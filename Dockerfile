@@ -7,6 +7,7 @@ RUN    apt-get update               \
                     build-essential \
                     curl            \
                     git             \
+                    libgmp-dev      \
                     m4              \
                     ocaml           \
                     rsync           \
