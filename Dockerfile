@@ -33,7 +33,7 @@ ENV NJOBS="8"
 ENV COMPILER="4.07.1+flambda"
 ENV OPAMPRECISETRACKING="1"
 ENV OCAMLFIND_VERSION="1.8.1"
-ENV DUNE_VERSION="2.5.1"
+ENV DUNE_VERSION="2.9.1"
 
 RUN    opam init --auto-setup --yes --jobs=${NJOBS} --compiler=${COMPILER} --disable-sandboxing         \
     && eval $(opam env)                                                                                 \
@@ -51,14 +51,16 @@ RUN    opam init --auto-setup --yes --jobs=${NJOBS} --compiler=${COMPILER} --dis
 # From: https://github.com/coq-community/docker-coq/blob/master/Dockerfile
 
 ENV COQ_VERSION="8.13.2"
-ENV COQ_EXTRA_OPAM="coq-bignums"
+ENV STDPP_VERSION="1.5.0"
+ENV COQ_OPAM="coq coq-stdpp"
 
-RUN    eval $(opam env --switch=${COMPILER} --set-switch)   \
-    && opam update -y -u                                    \
-    && opam pin add -n -k version coq ${COQ_VERSION}        \
-    && opam install -y -v -j ${NJOBS} coq ${COQ_EXTRA_OPAM} \
-    && opam clean -a -c -s --logs                           \
-    && opam config list                                     \
+RUN    eval $(opam env --switch=${COMPILER} --set-switch)                          \
+    && opam update -y -u                                                           \
+    && opam pin add -n -k version coq ${COQ_VERSION}                               \
+    && opam pin add -n -k version coq-stdpp ${STDPP_VERSION}                       \
+    && opam install -y -v -j ${NJOBS} ${COQ_OPAM}                                  \
+    && opam clean -a -c -s --logs                                                  \
+    && opam config list                                                            \
     && opam list
 
 # Setup SSH/Git/GitHub
