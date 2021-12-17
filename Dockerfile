@@ -9,7 +9,6 @@ RUN    apt-get update               \
                     git             \
                     libgmp-dev      \
                     m4              \
-                    ocaml           \
                     rsync           \
                     unzip           \
                     wget
