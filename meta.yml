@@ -1,0 +1,92 @@
+---
+fullname: VLSM
+shortname: vlsm
+organization: runtimeverification
+community: false
+dune: false
+coqdoc: false
+
+synopsis: >-
+  Coq formalization of validating labelled state transition
+  and message production systems
+
+description: |-
+  A validating labelled state transition and message production system
+  (VLSM) abstractly models a distributed system with faults. This project
+  contains a formalization of VLSMs and their theory in the Coq proof assistant.
+
+authors:
+- name: Mihai Calancea
+- name: Denisa Diaconescu
+- name: Wojciech Kołowski
+- name: Elaine Li
+- name: Brandon Moore
+- name: Karl Palmskog
+- name: Lucas Peña
+- name: Grigore Roșu
+- name: Traian Șerbănuță
+- name: Jan Tušil
+- name: Vlad Zamfir
+
+opam-file-maintainer: palmskog@gmail.com
+
+opam-file-version: dev
+
+license:
+  fullname: BSD 3-Clause "New" or "Revised" License
+  identifier: BSD-3-Clause
+  file: LICENSE.md
+
+supported_coq_versions:
+  text: 8.13
+  opam: '{>= "8.13" & < "8.14~"}'
+
+dependencies:
+- opam:
+    name: coq-stdpp
+    version: '{= "1.5.0"}'
+  description: |-
+    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.5.0
+
+namespace: VLSM
+
+keywords:
+- name: fault tolerance
+- name: distributed algorithms
+
+categories:
+- name: Computer Science/Concurrent Systems and Protocols/Theory of concurrent systems
+
+build: |-
+  ## Building instructions
+
+  The project is compatible with the 2021.09 package pick for Coq 8.13 of
+  [Coq Platform release 2021.09.0](https://github.com/coq/platform/releases/tag/2021.09.0),
+  so you can obtain all dependencies by installing that Coq Platform variant.
+
+  To instead install dependencies manually via [opam](https://opam.ocaml.org/doc/Install.html), do:
+
+  ```shell
+  opam repo add coq-released https://coq.inria.fr/opam/released
+  opam install coq.8.13.2 coq-stdpp.1.5.0
+  ```
+
+  To build the project when you have all dependencies installed, do:
+
+  ```shell
+  git clone https://github.com/runtimeverification/vlsm.git
+  cd vlsm
+  make   # or make -j <number-of-cores-on-your-machine>
+  ```
+
+documentation: |-
+  ## Coq file organization
+
+  - `theories/VLSM/Lib`: Various extensions to the Coq standard library and Coq-std++.
+  - `theories/VLSM/Core`: Core VLSM definitions and theory.
+
+  ## Documentation
+
+  - [latest coqdoc presentation of the Coq files](https://runtimeverification.github.io/vlsm-docs/latest/coqdoc/toc.html)
+  - [latest Alectryon presentation the Coq files](https://runtimeverification.github.io/vlsm-docs/latest/alectryon/toc.html)
+---

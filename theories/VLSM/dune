@@ -1,0 +1,7 @@
+(coq.theory
+ (name VLSM)
+ (package coq-vlsm)
+ (synopsis "Coq core definitions for VLSMs")
+ (flags -w -deprecated-hint-without-locality))
+
+(include_subdirs qualified)
