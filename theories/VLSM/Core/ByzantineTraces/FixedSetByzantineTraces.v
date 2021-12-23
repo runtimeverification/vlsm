@@ -2,7 +2,7 @@ From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble StdppListSet FinFunExtras ListExtras.
 From VLSM Require Import Core.VLSM Core.MessageDependencies Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces Core.ByzantineTraces.
-From VLSM Require Import Core.Validating Core.Equivocation Core.EquivocationProjections Core.Equivocation.NoEquivocation Core.Equivocation.FixedSetEquivocation.
+From VLSM Require Import Core.Validator Core.Equivocation Core.EquivocationProjections Core.Equivocation.NoEquivocation Core.Equivocation.FixedSetEquivocation.
 
 (** * VLSM Compositions with a fixed set of byzantine nodes
 
@@ -11,13 +11,13 @@ replaced by byzantine nodes, i.e., nodes which can send arbitrary
 [channel_authenticated_message]s at any time, while the rest are protocol
 abiding (non-equivocating) nodes.
 
-We will show that, if the non-byzantine nodes are validating for the
+We will show that, if the non-byzantine nodes are validators for the
 composition with that specific fixed-set of nodes as equivocators, then the
 projections of traces to the non-byzantine nodes are precisely the projections
 of traces of the composition with that specific fixed-set of nodes as
 equivocators to the non-equivocating nodes.
 
-That is, validating non-byzantine nodes do not distinguish between byzantine
+That is, non-byzantine validator nodes do not distinguish between byzantine
 nodes and equivocating ones.  Therefore, when analyzing the security of a
 protocol it suffices to consider equivocating nodes.
 *)
@@ -146,7 +146,7 @@ Definition non_byzantine_not_equivocating_constraint
 (** The first definition of the [fixed_byzantine_trace_prop]erty:
 
 Fixed byzantine traces are projections to the subset of protocol-following nodes
-of traces which are protocol for the composition in which a fixed set of nodes
+of traces which are valid for the composition in which a fixed set of nodes
 were replaced by byzantine nodes and the rest are protocol-following
 (i.e., they are not equivocating).
 *)
@@ -155,7 +155,7 @@ Definition fixed_byzantine_trace_prop
   (tr : list (composite_transition_item (sub_IM fixed_byzantine_IM non_byzantine)))
   : Prop :=
   exists bis btr,
-  finite_protocol_trace (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint) bis btr /\
+  finite_valid_trace (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint) bis btr /\
   composite_state_sub_projection fixed_byzantine_IM non_byzantine bis = is /\
   finite_trace_sub_projection fixed_byzantine_IM non_byzantine btr = tr.
 
@@ -178,7 +178,7 @@ Proof.
   - intros Hs.
     exists (lift_sub_state fixed_byzantine_IM non_byzantine s).
     split.
-    + apply composite_state_sub_projection_lift.
+    + apply composite_state_sub_projection_lift_to.
     + apply (lift_sub_state_initial fixed_byzantine_IM non_byzantine); assumption.
 Qed.
 
@@ -194,91 +194,40 @@ Proof.
   - revert H. apply induced_sub_projection_transition_preservation.
 Qed.
 
-Lemma non_byzantine_lift_full_projection
-  : VLSM_full_projection fixed_non_byzantine_projection (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint)
-    (lift_sub_label fixed_byzantine_IM non_byzantine)
-    (lift_sub_state fixed_byzantine_IM non_byzantine).
+(** The induced projection from the composition of [fixed_byzantine_IM] under
+the [non_byzantine_not_equivocating_constraint] to the non-byzantine nodes has
+the [projection_friendly_prop]erty.
+*)
+Lemma fixed_non_byzantine_projection_friendliness
+  : projection_friendly_prop
+      (induced_sub_projection_is_projection fixed_byzantine_IM non_byzantine
+        non_byzantine_not_equivocating_constraint).
 Proof.
-  apply basic_VLSM_full_projection; intro; intros.
-  - destruct Hv as [_ [_ [lX [sX [Heql [Heqs [HsX [Hom [Hv Hc]]]]]]]]].
-    destruct lX as [i li]. cbn in Hv, Hc.
-    unfold composite_label_sub_projection_option in Heql.
-    simpl in Heql.
-    case_decide; [|congruence].
-    inversion Heql. subst l. clear Heql.
-    cbn. unfold constrained_composite_valid. cbn.
-    unfold lift_sub_state.
-    rewrite lift_sub_state_to_eq with (Hi := H).
-    subst.
-    split; [assumption|].
-    destruct om as [m|]; [|exact I].
-    destruct (sender m) as [v|]; [|exact I].
-    simpl in *.
-    case_decide; [|exact I].
-    rewrite lift_sub_state_to_eq with (Hi := H0).
-    assumption.
-  - apply proj2 in H. revert H. cbn.
-    destruct (vtransition _ _ _) as (si', _om').
-    inversion 1. subst. clear H.
-    f_equal.
-    extensionality i.
-    destruct l as (sub_j, lj).
-    destruct_dec_sig sub_j j Hj Heqsub_j.
-    subst.
-    simpl.
-    destruct (decide (i = j)).
-    + subst. rewrite state_update_eq.
-      unfold lift_sub_state.
-      rewrite lift_sub_state_to_eq with (Hi := Hj).
-      unfold composite_state_sub_projection.
-      simpl.
-      rewrite state_update_eq.
-      reflexivity.
-    + rewrite state_update_neq by congruence.
-      destruct (decide (i ∈ non_byzantine)).
-      * unfold lift_sub_state.
-        rewrite! lift_sub_state_to_eq with (Hi := e).
-        unfold composite_state_sub_projection. simpl.
-        rewrite state_update_neq by congruence.
-        rewrite lift_sub_state_to_eq with (Hi := e).
-        reflexivity.
-      * unfold lift_sub_state, lift_sub_state_to.
-        destruct (decide _); [contradiction|reflexivity].
-  - apply (lift_sub_state_initial fixed_byzantine_IM).
-    destruct H as [sX [Hs_pr HsX]].
-    subst.
-    intro sub_i.
-    destruct_dec_sig sub_i i Hi Heqsub_i.
-    subst. apply HsX.
-  - assumption.
+  apply induced_sub_projection_friendliness.
+  apply induced_sub_projection_lift.
+  intros s1 s2 Heq l om.
+  destruct om as [m|]; [|intuition].
+  cbn.
+  destruct (sender m) as [v|]; [|intuition].
+  simpl.
+  case_decide as HAv; [|intuition].
+  replace (s2 (A v)) with (s1 (A v)); [intuition|].
+  exact (equal_f_dep Heq (dexist (A v) HAv)).
 Qed.
 
 (** Characterization result for the first definition:
 the [fixed_byzantine_trace_prop]erty is equivalent to the
-[finite_protocol_trace_prop]erty of the [induced_sub_projection] of the
+[finite_valid_trace_prop]erty of the [induced_sub_projection] of the
 the composition in which a fixed set of nodes were replaced by byzantine nodes
 and the rest are protocol-following to the set of protocol-following nodes.
 *)
 Lemma fixed_byzantine_trace_char1 is tr
   : fixed_byzantine_trace_prop is tr <->
-    finite_protocol_trace fixed_non_byzantine_projection is tr.
+    finite_valid_trace fixed_non_byzantine_projection is tr.
 Proof.
-  split.
-  - intros [bis [btr [Hbtr [His Htr]]]].
-    subst.
-    specialize
-      (induced_sub_projection_is_projection
-        fixed_byzantine_IM non_byzantine non_byzantine_not_equivocating_constraint)
-      as Hproj.
-    apply (VLSM_projection_finite_protocol_trace Hproj) in Hbtr.
-    replace (finite_trace_sub_projection _ _ _) with (VLSM_projection_trace_project Hproj btr)
-    ; [assumption|reflexivity].
-  - intro Htr.
-    eexists _,_.
-    intuition.
-    + apply (VLSM_full_projection_finite_protocol_trace non_byzantine_lift_full_projection), Htr.
-    + apply composite_state_sub_projection_lift.
-    + apply composite_trace_sub_projection_lift.
+  apply and_comm.
+  apply (projection_friendly_trace_char (induced_sub_projection_is_projection _ _ _)).
+  apply fixed_non_byzantine_projection_friendliness.
 Qed.
 
 End fixed_byzantine_traces_as_projections.
@@ -294,7 +243,7 @@ Section fixed_byzantine_traces_as_pre_loaded.
 
 Definition fixed_set_signed_message (m : message) : Prop :=
   non_sub_index_authenticated_message non_byzantine A sender m /\
-  (exists i, i ∈ non_byzantine /\ exists l s, protocol_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
+  (exists i, i ∈ non_byzantine /\ exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
 
 (**
 Given that we're only looking at the composition of nodes in the
@@ -421,10 +370,10 @@ Proof.
     + simpl in Hsent.
       simpl in HsY.
       apply
-        (preloaded_composite_sent_protocol (sub_IM fixed_byzantine_IM non_byzantine)
+        (preloaded_composite_sent_valid (sub_IM fixed_byzantine_IM non_byzantine)
           (finite_sub_index non_byzantine (listing_from_finite index))
           sub_fixed_byzantine_IM_Hbs _ _ _ HsY _ Hsent).
-    + apply initial_message_is_protocol. cbn. right. assumption.
+    + apply initial_message_is_valid. cbn. right. assumption.
   - split.
     + apply proj2,proj2 in Hv.
       revert Hv.
@@ -464,7 +413,7 @@ Proof.
       revert Hsent.
       apply (sub_IM_has_been_sent_iff_by_sender fixed_byzantine_IM non_byzantine
               A sender fixed_byzantine_IM_sender_safety sub_fixed_byzantine_IM_Hbs).
-      * apply (VLSM_incl_protocol_state
+      * apply (VLSM_incl_valid_state
                 (composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages
                   (sub_IM fixed_byzantine_IM non_byzantine) _ _))
         in HsX. assumption.
@@ -499,12 +448,12 @@ Proof.
   - destruct Hseeded as [[i [Hi Hsender]] Hvalid].
     pose (X := (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint)).
     pose (s0 := proj1_sig (composite_s0 fixed_byzantine_IM)).
-    assert (Hs0 : protocol_prop X s0 None).
-    { apply (protocol_initial X).
+    assert (Hs0 : valid_state_message_prop X s0 None).
+    { apply (valid_initial_state_message X).
       - destruct (composite_s0 fixed_byzantine_IM); assumption.
       - exact I.
     }
-    specialize (protocol_generated X _ _ Hs0 _ _ Hs0) as Hgen.
+    specialize (valid_generated_state_message X _ _ Hs0 _ _ Hs0) as Hgen.
     unfold non_byzantine in Hi.
     rewrite set_diff_iff in Hi.
     apply not_and_r in Hi as [Hi | Hi]; [elim Hi; apply elem_of_enum|].
@@ -531,8 +480,8 @@ Qed.
 (** Since the [fixed_non_byzantine_projection] is an [induced_projection] of
 the composition of [fixed_byzantine_IM] with a
 [non_byzantine_not_equivocating_constraint], its initial_messages and validity
-are derived from protocol messages and protocol validity of the larger
-composition; therefore, the following simple result becomes vrey important.
+are derived from valid messages and protocol validity of the larger
+composition; therefore, the following simple result becomes very important.
 *)
 Lemma pre_loaded_fixed_non_byzantine_vlsm_lift
   : VLSM_full_projection pre_loaded_fixed_non_byzantine_vlsm' (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint)
@@ -551,18 +500,18 @@ Lemma pre_loaded_fixed_non_byzantine_incl
 Proof.
   apply basic_VLSM_incl; intro; intros.
   - apply fixed_non_byzantine_projection_initial_state_preservation; assumption.
-  - apply initial_message_is_protocol.
+  - apply initial_message_is_valid.
     apply (pre_loaded_fixed_non_byzantine_vlsm_lift_initial_message l s m).
     + assumption.
     + apply proj1 in Hv. revert Hv.
-      apply (VLSM_full_projection_protocol_state pre_loaded_fixed_non_byzantine_vlsm_lift).
+      apply (VLSM_full_projection_valid_state pre_loaded_fixed_non_byzantine_vlsm_lift).
     + assumption.
   - exists (lift_sub_label fixed_byzantine_IM non_byzantine l).
     exists (lift_sub_state fixed_byzantine_IM non_byzantine s).
     split; [apply composite_label_sub_projection_option_lift|].
     split; [apply composite_state_sub_projection_lift|].
     revert Hv.
-    apply (VLSM_full_projection_protocol_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
+    apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
   - apply proj2 in H.
     revert H.
     apply induced_sub_projection_transition_preservation.
@@ -587,11 +536,11 @@ we introduce the following alternate definition to the
 [fixed_byzantine_trace_prop]erty, this time defined for (not necessarily valid)
 traces of the full composition, accepting any such trace as long as its
 projection to the non-byzantine nodes is indistinguishable from a projection
-of a valid protocol trace of the composition of [fixed_byzantine_IM] under the
+of a valid trace of the composition of [fixed_byzantine_IM] under the
 [non_byzantine_not_equivocating_constraint].
 *)
 Definition fixed_byzantine_trace_alt_prop is tr : Prop :=
-  finite_protocol_trace pre_loaded_fixed_non_byzantine_vlsm
+  finite_valid_trace pre_loaded_fixed_non_byzantine_vlsm
     (composite_state_sub_projection IM non_byzantine is)
     (finite_trace_sub_projection IM non_byzantine tr).
 
@@ -601,7 +550,7 @@ End fixed_byzantine_traces.
 
 In this section we show that while equivocators can always appear as byzantine
 to the protocol-abiding nodes, the converse is also true if the protocol-
-abiding nodes satisfy the [validating_projection_prop]erty, which basically
+abiding nodes satisfy the [projection_validator_prop]erty, which basically
 allows them to locally verify the authenticity of a received message.
 *)
 
@@ -619,9 +568,10 @@ Context
   (A : validator -> index)
   (sender : message -> option validator)
   {finite_index : finite.Finite index}
+  (selection_complement := set_diff (enum index) selection)
   (PreNonByzantine : VLSM message := pre_loaded_fixed_non_byzantine_vlsm IM Hbs selection A sender)
   (Fixed : VLSM message := fixed_equivocation_vlsm_composition IM Hbs Hbr selection)
-  (FixedNonEquivocating : VLSM message := induced_sub_projection IM (set_diff (enum index) selection) (fixed_equivocation_constraint IM Hbs Hbr selection))
+  (FixedNonEquivocating : VLSM message := induced_sub_projection IM selection_complement (fixed_equivocation_constraint IM Hbs Hbr selection))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM A sender)
   (Hsender_safety : sender_safety_alt_prop IM A sender :=
@@ -647,19 +597,19 @@ Proof.
   simpl.
   case_decide; [|exact I].
   unfold sub_IM. simpl.
-  apply (VLSM_incl_protocol_state (constraint_free_incl IM (fixed_equivocation_constraint IM Hbs Hbr selection))) in Hs.
-  apply (VLSM_incl_protocol_state (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))) in Hs.
-  assert (Hpre_si : forall i, protocol_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i)).
+  apply (VLSM_incl_valid_state (constraint_free_incl IM (fixed_equivocation_constraint IM Hbs Hbr selection))) in Hs.
+  apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))) in Hs.
+  assert (Hpre_si : forall i, valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i)).
   { intro i.
     revert Hs.
-    apply protocol_state_project_preloaded_to_preloaded.
+    apply valid_state_project_preloaded_to_preloaded.
   }
   cut (@has_been_sent _ _ (Hbs (A v)) (s (A v)) m).
   { apply has_been_sent_irrelevance; intuition. }
   apply set_diff_elim2 in H.
   destruct Hstrong_v as [Hsent | Hemitted].
   - destruct Hsent as [i [Hi Hsent]].
-    apply protocol_state_has_trace in Hs as [is [tr Htr]].
+    apply valid_state_has_trace in Hs as [is [tr Htr]].
     apply (has_been_sent_iff_by_sender IM Hbs Hsender_safety Htr Hsender).
     exists i; assumption.
   - elim H.
@@ -674,7 +624,7 @@ Proof.
     destruct H as [sX [HeqsX Hinitial]].
     subst.
     apply Hinitial.
-  - apply (VLSM_incl_protocol_valid fixed_non_equivocating_incl_sub_non_equivocating) in Hv.
+  - apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating) in Hv.
     destruct Hv as [Hs [_ Hv]].
     specialize
       (sub_IM_no_equivocation_preservation IM (set_diff (enum index) selection)
@@ -684,16 +634,16 @@ Proof.
     + simpl in Hsent.
       simpl in HsY.
       apply
-        (preloaded_composite_sent_protocol (sub_IM IM (set_diff (enum index) selection))
+        (preloaded_composite_sent_valid (sub_IM IM (set_diff (enum index) selection))
           (finite_sub_index (set_diff (enum index) selection) (listing_from_finite index))
           (sub_has_been_sent_capabilities IM (set_diff (enum index) selection) Hbs)
           _ _ _ HsY _ Hsent).
-    + apply initial_message_is_protocol.
+    + apply initial_message_is_valid.
       right.
       split; [assumption|].
       clear -Hv.
       apply induced_sub_projection_valid_projection in Hv; assumption.
-  - apply (VLSM_incl_protocol_valid fixed_non_equivocating_incl_sub_non_equivocating),
+  - apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating),
       proj2, proj2 in Hv.
     split.
     + revert Hv.
@@ -714,24 +664,24 @@ Proof.
     apply induced_sub_projection_transition_preservation.
 Qed.
 
-(** As a corollary to the above result, we can conclude that valid protocol
+(** As a corollary to the above result, we can conclude that valid
 traces for the composition with <<Fixed>> equivocation have the
 [fixed_byzantine_trace_alt_prop]erty.
 *)
 Corollary fixed_equivocating_traces_are_byzantine is tr
-  : finite_protocol_trace Fixed is tr ->
+  : finite_valid_trace Fixed is tr ->
     fixed_byzantine_trace_alt_prop IM Hbs selection A sender is tr.
 Proof.
   intro Htr.
-  apply (VLSM_incl_finite_protocol_trace fixed_non_equivocating_incl_fixed_non_byzantine).
+  apply (VLSM_incl_finite_valid_trace fixed_non_equivocating_incl_fixed_non_byzantine).
   specialize
     (induced_sub_projection_is_projection
       IM (set_diff (enum index) selection) (fixed_equivocation_constraint IM Hbs Hbr selection))
     as Hproj.
-  apply (VLSM_projection_finite_protocol_trace Hproj); assumption.
+  apply (VLSM_projection_finite_valid_trace Hproj); assumption.
 Qed.
 
-Section validating_fixed_set_byzantine.
+Section validator_fixed_set_byzantine.
 
 Context
   (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
@@ -763,7 +713,7 @@ Proof.
       unfold lift_sub_state.
       rewrite lift_sub_state_to_eq with (Hi0 := Hi); assumption.
     + right.
-      apply can_emit_protocol_iff in HomY.
+      apply emitted_messages_are_valid_iff in HomY.
       destruct HomY as [[_v [[_im Him] Heqim]] | Hiom]
       ; [elim (no_initial_messages_in_IM _v _im); assumption|].
       apply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm Fixed))
@@ -817,7 +767,7 @@ Context
     (lift_sub_state IM (set_diff (enum index) selection))).
 
 (** Since <<FixedNonEquivocating>> is an [induced_projection] of <<Fixed>>,
-its initial_messages and validity are derived from protocol messages and
+its initial_messages and validity are derived from valid messages and
 protocol validity of the larger composition; therefore, the following
 result becomes very important.
 *)
@@ -838,20 +788,20 @@ Lemma fixed_non_byzantine_incl_fixed_non_equivocating_from_initial
 Proof.
   apply basic_VLSM_incl; intro; intros.
   - exists (lift_sub_state IM (set_diff (enum index) selection) s).
-    split; [apply composite_state_sub_projection_lift|].
+    split; [apply composite_state_sub_projection_lift_to|].
     by apply (lift_sub_state_initial IM).
-  - apply initial_message_is_protocol.
+  - apply initial_message_is_valid.
     apply (Hfixed_non_byzantine_vlsm_lift_initial_message l s m).
     + assumption.
     + apply proj1 in Hv. revert Hv.
-      apply (VLSM_full_projection_protocol_state fixed_non_byzantine_vlsm_lift_from_initial).
+      apply (VLSM_full_projection_valid_state fixed_non_byzantine_vlsm_lift_from_initial).
     + assumption.
   - exists (lift_sub_label IM (set_diff (enum index) selection) l).
     exists (lift_sub_state IM (set_diff (enum index) selection) s).
     split; [apply composite_label_sub_projection_option_lift|].
     split; [apply composite_state_sub_projection_lift|].
     revert Hv.
-    apply (VLSM_full_projection_protocol_valid fixed_non_byzantine_vlsm_lift_from_initial).
+    apply (VLSM_full_projection_input_valid fixed_non_byzantine_vlsm_lift_from_initial).
   - apply proj2 in H.
     revert H.
     apply induced_sub_projection_transition_preservation.
@@ -869,12 +819,12 @@ Qed.
 End assuming_initial_messages_lift.
 
 Context
-  (Hvalidating:
+  (Hvalidator:
     forall i : index, i ∉ selection ->
-    validating_projection_prop IM (fixed_equivocation_constraint IM Hbs Hbr selection) i)
+    projection_validator_prop IM (fixed_equivocation_constraint IM Hbs Hbr selection) i)
   .
 
-Lemma validating_fixed_non_byzantine_vlsm_lift_initial_message
+Lemma validator_fixed_non_byzantine_vlsm_lift_initial_message
   : weak_full_projection_initial_message_preservation PreNonByzantine Fixed
     (lift_sub_state IM (set_diff (enum index) selection)).
 Proof.
@@ -885,66 +835,55 @@ Proof.
     subst. unfold sub_IM in Him. simpl in Him.
     clear -Him.
     cbn.
-    apply initial_message_is_protocol.
+    apply initial_message_is_valid.
     by exists i, (exist _ m Him).
   - destruct Hseeded as [Hsigned [i [Hi [li [si Hpre_valid]]]]].
     apply set_diff_elim2 in Hi.
-    specialize (Hvalidating i Hi _ _ Hpre_valid)
+    specialize (Hvalidator i Hi _ _ Hpre_valid)
       as [sX [Heqsi [HsX [Hm HvX]]]].
     assumption.
 Qed.
 
+(** The VLSM corresponding to the induced projection from a fixed-set byzantine
+composition to the non-byzantine components is trace-equivalent to the VLSM
+corresponding to the induced projection from the composition of regular nodes
+under a fixed-set equivocation constraint to the same components.
+*)
+Lemma validator_fixed_non_byzantine_eq_fixed_non_equivocating
+  : VLSM_eq PreNonByzantine FixedNonEquivocating.
+Proof.
+  apply fixed_non_byzantine_eq_fixed_non_equivocating_from_initial.
+  apply validator_fixed_non_byzantine_vlsm_lift_initial_message.
+Qed.
+
 (** ** The main result
 
-Assuming that the non-byzantine nodes are validating for the
+Assuming that the non-byzantine nodes are validators for the
 [fixed_equivocation_constraint] we give the following characterization of traces
 with the [fixed_byzantine_trace_alt_prop]erty in terms of equivocation:
 
 A trace has the [fixed_byzantine_trace_alt_prop]erty for a <<selection>> of
-byzantine nodes iff there exists a protocol valid trace for the <<Fixed>>
+byzantine nodes iff there exists a valid trace for the <<Fixed>>
 equivocation composition the projections of the two traces to the non-byzantine
 nodes, i.e., the nodes in the <<selection_complement>> coincide.
 *)
-Lemma validating_fixed_byzantine_traces_equivocation_char bis btr
-  (selection_complement := set_diff (enum index) selection)
+Lemma validator_fixed_byzantine_traces_equivocation_char bis btr
   : fixed_byzantine_trace_alt_prop IM Hbs selection A sender bis btr <->
     exists eis etr,
-      finite_protocol_trace Fixed eis etr /\
-      composite_state_sub_projection IM selection_complement bis = composite_state_sub_projection IM selection_complement eis /\
-      finite_trace_sub_projection IM selection_complement btr = finite_trace_sub_projection IM selection_complement etr.
+      finite_valid_trace Fixed eis etr /\
+      composite_state_sub_projection IM selection_complement eis = composite_state_sub_projection IM selection_complement bis /\
+      finite_trace_sub_projection IM selection_complement etr = finite_trace_sub_projection IM selection_complement btr.
 Proof.
-  split.
-  - intro Htr.
-    specialize (fixed_non_byzantine_vlsm_lift_from_initial validating_fixed_non_byzantine_vlsm_lift_initial_message)
-      as Hproj.
-    apply (VLSM_full_projection_finite_protocol_trace Hproj) in Htr.
-    eexists _,_; split; [exact Htr|].
-    unfold lift_sub_state.
-    rewrite composite_state_sub_projection_lift.
-    split; [reflexivity|].
-    symmetry. apply composite_trace_sub_projection_lift.
-  - intros [eis [etr [Hetr [Heis_pr Hetr_pr]]]].
-    apply fixed_equivocating_traces_are_byzantine in Hetr.
-    revert Hetr.
-    subst selection_complement.
-    unfold fixed_byzantine_trace_alt_prop.
-    rewrite Heis_pr, Hetr_pr.
-    exact id.
+  unfold fixed_byzantine_trace_alt_prop.
+  split; intros Htr.
+  - apply fixed_non_equivocating_traces_char.
+    apply (VLSM_eq_finite_valid_trace validator_fixed_non_byzantine_eq_fixed_non_equivocating).
+    assumption.
+  - apply (VLSM_eq_finite_valid_trace validator_fixed_non_byzantine_eq_fixed_non_equivocating).
+    apply fixed_non_equivocating_traces_char.
+    assumption.
 Qed.
 
-(** A characterization at the level of VLSMs: the VLSM corresponding to
-the induced projection from a fixed-set byzantine composition to the
-non-byzantine components is trace-equivalent to the VLSM corresponding to
-the induced projection from the composition of regular nodes under a fixed-set
-equivocation constraint to the same components.
-*)
-Lemma validating_fixed_non_byzantine_eq_fixed_non_equivocating
-  : VLSM_eq PreNonByzantine FixedNonEquivocating.
-Proof.
-  apply fixed_non_byzantine_eq_fixed_non_equivocating_from_initial.
-  apply validating_fixed_non_byzantine_vlsm_lift_initial_message.
-Qed.
-
-End validating_fixed_set_byzantine.
+End validator_fixed_set_byzantine.
 
 End fixed_non_equivocating_vs_byzantine.

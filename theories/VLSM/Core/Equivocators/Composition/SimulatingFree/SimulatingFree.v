@@ -62,14 +62,14 @@ for the given state.
 *)
 Definition zero_descriptor_constraint_lifting_prop : Prop :=
   forall
-    es (Hes : protocol_state_prop CE es)
+    es (Hes : valid_state_prop CE es)
     om (Hom : sent_except_from (equivocator_IM IM) (equivocator_Hbs IM Hbs) (vinitial_message_prop CE) es om)
     eqv li,
     constraintE (existT eqv (ContinueWith 0 li)) (es, om).
 
 (** The [replayable_message_prop]erty plays an important role in designing a
 general, abstract, proof for trace simulation (Lemma
-[generalized_equivocators_finite_protocol_trace_init_to_rev]), as it specifies
+[generalized_equivocators_finite_valid_trace_init_to_rev]), as it specifies
 that given a message <<m>> received in a regular node-composition state <<s>>
 for which the constraint <<constraintX>> is satisfied, then any trace of the
 equivocators-composition (constrained by <<constraintE>>>) producing <<m>>
@@ -78,45 +78,45 @@ to <<s>>, with no transitions being performed on the original copies.
 *)
 Definition replayable_message_prop : Prop :=
   forall si s tr
-    (HtrX : finite_protocol_trace_init_to CX si s tr)
+    (HtrX : finite_valid_trace_init_to CX si s tr)
     eqv_state_s
-    (Hstate_protocol: protocol_state_prop CE eqv_state_s)
+    (Hstate_valid: valid_state_prop CE eqv_state_s)
     (Hstate_final_project : equivocators_total_state_project IM eqv_state_s = s)
     eqv_msg_is eqv_msg_s eqv_msg_tr
-    (Hmsg_trace : finite_protocol_trace_init_to CE eqv_msg_is eqv_msg_s eqv_msg_tr)
+    (Hmsg_trace : finite_valid_trace_init_to CE eqv_msg_is eqv_msg_s eqv_msg_tr)
     iom
     (Hfinal_msg : last_in_trace_except_from (vinitial_message_prop CE) eqv_msg_tr iom)
     l
     (HcX: constraintX l (s, iom)),
     exists eqv_msg_tr lst_msg_tr,
-      finite_protocol_trace_from_to CE eqv_state_s lst_msg_tr eqv_msg_tr /\
+      finite_valid_trace_from_to CE eqv_state_s lst_msg_tr eqv_msg_tr /\
       equivocators_total_trace_project IM eqv_msg_tr = [] /\
       equivocators_total_state_project IM lst_msg_tr = s /\
       sent_except_from (equivocator_IM IM) (equivocator_Hbs IM Hbs) (vinitial_message_prop CE) lst_msg_tr iom.
 
 (** The main result of this section, showing that every trace of the
 composition of regular nodes can be obtained as a [zero_descriptor] projection
-of a protocol trace for the composition of equivocators.
+of a valid trace for the composition of equivocators.
 
 The proof proceeds by replaying the transitions of the trace on the original
 copy of the machines, replaying traces corresponding to the messages between
 those transition through equivocation to guarantee the no-message-equivocation
 constraint.
 *)
-Lemma generalized_equivocators_finite_protocol_trace_init_to_rev
+Lemma generalized_equivocators_finite_valid_trace_init_to_rev
   (Hsubsumption : zero_descriptor_constraint_lifting_prop)
   (Hreplayable : replayable_message_prop)
   isX sX trX
-  (HtrX : finite_protocol_trace_init_to CX isX sX trX)
+  (HtrX : finite_valid_trace_init_to CX isX sX trX)
   : exists is, equivocators_total_state_project IM is = isX /\
     exists s, equivocators_total_state_project IM s = sX /\
     exists tr, equivocators_total_trace_project IM tr = trX /\
-    finite_protocol_trace_init_to CE is s tr /\
+    finite_valid_trace_init_to CE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   assert (HinclE : VLSM_incl CE PreFreeE)
     by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
-  induction HtrX using finite_protocol_trace_init_to_rev_strong_ind.
+  induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
   - specialize (lift_initial_to_equivocators_state IM Hbs _ His) as Hs.
     remember (lift_to_equivocators_state IM is) as s.
     cut (equivocators_state_project IM (zero_descriptor IM) s = is).
@@ -127,7 +127,7 @@ Proof.
       split; [|reflexivity].
       split; [|assumption].
       constructor.
-      apply initial_is_protocol. assumption.
+      apply initial_state_is_valid. assumption.
     }
     apply functional_extensionality_dep_good.
     subst.
@@ -135,10 +135,10 @@ Proof.
   - destruct IHHtrX1 as [eqv_state_is [Hstate_start_project [eqv_state_s [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _ ]]]]]]].
     destruct IHHtrX2 as [eqv_msg_is [Hmsg_start_project [eqv_msg_s [_ [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg ]]]]]]].
     exists eqv_state_is. split; [assumption|].
-    apply ptrace_last_pstate in Hstate_trace as Hstate_protocol.
+    apply valid_trace_last_pstate in Hstate_trace as Hstate_valid.
     destruct Ht as [[Hs [Hiom [Hv Hc]]] Ht].
     specialize
-      (Hreplayable _ _ _ HtrX1 _ Hstate_protocol Hstate_final_project _ _ _ Hmsg_trace iom)
+      (Hreplayable _ _ _ HtrX1 _ Hstate_valid Hstate_final_project _ _ _ Hmsg_trace iom)
       as Hreplay.
     spec Hreplay.
     { clear -Heqiom Hfinal_msg.
@@ -154,7 +154,7 @@ Proof.
       as [emsg_tr [es [Hmsg_trace_full_replay [Hemsg_tr_pr [Hes_pr Hbs_iom]]]]].
     intros .
     specialize
-      (finite_protocol_trace_from_to_app CE  _ _ _ _ _ (proj1 Hstate_trace) Hmsg_trace_full_replay)
+      (finite_valid_trace_from_to_app CE  _ _ _ _ _ (proj1 Hstate_trace) Hmsg_trace_full_replay)
       as Happ.
     specialize
       (extend_right_finite_trace_from_to CE Happ) as Happ_extend.
@@ -165,7 +165,7 @@ Proof.
     destruct (vtransition CE el (es, iom))
       as (es', om') eqn:Hesom'.
     specialize (Happ_extend  el iom es' om').
-    apply ptrace_get_last in Happ as Heqes.
+    apply valid_trace_get_last in Happ as Heqes.
     assert (Hes_pr_i : forall i, equivocators_total_state_project IM es i = s i)
       by (rewrite <- Hes_pr; reflexivity).
     exists es'.
@@ -182,8 +182,8 @@ Proof.
     match type of Happ_extend with
     | ?H -> _ => cut H
     end.
-    { intro Hpt.
-      spec Happ_extend Hpt.
+    { intro Hivt.
+      spec Happ_extend Hivt.
       match goal with
       |- ?H /\ _ => assert (Hproject : H)
       end.
@@ -198,12 +198,12 @@ Proof.
       }
       split; [assumption|].
       eexists; split; [|split;[split; [exact Happ_extend|]|]].
-      - apply ptrace_forget_last in Happ_extend.
-        apply (VLSM_incl_finite_protocol_trace_from HinclE) in Happ_extend.
+      - apply valid_trace_forget_last in Happ_extend.
+        apply (VLSM_incl_finite_valid_trace_from HinclE) in Happ_extend.
         rewrite (equivocators_total_trace_project_app IM)
           by (eexists; exact Happ_extend).
-        apply ptrace_forget_last in Happ.
-        apply (VLSM_incl_finite_protocol_trace_from HinclE) in Happ.
+        apply valid_trace_forget_last in Happ.
+        apply (VLSM_incl_finite_valid_trace_from HinclE) in Happ.
         rewrite (equivocators_total_trace_project_app IM)
           by (eexists; exact Happ).
         rewrite Hemsg_tr_pr.
@@ -223,13 +223,13 @@ Proof.
       - rewrite! finite_trace_last_output_is_last. reflexivity.
     }
     clear Happ_extend.
-    apply ptrace_last_pstate in Happ.
+    apply valid_trace_last_pstate in Happ.
     repeat split; [assumption|..|assumption].
-    + destruct iom as [im|]; [|apply option_protocol_message_None].
+    + destruct iom as [im|]; [|apply option_valid_message_None].
       destruct Hbs_iom as [Hbs_iom | Hseeded].
-      * apply (preloaded_composite_sent_protocol (equivocator_IM IM) finite_index (equivocator_Hbs IM Hbs) _ _ _ Happ _ Hbs_iom).
-      * apply initial_message_is_protocol. assumption.
-    + subst el. cbn. rewrite equivocator_state_project_zero. 
+      * apply (preloaded_composite_sent_valid (equivocator_IM IM) finite_index (equivocator_Hbs IM Hbs) _ _ _ Happ _ Hbs_iom).
+      * apply initial_message_is_valid. assumption.
+    + subst el. cbn. rewrite equivocator_state_project_zero.
       rewrite Hes_pr_eqv. assumption.
     + apply Hsubsumption; assumption.
 Qed.
@@ -284,24 +284,23 @@ Definition all_equivocating_replayed_trace_from
     (composite_state_sub_projection (equivocator_IM IM) index_listing is)
     (VLSM_full_projection_finite_trace_project Hproj tr).
 
-Lemma replayed_trace_from_protocol_equivocating
+Lemma replayed_trace_from_valid_equivocating
   (full_replay_state : composite_state (equivocator_IM IM))
-  (Hfull_replay_state : protocol_state_prop SeededXE full_replay_state)
+  (Hfull_replay_state : valid_state_prop SeededXE full_replay_state)
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
-  (Htr : finite_protocol_trace SeededXE is tr)
-  : finite_protocol_trace_from SeededXE
+  (Htr : finite_valid_trace SeededXE is tr)
+  : finite_valid_trace_from SeededXE
       full_replay_state (all_equivocating_replayed_trace_from full_replay_state is tr).
 Proof.
-  specialize
-    (sub_replayed_trace_from_protocol_equivocating IM Hbs _ finite_index seed
+  apply
+    (sub_replayed_trace_from_valid_equivocating IM Hbs _ finite_index seed
       index_listing _ Hfull_replay_state
-    ) as Hprotocol.
-  apply Hprotocol. clear Hprotocol.
+    ).
   pose (Hproj := preloaded_sub_composition_all_full_projection (equivocator_IM IM) (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM) (free_constraint _) (equivocator_Hbs IM Hbs) seed) seed).
-  apply (VLSM_full_projection_finite_protocol_trace Hproj) in Htr.
+  apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr.
   revert Htr.
-  apply VLSM_incl_finite_protocol_trace.
+  apply VLSM_incl_finite_valid_trace.
   apply basic_VLSM_incl_preloaded_with; intro; intros
   ; [assumption| |assumption..].
   destruct H as [Hv Hc].
@@ -317,22 +316,22 @@ Proof.
   exists sub_i. subst. assumption.
 Qed.
 
-(** Specializing the [generalized_equivocators_finite_protocol_trace_init_to_rev]
+(** Specializing the [generalized_equivocators_finite_valid_trace_init_to_rev]
 result using the [free_constraint] for the composition of regular nodes
 and the no-message-equivocation constraint for the composition of equivocators.
 *)
-Lemma seeded_equivocators_finite_protocol_trace_init_to_rev
+Lemma seeded_equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   isX sX trX
-  (HtrX : finite_protocol_trace_init_to SeededFree isX sX trX)
+  (HtrX : finite_valid_trace_init_to SeededFree isX sX trX)
   : exists is, equivocators_total_state_project IM is = isX /\
     exists s, equivocators_total_state_project IM s = sX /\
     exists tr, equivocators_total_trace_project IM tr = trX /\
-    finite_protocol_trace_init_to SeededXE is s tr /\
+    finite_valid_trace_init_to SeededXE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   apply
-    (generalized_equivocators_finite_protocol_trace_init_to_rev
+    (generalized_equivocators_finite_valid_trace_init_to_rev
       IM Hbs finite_index)
   ; [..|assumption].
   - intro; intros. split; [|exact I].
@@ -354,14 +353,14 @@ Proof.
     }
     specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM IM) (free_constraint _) (equivocator_Hbs IM Hbs) seed)
       as HinclE.
-    apply ptrace_forget_last in Hmsg_trace.
+    apply valid_trace_forget_last in Hmsg_trace.
     specialize
-      (replayed_trace_from_protocol_equivocating
-       _ Hstate_protocol _ _ Hmsg_trace
+      (replayed_trace_from_valid_equivocating
+       _ Hstate_valid _ _ Hmsg_trace
       )
       as Hmsg_trace_full_replay.
     remember (all_equivocating_replayed_trace_from _ _ _ ) as emsg_tr.
-    apply ptrace_add_default_last in Hmsg_trace_full_replay.
+    apply valid_trace_add_default_last in Hmsg_trace_full_replay.
     eexists _,_; split; [exact Hmsg_trace_full_replay|].
     subst.
     unfold all_equivocating_replayed_trace_from.
@@ -376,10 +375,10 @@ Proof.
     repeat split. simpl.
     destruct Hfinal_msg as [Hfinal_msg | Hinitial]; [|right; assumption].
     left.
-    apply ptrace_first_pstate in Hmsg_trace_full_replay as Hfst.
-    apply protocol_state_has_trace in Hfst as [is_s [tr_s [Htr_s His_s]]].
-    specialize (finite_protocol_trace_from_to_app SeededXE _ _ _ _ _ Htr_s Hmsg_trace_full_replay) as Happ.
-    apply (VLSM_incl_finite_protocol_trace_from_to HinclE) in Happ.
+    apply valid_trace_first_pstate in Hmsg_trace_full_replay as Hfst.
+    apply valid_state_has_trace in Hfst as [is_s [tr_s [Htr_s His_s]]].
+    specialize (finite_valid_trace_from_to_app SeededXE _ _ _ _ _ Htr_s Hmsg_trace_full_replay) as Happ.
+    apply (VLSM_incl_finite_valid_trace_from_to HinclE) in Happ.
     apply
       (has_been_sent_examine_one_trace FreeE_Hbs _ _ _ (conj Happ His_s)).
 
@@ -408,23 +407,23 @@ Context {message : Type}
   (XE : VLSM message := equivocators_no_equivocations_vlsm IM Hbs)
   .
 
-(** Further specializing [seeded_equivocators_finite_protocol_trace_init_to_rev]
+(** Further specializing [seeded_equivocators_finite_valid_trace_init_to_rev]
 to remove the pre-loading operation.
 *)
-Lemma equivocators_finite_protocol_trace_init_to_rev
+Lemma equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   isX sX trX
-  (HtrX : finite_protocol_trace_init_to Free isX sX trX)
+  (HtrX : finite_valid_trace_init_to Free isX sX trX)
   : exists is, equivocators_total_state_project IM is = isX /\
     exists s, equivocators_total_state_project IM s = sX /\
     exists tr, equivocators_total_trace_project IM tr = trX /\
-    finite_protocol_trace_init_to XE is s tr /\
+    finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   specialize (vlsm_is_pre_loaded_with_False Free) as Heq.
-  apply (VLSM_eq_finite_protocol_trace_init_to Heq) in HtrX.
+  apply (VLSM_eq_finite_valid_trace_init_to Heq) in HtrX.
   specialize
-    (seeded_equivocators_finite_protocol_trace_init_to_rev
+    (seeded_equivocators_finite_valid_trace_init_to_rev
       IM Hbs finite_index (fun m => False) no_initial_messages_in_IM
       _ _ _ HtrX)
     as [is [His [s [Hs [tr [Htr_pr [Htr Houtput]]]]]]].
@@ -438,9 +437,9 @@ Proof.
   clear Heq.
   specialize (vlsm_is_pre_loaded_with_False (composite_vlsm (equivocator_IM IM) constraint))
     as Heq.
-  apply (VLSM_eq_finite_protocol_trace_init_to Heq) in Htr.
+  apply (VLSM_eq_finite_valid_trace_init_to Heq) in Htr.
   revert Htr.
-  apply VLSM_incl_finite_protocol_trace_init_to.
+  apply VLSM_incl_finite_valid_trace_init_to.
   apply constraint_subsumption_incl.
   apply preloaded_constraint_subsumption_stronger.
   apply strong_constraint_subsumption_strongest.

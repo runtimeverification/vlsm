@@ -10,9 +10,11 @@ regular machine X, and then, at any moment:
 - can perform [valid] [transition]s on any of its internal machines
 - can fork any of its internal machines by duplicating its state and then using
   the given label and message to [transition] on the new fork.
+
+  Note that we only allow forking if a transition is then taken on the neq fork.
 *)
 
-Section equivocator_vlsm.
+Section sec_equivocator_vlsm.
   Context
     {message : Type}
     (X : VLSM message)
@@ -451,7 +453,7 @@ Proof.
   unfold equivocator_state_n, equivocator_state_append, equivocator_state_last in *.
   simpl in *.
   lia.
-Qed. 
+Qed.
 
 Local Ltac destruct_equivocator_state_append_project' es es' i Hi k Hk Hpr :=
   let Hi' := fresh "Hi" in
@@ -535,7 +537,7 @@ Proof.
     lia.
   - destruct (decide (n = k)).
     + subst. rewrite equivocator_state_update_size in Hi.
-      rewrite equivocator_state_update_project_eq; 
+      rewrite equivocator_state_update_project_eq;
       [|rewrite equivocator_state_append_size; lia
       | reflexivity
       ].
@@ -661,7 +663,7 @@ Lemma mk_singleton_initial_state
     split;[reflexivity|assumption].
   Qed.
 
-End equivocator_vlsm.
+End sec_equivocator_vlsm.
 
 Arguments Spawn {_ _} _: assert.
 Arguments ContinueWith {_ _} _ _: assert.
@@ -718,7 +720,7 @@ Ltac destruct_equivocator_state_extend_project es s i Hi :=
   destruct_equivocator_state_extend_project' es s i Hi Hpr
   ; clear Hpr.
 
-Section equivocator_vlsm_protocol_state_projections.
+Section equivocator_vlsm_valid_state_projections.
 
 Context
   {message : Type}
@@ -956,41 +958,41 @@ Proof.
 Qed.
 
 (**
-Protocol messages in the [equivocator_vlsm] are also protocol in the
-original machine.  All components of a protocol state in the
-[equivocator_vlsm] are also protocol in the original machine.
+Valid messages in the [equivocator_vlsm] are also valid in the
+original machine.  All components of a valid state in the
+[equivocator_vlsm] are also valid in the original machine.
 *)
-Lemma preloaded_equivocator_state_project_protocol
+Lemma preloaded_equivocator_state_projection_preserves_validity
   (seed : message -> Prop)
   (bs : vstate equivocator_vlsm)
   (om : option message)
-  (Hbs : protocol_prop (pre_loaded_vlsm equivocator_vlsm seed) bs om)
-  : option_protocol_message_prop (pre_loaded_vlsm X seed) om /\
+  (Hbs : valid_state_message_prop (pre_loaded_vlsm equivocator_vlsm seed) bs om)
+  : option_valid_message_prop (pre_loaded_vlsm X seed) om /\
     forall i si,
       equivocator_state_project bs i = Some si ->
-      protocol_state_prop (pre_loaded_vlsm X seed) si.
+      valid_state_prop (pre_loaded_vlsm X seed) si.
 Proof.
   induction Hbs.
-  - split; [apply option_initial_message_is_protocol;assumption|].
+  - split; [apply option_initial_message_is_valid;assumption|].
     intros.
     destruct Hs as [Hn0 Hinit].
     apply equivocator_state_project_Some_rev in H as Hi.
     unfold is_singleton_state in Hn0.
     assert (i = 0) by lia. subst.
     rewrite equivocator_state_project_zero in H.
-    inversion H. apply initial_is_protocol. assumption.
-  - specialize (protocol_generated (pre_loaded_vlsm X seed)) as Hgen.
+    inversion H. apply initial_state_is_valid. assumption.
+  - specialize (valid_generated_state_message (pre_loaded_vlsm X seed)) as Hgen.
     apply proj2 in IHHbs1. apply proj1 in IHHbs2.
 
     (* destruction tactic for a valid equivocator transition
       vtransition equivocator_vlsm l (s, om) = (s', om')
     *)
     destruct l as [sn|i l|i l]
-    ; [ inversion_clear Ht; split; [apply option_protocol_message_None|]
+    ; [ inversion_clear Ht; split; [apply option_valid_message_None|]
       ; intros
       ; destruct_equivocator_state_extend_project s sn i Hi
       ; [ apply IHHbs1 in H; assumption
-      | inversion H; subst; apply initial_is_protocol; apply Hv
+      | inversion H; subst; apply initial_state_is_valid; apply Hv
       | discriminate]
       |..]
     ; cbn in Hv, Ht
@@ -1014,77 +1016,77 @@ Proof.
       * discriminate.
 Qed.
 
-Lemma preloaded_with_equivocator_state_project_protocol_state
+Lemma preloaded_with_equivocator_state_project_valid_state
   (seed : message -> Prop)
   (bs : vstate equivocator_vlsm)
-  (Hbs : protocol_state_prop (pre_loaded_vlsm equivocator_vlsm seed) bs)
+  (Hbs : valid_state_prop (pre_loaded_vlsm equivocator_vlsm seed) bs)
   : forall i si,
     equivocator_state_project bs i = Some si ->
-    protocol_state_prop (pre_loaded_vlsm X seed) si.
+    valid_state_prop (pre_loaded_vlsm X seed) si.
 Proof.
   destruct Hbs as [om  Hbs].
-  apply preloaded_equivocator_state_project_protocol, proj2 in Hbs.
+  apply preloaded_equivocator_state_projection_preserves_validity, proj2 in Hbs.
   assumption.
 Qed.
 
-Lemma preloaded_with_equivocator_state_project_protocol_message
+Lemma preloaded_with_equivocator_state_project_valid_message
   (seed : message -> Prop)
   (om : option message)
-  (Hom : option_protocol_message_prop (pre_loaded_vlsm equivocator_vlsm seed) om)
+  (Hom : option_valid_message_prop (pre_loaded_vlsm equivocator_vlsm seed) om)
   :
-  option_protocol_message_prop (pre_loaded_vlsm X seed) om.
+  option_valid_message_prop (pre_loaded_vlsm X seed) om.
 Proof.
   destruct Hom as [s Hm].
-  apply preloaded_equivocator_state_project_protocol, proj1 in Hm.
+  apply preloaded_equivocator_state_projection_preserves_validity, proj1 in Hm.
   assumption.
 Qed.
 
-Lemma equivocator_state_project_protocol_state
+Lemma equivocator_state_project_valid_state
   (bs : vstate equivocator_vlsm)
-  (Hbs : protocol_state_prop equivocator_vlsm bs)
+  (Hbs : valid_state_prop equivocator_vlsm bs)
   : forall i si,
-    equivocator_state_project bs i = Some si -> protocol_state_prop X si.
+    equivocator_state_project bs i = Some si -> valid_state_prop X si.
 Proof.
   intros i si Hpr.
-  apply (VLSM_eq_protocol_state (vlsm_is_pre_loaded_with_False equivocator_vlsm)) in Hbs.
-  specialize (preloaded_with_equivocator_state_project_protocol_state _ _ Hbs _ _ Hpr) as Hsi.
-  apply (VLSM_eq_protocol_state (vlsm_is_pre_loaded_with_False X)) in Hsi.
+  apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False equivocator_vlsm)) in Hbs.
+  specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
+  apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False X)) in Hsi.
   destruct X as (T, (S, M)).
   assumption.
 Qed.
 
-Lemma equivocator_state_project_protocol_message
+Lemma equivocator_state_project_valid_message
   (om : option message)
-  (Hom : option_protocol_message_prop equivocator_vlsm om)
+  (Hom : option_valid_message_prop equivocator_vlsm om)
   :
-  option_protocol_message_prop X om.
+  option_valid_message_prop X om.
 Proof.
-  destruct om as [m|]; [|apply option_protocol_message_None].
+  destruct om as [m|]; [|apply option_valid_message_None].
   specialize (vlsm_is_pre_loaded_with_False_initial_message equivocator_vlsm) as Hinit.
-  apply (VLSM_incl_protocol_message (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hom
+  apply (VLSM_incl_valid_message (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hom
   ; [| assumption].
-  apply preloaded_with_equivocator_state_project_protocol_message in Hom.
+  apply preloaded_with_equivocator_state_project_valid_message in Hom.
   specialize (vlsm_is_pre_loaded_with_False_initial_message_rev X) as Hinit_rev.
-  apply (VLSM_incl_protocol_message (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
+  apply (VLSM_incl_valid_message (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
   ; destruct X as (T, (S, M))
   ; assumption.
 Qed.
 
 (**
-All components of a protocol states of the [pre_loaded_with_all_messages_vlsm] corresponding
-to an [equivocator_vlsm] are also protocol for the [pre_loaded_with_all_messages_vlsm]
+All components of valid states of the [pre_loaded_with_all_messages_vlsm] corresponding
+to an [equivocator_vlsm] are also valid for the [pre_loaded_with_all_messages_vlsm]
 corresponding to the original machine.
 *)
-Lemma preloaded_equivocator_state_project_protocol_state
+Lemma preloaded_equivocator_state_project_valid_state
   (bs : vstate equivocator_vlsm)
-  (Hbs : protocol_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs)
+  (Hbs : valid_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs)
   : forall i si,
-    equivocator_state_project bs i = Some si -> protocol_state_prop (pre_loaded_with_all_messages_vlsm X) si.
+    equivocator_state_project bs i = Some si -> valid_state_prop (pre_loaded_with_all_messages_vlsm X) si.
 Proof.
   intros i si Hpr.
-  apply (VLSM_eq_protocol_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm)) in Hbs.
-  specialize (preloaded_with_equivocator_state_project_protocol_state _ _ Hbs _ _ Hpr) as Hsi.
-  apply (VLSM_eq_protocol_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X)) in Hsi.
+  apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm)) in Hbs.
+  specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
+  apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X)) in Hsi.
   destruct X as (T, (S, M)).
   assumption.
 Qed.
@@ -1237,7 +1239,7 @@ Proof.
   apply equivocator_state_project_Some_rev in Hsi. assumption.
 Qed.
 
-End equivocator_vlsm_protocol_state_projections.
+End equivocator_vlsm_valid_state_projections.
 
 Arguments NewMachine {_ _} _: assert.
 Arguments Existing {_ _} _ : assert.

@@ -41,14 +41,14 @@ Lemma VLSM_projection_oracle_reflect
   (oracleY : vstate Y -> message -> Prop)
   (HstepwiseX : oracle_stepwise_props (vlsm := X) selectorX oracleX)
   (HstepwiseY : oracle_stepwise_props (vlsm := Y) selectorY oracleY)
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
   forall m, oracleY (state_project s) m -> oracleX s m.
 Proof.
   intros s Hs m Hm.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseX _ Hs m).
   intros isX trX HtrX.
-  apply (VLSM_projection_finite_protocol_trace_init_to Hsimul) in HtrX.
-  apply (VLSM_projection_protocol_state Hsimul) in Hs as HsY.
+  apply (VLSM_projection_finite_valid_trace_init_to Hsimul) in HtrX.
+  apply (VLSM_projection_valid_state Hsimul) in Hs as HsY.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseY _ HsY m) in Hm.
   specialize (Hm _ _ HtrX).
   apply Exists_exists in Hm as [itemY [HitemY Hm]].
@@ -70,7 +70,7 @@ End selectors.
 Lemma VLSM_projection_has_been_sent_reflect
   {HbsX : HasBeenSentCapability X}
   {HbsY : HasBeenSentCapability Y}
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector output) (field_selector output).
@@ -83,7 +83,7 @@ Qed.
 Lemma VLSM_projection_has_been_received_reflect
   {HbrX : HasBeenReceivedCapability X}
   {HbrY : HasBeenReceivedCapability Y}
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector input) (field_selector input).
@@ -100,7 +100,7 @@ Lemma VLSM_projection_has_been_observed_reflect
   {HbsY : HasBeenSentCapability Y}
   {HbrY : HasBeenReceivedCapability Y}
   (HboY := HasBeenObservedCapability_from_sent_received Y)
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_observed Y (state_project s) m -> has_been_observed X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with item_sends_or_receives item_sends_or_receives.
@@ -141,13 +141,13 @@ Lemma VLSM_weak_full_projection_selected_message_exists_in_some_preloaded_traces
 Proof.
   intros [is [tr [Htr Hm]]].
   destruct Htr as [Htr His].
-  apply (VLSM_weak_full_projection_finite_protocol_trace_from_to Hsimul) in Htr.
-  apply ptrace_first_pstate in Htr as Hpr_is.
-  apply protocol_state_has_trace in Hpr_is as [is' [tr_is Hpr_is]].
+  apply (VLSM_weak_full_projection_finite_valid_trace_from_to Hsimul) in Htr.
+  apply valid_trace_first_pstate in Htr as Hpr_is.
+  apply valid_state_has_trace in Hpr_is as [is' [tr_is Hpr_is]].
   exists is', (tr_is ++ (VLSM_weak_full_projection_finite_trace_project Hsimul tr)).
   destruct Hpr_is as [Hpr_is His'].
   repeat split; [|assumption|].
-  - apply (finite_protocol_trace_from_to_app (pre_loaded_with_all_messages_vlsm Y))
+  - apply (finite_valid_trace_from_to_app (pre_loaded_with_all_messages_vlsm Y))
       with (state_project is)
     ; assumption.
   - apply Exists_app. right.
@@ -168,13 +168,13 @@ Lemma VLSM_weak_full_projection_oracle
   (HstepwiseY : oracle_stepwise_props (vlsm := Y) selectorY oracleY)
   (HoracleX_dec : RelDecision oracleX)
   (HoracleY_dec : RelDecision oracleY)
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, oracleX s m -> oracleY (state_project s) m.
 Proof.
   intros s Hs m Hm.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseX _ Hs m) in Hm.
   apply (selected_messages_consistency_prop_from_stepwise _ _ _ _ HstepwiseX HoracleX_dec _ Hs) in Hm.
-  apply (VLSM_weak_full_projection_protocol_state Hsimul) in Hs as HsY.
+  apply (VLSM_weak_full_projection_valid_state Hsimul) in Hs as HsY.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseY _ HsY m).
   apply (selected_messages_consistency_prop_from_stepwise _ _ _ _ HstepwiseY HoracleY_dec _ HsY).
   revert Hm.
@@ -186,7 +186,7 @@ End selectors.
 Lemma VLSM_weak_full_projection_has_been_sent
   {HbsX : HasBeenSentCapability X}
   {HbsY : HasBeenSentCapability Y}
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with (field_selector output) (field_selector output).
@@ -201,7 +201,7 @@ Qed.
 Lemma VLSM_weak_full_projection_has_been_received
   {HbrX : HasBeenReceivedCapability X}
   {HbrY : HasBeenReceivedCapability Y}
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with (field_selector input) (field_selector input).
@@ -220,7 +220,7 @@ Lemma VLSM_weak_full_projection_has_been_observed
   {HbsY : HasBeenSentCapability Y}
   {HbrY : HasBeenReceivedCapability Y}
   (HboY := HasBeenObservedCapability_from_sent_received Y)
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_observed X s m -> has_been_observed Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with item_sends_or_receives item_sends_or_receives.
@@ -248,14 +248,14 @@ Context
 Definition VLSM_full_projection_has_been_sent
   {HbsX : HasBeenSentCapability X}
   {HbsY : HasBeenSentCapability Y}
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m
   := VLSM_weak_full_projection_has_been_sent (VLSM_full_projection_weaken Hsimul).
 
 Definition VLSM_full_projection_has_been_received
   {HbsX : HasBeenReceivedCapability X}
   {HbsY : HasBeenReceivedCapability Y}
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m
   := VLSM_weak_full_projection_has_been_received (VLSM_full_projection_weaken Hsimul).
 
@@ -266,21 +266,21 @@ Definition VLSM_full_projection_has_been_observed
   {HbsY : HasBeenSentCapability Y}
   {HbrY : HasBeenReceivedCapability Y}
   (HboY := HasBeenObservedCapability_from_sent_received Y)
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_observed X s m -> has_been_observed Y (state_project s) m
   := VLSM_weak_full_projection_has_been_observed (VLSM_full_projection_weaken Hsimul).
 
 Definition VLSM_full_projection_has_been_sent_reflect
   {HbsX : HasBeenSentCapability X}
   {HbsY : HasBeenSentCapability Y}
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m
   := VLSM_projection_has_been_sent_reflect  (VLSM_full_projection_is_projection Hsimul).
 
 Definition VLSM_full_projection_has_been_received_reflect
   {HbrX : HasBeenReceivedCapability X}
   {HbrY : HasBeenReceivedCapability Y}
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m
   := VLSM_projection_has_been_received_reflect  (VLSM_full_projection_is_projection Hsimul).
 
@@ -291,7 +291,7 @@ Definition VLSM_full_projection_has_been_observed_reflect
   {HbsY : HasBeenSentCapability Y}
   {HbrY : HasBeenReceivedCapability Y}
   (HboY := HasBeenObservedCapability_from_sent_received Y)
-  : forall s, protocol_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_observed Y (state_project s) m -> has_been_observed X s m
   := VLSM_projection_has_been_observed_reflect  (VLSM_full_projection_is_projection Hsimul).
 
@@ -318,7 +318,7 @@ Existing Instance HbsFree2.
 [has_been_sent] predicate is preserved through the [same_IM_state_rew] map.
 *)
 Lemma same_IM_composite_has_been_sent_preservation s1 m
-  (Hs1 : protocol_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1)
+  (Hs1 : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1)
   : composite_has_been_sent IM1 Hbs1 s1 m ->
     composite_has_been_sent IM2 Hbs2 (same_IM_state_rew Heq s1) m.
 Proof.
@@ -360,7 +360,7 @@ Proof.
   specialize (Hsender_safety _ _ Hsender).
   intros [(s0,om0) [(i, li) [s1 Hemitted]]].
   specialize (preloaded_component_projection IM i) as Hproj.
-  specialize (VLSM_projection_protocol_transition Hproj (existT i li) li)
+  specialize (VLSM_projection_input_valid_transition Hproj (existT i li) li)
     as Htransition.
   spec Htransition.
   { clear. unfold composite_project_label. simpl.

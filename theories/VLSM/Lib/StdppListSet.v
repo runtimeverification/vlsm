@@ -41,7 +41,7 @@ Lemma set_add_intro1 :
 Proof.
   simple induction x; simpl.
   - intro Hel; inversion Hel.
-  - intros a0 l IH. 
+  - intros a0 l IH.
     rewrite elem_of_cons.
     intros [Ha0a| Hal].
     * subst; destruct (decide (b = a0)); simpl; left; assumption.
@@ -114,7 +114,7 @@ induction l as [|x xs Hrec].
   * tauto.
   * intro H. destruct H.
     + rewrite H. left.
-    + rewrite elem_of_cons. 
+    + rewrite elem_of_cons.
       right; apply Hrec; assumption.
 Qed.
 

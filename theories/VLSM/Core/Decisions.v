@@ -1,7 +1,7 @@
 From stdpp Require Import prelude.
 From Coq Require Import FinFun Streams Logic.Epsilon Arith.Compare_dec Lia.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.ListSetExtras Lib.RealsExtras.
-From VLSM Require Import Core.VLSM Core.Composition Core.ProjectionTraces.
+From VLSM Require Import Core.VLSM Core.Composition Core.VLSMProjections Core.ProjectionTraces.
 
 (** * VLSM Decisions on Consensus Values *)
 
@@ -28,7 +28,7 @@ Section CommuteSingleton.
 
   (* Definition of finality per document. *)
   Definition final_original : vdecision V -> Prop :=
-    fun (D : vdecision V) => forall (tr : protocol_trace V),
+    fun (D : vdecision V) => forall (tr : valid_trace V),
         forall (n1 n2 : nat) (s1 s2 : state) (c1 c2 : C),
           (trace_nth (proj1_sig tr) n1 = Some s1) ->
           (trace_nth (proj1_sig tr) n2 = Some s2) ->
@@ -44,16 +44,16 @@ Section CommuteSingleton.
         (D s2 = (Some c2)) ->
         c1 = c2.
 
-  (* 3.3.1 Initial protocol state bivalence *)
+  (* 3.3.1 Initial state bivalence *)
   Definition bivalent : vdecision V -> Prop :=
     fun (D : vdecision V) =>
       (* All initial states decide on None *)
       (forall (s0 : state),
         vinitial_state_prop V s0 ->
         D s0 = None) /\
-      (* Every protocol trace (already beginning from an initial state) contains a state deciding on each consensus value *)
+      (* Every valid trace (already beginning from an initial state) contains a state deciding on each consensus value *)
       (forall (c : C) ,
-          exists (tr : protocol_trace V) (s : state) (n : nat),
+          exists (tr : valid_trace V) (s : state) (n : nat),
             (trace_nth (proj1_sig tr) n) = Some s /\ D s = (Some c)).
 
   (* 3.3.2 No stuck states *)
@@ -61,7 +61,7 @@ Section CommuteSingleton.
   Definition stuck_free : vdecision V -> Prop :=
     fun (D : vdecision V) =>
       (forall (s : state),
-          exists (tr : protocol_trace V)
+          exists (tr : valid_trace V)
                  (decided_state : state)
                  (n_s n_decided : nat)
                  (c : C),
@@ -102,7 +102,7 @@ Section CommuteIndexed.
   *)
 
   Definition consistent_original :=
-      forall (tr : protocol_trace X),
+      forall (tr : valid_trace X),
       forall (n1 n2 : nat),
       forall (j k : index),
       forall (s1 s2 : vstate X),
@@ -183,11 +183,13 @@ Section CommuteIndexed.
   Lemma final_and_consistent_implies_final
       (Hcons : final_and_consistent)
       (i : index)
-      (Hfr : finite_projection_friendly IM constraint i)
+      (Hfr : projection_friendly_prop (component_projection IM constraint i))
       : final (composite_vlsm_constrained_projection IM constraint i) (ID i).
   Proof.
     intros s1 s2 c1 c2 Hfuturesi HD1 HD2.
-    specialize (projection_friendly_in_futures IM constraint i Hfr s1 s2 Hfuturesi)
+    specialize
+      (projection_friendly_in_futures (component_projection IM constraint i)
+        Hfr s1 s2 Hfuturesi)
     ; intros [sX1 [sX2 [Hs1 [Hs2 HfuturesX]]]].
     subst.
     apply (Hcons sX1 sX2 HfuturesX i i c1 c2 HD1 HD2).
@@ -242,7 +244,7 @@ Section Estimators.
 
   Lemma estimator_only_has_decision
     (Hde : decision_estimator_property)
-    (s : protocol_state X)
+    (s : valid_state X)
     (c c_other : C)
     (Hc  : D (proj1_sig s) = (Some c))
     (Hc_other : estimates (proj1_sig s) c_other)
@@ -257,7 +259,7 @@ Section Estimators.
 
   Lemma estimator_surely_has_decision
     (Hde : decision_estimator_property)
-    (s : protocol_state X)
+    (s : valid_state X)
     (c : C)
     (Hc  : D (proj1_sig s) = (Some c))
     : estimates (proj1_sig s) c.
@@ -294,7 +296,7 @@ Section Estimators.
     intros.
     unfold final.
     intros.
-    specialize (in_futures_protocol_snd X s1 s2 H0); intro Hps2.
+    specialize (in_futures_valid_snd X s1 s2 H0); intro Hps2.
     apply estimator_only_has_decision with (s := (exist _ s2 Hps2)).
     assumption.
     assumption.

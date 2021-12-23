@@ -220,7 +220,7 @@ Proof.
 Qed.
 
 Lemma ext_elem_of_filter {A} P Q
- `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} 
+ `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)}
  (l : list A) :
  filter P l = filter Q l -> forall a, a ∈ l -> (P a <-> Q a).
 Proof.
@@ -242,8 +242,8 @@ Proof.
     destruct H4; assumption.
 Qed.
 
-Lemma filter_complement {X} P Q 
- `{∀ (x:X), Decision (P x)} `{∀ (x:X), Decision (Q x)} 
+Lemma filter_complement {X} P Q
+ `{∀ (x:X), Decision (P x)} `{∀ (x:X), Decision (Q x)}
  (l : list X) :
  filter P l = filter Q l <->
  filter (fun x => ~ P x) l = filter (fun x => ~ Q x) l.

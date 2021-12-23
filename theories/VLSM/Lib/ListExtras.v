@@ -779,7 +779,7 @@ Proof.
   - inversion Hin.
   - rewrite list_annotate_unroll,elem_of_cons in Hin.
     destruct Hin as [Heq | Hin].
-    + subst xP. left. 
+    + subst xP. left.
     + right. specialize (IHl (Forall_tl Hs)). apply IHl. assumption.
 Qed.
 
@@ -1497,7 +1497,7 @@ Proof.
   - exists lb1. reflexivity.
   - rewrite elem_of_cons in Ha.
     destruct Ha. right.
-    apply elem_of_app. 
+    apply elem_of_app.
     right; left; reflexivity.
   - specialize (IHla1 a0 lb1 b la2 lb2 H1 Ha).
     destruct IHla1 as [la0b Hla0b].
@@ -1762,7 +1762,7 @@ Proof.
     rewrite Hn0; left.
   - specialize (list_max_elem_of_exists l) as Hmax.
     spec Hmax. lia. rewrite <- eq_max.
-    assumption.    
+    assumption.
 Qed.
 
 (* Returns all values which occur with maximum frequency in the given list.
@@ -2315,7 +2315,7 @@ Lemma filter_subseteq_fn {A} P Q
   forall (s : list A), filter P s ⊆ filter Q s.
 Proof.
 induction s; simpl.
-  - rewrite filter_nil; intros x Hx; inversion Hx.    
+  - rewrite filter_nil; intros x Hx; inversion Hx.
   - intro x; intros.
     rewrite filter_cons in H2.
     destruct (decide (P a)).

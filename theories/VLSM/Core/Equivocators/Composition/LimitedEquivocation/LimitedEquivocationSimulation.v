@@ -16,9 +16,9 @@ In this module we show that the composition of equivocators with no-message
 equivocation and limited state-equivocation can simulate all traces with the
 [fixed_limited_equivocation_prop]erty.
 
-As a corollary we show that any state which is protocol for the composition
+As a corollary we show that any state which is valid for the composition
 of regular nodes using a [limited_equivocation_constraint] can be
-obtained as the projection of a protocol state for the composition of
+obtained as the projection of a valid state for the composition of
 equivocators with no message equivocation and limited state equivocation.
 *)
 
@@ -41,8 +41,8 @@ Context
   .
 
 (** If the total weight of the equivocators allowed to state-equivocate is less
-than the [threshold], then traces of equivocators which are protocol w.r.t
-the fixed state-equivocation constraint are also protocol w.r.t. the
+than the [threshold], then traces of equivocators which are valid w.r.t
+the fixed state-equivocation constraint are also valid w.r.t. the
 limited state-equivocation constraint.
 *)
 Lemma equivocators_Fixed_incl_Limited
@@ -90,24 +90,24 @@ Context
 simulated by the composition of equivocators with no message-equivocation and
 limited state-equivocation.
 *)
-Lemma limited_equivocators_finite_protocol_trace_init_to_rev
+Lemma limited_equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   isX trX
   (HtrX : fixed_limited_equivocation_prop IM _ _ isX trX)
   : exists is, equivocators_total_state_project IM is = isX /\
     exists s, equivocators_total_state_project IM s = finite_trace_last isX trX /\
     exists tr, equivocators_total_trace_project IM tr = trX /\
-    finite_protocol_trace_init_to XE is s tr /\
+    finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   destruct HtrX as [equivocating [Hlimited HtrX]].
   specialize (Fixed_eq_StrongFixed IM Hbs Hbr finite_index equivocating)
     as Heq.
-  apply (VLSM_eq_finite_protocol_trace Heq) in HtrX.
+  apply (VLSM_eq_finite_valid_trace Heq) in HtrX.
   clear Heq.
-  apply ptrace_add_default_last in HtrX.
+  apply valid_trace_add_default_last in HtrX.
   specialize
-    (fixed_equivocators_finite_protocol_trace_init_to_rev IM Hbs finite_index _
+    (fixed_equivocators_finite_valid_trace_init_to_rev IM Hbs finite_index _
       no_initial_messages_in_IM _ _ _ HtrX)
     as [is [His [s [Hs [tr [Htr [Hptr Houtput]]]]]]].
   exists is. split; [assumption|].
@@ -115,7 +115,7 @@ Proof.
   exists tr. split; [assumption|].
   split; [|assumption].
   revert Hptr.
-  apply VLSM_incl_finite_protocol_trace_init_to.
+  apply VLSM_incl_finite_valid_trace_init_to.
   apply equivocators_Fixed_incl_Limited.
   assumption.
 Qed.
@@ -127,34 +127,34 @@ Context
   (message_dependencies : message -> set message)
   .
 
-(** Any protocol state for the composition of reqular nodes under a limited
-message-equivocation constraint is the projection of a protocol state of
+(** Any valid state for the composition of reqular nodes under a limited
+message-equivocation constraint is the projection of a valid state of
 the composition of equivocators under a no message-equivocation and limited
 state-equivocation constraint.
 *)
-Lemma limited_equivocators_protocol_state_rev
+Lemma limited_equivocators_valid_state_rev
   (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender finite_index)
   (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
   (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
   (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
-  : forall sX, protocol_state_prop Limited sX ->
+  : forall sX, valid_state_prop Limited sX ->
     exists s, equivocators_total_state_project IM s = sX /\
-    protocol_state_prop XE s.
+    valid_state_prop XE s.
 Proof.
   intros sX HsX.
   apply
-    (limited_protocol_state_has_trace_exhibiting_limited_equivocation IM Hbs Hbr finite_index
+    (limited_valid_state_has_trace_exhibiting_limited_equivocation IM Hbs Hbr finite_index
       sender message_dependencies Hwitnessed_equivocation HMsgDep Hfull
       no_initial_messages_in_IM can_emit_signed)
     in HsX as [isX [trX [HsX HtrX]]].
-  apply limited_equivocators_finite_protocol_trace_init_to_rev in HtrX
+  apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
     as [is [_ [s [Hpr_s [tr [_ [Htr _]]]]]]]
   ; [|assumption].
   exists s.
   subst. split; [assumption|].
-  apply ptrace_last_pstate in Htr.
+  apply valid_trace_last_pstate in Htr.
   assumption.
 Qed.
 

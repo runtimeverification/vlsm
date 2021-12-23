@@ -9,7 +9,7 @@ In this section we define fixed equivocation for the regular composition.
 
 Assuming that a only a fixed subset of the nodes (here called equivocating)
 are allowed to equivocate, inspired by the results leading to
-Lemma [equivocators_protocol_trace_from_project] which links state equivocation
+Lemma [equivocators_valid_trace_from_project] which links state equivocation
 to free composition, we can say that a message can be produced by a network
 of nodes allowed to equivocate, if it can be produced by their free composition
 [free_equivocating_vlsm_composition] preloaded with the current information
@@ -49,7 +49,7 @@ Definition free_equivocating_vlsm_composition
 
 (**
 [pre_loaded_free_equivocating_vlsm_composition] preloads the free composition
-of equivocating nodes all with the messages given by the @messageSet@.
+of equivocating nodes all with the messages given by the <<messageSet>>.
 *)
 Definition pre_loaded_free_equivocating_vlsm_composition
   (messageSet : message -> Prop)
@@ -265,18 +265,29 @@ Proof.
   apply fixed_equivocation_index_incl_subsumption.
 Qed.
 
+Lemma fixed_equivocation_vlsm_composition_index_incl
+  : VLSM_incl
+    (fixed_equivocation_vlsm_composition IM Hbs Hbr indices1)
+    (fixed_equivocation_vlsm_composition IM Hbs Hbr indices2).
+Proof.
+  apply constraint_subsumption_incl.
+  apply preloaded_constraint_subsumption_stronger.
+  apply strong_constraint_subsumption_strongest.
+  apply fixed_equivocation_constraint_index_incl_subsumption.
+Qed.
+
 End fixed_equivocation_index_incl.
 
-(** ** Restricting Fixed protocol traces to only the equivocators
+(** ** Restricting Fixed valid traces to only the equivocators
 
-In this section we study the properties of Fixed protocol traces
+In this section we study the properties of Fixed valid traces
 when projected to the composition of equivocator nodes.
 
-The main result, Lemma [fixed_finite_protocol_trace_sub_projection]
-is a strengthening of Lemma [finite_protocol_trace_sub_projection] for the
+The main result, Lemma [fixed_finite_valid_trace_sub_projection]
+is a strengthening of Lemma [finite_valid_trace_sub_projection] for the
 [fixed_equivocation_constraint], showing that, when restricting
-a Fixed protocol trace to only the transitions belonging to the equivocators,
-the obtained trace is protocol for the composition of equivocators pre-loaded
+a Fixed valid trace to only the transitions belonging to the equivocators,
+the obtained trace is valid for the composition of equivocators pre-loaded
 only with those messages sent by the non-equivocators in the original trace.
 *)
 Section fixed_equivocator_sub_projection.
@@ -345,35 +356,35 @@ Proof.
     apply Hpreserve.
 Qed.
 
-Lemma strong_fixed_equivocation_eqv_protocol base_s m
+Lemma strong_fixed_equivocation_eqv_valid_message base_s m
   (Hstrong : strong_fixed_equivocation IM Hbs equivocators base_s m)
-  : protocol_message_prop (equivocators_composition_for_sent IM Hbs equivocators base_s) m.
+  : valid_message_prop (equivocators_composition_for_sent IM Hbs equivocators base_s) m.
 Proof.
    destruct Hstrong as [Hobs | Hemit].
-  - apply initial_message_is_protocol. right. assumption.
-  - apply can_emit_protocol in Hemit. assumption.
+  - apply initial_message_is_valid. right. assumption.
+  - apply emitted_messages_are_valid in Hemit. assumption.
 Qed.
 
-Lemma strong_fixed_equivocation_eqv_protocol_in_futures base_s s
+Lemma strong_fixed_equivocation_eqv_valid_message_in_futures base_s s
   (Hfuture_s : in_futures PreFree s base_s)
   m
   (Hstrong : strong_fixed_equivocation IM Hbs equivocators s m)
-  : protocol_message_prop (equivocators_composition_for_sent IM Hbs equivocators base_s) m.
+  : valid_message_prop (equivocators_composition_for_sent IM Hbs equivocators base_s) m.
 Proof.
   destruct (in_futures_preserves_strong_fixed_equivocation _ _ Hfuture_s _ Hstrong)
     as [Hobs | Hemit].
-  - apply initial_message_is_protocol. right. assumption.
-  - apply can_emit_protocol in Hemit. assumption.
+  - apply initial_message_is_valid. right. assumption.
+  - apply emitted_messages_are_valid in Hemit. assumption.
 Qed.
 
-Section fixed_finite_protocol_trace_sub_projection_helper_lemmas.
+Section fixed_finite_valid_trace_sub_projection_helper_lemmas.
 
 (**
 The results in this section are not meant to be used directly. They are just
-sub-lemmas of [fixed_finite_protocol_trace_sub_projection_helper].
+sub-lemmas of [fixed_finite_valid_trace_sub_projection_helper].
 
 We make an assumption (<<Hobs_s_protocol>>) which is later shown to hold
-for all Fixed protocol states.
+for all Fixed valid states.
 
 We then restate (some of) these lemmas without the extra assumption.
 *)
@@ -388,7 +399,7 @@ Context
 (** See Lemma [fixed_input_has_strong_fixed_equivocation] below. *)
 Local Lemma fixed_input_has_strong_fixed_equivocation_helper
   l m
-  (Hv : protocol_valid Fixed l (s, Some m))
+  (Hv : input_valid Fixed l (s, Some m))
   : strong_fixed_equivocation IM Hbs equivocators base_s m.
 Proof.
   destruct Hv as [_ [_ [_ [Hobs | Hemit]]]].
@@ -398,20 +409,20 @@ Proof.
     apply VLSM_incl_can_emit; simpl.
     apply basic_VLSM_incl; intros s0 **; [assumption | | apply Hv | apply H].
     destruct HmX as [Him | Hobs].
-    + apply initial_message_is_protocol. left. assumption.
+    + apply initial_message_is_valid. left. assumption.
     + apply Hobs_s_protocol in Hobs as [Hsent | Hemit].
-      * apply initial_message_is_protocol. right. assumption.
-      * apply can_emit_protocol. assumption.
+      * apply initial_message_is_valid. right. assumption.
+      * apply emitted_messages_are_valid. assumption.
 Qed.
 
-Local Lemma fixed_protocol_transition_sub_projection_helper
-  (Hs_pr: protocol_state_prop (equivocators_composition_for_sent IM Hbs equivocators base_s)
+Local Lemma fixed_input_valid_transition_sub_projection_helper
+  (Hs_pr: valid_state_prop (equivocators_composition_for_sent IM Hbs equivocators base_s)
     (composite_state_sub_projection IM equivocators s))
   l
   (e : sub_index_prop equivocators (projT1 l))
   iom oom sf
-  (Ht : protocol_transition Fixed l (s, iom) (sf, oom))
-  : protocol_transition (equivocators_composition_for_sent IM Hbs equivocators base_s)
+  (Ht : input_valid_transition Fixed l (s, iom) (sf, oom))
+  : input_valid_transition (equivocators_composition_for_sent IM Hbs equivocators base_s)
       (composite_label_sub_projection IM equivocators l e)
       (composite_state_sub_projection IM equivocators s, iom)
       (composite_state_sub_projection IM equivocators sf, oom).
@@ -420,8 +431,8 @@ Proof.
   repeat split.
   - assumption.
   - apply proj1 in Ht.
-    destruct iom as [im|]; [|apply option_protocol_message_None].
-    apply strong_fixed_equivocation_eqv_protocol.
+    destruct iom as [im|]; [|apply option_valid_message_None].
+    apply strong_fixed_equivocation_eqv_valid_message.
     apply (fixed_input_has_strong_fixed_equivocation_helper _ _ Ht).
   - apply Ht.
   - apply proj2 in Ht. simpl in Ht.
@@ -441,17 +452,17 @@ Qed.
 
 (** See Lemma [fixed_output_has_strong_fixed_equivocation] below. *)
 Local Lemma fixed_output_has_strong_fixed_equivocation_helper
-  (Hs_pr: protocol_state_prop (equivocators_composition_for_sent IM Hbs equivocators base_s)
+  (Hs_pr: valid_state_prop (equivocators_composition_for_sent IM Hbs equivocators base_s)
     (composite_state_sub_projection IM equivocators s))
   sf
   (Hfuture : in_futures PreFree sf base_s)
   l iom om
-  (Ht : protocol_transition Fixed l (s, iom) (sf, Some om))
+  (Ht : input_valid_transition Fixed l (s, iom) (sf, Some om))
   : strong_fixed_equivocation IM Hbs equivocators base_s om.
 Proof.
   destruct (decide (projT1 l ∈ equivocators)).
   - apply
-      (fixed_protocol_transition_sub_projection_helper Hs_pr _ e) in Ht.
+      (fixed_input_valid_transition_sub_projection_helper Hs_pr _ e) in Ht.
     right. eexists _,_,_. exact Ht.
   - left.
     exists (projT1 l). split; [assumption|].
@@ -459,8 +470,8 @@ Proof.
       (preloaded_component_projection IM (projT1 l))) in Hfuture.
     apply in_futures_preserving_oracle_from_stepwise with (field_selector output) (sf (projT1 l))
     ; [apply has_been_sent_stepwise_from_trace| assumption |].
-    apply (VLSM_incl_protocol_transition Fixed_incl_Preloaded) in Ht.
-    specialize (VLSM_projection_protocol_transition
+    apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht.
+    specialize (VLSM_projection_input_valid_transition
       (preloaded_component_projection IM (projT1 l)) l (projT2 l)) as Hproject.
     spec Hproject.
     { unfold composite_project_label.
@@ -472,36 +483,36 @@ Proof.
     apply (has_been_sent_step_update Hproject). left. reflexivity.
 Qed.
 
-End fixed_finite_protocol_trace_sub_projection_helper_lemmas.
+End fixed_finite_valid_trace_sub_projection_helper_lemmas.
 
 (**
 Using the lemmas above we can now prove (by induction) a generic result,
 which has as part of the conclusion the "observability implies strong_fixed_equivocation"
 hypothesis assumed in the above section.
 *)
-Lemma fixed_finite_protocol_trace_sub_projection_helper
+Lemma fixed_finite_valid_trace_sub_projection_helper
   si s tr
-  (Htr: finite_protocol_trace_init_to Fixed si s tr)
+  (Htr: finite_valid_trace_init_to Fixed si s tr)
   base_s
   (Hfuture: in_futures PreFree s base_s)
-  : finite_protocol_trace_from_to (equivocators_composition_for_sent IM Hbs equivocators base_s)
+  : finite_valid_trace_from_to (equivocators_composition_for_sent IM Hbs equivocators base_s)
     (composite_state_sub_projection IM equivocators si)
     (composite_state_sub_projection IM equivocators s)
     (finite_trace_sub_projection IM equivocators tr) /\
     forall m, composite_has_been_observed IM Hbo s m ->
       strong_fixed_equivocation IM Hbs equivocators base_s m.
 Proof.
-  induction Htr using finite_protocol_trace_init_to_rev_ind.
+  induction Htr using finite_valid_trace_init_to_rev_ind.
   - split.
-    + apply finite_ptrace_from_to_empty.
+    + apply finite_valid_trace_from_to_empty.
       apply (composite_initial_state_sub_projection IM equivocators si) in Hsi.
-      apply initial_is_protocol. assumption.
+      apply initial_state_is_valid. assumption.
     + intros m Hobs. apply @has_been_observed_no_inits with (m := m) (Hhbo := Free_hbo) in Hsi.
       contradiction.
-  - apply (VLSM_incl_protocol_transition Fixed_incl_Preloaded) in Ht as Hpre_t.
+  - apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht as Hpre_t.
     assert (Hfuture_s : in_futures PreFree s base_s).
     { destruct Hfuture as [tr' Htr'].
-      specialize (finite_ptrace_from_to_extend _ _ _ _ Htr' _ _ _ _ Hpre_t) as Htr''.
+      specialize (finite_valid_trace_from_to_extend _ _ _ _ Htr' _ _ _ _ Hpre_t) as Htr''.
       eexists. exact Htr''.
     }
     specialize (IHHtr Hfuture_s) as [Htr_pr Htr_obs].
@@ -510,8 +521,8 @@ Proof.
       intros m Hobs. apply @has_been_observed_step_update with (msg := m) (Hhbo := Free_hbo) in Hpre_t.
       apply Hpre_t in Hobs. destruct Hobs as [Hitem | Hobs]
       ; [| apply Htr_obs in Hobs; assumption].
-      apply ptrace_last_pstate in Htr.
-      apply ptrace_last_pstate in Htr_pr.
+      apply valid_trace_last_pstate in Htr.
+      apply valid_trace_last_pstate in Htr_pr.
       destruct Hitem as [Hm | Hm];  subst.
       + apply (fixed_input_has_strong_fixed_equivocation_helper _ _ Htr_obs _ _ (proj1 Ht)).
       + apply (fixed_output_has_strong_fixed_equivocation_helper _ _  Htr_obs Htr_pr _ Hfuture _ _ _ Ht).
@@ -520,10 +531,10 @@ Proof.
     unfold pre_VLSM_projection_transition_item_project. simpl.
     unfold composite_label_sub_projection_option.
     case_decide.
-    + eapply finite_protocol_trace_from_to_app; [apply Htr_pr|].
-      apply finite_ptrace_from_to_singleton. simpl.
-      apply ptrace_last_pstate in Htr_pr.
-      apply (fixed_protocol_transition_sub_projection_helper _ _ Htr_obs Htr_pr _ H _ _ _ Ht).
+    + eapply finite_valid_trace_from_to_app; [apply Htr_pr|].
+      apply finite_valid_trace_from_to_singleton. simpl.
+      apply valid_trace_last_pstate in Htr_pr.
+      apply (fixed_input_valid_transition_sub_projection_helper _ _ Htr_obs Htr_pr _ H _ _ _ Ht).
     + rewrite app_nil_r.
       replace (composite_state_sub_projection _ _ sf) with (composite_state_sub_projection IM equivocators s)
       ; [assumption|].
@@ -539,74 +550,74 @@ Proof.
 Qed.
 
 (**
-Main result of this section: when restricting a Fixed protocol trace to only
-the transitions belonging to the equivocators, the obtained trace is protocol
+Main result of this section: when restricting a Fixed valid trace to only
+the transitions belonging to the equivocators, the obtained trace is valid
 for the composition of equivocators pre-loaded with messages sent by the
 non-equivocators in the original trace.
 
-This is a simple corollary of Lemma [fixed_finite_protocol_trace_sub_projection_helper]
+This is a simple corollary of Lemma [fixed_finite_valid_trace_sub_projection_helper]
 proved above.
 *)
-Lemma fixed_finite_protocol_trace_sub_projection is f tr
-  (Htr : finite_protocol_trace_init_to Fixed is f tr)
-  : finite_protocol_trace_init_to
+Lemma fixed_finite_valid_trace_sub_projection is f tr
+  (Htr : finite_valid_trace_init_to Fixed is f tr)
+  : finite_valid_trace_init_to
               (equivocators_composition_for_sent IM Hbs equivocators f)
               (composite_state_sub_projection IM equivocators is)
               (composite_state_sub_projection IM equivocators f)
               (finite_trace_sub_projection IM equivocators tr).
 Proof.
-  apply fixed_finite_protocol_trace_sub_projection_helper with (base_s := f) in Htr as Htr_pr.
+  apply fixed_finite_valid_trace_sub_projection_helper with (base_s := f) in Htr as Htr_pr.
   - split; [apply Htr_pr|].
     apply proj2 in Htr.
     specialize (composite_initial_state_sub_projection IM equivocators is Htr).
     exact id.
-  - apply in_futures_refl. apply ptrace_last_pstate in Htr.
-    apply (VLSM_incl_protocol_state Fixed_incl_Preloaded). assumption.
+  - apply in_futures_refl. apply valid_trace_last_pstate in Htr.
+    apply (VLSM_incl_valid_state Fixed_incl_Preloaded). assumption.
 Qed.
 
 (**
-Any message observed in a Fixed protocol state has either been sent by the
+Any message observed in a Fixed valid state has either been sent by the
 non-equivocating nodes, or it can be generated by the equivocating nodes
 using only the messages sent by the non-equivocating nodes.
 *)
 Lemma fixed_observed_has_strong_fixed_equivocation f
-  (Hf : protocol_state_prop Fixed f)
+  (Hf : valid_state_prop Fixed f)
   m
   (Hobs: composite_has_been_observed IM Hbo f m)
   : strong_fixed_equivocation IM Hbs equivocators f m.
 Proof.
-  apply (VLSM_incl_protocol_state Fixed_incl_Preloaded) in Hf as Hfuture.
+  apply (VLSM_incl_valid_state Fixed_incl_Preloaded) in Hf as Hfuture.
   apply in_futures_refl in Hfuture.
-  apply protocol_state_has_trace in Hf as [is [tr Htr]].
-  apply fixed_finite_protocol_trace_sub_projection_helper with (base_s := f)
+  apply valid_state_has_trace in Hf as [is [tr Htr]].
+  apply fixed_finite_valid_trace_sub_projection_helper with (base_s := f)
     in Htr as Htr_pr
   ; [|assumption..].
   revert m Hobs. apply Htr_pr.
 Qed.
 
-Lemma fixed_protocol_state_sub_projection s f
+Lemma fixed_valid_state_sub_projection s f
   (Hsf : in_futures Fixed s f)
-  : protocol_state_prop
+  : valid_state_prop
     (equivocators_composition_for_sent IM Hbs equivocators f)
     (composite_state_sub_projection IM equivocators s).
 Proof.
   destruct Hsf as [tr Htr].
-  apply finite_protocol_trace_from_to_complete_left in Htr as [is [trs [Htr Hs]]].
-  apply fixed_finite_protocol_trace_sub_projection in Htr as Hpr_tr.
-  apply proj1, finite_protocol_trace_from_to_app_split,proj1, ptrace_forget_last in Htr.
+  apply finite_valid_trace_from_to_complete_left in Htr as [is [trs [Htr Hs]]].
+  apply fixed_finite_valid_trace_sub_projection in Htr as Hpr_tr.
+  apply proj1, finite_valid_trace_from_to_app_split,proj1, valid_trace_forget_last in Htr.
   rewrite (finite_trace_sub_projection_app IM equivocators) in Hpr_tr.
-  apply proj1, finite_protocol_trace_from_to_app_split,proj1, ptrace_last_pstate in Hpr_tr.
+  apply proj1, finite_valid_trace_from_to_app_split,proj1, valid_trace_last_pstate in Hpr_tr.
   subst s. simpl.
   rewrite <- (finite_trace_sub_projection_last_state IM _ _ _ _ Htr).
   assumption.
 Qed.
 
-(** The input of a Fixed protocol transition has the [strong_fixed_equivocation]
+(** The input of a Fixed input valid transition has the [strong_fixed_equivocation]
 property.
 *)
 Lemma fixed_input_has_strong_fixed_equivocation
   l s m
-  (Ht : protocol_valid Fixed l (s, Some m))
+  (Ht : input_valid Fixed l (s, Some m))
   : strong_fixed_equivocation IM Hbs equivocators s m.
 Proof.
   apply fixed_input_has_strong_fixed_equivocation_helper with (base_s := s) in Ht
@@ -615,25 +626,25 @@ Proof.
   apply Ht.
 Qed.
 
-(** The output of a Fixed protocol transition has the [strong_fixed_equivocation]
+(** The output of a Fixed input valid transition has the [strong_fixed_equivocation]
 property for its destination.
 *)
 Lemma fixed_output_has_strong_fixed_equivocation
   l s iom sf om
-  (Ht : protocol_transition Fixed l (s, iom) (sf, Some om))
+  (Ht : input_valid_transition Fixed l (s, iom) (sf, Some om))
   : strong_fixed_equivocation IM Hbs equivocators sf om.
 Proof.
-  apply protocol_transition_origin in Ht as Hs.
+  apply input_valid_transition_origin in Ht as Hs.
   apply fixed_output_has_strong_fixed_equivocation_helper with s sf l iom.
   - intros m Hobs. apply in_futures_preserves_strong_fixed_equivocation with s.
-    + apply (VLSM_incl_protocol_transition Fixed_incl_Preloaded) in Ht.
-      revert Ht. apply (protocol_transition_in_futures PreFree).
+    + apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht.
+      revert Ht. apply (input_valid_transition_in_futures PreFree).
     + revert Hobs. apply fixed_observed_has_strong_fixed_equivocation.
       assumption.
-  - apply protocol_transition_in_futures in Ht.
-    revert Ht. apply fixed_protocol_state_sub_projection.
-  - apply in_futures_refl. apply protocol_transition_destination in Ht.
-    revert Ht. apply (VLSM_incl_protocol_state Fixed_incl_Preloaded).
+  - apply input_valid_transition_in_futures in Ht.
+    revert Ht. apply fixed_valid_state_sub_projection.
+  - apply in_futures_refl. apply input_valid_transition_destination in Ht.
+    revert Ht. apply (VLSM_incl_valid_state Fixed_incl_Preloaded).
   - assumption.
 Qed.
 
@@ -671,12 +682,12 @@ Context
   .
 
 (**
-Given a Fixed protocol state, the composition of the equivocators
+Given a Fixed valid state, the composition of the equivocators
 preloaded with all the observed messages in the state is not stronger
 than that preloaded with only the messages sent by non-equivocators.
 *)
 Lemma Equivocators_Fixed_Strong_incl base_s
-  (Hbase_s : protocol_state_prop Fixed base_s)
+  (Hbase_s : valid_state_prop Fixed base_s)
   : VLSM_incl
       (equivocators_composition_for_observed IM Hbs Hbr equivocators base_s)
       (equivocators_composition_for_sent IM Hbs equivocators base_s).
@@ -684,8 +695,8 @@ Proof.
   apply basic_VLSM_incl; intro; intros.
   - assumption.
   - destruct HmX as [Hinit | Hobs]
-    ; [apply initial_message_is_protocol; left; assumption|].
-    apply strong_fixed_equivocation_eqv_protocol.
+    ; [apply initial_message_is_valid; left; assumption|].
+    apply strong_fixed_equivocation_eqv_valid_message.
     revert Hobs.
     apply (fixed_observed_has_strong_fixed_equivocation IM Hbs Hbr finite_index).
     assumption.
@@ -694,7 +705,7 @@ Proof.
 Qed.
 
 Lemma Equivocators_Fixed_Strong_eq base_s
-  (Hbase_s : protocol_state_prop Fixed base_s)
+  (Hbase_s : valid_state_prop Fixed base_s)
   : VLSM_eq
       (equivocators_composition_for_observed IM Hbs Hbr equivocators base_s)
       (equivocators_composition_for_sent IM Hbs equivocators base_s).
@@ -705,10 +716,10 @@ Proof.
 Qed.
 
 (** The subsumption between [fixed_equivocation_constraint] and
-[strong_fixed_equivocation_constraint] holds under [protocol_valid] assumptions.
+[strong_fixed_equivocation_constraint] holds under [input_valid] assumptions.
 *)
 Lemma fixed_strong_equivocation_subsumption
-  : protocol_constraint_subsumption IM
+  : input_valid_constraint_subsumption IM
     (fixed_equivocation_constraint IM Hbs Hbr equivocators)
     (strong_fixed_equivocation_constraint IM Hbs equivocators).
 Proof.
@@ -741,9 +752,9 @@ only depends on the messages sent by non-equivocating nodes, it makes it much
 easier to establish results related to changing the behavior of equivocating
 nodes.
 
-In this section we essentially prove that given a Fixed protocol state <<s>>,
-any protocol trace over the composition of equivocators pre-loaded with the
-messages observed in <<s>> can be "lifted" to a Fixed protocol trace in which
+In this section we essentially prove that given a Fixed valid state <<s>>,
+any valid trace over the composition of equivocators pre-loaded with the
+messages observed in <<s>> can be "lifted" to a Fixed valid trace in which
 the non-equivocators remain in their corresponding component-state given by <<s>>
 (Lemma [EquivPreloadedBase_Fixed_weak_full_projection]).
 *)
@@ -877,23 +888,23 @@ Qed.
 
 Context
   (base_s : composite_state IM)
-  (Hbase_s : protocol_state_prop Fixed base_s)
+  (Hbase_s : valid_state_prop Fixed base_s)
   (EquivPreloadedBase := equivocators_composition_for_sent IM Hbs equivocators base_s)
   .
 
 (**
 As a corollary of the above projection result, the state obtained by replacing
-the equivocator component of a Fixed protocol state with initial states is
-still a Fixed protocol state.
+the equivocator component of a Fixed valid state with initial states is
+still a Fixed valid state.
 *)
 Lemma fixed_equivocator_lifting_initial_state
   : weak_full_projection_initial_state_preservation EquivPreloadedBase Fixed (lift_sub_state_to IM equivocators base_s).
 Proof.
   intros eqv_is Heqv_is.
-  apply (VLSM_incl_protocol_state (StrongFixed_incl_Fixed IM Hbs Hbr equivocators)).
-  apply (VLSM_projection_protocol_state (remove_equivocating_transitions_fixed_projection _ Heqv_is)).
+  apply (VLSM_incl_valid_state (StrongFixed_incl_Fixed IM Hbs Hbr equivocators)).
+  apply (VLSM_projection_valid_state (remove_equivocating_transitions_fixed_projection _ Heqv_is)).
   revert Hbase_s.
-  apply (VLSM_incl_protocol_state (Fixed_incl_StrongFixed IM Hbs Hbr finite_index equivocators)).
+  apply (VLSM_incl_valid_state (Fixed_incl_StrongFixed IM Hbs Hbr finite_index equivocators)).
 Qed.
 
 Lemma lift_sub_state_to_sent_are_observed s
@@ -916,7 +927,7 @@ Qed.
 
 (** *** Main result of the section
 
-Given a protocol state <<s>> for the <<Fixed>> composition (composition of
+Given a valid state <<s>> for the <<Fixed>> composition (composition of
 nodes where only the <<equivocators>> are allowed to message-equivocate),
 we can "lift" any trace of the free composition of just the equivocators
 pre-loaded with the messages observed in <<s>> to a trace over the <<Fixed>>
@@ -944,7 +955,7 @@ Proof.
     + destruct om as [m|]; [|exact I].
       simpl.
       destruct Hv as [_ [Hm _]].
-      apply can_emit_protocol_iff in Hm.
+      apply emitted_messages_are_valid_iff in Hm.
       destruct Hm as [[Hinit | Hobs]| Hemit].
       * destruct Hinit as [i [[im Him] Heqm]].
         destruct_dec_sig i j Hj Heqi. subst.
@@ -973,9 +984,9 @@ Proof.
   - apply fixed_equivocator_lifting_initial_state. assumption.
   - destruct HmX as [Hm | Hm].
     + destruct Hm as [(i, Hi) [[im Him] Heqm]].
-      apply initial_message_is_protocol.
+      apply initial_message_is_valid.
       exists i. exists (exist _ im Him). subst. reflexivity.
-    + apply (composite_observed_protocol IM finite_index Hbs Hbo Hbr _ _ Hbase_s).
+    + apply (composite_observed_valid IM finite_index Hbs Hbo Hbr _ _ Hbase_s).
       revert Hm.
       apply sent_by_non_equivocating_are_observed.
 Qed.
@@ -1064,3 +1075,114 @@ Proof.
 Qed.
 
 End fixed_equivocation_no_equivocators.
+
+Section fixed_non_equivocator_lifting.
+
+Context
+  {message : Type}
+  {index : Type}
+  {IndEqDec : EqDecision index}
+  {finite_index : finite.Finite index}
+  (IM : index -> VLSM message)
+  (Hbs : forall i, HasBeenSentCapability (IM i))
+  (Hbr : forall i, HasBeenReceivedCapability (IM i))
+  (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
+  (equivocators : list index)
+  (non_equivocators := set_diff (finite.enum index) equivocators)
+  (Free := free_composite_vlsm IM)
+  (Fixed := fixed_equivocation_vlsm_composition IM Hbs Hbr equivocators)
+  (FixedNonEquivocating:= induced_sub_projection IM non_equivocators
+                                (fixed_equivocation_constraint IM Hbs Hbr
+                                   equivocators))
+  (StrongFixed := strong_fixed_equivocation_vlsm_composition IM Hbs equivocators)
+  (StrongFixedNonEquivocating:= induced_sub_projection IM non_equivocators
+                                (strong_fixed_equivocation_constraint IM Hbs
+                                   equivocators))
+  (PreFree := pre_loaded_with_all_messages_vlsm Free)
+  (finite_listing := FinFunExtras.listing_from_finite index)
+  (Free_hbo := free_composite_HasBeenObservedCapability IM finite_listing Hbo)
+  (Free_hbr := free_composite_HasBeenReceivedCapability IM finite_listing Hbr)
+  (Free_hbs := free_composite_HasBeenSentCapability IM finite_listing Hbs)
+  .
+
+(** All valid traces in the induced projection of the composition under the
+strong fixed-equivocation constraint to the non-equivocating nodes can be lifted
+to valid traces of the constrained composition.
+*)
+Lemma lift_strong_fixed_non_equivocating
+  : VLSM_full_projection StrongFixedNonEquivocating StrongFixed
+    (lift_sub_label IM non_equivocators)
+    (lift_sub_state IM non_equivocators).
+Proof.
+  apply induced_sub_projection_lift.
+  intros s1 s2 Heq l om.
+  destruct om as [m|]; [|intuition].
+  cut
+    (forall m, sent_by_non_equivocating IM Hbs equivocators s1 m ->
+      sent_by_non_equivocating IM Hbs equivocators s2 m).
+  {
+    intros Hsent_impl [[j [Hj Hsent]] | Hemit].
+    - left. apply Hsent_impl. exists j; split; assumption.
+    - right. revert Hemit.
+      apply VLSM_incl_can_emit.
+      apply pre_loaded_vlsm_incl.
+      assumption.
+  }
+  clear -Heq.
+  intros m [i [Hi Hsent]].
+  exists i. split; [assumption|].
+  assert (Hi' : i ∈ non_equivocators)
+    by (apply set_diff_intro; [apply finite_index|assumption]).
+  apply f_equal_dep with (x := dexist i Hi') in Heq.
+  cbv in Heq.
+  rewrite <- Heq.
+  assumption.
+Qed.
+
+(** All valid traces in the induced projection of the composition under the
+fixed-equivocation constraint to the non-equivocating nodes can be lifted
+to valid traces of the constrained composition.
+*)
+Lemma lift_fixed_non_equivocating
+  : VLSM_full_projection FixedNonEquivocating Fixed
+    (lift_sub_label IM non_equivocators)
+    (lift_sub_state IM non_equivocators).
+Proof.
+  constructor.
+  intros sX trX Htr.
+  apply
+    (VLSM_incl_finite_valid_trace
+      (StrongFixed_incl_Fixed IM Hbs Hbr equivocators)).
+  apply (VLSM_full_projection_finite_valid_trace lift_strong_fixed_non_equivocating).
+  revert Htr.
+  apply VLSM_incl_finite_valid_trace.
+  apply induced_sub_projection_constraint_subsumption_incl.
+  apply fixed_strong_equivocation_subsumption with (finite.enum index).
+  apply FinFunExtras.listing_from_finite.
+Qed.
+
+Lemma fixed_non_equivocating_projection_friendliness
+  : projection_friendly_prop
+      (induced_sub_projection_is_projection IM non_equivocators
+        (fixed_equivocation_constraint IM Hbs Hbr equivocators)).
+Proof.
+  apply induced_sub_projection_friendliness.
+  apply lift_fixed_non_equivocating.
+Qed.
+
+(** The valid traces of the induced projection of the composition under the
+fixed-equivocation constraint to the non-equivocating nodes are precisely
+projections of traces of the constrained composition.
+*)
+Lemma fixed_non_equivocating_traces_char is tr
+  : finite_valid_trace FixedNonEquivocating is tr <->
+    exists eis etr,
+    finite_valid_trace Fixed eis etr /\
+    composite_state_sub_projection IM non_equivocators eis = is /\
+    finite_trace_sub_projection IM non_equivocators etr = tr.
+Proof.
+  apply (projection_friendly_trace_char (induced_sub_projection_is_projection _ _ _)).
+  apply fixed_non_equivocating_projection_friendliness.
+Qed.
+
+End fixed_non_equivocator_lifting.

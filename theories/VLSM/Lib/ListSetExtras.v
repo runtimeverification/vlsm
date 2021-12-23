@@ -71,7 +71,7 @@ Lemma set_eq_cons {A} : forall (a : A) (s1 s2 : set A),
   set_eq s1 s2 ->
   set_eq (a :: s1) (a :: s2).
 Proof.
-  intros. 
+  intros.
   split; intros x Hx; apply elem_of_cons in Hx; destruct Hx; subst
   ; (left; reflexivity) || (right; apply H; assumption).
 Qed.
@@ -108,9 +108,9 @@ Proof.
       pose proof set_add_intro a a (set_union [] s1) (or_introl (eq_refl a)) as Hadd.
       pose proof H1 a Hadd as Ha.
       inversion Ha.
-  - simpl in H. 
+  - simpl in H.
     pose proof (@list_subseteq_nil A []).
-    rewrite <- H in H0 at 1. 
+    rewrite <- H in H0 at 1.
     pose proof set_add_intro a a (set_union s1 s2) (or_introl (eq_refl a)) as Hadd.
     pose proof H0 a Hadd as Ha.
     inversion Ha.
@@ -185,7 +185,7 @@ Qed.
 Lemma set_union_iterated_subseteq
   `{EqDecision A}
   (ss ss': list (set A))
-  (Hincl : ss ⊆ ss') :  
+  (Hincl : ss ⊆ ss') :
   (fold_right set_union [] ss) ⊆
   (fold_right set_union [] ss').
 Proof.
@@ -196,7 +196,7 @@ Proof.
   destruct H as [x [Hx Ha]].
   exists x.
   unfold incl in Hincl.
-  split; [|assumption].  
+  split; [|assumption].
   apply Hincl.
   assumption.
 Qed.
@@ -362,7 +362,7 @@ Lemma set_remove_not_elem_of `{EqDecision A} : forall x (s : list A),
 Proof.
   induction s; intros.
   - reflexivity.
-  - simpl. 
+  - simpl.
     destruct (decide (x = a)).
     + subst; contradict H; left.
     + rewrite IHs; [reflexivity|].
@@ -466,7 +466,7 @@ Qed.
 
 Lemma subseteq_remove_union `{EqDecision A} : forall x (s1 s2 : list A),
   NoDup s1 ->
-  NoDup s2 ->  
+  NoDup s2 ->
   (set_remove x (set_union s1 s2)) ⊆
   (set_union s1 (set_remove x s2)).
 Proof.
@@ -655,7 +655,7 @@ Proof.
       intros [Ha _].
       apply elem_of_list_In in Ha.
       intro Hab.
-      apply elem_of_list_In in Hab.      
+      apply elem_of_list_In in Hab.
       rewrite in_map_iff in Hab.
       destruct Hab as [_ [[= Hax _] _]].
       subst.
@@ -737,7 +737,7 @@ Lemma len_set_diff_decrease `{EqDecision A} (new:A) (l a b: list A)
       (H_new_is_relevant: new ∈ l):
   length (set_diff_filter l a) < length (set_diff_filter l b).
 Proof.
-  induction l; [inversion H_new_is_relevant|]; 
+  induction l; [inversion H_new_is_relevant|];
     apply elem_of_cons in H_new_is_relevant; destruct H_new_is_relevant.
   - subst a0.
     unfold set_diff_filter.
@@ -915,7 +915,7 @@ Proof.
          assumption.
 Qed.
 
-Lemma subseteq_Forall (A:Type) (P : A -> Prop) (l1 l2 : list A) : 
+Lemma subseteq_Forall (A:Type) (P : A -> Prop) (l1 l2 : list A) :
  l2 ⊆ l1 -> Forall P l1 -> Forall P l2.
 Proof.
   intros Hsub Hfor.

@@ -1,7 +1,5 @@
 -Q theories/VLSM VLSM
 
--arg -w -arg -deprecated-hint-without-locality
-
 theories/VLSM/Lib/Preamble.v
 theories/VLSM/Lib/SsrExport.v
 theories/VLSM/Lib/StdppExtras.v
@@ -26,7 +24,7 @@ theories/VLSM/Core/VLSM.v
 theories/VLSM/Core/Composition.v
 theories/VLSM/Core/Plans.v
 theories/VLSM/Core/VLSMProjections.v
-theories/VLSM/Core/Validating.v
+theories/VLSM/Core/Validator.v
 theories/VLSM/Core/Decisions.v
 theories/VLSM/Core/MessageDependencies.v
 theories/VLSM/Core/ProjectionTraces.v

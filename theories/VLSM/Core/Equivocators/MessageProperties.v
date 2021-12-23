@@ -57,10 +57,10 @@ Proof.
     + specialize (IHtr i' eq_refl Hjbs). right. assumption.
 Qed.
 
-Lemma preloaded_equivocator_vlsm_trace_project_protocol_item_new_machine
+Lemma preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
   (bs : vstate equivocator_vlsm)
   (btr : list (vtransition_item equivocator_vlsm))
-  (Hbtr : finite_protocol_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs btr)
+  (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs btr)
   (bitem : vtransition_item equivocator_vlsm)
   (Hitem : bitem ∈ btr)
   (sn : state)
@@ -73,14 +73,14 @@ Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_protocol_trace_from_app_iff (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hbtr.
+  apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
   inversion Hbsuffix. subst s' tl bitem.
   destruct Ht as [[_ [_ Hv]] Ht].
   simpl.
   specialize
-    (equivocator_protocol_transition_item_project_inv5_new_machine
+    (equivocator_valid_transition_project_inv5_new_machine
       _ l s lst iom oom Ht)
     as Hpitem.
   unfold VLSM.l in *.
@@ -94,14 +94,14 @@ Proof.
 Qed.
 
 (**
-For any [transition_item] in a protocol trace segment of an
+For any [transition_item] in a valid trace segment of an
 [equivocator_vlsm] there exists a projection of that trace containing
 the projection of the item.
 *)
-Lemma preloaded_equivocator_vlsm_trace_project_protocol_item
+Lemma preloaded_equivocator_vlsm_trace_project_valid_item
   (bs bf : vstate equivocator_vlsm)
   (btr : list (vtransition_item equivocator_vlsm))
-  (Hbtr : finite_protocol_trace_from_to (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs bf btr)
+  (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs bf btr)
   (bitem : vtransition_item equivocator_vlsm)
   (Hitem : bitem ∈ btr)
   (idl : nat)
@@ -116,25 +116,25 @@ Lemma preloaded_equivocator_vlsm_trace_project_protocol_item
           existing_descriptor X dfinal (finite_trace_last bs btr) /\
           equivocator_vlsm_trace_project _ btr dfinal = Some (tr, dfirst).
 Proof.
-  specialize (preloaded_equivocator_vlsm_protocol_trace_project_inv2 X bs bf btr) as Hinv2.
+  specialize (preloaded_equivocator_vlsm_valid_trace_project_inv2 X bs bf btr) as Hinv2.
   spec Hinv2. { intro contra. subst. inversion Hitem. }
   spec Hinv2 Hbtr.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_protocol_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hbtr.
+  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
   inversion Hbsuffix; subst s' f bitem tl.
   destruct Ht as [[_ [_ Hv]] Ht].
   specialize
-    (equivocator_protocol_transition_item_project_inv5 _ l s lst iom oom Hv Ht) as Hpitem.
+    (equivocator_valid_transition_project_inv5 _ l s lst iom oom Hv Ht) as Hpitem.
   unfold VLSM.l in *.
   destruct (Hpitem _ Hlbitem) as [i [si [Hi [itemx Hitemx]]]].
 
-  apply ptrace_forget_last in Htl.
+  apply valid_trace_forget_last in Htl.
   destruct
-    (preloaded_equivocator_vlsm_trace_project_protocol_inv _ _ _ Htl _ _ Hi)
+    (preloaded_equivocator_vlsm_trace_project_valid_inv _ _ _ Htl _ _ Hi)
     as [suffix Hsuffix].
   exists itemx. split; [eexists; apply Hitemx|].
   remember (Existing i) as dsuffix.
@@ -147,14 +147,14 @@ Proof.
   spec Hsuffix' Hsuffix.
   subst bitem.
   destruct
-    (equivocator_protocol_transition_item_project_inv2 _ l lst s iom oom Hv Ht _ _ _ Hitemx)
+    (equivocator_valid_transition_project_inv2 _ l lst s iom oom Hv Ht _ _ _ Hitemx)
     as [_i [_Hdsuffix [s_i [_Hi Hd']]]].
   inversion _Hdsuffix. subst _i. clear _Hdsuffix.
   destruct Hd' as [_i' [_Heq [lst_i' [id [Hex [_Hitemx [Hvs' Hts']]]]]]].
   inversion _Heq. subst _i'. clear _Heq.
   subst lst.
   destruct
-    (preloaded_equivocator_vlsm_trace_project_protocol _ _ _ _ Hbprefix idl _ id)
+    (preloaded_equivocator_vlsm_trace_project_valid _ _ _ _ Hbprefix idl _ id)
     as [prefix [dfirst [Hprefix _]]].
   specialize
     (equivocator_vlsm_trace_project_app_inv _ _ _ _ _ _ _ _ Hprefix Hsuffix')
@@ -179,13 +179,13 @@ Proof.
 Qed.
 
 (**
-If an [equivocator_vlsm]'s protocol trace segment [output]s a message, then
+If an [equivocator_vlsm]'s valid trace segment [output]s a message, then
 one of its projections must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting_inv
   (is: vstate equivocator_vlsm)
   (tr: list (vtransition_item equivocator_vlsm))
-  (Htr: finite_protocol_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is tr)
+  (Htr: finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is tr)
   (m : message)
   (Hbbs : Exists (field_selector output m) tr)
   : exists
@@ -203,14 +203,14 @@ Proof.
   - destruct item. destruct l; inversion Hsndl.
     subst. simpl in *.
     specialize
-      (preloaded_equivocator_vlsm_trace_project_protocol_item_new_machine
+      (preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
          _ _ Htr _ Hin _ eq_refl)
       as Hitem.
     simpl in Hitem.
     destruct Hitem as [_ [Hcontra _]]. congruence.
-  - apply ptrace_add_default_last in Htr.
+  - apply valid_trace_add_default_last in Htr.
     specialize
-    (preloaded_equivocator_vlsm_trace_project_protocol_item
+    (preloaded_equivocator_vlsm_trace_project_valid_item
        _ _ _ Htr _ Hin _ Hsndl)
       as [itemx [[d Hitemx] [trx [Hinx [ifinal [ifirst [Hifirst [Hifinal Htrx]]]]]]]].
   exists ifinal. exists ifirst. split; [assumption|].
@@ -315,8 +315,8 @@ Proof.
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
       { repeat split
-        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_protocol_prop X)|assumption|assumption].
-        apply (preloaded_equivocator_state_project_protocol_state X _ Hs _ _ Hidesc).
+        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X)|assumption|assumption].
+        apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
       }
      specialize (existing_false_label_equivocator_state_project_not_same X Ht _ Hidesc)
        as Hnot_same.
@@ -372,8 +372,8 @@ Proof.
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
       { repeat split
-        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_protocol_prop X)|assumption|assumption].
-        apply (preloaded_equivocator_state_project_protocol_state X _ Hs _ _ Hidesc).
+        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X)|assumption|assumption].
+        apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
       }
       specialize (existing_true_label_equivocator_state_project_not_last X Ht _ Hidesc)
         as Hnot_last.
@@ -541,12 +541,12 @@ Definition equivocator_sent_messages_fn
 *)
 Lemma equivocator_sent_messages_full
   (s : vstate equivocator_vlsm)
-  (Hs : protocol_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) s)
+  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) s)
   (m : message)
   : m ∈ (equivocator_sent_messages_fn s)
   <-> exists (sm : sent_messages equivocator_vlsm s), proj1_sig sm = m.
 Proof.
-  specialize (preloaded_equivocator_state_project_protocol_state _ _ Hs) as HpsX.
+  specialize (preloaded_equivocator_state_project_valid_state _ _ Hs) as HpsX.
   split.
   - intro Hin. apply set_union_in_iterated in Hin.
     apply Exists_exists in Hin as [msgsi [Hmsgsi Hin]].
@@ -558,7 +558,7 @@ Proof.
     destruct Hin as [[m' Hm] Heq]. simpl in Heq. subst m'.
     apply (sent_messages_consistency X) in Hm; [|assumption].
     destruct Hs as [om Hs].
-    apply (protocol_is_trace (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hs.
+    apply (valid_state_message_has_trace (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hs.
     destruct Hs as [[Hs _] | [is [tr [Htr _]]]].
     + specialize (Hm si []).
       spec Hm.
@@ -567,13 +567,13 @@ Proof.
         - revert Hsi Hs. apply (equivocator_vlsm_initial_state_preservation_rev X).
       }
       inversion Hm.
-    + apply ptrace_get_last in Htr as Hlst.
+    + apply valid_trace_get_last in Htr as Hlst.
       assert (Hbm : selected_message_exists_in_some_preloaded_traces equivocator_vlsm (field_selector output) s m)
       ; [|exists (exist _ m Hbm); reflexivity].
       exists is. exists tr. exists Htr.
       subst s.
       destruct
-        (preloaded_equivocator_vlsm_trace_project_protocol _ _ _ _ (proj1 Htr) _ _ Hsi)
+        (preloaded_equivocator_vlsm_trace_project_valid _ _ _ _ (proj1 Htr) _ _ Hsi)
         as [trX [di [Hproject Hdi]]].
       destruct di as [sn | id].
       * apply equivocator_vlsm_trace_project_output_reflecting with trX (Existing i) (NewMachine sn)
@@ -587,7 +587,7 @@ Proof.
   - intros [[m' Hm] Heq]. simpl in Heq. subst m'.
     destruct Hm as [is [tr [Htr Hexists]]].
     destruct
-      (equivocator_vlsm_trace_project_output_reflecting_inv _ _ (proj1 (ptrace_forget_last Htr)) _ Hexists)
+      (equivocator_vlsm_trace_project_output_reflecting_inv _ _ (proj1 (valid_trace_forget_last Htr)) _ Hexists)
       as [ifinal [istart [_ [_ [trX [Hproject HexistsX]]]]]].
     assert (Hntr : tr <> []) by (intro contra; subst; inversion Hexists).
     destruct ifinal as [sfinal | i]
@@ -596,7 +596,7 @@ Proof.
       ; inversion Hproject; subst; inversion HexistsX
       |].
     specialize
-      (preloaded_equivocator_vlsm_protocol_trace_project_inv2 _ _ _ _ Hntr (proj1 Htr) _ _ _ Hproject)
+      (preloaded_equivocator_vlsm_valid_trace_project_inv2 _ _ _ _ Hntr (proj1 Htr) _ _ _ Hproject)
       as [si [Hi Histart]].
     apply set_union_in_iterated. apply Exists_exists.
     exists (sent_messages_fn X si).

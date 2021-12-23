@@ -128,7 +128,7 @@ Proof.
   reflexivity.
 Qed.
 
-Lemma composite_state_sub_projection_lift
+Lemma composite_state_sub_projection_lift_to
   (s0 : composite_state IM)
   (s : composite_state sub_IM)
   : composite_state_sub_projection (lift_sub_state_to s0 s) = s.
@@ -163,7 +163,7 @@ Proof.
     apply state_update_neq. congruence.
 Qed.
 
-Section induced_sub_projection.
+Section sec_induced_sub_projection.
 
 Context
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
@@ -178,11 +178,40 @@ Definition composite_label_sub_projection_option
   | _ => None
   end.
 
-Lemma composite_label_sub_projection_option_lift
-  (l : composite_label sub_IM)
-  : composite_label_sub_projection_option (lift_sub_label l) = Some l.
+(** By restricting the components of a composition to a subset we obtain a
+[projection_induced_vlsm].
+*)
+Definition induced_sub_projection : VLSM message :=
+  projection_induced_vlsm X (composite_type sub_IM)
+    composite_label_sub_projection_option
+    composite_state_sub_projection
+    lift_sub_label lift_sub_state.
+
+Lemma induced_sub_projection_transition_consistency_None
+  : weak_projection_transition_consistency_None X (composite_type sub_IM)
+      composite_label_sub_projection_option composite_state_sub_projection.
 Proof.
-  destruct l as (sub_i, li).
+  intros lX HlX sX om s'X om' HtX.
+  extensionality sub_i.
+  destruct_dec_sig sub_i i Hi Heqsub_i.
+  subst sub_i.
+  unfold composite_state_sub_projection. simpl.
+  destruct lX as [x v].
+  apply proj2 in HtX. cbn in HtX.
+  destruct (vtransition _ _ _) as (si', _om').
+  inversion_clear HtX.
+  rewrite state_update_neq; [reflexivity|].
+  intros ->.
+  unfold composite_label_sub_projection_option in HlX.
+  simpl in HlX.
+  case_decide; [discriminate|contradiction].
+Qed.
+
+Lemma composite_label_sub_projection_option_lift
+  : induced_projection_label_lift_prop (free_composite_vlsm IM) (composite_type sub_IM)
+      composite_label_sub_projection_option lift_sub_label.
+Proof.
+  intros (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i.
   subst.
   unfold lift_sub_label, composite_label_sub_projection_option.
@@ -195,20 +224,12 @@ Proof.
   reflexivity.
 Qed.
 
-Lemma composite_transition_item_sub_projection_lift
-  (item : composite_transition_item sub_IM)
-  : @pre_VLSM_projection_transition_item_project _ (composite_type IM) _
-    composite_label_sub_projection_option composite_state_sub_projection
-    (pre_VLSM_full_projection_trace_item_project _ _ lift_sub_label lift_sub_state item)
-    = Some item.
+Lemma composite_state_sub_projection_lift
+  : induced_projection_state_lift_prop (free_composite_vlsm IM) (composite_type sub_IM)
+      composite_state_sub_projection lift_sub_state.
 Proof.
-  destruct item.
-  unfold pre_VLSM_full_projection_trace_item_project,
-    pre_VLSM_projection_transition_item_project.
-  simpl.
-  rewrite composite_label_sub_projection_option_lift.
-  f_equal. f_equal.
-  apply composite_state_sub_projection_lift.
+  intro.
+  apply composite_state_sub_projection_lift_to.
 Qed.
 
 Lemma composite_trace_sub_projection_lift
@@ -218,21 +239,60 @@ Lemma composite_trace_sub_projection_lift
     (pre_VLSM_full_projection_finite_trace_project _ _ lift_sub_label lift_sub_state tr)
     = tr.
 Proof.
-  induction tr; [reflexivity|].
-  simpl.
-  rewrite composite_transition_item_sub_projection_lift.
-  f_equal.
-  assumption.
+  apply (induced_projection_trace_lift (free_composite_vlsm IM)).
+  - apply composite_label_sub_projection_option_lift.
+  - apply composite_state_sub_projection_lift.
 Qed.
 
-(** By restricting the components of a composition to a subset we obtain a
-[projection_induced_vlsm].
-*)
-Definition induced_sub_projection : VLSM message :=
-  projection_induced_vlsm X (composite_type sub_IM)
-    composite_label_sub_projection_option
-    composite_state_sub_projection
-    lift_sub_label lift_sub_state.
+Lemma induced_sub_projection_transition_consistency_Some
+  : induced_projection_transition_consistency_Some X (composite_type sub_IM)
+      composite_label_sub_projection_option composite_state_sub_projection.
+Proof.
+  intros lX1 lX2 lY HlX1_pr HlX2_pr sX1 sX2 HsXeq_pr iom sX1' oom1 Ht1 sX2' oom2 Ht2.
+  destruct lX1 as (i, lXi).
+  unfold composite_label_sub_projection_option in HlX1_pr.
+  simpl in HlX1_pr. case_decide as Hi; [|discriminate].
+  apply Some_inj in HlX1_pr. subst lY.
+  destruct lX2 as (_i, _lXi).
+  unfold composite_label_sub_projection_option in HlX2_pr.
+  simpl in HlX2_pr. case_decide as H_i; [|discriminate].
+  apply Some_inj in HlX2_pr.
+  unfold composite_label_sub_projection in HlX2_pr.
+  simpl in HlX2_pr.
+  inversion HlX2_pr.
+  subst _i.
+  apply
+    (@dec_sig_sigT_eq_rev _ _ _ sub_index_prop_dec (fun i => vlabel (IM i)))
+    in HlX2_pr as ->.
+  apply f_equal_dep with (x := dexist i Hi) in HsXeq_pr as HsXeq_pri.
+  cbv in HsXeq_pri.
+  cbn in Ht1, Ht2.
+  rewrite <- HsXeq_pri in Ht2.
+  destruct (vtransition _ _ _) as (si', om').
+  inversion Ht1. subst. clear Ht1.
+  inversion Ht2. subst. clear Ht2.
+  split; [|reflexivity].
+  extensionality sub_j.
+  apply f_equal_dep with (x := sub_j) in HsXeq_pr.
+  destruct_dec_sig sub_j j Hj Heqsub_j.
+  subst.
+  unfold composite_state_sub_projection in HsXeq_pr |- *.
+  simpl in HsXeq_pr |- *.
+  destruct (decide (i = j)).
+  - subst. rewrite !state_update_eq. reflexivity.
+  - rewrite !state_update_neq by congruence. assumption.
+Qed.
+
+Lemma weak_induced_sub_projection_transition_consistency_Some
+  : weak_projection_transition_consistency_Some X (composite_type sub_IM)
+      composite_label_sub_projection_option composite_state_sub_projection
+      lift_sub_label lift_sub_state.
+Proof.
+  apply basic_weak_projection_transition_consistency_Some.
+  - apply composite_label_sub_projection_option_lift.
+  - apply composite_state_sub_projection_lift.
+  - apply induced_sub_projection_transition_consistency_Some.
+Qed.
 
 (** The [induced_sub_projection] is actually a [VLSM_projection] of the
 original composition.
@@ -243,53 +303,14 @@ Lemma induced_sub_projection_is_projection
     composite_state_sub_projection.
 Proof.
   apply projection_induced_vlsm_is_projection.
-  - intros lX HlX sX om s'X om' HtX.
-    extensionality sub_i.
-    destruct_dec_sig sub_i i Hi Heqsub_i.
-    subst sub_i.
-    unfold composite_state_sub_projection. simpl.
-    apply proj2 in HtX. destruct lX. cbn in HtX.
-    destruct (vtransition _ _ _) as (si', _om').
-    inversion_clear HtX.
-    rewrite state_update_neq; [reflexivity|].
-    intro. subst.
-    unfold composite_label_sub_projection_option in HlX.
-    simpl in HlX.
-    case_decide; [discriminate|contradiction].
-  - intros lX lY Hl s1 om s1' om1' Ht1 s2' om2' Ht2.
-    apply proj2 in Ht1.
-    destruct lX as (i, lX).
-    unfold composite_label_sub_projection_option in Hl.
-    simpl in Hl. case_decide; [|discriminate].
-    inversion Hl. subst lY. clear Hl.
-    cbn in Ht1, Ht2.
-    unfold lift_sub_state at 1 in Ht2.
-    rewrite
-      (lift_sub_state_to_eq (fun (n : index) => proj1_sig (vs0 (IM n)))
-        (composite_state_sub_projection s1) i H) in Ht2.
-    unfold composite_state_sub_projection in Ht2. simpl in Ht2.
-    destruct (vtransition _ _ _) as (si', om').
-    inversion Ht1. subst.
-    inversion Ht2. subst.
-    split; [|reflexivity].
-    extensionality sub_j.
-    destruct_dec_sig sub_j j Hj Heqsub_j.
-    subst.
-    unfold composite_state_sub_projection. simpl.
-    destruct (decide (i = j)).
-    + subst. rewrite! state_update_eq. reflexivity.
-    + rewrite! state_update_neq by congruence.
-      unfold lift_sub_state.
-      rewrite
-      (lift_sub_state_to_eq (fun (n : index) => proj1_sig (vs0 (IM n)))
-        (λ subi : sub_index, s1 (`subi)) j Hj).
-      reflexivity.
+  - apply induced_sub_projection_transition_consistency_None.
+  - apply weak_induced_sub_projection_transition_consistency_Some.
 Qed.
 
 Lemma induced_sub_projection_valid_projection l s om
   (Hv : vvalid induced_sub_projection l (s, om))
   : exists i, i ∈ sub_index_list /\
-    exists l s, protocol_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, om).
+    exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, om).
 Proof.
   destruct l as (sub_i, li).
   destruct Hv as [lX [sX [HlX [Heqs [HsX [Hom Hv]]]]]].
@@ -307,13 +328,14 @@ Proof.
   apply proj1 in Hv.
   cbn in Hv.
   exists li, (sX i).
-  repeat split; [|apply any_message_is_protocol_in_preloaded|assumption].
-  apply (VLSM_projection_protocol_state (preloaded_component_projection IM i)).
-  apply (VLSM_incl_protocol_state (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))).
-  by apply (VLSM_incl_protocol_state (constraint_free_incl IM constraint)).
+  repeat split; [|apply any_message_is_valid_in_preloaded|assumption].
+  apply (VLSM_projection_valid_state (preloaded_component_projection IM i)).
+  apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))).
+  apply (VLSM_incl_valid_state (constraint_free_incl IM constraint)).
+  assumption.
 Qed.
 
-End induced_sub_projection.
+End sec_induced_sub_projection.
 
 Section induced_sub_projection_subsumption.
 
@@ -323,19 +345,14 @@ Context
   .
 
 Lemma induced_sub_projection_constraint_subsumption_incl
-  (Hsubsumption : protocol_constraint_subsumption IM constraint1 constraint2)
+  (Hsubsumption : input_valid_constraint_subsumption IM constraint1 constraint2)
   : VLSM_incl (induced_sub_projection constraint1) (induced_sub_projection constraint2).
 Proof.
-  specialize (constraint_subsumption_incl IM _ _ Hsubsumption) as Hincl.
-  apply basic_VLSM_incl; intro; intros.
-  - assumption.
-  - apply initial_message_is_protocol. revert HmX.
-    apply (VLSM_incl_protocol_message Hincl).
-    intro; intros. assumption.
-  - destruct Hv as [Hs [Hom [lX [sX [HlX [Heqs Hv]]]]]].
-    apply (VLSM_incl_protocol_valid Hincl) in Hv.
-    exists lX, sX; intuition.
-  - apply H.
+  apply projection_induced_vlsm_incl.
+  - apply weak_induced_sub_projection_transition_consistency_Some.
+  - apply weak_induced_sub_projection_transition_consistency_Some.
+  - apply constraint_subsumption_incl.
+    assumption.
 Qed.
 
 End induced_sub_projection_subsumption.
@@ -473,7 +490,7 @@ Qed.
 Lemma finite_trace_sub_projection_last_state
   (start : composite_state IM)
   (transitions : list (composite_transition_item IM))
-  (Htr : finite_protocol_trace_from X start transitions)
+  (Htr : finite_valid_trace_from X start transitions)
   (lstx := finite_trace_last start transitions)
   (lstj := finite_trace_last
     (composite_state_sub_projection start)
@@ -597,23 +614,23 @@ Definition state_sub_item_input_is_seeded_or_sub_previously_sent
   (s : composite_state IM)
   : Prop
   := forall is tr,
-    finite_protocol_trace_init_to Pre is s tr ->
+    finite_valid_trace_init_to Pre is s tr ->
     trace_sub_item_input_is_seeded_or_sub_previously_sent tr.
 
-Lemma finite_protocol_trace_sub_projection
+Lemma finite_valid_trace_sub_projection
   (s : composite_state IM)
   (tr : list (composite_transition_item IM))
   (Hmsg :  trace_sub_item_input_is_seeded_or_sub_previously_sent tr)
-  (Htr : finite_protocol_trace X s tr)
-  : finite_protocol_trace Xj (composite_state_sub_projection s) (finite_trace_sub_projection tr).
+  (Htr : finite_valid_trace X s tr)
+  : finite_valid_trace Xj (composite_state_sub_projection s) (finite_trace_sub_projection tr).
 Proof.
   destruct Htr as [Htr His].
   apply (composite_initial_state_sub_projection s) in His.
   split; [|assumption].
-  apply (initial_is_protocol Xj) in His as Hisp.
+  apply (initial_state_is_valid Xj) in His as Hisp.
   induction tr using rev_ind; simpl
   ; [constructor; assumption|].
-  apply finite_protocol_trace_from_app_iff in Htr.
+  apply finite_valid_trace_from_app_iff in Htr.
   destruct Htr as [Htr Hx].
   spec IHtr.
   { intros pre item suf m Heq Hin_m Hitem.
@@ -626,17 +643,17 @@ Proof.
   }
   spec IHtr Htr.
   rewrite finite_trace_sub_projection_app.
-  apply finite_protocol_trace_from_app_iff.
+  apply finite_valid_trace_from_app_iff.
   split; [assumption|].
   match goal with
-  |- finite_protocol_trace_from _ ?l _ => remember l as lst
+  |- finite_valid_trace_from _ ?l _ => remember l as lst
   end.
-  assert (Hlst : protocol_state_prop Xj lst).
-  { apply finite_ptrace_last_pstate in IHtr. subst. assumption. }
+  assert (Hlst : valid_state_prop Xj lst).
+  { apply finite_valid_trace_last_pstate in IHtr. subst. assumption. }
   simpl.
   unfold pre_VLSM_projection_transition_item_project, composite_label_sub_projection_option.
   case_decide; [|constructor; assumption].
-  apply (finite_ptrace_singleton Xj).
+  apply (finite_valid_trace_singleton Xj).
   inversion Hx; subst. simpl in *.
   destruct Ht as [Hv Ht].
   specialize (transition_sub_projection _ _ _ _ _ Ht H)
@@ -646,8 +663,8 @@ Proof.
     as Hvj.
   rewrite <- (finite_trace_sub_projection_last_state s tr Htr) in Htj, Hvj.
   repeat split; [assumption | | assumption | | assumption].
-  - destruct iom as [m|]; [|apply (option_protocol_message_None Xj)].
-    apply (option_protocol_message_Some Xj).
+  - destruct iom as [m|]; [|apply (option_valid_message_None Xj)].
+    apply (option_valid_message_Some Xj).
     clear -Hmsg m H IHtr tr.
     remember {| input := Some m |} as x.
     specialize (Hmsg tr x []).
@@ -660,8 +677,8 @@ Proof.
     specialize (Hmsg m eq_refl eq_refl).
     spec Hmsg. { subst x. assumption. }
     destruct Hmsg as [Hseed | [item [Hitem [Hout Hsub_item]]]]
-    ; [apply (initial_message_is_protocol Xj); right; assumption|].
-    apply (protocol_trace_output_is_protocol Xj _ _ IHtr).
+    ; [apply (initial_message_is_valid Xj); right; assumption|].
+    apply (valid_trace_output_is_valid Xj _ _ IHtr).
     apply Exists_exists.
     specialize
       (@pre_VLSM_projection_transition_item_project_is_Some _ (composite_type IM) _
@@ -693,16 +710,16 @@ Proof.
     left.
     remember (finite_trace_last (composite_state_sub_projection _) _) as lst.
     specialize (proper_sent Sub_Free lst (HasBeenSentCapability := Sub_Free_HasBeenSentCapability)) as Hproper.
-    assert (Hlstp : protocol_state_prop (pre_loaded_with_all_messages_vlsm Sub_Free) lst).
-    { revert Hlst. apply VLSM_incl_protocol_state.  apply Xj_incl_Pre_Sub_Free.  }
+    assert (Hlstp : valid_state_prop (pre_loaded_with_all_messages_vlsm Sub_Free) lst).
+    { revert Hlst. apply VLSM_incl_valid_state.  apply Xj_incl_Pre_Sub_Free.  }
     spec Hproper Hlstp.
     apply Hproper.
     apply has_been_sent_consistency; [apply Sub_Free_HasBeenSentCapability| assumption| ].
     exists (composite_state_sub_projection s), (finite_trace_sub_projection tr).
     split.
     { split;[|assumption].
-       apply (VLSM_incl_finite_protocol_trace_from_to Xj_incl_Pre_Sub_Free).
-       apply ptrace_add_last.
+       apply (VLSM_incl_finite_valid_trace_from_to Xj_incl_Pre_Sub_Free).
+       apply valid_trace_add_last.
        assumption.
        symmetry;assumption.
     }
@@ -723,50 +740,50 @@ Proof.
       assumption.
 Qed.
 
-Lemma protocol_state_sub_projection
+Lemma valid_state_sub_projection
   (s : state)
   (Hs : state_sub_item_input_is_seeded_or_sub_previously_sent s)
-  (Hps : protocol_state_prop X s)
-  : protocol_state_prop Xj (composite_state_sub_projection s).
+  (Hps : valid_state_prop X s)
+  : valid_state_prop Xj (composite_state_sub_projection s).
 Proof.
-  apply protocol_state_has_trace in Hps.
+  apply valid_state_has_trace in Hps.
   destruct Hps as [is [tr Htr]].
-  specialize (Hs _ _ (VLSM_incl_finite_protocol_trace_init_to X_incl_Pre _ _ _ Htr)).
-  apply ptrace_get_last in Htr as Hlst.
-  apply ptrace_forget_last in Htr.
+  specialize (Hs _ _ (VLSM_incl_finite_valid_trace_init_to X_incl_Pre _ _ _ Htr)).
+  apply valid_trace_get_last in Htr as Hlst.
+  apply valid_trace_forget_last in Htr.
   specialize (finite_trace_sub_projection_last_state _ _ (proj1 Htr)) as Hlst'.
-  apply (finite_protocol_trace_sub_projection _ _ Hs) in Htr as Hptr.
-  - destruct Hptr as [Hptr _]. apply finite_ptrace_last_pstate in Hptr.
+  apply (finite_valid_trace_sub_projection _ _ Hs) in Htr as Hptr.
+  - destruct Hptr as [Hptr _]. apply finite_valid_trace_last_pstate in Hptr.
     simpl in *.
     rewrite Hlst' in Hptr.
     subst. assumption.
 Qed.
 
-Lemma finite_protocol_trace_from_sub_projection
+Lemma finite_valid_trace_from_sub_projection
   (s : composite_state IM)
   (tr : list (composite_transition_item IM))
   (lst := finite_trace_last s tr)
   (Hmsg : state_sub_item_input_is_seeded_or_sub_previously_sent lst)
-  (Htr : finite_protocol_trace_from X s tr)
-  : finite_protocol_trace_from Xj (composite_state_sub_projection s) (finite_trace_sub_projection tr).
+  (Htr : finite_valid_trace_from X s tr)
+  : finite_valid_trace_from Xj (composite_state_sub_projection s) (finite_trace_sub_projection tr).
 Proof.
-  apply finite_protocol_trace_from_complete_left in Htr.
+  apply finite_valid_trace_from_complete_left in Htr.
   destruct Htr as [is [pre [Htr Hs]]].
   assert (Hpre := proj1 Htr).
-  apply finite_protocol_trace_from_app_iff in Hpre.
+  apply finite_valid_trace_from_app_iff in Hpre.
   destruct Hpre as [Hpre _].
   specialize (finite_trace_sub_projection_last_state _ _ Hpre) as Hpre_lst.
-  apply finite_protocol_trace_sub_projection in Htr.
+  apply finite_valid_trace_sub_projection in Htr.
   - destruct Htr as [Htr His].
     rewrite finite_trace_sub_projection_app in Htr.
-    apply finite_protocol_trace_from_app_iff in Htr.
+    apply finite_valid_trace_from_app_iff in Htr.
     destruct Htr as [_ Htr].
     subst s. simpl in *.
     rewrite Hpre_lst in Htr. assumption.
   - specialize (Hmsg is (pre ++ tr)).
     apply Hmsg.
-    apply (VLSM_incl_finite_protocol_trace_init_to X_incl_Pre).
-    apply ptrace_add_last.
+    apply (VLSM_incl_finite_valid_trace_init_to X_incl_Pre).
+    apply valid_trace_add_last.
     assumption.
     rewrite finite_trace_last_app.
     unfold lst. subst. reflexivity.
@@ -873,14 +890,14 @@ End sub_composition.
 
 (** ** Lifting a trace from a sub-composition to the full composition
 
-In this section we first show that given a protocol state for a composition of
+In this section we first show that given a valid state for a composition of
 all nodes we can reset some of its state-components to initial states for those
-components without losing the protocol state property.
+components without losing the valid state property.
 
 The set of nodes for which the reset operation will happen is <<equivocators>>.
 
 We then show that a similar result holds for replacing the equivocator
-components with the components corresponding to any protocol state of the
+components with the components corresponding to any valid state of the
 composition of just the equivocators.
 
 We proving those results for compositions pre-loaded with all messages
@@ -902,7 +919,7 @@ Context
   (SubFree : VLSM message :=  free_composite_vlsm equivocating_IM)
   (PreSubFree := pre_loaded_with_all_messages_vlsm SubFree)
   (base_s : composite_state IM)
-  (Hbase_s : protocol_state_prop PreFree base_s)
+  (Hbase_s : valid_state_prop PreFree base_s)
   .
 
 (** A partial label projection function which only keeps non-equivocating transitions.
@@ -993,11 +1010,11 @@ Proof.
 Qed.
 
 (**
-Given any protocol trace for the composition of all nodes and an initial state
+Given any valid trace for the composition of all nodes and an initial state
 for the composition of just the equivocators, the trace obtained by resetting
 the components corresponding to the equivocators to those of the given initial
 state and removing the transitions corresponding to the equivocators is
-still a protocol trace.
+still a valid trace.
 *)
 Lemma remove_equivocating_transitions_preloaded_projection eqv_is
   (Heqv_is : composite_initial_state_prop (sub_IM IM equivocators) eqv_is)
@@ -1014,11 +1031,11 @@ Qed.
 Lemma preloaded_lift_sub_state_to_initial_state
   : weak_full_projection_initial_state_preservation PreSubFree PreFree (lift_sub_state_to IM equivocators base_s).
 Proof.
-  apply protocol_state_has_trace in Hbase_s as Htr.
+  apply valid_state_has_trace in Hbase_s as Htr.
   destruct Htr as [is [tr Htr]].
   intros eqv_is Heqv_is.
-  apply (VLSM_projection_finite_protocol_trace_init_to (remove_equivocating_transitions_preloaded_projection _ Heqv_is)) in Htr.
-  apply ptrace_last_pstate in Htr. assumption.
+  apply (VLSM_projection_finite_valid_trace_init_to (remove_equivocating_transitions_preloaded_projection _ Heqv_is)) in Htr.
+  apply valid_trace_last_pstate in Htr. assumption.
 Qed.
 
 Lemma lift_sub_to_valid l s om
@@ -1058,10 +1075,10 @@ Proof.
 Qed.
 
 (**
-Given any protocol state for the composition of all nodes and a protocol trace
+Given any valid state for the composition of all nodes and a valid trace
 for the composition of just the equivocators, the trace obtained by completing
 the state-components from the trace with the components from the given
-protocol state is a protocol trace for the composition of all nodes.
+valid state is a valid trace for the composition of all nodes.
 **)
 Lemma PreSubFree_PreFree_weak_full_projection
   : VLSM_weak_full_projection PreSubFree PreFree (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
@@ -1071,7 +1088,96 @@ Proof.
     apply lift_sub_to_valid. apply Hv.
   - apply lift_sub_to_transition. apply H.
   - apply preloaded_lift_sub_state_to_initial_state; assumption.
-  - apply any_message_is_protocol_in_preloaded.
+  - apply any_message_is_valid_in_preloaded.
+Qed.
+
+(** If the composition constraint only depends on the projection sub-state,
+then valid traces of the [induced_sub_projection] can be lifted to valid traces
+of the constrained composition.
+*)
+Lemma induced_sub_projection_lift
+  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+  (Hconstraint_consistency :
+    forall s1 s2,
+      composite_state_sub_projection IM equivocators s1 = composite_state_sub_projection IM equivocators s2 ->
+      forall l om, constraint l (s1, om) -> constraint l (s2, om)
+    )
+  : VLSM_full_projection
+    (induced_sub_projection IM equivocators constraint)
+    (composite_vlsm IM constraint)
+    (lift_sub_label IM equivocators)
+    (lift_sub_state IM equivocators).
+Proof.
+  apply basic_VLSM_full_projection; intro; intros.
+  - destruct Hv as [_ [_ [[i li] [sX [Heql [Heqs [HsX [Hom [Hv Hc]]]]]]]]].
+    cbn in Hv, Hc.
+    unfold composite_label_sub_projection_option in Heql.
+    simpl in Heql.
+    case_decide; [|congruence].
+    inversion Heql. subst l. clear Heql.
+    cbn. unfold constrained_composite_valid. cbn.
+    unfold lift_sub_state.
+    rewrite lift_sub_state_to_eq with (Hi := H).
+    subst.
+    split; [assumption|].
+    revert Hc.
+    apply Hconstraint_consistency.
+    symmetry.
+    apply composite_state_sub_projection_lift_to.
+  - apply proj2 in H. revert H. cbn.
+    destruct (vtransition _ _ _) as (si', _om').
+    inversion 1. subst. clear H.
+    f_equal.
+    extensionality i.
+    destruct l as (sub_j, lj).
+    destruct_dec_sig sub_j j Hj Heqsub_j.
+    subst.
+    simpl.
+    destruct (decide (i = j)).
+    + subst. rewrite state_update_eq.
+      unfold lift_sub_state.
+      rewrite lift_sub_state_to_eq with (Hi := Hj).
+      unfold composite_state_sub_projection.
+      simpl.
+      rewrite state_update_eq.
+      reflexivity.
+    + rewrite state_update_neq by congruence.
+      destruct (decide (i ∈ equivocators)).
+      * unfold lift_sub_state.
+        rewrite !lift_sub_state_to_eq with (Hi := e).
+        unfold composite_state_sub_projection. simpl.
+        rewrite state_update_neq by congruence.
+        rewrite lift_sub_state_to_eq with (Hi := e).
+        reflexivity.
+      * unfold lift_sub_state, lift_sub_state_to.
+        destruct (decide _); [contradiction|reflexivity].
+  - apply (lift_sub_state_initial IM).
+    destruct H as [sX [<- HsX]].
+    intro sub_i.
+    destruct_dec_sig sub_i i Hi Heqsub_i.
+    subst. apply HsX.
+  - assumption.
+Qed.
+
+(** A specialization of [basic_projection_induces_friendliness] for
+[induced_sub_projection]s.
+*)
+Lemma induced_sub_projection_friendliness
+  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+  (Hlift_proj : VLSM_full_projection
+    (induced_sub_projection IM equivocators constraint)
+    (composite_vlsm IM constraint)
+    (lift_sub_label IM equivocators)
+    (lift_sub_state IM equivocators))
+  : projection_friendly_prop (induced_sub_projection_is_projection IM equivocators constraint).
+Proof.
+  eapply (basic_projection_induces_friendliness (composite_vlsm IM constraint)).
+  assumption.
+  Unshelve.
+  - apply induced_sub_projection_transition_consistency_None.
+  - apply composite_label_sub_projection_option_lift.
+  - apply composite_state_sub_projection_lift.
+  - apply induced_sub_projection_transition_consistency_Some.
 Qed.
 
 End lift_sub_state_to_preloaded.
@@ -1260,19 +1366,19 @@ Proof.
   specialize (PreSubFree_PreFree_weak_full_projection IM indices (proj1_sig (composite_s0 IM)))
     as Hproj.
   spec Hproj.
-  { apply initial_is_protocol. destruct (composite_s0 IM). assumption. }
+  { apply initial_state_is_valid. destruct (composite_s0 IM). assumption. }
   apply
-    (VLSM_incl_protocol_transition
+    (VLSM_incl_input_valid_transition
       (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (free_composite_vlsm sub_IM) P))
     in Ht.
-  apply (VLSM_weak_full_projection_protocol_transition Hproj) in Ht.
+  apply (VLSM_weak_full_projection_input_valid_transition Hproj) in Ht.
   clear Hproj.
   specialize (ProjectionTraces.preloaded_component_projection IM i)
     as Hproj.
   remember (lift_sub_state_to _ _ _ s) as sX.
   remember (lift_sub_state_to _ _ _ s') as sX'.
   remember (lift_sub_label _ _ _) as lX.
-  specialize (VLSM_projection_protocol_transition Hproj lX li) as Hproj_t.
+  specialize (VLSM_projection_input_valid_transition Hproj lX li) as Hproj_t.
   subst lX. unfold lift_sub_label in Hproj_t.
   simpl in Hproj_t.
   spec Hproj_t.
@@ -1363,14 +1469,14 @@ Context
   .
 
 Lemma sub_IM_has_been_sent_iff_by_sender s
-  (Hs : protocol_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm sub_IM)) s)
+  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm sub_IM)) s)
   m v
   (Hsender : sender m = Some v)
   (Hv : A v ∈ indices)
   : composite_has_been_sent sub_IM sub_IM_Hbs s m ->
     @has_been_sent _ _ (sub_IM_Hbs (dexist (A v) Hv)) (s (dexist (A v) Hv)) m.
 Proof.
-  apply protocol_state_has_trace in Hs as Htr.
+  apply valid_state_has_trace in Hs as Htr.
   destruct Htr as [is [tr Htr]].
   specialize
     (has_been_sent_iff_by_sender sub_IM
@@ -1392,7 +1498,7 @@ Proof.
     by (subst; apply (sub_IM_state_pi IM)).
   apply has_been_sent_irrelevance.
   subst.
-  apply (preloaded_protocol_state_projection sub_IM (dec_exist (sub_index_prop indices) (A v) Hv))
+  apply (preloaded_valid_state_projection sub_IM (dec_exist (sub_index_prop indices) (A v) Hv))
     in Hs.
   assumption.
 Qed.
@@ -1482,13 +1588,13 @@ Proof.
   destruct Hv as [lX [sX [_ [Heqs [_ [Hm [_ Hc]]]]]]].
   cbn in Hc |- *.
   specialize
-    (composite_no_initial_protocol_messages_have_sender IM A sender
+    (composite_no_initial_valid_messages_have_sender IM A sender
       can_emit_signed no_initial_messages_in_IM _ _ Hm)
     as Hhas_sender.
   destruct (sender m) as [v|] eqn:Hsender; [|congruence].
   clear Hhas_sender.
   simpl in Hc.
-  apply (can_emit_protocol_iff (composite_vlsm IM sub_IM_not_equivocating_constraint) m)
+  apply (emitted_messages_are_valid_iff (composite_vlsm IM sub_IM_not_equivocating_constraint) m)
     in Hm as [[i [[im Him] Heqm]] | Hemitted].
   - exfalso. clear -no_initial_messages_in_IM Him.
     elim (no_initial_messages_in_IM i im); assumption.
@@ -1679,9 +1785,9 @@ Lemma lift_sub_free_full_projection
 Proof.
   constructor.
   intros sX trX HtrX.
-  apply (VLSM_eq_finite_protocol_trace (vlsm_is_pre_loaded_with_False Free)),
-    (VLSM_full_projection_finite_protocol_trace (lift_sub_free_preloaded_with_full_projection _)),
-    (VLSM_eq_finite_protocol_trace (vlsm_is_pre_loaded_with_False SubFree)).
+  apply (VLSM_eq_finite_valid_trace (vlsm_is_pre_loaded_with_False Free)),
+    (VLSM_full_projection_finite_valid_trace (lift_sub_free_preloaded_with_full_projection _)),
+    (VLSM_eq_finite_valid_trace (vlsm_is_pre_loaded_with_False SubFree)).
   assumption.
 Qed.
 
@@ -1691,9 +1797,9 @@ Lemma lift_sub_preloaded_free_full_projection
 Proof.
   constructor.
   intros sX trX HtrX.
-  apply (VLSM_eq_finite_protocol_trace (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True Free)),
-    (VLSM_full_projection_finite_protocol_trace (lift_sub_free_preloaded_with_full_projection _)),
-    (VLSM_eq_finite_protocol_trace (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True SubFree)).
+  apply (VLSM_eq_finite_valid_trace (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True Free)),
+    (VLSM_full_projection_finite_valid_trace (lift_sub_free_preloaded_with_full_projection _)),
+    (VLSM_eq_finite_valid_trace (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True SubFree)).
   assumption.
 Qed.
 

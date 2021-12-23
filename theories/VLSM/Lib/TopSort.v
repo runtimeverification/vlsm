@@ -295,7 +295,7 @@ Proof.
   specialize (Hts a b Hab lb1 lb2 Heqb).
   rewrite Heqa in Heqb.
   assert (Ha : ~a ∈ (b :: lb2)).
-  { intro Ha. apply Hts. 
+  { intro Ha. apply Hts.
     rewrite elem_of_cons in Ha.
     destruct Ha; try assumption. subst.
     apply (preceeds_irreflexive preceeds P b Hpa) in Hab.
@@ -417,7 +417,7 @@ Proof.
     apply elem_of_app.
     left; assumption.
   }
-  specialize (Hpc b Hb' a Hab). 
+  specialize (Hpc b Hb' a Hab).
   apply elem_of_app in Hpc.
   destruct Hpc as [Ha | Ha]; try assumption.
   rewrite elem_of_cons in Ha.
@@ -489,7 +489,7 @@ Proof.
     specialize (set_remove_length min l Hin).
     rewrite <- Heql'. rewrite <- H0. intro Hlen.
     specialize (IHn Hlen).
-    split; intros x Hx; rewrite elem_of_cons in Hx; 
+    split; intros x Hx; rewrite elem_of_cons in Hx;
       destruct Hx as [Heq|Hinx]; try (subst x).
     + right. apply IHn. left.
     + destruct (decide (x = min)); try subst x.
@@ -570,7 +570,7 @@ Lemma top_sort_sorted : topologically_sorted preceeds (top_sort l).
 Proof.
   intro a; intros.
   intro Ha2.
-  assert (Ha : a ∈ l). { 
+  assert (Ha : a ∈ l). {
     apply top_sort_set_eq.
     rewrite Heq. simpl. apply elem_of_app. right. right. assumption.
   }
@@ -642,7 +642,7 @@ Proof.
       * subst l'.
         rewrite elem_of_cons in Ha.
         destruct Ha as [Heqa | Ha'].
-        -- subst a0. 
+        -- subst a0.
            rewrite elem_of_cons in i.
            contradict i.
            left; reflexivity.
@@ -678,7 +678,7 @@ Qed.
 
 Definition get_maximal_element := ListExtras.last_error (top_sort l).
 
-Lemma maximal_element_in 
+Lemma maximal_element_in
   (a : A)
   (Hmax : get_maximal_element = Some a) :
   a ∈ l.
@@ -708,7 +708,7 @@ Proof.
   intuition.
 Qed.
 
-Lemma get_maximal_element_correct 
+Lemma get_maximal_element_correct
   (a max : A)
   (Hina : a ∈ l)
   (Hmax : get_maximal_element = Some max) :
@@ -718,9 +718,9 @@ Proof.
   unfold topologically_sorted in Htop.
   intros contra.
   specialize (Htop max a contra).
-  
+
   assert (Hinmax: max ∈ l) by (apply maximal_element_in; intuition).
-  assert (Hinatop : a ∈ (top_sort l)) by (apply Hseteq; intuition). 
+  assert (Hinatop : a ∈ (top_sort l)) by (apply Hseteq; intuition).
   apply elem_of_list_split in Hinatop.
   destruct Hinatop as [prefA [sufA HeqA]].
   unfold get_maximal_element in Hmax.
@@ -728,7 +728,7 @@ Proof.
   - rewrite HeqA in Hmax.
     specialize (last_error_is_last prefA a) as Hlast.
     assert (a = max) by intuition congruence.
-    subst a. 
+    subst a.
     specialize StrictOrder_Irreflexive as Hirr.
     unfold Irreflexive in Hirr. unfold complement in Hirr.
     unfold Reflexive in Hirr.

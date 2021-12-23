@@ -86,6 +86,12 @@ function and a [valid]ity condition.
      ; valid := @valid _ _ _ vlsm
     |}.
 
+  (** For technical reasons, e.g., the need to easily talk about VLSMs over
+  the same set of messages and about VLSMs of the same type (over the same
+  set of messages, labels and states), the VLSM definition is split into
+  three parts, [VLSM_Type], [VLSM_Sign], and [VLSMClass], which are
+  packaged together by the following definition.
+  *)
   Definition VLSM (message : Type) :=
     sigT (fun T : VLSMType message =>
       sigT (fun S : VLSMSign T => VLSMClass S)).
@@ -187,7 +193,7 @@ In Coq, we can define these objects (which we name [transition_item]s) as consis
       : Prop
       := forall m, trace_received_not_sent_before_or_after tr m -> P m.
 
-  (** 'proto_run's are used for an alternative definition of 'protocol_prop' which
+  (** [proto_run] is used for an alternative definition of [valid_state_message_prop], which
   takes into account transitions. See 'vlsm_run_prop'.
   *)
   Record proto_run : Type := mk_proto_run
@@ -472,164 +478,170 @@ Existing Instance TypeX.
 Existing Instance SignX.
 Existing Instance MachineX.
 
-(** *** Protocol states and messages
+(** *** Valid states and messages
 
-We further characterize certain objects as being _protocol_, which means they can
+We further characterize certain objects as being _valid_, which means they can
 be witnessed or experienced during executions of the protocol. For example,
-a message is a [protocol_message] if there exists an execution of the protocol
+a message is a [valid_message] if there exists an execution of the protocol
 in which it is produced.
 
-We choose here to define protocol states and messages together as the
-[protocol_prop] property, inductively defined over the
+We choose here to define valid states and messages together as the
+[valid_state_message_prop]erty, inductively defined over the
 [state * option message] product type,
 as this definition avoids the need of using a mutually recursive definition.
 
 The inductive definition has three cases:
-- if <<s>> is a [state] with the [initial_state_prop]erty, then <<(s, None)>> has the [protocol_prop]erty;
-- if <<m>> is a <<message>> with the [initial_message_prop]erty, then <<(>>[s0, Some]<< m)>> has the [protocol_prop]erty;
-- for all [state]s <<s>>, [option]al <<message>> <<om>>,
-  and [label] <<l>>:
+- if <<s>> is a [state] with the [initial_state_prop]erty, then <<(s, None)>>
+  has the [valid_state_message_prop]erty;
+- if <<m>> is a <<message>> with the [initial_message_prop]erty,
+  then <<(>>[s0, Some]<< m)>> has the [valid_state_message_prop]erty;
+- for all [state]s <<s>>, [option]al <<message>> <<om>>, and [label] <<l>>:
 
-  if there is an (optional) <<message>> <<_om>> such that <<(s, _om)>> has the [protocol_prop]erty;
+  - if there is an (optional) <<message>> <<_om>> such that <<(s, _om)>>
+    has the [valid_state_message_prop]erty;
 
-  and if there is a [state] <<_s>> such that <<(_s, om)>> has the [protocol_prop]erty;
+  - and if there is a [state] <<_s>> such that <<(_s, om)>> has the
+    [valid_state_message_prop]erty;
 
-  and if <<l>> [valid] <<(s, om)>>,
+  - and if <<l>> [valid] <<(s, om)>>,
 
-  then [transition] <<l (s, om)>> has the [protocol_prop]erty.
+  - then [transition] <<l (s, om)>> has the [valid_state_message_prop]erty.
 *)
 
-    Inductive protocol_prop : state -> option message -> Prop :=
-    | protocol_initial
+    Inductive valid_state_message_prop : state -> option message -> Prop :=
+    | valid_initial_state_message
         (s : state)
         (Hs : initial_state_prop s)
         (om : option message)
         (Hom : option_initial_message_prop om)
-      : protocol_prop s om
-    | protocol_generated
+      : valid_state_message_prop s om
+    | valid_generated_state_message
         (s : state)
         (_om : option message)
-        (Hps : protocol_prop s _om)
+        (Hps : valid_state_message_prop s _om)
         (_s : state)
         (om : option message)
-        (Hpm : protocol_prop _s om)
+        (Hpm : valid_state_message_prop _s om)
         (l : label)
         (Hv : valid l (s, om))
         s' om'
         (Ht : transition l (s, om) = (s', om'))
-      : protocol_prop s' om'.
+      : valid_state_message_prop s' om'.
 
-    Definition protocol_initial_state
+    Definition valid_initial_state
       [s:state] (Hs: initial_state_prop s)
-      : protocol_prop s None
-      := protocol_initial s Hs None I.
+      : valid_state_message_prop s None
+      := valid_initial_state_message s Hs None I.
 
 (**
 
-The [protocol_state_prop]erty and the [protocol_message_prop]erty are now
+The [valid_state_prop]erty and the [valid_message_prop]erty are now
 definable as simple projections of the above definition.
 
 Moreover, we use these derived properties to define the corresponding
-dependent types [protocol_state] and [protocol_message].
+dependent types [valid_state] and [valid_message].
 
 *)
 
-    Definition protocol_state_prop (s : state) :=
-      exists om : option message, protocol_prop s om.
+    Definition valid_state_prop (s : state) :=
+      exists om : option message, valid_state_message_prop s om.
 
-    Definition protocol_message_prop (m : message) :=
-      exists s : state, protocol_prop s (Some m).
+    Definition valid_message_prop (m : message) :=
+      exists s : state, valid_state_message_prop s (Some m).
 
-    Definition protocol_state : Type :=
-      { s : state | protocol_state_prop s }.
+    Definition valid_state : Type :=
+      { s : state | valid_state_prop s }.
 
-    Definition protocol_message : Type :=
-      { m : message | protocol_message_prop m }.
+    Definition valid_message : Type :=
+      { m : message | valid_message_prop m }.
 
-    Lemma initial_is_protocol
+    Lemma initial_state_is_valid
       (s : state)
       (Hinitial : initial_state_prop s) :
-      protocol_state_prop s.
+      valid_state_prop s.
     Proof.
       exists None.
-      apply protocol_initial.
+      apply valid_initial_state_message.
       assumption.
       exact I.
     Qed.
 
-    Lemma initial_message_is_protocol
+    Lemma initial_message_is_valid
       (m : message)
       (Hinitial : initial_message_prop m) :
-      protocol_message_prop m.
+      valid_message_prop m.
     Proof.
       exists (proj1_sig (vs0 X)).
-      apply protocol_initial.
+      apply valid_initial_state_message.
       apply proj2_sig.
       assumption.
     Qed.
 
 (**
-As often times we work with optional protocol messages, it is convenient
-to define a protocol message property for optional messages:
+As often times we work with optional valid messages, it is convenient
+to define a valid message property for optional messages:
 *)
 
-    Definition option_protocol_message_prop (om : option message) :=
-      exists s : state, protocol_prop s om.
+    Definition option_valid_message_prop (om : option message) :=
+      exists s : state, valid_state_message_prop s om.
 
-    Lemma option_protocol_message_None
-      : option_protocol_message_prop None.
+    Lemma option_valid_message_None
+      : option_valid_message_prop None.
     Proof.
       exists (proj1_sig (vs0 X)).
-      apply protocol_initial.
+      apply valid_initial_state_message.
       apply proj2_sig.
       exact I.
     Qed.
 
-    Lemma option_protocol_message_Some
+    Lemma option_valid_message_Some
       (m : message)
-      (Hpm : protocol_message_prop m)
-      : option_protocol_message_prop (Some m).
+      (Hpm : valid_message_prop m)
+      : option_valid_message_prop (Some m).
     Proof.
       destruct Hpm as [s Hpm]. exists s. assumption.
     Qed.
 
-    Lemma option_initial_message_is_protocol
+    Lemma option_initial_message_is_valid
       (om : option message)
       (Hinitial : option_initial_message_prop om) :
-      option_protocol_message_prop om.
+      option_valid_message_prop om.
     Proof.
       destruct om;
-      [apply option_protocol_message_Some
-      |apply option_protocol_message_None].
-      apply initial_message_is_protocol;assumption.
+      [apply option_valid_message_Some
+      |apply option_valid_message_None].
+      apply initial_message_is_valid;assumption.
     Qed.
 
-(** *** Protocol validity and protocol transitions
+(** *** Input validity and input valid transitions
 
-To achieve this, it is useful to further define _protocol_ validity and
-_protocol_ transitions:
+To specify that a particular (input of a) transition can actually be
+encountered as part of a protocol execution, we define the notions of
+[input_valid]ity and [input_valid_transition].
+
+Input validity requires that the [valid] predicate holds for the
+given inputs and that they have a [valid_state] and a [valid_message].
 *)
-
-    Definition protocol_valid
+    Definition input_valid
                (l : label)
                (som : state * option message)
       : Prop
       :=
       let (s, om) := som in
-         protocol_state_prop s
-      /\ option_protocol_message_prop om
+         valid_state_prop s
+      /\ option_valid_message_prop om
       /\ valid l (s,om).
 
-
-    Definition protocol_transition
+(** Input valid transitions are transitions with [input_valid] inputs. *)
+    Definition input_valid_transition
       (l : label)
       (som : state * option message)
       (som' : state * option message)
       :=
-      protocol_valid l som
+      input_valid l som
       /\  transition l som = som'.
 
-    Definition protocol_transition_preserving
+    Definition input_valid_transition_preserving
       (R : state -> state -> Prop)
       : Prop
       :=
@@ -637,46 +649,46 @@ _protocol_ transitions:
         (s1 s2 : state)
         (l : label)
         (om1 om2 : option message)
-        (Hprotocol: protocol_transition l (s1, om1) (s2, om2)),
+        (Hvalid_transition: input_valid_transition l (s1, om1) (s2, om2)),
         R s1 s2.
 
 (**
   Next three lemmas show the two definitions above are strongly related.
 *)
 
-    Lemma protocol_transition_valid
+    Lemma input_valid_transition_valid
       (l : label)
       (som : state * option message)
       (som' : state * option message)
-      (Ht : protocol_transition l som som')
-      : protocol_valid l som.
+      (Ht : input_valid_transition l som som')
+      : input_valid l som.
     Proof.
       destruct Ht as [Hpv Ht].
       assumption.
     Qed.
 
-    Lemma protocol_valid_transition
+    Lemma input_valid_can_transition
       (l : label)
       (som : state * option message)
-      (Hv : protocol_valid l som)
+      (Hv : input_valid l som)
       : exists (som' : state * option message),
-        protocol_transition l som som'.
+        input_valid_transition l som som'.
     Proof.
       exists (transition l som).
       repeat split; assumption.
     Qed.
 
-    Lemma protocol_valid_transition_iff
+    Lemma input_valid_transition_iff
       (l : label)
       (som : state * option message)
-      : protocol_valid l som
+      : input_valid l som
       <-> exists (som' : state * option message),
-            protocol_transition l som som'.
+            input_valid_transition l som som'.
     Proof.
       split.
-      - apply protocol_valid_transition.
-      - intros [som' Hpt].
-        apply protocol_transition_valid with som'.
+      - apply input_valid_can_transition.
+      - intros [som' Hivt].
+        apply input_valid_transition_valid with som'.
         assumption.
     Qed.
 
@@ -686,156 +698,140 @@ The next couple of lemmas relate the two definitions above with
 pre-existing concepts.
 
  *)
-    Lemma protocol_generated_valid
-      {l : label}
-      {s : state}
-      {_om : option message}
-      {_s : state}
-      {om : option message}
-      (Hps : protocol_prop s _om)
-      (Hpm : protocol_prop _s om)
-      (Hv : valid l (s, om))
-      : protocol_valid l (s, om).
-    Proof.
-      repeat split; try assumption.
-      - exists _om. assumption.
-      - exists _s. assumption.
-    Qed.
-
-    Lemma protocol_transition_origin
+    Lemma input_valid_transition_origin
           {l : label}
           {s s' : state}
           {om om' : option message}
-          (Ht : protocol_transition l (s, om) (s',om'))
-      : protocol_state_prop s.
+          (Ht : input_valid_transition l (s, om) (s',om'))
+      : valid_state_prop s.
     Proof.
       destruct Ht as [[[_om Hp] _] _]. exists _om. assumption.
     Qed.
 
-    Lemma protocol_transition_destination
+    Lemma input_valid_transition_destination
           {l : label}
           {s s' : state}
           {om om' : option message}
-          (Ht : protocol_transition l (s, om) (s', om'))
-      : protocol_state_prop s'.
+          (Ht : input_valid_transition l (s, om) (s', om'))
+      : valid_state_prop s'.
     Proof.
       exists om'.
       destruct Ht as [[[_om Hs] [[_s Hom] Hv]] Ht].
-      apply protocol_generated with s _om _s om l; assumption.
+      apply valid_generated_state_message with s _om _s om l; assumption.
     Qed.
 
-    Lemma protocol_transition_in
+    Lemma input_valid_transition_in
           {l : label}
           {s s' : state}
           {om om' : option message}
-          (Ht : protocol_transition l (s, om) (s', om'))
-      : option_protocol_message_prop om.
+          (Ht : input_valid_transition l (s, om) (s', om'))
+      : option_valid_message_prop om.
     Proof.
       destruct Ht as [[_ [[_s Hom] _]] _].
       exists _s. assumption.
     Qed.
 
-    Lemma protocol_prop_transition_out
+    Lemma input_valid_transition_outputs_valid_state_message
           {l : label}
           {s s' : state}
           {om om' : option message}
-          (Ht : protocol_transition l (s, om) (s', om'))
-        : protocol_prop s' om'.
+          (Ht : input_valid_transition l (s, om) (s', om'))
+        : valid_state_message_prop s' om'.
     Proof.
       destruct Ht as [[[_om Hps] [[_s Hpm] Hv]] Ht].
-      apply protocol_generated with s _om _s om l; assumption.
+      apply valid_generated_state_message with s _om _s om l; assumption.
     Qed.
 
-    Lemma protocol_transition_out
+    Lemma input_valid_transition_out
           {l : label}
           {s s' : state}
           {om om' : option message}
-          (Ht : protocol_transition l (s, om) (s', om'))
-      : option_protocol_message_prop om'.
+          (Ht : input_valid_transition l (s, om) (s', om'))
+      : option_valid_message_prop om'.
     Proof.
-      apply protocol_prop_transition_out in Ht.
+      apply input_valid_transition_outputs_valid_state_message in Ht.
       exists s'. assumption.
     Qed.
 
-    Lemma protocol_transition_is_valid
+    Lemma input_valid_transition_is_valid
           {l : label}
           {s s' : state}
           {om om' : option message}
-          (Ht : protocol_transition l (s, om) (s', om'))
+          (Ht : input_valid_transition l (s, om) (s', om'))
       : valid l (s, om).
     Proof.
       destruct Ht as [[_ [_ Hv]] _].
       assumption.
     Qed.
 
-    Lemma protocol_transition_transition
+    Lemma input_valid_transition_transition
           {l : label}
           {s s' : state}
           {om om' : option message}
-          (Ht : protocol_transition l (s, om) (s', om'))
+          (Ht : input_valid_transition l (s, om) (s', om'))
         :  transition l (s, om) = (s', om').
      Proof.
       destruct Ht as [_ Ht]. assumption.
      Qed.
 
-    Lemma protocol_prop_valid_out
+    Lemma input_valid_state_message_outputs
       (l : label)
       (s : state)
       (om : option message)
-      (Hv : protocol_valid l (s, om))
+      (Hv : input_valid l (s, om))
       s' om'
       (Ht : transition l (s, om) = (s', om'))
-      : protocol_prop s' om'.
+      : valid_state_message_prop s' om'.
     Proof.
       destruct Hv as [[_om Hs] [[_s Hom] Hv]].
-      apply protocol_generated with s _om _s om l; assumption.
+      apply valid_generated_state_message with s _om _s om l; assumption.
     Qed.
 
     (** For VLSMs initialized with many initial messages such as
     the [composite_vlsm_constrained_projection] or the [pre_loaded_with_all_messages_vlsm],
     the question of whether a [VLSM] [can_emit] a message <<m>> becomes more
-    useful than that whether <<m>> is a [protocol_message].
+    useful than that whether <<m>> is a [valid_message].
     *)
 
-    Definition option_protocol_generated_prop
+    Definition option_can_produce
       (s : state)
       (om : option message)
       :=
       exists
       (som : state * option message)
       (l : label),
-      protocol_transition l som (s, om).
+      input_valid_transition l som (s, om).
 
-    Definition protocol_generated_prop
+    Definition can_produce
       (s : state)
       (m : message)
-      := option_protocol_generated_prop s (Some m).
+      := option_can_produce s (Some m).
 
-    (** Of course, if a VLSM [can_emit] <<(s,m)>>, then <<(s,m)>> is protocol.
+    (** Of course, if a VLSM [can_emit] <<(s,m)>>, then <<(s,m)>> is valid.
     *)
 
-    Lemma option_protocol_generated_prop_protocol
+    Lemma option_can_produce_valid
       (s : state)
       (om : option message)
-      (Hm : option_protocol_generated_prop s om)
-      : protocol_prop s om .
+      (Hm : option_can_produce s om)
+      : valid_state_message_prop s om .
     Proof.
       destruct Hm as [(s0, om0) [l [[[_om0 Hs0] [[_s0 Hom0] Hv]] Ht]]].
-      apply protocol_generated with s0 _om0 _s0 om0 l; assumption.
+      apply valid_generated_state_message with s0 _om0 _s0 om0 l; assumption.
     Qed.
 
-    Definition protocol_generated_prop_protocol
+    Definition can_produce_valid
       (s : state)
       (m : message)
-      (Hm : protocol_generated_prop s m)
-      : protocol_prop s (Some m)
-      := option_protocol_generated_prop_protocol s (Some m) Hm.
+      (Hm : can_produce s m)
+      : valid_state_message_prop s (Some m)
+      := option_can_produce_valid s (Some m) Hm.
 
-    Lemma option_protocol_generated_prop_protocol_iff
+    Lemma option_can_produce_valid_iff
       (s : state)
       (om : option message)
-      : protocol_prop s om <->
-        option_protocol_generated_prop s om \/ initial_state_prop s /\ option_initial_message_prop om.
+      : valid_state_message_prop s om <->
+        option_can_produce s om \/ initial_state_prop s /\ option_initial_message_prop om.
     Proof.
       split.
       - intros Hm; inversion Hm; subst.
@@ -845,16 +841,16 @@ pre-existing concepts.
           repeat split; [..|assumption|assumption]
           ; eexists; [exact Hps|exact Hpm].
       - intros [Hem | Him].
-        + apply option_protocol_generated_prop_protocol. assumption.
+        + apply option_can_produce_valid. assumption.
         + constructor; apply Him.
     Qed.
 
-    Definition protocol_generated_prop_protocol_iff
+    Definition can_produce_valid_iff
       (s : state)
       (m : message)
-      : protocol_prop s (Some m) <->
-        protocol_generated_prop s m \/ initial_state_prop s /\ initial_message_prop m
-      := option_protocol_generated_prop_protocol_iff s (Some m).
+      : valid_state_message_prop s (Some m) <->
+        can_produce s m \/ initial_state_prop s /\ initial_message_prop m
+      := option_can_produce_valid_iff s (Some m).
 
     Definition can_emit
       (m : message)
@@ -863,64 +859,64 @@ pre-existing concepts.
       (som : state * option message)
       (l : label)
       (s : state),
-      protocol_transition l som (s, Some m).
+      input_valid_transition l som (s, Some m).
 
     Lemma can_emit_iff
       (m : message)
-      : can_emit m <-> exists s, protocol_generated_prop s m.
+      : can_emit m <-> exists s, can_produce s m.
     Proof.
       split.
       - intros [som [l [s Ht]]]. exists s, som, l. assumption.
       - intros [s [som [l Ht]]]. exists som, l, s. assumption.
     Qed.
 
-    (** If a VLSM [can_emit] a message <<m>>, then <<m>> is protocol.
+    (** If a VLSM [can_emit] a message <<m>>, then <<m>> is valid.
     *)
 
-    Lemma can_emit_protocol
+    Lemma emitted_messages_are_valid
       (m : message)
       (Hm : can_emit m)
-      : protocol_message_prop m .
+      : valid_message_prop m .
     Proof.
       apply can_emit_iff in Hm.
       destruct Hm as [s Hm].
-      apply protocol_generated_prop_protocol in Hm.
+      apply can_produce_valid in Hm.
       exists s. assumption.
     Qed.
 
-    (** A characterization of protocol messages in terms of [can_emit]
+    (** A characterization of valid messages in terms of [can_emit]
     *)
 
-    Lemma can_emit_protocol_iff
+    Lemma emitted_messages_are_valid_iff
       (m : message)
-      : protocol_message_prop m <-> initial_message_prop m \/ can_emit m.
+      : valid_message_prop m <-> initial_message_prop m \/ can_emit m.
     Proof.
       split.
       - intros [s Hm].
-        apply protocol_generated_prop_protocol_iff in Hm as [Hgen | [_ Him]].
+        apply can_produce_valid_iff in Hm as [Hgen | [_ Him]].
         + right. apply can_emit_iff. exists s. assumption.
         + left. assumption.
       - intros [Him | Hm].
-        + apply initial_message_is_protocol. assumption.
-        + apply can_emit_protocol. assumption.
+        + apply initial_message_is_valid. assumption.
+        + apply emitted_messages_are_valid. assumption.
     Qed.
 
-(** *** Protocol state and protocol message characterization
+(** *** valid state and valid message characterization
 
 The definition and results below show that the mutually-recursive definitions
-for [protocol_state]s and [protocol_message]s can be derived from the
+for [valid_state]s and [valid_message]s can be derived from the
 prior definitions.
 
-The results below offers equivalent characterizations for [protocol_state]s
-and [protocol_message]s, similar to their recursive definition.
+The results below offers equivalent characterizations for [valid_state]s
+and [valid_message]s, similar to their recursive definition.
 *)
 
-    Lemma protocol_state_prop_iff :
+    Lemma valid_state_prop_iff :
       forall s' : state,
-        protocol_state_prop s'
+        valid_state_prop s'
         <-> (exists is : initial_state, s' = proj1_sig is)
           \/ exists (l : label) (som : state * option message) (om' : option message),
-            protocol_transition l som (s', om').
+            input_valid_transition l som (s', om').
     Proof.
       intros; split.
       - intro Hps'. destruct Hps' as [om' Hs].
@@ -931,49 +927,43 @@ and [protocol_message]s, similar to their recursive definition.
           + exists _om. assumption.
           + exists _s. assumption.
       - intros [[[s His] Heq] | [l [[s om] [om' [[[_om Hps] [[_s Hpm] Hv]] Ht]]]]]; subst.
-        + exists None. apply protocol_initial; [assumption | exact I].
-        + exists om'. apply protocol_generated with s _om _s om l; assumption.
+        + exists None. apply valid_initial_state_message; [assumption | exact I].
+        + exists om'. apply valid_generated_state_message with s _om _s om l; assumption.
     Qed.
 
-    (** A specialized induction principle for [protocol_state_prop].
+    (** A specialized induction principle for [valid_state_prop].
 
-        Compared to opening the existential and using [protocol_prop_ind],
-        this avoids the redundancy of the [protocol_initial_state] case
-        needing a proof for any [initial_state] and then [protocol_initial_message]
-        asking for a proof specifically for [s0], and also avoids the
-        little trouble of needing <<set>> or <<dependent induction>> to
-        handle the pair in the index in [protocol_prop (s,om)].
+        Compared to opening the existential and using [valid_state_message_prop_ind],
+        this expresses the inductive assumptions simply in terms of
+        [input_valid_transition], rather than than having everything exploded
+        as [valid_state_message_prop] assumptions over witnesses <<_s>>
+        and <<_om>>, and a spurious inductive assumption <<P _s>>.
      *)
-    Lemma protocol_state_prop_ind
+    Lemma valid_state_prop_ind
       (P : state -> Prop)
       (IHinit : forall (s : state) (Hs : initial_state_prop s), P s)
       (IHgen :
         forall (s' : state) (l: label) (om om' : option message) (s : state)
-          (Ht : protocol_transition l (s, om) (s', om')) (Hs : P s),
+          (Ht : input_valid_transition l (s, om) (s', om')) (Hs : P s),
           P s'
       )
-      : forall (s : state) (Hs : protocol_state_prop s), P s.
+      : forall (s : state) (Hs : valid_state_prop s), P s.
     Proof.
       intros.
       destruct Hs as [om Hs].
       induction Hs.
       - apply IHinit. assumption.
-      - specialize (IHgen s' l0 om om' s).
-        apply IHgen; try assumption.
-        repeat split; try assumption.
-        + exists _om. assumption.
-        + exists _s. assumption.
+      - apply (IHgen s' l0 om om' s);firstorder.
     Qed.
 
+    (* valid message characterization - similar to the definition in the report. *)
 
-    (* Protocol message characterization - similar to the definition in the report. *)
-
-    Lemma protocol_message_prop_iff :
+    Lemma valid_message_prop_iff :
       forall m' : message,
-        protocol_message_prop m'
+        valid_message_prop m'
         <-> (exists im : initial_message, m' = proj1_sig im)
           \/ exists (l : label) (som : state * option message) (s' : state),
-            protocol_transition l som (s', Some m').
+            input_valid_transition l som (s', Some m').
     Proof.
       intros; split.
       - intros [s' Hpm'].
@@ -982,9 +972,9 @@ and [protocol_message]s, similar to their recursive definition.
         + right. exists l0. exists (s, om). exists s'.
           firstorder.
       - intros [[[s His] Heq] | [l [[s om] [s' [[[_om Hps] [[_s Hpm] Hv]] Ht]]]]]; subst.
-        + apply initial_message_is_protocol. assumption.
+        + apply initial_message_is_valid. assumption.
         + exists s'.
-          apply protocol_generated with s _om _s om l; assumption.
+          apply valid_generated_state_message with s _om _s om l; assumption.
     Qed.
 
 (** ** Trace Properties
@@ -999,17 +989,17 @@ We will now split our groundwork for defining traces into the finite case and
 the infinite case.
 *)
 
-(** *** Finite [protocol_trace]s
+(** *** Finite [valid_trace]s
 
-A [finite_protocol_trace_from] a [state] <<start>> is a pair <<(start, steps)>> where <<steps>>
+A [finite_valid_trace_from] a [state] <<start>> is a pair <<(start, steps)>> where <<steps>>
 is a list of [transition_item]s, and is inductively defined by:
-- <<(s, [])>> is a [finite_protocol_trace_from] <<s>>
-- if there is a [protocol_transition] <<l (s', iom) (s, oom)>>
+- <<(s, [])>> is a [finite_valid_trace_from] <<s>> if <<s>> is valid
+- if there is an [input_valid_transition] <<l (s', iom) (s, oom)>>
 
-  and if <<(s,steps)>> is a [protocol_trace_from] <<s>>
+  and if <<(s,steps)>> is a [valid_trace_from] <<s>>
 
   then <<(s', ({| l := l; input := iom; destination := s; output := oom |} :: steps)>>
-  is a [protocol_transition_from] <<s'>>.
+  is a [finite_valid_trace_from] <<s'>>.
 
 Note that the definition is given such that it extends an existing trace by
 adding a transition to its front.
@@ -1017,34 +1007,34 @@ The reason for this choice is to have this definition be similar to the one
 for infinite traces, which can only be extended at the front.
 *)
 
-    Inductive finite_protocol_trace_from : state -> list transition_item -> Prop :=
-    | finite_ptrace_empty : forall (s : state)
-        (Hs : protocol_state_prop s),
-        finite_protocol_trace_from s []
-    | finite_ptrace_extend : forall  (s : state) (tl : list transition_item)
-        (Htl : finite_protocol_trace_from s tl)
+    Inductive finite_valid_trace_from : state -> list transition_item -> Prop :=
+    | finite_valid_trace_from_empty : forall (s : state)
+        (Hs : valid_state_prop s),
+        finite_valid_trace_from s []
+    | finite_valid_trace_from_extend : forall  (s : state) (tl : list transition_item)
+        (Htl : finite_valid_trace_from s tl)
         (s' : state) (iom oom : option message) (l : label)
-        (Ht : protocol_transition l (s', iom) (s, oom)),
-        finite_protocol_trace_from  s' ({| l := l; input := iom; destination := s; output := oom |} :: tl).
+        (Ht : input_valid_transition l (s', iom) (s, oom)),
+        finite_valid_trace_from  s' ({| l := l; input := iom; destination := s; output := oom |} :: tl).
 
-    Definition finite_ptrace_singleton :
+    Definition finite_valid_trace_singleton :
       forall {l : label} {s s': state} {iom oom : option message},
-        protocol_transition l (s, iom) (s', oom) ->
-        finite_protocol_trace_from  s ({| l := l; input := iom; destination := s'; output := oom |} :: [])
+        input_valid_transition l (s, iom) (s', oom) ->
+        finite_valid_trace_from  s ({| l := l; input := iom; destination := s'; output := oom |} :: [])
       := fun l s s' iom oom Hptrans =>
-           finite_ptrace_extend s' []
-               (finite_ptrace_empty s' (protocol_transition_destination Hptrans))
+           finite_valid_trace_from_extend s' []
+               (finite_valid_trace_from_empty s' (input_valid_transition_destination Hptrans))
                _ _ _ _ Hptrans.
 
 (**
-To complete our definition of a finite protocol trace, we must also guarantee that <<start>> is an
+To complete our definition of a finite valid trace, we must also guarantee that <<start>> is an
 initial state according to the protocol.
 *)
 
-    Definition finite_protocol_trace (s : state) (ls : list transition_item) : Prop :=
-      finite_protocol_trace_from s ls /\ initial_state_prop s.
+    Definition finite_valid_trace (s : state) (ls : list transition_item) : Prop :=
+      finite_valid_trace_from s ls /\ initial_state_prop s.
 
-    Opaque finite_protocol_trace.
+    Opaque finite_valid_trace.
 
 (**
 In the remainder of the section we provide various results allowing us to
@@ -1053,58 +1043,58 @@ prove or decompose the above properties in proofs.
 
     (** This is a bit more useful than the small proof suggests,
         because applying it always leaves just one subgoal.
-        The tactical <<split;[constructor;apply initial_is_protocol|];assumption>>
+        The tactical <<split;[constructor;apply initial_state_is_valid|];assumption>>
         only works if the assumption is available, which may require
         an <<assert>> and writing out the full VLSM and state expressions
         as part of the proof script.
      *)
-    Lemma finite_protocol_trace_empty (s : state):
+    Lemma finite_valid_trace_empty (s : state):
       vinitial_state_prop X s ->
-      finite_protocol_trace s [].
+      finite_valid_trace s [].
     Proof.
-      split;[constructor;apply initial_is_protocol|];assumption.
+      split;[constructor;apply initial_state_is_valid|];assumption.
     Qed.
 
-    Lemma finite_ptrace_first_valid_transition
+    Lemma finite_valid_trace_first_valid_transition
           (s : state)
           (tr : list transition_item)
           (te : transition_item)
-          (Htr : finite_protocol_trace_from s (te :: tr))
-      : protocol_transition (l te) (s, input te) (destination te, output te).
+          (Htr : finite_valid_trace_from s (te :: tr))
+      : input_valid_transition (l te) (s, input te) (destination te, output te).
     Proof.
       inversion Htr. assumption.
     Qed.
 
-    Lemma finite_ptrace_first_pstate
+    Lemma finite_valid_trace_first_pstate
       (s : state)
       (tr : list transition_item)
-      (Htr : finite_protocol_trace_from s tr)
-      : protocol_state_prop s.
+      (Htr : finite_valid_trace_from s tr)
+      : valid_state_prop s.
     Proof.
       inversion Htr; subst; [assumption|].
       apply Ht.
     Qed.
 
-    Lemma finite_ptrace_tail
+    Lemma finite_valid_trace_tail
           (s : state)
           (tr : list transition_item)
           (te : transition_item)
-          (Htr : finite_protocol_trace_from s (te :: tr))
-      : finite_protocol_trace_from (destination te) tr.
+          (Htr : finite_valid_trace_from s (te :: tr))
+      : finite_valid_trace_from (destination te) tr.
     Proof.
       inversion Htr. assumption.
     Qed.
 
-    Lemma finite_ptrace_last_pstate
+    Lemma finite_valid_trace_last_pstate
       (s : state)
       (tr : list transition_item)
-      (Htr : finite_protocol_trace_from s tr)
-      : protocol_state_prop (finite_trace_last s tr).
+      (Htr : finite_valid_trace_from s tr)
+      : valid_state_prop (finite_trace_last s tr).
     Proof.
       generalize dependent s.
       induction tr; intros.
-      - simpl. apply finite_ptrace_first_pstate with []. assumption.
-      - apply finite_ptrace_tail in Htr.
+      - simpl. apply finite_valid_trace_first_pstate with []. assumption.
+      - apply finite_valid_trace_tail in Htr.
         apply IHtr in Htr.
         replace
           (finite_trace_last s (a :: tr))
@@ -1116,15 +1106,15 @@ prove or decompose the above properties in proofs.
         reflexivity.
     Qed.
 
-    Lemma protocol_transition_to
+    Lemma input_valid_transition_to
           (s : state)
           (tr : list transition_item)
           (tr1 tr2 : list transition_item)
           (te : transition_item)
-          (Htr : finite_protocol_trace_from s tr)
+          (Htr : finite_valid_trace_from s tr)
           (Heq : tr = tr1 ++ [te] ++ tr2)
           (lst1 := finite_trace_last s tr1)
-      : protocol_transition (l te) (lst1, input te) (destination te, output te).
+      : input_valid_transition (l te) (lst1, input te) (destination te, output te).
     Proof.
       generalize dependent s. generalize dependent tr.
       induction tr1.
@@ -1135,76 +1125,76 @@ prove or decompose the above properties in proofs.
         apply IHtr1. assumption.
     Qed.
 
-    Lemma finite_ptrace_consecutive_valid_transition
+    Lemma finite_valid_trace_consecutive_valid_transition
           (s : state)
           (tr : list transition_item)
           (tr1 tr2 : list transition_item)
           (te1 te2 : transition_item)
-          (Htr : finite_protocol_trace_from s tr)
+          (Htr : finite_valid_trace_from s tr)
           (Heq : tr = tr1 ++ [te1; te2] ++ tr2)
-      : protocol_transition (l te2) (destination te1, input te2) (destination te2, output te2).
+      : input_valid_transition (l te2) (destination te1, input te2) (destination te2, output te2).
     Proof.
       change ([te1; te2] ++ tr2) with ([te1] ++ [te2] ++ tr2) in Heq.
       rewrite app_assoc in Heq.
-      specialize (protocol_transition_to s tr (tr1 ++ [te1]) tr2 te2 Htr Heq)
+      specialize (input_valid_transition_to s tr (tr1 ++ [te1]) tr2 te2 Htr Heq)
         as Ht.
       rewrite finite_trace_last_is_last in Ht. assumption.
     Qed.
 
 
-    Lemma protocol_trace_output_is_protocol
+    Lemma valid_trace_output_is_valid
       (is : state)
       (tr : list transition_item)
-      (Htr : finite_protocol_trace_from is tr)
+      (Htr : finite_valid_trace_from is tr)
       (m : message)
       (Houtput : trace_has_message (field_selector output) m tr)
-      : protocol_message_prop m.
+      : valid_message_prop m.
     Proof.
       revert is Htr.
       induction Houtput as [item tr' Hm| item tr'];intros;inversion Htr; subst.
-      - simpl in Hm. 
+      - simpl in Hm.
         subst.
-        apply protocol_transition_out in Ht.
+        apply input_valid_transition_out in Ht.
         assumption.
       - apply (IHHoutput s).
         assumption.
     Qed.
 
-    Lemma protocol_trace_input_is_protocol
+    Lemma valid_trace_input_is_valid
       (is : state)
       (tr : list transition_item)
-      (Htr : finite_protocol_trace_from is tr)
+      (Htr : finite_valid_trace_from is tr)
       (m : message)
       (Hinput : trace_has_message (field_selector input) m tr)
-      : protocol_message_prop m.
+      : valid_message_prop m.
     Proof.
       revert is Htr.
       induction Hinput as [item tr' Hm| item tr'];intros
       ;inversion Htr as [|s _tr'  Htr' _is iom oom l Ht ];subst.
       - simpl in Hm.
         subst.
-        apply protocol_transition_in in Ht.
+        apply input_valid_transition_in in Ht.
         assumption.
       - apply (IHHinput s).
         assumption.
     Qed.
 
-    Lemma protocol_trace_observed_is_protocol
+    Lemma valid_trace_observed_is_valid
       (is : state)
       (tr : list transition_item)
-      (Htr : finite_protocol_trace_from is tr)
+      (Htr : finite_valid_trace_from is tr)
       (m : message)
       (Hobserved : trace_has_message item_sends_or_receives m tr)
-      : protocol_message_prop m.
+      : valid_message_prop m.
     Proof.
       apply trace_has_message_observed_iff in Hobserved as [Hm |Hm]
-      ; revert Htr m Hm; [apply protocol_trace_input_is_protocol | apply protocol_trace_output_is_protocol].
+      ; revert Htr m Hm; [apply valid_trace_input_is_valid | apply valid_trace_output_is_valid].
     Qed.
 
     Lemma first_transition_valid
       (s : state)
       (te : transition_item)
-      : finite_protocol_trace_from s [te] <-> protocol_transition (l te) (s, input te) (destination te, output te).
+      : finite_valid_trace_from s [te] <-> input_valid_transition (l te) (s, input te) (destination te, output te).
 
     Proof.
       split.
@@ -1212,26 +1202,26 @@ prove or decompose the above properties in proofs.
         inversion Htr.
         assumption.
       - destruct te. simpl. intro Ht.
-        apply protocol_transition_destination in Ht as Hdestination0.
+        apply input_valid_transition_destination in Ht as Hdestination0.
         constructor; [|assumption]. constructor. assumption.
     Qed.
 
     Lemma extend_right_finite_trace_from
       (s1 : state)
       (ts : list transition_item)
-      (Ht12 : finite_protocol_trace_from s1 ts)
+      (Ht12 : finite_valid_trace_from s1 ts)
       (l3 : label)
       (s2 := finite_trace_last s1 ts)
       (iom3 : option message)
       (s3 : state)
       (oom3 : option message)
-      (Hv23 : protocol_transition l3 (s2, iom3) (s3, oom3))
-      : finite_protocol_trace_from s1 (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
+      (Hv23 : input_valid_transition l3 (s2, iom3) (s3, oom3))
+      : finite_valid_trace_from s1 (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
     Proof.
       induction Ht12.
-      - simpl. apply finite_ptrace_singleton;assumption.
+      - simpl. apply finite_valid_trace_singleton;assumption.
       - rewrite <- app_comm_cons.
-        apply finite_ptrace_extend; try assumption.
+        apply finite_valid_trace_from_extend; try assumption.
         simpl in IHHt12. apply IHHt12.
         unfold s2 in *; clear s2.
         rewrite finite_trace_last_cons in Hv23.
@@ -1239,22 +1229,22 @@ prove or decompose the above properties in proofs.
     Qed.
 
 (**
-We can now prove several general properties of [finite_protocol_trace]s. For example,
+We can now prove several general properties of [finite_valid_trace]s. For example,
 the following lemma states that given two such traces, such that the latter's starting state
 is equal to the former's last state, it is possible to _concatenate_ them into a single
-[finite_protocol_trace].
+[finite_valid_trace].
 *)
 
-    Lemma finite_protocol_trace_from_app_iff (s : state) (ls ls' : list transition_item) (s' := finite_trace_last s ls)
-      : finite_protocol_trace_from s ls /\ finite_protocol_trace_from s' ls'
+    Lemma finite_valid_trace_from_app_iff (s : state) (ls ls' : list transition_item) (s' := finite_trace_last s ls)
+      : finite_valid_trace_from s ls /\ finite_valid_trace_from s' ls'
         <->
-        finite_protocol_trace_from s (ls ++ ls').
+        finite_valid_trace_from s (ls ++ ls').
     Proof.
       subst s'.
       revert s.
       induction ls;intro s.
       - rewrite finite_trace_last_nil. simpl.
-        intuition (eauto using finite_ptrace_first_pstate, finite_ptrace_empty).
+        intuition (eauto using finite_valid_trace_first_pstate, finite_valid_trace_from_empty).
       - rewrite finite_trace_last_cons. simpl.
         specialize (IHls (destination a)).
         split.
@@ -1266,46 +1256,46 @@ is equal to the former's last state, it is possible to _concatenate_ them into a
           split;[constructor|];assumption.
     Qed.
 
-    Lemma finite_protocol_trace_from_rev_ind
+    Lemma finite_valid_trace_from_rev_ind
       (P : state -> list transition_item -> Prop)
       (Hempty: forall s,
-        protocol_state_prop s -> P s nil)
+        valid_state_prop s -> P s nil)
       (Hextend : forall s tr,
-        finite_protocol_trace_from s tr ->
+        finite_valid_trace_from s tr ->
         P s tr ->
         forall sf iom oom l
-        (Hx: protocol_transition l (finite_trace_last s tr,iom) (sf,oom)),
+        (Hx: input_valid_transition l (finite_trace_last s tr,iom) (sf,oom)),
         let x:= {|l:=l; input:=iom; destination:=sf; output:=oom|} in
         P s (tr++[x])):
       forall s tr,
-        finite_protocol_trace_from s tr ->
+        finite_valid_trace_from s tr ->
         P s tr.
     Proof.
       induction tr using rev_ind; intro Htr.
       - inversion Htr. apply Hempty. congruence.
-      - apply finite_protocol_trace_from_app_iff in Htr.
+      - apply finite_valid_trace_from_app_iff in Htr.
         destruct Htr as [Htr Hx].
         destruct x; apply (Hextend _ _ Htr (IHtr Htr)).
         inversion Hx; congruence.
     Qed.
 
-    Lemma finite_protocol_trace_rev_ind
+    Lemma finite_valid_trace_rev_ind
       (P : state -> list transition_item -> Prop)
       (Hempty: forall si,
         initial_state_prop si -> P si nil)
       (Hextend : forall si tr,
-        finite_protocol_trace si tr ->
+        finite_valid_trace si tr ->
         P si tr ->
         forall sf iom oom l
-        (Hx: protocol_transition l (finite_trace_last si tr,iom) (sf,oom)),
+        (Hx: input_valid_transition l (finite_trace_last si tr,iom) (sf,oom)),
         let x:= {|l:=l; input:=iom; destination:=sf; output:=oom|} in
         P si (tr++[x])):
       forall si tr,
-        finite_protocol_trace si tr ->
+        finite_valid_trace si tr ->
         P si tr.
     Proof.
       intros si tr [Htr Hinit].
-      induction Htr using finite_protocol_trace_from_rev_ind.
+      induction Htr using finite_valid_trace_from_rev_ind.
       - apply Hempty;auto.
       - apply Hextend;[split|..];auto.
     Qed.
@@ -1314,31 +1304,31 @@ is equal to the former's last state, it is possible to _concatenate_ them into a
 traces.
 *)
 
-    Lemma finite_protocol_trace_from_prefix
+    Lemma finite_valid_trace_from_prefix
       (s : state)
       (ls : list transition_item)
-      (Htr : finite_protocol_trace_from s ls)
+      (Htr : finite_valid_trace_from s ls)
       (n : nat)
-      : finite_protocol_trace_from s (list_prefix ls n).
+      : finite_valid_trace_from s (list_prefix ls n).
     Proof.
       specialize (list_prefix_suffix ls n); intro Hdecompose.
       rewrite <- Hdecompose in Htr.
-      apply finite_protocol_trace_from_app_iff in Htr.
+      apply finite_valid_trace_from_app_iff in Htr.
       destruct Htr as [Hpr _].
       assumption.
     Qed.
 
-    Lemma finite_protocol_trace_from_suffix
+    Lemma finite_valid_trace_from_suffix
       (s : state)
       (ls : list transition_item)
-      (Htr : finite_protocol_trace_from s ls)
+      (Htr : finite_valid_trace_from s ls)
       (n : nat)
       (nth : state)
       (Hnth : finite_trace_nth s ls n = Some nth)
-      : finite_protocol_trace_from nth (list_suffix ls n).
+      : finite_valid_trace_from nth (list_suffix ls n).
     Proof.
       rewrite <- (list_prefix_suffix ls n) in Htr.
-      apply finite_protocol_trace_from_app_iff in Htr.
+      apply finite_valid_trace_from_app_iff in Htr.
       destruct Htr as [_ Htr].
       replace (finite_trace_last s (list_prefix ls n)) with nth in Htr;[assumption|].
       {
@@ -1352,18 +1342,18 @@ traces.
       }
     Qed.
 
-    Lemma finite_protocol_trace_from_segment
+    Lemma finite_valid_trace_from_segment
       (s : state)
       (ls : list transition_item)
-      (Htr : finite_protocol_trace_from s ls)
+      (Htr : finite_valid_trace_from s ls)
       (n1 n2 : nat)
       (Hle : n1 <= n2)
       (n1th : state)
       (Hnth : finite_trace_nth s ls n1 = Some n1th)
-      : finite_protocol_trace_from n1th (list_segment ls n1 n2).
+      : finite_valid_trace_from n1th (list_segment ls n1 n2).
     Proof.
-      apply finite_protocol_trace_from_suffix with s.
-      - apply finite_protocol_trace_from_prefix. assumption.
+      apply finite_valid_trace_from_suffix with s.
+      - apply finite_valid_trace_from_prefix. assumption.
       - destruct n1;[assumption|].
         unfold finite_trace_nth in Hnth |- *.
         simpl in Hnth |- *.
@@ -1373,11 +1363,11 @@ traces.
 
     (* begin hide *)
 
-    Lemma can_emit_from_protocol_trace
+    Lemma can_emit_from_valid_trace
       (si : state)
       (m : message)
       (tr : list transition_item)
-      (Hprotocol: finite_protocol_trace si tr)
+      (Htr: finite_valid_trace si tr)
       (Hm : trace_has_message (field_selector output) m tr) :
       can_emit m.
     Proof.
@@ -1386,8 +1376,8 @@ traces.
       apply elem_of_list_split in Hin.
       destruct Hin as [l1 [l2 Hconcat]].
       unfold can_emit.
-      destruct Hprotocol as [Hprotocol _].
-      specialize (protocol_transition_to _ _ _ _ _ Hprotocol Hconcat).
+      destruct Htr as [Htr _].
+      specialize (input_valid_transition_to _ _ _ _ _ Htr Hconcat).
       intros Ht.
       simpl in Houtput, Ht.
       rewrite Houtput in Ht.
@@ -1397,54 +1387,54 @@ traces.
     (* End Hide *)
 
 (**
-** Finite [protocol_trace]s with a final state
+** Finite [valid_trace]s with a final state
 *)
 
 (**
-It is often necessary to refer to know ending state of a [finite_protocol_trace_from].
+It is often necessary to refer to know ending state of a [finite_valid_trace_from].
 This is either the [destination] of the [last] [transition_item] in the trace, or
 the starting state.
 To avoid repeating reasoning about [last], we define variants of
-[finite_protocol_trace_from] and [finite_protocol_trace]
+[finite_valid_trace_from] and [finite_valid_trace]
 that include the final state, and give appropriate induction principles.
  *)
 
-(** The final state of a finite portion of a protocol trace.
-    This is defined over [finite_protocol_trace_from] because
+(** The final state of a finite portion of a valid trace.
+    This is defined over [finite_valid_trace_from] because
     an initial state is necessary in case <<tr>> is empty,
     and this allows the definition to have only one non-implicit
     parameter.
  *)
 
-    Inductive finite_protocol_trace_from_to : state -> state -> list transition_item -> Prop :=
-    | finite_ptrace_from_to_empty : forall (s : state)
-        (Hs : protocol_state_prop s),
-        finite_protocol_trace_from_to s s []
-    | finite_ptrace_from_to_extend : forall  (s f : state) (tl : list transition_item)
-        (Htl : finite_protocol_trace_from_to s f tl)
+    Inductive finite_valid_trace_from_to : state -> state -> list transition_item -> Prop :=
+    | finite_valid_trace_from_to_empty : forall (s : state)
+        (Hs : valid_state_prop s),
+        finite_valid_trace_from_to s s []
+    | finite_valid_trace_from_to_extend : forall  (s f : state) (tl : list transition_item)
+        (Htl : finite_valid_trace_from_to s f tl)
         (s' : state) (iom oom : option message) (l : label)
-        (Ht : protocol_transition l (s', iom) (s, oom)),
-        finite_protocol_trace_from_to s' f ({| l := l; input := iom; destination := s; output := oom |} :: tl).
+        (Ht : input_valid_transition l (s', iom) (s, oom)),
+        finite_valid_trace_from_to s' f ({| l := l; input := iom; destination := s; output := oom |} :: tl).
 
-    Lemma finite_ptrace_from_to_singleton s s' iom oom l
-        : protocol_transition l (s, iom) (s', oom) ->
-          finite_protocol_trace_from_to s s' [{| l := l; input := iom; destination := s'; output := oom |}].
+    Lemma finite_valid_trace_from_to_singleton s s' iom oom l
+        : input_valid_transition l (s, iom) (s', oom) ->
+          finite_valid_trace_from_to s s' [{| l := l; input := iom; destination := s'; output := oom |}].
     Proof.
       intro Ht.
       constructor;[|assumption].
       constructor.
-      apply protocol_transition_destination in Ht.
+      apply input_valid_transition_destination in Ht.
       assumption.
     Qed.
 
-    Lemma finite_protocol_trace_from_to_forget_last
-          s f tr : finite_protocol_trace_from_to s f tr -> finite_protocol_trace_from s tr.
+    Lemma finite_valid_trace_from_to_forget_last
+          s f tr : finite_valid_trace_from_to s f tr -> finite_valid_trace_from s tr.
     Proof.
       induction 1;constructor;auto.
     Qed.
 
-    Lemma finite_protocol_trace_from_to_last
-          s f tr : finite_protocol_trace_from_to s f tr -> finite_trace_last s tr = f.
+    Lemma finite_valid_trace_from_to_last
+          s f tr : finite_valid_trace_from_to s f tr -> finite_trace_last s tr = f.
     Proof.
       induction 1.
       - apply finite_trace_last_nil.
@@ -1452,11 +1442,11 @@ that include the final state, and give appropriate induction principles.
     Qed.
 
 
-    Lemma finite_protocol_trace_from_add_last
+    Lemma finite_valid_trace_from_add_last
           s f tr :
-      finite_protocol_trace_from s tr ->
+      finite_valid_trace_from s tr ->
       finite_trace_last s tr = f ->
-      finite_protocol_trace_from_to s f tr.
+      finite_valid_trace_from_to s f tr.
     Proof.
       intro Hfrom.
       induction Hfrom.
@@ -1466,113 +1456,113 @@ that include the final state, and give appropriate induction principles.
         constructor;auto.
     Qed.
 
-    Lemma finite_protocol_trace_from_to_first_pstate
-          s f tr : finite_protocol_trace_from_to s f tr -> protocol_state_prop s.
+    Lemma finite_valid_trace_from_to_first_pstate
+          s f tr : finite_valid_trace_from_to s f tr -> valid_state_prop s.
     Proof.
       intro Htr.
-      apply finite_protocol_trace_from_to_forget_last in Htr.
-      apply finite_ptrace_first_pstate in Htr.
+      apply finite_valid_trace_from_to_forget_last in Htr.
+      apply finite_valid_trace_first_pstate in Htr.
       assumption.
     Qed.
 
-    Lemma finite_protocol_trace_from_to_last_pstate
-          s f tr : finite_protocol_trace_from_to s f tr -> protocol_state_prop f.
+    Lemma finite_valid_trace_from_to_last_pstate
+          s f tr : finite_valid_trace_from_to s f tr -> valid_state_prop f.
     Proof.
       intro Htr.
-      rewrite <- (finite_protocol_trace_from_to_last _ _ _ Htr).
-      apply finite_ptrace_last_pstate.
-      apply finite_protocol_trace_from_to_forget_last in Htr.
+      rewrite <- (finite_valid_trace_from_to_last _ _ _ Htr).
+      apply finite_valid_trace_last_pstate.
+      apply finite_valid_trace_from_to_forget_last in Htr.
       assumption.
     Qed.
 
-    Lemma finite_protocol_trace_from_to_app
+    Lemma finite_valid_trace_from_to_app
       (m s f: state) (ls ls' : list transition_item)
-      : finite_protocol_trace_from_to s m ls
-        -> finite_protocol_trace_from_to m f ls'
-        -> finite_protocol_trace_from_to s f (ls ++ ls').
+      : finite_valid_trace_from_to s m ls
+        -> finite_valid_trace_from_to m f ls'
+        -> finite_valid_trace_from_to s f (ls ++ ls').
     Proof.
       intros Hl Hl';induction Hl;simpl.
       - trivial.
       - constructor;auto.
     Qed.
 
-    Lemma finite_protocol_trace_from_to_app_split
+    Lemma finite_valid_trace_from_to_app_split
       (s f: state) (ls ls' : list transition_item)
-      : finite_protocol_trace_from_to s f (ls ++ ls') ->
+      : finite_valid_trace_from_to s f (ls ++ ls') ->
         let m := finite_trace_last s ls in
-        finite_protocol_trace_from_to s m ls
-        /\ finite_protocol_trace_from_to m f ls'.
+        finite_valid_trace_from_to s m ls
+        /\ finite_valid_trace_from_to m f ls'.
     Proof.
       revert s;induction ls;intros s;simpl.
       - rewrite finite_trace_last_nil.
         intro Htr. split;[|assumption].
-        apply finite_protocol_trace_from_to_first_pstate in Htr.
+        apply finite_valid_trace_from_to_first_pstate in Htr.
         constructor;assumption.
       - rewrite finite_trace_last_cons.
         inversion 1; subst; simpl in *.
         apply IHls in Htl as [].
-        auto using finite_ptrace_from_to_extend.
+        auto using finite_valid_trace_from_to_extend.
     Qed.
 
-    Definition finite_protocol_trace_init_to si sf tr : Prop
-      := finite_protocol_trace_from_to si sf tr
+    Definition finite_valid_trace_init_to si sf tr : Prop
+      := finite_valid_trace_from_to si sf tr
           /\ initial_state_prop si.
 
-    Lemma finite_protocol_trace_init_add_last si sf tr:
-      finite_protocol_trace si tr ->
+    Lemma finite_valid_trace_init_add_last si sf tr:
+      finite_valid_trace si tr ->
       finite_trace_last si tr = sf ->
-      finite_protocol_trace_init_to si sf tr.
+      finite_valid_trace_init_to si sf tr.
     Proof.
       intros [Htr Hinit] Hf.
-      split;eauto using finite_protocol_trace_from_add_last.
+      split;eauto using finite_valid_trace_from_add_last.
     Qed.
 
-    Lemma finite_protocol_trace_init_to_forget_last si sf tr:
-      finite_protocol_trace_init_to si sf tr ->
-      finite_protocol_trace si tr.
+    Lemma finite_valid_trace_init_to_forget_last si sf tr:
+      finite_valid_trace_init_to si sf tr ->
+      finite_valid_trace si tr.
     Proof.
       intros [Hinit Htr].
-      split;eauto using finite_protocol_trace_from_to_forget_last.
+      split;eauto using finite_valid_trace_from_to_forget_last.
     Qed.
 
-    Lemma finite_protocol_trace_init_to_last si sf tr:
-      finite_protocol_trace_init_to si sf tr ->
+    Lemma finite_valid_trace_init_to_last si sf tr:
+      finite_valid_trace_init_to si sf tr ->
       finite_trace_last si tr = sf.
     Proof.
       intros [Htr _].
-      eauto using finite_protocol_trace_from_to_last.
+      eauto using finite_valid_trace_from_to_last.
     Qed.
 
     Lemma extend_right_finite_trace_from_to
       (s1 s2 : state)
       (ts : list transition_item)
-      (Ht12 : finite_protocol_trace_from_to s1 s2 ts)
+      (Ht12 : finite_valid_trace_from_to s1 s2 ts)
       (l3 : label)
       (iom3 : option message)
       (s3 : state)
       (oom3 : option message)
-      (Hv23 : protocol_transition l3 (s2, iom3) (s3, oom3))
-      : finite_protocol_trace_from_to s1 s3 (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
+      (Hv23 : input_valid_transition l3 (s2, iom3) (s3, oom3))
+      : finite_valid_trace_from_to s1 s3 (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
     Proof.
       induction Ht12.
-      - simpl. apply finite_ptrace_from_to_singleton;assumption.
+      - simpl. apply finite_valid_trace_from_to_singleton;assumption.
       - rewrite <- app_comm_cons.
-        apply finite_ptrace_from_to_extend; auto.
+        apply finite_valid_trace_from_to_extend; auto.
     Qed.
 
-    Lemma finite_protocol_trace_from_to_rev_ind
+    Lemma finite_valid_trace_from_to_rev_ind
       (P : state -> state -> list transition_item -> Prop)
       (Hempty: forall si
-        (Hsi : protocol_state_prop si),
+        (Hsi : valid_state_prop si),
         P si si nil)
       (Hextend : forall si s tr
         (IHtr : P si s tr)
-        (Htr : finite_protocol_trace_from_to si s tr)
+        (Htr : finite_valid_trace_from_to si s tr)
         sf iom oom l
-        (Ht : protocol_transition l (s,iom) (sf,oom)),
+        (Ht : input_valid_transition l (s,iom) (sf,oom)),
         P si sf (tr++[{|l:=l; input:=iom; destination:=sf; output:=oom|}])):
       forall si sf tr,
-        finite_protocol_trace_from_to si sf tr ->
+        finite_valid_trace_from_to si sf tr ->
         P si sf tr.
     Proof.
       intros si sf tr Htr.
@@ -1580,7 +1570,7 @@ that include the final state, and give appropriate induction principles.
       induction tr using rev_ind;
       intros sf Htr.
       - inversion Htr;subst. apply Hempty;assumption.
-      - apply finite_protocol_trace_from_to_app_split in Htr.
+      - apply finite_valid_trace_from_to_app_split in Htr.
         destruct Htr as [Htr Hstep].
         inversion Hstep;subst.
         inversion Htl;subst.
@@ -1590,24 +1580,24 @@ that include the final state, and give appropriate induction principles.
         assumption.
     Qed.
 
-    Lemma finite_protocol_trace_init_to_rev_ind
+    Lemma finite_valid_trace_init_to_rev_ind
       (P : state -> state -> list transition_item -> Prop)
       (Hempty: forall si
         (Hsi : initial_state_prop si),
         P si si nil)
       (Hextend : forall si s tr
         (IHtr : P si s tr)
-        (Htr : finite_protocol_trace_init_to si s tr)
+        (Htr : finite_valid_trace_init_to si s tr)
         sf iom oom l
-        (Ht : protocol_transition l (s,iom) (sf,oom)),
+        (Ht : input_valid_transition l (s,iom) (sf,oom)),
         P si sf (tr++[{|l:=l; input:=iom; destination:=sf; output:=oom|}])):
       forall si sf tr,
-        finite_protocol_trace_init_to si sf tr ->
+        finite_valid_trace_init_to si sf tr ->
         P si sf tr.
     Proof.
       intros si sf tr Htr.
       destruct Htr as [Htr Hinit].
-      induction Htr using finite_protocol_trace_from_to_rev_ind.
+      induction Htr using finite_valid_trace_from_to_rev_ind.
       - apply Hempty. assumption.
       - apply Hextend with s.
         + apply IHHtr. assumption.
@@ -1615,51 +1605,51 @@ that include the final state, and give appropriate induction principles.
         + assumption.
     Qed.
 
-(** An inductive protocol trace property which also identifies the final message.
+(** An inductive valid trace property which also identifies the final message.
 
-As shown by the [finite_protocol_trace_init_to_emit_protocol]  and
-[finite_protocol_trace_init_to_emit_protocol_rev] lemmas below, this definition
-is the trace-equivalent of the [protocol_prop]erty.
+As shown by the [finite_valid_trace_init_to_emit_valid_state_message]  and
+[finite_valid_trace_init_to_emit_valid_state_message_rev] lemmas below, this definition
+is the trace-equivalent of the [valid_state_message_prop]erty.
 
-This inductive property is reflecting that fact that a that @protocol_prop (s,om)@
-holds only if @s@ and @om@ are the final state and output of an initial protocol
+This inductive property is reflecting that fact that a that <<valid_state_message_prop (s,om)>>
+holds only if <<s>> and <<om>> are the final state and output of an initial valid
 trace, or a pair of an initial state and option-initial message.
-It follows the inductive structure of @protocol_prop@, but augments every node of
+It follows the inductive structure of <<valid_state_message_prop>>, but augments every node of
 the tree with such an exhibiting trace.
 
 Its main benefit is that when performing induction over it, one can also use the
 induction hypothesis for the (trace generating the) message being received.
 
 Although this definition could be used directly, we prefer to use it to derive
-a stronger induction principle ([finite_protocol_trace_init_to_rev_strong_ind])
-over [finite_protocol_trace_init_to] traces.
+a stronger induction principle ([finite_valid_trace_init_to_rev_strong_ind])
+over [finite_valid_trace_init_to] traces.
 *)
-    Inductive finite_protocol_trace_init_to_emit : state -> state -> option message -> list transition_item -> Prop :=
-    | finite_ptrace_init_to_emit_empty : forall (is : state) (om : option message)
+    Inductive finite_valid_trace_init_to_emit : state -> state -> option message -> list transition_item -> Prop :=
+    | finite_valid_trace_init_to_emit_empty : forall (is : state) (om : option message)
         (His : initial_state_prop is)
         (Him : option_initial_message_prop om),
-        finite_protocol_trace_init_to_emit is is om []
-    | finite_ptrace_init_to_emit_extend
+        finite_valid_trace_init_to_emit is is om []
+    | finite_valid_trace_init_to_emit_extend
         : forall
           (is s : state) (_om : option message) (tl : list transition_item)
-          (Hs : finite_protocol_trace_init_to_emit is s _om tl)
+          (Hs : finite_valid_trace_init_to_emit is s _om tl)
           (iom_is iom_s : state) (iom : option message) (iom_tl : list transition_item)
-          (Hiom : finite_protocol_trace_init_to_emit iom_is iom_s iom iom_tl)
+          (Hiom : finite_valid_trace_init_to_emit iom_is iom_s iom iom_tl)
           (l : label)
           (Hv : valid l (s, iom))
           (s' : state) (oom : option message)
           (Ht : transition l (s, iom) = (s', oom)),
-          finite_protocol_trace_init_to_emit is s' oom (tl ++ [{| l := l; input := iom; destination := s'; output := oom |}]).
+          finite_valid_trace_init_to_emit is s' oom (tl ++ [{| l := l; input := iom; destination := s'; output := oom |}]).
 
-    Lemma finite_protocol_trace_init_to_emit_initial_state
+    Lemma finite_valid_trace_init_to_emit_initial_state
       (is f : state) (om : option message) (tl : list transition_item)
-      (Htl : finite_protocol_trace_init_to_emit is f om tl)
+      (Htl : finite_valid_trace_init_to_emit is f om tl)
       : initial_state_prop is.
     Proof.
       induction Htl; assumption.
     Qed.
 
-(** A property characterizing the "emit" message of [finite_protocol_trace_init_to_emit].
+(** A property characterizing the "emit" message of [finite_valid_trace_init_to_emit].
 
 There are two cases: (1) either the trace is empty, and then we require
 the message to be initial; or (2) the trace is not empty, and the message
@@ -1672,9 +1662,9 @@ is the output of the last transition.
       - exact (option_initial_message_prop om).
     Defined.
 
-    Lemma finite_protocol_trace_init_to_emit_output
+    Lemma finite_valid_trace_init_to_emit_output
       (s f : state) (om : option message) (tl : list transition_item)
-      (Htl : finite_protocol_trace_init_to_emit s f om tl)
+      (Htl : finite_valid_trace_init_to_emit s f om tl)
       : empty_initial_message_or_final_output tl om.
     Proof.
       unfold empty_initial_message_or_final_output.
@@ -1687,21 +1677,21 @@ is the output of the last transition.
         apply app_inj_tail, proj2 in Heqtl. subst. reflexivity.
     Qed.
 
-    Lemma finite_protocol_trace_init_to_emit_protocol
+    Lemma finite_valid_trace_init_to_emit_valid_state_message
       (s f : state) (om : option message) (tl : list transition_item)
-      (Htl : finite_protocol_trace_init_to_emit s f om tl)
-      : protocol_prop f om.
+      (Htl : finite_valid_trace_init_to_emit s f om tl)
+      : valid_state_message_prop f om.
     Proof.
       induction Htl.
-      - apply protocol_initial; assumption.
-      - apply protocol_generated with s _om iom_s iom l0; assumption.
+      - apply valid_initial_state_message; assumption.
+      - apply valid_generated_state_message with s _om iom_s iom l0; assumption.
     Qed.
 
-    Lemma finite_protocol_trace_init_to_emit_protocol_rev
+    Lemma finite_valid_trace_init_to_emit_valid_state_message_rev
       f om
-      (Hp : protocol_prop f om)
+      (Hp : valid_state_message_prop f om)
       : exists (s : state) (tl : list transition_item),
-        finite_protocol_trace_init_to_emit s f om tl.
+        finite_valid_trace_init_to_emit s f om tl.
     Proof.
       induction Hp.
       - exists s, []. constructor; assumption.
@@ -1709,110 +1699,110 @@ is the output of the last transition.
         destruct IHHp2 as [om_is [om_tl Hom]].
         eexists; eexists.
         apply
-          (finite_ptrace_init_to_emit_extend _ _ _ _ Hs _ _ _ _ Hom _ Hv _ _ Ht).
+          (finite_valid_trace_init_to_emit_extend _ _ _ _ Hs _ _ _ _ Hom _ Hv _ _ Ht).
     Qed.
 
-    Lemma finite_protocol_trace_init_to_emit_forget_emit
+    Lemma finite_valid_trace_init_to_emit_forget_emit
       (s f : state) (_om : option message) (tl : list transition_item)
-      (Htl : finite_protocol_trace_init_to_emit s f _om tl)
-      : finite_protocol_trace_init_to s f tl.
+      (Htl : finite_valid_trace_init_to_emit s f _om tl)
+      : finite_valid_trace_init_to s f tl.
     Proof.
-      apply finite_protocol_trace_init_to_emit_initial_state in Htl as Hinit.
+      apply finite_valid_trace_init_to_emit_initial_state in Htl as Hinit.
       split; [|assumption].
       clear Hinit.
       induction Htl.
-      - constructor. apply initial_is_protocol. assumption.
-      - apply finite_protocol_trace_from_to_app with s; [assumption|].
-        apply finite_ptrace_from_to_singleton.
-        apply finite_protocol_trace_init_to_emit_protocol in Htl1.
-        apply finite_protocol_trace_init_to_emit_protocol in Htl2.
+      - constructor. apply initial_state_is_valid. assumption.
+      - apply finite_valid_trace_from_to_app with s; [assumption|].
+        apply finite_valid_trace_from_to_singleton.
+        apply finite_valid_trace_init_to_emit_valid_state_message in Htl1.
+        apply finite_valid_trace_init_to_emit_valid_state_message in Htl2.
         repeat split; [..|assumption|assumption]; eexists; [exact Htl1 | exact Htl2].
     Qed.
 
-    Lemma finite_protocol_trace_init_to_add_emit
+    Lemma finite_valid_trace_init_to_add_emit
       (s f : state) (tl : list transition_item)
-      (Htl : finite_protocol_trace_init_to s f tl)
-      : finite_protocol_trace_init_to_emit s f (finite_trace_last_output tl) tl.
+      (Htl : finite_valid_trace_init_to s f tl)
+      : finite_valid_trace_init_to_emit s f (finite_trace_last_output tl) tl.
     Proof.
-      induction Htl using finite_protocol_trace_init_to_rev_ind.
+      induction Htl using finite_valid_trace_init_to_rev_ind.
       - constructor; [assumption | exact I].
       - rewrite finite_trace_last_output_is_last. simpl.
         destruct Ht as [[_ [[_s Hiom] Hv]] Ht].
-        specialize (finite_protocol_trace_init_to_emit_protocol_rev _ _ Hiom) as [iom_s [iom_tr Hiom_tr]].
-        apply (finite_ptrace_init_to_emit_extend _ _ _ _ IHHtl _ _ _ _ Hiom_tr _ Hv _ _ Ht).
+        specialize (finite_valid_trace_init_to_emit_valid_state_message_rev _ _ Hiom) as [iom_s [iom_tr Hiom_tr]].
+        apply (finite_valid_trace_init_to_emit_extend _ _ _ _ IHHtl _ _ _ _ Hiom_tr _ Hv _ _ Ht).
     Qed.
 
-(** Inspired by [finite_protocol_trace_init_to_add_emit], we can derive
-an induction principle for [finite_protocol_trace_init_to] stronger than
-[finite_protocol_trace_init_to_rev_ind], which allows the induction hypothesis
+(** Inspired by [finite_valid_trace_init_to_add_emit], we can derive
+an induction principle for [finite_valid_trace_init_to] stronger than
+[finite_valid_trace_init_to_rev_ind], which allows the induction hypothesis
 to be used for the trace generating the message received in the last transition.
 *)
-    Lemma finite_protocol_trace_init_to_rev_strong_ind
+    Lemma finite_valid_trace_init_to_rev_strong_ind
       (P : state -> state -> list transition_item -> Prop)
       (Hempty: forall is
         (His : initial_state_prop is),
         P is is nil)
       (Hextend : forall is s tr
         (IHs : P is s tr)
-        (Hs : finite_protocol_trace_init_to is s tr)
+        (Hs : finite_valid_trace_init_to is s tr)
         iom iom_si iom_s iom_tr
         (Heqiom : empty_initial_message_or_final_output iom_tr iom)
         (IHiom : P iom_si iom_s iom_tr)
-        (Hiom : finite_protocol_trace_init_to iom_si iom_s iom_tr)
+        (Hiom : finite_valid_trace_init_to iom_si iom_s iom_tr)
         sf oom l
-        (Ht : protocol_transition l (s,iom) (sf,oom)),
+        (Ht : input_valid_transition l (s,iom) (sf,oom)),
         P is sf (tr++[{|l:=l; input:=iom; destination:=sf; output:=oom|}]))
       : forall si sf tr,
-        finite_protocol_trace_init_to si sf tr ->
+        finite_valid_trace_init_to si sf tr ->
         P si sf tr.
     Proof.
       intros is sf tr Htr.
-      apply finite_protocol_trace_init_to_add_emit in Htr.
+      apply finite_valid_trace_init_to_add_emit in Htr.
       remember (finite_trace_last_output tr) as om. clear Heqom.
       induction Htr.
       - apply Hempty. assumption.
-      - assert (Hpt : protocol_transition l0 (s, iom) (s', oom)).
-        { apply finite_protocol_trace_init_to_emit_protocol in Htr1.
-          apply finite_protocol_trace_init_to_emit_protocol in Htr2.
+      - assert (Hivt : input_valid_transition l0 (s, iom) (s', oom)).
+        { apply finite_valid_trace_init_to_emit_valid_state_message in Htr1.
+          apply finite_valid_trace_init_to_emit_valid_state_message in Htr2.
           repeat split; [..|assumption|assumption]; eexists; [exact Htr1 | exact Htr2].
         }
-        apply finite_protocol_trace_init_to_emit_output in Htr2 as Houtput.
-        apply finite_protocol_trace_init_to_emit_forget_emit in Htr1.
-        apply finite_protocol_trace_init_to_emit_forget_emit in Htr2.
-        apply (Hextend _ _ _ IHHtr1 Htr1 _ _ _ _ Houtput IHHtr2 Htr2 _ _ _ Hpt).
+        apply finite_valid_trace_init_to_emit_output in Htr2 as Houtput.
+        apply finite_valid_trace_init_to_emit_forget_emit in Htr1.
+        apply finite_valid_trace_init_to_emit_forget_emit in Htr2.
+        apply (Hextend _ _ _ IHHtr1 Htr1 _ _ _ _ Houtput IHHtr2 Htr2 _ _ _ Hivt).
     Qed.
 
 (** *** Infinite [protcol_trace]s *)
 
-(** We now define [infinite_protocol_trace]s. The definitions
+(** We now define [infinite_valid_trace]s. The definitions
 resemble their finite counterparts, adapted to the technical
 necessities of defining infinite objects. Notably, <<steps>> is
 stored as a stream, as opposed to a list.
 *)
 
-    CoInductive infinite_protocol_trace_from :
+    CoInductive infinite_valid_trace_from :
       state -> Stream transition_item -> Prop :=
-    | infinite_protocol_trace_extend : forall  (s : state) (tl : Stream transition_item)
-        (Htl : infinite_protocol_trace_from s tl)
+    | infinite_valid_trace_from_extend : forall  (s : state) (tl : Stream transition_item)
+        (Htl : infinite_valid_trace_from s tl)
         (s' : state) (iom oom : option message) (l : label)
-        (Ht : protocol_transition l (s', iom) (s, oom)),
-        infinite_protocol_trace_from  s' (Cons {| l := l; input := iom; destination := s; output := oom |}  tl).
+        (Ht : input_valid_transition l (s', iom) (s, oom)),
+        infinite_valid_trace_from  s' (Cons {| l := l; input := iom; destination := s; output := oom |}  tl).
 
-    Definition infinite_protocol_trace (s : state) (st : Stream transition_item)
-      := infinite_protocol_trace_from s st /\ initial_state_prop s.
+    Definition infinite_valid_trace (s : state) (st : Stream transition_item)
+      := infinite_valid_trace_from s st /\ initial_state_prop s.
 
 (**
 As for the finite case, the following lemmas help decompose teh above
 definitions, mostly reducing them to properties about their finite segments.
 *)
-    Lemma infinite_protocol_trace_consecutive_valid_transition
+    Lemma infinite_valid_trace_consecutive_valid_transition
           (is : state)
           (tr tr2 : Stream transition_item)
           (tr1 : list transition_item)
           (te1 te2 : transition_item)
-          (Htr : infinite_protocol_trace_from is tr)
+          (Htr : infinite_valid_trace_from is tr)
           (Heq : tr = stream_app (tr1 ++ [te1; te2]) tr2)
-      : protocol_transition (l te2) (destination te1, input te2) (destination te2, output te2).
+      : input_valid_transition (l te2) (destination te1, input te2) (destination te2, output te2).
     Proof.
       generalize dependent is. generalize dependent tr.
       induction tr1.
@@ -1822,22 +1812,22 @@ definitions, mostly reducing them to properties about their finite segments.
         specialize (IHtr1 s Htl). assumption.
     Qed.
 
-    Lemma infinite_protocol_trace_from_app_iff
+    Lemma infinite_valid_trace_from_app_iff
       (s : state)
       (ls : list transition_item)
       (ls' : Stream transition_item)
       (s' := finite_trace_last s ls)
-      : finite_protocol_trace_from s ls /\ infinite_protocol_trace_from s' ls'
+      : finite_valid_trace_from s ls /\ infinite_valid_trace_from s' ls'
         <->
-        infinite_protocol_trace_from s (stream_app ls ls').
+        infinite_valid_trace_from s (stream_app ls ls').
     Proof.
       intros. generalize dependent ls'. generalize dependent s.
       induction ls; intros; split.
       - destruct 1. assumption.
       - simpl; intros Hls'; split; try assumption. constructor. inversion Hls'; try assumption.
-        apply (protocol_transition_origin Ht).
+        apply (input_valid_transition_origin Ht).
       - simpl. intros [Htr Htr'].
-        destruct a. apply infinite_protocol_trace_extend.
+        destruct a. apply infinite_valid_trace_from_extend.
         + apply IHls. inversion Htr. split. apply Htl.
           unfold s' in Htr'.
           rewrite finite_trace_last_cons in Htr'.
@@ -1849,25 +1839,25 @@ definitions, mostly reducing them to properties about their finite segments.
          + unfold s'. rewrite finite_trace_last_cons. assumption.
     Qed.
 
-    Lemma infinite_protocol_trace_from_prefix
+    Lemma infinite_valid_trace_from_prefix
       (s : state)
       (ls : Stream transition_item)
-      (Htr : infinite_protocol_trace_from s ls)
+      (Htr : infinite_valid_trace_from s ls)
       (n : nat)
-      : finite_protocol_trace_from s (stream_prefix ls n).
+      : finite_valid_trace_from s (stream_prefix ls n).
     Proof.
       specialize (stream_prefix_suffix ls n); intro Hdecompose.
       rewrite <- Hdecompose in Htr.
-      apply infinite_protocol_trace_from_app_iff in Htr.
+      apply infinite_valid_trace_from_app_iff in Htr.
       destruct Htr as [Hpr _].
       assumption.
     Qed.
 
-    Lemma infinite_protocol_trace_from_prefix_rev
+    Lemma infinite_valid_trace_from_prefix_rev
       (s : state)
       (ls : Stream transition_item)
-      (Hpref: forall n : nat, finite_protocol_trace_from s (stream_prefix ls n))
-      : infinite_protocol_trace_from s ls.
+      (Hpref: forall n : nat, finite_valid_trace_from s (stream_prefix ls n))
+      : infinite_valid_trace_from s ls.
     Proof.
       revert s ls Hpref.
       cofix Hls.
@@ -1883,28 +1873,28 @@ definitions, mostly reducing them to properties about their finite segments.
       assumption.
     Qed.
 
-    Lemma infinite_protocol_trace_from_EqSt :
-      forall s tl1 tl2, EqSt tl1 tl2 -> infinite_protocol_trace_from s tl1 -> infinite_protocol_trace_from s tl2.
+    Lemma infinite_valid_trace_from_EqSt :
+      forall s tl1 tl2, EqSt tl1 tl2 -> infinite_valid_trace_from s tl1 -> infinite_valid_trace_from s tl2.
     Proof.
       intros s tl1 tl2 Heq Htl1.
-      apply infinite_protocol_trace_from_prefix_rev.
+      apply infinite_valid_trace_from_prefix_rev.
       intro n.
       apply stream_prefix_EqSt with (n0 := n) in Heq.
-      apply infinite_protocol_trace_from_prefix with (n := n) in Htl1.
+      apply infinite_valid_trace_from_prefix with (n := n) in Htl1.
       rewrite <- Heq. assumption.
     Qed.
 
-    Lemma infinite_protocol_trace_from_segment
+    Lemma infinite_valid_trace_from_segment
       (s : state)
       (ls : Stream transition_item)
-      (Htr : infinite_protocol_trace_from s ls)
+      (Htr : infinite_valid_trace_from s ls)
       (n1 n2 : nat)
       (Hle : n1 <= n2)
       (n1th := Str_nth n1 (Cons s (Streams.map destination ls)))
-      : finite_protocol_trace_from n1th (stream_segment ls n1 n2).
+      : finite_valid_trace_from n1th (stream_segment ls n1 n2).
     Proof.
-      apply finite_protocol_trace_from_suffix with s.
-      - apply infinite_protocol_trace_from_prefix. assumption.
+      apply finite_valid_trace_from_suffix with s.
+      - apply infinite_valid_trace_from_prefix. assumption.
       - destruct n1; try reflexivity.
         unfold n1th. clear n1th.
         unfold finite_trace_nth.
@@ -1914,118 +1904,118 @@ definitions, mostly reducing them to properties about their finite segments.
         reflexivity.
     Qed.
 
-(** *** Protocol traces
+(** *** valid traces
 
 Finally, we define [Trace] as a sum-type of its finite/infinite variants.
 It inherits some previously introduced definitions, culminating with the
-[protocol_trace].
+[valid_trace].
 *)
 
-    Definition ptrace_from_prop (tr : Trace) : Prop :=
+    Definition valid_trace_from_prop (tr : Trace) : Prop :=
       match tr with
-      | Finite s ls => finite_protocol_trace_from s ls
-      | Infinite s sm => infinite_protocol_trace_from s sm
+      | Finite s ls => finite_valid_trace_from s ls
+      | Infinite s sm => infinite_valid_trace_from s sm
       end.
 
-    Definition protocol_trace_prop (tr : Trace) : Prop :=
+    Definition valid_trace_prop (tr : Trace) : Prop :=
       match tr with
-      | Finite s ls => finite_protocol_trace s ls
-      | Infinite s sm => infinite_protocol_trace s sm
+      | Finite s ls => finite_valid_trace s ls
+      | Infinite s sm => infinite_valid_trace s sm
       end.
 
-    Definition protocol_trace : Type :=
-      { tr : Trace | protocol_trace_prop tr}.
+    Definition valid_trace : Type :=
+      { tr : Trace | valid_trace_prop tr}.
 
-    Lemma protocol_trace_from
+    Lemma valid_trace_from
       (tr : Trace)
-      (Htr : protocol_trace_prop tr)
-      : ptrace_from_prop tr.
+      (Htr : valid_trace_prop tr)
+      : valid_trace_from_prop tr.
     Proof.
       destruct tr; simpl; destruct Htr as [Htr Hinit]; assumption.
     Qed.
 
-    Lemma protocol_trace_initial
+    Lemma valid_trace_initial
       (tr : Trace)
-      (Htr : protocol_trace_prop tr)
+      (Htr : valid_trace_prop tr)
       : initial_state_prop (trace_first tr).
     Proof.
       destruct tr; simpl; destruct Htr as [Htr Hinit]; assumption.
     Qed.
 
-    Lemma protocol_trace_from_iff
+    Lemma valid_trace_from_iff
       (tr : Trace)
-      : protocol_trace_prop tr
-      <-> ptrace_from_prop tr /\ initial_state_prop (trace_first tr).
+      : valid_trace_prop tr
+      <-> valid_trace_from_prop tr /\ initial_state_prop (trace_first tr).
     Proof.
       split.
       - intro Htr; split.
-        + apply protocol_trace_from; assumption.
-        + apply protocol_trace_initial; assumption.
+        + apply valid_trace_from; assumption.
+        + apply valid_trace_initial; assumption.
       - destruct tr; simpl; intros [Htr Hinit]; split; assumption.
     Qed.
 
-(** Having defined [protocol_trace]s, we now connect them to protocol states
+(** Having defined [valid_trace]s, we now connect them to valid states
 and messages, in the following sense: for each state-message pair (<<s>>, <<m>>)
-that has the [protocol_prop]erty, there exists a [protocol_trace] which ends
+that has the [valid_state_message_prop]erty, there exists a [valid_trace] which ends
 in <<s>> by outputting <<m>> *)
 
-    Lemma protocol_is_trace
+    Lemma valid_state_message_has_trace
           (s : state)
           (om : option message)
-          (Hp : protocol_prop s om)
+          (Hp : valid_state_message_prop s om)
       : initial_state_prop s /\ option_initial_message_prop om
       \/ exists (is : state) (tr : list transition_item),
-            finite_protocol_trace_init_to is s tr
+            finite_valid_trace_init_to is s tr
             /\ finite_trace_last_output tr = om.
     Proof.
-      apply finite_protocol_trace_init_to_emit_protocol_rev in Hp as [is [tr Htr]].
-      apply finite_protocol_trace_init_to_emit_output in Htr as Houtput.
+      apply finite_valid_trace_init_to_emit_valid_state_message_rev in Hp as [is [tr Htr]].
+      apply finite_valid_trace_init_to_emit_output in Htr as Houtput.
       unfold empty_initial_message_or_final_output in Houtput.
       destruct_list_last tr tr' item Heqtr.
       - left. split; [|assumption]. inversion Htr; [assumption|].
         destruct tl; simpl in *; congruence.
-      - right. apply finite_protocol_trace_init_to_emit_forget_emit in Htr.
+      - right. apply finite_valid_trace_init_to_emit_forget_emit in Htr.
         eexists _,_. split; [exact Htr|].
         rewrite finite_trace_last_output_is_last. assumption.
     Qed.
 
-    (** Giving a trace for [protocol_state_prop] can be stated more
-        simply than [protocol_is_trace], because we don't need a
+    (** Giving a trace for [valid_state_prop] can be stated more
+        simply than [valid_state_message_has_trace], because we don't need a
         disjunction because we are not making claims about [output]
         messages.
      *)
-    Lemma protocol_state_has_trace
+    Lemma valid_state_has_trace
           (s : state)
-          (Hp : protocol_state_prop s):
+          (Hp : valid_state_prop s):
       exists (is : state) (tr : list transition_item),
-        finite_protocol_trace_init_to is s tr.
+        finite_valid_trace_init_to is s tr.
     Proof using.
       destruct Hp as [_om Hp].
-      apply protocol_is_trace in Hp.
+      apply valid_state_message_has_trace in Hp.
       destruct Hp as [[Hinit _]|Htrace].
       + exists s, [].
         split;[|assumption].
         constructor.
-        apply initial_is_protocol.
+        apply initial_state_is_valid.
         assumption.
       + destruct Htrace as [is [tr [Htr _]]].
         exists is, tr.
         assumption.
     Qed.
 
-    (** For any protocol transition there exists a protocol trace ending in it. *)
+    (** For any input valid transition there exists a valid trace ending in it. *)
     Lemma exists_right_finite_trace_from
       l s1 iom s2 oom
-      (Ht : protocol_transition l (s1, iom) (s2, oom))
-      : exists s0 ts, finite_protocol_trace_init_to s0 s2 (ts ++ [{| l := l; destination := s2; input := iom; output := oom |}])
+      (Ht : input_valid_transition l (s1, iom) (s2, oom))
+      : exists s0 ts, finite_valid_trace_init_to s0 s2 (ts ++ [{| l := l; destination := s2; input := iom; output := oom |}])
         /\ finite_trace_last s0 ts = s1.
     Proof.
-      apply protocol_transition_origin in Ht as Hs1.
-      apply protocol_state_has_trace in Hs1.
+      apply input_valid_transition_origin in Ht as Hs1.
+      apply valid_state_has_trace in Hs1.
       destruct Hs1 as [s0 [ts Hts]].
       exists s0, ts.
       destruct Hts as [Hts Hinit].
-      repeat split; [|assumption|revert Hts; apply finite_protocol_trace_from_to_last].
+      repeat split; [|assumption|revert Hts; apply finite_valid_trace_from_to_last].
       revert Ht.
       apply extend_right_finite_trace_from_to.
       assumption.
@@ -2034,63 +2024,63 @@ in <<s>> by outputting <<m>> *)
     Lemma can_emit_has_trace m :
       can_emit m ->
       exists is tr item,
-      finite_protocol_trace is (tr ++ [item]) /\
+      finite_valid_trace is (tr ++ [item]) /\
       output item = Some m.
     Proof.
       intros [(s, im) [l [s' Hm]]].
       apply exists_right_finite_trace_from in Hm as [is [tr [Htr _]]].
-      apply finite_protocol_trace_init_to_forget_last in Htr.
+      apply finite_valid_trace_init_to_forget_last in Htr.
       eexists is, tr, _; split; [exact Htr|reflexivity].
     Qed.
 
-    (** Any trace with the 'finite_protocol_trace_from' property can be completed
+    (** Any trace with the 'finite_valid_trace_from' property can be completed
     (to the left) to start in an initial state*)
-    Lemma finite_protocol_trace_from_complete_left
+    Lemma finite_valid_trace_from_complete_left
       (s : state)
       (tr : list transition_item)
-      (Htr : finite_protocol_trace_from s tr)
+      (Htr : finite_valid_trace_from s tr)
       : exists (is : state) (trs : list transition_item),
-        finite_protocol_trace is (trs ++ tr) /\
+        finite_valid_trace is (trs ++ tr) /\
         finite_trace_last is trs = s.
     Proof.
-      apply finite_ptrace_first_pstate in Htr as Hs.
-      apply protocol_state_has_trace in Hs.
+      apply finite_valid_trace_first_pstate in Htr as Hs.
+      apply valid_state_has_trace in Hs.
       destruct Hs as [is [trs [Htrs His]]].
       exists is, trs.
-      apply finite_protocol_trace_from_to_last in Htrs as Hlast.
+      apply finite_valid_trace_from_to_last in Htrs as Hlast.
       rewrite <- Hlast in Htr.
-      apply finite_protocol_trace_from_to_forget_last in Htrs.
+      apply finite_valid_trace_from_to_forget_last in Htrs.
       repeat (split || assumption ||
-      apply finite_protocol_trace_from_app_iff).
+      apply finite_valid_trace_from_app_iff).
     Qed.
 
-    (** Any trace with the 'finite_protocol_trace_from_to' property can be completed
+    (** Any trace with the 'finite_valid_trace_from_to' property can be completed
     (to the left) to start in an initial state*)
-    Lemma finite_protocol_trace_from_to_complete_left
+    Lemma finite_valid_trace_from_to_complete_left
       (s f : state)
       (tr : list transition_item)
-      (Htr : finite_protocol_trace_from_to s f tr)
+      (Htr : finite_valid_trace_from_to s f tr)
       : exists (is : state) (trs : list transition_item),
-        finite_protocol_trace_init_to is f (trs ++ tr) /\
+        finite_valid_trace_init_to is f (trs ++ tr) /\
         finite_trace_last is trs = s.
     Proof.
-      assert (protocol_state_prop s) as Hs
-        by (apply finite_protocol_trace_from_to_forget_last,
-            finite_ptrace_first_pstate in Htr; assumption).
-      apply protocol_state_has_trace in Hs.
+      assert (valid_state_prop s) as Hs
+        by (apply finite_valid_trace_from_to_forget_last,
+            finite_valid_trace_first_pstate in Htr; assumption).
+      apply valid_state_has_trace in Hs.
       destruct Hs as [is [trs [Htrs His]]].
       exists is, trs.
       split.
       - split;[|assumption].
-        apply finite_protocol_trace_from_to_app with s;assumption.
-      - apply finite_protocol_trace_from_to_last in Htrs;assumption.
+        apply finite_valid_trace_from_to_app with s;assumption.
+      - apply finite_valid_trace_from_to_last in Htrs;assumption.
     Qed.
 
 (** Another benefit of defining traces is that we can succintly
 describe indirect transitions between arbitrary pairs of states.
 
 We say that state <<second>> is in state <<first>>'s futures if
-there exists a finite (possibly empty) protocol trace that begins
+there exists a finite (possibly empty) valid trace that begins
 with <<first>> and ends in <<second>>.
 
 This relation is often used in stating safety and liveness properties.*)
@@ -2099,12 +2089,12 @@ This relation is often used in stating safety and liveness properties.*)
       (first second : state)
       : Prop :=
       exists (tr : list transition_item),
-        finite_protocol_trace_from_to first second tr.
+        finite_valid_trace_from_to first second tr.
 
     Lemma in_futures_preserving
       (R : state -> state -> Prop)
       (Hpre : PreOrder R)
-      (Ht : protocol_transition_preserving R)
+      (Ht : input_valid_transition_preserving R)
       (s1 s2 : state)
       (Hin : in_futures s1 s2)
       : R s1 s2.
@@ -2122,7 +2112,7 @@ This relation is often used in stating safety and liveness properties.*)
     Lemma in_futures_strict_preserving
       (R : state -> state -> Prop)
       (Hpre : StrictOrder R)
-      (Ht : protocol_transition_preserving R)
+      (Ht : input_valid_transition_preserving R)
       (s1 s2 : state)
       (Hin : in_futures s1 s2)
       (Hneq : s1 <> s2)
@@ -2131,21 +2121,21 @@ This relation is often used in stating safety and liveness properties.*)
       apply (StrictOrder_PreOrder eq_equiv) in Hpre.
       - specialize (in_futures_preserving (relation_disjunction R eq) Hpre) as Hpreserve.
         spec Hpreserve.
-        + intro; intros. left. apply (Ht s3 s4 l0 om1 om2 Hprotocol).
+        + intro; intros. left. apply (Ht s3 s4 l0 om1 om2 Hvalid_transition).
         + spec Hpreserve s1 s2 Hin. destruct Hpreserve; try assumption.
           elim Hneq. assumption.
       - intros x1 x2 Heq. subst. intros y1 y2 Heq. subst.
         split; intro; assumption.
     Qed.
 
-    Lemma in_futures_protocol_fst
+    Lemma in_futures_valid_fst
       (first second : state)
       (Hfuture: in_futures first second)
-      : protocol_state_prop first.
+      : valid_state_prop first.
     Proof.
       destruct Hfuture as [tr Htr].
-      apply finite_protocol_trace_from_to_forget_last in Htr.
-      apply finite_ptrace_first_pstate in Htr.
+      apply finite_valid_trace_from_to_forget_last in Htr.
+      apply finite_valid_trace_first_pstate in Htr.
       assumption.
     Qed.
 
@@ -2153,7 +2143,7 @@ This relation is often used in stating safety and liveness properties.*)
 
     Lemma in_futures_refl
       (first: state)
-      (Hps : protocol_state_prop first)
+      (Hps : valid_state_prop first)
       : in_futures first first.
 
     Proof.
@@ -2171,40 +2161,40 @@ This relation is often used in stating safety and liveness properties.*)
       destruct H12 as [tr12 Htr12].
       destruct H23 as [tr23 Htr23].
       exists (tr12 ++ tr23).
-      apply finite_protocol_trace_from_to_app with second;assumption.
+      apply finite_valid_trace_from_to_app with second;assumption.
     Qed.
 
-    Lemma protocol_transition_in_futures {l s im s' om}
-      (Ht : protocol_transition l (s, im) (s', om))
+    Lemma input_valid_transition_in_futures {l s im s' om}
+      (Ht : input_valid_transition l (s, im) (s', om))
       : in_futures s s'.
     Proof.
-      apply finite_ptrace_singleton in Ht.
-      apply finite_protocol_trace_from_add_last with (f := s') in Ht; [|reflexivity].
+      apply finite_valid_trace_singleton in Ht.
+      apply finite_valid_trace_from_add_last with (f := s') in Ht; [|reflexivity].
       eexists. exact Ht.
     Qed.
 
     Lemma in_futures_witness
       (first second : state)
       (Hfutures : in_futures first second)
-      : exists (tr : protocol_trace) (n1 n2 : nat),
+      : exists (tr : valid_trace) (n1 n2 : nat),
         n1 <= n2
         /\ trace_nth (proj1_sig tr) n1 = Some first
         /\ trace_nth (proj1_sig tr) n2 = Some second.
     Proof.
-      specialize (in_futures_protocol_fst first second Hfutures); intro Hps.
-      apply protocol_state_has_trace in Hps.
+      specialize (in_futures_valid_fst first second Hfutures); intro Hps.
+      apply valid_state_has_trace in Hps.
       destruct Hps as [prefix_start [prefix_tr [Hprefix_tr Hinit]]].
       destruct Hfutures as [suffix_tr Hsuffix_tr].
-      specialize (finite_protocol_trace_from_to_app _ _ _ _ _ Hprefix_tr Hsuffix_tr) as Happ.
-      apply finite_protocol_trace_from_to_forget_last in Happ.
-      assert (Htr : protocol_trace_prop (Finite prefix_start (prefix_tr ++ suffix_tr)))
+      specialize (finite_valid_trace_from_to_app _ _ _ _ _ Hprefix_tr Hsuffix_tr) as Happ.
+      apply finite_valid_trace_from_to_forget_last in Happ.
+      assert (Htr : valid_trace_prop (Finite prefix_start (prefix_tr ++ suffix_tr)))
         by (split;assumption).
       exists (exist _ _ Htr).
       simpl.
       exists (length prefix_tr), (length prefix_tr + length suffix_tr).
       split;[lia|].
-      apply finite_protocol_trace_from_to_last in Hprefix_tr.
-      apply finite_protocol_trace_from_to_last in Hsuffix_tr.
+      apply finite_valid_trace_from_to_last in Hprefix_tr.
+      apply finite_valid_trace_from_to_last in Hsuffix_tr.
       split.
       - rewrite finite_trace_nth_app1;[|lia].
         rewrite finite_trace_nth_last.
@@ -2224,31 +2214,31 @@ This relation is often used in stating safety and liveness properties.*)
       | Infinite s l => stream_segment l n1 n2
       end.
 
-    Lemma ptrace_segment
+    Lemma valid_trace_segment
       (tr : Trace)
-      (Htr : protocol_trace_prop tr)
+      (Htr : valid_trace_prop tr)
       (n1 n2 : nat)
       (Hle : n1 <= n2)
       (first : state)
       (Hfirst : trace_nth tr n1 = Some first)
-      : finite_protocol_trace_from first (trace_segment tr n1 n2).
+      : finite_valid_trace_from first (trace_segment tr n1 n2).
     Proof.
       destruct tr as [s tr | s tr]; simpl in *; destruct Htr as [Htr Hinit].
-      - apply finite_protocol_trace_from_segment with s; try assumption.
+      - apply finite_valid_trace_from_segment with s; try assumption.
       - inversion Hfirst; subst; clear Hfirst.
-        apply (infinite_protocol_trace_from_segment s tr Htr n1 n2 Hle).
+        apply (infinite_valid_trace_from_segment s tr Htr n1 n2 Hle).
     Qed.
 
     Inductive Trace_messages : Type :=
     | Finite_messages : list (option message) -> Trace_messages
     | Infinite_messages : Stream (option message) -> Trace_messages.
 
-    Definition protocol_output_messages_trace (tr : protocol_trace) : Trace_messages :=
+    Definition protocol_output_messages_trace (tr : valid_trace) : Trace_messages :=
       match proj1_sig tr with
       | Finite _ ls => Finite_messages (List.map output ls)
       | Infinite _ st => Infinite_messages (map output st) end.
 
-    Definition protocol_input_messages_trace (tr : protocol_trace) : Trace_messages :=
+    Definition protocol_input_messages_trace (tr : valid_trace) : Trace_messages :=
       match proj1_sig tr with
       | Finite _ ls => Finite_messages (List.map input ls)
       | Infinite _ st => Infinite_messages (map input st) end.
@@ -2273,21 +2263,21 @@ This relation is often used in stating safety and liveness properties.*)
       | Infinite s st => Finite s (stream_prefix st n)
       end.
 
-    Lemma trace_prefix_protocol
-          (tr : protocol_trace)
+    Lemma trace_prefix_valid
+          (tr : valid_trace)
           (last : transition_item)
           (prefix : list transition_item)
           (Hprefix : trace_prefix (proj1_sig tr) last prefix)
-      : protocol_trace_prop (Finite (trace_first (proj1_sig tr)) (prefix ++ [last])).
+      : valid_trace_prop (Finite (trace_first (proj1_sig tr)) (prefix ++ [last])).
     Proof.
       destruct tr as [tr Htr]. simpl in *.
       generalize dependent tr. generalize dependent last.
-      apply (rev_ind (fun prefix => forall (last : transition_item) (tr : Trace), protocol_trace_prop tr -> trace_prefix tr last prefix -> finite_protocol_trace (trace_first tr) (prefix ++ [last]))).
+      apply (rev_ind (fun prefix => forall (last : transition_item) (tr : Trace), valid_trace_prop tr -> trace_prefix tr last prefix -> finite_valid_trace (trace_first tr) (prefix ++ [last]))).
       - intros last tr Htr Hprefix; destruct tr as [ | ]; unfold trace_prefix in Hprefix;   simpl in Hprefix
         ; destruct Hprefix as [suffix Heq]; subst; destruct Htr as [Htr Hinit]
         ; unfold trace_first; simpl; constructor; try assumption
         ; inversion Htr; subst; clear Htr
-        ; apply finite_ptrace_singleton; assumption.
+        ; apply finite_valid_trace_singleton; assumption.
       - intros last_p p Hind last tr Htr Hprefix.
         specialize (Hind last_p tr Htr).
         destruct tr as [ | ]; unfold trace_prefix in Hprefix;   simpl in Hprefix
@@ -2309,7 +2299,7 @@ This relation is often used in stating safety and liveness properties.*)
           rewrite <- (app_assoc p _ _) in Htr. simpl in Htr.
           rewrite <- app_assoc in Htr.
           specialize
-            (finite_ptrace_consecutive_valid_transition _ _ _ _ _ _ Htr eq_refl).
+            (finite_valid_trace_consecutive_valid_transition _ _ _ _ _ _ Htr eq_refl).
           simpl.
           rewrite finite_trace_last_is_last. trivial.
         + assert
@@ -2326,7 +2316,7 @@ This relation is often used in stating safety and liveness properties.*)
           rewrite stream_app_assoc in Htr.
           rewrite <- (app_assoc p _ _) in Htr. simpl in Htr.
           specialize
-            (infinite_protocol_trace_consecutive_valid_transition
+            (infinite_valid_trace_consecutive_valid_transition
                s
                (stream_app (p ++ [last_p; {| l := l0; input := input0; destination := destination0; output := output0 |}]) suffix)
                suffix
@@ -2341,22 +2331,22 @@ This relation is often used in stating safety and liveness properties.*)
     Qed.
 
 
-    Definition build_trace_prefix_protocol
-          {tr : protocol_trace}
+    Definition build_trace_prefix_valid
+          {tr : valid_trace}
           {last : transition_item}
           {prefix : list transition_item}
           (Hprefix : trace_prefix (proj1_sig tr) last prefix)
-          : protocol_trace
+          : valid_trace
       := exist _ (Finite (trace_first (proj1_sig tr)) (prefix ++ [last]))
-               (trace_prefix_protocol tr last prefix Hprefix).
+               (trace_prefix_valid tr last prefix Hprefix).
 
-    Lemma trace_prefix_fn_protocol
+    Lemma trace_prefix_fn_valid
           (tr : Trace)
-          (Htr : protocol_trace_prop tr)
+          (Htr : valid_trace_prop tr)
           (n : nat)
-      : protocol_trace_prop (trace_prefix_fn tr n).
+      : valid_trace_prop (trace_prefix_fn tr n).
     Proof.
-      specialize (trace_prefix_protocol (exist _ tr Htr)); simpl; intro Hpref.
+      specialize (trace_prefix_valid (exist _ tr Htr)); simpl; intro Hpref.
       remember (trace_prefix_fn tr n) as pref_tr.
       destruct pref_tr as [s l | s l].
       - destruct l as [| item l].
@@ -2365,14 +2355,14 @@ This relation is often used in stating safety and liveness properties.*)
           ; inversion Heqpref_tr; subst
           ; (split;[|assumption])
           ; constructor
-          ;  apply initial_is_protocol;assumption.
+          ;  apply initial_state_is_valid;assumption.
         + assert (Hnnil : item ::l <> [])
             by (intro Hnil; inversion Hnil).
           specialize (exists_last Hnnil); intros [prefix [last Heq]].
           rewrite Heq in *; clear Hnnil Heq l item.
           replace s with (trace_first (proj1_sig (exist _ tr Htr)))
           ; try (destruct tr; inversion Heqpref_tr; subst; reflexivity).
-          apply trace_prefix_protocol.
+          apply trace_prefix_valid.
           remember (prefix ++ [last]) as prefix_last. revert Heqprefix_last.
           destruct tr as [s' l' | s' l']
           ; inversion Heqpref_tr
@@ -2393,41 +2383,41 @@ This relation is often used in stating safety and liveness properties.*)
       - destruct tr as [s' l' | s' l']; inversion Heqpref_tr.
     Qed.
 
-    Lemma protocol_trace_nth
+    Lemma valid_trace_nth
       (tr : Trace)
-      (Htr : protocol_trace_prop tr)
+      (Htr : valid_trace_prop tr)
       (n : nat)
       (s : state)
       (Hnth : trace_nth tr n = Some s)
-      : protocol_state_prop s.
+      : valid_state_prop s.
     Proof.
       destruct tr as [s0 l | s0 l]; destruct Htr as [Htr Hinit].
-      - specialize (finite_protocol_trace_from_suffix s0 l Htr n s Hnth).
+      - specialize (finite_valid_trace_from_suffix s0 l Htr n s Hnth).
         intro Hsuf.
-        apply finite_ptrace_first_pstate in Hsuf.
+        apply finite_valid_trace_first_pstate in Hsuf.
         assumption.
       - assert (Hle : n <= n) by lia.
-        specialize (infinite_protocol_trace_from_segment s0 l Htr n n Hle)
+        specialize (infinite_valid_trace_from_segment s0 l Htr n n Hle)
         ; simpl; intros Hseg.
         inversion Hnth.
-        apply finite_ptrace_first_pstate in Hseg.
+        apply finite_valid_trace_first_pstate in Hseg.
         assumption.
     Qed.
 
-    Lemma in_futures_protocol_snd
+    Lemma in_futures_valid_snd
       (first second : state)
       (Hfutures: in_futures first second)
-      : protocol_state_prop second.
+      : valid_state_prop second.
     Proof.
       specialize (in_futures_witness first second Hfutures)
       ; intros [tr [n1 [n2 [Hle [Hn1 Hn2]]]]].
       destruct tr as [tr Htr]; simpl in Hn2.
-      apply protocol_trace_nth with tr n2; assumption.
+      apply valid_trace_nth with tr n2; assumption.
     Qed.
 
     Lemma in_futures_witness_reverse
       (first second : state)
-      (tr : protocol_trace)
+      (tr : valid_trace)
       (n1 n2 : nat)
       (Hle : n1 <= n2)
       (Hs1 : trace_nth (proj1_sig tr) n1 = Some first)
@@ -2439,10 +2429,10 @@ This relation is often used in stating safety and liveness properties.*)
       inversion Hle; subst; clear Hle.
       - rewrite Hs1 in Hs2. inversion Hs2; subst; clear Hs2.
         exists [].
-        constructor. apply protocol_trace_nth with tr n2; assumption.
+        constructor. apply valid_trace_nth with tr n2; assumption.
       - exists (trace_segment tr n1 (S m)).
-        apply finite_protocol_trace_from_add_last.
-        + apply ptrace_segment; try assumption. lia.
+        apply finite_valid_trace_from_add_last.
+        + apply valid_trace_segment; try assumption. lia.
         + { destruct tr as [s tr | s tr]; simpl.
           - simpl in Hs1, Hs2.
             unfold list_segment.
@@ -2469,9 +2459,9 @@ This relation is often used in stating safety and liveness properties.*)
 (**
 Stating livness properties will require quantifying over complete
 executions of the protocol. To make this possible, we will now define
-_complete_ [protocol_trace]s.
+_complete_ [valid_trace]s.
 
-A [protocol_trace] is _terminating_ if there's no other [protocol_trace]
+A [valid_trace] is _terminating_ if there's no other [valid_trace]
 that contains it as a prefix.
 *)
 
@@ -2479,17 +2469,17 @@ that contains it as a prefix.
        :=
          match tr with
          | Finite s ls =>
-             (exists (tr : protocol_trace)
+             (exists (tr : valid_trace)
              (last : transition_item),
              trace_prefix (proj1_sig tr) last ls) -> False
          | Infinite s ls => False
          end.
 
-(** A [protocol_trace] is _complete_, if it is either _terminating_ or infinite.
+(** A [valid_trace] is _complete_, if it is either _terminating_ or infinite.
 *)
 
     Definition complete_trace_prop (tr : Trace) : Prop
-       := protocol_trace_prop tr
+       := valid_trace_prop tr
           /\
           match tr with
           | Finite _ _ => terminating_trace_prop tr
@@ -2503,8 +2493,8 @@ that contains it as a prefix.
     (* Defining equivocation on these trace definitions *)
 
     (* Section 7 :
-       A message m received by a protocol state s with a transition label l in a
-       protocol execution trace is called "an equivocation" if it wasn't produced
+       A message m received by a valid state s with a transition label l in a
+       valid execution trace is called "an equivocation" if it wasn't produced
        in that trace
     *)
 
@@ -2520,19 +2510,19 @@ that contains it as a prefix.
 (* end hide *)
 End VLSM.
 
-(** Make all arguments of [protocol_state_prop_ind] explicit
+(** Make all arguments of [valid_state_prop_ind] explicit
     so it will work with the <<induction using>> tactic.
     (closing the section added <<{message}>> as an implicit argument)
  *)
-Arguments protocol_prop_ind : clear implicits.
-Arguments protocol_state_prop_ind : clear implicits.
-Arguments finite_protocol_trace_from_to_ind : clear implicits.
+Arguments valid_state_message_prop_ind : clear implicits.
+Arguments valid_state_prop_ind : clear implicits.
+Arguments finite_valid_trace_from_to_ind : clear implicits.
 
-Arguments finite_protocol_trace_rev_ind : clear implicits.
-Arguments finite_protocol_trace_from_rev_ind : clear implicits.
-Arguments finite_protocol_trace_from_to_rev_ind : clear implicits.
-Arguments finite_protocol_trace_init_to_rev_ind : clear implicits.
-Arguments finite_protocol_trace_init_to_rev_strong_ind : clear implicits.
+Arguments finite_valid_trace_rev_ind : clear implicits.
+Arguments finite_valid_trace_from_rev_ind : clear implicits.
+Arguments finite_valid_trace_from_to_rev_ind : clear implicits.
+Arguments finite_valid_trace_init_to_rev_ind : clear implicits.
+Arguments finite_valid_trace_init_to_rev_strong_ind : clear implicits.
 
 Arguments extend_right_finite_trace_from [message] (X) [s1] [ts] (Ht12) [l3] [iom3] [s3] [oom3] (Hv23).
 Arguments extend_right_finite_trace_from_to [message] (X) [s1] [s2] [ts] (Ht12) [l3] [iom3] [s3] [oom3] (Hv23).
@@ -2542,63 +2532,63 @@ Class TraceWithLast
       @state _ (@type _ X) -> list transition_item -> Prop)
       (trace_prop : forall {message} (X: VLSM message),
         state -> state -> list transition_item -> Prop) :=
-  {ptrace_add_last: forall [msg] [X: VLSM msg] [s f tr],
+  {valid_trace_add_last: forall [msg] [X: VLSM msg] [s f tr],
      base_prop X s tr -> finite_trace_last s tr = f -> trace_prop X s f tr;
-   ptrace_get_last: forall [msg] [X: VLSM msg] [s f tr],
+   valid_trace_get_last: forall [msg] [X: VLSM msg] [s f tr],
      trace_prop X s f tr -> finite_trace_last s tr = f;
-   ptrace_last_pstate: forall [msg] [X: VLSM msg] [s f tr],
-     trace_prop X s f tr -> protocol_state_prop X f;
-   ptrace_forget_last: forall [msg] [X: VLSM msg] [s f tr],
+   valid_trace_last_pstate: forall [msg] [X: VLSM msg] [s f tr],
+     trace_prop X s f tr -> valid_state_prop X f;
+   valid_trace_forget_last: forall [msg] [X: VLSM msg] [s f tr],
      trace_prop X s f tr -> base_prop X s tr
   }.
-Hint Mode TraceWithLast - ! : typeclass_instances.
-Hint Mode TraceWithLast ! - : typeclass_instances.
+Global Hint Mode TraceWithLast - ! : typeclass_instances.
+Global Hint Mode TraceWithLast ! - : typeclass_instances.
 
-Definition ptrace_add_default_last
+Definition valid_trace_add_default_last
   `{TraceWithLast base_prop trace_prop}
   [msg] [X:VLSM msg] [s tr] (Htr: base_prop msg X s tr):
     trace_prop msg X s (finite_trace_last s tr) tr.
 Proof.
-  apply ptrace_add_last. assumption. reflexivity.
+  apply valid_trace_add_last. assumption. reflexivity.
 Defined.
 
-Instance trace_with_last_ptrace_from:
-  TraceWithLast (@finite_protocol_trace_from) (@finite_protocol_trace_from_to)
-  := {ptrace_add_last := @finite_protocol_trace_from_add_last;
-      ptrace_get_last := @finite_protocol_trace_from_to_last;
-      ptrace_last_pstate := @finite_protocol_trace_from_to_last_pstate;
-      ptrace_forget_last := @finite_protocol_trace_from_to_forget_last;
+Instance trace_with_last_valid_trace_from:
+  TraceWithLast (@finite_valid_trace_from) (@finite_valid_trace_from_to)
+  := {valid_trace_add_last := @finite_valid_trace_from_add_last;
+      valid_trace_get_last := @finite_valid_trace_from_to_last;
+      valid_trace_last_pstate := @finite_valid_trace_from_to_last_pstate;
+      valid_trace_forget_last := @finite_valid_trace_from_to_forget_last;
      }.
 
-Instance trace_with_last_ptrace_init:
-  TraceWithLast (@finite_protocol_trace) (@finite_protocol_trace_init_to)
-  := {ptrace_add_last := @finite_protocol_trace_init_add_last;
-      ptrace_get_last := @finite_protocol_trace_init_to_last;
-      ptrace_last_pstate _ _ _ _ _ H := ptrace_last_pstate (proj1 H);
-      ptrace_forget_last := @finite_protocol_trace_init_to_forget_last;
+Instance trace_with_last_valid_trace_init:
+  TraceWithLast (@finite_valid_trace) (@finite_valid_trace_init_to)
+  := {valid_trace_add_last := @finite_valid_trace_init_add_last;
+      valid_trace_get_last := @finite_valid_trace_init_to_last;
+      valid_trace_last_pstate _ _ _ _ _ H := valid_trace_last_pstate (proj1 H);
+      valid_trace_forget_last := @finite_valid_trace_init_to_forget_last;
      }.
 
 Class TraceWithStart
      {message} {X : VLSM message}
      (start : @state message (type X))
      (trace_prop : list (transition_item (type X)) -> Prop) :=
- {ptrace_first_pstate:
-    forall [tr], trace_prop tr -> protocol_state_prop X start
+ {valid_trace_first_pstate:
+    forall [tr], trace_prop tr -> valid_state_prop X start
  }.
-Hint Mode TraceWithStart - - - ! : typeclass_instances.
+Global Hint Mode TraceWithStart - - - ! : typeclass_instances.
 
-Instance trace_with_start_ptrace_from message (X: VLSM message) s:
-  TraceWithStart s (finite_protocol_trace_from X s)
-  := {ptrace_first_pstate := finite_ptrace_first_pstate X s}.
-Instance trace_with_start_ptrace message (X: VLSM message) s:
-  TraceWithStart s (finite_protocol_trace X s)
-  := {ptrace_first_pstate tr H := ptrace_first_pstate (proj1 H)}.
-Instance trace_with_start_ptrace_from_to message (X: VLSM message) s f:
-  TraceWithStart s (finite_protocol_trace_from_to X s f)
-  := {ptrace_first_pstate tr H := ptrace_first_pstate (ptrace_forget_last H)}.
-Instance trace_with_start_ptrace_init_to message (X: VLSM message) s f:
-  TraceWithStart s (finite_protocol_trace_init_to X s f)
-  := {ptrace_first_pstate tr H := ptrace_first_pstate (ptrace_forget_last H)}.
+Instance trace_with_start_valid_trace_from message (X: VLSM message) s:
+  TraceWithStart s (finite_valid_trace_from X s)
+  := {valid_trace_first_pstate := finite_valid_trace_first_pstate X s}.
+Instance trace_with_start_valid_trace message (X: VLSM message) s:
+  TraceWithStart s (finite_valid_trace X s)
+  := {valid_trace_first_pstate tr H := valid_trace_first_pstate (proj1 H)}.
+Instance trace_with_start_valid_trace_from_to message (X: VLSM message) s f:
+  TraceWithStart s (finite_valid_trace_from_to X s f)
+  := {valid_trace_first_pstate tr H := valid_trace_first_pstate (valid_trace_forget_last H)}.
+Instance trace_with_start_valid_trace_init_to message (X: VLSM message) s f:
+  TraceWithStart s (finite_valid_trace_init_to X s f)
+  := {valid_trace_first_pstate tr H := valid_trace_first_pstate (valid_trace_forget_last H)}.
 
 (** *** Pre-loaded VLSMs
 
@@ -2641,7 +2631,7 @@ Byzantine fault tolerance analysis.
     A message which can be emitted during a protocol run of
     the [pre_loaded_with_all_messages_vlsm] is called a [byzantine_message], because
     as shown by Lemmas [byzantine_pre_loaded_with_all_messages] and [pre_loaded_with_all_messages_alt_eq],
-    byzantine traces for a [VLSM] are precisely the protocol traces
+    byzantine traces for a [VLSM] are precisely the valid traces
     of the [pre_loaded_with_all_messages_vlsm], hence a byzantine message is any message
     which a byzantine trace [can_emit].
   *)
@@ -2655,141 +2645,141 @@ Byzantine fault tolerance analysis.
     := sig byzantine_message_prop.
 
   (* begin hide *)
-  Lemma pre_loaded_with_all_messages_message_protocol_prop
+  Lemma pre_loaded_with_all_messages_message_valid_initial_state_message
     (om : option message)
-    : protocol_prop pre_loaded_with_all_messages_vlsm (proj1_sig (vs0 X)) om.
+    : valid_state_message_prop pre_loaded_with_all_messages_vlsm (proj1_sig (vs0 X)) om.
   Proof.
-    apply protocol_initial;[apply proj2_sig|].
+    apply valid_initial_state_message;[apply proj2_sig|].
     destruct om;exact I.
   Qed.
 
-  Lemma pre_loaded_with_all_messages_protocol_prop
+  Lemma pre_loaded_with_all_messages_valid_state_message_preservation
     (s : state)
     (om : option message)
-    (Hps : protocol_prop X s om)
-    : protocol_prop pre_loaded_with_all_messages_vlsm s om.
+    (Hps : valid_state_message_prop X s om)
+    : valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
   Proof.
     induction Hps.
-    - apply (protocol_initial pre_loaded_with_all_messages_vlsm).
+    - apply (valid_initial_state_message pre_loaded_with_all_messages_vlsm).
       assumption.
       destruct om;exact I.
-    - apply (protocol_generated pre_loaded_with_all_messages_vlsm) with s _om _s om l0; assumption.
+    - apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l0; assumption.
   Qed.
 
-  Lemma pre_loaded_with_all_messages_protocol_state_prop
+  Lemma pre_loaded_with_all_messages_valid_state_prop
     (s : state)
-    (Hps : protocol_state_prop X s)
-    : protocol_state_prop pre_loaded_with_all_messages_vlsm s.
+    (Hps : valid_state_prop X s)
+    : valid_state_prop pre_loaded_with_all_messages_vlsm s.
   Proof.
-    unfold protocol_state_prop in *.
+    unfold valid_state_prop in *.
     destruct Hps as [om Hprs].
     exists om.
-    apply pre_loaded_with_all_messages_protocol_prop.
+    apply pre_loaded_with_all_messages_valid_state_message_preservation.
     intuition.
   Qed.
   (* end hide *)
 
-  Lemma any_message_is_protocol_in_preloaded (om: option message):
-    option_protocol_message_prop pre_loaded_with_all_messages_vlsm om.
+  Lemma any_message_is_valid_in_preloaded (om: option message):
+    option_valid_message_prop pre_loaded_with_all_messages_vlsm om.
   Proof.
     eexists.
-    apply pre_loaded_with_all_messages_message_protocol_prop.
+    apply pre_loaded_with_all_messages_message_valid_initial_state_message.
   Qed.
 
-  Inductive preloaded_protocol_state_prop : state -> Prop :=
-  | preloaded_protocol_initial_state
+  Inductive preloaded_valid_state_prop : state -> Prop :=
+  | preloaded_valid_initial_state
       (s:state)
       (Hs: initial_state_prop (VLSMSign:=pre_loaded_with_all_messages_vlsm_sig) s):
-         preloaded_protocol_state_prop s
+         preloaded_valid_state_prop s
   | preloaded_protocol_generated
       (l : label)
       (s : state)
-      (Hps : preloaded_protocol_state_prop s)
+      (Hps : preloaded_valid_state_prop s)
       (om : option message)
       (Hv : valid (VLSMClass:=pre_loaded_with_all_messages_vlsm_machine) l (s, om))
       s' om'
       (Ht : transition (VLSMClass:=pre_loaded_with_all_messages_vlsm_machine) l (s, om) = (s', om'))
-    : preloaded_protocol_state_prop s'.
+    : preloaded_valid_state_prop s'.
 
-  Lemma preloaded_protocol_state_prop_iff s:
-    protocol_state_prop pre_loaded_with_all_messages_vlsm s
-    <-> preloaded_protocol_state_prop s.
+  Lemma preloaded_valid_state_prop_iff s:
+    valid_state_prop pre_loaded_with_all_messages_vlsm s
+    <-> preloaded_valid_state_prop s.
   Proof.
     split.
-    - intros [om Hproto].
-      induction Hproto.
-      + apply preloaded_protocol_initial_state.
+    - intros [om Hvalid].
+      induction Hvalid.
+      + apply preloaded_valid_initial_state.
         assumption.
       + apply preloaded_protocol_generated with l0 s om om';assumption.
     - induction 1.
       + exists None.
-        apply protocol_initial;[assumption|exact I].
-      + exists om'. destruct IHpreloaded_protocol_state_prop as [_om Hs].
-        specialize (any_message_is_protocol_in_preloaded om) as [_s Hom].
-        apply (protocol_generated pre_loaded_with_all_messages_vlsm) with s _om _s om l0;assumption.
+        apply valid_initial_state_message;[assumption|exact I].
+      + exists om'. destruct IHpreloaded_valid_state_prop as [_om Hs].
+        specialize (any_message_is_valid_in_preloaded om) as [_s Hom].
+        apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l0;assumption.
   Qed.
 
-  Lemma preloaded_weaken_protocol_prop s om:
-    protocol_prop X s om ->
-    protocol_prop pre_loaded_with_all_messages_vlsm s om.
+  Lemma preloaded_weaken_valid_state_message_prop s om:
+    valid_state_message_prop X s om ->
+    valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
   Proof.
     induction 1.
-    - refine (protocol_initial pre_loaded_with_all_messages_vlsm s Hs om _).
+    - refine (valid_initial_state_message pre_loaded_with_all_messages_vlsm s Hs om _).
       destruct om;exact I.
-    - exact (protocol_generated pre_loaded_with_all_messages_vlsm
-                                _ _ IHprotocol_prop1
-                                _ _ IHprotocol_prop2 l0 Hv _ _ Ht).
+    - exact (valid_generated_state_message pre_loaded_with_all_messages_vlsm
+                                _ _ IHvalid_state_message_prop1
+                                _ _ IHvalid_state_message_prop2 l0 Hv _ _ Ht).
   Qed.
 
-  Lemma preloaded_weaken_protocol_transition
+  Lemma preloaded_weaken_input_valid_transition
         l s om s' om':
-    protocol_transition X l (s,om) (s',om') ->
-    protocol_transition pre_loaded_with_all_messages_vlsm l (s,om) (s',om').
+    input_valid_transition X l (s,om) (s',om') ->
+    input_valid_transition pre_loaded_with_all_messages_vlsm l (s,om) (s',om').
   Proof.
-    unfold protocol_transition.
-    intros [[[_om Hproto_s] [_ Hpvalid]] Htrans].
+    unfold input_valid_transition.
+    intros [[[_om valid_s] [_ Hvalid]] Htrans].
     split;[clear Htrans|assumption].
     split.
     - exists _om.
-      apply preloaded_weaken_protocol_prop.
+      apply preloaded_weaken_valid_state_message_prop.
       assumption.
-    - clear _om Hproto_s.
+    - clear _om valid_s.
       split.
-      + apply any_message_is_protocol_in_preloaded.
+      + apply any_message_is_valid_in_preloaded.
       + assumption.
   Qed.
 
-  Lemma preloaded_weaken_protocol_trace_from s tr
-    : finite_protocol_trace_from X s tr ->
-      finite_protocol_trace_from pre_loaded_with_all_messages_vlsm s tr.
+  Lemma preloaded_weaken_valid_trace_from s tr
+    : finite_valid_trace_from X s tr ->
+      finite_valid_trace_from pre_loaded_with_all_messages_vlsm s tr.
   Proof.
-    intros H. induction H using finite_protocol_trace_from_rev_ind.
-    - apply (finite_ptrace_empty pre_loaded_with_all_messages_vlsm).
+    intros H. induction H using finite_valid_trace_from_rev_ind.
+    - apply (finite_valid_trace_from_empty pre_loaded_with_all_messages_vlsm).
       destruct H as [om H]. exists om.
-      revert H. apply preloaded_weaken_protocol_prop.
-    - apply (finite_protocol_trace_from_app_iff pre_loaded_with_all_messages_vlsm).
+      revert H. apply preloaded_weaken_valid_state_message_prop.
+    - apply (finite_valid_trace_from_app_iff pre_loaded_with_all_messages_vlsm).
       split; [assumption|].
-      apply (finite_ptrace_singleton pre_loaded_with_all_messages_vlsm).
-      revert Hx. apply preloaded_weaken_protocol_transition.
+      apply (finite_valid_trace_singleton pre_loaded_with_all_messages_vlsm).
+      revert Hx. apply preloaded_weaken_input_valid_transition.
   Qed.
 
 End pre_loaded_with_all_messages_vlsm.
 
-Lemma non_empty_protocol_trace_from_protocol_generated_prop
+Lemma non_empty_valid_trace_from_can_produce
   `(X : VLSM message)
   (s : state)
   (m : message)
-  : protocol_generated_prop X s m
+  : can_produce X s m
   <-> exists (is : state) (tr : list transition_item) (item : transition_item),
-    finite_protocol_trace X is tr /\
+    finite_valid_trace X is tr /\
     last_error tr = Some item /\
     destination item = s /\ output item = Some m.
 Proof.
   split.
   - intros [(s', om') [l Hsm]].
     destruct (id Hsm) as [[Hp _] _].
-    pose proof (finite_ptrace_singleton _ Hsm) as Htr.
-    apply finite_protocol_trace_from_complete_left in Htr.
+    pose proof (finite_valid_trace_singleton _ Hsm) as Htr.
+    apply finite_valid_trace_from_complete_left in Htr.
     destruct  Htr as [is [trs [Htrs _]]].
     exists is.
     match type of Htrs with
@@ -2805,7 +2795,7 @@ Proof.
     clear Heq.
     rewrite last_error_is_last in Hitem. inversion Hitem. clear Hitem. subst item'.
     destruct Htr as [Htr _].
-    apply finite_protocol_trace_from_app_iff in Htr.
+    apply finite_valid_trace_from_app_iff in Htr.
     destruct Htr as [_ Htr].
     inversion Htr. clear Htr. subst. simpl in Hm. subst.
     eexists _, l0. apply Ht.
