@@ -20,19 +20,22 @@ Context
   .
 
 (**
-[MessageDependencies] characterize a @message_dependencies@ function
+[MessageDependencies] characterize a <<message_dependencies>> function
 through two properties:
 
-- Necessity: All dependent messeges for a message @m@m are required to be
-observed by any state emitting the message @m@.
+- Necessity: All dependent messeges for a message <<m>>m are required to be
+observed by any state emitting the message <<m>>.
 
 - Sufficiency: A message can be produced by the machine pre-loaded with its
 dependencies.
+
+Together with [message_dependencies_full_node_condition_prop], it
+constitutes the _full node assumption_.
 *)
 Class MessageDependencies
   :=
   { message_dependencies_are_necessary (m : message)
-      `(protocol_generated_prop (pre_loaded_with_all_messages_vlsm X) s m)
+      `(can_produce (pre_loaded_with_all_messages_vlsm X) s m)
       : forall (dm : message),
         dm ∈ message_dependencies m ->
         has_been_observed X s dm
@@ -41,9 +44,9 @@ Class MessageDependencies
       : can_emit (pre_loaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
   }.
 
-(** The (local) full node condition for a given @message_dependencies@ function
+(** The (local) full node condition for a given <<message_dependencies>> function
 requires that a state (receiving the message) has previously
-observed all of @m@'s dependencies.
+observed all of <<m>>'s dependencies.
 *)
 Definition message_dependencies_full_node_condition
   (s : vstate X)

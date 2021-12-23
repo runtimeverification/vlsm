@@ -17,8 +17,8 @@ In this module we show that the composition of equivocators with no
 message-equivocation and fixed-set state-equivocation can simulate the
 fixed-set message-equivocation composition of regular nodes.
 
-The proof is based on [generalized_equivocators_finite_protocol_trace_init_to_rev],
-but also reuses [seeded_equivocators_finite_protocol_trace_init_to_rev] to
+The proof is based on [generalized_equivocators_finite_valid_trace_init_to_rev],
+but also reuses [seeded_equivocators_finite_valid_trace_init_to_rev] to
 lift a trace of the free subcomposition of equivocating nodes generating a
 message (given by the fixed message-equivocation constraint) to a trace of the
 subcomposition of equivocating equivocators with no message-equivocation,
@@ -59,30 +59,30 @@ Proof.
   assumption.
 Qed.
 
-(** Messages [sent_by_non_equivocating] nodes in the projection of a protocol
+(** Messages [sent_by_non_equivocating] nodes in the projection of a valid
 state for the fixed-set state-equivocation composition of equivocators with no
-message-equivocation are protocol for that composition of equivocators.
+message-equivocation are valid for that composition of equivocators.
 *)
-Lemma fixed_equivocating_sent_by_non_equivocating_protocol
+Lemma fixed_equivocating_messages_sent_by_non_equivocating_are_valid
   eqv_state_s
-  (Heqv_state_s : protocol_state_prop XE eqv_state_s)
+  (Heqv_state_s : valid_state_prop XE eqv_state_s)
   (s := equivocators_total_state_project IM eqv_state_s)
-  (Hs : protocol_state_prop X s)
+  (Hs : valid_state_prop X s)
   m
   (Hm : sent_by_non_equivocating IM Hbs equivocating s m)
-  : protocol_message_prop XE m.
+  : valid_message_prop XE m.
 Proof.
   specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM Hbs index_listing equivocating)
     as HinclE.
   apply sent_by_non_equivocating_are_sent in Hm.
   specialize (StrongFixed_incl_Preloaded IM Hbs equivocating)
     as Hincl.
-  apply (VLSM_incl_protocol_state Hincl) in Hs.
+  apply (VLSM_incl_valid_state Hincl) in Hs.
   apply
-    (composite_sent_protocol (equivocator_IM IM) finite_index (equivocator_Hbs IM Hbs)
+    (composite_sent_valid (equivocator_IM IM) finite_index (equivocator_Hbs IM Hbs)
       _ _ Heqv_state_s).
   revert Hm.
-  apply (VLSM_incl_protocol_state HinclE) in Heqv_state_s.
+  apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
   by specialize
     (VLSM_projection_has_been_sent_reflect
       (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM Hbs finite_index)
@@ -94,14 +94,14 @@ property (for the [equivocators_fixed_equivocations_constraint]).
  *)
 Lemma fixed_equivocating_non_equivocating_constraint_lifting
   eqv_state_s
-  (Heqv_state_s : protocol_state_prop XE eqv_state_s)
+  (Heqv_state_s : valid_state_prop XE eqv_state_s)
   l s om
   (Hv :
-    protocol_valid
+    input_valid
       (seeded_equivocators_no_equivocation_vlsm IM Hbs equivocating
         (sent_by_non_equivocating IM Hbs equivocating (equivocators_total_state_project IM eqv_state_s)))
         l (s, om))
-  (Hlift_s : protocol_state_prop XE (lift_equivocators_sub_state_to IM equivocating eqv_state_s s))
+  (Hlift_s : valid_state_prop XE (lift_equivocators_sub_state_to IM equivocating eqv_state_s s))
   : equivocators_fixed_equivocations_constraint IM Hbs index_listing
         equivocating
         (lift_equivocators_sub_label_to IM equivocating eqv_state_s l)
@@ -110,15 +110,15 @@ Proof.
   specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM Hbs index_listing equivocating)
     as HinclE.
   destruct Hv as [Hs [Hom [_ Hc]]].
-  apply protocol_has_fixed_equivocation in Hlift_s.
+  apply valid_state_has_fixed_equivocation in Hlift_s.
   split.
   - split; [|exact I].
     destruct om as [m|]; [|exact I].
     left.
     apply proj1 in Hc as [Hsent | Hseed].
     + revert Hsent. simpl.
-      apply (VLSM_incl_protocol_state HinclE) in Heqv_state_s.
-      apply (VLSM_incl_protocol_state (seeded_no_equivocation_incl_preloaded IM Hbs equivocating _)) in Hs.
+      apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
+      apply (VLSM_incl_valid_state (seeded_no_equivocation_incl_preloaded IM Hbs equivocating _)) in Hs.
       by specialize
         (VLSM_weak_full_projection_has_been_sent
           (PreFreeSubE_PreFreeE_weak_full_projection IM _ finite_index equivocating
@@ -136,9 +136,9 @@ Proof.
       apply
         (VLSM_projection_has_been_sent_reflect
           (preloaded_equivocator_zero_projection (IM i)) (HbsX := equivocator_HasBeenSentCapability (IM i))).
-      apply (VLSM_incl_protocol_state HinclE) in Heqv_state_s.
+      apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
       revert Heqv_state_s.
-      apply (VLSM_projection_protocol_state (preloaded_component_projection (equivocator_IM IM) i)).
+      apply (VLSM_projection_valid_state (preloaded_component_projection (equivocator_IM IM) i)).
   - destruct (composite_transition _ _ _) as (s', om') eqn:Ht'.
     apply
       (equivocating_transition_preserves_fixed_equivocation
@@ -151,24 +151,24 @@ Qed.
 (** A message that can be generated from a state <<s>> of the free composition
   of equivocating equivocators pre-loaded with all messages has the
   [composite_has_been_sent] property for the state obtained upon "appending"
-  state <<s>> to protocol state for the composition of all equivocators.
+  state <<s>> to valid state for the composition of all equivocators.
 
   This result plays an important role in satisfying the no-message equivocation
   constraint.
 *)
 Lemma fixed_equivocation_replay_has_message
   eqv_state_s
-  (Heqv_state_s : protocol_state_prop PreFreeE eqv_state_s)
+  (Heqv_state_s : valid_state_prop PreFreeE eqv_state_s)
   im s
   (Him :
-    protocol_generated_prop
+    can_produce
     (pre_loaded_with_all_messages_vlsm
       (free_composite_vlsm (equivocator_IM (sub_IM IM equivocating))))
     s im)
   : composite_has_been_sent (equivocator_IM IM) (equivocator_Hbs IM Hbs)
       (lift_equivocators_sub_state_to IM equivocating eqv_state_s s) im.
 Proof.
-  apply non_empty_protocol_trace_from_protocol_generated_prop in Him
+  apply non_empty_valid_trace_from_can_produce in Him
     as [im_eis [im_etr [item [Him_etr [Hlast [Heqs Him]]]]]].
   specialize
     (PreFreeSubE_PreFreeE_weak_full_projection IM index_listing finite_index
@@ -180,8 +180,8 @@ Proof.
       (finite_sub_index equivocating finite_index)
       (sub_has_been_sent_capabilities (equivocator_IM IM) equivocating (equivocator_Hbs IM Hbs))
       (free_constraint _)).
-  apply ptrace_add_default_last in Him_etr.
-  apply ptrace_last_pstate in Him_etr as Him_etr_lst.
+  apply valid_trace_add_default_last in Him_etr.
+  apply valid_trace_last_pstate in Him_etr as Him_etr_lst.
   specialize
     (VLSM_weak_full_projection_has_been_sent Hproj _ Him_etr_lst im) as Hsent.
   unfold has_been_sent in Hsent. simpl in Hsent.
@@ -223,28 +223,28 @@ Proof.
     split; [reflexivity|].
     split; [assumption|].
     apply sent_by_non_equivocating_are_sent in Hsent.
-    apply (VLSM_eq_protocol_state HeqXE) in Hstate_protocol.
-    apply (VLSM_incl_protocol_state HinclE) in Hstate_protocol.
+    apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
+    apply (VLSM_incl_valid_state HinclE) in Hstate_valid.
     left.
     revert Hsent. subst.
     specialize
       (VLSM_projection_has_been_sent_reflect
         (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM Hbs finite_index)
-        eqv_state_s Hstate_protocol im) as Hsent.
+        eqv_state_s Hstate_valid im) as Hsent.
     unfold has_been_sent in Hsent. simpl in Hsent.
     assumption.
   - (*  If <<im>> can be emitted by the free composition of equivocating nodes
         seeded with the messages [sent_by_non_equivocating] in <<s>>, then we can
-        use Lemma [seeded_equivocators_finite_protocol_trace_init_to_rev] to
+        use Lemma [seeded_equivocators_finite_valid_trace_init_to_rev] to
         simulate that trace in the equivocator-composition of equivocating
         nodes with no-messages equivocation.
     *)
     apply can_emit_has_trace in Hemitted
         as [im_is [im_tr [im_item [Him_tr Him_item]]]].
-    apply ptrace_add_default_last in Him_tr.
+    apply valid_trace_add_default_last in Him_tr.
     rewrite finite_trace_last_is_last in Him_tr.
     apply
-      (seeded_equivocators_finite_protocol_trace_init_to_rev
+      (seeded_equivocators_finite_valid_trace_init_to_rev
         (sub_IM IM equivocating) (sub_has_been_sent_capabilities IM equivocating Hbs)
         (finite_sub_index equivocating finite_index) _ no_initial_messages_in_sub_IM)
       in Him_tr
@@ -252,15 +252,15 @@ Proof.
     rewrite finite_trace_last_output_is_last in Him_output.
     rewrite Him_item in Him_output.
     (*  We will use Lemma
-        [sub_preloaded_replayed_trace_from_protocol_equivocating] to replay
+        [sub_preloaded_replayed_trace_from_valid_equivocating] to replay
         the trace obtained above on top of the given state, thus ensuring that
         state-equivocation is only introduced for the equivocating nodes.
-        We will used Lemmas [fixed_equivocating_sent_by_non_equivocating_protocol]
+        We will used Lemmas [fixed_equivocating_messages_sent_by_non_equivocating_are_valid]
         and [fixed_equivocating_non_equivocating_constraint_lifting] to satisfy
         the hypotheses of the replay lemma.
     *)
     specialize
-      (sub_preloaded_replayed_trace_from_protocol_equivocating
+      (sub_preloaded_replayed_trace_from_valid_equivocating
         IM Hbs _ finite_index (sent_by_non_equivocating IM Hbs equivocating s)
         equivocating
         (equivocators_fixed_equivocations_constraint IM Hbs index_listing equivocating)
@@ -269,8 +269,8 @@ Proof.
     spec Hreplay.
     { clear -finite_index HeqXE. intros i ns s Hi Hs.
       split; [split; exact I|].
-      apply (VLSM_eq_protocol_state HeqXE) in Hs.
-      apply protocol_has_fixed_equivocation in Hs.
+      apply (VLSM_eq_valid_state HeqXE) in Hs.
+      apply valid_state_has_fixed_equivocation in Hs.
       destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
       apply
         (equivocating_transition_preserves_fixed_equivocation
@@ -279,30 +279,30 @@ Proof.
     }
     spec Hreplay.
     { subst s.
-      apply ptrace_last_pstate in HtrX.
-      apply (VLSM_eq_protocol_state HeqXE) in Hstate_protocol.
-      apply (VLSM_eq_protocol_state HeqX) in HtrX.
+      apply valid_trace_last_pstate in HtrX.
+      apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
+      apply (VLSM_eq_valid_state HeqX) in HtrX.
       intros m Hsent.
-      apply (VLSM_incl_protocol_message (VLSM_eq_proj1 HeqXE)); [by left|].
-      by apply (fixed_equivocating_sent_by_non_equivocating_protocol eqv_state_s).
+      apply (VLSM_incl_valid_message (VLSM_eq_proj1 HeqXE)); [by left|].
+      by apply (fixed_equivocating_messages_sent_by_non_equivocating_are_valid eqv_state_s).
     }
     spec Hreplay eqv_state_s.
     spec Hreplay.
-    { by apply (VLSM_eq_protocol_state HeqXE), (VLSM_eq_protocol_state HeqXE). }
+    { by apply (VLSM_eq_valid_state HeqXE), (VLSM_eq_valid_state HeqXE). }
     spec Hreplay.
     { subst s.
-      clear -finite_index FreeE_Hbs SubFreeE_Hbs HeqXE Hstate_protocol.
+      clear -finite_index FreeE_Hbs SubFreeE_Hbs HeqXE Hstate_valid.
       intros l s om Hv Hlift_s.
-      apply (VLSM_eq_protocol_state HeqXE) in Hstate_protocol.
-      apply (VLSM_eq_protocol_state HeqXE) in Hlift_s.
+      apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
+      apply (VLSM_eq_valid_state HeqXE) in Hlift_s.
       by apply fixed_equivocating_non_equivocating_constraint_lifting.
     }
-    apply ptrace_get_last in Him_etr as Him_etr_lst.
-    apply ptrace_forget_last in Him_etr.
+    apply valid_trace_get_last in Him_etr as Him_etr_lst.
+    apply valid_trace_forget_last in Him_etr.
     specialize (Hreplay _ _ Him_etr).
-    apply ptrace_add_default_last in Hreplay.
+    apply valid_trace_add_default_last in Hreplay.
     eexists _,_; split; [exact Hreplay|].
-    (*  Having verified the protocol-ness part of the conclusion, now we only
+    (*  Having verified the validity part of the conclusion, now we only
         need to show two projection properties, and the no message-equivocation
         constraint for which we employ Lemma [fixed_equivocation_replay_has_message].
     *)
@@ -317,8 +317,8 @@ Proof.
         IM index_listing equivocating
         eqv_state_s im_eis im_etr).
     +
-      apply (VLSM_eq_protocol_state HeqXE) in Hstate_protocol.
-      apply (VLSM_incl_protocol_state HinclE) in Hstate_protocol as Hstate_pre.
+      apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
+      apply (VLSM_incl_valid_state HinclE) in Hstate_valid as Hstate_pre.
       specialize
         (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM (sub_IM IM equivocating))
           (free_constraint _)
@@ -326,7 +326,7 @@ Proof.
           (sent_by_non_equivocating IM Hbs equivocating
                     s)
         ) as Hsub_incl.
-      apply (VLSM_incl_finite_protocol_trace Hsub_incl) in Him_etr.
+      apply (VLSM_incl_finite_valid_trace Hsub_incl) in Him_etr.
       left.
       specialize
         (replayed_trace_from_finite_trace_last IM _ finite_index equivocating eqv_state_s im_eis im_etr (proj2 Him_etr)).
@@ -338,7 +338,7 @@ Proof.
       replace (im_ert' ++ [item]) with (im_ert' ++ [item] ++ []) in Him_etr
         by (rewrite app_assoc; apply app_nil_r).
       specialize
-        (protocol_transition_to
+        (input_valid_transition_to
           (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (equivocator_IM (sub_IM IM equivocating))))
           _ _ _ _ _ Him_etr eq_refl)
         as Ht.
@@ -352,17 +352,17 @@ Qed.
 
 The main result, showing that fixed-set message-equivocation traces can be
 simulated by fixed-set state-equivocation traces is obtained by instantiating
-Lemma [generalized_equivocators_finite_protocol_trace_init_to_rev], discharing
+Lemma [generalized_equivocators_finite_valid_trace_init_to_rev], discharing
 the most complex assumption of the lemma (about [replayable_message_prop])
 with Lemma [fixed_equivocation_has_replayable_message_prop].
 *)
-Lemma fixed_equivocators_finite_protocol_trace_init_to_rev
+Lemma fixed_equivocators_finite_valid_trace_init_to_rev
   isX sX trX
-  (HtrX : finite_protocol_trace_init_to X isX sX trX)
+  (HtrX : finite_valid_trace_init_to X isX sX trX)
   : exists is, equivocators_total_state_project IM is = isX /\
     exists s, equivocators_total_state_project IM s = sX /\
     exists tr, equivocators_total_trace_project IM tr = trX /\
-    finite_protocol_trace_init_to XE is s tr /\
+    finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   (*
@@ -376,9 +376,9 @@ Proof.
   }
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
   specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
-  apply (VLSM_eq_finite_protocol_trace_init_to HeqX) in HtrX.
+  apply (VLSM_eq_finite_valid_trace_init_to HeqX) in HtrX.
   apply
-    (generalized_equivocators_finite_protocol_trace_init_to_rev
+    (generalized_equivocators_finite_valid_trace_init_to_rev
       IM Hbs finite_index _ _
       (equivocators_fixed_equivocations_constraint IM Hbs index_listing equivocating))
     in HtrX
@@ -387,15 +387,15 @@ Proof.
     exists s. split; [assumption|].
     exists tr. split; [assumption|].
     split; [|assumption].
-    apply (VLSM_eq_finite_protocol_trace_init_to HeqXE).
+    apply (VLSM_eq_finite_valid_trace_init_to HeqXE).
     assumption.
   - intro; intros.
-    apply (VLSM_eq_protocol_state HeqXE) in Hes.
+    apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
     + split; [|exact I].  destruct om as [im|]; [|exact I].
       destruct Hom as [Hom|Hinitial]; [left; assumption|exfalso].
       apply no_initial_messages_in_XE in Hinitial. contradiction.
-    + apply protocol_has_fixed_equivocation in Hes.
+    + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
       simpl.
       apply
@@ -437,14 +437,14 @@ Context {message : Type}
 Existing Instance Free_Hbs.
 Existing Instance FreeE_Hbs.
 
-Lemma no_equivocating_equivocators_finite_protocol_trace_init_to_rev
+Lemma no_equivocating_equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   isX sX trX
-  (HtrX : finite_protocol_trace_init_to X isX sX trX)
+  (HtrX : finite_valid_trace_init_to X isX sX trX)
   : exists is, equivocators_total_state_project IM is = isX /\
     exists s, equivocators_total_state_project IM s = sX /\
     exists tr, equivocators_total_trace_project IM tr = trX /\
-    finite_protocol_trace_init_to XE is s tr /\
+    finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
@@ -455,9 +455,9 @@ Proof.
   }
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
   specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
-  apply (VLSM_eq_finite_protocol_trace_init_to HeqX) in HtrX.
+  apply (VLSM_eq_finite_valid_trace_init_to HeqX) in HtrX.
   apply
-    (generalized_equivocators_finite_protocol_trace_init_to_rev
+    (generalized_equivocators_finite_valid_trace_init_to_rev
       IM Hbs finite_index _ _
       (equivocators_fixed_equivocations_constraint IM Hbs index_listing []))
     in HtrX
@@ -466,15 +466,15 @@ Proof.
     exists s. split; [assumption|].
     exists tr. split; [assumption|].
     split; [|assumption].
-    apply (VLSM_eq_finite_protocol_trace_init_to HeqXE).
+    apply (VLSM_eq_finite_valid_trace_init_to HeqXE).
     assumption.
   - intro; intros.
-    apply (VLSM_eq_protocol_state HeqXE) in Hes.
+    apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
     + split; [|exact I].  destruct om as [im|]; [|exact I].
       destruct Hom as [Hom|Hinitial]; [left; assumption|exfalso].
       apply no_initial_messages_in_XE in Hinitial. contradiction.
-    + apply protocol_has_fixed_equivocation in Hes.
+    + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
       simpl.
       apply
@@ -496,14 +496,14 @@ Proof.
     split; [constructor; assumption|].
     split; [reflexivity|].
     split; [assumption|].
-    apply (VLSM_eq_protocol_state HeqXE) in Hstate_protocol.
-    apply (VLSM_incl_protocol_state HinclE) in Hstate_protocol.
+    apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
+    apply (VLSM_incl_valid_state HinclE) in Hstate_valid.
     left.
     revert Hsent. subst.
     specialize
       (VLSM_projection_has_been_sent_reflect
         (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM Hbs finite_index)
-        eqv_state_s Hstate_protocol im) as Hsent.
+        eqv_state_s Hstate_valid im) as Hsent.
     unfold has_been_sent in Hsent. simpl in Hsent.
     assumption.
 Qed.

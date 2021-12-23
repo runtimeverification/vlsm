@@ -148,7 +148,7 @@ Definition is_equivocating_tracewise
   : Prop
   :=
   forall is tr
-  (Hpr : finite_protocol_trace_init_to PreFree is s tr),
+  (Hpr : finite_valid_trace_init_to PreFree is s tr),
   exists (m : message),
   (sender m = Some v) /\
   exists prefix elem suffix (lprefix := finite_trace_last is prefix),
@@ -166,7 +166,7 @@ Definition is_equivocating_tracewise_no_has_been_sent
   : Prop
   :=
   forall is tr
-  (Htr : finite_protocol_trace_init_to PreFree is s tr),
+  (Htr : finite_valid_trace_init_to PreFree is s tr),
   exists (m : message),
   (sender m = Some v) /\
   equivocation_in_trace PreFree m tr.
@@ -176,7 +176,7 @@ Lemma is_equivocating_tracewise_no_has_been_sent_equivocating_senders_in_trace
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s v <->
     forall is tr
-    (Htr : finite_protocol_trace_init_to PreFree is s tr),
+    (Htr : finite_valid_trace_init_to PreFree is s tr),
     v ∈ equivocating_senders_in_trace tr.
 Proof.
   split; intros Heqv is tr Htr; specialize (Heqv _ _ Htr)
@@ -198,10 +198,10 @@ Proof.
   apply and_proper_l; intro Hsender.  apply exist_proper; intro prefix.
   apply exist_proper; intro item.  apply exist_proper; intro suffix.
   apply and_proper_l. intro Htreq.  apply and_iff_compat_l.  apply not_iff_compat.
-  assert (Hpre : finite_protocol_trace_init_to PreFree is (finite_trace_last is prefix) prefix).
+  assert (Hpre : finite_valid_trace_init_to PreFree is (finite_trace_last is prefix) prefix).
   { split; [|apply Htr].
     subst tr.
-    apply proj1, finite_protocol_trace_from_to_app_split, proj1 in Htr. 
+    apply proj1, finite_valid_trace_from_to_app_split, proj1 in Htr.
     assumption.
   }
   pose proof (CHbs := composite_has_been_sent_stepwise_props IM Hbs (free_constraint IM)).
@@ -212,7 +212,7 @@ Qed.
 
 Lemma transition_is_equivocating_tracewise_char
   l s om s' om'
-  (Ht : protocol_transition PreFree l (s, om) (s', om'))
+  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v ->
     is_equivocating_tracewise_no_has_been_sent s v \/
@@ -238,7 +238,7 @@ Qed.
 
 Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
   l s om s' om'
-  (Ht : protocol_transition PreFree l (s, om) (s', om'))
+  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
   (Hno_sender : option_bind _ _ sender om = None)
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v -> is_equivocating_tracewise_no_has_been_sent s v.
@@ -253,9 +253,9 @@ Lemma is_equivocating_statewise_implies_is_equivocating_tracewise s v
 Proof.
   intros [j [m [Hm [Hnbs_m Hbr_m]]]] is tr Htr.
   exists m. split; [assumption|].
-  apply preloaded_finite_ptrace_init_to_projection with (j0 := j) in Htr as Htrj.
+  apply preloaded_finite_valid_trace_init_to_projection with (j0 := j) in Htr as Htrj.
   apply proj1 in Htrj as Hlstj.
-  apply finite_protocol_trace_from_to_last_pstate in Hlstj.
+  apply finite_valid_trace_from_to_last_pstate in Hlstj.
   apply proper_received in Hbr_m; [|assumption].
 
   specialize (Hbr_m _ _ Htrj).
@@ -270,12 +270,12 @@ Proof.
 
   subst.
   clear -Hnbs_m Htr.
-  apply preloaded_finite_ptrace_init_to_projection with (j := A v) in Htr as Htrv.
-  apply proj1, finite_protocol_trace_from_to_app_split,proj1
-    , preloaded_finite_ptrace_from_to_projection with (j := A v)
-    , finite_protocol_trace_from_to_last in Htr.
+  apply preloaded_finite_valid_trace_init_to_projection with (j := A v) in Htr as Htrv.
+  apply proj1, finite_valid_trace_from_to_app_split,proj1
+    , preloaded_finite_valid_trace_from_to_projection with (j := A v)
+    , finite_valid_trace_from_to_last in Htr.
   rewrite (VLSMProjections.VLSM_projection_trace_project_app (preloaded_component_projection IM (A v))) in Htrv.
-  apply proj1, (finite_protocol_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (IM (A v)))),proj2 in Htrv.
+  apply proj1, (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (IM (A v)))),proj2 in Htrv.
   rewrite Htr in Htrv.
 
   intro Hbs_m. elim Hnbs_m. clear Hnbs_m.
@@ -293,7 +293,7 @@ Lemma initial_state_not_is_equivocating_tracewise
 Proof.
   intros Heqv.
   specialize (Heqv s []).
-  spec Heqv. { split; [|assumption]. constructor. apply initial_is_protocol. assumption. }
+  spec Heqv. { split; [|assumption]. constructor. apply initial_state_is_valid. assumption. }
   destruct Heqv as [m [_ [prefix [suf [item [Heq _]]]]]].
   destruct prefix; inversion Heq.
 Qed.
@@ -341,13 +341,13 @@ Proof.
   assumption.
 Qed.
 
-Lemma protocol_transition_receiving_no_sender_reflects_equivocating_validators
+Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validators
   l s om s' om'
-  (Ht : protocol_transition PreFree l (s, om) (s', om'))
+  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
   (Hno_sender : option_bind _ _ sender om = None)
   : equivocating_validators s' ⊆ equivocating_validators s.
 Proof.
-  intro v. 
+  intro v.
   intro Hs'. apply equivocating_validators_is_equivocating_tracewise_iff in Hs'.
   apply equivocating_validators_is_equivocating_tracewise_iff.
   apply transition_receiving_no_sender_reflects_is_equivocating_tracewise with l om s' om'
@@ -367,11 +367,11 @@ Qed.
 
 Lemma composite_transition_no_sender_equivocators_weight
   l s om s' om'
-  (Ht : protocol_transition PreFree l (s, om) (s', om'))
+  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
   (Hno_sender : option_bind _ _ sender om = None)
   : (equivocation_fault s' <= equivocation_fault s)%R.
 Proof.
-  specialize (protocol_transition_receiving_no_sender_reflects_equivocating_validators _ _ _ _ _ Ht Hno_sender) as Heqv.
+  specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators _ _ _ _ _ Ht Hno_sender) as Heqv.
   revert Heqv.
   apply incl_equivocating_validators_equivocation_fault.
 Qed.

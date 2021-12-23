@@ -60,13 +60,13 @@ Definition limited_equivocation_vlsm_composition
   :=
   composite_vlsm IM limited_equivocation_constraint.
 
-Lemma full_node_limited_equivocation_protocol_state_weight s
-  : protocol_state_prop limited_equivocation_vlsm_composition s ->
+Lemma full_node_limited_equivocation_valid_state_weight s
+  : valid_state_prop limited_equivocation_vlsm_composition s ->
     tracewise_not_heavy s.
 Proof.
   intro Hs.
   unfold tracewise_not_heavy, not_heavy.
-  induction Hs using protocol_state_prop_ind.
+  induction Hs using valid_state_prop_ind.
   - replace (equivocation_fault s) with 0%R
       by (symmetry;apply initial_state_equivocators_weight;assumption).
     destruct threshold. simpl. apply Rge_le. assumption.
@@ -85,7 +85,7 @@ Section fixed_limited_message_equivocation.
 
 In this section we show that if the set of allowed equivocators for a fixed
 equivocation constraint is of weight smaller than the threshold accepted for
-limited message equivocation, then any protocol trace for the fixed equivocation
+limited message equivocation, then any valid trace for the fixed equivocation
 constraint is also a trace under the limited equivocation constraint.
 *)
 
@@ -119,8 +119,8 @@ Context
   (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ Htracewise_BasicEquivocation)
   .
 
-Lemma StrongFixed_protocol_state_not_heavy s
-  (Hs : protocol_state_prop StrongFixed s)
+Lemma StrongFixed_valid_state_not_heavy s
+  (Hs : valid_state_prop StrongFixed s)
   : tracewise_not_heavy s.
 Proof.
   cut (tracewise_equivocating_validators s ⊆ equivocators).
@@ -137,8 +137,8 @@ Proof.
     - apply (constraint_free_incl IM (strong_fixed_equivocation_constraint IM Hbs equivocators)).
     - apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
-  apply protocol_state_has_trace in Hs as [is [tr Htr]].
-  apply (VLSM_incl_finite_protocol_trace_init_to StrongFixedinclPreFree) in Htr as Hpre_tr.
+  apply valid_state_has_trace in Hs as [is [tr Htr]].
+  apply (VLSM_incl_finite_valid_trace_init_to StrongFixedinclPreFree) in Htr as Hpre_tr.
   intros v Hv.
   apply equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
   specialize (Hvs' _ _ Hpre_tr).
@@ -146,11 +146,11 @@ Proof.
   rewrite Heqtr in Htr.
   destruct Htr as [Htr Hinit].
   change (pre ++ item::suf) with (pre ++ [item] ++ suf) in Htr.
-  apply (finite_protocol_trace_from_to_app_split StrongFixed) in Htr.
+  apply (finite_valid_trace_from_to_app_split StrongFixed) in Htr.
   destruct Htr as [Hpre Hitem].
-  apply (VLSM_incl_finite_protocol_trace_from_to StrongFixedinclPreFree) in Hpre as Hpre_pre.
-  apply ptrace_last_pstate in Hpre_pre as Hs_pre.
-  apply (finite_protocol_trace_from_to_app_split StrongFixed), proj1 in Hitem.
+  apply (VLSM_incl_finite_valid_trace_from_to StrongFixedinclPreFree) in Hpre as Hpre_pre.
+  apply valid_trace_last_pstate in Hpre_pre as Hs_pre.
+  apply (finite_valid_trace_from_to_app_split StrongFixed), proj1 in Hitem.
   inversion Hitem; subst; clear Htl Hitem. simpl in Hm0. subst.
   destruct Ht as [[_ [_ [_ Hc]]] _].
   destruct Hc as [[i [Hi Hsenti]] | Hemit].
@@ -170,8 +170,8 @@ Proof.
   intros (i, li) (s, om) Hpv.
   unfold limited_equivocation_constraint.
   destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
-  specialize (protocol_transition_destination StrongFixed (conj Hpv Ht)) as Hs'.
-  apply StrongFixed_protocol_state_not_heavy in Hs'.
+  specialize (input_valid_transition_destination StrongFixed (conj Hpv Ht)) as Hs'.
+  apply StrongFixed_valid_state_not_heavy in Hs'.
   assumption.
 Qed.
 
@@ -192,7 +192,7 @@ Section has_limited_equivocation.
 (** ** Limited Equivocation derived from Fixed Equivocation
 
 We say that a trace has the [fixed_limited_equivocation_prop]erty if it is
-protocol for the composition using a [generalized_fixed_equivocation_constraint]
+valid for the composition using a [generalized_fixed_equivocation_constraint]
 induced by a subset of indices whose weight is less than the allowed
 [ReachableThreshold].
 *)
@@ -213,7 +213,7 @@ Definition fixed_limited_equivocation_prop
   : Prop
   := exists (equivocators : list index) (Fixed := fixed_equivocation_vlsm_composition IM Hbs Hbr equivocators),
     (sum_weights (remove_dups equivocators) <= `threshold)%R /\
-    finite_protocol_trace Fixed s tr.
+    finite_valid_trace Fixed s tr.
 
 Context
   {index_listing : list index}
@@ -224,23 +224,23 @@ Context
   (Limited : VLSM message := limited_equivocation_vlsm_composition IM finite_index sender)
   .
 
-(** Traces with the [fixed_limited_equivocation_prop]erty are protocol for the
+(** Traces with the [fixed_limited_equivocation_prop]erty are valid for the
 composition using a [limited_equivocation_constraint].
 *)
-Lemma trace_exhibits_limited_equivocation_protocol
+Lemma traces_exhibiting_limited_equivocation_are_valid
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
-  : forall s tr, fixed_limited_equivocation_prop s tr -> finite_protocol_trace Limited s tr.
+  : forall s tr, fixed_limited_equivocation_prop s tr -> finite_valid_trace Limited s tr.
 Proof.
   intros s tr [equivocators [Hlimited Htr]].
-  eapply VLSM_incl_finite_protocol_trace; [| eassumption].
+  eapply VLSM_incl_finite_valid_trace; [| eassumption].
   apply Fixed_incl_Limited; assumption.
 Qed.
 
 (** Traces having the [strong_trace_witnessing_equivocation_prop]erty, which
-are protocol for the free composition and whose final state is [not_heavy] have
+are valid for the free composition and whose final state is [not_heavy] have
 the [fixed_limited_equivocation_prop]erty.
 *)
-Lemma trace_exhibits_limited_equivocation_protocol_rev
+Lemma traces_exhibiting_limited_equivocation_are_valid_rev
   (Hke : WitnessedEquivocationCapability IM id sender finite_index)
   (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
   (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
@@ -251,15 +251,14 @@ Lemma trace_exhibits_limited_equivocation_protocol_rev
     := equivocation_dec_tracewise IM (fun i => i) sender finite_index)
   (tracewise_not_heavy := @not_heavy _ _ _ _ Htracewise_basic_equivocation)
   : forall is s tr, strong_trace_witnessing_equivocation_prop IM id sender finite_index is tr ->
-    finite_protocol_trace_init_to (free_composite_vlsm IM) is s tr ->
+    finite_valid_trace_init_to (free_composite_vlsm IM) is s tr ->
     tracewise_not_heavy s ->
     fixed_limited_equivocation_prop is tr.
 Proof.
   intros is s tr Hstrong Htr Hnot_heavy.
   exists (equivocating_validators s).
-  split; [|split]; cycle 1.
-  - by eapply ptrace_forget_last, strong_witness_has_fixed_equivocation.
-  - apply Htr.
+  split; cycle 1.
+  - eapply valid_trace_forget_last, strong_witness_has_fixed_equivocation; eassumption.
   - replace (sum_weights _) with (equivocation_fault s); [assumption|].
     apply set_eq_nodup_sum_weight_eq.
     + apply equivocating_validators_nodup.
@@ -269,10 +268,10 @@ Proof.
 Qed.
 
 (** Traces with the [strong_trace_witnessing_equivocation_prop]erty, which are
-protocol for the composition using a [limited_equivocation_constraint]
+valid for the composition using a [limited_equivocation_constraint]
 have the [fixed_limited_equivocation_prop]erty.
 *)
-Lemma limited_trace_exhibits_limited_equivocation_protocol_rev
+Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
   (Hke : WitnessedEquivocationCapability IM id sender finite_index)
   (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
   (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
@@ -280,47 +279,47 @@ Lemma limited_trace_exhibits_limited_equivocation_protocol_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM id sender)
   : forall s tr, strong_trace_witnessing_equivocation_prop IM id sender finite_index s tr ->
-    finite_protocol_trace Limited s tr -> fixed_limited_equivocation_prop s tr.
+    finite_valid_trace Limited s tr -> fixed_limited_equivocation_prop s tr.
 Proof.
   intros s tr Hstrong Htr.
   apply proj1 in Htr as Hnot_heavy.
-  apply finite_ptrace_last_pstate, full_node_limited_equivocation_protocol_state_weight in Hnot_heavy.
-  assert (Hfree_tr : finite_protocol_trace (free_composite_vlsm IM) s tr). {
-    revert Htr. apply VLSM_incl_finite_protocol_trace.
+  apply finite_valid_trace_last_pstate, full_node_limited_equivocation_valid_state_weight in Hnot_heavy.
+  assert (Hfree_tr : finite_valid_trace (free_composite_vlsm IM) s tr). {
+    revert Htr. apply VLSM_incl_finite_valid_trace.
     apply constraint_free_incl.
   }
   clear Htr.
-  apply ptrace_add_default_last in Hfree_tr.
-  apply trace_exhibits_limited_equivocation_protocol_rev with (finite_trace_last s tr); assumption.
+  apply valid_trace_add_default_last in Hfree_tr.
+  apply traces_exhibiting_limited_equivocation_are_valid_rev with (finite_trace_last s tr); assumption.
 Qed.
 
-(** Any state which is protocol for limited equivocation can be produced by
+(** Any state which is valid for limited equivocation can be produced by
 a trace having the [fixed_limited_equivocation_prop]erty.
 *)
-Lemma limited_protocol_state_has_trace_exhibiting_limited_equivocation
+Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
   (Hke : WitnessedEquivocationCapability IM id sender finite_index)
   (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
   (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
   (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM id sender)
-  : forall s, protocol_state_prop Limited s ->
+  : forall s, valid_state_prop Limited s ->
     exists is tr, finite_trace_last is tr = s /\ fixed_limited_equivocation_prop is tr.
 Proof.
   intros s Hs.
-  assert (Hfree_s : protocol_state_prop (free_composite_vlsm IM) s). {
+  assert (Hfree_s : valid_state_prop (free_composite_vlsm IM) s). {
     revert Hs.
-    apply VLSM_incl_protocol_state.
+    apply VLSM_incl_valid_state.
     apply constraint_free_incl.
    }
   destruct
     (free_has_strong_trace_witnessing_equivocation_prop IM finite_index Hbs Hbr id sender finite_index _ s Hfree_s)
     as [is [tr [Htr Heqv]]].
   exists is, tr.
-  apply ptrace_get_last in Htr as Hlst.
+  apply valid_trace_get_last in Htr as Hlst.
   split; [assumption|].
-  apply full_node_limited_equivocation_protocol_state_weight in Hs.
-  apply trace_exhibits_limited_equivocation_protocol_rev with s.
+  apply full_node_limited_equivocation_valid_state_weight in Hs.
+  apply traces_exhibiting_limited_equivocation_are_valid_rev with s.
   all: assumption.
 Qed.
 

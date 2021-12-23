@@ -15,14 +15,14 @@ The witnessed equivocation assumption is a possible way to address this issue.
 Starting from the (reasonable) assumption that for any state <<s>>, there is
 a trace ending in <<s>> whose [equivocating_senders_in_trace] are precisely
 the equivocators of <<s>> (the [WitnessedEquivocationCapability]),
-we can show that for each Free protocol state there exists
-a protocol trace with the [strong_trace_witnessing_equivocation_prop]erty,
+we can show that for each Free valid state there exists
+a valid trace with the [strong_trace_witnessing_equivocation_prop]erty,
 i.e., a trace whose every prefix is a witness for its corresponding end state
 (Lemma [free_has_strong_trace_witnessing_equivocation_prop]).
 In particular, the set of equivocators is monotonically increasing for such a
 trace (Lemma [strong_witness_equivocating_validators_prefix_monotonicity]).
 
-We then use this result to show that any Free protocol state is also a protocol
+We then use this result to show that any Free valid state is also a valid
 state for the composition of nodes under the [fixed_equivocation_constraint]
 induced by its set of equivocators.
 *)
@@ -91,8 +91,8 @@ valid states there exist a trace witnessing its equivocation.
 Class WitnessedEquivocationCapability
   :=
   { is_equivocating_tracewise_witness :
-    forall s, protocol_state_prop PreFree s ->
-    exists is tr, finite_protocol_trace_init_to PreFree is s tr /\
+    forall s, valid_state_prop PreFree s ->
+    exists is tr, finite_valid_trace_init_to PreFree is s tr /\
       trace_witnessing_equivocation_prop is tr
   }.
 
@@ -125,7 +125,7 @@ its final transition is monotonic w.r.t. the [equivocating_validators].
 Lemma equivocating_validators_witness_monotonicity
   (is s : composite_state IM)
   (tr : list (composite_transition_item IM))
-  (Htr : finite_protocol_trace_init_to PreFree is s tr)
+  (Htr : finite_valid_trace_init_to PreFree is s tr)
   (item : composite_transition_item IM)
   (Hwitness : trace_witnessing_equivocation_prop is (tr ++ [item]))
   (s' := destination item)
@@ -148,17 +148,17 @@ are  included in the [equivocating_validators] for the source of its last
 transition, the the trace without its last transition also has the
 [trace_witnessing_equivocation_prop]erty.
 *)
-Lemma protocol_transition_reflects_trace_witnessing_equivocation_prop
+Lemma input_valid_transition_reflects_trace_witnessing_equivocation_prop
   (is s: composite_state IM)
   (tr: list (composite_transition_item IM))
-  (Htr: finite_protocol_trace_init_to PreFree is s tr)
+  (Htr: finite_valid_trace_init_to PreFree is s tr)
   (item : composite_transition_item IM)
   (Hwitness : trace_witnessing_equivocation_prop is (tr ++ [item]))
   (s' := destination item)
   (Hincl : equivocating_validators s' ⊆ equivocating_validators s)
   : trace_witnessing_equivocation_prop is tr.
 Proof.
-  apply finite_protocol_trace_init_to_last in Htr as Hlst.
+  apply finite_valid_trace_init_to_last in Htr as Hlst.
   simpl in Hlst.
   intros v. split; intros; simpl in *; rewrite Hlst in *.
   - apply equivocating_validators_is_equivocating_tracewise_iff in H.
@@ -179,14 +179,14 @@ message is not sent by any trace witnessing the source of the transition.
 *)
 Lemma equivocating_validators_step_update
     l s om s' om'
-    (Ht : protocol_transition PreFree l (s, om) (s', om'))
+    (Ht : input_valid_transition PreFree l (s, om) (s', om'))
     v
     : v ∈ equivocating_validators s' ->
       v ∈ equivocating_validators s \/
       (exists m, om = Some m /\
       sender m = Some v /\
       forall is tr
-      (Htr : finite_protocol_trace_init_to PreFree is s tr)
+      (Htr : finite_valid_trace_init_to PreFree is s tr)
       (Hwitness : trace_witnessing_equivocation_prop is tr),
       ~ trace_has_message (field_selector output) m tr).
 Proof.
@@ -210,7 +210,7 @@ Proof.
     inversion Heq_m. assumption.
   - elim Hnv.
     spec Hwitness v.
-    apply finite_protocol_trace_from_to_last in Htr as Hs.
+    apply finite_valid_trace_from_to_last in Htr as Hs.
     simpl in Hs, Hwitness. rewrite Hs in Hwitness.
     apply Hwitness. exists m'. split; [assumption|].
     exists prefix, item, suffix'.
@@ -226,7 +226,7 @@ Given a non-empty trace with the [trace_witnessing_equivocation_prop]erty,
 there are two disjoint possibilities concerning its last transition.
 
 (1) either it preserves the set of [equivocating_validators] and, in that case,
-the trace without the last transition has the 
+the trace without the last transition has the
 [trace_witnessing_equivocation_prop]erty as well; or
 
 (2) The set of [equivocating_validators] of its destination is obtained
@@ -242,7 +242,7 @@ Lemma equivocating_validators_witness_last_char
   (s' : composite_state IM)
   (om' : option message)
   (item  := {| l := l; input := om; destination := s'; output := om' |})
-  (Htr_item : finite_protocol_trace_init_to PreFree is s' (tr ++ [item]))
+  (Htr_item : finite_valid_trace_init_to PreFree is s' (tr ++ [item]))
   (Hwitness : trace_witnessing_equivocation_prop is (tr ++ [item]))
   (s := finite_trace_last is tr)
   : set_eq (equivocating_validators s) (equivocating_validators s')
@@ -253,19 +253,19 @@ Lemma equivocating_validators_witness_last_char
      v ∉ equivocating_validators s /\
      set_eq (equivocating_validators s') (set_add v (equivocating_validators s)) /\
      forall (is : _composite_state IM) (tr : list transition_item),
-        finite_protocol_trace_init_to PreFree is s tr ->
+        finite_valid_trace_init_to PreFree is s tr ->
         trace_witnessing_equivocation_prop is tr ->
         ~ trace_has_message (field_selector output) m tr
     ).
 Proof.
   destruct Htr_item as [Htr Hinit].
-  apply finite_protocol_trace_from_to_app_split in Htr.
+  apply finite_valid_trace_from_to_app_split in Htr.
   destruct Htr as [Htr Hitem].
   inversion_clear Hitem. clear Htl. subst s.
   apply equivocating_validators_witness_monotonicity with (s := (finite_trace_last is tr))
     in Hwitness as Hincl
   ; [| split; assumption].
-  specialize (protocol_transition_receiving_no_sender_reflects_equivocating_validators IM A sender finite_validator _ _ _  _ _ Ht)
+  specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators IM A sender finite_validator _ _ _  _ _ Ht)
     as Hreflect.
   remember (finite_trace_last is tr) as s.
   destruct (option_bind _ _ sender om) as [v|] eqn:Heq_v.
@@ -273,7 +273,7 @@ Proof.
     destruct (decide (set_eq (equivocating_validators s) (equivocating_validators s')))
     ; [left;split; [assumption|]|].
     + apply
-        (protocol_transition_reflects_trace_witnessing_equivocation_prop
+        (input_valid_transition_reflects_trace_witnessing_equivocation_prop
           _ _ _ (conj Htr Hinit) _ Hwitness).
       subst. apply s0.
     + right. exists m; split; [reflexivity|]. exists v. split; [assumption|].
@@ -307,7 +307,7 @@ Proof.
     left. split.
     + split; subst; assumption.
     + apply
-      (protocol_transition_reflects_trace_witnessing_equivocation_prop
+      (input_valid_transition_reflects_trace_witnessing_equivocation_prop
         _ _ _ (conj Htr Hinit) _ Hwitness
       ).
     apply Hreflect.
@@ -328,7 +328,7 @@ is that is guantees monotonicity of [equivocating_validators] along the trace.
 Lemma strong_witness_equivocating_validators_prefix_monotonicity
   (is s : composite_state IM)
   (tr : list (composite_transition_item IM))
-  (Htr : finite_protocol_trace_init_to PreFree is s tr)
+  (Htr : finite_valid_trace_init_to PreFree is s tr)
   (Hwitness : strong_trace_witnessing_equivocation_prop is tr)
   prefix suffix
   (Heqtr : prefix ++ suffix = tr)
@@ -336,7 +336,7 @@ Lemma strong_witness_equivocating_validators_prefix_monotonicity
   : equivocating_validators ps ⊆ equivocating_validators s.
 Proof.
   revert prefix suffix Heqtr ps.
-  induction Htr using finite_protocol_trace_init_to_rev_ind; intros.
+  induction Htr using finite_valid_trace_init_to_rev_ind; intros.
   - apply app_eq_nil in Heqtr. destruct Heqtr; subst.
     reflexivity.
   - remember {| input := iom |} as item.
@@ -345,7 +345,7 @@ Proof.
       specialize (Hwitness pre (suf ++ [item])).
       apply Hwitness.
       subst. apply app_assoc.
-    } 
+    }
     destruct_list_last suffix suffix' _item Heqsuffix.
     + rewrite app_nil_r in Heqtr. subst. subst ps.
       rewrite finite_trace_last_is_last. simpl. reflexivity.
@@ -369,9 +369,9 @@ the proof of Lemma [preloaded_has_strong_trace_witnessing_equivocation_prop].
 Lemma strong_trace_witnessing_equivocation_prop_extend_eq
   s
   is tr'
-  (Htr': finite_protocol_trace_init_to PreFree is s tr')
+  (Htr': finite_valid_trace_init_to PreFree is s tr')
   is' tr''
-  (Htr'': finite_protocol_trace_init_to PreFree is' s tr'')
+  (Htr'': finite_valid_trace_init_to PreFree is' s tr'')
   (Hprefix : strong_trace_witnessing_equivocation_prop is' tr'')
   item
   (Hwitness : trace_witnessing_equivocation_prop is (tr' ++ [item]))
@@ -385,7 +385,7 @@ Proof.
     intro v. rewrite finite_trace_last_is_last.
     specialize (Hprefix tr'' []).
     spec Hprefix; [apply app_nil_r|].
-    apply ptrace_get_last in Htr'' as Hlst'.
+    apply valid_trace_get_last in Htr'' as Hlst'.
     split.
     + intros Hv. apply Heq in Hv.
       rewrite <- Hlst' in Hv.
@@ -403,7 +403,7 @@ Proof.
       * destruct Heqv as [Heq_om Heqv].
         assert (Heqv' : ~ trace_has_message (field_selector output) m tr').
         { intro Heqv'. elim Heqv.
-          apply ptrace_last_pstate in Htr' as Htr'_lst.
+          apply valid_trace_last_pstate in Htr' as Htr'_lst.
           destruct
             (has_been_sent_consistency Free
               _ Htr'_lst m
@@ -431,7 +431,7 @@ Qed.
 Lemma strong_trace_witnessing_equivocation_prop_extend_neq
   s
   is tr
-  (Htr: finite_protocol_trace_init_to PreFree is s tr)
+  (Htr: finite_valid_trace_init_to PreFree is s tr)
   (Hprefix : strong_trace_witnessing_equivocation_prop is tr)
   item
   msg
@@ -449,7 +449,7 @@ Proof.
     intro v'. rewrite finite_trace_last_is_last. simpl.
     specialize (Hprefix tr []).
     spec Hprefix; [apply app_nil_r|].
-    apply ptrace_get_last in Htr as Hlst'.
+    apply valid_trace_get_last in Htr as Hlst'.
     split.
     + intros Hv'. apply Hneq in Hv'.
       apply set_add_iff in Hv'.
@@ -496,16 +496,16 @@ the induction hypothesis via property (2).
 The conclusion then follows by the two helper lemmas above.
 *)
 Lemma preloaded_has_strong_trace_witnessing_equivocation_prop s
-  (Hs : protocol_state_prop PreFree s)
+  (Hs : valid_state_prop PreFree s)
   : exists is' tr',
-    finite_protocol_trace_init_to PreFree is' s tr' /\
+    finite_valid_trace_init_to PreFree is' s tr' /\
     strong_trace_witnessing_equivocation_prop is' tr'.
 Proof.
   apply is_equivocating_tracewise_witness in Hs.
   destruct Hs as [is [tr [Htr Hwitness]]].
-  apply finite_protocol_trace_init_to_last in Htr as Hlst.
+  apply finite_valid_trace_init_to_last in Htr as Hlst.
   subst s.
-  apply finite_protocol_trace_init_to_forget_last in Htr.
+  apply finite_valid_trace_init_to_forget_last in Htr.
   remember (length tr) as n.
   remember (length (equivocating_validators (finite_trace_last is tr))) as m.
   revert m n is tr Heqm Heqn Htr Hwitness.
@@ -514,11 +514,11 @@ Proof.
     forall is tr,
     m = length (equivocating_validators (finite_trace_last is tr)) ->
     n = length tr ->
-    finite_protocol_trace PreFree is tr ->
+    finite_valid_trace PreFree is tr ->
     trace_witnessing_equivocation_prop is tr ->
     let s := finite_trace_last is tr in
     exists (is' : state) (tr' : list transition_item),
-      finite_protocol_trace_init_to PreFree is' s tr' /\
+      finite_valid_trace_init_to PreFree is' s tr' /\
       (forall prefix suffix : list transition_item,
        prefix ++ suffix = tr' ->
        trace_witnessing_equivocation_prop is' prefix))
@@ -530,14 +530,14 @@ Proof.
     intros _ _ Htr _.
     exists is, [].
     split.
-    + apply finite_protocol_trace_init_add_last
+    + apply finite_valid_trace_init_add_last
       ; [assumption | reflexivity].
     + intros prefix suffix Heq_tr.
       apply app_eq_nil  in Heq_tr. destruct Heq_tr. subst.
       apply initial_state_witnessing_equivocation_prop. apply Htr.
   - rewrite finite_trace_last_is_last.
     intros Hm Hn Htr'_item Hwitness.
-    apply finite_protocol_trace_init_add_last
+    apply finite_valid_trace_init_add_last
       with (sf := destination item)
       in Htr'_item
     ; [|apply finite_trace_last_is_last].
@@ -560,17 +560,17 @@ Proof.
       spec IHn ; [subst s m; apply le_antisym; assumption|].
       specialize (IHn eq_refl).
       destruct Htr'_item as [Htr'_item Hinit].
-      apply finite_protocol_trace_from_to_app_split in Htr'_item.
+      apply finite_valid_trace_from_to_app_split in Htr'_item.
       destruct Htr'_item as [Htr' Hitem].
       spec IHn.
       { split; [|assumption].
-        apply finite_protocol_trace_from_to_forget_last in Htr'.
+        apply finite_valid_trace_from_to_forget_last in Htr'.
         assumption.
       }
       spec IHn Hwitness'.
       destruct IHn as [is' [tr'' [[Htr'' Hinit'] Hprefix]]].
       specialize
-        (finite_protocol_trace_from_to_app PreFree _ _ _ _ _ Htr'' Hitem)
+        (finite_valid_trace_from_to_app PreFree _ _ _ _ _ Htr'' Hitem)
         as Htr''_item.
       eexists is', _.
       split; [exact (conj Htr''_item Hinit')|].
@@ -583,8 +583,8 @@ Proof.
       end.
       specialize (is_equivocating_tracewise_witness s) as Hwitness'.
       spec Hwitness'.
-      { apply proj1, finite_protocol_trace_from_to_app_split, proj1
-          , finite_protocol_trace_from_to_last_pstate
+      { apply proj1, finite_valid_trace_from_to_app_split, proj1
+          , finite_valid_trace_from_to_last_pstate
           in Htr'_item.
         subst. assumption.
       }
@@ -600,21 +600,21 @@ Proof.
         rewrite <- set_add_length in Hlen1; assumption.
       }
       spec IHm is' tr''.
-      apply finite_protocol_trace_init_to_last in Htr'' as Htr''_lst.
+      apply finite_valid_trace_init_to_last in Htr'' as Htr''_lst.
       simpl in *.
       rewrite Htr''_lst in IHm.
       specialize (IHm eq_refl eq_refl).
       spec IHm.
-      { apply finite_protocol_trace_init_to_forget_last in Htr''.
+      { apply finite_valid_trace_init_to_forget_last in Htr''.
         assumption.
       }
       spec IHm Hwitness'.
       destruct IHm as [is'' [tr''' [[Htr''' Hinit'] Hprefix]]].
-      apply proj1, finite_protocol_trace_from_to_app_split, proj2 in Htr'_item as Hitem.
+      apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr'_item as Hitem.
       simpl in *.
       rewrite <- Heqs in Hitem.
       specialize
-        (finite_protocol_trace_from_to_app PreFree _ _ _ _ _ Htr''' Hitem)
+        (finite_valid_trace_from_to_app PreFree _ _ _ _ _ Htr''' Hitem)
         as Htr'''_item.
       eexists is'', _.
       split; [exact (conj Htr'''_item Hinit')|].
@@ -632,21 +632,21 @@ Proof.
 Qed.
 
 (** A version of Lemma [preloaded_has_strong_trace_witnessing_equivocation_prop]
-guaranteeing that for any [protocol_state] w.r.t. the Free composition there is
-a trace ending in that state which is protocol w.r.t. the Free composition and
+guaranteeing that for any [valid_state] w.r.t. the Free composition there is
+a trace ending in that state which is valid w.r.t. the Free composition and
 it has the [strong_trace_witnessing_equivocation_prop]erty.
 *)
 Lemma free_has_strong_trace_witnessing_equivocation_prop s
-  (Hs : protocol_state_prop Free s)
+  (Hs : valid_state_prop Free s)
   : exists is' tr',
-    finite_protocol_trace_init_to Free is' s tr' /\
+    finite_valid_trace_init_to Free is' s tr' /\
     strong_trace_witnessing_equivocation_prop is' tr'.
 Proof.
-  apply (VLSM_incl_protocol_state (vlsm_incl_pre_loaded_with_all_messages_vlsm Free))
+  apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm Free))
     in Hs as Hpre_s.
   apply preloaded_has_strong_trace_witnessing_equivocation_prop in Hpre_s.
   destruct Hpre_s as [is [tr [Htr Hwitness]]].
-  apply (all_pre_traces_to_protocol_state_are_protocol IM _ Hbr finite_index) in Htr
+  apply (all_pre_traces_to_valid_state_are_valid IM _ Hbr finite_index) in Htr
   ; [|assumption].
   exists is, tr. split; assumption.
 Qed.
@@ -658,8 +658,8 @@ End witnessed_equivocation.
 
 The main result of this module is that, under witnessed equivocation
 assumptions, any trace with the [strong_trace_witnessing_equivocation_prop]erty
-which is protocol for the free composition (guaranteed to exist by
-Lemma [free_has_strong_trace_witnessing_equivocation_prop]) is also protocol
+which is valid for the free composition (guaranteed to exist by
+Lemma [free_has_strong_trace_witnessing_equivocation_prop]) is also valid
 for the composition constrained by the [fixed_equivocation_constrained] induced
 by the [equivocating_validators] of its final state.
 *)
@@ -695,7 +695,7 @@ Context
   (Hsender_safety : sender_safety_alt_prop IM id sender :=
     channel_authentication_sender_safety IM id sender can_emit_signed)
   (Free_has_sender :=
-    composite_no_initial_protocol_messages_have_sender IM id sender
+    composite_no_initial_valid_messages_have_sender IM id sender
       can_emit_signed no_initial_messages_in_IM (free_constraint IM))
   .
 
@@ -716,20 +716,8 @@ Definition equivocating_validators_fixed_equivocation_constraint
   :=
   fixed_equivocation_constraint IM Hbs Hbr (equivocating_validators s).
 
-(** The [equivocating_validators_fixed_equivocation_constraint] induced by a
-larger set of [equivocating_validators] is weaker.
-*)
-Lemma equivocating_validators_fixed_equivocation_subsumption
-  s s'
-  (Hincl : equivocating_validators s ⊆ equivocating_validators s')
-  : strong_constraint_subsumption IM (equivocating_validators_fixed_equivocation_constraint s) (equivocating_validators_fixed_equivocation_constraint s').
-Proof.
-  apply fixed_equivocation_constraint_index_incl_subsumption.
-  assumption.
-Qed.
-
 Lemma equivocators_can_emit_free m
-  (Hm : protocol_message_prop Free m)
+  (Hm : valid_message_prop Free m)
   v
   (Hsender: sender m = Some v)
   sf
@@ -740,7 +728,7 @@ Lemma equivocators_can_emit_free m
     (equivocators_composition_for_observed IM Hbs Hbr (equivocating_validators sf) s)
     m.
 Proof.
-    apply can_emit_protocol_iff in Hm.
+    apply emitted_messages_are_valid_iff in Hm.
     destruct Hm as [[_v [[_im Him] Heqim]] | Hiom]
     ; [elim (no_initial_messages_in_IM _v _im); assumption|].
     apply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
@@ -771,30 +759,31 @@ Qed.
 
 (** *** Main result of the section
 
-Any Free protocol trace with the
-[strong_trace_witnessing_equivocation_prop]erty is also protocol w.r.t. the
+Any Free valid trace with the
+[strong_trace_witnessing_equivocation_prop]erty is also valid w.r.t. the
 composition using the [equivocating_validators_fixed_equivocation_constraint]
 induced by its final state.
 
-The proof proceeds by induction on the protocol trace property.
-Lemmas [equivocating_validators_witness_monotonicity] and 
-[equivocating_validators_fixed_equivocation_subsumption] are used to restate the
+The proof proceeds by induction on the valid trace property.
+Lemmas [equivocating_validators_witness_monotonicity] and
+[fixed_equivocation_vlsm_composition_index_incl] are used to restate the
 induction hypothesis in terms of the final state after the last transition.
 *)
 Lemma strong_witness_has_fixed_equivocation is s tr
-  (Htr : finite_protocol_trace_init_to (free_composite_vlsm IM) is s tr)
+  (Htr : finite_valid_trace_init_to (free_composite_vlsm IM) is s tr)
   (Heqv: strong_trace_witnessing_equivocation_prop IM id sender finite_index is tr)
-  : finite_protocol_trace_from_to (fixed_equivocation_vlsm_composition IM Hbs Hbr (equivocating_validators s)) is s tr.
+  : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM Hbs Hbr (equivocating_validators s)) is s tr.
 Proof.
-  induction Htr using finite_protocol_trace_init_to_rev_ind.
-  - eapply (finite_ptrace_from_to_empty (fixed_equivocation_vlsm_composition IM Hbs Hbr (equivocating_validators si))).
-    apply initial_is_protocol. assumption.
+  split; [|apply Htr].
+  induction Htr using finite_valid_trace_init_to_rev_ind.
+  - eapply (finite_valid_trace_from_to_empty (fixed_equivocation_vlsm_composition IM Hbs Hbr (equivocating_validators si))).
+    apply initial_state_is_valid. assumption.
   - spec IHHtr.
     { intros prefix. intros.
       apply (Heqv prefix (suffix ++  [{| l := l; input := iom; destination := sf; output := oom |}])).
       subst. apply app_assoc.
     }
-    apply (VLSM_incl_finite_protocol_trace_init_to (vlsm_incl_pre_loaded_with_all_messages_vlsm Free))
+    apply (VLSM_incl_finite_valid_trace_init_to (vlsm_incl_pre_loaded_with_all_messages_vlsm Free))
       in Htr as Hpre_tr.
     specialize
       (equivocating_validators_witness_monotonicity IM id sender finite_index
@@ -809,20 +798,17 @@ Proof.
       assumption.
     }
     assert
-      (Htr_sf : finite_protocol_trace_from_to
+      (Htr_sf : finite_valid_trace_from_to
         (fixed_equivocation_vlsm_composition IM Hbs Hbr (equivocating_validators sf)) si s tr).
     { revert IHHtr.
-      apply VLSM_incl_finite_protocol_trace_from_to.
-      apply constraint_subsumption_incl.
-      apply preloaded_constraint_subsumption_stronger.
-      apply strong_constraint_subsumption_strongest.
-      apply equivocating_validators_fixed_equivocation_subsumption.
+      apply VLSM_incl_finite_valid_trace_from_to.
+      apply fixed_equivocation_vlsm_composition_index_incl.
       assumption.
     }
     clear IHHtr.
     apply (extend_right_finite_trace_from_to _ Htr_sf).
     destruct Ht as [[Hs [Hiom [Hv _]]] Ht].
-    apply finite_protocol_trace_from_to_last_pstate in Htr_sf as Hs'.
+    apply finite_valid_trace_from_to_last_pstate in Htr_sf as Hs'.
     specialize
       (Heqv
         (tr ++ [{| l := l; input := iom; destination := sf; output := oom |}])
@@ -831,7 +817,7 @@ Proof.
     destruct iom as [im|].
     2:{
       repeat split
-      ; [assumption| apply option_protocol_message_None | assumption..].
+      ; [assumption| apply option_valid_message_None | assumption..].
     }
     apply Free_has_sender in Hiom as _Hsender.
     destruct (sender im) as [v|] eqn:Hsender; [|congruence].
@@ -839,12 +825,12 @@ Proof.
     spec Heqv v.
     rewrite finite_trace_last_is_last in Heqv.
     simpl in Heqv.
-    assert (Hpre_s : protocol_state_prop (pre_loaded_with_all_messages_vlsm Free) s).
-    { apply proj1, finite_protocol_trace_from_to_last_pstate in Hpre_tr. assumption. }
+    assert (Hpre_s : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) s).
+    { apply proj1, finite_valid_trace_from_to_last_pstate in Hpre_tr. assumption. }
     destruct (@decide _ (composite_has_been_observed_dec IM finite_index Hbo s im)).
     { repeat split
-      ; [assumption| apply option_protocol_message_Some | assumption| | assumption].
-      - apply (composite_observed_protocol IM finite_index Hbs Hbo Hbr _ s); assumption. 
+      ; [assumption| apply option_valid_message_Some | assumption| | assumption].
+      - apply (composite_observed_valid IM finite_index Hbs Hbo Hbr _ s); assumption.
       - left. assumption.
     }
     assert (Hequivocating_v : v ∈ equivocating_validators sf).
@@ -864,7 +850,7 @@ Proof.
     specialize (equivocators_can_emit_free _ Hiom _ Hsender _ Hequivocating_v  _ _ Hv) as Hemit_im.
     repeat split
     ; [assumption|  | assumption| right; assumption | assumption].
-    apply can_emit_protocol.
+    apply emitted_messages_are_valid.
     specialize
       (EquivPreloadedBase_Fixed_weak_full_projection IM Hbs Hbr _ finite_index _ Hs') as Hproj.
     spec Hproj.
@@ -875,22 +861,22 @@ Proof.
 Qed.
 
 (**
-As a corollary of the above, every protocol state for the free composition is
-also a protocol state for the composition with the
+As a corollary of the above, every valid state for the free composition is
+also a valid state for the composition with the
 [equivocating_validators_fixed_equivocation_constraint] induced by it.
 *)
 Lemma equivocating_validators_fixed_equivocation_characterization
   : forall s,
-    protocol_state_prop Free s ->
-    protocol_state_prop
+    valid_state_prop Free s ->
+    valid_state_prop
       (composite_vlsm IM (equivocating_validators_fixed_equivocation_constraint s)) s.
 Proof.
   intros s Hs.
   destruct
     (free_has_strong_trace_witnessing_equivocation_prop IM finite_index Hbs Hbr id sender finite_index _ s Hs)
     as [is [tr [Htr Heqv]]].
-  cut (finite_protocol_trace_from_to (composite_vlsm IM (equivocating_validators_fixed_equivocation_constraint s)) is s tr).
-  { intro Htr'. apply finite_protocol_trace_from_to_last_pstate in Htr'.
+  cut (finite_valid_trace_from_to (composite_vlsm IM (equivocating_validators_fixed_equivocation_constraint s)) is s tr).
+  { intro Htr'. apply finite_valid_trace_from_to_last_pstate in Htr'.
     assumption.
   }
   clear Hs.

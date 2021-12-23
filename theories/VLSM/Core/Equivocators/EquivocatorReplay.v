@@ -60,7 +60,7 @@ Qed.
 Lemma equivocator_state_append_initial_state_in_futures
     (seed : message -> Prop)
     (base_s : equivocator_state X)
-    (Hbase_s : protocol_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
+    (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
     s
     : vinitial_state_prop (equivocator_vlsm X) s ->
       in_futures (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s (equivocator_state_append base_s s).
@@ -71,10 +71,10 @@ Proof.
       None
       (equivocator_state_append base_s s)
       None)].
-  apply (finite_ptrace_from_to_singleton (pre_loaded_vlsm (equivocator_vlsm X) seed)).
+  apply (finite_valid_trace_from_to_singleton (pre_loaded_vlsm (equivocator_vlsm X) seed)).
   repeat split.
   - assumption.
-  - apply option_protocol_message_None.
+  - apply option_valid_message_None.
   - apply H.
   - cbn. f_equal. symmetry. apply equivocator_state_append_singleton_is_extend. apply H.
 Qed.
@@ -82,20 +82,20 @@ Qed.
 Lemma equivocator_state_append_transition_initial_state
     (seed : message -> Prop)
     (base_s : equivocator_state X)
-    (Hbase_s : protocol_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
+    (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
     s
     : vinitial_state_prop (equivocator_vlsm X) s ->
-      protocol_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed)
+      valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed)
         (equivocator_state_append base_s s).
 Proof.
-  intros Hs. apply in_futures_protocol_snd with base_s.
+  intros Hs. apply in_futures_valid_snd with base_s.
   apply equivocator_state_append_initial_state_in_futures; assumption.
 Qed.
 
 Lemma equivocator_state_append_preloaded_with_weak_projection
   (seed : message -> Prop)
   (base_s : equivocator_state X)
-  (Hbase_s : protocol_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
+  (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
   : VLSM_weak_full_projection (pre_loaded_vlsm (equivocator_vlsm X) seed) (pre_loaded_vlsm (equivocator_vlsm X) seed)
         (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
@@ -103,50 +103,50 @@ Proof.
   - apply equivocator_state_append_valid. apply Hv.
   - apply equivocator_state_append_transition; apply H.
   - apply equivocator_state_append_transition_initial_state; assumption.
-  - apply initial_message_is_protocol; assumption.
+  - apply initial_message_is_valid; assumption.
 Qed.
 
 Lemma equivocator_state_append_preloaded_weak_projection
   (base_s : equivocator_state X)
-  (Hbase_s : protocol_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
+  (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
   : VLSM_weak_full_projection (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
         (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
   specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (equivocator_vlsm X)) as Heq.
   constructor.
   intros sX trX HtrX.
-  apply (VLSM_eq_finite_protocol_trace_from Heq) in HtrX.
-  apply (VLSM_eq_finite_protocol_trace_from Heq).
+  apply (VLSM_eq_finite_valid_trace_from Heq) in HtrX.
+  apply (VLSM_eq_finite_valid_trace_from Heq).
   revert sX trX HtrX.
   apply equivocator_state_append_preloaded_with_weak_projection.
-  apply (VLSM_eq_protocol_state Heq). assumption.
+  apply (VLSM_eq_valid_state Heq). assumption.
 Qed.
 
 Lemma equivocator_state_append_weak_projection
   (base_s : equivocator_state X)
-  (Hbase_s : protocol_state_prop (equivocator_vlsm X) base_s)
+  (Hbase_s : valid_state_prop (equivocator_vlsm X) base_s)
   : VLSM_weak_full_projection (equivocator_vlsm X) (equivocator_vlsm X)
         (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
   specialize (vlsm_is_pre_loaded_with_False (equivocator_vlsm X)) as Heq.
   constructor.
   intros sX trX HtrX.
-  apply (VLSM_eq_finite_protocol_trace_from Heq) in HtrX.
-  apply (VLSM_eq_finite_protocol_trace_from Heq).
+  apply (VLSM_eq_finite_valid_trace_from Heq) in HtrX.
+  apply (VLSM_eq_finite_valid_trace_from Heq).
   revert sX trX HtrX.
   apply equivocator_state_append_preloaded_with_weak_projection.
-  apply (VLSM_eq_protocol_state Heq). assumption.
+  apply (VLSM_eq_valid_state Heq). assumption.
 Qed.
 
 Lemma equivocator_state_append_in_futures
   (seed : message -> Prop)
-  base_s (Hbase_s : protocol_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
-  s (Hs : protocol_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) s)
+  base_s (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
+  s (Hs : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) s)
   : in_futures (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s (equivocator_state_append base_s s).
 Proof.
-  apply protocol_state_has_trace in Hs as [is [tr [Htr His]]].
+  apply valid_state_has_trace in Hs as [is [tr [Htr His]]].
   specialize (equivocator_state_append_preloaded_with_weak_projection seed _ Hbase_s) as Hproj.
-  apply (VLSM_weak_full_projection_finite_protocol_trace_from_to Hproj) in Htr.
+  apply (VLSM_weak_full_projection_finite_valid_trace_from_to Hproj) in Htr.
   apply in_futures_trans with (equivocator_state_append base_s is).
   - apply equivocator_state_append_initial_state_in_futures; assumption.
   - eexists; exact Htr.
@@ -154,14 +154,14 @@ Qed.
 
 Lemma equivocator_state_append_sent_left
   {Hbs : HasBeenSentCapability X}
-  base_s (Hbase_s : protocol_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
-  s (Hs : protocol_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
+  base_s (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
+  s (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
   : forall m, equivocator_has_been_sent X base_s m ->
     equivocator_has_been_sent X (equivocator_state_append base_s s) m.
 Proof.
   specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (equivocator_vlsm X)) as Heq.
-  apply (VLSM_eq_protocol_state Heq) in Hbase_s.
-  apply (VLSM_eq_protocol_state Heq) in Hs.
+  apply (VLSM_eq_valid_state Heq) in Hbase_s.
+  apply (VLSM_eq_valid_state Heq) in Hs.
   apply (equivocator_state_append_in_futures _ _ Hbase_s) in Hs.
   apply (VLSM_eq_in_futures Heq) in Hs.
   apply (in_futures_preserving_oracle_from_stepwise _ (equivocator_vlsm X) (field_selector output) (equivocator_has_been_sent X))
@@ -172,8 +172,8 @@ Qed.
 Lemma equivocator_state_append_sent_right
   {Hbs : HasBeenSentCapability X}
   (HbsE := equivocator_HasBeenSentCapability X)
-  base_s (Hbase_s : protocol_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
-  s (Hs : protocol_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
+  base_s (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
+  s (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
   : forall m, equivocator_has_been_sent X s m ->
     equivocator_has_been_sent X (equivocator_state_append base_s s) m.
 Proof.

@@ -53,7 +53,7 @@ Context {message : Type}
 .
 
 Lemma SeededXE_Free_full_projection
-  (Hseed : forall m, seed m -> protocol_message_prop FreeE m)
+  (Hseed : forall m, seed m -> valid_message_prop FreeE m)
   : VLSM_full_projection SeededXE
     (composite_vlsm equivocator_IM (free_constraint equivocator_IM))
     (lift_sub_label equivocator_IM equivocating) (lift_sub_state equivocator_IM equivocating).
@@ -64,7 +64,7 @@ Proof.
   - apply lift_sub_transition. apply H.
   - apply (lift_sub_state_initial equivocator_IM). assumption.
   - destruct HmX as [Hinit|Hseeded]; [|apply Hseed; assumption].
-    apply initial_message_is_protocol.
+    apply initial_message_is_valid.
     destruct Hinit as [i Him].
     exists (proj1_sig i). assumption.
 Qed.
@@ -514,8 +514,8 @@ Qed.
 
 Section pre_loaded_constrained_projection.
 (**
-By replaying a [protocol_trace] on top of a [protocol_state] we obtain a
-[protocol_trace]. We derive this as a more general [VLSM_weak_full_projection]
+By replaying a [valid_trace] on top of a [valid_state] we obtain a
+[valid_trace]. We derive this as a more general [VLSM_weak_full_projection]
 result for a class of VLSM parameterized by a constraint having "good"
 properties and pre-loaded with a seed, to allow deriving the
 [VLSM_weak_full_projection] result for both the free composition of equivocators
@@ -527,25 +527,25 @@ Context
   (constraint : composite_label equivocator_IM -> composite_state equivocator_IM * option message -> Prop)
   (seed1 : message -> Prop)
   (SeededCE := pre_loaded_vlsm (composite_vlsm equivocator_IM constraint) seed1)
-  (Hconstraint_none : forall i ns s, i ∈ equivocating -> protocol_state_prop SeededCE s -> constraint (existT i (Spawn ns)) (s, None))
-  (Hseed : forall m, seed m -> protocol_message_prop SeededCE m)
+  (Hconstraint_none : forall i ns s, i ∈ equivocating -> valid_state_prop SeededCE s -> constraint (existT i (Spawn ns)) (s, None))
+  (Hseed : forall m, seed m -> valid_message_prop SeededCE m)
   (full_replay_state : composite_state equivocator_IM)
-  (Hfull_replay_state : protocol_state_prop SeededCE full_replay_state)
-  (Hsubsumption : forall l s om, protocol_valid SeededXE l (s, om) ->
-    protocol_state_prop SeededCE (lift_equivocators_sub_state_to full_replay_state s) ->
+  (Hfull_replay_state : valid_state_prop SeededCE full_replay_state)
+  (Hsubsumption : forall l s om, input_valid SeededXE l (s, om) ->
+    valid_state_prop SeededCE (lift_equivocators_sub_state_to full_replay_state s) ->
     constraint (lift_equivocators_sub_label_to full_replay_state l)  (lift_equivocators_sub_state_to full_replay_state s, om))
   .
 
-Lemma replayed_initial_state_from_protocol
+Lemma replayed_initial_state_from_valid
   (is : composite_state sub_equivocator_IM)
   (His : composite_initial_state_prop sub_equivocator_IM is)
-  : finite_protocol_trace_from SeededCE full_replay_state (replayed_initial_state_from full_replay_state is).
+  : finite_valid_trace_from SeededCE full_replay_state (replayed_initial_state_from full_replay_state is).
 Proof.
   cut (forall l, incl l (@sub_index_listing _ _ equivocating index_listing) ->
-    finite_protocol_plan_from SeededCE
+    finite_valid_plan_from SeededCE
       full_replay_state (map (initial_new_machine_transition_item is) l)).
   { intros Hplan. specialize (Hplan _ (incl_refl _)).
-    unfold finite_protocol_plan_from in Hplan.
+    unfold finite_valid_plan_from in Hplan.
     assumption.
   }
   intro l.
@@ -553,17 +553,17 @@ Proof.
   - constructor. assumption.
   - spec IHl.  {  intros i Hi. apply H. apply in_app_iff. left. assumption. }
     rewrite map_app.
-    apply finite_protocol_plan_from_app_iff.
+    apply finite_valid_plan_from_app_iff.
     split; [assumption|].
-    apply finite_ptrace_singleton. simpl.
+    apply finite_valid_trace_singleton. simpl.
     repeat split.
-    + revert IHl. apply apply_plan_last_protocol.
-    + apply option_protocol_message_None.
+    + revert IHl. apply apply_plan_last_valid.
+    + apply option_valid_message_None.
     + apply His.
     + apply Hconstraint_none.
       * clear -x. destruct_dec_sig x i Hi Hx.
         subst. assumption.
-      * apply finite_ptrace_last_pstate in IHl.
+      * apply finite_valid_trace_last_pstate in IHl.
         remember (finite_trace_last _ _) as lst.
         replace ((apply_plan _ _ _).2) with lst
         ; [assumption|].
@@ -572,10 +572,10 @@ Proof.
 Qed.
 
 Lemma lift_initial_message
-  : forall m, vinitial_message_prop SeededXE m -> protocol_message_prop SeededCE m.
+  : forall m, vinitial_message_prop SeededXE m -> valid_message_prop SeededCE m.
 Proof.
   intros m [Hinit | Hseeded].
-  - apply initial_message_is_protocol. destruct Hinit as [[i Hi] Hinit].
+  - apply initial_message_is_valid. destruct Hinit as [[i Hi] Hinit].
     left. exists i. assumption.
   - apply Hseed. assumption.
 Qed.
@@ -589,62 +589,62 @@ Proof.
     + apply Hsubsumption; assumption.
   - apply lift_equivocators_sub_transition; apply H.
   - rewrite <- replayed_initial_state_from_lift; [|assumption].
-    apply finite_ptrace_last_pstate.
-    by apply replayed_initial_state_from_protocol.
+    apply finite_valid_trace_last_pstate.
+    by apply replayed_initial_state_from_valid.
   - by apply lift_initial_message.
 Qed.
 
-Lemma sub_preloaded_replayed_trace_from_protocol_equivocating
+Lemma sub_preloaded_replayed_trace_from_valid_equivocating
   (is : composite_state sub_equivocator_IM)
   (tr : list (composite_transition_item sub_equivocator_IM))
-  (Htr : finite_protocol_trace SeededXE is tr)
-  : finite_protocol_trace_from SeededCE
+  (Htr : finite_valid_trace SeededXE is tr)
+  : finite_valid_trace_from SeededCE
       full_replay_state (replayed_trace_from full_replay_state is tr).
 Proof.
   destruct Htr as [Htr His].
-  apply finite_protocol_trace_from_app_iff.
-  split; [apply replayed_initial_state_from_protocol; assumption|].
+  apply finite_valid_trace_from_app_iff.
+  split; [apply replayed_initial_state_from_valid; assumption|].
   rewrite replayed_initial_state_from_lift by assumption.
   revert Htr.
-  apply (VLSM_weak_full_projection_finite_protocol_trace_from lift_equivocators_sub_weak_projection).
+  apply (VLSM_weak_full_projection_finite_valid_trace_from lift_equivocators_sub_weak_projection).
 Qed.
 
 End pre_loaded_constrained_projection.
 
 Lemma SeededXE_PreFreeE_weak_full_projection
   (full_replay_state : composite_state equivocator_IM)
-  (Hfull_replay_state : protocol_state_prop PreFreeE  full_replay_state)
+  (Hfull_replay_state : valid_state_prop PreFreeE  full_replay_state)
   : VLSM_weak_full_projection SeededXE PreFreeE (lift_equivocators_sub_label_to full_replay_state) (lift_equivocators_sub_state_to full_replay_state).
 Proof.
   constructor.
   intros sX trX HtrX.
   specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True FreeE) as Heq.
-  apply (VLSM_eq_finite_protocol_trace_from Heq).
+  apply (VLSM_eq_finite_valid_trace_from Heq).
   revert sX trX HtrX.
   apply lift_equivocators_sub_weak_projection.
   - intros; exact I.
-  - intros. apply initial_message_is_protocol. right. exact I.
-  - apply (VLSM_eq_protocol_state Heq) in Hfull_replay_state. assumption.
+  - intros. apply initial_message_is_valid. right. exact I.
+  - apply (VLSM_eq_valid_state Heq) in Hfull_replay_state. assumption.
   - intros. exact I.
 Qed.
 
 Lemma PreFreeSubE_PreFreeE_weak_full_projection
   (full_replay_state : composite_state equivocator_IM)
-  (Hfull_replay_state : protocol_state_prop PreFreeE  full_replay_state)
+  (Hfull_replay_state : valid_state_prop PreFreeE  full_replay_state)
   : VLSM_weak_full_projection PreFreeSubE PreFreeE (lift_equivocators_sub_label_to full_replay_state) (lift_equivocators_sub_state_to full_replay_state).
 Proof.
   apply basic_VLSM_weak_full_projection; intro; intros.
   - split; [apply lift_equivocators_sub_valid; apply Hv|exact I].
   - apply lift_equivocators_sub_transition; apply H.
   - rewrite <- replayed_initial_state_from_lift; [|assumption].
-    apply finite_ptrace_last_pstate.
+    apply finite_valid_trace_last_pstate.
     specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True FreeE) as Heq.
-    apply (VLSM_eq_finite_protocol_trace_from Heq).
-    apply replayed_initial_state_from_protocol.
+    apply (VLSM_eq_finite_valid_trace_from Heq).
+    apply replayed_initial_state_from_valid.
     + intro; intros. exact I.
-    + apply (VLSM_eq_protocol_state Heq). assumption.
+    + apply (VLSM_eq_valid_state Heq). assumption.
     + assumption.
-  - apply any_message_is_protocol_in_preloaded.
+  - apply any_message_is_valid_in_preloaded.
 Qed.
 
 Section seeded_no_equiv.
@@ -652,18 +652,18 @@ Section seeded_no_equiv.
 Context
   (SeededAllXE : VLSM message := composite_no_equivocation_vlsm_with_pre_loaded equivocator_IM (free_constraint _) (equivocator_Hbs IM Hbs) seed)
   (full_replay_state : composite_state equivocator_IM)
-  (Hfull_replay_state : protocol_state_prop SeededAllXE full_replay_state)
+  (Hfull_replay_state : valid_state_prop SeededAllXE full_replay_state)
   .
 
 Local Lemma SeededNoEquiv_subsumption
-  : forall l s om, protocol_valid SeededXE l (s, om) ->
+  : forall l s om, input_valid SeededXE l (s, om) ->
   no_equivocations_additional_constraint_with_pre_loaded equivocator_IM (free_constraint _) (equivocator_Hbs IM Hbs) seed (lift_equivocators_sub_label_to full_replay_state l)  (lift_equivocators_sub_state_to full_replay_state s, om).
 Proof.
   split; [|exact I].
   destruct om as [m|]; [|exact I].
   destruct H as [Hs [_ [_ [Hc1 _]]]].
-  apply (VLSM_incl_protocol_state (NoEquivocation.seeded_no_equivocation_incl_preloaded equivocator_IM (free_constraint _) (equivocator_Hbs IM Hbs) seed)) in Hfull_replay_state.
-  specialize (protocol_state_project_preloaded_to_preloaded _ equivocator_IM (free_constraint _) full_replay_state)
+  apply (VLSM_incl_valid_state (NoEquivocation.seeded_no_equivocation_incl_preloaded equivocator_IM (free_constraint _) (equivocator_Hbs IM Hbs) seed)) in Hfull_replay_state.
+  specialize (valid_state_project_preloaded_to_preloaded _ equivocator_IM (free_constraint _) full_replay_state)
     as Hfull_replay_state_pr.
   pose (no_equivocations_additional_constraint_with_pre_loaded
           sub_equivocator_IM (free_constraint sub_equivocator_IM)  (equivocator_Hbs sub_IM Hbs_sub) seed)
@@ -672,8 +672,8 @@ Proof.
     (pre_loaded_vlsm_incl_pre_loaded_with_all_messages
       (composite_vlsm sub_equivocator_IM constraint)
       seed) as Hincl.
-  apply (VLSM_incl_protocol_state Hincl) in Hs.
-  specialize (protocol_state_project_preloaded_to_preloaded _ sub_equivocator_IM constraint s)
+  apply (VLSM_incl_valid_state Hincl) in Hs.
+  specialize (valid_state_project_preloaded_to_preloaded _ sub_equivocator_IM constraint s)
     as Hs_pr.
   simpl in Hc1.
   destruct Hc1 as [Hsub_sent | Hseeded].
@@ -688,11 +688,11 @@ Proof.
   - right. assumption.
 Qed.
 
-Local Lemma sent_are_protocol
-  : forall m, seed m -> protocol_message_prop SeededAllXE m.
+Local Lemma sent_are_valid
+  : forall m, seed m -> valid_message_prop SeededAllXE m.
 Proof.
   intros m Hm.
-  apply initial_message_is_protocol.
+  apply initial_message_is_valid.
   right. assumption.
 Qed.
 
@@ -705,28 +705,28 @@ Proof.
   constructor.
   apply lift_equivocators_sub_weak_projection; intros.
   - split; exact I.
-  - apply sent_are_protocol. assumption.
+  - apply sent_are_valid. assumption.
   - assumption.
   - apply SeededNoEquiv_subsumption; assumption.
 Qed.
 
-Lemma sub_replayed_trace_from_protocol_equivocating
+Lemma sub_replayed_trace_from_valid_equivocating
   (is : composite_state sub_equivocator_IM)
   (tr : list (composite_transition_item sub_equivocator_IM))
-  (Htr : finite_protocol_trace SeededXE is tr)
-  : finite_protocol_trace_from SeededAllXE
+  (Htr : finite_valid_trace SeededXE is tr)
+  : finite_valid_trace_from SeededAllXE
       full_replay_state (replayed_trace_from full_replay_state is tr).
 Proof.
   unfold composite_no_equivocation_vlsm_with_pre_loaded in SeededAllXE.
   specialize
-    (sub_preloaded_replayed_trace_from_protocol_equivocating
+    (sub_preloaded_replayed_trace_from_valid_equivocating
       (no_equivocations_additional_constraint_with_pre_loaded equivocator_IM (free_constraint _) (equivocator_Hbs IM Hbs) seed)
       seed)
-      as Hprotocol.
-  spec Hprotocol; [split; exact I|].
-  spec Hprotocol; [apply sent_are_protocol|].
-  specialize (Hprotocol _ Hfull_replay_state).
-  apply Hprotocol; [|assumption].
+      as Hvalid.
+  spec Hvalid; [split; exact I|].
+  spec Hvalid; [apply sent_are_valid|].
+  specialize (Hvalid _ Hfull_replay_state).
+  apply Hvalid; [|assumption].
   intros.
   apply SeededNoEquiv_subsumption.
   assumption.

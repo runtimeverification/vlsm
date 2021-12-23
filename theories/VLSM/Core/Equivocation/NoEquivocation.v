@@ -48,7 +48,7 @@ End no_equivocations.
 
 In this section we show that under [no_equivocations] assumptions:
 
-- for any protocol state all messages [observed_were_sent].
+- for any valid state all messages [observed_were_sent].
 - the [pre_loaded_with_all_messages_vlsm] is equal to the [no_equivocations] VLSM.
 
 *)
@@ -58,7 +58,7 @@ Section NoEquivocationInvariants.
     (X: VLSM message)
     (Hhbs: HasBeenSentCapability X)
     (Hhbo: HasBeenObservedCapability X)
-    (Henforced: forall l s om, protocol_valid (pre_loaded_with_all_messages_vlsm X) l (s,om) -> no_equivocations X l (s,om))
+    (Henforced: forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s,om) -> no_equivocations X l (s,om))
   .
 
 (**
@@ -82,13 +82,13 @@ any message that tests as [has_been_observed] in a state also tests as
   Qed.
 
   Lemma observed_were_sent_preserved l s im s' om:
-    protocol_transition X l (s,im) (s',om) ->
+    input_valid_transition X l (s,im) (s',om) ->
     observed_were_sent s ->
     observed_were_sent s'.
   Proof.
     intros Hptrans Hprev msg Hobs.
     specialize (Hprev msg).
-    apply preloaded_weaken_protocol_transition in Hptrans.
+    apply preloaded_weaken_input_valid_transition in Hptrans.
     apply (oracle_step_update has_been_observed_stepwise_props _ _ _ _ _ Hptrans) in Hobs.
     simpl in Hobs.
     specialize (Henforced l s (Some msg)).
@@ -106,11 +106,11 @@ any message that tests as [has_been_observed] in a state also tests as
   Qed.
 
   Lemma observed_were_sent_invariant s:
-    protocol_state_prop X s ->
+    valid_state_prop X s ->
     observed_were_sent s.
   Proof.
     intro Hproto.
-    induction Hproto using protocol_state_prop_ind.
+    induction Hproto using valid_state_prop_ind.
     - apply observed_were_sent_initial. assumption.
     - revert Ht IHHproto. apply observed_were_sent_preserved.
   Qed.
@@ -124,25 +124,25 @@ any message that tests as [has_been_observed] in a state also tests as
   Lemma no_equivocations_preloaded_traces
     (is : state)
     (tr : list transition_item)
-    : finite_protocol_trace (pre_loaded_with_all_messages_vlsm X) is tr -> finite_protocol_trace X is tr.
+    : finite_valid_trace (pre_loaded_with_all_messages_vlsm X) is tr -> finite_valid_trace X is tr.
   Proof.
     intro Htr.
-    induction Htr using finite_protocol_trace_rev_ind.
+    induction Htr using finite_valid_trace_rev_ind.
     - split;[|assumption].
-      rapply @finite_ptrace_empty.
-      apply initial_is_protocol.
+      rapply @finite_valid_trace_from_empty.
+      apply initial_state_is_valid.
       assumption.
     - destruct IHHtr as [IHtr His].
       split; [|assumption].
       rapply extend_right_finite_trace_from;[assumption|].
-      apply finite_ptrace_last_pstate in IHtr as Hs.
-      cut (option_protocol_message_prop X iom);[firstorder|].
-      destruct iom as [m|];[|apply option_protocol_message_None].
+      apply finite_valid_trace_last_pstate in IHtr as Hs.
+      cut (option_valid_message_prop X iom);[firstorder|].
+      destruct iom as [m|];[|apply option_valid_message_None].
       destruct Hx as [Hv _].
       apply Henforced in Hv.
       destruct Hv as [Hbsm | []].
       revert Hbsm.
-      apply sent_protocol.
+      apply sent_valid.
       assumption.
   Qed.
 
@@ -218,7 +218,7 @@ Section CompositeNoEquivocationInvariants.
     forall msg, composite_has_been_observed IM Hbo s msg -> composite_has_been_sent IM Hbs s msg.
 
   Lemma composite_observed_were_sent_invariant s:
-    protocol_state_prop X s ->
+    valid_state_prop X s ->
     composite_observed_were_sent s.
   Proof.
     intro Hs.

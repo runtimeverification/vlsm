@@ -189,7 +189,7 @@ Proof.
   apply equivocator_transition_cannot_decrease_state_size in Htj.
   inversion Ht. subst. clear Ht.
   intro eqv.
-  destruct (decide (j = eqv)).  
+  destruct (decide (j = eqv)).
   - subst. rewrite state_update_eq. assumption.
   - rewrite state_update_neq by congruence. lia.
 Qed.
@@ -221,7 +221,7 @@ Qed.
 Lemma equivocators_pre_trace_cannot_decrease_state_size
   (Pre := pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM))
   s s' tr
-  (Htr : finite_protocol_trace_from_to Pre s s' tr)
+  (Htr : finite_valid_trace_from_to Pre s s' tr)
   : forall eqv, equivocator_state_n (s eqv) <= equivocator_state_n (s' eqv).
 Proof.
   apply trace_to_plan_to_trace_from_to in Htr.
@@ -234,7 +234,7 @@ Qed.
 Lemma equivocators_pre_trace_preserves_equivocating_state
   (Pre := pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM))
   s s' tr
-  (Htr : finite_protocol_trace_from_to Pre s s' tr)
+  (Htr : finite_valid_trace_from_to Pre s s' tr)
   : forall eqv, is_equivocating_state (IM eqv) (s eqv) -> is_equivocating_state (IM eqv) (s' eqv).
 Proof.
   unfold is_equivocating_state, is_singleton_state.
@@ -266,7 +266,7 @@ Lemma equivocators_no_equivocations_vlsm_incl_equivocators_free
   : VLSM_incl equivocators_no_equivocations_vlsm equivocators_free_vlsm.
 Proof.
   apply basic_VLSM_incl; intro; intros; [assumption|..].
-  - apply initial_message_is_protocol; assumption.
+  - apply initial_message_is_valid; assumption.
   - split; [|exact I]. apply Hv.
   - apply H.
 Qed.

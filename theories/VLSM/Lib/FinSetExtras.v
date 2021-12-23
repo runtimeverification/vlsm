@@ -8,7 +8,7 @@ Context
   `{FinSet A C}.
 
 Section general.
-  
+
   Lemma union_size_ge_size1
     (X Y : C) :
     size (X ∪ Y) >= size X.
@@ -17,7 +17,7 @@ Section general.
     apply subseteq_union.
     set_solver.
   Qed.
-  
+
   Lemma union_size_ge_size2
     (X Y : C) :
     size (X ∪ Y) >= size Y.
@@ -26,7 +26,7 @@ Section general.
     apply subseteq_union.
     set_solver.
   Qed.
-  
+
   Lemma union_size_ge_average
     (X Y : C) :
     2 * size (X ∪ Y) >= size X + size Y.
@@ -35,7 +35,7 @@ Section general.
     specialize (union_size_ge_size2 X Y) as Hy.
     lia.
   Qed.
-  
+
   Lemma difference_size_le_self
     (X Y : C) :
     size (X ∖  Y) <= size X.
@@ -45,7 +45,7 @@ Section general.
     intros x Hx.
     apply elem_of_difference in Hx. intuition.
   Qed.
-  
+
   Lemma union_size_le_sum
     (X Y : C) :
     size (X ∪ Y) <= size X + size Y.
@@ -55,7 +55,7 @@ Section general.
     specialize (difference_size_le_self Y X).
     lia.
   Qed.
-  
+
   Lemma intersection_size1
     (X Y : C) :
     size (X ∩ Y) <= size X.
@@ -63,7 +63,7 @@ Section general.
     apply subseteq_size with (X0 := X ∩ Y) (Y0 := X).
     set_solver.
   Qed.
-  
+
   Lemma intersection_size2
     (X Y : C) :
     size (X ∩ Y) <= size Y.
@@ -71,7 +71,7 @@ Section general.
     apply subseteq_size with (X0 := X ∩ Y) (Y0 := Y).
     set_solver.
   Qed.
-  
+
   Lemma difference_size_subset
     (X Y : C)
     (Hsub : Y ⊆ X) :
@@ -85,10 +85,10 @@ Section general.
       - destruct (@decide (a ∈ Y)).
         apply elem_of_dec_slow.
         + apply elem_of_union. left. intuition.
-        + apply elem_of_union. right. set_solver. 
+        + apply elem_of_union. right. set_solver.
     }
     assert (Htemp2 : size Y + size (X ∖ Y) = size X). {
-      specialize (size_union Y (X ∖ Y)) as Hun. 
+      specialize (size_union Y (X ∖ Y)) as Hun.
       spec Hun. {
         apply elem_of_disjoint.
         intros a Ha Ha2.
@@ -100,14 +100,14 @@ Section general.
     }
     lia.
   Qed.
-  
+
   Lemma difference_with_intersection
     (X Y : C) :
     X ∖ Y ≡ X ∖ (X ∩ Y).
   Proof.
     set_solver.
   Qed.
-  
+
   Lemma difference_size
     (X Y : C) :
     (Z.of_nat (size (X ∖ Y)) = size X - size (X ∩ Y))%Z.
@@ -116,7 +116,7 @@ Section general.
     specialize (difference_size_subset X (X ∩ Y)) as Hdif.
     set_solver.
   Qed.
-  
+
   Lemma difference_size_ge_disjoint_case
     (X Y : C) :
     size (X ∖ Y) >= size X - size Y.
@@ -125,13 +125,13 @@ Section general.
     specialize (intersection_size2 X Y).
     lia.
   Qed.
-  
+
   Lemma list_to_set_size
     (l : list A) :
     size (list_to_set l (C := C)) <= length l.
   Proof.
     induction l.
-    - simpl. 
+    - simpl.
       rewrite size_empty. lia.
     - simpl.
       specialize (union_size_le_sum ({[a]}) (list_to_set l)) as Hun_size.
@@ -141,11 +141,11 @@ Section general.
 End general.
 
 Section filter.
-  Context (P P2 : A → Prop) 
+  Context (P P2 : A → Prop)
           `{!∀ x, Decision (P x)}
           `{!∀ x, Decision (P2 x)}
           (X Y : C).
-  
+
   Lemma filter_subset
     (Hsub : X ⊆ Y) :
     filter P X ⊆ filter P Y.
@@ -155,7 +155,7 @@ Section filter.
     apply elem_of_filter.
     set_solver.
   Qed.
-  
+
   Lemma filter_subprop
     (Hsub : forall a, (P a -> P2 a)) :
     filter P X ⊆ filter P2 X.
@@ -165,15 +165,15 @@ Section filter.
     apply elem_of_filter.
     intuition.
   Qed.
-  
+
 End filter.
 End fin_set.
 
 Section map.
-  Context 
+  Context
     `{FinSet A C}
     `{FinSet B D}.
-  
+
   Lemma set_map_subset
     (f : A -> B)
     (X Y : C)
@@ -185,13 +185,13 @@ Section map.
     apply elem_of_map.
     firstorder.
   Qed.
-  
+
   Lemma set_map_size_upper_bound
     (f : A -> B)
     (X : C) :
     size (set_map (D := D) f X) <= size X.
   Proof.
-    unfold set_map. 
+    unfold set_map.
     remember (f <$> elements X) as fX.
     specialize (list_to_set_size (A := B) fX) as Hsize.
     assert (length fX = size X). {

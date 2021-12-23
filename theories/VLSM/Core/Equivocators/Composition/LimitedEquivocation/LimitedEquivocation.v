@@ -122,15 +122,15 @@ Proof.
   intros l (s,om) Hv. apply Hv.
 Qed.
 
-(** A protocol state for a VLSM satisfying the limited equivocation assumption
+(** A valid state for a VLSM satisfying the limited equivocation assumption
 has limited equivocation.
 *)
-Lemma protocol_state_limited_equivocation
+Lemma valid_state_limited_equivocation
   (s : composite_state equivocator_IM)
-  (Hs : protocol_state_prop equivocators_limited_equivocations_vlsm s)
+  (Hs : valid_state_prop equivocators_limited_equivocations_vlsm s)
   : not_heavy s.
 Proof.
-  apply protocol_state_prop_iff in Hs.
+  apply valid_state_prop_iff in Hs.
   destruct Hs as [[(is, His) Heq_s] | [l [(s0, oim) [oom' [[_ [_ [_ [_ Hlimited]]]] Ht]]]]].
   - subst s. simpl. unfold not_heavy, equivocation_fault.
     replace (equivocating_validators is) with (@nil index).
@@ -144,15 +144,15 @@ Proof.
     simpl in *. rewrite Ht. reflexivity.
 Qed.
 
-(** A valid protocol trace for the composition of equivocators with limited
-state-equivocation and no message-equivocation is also a valid protocol trace
+(** A valid valid trace for the composition of equivocators with limited
+state-equivocation and no message-equivocation is also a valid valid trace
 for the composition of equivocators with no message-equivocation and fixed-set
 state-equivocation, where the fixed set is given by the state-equivocators
 measured for the final state of the trace.
 *)
-Lemma equivocators_limited_protocol_trace_is_fixed is s tr
-  : finite_protocol_trace_init_to equivocators_limited_equivocations_vlsm is s tr ->
-  finite_protocol_trace_init_to
+Lemma equivocators_limited_valid_trace_is_fixed is s tr
+  : finite_valid_trace_init_to equivocators_limited_equivocations_vlsm is s tr ->
+  finite_valid_trace_init_to
    (equivocators_fixed_equivocations_vlsm IM Hbs index_listing
     (equivocating_validators s)) is s tr.
 Proof.
@@ -160,16 +160,16 @@ Proof.
   split; [| apply H].
   cut
     (forall equivocating, equivocating_validators s ⊆ equivocating ->
-      finite_protocol_trace_from_to (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating) is s tr).
+      finite_valid_trace_from_to (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating) is s tr).
   { intros H'. apply H'. reflexivity. }
-  induction H using finite_protocol_trace_init_to_rev_ind; intros equivocating Hincl.
-  - apply (finite_ptrace_from_to_empty (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating)).
-    apply initial_is_protocol. assumption.
+  induction H using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
+  - apply (finite_valid_trace_from_to_empty (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating)).
+    apply initial_state_is_valid. assumption.
   - specialize (equivocating_indices_equivocating_validators IM _ finite_index _ reachable_threshold)
       as Heq.
     destruct (Heq sf) as [_ Hsf_incl].
-    specialize (IHfinite_protocol_trace_init_to equivocating).
-    spec IHfinite_protocol_trace_init_to.
+    specialize (IHfinite_valid_trace_init_to equivocating).
+    spec IHfinite_valid_trace_init_to.
     { apply proj2 in Ht.
       specialize (equivocators_transition_preserves_equivocating_indices IM index_listing _ _ _ _ _ Ht)
         as Hincl'.
@@ -180,34 +180,34 @@ Proof.
       transitivity (equivocating_indices IM index_listing s); assumption.
     }
     apply
-      (finite_protocol_trace_from_to_app
+      (finite_valid_trace_from_to_app
         (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating))
       with s; [assumption|].
-    apply ptrace_add_last; [|reflexivity].
-      apply (finite_ptrace_singleton (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating)).
-      apply ptrace_last_pstate in IHfinite_protocol_trace_init_to.
+    apply valid_trace_add_last; [|reflexivity].
+      apply (finite_valid_trace_singleton (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating)).
+      apply valid_trace_last_pstate in IHfinite_valid_trace_init_to.
       destruct Ht as [[_ [_ [Hv [[Hno_equiv _] Hno_heavy]]]] Ht].
       repeat split; [assumption| |assumption|assumption| |assumption].
-      + destruct iom as [m|]; [|apply option_protocol_message_None].
+      + destruct iom as [m|]; [|apply option_valid_message_None].
         destruct Hno_equiv as [Hsent | Hfalse]; [|contradiction].
         simpl in Hsent.
-        apply composite_sent_protocol with index_listing (equivocator_Hbs IM Hbs) s; assumption.
+        apply composite_sent_valid with index_listing (equivocator_Hbs IM Hbs) s; assumption.
       + replace (composite_transition _ _ _) with (sf, oom).
         unfold state_has_fixed_equivocation.
         transitivity (equivocating_validators sf); assumption.
 Qed.
 
-(** Projections of valid protocol traces for the composition of equivocators
+(** Projections of valid traces for the composition of equivocators
 with limited state-equivocation and no message-equivocation have the
 [fixed_limited_equivocation_prop]erty.
 *)
-Lemma equivocators_limited_protocol_trace_projects_to_fixed_limited_equivocation
+Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
   (final_descriptors : equivocator_descriptors)
   (is : composite_state equivocator_IM)
   (tr : list (composite_transition_item equivocator_IM))
   (final_state := finite_trace_last is tr)
   (Hproper: not_equivocating_equivocator_descriptors IM final_descriptors final_state)
-  (Htr : finite_protocol_trace equivocators_limited_equivocations_vlsm is tr)
+  (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
     (initial_descriptors : equivocator_descriptors)
@@ -218,12 +218,12 @@ Lemma equivocators_limited_protocol_trace_projects_to_fixed_limited_equivocation
     equivocators_state_project final_descriptors final_state = final_stateX /\
     fixed_limited_equivocation_prop IM Hbs Hbr isX trX.
 Proof.
-  apply ptrace_add_default_last in Htr as Hfixed_tr.
-  apply equivocators_limited_protocol_trace_is_fixed in Hfixed_tr.
-  apply ptrace_last_pstate in Hfixed_tr as Hfixed_last.
-  apply ptrace_forget_last in Hfixed_tr.
+  apply valid_trace_add_default_last in Htr as Hfixed_tr.
+  apply equivocators_limited_valid_trace_is_fixed in Hfixed_tr.
+  apply valid_trace_last_pstate in Hfixed_tr as Hfixed_last.
+  apply valid_trace_forget_last in Hfixed_tr.
   specialize
-    (fixed_equivocators_protocol_trace_project IM Hbs Hbr (equivocating_validators (finite_trace_last is tr))
+    (fixed_equivocators_valid_trace_project IM Hbs Hbr (equivocating_validators (finite_trace_last is tr))
       finite_index final_descriptors is tr) as Hpr.
   feed specialize Hpr; [| assumption |].
   - eapply not_equivocating_equivocator_descriptors_proper_fixed; eassumption.
@@ -233,7 +233,7 @@ Proof.
     + apply Hinitial_descriptors.
     + exists (equivocating_validators (finite_trace_last is tr)).
       split; [| assumption].
-      apply ptrace_add_default_last, ptrace_last_pstate, protocol_state_limited_equivocation in Htr.
+      apply valid_trace_add_default_last, valid_trace_last_pstate, valid_state_limited_equivocation in Htr.
       unfold not_heavy in Htr.
       transitivity (equivocation_fault (finite_trace_last is tr)); [|assumption].
       unfold equivocation_fault.
@@ -255,18 +255,18 @@ Context
   .
 
 (** If each of the nodes satisfy the [message_dependencies_full_node_condition_prop]erty,
-then projections of valid protocol traces for the composition of equivocators
+then projections of valid traces for the composition of equivocators
 with limited state-equivocation and no message-equivocation are also valid
-protocol traces for the composition of regular nodes with limited
+traces for the composition of regular nodes with limited
 message-equivocation.
 *)
-Lemma limited_equivocators_protocol_trace_project
+Lemma limited_equivocators_valid_trace_project
   (final_descriptors : equivocator_descriptors)
   (is : composite_state equivocator_IM)
   (tr : list (composite_transition_item equivocator_IM))
   (final_state := finite_trace_last is tr)
   (Hproper: not_equivocating_equivocator_descriptors IM final_descriptors final_state)
-  (Htr : finite_protocol_trace equivocators_limited_equivocations_vlsm is tr)
+  (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
     (initial_descriptors : equivocator_descriptors)
@@ -275,15 +275,15 @@ Lemma limited_equivocators_protocol_trace_project
     proper_equivocator_descriptors initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project final_descriptors final_state = final_stateX /\
-    finite_protocol_trace Limited isX trX.
+    finite_valid_trace Limited isX trX.
 Proof.
   specialize
-    (equivocators_limited_protocol_trace_projects_to_fixed_limited_equivocation
+    (equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
       final_descriptors is tr Hproper Htr)
       as [trX [initial_descriptors [Hinitial_descriptors [Hpr [Hlst_pr Hpr_limited]]]]].
   exists trX, initial_descriptors.
   repeat split; [assumption..| |].
-  - eapply trace_exhibits_limited_equivocation_protocol; eassumption.
+  - eapply traces_exhibiting_limited_equivocation_are_valid; eassumption.
   - destruct Hpr_limited as [equivs Hpr_limited]. apply Hpr_limited.
 Qed.
 
@@ -298,8 +298,8 @@ Proof.
   split; [split|].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert
-      (HPreFree_pre_tr : finite_protocol_trace_from (pre_loaded_with_all_messages_vlsm FreeE) s_pre (pre ++ tr)).
-    { revert Hpre_tr. apply VLSM_incl_finite_protocol_trace_from.
+      (HPreFree_pre_tr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) s_pre (pre ++ tr)).
+    { revert Hpre_tr. apply VLSM_incl_finite_valid_trace_from.
       apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
     }
     clear Hpre_tr.  revert s tr sX trX Hpr_tr s_pre pre Hs_lst HPreFree_pre_tr.
@@ -308,7 +308,7 @@ Proof.
     destruct (destruct_equivocators_partial_trace_project IM finite_index Hpr_tr)
       as [Hnot_equiv [initial_descriptors [Htr_project Hs_project]]].
 
-    destruct (limited_equivocators_protocol_trace_project _ _ _ Hnot_equiv Htr)
+    destruct (limited_equivocators_valid_trace_project _ _ _ Hnot_equiv Htr)
       as [_trX [_initial_descriptors [_ [_Htr_project [_ HtrX]]]]].
     rewrite Htr_project in _Htr_project.
     inversion _Htr_project. subst.  assumption.
@@ -323,14 +323,14 @@ Lemma limited_equivocators_vlsm_projection
 Proof.
   constructor; [constructor|]; intros.
   - apply PreFreeE_Free_vlsm_projection_type.
-    revert H. apply VLSM_incl_finite_protocol_trace_from.
+    revert H. apply VLSM_incl_finite_valid_trace_from.
     apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
-  - assert (Hpre_tr : finite_protocol_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
-    { revert H. apply VLSM_incl_finite_protocol_trace.
+  - assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
+    { revert H. apply VLSM_incl_finite_valid_trace.
       apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
     }
     specialize
-     (VLSM_partial_projection_finite_protocol_trace (limited_equivocators_vlsm_partial_projection (zero_descriptor IM))
+     (VLSM_partial_projection_finite_valid_trace (limited_equivocators_vlsm_partial_projection (zero_descriptor IM))
        sX trX (equivocators_state_project (zero_descriptor IM) sX) (equivocators_total_trace_project IM trX))
        as Hsim.
     spec Hsim.
