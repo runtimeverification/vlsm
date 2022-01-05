@@ -130,6 +130,20 @@ Proof.
   inversion HtX. subst. assumption.
 Qed.
 
+Lemma VLSM_weak_partial_projection_input_valid
+  : forall lX sX inX, input_valid X lX (sX, inX) ->
+    forall sX' outX, vtransition X lX (sX, inX) = (sX', outX) ->
+    forall sY itemY,
+    trace_project (sX, [{| l := lX;  input := inX; destination := sX'; output := outX |}])
+      = Some (sY, [itemY]) ->
+    input_valid Y (l itemY) (sY, input itemY).
+Proof.
+  intros lX sX inX HvX sX' outX HtX sY itemY Hpr.
+  eapply proj1, VLSM_weak_partial_projection_input_valid_transition
+  ; [eassumption|].
+  split; assumption.
+Qed.
+
 End weak_partial_projection_properties.
 
 Section partial_projection_properties.
@@ -194,6 +208,15 @@ Definition VLSM_partial_projection_input_valid_transition
     input_valid_transition X (l itemX) (sX, input itemX) (destination itemX, output itemX) ->
     input_valid_transition Y (l itemY) (sY, input itemY) (destination itemY, output itemY)
   := VLSM_weak_partial_projection_input_valid_transition VLSM_partial_projection_weaken.
+
+Definition VLSM_partial_projection_input_valid
+  : forall lX sX inX, input_valid X lX (sX, inX) ->
+    forall sX' outX, vtransition X lX (sX, inX) = (sX', outX) ->
+    forall sY itemY,
+    trace_project (sX, [{| l := lX;  input := inX; destination := sX'; output := outX |}])
+      = Some (sY, [itemY]) ->
+    input_valid Y (l itemY) (sY, input itemY)
+  := VLSM_weak_partial_projection_input_valid VLSM_partial_projection_weaken.
 
 End partial_projection_properties.
 
@@ -653,6 +676,17 @@ Proof.
   simpl. rewrite H. reflexivity.
 Qed.
 
+Lemma VLSM_weak_projection_input_valid
+  : forall lX lY, label_project lX = Some lY ->
+    forall sX im,
+    input_valid X lX (sX, im) -> input_valid Y lY (state_project sX, im).
+Proof.
+  intros lX lY Hpr sX im HvX.
+  destruct (vtransition X lX (sX, im)) eqn:HtX.
+  eapply proj1, VLSM_weak_projection_input_valid_transition, input_valid_can_transition
+  ; [eassumption|assumption|exact HtX].
+Qed.
+ 
 Lemma VLSM_weak_projection_finite_valid_trace_from_to
   : forall sX s'X trX,
     finite_valid_trace_from_to X sX s'X trX -> finite_valid_trace_from_to Y (state_project sX) (state_project s'X) (VLSM_weak_projection_trace_project Hsimul trX).
@@ -796,6 +830,12 @@ Definition VLSM_projection_input_valid_transition
     input_valid_transition X lX (s, im) (s', om ) ->
     input_valid_transition Y lY (state_project s, im) (state_project s', om)
   := VLSM_weak_projection_input_valid_transition VLSM_projection_weaken.
+
+Definition VLSM_projection_input_valid
+  : forall lX lY, label_project lX = Some lY ->
+    forall s im,
+    input_valid X lX (s, im) -> input_valid Y lY (state_project s, im)
+  := VLSM_weak_projection_input_valid VLSM_projection_weaken.
 
 Definition VLSM_projection_finite_valid_trace_from_to
   : forall sX s'X trX,
@@ -1275,6 +1315,14 @@ Proof.
   ; [assumption|reflexivity].
 Qed.
 
+Lemma VLSM_weak_full_projection_input_valid l s im
+  : input_valid X l (s,im) -> input_valid Y (label_project l) (state_project s,im).
+Proof.
+  intros.
+  eapply (VLSM_weak_projection_input_valid VLSM_weak_full_projection_is_projection)
+  ; [reflexivity|assumption].
+Qed.
+
 Lemma VLSM_weak_full_projection_infinite_valid_trace_from
   : forall sX trX,
     infinite_valid_trace_from X sX trX ->
@@ -1287,18 +1335,6 @@ Proof.
   apply (infinite_valid_trace_from_EqSt Y _ _ _ Heq).
   apply (VLSM_weak_projection_infinite_valid_trace_from VLSM_weak_full_projection_is_projection sX trX).
   assumption.
-Qed.
-
-Lemma VLSM_weak_full_projection_input_valid
-  : forall l s im,
-  input_valid X l (s,im) ->
-  input_valid Y (label_project l) (state_project s,im).
-Proof. intros.
-  destruct (vtransition X l (s, im)) as (s', om) eqn:Ht.
-  assert (Hivt : input_valid_transition X l (s, im) (s', om)).
-  { split; assumption. }
-  apply VLSM_weak_full_projection_input_valid_transition in Hivt.
-  apply Hivt.
 Qed.
 
 Lemma VLSM_weak_full_projection_can_produce
@@ -2976,6 +3012,24 @@ Proof.
   - destruct Hv as [_ [Hm _]].
     apply initial_message_is_valid.
     assumption.
+Qed.
+
+(** When we have a [VLSM_projection] to the [projection_induced_vlsm],
+[valid]ity is [input_valid]ity.
+*)
+Lemma induced_projection_valid_is_input_valid
+  (Hproj : VLSM_projection X projection_induced_vlsm label_project state_project)
+  l s om
+  : vvalid projection_induced_vlsm l (s, om) -> input_valid projection_induced_vlsm l (s,om).
+Proof.
+  intro Hv.
+  destruct (id Hv) as [lX [sX [HlX [<- [Hps [Hopm _]]]]]].
+  repeat split.
+  - apply (VLSM_projection_valid_state Hproj). assumption.
+  - destruct om as [m|]; [|apply option_valid_message_None].
+    apply option_initial_message_is_valid.
+    assumption.
+  - assumption.
 Qed.
 
 Section projection_induced_friendliness.

@@ -369,14 +369,14 @@ Lemma validator_component_byzantine_fault_tolerance
     (IM : index -> VLSM message)
     (constraint : composite_label IM -> composite_state IM  * option message -> Prop)
     (i : index)
-    (Hvalidator: projection_validator_prop IM constraint i)
+    (Hvalidator: component_projection_validator_prop IM constraint i)
     : forall tr, byzantine_trace_prop (IM i) tr ->
         valid_trace_prop (composite_vlsm_constrained_projection IM constraint i) tr.
 Proof.
     intros tr Htr.
     apply
         (VLSM_incl_valid_trace
-            (pre_loaded_with_all_messages_validator_proj_incl _ _ _ Hvalidator)).
+            (pre_loaded_with_all_messages_validator_component_proj_incl _ _ _ Hvalidator)).
     revert Htr.
     apply byzantine_pre_loaded_with_all_messages.
 Qed.
@@ -399,7 +399,7 @@ Section composite_validator_byzantine_traces.
             (X := composite_vlsm IM constraint)
             (PreLoadedX := pre_loaded_with_all_messages_vlsm X)
             (FreeX := free_composite_vlsm IM)
-            (Hvalidator: forall i : index, projection_validator_prop IM constraint i)
+            (Hvalidator: forall i : index, component_projection_validator_prop IM constraint i)
             .
 
 (**
