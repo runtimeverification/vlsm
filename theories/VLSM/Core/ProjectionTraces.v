@@ -264,13 +264,158 @@ Definition composite_project_label
   | _ => None
   end.
 
-Definition from_projection
-  (a : composite_transition_item IM)
-  : Prop
-  := j = projT1 (l a).
+(** The [composite_vlsm_constraint_projection] is [VLSM_eq]ual (trace-equivalent)
+to the [projection_induced_vlsm] by the [composite_project_label] and the
+projection of the state to the component.
+*)
+Lemma composite_vlsm_constrained_projection_is_induced
+  : VLSM_eq Xj
+    (projection_induced_vlsm X (type (IM j))
+      composite_project_label (fun s => s j)
+      (lift_to_composite_label IM j) (lift_to_composite_state IM j)).
+Proof.
+  apply VLSM_eq_incl_iff.
+  split.
+  - apply basic_VLSM_strong_incl.
+    + intros s Hs.
+      exists (lift_to_composite_state IM j s).
+      split; [apply state_update_eq|].
+      apply (lift_to_composite_state_initial IM).
+      assumption.
+    + intros m [[im Him] <-]. assumption.
+    + intros l s iom [sX [<- Hv]].
+      exists (existT j l), sX.
+      intuition.
+      unfold composite_project_label.
+      case_decide; [|contradiction].
+      cbn in H |- *.
+      replace H with (@eq_refl index j) by (apply Eqdep_dec.UIP_dec; assumption).
+      reflexivity.
+    + intros l s iom s' oom.
+      cbn.
+      unfold lift_to_composite_state at 1.
+      rewrite state_update_eq.
+      cbn.
+      intros Ht.
+      setoid_rewrite Ht.
+      rewrite state_update_eq.
+      reflexivity.
+  - cbn. apply basic_VLSM_strong_incl.
+    + intros s [sX [<- HsX]].
+      apply (HsX j).
+    + intros m Him.
+      exists (exist _ m Him).
+      reflexivity.
+    + intros l s iom [[i li] [sX [HlX [<- Hv]]]].
+      exists sX.
+      split; [reflexivity|].
+      unfold composite_project_label in HlX.
+      simpl in *.
+      case_decide; [|congruence].
+      subst i.
+      apply Some_inj in HlX.
+      cbv in HlX.
+      subst li.
+      assumption.
+    + intros l s iom s' oom.
+      cbn.
+      unfold lift_to_composite_state at 1.
+      rewrite state_update_eq.
+      destruct (vtransition _ _ _) as (si', om').
+      rewrite state_update_eq.
+      intuition.
+Qed.
 
-Instance dec_from_projection (a : transition_item) : Decision (from_projection a) :=
-  decide (from_projection a).
+Lemma component_label_projection_lift
+  : induced_projection_label_lift_prop X (type (IM j)) composite_project_label
+    (lift_to_composite_label IM j).
+Proof.
+  intros lj.
+  unfold composite_project_label.
+  case_decide as Hj; [|contradiction].
+  cbn in Hj |- *.
+  replace Hj with (@eq_refl index j) by (apply Eqdep_dec.UIP_dec; assumption).
+  reflexivity.
+Qed.
+
+Lemma component_state_projection_lift
+  : induced_projection_state_lift_prop X (type (IM j)) (fun s => s j)
+    (lift_to_composite_state IM j).
+Proof.
+  intros sj.
+  apply state_update_eq.
+Qed.
+
+Lemma component_transition_projection_None
+  : weak_projection_transition_consistency_None X (type (IM j))
+    composite_project_label (λ s : vstate X, s j).
+Proof.
+  intros (i, li) HlX sX iom s'X oom [_ Ht].
+  cbn in Ht.
+  destruct (vtransition _ _ _) as (si', om').
+  inversion Ht. subst.
+  apply state_update_neq.
+  unfold composite_project_label in HlX.
+  simpl in HlX.
+  case_decide; congruence.
+Qed.
+
+Lemma component_transition_projection_Some
+  : induced_projection_transition_consistency_Some X (type (IM j))
+    composite_project_label (λ s : vstate X, s j).
+Proof.
+  intros [j1 lj1] [j2 lj2] lj.
+  unfold composite_project_label.
+  cbn.
+  case_decide as Hj1; [|congruence].
+  subst j1.
+  intros Hlj1. cbv in Hlj1.
+  apply Some_inj in Hlj1.
+  subst lj1.
+  case_decide as Hj2; [|congruence].
+  subst j2.
+  intros Hlj2. cbv in Hlj2.
+  apply Some_inj in Hlj2.
+  subst lj2.
+  intros sX1 sX2 <- iom.
+  destruct (vtransition _ _ _) as (si', om').
+  intros sX1' oom1 Ht1. inversion Ht1. subst. clear Ht1.
+  intros sX2' oom2 Ht2. inversion Ht2. subst. clear Ht2.
+  split; [|reflexivity].
+  rewrite !state_update_eq.
+  reflexivity.
+Qed.
+
+(** The [projection_induced_vlsm] by the [composite_project_label] and the
+projection of the state to the component is indeed a [VLSM_projection].
+*)
+Lemma induced_component_projection
+  : VLSM_projection X
+    (projection_induced_vlsm X (type (IM j))
+      composite_project_label (fun s => s j)
+      (lift_to_composite_label IM j) (lift_to_composite_state IM j))
+    composite_project_label (fun s => s j).
+Proof.
+  apply projection_induced_vlsm_is_projection.
+  - apply component_transition_projection_None.
+  - apply basic_weak_projection_transition_consistency_Some.
+    + apply component_label_projection_lift.
+    + apply component_state_projection_lift.
+    + apply component_transition_projection_Some.
+Qed. 
+
+(** The projection on component <<j>> of valid traces from <<X>> is valid
+for the <<j>>th projection.
+*)
+Lemma component_projection : VLSM_projection X Xj composite_project_label (fun s => s j).
+Proof.
+  constructor.
+  - apply induced_component_projection.
+  - intros isX trX HtrX.
+    apply (VLSM_eq_finite_valid_trace composite_vlsm_constrained_projection_is_induced).
+    apply (VLSM_projection_finite_valid_trace induced_component_projection).
+    assumption.
+Qed.
 
 Lemma initial_state_projection
   (s : vstate X)
@@ -294,37 +439,6 @@ Proof.
   destruct iom as [m|];[|exact I].
   exists (exist _ m HpmX).
   reflexivity.
-Qed.
-
-(** The projection on component <<j>> of valid traces from <<X>> is valid
-for the <<j>>th projection
-*)
-Lemma component_projection : VLSM_projection X Xj composite_project_label (fun s => s j).
-Proof.
-  apply basic_VLSM_projection; intro; intros.
-  - destruct lX as (i, li).
-    unfold composite_project_label in HlX.
-    simpl in HlX. case_decide; [|congruence].
-    subst. inversion HlX. subst. clear HlX.
-    eexists; intuition.
-  - destruct lX as (i, li).
-    unfold composite_project_label in H.
-    simpl in H. destruct (decide _); [|congruence].
-    subst. inversion H. subst. clear H.
-    apply proj2 in H0.
-    simpl in H0.
-    cbn.
-    destruct (vtransition _ _ _) as (si', _om').
-    inversion H0. rewrite state_update_eq. reflexivity.
-  - destruct lX as (i, li).
-    unfold composite_project_label in H.
-    simpl in H. destruct (decide _); [congruence|].
-    clear H. apply proj2 in H0. cbn in H0.
-    destruct (vtransition _ _ _) as (si', _om').
-    inversion H0. rewrite state_update_neq by congruence.
-    reflexivity.
-  - apply initial_state_projection. assumption.
-  - apply valid_message_projection. apply Hv.
 Qed.
 
 (* The projection of a finite valid trace remains a valid trace *)
