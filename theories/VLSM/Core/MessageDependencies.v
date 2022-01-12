@@ -1,7 +1,7 @@
 From stdpp Require Import prelude.
-From Coq Require Import FinFun.
-From VLSM Require Import Lib.Preamble Lib.StdppListSet Lib.Measurable.
-From VLSM Require Import Core.VLSM Core.Composition Core.Equivocation.
+From Coq Require Import FinFun Relations.Relation_Operators.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet Measurable.
+From VLSM.Core Require Import VLSM Composition Equivocation.
 
 (** * VLSM Message Dependencies
 
@@ -10,7 +10,7 @@ Assumes that each message has an associated set of [message_dependencies].
 
 *)
 
-Section message_dependencies.
+Section sec_message_dependencies.
 
 Context
   {message : Type}
@@ -51,9 +51,8 @@ observed all of <<m>>'s dependencies.
 Definition message_dependencies_full_node_condition
   (s : vstate X)
   (m : message)
-  : Prop
-  := forall dm, dm ∈ message_dependencies m ->
-    has_been_observed X s dm.
+  : Prop :=
+  forall dm, dm ∈ message_dependencies m -> has_been_observed X s dm.
 
 (** A VLSM has the [message_dependencies_full_node_condition_prop]
 if the validity of receiving a message in a state implies the
@@ -63,4 +62,61 @@ Definition message_dependencies_full_node_condition_prop : Prop :=
   forall l s m,
   vvalid X l (s, Some m) -> message_dependencies_full_node_condition s m.
 
-End message_dependencies.
+Definition msg_dep_rel : relation message :=
+  fun m1 m2 => m1 ∈ message_dependencies m2.
+
+Definition msg_dep_happens_before : relation message := flip (clos_trans _ (flip msg_dep_rel)).
+
+Lemma msg_dep_happens_before_iff_one x z
+  : msg_dep_happens_before x z <->
+    msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
+Proof.
+  split.
+  - intros Hhb.
+    apply Operators_Properties.clos_trans_t1n in Hhb.
+    inversion Hhb; subst.
+    + left. assumption.
+    + right.
+      exists y.
+      split; [|assumption].
+      apply Operators_Properties.clos_t1n_trans.
+      assumption.
+  - intros Hhb.
+    apply Operators_Properties.clos_t1n_trans.
+    destruct Hhb as [Hone | [y [Hhb Hone]]].
+    + apply t1n_step. assumption.
+    + apply t1n_trans with y; [assumption|].
+      apply Operators_Properties.clos_trans_t1n.
+      assumption.
+Qed.
+
+Global Instance msg_dep_happens_before_transitive : Transitive msg_dep_happens_before.
+Proof.
+  apply flip_Transitive.
+  intros m1 m2 m3.
+  apply t_trans.
+Qed.
+
+Context
+  (Hmsg_dep_happens_before_wf : well_founded msg_dep_happens_before).
+
+Lemma well_founded_reflects_ind
+  (P : message -> Prop)
+  (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
+  : forall m, P m -> forall dm, msg_dep_happens_before dm m -> P dm.
+Proof.
+  induction m as [m Hind] using (well_founded_ind Hmsg_dep_happens_before_wf).
+  intros Hm dm Hdm.
+  apply msg_dep_happens_before_iff_one in Hdm as [Hone | [dm' [Hdm' Hone]]].
+  - revert Hm.
+    apply Hreflects.
+    assumption.
+  - apply Hind with dm'; [..|assumption].
+    + apply msg_dep_happens_before_iff_one. left. assumption.
+    + revert Hm.
+      apply Hreflects.
+      assumption.
+Qed.
+
+End sec_message_dependencies.
+
