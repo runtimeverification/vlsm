@@ -56,6 +56,20 @@ Proof.
   intros. subst. apply state_update_eq.
 Qed.
 
+Lemma sub_IM_state_update_neq
+  (s : composite_state sub_IM)
+  (i : index)
+  (ei : sub_index_prop i)
+  (si : vstate (IM i))
+  (j : index)
+  (ej : sub_index_prop j)
+  : i <> j -> state_update sub_IM s (dec_exist _ i ei) si (dec_exist _ j ej) = s (dec_exist _ j ej).
+Proof.
+  intro Hneq.
+  apply state_update_neq.
+  setoid_rewrite dsig_eq.
+  simpl. congruence.
+Qed.
 
 Definition free_sub_vlsm_composition : VLSM message
   := free_composite_vlsm sub_IM.
@@ -333,6 +347,33 @@ Proof.
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))).
   apply (VLSM_incl_valid_state (constraint_free_incl IM constraint)).
   assumption.
+Qed.
+
+Lemma induced_sub_projection_transition_is_composite l s om
+  : vtransition induced_sub_projection l (s, om) = composite_transition sub_IM l (s, om).
+Proof.
+  destruct l as (sub_i, li).
+  destruct_dec_sig sub_i i Hi Heqsub_i.
+  subst.
+  cbn.
+  unfold sub_IM, lift_sub_state.
+  rewrite lift_sub_state_to_eq with (Hi := Hi).
+  cbn.
+  destruct (vtransition _ _ _) as (si', om').
+  f_equal.
+  extensionality sub_k.
+  destruct_dec_sig sub_k k Hk Heqsub_k.
+  subst.
+  unfold composite_state_sub_projection.
+  simpl.
+  destruct (decide (i = k)).
+  + subst.
+    rewrite state_update_eq.
+    symmetry.
+    apply sub_IM_state_update_eq.
+  + setoid_rewrite sub_IM_state_update_neq; [|congruence].
+    rewrite state_update_neq by congruence.
+    apply lift_sub_state_to_eq.
 Qed.
 
 End sec_induced_sub_projection.
@@ -1751,6 +1792,95 @@ Proof.
 Qed.
 
 End sub_composition_all.
+
+Section sub_composition_element.
+(** ** A component can be lifted to a free subcomposition *)
+
+Context
+  {message : Type}
+  {index : Type}
+  {IndEqDec : EqDecision index}
+  (IM : index -> VLSM message)
+  (indices : set index)
+  (j : index)
+  (Hj : j ∈ indices)
+  .
+
+Definition sub_element_label (l : vlabel (IM j))
+  : composite_label (sub_IM IM indices) :=
+  existT (dexist j Hj) l.
+
+Definition sub_element_state (s : vstate (IM j)) sub_i
+  : vstate (sub_IM IM indices sub_i) :=
+  match (decide (` sub_i = j)) with
+  | left e =>
+    eq_rect_r (λ j : index, vstate (IM j)) s e
+  | right _ => ` (vs0 (IM (` sub_i)))
+  end.
+
+Lemma sub_element_state_eq s H_j
+  : sub_element_state s (dexist j H_j) = s.
+Proof.
+  unfold sub_element_state.
+  simpl.
+  case_decide as Heq_j; [|contradiction].
+  replace Heq_j with (@eq_refl index j) by (apply Eqdep_dec.UIP_dec; assumption).
+  reflexivity.
+Qed.
+
+Lemma sub_element_state_neq s i Hi
+  : i <> j -> sub_element_state s (dexist i Hi) = ` (vs0 (IM i)).
+Proof.
+  intros Hij.
+  unfold sub_element_state.
+  simpl.
+  case_decide; [contradiction|reflexivity].
+Qed.
+
+Lemma preloaded_sub_element_full_projection
+  (P Q : message -> Prop)
+  (PimpliesQ : forall m, P m -> Q m)
+  (PrePXj := pre_loaded_vlsm (IM j) P)
+  (PreQSubFree := pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q)
+  : VLSM_full_projection PrePXj PreQSubFree sub_element_label sub_element_state.
+Proof.
+  apply basic_VLSM_full_projection_preloaded_with; [assumption|..].
+  - intros l s om Hv.
+    split; [|exact I].
+    cbn.
+    rewrite sub_element_state_eq with (H_j := Hj).
+    assumption.
+  - intros l s om s' om'.
+    cbn.
+    rewrite sub_element_state_eq with (H_j := Hj).
+    intro Ht.
+    replace (vtransition _ _ _) with (s', om').
+    f_equal.
+    extensionality sub_i.
+    destruct_dec_sig sub_i i Hi Heqsub_i.
+    subst.
+    destruct (decide (i = j)).
+    + subst.
+      rewrite sub_IM_state_update_eq, sub_element_state_eq.
+      reflexivity.
+    + rewrite sub_IM_state_update_neq by congruence.
+      rewrite !sub_element_state_neq by congruence.
+      reflexivity.
+  - intros sj Hsj sub_i.
+    destruct_dec_sig sub_i i Hi Heqsub_i.
+    subst.
+    destruct (decide (i = j)).
+    + subst. rewrite sub_element_state_eq. assumption.
+    + rewrite sub_element_state_neq by congruence.
+      destruct (vs0 (IM i)).
+      assumption.
+  - intros m Hm.
+    exists (dexist j Hj), (exist _ m Hm).
+    reflexivity.
+Qed.
+
+
+End sub_composition_element.
 
 Section sub_composition_preloaded_lift.
 
