@@ -2763,6 +2763,45 @@ Byzantine fault tolerance analysis.
       revert Hx. apply preloaded_weaken_input_valid_transition.
   Qed.
 
+  Lemma pre_traces_with_valid_inputs_are_valid is s tr
+    (Htr : finite_valid_trace_init_to pre_loaded_with_all_messages_vlsm is s tr)
+    (Hobs : forall m,
+      trace_has_message (field_selector input) m tr ->
+      valid_message_prop X m
+    )
+    : finite_valid_trace_init_to X is s tr.
+  Proof.
+    revert s Htr Hobs.
+    induction tr using rev_ind; intros; split
+    ; [|apply Htr| | apply Htr]
+    ; destruct Htr as [Htr Hinit].
+    - inversion Htr. subst.
+      apply (finite_valid_trace_from_to_empty X).
+      apply initial_state_is_valid. assumption.
+    - apply finite_valid_trace_from_to_last in Htr as Hlst.
+      apply finite_valid_trace_from_to_app_split in Htr.
+      destruct Htr as [Htr Hx].
+      specialize (IHtr _ (conj Htr Hinit)).
+      spec IHtr.
+      { intros. apply Hobs.
+        apply trace_has_message_prefix. assumption.
+      }
+      apply proj1, finite_valid_trace_from_to_forget_last in IHtr.
+      apply finite_valid_trace_from_add_last; [|assumption].
+      inversion Hx. subst f tl s'.
+      apply (extend_right_finite_trace_from X)
+      ; [assumption|].
+      destruct Ht as [[_ [_ Hv]] Ht].
+      apply finite_valid_trace_last_pstate in IHtr as Hplst.
+      repeat split; try assumption.
+      destruct iom as [m|]; [|apply option_valid_message_None].
+      apply option_valid_message_Some.
+      apply Hobs.
+      apply Exists_app. right.
+      apply Exists_cons. left.
+      subst. reflexivity.
+  Qed.
+
 End pre_loaded_with_all_messages_vlsm.
 
 Lemma non_empty_valid_trace_from_can_produce
