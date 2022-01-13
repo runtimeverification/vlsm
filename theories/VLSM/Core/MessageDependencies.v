@@ -62,11 +62,18 @@ Definition message_dependencies_full_node_condition_prop : Prop :=
   forall l s m,
   vvalid X l (s, Some m) -> message_dependencies_full_node_condition s m.
 
+(** Membership to the message_dependencies of a message induces a dependency
+relation.
+*)
 Definition msg_dep_rel : relation message :=
   fun m1 m2 => m1 ∈ message_dependencies m2.
 
+(** The transitive closure of the [msg_dep_rel]ation is a happens-before
+relation.
+*)
 Definition msg_dep_happens_before : relation message := flip (clos_trans _ (flip msg_dep_rel)).
 
+(** Unrolling one the [msg_dep_happens_before] relation one step. *)
 Lemma msg_dep_happens_before_iff_one x z
   : msg_dep_happens_before x z <->
     msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
@@ -97,24 +104,25 @@ Proof.
   apply t_trans.
 Qed.
 
-Context
-  (Hmsg_dep_happens_before_wf : well_founded msg_dep_happens_before).
-
-Lemma well_founded_reflects_ind
+(** If the [msg_dep_rel]ation reflects a predicate <<P>> and the induced
+[msg_dep_happens_before] is [well_founded], then if <<P>> holds for a message,
+it will hold for all its dependencies. *)
+Lemma msg_dep_happens_before_reflect
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
-  : forall m, P m -> forall dm, msg_dep_happens_before dm m -> P dm.
+  : forall dm m, msg_dep_happens_before dm m -> P m -> P dm.
 Proof.
-  induction m as [m Hind] using (well_founded_ind Hmsg_dep_happens_before_wf).
-  intros Hm dm Hdm.
-  apply msg_dep_happens_before_iff_one in Hdm as [Hone | [dm' [Hdm' Hone]]].
-  - revert Hm.
+  intros dm m Hdm.
+  apply Operators_Properties.clos_trans_t1n in Hdm.
+  induction Hdm; [apply Hreflects; assumption|].
+  intro Hpx.
+  apply IHHdm.
+  revert Hpx.
     apply Hreflects.
     assumption.
-  - apply Hind with dm'; [..|assumption].
-    + apply msg_dep_happens_before_iff_one. left. assumption.
-    + revert Hm.
-      apply Hreflects.
+Qed.
+
+End sec_message_dependencies.
       assumption.
 Qed.
 
