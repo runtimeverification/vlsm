@@ -1,9 +1,9 @@
-From stdpp Require Import prelude.
+From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Lia Reals Lra.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinExtras Measurable.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinExtras FinFunExtras Measurable.
+From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.AnnotatedVLSM.
 From VLSM Require Import Core.Equivocation Core.Equivocation.TraceWiseEquivocation.
-From VLSM Require Import Core.Equivocation.NoEquivocation Core.Equivocation.LimitedEquivocation.
+From VLSM Require Import Core.Equivocation.NoEquivocation Core.Equivocation.LimitedEquivocation Core.Equivocation.MsgDepLimitedEquivocation.
 From VLSM Require Import Core.Equivocators.Common Core.Equivocators.Projections.
 From VLSM Require Import Core.Equivocators.MessageProperties Core.Equivocators.Composition.Common.
 From VLSM Require Import Core.Equivocators.Composition.Projections Core.MessageDependencies.
@@ -48,13 +48,13 @@ Section limited_state_equivocation.
 
 Context {message : Type}
   {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (Hbs : forall i : index, HasBeenSentCapability (IM i))
   (Hbr : forall i : index, HasBeenReceivedCapability (IM i))
   (Free := free_composite_vlsm IM)
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
+  (index_listing : list index := enum index)
+  (finite_index : Listing index_listing := listing_from_finite index)
   (equivocator_descriptors := equivocator_descriptors IM)
   (equivocators_state_project := equivocators_state_project IM)
   (equivocator_IM := equivocator_IM IM)
@@ -107,8 +107,11 @@ Qed.
 Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free
   : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm) PreFreeE.
 Proof.
-  apply basic_VLSM_incl_preloaded; intro; intros; [assumption| |assumption].
-  split; [|exact I]. apply H.
+  apply basic_VLSM_incl_preloaded.
+  1,3: intro; intros; assumption.
+  intros l s om Hv.
+  split; [|exact I].
+  apply Hv.
 Qed.
 
 (**
@@ -156,20 +159,20 @@ Lemma equivocators_limited_valid_trace_is_fixed is s tr
    (equivocators_fixed_equivocations_vlsm IM Hbs index_listing
     (equivocating_validators s)) is s tr.
 Proof.
-  intro H.
-  split; [| apply H].
+  intro Htr.
+  split; [| apply Htr].
   cut
     (forall equivocating, equivocating_validators s ⊆ equivocating ->
       finite_valid_trace_from_to (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating) is s tr).
   { intros H'. apply H'. reflexivity. }
-  induction H using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
+  induction Htr using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
   - apply (finite_valid_trace_from_to_empty (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating)).
     apply initial_state_is_valid. assumption.
   - specialize (equivocating_indices_equivocating_validators IM _ finite_index _ reachable_threshold)
       as Heq.
     destruct (Heq sf) as [_ Hsf_incl].
-    specialize (IHfinite_valid_trace_init_to equivocating).
-    spec IHfinite_valid_trace_init_to.
+    specialize (IHHtr equivocating).
+    spec IHHtr.
     { apply proj2 in Ht.
       specialize (equivocators_transition_preserves_equivocating_indices IM index_listing _ _ _ _ _ Ht)
         as Hincl'.
@@ -185,7 +188,7 @@ Proof.
       with s; [assumption|].
     apply valid_trace_add_last; [|reflexivity].
       apply (finite_valid_trace_singleton (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating)).
-      apply valid_trace_last_pstate in IHfinite_valid_trace_init_to.
+      apply valid_trace_last_pstate in IHHtr.
       destruct Ht as [[_ [_ [Hv [[Hno_equiv _] Hno_heavy]]]] Ht].
       repeat split; [assumption| |assumption|assumption| |assumption].
       + destruct iom as [m|]; [|apply option_valid_message_None].
@@ -244,6 +247,52 @@ Proof.
       * apply equivocating_validators_nodup.
       * intros i Hi. apply elem_of_remove_dups. assumption.
 Qed.
+
+Section sec_equivocators_projection_annotated_limited.
+
+Context
+  (message_dependencies : message -> set message)
+  (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
+  (full_message_dependencies : message -> set message)
+  (HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies)
+  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
+  (Hchannel : channel_authentication_prop IM Datatypes.id sender)
+  .
+
+(** Projections of valid traces for the composition of equivocators
+with limited state-equivocation and no message-equivocation can be
+annotated with equivocators to obtain a limited-message equivocation trace.
+*)
+Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation
+  (final_descriptors : equivocator_descriptors)
+  (is : composite_state equivocator_IM)
+  (tr : list (composite_transition_item equivocator_IM))
+  (final_state := finite_trace_last is tr)
+  (Hproper: not_equivocating_equivocator_descriptors IM final_descriptors final_state)
+  (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
+  : exists
+    (trX : list (composite_transition_item IM))
+    (initial_descriptors : equivocator_descriptors)
+    (isX := equivocators_state_project initial_descriptors is)
+    (final_stateX := finite_trace_last isX trX),
+    proper_equivocator_descriptors initial_descriptors is /\
+    equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
+    equivocators_state_project final_descriptors final_state = final_stateX /\
+    finite_valid_trace (msg_dep_limited_equivocation_vlsm IM Hbs Hbr full_message_dependencies sender)
+      {| original_state := isX; state_annotation := ` inhabitant |}
+      (msg_dep_annotate_trace_with_equivocators IM Hbs Hbr full_message_dependencies sender isX trX).
+Proof.
+  eapply equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation in Htr
+    as [trX [initial_descriptors [Hinitial_descriptors [Hpr [Hlst_pr Hpr_limited]]]]]
+  ; [|eassumption].
+  exists trX, initial_descriptors.
+  repeat (split; [assumption|]).
+  eapply msg_dep_limited_fixed_equivocation; eassumption.
+Qed.
+
+End sec_equivocators_projection_annotated_limited.
+
+Section sec_equivocators_projection_constrained_limited.
 
 Context
   {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
@@ -321,12 +370,14 @@ above strengthens to a [VLSM_projection].
 Lemma limited_equivocators_vlsm_projection
   : VLSM_projection equivocators_limited_equivocations_vlsm Limited (equivocators_total_label_project IM) (equivocators_total_state_project IM).
 Proof.
-  constructor; [constructor|]; intros.
-  - apply PreFreeE_Free_vlsm_projection_type.
-    revert H. apply VLSM_incl_finite_valid_trace_from.
+  constructor; [constructor|].
+  - intros sX trX HtrX.
+    apply PreFreeE_Free_vlsm_projection_type.
+    revert HtrX. apply VLSM_incl_finite_valid_trace_from.
     apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
-  - assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
-    { revert H. apply VLSM_incl_finite_valid_trace.
+  - intros sX trX HtrX.
+    assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
+    { revert HtrX. apply VLSM_incl_finite_valid_trace.
       apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
     }
     specialize
@@ -338,11 +389,13 @@ Proof.
       rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
       reflexivity.
     }
-    apply Hsim in H.
+    apply Hsim in HtrX.
     remember (pre_VLSM_projection_trace_project _ _ _ _ _) as tr.
     replace tr with (equivocators_total_trace_project IM trX); [assumption|].
     subst. symmetry.
     apply (equivocators_total_VLSM_projection_trace_project IM (proj1 Hpre_tr)).
 Qed.
+
+End sec_equivocators_projection_constrained_limited.
 
 End limited_state_equivocation.

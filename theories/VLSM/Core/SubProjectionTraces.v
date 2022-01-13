@@ -1886,6 +1886,23 @@ Proof.
     reflexivity.
 Qed.
 
+Lemma valid_preloaded_lifts_can_be_emitted
+  (P Q : message -> Prop)
+  (HPvalid : forall dm, P dm -> valid_message_prop (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q) dm)
+  : forall m, can_emit (pre_loaded_vlsm (IM j) P) m ->
+    can_emit (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q) m.
+Proof.
+  intros m Hm.
+  eapply VLSM_incl_can_emit.
+  {
+    apply pre_loaded_vlsm_incl_relaxed with (P0 := fun m => Q m \/ P m).
+    intuition.
+  }
+  eapply VLSM_full_projection_can_emit; [|eassumption].
+  apply preloaded_sub_element_full_projection.
+  intuition.
+Qed.
+
 Definition sub_label_element_project
   (l : composite_label (sub_IM IM indices))
   : option (vlabel (IM j)) :=

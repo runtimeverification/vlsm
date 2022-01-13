@@ -2067,6 +2067,33 @@ Section Composite.
   Definition no_initial_messages_in_IM_prop : Prop :=
     forall i m, ~vinitial_message_prop (IM i) m.
 
+  Lemma composite_no_initial_valid_messages_emitted_by_sender
+      (can_emit_signed : channel_authentication_prop)
+      (no_initial_messages_in_IM : no_initial_messages_in_IM_prop)
+      (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+      (X := composite_vlsm IM constraint)
+      : forall (m : message), valid_message_prop X m ->
+        exists v, sender m = Some v /\
+          can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m.
+  Proof.
+    intro m.
+    rewrite emitted_messages_are_valid_iff.
+    intros [[i [[mi Hmi] Hom]] | [(s, om) [(i, l) [s' Ht]]]]
+    ; [elim (no_initial_messages_in_IM i mi); assumption|].
+    apply (VLSM_incl_input_valid_transition (constraint_preloaded_free_incl IM _)) in Ht.
+    apply pre_loaded_with_all_messages_projection_input_valid_transition_eq with (j := i) in Ht; [|reflexivity].
+    specialize (can_emit_signed i m).
+    spec can_emit_signed; [eexists _,_,_; eassumption|].
+    unfold channel_authenticated_message in can_emit_signed.
+    destruct (sender m) as [v|] eqn: Hsender; [|inversion can_emit_signed].
+    apply Some_inj in can_emit_signed.
+    exists v.
+    split; [reflexivity|].
+    subst. cbn in Ht.
+    eexists _, _, _.
+    eassumption.
+  Qed.
+
   Lemma composite_no_initial_valid_messages_have_sender
       (can_emit_signed : channel_authentication_prop)
       (no_initial_messages_in_IM : no_initial_messages_in_IM_prop)
@@ -2074,22 +2101,13 @@ Section Composite.
       (X := composite_vlsm IM constraint)
       : forall (m : message) (Hm : valid_message_prop X m), sender m <> None.
   Proof.
-    intros m Hm Hsender.
-    apply emitted_messages_are_valid_iff in Hm.
-    destruct Hm as [Hinitial | Hemit].
-    - destruct Hinitial as [i [[mi Hmi] Hom]].
-      simpl in Hom. subst.
-      apply (no_initial_messages_in_IM i m).
-      assumption.
-    - destruct Hemit as [(s, om) [(i, l) [s' Ht]]].
-      specialize (can_emit_signed i m).
-      unfold channel_authenticated_message in can_emit_signed.
-      rewrite Hsender in can_emit_signed. simpl in can_emit_signed.
-      spec can_emit_signed; [|congruence].
-      red. eexists _, _, _.
-      apply (VLSM_incl_input_valid_transition (constraint_preloaded_free_incl IM _)) in Ht.
-      apply pre_loaded_with_all_messages_projection_input_valid_transition_eq with (j := i) in Ht; [|reflexivity].
-      exact Ht.
+    intros m Hm.
+    cut
+      (exists v, sender m = Some v /\
+        can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m)
+    ; [intros [v [Hsender _]]; congruence|].
+    revert m Hm.
+    apply composite_no_initial_valid_messages_emitted_by_sender; assumption.
   Qed.
 
   Lemma has_been_sent_iff_by_sender

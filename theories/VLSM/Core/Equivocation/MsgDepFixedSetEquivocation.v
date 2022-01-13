@@ -51,24 +51,10 @@ Lemma messages_with_valid_dependences_can_be_emitted s dm
   (Hemitted: can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
   : can_emit (equivocators_composition_for_sent IM Hbs equivocators s) dm.
 Proof.
-  eapply VLSM_incl_can_emit.
-  {
-    apply pre_loaded_vlsm_incl_relaxed
-      with (P := fun m => sent_by_non_equivocating IM Hbs equivocators s m \/ m ∈ message_dependencies dm).
-    intros m0 [Hsent_m0| Hdep_m0]; [intuition|].
-    right.
-    apply Hdepm.
-    assumption.
-  }
-  eapply VLSM_full_projection_can_emit.
-  {
-    apply preloaded_sub_element_full_projection with (P := fun m => m ∈ message_dependencies dm).
-    intuition.
-  }
+  apply valid_preloaded_lifts_can_be_emitted with dm_i (fun m => m ∈ message_dependencies dm)
+  ; [assumption|assumption|].
   apply message_dependencies_are_sufficient with (Hbs dm_i) (Hbr dm_i); [|assumption].
   intuition.
-Unshelve.
-  assumption.
 Qed.
 
 Lemma msg_dep_rel_reflects_dependencies_with_non_equivocating_senders_were_sent s

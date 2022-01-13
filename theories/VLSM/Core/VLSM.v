@@ -1363,6 +1363,24 @@ traces.
 
     (* begin hide *)
 
+    Lemma can_produce_from_valid_trace si tr
+      (Htr: finite_valid_trace_from si tr)
+      : forall item, item ∈ tr ->
+        option_can_produce (destination item) (output item).
+    Proof.
+      intros item Hitem.
+      cut (exists l1 l2, tr = l1 ++ item :: l2).
+      {
+        intros [l1 [l2 Heq]].
+        eexists _,_.
+        eapply input_valid_transition_to with (tr := tr); [eassumption|].
+        simpl.
+        eassumption.
+      }
+      apply elem_of_list_split.
+      assumption.
+    Qed.
+
     Lemma can_emit_from_valid_trace
       (si : state)
       (m : message)
@@ -1371,17 +1389,14 @@ traces.
       (Hm : trace_has_message (field_selector output) m tr) :
       can_emit m.
     Proof.
-      apply Exists_exists in Hm.
-      destruct Hm as [x [Hin Houtput]].
-      apply elem_of_list_split in Hin.
-      destruct Hin as [l1 [l2 Hconcat]].
-      unfold can_emit.
-      destruct Htr as [Htr _].
-      specialize (input_valid_transition_to _ _ _ _ _ Htr Hconcat).
-      intros Ht.
-      simpl in Houtput, Ht.
-      rewrite Houtput in Ht.
-      do 3 eexists;exact Ht.
+      apply can_emit_iff.
+      revert Hm.
+      setoid_rewrite Exists_exists.
+      intros [item [Hitem Houtput]].
+      exists (destination item).
+      unfold can_produce.
+      replace (Some m) with (output item) by assumption.
+      eapply can_produce_from_valid_trace; [apply Htr|assumption].
     Qed.
 
     (* End Hide *)
@@ -2171,6 +2186,42 @@ This relation is often used in stating safety and liveness properties.*)
       apply finite_valid_trace_singleton in Ht.
       apply finite_valid_trace_from_add_last with (f := s') in Ht; [|reflexivity].
       eexists. exact Ht.
+    Qed.
+
+    Lemma elem_of_trace_in_futures_left is s tr
+      (Htr : finite_valid_trace_from_to is s tr)
+      : forall item, item ∈ tr -> in_futures (destination item) s.
+    Proof.
+      intros item.
+      rewrite elem_of_list_In.
+      intros Hitem.
+      apply in_split in Hitem as [pre [suf Heqtr]].
+      exists suf.
+      replace (destination item) with (finite_trace_last is (pre ++ [item]))
+        by apply finite_trace_last_is_last.
+      eapply finite_valid_trace_from_to_app_split.
+      rewrite <- app_assoc.
+      simpl.
+      rewrite <- Heqtr.
+      assumption.
+    Qed.
+
+    Lemma elem_of_trace_in_futures_right is s tr
+      (Htr : finite_valid_trace_from_to is s tr)
+      : forall item, item ∈ tr -> in_futures is (destination item).
+    Proof.
+      intros item.
+      rewrite elem_of_list_In.
+      intros Hitem.
+      apply in_split in Hitem as [pre [suf Heqtr]].
+      exists (pre ++ [item]).
+      replace (destination item) with (finite_trace_last is (pre ++ [item]))
+        by apply finite_trace_last_is_last.
+      eapply finite_valid_trace_from_to_app_split.
+      rewrite <- app_assoc.
+      simpl.
+      rewrite <- Heqtr.
+      eassumption.
     Qed.
 
     Lemma in_futures_witness

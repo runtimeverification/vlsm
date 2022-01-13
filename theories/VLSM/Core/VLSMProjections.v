@@ -653,6 +653,17 @@ Proof.
   simpl. rewrite H. reflexivity.
 Qed.
 
+Lemma VLSM_weak_projection_input_valid
+  : forall lX lY, label_project lX = Some lY ->
+    forall s im, input_valid X lX (s, im) -> input_valid Y lY (state_project s, im).
+Proof.
+  intros lX lY HlX_pr s im Hv.
+  destruct (vtransition X lX (s, im)) as (s', om') eqn:Ht.
+  eapply input_valid_transition_valid.
+  eapply VLSM_weak_projection_input_valid_transition; [eassumption|].
+  split; eassumption.
+Qed.
+
 Lemma VLSM_weak_projection_finite_valid_trace_from_to
   : forall sX s'X trX,
     finite_valid_trace_from_to X sX s'X trX -> finite_valid_trace_from_to Y (state_project sX) (state_project s'X) (VLSM_weak_projection_trace_project Hsimul trX).
@@ -796,6 +807,13 @@ Definition VLSM_projection_input_valid_transition
     input_valid_transition X lX (s, im) (s', om ) ->
     input_valid_transition Y lY (state_project s, im) (state_project s', om)
   := VLSM_weak_projection_input_valid_transition VLSM_projection_weaken.
+
+Definition VLSM_projection_input_valid
+  : forall lX lY, label_project lX = Some lY ->
+    forall s im,
+    input_valid X lX (s, im) ->
+    input_valid Y lY (state_project s, im)
+  := VLSM_weak_projection_input_valid VLSM_projection_weaken.
 
 Definition VLSM_projection_finite_valid_trace_from_to
   : forall sX s'X trX,
@@ -1003,6 +1021,17 @@ Proof.
   destruct_list_last trX trX' lst HtrX
   ; [reflexivity|].
   setoid_rewrite map_app. simpl. rewrite !finite_trace_last_is_last.
+  reflexivity.
+Qed.
+
+Lemma pre_VLSM_full_projection_finite_trace_last_output
+  : forall trX,
+    finite_trace_last_output trX = finite_trace_last_output (pre_VLSM_full_projection_finite_trace_project trX).
+Proof.
+  intros.
+  destruct_list_last trX trX' lst HtrX
+  ; [reflexivity|].
+  setoid_rewrite map_app. simpl. rewrite !finite_trace_last_output_is_last.
   reflexivity.
 Qed.
 
