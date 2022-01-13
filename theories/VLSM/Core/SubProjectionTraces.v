@@ -497,16 +497,23 @@ Proof.
     apply Hfinite.
 Qed.
 
+Program Definition sub_index_list_annotate : list sub_index :=
+  list_annotate _ sub_index_list _.
+Next Obligation.
+  apply Forall_forall.
+  intuition.
+Qed.
+
 Global Instance stdpp_finite_sub_index
-  {Hfinite : finite.Finite index}
   : finite.Finite sub_index.
 Proof.
-  exists (select_sub_indices (enum index)).
-  - apply select_sub_indices_nodup. apply Hfinite.
-  - intro sub_x. destruct_dec_sig sub_x x Hx Heqsub_x.
+  exists (remove_dups sub_index_list_annotate).
+  - apply NoDup_remove_dups.
+  - intro sub_x. apply elem_of_remove_dups.
+    apply elem_of_list_annotate.
+    destruct_dec_sig sub_x x Hx Heqsub_x.
     subst.
-    apply in_select_sub_indices.
-    apply Hfinite.
+    assumption.
 Qed.
 
 Local Instance Sub_Free_HasBeenSentCapability
@@ -1214,7 +1221,7 @@ Lemma induced_sub_projection_friendliness
 Proof.
   eapply (basic_projection_induces_friendliness (composite_vlsm IM constraint)).
   assumption.
-  Unshelve.
+Unshelve.
   - apply induced_sub_projection_transition_consistency_None.
   - apply composite_label_sub_projection_option_lift.
   - apply composite_state_sub_projection_lift.
@@ -1879,6 +1886,129 @@ Proof.
     reflexivity.
 Qed.
 
+Definition sub_label_element_project
+  (l : composite_label (sub_IM IM indices))
+  : option (vlabel (IM j)) :=
+  match decide (j = ` (projT1 l)) with
+  | left e => Some (eq_rect_r (fun j => vlabel (IM j)) (projT2 l) e)
+  | in_right => None
+  end.
+
+Definition sub_state_element_project
+  (s : composite_state (sub_IM IM indices))
+  : vstate (IM j) := s (dexist j Hj).
+
+Lemma sub_transition_element_project_None
+  : forall lX, sub_label_element_project lX = None ->
+    forall s om s' om', composite_transition (sub_IM IM indices) lX (s, om) = (s', om') ->
+    sub_state_element_project s' = sub_state_element_project s.
+Proof.
+  intros (sub_i,li) HlX s om s' om' HtX.
+  destruct_dec_sig sub_i i Hi Heqsub_i.
+  subst.
+  unfold sub_label_element_project in HlX.
+  cbn in HlX, HtX.
+  case_decide as Hij; [congruence|].
+  clear HlX.
+  destruct (vtransition _ _ _) as (si', _om').
+  inversion HtX. subst. clear HtX.
+  unfold sub_state_element_project.
+  apply sub_IM_state_update_neq.
+  congruence.
+Qed.
+
+Lemma sub_element_label_project
+  : forall lY, sub_label_element_project (sub_element_label lY) = Some lY.
+Proof.
+  intros lY.
+  unfold sub_element_label, sub_label_element_project.
+  simpl.
+  case_decide as Heqj; [|contradiction].
+  replace Heqj with (eq_refl (A := index) (x := j)); [reflexivity|].
+  apply Eqdep_dec.UIP_dec.
+  assumption.
+Qed.
+
+Lemma sub_element_state_project
+  : forall sY, sub_state_element_project (sub_element_state sY) = sY.
+Proof.
+  intros sY.
+  unfold sub_element_state, sub_state_element_project.
+  simpl.
+  case_decide as Heqj; [|contradiction].
+  replace Heqj with (eq_refl (A := index) (x := j)); [reflexivity|].
+  apply Eqdep_dec.UIP_dec.
+  assumption.
+Qed.
+
+Lemma sub_transition_element_project_Some
+  : forall lX1 lX2 lY, sub_label_element_project lX1 = Some lY -> sub_label_element_project lX2 = Some lY ->
+    forall sX1 sX2, sub_state_element_project sX1 = sub_state_element_project sX2 ->
+    forall iom sX1' oom1, composite_transition (sub_IM IM indices) lX1 (sX1, iom) = (sX1', oom1) ->
+    forall sX2' oom2, composite_transition (sub_IM IM indices) lX2 (sX2, iom) = (sX2', oom2) ->
+    sub_state_element_project sX1' = sub_state_element_project sX2' /\ oom1 = oom2.
+Proof.
+  intros (sub_j1, lj1) (sub_j2, lj2) lj.
+  destruct_dec_sig sub_j1 j1 Hj1 Heqsub_j1.
+  destruct_dec_sig sub_j2 j2 Hj2 Heqsub_j2.
+  subst.
+  unfold sub_label_element_project.
+  cbn.
+  case_decide as Heqj; intro HlX; inversion HlX as [Heqlj].
+  clear HlX.
+  subst j1.
+  cbv in Heqlj.
+  subst lj1.
+  case_decide as Heqj; intro HlX; inversion HlX as [Heqlj].
+  clear HlX.
+  subst j2.
+  cbv in Heqlj.
+  subst lj2.
+  unfold sub_state_element_project.
+  intros sX1 sX2 Hsjeq iom.
+  replace (sX1 (dec_exist (sub_index_prop indices) j Hj1)) with (sX1 (dexist j Hj))
+    by apply sub_IM_state_pi.
+  replace (sX2 (dec_exist (sub_index_prop indices) j Hj2)) with (sX2 (dexist j Hj))
+    by apply sub_IM_state_pi.
+  rewrite <- Hsjeq.
+  unfold sub_IM.
+  cbn.
+  destruct (vtransition _ _ _) as (si', om').
+  intros sX' oom HtX.
+  inversion HtX. subst oom sX'. clear HtX.
+  intros sX' oom HtX.
+  inversion HtX. subst oom sX'. clear HtX.
+  split; [|reflexivity].
+  setoid_rewrite sub_IM_state_update_eq.
+  reflexivity.
+Qed.
+
+Definition induced_sub_element_projection constraint : VLSM message :=
+  projection_induced_vlsm
+    (induced_sub_projection IM indices constraint) (type (IM j))
+    sub_label_element_project sub_state_element_project
+    sub_element_label sub_element_state.
+
+Lemma induced_sub_element_projection_is_projection constraint
+  : VLSM_projection
+    (induced_sub_projection IM indices constraint)
+    (induced_sub_element_projection constraint)
+    sub_label_element_project sub_state_element_project.
+Proof.
+  apply projection_induced_vlsm_is_projection.
+  - intros lX HlX s om s' om' [_ Ht].
+    apply sub_transition_element_project_None with lX om om'; [assumption|].
+    setoid_rewrite <- induced_sub_projection_transition_is_composite.
+    eassumption.
+  - apply basic_weak_projection_transition_consistency_Some.
+    + intro. apply sub_element_label_project.
+    + intro. apply sub_element_state_project.
+    + intro.
+      setoid_rewrite induced_sub_projection_transition_is_composite.
+      apply sub_transition_element_project_Some.
+Unshelve.
+  exact constraint.
+Qed.
 
 End sub_composition_element.
 

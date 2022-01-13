@@ -515,6 +515,19 @@ and/or the message being valid (e.g., Lemma [Fixed_incl_StrongFixed]).
         forall (l : composite_label) (som : composite_state * option message),
           input_valid (composite_vlsm constraint1) l som -> constraint2 l som.
 
+(**
+The weakest form [constraint_subsumption] also requires that the input
+state and message are valid for the composition under the second constraint.
+*)
+    Definition weak_input_valid_constraint_subsumption
+        (constraint1 constraint2 : composite_label -> composite_state * option message -> Prop)
+        :=
+        forall (l : composite_label) (som : composite_state * option message),
+          input_valid (composite_vlsm constraint1) l som ->
+          valid_state_prop (composite_vlsm constraint2) som.1 ->
+          option_valid_message_prop (composite_vlsm constraint2) som.2 ->
+          constraint2 l som.
+
     Context
       (constraint1 constraint2 : composite_label -> composite_state * option message -> Prop)
       (X1 := composite_vlsm constraint1)
@@ -531,6 +544,18 @@ Lemma [basic_VLSM_incl]
 *)
 
 (* begin hide *)
+    Lemma weak_constraint_subsumption_incl
+      (Hsubsumption : weak_input_valid_constraint_subsumption constraint1 constraint2)
+      : VLSM_incl X1 X2.
+    Proof.
+      apply basic_VLSM_incl; intro; intros.
+      - assumption.
+      - apply initial_message_is_valid. assumption.
+      - split; [apply Hv|].
+        apply Hsubsumption; assumption.
+      - apply H.
+    Qed.
+
     Lemma constraint_subsumption_input_valid
       (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
       (l : label)
@@ -585,6 +610,13 @@ Lemma [basic_VLSM_incl]
       apply basic_VLSM_incl; intro; intros; [assumption| | |apply H].
       - apply initial_message_is_valid. assumption.
       - apply preloaded_constraint_subsumption_input_valid; assumption.
+    Qed.
+
+    Lemma weak_constraint_subsumption_weakest
+      (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
+      : weak_input_valid_constraint_subsumption constraint1 constraint2.
+    Proof.
+      intros l som Hv _ _. apply Hsubsumption. assumption.
     Qed.
 
     Lemma preloaded_constraint_subsumption_stronger

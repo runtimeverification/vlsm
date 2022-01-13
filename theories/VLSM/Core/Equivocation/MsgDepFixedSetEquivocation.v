@@ -20,16 +20,16 @@ Context
   (Hbo_sub := fun sub_i => HasBeenObservedCapability_from_sent_received (sub_IM IM equivocators sub_i))
   .
 
-Definition has_equivocating_sender (m : message) : Prop :=
+Definition equivocator_can_emit (m : message) : Prop :=
   exists i, i ∈ equivocators /\ can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m.
 
 Definition dependencies_with_non_equivocating_senders_were_sent s m : Prop :=
   forall dm, msg_dep_happens_before message_dependencies dm m ->
-    sent_by_non_equivocating IM _ equivocators s dm \/ has_equivocating_sender dm.
+    sent_by_non_equivocating IM _ equivocators s dm \/ equivocator_can_emit dm.
 
 Definition msg_dep_fixed_set_equivocation (s : composite_state IM) (m : message) :=
   sent_by_non_equivocating IM _ equivocators s m \/
-  has_equivocating_sender m /\
+  equivocator_can_emit m /\
   dependencies_with_non_equivocating_senders_were_sent s m.
 
 Definition msg_dep_fixed_set_equivocation_constraint
@@ -65,7 +65,7 @@ Proof.
     apply preloaded_sub_element_full_projection with (P := fun m => m ∈ message_dependencies dm).
     intuition.
   }
-  apply message_dependencies_are_sufficient with (Hbo dm_i); [|assumption].
+  apply message_dependencies_are_sufficient with (Hbs dm_i) (Hbr dm_i); [|assumption].
   intuition.
 Unshelve.
   assumption.
@@ -125,14 +125,14 @@ Proof.
 Qed.
 
 Lemma msg_dep_strong_fixed_equivocation_constraint_subsumption
-  : input_valid_constraint_subsumption IM
+  (Hmsg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies))
+  : strong_constraint_subsumption IM
     msg_dep_fixed_set_equivocation_constraint
     (strong_fixed_equivocation_constraint IM Hbs equivocators).
 Proof.
-  intros l (s, [m|]) [Hs [Hm [_ Hc]]]; [|exact I].
-  destruct Hc as [Hsent | [[i [Hi Hmi]] Hdeps]]; [left; assumption|].
-  right.
-Admitted.
+  intros l (s, [m|]) Hc; [|exact I].
+  apply msg_dep_strong_fixed_equivocation_subsumption; assumption.
+Qed.
 
 Lemma single_equivocator_projection s j
   (Hj : j ∈ equivocators)
@@ -206,7 +206,7 @@ Qed.
 
 Lemma equivocators_composition_can_emit_sender s m
   : can_emit (equivocators_composition_for_sent IM Hbs equivocators s) m ->
-    has_equivocating_sender m.
+    equivocator_can_emit m.
 Proof.
   intros [(sX, iom) [(sub_i, li) [sX' HtX]]].
   destruct_dec_sig sub_i i Hi Heqsub_i.
@@ -394,12 +394,16 @@ Proof.
 Qed.
 
 Lemma msg_dep_strong_fixed_equivocation_incl
+  (Hmsg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies))
   : VLSM_incl
     (composite_vlsm IM msg_dep_fixed_set_equivocation_constraint)
     (composite_vlsm IM (strong_fixed_equivocation_constraint IM Hbs equivocators)).
 Proof.
   apply constraint_subsumption_incl.
+  apply preloaded_constraint_subsumption_stronger.
+  apply strong_constraint_subsumption_strongest.
   apply msg_dep_strong_fixed_equivocation_constraint_subsumption.
+  assumption.
 Qed.
 
 Lemma strong_msg_dep_fixed_equivocation_incl
@@ -415,14 +419,166 @@ Proof.
 Qed.
 
 Lemma msg_dep_strong_fixed_equivocation_eq
+  (Hmsg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   : VLSM_eq
     (composite_vlsm IM msg_dep_fixed_set_equivocation_constraint)
     (composite_vlsm IM (strong_fixed_equivocation_constraint IM Hbs equivocators)).
 Proof.
   apply VLSM_eq_incl_iff; split.
-  - apply msg_dep_strong_fixed_equivocation_incl.
+  - apply msg_dep_strong_fixed_equivocation_incl. assumption.
   - apply strong_msg_dep_fixed_equivocation_incl. assumption.
 Qed.
 
 End msg_dep_fixed_set_equivocation.
+
+Section sec_full_node_fixed_set_equivocation.
+
+Context
+  {message : Type}
+  `{EqDecision index}
+  (IM : index -> VLSM message)
+  (Hbs : forall i, HasBeenSentCapability (IM i))
+  (message_dependencies : message -> set message)
+  (equivocators : set index)
+  {validator : Type}
+  (A : validator -> index)
+  (sender : message -> option validator)
+  .
+
+Definition has_equivocating_sender (m : message)
+  := exists v, sender m = Some v /\ A v ∈ equivocators.
+
+
+Definition full_node_fixed_set_equivocation (s : composite_state IM) (m : message) :=
+  sent_by_non_equivocating IM _ equivocators s m \/ has_equivocating_sender m.
+
+Definition full_node_fixed_set_equivocation_constraint
+  (l : composite_label IM)
+  (som : composite_state IM * option message)
+  : Prop :=
+  let (s, om) := som in
+  from_option (full_node_fixed_set_equivocation s) True om.
+
+Lemma msg_dep_full_node_fixed_set_equivocation_constraint_subsumption
+  (Hchannel : channel_authentication_prop IM A sender)
+  : strong_constraint_subsumption IM
+    (msg_dep_fixed_set_equivocation_constraint IM Hbs message_dependencies equivocators)
+    full_node_fixed_set_equivocation_constraint.
+Proof.
+  intros l (s, [m|]); [|intuition].
+  intros [Hsent | [[i [Hi Hemit]] Hdeps]]; [left; assumption|].
+  right.
+  apply Hchannel in Hemit.
+  cbv in Hemit |- *.
+  destruct (sender m) as [v|]; [|congruence].
+  eexists. split; [reflexivity|].
+  replace (A v) with i; [assumption|].
+  congruence.
+Qed.
+
+Context
+  (Hbr : forall i, HasBeenReceivedCapability (IM i))
+  (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
+  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
+  (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
+  .
+
+Lemma fixed_full_node_equivocation_incl
+  {finite_index : finite.Finite index}
+  (Hchannel : channel_authentication_prop IM A sender)
+  : VLSM_incl
+    (composite_vlsm IM (fixed_equivocation_constraint IM Hbs Hbr equivocators))
+    (composite_vlsm IM full_node_fixed_set_equivocation_constraint).
+Proof.
+  eapply VLSM_incl_trans.
+  - apply Fixed_incl_StrongFixed with (enum index).
+    apply listing_from_finite.
+  - eapply VLSM_incl_trans.
+    + apply strong_msg_dep_fixed_equivocation_incl with Hbr; eassumption.
+    + apply constraint_subsumption_incl
+        with (constraint1 := msg_dep_fixed_set_equivocation_constraint IM Hbs message_dependencies equivocators).
+      apply preloaded_constraint_subsumption_stronger.
+      apply strong_constraint_subsumption_strongest.
+      apply msg_dep_full_node_fixed_set_equivocation_constraint_subsumption.
+      assumption.
+Qed.
+
+Lemma full_node_fixed_equivocation_constraint_subsumption
+  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  (Hsender_safety : sender_safety_alt_prop IM A sender)
+  : input_valid_constraint_subsumption IM
+    full_node_fixed_set_equivocation_constraint
+    (fixed_equivocation_constraint IM Hbs Hbr equivocators).
+Proof.
+  intros l (s, [m|]) [_ [Hm [Hv Hc]]]; [|intuition].
+  destruct Hc as [Hsent | Heqv].
+  - left. revert Hsent. apply sent_by_non_equivocating_are_observed.
+  - right.
+    destruct l as (i, li).
+    destruct Heqv as [j [Hsender HAj]].
+    apply Hfull in Hv.
+    eapply VLSM_incl_can_emit.
+    {
+      apply pre_loaded_vlsm_incl_relaxed
+        with (P := fun dm => composite_has_been_observed IM Hbo s dm \/ dm ∈ message_dependencies m).
+      intros m0 [Hsent_m0| Hdep_m0]; [intuition|].
+      left.
+      exists i.
+      specialize (Hv _ Hdep_m0) as [Hsent | Hreceived]
+      ; [left | right]; assumption.
+    }
+    eapply VLSM_full_projection_can_emit.
+    {
+      apply preloaded_sub_element_full_projection with (P := fun dm => dm ∈ message_dependencies m).
+      intuition.
+    }
+    apply message_dependencies_are_sufficient with (Hbs (A j)) (Hbr (A j)); [apply HMsgDep|].
+    cut (exists k, can_emit (pre_loaded_with_all_messages_vlsm (IM k)) m).
+    {
+      intros [k Hk].
+      replace (A j) with k; [assumption|].
+      symmetry.
+      eapply Hsender_safety; eassumption.
+    }
+    eapply @can_emit_composite_project
+      with (constraint := full_node_fixed_set_equivocation_constraint).
+    apply
+      (VLSM_incl_can_emit
+        (vlsm_incl_pre_loaded_with_all_messages_vlsm (composite_vlsm IM _))).
+    apply emitted_messages_are_valid_iff in Hm as [[k [[im Him] Heqm]] | Hemit]
+    ; [|assumption].
+    elim (no_initial_messages_in_IM k im).
+    assumption.
+    Unshelve.
+    assumption.
+Qed.
+
+Lemma full_node_fixed_equivocation_incl
+  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  (Hsender_safety : sender_safety_alt_prop IM A sender)
+  : VLSM_incl
+    (composite_vlsm IM full_node_fixed_set_equivocation_constraint)
+    (composite_vlsm IM (fixed_equivocation_constraint IM Hbs Hbr equivocators)).
+Proof.
+  apply constraint_subsumption_incl.
+  apply full_node_fixed_equivocation_constraint_subsumption; assumption.
+Qed.
+
+Lemma full_node_fixed_equivocation_eq
+  {finite_index : finite.Finite index}
+  (Hchannel : channel_authentication_prop IM A sender)
+  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  : VLSM_eq
+    (composite_vlsm IM full_node_fixed_set_equivocation_constraint)
+    (composite_vlsm IM (fixed_equivocation_constraint IM Hbs Hbr equivocators)).
+Proof.
+  apply VLSM_eq_incl_iff; split.
+  - apply full_node_fixed_equivocation_incl; [assumption|].
+    apply channel_authentication_sender_safety.
+    assumption.
+  - apply fixed_full_node_equivocation_incl.
+    assumption.
+Qed.
+
+End sec_full_node_fixed_set_equivocation.

@@ -1239,6 +1239,36 @@ Proof.
   apply proper_not_sent.
 Defined.
 
+Lemma preloaded_has_been_sent_stepwise_props
+      [message : Type]
+      [vlsm: VLSM message]
+      (Hhbs: HasBeenSentCapability vlsm)
+      (seed : message -> Prop)
+      (X := pre_loaded_vlsm vlsm seed):
+  has_been_sent_stepwise_props (vlsm := X) (has_been_sent vlsm).
+Proof.
+  destruct (has_been_sent_stepwise_from_trace Hhbs) as [Hinit Hupdate].
+  split.
+  - intros s Hs. apply Hinit. assumption.
+  - intros l s im s' om Ht msg.
+    apply (Hupdate l s im s' om).
+    revert Ht.
+    apply VLSM_incl_input_valid_transition.
+    apply basic_VLSM_incl_preloaded; cbv; intuition.
+Qed.
+
+Lemma preloaded_HasBeenSentCapability
+      [message : Type]
+      [vlsm: VLSM message]
+      (Hhbs: HasBeenSentCapability vlsm)
+      (seed : message -> Prop):
+  HasBeenSentCapability (pre_loaded_vlsm vlsm seed).
+Proof.
+  eapply HasBeenSentCapability_from_stepwise.
+  - apply Hhbs.
+  - apply preloaded_has_been_sent_stepwise_props.
+Defined.
+
 Lemma has_been_sent_step_update
       `{Hhbs: HasBeenSentCapability message vlsm}:
   forall [l s im s' om],
@@ -1290,6 +1320,36 @@ Proof.
   apply has_been_received_dec.
   apply proper_received.
   apply proper_not_received.
+Defined.
+
+Lemma preloaded_has_been_received_stepwise_props
+      [message : Type]
+      [vlsm: VLSM message]
+      (Hhbr: HasBeenReceivedCapability vlsm)
+      (seed : message -> Prop)
+      (X := pre_loaded_vlsm vlsm seed):
+  has_been_received_stepwise_props (vlsm := X) (has_been_received vlsm).
+Proof.
+  destruct (has_been_received_stepwise_from_trace Hhbr) as [Hinit Hupdate].
+  split.
+  - intros s Hs. apply Hinit. assumption.
+  - intros l s im s' om Ht msg.
+    apply (Hupdate l s im s' om).
+    revert Ht.
+    apply VLSM_incl_input_valid_transition.
+    apply basic_VLSM_incl_preloaded; cbv; intuition.
+Qed.
+
+Lemma preloaded_HasBeenReceivedCapability
+      [message : Type]
+      [vlsm: VLSM message]
+      (Hhbr: HasBeenReceivedCapability vlsm)
+      (seed : message -> Prop):
+  HasBeenReceivedCapability (pre_loaded_vlsm vlsm seed).
+Proof.
+  eapply HasBeenReceivedCapability_from_stepwise.
+  - apply Hhbr.
+  - apply preloaded_has_been_received_stepwise_props.
 Defined.
 
 Lemma has_been_received_step_update
@@ -1601,6 +1661,23 @@ Proof.
     destruct Hreceived.
     + simpl in H. subst om. assumption.
     + auto.
+Qed.
+
+Lemma observed_valid
+    [message]
+    (X : VLSM message)
+    {Hhbs: HasBeenSentCapability X}
+    {Hhbr: HasBeenReceivedCapability X}
+    (Hhbo: HasBeenObservedCapability X := HasBeenObservedCapability_from_sent_received X)
+    (s : state)
+    (Hs : valid_state_prop X s)
+    (m : message)
+    (Hobserved : has_been_observed X s m) :
+    valid_message_prop X m.
+Proof.
+  destruct Hobserved as [Hsent | Hreceived].
+  - eapply sent_valid; eassumption.
+  - eapply received_valid; eassumption.
 Qed.
 
 (** *** Equivocation in compositions
