@@ -765,7 +765,7 @@ Proof.
   inversion Hpr. subst. clear Hpr.
   inversion Hpr_pre_item. subst. clear Hpr_pre_item.
   constructor. reflexivity.
-  Unshelve.
+Unshelve.
   - assumption.
   - assumption.
 Qed.
