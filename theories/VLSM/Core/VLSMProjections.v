@@ -686,7 +686,7 @@ Proof.
   eapply proj1, VLSM_weak_projection_input_valid_transition, input_valid_can_transition
   ; [eassumption|assumption|exact HtX].
 Qed.
- 
+
 Lemma VLSM_weak_projection_finite_valid_trace_from_to
   : forall sX s'X trX,
     finite_valid_trace_from_to X sX s'X trX -> finite_valid_trace_from_to Y (state_project sX) (state_project s'X) (VLSM_weak_projection_trace_project Hsimul trX).

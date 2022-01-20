@@ -402,7 +402,7 @@ Proof.
     + apply component_label_projection_lift.
     + apply component_state_projection_lift.
     + apply component_transition_projection_Some.
-Qed. 
+Qed.
 
 (** The projection on component <<j>> of valid traces from <<X>> is valid
 for the <<j>>th projection.

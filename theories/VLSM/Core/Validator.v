@@ -58,16 +58,13 @@ Qed.
 We say that <<Y>> is a [transition_validator] if any [valid]
 transition (from a reachable state) in <<Y>> can be "lifted" to
 an [input_valid_transition] in <<X>>.
-
 *)
-
 Definition transition_validator :=
   forall lY sY omi, input_valid PreY lY (sY, omi) ->
   exists lX sX sX' om',
    input_valid_transition X lX (sX, omi) (sX', om') /\
    label_project lX = Some lY /\
    state_project sX = sY.
-   
 
 (**
 Next two results show that the (simpler) [projection_validator_prop]erty
@@ -109,8 +106,7 @@ Context
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)
   (label_lift : vlabel Y -> vlabel X)
   (state_lift : vstate Y -> vstate X)
-  (Xi := projection_induced_vlsm X (type Y)
-    label_project state_project label_lift state_lift)
+  (Xi := projection_induced_vlsm X (type Y) label_project state_project label_lift state_lift)
   (Hlabel_lift : induced_projection_label_lift_prop _ _ label_project label_lift)
   (Hstate_lift : induced_projection_state_lift_prop _ _ state_project state_lift)
   (Hinitial_lift : strong_full_projection_initial_state_preservation Y X state_lift)
@@ -161,10 +157,11 @@ Proof.
 Qed.
 
 (** An alternative formulation of the [projection_validator_prop]erty with a
-seemingly stronger hypothesis, states that <<Y>> is a validator for <<X>>
-if for any <<sY>> a valid state in the projection <<Xi>>, <<li valid Y (sY, om)>>
-implies that <<li valid (si, om)>> in the projection <<Xi>> (i.e.,
-[projection_induced_valid]ity).
+seemingly stronger hypothesis, states that <<Y>> is a validator for <<X>> if
+for any <<li>>, <<si>>, <<iom>> such that <<li valid (si, iom)>> in <<Y>>
+and <<si>> is a valid state in the induced projection <<Xi>>,
+implies that <<li valid (si, om)>> in the induced projection <<Xi>>
+(i.e., [projection_induced_valid]ity).
 *)
 Definition projection_validator_prop_alt :=
   forall li si iom,
@@ -177,9 +174,7 @@ valid states in the induced projection <<Xi>>.
 *)
 Lemma validator_alt_free_states_are_projection_states
   : projection_validator_prop_alt ->
-  forall s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm Y) s ->
-    valid_state_prop Xi s.
+    forall s, valid_state_prop PreY s -> valid_state_prop Xi s.
 Proof.
   intros Hvalidator sY Hs.
   induction Hs using valid_state_prop_ind.
@@ -211,8 +206,7 @@ Proof.
       reflexivity.
 Qed.
 
-(** Below we show that the two definitions above are actually equivalent.
-*)
+(** Below we show that the two definitions above are actually equivalent. *)
 Lemma projection_validator_prop_alt_iff
   : projection_validator_prop_alt <-> projection_validator_prop.
 Proof.
@@ -231,9 +225,7 @@ Qed.
 
 Lemma validator_free_states_are_projection_states
   : projection_validator_prop ->
-  forall s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm Y) s ->
-    valid_state_prop Xi s.
+    forall s, valid_state_prop PreY s -> valid_state_prop Xi s.
 Proof.
   rewrite <- projection_validator_prop_alt_iff by assumption.
   apply validator_alt_free_states_are_projection_states.
