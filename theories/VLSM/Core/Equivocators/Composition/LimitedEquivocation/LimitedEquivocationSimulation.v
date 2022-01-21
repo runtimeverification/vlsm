@@ -1,9 +1,9 @@
-From stdpp Require Import prelude.
+From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Reals.
-From VLSM Require Import Lib.StdppListSet.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces.
+From VLSM Require Import Lib.StdppListSet Lib.FinFunExtras.
+From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces Core.AnnotatedVLSM.
 From VLSM Require Import Core.Equivocation Core.EquivocationProjections Core.Equivocation.FixedSetEquivocation Core.Equivocation.NoEquivocation.
-From VLSM Require Import Lib.Measurable Core.Equivocation.TraceWiseEquivocation Core.Equivocation.LimitedEquivocation.
+From VLSM Require Import Lib.Measurable Core.Equivocation.TraceWiseEquivocation Core.Equivocation.LimitedEquivocation Core.Equivocation.MsgDepLimitedEquivocation.
 From VLSM Require Import MessageDependencies Core.Equivocation.WitnessedEquivocation.
 From VLSM Require Import Core.Equivocators.Composition.Common Core.Equivocators.Composition.Projections.
 From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.LimitedEquivocation.
@@ -26,16 +26,15 @@ Section fixed_limited_state_equivocation.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   {i0 : Inhabited index}
   (Hbs : forall i, HasBeenSentCapability (IM i))
   (Hbr : forall i, HasBeenReceivedCapability (IM i))
   `{IndThreshold : ReachableThreshold index}
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
-  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM Hbs finite_index)
+  (index_listing : list index := enum index)
+  (finite_index : Listing index_listing := listing_from_finite index)
+  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM Hbs)
   (equivocating : list index)
   (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating)
   .
@@ -74,16 +73,15 @@ Section limited_equivocation_simulation.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   {i0 : Inhabited index}
   (Hbs : forall i, HasBeenSentCapability (IM i))
   (Hbr : forall i, HasBeenReceivedCapability (IM i))
   `{IndThreshold : ReachableThreshold index}
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
-  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM Hbs finite_index)
+  (index_listing : list index := enum index)
+  (finite_index : Listing index_listing := listing_from_finite index)
+  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM Hbs)
   .
 
 (** If a trace has the [fixed_limited_equivocation_prop]erty, then it can be
@@ -119,6 +117,52 @@ Proof.
   apply equivocators_Fixed_incl_Limited.
   assumption.
 Qed.
+
+Section sec_equivocators_simulating_annotated_limited.
+
+Context
+  (message_dependencies : message -> set message)
+  (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
+  (full_message_dependencies : message -> set message)
+  (HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies)
+  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
+  (sender : message -> option index)
+  (Hchannel : channel_authentication_prop IM Datatypes.id sender)
+  .
+
+Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation_rev
+  isX sX trX
+  (HtrX : finite_valid_trace_init_to (msg_dep_limited_equivocation_vlsm IM Hbs Hbr full_message_dependencies sender) isX sX trX)
+  : exists is, equivocators_total_state_project IM is = original_state isX /\
+    exists s, equivocators_total_state_project IM s = original_state sX /\
+    exists tr, equivocators_total_trace_project IM tr =
+      pre_VLSM_full_projection_finite_trace_project
+        (annotated_type (free_composite_vlsm IM) (set index)) (composite_type IM) Datatypes.id original_state
+        trX
+    /\ finite_valid_trace_init_to XE is s tr
+    /\ finite_trace_last_output trX = finite_trace_last_output tr.
+Proof.
+  apply valid_trace_get_last in HtrX as HeqsX.
+  apply valid_trace_forget_last in HtrX.
+  eapply msg_dep_fixed_limited_equivocation in HtrX.
+  2-5: eassumption.
+  apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
+    as [is [His_pr [s [Hpr_s [tr [Htr_pr [Htr Houtput]]]]]]]
+  ; [|assumption].
+  eexists; split; [eassumption|].
+  subst.
+  exists s.
+  rewrite Hpr_s.
+  erewrite <- pre_VLSM_full_projection_finite_trace_last.
+  split; [reflexivity|].
+  exists tr.
+  split; [assumption|].
+  split; [assumption|].
+  rewrite <- Houtput.
+  apply pre_VLSM_full_projection_finite_trace_last_output.
+Qed.
+
+End sec_equivocators_simulating_annotated_limited.
 
 Context
   (sender : message -> option index)
