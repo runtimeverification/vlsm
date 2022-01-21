@@ -277,7 +277,7 @@ Proof.
   apply VLSM_eq_incl_iff.
   split.
   - apply basic_VLSM_strong_incl.
-    + intros s Hs.
+    + intros s Hs; cbn; red.
       exists (lift_to_composite_state IM j s).
       split; [apply state_update_eq|].
       apply (lift_to_composite_state_initial IM).
@@ -295,7 +295,6 @@ Proof.
       cbn.
       unfold lift_to_composite_state at 1.
       rewrite state_update_eq.
-      cbn.
       intros Ht.
       setoid_rewrite Ht.
       rewrite state_update_eq.
@@ -306,7 +305,7 @@ Proof.
     + intros m Him.
       exists (exist _ m Him).
       reflexivity.
-    + intros l s iom [[i li] [sX [HlX [<- Hv]]]].
+    + intros l s iom ((i, li) & sX & HlX & <- & Hv).
       exists sX.
       split; [reflexivity|].
       unfold composite_project_label in HlX.

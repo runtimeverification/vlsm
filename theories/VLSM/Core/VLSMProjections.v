@@ -683,8 +683,8 @@ Lemma VLSM_weak_projection_input_valid
 Proof.
   intros lX lY Hpr sX im HvX.
   destruct (vtransition X lX (sX, im)) eqn:HtX.
-  eapply proj1, VLSM_weak_projection_input_valid_transition, input_valid_can_transition
-  ; [eassumption|assumption|exact HtX].
+  eapply VLSM_weak_projection_input_valid_transition, input_valid_can_transition
+  ; eassumption.
 Qed.
 
 Lemma VLSM_weak_projection_finite_valid_trace_from_to
@@ -1320,7 +1320,7 @@ Lemma VLSM_weak_full_projection_input_valid l s im
 Proof.
   intros.
   eapply (VLSM_weak_projection_input_valid VLSM_weak_full_projection_is_projection)
-  ; [reflexivity|assumption].
+  ; trivial.
 Qed.
 
 Lemma VLSM_weak_full_projection_infinite_valid_trace_from
@@ -3023,13 +3023,12 @@ Lemma induced_projection_valid_is_input_valid
   : vvalid projection_induced_vlsm l (s, om) -> input_valid projection_induced_vlsm l (s,om).
 Proof.
   intro Hv.
-  destruct (id Hv) as [lX [sX [HlX [<- [Hps [Hopm _]]]]]].
-  repeat split.
-  - apply (VLSM_projection_valid_state Hproj). assumption.
+  destruct (id Hv) as (lX & sX & HlX & <- & Hps & Hopm & _).
+  repeat split; [| | assumption].
+  - eapply VLSM_projection_valid_state; eassumption.
   - destruct om as [m|]; [|apply option_valid_message_None].
     apply option_initial_message_is_valid.
     assumption.
-  - assumption.
 Qed.
 
 Section projection_induced_friendliness.
