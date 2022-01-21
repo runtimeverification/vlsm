@@ -667,8 +667,7 @@ Qed.
 
 Lemma VLSM_weak_projection_input_valid
   : forall lX lY, label_project lX = Some lY ->
-    forall sX im,
-    input_valid X lX (sX, im) -> input_valid Y lY (state_project sX, im).
+    forall s im, input_valid X lX (s, im) -> input_valid Y lY (state_project s, im).
 Proof.
   intros lX lY Hpr sX im HvX.
   destruct (vtransition X lX (sX, im)) eqn:HtX.
@@ -1029,6 +1028,17 @@ Proof.
   destruct_list_last trX trX' lst HtrX
   ; [reflexivity|].
   setoid_rewrite map_app. simpl. rewrite !finite_trace_last_is_last.
+  reflexivity.
+Qed.
+
+Lemma pre_VLSM_full_projection_finite_trace_last_output
+  : forall trX,
+    finite_trace_last_output trX = finite_trace_last_output (pre_VLSM_full_projection_finite_trace_project trX).
+Proof.
+  intros.
+  destruct_list_last trX trX' lst HtrX
+  ; [reflexivity|].
+  setoid_rewrite map_app. simpl. rewrite !finite_trace_last_output_is_last.
   reflexivity.
 Qed.
 
@@ -2693,12 +2703,37 @@ Context
   (X : VLSM message)
   .
 
+Lemma pre_loaded_vlsm_incl_relaxed
+  (P Q : message -> Prop)
+  (PimpliesQorValid : forall m : message, P m -> Q m \/ valid_message_prop (pre_loaded_vlsm X Q) m)
+  : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
+Proof.
+  apply basic_VLSM_incl.
+  - cbv; intuition.
+  - intros _ _ m _ _ [Him | Hp].
+    + apply initial_message_is_valid. left. assumption.
+    + apply PimpliesQorValid in Hp as [Hq | Hvalid]; [|assumption].
+      apply initial_message_is_valid. right. assumption.
+  - cbv; intuition.
+  - cbv; intuition.
+Qed.
+
 Lemma pre_loaded_vlsm_incl
   (P Q : message -> Prop)
   (PimpliesQ : forall m : message, P m -> Q m)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
-  apply basic_VLSM_incl_preloaded_with; cbv; intuition.
+  apply pre_loaded_vlsm_incl_relaxed. intuition.
+Qed.
+
+Lemma pre_loaded_vlsm_with_valid_eq
+  (P Q : message -> Prop)
+  (QimpliesValid : forall m, Q m -> valid_message_prop (pre_loaded_vlsm X P) m)
+  : VLSM_eq (pre_loaded_vlsm X (fun m => P m \/ Q m)) (pre_loaded_vlsm X P).
+Proof.
+  apply VLSM_eq_incl_iff; split.
+  - apply pre_loaded_vlsm_incl_relaxed. intuition.
+  - cbv; apply pre_loaded_vlsm_incl. intuition.
 Qed.
 
 Lemma pre_loaded_vlsm_idem_l
