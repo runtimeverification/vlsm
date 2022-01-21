@@ -362,12 +362,7 @@ Proof.
   specialize (preloaded_component_projection IM i) as Hproj.
   specialize (VLSM_projection_input_valid_transition Hproj (existT i li) li)
     as Htransition.
-  spec Htransition.
-  { clear. unfold composite_project_label. simpl.
-    case_decide; [|congruence].
-    replace H with (@eq_refl index i) by (apply Eqdep_dec.UIP_dec; assumption).
-    reflexivity.
-  }
+  spec Htransition; [apply (composite_project_label_eq IM)|].
   apply Htransition in Hemitted. clear Htransition.
   remember (s0 i) as s0i. clear s0 Heqs0i.
   remember (s1 i) as s1i. clear s1 Heqs1i.
