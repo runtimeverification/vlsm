@@ -26,3 +26,4 @@ deps.map
 *.dpd
 *.dot
 .coq-native/
+.vscode
