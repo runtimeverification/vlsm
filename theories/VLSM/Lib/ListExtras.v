@@ -783,6 +783,33 @@ Proof.
     + right. specialize (IHl (Forall_tl Hs)). apply IHl. assumption.
 Qed.
 
+Lemma elem_of_list_annotate
+  `{EqDecision A}
+  (P : A -> Prop)
+  {Pdec : forall a, Decision (P a)}
+  (l : list A)
+  (Hs : Forall P l)
+  (xP : dsig P)
+  : xP ∈ (list_annotate P l Hs) <-> (` xP) ∈ l.
+Proof.
+  split; [apply elem_of_list_annotate_forget|].
+  destruct_dec_sig xP x HPx HeqxP.
+  subst.
+  simpl.
+  intros Hx.
+  induction l; [inversion Hx|].
+  rewrite list_annotate_unroll.
+  destruct (decide (x = a)) as [Heq | Hneq].
+  - subst.
+    replace (@dexist A P _ a (Forall_hd Hs)) with (dec_exist P a HPx); [left|].
+    apply dsig_eq.
+    reflexivity.
+  - right.
+    apply IHl.
+    inversion Hx; [congruence|].
+    assumption.
+Qed.
+
 Lemma nth_error_list_annotate
   {A : Type}
   (P : A -> Prop)
