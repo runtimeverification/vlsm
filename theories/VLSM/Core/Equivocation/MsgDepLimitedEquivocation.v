@@ -104,6 +104,14 @@ Proof.
     destruct om as [m|]; assumption.
 Qed.
 
+Definition coeqv_limited_equivocation_projection_validator_prop : index -> Prop :=
+  annotated_projection_validator_prop IM (fun s => s = empty_set)
+    coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
+
+Definition coeqv_limited_equivocation_projection_validator_prop_alt : index -> Prop :=
+  annotated_projection_validator_prop_alt IM (fun s => s = empty_set)
+    coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
+
 End sec_coequivocating_senders_limited_equivocation.
 
 Section sec_msg_dep_limited_equivocation.
@@ -141,6 +149,20 @@ Definition msg_dep_annotate_trace_with_equivocators :=
 
 Definition msg_dep_composite_transition_message_equivocators :=
   coeqv_composite_transition_message_equivocators IM Hbs Hbr sender msg_dep_coequivocating_senders.
+
+Definition msg_dep_limited_equivocation_projection_validator_prop :=
+  coeqv_limited_equivocation_projection_validator_prop IM Hbs Hbr sender msg_dep_coequivocating_senders.
+
+Definition msg_dep_limited_equivocation_projection_validator_prop_alt :=
+  coeqv_limited_equivocation_projection_validator_prop_alt IM Hbs Hbr sender msg_dep_coequivocating_senders.
+
+Lemma msg_dep_annotate_trace_with_equivocators_project s tr
+  : pre_VLSM_full_projection_finite_trace_project (type msg_dep_limited_equivocation_vlsm)
+    (composite_type IM) Datatypes.id original_state
+    (msg_dep_annotate_trace_with_equivocators s tr) = tr.
+Proof.
+  apply (annotate_trace_project (free_composite_vlsm IM) (set validator)).
+Qed.
 
 End sec_msg_dep_limited_equivocation.
 
@@ -480,16 +502,17 @@ Proof.
       apply msg_dep_happens_before_iff_one. left. assumption.
 Qed.
 
-Lemma msg_dep_fixed_limited_equivocation is tr
-  : finite_valid_trace Limited is tr ->
-    fixed_limited_equivocation_prop IM Hbs Hbr
+Lemma msg_dep_fixed_limited_equivocation_witnessed is tr
+  (Htr : finite_valid_trace Limited is tr)
+  (equivocators := state_annotation (finite_trace_last is tr))
+  (Fixed := fixed_equivocation_vlsm_composition IM Hbs Hbr equivocators)
+  : (sum_weights (remove_dups equivocators) <= `threshold)%R /\
+    finite_valid_trace Fixed
       (original_state is)
       (pre_VLSM_full_projection_finite_trace_project
         (type Limited) (composite_type IM) Datatypes.id original_state
         tr).
 Proof.
-  intro Htr.
-  exists (state_annotation (finite_trace_last is tr)).
   split.
   - rewrite set_eq_nodup_sum_weight_eq
       with (lv2 := state_annotation (finite_trace_last is tr)).
@@ -603,6 +626,20 @@ Proof.
           intros [[j [[mj Hmj] Heqim]] | Hemit]; [|assumption].
           elim (no_initial_messages_in_IM j mj).
           assumption.
+Qed.
+
+Corollary msg_dep_fixed_limited_equivocation is tr
+  : finite_valid_trace Limited is tr ->
+    fixed_limited_equivocation_prop IM Hbs Hbr
+      (original_state is)
+      (pre_VLSM_full_projection_finite_trace_project
+        (type Limited) (composite_type IM) Datatypes.id original_state
+        tr).
+Proof.
+  intro Htr.
+  exists (state_annotation (finite_trace_last is tr)).
+  apply msg_dep_fixed_limited_equivocation_witnessed.
+  assumption.
 Qed.
 
 Lemma fixed_transition_preserves_annotation_equivocators
