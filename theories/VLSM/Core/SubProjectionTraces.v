@@ -1801,7 +1801,10 @@ Qed.
 End sub_composition_all.
 
 Section sub_composition_element.
-(** ** A component can be lifted to a free subcomposition *)
+
+(** ** Relating a sub-composition with one of its components
+
+*** A component can be lifted to a free subcomposition *)
 
 Context
   {message : Type}
@@ -1902,6 +1905,18 @@ Proof.
   apply preloaded_sub_element_full_projection.
   intuition.
 Qed.
+
+(** *** A subcomposition can be projected to one component
+
+In the following we define the [projection_induced_vlsm] to a single component
+of the [induced_sub_projection] of a constrained composition so a subset of its
+components.
+
+Note that, in general, this is not trace-equivalent with the direclty obtained
+[projection_induced_vlsm] of the constrained composition to the corresponding
+component, as the intermediate induced projection might generate more
+[input_valid_transitions] to be considered as a basis for the next proejction.
+*)
 
 Definition sub_label_element_project
   (l : composite_label (sub_IM IM indices))
