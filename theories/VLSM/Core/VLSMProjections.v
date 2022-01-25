@@ -131,17 +131,14 @@ Proof.
 Qed.
 
 Lemma VLSM_weak_partial_projection_input_valid
-  : forall lX sX inX, input_valid X lX (sX, inX) ->
-    forall sX' outX, vtransition X lX (sX, inX) = (sX', outX) ->
-    forall sY itemY,
-    trace_project (sX, [{| l := lX;  input := inX; destination := sX'; output := outX |}])
-      = Some (sY, [itemY]) ->
+  : forall sX itemX, input_valid_transition_item X sX itemX ->
+    forall sY itemY, trace_project (sX, [itemX]) = Some (sY, [itemY]) ->
     input_valid Y (l itemY) (sY, input itemY).
 Proof.
-  intros lX sX inX HvX sX' outX HtX sY itemY Hpr.
-  eapply proj1, VLSM_weak_partial_projection_input_valid_transition
+  intros sX itemX HitemX sY itemY Hpr.
+  eapply VLSM_weak_partial_projection_input_valid_transition
   ; [eassumption|].
-  split; assumption.
+  assumption.
 Qed.
 
 End weak_partial_projection_properties.
@@ -210,12 +207,6 @@ Definition VLSM_partial_projection_input_valid_transition
   := VLSM_weak_partial_projection_input_valid_transition VLSM_partial_projection_weaken.
 
 Definition VLSM_partial_projection_input_valid
-  : forall lX sX inX, input_valid X lX (sX, inX) ->
-    forall sX' outX, vtransition X lX (sX, inX) = (sX', outX) ->
-    forall sY itemY,
-    trace_project (sX, [{| l := lX;  input := inX; destination := sX'; output := outX |}])
-      = Some (sY, [itemY]) ->
-    input_valid Y (l itemY) (sY, input itemY)
   := VLSM_weak_partial_projection_input_valid VLSM_partial_projection_weaken.
 
 End partial_projection_properties.
@@ -832,9 +823,6 @@ Definition VLSM_projection_input_valid_transition
   := VLSM_weak_projection_input_valid_transition VLSM_projection_weaken.
 
 Definition VLSM_projection_input_valid
-  : forall lX lY, label_project lX = Some lY ->
-    forall s im,
-    input_valid X lX (s, im) -> input_valid Y lY (state_project s, im)
   := VLSM_weak_projection_input_valid VLSM_projection_weaken.
 
 Definition VLSM_projection_finite_valid_trace_from_to

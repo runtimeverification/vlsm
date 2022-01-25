@@ -641,6 +641,9 @@ given inputs and that they have a [valid_state] and a [valid_message].
       input_valid l som
       /\  transition l som = som'.
 
+    Definition input_valid_transition_item (s : state) (item : transition_item) :=
+      input_valid_transition (l item) (s, input item) (destination item, output item).
+
     Definition input_valid_transition_preserving
       (R : state -> state -> Prop)
       : Prop
