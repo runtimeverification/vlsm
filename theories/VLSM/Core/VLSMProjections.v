@@ -136,9 +136,7 @@ Lemma VLSM_weak_partial_projection_input_valid
     input_valid Y (l itemY) (sY, input itemY).
 Proof.
   intros sX itemX HitemX sY itemY Hpr.
-  eapply VLSM_weak_partial_projection_input_valid_transition
-  ; [eassumption|].
-  assumption.
+  eapply VLSM_weak_partial_projection_input_valid_transition; eassumption.
 Qed.
 
 End weak_partial_projection_properties.

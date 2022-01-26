@@ -127,12 +127,12 @@ Proof.
   intros l s im (lX & sX & Hlx & <- & Hv).
   replace (vtransition Y _ _) with
     (state_project (vtransition X lX (sX, im)).1, (vtransition X lX (sX, im)).2).
-  - eapply (VLSM_projection_input_valid_transition Hproji) with (lY := l)
+  - eapply (VLSM_projection_input_valid_transition Hproji)
     ; [eassumption|].
     split; [assumption|].
     apply injective_projections; reflexivity.
   - symmetry.
-    eapply (VLSM_projection_input_valid_transition Hproj) with (lY := l)
+    eapply (VLSM_projection_input_valid_transition Hproj)
     ; [eassumption|].
     split; [assumption|].
     apply injective_projections; reflexivity.
@@ -145,7 +145,7 @@ Proof.
   - intros is (s & <- & Hs).
     apply (VLSM_projection_initial_state Hproj).
     assumption.
-  - intro; intros. apply any_message_is_valid_in_preloaded.
+  - intros l s m Hv HsY HmX. apply any_message_is_valid_in_preloaded.
   - intros l s om (_ & _ & lX & sX & Hlx & <- & Hv) _ _.
     simpl.
     eapply (VLSM_projection_input_valid Hproj); eassumption.
@@ -195,11 +195,10 @@ Proof.
     + assert (HivtX : input_valid_transition X lX (sX, om) (vtransition X lX (sX, om)))
         by firstorder.
       destruct (vtransition _ _ _) as (sX', _om').
-      apply (VLSM_projection_input_valid_transition Hproj) with (lY := l)
-        in HivtX as [_ Hs']
-      ; [|assumption].
+      eapply (VLSM_projection_input_valid_transition Hproj) in HivtX as [_ Hs']
+      ; [|eassumption].
       rewrite HsX in Hs'.
-      destruct Y as (TY, (SY, MY)).
+      destruct Y as (TY & SY & MY).
       cbv in Htrans, Hs'.
       rewrite Htrans in Hs'.
       inversion Hs'.
@@ -251,15 +250,11 @@ Proof.
   split; cycle 1.
   - exists (state_lift sY).
     split; [apply Hstate_lift|].
-    apply Hinitial_lift.
-    apply HtrY.
+    apply Hinitial_lift, HtrY.
   - induction HtrY using finite_valid_trace_rev_ind.
-    + apply (finite_valid_trace_from_empty Xi).
-      apply initial_state_is_valid.
+    + apply (finite_valid_trace_from_empty Xi), initial_state_is_valid.
       exists (state_lift si).
-      split; [apply Hstate_lift|].
-      apply Hinitial_lift.
-      assumption.
+      auto.
     + apply (extend_right_finite_trace_from Xi);[assumption|].
       split.
       * apply induced_projection_valid_is_input_valid; [assumption|].
@@ -353,7 +348,7 @@ Proof.
   - intro s. apply (lift_to_composite_state_initial IM).
   - apply component_transition_projection_Some.
   - intros li si omi Hiv.
-    apply Hvalidator in Hiv as [sX [<- HivX]].
+    apply Hvalidator in Hiv as (sX & <- & HivX).
     exists (existT i li), sX.
     intuition.
     unfold composite_project_label.
