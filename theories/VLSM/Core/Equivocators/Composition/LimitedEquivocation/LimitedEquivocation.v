@@ -390,7 +390,7 @@ Proof.
       reflexivity.
     }
     apply Hsim in HtrX.
-    remember (pre_VLSM_projection_trace_project _ _ _ _ _) as tr.
+    remember (pre_VLSM_projection_finite_trace_project _ _ _ _ _) as tr.
     replace tr with (equivocators_total_trace_project IM trX); [assumption|].
     subst. symmetry.
     apply (equivocators_total_VLSM_projection_trace_project IM (proj1 Hpre_tr)).

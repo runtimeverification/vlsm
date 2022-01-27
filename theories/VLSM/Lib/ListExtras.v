@@ -1,8 +1,21 @@
 From stdpp Require Import prelude finite.
-From Coq Require Import FinFun.
+From Coq Require Import FinFun FunctionalExtensionality.
 From VLSM Require Import Lib.Preamble.
 
 (** * Utility lemmas about lists *)
+
+Lemma map_composed
+  [A B C : Type]
+  (f : A -> B)
+  (g : B -> C)
+  : map (g ∘ f) = map g ∘ map f.
+Proof.
+  extensionality l.
+  induction l; [reflexivity|]; cbn.
+  rewrite IHl.
+  reflexivity.
+Qed.
+
 
 (** A list is empty if it has no members *)
 Lemma empty_nil [X:Type] (l:list X) :
@@ -1267,6 +1280,32 @@ Definition map_option
       end
     )
     [].
+
+Lemma map_option_composed_right
+  [A B C : Type]
+  (f : A -> B)
+  (g : B -> option C)
+  : map_option (g ∘ f) = map_option g ∘ map f.
+Proof.
+  extensionality l.
+  induction l; [reflexivity|].
+  cbn.
+  rewrite IHl.
+  reflexivity.
+Qed.
+
+Lemma map_option_composed_left
+  [A B C : Type]
+  (f : A -> option B)
+  (g : B -> C)
+  : map_option (option_map g ∘ f) = map g ∘ map_option f.
+Proof.
+  extensionality l.
+  induction l; [reflexivity|].
+  cbn.
+  rewrite IHl.
+  destruct (f a) as [b|]; reflexivity.
+Qed.
 
 Lemma map_option_app
   {A B : Type}

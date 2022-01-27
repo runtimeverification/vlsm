@@ -60,11 +60,11 @@ Definition emit_any_signed_message_vlsm
 
 End emit_any_signed_message_vlsm.
 
-Section fixed_byzantine_traces.
+Section sec_fixed_byzantine_traces.
 
 Context
   {message : Type}
-  `{EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (Hbs : forall i : index, HasBeenSentCapability (IM i))
   (byzantine : set index)
@@ -75,6 +75,15 @@ Context
   (can_emit_signed : channel_authentication_prop IM A sender)
   (Hsender_safety : sender_safety_alt_prop IM A sender :=
     channel_authentication_sender_safety IM A sender can_emit_signed)
+  (non_byzantine : set index := set_diff (enum index) byzantine)
+  .
+
+Section sec_fixed_byzantine_replacements.
+
+Context
+  (byzantine_replacements_IM : sub_index byzantine -> VLSM message)
+  (no_initial_messages_in_byzantine_IM : no_initial_messages_in_IM_prop byzantine_replacements_IM)
+  (can_emit_signed_byzantine : channel_authentication_prop byzantine_replacements_IM (sub_IM_A byzantine A) (sub_IM_sender byzantine A sender))
   .
 
 (** Given a collection of nodes indexed by an <<index>>, we define the
@@ -82,16 +91,17 @@ associated fixed byzantine collection of nodes by replacing the nodes
 corresponding to the indices in a given <<byzantine>> with byzantine nodes,
 i.e., nodes which can emit any (signed) message.
 *)
-Definition fixed_byzantine_IM : index -> VLSM message :=
-  update_IM IM byzantine (fun i => emit_any_signed_message_vlsm A sender (` i)).
+Definition fixed_byzantine_IM
+  : index -> VLSM message :=
+  update_IM IM byzantine byzantine_replacements_IM.
 
 Lemma fixed_byzantine_IM_no_initial_messages
   : forall i m, ~vinitial_message_prop (fixed_byzantine_IM i) m.
 Proof.
   unfold fixed_byzantine_IM, update_IM. simpl.
   intros i m Hm.
-  case_decide.
-  - cbn in Hm. assumption.
+  case_decide as Hi.
+  - elim (no_initial_messages_in_byzantine_IM (dexist i Hi) m). assumption.
   - elim (no_initial_messages_in_IM i m). assumption.
 Qed.
 
@@ -101,11 +111,15 @@ Proof.
   unfold fixed_byzantine_IM, update_IM. simpl.
   intros i m Hm.
   case_decide.
-  - destruct Hm as [(s0, om) [l [s1 [[_ [_ Hv]] Ht]]]].
-    cbn in Hv, Ht.
-    unfold signed_messages_valid, channel_authenticated_message in Hv.
-    inversion Ht.
-    subst; assumption.
+  - apply can_emit_signed_byzantine in Hm. revert Hm.
+    unfold channel_authenticated_message, sub_IM_A, sub_IM_sender.
+    destruct (sender m) as [v|]; [|inversion 1].
+    case_decide as HAv; [|inversion 1].
+    cbn.
+    intro Heq.
+    apply Some_inj, dec_sig_eq_iff in Heq.
+    simpl in Heq.
+    congruence.
   - apply can_emit_signed; assumption.
 Qed.
 
@@ -113,24 +127,6 @@ Definition fixed_byzantine_IM_sender_safety
   : sender_safety_alt_prop fixed_byzantine_IM A sender :=
   channel_authentication_sender_safety fixed_byzantine_IM A sender
     fixed_byzantine_IM_preserves_channel_authentication.
-
-Definition message_as_byzantine_label
-  (m : message)
-  (i : index)
-  (Hi : i ∈ byzantine)
-  : composite_label fixed_byzantine_IM.
-Proof.
-  exists i.
-  unfold fixed_byzantine_IM, update_IM.
-  simpl.
-  rewrite decide_True by assumption.
-  cbn. exact m.
-Defined.
-
-Context
-  {finite_index : finite.Finite index}
-  (non_byzantine : set index := set_diff (enum index) byzantine)
-  .
 
 Definition sub_fixed_byzantine_IM_Hbs
   : forall sub_i : sub_index non_byzantine,
@@ -143,25 +139,142 @@ Definition non_byzantine_not_equivocating_constraint
   : composite_label fixed_byzantine_IM -> composite_state fixed_byzantine_IM * option message -> Prop :=
   sub_IM_not_equivocating_constraint fixed_byzantine_IM non_byzantine A sender sub_fixed_byzantine_IM_Hbs.
 
-(** The first definition of the [fixed_byzantine_trace_prop]erty:
+Definition fixed_byantine_composite_vlsm : VLSM message :=
+  composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint.
 
-Fixed byzantine traces are projections to the subset of protocol-following nodes
-of traces which are valid for the composition in which a fixed set of nodes
-were replaced by byzantine nodes and the rest are protocol-following
-(i.e., they are not equivocating).
+(**
+Given that we're only looking at the composition of nodes in the
+[non_byzantine], we can define their subset as either a subset of the
+[fixed_byzantine_IM] or of the original <<IM>>.
+
+As it turns out, the first definition is easier to prove equivalent to the
+induced [fixed_non_byzantine_projection], while the second is easier to work
+with in general because it makes no reference to byzantine nodes.
+
+Therefore we'll first be defining them both below and show that they are
+equivalent to each-other using the generic Lemma [same_IM_full_projection].
 *)
-Definition fixed_byzantine_trace_prop
-  (is : composite_state (sub_IM fixed_byzantine_IM non_byzantine))
-  (tr : list (composite_transition_item (sub_IM fixed_byzantine_IM non_byzantine)))
-  : Prop :=
-  exists bis btr,
-  finite_valid_trace (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint) bis btr /\
-  composite_state_sub_projection fixed_byzantine_IM non_byzantine bis = is /\
-  finite_trace_sub_projection fixed_byzantine_IM non_byzantine btr = tr.
+
+Definition pre_loaded_fixed_non_byzantine_vlsm' : VLSM message :=
+  pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM fixed_byzantine_IM non_byzantine)).
+
+Lemma pre_loaded_fixed_non_byzantine_vlsm'_projection
+  : VLSM_projection fixed_byantine_composite_vlsm pre_loaded_fixed_non_byzantine_vlsm'
+    (composite_label_sub_projection_option fixed_byzantine_IM non_byzantine)
+    (composite_state_sub_projection fixed_byzantine_IM non_byzantine).
+Proof.
+  constructor; [apply induced_sub_projection_is_projection|].
+  intros sX trX HtrX.
+  apply
+    (VLSM_projection_finite_valid_trace
+      (induced_sub_projection_is_projection fixed_byzantine_IM non_byzantine _))
+    in HtrX.
+  revert HtrX.
+  apply VLSM_incl_finite_valid_trace.
+  apply induced_sub_projection_preloaded_free_incl.
+Qed.
+
+Definition pre_loaded_fixed_non_byzantine_vlsm : VLSM message :=
+  pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM non_byzantine)).
+
+Lemma non_byzantine_nodes_same
+  : forall sub_i, sub_IM fixed_byzantine_IM non_byzantine sub_i = sub_IM IM non_byzantine sub_i.
+Proof.
+  intro sub_i.
+  destruct_dec_sig sub_i i Hi Heqsub_i.
+  subst.
+  unfold sub_IM, fixed_byzantine_IM, update_IM.
+  simpl.
+  apply set_diff_elim2 in Hi.
+  case_decide; [contradiction|].
+  reflexivity.
+Qed.
+
+Lemma non_byzantine_nodes_same_sym
+  : forall sub_i, sub_IM IM non_byzantine sub_i = sub_IM fixed_byzantine_IM non_byzantine sub_i.
+Proof.
+  intro. symmetry. apply non_byzantine_nodes_same.
+Qed.
+
+Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection
+  : VLSM_full_projection
+    pre_loaded_fixed_non_byzantine_vlsm'
+    pre_loaded_fixed_non_byzantine_vlsm
+    (same_IM_label_rew non_byzantine_nodes_same)
+    (same_IM_state_rew non_byzantine_nodes_same).
+Proof.
+  apply same_IM_preloaded_free_full_projection.
+Qed.
+
+Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection'
+  : VLSM_full_projection
+    pre_loaded_fixed_non_byzantine_vlsm
+    pre_loaded_fixed_non_byzantine_vlsm'
+    (same_IM_label_rew non_byzantine_nodes_same_sym)
+    (same_IM_state_rew non_byzantine_nodes_same_sym).
+Proof.
+  apply same_IM_preloaded_free_full_projection.
+Qed.
+
+Definition pre_loaded_fixed_non_byzantine_label_projection :=
+  (option_map (same_IM_label_rew non_byzantine_nodes_same)) ∘
+    (composite_label_sub_projection_option fixed_byzantine_IM non_byzantine).
+
+Definition pre_loaded_fixed_non_byzantine_state_projection :=
+  (same_IM_state_rew non_byzantine_nodes_same) ∘
+    (composite_state_sub_projection fixed_byzantine_IM non_byzantine).
+
+Lemma pre_loaded_fixed_non_byzantine_vlsm_projection
+  : VLSM_projection fixed_byantine_composite_vlsm pre_loaded_fixed_non_byzantine_vlsm
+    pre_loaded_fixed_non_byzantine_label_projection
+    pre_loaded_fixed_non_byzantine_state_projection.
+Proof.
+  specialize
+    (pre_definitions_projection_relation_left_trace
+      (composite_type (sub_IM fixed_byzantine_IM non_byzantine))
+      (composite_type (sub_IM IM non_byzantine))
+      (same_IM_label_rew non_byzantine_nodes_same)
+      (same_IM_state_rew non_byzantine_nodes_same)
+      (composite_type fixed_byzantine_IM)
+      (composite_label_sub_projection_option fixed_byzantine_IM non_byzantine)
+      (composite_state_sub_projection fixed_byzantine_IM non_byzantine))
+    as Hrew.
+  constructor; [constructor|]; intros sX trX HtrX
+  ; unfold pre_loaded_fixed_non_byzantine_label_projection, pre_loaded_fixed_non_byzantine_state_projection
+  ; cbn in Hrew |- * ; rewrite Hrew.
+  - induction trX using rev_ind; [reflexivity|].
+    rewrite finite_trace_last_is_last.
+    cbn.
+    rewrite pre_VLSM_projection_finite_trace_project_app.
+    setoid_rewrite map_app.
+    rewrite !map_app.
+    destruct x; destruct l as (i, li); cbn.
+    unfold pre_VLSM_projection_transition_item_project, pre_loaded_fixed_non_byzantine_label_projection.
+    cbn.
+    unfold composite_label_sub_projection_option at 2.
+    cbn.
+    case_decide as Hi; cbn; [rewrite last_is_last; reflexivity|].
+    apply finite_valid_trace_from_app_iff in HtrX as [HtrX Hx].
+    spec IHtrX HtrX.
+    inversion Hx; subst; clear Hx Htl.
+    eapply induced_sub_projection_transition_consistency_None
+      with (sub_index_list := non_byzantine) in Ht.
+    + rewrite Ht.
+      cbn in IHtrX.
+      setoid_rewrite IHtrX.
+      rewrite app_nil_r.
+      reflexivity.
+    + unfold composite_label_sub_projection_option; cbn.
+      case_decide; [contradiction|reflexivity].
+  - cbn.
+    apply (VLSM_full_projection_finite_valid_trace pre_loaded_fixed_non_byzantine_vlsm_full_projection).
+    revert HtrX.
+    apply (VLSM_projection_finite_valid_trace pre_loaded_fixed_non_byzantine_vlsm'_projection).
+Qed.
 
 (** ** Byzantine traces characterization as projections. *)
 
-Section fixed_byzantine_traces_as_projections.
+Section sec_fixed_non_byzantine_projection.
 
 Definition fixed_non_byzantine_projection : VLSM message :=
   induced_sub_projection fixed_byzantine_IM non_byzantine non_byzantine_not_equivocating_constraint.
@@ -185,13 +298,14 @@ Qed.
 Lemma fixed_non_byzantine_projection_incl_preloaded
   : VLSM_incl fixed_non_byzantine_projection (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM fixed_byzantine_IM non_byzantine))).
 Proof.
-  apply basic_VLSM_strong_incl; intro; intros.
-  - apply fixed_non_byzantine_projection_initial_state_preservation. assumption.
-  - exact I.
-  - split; [|exact I].
-    revert H.
+  apply basic_VLSM_strong_incl.
+  - intros is. apply fixed_non_byzantine_projection_initial_state_preservation.
+  - intros m Hm. exact I.
+  - intros l s om Hv.
+    split; [|exact I].
+    revert Hv.
     apply induced_sub_projection_valid_preservation.
-  - revert H. apply induced_sub_projection_transition_preservation.
+  - intros l s om s' om'. apply induced_sub_projection_transition_preservation.
 Qed.
 
 (** The induced projection from the composition of [fixed_byzantine_IM] under
@@ -215,6 +329,30 @@ Proof.
   exact (equal_f_dep Heq (dexist (A v) HAv)).
 Qed.
 
+End sec_fixed_non_byzantine_projection.
+
+End sec_fixed_byzantine_replacements.
+
+(** The first definition of the [fixed_byzantine_trace_prop]erty:
+
+Fixed byzantine traces are projections to the subset of protocol-following nodes
+of traces which are valid for the composition in which a fixed set of nodes
+were replaced by byzantine nodes and the rest are protocol-following
+(i.e., they are not equivocating).
+*)
+Definition fixed_byzantine_trace_prop
+  (is : composite_state (sub_IM IM non_byzantine))
+  (tr : list (composite_transition_item (sub_IM IM non_byzantine)))
+  : Prop :=
+  exists
+    (byzantine_replacements_IM : sub_index byzantine -> VLSM message)
+    (no_initial_messages_in_byzantine_IM : no_initial_messages_in_IM_prop byzantine_replacements_IM)
+    (can_emit_signed_byzantine : channel_authentication_prop byzantine_replacements_IM (sub_IM_A byzantine A) (sub_IM_sender byzantine A sender)),
+  exists bis btr,
+  finite_valid_trace (fixed_byantine_composite_vlsm byzantine_replacements_IM) bis btr /\
+  pre_loaded_fixed_non_byzantine_state_projection byzantine_replacements_IM bis = is /\
+  VLSM_projection_trace_project (pre_loaded_fixed_non_byzantine_vlsm_projection byzantine_replacements_IM) btr = tr.
+
 (** Characterization result for the first definition:
 the [fixed_byzantine_trace_prop]erty is equivalent to the
 [finite_valid_trace_prop]erty of the [induced_sub_projection] of the
@@ -223,7 +361,7 @@ and the rest are protocol-following to the set of protocol-following nodes.
 *)
 Lemma fixed_byzantine_trace_char1 is tr
   : fixed_byzantine_trace_prop is tr <->
-    finite_valid_trace fixed_non_byzantine_projection is tr.
+    finite_valid_trace (fixed_non_byzantine_projection byzantine_replacements_IM) is tr.
 Proof.
   apply and_comm.
   apply (projection_friendly_trace_char (induced_sub_projection_is_projection _ _ _)).
@@ -245,81 +383,6 @@ Definition fixed_set_signed_message (m : message) : Prop :=
   non_sub_index_authenticated_message non_byzantine A sender m /\
   (exists i, i ∈ non_byzantine /\ exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
 
-(**
-Given that we're only looking at the composition of nodes in the
-[non_byzantine], we can define their subset as either a subset of the
-[fixed_byzantine_IM] or of the original <<IM>>.
-
-As it turns out, the first definition is easier to prove equivalent to the
-induced [fixed_non_byzantine_projection], while the second is easier to work
-with in general because it makes no reference to byzantine nodes.
-
-Therefore we'll first be defining them both below and show that they are
-equivalent to each-other using the generic Lemma [same_IM_full_projection].
-*)
-
-Definition pre_loaded_fixed_non_byzantine_vlsm' : VLSM message :=
-  composite_no_equivocation_vlsm_with_pre_loaded (sub_IM fixed_byzantine_IM non_byzantine) (free_constraint _) sub_fixed_byzantine_IM_Hbs fixed_set_signed_message.
-
-Definition pre_loaded_fixed_non_byzantine_vlsm : VLSM message :=
-  composite_no_equivocation_vlsm_with_pre_loaded (sub_IM IM non_byzantine) (free_constraint _) (sub_has_been_sent_capabilities IM non_byzantine Hbs) fixed_set_signed_message.
-
-Lemma non_byzantine_nodes_same
-  : forall sub_i, sub_IM fixed_byzantine_IM non_byzantine sub_i = sub_IM IM non_byzantine sub_i.
-Proof.
-  intro sub_i.
-  destruct_dec_sig sub_i i Hi Heqsub_i.
-  subst.
-  unfold sub_IM, fixed_byzantine_IM, update_IM.
-  simpl.
-  apply set_diff_elim2 in Hi.
-  rewrite decide_False by assumption.
-  reflexivity.
-Qed.
-
-Lemma non_byzantine_nodes_same_sym
-  : forall sub_i, sub_IM IM non_byzantine sub_i = sub_IM fixed_byzantine_IM non_byzantine sub_i.
-Proof.
-  intro. symmetry. apply non_byzantine_nodes_same.
-Qed.
-
-Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection
-  : VLSM_full_projection
-    pre_loaded_fixed_non_byzantine_vlsm'
-    pre_loaded_fixed_non_byzantine_vlsm
-    (same_IM_label_rew non_byzantine_nodes_same)
-    (same_IM_state_rew non_byzantine_nodes_same).
-Proof.
-  apply same_IM_full_projection.
-  intros s1 H l1 om H0.
-  apply proj1 in H0.
-  split; [|exact I].
-  destruct om as [m|]; [|exact I].
-  destruct H0 as [Hsent | Hseeded]; [|right; assumption].
-  cbn. left.
-  revert Hsent.
-  apply same_IM_composite_has_been_sent_preservation; [|assumption].
-  apply stdpp_finite_sub_index; assumption.
-Qed.
-
-Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection'
-  : VLSM_full_projection
-    pre_loaded_fixed_non_byzantine_vlsm
-    pre_loaded_fixed_non_byzantine_vlsm'
-    (same_IM_label_rew non_byzantine_nodes_same_sym)
-    (same_IM_state_rew non_byzantine_nodes_same_sym).
-Proof.
-  apply same_IM_full_projection.
-  intros s1 H l1 om H0.
-  apply proj1 in H0.
-  split; [|exact I].
-  destruct om as [m|]; [|exact I].
-  destruct H0 as [Hsent | Hseeded]; [|right; assumption].
-  cbn. left.
-  revert Hsent.
-  apply same_IM_composite_has_been_sent_preservation; [|assumption].
-  apply stdpp_finite_sub_index; assumption.
-Qed.
 
 (**
 We next show that the [fixed_non_byzantine_projection] and

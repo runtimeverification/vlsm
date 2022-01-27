@@ -231,7 +231,7 @@ Proof.
     specialize (Hsent _ _ Hpre_tr).
     apply Exists_exists in Hsent as [item [Hitem Hout]].
     apply elem_of_list_In in Hitem.
-    apply pre_VLSM_projection_trace_project_in_iff in Hitem as HitemX.
+    apply pre_VLSM_projection_finite_trace_project_in_iff in Hitem as HitemX.
     destruct HitemX as [itemX [HitemX HitemX_pr]].
     destruct itemX.
     unfold pre_VLSM_projection_transition_item_project, composite_project_label in HitemX_pr.
@@ -268,7 +268,7 @@ Proof.
       eapply in_futures_preserving_oracle_from_stepwise.
       * apply has_been_sent_stepwise_from_trace.
       * eexists; eassumption.
-    + apply pre_VLSM_projection_trace_project_app_rev in Htr_pr
+    + apply pre_VLSM_projection_finite_trace_project_app_rev in Htr_pr
         as [preX [sufX [Heqtr [HpreX_pr HsufX_pr]]]].
       apply valid_trace_last_pstate in Hpre_tr as Hdestinationi.
       apply proper_received in Hreceived; [|assumption].
@@ -276,7 +276,7 @@ Proof.
       apply Exists_exists in Hreceived as [item_dm [Hitem_dm Hreceived]].
       apply elem_of_list_In in Hitem_dm.
       rewrite <- HpreX_pr in Hitem_dm.
-      apply pre_VLSM_projection_trace_project_in_iff in Hitem_dm as HitemX_dm.
+      apply pre_VLSM_projection_finite_trace_project_in_iff in Hitem_dm as HitemX_dm.
       destruct HitemX_dm as [itemX_dm [HitemX_dm HitemX_dm_pr]].
       subst tr.
       apply proj1 in Htr.

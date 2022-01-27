@@ -248,7 +248,7 @@ Qed.
 
 Lemma composite_trace_sub_projection_lift
   (tr : list (composite_transition_item sub_IM))
-  : @pre_VLSM_projection_trace_project _ (composite_type IM) _
+  : @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _
     composite_label_sub_projection_option composite_state_sub_projection
     (pre_VLSM_full_projection_finite_trace_project _ _ lift_sub_label lift_sub_state tr)
     = tr.
@@ -321,14 +321,11 @@ Proof.
   - apply weak_induced_sub_projection_transition_consistency_Some.
 Qed.
 
-Lemma induced_sub_projection_valid_projection l s om
-  (Hv : vvalid induced_sub_projection l (s, om))
-  : exists i, i ∈ sub_index_list /\
-    exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, om).
+Lemma induced_sub_projection_valid_projection_strong i Hi li s om
+  : vvalid induced_sub_projection (existT (dexist i Hi) li) (s, om) ->
+    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (s (dexist i Hi), om).
 Proof.
-  destruct l as (sub_i, li).
-  destruct Hv as [lX [sX [HlX [Heqs [HsX [Hom Hv]]]]]].
-  destruct lX as [i _li].
+  intros ((_i, _li) & sX & HlX & Heqs & HsX & Hom & Hv).
   unfold composite_label_sub_projection_option in HlX.
   simpl in HlX.
   case_decide; [|congruence].
@@ -336,17 +333,30 @@ Proof.
   simpl in HlX.
   apply Some_inj in HlX.
   inversion HlX. subst.
-  simpl_existT. subst.
-  exists i.
-  split; [assumption|].
+  apply
+    (@dec_sig_sigT_eq_rev _ _ _ sub_index_prop_dec (fun i => vlabel (IM i)))
+    in HlX as ->.
   apply proj1 in Hv.
   cbn in Hv.
-  exists li, (sX i).
   repeat split; [|apply any_message_is_valid_in_preloaded|assumption].
   apply (VLSM_projection_valid_state (preloaded_component_projection IM i)).
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))).
   apply (VLSM_incl_valid_state (constraint_free_incl IM constraint)).
   assumption.
+Qed.
+
+Lemma induced_sub_projection_valid_projection l s om
+  (Hv : vvalid induced_sub_projection l (s, om))
+  : exists i, i ∈ sub_index_list /\
+    exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, om).
+Proof.
+  destruct l as (sub_i, li).
+  destruct_dec_sig sub_i i Hi Heqsub_i.
+  subst.
+  exists i.
+  split; [assumption|].
+  eexists _,_.
+  eapply induced_sub_projection_valid_projection_strong; eassumption.
 Qed.
 
 Lemma induced_sub_projection_transition_is_composite l s om
@@ -376,6 +386,26 @@ Proof.
     apply lift_sub_state_to_eq.
 Qed.
 
+Lemma induced_sub_projection_preloaded_free_incl
+  : VLSM_incl induced_sub_projection (pre_loaded_with_all_messages_vlsm (free_composite_vlsm sub_IM)).
+Proof.
+  apply basic_VLSM_strong_incl.
+  2: cbv; intuition.
+  - intros s (sX & <- & HsX) sub_i.
+    destruct_dec_sig sub_i i Hi Heqsub_i.
+    subst.
+    apply (HsX i).
+  - intros (sub_i, li) s om Hv.
+    split; [|exact I].
+    cbn.
+    destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+    apply induced_sub_projection_valid_projection_strong.
+    assumption.
+  - intros l s om s' om'; cbn; intros <-.
+    symmetry.
+    apply induced_sub_projection_transition_is_composite.
+Qed.
+
 End sec_induced_sub_projection.
 
 Section induced_sub_projection_subsumption.
@@ -403,7 +433,7 @@ Definition from_sub_projection : composite_transition_item IM -> Prop :=
 
 Definition finite_trace_sub_projection
   : list (composite_transition_item IM) -> list (composite_transition_item sub_IM) :=
-  @pre_VLSM_projection_trace_project _ (composite_type IM) _ composite_label_sub_projection_option composite_state_sub_projection.
+  @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _ composite_label_sub_projection_option composite_state_sub_projection.
 
 Section sub_projection_with_no_equivocation_constraints.
 
@@ -526,7 +556,7 @@ Definition finite_trace_sub_projection_app
   : finite_trace_sub_projection (tr1 ++ tr2) =
     finite_trace_sub_projection tr1 ++ finite_trace_sub_projection tr2
   :=
-  @pre_VLSM_projection_trace_project_app _ (composite_type IM) _ composite_label_sub_projection_option composite_state_sub_projection tr1 tr2.
+  @pre_VLSM_projection_finite_trace_project_app _ (composite_type IM) _ composite_label_sub_projection_option composite_state_sub_projection tr1 tr2.
 
 Lemma X_incl_Pre : VLSM_incl X Pre.
 Proof.

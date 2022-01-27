@@ -53,7 +53,7 @@ Proof.
   specialize (Hm _ _ HtrX).
   apply Exists_exists in Hm as [itemY [HitemY Hm]].
   apply elem_of_list_In in HitemY.
-  apply pre_VLSM_projection_trace_project_in_iff in HitemY
+  apply pre_VLSM_projection_finite_trace_project_in_iff in HitemY
     as [itemX [HitemX Hpr]].
   apply Exists_exists.
   apply elem_of_list_In in HitemX.
@@ -156,7 +156,7 @@ Proof.
     subst tr.
     setoid_rewrite map_app.
     apply List.Exists_app. right. simpl. left.
-    remember  (pre_VLSM_full_projection_trace_item_project _ _ _ _ _) as itemY.
+    remember  (pre_VLSM_full_projection_transition_item_project _ _ _ _ _) as itemY.
     specialize (Hselector item itemY). subst. destruct item.
     apply (Hselector eq_refl eq_refl).
     assumption.
