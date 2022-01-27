@@ -230,6 +230,9 @@ Definition annotated_projection_validator_prop : Prop :=
   @projection_validator_prop _ AnnotatedFree (IM i)
     annotated_composite_label_project annotated_composite_state_project.
 
+Definition annotated_message_validator_prop : Prop :=
+  @message_validator_prop _ AnnotatedFree (IM i).
+
 Definition annotated_composite_label_lift : vlabel (IM i) -> vlabel AnnotatedFree
   := lift_to_composite_label IM i.
 

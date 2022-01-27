@@ -43,6 +43,23 @@ Definition projection_validator_prop :=
     input_valid PreY li (si,omi) ->
     projection_induced_valid X (type Y) label_project state_project li (si,omi).
 
+(** A message validator can check within a component whether the message
+is valid for the composition.
+*)
+Definition message_validator_prop :=
+  forall li si im,
+    input_valid PreY li (si, Some im) ->
+    valid_message_prop X im.
+
+(** The [projection_validator_prop]erty is stronger. *)
+Lemma projection_validator_is_message_validator
+  : projection_validator_prop -> message_validator_prop.
+Proof.
+  intros Hvalidator li si im Hvi.
+  apply Hvalidator in Hvi as (_ & _ & _ & _ & _ & Him & _).
+  assumption.
+Qed.
+
 (**
 It is easy to see that the [projection_validator_prop]erty includes the
 [projection_validator_received_messages_prop]erty.
@@ -334,6 +351,34 @@ Proof.
     apply VLSM_incl_finite_valid_trace.
     apply constraint_preloaded_free_incl with (constraint0 := constraint).
 Qed.
+
+Lemma component_projection_validator_prop_is_induced
+  : component_projection_validator_prop <->
+    @projection_validator_prop _ X (IM i) (composite_project_label IM i) (fun s => s i).
+Proof.
+  split.
+  - intros Hvalidator li si omi Hvi.
+    apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
+    apply projection_valid_input_valid.
+    apply Hvalidator.
+    assumption.
+  - intros Hvalidator li (si, omi) Hvi.
+    apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
+    revert Hvi.
+    apply VLSM_incl_input_valid.
+    apply pre_loaded_with_all_messages_validator_proj_incl.
+    + apply component_projection_to_preloaded.
+    + apply component_transition_projection_None.
+    + apply component_label_projection_lift.
+    + apply component_state_projection_lift.
+    + intros isi.
+      apply (lift_to_composite_state_initial IM).
+    + apply component_transition_projection_Some.
+    + assumption.
+Qed.
+
+Definition component_message_validator_prop : Prop :=
+  @message_validator_prop _ X (IM i).
 
 (** Assuming the [component_projection_validator_prop]erty, the component
 [pre_loaded_with_all_messages_vlsm] is [VLSM_eq]ual (trace-equivalent) with

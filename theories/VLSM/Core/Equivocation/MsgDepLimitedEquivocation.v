@@ -110,6 +110,10 @@ Definition coeqv_limited_equivocation_projection_validator_prop : index -> Prop 
   annotated_projection_validator_prop IM (fun s => s = empty_set)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
 
+Definition coeqv_limited_equivocation_message_validator_prop : index -> Prop :=
+  annotated_message_validator_prop IM (fun s => s = empty_set)
+    coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
+
 Definition coeqv_limited_equivocation_projection_validator_prop_alt : index -> Prop :=
   annotated_projection_validator_prop_alt IM (fun s => s = empty_set)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
@@ -154,6 +158,9 @@ Definition msg_dep_composite_transition_message_equivocators :=
 
 Definition msg_dep_limited_equivocation_projection_validator_prop :=
   coeqv_limited_equivocation_projection_validator_prop IM Hbs Hbr sender msg_dep_coequivocating_senders.
+
+Definition msg_dep_limited_equivocation_message_validator_prop :=
+  coeqv_limited_equivocation_message_validator_prop IM Hbs Hbr sender msg_dep_coequivocating_senders.
 
 Definition msg_dep_limited_equivocation_projection_validator_prop_alt :=
   coeqv_limited_equivocation_projection_validator_prop_alt IM Hbs Hbr sender msg_dep_coequivocating_senders.
