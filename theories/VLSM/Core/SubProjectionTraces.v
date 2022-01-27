@@ -2080,6 +2080,32 @@ Proof.
   assumption.
 Qed.
 
+(** Deriving reachable-validity for the component from the input validity
+w.r.t. a sub_composition preloaded with messages.
+*)
+Lemma pre_loaded_sub_composite_input_valid_projection constraint Q
+  i Hi li sub_s im
+  : input_valid
+      (pre_loaded_vlsm (composite_vlsm (sub_IM IM indices) constraint) Q)
+      (existT (dexist i Hi) li) (sub_s, Some im) ->
+    input_valid (pre_loaded_with_all_messages_vlsm (IM i))
+      li (lift_sub_state IM indices sub_s i, Some im).
+Proof.
+  intro Ht_sub.
+  eapply
+    (VLSM_projection_input_valid (preloaded_component_projection IM i) (existT i li) li)
+  ; [rewrite composite_project_label_eq; reflexivity|].
+  cut (
+    input_valid
+      (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM indices)))
+      (existT (dexist i Hi) li) (sub_s, Some im))
+  ; [eapply
+      (VLSM_full_projection_input_valid lift_sub_preloaded_free_full_projection)|].
+  eapply VLSM_incl_input_valid
+  ; [apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages|].
+  assumption.
+Qed.
+
 Lemma can_emit_sub_projection
   {validator : Type}
   (A : validator -> index)
