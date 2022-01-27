@@ -550,7 +550,7 @@ End fixed_byzantine_traces.
 
 In this section we show that while equivocators can always appear as byzantine
 to the protocol-abiding nodes, the converse is also true if the protocol-
-abiding nodes satisfy the [projection_validator_prop]erty, which basically
+abiding nodes satisfy the [projection_message_validator_prop]erty, which basically
 allows them to locally verify the authenticity of a received message.
 *)
 
@@ -821,7 +821,7 @@ End assuming_initial_messages_lift.
 Context
   (Hvalidator:
     forall i : index, i ∉ selection ->
-    component_projection_validator_prop IM (fixed_equivocation_constraint IM Hbs Hbr selection) i)
+    component_message_validator_prop IM (fixed_equivocation_constraint IM Hbs Hbr selection) i)
   .
 
 Lemma validator_fixed_non_byzantine_vlsm_lift_initial_message
@@ -839,9 +839,7 @@ Proof.
     by exists i, (exist _ m Him).
   - destruct Hseeded as [Hsigned [i [Hi [li [si Hpre_valid]]]]].
     apply set_diff_elim2 in Hi.
-    specialize (Hvalidator i Hi _ _ Hpre_valid)
-      as [sX [Heqsi [HsX [Hm HvX]]]].
-    assumption.
+    eapply Hvalidator; eassumption.
 Qed.
 
 (** The VLSM corresponding to the induced projection from a fixed-set byzantine

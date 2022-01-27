@@ -57,7 +57,7 @@ Context
   {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   (limited_constraint := limited_equivocation_constraint IM (listing_from_finite index) sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
-  (Hvalidator: forall i : index, component_projection_validator_prop IM limited_constraint i)
+  (Hvalidator: forall i : index, component_message_validator_prop IM limited_constraint i)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
   (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
@@ -192,9 +192,7 @@ Proof.
       exists i, (exist _ m Him); intuition.
     + destruct Hseeded as [Hsigned [i [Hi [li [si Hpre_valid]]]]].
       apply set_diff_elim2 in Hi.
-      specialize (Hvalidator i _ _ Hpre_valid)
-        as [_ [_ [_ [Hmsg _]]]].
-      assumption.
+      eapply Hvalidator; eassumption.
 Qed.
 
 End fixed_limited_selection.
@@ -274,7 +272,7 @@ Context
     channel_authentication_sender_safety _ _ _ Hchannel)
   (Hvalidator:
     forall i : index,
-      msg_dep_limited_equivocation_projection_validator_prop IM Hbs Hbr
+      msg_dep_limited_equivocation_message_validator_prop IM Hbs Hbr
         full_message_dependencies sender i)
   (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
   .
@@ -370,8 +368,8 @@ Proof.
       replace (finite_trace_last _ _) with lst.
       repeat split.
       - assumption.
-      - apply Hvalidator in Hvi as (_ & _ & _ & _ & _ & Hiom & _).
-        assumption.
+      - destruct iom as [im|]; [|apply option_valid_message_None].
+        eapply Hvalidator; eassumption.
       - cbn.
         rewrite Hlsti.
         unfold lift_sub_state.
