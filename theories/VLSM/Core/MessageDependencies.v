@@ -232,6 +232,12 @@ Qed.
 
 End sec_message_dependencies.
 
+(* Given the VLSM for which it's defined, the other arguments (message,
+message_dependencies function, [HasBeenSentCapability] and
+[HasBeenReceivedCapability]) can be inferred from that.
+*)
+Global Hint Mode MessageDependencies - - ! - - : typeclass_instances.
+
 Section sec_composite_message_dependencies.
 
 Context
@@ -419,20 +425,24 @@ Class FullMessageDependencies
 
 End sec_full_message_dependencies.
 
+(* given the message type, we can usually look up the functions for
+message dependencies *)
+Global Hint Mode FullMessageDependencies ! - - : typeclass_instances.
+
 Section full_message_dependencies_happens_before.
 
 Context
   {message : Type}
   (message_dependencies : message -> set message)
   (full_message_dependencies : message -> set message)
-  (HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies)
+  {HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies}
   .
 
 Global Instance msg_dep_happens_before_irrefl : Irreflexive (msg_dep_happens_before message_dependencies).
 Proof.
   intros m Hm.
   elim (full_message_dependencies_irreflexive m).
-  eapply full_message_dependencies_happens_before.
+  apply full_message_dependencies_happens_before.
   assumption.
 Qed.
 
