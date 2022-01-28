@@ -509,8 +509,8 @@ Global Instance stdpp_finite_sub_index
 Proof.
   exists (remove_dups sub_index_list_annotate).
   - apply NoDup_remove_dups.
-  - intro sub_x. apply elem_of_remove_dups.
-    apply elem_of_list_annotate.
+  - intro sub_x.
+    apply elem_of_remove_dups, elem_of_list_annotate.
     destruct_dec_sig sub_x x Hx Heqsub_x.
     subst.
     assumption.
@@ -1873,8 +1873,7 @@ Proof.
     + subst.
       rewrite sub_IM_state_update_eq, sub_element_state_eq.
       reflexivity.
-    + rewrite sub_IM_state_update_neq by congruence.
-      rewrite !sub_element_state_neq by congruence.
+    + rewrite sub_IM_state_update_neq, !sub_element_state_neq by congruence.
       reflexivity.
   - intros sj Hsj sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i.
@@ -1897,13 +1896,11 @@ Lemma valid_preloaded_lifts_can_be_emitted
 Proof.
   intros m Hm.
   eapply VLSM_incl_can_emit.
-  {
-    apply pre_loaded_vlsm_incl_relaxed with (P0 := fun m => Q m \/ P m).
+  - apply pre_loaded_vlsm_incl_relaxed with (P0 := fun m => Q m \/ P m).
     intuition.
-  }
-  eapply VLSM_full_projection_can_emit; [|eassumption].
-  apply preloaded_sub_element_full_projection.
-  intuition.
+  - eapply VLSM_full_projection_can_emit; [|eassumption].
+    apply preloaded_sub_element_full_projection.
+    intuition.
 Qed.
 
 (** *** A subcomposition can be projected to one component

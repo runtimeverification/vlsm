@@ -551,8 +551,7 @@ Lemma [basic_VLSM_incl]
       apply basic_VLSM_incl; intro; intros.
       - assumption.
       - apply initial_message_is_valid. assumption.
-      - split; [apply Hv|].
-        apply Hsubsumption; assumption.
+      - split; [apply Hv | auto].
       - apply H.
     Qed.
 
@@ -616,7 +615,7 @@ Lemma [basic_VLSM_incl]
       (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
       : weak_input_valid_constraint_subsumption constraint1 constraint2.
     Proof.
-      intros l som Hv _ _. apply Hsubsumption. assumption.
+      intros l som Hv _ _. auto.
     Qed.
 
     Lemma preloaded_constraint_subsumption_stronger

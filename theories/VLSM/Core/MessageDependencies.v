@@ -82,23 +82,11 @@ Lemma msg_dep_happens_before_iff_one x z
   : msg_dep_happens_before x z <->
     msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
 Proof.
+  unfold msg_dep_happens_before; simpl.
+  setoid_rewrite Operators_Properties.clos_trans_t1n_iff.
   split.
-  - intros Hhb.
-    apply Operators_Properties.clos_trans_t1n in Hhb.
-    inversion Hhb; subst.
-    + left. assumption.
-    + right.
-      exists y.
-      split; [|assumption].
-      apply Operators_Properties.clos_t1n_trans.
-      assumption.
-  - intros Hhb.
-    apply Operators_Properties.clos_t1n_trans.
-    destruct Hhb as [Hone | [y [Hhb Hone]]].
-    + apply t1n_step. assumption.
-    + apply t1n_trans with y; [assumption|].
-      apply Operators_Properties.clos_trans_t1n.
-      assumption.
+  - inversion 1; subst; eauto.
+  - intros [H | [y [H1 H2]]]; econstructor; eassumption.
 Qed.
 
 Global Instance msg_dep_happens_before_transitive : Transitive msg_dep_happens_before.
@@ -118,12 +106,7 @@ Lemma msg_dep_happens_before_reflect
 Proof.
   intros dm m Hdm.
   apply Operators_Properties.clos_trans_t1n in Hdm.
-  induction Hdm; [apply Hreflects; assumption|].
-  intro Hpx.
-  apply IHHdm.
-  revert Hpx.
-  apply Hreflects.
-  assumption.
+  induction Hdm; firstorder.
 Qed.
 
 (** In the absence of initial messages, and if [msg_dep_rel] reflects the
@@ -142,28 +125,23 @@ Lemma msg_dep_reflects_validity
     valid_message_prop (pre_loaded_vlsm X P) dm.
 Proof.
   intros dm m Hdm.
-  rewrite emitted_messages_are_valid_iff.
-  rewrite can_emit_iff.
+  rewrite emitted_messages_are_valid_iff, can_emit_iff.
   intros [Hinit | [s Hproduce]].
   - rewrite emitted_messages_are_valid_iff.
-    left.
-    right.
-    apply Hreflects with m; [assumption|].
-    destruct Hinit as [Hinit | Hp]; [|assumption].
+    left; right.
+    apply Hreflects with m; [assumption |].
+    destruct Hinit as [Hinit | Hp]; [| assumption].
     elim (no_initial_messages_in_X m).
     assumption.
-  - apply (observed_valid (pre_loaded_vlsm X P)) with (s := s)
-    ; [exists (Some m); apply can_produce_valid; eassumption|].
-    cut (has_been_observed X s dm).
-    {
-      intros [Hsent | Hreceived]; [left|right].
-      - clear -Hsent. destruct Hbs. assumption.
-      - clear -Hreceived. destruct Hbr. assumption.
-    }
-    apply message_dependencies_are_necessary with m; [|assumption].
-    revert Hproduce.
-    apply VLSM_incl_can_produce.
-    apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  - apply (observed_valid (pre_loaded_vlsm X P)) with (s := s).
+    + exists (Some m). apply can_produce_valid. assumption.
+    + cut (has_been_observed X s dm).
+      {
+        intros [Hsent | Hreceived]; [left|right]; auto.
+      }
+      apply message_dependencies_are_necessary with m; [| assumption].
+      revert Hproduce.
+      apply VLSM_incl_can_produce, pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 (** Under [MessageDependencies] assumptions, if a message [has_been_sent]
@@ -178,9 +156,10 @@ Lemma msg_dep_has_been_sent
   : forall dm, msg_dep_rel dm m -> has_been_observed X s dm.
 Proof.
   intros dm Hdm.
-  cut (exists item, can_produce (pre_loaded_with_all_messages_vlsm X) (destination item) m /\ in_futures (pre_loaded_with_all_messages_vlsm X) (destination item) s).
+  cut (exists item, can_produce (pre_loaded_with_all_messages_vlsm X) (destination item) m /\
+                    in_futures (pre_loaded_with_all_messages_vlsm X) (destination item) s).
   {
-    intros [s_dm [Hproduce Hfutures]].
+    intros (s_dm & Hproduce & Hfutures).
     eapply in_futures_preserving_oracle_from_stepwise; [|eassumption|].
     - apply has_been_observed_from_sent_received_stepwise_props.
     - apply message_dependencies_are_necessary with m; assumption.
@@ -330,9 +309,7 @@ Proof.
     assumption.
   - intuition.
   - eassumption.
-  - apply emitted_messages_are_valid_iff.
-    right.
-    assumption.
+  - apply emitted_messages_are_valid_iff. auto.
 Qed.
 
 Lemma msg_dep_reflects_happens_before_free_validity
@@ -410,7 +387,7 @@ Lemma msg_dep_reflects_sub_free_validity
     valid_message_prop (pre_loaded_vlsm X P) m ->
     valid_message_prop (pre_loaded_vlsm X P) dm.
 Proof.
-  eapply msg_dep_reflects_validity; [..|assumption].
+  eapply msg_dep_reflects_validity; [| |assumption].
   - apply sub_composite_message_dependencies.
   - intros m [sub_i [[im Him] Heqm]].
     destruct_dec_sig sub_i i Hi Heqsub_i.
@@ -478,7 +455,9 @@ Proof.
   replace (S _) with (length (dm :: full_message_dependencies dm))
     by reflexivity.
   apply NoDup_subseteq_length.
-  - constructor; [apply full_message_dependencies_irreflexive| apply full_message_dependencies_nodups].
+  - constructor.
+    + apply full_message_dependencies_irreflexive.
+    + apply full_message_dependencies_nodups.
   - intros m' Hm'.
     inversion Hm'; subst; [apply full_message_dependencies_happens_before; assumption|].
     revert H1.
@@ -499,11 +478,11 @@ Proof.
   apply H; [apply full_message_dependencies_happens_before; assumption|].
   intros dm0 Hdm0.
   apply IHm.
-  apply full_message_dependencies_happens_before in Hdm.
-  apply full_message_dependencies_happens_before in Hdm0.
+
   apply full_message_dependencies_happens_before.
-  change _ with (msg_dep_happens_before message_dependencies dm0 m).
-  transitivity dm; assumption.
+  transitivity dm.
+  - apply full_message_dependencies_happens_before. assumption.
+  - apply full_message_dependencies_happens_before. assumption.
 Qed.
 
 End full_message_dependencies_happens_before.

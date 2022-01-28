@@ -1248,13 +1248,7 @@ Lemma preloaded_has_been_sent_stepwise_props
   has_been_sent_stepwise_props (vlsm := X) (has_been_sent vlsm).
 Proof.
   destruct (has_been_sent_stepwise_from_trace Hhbs) as [Hinit Hupdate].
-  split.
-  - intros s Hs. apply Hinit. assumption.
-  - intros l s im s' om Ht msg.
-    apply (Hupdate l s im s' om).
-    revert Ht.
-    apply VLSM_incl_input_valid_transition.
-    apply basic_VLSM_incl_preloaded; cbv; intuition.
+  split; auto.
 Qed.
 
 Lemma preloaded_HasBeenSentCapability
@@ -1331,13 +1325,7 @@ Lemma preloaded_has_been_received_stepwise_props
   has_been_received_stepwise_props (vlsm := X) (has_been_received vlsm).
 Proof.
   destruct (has_been_received_stepwise_from_trace Hhbr) as [Hinit Hupdate].
-  split.
-  - intros s Hs. apply Hinit. assumption.
-  - intros l s im s' om Ht msg.
-    apply (Hupdate l s im s' om).
-    revert Ht.
-    apply VLSM_incl_input_valid_transition.
-    apply basic_VLSM_incl_preloaded; cbv; intuition.
+  split; auto.
 Qed.
 
 Lemma preloaded_HasBeenReceivedCapability
@@ -1654,7 +1642,9 @@ Lemma received_valid
     valid_message_prop X m.
 Proof.
   induction Hs using valid_state_prop_ind.
-  - contradict Hreceived. apply (oracle_no_inits (has_been_received_stepwise_from_trace Hhbr));assumption.
+  - contradict Hreceived.
+    eapply oracle_no_inits; [| eassumption].
+    apply has_been_received_stepwise_from_trace.
   - apply input_valid_transition_in in Ht as Hom'.
     apply preloaded_weaken_input_valid_transition in Ht.
     apply (oracle_step_update (has_been_received_stepwise_from_trace Hhbr) _ _ _ _ _ Ht) in Hreceived.
@@ -2102,12 +2092,11 @@ Section Composite.
       : forall (m : message) (Hm : valid_message_prop X m), sender m <> None.
   Proof.
     intros m Hm.
-    cut
-      (exists v, sender m = Some v /\
-        can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m)
-    ; [intros [v [Hsender _]]; congruence|].
-    revert m Hm.
-    apply composite_no_initial_valid_messages_emitted_by_sender; assumption.
+    cut (exists v, sender m = Some v /\
+                   can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
+    - intros (v & Hsender & _). congruence.
+    - revert m Hm.
+      apply composite_no_initial_valid_messages_emitted_by_sender; assumption.
   Qed.
 
   Lemma has_been_sent_iff_by_sender
@@ -2280,7 +2269,9 @@ Section Composite.
     : valid_message_prop X m.
   Proof.
     pose (Xhbr := preloaded_composite_HasBeenReceivedCapability has_been_received_capabilities constraint seed).
-    apply (received_valid X s). assumption. exists i;assumption.
+    apply (received_valid X s).
+    - assumption.
+    - exists i; assumption.
   Qed.
 
   Lemma composite_sent_valid

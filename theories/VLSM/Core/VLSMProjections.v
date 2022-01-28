@@ -2709,13 +2709,11 @@ Lemma pre_loaded_vlsm_incl_relaxed
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
   apply basic_VLSM_incl.
-  - cbv; intuition.
-  - intros _ _ m _ _ [Him | Hp].
-    + apply initial_message_is_valid. left. assumption.
-    + apply PimpliesQorValid in Hp as [Hq | Hvalid]; [|assumption].
-      apply initial_message_is_valid. right. assumption.
-  - cbv; intuition.
-  - cbv; intuition.
+  1, 3-4: cbv; intuition.
+  intros _ _ m _ _ [Him | Hp].
+  - apply initial_message_is_valid. left. assumption.
+  - apply PimpliesQorValid in Hp as [Hq | Hvalid]; [|assumption].
+    apply initial_message_is_valid. right. assumption.
 Qed.
 
 Lemma pre_loaded_vlsm_incl

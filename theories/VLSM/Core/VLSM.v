@@ -1375,16 +1375,10 @@ traces.
         option_can_produce (destination item) (output item).
     Proof.
       intros item Hitem.
-      cut (exists l1 l2, tr = l1 ++ item :: l2).
-      {
-        intros [l1 [l2 Heq]].
-        eexists _,_.
-        eapply input_valid_transition_to with (tr := tr); [eassumption|].
-        simpl.
-        eassumption.
-      }
-      apply elem_of_list_split.
-      assumption.
+      apply elem_of_list_split in Hitem as (l1 & l2 & Heq).
+      eexists _,_.
+      eapply input_valid_transition_to; [eassumption|].
+      simpl. eassumption.
     Qed.
 
     Lemma can_emit_from_valid_trace
@@ -2198,17 +2192,14 @@ This relation is often used in stating safety and liveness properties.*)
       (Htr : finite_valid_trace_from_to is s tr)
       : forall item, item ∈ tr -> in_futures (destination item) s.
     Proof.
-      intros item.
-      rewrite elem_of_list_In.
-      intros Hitem.
-      apply in_split in Hitem as [pre [suf Heqtr]].
+      intros item Hitem.
+      apply elem_of_list_split in Hitem as (pre & suf & Heqtr).
       exists suf.
-      replace (destination item) with (finite_trace_last is (pre ++ [item]))
-        by apply finite_trace_last_is_last.
+      replace (destination item)
+         with (finite_trace_last is (pre ++ [item]))
+           by apply finite_trace_last_is_last.
       eapply finite_valid_trace_from_to_app_split.
-      rewrite <- app_assoc.
-      simpl.
-      rewrite <- Heqtr.
+      rewrite <- app_assoc. simpl. rewrite <- Heqtr.
       assumption.
     Qed.
 
@@ -2216,17 +2207,14 @@ This relation is often used in stating safety and liveness properties.*)
       (Htr : finite_valid_trace_from_to is s tr)
       : forall item, item ∈ tr -> in_futures is (destination item).
     Proof.
-      intros item.
-      rewrite elem_of_list_In.
-      intros Hitem.
-      apply in_split in Hitem as [pre [suf Heqtr]].
+      intros item Hitem.
+      apply elem_of_list_split in Hitem as (pre & suf & Heqtr).
       exists (pre ++ [item]).
-      replace (destination item) with (finite_trace_last is (pre ++ [item]))
-        by apply finite_trace_last_is_last.
+      replace (destination item)
+         with (finite_trace_last is (pre ++ [item]))
+           by apply finite_trace_last_is_last.
       eapply finite_valid_trace_from_to_app_split.
-      rewrite <- app_assoc.
-      simpl.
-      rewrite <- Heqtr.
+      rewrite <- app_assoc. simpl. rewrite <- Heqtr.
       eassumption.
     Qed.
 
