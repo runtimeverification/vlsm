@@ -147,7 +147,7 @@ Proof.
   eapply msg_dep_fixed_limited_equivocation in HtrX.
   2-5: eassumption.
   apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
-    as [is [His_pr [s [Hpr_s [tr [Htr_pr [Htr Houtput]]]]]]]
+   as (is & His_pr & s & Hpr_s & tr & Htr_pr & Htr & Houtput)
   ; [|assumption].
   eexists; split; [eassumption|].
   subst.

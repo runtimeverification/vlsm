@@ -73,11 +73,8 @@ Definition annotate_trace_item
   (k : annotated_state -> list (@transition_item _ annotated_type))
   (sa : annotated_state)
   : list (@transition_item _ annotated_type) :=
-  match item with
-  | {| l := l; input := iom; destination := s'; output := oom |} =>
-    let sa' := {| original_state := s'; state_annotation := annotated_transition_state l (sa, iom) |} in
-    @Build_transition_item _ annotated_type l iom sa' oom :: k sa'
-  end.
+    let sa' := {| original_state := destination item; state_annotation := annotated_transition_state (l item) (sa, input item) |} in
+    @Build_transition_item _ annotated_type (l item) (input item) sa' (output item) :: k sa'.
 
 Lemma annotate_trace_item_project
   (item : vtransition_item X)
@@ -114,14 +111,9 @@ Proof.
   revert sa.
   induction tr1 as [|item tr1]; [reflexivity|].
   intro sa.
-  change ((item :: tr1) ++ tr2) with (item :: (tr1 ++ tr2)).
-  rewrite !annotate_trace_from_unroll.
+  rewrite <- app_comm_cons, !annotate_trace_from_unroll.
   simpl.
-  rewrite IHtr1.
-  f_equal.
-  f_equal.
-  f_equal.
-  rewrite finite_trace_last_cons.
+  rewrite IHtr1, finite_trace_last_cons.
   reflexivity.
 Qed.
 
@@ -131,8 +123,8 @@ Lemma annotate_trace_from_last_original_state sa tr
 Proof.
   destruct_list_last tr tr' item Heqtr; subst; [reflexivity|].
   rewrite annotate_trace_from_app.
-  destruct item.
   cbn.
+  unfold annotate_trace_item.
   rewrite! finite_trace_last_is_last.
   reflexivity.
 Qed.
@@ -148,13 +140,10 @@ Lemma annotate_trace_project is tr
       = tr.
 Proof.
   unfold annotate_trace.
-  remember {| original_state := is |} as sa.
-  clear Heqsa.
-  revert sa.
+  remember {| original_state := is |} as sa; clear Heqsa; revert sa.
   induction tr as [| item]; [reflexivity|].
   intro sa.
-  cbn.
-  rewrite annotate_trace_item_project.
+  setoid_rewrite annotate_trace_item_project.
   f_equal.
   apply IHtr.
 Qed.
@@ -181,15 +170,11 @@ Definition forget_annotations_projection
   : VLSM_full_projection AnnotatedX X id original_state.
 Proof.
   apply basic_VLSM_strong_full_projection.
-  - cbv; intuition.
-  - intros l (s,a) om (s', a') om'.
-    cbn.
-    unfold annotated_transition.
-    cbn.
-    destruct (vtransition _ _ _) as (_s', _om').
-    inversion 1; reflexivity.
-  - cbv; intuition.
-  - cbv; intuition.
+  1, 3-4: cbv; intuition.
+  intros l (s,a) om (s', a') om'.
+  cbn; unfold annotated_transition; cbn.
+  destruct (vtransition _ _ _) as (_s', _om').
+  inversion 1; reflexivity.
 Qed.
 
 End sec_annotated_vlsm_projections.

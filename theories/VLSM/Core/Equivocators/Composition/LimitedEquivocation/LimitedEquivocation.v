@@ -108,7 +108,7 @@ Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free
   : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm) PreFreeE.
 Proof.
   apply basic_VLSM_incl_preloaded.
-  1,3: intro; intros; assumption.
+  1, 3: intros s H0; auto.
   intros l s om Hv.
   split; [|exact I].
   apply Hv.
@@ -164,7 +164,7 @@ Proof.
   cut
     (forall equivocating, equivocating_validators s ⊆ equivocating ->
       finite_valid_trace_from_to (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating) is s tr).
-  { intros H'. apply H'. reflexivity. }
+  { auto. }
   induction Htr using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
   - apply (finite_valid_trace_from_to_empty (equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating)).
     apply initial_state_is_valid. assumption.
@@ -283,7 +283,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
       (msg_dep_annotate_trace_with_equivocators IM Hbs Hbr full_message_dependencies sender isX trX).
 Proof.
   eapply equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation in Htr
-    as [trX [initial_descriptors [Hinitial_descriptors [Hpr [Hlst_pr Hpr_limited]]]]]
+    as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_limited)
   ; [|eassumption].
   exists trX, initial_descriptors.
   repeat (split; [assumption|]).
@@ -368,15 +368,14 @@ are guaranteed to obtain a trace projection for each trace, hence the relation
 above strengthens to a [VLSM_projection].
 *)
 Lemma limited_equivocators_vlsm_projection
-  : VLSM_projection equivocators_limited_equivocations_vlsm Limited (equivocators_total_label_project IM) (equivocators_total_state_project IM).
+  : VLSM_projection equivocators_limited_equivocations_vlsm Limited
+    (equivocators_total_label_project IM) (equivocators_total_state_project IM).
 Proof.
-  constructor; [constructor|].
-  - intros sX trX HtrX.
-    apply PreFreeE_Free_vlsm_projection_type.
+  constructor; [constructor|]; intros sX trX HtrX.
+  - apply PreFreeE_Free_vlsm_projection_type.
     revert HtrX. apply VLSM_incl_finite_valid_trace_from.
     apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
-  - intros sX trX HtrX.
-    assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
+  - assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
     { revert HtrX. apply VLSM_incl_finite_valid_trace.
       apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
     }

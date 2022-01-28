@@ -31,10 +31,10 @@ Definition coeqv_composite_transition_message_equivocators
   (l : composite_label IM)
   (som : annotated_state (free_composite_vlsm IM) (set validator) * option message)
   : set validator :=
-  match som.2 with
-  | None => state_annotation som.1
-  | Some m =>
-    set_union (state_annotation som.1) (coeqv_message_equivocators (original_state som.1) m)
+  match som with
+  | (sa, None) => state_annotation sa
+  | (sa, Some m) =>
+    set_union (state_annotation sa) (coeqv_message_equivocators (original_state sa) m)
   end.
 
 Definition coeqv_limited_equivocation_constraint
@@ -58,11 +58,9 @@ Lemma coeqv_limited_equivocation_transition_state_annotation_incl [l s iom s' oo
   : vtransition coeqv_limited_equivocation_vlsm l (s, iom) = (s', oom) ->
     state_annotation s ⊆ state_annotation s'.
 Proof.
-  cbn.
-  unfold annotated_transition.
+  cbn; unfold annotated_transition.
   destruct (vtransition _ _ _) as (_s', _om').
-  inversion 1.
-  cbn.
+  inversion 1; cbn.
   destruct iom as [m|]; [|reflexivity].
   apply set_union_subseteq_left.
 Qed.
@@ -232,22 +230,14 @@ Proof.
   apply Hvalid.
 Qed.
 
-Lemma full_node_msg_dep_composite_transition_message_equivocators
+
+Lemma annotated_free_input_valid_projection
   iprop `{Inhabited (sig iprop)} constr trans
-  l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
-  (Hvalid : input_valid (annotated_vlsm (free_composite_vlsm IM) (set validator) iprop constr trans) l (s, om))
-  : full_node_composite_transition_message_equivocators IM Hbs Hbr sender l (s, om) =
-    msg_dep_composite_transition_message_equivocators IM Hbs Hbr full_message_dependencies sender l (s, om).
+  i li s om
+  : input_valid (annotated_vlsm (free_composite_vlsm IM) (set validator) iprop constr trans) (existT i li) (s, om) ->
+    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om).
 Proof.
-  destruct om as [m|]; [|reflexivity].
-  cbn.
-  f_equal.
-  unfold coeqv_message_equivocators.
-  case_decide as Hobs; [reflexivity|].
-  f_equal.
-  symmetry.
-  destruct l as (i, li).
-  eapply full_node_msg_dep_coequivocating_senders.
+  intro Hvalid.
   eapply
     (VLSM_projection_input_valid (preloaded_component_projection IM i))
     with (lX := existT i li)
@@ -257,6 +247,48 @@ Proof.
   apply
     (VLSM_full_projection_input_valid
       (forget_annotations_projection (free_composite_vlsm IM) _ _ _)).
+Qed.
+
+
+Lemma full_node_msg_dep_composite_transition_message_equivocators
+  i li (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
+  (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om))
+  : full_node_composite_transition_message_equivocators IM Hbs Hbr sender (existT i li) (s, om) =
+    msg_dep_composite_transition_message_equivocators IM Hbs Hbr full_message_dependencies sender (existT i li) (s, om).
+Proof.
+  destruct om as [m|]; [|reflexivity].
+  cbn.
+  f_equal.
+  unfold coeqv_message_equivocators.
+  case_decide as Hobs; [reflexivity|].
+  f_equal.
+  symmetry.
+  eapply full_node_msg_dep_coequivocating_senders; eassumption.
+Qed.
+
+Lemma msg_dep_full_node_valid_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
+  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
+  : vvalid (msg_dep_limited_equivocation_vlsm IM Hbs Hbr full_message_dependencies sender) l (s, om) <->
+    vvalid (full_node_limited_equivocation_vlsm IM Hbs Hbr sender) l (s, om).
+Proof.
+  cbn.
+  unfold annotated_valid, coeqv_limited_equivocation_constraint.
+  destruct l as (i, li).
+  setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators; [|assumption].
+  intuition.
+Qed.
+
+Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
+  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
+  : vtransition (msg_dep_limited_equivocation_vlsm IM Hbs Hbr full_message_dependencies sender) l (s, om) =
+    vtransition (full_node_limited_equivocation_vlsm IM Hbs Hbr sender) l (s, om).
+Proof.
+  cbn.
+  unfold annotated_transition.
+  destruct (vtransition _ _ _) as (s', om').
+  destruct l as (i, li).
+  setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators; [|assumption].
+  reflexivity.
 Qed.
 
 Lemma msg_dep_full_node_limited_equivocation_vlsm_incl
@@ -270,21 +302,14 @@ Proof.
   - intros _ _ m _ _ Hinit.
     apply initial_message_is_valid.
     assumption.
-  - intros l s om HvX HsY HomY.
-    split; [apply HvX|].
-    unfold coeqv_limited_equivocation_constraint.
-    setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators
-    ; [apply HvX|eassumption].
+  - intros (i, li) s om HvX _ _.
+    apply msg_dep_full_node_valid_iff; [|apply HvX].
+    eapply annotated_free_input_valid_projection; eassumption.
   - intros (i, li) s iom s' oom [Hv Ht].
-    revert Ht. cbn.
-    unfold annotated_transition.
-    cbn.
-    destruct (vtransition _ _ _) as (si', om').
-    inversion 1.
-    subst.
-    clear Ht.
-    setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators
-    ; [reflexivity|eassumption].
+    cbn in Ht |- *. rewrite <- Ht.
+    symmetry.
+    apply msg_dep_full_node_transition_iff.
+    eapply annotated_free_input_valid_projection; eassumption.
 Qed.
 
 Lemma full_node_msg_dep_limited_equivocation_vlsm_incl
@@ -298,21 +323,13 @@ Proof.
   - intros _ _ m _ _ Hinit.
     apply initial_message_is_valid.
     assumption.
-  - intros l s om HvX HsY HomY.
-    split; [apply HvX|].
-    unfold coeqv_limited_equivocation_constraint.
-    setoid_rewrite <- full_node_msg_dep_composite_transition_message_equivocators
-    ; [apply HvX|eassumption].
+  - intros (i, li) s om HvX _ _.
+    apply msg_dep_full_node_valid_iff; [|apply HvX].
+    eapply annotated_free_input_valid_projection; eassumption.
   - intros (i, li) s iom s' oom [Hv Ht].
-    revert Ht. cbn.
-    unfold annotated_transition.
-    cbn.
-    destruct (vtransition _ _ _) as (si', om').
-    inversion 1.
-    subst.
-    clear Ht.
-    setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators
-    ; [reflexivity|eassumption].
+    cbn in Ht |- *. rewrite <- Ht.
+    apply msg_dep_full_node_transition_iff.
+    eapply annotated_free_input_valid_projection; eassumption.
 Qed.
 
 Lemma full_node_msg_dep_limited_equivocation_vlsm_eq
@@ -398,8 +415,8 @@ Proof.
       rewrite full_message_dependencies_happens_before.
       assumption.
     }
-    eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender
-    ; [eassumption|eassumption|eassumption|eassumption|..|eassumption].
+    eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender.
+    1-4, 6: eassumption.
     apply emitted_messages_are_valid_iff.
     right.
     revert HLemit.
@@ -409,7 +426,7 @@ Proof.
   eapply VLSM_full_projection_can_emit.
   {
     apply equivocators_composition_for_observed_index_incl_full_projection
-      with (indices1 := equivocating_senders).
+      with (Hincl := ltac: (eapply set_union_subseteq_right)).
   }
   assert
     (Hemitj : exists j, j ∈ equivocating_senders /\
@@ -455,14 +472,12 @@ Proof.
   right.
   apply valid_preloaded_lifts_can_be_emitted with dm_i (fun m => m ∈ message_dependencies dm)
   ; [assumption|..]; cycle 1.
-  - eapply message_dependencies_are_sufficient; [apply HMsgDep|assumption].
+  - apply message_dependencies_are_sufficient with (Hbs dm_i) (Hbr dm_i); [apply HMsgDep|assumption].
   - intros dm' Hdm'.
     apply Hind.
     + apply msg_dep_happens_before_iff_one. left. assumption.
     + transitivity dm; [|assumption].
       apply msg_dep_happens_before_iff_one. left. assumption.
-Unshelve.
-  apply set_union_subseteq_right.
 Qed.
 
 Lemma msg_dep_fixed_limited_equivocation is tr
@@ -700,7 +715,8 @@ Proof.
     + apply list_subseteq_nil.
   - setoid_rewrite annotate_trace_from_app.
     cbn.
-    rewrite finite_trace_last_is_last.
+    unfold annotate_trace_item.
+    rewrite !finite_trace_last_is_last.
     cbn.
     split.
     + apply finite_valid_trace_from_app_iff.
