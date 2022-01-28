@@ -106,6 +106,7 @@ Lemma msg_dep_happens_before_reflect
 Proof.
   intros dm m Hdm.
   apply Operators_Properties.clos_trans_t1n in Hdm.
+  clear -Hdm Hreflects.
   induction Hdm; firstorder.
 Qed.
 
