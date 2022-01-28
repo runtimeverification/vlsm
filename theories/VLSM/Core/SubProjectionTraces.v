@@ -1219,13 +1219,13 @@ Lemma induced_sub_projection_friendliness
     (lift_sub_state IM equivocators))
   : projection_friendly_prop (induced_sub_projection_is_projection IM equivocators constraint).
 Proof.
-  eapply (basic_projection_induces_friendliness (composite_vlsm IM constraint)).
+  apply (basic_projection_induces_friendliness (composite_vlsm IM constraint)) with
+    (Htransition_None := ltac: (eapply induced_sub_projection_transition_consistency_None))
+    (Hlabel_lift := ltac: (eapply composite_label_sub_projection_option_lift))
+    (Hstate_lift := ltac: (eapply composite_state_sub_projection_lift))
+    (Htransition_consistency := ltac:(eapply induced_sub_projection_transition_consistency_Some))
+    .
   assumption.
-Unshelve.
-  - apply induced_sub_projection_transition_consistency_None.
-  - apply composite_label_sub_projection_option_lift.
-  - apply composite_state_sub_projection_lift.
-  - apply induced_sub_projection_transition_consistency_Some.
 Qed.
 
 End lift_sub_state_to_preloaded.
@@ -2027,16 +2027,15 @@ Proof.
   apply projection_induced_vlsm_is_projection.
   - intros lX HlX s om s' om' [_ Ht].
     apply sub_transition_element_project_None with lX om om'; [assumption|].
-    setoid_rewrite <- induced_sub_projection_transition_is_composite.
-    eassumption.
+    setoid_rewrite <- induced_sub_projection_transition_is_composite
+      with (constraint0 := constraint).
+    assumption.
   - apply basic_weak_projection_transition_consistency_Some.
     + intro. apply sub_element_label_project.
     + intro. apply sub_element_state_project.
     + intro.
       setoid_rewrite induced_sub_projection_transition_is_composite.
       apply sub_transition_element_project_Some.
-Unshelve.
-  exact constraint.
 Qed.
 
 End sub_composition_element.

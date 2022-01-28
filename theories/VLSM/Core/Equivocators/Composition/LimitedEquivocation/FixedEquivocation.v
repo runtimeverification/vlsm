@@ -691,8 +691,9 @@ Proof.
   { apply (finite_valid_trace_last_pstate (pre_loaded_with_all_messages_vlsm Free)).
     apply HtrX_Pre.
   }
-
-  rewrite has_been_observed_sent_received_iff; [|assumption].
+  rewrite has_been_observed_sent_received_iff
+    with (Hbr0 := Free_HasBeenReceivedCapability) (Hbs0 := Free_HasBeenSentCapability)
+  ; [|assumption].
   right. apply proper_sent; [assumption|].
   apply has_been_sent_consistency; [assumption| assumption |].
   exists (equivocators_state_project IM initial_descriptors is), trX,
@@ -765,9 +766,6 @@ Proof.
   inversion Hpr. subst. clear Hpr.
   inversion Hpr_pre_item. subst. clear Hpr_pre_item.
   constructor. reflexivity.
-Unshelve.
-  - assumption.
-  - assumption.
 Qed.
 
 (**
