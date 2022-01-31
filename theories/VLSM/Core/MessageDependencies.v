@@ -72,18 +72,16 @@ relation.
 Definition msg_dep_rel : relation message :=
   fun m1 m2 => m1 ∈ message_dependencies m2.
 
-(** The transitive closure of the [msg_dep_rel]ation is a happens-before
-relation.
+(** The transitive closure ([clos_trans_1n]) of the [msg_dep_rel]ation is a
+happens-before relation.
 *)
-Definition msg_dep_happens_before : relation message := flip (clos_trans _ (flip msg_dep_rel)).
+Definition msg_dep_happens_before : relation message := flip (clos_trans_1n _ (flip msg_dep_rel)).
 
 (** Unrolling one the [msg_dep_happens_before] relation one step. *)
 Lemma msg_dep_happens_before_iff_one x z
   : msg_dep_happens_before x z <->
     msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
 Proof.
-  unfold msg_dep_happens_before; simpl.
-  setoid_rewrite Operators_Properties.clos_trans_t1n_iff.
   split.
   - inversion 1; subst; eauto.
   - intros [H | [y [H1 H2]]]; econstructor; eassumption.
@@ -92,7 +90,8 @@ Qed.
 Global Instance msg_dep_happens_before_transitive : Transitive msg_dep_happens_before.
 Proof.
   apply flip_Transitive.
-  intros m1 m2 m3.
+  intros m1 m2 m3 .
+  rewrite <- !Relations.Operators_Properties.clos_trans_t1n_iff.
   apply t_trans.
 Qed.
 
@@ -105,7 +104,6 @@ Lemma msg_dep_happens_before_reflect
   : forall dm m, msg_dep_happens_before dm m -> P m -> P dm.
 Proof.
   intros dm m Hdm.
-  apply Operators_Properties.clos_trans_t1n in Hdm.
   clear -Hdm Hreflects.
   induction Hdm; firstorder.
 Qed.
