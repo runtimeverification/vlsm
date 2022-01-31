@@ -5,7 +5,7 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
 
 (** * VLSM Projection Validators
 
-In the sequel we fix a VLSMs <<X>> and <<Y>> and a [VLSM_projection]
+In the sequel we fix VLSMs <<X>> and <<Y>> and a [VLSM_projection]
 of <<X>> into <<PreY>>, the [pre_loaded_with_all_messages_vlsm] of <<Y>>.
 *)
 
@@ -22,19 +22,7 @@ Context
 
 (**
 We say that <<Y>> is a validator for received messages if
-non-[projection_induced_valid]itiy implied non-component-[valid]ity
-(or non-reachability).
-*)
-
-Definition projection_validator_received_messages_prop :=
-  forall (li : vlabel Y) (si : vstate Y) (mi : message),
-    ~ projection_induced_valid X (type Y) label_project state_project li (si, Some mi)
-    -> ~ input_valid PreY li (si, Some mi).
-
-(**
-We can slightly generalize the definition above to also include empty messages
-and state it in a positive manner as the [projection_validator_prop]erty below,
-requiring that [valid]ity in the component (for reachable states) implies
+[valid]ity in the component (for reachable states) implies
 [projection_induced_valid]ity.
 *)
 
@@ -42,17 +30,6 @@ Definition projection_validator_prop :=
   forall li si omi,
     input_valid PreY li (si,omi) ->
     projection_induced_valid X (type Y) label_project state_project li (si,omi).
-
-(**
-It is easy to see that the [projection_validator_prop]erty includes the
-[projection_validator_received_messages_prop]erty.
-*)
-Lemma projection_validator_messages_received
-  : projection_validator_prop -> projection_validator_received_messages_prop.
-Proof.
-  unfold projection_validator_prop, projection_validator_received_messages_prop.
-  intuition.
-Qed.
 
 (**
 We say that <<Y>> is a [transition_validator] if any [valid]
