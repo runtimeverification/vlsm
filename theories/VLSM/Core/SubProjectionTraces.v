@@ -390,14 +390,12 @@ Lemma induced_sub_projection_preloaded_free_incl
   : VLSM_incl induced_sub_projection (pre_loaded_with_all_messages_vlsm (free_composite_vlsm sub_IM)).
 Proof.
   apply basic_VLSM_strong_incl.
-  2: cbv; intuition.
   - intros s (sX & <- & HsX) sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i.
-    subst.
-    apply (HsX i).
+    subst. apply HsX.
+  - cbv; intuition.
   - intros (sub_i, li) s om Hv.
-    split; [|exact I].
-    cbn.
+    split; [cbn |exact I].
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     apply induced_sub_projection_valid_projection_strong.
     assumption.

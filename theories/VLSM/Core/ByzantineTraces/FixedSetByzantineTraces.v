@@ -300,7 +300,7 @@ Lemma fixed_non_byzantine_projection_incl_preloaded
 Proof.
   apply basic_VLSM_strong_incl.
   - intros is. apply fixed_non_byzantine_projection_initial_state_preservation.
-  - intros m Hm. exact I.
+  - intros m Hm. compute. trivial.
   - intros l s om Hv.
     split; [|exact I].
     revert Hv.

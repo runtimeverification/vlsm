@@ -1093,7 +1093,7 @@ Lemma pre_definitions_projection_relation_right_trace
 Proof.
   unfold pre_VLSM_projection_finite_trace_project at 1.
   rewrite pre_definitions_projection_relation_right_item.
-  apply map_option_composed_right.
+  apply map_option_comp_r.
 Qed.
 
 End pre_definitions_projection_relation_right.
@@ -1124,7 +1124,7 @@ Lemma pre_definitions_projection_relation_left_trace
 Proof.
   unfold pre_VLSM_projection_finite_trace_project at 1.
   rewrite pre_definitions_projection_relation_left_item.
-  apply map_option_composed_left.
+  apply map_option_comp_l.
 Qed.
 
 End pre_definitions_projection_relation_left.
