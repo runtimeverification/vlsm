@@ -821,7 +821,7 @@ End assuming_initial_messages_lift.
 Context
   (Hvalidator:
     forall i : index, i ∉ selection ->
-    projection_validator_prop IM (fixed_equivocation_constraint IM Hbs Hbr selection) i)
+    component_projection_validator_prop IM (fixed_equivocation_constraint IM Hbs Hbr selection) i)
   .
 
 Lemma validator_fixed_non_byzantine_vlsm_lift_initial_message

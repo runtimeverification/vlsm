@@ -641,6 +641,12 @@ given inputs and that they have a [valid_state] and a [valid_message].
       input_valid l som
       /\  transition l som = som'.
 
+    Definition input_valid_transition_item
+      (s : state)
+      (item : transition_item)
+      :=
+      input_valid_transition (l item) (s, input item) (destination item, output item).
+
     Definition input_valid_transition_preserving
       (R : state -> state -> Prop)
       : Prop
@@ -671,10 +677,9 @@ given inputs and that they have a [valid_state] and a [valid_message].
       (l : label)
       (som : state * option message)
       (Hv : input_valid l som)
-      : exists (som' : state * option message),
+      : forall som', transition l som = som' ->
         input_valid_transition l som som'.
     Proof.
-      exists (transition l som).
       repeat split; assumption.
     Qed.
 
@@ -686,7 +691,8 @@ given inputs and that they have a [valid_state] and a [valid_message].
             input_valid_transition l som som'.
     Proof.
       split.
-      - apply input_valid_can_transition.
+      - eexists.
+        apply input_valid_can_transition; [assumption|reflexivity].
       - intros [som' Hivt].
         apply input_valid_transition_valid with som'.
         assumption.

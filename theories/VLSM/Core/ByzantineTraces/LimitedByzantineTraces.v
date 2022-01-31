@@ -57,7 +57,7 @@ Context
   {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   (limited_constraint := limited_equivocation_constraint IM (listing_from_finite index) sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
-  (Hvalidator: forall i : index, projection_validator_prop IM limited_constraint i)
+  (Hvalidator: forall i : index, component_projection_validator_prop IM limited_constraint i)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
   (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
