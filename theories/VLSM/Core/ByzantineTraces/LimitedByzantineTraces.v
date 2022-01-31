@@ -402,6 +402,7 @@ Proof.
     rewrite !map_app.
     setoid_rewrite annotate_trace_from_app.
     cbn.
+    unfold annotate_trace_item; cbn.
     rewrite finite_trace_last_is_last.
     cbn.
     destruct l as (sub_i, li).
@@ -431,8 +432,7 @@ Proof.
       split; [|assumption].
       apply finite_valid_trace_from_app_iff.
       split; [assumption|].
-      subst x.
-      cbn.
+      subst x; cbn.
       apply finite_valid_trace_singleton.
       replace (finite_trace_last _ _) with lst.
       eapply lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited.

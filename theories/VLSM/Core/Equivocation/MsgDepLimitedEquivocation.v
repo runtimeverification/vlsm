@@ -493,7 +493,7 @@ Proof.
   ; [assumption| |assumption].
   clear Heqequivocating_senders.
   induction dm as [dm Hind]
-    using (well_founded_ind (msg_dep_happens_before_wf _ _ HFullMsgDep)).
+    using (well_founded_ind (msg_dep_happens_before_wf message_dependencies full_message_dependencies)).
   intros Hdm.
   apply emitted_messages_are_valid_iff.
   destruct (Hsenders _ Hdm) as [Hobs_dm | [dm_i [Hdm_i Hemit_dm]]]
