@@ -203,12 +203,11 @@ Qed.
 Lemma projection_validator_prop_alt_iff
   : projection_validator_prop_alt <-> projection_validator_prop.
 Proof.
-  split.
-  - intros Hvalidator l si om Hvalid.
-    apply Hvalidator; [apply Hvalid|].
+  split; intros Hvalidator l si om Hvalid.
+  - apply Hvalidator; [apply Hvalid|].
     apply validator_alt_free_states_are_projection_states
-    ; [assumption| apply Hvalid].
-  - intros Hvalidator l si om Hvalid HXisi.
+    ; [assumption|apply Hvalid].
+  - intro HXisi.
     apply Hvalidator.
     repeat split; [| apply any_message_is_valid_in_preloaded | assumption].
     revert HXisi.
@@ -305,9 +304,9 @@ We say that the component <<i>> of X is a validator for received messages if
 if [valid]ity in the component (for reachable states) implies [projection_valid]ity.
 *)
 Definition component_projection_validator_prop :=
-  forall (li : vlabel (IM i)) (siomi : vstate (IM i) * option message),
-    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li siomi ->
-    vvalid Xi li siomi.
+  forall (li : vlabel (IM i)) (si : vstate (IM i)) (omi : option message),
+    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (si, omi) ->
+    vvalid Xi li (si, omi).
 
 Lemma component_projection_to_preloaded
   : VLSM_projection X PreXi (composite_project_label IM i) (fun s => s i).
@@ -325,23 +324,17 @@ Lemma component_projection_validator_prop_is_induced
   : component_projection_validator_prop <->
     @projection_validator_prop _ X (IM i) (composite_project_label IM i) (fun s => s i).
 Proof.
-  split.
-  - intros Hvalidator li si omi Hvi.
-    apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
-    apply projection_valid_input_valid.
-    apply Hvalidator.
-    assumption.
-  - intros Hvalidator li (si, omi) Hvi.
-    apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
+  split; intros Hvalidator li si omi Hvi.
+  - apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
+    apply projection_valid_input_valid, Hvalidator, Hvi.
+  - apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
     revert Hvi.
-    apply VLSM_incl_input_valid.
-    apply pre_loaded_with_all_messages_validator_proj_incl.
+    apply VLSM_incl_input_valid, pre_loaded_with_all_messages_validator_proj_incl.
     + apply component_projection_to_preloaded.
     + apply component_transition_projection_None.
     + apply component_label_projection_lift.
     + apply component_state_projection_lift.
-    + intros isi.
-      apply (lift_to_composite_state_initial IM).
+    + intros isi.  apply (lift_to_composite_state_initial IM).
     + apply component_transition_projection_Some.
     + assumption.
 Qed.

@@ -332,9 +332,7 @@ Proof.
       rewrite elem_of_remove_dups.
       apply Heqv_byzantine.
   - clear -Ht_sub Hann_s_pr.
-    cbn.
-    unfold annotated_transition.
-    cbn.
+    cbn; unfold annotated_transition; cbn.
     apply proj2 in Ht_sub.
     revert Ht_sub.
     cbn.
@@ -344,12 +342,8 @@ Proof.
     unfold sub_IM at 2.
     cbn.
     destruct (vtransition _ _ _) as (si', om').
-    intro Ht.
-    inversion Ht.
-    subst.
-    clear Ht.
-    f_equal.
-    f_equal.
+    inversion_clear 1.
+    do 2 f_equal.
     extensionality j.
     destruct (decide (i = j)) as [Hij | Hij].
     + subst j.
@@ -358,13 +352,12 @@ Proof.
       rewrite !state_update_eq.
       reflexivity.
     + rewrite state_update_neq by congruence.
+      unfold lift_sub_state.
       destruct (decide (j ∈ set_diff (enum index) byzantine)) as [Hj|Hj].
-      * unfold lift_sub_state.
-        rewrite !lift_sub_state_to_eq with (Hi0 := Hj).
+      * rewrite !lift_sub_state_to_eq with (Hi0 := Hj).
         rewrite sub_IM_state_update_neq by congruence.
         reflexivity.
-      * unfold lift_sub_state.
-        rewrite !lift_sub_state_to_neq by assumption.
+      * rewrite !lift_sub_state_to_neq by assumption.
         reflexivity.
 Qed.
 

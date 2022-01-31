@@ -2103,18 +2103,16 @@ Lemma pre_loaded_sub_composite_input_valid_projection constraint Q
       li (lift_sub_state IM indices sub_s i, Some im).
 Proof.
   intro Ht_sub.
-  eapply
-    (VLSM_projection_input_valid (preloaded_component_projection IM i) (existT i li) li)
+  eapply (VLSM_projection_input_valid (preloaded_component_projection IM i) (existT i li) li)
   ; [rewrite composite_project_label_eq; reflexivity|].
-  cut (
-    input_valid
-      (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM indices)))
-      (existT (dexist i Hi) li) (sub_s, Some im))
-  ; [eapply
-      (VLSM_full_projection_input_valid lift_sub_preloaded_free_full_projection)|].
-  eapply VLSM_incl_input_valid
-  ; [apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages|].
-  assumption.
+  cut (input_valid
+        (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM indices)))
+        (existT (dexist i Hi) li) (sub_s, Some im)).
+  {
+    apply (VLSM_full_projection_input_valid lift_sub_preloaded_free_full_projection).
+  }
+  eapply VLSM_incl_input_valid; [| assumption].
+  apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma can_emit_sub_projection
