@@ -130,8 +130,7 @@ Proof.
     left; right.
     apply Hreflects with m; [assumption |].
     destruct Hinit as [Hinit | Hp]; [| assumption].
-    elim (no_initial_messages_in_X m).
-    assumption.
+    contradict Hinit. apply no_initial_messages_in_X.
   - apply (observed_valid (pre_loaded_vlsm X P)) with (s := s).
     + exists (Some m). apply can_produce_valid. assumption.
     + cut (has_been_observed X s dm).
@@ -172,7 +171,7 @@ Proof.
   - eapply elem_of_trace_in_futures_left; [|eassumption].
     apply Htr.
   - unfold can_produce.
-    replace (Some m) with (output item) by assumption.
+    rewrite <- Houtput.
     eapply can_produce_from_valid_trace; [|eassumption].
     eapply valid_trace_forget_last.
     apply Htr.
@@ -261,18 +260,16 @@ Lemma composite_message_dependencies
   : MessageDependencies message_dependencies (free_composite_vlsm IM).
 Proof.
   split.
-  - intros m s Hproduce dm Hdm.
-    destruct Hproduce as [(is, iom) [(i, li) Ht]].
-    cut (@has_been_observed _ (IM i) (Hbo i) (s i) dm)
-    ; [intros [Hsent | Hreceived]; [left | right]; exists i; assumption|].
+  - intros m s ((is, iom) & (i, li) & Ht) dm Hdm.
+    apply composite_has_been_observed_free_iff.
+    eapply composite_has_been_observed_from_component.
     eapply message_dependencies_are_necessary; [apply HMsgDep| |eassumption].
     exists (is i, iom), li.
     revert Ht.
     apply
       (VLSM_projection_input_valid_transition (preloaded_component_projection IM _))
       with (lY := li).
-    unfold composite_project_label.
-    cbn.
+    unfold composite_project_label; cbn.
     case_decide as Heqi; [|contradiction].
     replace Heqi with (@eq_refl index i) by (apply Eqdep_dec.UIP_dec; assumption).
     reflexivity.
@@ -293,28 +290,27 @@ Lemma msg_dep_reflects_free_validity
 Proof.
   intros dm m Hdm.
   rewrite !emitted_messages_are_valid_iff.
-  intros [[i [[im Him] Heqm]] | Hemit]
-  ; [elim (no_initial_messages_in_IM i im); assumption|].
+  intros [[i [[im Him] _]] | Hemit]
+  ; [contradict Him; apply no_initial_messages_in_IM|].
   right.
   pose proof (vlsm_is_pre_loaded_with_False X) as XeqXFalse.
-  apply (VLSM_eq_can_emit XeqXFalse) in Hemit.
   apply (VLSM_eq_can_emit XeqXFalse).
   cut (valid_message_prop (pre_loaded_vlsm X (fun _ => False)) dm).
   {
     clear -no_initial_messages_in_IM.
     rewrite emitted_messages_are_valid_iff.
-    intros [[[i [[im Him] Heqm]] | Hpreloaded] | Hemit]
-    ; [elim (no_initial_messages_in_IM i im); assumption|contradiction| assumption].
+    intros [[[i [[im Him] _]] | Hpreloaded] | Hemit]; intuition.
+    contradict Him; apply no_initial_messages_in_IM.
   }
   eapply msg_dep_reflects_validity.
   - apply composite_message_dependencies.
-  - clear -no_initial_messages_in_IM.
-    intros m [i [[im Him] Heqm]].
-    elim (no_initial_messages_in_IM i im).
-    assumption.
+  - intros _ [i [[im Him] _]].
+    contradict Him. apply no_initial_messages_in_IM.
   - intuition.
   - eassumption.
-  - apply emitted_messages_are_valid_iff. auto.
+  - apply emitted_messages_are_valid_iff.
+    apply (VLSM_eq_can_emit XeqXFalse) in Hemit.
+    auto.
 Qed.
 
 Lemma msg_dep_reflects_happens_before_free_validity
@@ -343,8 +339,7 @@ Proof.
   intros m Hm dm Hdm.
   cut (valid_message_prop X dm).
   {
-    clear Hdm.
-    revert dm.
+    clear Hdm; revert dm.
     apply composite_no_initial_valid_messages_emitted_by_sender; assumption.
   }
   revert dm m Hdm Hm.
@@ -395,10 +390,8 @@ Proof.
   eapply msg_dep_reflects_validity; [| |assumption].
   - apply sub_composite_message_dependencies.
   - intros m [sub_i [[im Him] Heqm]].
-    destruct_dec_sig sub_i i Hi Heqsub_i.
-    subst.
-    elim (no_initial_messages_in_IM i im).
-    assumption.
+    destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+    contradict Him; apply no_initial_messages_in_IM.
 Qed.
 
 End sec_sub_composite_message_dependencies.
@@ -436,12 +429,13 @@ Context
   {HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies}
   .
 
-Global Instance msg_dep_happens_before_irrefl : Irreflexive (msg_dep_happens_before message_dependencies).
+Global Instance msg_dep_happens_before_irrefl :
+  Irreflexive (msg_dep_happens_before message_dependencies).
 Proof.
   intros m Hm.
-  elim (full_message_dependencies_irreflexive m).
-  apply full_message_dependencies_happens_before.
-  assumption.
+  contradict Hm.
+  rewrite <- full_message_dependencies_happens_before.
+  apply full_message_dependencies_irreflexive.
 Qed.
 
 Global Instance msg_dep_happens_before_strict : StrictOrder (msg_dep_happens_before message_dependencies) := {}.
@@ -461,24 +455,25 @@ Proof.
   apply IHn.
   unfold lt.
   transitivity (length (full_message_dependencies m)); [|lia].
-  replace (S _) with (length (dm :: full_message_dependencies dm))
-    by reflexivity.
+  rewrite <- (cons_length dm).
   apply NoDup_subseteq_length.
   - constructor.
     + apply full_message_dependencies_irreflexive.
     + apply full_message_dependencies_nodups.
   - intros m' Hm'.
-    inversion Hm'; subst; [apply full_message_dependencies_happens_before; assumption|].
-    revert H1.
-    setoid_rewrite full_message_dependencies_happens_before.
-    intro Hm'dm.
-    transitivity dm; assumption.
+apply elem_of_cons in Hm' as [-> | Hm'].
+    + apply full_message_dependencies_happens_before; assumption.
+    + revert Hm'.
+      setoid_rewrite full_message_dependencies_happens_before.
+      intro Hm'dm.
+      transitivity dm; assumption.
 Qed.
 
 Lemma FullMessageDependencies_ind
   (P : message -> Prop)
   m
-  (IHm : forall dm, dm ∈ full_message_dependencies m -> (forall dm0, dm0 ∈ full_message_dependencies dm -> P dm0) -> P dm)
+  (IHm : forall dm, dm ∈ full_message_dependencies m ->
+    (forall dm0, dm0 ∈ full_message_dependencies dm -> P dm0) -> P dm)
   : forall dm, dm ∈ full_message_dependencies m -> P dm.
 Proof.
   induction m using (well_founded_ind msg_dep_happens_before_wf).
@@ -486,12 +481,8 @@ Proof.
   apply IHm; [assumption|].
   apply H; [apply full_message_dependencies_happens_before; assumption|].
   intros dm0 Hdm0.
-  apply IHm.
-
-  apply full_message_dependencies_happens_before.
-  transitivity dm.
-  - apply full_message_dependencies_happens_before. assumption.
-  - apply full_message_dependencies_happens_before. assumption.
+  apply IHm, full_message_dependencies_happens_before.
+  transitivity dm; apply full_message_dependencies_happens_before; assumption.
 Qed.
 
 End full_message_dependencies_happens_before.

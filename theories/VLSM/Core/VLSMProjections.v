@@ -1031,14 +1031,15 @@ Proof.
   reflexivity.
 Qed.
 
-Lemma pre_VLSM_full_projection_finite_trace_last_output
-  : forall trX,
-    finite_trace_last_output trX = finite_trace_last_output (pre_VLSM_full_projection_finite_trace_project trX).
+Lemma pre_VLSM_full_projection_finite_trace_last_output :
+  forall trX,
+    finite_trace_last_output trX
+      =
+    finite_trace_last_output (pre_VLSM_full_projection_finite_trace_project trX).
 Proof.
-  intros.
-  destruct_list_last trX trX' lst HtrX
-  ; [reflexivity|].
-  setoid_rewrite map_app. simpl. rewrite !finite_trace_last_output_is_last.
+  intros trX.
+  destruct_list_last trX trX' lst HtrX; [reflexivity|].
+  setoid_rewrite map_app; simpl; rewrite !finite_trace_last_output_is_last.
   reflexivity.
 Qed.
 

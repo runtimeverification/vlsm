@@ -63,7 +63,10 @@ Lemma sub_IM_state_update_neq
   (si : vstate (IM i))
   (j : index)
   (ej : sub_index_prop j)
-  : i <> j -> state_update sub_IM s (dec_exist _ i ei) si (dec_exist _ j ej) = s (dec_exist _ j ej).
+  : i <> j ->
+      state_update sub_IM s (dec_exist _ i ei) si (dec_exist _ j ej)
+        =
+      s (dec_exist _ j ej).
 Proof.
   intro Hneq.
   apply state_update_neq.
@@ -353,26 +356,18 @@ Lemma induced_sub_projection_transition_is_composite l s om
   : vtransition induced_sub_projection l (s, om) = composite_transition sub_IM l (s, om).
 Proof.
   destruct l as (sub_i, li).
-  destruct_dec_sig sub_i i Hi Heqsub_i.
-  subst.
-  cbn.
-  unfold sub_IM, lift_sub_state.
-  rewrite lift_sub_state_to_eq with (Hi := Hi).
-  cbn.
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+  cbn; unfold sub_IM, lift_sub_state;
+  rewrite lift_sub_state_to_eq with (Hi := Hi); cbn.
   destruct (vtransition _ _ _) as (si', om').
   f_equal.
   extensionality sub_k.
-  destruct_dec_sig sub_k k Hk Heqsub_k.
-  subst.
-  unfold composite_state_sub_projection.
-  simpl.
-  destruct (decide (i = k)).
-  + subst.
-    rewrite state_update_eq.
-    symmetry.
-    apply sub_IM_state_update_eq.
-  + setoid_rewrite sub_IM_state_update_neq; [|congruence].
-    rewrite state_update_neq by congruence.
+  destruct_dec_sig sub_k k Hk Heqsub_k; subst.
+  unfold composite_state_sub_projection; cbn.
+  destruct (decide (i = k)); subst.
+  + rewrite state_update_eq, sub_IM_state_update_eq.
+    reflexivity.
+  + rewrite sub_IM_state_update_neq, state_update_neq by congruence.
     apply lift_sub_state_to_eq.
 Qed.
 
@@ -511,9 +506,8 @@ Proof.
   - apply NoDup_remove_dups.
   - intro sub_x.
     apply elem_of_remove_dups, elem_of_list_annotate.
-    destruct_dec_sig sub_x x Hx Heqsub_x.
-    subst.
-    assumption.
+    destruct_dec_sig sub_x x Hx Heqsub_x; subst.
+    cbn; red in Hx. assumption.
 Qed.
 
 Local Instance Sub_Free_HasBeenSentCapability
@@ -1831,10 +1825,8 @@ Definition sub_element_state (s : vstate (IM j)) sub_i
 Lemma sub_element_state_eq s H_j
   : sub_element_state s (dexist j H_j) = s.
 Proof.
-  unfold sub_element_state.
-  simpl.
-  case_decide as Heq_j; [|contradiction].
-  replace Heq_j with (@eq_refl index j) by (apply Eqdep_dec.UIP_dec; assumption).
+  unfold sub_element_state; cbn.
+  rewrite decide_left with (HP := eq_refl); cbn.
   reflexivity.
 Qed.
 
@@ -1842,9 +1834,8 @@ Lemma sub_element_state_neq s i Hi
   : i <> j -> sub_element_state s (dexist i Hi) = ` (vs0 (IM i)).
 Proof.
   intros Hij.
-  unfold sub_element_state.
-  simpl.
-  case_decide; [contradiction|reflexivity].
+  unfold sub_element_state; cbn.
+  case_decide; congruence.
 Qed.
 
 Lemma preloaded_sub_element_full_projection
@@ -1856,30 +1847,23 @@ Lemma preloaded_sub_element_full_projection
 Proof.
   apply basic_VLSM_full_projection_preloaded_with; [assumption|..].
   - intros l s om Hv.
-    split; [|exact I].
-    cbn.
+    split; [cbn |exact I].
     rewrite sub_element_state_eq with (H_j := Hj).
     assumption.
-  - intros l s om s' om'.
-    cbn.
+  - intros l s om s' om'; cbn.
     rewrite sub_element_state_eq with (H_j := Hj).
-    intro Ht.
-    replace (vtransition _ _ _) with (s', om').
-    f_equal.
+    intro Ht; replace (vtransition _ _ _) with (s', om'); f_equal.
     extensionality sub_i.
-    destruct_dec_sig sub_i i Hi Heqsub_i.
-    subst.
-    destruct (decide (i = j)).
-    + subst.
+    destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+    destruct (decide (i = j)); subst.
       rewrite sub_IM_state_update_eq, sub_element_state_eq.
       reflexivity.
     + rewrite sub_IM_state_update_neq, !sub_element_state_neq by congruence.
       reflexivity.
   - intros sj Hsj sub_i.
-    destruct_dec_sig sub_i i Hi Heqsub_i.
-    subst.
-    destruct (decide (i = j)).
-    + subst. rewrite sub_element_state_eq. assumption.
+    destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+    destruct (decide (i = j)); subst.
+    + rewrite sub_element_state_eq. assumption.
     + rewrite sub_element_state_neq by congruence.
       destruct (vs0 (IM i)).
       assumption.
@@ -1933,14 +1917,11 @@ Lemma sub_transition_element_project_None
     sub_state_element_project s' = sub_state_element_project s.
 Proof.
   intros (sub_i,li) HlX s om s' om' HtX.
-  destruct_dec_sig sub_i i Hi Heqsub_i.
-  subst.
-  unfold sub_label_element_project in HlX.
-  cbn in HlX, HtX.
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+  unfold sub_label_element_project in HlX; cbn in HlX, HtX.
   case_decide as Hij; [congruence|].
-  clear HlX.
   destruct (vtransition _ _ _) as (si', _om').
-  inversion HtX. subst. clear HtX.
+  inversion_clear HtX.
   unfold sub_state_element_project.
   apply sub_IM_state_update_neq.
   congruence.
@@ -1950,49 +1931,37 @@ Lemma sub_element_label_project
   : forall lY, sub_label_element_project (sub_element_label lY) = Some lY.
 Proof.
   intros lY.
-  unfold sub_element_label, sub_label_element_project.
-  simpl.
-  case_decide as Heqj; [|contradiction].
-  replace Heqj with (eq_refl (A := index) (x := j)); [reflexivity|].
-  apply Eqdep_dec.UIP_dec.
-  assumption.
+  unfold sub_element_label, sub_label_element_project; cbn.
+  rewrite decide_left with (HP := eq_refl); cbn.
+  reflexivity.
 Qed.
 
 Lemma sub_element_state_project
   : forall sY, sub_state_element_project (sub_element_state sY) = sY.
 Proof.
   intros sY.
-  unfold sub_element_state, sub_state_element_project.
-  simpl.
-  case_decide as Heqj; [|contradiction].
-  replace Heqj with (eq_refl (A := index) (x := j)); [reflexivity|].
-  apply Eqdep_dec.UIP_dec.
-  assumption.
+  unfold sub_element_state, sub_state_element_project; cbn.
+  rewrite decide_left with (HP := eq_refl); cbn.
+  reflexivity.
 Qed.
 
-Lemma sub_transition_element_project_Some
-  : forall lX1 lX2 lY, sub_label_element_project lX1 = Some lY -> sub_label_element_project lX2 = Some lY ->
-    forall sX1 sX2, sub_state_element_project sX1 = sub_state_element_project sX2 ->
-    forall iom sX1' oom1, composite_transition (sub_IM IM indices) lX1 (sX1, iom) = (sX1', oom1) ->
-    forall sX2' oom2, composite_transition (sub_IM IM indices) lX2 (sX2, iom) = (sX2', oom2) ->
-    sub_state_element_project sX1' = sub_state_element_project sX2' /\ oom1 = oom2.
+Lemma sub_transition_element_project_Some :
+  forall lX1 lX2 lY,
+    sub_label_element_project lX1 = Some lY ->
+    sub_label_element_project lX2 = Some lY ->
+  forall sX1 sX2,
+    sub_state_element_project sX1 = sub_state_element_project sX2 ->
+  forall iom sX1' oom1,
+    composite_transition (sub_IM IM indices) lX1 (sX1, iom) = (sX1', oom1) ->
+  forall sX2' oom2,
+    composite_transition (sub_IM IM indices) lX2 (sX2, iom) = (sX2', oom2) ->
+      sub_state_element_project sX1' = sub_state_element_project sX2' /\ oom1 = oom2.
 Proof.
   intros (sub_j1, lj1) (sub_j2, lj2) lj.
-  destruct_dec_sig sub_j1 j1 Hj1 Heqsub_j1.
-  destruct_dec_sig sub_j2 j2 Hj2 Heqsub_j2.
-  subst.
-  unfold sub_label_element_project.
-  cbn.
-  case_decide as Heqj; intro HlX; inversion HlX as [Heqlj].
-  clear HlX.
-  subst j1.
-  cbv in Heqlj.
-  subst lj1.
-  case_decide as Heqj; intro HlX; inversion HlX as [Heqlj].
-  clear HlX.
-  subst j2.
-  cbv in Heqlj.
-  subst lj2.
+  destruct_dec_sig sub_j1 j1 Hj1 Heqsub_j1;
+  destruct_dec_sig sub_j2 j2 Hj2 Heqsub_j2; subst.
+  unfold sub_label_element_project; cbn.
+  do 2 (case_decide; inversion 1); subst; cbn in *; subst.
   unfold sub_state_element_project.
   intros sX1 sX2 Hsjeq iom.
   replace (sX1 (dec_exist (sub_index_prop indices) j Hj1)) with (sX1 (dexist j Hj))
@@ -2000,13 +1969,9 @@ Proof.
   replace (sX2 (dec_exist (sub_index_prop indices) j Hj2)) with (sX2 (dexist j Hj))
     by apply sub_IM_state_pi.
   rewrite <- Hsjeq.
-  unfold sub_IM.
-  cbn.
+  unfold sub_IM; cbn.
   destruct (vtransition _ _ _) as (si', om').
-  intros sX' oom HtX.
-  inversion HtX. subst oom sX'. clear HtX.
-  intros sX' oom HtX.
-  inversion HtX. subst oom sX'. clear HtX.
+  do 2 inversion_clear 1.
   split; [|reflexivity].
   setoid_rewrite sub_IM_state_update_eq.
   reflexivity.
@@ -2031,10 +1996,9 @@ Proof.
       with (constraint0 := constraint).
     assumption.
   - apply basic_weak_projection_transition_consistency_Some.
-    + intro. apply sub_element_label_project.
-    + intro. apply sub_element_state_project.
-    + intro.
-      setoid_rewrite induced_sub_projection_transition_is_composite.
+    + intro; apply sub_element_label_project.
+    + intro; apply sub_element_state_project.
+    + intro; setoid_rewrite induced_sub_projection_transition_is_composite.
       apply sub_transition_element_project_Some.
 Qed.
 

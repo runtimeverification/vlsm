@@ -1377,8 +1377,7 @@ traces.
       intros item Hitem.
       apply elem_of_list_split in Hitem as (l1 & l2 & Heq).
       eexists _,_.
-      eapply input_valid_transition_to; [eassumption|].
-      simpl. eassumption.
+      eapply input_valid_transition_to; cbn; eassumption.
     Qed.
 
     Lemma can_emit_from_valid_trace
@@ -1392,10 +1391,10 @@ traces.
       apply can_emit_iff.
       revert Hm.
       setoid_rewrite Exists_exists.
-      intros [item [Hitem Houtput]].
+      intros (item & Hitem & Houtput).
       exists (destination item).
       unfold can_produce.
-      replace (Some m) with (output item) by assumption.
+      rewrite <- Houtput.
       eapply can_produce_from_valid_trace; [apply Htr|assumption].
     Qed.
 
@@ -2195,12 +2194,10 @@ This relation is often used in stating safety and liveness properties.*)
       intros item Hitem.
       apply elem_of_list_split in Hitem as (pre & suf & Heqtr).
       exists suf.
-      replace (destination item)
-         with (finite_trace_last is (pre ++ [item]))
-           by apply finite_trace_last_is_last.
+      erewrite <- finite_trace_last_is_last.
       eapply finite_valid_trace_from_to_app_split.
-      rewrite <- app_assoc. simpl. rewrite <- Heqtr.
-      assumption.
+      rewrite <- app_assoc; cbn; rewrite <- Heqtr.
+      eassumption.
     Qed.
 
     Lemma elem_of_trace_in_futures_right is s tr
@@ -2210,11 +2207,9 @@ This relation is often used in stating safety and liveness properties.*)
       intros item Hitem.
       apply elem_of_list_split in Hitem as (pre & suf & Heqtr).
       exists (pre ++ [item]).
-      replace (destination item)
-         with (finite_trace_last is (pre ++ [item]))
-           by apply finite_trace_last_is_last.
+      erewrite <- finite_trace_last_is_last.
       eapply finite_valid_trace_from_to_app_split.
-      rewrite <- app_assoc. simpl. rewrite <- Heqtr.
+      rewrite <- app_assoc; cbn; rewrite <- Heqtr.
       eassumption.
     Qed.
 
@@ -2834,17 +2829,14 @@ Byzantine fault tolerance analysis.
       apply proj1, finite_valid_trace_from_to_forget_last in IHtr.
       apply finite_valid_trace_from_add_last; [|assumption].
       inversion Hx. subst f tl s'.
-      apply (extend_right_finite_trace_from X)
-      ; [assumption|].
+      apply (extend_right_finite_trace_from X); [assumption|].
       destruct Ht as [[_ [_ Hv]] Ht].
       apply finite_valid_trace_last_pstate in IHtr as Hplst.
-      repeat split; try assumption.
+      repeat split. 1, 3-4: assumption.
       destruct iom as [m|]; [|apply option_valid_message_None].
-      apply option_valid_message_Some.
-      apply Hobs.
-      apply Exists_app. right.
-      apply Exists_cons. left.
-      subst. reflexivity.
+      apply option_valid_message_Some, Hobs.
+      red. rewrite Exists_app, Exists_cons.
+      subst; cbn; firstorder.
   Qed.
 
 End pre_loaded_with_all_messages_vlsm.
