@@ -20,6 +20,16 @@ Context
   `{HasBeenReceivedCapability message X}
   .
 
+(** The (local) full node condition for a given <<message_dependencies>> function
+requires that a state (receiving the message) has previously
+observed all of <<m>>'s dependencies.
+*)
+Definition message_dependencies_full_node_condition
+  (s : vstate X)
+  (m : message)
+  : Prop :=
+  forall dm, dm ∈ message_dependencies m -> has_been_observed X s dm.
+
 (**
 [MessageDependencies] characterize a <<message_dependencies>> function
 through two properties:
@@ -37,23 +47,11 @@ Class MessageDependencies
   :=
   { message_dependencies_are_necessary (m : message)
       `(can_produce (pre_loaded_with_all_messages_vlsm X) s m)
-      : forall (dm : message),
-        dm ∈ message_dependencies m ->
-        has_been_observed X s dm
+      : message_dependencies_full_node_condition s m
   ; message_dependencies_are_sufficient (m : message)
       `(can_emit (pre_loaded_with_all_messages_vlsm X) m)
       : can_emit (pre_loaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
   }.
-
-(** The (local) full node condition for a given <<message_dependencies>> function
-requires that a state (receiving the message) has previously
-observed all of <<m>>'s dependencies.
-*)
-Definition message_dependencies_full_node_condition
-  (s : vstate X)
-  (m : message)
-  : Prop :=
-  forall dm, dm ∈ message_dependencies m -> has_been_observed X s dm.
 
 (** A VLSM has the [message_dependencies_full_node_condition_prop]
 if the validity of receiving a message in a state implies the
