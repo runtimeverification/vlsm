@@ -2394,3 +2394,11 @@ Lemma NoDup_subseteq_length [A : Type]
 Proof.
   apply submseteq_length, NoDup_submseteq; assumption.
 Qed.
+
+Lemma elem_of_list_map
+  [A B : Type] (f : A -> B) (x : A) (l : list A) :
+    x ∈ l -> f x ∈ map f l.
+Proof.
+  rewrite 2!elem_of_list_In.
+  apply in_map.
+Qed.
