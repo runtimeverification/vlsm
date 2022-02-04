@@ -68,46 +68,44 @@ Qed.
 End selectors.
 
 Lemma VLSM_projection_has_been_sent_reflect
-  {HbsX : HasBeenSentCapability X}
-  {HbsY : HasBeenSentCapability Y}
+  `{HasBeenSentCapability message X}
+  `{HasBeenSentCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector output) (field_selector output).
   - intros. destruct itemX, itemY. simpl in *. subst.
     split; exact id.
-  - apply (has_been_sent_stepwise_from_trace HbsX).
-  - apply (has_been_sent_stepwise_from_trace HbsY).
+  - apply (has_been_sent_stepwise_from_trace X).
+  - apply (has_been_sent_stepwise_from_trace Y).
 Qed.
 
 Lemma VLSM_projection_has_been_received_reflect
-  {HbrX : HasBeenReceivedCapability X}
-  {HbrY : HasBeenReceivedCapability Y}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector input) (field_selector input).
   - intros. destruct itemX, itemY. simpl in *. subst.
     split; exact id.
-  - apply (has_been_received_stepwise_from_trace HbrX).
-  - apply (has_been_received_stepwise_from_trace HbrY).
+  - apply (has_been_received_stepwise_from_trace X).
+  - apply (has_been_received_stepwise_from_trace Y).
 Qed.
 
 Lemma VLSM_projection_has_been_observed_reflect
-  {HbsX : HasBeenSentCapability X}
-  {HbrX : HasBeenReceivedCapability X}
-  (HboX := HasBeenObservedCapability_from_sent_received X)
-  {HbsY : HasBeenSentCapability Y}
-  {HbrY : HasBeenReceivedCapability Y}
-  (HboY := HasBeenObservedCapability_from_sent_received Y)
+  `{HasBeenSentCapability message X}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenSentCapability message Y}
+  `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_observed Y (state_project s) m -> has_been_observed X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with item_sends_or_receives item_sends_or_receives.
   - intros. destruct itemX, itemY. simpl in *. subst.
     split; exact id.
-  - apply HboX.
-  - apply HboY.
+  - apply has_been_observed_stepwise_props.
+  - apply has_been_observed_stepwise_props.
 Qed.
 
 End projection_oracle.
@@ -184,52 +182,50 @@ Qed.
 End selectors.
 
 Lemma VLSM_weak_full_projection_has_been_sent
-  {HbsX : HasBeenSentCapability X}
-  {HbsY : HasBeenSentCapability Y}
+  `{HasBeenSentCapability message X}
+  `{HasBeenSentCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with (field_selector output) (field_selector output).
-  - intros. destruct itemX, itemY. simpl in H0. subst. simpl.
+  - intros itemX itemY Hin Hout. destruct itemX, itemY. simpl in Hout. subst. simpl.
     split; exact id.
-  - apply (has_been_sent_stepwise_from_trace HbsX).
-  - apply (has_been_sent_stepwise_from_trace HbsY).
-  - apply HbsX.
-  - apply HbsY.
+  - apply (has_been_sent_stepwise_from_trace X).
+  - apply (has_been_sent_stepwise_from_trace Y).
+  - apply has_been_sent_dec.
+  - apply has_been_sent_dec.
 Qed.
 
 Lemma VLSM_weak_full_projection_has_been_received
-  {HbrX : HasBeenReceivedCapability X}
-  {HbrY : HasBeenReceivedCapability Y}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with (field_selector input) (field_selector input).
-  - intros. destruct itemX, itemY. simpl in H. subst. simpl.
+  - intros itemX itemY Hin Hout. destruct itemX, itemY. simpl in Hin. subst. simpl.
     split; exact id.
-  - apply (has_been_received_stepwise_from_trace HbrX).
-  - apply (has_been_received_stepwise_from_trace HbrY).
-  - apply HbrX.
-  - apply HbrY.
+  - apply (has_been_received_stepwise_from_trace X).
+  - apply (has_been_received_stepwise_from_trace Y).
+  - apply has_been_received_dec.
+  - apply has_been_received_dec.
 Qed.
 
 Lemma VLSM_weak_full_projection_has_been_observed
-  {HbsX : HasBeenSentCapability X}
-  {HbrX : HasBeenReceivedCapability X}
-  (HboX := HasBeenObservedCapability_from_sent_received X)
-  {HbsY : HasBeenSentCapability Y}
-  {HbrY : HasBeenReceivedCapability Y}
-  (HboY := HasBeenObservedCapability_from_sent_received Y)
+  `{HasBeenSentCapability message X}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenSentCapability message Y}
+  `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_observed X s m -> has_been_observed Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with item_sends_or_receives item_sends_or_receives.
   - intros. destruct itemX, itemY. simpl in *. subst.
     split; exact id.
-  - apply HboX.
-  - apply HboY.
-  - apply HboX.
-  - apply HboY.
+  - apply has_been_observed_stepwise_props.
+  - apply has_been_observed_stepwise_props.
+  - apply has_been_observed_dec.
+  - apply has_been_observed_dec.
 Qed.
 
 End weak_full_projection_oracle.
@@ -246,81 +242,169 @@ Context
   .
 
 Definition VLSM_full_projection_has_been_sent
-  {HbsX : HasBeenSentCapability X}
-  {HbsY : HasBeenSentCapability Y}
+  `{HasBeenSentCapability message X}
+  `{HasBeenSentCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m
   := VLSM_weak_full_projection_has_been_sent (VLSM_full_projection_weaken Hsimul).
 
 Definition VLSM_full_projection_has_been_received
-  {HbsX : HasBeenReceivedCapability X}
-  {HbsY : HasBeenReceivedCapability Y}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m
   := VLSM_weak_full_projection_has_been_received (VLSM_full_projection_weaken Hsimul).
 
 Definition VLSM_full_projection_has_been_observed
-  {HbsX : HasBeenSentCapability X}
-  {HbrX : HasBeenReceivedCapability X}
-  (HboX := HasBeenObservedCapability_from_sent_received X)
-  {HbsY : HasBeenSentCapability Y}
-  {HbrY : HasBeenReceivedCapability Y}
-  (HboY := HasBeenObservedCapability_from_sent_received Y)
+  `{HasBeenSentCapability message X}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenSentCapability message Y}
+  `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_observed X s m -> has_been_observed Y (state_project s) m
   := VLSM_weak_full_projection_has_been_observed (VLSM_full_projection_weaken Hsimul).
 
 Definition VLSM_full_projection_has_been_sent_reflect
-  {HbsX : HasBeenSentCapability X}
-  {HbsY : HasBeenSentCapability Y}
+  `{HasBeenSentCapability message X}
+  `{HasBeenSentCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m
   := VLSM_projection_has_been_sent_reflect  (VLSM_full_projection_is_projection Hsimul).
 
 Definition VLSM_full_projection_has_been_received_reflect
-  {HbrX : HasBeenReceivedCapability X}
-  {HbrY : HasBeenReceivedCapability Y}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m
   := VLSM_projection_has_been_received_reflect  (VLSM_full_projection_is_projection Hsimul).
 
 Definition VLSM_full_projection_has_been_observed_reflect
-  {HbsX : HasBeenSentCapability X}
-  {HbrX : HasBeenReceivedCapability X}
-  (HboX := HasBeenObservedCapability_from_sent_received X)
-  {HbsY : HasBeenSentCapability Y}
-  {HbrY : HasBeenReceivedCapability Y}
-  (HboY := HasBeenObservedCapability_from_sent_received Y)
+  `{HasBeenSentCapability message X}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenSentCapability message Y}
+  `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_observed Y (state_project s) m -> has_been_observed X s m
   := VLSM_projection_has_been_observed_reflect  (VLSM_full_projection_is_projection Hsimul).
 
 End full_projection_oracle.
 
+Section incl_oracle.
+(** ** [VLSM_incl]usions both preserve and reflect message properties *)
+
+Context
+  {message : Type}
+  {T : VLSMType message}
+  {SX SY : VLSMSign T}
+  {MX : VLSMClass SX}
+  {MY : VLSMClass SY}
+  (X := mk_vlsm MX)
+  (Y := mk_vlsm MY)
+  (Hincl : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y))
+  .
+
+Lemma VLSM_incl_has_been_sent
+  `{HasBeenSentCapability message X}
+  `{HasBeenSentCapability message Y}
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+    forall m, has_been_sent X s m -> has_been_sent Y s m.
+Proof.
+  intros s Hs m Hm.
+  eapply
+    (@VLSM_full_projection_has_been_sent _ X Y _ _
+      (VLSM_incl_is_full_projection Hincl))
+  ; assumption.
+Qed.
+
+Lemma VLSM_incl_has_been_received
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenReceivedCapability message Y}
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+    forall m, has_been_received X s m -> has_been_received Y s m.
+Proof.
+  intros s Hs m Hm.
+  eapply
+    (@VLSM_full_projection_has_been_received _ X Y _ _
+      (VLSM_incl_is_full_projection Hincl))
+  ; assumption.
+Qed.
+
+Lemma VLSM_incl_has_been_observed
+  `{HasBeenSentCapability message X}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenSentCapability message Y}
+  `{HasBeenReceivedCapability message Y}
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+    forall m, has_been_observed X s m -> has_been_observed Y s m.
+Proof.
+  intros s Hs m Hm.
+  eapply
+    (@VLSM_full_projection_has_been_observed _ X Y _ _
+      (VLSM_incl_is_full_projection Hincl))
+  ; assumption.
+Qed.
+
+Lemma VLSM_incl_has_been_sent_reflect
+  `{HasBeenSentCapability message X}
+  `{HasBeenSentCapability message Y}
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+    forall m, has_been_sent Y s m -> has_been_sent X s m.
+Proof.
+  intros s Hs m Hm.
+  eapply
+    (@VLSM_full_projection_has_been_sent_reflect _ X Y _ _
+      (VLSM_incl_is_full_projection Hincl))
+  ; assumption.
+Qed.
+
+Lemma VLSM_incl_has_been_received_reflect
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenReceivedCapability message Y}
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+    forall m, has_been_received Y s m -> has_been_received X s m.
+Proof.
+  intros s Hs m Hm.
+  eapply
+    (@VLSM_full_projection_has_been_received_reflect _ X Y _ _
+      (VLSM_incl_is_full_projection Hincl))
+  ; assumption.
+Qed.
+
+Lemma VLSM_incl_has_been_observed_reflect
+  `{HasBeenSentCapability message X}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenSentCapability message Y}
+  `{HasBeenReceivedCapability message Y}
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+    forall m, has_been_observed Y s m -> has_been_observed X s m.
+Proof.
+  intros s Hs m Hm.
+  eapply
+    (@VLSM_full_projection_has_been_observed_reflect _ X Y _ _
+      (VLSM_incl_is_full_projection Hincl))
+  ; assumption.
+Qed.
+
+End incl_oracle.
+
 Section same_IM_oracle_properties.
 
 Context
   {message : Type}
-  `{EqDecision index}
+  `{finite.Finite index}
   (IM1 IM2 : index -> VLSM message)
-  (Hbs1 : forall i, HasBeenSentCapability (IM1 i))
-  (Hbs2 : forall i, HasBeenSentCapability (IM2 i))
+  `{forall i, HasBeenSentCapability (IM1 i)}
+  `{forall i, HasBeenSentCapability (IM2 i)}
   (Heq : forall i, IM1 i = IM2 i)
-  (finite_index : finite.Finite index)
-  (HbsFree1 := free_composite_HasBeenSentCapability IM1 (listing_from_finite index) Hbs1)
-  (HbsFree2 := free_composite_HasBeenSentCapability IM2 (listing_from_finite index) Hbs2)
   .
-
-Existing Instance HbsFree1.
-Existing Instance HbsFree2.
 
 (** If two indexed sets of VLSMs are extensionally-equal, then the
 [has_been_sent] predicate is preserved through the [same_IM_state_rew] map.
 *)
 Lemma same_IM_composite_has_been_sent_preservation s1 m
   (Hs1 : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1)
-  : composite_has_been_sent IM1 Hbs1 s1 m ->
-    composite_has_been_sent IM2 Hbs2 (same_IM_state_rew Heq s1) m.
+  : composite_has_been_sent IM1 s1 m ->
+    composite_has_been_sent IM2 (same_IM_state_rew Heq s1) m.
 Proof.
   specialize (same_IM_preloaded_free_full_projection IM1 IM2 Heq) as Hproj.
   intros Hbs1_m.

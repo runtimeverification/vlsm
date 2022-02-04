@@ -2795,6 +2795,16 @@ Proof.
   split; apply basic_VLSM_strong_incl; cbv; intuition.
 Qed.
 
+Lemma vlsm_incl_pre_loaded
+  (P : message -> Prop)
+  : VLSM_incl X (pre_loaded_vlsm X P).
+Proof.
+  eapply VLSM_incl_trans.
+  - eapply VLSM_eq_proj1, vlsm_is_pre_loaded_with_False.
+  - apply pre_loaded_vlsm_incl.
+    intuition.
+Qed.
+
 Lemma vlsm_is_pre_loaded_with_False_initial_message
   : strong_full_projection_initial_message_preservation X (pre_loaded_vlsm X (fun m => False)).
 Proof.

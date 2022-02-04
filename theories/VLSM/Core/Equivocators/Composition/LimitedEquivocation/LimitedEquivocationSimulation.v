@@ -26,18 +26,14 @@ Section fixed_limited_state_equivocation.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
-  {i0 : Inhabited index}
-  (Hbs : forall i, HasBeenSentCapability (IM i))
-  (Hbr : forall i, HasBeenReceivedCapability (IM i))
+  `{forall i, HasBeenSentCapability (IM i)}
+  `{forall i, HasBeenReceivedCapability (IM i)}
   `{IndThreshold : ReachableThreshold index}
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
-  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM Hbs finite_index)
+  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM)
   (equivocating : list index)
-  (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM Hbs index_listing equivocating)
+  (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM equivocating)
   .
 
 (** If the total weight of the equivocators allowed to state-equivocate is less
@@ -59,7 +55,7 @@ Proof.
   remember (composite_transition _ _ _).1. clear Heqc.
   unfold state_has_fixed_equivocation in Hfixed.
   unfold equivocation_fault.
-  specialize (equivocating_indices_equivocating_validators IM _ finite_index _ IndThreshold c)
+  specialize (equivocating_indices_equivocating_validators IM c)
     as Heq.
   apply sum_weights_subseteq.
   - apply equivocating_validators_nodup.
@@ -74,16 +70,12 @@ Section limited_equivocation_simulation.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
-  {i0 : Inhabited index}
-  (Hbs : forall i, HasBeenSentCapability (IM i))
-  (Hbr : forall i, HasBeenReceivedCapability (IM i))
+  `{forall i, HasBeenSentCapability (IM i)}
+  `{forall i, HasBeenReceivedCapability (IM i)}
   `{IndThreshold : ReachableThreshold index}
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
-  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM Hbs finite_index)
+  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM)
   .
 
 (** If a trace has the [fixed_limited_equivocation_prop]erty, then it can be
@@ -93,7 +85,7 @@ limited state-equivocation.
 Lemma limited_equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   isX trX
-  (HtrX : fixed_limited_equivocation_prop IM _ _ isX trX)
+  (HtrX : fixed_limited_equivocation_prop IM isX trX)
   : exists is, equivocators_total_state_project IM is = isX /\
     exists s, equivocators_total_state_project IM s = finite_trace_last isX trX /\
     exists tr, equivocators_total_trace_project IM tr = trX /\
@@ -101,13 +93,12 @@ Lemma limited_equivocators_finite_valid_trace_init_to_rev
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   destruct HtrX as [equivocating [Hlimited HtrX]].
-  specialize (Fixed_eq_StrongFixed IM Hbs Hbr finite_index equivocating)
-    as Heq.
-  apply (VLSM_eq_finite_valid_trace Heq) in HtrX.
-  clear Heq.
+  pose proof (VLSM_eq_proj1 (Fixed_eq_StrongFixed IM equivocating))  as Hincl.
+  apply (VLSM_incl_finite_valid_trace Hincl) in HtrX.
+  clear Hincl.
   apply valid_trace_add_default_last in HtrX.
   specialize
-    (fixed_equivocators_finite_valid_trace_init_to_rev IM Hbs finite_index _
+    (fixed_equivocators_finite_valid_trace_init_to_rev IM _
       no_initial_messages_in_IM _ _ _ HtrX)
     as [is [His [s [Hs [tr [Htr [Hptr Houtput]]]]]]].
   exists is. split; [assumption|].
@@ -122,8 +113,8 @@ Qed.
 
 Context
   (sender : message -> option index)
-  {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := limited_equivocation_vlsm_composition IM finite_index sender)
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
+  (Limited : VLSM message := limited_equivocation_vlsm_composition IM sender)
   (message_dependencies : message -> set message)
   .
 
@@ -133,9 +124,8 @@ the composition of equivocators under a no message-equivocation and limited
 state-equivocation constraint.
 *)
 Lemma limited_equivocators_valid_state_rev
-  (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender finite_index)
-  (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
-  (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
+  (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender)
+  `{forall i, MessageDependencies message_dependencies (IM i)}
   (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
@@ -145,8 +135,8 @@ Lemma limited_equivocators_valid_state_rev
 Proof.
   intros sX HsX.
   apply
-    (limited_valid_state_has_trace_exhibiting_limited_equivocation IM Hbs Hbr finite_index
-      sender message_dependencies Hwitnessed_equivocation HMsgDep Hfull
+    (limited_valid_state_has_trace_exhibiting_limited_equivocation IM
+      sender message_dependencies Hwitnessed_equivocation Hfull
       no_initial_messages_in_IM can_emit_signed)
     in HsX as [isX [trX [HsX HtrX]]].
   apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
