@@ -179,20 +179,17 @@ Lemma limited_PreNonByzantine_vlsm_lift
 Proof.
   apply basic_VLSM_full_projection; intros ? *.
   - intros; apply limited_PreNonByzantine_lift_valid; assumption.
-  - intros [_ Ht]. apply lift_sub_transition. assumption.
+  - intros * []; apply lift_sub_transition; assumption.
   - intros; apply (lift_sub_state_initial IM); assumption.
-  - intros.
-    destruct HmX as [[sub_i [[im Him] Heqm]] | Hseeded].
-    + simpl in Heqm. subst.
-      destruct_dec_sig sub_i i Hi Heqsub_i.
-      subst. unfold sub_IM in Him. simpl in Him.
-      clear -Him.
+  - intros Hv HsY [[sub_i [[im Him] Heqm]] | Hseeded].
+    + cbn in Heqm; subst.
+      destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+      unfold sub_IM in Him; cbn in Him; clear -Him.
       apply initial_message_is_valid.
-      exists i, (exist _ m Him); intuition.
-    + destruct Hseeded as [Hsigned [i [Hi [li [si Hpre_valid]]]]].
+      exists i, (exist _ m Him). reflexivity.
+    + destruct Hseeded as (Hsigned & i & Hi & li & si & Hpre_valid).
       apply set_diff_elim2 in Hi.
-      specialize (Hvalidator i _ _ Hpre_valid)
-        as [_ [_ [_ [Hmsg _]]]].
+      specialize (Hvalidator i _ _ Hpre_valid) as (_ & _ & _ & Hmsg & _).
       assumption.
 Qed.
 
