@@ -2229,12 +2229,26 @@ Definition update_IM
 for fixed-set equivocation model, similar to the one for byzantine traces.
 *)
 
+Definition update_IM_id_same_IM
+  : forall i, update_IM (fun sub_i => IM (` sub_i)) i = IM i.
+Proof.
+  intro; unfold update_IM; case_decide; reflexivity.
+Defined.
+
 Context
   (replacement_IM : sub_index selection -> VLSM message)
   (updated_IM := update_IM replacement_IM)
   `{finite.Finite index}
   (selection_complement : set index := set_diff (enum index) selection)
   .
+
+Lemma selection_complement_index_not_in_selection
+  (sub_i : sub_index selection_complement)
+  : ~ (`sub_i ∈ selection).
+Proof.
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst; cbn in *.
+  eapply set_diff_elim2; eassumption.
+Qed.
 
 Lemma update_IM_complement_Hbs
   (Hbs : forall i : index, HasBeenSentCapability (IM i))

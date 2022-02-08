@@ -3316,4 +3316,16 @@ Proof.
     assumption.
 Qed.
 
+Lemma same_VLSM_preloaded_full_projection
+  : VLSM_full_projection
+    (pre_loaded_with_all_messages_vlsm X1) (pre_loaded_with_all_messages_vlsm X2)
+    (same_VLSM_label_rew Heq) (same_VLSM_state_rew Heq).
+Proof.
+  apply basic_VLSM_strong_full_projection.
+  - cbv; apply same_VLSM_valid_preservation.
+  - cbv; apply same_VLSM_transition_preservation.
+  - cbv; apply same_VLSM_initial_state_preservation.
+  - cbv; trivial.
+Qed.
+
 End same_VLSM_full_projection.
