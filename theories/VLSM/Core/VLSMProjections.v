@@ -2712,9 +2712,9 @@ Proof.
   apply basic_VLSM_incl.
   1, 3-4: cbv; intuition.
   intros _ _ m _ _ [Him | Hp].
-  - apply initial_message_is_valid. left. assumption.
+  - apply initial_message_is_valid; left; assumption.
   - apply PimpliesQorValid in Hp as [Hq | Hvalid]; [|assumption].
-    apply initial_message_is_valid. right. assumption.
+    apply initial_message_is_valid; right; assumption.
 Qed.
 
 Lemma pre_loaded_vlsm_incl
@@ -2801,8 +2801,7 @@ Lemma vlsm_incl_pre_loaded
 Proof.
   eapply VLSM_incl_trans.
   - eapply VLSM_eq_proj1, vlsm_is_pre_loaded_with_False.
-  - apply pre_loaded_vlsm_incl.
-    intuition.
+  - apply pre_loaded_vlsm_incl; contradiction.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_initial_message

@@ -998,6 +998,25 @@ Proof.
   clear -H H0. tauto.
 Qed.
 
+Lemma oracle_stepwise_props_change_selector
+      [message] [vlsm: VLSM message]
+      [selector]
+      [oracle : state_message_oracle vlsm]
+      (Horacle: oracle_stepwise_props selector oracle)
+      selector'
+      (Heqv :
+        forall s item,
+          input_valid_transition_item (pre_loaded_with_all_messages_vlsm vlsm) s item ->
+          forall m, selector m item <-> selector' m item)
+      : oracle_stepwise_props selector' oracle.
+Proof.
+  destruct Horacle as [Hinits Hupdate].
+  constructor; [assumption|].
+  intros l s om s' om' Ht msg.
+  simpl; rewrite Hupdate, Heqv by eassumption.
+  reflexivity.
+Qed.
+
 (**
    Proving the trace properties from the stepwise properties
    begins with a lemma using induction along a trace to
@@ -2030,8 +2049,7 @@ Section Composite.
     exists v.
     split; [reflexivity|].
     subst. cbn in Ht.
-    eexists _, _, _.
-    eassumption.
+  unfold can_emit; eauto.
   Qed.
 
   Lemma composite_no_initial_valid_messages_have_sender
@@ -2043,7 +2061,7 @@ Section Composite.
   Proof.
     intros m Hm.
     cut (exists v, sender m = Some v /\
-                   can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
+     can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
     - intros (v & -> & _); congruence.
     - eapply composite_no_initial_valid_messages_emitted_by_sender; eassumption.
   Qed.

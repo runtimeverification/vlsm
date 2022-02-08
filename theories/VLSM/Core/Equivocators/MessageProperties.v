@@ -437,24 +437,14 @@ Global Instance equivocator_has_been_received_dec
 Lemma equivocator_has_been_received_stepwise_props
   : has_been_received_stepwise_props (vlsm := equivocator_vlsm) equivocator_has_been_received.
 Proof.
-  assert
-    (Hlift :
-      oracle_stepwise_props
-        (equivocator_selector (field_selector input))
-        (equivocator_oracle (has_been_received X))).
-  {
-    apply equivocator_oracle_stepwise_props.
-    - cbv; intuition.
-    - apply has_been_received_stepwise_from_trace.
-  }
-  destruct Hlift as [Hinits Hupdate].
-  constructor; [assumption|].
-  intros l s om s' om' Ht msg.
-  simpl; rewrite Hupdate by eassumption.
-  unfold equivocator_selector; simpl.
-  destruct l; [|intuition..].
-  destruct Ht as [(_ & _ & _ & Him) _]; simpl in Him; subst.
-  intuition congruence.
+  eapply oracle_stepwise_props_change_selector.
+  - apply equivocator_oracle_stepwise_props
+    ; [|apply has_been_received_stepwise_from_trace].
+    cbv; intuition.
+  - intros s item; destruct item, l; cbn.
+    2,3:intuition.
+    intros [(_ & _ & _ & Him) _]; simpl in Him; subst.
+    intuition congruence.
 Qed.
 
 (** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm].
@@ -487,25 +477,14 @@ Global Instance equivocator_has_been_sent_dec
 Lemma equivocator_has_been_sent_stepwise_props
   : has_been_sent_stepwise_props (vlsm := equivocator_vlsm) equivocator_has_been_sent.
 Proof.
-  assert
-    (Hlift :
-      oracle_stepwise_props
-        (equivocator_selector (field_selector output))
-        (equivocator_oracle (has_been_sent X))).
-  {
-    apply equivocator_oracle_stepwise_props.
-    - cbv; intuition.
-    - apply has_been_sent_stepwise_from_trace.
-  }
-  destruct Hlift as [Hinits Hupdate].
-  constructor; [assumption|].
-  intros l s om s' om' Ht msg.
-  simpl; rewrite Hupdate by eassumption.
-  unfold equivocator_selector; simpl.
-  destruct l; [|intuition..].
-  apply proj2 in Ht.
-  inversion_clear Ht.
-  intuition congruence.
+  eapply oracle_stepwise_props_change_selector.
+  - apply equivocator_oracle_stepwise_props
+    ; [|apply has_been_sent_stepwise_from_trace].
+    cbv; intuition.
+  - intros s item; destruct item, l; cbn.
+    2,3:intuition.
+    intros [_ Ht]; inversion_clear Ht.
+    intuition congruence.
 Qed.
 
 (** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm].

@@ -43,10 +43,8 @@ Proof.
   intros item tr.
   destruct item. destruct input as [m|]
   ; [|right; intuition].
-  apply Decision_not.
-  apply @Exists_dec.
-  intros.
-  apply decide_eq.
+  unfold item_equivocating_in_trace, trace_has_message, field_selector; cbn.
+  typeclasses eauto.
 Qed.
 
 (** Given a trace, we can precisely identify the validators equivocating
@@ -189,23 +187,29 @@ Lemma is_equivocating_tracewise_no_has_been_sent_iff
   s v
   : is_equivocating_tracewise_no_has_been_sent s v <-> is_equivocating_tracewise s v.
 Proof.
-  unfold is_equivocating_tracewise, equivocation_in_trace, is_equivocating_tracewise_no_has_been_sent.
-  apply forall_proper. intros is. apply forall_proper. intros tr.
-  apply impl_proper; intro Htr.  apply exist_proper; intro m.
-  apply and_proper_l; intro Hsender.  apply exist_proper; intro prefix.
-  apply exist_proper; intro item.  apply exist_proper; intro suffix.
-  apply and_proper_l. intro Htreq.  apply and_iff_compat_l.  apply not_iff_compat.
-  assert (Hpre : finite_valid_trace_init_to PreFree is (finite_trace_last is prefix) prefix).
-  { split; [|apply Htr].
-    subst tr.
-    apply proj1, finite_valid_trace_from_to_app_split, proj1 in Htr.
-    assumption.
+  unfold is_equivocating_tracewise, equivocation_in_trace,
+    is_equivocating_tracewise_no_has_been_sent.
+  apply forall_proper; intros is.
+  apply forall_proper; intros.
+  apply impl_proper; intros [].
+  apply exist_proper; intros.
+  apply and_proper_l; intro.
+  apply exist_proper; intro prefix.
+  apply exist_proper; intro.
+  apply exist_proper; intro.
+  apply and_proper_l; intros ->.
+  apply and_iff_compat_l, not_iff_compat; cbn.
+  cut (finite_valid_trace_init_to PreFree is (finite_trace_last is prefix) prefix).
+  {
+    intros.
+    erewrite <- oracle_initial_trace_update
+      with (vlsm := free_composite_vlsm IM); cycle 1.
+    - apply composite_has_been_sent_stepwise_props.
+    - eassumption.
+    - eapply has_been_sent_iff_by_sender; eassumption.
   }
-  simpl.
-  pose proof (CHbs := composite_has_been_sent_stepwise_props IM (free_constraint IM)).
-  simpl.
-  rewrite <- (oracle_initial_trace_update CHbs _ _ _ Hpre m).
-  eapply has_been_sent_iff_by_sender;eassumption.
+  split; [|eassumption].
+  eapply  finite_valid_trace_from_to_app_split; eassumption.
 Qed.
 
 Lemma transition_is_equivocating_tracewise_char
@@ -299,14 +303,15 @@ Context
   `{finite.Finite validator}
   .
 
-Local Instance equivocation_dec_tracewise
-    : BasicEquivocation (composite_state IM) validator
-  :=
-  {|
+Local Program Instance equivocation_dec_tracewise
+  : BasicEquivocation (composite_state IM) validator :=
+  {
     state_validators := fun _ => enum validator;
     is_equivocating := is_equivocating_tracewise_no_has_been_sent;
-    state_validators_nodup := ltac:(intro; apply NoDup_enum)
-  |}.
+  }.
+Next Obligation.
+  intro; apply NoDup_enum.
+Qed.
 
 Lemma equivocating_validators_is_equivocating_tracewise_iff s v
   : v ∈ (equivocating_validators s) <-> is_equivocating_tracewise_no_has_been_sent s v.

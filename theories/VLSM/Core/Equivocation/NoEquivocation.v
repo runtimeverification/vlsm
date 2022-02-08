@@ -100,10 +100,10 @@ any message that tests as [has_been_observed] in a state also tests as
       destruct Henforced; [|contradiction].
       right. assumption.
     - left. reflexivity.
-    - specialize (Hprev Hobs).
-      right. assumption.
+    - right. apply Hprev. assumption.
   Qed.
 
+  (* TODO(wkolowski): make notation uniform accross the file. *)
   Lemma observed_were_sent_invariant s:
     valid_state_prop X s ->
     observed_were_sent s.
@@ -220,17 +220,11 @@ Section CompositeNoEquivocationInvariants.
   Proof.
     intros Hs m.
     rewrite composite_has_been_observed_sent_received_iff.
-    specialize (observed_were_sent_invariant message X) as Hinv.
-    spec Hinv.
-    {
-      intros l s0 om Hv.
-      apply Hsubsumed in Hv.
-      assumption.
-    }
-    spec Hinv s Hs.
     intros Hobs.
-    apply Hinv.
-    assumption.
+    cut (has_been_sent X s m); [intro; assumption|].
+    apply (observed_were_sent_invariant message X); [|assumption|assumption].
+    intros l s0 om.
+    apply Hsubsumed.
   Qed.
 End CompositeNoEquivocationInvariants.
 

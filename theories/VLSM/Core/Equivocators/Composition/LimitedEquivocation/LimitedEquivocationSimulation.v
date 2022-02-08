@@ -92,23 +92,19 @@ Lemma limited_equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  destruct HtrX as [equivocating [Hlimited HtrX]].
-  pose proof (VLSM_eq_proj1 (Fixed_eq_StrongFixed IM equivocating))  as Hincl.
-  apply (VLSM_incl_finite_valid_trace Hincl) in HtrX.
-  clear Hincl.
-  apply valid_trace_add_default_last in HtrX.
+  destruct HtrX as (equivocating & Hlimited & HtrX).
+  eapply VLSM_incl_finite_valid_trace, valid_trace_add_default_last in HtrX
+  ; [|eapply VLSM_eq_proj1,Fixed_eq_StrongFixed].
   specialize
     (fixed_equivocators_finite_valid_trace_init_to_rev IM _
       no_initial_messages_in_IM _ _ _ HtrX)
-    as [is [His [s [Hs [tr [Htr [Hptr Houtput]]]]]]].
-  exists is. split; [assumption|].
-  exists s. split; [assumption|].
-  exists tr. split; [assumption|].
+    as (is & His & s & Hs & tr & Htr & Hptr & Houtput).
+  exists is; split; [assumption|].
+  exists s; split; [assumption|].
+  exists tr; split; [assumption|].
   split; [|assumption].
-  revert Hptr.
-  apply VLSM_incl_finite_valid_trace_init_to.
-  apply equivocators_Fixed_incl_Limited.
-  assumption.
+  revert Hptr; apply VLSM_incl_finite_valid_trace_init_to.
+  apply equivocators_Fixed_incl_Limited; assumption.
 Qed.
 
 Context

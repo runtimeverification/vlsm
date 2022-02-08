@@ -1389,13 +1389,11 @@ traces.
       can_emit m.
     Proof.
       apply can_emit_iff.
-      revert Hm.
-      setoid_rewrite Exists_exists.
-      intros (item & Hitem & Houtput).
+      setoid_rewrite Exists_exists in Hm.
+      destruct Hm as (item & Hitem & Houtput).
       exists (destination item).
-      unfold can_produce.
-      rewrite <- Houtput.
-      eapply can_produce_from_valid_trace; [apply Htr|assumption].
+      unfold can_produce; rewrite <- Houtput.
+      eapply can_produce_from_valid_trace; [apply Htr | assumption].
     Qed.
 
     (* End Hide *)
@@ -2813,30 +2811,33 @@ Byzantine fault tolerance analysis.
   Proof.
     revert s Htr Hobs.
     induction tr using rev_ind; intros; split
-    ; [|apply Htr| | apply Htr]
+    ; [|apply Htr | | apply Htr]
     ; destruct Htr as [Htr Hinit].
-    - inversion Htr. subst.
+    - inversion Htr; subst.
       apply (finite_valid_trace_from_to_empty X).
-      apply initial_state_is_valid. assumption.
+      apply initial_state_is_valid.
+      assumption.
     - apply finite_valid_trace_from_to_last in Htr as Hlst.
       apply finite_valid_trace_from_to_app_split in Htr.
       destruct Htr as [Htr Hx].
       specialize (IHtr _ (conj Htr Hinit)).
       spec IHtr.
-      { intros. apply Hobs.
+      {
+        intros. apply Hobs.
         apply trace_has_message_prefix. assumption.
       }
-      apply proj1, finite_valid_trace_from_to_forget_last in IHtr.
-      apply finite_valid_trace_from_add_last; [|assumption].
-      inversion Hx. subst f tl s'.
-      apply (extend_right_finite_trace_from X); [assumption|].
+      destruct IHtr as [IHtr _];
+      apply finite_valid_trace_from_to_forget_last in IHtr.
+      apply finite_valid_trace_from_add_last; [| assumption].
+      inversion Hx; subst f tl s'.
+      apply (extend_right_finite_trace_from X); [assumption |].
       destruct Ht as [[_ [_ Hv]] Ht].
       apply finite_valid_trace_last_pstate in IHtr as Hplst.
       repeat split. 1, 3-4: assumption.
-      destruct iom as [m|]; [|apply option_valid_message_None].
+      destruct iom as [m |]; [| apply option_valid_message_None].
       apply option_valid_message_Some, Hobs.
-      red. rewrite Exists_app, Exists_cons.
-      subst; cbn; firstorder.
+      red; rewrite Exists_app, Exists_cons.
+      subst; cbn; intuition.
   Qed.
 
 End pre_loaded_with_all_messages_vlsm.
