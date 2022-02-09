@@ -998,6 +998,7 @@ Proof.
   clear -H H0. tauto.
 Qed.
 
+(* TODO(wkolowski): make notation uniform accross the file. *)
 Lemma oracle_stepwise_props_change_selector
       [message] [vlsm: VLSM message]
       [selector]
@@ -1529,7 +1530,7 @@ Proof.
     (prove_all_have_message_from_stepwise message vlsm  item_sends_or_receives
     (has_been_observed vlsm) (has_been_observed_stepwise_props _) _ Hs m) as Hall.
   split; [intro Hobs | intros [Hreceived | Hsent]].
-  - apply proj1 in Hall. specialize (Hall Hobs).
+  - destruct Hall as [Hall _]. specialize (Hall Hobs).
     apply consistency_from_valid_state_proj2 in Hall; [|assumption].
     destruct Hall as [is [tr [Htr Hexists]]].
     apply Exists_or_inv in Hexists.
@@ -1570,21 +1571,20 @@ Qed.
 Lemma has_been_observed_from_sent_received_stepwise_props
   : oracle_stepwise_props item_sends_or_receives has_been_observed_from_sent_received.
 Proof.
-  apply stepwise_props_from_trace; [apply has_been_observed_from_sent_received_dec|..]
+  apply stepwise_props_from_trace
+  ; [apply has_been_observed_from_sent_received_dec|..]
   ; intros; split.
-  - intros Hobs start tr Htr.
-    destruct Hobs as [Hsent | Hreceived].
+  - intros [Hsent | Hreceived] start tr Htr.
     + apply proper_sent in Hsent; [|assumption].
-      apply Exists_or. right.
+      apply Exists_or; right.
       eapply Hsent; eassumption.
     + apply proper_received in Hreceived; [|assumption].
-      apply Exists_or. left.
+      apply Exists_or; left.
       eapply Hreceived; eassumption.
   - intros Hobs.
     apply consistency_from_valid_state_proj2 in Hobs; [|assumption].
     destruct Hobs as (is & tr & Htr & Hexists).
-    apply Exists_or_inv in Hexists.
-    destruct Hexists as [Hsent | Hreceived].
+    apply Exists_or_inv in Hexists as [Hsent | Hreceived].
     + right. apply proper_received; [assumption|].
       apply has_been_received_consistency; [assumption|assumption|].
       exists is, tr, Htr. assumption.
@@ -1757,7 +1757,6 @@ Section Composite.
         - (* initial states not claim *)
           intros s Hs m [i Horacle].
           revert Horacle.
-          fold (~ oracles i (s i) m).
           apply (oracle_no_inits (stepwise_props i)).
           apply Hs.
         - (* step update property *)
@@ -2047,9 +2046,7 @@ Section Composite.
     destruct (sender m) as [v|] eqn: Hsender; [|inversion can_emit_signed].
     apply Some_inj in can_emit_signed.
     exists v.
-    split; [reflexivity|].
-    subst. cbn in Ht.
-  unfold can_emit; eauto.
+    subst; cbn in Ht; unfold can_emit; eauto.
   Qed.
 
   Lemma composite_no_initial_valid_messages_have_sender
