@@ -18,53 +18,57 @@ projections of traces of the composition of the regular nodes under a
 composition constraint allowing only a limited amount of equivocation.
 *)
 
-Section limited_byzantine_traces.
+Section sec_limited_byzantine_traces.
 
 Context
   {message : Type}
-  `{EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (Hbs : forall i : index, HasBeenSentCapability (IM i))
   (Hbr : forall i : index, HasBeenReceivedCapability (IM i))
   (sender : message -> option index)
-  {finite_index : finite.Finite index}
   `{ReachableThreshold index}
   .
 
-(**
-We define the [limited_byzantine_trace_prop]erty in two steps. First, we
-leverage the [fixed_byzantine_trace_alt_prop]erty by assuming a fixed selection
-of <<byzantine>> nodes whose added weight is below the [ReachableThreshold].
-*)
-Definition fixed_limited_byzantine_trace_prop
-  (s : composite_state IM)
-  (tr : list (composite_transition_item IM))
-  (byzantine : set index)
-  : Prop
-  := (sum_weights (remove_dups byzantine) <= `threshold)%R /\
-     fixed_byzantine_trace_alt_prop IM Hbs byzantine (fun i => i) sender s tr.
+Definition limited_byzantine_set : Type :=
+  { byzantine : set index | (sum_weights (remove_dups byzantine) <= `threshold)%R }.
 
-(** The union of traces with the [fixed_limited_byzantine_trace_prop]erty over
-all possible selections of (limited) byzantine nodes.
-*)
-Definition limited_byzantine_trace_prop
-  (s : composite_state IM)
-  (tr : list (composite_transition_item IM))
-  : Prop :=
-  exists byzantine, fixed_limited_byzantine_trace_prop s tr byzantine.
+Definition limited_byzantine_trace : Type :=
+  { limited_byzantine : limited_byzantine_set & fixed_byzantine_trace IM Hbs (` limited_byzantine) Datatypes.id sender}.
 
 Context
-  {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (limited_constraint := limited_equivocation_constraint IM (listing_from_finite index) sender)
-  (Limited : VLSM message := composite_vlsm IM limited_constraint)
-  (Hvalidator: forall i : index, component_message_validator_prop IM limited_constraint i)
-  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
-  (Hbo := fun i => HasBeenObservedCapability_from_sent_received (IM i))
   (message_dependencies : message -> set message)
   (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  (full_message_dependencies : message -> set message)
+  (HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies)
+  (Limited := msg_dep_limited_equivocation_vlsm IM Hbs Hbr full_message_dependencies sender)
+  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
+  (Hchannel : channel_authentication_prop IM Datatypes.id sender)
+  (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender :=
+    channel_authentication_sender_safety _ _ _ Hchannel)
   .
+
+Program Definition limited_equivocating_traces_are_byzantine is tr
+  (Htr : finite_valid_trace Limited is tr)
+  (equivocators := state_annotation (finite_trace_last is tr))
+  : limited_byzantine_trace :=
+  existT (exist _ equivocators _)
+    (fixed_equivocating_traces_are_byzantine_traces IM equivocators Datatypes.id sender no_initial_messages_in_IM Hchannel (original_state is) (pre_VLSM_full_projection_finite_trace_project
+    (type Limited) (composite_type IM) Datatypes.id original_state
+    tr) _).
+Next Obligation.
+  intros; cbn.
+  eapply msg_dep_fixed_limited_equivocation_witnessed; eassumption.
+Qed.
+Next Obligation.
+  intros; cbn.
+  eapply msg_dep_fixed_limited_equivocation_witnessed; eassumption.
+Qed.
+
+
+End sec_limited_byzantine_traces.
+
+(*
 
 (** ** Assuming the byzantine nodes are known
 We will first fix a selection of <<byzantine>> nodes of limited weight and
@@ -544,3 +548,4 @@ Proof.
 Qed.
 
 End sec_msg_dep_limited_byzantine_traces.
+*)
