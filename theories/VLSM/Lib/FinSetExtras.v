@@ -75,7 +75,7 @@ Section general.
   Lemma difference_size_subset
     (X Y : C)
     (Hsub : Y ⊆ X) :
-    (Z.of_nat (size (X ∖ Y)) = size X - size Y)%Z.
+    (Z.of_nat (size (X ∖ Y)) = Z.of_nat (size X) - Z.of_nat (size Y))%Z.
   Proof.
     assert (Htemp : Y ∪ (X ∖ Y) ≡ X). {
       apply set_equiv_equivalence.
@@ -110,7 +110,7 @@ Section general.
 
   Lemma difference_size
     (X Y : C) :
-    (Z.of_nat (size (X ∖ Y)) = size X - size (X ∩ Y))%Z.
+    (Z.of_nat (size (X ∖ Y)) = Z.of_nat (size X) - Z.of_nat (size (X ∩ Y)))%Z.
   Proof.
     rewrite difference_with_intersection.
     specialize (difference_size_subset X (X ∩ Y)) as Hdif.

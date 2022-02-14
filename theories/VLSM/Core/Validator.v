@@ -14,7 +14,7 @@ Section projection_validator.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> option (vlabel Y)}
+  {label_project : vlabel X -> option (vlabel Y)} 
   {state_project : vstate X -> vstate Y}
   (PreY := pre_loaded_with_all_messages_vlsm Y)
   (Hproj : VLSM_projection X PreY label_project state_project)
@@ -355,7 +355,7 @@ Proof.
     apply Hvalidator in Hiv as (sX & <- & HivX).
     exists (existT i li), sX; intuition.
     unfold composite_project_label; cbn.
-    rewrite decide_left with eq_refl; reflexivity.
+    rewrite (decide_True_pi eq_refl); reflexivity.
 Qed.
 
 Definition pre_loaded_with_all_messages_validator_component_proj_incl

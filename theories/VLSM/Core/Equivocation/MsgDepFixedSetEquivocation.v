@@ -155,7 +155,7 @@ Proof.
           (single_equivocator_projection s i Hi)) with (lY := li) in HtX
   ; [eexists _,_,_; eassumption |].
   unfold sub_label_element_project; cbn.
-  rewrite decide_left with eq_refl; cbn.
+  rewrite (decide_True_pi eq_refl).
   reflexivity.
 Qed.
 
@@ -218,7 +218,7 @@ Proof.
       eapply (VLSM_projection_input_valid_transition (single_equivocator_projection s i Hi))
       ; [| eassumption].
       unfold sub_label_element_project; cbn.
-      rewrite decide_left with eq_refl; reflexivity.
+      rewrite (decide_True_pi eq_refl); reflexivity.
 Qed.
 
 Lemma strong_fixed_equivocation_msg_dep_constraint_subsumption
