@@ -1448,7 +1448,7 @@ Proof.
   apply has_been_observed_stepwise_props.
 Qed.
 
-Lemma proper_not_observed {message} (vlsm : VLSM message) `{HasBeenObservedCapability message vlsm}:
+Lemma proper_not_observed `(vlsm : VLSM message) `{HasBeenObservedCapability message vlsm}:
   forall (s:state),
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
