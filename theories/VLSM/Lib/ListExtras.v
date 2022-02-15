@@ -2402,3 +2402,12 @@ Proof.
   rewrite 2!elem_of_list_In.
   apply in_map.
 Qed.
+
+Lemma take_app_inv :
+  forall [A : Type] (n : nat) (l l' : list A) (x : A),
+    take n l = l' ++ [x] -> exists n' : nat, n = S n'.
+Proof.
+  induction n as [| n']; intros l l' x H.
+  - contradict H. rewrite take_0. apply app_cons_not_nil.
+  - exists n'. reflexivity.
+Qed.
