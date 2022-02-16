@@ -489,49 +489,47 @@ Proof.
     + apply finite_valid_trace_from_to_empty.
       apply (composite_initial_state_sub_projection IM equivocators si) in Hsi.
       apply initial_state_is_valid. assumption.
-    + intros m Hobs.
-      exfalso.
+    + intros m Hobs; exfalso.
       eapply (@has_been_observed_no_inits _ Free); [eassumption|].
       apply composite_has_been_observed_free_iff; eassumption.
   - apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht as Hpre_t.
     assert (Hfuture_s : in_futures PreFree s base_s).
-    { destruct Hfuture as [tr' Htr'].
+    {
+      destruct Hfuture as [tr' Htr'].
       specialize (finite_valid_trace_from_to_extend _ _ _ _ Htr' _ _ _ _ Hpre_t) as Htr''.
-      eexists. exact Htr''.
+      eexists. eassumption.
     }
     specialize (IHHtr Hfuture_s) as [Htr_pr Htr_obs].
-    split.
-    2: {
-      intros m Hobs.
+    split; cycle 1.
+    + intros m Hobs.
       eapply @has_been_observed_step_update with (msg := m) (vlsm := Free) in Hpre_t.
-      apply composite_has_been_observed_free_iff,Hpre_t in Hobs. destruct Hobs as [Hitem | Hobs]
-      ; [| apply composite_has_been_observed_free_iff,Htr_obs in Hobs; assumption].
+      apply composite_has_been_observed_free_iff,Hpre_t in Hobs.
+      destruct Hobs as [Hitem | Hobs]
+      ; [| apply composite_has_been_observed_free_iff, Htr_obs in Hobs; assumption].
       apply valid_trace_last_pstate in Htr.
       apply valid_trace_last_pstate in Htr_pr.
-      destruct Hitem as [Hm | Hm];  subst.
-      + apply (fixed_input_has_strong_fixed_equivocation_helper _ _ Htr_obs _ _ (proj1 Ht)).
-      + apply (fixed_output_has_strong_fixed_equivocation_helper _ _  Htr_obs Htr_pr _ Hfuture _ _ _ Ht).
-    }
-    rewrite (finite_trace_sub_projection_app IM equivocators). simpl.
-    unfold pre_VLSM_projection_transition_item_project. simpl.
-    unfold composite_label_sub_projection_option.
-    case_decide as Hl.
-    + eapply finite_valid_trace_from_to_app; [apply Htr_pr|].
-      apply finite_valid_trace_from_to_singleton. simpl.
-      apply valid_trace_last_pstate in Htr_pr.
-      apply (fixed_input_valid_transition_sub_projection_helper _ _ Htr_obs Htr_pr _ Hl _ _ _ Ht).
-    + rewrite app_nil_r.
-      replace (composite_state_sub_projection _ _ sf) with (composite_state_sub_projection IM equivocators s)
-      ; [assumption|].
-      apply proj2 in Ht. simpl in Ht.
-      destruct l as (i, li). destruct (vtransition _ _ _) as (si', om').
-      inversion_clear Ht.
-      clear -Hl.
-      extensionality sub_j; destruct_dec_sig sub_j j Hj Heqsub_j; subst.
-      unfold composite_state_sub_projection. simpl.
-      rewrite state_update_neq; [reflexivity|].
-      contradict Hl.
-      simpl; subst; assumption.
+      destruct Hitem as [Hm | Hm]; subst.
+      * eapply fixed_input_has_strong_fixed_equivocation_helper; destruct Ht; eassumption.
+      * eapply fixed_output_has_strong_fixed_equivocation_helper; cycle 3; eassumption.
+    + rewrite (finite_trace_sub_projection_app IM equivocators);
+      cbn; unfold pre_VLSM_projection_transition_item_project;
+      cbn; unfold composite_label_sub_projection_option.
+      case_decide as Hl.
+      * eapply finite_valid_trace_from_to_app; [apply Htr_pr |].
+        apply finite_valid_trace_from_to_singleton.
+        apply valid_trace_last_pstate in Htr_pr.
+        apply fixed_input_valid_transition_sub_projection_helper; assumption.
+      * rewrite app_nil_r;
+        replace (composite_state_sub_projection _ _ sf)
+           with (composite_state_sub_projection IM equivocators s)
+        ; [exact Htr_pr |].
+        destruct Ht as [_ Ht]; cbn in Ht;
+        destruct l as (i, li), (vtransition _ _ _) as (si', om');
+        inversion_clear Ht; clear -Hl.
+        extensionality sub_j; destruct_dec_sig sub_j j Hj Heqsub_j;
+        subst; unfold composite_state_sub_projection; cbn.
+        rewrite state_update_neq; [reflexivity |].
+        contradict Hl; cbn; subst; assumption.
 Qed.
 
 (**
@@ -674,13 +672,11 @@ Lemma Equivocators_Fixed_Strong_incl base_s
       (equivocators_composition_for_sent IM equivocators base_s).
 Proof.
   apply basic_VLSM_incl.
-  - intro; intros; assumption.
-  - intro; intros. destruct HmX as [Hinit | Hobs]
+  - intros s H2; assumption.
+  - intros l s m Hv HsY [Hinit | Hobs]
     ; [apply initial_message_is_valid; left; assumption|].
     apply strong_fixed_equivocation_eqv_valid_message.
-    revert Hobs.
-    apply fixed_observed_has_strong_fixed_equivocation.
-    assumption.
+    apply fixed_observed_has_strong_fixed_equivocation; assumption.
   - intros l s om (_ & _ & Hv) _ _; assumption.
   - intros l s om s' om' [_ Ht]; assumption.
 Qed.
@@ -815,42 +811,36 @@ Lemma remove_equivocating_transitions_fixed_projection eqv_is
   : VLSM_projection StrongFixed StrongFixed (remove_equivocating_label_project IM equivocators) (remove_equivocating_state_project IM equivocators eqv_is).
 Proof.
   apply basic_VLSM_strong_projection.
-  - intros (i, liX) lY.
-    unfold remove_equivocating_state_project.
-    unfold remove_equivocating_label_project.
-    simpl.
-    case_decide as Hi; [congruence|].
-    inversion_clear 1.
+  - intros [i liX] lY.
+    unfold remove_equivocating_state_project;
+    unfold remove_equivocating_label_project; cbn.
+    case_decide as Hi; inversion_clear 1.
     intros s om [Hv Hc].
     split.
-    + cbn. rewrite lift_sub_state_to_neq; assumption.
-    + destruct om as [m|]; [|exact I].
-      apply lift_sub_state_to_strong_fixed_equivocation. assumption.
+    + cbn; rewrite lift_sub_state_to_neq; assumption.
+    + destruct om as [m|]; [| trivial].
+      apply lift_sub_state_to_strong_fixed_equivocation; assumption.
   - intros [i liX] lY.
-    unfold remove_equivocating_state_project.
-    unfold remove_equivocating_label_project.
-    cbn.
-    case_decide as Hi; [congruence|].
+    unfold remove_equivocating_state_project;
+    unfold remove_equivocating_label_project; cbn.
+    case_decide as Hi; inversion_clear 1.
+    intros s om s' om';
+    rewrite lift_sub_state_to_neq by assumption;
+    destruct (vtransition _ _ _) as (si', _om');
     inversion_clear 1.
-    intros s om s' om'.
-    rewrite lift_sub_state_to_neq by assumption.
-    destruct (vtransition _ _ _) as (si', _om').
-    inversion_clear 1.
-    f_equal.
-    extensionality j.
-    destruct (decide (i = j)).
-    + subst. rewrite lift_sub_state_to_neq by assumption.
-      rewrite !state_update_eq. reflexivity.
+    f_equal; extensionality j.
+    destruct (decide (i = j)); subst.
+    + rewrite lift_sub_state_to_neq, !state_update_eq by assumption.
+      reflexivity.
     + rewrite state_update_neq by congruence.
-      unfold lift_sub_state_to. destruct (decide _); [reflexivity|].
-      rewrite state_update_neq by congruence. reflexivity.
-  - intros (i, liX).
-    unfold remove_equivocating_state_project.
-    unfold remove_equivocating_label_project.
-    cbn.
+      unfold lift_sub_state_to. case_decide; [reflexivity |].
+      rewrite state_update_neq; congruence.
+  - intros [i liX].
+    unfold remove_equivocating_state_project;
+    unfold remove_equivocating_label_project; cbn.
     case_decide as Hi; [|congruence].
-    intros _ s om s' om'.
-    destruct (vtransition _ _ _) as (si', _om') eqn:Hti.
+    intros _ s om s' om';
+    destruct (vtransition _ _ _) as (si', _om') eqn: Hti;
     inversion_clear 1.
     extensionality j.
     unfold lift_sub_state_to.
@@ -862,7 +852,7 @@ Proof.
     case_decide as Hi.
     + exact (Heqv_is (dexist i Hi)).
     + exact (Hs i).
-  - intro; intros; assumption.
+  - intros m H2; assumption.
 Qed.
 
 Context
@@ -927,46 +917,38 @@ Lemma EquivPreloadedBase_Fixed_weak_full_projection
   : VLSM_weak_full_projection EquivPreloadedBase Fixed (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
 Proof.
   apply basic_VLSM_weak_full_projection.
-  - intro; intros. split.
-    + destruct Hv as [_ [_ [Hv _]]]. revert Hv. destruct l as (i, li).
-      destruct_dec_sig i j Hj Heq. subst i.
-      simpl. unfold sub_IM. simpl.
-      rewrite lift_sub_state_to_eq with (Hi := Hj). exact id.
-    + destruct om as [m|]; [|exact I].
-      simpl.
-      destruct Hv as [_ [Hm _]].
+  - intros l s om Hv HsY HomY. split.
+    + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
+      destruct_dec_sig i j Hj Heq; subst i; cbn; unfold sub_IM; cbn.
+      rewrite lift_sub_state_to_eq with (Hi := Hj). trivial.
+    + destruct om as [m|]; [| exact I]; cbn.
+      destruct Hv as (_ & Hm & _).
       apply emitted_messages_are_valid_iff in Hm.
-      destruct Hm as [[Hinit | Hobs]| Hemit].
+      destruct Hm as [[Hinit | Hobs] | Hemit].
       * destruct Hinit as [i [[im Him] Heqm]].
-        destruct_dec_sig i j Hj Heqi. subst.
-        simpl.
-        elim (no_initial_messages_for_equivocators j im); assumption.
-      * apply strong_fixed_equivocation_lift_sub_state_to. left. assumption.
-      * apply strong_fixed_equivocation_lift_sub_state_to. right. assumption.
+        destruct_dec_sig i j Hj Heqi; subst; cbn.
+        clear HomY; contradict Him.
+        apply no_initial_messages_for_equivocators; cbn; assumption.
+      * apply strong_fixed_equivocation_lift_sub_state_to; left; assumption.
+      * apply strong_fixed_equivocation_lift_sub_state_to; right; assumption.
   - intros (sub_i, li) s om s' om'.
-    destruct_dec_sig sub_i j Hj Heq; subst.
-    unfold input_valid_transition. cbn. unfold sub_IM. simpl.
-    rewrite lift_sub_state_to_eq with (Hi := Hj).
-    destruct (vtransition _ _ _) as (si', _om').
-    intros [_ Ht].
-    inversion_clear Ht.
-    f_equal.
-    extensionality i.
-    destruct (decide (i = j)).
-    + subst.
-      rewrite lift_sub_state_to_eq with (Hi := Hj).
-      rewrite! state_update_eq. reflexivity.
+    destruct_dec_sig sub_i j Hj Heq; subst;
+    unfold input_valid_transition; cbn; unfold sub_IM; cbn;
+    rewrite lift_sub_state_to_eq with (Hi := Hj);
+    destruct (vtransition _ _ _) as (si', _om');
+    intros [_ Ht]; inversion_clear Ht.
+    f_equal. extensionality i.
+    destruct (decide (i = j)); subst.
+    + rewrite lift_sub_state_to_eq with (Hi := Hj), !state_update_eq; reflexivity.
     + rewrite state_update_neq by congruence.
       destruct (decide (i ∈ equivocators)).
-      * rewrite !lift_sub_state_to_eq with (Hi := e).
-        rewrite state_update_neq; [reflexivity|].
-        intro Hcontra. apply dsig_eq in Hcontra. contradiction.
-      * rewrite !lift_sub_state_to_neq by assumption. reflexivity.
-  - intro; intros. apply fixed_equivocator_lifting_initial_state. assumption.
-  - intro; intros. destruct HmX as [Hm | Hm].
-    + destruct Hm as [(i, Hi) [[im Him] Heqm]].
-      apply initial_message_is_valid.
-      exists i. exists (exist _ im Him). subst. reflexivity.
+      * rewrite !lift_sub_state_to_eq with (Hi := e), state_update_neq; [reflexivity|].
+        intros Hcontra%dsig_eq; contradiction.
+      * rewrite !lift_sub_state_to_neq by assumption; reflexivity.
+  - intros s H2; apply fixed_equivocator_lifting_initial_state; assumption.
+  - intros l s m Hv HsY [[(i, Hi) [[im Him] Heqm]] | Hm].
+    + apply initial_message_is_valid.
+      exists i, (exist _ im Him). assumption.
     + clear HsY. eapply composite_observed_valid; [eassumption|].
       eapply sent_by_non_equivocating_are_observed; eassumption.
 Qed.

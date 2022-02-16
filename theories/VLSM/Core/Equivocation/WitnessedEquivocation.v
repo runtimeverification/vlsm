@@ -142,14 +142,14 @@ Lemma input_valid_transition_reflects_trace_witnessing_equivocation_prop
   : trace_witnessing_equivocation_prop is tr.
 Proof.
   apply finite_valid_trace_init_to_last in Htr as Hlst.
-  simpl in Hlst.
-  intros v. split; intros *; simpl in *; rewrite Hlst in *.
+  intros v; split; simpl in *; rewrite Hlst in *.
   - intros Hv.
     apply equivocating_validators_is_equivocating_tracewise_iff in Hv.
-    apply (Hv is). assumption.
+    eapply Hv; eassumption.
   - intros (msg & Hsender & Heqv).
     apply Hincl.
-    spec Hwitness v. rewrite finite_trace_last_is_last in Hwitness.
+    spec Hwitness v;
+    rewrite finite_trace_last_is_last in Hwitness;
     apply Hwitness.
     exists msg. split; [assumption|].
     apply equivocation_in_trace_prefix.

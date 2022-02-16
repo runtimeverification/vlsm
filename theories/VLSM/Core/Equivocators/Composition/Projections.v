@@ -649,9 +649,8 @@ Lemma equivocators_trace_project_app_inv_item
 Proof.
   generalize dependent sufX. generalize dependent eqv_descriptors.
   induction tr using rev_ind; intros eqv_descriptors sufX.
-  - simpl.
-    intro Hsome; inversion Hsome as [[Hnil Heq]].
-    clear -Hnil; destruct preX; inversion Hnil.
+  - cbn; inversion 1 as [[Hnil Heq]]; clear -Hnil.
+    destruct preX; inversion Hnil.
   - intro Hsome.
     apply equivocators_trace_project_app_iff in Hsome
       as (trX' & xX & eqv_descriptors' & Hpr_x & Hpr_tr & Heq).
@@ -983,11 +982,8 @@ Proof.
     clear Hproject_x trX sufX.
     destruct Hx as [(_ & _  & Hv & _) Ht].
     eapply IHHtr; [eassumption|].
-    revert Hi.
     eapply equivocators_transition_item_project_preserves_zero_descriptors
-      with (item := x).
-    2,3:eassumption.
-    exact Ht.
+      with (item := x); cycle 1; eassumption.
 Qed.
 
 Lemma preloaded_equivocators_valid_trace_from_project
@@ -1974,7 +1970,7 @@ Lemma SeededXE_incl_PreFreeE
 Proof.
   apply basic_VLSM_strong_incl.
   1,2,4:cbv; intuition.
-  - intros l s om [Hv _]. split; [|exact I]. assumption.
+  intros l s om [Hv _]; split; [assumption | exact I].
 Qed.
 
 Lemma PreSeededXE_incl_PreFreeE
@@ -1982,8 +1978,7 @@ Lemma PreSeededXE_incl_PreFreeE
 Proof.
   apply basic_VLSM_incl_preloaded.
   1,3: intro; intros; assumption.
-  intros l s om [Hv _].
-  split; [assumption|exact I].
+  intros l s om [Hv _]; split; [assumption| exact I].
 Qed.
 
 Lemma SeededXE_SeededX_vlsm_partial_projection
@@ -2125,11 +2120,9 @@ Proof.
       simpl.
       case_decide as Hla; [|contradict Hla; apply elem_of_enum].
       f_equal; [|assumption].
-      destruct a. destruct l as (i, li).
-      simpl.
-      f_equal.
-      unfold composite_label_sub_projection. simpl.
-      unfold free_sub_free_index.
+      destruct a, l as (i, li); cbn; f_equal.
+      unfold composite_label_sub_projection;
+      cbn; unfold free_sub_free_index.
       apply
         (@dec_sig_sigT_eq _ _
           (sub_index_prop_dec (enum index))
@@ -2173,8 +2166,8 @@ Proof.
       composite_label_sub_projection_option.
     simpl.
     case_decide as Hla; [|contradict Hla; apply elem_of_enum].
-    simpl. f_equal; [|assumption].
-    destruct a. destruct l as (i, li).
+    cbn; f_equal; [|assumption].
+    destruct a, l as (i, li).
     reflexivity.
 Qed.
 
@@ -2246,12 +2239,11 @@ Lemma equivocators_no_equivocations_vlsm_X_vlsm_projection
 Proof.
   constructor; [constructor|].
   - intros * Htr. apply PreFreeE_Free_vlsm_projection_type.
-    revert Htr.
-    apply VLSM_incl_finite_valid_trace_from.
+    apply VLSM_incl_finite_valid_trace_from; [| assumption].
     apply equivocators_no_equivocations_vlsm_incl_PreFree.
   - intros * Htr.
     assert (Hpre_tr : finite_valid_trace PreFreeE sX trX).
-    { revert Htr. apply VLSM_incl_finite_valid_trace.
+    { apply VLSM_incl_finite_valid_trace; [| assumption].
       apply equivocators_no_equivocations_vlsm_incl_PreFree.
     }
     specialize

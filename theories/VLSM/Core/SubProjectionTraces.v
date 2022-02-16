@@ -357,10 +357,9 @@ Proof.
   destruct l as (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   cbn; unfold sub_IM, lift_sub_state;
-  rewrite lift_sub_state_to_eq with (Hi := Hi); cbn.
+  rewrite lift_sub_state_to_eq with (Hi := Hi); cbn;
   destruct (vtransition _ _ _) as (si', om').
-  f_equal.
-  extensionality sub_k.
+  f_equal; extensionality sub_k.
   destruct_dec_sig sub_k k Hk Heqsub_k; subst.
   unfold composite_state_sub_projection; cbn.
   destruct (decide (i = k)); subst.
@@ -1062,45 +1061,36 @@ Lemma induced_sub_projection_lift
 Proof.
   apply basic_VLSM_full_projection.
   - intros l s om (_ & _ & (i, li) & sX & Heql & Heqs & HsX & Hom & Hv & Hc) _ _.
-    unfold composite_label_sub_projection_option in Heql.
-    simpl in Heql.
-    case_decide as Hi; [|congruence].
+    unfold composite_label_sub_projection_option in Heql; cbn in Heql.
+    case_decide as Hi; [| congruence].
     apply Some_inj in Heql; subst l; cbn.
-    unfold constrained_composite_valid, lift_sub_state. cbn.
-    rewrite lift_sub_state_to_eq with (Hi0 := Hi).
-    subst.
+    unfold constrained_composite_valid, lift_sub_state; cbn;
+    rewrite lift_sub_state_to_eq with (Hi0 := Hi); subst.
     split; [assumption|].
     eapply Hconstraint_consistency; [|eassumption].
-    symmetry.
-    apply composite_state_sub_projection_lift_to.
+    symmetry; apply composite_state_sub_projection_lift_to.
   - intros l s om s' om' [_ Ht].
-    revert Ht; cbn.
-    destruct (vtransition _ _ _) as (si', _om').
+    revert Ht; cbn;
+    destruct (vtransition _ _ _) as (si', _om');
     inversion_clear 1.
-    f_equal.
-    extensionality i.
-    destruct l as (sub_j, lj).
-    destruct_dec_sig sub_j j Hj Heqsub_j.
-    subst.
-    simpl.
-    destruct (decide (i = j)).
-    + subst. rewrite state_update_eq.
-      unfold lift_sub_state.
-      rewrite lift_sub_state_to_eq with (Hi := Hj).
-      unfold composite_state_sub_projection.
-      simpl.
-      rewrite state_update_eq.
-      reflexivity.
+    f_equal; extensionality i.
+    destruct l as (sub_j, lj);
+    destruct_dec_sig sub_j j Hj Heqsub_j; subst; cbn;
+    destruct (decide (i = j)); subst.
+    + unfold lift_sub_state.
+      rewrite state_update_eq, lift_sub_state_to_eq with (Hi := Hj).
+      unfold composite_state_sub_projection; cbn.
+      rewrite state_update_eq; reflexivity.
     + rewrite state_update_neq by congruence.
       destruct (decide (i ∈ equivocators)).
       * unfold lift_sub_state.
         rewrite !lift_sub_state_to_eq with (Hi := e).
-        unfold composite_state_sub_projection. simpl.
+        unfold composite_state_sub_projection; cbn.
         rewrite state_update_neq by congruence.
         rewrite lift_sub_state_to_eq with (Hi := e).
         reflexivity.
       * unfold lift_sub_state, lift_sub_state_to.
-        destruct (decide _); [contradiction|reflexivity].
+        case_decide; [contradiction | reflexivity].
   - intros s Hs.
     apply (lift_sub_state_initial IM).
     destruct Hs as [sX [<- HsX]].
@@ -1121,13 +1111,12 @@ Lemma induced_sub_projection_friendliness
     (lift_sub_state IM equivocators))
   : projection_friendly_prop (induced_sub_projection_is_projection IM equivocators constraint).
 Proof.
-  eapply basic_projection_induces_friendliness.
-  assumption.
+  eapply basic_projection_induces_friendliness; assumption.
   Unshelve.
-    - apply induced_sub_projection_transition_consistency_None.
-    - apply composite_label_sub_projection_option_lift.
-    - apply composite_state_sub_projection_lift.
-    - apply induced_sub_projection_transition_consistency_Some.
+  - apply induced_sub_projection_transition_consistency_None.
+  - apply composite_label_sub_projection_option_lift.
+  - apply composite_state_sub_projection_lift.
+  - apply induced_sub_projection_transition_consistency_Some.
 Qed.
 
 End lift_sub_state_to_preloaded.
@@ -1758,17 +1747,16 @@ Proof.
     extensionality sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     destruct (decide (i = j)); subst.
-      rewrite sub_IM_state_update_eq, sub_element_state_eq.
+    + rewrite sub_IM_state_update_eq, sub_element_state_eq.
       reflexivity.
     + rewrite sub_IM_state_update_neq, !sub_element_state_neq by congruence.
       reflexivity.
   - intros sj Hsj sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     destruct (decide (i = j)); subst.
-    + rewrite sub_element_state_eq. assumption.
+    + rewrite sub_element_state_eq; assumption.
     + rewrite sub_element_state_neq by congruence.
-      destruct (vs0 (IM i)).
-      assumption.
+      destruct (vs0 (IM i)); assumption.
   - intros m Hm.
     exists (dexist j Hj), (exist _ m Hm).
     reflexivity.

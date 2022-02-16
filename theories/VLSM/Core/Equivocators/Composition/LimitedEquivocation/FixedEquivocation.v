@@ -581,8 +581,8 @@ Proof.
       * eapply valid_trace_output_is_valid; [apply HtrXm|assumption].
       * rewrite <- Hstate_project.
         apply Hconstraint_hbs; [assumption| apply Hproper'|].
-        assert (Hlst'pre : valid_state_prop (pre_loaded_with_all_messages_vlsm FreeE) (finite_trace_last is tr')).
-        { apply finite_valid_trace_last_pstate. apply Htr'pre. }
+        assert (Hlst'pre : valid_state_prop (pre_loaded_with_all_messages_vlsm FreeE) (finite_trace_last is tr'))
+            by (apply finite_valid_trace_last_pstate, Htr'pre).
         apply proper_sent; [assumption|].
         apply has_been_sent_consistency; [typeclasses eauto| assumption| ].
         exists is, tr', (valid_trace_add_default_last Htr'pre). assumption.
@@ -1015,11 +1015,8 @@ Proof.
   apply basic_VLSM_incl.
   - intro; intros; assumption.
   - intro; intros.
-    apply initial_message_is_valid.
-    simpl.
-    destruct HmX.
-    + left; assumption.
-    + right. by apply Hseed12.
+    apply initial_message_is_valid; cbn.
+    destruct HmX; auto.
   - intros l s om [Hs [_ [Hv Hc]]].
     split; [assumption|].
     destruct Hc as [Hc _].
@@ -1057,11 +1054,8 @@ Proof.
   apply basic_VLSM_incl; intros ? *.
   - intro; assumption.
   - intros.
-    apply initial_message_is_valid.
-    simpl.
-    destruct HmX; [left; assumption|].
-    right.
-    apply Hseed12; assumption.
+    apply initial_message_is_valid; cbn.
+    destruct HmX; auto.
   - intros (Hs & _ & Hv & Hc & _) _ _.
     split; [assumption|].
     split; [|exact I].
@@ -1326,14 +1320,12 @@ Qed.
 Lemma fixed_equivocators_vlsm_projection
   : VLSM_projection XE X (equivocators_total_label_project IM) (equivocators_total_state_project IM).
 Proof.
-  constructor; [constructor|]; intros *.
-  - intro HtrX.
-    apply PreFreeE_Free_vlsm_projection_type.
-    revert HtrX. apply VLSM_incl_finite_valid_trace_from.
+  constructor; [constructor|]; intros sX trX HtrX.
+  - apply PreFreeE_Free_vlsm_projection_type.
+    apply VLSM_incl_finite_valid_trace_from; [| assumption].
     apply equivocators_fixed_equivocations_vlsm_incl_PreFree.
-  - intro HtrX.
-    assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
-    { revert HtrX. apply VLSM_incl_finite_valid_trace.
+  - assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
+    { apply VLSM_incl_finite_valid_trace; [| assumption].
       apply equivocators_fixed_equivocations_vlsm_incl_PreFree.
     }
     specialize

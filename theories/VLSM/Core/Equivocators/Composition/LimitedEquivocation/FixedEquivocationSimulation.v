@@ -157,7 +157,7 @@ Lemma fixed_equivocation_replay_has_message
       (lift_equivocators_sub_state_to IM equivocating eqv_state_s s) im.
 Proof.
   apply non_empty_valid_trace_from_can_produce in Him
-    as [im_eis [im_etr [item [Him_etr [Hlast [Heqs Him]]]]]].
+     as (im_eis & im_etr & item & Him_etr & Hlast & Heqs & Him).
   specialize
     (PreFreeSubE_PreFreeE_weak_full_projection IM equivocating _ Heqv_state_s)
     as Hproj.

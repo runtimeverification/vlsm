@@ -129,9 +129,9 @@ Proof.
     ; [|revert Hproduce; apply VLSM_incl_can_produce; apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
     clear H1 no_initial_messages_in_X Hreflects.
     revert H H0 s Hdm Hproduce; destruct X as (T & S & M); cbn; intros.
-    revert Hdm.
-    apply VLSM_incl_has_been_observed
-    ; [apply basic_VLSM_incl_preloaded; cbv;intuition|].
+    eapply VLSM_incl_has_been_observed
+    ; [apply basic_VLSM_incl_preloaded; cbv;intuition | | eassumption].
+
     exists (Some m).
     apply can_produce_valid.
     revert Hproduce.
@@ -275,8 +275,7 @@ Proof.
   intros dm m Hdm.
   rewrite !emitted_messages_are_valid_iff.
   intros [[i [[im Him] _]] | Hemit]
-  ; [contradict Him; apply no_initial_messages_in_IM|].
-  right.
+  ; [contradict Him; apply no_initial_messages_in_IM | right].
   pose proof (vlsm_is_pre_loaded_with_False X) as XeqXFalse.
   apply (VLSM_eq_can_emit XeqXFalse).
   cut (valid_message_prop (pre_loaded_vlsm X (fun _ => False)) dm).
@@ -289,7 +288,7 @@ Proof.
   eapply msg_dep_reflects_validity.
   - apply composite_message_dependencies.
   - intros _ [i [[im Him] _]].
-    contradict Him. apply no_initial_messages_in_IM.
+    contradict Him; apply no_initial_messages_in_IM.
   - intuition.
   - eassumption.
   - apply emitted_messages_are_valid_iff.
@@ -322,13 +321,8 @@ Lemma msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_send
 Proof.
   intros m Hm dm Hdm.
   cut (valid_message_prop X dm).
-  {
-    clear Hdm; revert dm.
-    apply composite_no_initial_valid_messages_emitted_by_sender; assumption.
-  }
-  revert dm m Hdm Hm.
-  apply msg_dep_reflects_happens_before_free_validity.
-  assumption.
+  - apply composite_no_initial_valid_messages_emitted_by_sender; assumption.
+  - eapply msg_dep_reflects_happens_before_free_validity; eassumption.
 Qed.
 
 End sec_composite_message_dependencies.
@@ -428,8 +422,7 @@ Proof.
   - constructor.
     + apply full_message_dependencies_irreflexive.
     + apply full_message_dependencies_nodups.
-  - intros m' Hm'.
-apply elem_of_cons in Hm' as [-> | Hm'].
+  - intros m' Hm'. apply elem_of_cons in Hm' as [-> | Hm'].
     + apply full_message_dependencies_happens_before; assumption.
     + revert Hm'.
       setoid_rewrite full_message_dependencies_happens_before.

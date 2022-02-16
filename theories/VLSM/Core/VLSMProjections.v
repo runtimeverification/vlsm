@@ -2722,7 +2722,7 @@ Lemma pre_loaded_vlsm_incl
   (PimpliesQ : forall m : message, P m -> Q m)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
-  apply pre_loaded_vlsm_incl_relaxed. intuition.
+  apply pre_loaded_vlsm_incl_relaxed; intuition.
 Qed.
 
 Lemma pre_loaded_vlsm_with_valid_eq
@@ -2731,8 +2731,8 @@ Lemma pre_loaded_vlsm_with_valid_eq
   : VLSM_eq (pre_loaded_vlsm X (fun m => P m \/ Q m)) (pre_loaded_vlsm X P).
 Proof.
   apply VLSM_eq_incl_iff; split.
-  - apply pre_loaded_vlsm_incl_relaxed. intuition.
-  - cbv; apply pre_loaded_vlsm_incl. intuition.
+  - apply pre_loaded_vlsm_incl_relaxed; intuition.
+  - cbv; apply pre_loaded_vlsm_incl; intuition.
 Qed.
 
 Lemma pre_loaded_vlsm_idem_l

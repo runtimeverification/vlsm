@@ -1529,8 +1529,8 @@ Proof.
   specialize
     (prove_all_have_message_from_stepwise message vlsm  item_sends_or_receives
     (has_been_observed vlsm) (has_been_observed_stepwise_props _) _ Hs m) as Hall.
-  split; [intro Hobs | intros [Hreceived | Hsent]].
-  - destruct Hall as [Hall _]. specialize (Hall Hobs).
+  split.
+  - intro Hobs. destruct Hall as [Hall _]. specialize (Hall Hobs).
     apply consistency_from_valid_state_proj2 in Hall; [|assumption].
     destruct Hall as [is [tr [Htr Hexists]]].
     apply Exists_or_inv in Hexists.
@@ -1541,16 +1541,13 @@ Proof.
     + right. specialize (has_been_sent_consistency vlsm _ Hs m) as Hcons.
       apply proper_sent; [assumption|].
       apply Hcons. exists is, tr, Htr. assumption.
-  - apply Hall.
-    intro is; intros.
-    apply proper_received in Hreceived; [|assumption].
-    apply Exists_or. left.
-    eapply Hreceived; eassumption.
-  - apply Hall.
-    intro is; intros.
-    apply proper_sent in Hsent; [|assumption].
-    apply Exists_or. right.
-    eapply Hsent; eassumption.
+  - intros [Hreceived | Hsent]; apply Hall; intros is tr Htr.
+    + apply proper_received in Hreceived; [|assumption].
+      apply Exists_or. left.
+      eapply Hreceived; eassumption.
+    + apply proper_sent in Hsent; [|assumption].
+      apply Exists_or. right.
+      eapply Hsent; eassumption.
 Qed.
 
 Definition has_been_observed_from_sent_received
@@ -1663,9 +1660,8 @@ Proof.
     apply preloaded_weaken_input_valid_transition in Ht.
     erewrite oracle_step_update in Hsent
     ; [|apply has_been_sent_stepwise_from_trace |eassumption].
-    destruct Hsent as [Hnow | Hsent].
-    + simpl in Hnow. subst om'. assumption.
-    + auto.
+    destruct Hsent as [Hnow | Hsent]; [| auto].
+    simpl in Hnow; subst om'; assumption.
 Qed.
 
 Lemma received_valid
@@ -1687,7 +1683,7 @@ Proof.
     erewrite oracle_step_update in Hreceived
     ; [|apply has_been_received_stepwise_from_trace|eassumption].
     destruct Hreceived as [Hnow|]; [| auto].
-    simpl in Hnow. subst om. assumption.
+    simpl in Hnow; subst om; assumption.
 Qed.
 
 Lemma observed_valid
@@ -2039,14 +2035,13 @@ Section Composite.
     ; [contradict Hmi; apply no_initial_messages_in_IM |].
     apply (VLSM_incl_input_valid_transition (constraint_preloaded_free_incl IM _)) in Ht.
     apply pre_loaded_with_all_messages_projection_input_valid_transition_eq
-      with (j := i) in Ht; [|reflexivity].
+      with (j := i) in Ht; [|reflexivity]; cbn in Ht.
     specialize (can_emit_signed i m).
     spec can_emit_signed; [eexists _,_,_; eassumption|].
     unfold channel_authenticated_message in can_emit_signed.
     destruct (sender m) as [v|] eqn: Hsender; [|inversion can_emit_signed].
     apply Some_inj in can_emit_signed.
-    exists v.
-    subst; cbn in Ht; unfold can_emit; eauto.
+    exists v; subst; unfold can_emit; eauto.
   Qed.
 
   Lemma composite_no_initial_valid_messages_have_sender
@@ -2071,7 +2066,7 @@ Section Composite.
   Proof.
     split;[|exists (A v);assumption].
     intros [i Hi].
-    erewrite Hsender_safety. 1,2: eassumption.
+    erewrite Hsender_safety; [eassumption | eassumption |].
     assert
       (Htr_pr : finite_valid_trace_init_to
         (pre_loaded_with_all_messages_vlsm (IM i))
@@ -2081,10 +2076,9 @@ Section Composite.
       assumption.
     }
     eapply can_emit_from_valid_trace.
-    - eapply valid_trace_forget_last. eassumption.
-    - eapply proper_sent. 2,3:eassumption.
-      revert Htr_pr.
-      apply valid_trace_last_pstate.
+    - eapply valid_trace_forget_last; eassumption.
+    - eapply proper_sent; [| eassumption | eassumption].
+      revert Htr_pr; apply valid_trace_last_pstate.
   Qed.
 
   Lemma no_additional_equivocations_constraint_dec

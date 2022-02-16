@@ -180,11 +180,11 @@ Lemma fixed_non_byzantine_projection_incl_preloaded
   : VLSM_incl fixed_non_byzantine_projection (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM fixed_byzantine_IM non_byzantine))).
 Proof.
   apply basic_VLSM_strong_incl.
-  - intro; intros. apply fixed_non_byzantine_projection_initial_state_preservation. assumption.
-  - intro; intros; cbv; trivial.
-  - split; [|cbv; trivial].
+  - intros s H1; apply fixed_non_byzantine_projection_initial_state_preservation; assumption.
+  - intros m H1; cbv; trivial.
+  - split; [| cbv; trivial].
     eapply induced_sub_projection_valid_preservation; eassumption.
-  - intros l s om s' om'. apply induced_sub_projection_transition_preservation.
+  - intros l s om s' om'; apply induced_sub_projection_transition_preservation.
 Qed.
 
 (** The induced projection from the composition of [fixed_byzantine_IM] under
@@ -285,10 +285,9 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection
 Proof.
   apply same_IM_full_projection.
   intros s1 Hs1 l1 om [Hom _].
-  split; [|cbv; trivial].
-  destruct om as [m|]; [|cbv; trivial].
-  destruct Hom as [Hsent | Hseeded]; [|right; assumption].
-  left.
+  split; [| cbv; trivial].
+  destruct om as [m |]; [| cbv; trivial].
+  destruct Hom as [Hsent | Hseeded]; [left | right; assumption].
   eapply same_IM_composite_has_been_sent_preservation; eassumption.
 Qed.
 
@@ -301,9 +300,9 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection'
 Proof.
   apply same_IM_full_projection.
   intros s1 Hs1 l1 om [Hom _].
-  split; [|cbv; trivial].
-  destruct om as [m|]; [|cbv; trivial].
-  destruct Hom as [Hsent | Hseeded]; [left |right; assumption].
+  split; [| cbv; trivial].
+  destruct om as [m |]; [| cbv; trivial].
+  destruct Hom as [Hsent | Hseeded]; [left | right; assumption].
   eapply same_IM_composite_has_been_sent_preservation; eassumption.
 Qed.
 
@@ -353,14 +352,13 @@ Proof.
   - intros l s m (Hs & _ & Hv) HsY _.
     apply fixed_non_byzantine_projection_valid_no_equivocations
        in Hv as [Hsent | Hseeded].
-    + simpl in Hsent.
-      simpl in HsY.
+    + simpl in Hsent, HsY.
       eapply preloaded_composite_sent_valid; eassumption.
-    + apply initial_message_is_valid. right. assumption.
+    + apply initial_message_is_valid; right; assumption.
   - intros l s om (_ & _ & Hv) _ _; split.
     + eapply induced_sub_projection_valid_preservation; eassumption.
     + split; [|cbv; trivial].
-      apply fixed_non_byzantine_projection_valid_no_equivocations. assumption.
+      apply fixed_non_byzantine_projection_valid_no_equivocations; assumption.
   - intros l s om s' om' [_ Ht].
     revert Ht.
     eapply induced_sub_projection_transition_preservation.
@@ -387,11 +385,8 @@ Proof.
       apply (sub_IM_has_been_sent_iff_by_sender fixed_byzantine_IM non_byzantine
               A sender fixed_byzantine_IM_sender_safety)
       ; [| assumption | assumption].
-      apply (VLSM_incl_valid_state
-              (composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages
-                (sub_IM fixed_byzantine_IM non_byzantine) _ _))
-         in HsX.
-      assumption.
+      eapply (VLSM_incl_valid_state); [| eassumption].
+      eapply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
     + contradict HAv; clear -Hseeded Hsender.
       destruct Hseeded as [(i & Hi & Hm) _].
       unfold channel_authenticated_message in Hm.
