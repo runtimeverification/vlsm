@@ -311,31 +311,41 @@ Proof.
   apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).
 Qed.
 
+Lemma in_futures_preserves_sent_by_non_equivocating s base_s
+  (Hfuture_s : in_futures PreFree s base_s)
+  : forall m : message,
+    sent_by_non_equivocating IM equivocators s m ->
+    sent_by_non_equivocating IM equivocators base_s m.
+Proof.
+  intros m Hsent.
+  destruct Hsent as [i [Hi Hsent]]. exists i. split; [assumption|].
+  revert Hsent.
+  apply in_futures_preserving_oracle_from_stepwise with (field_selector output)
+  ; [apply has_been_sent_stepwise_from_trace|].
+  revert Hfuture_s.
+  apply (VLSM_projection_in_futures (preloaded_component_projection IM i)).
+Qed.
+
+Lemma in_futures_preserves_can_emit_by_equivocators_composition_for_sent s base_s
+  (Hfuture_s : in_futures PreFree s base_s)
+  : forall m : message,
+    can_emit (equivocators_composition_for_sent IM equivocators s) m ->
+    can_emit (equivocators_composition_for_sent IM equivocators base_s) m.
+Proof.
+  apply VLSM_incl_can_emit, pre_loaded_vlsm_incl,
+    in_futures_preserves_sent_by_non_equivocating.
+  assumption.
+Qed.
+
 Lemma in_futures_preserves_strong_fixed_equivocation s base_s
   (Hfuture_s : in_futures PreFree s base_s)
   m
   (Hstrong : strong_fixed_equivocation IM equivocators s m)
   : strong_fixed_equivocation IM equivocators base_s m.
 Proof.
-  assert
-    (Hpreserve : forall m0,
-      sent_by_non_equivocating IM equivocators s m0 ->
-      sent_by_non_equivocating IM equivocators base_s m0).
-  { clear -Hfuture_s. intros m Hsent.
-    destruct Hsent as [i [Hi Hsent]]. exists i. split; [assumption|].
-    revert Hsent.
-    apply in_futures_preserving_oracle_from_stepwise with (field_selector output)
-    ; [apply has_been_sent_stepwise_from_trace|].
-    revert Hfuture_s.
-    apply (VLSM_projection_in_futures (preloaded_component_projection IM i)).
-  }
-  destruct Hstrong as [Hsent | Hemit].
-  - left. apply Hpreserve. assumption.
-  - right.
-    revert Hemit.
-    apply VLSM_incl_can_emit.
-    apply pre_loaded_vlsm_incl.
-    apply Hpreserve.
+  destruct Hstrong as [Hsent | Hemit]; [left | right].
+  - eapply in_futures_preserves_sent_by_non_equivocating; eassumption.
+  - eapply in_futures_preserves_can_emit_by_equivocators_composition_for_sent; eassumption.
 Qed.
 
 Lemma strong_fixed_equivocation_eqv_valid_message base_s m

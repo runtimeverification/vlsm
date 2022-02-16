@@ -801,9 +801,9 @@ Proof.
   rewrite list_annotate_unroll.
   destruct (decide (x = a)) as [Heq | Hneq].
   - subst.
-    replace (@dexist A P _ a (Forall_hd Hs)) with (dec_exist P a HPx); [left|].
-    apply dsig_eq.
-    reflexivity.
+    replace (dexist a (Forall_hd Hs)) with (dexist a HPx)
+      by (apply dsig_eq; reflexivity).
+    left.
   - right.
     apply IHl.
     inversion Hx; [congruence|].

@@ -723,7 +723,7 @@ Proof.
         apply (Hfull _ _ _ _ Hv) in Hdm.
         exists i. assumption.
       }
-      spec Hproj (@dec_exist _ _ (fun v => sub_index_prop_dec (equivocating_validators sf) v) v Hequivocating_v).
+      spec Hproj (@dexist _ _ (fun v => sub_index_prop_dec (equivocating_validators sf) v) v Hequivocating_v).
       apply (VLSM_full_projection_can_emit Hproj).
       assumption.
 Qed.
