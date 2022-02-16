@@ -667,7 +667,8 @@ Qed.
 
 Lemma VLSM_weak_projection_input_valid
   : forall lX lY, label_project lX = Some lY ->
-    forall s im, input_valid X lX (s, im) -> input_valid Y lY (state_project s, im).
+    forall sX im,
+    input_valid X lX (sX, im) -> input_valid Y lY (state_project sX, im).
 Proof.
   intros lX lY Hpr sX im HvX.
   destruct (vtransition X lX (sX, im)) eqn:HtX.
