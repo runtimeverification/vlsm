@@ -1220,38 +1220,15 @@ Proof.
   apply IHl.
 Qed.
 
-Lemma forall_finite
-  {index : Type}
-  {index_listing : list index}
-  (Hfinite_index : Full index_listing)
-  (P : index -> Prop)
-  : (forall n : index, P n) <-> Forall P index_listing.
-Proof.
-  split; intros.
-  - apply Forall_forall; intros. apply H.
-  - rewrite Forall_forall in H.
-    apply H.
-    apply elem_of_list_In.
-    apply Hfinite_index.
-Qed.
-
 Lemma exists_finite
-  {index : Type}
-  {index_listing : list index}
-  (Hfinite_index : Full index_listing)
+  `{finite.Finite index}
   (P : index -> Prop)
-  : (exists n : index, P n) <-> List.Exists P index_listing.
+  : (exists n : index, P n) <-> Exists P (enum index).
 Proof.
-  split; intros.
-  - apply Exists_exists; intros.
-    destruct H as [n H].
-    exists n.
-    split; try assumption.
-    apply elem_of_list_In.
-    apply Hfinite_index.
-  - rewrite Exists_exists in H.
-    destruct H as [n [_ H]].
-    exists n. assumption.
+  rewrite Exists_exists.
+  split.
+  - intros [n Hn]; eexists; split; [apply elem_of_enum | eassumption].
+  - intros (n & _ & Hn); eexists; eassumption.
 Qed.
 
 Definition map_option
@@ -2303,7 +2280,7 @@ apply Hlm.
 assumption.
 Qed.
 
-Global Instance list_subseteq_dec [A : Type] {HeqA : EqDecision A} : RelDecision (@subseteq (list A) _).
+Global Instance list_subseteq_dec `{EqDecision A} : RelDecision (@subseteq (list A) _).
 Proof.
   intros x.
   induction x.

@@ -4,11 +4,11 @@ From VLSM Require Import Lib.Preamble Lib.ListExtras.
 
 (** * Finite function utility definitions and lemmas *)
 
-Lemma listing_from_finite (A : Type) `{Hfinite : finite.Finite A} : Listing (@enum _ _ Hfinite).
+Lemma listing_from_finite (A : Type) `{finite.Finite A} : Listing (enum A).
 Proof.
   constructor.
-  - apply NoDup_ListNoDup. apply Hfinite.
-  - intro a. apply elem_of_list_In. apply Hfinite.
+  - apply NoDup_ListNoDup, NoDup_enum.
+  - intro a. apply elem_of_list_In, elem_of_enum.
 Qed.
 
 Lemma map_option_listing

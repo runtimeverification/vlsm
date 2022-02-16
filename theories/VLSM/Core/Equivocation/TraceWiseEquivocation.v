@@ -1,4 +1,4 @@
-From stdpp Require Import prelude.
+From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Rdefinitions.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
 From VLSM Require Import Lib.ListSetExtras Lib.Measurable.
@@ -18,15 +18,12 @@ and limited state equivocation.
 Section tracewise_equivocation.
 
 Context
-  {message : Type}
-  {MsgEqDec : EqDecision message}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{EqDecision message}
+  `{EqDecision index}
   (IM : index -> VLSM message)
-  (Hbs : forall i : index, HasBeenSentCapability (IM i))
-  (Hbr : forall i : index, HasBeenReceivedCapability (IM i))
-  {validator : Type}
-  {ValEqDec : EqDecision validator}
+  `{forall i : index, HasBeenSentCapability (IM i)}
+  `{forall i : index, HasBeenReceivedCapability (IM i)}
+  `{EqDecision validator}
   (A : validator -> index)
   (sender : message -> option validator)
   (PreFree := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
@@ -41,15 +38,13 @@ Definition item_equivocating_in_trace
   : Prop
   := from_option (fun m => ~trace_has_message (field_selector output) m tr) False (input item).
 
-Instance item_equivocating_in_trace_dec : RelDecision item_equivocating_in_trace.
+Local Instance item_equivocating_in_trace_dec : RelDecision item_equivocating_in_trace.
 Proof.
   intros item tr.
   destruct item. destruct input as [m|]
   ; [|right; intuition].
-  apply Decision_not.
-  apply @Exists_dec.
-  intros.
-  apply decide_eq.
+  unfold item_equivocating_in_trace, trace_has_message, field_selector; cbn.
+  typeclasses eauto.
 Qed.
 
 (** Given a trace, we can precisely identify the validators equivocating
@@ -192,22 +187,29 @@ Lemma is_equivocating_tracewise_no_has_been_sent_iff
   s v
   : is_equivocating_tracewise_no_has_been_sent s v <-> is_equivocating_tracewise s v.
 Proof.
-  unfold is_equivocating_tracewise, equivocation_in_trace, is_equivocating_tracewise_no_has_been_sent.
-  apply forall_proper. intros is. apply forall_proper. intros tr.
-  apply impl_proper; intro Htr.  apply exist_proper; intro m.
-  apply and_proper_l; intro Hsender.  apply exist_proper; intro prefix.
-  apply exist_proper; intro item.  apply exist_proper; intro suffix.
-  apply and_proper_l. intro Htreq.  apply and_iff_compat_l.  apply not_iff_compat.
-  assert (Hpre : finite_valid_trace_init_to PreFree is (finite_trace_last is prefix) prefix).
-  { split; [|apply Htr].
-    subst tr.
-    apply proj1, finite_valid_trace_from_to_app_split, proj1 in Htr.
-    assumption.
+  unfold is_equivocating_tracewise, equivocation_in_trace,
+    is_equivocating_tracewise_no_has_been_sent.
+  apply forall_proper; intros is.
+  apply forall_proper; intros.
+  apply impl_proper; intros [].
+  apply exist_proper; intros.
+  apply and_proper_l; intro.
+  apply exist_proper; intro prefix.
+  apply exist_proper; intro.
+  apply exist_proper; intro.
+  apply and_proper_l; intros ->.
+  apply and_iff_compat_l, not_iff_compat; cbn.
+  cut (finite_valid_trace_init_to PreFree is (finite_trace_last is prefix) prefix).
+  {
+    intros.
+    erewrite <- oracle_initial_trace_update
+      with (vlsm := free_composite_vlsm IM); cycle 1.
+    - apply composite_has_been_sent_stepwise_props.
+    - eassumption.
+    - eapply has_been_sent_iff_by_sender; eassumption.
   }
-  pose proof (CHbs := composite_has_been_sent_stepwise_props IM Hbs (free_constraint IM)).
-  simpl.
-  rewrite <- (oracle_initial_trace_update CHbs _ _ _ Hpre m).
-  apply (has_been_sent_iff_by_sender IM Hbs Hsender_safety Hpre);assumption.
+  split; [|eassumption].
+  eapply  finite_valid_trace_from_to_app_split; eassumption.
 Qed.
 
 Lemma transition_is_equivocating_tracewise_char
@@ -249,7 +251,7 @@ Proof.
 Qed.
 
 Lemma is_equivocating_statewise_implies_is_equivocating_tracewise s v
-  : is_equivocating_statewise IM Hbs A sender Hbr s v -> is_equivocating_tracewise s v.
+  : is_equivocating_statewise IM A sender s v -> is_equivocating_tracewise s v.
 Proof.
   intros [j [m [Hm [Hnbs_m Hbr_m]]]] is tr Htr.
   exists m. split; [assumption|].
@@ -257,7 +259,6 @@ Proof.
   apply proj1 in Htrj as Hlstj.
   apply finite_valid_trace_from_to_last_pstate in Hlstj.
   apply proper_received in Hbr_m; [|assumption].
-
   specialize (Hbr_m _ _ Htrj).
   apply Exists_exists in Hbr_m.
   destruct Hbr_m as [itemj [Hitemj Hinput]].
@@ -267,7 +268,6 @@ Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [prefix [suffix Heq_tr]].
   exists prefix, item, suffix. split; [assumption|]. split; [assumption|].
-
   subst.
   clear -Hnbs_m Htr.
   apply preloaded_finite_valid_trace_init_to_projection with (j := A v) in Htr as Htrv.
@@ -277,7 +277,6 @@ Proof.
   rewrite (VLSMProjections.VLSM_projection_trace_project_app (preloaded_component_projection IM (A v))) in Htrv.
   apply proj1, (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (IM (A v)))),proj2 in Htrv.
   rewrite Htr in Htrv.
-
   intro Hbs_m. elim Hnbs_m. clear Hnbs_m.
   revert Hbs_m.
   apply in_futures_preserving_oracle_from_stepwise with (field_selector output)
@@ -299,26 +298,20 @@ Proof.
 Qed.
 
 Context
-  {measurable_V : Measurable validator}
-  {threshold_V : ReachableThreshold validator}
-  {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision is_equivocating_tracewise_no_has_been_sent}
-  {validator_listing : list validator}
-  (finite_validator : Listing validator_listing)
+  `{ReachableThreshold validator}
+  `{RelDecision _ _ is_equivocating_tracewise_no_has_been_sent}
+  `{finite.Finite validator}
   .
 
 Local Program Instance equivocation_dec_tracewise
-    : BasicEquivocation (composite_state IM) validator
-  :=
-  {|
-    state_validators := fun _ => validator_listing;
-    state_validators_nodup := _;
+  : BasicEquivocation (composite_state IM) validator :=
+  {
+    state_validators := fun _ => enum validator;
     is_equivocating := is_equivocating_tracewise_no_has_been_sent;
-    is_equivocating_dec := is_equivocating_tracewise_no_has_been_sent_dec
-  |}.
+  }.
 Next Obligation.
-intros s.
-apply (Listing_NoDup finite_validator).
-Defined.
+  intro; apply NoDup_enum.
+Qed.
 
 Lemma equivocating_validators_is_equivocating_tracewise_iff s v
   : v ∈ (equivocating_validators s) <-> is_equivocating_tracewise_no_has_been_sent s v.
@@ -326,7 +319,7 @@ Proof.
   unfold equivocating_validators.
   simpl.
   rewrite elem_of_list_filter.
-  intuition. apply elem_of_list_In. apply finite_validator.
+  intuition (apply elem_of_enum). 
 Qed.
 
 Lemma equivocating_validators_empty_in_initial_state

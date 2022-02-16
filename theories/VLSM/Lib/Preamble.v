@@ -574,8 +574,7 @@ Proof.
 Qed.
 
 Lemma comparable_function
-  {A : Type}
-  {eq_A : EqDecision A}
+  `{EqDecision A}
   (f : A -> A -> bool)
   (R : A -> A -> Prop)
   (HR : PredicateFunction2 R f)
@@ -596,8 +595,7 @@ Proof.
 Qed.
 
 Instance comparable_dec
-  {A : Type}
-  {eq_A : EqDecision A}
+  `{EqDecision A}
   (R : A -> A -> Prop)
   {HR : RelDecision R}
   : RelDecision (comparable R).
@@ -627,8 +625,7 @@ Proof.
 Qed.
 
 Lemma comparable_function_bool
-  {A : Type}
-  {eq_A : EqDecision A}
+  `{EqDecision A}
   (f : A -> A -> bool)
   : PredicateFunction2 (comparable f) (comparableb f).
 Proof.

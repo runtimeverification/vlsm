@@ -273,8 +273,7 @@ Section component_projection_validator.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{EqDecision index}
   (IM : index -> VLSM message)
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)

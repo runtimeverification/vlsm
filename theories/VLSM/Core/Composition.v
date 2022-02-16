@@ -1,4 +1,4 @@
-From stdpp Require Import prelude.
+From stdpp Require Import prelude finite.
 From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.StreamExtras.
 From VLSM Require Import Core.VLSM Core.Plans Core.VLSMProjections.
@@ -18,8 +18,7 @@ such that equality on <<index>> is decidable.
 *)
 
   Context {message : Type}
-          {index : Type}
-          {IndEqDec : EqDecision index}
+          `{EqDecision index}
           (IM : index -> VLSM message)
           .
 
@@ -1012,11 +1011,8 @@ component, then it is decidable for a finite composition as well.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
-  (IM : index -> VLSM message)
-  {index_listing : list index}
-  (finite_index : Listing index_listing).
+  `{finite.Finite index}
+  (IM : index -> VLSM message).
 
 Lemma composite_decidable_initial_message
   (Hdec_init : forall i, vdecidable_initial_messages_prop (IM i))
@@ -1025,9 +1021,9 @@ Proof.
   intro m. simpl. unfold composite_initial_message_prop.
   apply
     (Decision_iff
-      (P := List.Exists (fun i => vinitial_message_prop (IM i) m) index_listing)
+      (P := List.Exists (fun i => vinitial_message_prop (IM i) m) (enum index))
     ).
-  - rewrite <- exists_finite by (apply finite_index).
+  - rewrite <- exists_finite.
     split; intros [i Hm]; exists i.
     + exists (exist _ _ Hm). reflexivity.
     + destruct Hm as [[im Hinit] Him]. subst. assumption.
@@ -1040,7 +1036,7 @@ Section composite_plan_properties.
 
   Context {message : Type}
           {index : Type}
-          {IndEqDec : EqDecision index}
+          `{EqDecision index}
           (IM :index -> VLSM message)
           (Free := free_composite_vlsm IM)
           .
@@ -1330,30 +1326,25 @@ End composite_plan_properties.
 Section empty_composition_properties.
 
 Context {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  (index_listing : list index)
-  (finite_index : Listing index_listing)
-  (Hempty_index : index_listing = [])
+  (Hempty_index : enum index = [])
   .
 
 Lemma empty_composition_no_index
   (i : index)
   : False.
 Proof.
-  specialize (proj2 finite_index i) as Hin.
-  subst index_listing. contradiction.
+  specialize (elem_of_enum i); rewrite Hempty_index; inversion 1.
 Qed.
 
 Lemma empty_composition_single_state
   (s : composite_state IM)
   : s = (proj1_sig (composite_s0 IM)).
 Proof.
-  apply functional_extensionality_dep_good.
-  intro i. elim (empty_composition_no_index i).
+  extensionality i; elim (empty_composition_no_index i).
 Qed.
 
 Lemma empty_composition_no_label
@@ -1372,8 +1363,7 @@ Qed.
 Lemma empty_composition_no_emit
   : forall m, ~ can_emit X m.
 Proof.
-  intros m [s' [l _]].
-  elim (empty_composition_no_label l).
+  intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
 Lemma empty_composition_no_valid_message
@@ -1390,15 +1380,13 @@ Lemma pre_loaded_empty_composition_no_emit
   (PreX := pre_loaded_vlsm X seed)
   : forall m, ~ can_emit PreX m.
 Proof.
-  intros m [s' [l _]].
-  elim (empty_composition_no_label l).
+  intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
 Lemma pre_loaded_with_all_empty_composition_no_emit
   : forall m, ~ can_emit (pre_loaded_with_all_messages_vlsm X) m.
 Proof.
-  intros m [s' [l _]].
-  elim (empty_composition_no_label l).
+  intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
 End empty_composition_properties.

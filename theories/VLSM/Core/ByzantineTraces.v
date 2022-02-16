@@ -392,8 +392,7 @@ context) are [valid_trace]s of <<X>>.
 Section composite_validator_byzantine_traces.
 
     Context {message : Type}
-            {index : Type}
-            {IndEqDec : EqDecision index}
+            `{EqDecision index}
             (IM : index -> VLSM message)
             (constraint : composite_label IM -> composite_state IM  * option message -> Prop)
             (X := composite_vlsm IM constraint)
