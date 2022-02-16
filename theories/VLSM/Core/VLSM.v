@@ -1369,6 +1369,17 @@ traces.
 
     (* begin hide *)
 
+    Lemma can_produce_from_valid_trace si tr
+      (Htr: finite_valid_trace_from si tr)
+      : forall item, item ∈ tr ->
+        option_can_produce (destination item) (output item).
+    Proof.
+      intros item Hitem.
+      apply elem_of_list_split in Hitem as (l1 & l2 & Heq).
+      eexists _,_.
+      eapply input_valid_transition_to; cbn; eassumption.
+    Qed.
+
     Lemma can_emit_from_valid_trace
       (si : state)
       (m : message)
@@ -1377,17 +1388,12 @@ traces.
       (Hm : trace_has_message (field_selector output) m tr) :
       can_emit m.
     Proof.
-      apply Exists_exists in Hm.
-      destruct Hm as [x [Hin Houtput]].
-      apply elem_of_list_split in Hin.
-      destruct Hin as [l1 [l2 Hconcat]].
-      unfold can_emit.
-      destruct Htr as [Htr _].
-      specialize (input_valid_transition_to _ _ _ _ _ Htr Hconcat).
-      intros Ht.
-      simpl in Houtput, Ht.
-      rewrite Houtput in Ht.
-      do 3 eexists;exact Ht.
+      apply can_emit_iff.
+      setoid_rewrite Exists_exists in Hm.
+      destruct Hm as (item & Hitem & Houtput).
+      exists (destination item).
+      unfold can_produce; rewrite <- Houtput.
+      eapply can_produce_from_valid_trace; [apply Htr | assumption].
     Qed.
 
     (* End Hide *)
@@ -2179,6 +2185,32 @@ This relation is often used in stating safety and liveness properties.*)
       eexists. exact Ht.
     Qed.
 
+    Lemma elem_of_trace_in_futures_left is s tr
+      (Htr : finite_valid_trace_from_to is s tr)
+      : forall item, item ∈ tr -> in_futures (destination item) s.
+    Proof.
+      intros item Hitem.
+      apply elem_of_list_split in Hitem as (pre & suf & Heqtr).
+      exists suf.
+      erewrite <- finite_trace_last_is_last.
+      eapply finite_valid_trace_from_to_app_split.
+      rewrite <- app_assoc; cbn; rewrite <- Heqtr.
+      eassumption.
+    Qed.
+
+    Lemma elem_of_trace_in_futures_right is s tr
+      (Htr : finite_valid_trace_from_to is s tr)
+      : forall item, item ∈ tr -> in_futures is (destination item).
+    Proof.
+      intros item Hitem.
+      apply elem_of_list_split in Hitem as (pre & suf & Heqtr).
+      exists (pre ++ [item]).
+      erewrite <- finite_trace_last_is_last.
+      eapply finite_valid_trace_from_to_app_split.
+      rewrite <- app_assoc; cbn; rewrite <- Heqtr.
+      eassumption.
+    Qed.
+
     Lemma in_futures_witness
       (first second : state)
       (Hfutures : in_futures first second)
@@ -2767,6 +2799,45 @@ Byzantine fault tolerance analysis.
       split; [assumption|].
       apply (finite_valid_trace_singleton pre_loaded_with_all_messages_vlsm).
       revert Hx. apply preloaded_weaken_input_valid_transition.
+  Qed.
+
+  Lemma pre_traces_with_valid_inputs_are_valid is s tr
+    (Htr : finite_valid_trace_init_to pre_loaded_with_all_messages_vlsm is s tr)
+    (Hobs : forall m,
+      trace_has_message (field_selector input) m tr ->
+      valid_message_prop X m
+    )
+    : finite_valid_trace_init_to X is s tr.
+  Proof.
+    revert s Htr Hobs.
+    induction tr using rev_ind; intros; split
+    ; [|apply Htr | | apply Htr]
+    ; destruct Htr as [Htr Hinit].
+    - inversion Htr; subst.
+      apply (finite_valid_trace_from_to_empty X).
+      apply initial_state_is_valid.
+      assumption.
+    - apply finite_valid_trace_from_to_last in Htr as Hlst.
+      apply finite_valid_trace_from_to_app_split in Htr.
+      destruct Htr as [Htr Hx].
+      specialize (IHtr _ (conj Htr Hinit)).
+      spec IHtr.
+      {
+        intros. apply Hobs.
+        apply trace_has_message_prefix. assumption.
+      }
+      destruct IHtr as [IHtr _];
+      apply finite_valid_trace_from_to_forget_last in IHtr.
+      apply finite_valid_trace_from_add_last; [| assumption].
+      inversion Hx; subst f tl s'.
+      apply (extend_right_finite_trace_from X); [assumption |].
+      destruct Ht as [[_ [_ Hv]] Ht].
+      apply finite_valid_trace_last_pstate in IHtr as Hplst.
+      repeat split. 1, 3-4: assumption.
+      destruct iom as [m |]; [| apply option_valid_message_None].
+      apply option_valid_message_Some, Hobs.
+      red; rewrite Exists_app, Exists_cons.
+      subst; cbn; intuition.
   Qed.
 
 End pre_loaded_with_all_messages_vlsm.

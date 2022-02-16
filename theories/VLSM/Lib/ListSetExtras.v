@@ -116,6 +116,14 @@ Proof.
     inversion Ha.
 Qed.
 
+Lemma set_union_nodup_left `{EqDecision A} (l l' : set A)
+  : NoDup l -> NoDup (set_union l l').
+Proof.
+  intro Hl.
+  induction l' as [|x' l' IH]; [trivial|].
+  now apply set_add_nodup.
+Qed.
+
 Lemma set_union_subseteq_left `{EqDecision A}  : forall (s1 s2 : list A),
   s1 ⊆ (set_union s1 s2).
 Proof.
@@ -128,6 +136,15 @@ Lemma set_union_subseteq_right `{EqDecision A}  : forall (s1 s2 : list A),
 Proof.
   intros; intros x H; apply set_union_intro.
   right; assumption.
+Qed.
+
+Lemma set_union_subseteq_iff `{EqDecision A}  : forall (s1 s2 s : list A),
+  set_union s1 s2 ⊆ s <-> s1 ⊆ s /\ s2 ⊆ s.
+Proof.
+  intros.
+  unfold subseteq, list_subseteq.
+  setoid_rewrite set_union_iff.
+  intuition.
 Qed.
 
 Lemma set_union_iterated_nodup `{EqDecision A}

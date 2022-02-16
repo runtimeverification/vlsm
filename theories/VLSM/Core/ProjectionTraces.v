@@ -264,65 +264,57 @@ Definition composite_project_label
   | _ => None
   end.
 
+Lemma composite_project_label_eq lj
+  : composite_project_label (existT j lj) = Some lj.
+Proof.
+  unfold composite_project_label; cbn.
+  rewrite decide_left with eq_refl; cbn.
+  reflexivity.
+Qed.
+
+Definition composite_vlsm_induced_projection : VLSM message :=
+  projection_induced_vlsm X (type (IM j))
+    composite_project_label (fun s => s j)
+    (lift_to_composite_label IM j) (lift_to_composite_state IM j).
+
 (** The [composite_vlsm_constraint_projection] is [VLSM_eq]ual (trace-equivalent)
 to the [projection_induced_vlsm] by the [composite_project_label] and the
 projection of the state to the component.
 *)
 Lemma composite_vlsm_constrained_projection_is_induced
-  : VLSM_eq Xj
-    (projection_induced_vlsm X (type (IM j))
-      composite_project_label (fun s => s j)
-      (lift_to_composite_label IM j) (lift_to_composite_state IM j)).
+  : VLSM_eq Xj composite_vlsm_induced_projection.
 Proof.
   apply VLSM_eq_incl_iff.
   split.
   - apply basic_VLSM_strong_incl.
-    + intros s Hs; cbn; red.
+    + intros s Hs; cbn in *; red.
       exists (lift_to_composite_state IM j s).
       split; [apply state_update_eq|].
       apply (lift_to_composite_state_initial IM).
       assumption.
-    + intros m [[im Him] <-]. assumption.
+    + intros m [[im Him] <-]; assumption.
     + intros l s iom [sX [<- Hv]].
       exists (existT j l), sX.
       intuition.
-      unfold composite_project_label.
-      case_decide; [|contradiction].
-      cbn in H |- *.
-      replace H with (@eq_refl index j) by (apply Eqdep_dec.UIP_dec; assumption).
-      reflexivity.
+      apply composite_project_label_eq.
     + intros l s iom s' oom.
-      cbn.
-      unfold lift_to_composite_state at 1.
-      rewrite state_update_eq.
-      intros Ht.
-      setoid_rewrite Ht.
-      rewrite state_update_eq.
-      reflexivity.
-  - cbn. apply basic_VLSM_strong_incl.
-    + intros s [sX [<- HsX]].
-      apply (HsX j).
-    + intros m Him.
-      exists (exist _ m Him).
-      reflexivity.
-    + intros l s iom ((i, li) & sX & HlX & <- & Hv).
-      exists sX.
-      split; [reflexivity|].
-      unfold composite_project_label in HlX.
-      simpl in *.
-      case_decide; [|congruence].
-      subst i.
-      apply Some_inj in HlX.
-      cbv in HlX.
-      subst li.
+      cbn; unfold lift_to_composite_state at 1; rewrite state_update_eq.
+      intros Ht; setoid_rewrite Ht.
+      rewrite state_update_eq; reflexivity.
+  - cbn; apply basic_VLSM_strong_incl.
+    + intros s [sX [<- HsX]]; cbn. apply HsX.
+    + intros m Him; cbn. exists (exist _ m Him). reflexivity.
+    + intros l s iom ((i, li) & sX & HlX & <- & Hv); cbn.
+      exists sX; split; [reflexivity|].
+      unfold composite_project_label in HlX; cbn in *.
+      case_decide; [| congruence].
+      subst i; apply Some_inj in HlX; cbn in HlX; subst li.
       assumption.
-    + intros l s iom s' oom.
-      cbn.
-      unfold lift_to_composite_state at 1.
-      rewrite state_update_eq.
+    + intros l s iom s' oom; cbn.
+      unfold lift_to_composite_state at 1;
+      rewrite state_update_eq;
       destruct (vtransition _ _ _) as (si', om').
-      rewrite state_update_eq.
-      intuition.
+      rewrite state_update_eq; trivial.
 Qed.
 
 Lemma component_label_projection_lift
@@ -330,11 +322,7 @@ Lemma component_label_projection_lift
     (lift_to_composite_label IM j).
 Proof.
   intros lj.
-  unfold composite_project_label.
-  case_decide as Hj; [|contradiction].
-  cbn in Hj |- *.
-  replace Hj with (@eq_refl index j) by (apply Eqdep_dec.UIP_dec; assumption).
-  reflexivity.
+  apply composite_project_label_eq.
 Qed.
 
 Lemma component_state_projection_lift

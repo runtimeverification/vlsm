@@ -422,7 +422,7 @@ Section has_been_received_lifting.
 (** ** Lifting the [HasBeenReceivedCapability] *)
 
 Context
-  {Hbr : HasBeenReceivedCapability X}
+  `{HasBeenReceivedCapability message X}
   .
 
 (** We define [has_been_received] for the [equivocator_vlsm] as being received by any
@@ -437,26 +437,19 @@ Global Instance equivocator_has_been_received_dec
 Lemma equivocator_has_been_received_stepwise_props
   : has_been_received_stepwise_props (vlsm := equivocator_vlsm) equivocator_has_been_received.
 Proof.
-  assert (Hreceived_stepwise : oracle_stepwise_props (field_selector input) (has_been_received X)).
-  { destruct Hbr.  apply stepwise_props_from_trace; assumption. }
-  specialize (equivocator_oracle_stepwise_props (field_selector input)) as Hlift.
-  spec Hlift. { intros. simpl. split; exact id. }
-  specialize (Hlift _ Hreceived_stepwise).
-  constructor; [apply Hlift|].
-  intros. simpl.
-  destruct Hlift as [_ Hlift].
-  specialize (Hlift _ _ _ _ _ H msg).
-  rewrite Hlift. clear -H.
-  unfold equivocator_selector. simpl.
-  destruct l; [|intuition..].
-  destruct H as [[_ [_ [_ Him]]] _].
-  simpl in Him. subst.
-  intuition. congruence.
+  eapply oracle_stepwise_props_change_selector.
+  - apply equivocator_oracle_stepwise_props
+    ; [|apply has_been_received_stepwise_from_trace].
+    cbv; intuition.
+  - intros s item; destruct item, l; cbn.
+    2,3:intuition.
+    intros [(_ & _ & _ & Him) _]; simpl in Him; subst.
+    intuition congruence.
 Qed.
 
 (** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm].
 *)
-Definition equivocator_HasBeenReceivedCapability
+Global Instance equivocator_HasBeenReceivedCapability
   : HasBeenReceivedCapability equivocator_vlsm
   := HasBeenReceivedCapability_from_stepwise (vlsm := equivocator_vlsm)
     equivocator_has_been_received_dec
@@ -469,7 +462,7 @@ Section has_been_sent_lifting.
 (** ** Lifting the [HasBeenSentCapability] *)
 
 Context
-  {Hbs : HasBeenSentCapability X}
+  `{HasBeenSentCapability message X}
   .
 
 (** We define [has_been_sent] for the [equivocator_vlsm] as being sent by any
@@ -484,26 +477,19 @@ Global Instance equivocator_has_been_sent_dec
 Lemma equivocator_has_been_sent_stepwise_props
   : has_been_sent_stepwise_props (vlsm := equivocator_vlsm) equivocator_has_been_sent.
 Proof.
-  assert (Hsent_stepwise : oracle_stepwise_props (field_selector output) (has_been_sent X)).
-  { destruct Hbs.  apply stepwise_props_from_trace; assumption. }
-  specialize (equivocator_oracle_stepwise_props (field_selector output)) as Hlift.
-  spec Hlift. { intros. simpl. split; exact id. }
-  specialize (Hlift _ Hsent_stepwise).
-  constructor; [apply Hlift|].
-  intros. simpl.
-  destruct Hlift as [_ Hlift].
-  specialize (Hlift _ _ _ _ _ H msg).
-  rewrite Hlift. clear -H.
-  unfold equivocator_selector. simpl.
-  destruct l; [|intuition..].
-  destruct H as [_ Ht].
-  inversion Ht. subst.
-  intuition. congruence.
+  eapply oracle_stepwise_props_change_selector.
+  - apply equivocator_oracle_stepwise_props
+    ; [|apply has_been_sent_stepwise_from_trace].
+    cbv; intuition.
+  - intros s item; destruct item, l; cbn.
+    2,3:intuition.
+    intros [_ Ht]; inversion_clear Ht.
+    intuition congruence.
 Qed.
 
 (** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm].
 *)
-Definition equivocator_HasBeenSentCapability
+Global Instance equivocator_HasBeenSentCapability
   : HasBeenSentCapability equivocator_vlsm
   := HasBeenSentCapability_from_stepwise (vlsm := equivocator_vlsm)
     equivocator_has_been_sent_dec
@@ -520,6 +506,8 @@ Context
   (message_eq : EqDecision message)
   (Hbeen_sent_X := @ComputableSentMessages_HasBeenSentCapability message X Hsent_messages message_eq)
   .
+
+Existing Instance Hbeen_sent_X.
 
 (** We define the [sent_messages_fn] for the [equivocator_vlsm] as the
 union of all [sent_messages_fn] for its internal machines.
@@ -631,8 +619,8 @@ Program Definition equivocator_ComputableSentMessages
 Next Obligation.
   intros.
   apply has_been_sent_consistency; [| assumption].
-  apply (equivocator_HasBeenSentCapability (Hbs := Hbeen_sent_X)).
-Defined.
+  eapply equivocator_HasBeenSentCapability.
+Qed.
 
 End ComputableSentMessages_lifting.
 

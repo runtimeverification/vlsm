@@ -9,8 +9,7 @@ Section sub_composition.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (sub_index_list : list index)
   .
@@ -56,6 +55,23 @@ Proof.
   intros. subst. apply state_update_eq.
 Qed.
 
+Lemma sub_IM_state_update_neq
+  (s : composite_state sub_IM)
+  (i : index)
+  (ei : sub_index_prop i)
+  (si : vstate (IM i))
+  (j : index)
+  (ej : sub_index_prop j)
+  : i <> j ->
+      state_update sub_IM s (dec_exist _ i ei) si (dec_exist _ j ej)
+        =
+      s (dec_exist _ j ej).
+Proof.
+  intro Hneq.
+  apply state_update_neq.
+  setoid_rewrite dsig_eq.
+  simpl. congruence.
+Qed.
 
 Definition free_sub_vlsm_composition : VLSM message
   := free_composite_vlsm sub_IM.
@@ -335,6 +351,24 @@ Proof.
   assumption.
 Qed.
 
+Lemma induced_sub_projection_transition_is_composite l s om
+  : vtransition induced_sub_projection l (s, om) = composite_transition sub_IM l (s, om).
+Proof.
+  destruct l as (sub_i, li).
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+  cbn; unfold sub_IM, lift_sub_state;
+  rewrite lift_sub_state_to_eq with (Hi := Hi); cbn;
+  destruct (vtransition _ _ _) as (si', om').
+  f_equal; extensionality sub_k.
+  destruct_dec_sig sub_k k Hk Heqsub_k; subst.
+  unfold composite_state_sub_projection; cbn.
+  destruct (decide (i = k)); subst.
+  + rewrite state_update_eq, sub_IM_state_update_eq.
+    reflexivity.
+  + rewrite sub_IM_state_update_neq, state_update_neq by congruence.
+    apply lift_sub_state_to_eq.
+Qed.
+
 End sec_induced_sub_projection.
 
 Section induced_sub_projection_subsumption.
@@ -366,112 +400,32 @@ Definition finite_trace_sub_projection
 
 Section sub_projection_with_no_equivocation_constraints.
 
-Definition sub_has_been_sent_capabilities
-  (has_been_sent_capabilities : forall i : index, (HasBeenSentCapability (IM i)))
-  : forall i : sub_index, (HasBeenSentCapability (sub_IM i))
-  := fun sub_i => has_been_sent_capabilities (proj1_sig sub_i).
-
-Definition sub_has_been_received_capabilities
-  (has_been_received_capabilities : forall i : index, (HasBeenReceivedCapability (IM i)))
-  : forall i : sub_index, (HasBeenReceivedCapability (sub_IM i))
-  := fun sub_i => has_been_received_capabilities (proj1_sig sub_i).
-
-Existing Instance  IndEqDec.
-
 Context
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (has_been_sent_capabilities : forall i : index, (HasBeenSentCapability (IM i)))
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
+  `{forall i : index, (HasBeenSentCapability (IM i))}
   (Free := free_composite_vlsm IM)
   (Sub_Free := free_composite_vlsm sub_IM)
   (X := composite_vlsm IM constraint)
   (Pre := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
   .
 
-Fixpoint select_sub_indices
-  (l : list index)
-  : list sub_index
-  :=
-  match l with
-  | [] => []
-  | h :: t =>
-    let t' := select_sub_indices t in
-    match decide (sub_index_prop h) with
-    | left e => dec_exist _ h e :: t'
-    | _ => t'
-    end
-  end.
-
-Definition sub_index_listing : list sub_index := select_sub_indices index_listing.
-
-Lemma in_select_sub_indices
-  (a: index)
-  (s: sub_index_prop a)
-  (l: list index)
-  : (dec_exist sub_index_prop a s) ∈ (select_sub_indices l) <-> a ∈ l.
-Proof.
-  induction l; [simpl; intuition; inversion H|].
-  simpl.
-  destruct (decide (sub_index_prop a0)); [|rewrite IHl].
-  - rewrite 2!elem_of_cons.
-    split; intros [Heq | H].
-    * left; apply dec_sig_eq_iff in Heq; assumption.
-    * right; apply IHl; assumption.
-    * left; apply dec_sig_eq_iff; assumption.
-    * right; apply IHl; assumption.
-  - rewrite !elem_of_cons.
-    split; [intuition|].
-    intros [Heq | H]; [|assumption].
-    subst. contradiction.
-Qed.
-
-Lemma select_sub_indices_nodup l (Hl : NoDup l) : NoDup (select_sub_indices l).
-Proof.
-  induction l; [constructor|].
-  inversion Hl. subst.
-  simpl. spec IHl H2.
-  destruct (decide (sub_index_prop a)); [|assumption].
-  constructor; [|assumption].
-  intro contra. contradict H1.
-  apply in_select_sub_indices in contra.
-  assumption.
-Qed.
-
-Lemma finite_sub_index : Listing sub_index_listing.
-Proof.
-  unfold sub_index_listing.
-  clear -finite_index.
-  destruct finite_index as [Hnodup Hfinite].
-  split.
-  - apply NoDup_ListNoDup in Hnodup.
-    apply NoDup_ListNoDup.
-    revert Hnodup.
-    apply select_sub_indices_nodup.
-  - intros subi. destruct_dec_sig subi i Hi Heq.
-    subst.
-    apply elem_of_list_In.
-    apply in_select_sub_indices.
-    apply elem_of_list_In.
-    apply Hfinite.
+Program Definition sub_index_list_annotate : list sub_index :=
+  list_annotate _ sub_index_list _.
+Next Obligation.
+  apply Forall_forall.
+  intuition.
 Qed.
 
 Global Instance stdpp_finite_sub_index
-  {Hfinite : finite.Finite index}
   : finite.Finite sub_index.
 Proof.
-  exists (select_sub_indices (enum index)).
-  - apply select_sub_indices_nodup. apply Hfinite.
-  - intro sub_x. destruct_dec_sig sub_x x Hx Heqsub_x.
-    subst.
-    apply in_select_sub_indices.
-    apply Hfinite.
+  exists (remove_dups sub_index_list_annotate).
+  - apply NoDup_remove_dups.
+  - intro sub_x.
+    apply elem_of_remove_dups, elem_of_list_annotate.
+    destruct_dec_sig sub_x x Hx Heqsub_x; subst.
+    cbn; red in Hx. assumption.
 Qed.
-
-Local Instance Sub_Free_HasBeenSentCapability
-  : HasBeenSentCapability Sub_Free
-  :=
-  free_composite_HasBeenSentCapability sub_IM finite_sub_index (sub_has_been_sent_capabilities has_been_sent_capabilities).
 
 Definition finite_trace_sub_projection_app
   (tr1 tr2 : list (composite_transition_item IM))
@@ -555,7 +509,7 @@ Qed.
 Context
   (seed : message -> Prop)
   (sub_constraint : composite_label sub_IM -> composite_state sub_IM * option message -> Prop)
-  (Xj := composite_no_equivocation_vlsm_with_pre_loaded sub_IM (free_constraint sub_IM) (sub_has_been_sent_capabilities has_been_sent_capabilities) seed )
+  (Xj := composite_no_equivocation_vlsm_with_pre_loaded sub_IM (free_constraint sub_IM) seed )
   .
 
 Lemma Xj_incl_Pre_Sub_Free
@@ -566,7 +520,7 @@ Proof.
   specialize
     (preloaded_constraint_subsumption_incl sub_IM
       (no_equivocations_additional_constraint_with_pre_loaded sub_IM
-        (free_constraint sub_IM) (sub_has_been_sent_capabilities has_been_sent_capabilities)
+        (free_constraint sub_IM)
         seed)
       (free_constraint sub_IM)
     ) as Hincl.
@@ -652,20 +606,20 @@ Proof.
   { apply finite_valid_trace_last_pstate in IHtr. subst. assumption. }
   simpl.
   unfold pre_VLSM_projection_transition_item_project, composite_label_sub_projection_option.
-  case_decide; [|constructor; assumption].
+  case_decide as Hlx; [|constructor; assumption].
   apply (finite_valid_trace_singleton Xj).
   inversion Hx; subst. simpl in *.
   destruct Ht as [Hv Ht].
-  specialize (transition_sub_projection _ _ _ _ _ Ht H)
+  specialize (transition_sub_projection _ _ _ _ _ Ht Hlx)
     as Htj.
   destruct Hv as [_ [_ [Hv Hc]]].
-  specialize (valid_sub_projection _ _ _ Hv H)
+  specialize (valid_sub_projection _ _ _ Hv Hlx)
     as Hvj.
   rewrite <- (finite_trace_sub_projection_last_state s tr Htr) in Htj, Hvj.
   repeat split; [assumption | | assumption | | assumption].
   - destruct iom as [m|]; [|apply (option_valid_message_None Xj)].
     apply (option_valid_message_Some Xj).
-    clear -Hmsg m H IHtr tr.
+    clear -Hmsg m Hlx IHtr tr.
     remember {| input := Some m |} as x.
     specialize (Hmsg tr x []).
     assert (Hx : from_sub_projection x).
@@ -693,7 +647,7 @@ Proof.
       destruct (composite_label_sub_projection_option _); [|congruence].
       inversion HitemX.
       assumption.
-  - clear -Hmsg Sub_Free finite_index Hlst His IHtr.
+  - clear -Hmsg Sub_Free Hlst His IHtr.
     destruct iom as [m|]; [|exact I].
     simpl in *.
     remember {| input := Some m |} as x.
@@ -709,35 +663,34 @@ Proof.
     ; [right; assumption|].
     left.
     remember (finite_trace_last (composite_state_sub_projection _) _) as lst.
-    specialize (proper_sent Sub_Free lst (HasBeenSentCapability := Sub_Free_HasBeenSentCapability)) as Hproper.
-    assert (Hlstp : valid_state_prop (pre_loaded_with_all_messages_vlsm Sub_Free) lst).
+    assert (Hlst_pre : valid_state_prop (pre_loaded_with_all_messages_vlsm Sub_Free) lst).
     { revert Hlst. apply VLSM_incl_valid_state.  apply Xj_incl_Pre_Sub_Free.  }
-    spec Hproper Hlstp.
-    apply Hproper.
-    apply has_been_sent_consistency; [apply Sub_Free_HasBeenSentCapability| assumption| ].
+    apply composite_proper_sent; [assumption|].
+    apply has_been_sent_consistency; [typeclasses eauto|assumption|].
     exists (composite_state_sub_projection s), (finite_trace_sub_projection tr).
     split.
-    { split;[|assumption].
+    + split;[|assumption].
        apply (VLSM_incl_finite_valid_trace_from_to Xj_incl_Pre_Sub_Free).
-       apply valid_trace_add_last.
-       assumption.
-       symmetry;assumption.
-    }
-    unfold trace_has_message.
-    apply Exists_exists.
-    specialize
-      (@pre_VLSM_projection_transition_item_project_is_Some _ (composite_type IM) _
-        composite_label_sub_projection_option composite_state_sub_projection
-        item Hsub_item)
-      as [itemX HitemX].
-    exists itemX.
-    split.
-    + apply elem_of_map_option. exists item.
-      split; assumption.
-    + unfold pre_VLSM_projection_transition_item_project in HitemX.
-      destruct (composite_label_sub_projection_option _); [|congruence].
-      inversion HitemX.
-      assumption.
+       apply valid_trace_add_last; auto.
+    + apply Exists_exists.
+      assert
+        (Hsome: is_Some
+          (pre_VLSM_projection_transition_item_project
+            (composite_type IM) (composite_type sub_IM)
+            composite_label_sub_projection_option composite_state_sub_projection
+            item))
+        by (apply pre_VLSM_projection_transition_item_project_is_Some; assumption).
+      exists (is_Some_proj Hsome).
+      destruct (pre_VLSM_projection_transition_item_project _ _ _ _ _) eqn:Hproj;
+      [|contradict Hsome; apply is_Some_None].
+      cbn.
+      split.
+      * apply elem_of_map_option. exists item.
+        split; assumption.
+      * unfold pre_VLSM_projection_transition_item_project in Hproj.
+        destruct (composite_label_sub_projection_option _); [|congruence].
+        inversion Hproj.
+        assumption.
 Qed.
 
 Lemma valid_state_sub_projection
@@ -798,9 +751,8 @@ Lemma lift_sub_state_initial
 Proof.
   intros i.
   unfold lift_sub_state, lift_sub_state_to.
-  case_decide.
-  - specialize (Hs (dec_exist _ i H)).
-    assumption.
+  case_decide as Hi.
+  - apply (Hs (dexist i Hi)).
   - destruct (vs0 _). assumption.
 Qed.
 
@@ -813,9 +765,8 @@ Lemma lift_sub_state_to_initial
 Proof.
   intros i.
   unfold lift_sub_state_to.
-  case_decide.
-  - specialize (Hs (dec_exist _ i H)).
-    assumption.
+  case_decide as Hi.
+  - apply (Hs (dexist i Hi)).
   - apply Hs0.
 Qed.
 
@@ -836,13 +787,13 @@ Lemma lift_sub_valid l s om
 Proof.
   revert Hv.
   destruct l as (sub_i, li).
-  destruct_dec_sig sub_i i H Heqsub_i.
+  destruct_dec_sig sub_i i Hi Heqsub_i.
   simpl.
   unfold vvalid. unfold lift_sub_state, lift_sub_state_to.
   simpl.
   subst. simpl.
   unfold sub_IM in li. simpl in li.
-  case_decide; [|contradiction].
+  case_decide as _Hi; [|contradiction].
   match goal with
   |- valid _ (s ?i1, _) -> valid _ (s ?i2, _)
     => replace (s i1) with (s i2)
@@ -863,10 +814,10 @@ Proof.
   simpl.
   subst. simpl.
   unfold sub_IM in li. simpl in li.
-  case_decide; [|contradiction].
-  replace (s (dec_exist sub_index_prop i H)) with (s (dexist i Hi))
+  case_decide as _Hi; [|contradiction].
+  replace (s (dec_exist sub_index_prop i _Hi)) with (s (dexist i Hi))
     by apply sub_IM_state_pi.
-  clear H.
+  clear _Hi.
   destruct (transition _ _) as (si', _om').
   inversion_clear 1.
   f_equal.
@@ -909,8 +860,7 @@ Section lift_sub_state_to_preloaded.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (equivocators : list index)
   (Free := free_composite_vlsm IM)
@@ -1083,12 +1033,13 @@ valid state is a valid trace for the composition of all nodes.
 Lemma PreSubFree_PreFree_weak_full_projection
   : VLSM_weak_full_projection PreSubFree PreFree (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
 Proof.
-  apply basic_VLSM_weak_full_projection; intro; intros.
+  apply basic_VLSM_weak_full_projection.
   - split; [|exact I].
-    apply lift_sub_to_valid. apply Hv.
-  - apply lift_sub_to_transition. apply H.
-  - apply preloaded_lift_sub_state_to_initial_state; assumption.
-  - apply any_message_is_valid_in_preloaded.
+    apply lift_sub_to_valid, Hv.
+  - intros l s om s' om' Hv.
+    apply lift_sub_to_transition, Hv.
+  - apply preloaded_lift_sub_state_to_initial_state.
+  - intro; intros; apply any_message_is_valid_in_preloaded.
 Qed.
 
 (** If the composition constraint only depends on the projection sub-state,
@@ -1108,55 +1059,44 @@ Lemma induced_sub_projection_lift
     (lift_sub_label IM equivocators)
     (lift_sub_state IM equivocators).
 Proof.
-  apply basic_VLSM_full_projection; intro; intros.
-  - destruct Hv as [_ [_ [[i li] [sX [Heql [Heqs [HsX [Hom [Hv Hc]]]]]]]]].
-    cbn in Hv, Hc.
-    unfold composite_label_sub_projection_option in Heql.
-    simpl in Heql.
-    case_decide; [|congruence].
-    inversion Heql. subst l. clear Heql.
-    cbn. unfold constrained_composite_valid. cbn.
-    unfold lift_sub_state.
-    rewrite lift_sub_state_to_eq with (Hi := H).
-    subst.
+  apply basic_VLSM_full_projection.
+  - intros l s om (_ & _ & (i, li) & sX & Heql & Heqs & HsX & Hom & Hv & Hc) _ _.
+    unfold composite_label_sub_projection_option in Heql; cbn in Heql.
+    case_decide as Hi; [| congruence].
+    apply Some_inj in Heql; subst l; cbn.
+    unfold constrained_composite_valid, lift_sub_state; cbn;
+    rewrite lift_sub_state_to_eq with (Hi0 := Hi); subst.
     split; [assumption|].
-    revert Hc.
-    apply Hconstraint_consistency.
-    symmetry.
-    apply composite_state_sub_projection_lift_to.
-  - apply proj2 in H. revert H. cbn.
-    destruct (vtransition _ _ _) as (si', _om').
-    inversion 1. subst. clear H.
-    f_equal.
-    extensionality i.
-    destruct l as (sub_j, lj).
-    destruct_dec_sig sub_j j Hj Heqsub_j.
-    subst.
-    simpl.
-    destruct (decide (i = j)).
-    + subst. rewrite state_update_eq.
-      unfold lift_sub_state.
-      rewrite lift_sub_state_to_eq with (Hi := Hj).
-      unfold composite_state_sub_projection.
-      simpl.
-      rewrite state_update_eq.
-      reflexivity.
+    eapply Hconstraint_consistency; [|eassumption].
+    symmetry; apply composite_state_sub_projection_lift_to.
+  - intros l s om s' om' [_ Ht].
+    revert Ht; cbn;
+    destruct (vtransition _ _ _) as (si', _om');
+    inversion_clear 1.
+    f_equal; extensionality i.
+    destruct l as (sub_j, lj);
+    destruct_dec_sig sub_j j Hj Heqsub_j; subst; cbn;
+    destruct (decide (i = j)); subst.
+    + unfold lift_sub_state.
+      rewrite state_update_eq, lift_sub_state_to_eq with (Hi := Hj).
+      unfold composite_state_sub_projection; cbn.
+      rewrite state_update_eq; reflexivity.
     + rewrite state_update_neq by congruence.
       destruct (decide (i ∈ equivocators)).
       * unfold lift_sub_state.
         rewrite !lift_sub_state_to_eq with (Hi := e).
-        unfold composite_state_sub_projection. simpl.
+        unfold composite_state_sub_projection; cbn.
         rewrite state_update_neq by congruence.
         rewrite lift_sub_state_to_eq with (Hi := e).
         reflexivity.
       * unfold lift_sub_state, lift_sub_state_to.
-        destruct (decide _); [contradiction|reflexivity].
-  - apply (lift_sub_state_initial IM).
-    destruct H as [sX [<- HsX]].
-    intro sub_i.
-    destruct_dec_sig sub_i i Hi Heqsub_i.
-    subst. apply HsX.
-  - assumption.
+        case_decide; [contradiction | reflexivity].
+  - intros s Hs.
+    apply (lift_sub_state_initial IM).
+    destruct Hs as [sX [<- HsX]].
+    intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+    apply HsX.
+  - intro; intros; assumption.
 Qed.
 
 (** A specialization of [basic_projection_induces_friendliness] for
@@ -1171,8 +1111,7 @@ Lemma induced_sub_projection_friendliness
     (lift_sub_state IM equivocators))
   : projection_friendly_prop (induced_sub_projection_is_projection IM equivocators constraint).
 Proof.
-  eapply (basic_projection_induces_friendliness (composite_vlsm IM constraint)).
-  assumption.
+  eapply basic_projection_induces_friendliness; assumption.
   Unshelve.
   - apply induced_sub_projection_transition_consistency_None.
   - apply composite_label_sub_projection_option_lift.
@@ -1465,7 +1404,7 @@ Proof.
 Qed.
 
 Context
-  (sub_IM_Hbs : forall sub_i, HasBeenSentCapability (sub_IM sub_i))
+  `{forall sub_i, HasBeenSentCapability (sub_IM sub_i)}
   .
 
 Lemma sub_IM_has_been_sent_iff_by_sender s
@@ -1473,33 +1412,27 @@ Lemma sub_IM_has_been_sent_iff_by_sender s
   m v
   (Hsender : sender m = Some v)
   (Hv : A v ∈ indices)
-  : composite_has_been_sent sub_IM sub_IM_Hbs s m ->
-    @has_been_sent _ _ (sub_IM_Hbs (dexist (A v) Hv)) (s (dexist (A v) Hv)) m.
+  : composite_has_been_sent sub_IM s m ->
+    has_been_sent (sub_IM (dexist (A v) Hv)) (s (dexist (A v) Hv)) m.
 Proof.
   apply valid_state_has_trace in Hs as Htr.
   destruct Htr as [is [tr Htr]].
-  specialize
-    (has_been_sent_iff_by_sender sub_IM
-      sub_IM_Hbs sub_IM_sender_safety Htr)
-    as Hsent_m.
-  specialize (Hsent_m m (dec_exist (fun v => A v ∈ indices) _ Hv)).
-  spec Hsent_m.
+  assert (Hsub_sender : sub_IM_sender m = Some (dexist v Hv)).
   { unfold sub_IM_sender. rewrite Hsender.
     case_decide; [|contradiction].
     f_equal.
-    apply dsig_eq; intuition.
+    apply dsig_eq; reflexivity.
   }
-  rewrite Hsent_m.
-  clear -Hsender Hs.
-  unfold sub_IM_A, sub_IM.
+  erewrite has_been_sent_iff_by_sender
+  ; [|apply sub_IM_sender_safety|eassumption|eassumption].
+  unfold sub_IM_A, sub_IM, SubProjectionTraces.sub_IM.
   cbn.
   remember (s (dexist _ _)) as sAv.
   replace sAv with (s (dexist (A v) Hv))
     by (subst; apply (sub_IM_state_pi IM)).
   apply has_been_sent_irrelevance.
   subst.
-  apply (preloaded_valid_state_projection sub_IM (dec_exist (sub_index_prop indices) (A v) Hv))
-    in Hs.
+  apply preloaded_valid_state_projection with (j := dexist (A v) Hv) in Hs.
   assumption.
 Qed.
 
@@ -1522,7 +1455,7 @@ Definition sub_IM_not_equivocating_constraint
       match decide (i ∈ indices) with
       | left non_byzantine_i =>
         let sub_i := dec_exist (sub_index_prop indices) i non_byzantine_i in
-        @has_been_sent _ _ (sub_IM_Hbs sub_i) (s i) m
+        has_been_sent (sub_IM sub_i) (s i) m
       | _ => True
       end
     end
@@ -1581,7 +1514,7 @@ Lemma sub_IM_no_equivocation_preservation
   l s om
   (Hv : vvalid (induced_sub_projection IM indices sub_IM_not_equivocating_constraint)
     l (s, om))
-  : composite_no_equivocations_except_from sub_IM sub_IM_Hbs
+  : composite_no_equivocations_except_from sub_IM
       non_sub_index_authenticated_message l (s, om).
 Proof.
   destruct om as [m|]; [|exact I].
@@ -1752,6 +1685,215 @@ Qed.
 
 End sub_composition_all.
 
+Section sub_composition_element.
+
+(** ** Relating a sub-composition with one of its components
+
+*** A component can be lifted to a free subcomposition *)
+
+Context
+  {message : Type}
+  {index : Type}
+  {IndEqDec : EqDecision index}
+  (IM : index -> VLSM message)
+  (indices : set index)
+  (j : index)
+  (Hj : j ∈ indices)
+  .
+
+Definition sub_element_label (l : vlabel (IM j))
+  : composite_label (sub_IM IM indices) :=
+  existT (dexist j Hj) l.
+
+Definition sub_element_state (s : vstate (IM j)) sub_i
+  : vstate (sub_IM IM indices sub_i) :=
+  match (decide (` sub_i = j)) with
+  | left e =>
+    eq_rect_r (λ j : index, vstate (IM j)) s e
+  | right _ => ` (vs0 (IM (` sub_i)))
+  end.
+
+Lemma sub_element_state_eq s H_j
+  : sub_element_state s (dexist j H_j) = s.
+Proof.
+  unfold sub_element_state; cbn.
+  rewrite decide_left with (HP := eq_refl); cbn.
+  reflexivity.
+Qed.
+
+Lemma sub_element_state_neq s i Hi
+  : i <> j -> sub_element_state s (dexist i Hi) = ` (vs0 (IM i)).
+Proof.
+  intros Hij.
+  unfold sub_element_state; cbn.
+  case_decide; congruence.
+Qed.
+
+Lemma preloaded_sub_element_full_projection
+  (P Q : message -> Prop)
+  (PimpliesQ : forall m, P m -> Q m)
+  (PrePXj := pre_loaded_vlsm (IM j) P)
+  (PreQSubFree := pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q)
+  : VLSM_full_projection PrePXj PreQSubFree sub_element_label sub_element_state.
+Proof.
+  apply basic_VLSM_full_projection_preloaded_with; [assumption|..].
+  - intros l s om Hv.
+    split; [cbn |exact I].
+    rewrite sub_element_state_eq with (H_j := Hj).
+    assumption.
+  - intros l s om s' om'; cbn.
+    rewrite sub_element_state_eq with (H_j := Hj).
+    intro Ht; replace (vtransition _ _ _) with (s', om'); f_equal.
+    extensionality sub_i.
+    destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+    destruct (decide (i = j)); subst.
+    + rewrite sub_IM_state_update_eq, sub_element_state_eq.
+      reflexivity.
+    + rewrite sub_IM_state_update_neq, !sub_element_state_neq by congruence.
+      reflexivity.
+  - intros sj Hsj sub_i.
+    destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+    destruct (decide (i = j)); subst.
+    + rewrite sub_element_state_eq; assumption.
+    + rewrite sub_element_state_neq by congruence.
+      destruct (vs0 (IM i)); assumption.
+  - intros m Hm.
+    exists (dexist j Hj), (exist _ m Hm).
+    reflexivity.
+Qed.
+
+Lemma valid_preloaded_lifts_can_be_emitted
+  (P Q : message -> Prop)
+  (HPvalid : forall dm, P dm -> valid_message_prop (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q) dm)
+  : forall m, can_emit (pre_loaded_vlsm (IM j) P) m ->
+    can_emit (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q) m.
+Proof.
+  intros m Hm.
+  eapply VLSM_incl_can_emit.
+  - apply pre_loaded_vlsm_incl_relaxed with (P0 := fun m => Q m \/ P m).
+    intuition.
+  - eapply VLSM_full_projection_can_emit; [|eassumption].
+    apply preloaded_sub_element_full_projection.
+    intuition.
+Qed.
+
+(** *** A subcomposition can be projected to one component
+
+In the following we define the [projection_induced_vlsm] to a single component
+of the [induced_sub_projection] of a constrained composition so a subset of its
+components.
+
+Note that, in general, this is not trace-equivalent with the direclty obtained
+[projection_induced_vlsm] of the constrained composition to the corresponding
+component, as the intermediate induced projection might generate more
+[input_valid_transitions] to be considered as a basis for the next proejction.
+*)
+
+Definition sub_label_element_project
+  (l : composite_label (sub_IM IM indices))
+  : option (vlabel (IM j)) :=
+  match decide (j = ` (projT1 l)) with
+  | left e => Some (eq_rect_r (fun j => vlabel (IM j)) (projT2 l) e)
+  | in_right => None
+  end.
+
+Definition sub_state_element_project
+  (s : composite_state (sub_IM IM indices))
+  : vstate (IM j) := s (dexist j Hj).
+
+Lemma sub_transition_element_project_None
+  : forall lX, sub_label_element_project lX = None ->
+    forall s om s' om', composite_transition (sub_IM IM indices) lX (s, om) = (s', om') ->
+    sub_state_element_project s' = sub_state_element_project s.
+Proof.
+  intros (sub_i,li) HlX s om s' om' HtX.
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+  unfold sub_label_element_project in HlX; cbn in HlX, HtX.
+  case_decide as Hij; [congruence|].
+  destruct (vtransition _ _ _) as (si', _om').
+  inversion_clear HtX.
+  unfold sub_state_element_project.
+  apply sub_IM_state_update_neq.
+  congruence.
+Qed.
+
+Lemma sub_element_label_project
+  : forall lY, sub_label_element_project (sub_element_label lY) = Some lY.
+Proof.
+  intros lY.
+  unfold sub_element_label, sub_label_element_project; cbn.
+  rewrite decide_left with (HP := eq_refl); cbn.
+  reflexivity.
+Qed.
+
+Lemma sub_element_state_project
+  : forall sY, sub_state_element_project (sub_element_state sY) = sY.
+Proof.
+  intros sY.
+  unfold sub_element_state, sub_state_element_project; cbn.
+  rewrite decide_left with (HP := eq_refl); cbn.
+  reflexivity.
+Qed.
+
+Lemma sub_transition_element_project_Some :
+  forall lX1 lX2 lY,
+    sub_label_element_project lX1 = Some lY ->
+    sub_label_element_project lX2 = Some lY ->
+  forall sX1 sX2,
+    sub_state_element_project sX1 = sub_state_element_project sX2 ->
+  forall iom sX1' oom1,
+    composite_transition (sub_IM IM indices) lX1 (sX1, iom) = (sX1', oom1) ->
+  forall sX2' oom2,
+    composite_transition (sub_IM IM indices) lX2 (sX2, iom) = (sX2', oom2) ->
+      sub_state_element_project sX1' = sub_state_element_project sX2' /\ oom1 = oom2.
+Proof.
+  intros (sub_j1, lj1) (sub_j2, lj2) lj.
+  destruct_dec_sig sub_j1 j1 Hj1 Heqsub_j1;
+  destruct_dec_sig sub_j2 j2 Hj2 Heqsub_j2; subst.
+  unfold sub_label_element_project; cbn.
+  do 2 (case_decide; inversion 1); subst; cbn in *; subst.
+  unfold sub_state_element_project.
+  intros sX1 sX2 Hsjeq iom.
+  replace (sX1 (dec_exist (sub_index_prop indices) j Hj1)) with (sX1 (dexist j Hj))
+    by apply sub_IM_state_pi.
+  replace (sX2 (dec_exist (sub_index_prop indices) j Hj2)) with (sX2 (dexist j Hj))
+    by apply sub_IM_state_pi.
+  rewrite <- Hsjeq.
+  unfold sub_IM; cbn.
+  destruct (vtransition _ _ _) as (si', om').
+  do 2 inversion_clear 1.
+  split; [|reflexivity].
+  setoid_rewrite sub_IM_state_update_eq.
+  reflexivity.
+Qed.
+
+Definition induced_sub_element_projection constraint : VLSM message :=
+  projection_induced_vlsm
+    (induced_sub_projection IM indices constraint) (type (IM j))
+    sub_label_element_project sub_state_element_project
+    sub_element_label sub_element_state.
+
+Lemma induced_sub_element_projection_is_projection constraint
+  : VLSM_projection
+    (induced_sub_projection IM indices constraint)
+    (induced_sub_element_projection constraint)
+    sub_label_element_project sub_state_element_project.
+Proof.
+  apply projection_induced_vlsm_is_projection.
+  - intros lX HlX s om s' om' [_ Ht].
+    apply sub_transition_element_project_None with lX om om'; [assumption|].
+    setoid_rewrite <- induced_sub_projection_transition_is_composite
+      with (constraint0 := constraint).
+    assumption.
+  - apply basic_weak_projection_transition_consistency_Some.
+    + intro; apply sub_element_label_project.
+    + intro; apply sub_element_state_project.
+    + intro; setoid_rewrite induced_sub_projection_transition_is_composite.
+      apply sub_transition_element_project_Some.
+Qed.
+
+End sub_composition_element.
+
 Section sub_composition_preloaded_lift.
 
 Context
@@ -1905,19 +2047,17 @@ Context
   (selection_complement : set index := set_diff (enum index) selection)
   .
 
-Lemma update_IM_complement_Hbs
-  (Hbs : forall i : index, HasBeenSentCapability (IM i))
+Global Instance update_IM_complement_Hbs
+  `{forall i : index, HasBeenSentCapability (IM i)}
   : forall sub_i : sub_index selection_complement,
     HasBeenSentCapability (sub_IM updated_IM selection_complement sub_i).
 Proof.
   intros sub_i.
   unfold sub_IM, updated_IM, update_IM.
-  case_decide; [|apply Hbs].
-  exfalso.
-  destruct_dec_sig sub_i i Hi Heqsub_i.
-  subst. simpl in H0.
-  apply set_diff_elim2 in Hi.
-  contradiction.
+  case_decide as Hi; [|typeclasses eauto].
+  contradict Hi.
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i; simpl.
+  eapply set_diff_elim2; eassumption.
 Qed.
 
 End update_IM.
