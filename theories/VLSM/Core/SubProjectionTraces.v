@@ -20,8 +20,7 @@ Local Program Instance sub_index_prop_dec
   (i : index)
   : Decision (sub_index_prop i).
 Next Obligation.
-  unfold sub_index_prop.
-  apply decide_rel; typeclasses eauto.
+  intros; apply decide_rel; typeclasses eauto.
 Qed.
 
 Definition sub_index : Type
@@ -341,10 +340,9 @@ Proof.
   simpl_existT. subst.
   exists i.
   split; [assumption|].
-  apply proj1 in Hv.
   cbn in Hv.
   exists li, (sX i).
-  repeat split; [|apply any_message_is_valid_in_preloaded|assumption].
+  repeat split; [|apply any_message_is_valid_in_preloaded|apply Hv].
   apply (VLSM_projection_valid_state (preloaded_component_projection IM i)).
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))).
   apply (VLSM_incl_valid_state (constraint_free_incl IM constraint)).
@@ -839,6 +837,14 @@ Qed.
 
 End sub_composition.
 
+(* make initial arguments of lift_sub_transition not maximally inserted,
+   so tactics like rapply lift_sub_transition
+   do not try to guess those arguments before looking at the goal,
+   and we don't have to always write rapply @lift_sub_transition.
+ *)
+Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%function_scope
+  sub_index_list%list_scope l s om s' om' Ht.
+
 (** ** Lifting a trace from a sub-composition to the full composition
 
 In this section we first show that given a valid state for a composition of
@@ -892,11 +898,10 @@ Proof.
   simpl in Hl.
   destruct (decide _); [congruence|].
   inversion Hl. subst lY. clear Hl.
-  apply proj1 in Hv.
   split; [|exact I].
   cbn in Hv |- *.
   unfold remove_equivocating_state_project.
-  rewrite lift_sub_state_to_neq; assumption.
+  rewrite lift_sub_state_to_neq;[apply Hv|assumption].
 Qed.
 
 Lemma remove_equivocating_strong_projection_transition_preservation_Some eqv_is
@@ -1653,12 +1658,11 @@ Proof.
   apply basic_VLSM_strong_full_projection; intro; intros.
   - destruct l as (sub_i, li). split; [|apply H].
     destruct_dec_sig sub_i i Hi Heqi. subst sub_i.
-    apply proj1 in H.
     simpl in *.
     unfold sub_IM, SubProjectionTraces.sub_IM in H. simpl in H.
     unfold free_sub_free_state.
     replace (s (free_sub_free_index i)) with (s (@dec_exist _ _ (sub_index_prop_dec (enum index)) i Hi))
-    ; [assumption|].
+    ; [apply H|].
     apply sub_IM_state_pi.
   - destruct l as (sub_i, li). simpl in *.
     destruct_dec_sig sub_i i Hi Heqi. subst sub_i.
@@ -1916,7 +1920,7 @@ Proof.
   apply (basic_VLSM_full_projection_preloaded_with SubFree Free seed seed); intro; intros.
   - assumption.
   - split; [|exact I]. apply lift_sub_valid. apply H.
-  - apply lift_sub_transition; assumption.
+  - rapply lift_sub_transition; assumption.
   - apply (lift_sub_state_initial IM); assumption.
   - apply (lift_sub_message_initial IM indices); assumption.
 Qed.
