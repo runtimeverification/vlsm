@@ -2297,45 +2297,6 @@ Section Composite.
     apply (composite_project_label_eq IM).
   Qed.
 
-  Lemma messages_received_from_component_received_previously
-    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
-    (X := composite_vlsm IM constraint)
-    [s : composite_state IM]
-    (Hs : valid_state_prop X s)
-    [i : index]
-    [m : message]
-    (Hreceived : has_been_received (IM i) (s i) m) :
-    exists li s_m s_m' oom,
-      in_futures X s_m' s /\
-      input_valid_transition X (existT i li) (s_m, Some m) (s_m', oom).
-  Proof.
-    apply valid_state_has_trace in Hs as [is [tr Htr]].
-    eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr
-    ; [|apply constraint_preloaded_free_incl].
-    apply (VLSM_projection_finite_valid_trace_init_to
-            (preloaded_component_projection IM i))
-       in Hpre_tr.
-    apply proper_received in Hreceived;
-      [|eapply finite_valid_trace_from_to_last_pstate, Hpre_tr].
-    specialize (Hreceived _ _ Hpre_tr); clear Hpre_tr.
-    apply Exists_exists in Hreceived as [item [Hitem Hout]].
-    apply elem_of_map_option in Hitem as [[(_i, li) input destination output] [HitemX HitemX_pr]].
-    apply elem_of_list_split in HitemX as [pre [suf Htr_pr]].
-    rewrite cons_middle in Htr_pr.
-    eapply (input_valid_transition_to X) in Htr_pr as Ht;
-      [cbn in Ht|apply valid_trace_forget_last in Htr; apply Htr].
-    unfold pre_VLSM_projection_transition_item_project,
-       composite_project_label in HitemX_pr; cbn in HitemX_pr.
-    rewrite app_assoc in Htr_pr.
-    case_decide as Hi; [|congruence]; apply Some_inj in HitemX_pr;
-      subst _i item tr; cbn in *; subst input.
-    eexists _, _, _, _; split; [|eassumption]; clear Ht.
-    exists suf.
-    apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr.
-    rewrite finite_trace_last_is_last in Htr; assumption.
-  Qed.
-
-
   Lemma messages_sent_from_component_of_valid_state_are_valid
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
