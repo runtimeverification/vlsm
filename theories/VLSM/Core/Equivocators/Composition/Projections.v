@@ -1675,7 +1675,7 @@ Proof.
       ; simpl
       ; destruct (decide ((proj1_sig i) = projT1 (l item))).
       * rewrite equivocator_descriptors_update_eq_rew with (Heq := e).
-        assert (e1 : i = (dec_exist (sub_index_prop selection) (projT1 (l item)) Hl)).
+        assert (e1 : i = (dexist (projT1 (l item)) Hl)).
         { apply dec_sig_eq_iff. assumption. }
         subst i.
         rewrite equivocator_descriptors_update_eq_rew with (Heq := eq_refl).
@@ -1684,7 +1684,7 @@ Proof.
       * rewrite! equivocator_descriptors_update_neq; [reflexivity | assumption |].
         intro contra. elim n. apply dec_sig_eq_iff in contra. assumption.
       * rewrite equivocator_descriptors_update_eq_rew with (Heq := e).
-        assert (e1 : i = (dec_exist (sub_index_prop selection) (projT1 (l item)) Hl)).
+        assert (e1 : i = (dexist (projT1 (l item)) Hl)).
         { apply dec_sig_eq_iff. assumption. }
         subst i.
         rewrite equivocator_descriptors_update_eq_rew with (Heq := eq_refl).
@@ -2081,8 +2081,7 @@ Proof.
       destruct om as [m|]; [|exact I].
       left. destruct Hno_equiv as [Hno_equiv | Hfalse]; [|contradiction].
       destruct Hno_equiv as [eqv Hno_equiv].
-      exists (dec_exist (sub_index_prop (finite.enum index)) eqv
-        (SubProjectionTraces.free_sub_free_index_obligation_1 eqv)).
+      exists (dexist eqv (SubProjectionTraces.free_sub_free_index_obligation_1 eqv)).
       assumption.
     }
     apply (VLSM_eq_finite_valid_trace Heq) in Htr'.

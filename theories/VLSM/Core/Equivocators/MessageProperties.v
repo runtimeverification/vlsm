@@ -503,8 +503,8 @@ Section ComputableSentMessages_lifting.
 
 Context
   {Hsent_messages : ComputableSentMessages X}
-  (message_eq : EqDecision message)
-  (Hbeen_sent_X := @ComputableSentMessages_HasBeenSentCapability message X Hsent_messages message_eq)
+  `(EqDecision message)
+  (Hbeen_sent_X := @ComputableSentMessages_HasBeenSentCapability message X Hsent_messages)
   .
 
 Existing Instance Hbeen_sent_X.

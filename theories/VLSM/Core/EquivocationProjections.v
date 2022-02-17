@@ -417,8 +417,7 @@ Section sender_safety_can_emit_projection.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{EqDecision index}
   (IM : index -> VLSM message)
   {validator : Type}
   (A : validator -> index)

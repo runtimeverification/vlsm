@@ -87,7 +87,7 @@ Definition lift_equivocators_sub_state_to
   : composite_state equivocator_IM
   := fun i =>
     match @decide  (sub_index_prop equivocating i) (sub_index_prop_dec equivocating i) with
-    | left e =>  equivocator_state_append (base_s i) (s (dec_exist _ i e))
+    | left e =>  equivocator_state_append (base_s i) (s (dexist i e))
     | _ => base_s i
     end.
 
@@ -96,13 +96,11 @@ Lemma lift_equivocators_sub_state_to_sub
   (s : composite_state sub_equivocator_IM)
   i
   (Hi : sub_index_prop equivocating i)
-  : lift_equivocators_sub_state_to base_s s i =  equivocator_state_append (base_s i) (s (dec_exist _ i Hi)).
+  : lift_equivocators_sub_state_to base_s s i =  equivocator_state_append (base_s i) (s (dexist i Hi)).
 Proof.
   unfold lift_equivocators_sub_state_to.
-  destruct (decide _); [|contradiction].
-  replace ((s (dec_exist (sub_index_prop equivocating) i s0))) with (s (dec_exist (sub_index_prop equivocating) i Hi))
-  ; [reflexivity|].
-  apply sub_IM_state_pi.
+  case_decide as H_i; [| contradiction].
+  rewrite (sub_IM_state_pi s H_i Hi); reflexivity.
 Qed.
 
 Lemma lift_equivocators_sub_state_to_size
@@ -158,67 +156,55 @@ Proof.
       tr_full_replay_is.2 i =
       match @decide  (sub_index_prop equivocating i) (sub_index_prop_dec equivocating i) with
       | left e =>
-        let eqv := (dec_exist _ i e) in
+        let eqv := (dexist i e) in
         if (decide (eqv ∈ l)) then equivocator_state_append (full_replay_state i) (is eqv)
         else full_replay_state i
       | _ =>  full_replay_state i
       end
     )).
-  { intros Hcut. specialize (Hcut _ (incl_refl _) ltac:(apply NoDup_enum)).
-    unfold replayed_initial_state_from, composite_apply_plan. rewrite _apply_plan_last.
-    extensionality i.
-    spec Hcut i. unfold composite_apply_plan in Hcut. unfold spawn_initial_state.
-    simpl in *. rewrite Hcut.
+  {
+    intros Hcut; specialize (Hcut _ (incl_refl _) ltac:(apply NoDup_enum)).
+    unfold replayed_initial_state_from, composite_apply_plan.
+    rewrite _apply_plan_last; extensionality i.
+    spec Hcut i; unfold composite_apply_plan in Hcut; unfold spawn_initial_state
+    ; simpl in *; rewrite Hcut.
     unfold lift_equivocators_sub_state_to.
-    case_decide; [|reflexivity].
-    rewrite decide_True; [reflexivity|].
+    case_decide; [| reflexivity].
+    rewrite decide_True; [reflexivity |].
     apply elem_of_enum.
   }
   induction l using rev_ind; intros.
   - case_decide; [|reflexivity].
     rewrite decide_False; [reflexivity|]. intro Hin. inversion Hin.
-  - spec IHl. { apply incl_app_inv in Hincl. apply Hincl. }
-    spec IHl. {  apply NoDup_app in Hnodup. apply Hnodup.  }
+  - spec IHl; [apply incl_app_inv in Hincl; apply Hincl |].
+    spec IHl; [apply NoDup_app in Hnodup; apply Hnodup |].
     subst tr_full_replay_is.
-    rewrite map_app. simpl in *.
-    rewrite (composite_apply_plan_app equivocator_IM).
-    simpl in *.
-    destruct (composite_apply_plan _ _ _) as (aitems, afinal).
-    simpl in *.
-    spec IHl i. destruct_dec_sig x ix Hix Heqx. subst x.
-    simpl in *.
-    case_decide as _Hix.
+    rewrite map_app, (composite_apply_plan_app equivocator_IM); simpl in *
+    ; destruct (composite_apply_plan _ _ _) as (aitems, afinal); simpl in *.
+    spec IHl i; destruct_dec_sig x ix Hix Heqx; subst x; simpl in *.
+    case_decide as _Hix; cycle 1.
+    + rewrite state_update_neq; congruence.
     + destruct (decide (ix = i)).
-      * subst ix. rewrite state_update_eq.
+      * subst ix; rewrite state_update_eq.
         rewrite decide_False in IHl.
-        2: { intro Heqv.
-          apply NoDup_app, proj2, proj1 in Hnodup.
-          elim (Hnodup _ Heqv).
-          replace (dec_exist _ i _Hix) with (dec_exist _ i Hix (P_dec := sub_index_prop_dec equivocating))
-            by (apply dec_sig_eq_iff; reflexivity).
-          left.
+        2: {
+          intro Heqv.
+          apply NoDup_app in Hnodup as (_ & Hnodup & _).
+          eapply Hnodup; [eassumption |].
+          rewrite elem_of_list_singleton.
+          apply dec_sig_eq_iff; cbn; reflexivity.
         }
-        rewrite IHl.
-        rewrite decide_True.
-        -- replace (is (dec_exist _ i _Hix)) with (is (dec_exist _ i Hix (P_dec := sub_index_prop_dec equivocating)))
-          by apply sub_IM_state_pi.
-          rewrite equivocator_state_append_singleton_is_extend; [reflexivity|].
-          apply (His (dec_exist (sub_index_prop equivocating) i Hix)).
-        -- apply elem_of_app. right.
-          replace (dec_exist _ i _Hix) with (dec_exist _ i Hix (P_dec := sub_index_prop_dec equivocating))
-            by (apply dec_sig_eq_iff; reflexivity).
-          left.
+        rewrite IHl, decide_True.
+        -- rewrite (sub_IM_state_pi is _Hix Hix); symmetry.
+           apply equivocator_state_append_singleton_is_extend, (His (dexist i Hix)).
+        -- rewrite elem_of_app, elem_of_list_singleton; right.
+           apply dec_sig_eq_iff; cbn; reflexivity.
       * rewrite state_update_neq by congruence.
         case_decide.
-        -- rewrite decide_True; [assumption|].
-          apply elem_of_app. left. assumption.
-        -- rewrite decide_False; [assumption|].
-          intro Hin. apply elem_of_app in Hin.
-          destruct Hin as [Hin | Hx]; [contradiction|].
-          apply elem_of_list_singleton in Hx.
-          apply dsig_eq in Hx. simpl in Hx. congruence.
-    + rewrite state_update_neq; [assumption|].
-      congruence.
+        -- rewrite decide_True; rewrite ?elem_of_app; intuition.
+        -- rewrite decide_False; [assumption |].
+           intros [Hin | Hx]%elem_of_app; [contradiction Hin | contradict Hx].
+           rewrite elem_of_list_singleton, dsig_eq; cbn; congruence.
 Qed.
 
 (** For any [equivocator_descriptors] corresponding to the base state
@@ -457,7 +443,7 @@ Proof.
   destruct_dec_sig sub_i i Hi Heqsub_i. subst sub_i.
   specialize
     (equivocator_state_append_valid (IM i) li
-      (s (dec_exist (sub_index_prop equivocating) i Hi)) om
+      (s (dexist i Hi)) om
       (full_replay_state i) Hv
     ) as Hlift.
   cbn.
@@ -478,8 +464,8 @@ Proof.
   destruct_dec_sig sub_i i Hi Heqsub_i. subst sub_i.
   specialize
     (equivocator_state_append_transition (IM i) li
-      (s (dec_exist (sub_index_prop equivocating) i Hi)) om
-      (s' (dec_exist (sub_index_prop equivocating) i Hi)) om'
+      (s (dexist i Hi)) om
+      (s' (dexist i Hi)) om'
       (full_replay_state i) Hv
     ) as Hlift.
   cbn in Ht.
@@ -676,7 +662,7 @@ Proof.
     simpl. rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
     subst. unfold SubProjectionTraces.sub_IM in Hsent. cbn in Hsent |-*.
     specialize (Hfull_replay_state_pr i Hfull_replay_state).
-    specialize (Hs_pr (dec_exist (sub_index_prop equivocating) i Hi) Hs).
+    specialize (Hs_pr (dexist i Hi) Hs).
     apply equivocator_state_append_sent_right; assumption.
   - right. assumption.
 Qed.

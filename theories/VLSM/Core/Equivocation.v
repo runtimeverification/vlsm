@@ -100,7 +100,7 @@ Qed.
 
 Lemma eq_equivocating_validators_equivocation_fault
   `{Heqv: BasicEquivocation st validator }
-  {ValEqDec : EqDecision validator}
+  `{EqDecision validator}
   : forall s1 s2,
     set_eq (equivocating_validators s1) (equivocating_validators s2) ->
     equivocation_fault s1 = equivocation_fault s2.
@@ -117,7 +117,7 @@ Qed.
 
 Lemma incl_equivocating_validators_equivocation_fault
   `{Heqv: BasicEquivocation st validator }
-  {ValEqDec : EqDecision validator}
+  `{EqDecision validator}
   : forall s1 s2,
     (equivocating_validators s1) ⊆ (equivocating_validators s2) ->
     (equivocation_fault s1 <= equivocation_fault s2)%R.
@@ -171,7 +171,7 @@ Section Simple.
         /\ ~trace_has_message (field_selector output) msg prefix.
 
     Instance equivocation_in_trace_dec
-      {MsgEqDec : EqDecision message}
+      `{EqDecision message}
       : RelDecision equivocation_in_trace.
     Proof.
       intros msg tr.
@@ -748,7 +748,7 @@ Section Simple.
 
     Global Instance computable_sent_message_has_been_sent_dec
       {Hsm : ComputableSentMessages}
-      {eq_message: EqDecision message}
+      `{EqDecision message}
       : RelDecision ComputableSentMessages_has_been_sent :=
       fun s m => decide_rel _ _ (sent_messages_fn s).
 
@@ -810,7 +810,7 @@ Section Simple.
 
     Definition ComputableSentMessages_HasBeenSentCapability
       {Hsm : ComputableSentMessages}
-      {eq_message : EqDecision message}
+      `{EqDecision message}
       : HasBeenSentCapability
       :=
       {|
@@ -862,7 +862,7 @@ Section Simple.
 
     Global Instance ComputableReceivedMessages_has_been_received_dec
       {Hsm : ComputableReceivedMessages}
-      {eq_message : EqDecision message}
+      `{EqDecision message}
       : RelDecision ComputableReceivedMessages_has_been_received
       := fun s m => decide_rel _ _ (received_messages_fn s).
 
@@ -913,7 +913,7 @@ Section Simple.
 
     Definition ComputableReceivedMessages_HasBeenReceivedCapability
       {Hsm : ComputableReceivedMessages}
-      {eq_message : EqDecision message}
+      `{EqDecision message}
       : HasBeenReceivedCapability
       :=
       {|
@@ -1785,6 +1785,48 @@ Section Composite.
                  right.
                  assumption.
       Qed.
+
+      Lemma oracle_component_selected_previously
+        [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+        (X := composite_vlsm IM constraint)
+        [s : composite_state IM]
+        (Hs : valid_state_prop X s)
+        [i : index]
+        [m : message]
+        (Horacle : oracles i (s i) m) :
+        exists s_item item,
+          input_valid_transition_item X s_item item /\
+          in_futures X (destination item) s /\
+          projT1 (l item) = i /\
+          composite_message_selector m item.
+      Proof.
+        apply valid_state_has_trace in Hs as (is & tr & Htr).
+        eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr
+        ; [|apply constraint_preloaded_free_incl].
+        apply (VLSM_projection_finite_valid_trace_init_to
+                (preloaded_component_projection IM i))
+           in Hpre_tr.
+        eapply prove_all_have_message_from_stepwise in Horacle
+        ; [| apply stepwise_props |eapply finite_valid_trace_from_to_last_pstate, Hpre_tr].
+        specialize (Horacle _ _ Hpre_tr); clear Hpre_tr.
+        apply Exists_exists in Horacle as (item & Hitem & Hout).
+        apply elem_of_map_option in Hitem as (itemX & HitemX & HitemX_pr).
+        apply elem_of_list_split in HitemX as (pre & suf & Htr_pr).
+        exists (finite_trace_last is pre), itemX.
+        rewrite cons_middle in Htr_pr.
+        eapply (input_valid_transition_to X) in Htr_pr as Ht
+        ; [cbn in Ht | apply valid_trace_forget_last in Htr; apply Htr].
+        unfold pre_VLSM_projection_transition_item_project,
+               composite_project_label in HitemX_pr; cbn in HitemX_pr.
+        rewrite app_assoc in Htr_pr.
+        case_decide as Hi; [|congruence]; apply Some_inj in HitemX_pr
+        ; subst i item tr; cbn in *.
+        apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr.
+        rewrite finite_trace_last_is_last in Htr.
+        destruct itemX, l; cbn in *; intuition.
+        exists suf; assumption.
+      Qed.
+
   End StepwiseProps.
 
   (** A message 'has_been_sent' for a composite state if it 'has_been_sent' for any of
@@ -1891,6 +1933,33 @@ Section Composite.
     (X := composite_vlsm IM constraint)
     : HasBeenObservedCapability X :=
     HasBeenObservedCapability_from_sent_received X.
+
+  Lemma preloaded_composite_has_been_received_stepwise_props
+    (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+    (seed : message -> Prop)
+    (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
+    : has_been_received_stepwise_props (vlsm := X) composite_has_been_received.
+  Proof.
+    unfold has_been_received_stepwise_props.
+    specialize (composite_stepwise_props
+                  (fun i => has_been_received_stepwise_from_trace (IM i)))
+         as [Hinits Hstep].
+    split; [assumption |].
+    (* <<exact Hstep>> doesn't work because [composite_message_selector]
+       pattern matches on the label l, so we instantiate and destruct
+       to let that simplify *)
+    intros l; specialize (Hstep l); destruct l.
+    exact Hstep.
+  Qed.
+
+  Definition preloaded_composite_HasBeenReceivedCapability
+    (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+    (seed : message -> Prop)
+    (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
+    : HasBeenReceivedCapability X :=
+    HasBeenReceivedCapability_from_stepwise (vlsm := X)
+      composite_has_been_received_dec
+      (preloaded_composite_has_been_received_stepwise_props constraint seed).
 
   End composite_has_been_received.
 
@@ -2129,8 +2198,7 @@ Section Composite.
   Qed.
 
   Context
-      {validator_listing : list validator}
-      (finite_validator : Listing validator_listing)
+      `{finite.Finite validator}
       {measurable_V : Measurable validator}
       {threshold_V : ReachableThreshold validator}
       .
@@ -2139,19 +2207,16 @@ Section Composite.
       refers to [is_equivocating_statewise], but this might change
       in the future **)
 
-  Program Definition equivocation_dec_statewise
+  Definition equivocation_dec_statewise
      (Hdec : RelDecision is_equivocating_statewise)
       : BasicEquivocation (composite_state IM) (validator)
     :=
     {|
-      state_validators := fun _ => validator_listing;
-      state_validators_nodup := _;
+      state_validators := fun _ => enum validator;
+      state_validators_nodup := fun _ => NoDup_enum validator;
       is_equivocating := is_equivocating_statewise;
       is_equivocating_dec := Hdec
     |}.
-  Next Obligation.
-   intros; apply (Listing_NoDup finite_validator).
-  Defined.
 
   Definition equivocation_fault_constraint
     (Dec : BasicEquivocation (composite_state IM) validator)
@@ -2161,6 +2226,75 @@ Section Composite.
     :=
     let (s', om') := (composite_transition IM l som) in
     not_heavy s'.
+
+  Lemma sent_component_sent_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Horacle : has_been_sent (IM i) (s i) m) :
+    exists s_item item,
+      input_valid_transition_item X s_item item /\
+      in_futures X (destination item) s /\
+      projT1 (l item) = i /\
+      output item = Some m.
+  Proof.
+    clear -Hs Horacle.
+    specialize
+      (oracle_component_selected_previously
+        (fun i => has_been_sent_stepwise_from_trace (IM i))
+        Hs Horacle)
+      as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
+    eexists _, _; intuition eassumption.
+  Qed.
+
+  Lemma received_component_received_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Horacle : has_been_received (IM i) (s i) m) :
+    exists s_item item,
+      input_valid_transition_item X s_item item /\
+      in_futures X (destination item) s /\
+      projT1 (l item) = i /\
+      input item = Some m.
+  Proof.
+    clear -Hs Horacle.
+    specialize
+      (oracle_component_selected_previously
+        (fun i => has_been_received_stepwise_from_trace (IM i))
+        Hs Horacle)
+      as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
+    eexists _, _; intuition eassumption.
+  Qed.
+
+  Lemma messages_sent_from_component_produced_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Hsent : has_been_sent (IM i) (s i) m) :
+    exists s_m,
+      in_futures X s_m s /\
+      can_produce (pre_loaded_with_all_messages_vlsm (IM i)) (s_m i) m.
+  Proof.
+    specialize (sent_component_sent_previously Hs Hsent)
+      as (s_item & [] & Ht & Hfutures & <- & Houtput)
+    ; destruct l as [i li]; cbn in *; subst output.
+    exists destination; split; [assumption |].
+    eapply VLSM_incl_input_valid_transition in Ht; cbn in Ht;
+      [|apply constraint_preloaded_free_incl].
+    eapply (VLSM_projection_input_valid_transition (preloaded_component_projection IM i))
+      in Ht; [eexists _,_; eassumption |].
+    apply (composite_project_label_eq IM).
+  Qed.
 
   Lemma messages_sent_from_component_of_valid_state_are_valid
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)

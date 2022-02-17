@@ -336,6 +336,11 @@ Definition pre_VLSM_projection_trace_project_in_iff
     exists itemX, In itemX trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY
   := in_map_option _.
 
+Definition elem_of_pre_VLSM_projection_trace_project
+  : forall trX itemY, itemY ∈ pre_VLSM_projection_trace_project trX <->
+    exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY
+  := elem_of_map_option _.
+
 Definition pre_VLSM_projection_trace_project_in
   : forall itemX itemY, pre_VLSM_projection_transition_item_project itemX = Some itemY ->
     forall trX, In itemX trX -> In itemY (pre_VLSM_projection_trace_project trX)

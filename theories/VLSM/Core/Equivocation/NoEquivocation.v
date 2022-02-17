@@ -21,7 +21,7 @@ Context
   *)
 
     Definition no_equivocations_except_from
-      {Hbs : HasBeenSentCapability vlsm}
+      `{HasBeenSentCapability message vlsm}
       (exception : message -> Prop)
       (l : vlabel vlsm)
       (som : state * option message)
@@ -33,7 +33,7 @@ Context
     (messages being received must have been previously sent).
     *)
     Definition no_equivocations
-      {Hbs : HasBeenSentCapability vlsm}
+      `{HasBeenSentCapability message vlsm}
       (l : vlabel vlsm)
       (som : state * option message)
       : Prop

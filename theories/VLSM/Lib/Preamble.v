@@ -92,8 +92,6 @@ Qed.
 Definition dec_sig {A} (P : A -> Prop) {P_dec : forall x, Decision (P x)} : Type
   := dsig P.
 
-Definition dec_exist {A} (P : A -> Prop) {P_dec : forall x, Decision (P x)} := @dexist A P P_dec.
-
 Definition dec_proj1_sig
   `{P_dec : forall x : A, Decision (P x)} : dsig P -> A := @proj1_sig _ _.
 
@@ -101,11 +99,11 @@ Definition dec_proj2_sig `{P_dec : forall x: A, Decision (P x)} := @proj2_dsig A
 
 Definition dec_sig_eq_iff `{P_dec : forall x: A, Decision (P x)} := @dsig_eq A P P_dec.
 
-(** destructs a dec_sig element into a dec_exist construct
+(** destructs a dec_sig element into a dexist construct
 *)
 
 Lemma dec_sig_to_exist {A} {P} {P_dec: forall (x:A), Decision (P x)}
-            (a: dsig P): exists a' (e: P a'), a = dec_exist _ a' e.
+            (a: dsig P): exists a' (e: P a'), a = dexist a' e.
 Proof.
   exists (dec_proj1_sig a), (dec_proj2_sig a).
   apply dec_sig_eq_iff.
@@ -576,8 +574,7 @@ Proof.
 Qed.
 
 Lemma comparable_function
-  {A : Type}
-  {eq_A : EqDecision A}
+  `{EqDecision A}
   (f : A -> A -> bool)
   (R : A -> A -> Prop)
   (HR : PredicateFunction2 R f)
@@ -598,8 +595,7 @@ Proof.
 Qed.
 
 Instance comparable_dec
-  {A : Type}
-  {eq_A : EqDecision A}
+  `{EqDecision A}
   (R : A -> A -> Prop)
   {HR : RelDecision R}
   : RelDecision (comparable R).
@@ -629,8 +625,7 @@ Proof.
 Qed.
 
 Lemma comparable_function_bool
-  {A : Type}
-  {eq_A : EqDecision A}
+  `{EqDecision A}
   (f : A -> A -> bool)
   : PredicateFunction2 (comparable f) (comparableb f).
 Proof.
