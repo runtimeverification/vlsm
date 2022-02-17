@@ -5,27 +5,16 @@ From VLSM Require Import Core.Equivocation.
 
 Section full_node_constraint.
 
-  Context {message : Type}
+  Context
           `{EqDecision message}
-          {index : Type}
-          {IndEqDec : EqDecision index}
+          `{finite.Finite index}
           (IM : index -> VLSM message)
           (Free := free_composite_vlsm IM)
-          (has_been_sent_capabilities : forall i : index, (HasBeenSentCapability (IM i)))
-          (has_been_received_capabilities : forall i : index, (HasBeenReceivedCapability (IM i)))
-          (has_been_observed_capabilities : forall i : index, (HasBeenObservedCapability (IM i))
-            := fun i => HasBeenObservedCapability_from_sent_received (IM i))
-          {index_listing : list index}
-          (finite_index : Listing index_listing)
-          (Free_HasBeenSentCapability : HasBeenSentCapability Free := free_composite_HasBeenSentCapability IM finite_index has_been_sent_capabilities)
-          (Free_HasBeenReceivedCapability : HasBeenReceivedCapability Free := free_composite_HasBeenReceivedCapability IM finite_index has_been_received_capabilities)
-          (Free_HasBeenObservedCapability : HasBeenObservedCapability Free := free_composite_HasBeenObservedCapability IM finite_index has_been_observed_capabilities)
+          `{forall i : index, HasBeenSentCapability (IM i)}
+          `{forall i : index, HasBeenReceivedCapability (IM i)}
           (admissible_index : composite_state IM -> index -> Prop)
           (** admissible equivocator index: this index can equivocate from given state *)
           .
-
-  Existing Instance Free_HasBeenObservedCapability.
-  Existing Instance Free_HasBeenSentCapability.
 
   (**
   Given a composite state <<s>>, a message <<m>>, and a node index <<i>>
@@ -42,7 +31,7 @@ Section full_node_constraint.
     : Prop
     := exists (si : vstate (IM i)),
       can_produce (pre_loaded_with_all_messages_vlsm (IM i)) si m /\
-      state_received_not_sent_invariant (IM i) si (composite_has_been_observed IM has_been_observed_capabilities s).
+      state_received_not_sent_invariant (IM i) si (composite_has_been_observed IM s).
 
   (**
   Similar to the condition above, but now the message is required to be
@@ -54,7 +43,7 @@ Section full_node_constraint.
     (m : message)
     (i : index)
     : Prop
-    := can_emit (pre_loaded_vlsm (IM i) (composite_has_been_observed IM has_been_observed_capabilities s)) m.
+    := can_emit (pre_loaded_vlsm (IM i) (composite_has_been_observed IM s)) m.
 
   (**
   The equivocation-based abstract definition of the full node condition
@@ -71,7 +60,7 @@ Section full_node_constraint.
     match om with
     | None => True
     | Some m =>
-      composite_has_been_observed IM has_been_observed_capabilities s m \/
+      composite_has_been_observed IM s m \/
       exists (i : index), admissible_index s i /\ node_generated_without_further_equivocation s m i
     end.
 
@@ -88,7 +77,7 @@ Section full_node_constraint.
     match om with
     | None => True
     | Some m =>
-      composite_has_been_observed IM has_been_observed_capabilities s m \/
+      composite_has_been_observed IM s m \/
       exists (i : index), admissible_index s i /\
       node_generated_without_further_equivocation_alt s m i
     end.
@@ -111,8 +100,7 @@ Section full_node_constraint.
     destruct Hsmi as [si [Hsim Hsi]].
     apply can_emit_iff. exists si.
     revert Hsim.
-    apply lift_generated_to_seeded with (has_been_sent_capabilities i)  (has_been_received_capabilities i)
-    ; assumption.
+    eapply lift_generated_to_seeded; assumption.
   Qed.
 
   (** if all machines satisty the [cannot_resend_message_stepwise_prop]erty,

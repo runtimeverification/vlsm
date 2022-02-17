@@ -6,7 +6,7 @@ From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppExtras Lib.StdppLi
 Definition set_eq {A} (s1 s2 : set A) : Prop :=
   s1 ⊆ s2 /\ s2 ⊆ s1.
 
-Global Instance set_eq_dec [A : Type] {HeqA : EqDecision A} : RelDecision (@set_eq A).
+Global Instance set_eq_dec `{EqDecision A} : RelDecision (@set_eq A).
 Proof.
   intros s1 s2.
   apply and_dec; apply list_subseteq_dec; assumption.

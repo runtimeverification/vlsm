@@ -37,11 +37,6 @@ Next Obligation.
   - destruct inhabitant. assumption.
 Qed.
 
-Instance annotated_sign : VLSMSign annotated_type :=
-  { initial_state_prop := annotated_initial_state_prop
-  ; initial_message_prop := λ m : message, vinitial_message_prop X m
-  }.
-
 Context
   (annotated_constraint : @label _ annotated_type -> annotated_state * option message -> Prop)
   (annotated_transition_state : @label _ annotated_type -> annotated_state * option message -> annotation)
@@ -61,12 +56,15 @@ Definition annotated_transition
   let (s', om') := vtransition X l (original_state som.1, som.2) in
   ({| original_state := s'; state_annotation := annotated_transition_state l som |}, om').
 
-Instance annotated_vlsm_class : VLSMClass annotated_sign :=
-  { valid := annotated_valid
-  ; transition := annotated_transition
-  }.
+Definition annotated_vlsm_machine : VLSMMachine annotated_type :=
+  {| initial_state_prop := fun s : @state _ annotated_type => annotated_initial_state_prop s
+  ; initial_message_prop := λ m : message, vinitial_message_prop X m
 
-Definition annotated_vlsm : VLSM message := mk_vlsm annotated_vlsm_class.
+  ; valid := annotated_valid
+  ; transition := annotated_transition
+  |}.
+
+Definition annotated_vlsm : VLSM message := mk_vlsm annotated_vlsm_machine.
 
 Definition annotate_trace_item
   (item : vtransition_item X)

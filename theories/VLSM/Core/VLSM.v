@@ -24,95 +24,70 @@ Class VLSMType (message : Type) :=
   ; label : Type
   }.
 
-(** *** The signature of a VLSM
-
-Although the VLSM definition does not single out the notion of a VLSM
-signature, we find it convenient to extract it as the [VLSMSign] class.
-
-The [VLSMSign] class is parameterized by a [VLSMType] and defines properties
-for initial states ([initial_state_prop]) and initial messages
-([initial_message_prop]), from which we can immediately define the dependent
-types [initial_state] (as [state]s having the [initial_state_prop]erty) and
-[intial_message] (as <<message>>s having the [initial_message_prop]erty).
-
-Additionally, [VLSMSign] requires the identification of an [initial_state] [s0],
-a <<message>> [m0], and a [label] [l0] to ensure the non-emptiness of the
-corresponding sets.
-*)
-
-  Class VLSMSign {message : Type} (vtype : VLSMType message) :=
-    { initial_state_prop : state -> Prop
-    ; initial_state := { s : state | initial_state_prop s }
-    ; initial_message_prop : message -> Prop
-    ; initial_message := { m : message | initial_message_prop m }
-    ; s0 : Inhabited initial_state
-    }.
-
-  Definition option_initial_message_prop
-    {message : Type} {vtype : VLSMType message} {sign : VLSMSign vtype}
-    : option message -> Prop := from_option initial_message_prop True.
-
-  Definition VLSMSign_pre_loaded_with_messages
-    {message : Type} {vtype : VLSMType message} (sign : VLSMSign vtype)
-    (initial : message -> Prop)
-    : VLSMSign vtype
-    :=
-    {| initial_state_prop := @initial_state_prop _ _ sign
-    ; initial_message_prop := fun m => @initial_message_prop _ _ sign  m \/ initial m
-    ; s0 := @s0 _ _ sign
-    |}.
-
-  Definition decidable_initial_messages_prop
-    {message : Type} {vtype : VLSMType message} (sign : VLSMSign vtype)
-    := forall m, Decision (initial_message_prop m).
-
 (** *** VLSM class definition
 
-Given a [VLSMSign]nature, a [VLSM] is defined by providing a [transition]
-function and a [valid]ity condition.
+The [VLSMMachine] class is parameterized by a [VLSMType], and contains the
+remaining parameters to define a VLSM over the given types.
+These are the properties for initial states ([initial_state_prop])
+and initial messages ([initial_message_prop]),
+from which we can immediately define the dependent
+types [initial_state] (as [state]s having the [initial_state_prop]erty) and
+[intial_message] (as <<message>>s having the [initial_message_prop]erty),
+a witness [s0] to nonemptiness of the [initial_state] set,
+and the [transition] function and [valid] predicate.
 *)
 
-  Class VLSMClass {message : Type} {vtype : VLSMType message} (lsm : VLSMSign vtype) :=
-    { transition : label -> state * option message -> state * option message
-    ; valid : label -> state * option message -> Prop
-    }.
+Class VLSMMachine {message : Type} (vtype : VLSMType message) :=
+  { initial_state_prop : state -> Prop
+  ; initial_state := { s : state | initial_state_prop s }
+  ; initial_message_prop : message -> Prop
+  ; initial_message := { m : message | initial_message_prop m }
+  ; s0 : Inhabited initial_state
+  ; transition : label -> state * option message -> state * option message
+  ; valid : label -> state * option message -> Prop
+  }.
 
-  Definition VLSMClass_pre_loaded_with_messages
-    {message : Type} {vtype : VLSMType message} {lsm : VLSMSign vtype} (vlsm : VLSMClass lsm)
-    (initial : message -> Prop)
-    : VLSMClass (VLSMSign_pre_loaded_with_messages lsm initial)
-    :=
-    {| transition := @transition _ _ _ vlsm
-     ; valid := @valid _ _ _ vlsm
-    |}.
+Definition option_initial_message_prop
+  {message : Type} {vtype : VLSMType message} {vmachine : VLSMMachine vtype}
+  : option message -> Prop := from_option initial_message_prop True.
 
-  (** For technical reasons, e.g., the need to easily talk about VLSMs over
-  the same set of messages and about VLSMs of the same type (over the same
-  set of messages, labels and states), the VLSM definition is split into
-  three parts, [VLSM_Type], [VLSM_Sign], and [VLSMClass], which are
-  packaged together by the following definition.
-  *)
-  Definition VLSM (message : Type) :=
-    sigT (fun T : VLSMType message =>
-      sigT (fun S : VLSMSign T => VLSMClass S)).
+Definition VLSMMachine_pre_loaded_with_messages
+  {message : Type} {vtype : VLSMType message} (vmachine : VLSMMachine vtype)
+  (initial : message -> Prop)
+  : VLSMMachine vtype
+  :=
+  {| initial_state_prop := @initial_state_prop _ _ vmachine
+  ; initial_message_prop := fun m => @initial_message_prop _ _ vmachine  m \/ initial m
+  ; s0 := @s0 _ _ vmachine
+  ; transition := @transition _ _ vmachine
+  ; valid := @valid _ _ vmachine
+  |}.
 
-  Definition mk_vlsm
-    {message : Type}
-    {T : VLSMType message}
-    {S : VLSMSign T}
-    (M : VLSMClass S)
-    : VLSM message
-    := existT T (existT S M).
+Definition decidable_initial_messages_prop
+  {message : Type} {vtype : VLSMType message} (vmachine : VLSMMachine vtype)
+  := forall m, Decision (initial_message_prop m).
 
-  Definition pre_loaded_vlsm
-    {message : Type}
-    (X : VLSM message)
-    (initial : message -> Prop)
-    : VLSM message
-    :=
-    let M := projT2 (projT2 X) in
-    let M' := VLSMClass_pre_loaded_with_messages M initial in
-    mk_vlsm M'.
+(** *** VLSM type definition
+
+For technical reasons, e.g., the need to easily talk about VLSMs over
+the same set of messages and about VLSMs of the same type (over the same
+set of messages, labels and states), the VLSM definition is split into
+two parts, [VLSMType] and [VLSMMachine], which are
+packaged together by the following definition.
+*)
+Record VLSM (message : Type) : Type :=
+  mk_vlsm { vtype : VLSMType message; vmachine : VLSMMachine vtype }.
+Arguments vtype [message] v.
+Arguments vmachine [message] v.
+Arguments mk_vlsm [message] [vtype] vmachine.
+
+Definition pre_loaded_vlsm
+  {message : Type}
+  (X : VLSM message)
+  (initial : message -> Prop)
+  : VLSM message
+  :=
+  {| vmachine := VLSMMachine_pre_loaded_with_messages (vmachine X) initial |}.
 
 Section Traces.
 
@@ -426,24 +401,23 @@ Section vlsm_projections.
     .
 
 (**
-Given a [VLSM], it is convenient to be able to retrieve its V[VLSMSign]nature
-or [VLSMType]. Functions [sign] and [type] below achieve this precise purpose.
+Given a [VLSM], it is convenient to be able to retrieve its [VLSMMachine]
+or [VLSMType]. Functions [machine] and [type] below achieve this precise purpose.
 *)
 
-  Definition type := projT1 vlsm.
-  Definition sign := projT1 (projT2 vlsm).
-  Definition machine := projT2 (projT2 vlsm).
+  Definition type := vtype vlsm.
+  Definition machine := vmachine vlsm.
   Definition vstate := @state _ type.
   Definition vlabel := @label _ type.
-  Definition vinitial_state_prop := @initial_state_prop _ _ sign.
-  Definition vinitial_state := @initial_state _ _ sign.
-  Definition vinitial_message_prop := @initial_message_prop _ _ sign.
-  Definition voption_initial_message_prop := @option_initial_message_prop _ _ sign.
-  Definition vinitial_message := @initial_message _ _ sign.
-  Definition vs0 := @inhabitant _ (@s0 _ _ sign).
-  Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ sign.
-  Definition vtransition := @transition _ _ _ machine.
-  Definition vvalid := @valid _ _ _ machine.
+  Definition vinitial_state_prop := @initial_state_prop _ _ machine.
+  Definition vinitial_state := @initial_state _ _ machine.
+  Definition vinitial_message_prop := @initial_message_prop _ _ machine.
+  Definition voption_initial_message_prop := @option_initial_message_prop _ _ machine.
+  Definition vinitial_message := @initial_message _ _ machine.
+  Definition vs0 := @inhabitant _ (@s0 _ _ machine).
+  Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ machine.
+  Definition vtransition := @transition _ _ machine.
+  Definition vvalid := @valid _ _ machine.
   Definition vtransition_item := @transition_item _ type.
   Definition vTrace := @Trace _ type.
   Definition vproto_run := @proto_run _ type.
@@ -457,7 +431,7 @@ Lemma mk_vlsm_machine
   (X : VLSM message)
   : mk_vlsm (machine X) = X.
 Proof.
-  destruct X as (T, (S, M)). reflexivity.
+  destruct X as (T, M). reflexivity.
 Qed.
 
   Section VLSM.
@@ -470,12 +444,10 @@ In this section we assume a fixed [VLSM].
       {message : Type}
       (X : VLSM message)
       (TypeX := type X)
-      (SignX := sign X)
       (MachineX := machine X)
       .
 
 Existing Instance TypeX.
-Existing Instance SignX.
 Existing Instance MachineX.
 
 (** *** Valid states and messages
@@ -1377,8 +1349,7 @@ traces.
       intros item Hitem.
       apply elem_of_list_split in Hitem as (l1 & l2 & Heq).
       eexists _,_.
-      eapply input_valid_transition_to; [eassumption|].
-      simpl. eassumption.
+      eapply input_valid_transition_to; cbn; eassumption.
     Qed.
 
     Lemma can_emit_from_valid_trace
@@ -1390,13 +1361,11 @@ traces.
       can_emit m.
     Proof.
       apply can_emit_iff.
-      revert Hm.
-      setoid_rewrite Exists_exists.
-      intros [item [Hitem Houtput]].
+      setoid_rewrite Exists_exists in Hm.
+      destruct Hm as (item & Hitem & Houtput).
       exists (destination item).
-      unfold can_produce.
-      replace (Some m) with (output item) by assumption.
-      eapply can_produce_from_valid_trace; [apply Htr|assumption].
+      unfold can_produce; rewrite <- Houtput.
+      eapply can_produce_from_valid_trace; [apply Htr | assumption].
     Qed.
 
     (* End Hide *)
@@ -2195,12 +2164,10 @@ This relation is often used in stating safety and liveness properties.*)
       intros item Hitem.
       apply elem_of_list_split in Hitem as (pre & suf & Heqtr).
       exists suf.
-      replace (destination item)
-         with (finite_trace_last is (pre ++ [item]))
-           by apply finite_trace_last_is_last.
+      erewrite <- finite_trace_last_is_last.
       eapply finite_valid_trace_from_to_app_split.
-      rewrite <- app_assoc. simpl. rewrite <- Heqtr.
-      assumption.
+      rewrite <- app_assoc; cbn; rewrite <- Heqtr.
+      eassumption.
     Qed.
 
     Lemma elem_of_trace_in_futures_right is s tr
@@ -2210,11 +2177,9 @@ This relation is often used in stating safety and liveness properties.*)
       intros item Hitem.
       apply elem_of_list_split in Hitem as (pre & suf & Heqtr).
       exists (pre ++ [item]).
-      replace (destination item)
-         with (finite_trace_last is (pre ++ [item]))
-           by apply finite_trace_last_is_last.
+      erewrite <- finite_trace_last_is_last.
       eapply finite_valid_trace_from_to_app_split.
-      rewrite <- app_assoc. simpl. rewrite <- Heqtr.
+      rewrite <- app_assoc; cbn; rewrite <- Heqtr.
       eassumption.
     Qed.
 
@@ -2653,18 +2618,13 @@ Byzantine fault tolerance analysis.
       (X : VLSM message)
       .
 
-  Definition pre_loaded_with_all_messages_vlsm_sig
-    : VLSMSign (type X)
+  Definition pre_loaded_with_all_messages_vlsm_machine
+    : VLSMMachine (type X)
     :=
     {| initial_state_prop := vinitial_state_prop X
      ; initial_message_prop := fun message => True
-     ; s0 := @s0 _ _ (sign X)
-    |}.
-
-  Definition pre_loaded_with_all_messages_vlsm_machine
-    : VLSMClass pre_loaded_with_all_messages_vlsm_sig
-    :=
-    {| transition := vtransition X
+     ; s0 := @s0 _ _ (machine X)
+     ; transition := vtransition X
      ; valid := vvalid X
     |}.
 
@@ -2734,16 +2694,16 @@ Byzantine fault tolerance analysis.
   Inductive preloaded_valid_state_prop : state -> Prop :=
   | preloaded_valid_initial_state
       (s:state)
-      (Hs: initial_state_prop (VLSMSign:=pre_loaded_with_all_messages_vlsm_sig) s):
+      (Hs: initial_state_prop (VLSMMachine:=pre_loaded_with_all_messages_vlsm_machine) s):
          preloaded_valid_state_prop s
   | preloaded_protocol_generated
       (l : label)
       (s : state)
       (Hps : preloaded_valid_state_prop s)
       (om : option message)
-      (Hv : valid (VLSMClass:=pre_loaded_with_all_messages_vlsm_machine) l (s, om))
+      (Hv : valid (VLSMMachine:=pre_loaded_with_all_messages_vlsm_machine) l (s, om))
       s' om'
-      (Ht : transition (VLSMClass:=pre_loaded_with_all_messages_vlsm_machine) l (s, om) = (s', om'))
+      (Ht : transition (VLSMMachine:=pre_loaded_with_all_messages_vlsm_machine) l (s, om) = (s', om'))
     : preloaded_valid_state_prop s'.
 
   Lemma preloaded_valid_state_prop_iff s:
@@ -2818,33 +2778,33 @@ Byzantine fault tolerance analysis.
   Proof.
     revert s Htr Hobs.
     induction tr using rev_ind; intros; split
-    ; [|apply Htr| | apply Htr]
+    ; [|apply Htr | | apply Htr]
     ; destruct Htr as [Htr Hinit].
-    - inversion Htr. subst.
+    - inversion Htr; subst.
       apply (finite_valid_trace_from_to_empty X).
-      apply initial_state_is_valid. assumption.
+      apply initial_state_is_valid.
+      assumption.
     - apply finite_valid_trace_from_to_last in Htr as Hlst.
       apply finite_valid_trace_from_to_app_split in Htr.
       destruct Htr as [Htr Hx].
       specialize (IHtr _ (conj Htr Hinit)).
       spec IHtr.
-      { intros. apply Hobs.
+      {
+        intros. apply Hobs.
         apply trace_has_message_prefix. assumption.
       }
-      apply proj1, finite_valid_trace_from_to_forget_last in IHtr.
-      apply finite_valid_trace_from_add_last; [|assumption].
-      inversion Hx. subst f tl s'.
-      apply (extend_right_finite_trace_from X)
-      ; [assumption|].
+      destruct IHtr as [IHtr _];
+      apply finite_valid_trace_from_to_forget_last in IHtr.
+      apply finite_valid_trace_from_add_last; [| assumption].
+      inversion Hx; subst f tl s'.
+      apply (extend_right_finite_trace_from X); [assumption |].
       destruct Ht as [[_ [_ Hv]] Ht].
       apply finite_valid_trace_last_pstate in IHtr as Hplst.
-      repeat split; try assumption.
-      destruct iom as [m|]; [|apply option_valid_message_None].
-      apply option_valid_message_Some.
-      apply Hobs.
-      apply Exists_app. right.
-      apply Exists_cons. left.
-      subst. reflexivity.
+      repeat split. 1, 3-4: assumption.
+      destruct iom as [m |]; [| apply option_valid_message_None].
+      apply option_valid_message_Some, Hobs.
+      red; rewrite Exists_app, Exists_cons.
+      subst; cbn; intuition.
   Qed.
 
 End pre_loaded_with_all_messages_vlsm.

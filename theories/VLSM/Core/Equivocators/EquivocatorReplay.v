@@ -153,7 +153,7 @@ Proof.
 Qed.
 
 Lemma equivocator_state_append_sent_left
-  {Hbs : HasBeenSentCapability X}
+  `{HasBeenSentCapability message X}
   base_s (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
   s (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
   : forall m, equivocator_has_been_sent X base_s m ->
@@ -170,8 +170,7 @@ Proof.
 Qed.
 
 Lemma equivocator_state_append_sent_right
-  {Hbs : HasBeenSentCapability X}
-  (HbsE := equivocator_HasBeenSentCapability X)
+  `{HasBeenSentCapability message X}
   base_s (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
   s (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
   : forall m, equivocator_has_been_sent X s m ->

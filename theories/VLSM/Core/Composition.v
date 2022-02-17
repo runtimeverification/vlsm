@@ -1,4 +1,4 @@
-From stdpp Require Import prelude.
+From stdpp Require Import prelude finite.
 From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.StreamExtras.
 From VLSM Require Import Core.VLSM Core.Plans Core.VLSMProjections.
@@ -18,8 +18,7 @@ such that equality on <<index>> is decidable.
 *)
 
   Context {message : Type}
-          {index : Type}
-          {IndEqDec : EqDecision index}
+          `{EqDecision index}
           (IM : index -> VLSM message)
           .
 
@@ -150,12 +149,12 @@ The next few results describe several properties of the [state_update] operation
     Qed.
   End composite_type.
 
-  Section composite_sig.
-(** ** The signature of a composite VLSM
+  Section sec_composite_vlsm.
+(** ** Constrained VLSM composition
 
 Assume an non-empty <<index>> type and let <<IT>> be
-an <<index>>ed family of [VLSMType]s, and for each index <<i>>, let <<IS i>> be
-a [VLSMSign]ature of type <<IT i>>.
+an <<index>>ed family of [VLSMType]s, and for each index <<i>>, let <<IM i>> be
+a [VLSMMachine] of type <<IT i>>.
 *)
 
 (**
@@ -181,8 +180,8 @@ states have the [initial_state_prop]erty in the corresponding component signatur
       {| inhabitant := composite_s0 |}.
 
 (**
-A message has the [initial_message_prop]erty in the [composite_sig]nature
-iff it has the [initial_message_prop]erty in any of the component signatures.
+A message has the [initial_message_prop]erty in the composite
+iff it has the [initial_message_prop]erty in any of the components.
 *)
     Definition composite_initial_message_prop (m : message) : Prop
       :=
@@ -190,13 +189,6 @@ iff it has the [initial_message_prop]erty in any of the component signatures.
 
     Definition option_composite_initial_message_prop : option message -> Prop
       := from_option composite_initial_message_prop True.
-
-    Definition composite_sig
-      : VLSMSign composite_type
-      :=
-        {|   initial_state_prop := composite_initial_state_prop
-           ; initial_message_prop := composite_initial_message_prop
-        |}.
 
 (**
 We can always "lift" state <<sj>> from component <<j>> to a composite state by
@@ -267,20 +259,10 @@ updating an initial composite state, say [s0], to <<sj>> on component <<j>>.
       - exact input_a.
     Defined.
 
-  End composite_sig.
-
-  Section sec_composite_vlsm.
-(** ** Constrained VLSM composition
-
-Assume an non-empty <<index>> type, let
-<<IT>> be an <<index>>ed family of [VLSMType]s, and for each index <<i>>, let
-<<IS i>> be a [VLSMSign]ature of type <<IT i>> and <<IM i>> be a VLSM of
-signature <<IS i>>.
-*)
-
 (**
-The [transition] function for the [composite_vlsm] is defined as follows
-takes a transition in the VLSM corresponding to the given [composite_label]
+The [transition] function for the [composite_vlsm] takes a transition in
+the component selected by the index in the given [composite_label]
+with the contained label,
 and returnes the produced message together with the state updated on that
 component:
 *)
@@ -326,9 +308,11 @@ the [composite_valid]ity.
 
     Definition composite_vlsm_machine
       (constraint : composite_label -> composite_state * option message -> Prop)
-      : VLSMClass composite_sig
+      : VLSMMachine composite_type
       :=
-      {|  transition := composite_transition
+      {|  initial_state_prop := composite_initial_state_prop
+       ;  initial_message_prop := composite_initial_message_prop
+       ;  transition := composite_transition
        ;  valid := constrained_composite_valid constraint
       |}.
 
@@ -879,7 +863,7 @@ Proof.
       apply valid_state_project_preloaded_to_preloaded.
     + apply any_message_is_valid_in_preloaded.
     + destruct l. apply Hcvalid.
-  - apply composite_transition_project_active in Htrans;assumption.
+  - revert Htrans; rapply composite_transition_project_active.
 Qed.
 
 Lemma input_valid_transition_project_active
@@ -1012,22 +996,21 @@ component, then it is decidable for a finite composition as well.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
-  {index_listing : list index}
-  (finite_index : Listing index_listing).
+  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+  .
 
 Lemma composite_decidable_initial_message
   (Hdec_init : forall i, vdecidable_initial_messages_prop (IM i))
-  : decidable_initial_messages_prop (composite_sig IM).
+  : decidable_initial_messages_prop (composite_vlsm_machine IM constraint).
 Proof.
   intro m. simpl. unfold composite_initial_message_prop.
   apply
     (Decision_iff
-      (P := List.Exists (fun i => vinitial_message_prop (IM i) m) index_listing)
+      (P := List.Exists (fun i => vinitial_message_prop (IM i) m) (enum index))
     ).
-  - rewrite <- exists_finite by (apply finite_index).
+  - rewrite <- exists_finite.
     split; intros [i Hm]; exists i.
     + exists (exist _ _ Hm). reflexivity.
     + destruct Hm as [[im Hinit] Him]. subst. assumption.
@@ -1040,7 +1023,7 @@ Section composite_plan_properties.
 
   Context {message : Type}
           {index : Type}
-          {IndEqDec : EqDecision index}
+          `{EqDecision index}
           (IM :index -> VLSM message)
           (Free := free_composite_vlsm IM)
           .
@@ -1330,30 +1313,25 @@ End composite_plan_properties.
 Section empty_composition_properties.
 
 Context {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  (index_listing : list index)
-  (finite_index : Listing index_listing)
-  (Hempty_index : index_listing = [])
+  (Hempty_index : enum index = [])
   .
 
 Lemma empty_composition_no_index
   (i : index)
   : False.
 Proof.
-  specialize (proj2 finite_index i) as Hin.
-  subst index_listing. contradiction.
+  specialize (elem_of_enum i); rewrite Hempty_index; apply not_elem_of_nil.
 Qed.
 
 Lemma empty_composition_single_state
   (s : composite_state IM)
   : s = (proj1_sig (composite_s0 IM)).
 Proof.
-  apply functional_extensionality_dep_good.
-  intro i. elim (empty_composition_no_index i).
+  extensionality i; elim (empty_composition_no_index i).
 Qed.
 
 Lemma empty_composition_no_label
@@ -1372,8 +1350,7 @@ Qed.
 Lemma empty_composition_no_emit
   : forall m, ~ can_emit X m.
 Proof.
-  intros m [s' [l _]].
-  elim (empty_composition_no_label l).
+  intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
 Lemma empty_composition_no_valid_message
@@ -1390,15 +1367,13 @@ Lemma pre_loaded_empty_composition_no_emit
   (PreX := pre_loaded_vlsm X seed)
   : forall m, ~ can_emit PreX m.
 Proof.
-  intros m [s' [l _]].
-  elim (empty_composition_no_label l).
+  intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
 Lemma pre_loaded_with_all_empty_composition_no_emit
   : forall m, ~ can_emit (pre_loaded_with_all_messages_vlsm X) m.
 Proof.
-  intros m [s' [l _]].
-  elim (empty_composition_no_label l).
+  intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
 End empty_composition_properties.

@@ -1,9 +1,7 @@
 From stdpp Require Import prelude.
-From Coq Require Import FunctionalExtensionality FinFun Program.Tactics.
+From Coq Require Import FunctionalExtensionality FinFun.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StreamExtras.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.Equivocation.
-
-Require Import Coq.Program.Tactics.
 
 (** * VLSM No Equivocation Composition Constraints *)
 
@@ -23,7 +21,7 @@ Context
   *)
 
     Definition no_equivocations_except_from
-      {Hbs : HasBeenSentCapability vlsm}
+      `{HasBeenSentCapability message vlsm}
       (exception : message -> Prop)
       (l : vlabel vlsm)
       (som : state * option message)
@@ -35,7 +33,7 @@ Context
     (messages being received must have been previously sent).
     *)
     Definition no_equivocations
-      {Hbs : HasBeenSentCapability vlsm}
+      `{HasBeenSentCapability message vlsm}
       (l : vlabel vlsm)
       (som : state * option message)
       : Prop
@@ -56,8 +54,8 @@ Section NoEquivocationInvariants.
   Context
     message
     (X: VLSM message)
-    (Hhbs: HasBeenSentCapability X)
-    (Hhbo: HasBeenObservedCapability X)
+    `{HasBeenSentCapability message X}
+    `{HasBeenObservedCapability message X}
     (Henforced: forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s,om) -> no_equivocations X l (s,om))
   .
 
@@ -77,7 +75,7 @@ any message that tests as [has_been_observed] in a state also tests as
   Proof.
     intros Hinitial msg Hsend.
     contradict Hsend.
-    apply (oracle_no_inits has_been_observed_stepwise_props).
+    apply has_been_observed_no_inits.
     assumption.
   Qed.
 
@@ -89,22 +87,21 @@ any message that tests as [has_been_observed] in a state also tests as
     intros Hptrans Hprev msg Hobs.
     specialize (Hprev msg).
     apply preloaded_weaken_input_valid_transition in Hptrans.
-    apply (oracle_step_update has_been_observed_stepwise_props _ _ _ _ _ Hptrans) in Hobs.
+    eapply (oracle_step_update (has_been_observed_stepwise_props X) _ _ _ _ _ Hptrans) in Hobs.
     simpl in Hobs.
     specialize (Henforced l s (Some msg)).
-    rewrite (oracle_step_update (has_been_sent_stepwise_from_trace Hhbs) _ _ _ _ _ Hptrans).
+    rewrite (oracle_step_update (has_been_sent_stepwise_from_trace X) _ _ _ _ _ Hptrans).
     destruct Hptrans as [Hv _].
-    destruct Hobs as [[|]|].
+    destruct Hobs as [[Hin|Hout]|Hobs]; subst.
     - (* by [no_equivocations], the incoming message [im] was previously sent *)
-      rewrite H in Hv.
       specialize (Henforced Hv).
       destruct Henforced; [|contradiction].
       right. assumption.
-    - left. assumption.
-    - specialize (Hprev H).
-      right. assumption.
+    - left. reflexivity.
+    - right. apply Hprev. assumption.
   Qed.
 
+  (* TODO(wkolowski): make notation uniform accross the file. *)
   Lemma observed_were_sent_invariant s:
     valid_state_prop X s ->
     observed_were_sent s.
@@ -170,14 +167,14 @@ Section CompositeNoEquivocation.
 
 Context
   {message : Type}
-  `{IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
+  `{forall i, HasBeenSentCapability (IM i)}
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (Hbs : forall i, HasBeenSentCapability (IM i))
   .
 
 Definition sent_except_from exception es iom : Prop :=
-  from_option (fun im => composite_has_been_sent IM Hbs es im \/ exception im) True iom.
+  from_option (fun im => composite_has_been_sent IM es im \/ exception im) True iom.
 
 Definition composite_no_equivocations_except_from
   (exception : message -> Prop)
@@ -207,28 +204,25 @@ in the same state.
  *)
 Section CompositeNoEquivocationInvariants.
   Context
-    (Hbo : forall i, HasBeenObservedCapability (IM i))
-    {index_listing : list index}
-    (finite_index : Listing index_listing)
+    `{forall i, HasBeenReceivedCapability (IM i)}
     (X := composite_vlsm IM constraint)
     (Hsubsumed: preloaded_constraint_subsumption IM constraint composite_no_equivocations)
     .
 
   Definition composite_observed_were_sent (s: state) : Prop :=
-    forall msg, composite_has_been_observed IM Hbo s msg -> composite_has_been_sent IM Hbs s msg.
+    forall msg, composite_has_been_observed IM s msg -> composite_has_been_sent IM s msg.
 
   Lemma composite_observed_were_sent_invariant s:
     valid_state_prop X s ->
     composite_observed_were_sent s.
   Proof.
-    intro Hs.
-    apply (observed_were_sent_invariant _ _
-           (composite_HasBeenSentCapability IM finite_index Hbs _)
-           (composite_HasBeenObservedCapability IM finite_index Hbo constraint))
-    ; [|assumption].
-    intros l s' om Hv.
-    apply Hsubsumed in Hv.
-    assumption.
+    intros Hs m.
+    rewrite composite_has_been_observed_sent_received_iff.
+    intros Hobs.
+    cut (has_been_sent X s m); [intro; assumption|].
+    apply (observed_were_sent_invariant message X); [|assumption|assumption].
+    intros l s0 om.
+    apply Hsubsumed.
   Qed.
 End CompositeNoEquivocationInvariants.
 
@@ -244,8 +238,6 @@ the newly added initial messages are safe to be received at all times.
 
   Context
     (X := free_composite_vlsm IM)
-    {index_listing : list index}
-    (finite_index : Listing index_listing)
     .
 
 Section seeded_composite_vlsm_no_equivocation_definition.
