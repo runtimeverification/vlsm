@@ -589,18 +589,18 @@ Proof.
     apply set_union_in_iterated. apply Exists_exists.
     exists (sent_messages_fn X si).
     split.
-    + apply elem_of_list_In.
-      apply in_map_iff. exists i. rewrite Hi.
-      split; [reflexivity|]. apply elem_of_list_In. apply up_to_n_full.
+    + rewrite elem_of_list_fmap.
+      exists i. rewrite Hi.
+      split; [reflexivity|]. apply up_to_n_full.
       apply equivocator_state_project_Some_rev in Hi. assumption.
     + specialize (HpsX _ _ Hi). apply (sent_messages_full X); [apply HpsX|].
       assert (Hm : selected_message_exists_in_some_preloaded_traces X (field_selector output) si m)
       ; [|exists (exist _ m Hm); reflexivity].
       destruct istart as [sstart | istart].
       * exists sstart. exists trX. exists Histart. assumption.
-      * destruct Histart as [isi [Histart [HtrX HinitX]]]. specialize (HinitX (proj2 Htr)).
-        exists isi.
-        exists trX. exists (conj HtrX HinitX).
+      * destruct Histart as [isi [Histart [HtrX HinitX]]].
+        specialize (HinitX (proj2 Htr)).
+        exists isi, trX, (conj HtrX HinitX).
         assumption.
 Qed.
 
