@@ -1329,6 +1329,44 @@ Proof.
   assumption.
 Qed.
 
+Lemma elem_of_map_option
+  {A B : Type}
+  (f : A -> option B)
+  (l : list A)
+  (b : B)
+  : b ∈ map_option f l <-> exists a : A, a ∈ l /\ f a = Some b.
+Proof.
+  split.
+  - intro Hin.
+    induction l; cbn in Hin; [inversion Hin|].
+    cut (f a = Some b \/ b ∈ map_option f l).
+    {
+      intros [ Hb | Hb]; [exists a; split; [left | assumption]|].
+      apply IHl in Hb as [a' [Hin' Hfa']].
+      eexists; split; [right|]; eassumption.
+    }
+    destruct (f a) eqn:Hfa; [|right; assumption].
+    apply elem_of_cons in Hin as [Heq | Hin];
+      [left; congruence | right; assumption].
+  - induction l; intros [a' [Hin' Hfa']]; inversion Hin'; subst; clear Hin'; cbn.
+    + rewrite Hfa'; left.
+    + destruct (f a) eqn:Hfa; [right|];
+      apply IHl; exists a'; split; assumption.
+Qed.
+
+Lemma elem_of_map_option_rev
+  {A B : Type}
+  (f : A -> option B)
+  (a : A)
+  (b : B)
+  (Hab : f a = Some b)
+  (l : list A)
+  : a ∈ l -> b ∈ map_option f l.
+Proof.
+  intro Ha; apply elem_of_map_option; exists a; intuition.
+Qed.
+
+
 Lemma in_map_option
   {A B : Type}
   (f : A -> option B)
@@ -1336,25 +1374,7 @@ Lemma in_map_option
   (b : B)
   : In b (map_option f l) <-> exists a : A, In a l /\ f a = Some b.
 Proof.
-  split.
-  - intro Hin.
-    induction l; try inversion Hin.
-    simpl in Hin. destruct (f a) eqn:Hfa.
-    + destruct Hin as [Heq | Hin]; subst.
-      * exists a.
-        split; try assumption.
-        left. reflexivity.
-      * specialize (IHl Hin). destruct IHl as [a' [Hin' Hfa']].
-        exists a'. split; try assumption.
-        right. assumption.
-    + specialize (IHl Hin). destruct IHl as [a' [Hin' Hfa']].
-      exists a'. split; try assumption.
-      right. assumption.
-  - induction l; intros [a' [Hin' Hfa']]; try inversion Hin'; subst; clear Hin'.
-    + simpl. rewrite Hfa'. left. reflexivity.
-    + simpl. destruct (f a) eqn:Hfa.
-      * right. apply IHl. exists a'. split; try assumption.
-      * apply IHl. exists a'. split; try assumption.
+  setoid_rewrite <- elem_of_list_In; apply elem_of_map_option.
 Qed.
 
 Lemma in_map_option_rev
@@ -1366,8 +1386,7 @@ Lemma in_map_option_rev
   (l : list A)
   : In a l -> In b (map_option f l).
 Proof.
-  intro Ha.
-  apply in_map_option. exists a. split; assumption.
+  setoid_rewrite <- elem_of_list_In; apply elem_of_map_option_rev; assumption.
 Qed.
 
 (** [map_option] can be expressed as a [list_filter_map].
@@ -2334,42 +2353,6 @@ induction s; simpl.
       destruct (decide (Q a)).
       -- right. apply IHs. assumption.
       -- apply IHs. assumption.
-Qed.
-
-Lemma elem_of_map_option
-  {A B : Type}
-  (f : A -> option B)
-  (l : list A)
-  (b : B)
-  : b ∈ (map_option f l) <-> exists a : A, a ∈ l /\ f a = Some b.
-Proof.
-  split.
-  - intro Hin.
-    induction l; [inversion Hin|].
-    simpl in Hin. destruct (f a) eqn:Hfa.
-    + rewrite elem_of_cons in Hin.
-      destruct Hin as [Heq | Hin]; subst.
-      * exists a.
-        split; try assumption.
-        left.
-      * specialize (IHl Hin). destruct IHl as [a' [Hin' Hfa']].
-        exists a'. split; try assumption.
-        right. assumption.
-    + specialize (IHl Hin). destruct IHl as [a' [Hin' Hfa']].
-      exists a'. split; try assumption.
-      right. assumption.
-  - induction l; intros [a' [Hin' Hfa']]; [inversion Hin'|]; subst.
-    rewrite elem_of_cons in Hin'.
-    destruct Hin'.
-    + simpl; destruct (f a) eqn:Hfa.
-      * subst. rewrite Hfa in Hfa'. injection Hfa'.
-        intros Hb; subst; left.
-      * congruence.
-    + simpl; destruct (f a) eqn:Hfa.
-      * right; apply IHl.
-        exists a'; split; assumption.
-      * apply IHl.
-        exists a'; split; assumption.
 Qed.
 
 Lemma map_option_subseteq

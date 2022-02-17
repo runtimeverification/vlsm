@@ -174,90 +174,28 @@ Lemma sent_by_non_equivocating_msg_dep_rel_strong_fixed_equivocation
     strong_fixed_equivocation IM equivocators s dm.
 Proof.
   intros s Hs dm m Hdm [i [Hni Hsent]].
-  apply valid_state_has_trace in Hs as Htr;
-  destruct Htr as [is [tr Htr]].
-  eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr
-  ; [|apply constraint_preloaded_free_incl].
-  apply (VLSM_projection_finite_valid_trace_init_to
-          (preloaded_component_projection IM i))
-     in Hpre_tr.
-  apply valid_trace_last_pstate in Hpre_tr as Hsi.
-  apply proper_sent in Hsent; [|assumption].
-  specialize (Hsent _ _ Hpre_tr).
-  apply Exists_exists in Hsent as [item [Hitem Hout]].
-  apply elem_of_list_In in Hitem.
-  apply pre_VLSM_projection_trace_project_in_iff in Hitem as HitemX;
-  destruct HitemX as [[l input destination output] [HitemX HitemX_pr]].
-  unfold pre_VLSM_projection_transition_item_project,
-         composite_project_label in HitemX_pr; cbn in HitemX_pr.
-  case_decide as Hi; [|congruence]; apply Some_inj in HitemX_pr.
-  apply in_split in Hitem as [pre [suf Htr_pr]].
-  rewrite cons_middle, app_assoc in Htr_pr.
-  rewrite Htr_pr in Hpre_tr.
-  destruct Hpre_tr as [Hpre_tr Hinit].
-  apply finite_valid_trace_from_to_app_split in Hpre_tr as [Hpre_tr Hsuf].
-  rewrite finite_trace_last_is_last in Hsuf.
-  apply finite_valid_trace_from_to_app_split in Hpre_tr as Hitem.
-  apply proj2 in Hitem.
-  rewrite finite_trace_last_is_last in Hpre_tr, Hitem.
-  subst; destruct l as (i, li); cbn in *; subst output.
-  inversion_clear Hitem.
-  assert (Hproduce :
-            can_produce (pre_loaded_with_all_messages_vlsm (IM i)) (destination i) m)
-      by (eexists _,_; eassumption).
-  eapply message_dependencies_are_necessary in Hproduce; [|typeclasses eauto].
-  eapply has_been_observed_sent_received_iff in Hproduce
-  ; [|revert Ht; apply input_valid_transition_destination|eassumption].
-  destruct Hproduce as [Hreceived | Hsent]; cycle 1.
+  apply (messages_sent_from_component_produced_previously IM Hs) in Hsent
+    as (destination & Hfutures & Hproduce).
+  eapply VLSM_incl_in_futures in Hfutures as Hpre_futures;
+    [|apply constraint_preloaded_free_incl with (constraint :=  strong_fixed_equivocation_constraint IM equivocators)].
+  apply (VLSM_projection_in_futures (preloaded_component_projection IM i)) in Hpre_futures.
+  eapply message_dependencies_are_necessary, has_been_observed_sent_received_iff
+    in Hproduce as [Hreceived| Hsent]; [..|eassumption|typeclasses eauto]; cycle 1.
   + left. exists i. split; [assumption|].
-    revert Hsent.
-    eapply in_futures_preserving_oracle_from_stepwise.
-    * apply has_been_sent_stepwise_from_trace.
-    * eexists; eassumption.
-  + clear -Htr_pr Hpre_tr Hreceived Hinit Htr.
-    apply pre_VLSM_projection_trace_project_app_rev in Htr_pr
-      as (preX & sufX & Heqtr & HpreX_pr & _); subst tr.
-    apply valid_trace_last_pstate in Hpre_tr as Hdestinationi.
-    apply proper_received in Hreceived; [|assumption].
-    specialize (Hreceived _ _ (conj Hpre_tr Hinit)).
-    apply Exists_exists in Hreceived as [item_dm [Hitem_dm Hreceived]].
-    apply elem_of_list_In in Hitem_dm.
-    rewrite <- HpreX_pr in Hitem_dm.
-    apply pre_VLSM_projection_trace_project_in_iff in Hitem_dm as HitemX_dm;
-    destruct HitemX_dm as [itemX_dm [HitemX_dm HitemX_dm_pr]].
-    apply proj1 in Htr.
-    apply (finite_valid_trace_from_to_app_split (composite_vlsm IM _))
-       in Htr as [HpreX HsufX].
-    apply in_split in HitemX_dm as [preX_dm [sufX_dm HpreX_dm_pr]].
-    rewrite cons_middle, app_assoc in HpreX_dm_pr.
-    rewrite HpreX_dm_pr in HpreX.
-    apply (finite_valid_trace_from_to_app_split (composite_vlsm IM _))
-       in HpreX as [HpreX_dm HsufX_dm].
-    apply (finite_valid_trace_from_to_app_split (composite_vlsm IM _)), proj2
-       in HpreX_dm.
-    rewrite finite_trace_last_is_last in HpreX_dm, HsufX_dm; subst.
-    assert (Hfutures :
-      in_futures (composite_vlsm IM (strong_fixed_equivocation_constraint IM equivocators))
-        (@finite_trace_last _ (composite_type IM) is preX_dm) s).
-    {
-      clear -HpreX_dm HsufX_dm HsufX.
-      exists ([itemX_dm] ++ sufX_dm ++ sufX).
-      apply (finite_valid_trace_from_to_app (composite_vlsm IM _)) with (VLSM.destination itemX_dm)
-      ; [assumption|].
-      eapply (finite_valid_trace_from_to_app (composite_vlsm IM _)); eassumption.
-    }
-    destruct itemX_dm.
-    unfold pre_VLSM_projection_transition_item_project,
-           composite_project_label in HitemX_dm_pr; cbn in HitemX_dm_pr.
-    case_decide as Hi; [|congruence]; apply Some_inj in HitemX_dm_pr; subst.
-    destruct l as (i, li_dm); cbn in *; subst.
-    clear -HpreX_dm Hfutures.
-    inversion_clear HpreX_dm.
-    destruct Ht as [(_ & _ & _ & Hc) _]; revert Hc.
-    apply in_futures_preserves_strong_fixed_equivocation.
-    eapply VLSM_incl_in_futures; [| eassumption].
-    apply constraint_preloaded_free_incl
-     with (constraint := (strong_fixed_equivocation_constraint IM equivocators)).
+    eapply in_futures_preserving_oracle_from_stepwise;
+      [apply has_been_sent_stepwise_from_trace|eassumption|eassumption].
+  + eapply in_futures_valid_fst; eassumption.
+  + apply in_futures_valid_fst in Hfutures as Hdestination.
+    specialize (received_component_received_previously IM Hdestination Hreceived)
+      as (s_item_dm & [] & Ht & Hfutures_dm & <- & Hinput);
+      destruct l as (i, li); cbn in Hinput; subst input; cbn in *.
+      apply input_valid_transition_in_futures in Ht as Hfutures_t; cbn in Hfutures_t.
+      destruct Ht as [(_ & _ & _ & Hc) _].
+      revert Hc; apply in_futures_preserves_strong_fixed_equivocation.
+      eapply VLSM_incl_in_futures;
+        [apply constraint_preloaded_free_incl
+          with (constraint := (strong_fixed_equivocation_constraint IM equivocators))|].
+      do 2 (eapply in_futures_trans; [eassumption|]); assumption.
 Qed.
 
 Lemma msg_dep_rel_reflects_strong_fixed_equivocation
@@ -380,8 +318,7 @@ Definition full_node_fixed_set_equivocation_constraint
   (l : composite_label IM)
   (som : composite_state IM * option message)
   : Prop :=
-  let (s, om) := som in
-  from_option (full_node_fixed_set_equivocation s) True om.
+  from_option (full_node_fixed_set_equivocation som.1) True som.2.
 
 Lemma msg_dep_full_node_fixed_set_equivocation_constraint_subsumption
   (Hchannel : channel_authentication_prop IM A sender)

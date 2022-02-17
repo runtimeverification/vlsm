@@ -1785,6 +1785,48 @@ Section Composite.
                  right.
                  assumption.
       Qed.
+
+      Lemma oracle_component_selected_previously
+        [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+        (X := composite_vlsm IM constraint)
+        [s : composite_state IM]
+        (Hs : valid_state_prop X s)
+        [i : index]
+        [m : message]
+        (Horacle : oracles i (s i) m) :
+        exists s_item item,
+          input_valid_transition_item X s_item item /\
+          in_futures X (destination item) s /\
+          projT1 (l item) = i /\
+          composite_message_selector m item.
+      Proof.
+        apply valid_state_has_trace in Hs as [is [tr Htr]].
+        eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr
+        ; [|apply constraint_preloaded_free_incl].
+        apply (VLSM_projection_finite_valid_trace_init_to
+                (preloaded_component_projection IM i))
+           in Hpre_tr.
+        eapply prove_all_have_message_from_stepwise in Horacle;
+          [|apply stepwise_props|eapply finite_valid_trace_from_to_last_pstate, Hpre_tr].
+        specialize (Horacle _ _ Hpre_tr); clear Hpre_tr.
+        apply Exists_exists in Horacle as [item [Hitem Hout]].
+        apply elem_of_map_option in Hitem as [itemX [HitemX HitemX_pr]].
+        apply elem_of_list_split in HitemX as [pre [suf Htr_pr]].
+        exists (finite_trace_last is pre), itemX.
+        rewrite cons_middle in Htr_pr.
+        eapply (input_valid_transition_to X) in Htr_pr as Ht;
+          [cbn in Ht|apply valid_trace_forget_last in Htr; apply Htr].
+        unfold pre_VLSM_projection_transition_item_project,
+           composite_project_label in HitemX_pr; cbn in HitemX_pr.
+        rewrite app_assoc in Htr_pr.
+        case_decide as Hi; [|congruence]; apply Some_inj in HitemX_pr;
+          subst i item tr; cbn in *.
+        apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr.
+        rewrite finite_trace_last_is_last in Htr.
+        destruct itemX, l; cbn in *; intuition.
+        exists suf; assumption.
+      Qed.
+
   End StepwiseProps.
 
   (** A message 'has_been_sent' for a composite state if it 'has_been_sent' for any of
@@ -2184,6 +2226,115 @@ Section Composite.
     :=
     let (s', om') := (composite_transition IM l som) in
     not_heavy s'.
+
+  Lemma sent_component_sent_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Horacle : has_been_sent (IM i) (s i) m) :
+    exists s_item item,
+      input_valid_transition_item X s_item item /\
+      in_futures X (destination item) s /\
+      projT1 (l item) = i /\
+      output item = Some m.
+  Proof.
+    clear -Hs Horacle.
+    specialize
+      (oracle_component_selected_previously
+        (fun i => has_been_sent_stepwise_from_trace (IM i))
+        Hs Horacle)
+      as (s_item & item & Ht & Hfutures & Hi & Hselected).
+    destruct item, l.
+    eexists _,_; split; [eassumption|]; intuition.
+  Qed.
+
+  Lemma received_component_received_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Horacle : has_been_received (IM i) (s i) m) :
+    exists s_item item,
+      input_valid_transition_item X s_item item /\
+      in_futures X (destination item) s /\
+      projT1 (l item) = i /\
+      input item = Some m.
+  Proof.
+    clear -Hs Horacle.
+    specialize
+      (oracle_component_selected_previously
+        (fun i => has_been_received_stepwise_from_trace (IM i))
+        Hs Horacle)
+      as (s_item & item & Ht & Hfutures & Hi & Hselected).
+    destruct item, l.
+    eexists _,_; split; [eassumption|]; intuition.
+  Qed.
+
+  Lemma messages_sent_from_component_produced_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Hsent : has_been_sent (IM i) (s i) m) :
+    exists s_m,
+      in_futures X s_m s /\
+      can_produce (pre_loaded_with_all_messages_vlsm (IM i)) (s_m i) m.
+  Proof.
+    specialize (sent_component_sent_previously Hs Hsent)
+      as (s_item & [] & Ht & Hfutures & <- & Houtput); destruct l as (i, li); cbn in *; subst output.
+    exists destination; split; [assumption|].
+    eapply VLSM_incl_input_valid_transition in Ht; cbn in Ht;
+      [|apply constraint_preloaded_free_incl].
+    eapply (VLSM_projection_input_valid_transition (preloaded_component_projection IM i))
+      in Ht; [eexists _,_; eassumption|].
+    apply (composite_project_label_eq IM).
+  Qed.
+
+  Lemma messages_received_from_component_received_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Hreceived : has_been_received (IM i) (s i) m) :
+    exists li s_m s_m' oom,
+      in_futures X s_m' s /\
+      input_valid_transition X (existT i li) (s_m, Some m) (s_m', oom).
+  Proof.
+    apply valid_state_has_trace in Hs as [is [tr Htr]].
+    eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr
+    ; [|apply constraint_preloaded_free_incl].
+    apply (VLSM_projection_finite_valid_trace_init_to
+            (preloaded_component_projection IM i))
+       in Hpre_tr.
+    apply proper_received in Hreceived;
+      [|eapply finite_valid_trace_from_to_last_pstate, Hpre_tr].
+    specialize (Hreceived _ _ Hpre_tr); clear Hpre_tr.
+    apply Exists_exists in Hreceived as [item [Hitem Hout]].
+    apply elem_of_map_option in Hitem as [[(_i, li) input destination output] [HitemX HitemX_pr]].
+    apply elem_of_list_split in HitemX as [pre [suf Htr_pr]].
+    rewrite cons_middle in Htr_pr.
+    eapply (input_valid_transition_to X) in Htr_pr as Ht;
+      [cbn in Ht|apply valid_trace_forget_last in Htr; apply Htr].
+    unfold pre_VLSM_projection_transition_item_project,
+       composite_project_label in HitemX_pr; cbn in HitemX_pr.
+    rewrite app_assoc in Htr_pr.
+    case_decide as Hi; [|congruence]; apply Some_inj in HitemX_pr;
+      subst _i item tr; cbn in *; subst input.
+    eexists _, _, _, _; split; [|eassumption]; clear Ht.
+    exists suf.
+    apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr.
+    rewrite finite_trace_last_is_last in Htr; assumption.
+  Qed.
+
 
   Lemma messages_sent_from_component_of_valid_state_are_valid
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
