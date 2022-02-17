@@ -277,11 +277,11 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
       {| original_state := isX; state_annotation := ` inhabitant |}
       (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender isX trX).
 Proof.
-  eapply equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation in Htr
-    as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_limited)
-  ; [|eassumption].
+  eapply equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
+      in Htr as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_limited)
+  ; [| eassumption].
   exists trX, initial_descriptors.
-  repeat (split; [assumption|]).
+  cbn; intuition.
   eapply msg_dep_limited_fixed_equivocation; eassumption.
 Qed.
 

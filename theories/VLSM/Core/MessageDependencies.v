@@ -118,21 +118,19 @@ Proof.
   intros dm m Hdm.
   rewrite emitted_messages_are_valid_iff, can_emit_iff.
   intros [Hinit | [s Hproduce]].
-  - rewrite emitted_messages_are_valid_iff.
-    left; right.
+  - rewrite emitted_messages_are_valid_iff; left; right.
     apply Hreflects with m; [assumption |].
     destruct Hinit as [Hinit | Hp]; [| assumption].
-    elim (no_initial_messages_in_X m).
-    assumption.
+    contradict Hinit; apply no_initial_messages_in_X.
   - apply (observed_valid (pre_loaded_vlsm X P)) with (s0 := s).
-    + exists (Some m). apply can_produce_valid. assumption.
+    + exists (Some m). apply can_produce_valid; assumption.
     + cut (has_been_observed X s dm).
       {
-        intros [Hsent | Hreceived]; [left|right]; auto.
+        intros [Hsent | Hreceived]; [left | right]; auto.
       }
       apply message_dependencies_are_necessary with m; [| assumption].
-      revert Hproduce.
-      apply VLSM_incl_can_produce, pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+      revert Hproduce
+      ; apply VLSM_incl_can_produce, pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 (** Under [MessageDependencies] assumptions, if a message [has_been_sent]

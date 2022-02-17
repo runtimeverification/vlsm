@@ -86,11 +86,12 @@ Lemma limited_equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   isX trX
   (HtrX : fixed_limited_equivocation_prop IM isX trX)
-  : exists is, equivocators_total_state_project IM is = isX /\
-    exists s, equivocators_total_state_project IM s = finite_trace_last isX trX /\
-    exists tr, equivocators_total_trace_project IM tr = trX /\
-    finite_valid_trace_init_to XE is s tr /\
-    finite_trace_last_output trX = finite_trace_last_output tr.
+  : exists is s tr,
+      equivocators_total_state_project IM is = isX /\
+      equivocators_total_state_project IM s = finite_trace_last isX trX /\
+      equivocators_total_trace_project IM tr = trX /\
+      finite_valid_trace_init_to XE is s tr /\
+      finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   destruct HtrX as (equivocating & Hlimited & HtrX).
   eapply VLSM_incl_finite_valid_trace, valid_trace_add_default_last in HtrX
@@ -98,11 +99,8 @@ Proof.
   specialize
     (fixed_equivocators_finite_valid_trace_init_to_rev IM _
       no_initial_messages_in_IM _ _ _ HtrX)
-    as (is & His & s & Hs & tr & Htr & Hptr & Houtput).
-  exists is; split; [assumption|].
-  exists s; split; [assumption|].
-  exists tr; split; [assumption|].
-  split; [|assumption].
+    as (is & s & tr & His & Hs & Htr & Hptr & Houtput).
+  exists is, s, tr; intuition.
   revert Hptr; apply VLSM_incl_finite_valid_trace_init_to.
   apply equivocators_Fixed_incl_Limited; assumption.
 Qed.
@@ -122,33 +120,26 @@ Context
 Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation_rev
   isX sX trX
   (HtrX : finite_valid_trace_init_to (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender) isX sX trX)
-  : exists is, equivocators_total_state_project IM is = original_state isX /\
-    exists s, equivocators_total_state_project IM s = original_state sX /\
-    exists tr, equivocators_total_trace_project IM tr =
-      pre_VLSM_full_projection_finite_trace_project
-        (annotated_type (free_composite_vlsm IM) (set index)) (composite_type IM) Datatypes.id original_state
-        trX
-    /\ finite_valid_trace_init_to XE is s tr
-    /\ finite_trace_last_output trX = finite_trace_last_output tr.
+  : exists is s tr,
+      equivocators_total_state_project IM is = original_state isX /\
+      equivocators_total_state_project IM s = original_state sX /\
+      equivocators_total_trace_project IM tr =
+        pre_VLSM_full_projection_finite_trace_project
+          (annotated_type (free_composite_vlsm IM) (set index)) (composite_type IM) Datatypes.id original_state
+          trX /\
+      finite_valid_trace_init_to XE is s tr /\
+      finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   apply valid_trace_get_last in HtrX as HeqsX.
-  apply valid_trace_forget_last in HtrX.
-  eapply msg_dep_fixed_limited_equivocation in HtrX.
+  eapply valid_trace_forget_last, msg_dep_fixed_limited_equivocation
+      in HtrX.
   2-5: eassumption.
-  apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
-   as (is & His_pr & s & Hpr_s & tr & Htr_pr & Htr & Houtput)
-  ; [|assumption].
-  eexists; split; [eassumption|].
-  subst.
-  exists s.
-  rewrite Hpr_s.
-  erewrite <- pre_VLSM_full_projection_finite_trace_last.
-  split; [reflexivity|].
-  exists tr.
-  split; [assumption|].
-  split; [assumption|].
-  rewrite <- Houtput.
-  apply pre_VLSM_full_projection_finite_trace_last_output.
+  apply limited_equivocators_finite_valid_trace_init_to_rev
+     in HtrX as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput)
+  ; [| assumption].
+  exists is, s, tr; subst; intuition.
+  - erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last; reflexivity.
+  - rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
 Qed.
 
 End sec_equivocators_simulating_annotated_limited.
@@ -180,9 +171,9 @@ Proof.
     (limited_valid_state_has_trace_exhibiting_limited_equivocation IM
       sender message_dependencies Hwitnessed_equivocation Hfull
       no_initial_messages_in_IM can_emit_signed)
-    in HsX as [isX [trX [HsX HtrX]]].
+    in HsX as (isX & trX & HsX & HtrX).
   apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
-    as [is [_ [s [Hpr_s [tr [_ [Htr _]]]]]]]
+    as (is & s & tr & _ & Hpr_s & _ & Htr & _)
   ; [|assumption].
   exists s.
   subst. split; [assumption|].
