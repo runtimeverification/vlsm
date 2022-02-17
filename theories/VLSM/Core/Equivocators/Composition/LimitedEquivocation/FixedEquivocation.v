@@ -101,7 +101,7 @@ Proof.
   apply transitivity.
   destruct Ht as [_ Ht].
   revert Ht.
-  apply equivocators_transition_preserves_equivocating_indices.
+  rapply @equivocators_transition_preserves_equivocating_indices.
 Qed.
 
 (** Composition of equivocators with no message equivocation and a

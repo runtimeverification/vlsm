@@ -179,7 +179,7 @@ Lemma limited_PreNonByzantine_vlsm_lift
 Proof.
   apply basic_VLSM_full_projection; intros ? *.
   - intros; apply limited_PreNonByzantine_lift_valid; assumption.
-  - intros * []; apply lift_sub_transition; assumption.
+  - intros * []; rapply lift_sub_transition; assumption.
   - intros; apply (lift_sub_state_initial IM); assumption.
   - intros Hv HsY [[sub_i [[im Him] Heqm]] | Hseeded].
     + cbn in Heqm; subst.

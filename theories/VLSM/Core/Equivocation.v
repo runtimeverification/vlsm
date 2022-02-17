@@ -1,5 +1,5 @@
 From stdpp Require Import prelude finite.
-From Coq Require Import Streams FinFun Rdefinitions Program.Tactics.
+From Coq Require Import Streams FinFun Rdefinitions.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
 From VLSM Require Import Lib.ListSetExtras Lib.Measurable Lib.FinFunExtras.
 From VLSM Require Import Core.Decisions Core.VLSM Core.VLSMProjections.
@@ -546,7 +546,7 @@ Section Simple.
       split; [|assumption].
       revert Htr.
       unfold pre_vlsm;clear.
-      destruct vlsm as (T,(S,M)).
+      destruct vlsm as (T,M).
       apply VLSM_incl_finite_valid_trace_init_to.
       apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
     Qed.
@@ -571,7 +571,7 @@ Section Simple.
       spec Hsm;[|assumption].
       revert Htr.
       unfold pre_vlsm;clear.
-      destruct vlsm as (T,(S,M)).
+      destruct vlsm as (T,M).
       apply VLSM_incl_finite_valid_trace_init_to.
       apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
     Qed.
@@ -947,7 +947,7 @@ Record oracle_stepwise_props
        (message_selector: message -> transition_item -> Prop)
        (oracle: state_message_oracle vlsm) : Prop :=
   {oracle_no_inits: forall (s: vstate vlsm),
-      initial_state_prop (VLSMSign:=sign vlsm) s ->
+      initial_state_prop (VLSMMachine:=vmachine vlsm) s ->
       forall m, ~oracle s m;
    oracle_step_update:
        forall l s im s' om,
@@ -1149,7 +1149,7 @@ Section StepwiseFromTrace.
          no_traces_have_message_prop vlsm selector (fun m s => ~oracle m s) s m).
 
   Lemma oracle_no_inits_from_trace:
-    forall (s: vstate vlsm), initial_state_prop (VLSMSign:=sign vlsm) s ->
+    forall (s: vstate vlsm), initial_state_prop (VLSMMachine:=vmachine vlsm) s ->
                              forall m, ~oracle s m.
   Proof.
     intros s Hinit m Horacle.

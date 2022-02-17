@@ -175,7 +175,7 @@ Proof.
       eapply (VLSM_projection_input_valid_transition Hproj) in HivtX as [_ Hs']
       ; [|eassumption].
       rewrite HsX in Hs'.
-      destruct Y as (TY & SY & MY).
+      destruct Y as (TY & MY).
       cbv in Htrans, Hs'.
       rewrite Htrans in Hs'.
       inversion Hs'.
@@ -315,7 +315,7 @@ Proof.
     (machine (projection_induced_vlsm X (type (IM i))
       (composite_project_label IM i) (fun s => s i)
       (lift_to_composite_label IM i) (lift_to_composite_state IM i)))
-  ; [|apply VLSM_eq_sym, composite_vlsm_constrained_projection_is_induced].
+  ; simpl; [|apply VLSM_eq_sym, composite_vlsm_constrained_projection_is_induced].
   apply pre_loaded_with_all_messages_validator_proj_eq.
   - apply component_projection_to_preloaded.
   - apply component_transition_projection_None.
@@ -389,7 +389,7 @@ Lemma pre_loaded_with_all_messages_self_validator_vlsm_incl
   : VLSM_incl PreX X.
 Proof.
   unfold self_validator_vlsm_prop  in Hvalidator.
-  destruct X as (T & S & M). simpl in *.
+  destruct X as (T & M). simpl in *.
   (* redcuction to inclusion of finite traces. *)
   apply VLSM_incl_finite_traces_characterization.
   intros s tr [Htr Hs].
@@ -421,7 +421,7 @@ Proof.
   split.
   - apply pre_loaded_with_all_messages_self_validator_vlsm_incl.
   - pose (vlsm_incl_pre_loaded_with_all_messages_vlsm X) as Hincl.
-    destruct X as (T, (S, M)).
+    destruct X as (T, M).
     apply Hincl.
 Qed.
 

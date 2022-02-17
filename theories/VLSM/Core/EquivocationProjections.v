@@ -295,9 +295,7 @@ Section incl_oracle.
 Context
   {message : Type}
   {T : VLSMType message}
-  {SX SY : VLSMSign T}
-  {MX : VLSMClass SX}
-  {MY : VLSMClass SY}
+  {MX MY : VLSMMachine T}
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   (Hincl : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y))

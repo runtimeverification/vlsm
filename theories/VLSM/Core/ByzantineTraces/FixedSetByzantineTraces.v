@@ -49,9 +49,12 @@ Definition signed_messages_valid
   channel_authenticated_message A sender node_idx l.
 
 Definition emit_any_signed_message_vlsm_machine
-  : VLSMClass all_messages_sig
+  : VLSMMachine all_messages_type
   :=
-  {| transition := all_messages_transition
+  {| initial_state_prop := fun s => True
+   ; initial_message_prop := fun m => False
+   ; s0 := all_messages_state_inh
+   ; transition := all_messages_transition
    ; valid := signed_messages_valid
   |}.
 
@@ -183,8 +186,14 @@ Proof.
   - intros s H1; apply fixed_non_byzantine_projection_initial_state_preservation; assumption.
   - intros m H1; cbv; trivial.
   - split; [| cbv; trivial].
-    eapply induced_sub_projection_valid_preservation; eassumption.
-  - intros l s om s' om'; apply induced_sub_projection_transition_preservation.
+    eapply induced_sub_projection_valid_preservation;eassumption.
+  - intros l s om s' om'.
+    unfold vtransition, transition, machine.
+    cbn [vtransition transition machine vmachine].
+    unfold projection_induced_vlsm_machine.
+    unfold pre_loaded_with_all_messages_vlsm_machine.
+    (* an ugly trick to get the forward direction from an iff (<->) lemma *)
+    eapply proj1; rapply @induced_sub_projection_transition_preservation.
 Qed.
 
 (** The induced projection from the composition of [fixed_byzantine_IM] under
@@ -360,8 +369,7 @@ Proof.
     + split; [|cbv; trivial].
       apply fixed_non_byzantine_projection_valid_no_equivocations; assumption.
   - intros l s om s' om' [_ Ht].
-    revert Ht.
-    eapply induced_sub_projection_transition_preservation.
+    apply induced_sub_projection_transition_preservation in Ht; assumption.
 Qed.
 
 Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_valid
@@ -457,7 +465,7 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_lift
 Proof.
   apply basic_VLSM_full_projection.
   - intro; intros; apply pre_loaded_fixed_non_byzantine_vlsm_lift_valid; assumption.
-  - intro; intros * []; apply lift_sub_transition; assumption.
+  - intro; intros * []; rapply lift_sub_transition; assumption.
   - intro; intros; apply (lift_sub_state_initial fixed_byzantine_IM); assumption.
   - intro; intros; apply (pre_loaded_fixed_non_byzantine_vlsm_lift_initial_message l s m); assumption.
 Qed.
@@ -482,7 +490,7 @@ Proof.
     apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
   - intros l s om s' om' [_ Ht].
     revert Ht.
-    apply induced_sub_projection_transition_preservation.
+    apply @induced_sub_projection_transition_preservation.
 Qed.
 
 Lemma fixed_non_byzantine_pre_loaded_eq
@@ -605,7 +613,7 @@ Proof.
       eapply induced_sub_projection_valid_projection. apply Hv.
   - intros l s om s' om' [_ Ht].
     revert Ht.
-    apply induced_sub_projection_transition_preservation.
+    apply @induced_sub_projection_transition_preservation.
 Qed.
 
 (** As a corollary to the above result, we can conclude that valid
@@ -643,7 +651,7 @@ Proof.
   - apply lift_sub_valid. apply Hv.
   - destruct om as [m|]; [|exact I].
     apply proj2 in Hv as Hc.
-    apply proj2, proj2, proj1 in Hc.
+    destruct Hc as [_ [_ [Hc _]]].
     destruct Hc as [Hsent | Hseeded].
     + left.
       apply composite_has_been_observed_sent_received_iff.
@@ -675,7 +683,7 @@ Proof.
       apply dec_stable in Hi.
       apply can_emit_with_more; [assumption|].
       intros dm Hdm.
-      apply proj2, proj2, proj1 in Hv.
+      destruct Hv as [_ [_ [Hv _]]].
       destruct l as (sub_j, lj).
       destruct_dec_sig sub_j j Hj Heqsub_j.
       subst sub_j.
@@ -696,7 +704,7 @@ Proof.
   - intros l s om [Hv _].
     split; [|exact I].
     apply lift_sub_valid; assumption.
-  - intro; intros; apply lift_sub_transition; assumption.
+  - intro; intros; rapply lift_sub_transition; assumption.
   - intro; intros; apply (lift_sub_state_initial IM); assumption.
   - intro; intros; cbn; trivial.
 Qed.
@@ -720,7 +728,7 @@ Lemma fixed_non_byzantine_vlsm_lift_from_initial
 Proof.
   apply basic_VLSM_full_projection.
   - intro; intros; apply fixed_non_byzantine_vlsm_lift_valid; assumption.
-  - intro; intros * []; apply lift_sub_transition; assumption.
+  - intro; intros * []; rapply lift_sub_transition; assumption.
   - intro; intros; apply (lift_sub_state_initial IM); assumption.
   - intros; apply Hfixed_non_byzantine_vlsm_lift_initial_message.
 Qed.

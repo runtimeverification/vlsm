@@ -47,14 +47,6 @@ with the exception that the [initial_message]s for the projection are defined
 to be all [valid_message]s of <<X>>:
 
 *)
-  Definition composite_vlsm_constrained_projection_sig
-    (i : index)
-    : VLSMSign (type (IM i))
-    :=
-    {|   initial_state_prop := vinitial_state_prop (IM i)
-     ;   initial_message_prop := fun pmi => exists xm : valid_message X, proj1_sig xm = pmi
-     ;   s0 := @s0 _ _ (sign (IM i))
-    |}.
 
 (**
 [projection_valid]ity is defined as the projection of [input_valid]ity of <<X>>:
@@ -211,8 +203,12 @@ having the same transition function as <<IM i>>, the <<i>>th component of <<IM>>
 *)
   Definition composite_vlsm_constrained_projection_machine
     (i : index)
-    : VLSMClass (composite_vlsm_constrained_projection_sig i) :=
-    {|  transition :=  vtransition (IM i)
+    : VLSMMachine (type (IM i))
+    :=
+    {|   initial_state_prop := vinitial_state_prop (IM i)
+     ;   initial_message_prop := fun pmi => exists xm : valid_message X, proj1_sig xm = pmi
+     ;   s0 := @s0 _ _ (machine (IM i))
+     ;  transition :=  vtransition (IM i)
      ;  valid := projection_valid i
     |}.
 
@@ -852,7 +848,7 @@ Proof.
   - apply (valid_initial_state_message PreLoaded).
     assumption. destruct om;exact I.
   - apply (valid_generated_state_message PreLoaded) with s _om _s om l; try assumption.
-    eapply (projection_valid_implies_valid IM). exact Hv.
+    simpl. eapply (projection_valid_implies_valid IM). exact Hv.
 Qed.
 
 (**
@@ -865,7 +861,8 @@ Proof.
   apply (basic_VLSM_incl (machine Xj) (machine PreLoaded)); intro; intros.
   - assumption.
   - apply initial_message_is_valid; exact I.
-  - eapply (projection_valid_implies_valid IM).
+  - unfold vvalid;simpl.
+    eapply (projection_valid_implies_valid IM).
     apply Hv.
   - apply H.
 Qed.
