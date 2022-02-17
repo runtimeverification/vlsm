@@ -128,15 +128,14 @@ Proof.
     apply (@message_dependencies_are_necessary _ m s) in Hdm
     ; [|revert Hproduce; apply VLSM_incl_can_produce; apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
     clear H1 no_initial_messages_in_X Hreflects.
-    revert H H0 s Hdm Hproduce; destruct X as (T & S & M); cbn; intros.
+    revert H H0 s Hdm Hproduce; destruct X as [T M]; clear X; cbn; intros.
     eapply VLSM_incl_has_been_observed
     ; [apply basic_VLSM_incl_preloaded; cbv;intuition | | eassumption].
-
     exists (Some m).
     apply can_produce_valid.
     revert Hproduce.
     eapply VLSM_incl_can_produce.
-    apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    exact (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P).
 Qed.
 
 (** Under [MessageDependencies] assumptions, if a message [has_been_sent]

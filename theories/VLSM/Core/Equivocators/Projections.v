@@ -940,13 +940,13 @@ Proof.
     split; [assumption|].
     apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Htr.
     clear -Htr.
-    destruct X as (T, (S, M)).
+    destruct X as (T, M).
     assumption.
   - destruct Hdi as [s [Hpr_bs_i Htr]].
     eexists; split; [exact Hpr_bs_i|].
     apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Htr.
     clear -Htr.
-    destruct X as (T, (S, M)).
+    destruct X as (T, M).
     assumption.
 Qed.
 
@@ -984,13 +984,13 @@ Proof.
     split; [assumption|].
     apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
     clear -Htr.
-    destruct X as (T, (S, M)).
+    destruct X as (T, M).
     assumption.
   - destruct Hdi as [s [Hpr_bs_i Htr]].
     eexists; split; [exact Hpr_bs_i|].
     apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
     clear -Htr.
-    destruct X as (T, (S, M)).
+    destruct X as (T, M).
     assumption.
 Qed.
 

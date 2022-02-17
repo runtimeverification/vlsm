@@ -573,13 +573,6 @@ Defined.
 Instance equivocator_initial_state_inh : Inhabited equivocator_initial_state :=
   {| inhabitant := equivocator_s0 |}.
 
-Definition equivocator_sig
-  : VLSMSign equivocator_type
-  :=
-    {|   initial_state_prop := equivocator_initial_state_prop
-       ; initial_message_prop := vinitial_message_prop X
-    |}.
-
 Definition equivocator_transition
   (bl : equivocator_label)
   (bsom : equivocator_state * option message)
@@ -620,9 +613,11 @@ Definition equivocator_valid
   end.
 
 Definition equivocator_vlsm_machine
-  : VLSMClass equivocator_sig
+  : VLSMMachine equivocator_type
   :=
-  {|  transition := equivocator_transition
+  {|  initial_state_prop := equivocator_initial_state_prop
+   ;  initial_message_prop := vinitial_message_prop X
+   ;  transition := equivocator_transition
    ;  valid := equivocator_valid
   |}.
 
@@ -894,7 +889,7 @@ Lemma equivocator_transition_reflects_singleton_state
   (iom oom: option message)
   (l: vlabel equivocator_vlsm)
   (s s': vstate equivocator_vlsm)
-  (Ht: vtransition equivocator_vlsm l (s, iom) = (s', oom))
+  (Ht: equivocator_transition X l (s, iom) = (s', oom))
   : is_singleton_state X s' -> is_singleton_state X s.
 Proof.
   unfold is_singleton_state.
@@ -912,7 +907,7 @@ Lemma equivocator_transition_cannot_decrease_state_size
   (iom oom: option message)
   (l: vlabel equivocator_vlsm)
   (s s': vstate equivocator_vlsm)
-  (Ht: vtransition equivocator_vlsm l (s, iom) = (s', oom))
+  (Ht: equivocator_transition X l (s, iom) = (s', oom))
   : equivocator_state_n s <= equivocator_state_n s'.
 Proof.
   specialize (equivocator_state_extend_size X s) as Hex_size.
@@ -931,7 +926,7 @@ Lemma equivocator_transition_preserves_equivocating_state
   (iom oom: option message)
   (l: vlabel equivocator_vlsm)
   (s s': vstate equivocator_vlsm)
-  (Ht: vtransition equivocator_vlsm l (s, iom) = (s', oom))
+  (Ht: equivocator_transition X l (s, iom) = (s', oom))
   : is_equivocating_state X s -> is_equivocating_state X s'.
 Proof.
   intros Hs Hs'. elim Hs. clear Hs. revert Ht Hs' .
@@ -942,7 +937,7 @@ Lemma zero_descriptor_transition_reflects_equivocating_state
   (iom oom: option message)
   (l: vlabel equivocator_vlsm)
   (s s': vstate equivocator_vlsm)
-  (Ht: vtransition equivocator_vlsm l (s, iom) = (s', oom))
+  (Ht: equivocator_transition X l (s, iom) = (s', oom))
   li
   (Hzero : l = ContinueWith 0 li)
   : is_equivocating_state X s' -> is_equivocating_state X s.
@@ -1051,7 +1046,7 @@ Proof.
   apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False equivocator_vlsm)) in Hbs.
   specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
   apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False X)) in Hsi.
-  destruct X as (T, (S, M)).
+  destruct X as (T, M).
   assumption.
 Qed.
 
@@ -1068,7 +1063,7 @@ Proof.
   apply preloaded_with_equivocator_state_project_valid_message in Hom.
   specialize (vlsm_is_pre_loaded_with_False_initial_message_rev X) as Hinit_rev.
   apply (VLSM_incl_valid_message (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
-  ; destruct X as (T, (S, M))
+  ; destruct X as (T, M)
   ; assumption.
 Qed.
 
@@ -1087,7 +1082,7 @@ Proof.
   apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm)) in Hbs.
   specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
   apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X)) in Hsi.
-  destruct X as (T, (S, M)).
+  destruct X as (T, M).
   assumption.
 Qed.
 

@@ -55,7 +55,7 @@ Proof.
   apply basic_VLSM_full_projection; intros ? *.
   - split; [|exact I].
     apply lift_sub_valid. apply Hv.
-  - intros [_ Ht]. apply lift_sub_transition. assumption.
+  - intros [_ Ht]. revert Ht. apply lift_sub_transition.
   - intros; apply (lift_sub_state_initial equivocator_IM). assumption.
   - intros; destruct HmX as [Hinit|Hseeded]; [|apply Hseed; assumption].
     apply initial_message_is_valid.
