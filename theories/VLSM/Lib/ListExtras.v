@@ -2399,8 +2399,7 @@ Lemma elem_of_list_map
   [A B : Type] (f : A -> B) (x : A) (l : list A) :
     x ∈ l -> f x ∈ map f l.
 Proof.
-  rewrite 2!elem_of_list_In.
-  apply in_map.
+  rewrite elem_of_list_fmap; firstorder.
 Qed.
 
 Lemma take_app_inv :
