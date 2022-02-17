@@ -1337,7 +1337,7 @@ Lemma empty_composition_no_index
   (i : index)
   : False.
 Proof.
-  specialize (elem_of_enum i); rewrite Hempty_index; inversion 1.
+  specialize (elem_of_enum i); rewrite Hempty_index; apply not_elem_of_nil.
 Qed.
 
 Lemma empty_composition_single_state

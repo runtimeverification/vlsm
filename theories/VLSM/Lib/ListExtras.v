@@ -792,22 +792,9 @@ Lemma elem_of_list_annotate
   (xP : dsig P)
   : xP ∈ (list_annotate P l Hs) <-> (` xP) ∈ l.
 Proof.
-  split; [apply elem_of_list_annotate_forget|].
-  destruct_dec_sig xP x HPx HeqxP.
-  subst.
-  simpl.
-  intros Hx.
-  induction l; [inversion Hx|].
-  rewrite list_annotate_unroll.
-  destruct (decide (x = a)) as [Heq | Hneq].
-  - subst.
-    replace (dexist a (Forall_hd Hs)) with (dexist a HPx)
-      by (apply dsig_eq; reflexivity).
-    left.
-  - right.
-    apply IHl.
-    inversion Hx; [congruence|].
-    assumption.
+  split; [apply elem_of_list_annotate_forget |].
+  destruct_dec_sig xP x HPx HeqxP; subst; cbn.
+  induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
 Qed.
 
 Lemma nth_error_list_annotate
@@ -1225,8 +1212,7 @@ Lemma exists_finite
   (P : index -> Prop)
   : (exists n : index, P n) <-> Exists P (enum index).
 Proof.
-  rewrite Exists_exists.
-  split.
+  rewrite Exists_exists; split.
   - intros [n Hn]; eexists; split; [apply elem_of_enum | eassumption].
   - intros (n & _ & Hn); eexists; eassumption.
 Qed.
@@ -1336,22 +1322,10 @@ Lemma elem_of_map_option
   (b : B)
   : b ∈ map_option f l <-> exists a : A, a ∈ l /\ f a = Some b.
 Proof.
-  split.
-  - intro Hin.
-    induction l; cbn in Hin; [inversion Hin|].
-    cut (f a = Some b \/ b ∈ map_option f l).
-    {
-      intros [ Hb | Hb]; [exists a; split; [left | assumption]|].
-      apply IHl in Hb as [a' [Hin' Hfa']].
-      eexists; split; [right|]; eassumption.
-    }
-    destruct (f a) eqn:Hfa; [|right; assumption].
-    apply elem_of_cons in Hin as [Heq | Hin];
-      [left; congruence | right; assumption].
-  - induction l; intros [a' [Hin' Hfa']]; inversion Hin'; subst; clear Hin'; cbn.
-    + rewrite Hfa'; left.
-    + destruct (f a) eqn:Hfa; [right|];
-      apply IHl; exists a'; split; assumption.
+  induction l as [| h t]; cbn.
+  - setoid_rewrite elem_of_nil. firstorder.
+  - destruct (f h) eqn: Heq; setoid_rewrite elem_of_cons
+    ; firstorder; subst; intuition congruence + eauto.
 Qed.
 
 Lemma elem_of_map_option_rev
@@ -1365,7 +1339,6 @@ Lemma elem_of_map_option_rev
 Proof.
   intro Ha; apply elem_of_map_option; exists a; intuition.
 Qed.
-
 
 Lemma in_map_option
   {A B : Type}

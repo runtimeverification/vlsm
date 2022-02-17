@@ -1193,27 +1193,23 @@ Lemma lift_sub_incl_transition l s om s' om'
     (lift_sub_incl_label l) (lift_sub_incl_state s, om) = (lift_sub_incl_state s', om').
 Proof.
   revert Ht.
-  destruct l as (sub1_i, li); destruct_dec_sig sub1_i i Hi Heqsub1_i; subst; cbn.
-  unfold vtransition, lift_sub_incl_state at 1; cbn.
-  unfold sub_IM in li; simpl in li.
+  destruct l as (sub1_i, li); destruct_dec_sig sub1_i i Hi Heqsub1_i; subst
+  ; cbn; unfold vtransition, lift_sub_incl_state at 1
+  ; cbn; unfold sub_IM in li; simpl in li.
   destruct (decide (sub_index_prop indices1 i)) as [H_i|]
-  ; [|contradiction].
+  ; [| contradiction].
   rewrite (sub_IM_state_pi s H_i Hi).
-  destruct (transition _ _) as (si', _om'); inversion_clear 1.
-  f_equal.
+  destruct (transition _ _) as (si', _om'); inversion_clear 1; f_equal.
   extensionality sub2_j; destruct_dec_sig sub2_j j Hj Heqsub2_j; subst.
-  destruct (decide (i = j)) as [|Hij].
-  - subst.
-    rewrite sub_IM_state_update_eq with (s0 := lift_sub_incl_state s).
+  destruct (decide (i = j)) as [| Hij]; subst.
+  - rewrite sub_IM_state_update_eq.
     unfold lift_sub_incl_state; cbn.
-    case_decide; [|contradiction].
+    case_decide; [| contradiction].
     rewrite sub_IM_state_update_eq; reflexivity.
-  - rewrite sub_IM_state_update_neq with (s0 := lift_sub_incl_state s)
-      by assumption.
+  - rewrite sub_IM_state_update_neq by assumption.
     unfold lift_sub_incl_state; cbn.
-    case_decide; [|reflexivity].
-    rewrite sub_IM_state_update_neq by assumption.
-    reflexivity.
+    case_decide; [| reflexivity].
+    rewrite sub_IM_state_update_neq; trivial.
 Qed.
 
 Lemma lift_sub_incl_full_projection
@@ -1557,41 +1553,40 @@ Lemma preloaded_sub_composition_all_full_projection
   : VLSM_full_projection (pre_loaded_vlsm X seed) (pre_loaded_vlsm SubX seed) free_sub_free_label (composite_state_sub_projection IM (enum index)).
 Proof.
   apply basic_VLSM_strong_full_projection.
-  - intros (i, li) *; auto.
-  - intros (i, li) *; cbn.
-    unfold sub_IM, SubProjectionTraces.sub_IM at 2; cbn.
-    unfold composite_state_sub_projection at 1; cbn.
-    destruct (vtransition _ _ _) as (si', _om'); inversion_clear 1.
-    f_equal.
-    extensionality sub_j; destruct_dec_sig sub_j j Hj Heqj; subst sub_j.
-    unfold composite_state_sub_projection at 2; cbn.
-    destruct (decide (i = j)) as [|Hij].
-    + subst. unfold free_sub_free_index.
+  - intros [i li] *; auto.
+  - intros [i li] *; cbn.
+    unfold sub_IM, SubProjectionTraces.sub_IM at 2; cbn
+    ; unfold composite_state_sub_projection at 1; cbn
+    ; destruct (vtransition _ _ _) as (si', _om')
+    ; inversion_clear 1; f_equal.
+    extensionality sub_j; destruct_dec_sig sub_j j Hj Heqj; subst sub_j
+    ; unfold composite_state_sub_projection at 2; cbn.
+    destruct (decide (i = j)) as [| Hij]; subst.
+    + unfold free_sub_free_index.
       rewrite state_update_eq, sub_IM_state_update_eq; reflexivity.
-    + rewrite !state_update_neq; [reflexivity|congruence|].
+    + rewrite !state_update_neq; [reflexivity | congruence |].
       contradict Hij; apply dsig_eq in Hij; cbn in Hij; congruence.
   - intros s Hs; rapply (composite_initial_state_sub_projection IM); assumption.
   - intros m [[i Hi] | Hseed]; [left|right; assumption].
-    exists (free_sub_free_index i);  assumption.
+    exists (free_sub_free_index i); assumption.
 Qed.
 
 Lemma sub_composition_all_full_projection
   : VLSM_full_projection X SubX free_sub_free_label (composite_state_sub_projection IM (enum index)).
 Proof.
   apply basic_VLSM_strong_full_projection.
-  - intros (i, li) *; auto.
-  - intros (i, li) *; cbn.
-    unfold vtransition; cbn.
-    unfold sub_IM, SubProjectionTraces.sub_IM at 2; cbn.
-    unfold composite_state_sub_projection at 1; cbn.
-    destruct (transition _ _) as (si', _om'); inversion_clear 1.
-    f_equal.
-    extensionality sub_j; destruct_dec_sig sub_j j Hj Heqj; subst sub_j.
-    unfold composite_state_sub_projection at 2; cbn.
-    destruct (decide (i = j)) as [|Hij].
-    + subst. unfold free_sub_free_index.
+  - intros [i li] *; auto.
+  - intros [i li] *
+    ; cbn; unfold vtransition
+    ; cbn; unfold sub_IM, SubProjectionTraces.sub_IM at 2
+    ; cbn; unfold composite_state_sub_projection at 1
+    ; cbn; destruct (transition _ _) as (si', _om'); inversion_clear 1.
+    f_equal; extensionality sub_j; destruct_dec_sig sub_j j Hj Heqj; subst sub_j
+    ; unfold composite_state_sub_projection at 2; cbn.
+    destruct (decide (i = j)) as [| Hij]; subst.
+    + unfold free_sub_free_index.
       rewrite state_update_eq, sub_IM_state_update_eq; reflexivity.
-    + rewrite !state_update_neq; [reflexivity|congruence|].
+    + rewrite !state_update_neq; [reflexivity | congruence |].
       contradict Hij; apply dsig_eq in Hij; simpl in Hij; congruence.
   - intros s Hs; rapply (composite_initial_state_sub_projection IM); assumption.
   - intros m [i Hi]; exists (free_sub_free_index i); assumption.
@@ -1601,27 +1596,25 @@ Lemma sub_composition_all_full_projection_rev
   : VLSM_full_projection SubX X (lift_sub_label IM (enum index)) free_sub_free_state.
 Proof.
   apply basic_VLSM_strong_full_projection.
-  - intros (sub_i, li) * [Hv Hc]; split; [|assumption].
-    destruct_dec_sig sub_i i Hi Heqi; subst sub_i; cbn in *.
-    unfold sub_IM, SubProjectionTraces.sub_IM in Hc; cbn in Hc.
-    unfold free_sub_free_state, free_sub_free_index.
+  - intros [sub_i li] * [Hv Hc]; split; [| assumption].
+    destruct_dec_sig sub_i i Hi Heqi; subst sub_i; cbn in *
+    ; unfold sub_IM, SubProjectionTraces.sub_IM in Hc; cbn in Hc
+    ; unfold free_sub_free_state, free_sub_free_index.
     rewrite (sub_IM_state_pi s (free_sub_free_index_obligation_1 i) Hi).
     assumption.
-  - intros (sub_i, li) *; destruct_dec_sig sub_i i Hi Heqi; subst sub_i.
-    unfold vtransition; cbn.
-    unfold sub_IM at 2, SubProjectionTraces.sub_IM, free_sub_free_state at 1
-      , free_sub_free_index; cbn.
-    rewrite (sub_IM_state_pi s (free_sub_free_index_obligation_1 i) Hi).
-    destruct (vtransition _ _ _) as (si', _om'); inversion_clear 1.
-    f_equal.
-    extensionality j.
-    unfold free_sub_free_state at 2.
-    destruct (decide (i = j)) as [|Hij].
-    + subst; unfold free_sub_free_index, sub_IM.
+  - intros [sub_i li] *; destruct_dec_sig sub_i i Hi Heqi; subst sub_i.
+    unfold vtransition; cbn
+    ; unfold sub_IM at 2, SubProjectionTraces.sub_IM, free_sub_free_state at 1,
+             free_sub_free_index; cbn
+    ; rewrite (sub_IM_state_pi s (free_sub_free_index_obligation_1 i) Hi)
+    ; destruct (vtransition _ _ _) as (si', _om'); inversion_clear 1.
+    f_equal; extensionality j; unfold free_sub_free_state at 2.
+    destruct (decide (i = j)) as [| Hij]; subst.
+    + unfold free_sub_free_index, sub_IM.
       rewrite state_update_eq, sub_IM_state_update_eq; reflexivity.
-    + rewrite !state_update_neq; [reflexivity| |congruence].
+    + rewrite !state_update_neq; [reflexivity | | congruence].
       contradict Hij; apply dsig_eq in Hij; simpl in Hij; congruence.
-  - intros s Hi i. rapply Hi.
+  - intros s Hi i; rapply Hi.
   - intros m [[i Hi] Him]; exists i; assumption.
 Qed.
 
@@ -1788,17 +1781,16 @@ Lemma sub_transition_element_project_Some :
     composite_transition (sub_IM IM indices) lX2 (sX2, iom) = (sX2', oom2) ->
       sub_state_element_project sX1' = sub_state_element_project sX2' /\ oom1 = oom2.
 Proof.
-  intros (sub_j1, lj1) (sub_j2, lj2) lj.
+  intros [sub_j1 lj1] [sub_j2 lj2] lj.
   destruct_dec_sig sub_j1 j1 Hj1 Heqsub_j1;
   destruct_dec_sig sub_j2 j2 Hj2 Heqsub_j2; subst.
   unfold sub_label_element_project; cbn.
   do 2 (case_decide; inversion 1); subst; cbn in *; subst.
   unfold sub_state_element_project.
   intros sX1 sX2 Hsjeq iom.
-  rewrite (sub_IM_state_pi sX1 Hj1 Hj), (sub_IM_state_pi sX2 Hj2 Hj),
-    <- Hsjeq.
-  unfold sub_IM at 3 13; cbn.
-  destruct (vtransition _ _ _) as (si', om').
+  rewrite (sub_IM_state_pi sX1 Hj1 Hj), (sub_IM_state_pi sX2 Hj2 Hj), <- Hsjeq
+  ; unfold sub_IM at 3 13; cbn
+  ; destruct (vtransition _ _ _) as (si', om').
   do 2 inversion_clear 1.
   rewrite !sub_IM_state_update_eq.
   intuition.

@@ -317,13 +317,12 @@ Lemma in_futures_preserves_sent_by_non_equivocating s base_s
     sent_by_non_equivocating IM equivocators s m ->
     sent_by_non_equivocating IM equivocators base_s m.
 Proof.
-  intros m Hsent.
-  destruct Hsent as [i [Hi Hsent]]. exists i. split; [assumption|].
-  revert Hsent.
-  apply in_futures_preserving_oracle_from_stepwise with (field_selector output)
-  ; [apply has_been_sent_stepwise_from_trace|].
-  revert Hfuture_s.
-  apply (VLSM_projection_in_futures (preloaded_component_projection IM i)).
+  intros m (i & Hi & Hsent).
+  exists i; split; [assumption |].
+  eapply in_futures_preserving_oracle_from_stepwise
+  ; [apply has_been_sent_stepwise_from_trace | | eassumption].
+  apply (VLSM_projection_in_futures (preloaded_component_projection IM i))
+  ; assumption.
 Qed.
 
 Lemma in_futures_preserves_can_emit_by_equivocators_composition_for_sent s base_s
@@ -333,7 +332,7 @@ Lemma in_futures_preserves_can_emit_by_equivocators_composition_for_sent s base_
     can_emit (equivocators_composition_for_sent IM equivocators base_s) m.
 Proof.
   apply VLSM_incl_can_emit, pre_loaded_vlsm_incl,
-    in_futures_preserves_sent_by_non_equivocating.
+        in_futures_preserves_sent_by_non_equivocating.
   assumption.
 Qed.
 

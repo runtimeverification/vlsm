@@ -1800,27 +1800,27 @@ Section Composite.
           projT1 (l item) = i /\
           composite_message_selector m item.
       Proof.
-        apply valid_state_has_trace in Hs as [is [tr Htr]].
+        apply valid_state_has_trace in Hs as (is & tr & Htr).
         eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr
         ; [|apply constraint_preloaded_free_incl].
         apply (VLSM_projection_finite_valid_trace_init_to
                 (preloaded_component_projection IM i))
            in Hpre_tr.
-        eapply prove_all_have_message_from_stepwise in Horacle;
-          [|apply stepwise_props|eapply finite_valid_trace_from_to_last_pstate, Hpre_tr].
+        eapply prove_all_have_message_from_stepwise in Horacle
+        ; [| apply stepwise_props |eapply finite_valid_trace_from_to_last_pstate, Hpre_tr].
         specialize (Horacle _ _ Hpre_tr); clear Hpre_tr.
-        apply Exists_exists in Horacle as [item [Hitem Hout]].
-        apply elem_of_map_option in Hitem as [itemX [HitemX HitemX_pr]].
-        apply elem_of_list_split in HitemX as [pre [suf Htr_pr]].
+        apply Exists_exists in Horacle as (item & Hitem & Hout).
+        apply elem_of_map_option in Hitem as (itemX & HitemX & HitemX_pr).
+        apply elem_of_list_split in HitemX as (pre & suf & Htr_pr).
         exists (finite_trace_last is pre), itemX.
         rewrite cons_middle in Htr_pr.
-        eapply (input_valid_transition_to X) in Htr_pr as Ht;
-          [cbn in Ht|apply valid_trace_forget_last in Htr; apply Htr].
+        eapply (input_valid_transition_to X) in Htr_pr as Ht
+        ; [cbn in Ht | apply valid_trace_forget_last in Htr; apply Htr].
         unfold pre_VLSM_projection_transition_item_project,
-           composite_project_label in HitemX_pr; cbn in HitemX_pr.
+               composite_project_label in HitemX_pr; cbn in HitemX_pr.
         rewrite app_assoc in Htr_pr.
-        case_decide as Hi; [|congruence]; apply Some_inj in HitemX_pr;
-          subst i item tr; cbn in *.
+        case_decide as Hi; [|congruence]; apply Some_inj in HitemX_pr
+        ; subst i item tr; cbn in *.
         apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr.
         rewrite finite_trace_last_is_last in Htr.
         destruct itemX, l; cbn in *; intuition.
@@ -1944,11 +1944,11 @@ Section Composite.
     specialize (composite_stepwise_props
                   (fun i => has_been_received_stepwise_from_trace (IM i)))
          as [Hinits Hstep].
-    split;[exact Hinits|].
+    split; [assumption |].
     (* <<exact Hstep>> doesn't work because [composite_message_selector]
        pattern matches on the label l, so we instantiate and destruct
        to let that simplify *)
-    intros l;specialize (Hstep l);destruct l.
+    intros l; specialize (Hstep l); destruct l.
     exact Hstep.
   Qed.
 
@@ -2246,9 +2246,8 @@ Section Composite.
       (oracle_component_selected_previously
         (fun i => has_been_sent_stepwise_from_trace (IM i))
         Hs Horacle)
-      as (s_item & item & Ht & Hfutures & Hi & Hselected).
-    destruct item, l.
-    eexists _,_; split; [eassumption|]; intuition.
+      as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
+    eexists _, _; intuition eassumption.
   Qed.
 
   Lemma received_component_received_previously
@@ -2270,9 +2269,8 @@ Section Composite.
       (oracle_component_selected_previously
         (fun i => has_been_received_stepwise_from_trace (IM i))
         Hs Horacle)
-      as (s_item & item & Ht & Hfutures & Hi & Hselected).
-    destruct item, l.
-    eexists _,_; split; [eassumption|]; intuition.
+      as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
+    eexists _, _; intuition eassumption.
   Qed.
 
   Lemma messages_sent_from_component_produced_previously
@@ -2288,12 +2286,13 @@ Section Composite.
       can_produce (pre_loaded_with_all_messages_vlsm (IM i)) (s_m i) m.
   Proof.
     specialize (sent_component_sent_previously Hs Hsent)
-      as (s_item & [] & Ht & Hfutures & <- & Houtput); destruct l as (i, li); cbn in *; subst output.
-    exists destination; split; [assumption|].
+      as (s_item & [] & Ht & Hfutures & <- & Houtput)
+    ; destruct l as [i li]; cbn in *; subst output.
+    exists destination; split; [assumption |].
     eapply VLSM_incl_input_valid_transition in Ht; cbn in Ht;
       [|apply constraint_preloaded_free_incl].
     eapply (VLSM_projection_input_valid_transition (preloaded_component_projection IM i))
-      in Ht; [eexists _,_; eassumption|].
+      in Ht; [eexists _,_; eassumption |].
     apply (composite_project_label_eq IM).
   Qed.
 
