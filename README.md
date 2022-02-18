@@ -12,9 +12,14 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
   - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.6.0 or later
 - Coq namespace: `VLSM`
 
+## Working with the project online
+
+The simplest way of working with this project without needing to install anything is by doing so online:
+[![Open in Papillon](https://papillon.unbounded.network/github-badge.svg)](https://papillon.unbounded.network/projects/github/runtimeverification/vlsm/master)
+
 ## Building instructions
 
-The project is compatible with the Jan 2022 package pick for Coq 8.13 of
+For local development, the project is compatible with the Jan 2022 package pick for Coq 8.13 of
 [Coq Platform release 2022.01.0](https://github.com/coq/platform/releases/tag/2022.01.0),
 so you can obtain all dependencies by installing that Coq Platform variant.
 
