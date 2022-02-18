@@ -1945,9 +1945,6 @@ Section Composite.
                   (fun i => has_been_received_stepwise_from_trace (IM i)))
          as [Hinits Hstep].
     split; [assumption |].
-    (* <<exact Hstep>> doesn't work because [composite_message_selector]
-       pattern matches on the label l, so we instantiate and destruct
-       to let that simplify *)
     intros l; specialize (Hstep l); destruct l.
     exact Hstep.
   Qed.

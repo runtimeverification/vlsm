@@ -393,7 +393,7 @@ Section composite_validator_byzantine_traces.
             (X := composite_vlsm IM constraint)
             (PreLoadedX := pre_loaded_with_all_messages_vlsm X)
             (FreeX := free_composite_vlsm IM)
-            (Hvalidator: forall i : index, component_projection_validator_prop IM constraint i)
+            (Hvalidator: forall i : index, component_message_validator_prop IM constraint i)
             .
 
 (**
@@ -432,18 +432,10 @@ included in <<X>> to prove our main result.
           destruct l as (i, li). simpl in *.
           specialize (valid_state_project_preloaded_to_preloaded _ IM constraint lst i Hlst)
             as Hlsti.
-          assert (Hiv : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (lst i, iom)).
-          { split; [assumption|]. split; [|assumption].
-            eexists _. apply (pre_loaded_with_all_messages_message_valid_initial_state_message (IM i)).
-          }
-          apply Hvalidator in Hiv.
-          clear -Hiv.
-          destruct Hiv as [_ [_ [_ [Hinput _]]]].
-          destruct Hinput as [s Hinput].
-          exists s.
-          revert Hinput.
-          apply (constraint_subsumption_valid_state_message_preservation IM constraint).
-          intro. intros. destruct som. apply H.
+          destruct iom as [im |]; [| apply option_valid_message_None].
+          eapply Hvalidator; split; [eassumption |]; split; [| eassumption].
+          eexists _.
+          apply (pre_loaded_with_all_messages_message_valid_initial_state_message (IM i)).
     Qed.
 
 (**

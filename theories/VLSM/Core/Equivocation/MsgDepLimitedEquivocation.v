@@ -94,6 +94,18 @@ Proof.
     destruct om as [m |]; assumption.
 Qed.
 
+Definition coeqv_limited_equivocation_projection_validator_prop : index -> Prop :=
+  annotated_projection_validator_prop IM (fun s => s = empty_set)
+    coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
+
+Definition coeqv_limited_equivocation_message_validator_prop : index -> Prop :=
+  annotated_message_validator_prop IM (fun s => s = empty_set)
+    coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
+
+Definition coeqv_limited_equivocation_projection_validator_prop_alt : index -> Prop :=
+  annotated_projection_validator_prop_alt IM (fun s => s = empty_set)
+    coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
+
 End sec_coequivocating_senders_limited_equivocation.
 
 Section sec_msg_dep_limited_equivocation.
@@ -130,6 +142,23 @@ Definition msg_dep_annotate_trace_with_equivocators :=
 
 Definition msg_dep_composite_transition_message_equivocators :=
   coeqv_composite_transition_message_equivocators IM sender msg_dep_coequivocating_senders.
+
+Definition msg_dep_limited_equivocation_projection_validator_prop :=
+  coeqv_limited_equivocation_projection_validator_prop IM sender msg_dep_coequivocating_senders.
+
+Definition msg_dep_limited_equivocation_message_validator_prop :=
+  coeqv_limited_equivocation_message_validator_prop IM sender msg_dep_coequivocating_senders.
+
+Definition msg_dep_limited_equivocation_projection_validator_prop_alt :=
+  coeqv_limited_equivocation_projection_validator_prop_alt IM sender msg_dep_coequivocating_senders.
+
+Lemma msg_dep_annotate_trace_with_equivocators_project s tr
+  : pre_VLSM_full_projection_finite_trace_project (type msg_dep_limited_equivocation_vlsm)
+    (composite_type IM) Datatypes.id original_state
+    (msg_dep_annotate_trace_with_equivocators s tr) = tr.
+Proof.
+  apply (annotate_trace_project (free_composite_vlsm IM) (set validator)).
+Qed.
 
 End sec_msg_dep_limited_equivocation.
 
@@ -361,8 +390,8 @@ Proof.
   }
   eapply VLSM_full_projection_can_emit.
   {
-    apply equivocators_composition_for_observed_index_incl_full_projection.
-    Unshelve. 2: apply set_union_subseteq_right.
+    apply equivocators_composition_for_observed_index_incl_full_projection
+     with (Hincl := set_union_subseteq_right (state_annotation s) equivocating_senders).
   }
   assert (Hemitj :
     exists j, j ∈ equivocating_senders /\
@@ -404,14 +433,18 @@ Proof.
       apply msg_dep_happens_before_iff_one; left; assumption.
 Qed.
 
-Lemma msg_dep_fixed_limited_equivocation is tr
-  : finite_valid_trace Limited is tr ->
-    fixed_limited_equivocation_prop IM
+Lemma msg_dep_fixed_limited_equivocation_witnessed is tr
+  (Htr : finite_valid_trace Limited is tr)
+  (equivocators := state_annotation (finite_trace_last is tr))
+  (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
+  : (sum_weights (remove_dups equivocators) <= `threshold)%R /\
+    finite_valid_trace Fixed
       (original_state is)
       (pre_VLSM_full_projection_finite_trace_project
-        (type Limited) (composite_type IM) Datatypes.id original_state tr).
+        (type Limited) (composite_type IM) Datatypes.id original_state
+        tr).
 Proof.
-  intro Htr; exists (state_annotation (finite_trace_last is tr)); split.
+  split.
   - rewrite set_eq_nodup_sum_weight_eq
       with (lv2 := state_annotation (finite_trace_last is tr)).
     + apply coeqv_limited_equivocation_state_not_heavy,
@@ -427,8 +460,7 @@ Proof.
     induction Htr using finite_valid_trace_init_to_rev_ind
     ; [constructor; apply initial_state_is_valid; apply Hsi |].
     setoid_rewrite map_app.
-    apply finite_valid_trace_from_app_iff.
-    split.
+    apply finite_valid_trace_from_app_iff; split.
     + revert IHHtr.
       eapply VLSM_incl_finite_valid_trace_from,
              fixed_equivocation_vlsm_composition_index_incl,
@@ -442,7 +474,8 @@ Proof.
         valid_state_prop
           (fixed_equivocation_vlsm_composition IM (state_annotation s))
           (original_state s)).
-      { replace s with (finite_trace_last si tr) at 2
+      {
+        replace s with (finite_trace_last si tr) at 2
           by (apply valid_trace_get_last in Htr; assumption).
         rewrite
           (pre_VLSM_full_projection_finite_trace_last
@@ -455,7 +488,7 @@ Proof.
       replace (finite_trace_last si _) with s
         by (apply valid_trace_get_last in Htr; congruence).
       destruct l as [i li], (vtransition _ _ _) as (si', om').
-      inversion_clear HLt; cbn.
+      inversion HLt; subst; clear HLt; cbn.
       repeat split.
       * revert Hs; apply VLSM_incl_valid_state.
         apply fixed_equivocation_vlsm_composition_index_incl.
@@ -498,6 +531,19 @@ Proof.
         ; [| apply emitted_messages_are_valid_iff; assumption].
         intros [[j [[mj Hmj] Heqim]] | Hemit]; [| assumption].
         contradiction (no_initial_messages_in_IM j mj).
+Qed.
+
+Corollary msg_dep_fixed_limited_equivocation is tr
+  : finite_valid_trace Limited is tr ->
+    fixed_limited_equivocation_prop IM
+      (original_state is)
+      (pre_VLSM_full_projection_finite_trace_project
+        (type Limited) (composite_type IM) Datatypes.id original_state
+        tr).
+Proof.
+  intro Htr.
+  exists (state_annotation (finite_trace_last is tr)).
+  apply msg_dep_fixed_limited_equivocation_witnessed; assumption.
 Qed.
 
 Lemma fixed_transition_preserves_annotation_equivocators

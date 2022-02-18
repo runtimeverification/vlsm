@@ -109,9 +109,9 @@ Section sec_equivocators_simulating_annotated_limited.
 
 Context
   (message_dependencies : message -> set message)
-  (HMsgDep : forall i, MessageDependencies message_dependencies (IM i))
+  `{forall i, MessageDependencies message_dependencies (IM i)}
   (full_message_dependencies : message -> set message)
-  (HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies)
+  `{FullMessageDependencies message message_dependencies full_message_dependencies}
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (sender : message -> option index)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)

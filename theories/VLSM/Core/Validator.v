@@ -43,10 +43,22 @@ Definition transition_validator :=
    label_project lX = Some lY /\
    state_project sX = sY.
 
-(**
-Next two results show that the (simpler) [projection_validator_prop]erty
-is equivalent with the [transition_validator] property.
+(** A message validator can check within a component whether the message
+is valid for the composition.
 *)
+Definition message_validator_prop :=
+  forall li si im,
+    input_valid PreY li (si, Some im) ->
+    valid_message_prop X im.
+
+(** The [projection_validator_prop]erty is stronger. *)
+Lemma projection_validator_is_message_validator
+  : projection_validator_prop -> message_validator_prop.
+Proof.
+  intros Hvalidator li si im Hvi.
+  apply Hvalidator in Hvi as (_ & _ & _ & _ & _ & Him & _).
+  assumption.
+Qed.
 
 Lemma projection_validator_messages_transitions
   : projection_validator_prop -> transition_validator.
@@ -166,8 +178,7 @@ Proof.
     replace s' with (state_project (vtransition X lX (sX, om)).1).
     + eapply input_valid_transition_destination,
         (VLSM_projection_input_valid_transition Hproji)
-      ; [eassumption|].
-      split; [eassumption|].
+      ; [|split]; [eassumption|eassumption|].
       apply injective_projections; reflexivity.
     + assert (HivtX : input_valid_transition X lX (sX, om) (vtransition X lX (sX, om)))
         by firstorder.
@@ -175,23 +186,19 @@ Proof.
       eapply (VLSM_projection_input_valid_transition Hproj) in HivtX as [_ Hs']
       ; [|eassumption].
       rewrite HsX in Hs'.
-      destruct Y as (TY & MY).
-      cbv in Htrans, Hs'.
-      rewrite Htrans in Hs'.
-      inversion Hs'.
-      reflexivity.
+      destruct Y as (TY & MY); cbv in Htrans, Hs'.
+      rewrite Htrans in Hs'; inversion Hs'; reflexivity.
 Qed.
 
 (** Below we show that the two definitions above are actually equivalent. *)
 Lemma projection_validator_prop_alt_iff
   : projection_validator_prop_alt <-> projection_validator_prop.
 Proof.
-  split.
-  - intros Hvalidator l si om Hvalid.
-    apply Hvalidator; [apply Hvalid|].
+  split; intros Hvalidator l si om Hvalid.
+  - apply Hvalidator; [apply Hvalid|].
     apply validator_alt_free_states_are_projection_states
-    ; [assumption| apply Hvalid].
-  - intros Hvalidator l si om Hvalid HXisi.
+    ; [assumption|apply Hvalid].
+  - intro HXisi.
     apply Hvalidator.
     repeat split; [| apply any_message_is_valid_in_preloaded | assumption].
     revert HXisi.
@@ -287,9 +294,9 @@ We say that the component <<i>> of X is a validator for received messages if
 if [valid]ity in the component (for reachable states) implies [projection_valid]ity.
 *)
 Definition component_projection_validator_prop :=
-  forall (li : vlabel (IM i)) (siomi : vstate (IM i) * option message),
-    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li siomi ->
-    vvalid Xi li siomi.
+  forall (li : vlabel (IM i)) (si : vstate (IM i)) (omi : option message),
+    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (si, omi) ->
+    vvalid Xi li (si, omi).
 
 Lemma component_projection_to_preloaded
   : VLSM_projection X PreXi (composite_project_label IM i) (fun s => s i).
@@ -302,6 +309,27 @@ Proof.
     apply VLSM_incl_finite_valid_trace.
     apply constraint_preloaded_free_incl with (constraint0 := constraint).
 Qed.
+
+Lemma component_projection_validator_prop_is_induced
+  : component_projection_validator_prop <->
+    @projection_validator_prop _ X (IM i) (composite_project_label IM i) (fun s => s i).
+Proof.
+  split; intros Hvalidator li si omi Hvi.
+  - apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)),
+          (projection_valid_input_valid IM), Hvalidator, Hvi.
+  - apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
+    revert Hvi; apply VLSM_incl_input_valid, pre_loaded_with_all_messages_validator_proj_incl.
+    + apply component_projection_to_preloaded.
+    + apply component_transition_projection_None.
+    + apply component_label_projection_lift.
+    + apply component_state_projection_lift.
+    + intros isi; apply (lift_to_composite_state_initial IM).
+    + apply component_transition_projection_Some.
+    + assumption.
+Qed.
+
+Definition component_message_validator_prop : Prop :=
+  @message_validator_prop _ X (IM i).
 
 (** Assuming the [component_projection_validator_prop]erty, the component
 [pre_loaded_with_all_messages_vlsm] is [VLSM_eq]ual (trace-equivalent) with
@@ -325,13 +353,9 @@ Proof.
   - apply component_transition_projection_Some.
   - intros li si omi Hiv.
     apply Hvalidator in Hiv as (sX & <- & HivX).
-    exists (existT i li), sX.
-    intuition.
-    unfold composite_project_label.
-    simpl.
-    case_decide as Hi; [|contradiction].
-    replace Hi with (@eq_refl index i) by (apply Eqdep_dec.UIP_dec; assumption).
-    reflexivity.
+    exists (existT i li), sX; intuition.
+    unfold composite_project_label; cbn.
+    rewrite decide_left with eq_refl; reflexivity.
 Qed.
 
 Definition pre_loaded_with_all_messages_validator_component_proj_incl
@@ -396,19 +420,15 @@ Proof.
   split; [|assumption].
   (* reverse induction on the length of a trace. *)
   induction tr using rev_ind.
-  - constructor. apply initial_state_is_valid. assumption.
-  - apply finite_valid_trace_from_app_iff in Htr.
-    destruct Htr as [Htr Hx].
-    specialize (IHtr Htr).
+  - constructor; apply initial_state_is_valid; assumption.
+  - apply finite_valid_trace_from_app_iff in Htr as [Htr Hx].
     apply (finite_valid_trace_from_app_iff (mk_vlsm M)).
-    split; [assumption|].
+    split; [apply IHtr; assumption|].
     apply (first_transition_valid (mk_vlsm M)).
-    apply first_transition_valid in Hx.
-    destruct Hx as [Hvx Htx].
+    apply first_transition_valid in Hx as [Hvx Htx].
     split; [|assumption].
     (* using the [self_validator_vlsm_prop]erty. *)
-    revert Hvx.
-    apply Hvalidator.
+    revert Hvx; apply Hvalidator.
 Qed.
 
 (**
