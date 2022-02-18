@@ -16,8 +16,7 @@ Let us fix an indexed set of VLSMs <<IM>> and their composition <<X>> using <<co
 *)
 
   Context {message : Type}
-          {index : Type}
-          {IndEqDec : EqDecision index}
+          `{EqDecision index}
           (IM : index -> VLSM message)
           (T := composite_type IM)
           (constraint : composite_label IM -> composite_state IM * option message -> Prop)
@@ -48,14 +47,6 @@ with the exception that the [initial_message]s for the projection are defined
 to be all [valid_message]s of <<X>>:
 
 *)
-  Definition composite_vlsm_constrained_projection_sig
-    (i : index)
-    : VLSMSign (type (IM i))
-    :=
-    {|   initial_state_prop := vinitial_state_prop (IM i)
-     ;   initial_message_prop := fun pmi => exists xm : valid_message X, proj1_sig xm = pmi
-     ;   s0 := @s0 _ _ (sign (IM i))
-    |}.
 
 (**
 [projection_valid]ity is defined as the projection of [input_valid]ity of <<X>>:
@@ -121,11 +112,8 @@ to be all [valid_message]s of <<X>>:
 
     split.
     {
-      exists (exist _ s' Hps').
-
-      pose proof (H := @composite_transition_state_eq message index IndEqDec IM constraint er).
-      specialize (H s s' omi om' Hivt). rewrite Heqer in H. simpl in H.
-      rewrite <- Hsi. rewrite <- H. simpl. reflexivity.
+      apply (composite_transition_state_eq IM) in Hivt.
+      subst; exists (exist _ s' Hps'); assumption.
     }
     unfold option_valid_message_prop.
 
@@ -215,8 +203,12 @@ having the same transition function as <<IM i>>, the <<i>>th component of <<IM>>
 *)
   Definition composite_vlsm_constrained_projection_machine
     (i : index)
-    : VLSMClass (composite_vlsm_constrained_projection_sig i) :=
-    {|  transition :=  vtransition (IM i)
+    : VLSMMachine (type (IM i))
+    :=
+    {|   initial_state_prop := vinitial_state_prop (IM i)
+     ;   initial_message_prop := fun pmi => exists xm : valid_message X, proj1_sig xm = pmi
+     ;   s0 := @s0 _ _ (machine (IM i))
+     ;  transition :=  vtransition (IM i)
      ;  valid := projection_valid i
     |}.
 
@@ -246,8 +238,7 @@ Section ProjectionTraces.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{EqDecision index}
   (IM : index -> VLSM message)
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
@@ -267,10 +258,8 @@ Definition composite_project_label
 Lemma composite_project_label_eq lj
   : composite_project_label (existT j lj) = Some lj.
 Proof.
-  unfold composite_project_label.
-  cbn.
-  case_decide as Heqi; [|contradiction].
-  replace Heqi with (@eq_refl index j) by (apply Eqdep_dec.UIP_dec; assumption).
+  unfold composite_project_label; cbn.
+  rewrite decide_left with eq_refl; cbn.
   reflexivity.
 Qed.
 
@@ -289,48 +278,34 @@ Proof.
   apply VLSM_eq_incl_iff.
   split.
   - apply basic_VLSM_strong_incl.
-    + intros s Hs; cbn; red.
+    + intros s Hs; cbn in *; red.
       exists (lift_to_composite_state IM j s).
       split; [apply state_update_eq|].
       apply (lift_to_composite_state_initial IM).
       assumption.
-    + intros m [[im Him] <-]. assumption.
+    + intros m [[im Him] <-]; assumption.
     + intros l s iom [sX [<- Hv]].
       exists (existT j l), sX.
       intuition.
       apply composite_project_label_eq.
     + intros l s iom s' oom.
-      cbn.
-      unfold lift_to_composite_state at 1.
-      rewrite state_update_eq.
-      intros Ht.
-      setoid_rewrite Ht.
-      rewrite state_update_eq.
-      reflexivity.
-  - cbn. apply basic_VLSM_strong_incl.
-    + intros s [sX [<- HsX]].
-      apply (HsX j).
-    + intros m Him.
-      exists (exist _ m Him).
-      reflexivity.
-    + intros l s iom ((i, li) & sX & HlX & <- & Hv).
-      exists sX.
-      split; [reflexivity|].
-      unfold composite_project_label in HlX.
-      simpl in *.
-      case_decide; [|congruence].
-      subst i.
-      apply Some_inj in HlX.
-      cbv in HlX.
-      subst li.
+      cbn; unfold lift_to_composite_state at 1; rewrite state_update_eq.
+      intros Ht; setoid_rewrite Ht.
+      rewrite state_update_eq; reflexivity.
+  - cbn; apply basic_VLSM_strong_incl.
+    + intros s [sX [<- HsX]]; cbn. apply HsX.
+    + intros m Him; cbn. exists (exist _ m Him). reflexivity.
+    + intros l s iom ((i, li) & sX & HlX & <- & Hv); cbn.
+      exists sX; split; [reflexivity|].
+      unfold composite_project_label in HlX; cbn in *.
+      case_decide; [| congruence].
+      subst i; apply Some_inj in HlX; cbn in HlX; subst li.
       assumption.
-    + intros l s iom s' oom.
-      cbn.
-      unfold lift_to_composite_state at 1.
-      rewrite state_update_eq.
+    + intros l s iom s' oom; cbn.
+      unfold lift_to_composite_state at 1;
+      rewrite state_update_eq;
       destruct (vtransition _ _ _) as (si', om').
-      rewrite state_update_eq.
-      intuition.
+      rewrite state_update_eq; trivial.
 Qed.
 
 Lemma component_label_projection_lift
@@ -478,8 +453,7 @@ Section PreLoadedProjectionTraces.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{EqDecision index}
   (IM : index -> VLSM message)
   (j : index)
   .
@@ -647,8 +621,7 @@ Section ProjectionTraces_membership.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{EqDecision index}
   (IM : index -> VLSM message)
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
@@ -720,8 +693,7 @@ End binary_free_composition_projections.
 Section fixed_projection.
 
 Context {message : Type}
-        {index : Type}
-        {IndEqDec : EqDecision index}
+        `{EqDecision index}
         (IM : index -> VLSM message)
         (T := composite_type IM)
         (constraint : composite_label IM -> composite_state IM * option message -> Prop)
@@ -876,7 +848,7 @@ Proof.
   - apply (valid_initial_state_message PreLoaded).
     assumption. destruct om;exact I.
   - apply (valid_generated_state_message PreLoaded) with s _om _s om l; try assumption.
-    eapply (projection_valid_implies_valid IM). exact Hv.
+    simpl. eapply (projection_valid_implies_valid IM). exact Hv.
 Qed.
 
 (**
@@ -889,7 +861,8 @@ Proof.
   apply (basic_VLSM_incl (machine Xj) (machine PreLoaded)); intro; intros.
   - assumption.
   - apply initial_message_is_valid; exact I.
-  - eapply (projection_valid_implies_valid IM).
+  - unfold vvalid;simpl.
+    eapply (projection_valid_implies_valid IM).
     apply Hv.
   - apply H.
 Qed.
@@ -899,8 +872,7 @@ End fixed_projection.
 Section projection_friendliness_sufficient_condition.
 
 Context {message : Type}
-        {index : Type}
-        {IndEqDec : EqDecision index}
+        `{EqDecision index}
         (IM : index -> VLSM message)
         (T := composite_type IM)
         (constraint : composite_label IM -> composite_state IM * option message -> Prop)

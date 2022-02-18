@@ -88,8 +88,7 @@ Section CommuteIndexed.
   Context
     {CV : ConsensusValues}
     {message : Type}
-    {index : Type}
-    {Heqd : EqDecision index}
+    `{EqDecision index}
     (IM : index -> VLSM message)
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
@@ -320,8 +319,7 @@ Section composite_estimators.
   Context
     {CV : ConsensusValues}
     {message : Type}
-    {index : Type}
-    {Heqd : EqDecision index}
+    `{EqDecision index}
     (IM : index -> VLSM message)
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
