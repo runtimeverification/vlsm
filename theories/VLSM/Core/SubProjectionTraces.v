@@ -1655,7 +1655,7 @@ Lemma sub_element_state_eq s H_j
   : sub_element_state s (dexist j H_j) = s.
 Proof.
   unfold sub_element_state; cbn.
-  rewrite decide_left with (HP := eq_refl); cbn.
+  rewrite (decide_True_pi eq_refl).
   reflexivity.
 Qed.
 
@@ -1760,7 +1760,7 @@ Lemma sub_element_label_project
 Proof.
   intros lY.
   unfold sub_element_label, sub_label_element_project; cbn.
-  rewrite decide_left with (HP := eq_refl); cbn.
+  rewrite (decide_True_pi eq_refl).
   reflexivity.
 Qed.
 
@@ -1769,7 +1769,7 @@ Lemma sub_element_state_project
 Proof.
   intros sY.
   unfold sub_element_state, sub_state_element_project; cbn.
-  rewrite decide_left with (HP := eq_refl); cbn.
+  rewrite (decide_True_pi eq_refl).
   reflexivity.
 Qed.
 

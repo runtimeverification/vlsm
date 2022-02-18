@@ -259,7 +259,7 @@ Lemma composite_project_label_eq lj
   : composite_project_label (existT j lj) = Some lj.
 Proof.
   unfold composite_project_label; cbn.
-  rewrite decide_left with eq_refl; cbn.
+  rewrite (decide_True_pi eq_refl).
   reflexivity.
 Qed.
 
