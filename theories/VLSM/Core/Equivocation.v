@@ -2522,11 +2522,8 @@ End Composite.
       apply Exists_exists.
       apply Exists_exists in Hobs.
       destruct Hobs as [composite_item [Hcomposite_item Hx]].
-      apply elem_of_list_In in Hcomposite_item.
-      apply in_map_iff in Hcomposite_item.
-      destruct Hcomposite_item as [item [Hcomposite_item Hitem]].
+      apply elem_of_list_fmap_2 in Hcomposite_item as [item [Hcomposite_item Hitem]].
       exists item.
-      apply elem_of_list_In in Hitem.
       split; [assumption|].
       subst composite_item.
       destruct item. simpl in *.
