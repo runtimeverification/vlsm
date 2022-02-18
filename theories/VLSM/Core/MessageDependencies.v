@@ -118,24 +118,19 @@ Proof.
   intros dm m Hdm.
   rewrite emitted_messages_are_valid_iff, can_emit_iff.
   intros [Hinit | [s Hproduce]].
-  - rewrite emitted_messages_are_valid_iff.
-    left; right.
+  - rewrite emitted_messages_are_valid_iff; left; right.
     apply Hreflects with m; [assumption |].
     destruct Hinit as [Hinit | Hp]; [| assumption].
-    contradict Hinit. apply no_initial_messages_in_X.
-  - eapply (observed_valid (pre_loaded_vlsm X P))
-    ; [eexists; apply can_produce_valid; eassumption|].
-    apply (@message_dependencies_are_necessary _ m s) in Hdm
-    ; [|revert Hproduce; apply VLSM_incl_can_produce; apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
-    clear H1 no_initial_messages_in_X Hreflects.
-    revert H H0 s Hdm Hproduce; destruct X as [T M]; clear X; cbn; intros.
-    eapply VLSM_incl_has_been_observed
-    ; [apply basic_VLSM_incl_preloaded; cbv;intuition | | eassumption].
-    exists (Some m).
-    apply can_produce_valid.
-    revert Hproduce.
-    eapply VLSM_incl_can_produce.
-    exact (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P).
+    contradict Hinit; apply no_initial_messages_in_X.
+  - apply (observed_valid (pre_loaded_vlsm X P)) with (s0 := s).
+    + exists (Some m). apply can_produce_valid; assumption.
+    + cut (has_been_observed X s dm).
+      {
+        intros [Hsent | Hreceived]; [left | right]; auto.
+      }
+      apply message_dependencies_are_necessary with m; [| assumption].
+      revert Hproduce
+      ; apply VLSM_incl_can_produce, pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 (** Under [MessageDependencies] assumptions, if a message [has_been_sent]
@@ -189,14 +184,14 @@ Proof.
   - exists (item  :: suf).
     eapply finite_valid_trace_from_to_app_split.
     rewrite <- Heqtr.
-    exact (proj1 Htr).
+    apply Htr.
   - eapply Hfull; [|eassumption].
     replace (Some m) with (input item) by assumption.
     clear Hinput.
     eapply (input_valid_transition_is_valid (pre_loaded_with_all_messages_vlsm X)).
     eapply input_valid_transition_to; [|simpl; eassumption].
     eapply valid_trace_forget_last.
-    exact (proj1 Htr).
+    apply Htr.
 Qed.
 
 (** By combining Lemmas [msg_dep_has_been_sent] and [full_node_has_been_received],

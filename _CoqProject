@@ -29,6 +29,7 @@ theories/VLSM/Core/Decisions.v
 theories/VLSM/Core/MessageDependencies.v
 theories/VLSM/Core/ProjectionTraces.v
 theories/VLSM/Core/SubProjectionTraces.v
+theories/VLSM/Core/AnnotatedVLSM.v
 
 theories/VLSM/Core/Equivocation.v
 theories/VLSM/Core/EquivocationProjections.v
@@ -39,6 +40,7 @@ theories/VLSM/Core/Equivocation/TraceWiseEquivocation.v
 theories/VLSM/Core/Equivocation/WitnessedEquivocation.v
 theories/VLSM/Core/Equivocation/FullNode.v
 theories/VLSM/Core/Equivocation/LimitedEquivocation.v
+theories/VLSM/Core/Equivocation/MsgDepLimitedEquivocation.v
 
 theories/VLSM/Core/Equivocators/Common.v
 theories/VLSM/Core/Equivocators/Projections.v

@@ -336,11 +336,12 @@ with Lemma [fixed_equivocation_has_replayable_message_prop].
 Lemma fixed_equivocators_finite_valid_trace_init_to_rev
   isX sX trX
   (HtrX : finite_valid_trace_init_to X isX sX trX)
-  : exists is, equivocators_total_state_project IM is = isX /\
-    exists s, equivocators_total_state_project IM s = sX /\
-    exists tr, equivocators_total_trace_project IM tr = trX /\
-    finite_valid_trace_init_to XE is s tr /\
-    finite_trace_last_output trX = finite_trace_last_output tr.
+  : exists is s tr,
+      equivocators_total_state_project IM is = isX /\
+      equivocators_total_state_project IM s = sX /\
+      equivocators_total_trace_project IM tr = trX /\
+      finite_valid_trace_init_to XE is s tr /\
+      finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   (*
   Since the base result works with pre-loaded vlsms, some massaging of the
@@ -358,13 +359,9 @@ Proof.
     (generalized_equivocators_finite_valid_trace_init_to_rev
       IM _ _ (equivocators_fixed_equivocations_constraint IM equivocating))
     in HtrX
-    as [is [His [s [Hs [tr [Htr [Hptr Houtput]]]]]]].
-  - exists is. split; [assumption|].
-    exists s. split; [assumption|].
-    exists tr. split; [assumption|].
-    split; [|assumption].
-    apply (VLSM_eq_finite_valid_trace_init_to HeqXE).
-    assumption.
+    as (is & His & s & Hs & tr & Htr & Hptr & Houtput).
+  - exists is, s, tr; intuition.
+    apply (VLSM_eq_finite_valid_trace_init_to HeqXE); assumption.
   - intro; intros.
     apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
