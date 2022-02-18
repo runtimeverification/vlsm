@@ -292,19 +292,14 @@ Lemma annotated_composite_induced_projection_transition_None
   : weak_projection_transition_consistency_None _ _ annotated_composite_label_project annotated_composite_state_project.
 Proof.
   intros (j, lj).
-  unfold annotated_composite_label_project, composite_project_label.
-  cbn.
+  unfold annotated_composite_label_project, composite_project_label; cbn.
   case_decide as Hij; [congruence|].
   intros _ sX omX s'X om'X [_ Ht].
-  revert Ht.
-  cbn.
-  unfold annotated_transition.
-  cbn.
+  revert Ht; cbn.
+  unfold annotated_transition; cbn.
   destruct (vtransition _ _ _) as (si', om').
-  inversion 1.
-  subst om' s'X.
-  clear Ht.
-  cbn.
+  inversion 1; clear Ht.
+  subst om' s'X; cbn.
   rewrite state_update_neq by congruence.
   reflexivity.
 Qed.
@@ -338,25 +333,21 @@ Lemma annotated_composite_induced_projection_transition_consistency
     annotated_composite_label_project annotated_composite_state_project.
 Proof.
   intros (i1, li1) (i2, li2) li.
-  unfold annotated_composite_label_project, composite_project_label.
-  cbn.
+  unfold annotated_composite_label_project, composite_project_label; cbn.
   case_decide as Hi1; [|congruence].
-  subst i1.
-  cbn.
+  subst i1; cbn.
   intro Hli1.
   inversion Hli1.
   subst li1.
   clear Hli1.
   case_decide as Hi2; [|congruence].
-  subst i2.
-  cbn.
+  subst i2; cbn.
   intro Hli2.
   inversion Hli2.
   subst li2.
   clear Hli2.
   intros (s1, ann1) (s2, ann2).
-  unfold annotated_transition.
-  cbn.
+  unfold annotated_transition; cbn.
   intros <- iom sX1' oom1.
   destruct (vtransition _ _ _) as (si', om').
   intro Heq.
@@ -368,8 +359,7 @@ Proof.
   inversion Heq.
   subst.
   clear Heq.
-  split; [|reflexivity].
-  cbn.
+  split; [cbn|reflexivity].
   rewrite !state_update_eq.
   reflexivity.
 Qed.
