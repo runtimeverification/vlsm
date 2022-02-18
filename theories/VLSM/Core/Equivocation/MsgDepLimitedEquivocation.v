@@ -391,7 +391,7 @@ Proof.
   eapply VLSM_full_projection_can_emit.
   {
     apply equivocators_composition_for_observed_index_incl_full_projection
-      with (Hincl := set_union_subseteq_right (state_annotation s) equivocating_senders).
+     with (Hincl := set_union_subseteq_right (state_annotation s) equivocating_senders).
   }
   assert (Hemitj :
     exists j, j ∈ equivocating_senders /\
@@ -460,8 +460,7 @@ Proof.
     induction Htr using finite_valid_trace_init_to_rev_ind
     ; [constructor; apply initial_state_is_valid; apply Hsi |].
     setoid_rewrite map_app.
-    apply finite_valid_trace_from_app_iff.
-    split.
+    apply finite_valid_trace_from_app_iff; split.
     + revert IHHtr.
       eapply VLSM_incl_finite_valid_trace_from,
              fixed_equivocation_vlsm_composition_index_incl,
@@ -475,7 +474,8 @@ Proof.
         valid_state_prop
           (fixed_equivocation_vlsm_composition IM (state_annotation s))
           (original_state s)).
-      { replace s with (finite_trace_last si tr) at 2
+      {
+        replace s with (finite_trace_last si tr) at 2
           by (apply valid_trace_get_last in Htr; assumption).
         rewrite
           (pre_VLSM_full_projection_finite_trace_last

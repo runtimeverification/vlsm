@@ -315,16 +315,15 @@ Lemma component_projection_validator_prop_is_induced
     @projection_validator_prop _ X (IM i) (composite_project_label IM i) (fun s => s i).
 Proof.
   split; intros Hvalidator li si omi Hvi.
+  - apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)),
+          (projection_valid_input_valid IM), Hvalidator, Hvi.
   - apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
-    apply (projection_valid_input_valid IM), Hvalidator, Hvi.
-  - apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
-    revert Hvi.
-    apply VLSM_incl_input_valid, pre_loaded_with_all_messages_validator_proj_incl.
+    revert Hvi; apply VLSM_incl_input_valid, pre_loaded_with_all_messages_validator_proj_incl.
     + apply component_projection_to_preloaded.
     + apply component_transition_projection_None.
     + apply component_label_projection_lift.
     + apply component_state_projection_lift.
-    + intros isi.  apply (lift_to_composite_state_initial IM).
+    + intros isi; apply (lift_to_composite_state_initial IM).
     + apply component_transition_projection_Some.
     + assumption.
 Qed.

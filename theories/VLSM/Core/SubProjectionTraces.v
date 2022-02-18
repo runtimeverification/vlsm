@@ -1890,7 +1890,7 @@ Lemma pre_loaded_sub_composite_input_valid_projection constraint Q
 Proof.
   intro Ht_sub.
   eapply (VLSM_projection_input_valid (preloaded_component_projection IM i) (existT i li) li)
-  ; [rewrite composite_project_label_eq; reflexivity|].
+  ; [rewrite composite_project_label_eq; reflexivity |].
   cut (input_valid
         (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM indices)))
         (existT (dexist i Hi) li) (sub_s, Some im)).

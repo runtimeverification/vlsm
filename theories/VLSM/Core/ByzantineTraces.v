@@ -432,9 +432,8 @@ included in <<X>> to prove our main result.
           destruct l as (i, li). simpl in *.
           specialize (valid_state_project_preloaded_to_preloaded _ IM constraint lst i Hlst)
             as Hlsti.
-          destruct iom as [im|]; [|apply option_valid_message_None].
-          eapply Hvalidator.
-          split; [eassumption|]. split; [|eassumption].
+          destruct iom as [im |]; [| apply option_valid_message_None].
+          eapply Hvalidator; split; [eassumption |]; split; [| eassumption].
           eexists _.
           apply (pre_loaded_with_all_messages_message_valid_initial_state_message (IM i)).
     Qed.

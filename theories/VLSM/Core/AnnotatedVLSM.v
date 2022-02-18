@@ -228,59 +228,34 @@ Lemma annotated_composite_preloaded_projection
     annotated_composite_label_project annotated_composite_state_project.
 Proof.
   apply basic_VLSM_projection.
-  - intros (_i, _li) li.
-    unfold annotated_composite_label_project, composite_project_label.
-    cbn.
-    case_decide; [|congruence].
-    subst _i.
-    cbn.
-    intro Heq_li.
-    inversion Heq_li.
-    subst _li.
-    clear Heq_li.
+  - intros [_i _li] li.
+    unfold annotated_composite_label_project, composite_project_label; cbn.
+    case_decide; [| congruence].
+    subst _i; cbn; inversion_clear 1.
     intros (s, ann) om (_ & _ & [Hv _] & _) _ _.
     assumption.
-  - intros (_i, _li) li.
-    unfold annotated_composite_label_project, composite_project_label.
-    cbn.
-    case_decide; [|congruence].
-    subst _i.
-    cbn.
-    intro Heq_li.
-    inversion Heq_li.
-    subst _li.
-    clear Heq_li.
-    intros (s, ann) iom (s', ann') oom.
-    unfold input_valid_transition.
-    cbn.
-    unfold annotated_transition.
-    cbn.
-    destruct (vtransition _ _ _) as (si', om').
-    intros [_ Ht].
-    inversion Ht.
-    f_equal.
-    symmetry.
+  - intros [_i _li] li.
+    unfold annotated_composite_label_project, composite_project_label; cbn.
+    case_decide; [| congruence].
+    subst _i; cbn; inversion_clear 1.
+    intros [s ann] iom [s' ann'] oom.
+    unfold input_valid_transition; cbn
+    ; unfold annotated_transition; cbn
+    ; destruct (vtransition _ _ _) as (si', om').
+    intros [_ Ht]; inversion Ht.
+    f_equal; symmetry.
     apply state_update_eq.
-  - intros (j, lj).
-    unfold annotated_composite_label_project, composite_project_label.
-    cbn.
-    case_decide as Hij; [congruence|].
-    intros _.
-    intros (s, ann) iom (s', ann') oom.
-    unfold input_valid_transition.
-    cbn.
-    unfold annotated_transition.
-    cbn.
-    destruct (vtransition _ _ _) as (si', om').
-    intros [_ Ht].
-    inversion Ht.
-    apply state_update_neq.
-    congruence.
-  - intros (s, ann). cbn.
-    intros [Hs _].
-    apply Hs.
-  - intro; intros.
-    apply any_message_is_valid_in_preloaded.
+  - intros [j lj].
+    unfold annotated_composite_label_project, composite_project_label; cbn.
+    case_decide as Hij; [congruence |].
+    intros _ [s ann] iom [s' ann'] oom.
+    unfold input_valid_transition; cbn
+    ; unfold annotated_transition; cbn
+    ; destruct (vtransition _ _ _) as (si', om').
+    intros [_ Ht]; inversion Ht.
+    apply state_update_neq; congruence.
+  - intros [s ann] [Hs _]; cbn; apply Hs.
+  - intro; intros; apply any_message_is_valid_in_preloaded.
 Qed.
 
 Definition annotated_composite_induced_projection : VLSM message
@@ -291,17 +266,14 @@ Definition annotated_composite_induced_projection : VLSM message
 Lemma annotated_composite_induced_projection_transition_None
   : weak_projection_transition_consistency_None _ _ annotated_composite_label_project annotated_composite_state_project.
 Proof.
-  intros (j, lj).
+  intros [j lj].
   unfold annotated_composite_label_project, composite_project_label; cbn.
-  case_decide as Hij; [congruence|].
-  intros _ sX omX s'X om'X [_ Ht].
-  revert Ht; cbn.
-  unfold annotated_transition; cbn.
-  destruct (vtransition _ _ _) as (si', om').
-  inversion 1; clear Ht.
-  subst om' s'X; cbn.
-  rewrite state_update_neq by congruence.
-  reflexivity.
+  case_decide as Hij; [congruence |].
+  intros _ sX omX s'X om'X [_ Ht]; revert Ht; cbn.
+  unfold annotated_transition; cbn
+  ; destruct (vtransition _ _ _) as (si', om')
+  ; inversion 1; clear Ht; subst om' s'X; cbn.
+  rewrite state_update_neq by congruence; reflexivity.
 Qed.
 
 Lemma annotated_composite_induced_projection_label_lift
@@ -315,8 +287,7 @@ Lemma annotated_composite_induced_projection_state_lift
   : induced_projection_state_lift_prop _ _
     annotated_composite_state_project annotated_composite_state_lift.
 Proof.
-  intros si.
-  apply state_update_eq.
+  intros si; apply state_update_eq.
 Qed.
 
 Lemma annotated_composite_induced_projection_initial_lift
@@ -332,47 +303,30 @@ Lemma annotated_composite_induced_projection_transition_consistency
   : induced_projection_transition_consistency_Some _ _
     annotated_composite_label_project annotated_composite_state_project.
 Proof.
-  intros (i1, li1) (i2, li2) li.
+  intros [i1 li1] [i2 li2] li.
   unfold annotated_composite_label_project, composite_project_label; cbn.
-  case_decide as Hi1; [|congruence].
-  subst i1; cbn.
-  intro Hli1.
-  inversion Hli1.
-  subst li1.
-  clear Hli1.
-  case_decide as Hi2; [|congruence].
-  subst i2; cbn.
-  intro Hli2.
-  inversion Hli2.
-  subst li2.
-  clear Hli2.
-  intros (s1, ann1) (s2, ann2).
-  unfold annotated_transition; cbn.
-  intros <- iom sX1' oom1.
-  destruct (vtransition _ _ _) as (si', om').
-  intro Heq.
-  inversion Heq.
-  subst.
-  clear Heq.
-  intros sX2' oom2.
-  intro Heq.
-  inversion Heq.
-  subst.
-  clear Heq.
-  split; [cbn|reflexivity].
-  rewrite !state_update_eq.
-  reflexivity.
+  case_decide as Hi1; [| congruence].
+  subst i1; cbn; inversion_clear 1.
+  case_decide as Hi2; [| congruence].
+  subst i2; cbn; inversion_clear 1.
+  intros [s1 ann1] [s2 ann2]
+  ; unfold annotated_transition; cbn
+  ; intros <- iom sX1' oom1
+  ;destruct (vtransition _ _ _) as (si', om').
+  inversion_clear 1; intros sX2' oom2; inversion_clear 1.
+  split; [cbn | reflexivity].
+  rewrite !state_update_eq; reflexivity.
 Qed.
 
-Definition annotated_composite_induced_projection_transition_Some
-  := basic_weak_projection_transition_consistency_Some _ _ _ _ _ _
+Definition annotated_composite_induced_projection_transition_Some :=
+  basic_weak_projection_transition_consistency_Some _ _ _ _ _ _
     annotated_composite_induced_projection_label_lift
     annotated_composite_induced_projection_state_lift
     annotated_composite_induced_projection_transition_consistency.
 
-Definition annotated_composite_induced_projection_is_projection
-  := projection_induced_vlsm_is_projection _ _ _ _ _ _
-  annotated_composite_induced_projection_transition_None
+Definition annotated_composite_induced_projection_is_projection :=
+  projection_induced_vlsm_is_projection _ _ _ _ _ _
+    annotated_composite_induced_projection_transition_None
     annotated_composite_induced_projection_transition_Some.
 
 Lemma annotated_projection_validator_prop_alt_iff
