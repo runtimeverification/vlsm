@@ -291,10 +291,10 @@ Lemma topologically_sorted_occurrences_ordering
   : exists (lab : list A), lb1 = la1 ++ a :: lab.
 Proof.
   assert (Hpa : P a).
-  { rewrite Forall_forall in Hl. apply Hl.  apply elem_of_list_In. rewrite Heqa. apply in_elt. }
+  { rewrite Forall_forall in Hl. apply Hl. rewrite Heqa, !elem_of_app, elem_of_list_singleton. auto. }
   specialize (Hts a b Hab lb1 lb2 Heqb).
   rewrite Heqa in Heqb.
-  assert (Ha : ~a ∈ (b :: lb2)).
+  assert (Ha : a ∉ (b :: lb2)).
   { intro Ha. apply Hts.
     rewrite elem_of_cons in Ha.
     destruct Ha; try assumption. subst.

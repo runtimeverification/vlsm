@@ -243,8 +243,7 @@ Proof.
   split; intro Hnone.
   - induction l; try reflexivity.
     assert (Hno_a := Hnone a).
-    assert (Hin_a : In a (a :: l)) by (left;reflexivity).
-    apply elem_of_list_In in Hin_a.
+    assert (Hin_a : a ∈ a :: l) by left.
     specialize (Hno_a Hin_a).
     rewrite filter_cons.
     destruct (decide (P a)); try congruence.
@@ -1712,7 +1711,7 @@ Proof.
     destruct Hle as [Hle _].
     rewrite eq_max in Hle. spec Hle. apply le_refl.
     rewrite Forall_forall in Hle.
-    specialize (Hle n). spec Hle. apply elem_of_list_In. auto with datatypes.
+    specialize (Hle n). spec Hle; [left |].
     simpl. lia.
   - specialize (list_max_exists l) as Hmax.
     spec Hmax. lia. rewrite <- eq_max. intuition.
@@ -2393,4 +2392,22 @@ Lemma NoDup_subseteq_length [A : Type]
   : length l1 <= length l2.
 Proof.
   apply submseteq_length, NoDup_submseteq; assumption.
+Qed.
+
+Lemma take_app_inv :
+  forall [A : Type] (n : nat) (l l' : list A) (x : A),
+    take n l = l' ++ [x] -> exists n' : nat, n = S n'.
+Proof.
+  induction n as [| n']; intros l l' x H.
+  - contradict H. rewrite take_0. apply app_cons_not_nil.
+  - exists n'. reflexivity.
+Qed.
+
+Lemma elem_of_list_prod :
+  forall [A B : Type] (x : A) (y : B) (la : list A) (lb : list B),
+    (x, y) ∈ list_prod la lb <-> x ∈ la /\ y ∈ lb.
+Proof.
+  intros.
+  rewrite elem_of_list_In, in_prod_iff, <- !elem_of_list_In.
+  reflexivity.
 Qed.
