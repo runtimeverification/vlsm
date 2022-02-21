@@ -358,7 +358,7 @@ Lemma lsorted_pairwise_ordered
   (Hconcat : l = alfa ++ [x] ++ beta ++ [y] ++ gamma) :
   R x y.
 Proof.
-  apply lsorted_app with (R0 := R) (alfa0 := alfa) in Hconcat.
+  apply (lsorted_app _ _ Hsorted _ alfa) in Hconcat.
   destruct Hconcat as [_ Hneed].
   simpl in Hneed.
   rewrite <- Sorted_LocallySorted_iff in Hneed.
@@ -368,8 +368,6 @@ Proof.
   spec Hneed.
   apply elem_of_app.
   right; left.
-  assumption.
-  assumption.
   assumption.
   assumption.
 Qed.

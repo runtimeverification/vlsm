@@ -129,7 +129,7 @@ Proof.
                       (lift_sub_state IM non_byzantine (finite_trace_last is pre)) m0).
     { exists i.
       unfold lift_sub_state.
-      rewrite lift_sub_state_to_eq with (Hi0 := Hi).
+      rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
       assumption.
     }
     apply (composite_proper_sent IM) in Hsent; [|assumption].
@@ -308,7 +308,7 @@ Proof.
     eapply Hvalidator,
       pre_loaded_sub_composite_input_valid_projection, Ht_sub.
   - unfold lift_sub_state in Hann_s_pr.
-    rewrite Hann_s_pr, lift_sub_state_to_eq with (Hi0 := Hi).
+    rewrite Hann_s_pr, (lift_sub_state_to_eq _ _ _ _ _ Hi).
     apply Ht_sub.
   - apply Rle_trans with (sum_weights (remove_dups byzantine))
     ; [| assumption].
@@ -326,20 +326,20 @@ Proof.
     destruct Ht_sub as [_ Ht_sub]; revert Ht_sub
     ; unfold annotated_transition; cbn
     ; rewrite Hann_s_pr; unfold lift_sub_state at 1
-    ; rewrite lift_sub_state_to_eq with (Hi0 := Hi)
+    ; rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi)
     ; unfold sub_IM at 2; cbn
     ; destruct (vtransition _ _ _) as (si', om')
     ; inversion_clear 1.
     do 2 f_equal; extensionality j.
     destruct (decide (i = j)) as [| Hij]; subst.
-    + unfold lift_sub_state; rewrite lift_sub_state_to_eq with (Hi0 := Hi).
+    + unfold lift_sub_state.
+      rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
       rewrite !state_update_eq; reflexivity.
     + rewrite state_update_neq by congruence.
       unfold lift_sub_state.
       destruct (decide (j ∈ set_diff (enum index) byzantine)) as [Hj |].
-      * rewrite !lift_sub_state_to_eq with (Hi0 := Hj),
-                sub_IM_state_update_neq by congruence
-        ; reflexivity.
+      * rewrite !(lift_sub_state_to_eq _ _ _ _ _ Hj).
+        rewrite sub_IM_state_update_neq by congruence; reflexivity.
       * rewrite !lift_sub_state_to_neq by assumption; reflexivity.
 Qed.
 
@@ -410,8 +410,7 @@ Proof.
     apply set_union_subseteq_iff; split; [assumption |].
     unfold coeqv_message_equivocators
     ; case_decide as Hnobs; [apply list_subseteq_nil |].
-    erewrite full_node_msg_dep_coequivocating_senders with (i0 := i) (li0 := li).
-    2-4: eassumption.
+    rewrite (full_node_msg_dep_coequivocating_senders _ _ _ _ Hfull _ _ i li).
     2: cbn; rewrite Hlsti
     ; eapply @pre_loaded_sub_composite_input_valid_projection, Hx.
     rewrite app_nil_r; cbn.
@@ -424,8 +423,8 @@ Proof.
       ; destruct_dec_sig sub_i_im _i_im H_i_im Heqsub_i_im; subst sub_i_im.
       apply composite_has_been_observed_sent_received_iff; left.
       exists _i_im.
-      rewrite Hlsti; cbn; unfold lift_sub_state
-      ; rewrite lift_sub_state_to_eq with (Hi0 := H_i_im).
+      rewrite Hlsti; cbn; unfold lift_sub_state.
+      rewrite (lift_sub_state_to_eq _ _ _ _ _ H_i_im).
       assumption.
     + clear -Hsender Hsigned.
       destruct Hsigned as (_i_im & H_i_im & Hauth).
@@ -462,8 +461,9 @@ Proof.
       as [Hbtr Heqv_byzantine]
     ; [| assumption].
     eexists _,_, byzantine; do 3 (split; [eassumption |]); split.
-    + extensionality sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; cbn
-      ; unfold lift_sub_state; rewrite lift_sub_state_to_eq with (Hi0 := Hi).
+    + extensionality sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; cbn.
+      unfold lift_sub_state.
+      rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
       reflexivity.
     + subst Limited.
       rewrite msg_dep_annotate_trace_with_equivocators_project.

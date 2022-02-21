@@ -1839,11 +1839,9 @@ Proof.
   { revert Htr_to. apply VLSM_incl_finite_valid_trace_init_to.
     apply seeded_no_equivocation_incl_preloaded.
   }
-  apply pre_equivocators_valid_trace_project
-    with (final_descriptors0 := final_descriptors)
-    in Hpre_tr_to
-  ; [|typeclasses eauto|assumption].
-  destruct Hpre_tr_to as [initial_descriptors [Hproper_initial [trX [Hpr_trX Hpre_trX]]]].
+  pose proof (pre_equivocators_valid_trace_project _ _ _ _
+    Hpre_tr_to final_descriptors Hproper) as Hex.
+  destruct Hex as [initial_descriptors [Hproper_initial [trX [Hpr_trX Hpre_trX]]]].
   exists trX, initial_descriptors.
   split; [assumption|]. split; [assumption|].
   apply finite_valid_trace_init_to_last in Hpre_trX as Hfinal_stateX.
@@ -1915,10 +1913,8 @@ Proof.
     { revert Htr_to. apply VLSM_incl_finite_valid_trace_init_to.
       apply seeded_no_equivocation_incl_preloaded.
     }
-    apply pre_equivocators_valid_trace_project
-      with (final_descriptors0 := final_descriptors')
-      in Hpre_tr_to as Hpr_tr'
-    ; [|typeclasses eauto|assumption].
+    pose proof (pre_equivocators_valid_trace_project sub_IM _ _ _
+     Hpre_tr_to final_descriptors' Hproper') as Hpr_tr'.
     destruct Hpr_tr' as [_initial_descriptors [_ [_trX' [_Hpr_trX' Heq_final_stateX']]]].
     replace (equivocators_trace_project _ _ _) with (Some (trX', initial_descriptors))
       in _Hpr_trX'.
@@ -1951,12 +1947,8 @@ Proof.
     assert (Hfinal_descriptors_m_proper : proper_equivocator_descriptors sub_IM final_descriptors_m (finite_trace_last is tr'))
       by (apply not_equivocating_equivocator_descriptors_proper; assumption).
     specialize (H final_descriptors_m Hfinal_descriptors_m_proper).
-
-    apply pre_equivocators_valid_trace_project
-      with (final_descriptors0 := final_descriptors_m)
-      in Hpre_tr_to as Hpr_tr'
-    ; [|typeclasses eauto|assumption].
-
+    pose proof (pre_equivocators_valid_trace_project _ _ _ _
+     Hpre_tr_to final_descriptors_m Hfinal_descriptors_m_proper) as Hpr_tr'.
     destruct Hpr_tr' as [initial_descriptors_m' [Hproper_initial_m [trXm' [Hproject_trXm' HtrXm]]]].
     specialize (H _ _ Hproject_trXm').
     simpl in *. rewrite Hproject_trXm in Hproject_trXm'.

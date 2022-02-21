@@ -147,8 +147,7 @@ Proof.
     apply (composite_proper_sent IM) in Hsent; [|assumption].
     specialize (Hsent _ _ (conj Hpre_pre Hinit)).
     contradiction.
-  +  apply (SubProjectionTraces.sub_can_emit_sender IM equivocators (fun i => i) sender Hsender_safety)
-        with (v0 := v) in Hemit
+  +  apply (SubProjectionTraces.sub_can_emit_sender IM equivocators (fun i => i) sender Hsender_safety _ _ v) in Hemit
       ; assumption.
 Qed.
 

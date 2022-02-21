@@ -1,4 +1,5 @@
 -Q theories/VLSM VLSM
+-arg -w -arg -deprecated-instance-without-locality
 
 theories/VLSM/Lib/Preamble.v
 theories/VLSM/Lib/SsrExport.v

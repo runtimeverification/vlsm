@@ -60,7 +60,7 @@ Section general.
     (X Y : C) :
     size (X ∩ Y) <= size X.
   Proof.
-    apply subseteq_size with (X0 := X ∩ Y) (Y0 := X).
+    apply (subseteq_size (X ∩ Y) X).
     set_solver.
   Qed.
 
@@ -68,7 +68,7 @@ Section general.
     (X Y : C) :
     size (X ∩ Y) <= size Y.
   Proof.
-    apply subseteq_size with (X0 := X ∩ Y) (Y0 := Y).
+    apply (subseteq_size (X ∩ Y) Y).
     set_solver.
   Qed.
 
