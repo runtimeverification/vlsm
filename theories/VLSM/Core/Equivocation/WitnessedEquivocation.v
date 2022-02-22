@@ -1,8 +1,9 @@
 From stdpp Require Import prelude.
 From Coq Require Import FinFun Rdefinitions FunctionalExtensionality.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.ListSetExtras Lib.Measurable.
-From VLSM Require Import Core.VLSM VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces Core.MessageDependencies.
-From VLSM Require Import Core.Equivocation Core.Equivocation.NoEquivocation Core.Equivocation.FixedSetEquivocation Core.Equivocation.TraceWiseEquivocation.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras Measurable.
+From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
+From VLSM.Core Require Import SubProjectionTraces MessageDependencies Equivocation.
+From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquivocation.
 
 (** * Witnessed equivocation
 
@@ -541,7 +542,7 @@ Proof.
       end.
       specialize (NoDup_subseteq_length (equivocating_validators_nodup s) (proj1 Heq))
         as Hlen2.
-      spec IHn ; [subst s m; apply le_antisym; assumption|].
+      spec IHn ; [subst s m; apply Nat.le_antisymm; assumption|].
       specialize (IHn eq_refl).
       destruct Htr'_item as [Htr'_item Hinit].
       apply finite_valid_trace_from_to_app_split in Htr'_item.

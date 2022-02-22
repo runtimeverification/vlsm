@@ -2210,8 +2210,7 @@ This relation is often used in stating safety and liveness properties.*)
         rewrite finite_trace_nth_last.
         congruence.
       - rewrite finite_trace_nth_app2;[|lia].
-        rewrite Minus.minus_plus.
-        rewrite finite_trace_nth_last.
+        rewrite Nat.add_comm, Nat.add_sub, finite_trace_nth_last.
         congruence.
     Qed.
 
