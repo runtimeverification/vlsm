@@ -559,7 +559,7 @@ Proof.
     rewrite Hs in Heq.
     rewrite Heq.
     rewrite stream_prefix_nth.
-    + rewrite Plus.plus_comm; reflexivity.
+    + rewrite Nat.add_comm; reflexivity.
     + lia.
     + lia.
 Qed.
