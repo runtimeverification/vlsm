@@ -389,7 +389,7 @@ Proof.
     case_decide as HAv; [| trivial].
     cbn in Hc; destruct Hc as [Hsent | Hseeded].
     + unfold lift_sub_state.
-      rewrite lift_sub_state_to_eq with (Hi0 := HAv).
+      rewrite (lift_sub_state_to_eq _ _ _ _ _ HAv).
       apply (sub_IM_has_been_sent_iff_by_sender fixed_byzantine_IM non_byzantine
               A sender fixed_byzantine_IM_sender_safety)
       ; [| assumption | assumption].
@@ -662,7 +662,7 @@ Proof.
       subst.
       exists i.
       unfold lift_sub_state.
-      rewrite lift_sub_state_to_eq with (Hi0 := Hi); assumption.
+      rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi); assumption.
     + right.
       apply emitted_messages_are_valid_iff in HomY.
       destruct HomY as [[_v [[_im Him] Heqim]] | Hiom]
@@ -692,7 +692,7 @@ Proof.
       specialize (Hfull j _ _ _ Hv _ Hdm).
       exists j.
       unfold lift_sub_state.
-      rewrite lift_sub_state_to_eq with (Hi0 := Hj); assumption.
+      rewrite (lift_sub_state_to_eq _ _ _ _ _ Hj); assumption.
 Qed.
 
 Lemma preloaded_non_byzantine_vlsm_lift

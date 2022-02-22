@@ -122,7 +122,7 @@ Proof.
     apply Hreflects with m; [assumption |].
     destruct Hinit as [Hinit | Hp]; [| assumption].
     contradict Hinit; apply no_initial_messages_in_X.
-  - apply (observed_valid (pre_loaded_vlsm X P)) with (s0 := s).
+  - apply (observed_valid (pre_loaded_vlsm X P) s).
     + exists (Some m). apply can_produce_valid; assumption.
     + cut (has_been_observed X s dm).
       {
