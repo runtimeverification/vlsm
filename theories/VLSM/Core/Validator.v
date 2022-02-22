@@ -5,7 +5,7 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
 
 (** * VLSM Projection Validators
 
-In the sequel we fix a VLSMs <<X>> and <<Y>> and a [VLSM_projection]
+In the sequel we fix VLSMs <<X>> and <<Y>> and a [VLSM_projection]
 of <<X>> into <<PreY>>, the [pre_loaded_with_all_messages_vlsm] of <<Y>>.
 *)
 
@@ -14,7 +14,7 @@ Section projection_validator.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> option (vlabel Y)}
+  {label_project : vlabel X -> option (vlabel Y)} 
   {state_project : vstate X -> vstate Y}
   (PreY := pre_loaded_with_all_messages_vlsm Y)
   (Hproj : VLSM_projection X PreY label_project state_project)
@@ -22,19 +22,7 @@ Context
 
 (**
 We say that <<Y>> is a validator for received messages if
-non-[projection_induced_valid]itiy implied non-component-[valid]ity
-(or non-reachability).
-*)
-
-Definition projection_validator_received_messages_prop :=
-  forall (li : vlabel Y) (si : vstate Y) (mi : message),
-    ~ projection_induced_valid X (type Y) label_project state_project li (si, Some mi)
-    -> ~ input_valid PreY li (si, Some mi).
-
-(**
-We can slightly generalize the definition above to also include empty messages
-and state it in a positive manner as the [projection_validator_prop]erty below,
-requiring that [valid]ity in the component (for reachable states) implies
+[valid]ity in the component (for reachable states) implies
 [projection_induced_valid]ity.
 *)
 
@@ -42,6 +30,18 @@ Definition projection_validator_prop :=
   forall li si omi,
     input_valid PreY li (si,omi) ->
     projection_induced_valid X (type Y) label_project state_project li (si,omi).
+
+(**
+We say that <<Y>> is a [transition_validator] if any [valid]
+transition (from a reachable state) in <<Y>> can be "lifted" to
+an [input_valid_transition] in <<X>>.
+*)
+Definition transition_validator :=
+  forall lY sY omi, input_valid PreY lY (sY, omi) ->
+  exists lX sX sX' om',
+   input_valid_transition X lX (sX, omi) (sX', om') /\
+   label_project lX = Some lY /\
+   state_project sX = sY.
 
 (** A message validator can check within a component whether the message
 is valid for the composition.
@@ -60,40 +60,12 @@ Proof.
   assumption.
 Qed.
 
-(**
-It is easy to see that the [projection_validator_prop]erty includes the
-[projection_validator_received_messages_prop]erty.
-*)
-Lemma projection_validator_messages_received
-  : projection_validator_prop -> projection_validator_received_messages_prop.
-Proof.
-  unfold projection_validator_prop, projection_validator_received_messages_prop.
-  intuition.
-Qed.
-
-(**
-We say that <<Y>> is a [transition_validator] if any [valid]
-transition (from a reachable state) in <<Y>> can be "lifted" to
-an [input_valid_transition] in <<X>>.
-*)
-Definition transition_validator :=
-  forall lY sY omi, input_valid PreY lY (sY, omi) ->
-  exists lX sX sX' om',
-   input_valid_transition X lX (sX, omi) (sX', om') /\
-   label_project lX = Some lY /\
-   state_project sX = sY.
-
-(**
-Next two results show that the (simpler) [projection_validator_prop]erty
-is equivalent with the [transition_validator] property.
-*)
-
 Lemma projection_validator_messages_transitions
   : projection_validator_prop -> transition_validator.
 Proof.
   intros Hvalidator li si omi Hpvi.
   specialize (Hvalidator _ _ _ Hpvi)
-    as [l [s [Hli [Hsi [Hps [Hopm Hvalid]]]]]].
+    as (l & s & Hli & Hsi & Hps & Hopm & Hvalid).
   exists l, s.
   unfold input_valid_transition.
   destruct (transition _ _ ) as (s', om').
@@ -106,7 +78,7 @@ Lemma transition_validator_messages
 Proof.
   intros Hvalidator li si omi Hpvi.
   specialize (Hvalidator _ _ _ Hpvi)
-    as [l [s [s' [om' [[Hvalid Htransition] [Hli Hsi]]]]]].
+    as (l & s & s' & om' & [Hvalid Htransition] & Hli & Hsi).
   exists l, s.
   intuition.
 Qed.
@@ -141,15 +113,15 @@ Lemma projection_induced_valid_transition_eq
   : forall l s om, vvalid Xi l (s, om) ->
     vtransition Xi l (s, om) = vtransition Y l (s, om).
 Proof.
-  intros l s im [lX [sX [Hlx [<- Hv]]]].
+  intros l s im (lX & sX & Hlx & <- & Hv).
   replace (vtransition Y _ _) with
     (state_project (vtransition X lX (sX, im)).1, (vtransition X lX (sX, im)).2).
-  - eapply proj2, (VLSM_projection_input_valid_transition Hproji) with (lY := l)
+  - eapply (VLSM_projection_input_valid_transition Hproji)
     ; [eassumption|].
     split; [assumption|].
     apply injective_projections; reflexivity.
   - symmetry.
-    eapply proj2, (VLSM_projection_input_valid_transition Hproj) with (lY := l)
+    eapply (VLSM_projection_input_valid_transition Hproj)
     ; [eassumption|].
     split; [assumption|].
     apply injective_projections; reflexivity.
@@ -159,13 +131,13 @@ Lemma induced_projection_incl_preloaded_with_all_messages
   : VLSM_incl Xi PreY.
 Proof.
   apply basic_VLSM_incl.
-  - intros is [s [<- Hs]].
+  - intros is (s & <- & Hs).
     apply (VLSM_projection_initial_state Hproj).
     assumption.
-  - intro; intros. apply any_message_is_valid_in_preloaded.
-  - intros l s om [_ [_ [lX [sX [Hlx [<- Hv]]]]]] _ _.
+  - intros l s m Hv HsY HmX. apply any_message_is_valid_in_preloaded.
+  - intros l s om (_ & _ & lX & sX & Hlx & <- & Hv) _ _.
     simpl.
-    eapply proj2, proj2, (VLSM_projection_input_valid Hproj); eassumption.
+    eapply (VLSM_projection_input_valid Hproj); eassumption.
   - intros l s im s' om [[_ [_ HvXi]] HtXi].
     setoid_rewrite <- HtXi.
     symmetry.
@@ -202,37 +174,31 @@ Proof.
     assumption.
   - destruct Ht as [[_ [_ Hvalid]] Htrans].
     specialize (Hvalidator _ _ _ Hvalid IHHs)
-      as [lX [sX [HlX [HsX HvX]]]].
+      as (lX & sX & HlX & HsX & HvX).
     replace s' with (state_project (vtransition X lX (sX, om)).1).
     + eapply input_valid_transition_destination,
-        (VLSM_projection_input_valid_transition Hproji);
-      [exact HlX|].
-      split; [exact HvX|].
+        (VLSM_projection_input_valid_transition Hproji)
+      ; [|split]; [eassumption|eassumption|].
       apply injective_projections; reflexivity.
     + assert (HivtX : input_valid_transition X lX (sX, om) (vtransition X lX (sX, om)))
-        by (split; [assumption|reflexivity]).
+        by firstorder.
       destruct (vtransition _ _ _) as (sX', _om').
-      apply (VLSM_projection_input_valid_transition Hproj) with (lY := l)
-        in HivtX as [_ Hs']
-      ; [|assumption].
+      eapply (VLSM_projection_input_valid_transition Hproj) in HivtX as [_ Hs']
+      ; [|eassumption].
       rewrite HsX in Hs'.
-      destruct Y as (TY, (SY, MY)).
-      cbv in Htrans, Hs'.
-      rewrite Htrans in Hs'.
-      inversion Hs'.
-      reflexivity.
+      destruct Y as (TY & MY); cbv in Htrans, Hs'.
+      rewrite Htrans in Hs'; inversion Hs'; reflexivity.
 Qed.
 
 (** Below we show that the two definitions above are actually equivalent. *)
 Lemma projection_validator_prop_alt_iff
   : projection_validator_prop_alt <-> projection_validator_prop.
 Proof.
-  split.
-  - intros Hvalidator l si om Hvalid.
-    apply Hvalidator; [apply Hvalid|].
-    apply validator_alt_free_states_are_projection_states; [assumption..|].
-    apply Hvalid.
-  - intros Hvalidator l si om Hvalid HXisi.
+  split; intros Hvalidator l si om Hvalid.
+  - apply Hvalidator; [apply Hvalid|].
+    apply validator_alt_free_states_are_projection_states
+    ; [assumption|apply Hvalid].
+  - intro HXisi.
     apply Hvalidator.
     repeat split; [| apply any_message_is_valid_in_preloaded | assumption].
     revert HXisi.
@@ -268,25 +234,18 @@ Proof.
   split; cycle 1.
   - exists (state_lift sY).
     split; [apply Hstate_lift|].
-    apply Hinitial_lift.
-    apply HtrY.
+    apply Hinitial_lift, HtrY.
   - induction HtrY using finite_valid_trace_rev_ind.
-    + apply (finite_valid_trace_from_empty Xi).
-      apply initial_state_is_valid.
+    + apply (finite_valid_trace_from_empty Xi), initial_state_is_valid.
       exists (state_lift si).
-      split; [apply Hstate_lift|].
-      apply Hinitial_lift.
-      assumption.
+      auto.
     + apply (extend_right_finite_trace_from Xi);[assumption|].
       split.
       * apply induced_projection_valid_is_input_valid; [assumption|].
-        apply Hvalidator.
-        apply Hx.
+        apply Hvalidator, Hx.
       * replace (sf, _) with (vtransition Y l (finite_trace_last si tr, iom))
           by apply Hx.
-        apply projection_induced_valid_transition_eq.
-        apply Hvalidator.
-        apply Hx.
+        apply projection_induced_valid_transition_eq, Hvalidator, Hx.
 Qed.
 
 (**
@@ -321,8 +280,7 @@ Section component_projection_validator.
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{EqDecision index}
   (IM : index -> VLSM message)
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
@@ -336,9 +294,9 @@ We say that the component <<i>> of X is a validator for received messages if
 if [valid]ity in the component (for reachable states) implies [projection_valid]ity.
 *)
 Definition component_projection_validator_prop :=
-  forall (li : vlabel (IM i)) (siomi : vstate (IM i) * option message),
-    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li siomi ->
-    vvalid Xi li siomi.
+  forall (li : vlabel (IM i)) (si : vstate (IM i)) (omi : option message),
+    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (si, omi) ->
+    vvalid Xi li (si, omi).
 
 Lemma component_projection_to_preloaded
   : VLSM_projection X PreXi (composite_project_label IM i) (fun s => s i).
@@ -356,23 +314,16 @@ Lemma component_projection_validator_prop_is_induced
   : component_projection_validator_prop <->
     @projection_validator_prop _ X (IM i) (composite_project_label IM i) (fun s => s i).
 Proof.
-  split.
-  - intros Hvalidator li si omi Hvi.
-    apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
-    apply projection_valid_input_valid.
-    apply Hvalidator.
-    assumption.
-  - intros Hvalidator li (si, omi) Hvi.
-    apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
-    revert Hvi.
-    apply VLSM_incl_input_valid.
-    apply pre_loaded_with_all_messages_validator_proj_incl.
+  split; intros Hvalidator li si omi Hvi.
+  - apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)),
+          (projection_valid_input_valid IM), Hvalidator, Hvi.
+  - apply (VLSM_eq_input_valid (composite_vlsm_constrained_projection_is_induced IM constraint i)).
+    revert Hvi; apply VLSM_incl_input_valid, pre_loaded_with_all_messages_validator_proj_incl.
     + apply component_projection_to_preloaded.
     + apply component_transition_projection_None.
     + apply component_label_projection_lift.
     + apply component_state_projection_lift.
-    + intros isi.
-      apply (lift_to_composite_state_initial IM).
+    + intros isi; apply (lift_to_composite_state_initial IM).
     + apply component_transition_projection_Some.
     + assumption.
 Qed.
@@ -392,7 +343,7 @@ Proof.
     (machine (projection_induced_vlsm X (type (IM i))
       (composite_project_label IM i) (fun s => s i)
       (lift_to_composite_label IM i) (lift_to_composite_state IM i)))
-  ; [|apply VLSM_eq_sym; apply composite_vlsm_constrained_projection_is_induced].
+  ; simpl; [|apply VLSM_eq_sym, composite_vlsm_constrained_projection_is_induced].
   apply pre_loaded_with_all_messages_validator_proj_eq.
   - apply component_projection_to_preloaded.
   - apply component_transition_projection_None.
@@ -401,14 +352,10 @@ Proof.
   - intro s. apply (lift_to_composite_state_initial IM).
   - apply component_transition_projection_Some.
   - intros li si omi Hiv.
-    apply Hvalidator in Hiv as [sX [<- HivX]].
-    exists (existT i li), sX.
-    intuition.
-    unfold composite_project_label.
-    simpl.
-    case_decide as Hi; [|contradiction].
-    replace Hi with (@eq_refl index i) by (apply Eqdep_dec.UIP_dec; assumption).
-    reflexivity.
+    apply Hvalidator in Hiv as (sX & <- & HivX).
+    exists (existT i li), sX; intuition.
+    unfold composite_project_label; cbn.
+    rewrite (decide_True_pi eq_refl); reflexivity.
 Qed.
 
 Definition pre_loaded_with_all_messages_validator_component_proj_incl
@@ -466,27 +413,22 @@ Lemma pre_loaded_with_all_messages_self_validator_vlsm_incl
   : VLSM_incl PreX X.
 Proof.
   unfold self_validator_vlsm_prop  in Hvalidator.
-  destruct X as [T [S M]]. simpl in *.
+  destruct X as (T & M). simpl in *.
   (* redcuction to inclusion of finite traces. *)
   apply VLSM_incl_finite_traces_characterization.
-  intros.
-  split; [|apply H].
-  destruct H as [Htr Hs].
+  intros s tr [Htr Hs].
+  split; [|assumption].
   (* reverse induction on the length of a trace. *)
   induction tr using rev_ind.
-  - constructor. apply initial_state_is_valid. assumption.
-  - apply finite_valid_trace_from_app_iff in Htr.
-    destruct Htr as [Htr Hx].
-    specialize (IHtr Htr).
+  - constructor; apply initial_state_is_valid; assumption.
+  - apply finite_valid_trace_from_app_iff in Htr as [Htr Hx].
     apply (finite_valid_trace_from_app_iff (mk_vlsm M)).
-    split; [assumption|].
+    split; [apply IHtr; assumption|].
     apply (first_transition_valid (mk_vlsm M)).
-    apply first_transition_valid in Hx.
-    destruct Hx as [Hvx Htx].
+    apply first_transition_valid in Hx as [Hvx Htx].
     split; [|assumption].
     (* using the [self_validator_vlsm_prop]erty. *)
-    revert Hvx.
-    apply Hvalidator.
+    revert Hvx; apply Hvalidator.
 Qed.
 
 (**
@@ -499,7 +441,7 @@ Proof.
   split.
   - apply pre_loaded_with_all_messages_self_validator_vlsm_incl.
   - pose (vlsm_incl_pre_loaded_with_all_messages_vlsm X) as Hincl.
-    destruct X as (T, (S, M)).
+    destruct X as (T, M).
     apply Hincl.
 Qed.
 

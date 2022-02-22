@@ -1,7 +1,7 @@
-From stdpp Require Import prelude.
-From Coq Require Import Streams FinFun Rdefinitions Program.Tactics.
+From stdpp Require Import prelude finite.
+From Coq Require Import Streams FinFun Rdefinitions.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
-From VLSM Require Import Lib.ListSetExtras Lib.Measurable.
+From VLSM Require Import Lib.ListSetExtras Lib.Measurable Lib.FinFunExtras.
 From VLSM Require Import Core.Decisions Core.VLSM Core.VLSMProjections.
 From VLSM Require Import Core.Composition Core.ProjectionTraces.
 
@@ -100,7 +100,7 @@ Qed.
 
 Lemma eq_equivocating_validators_equivocation_fault
   `{Heqv: BasicEquivocation st validator }
-  {ValEqDec : EqDecision validator}
+  `{EqDecision validator}
   : forall s1 s2,
     set_eq (equivocating_validators s1) (equivocating_validators s2) ->
     equivocation_fault s1 = equivocation_fault s2.
@@ -117,7 +117,7 @@ Qed.
 
 Lemma incl_equivocating_validators_equivocation_fault
   `{Heqv: BasicEquivocation st validator }
-  {ValEqDec : EqDecision validator}
+  `{EqDecision validator}
   : forall s1 s2,
     (equivocating_validators s1) ⊆ (equivocating_validators s2) ->
     (equivocation_fault s1 <= equivocation_fault s2)%R.
@@ -171,7 +171,7 @@ Section Simple.
         /\ ~trace_has_message (field_selector output) msg prefix.
 
     Instance equivocation_in_trace_dec
-      {MsgEqDec : EqDecision message}
+      `{EqDecision message}
       : RelDecision equivocation_in_trace.
     Proof.
       intros msg tr.
@@ -481,7 +481,7 @@ Section Simple.
     Qed.
 
     Lemma has_been_sent_consistency
-      {Hbs : HasBeenSentCapability}
+      `{HasBeenSentCapability}
       (s : state)
       (Hs : valid_state_prop pre_vlsm s)
       (m : message)
@@ -501,7 +501,7 @@ Section Simple.
     Qed.
 
     Lemma can_produce_has_been_sent
-      {Hbs : HasBeenSentCapability}
+      `{HasBeenSentCapability}
       (s : state)
       (m : message)
       (Hsm : can_produce pre_vlsm s m)
@@ -528,7 +528,7 @@ Section Simple.
     'pre_loaded_with_all_messages_vlsm'
     *)
     Lemma specialized_proper_sent
-      {Hbs : HasBeenSentCapability}
+      `{HasBeenSentCapability}
       (s : state)
       (Hs : valid_state_prop vlsm s)
       (m : message)
@@ -546,7 +546,7 @@ Section Simple.
       split; [|assumption].
       revert Htr.
       unfold pre_vlsm;clear.
-      destruct vlsm as (T,(S,M)).
+      destruct vlsm as (T,M).
       apply VLSM_incl_finite_valid_trace_init_to.
       apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
     Qed.
@@ -555,7 +555,7 @@ Section Simple.
     (avoiding 'pre_loaded_with_all_messages_vlsm')
     *)
     Lemma specialized_proper_sent_rev
-      {Hbs : HasBeenSentCapability}
+      `{HasBeenSentCapability}
       (s : state)
       (Hs : valid_state_prop vlsm s)
       (m : message)
@@ -571,7 +571,7 @@ Section Simple.
       spec Hsm;[|assumption].
       revert Htr.
       unfold pre_vlsm;clear.
-      destruct vlsm as (T,(S,M)).
+      destruct vlsm as (T,M).
       apply VLSM_incl_finite_valid_trace_init_to.
       apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
     Qed.
@@ -618,7 +618,7 @@ Section Simple.
     }.
 
     Lemma has_been_received_consistency
-      {Hbs : HasBeenReceivedCapability}
+      `{HasBeenReceivedCapability}
       (s : state)
       (Hs : valid_state_prop pre_vlsm s)
       (m : message)
@@ -670,7 +670,7 @@ Section Simple.
       sig (fun m => selected_message_exists_in_some_preloaded_traces (field_selector output) s m).
 
     Lemma sent_messages_proper
-      (Hhbs : HasBeenSentCapability)
+      `{HasBeenSentCapability}
       (s : vstate vlsm)
       (Hs : valid_state_prop pre_vlsm s)
       (m : message)
@@ -691,7 +691,7 @@ Section Simple.
       sig (fun m => selected_message_exists_in_some_preloaded_traces (field_selector input) s m).
 
     Lemma received_messages_proper
-      (Hhbs : HasBeenReceivedCapability)
+      `{HasBeenReceivedCapability}
       (s : vstate vlsm)
       (Hs : valid_state_prop pre_vlsm s)
       (m : message)
@@ -748,7 +748,7 @@ Section Simple.
 
     Global Instance computable_sent_message_has_been_sent_dec
       {Hsm : ComputableSentMessages}
-      {eq_message: EqDecision message}
+      `{EqDecision message}
       : RelDecision ComputableSentMessages_has_been_sent :=
       fun s m => decide_rel _ _ (sent_messages_fn s).
 
@@ -810,7 +810,7 @@ Section Simple.
 
     Definition ComputableSentMessages_HasBeenSentCapability
       {Hsm : ComputableSentMessages}
-      {eq_message : EqDecision message}
+      `{EqDecision message}
       : HasBeenSentCapability
       :=
       {|
@@ -862,7 +862,7 @@ Section Simple.
 
     Global Instance ComputableReceivedMessages_has_been_received_dec
       {Hsm : ComputableReceivedMessages}
-      {eq_message : EqDecision message}
+      `{EqDecision message}
       : RelDecision ComputableReceivedMessages_has_been_received
       := fun s m => decide_rel _ _ (received_messages_fn s).
 
@@ -913,7 +913,7 @@ Section Simple.
 
     Definition ComputableReceivedMessages_HasBeenReceivedCapability
       {Hsm : ComputableReceivedMessages}
-      {eq_message : EqDecision message}
+      `{EqDecision message}
       : HasBeenReceivedCapability
       :=
       {|
@@ -922,6 +922,9 @@ Section Simple.
         proper_not_received := ComputableReceivedMessages_has_not_been_received_proper
       |}.
 End Simple.
+
+Global Hint Mode HasBeenSentCapability - ! : typeclass_instances.
+Global Hint Mode HasBeenReceivedCapability - ! : typeclass_instances.
 
 (** *** Stepwise consistency properties for [state_message_oracle]
 
@@ -944,7 +947,7 @@ Record oracle_stepwise_props
        (message_selector: message -> transition_item -> Prop)
        (oracle: state_message_oracle vlsm) : Prop :=
   {oracle_no_inits: forall (s: vstate vlsm),
-      initial_state_prop (VLSMSign:=sign vlsm) s ->
+      initial_state_prop (VLSMMachine:=vmachine vlsm) s ->
       forall m, ~oracle s m;
    oracle_step_update:
        forall l s im s' om,
@@ -993,6 +996,26 @@ Proof.
   pose proof (oracle_partial_trace_update Horacle _ _ _ (proj1 Htr) m).
   pose proof (oracle_no_inits Horacle s0 (proj2 Htr) m).
   clear -H H0. tauto.
+Qed.
+
+(* TODO(wkolowski): make notation uniform accross the file. *)
+Lemma oracle_stepwise_props_change_selector
+      [message] [vlsm: VLSM message]
+      [selector]
+      [oracle : state_message_oracle vlsm]
+      (Horacle: oracle_stepwise_props selector oracle)
+      selector'
+      (Heqv :
+        forall s item,
+          input_valid_transition_item (pre_loaded_with_all_messages_vlsm vlsm) s item ->
+          forall m, selector m item <-> selector' m item)
+      : oracle_stepwise_props selector' oracle.
+Proof.
+  destruct Horacle as [Hinits Hupdate].
+  constructor; [assumption|].
+  intros l s om s' om' Ht msg.
+  simpl; rewrite Hupdate, Heqv by eassumption.
+  reflexivity.
 Qed.
 
 (**
@@ -1126,7 +1149,7 @@ Section StepwiseFromTrace.
          no_traces_have_message_prop vlsm selector (fun m s => ~oracle m s) s m).
 
   Lemma oracle_no_inits_from_trace:
-    forall (s: vstate vlsm), initial_state_prop (VLSMSign:=sign vlsm) s ->
+    forall (s: vstate vlsm), initial_state_prop (VLSMMachine:=vmachine vlsm) s ->
                              forall m, ~oracle s m.
   Proof.
     intros s Hinit m Horacle.
@@ -1229,8 +1252,8 @@ Defined.
 
 Lemma has_been_sent_stepwise_from_trace
       [message : Type]
-      [vlsm: VLSM message]
-      (Hhbs: HasBeenSentCapability vlsm):
+      (vlsm: VLSM message)
+      `{HasBeenSentCapability message vlsm}:
   oracle_stepwise_props (field_selector output) (has_been_sent vlsm).
 Proof.
   apply stepwise_props_from_trace.
@@ -1241,54 +1264,49 @@ Defined.
 
 Lemma preloaded_has_been_sent_stepwise_props
       [message : Type]
-      [vlsm: VLSM message]
-      (Hhbs: HasBeenSentCapability vlsm)
+      (vlsm: VLSM message)
+      `{HasBeenSentCapability message vlsm}
       (seed : message -> Prop)
       (X := pre_loaded_vlsm vlsm seed):
   has_been_sent_stepwise_props (vlsm := X) (has_been_sent vlsm).
 Proof.
-  destruct (has_been_sent_stepwise_from_trace Hhbs) as [Hinit Hupdate].
-  split.
-  - intros s Hs. apply Hinit. assumption.
-  - intros l s im s' om Ht msg.
-    apply (Hupdate l s im s' om).
-    revert Ht.
-    apply VLSM_incl_input_valid_transition.
-    apply basic_VLSM_incl_preloaded; cbv; intuition.
+  destruct (has_been_sent_stepwise_from_trace vlsm); split; assumption.
 Qed.
 
-Lemma preloaded_HasBeenSentCapability
+Global Instance preloaded_HasBeenSentCapability
       [message : Type]
-      [vlsm: VLSM message]
-      (Hhbs: HasBeenSentCapability vlsm)
+      (vlsm: VLSM message)
+      `{HasBeenSentCapability message vlsm}
       (seed : message -> Prop):
   HasBeenSentCapability (pre_loaded_vlsm vlsm seed).
 Proof.
   eapply HasBeenSentCapability_from_stepwise.
-  - apply Hhbs.
+  - apply (has_been_sent_dec vlsm).
   - apply preloaded_has_been_sent_stepwise_props.
 Defined.
 
 Lemma has_been_sent_step_update
-      `{Hhbs: HasBeenSentCapability message vlsm}:
+      `{HasBeenSentCapability message vlsm}:
   forall [l s im s' om],
     input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s,im) (s',om) ->
     forall m,
       has_been_sent vlsm s' m <-> (om = Some m \/ has_been_sent vlsm s m).
 Proof.
-  exact (oracle_step_update (has_been_sent_stepwise_from_trace Hhbs)).
+  exact (oracle_step_update (has_been_sent_stepwise_from_trace vlsm)).
 Qed.
 
 Lemma has_been_sent_examine_one_trace
-  `(Hhbs: HasBeenSentCapability message vlsm):
+  `{HasBeenSentCapability message vlsm}:
   forall is s tr,
     finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr ->
   forall m,
     has_been_sent vlsm s m <->
     trace_has_message (field_selector output) m tr.
 Proof.
-  destruct Hhbs.
-  apply examine_one_trace; assumption.
+  apply examine_one_trace.
+  - apply has_been_sent_dec.
+  - apply proper_sent.
+  - apply proper_not_sent.
 Qed.
 
 (** ** Stepwise view of [HasBeenReceivedCapability] *)
@@ -1312,8 +1330,8 @@ Defined.
 
 Lemma has_been_received_stepwise_from_trace
       [message : Type]
-      [vlsm: VLSM message]
-      (Hhbr: HasBeenReceivedCapability vlsm):
+      (vlsm: VLSM message)
+      `{HasBeenReceivedCapability message vlsm}:
   oracle_stepwise_props (field_selector input) (has_been_received vlsm).
 Proof.
   apply stepwise_props_from_trace.
@@ -1323,59 +1341,55 @@ Proof.
 Defined.
 
 Lemma preloaded_has_been_received_stepwise_props
-      [message : Type]
-      [vlsm: VLSM message]
-      (Hhbr: HasBeenReceivedCapability vlsm)
+      {message : Type}
+      (vlsm: VLSM message)
+      `{HasBeenReceivedCapability message vlsm}
       (seed : message -> Prop)
       (X := pre_loaded_vlsm vlsm seed):
   has_been_received_stepwise_props (vlsm := X) (has_been_received vlsm).
 Proof.
-  destruct (has_been_received_stepwise_from_trace Hhbr) as [Hinit Hupdate].
-  split.
-  - intros s Hs. apply Hinit. assumption.
-  - intros l s im s' om Ht msg.
-    apply (Hupdate l s im s' om).
-    revert Ht.
-    apply VLSM_incl_input_valid_transition.
-    apply basic_VLSM_incl_preloaded; cbv; intuition.
+  destruct (has_been_received_stepwise_from_trace vlsm); split; assumption.
 Qed.
 
-Lemma preloaded_HasBeenReceivedCapability
-      [message : Type]
-      [vlsm: VLSM message]
-      (Hhbr: HasBeenReceivedCapability vlsm)
+Global Instance preloaded_HasBeenReceivedCapability
+      {message : Type}
+      (vlsm: VLSM message)
+      `{HasBeenReceivedCapability message vlsm}
       (seed : message -> Prop):
   HasBeenReceivedCapability (pre_loaded_vlsm vlsm seed).
 Proof.
   eapply HasBeenReceivedCapability_from_stepwise.
-  - apply Hhbr.
+  - apply (has_been_received_dec vlsm).
   - apply preloaded_has_been_received_stepwise_props.
 Defined.
 
 Lemma has_been_received_step_update
-      `{Hhbs: HasBeenReceivedCapability message vlsm}:
+      `{HasBeenReceivedCapability message vlsm}:
   forall [l s im s' om],
     input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s,im) (s',om) ->
     forall m,
       has_been_received vlsm s' m <-> (im = Some m \/ has_been_received vlsm s m).
 Proof.
-  exact (oracle_step_update (has_been_received_stepwise_from_trace Hhbs)).
+  exact (oracle_step_update (has_been_received_stepwise_from_trace vlsm)).
 Qed.
 
 Lemma has_been_received_examine_one_trace
-  `(Hhbr: HasBeenReceivedCapability message vlsm):
+  `{HasBeenReceivedCapability message vlsm}:
   forall is s tr,
     finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr ->
   forall m,
     has_been_received vlsm s m <->
     trace_has_message (field_selector input) m tr.
 Proof.
-  destruct Hhbr.
-  apply examine_one_trace; assumption.
+  apply examine_one_trace.
+  - apply has_been_received_dec.
+  - apply proper_received.
+  - apply proper_not_received.
 Qed.
 
 Lemma trace_to_initial_state_has_no_inputs
-  `{Hbr: HasBeenReceivedCapability message vlsm}
+  {message} vlsm
+  `{HasBeenReceivedCapability message vlsm}
   is s tr
   (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr)
   (Hs : vinitial_state_prop vlsm s)
@@ -1408,31 +1422,33 @@ Class HasBeenObservedCapability {message} (vlsm: VLSM message) :=
   }.
 Arguments has_been_observed {message} vlsm {_}.
 Arguments has_been_observed_dec {message} vlsm {_}.
+Arguments has_been_observed_stepwise_props {message} vlsm {_}.
 
-Definition has_been_observed_no_inits `{Hhbo: HasBeenObservedCapability message vlsm}
-  := oracle_no_inits has_been_observed_stepwise_props.
+Global Hint Mode HasBeenObservedCapability - ! : typeclass_instances.
 
-Definition has_been_observed_step_update `{Hhbo: HasBeenObservedCapability message vlsm} :
+Definition has_been_observed_no_inits `[HasBeenObservedCapability message vlsm]
+  := oracle_no_inits (has_been_observed_stepwise_props vlsm).
+
+Definition has_been_observed_step_update `{HasBeenObservedCapability message vlsm} :
   forall l s im s' om,
     input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
     forall msg,
       has_been_observed vlsm s' msg <->
       ((im = Some msg \/ om = Some msg) \/ has_been_observed vlsm s msg)
-  := oracle_step_update has_been_observed_stepwise_props.
+  := oracle_step_update (has_been_observed_stepwise_props vlsm).
 
-Lemma proper_observed `(Hhbo: HasBeenObservedCapability message vlsm):
+Lemma proper_observed {message} (vlsm : VLSM message) `{HasBeenObservedCapability message vlsm}:
   forall (s:state),
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
       all_traces_have_message_prop vlsm item_sends_or_receives (has_been_observed vlsm) s m.
 Proof.
   intros.
-  apply prove_all_have_message_from_stepwise.
-  apply Hhbo.
-  assumption.
+  apply prove_all_have_message_from_stepwise; [|assumption].
+  apply has_been_observed_stepwise_props.
 Qed.
 
-Lemma proper_not_observed `(Hhbo: HasBeenObservedCapability message vlsm):
+Lemma proper_not_observed `(vlsm : VLSM message) `{HasBeenObservedCapability message vlsm}:
   forall (s:state),
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
@@ -1440,13 +1456,12 @@ Lemma proper_not_observed `(Hhbo: HasBeenObservedCapability message vlsm):
                                   (fun s m => ~has_been_observed vlsm s m) s m.
 Proof.
   intros.
-  apply prove_none_have_message_from_stepwise.
-  apply Hhbo.
-  assumption.
+  apply prove_none_have_message_from_stepwise; [|assumption].
+  apply has_been_observed_stepwise_props.
 Qed.
 
 Lemma has_been_observed_examine_one_trace
-  `(Hhbo: HasBeenObservedCapability message vlsm):
+  {message} (vlsm : VLSM message) `{HasBeenObservedCapability message vlsm}:
   forall is s tr,
     finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr ->
   forall m,
@@ -1465,7 +1480,7 @@ Qed.
 Definition no_additional_equivocations
   {message : Type}
   (vlsm : VLSM message)
-  {Hbo : HasBeenObservedCapability vlsm}
+  `{HasBeenObservedCapability message vlsm}
   (s : state)
   (m : message)
   : Prop
@@ -1478,7 +1493,7 @@ Definition no_additional_equivocations
 Lemma no_additional_equivocations_dec
   {message : Type}
   (vlsm : VLSM message)
-  {Hbo : HasBeenObservedCapability vlsm}
+  `{HasBeenObservedCapability message vlsm}
   : RelDecision (no_additional_equivocations vlsm).
 Proof.
   apply has_been_observed_dec.
@@ -1487,7 +1502,7 @@ Qed.
 Definition no_additional_equivocations_constraint
   {message : Type}
   (vlsm : VLSM message)
-  {Hbo : HasBeenObservedCapability vlsm}
+  `{HasBeenObservedCapability message vlsm}
   (l : vlabel vlsm)
   (som : state * option message)
   : Prop
@@ -1500,12 +1515,12 @@ Section sent_received_observed_capabilities.
 Context
   {message : Type}
   (vlsm : VLSM message)
-  {Hbr : HasBeenReceivedCapability vlsm}
-  {Hbs : HasBeenSentCapability vlsm}
+  `{HasBeenReceivedCapability message vlsm}
+  `{HasBeenSentCapability message vlsm}
   .
 
 Lemma has_been_observed_sent_received_iff
-  {Hbo : HasBeenObservedCapability vlsm}
+  `{HasBeenObservedCapability message vlsm}
   (s : state)
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
   (m : message)
@@ -1513,9 +1528,9 @@ Lemma has_been_observed_sent_received_iff
 Proof.
   specialize
     (prove_all_have_message_from_stepwise message vlsm  item_sends_or_receives
-    (has_been_observed vlsm) has_been_observed_stepwise_props _ Hs m) as Hall.
-  split; [intro H | intros [H | H]].
-  - apply proj1 in Hall. specialize (Hall H).
+    (has_been_observed vlsm) (has_been_observed_stepwise_props _) _ Hs m) as Hall.
+  split.
+  - intro Hobs. destruct Hall as [Hall _]. specialize (Hall Hobs).
     apply consistency_from_valid_state_proj2 in Hall; [|assumption].
     destruct Hall as [is [tr [Htr Hexists]]].
     apply Exists_or_inv in Hexists.
@@ -1526,14 +1541,13 @@ Proof.
     + right. specialize (has_been_sent_consistency vlsm _ Hs m) as Hcons.
       apply proper_sent; [assumption|].
       apply Hcons. exists is, tr, Htr. assumption.
-  - apply Hall.
-    intro is; intros.
-    apply proper_received in H; [|assumption]. specialize (H is tr Htr).
-    apply Exists_or. left. assumption.
-  - apply Hall.
-    intro is; intros.
-    apply proper_sent in H; [|assumption]. specialize (H is tr Htr).
-    apply Exists_or. right. assumption.
+  - intros [Hreceived | Hsent]; apply Hall; intros is tr Htr.
+    + apply proper_received in Hreceived; [|assumption].
+      apply Exists_or. left.
+      eapply Hreceived; eassumption.
+    + apply proper_sent in Hsent; [|assumption].
+      apply Exists_or. right.
+      eapply Hsent; eassumption.
 Qed.
 
 Definition has_been_observed_from_sent_received
@@ -1554,25 +1568,28 @@ Qed.
 Lemma has_been_observed_from_sent_received_stepwise_props
   : oracle_stepwise_props item_sends_or_receives has_been_observed_from_sent_received.
 Proof.
-  apply stepwise_props_from_trace; [apply has_been_observed_from_sent_received_dec|..]
-  ; intros; split; intros.
-  - intro; intros.
-    destruct H as [H | H].
-    + apply proper_sent in H; [|apply Hs]. specialize (H _ _ Htr).
-      apply Exists_or. right. assumption.
-    + apply proper_received in H; [|apply Hs]. specialize (H _ _ Htr).
-      apply Exists_or. left. assumption.
-  - apply consistency_from_valid_state_proj2 in H; [|assumption].
-    destruct H as [is [tr [Htr Hexists]]].
-    apply Exists_or_inv in Hexists.
-    destruct Hexists as [Hsent | Hreceived].
+  apply stepwise_props_from_trace
+  ; [apply has_been_observed_from_sent_received_dec|..]
+  ; intros; split.
+  - intros [Hsent | Hreceived] start tr Htr.
+    + apply proper_sent in Hsent; [|assumption].
+      apply Exists_or; right.
+      eapply Hsent; eassumption.
+    + apply proper_received in Hreceived; [|assumption].
+      apply Exists_or; left.
+      eapply Hreceived; eassumption.
+  - intros Hobs.
+    apply consistency_from_valid_state_proj2 in Hobs; [|assumption].
+    destruct Hobs as (is & tr & Htr & Hexists).
+    apply Exists_or_inv in Hexists as [Hsent | Hreceived].
     + right. apply proper_received; [assumption|].
       apply has_been_received_consistency; [assumption|assumption|].
       exists is, tr, Htr. assumption.
     + left. apply proper_sent; [assumption|].
       apply has_been_sent_consistency; [assumption|assumption|].
       exists is, tr, Htr. assumption.
-  - intro; intros. intro Hexists. elim H.
+  - intros Hnobs start tr Htr Hexists.
+    contradict Hnobs.
     apply Exists_or_inv in Hexists.
     destruct Hexists as [Hexists| Hexists].
     + right. apply proper_received; [assumption|].
@@ -1581,18 +1598,20 @@ Proof.
     + left. apply proper_sent; [assumption|].
       apply has_been_sent_consistency; [assumption|assumption|].
       exists start, tr, Htr. assumption.
-  - intros [Hobs | Hobs].
+  - intros Hnobs  [Hobs | Hobs].
     + apply proper_sent in Hobs; [|assumption].
       apply has_been_sent_consistency in Hobs; [|assumption|assumption].
       destruct Hobs as [is [tr [Htr Hexists]]].
-      specialize (H _ _ Htr). elim H. apply Exists_or. right. assumption.
+      eapply Hnobs; [eassumption|].
+      apply Exists_or. right. assumption.
     + apply proper_received in Hobs; [|assumption].
       apply has_been_received_consistency in Hobs; [|assumption|assumption].
       destruct Hobs as [is [tr [Htr Hexists]]].
-      specialize (H _ _ Htr). elim H. apply Exists_or. left. assumption.
+      eapply Hnobs; [eassumption|].
+      apply Exists_or. left. assumption.
 Qed.
 
-Local Program Instance HasBeenObservedCapability_from_sent_received
+Global Program Instance HasBeenObservedCapability_from_sent_received
   : HasBeenObservedCapability vlsm
   :=
   { has_been_observed := has_been_observed_from_sent_received;
@@ -1602,7 +1621,7 @@ Local Program Instance HasBeenObservedCapability_from_sent_received
   }.
 
   Lemma has_been_observed_consistency
-    {Hbo : HasBeenObservedCapability vlsm}
+    `{HasBeenObservedCapability message vlsm}
     (s : state)
     (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
     (m : message)
@@ -1611,8 +1630,8 @@ Local Program Instance HasBeenObservedCapability_from_sent_received
     split.
     - intro Hsome.
       destruct (decide (has_been_observed vlsm s m)) as [Hsm|Hsm].
-      apply (proper_observed Hbo) in Hsm;assumption.
-      apply (proper_not_observed Hbo) in Hsm;[|assumption].
+      apply proper_observed in Hsm;assumption.
+      apply proper_not_observed in Hsm;[|assumption].
       exfalso.
       destruct Hsome as [is [tr [Htr Hmsg]]].
       elim (Hsm _ _ Htr).
@@ -1626,7 +1645,7 @@ End sent_received_observed_capabilities.
 Lemma sent_valid
     [message]
     (X : VLSM message)
-    {Hhbs: HasBeenSentCapability X}
+    `{HasBeenSentCapability message X}
     (s : state)
     (Hs : valid_state_prop X s)
     (m : message)
@@ -1634,19 +1653,21 @@ Lemma sent_valid
     valid_message_prop X m.
 Proof.
   induction Hs using valid_state_prop_ind.
-  - contradict Hsent. apply (oracle_no_inits (has_been_sent_stepwise_from_trace Hhbs));assumption.
+  - contradict Hsent.
+    eapply oracle_no_inits; [|assumption].
+    apply has_been_sent_stepwise_from_trace.
   - apply input_valid_transition_out in Ht as Hom'.
     apply preloaded_weaken_input_valid_transition in Ht.
-    apply (oracle_step_update (has_been_sent_stepwise_from_trace Hhbs) _ _ _ _ _ Ht) in Hsent.
-    destruct Hsent.
-    + simpl in H. subst om'. assumption.
-    + auto.
+    erewrite oracle_step_update in Hsent
+    ; [|apply has_been_sent_stepwise_from_trace |eassumption].
+    destruct Hsent as [Hnow | Hsent]; [| auto].
+    simpl in Hnow; subst om'; assumption.
 Qed.
 
 Lemma received_valid
     [message]
     (X : VLSM message)
-    {Hhbr: HasBeenReceivedCapability X}
+    `{HasBeenReceivedCapability message X}
     (s : state)
     (Hs : valid_state_prop X s)
     (m : message)
@@ -1654,28 +1675,29 @@ Lemma received_valid
     valid_message_prop X m.
 Proof.
   induction Hs using valid_state_prop_ind.
-  - contradict Hreceived. apply (oracle_no_inits (has_been_received_stepwise_from_trace Hhbr));assumption.
+  - contradict Hreceived.
+    eapply oracle_no_inits; [| eassumption].
+    apply has_been_received_stepwise_from_trace.
   - apply input_valid_transition_in in Ht as Hom'.
     apply preloaded_weaken_input_valid_transition in Ht.
-    apply (oracle_step_update (has_been_received_stepwise_from_trace Hhbr) _ _ _ _ _ Ht) in Hreceived.
-    destruct Hreceived.
-    + simpl in H. subst om. assumption.
-    + auto.
+    erewrite oracle_step_update in Hreceived
+    ; [|apply has_been_received_stepwise_from_trace|eassumption].
+    destruct Hreceived as [Hnow|]; [| auto].
+    simpl in Hnow; subst om; assumption.
 Qed.
 
 Lemma observed_valid
     [message]
     (X : VLSM message)
-    {Hhbs: HasBeenSentCapability X}
-    {Hhbr: HasBeenReceivedCapability X}
-    (Hhbo: HasBeenObservedCapability X := HasBeenObservedCapability_from_sent_received X)
+    `{HasBeenSentCapability message X}
+    `{HasBeenReceivedCapability message X}
     (s : state)
     (Hs : valid_state_prop X s)
     (m : message)
     (Hobserved : has_been_observed X s m) :
     valid_message_prop X m.
 Proof.
-  destruct Hobserved as [Hsent | Hreceived].
+  destruct Hobserved.
   - eapply sent_valid; eassumption.
   - eapply received_valid; eassumption.
 Qed.
@@ -1698,14 +1720,11 @@ Qed.
 Section Composite.
 
   Context {message : Type}
-          {index : Type}
-          {IndEqDec : EqDecision index}
+          `{finite.Finite index}
           (IM : index -> VLSM message)
           (Free := free_composite_vlsm IM)
-          {index_listing : list index}
-          (finite_index : Listing index_listing)
-          (has_been_sent_capabilities : forall i : index, (HasBeenSentCapability (IM i)))
-          (has_been_observed_capabilities : forall i : index, (HasBeenObservedCapability (IM i)))
+          `{forall i : index, (HasBeenSentCapability (IM i))}
+          `{forall i : index, (HasBeenReceivedCapability (IM i))}
           .
 
   Section StepwiseProps.
@@ -1732,28 +1751,25 @@ Section Composite.
       Proof.
         split.
         - (* initial states not claim *)
-          intros s Hs m [i H].
-          revert H.
-          fold (~ oracles i (s i) m).
+          intros s Hs m [i Horacle].
+          revert Horacle.
           apply (oracle_no_inits (stepwise_props i)).
           apply Hs.
         - (* step update property *)
           intros l s im s' om Hproto msg.
           destruct l as [i li].
           simpl.
-          assert (forall j, s j = s' j \/ j = i).
+          assert (Hsj : forall j, s j = s' j \/ j = i).
           {
             intro j.
             apply (input_valid_transition_preloaded_project_any j) in Hproto.
-            destruct Hproto;[left;assumption|right].
-            destruct H as [lj [Hlj _]].
-            congruence.
+            destruct Hproto as [|(lj & Hlj & _)];[left;assumption|right; congruence].
           }
           apply input_valid_transition_preloaded_project_active in Hproto;simpl in Hproto.
           apply (oracle_step_update (stepwise_props i)) with (msg:=msg) in Hproto.
           split.
           + intros [j Hj].
-            destruct (H j) as [Hunchanged|Hji].
+            destruct (Hsj j) as [Hunchanged|Hji].
             * right;exists j;rewrite Hunchanged;assumption.
             * subst j.
               apply Hproto in Hj.
@@ -1763,12 +1779,54 @@ Section Composite.
               apply Hproto.
               left;assumption.
             * exists j.
-              destruct (H j) as [Hunchanged| ->].
+              destruct (Hsj j) as [Hunchanged| ->].
               -- rewrite <- Hunchanged;assumption.
               -- apply Hproto.
                  right.
                  assumption.
       Qed.
+
+      Lemma oracle_component_selected_previously
+        [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+        (X := composite_vlsm IM constraint)
+        [s : composite_state IM]
+        (Hs : valid_state_prop X s)
+        [i : index]
+        [m : message]
+        (Horacle : oracles i (s i) m) :
+        exists s_item item,
+          input_valid_transition_item X s_item item /\
+          in_futures X (destination item) s /\
+          projT1 (l item) = i /\
+          composite_message_selector m item.
+      Proof.
+        apply valid_state_has_trace in Hs as (is & tr & Htr).
+        eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr
+        ; [|apply constraint_preloaded_free_incl].
+        apply (VLSM_projection_finite_valid_trace_init_to
+                (preloaded_component_projection IM i))
+           in Hpre_tr.
+        eapply prove_all_have_message_from_stepwise in Horacle
+        ; [| apply stepwise_props |eapply finite_valid_trace_from_to_last_pstate, Hpre_tr].
+        specialize (Horacle _ _ Hpre_tr); clear Hpre_tr.
+        apply Exists_exists in Horacle as (item & Hitem & Hout).
+        apply elem_of_map_option in Hitem as (itemX & HitemX & HitemX_pr).
+        apply elem_of_list_split in HitemX as (pre & suf & Htr_pr).
+        exists (finite_trace_last is pre), itemX.
+        rewrite cons_middle in Htr_pr.
+        eapply (input_valid_transition_to X) in Htr_pr as Ht
+        ; [cbn in Ht | apply valid_trace_forget_last in Htr; apply Htr].
+        unfold pre_VLSM_projection_transition_item_project,
+               composite_project_label in HitemX_pr; cbn in HitemX_pr.
+        rewrite app_assoc in Htr_pr.
+        case_decide as Hi; [|congruence]; apply Some_inj in HitemX_pr
+        ; subst i item tr; cbn in *.
+        apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr.
+        rewrite finite_trace_last_is_last in Htr.
+        destruct itemX, l; cbn in *; intuition.
+        exists suf; assumption.
+      Qed.
+
   End StepwiseProps.
 
   (** A message 'has_been_sent' for a composite state if it 'has_been_sent' for any of
@@ -1783,8 +1841,8 @@ Section Composite.
   Lemma composite_has_been_sent_dec : RelDecision composite_has_been_sent.
   Proof.
     intros s m.
-    apply (Decision_iff (P:=List.Exists (fun i => has_been_sent (IM i) (s i) m) index_listing)).
-    - rewrite <- exists_finite by (apply finite_index). reflexivity.
+    apply (Decision_iff (P:=List.Exists (fun i => has_been_sent (IM i) (s i) m) (enum index))).
+    - rewrite Exists_finite. reflexivity.
     - typeclasses eauto.
   Qed.
 
@@ -1796,7 +1854,7 @@ Section Composite.
     unfold has_been_sent_stepwise_props.
     pose proof (composite_stepwise_props
                   (fun i => has_been_sent_stepwise_from_trace
-                              (has_been_sent_capabilities i)))
+                              (IM i)))
          as [Hinits Hstep].
     split;[exact Hinits|].
     (* <<exact Hstep>> doesn't work because [composite_message_selector]
@@ -1806,44 +1864,13 @@ Section Composite.
     exact Hstep.
   Qed.
 
-  Definition composite_HasBeenSentCapability
+  Global Instance composite_HasBeenSentCapability
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
     : HasBeenSentCapability X :=
     HasBeenSentCapability_from_stepwise (vlsm := X)
       composite_has_been_sent_dec
       (composite_has_been_sent_stepwise_props constraint).
-
-  Global Instance free_composite_HasBeenSentCapability : HasBeenSentCapability Free :=
-    composite_HasBeenSentCapability (free_constraint IM).
-
-  Lemma preloaded_composite_has_been_sent_stepwise_props
-    (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-    (seed : message -> Prop)
-    (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-    : has_been_sent_stepwise_props (vlsm := X) composite_has_been_sent.
-  Proof.
-    unfold has_been_sent_stepwise_props.
-    pose proof (composite_stepwise_props
-                  (fun i => has_been_sent_stepwise_from_trace
-                              (has_been_sent_capabilities i)))
-         as [Hinits Hstep].
-    split;[exact Hinits|].
-    (* <<exact Hstep>> doesn't work because [composite_message_selector]
-       pattern matches on the label l, so we instantiate and destruct
-       to let that simplify *)
-    intros l;specialize (Hstep l);destruct l.
-    exact Hstep.
-  Qed.
-
-  Definition preloaded_composite_HasBeenSentCapability
-    (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-    (seed : message -> Prop)
-    (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-    : HasBeenSentCapability X :=
-    HasBeenSentCapability_from_stepwise (vlsm := X)
-      composite_has_been_sent_dec
-      (preloaded_composite_has_been_sent_stepwise_props constraint seed).
 
   Lemma composite_proper_sent
     (s : state)
@@ -1858,10 +1885,6 @@ Section Composite.
 
   Section composite_has_been_received.
 
-  Context
-        (has_been_received_capabilities : forall i : index, (HasBeenReceivedCapability (IM i)))
-        .
-
   (** A message 'has_been_received' for a composite state if it 'has_been_received' for any of
   its components.*)
   Definition composite_has_been_received
@@ -1874,8 +1897,8 @@ Section Composite.
   Lemma composite_has_been_received_dec : RelDecision composite_has_been_received.
   Proof.
     intros s m.
-    apply (Decision_iff (P:=List.Exists (fun i => has_been_received (IM i) (s i) m) index_listing)).
-    - rewrite <- exists_finite by (apply finite_index). reflexivity.
+    apply (Decision_iff (P:=List.Exists (fun i => has_been_received (IM i) (s i) m) (enum index))).
+    - rewrite Exists_finite. reflexivity.
     - typeclasses eauto.
   Qed.
 
@@ -1887,7 +1910,7 @@ Section Composite.
     unfold has_been_received_stepwise_props.
     pose proof (composite_stepwise_props
                   (fun i => has_been_received_stepwise_from_trace
-                              (has_been_received_capabilities i)))
+                              (IM i)))
          as [Hinits Hstep].
     split;[exact Hinits|].
     (* <<exact Hstep>> doesn't work because [composite_message_selector]
@@ -1897,7 +1920,7 @@ Section Composite.
     exact Hstep.
   Qed.
 
-  Definition composite_HasBeenReceivedCapability
+  Global Instance composite_HasBeenReceivedCapability
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
     : HasBeenReceivedCapability X :=
@@ -1905,8 +1928,11 @@ Section Composite.
       composite_has_been_received_dec
       (composite_has_been_received_stepwise_props constraint).
 
-  Global Instance free_composite_HasBeenReceivedCapability : HasBeenReceivedCapability Free :=
-    composite_HasBeenReceivedCapability (free_constraint IM).
+  Global Instance composite_HasBeenObservedCapability
+    (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+    (X := composite_vlsm IM constraint)
+    : HasBeenObservedCapability X :=
+    HasBeenObservedCapability_from_sent_received X.
 
   Lemma preloaded_composite_has_been_received_stepwise_props
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
@@ -1915,15 +1941,11 @@ Section Composite.
     : has_been_received_stepwise_props (vlsm := X) composite_has_been_received.
   Proof.
     unfold has_been_received_stepwise_props.
-    pose proof (composite_stepwise_props
-                  (fun i => has_been_received_stepwise_from_trace
-                              (has_been_received_capabilities i)))
+    specialize (composite_stepwise_props
+                  (fun i => has_been_received_stepwise_from_trace (IM i)))
          as [Hinits Hstep].
-    split;[exact Hinits|].
-    (* <<exact Hstep>> doesn't work because [composite_message_selector]
-       pattern matches on the label l, so we instantiate and destruct
-       to let that simplify *)
-    intros l;specialize (Hstep l);destruct l.
+    split; [assumption |].
+    intros l; specialize (Hstep l); destruct l.
     exact Hstep.
   Qed.
 
@@ -1951,8 +1973,8 @@ Section Composite.
   Lemma composite_has_been_observed_dec : RelDecision composite_has_been_observed.
   Proof.
     intros s m.
-    apply (Decision_iff (P:=List.Exists (fun i => has_been_observed (IM i) (s i) m) index_listing)).
-    - rewrite <- exists_finite by (apply finite_index). reflexivity.
+    apply (Decision_iff (P:=List.Exists (fun i => has_been_observed (IM i) (s i) m) (enum index))).
+    - rewrite Exists_finite. reflexivity.
     - typeclasses eauto.
   Qed.
 
@@ -1962,14 +1984,14 @@ Section Composite.
     : oracle_stepwise_props (vlsm := X) item_sends_or_receives composite_has_been_observed.
   Proof.
     pose proof (composite_stepwise_props
-                  (fun i => has_been_observed_stepwise_props))
+                  (fun i => (has_been_observed_stepwise_props (IM i))))
          as [Hinits Hstep].
     split;[exact Hinits|].
     intros l;specialize (Hstep l);destruct l.
     exact Hstep.
   Qed.
 
-  Definition composite_HasBeenObservedCapability
+  Definition composite_HasBeenObservedCapability_from_stepwise
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
     : HasBeenObservedCapability X.
@@ -1978,9 +2000,6 @@ Section Composite.
     - apply composite_has_been_observed_dec.
     - apply (composite_has_been_observed_stepwise_props constraint).
   Defined.
-
-  Global Instance free_composite_HasBeenObservedCapability : HasBeenObservedCapability Free :=
-    composite_HasBeenObservedCapability (free_constraint IM).
 
   Context
         {validator : Type}
@@ -2078,20 +2097,17 @@ Section Composite.
   Proof.
     intro m.
     rewrite emitted_messages_are_valid_iff.
-    intros [[i [[mi Hmi] Hom]] | [(s, om) [(i, l) [s' Ht]]]]
-    ; [elim (no_initial_messages_in_IM i mi); assumption|].
+    intros [[i [[mi Hmi] _]] | [(s, om) [(i, l) [s' Ht]]]]
+    ; [contradict Hmi; apply no_initial_messages_in_IM |].
     apply (VLSM_incl_input_valid_transition (constraint_preloaded_free_incl IM _)) in Ht.
-    apply pre_loaded_with_all_messages_projection_input_valid_transition_eq with (j := i) in Ht; [|reflexivity].
+    apply pre_loaded_with_all_messages_projection_input_valid_transition_eq
+      with (j := i) in Ht; [|reflexivity]; cbn in Ht.
     specialize (can_emit_signed i m).
     spec can_emit_signed; [eexists _,_,_; eassumption|].
     unfold channel_authenticated_message in can_emit_signed.
     destruct (sender m) as [v|] eqn: Hsender; [|inversion can_emit_signed].
     apply Some_inj in can_emit_signed.
-    exists v.
-    split; [reflexivity|].
-    subst. cbn in Ht.
-    eexists _, _, _.
-    eassumption.
+    exists v; subst; unfold can_emit; eauto.
   Qed.
 
   Lemma composite_no_initial_valid_messages_have_sender
@@ -2102,12 +2118,10 @@ Section Composite.
       : forall (m : message) (Hm : valid_message_prop X m), sender m <> None.
   Proof.
     intros m Hm.
-    cut
-      (exists v, sender m = Some v /\
-        can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m)
-    ; [intros [v [Hsender _]]; congruence|].
-    revert m Hm.
-    apply composite_no_initial_valid_messages_emitted_by_sender; assumption.
+    cut (exists v, sender m = Some v /\
+     can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
+    - intros (v & -> & _); congruence.
+    - eapply composite_no_initial_valid_messages_emitted_by_sender; eassumption.
   Qed.
 
   Lemma has_been_sent_iff_by_sender
@@ -2118,26 +2132,19 @@ Section Composite.
   Proof.
     split;[|exists (A v);assumption].
     intros [i Hi].
-    rewrite (Hsender_safety _ _ Hsender i);[assumption|].
-    assert (finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm (IM i)) (is i) (s i)
-                                          (VLSM_projection_trace_project (preloaded_component_projection IM i) tr)).
+    erewrite Hsender_safety; [eassumption | eassumption |].
+    assert
+      (Htr_pr : finite_valid_trace_init_to
+        (pre_loaded_with_all_messages_vlsm (IM i))
+        (is i) (s i) (VLSM_projection_trace_project (preloaded_component_projection IM i) tr)).
     {
-      rewrite <- (valid_trace_get_last Htr).
-      apply valid_trace_forget_last in Htr.
-      destruct Htr as [Htr Hinit].
-      apply valid_trace_add_last.
-      split. revert Htr;apply preloaded_finite_valid_trace_projection.
-      exact (Hinit i).
-      symmetry.
-      apply (VLSM_projection_finite_trace_last (preloaded_component_projection IM i)).
+      apply (VLSM_projection_finite_valid_trace_init_to (preloaded_component_projection IM i)).
       assumption.
     }
-    apply (can_emit_from_valid_trace (pre_loaded_with_all_messages_vlsm (IM i)) (is i) m
-                                        (VLSM_projection_trace_project (preloaded_component_projection IM i) tr)).
-    exact (valid_trace_forget_last H).
-    apply (oracle_initial_trace_update (has_been_sent_stepwise_from_trace (has_been_sent_capabilities i)) (is i) (s i)).
-    assumption.
-    assumption.
+    eapply can_emit_from_valid_trace.
+    - eapply valid_trace_forget_last; eassumption.
+    - eapply proper_sent; [| eassumption | eassumption].
+      revert Htr_pr; apply valid_trace_last_pstate.
   Qed.
 
   Lemma no_additional_equivocations_constraint_dec
@@ -2147,10 +2154,6 @@ Section Composite.
     destruct om; [|left; exact I].
     apply no_additional_equivocations_dec.
   Qed.
-
-  Context
-        (has_been_received_capabilities : forall i : index, (HasBeenReceivedCapability (IM i)))
-        .
 
    (** We say that a validator <v> (with associated component <i>) is equivocating wrt.
    to another component <j>, if there exists a message which [has_been_received] by
@@ -2192,8 +2195,7 @@ Section Composite.
   Qed.
 
   Context
-      {validator_listing : list validator}
-      (finite_validator : Listing validator_listing)
+      `{finite.Finite validator}
       {measurable_V : Measurable validator}
       {threshold_V : ReachableThreshold validator}
       .
@@ -2202,19 +2204,16 @@ Section Composite.
       refers to [is_equivocating_statewise], but this might change
       in the future **)
 
-  Program Definition equivocation_dec_statewise
+  Definition equivocation_dec_statewise
      (Hdec : RelDecision is_equivocating_statewise)
       : BasicEquivocation (composite_state IM) (validator)
     :=
     {|
-      state_validators := fun _ => validator_listing;
-      state_validators_nodup := _;
+      state_validators := fun _ => enum validator;
+      state_validators_nodup := fun _ => NoDup_enum validator;
       is_equivocating := is_equivocating_statewise;
       is_equivocating_dec := Hdec
     |}.
-  Next Obligation.
-   apply (Listing_NoDup finite_validator).
-  Defined.
 
   Definition equivocation_fault_constraint
     (Dec : BasicEquivocation (composite_state IM) validator)
@@ -2224,6 +2223,75 @@ Section Composite.
     :=
     let (s', om') := (composite_transition IM l som) in
     not_heavy s'.
+
+  Lemma sent_component_sent_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Horacle : has_been_sent (IM i) (s i) m) :
+    exists s_item item,
+      input_valid_transition_item X s_item item /\
+      in_futures X (destination item) s /\
+      projT1 (l item) = i /\
+      output item = Some m.
+  Proof.
+    clear -Hs Horacle.
+    specialize
+      (oracle_component_selected_previously
+        (fun i => has_been_sent_stepwise_from_trace (IM i))
+        Hs Horacle)
+      as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
+    eexists _, _; intuition eassumption.
+  Qed.
+
+  Lemma received_component_received_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Horacle : has_been_received (IM i) (s i) m) :
+    exists s_item item,
+      input_valid_transition_item X s_item item /\
+      in_futures X (destination item) s /\
+      projT1 (l item) = i /\
+      input item = Some m.
+  Proof.
+    clear -Hs Horacle.
+    specialize
+      (oracle_component_selected_previously
+        (fun i => has_been_received_stepwise_from_trace (IM i))
+        Hs Horacle)
+      as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
+    eexists _, _; intuition eassumption.
+  Qed.
+
+  Lemma messages_sent_from_component_produced_previously
+    [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+    (X := composite_vlsm IM constraint)
+    [s : composite_state IM]
+    (Hs : valid_state_prop X s)
+    [i : index]
+    [m : message]
+    (Hsent : has_been_sent (IM i) (s i) m) :
+    exists s_m,
+      in_futures X s_m s /\
+      can_produce (pre_loaded_with_all_messages_vlsm (IM i)) (s_m i) m.
+  Proof.
+    specialize (sent_component_sent_previously Hs Hsent)
+      as (s_item & [] & Ht & Hfutures & <- & Houtput)
+    ; destruct l as [i li]; cbn in *; subst output.
+    exists destination; split; [assumption |].
+    eapply VLSM_incl_input_valid_transition in Ht; cbn in Ht;
+      [|apply constraint_preloaded_free_incl].
+    eapply (VLSM_projection_input_valid_transition (preloaded_component_projection IM i))
+      in Ht; [eexists _,_; eassumption |].
+    apply (composite_project_label_eq IM).
+  Qed.
 
   Lemma messages_sent_from_component_of_valid_state_are_valid
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
@@ -2235,7 +2303,6 @@ Section Composite.
     (Hsent : has_been_sent (IM i) (s i) m) :
     valid_message_prop X m.
   Proof.
-    pose (Xhbs := composite_HasBeenSentCapability constraint).
     apply (sent_valid X s). assumption. exists i;assumption.
   Qed.
 
@@ -2250,8 +2317,9 @@ Section Composite.
     (Hsent : has_been_sent (IM i) (s i) m) :
     valid_message_prop X m.
   Proof.
-    pose (Xhbs := preloaded_composite_HasBeenSentCapability constraint seed).
-    apply (sent_valid X s). assumption. exists i;assumption.
+    eapply sent_valid.
+    - eassumption.
+    - exists i;assumption.
   Qed.
 
   Lemma messages_received_from_component_of_valid_state_are_valid
@@ -2264,8 +2332,9 @@ Section Composite.
     (Hreceived : has_been_received (IM i) (s i) m)
     : valid_message_prop X m.
   Proof.
-    pose (Xhbr := composite_HasBeenReceivedCapability has_been_received_capabilities constraint).
-    apply (received_valid X s). assumption. exists i;assumption.
+    eapply received_valid.
+    - eassumption.
+    - exists i;assumption.
   Qed.
 
   Lemma preloaded_messages_received_from_component_of_valid_state_are_valid
@@ -2279,8 +2348,9 @@ Section Composite.
     (Hreceived : has_been_received (IM i) (s i) m)
     : valid_message_prop X m.
   Proof.
-    pose (Xhbr := preloaded_composite_HasBeenReceivedCapability has_been_received_capabilities constraint seed).
-    apply (received_valid X s). assumption. exists i;assumption.
+    eapply received_valid.
+    - eassumption.
+    - exists i; assumption.
   Qed.
 
   Lemma composite_sent_valid
@@ -2318,7 +2388,7 @@ Section Composite.
     (s : composite_state IM)
     (Hs : valid_state_prop X s)
     (m : message)
-    (Hreceived : composite_has_been_received has_been_received_capabilities s m)
+    (Hreceived : composite_has_been_received s m)
     : valid_message_prop X m.
   Proof.
     destruct Hreceived as [i Hreceived].
@@ -2333,7 +2403,7 @@ Section Composite.
     (s : composite_state IM)
     (Hs : valid_state_prop X s)
     (m : message)
-    (Hreceived : composite_has_been_received has_been_received_capabilities s m)
+    (Hreceived : composite_has_been_received s m)
     : valid_message_prop X m.
   Proof.
     destruct Hreceived as [i Hreceived].
@@ -2371,8 +2441,8 @@ Section Composite.
     destruct Hobserved as [i Hobserved].
     apply (has_been_observed_sent_received_iff (IM i)) in Hobserved.
     - destruct Hobserved as [Hreceived | Hsent].
-      + apply preloaded_messages_received_from_component_of_valid_state_are_valid with s i; assumption.
-      + apply preloaded_messages_sent_from_component_of_valid_state_are_valid with s i; assumption.
+      + eapply preloaded_messages_received_from_component_of_valid_state_are_valid; eassumption.
+      + eapply preloaded_messages_sent_from_component_of_valid_state_are_valid; eassumption.
     - eapply valid_state_project_preloaded_to_preloaded.
       eapply VLSM_incl_valid_state; [|eassumption].
       apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
@@ -2382,71 +2452,83 @@ End Composite.
 
   Lemma composite_has_been_observed_sent_received_iff
     {message}
-    `{IndEqDec : EqDecision index}
+    `{EqDecision index}
     (IM : index -> VLSM message)
-    (Hbs : forall i : index, HasBeenSentCapability (IM i))
-    (Hbr : forall i : index, HasBeenReceivedCapability (IM i))
-    (Hbo : forall i : index, HasBeenObservedCapability (IM i)
-      := fun i => HasBeenObservedCapability_from_sent_received (IM i))
+    `{forall i : index, HasBeenSentCapability (IM i)}
+    `{forall i : index, HasBeenReceivedCapability (IM i)}
     (s : composite_state IM)
     (m : message)
-    : composite_has_been_observed IM Hbo s m <-> composite_has_been_sent IM Hbs s m \/ composite_has_been_received IM Hbr s m.
+    : composite_has_been_observed IM s m <-> composite_has_been_sent IM s m \/ composite_has_been_received IM s m.
   Proof.
     split.
     - intros [i [Hs|Hr]]; [left|right]; exists i; assumption.
     - intros [[i Hs] | [i Hr]]; exists i; [left|right]; assumption.
   Qed.
 
-(* Make also A and sender implicit, because they are inferrable from Hsender_safety *)
-Arguments has_been_sent_iff_by_sender {message index}%type_scope {IndEqDec} _%function_scope
-  _%function_scope {validator}%type_scope {A sender}%function_scope Hsender_safety [is s] [tr]%list_scope _ [m v].
+  Lemma composite_has_been_observed_free_iff
+    {message}
+    `{finite.Finite index}
+    (IM : index -> VLSM message)
+    `{forall i : index, HasBeenSentCapability (IM i)}
+    `{forall i : index, HasBeenReceivedCapability (IM i)}
+    (s : vstate (free_composite_vlsm IM))
+    (m : message)
+    : composite_has_been_observed IM s m <-> has_been_observed (free_composite_vlsm IM) s m.
+  Proof.
+    unfold has_been_observed; cbn; unfold has_been_observed_from_sent_received; cbn.
+    apply composite_has_been_observed_sent_received_iff.
+  Qed.
+
+  Lemma composite_has_been_observed_from_component
+    {message}
+    `{finite.Finite index}
+    (IM : index -> VLSM message)
+    `{forall i : index, HasBeenSentCapability (IM i)}
+    `{forall i : index, HasBeenReceivedCapability (IM i)}
+    (s : composite_state IM)
+    (i : index)
+    (m : message)
+    : has_been_observed (IM i) (s i) m -> composite_has_been_observed IM s m.
+  Proof.
+    exists i. assumption.
+  Qed.
 
   Lemma lift_to_composite_state_observed
     {message}
-    `{IndEqDec : EqDecision index}
+    `{finite.Finite index}
     (IM : index -> VLSM message)
-    (Hbs : forall i : index, HasBeenSentCapability (IM i))
-    (Hbr : forall i : index, HasBeenReceivedCapability (IM i))
-    (Hbo : forall i : index, HasBeenObservedCapability (IM i)
-      := fun i => HasBeenObservedCapability_from_sent_received (IM i))
-    {index_listing : list index}
-    (finite_index : Listing index_listing)
+    `{forall i : index, HasBeenSentCapability (IM i)}
+    `{forall i : index, HasBeenReceivedCapability (IM i)}
     (i : index)
     (s : vstate (IM i))
     (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) s)
     (m : message)
-    : composite_has_been_observed IM Hbo (lift_to_composite_state IM i s) m <-> has_been_observed (HasBeenObservedCapability := Hbo i) (IM i) s m.
+    : composite_has_been_observed IM (lift_to_composite_state IM i s) m <-> has_been_observed (IM i) s m.
   Proof.
     pose (free_composite_vlsm IM) as Free.
-    pose (free_composite_HasBeenObservedCapability IM finite_index Hbo) as Free_Hbo.
-    pose (free_composite_HasBeenReceivedCapability IM finite_index Hbr) as Free_Hbr.
-    pose (free_composite_HasBeenSentCapability IM finite_index Hbs) as Free_Hbs.
     assert
       (Hlift_s : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) (lift_to_composite_state IM i s)).
     { revert Hs.  apply valid_state_preloaded_composite_free_lift. }
     split; intros Hobs.
-    - apply (proper_observed (Hbo i)); [assumption|].
+    - apply (proper_observed (IM i)); [assumption|].
       intros is tr Htr.
-      apply (proper_observed Free_Hbo) in Hobs
+      apply composite_has_been_observed_free_iff, proper_observed in Hobs
       ; [|assumption].
       apply (VLSM_full_projection_finite_valid_trace_init_to (lift_to_composite_preloaded_vlsm_full_projection IM i)) in Htr as Hpre_tr.
       specialize (Hobs _ _ Hpre_tr).
       apply Exists_exists.
       apply Exists_exists in Hobs.
       destruct Hobs as [composite_item [Hcomposite_item Hx]].
-      apply elem_of_list_In in Hcomposite_item.
-      apply in_map_iff in Hcomposite_item.
-      destruct Hcomposite_item as [item [Hcomposite_item Hitem]].
+      apply elem_of_list_fmap_2 in Hcomposite_item as [item [Hcomposite_item Hitem]].
       exists item.
-      apply elem_of_list_In in Hitem.
       split; [assumption|].
       subst composite_item.
       destruct item. simpl in *.
       assumption.
-    - apply (proper_observed Free_Hbo); [assumption|].
-      apply has_been_observed_consistency; [assumption|assumption|].
-      apply (proper_observed (Hbo i)) in Hobs ; [|assumption].
-      apply has_been_observed_consistency in Hobs; [|apply Hbo|assumption].
+    - apply composite_has_been_observed_free_iff, proper_observed; [assumption|].
+      apply has_been_observed_consistency; [typeclasses eauto|assumption|].
+      apply proper_observed in Hobs ; [|assumption].
+      apply has_been_observed_consistency in Hobs; [|typeclasses eauto|assumption].
       destruct Hobs as [is [tr [Htr Hobs]]].
       apply (VLSM_full_projection_finite_valid_trace_init_to (lift_to_composite_preloaded_vlsm_full_projection IM i)) in Htr as Hpre_tr.
       eexists. eexists. exists Hpre_tr.
@@ -2468,8 +2550,8 @@ Context
   `{EqDecision message}
   (X : VLSM message)
   (PreX := pre_loaded_with_all_messages_vlsm X)
-  {Hbs : HasBeenSentCapability X}
-  {Hbr : HasBeenReceivedCapability X}
+  `{HasBeenSentCapability message X}
+  `{HasBeenReceivedCapability message X}
   .
 
 Definition state_received_not_sent (s : state) (m : message) : Prop :=
@@ -2711,18 +2793,14 @@ Section all_traces_to_valid_state_are_valid.
 Context
   {message : Type}
   {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
+  `{forall i : index, (HasBeenReceivedCapability (IM i))}
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   (PreX := pre_loaded_with_all_messages_vlsm X)
-  (has_been_received_capabilities : forall i : index, (HasBeenReceivedCapability (IM i)))
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
-  (X_HasBeenReceivedCapability : HasBeenReceivedCapability X
-    := composite_HasBeenReceivedCapability IM finite_index has_been_received_capabilities constraint).
+  .
 
-Existing Instance X_HasBeenReceivedCapability.
 
 (**
 Under [HasBeenReceivedCapability] assumptions, and given the fact that
@@ -2743,13 +2821,10 @@ Proof.
   apply pre_traces_with_valid_inputs_are_valid in Htr; [assumption|].
   apply valid_trace_last_pstate in Htr as Hspre.
   intros.
-  apply
-    (composite_received_valid IM finite_index
-      has_been_received_capabilities _ _ Hs
-    ).
+  eapply composite_received_valid; [eassumption|].
   specialize (proper_received _ s Hspre m) as Hproper.
   apply proj2 in Hproper. apply Hproper.
-  apply has_been_received_consistency; [assumption|assumption|].
+  apply has_been_received_consistency; [typeclasses eauto|assumption|].
   exists is, tr, Htr. assumption.
 Qed.
 
@@ -2760,7 +2835,7 @@ Section has_been_received_in_state.
   Context
     {message : Type}
     (X : VLSM message)
-    (Hbr : HasBeenReceivedCapability X)
+    `{HasBeenReceivedCapability message X}
   .
 
   Lemma has_been_received_in_state s1 m:

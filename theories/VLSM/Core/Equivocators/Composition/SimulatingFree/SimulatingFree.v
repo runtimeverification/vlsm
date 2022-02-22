@@ -1,4 +1,4 @@
-From stdpp Require Import prelude.
+From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Lia FunctionalExtensionality.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.FinExtras Lib.FinFunExtras.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces.
@@ -31,19 +31,14 @@ related through the [zero_descriptor_constraint_lifting_prop]erty and the
 
 Context
   {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
-  (Hbs : forall i : index, HasBeenSentCapability (IM i))
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
-
+  `{forall i : index, HasBeenSentCapability (IM i)}
   (seed : message -> Prop)
   (constraintX : composite_label IM -> composite_state IM * option message -> Prop)
   (CX := pre_loaded_vlsm (composite_vlsm IM constraintX) seed)
   (constraintE : composite_label (equivocator_IM IM) -> composite_state (equivocator_IM IM) * option message -> Prop)
   (CE := pre_loaded_vlsm (composite_vlsm (equivocator_IM IM) constraintE) seed)
-
   (FreeE := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   .
@@ -63,7 +58,7 @@ for the given state.
 Definition zero_descriptor_constraint_lifting_prop : Prop :=
   forall
     es (Hes : valid_state_prop CE es)
-    om (Hom : sent_except_from (equivocator_IM IM) (equivocator_Hbs IM Hbs) (vinitial_message_prop CE) es om)
+    om (Hom : sent_except_from (equivocator_IM IM) (vinitial_message_prop CE) es om)
     eqv li,
     constraintE (existT eqv (ContinueWith 0 li)) (es, om).
 
@@ -92,7 +87,7 @@ Definition replayable_message_prop : Prop :=
       finite_valid_trace_from_to CE eqv_state_s lst_msg_tr eqv_msg_tr /\
       equivocators_total_trace_project IM eqv_msg_tr = [] /\
       equivocators_total_state_project IM lst_msg_tr = s /\
-      sent_except_from (equivocator_IM IM) (equivocator_Hbs IM Hbs) (vinitial_message_prop CE) lst_msg_tr iom.
+      sent_except_from (equivocator_IM IM) (vinitial_message_prop CE) lst_msg_tr iom.
 
 (** The main result of this section, showing that every trace of the
 composition of regular nodes can be obtained as a [zero_descriptor] projection
@@ -117,7 +112,7 @@ Proof.
   assert (HinclE : VLSM_incl CE PreFreeE)
     by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
-  - specialize (lift_initial_to_equivocators_state IM Hbs _ His) as Hs.
+  - specialize (lift_initial_to_equivocators_state IM _ His) as Hs.
     remember (lift_to_equivocators_state IM is) as s.
     cut (equivocators_state_project IM (zero_descriptor IM) s = is).
     { intro Hproject.
@@ -227,7 +222,7 @@ Proof.
     repeat split; [assumption|..|assumption].
     + destruct iom as [im|]; [|apply option_valid_message_None].
       destruct Hbs_iom as [Hbs_iom | Hseeded].
-      * apply (preloaded_composite_sent_valid (equivocator_IM IM) finite_index (equivocator_Hbs IM Hbs) _ _ _ Happ _ Hbs_iom).
+      * apply (preloaded_composite_sent_valid (equivocator_IM IM) _ _ _ Happ _ Hbs_iom).
       * apply initial_message_is_valid. assumption.
     + subst el. cbn. rewrite equivocator_state_project_zero.
       rewrite Hes_pr_eqv. assumption.
@@ -248,23 +243,16 @@ pre-loaded with the same set of messages.
 Section seeded_all_equivocating.
 
 Context {message : Type}
-  {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
-  (Hbs : forall i : index, HasBeenSentCapability (IM i))
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
-  (Finite_index := Listing_finite_transparent finite_index)
+  `{forall i : index, HasBeenSentCapability (IM i)}
   (FreeE := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
-  (FreeE_Hbs := free_composite_HasBeenSentCapability (equivocator_IM IM) finite_index (equivocator_Hbs IM Hbs))
   (seed : message -> Prop)
-  (SeededXE : VLSM message := composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) (free_constraint _) (equivocator_Hbs IM Hbs) seed)
+  (SeededXE : VLSM message := composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed)
   (Free := free_composite_vlsm IM)
   (SeededFree := pre_loaded_vlsm Free seed)
   .
-
-Existing Instance Finite_index.
 
 (** Since [replayed_trace_from] was defined for a subset of the equivocators, we
 here define a specialized version of it when the set of all equivocators is used.
@@ -278,10 +266,10 @@ Definition all_equivocating_replayed_trace_from
   (tr : list (composite_transition_item (equivocator_IM IM)))
   : list (composite_transition_item (equivocator_IM IM))
   :=
-  let Hproj := sub_composition_all_full_projection (equivocator_IM IM) (equivocators_no_equivocations_constraint IM Hbs) in
-  replayed_trace_from IM index_listing index_listing
+  let Hproj := sub_composition_all_full_projection (equivocator_IM IM) (equivocators_no_equivocations_constraint IM) in
+  replayed_trace_from IM (enum index)
     full_replay_state
-    (composite_state_sub_projection (equivocator_IM IM) index_listing is)
+    (composite_state_sub_projection (equivocator_IM IM) (enum index) is)
     (VLSM_full_projection_finite_trace_project Hproj tr).
 
 Lemma replayed_trace_from_valid_equivocating
@@ -294,26 +282,24 @@ Lemma replayed_trace_from_valid_equivocating
       full_replay_state (all_equivocating_replayed_trace_from full_replay_state is tr).
 Proof.
   apply
-    (sub_replayed_trace_from_valid_equivocating IM Hbs _ finite_index seed
-      index_listing _ Hfull_replay_state
+    (sub_replayed_trace_from_valid_equivocating IM seed
+      (enum index) _ Hfull_replay_state
     ).
-  pose (Hproj := preloaded_sub_composition_all_full_projection (equivocator_IM IM) (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM) (free_constraint _) (equivocator_Hbs IM Hbs) seed) seed).
+  pose (Hproj := preloaded_sub_composition_all_full_projection (equivocator_IM IM) (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed) seed).
   apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr.
   revert Htr.
   apply VLSM_incl_finite_valid_trace.
-  apply basic_VLSM_incl_preloaded_with; intro; intros
-  ; [assumption| |assumption..].
-  destruct H as [Hv Hc].
+  apply basic_VLSM_incl_preloaded_with.
+  1,3-5: intro; intros; assumption.
+  intros l s om (Hv & Hc & _).
   split; [assumption|].
   split; [|exact I].
   destruct om; [| exact I].
-  apply proj1 in Hc.
   destruct Hc as [Hc | Hc]; [|right; assumption].
   left.
   destruct Hc as [i Hsent].
-  remember (@free_sub_free_index index _ Finite_index i) as sub_i.
-  unfold free_sub_free_state in Hsent.
-  exists sub_i. subst. assumption.
+  exists (free_sub_free_index i).
+  subst. assumption.
 Qed.
 
 (** Specializing the [generalized_equivocators_finite_valid_trace_init_to_rev]
@@ -331,8 +317,7 @@ Lemma seeded_equivocators_finite_valid_trace_init_to_rev
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   apply
-    (generalized_equivocators_finite_valid_trace_init_to_rev
-      IM Hbs finite_index)
+    (generalized_equivocators_finite_valid_trace_init_to_rev IM)
   ; [..|assumption].
   - intro; intros. split; [|exact I].
     destruct om; [|exact I].
@@ -351,7 +336,7 @@ Proof.
       split; [assumption|].
       exact I.
     }
-    specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM IM) (free_constraint _) (equivocator_Hbs IM Hbs) seed)
+    specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM IM) (free_constraint _) seed)
       as HinclE.
     apply valid_trace_forget_last in Hmsg_trace.
     specialize
@@ -366,12 +351,10 @@ Proof.
     unfold all_equivocating_replayed_trace_from.
     rewrite
       (equivocators_total_state_project_replayed_trace_from
-        IM index_listing index_listing
-        eqv_state_s).
+        IM (enum index) eqv_state_s).
     rewrite
       (equivocators_total_trace_project_replayed_trace_from
-        IM index_listing index_listing
-        eqv_state_s).
+        IM (enum index) eqv_state_s).
     repeat split. simpl.
     destruct Hfinal_msg as [Hfinal_msg | Hinitial]; [|right; assumption].
     left.
@@ -379,8 +362,9 @@ Proof.
     apply valid_state_has_trace in Hfst as [is_s [tr_s [Htr_s His_s]]].
     specialize (finite_valid_trace_from_to_app SeededXE _ _ _ _ _ Htr_s Hmsg_trace_full_replay) as Happ.
     apply (VLSM_incl_finite_valid_trace_from_to HinclE) in Happ.
-    apply
-      (has_been_sent_examine_one_trace FreeE_Hbs _ _ _ (conj Happ His_s)).
+    specialize (@has_been_sent_examine_one_trace _ FreeE _ _ _ _ (conj Happ His_s) im)
+      as Hrew.
+    unfold has_been_sent in Hrew; cbn in Hrew; apply Hrew.
 
     apply Exists_app. right.
     destruct_list_last eqv_msg_tr eqv_msg_tr' itemX Heqv_msg_tr
@@ -398,13 +382,11 @@ Section all_equivocating.
 
 Context {message : Type}
   {index : Type}
-  {IndEqDec : EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
-  (Hbs : forall i : index, HasBeenSentCapability (IM i))
-  {index_listing : list index}
-  (finite_index : Listing index_listing)
+  `{forall i : index, HasBeenSentCapability (IM i)}
   (Free := free_composite_vlsm IM)
-  (XE : VLSM message := equivocators_no_equivocations_vlsm IM Hbs)
+  (XE : VLSM message := equivocators_no_equivocations_vlsm IM)
   .
 
 (** Further specializing [seeded_equivocators_finite_valid_trace_init_to_rev]
@@ -424,7 +406,7 @@ Proof.
   apply (VLSM_eq_finite_valid_trace_init_to Heq) in HtrX.
   specialize
     (seeded_equivocators_finite_valid_trace_init_to_rev
-      IM Hbs finite_index (fun m => False) no_initial_messages_in_IM
+      IM (fun m => False) no_initial_messages_in_IM
       _ _ _ HtrX)
     as [is [His [s [Hs [tr [Htr_pr [Htr Houtput]]]]]]].
   exists is. split; [assumption|].
@@ -432,7 +414,7 @@ Proof.
   exists tr. split; [assumption|].
   split; [|assumption].
   unfold composite_no_equivocation_vlsm_with_pre_loaded in Htr.
-  remember (no_equivocations_additional_constraint_with_pre_loaded _ _ _ _)
+  remember (no_equivocations_additional_constraint_with_pre_loaded _ _ _)
     as constraint.
   clear Heq.
   specialize (vlsm_is_pre_loaded_with_False (composite_vlsm (equivocator_IM IM) constraint))

@@ -6,7 +6,7 @@ From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppExtras Lib.StdppLi
 Definition set_eq {A} (s1 s2 : set A) : Prop :=
   s1 ⊆ s2 /\ s2 ⊆ s1.
 
-Global Instance set_eq_dec [A : Type] {HeqA : EqDecision A} : RelDecision (@set_eq A).
+Global Instance set_eq_dec `{EqDecision A} : RelDecision (@set_eq A).
 Proof.
   intros s1 s2.
   apply and_dec; apply list_subseteq_dec; assumption.
@@ -657,26 +657,11 @@ Proof.
     * apply NoDup_fmap;[congruence|assumption].
     * assumption.
     * intros [a b].
-      rewrite elem_of_list_In.
-      rewrite in_map_iff.
-      intros [_ [[= <- _] _]].
-      intro Hxb.
-      apply elem_of_list_In in Hxb.
-      rewrite in_prod_iff in Hxb.
-      destruct Hxb as [Hx Hb].
-      apply elem_of_list_In in Hx.
-      tauto.
+      rewrite elem_of_list_fmap, elem_of_list_prod.
+      intros [_ [[= <- _] _]]. tauto.
     * intros [a b].
-      rewrite elem_of_list_In.
-      rewrite in_prod_iff.
-      intros [Ha _].
-      apply elem_of_list_In in Ha.
-      intro Hab.
-      apply elem_of_list_In in Hab.
-      rewrite in_map_iff in Hab.
-      destruct Hab as [_ [[= Hax _] _]].
-      subst.
-      congruence.
+      rewrite elem_of_list_prod, elem_of_list_fmap.
+      intros [Ha _] [_ [[= Hax _] _]]. congruence.
 Qed.
 
 (** An alternative to [set_diff].
@@ -790,15 +775,11 @@ Lemma len_set_diff_map_set_add `{EqDecision B} (new:B) `{EqDecision A} (f: B -> 
     length (set_diff_filter l (map f a)).
 Proof.
   apply len_set_diff_decrease with (f new).
-  - intro x. rewrite 2 elem_of_list_In, 2 in_map_iff.
+  - intro x. rewrite 2 elem_of_list_fmap.
     intros [x0 [Hx0 Hin]]. exists x0.
-    rewrite <- elem_of_list_In.
-    apply elem_of_list_In in Hin.
     rewrite set_add_iff. tauto.
   - split;[|assumption].
-    apply elem_of_list_In.
-    apply in_map.
-    apply elem_of_list_In.
+    apply elem_of_list_fmap_1.
     apply set_add_iff.
     left. reflexivity.
   - assumption.

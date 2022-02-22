@@ -100,13 +100,6 @@ Definition all_messages_s0 := exist (fun s: @state _ all_messages_type => True) 
 Instance all_messages_state_inh : Inhabited (sig  (fun s: @state _ all_messages_type => True)) :=
   {| inhabitant := all_messages_s0 |}.
 
-Definition all_messages_sig
-    : VLSMSign all_messages_type
-    :=
-    {| initial_state_prop := fun s => True
-     ; initial_message_prop := fun m => False
-    |}.
-
 (**
 
 The [transition] function of the [emit_any_message_vlsm] generates the
@@ -132,9 +125,11 @@ Definition all_messages_valid
     := True.
 
 Definition emit_any_message_vlsm_machine
-    : VLSMClass all_messages_sig
+    : VLSMMachine all_messages_type
     :=
-    {| transition := all_messages_transition
+    {| initial_state_prop := fun s => True
+     ; initial_message_prop := fun m => False
+     ; transition := all_messages_transition
      ; valid := all_messages_valid
     |}.
 
@@ -378,7 +373,7 @@ Proof.
         (VLSM_incl_valid_trace
             (pre_loaded_with_all_messages_validator_component_proj_incl _ _ _ Hvalidator)).
     revert Htr.
-    apply byzantine_pre_loaded_with_all_messages.
+    simpl. apply byzantine_pre_loaded_with_all_messages.
 Qed.
 
 
@@ -392,8 +387,7 @@ context) are [valid_trace]s of <<X>>.
 Section composite_validator_byzantine_traces.
 
     Context {message : Type}
-            {index : Type}
-            {IndEqDec : EqDecision index}
+            `{EqDecision index}
             (IM : index -> VLSM message)
             (constraint : composite_label IM -> composite_state IM  * option message -> Prop)
             (X := composite_vlsm IM constraint)
@@ -438,9 +432,8 @@ included in <<X>> to prove our main result.
           destruct l as (i, li). simpl in *.
           specialize (valid_state_project_preloaded_to_preloaded _ IM constraint lst i Hlst)
             as Hlsti.
-          destruct iom as [im|]; [|apply option_valid_message_None].
-          eapply Hvalidator.
-          split; [eassumption|]. split; [|eassumption].
+          destruct iom as [im |]; [| apply option_valid_message_None].
+          eapply Hvalidator; split; [eassumption |]; split; [| eassumption].
           eexists _.
           apply (pre_loaded_with_all_messages_message_valid_initial_state_message (IM i)).
     Qed.
@@ -456,7 +449,7 @@ resist any kind of external influence:
     Proof.
         apply validator_pre_loaded_with_all_messages_incl.
         apply alt_pre_loaded_with_all_messages_incl.
-        apply byzantine_alt_byzantine_iff.
+        apply byzantine_alt_byzantine_iff in Hbyz.
         assumption.
     Qed.
 End composite_validator_byzantine_traces.

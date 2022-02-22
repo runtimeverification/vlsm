@@ -132,17 +132,12 @@ Proof.
 Qed.
 
 Lemma VLSM_weak_partial_projection_input_valid
-  : forall lX sX inX, input_valid X lX (sX, inX) ->
-    forall sX' outX, vtransition X lX (sX, inX) = (sX', outX) ->
-    forall sY itemY,
-    trace_project (sX, [{| l := lX;  input := inX; destination := sX'; output := outX |}])
-      = Some (sY, [itemY]) ->
+  : forall sX itemX, input_valid_transition_item X sX itemX ->
+    forall sY itemY, trace_project (sX, [itemX]) = Some (sY, [itemY]) ->
     input_valid Y (l itemY) (sY, input itemY).
 Proof.
-  intros lX sX inX HvX sX' outX HtX sY itemY Hpr.
-  eapply proj1, VLSM_weak_partial_projection_input_valid_transition
-  ; [eassumption|].
-  split; assumption.
+  intros sX itemX HitemX sY itemY Hpr.
+  eapply VLSM_weak_partial_projection_input_valid_transition; eassumption.
 Qed.
 
 End weak_partial_projection_properties.
@@ -211,12 +206,6 @@ Definition VLSM_partial_projection_input_valid_transition
   := VLSM_weak_partial_projection_input_valid_transition VLSM_partial_projection_weaken.
 
 Definition VLSM_partial_projection_input_valid
-  : forall lX sX inX, input_valid X lX (sX, inX) ->
-    forall sX' outX, vtransition X lX (sX, inX) = (sX', outX) ->
-    forall sY itemY,
-    trace_project (sX, [{| l := lX;  input := inX; destination := sX'; output := outX |}])
-      = Some (sY, [itemY]) ->
-    input_valid Y (l itemY) (sY, input itemY)
   := VLSM_weak_partial_projection_input_valid VLSM_partial_projection_weaken.
 
 End partial_projection_properties.
@@ -348,7 +337,12 @@ Definition pre_VLSM_projection_finite_trace_project_in_iff
     exists itemX, In itemX trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY
   := in_map_option _.
 
-Definition pre_VLSM_projection_finite_trace_project_in
+Definition elem_of_pre_VLSM_projection_trace_project
+  : forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
+    exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY
+  := elem_of_map_option _.
+
+Definition pre_VLSM_projection_trace_project_in
   : forall itemX itemY, pre_VLSM_projection_transition_item_project itemX = Some itemY ->
     forall trX, In itemX trX -> In itemY (pre_VLSM_projection_finite_trace_project trX)
   := in_map_option_rev _.
@@ -681,11 +675,10 @@ Lemma VLSM_weak_projection_input_valid
   : forall lX lY, label_project lX = Some lY ->
     forall s im, input_valid X lX (s, im) -> input_valid Y lY (state_project s, im).
 Proof.
-  intros lX lY HlX_pr s im Hv.
-  destruct (vtransition X lX (s, im)) as (s', om') eqn:Ht.
-  eapply input_valid_transition_valid.
-  eapply VLSM_weak_projection_input_valid_transition; [eassumption|].
-  split; eassumption.
+  intros lX lY Hpr sX im HvX.
+  destruct (vtransition X lX (sX, im)) eqn:HtX.
+  eapply VLSM_weak_projection_input_valid_transition, input_valid_can_transition
+  ; eassumption.
 Qed.
 
 Lemma VLSM_weak_projection_finite_valid_trace_from_to
@@ -779,7 +772,7 @@ Definition VLSM_projection_trace_project_app_rev
 Definition VLSM_projection_trace_project_in
   : forall itemX itemY, pre_VLSM_projection_transition_item_project _ _ label_project state_project itemX = Some itemY ->
     forall trX, In itemX trX -> In itemY (VLSM_projection_trace_project Hsimul trX)
-  := pre_VLSM_projection_finite_trace_project_in _ _ label_project state_project.
+  := pre_VLSM_projection_trace_project_in _ _ label_project state_project.
 
 Definition VLSM_projection_finite_trace_last
   : forall sX trX,
@@ -833,9 +826,6 @@ Definition VLSM_projection_input_valid_transition
   := VLSM_weak_projection_input_valid_transition VLSM_projection_weaken.
 
 Definition VLSM_projection_input_valid
-  : forall lX lY, label_project lX = Some lY ->
-    forall s im,
-    input_valid X lX (s, im) -> input_valid Y lY (state_project s, im)
   := VLSM_weak_projection_input_valid VLSM_projection_weaken.
 
 Definition VLSM_projection_finite_valid_trace_from_to
@@ -1047,14 +1037,15 @@ Proof.
   reflexivity.
 Qed.
 
-Lemma pre_VLSM_full_projection_finite_trace_last_output
-  : forall trX,
-    finite_trace_last_output trX = finite_trace_last_output (pre_VLSM_full_projection_finite_trace_project trX).
+Lemma pre_VLSM_full_projection_finite_trace_last_output :
+  forall trX,
+    finite_trace_last_output trX
+      =
+    finite_trace_last_output (pre_VLSM_full_projection_finite_trace_project trX).
 Proof.
-  intros.
-  destruct_list_last trX trX' lst HtrX
-  ; [reflexivity|].
-  setoid_rewrite map_app. simpl. rewrite !finite_trace_last_output_is_last.
+  intros trX.
+  destruct_list_last trX trX' lst HtrX; [reflexivity|].
+  setoid_rewrite map_app; simpl; rewrite !finite_trace_last_output_is_last.
   reflexivity.
 Qed.
 
@@ -1403,7 +1394,7 @@ Lemma VLSM_weak_full_projection_input_valid l s im
 Proof.
   intros.
   eapply (VLSM_weak_projection_input_valid VLSM_weak_full_projection_is_projection)
-  ; [reflexivity|assumption].
+  ; trivial.
 Qed.
 
 Lemma VLSM_weak_full_projection_infinite_valid_trace_from
@@ -1631,8 +1622,7 @@ Section VLSM_equality.
     .
 
 Definition VLSM_eq_part
-  {SigX SigY: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY)
+  (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   :=
   forall t : Trace,
@@ -1640,8 +1630,7 @@ Definition VLSM_eq_part
 Local Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
 
 Definition VLSM_incl_part
-  {SigX SigY: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY)
+  (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   :=
   forall t : Trace,
@@ -1649,8 +1638,7 @@ Definition VLSM_incl_part
 Local Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
 
 Lemma VLSM_incl_refl
-  {SigX : VLSMSign vtype}
-  (MX : VLSMClass SigX)
+  (MX : VLSMMachine vtype)
   (X := mk_vlsm MX)
   : VLSM_incl X X.
 Proof.
@@ -1658,8 +1646,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_trans
-  {SigX SigY SigZ: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY) (MZ : VLSMClass SigZ)
+  (MX MY MZ : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
   : VLSM_incl X Y -> VLSM_incl Y Z -> VLSM_incl X Z.
 Proof.
@@ -1669,8 +1656,7 @@ Qed.
 (* begin hide *)
 
 Lemma VLSM_eq_incl_l
-  {SigX SigY: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY)
+  (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_eq X Y -> VLSM_incl X Y.
 Proof.
@@ -1681,8 +1667,7 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_incl_r
-  {SigX SigY: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY)
+  (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_eq X Y -> VLSM_incl Y X.
 Proof.
@@ -1693,8 +1678,7 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_incl_iff
-  {SigX SigY: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY)
+  (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_eq X Y <-> VLSM_incl X Y /\ VLSM_incl Y X.
 Proof.
@@ -1711,8 +1695,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_finite_traces_characterization
-  {SigX SigY: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY)
+  (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <->
     forall (s : vstate X)
@@ -1742,8 +1725,7 @@ Qed.
 label and state projection functions are identities.
 *)
 Lemma VLSM_incl_full_projection_iff
-  {SigX SigY: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY)
+  (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <-> VLSM_full_projection X Y id id.
 Proof.
@@ -1761,16 +1743,14 @@ Proof.
 Qed.
 
 Definition VLSM_incl_is_full_projection
-  {SigX SigY: VLSMSign vtype}
-  {MX : VLSMClass SigX} {MY : VLSMClass SigY}
+  {MX MY : VLSMMachine vtype}
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   (Hincl : VLSM_incl X Y)
   : VLSM_full_projection X Y id id
   := proj1 (VLSM_incl_full_projection_iff MX MY) Hincl.
 
 Lemma VLSM_incl_is_full_projection_finite_trace_project
-  {SigX SigY: VLSMSign vtype}
-  {MX : VLSMClass SigX} {MY : VLSMClass SigY}
+  {MX MY : VLSMMachine vtype}
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   (Hincl : VLSM_incl X Y)
   : forall tr,
@@ -1789,8 +1769,7 @@ Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
 Lemma VLSM_eq_refl
   {message : Type}
   {vtype : VLSMType message}
-  {SigX : VLSMSign vtype}
-  (MX : VLSMClass SigX)
+  (MX : VLSMMachine vtype)
   (X := mk_vlsm MX)
   : VLSM_eq X X.
 Proof.
@@ -1800,8 +1779,7 @@ Qed.
 Lemma VLSM_eq_sym
   {message : Type}
   {vtype : VLSMType message}
-  {SigX SigY: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY)
+  (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_eq X Y -> VLSM_eq Y X.
 Proof.
@@ -1811,8 +1789,7 @@ Qed.
 Lemma VLSM_eq_trans
   {message : Type}
   {vtype : VLSMType message}
-  {SigX SigY SigZ: VLSMSign vtype}
-  (MX : VLSMClass SigX) (MY : VLSMClass SigY) (MZ : VLSMClass SigZ)
+  (MX MY MZ : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
   : VLSM_eq X Y -> VLSM_eq Y Z -> VLSM_eq X Z.
 Proof.
@@ -1824,9 +1801,7 @@ Section VLSM_incl_preservation.
 Context
   {message : Type}
   {T : VLSMType message}
-  {SX SY : VLSMSign T}
-  (MX : VLSMClass SX)
-  (MY : VLSMClass SY)
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   .
@@ -1857,8 +1832,8 @@ End VLSM_incl_preservation.
 Section VLSM_incl_properties.
 
 Context
-  {message : Type} [vtype : VLSMType message] [SigX SigY : VLSMSign vtype]
-  [MX : VLSMClass SigX] [MY : VLSMClass SigY]
+  {message : Type} [vtype : VLSMType message]
+  [MX MY : VLSMMachine vtype]
   (Hincl : VLSM_incl_part MX MY)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
@@ -2036,14 +2011,14 @@ Lemma vlsm_incl_pre_loaded_with_all_messages_vlsm
 Proof.
   apply VLSM_incl_finite_traces_characterization.
   intros. split; [|apply H].
-  apply preloaded_weaken_valid_trace_from. destruct X as (T, (S, M)). apply H.
+  apply preloaded_weaken_valid_trace_from. destruct X. apply H.
 Qed.
 
 Section VLSM_eq_properties.
 
 Context
-  {message : Type} [vtype : VLSMType message] [SigX SigY : VLSMSign vtype]
-  [MX : VLSMClass SigX] [MY : VLSMClass SigY]
+  {message : Type} [vtype : VLSMType message]
+  [MX MY : VLSMMachine vtype]
   (Hincl : VLSM_eq_part MX MY)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
@@ -2729,9 +2704,7 @@ Section basic_VLSM_incl.
 Context
   {message : Type}
   {T : VLSMType message}
-  {SX SY : VLSMSign T}
-  (MX : VLSMClass SX)
-  (MY : VLSMClass SY)
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   .
@@ -2796,13 +2769,11 @@ Lemma pre_loaded_vlsm_incl_relaxed
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
   apply basic_VLSM_incl.
-  - cbv; intuition.
-  - intros _ _ m _ _ [Him | Hp].
-    + apply initial_message_is_valid. left. assumption.
-    + apply PimpliesQorValid in Hp as [Hq | Hvalid]; [|assumption].
-      apply initial_message_is_valid. right. assumption.
-  - cbv; intuition.
-  - cbv; intuition.
+  1, 3-4: cbv; intuition.
+  intros _ _ m _ _ [Him | Hp].
+  - apply initial_message_is_valid; left; assumption.
+  - apply PimpliesQorValid in Hp as [Hq | Hvalid]; [|assumption].
+    apply initial_message_is_valid; right; assumption.
 Qed.
 
 Lemma pre_loaded_vlsm_incl
@@ -2810,7 +2781,7 @@ Lemma pre_loaded_vlsm_incl
   (PimpliesQ : forall m : message, P m -> Q m)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
-  apply pre_loaded_vlsm_incl_relaxed. intuition.
+  apply pre_loaded_vlsm_incl_relaxed; intuition.
 Qed.
 
 Lemma pre_loaded_vlsm_with_valid_eq
@@ -2819,8 +2790,8 @@ Lemma pre_loaded_vlsm_with_valid_eq
   : VLSM_eq (pre_loaded_vlsm X (fun m => P m \/ Q m)) (pre_loaded_vlsm X P).
 Proof.
   apply VLSM_eq_incl_iff; split.
-  - apply pre_loaded_vlsm_incl_relaxed. intuition.
-  - cbv; apply pre_loaded_vlsm_incl. intuition.
+  - apply pre_loaded_vlsm_incl_relaxed; intuition.
+  - cbv; apply pre_loaded_vlsm_incl; intuition.
 Qed.
 
 Lemma pre_loaded_vlsm_idem_l
@@ -2878,9 +2849,18 @@ Qed.
 Lemma vlsm_is_pre_loaded_with_False
   : VLSM_eq X (pre_loaded_vlsm X (fun m => False)).
 Proof.
-  destruct X as (T, (S, M)). intro Hpp.
+  destruct X as (T, M). intro Hpp.
   apply VLSM_eq_incl_iff. simpl.
   split; apply basic_VLSM_strong_incl; cbv; intuition.
+Qed.
+
+Lemma vlsm_incl_pre_loaded
+  (P : message -> Prop)
+  : VLSM_incl X (pre_loaded_vlsm X P).
+Proof.
+  eapply VLSM_incl_trans.
+  - eapply VLSM_eq_proj1, vlsm_is_pre_loaded_with_False.
+  - apply pre_loaded_vlsm_incl; contradiction.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_initial_message
@@ -2921,7 +2901,7 @@ Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om
 Proof.
   pose proof vlsm_is_pre_loaded_with_False as Heq.
   apply VLSM_eq_incl_iff in Heq.
-  destruct X as (T, (S, M)); simpl in *.
+  destruct X as (T, M); simpl in *.
   split; (apply VLSM_incl_valid_state_message; [|cbv;tauto]); apply Heq.
 Qed.
 
@@ -2941,7 +2921,7 @@ Lemma preloaded_weaken_finite_valid_trace_from
   finite_valid_trace_from X from tr ->
   finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) from tr.
 Proof.
-  destruct X as (T, (S, M)).
+  destruct X as (T, M).
   apply VLSM_incl_finite_valid_trace_from.
   apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -2951,7 +2931,7 @@ Lemma preloaded_weaken_finite_valid_trace_from_to
   finite_valid_trace_from_to X from to tr ->
   finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) from to tr.
 Proof.
-  destruct X as (T, (S, M)).
+  destruct X as (T, M).
   apply VLSM_incl_finite_valid_trace_from_to.
   apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -2984,21 +2964,11 @@ Context
 Definition projection_induced_initial_state_prop (sY : @state _ TY) : Prop :=
   exists sX, state_project sX = sY /\ vinitial_state_prop X sX.
 
-Program Instance projection_induced_initial_state_inh : Inhabited (sig projection_induced_initial_state_prop)
-  := populate (exist _ (state_project (proj1_sig (@inhabitant _ (@s0 _ _ (sign X))))) _).
-Next Obligation.
-  eexists. split.
-  - reflexivity.
-  - destruct (@inhabitant _ (@s0 _ _ (sign X))). assumption.
-Qed.
+Instance projection_induced_initial_state_inh : Inhabited (sig projection_induced_initial_state_prop)
+  := populate (exist _ (state_project (` (vs0 X))) (ex_intro _ _ (conj (eq_refl _) (proj2_sig _)))).
 
 Definition projection_induced_initial_message_prop : message -> Prop :=
   valid_message_prop X.
-
-Definition projection_induced_vlsm_sig : VLSMSign TY :=
-  {| initial_message_prop := projection_induced_initial_message_prop
-   ; initial_state_prop := projection_induced_initial_state_prop
-  |}.
 
 Definition projection_induced_transition
   (lY : @label _ TY)
@@ -3016,13 +2986,15 @@ Definition projection_induced_valid
   exists lX sX, label_project lX = Some lY /\ state_project sX = sY /\
   input_valid X lX (sX, om).
 
-Definition projection_induced_vlsm_class : VLSMClass projection_induced_vlsm_sig :=
-  {| transition := projection_induced_transition
+Definition projection_induced_vlsm_machine : VLSMMachine TY :=
+  {| initial_message_prop := projection_induced_initial_message_prop
+   ; initial_state_prop := projection_induced_initial_state_prop
+   ; transition := projection_induced_transition
    ;  valid := projection_induced_valid
   |}.
 
 Definition projection_induced_vlsm : VLSM message :=
-  mk_vlsm projection_induced_vlsm_class.
+  mk_vlsm projection_induced_vlsm_machine.
 
 (** <<label_project>> is a left-inverse of <<label_lift>> *)
 Definition induced_projection_label_lift_prop : Prop :=
@@ -3131,13 +3103,12 @@ Lemma induced_projection_valid_is_input_valid
   : vvalid projection_induced_vlsm l (s, om) -> input_valid projection_induced_vlsm l (s,om).
 Proof.
   intro Hv.
-  destruct (id Hv) as [lX [sX [HlX [<- [Hps [Hopm _]]]]]].
-  repeat split.
-  - apply (VLSM_projection_valid_state Hproj). assumption.
+  destruct (id Hv) as (lX & sX & HlX & <- & Hps & Hopm & _).
+  repeat split; [| | assumption].
+  - eapply VLSM_projection_valid_state; eassumption.
   - destruct om as [m|]; [|apply option_valid_message_None].
     apply option_initial_message_is_valid.
     assumption.
-  - assumption.
 Qed.
 
 Section projection_induced_friendliness.
@@ -3208,8 +3179,7 @@ their projections induced by the same maps.
 Lemma projection_induced_vlsm_incl
   {message : Type}
   {TX : VLSMType message}
-  {SigX1 SigX2: VLSMSign TX}
-  (MX1 : VLSMClass SigX1) (MX2 : VLSMClass SigX2)
+  (MX1 MX2 : VLSMMachine TX)
   (X1 := mk_vlsm MX1) (X2 := mk_vlsm MX2)
   (TY : VLSMType message)
   (label_project : @label _ TX -> option (@label _ TY))
@@ -3269,8 +3239,7 @@ their projections induced by the same maps.
 Lemma projection_induced_vlsm_eq
   {message : Type}
   {TX : VLSMType message}
-  {SigX1 SigX2: VLSMSign TX}
-  (MX1 : VLSMClass SigX1) (MX2 : VLSMClass SigX2)
+  (MX1 MX2: VLSMMachine TX)
   (X1 := mk_vlsm MX1) (X2 := mk_vlsm MX2)
   (TY : VLSMType message)
   (label_project : @label _ TX -> option (@label _ TY))

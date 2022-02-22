@@ -253,8 +253,7 @@ Proof.
   split; intro Hnone.
   - induction l; try reflexivity.
     assert (Hno_a := Hnone a).
-    assert (Hin_a : In a (a :: l)) by (left;reflexivity).
-    apply elem_of_list_In in Hin_a.
+    assert (Hin_a : a ∈ a :: l) by left.
     specialize (Hno_a Hin_a).
     rewrite filter_cons.
     destruct (decide (P a)); try congruence.
@@ -802,22 +801,9 @@ Lemma elem_of_list_annotate
   (xP : dsig P)
   : xP ∈ (list_annotate P l Hs) <-> (` xP) ∈ l.
 Proof.
-  split; [apply elem_of_list_annotate_forget|].
-  destruct_dec_sig xP x HPx HeqxP.
-  subst.
-  simpl.
-  intros Hx.
-  induction l; [inversion Hx|].
-  rewrite list_annotate_unroll.
-  destruct (decide (x = a)) as [Heq | Hneq].
-  - subst.
-    replace (@dexist A P _ a (Forall_hd Hs)) with (dec_exist P a HPx); [left|].
-    apply dsig_eq.
-    reflexivity.
-  - right.
-    apply IHl.
-    inversion Hx; [congruence|].
-    assumption.
+  split; [apply elem_of_list_annotate_forget |].
+  destruct_dec_sig xP x HPx HeqxP; subst; cbn.
+  induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
 Qed.
 
 Lemma nth_error_list_annotate
@@ -1230,38 +1216,14 @@ Proof.
   apply IHl.
 Qed.
 
-Lemma forall_finite
-  {index : Type}
-  {index_listing : list index}
-  (Hfinite_index : Full index_listing)
-  (P : index -> Prop)
-  : (forall n : index, P n) <-> Forall P index_listing.
-Proof.
-  split; intros.
-  - apply Forall_forall; intros. apply H.
-  - rewrite Forall_forall in H.
-    apply H.
-    apply elem_of_list_In.
-    apply Hfinite_index.
-Qed.
-
 Lemma exists_finite
-  {index : Type}
-  {index_listing : list index}
-  (Hfinite_index : Full index_listing)
+  `{finite.Finite index}
   (P : index -> Prop)
-  : (exists n : index, P n) <-> List.Exists P index_listing.
+  : (exists n : index, P n) <-> Exists P (enum index).
 Proof.
-  split; intros.
-  - apply Exists_exists; intros.
-    destruct H as [n H].
-    exists n.
-    split; try assumption.
-    apply elem_of_list_In.
-    apply Hfinite_index.
-  - rewrite Exists_exists in H.
-    destruct H as [n [_ H]].
-    exists n. assumption.
+  rewrite Exists_exists; split.
+  - intros [n Hn]; eexists; split; [apply elem_of_enum | eassumption].
+  - intros (n & _ & Hn); eexists; eassumption.
 Qed.
 
 Definition map_option
@@ -1383,6 +1345,31 @@ Proof.
   assumption.
 Qed.
 
+Lemma elem_of_map_option
+  {A B : Type}
+  (f : A -> option B)
+  (l : list A)
+  (b : B)
+  : b ∈ map_option f l <-> exists a : A, a ∈ l /\ f a = Some b.
+Proof.
+  induction l as [| h t]; cbn.
+  - setoid_rewrite elem_of_nil. firstorder.
+  - destruct (f h) eqn: Heq; setoid_rewrite elem_of_cons
+    ; firstorder; subst; intuition congruence + eauto.
+Qed.
+
+Lemma elem_of_map_option_rev
+  {A B : Type}
+  (f : A -> option B)
+  (a : A)
+  (b : B)
+  (Hab : f a = Some b)
+  (l : list A)
+  : a ∈ l -> b ∈ map_option f l.
+Proof.
+  intro Ha; apply elem_of_map_option; exists a; intuition.
+Qed.
+
 Lemma in_map_option
   {A B : Type}
   (f : A -> option B)
@@ -1390,25 +1377,7 @@ Lemma in_map_option
   (b : B)
   : In b (map_option f l) <-> exists a : A, In a l /\ f a = Some b.
 Proof.
-  split.
-  - intro Hin.
-    induction l; try inversion Hin.
-    simpl in Hin. destruct (f a) eqn:Hfa.
-    + destruct Hin as [Heq | Hin]; subst.
-      * exists a.
-        split; try assumption.
-        left. reflexivity.
-      * specialize (IHl Hin). destruct IHl as [a' [Hin' Hfa']].
-        exists a'. split; try assumption.
-        right. assumption.
-    + specialize (IHl Hin). destruct IHl as [a' [Hin' Hfa']].
-      exists a'. split; try assumption.
-      right. assumption.
-  - induction l; intros [a' [Hin' Hfa']]; try inversion Hin'; subst; clear Hin'.
-    + simpl. rewrite Hfa'. left. reflexivity.
-    + simpl. destruct (f a) eqn:Hfa.
-      * right. apply IHl. exists a'. split; try assumption.
-      * apply IHl. exists a'. split; try assumption.
+  setoid_rewrite <- elem_of_list_In; apply elem_of_map_option.
 Qed.
 
 Lemma in_map_option_rev
@@ -1420,8 +1389,7 @@ Lemma in_map_option_rev
   (l : list A)
   : In a l -> In b (map_option f l).
 Proof.
-  intro Ha.
-  apply in_map_option. exists a. split; assumption.
+  setoid_rewrite <- elem_of_list_In; apply elem_of_map_option_rev; assumption.
 Qed.
 
 (** [map_option] can be expressed as a [list_filter_map].
@@ -1774,7 +1742,7 @@ Proof.
     destruct Hle as [Hle _].
     rewrite eq_max in Hle. spec Hle. apply le_refl.
     rewrite Forall_forall in Hle.
-    specialize (Hle n). spec Hle. apply elem_of_list_In. auto with datatypes.
+    specialize (Hle n). spec Hle; [left |].
     simpl. lia.
   - specialize (list_max_exists l) as Hmax.
     spec Hmax. lia. rewrite <- eq_max. intuition.
@@ -2334,7 +2302,7 @@ apply Hlm.
 assumption.
 Qed.
 
-Global Instance list_subseteq_dec [A : Type] {HeqA : EqDecision A} : RelDecision (@subseteq (list A) _).
+Global Instance list_subseteq_dec `{EqDecision A} : RelDecision (@subseteq (list A) _).
 Proof.
   intros x.
   induction x.
@@ -2388,42 +2356,6 @@ induction s; simpl.
       destruct (decide (Q a)).
       -- right. apply IHs. assumption.
       -- apply IHs. assumption.
-Qed.
-
-Lemma elem_of_map_option
-  {A B : Type}
-  (f : A -> option B)
-  (l : list A)
-  (b : B)
-  : b ∈ (map_option f l) <-> exists a : A, a ∈ l /\ f a = Some b.
-Proof.
-  split.
-  - intro Hin.
-    induction l; [inversion Hin|].
-    simpl in Hin. destruct (f a) eqn:Hfa.
-    + rewrite elem_of_cons in Hin.
-      destruct Hin as [Heq | Hin]; subst.
-      * exists a.
-        split; try assumption.
-        left.
-      * specialize (IHl Hin). destruct IHl as [a' [Hin' Hfa']].
-        exists a'. split; try assumption.
-        right. assumption.
-    + specialize (IHl Hin). destruct IHl as [a' [Hin' Hfa']].
-      exists a'. split; try assumption.
-      right. assumption.
-  - induction l; intros [a' [Hin' Hfa']]; [inversion Hin'|]; subst.
-    rewrite elem_of_cons in Hin'.
-    destruct Hin'.
-    + simpl; destruct (f a) eqn:Hfa.
-      * subst. rewrite Hfa in Hfa'. injection Hfa'.
-        intros Hb; subst; left.
-      * congruence.
-    + simpl; destruct (f a) eqn:Hfa.
-      * right; apply IHl.
-        exists a'; split; assumption.
-      * apply IHl.
-        exists a'; split; assumption.
 Qed.
 
 Lemma map_option_subseteq
@@ -2491,4 +2423,22 @@ Lemma NoDup_subseteq_length [A : Type]
   : length l1 <= length l2.
 Proof.
   apply submseteq_length, NoDup_submseteq; assumption.
+Qed.
+
+Lemma take_app_inv :
+  forall [A : Type] (n : nat) (l l' : list A) (x : A),
+    take n l = l' ++ [x] -> exists n' : nat, n = S n'.
+Proof.
+  induction n as [| n']; intros l l' x H.
+  - contradict H. rewrite take_0. apply app_cons_not_nil.
+  - exists n'. reflexivity.
+Qed.
+
+Lemma elem_of_list_prod :
+  forall [A B : Type] (x : A) (y : B) (la : list A) (lb : list B),
+    (x, y) ∈ list_prod la lb <-> x ∈ la /\ y ∈ lb.
+Proof.
+  intros.
+  rewrite elem_of_list_In, in_prod_iff, <- !elem_of_list_In.
+  reflexivity.
 Qed.

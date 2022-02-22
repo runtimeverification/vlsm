@@ -81,7 +81,7 @@ Qed.
 Lemma last_last_error {A : Type} (l : list A) :
  last_error l = last l.
 Proof.
- induction l; [reflexivity|]; simpl.
+ induction l; [reflexivity|]; rewrite last_cons.
  rewrite <- IHl; clear IHl.
  destruct l; [reflexivity|]; simpl.
  f_equal.
