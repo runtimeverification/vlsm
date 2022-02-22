@@ -164,7 +164,7 @@ Proof.
 Qed.
 
 Definition pre_loaded_fixed_non_byzantine_label_projection :=
-  (option_map (same_IM_label_rew non_byzantine_nodes_same)) ∘
+  (mbind (Some ∘ (same_IM_label_rew non_byzantine_nodes_same))) ∘
     (composite_label_sub_projection_option fixed_byzantine_IM non_byzantine).
 
 Definition pre_loaded_fixed_non_byzantine_state_projection :=
@@ -176,40 +176,24 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_projection
     pre_loaded_fixed_non_byzantine_label_projection
     pre_loaded_fixed_non_byzantine_state_projection.
 Proof.
-  specialize
-    (pre_definitions_projection_relation_left_trace
-      (composite_type (sub_IM fixed_byzantine_IM non_byzantine))
-      (composite_type (sub_IM IM non_byzantine))
-      (same_IM_label_rew non_byzantine_nodes_same)
-      (same_IM_state_rew non_byzantine_nodes_same)
-      (composite_type fixed_byzantine_IM)
-      (composite_label_sub_projection_option fixed_byzantine_IM non_byzantine)
-      (composite_state_sub_projection fixed_byzantine_IM non_byzantine))
-    as Hrew.
-  constructor; [constructor|]; intros sX trX HtrX
-  ; unfold pre_loaded_fixed_non_byzantine_label_projection, pre_loaded_fixed_non_byzantine_state_projection
-  ; cbn in Hrew |- * ; rewrite Hrew.
-  - induction trX using rev_ind; [reflexivity|].
-    rewrite finite_trace_last_is_last; cbn.
-    rewrite pre_VLSM_projection_finite_trace_project_app.
-    unfold pre_VLSM_full_projection_finite_trace_project; rewrite !map_app.
-    destruct x, l as (i, li); cbn.
-    unfold pre_VLSM_projection_transition_item_project, pre_loaded_fixed_non_byzantine_label_projection; cbn.
-    unfold composite_label_sub_projection_option at 2; cbn.
-    case_decide as Hi; cbn; [rewrite last_is_last; reflexivity|].
-    apply finite_valid_trace_from_app_iff in HtrX as [HtrX Hx].
-    spec IHtrX HtrX.
-    inversion Hx; subst; clear Hx Htl.
-    eapply induced_sub_projection_transition_consistency_None
-      with (sub_index_list := non_byzantine) in Ht.
-    + rewrite Ht; cbn in *.
-      rewrite IHtrX, app_nil_r.
-      reflexivity.
-    + unfold composite_label_sub_projection_option; cbn.
-      case_decide; [contradiction|reflexivity].
-  - apply (VLSM_full_projection_finite_valid_trace pre_loaded_fixed_non_byzantine_vlsm_full_projection).
-    eapply (VLSM_projection_finite_valid_trace pre_loaded_fixed_non_byzantine_vlsm'_projection).
-    eassumption.
+  apply (@VLSM_projection_composition _ _ _ pre_loaded_fixed_non_byzantine_vlsm _ _ pre_loaded_fixed_non_byzantine_vlsm'_projection),
+    @VLSM_full_projection_is_projection, pre_loaded_fixed_non_byzantine_vlsm_full_projection.
+Qed.
+
+Definition pre_loaded_fixed_non_byzantine_label_component_projection i :=
+  (mbind (sub_label_element_project IM non_byzantine i)) ∘
+    pre_loaded_fixed_non_byzantine_label_projection.
+
+Definition pre_loaded_fixed_non_byzantine_state_component_projection i (Hi : i ∈ non_byzantine) :=
+  sub_state_element_project IM non_byzantine i Hi ∘
+    pre_loaded_fixed_non_byzantine_state_projection.
+
+Lemma pre_loaded_fixed_non_byzantine_vlsm_component_projection i (Hi : i ∈ non_byzantine)
+  : VLSM_projection fixed_byzantine_composite_vlsm (pre_loaded_with_all_messages_vlsm (IM i))
+    (pre_loaded_fixed_non_byzantine_label_component_projection i)
+    (pre_loaded_fixed_non_byzantine_state_component_projection i Hi).
+Proof.
+  apply (VLSM_projection_composition pre_loaded_fixed_non_byzantine_vlsm_projection (sub_preloaded_all_component_projection IM non_byzantine i Hi _)).
 Qed.
 
 (** ** Byzantine traces characterization as projections. *)
@@ -531,6 +515,47 @@ Proof.
   destruct byz_tr as ((byz_IM & no_initial_byz & can_emit_byz) & (byz_is, byz_tr) & Hbyz_tr); cbn in *.
   eexists; split; [apply composite_state_sub_projection_lift|].
   eexists; split; [apply composite_trace_sub_projection_lift|].
+  assert
+    (Hinit : composite_initial_state_prop IM
+      (lift_sub_state IM selection_complement
+        (pre_loaded_fixed_non_byzantine_state_projection IM selection byz_IM byz_is))).
+  { destruct Hbyz_tr as [_ Hinit]
+    ; eapply VLSM_projection_initial_state in Hinit
+    ; [| apply pre_loaded_fixed_non_byzantine_vlsm_projection].
+    apply lift_sub_state_initial; assumption.
+  }
+  split; [|assumption].
+  induction Hbyz_tr using finite_valid_trace_rev_ind
+  ; [constructor; apply initial_state_is_valid; assumption|].
+  specialize (IHHbyz_tr Hinit).
+  unfold VLSM_projection_trace_project, pre_VLSM_projection_finite_trace_project;
+    rewrite map_option_app.
+  unfold pre_VLSM_full_projection_finite_trace_project; rewrite map_app.
+  apply finite_valid_trace_from_app_iff; split; [assumption|]; cbn.
+  remember (finite_trace_last (lift_sub_state _ _ _) _) as lst.
+  assert (Hlst : valid_state_prop Fixed lst)
+    by (subst; apply finite_valid_trace_last_pstate; assumption).
+  destruct l as (i, li); unfold pre_VLSM_projection_transition_item_project, pre_loaded_fixed_non_byzantine_label_projection, composite_label_sub_projection_option; cbn.
+  case_decide as Hi; [|constructor; assumption]; cbn.
+  unfold composite_label_sub_projection; cbn.
+  apply finite_valid_trace_singleton; cbn.
+  repeat split.
+  - assumption.
+  - destruct iom as [im|]; [|apply option_valid_message_None].
+    apply set_diff_elim2 in Hi as Hni.
+    specialize (VLSM_projection_input_valid_transition (pre_loaded_fixed_non_byzantine_vlsm_component_projection IM selection A sender byz_IM i Hi) (existT i li)) as Hproj.
+    remember (pre_loaded_fixed_non_byzantine_label_component_projection _ _ _ _ _) as somelY.
+    unfold pre_loaded_fixed_non_byzantine_label_component_projection, pre_loaded_fixed_non_byzantine_label_projection, composite_label_sub_projection_option in HeqsomelY; cbn in HeqsomelY. 
+    case_decide as H_i; [|contradiction]; unfold sub_label_element_project in HeqsomelY; cbn in HeqsomelY.
+    rewrite decide_True_pi with eq_refl in HeqsomelY; cbn in HeqsomelY; subst somelY.
+    specialize (Hproj _ eq_refl _ _ _ _ Hx) as [Hv _]. 
+    eapply (Hvalidator i); [assumption|eassumption].
+  - destruct Hx as [(_ & _ & Hv & _) _].
+    revert Hv; cbn.
+    clear -Heqlst Hi.
+    subst lst. revert li.
+    unfold same_VLSM_label_rew, non_byzantine_nodes_same, fixed_byzantine_IM, update_IM; cbn.
+    
   admit.
 Admitted.
 

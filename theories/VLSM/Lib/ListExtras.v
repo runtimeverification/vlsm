@@ -1261,6 +1261,17 @@ Proof.
   destruct (f a) as [b|]; reflexivity.
 Qed.
 
+Lemma map_option_comp_bind
+  [A B C : Type]
+  (f : A -> option B)
+  (g : B -> option C)
+  : map_option (mbind g ∘ f) = map_option g ∘ map_option f.
+Proof.
+  extensionality l.
+  induction l; [reflexivity|]; cbn; rewrite IHl.
+  destruct (f a) as [b|]; reflexivity.
+Qed.
+
 Lemma map_option_app
   {A B : Type}
   (f : A -> option B)

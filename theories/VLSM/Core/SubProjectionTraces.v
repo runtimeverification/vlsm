@@ -101,6 +101,15 @@ Definition composite_label_sub_projection
   :=
   existT (dexist i e) (projT2 l).
 
+Lemma composite_label_sub_projection_pi
+  (l : composite_label IM)
+  (i := projT1 l)
+  (e e' : sub_index_prop i)
+  : composite_label_sub_projection l e = composite_label_sub_projection l e'.
+Proof.
+  apply (@dec_sig_sigT_eq _ _ sub_index_prop_dec (fun i => vlabel (IM i))); reflexivity.
+Qed.
+
 Definition lift_sub_label
   (l : composite_label sub_IM)
   : composite_label IM
@@ -1844,6 +1853,54 @@ Proof.
       apply sub_transition_element_project_Some.
 Qed.
 
+Lemma sub_preloaded_component_projection constraint P
+  : VLSM_projection
+      (pre_loaded_vlsm (composite_vlsm (sub_IM IM indices) constraint) P)
+      (pre_loaded_with_all_messages_vlsm (IM j))
+      sub_label_element_project sub_state_element_project.
+Proof.
+  apply basic_VLSM_projection.
+  - intros (sub_i, lXi) lY HlX_pr; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+    unfold sub_label_element_project in HlX_pr; cbn in HlX_pr.
+    case_decide as Hij; [|congruence]; apply Some_inj in HlX_pr; subst; cbn.
+    intros s om (_ & _ & Hv & _) _ _; revert Hv; cbn.
+    replace (s (dexist _ _)) with (sub_state_element_project s)
+      by apply sub_IM_state_pi.
+    auto.
+  - intros (sub_i, lXi) lY HlX_pr; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+    unfold sub_label_element_project in HlX_pr; cbn in HlX_pr.
+    case_decide as Hij; [|congruence]; apply Some_inj in HlX_pr; subst; cbn.
+    intros * [_ Ht]; revert Ht; cbn.
+    replace (s (dexist _ _)) with (sub_state_element_project s)
+      by apply sub_IM_state_pi.
+    destruct (vtransition _ _ _); inversion_clear 1; f_equal.
+    symmetry; apply sub_IM_state_update_eq.
+  - intros (sub_i, lXi) HlX_pr; destruct_dec_sig sub_i i Hi Heqsub_i; subst. 
+    unfold sub_label_element_project in HlX_pr; cbn in HlX_pr.
+    case_decide as Hij; [congruence|]; clear HlX_pr.
+    intros * [_ Ht]; revert Ht; cbn.
+    destruct (vtransition _ _ _); inversion_clear 1.
+    apply sub_IM_state_update_neq; congruence.
+  - intros s Hs; apply (Hs (dexist j Hj)).
+  - intro; intros; apply any_message_is_valid_in_preloaded.
+Qed.
+
+Lemma sub_preloaded_all_component_projection constraint
+  : VLSM_projection
+      (pre_loaded_with_all_messages_vlsm (composite_vlsm (sub_IM IM indices) constraint))
+      (pre_loaded_with_all_messages_vlsm (IM j))
+      sub_label_element_project sub_state_element_project.
+Proof.
+  constructor; [constructor|]; cbn; intros sX trX HtrX.
+  - apply (@final_state_project message (pre_loaded_vlsm (composite_vlsm (sub_IM IM indices) constraint) (fun m => true))).
+    + apply (projection_type _ _ _ _ (sub_preloaded_component_projection constraint (fun m => True))).
+    + revert HtrX; apply VLSM_incl_finite_valid_trace_from.
+      apply pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l.
+  - apply (VLSM_projection_finite_valid_trace (sub_preloaded_component_projection constraint (fun m => True))).
+    revert HtrX; apply VLSM_incl_finite_valid_trace.
+    apply pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l.
+Qed.
+
 End sub_composition_element.
 
 Section sub_composition_preloaded_lift.
@@ -2019,6 +2076,15 @@ Context
   (updated_IM := update_IM replacement_IM)
   (selection_complement : set index := set_diff (enum index) selection)
   .
+
+Lemma selection_complement_index_not_in_selection
+  (sub_i : sub_index selection_complement)
+  : ~ (`sub_i ∈ selection).
+Proof.
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst; cbn in *.
+  eapply set_diff_elim2; eassumption.
+Qed.
+
 
 Global Instance update_IM_complement_Hbs
   `{forall i : index, HasBeenSentCapability (IM i)}
