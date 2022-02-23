@@ -42,10 +42,23 @@ $(ALECTRYONDIR)/toc.html:
 	done
 	$(HIDE)cat resources/alectryon_toc_footer.html >> $@
 
-resources/deps.dot: $(DOCVFILES)
-	$(SHOW)'GENERATE resources/deps.dot'
+resources/map.dot: $(DOCVFILES)
+	$(SHOW)'GENERATE resources/map.dot'
 	$(HIDE)./scripts/dotdeps.sh $(DOCVFILES) > $@
 
-resources/deps.svg: resources/deps.dot
-	$(SHOW)'GENERATE resources/deps.svg'
-	$(HIDE)dot -T svg resources/deps.dot > resources/deps.svg
+$(COQDOCDIR)/map.svg: resources/map.dot
+	$(HIDE)mkdir -p $(COQDOCDIR)
+	$(HIDE)dot -T svg resources/map.dot > $@
+
+$(DPDFILES): %.dpd: %.v %.glob %.vo
+	echo "Set DependGraph File \"$@\". Print FileDependGraph $(patsubst theories.%,%,$(subst /,.,$(basename $@)))." | $(COQTOP) $(COQDEBUG) $(COQFLAGS) $(COQLIBS) -require-import-from rvdpdgraph rvdpdgraph -load-vernac-object $(patsubst theories.%,%,$(subst /,.,$(basename $@))) -quiet > /dev/null 2>&1
+
+$(DOTFILES): %.dot: %.dpd
+	rvdpd2dot -graphname rvdpdgraph -o $@ $<
+
+$(SVGFILES): %.svg: %.dot $(COQDOCDIR)/map.svg
+	dot -T svg $< > $(COQDOCDIR)/$(patsubst theories.%,%,$(subst /,.,$@))
+.PHONY: $(SVGFILES)
+
+rvdpd: $(SVGFILES)
+.PHONY: rvdpd

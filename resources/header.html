@@ -12,7 +12,15 @@
 <body onload="document.getElementById('content').focus()">
   <div id="header">
     <span class="left">
-      <span class="modulename"><script>document.write(document.title)</script></span>
+      <span class="modulename">
+	<script>
+	  if (document.title === "Table of Contents") {
+	      document.write("<a href='map.svg'>File dependency graph</a>");
+	  } else {
+              document.write("<a href='" + document.title + ".svg'>" + document.title + " dependency graph</a>");
+	  }
+	</script>
+      </span>
     </span>
 
     <span class="button" id="toggle-proofs"></span>
