@@ -1,5 +1,8 @@
 DOCVFILES = $(VFILES)
 DOCGLOBFILES = $(DOCVFILES:.v=.glob)
+DPDFILES = $(DOCVFILES:.v=.dpd)
+DOTFILES = $(DOCVFILES:.v=.dot)
+SVGFILES = $(DOCVFILES:.v=.svg)
 
 CSSFILES = resources/coqdoc.css resources/coqdocjs.css
 JSFILES = resources/config.js resources/coqdocjs.js
@@ -38,3 +41,11 @@ $(ALECTRYONDIR)/toc.html:
 	    echo "    <li><a href='$$vfile.html'>$$vfile</a></li>" >> $@; \
 	done
 	$(HIDE)cat resources/alectryon_toc_footer.html >> $@
+
+resources/deps.dot: $(DOCVFILES)
+	$(SHOW)'GENERATE resources/deps.dot'
+	$(HIDE)./scripts/dotdeps.sh $(DOCVFILES) > $@
+
+resources/deps.svg: resources/deps.dot
+	$(SHOW)'GENERATE resources/deps.svg'
+	$(HIDE)dot -T svg resources/deps.dot > resources/deps.svg

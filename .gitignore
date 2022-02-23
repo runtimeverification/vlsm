@@ -15,14 +15,12 @@ Makefile.coq.conf
 *.depend
 *.v~
 _build
-resources/index.html
-resources/deps.png
 resources/map.html
+resources/deps.svg
+resources/deps.dot
 .lia.cache
 .nia.cache
 html
-deps.dot
-deps.map
 *.dpd
 *.dot
 .coq-native/
