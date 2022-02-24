@@ -26,13 +26,18 @@ coqdoc: $(DOCGLOBFILES) $(DOCVFILES) $(CSSFILES) $(JSFILES) $(HTMLFILES)
 	$(HIDE)cp $(CSSFILES) $(JSFILES) $(COQDOCDIR)
 .PHONY: coqdoc
 
+# requires https://github.com/cpitclaudel/alectryon
+alectryon: $(ALECTRYONHTMLFILES)
+.PHONY: alectryon
+
+# requires https://github.com/palmskog/rvdpdgraph/tree/v8.13
+rvdpd: $(SVGFILES)
+.PHONY: rvdpd
+
 $(ALECTRYONHTMLFILES): %.alectryon.html: %.v %.glob %.vo $(ALECTRYONDIR)/toc.html
 	$(SHOW)'ALECTRYON --output-directory $(ALECTRYONDIR) --output $(ALECTRYONDIR)/$(addsuffix .html,$(subst /,.,$(patsubst theories/%,%,$(basename $<))))'
 	$(HIDE)$(ALECTRYON) $(ALECTRYONHTMLFLAGS) $(COQDOCLIBS) --output-directory $(ALECTRYONDIR) --output $(ALECTRYONDIR)/$(addsuffix .html,$(subst /,.,$(patsubst theories/%,%,$(basename $<)))) $<
 .PHONY: $(ALECTRYONHTMLFILES)
-
-alectryon: $(ALECTRYONHTMLFILES)
-.PHONY: alectryon
 
 $(ALECTRYONDIR)/toc.html:
 	$(HIDE)mkdir -p $(@D)
@@ -60,5 +65,8 @@ $(SVGFILES): %.svg: %.dot $(COQDOCDIR)/map.svg
 	dot -T svg $< > $(COQDOCDIR)/$(patsubst theories.%,%,$(subst /,.,$@))
 .PHONY: $(SVGFILES)
 
-rvdpd: $(SVGFILES)
-.PHONY: rvdpd
+resources/index.html: resources/index.md
+	pandoc -s -o index.html index.md
+
+clean::
+	$(HIDE)rm -f $(DPDFILES) $(DOTFILES) resources/map.dot
