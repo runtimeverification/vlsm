@@ -1,6 +1,6 @@
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Rdefinitions RIneq.
-From VLSM Require Import Lib.Preamble Lib.Measurable Lib.StdppListSet.
+From VLSM Require Import Lib.Preamble Lib.Measurable Lib.StdppListSet Lib.RealsExtras.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.MessageDependencies Core.Composition Core.Equivocation Core.Equivocation.FixedSetEquivocation Core.Equivocation.TraceWiseEquivocation.
 From VLSM Require Import Core.Equivocation.WitnessedEquivocation.
 

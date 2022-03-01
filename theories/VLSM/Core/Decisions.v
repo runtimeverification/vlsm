@@ -6,29 +6,25 @@ From VLSM Require Import Core.VLSM Core.Composition Core.VLSMProjections Core.Pr
 (** * VLSM Decisions on Consensus Values *)
 
 (* Need to add consensus values (and decision functions) to VLSM definitions? *)
-Class ConsensusValues :=
-  { C : Type;
-    about_C : exists (c1 c2 : C), c1 <> c2;
-  }.
 
-Definition decision {message} (T : VLSMType message) {CV : ConsensusValues}
+Definition decision {message} (T : VLSMType message) (C : Type)
   := @state _ T -> option C.
 
-Definition vdecision {message} (V : VLSM message) {CV : ConsensusValues}
-  := decision (type V).
+Definition vdecision {message} (V : VLSM message) (C : Type)
+  := decision (type V) C.
 
 Section CommuteSingleton.
 
   Context
     {message : Type}
-    {CV : ConsensusValues}
-    (V : VLSM message).
+    (V : VLSM message)
+    (C : Type).
 
   (* 3.2.1 Decision finality *)
 
   (* Definition of finality per document. *)
-  Definition final_original : vdecision V -> Prop :=
-    fun (D : vdecision V) => forall (tr : valid_trace V),
+  Definition final_original : vdecision V C -> Prop :=
+    fun (D : vdecision V C) => forall (tr : valid_trace V),
         forall (n1 n2 : nat) (s1 s2 : state) (c1 c2 : C),
           (trace_nth (proj1_sig tr) n1 = Some s1) ->
           (trace_nth (proj1_sig tr) n2 = Some s2) ->
@@ -37,16 +33,16 @@ Section CommuteSingleton.
           c1 = c2.
 
   (* Definition of finality using in_futures, which plays better with the estimator property *)
-  Definition final: vdecision V -> Prop :=
-  fun (D : vdecision V) => forall (s1 s2 : vstate V) (c1 c2 : C),
+  Definition final: vdecision V C -> Prop :=
+  fun (D : vdecision V C) => forall (s1 s2 : vstate V) (c1 c2 : C),
         in_futures V s1 s2 ->
         (D s1 = (Some c1)) ->
         (D s2 = (Some c2)) ->
         c1 = c2.
 
   (* 3.3.1 Initial state bivalence *)
-  Definition bivalent : vdecision V -> Prop :=
-    fun (D : vdecision V) =>
+  Definition bivalent : vdecision V C -> Prop :=
+    fun (D : vdecision V C) =>
       (* All initial states decide on None *)
       (forall (s0 : state),
         vinitial_state_prop V s0 ->
@@ -58,8 +54,8 @@ Section CommuteSingleton.
 
   (* 3.3.2 No stuck states *)
 
-  Definition stuck_free : vdecision V -> Prop :=
-    fun (D : vdecision V) =>
+  Definition stuck_free : vdecision V C -> Prop :=
+    fun (D : vdecision V C) =>
       (forall (s : state),
           exists (tr : valid_trace V)
                  (decided_state : state)
@@ -73,12 +69,12 @@ Section CommuteSingleton.
   (* 3.3.3 Protocol definition symmetry *)
   (* How do we formalize this property set-theoretically? *)
 
-  Definition behavior : vdecision V -> Prop :=
+  Definition behavior : vdecision V C -> Prop :=
     fun _ => True.
 
-  Definition symmetric : vdecision V -> Prop :=
-    fun (D : vdecision V) =>
-    exists (f : vdecision V -> vdecision V),
+  Definition symmetric : vdecision V C -> Prop :=
+    fun (D : vdecision V C) =>
+    exists (f : vdecision V C -> vdecision V C),
       behavior D = behavior (f D).
 
 End CommuteSingleton.
@@ -86,13 +82,13 @@ End CommuteSingleton.
 Section CommuteIndexed.
 
   Context
-    {CV : ConsensusValues}
     {message : Type}
     `{EqDecision index}
     (IM : index -> VLSM message)
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+    (C : Type)
     (X := composite_vlsm IM constraint)
-    (ID : forall i : index, vdecision (IM i)).
+    (ID : forall i : index, vdecision (IM i) C).
 
   (* ** Decision consistency
 
@@ -183,7 +179,7 @@ Section CommuteIndexed.
       (Hcons : final_and_consistent)
       (i : index)
       (Hfr : projection_friendly_prop (component_projection IM constraint i))
-      : final (composite_vlsm_constrained_projection IM constraint i) (ID i).
+      : final (composite_vlsm_constrained_projection IM constraint i) C (ID i).
   Proof.
     intros s1 s2 c1 c2 Hfuturesi HD1 HD2.
     specialize
@@ -222,10 +218,10 @@ Section Estimators.
     }.
 
   Context
-    {CV : ConsensusValues}
     {message : Type}
     (X : VLSM message)
-    (D : vdecision X)
+    (C : Type)
+    (D : vdecision X C)
     (E : Estimator (vstate X) C)
     (estimates := @estimator _ _ E)
     .
@@ -290,7 +286,7 @@ Section Estimators.
    *)
 
   Theorem decision_estimator_finality
-    : decision_estimator_property -> final X D.
+    : decision_estimator_property -> final X C D.
   Proof.
     intros.
     unfold final.
@@ -317,18 +313,18 @@ End Estimators.
 Section composite_estimators.
 
   Context
-    {CV : ConsensusValues}
     {message : Type}
     `{EqDecision index}
     (IM : index -> VLSM message)
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+    (C : Type)
     (X := composite_vlsm IM constraint)
-    (ID : forall i : index, vdecision (IM i))
+    (ID : forall i : index, vdecision (IM i) C)
     (IE : forall i : index, Estimator (vstate (IM i)) C).
 
   Definition composite_projection_decision_estimator_property
     (i : index)
     (Xi := composite_vlsm_constrained_projection IM constraint i)
-    := decision_estimator_property Xi (ID i) (IE i).
+    := decision_estimator_property Xi C (ID i) (IE i).
 
 End composite_estimators.
