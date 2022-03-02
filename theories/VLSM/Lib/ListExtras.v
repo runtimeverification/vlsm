@@ -1723,7 +1723,7 @@ Proof.
   - simpl in nz. lia.
   - simpl in *.
     destruct (a <=? (list_max l)) eqn : eq_leb.
-    + assert (Init.Nat.max a (list_max l) = list_max l). {
+    + assert (Nat.max a (list_max l) = list_max l). {
          apply max_r.
          apply Nat.leb_le.
          assumption.
@@ -1732,7 +1732,7 @@ Proof.
       right.
       apply IHl.
       assumption.
-    + assert (Init.Nat.max a (list_max l) = a). {
+    + assert (Nat.max a (list_max l) = a). {
         apply leb_iff_conv in eq_leb.
         apply max_l.
         lia.
@@ -1751,7 +1751,7 @@ Proof.
   - destruct l;[intuition congruence|].
     specialize (list_max_le (n :: l) 0) as Hle.
     destruct Hle as [Hle _].
-    rewrite eq_max in Hle. spec Hle. apply le_refl.
+    rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
     rewrite Forall_forall in Hle.
     specialize (Hle n). spec Hle; [left |].
     simpl. lia.
@@ -1792,7 +1792,7 @@ Proof.
   - destruct l;[intuition congruence|].
     specialize (list_max_le (n :: l) 0) as Hle.
     destruct Hle as [Hle _].
-    rewrite eq_max in Hle. spec Hle. apply le_refl.
+    rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
     rewrite Forall_forall in Hle.
     specialize (Hle n). spec Hle. left.
     assert (Hn0: n = 0) by lia.

@@ -9,12 +9,13 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
 - License: [BSD 3-Clause "New" or "Revised" License](LICENSE.md)
 - Compatible Coq versions: 8.13
 - Additional dependencies:
-  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.6.0 or later
+  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.6.0
 - Coq namespace: `VLSM`
 
 ## Working with the project online
 
 The simplest way of working with this project without needing to install anything is by doing so online:
+
 [![Open in Papillon](https://papillon.unbounded.network/github-badge.svg)](https://papillon.unbounded.network/projects/github/runtimeverification/vlsm/master)
 
 ## Building instructions

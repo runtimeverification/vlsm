@@ -39,14 +39,14 @@ license:
 
 supported_coq_versions:
   text: 8.13
-  opam: '{>= "8.13" & < "8.14~"}'
+  opam: '{>= "8.13"}'
 
 dependencies:
 - opam:
     name: coq-stdpp
     version: '{>= "1.6.0"}'
   description: |-
-    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.6.0 or later
+    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.6.0
 
 namespace: VLSM
 
@@ -61,6 +61,7 @@ build: |-
   ## Working with the project online
 
   The simplest way of working with this project without needing to install anything is by doing so online:
+
   [![Open in Papillon](https://papillon.unbounded.network/github-badge.svg)](https://papillon.unbounded.network/projects/github/runtimeverification/vlsm/master)
 
   ## Building instructions

@@ -616,8 +616,7 @@ Proof.
   unfold VLSM_weak_projection_infinite_trace_project, pre_VLSM_projection_infinite_trace_project.
   replace (stream_prefix _ _) with (VLSM_weak_projection_trace_project Hsimul (stream_prefix trX m)).
   apply VLSM_weak_projection_finite_valid_trace_from.
-
-  apply infinite_valid_trace_from_prefix with (n0 := m) in HtrX.
+  apply infinite_valid_trace_from_prefix.
   assumption.
 Qed.
 
@@ -1717,8 +1716,8 @@ Proof.
       split; [|assumption].
       apply infinite_valid_trace_from_prefix_rev.
       intros.
-      apply infinite_valid_trace_from_prefix with (n0 := n) in HtrX.
-      apply (Hincl _ _ (conj HtrX HisX)).
+      pose proof (infinite_valid_trace_from_prefix _ _ _ HtrX n) as HfinX.
+      apply (Hincl _ _ (conj HfinX HisX)).
 Qed.
 
 (** A [VLSM_incl]usion is equivalent to a [VLSM_full_projection] in which both the

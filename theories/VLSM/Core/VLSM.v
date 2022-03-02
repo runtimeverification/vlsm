@@ -1863,9 +1863,9 @@ definitions, mostly reducing them to properties about their finite segments.
       intros s tl1 tl2 Heq Htl1.
       apply infinite_valid_trace_from_prefix_rev.
       intro n.
-      apply stream_prefix_EqSt with (n0 := n) in Heq.
-      apply infinite_valid_trace_from_prefix with (n := n) in Htl1.
-      rewrite <- Heq. assumption.
+      rewrite <- (stream_prefix_EqSt _ _ Heq n).
+      apply infinite_valid_trace_from_prefix.
+      assumption.
     Qed.
 
     Lemma infinite_valid_trace_from_segment
@@ -2210,8 +2210,7 @@ This relation is often used in stating safety and liveness properties.*)
         rewrite finite_trace_nth_last.
         congruence.
       - rewrite finite_trace_nth_app2;[|lia].
-        rewrite Minus.minus_plus.
-        rewrite finite_trace_nth_last.
+        rewrite Nat.add_comm, Nat.add_sub, finite_trace_nth_last.
         congruence.
     Qed.
 

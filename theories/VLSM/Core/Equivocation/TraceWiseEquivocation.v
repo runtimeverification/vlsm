@@ -255,7 +255,7 @@ Lemma is_equivocating_statewise_implies_is_equivocating_tracewise s v
 Proof.
   intros [j [m [Hm [Hnbs_m Hbr_m]]]] is tr Htr.
   exists m. split; [assumption|].
-  apply preloaded_finite_valid_trace_init_to_projection with (j0 := j) in Htr as Htrj.
+  apply (preloaded_finite_valid_trace_init_to_projection _ j) in Htr as Htrj.
   apply proj1 in Htrj as Hlstj.
   apply finite_valid_trace_from_to_last_pstate in Hlstj.
   apply proper_received in Hbr_m; [|assumption].

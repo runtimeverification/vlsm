@@ -307,7 +307,7 @@ Proof.
     apply (VLSM_projection_finite_valid_trace (preloaded_component_projection IM i)).
     revert HtrX.
     apply VLSM_incl_finite_valid_trace.
-    apply constraint_preloaded_free_incl with (constraint0 := constraint).
+    apply (constraint_preloaded_free_incl _ constraint).
 Qed.
 
 Lemma component_projection_validator_prop_is_induced

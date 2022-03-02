@@ -1091,7 +1091,7 @@ Proof.
     case_decide as Hi; [| congruence].
     apply Some_inj in Heql; subst l; cbn.
     unfold constrained_composite_valid, lift_sub_state; cbn;
-    rewrite lift_sub_state_to_eq with (Hi0 := Hi); subst.
+    rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi); subst.
     split; [assumption|].
     eapply Hconstraint_consistency; [|eassumption].
     symmetry; apply composite_state_sub_projection_lift_to.
@@ -1485,7 +1485,7 @@ Proof.
   destruct_dec_sig sub_i i Hi Heqsub_i.
   subst.
   cbn. unfold sub_IM at 6. simpl.
-  unfold lift_sub_state at 1. rewrite lift_sub_state_to_eq with (Hi0 := Hi).
+  unfold lift_sub_state at 1. rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
   destruct (vtransition _ _ _) as (si', _om').
   split; inversion 1; subst; clear H; f_equal; extensionality sub_j
   ; destruct_dec_sig sub_j j Hj Heqsub_j
@@ -1498,7 +1498,7 @@ Proof.
   ; rewrite (state_update_neq _ (lift_sub_state _ _ _)) by congruence
   ; rewrite state_update_neq by (setoid_rewrite dsig_eq; simpl; congruence)
   ; unfold lift_sub_state
-  ; rewrite lift_sub_state_to_eq with (Hi0 := Hj)
+  ; rewrite (lift_sub_state_to_eq _ _ _ _ _ Hj)
   ; intuition.
 Qed.
 
@@ -1736,7 +1736,7 @@ Lemma valid_preloaded_lifts_can_be_emitted
 Proof.
   intros m Hm.
   eapply VLSM_incl_can_emit.
-  - apply pre_loaded_vlsm_incl_relaxed with (P0 := fun m => Q m \/ P m).
+  - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
     intuition.
   - eapply VLSM_full_projection_can_emit; [|eassumption].
     apply preloaded_sub_element_full_projection.
@@ -1843,8 +1843,7 @@ Proof.
   apply projection_induced_vlsm_is_projection.
   - intros lX HlX s om s' om' [_ Ht].
     apply sub_transition_element_project_None with lX om om'; [assumption|].
-    setoid_rewrite <- induced_sub_projection_transition_is_composite
-      with (constraint0 := constraint).
+    setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
     assumption.
   - apply basic_weak_projection_transition_consistency_Some.
     + intro; apply sub_element_label_project.

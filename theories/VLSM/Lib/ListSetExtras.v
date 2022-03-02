@@ -1,5 +1,5 @@
 From stdpp Require Import prelude.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppExtras Lib.StdppListSet.
+From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
 
 (** * List set utility definitions and lemmas *)
 
@@ -754,7 +754,7 @@ Proof.
     rewrite 2 filter_cons.
     destruct (decide (~ a0 ∈ a)); destruct (decide (~ a0 ∈ b)).
     + simpl.
-      apply lt_n_S.
+      rewrite <- Nat.succ_lt_mono.
       apply IHl.
     + contradict n.
       apply H_subseteq.
@@ -762,7 +762,7 @@ Proof.
       contradict n0.
       assumption.
     + simpl.
-      apply lt_S.
+      apply Nat.lt_lt_succ_r.
       apply IHl.
     + apply IHl.
 Qed.

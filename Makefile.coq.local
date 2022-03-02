@@ -1,0 +1,72 @@
+DOCVFILES = $(VFILES)
+DOCGLOBFILES = $(DOCVFILES:.v=.glob)
+DPDFILES = $(DOCVFILES:.v=.dpd)
+DOTFILES = $(DOCVFILES:.v=.dot)
+SVGFILES = $(DOCVFILES:.v=.svg)
+
+CSSFILES = resources/coqdoc.css resources/coqdocjs.css
+JSFILES = resources/config.js resources/coqdocjs.js
+HTMLFILES = resources/header.html resources/footer.html
+
+COQDOCDIR = docs/coqdoc
+COQDOCHTMLFLAGS = --toc --toc-depth 3 --index indexpage --html -s \
+  --interpolate --no-lib-name --parse-comments \
+  --with-header resources/header.html --with-footer resources/footer.html
+
+ALECTRYON = alectryon
+ALECTRYONDIR = docs/alectryon
+ALECTRYONHTMLFLAGS = --frontend coqdoc --webpage-style windowed
+ALECTRYONHTMLFILES = $(DOCVFILES:.v=.alectryon.html)
+
+coqdoc: $(DOCGLOBFILES) $(DOCVFILES) $(CSSFILES) $(JSFILES) $(HTMLFILES)
+	$(SHOW)'COQDOC -d $(COQDOCDIR)'
+	$(HIDE)mkdir -p $(COQDOCDIR)
+	$(HIDE)$(COQDOC) $(COQDOCHTMLFLAGS) $(COQDOCLIBS) -d $(COQDOCDIR) $(DOCVFILES)
+	$(SHOW)'COPY resources'
+	$(HIDE)cp $(CSSFILES) $(JSFILES) $(COQDOCDIR)
+.PHONY: coqdoc
+
+# requires https://github.com/cpitclaudel/alectryon
+alectryon: $(ALECTRYONHTMLFILES)
+.PHONY: alectryon
+
+# requires https://github.com/palmskog/rvdpdgraph/tree/v8.13
+rvdpd: $(SVGFILES)
+.PHONY: rvdpd
+
+$(ALECTRYONHTMLFILES): %.alectryon.html: %.v %.glob %.vo $(ALECTRYONDIR)/toc.html
+	$(SHOW)'ALECTRYON --output-directory $(ALECTRYONDIR) --output $(ALECTRYONDIR)/$(addsuffix .html,$(subst /,.,$(patsubst theories/%,%,$(basename $<))))'
+	$(HIDE)$(ALECTRYON) $(ALECTRYONHTMLFLAGS) $(COQDOCLIBS) --output-directory $(ALECTRYONDIR) --output $(ALECTRYONDIR)/$(addsuffix .html,$(subst /,.,$(patsubst theories/%,%,$(basename $<)))) $<
+.PHONY: $(ALECTRYONHTMLFILES)
+
+$(ALECTRYONDIR)/toc.html:
+	$(HIDE)mkdir -p $(@D)
+	$(HIDE)cat resources/alectryon_toc_header.html > $@
+	$(HIDE)for vfile in $(subst /,.,$(patsubst theories/%,%,$(basename $(DOCVFILES)))) ; do \
+	    echo "    <li><a href='$$vfile.html'>$$vfile</a></li>" >> $@; \
+	done
+	$(HIDE)cat resources/alectryon_toc_footer.html >> $@
+
+resources/map.dot: $(DOCVFILES)
+	$(SHOW)'GENERATE resources/map.dot'
+	$(HIDE)./scripts/dotdeps.sh $(DOCVFILES) > $@
+
+$(COQDOCDIR)/map.svg: resources/map.dot
+	$(HIDE)mkdir -p $(COQDOCDIR)
+	$(HIDE)dot -T svg resources/map.dot > $@
+
+$(DPDFILES): %.dpd: %.v %.glob %.vo
+	echo "Set DependGraph File \"$@\". Print FileDependGraph $(patsubst theories.%,%,$(subst /,.,$(basename $@)))." | $(COQTOP) $(COQDEBUG) $(COQFLAGS) $(COQLIBS) -require-import-from rvdpdgraph rvdpdgraph -load-vernac-object $(patsubst theories.%,%,$(subst /,.,$(basename $@))) -quiet > /dev/null 2>&1
+
+$(DOTFILES): %.dot: %.dpd
+	rvdpd2dot -graphname rvdpdgraph -o $@ $<
+
+$(SVGFILES): %.svg: %.dot $(COQDOCDIR)/map.svg
+	dot -T svg $< > $(COQDOCDIR)/$(patsubst theories.%,%,$(subst /,.,$@))
+.PHONY: $(SVGFILES)
+
+resources/index.html: resources/index.md
+	pandoc -s -o index.html index.md
+
+clean::
+	$(HIDE)rm -f $(DPDFILES) $(DOTFILES) resources/map.dot

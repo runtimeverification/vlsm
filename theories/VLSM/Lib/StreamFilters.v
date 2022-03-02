@@ -162,8 +162,8 @@ Proof.
   specialize (filtering_subsequence_witness _ _ _ Hfs m) as Hm.
   rewrite decide_True in Hfilter by assumption.
   rewrite decide_True by assumption.
-  rewrite app_length, Plus.plus_comm in Hfilter. simpl in Hfilter.
-  rewrite app_length, Plus.plus_comm. simpl.
+  rewrite app_length, Nat.add_comm in Hfilter. simpl in Hfilter.
+  rewrite app_length, Nat.add_comm. simpl.
   rewrite Hfilter.
   f_equal.
   clear -Hfs.
@@ -188,12 +188,11 @@ Lemma filtering_subsequence_prefix_is_filter_last
 Proof.
   specialize (filtering_subsequence_witness_rev _ _ _ Hfs _ Hn) as [k Heqn].
   replace (length _) with k; [subst; reflexivity|].
-
   specialize (filtering_subsequence_prefix_length _ _ _ Hfs k) as Hlength.
   rewrite! stream_prefix_S, filter_app in Hlength.
   unfold filter at 2 in Hlength. simpl in Hlength.
   rewrite decide_True in Hlength by (subst; assumption).
-  rewrite app_length, Plus.plus_comm in Hlength. simpl in Hlength.
+  rewrite app_length, Nat.add_comm in Hlength. simpl in Hlength.
   inversion Hlength. subst. reflexivity.
 Qed.
 
@@ -236,7 +235,7 @@ Proof.
   rewrite filter_annotate_unroll in Heqlst. simpl in Heqlst.
   case_decide; subst lst; simpl.
   2: {
-    rewrite Plus.plus_comm, app_nil_r. simpl. assumption.
+    rewrite Nat.add_comm, app_nil_r. simpl. assumption.
   }
   replace (length (list_filter_map P f (stream_prefix s n)) + 1)
     with (S (length (list_filter_map P f (stream_prefix s n))))
@@ -249,7 +248,6 @@ Proof.
   f_equal. apply dsig_eq.
   simpl. rewrite nat_sequence_nth.
   f_equal.
-
   unfold list_filter_map.
   rewrite map_length. rewrite filter_annotate_length.
   apply filtering_subsequence_prefix_is_filter_last; assumption.
@@ -407,7 +405,7 @@ Proof.
     as [k [Heq [Hp Hnp]]].
   subst sn fpair.
   rewrite Heq.
-  clear -Hp Hnp. rewrite Str_nth_plus, Plus.plus_comm in Hp.
+  clear -Hp Hnp. rewrite Str_nth_plus, Nat.add_comm in Hp.
   split; [assumption|].
   intros i [Hlt_i Hilt].
   apply le_plus_dec in Hlt_i as [i' Hi].

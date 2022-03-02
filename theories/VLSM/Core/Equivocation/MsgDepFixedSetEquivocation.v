@@ -210,7 +210,7 @@ Proof.
       apply no_initial_messages_in_IM.
     }
     destruct Hemit as ((sX, iom) & (sub_i, li) & sX' & HtX).
-    eapply preloaded_composite_observed_valid with (s0 := sX').
+    eapply (preloaded_composite_observed_valid _ _ _ sX').
     + eapply input_valid_transition_destination; eassumption.
     + exists sub_i. destruct_dec_sig sub_i i Hi Heqsub_i; subst.
       eapply message_dependencies_are_necessary; [typeclasses eauto| |eassumption].
