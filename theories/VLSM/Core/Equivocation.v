@@ -2,7 +2,7 @@ From stdpp Require Import prelude finite.
 From Coq Require Import Streams FinFun Rdefinitions.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
 From VLSM Require Import Lib.ListSetExtras Lib.Measurable Lib.FinFunExtras.
-From VLSM Require Import Core.Decisions Core.VLSM Core.VLSMProjections.
+From VLSM Require Import Core.VLSM Core.VLSMProjections.
 From VLSM Require Import Core.Composition Core.ProjectionTraces.
 
 (** * VLSM Equivocation Definitions **)
