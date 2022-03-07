@@ -953,7 +953,7 @@ of the trace's final state, then it must be that it was emitted by one of
 the nodes allowed to equivocate.
 *)
 Lemma projection_has_not_been_observed_is_equivocating
-  (is: _composite_state (equivocator_IM IM))
+  (is: composite_state (equivocator_IM IM))
   (tr: list (composite_transition_item (equivocator_IM IM)))
   (Htr: finite_valid_trace XE is tr)
   (s := @finite_trace_last _ (composite_type (equivocator_IM IM)) is tr)

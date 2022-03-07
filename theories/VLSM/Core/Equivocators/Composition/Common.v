@@ -132,7 +132,7 @@ Lemma equivocators_transition_preserves_equivocating_indices
   (index_listing : list index)
   (s: composite_state equivocator_IM)
   (iom oom: option message)
-  (l: _composite_label equivocator_IM)
+  (l: composite_label equivocator_IM)
   (s0: composite_state equivocator_IM)
   (Ht: composite_transition equivocator_IM l (s0, iom) = (s, oom))
   : (equivocating_indices index_listing s0) ⊆ (equivocating_indices index_listing s).

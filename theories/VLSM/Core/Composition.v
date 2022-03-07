@@ -39,7 +39,7 @@ machine <<n>>.
 Note that the [composite_state] type is the dependent product type of the
 family of [state] types corresponding to each index.
 *)
-    Definition _composite_state : Type :=
+    Definition composite_state : Type :=
       forall n : index, vstate (IM n).
 
 (**
@@ -48,17 +48,15 @@ A [composite_label] is a pair between an index <<N>> and a [label] of <<IT n>>.
 Note that the [composite_label] type is the dependent sum of the family of
 types <<[@label _ (IT n) | n <- index]>>.
 *)
-    Definition _composite_label
+    Definition composite_label
       : Type
       := sigT (fun n => vlabel (IM n)).
 
-    Definition composite_type : VLSMType message :=
-      {| state := _composite_state
-       ; label := _composite_label
+    Canonical Structure composite_type : VLSMType message :=
+      {| state := composite_state
+       ; label := composite_label
       |}.
 
-    Definition composite_state := @state message composite_type.
-    Definition composite_label := @label message composite_type.
     Definition composite_transition_item : Type := @transition_item message composite_type.
 
 (**
@@ -310,10 +308,10 @@ the [composite_valid]ity.
       (constraint : composite_label -> composite_state * option message -> Prop)
       : VLSMMachine composite_type
       :=
-      {|  initial_state_prop := composite_initial_state_prop
-       ;  initial_message_prop := composite_initial_message_prop
-       ;  transition := composite_transition
-       ;  valid := constrained_composite_valid constraint
+      {| initial_state_prop := composite_initial_state_prop
+       ; initial_message_prop := composite_initial_message_prop
+       ; transition := composite_transition
+       ; valid := constrained_composite_valid constraint
       |}.
 
     Definition composite_vlsm
@@ -832,7 +830,7 @@ Qed.
 
 Lemma composite_transition_project_active
       message `{EqDecision index} (IM : index -> VLSM message)
-  : forall (l : label) (s : state) (im : option message) (s' : state) (om : option message),
+  : forall (l : composite_label IM) (s : composite_state IM) (im : option message) (s' : composite_state IM) (om : option message),
       composite_transition IM l (s, im) = (s', om) ->
       vtransition (IM (projT1 l)) (projT2 l) (s (projT1 l), im) = (s' (projT1 l), om).
 Proof.
