@@ -385,11 +385,16 @@ Context
   `{FullMessageDependencies _ message_dependencies full_message_dependencies}
   .
 
-Global Instance msg_dep_happens_before_dec : RelDecision (msg_dep_happens_before message_dependencies).
+Global Instance msg_dep_happens_before_dec :
+ RelDecision (msg_dep_happens_before message_dependencies).
 Proof.
-  intros m1 m2.
-  destruct (decide (m1 ∈ full_message_dependencies m2)); [left|right];
-    rewrite <- full_message_dependencies_happens_before; assumption.
+ refine
+   (fun m1 m2 =>
+      match decide (m1 ∈ full_message_dependencies m2) with
+      | left Hdec => left _
+      | right Hdec => right _
+      end);
+  rewrite <- full_message_dependencies_happens_before; assumption.
 Qed.
 
 Global Instance msg_dep_happens_before_irrefl :
