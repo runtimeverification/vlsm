@@ -379,11 +379,23 @@ Global Hint Mode FullMessageDependencies ! - - : typeclass_instances.
 Section full_message_dependencies_happens_before.
 
 Context
-  {message : Type}
+  `{EqDecision message}
   (message_dependencies : message -> set message)
   (full_message_dependencies : message -> set message)
   `{FullMessageDependencies _ message_dependencies full_message_dependencies}
   .
+
+Global Instance msg_dep_happens_before_dec :
+ RelDecision (msg_dep_happens_before message_dependencies).
+Proof.
+ refine
+   (fun m1 m2 =>
+      match decide (m1 ∈ full_message_dependencies m2) with
+      | left Hdec => left _
+      | right Hdec => right _
+      end);
+  rewrite <- full_message_dependencies_happens_before; assumption.
+Qed.
 
 Global Instance msg_dep_happens_before_irrefl :
   Irreflexive (msg_dep_happens_before message_dependencies).
