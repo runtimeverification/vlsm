@@ -144,7 +144,7 @@ Lemma msg_dep_has_been_sent
   : forall dm, msg_dep_rel dm m -> has_been_observed X s dm.
 Proof.
   revert m Hsent; induction Hs using valid_state_prop_ind; intro m.
-  - intro Hbs; contradict Hbs; eapply oracle_no_inits; [|assumption].
+  - intro Hbs; contradict Hbs; eapply oracle_no_inits; [| assumption].
     apply has_been_sent_stepwise_from_trace.
   - rewrite has_been_sent_step_update by eassumption; intros [-> | Hrcv] dm Hdm.
     + eapply message_dependencies_are_necessary; [eexists _,_; eassumption | eassumption].
@@ -165,10 +165,10 @@ Lemma full_node_has_been_received
   : forall dm, msg_dep_rel dm m -> has_been_observed X s dm.
 Proof.
   revert m Hreceived; induction Hs using valid_state_prop_ind; intro m.
-  - intro Hbr; contradict Hbr; eapply oracle_no_inits; [|assumption].
+  - intro Hbr; contradict Hbr; eapply oracle_no_inits; [| assumption].
     apply has_been_received_stepwise_from_trace.
-  - rewrite has_been_received_step_update by eassumption; intros [-> | Hrcv] dm Hdm;
-      rewrite has_been_observed_step_update by eassumption; right.
+  - rewrite has_been_received_step_update by eassumption; intros [-> | Hrcv] dm Hdm
+    ; rewrite has_been_observed_step_update by eassumption; right.
     + eapply Hfull; [apply Ht | assumption].
     + eapply IHHs; eassumption.
 Qed.
@@ -200,7 +200,7 @@ Lemma msg_dep_full_node_happens_before_reflects_has_been_observed
     has_been_observed X s m -> has_been_observed X s dm.
 Proof.
   intros dm m Hdm Hobs.
-  eapply msg_dep_happens_before_reflect; [|eassumption|assumption].
+  eapply msg_dep_happens_before_reflect; [| eassumption| assumption].
   apply msg_dep_full_node_reflects_has_been_observed; assumption.
 Qed.
 
@@ -215,7 +215,7 @@ Lemma msg_dep_full_node_input_valid_happens_before_has_been_observed
   : forall dm, msg_dep_happens_before dm m ->
     has_been_observed X s dm.
 Proof.
-  intro dm; rewrite msg_dep_happens_before_iff_one; intros [Hdm | [dm' [Hdm' Hdm]]].
+  intro dm; rewrite msg_dep_happens_before_iff_one; intros [Hdm | (dm' & Hdm' & Hdm)].
   - eapply Hfull; [apply Hvalid | eassumption].
   - eapply msg_dep_happens_before_reflect; [| eassumption |].
     + apply msg_dep_full_node_reflects_has_been_observed; [apply Hfull | apply Hvalid].

@@ -220,7 +220,7 @@ Proof.
   intros v (dm & [Hnobs Hdm]  & _).
   contradict Hnobs; exists i.
   eapply msg_dep_full_node_input_valid_happens_before_has_been_observed;
-    [typeclasses eauto| apply Hfull| eassumption|].
+    [typeclasses eauto| apply Hfull | eassumption |].
   apply full_message_dependencies_happens_before; assumption.
 Qed.
 
@@ -335,10 +335,13 @@ Context
     channel_authentication_sender_safety _ _ _ Hchannel)
   .
 
-Lemma equivocating_messages_are_equivocator_emitted s im
-  (Him: can_emit (free_composite_vlsm IM) im)
-  (Hnobserved: ¬ composite_has_been_observed IM s im)
-  : exists j, j ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im) /\
+Lemma equivocating_messages_are_equivocator_emitted
+  s im
+  (Him : can_emit (free_composite_vlsm IM) im)
+  (Hnobserved : ¬ composite_has_been_observed IM s im) :
+    exists j,
+      j ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im)
+        /\
       can_emit (pre_loaded_vlsm (IM j) (fun dm => msg_dep_rel message_dependencies dm im)) im.
 Proof.
   eapply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
@@ -347,33 +350,35 @@ Proof.
   apply Hchannel in Him as Hsender.
   exists j; subst; cbn.
   unfold msg_dep_message_equivocators, coeqv_message_equivocators,
-      msg_dep_coequivocating_senders, not_observed_happens_before_dependencies
+         msg_dep_coequivocating_senders, not_observed_happens_before_dependencies
   ; rewrite decide_False by assumption; cbn.
-  unfold channel_authenticated_message in Hsender; destruct (sender im) as [_j |];
-    [| inversion Hsender]; apply Some_inj in Hsender; cbn in Hsender; subst.
+  unfold channel_authenticated_message in Hsender
+  ; destruct (sender im) as [_j |]; [| inversion Hsender]
+  ; apply Some_inj in Hsender; cbn in Hsender; subst.
   split.
   - rewrite elem_of_app; left; left.
-  - eapply message_dependencies_are_sufficient; [typeclasses eauto| assumption].
+  - eapply message_dependencies_are_sufficient; [typeclasses eauto | assumption].
 Qed.
 
-Lemma equivocating_messages_dependencies_are_observed_or_equivocator_emitted s im
-  (Him: can_emit (free_composite_vlsm IM) im)
-  (Hnobserved: ¬ composite_has_been_observed IM s im)
+Lemma equivocating_messages_dependencies_are_observed_or_equivocator_emitted
+  s im
+  (Him : can_emit (free_composite_vlsm IM) im)
+  (Hnobserved : ¬ composite_has_been_observed IM s im)
   : forall dm, msg_dep_happens_before message_dependencies dm im ->
     composite_has_been_observed IM s dm \/
     exists dm_i, dm_i ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im) /\
       can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm.
 Proof.
   intros dm Hdm.
-  destruct (decide (composite_has_been_observed IM s dm))
-    as [Hobs | Hnobs]; [left; assumption | right].
+  destruct (decide (composite_has_been_observed IM s dm)) as [Hobs | Hnobs]
+  ; [left; assumption | right].
   cut (exists i, sender dm = Some i /\
-        can_emit (pre_loaded_with_all_messages_vlsm (IM i)) dm).
+                 can_emit (pre_loaded_with_all_messages_vlsm (IM i)) dm).
   {
     intros (i & Hsender & Hemit).
     exists i; split; [| assumption].
     unfold msg_dep_message_equivocators, coeqv_message_equivocators,
-      msg_dep_coequivocating_senders, not_observed_happens_before_dependencies
+           msg_dep_coequivocating_senders, not_observed_happens_before_dependencies
     ; rewrite decide_False, elem_of_app, !elem_of_map_option by assumption.
     right; exists dm; rewrite elem_of_list_filter
     ; setoid_rewrite full_message_dependencies_happens_before
@@ -387,8 +392,8 @@ Lemma message_equivocators_can_emit (s : vstate Limited) im
   (Hs : valid_state_prop
           (fixed_equivocation_vlsm_composition IM (state_annotation s))
           (original_state s))
-  (Hnobserved: ¬ composite_has_been_observed IM (original_state s) im)
-  (HLemit: can_emit (free_composite_vlsm IM) im)
+  (Hnobserved : ¬ composite_has_been_observed IM (original_state s) im)
+  (HLemit : can_emit (free_composite_vlsm IM) im)
   : can_emit
       (equivocators_composition_for_observed IM
         (set_union (state_annotation s)
@@ -398,40 +403,40 @@ Lemma message_equivocators_can_emit (s : vstate Limited) im
       im.
 Proof.
   eapply VLSM_full_projection_can_emit.
-  {
-    apply equivocators_composition_for_observed_index_incl_full_projection
-     with (Hincl := set_union_subseteq_right (state_annotation s) (msg_dep_message_equivocators IM full_message_dependencies sender (original_state s) im)).
-  }
-  specialize (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
-    as [j [Heqv_j Hemitj]].
-  eapply valid_preloaded_lifts_can_be_emitted
-  ; [eassumption | | eassumption]; cbn; intros dm H_dm.
-  assert (Hdm : msg_dep_happens_before message_dependencies dm im)
-    by (apply msg_dep_happens_before_iff_one; left; assumption).
-  clear H_dm; revert dm Hdm.
-  induction dm as [dm Hind]
-    using (well_founded_ind (msg_dep_happens_before_wf message_dependencies full_message_dependencies))
-  ; intros Hdm.
-  apply emitted_messages_are_valid_iff.
-  specialize
-    (equivocating_messages_dependencies_are_observed_or_equivocator_emitted _ _
-      HLemit Hnobserved _ Hdm)
-    as [Hobs_dm | [dm_i [Hdm_i Hemit_dm]]]
-  ; [left; right; assumption | right].
-  eapply valid_preloaded_lifts_can_be_emitted
-  ; [eassumption | |]; cycle 1.
-  - eapply message_dependencies_are_sufficient; [typeclasses eauto | assumption].
-  - intros dm' Hdm'; apply Hind.
-    + apply msg_dep_happens_before_iff_one; left; assumption.
-    + transitivity dm; [| assumption].
-      apply msg_dep_happens_before_iff_one; left; assumption.
+  - apply equivocators_composition_for_observed_index_incl_full_projection
+     with (Hincl := set_union_subseteq_right (state_annotation s) (msg_dep_message_equivocators
+                      IM full_message_dependencies sender (original_state s) im)).
+  - specialize (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
+            as (j & Heqv_j & Hemitj).
+    eapply valid_preloaded_lifts_can_be_emitted
+    ; [eassumption | | eassumption]; cbn; intros dm H_dm.
+    assert (Hdm : msg_dep_happens_before message_dependencies dm im)
+        by (apply msg_dep_happens_before_iff_one; left; assumption).
+    clear H_dm; revert dm Hdm.
+    induction dm as [dm Hind] using
+      (well_founded_ind (msg_dep_happens_before_wf message_dependencies full_message_dependencies))
+    ; intros Hdm.
+    apply emitted_messages_are_valid_iff.
+    specialize (equivocating_messages_dependencies_are_observed_or_equivocator_emitted
+                  _ _ HLemit Hnobserved _ Hdm)
+            as [Hobs_dm | (dm_i & Hdm_i & Hemit_dm)]
+    ; [left; right; assumption | right].
+    eapply valid_preloaded_lifts_can_be_emitted
+    ; [eassumption | |]; cycle 1.
+    + eapply message_dependencies_are_sufficient; [typeclasses eauto | assumption].
+    + intros dm' Hdm'; apply Hind.
+      * apply msg_dep_happens_before_iff_one; left; assumption.
+      * transitivity dm; [| assumption].
+        apply msg_dep_happens_before_iff_one; left; assumption.
 Qed.
 
-Lemma msg_dep_fixed_limited_equivocation_witnessed is tr
+Lemma msg_dep_fixed_limited_equivocation_witnessed
+  is tr
   (Htr : finite_valid_trace Limited is tr)
   (equivocators := state_annotation (finite_trace_last is tr))
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
-  : (sum_weights (remove_dups equivocators) <= `threshold)%R /\
+  : (sum_weights (remove_dups equivocators) <= `threshold)%R
+      /\
     finite_valid_trace Fixed
       (original_state is)
       (pre_VLSM_full_projection_finite_trace_project
@@ -440,7 +445,7 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed is tr
 Proof.
   split.
   - rewrite set_eq_nodup_sum_weight_eq
-      with (lv2 := state_annotation (finite_trace_last is tr)).
+       with (lv2 := state_annotation (finite_trace_last is tr)).
     + apply coeqv_limited_equivocation_state_not_heavy,
             finite_valid_trace_last_pstate, Htr.
     + apply NoDup_remove_dups.
@@ -462,25 +467,23 @@ Proof.
              Ht.
     + apply finite_valid_trace_singleton.
       unfold input_valid_transition, input_valid.
-      change (map _ _) with (pre_VLSM_full_projection_finite_trace_project  (type Limited) (composite_type IM) Datatypes.id original_state tr).
+      change (map _ _) with (pre_VLSM_full_projection_finite_trace_project (type Limited)
+                              (composite_type IM) Datatypes.id original_state tr).
       rewrite <- pre_VLSM_full_projection_finite_trace_last.
-      assert (Hs :
-        valid_state_prop
-          (fixed_equivocation_vlsm_composition IM (state_annotation s))
-          (original_state s)).
+      assert (Hs : valid_state_prop
+                    (fixed_equivocation_vlsm_composition IM (state_annotation s))
+                    (original_state s)).
       {
         replace s with (finite_trace_last si tr) at 2
-          by (apply valid_trace_get_last in Htr; assumption).
-        rewrite
-          (pre_VLSM_full_projection_finite_trace_last
-            (type Limited) (composite_type IM) Datatypes.id original_state
-            si tr).
+             by (apply valid_trace_get_last in Htr; assumption).
+        rewrite (pre_VLSM_full_projection_finite_trace_last
+                  (type Limited) (composite_type IM) Datatypes.id original_state si tr).
         apply finite_valid_trace_last_pstate; assumption.
       }
       destruct Ht as [[HLs [HLim HLv]] HLt].
       cbn in HLt |- *; unfold annotated_transition in HLt; cbn in HLt.
       replace (finite_trace_last si _) with s
-        by (apply valid_trace_get_last in Htr; congruence).
+           by (apply valid_trace_get_last in Htr; congruence).
       destruct l as [i li], (vtransition _ _ _) as (si', om').
       inversion HLt; subst; clear HLt; cbn.
       repeat split.
@@ -515,8 +518,8 @@ Proof.
              apply fixed_equivocation_vlsm_composition_index_incl,
                set_union_subseteq_left.
            }
-           apply message_equivocators_can_emit; [assumption|assumption|].
-           eapply VLSM_full_projection_can_emit; [|eassumption].
+           apply message_equivocators_can_emit; [assumption | assumption |].
+           eapply VLSM_full_projection_can_emit; [| eassumption].
            apply forget_annotations_projection.
       * apply HLv.
       * destruct iom as [im |]; [| exact I].
@@ -525,8 +528,8 @@ Proof.
         apply message_equivocators_can_emit; [assumption | assumption|].
         apply emitted_messages_are_valid_iff in HLim
           as [[j [[mj Hmj] Heqim]] | Hemit]
-        ; [clear Heqim; contradict Hmj; apply no_initial_messages_in_IM|].
-        eapply VLSM_full_projection_can_emit; [|eassumption].
+        ; [clear Heqim; contradict Hmj; apply no_initial_messages_in_IM |].
+        eapply VLSM_full_projection_can_emit; [| eassumption].
         apply forget_annotations_projection.
 Qed.
 
