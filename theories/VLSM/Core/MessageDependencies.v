@@ -102,8 +102,9 @@ Proof.
   induction Hdm; firstorder.
 Qed.
 
-(** In the absence of initial messages, and if [msg_dep_rel] reflects the
-pre-loaded message property, then it also reflects the [valid_message_prop]erty.
+(** In the absence of initial messages, and if [msg_dep_rel]ation reflects
+the pre-loaded message property, then it also reflects the
+[valid_message_prop]erty.
 *)
 Lemma msg_dep_reflects_validity
   `{MessageDependencies}
@@ -174,7 +175,7 @@ Proof.
 Qed.
 
 (** By combining Lemmas [msg_dep_has_been_sent] and [full_node_has_been_received],
-[msg_dep_rel] reflects the [has_been_observed] predicate.
+the [msg_dep_rel]ation reflects the [has_been_observed] predicate.
 *)
 Lemma msg_dep_full_node_reflects_has_been_observed
   `{MessageDependencies}
@@ -189,7 +190,8 @@ Proof.
   - eapply full_node_has_been_received; eassumption.
 Qed.
 
-(** Under full-node assumptions, [msg_dep_happens_before] reflects the [has_been_observed] predicate.
+(** Under full-node assumptions, the [msg_dep_happens_before] relation
+reflects the [has_been_observed] predicate.
 *)
 Lemma msg_dep_full_node_happens_before_reflects_has_been_observed
   `{MessageDependencies}
