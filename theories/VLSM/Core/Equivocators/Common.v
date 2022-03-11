@@ -22,7 +22,7 @@ Section sec_equivocator_vlsm.
 
 (** The state of such a machine will be abstracted using
 
-1. A [nat]ural <<n>>, stating the number of copies of the original machine
+1. A natural <<n>>, stating the number of copies of the original machine
 2. A state of <<X>> for each 1..n+1
 *)
 Local Definition bounded_state_copies := {n : nat & Fin.t (S n) -> vstate X}.

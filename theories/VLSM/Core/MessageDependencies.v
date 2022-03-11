@@ -90,9 +90,8 @@ Proof.
   apply t_trans.
 Qed.
 
-(** If the [msg_dep_rel]ation reflects a predicate <<P>> and the induced
-[msg_dep_happens_before] is [well_founded], then if <<P>> holds for a message,
-it will hold for all its dependencies. *)
+(** If the [msg_dep_rel]ation reflects a predicate <<P>>, then
+[msg_dep_happens_before] will also reflect it. *)
 Lemma msg_dep_happens_before_reflect
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
@@ -103,8 +102,9 @@ Proof.
   induction Hdm; firstorder.
 Qed.
 
-(** In the absence of initial messages, and if [msg_dep_rel] reflects the
-pre-loaded message property, then it also reflects the [valid_message_prop]erty.
+(** In the absence of initial messages, and if [msg_dep_rel]ation reflects
+the pre-loaded message property, then it also reflects the
+[valid_message_prop]erty.
 *)
 Lemma msg_dep_reflects_validity
   `{MessageDependencies}
@@ -144,21 +144,13 @@ Lemma msg_dep_has_been_sent
   (Hsent : has_been_sent X s m)
   : forall dm, msg_dep_rel dm m -> has_been_observed X s dm.
 Proof.
-  apply proper_sent in Hsent; [|assumption].
-  apply valid_state_has_trace in Hs as (is & tr & Htr).
-  specialize (Hsent _ _ Htr).
-  apply Exists_exists in Hsent as (item & Hitem & Houtput).
-  intros dm Hdm.
-  eapply in_futures_preserving_oracle_from_stepwise; cycle 2.
-  - eapply message_dependencies_are_necessary; [|eassumption].
-    unfold can_produce.
-    rewrite <- Houtput.
-    eapply can_produce_from_valid_trace; [|eassumption].
-    eapply valid_trace_forget_last.
-    exact (proj1 Htr).
-  - apply has_been_observed_from_sent_received_stepwise_props.
-  - eapply elem_of_trace_in_futures_left; [|eassumption].
-    exact (proj1 Htr).
+  revert m Hsent; induction Hs using valid_state_prop_ind; intro m.
+  - intro Hbs; contradict Hbs; eapply oracle_no_inits; [| assumption].
+    apply has_been_sent_stepwise_from_trace.
+  - rewrite has_been_sent_step_update by eassumption; intros [-> | Hrcv] dm Hdm.
+    + eapply message_dependencies_are_necessary; [eexists _,_; eassumption | eassumption].
+    + rewrite has_been_observed_step_update by eassumption; right.
+      eapply IHHs; eassumption.
 Qed.
 
 (** If the [valid]ity predicate has the [message_dependencies_full_node_condition_prop]erty,
@@ -173,29 +165,17 @@ Lemma full_node_has_been_received
   (Hreceived : has_been_received X s m)
   : forall dm, msg_dep_rel dm m -> has_been_observed X s dm.
 Proof.
-  intros dm Hdm.
-  apply proper_received in Hreceived; [|assumption].
-  apply valid_state_has_trace in Hs as [is [tr Htr]].
-  specialize (Hreceived _ _ Htr).
-  apply Exists_exists in Hreceived as [item [Hitem Hinput]].
-  apply elem_of_list_split in Hitem as [pre [suf Heqtr]].
-  eapply in_futures_preserving_oracle_from_stepwise with (s1 := finite_trace_last is pre)
-  ; [apply has_been_observed_from_sent_received_stepwise_props|..].
-  - exists (item  :: suf).
-    eapply finite_valid_trace_from_to_app_split.
-    rewrite <- Heqtr.
-    apply Htr.
-  - eapply Hfull; [|eassumption].
-    replace (Some m) with (input item) by assumption.
-    clear Hinput.
-    eapply (input_valid_transition_is_valid (pre_loaded_with_all_messages_vlsm X)).
-    eapply input_valid_transition_to; [|simpl; eassumption].
-    eapply valid_trace_forget_last.
-    apply Htr.
+  revert m Hreceived; induction Hs using valid_state_prop_ind; intro m.
+  - intro Hbr; contradict Hbr; eapply oracle_no_inits; [| assumption].
+    apply has_been_received_stepwise_from_trace.
+  - rewrite has_been_received_step_update by eassumption; intros [-> | Hrcv] dm Hdm
+    ; rewrite has_been_observed_step_update by eassumption; right.
+    + eapply Hfull; [apply Ht | assumption].
+    + eapply IHHs; eassumption.
 Qed.
 
 (** By combining Lemmas [msg_dep_has_been_sent] and [full_node_has_been_received],
-[msg_dep_rel] reflects the [has_been_observed] predicate.
+the [msg_dep_rel]ation reflects the [has_been_observed] predicate.
 *)
 Lemma msg_dep_full_node_reflects_has_been_observed
   `{MessageDependencies}
@@ -203,12 +183,45 @@ Lemma msg_dep_full_node_reflects_has_been_observed
   s
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
   : forall dm m, msg_dep_rel dm m ->
-    has_been_observed X s m ->
-    has_been_observed X s dm.
+    has_been_observed X s m -> has_been_observed X s dm.
 Proof.
   intros dm m Hdm [Hsent|Hreceived].
   - eapply msg_dep_has_been_sent; eassumption.
   - eapply full_node_has_been_received; eassumption.
+Qed.
+
+(** Under full-node assumptions, the [msg_dep_happens_before] relation
+reflects the [has_been_observed] predicate.
+*)
+Lemma msg_dep_full_node_happens_before_reflects_has_been_observed
+  `{MessageDependencies}
+  (Hfull : message_dependencies_full_node_condition_prop)
+  s
+  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  : forall dm m, msg_dep_happens_before dm m ->
+    has_been_observed X s m -> has_been_observed X s dm.
+Proof.
+  intros dm m Hdm Hobs.
+  eapply msg_dep_happens_before_reflect; [| eassumption| assumption].
+  apply msg_dep_full_node_reflects_has_been_observed; assumption.
+Qed.
+
+(** Under full-node assumptions, it it is valid to receive a message in a state
+then any of its happens-before dependencies [has_been_observed] in that state.
+*)
+Lemma msg_dep_full_node_input_valid_happens_before_has_been_observed
+  `{MessageDependencies}
+  (Hfull : message_dependencies_full_node_condition_prop)
+  l s m
+  (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m))
+  : forall dm, msg_dep_happens_before dm m ->
+    has_been_observed X s dm.
+Proof.
+  intro dm; rewrite msg_dep_happens_before_iff_one; intros [Hdm | (dm' & Hdm' & Hdm)].
+  - eapply Hfull; [apply Hvalid | eassumption].
+  - eapply msg_dep_happens_before_reflect; [| eassumption |].
+    + apply msg_dep_full_node_reflects_has_been_observed; [apply Hfull | apply Hvalid].
+    + eapply Hfull; [apply Hvalid | eassumption].
 Qed.
 
 End sec_message_dependencies.
@@ -379,11 +392,23 @@ Global Hint Mode FullMessageDependencies ! - - : typeclass_instances.
 Section full_message_dependencies_happens_before.
 
 Context
-  {message : Type}
+  `{EqDecision message}
   (message_dependencies : message -> set message)
   (full_message_dependencies : message -> set message)
   `{FullMessageDependencies _ message_dependencies full_message_dependencies}
   .
+
+Global Instance msg_dep_happens_before_dec :
+ RelDecision (msg_dep_happens_before message_dependencies).
+Proof.
+ refine
+   (fun m1 m2 =>
+      match decide (m1 ∈ full_message_dependencies m2) with
+      | left Hdec => left _
+      | right Hdec => right _
+      end);
+  rewrite <- full_message_dependencies_happens_before; assumption.
+Qed.
 
 Global Instance msg_dep_happens_before_irrefl :
   Irreflexive (msg_dep_happens_before message_dependencies).

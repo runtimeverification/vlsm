@@ -26,7 +26,6 @@ theories/VLSM/Core/Composition.v
 theories/VLSM/Core/Plans.v
 theories/VLSM/Core/VLSMProjections.v
 theories/VLSM/Core/Validator.v
-theories/VLSM/Core/Decisions.v
 theories/VLSM/Core/MessageDependencies.v
 theories/VLSM/Core/ProjectionTraces.v
 theories/VLSM/Core/SubProjectionTraces.v
