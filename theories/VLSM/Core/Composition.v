@@ -52,6 +52,11 @@ types <<[@label _ (IT n) | n <- index]>>.
       : Type
       := sigT (fun n => vlabel (IM n)).
 
+    (* Declaring this a "canonical structure" will make type checking
+       guess that a VLSMType should be composite_type instead of just
+       failing, if it has to compare composite_state with state or
+       vstate of an unsolved VLSMType or VLSM.
+     *)
     Canonical Structure composite_type : VLSMType message :=
       {| state := composite_state
        ; label := composite_label
