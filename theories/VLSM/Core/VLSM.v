@@ -40,12 +40,20 @@ and the [transition] function and [valid] predicate.
 Class VLSMMachine {message : Type} (vtype : VLSMType message) :=
   { initial_state_prop : state -> Prop
   ; initial_state := { s : state | initial_state_prop s }
+  ; s0 : Inhabited initial_state
   ; initial_message_prop : message -> Prop
   ; initial_message := { m : message | initial_message_prop m }
-  ; s0 : Inhabited initial_state
   ; transition : label -> state * option message -> state * option message
   ; valid : label -> state * option message -> Prop
   }.
+(* The & is a "bidirectionality hint", so that typechecking
+   a VLSMMachine record definition will try to use the expected
+   result type to determine [vtype] before typechecking the fields.
+   Without this, the types of the values given for the fields would
+   have to be written so they only mention the state and label type
+   in ways that can be matched with [@state _ ?vtype] and [@label _ ?vtype].
+ *)
+Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
 Definition option_initial_message_prop
   {message : Type} {vtype : VLSMType message} {vmachine : VLSMMachine vtype}

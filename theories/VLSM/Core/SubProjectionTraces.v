@@ -37,7 +37,7 @@ Lemma sub_IM_state_pi
   (e1 e2 : sub_index_prop i)
   : s (dexist i e1) = s (dexist i e2).
 Proof.
-  unfold composite_state in s. simpl in s. unfold _composite_state in s.
+  unfold composite_state in s. simpl in s.
   apply (dsig_f_equal (fun i => vstate (IM i)) s).
 Qed.
 

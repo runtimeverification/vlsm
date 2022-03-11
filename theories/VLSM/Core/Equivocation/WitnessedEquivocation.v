@@ -237,7 +237,7 @@ Lemma equivocating_validators_witness_last_char
      exists v, sender m = Some v /\
      v ∉ equivocating_validators s /\
      set_eq (equivocating_validators s') (set_add v (equivocating_validators s)) /\
-     forall (is : _composite_state IM) (tr : list transition_item),
+     forall (is : composite_state IM) (tr : list transition_item),
         finite_valid_trace_init_to PreFree is s tr ->
         trace_witnessing_equivocation_prop is tr ->
         ~ trace_has_message (field_selector output) m tr
