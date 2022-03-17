@@ -379,23 +379,39 @@ Context
   (sender : message -> option validator)
   .
 
-(** The property of a message of having a sender and being emitable by the
+(**
+The property of a message of having a sender and being emittable by the
 component corresponding to its sender pre-loaded with the dependencies of the
 message.
 *)
+Inductive Emittable_from_dependencies_prop (m : message) : Prop :=
+  | efdp : forall (v : validator) (Hsender : sender m = Some v),
+             can_emit (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m)) m ->
+               Emittable_from_dependencies_prop m.
+
 Definition emittable_from_dependencies_prop (m : message) : Prop :=
   match sender m with
   | None => False
   | Some v => can_emit (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m)) m
   end.
 
-(** The property of a message that both itself and all of its dependencies are
-emitable from their dependencies.
+Lemma emittable_from_dependencies_prop_iff m
+  : Emittable_from_dependencies_prop m <-> emittable_from_dependencies_prop m.
+Proof.
+  unfold emittable_from_dependencies_prop; split.
+  - inversion 1; rewrite Hsender; assumption.
+  - destruct (sender m) eqn:Hsender; [split with v; assumption|inversion 1].
+Qed.
+
+(**
+The property of a message that both itself and all of its dependencies are
+emittable from their dependencies.
 *)
 Definition all_dependencies_emittable_from_dependencies_prop (m : message) : Prop :=
-  forall dm, dm ∈ m :: full_message_dependencies m -> emittable_from_dependencies_prop dm.
+  forall dm, dm ∈ m :: full_message_dependencies m -> Emittable_from_dependencies_prop dm.
 
-(** The property of requiring that the validity predicate subsumes the
+(**
+The property of requiring that the validity predicate subsumes the
 [all_dependencies_emittable_from_dependencies_prop]erty.
 *)
 Definition valid_all_dependencies_emittable_from_dependencies_prop
@@ -403,7 +419,8 @@ Definition valid_all_dependencies_emittable_from_dependencies_prop
     forall l s m, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m) ->
       all_dependencies_emittable_from_dependencies_prop m.
 
-(** If a message can be emitted by a node preloaded with the message's direct
+(**
+If a message can be emitted by a node preloaded with the message's direct
 dependencies, and if all the dependencies of the message are valid for the
 free composition, the the message itself is valid for the free composition.
 *)
@@ -421,7 +438,8 @@ Proof.
     left ; assumption.
 Qed.
 
-(** Any message with the [all_dependencies_emittable_from_dependencies_prop]erty
+(**
+Any message with the [all_dependencies_emittable_from_dependencies_prop]erty
 is valid for the free composition.
 *)
 Lemma free_valid_from_all_dependencies_emitable_from_dependencies :
@@ -431,16 +449,17 @@ Lemma free_valid_from_all_dependencies_emitable_from_dependencies :
 Proof.
   intros m Hm.
   specialize (Hm m) as Hemit; spec Hemit; [left |].
-  unfold emittable_from_dependencies_prop in Hemit; destruct (sender m); [| contradiction].
-  apply free_valid_from_valid_dependencies with (A v); [assumption | clear v Hemit].
+  inversion Hemit as [v _ Hemit']; clear Hemit.
+  apply free_valid_from_valid_dependencies with (A v); [assumption | clear v Hemit'].
   eapply FullMessageDependencies_ind; [eassumption |].
   intros dm Hdm Hdeps.
   specialize (Hm dm); spec Hm; [right; assumption |].
-  unfold emittable_from_dependencies_prop in Hm; destruct (sender dm); [| contradiction].
+  inversion Hm as [v _ ?]; clear Hm.
   apply free_valid_from_valid_dependencies with (A v); assumption.
 Qed.
 
-(** If a node in a composition satisfied the
+(**
+If a node in a composition satisfied the
 [valid_all_dependencies_emittable_from_dependencies_prop]erty, then it also has
 the [component_message_validator_prop]erty, that is, it is a validator for the
 free composition.
