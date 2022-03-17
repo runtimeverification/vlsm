@@ -46,7 +46,7 @@ Lemma messages_with_valid_dependences_can_be_emitted s dm
   (Hemitted: can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
   : can_emit (equivocators_composition_for_sent IM equivocators s) dm.
 Proof.
-  eapply valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient
+  eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient
   ; intuition eauto.
 Qed.
 

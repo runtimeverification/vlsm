@@ -687,6 +687,48 @@ Lemma [basic_VLSM_incl]
       - intro; intros. apply lift_to_composite_state_initial. assumption.
     Qed.
 
+    (** If all messages desribed by a predicate <<P>> are valid for the free
+    composition pre-loaded with messages described by a predicate <<Q>>, then
+    any message which can be emitted by a component pre-loaded with <<P>> can
+    also be emitted by the free composition pre-loaded with <<Q>>.
+    *)
+    Lemma valid_preloaded_lifts_can_be_emitted
+      (P Q : message -> Prop)
+      (HPvalid : forall dm, P dm -> valid_message_prop (pre_loaded_vlsm free_composite_vlsm Q) dm)
+      : forall j m, can_emit (pre_loaded_vlsm (IM j) P) m ->
+        can_emit (pre_loaded_vlsm free_composite_vlsm Q) m.
+    Proof.
+      intros j m Hm.
+      eapply VLSM_incl_can_emit.
+      - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
+        intuition.
+      - eapply VLSM_full_projection_can_emit; [|eassumption].
+        apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
+        intuition.
+    Qed.
+
+    (** As a specialization of [valid_preloaded_lifts_can_be_emitted], if all
+    messages desribed by a predicate <<P>> are valid for the free composition,
+    then any message which can be emitted by a component pre-loaded with <<P>>
+    can also be emitted by the free composition.
+    *)
+    Lemma free_valid_preloaded_lifts_can_be_emitted
+      (P : message -> Prop)
+      (Hdeps : forall dm, P dm -> valid_message_prop free_composite_vlsm dm)
+      : forall i m, can_emit (pre_loaded_vlsm (IM i) P) m ->
+        can_emit free_composite_vlsm m.
+    Proof.
+      intros.
+      eapply VLSM_incl_can_emit.
+      - eapply VLSM_eq_proj2, (vlsm_is_pre_loaded_with_False free_composite_vlsm).
+      - eapply valid_preloaded_lifts_can_be_emitted; [|eassumption].
+        intros dm Hdm.
+        eapply VLSM_incl_valid_message.
+        + apply VLSM_eq_proj1, (vlsm_is_pre_loaded_with_False free_composite_vlsm).
+        + cbv; intuition.
+        + apply Hdeps; assumption.
+    Qed.
+
     Lemma valid_state_preloaded_composite_free_lift
       (j : index)
       (sj : vstate (IM j))
