@@ -15,6 +15,11 @@ description: |-
   (VLSM) abstractly models a distributed system with faults. This project
   contains a formalization of VLSMs and their theory in the Coq proof assistant.
 
+publications:
+- pub_doi: 10.48550/arXiv.2202.12662
+  pub_url: https://arxiv.org/abs/2202.12662
+  pub_title: 'VLSM: Validating Labelled State Transition and Message Production Systems'
+
 authors:
 - name: Mihai Calancea
 - name: Denisa Diaconescu
