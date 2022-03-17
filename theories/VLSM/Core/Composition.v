@@ -702,7 +702,7 @@ Lemma [basic_VLSM_incl]
       eapply VLSM_incl_can_emit.
       - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
         intuition.
-      - eapply VLSM_full_projection_can_emit; [|eassumption].
+      - eapply VLSM_full_projection_can_emit; [| eassumption].
         apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
         intuition.
     Qed.
@@ -721,7 +721,7 @@ Lemma [basic_VLSM_incl]
       intros.
       eapply VLSM_incl_can_emit.
       - eapply VLSM_eq_proj2, (vlsm_is_pre_loaded_with_False free_composite_vlsm).
-      - eapply valid_preloaded_lifts_can_be_emitted; [|eassumption].
+      - eapply valid_preloaded_lifts_can_be_emitted; [| eassumption].
         intros dm Hdm.
         eapply VLSM_incl_valid_message.
         + apply VLSM_eq_proj1, (vlsm_is_pre_loaded_with_False free_composite_vlsm).
