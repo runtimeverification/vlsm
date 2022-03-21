@@ -365,6 +365,15 @@ Definition pre_loaded_with_all_messages_validator_component_proj_incl
 
 End component_projection_validator.
 
+(** ** Basic validation condition for free composition
+
+In this section we show (Lemma [valid_free_validating_is_message_validating])
+that, under [FullMessageDependencies] assumptions, if the validity predicate
+ensures that message itself and all of its dependencies can be emitted using
+only its dependencies, then the input message is valid for the free composition,
+thus the node itself is a validator for the free composition.
+*)
+
 Section free_composition_validators.
 
 Context
@@ -422,7 +431,7 @@ Definition valid_all_dependencies_emittable_from_dependencies_prop
 (**
 If a message can be emitted by a node preloaded with the message's direct
 dependencies, and if all the dependencies of the message are valid for the
-free composition, the the message itself is valid for the free composition.
+free composition, then the message itself is valid for the free composition.
 *)
 Lemma free_valid_from_valid_dependencies
   m i
@@ -459,7 +468,7 @@ Proof.
 Qed.
 
 (**
-If a node in a composition satisfied the
+If a node in a composition satisfies the
 [valid_all_dependencies_emittable_from_dependencies_prop]erty, then it also has
 the [component_message_validator_prop]erty, that is, it is a validator for the
 free composition.

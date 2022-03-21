@@ -688,7 +688,7 @@ Lemma [basic_VLSM_incl]
     Qed.
 
     (**
-    If all messages desribed by a predicate <<P>> are valid for the free
+    If all messages described by a predicate <<P>> are valid for the free
     composition pre-loaded with messages described by a predicate <<Q>>, then
     any message which can be emitted by a component pre-loaded with <<P>> can
     also be emitted by the free composition pre-loaded with <<Q>>.
@@ -710,7 +710,7 @@ Lemma [basic_VLSM_incl]
 
     (**
     As a specialization of [valid_preloaded_lifts_can_be_emitted], if all
-    messages desribed by a predicate <<P>> are valid for the free composition,
+    messages described by a predicate <<P>> are valid for the free composition,
     then any message which can be emitted by a component pre-loaded with <<P>>
     can also be emitted by the free composition.
     *)
