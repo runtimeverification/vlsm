@@ -1700,7 +1700,7 @@ Proof.
     reflexivity.
 Qed.
 
-Lemma valid_preloaded_lifts_can_be_emitted
+Lemma sub_valid_preloaded_lifts_can_be_emitted
   (P Q : message -> Prop)
   (HPvalid : forall dm, P dm -> valid_message_prop (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q) dm)
   : forall m, can_emit (pre_loaded_vlsm (IM j) P) m ->

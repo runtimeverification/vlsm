@@ -408,7 +408,7 @@ Proof.
                       IM full_message_dependencies sender (original_state s) im)).
   - specialize (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
             as (j & Heqv_j & Hemitj).
-    eapply valid_preloaded_lifts_can_be_emitted
+    eapply sub_valid_preloaded_lifts_can_be_emitted
     ; [eassumption | | eassumption]; cbn; intros dm H_dm.
     assert (Hdm : msg_dep_happens_before message_dependencies dm im)
         by (apply msg_dep_happens_before_iff_one; left; assumption).
@@ -421,7 +421,7 @@ Proof.
                   _ _ HLemit Hnobserved _ Hdm)
             as [Hobs_dm | (dm_i & Hdm_i & Hemit_dm)]
     ; [left; right; assumption | right].
-    eapply valid_preloaded_lifts_can_be_emitted
+    eapply sub_valid_preloaded_lifts_can_be_emitted
     ; [eassumption | |]; cycle 1.
     + eapply message_dependencies_are_sufficient; [typeclasses eauto | assumption].
     + intros dm' Hdm'; apply Hind.

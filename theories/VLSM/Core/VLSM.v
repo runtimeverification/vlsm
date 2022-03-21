@@ -176,15 +176,6 @@ In Coq, we can define these objects (which we name [transition_item]s) as consis
       : Prop
       := forall m, trace_received_not_sent_before_or_after tr m -> P m.
 
-  (** [proto_run] is used for an alternative definition of [valid_state_message_prop], which
-  takes into account transitions. See 'vlsm_run_prop'.
-  *)
-  Record proto_run : Type := mk_proto_run
-    { start : state
-      ; transitions : list transition_item
-      ; final : state * option message
-    }.
-
   Inductive Trace : Type :=
   | Finite : state -> list transition_item -> Trace
   | Infinite : state -> Stream transition_item -> Trace.
@@ -428,7 +419,6 @@ or [VLSMType]. Functions [machine] and [type] below achieve this precise purpose
   Definition vvalid := @valid _ _ machine.
   Definition vtransition_item := @transition_item _ type.
   Definition vTrace := @Trace _ type.
-  Definition vproto_run := @proto_run _ type.
 
 End vlsm_projections.
 
