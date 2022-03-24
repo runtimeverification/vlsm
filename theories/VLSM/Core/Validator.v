@@ -378,7 +378,7 @@ Section free_composition_validators.
 
 Context
   {message : Type}
-  `{EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -479,6 +479,35 @@ Lemma valid_free_validating_is_message_validating
 Proof.
   intros i Hvalidating l s im Hv.
   eapply free_valid_from_all_dependencies_emitable_from_dependencies, Hvalidating; eassumption.
+Qed.
+
+(**
+Under several additional (but regularly used) assumptions, including the
+[MessageDependencies] assumptions, the [channel_authentication_prop]erty and the
+[no_initial_messages_in_IM_prop]erty, we can show that the
+[component_message_validator_prop]erty is fully equivalent to the
+[valid_all_dependencies_emittable_from_dependencies_prop]erty.
+*)
+Lemma valid_free_validating_equiv_message_validating
+  `{forall i, MessageDependencies message_dependencies (IM i)}
+  (Hchannel : channel_authentication_prop  IM A sender)
+  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
+  : forall i, component_message_validator_prop IM (free_constraint IM) i <->
+  valid_all_dependencies_emittable_from_dependencies_prop i.
+Proof.
+  intros; split; [|apply valid_free_validating_is_message_validating].
+  intros Hvalidator l s m Hv dm Hdm.
+  specialize (Hvalidator l s m Hv).
+  inversion Hdm as [|? ? ? Hin]; subst.
+  - eapply composite_no_initial_valid_messages_emitted_by_sender in Hvalidator
+      as [v [Hsender Hemit]]; [| eassumption | assumption].
+    exists v; [assumption |].
+    eapply message_dependencies_are_sufficient; [typeclasses eauto | assumption].
+  - apply full_message_dependencies_happens_before in Hin.
+    eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender
+      in Hin as [v [Hsender Hemit]]. 2-6: eassumption.
+    exists v; [assumption |].
+    eapply message_dependencies_are_sufficient; [typeclasses eauto | assumption].
 Qed.
 
 End free_composition_validators.
