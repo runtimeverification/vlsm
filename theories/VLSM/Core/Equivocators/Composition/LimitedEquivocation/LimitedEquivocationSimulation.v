@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Reals.
 From VLSM Require Import Lib.StdppListSet Lib.FinFunExtras.
@@ -100,7 +101,7 @@ Proof.
     (fixed_equivocators_finite_valid_trace_init_to_rev IM _
       no_initial_messages_in_IM _ _ _ HtrX)
     as (is & s & tr & His & Hs & Htr & Hptr & Houtput).
-  exists is, s, tr; intuition.
+  exists is, s, tr; split_and?; try itauto.
   revert Hptr; apply VLSM_incl_finite_valid_trace_init_to.
   apply equivocators_Fixed_incl_Limited; assumption.
 Qed.
@@ -137,7 +138,7 @@ Proof.
   apply limited_equivocators_finite_valid_trace_init_to_rev
      in HtrX as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput)
   ; [| assumption].
-  exists is, s, tr; subst; intuition.
+  exists is, s, tr; subst; split_and!; try itauto.
   - erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last; reflexivity.
   - rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
 Qed.

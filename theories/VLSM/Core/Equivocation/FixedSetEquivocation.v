@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun FunctionalExtensionality.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
@@ -1008,7 +1009,7 @@ Proof.
   simpl.
   specialize (strong_fixed_equivocation_no_equivocators s m).
   unfold composite_no_equivocations, composite_no_equivocations_except_from, sent_except_from. simpl.
-  intuition.
+  itauto.
 Qed.
 
 Lemma strong_fixed_equivocation_vlsm_composition_no_equivocators
@@ -1073,7 +1074,7 @@ Lemma lift_strong_fixed_non_equivocating
 Proof.
   apply induced_sub_projection_lift.
   intros s1 s2 Heq l om.
-  destruct om as [m|]; [|intuition].
+  destruct om as [m|]; [|itauto].
   cut
     (forall m, sent_by_non_equivocating IM equivocators s1 m ->
       sent_by_non_equivocating IM equivocators s2 m).

@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import Reals.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinFunExtras Measurable.
@@ -257,7 +258,7 @@ Lemma msg_dep_full_node_valid_iff l (s : @state _ (annotated_type (free_composit
     vvalid (full_node_limited_equivocation_vlsm IM sender) l (s, om).
 Proof.
   cbn; unfold annotated_valid, coeqv_limited_equivocation_constraint; destruct l as [i li].
-  setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators; intuition.
+  setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
 Qed.
 
 Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
@@ -267,7 +268,7 @@ Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_com
 Proof.
   cbn; unfold annotated_transition;
     destruct (vtransition _ _ _) as (s', om'), l as (i, li).
-  setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators; intuition.
+  setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
 Qed.
 
 Lemma msg_dep_full_node_limited_equivocation_vlsm_incl :
@@ -382,7 +383,7 @@ Proof.
     ; rewrite decide_False, elem_of_app, !elem_of_map_option by assumption.
     right; exists dm; rewrite elem_of_list_filter
     ; setoid_rewrite full_message_dependencies_happens_before
-    ; intuition.
+    ; itauto.
   }
   apply emitted_messages_are_valid in Him.
   eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender; eassumption.
@@ -453,7 +454,7 @@ Proof.
             finite_valid_trace_last_pstate, Htr.
     + apply set_eq_extract_forall.
       setoid_rewrite elem_of_remove_dups.
-      intuition.
+      itauto.
   - split; [| apply Htr].
     apply valid_trace_add_default_last in Htr.
     induction Htr using finite_valid_trace_init_to_rev_ind
@@ -635,7 +636,7 @@ Proof.
       (finite_valid_trace_from Limited is tr /\
         (state_annotation (@finite_trace_last _ (type Limited) is tr) ⊆ equivocators))
   end
-  ; [intuition |].
+  ; [itauto |].
   induction Htr using finite_valid_trace_init_to_rev_strong_ind.
   - split; [| apply list_subseteq_nil].
     constructor; apply initial_state_is_valid; split; [assumption | reflexivity].

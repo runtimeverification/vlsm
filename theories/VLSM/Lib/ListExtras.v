@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun.
 From VLSM Require Import Lib.Preamble.
@@ -278,14 +279,14 @@ Proof.
   destruct (decide (P a)).
   - exists nil, l, a.
     rewrite Exists_nil.
-    tauto.
+    itauto.
   - apply Exists_cons in Hsomething.
     destruct Hsomething;[exfalso;tauto|].
     specialize (IHl H);clear H.
     destruct IHl as [prefix [suffix [first [Hf [-> Hnone_before]]]]].
     exists (a :: prefix), suffix, first.
     rewrite Exists_cons.
-    tauto.
+    itauto.
 Qed.
 
 Lemma in_not_in : forall A (x y : A) (l:list A),
@@ -473,7 +474,7 @@ Proof.
   intros l1 l2 x; split; intro H_in;
   apply in_or_app; apply in_app_or in H_in;
     destruct H_in as [cat | dog];
-    tauto.
+    itauto.
 Qed.
 
 Lemma nth_error_last
@@ -558,7 +559,7 @@ Proof.
     + assert (left_len = length left). {
         simpl in Hlen.
         inversion Hlen.
-        intuition.
+        itauto.
       }
       specialize (IHleft_len right left H (left ++ right) eq_refl).
       rewrite Hsplit.
@@ -1324,7 +1325,7 @@ Proof.
   induction l as [| h t]; cbn.
   - setoid_rewrite elem_of_nil. firstorder.
   - destruct (f h) eqn: Heq; setoid_rewrite elem_of_cons
-    ; firstorder; subst; intuition congruence + eauto.
+    ; firstorder; subst; itauto congruence + eauto.
 Qed.
 
 Lemma elem_of_map_option_rev
@@ -1336,7 +1337,7 @@ Lemma elem_of_map_option_rev
   (l : list A)
   : a ∈ l -> b ∈ map_option f l.
 Proof.
-  intro Ha; apply elem_of_map_option; exists a; intuition.
+  intro Ha; apply elem_of_map_option; exists a; itauto.
 Qed.
 
 Lemma in_map_option
@@ -1383,7 +1384,7 @@ Definition cat_option {A : Type} : list (option A) -> list A :=
   @map_option (option A) A id.
 
 Example cat_option1 : cat_option [Some 1; Some 5; None; Some 6; None] = [1; 5; 6].
-Proof. intuition. Qed.
+Proof. itauto. Qed.
 
 Lemma cat_option_length
   {A : Type}
@@ -1391,7 +1392,7 @@ Lemma cat_option_length
     (Hfl : Forall (fun a => a <> None) l)
   : length (cat_option l) = length l.
 Proof.
-  apply map_option_length; intuition.
+  apply map_option_length; itauto.
 Qed.
 
 Lemma cat_option_length_le
@@ -1400,7 +1401,7 @@ Lemma cat_option_length_le
   : length (cat_option l) <= length l.
 Proof.
   induction l.
-  - intuition.
+  - itauto.
   - simpl.
     destruct (id a) eqn : eq_id; simpl in *; subst a; simpl; lia.
 Qed.
@@ -1411,7 +1412,7 @@ Lemma cat_option_app
   cat_option (l1 ++ l2) = cat_option l1 ++ cat_option l2.
 Proof.
   induction l1.
-  - simpl in *. intuition.
+  - simpl in *. itauto.
   - destruct a eqn : eq_a;
       simpl in *;
       rewrite IHl1;
@@ -1432,7 +1433,7 @@ Proof.
   intros.
   unfold id in *.
   apply H.
-  all : intuition.
+  all : itauto.
 Qed.
 
 Lemma in_cat_option
@@ -1706,7 +1707,7 @@ Lemma list_max_exists2
    In (list_max l) l.
 Proof.
   destruct (list_max l) eqn : eq_max.
-  - destruct l;[intuition congruence|].
+  - destruct l;[itauto congruence|].
     specialize (list_max_le (n :: l) 0) as Hle.
     destruct Hle as [Hle _].
     rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
@@ -1714,7 +1715,7 @@ Proof.
     specialize (Hle n). spec Hle; [left |].
     simpl. lia.
   - specialize (list_max_exists l) as Hmax.
-    spec Hmax. lia. rewrite <- eq_max. intuition.
+    spec Hmax. lia. rewrite <- eq_max. itauto.
 Qed.
 
 Lemma list_max_elem_of_exists
@@ -1747,7 +1748,7 @@ Lemma list_max_elem_of_exists2
    (list_max l) ∈ l.
 Proof.
   destruct (list_max l) eqn : eq_max.
-  - destruct l;[intuition congruence|].
+  - destruct l;[itauto congruence|].
     specialize (list_max_le (n :: l) 0) as Hle.
     destruct Hle as [Hle _].
     rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
@@ -1770,7 +1771,7 @@ Definition mode
   filter (fun a => (count_occ decide_eq l a) = mode_value) l.
 
 Example mode1 : mode [1; 1; 2; 3; 3] = [1; 1; 3; 3].
-Proof. intuition. Qed.
+Proof. itauto. Qed.
 
 Lemma mode_not_empty
   `{EqDecision A}
@@ -1827,8 +1828,7 @@ Proof.
   destruct H.
   intros contra.
   rewrite contra in H0.
-  destruct H0.
-  intuition.
+  destruct H0; inversion H0.
 Qed.
 
 (* Computes the list suff which satisfies <<pref ++ suff = l>> or
@@ -1851,9 +1851,9 @@ Fixpoint complete_prefix
   end.
 
 Example complete_prefix_some : complete_prefix [1;2;3;4] [1;2] = Some [3;4].
-Proof. intuition. Qed.
+Proof. itauto. Qed.
 Example complete_prefix_none : complete_prefix [1;2;3;4] [1;3] = None.
-Proof. intuition. Qed.
+Proof. itauto. Qed.
 
 Lemma complete_prefix_empty
   `{EqDecision A}
@@ -1888,9 +1888,9 @@ Proof.
       destruct pref.
       * specialize (IHl [] l).
         spec IHl.
-        intuition.
+        itauto.
         rewrite app_nil_l in H.
-        f_equal. intuition.
+        f_equal. itauto.
       * destruct (decide (a = a0)) eqn : eq_d.
         specialize (IHl pref suff).
         unfold complete_prefix in IHl.
@@ -1905,12 +1905,12 @@ Proof.
      generalize dependent pref.
      induction l; intros.
      + destruct pref; destruct suff;
-       try intuition;
+       try itauto;
        try discriminate H.
      + destruct pref eqn : eq_pref.
        rewrite complete_prefix_empty in H.
        inversion H.
-       intuition.
+       itauto.
        simpl.
        simpl in H.
        destruct (decide (a = a0)).
@@ -1940,7 +1940,7 @@ Definition complete_suffix
   end.
 
 Example complete_suffix_some : complete_suffix [1;2;3;4] [3;4] = Some [1;2].
-Proof. intuition. Qed.
+Proof. itauto. Qed.
 
 Lemma complete_suffix_correct
   `{EqDecision A}

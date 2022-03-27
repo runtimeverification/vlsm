@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import Streams FinFun Rdefinitions.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
@@ -974,12 +975,12 @@ Proof.
   - intro m.
     unfold trace_has_message.
     rewrite Exists_nil.
-    tauto.
+    itauto.
   - intro m. specialize (IHHtr m).
     unfold trace_has_message.
     rewrite Exists_cons.
     apply (Horacle.(oracle_step_update)) with (msg:=m) in Ht.
-    tauto.
+    itauto.
 Qed.
 
 Lemma oracle_initial_trace_update
@@ -995,7 +996,7 @@ Proof.
   intros m.
   pose proof (oracle_partial_trace_update Horacle _ _ _ (proj1 Htr) m).
   pose proof (oracle_no_inits Horacle s0 (proj2 Htr) m).
-  clear -H H0. tauto.
+  clear -H H0. itauto.
 Qed.
 
 (* TODO(wkolowski): make notation uniform accross the file. *)
@@ -1051,7 +1052,7 @@ Section TraceFromStepwise.
     rewrite (oracle_partial_trace_update oracle_props _ _ _ Htr).
     assert (~oracle s0 m).
     apply oracle_props, Hinit.
-    tauto.
+    itauto.
   Qed.
 
   Lemma prove_all_have_message_from_stepwise:
@@ -1208,7 +1209,7 @@ Section StepwiseFromTrace.
     clear.
     progress cbn. unfold trace_has_message.
     rewrite Exists_app, Exists_cons, Exists_nil.
-    tauto.
+    itauto.
   Qed.
 
   Lemma stepwise_props_from_trace : oracle_stepwise_props selector oracle.
@@ -1823,8 +1824,8 @@ Section Composite.
         ; subst i item tr; cbn in *.
         apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr.
         rewrite finite_trace_last_is_last in Htr.
-        destruct itemX, l; cbn in *; intuition.
-        exists suf; assumption.
+        destruct itemX, l; cbn in *.
+        by split; [|split; [exists suf|]].
       Qed.
 
   End StepwiseProps.
@@ -2244,7 +2245,7 @@ Section Composite.
         (fun i => has_been_sent_stepwise_from_trace (IM i))
         Hs Horacle)
       as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
-    eexists _, _; intuition eassumption.
+    eexists _, _; itauto eassumption.
   Qed.
 
   Lemma received_component_received_previously
@@ -2267,7 +2268,7 @@ Section Composite.
         (fun i => has_been_received_stepwise_from_trace (IM i))
         Hs Horacle)
       as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
-    eexists _, _; intuition eassumption.
+    eexists _, _; itauto eassumption.
   Qed.
 
   Lemma messages_sent_from_component_produced_previously

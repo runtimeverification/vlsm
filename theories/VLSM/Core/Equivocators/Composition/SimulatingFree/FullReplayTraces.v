@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Lia Program.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.FinExtras Lib.FinFunExtras.
@@ -201,7 +202,7 @@ Proof.
            apply dec_sig_eq_iff; cbn; reflexivity.
       * rewrite state_update_neq by congruence.
         case_decide.
-        -- rewrite decide_True; rewrite ?elem_of_app; intuition.
+        -- rewrite decide_True; rewrite ?elem_of_app; itauto.
         -- rewrite decide_False; [assumption |].
            intros [Hin | Hx]%elem_of_app; [contradiction Hin | contradict Hx].
            rewrite elem_of_list_singleton, dsig_eq; cbn; congruence.

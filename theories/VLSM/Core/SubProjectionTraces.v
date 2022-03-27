@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Lia FinFun Eqdep Program.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
@@ -411,7 +412,7 @@ Program Definition sub_index_list_annotate : list sub_index :=
   list_annotate _ sub_index_list _.
 Next Obligation.
   apply Forall_forall.
-  intuition.
+  itauto.
 Qed.
 
 Global Instance stdpp_finite_sub_index
@@ -536,7 +537,7 @@ Proof.
     |- context [pre_loaded_vlsm ?v _] =>
       apply (pre_loaded_vlsm_incl v seed (fun m => True))
     end.
-    intuition.
+    itauto.
   - match goal with
     |- context [pre_loaded_with_all_messages_vlsm ?v] =>
       specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True v) as Hincl
@@ -1338,7 +1339,7 @@ Proof.
   case_decide; [|contradiction].
   simpl.
   f_equal.
-  apply dec_sig_eq_iff; intuition.
+  apply dec_sig_eq_iff; itauto.
 Qed.
 
 Lemma sub_IM_preserves_no_initial_messages
@@ -1365,7 +1366,7 @@ Proof.
     unfold sub_IM_sender in Hsender.
     destruct (sender m) as [_v|] eqn:Hsender_v; [|congruence].
     case_decide; [|congruence].
-    inversion Hsender; intuition.
+    inversion Hsender; itauto.
   - clear -Hm.
     revert Hm.
     unfold sub_IM, SubProjectionTraces.sub_IM. simpl.
@@ -1471,7 +1472,7 @@ Proof.
   ; rewrite state_update_neq by (setoid_rewrite dsig_eq; simpl; congruence)
   ; unfold lift_sub_state
   ; rewrite (lift_sub_state_to_eq _ _ _ _ _ Hj)
-  ; intuition.
+  ; itauto.
 Qed.
 
 Lemma sub_IM_no_equivocation_preservation
@@ -1497,14 +1498,14 @@ Proof.
     elim (no_initial_messages_in_IM i im); assumption.
   - apply (VLSM_incl_can_emit (constraint_preloaded_free_incl _ _)) in Hemitted.
     specialize (can_emit_projection IM A sender Hsender_safety (A v) m) as Hemit.
-    spec Hemit; [rewrite Hsender; intuition|].
+    spec Hemit; [rewrite Hsender; itauto|].
     apply Hemit in Hemitted. clear Hemit.
     case_decide.
     + left. subst.
       eexists; exact Hc.
     + right. exists (A v). split; [assumption|].
       unfold channel_authenticated_message.
-      rewrite Hsender; intuition.
+      rewrite Hsender; itauto.
 Qed.
 
 End sub_composition_sender.
@@ -1709,10 +1710,10 @@ Proof.
   intros m Hm.
   eapply VLSM_incl_can_emit.
   - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
-    intuition.
+    itauto.
   - eapply VLSM_full_projection_can_emit; [|eassumption].
     apply preloaded_sub_element_full_projection.
-    intuition.
+    itauto.
 Qed.
 
 (** *** A subcomposition can be projected to one component
@@ -1797,7 +1798,7 @@ Proof.
   ; destruct (vtransition _ _ _) as (si', om').
   do 2 inversion_clear 1.
   rewrite !sub_IM_state_update_eq.
-  intuition.
+  itauto.
 Qed.
 
 Definition induced_sub_element_projection constraint : VLSM message :=

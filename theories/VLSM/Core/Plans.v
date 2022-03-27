@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM Require Import Lib.ListExtras Core.VLSM.
 
@@ -135,7 +136,7 @@ Section apply_plans.
   Proof.
     replace (ai :: a') with ([ai] ++ a').
     apply _apply_plan_app.
-    intuition.
+    itauto.
   Qed.
 
   (** We can forget information from a trace to obtain a plan. *)
@@ -392,7 +393,7 @@ Section valid_plans.
       setoid_rewrite eq_trans.
       apply finite_valid_trace_from_extend.
       apply finite_valid_trace_from_empty.
-      apply input_valid_transition_destination in H; intuition.
+      apply input_valid_transition_destination in H; itauto.
       assumption.
   Qed.
 
@@ -436,11 +437,10 @@ Section valid_plans.
       apply Hensures.
       rewrite Heqs'.
       apply apply_plan_last_valid.
-      intuition.
-      intuition.
+      itauto.
       rewrite Heqs'.
       apply Hpreserves.
-      all : intuition.
+      all : itauto.
    Qed.
 
 End valid_plans.

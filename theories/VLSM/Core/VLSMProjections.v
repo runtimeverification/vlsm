@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM Require Import Core.VLSM.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
@@ -2696,7 +2697,7 @@ Lemma pre_loaded_vlsm_incl_relaxed
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
   apply basic_VLSM_incl.
-  1, 3-4: cbv; intuition.
+  1, 3-4: cbv; itauto.
   intros _ _ m _ _ [Him | Hp].
   - apply initial_message_is_valid; left; assumption.
   - apply PimpliesQorValid in Hp as [Hq | Hvalid]; [|assumption].
@@ -2708,7 +2709,7 @@ Lemma pre_loaded_vlsm_incl
   (PimpliesQ : forall m : message, P m -> Q m)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
-  apply pre_loaded_vlsm_incl_relaxed; intuition.
+  apply pre_loaded_vlsm_incl_relaxed; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_with_valid_eq
@@ -2717,22 +2718,22 @@ Lemma pre_loaded_vlsm_with_valid_eq
   : VLSM_eq (pre_loaded_vlsm X (fun m => P m \/ Q m)) (pre_loaded_vlsm X P).
 Proof.
   apply VLSM_eq_incl_iff; split.
-  - apply pre_loaded_vlsm_incl_relaxed; intuition.
-  - cbv; apply pre_loaded_vlsm_incl; intuition.
+  - apply pre_loaded_vlsm_incl_relaxed; itauto.
+  - cbv; apply pre_loaded_vlsm_incl; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_idem_l
   (P : message -> Prop)
   : VLSM_incl (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_idem_r
   (P : message -> Prop)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm (pre_loaded_vlsm X P) P).
 Proof.
-  apply basic_VLSM_incl_preloaded_with; cbv; intuition.
+  apply basic_VLSM_incl_preloaded_with; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_idem
@@ -2748,13 +2749,13 @@ Qed.
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l
   : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun m => True)).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_r
   : VLSM_incl (pre_loaded_vlsm X (fun m => True)) (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True
@@ -2770,7 +2771,7 @@ Lemma pre_loaded_vlsm_incl_pre_loaded_with_all_messages
   (P : message -> Prop)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False
@@ -2778,7 +2779,7 @@ Lemma vlsm_is_pre_loaded_with_False
 Proof.
   destruct X as (T, M). intro Hpp.
   apply VLSM_eq_incl_iff. simpl.
-  split; apply basic_VLSM_strong_incl; cbv; intuition.
+  split; apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma vlsm_incl_pre_loaded
@@ -2805,13 +2806,13 @@ Qed.
 Lemma pre_loaded_with_all_messages_vlsm_idem_l
   : VLSM_incl (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)) (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_idem_r
   : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)).
 Proof.
-  apply basic_VLSM_incl_preloaded; cbv; intuition.
+  apply basic_VLSM_incl_preloaded; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_idem
@@ -3089,10 +3090,10 @@ Proof.
   intros Hfull_proj isY trY HtrY.
   exists (state_lift isY).
   exists (VLSM_full_projection_finite_trace_project Hfull_proj trY).
-  intuition.
-  + apply (VLSM_full_projection_finite_valid_trace Hfull_proj).
+  split; [|split;[done|]].
+  - apply (VLSM_full_projection_finite_valid_trace Hfull_proj).
     assumption.
-  + apply induced_projection_trace_lift.
+  - apply induced_projection_trace_lift.
 Qed.
 
 End projection_induced_friendliness.
@@ -3151,7 +3152,7 @@ Proof.
   repeat split.
   - eapply finite_valid_trace_last_pstate; eassumption.
   - apply projection_induced_valid_message_char; [assumption| apply HivtX1].
-  - exists lX, sX. intuition. apply HivtX1.
+  - exists lX, sX. split_and!; try itauto. apply HivtX1.
   - cbn in *. rewrite <- HsX_pr.
     destruct (vtransition X2 _ _) as (_s'X2, _oom) eqn:H_tX2.
     apply (Htransition_Some2 _ _ HlX_pr _ _ _ _ HivtX1) in H_tX2

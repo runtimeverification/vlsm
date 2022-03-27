@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Eqdep Vectors.Fin Program.Equality Lia FunctionalExtensionality.
 From VLSM Require Import Lib.Preamble Core.VLSM Core.VLSMProjections.
@@ -760,7 +761,7 @@ Lemma newmachine_descriptor_dec (d : MachineDescriptor)
 Proof.
   destruct d.
   - left. exact I.
-  - right. simpl. intuition.
+  - right. simpl. itauto.
 Qed.
 
 (** Projecting an [equivocator_state] over a [MachineDescriptor].  *)
@@ -808,7 +809,7 @@ Definition existing_descriptor
 Local Instance  existing_descriptor_dec : RelDecision existing_descriptor.
 Proof.
   intros d s. destruct d; simpl.
-  - right. intuition.
+  - right. itauto.
   - destruct_equivocator_state_project s n _sn Hn.
     + left. eexists; reflexivity.
     + right. intros [si Hi]. congruence.

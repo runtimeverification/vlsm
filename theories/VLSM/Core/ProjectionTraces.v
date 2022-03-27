@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep.
 From VLSM Require Import Lib.Preamble Lib.StreamExtras Lib.ListExtras.
@@ -285,9 +286,8 @@ Proof.
       assumption.
     + intros m [[im Him] <-]; assumption.
     + intros l s iom [sX [<- Hv]].
-      exists (existT j l), sX.
-      intuition.
-      apply composite_project_label_eq.
+      exists (existT j l), sX.      
+      by split; [apply composite_project_label_eq|split].
     + intros l s iom s' oom.
       cbn; unfold lift_to_composite_state at 1; rewrite state_update_eq.
       intros Ht; setoid_rewrite Ht.

@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Vectors.Fin FunctionalExtensionality Arith.Compare_dec Lia Program.Equality.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
@@ -440,11 +441,11 @@ Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
     ; [|apply has_been_received_stepwise_from_trace].
-    cbv; intuition.
+    cbv; itauto.
   - intros s item; destruct item, l; cbn.
-    2,3:intuition.
+    2,3:itauto.
     intros [(_ & _ & _ & Him) _]; simpl in Him; subst.
-    intuition congruence.
+    itauto congruence.
 Qed.
 
 (** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm].
@@ -480,11 +481,11 @@ Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
     ; [|apply has_been_sent_stepwise_from_trace].
-    cbv; intuition.
+    cbv; itauto.
   - intros s item; destruct item, l; cbn.
-    2,3:intuition.
+    2,3:itauto.
     intros [_ Ht]; inversion_clear Ht.
-    intuition congruence.
+    itauto congruence.
 Qed.
 
 (** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm].

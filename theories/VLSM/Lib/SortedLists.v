@@ -1,6 +1,7 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From Coq Require Import Sorting RelationClasses Relations Orders ListSet.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.ListSetExtras.
+From Coq Require Import Sorting RelationClasses Relations Orders.
+From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.ListSetExtras.
 
 (** * Sorted list utility functions and lemmas **)
 
@@ -245,7 +246,7 @@ Proof.
     destruct H as [Hirr Htr].
     pose proof (Htr x1 x2 x1 H2 H3) as Hlt.
     unfold complement in ltIrr.
-    tauto.
+    itauto.
   }
   subst.
   split. reflexivity.
@@ -398,7 +399,7 @@ Proof.
   rename H into Hin_y.
   destruct Hin_y as [Hin_y|Hin_y].
   - symmetry in Hin_y.
-    intuition.
+    itauto.
   - apply elem_of_app in Hin_y; destruct Hin_y.
     * apply elem_of_list_split in H.
       destruct H as [pref2 [suf2 Hconcat2]].

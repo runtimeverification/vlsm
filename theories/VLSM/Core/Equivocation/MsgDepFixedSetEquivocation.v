@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import Relations.Relation_Operators.
 From VLSM.Lib Require Import Preamble StdppListSet FinFunExtras.
@@ -47,7 +48,7 @@ Lemma messages_with_valid_dependences_can_be_emitted s dm
   : can_emit (equivocators_composition_for_sent IM equivocators s) dm.
 Proof.
   eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient
-  ; intuition eauto.
+  ; itauto eauto.
 Qed.
 
 Lemma msg_dep_rel_reflects_dependencies_with_non_equivocating_senders_were_sent s
@@ -59,7 +60,7 @@ Proof.
   apply Hdeps.
   transitivity dm; [assumption|].
   apply msg_dep_happens_before_iff_one.
-  intuition.
+  itauto.
 Qed.
 
 Lemma dependencies_are_valid s m
@@ -73,7 +74,7 @@ Proof.
   intros Heqv dm Hdm.
   apply emitted_messages_are_valid_iff.
   assert (Hdm_hb : msg_dep_happens_before message_dependencies dm m)
-    by (apply msg_dep_happens_before_iff_one; intuition).
+    by (apply msg_dep_happens_before_iff_one; itauto).
   destruct (Heqv _ Hdm_hb) as [Hsent | (dm_i & Hdm_i & Hemitted)]
   ; [left; right; assumption | right].
   apply messages_with_valid_dependences_can_be_emitted with dm_i
@@ -93,7 +94,7 @@ Proof.
   cut (forall dm, msg_dep_rel message_dependencies dm m -> valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm)
   ; [| apply dependencies_are_valid; assumption].
   intro Hdeps; right.
-  apply messages_with_valid_dependences_can_be_emitted with i; intuition.
+  apply messages_with_valid_dependences_can_be_emitted with i; itauto.
 Qed.
 
 Lemma msg_dep_strong_fixed_equivocation_constraint_subsumption
@@ -355,7 +356,7 @@ Lemma full_node_fixed_equivocation_constraint_subsumption
       full_node_fixed_set_equivocation_constraint
       (fixed_equivocation_constraint IM equivocators).
 Proof.
-  intros l [s [m |]] (_ & Hm & Hv & Hc); [| intuition]
+  intros l [s [m |]] (_ & Hm & Hv & Hc); [| itauto]
   ; destruct Hc as [Hsent | Heqv]; [left | right].
   - revert Hsent; apply sent_by_non_equivocating_are_observed.
   - destruct l as [i li], Heqv as (j & Hsender & HAj).
@@ -364,7 +365,7 @@ Proof.
     {
       apply pre_loaded_vlsm_incl_relaxed
         with (P := fun dm => composite_has_been_observed IM s dm \/ dm ∈ message_dependencies m).
-      intros m0 [Hsent_m0 | Hdep_m0]; [intuition |].
+      intros m0 [Hsent_m0 | Hdep_m0]; [itauto |].
       left; exists i.
       specialize (Hv _ Hdep_m0) as [Hsent | Hreceived]
       ; [left | right]; assumption.
@@ -373,7 +374,7 @@ Proof.
     {
       apply @preloaded_sub_element_full_projection
         with (Hj := HAj) (P := fun dm => dm ∈ message_dependencies m).
-      intuition.
+      itauto.
     }
     eapply message_dependencies_are_sufficient with (X := IM (A j)); [typeclasses eauto |].
     cut (exists k, can_emit (pre_loaded_with_all_messages_vlsm (IM k)) m).

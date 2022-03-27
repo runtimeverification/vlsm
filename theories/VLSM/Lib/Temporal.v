@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From Coq Require Import Streams Classical.
 
 Set Implicit Arguments.
@@ -110,9 +111,9 @@ Lemma use_eventually [A:Type] (P Q : Stream A -> Prop):
             exists s', P s' /\ Forever Q s'.
 Proof.
   induction 1.
-  exists s;tauto.
+  exists s;itauto.
   inversion 1. subst.
-  tauto.
+  itauto.
 Qed.
 
 Lemma refutation [A:Type] [R:A -> A-> Prop] (HR: well_founded R)

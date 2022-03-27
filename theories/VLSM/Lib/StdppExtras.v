@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras.
 
@@ -118,7 +119,7 @@ Proof.
   destruct (decide (P x)).
   - exists l, nil, x.
     rewrite Exists_nil.
-    tauto.
+    itauto.
   - apply Exists_app in Hsomething.
     destruct Hsomething.
     2:{ inversion H; subst. contradiction. inversion H1. }
@@ -127,7 +128,7 @@ Proof.
     exists prefix, (suffix ++ [x]), last.
     simpl. rewrite app_assoc_reverse. simpl.
     rewrite Exists_app. rewrite Exists_cons. rewrite Exists_nil.
-    tauto.
+    itauto.
 Qed.
 
 Lemma existsb_last
@@ -189,10 +190,10 @@ Definition get_maximal_elements
   filter (fun a => Forall (fun b => (~ preceeds a b)) l) l.
 
 Example get_maximal_elements1: get_maximal_elements Nat.lt [1; 4; 2; 4] = [4;4].
-Proof. intuition. Qed.
+Proof. itauto. Qed.
 
 Example get_maximal_elements2 : get_maximal_elements Nat.le [1; 4; 2; 4] = [].
-Proof. intuition. Qed.
+Proof. itauto. Qed.
 
 Lemma filter_ext_elem_of {A} P Q
  `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} (l:list A) :
@@ -253,17 +254,17 @@ Proof.
      apply filter_ext_elem_of.
      intros.
      specialize (Hext a H2).
-     rewrite Hext. intuition.
+     rewrite Hext. itauto.
    - specialize (ext_elem_of_filter _ _ l H1) as Hext.
      apply filter_ext_elem_of. intros.
      specialize (Hext a H2).
      destruct (decide (P a)); destruct (decide (Q a)).
-     * tauto.
+     * itauto.
      * apply Hext in n.
        contradict n; assumption.
      * apply Hext in n.
        contradict n; assumption.
-     * tauto.
+     * itauto.
 Qed.
 
 Lemma NoDup_elem_of_remove A (l l' : list A) a :

@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.StreamExtras.
@@ -439,7 +440,7 @@ Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
       (P : message -> Prop)
       : VLSM_incl (pre_loaded_vlsm (composite_vlsm constraint) P) (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
     Proof.
-      apply basic_VLSM_strong_incl; cbv; intuition.
+      by apply basic_VLSM_strong_incl; cbv; try itauto.
     Qed.
 
     Lemma constraint_free_valid_state_message_preservation
@@ -702,10 +703,10 @@ Lemma [basic_VLSM_incl]
       intros j m Hm.
       eapply VLSM_incl_can_emit.
       - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
-        intuition.
+        itauto.
       - eapply VLSM_full_projection_can_emit; [| eassumption].
         apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
-        intuition.
+        itauto.
     Qed.
 
     (**
@@ -727,7 +728,7 @@ Lemma [basic_VLSM_incl]
         intros dm Hdm.
         eapply VLSM_incl_valid_message.
         + apply VLSM_eq_proj1, (vlsm_is_pre_loaded_with_False free_composite_vlsm).
-        + cbv; intuition.
+        + cbv; itauto.
         + apply Hdeps; assumption.
     Qed.
 
@@ -1095,7 +1096,7 @@ Section composite_plan_properties.
     input_valid Free l (s', input).
   Proof.
     unfold input_valid in *.
-    split; [intuition|intuition|..].
+    split; [itauto|split;[itauto|]].
     unfold valid in *; simpl in *.
     unfold constrained_composite_valid in *.
     unfold composite_valid in *.
@@ -1105,7 +1106,7 @@ Section composite_plan_properties.
     simpl in i.
     unfold i in Heq.
     rewrite <- Heq.
-    assumption.
+    itauto.
   Qed.
 
   (* The effect of the transition is also the same *)
@@ -1127,7 +1128,8 @@ Section composite_plan_properties.
     simpl in i.
     unfold i in Heq.
     rewrite Heq.
-    destruct (vtransition (IM x) v (s' x, input)); [intuition|..].
+    destruct (vtransition (IM x) v (s' x, input)).
+    split; [done|].
     unfold i.
     rewrite state_update_eq.
     rewrite state_update_eq.
@@ -1164,7 +1166,7 @@ Section composite_plan_properties.
         unfold input_valid_transition in *.
         destruct Ht as [Hpr_valid Htrans].
         apply relevant_component_transition with (s' := s') in Hpr_valid.
-        all : intuition.
+        all : itauto.
       }
 
       apply finite_valid_trace_from_extend.
@@ -1181,7 +1183,7 @@ Section composite_plan_properties.
       | let (_, _) := ?t in _ => replace t with (s0, o) in Hrel
       end.
       unfold i.
-      intuition.
+      itauto.
   Qed.
 
   (* Transitioning on some index different from <<i>> does not affect
@@ -1226,7 +1228,7 @@ Section composite_plan_properties.
     (res i) = (s i).
   Proof.
     induction a using rev_ind.
-    - simpl; intuition.
+    - simpl; itauto.
     - simpl in *.
       rewrite (composite_apply_plan_app IM).
       destruct (composite_apply_plan IM s a) as (tra, sa) eqn : eq_a; simpl in *.
@@ -1288,7 +1290,7 @@ Section composite_plan_properties.
         intros e H; simpl.
         rewrite 2 map_app, elem_of_app.
         left; assumption.
-        intuition.
+        itauto.
       }
 
       spec IHa. {
@@ -1301,7 +1303,7 @@ Section composite_plan_properties.
 
       spec Hrel. {
         apply apply_plan_last_valid.
-        all : intuition.
+        all : itauto.
       }
 
       specialize (Hrel x); simpl in *.
@@ -1321,7 +1323,7 @@ Section composite_plan_properties.
       destruct Hrel as [Hrelpr Hrelind].
       split.
       + apply finite_valid_plan_from_app_iff.
-        split; intuition.
+        split; itauto.
       + intros i Hi.
         specialize (IHaind i Hi).
         specialize (Heq i Hi).
@@ -1338,7 +1340,7 @@ Section composite_plan_properties.
           as (trx', sx') eqn : eq_xsa'.
         simpl in *.
         destruct (decide (i = (projT1 (label_a x)))).
-        * rewrite e; intuition.
+        * rewrite e; itauto.
         * specialize (irrelevant_components_one sa) as Hdiff.
           specialize (Hdiff x i n).
 

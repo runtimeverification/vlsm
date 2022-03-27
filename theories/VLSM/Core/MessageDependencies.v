@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import FinFun Relations.Relation_Operators Program.Equality.
 From VLSM.Lib Require Import Preamble ListExtras FinFunExtras StdppListSet Measurable.
@@ -270,7 +271,7 @@ Proof.
     revert Hemitj.
     eapply VLSM_full_projection_can_emit.
     apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
-    intuition.
+    itauto.
 Qed.
 
 Lemma msg_dep_reflects_free_validity
@@ -289,14 +290,14 @@ Proof.
   {
     clear -no_initial_messages_in_IM.
     rewrite emitted_messages_are_valid_iff.
-    intros [[[i [[im Him] _]] | Hpreloaded] | Hemit]; intuition.
+    intros [[[i [[im Him] _]] | Hpreloaded] | Hemit]; try itauto.
     contradict Him; apply no_initial_messages_in_IM.
   }
   eapply msg_dep_reflects_validity.
   - apply composite_message_dependencies.
   - intros _ [i [[im Him] _]].
     contradict Him; apply no_initial_messages_in_IM.
-  - intuition.
+  - itauto.
   - eassumption.
   - apply emitted_messages_are_valid_iff.
     apply (VLSM_eq_can_emit XeqXFalse) in Hemit.

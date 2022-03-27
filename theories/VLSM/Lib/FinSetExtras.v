@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 
@@ -43,7 +44,7 @@ Section general.
     apply subseteq_size.
     apply elem_of_subseteq.
     intros x Hx.
-    apply elem_of_difference in Hx. intuition.
+    apply elem_of_difference in Hx. itauto.
   Qed.
 
   Lemma union_size_le_sum
@@ -84,7 +85,7 @@ Section general.
       - set_solver.
       - destruct (@decide (a ∈ Y)).
         apply elem_of_dec_slow.
-        + apply elem_of_union. left. intuition.
+        + apply elem_of_union. left. itauto.
         + apply elem_of_union. right. set_solver.
     }
     assert (Htemp2 : size Y + size (X ∖ Y) = size X). {
@@ -93,10 +94,10 @@ Section general.
         apply elem_of_disjoint.
         intros a Ha Ha2.
         apply elem_of_difference in Ha2.
-        intuition.
+        itauto.
       }
       rewrite Htemp in Hun.
-      intuition.
+      itauto.
     }
     lia.
   Qed.
@@ -163,7 +164,7 @@ Section filter.
     intros a HaP.
     apply elem_of_filter in HaP.
     apply elem_of_filter.
-    intuition.
+    itauto.
   Qed.
 
 End filter.

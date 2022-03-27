@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 
 (* TODO(traiansf): fix indentation for the whole file. *)
@@ -77,7 +78,7 @@ simple induction x.
 - simpl. rewrite elem_of_cons; intros [H1| H2]; auto with datatypes.
 - simpl; intros a0 l IH.
   destruct (decide (b = a0)).
-  * simpl; tauto.
+  * simpl; itauto.
   * rewrite elem_of_cons; intros [Heq|Hin].
     + subst; right; left.
     + specialize (IH Hin).
@@ -103,7 +104,7 @@ Proof.
 induction 1 as [|x l H H' IH]; simpl.
 - constructor; [|apply NoDup_nil; trivial]; intro Ha; inversion Ha.
 - destruct (decide (a = x)) as [<-|Hax]; constructor; trivial.
-  rewrite set_add_iff. intuition.
+  rewrite set_add_iff. itauto.
 Qed.
 
 Lemma set_remove_1 (a b : A) (l : set) : a ∈ (set_remove b l) -> a ∈ l.
@@ -111,7 +112,7 @@ Proof.
 induction l as [|x xs Hrec].
 - intros. auto.
 - simpl; destruct (decide (b = x)); rewrite elem_of_cons.
-  * tauto.
+  * itauto.
   * intro H. destruct H.
     + rewrite H. left.
     + rewrite elem_of_cons.
@@ -160,7 +161,7 @@ induction 1 as [|x l H H' IH]; simpl.
 - constructor.
 - destruct (decide (a = x)) as [<-|Hax]; trivial.
   constructor; trivial.
-  rewrite set_remove_iff; trivial. intuition.
+  rewrite set_remove_iff; trivial. itauto.
 Qed.
 
 Lemma set_union_intro : forall (a:A) (x y:set),
@@ -181,11 +182,11 @@ Lemma set_union_elim :
  forall (a:A) (x y:set), a ∈ (set_union x y) -> a ∈ x \/ a ∈ y.
 Proof.
 simple induction y; simpl.
-- tauto.
+- itauto.
 - intros; rewrite elem_of_cons.
   destruct (set_add_elim a a0 _ H0).
   + right; left; assumption.
-  + tauto.
+  + itauto.
 Qed.
 
 Lemma set_union_iff a l l': a ∈ (set_union l l') <-> a ∈ l \/ a ∈ l'.
