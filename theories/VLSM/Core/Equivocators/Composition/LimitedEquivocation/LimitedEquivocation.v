@@ -280,7 +280,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
 Proof.
   eapply equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
       in Htr as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_limited)
-  ; [| eassumption].  
+  ; [| eassumption].
   exists trX, initial_descriptors.
   cbn; split_and?; try itauto.
   eapply msg_dep_limited_fixed_equivocation; eassumption.

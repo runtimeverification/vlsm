@@ -1962,8 +1962,10 @@ Lemma SeededXE_incl_PreFreeE
   : VLSM_incl SeededXE SubPreFreeE.
 Proof.
   apply basic_VLSM_strong_incl.
-  1,2,4:cbv; intros; try (specialize (H1 n)); itauto.
-  intros l s om [Hv _]; split; [assumption | exact I].
+  - intros s Hn n; specialize (Hn n); itauto.
+  - cbv; itauto.
+  - intros l s om [Hv _]; split; [assumption | exact I].
+  - cbv; itauto.
 Qed.
 
 Lemma PreSeededXE_incl_PreFreeE

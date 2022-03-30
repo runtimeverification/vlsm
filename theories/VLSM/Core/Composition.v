@@ -440,7 +440,7 @@ Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
       (P : message -> Prop)
       : VLSM_incl (pre_loaded_vlsm (composite_vlsm constraint) P) (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
     Proof.
-      by apply basic_VLSM_strong_incl; cbv; try itauto.
+      by apply basic_VLSM_strong_incl; cbv; [..|itauto|].
     Qed.
 
     Lemma constraint_free_valid_state_message_preservation
