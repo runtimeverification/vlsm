@@ -76,11 +76,7 @@ build: |-
 
   ## Building instructions
 
-  For local development, the project is compatible with the Jan 2022 package pick for Coq 8.15 of
-  [Coq Platform release 2022.01.0](https://github.com/coq/platform/releases/tag/2022.01.0),
-  so you can obtain all dependencies by installing that Coq Platform variant.
-
-  To instead install dependencies manually via [opam](https://opam.ocaml.org/doc/Install.html), do:
+  To install the project dependencies via [opam](https://opam.ocaml.org/doc/Install.html), do:
 
   ```shell
   opam repo add coq-released https://coq.inria.fr/opam/released
