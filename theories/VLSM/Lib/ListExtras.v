@@ -1325,7 +1325,7 @@ Proof.
   induction l as [| h t]; cbn.
   - setoid_rewrite elem_of_nil. firstorder.
   - destruct (f h) eqn: Heq; setoid_rewrite elem_of_cons
-    ; firstorder; subst; itauto congruence + eauto.
+    ; firstorder; subst; itauto (eauto || congruence).
 Qed.
 
 Lemma elem_of_map_option_rev
@@ -1905,8 +1905,7 @@ Proof.
      generalize dependent pref.
      induction l; intros.
      + destruct pref; destruct suff;
-       try itauto;
-       try discriminate H.
+       simpl in H; itauto (auto || congruence).
      + destruct pref eqn : eq_pref.
        rewrite complete_prefix_empty in H.
        inversion H.

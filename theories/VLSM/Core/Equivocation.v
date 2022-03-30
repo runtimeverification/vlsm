@@ -1825,7 +1825,7 @@ Section Composite.
         apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr.
         rewrite finite_trace_last_is_last in Htr.
         destruct itemX, l; cbn in *.
-        by split; [|split; [exists suf|]].
+        by split_and!; [|exists suf|..].
       Qed.
 
   End StepwiseProps.

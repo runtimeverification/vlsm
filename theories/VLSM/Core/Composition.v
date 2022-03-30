@@ -1096,7 +1096,7 @@ Section composite_plan_properties.
     input_valid Free l (s', input).
   Proof.
     unfold input_valid in *.
-    split; [itauto|split;[itauto|]].
+    split_and!; try itauto.
     unfold valid in *; simpl in *.
     unfold constrained_composite_valid in *.
     unfold composite_valid in *.

@@ -3090,10 +3090,10 @@ Proof.
   intros Hfull_proj isY trY HtrY.
   exists (state_lift isY).
   exists (VLSM_full_projection_finite_trace_project Hfull_proj trY).
-  split; [|split;[done|]].
-  - apply (VLSM_full_projection_finite_valid_trace Hfull_proj).
-    assumption.
-  - apply induced_projection_trace_lift.
+  split_and!.
+  - by apply (VLSM_full_projection_finite_valid_trace Hfull_proj).
+  - done.
+  - by apply induced_projection_trace_lift.
 Qed.
 
 End projection_induced_friendliness.
@@ -3152,7 +3152,7 @@ Proof.
   repeat split.
   - eapply finite_valid_trace_last_pstate; eassumption.
   - apply projection_induced_valid_message_char; [assumption| apply HivtX1].
-  - exists lX, sX. split_and!; try itauto. apply HivtX1.
+  - exists lX, sX. split_and!; try itauto. by apply HivtX1.
   - cbn in *. rewrite <- HsX_pr.
     destruct (vtransition X2 _ _) as (_s'X2, _oom) eqn:H_tX2.
     apply (Htransition_Some2 _ _ HlX_pr _ _ _ _ HivtX1) in H_tX2

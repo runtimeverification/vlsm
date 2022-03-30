@@ -235,7 +235,7 @@ Lemma equivocators_no_equivocations_vlsm_incl_equivocators_free
   : VLSM_incl equivocators_no_equivocations_vlsm equivocators_free_vlsm.
 Proof.
   apply basic_VLSM_incl.
-  - cbv. intros; specialize (H2 n); split_and?; itauto.
+  - cbv. intros; specialize (H2 n); split_and!; itauto.
   - intro; intros; apply initial_message_is_valid; assumption.
   - split; [|exact I]. apply Hv.
   - intros l s om s' om' [_ Ht]. assumption.
