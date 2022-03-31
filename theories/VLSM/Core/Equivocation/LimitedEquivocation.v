@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Rdefinitions RIneq.
 From VLSM Require Import Lib.Preamble Lib.Measurable Lib.StdppListSet Lib.RealsExtras.
@@ -247,7 +248,7 @@ Proof.
     + apply equivocating_validators_nodup.
     + apply NoDup_remove_dups.
     + apply ListSetExtras.set_eq_extract_forall.
-      intro i. rewrite elem_of_remove_dups. intuition.
+      intro i. rewrite elem_of_remove_dups. itauto.
 Qed.
 
 (** Traces with the [strong_trace_witnessing_equivocation_prop]erty, which are

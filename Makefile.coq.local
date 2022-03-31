@@ -66,7 +66,7 @@ $(SVGFILES): %.svg: %.dot $(COQDOCDIR)/map.svg
 .PHONY: $(SVGFILES)
 
 resources/index.html: resources/index.md
-	pandoc -s -o index.html index.md
+	pandoc -s -o $@ $<
 
 clean::
 	$(HIDE)rm -f $(DPDFILES) $(DOTFILES) resources/map.dot

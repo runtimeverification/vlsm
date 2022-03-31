@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
 
@@ -144,7 +145,7 @@ Proof.
   intros.
   unfold subseteq, list_subseteq.
   setoid_rewrite set_union_iff.
-  intuition.
+  split; itauto.
 Qed.
 
 Lemma set_union_iterated_nodup `{EqDecision A}
@@ -369,7 +370,7 @@ Proof.
     + intro H_not_in. exfalso. apply H_not_in. rewrite e. left.
     + intro H_not_in.
       rewrite elem_of_cons in H_not_in.
-      rewrite IHl by tauto.
+      rewrite IHl by itauto.
       reflexivity.
 Qed.
 
@@ -384,7 +385,7 @@ Proof.
     + subst; contradict H; left.
     + rewrite IHs; [reflexivity|].
       rewrite elem_of_cons in H.
-      tauto.
+      itauto.
 Qed.
 
 Lemma set_remove_elim `{EqDecision A} : forall x (s : list A),
@@ -637,7 +638,7 @@ Lemma set_remove_list_1
 Proof.
   unfold set_remove_list in Hin.
   induction l1.
-  - simpl in Hin; intuition.
+  - simpl in Hin; itauto.
   - simpl in Hin.
     apply set_remove_1 in Hin.
     apply IHl1 in Hin.
@@ -658,7 +659,7 @@ Proof.
     * assumption.
     * intros [a b].
       rewrite elem_of_list_fmap, elem_of_list_prod.
-      intros [_ [[= <- _] _]]. tauto.
+      intros [_ [[= <- _] _]]. itauto.
     * intros [a b].
       rewrite elem_of_list_prod, elem_of_list_fmap.
       intros [Ha _] [_ [[= Hax _] _]]. congruence.
@@ -684,15 +685,15 @@ Lemma set_diff_filter_iff `{EqDecision A} (a:A) l r:
   a ∈ (set_diff_filter l r) <-> (a ∈ l /\ ~a ∈ r).
 Proof.
   induction l;simpl.
-  - cbn. split; intuition.
+  - cbn. split; intros; [|itauto].
     inversion H.
   - unfold set_diff_filter in *.
     rewrite filter_cons.
     destruct (decide (~ a0 ∈ r)).
     * rewrite 2 elem_of_cons, IHl.
-      intuition congruence.
+      split; itauto congruence.
     * rewrite elem_of_cons.
-      intuition congruence.
+      split;itauto congruence.
 Qed.
 
 Lemma set_diff_filter_nodup `{EqDecision A} (l r:list A):
@@ -745,7 +746,7 @@ Proof.
     unfold set_diff_filter.
     rewrite 2 filter_cons.
     destruct (decide (~ new ∈ a)); [tauto|].
-    destruct (decide (~ new ∈ b));[|contradict n0; tauto].
+    destruct (decide (~ new ∈ b));[|contradict n0; itauto].
     simpl.
     apply le_n_S.
     apply len_set_diff_incl_le;assumption.
@@ -777,7 +778,7 @@ Proof.
   apply len_set_diff_decrease with (f new).
   - intro x. rewrite 2 elem_of_list_fmap.
     intros [x0 [Hx0 Hin]]. exists x0.
-    rewrite set_add_iff. tauto.
+    rewrite set_add_iff. itauto.
   - split;[|assumption].
     apply elem_of_list_fmap_1.
     apply set_add_iff.
@@ -813,7 +814,7 @@ Proof.
   apply set_union_in_iterated in H. rewrite Exists_exists in H.
   destruct H as [s [Hins Hina]].
   apply Hp with (s := s).
-  intuition.
+  itauto.
 Qed.
 
 Lemma filter_set_eq {X} P Q

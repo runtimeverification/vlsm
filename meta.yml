@@ -43,19 +43,24 @@ license:
   file: LICENSE.md
 
 supported_coq_versions:
-  text: 8.13
-  opam: '{>= "8.13"}'
+  text: 8.15
+  opam: '{>= "8.15"}'
 
 dependencies:
 - opam:
     name: coq-stdpp
-    version: '{>= "1.6.0"}'
+    version: '{>= "1.7.0"}'
   description: |-
-    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.6.0
+    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0
+- opam:
+    name: coq-itauto
+  description: |-
+    [Itauto](https://gitlab.inria.fr/fbesson/itauto)
 
 namespace: VLSM
 
 keywords:
+- name: consensus
 - name: fault tolerance
 - name: distributed algorithms
 
@@ -71,15 +76,11 @@ build: |-
 
   ## Building instructions
 
-  For local development, the project is compatible with the Jan 2022 package pick for Coq 8.13 of
-  [Coq Platform release 2022.01.0](https://github.com/coq/platform/releases/tag/2022.01.0),
-  so you can obtain all dependencies by installing that Coq Platform variant.
-
-  To instead install dependencies manually via [opam](https://opam.ocaml.org/doc/Install.html), do:
+  To install the project dependencies via [opam](https://opam.ocaml.org/doc/Install.html), do:
 
   ```shell
   opam repo add coq-released https://coq.inria.fr/opam/released
-  opam install coq.8.13.2 coq-stdpp.1.6.0
+  opam install coq.8.15.1 coq-stdpp.1.7.0 coq-itauto
   ```
 
   To build the project when you have all dependencies installed, do:

@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Rdefinitions.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
@@ -42,7 +43,7 @@ Local Instance item_equivocating_in_trace_dec : RelDecision item_equivocating_in
 Proof.
   intros item tr.
   destruct item. destruct input as [m|]
-  ; [|right; intuition].
+  ; [|right; itauto].
   unfold item_equivocating_in_trace, trace_has_message, field_selector; cbn.
   typeclasses eauto.
 Qed.
@@ -319,7 +320,7 @@ Proof.
   unfold equivocating_validators.
   simpl.
   rewrite elem_of_list_filter.
-  intuition (apply elem_of_enum). 
+  itauto (apply elem_of_enum). 
 Qed.
 
 Lemma equivocating_validators_empty_in_initial_state

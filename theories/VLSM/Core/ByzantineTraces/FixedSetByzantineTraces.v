@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble StdppListSet FinFunExtras ListExtras.
@@ -208,12 +209,12 @@ Proof.
   apply induced_sub_projection_friendliness.
   apply induced_sub_projection_lift.
   intros s1 s2 Heq l om.
-  destruct om as [m|]; [|intuition].
+  destruct om as [m|]; [|itauto].
   cbn.
-  destruct (sender m) as [v|]; [|intuition].
+  destruct (sender m) as [v|]; [|itauto].
   simpl.
-  case_decide as HAv; [|intuition].
-  replace (s2 (A v)) with (s1 (A v)); [intuition|].
+  case_decide as HAv; [|itauto].
+  replace (s2 (A v)) with (s1 (A v)); [itauto|].
   exact (equal_f_dep Heq (dexist (A v) HAv)).
 Qed.
 
@@ -449,7 +450,7 @@ Proof.
     simpl.
     rewrite @decide_True by assumption.
     cbn. unfold all_messages_transition.
-    inversion 1; intuition.
+    inversion 1; itauto.
 Qed.
 
 (** Since the [fixed_non_byzantine_projection] is an [induced_projection] of

@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import FinFun.
 From VLSM.Lib Require Import Preamble ListExtras.
@@ -80,7 +81,7 @@ Proof.
   specialize (Hvalidator _ _ _ Hpvi)
     as (l & s & s' & om' & [Hvalid Htransition] & Hli & Hsi).
   exists l, s.
-  intuition.
+  itauto.
 Qed.
 
 (** ** Projection validators and Byzantine behavior
@@ -353,9 +354,9 @@ Proof.
   - apply component_transition_projection_Some.
   - intros li si omi Hiv.
     apply Hvalidator in Hiv as (sX & <- & HivX).
-    exists (existT i li), sX; intuition.
+    exists (existT i li), sX.
     unfold composite_project_label; cbn.
-    rewrite (decide_True_pi eq_refl); reflexivity.
+    by rewrite (decide_True_pi eq_refl).
 Qed.
 
 Definition pre_loaded_with_all_messages_validator_component_proj_incl

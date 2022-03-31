@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Validator Composition ProjectionTraces.
@@ -170,7 +171,7 @@ Definition forget_annotations_projection
   : VLSM_full_projection AnnotatedX X id original_state.
 Proof.
   apply basic_VLSM_strong_full_projection.
-  1, 3-4: cbv; intuition.
+  1, 3-4: cbv; itauto.
   intros l [s a] om [s' a'] om'.
   cbn; unfold annotated_transition; cbn
   ; destruct (vtransition _ _ _) as (_s', _om').

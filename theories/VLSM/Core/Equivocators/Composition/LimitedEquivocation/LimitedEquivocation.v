@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Lia Reals Lra.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinExtras FinFunExtras Measurable.
@@ -105,7 +106,7 @@ Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free
   : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm) PreFreeE.
 Proof.
   apply basic_VLSM_incl_preloaded; intros ? *.
-  1, 3: intuition.
+  1, 3: itauto.
   intros [Hv _]. split; [assumption|exact I].
 Qed.
 
@@ -281,7 +282,7 @@ Proof.
       in Htr as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_limited)
   ; [| eassumption].
   exists trX, initial_descriptors.
-  cbn; intuition.
+  cbn; split_and?; try itauto.
   eapply msg_dep_limited_fixed_equivocation; eassumption.
 Qed.
 

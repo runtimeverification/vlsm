@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import FinFun.
 From VLSM Require Import Lib.Preamble Lib.ListExtras.
@@ -360,7 +361,7 @@ Proof.
       IM _ _ (equivocators_fixed_equivocations_constraint IM equivocating))
     in HtrX
     as (is & His & s & Hs & tr & Htr & Hptr & Houtput).
-  - exists is, s, tr; intuition.
+  - exists is, s, tr; split_and!; try itauto.
     apply (VLSM_eq_finite_valid_trace_init_to HeqXE); assumption.
   - intro; intros.
     apply (VLSM_eq_valid_state HeqXE) in Hes.

@@ -1,5 +1,6 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import FinFun Lia.
+From Coq Require Import FinFun.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet FinExtras.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.Equivocation.
 From VLSM Require Import Core.Equivocation.NoEquivocation Core.Equivocation.FullNode Core.Equivocation.FixedSetEquivocation.
@@ -257,7 +258,7 @@ allowed to equivocate is non-empty.
     unfold node_generated_without_further_equivocation_alt in Hm.
     right.
     eapply can_emit_composite_free_lift with (j := dexist i Hi); [|eassumption].
-    intuition.
+    itauto.
   Qed.
 
   (** If all nodes have the [cannot_resend_message_stepwise_prop]erty, then the

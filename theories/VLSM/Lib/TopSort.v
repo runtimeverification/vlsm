@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.ListSetExtras Lib.StdppListSet.
 
@@ -70,7 +71,7 @@ Proof.
   - intro a0. simpl.
     destruct (decide (count_predecessors a < count_predecessors a0));
     [specialize (IHl' a)|specialize (IHl' a0)];
-    destruct IHl'; rewrite elem_of_cons; intuition.
+    destruct IHl'; rewrite elem_of_cons; itauto.
 Qed.
 
 Lemma min_predecessors_correct
@@ -686,15 +687,15 @@ Proof.
   unfold get_maximal_element in Hmax.
   assert (exists l', l' ++ [a] = top_sort l). {
     destruct l.
-    - simpl in Hmax. intuition congruence.
+    - simpl in Hmax. itauto congruence.
     - specialize (@exists_last _ (top_sort (a0 :: l0))) as Hlast.
-      spec Hlast. unfold top_sort. simpl. intuition congruence.
+      spec Hlast. unfold top_sort. simpl. itauto congruence.
       destruct Hlast as [l' [a' Heq]].
       rewrite Heq in Hmax.
       rewrite Heq.
       exists l'.
       specialize (last_error_is_last l' a') as Hlast.
-      intuition congruence.
+      itauto congruence.
   }
   assert (a ∈ (top_sort l)). {
     destruct H as [l' Heq].
@@ -705,7 +706,7 @@ Proof.
   specialize (top_sort_correct) as [Htop _].
   destruct Htop as [_ Htop].
   specialize (Htop a H0).
-  intuition.
+  itauto.
 Qed.
 
 Lemma get_maximal_element_correct
@@ -719,15 +720,15 @@ Proof.
   intros contra.
   specialize (Htop max a contra).
 
-  assert (Hinmax: max ∈ l) by (apply maximal_element_in; intuition).
-  assert (Hinatop : a ∈ (top_sort l)) by (apply Hseteq; intuition).
+  assert (Hinmax: max ∈ l) by (apply maximal_element_in; itauto).
+  assert (Hinatop : a ∈ (top_sort l)) by (apply Hseteq; itauto).
   apply elem_of_list_split in Hinatop.
   destruct Hinatop as [prefA [sufA HeqA]].
   unfold get_maximal_element in Hmax.
   destruct sufA.
   - rewrite HeqA in Hmax.
     specialize (last_error_is_last prefA a) as Hlast.
-    assert (a = max) by intuition congruence.
+    assert (a = max) by itauto congruence.
     subst a.
     specialize StrictOrder_Irreflexive as Hirr.
     unfold Irreflexive in Hirr. unfold complement in Hirr.
@@ -738,16 +739,16 @@ Proof.
       assumption.
     }
     specialize (Hirr (exist _ max H)).
-    intuition.
+    itauto.
   - rewrite HeqA in Hmax.
     specialize (@exists_last _ (a0 :: sufA)) as Hex.
-    spec Hex. intuition congruence.
+    spec Hex. itauto congruence.
     destruct Hex as [l' [a' Heq]].
     rewrite Heq in Hmax.
     specialize (last_error_is_last (prefA ++ a :: l') a') as Hlast.
     rewrite <- app_assoc in Hlast.
     simpl in Hlast.
-    assert (a' = max) by intuition congruence.
+    assert (a' = max) by itauto congruence.
     specialize (Htop prefA (l' ++ [a'])).
     rewrite Heq in HeqA.
     specialize (Htop HeqA).
@@ -770,7 +771,7 @@ Proof.
           (if decide (min_predecessors preceeds (a :: l0) l0 a = a)
            then l0
            else a :: set_remove (min_predecessors preceeds (a :: l0) l0 a) l0))
-       (min_predecessors preceeds (a :: l0) l0 a)). intuition.
+       (min_predecessors preceeds (a :: l0) l0 a)). itauto.
 Qed.
 
 End top_sort.

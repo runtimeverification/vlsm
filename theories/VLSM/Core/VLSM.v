@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Streams.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
@@ -1220,7 +1221,7 @@ is equal to the former's last state, it is possible to _concatenate_ them into a
       revert s.
       induction ls;intro s.
       - rewrite finite_trace_last_nil. simpl.
-        intuition (eauto using finite_valid_trace_first_pstate, finite_valid_trace_from_empty).
+        itauto (eauto using finite_valid_trace_first_pstate, finite_valid_trace_from_empty).
       - rewrite finite_trace_last_cons. simpl.
         specialize (IHls (destination a)).
         split.
@@ -2677,7 +2678,7 @@ Byzantine fault tolerance analysis.
     destruct Hps as [om Hprs].
     exists om.
     apply pre_loaded_with_all_messages_valid_state_message_preservation.
-    intuition.
+    itauto.
   Qed.
   (* end hide *)
 
@@ -2801,7 +2802,7 @@ Byzantine fault tolerance analysis.
       destruct iom as [m |]; [| apply option_valid_message_None].
       apply option_valid_message_Some, Hobs.
       red; rewrite Exists_app, Exists_cons.
-      subst; cbn; intuition.
+      subst; cbn; itauto.
   Qed.
 
 End pre_loaded_with_all_messages_vlsm.

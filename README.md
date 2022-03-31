@@ -7,9 +7,10 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
 ## Meta
 
 - License: [BSD 3-Clause "New" or "Revised" License](LICENSE.md)
-- Compatible Coq versions: 8.13
+- Compatible Coq versions: 8.15
 - Additional dependencies:
-  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.6.0
+  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0
+  - [Itauto](https://gitlab.inria.fr/fbesson/itauto)
 - Coq namespace: `VLSM`
 - Related publication(s):
   - [VLSM: Validating Labelled State Transition and Message Production Systems](https://arxiv.org/abs/2202.12662) doi:[10.48550/arXiv.2202.12662](https://doi.org/10.48550/arXiv.2202.12662)
@@ -22,15 +23,11 @@ The simplest way of working with this project without needing to install anythin
 
 ## Building instructions
 
-For local development, the project is compatible with the Jan 2022 package pick for Coq 8.13 of
-[Coq Platform release 2022.01.0](https://github.com/coq/platform/releases/tag/2022.01.0),
-so you can obtain all dependencies by installing that Coq Platform variant.
-
-To instead install dependencies manually via [opam](https://opam.ocaml.org/doc/Install.html), do:
+To install the project dependencies via [opam](https://opam.ocaml.org/doc/Install.html), do:
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq.8.13.2 coq-stdpp.1.6.0
+opam install coq.8.15.1 coq-stdpp.1.7.0 coq-itauto
 ```
 
 To build the project when you have all dependencies installed, do:

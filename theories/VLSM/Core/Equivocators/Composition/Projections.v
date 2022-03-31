@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun FunctionalExtensionality Program.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.FinExtras.
@@ -97,7 +98,7 @@ Proof.
     specialize (Hdescriptors eqv).
     rewrite state_update_eq in Hitem_pr, Hdescriptors.
     cut (is_equivocating_state (IM eqv) si' \/  is_newmachine_descriptor (IM eqv) (descriptors eqv)).
-      by intuition.
+      by itauto.
     apply
       (equivocator_transition_item_project_preserves_equivocating_indices (IM eqv) {|
       l := li;
@@ -107,7 +108,7 @@ Proof.
     clear -Heqv.
     unfold equivocator_descriptors_update in Heqv.
     rewrite equivocator_descriptors_update_eq in Heqv.
-    intuition.
+    itauto.
   - destruct Heqv as [Heqv | Heqv].
     + left.
       apply elem_of_list_filter in Heqv.
@@ -1961,8 +1962,10 @@ Lemma SeededXE_incl_PreFreeE
   : VLSM_incl SeededXE SubPreFreeE.
 Proof.
   apply basic_VLSM_strong_incl.
-  1,2,4:cbv; intuition.
-  intros l s om [Hv _]; split; [assumption | exact I].
+  - intros s Hn n; specialize (Hn n); itauto.
+  - cbv; itauto.
+  - intros l s om [Hv _]; split; [assumption | exact I].
+  - cbv; itauto.
 Qed.
 
 Lemma PreSeededXE_incl_PreFreeE

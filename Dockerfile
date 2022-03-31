@@ -29,9 +29,9 @@ WORKDIR /home/user
 # From: https://github.com/coq-community/docker-base/blob/master/Dockerfile
 
 ENV NJOBS="8"
-ENV COMPILER="4.07.1+flambda"
+ENV COMPILER="4.11.2+flambda"
 ENV OPAMPRECISETRACKING="1"
-ENV OCAMLFIND_VERSION="1.8.1"
+ENV OCAMLFIND_VERSION="1.9.1"
 ENV DUNE_VERSION="2.9.1"
 
 RUN    opam init --auto-setup --yes --jobs=${NJOBS} --compiler=${COMPILER} --disable-sandboxing         \
@@ -49,9 +49,9 @@ RUN    opam init --auto-setup --yes --jobs=${NJOBS} --compiler=${COMPILER} --dis
 
 # From: https://github.com/coq-community/docker-coq/blob/master/Dockerfile
 
-ENV COQ_VERSION="8.13.2"
-ENV STDPP_VERSION="1.6.0"
-ENV COQ_OPAM="coq coq-stdpp"
+ENV COQ_VERSION="8.15.1"
+ENV STDPP_VERSION="1.7.0"
+ENV COQ_OPAM="coq coq-stdpp coq-itauto"
 
 RUN    eval $(opam env --switch=${COMPILER} --set-switch)                          \
     && opam update -y -u                                                           \
