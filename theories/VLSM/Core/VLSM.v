@@ -768,8 +768,7 @@ pre-existing concepts.
         are determined by the label, initial state and input message of the
         transition. This is because [transition] is a function.
 
-        Because of the above, [input_valid_transition]s are also deterministic,
-        but it's handy to have a separate lemma. *)
+        Because of the above, [input_valid_transition]s are also deterministic. *)
 
     Lemma input_valid_transition_deterministic :
       forall {lbl : label} {s s1 s2 : state} {iom oom1 oom2 : option message},
