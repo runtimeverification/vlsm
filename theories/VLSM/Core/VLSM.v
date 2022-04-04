@@ -764,6 +764,21 @@ pre-existing concepts.
       apply valid_generated_state_message with s _om _s om l; assumption.
     Qed.
 
+    (** [transition]s are deterministic, i.e. the final state and output message
+        are determined by the label, initial state and input message of the
+        transition. This is because [transition] is a function.
+
+        Because of the above, [input_valid_transition]s are also deterministic. *)
+
+    Lemma input_valid_transition_deterministic :
+      forall {lbl : label} {s s1 s2 : state} {iom oom1 oom2 : option message},
+        input_valid_transition lbl (s, iom) (s1, oom1) ->
+        input_valid_transition lbl (s, iom) (s2, oom2) ->
+          s1 = s2 /\ oom1 = oom2.
+    Proof.
+      do 2 inversion 1; itauto congruence.
+    Qed.
+
     (** For VLSMs initialized with many initial messages such as
     the [composite_vlsm_constrained_projection] or the [pre_loaded_with_all_messages_vlsm],
     the question of whether a [VLSM] [can_emit] a message <<m>> becomes more
