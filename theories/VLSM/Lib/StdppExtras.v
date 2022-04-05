@@ -182,12 +182,12 @@ Proof.
 Qed.
 
 (* Returns all elements X of l such that X does not compare less
-   than any other element w.r.t to the preceeds relation *)
+   than any other element w.r.t to the precedes relation *)
 
 Definition get_maximal_elements
-  {A} (preceeds: relation A) `{!RelDecision preceeds} (l : list A)
+  {A} (precedes: relation A) `{!RelDecision precedes} (l : list A)
   : list A :=
-  filter (fun a => Forall (fun b => (~ preceeds a b)) l) l.
+  filter (fun a => Forall (fun b => (~ precedes a b)) l) l.
 
 Example get_maximal_elements1: get_maximal_elements Nat.lt [1; 4; 2; 4] = [4;4].
 Proof. itauto. Qed.
