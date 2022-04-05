@@ -12,11 +12,11 @@ sorting algorithm.
 The algorithm extracts an element with a minimal number of predecessors
 among the current elements, then recurses on the remaining elements.
 
-To begin with, we assume an unconstrained <<preceeds>> function to say
-whether an element preceeds another.  The proofs will show that if
-<<preceeds>> determines a strict order on the set of elements in the list,
+To begin with, we assume an unconstrained <<precedes>> function to say
+whether an element precedes another.  The proofs will show that if
+<<precedes>> determines a strict order on the set of elements in the list,
 then the [top_sort] algoritm produces a linear extension of that ordering
-(Lemmas [top_sort_preceeds] and [top_sort_preceeds_before]).
+(Lemmas [top_sort_precedes] and [top_sort_precedes_before]).
 *)
 
 Section min_predecessors.
@@ -25,17 +25,17 @@ Section min_predecessors.
 (** For this section we will fix a list <<l>> and count the predecessors
 occurring in that list. *)
 
-Context {A} (preceeds : relation A) `{!RelDecision preceeds} (l : list A).
+Context {A} (precedes : relation A) `{!RelDecision precedes} (l : list A).
 
 Definition count_predecessors
   (a : A)
   : nat
-  := length (filter (fun b => preceeds b a) l).
+  := length (filter (fun b => precedes b a) l).
 
 Lemma zero_predecessors
   (a : A)
   (Ha : count_predecessors a = 0)
-  : Forall (fun b => ~ preceeds b a) l.
+  : Forall (fun b => ~ precedes b a) l.
 Proof.
   apply length_zero_iff_nil in Ha.
   apply Forall_filter_nil in Ha.
@@ -112,46 +112,46 @@ Proof.
            assumption.
 Qed.
 
-(** Given <<P>> a property on <<A>>, [preceeds_P] is the relation
-induced by <<preceeds>> on the subset of <<A>> determined by <<P>>. *)
+(** Given <<P>> a property on <<A>>, [precedes_P] is the relation
+induced by <<precedes>> on the subset of <<A>> determined by <<P>>. *)
 
-Definition preceeds_P
+Definition precedes_P
   (P : A -> Prop)
   (x y : sig P)
   : Prop
-  := preceeds (proj1_sig x) (proj1_sig y).
+  := precedes (proj1_sig x) (proj1_sig y).
 
 (** In what follows, let us fix a property <<P>> satisfied by all elements
-of <<l>>, such that [preceeds_P] <<P>> is a [StrictOrder].
+of <<l>>, such that [precedes_P] <<P>> is a [StrictOrder].
 
-Consequently, this means that <<preceeds>> is a [StrictOrder] on the
+Consequently, this means that <<precedes>> is a [StrictOrder] on the
 elements of <<l>>.
 *)
 
 Context
   (P : A -> Prop)
   (HPl : Forall P l)
-  {Hso : StrictOrder (preceeds_P P)}
+  {Hso : StrictOrder (precedes_P P)}
   .
 
 (** Next we derive easier to work with formulations for the [StrictOrder]
-properties associated with [preceeds_P]. *)
-Lemma preceeds_irreflexive
+properties associated with [precedes_P]. *)
+Lemma precedes_irreflexive
   (a : A)
   (Ha : P a)
-  : ~ preceeds a a.
+  : ~ precedes a a.
 Proof.
   specialize (StrictOrder_Irreflexive (exist P a Ha)).
-  unfold complement; unfold preceeds_P; simpl; intro Hirr.
-  destruct (decide (preceeds a a)); assumption.
+  unfold complement; unfold precedes_P; simpl; intro Hirr.
+  destruct (decide (precedes a a)); assumption.
 Qed.
 
-Lemma preceeds_asymmetric
+Lemma precedes_asymmetric
   (a b : A)
   (Ha : P a)
   (Hb : P b)
-  (Hab : preceeds a b)
-  : ~ preceeds b a.
+  (Hab : precedes a b)
+  : ~ precedes b a.
 Proof.
   intro Hba.
   exact
@@ -161,14 +161,14 @@ Proof.
     ).
 Qed.
 
-Lemma preceeds_transitive
+Lemma precedes_transitive
   (a b c : A)
   (Ha : P a)
   (Hb : P b)
   (Hc : P c)
-  (Hab : preceeds a b)
-  (Hbc : preceeds b c)
-  : preceeds a c.
+  (Hab : precedes a b)
+  (Hbc : precedes b c)
+  : precedes a c.
 Proof.
   exact
     (RelationClasses.StrictOrder_Transitive
@@ -177,7 +177,7 @@ Proof.
     ).
 Qed.
 
-(** If <<preceeds>> is a [StrictOrder] on <<l>>, then there must exist an
+(** If <<precedes>> is a [StrictOrder] on <<l>>, then there must exist an
 element of <<l>> with no predecessors in <<l>>.
 *)
 Lemma count_predecessors_zero
@@ -191,14 +191,14 @@ Proof.
     specialize (IHl0 HPl0).
     apply Exists_cons.
     rewrite filter_cons.
-    destruct (decide (preceeds a a)); [contradict p;apply preceeds_irreflexive; assumption|].
+    destruct (decide (precedes a a)); [contradict p;apply precedes_irreflexive; assumption|].
     assert ({ l0=[] }+{l0 <> [] }) by (destruct l0;clear;[left|right];congruence).
     destruct H as [?|Hl0];[subst l0|].
     + left. reflexivity.
     + specialize (IHl0 Hl0).
       apply Exists_exists in IHl0.
       destruct IHl0 as [x [Hin Hlen]].
-      destruct (decide (preceeds a x)).
+      destruct (decide (precedes a x)).
       * left. (* inversion H2; subst. *)
         specialize (Forall_forall P l0); intros [Hall _].
         specialize (Hall HPl0 x Hin).
@@ -210,10 +210,10 @@ Proof.
         intro.
         apply (Forall_impl P); [assumption|].
         intros.
-        apply preceeds_transitive with a;assumption.
+        apply precedes_transitive with a;assumption.
       * right. apply Exists_exists. exists x. split; try assumption.
         rewrite filter_cons.
-        destruct (decide (preceeds a x)); [contradict n0; assumption|].
+        destruct (decide (precedes a x)); [contradict n0; assumption|].
         assumption.
 Qed.
 
@@ -245,27 +245,27 @@ Section topologically_sorted.
 
 (** ** Topologically sorted lists. Definition and properties. *)
 
-Context {A} (preceeds : relation A) `{!RelDecision preceeds} (l : list A).
+Context {A} (precedes : relation A) `{!RelDecision precedes} (l : list A).
 
 (**
-We say that a list <<l>> is [topologically_sorted] w.r.t a <<preceeds>>
-relation iff <<a preceeds b>> implies that <<a>> cannot occur after <<b>> in <<l>>.
+We say that a list <<l>> is [topologically_sorted] w.r.t a <<precedes>>
+relation iff <<a precedes b>> implies that <<a>> cannot occur after <<b>> in <<l>>.
 *)
 Definition topologically_sorted
   :=
   forall
     (a b : A)
-    (Hab : preceeds a b)
+    (Hab : precedes a b)
     (l1 l2 : list A)
     (Heq : l = l1 ++ [b] ++ l2)
     , ~a ∈ l2.
 
-(** The following properties assume that <<preceeds>> determines a [StrictOrder]
+(** The following properties assume that <<precedes>> determines a [StrictOrder]
 on the list
 *)
 Context
   (P : A -> Prop)
-  {Hso : StrictOrder (preceeds_P preceeds P)}
+  {Hso : StrictOrder (precedes_P precedes P)}
   .
 
 Section topologically_sorted_fixed_list.
@@ -276,7 +276,7 @@ Context
   .
 
 (** If <<l>> is [topologically_sorted], then for any occurences
-of <<a>> and <<b>> in <<l>> such that <<a preceeds b>> it must be that
+of <<a>> and <<b>> in <<l>> such that <<a precedes b>> it must be that
 the occurrence of <<a>> is before that of <<b>>.
 
 Hence all occurrences of <<a>> must be before all occurrences of <<b>> in
@@ -284,7 +284,7 @@ a [topologically_sorted] list.
 *)
 Lemma topologically_sorted_occurrences_ordering
   (a b : A)
-  (Hab : preceeds a b)
+  (Hab : precedes a b)
   (la1 la2 : list A)
   (Heqa : l = la1 ++ [a] ++ la2)
   (lb1 lb2 : list A)
@@ -299,7 +299,7 @@ Proof.
   { intro Ha. apply Hts.
     rewrite elem_of_cons in Ha.
     destruct Ha; try assumption. subst.
-    apply (preceeds_irreflexive preceeds P b Hpa) in Hab.
+    apply (precedes_irreflexive precedes P b Hpa) in Hab.
     contradict Hab.
   }
   specialize (occurrences_ordering a b la1 la2 lb1 lb2 Heqb Ha).
@@ -307,12 +307,12 @@ Proof.
 Qed.
 
 (**
-If <<a>> and <<b>> are in a [topologically_sorted] list <<lts>> and <<a preceeds b>>
+If <<a>> and <<b>> are in a [topologically_sorted] list <<lts>> and <<a precedes b>>
 then there is an <<a>> before any occurence of <<b>> in <<lts>>.
 *)
 Corollary top_sort_before
   (a b : A)
-  (Hab : preceeds a b)
+  (Hab : precedes a b)
   (Ha : a ∈ l)
   (l1 l2 : list A)
   (Heq : l = l1 ++ [b] ++ l2)
@@ -328,12 +328,12 @@ Proof.
 Qed.
 
 (**
-As a corollary of the above, if <<a preceeds b>> then <<a>> can be found before
+As a corollary of the above, if <<a precedes b>> then <<a>> can be found before
 <<b>> in l.
 *)
-Corollary top_sort_preceeds
+Corollary top_sort_precedes
   (a b : A)
-  (Hab : preceeds a b)
+  (Hab : precedes a b)
   (Ha : a ∈ l)
   (Hb : b ∈ l)
   : exists l1 l2 l3, l = l1 ++ [a] ++ l2 ++ [b] ++ l3.
@@ -353,14 +353,14 @@ End topologically_sorted.
 
 Lemma toplogically_sorted_remove_last
   {A : Type}
-  (preceeds : relation A)
-  `{!RelDecision preceeds}
+  (precedes : relation A)
+  `{!RelDecision precedes}
   (l : list A)
-  (Hts : topologically_sorted preceeds l)
+  (Hts : topologically_sorted precedes l)
   (init : list A)
   (final : A)
   (Hinit : l = init ++ [final])
-  : topologically_sorted preceeds init.
+  : topologically_sorted precedes init.
 Proof.
   subst l.
   intros a b Hab l1 l2 Hinit.
@@ -370,24 +370,24 @@ Proof.
   apply elem_of_app. left. assumption.
 Qed.
 
-Definition preceeds_closed
+Definition precedes_closed
   {A : Type}
-  (preceeds : relation A)
-  `{!RelDecision preceeds}
+  (precedes : relation A)
+  `{!RelDecision precedes}
   (s : set A)
   : Prop
   :=
-  Forall (fun (b : A) => forall (a : A) (Hmj : preceeds a b), a ∈ s) s.
+  Forall (fun (b : A) => forall (a : A) (Hmj : precedes a b), a ∈ s) s.
 
-Lemma preceeds_closed_set_eq
+Lemma precedes_closed_set_eq
   {A : Type}
-  (preceeds : relation A)
-  `{!RelDecision preceeds}
+  (precedes : relation A)
+  `{!RelDecision precedes}
   (s1 s2 : set A)
   (Heq : set_eq s1 s2)
-  : preceeds_closed preceeds s1 <-> preceeds_closed preceeds s2.
+  : precedes_closed precedes s1 <-> precedes_closed precedes s2.
 Proof.
-  unfold preceeds_closed. repeat rewrite Forall_forall.
+  unfold precedes_closed. repeat rewrite Forall_forall.
   split; intros Hpc b Hb a Hab;
   apply Heq;
   apply Heq in Hb;
@@ -395,22 +395,22 @@ Proof.
   assumption.
 Qed.
 
-Lemma topologically_sorted_preceeds_closed_remove_last
+Lemma topologically_sorted_precedes_closed_remove_last
   {A : Type}
-  (preceeds : relation A)
-  `{!RelDecision preceeds}
+  (precedes : relation A)
+  `{!RelDecision precedes}
   (P : A -> Prop)
-  {Hso : StrictOrder (preceeds_P preceeds P)}
+  {Hso : StrictOrder (precedes_P precedes P)}
   (l : list A)
   (Hl : Forall P l)
-  (Hts : topologically_sorted preceeds l)
+  (Hts : topologically_sorted precedes l)
   (init : list A)
   (final : A)
   (Hinit : l = init ++ [final])
-  (Hpc : preceeds_closed preceeds l)
-  : preceeds_closed preceeds init.
+  (Hpc : precedes_closed precedes l)
+  : precedes_closed precedes init.
 Proof.
-  unfold preceeds_closed in *.
+  unfold precedes_closed in *.
   rewrite Forall_forall in Hpc. rewrite Forall_forall.
   subst l.
   intros b Hb a Hab.
@@ -427,7 +427,7 @@ Proof.
   apply elem_of_list_split in Hb'.
   destruct Hb' as  [l1 [l2 Heq]].
   specialize
-    (topologically_sorted_occurrences_ordering preceeds
+    (topologically_sorted_occurrences_ordering precedes
       (init ++ [a]) P Hl Hts a b Hab init [] eq_refl l1 l2 Heq
     ).
   intros [lab Hlab].
@@ -442,7 +442,7 @@ Qed.
 Section top_sort.
 (** ** The topological sorting algorithm *)
 
-Context {A} `{EqDecision A} (preceeds : relation A) `{!RelDecision preceeds}.
+Context {A} `{EqDecision A} (precedes : relation A) `{!RelDecision precedes}.
 
 (** Iteratively extracts <<n>> elements with minimal number of precessors
 from a given list.
@@ -457,7 +457,7 @@ Fixpoint top_sort_n
   | 0, _ => []
   | _, [] => []
   | S n', a :: l' =>
-    let min := min_predecessors preceeds l l' a in
+    let min := min_predecessors precedes l l' a in
     let l'' := set_remove min l in
     min :: top_sort_n n' l''
   end.
@@ -480,11 +480,11 @@ Proof.
   induction n; intros; destruct l; try apply set_eq_refl
   ; inversion Heqn.
   simpl.
-  remember (min_predecessors preceeds (a :: l) l a) as min.
+  remember (min_predecessors precedes (a :: l) l a) as min.
   remember (set_remove min l) as l'.
   destruct (decide (min = a)); try rewrite e.
   - apply set_eq_cons. specialize (IHn l H0). subst. assumption.
-  - specialize (min_predecessors_in preceeds (a :: l) l a).
+  - specialize (min_predecessors_in precedes (a :: l) l a).
     rewrite <- Heqmin. simpl. intros [Heq | Hin]; try (elim n0; assumption).
     specialize (IHn (a :: l')).
     specialize (set_remove_length min l Hin).
@@ -521,24 +521,24 @@ Proof.
     + simpl.
       assert (Hl' : NoDup l) by (inversion Hl; assumption).
       assert (Hlen : len = length l) by (inversion Heqlen; reflexivity).
-      assert (Hl'' : NoDup (set_remove (min_predecessors preceeds (a :: l) l a) l))
+      assert (Hl'' : NoDup (set_remove (min_predecessors precedes (a :: l) l a) l))
         by (apply set_remove_nodup; assumption).
-      destruct (decide (min_predecessors preceeds (a :: l) l a = a)); constructor.
+      destruct (decide (min_predecessors precedes (a :: l) l a = a)); constructor.
       * specialize (IHlen l Hl'  Hlen).
         rewrite e in *.
         inversion Hl; subst x l0. intro Ha. elim H1.
         apply top_sort_set_eq. subst len. assumption.
       * apply IHlen; try assumption.
       * intro Hmin.
-        assert (Hlen' : len = length (a :: set_remove (min_predecessors preceeds (a :: l) l a) l)).
+        assert (Hlen' : len = length (a :: set_remove (min_predecessors precedes (a :: l) l a) l)).
         { simpl.
           rewrite <- set_remove_length; try assumption.
-          pose (@min_predecessors_in _ preceeds _ (a :: l) l a) as Hin.
+          pose (@min_predecessors_in _ precedes _ (a :: l) l a) as Hin.
           destruct Hin as [Heq | Hin]; try assumption.
           elim n. assumption.
         }
         rewrite Hlen' in Hmin.
-        apply (proj2 (top_sort_set_eq (a :: set_remove (min_predecessors preceeds (a :: l) l a) l)))
+        apply (proj2 (top_sort_set_eq (a :: set_remove (min_predecessors precedes (a :: l) l a) l)))
           in Hmin.
         rewrite elem_of_cons in Hmin.
         destruct Hmin; [contradiction|].
@@ -551,23 +551,23 @@ Proof.
            inversion Hl. elim H1. assumption.
         -- simpl.
            rewrite <- set_remove_length; try assumption.
-           pose (@min_predecessors_in _ preceeds _ (a :: l) l a) as Hin.
+           pose (@min_predecessors_in _ precedes _ (a :: l) l a) as Hin.
            destruct Hin as [Heq | Hin]; try assumption.
            elim n. assumption.
 Qed.
 
 Context
   (P : A -> Prop)
-  {Hso : StrictOrder (preceeds_P preceeds P)}
+  {Hso : StrictOrder (precedes_P precedes P)}
   (l : list A)
   (Hl : Forall P l)
   .
 
-(** Under the assumption that <<preceeds>> induces a [StrictOrder] on the elements of
+(** Under the assumption that <<precedes>> induces a [StrictOrder] on the elements of
 <<l>>, [top_sort] <<l>> is [topologically_sorted].
 
 *)
-Lemma top_sort_sorted : topologically_sorted preceeds (top_sort l).
+Lemma top_sort_sorted : topologically_sorted precedes (top_sort l).
 Proof.
   intro a; intros.
   intro Ha2.
@@ -589,7 +589,7 @@ Proof.
   ; try (symmetry in Heqn;  apply length_zero_iff_nil in Heqn; subst l; inversion Ha).
   destruct l as [| a0 l0]; inversion Hl; subst; simpl in Heq.
   + inversion Ha.
-  + remember (min_predecessors preceeds (a0 :: l0) l0 a0) as min.
+  + remember (min_predecessors precedes (a0 :: l0) l0 a0) as min.
     remember
       (match decide (min = a0) return (set A) with
       | left _ => l0
@@ -613,7 +613,7 @@ Proof.
         subst l'. assumption.
       - subst l'. simpl.
         rewrite <- set_remove_length; try assumption.
-        specialize (min_predecessors_in preceeds (a0 :: l0) l0 a0).
+        specialize (min_predecessors_in precedes (a0 :: l0) l0 a0).
         rewrite <- Heqmin. simpl.
         intros [Heq' | Hin]; try assumption.
         elim n0. assumption.
@@ -622,7 +622,7 @@ Proof.
     assert (Hminb : b <> min).
     { destruct (decide (b = min)); try assumption.
       subst b.
-      specialize (min_predecessors_zero preceeds (a0 :: l0) P Hl l0 a0 eq_refl).
+      specialize (min_predecessors_zero precedes (a0 :: l0) P Hl l0 a0 eq_refl).
       rewrite <- Heqmin. simpl. intro Hmin.
       apply zero_predecessors in Hmin.
       rewrite Forall_forall in Hmin.
@@ -666,7 +666,7 @@ and is [toplogically_sorted].
 Definition topological_sorting
   (l lts : list A)
   :=
-  set_eq l lts /\ topologically_sorted preceeds lts.
+  set_eq l lts /\ topologically_sorted precedes lts.
 
 Corollary top_sort_correct : topological_sorting l (top_sort l).
 Proof.
@@ -713,7 +713,7 @@ Lemma get_maximal_element_correct
   (a max : A)
   (Hina : a ∈ l)
   (Hmax : get_maximal_element = Some max) :
-  ~ preceeds max a.
+  ~ precedes max a.
 Proof.
   specialize top_sort_correct as [Hseteq Htop].
   unfold topologically_sorted in Htop.
@@ -768,10 +768,10 @@ Proof.
   - simpl.
     exists (List.last
        (top_sort_n (length l0)
-          (if decide (min_predecessors preceeds (a :: l0) l0 a = a)
+          (if decide (min_predecessors precedes (a :: l0) l0 a = a)
            then l0
-           else a :: set_remove (min_predecessors preceeds (a :: l0) l0 a) l0))
-       (min_predecessors preceeds (a :: l0) l0 a)). itauto.
+           else a :: set_remove (min_predecessors precedes (a :: l0) l0 a) l0))
+       (min_predecessors precedes (a :: l0) l0 a)). itauto.
 Qed.
 
 End top_sort.
