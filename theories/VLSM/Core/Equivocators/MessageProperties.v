@@ -172,7 +172,7 @@ Proof.
       * destruct Hdinitial as [bsj [Hdinitial _]]. exists bsj. assumption.
     + remember (bprefix ++ _) as btr.
       specialize (equivocator_vlsm_trace_project_inv X btr) as Hinv.
-      spec Hinv. { destruct bprefix; subst; discriminate. }
+      spec Hinv. { by destruct bprefix; subst. }
       spec Hinv i.
       spec Hinv. { subst. eexists; exact Htr. }
       specialize (Hinv bs) as [lst_i Hlst_i].

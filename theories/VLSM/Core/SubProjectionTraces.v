@@ -220,7 +220,7 @@ Proof.
   intros ->.
   unfold composite_label_sub_projection_option in HlX.
   simpl in HlX.
-  case_decide; [discriminate|contradiction].
+  by case_decide.
 Qed.
 
 Lemma composite_label_sub_projection_option_lift
@@ -267,11 +267,11 @@ Proof.
   intros lX1 lX2 lY HlX1_pr HlX2_pr sX1 sX2 HsXeq_pr iom sX1' oom1 Ht1 sX2' oom2 Ht2.
   destruct lX1 as (i, lXi).
   unfold composite_label_sub_projection_option in HlX1_pr.
-  simpl in HlX1_pr. case_decide as Hi; [|discriminate].
+  simpl in HlX1_pr. case_decide as Hi; [| done].
   apply Some_inj in HlX1_pr. subst lY.
   destruct lX2 as (_i, _lXi).
   unfold composite_label_sub_projection_option in HlX2_pr.
-  simpl in HlX2_pr. case_decide as H_i; [|discriminate].
+  simpl in HlX2_pr. case_decide as H_i; [| done].
   apply Some_inj in HlX2_pr.
   unfold composite_label_sub_projection in HlX2_pr.
   simpl in HlX2_pr.

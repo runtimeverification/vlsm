@@ -227,7 +227,7 @@ Lemma mirror_reflect: forall X (f : X -> bool) (P : X -> Prop),
   (forall x : X, f x = false <-> ~P x).
 Proof.
   split; repeat intro.
-  + rewrite <- H in H1. rewrite H0 in H1. discriminate.
+  + by rewrite <- H, H0 in H1.
   + specialize (H x). destruct (f x).
     exfalso. apply H0. rewrite <- H. reflexivity.
     reflexivity.
@@ -240,11 +240,8 @@ Theorem mirror_reflect_curry :
 Proof.
   intros.
   split; intros.
-  intro H_absurd. apply H in H_absurd.
-  rewrite H0 in H_absurd; discriminate.
-  apply not_true_is_false.
-  intro H_not. apply H in H_not.
-  contradiction.
+  - by rewrite <- H, H0.
+  - apply not_true_is_false. by rewrite H.
 Qed.
 
 Lemma dec_if_true
@@ -380,9 +377,7 @@ Proof. intros; now apply H. Qed.
 Lemma compare_eq_lt {A} `{CompareReflexive A} :
   forall x, ~ compare x x = Lt.
 Proof.
-  intros x Hnot.
-  assert (compare x x = Eq) by apply compare_eq_refl.
-  rewrite Hnot in H0; discriminate.
+  by intros x; rewrite compare_eq_refl.
 Qed.
 
 Lemma compare_lt_neq {A} `{CompareReflexive A} :
@@ -395,9 +390,7 @@ Qed.
 Lemma compare_eq_gt {A} `{CompareReflexive A} :
   forall x, ~ compare x x = Gt.
 Proof.
-  intros x Hnot.
-  assert (compare x x = Eq) by apply compare_eq_refl.
-  rewrite Hnot in H0; discriminate.
+  by intros x; rewrite compare_eq_refl.
 Qed.
 
 Lemma compare_gt_neq {A} `{CompareReflexive A} :
@@ -477,9 +470,7 @@ Qed.
 Lemma compare_lt_irreflexive {A} `{CompareReflexive A} :
   Irreflexive (compare_lt compare).
 Proof.
-  intros x Hlt.
-  assert (compare x x = Eq) by apply compare_eq_refl.
-  rewrite Hlt in H0; discriminate.
+  intros x; apply compare_eq_lt.
 Qed.
 
 Lemma compare_lt_transitive {A} `{CompareTransitive A} :
@@ -500,11 +491,9 @@ Qed.
 Lemma compare_lt_asymmetric {A} `{CompareStrictOrder A} :
   Asymmetric (compare_lt compare).
 Proof.
-  intros.
   destruct H as [IR TR].
   intros x y Hxy Hyx. apply (TR _ _ _ _ Hxy) in Hyx.
-  assert (compare x x = Eq) by (apply compare_eq; reflexivity).
-  rewrite Hyx in H; discriminate.
+  by contradict Hyx; destruct (IR x x) as [_ ->].
 Qed.
 
 (* We can easily obtain inhabitants of above Typeclasses using Program Definitions, for instance : *)
@@ -615,13 +604,11 @@ Lemma comparable_function_neg
   : a <> b /\ ~R a b /\ ~R b a.
 Proof.
   unfold comparableb in Hnc.
-  destruct (decide (a = b)); try discriminate Hnc.
-  split; try assumption.
-  destruct (f a b) eqn:Hab; try discriminate Hnc.
-  destruct (f b a) eqn:Hba; try discriminate Hnc.
+  destruct (decide (a = b)); [done |].
+  destruct (f a b) eqn:Hab; [done |].
+  destruct (f b a) eqn:Hba; [done |].
   apply (predicate_function2_neg _ _ _ _ HR) in Hab.
-  apply (predicate_function2_neg _ _ _ _ HR) in Hba.
-  split; assumption.
+  by apply (predicate_function2_neg _ _ _ _ HR) in Hba.
 Qed.
 
 Lemma comparable_function_bool
@@ -728,10 +715,10 @@ Lemma option_compare_transitive
   {Xsc : StrictlyComparable X}
   : CompareTransitive (option_compare (@compare X _)).
 Proof.
-  intros [x|] [y|] [z|] [| |]; simpl; intros Hxy Hyz; try discriminate; try reflexivity.
-  - apply (StrictOrder_Transitive x y z _); assumption.
-  - apply (StrictOrder_Transitive x y z _); assumption.
-  - apply (StrictOrder_Transitive x y z _); assumption.
+  intros [x|] [y|] [z|] [| |]; simpl; intros Hxy Hyz; try done.
+  - by apply (StrictOrder_Transitive x y z _).
+  - by apply (StrictOrder_Transitive x y z _).
+  - by apply (StrictOrder_Transitive x y z _).
 Qed.
 
 Lemma strictorder_option
@@ -780,15 +767,10 @@ Lemma reflexive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparabl
 Proof.
   intros (x1, y1) (x2, y2).
   split; intros.
-  simpl in H1.
-  destruct (compare x1 x2) eqn:H_x;
-    destruct (compare y1 y2) eqn: H_y;
-    try discriminate.
-  apply StrictOrder_Reflexive in H_x;
-    apply StrictOrder_Reflexive in H_y.
-  subst; reflexivity.
-  inversion H1; subst.
-  simpl; do 2 rewrite compare_eq_refl; reflexivity.
+  - simpl in H1.
+    destruct (compare x1 x2) eqn: H_x, (compare y1 y2) eqn: H_y; try done.
+    by apply StrictOrder_Reflexive in H_x; apply StrictOrder_Reflexive in H_y; subst.
+  - inversion H1; subst; cbn. by rewrite !compare_eq_refl.
 Qed.
 
 Lemma compare_compose_lt {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : forall (x1 x2 : X) (y1 y2 : Y) (c : comparison),
@@ -800,7 +782,7 @@ Proof.
   simpl in H_12.
   destruct (compare x1 x2) eqn:H_x; try (left; assumption).
   right. split. now apply StrictOrder_Reflexive in H_x.
-  destruct (compare y1 y2) eqn:H_y; try discriminate; assumption.
+  by destruct (compare y1 y2) eqn:H_y.
 Qed.
 
 Lemma transitive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareTransitive (compare_compose X Y).

@@ -39,7 +39,7 @@ Ltac destruct_list_last l l' a Heq :=
 Lemma last_not_null {S} (l : list S) (a : S)
   : l ++ [a] <> [].
 Proof.
-  intro contra. destruct l; discriminate contra.
+  by destruct l.
 Qed.
 
 Definition last_error {S} (l : list S) : option S :=
@@ -124,10 +124,8 @@ Lemma last_error_some {S}
   (Herr : last_error l = Some s) :
   List.last l random = s.
 Proof.
-  destruct l.
-  - simpl in *. discriminate Herr.
-  - simpl in Herr. inversion Herr.
-    apply unroll_last.
+  destruct l; [done |].
+  inversion Herr. apply unroll_last.
 Qed.
 
 Lemma incl_empty : forall A (l : list A),
@@ -303,8 +301,7 @@ Definition inb {A} (Aeq_dec : forall x y:A, {x = y} + {x <> y}) (x : A) (xs : li
 Lemma in_function {A}  (Aeq_dec : forall x y:A, {x = y} + {x <> y}) :
   PredicateFunction2 (@In A) (inb Aeq_dec).
 Proof.
-  intros x xs. unfold inb. destruct (in_dec Aeq_dec x xs); split; intros
-  ; try assumption; try reflexivity; try contradiction; discriminate.
+  intros x xs. unfold inb. by destruct (in_dec Aeq_dec x xs).
 Qed.
 
 Lemma in_correct `{EqDecision X} :
@@ -554,18 +551,18 @@ Proof.
     destruct l;
     reflexivity.
   - intros.
-    destruct left.
-    + discriminate Hlen.
-    + assert (left_len = length left). {
-        simpl in Hlen.
-        inversion Hlen.
-        itauto.
-      }
-      specialize (IHleft_len right left H (left ++ right) eq_refl).
-      rewrite Hsplit.
-      simpl.
-      rewrite IHleft_len.
-      reflexivity.
+    destruct left; [done |].
+    assert (left_len = length left).
+    {
+      simpl in Hlen.
+      inversion Hlen.
+      itauto.
+    }
+    specialize (IHleft_len right left H (left ++ right) eq_refl).
+    rewrite Hsplit.
+    simpl.
+    rewrite IHleft_len.
+    reflexivity.
 Qed.
 
 Lemma list_prefix_map
@@ -731,12 +728,10 @@ Proof.
   split; [|intro; subst; apply list_annotate_pi].
   revert Hl1 l2 Hl2.
   induction l1; destruct l2; simpl; intros.
-  - reflexivity.
-  - discriminate.
-  - discriminate.
-  - inversion H.
-    apply IHl1 in H2.
-    subst. reflexivity.
+  1-3: done.
+  inversion H.
+  apply IHl1 in H2.
+  subst. reflexivity.
 Qed.
 
 Lemma list_annotate_unroll
@@ -1860,13 +1855,8 @@ Lemma complete_prefix_empty
   (l : list A) :
   complete_prefix l [] = Some l.
 Proof.
-  induction l.
-  - simpl. reflexivity.
-  - simpl.
-    destruct (complete_prefix l []).
-    inversion IHl.
-    reflexivity.
-    discriminate IHl.
+  induction l; cbn; [done |].
+  by destruct (complete_prefix l []).
 Qed.
 
 Lemma complete_prefix_correct
@@ -1880,9 +1870,7 @@ Proof.
     generalize dependent pref.
     induction l.
     + intros. simpl in *.
-      destruct pref; destruct suff;
-      try reflexivity;
-      try discriminate H.
+      by destruct pref, suff.
     + intros.
       unfold complete_prefix.
       destruct pref.
@@ -1912,18 +1900,13 @@ Proof.
        itauto.
        simpl.
        simpl in H.
-       destruct (decide (a = a0)).
-       destruct (complete_prefix l l0) eqn : eq_cp.
-       inversion H.
-       rewrite e.
+       destruct (decide (a = a0)); [| done].
+       destruct (complete_prefix l l0) eqn : eq_cp; [| done].
+       inversion H; subst.
        f_equal.
        specialize (IHl l0 suff).
-       spec IHl.
-       rewrite eq_cp.
-       f_equal. assumption.
-       assumption.
-       discriminate H.
-       discriminate H.
+       spec IHl; [| done].
+       by rewrite eq_cp.
 Qed.
 
 (* Computes the list pref which satisfies <<pref ++ suff = l>> or
@@ -1968,17 +1951,12 @@ Proof.
       assumption.
     }
     apply complete_prefix_correct in H0.
-    rewrite eq_c in H0.
-    discriminate H0.
-  - destruct (complete_prefix (rev l) (rev suff)) eqn : eq_c.
-    intros.
-    inversion H.
+    by rewrite eq_c in H0.
+  - destruct (complete_prefix (rev l) (rev suff)) eqn: eq_c; [| done].
+    inversion_clear 1.
     apply complete_prefix_correct in eq_c.
     apply rev_eq_app in eq_c.
-    rewrite rev_involutive in eq_c.
-    assumption.
-    intros.
-    discriminate H.
+    by rewrite rev_involutive in eq_c.
 Qed.
 
 Lemma complete_suffix_empty

@@ -89,9 +89,8 @@ Qed.
 
 Lemma set_add_not_empty : forall (a:A) (x:set), set_add a x <> empty_set.
 Proof.
-simple induction x; simpl.
-- discriminate.
-- intros; destruct (decide (a = a0)); discriminate.
+  simple induction x; cbn; [done |].
+  by intros; destruct (decide (a = a0)).
 Qed.
 
 Lemma set_add_iff a b l : a ∈ (set_add b l) <-> a = b \/ a ∈ l.

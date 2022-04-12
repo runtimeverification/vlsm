@@ -989,7 +989,7 @@ Proof.
       ; destruct_equivocator_state_extend_project s sn i Hi
       ; [ apply IHHbs1 in H; assumption
       | inversion H; subst; apply initial_state_is_valid; apply Hv
-      | discriminate]
+      | done]
       |..]
     ; cbn in Hv, Ht
     ; destruct_equivocator_state_project' s i si Hi Hpr; [|contradiction| |contradiction]
@@ -1003,13 +1003,13 @@ Proof.
       ; specialize (Hgen _ _ Hsi _ _ Hom _ Hv _ _ Hti)
       ; split; [eexists; exact Hgen| | eexists; exact Hgen|]; intros.
     + destruct_equivocator_state_update_project s i si' i0 Hi0 Hij.
-      * discriminate.
+      * done.
       * inversion H. subst. eexists; exact Hgen.
       * apply IHHbs1 in H. assumption.
     + destruct_equivocator_state_extend_project s si' i0 Hi0.
       * apply IHHbs1 in H. assumption.
       * inversion H. subst. eexists; exact Hgen.
-      * discriminate.
+      * done.
 Qed.
 
 Lemma preloaded_with_equivocator_state_project_valid_state

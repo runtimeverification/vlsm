@@ -558,7 +558,7 @@ Proof.
       simpl in *.
       destruct (equivocators_transition_item_project e1 a)
         as [(oitem, odescriptor)|] eqn:Ha
-      ; [|discriminate Htr].
+      ; [| done].
       destruct oitem as [item'|]; inversion Htr; reflexivity.
 Qed.
 
@@ -908,7 +908,7 @@ Proof.
         subst eqv_final.
         destruct (equivocator_vlsm_transition_item_project _ _ _)
           as [(oitem', descriptor')|] eqn:Heqpr_item_x
-        ; [|discriminate Hproject_xi].
+        ; [| done].
         destruct oitem' as [item'|]
         ; inversion Hproject_xi; subst descriptor' project_xi; clear Hproject_xi
         ; inversion Hpr_item_x; subst; clear Hpr_item_x
@@ -935,7 +935,7 @@ Proof.
         destruct
           (equivocator_vlsm_transition_item_project _ _ _)
           as [(oitem', descriptor')|] eqn:Heqpr_item_x
-        ; [|discriminate Hpr_item_x].
+        ; [| done].
         destruct oitem' as [item'|]
         ; inversion Hpr_item_x; subst; clear Hpr_item_x
         ; inversion Hproject_x; subst; clear Hproject_x
@@ -1137,7 +1137,7 @@ Proof.
     destruct (equivocator_transition _ _ _) as (si', om') eqn:Ht'.
     inversion Ht. subst om'. clear Ht.
     replace (s i) with si' in * by (subst; rewrite state_update_eq; reflexivity).
-    destruct (equivocator_state_project si' j) as [si'j|] eqn:Hj; [|discriminate].
+    destruct (equivocator_state_project si' j) as [si'j|] eqn:Hj; [| done].
     destruct li as [ndi | idi li | idi li]
     ; destruct (decide _)
     ; inversion Heqprojecti; subst; clear Heqprojecti

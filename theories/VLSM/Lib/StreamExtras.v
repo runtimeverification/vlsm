@@ -386,7 +386,7 @@ Proof.
   split.
   - intros Hp n i.
     destruct (decide (n <= S i)).
-    + intros. rewrite lookup_ge_None_2 in H0; [discriminate|].
+    + intros. rewrite lookup_ge_None_2 in H0; [done |].
       rewrite stream_prefix_length. assumption.
     + pose proof (stream_prefix_length s n) as Hlen.
       rewrite (Hi n i) by lia.

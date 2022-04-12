@@ -103,10 +103,10 @@ Lemma equivocator_vlsm_transition_item_project_some_inj
 Proof.
   destruct item.
   destruct l as [sn| j ls| j l2]; cbn in HitemX, HitemX'
-  ; destruct (equivocator_state_project _ i) as [si|] eqn:Hsi; [|discriminate| |discriminate | |discriminate]
-  ; destruct (equivocator_state_project _ i') as [si'|] eqn:Hsi'; [|discriminate| |discriminate | |discriminate]
-  ; case_decide; [discriminate| discriminate| | discriminate| |discriminate]; subst
-  ; case_decide; [| discriminate| | discriminate]; subst.
+  ; destruct (equivocator_state_project _ i) as [si|] eqn:Hsi; [| done | | done | | done]
+  ; destruct (equivocator_state_project _ i') as [si'|] eqn:Hsi'; [| done | | done | | done]
+  ; case_decide; [done | done | | done | | done]; subst
+  ; case_decide; [| done | | done]; subst.
   - assert (si = si') by congruence; subst si'.
     inversion_clear HitemX.
     inversion_clear HitemX'.
@@ -134,7 +134,7 @@ Proof.
   destruct descriptor as [s|i]; cbn in *; [congruence|].
   exists i. split; [reflexivity|].
   destruct_equivocator_state_project destination i si Hi; [|reflexivity].
-  destruct l; case_decide; discriminate.
+  by destruct l; case_decide.
 Qed.
 
 Lemma equivocator_transition_item_project_proper
@@ -169,11 +169,11 @@ Proof.
   exists j. split; [reflexivity|].
   destruct item.
   simpl in Hitem |- *.
-  destruct (equivocator_state_project _ _); [|discriminate].
+  destruct (equivocator_state_project _ _); [| done].
   split; [eexists;reflexivity|].
   destruct l as [s | i' | i']
-  ; [destruct (decide _); discriminate|..]
-  ; destruct (decide _); [|discriminate| |discriminate]
+  ; [destruct (decide _); done |..]
+  ; destruct (decide _); [| done | | done]
   ; inversion Hitem; split; reflexivity.
 Qed.
 
@@ -455,7 +455,7 @@ Proof.
     right.
     unfold equivocator_vlsm_transition_item_project in Hproject.
     destruct descriptor as [|deqvi]; [assumption|].
-    destruct (equivocator_state_project destination deqvi); [|discriminate].
+    destruct (equivocator_state_project destination deqvi); [| done].
     case_decide; [congruence|].
     inversion Hproject. subst. inversion Heqv.
   - specialize (existing_true_label_equivocator_transition_size X Ht _ Hsj) as Ht_size.
@@ -636,12 +636,12 @@ Proof.
   destruct di as [sn| i]; [simpl in Hitem; congruence|].
   eexists _; split; [reflexivity|].
   simpl in Hitem.
-  destruct (equivocator_state_project s i) as [si|] eqn:Heqsi; [|discriminate].
+  destruct (equivocator_state_project s i) as [si|] eqn:Heqsi; [| done].
   eexists; split; [reflexivity|].
-  destruct l as [sn| j lx| j lx]; [destruct (decide _); discriminate|..]
+  destruct l as [sn| j lx| j lx]; [by destruct (decide _) |..]
   ; cbn in Hv
   ; (destruct (equivocator_state_project s' j) as [s'j|] eqn:Heqs'j; [|contradiction])
-  ; (destruct (decide _); [|discriminate])
+  ; (destruct (decide _); [| done])
   ; inversion Hitem; subst; simpl; repeat split; eexists _; repeat split; exists s'j
   ; (repeat split; [assumption..|])
   ; destruct (vtransition X _ _) as (s'j', _oom) eqn:Hti.
@@ -683,7 +683,7 @@ Lemma equivocator_valid_transition_project_inv3
 Proof.
   destruct di as [si | i]; [inversion Hitem; reflexivity|].
   subst item. simpl in Hitem.
-  destruct (equivocator_state_project s i) as [si|] eqn:Heqsi; [|discriminate].
+  destruct (equivocator_state_project s i) as [si|] eqn:Heqsi; [| done].
   destruct l as [sn|id lx|id lx]; destruct (decide _); inversion Hitem; subst.
   - split; [reflexivity|]. split; [reflexivity|].
     split; [apply Hv|]. inversion Ht. subst.

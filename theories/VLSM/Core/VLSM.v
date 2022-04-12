@@ -241,10 +241,10 @@ Section TraceLemmas.
     : finite_trace_last default tr  = s.
   Proof.
     unfold option_map in Hlast.
-    destruct (last_error tr) eqn : eq; try discriminate Hlast.
+    destruct (last_error tr) eqn: eq; [| done].
     inversion Hlast.
     unfold last_error in eq.
-    destruct tr; try discriminate eq.
+    destruct tr; [done |].
     inversion eq.
     unfold finite_trace_last.
     rewrite last_map. reflexivity.
