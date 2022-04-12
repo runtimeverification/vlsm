@@ -371,7 +371,7 @@ Global Hint Mode CompareReflexive ! - : typeclass_instances.
 (* About reflexive comparison operators *)
 Lemma compare_eq_refl {A} `{CompareReflexive A} :
   forall x, compare x x = Eq.
-Proof. intros; now apply H. Qed.
+Proof. by intros; apply H. Qed.
 
 Lemma compare_eq_lt {A} `{CompareReflexive A} :
   forall x, ~ compare x x = Lt.
@@ -383,7 +383,7 @@ Lemma compare_lt_neq {A} `{CompareReflexive A} :
   forall x y, compare x y = Lt -> x <> y.
 Proof.
   intros x y Hcomp Hnot.
-  subst. now (apply (compare_eq_lt y) in Hcomp).
+  by subst; by apply (compare_eq_lt y) in Hcomp.
 Qed.
 
 Lemma compare_eq_gt {A} `{CompareReflexive A} :
@@ -396,7 +396,7 @@ Lemma compare_gt_neq {A} `{CompareReflexive A} :
   forall x y, compare x y = Gt -> x <> y.
 Proof.
   intros x y H_comp H_not.
-  subst. now apply compare_eq_gt in H_comp.
+  by subst; apply compare_eq_gt in H_comp.
 Qed.
 
 (* Transitivity of comparison operators *)
@@ -419,9 +419,10 @@ Lemma compare_eq_dec {A} `{CompareStrictOrder A} :
   EqDecision A.
 Proof.
   intros x y.
-  destruct (compare x y) eqn:Hxy;
-    (left; apply StrictOrder_Reflexive; assumption)
-    || (right; intro; subst; [now apply compare_eq_lt in Hxy || now apply compare_eq_gt in Hxy]).
+  destruct (compare x y) eqn: Hxy.
+  - by left; apply StrictOrder_Reflexive.
+  - right. intros ->. by apply compare_eq_lt in Hxy.
+  - right. intros ->. by apply compare_eq_gt in Hxy.
 Qed.
 
 Definition eq_bool {X} `{CompareStrictOrder X} (x y : X) : bool :=
@@ -441,11 +442,11 @@ Lemma compare_asymmetric_intro {A} `{CompareStrictOrder A} :
 Proof.
   intros. destruct H as [R TR]. intros; split; intros.
   - destruct (compare y x) eqn:Hyx; try reflexivity; exfalso.
-    + apply R in Hyx; subst. now apply compare_eq_lt in H.
-    + apply (TR _ _ _ _ Hyx) in H. now apply compare_eq_lt in H.
+    + by apply R in Hyx; subst; apply compare_eq_lt in H.
+    + by apply (TR _ _ _ _ Hyx), compare_eq_lt in H.
   - destruct (compare x y) eqn:Hyx; try reflexivity; exfalso.
-    + apply R in Hyx; subst. now apply compare_eq_gt in H.
-    + apply (TR _ _ _ _ Hyx) in H. now apply compare_eq_gt in H.
+    + by apply R in Hyx; subst; apply compare_eq_gt in H.
+    + by apply (TR _ _ _ _ Hyx), compare_eq_gt in H.
 Qed.
 
 Instance CompareStrictOrder_Asymmetric {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
@@ -475,7 +476,7 @@ Qed.
 Lemma compare_lt_transitive {A} `{CompareTransitive A} :
   Transitive (compare_lt compare).
 Proof.
-  intros x y z Hxy Hyz; now apply (H _ _ _ _ Hxy Hyz).
+  by intros x y z Hxy Hyz; apply (H _ _ _ _ Hxy Hyz).
 Qed.
 
 Lemma compare_lt_strict_order {A} `{CompareStrictOrder A} :
@@ -483,8 +484,8 @@ Lemma compare_lt_strict_order {A} `{CompareStrictOrder A} :
 Proof.
   destruct H as [R T].
   split.
-  - now apply compare_lt_irreflexive.
-  - now apply compare_lt_transitive.
+  - by apply compare_lt_irreflexive.
+  - by apply compare_lt_transitive.
 Qed.
 
 Lemma compare_lt_asymmetric {A} `{CompareStrictOrder A} :
@@ -631,10 +632,10 @@ Proof.
   left. split; try reflexivity.
   rewrite compare_eq in H_m. subst.
   apply compare_eq_refl.
-  right. left; split; try reflexivity.
-  now apply compare_asymmetric.
+  right; left; split; try reflexivity.
+  by apply compare_asymmetric.
   right; right; split; try reflexivity.
-  now apply compare_asymmetric.
+  by apply compare_asymmetric.
 Qed.
 
 Tactic Notation "case_pair" constr(about_M) constr(m1) constr(m2) :=
@@ -780,8 +781,9 @@ Proof.
   intros x1 x2 y1 y2 c H_12.
   simpl in H_12.
   destruct (compare x1 x2) eqn:H_x; try (left; assumption).
-  right. split. now apply StrictOrder_Reflexive in H_x.
-  by destruct (compare y1 y2) eqn:H_y.
+  right. split.
+  - by apply StrictOrder_Reflexive in H_x.
+  - by destruct (compare y1 y2) eqn: H_y.
 Qed.
 
 Lemma transitive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareTransitive (compare_compose X Y).

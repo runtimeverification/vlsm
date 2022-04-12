@@ -74,9 +74,7 @@ Lemma set_eq_nodup_sum_weight_eq
     sum_weights lv1 = sum_weights lv2.
 Proof.
   intros lv1 lv2 H_nodup1 H_nodup2 [H_eq_l H_eq_r].
-  assert (H_useful := sum_weights_subseteq lv1 lv2 H_nodup1 H_nodup2 H_eq_l).
-  assert (H_useful' := sum_weights_subseteq lv2 lv1 H_nodup2 H_nodup1 H_eq_r).
-  now apply Rle_antisym.
+  by apply Rle_antisym; apply sum_weights_subseteq.
 Qed.
 
 Lemma sum_weights_app

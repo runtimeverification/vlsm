@@ -122,7 +122,7 @@ Lemma set_union_nodup_left `{EqDecision A} (l l' : set A)
 Proof.
   intro Hl.
   induction l' as [| x' l' IH]; [done |].
-  now apply set_add_nodup.
+  by apply set_add_nodup.
 Qed.
 
 Lemma set_union_subseteq_left `{EqDecision A}  : forall (s1 s2 : list A),

@@ -249,7 +249,7 @@ Lemma set_diff_iff a l l' : a ∈ (set_diff l l') <-> a ∈ l /\ ~a ∈ l'.
 Proof.
 split.
   - split; [eapply set_diff_elim1 | eapply set_diff_elim2]; eauto.
-  - destruct 1. now apply set_diff_intro.
+  - by destruct 1; apply set_diff_intro.
 Qed.
 
 Lemma set_diff_nodup l l' : NoDup l -> NoDup (set_diff l l').
