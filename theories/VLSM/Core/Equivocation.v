@@ -656,7 +656,7 @@ Section Simple.
         assert (Hsm' : selected_message_exists_in_some_preloaded_traces (field_selector input) s m)
           by (exists is; exists tr; exists Htr; assumption).
         apply Hconsistency in Hsm'.
-        apply proper_received in Hsm'. contradiction.
+        by apply proper_received in Hsm'.
       - intro Hnone. destruct (decide (has_been_received s m)) as [Hsm|Hsm];[|assumption].
         exfalso.
         apply proper_received in Hsm. apply Hconsistency in Hsm.

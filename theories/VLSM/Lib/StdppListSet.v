@@ -124,8 +124,7 @@ induction l as [|x l IH]; intro Hnd; simpl.
 - intro Hem; inversion Hem.
 - inversion_clear Hnd.
   destruct (decide (b = x)) as [<-|Hbx].
-  + intros; intro Ha.
-    subst; contradiction.
+  + by intros Ha ->.
   + rewrite elem_of_cons.
     intros [Ha|Hset].
     * subst; auto.
@@ -138,7 +137,7 @@ induction l as [|x xs Hrec].
 - intro Ha; inversion Ha.
 - rewrite elem_of_cons; simpl.
   destruct (decide (b = x)) as [<-|Hbx]; simpl.
-  + intros [Ha|Hx] Hab; [contradiction|].
+  + intros [Ha|Hx] Hab; [done |].
     assumption.
   + intros [Ha|Hx] Hab; subst; [left|].
     right.

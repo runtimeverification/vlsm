@@ -122,7 +122,7 @@ Proof.
     itauto.
   - apply Exists_app in Hsomething.
     destruct Hsomething.
-    2:{ inversion H; subst. contradiction. inversion H1. }
+    2:{ inversion H; [done |]. inversion H1. }
     specialize (IHl H);clear H.
     destruct IHl as [prefix [suffix [last [Hf [-> Hnone_after]]]]].
     exists prefix, (suffix ++ [x]), last.
@@ -281,7 +281,7 @@ Proof.
     intro Hxl'; contradict Ha; right; assumption.
   - rewrite elem_of_app.
     intro Hal.
-    destruct Hal as [Hal|Hal]; [|contradiction].
+    destruct Hal as [Hal|Hal]; [| done].
     specialize (Ha a Hal).
     contradict Ha; left.
 Qed.

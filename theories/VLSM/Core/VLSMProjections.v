@@ -2786,7 +2786,7 @@ Lemma vlsm_incl_pre_loaded
 Proof.
   eapply VLSM_incl_trans.
   - eapply VLSM_eq_proj1, vlsm_is_pre_loaded_with_False.
-  - apply pre_loaded_vlsm_incl; contradiction.
+  - by apply pre_loaded_vlsm_incl.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_initial_message
@@ -2798,7 +2798,7 @@ Qed.
 Lemma vlsm_is_pre_loaded_with_False_initial_message_rev
   : strong_full_projection_initial_message_preservation (pre_loaded_vlsm X (fun m => False)) X.
 Proof.
-  intros m [Hm | Hfalse]; [assumption|contradiction].
+  by intros m [Hm | Hfalse].
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_idem_l

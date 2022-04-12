@@ -100,7 +100,7 @@ Lemma lift_equivocators_sub_state_to_sub
   : lift_equivocators_sub_state_to base_s s i =  equivocator_state_append (base_s i) (s (dexist i Hi)).
 Proof.
   unfold lift_equivocators_sub_state_to.
-  case_decide as H_i; [| contradiction].
+  case_decide as H_i; [| done].
   rewrite (sub_IM_state_pi s H_i Hi); reflexivity.
 Qed.
 
@@ -204,8 +204,8 @@ Proof.
         case_decide.
         -- rewrite decide_True; rewrite ?elem_of_app; itauto.
         -- rewrite decide_False; [assumption |].
-           intros [Hin | Hx]%elem_of_app; [contradiction Hin | contradict Hx].
-           rewrite elem_of_list_singleton, dsig_eq; cbn; congruence.
+           intros [Hin | Hx]%elem_of_app; [ done |].
+           by rewrite elem_of_list_singleton, dsig_eq in Hx.
 Qed.
 
 (** For any [equivocator_descriptors] corresponding to the base state
@@ -236,7 +236,7 @@ Proof.
     repeat split; [|apply IHl].
     specialize (Heqv_descriptors (` x)).
     unfold existing_descriptor in Heqv_descriptors.
-    destruct (eqv_descriptors (` x)) eqn:Heqv_x; [contradiction|].
+    destruct (eqv_descriptors (` x)) eqn:Heqv_x; [done |].
     destruct Heqv_descriptors as [s_x_n Heqv_descriptors].
     apply equivocator_state_project_Some_rev in Heqv_descriptors as Hltn.
     apply proj2 in IHl.
@@ -299,7 +299,7 @@ Proof.
   intro i. spec Heqv_descriptors i.
   unfold equivocator_state_descriptor_project.
   unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors i) as [sn|ji]; [contradiction|].
+  destruct (eqv_descriptors i) as [sn|ji]; [done |].
   destruct Heqv_descriptors as [full_i_ji Hpr_ji].
   apply equivocator_state_project_Some_rev in Hpr_ji as Hltji.
   subst lst.
@@ -364,7 +364,7 @@ Proof.
   intro i. spec Heqv_descriptors i.
   unfold equivocator_state_descriptor_project.
   unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors i) as [sn|ji]; [contradiction|].
+  destruct (eqv_descriptors i) as [sn|ji]; [done |].
   destruct Heqv_descriptors as [full_i_ji Hpr_ji].
   apply equivocator_state_project_Some_rev in Hpr_ji as Hltji.
   subst lst.
@@ -406,7 +406,7 @@ Proof.
   subst sub_i.
   specialize (Heqv_descriptors i).
   unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors _) eqn:Heqv_l; [contradiction|].
+  destruct (eqv_descriptors _) eqn:Heqv_l; [done |].
   destruct Heqv_descriptors as [s_l_n Hs_l_n].
   apply equivocator_state_project_Some_rev in Hs_l_n as Hltn.
   specialize (lift_equivocators_sub_state_to_size full_replay_state destination i)

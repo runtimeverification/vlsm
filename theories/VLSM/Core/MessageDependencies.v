@@ -262,7 +262,7 @@ Proof.
       (VLSM_projection_input_valid_transition (preloaded_component_projection IM _))
       with (lY := li).
     unfold composite_project_label; cbn.
-    case_decide as Heqi; [|contradiction].
+    case_decide as Heqi; [| done].
     replace Heqi with (@eq_refl index i) by (apply Eqdep_dec.UIP_dec; assumption).
     reflexivity.
   - intros m Hemit.

@@ -325,11 +325,7 @@ Definition predicate_not {A} (p : A -> Prop) : A -> Prop :=
 Lemma predicate_function_neg {A} `{PredicateFunction A} :
   forall a, ~ r a <-> r_fn a = false.
 Proof.
-  intro a; split; intros.
-  apply not_true_iff_false. intro Hnot.
-  apply equiv in Hnot. contradiction.
-  intro Hnot. apply not_true_iff_false in H0.
-  apply H0. apply (equiv a). assumption.
+  by intros; rewrite equiv; destruct (r_fn a).
 Qed.
 
 Class PredicateFunction2 {A B} (r : A -> B -> Prop) (r_fn : A -> B -> bool) : Prop :=

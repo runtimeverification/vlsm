@@ -95,7 +95,7 @@ any message that tests as [has_been_observed] in a state also tests as
     destruct Hobs as [[Hin|Hout]|Hobs]; subst.
     - (* by [no_equivocations], the incoming message [im] was previously sent *)
       specialize (Henforced Hv).
-      destruct Henforced; [|contradiction].
+      destruct Henforced; [| done].
       right. assumption.
     - left. reflexivity.
     - right. apply Hprev. assumption.

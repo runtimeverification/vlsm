@@ -824,10 +824,7 @@ Definition existing_equivocator_label_extract
   (Hs : existing_equivocator_label l)
   : vlabel X.
 Proof.
-  destruct l.
-  - contradiction.
-  - exact v.
-  - exact v.
+  by destruct l.
 Defined.
 
 Definition proper_existing_equivocator_label
@@ -876,7 +873,7 @@ Proof.
   unfold is_singleton_state in Hs'.
   destruct l as [sn | ei l | ei l]
   ; [ inversion Ht; subst; rewrite equivocator_state_extend_size in Hs'; cbv in Hs'; lia|..]
-  ; cbn in Hv, Ht;  destruct_equivocator_state_project s ei sei Hei; [|contradiction| |contradiction]
+  ; cbn in Hv, Ht;  destruct_equivocator_state_project s ei sei Hei; [| done | | done]
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion Ht; subst.
   - rewrite equivocator_state_update_size in Hs'. exists l. f_equal. lia.
@@ -992,7 +989,7 @@ Proof.
       | done]
       |..]
     ; cbn in Hv, Ht
-    ; destruct_equivocator_state_project' s i si Hi Hpr; [|contradiction| |contradiction]
+    ; destruct_equivocator_state_project' s i si Hi Hpr; [| done | | done]
     ; destruct (vtransition _ _ _) as (si', _om') eqn:Hti
     ; inversion Ht; subst s' _om'; clear Ht
 

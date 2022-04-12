@@ -349,10 +349,7 @@ Proof.
   induction l as [|hd tl IHl]; intros x H_in.
   - inversion H_in.
   - inversion H_in.
-    + subst. simpl.
-      destruct (decide (hd = hd)).
-      reflexivity.
-      contradiction.
+    + by cbn; rewrite decide_True.
     + subst.
       spec IHl x H2. simpl.
       destruct (decide (x = hd)).
@@ -582,9 +579,7 @@ Proof.
     right; assumption.
     rewrite <- IHlv at 2.
     simpl.
-    destruct (decide (v = hd)).
-    contradiction.
-    reflexivity.
+    by destruct (decide (v = hd)).
 Qed.
 
 Lemma set_union_iterated_empty `{EqDecision A} :

@@ -259,8 +259,7 @@ Proof.
     rewrite elem_of_cons in IN1.
     destruct IN1; [|assumption].
     subst.
-    apply StrictOrder_Irreflexive in H0.
-    contradiction.
+    by apply StrictOrder_Irreflexive in H0.
   - intros x Hx.
     pose proof (LocallySorted_elem_of_lt x _ _ LS2 Hx).
     specialize (IN2 x).
@@ -269,8 +268,7 @@ Proof.
     rewrite elem_of_cons in IN2.
     destruct IN2; [|assumption].
     subst.
-    apply StrictOrder_Irreflexive in H0.
-    contradiction.
+    by apply StrictOrder_Irreflexive in H0.
 Qed.
 
 Lemma set_equality_predicate {A}  {lt : relation A} `{StrictOrder A lt} :

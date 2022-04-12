@@ -418,7 +418,7 @@ Proof.
     unfold sub_IM, fixed_byzantine_IM, update_IM in Him.
     simpl in Him.
     apply set_diff_elim2 in Hi.
-    case_decide; [contradiction|].
+    case_decide; [done |].
     elim (no_initial_messages_in_IM i im).
     assumption.
   - destruct Hseeded as [[i [Hi Hsender]] Hvalid].

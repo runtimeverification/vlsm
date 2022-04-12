@@ -2152,8 +2152,8 @@ Definition ExistsSuffix1 [A : Type] (P : A -> Prop) : list A -> Prop :=
 Lemma ExistsSuffix1_Exists [A : Type] (P : A -> Prop)
   : forall l, ExistsSuffix1 P l <-> Exists P l.
 Proof.
-  split; induction 1.
-  - destruct l; [contradiction|]. left. assumption.
+  split; induction 1. Search Exists cons.
+  - by destruct l; [| left].
   - right. assumption.
   - left. assumption.
   - right. assumption.

@@ -342,7 +342,7 @@ Proof.
       | right _ =>
         stream_filter_fst_pos (tl s) _ (S n)
      end).
-  destruct Hev; [contradiction|assumption].
+  by destruct Hev.
 Defined.
 
 Lemma stream_filter_fst_pos_characterization
@@ -357,7 +357,7 @@ Proof.
   fix H 2.
   intros.
   destruct Hev; simpl.
-  - destruct (decide _); [|contradiction].
+  - destruct (decide _); [| done].
     exists 0. repeat split; [|assumption|lia]. f_equal. lia.
   - destruct (decide _); simpl.
     1: {

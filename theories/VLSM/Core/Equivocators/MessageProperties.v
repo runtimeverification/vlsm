@@ -269,7 +269,7 @@ Proof.
   - unfold equivocator_oracle. rewrite Exists_exists.
     split.
     * intros [i [_ Hi]].
-      destruct (equivocator_state_project s i) as [si|] eqn:Hsi; [|contradiction].
+      destruct (equivocator_state_project s i) as [si|] eqn:Hsi; [| done].
       exists i, si. split; assumption.
     * intros [i [si [Hsi Hi]]]. exists i.
       apply equivocator_state_project_Some_rev in Hsi as Hlti.
@@ -305,12 +305,12 @@ Proof.
         ; [exists ins, sins; split; assumption| |congruence].
         inversion Hsins. subst.
         elim (oracle_no_inits _ Hisdesc msg).  assumption.
-      * intros [H | [ins [sins [Hsins Hir]]]]; [contradiction|].
+      * intros [H | [ins [sins [Hsins Hir]]]]; [done |].
         exists ins, sins. split; [|assumption].
         rewrite equivocator_state_extend_project_1; [assumption|].
         apply equivocator_state_project_Some_rev in Hsins. assumption.
     + cbn in Hv.
-      destruct (equivocator_state_project s idesc) as [sidesc|] eqn:Hidesc; [|contradiction].
+      destruct (equivocator_state_project s idesc) as [sidesc|] eqn:Hidesc; [| done].
       destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn:Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
@@ -367,7 +367,7 @@ Proof.
             destruct_equivocator_state_project s' ins _sins Hins; [|lia].
             simpl in Hnot_same. congruence.
     + cbn in Hv.
-      destruct (equivocator_state_project s idesc) as [sidesc|] eqn:Hidesc; [|contradiction].
+      destruct (equivocator_state_project s idesc) as [sidesc|] eqn:Hidesc; [| done].
       destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn:Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').

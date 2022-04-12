@@ -953,7 +953,7 @@ Proof.
     + rewrite state_update_neq by congruence.
       destruct (decide (i ∈ equivocators)).
       * rewrite !lift_sub_state_to_eq with (Hi := e), state_update_neq; [reflexivity|].
-        intros Hcontra%dsig_eq; contradiction.
+        by intros Hcontra%dsig_eq.
       * rewrite !lift_sub_state_to_neq by assumption; reflexivity.
   - intros s H2; apply fixed_equivocator_lifting_initial_state; assumption.
   - intros l s m Hv HsY [[(i, Hi) [[im Him] Heqm]] | Hm].
@@ -989,7 +989,7 @@ Proof.
   split.
   - intros [Hsent | Hemit].
     + apply sent_by_non_equivocating_are_sent in Hsent. assumption.
-    + apply sub_no_indices_no_can_emit in Hemit; [contradiction|reflexivity].
+    + by apply sub_no_indices_no_can_emit in Hemit.
   - intros Hsent.
     left.
     destruct Hsent as [i Hsent].

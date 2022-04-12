@@ -846,8 +846,7 @@ Proof.
   specialize (Hdescriptors eqv).
   apply elem_of_list_filter in Heqv.
   destruct Heqv as [Heqv Hin].
-  destruct (descriptors eqv); [|contradiction].
-  contradiction.
+  by destruct (descriptors eqv).
 Qed.
 
 (**
@@ -1544,13 +1543,13 @@ Proof.
   - inversion_clear Ht.
     rewrite decide_False; [reflexivity|].
     rewrite state_update_eq. rewrite equivocator_state_extend_lst. cbv; lia.
-  - destruct (equivocator_state_project _ _) as [s_i|]; [|contradiction].
+  - destruct (equivocator_state_project _ _) as [s_i|]; [| done].
     destruct (vtransition _ _ _) as (si', _om').
     inversion_clear Ht. rewrite!state_update_eq.
     destruct ji as [|ji].
     + rewrite decide_True by reflexivity. reflexivity.
     + rewrite decide_False by congruence. reflexivity.
-  - destruct (equivocator_state_project _ _) as [s_i|]; [|contradiction].
+  - destruct (equivocator_state_project _ _) as [s_i|]; [| done].
     destruct (vtransition _ _ _) as (si', _om').
     inversion_clear Ht. rewrite!state_update_eq.
     rewrite !equivocator_state_extend_lst.
@@ -1701,7 +1700,7 @@ Proof.
       unfold pre_VLSM_projection_transition_item_project,
         composite_label_sub_projection_option.
       simpl.
-      case_decide as _Hl; [|contradiction].
+      case_decide as _Hl; [| done].
       do 2 f_equal.
       unfold composite_label_sub_projection.
       apply
@@ -1732,9 +1731,7 @@ Proof.
       unfold from_sub_projection. simpl.
       unfold pre_VLSM_projection_transition_item_project,
         composite_label_sub_projection_option.
-      simpl.
-      case_decide; [contradiction|].
-      reflexivity.
+      by case_decide.
 Qed.
 
 Lemma equivocators_trace_project_finite_trace_sub_projection_commute
@@ -2074,7 +2071,7 @@ Proof.
       intros [Hno_equiv _].
       split; [|exact I].
       destruct om as [m|]; [|exact I].
-      left. destruct Hno_equiv as [Hno_equiv | Hfalse]; [|contradiction].
+      left. destruct Hno_equiv as [Hno_equiv | Hfalse]; [| done].
       destruct Hno_equiv as [eqv Hno_equiv].
       exists (dexist eqv (SubProjectionTraces.free_sub_free_index_obligation_1 eqv)).
       assumption.
@@ -2214,13 +2211,13 @@ Proof.
     simpl.
     apply state_update_id. reflexivity.
   - simpl in Hl. destruct ji as [|ji]; [inversion Hl|]. clear Hl.
-    destruct (equivocator_state_project _ _) as [si|]; [|contradiction].
+    destruct (equivocator_state_project _ _) as [si|]; [| done].
     destruct (vtransition _ _ _) as (si', _om').
     inversion_clear Ht.  unfold equivocators_total_state_project.
     rewrite (equivocators_state_project_state_update_eqv IM).
     simpl.
     apply state_update_id. reflexivity.
-  - destruct (equivocator_state_project _ _) as [si|]; [|contradiction].
+  - destruct (equivocator_state_project _ _) as [si|]; [| done].
     destruct (vtransition _ _ _) as (si', _om').
     inversion_clear Ht.  unfold equivocators_total_state_project.
     rewrite (equivocators_state_project_state_update_eqv IM).

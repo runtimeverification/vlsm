@@ -146,8 +146,7 @@ Proof.
   + assert (Hsent : composite_has_been_sent IM (finite_trace_last is pre) m0)
       by (exists i; assumption).
     apply (composite_proper_sent IM) in Hsent; [|assumption].
-    specialize (Hsent _ _ (conj Hpre_pre Hinit)).
-    contradiction.
+    by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
   +  apply (SubProjectionTraces.sub_can_emit_sender IM equivocators (fun i => i) sender Hsender_safety _ _ v) in Hemit
       ; assumption.
 Qed.
