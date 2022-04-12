@@ -1325,8 +1325,8 @@ traces.
       replace (finite_trace_last s (list_prefix ls n)) with nth in Htr;[assumption|].
       {
         destruct n.
-        - rewrite finite_trace_nth_first in Hnth. injection Hnth as ->.
-          destruct ls;reflexivity.
+        - rewrite finite_trace_nth_first in Hnth.
+          destruct ls; cbn; congruence.
         - unfold finite_trace_last.
           rewrite list_prefix_map.
           apply list_prefix_nth_last.

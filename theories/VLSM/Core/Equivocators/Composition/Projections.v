@@ -747,7 +747,7 @@ Proof.
     destruct
       (equivocators_transition_item_project descriptors x)
       as [(oitemx, _descriptors')|] eqn:Hpr_x ; [|congruence].
-    assert (_descriptors' = descriptors') as -> by (destruct oitemx;injection Hproject_x;congruence).
+    assert (_descriptors' = descriptors') as -> by (destruct oitemx; congruence).
     clear Hproject_x trX sufX.
 
     destruct Ht as [[_ [_ [Hv _]]] Ht].
@@ -979,7 +979,7 @@ Proof.
     destruct
       (equivocators_transition_item_project descriptors x)
       as [(oitemx, _descriptors')|] eqn:Hpr_x ; [|congruence].
-    assert (_descriptors' = descriptors') as -> by (destruct oitemx;injection Hproject_x;congruence).
+    assert (_descriptors' = descriptors') as -> by (destruct oitemx; congruence).
     clear Hproject_x trX sufX.
     destruct Hx as [(_ & _  & Hv & _) Ht].
     eapply IHHtr; [eassumption|].
