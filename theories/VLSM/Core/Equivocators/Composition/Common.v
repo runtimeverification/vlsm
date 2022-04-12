@@ -253,8 +253,8 @@ Lemma preloaded_equivocators_no_equivocations_vlsm_incl_PreFree
   : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm) (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
 Proof.
   apply basic_VLSM_incl_preloaded.
-  1,3: intro; intros; assumption.
-  intros l s om [Hv _]. split; [assumption|cbv; trivial].
+  1,3: by intro.
+  by intros l s om [Hv _].
 Qed.
 
 Lemma equivocators_initial_state_size

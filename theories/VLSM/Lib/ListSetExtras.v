@@ -121,7 +121,7 @@ Lemma set_union_nodup_left `{EqDecision A} (l l' : set A)
   : NoDup l -> NoDup (set_union l l').
 Proof.
   intro Hl.
-  induction l' as [|x' l' IH]; [trivial|].
+  induction l' as [| x' l' IH]; [done |].
   now apply set_add_nodup.
 Qed.
 
@@ -156,7 +156,7 @@ Proof.
   intros.
   generalize dependent ss.
   induction ss.
-  - intros. simpl. apply NoDup_nil. trivial.
+  - by intros; apply NoDup_nil.
   - intros.
     simpl.
     apply set_union_nodup.

@@ -1214,7 +1214,7 @@ Proof.
   - rewrite sub_IM_state_update_neq by assumption.
     unfold lift_sub_incl_state; cbn.
     case_decide; [| reflexivity].
-    rewrite sub_IM_state_update_neq; trivial.
+    by rewrite sub_IM_state_update_neq.
 Qed.
 
 Lemma lift_sub_incl_full_projection

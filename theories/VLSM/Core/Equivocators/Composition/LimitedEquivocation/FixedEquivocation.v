@@ -97,7 +97,7 @@ Lemma in_futures_reflects_fixed_equivocation
   : state_has_fixed_equivocation s2 -> state_has_fixed_equivocation s1.
 Proof.
   destruct Hfutures as [tr Htr].
-  induction Htr;[trivial|].
+  induction Htr; [done |].
   intros Hf. specialize (IHHtr Hf). revert IHHtr.
   apply transitivity.
   destruct Ht as [_ Ht].

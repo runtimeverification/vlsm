@@ -828,7 +828,7 @@ Proof.
     intros s om [Hv Hc].
     split.
     + cbn; rewrite lift_sub_state_to_neq; assumption.
-    + destruct om as [m|]; [| trivial].
+    + destruct om as [m|]; [| done].
       apply lift_sub_state_to_strong_fixed_equivocation; assumption.
   - intros [i liX] lY.
     unfold remove_equivocating_state_project;
@@ -930,7 +930,7 @@ Proof.
   - intros l s om Hv HsY HomY. split.
     + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
       destruct_dec_sig i j Hj Heq; subst i; cbn; unfold sub_IM; cbn.
-      rewrite lift_sub_state_to_eq with (Hi := Hj). trivial.
+      by rewrite lift_sub_state_to_eq with (Hi := Hj).
     + destruct om as [m|]; [| exact I]; cbn.
       destruct Hv as (_ & Hm & _).
       apply emitted_messages_are_valid_iff in Hm.

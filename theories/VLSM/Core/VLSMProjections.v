@@ -1320,9 +1320,7 @@ Qed.
 Lemma VLSM_weak_full_projection_input_valid l s im
   : input_valid X l (s,im) -> input_valid Y (label_project l) (state_project s,im).
 Proof.
-  intros.
-  eapply (VLSM_weak_projection_input_valid VLSM_weak_full_projection_is_projection)
-  ; trivial.
+  by intros; eapply (VLSM_weak_projection_input_valid VLSM_weak_full_projection_is_projection).
 Qed.
 
 Lemma VLSM_weak_full_projection_infinite_valid_trace_from

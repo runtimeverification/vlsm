@@ -103,7 +103,7 @@ Lemma msg_dep_strong_fixed_equivocation_constraint_subsumption
       msg_dep_fixed_set_equivocation_constraint
       (strong_fixed_equivocation_constraint IM equivocators).
 Proof.
-  intros l [s [m |]] Hc; [| trivial].
+  intros l [s [m |]] Hc; [| done].
   apply msg_dep_strong_fixed_equivocation_subsumption; assumption.
 Qed.
 
@@ -122,7 +122,7 @@ Proof.
     case_decide as Heqij; [| congruence].
     subst i; cbv in HlX_pr; apply Some_inj in HlX_pr; subst li.
     unfold sub_IM, sub_state_element_project; cbn.
-    rewrite (sub_IM_state_pi sX Hj Hi); trivial.
+    by rewrite (sub_IM_state_pi sX Hj Hi).
   - intros [sub_i li] lY HlX_pr sX om sX' om' [_ HtX]; revert HtX.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     unfold sub_label_element_project in HlX_pr; cbn in HlX_pr.
@@ -228,7 +228,7 @@ Lemma strong_fixed_equivocation_msg_dep_constraint_subsumption
       (strong_fixed_equivocation_constraint IM equivocators)
       msg_dep_fixed_set_equivocation_constraint.
 Proof.
-  intros l [s [m |]] (Hs & _ & _ & Hc); [| trivial].
+  intros l [s [m |]] (Hs & _ & _ & Hc); [| done].
   cut (dependencies_with_non_equivocating_senders_were_sent s m).
   {
     intros Hassume.
@@ -316,7 +316,7 @@ Lemma msg_dep_full_node_fixed_set_equivocation_constraint_subsumption
       (msg_dep_fixed_set_equivocation_constraint IM message_dependencies equivocators)
       full_node_fixed_set_equivocation_constraint.
 Proof.
-  intros l [s [m |]]; [| trivial]
+  intros l [s [m |]]; [| done]
   ; intros [Hsent | [[i [Hi Hemit]] Hdeps]]; [left; assumption | right].
   apply Hchannel in Hemit; cbv in Hemit |- *.
   destruct (sender m) as [v |]; [| congruence].

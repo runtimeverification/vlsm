@@ -179,9 +179,8 @@ Definition noneOrAll : option Prop -> Prop := default True.
 Lemma eq_dec_refl A (eq_dec : forall x y : A, {x = y} + {x <> y}) x :
   eq_dec x x = left eq_refl.
 Proof.
-  destruct (eq_dec x x) as [|[]]; trivial.
-  f_equal.
-  now apply K_dec_type with (P := fun prf => prf = eq_refl).
+  destruct (eq_dec x x) as [| []]; [| done].
+  by rewrite K_dec_type with (P := fun prf => prf = eq_refl).
 Qed.
 
 Definition mid {X Y Z : Type} (xyz : X * Y * Z) : Y :=

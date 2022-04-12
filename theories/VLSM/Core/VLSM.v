@@ -1479,9 +1479,8 @@ that include the final state, and give appropriate induction principles.
         -> finite_valid_trace_from_to m f ls'
         -> finite_valid_trace_from_to s f (ls ++ ls').
     Proof.
-      intros Hl Hl';induction Hl;simpl.
-      - trivial.
-      - constructor;auto.
+      intros Hl Hl'; induction Hl; cbn; [done |].
+      constructor; auto.
     Qed.
 
     Lemma finite_valid_trace_from_to_app_split
@@ -2324,7 +2323,7 @@ This relation is often used in stating safety and liveness properties.*)
           specialize
             (finite_valid_trace_consecutive_valid_transition _ _ _ _ _ _ Htr eq_refl).
           simpl.
-          rewrite finite_trace_last_is_last. trivial.
+          by rewrite finite_trace_last_is_last.
         + assert
             (Hex : exists suffix0 : Stream transition_item,
                 stream_app (p ++ [last_p])  (Cons last suffix) = stream_app p (Cons last_p suffix0)
@@ -2350,7 +2349,7 @@ This relation is often used in stating safety and liveness properties.*)
                eq_refl
             ).
           simpl.
-          rewrite finite_trace_last_is_last. trivial.
+          by rewrite finite_trace_last_is_last.
     Qed.
 
 
