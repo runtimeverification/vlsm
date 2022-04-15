@@ -238,8 +238,7 @@ First note that _all_ messages are [valid_message]s for <<Alt>>, as
           by (apply valid_initial_state;apply proj2_sig).
         eapply (valid_generated_state_message Alt) with s None s None (existT second _)
         ;[assumption|assumption|split; exact I|].
-        simpl. f_equal.
-        rewrite state_update_id; reflexivity.
+        by cbn; rewrite state_update_id.
     Qed.
 
 (**
@@ -292,7 +291,7 @@ Lifting a [valid_state] of <<PreLoaded>> we obtain a [valid_state] of <<Alt>>.
         * simpl.
           replace (lifted_alt_state s first) with s
             by (unfold lifted_alt_state,lift_to_composite_state
-               ;rewrite state_update_eq;reflexivity).
+               ;rewrite state_update_eq; done).
           apply proj2 in Ht.
           change (vtransition M l (s: vstate M,om0) = (s',om')) in Ht.
           rewrite Ht.
@@ -312,7 +311,7 @@ results above to show that <<Preloaded>> is included in <<Alt1>>.
         ; intro; intros; [assumption| | |apply H].
         - apply alt_proj_option_valid_message.
         - exists (lifted_alt_state s).
-          split; [reflexivity|].
+          split; [done |].
           destruct Hv as [[_om Hps] [Hpm Hv]].
           repeat split.
           + apply preloaded_alt_valid_state with _om; assumption.

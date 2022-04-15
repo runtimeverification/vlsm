@@ -104,7 +104,7 @@ Lemma recons
   (s : Stream A)
   : Cons (hd s) (tl s) = s.
 Proof.
-  case s.  reflexivity.
+  by case s.
 Qed.
 
 Definition stream_app
@@ -128,7 +128,7 @@ Lemma stream_app_assoc
   (n : Stream A)
   : stream_app l (stream_app m n) = stream_app (l ++ m) n.
 Proof.
-  induction l; try reflexivity.
+  induction l; [done |].
   simpl. apply f_equal. assumption.
 Qed.
 
@@ -141,7 +141,7 @@ Lemma stream_app_f_equal
   : EqSt (stream_app l1 s1) (stream_app l2 s2).
 Proof.
   subst. induction l2; try assumption.
-  simpl. constructor; try reflexivity. assumption.
+  simpl. by constructor.
 Qed.
 
 Lemma stream_app_inj_l
@@ -153,7 +153,7 @@ Lemma stream_app_inj_l
   : l1 = l2.
 Proof.
   generalize dependent l2.
-  induction l1; intros; destruct l2; try reflexivity; try inversion Heq_len.
+  induction l1; intros; destruct l2; try done; try inversion Heq_len.
   inversion Heq.
   f_equal.
   specialize (IHl1 l2 H2 H0).
@@ -178,15 +178,10 @@ Lemma stream_prefix_nth
   (Hi : i < n)
   : nth_error (stream_prefix s n) i = Some (Str_nth i s).
 Proof.
-  generalize dependent n. generalize dependent s.
-  induction i; intros [a s] [|n] Hi; try reflexivity.
-  - inversion Hi.
-  - inversion Hi.
-  - simpl.
-    assert (Hi': i < n) by lia.
-    specialize (IHi s n Hi').
-    rewrite IHi.
-    reflexivity.
+  revert s n Hi.
+  induction i; intros [a s] [| n] Hi; cbn.
+  1-3: by inversion Hi.
+  apply IHi. lia.
 Qed.
 
 Lemma stream_prefix_lookup
@@ -198,14 +193,9 @@ Lemma stream_prefix_lookup
   : stream_prefix s n !! i = Some (Str_nth i s).
 Proof.
   revert s n Hi.
-  induction i; intros [a s] [|n] Hi; try reflexivity.
-  - inversion Hi.
-  - inversion Hi.
-  - simpl.
-    assert (Hi': i < n) by lia.
-    specialize (IHi s n Hi').
-    rewrite IHi.
-    reflexivity.
+  induction i; intros [a s] [| n] Hi; cbn.
+  1-3: by inversion Hi.
+  apply IHi. lia.
 Qed.
 
 Lemma stream_prefix_S
@@ -215,9 +205,7 @@ Lemma stream_prefix_S
   : stream_prefix s (S n) = stream_prefix s n ++ [Str_nth n s].
 Proof.
   revert s.
-  induction n; intros; rewrite <- (recons s); [reflexivity|].
-  simpl.
-  f_equal. apply IHn.
+  by induction n; intros; rewrite <- (recons s); cbn; f_equal; rewrite <- IHn.
 Qed.
 
 Lemma stream_prefix_EqSt
@@ -226,14 +214,9 @@ Lemma stream_prefix_EqSt
   (Heq : EqSt s1 s2)
   : forall n : nat, stream_prefix s1 n = stream_prefix s2 n .
 Proof.
-  intro n.
-  generalize dependent s2. generalize dependent s1.
-  induction n; try reflexivity; intros (a1, s1) (a2,s2) Heq.
-  inversion Heq. simpl in H; subst.
-  simpl.
-  f_equal.
-  apply IHn.
-  assumption.
+  intro n; revert s1 s2 Heq.
+  induction n; [done |]; intros [a1 s1] [a2 s2] Heq.
+  by inversion Heq; cbn in *; subst; erewrite IHn.
 Qed.
 
 Lemma EqSt_stream_prefix
@@ -249,11 +232,9 @@ Proof.
   {
     rewrite <- (stream_prefix_nth  s1 (S n) n Hlt).
     rewrite <- (stream_prefix_nth  s2 (S n) n Hlt).
-    specialize (Hpref (S n)).
-    rewrite Hpref.
-    reflexivity.
+    by rewrite (Hpref (S n)).
   }
-  inversion HSome. reflexivity.
+  by inversion HSome.
 Qed.
 
 Lemma elem_of_stream_prefix
@@ -269,8 +250,7 @@ Proof.
   - destruct H as [k [Hk _]]. lia.
   - destruct l as (b, l).
     inversion H; subst.
-    + exists 0. split; try reflexivity.
-      lia.
+    + exists 0. split; [lia | done].
     + apply IHn in H2 as [k [Hlt Heq]].
       exists (S k).
       split; try assumption.
@@ -291,13 +271,9 @@ Lemma stream_prefix_app_l
   (Hle : n <= length l)
   : stream_prefix (stream_app l s) n = list_prefix l n.
 Proof.
-  generalize dependent n.
-  induction l; intros [|n] Hle; try reflexivity.
-  - inversion Hle.
-  - simpl in Hle.
-    simpl. f_equal.
-    apply IHl.
-    lia.
+  revert n Hle; induction l; intros [| n] Hle.
+  1-3: by inversion Hle.
+  by cbn in *; rewrite IHl; [| lia].
 Qed.
 
 Lemma stream_prefix_app_r
@@ -311,14 +287,9 @@ Proof.
   generalize dependent l.
   generalize dependent s.
   induction n.
-  - intros. simpl.
-    destruct l as [|a l]; try reflexivity.
-    simpl in Hge. inversion Hge.
-  - intros s [| a l] Hge; try reflexivity.
-    simpl. f_equal.
-    apply IHn.
-    simpl in Hge.
-    lia.
+  - intros s [| a l] Hge; cbn in *; [done | lia].
+  - intros s [| a l] Hge; cbn in *; [done |].
+    rewrite <- IHn; [done | lia].
 Qed.
 
 Lemma stream_prefix_map
@@ -328,10 +299,7 @@ Lemma stream_prefix_map
   (n : nat)
   : List.map f (stream_prefix l n) = stream_prefix (Streams.map f l) n.
 Proof.
-  generalize dependent l. induction n; intros [a l]; try reflexivity.
-  simpl.
-  f_equal.
-  apply IHn.
+  by revert l; induction n; intros [a l]; cbn; rewrite ?IHn.
 Qed.
 
 Lemma stream_prefix_length
@@ -340,9 +308,7 @@ Lemma stream_prefix_length
   (n : nat)
   : length (stream_prefix l n) = n.
 Proof.
-  generalize dependent l. induction n; intros [a l]; try reflexivity.
-  simpl in *. f_equal.
-  apply IHn.
+  by revert l; induction n; intros [a l]; cbn; rewrite ?IHn.
 Qed.
 
 (** The following two of lemmas connect forall quantifiers looking at one
@@ -396,7 +362,7 @@ Proof.
   - intros Hp n.
     specialize (Hp (S (S n)) n).
     rewrite !Hi in Hp by lia.
-    apply Hp; reflexivity.
+    by apply Hp.
 Qed.
 
 Lemma ForAll2_transitive_lookup [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
@@ -410,7 +376,7 @@ Proof.
   - intros Hp i j Hij.
     specialize (Hp (S j) i j (Str_nth i s) (Str_nth j s) Hij).
     rewrite !Hi in Hp by lia.
-    apply Hp; reflexivity.
+    by apply Hp.
   - intros Hp n i j a b Hlt Ha Hb.
     apply lookup_lt_Some in Hb as Hltj.
     rewrite stream_prefix_length in Hltj.
@@ -464,7 +430,7 @@ Lemma stream_suffix_S
   : stream_suffix l n = Cons (Str_nth n l) (stream_suffix l (S n)).
 Proof.
   generalize dependent l. induction n; intros.
-  - destruct l; reflexivity.
+  - by destruct l.
   - specialize (IHn (tl l)); simpl in IHn.
     simpl. assumption.
 Qed.
@@ -486,7 +452,7 @@ Lemma stream_prefix_suffix
   : stream_app (stream_prefix l n) (stream_suffix l n) = l.
 Proof.
   generalize dependent l. unfold stream_suffix.
-  induction n; try reflexivity; intros [a l]; simpl.
+  induction n; [done |]; intros [a l]; cbn.
   f_equal. apply IHn.
 Qed.
 
@@ -497,11 +463,10 @@ Lemma stream_prefix_prefix
   (Hn: n1 <= n2)
   : list_prefix (stream_prefix l n2) n1 = stream_prefix l n1.
 Proof.
-  generalize dependent n2.
-  generalize dependent l.
-  induction n1; intros [a l]; intros [|n2] Hn; try reflexivity.
-  - inversion Hn.
-  - simpl. f_equal. apply IHn1. lia.
+  revert l n2 Hn.
+  induction n1; intros [a l]; intros [| n2] Hn; cbn.
+  1-3: by inversion Hn.
+  rewrite IHn1; [done | lia].
 Qed.
 
 Definition stream_segment
@@ -546,22 +511,17 @@ Proof.
   destruct (decide (n2 - n1 <= k)).
   - specialize (nth_error_None (list_suffix (stream_prefix l n2) n1) k); intros [_ H].
     specialize (nth_error_None (stream_prefix (stream_suffix l n1) (n2 - n1)) k); intros [_ H_alt].
-    rewrite H, H_alt; try reflexivity.
+    rewrite H, H_alt; [done | |].
     + rewrite stream_prefix_length; assumption.
     + rewrite list_suffix_length. rewrite stream_prefix_length. assumption.
-  - rewrite stream_prefix_nth; try assumption.
-    rewrite stream_suffix_nth.
+  - rewrite stream_prefix_nth, stream_suffix_nth by lia.
     assert (Hle : n1 <= n1 + k) by lia.
     specialize (list_suffix_nth (stream_prefix l n2) n1 (n1 + k) Hle)
     ; intro Heq.
     clear Hle.
     assert (Hs: n1 + k - n1 = k) by lia.
     rewrite Hs in Heq.
-    rewrite Heq.
-    rewrite stream_prefix_nth.
-    + rewrite Nat.add_comm; reflexivity.
-    + lia.
-    + lia.
+    rewrite Heq, stream_prefix_nth; [do 2 f_equal |]; lia.
 Qed.
 
 Lemma stream_prefix_segment
@@ -687,7 +647,7 @@ Definition nat_sequence : Stream nat := nat_sequence_from 0.
 Lemma nat_sequence_from_nth : forall m n, Str_nth n (nat_sequence_from m) = n + m.
 Proof.
   intros m n. revert m.
-  induction n; [reflexivity|].
+  induction n; [done |].
   intros. simpl.
   unfold Str_nth. simpl.
   unfold Str_nth in IHn. rewrite IHn. lia.
@@ -740,9 +700,7 @@ Proof.
   assert (Hlt : n < S n) by constructor.
   specialize (Hnth Hlt).
   rewrite Hnth in Hlast.
-  simpl.
-  inversion Hlast.
-  reflexivity.
+  by inversion Hlast.
 Qed.
 
 Section infinitely_often.

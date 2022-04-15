@@ -67,7 +67,7 @@ Lemma min_predecessors_in
 Proof.
   unfold min; clear min. revert a.
   induction l'.
-  - intros; left; reflexivity.
+  - by intros; left.
   - intro a0. simpl.
     destruct (decide (count_predecessors a < count_predecessors a0));
     [specialize (IHl' a)|specialize (IHl' a0)];
@@ -88,11 +88,11 @@ Proof.
     destruct H as [Heq | Hin]; subst.
     + simpl. destruct (decide (count_predecessors a < count_predecessors a0)).
       * specialize (IHl' a). rewrite Forall_forall in IHl'.
-        assert (Ha : a ∈ (a :: l')) by (left; reflexivity).
+        assert (Ha : a ∈ (a :: l')) by left.
         specialize (IHl' a Ha).
         lia.
       * specialize (IHl' a0). rewrite Forall_forall in IHl'.
-        assert (Hx : a0 ∈ (a0 :: l')) by (left; reflexivity).
+        assert (Hx : a0 ∈ (a0 :: l')) by left.
         specialize (IHl' a0 Hx).
         assumption.
     + simpl. destruct (decide (count_predecessors a < count_predecessors a0)).
@@ -103,7 +103,7 @@ Proof.
         rewrite elem_of_cons in Hin.
         destruct Hin as [Heq | Hin]; subst.
         -- specialize (IHl' a0). rewrite Forall_forall in IHl'.
-           assert (Ha0 : a0 ∈ (a0 :: l')) by (left; reflexivity).
+           assert (Ha0 : a0 ∈ (a0 :: l')) by left.
            specialize (IHl' a0 Ha0).
            lia.
         -- specialize (IHl' a0). rewrite Forall_forall in IHl'.
@@ -186,7 +186,7 @@ Lemma count_predecessors_zero
 Proof.
   unfold count_predecessors.
   induction l.
-  - elim Hl;reflexivity.
+  - done.
   - inversion_clear HPl as [|? ? HPa HPl0].
     specialize (IHl0 HPl0).
     apply Exists_cons.
@@ -194,7 +194,7 @@ Proof.
     destruct (decide (precedes a a)); [contradict p;apply precedes_irreflexive; assumption|].
     assert ({ l0=[] }+{l0 <> [] }) by (destruct l0;clear;[left|right];congruence).
     destruct H as [?|Hl0];[subst l0|].
-    + left. reflexivity.
+    + by left.
     + specialize (IHl0 Hl0).
       apply Exists_exists in IHl0.
       destruct IHl0 as [x [Hin Hlen]].
@@ -344,8 +344,7 @@ Proof.
   intros Ha12. apply elem_of_list_split in Ha12.
   destruct Ha12 as [l1 [l2 Ha12]].
   subst l12.
-  exists l1. exists l2. exists l3. rewrite Hb'. rewrite <- app_assoc.
-  reflexivity.
+  exists l1, l2, l3. by rewrite Hb', <- app_assoc.
 Qed.
 
 End topologically_sorted_fixed_list.
@@ -501,7 +500,7 @@ Proof.
     + right. assumption.
     + apply IHn in Hinx.
       rewrite elem_of_cons in Hinx.
-      destruct Hinx as [Heq | Hinx]; try (subst; left; reflexivity).
+      destruct Hinx as [-> | Hinx]; [left |].
       right. subst. apply set_remove_1 in Hinx. assumption.
 Qed.
 
@@ -520,7 +519,7 @@ Proof.
     + constructor.
     + simpl.
       assert (Hl' : NoDup l) by (inversion Hl; assumption).
-      assert (Hlen : len = length l) by (inversion Heqlen; reflexivity).
+      assert (Hlen : len = length l) by (inversion Heqlen; done).
       assert (Hl'' : NoDup (set_remove (min_predecessors precedes (a :: l) l a) l))
         by (apply set_remove_nodup; assumption).
       destruct (decide (min_predecessors precedes (a :: l) l a = a)); constructor.
@@ -542,8 +541,7 @@ Proof.
           in Hmin.
         rewrite elem_of_cons in Hmin.
         destruct Hmin; [done |].
-        apply set_remove_2 in H; try assumption.
-        elim H. reflexivity.
+        by apply set_remove_2 in H.
       * apply IHlen.
         -- constructor; try assumption.
            intro Ha. apply set_remove_iff in Ha; try assumption.
@@ -629,8 +627,7 @@ Proof.
       apply Hmin in Ha.
       congruence.
     }
-    destruct l1 as [| _min l1]; inversion Heq
-    ; try (subst b; elim Hminb; reflexivity).
+    destruct l1 as [| _min l1]; inversion Heq; [by subst |].
     subst _min.
     destruct (decide (a ∈ l')) as [i|i].
     - apply (IHn i l1 l2 Ha2 H4).
@@ -642,8 +639,7 @@ Proof.
         destruct Ha as [Heqa | Ha'].
         -- subst a0.
            rewrite elem_of_cons in i.
-           contradict i.
-           left; reflexivity.
+           by contradict i; left.
         -- destruct (decide (a = min)); try (symmetry; assumption).
            apply (set_remove_3 _ _ _ Ha') in n1.
            contradict i.

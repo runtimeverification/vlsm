@@ -142,7 +142,7 @@ Proof.
       intro. assumption.
   - replace s with
     (fst (composite_transition equivocator_IM l (s0, oim))); [assumption|].
-    simpl in *. rewrite Ht. reflexivity.
+    by cbn in *; rewrite Ht.
 Qed.
 
 (** A valid valid trace for the composition of equivocators with limited
@@ -162,7 +162,7 @@ Proof.
   cut
     (forall equivocating, equivocating_validators s ⊆ equivocating ->
       finite_valid_trace_from_to (equivocators_fixed_equivocations_vlsm IM equivocating) is s tr).
-  { intros H'. apply H'. reflexivity. }
+  { by intros H'; apply H'. }
   induction Htr using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
   - apply (finite_valid_trace_from_to_empty (equivocators_fixed_equivocations_vlsm IM equivocating)).
     apply initial_state_is_valid. assumption.
@@ -184,7 +184,7 @@ Proof.
       (finite_valid_trace_from_to_app
         (equivocators_fixed_equivocations_vlsm IM equivocating))
       with s; [assumption|].
-    apply valid_trace_add_last; [|reflexivity].
+    apply valid_trace_add_last; [| done].
       apply (finite_valid_trace_singleton (equivocators_fixed_equivocations_vlsm IM equivocating)).
       apply valid_trace_last_pstate in IHHtr.
       destruct Ht as [[_ [_ [Hv [[Hno_equiv _] Hno_heavy]]]] Ht].
@@ -380,8 +380,7 @@ Proof.
        as Hsim.
     spec Hsim.
     { simpl. rewrite decide_True by apply zero_descriptor_not_equivocating.
-      rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
-      reflexivity.
+      by rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
     }
     apply Hsim in HtrX.
     remember (pre_VLSM_projection_trace_project _ _ _ _ _) as tr.

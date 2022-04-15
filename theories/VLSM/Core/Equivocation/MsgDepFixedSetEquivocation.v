@@ -156,8 +156,7 @@ Proof.
           (single_equivocator_projection s i Hi)) with (lY := li) in HtX
   ; [eexists _,_,_; eassumption |].
   unfold sub_label_element_project; cbn.
-  rewrite (decide_True_pi eq_refl).
-  reflexivity.
+  by rewrite (decide_True_pi eq_refl).
 Qed.
 
 Lemma sent_by_non_equivocating_msg_dep_rel_strong_fixed_equivocation
@@ -219,7 +218,7 @@ Proof.
       eapply (VLSM_projection_input_valid_transition (single_equivocator_projection s i Hi))
       ; [| eassumption].
       unfold sub_label_element_project; cbn.
-      rewrite (decide_True_pi eq_refl); reflexivity.
+      by rewrite (decide_True_pi eq_refl).
 Qed.
 
 Lemma strong_fixed_equivocation_msg_dep_constraint_subsumption
@@ -320,7 +319,7 @@ Proof.
   ; intros [Hsent | [[i [Hi Hemit]] Hdeps]]; [left; assumption | right].
   apply Hchannel in Hemit; cbv in Hemit |- *.
   destruct (sender m) as [v |]; [| congruence].
-  eexists; split; [reflexivity|].
+  eexists; split; [done |].
   replace (A v) with i; [assumption |].
   congruence.
 Qed.

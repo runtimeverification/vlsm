@@ -247,69 +247,56 @@ Section TraceLemmas.
     destruct tr; [done |].
     inversion eq.
     unfold finite_trace_last.
-    rewrite last_map. reflexivity.
+    by rewrite last_map.
   Qed.
 
   Lemma finite_trace_last_cons
     s x tl:
     finite_trace_last s (x::tl) = finite_trace_last (destination x) tl.
   Proof.
-    unfold finite_trace_last. rewrite map_cons, unroll_last. reflexivity.
+    by unfold finite_trace_last; rewrite map_cons, unroll_last.
   Qed.
 
   Lemma finite_trace_last_nil
     s:
     finite_trace_last s [] = s.
-  Proof. reflexivity. Qed.
+  Proof. done. Qed.
 
   Lemma finite_trace_last_app
     s t1 t2:
     finite_trace_last s (t1 ++ t2) = finite_trace_last (finite_trace_last s t1) t2.
   Proof.
-    unfold finite_trace_last.
-    rewrite map_app, last_app.
-    reflexivity.
+    by unfold finite_trace_last; rewrite map_app, last_app.
   Qed.
 
   Lemma finite_trace_last_is_last
     s x tl:
     finite_trace_last s (tl++[x]) = destination x.
   Proof.
-    unfold finite_trace_last.
-    rewrite map_app.
-    simpl.
-    rewrite last_is_last.
-    reflexivity.
+    by unfold finite_trace_last; rewrite map_app; cbn; rewrite last_is_last.
   Qed.
 
   Lemma finite_trace_last_output_is_last
     x tl:
     finite_trace_last_output (tl++[x]) = output x.
   Proof.
-    unfold finite_trace_last_output.
-    rewrite map_app.
-    simpl.
-    rewrite last_is_last.
-    reflexivity.
+    by unfold finite_trace_last_output; rewrite map_app; cbn; rewrite last_is_last.
   Qed.
 
   Lemma finite_trace_nth_first
     (si : state) (tr : list transition_item):
     finite_trace_nth si tr 0 = Some si.
-  Proof.
-    reflexivity.
-  Qed.
+  Proof. done. Qed.
 
   Lemma finite_trace_nth_last
     (si : state) (tr : list transition_item):
     finite_trace_nth si tr (length tr) = Some (finite_trace_last si tr).
   Proof.
     unfold finite_trace_nth, finite_trace_last.
-    destruct tr;[reflexivity|].
+    destruct tr; [done |].
     cbn [nth_error length].
     apply nth_error_last.
-    rewrite map_length.
-    reflexivity.
+    by rewrite map_length.
   Qed.
 
   Lemma finite_trace_nth_app1
@@ -337,11 +324,9 @@ Section TraceLemmas.
       rewrite map_app, app_comm_cons.
       rewrite nth_error_app2;simpl length;rewrite map_length;[|solve[auto with arith]].
       destruct n;[exfalso;lia|].
-      replace (S n -length t1) with (S (n - length t1)) by lia.
-      reflexivity.
-    - rewrite finite_trace_nth_app1, finite_trace_nth_last by reflexivity.
-      rewrite PeanoNat.Nat.sub_diag, finite_trace_nth_first.
-      reflexivity.
+      rewrite (PeanoNat.Nat.sub_succ_l (length t1) n); [done | lia].
+    - by rewrite finite_trace_nth_app1, finite_trace_nth_last,
+                 PeanoNat.Nat.sub_diag, finite_trace_nth_first.
   Qed.
 
   Lemma finite_trace_nth_length
@@ -366,7 +351,7 @@ Section TraceLemmas.
     rewrite list_prefix_map.
     generalize (List.map destination tr); intro l; clear tr.
     destruct n.
-    - simpl. intros [=<-]. destruct l;reflexivity.
+    - simpl. intros [=<-]. by destruct l.
     - simpl. intro H. symmetry. revert H s.
       apply list_prefix_nth_last.
   Qed.
@@ -386,9 +371,7 @@ Section TraceLemmas.
 
   Lemma unlock_finite_trace_last s tr:
     finite_trace_last s tr = List.last (List.map destination tr) s.
-  Proof.
-    reflexivity.
-  Qed.
+  Proof. done. Qed.
   Opaque finite_trace_last.
 
 End TraceLemmas.
@@ -430,7 +413,7 @@ Lemma mk_vlsm_machine
   (X : VLSM message)
   : mk_vlsm (machine X) = X.
 Proof.
-  destruct X as (T, M). reflexivity.
+  by destruct X.
 Qed.
 
   Section VLSM.
@@ -662,8 +645,7 @@ given inputs and that they have a [valid_state] and a [valid_message].
             input_valid_transition l som som'.
     Proof.
       split.
-      - eexists.
-        apply input_valid_can_transition; [assumption|reflexivity].
+      - by eexists; apply input_valid_can_transition.
       - intros [som' Hivt].
         apply input_valid_transition_valid with som'.
         assumption.
@@ -913,7 +895,7 @@ and [valid_message]s, similar to their recursive definition.
       intros; split.
       - intro Hps'. destruct Hps' as [om' Hs].
         inversion Hs; subst.
-        * left. exists (exist _ _ Hs0). reflexivity.
+        * by left; exists (exist _ _ Hs0).
         * right. exists l0. exists (s, om). exists om'.
           repeat split; try assumption.
           + exists _om. assumption.
@@ -960,7 +942,7 @@ and [valid_message]s, similar to their recursive definition.
       intros; split.
       - intros [s' Hpm'].
         inversion Hpm'; subst.
-        + left. exists (exist _ m' Hom). reflexivity.
+        + by left; exists (exist _ m' Hom).
         + right. exists l0. exists (s, om). exists s'.
           firstorder.
       - intros [[[s His] Heq] | [l [[s om] [s' [[[_om Hps] [[_s Hpm] Hv]] Ht]]]]]; subst.
@@ -1093,9 +1075,7 @@ prove or decompose the above properties in proofs.
           with (finite_trace_last (destination a) tr)
         ;[assumption|].
         unfold finite_trace_last.
-        rewrite map_cons.
-        rewrite unroll_last.
-        reflexivity.
+        by rewrite map_cons, unroll_last.
     Qed.
 
     Lemma input_valid_transition_to
@@ -1670,7 +1650,7 @@ is the output of the last transition.
       - rewrite <- Heqtl in Htl.
         inversion Htl; [destruct tl'; simpl in *; congruence|].
         revert Heqtl; subst; intro Heqtl.
-        apply app_inj_tail, proj2 in Heqtl. subst. reflexivity.
+        by apply app_inj_tail, proj2 in Heqtl; subst.
     Qed.
 
     Lemma finite_valid_trace_init_to_emit_valid_state_message
@@ -1891,13 +1871,9 @@ definitions, mostly reducing them to properties about their finite segments.
     Proof.
       apply finite_valid_trace_from_suffix with s.
       - apply infinite_valid_trace_from_prefix. assumption.
-      - destruct n1; try reflexivity.
-        unfold n1th. clear n1th.
-        unfold finite_trace_nth.
-        simpl.
-        rewrite stream_prefix_map.
-        rewrite stream_prefix_nth; try assumption.
-        reflexivity.
+      - destruct n1; [done |].
+        subst n1th; unfold finite_trace_nth; cbn.
+        by rewrite stream_prefix_map, stream_prefix_nth.
     Qed.
 
 (** *** valid traces
@@ -2026,7 +2002,7 @@ in <<s>> by outputting <<m>> *)
       intros [(s, im) [l [s' Hm]]].
       apply exists_right_finite_trace_from in Hm as [is [tr [Htr _]]].
       apply finite_valid_trace_init_to_forget_last in Htr.
-      eexists is, tr, _; split; [exact Htr|reflexivity].
+      by eexists is, tr, _.
     Qed.
 
     (** Any trace with the 'finite_valid_trace_from' property can be completed
@@ -2097,10 +2073,8 @@ This relation is often used in stating safety and liveness properties.*)
     Proof.
       unfold in_futures in Hin.
       destruct Hin as [tr Htr].
-      induction Htr.
-      - reflexivity.
-      - apply Ht in Ht0.
-        transitivity s;assumption.
+      induction Htr; [done |].
+      apply Ht in Ht0. by transitivity s.
     Qed.
 
     Instance eq_equiv : @Equivalence state eq := _.
@@ -2165,8 +2139,8 @@ This relation is often used in stating safety and liveness properties.*)
       : in_futures s s'.
     Proof.
       apply finite_valid_trace_singleton in Ht.
-      apply finite_valid_trace_from_add_last with (f := s') in Ht; [|reflexivity].
-      eexists. exact Ht.
+      apply finite_valid_trace_from_add_last with (f := s') in Ht; [| done].
+      by eexists.
     Qed.
 
     Lemma elem_of_trace_in_futures_left is s tr
@@ -2308,7 +2282,7 @@ This relation is often used in stating safety and liveness properties.*)
         + assert
             (Hex : exists suffix0 : list transition_item,
                 (p ++ [last_p]) ++ last :: suffix = p ++ last_p :: suffix0
-            ) by (exists (last :: suffix); rewrite <- app_assoc; reflexivity)
+            ) by (exists (last :: suffix); rewrite <- app_assoc; done)
           ; specialize (Hind Hex); clear Hex
           ; destruct Hind as [Hptr _]
           ; destruct last
@@ -2326,7 +2300,7 @@ This relation is often used in stating safety and liveness properties.*)
         + assert
             (Hex : exists suffix0 : Stream transition_item,
                 stream_app (p ++ [last_p])  (Cons last suffix) = stream_app p (Cons last_p suffix0)
-            ) by (exists (Cons last suffix); rewrite <- stream_app_assoc; reflexivity)
+            ) by (exists (Cons last suffix); rewrite <- stream_app_assoc; done)
           ; specialize (Hind Hex); clear Hex
           ; destruct Hind as [Hptr _]
           ; destruct last
@@ -2382,7 +2356,7 @@ This relation is often used in stating safety and liveness properties.*)
           specialize (exists_last Hnnil); intros [prefix [last Heq]].
           rewrite Heq in *; clear Hnnil Heq l item.
           replace s with (trace_first (proj1_sig (exist _ tr Htr)))
-          ; try (destruct tr; inversion Heqpref_tr; subst; reflexivity).
+          ; try (by destruct tr; inversion Heqpref_tr; subst).
           apply trace_prefix_valid.
           remember (prefix ++ [last]) as prefix_last. revert Heqprefix_last.
           destruct tr as [s' l' | s' l']
@@ -2394,13 +2368,11 @@ This relation is often used in stating safety and liveness properties.*)
           * specialize (list_prefix_suffix l' n); intro Hl'.
             rewrite <- Hl'. rewrite Heqprefix.
             exists (list_suffix l' n).
-            rewrite <- app_assoc.
-            reflexivity.
+            by rewrite <- app_assoc.
           * specialize (stream_prefix_suffix l' n); intro Hl'.
             rewrite <- Hl'. rewrite Heqprefix.
             exists (stream_suffix l' n).
-            rewrite <- stream_app_assoc.
-            reflexivity.
+            by rewrite <- stream_app_assoc.
       - destruct tr as [s' l' | s' l']; inversion Heqpref_tr.
     Qed.
 
@@ -2468,8 +2440,7 @@ This relation is often used in stating safety and liveness properties.*)
             rewrite list_suffix_last.
             + symmetry. rewrite stream_prefix_nth_last.
               unfold Str_nth in Hs2. simpl in Hs2.
-              inversion Hs2; subst.
-              reflexivity.
+              by inversion Hs2; subst.
             + specialize (stream_prefix_length (Streams.map destination tr) (S m)); intro Hpref_len.
               rewrite Hpref_len.
               lia.
@@ -2570,7 +2541,7 @@ Definition valid_trace_add_default_last
   [msg] [X:VLSM msg] [s tr] (Htr: base_prop msg X s tr):
     trace_prop msg X s (finite_trace_last s tr) tr.
 Proof.
-  apply valid_trace_add_last. assumption. reflexivity.
+  by apply valid_trace_add_last.
 Defined.
 
 Instance trace_with_last_valid_trace_from:
@@ -2841,10 +2812,7 @@ Proof.
     | context [_ ++ [?item]] => remember item as lstitem
     end.
     exists (trs ++ [lstitem]). exists lstitem.
-    split; [assumption|].
-    split; [apply last_error_is_last|].
-    subst lstitem.
-    split; reflexivity.
+    by rewrite last_error_is_last; subst.
   - intros [is [tr [item [Htr [Hitem [Hs Hm]]]]]].
     destruct_list_last tr tr' item' Heq; [inversion Hitem|].
     clear Heq.

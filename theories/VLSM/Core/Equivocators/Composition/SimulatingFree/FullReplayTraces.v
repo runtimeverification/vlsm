@@ -101,7 +101,7 @@ Lemma lift_equivocators_sub_state_to_sub
 Proof.
   unfold lift_equivocators_sub_state_to.
   case_decide as H_i; [| done].
-  rewrite (sub_IM_state_pi s H_i Hi); reflexivity.
+  by rewrite (sub_IM_state_pi s H_i Hi).
 Qed.
 
 Lemma lift_equivocators_sub_state_to_size
@@ -170,13 +170,13 @@ Proof.
     spec Hcut i; unfold composite_apply_plan in Hcut; unfold spawn_initial_state
     ; simpl in *; rewrite Hcut.
     unfold lift_equivocators_sub_state_to.
-    case_decide; [| reflexivity].
-    rewrite decide_True; [reflexivity |].
+    case_decide; [| done].
+    rewrite decide_True; [done |].
     apply elem_of_enum.
   }
   induction l using rev_ind; intros.
-  - case_decide; [|reflexivity].
-    rewrite decide_False; [reflexivity|]. intro Hin. inversion Hin.
+  - case_decide; [| done].
+    rewrite decide_False; [done |]. intro Hin. inversion Hin.
   - spec IHl; [apply incl_app_inv in Hincl; apply Hincl |].
     spec IHl; [apply NoDup_app in Hnodup; apply Hnodup |].
     subst tr_full_replay_is.
@@ -193,13 +193,13 @@ Proof.
           apply NoDup_app in Hnodup as (_ & Hnodup & _).
           eapply Hnodup; [eassumption |].
           rewrite elem_of_list_singleton.
-          apply dec_sig_eq_iff; cbn; reflexivity.
+          by apply dec_sig_eq_iff; cbn.
         }
         rewrite IHl, decide_True.
         -- rewrite (sub_IM_state_pi is _Hix Hix); symmetry.
            apply equivocator_state_append_singleton_is_extend, (His (dexist i Hix)).
         -- rewrite elem_of_app, elem_of_list_singleton; right.
-           apply dec_sig_eq_iff; cbn; reflexivity.
+           by apply dec_sig_eq_iff; cbn.
       * rewrite state_update_neq by congruence.
         case_decide.
         -- rewrite decide_True; rewrite ?elem_of_app; itauto.
@@ -224,7 +224,7 @@ Proof.
   remember (composite_apply_plan _ _ _) as plan.
   apply proj1 with (forall i, equivocator_state_n (full_replay_state i) <= equivocator_state_n (plan.2 i)).
   subst plan.
-  induction l using rev_ind; [split; simpl; [reflexivity|lia]|].
+  induction l using rev_ind; [split; simpl; [done | lia] |].
   rewrite map_app, (composite_apply_plan_app equivocator_IM).
   destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn:Hplanl.
   destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn:Hplana.
@@ -266,7 +266,7 @@ Proof.
   unfold replayed_initial_state_from, spawn_initial_state.
   generalize (enum (sub_index equivocating)).
   intro l.
-  induction l using rev_ind; simpl; [reflexivity|].
+  induction l using rev_ind; simpl; [done |].
   rewrite map_app, (composite_apply_plan_app equivocator_IM).
   specialize (composite_apply_plan_last equivocator_IM full_replay_state (map (initial_new_machine_transition_item is) l))
     as Hlst.
@@ -303,9 +303,7 @@ Proof.
   destruct Heqv_descriptors as [full_i_ji Hpr_ji].
   apply equivocator_state_project_Some_rev in Hpr_ji as Hltji.
   subst lst.
-  rewrite equivocator_state_project_replayed_initial_state_from_left by assumption.
-  rewrite Hpr_ji.
-  reflexivity.
+  by rewrite equivocator_state_project_replayed_initial_state_from_left, Hpr_ji.
 Qed.
 
 Definition replayed_trace_from full_replay_state is tr :=
@@ -325,9 +323,7 @@ Proof.
     apply replayed_initial_state_from_lift.
     assumption.
   - unfold replayed_trace_from, pre_VLSM_full_projection_finite_trace_project.
-    rewrite map_app, app_assoc. simpl.
-    rewrite !finite_trace_last_is_last.
-    reflexivity.
+    by rewrite map_app, app_assoc; cbn; rewrite !finite_trace_last_is_last.
 Qed.
 
 Lemma equivocator_state_project_replayed_trace_from_left full_replay_state is tr
@@ -348,9 +344,8 @@ Proof.
     simpl.
     intros i j Hltj.
     unfold lift_equivocators_sub_state_to.
-    destruct (decide _); [|reflexivity].
-    rewrite equivocator_state_append_project_1 by assumption.
-    reflexivity.
+    destruct (decide _); [| done].
+    by rewrite equivocator_state_append_project_1.
 Qed.
 
 Lemma equivocator_state_descriptor_project_replayed_trace_from_left full_replay_state is tr
@@ -368,9 +363,7 @@ Proof.
   destruct Heqv_descriptors as [full_i_ji Hpr_ji].
   apply equivocator_state_project_Some_rev in Hpr_ji as Hltji.
   subst lst.
-  rewrite equivocator_state_project_replayed_trace_from_left by assumption.
-  rewrite Hpr_ji.
-  reflexivity.
+  by rewrite equivocator_state_project_replayed_trace_from_left, Hpr_ji.
 Qed.
 
 Lemma equivocators_total_state_project_replayed_trace_from full_replay_state is tr
@@ -393,7 +386,7 @@ Proof.
   apply equivocators_trace_project_app_iff.
   exists [],[],eqv_descriptors.
   repeat split; [|apply equivocators_trace_project_replayed_initial_state_from; assumption].
-  induction tr using rev_ind; [reflexivity|].
+  induction tr using rev_ind; [done |].
   unfold pre_VLSM_full_projection_finite_trace_project.
   rewrite map_app.
   apply equivocators_trace_project_app_iff.
@@ -429,7 +422,7 @@ Lemma equivocators_total_trace_project_replayed_trace_from full_replay_state is 
 Proof.
   unfold equivocators_total_trace_project.
   rewrite equivocators_trace_project_replayed_trace_from_left
-  ; [reflexivity|].
+  ; [done |].
   apply zero_descriptor_not_equivocating.
 Qed.
 
@@ -481,12 +474,11 @@ Proof.
   apply functional_extensionality_dep. intro j.
   destruct (decide (i = j)).
   - subst. rewrite state_update_eq.
-    rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
-    rewrite state_update_eq. reflexivity.
+    by rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi), state_update_eq.
   - rewrite state_update_neq by congruence.
     unfold lift_equivocators_sub_state_to.
-    destruct (decide _); [|reflexivity].
-    rewrite state_update_neq; [reflexivity|].
+    destruct (decide _); [| done].
+    rewrite state_update_neq; [done |].
     intro Hcontra. apply dsig_eq in Hcontra. simpl in Hcontra. congruence.
 Qed.
 

@@ -263,8 +263,7 @@ Proof.
       with (lY := li).
     unfold composite_project_label; cbn.
     case_decide as Heqi; [| done].
-    replace Heqi with (@eq_refl index i) by (apply Eqdep_dec.UIP_dec; assumption).
-    reflexivity.
+    by replace Heqi with (@eq_refl index i) by (apply Eqdep_dec.UIP_dec; assumption).
   - intros m Hemit.
     apply can_emit_composite_project in Hemit as [j Hemitj].
     eapply message_dependencies_are_sufficient in Hemitj; [|typeclasses eauto].

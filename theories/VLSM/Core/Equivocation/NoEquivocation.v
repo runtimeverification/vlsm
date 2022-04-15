@@ -97,7 +97,7 @@ any message that tests as [has_been_observed] in a state also tests as
       specialize (Henforced Hv).
       destruct Henforced; [| done].
       right. assumption.
-    - left. reflexivity.
+    - by left.
     - right. apply Hprev. assumption.
   Qed.
 

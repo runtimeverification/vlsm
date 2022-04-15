@@ -10,14 +10,14 @@ Lemma empty_nil [X:Type] (l:list X) :
   (forall v, ~In v l) -> l = [].
 Proof.
   clear.
-  destruct l as [|a]. reflexivity.
-  simpl. intro H. elim (H a). left. reflexivity.
+  destruct l as [| a]; [done |].
+  simpl. intro H. elim (H a). by left.
 Qed.
 
 (** It is decidable whether a list is null or not *)
 Lemma null_dec {S} (l : list S) : Decision (l = []).
 Proof.
-  destruct l; [left; reflexivity|right; congruence].
+  by destruct l; [left | right].
 Qed.
 
 (** A list is either null or it can be decomposed into an initial prefix
@@ -50,44 +50,29 @@ Definition last_error {S} (l : list S) : option S :=
 
 Lemma unfold_last_hd {S} : forall (random a b : S) (l : list S),
   List.last (a :: (b :: l)) random = List.last (b :: l) random.
-Proof.
-  intros random h1 h2 tl.
-  unfold last. reflexivity.
-Qed.
+Proof. done. Qed.
 
 Lemma swap_head_last {S} : forall (random a b c : S) (l : list S),
   List.last (a :: b :: c :: l) random = List.last (b :: a :: c :: l) random.
 Proof.
   intros random h1 h2 s tl.
-  induction tl as [| hd tl IHl].
-  - reflexivity.
-  - simpl. reflexivity.
+  by induction tl as [| hd tl IHl].
 Qed.
 
 Lemma remove_hd_last {X} :
   forall (hd1 hd2 d1 d2 : X) (tl : list X),
     List.last (hd1 :: hd2 :: tl) d1 = List.last (hd2 :: tl) d2.
 Proof.
-  intros. induction tl.
-  simpl. reflexivity.
-  rewrite unfold_last_hd.
-  rewrite unfold_last_hd in IHtl.
-  rewrite unfold_last_hd.
-  rewrite unfold_last_hd.
-  destruct tl.
-  reflexivity.
-  do 2 rewrite unfold_last_hd in IHtl.
-  do 2 rewrite unfold_last_hd.
-  assumption.
+  intros. induction tl; [done |].
+  cbn in *. by destruct tl.
 Qed.
 
 Lemma unroll_last {S} : forall (random a : S) (l : list S),
   List.last (a :: l) random = List.last l a.
 Proof.
-  induction l; try reflexivity.
-  destruct l; try reflexivity.
-  rewrite swap_head_last. rewrite unfold_last_hd. rewrite IHl.
-  rewrite unfold_last_hd. reflexivity.
+  induction l; [done |].
+  destruct l; [done |].
+  by rewrite swap_head_last, unfold_last_hd, IHl, unfold_last_hd.
 Qed.
 
 Lemma last_app
@@ -97,10 +82,8 @@ Lemma last_app
   : List.last (l1 ++ l2) def = List.last l2 (List.last l1 def).
 Proof.
   generalize dependent def.
-  induction l1; try reflexivity; intro def.
-  remember List.last as lst; simpl; subst lst.
-  repeat rewrite unroll_last.
-  apply IHl1.
+  induction l1; [done |].
+  intro def. by rewrite <- !app_comm_cons, !unroll_last.
 Qed.
 
 Lemma last_map
@@ -111,11 +94,9 @@ Lemma last_map
   (def : B)
   : List.last (map f (h :: t)) def = f (List.last t h).
 Proof.
-  generalize dependent def. generalize dependent h.
-  induction t; try reflexivity; intros.
-  rewrite map_cons.
-  repeat rewrite unroll_last.
-  apply IHt.
+  revert def h.
+  induction t; intros; [done |].
+  by rewrite map_cons, !unroll_last.
 Qed.
 
 Lemma last_error_some {S}
@@ -130,8 +111,8 @@ Qed.
 Lemma incl_empty : forall A (l : list A),
   incl l nil -> l = nil.
 Proof.
-  intros. destruct l; try reflexivity.
-  exfalso. destruct (H a). left. reflexivity.
+  intros A [] H; [done |].
+  by destruct (H a); left.
 Qed.
 
 Lemma incl_singleton {A} : forall (l : list A) (a : A),
@@ -139,8 +120,7 @@ Lemma incl_singleton {A} : forall (l : list A) (a : A),
   forall b, In b l -> b = a.
 Proof.
   intros. induction l; inversion H0; subst.
-  - clear H0. destruct (H b); try (left; reflexivity); subst; try reflexivity.
-    inversion H0.
+  - destruct (H b); [by left | done | inversion H1].
   - apply IHl; try assumption.
     apply incl_tran with (a0 :: l); try assumption.
     apply incl_tl. apply incl_refl.
@@ -166,7 +146,7 @@ Proof.
   - rewrite filter_cons in H1.
     destruct (decide (P a)).
     + destruct H1.
-      * subst. apply filter_in; try assumption. apply H0. left. reflexivity.
+      * subst. apply filter_in; try assumption. by apply H0; left.
       * apply IHs1; try assumption. intro y; intro. apply H0. right. assumption.
     + apply IHs1; try assumption. intro y; intro. apply H0. right. assumption.
 Qed.
@@ -184,8 +164,8 @@ Proof.
     + rewrite filter_cons.
       destruct (decide (Q a)).
       * destruct H2.
-        -- left. rewrite H2. reflexivity.
-        -- right. apply IHs. assumption.
+        -- by left.
+        -- right. by apply IHs.
       * contradict n. apply H1. assumption.
     + rewrite filter_cons.
       destruct (decide (Q a)).
@@ -216,22 +196,13 @@ Lemma filter_eq_fn {A} P Q
   (forall a, In a s -> P a <-> Q a) ->
   filter P s = filter Q s.
 Proof.
- induction s; intros; try reflexivity. simpl.
- assert (IHs' : forall a : A, In a s -> P a <-> Q a).
- { intros. apply H1. right. assumption. }
- apply IHs in IHs'. clear IHs.
- rewrite 2 filter_cons.
- destruct (decide (P a)).
- - destruct (decide (Q a)).
-   + rewrite IHs'. reflexivity.
-   + contradict n.
-     apply H1; try assumption.
-     left. reflexivity.
- - destruct (decide (Q a)).
-   + contradict n.
-     apply H1; try assumption.
-     left; reflexivity.
-   + assumption.
+  induction s; intros; [done |].
+  assert (IHs' : forall a : A, In a s -> P a <-> Q a).
+  { intros. apply H1. right. assumption. }
+  apply IHs in IHs'. clear IHs.
+  erewrite !filter_cons, decide_ext; cycle 1.
+  - by apply H1; left.
+  - by rewrite IHs'.
 Qed.
 
 Lemma Forall_filter_nil {A} P `{∀ (x:A), Decision (P x)} l :
@@ -239,7 +210,7 @@ Lemma Forall_filter_nil {A} P `{∀ (x:A), Decision (P x)} l :
 Proof.
   rewrite Forall_forall.
   split; intro Hnone.
-  - induction l; try reflexivity.
+  - induction l; [done |].
     assert (Hno_a := Hnone a).
     assert (Hin_a : a ∈ a :: l) by left.
     specialize (Hno_a Hin_a).
@@ -316,8 +287,7 @@ Lemma in_correct_refl `{EqDecision X} :
     In x l <-> inb decide_eq x l.
 Proof.
   intros s msg.
-  rewrite in_correct, Is_true_iff_eq_true.
-  reflexivity.
+  by rewrite in_correct, Is_true_iff_eq_true.
 Qed.
 
 Lemma in_correct' `{EqDecision X} :
@@ -325,8 +295,7 @@ Lemma in_correct' `{EqDecision X} :
     ~ In x l <-> inb decide_eq x l = false.
 Proof.
   intros s msg.
-  rewrite in_correct, not_true_iff_false.
-  reflexivity.
+  by rewrite in_correct, not_true_iff_false.
 Qed.
 
 Definition inclb
@@ -401,15 +370,16 @@ Qed.
 Lemma last_is_last {A} : forall (l : list A) (x dummy: A),
   List.last (l ++ [x]) dummy = x.
 Proof.
-  induction l; try reflexivity; intros.
-  rewrite <- app_comm_cons. specialize (IHl x dummy). rewrite <- IHl at 2. simpl.
-  destruct l; simpl; reflexivity.
+  induction l; intros; [done |].
+  rewrite <- app_comm_cons. rewrite <- (IHl x dummy) at 2.
+  by destruct l.
 Qed.
 
 Lemma last_error_is_last {A} : forall (l : list A) (x : A),
   last_error (l ++ [x]) = Some x.
 Proof.
-  destruct l; try reflexivity; intros; simpl. apply f_equal. apply last_is_last.
+  destruct l; cbn; [done |].
+  by intros; rewrite last_is_last.
 Qed.
 
 (** Polymorphic list library **)
@@ -433,28 +403,12 @@ Lemma is_member_correct {W} `{StrictlyComparable W}
   : forall l (w : W), is_member w l = true <-> In w l.
 Proof.
   intros l w.
-  induction l as [|hd tl IHl].
-  - split; intro H'.
-    + unfold is_member in H'; inversion H'.
-    + inversion H'.
-  - split; intro H'.
-    + simpl in H'.
-      destruct (compare w hd) eqn:Hcmp;
-        try (right; apply IHl; assumption ).
-      apply StrictOrder_Reflexive in Hcmp.
-      left. symmetry; assumption.
-    + apply in_inv in H'.
-      destruct H' as [eq | neq].
-      rewrite eq.
-      simpl.
-      rewrite compare_eq_refl.
-      reflexivity.
-      rewrite <- IHl in neq.
-      simpl. assert (H_dec := compare_eq_dec w hd).
-      destruct H_dec as [Heq | Hneq].
-      rewrite Heq. rewrite compare_eq_refl. reflexivity.
-      destruct (compare w hd); try reflexivity;
-        assumption.
+  induction l as [| hd tl IHl]; cbn.
+  - itauto congruence.
+  - destruct (compare w hd) eqn: Hcmp.
+    + rewrite compare_eq in Hcmp. itauto.
+    + rewrite <- compare_eq. rewrite compare_asymmetric in Hcmp. itauto congruence.
+    + rewrite <- compare_eq. rewrite <- compare_asymmetric in Hcmp. itauto congruence.
 Qed.
 
 Lemma is_member_correct' {W} `{StrictlyComparable W}
@@ -485,13 +439,12 @@ Proof.
   generalize dependent l.
   induction n; intros.
   - destruct l; inversion Hlast. symmetry in H0.
-    apply length_zero_iff_nil in H0. subst. reflexivity.
+    apply length_zero_iff_nil in H0. by subst.
   - destruct l; inversion Hlast.
     specialize (IHn l H0 _last). rewrite unroll_last.
     simpl. rewrite IHn. f_equal.
     destruct l; inversion H0.
-    repeat rewrite unroll_last.
-    reflexivity.
+    by rewrite !unroll_last.
 Qed.
 
 Fixpoint list_suffix
@@ -513,9 +466,7 @@ Lemma list_suffix_map
   (n : nat)
   : List.map f (list_suffix l n) = list_suffix (List.map f l) n.
 Proof.
-  generalize dependent l. induction n; intros [|a l]; try reflexivity.
-  simpl.
-  apply IHn.
+  revert l. induction n; intros [| a l]. 1-3: done. apply IHn.
 Qed.
 
 Fixpoint list_prefix
@@ -547,8 +498,7 @@ Proof.
     rewrite length_zero_iff_nil in Hlen.
     rewrite Hlen.
     unfold list_prefix.
-    destruct l;
-    reflexivity.
+    by destruct l.
   - intros.
     destruct left; [done |].
     assert (left_len = length left).
@@ -560,8 +510,7 @@ Proof.
     specialize (IHleft_len right left H (left ++ right) eq_refl).
     rewrite Hsplit.
     simpl.
-    rewrite IHleft_len.
-    reflexivity.
+    by rewrite IHleft_len.
 Qed.
 
 Lemma list_prefix_map
@@ -571,10 +520,7 @@ Lemma list_prefix_map
   (n : nat)
   : List.map f (list_prefix l n) = list_prefix (List.map f l) n.
 Proof.
-  generalize dependent l. induction n; intros [|a l]; try reflexivity.
-  simpl.
-  f_equal.
-  apply IHn.
+  revert l. induction n; intros [| a l]. 1-3: done. by cbn; rewrite IHn.
 Qed.
 
 Lemma list_prefix_length
@@ -584,11 +530,9 @@ Lemma list_prefix_length
   (Hlen : n <= length l)
   : length (list_prefix l n) = n.
 Proof.
-  generalize dependent l. induction n; intros [|a l] Hlen; try reflexivity.
-  - inversion Hlen.
-  - simpl in *. f_equal.
-    apply IHn.
-    lia.
+  revert l Hlen.
+  induction n; intros [|a l] Hlen; cbn in *
+  ; [done | done | inversion Hlen | rewrite IHn; lia].
 Qed.
 
 Lemma list_suffix_length
@@ -597,8 +541,7 @@ Lemma list_suffix_length
   (n : nat)
   : length (list_suffix l n) = length l - n.
 Proof.
-  generalize dependent l. induction n; intros [|a l]; try reflexivity.
-  simpl. apply IHn.
+  revert l. induction n; intros [|a l]. 1-3: done. apply IHn.
 Qed.
 
 Lemma list_prefix_prefix
@@ -609,7 +552,7 @@ Lemma list_prefix_prefix
   : list_prefix (list_prefix l n2) n1 = list_prefix l n1.
 Proof.
   generalize dependent n1. generalize dependent n2.
-  induction l; intros [|n2] [|n1] Hn; try reflexivity.
+  induction l; intros [| n2] [| n1] Hn; try done.
   - inversion Hn.
   - simpl. f_equal. apply IHl. lia.
 Qed.
@@ -620,9 +563,8 @@ Lemma list_prefix_suffix
   (n : nat)
   : list_prefix l n ++ list_suffix l n = l.
   Proof.
-   generalize dependent n. induction l; intros [|n]; try reflexivity.
-   simpl.
-   f_equal. apply IHl.
+    revert n. induction l; intros [|n]. 1-3: done.
+    cbn. f_equal. apply IHl.
   Qed.
 
 Definition list_segment
@@ -693,8 +635,8 @@ Lemma list_annotate_length
   (Hs : Forall P l)
   : length (list_annotate P l Hs) = length l.
 Proof.
-  induction l; [reflexivity|].
-  simpl. rewrite IHl. reflexivity.
+  induction l; [done |].
+  by cbn; rewrite IHl.
 Qed.
 
 Lemma list_annotate_pi
@@ -707,11 +649,10 @@ Lemma list_annotate_pi
   : list_annotate P l Hs = list_annotate P l Hs'.
 Proof.
   revert Hs Hs'.
-  induction l; [reflexivity|].
+  induction l; [done |].
   intros; simpl.
   f_equal; [|apply IHl].
-  apply dsig_eq.
-  reflexivity.
+  by apply dsig_eq.
 Qed.
 
 Lemma list_annotate_eq
@@ -730,7 +671,7 @@ Proof.
   1-3: done.
   inversion H.
   apply IHl1 in H2.
-  subst. reflexivity.
+  by subst.
 Qed.
 
 Lemma list_annotate_unroll
@@ -741,9 +682,7 @@ Lemma list_annotate_unroll
   (l : list A)
   (Hs : Forall P (a :: l))
   : list_annotate P (a :: l) Hs = dexist a (Forall_hd Hs) ::  list_annotate P l (Forall_tl Hs).
-Proof.
-  reflexivity.
-Qed.
+Proof. done. Qed.
 
 Lemma list_annotate_app
   {A : Type}
@@ -755,7 +694,7 @@ Lemma list_annotate_app
 Proof.
   induction l1; [apply list_annotate_pi|].
   simpl. f_equal.
-  - apply dsig_eq. reflexivity.
+  - by apply dsig_eq.
   - rewrite IHl1. f_equal; apply list_annotate_pi.
 Qed.
 
@@ -804,11 +743,10 @@ Lemma nth_error_list_annotate
 Proof.
   generalize dependent l.
   induction n; intros [| a l] Hs.
-  - exists None. split; reflexivity.
+  - by exists None.
   - inversion Hs; subst. exists (Some (dexist a (Forall_hd Hs))).
-    rewrite list_annotate_unroll.
-    split; reflexivity.
-  - exists None. split; reflexivity.
+    by rewrite list_annotate_unroll.
+  - by exists None.
   - rewrite list_annotate_unroll.
     specialize (IHn l (Forall_tl Hs)).
     destruct IHn as [oa [Hoa Hnth]].
@@ -894,20 +832,16 @@ Proof.
   - intros; simpl in Hnth. destruct n; inversion Hnth.
   - intros. rewrite filter_cons in Hnth. simpl. destruct (decide (P a)).
     + destruct n.
-      * inversion Hnth; subst. exists 0; split; reflexivity.
+      * inversion Hnth; subst. by exists 0.
       * simpl in Hnth.
         specialize (IHl n a0 Hnth).
         destruct IHl as [nth [Hnth' Ha0]].
         exists (S nth).
-        split; try assumption.
-        rewrite Hnth'.
-        reflexivity.
+        by rewrite Hnth'.
     + specialize (IHl n a0 Hnth).
       destruct IHl as [nth [Hnth' Ha0]].
       exists (S nth).
-      split; try assumption.
-      rewrite Hnth'.
-      reflexivity.
+      by rewrite Hnth'.
 Qed.
 
 Fixpoint Forall_filter
@@ -957,9 +891,7 @@ Lemma filter_annotate_unroll
     | _ => fa
     end.
 Proof.
-  unfold filter_annotate, filter.
-  simpl.
-  destruct (decide _); reflexivity.
+  by cbn; case_decide.
 Qed.
 
 Lemma filter_annotate_app
@@ -969,9 +901,8 @@ Lemma filter_annotate_app
   (l1 l2 : list A)
   : filter_annotate P (l1 ++ l2) = filter_annotate P l1 ++ filter_annotate P l2.
 Proof.
-  induction l1; [reflexivity|].
-  simpl. rewrite! filter_annotate_unroll. rewrite IHl1. clear IHl1.
-  destruct (decide _); reflexivity.
+  induction l1; [done |].
+  by simpl; rewrite! filter_annotate_unroll, IHl1; case_decide.
 Qed.
 
 (** Filters a list through a predicate, then transforms each element using a
@@ -994,7 +925,7 @@ Lemma list_filter_map_app
   (l1 l2 : list A)
   : list_filter_map P f (l1 ++ l2) = list_filter_map P f l1 ++ list_filter_map P f l2.
 Proof.
-  unfold list_filter_map. rewrite filter_annotate_app, map_app. reflexivity.
+  by unfold list_filter_map; rewrite filter_annotate_app, map_app.
 Qed.
 
 Lemma list_prefix_nth
@@ -1005,15 +936,11 @@ Lemma list_prefix_nth
   (Hi : i < n)
   : nth_error (list_prefix s n) i = nth_error s i.
 Proof.
-  generalize dependent n. generalize dependent s.
-  induction i; intros [|a s] [|n] Hi; try reflexivity.
+  revert s n Hi.
+  induction i; intros [| a s] [| n] Hi; try done.
   - inversion Hi.
   - inversion Hi.
-  - simpl.
-    assert (Hi': i < n) by lia.
-    specialize (IHi s n Hi').
-    rewrite IHi.
-    reflexivity.
+  - cbn. rewrite (IHi s n); [done | lia].
 Qed.
 
 Lemma nth_error_length
@@ -1046,8 +973,7 @@ Proof.
   specialize (list_prefix_nth l (S n) n); intro Hpref.
   rewrite <- Hpref in Hnth.
   - specialize (nth_error_last (list_prefix l (S n)) n Hpref_len _last); intro Hlast.
-    rewrite Hlast in Hnth. inversion Hnth.
-    reflexivity.
+    rewrite Hlast in Hnth. by inversion Hnth.
   - constructor.
 Qed.
 
@@ -1059,8 +985,8 @@ Lemma list_suffix_nth
   (Hi : n <= i)
   : nth_error (list_suffix s n) (i - n) = nth_error s i.
 Proof.
-  generalize dependent n. generalize dependent s.
-  induction i; intros [|a s] [|n] Hi; try reflexivity.
+  revert s n Hi.
+  induction i; intros [| a s] [| n] Hi; try done.
   - inversion Hi.
   - simpl. apply nth_error_None. simpl. lia.
   - simpl.
@@ -1077,11 +1003,8 @@ Lemma list_suffix_lookup
   : list_suffix s n !! (i - n) = s !! i.
 Proof.
   revert s n Hi.
-  induction i; intros [|a s] [|n] Hi
-  ; [reflexivity|reflexivity|reflexivity|lia|reflexivity|reflexivity|reflexivity|].
-  simpl.
-  apply IHi.
-  lia.
+  induction i; intros [|a s] [|n] Hi; try done; [lia |].
+  simpl. apply IHi. lia.
 Qed.
 
 Lemma list_suffix_last
@@ -1092,8 +1015,7 @@ Lemma list_suffix_last
   (_default : A)
   : List.last (list_suffix l i) _default  = List.last l _default.
 Proof.
-  generalize dependent l. induction i; intros [|a l] Hlt
-  ; try reflexivity.
+  revert l Hlt. induction i; intros [|a l] Hlt; try done.
   simpl in Hlt.
   assert (Hlt': i < length l) by lia.
   specialize (IHi l Hlt').
@@ -1101,7 +1023,7 @@ Proof.
   rewrite IHi.
   destruct l.
   - inversion Hlt; lia.
-  - rewrite unroll_last. rewrite unroll_last. reflexivity.
+  - by rewrite unroll_last, unroll_last.
 Qed.
 
 Lemma list_suffix_last_default
@@ -1112,13 +1034,8 @@ Lemma list_suffix_last_default
   (_default : A)
   : List.last (list_suffix l i) _default  = _default.
 Proof.
-  generalize dependent l. induction i; intros [|a l] Hlast
-  ; try reflexivity.
-  - inversion Hlast.
-  - simpl in Hlast. inversion Hlast.
-  specialize (IHi l H0).
-  simpl. subst.
-  assumption.
+  revert l Hlast. induction i; intros [|a l] Hlast; try done.
+  apply IHi. by inversion Hlast.
 Qed.
 
 Lemma list_segment_nth
@@ -1186,7 +1103,7 @@ Proof.
   clear -Hlength Hlast1.
   destruct x; inversion Hlength.
   destruct x; inversion H0.
-  simpl in Hlast1; subst; reflexivity.
+  by simpl in Hlast1; subst.
 Qed.
 
 Lemma nth_error_map
@@ -1196,9 +1113,7 @@ Lemma nth_error_map
   (n : nat)
   : nth_error (List.map f l) n = option_map f (nth_error l n).
 Proof.
-  generalize dependent n.
-  induction l; intros [|n]; try reflexivity; simpl.
-  apply IHl.
+  revert n. induction l; intros [| n]; firstorder.
 Qed.
 
 Lemma exists_finite
@@ -1231,13 +1146,9 @@ Lemma map_option_app
   l1 l2
   : map_option f (l1 ++ l2) = map_option f l1 ++ map_option f l2.
 Proof.
-  induction l1; [reflexivity|].
-  change (a :: l1) with ([a] ++ l1).
-  rewrite <- app_assoc. simpl.
-  rewrite IHl1.
-  destruct (f a); [|reflexivity].
-  change (b :: map_option f l1) with ([b] ++ map_option f l1).
-  rewrite <- app_assoc. reflexivity.
+  induction l1; [done |].
+  cbn; rewrite IHl1.
+  by destruct (f a).
 Qed.
 
 Lemma map_option_app_rev
@@ -1256,19 +1167,16 @@ Proof.
     destruct (f a) eqn:Hfa; swap 1 2.
     + specialize (IHl _ _ Happ_rev) as [_l1 [l2 [Hl [H_l1 Hl2]]]].
       subst.
-      exists (a :: _l1), l2.
-      repeat split. simpl. rewrite Hfa. reflexivity.
+      exists (a :: _l1), l2. by cbn; rewrite Hfa.
     + destruct l1' as [|_b l1']; swap 1 2.
       * change (_b :: l1') with ([_b] ++ l1') in Happ_rev.
         rewrite <- app_assoc in Happ_rev. inversion Happ_rev.
         subst _b.
         specialize (IHl _ _ H1) as [_l1 [l2 [Hl [H_l1 Hl2]]]].
         subst.
-        exists (a :: _l1), l2.
-        repeat split. simpl. rewrite Hfa. reflexivity.
+        exists (a :: _l1), l2. by cbn; rewrite Hfa.
       * simpl in Happ_rev. subst.
-        exists [], (a :: l).
-        repeat split. simpl. rewrite Hfa. reflexivity.
+        exists [], (a :: l). by cbn; rewrite Hfa.
 Qed.
 
 Lemma map_option_length
@@ -1278,12 +1186,10 @@ Lemma map_option_length
   (Hfl : Forall (fun a => f a <> None) l)
   : length (map_option f l) = length l.
 Proof.
-  induction l; try reflexivity.
+  induction l; [done |].
   inversion Hfl; subst.
-  spec IHl H2.
-  simpl.
-  destruct (f a); try (elim H1; reflexivity).
-  simpl. f_equal. assumption.
+  spec IHl H2; cbn.
+  destruct (f a); cbn; congruence.
 Qed.
 
 Lemma map_option_nth
@@ -1299,14 +1205,10 @@ Lemma map_option_nth
   : Some (nth i (map_option f l) dummyb) = f (nth i l dummya).
 Proof.
   generalize dependent i.
-  induction l; intros; simpl in *. { lia. }
-  inversion Hfl. subst. spec IHl H2.
-  destruct (f a) eqn: Hfa; try (elim H1; reflexivity).
-  symmetry in Hfa.
-  destruct i; try assumption.
-  spec IHl i.
-  spec IHl. { lia. }
-  assumption.
+  induction l; intros; simpl in *; [lia |].
+  inversion Hfl; subst.
+  destruct (f a) eqn: Hfa; [| done].
+  destruct i; firstorder. apply H. lia.
 Qed.
 
 Lemma elem_of_map_option
@@ -1364,13 +1266,11 @@ Lemma map_option_as_filter
   (l : list A)
   : map_option f l = list_filter_map (is_Some ∘ f) (fun x => is_Some_proj (proj2_dsig x)) l.
 Proof.
-  induction l using rev_ind; [reflexivity|].
-  rewrite map_option_app, IHl. clear IHl.
-  rewrite list_filter_map_app. f_equal.
-  cbn.
+  induction l using rev_ind; [done |].
+  rewrite map_option_app, IHl, list_filter_map_app; cbn; clear IHl.
   destruct (decide _).
-  - cbv. destruct (f x); [reflexivity|elim (is_Some_None (A := B)); assumption].
-  - simpl. destruct (f x); [|reflexivity]. elim n. eexists; reflexivity.
+  - cbv. by destruct i as [? ->].
+  - simpl. destruct (f x); [| done]. by elim n.
 Qed.
 
 (* Unpack list of [option A] into list of [A] *)
@@ -1407,10 +1307,7 @@ Lemma cat_option_app
 Proof.
   induction l1.
   - simpl in *. itauto.
-  - destruct a eqn : eq_a;
-      simpl in *;
-      rewrite IHl1;
-      reflexivity.
+  - by destruct a; cbn in *; rewrite IHl1.
 Qed.
 
 Lemma cat_option_nth
@@ -1457,7 +1354,7 @@ Lemma nth_error_eq
   : l1 = l2.
 Proof.
   generalize dependent l2.
-  induction l1; intros [| a2 l2] Hnth; try reflexivity.
+  induction l1; intros [| a2 l2] Hnth; [done |..].
   - specialize (Hnth 0); simpl in Hnth. inversion Hnth.
   - specialize (Hnth 0); simpl in Hnth. inversion Hnth.
   - assert (H0 := Hnth 0). simpl in H0.
@@ -1482,16 +1379,12 @@ Proof.
   generalize dependent a.
   induction la1; intros; destruct lb1 as [|b0 lb1]; simpl in *
   ; inversion Heq; subst.
-  - rewrite elem_of_cons in Ha.
-    destruct Ha. left. reflexivity.
-  - exists lb1. reflexivity.
-  - rewrite elem_of_cons in Ha.
-    destruct Ha. right.
-    apply elem_of_app.
-    right; left; reflexivity.
+  - contradict Ha. left.
+  - by exists lb1.
+  - contradict Ha. rewrite elem_of_cons, elem_of_app, elem_of_cons; auto.
   - specialize (IHla1 a0 lb1 b la2 lb2 H1 Ha).
     destruct IHla1 as [la0b Hla0b].
-    exists la0b. subst. reflexivity.
+    by exists la0b; subst.
 Qed.
 
 (* TODO remove (we have Exists_first) *)
@@ -1518,7 +1411,7 @@ Proof.
       specialize (IHl Hl).
       destruct IHl as [prefix [suffix [first [Hfirst [Heq Hprefix]]]]].
       exists (a :: prefix). exists suffix. exists first. repeat split; try assumption.
-      * simpl. subst. reflexivity.
+      * by subst.
       * intro Hprefix'. inversion Hprefix'; try (elim n; assumption).
         elim Hprefix. assumption.
 Qed.
@@ -1532,9 +1425,7 @@ Lemma in_fast
   (Hneq : b <> a) :
   In a l.
 Proof.
-  destruct Hin.
-  - subst. elim Hneq. reflexivity.
-  - assumption.
+  by destruct Hin.
 Qed.
 
 Fixpoint one_element_decompositions
@@ -1563,22 +1454,19 @@ Proof.
   induction l; intros pre x suf; split; simpl; intro H.
   - inversion H.
   - destruct pre; inversion H.
-  - inversion H; subst.
-    + reflexivity.
-    + apply elem_of_list_fmap in H2 as [x0 [Heq Hin]].
-      destruct x0 as ((prex0,x0),sufx0).
-      specialize (IHl prex0 x0 sufx0).
-      apply IHl in Hin.
-      subst l.
-      inversion Heq. reflexivity.
+  - inversion H; subst; [done |].
+    apply elem_of_list_fmap in H2 as [x0 [Heq Hin]].
+    destruct x0 as ((prex0,x0),sufx0).
+    specialize (IHl prex0 x0 sufx0).
+    apply IHl in Hin.
+    by inversion Heq; subst.
   - destruct pre.
     + inversion H. left.
     + right. apply elem_of_list_fmap.
       rewrite <- app_comm_cons in H.
       inversion H. subst. clear H.
       exists (pre, x, suf).
-      split; try reflexivity.
-      apply IHl. reflexivity.
+      by rewrite IHl.
 Qed.
 
 Lemma in_one_element_decompositions_iff
@@ -1625,14 +1513,13 @@ Proof.
     inversion Hdec. subst. clear Hdec.
     apply in_one_element_decompositions_iff in Hdecx.
     apply in_one_element_decompositions_iff in Hin.
-    subst sufx l. reflexivity.
+    by subst.
   - remember (mid ++ [y] ++ suf) as sufx.
     intro H.
     exists (pre, x, sufx). apply in_one_element_decompositions_iff in H.
     split; try assumption.
     apply in_map_iff. exists (mid, y, suf).
-    split; try reflexivity.
-    apply in_one_element_decompositions_iff. symmetry. assumption.
+    by rewrite in_one_element_decompositions_iff.
 Qed.
 
 Lemma order_decompositions
@@ -1644,27 +1531,15 @@ Lemma order_decompositions
   \/ (exists suf2', pre2 = pre1 ++ suf2').
 Proof.
   remember (pre1 ++ suf1) as l.
-  generalize dependent Heq.
-  generalize dependent Heql.
-  revert pre1 suf1 pre2 suf2.
+  revert pre1 suf1 pre2 suf2 Heql Heq.
   induction l; intros.
-  - left.
-    symmetry in Heql. apply app_eq_nil in Heql. destruct Heql as [Hpre1 _]. subst pre1.
-    symmetry in Heq. apply app_eq_nil in Heq. destruct Heq as [Hpre2 _]. subst pre2.
-    reflexivity.
-  - destruct pre1 as [| a1 pre1]; destruct pre2 as [|a2 pre2].
-    + left. reflexivity.
-    + right. right. exists (a2 :: pre2). reflexivity.
-    + right. left. exists (a1 :: pre1). reflexivity.
-    + inversion Heql. subst a1. clear Heql.
-      inversion Heq. subst a2. clear Heq.
-      specialize (IHl pre1 suf1 pre2 suf2 H1 H2).
-      destruct IHl as [Heq | [Hgt | Hlt]].
-      * left. f_equal. assumption.
-      * destruct Hgt as [suf1' Hgt].
-        right. left. exists suf1'. simpl. f_equal. assumption.
-      * destruct Hlt as [suf2' Hlt].
-        right. right. exists suf2'. simpl. f_equal. assumption.
+  - left. symmetry in Heql, Heq.
+    by apply app_nil in Heql as [-> ->], Heq as [-> ->].
+  - destruct pre1 as [| a1 pre1]; destruct pre2 as [|a2 pre2]. 1-3: eauto.
+    inversion Heql; subst a1; clear Heql.
+    inversion Heq; subst a2; clear Heq.
+    destruct (IHl pre1 suf1 pre2 suf2 H1 H2)
+          as [Heq | [[suf1' Hgt] | [suf2' Hlt]]]; subst; eauto.
 Qed.
 
 Lemma list_max_exists
@@ -1690,9 +1565,7 @@ Proof.
         apply max_l.
         lia.
       }
-      rewrite H in *.
-      left.
-      reflexivity.
+      by rewrite H; left.
 Qed.
 
 Lemma list_max_exists2
@@ -1773,18 +1646,13 @@ Lemma mode_not_empty
   (Hne : l <> []) :
   mode l <> [].
 Proof.
-  destruct l.
-  elim Hne. reflexivity.
+  destruct l; [done |].
   remember (a :: l) as l'.
   remember (List.map (count_occ decide_eq l') l') as occurrences.
 
   assert (Hmaxp: list_max occurrences > 0). {
-    rewrite Heqoccurrences.
-    rewrite Heql'.
-    simpl.
-    rewrite decide_True.
-    lia.
-    reflexivity.
+    rewrite Heqoccurrences, Heql'; cbn.
+    rewrite decide_True; [lia | done].
   }
 
   assert (exists a, (count_occ decide_eq l' a) = list_max occurrences). {
@@ -1815,9 +1683,7 @@ Proof.
     unfold mode.
     apply filter_in.
     assumption.
-    rewrite Heqoccurrences in H.
-    rewrite H.
-    reflexivity.
+    by rewrite H, Heqoccurrences.
   }
   destruct H.
   intros contra.
@@ -1871,23 +1737,11 @@ Proof.
     + intros. simpl in *.
       by destruct pref, suff.
     + intros.
-      unfold complete_prefix.
-      destruct pref.
-      * specialize (IHl [] l).
-        spec IHl.
-        itauto.
-        rewrite app_nil_l in H.
-        f_equal. itauto.
-      * destruct (decide (a = a0)) eqn : eq_d.
-        specialize (IHl pref suff).
-        unfold complete_prefix in IHl.
-        rewrite IHl.
-        reflexivity.
-        simpl in H.
-        inversion H.
-        reflexivity.
-        inversion H.
-        elim n. assumption.
+      destruct pref; cbn.
+      * by rewrite H.
+      * inversion H; subst.
+        rewrite decide_True; [| done].
+        by rewrite (IHl pref suff).
    - generalize dependent suff.
      generalize dependent pref.
      induction l; intros.
@@ -1988,9 +1842,8 @@ Definition list_sum_project_right
 Lemma fold_right_andb_false l:
   fold_right andb false l = false.
 Proof.
-  induction l.
-  - reflexivity.
-  - simpl. rewrite IHl. apply andb_false_r.
+  induction l; [done |].
+  simpl. rewrite IHl. apply andb_false_r.
 Qed.
 
 Definition Listing_finite_transparent `{EqDecision A} {l : list A} (finite_l : Listing l) : finite.Finite A.
@@ -2017,19 +1870,11 @@ Lemma list_sum_decrease [A:Type] (f g: A -> nat) (l: list A):
   (forall a, In a l -> f a <= g a) -> Exists (fun a => f a < g a) l ->
   list_sum (map f l) < list_sum (map g l).
 Proof.
-  induction 2.
-  - simpl.
-    apply PeanoNat.Nat.add_lt_le_mono.
-    assumption.
-    induction l.
-    + reflexivity.
-    + simpl. apply PeanoNat.Nat.add_le_mono.
-      apply H. firstorder.
-      apply IHl. firstorder.
-  - simpl.
-    apply PeanoNat.Nat.add_le_lt_mono.
-    apply H;left;reflexivity.
-    apply IHExists. intros;apply H;right;assumption.
+  induction 2; cbn.
+  - apply PeanoNat.Nat.add_lt_le_mono; [done |].
+    induction l; cbn; [done |].
+    apply PeanoNat.Nat.add_le_mono; firstorder.
+  - apply PeanoNat.Nat.add_le_lt_mono; firstorder.
 Qed.
 
 (* Nearly the natural induction principle for fold_left.
@@ -2323,8 +2168,8 @@ Qed.
 Lemma elem_of_empty_nil [X:Type] (l:list X) :
   (forall v, v ∉ l) -> l = [].
 Proof.
-  destruct l as [|a]. reflexivity.
-  simpl. intro H. elim (H a). left.
+  destruct l as [| a]; [done |].
+  intro H. elim (H a). left.
 Qed.
 
 Lemma nodup_append_left {A}:
@@ -2339,7 +2184,7 @@ Qed.
 Lemma subseteq_empty {A} : forall (l : list A),
   l ⊆ nil -> l = nil.
 Proof.
-  intros. destruct l; [reflexivity|].
+  intros. destruct l; [done |].
   exfalso.
   specialize (H a (elem_of_list_here _ _)).
   inversion H.
@@ -2376,7 +2221,7 @@ Lemma take_app_inv :
 Proof.
   induction n as [| n']; intros l l' x H.
   - contradict H. rewrite take_0. apply app_cons_not_nil.
-  - exists n'. reflexivity.
+  - by exists n'.
 Qed.
 
 Lemma elem_of_list_prod :
@@ -2384,6 +2229,5 @@ Lemma elem_of_list_prod :
     (x, y) ∈ list_prod la lb <-> x ∈ la /\ y ∈ lb.
 Proof.
   intros.
-  rewrite elem_of_list_In, in_prod_iff, <- !elem_of_list_In.
-  reflexivity.
+  by rewrite elem_of_list_In, in_prod_iff, <- !elem_of_list_In.
 Qed.

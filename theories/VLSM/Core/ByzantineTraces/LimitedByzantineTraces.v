@@ -187,7 +187,7 @@ Proof.
       destruct_dec_sig sub_i i Hi Heqsub_i; subst.
       unfold sub_IM in Him; cbn in Him; clear -Him.
       apply initial_message_is_valid.
-      exists i, (exist _ m Him). reflexivity.
+      by exists i, (exist _ m Him).
     + destruct Hseeded as (Hsigned & i & Hi & li & si & Hpre_valid).
       apply set_diff_elim2 in Hi.
       eapply Hvalidator; eassumption.
@@ -216,7 +216,7 @@ Proof.
     exact Hfixed.
   - unfold lift_sub_state.
     rewrite composite_state_sub_projection_lift_to.
-    split; [reflexivity|].
+    split; [done |].
     symmetry. apply composite_trace_sub_projection_lift.
 Qed.
 
@@ -332,14 +332,12 @@ Proof.
     do 2 f_equal; extensionality j.
     destruct (decide (i = j)) as [| Hij]; subst.
     + unfold lift_sub_state.
-      rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
-      rewrite !state_update_eq; reflexivity.
+      by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi), !state_update_eq.
     + rewrite state_update_neq by congruence.
       unfold lift_sub_state.
       destruct (decide (j ∈ set_diff (enum index) byzantine)) as [Hj |].
-      * rewrite !(lift_sub_state_to_eq _ _ _ _ _ Hj).
-        rewrite sub_IM_state_update_neq by congruence; reflexivity.
-      * rewrite !lift_sub_state_to_neq by assumption; reflexivity.
+      * by rewrite !(lift_sub_state_to_eq _ _ _ _ _ Hj), sub_IM_state_update_neq.
+      * by rewrite !lift_sub_state_to_neq.
 Qed.
 
 (** Considering a trace with the [fixed_byzantine_trace_alt_prop]erty for a
@@ -462,8 +460,7 @@ Proof.
     eexists _,_, byzantine; do 3 (split; [eassumption |]); split.
     + extensionality sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; cbn.
       unfold lift_sub_state.
-      rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
-      reflexivity.
+      by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
     + subst Limited.
       rewrite msg_dep_annotate_trace_with_equivocators_project.
       symmetry; apply composite_trace_sub_projection_lift.

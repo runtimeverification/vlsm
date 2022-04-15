@@ -197,13 +197,10 @@ Proof.
   intro; intros.
   destruct iom as [im|]; swap 1 2; [|destruct HcX as [Hsent | Hemitted]].
   - exists []. exists eqv_state_s.
-    split; [constructor; assumption|].
-    split; [reflexivity|].
-    split; [assumption|].
-    exact I.
+    split; [constructor|]; eauto.
   - exists []. exists eqv_state_s.
     split; [constructor; assumption|].
-    split; [reflexivity|].
+    split; [done |].
     split; [assumption|].
     apply sent_by_non_equivocating_are_sent in Hsent.
     apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
@@ -372,11 +369,10 @@ Proof.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
       simpl.
-      apply
+      by apply
         (zero_descriptor_transition_preserves_fixed_equivocation
           IM equivocating _ _ _ _ _ Het Hes li
         ).
-      reflexivity.
   - apply fixed_equivocation_has_replayable_message_prop.
 Qed.
 
@@ -441,24 +437,21 @@ Proof.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
       simpl.
-      apply
+      by apply
         (zero_descriptor_transition_preserves_fixed_equivocation
           IM [] _ _ _ _ _ Het Hes li
         ).
-      reflexivity.
   - clear isX sX trX HtrX. intro; intros.
     specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM []) as HinclE.
     destruct iom as [im|].
     2: {
       exists []. exists eqv_state_s.
-      split; [constructor; assumption|].
-      split; [reflexivity|].
-      split; [assumption|exact I].
+      split; [constructor |]; eauto.
     }
     destruct HcX as [Hsent | Hemitted]; [| done].
     exists []. exists eqv_state_s.
     split; [constructor; assumption|].
-    split; [reflexivity|].
+    split; [done |].
     split; [assumption|].
     apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
     apply (VLSM_incl_valid_state HinclE) in Hstate_valid.

@@ -333,7 +333,7 @@ Lemma zero_descriptor_not_equivocating
   (s : vstate equivocators_free_vlsm)
   : not_equivocating_equivocator_descriptors zero_descriptor s.
 Proof.
-  intro eqv. eexists; reflexivity.
+  by intro eqv; eexists.
 Qed.
 
 Lemma zero_descriptor_proper
@@ -381,8 +381,7 @@ Lemma lift_initial_to_equivocators_state
 Proof.
   unfold vinitial_state_prop in *. simpl in *.
   unfold composite_initial_state_prop in *.
-  intro i. spec Hs i.
-  split; [reflexivity|assumption].
+  by intro i; spec Hs i.
 Qed.
 
 Definition newmachine_descriptors_list
@@ -446,7 +445,7 @@ Lemma equivocator_descriptors_update_eq
   (si : MachineDescriptor (IM i))
   : equivocator_descriptors_update s i si i = si.
 Proof.
-  rewrite equivocator_descriptors_update_eq_rew with (Heq := eq_refl). reflexivity.
+  by rewrite equivocator_descriptors_update_eq_rew with (Heq := eq_refl).
 Qed.
 
 Lemma equivocator_descriptors_update_id
@@ -474,8 +473,7 @@ Proof.
   intro j.
   destruct (decide (j = i)).
   - subst. rewrite equivocator_descriptors_update_eq. symmetry. apply equivocator_descriptors_update_eq.
-  - repeat rewrite equivocator_descriptors_update_neq by assumption.
-    reflexivity.
+  - by rewrite !equivocator_descriptors_update_neq.
 Qed.
 
 Lemma equivocators_state_project_state_update_eqv
@@ -498,10 +496,7 @@ Proof.
   intro ieqv.
   unfold equivocators_state_project.
   unfold state_update.
-  match goal with
-    |- context [decide ?d] => destruct (decide d)
-    end
-  ; subst; reflexivity.
+  by repeat (case_decide; subst).
 Qed.
 
 Lemma equivocators_initial_state_project

@@ -101,9 +101,7 @@ The next few results describe several properties of the [state_update] operation
                (si : vstate (IM i))
       : state_update s i si i = si.
     Proof.
-      unfold state_update.
-      unfold decide, decide_rel.
-      rewrite eq_dec_refl. reflexivity.
+      by unfold state_update, decide, decide_rel; rewrite eq_dec_refl.
     Qed.
 
     Lemma state_update_id
@@ -130,8 +128,7 @@ The next few results describe several properties of the [state_update] operation
       intro j.
       destruct (decide (j = i)).
       - subst. rewrite state_update_eq. symmetry. apply state_update_eq.
-      - repeat rewrite state_update_neq; try assumption.
-        reflexivity.
+      - by rewrite !state_update_neq.
     Qed.
 
     Lemma state_update_twice_neq
@@ -147,9 +144,8 @@ The next few results describe several properties of the [state_update] operation
       intro k.
       destruct (decide (k = j)); destruct (decide (k = i)); subst
       ; repeat (rewrite state_update_eq ; try (rewrite state_update_neq; try assumption))
-      ; try reflexivity.
-      repeat (rewrite state_update_neq; try assumption).
-      reflexivity.
+      ; try done.
+      by rewrite !state_update_neq.
     Qed.
   End composite_type.
 
@@ -417,7 +413,7 @@ Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
         rewrite state_update_eq. replace (vtransition _ _ _) with (s', om').
         f_equal. unfold lift_to_composite_state. apply state_update_twice.
       - apply lift_to_composite_state_initial. assumption.
-      - exists j, (exist _ _ H). reflexivity.
+      - by exists j, (exist _ _ H).
     Qed.
 
     Definition lift_to_composite_finite_trace j
@@ -672,7 +668,7 @@ Lemma [basic_VLSM_incl]
         rewrite state_update_eq. replace (vtransition (IM j) l _) with (s', om').
         f_equal. unfold lift_to_composite_state. apply state_update_twice.
       - apply lift_to_composite_state_initial. assumption.
-      - exists j, (exist _ _ H); reflexivity.
+      - by exists j, (exist _ _ H).
     Qed.
 
     Lemma lift_to_composite_preloaded_vlsm_full_projection
@@ -799,13 +795,12 @@ Lemma [basic_VLSM_incl]
           specialize
             (valid_generated_state_message free_composite_vlsm _ _ Hs _ _ Hom  (existT j lj))
             as Hgen.
-          assert (n' : j <> i) by (intro contra; subst; elim n; reflexivity).
           spec Hgen.
-          { split; try exact I. simpl. rewrite state_update_neq; assumption. }
+          { split; try exact I. simpl. by rewrite state_update_neq. }
           simpl in Hgen.
-          rewrite state_update_neq in Hgen; try assumption. simpl in *.
+          rewrite state_update_neq in Hgen; [| done].
           rewrite Htj in Hgen.
-          eexists _. apply Hgen. reflexivity.
+          by eexists _; apply Hgen.
     Qed.
   End sec_composite_vlsm.
 
@@ -890,8 +885,7 @@ Proof.
   destruct (vtransition (IM x) v (s x, im)).
   inversion H.
   f_equal.
-  rewrite state_update_eq.
-  reflexivity.
+  by rewrite state_update_eq.
 Qed.
 
 Lemma input_valid_transition_preloaded_project_active
@@ -945,7 +939,7 @@ Proof.
   - subst j.
     right.
     exists lj.
-    split;[reflexivity|].
+    split; [done |].
     revert Hptrans.
     apply input_valid_transition_preloaded_project_active.
   - left.
@@ -953,8 +947,7 @@ Proof.
     cbn in Htrans.
     destruct (vtransition (IM j) lj (s j, im)).
     inversion_clear Htrans.
-    rewrite state_update_neq by assumption.
-    reflexivity.
+    by rewrite state_update_neq.
 Qed.
 
 Lemma input_valid_transition_project_any {V} (i:V)
@@ -1060,7 +1053,7 @@ Proof.
     ).
   - rewrite <- exists_finite.
     split; intros [i Hm]; exists i.
-    + exists (exist _ _ Hm). reflexivity.
+    + by exists (exist _ _ Hm).
     + destruct Hm as [[im Hinit] Him]. subst. assumption.
   - apply @Exists_dec. intro i. apply Hdec_init.
 Qed.
@@ -1131,9 +1124,7 @@ Section composite_plan_properties.
     destruct (vtransition (IM x) v (s' x, input)).
     split; [done|].
     unfold i.
-    rewrite state_update_eq.
-    rewrite state_update_eq.
-    reflexivity.
+    by rewrite !state_update_eq.
   Qed.
 
   Lemma relevant_components_one
@@ -1211,9 +1202,7 @@ Section composite_plan_properties.
     match type of eq_trans with
     | (let (si', om') := ?t in _) = _ => destruct t end.
     inversion eq_trans.
-    rewrite state_update_neq.
-    reflexivity.
-    assumption.
+    by rewrite state_update_neq.
   Qed.
 
   (* Same as the previous result, but for multiple transitions. *)
@@ -1247,7 +1236,7 @@ Section composite_plan_properties.
       }
 
       rewrite <- IHa.
-      replace sx with (snd (composite_apply_plan IM sa [x])) by (rewrite eq_x; reflexivity).
+      replace sx with (snd (composite_apply_plan IM sa [x])) by (rewrite eq_x; done).
       apply irrelevant_components_one.
       intros contra.
       rewrite contra in Hdif.
@@ -1488,8 +1477,8 @@ Proof.
     f_equal. extensionality j.
     unfold same_IM_state_rew at 2.
     destruct (decide (i = j)).
-    + subst. rewrite !state_update_eq. reflexivity.
-    + rewrite !state_update_neq by congruence. reflexivity.
+    + by subst; rewrite !state_update_eq.
+    + by rewrite !state_update_neq.
   - intros i. apply same_VLSM_initial_state_preservation, H.
   - apply initial_message_is_valid.
     destruct HmX as [[i [[im Him] Hi]] | Hseed]; [| right; assumption].
@@ -1498,7 +1487,7 @@ Proof.
     left. exists i.
     assert (Hm : vinitial_message_prop (IM2 i) m).
     + eapply same_VLSM_initial_message_preservation; eauto.
-    + exists (exist _ m Hm). reflexivity.
+    + by exists (exist _ m Hm).
 Qed.
 
 End pre_loaded_constrained.

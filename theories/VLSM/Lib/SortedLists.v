@@ -25,10 +25,8 @@ Proof.
   split.
   - intro x. induction x; intros; destruct y; split; intros; try done.
     + simpl in H. destruct (compare a a0) eqn: Hcmp; try done.
-      apply R in Hcmp; subst. apply IHx in H; subst.
-      reflexivity.
-    + inversion H; subst. simpl. rewrite compare_eq_refl; try assumption.
-      apply IHx. reflexivity.
+      apply compare_eq in Hcmp as ->. by apply IHx in H as ->.
+    + inversion H; subst; cbn. by rewrite compare_eq_refl, IHx.
   - intros x y. generalize dependent x.
     induction y; intros; destruct x; destruct z; try assumption
     ; destruct comp; try done
@@ -36,9 +34,9 @@ Proof.
     ; inversion H0; clear H0; destruct (compare a a1) eqn:Ha1; try done
     ; try apply (IHy _ _ _ H2) in H1; try apply (T _ _ _ _ Ha0) in Ha1
     ; try apply R in Ha0; subst
-    ; try (simpl; rewrite Ha1; try rewrite H1, H2; reflexivity)
-    ; try (simpl; rewrite Ha1; rewrite H2; reflexivity)
-    ; try (apply R in Ha1; subst; simpl;  rewrite Ha0; rewrite H1; reflexivity)
+    ; try (by simpl; rewrite Ha1; try rewrite H1, H2)
+    ; try (by simpl; rewrite Ha1; rewrite H2)
+    ; try (by apply R in Ha1; subst; simpl;  rewrite Ha0; rewrite H1)
     .
 Defined.
 
@@ -74,16 +72,14 @@ Lemma add_in_sorted_list_in {A} {compare : A -> A -> comparison} `{CompareStrict
 Proof.
   intros. induction sigma; simpl in H0.
   - rewrite elem_of_cons in H0.
-    destruct H0 as [H0 | H0]; subst; try inversion H0; left; reflexivity.
+    by destruct H0 as [H0 | H0]; subst; try inversion H0; left.
   - destruct (compare msg a) eqn:Hcmp.
     + apply StrictOrder_Reflexive in Hcmp; subst. right. assumption.
     + rewrite elem_of_cons in H0.
-      destruct H0 as [Heq | Hin]; subst.
-      * left; reflexivity.
-      * right; assumption.
+      by destruct H0 as [Heq | Hin]; subst; [left | right].
     + rewrite elem_of_cons in H0.
       destruct H0 as [Heq | Hin]; subst.
-      * right; left; reflexivity.
+      * by right; left.
       * apply IHsigma in Hin. destruct Hin; try (left; assumption).
         right. right. assumption.
 Qed.
@@ -93,13 +89,13 @@ Lemma add_in_sorted_list_in_rev {A} {compare : A -> A -> comparison} `{CompareSt
   msg' ∈ (add_in_sorted_list_fn compare msg sigma).
 Proof.
   intros. induction sigma; simpl in H0.
-  - destruct H0 as [H0 | H0]; subst; try inversion H0; left; reflexivity.
+  - destruct H0 as [H0 | H0]; subst; [left | inversion H0].
   - rewrite elem_of_cons in H0.
     simpl.
     destruct H0 as [Heq|Heq];destruct (compare msg a) eqn:Hcmp.
     + apply StrictOrder_Reflexive in Hcmp; subst; left.
     + subst; left.
-    + subst; right; apply IHsigma; left; reflexivity.
+    + by subst; right; apply IHsigma; left.
     + apply StrictOrder_Reflexive in Hcmp; subst.
       destruct Heq as [Heq|Heq].
       * subst; left.
@@ -124,8 +120,7 @@ Qed.
 Lemma add_in_sorted_list_head {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
   msg ∈ (add_in_sorted_list_fn compare msg sigma).
 Proof.
-  intros.
-  apply add_in_sorted_list_iff; try assumption. left; reflexivity.
+  by intros; apply add_in_sorted_list_iff; left.
 Qed.
 
 Lemma add_in_sorted_list_tail {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
@@ -213,10 +208,10 @@ Proof.
   - inversion H1.
   - rewrite elem_of_cons in H1.
     destruct H1 as [Heq | Hin].
-    + subst. simpl. rewrite compare_eq_refl. reflexivity.
+    + by subst; cbn; rewrite compare_eq_refl.
     + apply LocallySorted_tl in H0 as LS.
       spec IHsigma LS Hin. simpl.
-      destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma; try reflexivity.
+      destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma. 1, 3: done.
       apply (@LocallySorted_elem_of_lt _ _ compare_lt_strict_order msg a sigma H0) in Hin.
       unfold compare_lt in Hin. apply compare_asymmetric in Hin.
       rewrite Hin in Hcmp. inversion Hcmp.
@@ -239,7 +234,7 @@ Proof.
     specialize (IN2 x2).
     rewrite 2 elem_of_cons in IN2.
     specialize (IN2 (or_introl (eq_refl x2))).
-    destruct IN2; [subst; reflexivity|].
+    destruct IN2; [by subst |].
     pose proof (LocallySorted_elem_of_lt x2 x1 s1 LS1 H1).
     pose proof (LocallySorted_elem_of_lt x1 x2 s2 LS2 H0).
     pose proof (StrictOrder_Irreflexive x1) as ltIrr.
@@ -249,7 +244,7 @@ Proof.
     itauto.
   }
   subst.
-  split. reflexivity.
+  split; [done |].
   split.
   - intros x Hx.
     pose proof (LocallySorted_elem_of_lt x _ _ LS1 Hx).
@@ -281,7 +276,7 @@ Proof.
   assert (SO' := SO). destruct SO' as [IR TR].
   split.
   - generalize dependent s2. induction s1; destruct s2.
-    + intros. reflexivity.
+    + by intros.
     + intros. destruct H. exfalso. pose proof (H0 a).
       rewrite elem_of_cons in H1.
       specialize (H1 (or_introl (eq_refl a))).
@@ -293,7 +288,7 @@ Proof.
     + intros. apply (set_eq_first_equal a a0 s1 s2 LS1 LS2) in H. destruct H; subst.
       apply Sorted_LocallySorted_iff in LS1. apply Sorted_inv in LS1. destruct LS1 as [LS1 _]. apply Sorted_LocallySorted_iff in LS1.
       apply Sorted_LocallySorted_iff in LS2. apply Sorted_inv in LS2. destruct LS2 as [LS2 _]. apply Sorted_LocallySorted_iff in LS2.
-      apply (IHs1 LS1 s2 LS2) in H0. subst. reflexivity.
+      by apply (IHs1 LS1 s2 LS2) in H0; subst.
   - intros. subst. easy.
 Qed.
 

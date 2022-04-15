@@ -261,7 +261,7 @@ Proof.
         (input_valid_transition_reflects_trace_witnessing_equivocation_prop
           _ _ _ (conj Htr Hinit) _ Hwitness).
       subst. apply s0.
-    + right. exists m; split; [reflexivity|]. exists v. split; [assumption|].
+    + right. exists m; split; [done |]. exists v. split; [done |].
       specialize (equivocating_validators_step_update _ _ _ _ _ Ht) as Honly_v.
       simpl in Honly_v.
       assert (Hv : exists v, v ∈ equivocating_validators s' /\ v ∉ equivocating_validators s).
@@ -322,8 +322,7 @@ Lemma strong_witness_equivocating_validators_prefix_monotonicity
 Proof.
   revert prefix suffix Heqtr ps.
   induction Htr using finite_valid_trace_init_to_rev_ind; intros.
-  - apply app_eq_nil in Heqtr. destruct Heqtr; subst.
-    reflexivity.
+  - by apply app_eq_nil in Heqtr as []; subst.
   - remember {| input := iom |} as item.
     spec IHHtr.
     { intros pre suf Heq.
@@ -333,7 +332,7 @@ Proof.
     }
     destruct_list_last suffix suffix' _item Heqsuffix.
     + rewrite app_nil_r in Heqtr. subst. subst ps.
-      rewrite finite_trace_last_is_last. simpl. reflexivity.
+      by rewrite finite_trace_last_is_last.
     + rewrite app_assoc in Heqtr. apply app_inj_tail in Heqtr.
       destruct Heqtr as [Heqtr Heq_item]. subst _item.
       specialize (IHHtr _ _ Heqtr).
@@ -341,7 +340,7 @@ Proof.
       ; [assumption|].
       specialize (Hwitness (tr ++ [item]) []).
       spec Hwitness. { apply app_nil_r. }
-      replace sf with (destination item) by (subst; reflexivity).
+      replace sf with (destination item) by (subst; done).
       apply (equivocating_validators_witness_monotonicity _ _ _ Htr _ Hwitness).
 Qed.
 
@@ -406,7 +405,7 @@ Proof.
         apply Hwitness.
         subst. exists m. split; [assumption|].
         eexists tr', _, [].
-        split; [reflexivity|].
+        split; [done |].
         split; assumption.
   - rewrite app_assoc in Heq_tr''_item. apply app_inj_tail in Heq_tr''_item.
     destruct Heq_tr''_item as [Heq_tr'' Heq_item].
@@ -515,8 +514,7 @@ Proof.
     intros _ _ Htr _.
     exists is, [].
     split.
-    + apply finite_valid_trace_init_add_last
-      ; [assumption | reflexivity].
+    + by apply finite_valid_trace_init_add_last.
     + intros prefix suffix Heq_tr.
       apply app_eq_nil  in Heq_tr. destruct Heq_tr. subst.
       apply initial_state_witnessing_equivocation_prop. apply Htr.
@@ -610,7 +608,7 @@ Proof.
       specialize
         (strong_trace_witnessing_equivocation_prop_extend_neq _ _ _ (conj Htr''' Hinit') Hprefix item msg)
         as Hextend.
-      spec Hextend; [subst; reflexivity|].
+      spec Hextend; [by subst |].
       specialize (Hextend Hwneq _ Hsender).
       apply Hextend.
       subst. assumption.
@@ -809,8 +807,8 @@ Proof.
     assert (Hequivocating_v : v ∈ equivocating_validators sf).
     { apply Heqv. exists im. split; [assumption|].
       eexists tr, _, [].
-      split; [reflexivity|].
-      split; [reflexivity|].
+      split; [done |].
+      split; [done |].
       intros Him_output.
       elim n.
       apply composite_has_been_observed_sent_received_iff.

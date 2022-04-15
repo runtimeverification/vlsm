@@ -104,7 +104,7 @@ Proof.
     exists im. split; [assumption|].
     exists prefix, item, suffix.
     apply elem_of_one_element_decompositions in Hdec. simpl in Hdec.
-    split; [subst; reflexivity|].
+    split; [by subst |].
     split; [assumption|].
     unfold item_equivocating_in_trace in Heqv.
     rewrite Hinput in Heqv.
@@ -112,13 +112,12 @@ Proof.
   - intros [im [Hsender [prefix [item [suffix [Heq_tr [Hinput Heqv]]]]]]].
     exists im. split; [|assumption]. exists item.
     split; [|assumption]. exists ((prefix, item), suffix).
-    split; [reflexivity|].
+    split; [done |].
     apply elem_of_list_filter.
     unfold item_equivocating_in_trace.
     simpl in *.  rewrite Hinput.
     split; [assumption|].
-    apply elem_of_one_element_decompositions.
-    subst. reflexivity.
+    by apply elem_of_one_element_decompositions.
 Qed.
 
 Lemma equivocating_senders_in_trace_prefix prefix suffix
@@ -233,10 +232,7 @@ Proof.
   exists item, suffix'. split; [|assumption].
   replace (prefix ++ item :: suffix' ++ [item']) with ((prefix ++ item :: suffix') ++ [item']) in Heq.
   - apply app_inj_tail in Heq. apply Heq.
-  - replace (prefix ++ item :: suffix') with ((prefix ++ [item]) ++ suffix')
-      by (rewrite <- app_assoc; reflexivity).
-    rewrite <- !app_assoc.
-    reflexivity.
+  - by rewrite <- app_assoc.
 Qed.
 
 Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
@@ -355,8 +351,7 @@ Lemma initial_state_equivocators_weight
 Proof.
   apply equivocating_validators_empty_in_initial_state in Hs.
   unfold equivocation_fault.
-  rewrite Hs.
-  reflexivity.
+  by rewrite Hs.
 Qed.
 
 Lemma composite_transition_no_sender_equivocators_weight

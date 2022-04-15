@@ -127,10 +127,7 @@ to be all [valid_message]s of <<X>>:
       simpl.
       unfold vtransition in Heq2. unfold transition in Heq2. unfold machine in Heq2.
       simpl in Heq2.
-      rewrite Hsi in Heq2.
-      rewrite Heq1 in Heq2.
-      inversion Heq2.
-      reflexivity.
+      by rewrite Hsi, Heq1 in Heq2; inversion Heq2.
     }
     rewrite Hveq.
     rewrite <- Heqsm'.
@@ -260,8 +257,7 @@ Lemma composite_project_label_eq lj
   : composite_project_label (existT j lj) = Some lj.
 Proof.
   unfold composite_project_label; cbn.
-  rewrite (decide_True_pi eq_refl).
-  reflexivity.
+  by rewrite (decide_True_pi eq_refl).
 Qed.
 
 Definition composite_vlsm_induced_projection : VLSM message :=
@@ -291,12 +287,12 @@ Proof.
     + intros l s iom s' oom.
       cbn; unfold lift_to_composite_state at 1; rewrite state_update_eq.
       intros Ht; setoid_rewrite Ht.
-      rewrite state_update_eq; reflexivity.
+      by rewrite state_update_eq.
   - cbn; apply basic_VLSM_strong_incl.
     + intros s [sX [<- HsX]]; cbn. apply HsX.
-    + intros m Him; cbn. exists (exist _ m Him). reflexivity.
+    + by intros m Him; cbn; exists (exist _ m Him).
     + intros l s iom ((i, li) & sX & HlX & <- & Hv); cbn.
-      exists sX; split; [reflexivity|].
+      exists sX; split; [done |].
       unfold composite_project_label in HlX; cbn in *.
       case_decide; [| congruence].
       subst i; apply Some_inj in HlX; cbn in HlX; subst li.
@@ -359,9 +355,7 @@ Proof.
   destruct (vtransition _ _ _) as (si', om').
   intros sX1' oom1 Ht1. inversion Ht1. subst. clear Ht1.
   intros sX2' oom2 Ht2. inversion Ht2. subst. clear Ht2.
-  split; [|reflexivity].
-  rewrite !state_update_eq.
-  reflexivity.
+  by rewrite !state_update_eq.
 Qed.
 
 (** The [projection_induced_vlsm] by the [composite_project_label] and the
@@ -415,8 +409,7 @@ Lemma valid_message_projection
 Proof.
   apply option_initial_message_is_valid.
   destruct iom as [m|];[|exact I].
-  exists (exist _ m HpmX).
-  reflexivity.
+  by exists (exist _ m HpmX).
 Qed.
 
 (* The projection of a finite valid trace remains a valid trace *)
@@ -474,14 +467,13 @@ Proof.
     cbn in H0.
     cbn.
     destruct (vtransition _ _ _) as (si', _om').
-    inversion H0. rewrite state_update_eq. reflexivity.
+    inversion H0. by rewrite state_update_eq.
   - destruct lX as (i, li).
     unfold composite_project_label in H.
     simpl in H. destruct (decide _); [congruence|].
     clear H. cbn in H0.
     destruct (vtransition _ _ _) as (si', _om').
-    inversion H0. rewrite state_update_neq by congruence.
-    reflexivity.
+    inversion H0. by rewrite state_update_neq.
   - apply initial_state_projection. assumption.
 Qed.
 
@@ -517,7 +509,7 @@ Proof.
   f_equal. unfold composite_transition_item_projection, composite_transition_item_projection_from_eq.
   simpl.
   f_equal.
-  replace e with (eq_refl (A := index) (x := i)); [reflexivity|].
+  replace e with (eq_refl (A := index) (x := i)); [done |].
   apply Eqdep_dec.UIP_dec.
   assumption.
 Qed.
@@ -533,8 +525,7 @@ Proof.
   destruct item. destruct l as (i, li).
   unfold pre_VLSM_projection_transition_item_project, composite_project_label.
   simpl in *.
-  destruct (decide _); [congruence|].
-  reflexivity.
+  by destruct (decide _).
 Qed.
 
 Definition finite_trace_projection_list (tr : list (composite_transition_item IM))
@@ -589,8 +580,8 @@ Proof.
     (VLSM_projection_input_valid_transition preloaded_component_projection l) as Hivt.
   subst j. specialize (Hivt (projT2 l)).
   spec Hivt.
-  { unfold composite_project_label. destruct (decide _); [| elim n; reflexivity].
-    replace e with (eq_refl (A := index) (x := projT1 l)); [reflexivity|].
+  { unfold composite_project_label. destruct (decide _); [| by elim n].
+    replace e with (eq_refl (A := index) (x := projT1 l)); [done |].
     apply Eqdep_dec.UIP_dec. assumption.
   }
   apply Hivt in Ht. assumption.
@@ -611,8 +602,7 @@ Proof.
   destruct (vtransition _ _ _) as (si', om') eqn:Htj.
   inversion Ht. subst; clear Ht.
   simpl in Hi.
-  rewrite state_update_neq by congruence.
-  reflexivity.
+  by rewrite state_update_neq.
 Qed.
 
 End PreLoadedProjectionTraces.
@@ -638,9 +628,9 @@ Proof.
   exists itemX. split; [assumption|].
   unfold pre_VLSM_projection_transition_item_project, composite_project_label.
   subst j.
-  case_decide; [|elim H; reflexivity].
+  case_decide; [| by elim H].
   replace H with (eq_refl (A := index) (x := projT1 (l itemX)))
-  ; [reflexivity|].
+  ; [done |].
   apply Eqdep_dec.UIP_dec. assumption.
 Qed.
 
@@ -665,7 +655,7 @@ Proof.
   unfold composite_project_label in Hly.
   case_decide; [|congruence].
   exists H.
-  inversion Hly. reflexivity.
+  by inversion Hly.
 Qed.
 
 End ProjectionTraces_membership.
@@ -829,7 +819,7 @@ Proof.
     set (lX := existT j l) in Hv.
     eexists.
     apply (input_valid_state_message_outputs X _ _ _ Hv).
-    simpl. replace (vtransition (IM j) _ _) with (sj, Some m). reflexivity.
+    simpl. by replace (vtransition (IM j) _ _) with (sj, Some m).
 Qed.
 
 (**

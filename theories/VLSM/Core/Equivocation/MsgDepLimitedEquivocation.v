@@ -67,7 +67,7 @@ Lemma coeqv_limited_equivocation_transition_state_annotation_incl [l s iom s' oo
 Proof.
   cbn; unfold annotated_transition; destruct (vtransition _ _ _) as (_s', _om').
   inversion 1; cbn.
-  destruct iom as [m |]; [apply set_union_subseteq_left | reflexivity].
+  by destruct iom as [m |]; [apply set_union_subseteq_left |].
 Qed.
 
 Lemma coeqv_limited_equivocation_state_annotation_nodup s
@@ -215,7 +215,7 @@ Proof.
   {
     intros Hv.
     destruct (msg_dep_coequivocating_senders IM full_message_dependencies sender s m)
-    ; [reflexivity | contradiction (Hv v); left].
+    ; [done | contradiction (Hv v); left].
   }
   setoid_rewrite elem_of_map_option; setoid_rewrite elem_of_list_filter.
   intros v (dm & [Hnobs Hdm]  & _).
@@ -246,9 +246,9 @@ Lemma full_node_msg_dep_composite_transition_message_equivocators
       =
     msg_dep_composite_transition_message_equivocators IM full_message_dependencies sender (existT i li) (s, om).
 Proof.
-  destruct om as [m |]; [| reflexivity]; cbn; f_equal.
+  destruct om as [m |]; [| done]; cbn; f_equal.
   unfold coeqv_message_equivocators.
-  case_decide as Hobs; [reflexivity |]; f_equal.
+  case_decide as Hobs; [done |]; f_equal.
   symmetry; eapply full_node_msg_dep_coequivocating_senders; eassumption.
 Qed.
 
@@ -491,7 +491,7 @@ Proof.
       * revert Hs; apply VLSM_incl_valid_state.
         apply fixed_equivocation_vlsm_composition_index_incl.
         destruct iom as [im |]
-        ; [apply set_union_subseteq_left | reflexivity].
+        ; [apply set_union_subseteq_left | done].
       * destruct iom as [im |]
         ; [apply option_valid_message_Some|apply option_valid_message_None].
         destruct (decide (composite_has_been_observed IM (original_state s) im))
@@ -628,7 +628,7 @@ Lemma msg_dep_limited_fixed_equivocation
       (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender is tr).
 Proof.
   intros (equivocators & Hlimited & Htr).
-  split; [| split; [apply Htr | reflexivity]].
+  split; [| split; [apply Htr | done]].
   apply valid_trace_add_default_last in Htr.
   match goal with
   |- finite_valid_trace_from Limited ?is ?tr =>
@@ -639,7 +639,7 @@ Proof.
   ; [itauto |].
   induction Htr using finite_valid_trace_init_to_rev_strong_ind.
   - split; [| apply list_subseteq_nil].
-    constructor; apply initial_state_is_valid; split; [assumption | reflexivity].
+    by constructor; apply initial_state_is_valid.
   - setoid_rewrite annotate_trace_from_app; cbn
     ; unfold annotate_trace_item; rewrite !finite_trace_last_is_last; cbn.
     split; cycle 1.
@@ -684,9 +684,9 @@ Proof.
         rewrite !annotate_trace_from_last_original_state; cbn.
         replace (finite_trace_last _ _) with s
              by (apply valid_trace_get_last in Htr1; congruence).
-        destruct Ht as [_ Ht]; cbn in Ht
+        by destruct Ht as [_ Ht]; cbn in Ht
         ; destruct (vtransition _ _ _) as (si', om')
-        ; inversion Ht; reflexivity.
+        ; inversion Ht.
 Qed.
 
 Lemma annotated_limited_incl_constrained_limited
