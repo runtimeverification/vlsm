@@ -38,7 +38,7 @@ Lemma filtering_subsequence_prefix_sorted
 Proof.
   intro n. apply LocallySorted_ForAll2.
   apply stream_prefix_ForAll2.
-  apply filtering_subsequence_sorted in Hfs. assumption.
+  by apply filtering_subsequence_sorted in Hfs.
 Qed.
 
 Lemma filtering_subsequence_iff
@@ -87,13 +87,12 @@ Proof.
   apply monotone_nat_stream_prop_from_successor in Hss_sorted.
   apply monotone_nat_stream_find with (n := n) in Hss_sorted.
   destruct Hss_sorted  as [Hlt | [k Hk]].
-  - exfalso. apply proj1 in Hfs.
-    elim (Hfs n); assumption.
+  - destruct Hfs as [Hfs _]. by elim (Hfs n).
   - destruct Hk as [Heq | Hk]; subst; [by exists k |].
     exfalso. apply proj2 in Hfs.
     rewrite ForAll2_forall in Hfs.
     specialize (Hfs k) as [_ [_ Hfs]].
-    elim (Hfs n); assumption.
+    by elim (Hfs n).
 Qed.
 
 (** Prefixes of the filtering subsequence expressed as filters.
@@ -111,7 +110,7 @@ Lemma filtering_subsequence_prefix_is_filter
 Proof.
   intro k.
   apply (@set_equality_predicate _ lt _).
-  - apply filtering_subsequence_prefix_sorted with P s. assumption.
+  - by apply filtering_subsequence_prefix_sorted with P s.
   - apply LocallySorted_filter.
     + unfold Transitive. lia.
     + apply nat_sequence_prefix_sorted.
@@ -122,12 +121,12 @@ Proof.
     split; intros.
     + destruct H as [i [Hi Ha]].
       subst.
-      split; [apply filtering_subsequence_witness; assumption|].
+      split; [by apply filtering_subsequence_witness |].
       eexists; split; [| done].
       destruct (decide (i = k)); [subst; lia|].
       cut (Str_nth i ss < Str_nth k ss); [lia|].
       apply ForAll2_transitive_lookup; [unfold Transitive; lia| | lia].
-      apply filtering_subsequence_sorted in Hfs. assumption.
+      by apply filtering_subsequence_sorted in Hfs.
     + destruct H as [Hpa [_a [Hlt H_a]]].
       subst _a.
       specialize (filtering_subsequence_witness_rev _ _ _ Hfs _ Hpa)
@@ -160,8 +159,8 @@ Proof.
   rewrite stream_prefix_S, filter_app.
   unfold filter at 2. simpl.
   specialize (filtering_subsequence_witness _ _ _ Hfs m) as Hm.
-  rewrite decide_True in Hfilter by assumption.
-  rewrite decide_True by assumption.
+  rewrite decide_True in Hfilter by done.
+  rewrite decide_True by done.
   rewrite app_length, Nat.add_comm in Hfilter. simpl in Hfilter.
   rewrite app_length, Nat.add_comm. simpl.
   rewrite Hfilter.
@@ -190,7 +189,7 @@ Proof.
   specialize (filtering_subsequence_prefix_length _ _ _ Hfs k) as Hlength.
   rewrite! stream_prefix_S, filter_app in Hlength.
   unfold filter at 2 in Hlength. simpl in Hlength.
-  rewrite decide_True in Hlength by (subst; assumption).
+  rewrite decide_True in Hlength by (subst; done).
   rewrite app_length, Nat.add_comm in Hlength. simpl in Hlength.
   by inversion Hlength; subst.
 Qed.
@@ -232,10 +231,7 @@ Proof.
   remember (list_filter_map P f [Str_nth n s]) as lst.
   unfold list_filter_map in Heqlst.
   rewrite filter_annotate_unroll in Heqlst. simpl in Heqlst.
-  case_decide; subst lst; simpl.
-  2: {
-    rewrite Nat.add_comm, app_nil_r. simpl. assumption.
-  }
+  case_decide; subst lst; simpl; [| by rewrite Nat.add_comm, app_nil_r].
   replace (length (list_filter_map P f (stream_prefix s n)) + 1)
     with (S (length (list_filter_map P f (stream_prefix s n))))
     by lia.
@@ -249,7 +245,7 @@ Proof.
   f_equal.
   unfold list_filter_map.
   rewrite map_length. rewrite filter_annotate_length.
-  apply filtering_subsequence_prefix_is_filter_last; assumption.
+  by apply filtering_subsequence_prefix_is_filter_last.
 Qed.
 
 Program Definition fitering_subsequence_stream_filter_map_prefix_ex
@@ -277,8 +273,7 @@ Next Obligation.
   unfold list_filter_map.
   rewrite map_length. rewrite filter_annotate_length.
   symmetry. subst.
-  apply filtering_subsequence_prefix_length.
-  assumption.
+  by apply filtering_subsequence_prefix_length.
 Qed.
 
 Lemma stream_filter_Forall
@@ -295,7 +290,7 @@ Proof.
   unfold s'.
   unfold stream_subsequence.
   rewrite Str_nth_map.
-  apply filtering_subsequence_witness. assumption.
+  by apply filtering_subsequence_witness.
 Qed.
 
 (** ** Obtaining [filtering_sequences] for streams
@@ -357,18 +352,15 @@ Proof.
   intros.
   destruct Hev; simpl.
   - destruct (decide _); [| done].
-    exists 0. repeat split; [|assumption|lia]. f_equal. lia.
+    exists 0. split_and!; f_equal; [lia | done | lia].
   - destruct (decide _); simpl.
-    1: {
-      exists 0. repeat split; [|assumption|lia]. f_equal. lia.
-    }
-    specialize (H (tl s) Hev (S n))
-      as [k [Heq [Hp Hnp]]].
-    exists (S k). rewrite Heq.
-    split; [f_equal; lia|].
-    split; [assumption|].
-    intros. destruct i; [assumption|].
-    apply Hnp. lia.
+    + exists 0. split_and!; f_equal; [lia | done | lia].
+    + specialize (H (tl s) Hev (S n)) as (k & Heq & Hp & Hnp).
+      exists (S k). rewrite Heq.
+      split; [f_equal; lia|].
+      split; [done |].
+      intros. destruct i; [done |].
+      apply Hnp. lia.
 Qed.
 
 Lemma stream_filter_fst_pos_infinitely_often
@@ -405,7 +397,7 @@ Proof.
   subst sn fpair.
   rewrite Heq.
   clear -Hp Hnp. rewrite Str_nth_plus, Nat.add_comm in Hp.
-  split; [assumption|].
+  split; [done |].
   intros i [Hlt_i Hilt].
   apply le_plus_dec in Hlt_i as [i' Hi].
   subst i.
@@ -493,8 +485,7 @@ Proof.
   - specialize (stream_filter_fst_pos_characterization s (fHere (Exists1 P) s Hinf) 0)
       as [k [Heq [Hpk Hnp]]].
     simpl in Heq.
-    rewrite stream_filter_positions_unroll.
-    simpl. rewrite Heq. assumption.
+    by rewrite stream_filter_positions_unroll; cbn; rewrite Heq.
   - apply ForAll2_forall.
     intro n.
     specialize (stream_filter_positions_Str_nth_tl s Hinf 0 n) as Hnth_tl.
@@ -506,7 +497,7 @@ Proof.
     specialize (stream_filter_fst_pos_characterization (Str_nth_tl kn (tl s)) (fHere _ _ Hnth_inf) (S kn))
       as [k [Heq [Hpk Hnp]]].
     rewrite Hnth; simpl.
-    split; [assumption|].
+    split; [done |].
     rewrite Heq. simpl.
     split; [lia|].
     intros i [Hle Hlt].
@@ -576,9 +567,7 @@ Program Definition stream_map_option_prefix_ex
   let (n, Heq) := (fitering_subsequence_stream_filter_map_prefix_ex P (fun k => is_Some_proj (proj2_dsig k)) _ _ Hfs k) in
   exist _ n _.
 Next Obligation.
-  intros. simpl.
-  rewrite !(map_option_as_filter f (stream_prefix s n)).
-  assumption.
+  by intros; cbn; rewrite !map_option_as_filter.
 Qed.
 
 Definition bounded_stream_map_option

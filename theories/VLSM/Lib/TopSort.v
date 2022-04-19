@@ -85,31 +85,18 @@ Proof.
   induction l'; intros; rewrite Forall_forall; intros.
   - simpl in H; inversion H; subst; [simpl; lia|inversion H2].
   - rewrite elem_of_cons in H.
+    setoid_rewrite Forall_forall in IHl'.
     destruct H as [Heq | Hin]; subst.
     + simpl. destruct (decide (count_predecessors a < count_predecessors a0)).
-      * specialize (IHl' a). rewrite Forall_forall in IHl'.
-        assert (Ha : a ∈ (a :: l')) by left.
-        specialize (IHl' a Ha).
-        lia.
-      * specialize (IHl' a0). rewrite Forall_forall in IHl'.
-        assert (Hx : a0 ∈ (a0 :: l')) by left.
-        specialize (IHl' a0 Hx).
-        assumption.
+      * transitivity (count_predecessors a); [| lia]. apply IHl'; left.
+      * apply IHl'; left.
     + simpl. destruct (decide (count_predecessors a < count_predecessors a0)).
-      * specialize (IHl' a). rewrite Forall_forall in IHl'.
-        specialize (IHl' x Hin).
-        assumption.
+      * by apply IHl'.
       * apply not_lt in n. unfold ge in n.
         rewrite elem_of_cons in Hin.
         destruct Hin as [Heq | Hin]; subst.
-        -- specialize (IHl' a0). rewrite Forall_forall in IHl'.
-           assert (Ha0 : a0 ∈ (a0 :: l')) by left.
-           specialize (IHl' a0 Ha0).
-           lia.
-        -- specialize (IHl' a0). rewrite Forall_forall in IHl'.
-           assert (Hx : x ∈ (a0 :: l')) by (right; assumption).
-           specialize (IHl' x Hx).
-           assumption.
+        -- transitivity (count_predecessors a0); [| lia]. apply IHl'; left.
+        -- by apply IHl'; right.
 Qed.
 
 (** Given <<P>> a property on <<A>>, [precedes_P] is the relation
@@ -143,7 +130,7 @@ Lemma precedes_irreflexive
 Proof.
   specialize (StrictOrder_Irreflexive (exist P a Ha)).
   unfold complement; unfold precedes_P; simpl; intro Hirr.
-  destruct (decide (precedes a a)); assumption.
+  by destruct (decide (precedes a a)).
 Qed.
 
 Lemma precedes_asymmetric
@@ -191,7 +178,7 @@ Proof.
     specialize (IHl0 HPl0).
     apply Exists_cons.
     rewrite filter_cons.
-    destruct (decide (precedes a a)); [contradict p;apply precedes_irreflexive; assumption|].
+    destruct (decide (precedes a a)); [by contradict p; apply precedes_irreflexive |].
     assert ({ l0=[] }+{l0 <> [] }) by (destruct l0;clear;[left|right];congruence).
     destruct H as [?|Hl0];[subst l0|].
     + by left.
@@ -208,13 +195,12 @@ Proof.
         apply filter_length_fn.
         revert HPl0.
         intro.
-        apply (Forall_impl P); [assumption|].
+        apply (Forall_impl P); [done |].
         intros.
-        apply precedes_transitive with a;assumption.
-      * right. apply Exists_exists. exists x. split; try assumption.
+        by apply precedes_transitive with a.
+      * right. apply Exists_exists. exists x.
         rewrite filter_cons.
-        destruct (decide (precedes a x)); [contradict n0; assumption|].
-        assumption.
+        by destruct (decide (precedes a x)).
 Qed.
 
 (**
@@ -298,12 +284,10 @@ Proof.
   assert (Ha : a ∉ (b :: lb2)).
   { intro Ha. apply Hts.
     rewrite elem_of_cons in Ha.
-    destruct Ha; try assumption. subst.
-    apply (precedes_irreflexive precedes P b Hpa) in Hab.
-    contradict Hab.
+    destruct Ha; subst; [| done].
+    by apply (precedes_irreflexive precedes P b Hpa) in Hab.
   }
-  specialize (occurrences_ordering a b la1 la2 lb1 lb2 Heqb Ha).
-  intro; assumption.
+  by apply (occurrences_ordering a b la1 la2 lb1 lb2 Heqb Ha).
 Qed.
 
 (**
@@ -366,7 +350,7 @@ Proof.
   specialize (Hts a b Hab l1 (l2 ++ [final])).
   rewrite Hinit in Hts. repeat rewrite <- app_assoc in Hts.
   specialize (Hts eq_refl). intro Hnin. apply Hts.
-  apply elem_of_app. left. assumption.
+  by apply elem_of_app; left.
 Qed.
 
 Definition precedes_closed
@@ -386,12 +370,7 @@ Lemma precedes_closed_set_eq
   (Heq : set_eq s1 s2)
   : precedes_closed precedes s1 <-> precedes_closed precedes s2.
 Proof.
-  unfold precedes_closed. repeat rewrite Forall_forall.
-  split; intros Hpc b Hb a Hab;
-  apply Heq;
-  apply Heq in Hb;
-  apply (Hpc b Hb);
-  assumption.
+  unfold precedes_closed; repeat rewrite Forall_forall; firstorder.
 Qed.
 
 Lemma topologically_sorted_precedes_closed_remove_last
@@ -413,29 +392,17 @@ Proof.
   rewrite Forall_forall in Hpc. rewrite Forall_forall.
   subst l.
   intros b Hb a Hab.
-  assert (Hb' : b ∈ (init ++ [final])). {
-    apply elem_of_app.
-    left; assumption.
-  }
+  assert (Hb' : b ∈ (init ++ [final])) by (apply elem_of_app; left; done).
   specialize (Hpc b Hb' a Hab).
   apply elem_of_app in Hpc.
-  destruct Hpc as [Ha | Ha]; try assumption.
-  rewrite elem_of_cons in Ha.
-  destruct Ha as [Heq | Hn]; try inversion Hn.
-  subst final.
-  apply elem_of_list_split in Hb'.
-  destruct Hb' as  [l1 [l2 Heq]].
-  specialize
-    (topologically_sorted_occurrences_ordering precedes
-      (init ++ [a]) P Hl Hts a b Hab init [] eq_refl l1 l2 Heq
-    ).
-  intros [lab Hlab].
-  rewrite Hlab in Heq. exfalso. clear -Heq.
-  simpl in Heq. rewrite <- app_assoc in Heq. simpl in Heq.
-  apply app_inv_head in Heq. inversion Heq.
-  symmetry in H0. apply app_eq_nil in H0.
-  destruct H0 as [_ H].
-  inversion H.
+  destruct Hpc as [Ha | Ha]; [done |].
+  rewrite elem_of_list_singleton in Ha; subst final.
+  apply elem_of_list_split in Hb' as  (l1 & l2 & Heq).
+  destruct (topologically_sorted_occurrences_ordering precedes
+             (init ++ [a]) P Hl Hts a b Hab init [] eq_refl l1 l2 Heq)
+        as [lab Hlab].
+  rewrite Hlab in Heq. apply (f_equal length) in Heq.
+  rewrite !app_length in Heq. cbn in Heq. lia.
 Qed.
 
 Section top_sort.
@@ -482,9 +449,9 @@ Proof.
   remember (min_predecessors precedes (a :: l) l a) as min.
   remember (set_remove min l) as l'.
   destruct (decide (min = a)); try rewrite e.
-  - apply set_eq_cons. specialize (IHn l H0). subst. assumption.
+  - subst. by apply set_eq_cons, IHn.
   - specialize (min_predecessors_in precedes (a :: l) l a).
-    rewrite <- Heqmin. simpl. intros [Heq | Hin]; try (elim n0; assumption).
+    rewrite <- Heqmin. simpl. intros [Heq | Hin]; [done |].
     specialize (IHn (a :: l')).
     specialize (set_remove_length min l Hin).
     rewrite <- Heql'. rewrite <- H0. intro Hlen.
@@ -496,12 +463,12 @@ Proof.
       * left.
       * specialize (set_remove_3 _ _ l Hinx n1).
         rewrite <- Heql'. intro Hinx'.
-        right. apply IHn. right. assumption.
-    + right. assumption.
+        by right; apply IHn; right.
+    + by right.
     + apply IHn in Hinx.
       rewrite elem_of_cons in Hinx.
       destruct Hinx as [-> | Hinx]; [left |].
-      right. subst. apply set_remove_1 in Hinx. assumption.
+      right. subst. by apply set_remove_1 in Hinx.
 Qed.
 
 Lemma top_sort_nodup
@@ -518,23 +485,21 @@ Proof.
   - destruct l as [| a l].
     + constructor.
     + simpl.
-      assert (Hl' : NoDup l) by (inversion Hl; assumption).
+      assert (Hl' : NoDup l) by (inversion Hl; done).
       assert (Hlen : len = length l) by (inversion Heqlen; done).
       assert (Hl'' : NoDup (set_remove (min_predecessors precedes (a :: l) l a) l))
-        by (apply set_remove_nodup; assumption).
+        by (apply set_remove_nodup; done).
       destruct (decide (min_predecessors precedes (a :: l) l a = a)); constructor.
       * specialize (IHlen l Hl'  Hlen).
         rewrite e in *.
-        inversion Hl; subst x l0. intro Ha. elim H1.
-        apply top_sort_set_eq. subst len. assumption.
-      * apply IHlen; try assumption.
+        inversion Hl; subst. intro Ha; elim H1.
+        by apply top_sort_set_eq in Ha.
+      * by apply IHlen.
       * intro Hmin.
         assert (Hlen' : len = length (a :: set_remove (min_predecessors precedes (a :: l) l a) l)).
         { simpl.
-          rewrite <- set_remove_length; try assumption.
-          pose (@min_predecessors_in _ precedes _ (a :: l) l a) as Hin.
-          destruct Hin as [Heq | Hin]; try assumption.
-          elim n. assumption.
+          rewrite <- set_remove_length; [done |].
+          by destruct (@min_predecessors_in _ precedes _ (a :: l) l a).
         }
         rewrite Hlen' in Hmin.
         apply (proj2 (top_sort_set_eq (a :: set_remove (min_predecessors precedes (a :: l) l a) l)))
@@ -543,15 +508,13 @@ Proof.
         destruct Hmin; [done |].
         by apply set_remove_2 in H.
       * apply IHlen.
-        -- constructor; try assumption.
-           intro Ha. apply set_remove_iff in Ha; try assumption.
+        -- constructor; [| done].
+           intro Ha. apply set_remove_iff in Ha; [| done].
            destruct Ha as [Ha _].
-           inversion Hl. elim H1. assumption.
+           by inversion Hl.
         -- simpl.
-           rewrite <- set_remove_length; try assumption.
-           pose (@min_predecessors_in _ precedes _ (a :: l) l a) as Hin.
-           destruct Hin as [Heq | Hin]; try assumption.
-           elim n. assumption.
+           rewrite <- set_remove_length; [done |].
+           by destruct (@min_predecessors_in _ precedes _ (a :: l) l a).
 Qed.
 
 Context
@@ -571,7 +534,7 @@ Proof.
   intro Ha2.
   assert (Ha : a ∈ l). {
     apply top_sort_set_eq.
-    rewrite Heq. simpl. apply elem_of_app. right. right. assumption.
+    rewrite Heq. simpl. rewrite elem_of_app, elem_of_cons. auto.
   }
   unfold top_sort in Heq.
   remember (length l) as n.
@@ -582,7 +545,8 @@ Proof.
   generalize dependent Hab.
   generalize dependent b.
   generalize dependent a.
-  generalize dependent l. clear Hl l.
+  generalize dependent l.
+  clear Hl l.
   induction n; intros
   ; try (symmetry in Heqn;  apply length_zero_iff_nil in Heqn; subst l; inversion Ha).
   destruct l as [| a0 l0]; inversion Hl; subst; simpl in Heq.
@@ -597,31 +561,26 @@ Proof.
     assert (Hall' : Forall P l').
     { rewrite Forall_forall. intros x Hx.
       rewrite Forall_forall in H2.
-      destruct (decide (min = a0)).
-      - subst a0 l'. apply H2. assumption.
-      - subst l'.
-        apply elem_of_cons in Hx.
-        destruct Hx as [Heqx | Hx]; try (subst; assumption).
+      destruct (decide (min = a0)); subst.
+      - by apply H2.
+      - apply elem_of_cons in Hx.
+        destruct Hx as [-> | Hx]; [done |].
         apply set_remove_1 in Hx.
-        apply H2. assumption.
+        by apply H2.
     }
     assert (Hlenl' : n = length l').
-    { destruct (decide (min = a0)).
-      - subst a0.
-        subst l'. assumption.
-      - subst l'. simpl.
-        rewrite <- set_remove_length; try assumption.
-        specialize (min_predecessors_in precedes (a0 :: l0) l0 a0).
-        rewrite <- Heqmin. simpl.
-        intros [Heq' | Hin]; try assumption.
-        elim n0. assumption.
+    {
+      destruct (decide (min = a0)); subst; cbn; [done |].
+      rewrite <- set_remove_length; [done |].
+      specialize (min_predecessors_in precedes (a0 :: l0) l0 a0).
+      by cbn; intros [Heq' | Hin].
     }
     specialize (IHn l' Hall' Hlenl' a b Hab).
     assert (Hminb : b <> min).
-    { destruct (decide (b = min)); try assumption.
-      subst b.
+    {
+      destruct (decide (b = min)); subst; [| done].
       specialize (min_predecessors_zero precedes (a0 :: l0) P Hl l0 a0 eq_refl).
-      rewrite <- Heqmin. simpl. intro Hmin.
+      simpl. intro Hmin.
       apply zero_predecessors in Hmin.
       rewrite Forall_forall in Hmin.
       apply Hmin in Ha.
@@ -640,17 +599,11 @@ Proof.
         -- subst a0.
            rewrite elem_of_cons in i.
            by contradict i; left.
-        -- destruct (decide (a = min)); try (symmetry; assumption).
+        -- destruct (decide (a = min)); [done |].
            apply (set_remove_3 _ _ _ Ha') in n1.
-           contradict i.
-           right; assumption.
-      * subst a.
-        apply i.
-        apply top_sort_set_eq.
-        unfold top_sort. rewrite <- Hlenl'.
-        rewrite H4.
-        rewrite elem_of_app.
-        right. right. assumption.
+           by contradict i; right.
+      * subst. apply i, top_sort_set_eq. unfold top_sort.
+        rewrite <- Hlenl', H4, elem_of_app, !elem_of_cons. itauto.
 Qed.
 
 (** <<lts>> is a [topological_sorting] of <<l>> if it has the same elements as <<l>>
@@ -726,11 +679,7 @@ Proof.
     specialize StrictOrder_Irreflexive as Hirr.
     unfold Irreflexive in Hirr. unfold complement in Hirr.
     unfold Reflexive in Hirr.
-    assert (P max). {
-      rewrite Forall_forall in Hl.
-      apply Hl.
-      assumption.
-    }
+    assert (P max) by (eapply Forall_forall; done).
     specialize (Hirr (exist _ max H)).
     itauto.
   - rewrite HeqA in Hmax.

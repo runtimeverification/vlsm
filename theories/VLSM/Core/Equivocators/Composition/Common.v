@@ -95,12 +95,8 @@ Proof.
   unfold equivocating_validators, is_equivocating.
   simpl.
   split; intro Hin.
-  - apply elem_of_list_filter in Hin.
-    destruct Hin as [Hin Hel].
-    assumption.
-  - apply elem_of_list_filter.
-    split; [assumption|].
-    apply elem_of_enum.
+  - by apply elem_of_list_filter in Hin as [Hin Hel].
+  - apply elem_of_list_filter. auto using elem_of_enum.
 Qed.
 
 Lemma eq_equivocating_indices_equivocation_fault
@@ -148,10 +144,9 @@ Proof.
   destruct l as (j, lj).
   destruct (vtransition (equivocator_IM j) lj (s0 j, iom)) as (sj', om') eqn:Htj.
   inversion Ht. subst. clear Ht.
-  destruct (decide (i = j)); [|rewrite state_update_neq in Hsi; assumption].
+  destruct (decide (i = j)); [| by rewrite state_update_neq in Hsi].
   subst. rewrite state_update_eq in Hsi.
-  revert Hsi. apply equivocator_transition_reflects_singleton_state with iom oom lj.
-  assumption.
+  by revert Hsi; apply equivocator_transition_reflects_singleton_state with iom oom lj.
 Qed.
 
 Lemma equivocators_transition_cannot_decrease_state_size
@@ -164,9 +159,9 @@ Proof.
   apply equivocator_transition_cannot_decrease_state_size in Htj.
   inversion Ht. subst. clear Ht.
   intro eqv.
-  destruct (decide (j = eqv)).
-  - subst. rewrite state_update_eq. assumption.
-  - rewrite state_update_neq by congruence. lia.
+  destruct (decide (j = eqv)); subst.
+  - by rewrite state_update_eq.
+  - by rewrite state_update_neq.
 Qed.
 
 Lemma equivocators_plan_cannot_decrease_state_size
@@ -201,9 +196,7 @@ Lemma equivocators_pre_trace_cannot_decrease_state_size
 Proof.
   apply trace_to_plan_to_trace_from_to in Htr.
   specialize (equivocators_plan_cannot_decrease_state_size s (trace_to_plan Pre tr)) as Hmon.
-  simpl in Hmon.
-  replace (composite_apply_plan _ _ _) with (tr, s') in Hmon. simpl in Hmon.
-  assumption.
+  by replace (composite_apply_plan _ _ _) with (tr, s') in Hmon.
 Qed.
 
 Lemma equivocators_pre_trace_preserves_equivocating_state
@@ -236,9 +229,9 @@ Lemma equivocators_no_equivocations_vlsm_incl_equivocators_free
 Proof.
   apply basic_VLSM_incl.
   - cbv; intros s Hn n; specialize (Hn n); split_and!; itauto.
-  - intro; intros; apply initial_message_is_valid; assumption.
-  - split; [|exact I]. apply Hv.
-  - intros l s om s' om' [_ Ht]. assumption.
+  - by intro; intros; apply initial_message_is_valid.
+  - split; [| done]. apply Hv.
+  - by destruct 1.
 Qed.
 
 Lemma equivocators_no_equivocations_vlsm_incl_PreFree
@@ -263,9 +256,7 @@ Lemma equivocators_initial_state_size
   (eqv : index)
   : equivocator_state_n (is eqv) = 1.
 Proof.
-  specialize (His eqv).
-  destruct His as [Hzero His].
-  assumption.
+  by destruct (His eqv).
 Qed.
 
 (**
@@ -308,9 +299,8 @@ Proof.
   intros eqv_descriptors s.
   apply @Decision_iff with (P := (Forall (fun eqv => existing_descriptor (IM eqv) (eqv_descriptors eqv) (s eqv)) (enum index))).
   - rewrite Forall_forall. apply forall_proper. intros.
-    split.
-    + intro Henum. apply Henum. apply elem_of_enum.
-    + intros; assumption. 
+    split; [| done].
+    intro Henum. apply Henum, elem_of_enum.
   - apply Forall_dec. intro eqv.
     apply existing_descriptor_dec.
 Qed.
@@ -354,9 +344,9 @@ Lemma proper_equivocator_descriptors_state_update_eqv
 Proof.
   intro eqv'.
   specialize (Hproper eqv').
-  destruct (decide (eqv' = eqv)).
-  - subst. rewrite state_update_eq in Hproper. assumption.
-  - rewrite state_update_neq in Hproper; assumption.
+  destruct (decide (eqv' = eqv)); subst.
+  - by rewrite state_update_eq in Hproper.
+  - by rewrite state_update_neq in Hproper.
 Qed.
 
 Definition equivocators_state_project
@@ -436,7 +426,7 @@ Proof.
   unfold equivocator_descriptors_update.
   destruct (decide (j = i)); [|congruence]. subst.
   f_equal.
-  apply Eqdep_dec.UIP_dec. assumption.
+  by apply Eqdep_dec.UIP_dec.
 Qed.
 
 Lemma equivocator_descriptors_update_eq
@@ -459,7 +449,7 @@ Proof.
   intro j.
   destruct (decide (j = i)).
   - subst. apply equivocator_descriptors_update_eq.
-  - apply equivocator_descriptors_update_neq. assumption.
+  - by apply equivocator_descriptors_update_neq.
 Qed.
 
 Lemma equivocator_descriptors_update_twice
@@ -510,7 +500,7 @@ Proof.
   unfold equivocator_IM in Hes.
   unfold equivocators_state_project.
   specialize (Heqv eqv).
-  destruct (eqv_descriptors eqv) as [sn | i]; [assumption|].
+  destruct (eqv_descriptors eqv) as [sn | i]; [done |].
   destruct Heqv as [es_eqv_i Hes_eqv_i].
   simpl. rewrite Hes_eqv_i. simpl.
   revert Hes_eqv_i Hes.
@@ -523,15 +513,12 @@ Lemma equivocators_initial_message
   : vinitial_message_prop Free m.
 Proof.
   destruct Hem as [eqv [emi Hem]].
-  exists eqv.
-  unfold equivocator_IM in emi.
-  exists emi. assumption.
+  by exists eqv, emi.
 Qed.
+
 End fully_equivocating_composition.
 
-
 Section equivocators_sub_projections.
-
 
 Context {message : Type}
   `{EqDecision index}

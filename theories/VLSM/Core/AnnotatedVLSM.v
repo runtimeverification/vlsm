@@ -42,8 +42,8 @@ Global Program Instance annotated_initial_state_prop_inhabited
   populate (exist _ {| original_state := ` (vs0 X); state_annotation := ` inhabitant  |} _).
 Next Obligation.
   split; cbn.
-  - destruct (vs0 X); assumption.
-  - destruct inhabitant; assumption.
+  - by destruct (vs0 X).
+  - by destruct inhabitant.
 Qed.
 
 Context
@@ -231,8 +231,7 @@ Proof.
     unfold annotated_composite_label_project, composite_project_label; cbn.
     case_decide; [| congruence].
     subst _i; cbn; inversion_clear 1.
-    intros (s, ann) om (_ & _ & [Hv _] & _) _ _.
-    assumption.
+    by intros (s, ann) om (_ & _ & [Hv _] & _) _ _.
   - intros [_i _li] li.
     unfold annotated_composite_label_project, composite_project_label; cbn.
     case_decide; [| congruence].
@@ -294,8 +293,8 @@ Lemma annotated_composite_induced_projection_initial_lift
     annotated_composite_state_lift.
 Proof.
   split; cbn.
-  - apply lift_to_composite_state_initial; assumption.
-  - destruct inhabitant; assumption.
+  - by apply lift_to_composite_state_initial.
+  - by destruct inhabitant.
 Qed.
 
 Lemma annotated_composite_induced_projection_transition_consistency

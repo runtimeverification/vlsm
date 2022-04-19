@@ -217,8 +217,7 @@ Section valid_plans.
     (Hpr : valid_state_prop X s)  :
     finite_valid_plan_from s [].
   Proof.
-    apply finite_valid_trace_from_empty.
-    assumption.
+    by apply finite_valid_trace_from_empty.
   Qed.
 
   Lemma apply_plan_last_valid
@@ -230,8 +229,7 @@ Section valid_plans.
   Proof.
     subst after_a.
     rewrite <- apply_plan_last.
-    apply finite_valid_trace_last_pstate.
-    assumption.
+    by apply finite_valid_trace_last_pstate.
   Qed.
 
   (** By extracting a plan from a [valid_trace] based on a state <<s>>
@@ -273,8 +271,7 @@ Section valid_plans.
     (Htr : finite_valid_trace_from X s tr)
     : finite_valid_plan_from s (trace_to_plan tr).
   Proof.
-    unfold finite_valid_plan_from.
-    rewrite trace_to_plan_to_trace; assumption.
+    by unfold finite_valid_plan_from; rewrite trace_to_plan_to_trace.
   Qed.
 
   (** Characterization of valid plans. *)
@@ -295,14 +292,13 @@ Section valid_plans.
     ; try
       ( apply finite_valid_plan_from_app_iff in H
       ; destruct H as [Ha Hx]; apply IHa in Ha as Ha').
-    - inversion H. assumption.
+    - by inversion H.
     - constructor.
     - by destruct prefa; simpl in Heqa.
-    - destruct H as [Hs _]. constructor. assumption.
-    - destruct Ha' as [Hs _].
-      assumption.
+    - destruct H as [Hs _]. by constructor.
+    - by destruct Ha' as [Hs _].
     - destruct Ha' as [_ [Hmsgs _]].
-      apply Forall_app. split; try assumption.
+      apply Forall_app. split; [done |].
       repeat constructor. unfold finite_valid_plan_from in Hx.
       remember (snd (apply_plan s a)) as lst.
       unfold apply_plan, _apply_plan in Hx. simpl in Hx.
@@ -327,17 +323,16 @@ Section valid_plans.
         repeat rewrite app_assoc in Heqa.
         apply app_inj_tail in Heqa. rewrite <- app_assoc in Heqa. destruct Heqa; subst.
         destruct Ha' as [_ [_ Ha']].
-        specialize (Ha' _ _ _ eq_refl). assumption.
+        by eapply IHa.
     - destruct H as [Hs [Hinput Hvalid]].
       apply Forall_app in Hinput. destruct Hinput as [Hinput Hinput_ai].
       apply finite_valid_plan_from_app_iff.
-      assert (Ha : finite_valid_plan_from s a); try (split; try assumption)
-      ; try apply IHa; repeat split; try assumption.
+      assert (Ha : finite_valid_plan_from s a); try (by split)
+      ; try apply IHa; repeat split; try done.
       + intros.
         specialize (Hvalid prefa (suffa ++ [x]) ai).
         repeat rewrite app_assoc in *.
-        subst a.
-        specialize (Hvalid eq_refl). assumption.
+        by subst a; apply Hvalid.
       + unfold finite_valid_plan_from.
         specialize (Hvalid a [] x).
         rewrite app_assoc in Hvalid. rewrite app_nil_r in Hvalid.
@@ -353,13 +348,13 @@ Section valid_plans.
         specialize (apply_plan_last s a) as Hlst.
         simpl in Hlst, Ha.
         setoid_rewrite Hlst in Ha. setoid_rewrite <- Heqsa in Ha.
-        repeat constructor; try assumption.
+        repeat constructor. 2-5: done.
         exists out.
         replace (@pair (@state message (@type message X)) (option message) dest out)
           with (vtransition X label_a0 (sa, input_a0)).
         destruct Ha as [_oma Hsa].
         destruct Hinput_ai as [_s Hinput_a0].
-        apply valid_generated_state_message with sa _oma _s input_a0 label_a0; assumption.
+        by apply valid_generated_state_message with sa _oma _s input_a0 label_a0.
   Qed.
 
   (** Characterizing a singleton valid plan as a input valid transition. *)
@@ -379,17 +374,15 @@ Section valid_plans.
       | context[let (_, _) := let (_, _) := ?t in _ in _] =>
         destruct t as [dest output] eqn : eq_trans
       end.
-      inversion H. subst. setoid_rewrite eq_trans.
-      assumption.
+      inversion H; subst. by setoid_rewrite eq_trans.
     - match type of H with
       | input_valid_transition _ _ _ ?t =>
         destruct t as [dest output] eqn : eq_trans
       end.
       setoid_rewrite eq_trans.
-      apply finite_valid_trace_from_extend.
+      apply finite_valid_trace_from_extend; [| done].
       apply finite_valid_trace_from_empty.
-      apply input_valid_transition_destination in H; itauto.
-      assumption.
+      by apply input_valid_transition_destination in H.
   Qed.
 
   Definition preserves
@@ -411,7 +404,7 @@ Section valid_plans.
       then these two plans can be composed and the application of `a ++ b` will also
       be valid. *)
 
-   Lemma plan_independence
+  Lemma plan_independence
     (a b : plan)
     (Pb : vstate X -> Prop)
     (s : state)
@@ -420,22 +413,15 @@ Section valid_plans.
     (Hhave : Pb s)
     (Hensures : ensures b Pb)
     (Hpreserves : preserves a Pb) :
-   finite_valid_plan_from s (a ++ b).
-   Proof.
-    unfold ensures in *.
-    unfold preserves in *.
+      finite_valid_plan_from s (a ++ b).
+  Proof.
+    unfold ensures, preserves in *.
     apply finite_valid_plan_from_app_iff.
-    split.
-    - assumption.
-    - remember (snd (apply_plan s a)) as s'.
-      specialize (Hensures s').
-      apply Hensures.
-      rewrite Heqs'.
-      apply apply_plan_last_valid.
-      itauto.
-      rewrite Heqs'.
-      apply Hpreserves.
-      all : itauto.
-   Qed.
+    split; [done |].
+    remember (snd (apply_plan s a)) as s'.
+    rewrite Heqs'. apply Hensures.
+    - by apply apply_plan_last_valid.
+    - by apply Hpreserves.
+  Qed.
 
 End valid_plans.

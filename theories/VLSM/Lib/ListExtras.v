@@ -26,8 +26,8 @@ Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a::nil)}} + {l = nil} .
 Proof.
   destruct (null_dec l).
-  - right. assumption.
-  - left. apply exists_last in n. assumption.
+  - by right.
+  - by left; apply exists_last in n.
 Qed.
 
 (** destructs a list in @l@ in either null or a prefix @l'@ and
@@ -121,8 +121,8 @@ Lemma incl_singleton {A} : forall (l : list A) (a : A),
 Proof.
   intros. induction l; inversion H0; subst.
   - destruct (H b); [by left | done | inversion H1].
-  - apply IHl; try assumption.
-    apply incl_tran with (a0 :: l); try assumption.
+  - apply IHl; [| done].
+    apply incl_tran with (a0 :: l); [| done].
     apply incl_tl. apply incl_refl.
 Qed.
 
@@ -146,9 +146,9 @@ Proof.
   - rewrite filter_cons in H1.
     destruct (decide (P a)).
     + destruct H1.
-      * subst. apply filter_in; try assumption. by apply H0; left.
-      * apply IHs1; try assumption. intro y; intro. apply H0. right. assumption.
-    + apply IHs1; try assumption. intro y; intro. apply H0. right. assumption.
+      * subst. apply filter_in; [| done]. by apply H0; left.
+      * apply IHs1; [| done]. by intros y HIn; apply H0; right.
+    + apply IHs1; [| done]. by intros y HIn; apply H0; right.
 Qed.
 
 Lemma filter_incl_fn {A} P Q
@@ -158,19 +158,8 @@ Lemma filter_incl_fn {A} P Q
 Proof.
   induction s; simpl.
   - apply incl_refl.
-  - intro x; intros.
-    rewrite filter_cons in H2.
-    destruct (decide (P a)).
-    + rewrite filter_cons.
-      destruct (decide (Q a)).
-      * destruct H2.
-        -- by left.
-        -- right. by apply IHs.
-      * contradict n. apply H1. assumption.
-    + rewrite filter_cons.
-      destruct (decide (Q a)).
-      -- right. apply IHs. assumption.
-      -- apply IHs. assumption.
+  - intros x HIn. rewrite filter_cons in *.
+    destruct (decide (P a)), (decide (Q a)); cbn in *; itauto.
 Qed.
 
 Lemma filter_length_fn {A} P Q
@@ -182,13 +171,7 @@ Proof.
   - lia.
   - inversion Hfg; subst. specialize (IHs H4).
     rewrite 2 filter_cons.
-    destruct (decide (P a)).
-    + destruct (decide (Q a)).
-      * simpl; lia.
-      * contradict n. apply H3. assumption.
-    + destruct (decide (Q a)).
-      * simpl. lia.
-      * apply IHs.
+    destruct (decide (P a)), (decide (Q a)); cbn; itauto lia.
 Qed.
 
 Lemma filter_eq_fn {A} P Q
@@ -198,7 +181,7 @@ Lemma filter_eq_fn {A} P Q
 Proof.
   induction s; intros; [done |].
   assert (IHs' : forall a : A, In a s -> P a <-> Q a).
-  { intros. apply H1. right. assumption. }
+  { by intros; apply H1; right. }
   apply IHs in IHs'. clear IHs.
   erewrite !filter_cons, decide_ext; cycle 1.
   - by apply H1; left.
@@ -211,22 +194,9 @@ Proof.
   rewrite Forall_forall.
   split; intro Hnone.
   - induction l; [done |].
-    assert (Hno_a := Hnone a).
-    assert (Hin_a : a ∈ a :: l) by left.
-    specialize (Hno_a Hin_a).
-    rewrite filter_cons.
-    destruct (decide (P a)); try congruence.
-    apply IHl.
-    intros b Hin_b.
-    apply Hnone.
-    right.
-    assumption.
-  - induction l; intros x Hx; inversion Hx; subst; clear Hx.
-    + rewrite filter_cons in Hnone.
-      destruct (decide (P a)); [inversion Hnone|assumption].
-    + rewrite filter_cons in Hnone.
-      destruct (decide (P a)); [inversion Hnone|].
-      apply IHl; assumption.
+    setoid_rewrite elem_of_cons in Hnone.
+    cbn. rewrite decide_False; auto.
+  - intros x Hel Px. contradict Hel. eapply filter_nil_not_elem_of; eauto.
 Qed.
 
 Lemma Exists_first
@@ -261,9 +231,7 @@ Lemma in_not_in : forall A (x y : A) (l:list A),
   x ∈ l ->
   ~ y ∈ l ->
   x <> y.
-Proof.
-  intros. intro; subst. apply H0. assumption.
-Qed.
+Proof. itauto congruence. Qed.
 
 Definition inb {A} (Aeq_dec : forall x y:A, {x = y} + {x <> y}) (x : A) (xs : list A) :=
   if in_dec Aeq_dec x xs then true else false.
@@ -307,7 +275,7 @@ Definition inclb
 Lemma incl_function `{EqDecision A} : PredicateFunction2 (@incl A) (inclb).
 Proof.
   intros l1 l2. unfold inclb. rewrite forallb_forall.
-  split; intros Hincl x Hx; apply in_correct; apply Hincl; assumption.
+  by split; intros Hincl x Hx; apply in_correct; apply Hincl.
 Qed.
 
 Definition incl_correct `{EqDecision A}
@@ -321,9 +289,7 @@ Lemma map_incl {A B} (f : B -> A) : forall s s',
 Proof.
   intros s s' Hincl fx Hin.
   apply in_map_iff .
-  apply in_map_iff in Hin.
-  destruct Hin as [x [Heq Hin]].
-  exists x. split; try assumption. apply Hincl. assumption.
+  apply in_map_iff in Hin as (x & Heq & Hin). eauto.
 Qed.
 
 Definition app_cons {A}
@@ -337,16 +303,15 @@ Lemma append_nodup_left {A}:
 Proof.
   induction l1; intros.
   - constructor.
-  - inversion H. apply IHl1 in H3. constructor; try assumption. intro. apply H2.
-    apply in_app_iff. left. assumption.
+  - inversion H. apply IHl1 in H3. constructor; [| done].
+    rewrite in_app_iff in H2. itauto.
 Qed.
 
 Lemma append_nodup_right {A}:
   forall (l1 l2 : list A), List.NoDup (l1 ++ l2) -> List.NoDup l2.
 Proof.
-  induction l1; intros.
-  - simpl in H. assumption.
-  - simpl in H. inversion H. apply IHl1 in H3. assumption.
+  induction l1; cbn; intros; [done |].
+  inversion H. auto.
 Qed.
 
 Lemma nodup_append {A} : forall (l1 l2 : list A),
@@ -356,15 +321,14 @@ Lemma nodup_append {A} : forall (l1 l2 : list A),
   (forall a, a ∈ l2 -> ~ a ∈ l1) ->
   NoDup (l1 ++ l2).
 Proof.
-  induction l1; simpl; intros; try assumption.
+  induction l1; simpl; intros; [done |].
   inversion H; subst; clear H. constructor.
   - intro. apply elem_of_app in H. destruct H as [Inl1 | InL2].
-    + apply H5. assumption.
-    + apply (H1 a); try assumption.
-      left.
-  - apply IHl1; try assumption; intros.
-    + apply H1. right. assumption.
-    + apply H2 in H. intro. apply H. right. assumption.
+    + by apply H5.
+    + by apply (H1 a); [left |].
+  - apply IHl1; [done | done | |]; intros.
+    + by apply H1; right.
+    + apply H2 in H. rewrite elem_of_cons in H. itauto.
 Qed.
 
 Lemma last_is_last {A} : forall (l : list A) (x dummy: A),
@@ -587,8 +551,7 @@ Proof.
   rewrite <- (list_prefix_suffix (list_prefix l n2) n1) at 2.
   f_equal.
   symmetry.
-  apply list_prefix_prefix.
-  assumption.
+  by apply list_prefix_prefix.
 Qed.
 
 Definition Forall_hd
@@ -713,7 +676,7 @@ Proof.
   - rewrite list_annotate_unroll,elem_of_cons in Hin.
     destruct Hin as [Heq | Hin].
     + subst xP. left.
-    + right. specialize (IHl (Forall_tl Hs)). apply IHl. assumption.
+    + by right; apply (IHl (Forall_tl Hs)).
 Qed.
 
 Lemma elem_of_list_annotate
@@ -747,11 +710,7 @@ Proof.
   - inversion Hs; subst. exists (Some (dexist a (Forall_hd Hs))).
     by rewrite list_annotate_unroll.
   - by exists None.
-  - rewrite list_annotate_unroll.
-    specialize (IHn l (Forall_tl Hs)).
-    destruct IHn as [oa [Hoa Hnth]].
-    exists oa.
-    split; assumption.
+  - rewrite list_annotate_unroll; eauto.
 Qed.
 
 Fixpoint nth_error_filter_index
@@ -790,7 +749,7 @@ Proof.
   - simpl in Hin1. simpl in Hin2.
     destruct (decide (P a)).
     + destruct n1; destruct n2.
-      * inversion Hin1; inversion Hin2; subst; assumption.
+      * by inversion Hin1; inversion Hin2; subst.
       * destruct (nth_error_filter_index P l n2)
         ; inversion Hin1; inversion Hin2; subst.
         lia.
@@ -850,13 +809,8 @@ Fixpoint Forall_filter
   {Pdec : forall a : A, Decision (P a)}
   (l : list A) : Forall P (filter P l).
 Proof.
- destruct l; simpl.
- - exact (List.Forall_nil P).
- - specialize (Forall_filter A P _ l).
-    unfold filter,list_filter.
-    destruct (decide (P a)).
-    + constructor; assumption.
-    + assumption.
+  destruct l; cbn; [done |].
+  destruct (decide (P a)); eauto.
 Defined.
 
 (**
@@ -1049,9 +1003,8 @@ Lemma list_segment_nth
   : nth_error (list_segment l n1 n2) (i - n1) = nth_error l i.
 Proof.
   unfold list_segment.
-  rewrite list_suffix_nth; try assumption.
-  apply list_prefix_nth.
-  assumption.
+  rewrite list_suffix_nth; [| done].
+  by apply list_prefix_nth.
 Qed.
 
 Lemma list_segment_app
@@ -1073,9 +1026,7 @@ Proof.
   rewrite Hl3 in Hl2.
   rewrite <- Hl2 in Hl1.
   rewrite <- app_assoc in Hl1.
-  apply app_inv_head in Hl1.
-  symmetry.
-  assumption.
+  by apply app_inv_head in Hl1.
 Qed.
 
 Lemma list_segment_singleton
@@ -1088,14 +1039,14 @@ Lemma list_segment_singleton
 Proof.
   unfold list_segment.
   assert (Hle : S n <= length l)
-    by (apply nth_error_length in Hnth; assumption).
+    by (apply nth_error_length in Hnth; done).
   assert (Hlt : n < length (list_prefix l (S n)))
-    by (rewrite list_prefix_length; try constructor; assumption).
+    by (rewrite list_prefix_length; try constructor; done).
   specialize (list_suffix_last (list_prefix l (S n)) n Hlt a); intro Hlast1.
   specialize (list_prefix_nth_last l n a Hnth a); intro Hlast2.
   rewrite <- Hlast2 in Hlast1.
   specialize (list_suffix_length (list_prefix l (S n)) n).
-  rewrite list_prefix_length; try assumption.
+  rewrite list_prefix_length; [| done].
   intro Hlength.
   assert (Hs: S n - n = 1) by lia.
   rewrite Hs in Hlength.
@@ -1122,8 +1073,8 @@ Lemma exists_finite
   : (exists n : index, P n) <-> Exists P (enum index).
 Proof.
   rewrite Exists_exists; split.
-  - intros [n Hn]; eexists; split; [apply elem_of_enum | eassumption].
-  - intros (n & _ & Hn); eexists; eassumption.
+  - intros [n Hn]; eexists; split; [apply elem_of_enum | done].
+  - by intros (n & _ & Hn); eexists.
 Qed.
 
 Definition map_option
@@ -1255,7 +1206,7 @@ Lemma in_map_option_rev
   (l : list A)
   : In a l -> In b (map_option f l).
 Proof.
-  setoid_rewrite <- elem_of_list_In; apply elem_of_map_option_rev; assumption.
+  by setoid_rewrite <- elem_of_list_In; apply elem_of_map_option_rev.
 Qed.
 
 (** [map_option] can be expressed as a [list_filter_map].
@@ -1362,8 +1313,7 @@ Proof.
     f_equal.
     apply IHl1.
     intro n.
-    specialize (Hnth (S n)).
-    assumption.
+    apply (Hnth (S n)).
 Qed.
 
 Lemma occurrences_ordering
@@ -1404,16 +1354,12 @@ Proof.
   induction l.
   - inversion Hsomething.
   - destruct (Pdec a).
-    + exists []. exists l. exists a. repeat split; try assumption.
-      intro H; inversion H.
-    + assert (Hl : Exists P l).
-      { inversion Hsomething; subst; try (elim n; assumption). assumption. }
+    + exists [], l, a. rewrite Exists_nil. itauto.
+    + assert (Hl : Exists P l) by (inversion Hsomething; subst; done).
       specialize (IHl Hl).
       destruct IHl as [prefix [suffix [first [Hfirst [Heq Hprefix]]]]].
-      exists (a :: prefix). exists suffix. exists first. repeat split; try assumption.
-      * by subst.
-      * intro Hprefix'. inversion Hprefix'; try (elim n; assumption).
-        elim Hprefix. assumption.
+      exists (a :: prefix), suffix, first. split_and!; subst; [done | done |].
+      by inversion 1; subst.
 Qed.
 
 Lemma in_fast
@@ -1517,7 +1463,7 @@ Proof.
   - remember (mid ++ [y] ++ suf) as sufx.
     intro H.
     exists (pre, x, sufx). apply in_one_element_decompositions_iff in H.
-    split; try assumption.
+    split; [done |].
     apply in_map_iff. exists (mid, y, suf).
     by rewrite in_one_element_decompositions_iff.
 Qed.
@@ -1551,20 +1497,9 @@ Proof.
   - simpl in nz. lia.
   - simpl in *.
     destruct (a <=? (list_max l)) eqn : eq_leb.
-    + assert (Nat.max a (list_max l) = list_max l). {
-         apply max_r.
-         apply Nat.leb_le.
-         assumption.
-      }
-      rewrite H in *.
-      right.
-      apply IHl.
-      assumption.
-    + assert (Nat.max a (list_max l) = a). {
-        apply leb_iff_conv in eq_leb.
-        apply max_l.
-        lia.
-      }
+    + assert (Nat.max a (list_max l) = list_max l) by lia.
+      itauto congruence.
+    + assert (Nat.max a (list_max l) = a) by lia.
       by rewrite H; left.
 Qed.
 
@@ -1590,23 +1525,9 @@ Lemma list_max_elem_of_exists
    (nz : list_max l > 0) :
    (list_max l) ∈ l.
 Proof.
-  induction l; [simpl in nz; lia|].
-  simpl in *.
-  destruct (decide (a <= list_max l)) as [Hle|Hle].
-  - assert (Nat.max a (list_max l) = list_max l). {
-      apply max_r.
-      assumption.
-    }
-    rewrite H in *.
-    right.
-    apply IHl.
-    assumption.
-  - assert (Nat.max a (list_max l) = a). {
-      apply max_l.
-      lia.
-    }
-    rewrite H in *.
-    left.
+  induction l; simpl in *; [lia |].
+  rewrite elem_of_cons.
+  destruct (Nat.max_spec_le a (list_max l)) as [[H ->] | [H ->]]; itauto lia.
 Qed.
 
 Lemma list_max_elem_of_exists2
@@ -1624,8 +1545,7 @@ Proof.
     assert (Hn0: n = 0) by lia.
     rewrite Hn0; left.
   - specialize (list_max_elem_of_exists l) as Hmax.
-    spec Hmax. lia. rewrite <- eq_max.
-    assumption.
+    rewrite <- eq_max; itauto lia.
 Qed.
 
 (* Returns all values which occur with maximum frequency in the given list.
@@ -1656,20 +1576,10 @@ Proof.
   }
 
   assert (exists a, (count_occ decide_eq l' a) = list_max occurrences). {
-    assert (In (list_max occurrences) occurrences). {
-      apply list_max_exists.
-      rewrite Heqoccurrences.
-      rewrite Heql'.
-      rewrite Heqoccurrences in Hmaxp.
-      rewrite Heql' in Hmaxp.
-      assumption.
-    }
-    rewrite Heqoccurrences in H.
-    rewrite in_map_iff in H.
-    destruct H as [x [Heq Hin]].
-    exists x.
-    rewrite Heqoccurrences.
-    assumption.
+    assert (In (list_max occurrences) occurrences) by (apply list_max_exists; done).
+    rewrite Heqoccurrences, in_map_iff in H.
+    destruct H as (x & Heq & Hin).
+    rewrite Heqoccurrences. eauto.
   }
 
   assert (exists a, In a (mode l')). {
@@ -1681,8 +1591,7 @@ Proof.
     rewrite H in H1.
     specialize (H1 Hmaxp).
     unfold mode.
-    apply filter_in.
-    assumption.
+    apply filter_in; [done |].
     by rewrite H, Heqoccurrences.
   }
   destruct H.
@@ -1790,19 +1699,11 @@ Proof.
     apply complete_prefix_correct in eq_c.
     rewrite H in eq_c.
     rewrite rev_app_distr in eq_c.
-    assert (l0 = rev pref). {
-      apply app_inv_head in eq_c.
-      symmetry.
-      assumption.
-    }
+    assert (l0 = rev pref) by (apply app_inv_head in eq_c; done).
     rewrite H0.
     f_equal.
     apply rev_involutive.
-    assert (rev l = rev suff ++ rev pref). {
-      apply rev_eq_app.
-      rewrite rev_involutive.
-      assumption.
-    }
+    assert (rev l = rev suff ++ rev pref) by (subst; apply rev_app_distr).
     apply complete_prefix_correct in H0.
     by rewrite eq_c in H0.
   - destruct (complete_prefix (rev l) (rev suff)) eqn: eq_c; [| done].
@@ -1863,7 +1764,7 @@ Lemma sumbool_forall [A : Type] [P Q : A → Prop]:
 Proof.
   induction l.
   left. constructor.
-  refine (if X a then if IHl then left _ else right _ else right _);constructor;assumption.
+  by refine (if X a then if IHl then left _ else right _ else right _); constructor.
 Qed.
 
 Lemma list_sum_decrease [A:Type] (f g: A -> nat) (l: list A):
@@ -1911,8 +1812,7 @@ Lemma fold_left_ind_rev
 Proof.
   induction l using rev_ind.
   - apply Hstart.
-  - rewrite fold_left_app. simpl.
-    apply Hstep. assumption.
+  - by rewrite fold_left_app; apply Hstep.
 Qed.
 
 Section suffix_quantifiers.
@@ -1940,20 +1840,15 @@ Inductive ForAllSuffix : list A -> Prop :=
   | SHereAndFurther : forall a l, P (a :: l) -> ForAllSuffix l -> ForAllSuffix (a :: l).
 
 Lemma fsHere : forall l, ForAllSuffix l -> P l.
-Proof.
-  inversion 1; assumption.
-Qed.
+Proof. by inversion 1. Qed.
 
 Lemma fsFurther : forall a l, ForAllSuffix (a :: l) -> ForAllSuffix l.
-Proof.
-  inversion 1; assumption.
-Qed.
+Proof. by inversion 1. Qed.
 
 Lemma ForAll_list_suffix : forall m x, ForAllSuffix x -> ForAllSuffix (list_suffix x m).
 Proof.
-  induction m; simpl; intros; [assumption|destruct x].
-  - assumption.
-  - apply fsFurther in H. apply IHm. assumption.
+  induction m; simpl; intros [] **. 1-3: done.
+  by apply fsFurther in H; apply IHm.
 Qed.
 
 Lemma ForAllSuffix_induction
@@ -1963,10 +1858,10 @@ Lemma ForAllSuffix_induction
   : forall l, Inv l -> ForAllSuffix l.
 Proof.
   induction l; intros.
-  - constructor. apply InvThenP. assumption.
+  - by constructor; apply InvThenP.
   - constructor.
-    + apply InvThenP. assumption.
-    + apply IHl. apply InvIsStable in H. assumption.
+    + by apply InvThenP.
+    + by eapply IHl, InvIsStable.
 Qed.
 
 End suffix_quantifiers.
@@ -1975,10 +1870,7 @@ Lemma ForAllSuffix_subsumption [A : Type] (P Q : list A -> Prop)
   (HPQ : forall l, P l -> Q l)
   : forall l, ForAllSuffix P l -> ForAllSuffix Q l.
 Proof.
-  induction 1; constructor.
-  - apply HPQ. assumption.
-  - apply HPQ. assumption.
-  - assumption.
+  induction 1; constructor; auto.
 Qed.
 
 Definition ForAllSuffix1 [A : Type] (P : A -> Prop) : list A -> Prop :=
@@ -1998,9 +1890,9 @@ Lemma ExistsSuffix1_Exists [A : Type] (P : A -> Prop)
 Proof.
   split; induction 1.
   - by destruct l; [| left].
-  - right. assumption.
-  - left. assumption.
-  - right. assumption.
+  - by right.
+  - by left.
+  - by right.
 Qed.
 
 Definition ForAllSuffix2 [A : Type] (R : A -> A -> Prop) : list A -> Prop :=
@@ -2021,7 +1913,7 @@ Proof.
     intros l0 Hall a b Ha Hb.
     destruct l0 as [|_a l0]; inversion Ha; subst _a; clear Ha.
     destruct l0 as [|_b l0]; inversion Hb; subst _b; clear Hb.
-    apply fsHere in Hall. assumption.
+    by apply fsHere in Hall.
   - apply
       (ForAllSuffix_induction
         (fun l => match l with | a :: b :: _ => R a b | _ => True end)
@@ -2040,8 +1932,8 @@ Proof.
   inversion 1. subst. destruct l.
   - constructor; [exact I|]. constructor. exact I.
   - inversion H3. subst.
-    constructor; [|assumption].
-    transitivity b; assumption.
+    constructor; [| done].
+    by transitivity b.
 Qed.
 
 Lemma ForAllSuffix2_transitive_lookup [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
@@ -2060,7 +1952,7 @@ Proof.
   apply lookup_lt_is_Some in Hlt as [c Hc].
   specialize (Hall _ _ _ Hc Hb).
   specialize (IHk  _ _ Ha Hc).
-  transitivity c; assumption.
+  by transitivity c.
 Qed.
 
 Lemma ForAllSuffix2_filter [A : Type] (R : A -> A -> Prop) `{HT : Transitive _ R}
@@ -2070,26 +1962,22 @@ Proof.
   induction l; [exact id|].
   intro Hl.
   unfold filter. simpl.
-  spec IHl; [apply fsFurther in Hl; assumption|].
-  case_decide; [|assumption].
-  constructor; [|assumption].
+  spec IHl; [by apply fsFurther in Hl |].
+  case_decide; [| done].
+  constructor; [| done].
   clear IHl H.
-  induction l; [exact I|].
-  spec IHl.
-  { revert Hl. apply fsFurther2_transitive. assumption.
-  }
-  cbn. case_decide; [|assumption].
-  inversion Hl. assumption.
+  induction l; cbn; [done |].
+  case_decide.
+  - by inversion Hl.
+  - apply IHl. by eapply fsFurther2_transitive.
 Qed.
 
 
 Lemma list_subseteq_tran : forall (A : Type) (l m n : list A),
  l ⊆ m → m ⊆ n → l ⊆ n.
 Proof.
-intros A l m n Hlm Hmn x y.
-apply Hmn.
-apply Hlm.
-assumption.
+  intros A l m n Hlm Hmn x y.
+  by apply Hmn, Hlm.
 Qed.
 
 Global Instance list_subseteq_dec `{EqDecision A} : RelDecision (@subseteq (list A) _).
@@ -2100,10 +1988,10 @@ Proof.
   - intro y. specialize (IHx y) as [Hsub | Hnsub].
     2: {
       right. intro Hsub. elim Hnsub.
-      intros b Hb. apply Hsub. right. assumption.
+      by intros b Hb; apply Hsub; right.
     }
     destruct (decide (a ∈ y)).
-    + left. intros b Hb. inversion Hb; subst; [assumption|]. apply Hsub. assumption.
+    + left. intros b Hb. inversion Hb; subst; [done |]. by apply Hsub.
     + right. intro Hsub'. elim n. apply Hsub'. left.
 Qed.
 
@@ -2119,10 +2007,10 @@ induction s1; intros; intro x; intros.
     + rewrite elem_of_cons in H1.
       destruct H1.
       * subst; apply elem_of_list_filter.
-        split; [assumption|].
+        split; [done |].
         apply H0; left.
-      * apply IHs1; try assumption. intro y; intro. apply H0. right. assumption.
-    + apply IHs1; try assumption. intro y; intro. apply H0. right. assumption.
+      * apply IHs1; [| done]. by intros y Hel; apply H0; right.
+    + apply IHs1; [| done]. by intros y Hel; apply H0; right.
 Qed.
 
 Lemma filter_subseteq_fn {A} P Q
@@ -2140,12 +2028,12 @@ induction s; simpl.
       destruct (decide (Q a)).
       * destruct H2.
         -- subst; left.
-        -- right. apply IHs. assumption.
-      * contradict n. apply H1. assumption.
+        -- by right; apply IHs.
+      * itauto.
     + rewrite filter_cons.
       destruct (decide (Q a)).
-      -- right. apply IHs. assumption.
-      -- apply IHs. assumption.
+      -- by right; apply IHs.
+      -- by apply IHs.
 Qed.
 
 Lemma map_option_subseteq
@@ -2155,14 +2043,7 @@ Lemma map_option_subseteq
   (Hincl : l1 ⊆ l2)
   : (map_option f l1) ⊆ (map_option f l2).
 Proof.
- intro b. repeat rewrite in_map_subseteq.
- intros Hb.
- apply elem_of_map_option.
- apply elem_of_map_option in Hb.
- destruct Hb as [a [Ha Hfa]].
- exists a.
- apply Hincl in Ha.
- split; assumption.
+  intros b. rewrite !elem_of_map_option. firstorder.
 Qed.
 
 Lemma elem_of_empty_nil [X:Type] (l:list X) :
@@ -2177,8 +2058,8 @@ Lemma nodup_append_left {A}:
 Proof.
   induction l1; intros.
   - constructor.
-  - inversion H. apply IHl1 in H3. constructor; try assumption. intro. apply H2.
-    apply elem_of_app. left. assumption.
+  - inversion H. apply IHl1 in H3. constructor; [| done]. intro. apply H2.
+    by apply elem_of_app; left.
 Qed.
 
 Lemma subseteq_empty {A} : forall (l : list A),
@@ -2201,9 +2082,8 @@ Qed.
 
 Lemma Listing_NoDup {A} {l : list A} : Listing l -> NoDup l.
 Proof.
- intros [Hnd Hfull].
- apply NoDup_ListNoDup in Hnd.
- assumption.
+  intros [Hnd Hfull].
+  by apply NoDup_ListNoDup.
 Qed.
 
 Lemma NoDup_subseteq_length [A : Type]
@@ -2212,7 +2092,7 @@ Lemma NoDup_subseteq_length [A : Type]
   (Hincl : l1 ⊆ l2)
   : length l1 <= length l2.
 Proof.
-  apply submseteq_length, NoDup_submseteq; assumption.
+  by apply submseteq_length, NoDup_submseteq.
 Qed.
 
 Lemma take_app_inv :

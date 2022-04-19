@@ -81,7 +81,7 @@ Local Lemma equivocator_state_eq s (i1 i2 : fin (equivocator_state_n s))
 Proof.
   intro Heq.
   replace i2 with i1; [done |].
-  apply (inj fin_to_nat). assumption.
+  by apply (inj fin_to_nat).
 Qed.
 
 Definition is_singleton_state
@@ -143,9 +143,7 @@ Qed.
 Lemma equivocator_state_project_Some_rev s i si
   : equivocator_state_project s i = Some si -> i < equivocator_state_n s.
 Proof.
-  unfold equivocator_state_project.
-  case_decide; [|congruence].
-  intro. assumption.
+  by unfold equivocator_state_project; case_decide.
 Qed.
 
 Lemma equivocator_state_project_None_rev s i
@@ -195,8 +193,7 @@ Proof.
   rewrite <- !(@nat_to_fin_to_nat _ x Hx).
   destruct es1, es2; simpl in *. subst. simpl.
   rewrite (equivocator_state_project_Some (existT x1 v) x Hx) in Hext.
-  inversion Hext.
-  assumption.
+  by inversion Hext.
 Qed.
 
 (** The original state index is present in any equivocator state*)
@@ -553,8 +550,7 @@ Proof.
   exists (mk_singleton_state (proj1_sig (vs0 X))).
   unfold mk_singleton_state.
   unfold equivocator_initial_state_prop.
-  split; [done |].
-  simpl. destruct (vs0 X). assumption.
+  split; cbn; [done |]. by destruct (vs0 X).
 Defined.
 
 Instance equivocator_initial_state_inh : Inhabited equivocator_initial_state :=
@@ -615,15 +611,11 @@ Definition equivocator_vlsm
 
 Lemma equivocator_vlsm_initial_message_preservation
   : strong_full_projection_initial_message_preservation X equivocator_vlsm.
-Proof.
-  intro; intros. assumption.
-Qed.
+Proof. by red. Qed.
 
 Lemma equivocator_vlsm_initial_message_preservation_rev
   : strong_full_projection_initial_message_preservation equivocator_vlsm X.
-Proof.
-  intro; intros. assumption.
-Qed.
+Proof. by red. Qed.
 
 Lemma equivocator_vlsm_initial_state_preservation_rev is i s
   (Hs : equivocator_state_project is i = Some s)
@@ -631,16 +623,15 @@ Lemma equivocator_vlsm_initial_state_preservation_rev is i s
 Proof.
   intros [Hzero Hinit].
   apply equivocator_state_project_Some_rev in Hs as Hlt_i.
-  assert (i = 0) by (cbv in *; lia). subst i.
-  rewrite equivocator_state_project_zero in Hs. inversion Hs.
-  assumption.
+  replace i with 0 in * by (cbv in *; lia).
+  by rewrite equivocator_state_project_zero in Hs; inversion Hs.
 Qed.
 
 Lemma mk_singleton_initial_state
   (s : vstate X)
   : vinitial_state_prop X s ->
     vinitial_state_prop equivocator_vlsm (mk_singleton_state s).
-  Proof. done. Qed.
+Proof. done. Qed.
 
 End sec_equivocator_vlsm.
 
@@ -830,10 +821,7 @@ Lemma existing_descriptor_proper
   (s : vstate equivocator_vlsm)
   (Hned : existing_descriptor d s)
   : proper_descriptor d s.
-Proof.
-  destruct d; [contradict Hned|].
-  assumption.
-Qed.
+Proof. by destruct d. Qed.
 
 (* TODO: derive some some simpler lemmas about the equivocator operations,
 or a simpler way of defining the equivocator_transition
@@ -949,14 +937,14 @@ Lemma preloaded_equivocator_state_projection_preserves_validity
       valid_state_prop (pre_loaded_vlsm X seed) si.
 Proof.
   induction Hbs.
-  - split; [apply option_initial_message_is_valid;assumption|].
+  - split; [by apply option_initial_message_is_valid |].
     intros.
     destruct Hs as [Hn0 Hinit].
     apply equivocator_state_project_Some_rev in H as Hi.
     unfold is_singleton_state in Hn0.
-    assert (i = 0) by lia. subst.
-    rewrite equivocator_state_project_zero in H.
-    inversion H. apply initial_state_is_valid. assumption.
+    replace i with 0 in * by lia.
+    rewrite equivocator_state_project_zero in H; inversion H.
+    by apply initial_state_is_valid.
   - specialize (valid_generated_state_message (pre_loaded_vlsm X seed)) as Hgen.
     apply proj2 in IHHbs1. apply proj1 in IHHbs2.
 
@@ -967,7 +955,7 @@ Proof.
     ; [ inversion_clear Ht; split; [apply option_valid_message_None|]
       ; intros
       ; destruct_equivocator_state_extend_project s sn i Hi
-      ; [ apply IHHbs1 in H; assumption
+      ; [ by apply IHHbs1 in H
       | inversion H; subst; apply initial_state_is_valid; apply Hv
       | done]
       |..]
@@ -984,11 +972,11 @@ Proof.
       ; split; [eexists; exact Hgen| | eexists; exact Hgen|]; intros.
     + destruct_equivocator_state_update_project s i si' i0 Hi0 Hij.
       * done.
-      * inversion H. subst. eexists; exact Hgen.
-      * apply IHHbs1 in H. assumption.
+      * by inversion H; subst; eexists.
+      * by apply IHHbs1 in H.
     + destruct_equivocator_state_extend_project s si' i0 Hi0.
-      * apply IHHbs1 in H. assumption.
-      * inversion H. subst. eexists; exact Hgen.
+      * by apply IHHbs1 in H.
+      * by inversion H; subst; eexists.
       * done.
 Qed.
 
@@ -1001,8 +989,7 @@ Lemma preloaded_with_equivocator_state_project_valid_state
     valid_state_prop (pre_loaded_vlsm X seed) si.
 Proof.
   destruct Hbs as [om  Hbs].
-  apply preloaded_equivocator_state_projection_preserves_validity, proj2 in Hbs.
-  assumption.
+  by apply preloaded_equivocator_state_projection_preserves_validity, proj2 in Hbs.
 Qed.
 
 Lemma preloaded_with_equivocator_state_project_valid_message
@@ -1013,8 +1000,7 @@ Lemma preloaded_with_equivocator_state_project_valid_message
   option_valid_message_prop (pre_loaded_vlsm X seed) om.
 Proof.
   destruct Hom as [s Hm].
-  apply preloaded_equivocator_state_projection_preserves_validity, proj1 in Hm.
-  assumption.
+  by apply preloaded_equivocator_state_projection_preserves_validity, proj1 in Hm.
 Qed.
 
 Lemma equivocator_state_project_valid_state
@@ -1027,8 +1013,7 @@ Proof.
   apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False equivocator_vlsm)) in Hbs.
   specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
   apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False X)) in Hsi.
-  destruct X as (T, M).
-  assumption.
+  by destruct X.
 Qed.
 
 Lemma equivocator_state_project_valid_message
@@ -1040,12 +1025,11 @@ Proof.
   destruct om as [m|]; [|apply option_valid_message_None].
   specialize (vlsm_is_pre_loaded_with_False_initial_message equivocator_vlsm) as Hinit.
   apply (VLSM_incl_valid_message (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hom
-  ; [| assumption].
+  ; [| done].
   apply preloaded_with_equivocator_state_project_valid_message in Hom.
   specialize (vlsm_is_pre_loaded_with_False_initial_message_rev X) as Hinit_rev.
-  apply (VLSM_incl_valid_message (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
-  ; destruct X as (T, M)
-  ; assumption.
+  by apply (VLSM_incl_valid_message (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
+  ; destruct X.
 Qed.
 
 (**
@@ -1063,8 +1047,7 @@ Proof.
   apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm)) in Hbs.
   specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
   apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X)) in Hsi.
-  destruct X as (T, M).
-  assumption.
+  by destruct X.
 Qed.
 
 (**
@@ -1209,7 +1192,7 @@ Proof.
   split; [done |].
   simpl.
   rewrite equivocator_state_update_project_eq; [done | | done].
-  apply equivocator_state_project_Some_rev in Hsi. assumption.
+  by apply equivocator_state_project_Some_rev in Hsi.
 Qed.
 
 End equivocator_vlsm_valid_state_projections.

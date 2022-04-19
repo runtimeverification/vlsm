@@ -74,9 +74,7 @@ any message that tests as [has_been_observed] in a state also tests as
     observed_were_sent s.
   Proof.
     intros Hinitial msg Hsend.
-    contradict Hsend.
-    apply has_been_observed_no_inits.
-    assumption.
+    by apply has_been_observed_no_inits in Hsend.
   Qed.
 
   Lemma observed_were_sent_preserved l s im s' om:
@@ -95,10 +93,9 @@ any message that tests as [has_been_observed] in a state also tests as
     destruct Hobs as [[Hin|Hout]|Hobs]; subst.
     - (* by [no_equivocations], the incoming message [im] was previously sent *)
       specialize (Henforced Hv).
-      destruct Henforced; [| done].
-      right. assumption.
+      by destruct Henforced; [right |].
     - by left.
-    - right. apply Hprev. assumption.
+    - by right; apply Hprev.
   Qed.
 
   (* TODO(wkolowski): make notation uniform accross the file. *)
@@ -108,8 +105,8 @@ any message that tests as [has_been_observed] in a state also tests as
   Proof.
     intro Hproto.
     induction Hproto using valid_state_prop_ind.
-    - apply observed_were_sent_initial. assumption.
-    - revert Ht IHHproto. apply observed_were_sent_preserved.
+    - by apply observed_were_sent_initial.
+    - by eapply observed_were_sent_preserved.
   Qed.
 
   (**
@@ -125,22 +122,19 @@ any message that tests as [has_been_observed] in a state also tests as
   Proof.
     intro Htr.
     induction Htr using finite_valid_trace_rev_ind.
-    - split;[|assumption].
+    - split; [| done].
       rapply @finite_valid_trace_from_empty.
-      apply initial_state_is_valid.
-      assumption.
+      by apply initial_state_is_valid.
     - destruct IHHtr as [IHtr His].
-      split; [|assumption].
-      rapply extend_right_finite_trace_from;[assumption|].
+      split; [| done].
+      rapply extend_right_finite_trace_from; [done |].
       apply finite_valid_trace_last_pstate in IHtr as Hs.
       cut (option_valid_message_prop X iom);[firstorder|].
       destruct iom as [m|];[|apply option_valid_message_None].
       destruct Hx as [Hv _].
       apply Henforced in Hv.
       destruct Hv as [Hbsm | []].
-      revert Hbsm.
-      apply sent_valid.
-      assumption.
+      by eapply sent_valid.
   Qed.
 
   Lemma preloaded_incl_no_equivocations
@@ -158,7 +152,7 @@ any message that tests as [has_been_observed] in a state also tests as
     specialize (vlsm_incl_pre_loaded_with_all_messages_vlsm X).
     clear -X. destruct X as [T [S M]].
     intros Hincl Hincl'.
-    apply VLSM_eq_incl_iff. split; assumption.
+    by apply VLSM_eq_incl_iff.
   Qed.
 
 End NoEquivocationInvariants.
@@ -219,11 +213,12 @@ Section CompositeNoEquivocationInvariants.
     intros Hs m.
     rewrite composite_has_been_observed_sent_received_iff.
     intros Hobs.
-    cut (has_been_sent X s m); [intro; assumption|].
-    apply (observed_were_sent_invariant message X); [|assumption|assumption].
+    cut (has_been_sent X s m); [done |].
+    apply (observed_were_sent_invariant message X); [| done | done].
     intros l s0 om.
     apply Hsubsumed.
   Qed.
+
 End CompositeNoEquivocationInvariants.
 
 Section seeded_composite_vlsm_no_equivocation.
@@ -276,11 +271,9 @@ Section seeded_composite_vlsm_no_equivocation_definition.
     match type of Hprev with
     | VLSM_incl _ (mk_vlsm ?m) => apply VLSM_incl_trans with m
     end
-    ; [assumption| ].
-    unfold free_composite_vlsm.
-    simpl.
-    apply preloaded_constraint_subsumption_incl.
-    intro. intros. exact I.
+    ; [done |].
+    unfold free_composite_vlsm; cbn.
+    by apply preloaded_constraint_subsumption_incl.
   Qed.
 
 End seeded_composite_vlsm_no_equivocation_definition.
@@ -312,7 +305,7 @@ End seeded_composite_vlsm_no_equivocation_definition.
     match type of Heq with
     | VLSM_eq _ ?v => apply VLSM_eq_trans with (machine v)
     end
-    ; [assumption|].
+    ; [done |].
     apply VLSM_eq_incl_iff.
     specialize (constraint_subsumption_incl IM) as Hincl.
     unfold no_equivocations_additional_constraint_with_pre_loaded.
