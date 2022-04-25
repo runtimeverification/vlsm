@@ -92,7 +92,7 @@ The next few results describe several properties of the [state_update] operation
                (Hneq : j <> i)
       : state_update s i si j = s j.
     Proof.
-      unfold state_update. destruct (decide (j = i)); try contradiction. reflexivity.
+      by unfold state_update; case_decide.
     Qed.
 
     Lemma state_update_eq

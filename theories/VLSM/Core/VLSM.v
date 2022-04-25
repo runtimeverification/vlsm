@@ -241,10 +241,10 @@ Section TraceLemmas.
     : finite_trace_last default tr  = s.
   Proof.
     unfold option_map in Hlast.
-    destruct (last_error tr) eqn : eq; try discriminate Hlast.
+    destruct (last_error tr) eqn: eq; [| done].
     inversion Hlast.
     unfold last_error in eq.
-    destruct tr; try discriminate eq.
+    destruct tr; [done |].
     inversion eq.
     unfold finite_trace_last.
     rewrite last_map. reflexivity.
@@ -1325,8 +1325,8 @@ traces.
       replace (finite_trace_last s (list_prefix ls n)) with nth in Htr;[assumption|].
       {
         destruct n.
-        - rewrite finite_trace_nth_first in Hnth. injection Hnth as ->.
-          destruct ls;reflexivity.
+        - rewrite finite_trace_nth_first in Hnth.
+          destruct ls; cbn; congruence.
         - unfold finite_trace_last.
           rewrite list_prefix_map.
           apply list_prefix_nth_last.
@@ -1479,9 +1479,7 @@ that include the final state, and give appropriate induction principles.
         -> finite_valid_trace_from_to m f ls'
         -> finite_valid_trace_from_to s f (ls ++ ls').
     Proof.
-      intros Hl Hl';induction Hl;simpl.
-      - trivial.
-      - constructor;auto.
+      by intros Hl Hl'; induction Hl; [|constructor; auto].
     Qed.
 
     Lemma finite_valid_trace_from_to_app_split
@@ -2324,7 +2322,7 @@ This relation is often used in stating safety and liveness properties.*)
           specialize
             (finite_valid_trace_consecutive_valid_transition _ _ _ _ _ _ Htr eq_refl).
           simpl.
-          rewrite finite_trace_last_is_last. trivial.
+          by rewrite finite_trace_last_is_last.
         + assert
             (Hex : exists suffix0 : Stream transition_item,
                 stream_app (p ++ [last_p])  (Cons last suffix) = stream_app p (Cons last_p suffix0)
@@ -2350,7 +2348,7 @@ This relation is often used in stating safety and liveness properties.*)
                eq_refl
             ).
           simpl.
-          rewrite finite_trace_last_is_last. trivial.
+          by rewrite finite_trace_last_is_last.
     Qed.
 
 

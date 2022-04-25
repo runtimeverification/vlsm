@@ -305,7 +305,7 @@ Proof.
       unfold lift_to_composite_state at 1;
       rewrite state_update_eq;
       destruct (vtransition _ _ _) as (si', om').
-      rewrite state_update_eq; trivial.
+      by rewrite state_update_eq.
 Qed.
 
 Lemma component_label_projection_lift

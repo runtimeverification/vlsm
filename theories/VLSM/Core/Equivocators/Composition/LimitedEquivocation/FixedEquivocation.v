@@ -97,7 +97,7 @@ Lemma in_futures_reflects_fixed_equivocation
   : state_has_fixed_equivocation s2 -> state_has_fixed_equivocation s1.
 Proof.
   destruct Hfutures as [tr Htr].
-  induction Htr;[trivial|].
+  induction Htr; [done |].
   intros Hf. specialize (IHHtr Hf). revert IHHtr.
   apply transitivity.
   destruct Ht as [_ Ht].
@@ -337,7 +337,7 @@ Proof.
     as Hzero.
   unfold is_singleton_state in Hzero.
   specialize (Heqv_descriptors i). unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors i); [contradiction|].
+  destruct (eqv_descriptors i); [done |].
   destruct Heqv_descriptors as [s_i_n Heqv_descriptors].
   apply equivocator_state_project_Some_rev in Heqv_descriptors.
   f_equal; lia.
@@ -553,7 +553,7 @@ Proof.
       simpl in Hno_equiv.
       apply or_comm in Hno_equiv.
       destruct Hno_equiv as [Hinit_input | Hno_equiv]
-      ; [contradiction|].
+      ; [done |].
       assert
         (Hs_free : valid_state_prop FreeE (finite_trace_last is tr')).
       { destruct Hs as [_om Hs].
@@ -798,7 +798,7 @@ Proof.
   destruct Hivt as [[_ [_ [_ [[Hc _] Hfixed]]]] Ht].
   simpl in Ht, Hfixed. rewrite Ht in Hfixed. simpl in Hfixed.
   clear Ht.
-  destruct Hc as [Hc | Hinit]; [|contradiction].
+  destruct Hc as [Hc | Hinit]; [|done ].
   assert (Hpre_free : finite_valid_trace FreeE is pre).
   { split; [|assumption]. revert Hpre. apply VLSM_incl_finite_valid_trace_from.
     apply equivocators_fixed_equivocations_vlsm_incl_free.
@@ -1259,9 +1259,7 @@ specialize
 
   unfold pre_VLSM_projection_transition_item_project,
     composite_label_sub_projection_option.
-  simpl.
-  case_decide; [|contradiction].
-  constructor. simpl. assumption.
+  by case_decide; [constructor |].
 Qed.
 
 (**

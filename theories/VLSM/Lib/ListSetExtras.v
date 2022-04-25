@@ -121,8 +121,8 @@ Lemma set_union_nodup_left `{EqDecision A} (l l' : set A)
   : NoDup l -> NoDup (set_union l l').
 Proof.
   intro Hl.
-  induction l' as [|x' l' IH]; [trivial|].
-  now apply set_add_nodup.
+  induction l' as [| x' l' IH]; [done |].
+  by apply set_add_nodup.
 Qed.
 
 Lemma set_union_subseteq_left `{EqDecision A}  : forall (s1 s2 : list A),
@@ -156,7 +156,7 @@ Proof.
   intros.
   generalize dependent ss.
   induction ss.
-  - intros. simpl. apply NoDup_nil. trivial.
+  - by intros; apply NoDup_nil.
   - intros.
     simpl.
     apply set_union_nodup.
@@ -349,10 +349,7 @@ Proof.
   induction l as [|hd tl IHl]; intros x H_in.
   - inversion H_in.
   - inversion H_in.
-    + subst. simpl.
-      destruct (decide (hd = hd)).
-      reflexivity.
-      contradiction.
+    + by cbn; rewrite decide_True.
     + subst.
       spec IHl x H2. simpl.
       destruct (decide (x = hd)).
@@ -582,9 +579,7 @@ Proof.
     right; assumption.
     rewrite <- IHlv at 2.
     simpl.
-    destruct (decide (v = hd)).
-    contradiction.
-    reflexivity.
+    by destruct (decide (v = hd)).
 Qed.
 
 Lemma set_union_iterated_empty `{EqDecision A} :

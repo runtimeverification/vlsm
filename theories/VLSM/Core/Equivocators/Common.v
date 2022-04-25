@@ -824,10 +824,7 @@ Definition existing_equivocator_label_extract
   (Hs : existing_equivocator_label l)
   : vlabel X.
 Proof.
-  destruct l.
-  - contradiction.
-  - exact v.
-  - exact v.
+  by destruct l.
 Defined.
 
 Definition proper_existing_equivocator_label
@@ -876,7 +873,7 @@ Proof.
   unfold is_singleton_state in Hs'.
   destruct l as [sn | ei l | ei l]
   ; [ inversion Ht; subst; rewrite equivocator_state_extend_size in Hs'; cbv in Hs'; lia|..]
-  ; cbn in Hv, Ht;  destruct_equivocator_state_project s ei sei Hei; [|contradiction| |contradiction]
+  ; cbn in Hv, Ht;  destruct_equivocator_state_project s ei sei Hei; [| done | | done]
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion Ht; subst.
   - rewrite equivocator_state_update_size in Hs'. exists l. f_equal. lia.
@@ -989,10 +986,10 @@ Proof.
       ; destruct_equivocator_state_extend_project s sn i Hi
       ; [ apply IHHbs1 in H; assumption
       | inversion H; subst; apply initial_state_is_valid; apply Hv
-      | discriminate]
+      | done]
       |..]
     ; cbn in Hv, Ht
-    ; destruct_equivocator_state_project' s i si Hi Hpr; [|contradiction| |contradiction]
+    ; destruct_equivocator_state_project' s i si Hi Hpr; [| done | | done]
     ; destruct (vtransition _ _ _) as (si', _om') eqn:Hti
     ; inversion Ht; subst s' _om'; clear Ht
 
@@ -1003,13 +1000,13 @@ Proof.
       ; specialize (Hgen _ _ Hsi _ _ Hom _ Hv _ _ Hti)
       ; split; [eexists; exact Hgen| | eexists; exact Hgen|]; intros.
     + destruct_equivocator_state_update_project s i si' i0 Hi0 Hij.
-      * discriminate.
+      * done.
       * inversion H. subst. eexists; exact Hgen.
       * apply IHHbs1 in H. assumption.
     + destruct_equivocator_state_extend_project s si' i0 Hi0.
       * apply IHHbs1 in H. assumption.
       * inversion H. subst. eexists; exact Hgen.
-      * discriminate.
+      * done.
 Qed.
 
 Lemma preloaded_with_equivocator_state_project_valid_state

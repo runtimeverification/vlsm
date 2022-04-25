@@ -185,8 +185,8 @@ Lemma fixed_non_byzantine_projection_incl_preloaded
 Proof.
   apply basic_VLSM_strong_incl.
   - intros s H1; apply fixed_non_byzantine_projection_initial_state_preservation; assumption.
-  - intros m H1; cbv; trivial.
-  - split; [| cbv; trivial].
+  - by intros m H1; cbv.
+  - split; [| done].
     eapply induced_sub_projection_valid_preservation;eassumption.
   - intros l s om s' om'.
     unfold vtransition, transition, machine.
@@ -295,8 +295,8 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection
 Proof.
   apply same_IM_full_projection.
   intros s1 Hs1 l1 om [Hom _].
-  split; [| cbv; trivial].
-  destruct om as [m |]; [| cbv; trivial].
+  split; [| done].
+  destruct om as [m |]; [| done].
   destruct Hom as [Hsent | Hseeded]; [left | right; assumption].
   eapply same_IM_composite_has_been_sent_preservation; eassumption.
 Qed.
@@ -418,7 +418,7 @@ Proof.
     unfold sub_IM, fixed_byzantine_IM, update_IM in Him.
     simpl in Him.
     apply set_diff_elim2 in Hi.
-    case_decide; [contradiction|].
+    case_decide; [done |].
     elim (no_initial_messages_in_IM i im).
     assumption.
   - destruct Hseeded as [[i [Hi Hsender]] Hvalid].

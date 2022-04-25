@@ -128,7 +128,7 @@ Lemma lift_sub_state_to_eq
   : lift_sub_state_to s0 s i = s (dexist i Hi).
 Proof.
   unfold lift_sub_state_to.
-  case_decide; [|contradiction].
+  case_decide; [| done].
   apply sub_IM_state_pi.
 Qed.
 
@@ -139,9 +139,7 @@ Lemma lift_sub_state_to_neq
   (Hni : ~sub_index_prop i)
   : lift_sub_state_to s0 s i = s0 i.
 Proof.
-  unfold lift_sub_state_to.
-  case_decide; [contradiction|].
-  reflexivity.
+  by unfold lift_sub_state_to; case_decide.
 Qed.
 
 Lemma composite_state_sub_projection_lift_to
@@ -171,7 +169,7 @@ Proof.
   apply functional_extensionality_dep. intro j.
   destruct (decide (j = i)).
   - subst. rewrite state_update_eq.
-    unfold lift_sub_state_to. case_decide; [contradiction|].
+    unfold lift_sub_state_to. case_decide; [done |].
     apply state_update_eq.
   - rewrite state_update_neq by congruence.
     unfold lift_sub_state_to.
@@ -220,7 +218,7 @@ Proof.
   intros ->.
   unfold composite_label_sub_projection_option in HlX.
   simpl in HlX.
-  case_decide; [discriminate|contradiction].
+  by case_decide.
 Qed.
 
 Lemma composite_label_sub_projection_option_lift
@@ -232,7 +230,7 @@ Proof.
   subst.
   unfold lift_sub_label, composite_label_sub_projection_option.
   simpl.
-  case_decide; [|contradiction].
+  case_decide; [| done].
   unfold composite_label_sub_projection.
   f_equal. simpl.
   apply
@@ -267,11 +265,11 @@ Proof.
   intros lX1 lX2 lY HlX1_pr HlX2_pr sX1 sX2 HsXeq_pr iom sX1' oom1 Ht1 sX2' oom2 Ht2.
   destruct lX1 as (i, lXi).
   unfold composite_label_sub_projection_option in HlX1_pr.
-  simpl in HlX1_pr. case_decide as Hi; [|discriminate].
+  simpl in HlX1_pr. case_decide as Hi; [| done].
   apply Some_inj in HlX1_pr. subst lY.
   destruct lX2 as (_i, _lXi).
   unfold composite_label_sub_projection_option in HlX2_pr.
-  simpl in HlX2_pr. case_decide as H_i; [|discriminate].
+  simpl in HlX2_pr. case_decide as H_i; [| done].
   apply Some_inj in HlX2_pr.
   unfold composite_label_sub_projection in HlX2_pr.
   simpl in HlX2_pr.
@@ -486,7 +484,7 @@ Proof.
     simpl. rewrite state_update_eq.
     apply sub_IM_state_update_eq.
   - rewrite! state_update_neq; [reflexivity|assumption|].
-    intro contra. apply dec_sig_eq_iff in contra. contradiction.
+    by inversion 1.
 Qed.
 
 Lemma valid_sub_projection
@@ -623,8 +621,7 @@ Proof.
     specialize (Hmsg tr x []).
     assert (Hx : from_sub_projection x).
     { unfold from_sub_projection at 1, pre_VLSM_projection_in_projection, composite_label_sub_projection_option.
-      subst. case_decide; [|contradiction].
-      eexists; reflexivity.
+      subst. by case_decide.
     }
     rewrite Heqx in Hmsg.
     specialize (Hmsg m eq_refl eq_refl).
@@ -652,8 +649,7 @@ Proof.
     remember {| input := Some m |} as x.
     assert (Hx : from_sub_projection x).
     { unfold from_sub_projection at 1, pre_VLSM_projection_in_projection, composite_label_sub_projection_option.
-      subst. case_decide; [|contradiction].
-      eexists; reflexivity.
+      by subst; case_decide.
     }
      specialize (Hmsg tr x []). rewrite Heqx in Hmsg.
     specialize (Hmsg m eq_refl eq_refl).
@@ -792,7 +788,7 @@ Proof.
   simpl.
   subst. simpl.
   unfold sub_IM in li. simpl in li.
-  case_decide as _Hi; [|contradiction].
+  case_decide as _Hi; [| done].
   rewrite (sub_IM_state_pi s _Hi Hi); auto.
 Qed.
 
@@ -809,7 +805,7 @@ Proof.
   simpl.
   subst. simpl.
   unfold sub_IM in li. simpl in li.
-  case_decide as _Hi; [|contradiction].
+  case_decide as _Hi; [| done].
   rewrite (sub_IM_state_pi s _Hi Hi).
   clear _Hi; destruct (transition _ _) as (si', _om'); inversion_clear 1.
   f_equal.
@@ -818,14 +814,12 @@ Proof.
   - subst.
     rewrite state_update_eq.
     unfold lift_sub_state, lift_sub_state_to. simpl.
-    case_decide; [|contradiction].
-    rewrite sub_IM_state_update_eq.
-    reflexivity.
+    by case_decide; rewrite ?sub_IM_state_update_eq.
   - rewrite state_update_neq by congruence.
     unfold lift_sub_state, lift_sub_state_to. simpl.
     case_decide; [|reflexivity].
     rewrite state_update_neq; [reflexivity|].
-    intro contra. apply dec_sig_eq_iff in contra. simpl in contra. congruence.
+    by inversion 1.
 Qed.
 
 End sub_composition.
@@ -944,7 +938,7 @@ Proof.
   unfold lift_sub_state_to.
   case_decide; [reflexivity|].
   apply state_update_neq.
-  intro. subst. contradiction.
+  by intro; subst.
 Qed.
 
 Lemma remove_equivocating_strong_full_projection_initial_state_preservation eqv_is
@@ -1019,7 +1013,7 @@ Proof.
     destruct (decide (i ∈ equivocators)).
     + rewrite !lift_sub_state_to_eq with (Hi := e).
       rewrite state_update_neq; [reflexivity|].
-      intro Hcontra. apply dsig_eq in Hcontra. contradiction.
+      by inversion 1.
     + rewrite !lift_sub_state_to_neq by assumption. reflexivity.
 Qed.
 
@@ -1088,8 +1082,7 @@ Proof.
         rewrite state_update_neq by congruence.
         rewrite lift_sub_state_to_eq with (Hi := e).
         reflexivity.
-      * unfold lift_sub_state, lift_sub_state_to.
-        case_decide; [contradiction | reflexivity].
+      * by unfold lift_sub_state, lift_sub_state_to; case_decide.
   - intros s Hs.
     apply (lift_sub_state_initial IM).
     destruct Hs as [sX [<- HsX]].
@@ -1188,7 +1181,7 @@ Proof.
   unfold vvalid, lift_sub_incl_state; cbn.
   unfold sub_IM in li; simpl in li.
   destruct (decide (sub_index_prop indices1 i)) as [H_i|]
-  ; [|contradiction].
+  ; [| done].
   rewrite (sub_IM_state_pi s H_i Hi); auto.
 Qed.
 
@@ -1202,19 +1195,19 @@ Proof.
   ; cbn; unfold vtransition, lift_sub_incl_state at 1
   ; cbn; unfold sub_IM in li; simpl in li.
   destruct (decide (sub_index_prop indices1 i)) as [H_i|]
-  ; [| contradiction].
+  ; [| done].
   rewrite (sub_IM_state_pi s H_i Hi).
   destruct (transition _ _) as (si', _om'); inversion_clear 1; f_equal.
   extensionality sub2_j; destruct_dec_sig sub2_j j Hj Heqsub2_j; subst.
   destruct (decide (i = j)) as [| Hij]; subst.
   - rewrite sub_IM_state_update_eq.
     unfold lift_sub_incl_state; cbn.
-    case_decide; [| contradiction].
+    case_decide; [| done].
     rewrite sub_IM_state_update_eq; reflexivity.
   - rewrite sub_IM_state_update_neq by assumption.
     unfold lift_sub_incl_state; cbn.
     case_decide; [| reflexivity].
-    rewrite sub_IM_state_update_neq; trivial.
+    by rewrite sub_IM_state_update_neq.
 Qed.
 
 Lemma lift_sub_incl_full_projection
@@ -1336,7 +1329,7 @@ Proof.
   unfold sub_IM_sender.
   destruct (sender m) as [v|]; [|simpl in Hemit; congruence].
   apply Some_inj in Hemit. subst.
-  case_decide; [|contradiction].
+  case_decide; [| done].
   simpl.
   f_equal.
   apply dec_sig_eq_iff; itauto.
@@ -1389,7 +1382,7 @@ Proof.
   destruct Htr as [is [tr Htr]].
   assert (Hsub_sender : sub_IM_sender m = Some (dexist v Hv)).
   { unfold sub_IM_sender. rewrite Hsender.
-    case_decide; [|contradiction].
+    case_decide; [| done].
     f_equal.
     apply dsig_eq; reflexivity.
   }

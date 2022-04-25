@@ -558,7 +558,7 @@ Proof.
       simpl in *.
       destruct (equivocators_transition_item_project e1 a)
         as [(oitem, odescriptor)|] eqn:Ha
-      ; [|discriminate Htr].
+      ; [| done].
       destruct oitem as [item'|]; inversion Htr; reflexivity.
 Qed.
 
@@ -747,7 +747,7 @@ Proof.
     destruct
       (equivocators_transition_item_project descriptors x)
       as [(oitemx, _descriptors')|] eqn:Hpr_x ; [|congruence].
-    assert (_descriptors' = descriptors') as -> by (destruct oitemx;injection Hproject_x;congruence).
+    assert (_descriptors' = descriptors') as -> by (destruct oitemx; congruence).
     clear Hproject_x trX sufX.
 
     destruct Ht as [[_ [_ [Hv _]]] Ht].
@@ -846,8 +846,7 @@ Proof.
   specialize (Hdescriptors eqv).
   apply elem_of_list_filter in Heqv.
   destruct Heqv as [Heqv Hin].
-  destruct (descriptors eqv); [|contradiction].
-  contradiction.
+  by destruct (descriptors eqv).
 Qed.
 
 (**
@@ -908,7 +907,7 @@ Proof.
         subst eqv_final.
         destruct (equivocator_vlsm_transition_item_project _ _ _)
           as [(oitem', descriptor')|] eqn:Heqpr_item_x
-        ; [|discriminate Hproject_xi].
+        ; [| done].
         destruct oitem' as [item'|]
         ; inversion Hproject_xi; subst descriptor' project_xi; clear Hproject_xi
         ; inversion Hpr_item_x; subst; clear Hpr_item_x
@@ -935,7 +934,7 @@ Proof.
         destruct
           (equivocator_vlsm_transition_item_project _ _ _)
           as [(oitem', descriptor')|] eqn:Heqpr_item_x
-        ; [|discriminate Hpr_item_x].
+        ; [| done].
         destruct oitem' as [item'|]
         ; inversion Hpr_item_x; subst; clear Hpr_item_x
         ; inversion Hproject_x; subst; clear Hproject_x
@@ -979,7 +978,7 @@ Proof.
     destruct
       (equivocators_transition_item_project descriptors x)
       as [(oitemx, _descriptors')|] eqn:Hpr_x ; [|congruence].
-    assert (_descriptors' = descriptors') as -> by (destruct oitemx;injection Hproject_x;congruence).
+    assert (_descriptors' = descriptors') as -> by (destruct oitemx; congruence).
     clear Hproject_x trX sufX.
     destruct Hx as [(_ & _  & Hv & _) Ht].
     eapply IHHtr; [eassumption|].
@@ -1137,7 +1136,7 @@ Proof.
     destruct (equivocator_transition _ _ _) as (si', om') eqn:Ht'.
     inversion Ht. subst om'. clear Ht.
     replace (s i) with si' in * by (subst; rewrite state_update_eq; reflexivity).
-    destruct (equivocator_state_project si' j) as [si'j|] eqn:Hj; [|discriminate].
+    destruct (equivocator_state_project si' j) as [si'j|] eqn:Hj; [| done].
     destruct li as [ndi | idi li | idi li]
     ; destruct (decide _)
     ; inversion Heqprojecti; subst; clear Heqprojecti
@@ -1544,13 +1543,13 @@ Proof.
   - inversion_clear Ht.
     rewrite decide_False; [reflexivity|].
     rewrite state_update_eq. rewrite equivocator_state_extend_lst. cbv; lia.
-  - destruct (equivocator_state_project _ _) as [s_i|]; [|contradiction].
+  - destruct (equivocator_state_project _ _) as [s_i|]; [| done].
     destruct (vtransition _ _ _) as (si', _om').
     inversion_clear Ht. rewrite!state_update_eq.
     destruct ji as [|ji].
     + rewrite decide_True by reflexivity. reflexivity.
     + rewrite decide_False by congruence. reflexivity.
-  - destruct (equivocator_state_project _ _) as [s_i|]; [|contradiction].
+  - destruct (equivocator_state_project _ _) as [s_i|]; [| done].
     destruct (vtransition _ _ _) as (si', _om').
     inversion_clear Ht. rewrite!state_update_eq.
     rewrite !equivocator_state_extend_lst.
@@ -1701,7 +1700,7 @@ Proof.
       unfold pre_VLSM_projection_transition_item_project,
         composite_label_sub_projection_option.
       simpl.
-      case_decide as _Hl; [|contradiction].
+      case_decide as _Hl; [| done].
       do 2 f_equal.
       unfold composite_label_sub_projection.
       apply
@@ -1732,9 +1731,7 @@ Proof.
       unfold from_sub_projection. simpl.
       unfold pre_VLSM_projection_transition_item_project,
         composite_label_sub_projection_option.
-      simpl.
-      case_decide; [contradiction|].
-      reflexivity.
+      by case_decide.
 Qed.
 
 Lemma equivocators_trace_project_finite_trace_sub_projection_commute
@@ -2074,7 +2071,7 @@ Proof.
       intros [Hno_equiv _].
       split; [|exact I].
       destruct om as [m|]; [|exact I].
-      left. destruct Hno_equiv as [Hno_equiv | Hfalse]; [|contradiction].
+      left. destruct Hno_equiv as [Hno_equiv | Hfalse]; [| done].
       destruct Hno_equiv as [eqv Hno_equiv].
       exists (dexist eqv (SubProjectionTraces.free_sub_free_index_obligation_1 eqv)).
       assumption.
@@ -2214,13 +2211,13 @@ Proof.
     simpl.
     apply state_update_id. reflexivity.
   - simpl in Hl. destruct ji as [|ji]; [inversion Hl|]. clear Hl.
-    destruct (equivocator_state_project _ _) as [si|]; [|contradiction].
+    destruct (equivocator_state_project _ _) as [si|]; [| done].
     destruct (vtransition _ _ _) as (si', _om').
     inversion_clear Ht.  unfold equivocators_total_state_project.
     rewrite (equivocators_state_project_state_update_eqv IM).
     simpl.
     apply state_update_id. reflexivity.
-  - destruct (equivocator_state_project _ _) as [si|]; [|contradiction].
+  - destruct (equivocator_state_project _ _) as [si|]; [| done].
     destruct (vtransition _ _ _) as (si', _om').
     inversion_clear Ht.  unfold equivocators_total_state_project.
     rewrite (equivocators_state_project_state_update_eqv IM).

@@ -274,7 +274,7 @@ Proof.
       }
       destruct Hv as [v' [Heqv Hneqv]].
       apply Honly_v in Heqv as Heq_v'.
-      destruct Heq_v' as [|[_m [Heq_m [Heq_v' Hweqv]]]]; [subst; contradiction|].
+      destruct Heq_v' as [|[_m [Heq_m [Heq_v' Hweqv]]]]; [by subst |].
       inversion Heq_m. subst _m. clear Heq_m.
       assert (v' = v) by congruence. subst v'. clear Heq_v'.
       split; [assumption|]. split; [|subst; assumption].
@@ -283,7 +283,7 @@ Proof.
         ; [apply set_add_intro1; assumption|].
         apply set_add_intro2.
         apply Honly_v in Hv'.
-        destruct Hv' as [|[_m [Heq_m [Heq_v' _]]]]; [subst; contradiction|].
+        destruct Hv' as [|[_m [Heq_m [Heq_v' _]]]]; [by subst |].
         congruence.
       * apply set_add_elim in Hv' as [Heq_v' | Hs'0]
         ; [subst v'; assumption|].

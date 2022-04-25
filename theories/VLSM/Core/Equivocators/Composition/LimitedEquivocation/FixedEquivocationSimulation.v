@@ -118,7 +118,7 @@ Proof.
       simpl.
       exists i.
       unfold lift_equivocators_sub_state_to.
-      case_decide; [contradiction|].
+      case_decide; [done |].
       unfold equivocator_IM.
       change (equivocators_total_state_project _ _ _) with (equivocator_state_zero (eqv_state_s i)) in Hsent.
       revert Hsent.
@@ -349,7 +349,7 @@ Proof.
   hypothesis and conclusion is done to fit the applied lemma.
   *)
   assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
-  { intros m [[i [[mi Hmi] Him]]|Hseeded]; [|contradiction].
+  { intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
     elim (no_initial_messages_in_IM i mi).
     assumption.
   }
@@ -368,7 +368,7 @@ Proof.
     split.
     + split; [|exact I].  destruct om as [im|]; [|exact I].
       destruct Hom as [Hom|Hinitial]; [left; assumption|exfalso].
-      apply no_initial_messages_in_XE in Hinitial. contradiction.
+      by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
       simpl.
@@ -414,7 +414,7 @@ Lemma no_equivocating_equivocators_finite_valid_trace_init_to_rev
 Proof.
   assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   {
-    intros m [[i [[mi Hmi] Him]]|Hseeded]; [|contradiction].
+    intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
     elim (no_initial_messages_in_IM i mi).
     assumption.
   }
@@ -437,7 +437,7 @@ Proof.
     split.
     + split; [|exact I].  destruct om as [im|]; [|exact I].
       destruct Hom as [Hom|Hinitial]; [left; assumption|exfalso].
-      apply no_initial_messages_in_XE in Hinitial. contradiction.
+      by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
       simpl.
@@ -455,7 +455,7 @@ Proof.
       split; [reflexivity|].
       split; [assumption|exact I].
     }
-    destruct HcX as [Hsent | Hemitted]; [|contradiction].
+    destruct HcX as [Hsent | Hemitted]; [| done].
     exists []. exists eqv_state_s.
     split; [constructor; assumption|].
     split; [reflexivity|].

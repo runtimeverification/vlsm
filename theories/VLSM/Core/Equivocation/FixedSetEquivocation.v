@@ -828,7 +828,7 @@ Proof.
     intros s om [Hv Hc].
     split.
     + cbn; rewrite lift_sub_state_to_neq; assumption.
-    + destruct om as [m|]; [| trivial].
+    + destruct om as [m|]; [| done].
       apply lift_sub_state_to_strong_fixed_equivocation; assumption.
   - intros [i liX] lY.
     unfold remove_equivocating_state_project;
@@ -930,7 +930,7 @@ Proof.
   - intros l s om Hv HsY HomY. split.
     + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
       destruct_dec_sig i j Hj Heq; subst i; cbn; unfold sub_IM; cbn.
-      rewrite lift_sub_state_to_eq with (Hi := Hj). trivial.
+      by rewrite lift_sub_state_to_eq with (Hi := Hj).
     + destruct om as [m|]; [| exact I]; cbn.
       destruct Hv as (_ & Hm & _).
       apply emitted_messages_are_valid_iff in Hm.
@@ -953,7 +953,7 @@ Proof.
     + rewrite state_update_neq by congruence.
       destruct (decide (i ∈ equivocators)).
       * rewrite !lift_sub_state_to_eq with (Hi := e), state_update_neq; [reflexivity|].
-        intros Hcontra%dsig_eq; contradiction.
+        by intros Hcontra%dsig_eq.
       * rewrite !lift_sub_state_to_neq by assumption; reflexivity.
   - intros s H2; apply fixed_equivocator_lifting_initial_state; assumption.
   - intros l s m Hv HsY [[(i, Hi) [[im Him] Heqm]] | Hm].
@@ -989,7 +989,7 @@ Proof.
   split.
   - intros [Hsent | Hemit].
     + apply sent_by_non_equivocating_are_sent in Hsent. assumption.
-    + apply sub_no_indices_no_can_emit in Hemit; [contradiction|reflexivity].
+    + by apply sub_no_indices_no_can_emit in Hemit.
   - intros Hsent.
     left.
     destruct Hsent as [i Hsent].

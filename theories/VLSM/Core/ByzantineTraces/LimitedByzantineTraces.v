@@ -134,8 +134,7 @@ Proof.
     }
     apply (composite_proper_sent IM) in Hsent; [|assumption].
     apply (VLSM_full_projection_initial_state Hproj) in Hinit.
-    specialize (Hsent _ _ (conj Hpre_pre Hinit)).
-    contradiction.
+    by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
   + specialize (proj1 Hemit) as [i [Hi Hsigned]].
     subst.
     destruct (decide (i ∈ byzantine)).

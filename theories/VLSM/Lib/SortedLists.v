@@ -23,17 +23,17 @@ Instance list_compare_strict_order {A} {compare : A -> A -> comparison} `{Compar
 Proof.
   intros. destruct H as [R T].
   split.
-  - intro x. induction x; intros; destruct y; split; intros; try discriminate; try reflexivity.
-    + simpl in H. destruct (compare a a0) eqn:Hcmp; try discriminate H.
+  - intro x. induction x; intros; destruct y; split; intros; try done.
+    + simpl in H. destruct (compare a a0) eqn: Hcmp; try done.
       apply R in Hcmp; subst. apply IHx in H; subst.
       reflexivity.
     + inversion H; subst. simpl. rewrite compare_eq_refl; try assumption.
       apply IHx. reflexivity.
   - intros x y. generalize dependent x.
     induction y; intros; destruct x; destruct z; try assumption
-    ; destruct comp; try discriminate
-    ; inversion H; clear H; destruct (compare a0 a) eqn:Ha0; try discriminate
-    ; inversion H0; clear H0; destruct (compare a a1) eqn:Ha1; try discriminate
+    ; destruct comp; try done
+    ; inversion H; clear H; destruct (compare a0 a) eqn:Ha0; try done
+    ; inversion H0; clear H0; destruct (compare a a1) eqn:Ha1; try done
     ; try apply (IHy _ _ _ H2) in H1; try apply (T _ _ _ _ Ha0) in Ha1
     ; try apply R in Ha0; subst
     ; try (simpl; rewrite Ha1; try rewrite H1, H2; reflexivity)
@@ -259,8 +259,7 @@ Proof.
     rewrite elem_of_cons in IN1.
     destruct IN1; [|assumption].
     subst.
-    apply StrictOrder_Irreflexive in H0.
-    contradiction.
+    by apply StrictOrder_Irreflexive in H0.
   - intros x Hx.
     pose proof (LocallySorted_elem_of_lt x _ _ LS2 Hx).
     specialize (IN2 x).
@@ -269,8 +268,7 @@ Proof.
     rewrite elem_of_cons in IN2.
     destruct IN2; [|assumption].
     subst.
-    apply StrictOrder_Irreflexive in H0.
-    contradiction.
+    by apply StrictOrder_Irreflexive in H0.
 Qed.
 
 Lemma set_equality_predicate {A}  {lt : relation A} `{StrictOrder A lt} :

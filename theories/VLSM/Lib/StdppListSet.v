@@ -89,9 +89,8 @@ Qed.
 
 Lemma set_add_not_empty : forall (a:A) (x:set), set_add a x <> empty_set.
 Proof.
-simple induction x; simpl.
-- discriminate.
-- intros; destruct (decide (a = a0)); discriminate.
+  simple induction x; cbn; [done |].
+  by intros; destruct (decide (a = a0)).
 Qed.
 
 Lemma set_add_iff a b l : a ∈ (set_add b l) <-> a = b \/ a ∈ l.
@@ -101,10 +100,10 @@ Qed.
 
 Lemma set_add_nodup a l : NoDup l -> NoDup (set_add a l).
 Proof.
-induction 1 as [|x l H H' IH]; simpl.
-- constructor; [|apply NoDup_nil; trivial]; intro Ha; inversion Ha.
-- destruct (decide (a = x)) as [<-|Hax]; constructor; trivial.
-  rewrite set_add_iff. itauto.
+  induction 1 as [| x l H H' IH]; cbn.
+  - constructor; [| by apply NoDup_nil]; inversion 1.
+  - destruct (decide (a = x)) as [<- | Hax]; constructor
+    ; rewrite ?set_add_iff; itauto.
 Qed.
 
 Lemma set_remove_1 (a b : A) (l : set) : a ∈ (set_remove b l) -> a ∈ l.
@@ -125,8 +124,7 @@ induction l as [|x l IH]; intro Hnd; simpl.
 - intro Hem; inversion Hem.
 - inversion_clear Hnd.
   destruct (decide (b = x)) as [<-|Hbx].
-  + intros; intro Ha.
-    subst; contradiction.
+  + by intros Ha ->.
   + rewrite elem_of_cons.
     intros [Ha|Hset].
     * subst; auto.
@@ -139,7 +137,7 @@ induction l as [|x xs Hrec].
 - intro Ha; inversion Ha.
 - rewrite elem_of_cons; simpl.
   destruct (decide (b = x)) as [<-|Hbx]; simpl.
-  + intros [Ha|Hx] Hab; [contradiction|].
+  + intros [Ha|Hx] Hab; [done |].
     assumption.
   + intros [Ha|Hx] Hab; subst; [left|].
     right.
@@ -157,11 +155,10 @@ Qed.
 
 Lemma set_remove_nodup a l : NoDup l -> NoDup (set_remove a l).
 Proof.
-induction 1 as [|x l H H' IH]; simpl.
-- constructor.
-- destruct (decide (a = x)) as [<-|Hax]; trivial.
-  constructor; trivial.
-  rewrite set_remove_iff; trivial. itauto.
+  induction 1 as [| x l H H' IH]; cbn; [constructor |].
+  destruct (decide (a = x)) as [<- | Hax]; [done |].
+  constructor; [| done].
+  rewrite set_remove_iff; itauto.
 Qed.
 
 Lemma set_union_intro : forall (a:A) (x y:set),
@@ -196,7 +193,8 @@ Qed.
 
 Lemma set_union_nodup l l' : NoDup l -> NoDup l' -> NoDup (set_union l l').
 Proof.
-induction 2 as [|x' l' ? ? IH]; simpl; trivial. now apply set_add_nodup.
+  induction 2 as [| x' l' ? ? IH]; cbn; [done |].
+  by apply set_add_nodup.
 Qed.
 
 Lemma set_diff_intro :
@@ -250,7 +248,7 @@ Lemma set_diff_iff a l l' : a ∈ (set_diff l l') <-> a ∈ l /\ ~a ∈ l'.
 Proof.
 split.
   - split; [eapply set_diff_elim1 | eapply set_diff_elim2]; eauto.
-  - destruct 1. now apply set_diff_intro.
+  - by destruct 1; apply set_diff_intro.
 Qed.
 
 Lemma set_diff_nodup l l' : NoDup l -> NoDup (set_diff l l').

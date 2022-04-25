@@ -190,7 +190,7 @@ Proof.
       destruct Ht as [[_ [_ [Hv [[Hno_equiv _] Hno_heavy]]]] Ht].
       repeat split; [assumption| |assumption|assumption| |assumption].
       + destruct iom as [m|]; [|apply option_valid_message_None].
-        destruct Hno_equiv as [Hsent | Hfalse]; [|contradiction].
+        destruct Hno_equiv as [Hsent | Hfalse]; [| done].
         simpl in Hsent.
         eapply composite_sent_valid; eassumption.
       + replace (composite_transition _ _ _) with (sf, oom).

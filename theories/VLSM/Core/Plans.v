@@ -302,7 +302,7 @@ Section valid_plans.
       ; destruct H as [Ha Hx]; apply IHa in Ha as Ha').
     - inversion H. assumption.
     - constructor.
-    - destruct prefa; simpl in Heqa; discriminate Heqa.
+    - by destruct prefa; simpl in Heqa.
     - destruct H as [Hs _]. constructor. assumption.
     - destruct Ha' as [Hs _].
       assumption.

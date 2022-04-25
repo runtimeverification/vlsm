@@ -582,7 +582,7 @@ Proof.
   unfold coeqv_message_equivocators.
   case_decide as Hnobserved; [apply list_subseteq_nil |].
   destruct Ht as [(Hs & Him & Hv & [Hobs | Hemitted]) Ht]
-  ; [contradiction | intros eqv Heqv].
+  ; [done | intros eqv Heqv].
   unfold msg_dep_coequivocating_senders,
          not_observed_happens_before_dependencies in Heqv
   ; rewrite elem_of_app, !elem_of_map_option in Heqv

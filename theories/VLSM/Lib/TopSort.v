@@ -541,7 +541,7 @@ Proof.
         apply (proj2 (top_sort_set_eq (a :: set_remove (min_predecessors precedes (a :: l) l a) l)))
           in Hmin.
         rewrite elem_of_cons in Hmin.
-        destruct Hmin; [contradiction|].
+        destruct Hmin; [done |].
         apply set_remove_2 in H; try assumption.
         elim H. reflexivity.
       * apply IHlen.
@@ -636,10 +636,7 @@ Proof.
     - apply (IHn i l1 l2 Ha2 H4).
     - assert (Hmina : min = a).
       destruct (decide (min = a0)).
-      * subst a0 l'.
-        rewrite elem_of_cons in Ha.
-        destruct Ha as [Ha|Ha]; [rewrite Ha; reflexivity|].
-        contradiction.
+      * by subst a0 l'; apply elem_of_cons in Ha as [].
       * subst l'.
         rewrite elem_of_cons in Ha.
         destruct Ha as [Heqa | Ha'].
