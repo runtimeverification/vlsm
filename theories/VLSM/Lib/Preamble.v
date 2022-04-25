@@ -417,8 +417,8 @@ Proof.
   intros x y.
   destruct (compare x y) eqn: Hxy.
   - by left; apply StrictOrder_Reflexive.
-  - right. intros ->. by apply compare_eq_lt in Hxy.
-  - right. intros ->. by apply compare_eq_gt in Hxy.
+  - by right; intros ->; apply compare_eq_lt in Hxy.
+  - by right; intros ->; apply compare_eq_gt in Hxy.
 Qed.
 
 Definition eq_bool {X} `{CompareStrictOrder X} (x y : X) : bool :=

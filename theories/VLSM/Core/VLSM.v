@@ -1479,8 +1479,7 @@ that include the final state, and give appropriate induction principles.
         -> finite_valid_trace_from_to m f ls'
         -> finite_valid_trace_from_to s f (ls ++ ls').
     Proof.
-      intros Hl Hl'; induction Hl; cbn; [done |].
-      constructor; auto.
+      by intros Hl Hl'; induction Hl; [|constructor; auto].
     Qed.
 
     Lemma finite_valid_trace_from_to_app_split

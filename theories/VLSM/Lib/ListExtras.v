@@ -124,8 +124,7 @@ Lemma last_error_some {S}
   (Herr : last_error l = Some s) :
   List.last l random = s.
 Proof.
-  destruct l; [done |].
-  inversion Herr. apply unroll_last.
+  by destruct l; [|inversion Herr; apply unroll_last].
 Qed.
 
 Lemma incl_empty : forall A (l : list A),
@@ -301,7 +300,7 @@ Definition inb {A} (Aeq_dec : forall x y:A, {x = y} + {x <> y}) (x : A) (xs : li
 Lemma in_function {A}  (Aeq_dec : forall x y:A, {x = y} + {x <> y}) :
   PredicateFunction2 (@In A) (inb Aeq_dec).
 Proof.
-  intros x xs. unfold inb. by destruct (in_dec Aeq_dec x xs).
+  by intros x xs; unfold inb; destruct (in_dec Aeq_dec x xs).
 Qed.
 
 Lemma in_correct `{EqDecision X} :
