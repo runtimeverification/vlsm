@@ -214,8 +214,8 @@ Proof.
   cut (forall v, v ∉ msg_dep_coequivocating_senders IM full_message_dependencies sender s m).
   {
     intros Hv.
-    destruct (msg_dep_coequivocating_senders IM full_message_dependencies sender s m)
-    ; [done | contradiction (Hv v); left].
+    by destruct (msg_dep_coequivocating_senders IM full_message_dependencies sender s m)
+    ; [| contradiction (Hv v); left].
   }
   setoid_rewrite elem_of_map_option; setoid_rewrite elem_of_list_filter.
   intros v (dm & [Hnobs Hdm]  & _).
@@ -356,8 +356,8 @@ Proof.
   ; destruct (sender im) as [_j |]; [| inversion Hsender]
   ; apply Some_inj in Hsender; cbn in Hsender; subst.
   split.
-  - rewrite elem_of_app; left; left.
-  - eapply message_dependencies_are_sufficient; [typeclasses eauto | done].
+  - by rewrite elem_of_app; left; left.
+  - by eapply message_dependencies_are_sufficient; [typeclasses eauto|].
 Qed.
 
 Lemma equivocating_messages_dependencies_are_observed_or_equivocator_emitted

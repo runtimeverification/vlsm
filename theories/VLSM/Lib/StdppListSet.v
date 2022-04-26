@@ -46,7 +46,7 @@ Lemma set_add_intro2 :
 Proof.
   induction x; cbn.
   - by rewrite elem_of_cons; left.
-  - intros ->. destruct (decide (b = a0)); rewrite !elem_of_cons; itauto.
+  - by intros ->; destruct (decide (b = a0)); rewrite !elem_of_cons; itauto.
 Qed.
 
 Local Hint Resolve set_add_intro1 set_add_intro2 : core.
@@ -62,7 +62,7 @@ Lemma set_add_elim :
 Proof.
   induction x; cbn.
   - by rewrite elem_of_cons.
-  - destruct (decide (b = a0)); rewrite !elem_of_cons; itauto.
+  - by destruct (decide (b = a0)); rewrite !elem_of_cons; itauto.
 Qed.
 
 Lemma set_add_not_empty :

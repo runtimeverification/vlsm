@@ -2555,8 +2555,8 @@ Proof.
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' iom_lst Heqiom_tr
       ; [apply option_initial_message_is_valid; destruct Heqiom as [Him | Hp]|].
-      * left. revert Him. apply Hmessage.
-      * right; auto.
+      * by left; revert Him; apply Hmessage.
+      * by right; auto.
       * apply
           (valid_trace_output_is_valid (pre_loaded_vlsm Y Q) _ _ IHHtrX2 m).
         setoid_rewrite map_app. apply Exists_app. by right; left.

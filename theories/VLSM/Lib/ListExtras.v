@@ -157,9 +157,9 @@ Lemma filter_incl_fn {A} P Q
   forall s, incl (filter P s) (filter Q s).
 Proof.
   induction s; simpl.
-  - apply incl_refl.
+  - by apply incl_refl.
   - intros x HIn. rewrite filter_cons in *.
-    destruct (decide (P a)), (decide (Q a)); cbn in *; itauto.
+    by destruct (decide (P a)), (decide (Q a)); cbn in *; itauto.
 Qed.
 
 Lemma filter_length_fn {A} P Q
@@ -168,10 +168,10 @@ Lemma filter_length_fn {A} P Q
   length (filter P s) <= length (filter Q s).
 Proof.
   induction s; simpl.
-  - lia.
+  - by lia.
   - inversion Hfg; subst. specialize (IHs H4).
     rewrite 2 filter_cons.
-    destruct (decide (P a)), (decide (Q a)); cbn; itauto lia.
+    by destruct (decide (P a)), (decide (Q a)); cbn; itauto lia.
 Qed.
 
 Lemma filter_eq_fn {A} P Q

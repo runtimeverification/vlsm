@@ -94,8 +94,7 @@ Lemma fixed_byzantine_IM_no_initial_messages
 Proof.
   unfold fixed_byzantine_IM, update_IM. simpl.
   intros i m Hm.
-  case_decide; [done |].
-  by elim (no_initial_messages_in_IM i m).
+  by case_decide; [|destruct (no_initial_messages_in_IM i m)].
 Qed.
 
 Lemma fixed_byzantine_IM_preserves_channel_authentication
@@ -183,15 +182,14 @@ Proof.
   apply basic_VLSM_strong_incl.
   - by intros s H1; apply fixed_non_byzantine_projection_initial_state_preservation.
   - by intros m H1; cbv.
-  - split; [| done].
-    by eapply induced_sub_projection_valid_preservation.
+  - by split; [eapply induced_sub_projection_valid_preservation|].
   - intros l s om s' om'.
     unfold vtransition, transition, machine.
     cbn [vtransition transition machine vmachine].
     unfold projection_induced_vlsm_machine.
     unfold pre_loaded_with_all_messages_vlsm_machine.
     (* an ugly trick to get the forward direction from an iff (<->) lemma *)
-    eapply proj1; rapply @induced_sub_projection_transition_preservation.
+    by eapply proj1; rapply @induced_sub_projection_transition_preservation.
 Qed.
 
 (** The induced projection from the composition of [fixed_byzantine_IM] under
@@ -414,8 +412,7 @@ Proof.
     unfold sub_IM, fixed_byzantine_IM, update_IM in Him.
     simpl in Him.
     apply set_diff_elim2 in Hi.
-    case_decide; [done |].
-    by elim (no_initial_messages_in_IM i im).
+    by case_decide; [|destruct (no_initial_messages_in_IM i im)].
   - destruct Hseeded as [[i [Hi Hsender]] Hvalid].
     pose (X := (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint)).
     pose (s0 := proj1_sig (composite_s0 fixed_byzantine_IM)).
@@ -591,8 +588,7 @@ Proof.
     destruct Hnoeqv as [Hsent | Hseeded].
     + by eapply preloaded_composite_sent_valid.
     + apply initial_message_is_valid.
-      right; split; [done |].
-      eapply induced_sub_projection_valid_projection. apply Hv.
+      by right; split; [|eapply induced_sub_projection_valid_projection; apply Hv].
   - intros l s om Hv.
     apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating)
        in Hv as (_ & _ & Hv).
@@ -604,11 +600,10 @@ Proof.
       2-4: done.
       destruct om as [m |]; [| done].
       destruct Hnoequiv as [Hsent|Hseeded]; [by left | right].
-      split; [done |].
-      eapply induced_sub_projection_valid_projection. apply Hv.
+      by split; [|eapply induced_sub_projection_valid_projection; apply Hv].
   - intros l s om s' om' [_ Ht].
     revert Ht.
-    apply @induced_sub_projection_transition_preservation.
+    by apply @induced_sub_projection_transition_preservation.
 Qed.
 
 (** As a corollary to the above result, we can conclude that valid
@@ -697,8 +692,7 @@ Lemma preloaded_non_byzantine_vlsm_lift
 Proof.
   apply basic_VLSM_strong_full_projection; [| | | done].
   - intros l s om [Hv _].
-    split; [| done].
-    by apply lift_sub_valid.
+    by split; [apply lift_sub_valid|].
   - by intro; intros; rapply lift_sub_transition.
   - by intro; intros; apply (lift_sub_state_initial IM).
 Qed.

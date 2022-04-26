@@ -476,7 +476,7 @@ Proof.
   - apply equivocator_state_extend_project_3. lia.
   - rewrite equivocator_state_extend_project_2 by lia.
     rewrite <- equivocator_state_project_zero.
-    f_equal. lia.
+    by f_equal; lia.
   - by rewrite equivocator_state_extend_project_1 by lia.
 Qed.
 
@@ -550,7 +550,7 @@ Proof.
   exists (mk_singleton_state (proj1_sig (vs0 X))).
   unfold mk_singleton_state.
   unfold equivocator_initial_state_prop.
-  split; cbn; [done |]. by destruct (vs0 X).
+  by split; [|destruct (vs0 X)].
 Defined.
 
 Instance equivocator_initial_state_inh : Inhabited equivocator_initial_state :=

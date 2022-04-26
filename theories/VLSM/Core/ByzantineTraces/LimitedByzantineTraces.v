@@ -140,8 +140,7 @@ Proof.
       * unfold channel_authenticated_message in Hsigned.
         rewrite Hsender0 in Hsigned.
         by apply Some_inj in Hsigned; subst.
-      * elim Hi.
-        apply set_diff_intro; [apply elem_of_enum | done].
+      * by destruct Hi; apply set_diff_intro; [apply elem_of_enum|].
 Qed.
 
 (** When replacing the byzantine components of a composite [valid_state] with

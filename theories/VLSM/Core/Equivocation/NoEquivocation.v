@@ -214,9 +214,8 @@ Section CompositeNoEquivocationInvariants.
     rewrite composite_has_been_observed_sent_received_iff.
     intros Hobs.
     cut (has_been_sent X s m); [done |].
-    apply (observed_were_sent_invariant message X); [| done | done].
-    intros l s0 om.
-    apply Hsubsumed.
+    apply (observed_were_sent_invariant message X); [|done ..].
+    by intros l s0 om; apply Hsubsumed.
   Qed.
 
 End CompositeNoEquivocationInvariants.

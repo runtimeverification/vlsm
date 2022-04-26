@@ -171,7 +171,7 @@ Proof.
     apply has_been_received_stepwise_from_trace.
   - rewrite has_been_received_step_update by done; intros [-> | Hrcv] dm Hdm
     ; rewrite has_been_observed_step_update by done; right.
-    + eapply Hfull; [apply Ht | done].
+    + by eapply Hfull; [apply Ht|].
     + by eapply IHHs.
 Qed.
 
@@ -203,7 +203,7 @@ Lemma msg_dep_full_node_happens_before_reflects_has_been_observed
     has_been_observed X s m -> has_been_observed X s dm.
 Proof.
   intros dm m Hdm Hobs.
-  eapply msg_dep_happens_before_reflect; [| done | done].
+  eapply msg_dep_happens_before_reflect; [|done ..].
   by apply msg_dep_full_node_reflects_has_been_observed.
 Qed.
 

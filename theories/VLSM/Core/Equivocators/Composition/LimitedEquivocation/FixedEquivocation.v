@@ -1338,8 +1338,7 @@ Lemma strong_constraint_subsumption_fixed_all
     (equivocators_no_equivocations_constraint IM)
     (equivocators_fixed_equivocations_constraint IM (enum index)).
 Proof.
-  split; [done |].
-  intro; intros. apply elem_of_enum.
+  by split; [|intro; intros; apply elem_of_enum].
 Qed.
 
 Lemma strong_constraint_subsumption_all_fixed

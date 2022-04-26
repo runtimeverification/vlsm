@@ -2499,15 +2499,12 @@ Proof.
     split; [done |].
     intro Hbsm. elim Hnbsm.
     apply proper_sent; [done |].
-    apply has_been_sent_consistency; [done | done |].
-    by exists is, tr, Htr.
+    by apply has_been_sent_consistency; [..|exists is, tr, Htr].
   - split.
     + apply proper_received; [done |].
-      apply has_been_received_consistency; [done | done |].
-      by exists is, tr, Htr.
+      by apply has_been_received_consistency; [..|exists is, tr, Htr].
     + intro Hbsm. elim Hnbsm.
-      apply proper_sent in Hbsm; [| done].
-      by eapply Hbsm.
+      by apply proper_sent in Hbsm; [eapply Hbsm|].
 Qed.
 
 Definition state_received_not_sent_invariant

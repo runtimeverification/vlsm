@@ -762,7 +762,7 @@ Proof.
   simpl.
   inversion Ht. subst. clear Ht.
   exists (equivocator_state_n s').
-  rewrite equivocator_state_extend_lst, equivocator_state_extend_project_2, decide_True
+  by rewrite equivocator_state_extend_lst, equivocator_state_extend_project_2, decide_True
   ; eauto.
 Qed.
 

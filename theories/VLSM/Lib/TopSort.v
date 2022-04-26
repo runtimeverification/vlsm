@@ -88,14 +88,16 @@ Proof.
     setoid_rewrite Forall_forall in IHl'.
     destruct H as [Heq | Hin]; subst.
     + simpl. destruct (decide (count_predecessors a < count_predecessors a0)).
-      * transitivity (count_predecessors a); [| lia]. apply IHl'; left.
-      * apply IHl'; left.
+      * transitivity (count_predecessors a); [| lia]. 
+        by apply IHl'; left.
+      * by apply IHl'; left.
     + simpl. destruct (decide (count_predecessors a < count_predecessors a0)).
       * by apply IHl'.
       * apply not_lt in n. unfold ge in n.
         rewrite elem_of_cons in Hin.
         destruct Hin as [Heq | Hin]; subst.
-        -- transitivity (count_predecessors a0); [| lia]. apply IHl'; left.
+        -- transitivity (count_predecessors a0); [| lia].
+           by apply IHl'; left.
         -- by apply IHl'; right.
 Qed.
 

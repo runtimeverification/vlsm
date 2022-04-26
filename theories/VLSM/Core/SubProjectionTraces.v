@@ -128,8 +128,7 @@ Lemma lift_sub_state_to_eq
   : lift_sub_state_to s0 s i = s (dexist i Hi).
 Proof.
   unfold lift_sub_state_to.
-  case_decide; [| done].
-  apply sub_IM_state_pi.
+  by case_decide; [apply sub_IM_state_pi|].
 Qed.
 
 Lemma lift_sub_state_to_neq

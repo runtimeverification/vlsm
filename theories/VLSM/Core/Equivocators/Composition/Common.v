@@ -96,7 +96,7 @@ Proof.
   simpl.
   split; intro Hin.
   - by apply elem_of_list_filter in Hin as [Hin Hel].
-  - apply elem_of_list_filter. auto using elem_of_enum.
+  - by apply elem_of_list_filter; auto using elem_of_enum.
 Qed.
 
 Lemma eq_equivocating_indices_equivocation_fault

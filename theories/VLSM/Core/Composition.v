@@ -569,7 +569,7 @@ Lemma [basic_VLSM_incl]
       - done.
       - by apply initial_message_is_valid.
       - by apply constraint_subsumption_input_valid.
-      - apply H.
+      - by apply H.
     Qed.
 
     Lemma preloaded_constraint_subsumption_input_valid
@@ -1256,8 +1256,7 @@ Section composite_plan_properties.
     (forall (i : index), i ∈ li -> (res' i) = res i).
   Proof.
     induction a using rev_ind.
-    - split; [| done].
-      by apply finite_valid_plan_empty.
+    - by split; [apply finite_valid_plan_empty|].
     - simpl in *.
       apply finite_valid_plan_from_app_iff in Hpr.
       destruct Hpr as [Hrem Hsingle].

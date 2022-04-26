@@ -87,8 +87,7 @@ Proof.
   unfold VLSM.l in *.
   subst l.
   specialize (Hpitem _ eq_refl) as [i [lst_i [Hi Hpitem]]].
-  inversion Ht. destruct Hv as [Hsndl Hiom]; subst.
-  eauto.
+  by inversion Ht; destruct Hv as [Hsndl Hiom]; subst; eauto.
 Qed.
 
 (**
@@ -613,9 +612,8 @@ Program Definition equivocator_ComputableSentMessages
     sent_messages_full := equivocator_sent_messages_full;
   |}.
 Next Obligation.
-  intros.
-  apply has_been_sent_consistency; [| done].
-  eapply equivocator_HasBeenSentCapability.
+  by intros; apply has_been_sent_consistency;
+   [eapply equivocator_HasBeenSentCapability|].
 Qed.
 
 End ComputableSentMessages_lifting.

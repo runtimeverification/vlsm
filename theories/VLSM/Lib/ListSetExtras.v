@@ -9,7 +9,7 @@ Definition set_eq {A} (s1 s2 : set A) : Prop :=
 
 Global Instance set_eq_dec `{EqDecision A} : RelDecision (@set_eq A).
 Proof.
-  intros s1 s2. typeclasses eauto.
+  by intros s1 s2; typeclasses eauto.
 Qed.
 
 Lemma set_eq_extract_forall
@@ -63,7 +63,7 @@ Proof.
   destruct l as [| hd tl]; [done |].
   destruct H.
   spec H hd (elem_of_list_here hd tl).
-  inversion H.
+  by inversion H.
 Qed.
 
 Lemma set_eq_cons {A} : forall (a : A) (s1 s2 : set A),
@@ -470,7 +470,7 @@ induction 1 as [|x l H H' IH]; simpl.
 - constructor.
 - case_decide.
   + by apply IH.
-  + apply set_add_nodup, IH.
+  + by apply set_add_nodup, IH.
 Qed.
 
 Lemma diff_app_nodup `{EqDecision A} : forall (s1 s2 : list A),

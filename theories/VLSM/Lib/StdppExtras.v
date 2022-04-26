@@ -24,7 +24,7 @@ Lemma map_skipn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
 Proof.
   revert n; induction l; intros n.
   - by rewrite !skipn_nil.
-  - cbn. destruct n; cbn; auto.
+  - by destruct n; cbn; auto.
 Qed.
 
 Lemma map_firstn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
@@ -130,7 +130,7 @@ Proof.
   setoid_rewrite <-not_true_iff_false.
   setoid_rewrite existsb_Exists.
   apply Exists_last.
-  - typeclasses eauto.
+  - by typeclasses eauto.
   - by apply existsb_Exists.
 Qed.
 
@@ -185,8 +185,7 @@ Proof.
   - by rewrite 2 filter_nil.
   - rewrite 2 filter_cons.
     setoid_rewrite elem_of_cons in H1.
-    destruct (decide (P a)); destruct (decide (Q a)).
-    2-4: firstorder.
+    destruct (decide (P a)); destruct (decide (Q a)); [|firstorder ..].
     rewrite IHl; [done |]. firstorder.
 Qed.
 
@@ -227,6 +226,6 @@ Proof.
   apply NoDup_cons in Hnda.
   setoid_rewrite elem_of_cons in Ha.
   destruct Hnda as [Ha' Hnd']; split.
-  - apply NoDup_app; firstorder.
-  - rewrite elem_of_app; firstorder.
+  - by apply NoDup_app; firstorder.
+  - by rewrite elem_of_app; firstorder.
 Qed.

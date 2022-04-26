@@ -203,8 +203,7 @@ of <<Alt1>> into <<Preloaded>>
     Lemma alt_pre_loaded_with_all_messages_incl
         : VLSM_incl Alt1 PreLoaded.
     Proof.
-      intros t Hvt.
-      by apply byzantine_pre_loaded_with_all_messages, byzantine_alt_byzantine.
+      by intros t Hvt; apply byzantine_pre_loaded_with_all_messages, byzantine_alt_byzantine.
     Qed.
 
 (**
@@ -279,10 +278,8 @@ Lifting a [valid_state] of <<PreLoaded>> we obtain a [valid_state] of <<Alt>>.
         cut (input_valid_transition Alt (existT first l) (lifted_alt_state s,om0) (lifted_alt_state s', om'))
           ;[apply input_valid_transition_outputs_valid_state_message|].
         split.
-        * split; [done |].
-          split; [done |].
-          split; [| done].
-          cbn; apply Ht.
+        * split_and!; [done ..|].
+          by split; [cbn; apply Ht|].
         * simpl.
           replace (lifted_alt_state s first) with s
             by (unfold lifted_alt_state,lift_to_composite_state

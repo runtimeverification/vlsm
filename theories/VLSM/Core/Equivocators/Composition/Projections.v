@@ -756,7 +756,7 @@ Proof.
   generalize dependent descriptors.
   generalize dependent s.
   induction tr using rev_ind; intros.
-  - inversion Hproject_tr. subst. destruct (idescriptors eqv); simpl; [done | lia].
+  - by inversion Hproject_tr; subst; destruct (idescriptors eqv); simpl; [|lia].
   - apply finite_valid_trace_from_to_last in Htr as Heq_s.
     rewrite finite_trace_last_is_last in Heq_s. subst s.
     apply finite_valid_trace_from_to_app_split in Htr.
@@ -1001,8 +1001,8 @@ Proof.
       exists (trX' ++ [item]), initial_descriptors. subst foldx.
       by erewrite equivocators_trace_project_folder_additive, !finite_trace_last_is_last.
     + exists trX', initial_descriptors.
-      subst; repeat split; [done | done |].
-      rewrite finite_trace_last_is_last; cbn in *; congruence.
+      subst; split_and!; [done ..|].
+      by rewrite finite_trace_last_is_last; congruence.
 Qed.
 
 Lemma equivocators_trace_project_zero_descriptors

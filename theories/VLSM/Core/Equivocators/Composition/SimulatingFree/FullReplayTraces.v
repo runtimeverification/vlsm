@@ -639,9 +639,9 @@ Proof.
     left. exists i.
     simpl. rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
     subst. unfold SubProjectionTraces.sub_IM in Hsent. cbn in Hsent |-*.
-    apply equivocator_state_append_sent_right; [| | done].
+    apply equivocator_state_append_sent_right; [..|done].
     + by apply Hfull_replay_state_pr.
-    + apply (Hs_pr (dexist i Hi) Hs).
+    + by apply (Hs_pr (dexist i Hi) Hs).
   - by right.
 Qed.
 

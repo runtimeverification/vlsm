@@ -241,8 +241,8 @@ Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
   : is_equivocating_tracewise_no_has_been_sent s' v -> is_equivocating_tracewise_no_has_been_sent s v.
 Proof.
   intro Hs'.
-  destruct (transition_is_equivocating_tracewise_char _ _ _ _ _ Ht v Hs')
-  ; [done | congruence].
+  by destruct (transition_is_equivocating_tracewise_char _ _ _ _ _ Ht v Hs')
+  ; [|congruence].
 Qed.
 
 Lemma is_equivocating_statewise_implies_is_equivocating_tracewise s v

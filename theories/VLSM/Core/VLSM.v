@@ -321,9 +321,9 @@ Section TraceLemmas.
       rewrite map_app, app_comm_cons.
       rewrite nth_error_app2;simpl length;rewrite map_length;[|solve[auto with arith]].
       destruct n;[exfalso;lia|].
-      rewrite (PeanoNat.Nat.sub_succ_l (length t1) n); [done | lia].
+      by rewrite (Nat.sub_succ_l (length t1) n); [|lia].
     - by rewrite finite_trace_nth_app1, finite_trace_nth_last,
-                 PeanoNat.Nat.sub_diag, finite_trace_nth_first.
+        Nat.sub_diag, finite_trace_nth_first.
   Qed.
 
   Lemma finite_trace_nth_length
@@ -334,7 +334,7 @@ Section TraceLemmas.
     intros H.
     apply nth_error_length in H.
     simpl in H.
-    rewrite map_length in H. lia.
+    by rewrite map_length in H; lia.
   Qed.
 
   Lemma finite_trace_last_prefix
@@ -1022,7 +1022,7 @@ prove or decompose the above properties in proofs.
       (Htr : finite_valid_trace_from s tr)
       : valid_state_prop s.
     Proof.
-      inversion Htr; subst; [done |]. apply Ht.
+      by inversion Htr; subst; [|apply Ht].
     Qed.
 
     Lemma finite_valid_trace_tail
@@ -1143,7 +1143,7 @@ prove or decompose the above properties in proofs.
       - by inversion 1.
       - destruct te. simpl. intro Ht.
         apply input_valid_transition_destination in Ht as Hdestination0.
-        constructor; [| done]. by constructor.
+        by constructor; [constructor|].
     Qed.
 
     Lemma extend_right_finite_trace_from
@@ -1271,7 +1271,7 @@ traces.
       {
         destruct n.
         - rewrite finite_trace_nth_first in Hnth.
-          destruct ls; cbn; congruence.
+          by destruct ls; cbn; congruence.
         - unfold finite_trace_last.
           rewrite list_prefix_map.
           by apply list_prefix_nth_last.
@@ -1389,8 +1389,8 @@ that include the final state, and give appropriate induction principles.
     Proof.
       intro Hfrom.
       induction Hfrom.
-      - rewrite finite_trace_last_nil. intros <-. constructor; auto.
-      - rewrite finite_trace_last_cons. intros <-. constructor; auto.
+      - by rewrite finite_trace_last_nil; intros <-; constructor; auto.
+      - by rewrite finite_trace_last_cons; intros <-; constructor; auto.
     Qed.
 
     Lemma finite_valid_trace_from_to_first_pstate
@@ -1910,7 +1910,7 @@ in <<s>> by outputting <<m>> *)
         split;[| done].
         constructor.
         by apply initial_state_is_valid.
-      + destruct Htrace as [is [tr [Htr _]]]. eauto.
+      + by destruct Htrace as [is [tr [Htr _]]]; eauto.
     Qed.
 
     (** For any input valid transition there exists a valid trace ending in it. *)

@@ -432,7 +432,7 @@ Proof.
     unfold composite_state_sub_projection at 2. simpl.
     destruct (decide (j = i)).
     + by subst; rewrite sub_IM_state_update_eq, state_update_eq.
-    + rewrite !state_update_neq; [done | done |].
+    + rewrite !state_update_neq; [done ..|].
       by inversion 1.
 Qed.
 
@@ -531,9 +531,8 @@ Proof.
         destruct l as (i, li), (vtransition _ _ _) as (si', om');
         inversion_clear Ht; clear -Hl.
         extensionality sub_j; destruct_dec_sig sub_j j Hj Heqsub_j;
-        subst; unfold composite_state_sub_projection; cbn.
-        rewrite state_update_neq; [done |].
-        by contradict Hl; cbn; subst.
+        subst; unfold composite_state_sub_projection.
+        by rewrite state_update_neq; [|contradict Hl; subst].
 Qed.
 
 (**
@@ -576,7 +575,7 @@ Proof.
   apply (VLSM_incl_valid_state Fixed_incl_Preloaded) in Hf as Hfuture.
   apply in_futures_refl in Hfuture.
   apply valid_state_has_trace in Hf as [is [tr Htr]].
-  eapply fixed_finite_valid_trace_sub_projection_helper in Htr as Htr_pr; [|done ..].
+  eapply fixed_finite_valid_trace_sub_projection_helper in Htr as Htr_pr; [|done].
   by apply Htr_pr.
 Qed.
 

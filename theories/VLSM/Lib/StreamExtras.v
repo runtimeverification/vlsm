@@ -168,9 +168,8 @@ Lemma stream_prefix_nth
   : nth_error (stream_prefix s n) i = Some (Str_nth i s).
 Proof.
   revert s n Hi.
-  induction i; intros [a s] [| n] Hi; cbn.
-  1-3: by inversion Hi.
-  apply IHi. lia.
+  induction i; intros [a s] [| n] Hi; [by inversion Hi ..|].
+  by apply IHi; lia.
 Qed.
 
 Lemma stream_prefix_lookup
@@ -182,9 +181,8 @@ Lemma stream_prefix_lookup
   : stream_prefix s n !! i = Some (Str_nth i s).
 Proof.
   revert s n Hi.
-  induction i; intros [a s] [| n] Hi; cbn.
-  1-3: by inversion Hi.
-  apply IHi. lia.
+  induction i; intros [a s] [| n] Hi; [by inversion Hi ..|].
+  by apply IHi; lia.
 Qed.
 
 Lemma stream_prefix_S
