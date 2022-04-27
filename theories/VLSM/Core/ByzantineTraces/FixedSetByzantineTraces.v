@@ -304,8 +304,8 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection'
 Proof.
   apply same_IM_full_projection.
   intros s1 Hs1 l1 om [Hom _].
-  split; [| cbv; trivial].
-  destruct om as [m |]; [| cbv; trivial].
+  split; [| done].
+  destruct om as [m |]; [| done].
   destruct Hom as [Hsent | Hseeded]; [left | by right].
   by eapply same_IM_composite_has_been_sent_preservation.
 Qed.
@@ -361,7 +361,7 @@ Proof.
     + by apply initial_message_is_valid; right.
   - intros l s om (_ & _ & Hv) _ _; split.
     + by eapply induced_sub_projection_valid_preservation.
-    + split; [|cbv; trivial].
+    + split; [| done].
       by apply fixed_non_byzantine_projection_valid_no_equivocations.
   - intros l s om s' om' [_ Ht].
     by apply induced_sub_projection_transition_preservation in Ht.
@@ -379,9 +379,9 @@ Proof.
   split.
   - by apply lift_sub_valid.
   - clear -Hsender_safety Hc HsX.
-    cbn; destruct om as [m |]; [| trivial].
+    cbn; destruct om as [m |]; [| done].
     destruct (sender m) as [v |] eqn: Hsender; [| done]; cbn.
-    case_decide as HAv; [| trivial].
+    case_decide as HAv; [| done].
     cbn in Hc; destruct Hc as [Hsent | Hseeded].
     + unfold lift_sub_state.
       rewrite (lift_sub_state_to_eq _ _ _ _ _ HAv).
@@ -555,7 +555,7 @@ Proof.
   apply (fixed_strong_equivocation_subsumption IM selection)
     in Hv as Hstrong_v.
   destruct Hv as (Hs & Hom & Hv & Hc).
-  destruct om; [| trivial].
+  destruct om; [| done].
   cbn; destruct (sender m) as [v |] eqn: Hsender; [| done]; cbn.
   case_decide as HAv; [| done].
   unfold sub_IM; cbn.
