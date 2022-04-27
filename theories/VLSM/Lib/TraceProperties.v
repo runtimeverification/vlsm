@@ -35,7 +35,7 @@ Lemma infiniteT_setoidT : setoidT infiniteT.
 Proof.
 cofix CIH.
 move => tr0 h0 tr1 h1.
-invs h0. invs h1.
+invs h0; invs h1.
 exact: (infiniteT_delay a b (CIH _ H _ H4)).
 Qed.
 
@@ -54,17 +54,17 @@ Lemma infiniteT_trace_append :
 Proof.
 cofix CIH.
 move => tr Htr.
-case => [a|a b tr']; first by rewrite trace_append_nil.
+case => [a | a b tr']; first by rewrite trace_append_nil.
 rewrite trace_append_cons.
-apply infiniteT_delay.
-by apply CIH.
+apply: infiniteT_delay.
+by apply: CIH.
 Qed.
 
 Lemma trace_append_infiniteT :
  forall tr, infiniteT tr -> forall tr', infiniteT (tr +++ tr').
 Proof.
 cofix CIH.
-case => [a|a b tr0] Hinf; first by inversion Hinf.
+case => [a | a b tr0] Hinf; first by inversion Hinf.
 inversion Hinf; subst => tr'.
 rewrite trace_append_cons.
 apply infiniteT_delay.
