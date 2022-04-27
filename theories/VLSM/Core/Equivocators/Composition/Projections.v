@@ -531,7 +531,7 @@ Proof.
   induction tr; intros.
   - simpl. split; intro Htr.
     + inversion Htr. subst. by exists [].
-    + by destruct Htr as [trX [[=<-] ?]]; subst.
+    + by destruct Htr as [trX [[= <-] ?]]; subst.
   - simpl.
     remember (fold_right equivocators_trace_project_folder (Some (itrX, ieqv_descriptors)) tr)
       as pr_itrX_tr.
@@ -667,7 +667,7 @@ Proof.
       apply equivocators_trace_project_app_iff.
       exists sufX, [], eqv_descriptors'. rewrite app_nil_r.
       repeat split; [|assumption].
-      by cbn; rewrite Hpr_x_item.
+      by simpl; rewrite Hpr_x_item.
     + destruct ox; [|congruence].
       inversion Hpr_x. subst. clear Hpr_x.
       destruct_list_last sufX sufX' _xX Heq_sufX.
@@ -686,7 +686,7 @@ Proof.
         apply equivocators_trace_project_app_iff.
         exists sufX', [xX], eqv_descriptors'.
         repeat split; [|assumption].
-        by cbn; rewrite Hpr_x_item.
+        by simpl; rewrite Hpr_x_item.
 Qed.
 
 (**
@@ -717,7 +717,7 @@ Proof.
     apply equivocators_trace_project_app_iff.
     exists [itemX], sufX, item_descriptors.
     repeat split; [assumption|].
-    by cbn; rewrite Hpr_item.
+    by simpl; rewrite Hpr_item.
 Qed.
 
 Lemma equivocators_trace_project_preserves_equivocating_indices

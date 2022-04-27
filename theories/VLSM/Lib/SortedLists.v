@@ -208,7 +208,7 @@ Proof.
   - inversion H1.
   - rewrite elem_of_cons in H1.
     destruct H1 as [Heq | Hin].
-    + by subst; cbn; rewrite compare_eq_refl.
+    + by subst; simpl; rewrite compare_eq_refl.
     + apply LocallySorted_tl in H0 as LS.
       spec IHsigma LS Hin. simpl.
       destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma. 1, 3: done.

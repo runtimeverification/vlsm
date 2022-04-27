@@ -325,7 +325,7 @@ Proof.
         apply equivocator_state_project_Some_rev in Hpr'.
         rewrite <- (new_machine_label_equivocator_state_project_not_last X Ht)
           by assumption.
-        by cbn; rewrite Hpr.
+        by simpl; rewrite Hpr.
       }
       simpl.
       apply equivocator_state_project_Some_rev in Hpr as Hn.
@@ -357,7 +357,7 @@ Proof.
         destruct Hproper as [_sn Hprn].
         apply equivocator_state_project_Some_rev in Hprn.
         rewrite <- (existing_false_label_equivocator_state_project_not_same X Ht _ Hpri _ Hprn H).
-        by cbn; rewrite Hpr.
+        by simpl; rewrite Hpr.
       }
       simpl.
       specialize (existing_false_label_equivocator_transition_size X Ht _ Hpri) as Ht_size.
@@ -627,7 +627,7 @@ Proof.
   ; destruct (vtransition X _ _) as (s'j', _oom) eqn:Hti.
   - specialize (existing_false_label_equivocator_state_project_same X Ht _ Heqs'j _ _ Hti)
       as [Heq_oom Heqs'j'].
-    by subst; cbn; rewrite Heqsi.
+    by subst; simpl; rewrite Heqsi.
   - specialize (existing_true_label_equivocator_state_project_last X Ht _ Heqs'j _ _ Hti)
       as [Heq_oom Heqs'j'].
     subst. simpl.

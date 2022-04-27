@@ -496,7 +496,7 @@ Proof.
   intro ieqv.
   unfold equivocators_state_project.
   unfold state_update.
-  by repeat (case_decide; subst).
+  by case_decide; subst.
 Qed.
 
 Lemma equivocators_initial_state_project

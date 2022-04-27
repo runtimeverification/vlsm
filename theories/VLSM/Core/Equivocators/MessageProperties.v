@@ -140,7 +140,7 @@ Proof.
   specialize
     (equivocator_vlsm_trace_project_app_inv _ [bitem] bsuffix (Existing i) (Existing idl) dsuffix [itemx] suffix)
     as Hsuffix'.
-  spec Hsuffix'.  { by cbn; rewrite Hitemx. }
+  spec Hsuffix'.  { by simpl; rewrite Hitemx. }
   subst dsuffix.
   spec Hsuffix' Hsuffix.
   subst bitem.

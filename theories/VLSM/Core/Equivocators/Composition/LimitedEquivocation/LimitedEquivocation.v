@@ -142,7 +142,7 @@ Proof.
       intro. assumption.
   - replace s with
     (fst (composite_transition equivocator_IM l (s0, oim))); [assumption|].
-    by cbn in *; rewrite Ht.
+    by simpl in *; rewrite Ht.
 Qed.
 
 (** A valid valid trace for the composition of equivocators with limited
