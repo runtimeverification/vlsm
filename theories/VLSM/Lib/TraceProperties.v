@@ -453,7 +453,7 @@ Lemma followsT_setoidT_L : forall p,
  forall tr2, bisim tr0 tr2 ->  followsT p tr2 tr1.
 Proof.
 move => p. cofix CIH. move =>  tr tr0 h0 tr1 h1. invs h0.
-- invs h1. apply followsT_nil. reflexivity. apply H0.
+- invs h1. by apply followsT_nil.
 - invs h1. exact: (followsT_delay a b (CIH _ _ H _ H4)).
 Qed.
 

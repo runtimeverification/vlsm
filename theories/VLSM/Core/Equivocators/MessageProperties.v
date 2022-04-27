@@ -87,11 +87,8 @@ Proof.
   unfold VLSM.l in *.
   subst l.
   specialize (Hpitem _ eq_refl) as [i [lst_i [Hi Hpitem]]].
-  inversion Ht. destruct Hv as [Hsndl Hiom]. simpl in Hiom.
-  subst.
-  split; [reflexivity|].
-  split; [reflexivity|].
-  eexists _. exact Hpitem.
+  inversion Ht. destruct Hv as [Hsndl Hiom]; subst.
+  eauto.
 Qed.
 
 (**
@@ -143,7 +140,7 @@ Proof.
   specialize
     (equivocator_vlsm_trace_project_app_inv _ [bitem] bsuffix (Existing i) (Existing idl) dsuffix [itemx] suffix)
     as Hsuffix'.
-  spec Hsuffix'.  { simpl. rewrite Hitemx. reflexivity. }
+  spec Hsuffix'.  { by simpl; rewrite Hitemx. }
   subst dsuffix.
   spec Hsuffix' Hsuffix.
   subst bitem.
@@ -351,7 +348,7 @@ Proof.
           simpl in Hsame.
           destruct_equivocator_state_project  s' idesc _sidesc' Hlst; [|lia].
           simpl in Hsame.
-          subst. split; [reflexivity|assumption].
+          by subst.
         -- apply equivocator_state_project_Some_rev in Hsins as Hltins.
           simpl in Hsame.
           destruct (decide (idesc = ins)). subst idesc.
@@ -360,7 +357,7 @@ Proof.
             exists ins, sidesc'. split; [|assumption].
             simpl in Hsame.
             destruct_equivocator_state_project s' ins _sidesc' Hins; [|lia].
-            subst. reflexivity.
+            by subst.
           ++ exists ins, sins. split; [|assumption].
             spec Hnot_same ins. spec Hnot_same; [lia|]. spec Hnot_same n.
             simpl in Hnot_same. rewrite Hsins in Hnot_same.
@@ -407,7 +404,7 @@ Proof.
           exists (equivocator_state_n s), sidesc'.
           simpl in Hlast.
           destruct_equivocator_state_project  s' (equivocator_state_n s) _sidesc' Hlst; [|lia].
-          subst. split; [reflexivity|assumption].
+          by subst.
         -- apply equivocator_state_project_Some_rev in Hsins as Hltins.
             spec Hnot_last ins. spec Hnot_last; [lia|].
             simpl in Hnot_last. rewrite Hsins in Hnot_last.
@@ -558,7 +555,7 @@ Proof.
       inversion Hm.
     + apply valid_trace_get_last in Htr as Hlst.
       assert (Hbm : selected_message_exists_in_some_preloaded_traces equivocator_vlsm (field_selector output) s m)
-      ; [|exists (exist _ m Hbm); reflexivity].
+      ; [| by exists (exist _ m Hbm)].
       exists is. exists tr. exists Htr.
       subst s.
       destruct
@@ -592,11 +589,11 @@ Proof.
     split.
     + rewrite elem_of_list_fmap.
       exists i. rewrite Hi.
-      split; [reflexivity|]. apply up_to_n_full.
+      split; [done |]. apply up_to_n_full.
       apply equivocator_state_project_Some_rev in Hi. assumption.
     + specialize (HpsX _ _ Hi). apply (sent_messages_full X); [apply HpsX|].
       assert (Hm : selected_message_exists_in_some_preloaded_traces X (field_selector output) si m)
-      ; [|exists (exist _ m Hm); reflexivity].
+      ; [| by exists (exist _ m Hm)].
       destruct istart as [sstart | istart].
       * exists sstart. exists trX. exists Histart. assumption.
       * destruct Histart as [isi [Histart [HtrX HinitX]]].

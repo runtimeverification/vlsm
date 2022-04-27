@@ -62,7 +62,7 @@ Proof.
   unfold pre_VLSM_projection_transition_item_project in Hpr.
   destruct (label_project (l itemX)); [|congruence].
   inversion Hpr.
-  apply Hselector; reflexivity.
+  by apply Hselector.
 Qed.
 
 End selectors.

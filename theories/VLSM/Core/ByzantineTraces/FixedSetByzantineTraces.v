@@ -276,8 +276,7 @@ Proof.
   unfold sub_IM, fixed_byzantine_IM, update_IM.
   simpl.
   apply set_diff_elim2 in Hi.
-  rewrite decide_False by assumption.
-  reflexivity.
+  by rewrite decide_False.
 Qed.
 
 Lemma non_byzantine_nodes_same_sym

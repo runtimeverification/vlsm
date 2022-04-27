@@ -22,13 +22,9 @@ Qed.
 Lemma map_skipn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
   map f (skipn n l) = skipn n (map f l).
 Proof.
-  generalize dependent n.
-  induction l; intros n.
-  - simpl. repeat rewrite skipn_nil. reflexivity.
-  - simpl.
-    destruct n.
-    { reflexivity. }
-    simpl. apply IHl.
+  revert n; induction l; intros n.
+  - by rewrite !skipn_nil.
+  - cbn. destruct n; cbn; auto.
 Qed.
 
 Lemma map_firstn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
@@ -36,59 +32,47 @@ Lemma map_firstn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
 Proof.
   generalize dependent n.
   induction l; intros n.
-  - simpl. repeat rewrite firstn_nil. reflexivity.
-  - simpl.
-    destruct n.
-    { reflexivity. }
-    simpl.
-    rewrite IHl. reflexivity.
+  - by cbn; rewrite !firstn_nil.
+  - by destruct n; cbn; rewrite ?IHl.
 Qed.
 
 Lemma skipn_S_tail {A : Type} (l : list A) (n : nat) :
   skipn (S n) l = (skipn n (tail l)).
 Proof.
-  destruct l.
-  { simpl. rewrite drop_nil. reflexivity. }
-  simpl. reflexivity.
+  by destruct l; cbn; rewrite ?drop_nil.
 Qed.
 
 Lemma skipn_tail_comm {A : Type} (l : list A) (n : nat) :
   skipn n (tail l) = tail (skipn n l).
 Proof.
-  generalize dependent l.
-  induction n; intros l.
-  - repeat rewrite drop_0. reflexivity.
-  - destruct l.
-    { reflexivity. }
-    simpl. rewrite <- IHn. apply skipn_S_tail.
+  revert l; induction n; intros l.
+  - by rewrite !drop_0.
+  - by rewrite !skipn_S_tail, IHn.
 Qed.
 
 Lemma map_tail [A B : Type] (f : A -> B) (l : list A) :
   map f (tail l) = tail (map f l).
 Proof.
-  destruct l; reflexivity.
+  by destruct l.
 Qed.
 
 Lemma nth_error_stdpp_last {A : Type} (l : list A) :
   nth_error l (length l - 1) = last l.
 Proof.
-  induction l; [reflexivity|]; simpl.
-  destruct l; [reflexivity|]; simpl.
-  simpl in IHl.
-  rewrite Nat.sub_0_r in IHl.
-  rewrite IHl; reflexivity.
+  induction l; [done |].
+  destruct l; [done |]; cbn in *.
+  by rewrite <- IHl, Nat.sub_0_r.
 Qed.
 
 Lemma last_last_error {A : Type} (l : list A) :
- last_error l = last l.
+  last_error l = last l.
 Proof.
- induction l; [reflexivity|]; rewrite last_cons.
- rewrite <- IHl; clear IHl.
- destruct l; [reflexivity|]; simpl.
- f_equal.
- induction l; [reflexivity|]; simpl.
- rewrite <- IHl.
- destruct l; reflexivity.
+  induction l; [done |].
+  rewrite last_cons, <- IHl; clear IHl.
+  destruct l; [done |]; cbn; f_equal.
+  induction l; [done |]; cbn.
+  rewrite <- IHl.
+  by destruct l.
 Qed.
 
 Lemma existsb_Exists {A} (f : A -> bool):
@@ -155,11 +139,8 @@ Lemma existsb_forall {A} (f : A -> bool):
 Proof.
   intro l.
   setoid_rewrite <- not_true_iff_false.
-  rewrite existsb_Exists.
-  rewrite <- Forall_Exists_neg.
-  rewrite Forall_forall.
-  setoid_rewrite -> elem_of_list_In.
-  reflexivity.
+  setoid_rewrite <- elem_of_list_In.
+  by rewrite existsb_Exists, <- Forall_Exists_neg, Forall_forall.
 Qed.
 
 Lemma existsb_first
@@ -201,19 +182,17 @@ Lemma filter_ext_elem_of {A} P Q
  filter P l = filter Q l.
 Proof.
   induction l; intros.
-  - rewrite 2 filter_nil. reflexivity.
+  - by rewrite 2 filter_nil.
   - rewrite 2 filter_cons.
     destruct (decide (P a)); destruct (decide (Q a)).
-    + rewrite IHl; [reflexivity|].
+    + rewrite IHl; [done |].
       intros.
       apply H1.
       right; assumption.
     + contradict n.
-      apply H1; [|assumption].
-      left; reflexivity.
+      by apply H1; [left |].
     + contradict n.
-      apply H1; [|assumption].
-      left; reflexivity.
+      by apply H1; [left |].
     + apply IHl.
       intros.
       apply H1.

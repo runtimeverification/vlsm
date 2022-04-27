@@ -436,9 +436,8 @@ Proof.
     destruct_dec_sig sub_j j Hj Heqsub_j. subst.
     unfold composite_state_sub_projection at 2. simpl.
     destruct (decide (j = i)).
-    + subst.
-      rewrite sub_IM_state_update_eq, state_update_eq. reflexivity.
-    + rewrite !state_update_neq; [reflexivity|assumption|].
+    + by subst; rewrite sub_IM_state_update_eq, state_update_eq.
+    + rewrite !state_update_neq; [done | done |].
       intro Heq. elim n. apply dec_sig_eq_iff in Heq. assumption.
 Qed.
 
@@ -467,12 +466,12 @@ Proof.
       (preloaded_component_projection IM (projT1 l)) l (projT2 l)) as Hproject.
     spec Hproject.
     { unfold composite_project_label.
-      destruct (decide _); [|elim n0; reflexivity].
-      replace e with (eq_refl (A := index) (x := projT1 l)); [reflexivity|].
+      destruct (decide _); [| by elim n0].
+      replace e with (eq_refl (A := index) (x := projT1 l)); [done |].
       apply Eqdep_dec.UIP_dec. assumption.
     }
     specialize (Hproject _ _ _ _ Ht).
-    apply (has_been_sent_step_update Hproject). left. reflexivity.
+    by apply (has_been_sent_step_update Hproject); left.
 Qed.
 
 End fixed_finite_valid_trace_sub_projection_helper_lemmas.
@@ -538,8 +537,8 @@ Proof.
         inversion_clear Ht; clear -Hl.
         extensionality sub_j; destruct_dec_sig sub_j j Hj Heqsub_j;
         subst; unfold composite_state_sub_projection; cbn.
-        rewrite state_update_neq; [reflexivity |].
-        contradict Hl; cbn; subst; assumption.
+        rewrite state_update_neq; [done |].
+        by contradict Hl; cbn; subst.
 Qed.
 
 (**
@@ -840,11 +839,9 @@ Proof.
     inversion_clear 1.
     f_equal; extensionality j.
     destruct (decide (i = j)); subst.
-    + rewrite lift_sub_state_to_neq, !state_update_eq by assumption.
-      reflexivity.
-    + rewrite state_update_neq by congruence.
-      unfold lift_sub_state_to. case_decide; [reflexivity |].
-      rewrite state_update_neq; congruence.
+    + by rewrite lift_sub_state_to_neq, !state_update_eq.
+    + unfold lift_sub_state_to.
+      by rewrite state_update_neq, state_update_neq.
   - intros [i liX].
     unfold remove_equivocating_state_project;
     unfold remove_equivocating_label_project; cbn.
@@ -854,7 +851,7 @@ Proof.
     inversion_clear 1.
     extensionality j.
     unfold lift_sub_state_to.
-    case_decide as Hj; [reflexivity|].
+    case_decide as Hj; [done |].
     destruct (decide (i = j)); [contradict Hj; subst; assumption|].
     apply state_update_neq. congruence.
   - intros s Hs i.
@@ -949,12 +946,12 @@ Proof.
     intros [_ Ht]; inversion_clear Ht.
     f_equal. extensionality i.
     destruct (decide (i = j)); subst.
-    + rewrite lift_sub_state_to_eq with (Hi := Hj), !state_update_eq; reflexivity.
+    + by rewrite lift_sub_state_to_eq with (Hi := Hj), !state_update_eq.
     + rewrite state_update_neq by congruence.
       destruct (decide (i ∈ equivocators)).
-      * rewrite !lift_sub_state_to_eq with (Hi := e), state_update_neq; [reflexivity|].
+      * rewrite !lift_sub_state_to_eq with (Hi := e), state_update_neq; [done |].
         by intros Hcontra%dsig_eq.
-      * rewrite !lift_sub_state_to_neq by assumption; reflexivity.
+      * by rewrite !lift_sub_state_to_neq.
   - intros s H2; apply fixed_equivocator_lifting_initial_state; assumption.
   - intros l s m Hv HsY [[(i, Hi) [[im Him] Heqm]] | Hm].
     + apply initial_message_is_valid.

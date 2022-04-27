@@ -152,8 +152,7 @@ Proof.
   subst.
   unfold composite_state_sub_projection.
   simpl.
-  rewrite lift_sub_state_to_eq with (Hi := Hi).
-  reflexivity.
+  by rewrite lift_sub_state_to_eq with (Hi := Hi).
 Qed.
 
 Lemma lift_sub_state_to_neq_state_update
@@ -171,10 +170,7 @@ Proof.
   - subst. rewrite state_update_eq.
     unfold lift_sub_state_to. case_decide; [done |].
     apply state_update_eq.
-  - rewrite state_update_neq by congruence.
-    unfold lift_sub_state_to.
-    case_decide; [reflexivity|].
-    apply state_update_neq. congruence.
+  - by unfold lift_sub_state_to; rewrite !state_update_neq.
 Qed.
 
 Section sec_induced_sub_projection.
@@ -214,7 +210,7 @@ Proof.
   apply proj2 in HtX. cbn in HtX.
   destruct (vtransition _ _ _) as (si', _om').
   inversion_clear HtX.
-  rewrite state_update_neq; [reflexivity|].
+  rewrite state_update_neq; [done |].
   intros ->.
   unfold composite_label_sub_projection_option in HlX.
   simpl in HlX.
@@ -233,9 +229,7 @@ Proof.
   case_decide; [| done].
   unfold composite_label_sub_projection.
   f_equal. simpl.
-  apply
-    (@dec_sig_sigT_eq _ _ sub_index_prop_dec (fun i => vlabel (IM i))).
-  reflexivity.
+  by apply (@dec_sig_sigT_eq _ _ sub_index_prop_dec (fun i => vlabel (IM i))).
 Qed.
 
 Lemma composite_state_sub_projection_lift
@@ -285,7 +279,7 @@ Proof.
   destruct (vtransition _ _ _) as (si', om').
   inversion Ht1. subst. clear Ht1.
   inversion Ht2. subst. clear Ht2.
-  split; [|reflexivity].
+  split; [| done].
   extensionality sub_j.
   apply f_equal_dep with (x := sub_j) in HsXeq_pr.
   destruct_dec_sig sub_j j Hj Heqsub_j.
@@ -293,8 +287,8 @@ Proof.
   unfold composite_state_sub_projection in HsXeq_pr |- *.
   simpl in HsXeq_pr |- *.
   destruct (decide (i = j)).
-  - subst. rewrite !state_update_eq. reflexivity.
-  - rewrite !state_update_neq by congruence. assumption.
+  - by subst; rewrite !state_update_eq.
+  - by rewrite !state_update_neq.
 Qed.
 
 Lemma weak_induced_sub_projection_transition_consistency_Some
@@ -360,8 +354,7 @@ Proof.
   destruct_dec_sig sub_k k Hk Heqsub_k; subst.
   unfold composite_state_sub_projection; cbn.
   destruct (decide (i = k)); subst.
-  + rewrite state_update_eq, sub_IM_state_update_eq.
-    reflexivity.
+  + by rewrite state_update_eq, sub_IM_state_update_eq.
   + rewrite sub_IM_state_update_neq, state_update_neq by congruence.
     apply lift_sub_state_to_eq.
 Qed.
@@ -483,8 +476,7 @@ Proof.
   - subst.
     simpl. rewrite state_update_eq.
     apply sub_IM_state_update_eq.
-  - rewrite! state_update_neq; [reflexivity|assumption|].
-    by inversion 1.
+  - rewrite! state_update_neq; cbn; [done | done | by inversion 1].
 Qed.
 
 Lemma valid_sub_projection
@@ -734,7 +726,7 @@ Proof.
     apply valid_trace_add_last.
     assumption.
     rewrite finite_trace_last_app.
-    unfold lst. subst. reflexivity.
+    by unfold lst; subst.
 Qed.
 
 End sub_projection_with_no_equivocation_constraints.
@@ -817,8 +809,8 @@ Proof.
     by case_decide; rewrite ?sub_IM_state_update_eq.
   - rewrite state_update_neq by congruence.
     unfold lift_sub_state, lift_sub_state_to. simpl.
-    case_decide; [|reflexivity].
-    rewrite state_update_neq; [reflexivity|].
+    case_decide; [| done].
+    rewrite state_update_neq; [done |].
     by inversion 1.
 Qed.
 
@@ -911,14 +903,8 @@ Proof.
   intro j.
   destruct (decide (i = j)).
   - subst. rewrite state_update_eq.
-    rewrite lift_sub_state_to_neq by assumption.
-    rewrite state_update_eq.
-    reflexivity.
-  - rewrite state_update_neq by congruence.
-    unfold lift_sub_state_to.
-    case_decide; [reflexivity|].
-    rewrite state_update_neq by congruence.
-    reflexivity.
+    by rewrite lift_sub_state_to_neq, state_update_eq.
+  - by unfold lift_sub_state_to; rewrite !state_update_neq.
 Qed.
 
 Lemma remove_equivocating_strong_projection_transition_consistency_None eqv_is
@@ -936,7 +922,7 @@ Proof.
   intro j.
   unfold remove_equivocating_state_project.
   unfold lift_sub_state_to.
-  case_decide; [reflexivity|].
+  case_decide; [done |].
   apply state_update_neq.
   by intro; subst.
 Qed.
@@ -1006,15 +992,13 @@ Proof.
   f_equal.
   apply functional_extensionality_dep. intro i.
   destruct (decide (i = j)).
-  - subst.
-    rewrite lift_sub_state_to_eq with (Hi := Hj).
-    rewrite! state_update_eq. reflexivity.
+  - by subst; rewrite lift_sub_state_to_eq with (Hi := Hj), !state_update_eq.
   - rewrite state_update_neq by congruence.
     destruct (decide (i ∈ equivocators)).
     + rewrite !lift_sub_state_to_eq with (Hi := e).
-      rewrite state_update_neq; [reflexivity|].
+      rewrite state_update_neq; [done |].
       by inversion 1.
-    + rewrite !lift_sub_state_to_neq by assumption. reflexivity.
+    + by rewrite !lift_sub_state_to_neq by assumption.
 Qed.
 
 (**
@@ -1073,15 +1057,14 @@ Proof.
     + unfold lift_sub_state.
       rewrite state_update_eq, lift_sub_state_to_eq with (Hi := Hj).
       unfold composite_state_sub_projection; cbn.
-      rewrite state_update_eq; reflexivity.
+      by rewrite state_update_eq.
     + rewrite state_update_neq by congruence.
       destruct (decide (i ∈ equivocators)).
       * unfold lift_sub_state.
         rewrite !lift_sub_state_to_eq with (Hi := e).
         unfold composite_state_sub_projection; cbn.
         rewrite state_update_neq by congruence.
-        rewrite lift_sub_state_to_eq with (Hi := e).
-        reflexivity.
+        by rewrite lift_sub_state_to_eq with (Hi := e).
       * by unfold lift_sub_state, lift_sub_state_to; case_decide.
   - intros s Hs.
     apply (lift_sub_state_initial IM).
@@ -1203,10 +1186,10 @@ Proof.
   - rewrite sub_IM_state_update_eq.
     unfold lift_sub_incl_state; cbn.
     case_decide; [| done].
-    rewrite sub_IM_state_update_eq; reflexivity.
+    by rewrite sub_IM_state_update_eq.
   - rewrite sub_IM_state_update_neq by assumption.
     unfold lift_sub_incl_state; cbn.
-    case_decide; [| reflexivity].
+    case_decide; [| done].
     by rewrite sub_IM_state_update_neq.
 Qed.
 
@@ -1287,8 +1270,7 @@ Proof.
   { unfold ProjectionTraces.composite_project_label.
     simpl.
     case_decide; [|congruence].
-    replace H with (eq_refl (A := index) (x := i))
-    ; [reflexivity|].
+    replace H with (eq_refl (A := index) (x := i)); [done |].
     apply Eqdep_dec.UIP_dec.
     assumption.
   }
@@ -1384,7 +1366,7 @@ Proof.
   { unfold sub_IM_sender. rewrite Hsender.
     case_decide; [| done].
     f_equal.
-    apply dsig_eq; reflexivity.
+    by apply dsig_eq.
   }
   erewrite has_been_sent_iff_by_sender
   ; [|apply sub_IM_sender_safety|eassumption|eassumption].
@@ -1460,7 +1442,7 @@ Proof.
   ; simpl
   ; unfold sub_IM
   ; (destruct (decide (i = j))
-    ; [subst; rewrite state_update_eq, sub_IM_state_update_eq; reflexivity|])
+    ; [by subst; rewrite state_update_eq, sub_IM_state_update_eq|])
   ; rewrite (state_update_neq _ (lift_sub_state _ _ _)) by congruence
   ; rewrite state_update_neq by (setoid_rewrite dsig_eq; simpl; congruence)
   ; unfold lift_sub_state
@@ -1561,8 +1543,8 @@ Proof.
     ; unfold composite_state_sub_projection at 2; cbn.
     destruct (decide (i = j)) as [| Hij]; subst.
     + unfold free_sub_free_index.
-      rewrite state_update_eq, sub_IM_state_update_eq; reflexivity.
-    + rewrite !state_update_neq; [reflexivity | congruence |].
+      by rewrite state_update_eq, sub_IM_state_update_eq.
+    + rewrite !state_update_neq; [done | done |].
       contradict Hij; apply dsig_eq in Hij; cbn in Hij; congruence.
   - intros s Hs; rapply (composite_initial_state_sub_projection IM); assumption.
   - intros m [[i Hi] | Hseed]; [left|right; assumption].
@@ -1583,8 +1565,8 @@ Proof.
     ; unfold composite_state_sub_projection at 2; cbn.
     destruct (decide (i = j)) as [| Hij]; subst.
     + unfold free_sub_free_index.
-      rewrite state_update_eq, sub_IM_state_update_eq; reflexivity.
-    + rewrite !state_update_neq; [reflexivity | congruence |].
+      by rewrite state_update_eq, sub_IM_state_update_eq.
+    + rewrite !state_update_neq; [done | done |].
       contradict Hij; apply dsig_eq in Hij; simpl in Hij; congruence.
   - intros s Hs; rapply (composite_initial_state_sub_projection IM); assumption.
   - intros m [i Hi]; exists (free_sub_free_index i); assumption.
@@ -1609,8 +1591,8 @@ Proof.
     f_equal; extensionality j; unfold free_sub_free_state at 2.
     destruct (decide (i = j)) as [| Hij]; subst.
     + unfold free_sub_free_index, sub_IM.
-      rewrite state_update_eq, sub_IM_state_update_eq; reflexivity.
-    + rewrite !state_update_neq; [reflexivity | | congruence].
+      by rewrite state_update_eq, sub_IM_state_update_eq.
+    + rewrite !state_update_neq; [done | | congruence].
       contradict Hij; apply dsig_eq in Hij; simpl in Hij; congruence.
   - intros s Hi i; rapply Hi.
   - intros m [[i Hi] Him]; exists i; assumption.
@@ -1649,8 +1631,7 @@ Lemma sub_element_state_eq s H_j
   : sub_element_state s (dexist j H_j) = s.
 Proof.
   unfold sub_element_state; cbn.
-  rewrite (decide_True_pi eq_refl).
-  reflexivity.
+  by rewrite (decide_True_pi eq_refl).
 Qed.
 
 Lemma sub_element_state_neq s i Hi
@@ -1679,10 +1660,8 @@ Proof.
     extensionality sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     destruct (decide (i = j)); subst.
-    + rewrite sub_IM_state_update_eq, sub_element_state_eq.
-      reflexivity.
-    + rewrite sub_IM_state_update_neq, !sub_element_state_neq by congruence.
-      reflexivity.
+    + by rewrite sub_IM_state_update_eq, sub_element_state_eq.
+    + by rewrite sub_IM_state_update_neq, !sub_element_state_neq.
   - intros sj Hsj sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     destruct (decide (i = j)); subst.
@@ -1690,8 +1669,7 @@ Proof.
     + rewrite sub_element_state_neq by congruence.
       destruct (vs0 (IM i)); assumption.
   - intros m Hm.
-    exists (dexist j Hj), (exist _ m Hm).
-    reflexivity.
+    by exists (dexist j Hj), (exist _ m Hm).
 Qed.
 
 Lemma sub_valid_preloaded_lifts_can_be_emitted
@@ -1754,8 +1732,7 @@ Lemma sub_element_label_project
 Proof.
   intros lY.
   unfold sub_element_label, sub_label_element_project; cbn.
-  rewrite (decide_True_pi eq_refl).
-  reflexivity.
+  by rewrite (decide_True_pi eq_refl).
 Qed.
 
 Lemma sub_element_state_project
@@ -1763,8 +1740,7 @@ Lemma sub_element_state_project
 Proof.
   intros sY.
   unfold sub_element_state, sub_state_element_project; cbn.
-  rewrite (decide_True_pi eq_refl).
-  reflexivity.
+  by rewrite (decide_True_pi eq_refl).
 Qed.
 
 Lemma sub_transition_element_project_Some :
@@ -1883,7 +1859,7 @@ Lemma pre_loaded_sub_composite_input_valid_projection constraint Q
 Proof.
   intro Ht_sub.
   eapply (VLSM_projection_input_valid (preloaded_component_projection IM i) (existT i li) li)
-  ; [rewrite composite_project_label_eq; reflexivity |].
+  ; [by rewrite composite_project_label_eq |].
   cut (input_valid
         (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM indices)))
         (existT (dexist i Hi) li) (sub_s, Some im)).

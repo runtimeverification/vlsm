@@ -119,13 +119,11 @@ Proof.
     (state_project (vtransition X lX (sX, im)).1, (vtransition X lX (sX, im)).2).
   - eapply (VLSM_projection_input_valid_transition Hproji)
     ; [eassumption|].
-    split; [assumption|].
-    apply injective_projections; reflexivity.
+    by erewrite injective_projections.
   - symmetry.
     eapply (VLSM_projection_input_valid_transition Hproj)
     ; [eassumption|].
-    split; [assumption|].
-    apply injective_projections; reflexivity.
+    by erewrite injective_projections.
 Qed.
 
 Lemma induced_projection_incl_preloaded_with_all_messages
@@ -180,7 +178,7 @@ Proof.
     + eapply input_valid_transition_destination,
         (VLSM_projection_input_valid_transition Hproji)
       ; [|split]; [eassumption|eassumption|].
-      apply injective_projections; reflexivity.
+      by apply injective_projections.
     + assert (HivtX : input_valid_transition X lX (sX, om) (vtransition X lX (sX, om)))
         by firstorder.
       destruct (vtransition _ _ _) as (sX', _om').
@@ -188,7 +186,7 @@ Proof.
       ; [|eassumption].
       rewrite HsX in Hs'.
       destruct Y as (TY & MY); cbv in Htrans, Hs'.
-      rewrite Htrans in Hs'; inversion Hs'; reflexivity.
+      by rewrite Htrans in Hs'; inversion Hs'.
 Qed.
 
 (** Below we show that the two definitions above are actually equivalent. *)

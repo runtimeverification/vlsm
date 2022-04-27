@@ -22,9 +22,7 @@ Proof.
   split.
   - intros [[x Hx] Heq];simpl in Heq;subst x.
     assumption.
-  - intro Ha.
-    exists (exist _ a Ha).
-    reflexivity.
+  - by intro Ha; exists (exist _ a Ha).
 Qed.
 
 (** ** Basic equivocation **)
@@ -187,8 +185,7 @@ Section Simple.
           split; assumption.
         + intros [prefix [item [suffix [Hitem Heqv]]]].
           exists ((prefix, item), suffix).
-          rewrite elem_of_list_In, in_one_element_decompositions_iff.
-          split; [subst; reflexivity|assumption].
+          by rewrite elem_of_list_In, in_one_element_decompositions_iff.
       - apply Exists_dec. intros ((prefix, item), suffix).
         apply Decision_and.
         + apply option_eq_dec.
@@ -241,10 +238,7 @@ Section Simple.
           | [Hinput Hnoutput]].
         + exists prefix, item', (suffix ++ [item]).
           repeat split; [|assumption|assumption].
-          subst tr.
-          change (item' :: suffix ++ [item]) with (([item'] ++ suffix) ++ [item]).
-          change (item' :: suffix) with ([item'] ++ suffix).
-          rewrite !app_assoc. reflexivity.
+          subst tr. cbn. by rewrite <- app_assoc.
         + exists tr, item, [].
           repeat split; assumption.
     Qed.
@@ -729,9 +723,9 @@ Section Simple.
       assert (Hps : valid_state_prop pre_vlsm (proj1_sig s))
         by (apply initial_state_is_valid; apply proj2_sig).
       destruct s as [s Hs]. simpl in *.
-      destruct (sent_messages_fn s) as [|m l] eqn:Hsm; try reflexivity.
+      destruct (sent_messages_fn s) as [|m l] eqn: Hsm; [done |].
       specialize (sent_messages_full s Hps m) as Hl. apply proj1 in Hl.
-      spec Hl; try (rewrite Hsm; left; reflexivity).
+      spec Hl; [by rewrite Hsm; left |].
       destruct Hl as [[m0 Hm] Heq]. simpl in Heq. subst m0.
       apply sent_messages_consistency in Hm; try assumption.
       exfalso. revert Hm.
@@ -771,7 +765,7 @@ Section Simple.
       - intro H.
         apply (sent_messages_consistency s Hs m) in H.
         apply sent_messages_full; try assumption.
-        exists (exist _ m H). reflexivity.
+        by exists (exist _ m H).
     Qed.
 
     Definition ComputableSentMessages_has_not_been_sent
@@ -800,8 +794,7 @@ Section Simple.
         }
         contradict Hin.
         apply sent_messages_full;[assumption|].
-        exists (exist _ m Hin).
-        reflexivity.
+        by exists (exist _ m Hin).
       - intros Htrace Hin.
         apply sent_messages_full in Hin;[|assumption].
         destruct Hin as [[m0 Hm] Heq];simpl in Heq;subst m0.
@@ -843,9 +836,9 @@ Section Simple.
       assert (Hps : valid_state_prop pre_vlsm (proj1_sig s))
         by (apply initial_state_is_valid;apply proj2_sig).
       destruct s as [s Hs]. simpl in *.
-      destruct (received_messages_fn s) as [|m l] eqn:Hrcv; try reflexivity.
+      destruct (received_messages_fn s) as [|m l] eqn: Hrcv; [done |].
       specialize (received_messages_full s Hps m) as Hl. apply proj1 in Hl.
-      spec Hl; try (rewrite Hrcv; left; reflexivity).
+      spec Hl; [by rewrite Hrcv; left |].
       destruct Hl as [[m0 Hm] Heq]. simpl in Heq. subst m0.
       apply received_messages_consistency in Hm; try assumption.
       exfalso. revert Hm.
@@ -883,7 +876,7 @@ Section Simple.
         apply received_messages_consistency;assumption.
       - intro H. apply received_messages_full;[assumption|].
         apply (received_messages_consistency s Hs m) in H.
-        exists (exist _ m H). reflexivity.
+        by exists (exist _ m H).
     Qed.
 
     Definition ComputableReceivedMessages_has_not_been_received
@@ -908,8 +901,7 @@ Section Simple.
       apply not_iff_compat.
       rewrite received_messages_full;[|assumption].
       unfold received_messages.
-      rewrite exists_proj1_sig.
-      reflexivity.
+      by rewrite exists_proj1_sig.
     Qed.
 
     Definition ComputableReceivedMessages_HasBeenReceivedCapability
@@ -1015,8 +1007,7 @@ Proof.
   destruct Horacle as [Hinits Hupdate].
   constructor; [assumption|].
   intros l s om s' om' Ht msg.
-  simpl; rewrite Hupdate, Heqv by eassumption.
-  reflexivity.
+  by simpl; rewrite Hupdate, Heqv.
 Qed.
 
 (**
@@ -1397,7 +1388,7 @@ Lemma trace_to_initial_state_has_no_inputs
   : forall item, In item tr -> input item = None.
 Proof.
   intros item Hitem.
-  destruct (input item) as [m|] eqn:Heqm; [|reflexivity].
+  destruct (input item) as [m|] eqn:Heqm; [| done].
   elim (selected_message_exists_in_all_traces_initial_state _ _ Hs (field_selector input) m).
   apply has_been_received_consistency; [assumption|apply initial_state_is_valid; assumption|].
   eexists _,_, Htr.
@@ -1843,7 +1834,7 @@ Section Composite.
   Proof.
     intros s m.
     apply (Decision_iff (P:=List.Exists (fun i => has_been_sent (IM i) (s i) m) (enum index))).
-    - rewrite Exists_finite. reflexivity.
+    - by rewrite Exists_finite.
     - typeclasses eauto.
   Qed.
 
@@ -1899,7 +1890,7 @@ Section Composite.
   Proof.
     intros s m.
     apply (Decision_iff (P:=List.Exists (fun i => has_been_received (IM i) (s i) m) (enum index))).
-    - rewrite Exists_finite. reflexivity.
+    - by rewrite Exists_finite.
     - typeclasses eauto.
   Qed.
 
@@ -1975,7 +1966,7 @@ Section Composite.
   Proof.
     intros s m.
     apply (Decision_iff (P:=List.Exists (fun i => has_been_observed (IM i) (s i) m) (enum index))).
-    - rewrite Exists_finite. reflexivity.
+    - by rewrite Exists_finite.
     - typeclasses eauto.
   Qed.
 
@@ -2102,7 +2093,7 @@ Section Composite.
     ; [contradict Hmi; apply no_initial_messages_in_IM |].
     apply (VLSM_incl_input_valid_transition (constraint_preloaded_free_incl IM _)) in Ht.
     apply pre_loaded_with_all_messages_projection_input_valid_transition_eq
-      with (j := i) in Ht; [|reflexivity]; cbn in Ht.
+      with (j := i) in Ht; [| done]; cbn in Ht.
     specialize (can_emit_signed i m).
     spec can_emit_signed; [eexists _,_,_; eassumption|].
     unfold channel_authenticated_message in can_emit_signed.
@@ -2541,8 +2532,7 @@ End Composite.
       apply elem_of_list_In.
       apply in_map_iff. exists item.
       apply elem_of_list_In in Hitem.
-      split; [|assumption].
-      destruct item; reflexivity.
+      by destruct item.
   Qed.
 
 Section cannot_resend_message.
@@ -2656,7 +2646,7 @@ Qed.
     apply proper_received; [assumption|].
     apply has_been_received_consistency; [assumption|assumption|].
     exists _,_,Htr.
-    apply Exists_app. right. apply Exists_cons. left. reflexivity.
+    by apply Exists_app; right; apply Exists_cons; left.
   Qed.
 
   Lemma lift_preloaded_trace_to_seeded
@@ -2703,15 +2693,14 @@ Qed.
       + apply initial_message_is_valid.
         right. apply Htrm.
         split.
-        * apply Exists_app. right;apply Exists_cons. left;reflexivity.
+        * by apply Exists_app; right; apply Exists_cons; left.
         * intro Hsent;destruct Hnot_sent.
           unfold trace_has_message in Hsent.
           rewrite Exists_app, Exists_cons, Exists_nil in Hsent.
           destruct Hsent as [Hsent|[[=->]|[]]];[assumption|exfalso].
           apply Hno_resend in Hx as Hx'.
           apply (proj2 Hx');clear Hx'.
-          rewrite (has_been_received_step_update Hx).
-          left;reflexivity.
+          by rewrite (has_been_received_step_update Hx); left.
   Qed.
 
   Lemma lift_preloaded_state_to_seeded
@@ -2752,7 +2741,7 @@ Qed.
       apply state_received_not_sent_invariant_trace_iff with is.
       apply valid_trace_add_last. assumption.
       apply last_error_destination_last.
-      destruct Hgen as [Hlst [Hs _]]. rewrite Hlst. subst. reflexivity.
+      destruct Hgen as [Hlst [Hs _]]. by rewrite Hlst; subst.
     }
     apply Hlift. assumption.
   Qed.
@@ -2875,9 +2864,7 @@ Section has_been_received_in_state.
     destruct tritem eqn:Heqtritem.
     simpl in Hintritem. subst input.
     eexists. eexists. eexists.
-    split.
-    2: { apply  Htr2. }
-    reflexivity.
+    by split; [| apply  Htr2].
   Qed.
 
   Lemma has_been_received_in_state_preloaded s1 m:
@@ -2912,9 +2899,7 @@ Section has_been_received_in_state.
     destruct tritem eqn:Heqtritem.
     simpl in Hintritem. subst input.
     eexists. eexists. eexists.
-    split.
-    2: { apply  Htr2. }
-    reflexivity.
+    by split; [| apply  Htr2].
   Qed.
 
 End has_been_received_in_state.

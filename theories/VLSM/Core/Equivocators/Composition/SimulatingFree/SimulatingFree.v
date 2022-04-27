@@ -118,15 +118,12 @@ Proof.
     { intro Hproject.
       exists s. split; [exact Hproject|].
       exists s. split; [exact Hproject|].
-      exists []. split; [reflexivity|].
-      split; [|reflexivity].
-      split; [|assumption].
+      exists []. split; [done |]. do 2 (split; [| done]).
       constructor.
       apply initial_state_is_valid. assumption.
     }
     apply functional_extensionality_dep_good.
-    subst.
-    reflexivity.
+    by subst.
   - destruct IHHtrX1 as [eqv_state_is [Hstate_start_project [eqv_state_s [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _ ]]]]]]].
     destruct IHHtrX2 as [eqv_msg_is [Hmsg_start_project [eqv_msg_s [_ [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg ]]]]]]].
     exists eqv_state_is. split; [assumption|].
@@ -162,7 +159,7 @@ Proof.
     specialize (Happ_extend  el iom es' om').
     apply valid_trace_get_last in Happ as Heqes.
     assert (Hes_pr_i : forall i, equivocators_total_state_project IM es i = s i)
-      by (rewrite <- Hes_pr; reflexivity).
+      by (rewrite <- Hes_pr; done).
     exists es'.
     assert (Het := Hesom').
     specialize (Hes_pr_i eqv) as Hes_pr_eqv.
@@ -187,7 +184,7 @@ Proof.
         unfold equivocators_total_state_project at 1.
         unfold equivocators_state_project.
         destruct (decide (i = eqv)).
-        * subst. rewrite !state_update_eq. reflexivity.
+        * by subst; rewrite !state_update_eq.
         * rewrite !state_update_neq by congruence.
           simpl. apply Hes_pr_i.
       }
@@ -208,14 +205,10 @@ Proof.
         subst el.
         unfold equivocators_total_trace_project.
         cbn. unfold equivocators_transition_item_project.
-        cbn.
-        rewrite !equivocator_state_project_zero.
-        rewrite decide_True by reflexivity.
-        simpl.
-        repeat f_equal.
-        assumption.
+        by cbn; rewrite !equivocator_state_project_zero, decide_True
+        ; cbn; repeat f_equal.
       - apply Hstate_trace.
-      - rewrite! finite_trace_last_output_is_last. reflexivity.
+      - by rewrite! finite_trace_last_output_is_last.
     }
     clear Happ_extend.
     apply valid_trace_last_pstate in Happ.
@@ -332,7 +325,7 @@ Proof.
     2: {
       exists []. exists eqv_state_s.
       split; [constructor; assumption|].
-      split; [reflexivity|].
+      split; [done |].
       split; [assumption|].
       exact I.
     }

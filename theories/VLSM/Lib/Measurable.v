@@ -53,7 +53,7 @@ Lemma sum_weights_subseteq
 Proof.
   induction vs; intros; try apply sum_weights_positive.
   specialize (sum_weights_in a vs' H0) as Hvs'.
-  spec Hvs'; try (apply H1; left; reflexivity).
+  spec Hvs'; [by apply H1; left |].
   rewrite Hvs'. simpl.
   apply Rplus_le_compat_l.
   inversion H. subst.  clear H.
@@ -83,6 +83,6 @@ Lemma sum_weights_app
   sum_weights (vs ++ vs') = (sum_weights vs + sum_weights vs')%R.
 Proof.
   induction vs; intros; simpl.
-  - rewrite Rplus_0_l. reflexivity.
-  - rewrite IHvs. rewrite Rplus_assoc. reflexivity.
+  - by rewrite Rplus_0_l.
+  - by rewrite IHvs, Rplus_assoc.
 Qed.

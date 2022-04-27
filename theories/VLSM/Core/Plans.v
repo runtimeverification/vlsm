@@ -65,11 +65,10 @@ Section apply_plans.
       fold_right _apply_plan_folder (start, seed_items) aitems = (final, items ++ seed_items).
   Proof.
     generalize dependent seed_items.
-    induction aitems; simpl; intros; try reflexivity.
+    induction aitems; simpl; intros; [done |].
     destruct (fold_right _apply_plan_folder (start, []) aitems) as (afinal, aitemsX).
-    rewrite IHaitems.
-    destruct a. simpl. destruct (transition label_a0 (afinal, input_a0)) as (dest, out).
-    reflexivity.
+    rewrite IHaitems; cbn.
+    by destruct a, (transition label_a0 (afinal, input_a0)) as [dest out].
   Qed.
 
   Definition _apply_plan
@@ -87,7 +86,7 @@ Section apply_plans.
     (after_a := _apply_plan start a)
     : finite_trace_last start (fst after_a) = snd after_a.
   Proof.
-    induction a using rev_ind; try reflexivity.
+    induction a using rev_ind; [done |].
     unfold after_a. clear after_a. unfold _apply_plan.
     rewrite rev_unit. unfold _apply_plan in IHa.
     simpl in *.
@@ -97,9 +96,7 @@ Section apply_plans.
     simpl.
     destruct x.
     destruct (transition label_a0 (final, input_a0)) as (dest,out) eqn:Ht.
-    unfold fst. unfold snd.
-    simpl.
-    rewrite finite_trace_last_is_last. reflexivity.
+    by simpl; rewrite finite_trace_last_is_last.
   Qed.
 
   Lemma _apply_plan_app
@@ -122,7 +119,7 @@ Section apply_plans.
     clear - Ha'.
     specialize (_apply_plan_folder_additive afinal (rev a') aitems) as Hadd.
     rewrite Ha' in Hadd.
-    rewrite Hadd. rewrite rev_app_distr. reflexivity.
+    by rewrite Hadd, rev_app_distr.
   Qed.
 
   Lemma _apply_plan_cons
@@ -246,8 +243,7 @@ Section valid_plans.
     (Htr : finite_valid_trace_from_to X s s' tr)
     : apply_plan s (trace_to_plan tr) = (tr, s').
   Proof.
-    induction Htr using finite_valid_trace_from_to_rev_ind
-    ;[reflexivity|].
+    induction Htr using finite_valid_trace_from_to_rev_ind; [done |].
     unfold trace_to_plan, _trace_to_plan.
     rewrite map_last, apply_plan_app.
     change (map _ tr) with (trace_to_plan tr).
@@ -255,8 +251,7 @@ Section valid_plans.
     unfold _transition_item_to_plan_item, apply_plan, _apply_plan.
     simpl.
     destruct Ht as [Hvx Hx].
-    replace (vtransition X l _) with (sf,oom) by (symmetry;apply Hx).
-    reflexivity.
+    by replace (vtransition X l _) with (sf, oom).
   Qed.
 
   Lemma trace_to_plan_to_trace
@@ -266,7 +261,7 @@ Section valid_plans.
     : fst (apply_plan s (trace_to_plan tr)) = tr.
   Proof.
     apply valid_trace_add_default_last, trace_to_plan_to_trace_from_to in Htr.
-    rewrite Htr. reflexivity.
+    by rewrite Htr.
   Qed.
 
   (** The plan extracted from a valid trace is valid w.r.t. the starting

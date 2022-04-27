@@ -268,7 +268,7 @@ Proof.
   intros [lY HlY].
   unfold pre_VLSM_projection_transition_item_project.
   rewrite HlY.
-  eexists; reflexivity.
+  by eexists.
 Qed.
 
 Lemma pre_VLSM_projection_transition_item_project_is_Some_rev
@@ -650,7 +650,7 @@ Lemma VLSM_weak_projection_valid_state
 Proof.
   specialize VLSM_weak_partial_projection_from_projection as Hpart_simul.
   specialize (VLSM_weak_partial_projection_valid_state Hpart_simul) as Hps.
-  intro sX. eapply Hps; reflexivity.
+  by intro sX; eapply Hps.
 Qed.
 
 Lemma VLSM_weak_projection_input_valid_transition
@@ -666,8 +666,7 @@ Proof.
     (Hivt s {| l := lX; input := im; destination := s'; output := om|}
       (state_project s) {| l := lY; input := im; destination := state_project s'; output := om|})
   ; [|assumption].
-  simpl. unfold pre_VLSM_projection_transition_item_project.
-  simpl. rewrite H. reflexivity.
+  by cbn; unfold pre_VLSM_projection_transition_item_project; cbn; rewrite H.
 Qed.
 
 Lemma VLSM_weak_projection_input_valid
@@ -691,7 +690,7 @@ Proof.
   apply valid_trace_forget_last in HtrX. subst.
   rewrite (final_state_project _ _ _ _ Hsimul).
   - apply valid_trace_add_default_last. revert HtrX.
-    apply Htr. reflexivity.
+    by apply Htr.
   - assumption.
 Qed.
 
@@ -804,7 +803,7 @@ Proof.
   specialize VLSM_partial_projection_from_projection as Hpart_simul.
   specialize (VLSM_partial_projection_finite_valid_trace_from Hpart_simul) as Hivt.
   intros sX trX.
-  apply Hivt. simpl. reflexivity.
+  by apply Hivt.
 Qed.
 
 Definition VLSM_projection_weaken : VLSM_weak_projection X Y label_project state_project :=
@@ -854,7 +853,7 @@ Lemma VLSM_projection_initial_state
 Proof.
   specialize VLSM_partial_projection_from_projection as Hpart_simul.
   specialize (VLSM_partial_projection_initial_state Hpart_simul) as His.
-  intro sX. eapply His; reflexivity.
+  by intro sX; eapply His.
 Qed.
 
 Lemma VLSM_projection_finite_valid_trace_init_to
@@ -1014,7 +1013,7 @@ Lemma pre_VLSM_full_projection_infinite_trace_project_infinitely_often
   : forall s, InfinitelyOften (is_Some ∘ (Some ∘ label_project ∘ l)) s.
 Proof.
   cofix H. intros (a, s). constructor; simpl; [|apply H].
-  apply Streams.Here. eexists; reflexivity.
+  apply Streams.Here. by eexists.
 Qed.
 
 Lemma pre_VLSM_full_projection_infinite_trace_project_EqSt
@@ -1030,10 +1029,8 @@ Lemma pre_VLSM_full_projection_finite_trace_last
     state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX) (pre_VLSM_full_projection_finite_trace_project trX).
 Proof.
   intros.
-  destruct_list_last trX trX' lst HtrX
-  ; [reflexivity|].
-  setoid_rewrite map_app. simpl. rewrite !finite_trace_last_is_last.
-  reflexivity.
+  destruct_list_last trX trX' lst HtrX; [done |].
+  by setoid_rewrite map_app; cbn; rewrite !finite_trace_last_is_last.
 Qed.
 
 Lemma pre_VLSM_full_projection_finite_trace_last_output :
@@ -1043,9 +1040,8 @@ Lemma pre_VLSM_full_projection_finite_trace_last_output :
     finite_trace_last_output (pre_VLSM_full_projection_finite_trace_project trX).
 Proof.
   intros trX.
-  destruct_list_last trX trX' lst HtrX; [reflexivity|].
-  setoid_rewrite map_app; simpl; rewrite !finite_trace_last_output_is_last.
-  reflexivity.
+  destruct_list_last trX trX' lst HtrX; [done |].
+  by setoid_rewrite map_app; simpl; rewrite !finite_trace_last_output_is_last.
 Qed.
 
 End pre_definitions.
@@ -1252,7 +1248,7 @@ Lemma VLSM_full_projection_projection_type
   : VLSM_projection_type X (type Y) (fun l => Some (label_project l)) state_project.
 Proof.
   split; intros.
-  - destruct_list_last trX trX' lstX Heq; [reflexivity|].
+  - destruct_list_last trX trX' lstX Heq; [done |].
     apply (pre_VLSM_full_projection_finite_trace_last _).
 Qed.
 
@@ -1312,9 +1308,8 @@ Lemma VLSM_weak_full_projection_input_valid_transition
   input_valid_transition Y (label_project l) (state_project s,im) (state_project s',om).
 Proof.
   intros.
-  apply (VLSM_weak_projection_input_valid_transition VLSM_weak_full_projection_is_projection)
-    with (lY := label_project l) in H
-  ; [assumption|reflexivity].
+  by apply (VLSM_weak_projection_input_valid_transition VLSM_weak_full_projection_is_projection)
+      with (lY := label_project l) in H.
 Qed.
 
 Lemma VLSM_weak_full_projection_input_valid l s im
@@ -1656,7 +1651,7 @@ Lemma VLSM_incl_full_projection_iff
   : VLSM_incl X Y <-> VLSM_full_projection X Y id id.
 Proof.
   assert (Hid : forall tr, tr = pre_VLSM_full_projection_finite_trace_project _ _ id id tr).
-  { induction tr; [reflexivity|]. destruct a. simpl. f_equal. assumption. }
+  { induction tr; [done |]. destruct a. simpl. f_equal. assumption. }
   split.
   - constructor; intros.
     apply (proj1 (VLSM_incl_finite_traces_characterization (machine X) (machine Y)) H) in H0.
@@ -1682,9 +1677,9 @@ Lemma VLSM_incl_is_full_projection_finite_trace_project
   : forall tr,
     VLSM_full_projection_finite_trace_project (VLSM_incl_is_full_projection Hincl) tr = tr.
 Proof.
-  induction tr; [reflexivity|].
+  induction tr; [done |].
   simpl. f_equal; [|assumption].
-  destruct a; reflexivity.
+  by destruct a.
 Qed.
 
 End VLSM_equality.
@@ -1908,7 +1903,7 @@ Proof.
   apply Streams.ntheq_eqst.
   unfold VLSM_full_projection_infinite_trace_project, pre_VLSM_full_projection_infinite_trace_project.
   intro n. rewrite Streams.Str_nth_map.
-  destruct (Streams.Str_nth _ _). reflexivity.
+  by destruct (Streams.Str_nth _ _).
 Qed.
 
 Lemma VLSM_incl_infinite_valid_trace
@@ -2131,17 +2126,16 @@ Proof.
   constructor.
   intros is tr Htr.
   induction Htr using finite_valid_trace_from_rev_ind
-  ; [reflexivity|].
+  ; [done |].
   rewrite (pre_VLSM_projection_trace_project_app _ _ label_project state_project).
   rewrite finite_trace_last_is_last.
   rewrite finite_trace_last_app, <- IHHtr.
   clear IHHtr.
   simpl.
   unfold pre_VLSM_projection_transition_item_project.
-  destruct (label_project _) as [lY|] eqn:Hl; [reflexivity|].
+  destruct (label_project _) as [lY |] eqn: Hl; [done |].
   apply (Htransition_None _ Hl) in Hx.
-  rewrite Hx.
-  reflexivity.
+  by rewrite Hx.
 Qed.
 
 End basic_VLSM_projection_type.
@@ -2286,17 +2280,16 @@ Proof.
   constructor.
   intros is tr Htr.
   induction Htr using finite_valid_trace_from_rev_ind
-  ; [reflexivity|].
+  ; [done |].
   rewrite (@pre_VLSM_projection_trace_project_app _ (type (pre_loaded_with_all_messages_vlsm X)) (type Y) label_project state_project).
   rewrite finite_trace_last_is_last.
   rewrite finite_trace_last_app, <- IHHtr.
   clear IHHtr.
   simpl.
   unfold pre_VLSM_projection_transition_item_project.
-  destruct (label_project _) as [lY|] eqn:Hl; [reflexivity|].
+  destruct (label_project _) as [lY|] eqn:Hl; [done |].
   apply proj2, (Htransition_None _ Hl) in Hx.
-  rewrite Hx.
-  reflexivity.
+  by rewrite Hx.
 Qed.
 
 Lemma basic_VLSM_projection_preloaded
@@ -2349,17 +2342,16 @@ Proof.
   constructor.
   intros is tr Htr.
   induction Htr using finite_valid_trace_from_rev_ind
-  ; [reflexivity|].
+  ; [done |].
   rewrite (@pre_VLSM_projection_trace_project_app _ (type (pre_loaded_vlsm X P)) (type Y) label_project state_project).
   rewrite finite_trace_last_is_last.
   rewrite finite_trace_last_app, <- IHHtr.
   clear IHHtr.
   simpl.
   unfold pre_VLSM_projection_transition_item_project.
-  destruct (label_project _) as [lY|] eqn:Hl; [reflexivity|].
+  destruct (label_project _) as [lY|] eqn:Hl; [done |].
   apply proj2, (Htransition_None _ Hl) in Hx.
-  rewrite Hx.
-  reflexivity.
+  by rewrite Hx.
 Qed.
 
 Lemma basic_VLSM_projection_preloaded_with
@@ -3005,16 +2997,14 @@ Lemma projection_induced_vlsm_is_projection
   : VLSM_projection X projection_induced_vlsm label_project state_project.
 Proof.
   apply basic_VLSM_projection; intro; intros.
-  - exists lX, s.
-    split; [assumption|].
-    split; [reflexivity|assumption].
+  - by exists lX, s.
   - specialize (Htransition_Some _ _ H _ _ _ _ H0).
     cbn.
     destruct (vtransition _ _ _) as (s2', om2').
     specialize (Htransition_Some _ _ eq_refl) as [Heqs Heqom].
-    subst. rewrite Heqs. reflexivity.
+    by subst; rewrite Heqs.
   - apply (Htransition_None _ H _ _ _ _ H0).
-  - exists s. split; [reflexivity|assumption].
+  - by exists s.
   - destruct Hv as [_ [Hm _]].
     apply initial_message_is_valid.
     assumption.
@@ -3071,7 +3061,7 @@ Lemma induced_projection_trace_lift
     (pre_VLSM_full_projection_finite_trace_project _ _ label_lift state_lift tr)
     = tr.
 Proof.
-  induction tr; [reflexivity|].
+  induction tr; [done |].
   simpl.
   rewrite induced_projection_transition_item_lift.
   f_equal.

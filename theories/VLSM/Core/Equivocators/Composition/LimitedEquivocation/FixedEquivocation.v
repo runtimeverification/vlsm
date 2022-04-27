@@ -458,12 +458,12 @@ Proof.
   subst len_tr.
   destruct_list_last tr tr' lst Htr_lst.
   - clear IHlen. subst. exists [], final_descriptors.
-    split; [assumption|]. split; [reflexivity|]. split; [reflexivity|].
+    split; [assumption|]. split; [done |]. split; [done |].
     remember (equivocators_state_project IM final_descriptors is) as isx.
     cut (vinitial_state_prop X' isx).
     { intro His. split; [|assumption]. constructor.
       apply valid_state_prop_iff. left.
-      exists (exist _ _ His). reflexivity.
+      by exists (exist _ _ His).
     }
     subst.
     apply fixed_equivocators_initial_state_project; [|apply Hproper].
@@ -526,7 +526,7 @@ Proof.
       rewrite equivocators_trace_project_folder_additive with (trX := trX') (eqv_descriptors := initial_descriptors)
       ; [|assumption].
       split; [assumption|].
-      split; [reflexivity|].
+      split; [done |].
       rewrite finite_trace_last_is_last.
       unfold final_state. subst tr.
       rewrite finite_trace_last_is_last.
@@ -590,10 +590,8 @@ Proof.
     + exists trX'. exists initial_descriptors. subst foldx. split; [assumption|].
       split; [apply Htr_project|]. split; [|assumption].
       subst tr. clear -Hstate_project Hx.
-      rewrite Hstate_project in Hx.
-      rewrite <- Hx. f_equal. unfold final_state.
-      rewrite finite_trace_last_is_last.
-      reflexivity.
+      unfold final_state.
+      by rewrite <- Hstate_project, <- Hx, finite_trace_last_is_last.
 Qed.
 
 (** Instantiating the lemma above with the free constraint.
@@ -724,10 +722,10 @@ Proof.
   unfold equivocator_vlsm_transition_item_project in Hpr.
   rewrite state_update_eq in Hpr.
   rewrite equivocator_state_project_zero in Hpr.
-  rewrite decide_True in Hpr by reflexivity.
+  rewrite decide_True in Hpr by done.
   inversion Hpr. subst. clear Hpr.
   inversion Hpr_pre_item. subst. clear Hpr_pre_item.
-  constructor. reflexivity.
+  by constructor.
 Qed.
 
 (**
@@ -846,7 +844,7 @@ Proof.
     rewrite finite_trace_last_is_last in Hfuture.
     eexists.
     apply valid_trace_add_last;[apply Hfuture|].
-    rewrite finite_trace_last_is_last;reflexivity.
+    by rewrite finite_trace_last_is_last.
   }
   eapply (in_futures_reflects_fixed_equivocation) in Hfutures; [|eassumption].
   destruct (free_equivocators_valid_trace_project final_descriptors' is pre Hfinal' (conj Hpre His))
@@ -855,7 +853,7 @@ Proof.
   clear _Htr_project.
   unfold from_sub_projection, pre_VLSM_projection_in_projection,
     composite_label_sub_projection_option.
-  case_decide as Hl; [eexists; reflexivity|].
+  case_decide as Hl; [by eexists |].
   contradict Heqv.
   apply composite_has_been_observed_free_iff.
   eapply in_futures_preserving_oracle_from_stepwise; cycle 2
@@ -1333,8 +1331,7 @@ Proof.
      ) as Hsim.
     spec Hsim.
     { simpl. rewrite decide_True by apply zero_descriptor_not_equivocating.
-      rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
-      reflexivity.
+      by rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
     }
     apply Hsim in HtrX.
     remember (pre_VLSM_projection_trace_project _ _ _ _ _) as tr.

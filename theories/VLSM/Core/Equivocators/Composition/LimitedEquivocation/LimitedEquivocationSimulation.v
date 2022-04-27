@@ -139,7 +139,7 @@ Proof.
      in HtrX as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput)
   ; [| assumption].
   exists is, s, tr; subst; split_and!; try itauto.
-  - erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last; reflexivity.
+  - by erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last.
   - rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
 Qed.
 
