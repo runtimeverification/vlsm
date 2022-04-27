@@ -1205,7 +1205,7 @@ Proof.
   apply (finite_trace_projection_list_in_rev IM) in Hx.
   destruct Hx as [itemX [HitemX [Houtput _]]].
   apply Exists_exists. exists itemX. split; [done |].
-  by cbn; rewrite Houtput.
+  by simpl; rewrite Houtput.
 Qed.
 
 Lemma equivocators_trace_project_output_reflecting_iff

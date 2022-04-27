@@ -135,7 +135,7 @@ Proof.
     unfold not_heavy, Equivocation.not_heavy,
       equivocation_fault, Equivocation.equivocation_fault.
     replace (Equivocation.equivocating_validators is) with (@nil index).
-    + destruct threshold as [t Ht]; cbn. by apply Rge_le.
+    + by destruct threshold as [t Ht]; simpl; apply Rge_le.
     + symmetry. apply set_eq_empty_iff.
       specialize (equivocating_indices_equivocating_validators IM is).
       by rewrite equivocating_indices_initially_empty.

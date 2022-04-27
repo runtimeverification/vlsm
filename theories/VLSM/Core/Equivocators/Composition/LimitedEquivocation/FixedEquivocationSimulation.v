@@ -179,7 +179,7 @@ Proof.
     exists (pred (length im_etr)).
     by induction im_etr as [| ?[]].
   - apply last_error_destination_last.
-    by rewrite Hlast; cbn; f_equal.
+    by rewrite Hlast; simpl; f_equal.
 Qed.
 
 (** Messages satisfying the [strong_fixed_equivocation_constraint] have the

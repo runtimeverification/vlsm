@@ -359,7 +359,7 @@ Proof.
     apply Exists_app. right.
     unfold VLSM_full_projection_finite_trace_project, pre_VLSM_full_projection_finite_trace_project.
     rewrite! map_app.
-    by apply Exists_app; cbn; right; left.
+    by apply Exists_app; simpl; right; left.
 Qed.
 
 End seeded_all_equivocating.

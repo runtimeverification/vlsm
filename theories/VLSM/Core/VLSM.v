@@ -1064,7 +1064,7 @@ prove or decompose the above properties in proofs.
     Proof.
       generalize dependent s. generalize dependent tr.
       induction tr1.
-      - intros tr Heq s Htr. cbn in Heq; subst. by inversion Htr; subst.
+      - by intros tr [= ->] s; inversion 1.
       - specialize (IHtr1 (tr1 ++ [te] ++ tr2) eq_refl).
         intros tr Heq is Htr; subst. inversion Htr; subst.
         rewrite finite_trace_last_cons.
@@ -2195,7 +2195,7 @@ This relation is often used in stating safety and liveness properties.*)
       destruct tr as [tr Htr]. simpl in *.
       generalize dependent tr. generalize dependent last.
       apply (rev_ind (fun prefix => forall (last : transition_item) (tr : Trace), valid_trace_prop tr -> trace_prefix tr last prefix -> finite_valid_trace (trace_first tr) (prefix ++ [last]))).
-      - by intros last tr Htr Hprefix; destruct tr as [ | ]; unfold trace_prefix in Hprefix;   simpl in Hprefix
+      - by intros last tr Htr Hprefix; destruct tr as [ | ]; unfold trace_prefix in Hprefix; simpl in Hprefix
         ; destruct Hprefix as [suffix Heq]; subst; destruct Htr as [Htr Hinit]
         ; unfold trace_first; simpl; constructor; try done
         ; inversion Htr; subst; clear Htr
