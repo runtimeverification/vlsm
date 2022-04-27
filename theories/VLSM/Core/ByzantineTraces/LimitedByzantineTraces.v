@@ -208,9 +208,8 @@ Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating 
 Proof.
   intros [Hlimit Hfixed].
   eexists _, _; split.
-  - apply (VLSM_full_projection_finite_valid_trace
+  - by apply (VLSM_full_projection_finite_valid_trace
             (limited_PreNonByzantine_vlsm_lift byzantine Hlimit)).
-    exact Hfixed.
   - unfold lift_sub_state.
     rewrite composite_state_sub_projection_lift_to.
     split; [done |].

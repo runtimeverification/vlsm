@@ -405,7 +405,7 @@ Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
       : VLSM_full_projection (IM j) free_composite_vlsm (lift_to_composite_label j) (lift_to_composite_state j).
     Proof.
       apply basic_VLSM_strong_full_projection; intro; intros.
-      - split; [|exact I]. simpl.
+      - split; [| done]. simpl.
         unfold lift_to_composite_state. rewrite state_update_eq. apply H.
       - unfold vtransition. simpl. unfold lift_to_composite_state at 1.
         rewrite state_update_eq. replace (vtransition _ _ _) with (s', om').
@@ -633,8 +633,7 @@ Lemma [basic_VLSM_incl]
       (constraint : composite_label -> composite_state  * option message -> Prop)
       : VLSM_incl (pre_loaded_with_all_messages_vlsm (composite_vlsm constraint)) (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
     Proof.
-      apply preloaded_constraint_subsumption_incl.
-      intro; intros; exact I.
+      by apply preloaded_constraint_subsumption_incl.
     Qed.
 
     (* TODO(traiansf): There are many places where, because the lemma below
@@ -673,7 +672,7 @@ Lemma [basic_VLSM_incl]
       : VLSM_full_projection (pre_loaded_with_all_messages_vlsm (IM j)) (pre_loaded_with_all_messages_vlsm free_composite_vlsm) (lift_to_composite_label j) (lift_to_composite_state j).
     Proof.
       apply basic_VLSM_full_projection_preloaded.
-      - intro; intros. split; [|exact I]. simpl.
+      - intro; intros. split; [| done]. simpl.
         unfold lift_to_composite_state. rewrite state_update_eq. apply H.
       - intro; intros. unfold vtransition. simpl. unfold vtransition. simpl. unfold lift_to_composite_state at 1.
         rewrite state_update_eq. replace (transition l _) with (s', om').
@@ -792,7 +791,7 @@ Lemma [basic_VLSM_incl]
             (valid_generated_state_message free_composite_vlsm _ _ Hs _ _ Hom  (existT j lj))
             as Hgen.
           spec Hgen.
-          { split; try exact I. simpl. by rewrite state_update_neq. }
+          { split; [| done]. simpl. by rewrite state_update_neq. }
           simpl in Hgen.
           rewrite state_update_neq in Hgen; [| done].
           rewrite Htj in Hgen.
@@ -1490,7 +1489,7 @@ Proof.
   clear Heq1.
   specialize (same_IM_full_projection (free_constraint IM1) (free_constraint IM2))
     as Hproj.
-  spec Hproj. { intros. exact I. }
+  spec Hproj; [done |].
   specialize (Hproj (fun _ => True)).
   apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr1.
   specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM2)) as Heq2.

@@ -116,8 +116,8 @@ Proof.
     remember (lift_to_equivocators_state IM is) as s.
     cut (equivocators_state_project IM (zero_descriptor IM) s = is).
     { intro Hproject.
-      exists s. split; [exact Hproject|].
-      exists s. split; [exact Hproject|].
+      exists s. split; [done |].
+      exists s. split; [done |].
       exists []. split; [done |]. do 2 (split; [| done]).
       constructor.
       by apply initial_state_is_valid.
@@ -134,7 +134,7 @@ Proof.
       as Hreplay.
     spec Hreplay.
     { clear -Heqiom Hfinal_msg.
-      destruct iom as [im|]; [|exact I].
+      destruct iom as [im|]; [| done].
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' item Heqiom_tr.
       - by right.
@@ -188,15 +188,15 @@ Proof.
           simpl. apply Hes_pr_i.
       }
       split; [done |].
-      eexists; split; [|split;[split; [exact Happ_extend|]|]].
+      eexists; split; [| split; [split; [done |] |]].
       - apply valid_trace_forget_last in Happ_extend.
         apply (VLSM_incl_finite_valid_trace_from HinclE) in Happ_extend.
         rewrite (equivocators_total_trace_project_app IM)
-          by (eexists; exact Happ_extend).
+          by (eexists; done).
         apply valid_trace_forget_last in Happ.
         apply (VLSM_incl_finite_valid_trace_from HinclE) in Happ.
         rewrite (equivocators_total_trace_project_app IM)
-          by (eexists; exact Happ).
+          by (eexists; done).
         rewrite Hemsg_tr_pr.
         rewrite app_nil_r.
         rewrite Hstate_project.
@@ -310,7 +310,7 @@ Proof.
     (generalized_equivocators_finite_valid_trace_init_to_rev IM)
   ; [..| done].
   - intro; intros. split; [| done].
-    destruct om; [|exact I].
+    destruct om; [| done].
     destruct Hom as [Hsent|Hinitial]; [by left |].
     right.
     destruct Hinitial as [[i [[mi Hmi] Him]]|Hseeded]; [exfalso | done].
@@ -332,7 +332,7 @@ Proof.
       as Hmsg_trace_full_replay.
     remember (all_equivocating_replayed_trace_from _ _ _ ) as emsg_tr.
     apply valid_trace_add_default_last in Hmsg_trace_full_replay.
-    eexists _,_; split; [exact Hmsg_trace_full_replay|].
+    eexists _,_; split; [done |].
     subst.
     unfold all_equivocating_replayed_trace_from.
     rewrite

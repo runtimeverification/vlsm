@@ -561,7 +561,7 @@ Definition Forall_hd
   (Hs : Forall P (a :: l))
   : P a.
 Proof.
-  inversion Hs. subst. exact H1.
+  by inversion Hs.
 Defined.
 
 Definition Forall_tl
@@ -572,7 +572,7 @@ Definition Forall_tl
   (Hs : Forall P (a :: l))
   : Forall P l.
 Proof.
-  inversion Hs. subst. exact H2.
+  by inversion Hs.
 Defined.
 
 Fixpoint list_annotate
@@ -1918,18 +1918,16 @@ Proof.
         (fun l => match l with | a :: b :: _ => R a b | _ => True end)
         (fun l => (∀ (n : nat) (a b : A),
           l !! n = Some a → l !! (S n) = Some b → R a b))); intros.
-    + specialize (H 0).
-      destruct l0 as [|a l0]; [exact I|].
-      destruct l0 as [|b l0]; [exact I|].
-      exact (H a b eq_refl eq_refl).
-    + exact (H (S n) a0 b H0 H1).
+    + destruct l0 as [| a [| b l0']]; [done | done |].
+      by apply (H 0).
+    + by apply (H (S n)).
 Qed.
 
 Lemma fsFurther2_transitive [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
   : forall a b l, ForAllSuffix2 R (a::b::l) -> ForAllSuffix2 R (a::l).
 Proof.
   inversion 1. subst. destruct l.
-  - constructor; [exact I|]. constructor. exact I.
+  - by repeat constructor.
   - inversion H3. subst.
     constructor; [| done].
     by transitivity b.
@@ -1958,7 +1956,7 @@ Lemma ForAllSuffix2_filter [A : Type] (R : A -> A -> Prop) `{HT : Transitive _ R
   (P : A -> Prop) {Pdec : forall a, Decision (P a)}
   : forall l, ForAllSuffix2 R l -> ForAllSuffix2 R (filter P l).
 Proof.
-  induction l; [exact id|].
+  induction l; [done |].
   intro Hl.
   unfold filter. simpl.
   spec IHl; [by apply fsFurther in Hl |].

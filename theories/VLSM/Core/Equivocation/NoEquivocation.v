@@ -266,7 +266,7 @@ Section seeded_composite_vlsm_no_equivocation_definition.
     match type of Hprev with
     | VLSM_incl (mk_vlsm ?m) _ => apply VLSM_incl_trans with m
     end
-    ; [apply pre_loaded_vlsm_incl; intros; exact I|].
+    ; [by apply pre_loaded_vlsm_incl |].
     match type of Hprev with
     | VLSM_incl _ (mk_vlsm ?m) => apply VLSM_incl_trans with m
     end

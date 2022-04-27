@@ -170,9 +170,9 @@ Proof.
       specialize (equivocator_vlsm_trace_project_inv X btr) as Hinv.
       spec Hinv. { by destruct bprefix; subst. }
       spec Hinv i.
-      spec Hinv. { subst. eexists; exact Htr. }
+      spec Hinv; [by subst; eexists |].
       specialize (Hinv bs) as [lst_i Hlst_i].
-      eexists; exact Hlst_i.
+      by eexists.
 Qed.
 
 (**

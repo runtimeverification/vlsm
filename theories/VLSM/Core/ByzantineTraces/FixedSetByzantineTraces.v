@@ -331,7 +331,7 @@ Proof.
       A sender fixed_byzantine_IM_sender_safety
       fixed_byzantine_IM_no_initial_messages fixed_byzantine_IM_preserves_channel_authentication)
     in Hv as Hnoequiv.
-  destruct om as [m|]; [|exact I].
+  destruct om as [m|]; [| done].
   destruct Hnoequiv as [Hsent|Hseeded].
   - by left.
   - right.
@@ -380,7 +380,7 @@ Proof.
   - by apply lift_sub_valid.
   - clear -Hsender_safety Hc HsX.
     cbn; destruct om as [m |]; [| trivial].
-    destruct (sender m) as [v |] eqn: Hsender; [| exact I]; cbn.
+    destruct (sender m) as [v |] eqn: Hsender; [| done]; cbn.
     case_decide as HAv; [| trivial].
     cbn in Hc; destruct Hc as [Hsent | Hseeded].
     + unfold lift_sub_state.
@@ -427,14 +427,14 @@ Proof.
     apply dec_stable in Hi.
     spec Hgen (message_as_byzantine_label m i Hi).
     spec Hgen.
-    { split; [|exact I].
+    { split; [| done].
       cbn. unfold fixed_byzantine_IM, update_IM. simpl.
       by rewrite @decide_True.
     }
     cbn in Hgen.
     destruct (vtransition _ _ _) as (si', _om) eqn:Ht.
     specialize (Hgen _ _ eq_refl).
-    replace _om with (Some m) in Hgen; [eexists; exact Hgen|].
+    replace _om with (Some m) in Hgen; [by eexists |].
     clear -Ht.
     revert si' Ht.
     unfold fixed_byzantine_IM, update_IM.
@@ -556,8 +556,8 @@ Proof.
     in Hv as Hstrong_v.
   destruct Hv as (Hs & Hom & Hv & Hc).
   destruct om; [| trivial].
-  cbn; destruct (sender m) as [v |] eqn: Hsender; [| exact I]; cbn.
-  case_decide as HAv; [| trivial].
+  cbn; destruct (sender m) as [v |] eqn: Hsender; [| done]; cbn.
+  case_decide as HAv; [| done].
   unfold sub_IM; cbn.
   apply (VLSM_incl_valid_state (constraint_free_incl IM (fixed_equivocation_constraint IM selection))) in Hs.
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))) in Hs.
@@ -595,7 +595,7 @@ Proof.
     split.
     + revert Hv.
       apply induced_sub_projection_valid_preservation.
-    + split; [| exact I].
+    + split; [| done].
       apply sub_IM_no_equivocation_preservation in Hv as Hnoequiv.
       2-4: done.
       destruct om as [m |]; [| done].
@@ -639,7 +639,7 @@ Proof.
   intros l s om Hv HsY HomY.
   split.
   - apply lift_sub_valid. apply Hv.
-  - destruct om as [m|]; [|exact I].
+  - destruct om as [m|]; [| done].
     apply proj2 in Hv as Hc.
     destruct Hc as [_ [_ [Hc _]]].
     destruct Hc as [Hsent | Hseeded].

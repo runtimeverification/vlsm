@@ -533,9 +533,8 @@ to define a valid message property for optional messages:
       : option_valid_message_prop None.
     Proof.
       exists (proj1_sig (vs0 X)).
-      apply valid_initial_state_message.
+      apply valid_initial_state_message; [| done].
       apply proj2_sig.
-      exact I.
     Qed.
 
     Lemma option_valid_message_Some
@@ -2556,7 +2555,7 @@ Byzantine fault tolerance analysis.
     : valid_state_message_prop pre_loaded_with_all_messages_vlsm (proj1_sig (vs0 X)) om.
   Proof.
     apply valid_initial_state_message;[apply proj2_sig|].
-    destruct om;exact I.
+    by destruct om.
   Qed.
 
   Lemma pre_loaded_with_all_messages_valid_state_message_preservation
@@ -2628,10 +2627,8 @@ Byzantine fault tolerance analysis.
   Proof.
     induction 1.
     - refine (valid_initial_state_message pre_loaded_with_all_messages_vlsm s Hs om _).
-      destruct om;exact I.
-    - exact (valid_generated_state_message pre_loaded_with_all_messages_vlsm
-                                _ _ IHvalid_state_message_prop1
-                                _ _ IHvalid_state_message_prop2 l0 Hv _ _ Ht).
+      by destruct om.
+    - eapply valid_generated_state_message; cycle 2; eauto.
   Qed.
 
   Lemma preloaded_weaken_input_valid_transition

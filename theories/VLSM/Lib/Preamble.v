@@ -686,7 +686,9 @@ Lemma strictorder_option
   (Xsc : StrictlyComparable X)
   : CompareStrictOrder (option_compare (@compare X _)).
 Proof.
-  split; exact (option_compare_reflexive X) || exact (option_compare_transitive X).
+  split.
+  - apply option_compare_reflexive.
+  - apply option_compare_transitive.
 Qed.
 
 (* Now we can have the following for free : *)
@@ -714,13 +716,9 @@ Definition compare_compose (X Y : Type) `{StrictlyComparable X} `{StrictlyCompar
     end.
 
 (* Constructing the inhabited proof *)
-Lemma inhabited_compose {X Y : Type} `{HscX : StrictlyComparable X} `{HscY : StrictlyComparable Y}
-  : X * Y.
-Proof.
-  remember (@inhabited _ HscX ) as x.
-  remember (@inhabited _ HscY) as y.
-  exact (x,y).
-Qed.
+Definition inhabited_compose
+  {X Y : Type} `{HscX : StrictlyComparable X} `{HscY : StrictlyComparable Y}
+  : X * Y := (inhabited, inhabited).
 
 (* Constructing the strictorder proof *)
 Lemma reflexive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareReflexive (compare_compose X Y).
@@ -784,7 +782,9 @@ Qed.
 
 Lemma strictorder_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareStrictOrder (compare_compose X Y).
 Proof.
-  split; exact reflexive_compose || exact transitive_compose.
+  split.
+  - apply reflexive_compose.
+  - apply transitive_compose.
 Qed.
 
 (* Now we can have the following for free : *)
@@ -804,8 +804,7 @@ Definition triple_strictly_comparable_proj1_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : X.
 Proof.
-  destruct HscXYZ as [((x, y), z) _ _].
-  exact x.
+  by destruct HscXYZ as [((x, _), _) _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj1_compare
@@ -848,8 +847,7 @@ Definition triple_strictly_comparable_proj2_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : Y.
 Proof.
-  destruct HscXYZ as [[(x, y) z] _ _].
-  exact y.
+  by destruct HscXYZ as [[(_, y) _] _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj2_compare
@@ -892,8 +890,7 @@ Definition triple_strictly_comparable_proj3_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : Z.
 Proof.
-  destruct HscXYZ as [[(x, y) z] _ _].
-  exact z.
+  by destruct HscXYZ as [[_ z] _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj3_compare

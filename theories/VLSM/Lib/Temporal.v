@@ -111,7 +111,7 @@ Lemma refutation [A:Type] [R:A -> A-> Prop] (HR: well_founded R)
   pose proof (use_eventually H HF).
   destruct H1 as [[a' s'] [Ha' H1']].
   simpl in Ha'.
-  exact (H0 a' Ha' (Cons a' s') (eq_refl a') H1').
+  by eapply H0; eauto.
 Qed.
 
 Lemma forall_forever: forall [A B:Type] (P: A -> Stream B -> Prop) [s: Stream B],

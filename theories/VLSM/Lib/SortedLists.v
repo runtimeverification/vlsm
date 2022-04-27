@@ -120,10 +120,10 @@ Lemma LocallySorted_ForAll2 [A : Type] (R : A -> A -> Prop)
   : forall l, LocallySorted R l <-> ForAllSuffix2 R l.
 Proof.
   induction l; split; intro Hl.
-  - constructor. exact I.
+  - by constructor.
   - constructor.
   - inversion Hl; subst.
-    + constructor; [exact I|]. constructor. exact I.
+    + by repeat constructor.
     + apply IHl in H1. by constructor.
   - apply proj2 in IHl. inversion Hl; subst.
     destruct l; constructor; auto.

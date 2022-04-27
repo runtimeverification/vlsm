@@ -225,7 +225,7 @@ Lemma equivocators_composition_for_observed_index_incl_full_projection
     (equivocators_composition_for_observed IM indices2 s)
     (lift_sub_incl_label IM _ _ Hincl) (lift_sub_incl_state IM _ _).
 Proof.
-  apply lift_sub_incl_preloaded_full_projection. intro. exact id.
+  by apply lift_sub_incl_preloaded_full_projection.
 Qed.
 
 Lemma fixed_equivocation_index_incl_subsumption
@@ -246,7 +246,7 @@ Lemma fixed_equivocation_constraint_index_incl_subsumption
     (fixed_equivocation_constraint IM indices1)
     (fixed_equivocation_constraint IM indices2).
 Proof.
-  intros l (s, [m|]); [|exact id].
+  intros l (s, [m |]); [| done].
   apply fixed_equivocation_index_incl_subsumption.
 Qed.
 
@@ -449,7 +449,7 @@ Proof.
   destruct (decide (projT1 l ∈ equivocators)).
   - apply
       (fixed_input_valid_transition_sub_projection_helper Hs_pr _ e) in Ht.
-    right. eexists _,_,_. exact Ht.
+    by right; eexists _,_,_.
   - left.
     exists (projT1 l). split; [done |].
     apply (VLSM_projection_in_futures
@@ -526,7 +526,7 @@ Proof.
       * rewrite app_nil_r;
         replace (composite_state_sub_projection _ _ sf)
            with (composite_state_sub_projection IM equivocators s)
-        ; [exact Htr_pr |].
+        ; [done |].
         destruct Ht as [_ Ht]; cbn in Ht;
         destruct l as (i, li), (vtransition _ _ _) as (si', om');
         inversion_clear Ht; clear -Hl.
@@ -555,8 +555,7 @@ Proof.
   apply fixed_finite_valid_trace_sub_projection_helper with (base_s := f) in Htr as Htr_pr.
   - split; [apply Htr_pr|].
     apply proj2 in Htr.
-    specialize (composite_initial_state_sub_projection IM equivocators is Htr).
-    exact id.
+    by specialize (composite_initial_state_sub_projection IM equivocators is Htr).
   - apply in_futures_refl. apply valid_trace_last_pstate in Htr.
     by apply (VLSM_incl_valid_state Fixed_incl_Preloaded).
 Qed.
@@ -700,7 +699,7 @@ Lemma fixed_strong_equivocation_subsumption
     (strong_fixed_equivocation_constraint IM equivocators).
 Proof.
   intros l (s, om) Hv.
-  destruct om as [m|]; [|exact I].
+  destruct om as [m |]; [| done].
   apply proj1 in Hv as Hs.
   by eapply fixed_input_has_strong_fixed_equivocation.
 Qed.
@@ -847,7 +846,7 @@ Proof.
     unfold remove_equivocating_state_project, lift_sub_state_to.
     case_decide as Hi.
     + exact (Heqv_is (dexist i Hi)).
-    + exact (Hs i).
+    + apply Hs.
   - by intros m H2.
 Qed.
 
@@ -916,7 +915,7 @@ Proof.
     + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
       destruct_dec_sig i j Hj Heq; subst i; cbn; unfold sub_IM; cbn.
       by rewrite lift_sub_state_to_eq with (Hi := Hj).
-    + destruct om as [m|]; [| exact I]; cbn.
+    + destruct om as [m|]; [| done]; cbn.
       destruct Hv as (_ & Hm & _).
       apply emitted_messages_are_valid_iff in Hm.
       destruct Hm as [[Hinit | Hobs] | Hemit].
@@ -988,7 +987,7 @@ Lemma strong_fixed_equivocation_constraint_no_equivocators
     composite_no_equivocations IM l som.
 Proof.
   intros.
-  destruct som as (s, [m|]); [|split; exact id].
+  destruct som as (s, [m |]); [| done].
   simpl.
   specialize (strong_fixed_equivocation_no_equivocators s m).
   unfold composite_no_equivocations, composite_no_equivocations_except_from, sent_except_from. simpl.

@@ -298,12 +298,8 @@ Section Simple.
         <-> specialized_selected_message_exists_in_no_trace X message_selector s m.
     Proof.
       split.
-      - intro Hnot.
-        intros is tr Htr Hsend.
-        apply Hnot.
-        exists is, tr, Htr. exact Hsend.
-      - intros Hno [is [tr [Htr Hsend]]].
-        exact (Hno is tr Htr Hsend).
+      - by intros Hnot is tr Htr Hsend; apply Hnot; exists is, tr, Htr.
+      - by intros Hno (is & tr & Htr & Hsend); eapply Hno.
     Qed.
 
     Lemma selected_message_exists_preloaded_not_some_iff_no
@@ -481,9 +477,7 @@ Section Simple.
       : has_been_sent s m.
     Proof.
       assert (valid_state_prop pre_vlsm s).
-      { apply can_produce_valid in Hsm.
-        eexists; exact Hsm.
-      }
+      { by apply can_produce_valid in Hsm; eexists. }
       apply proper_sent; [done |].
       apply has_been_sent_consistency; [done |].
       apply non_empty_valid_trace_from_can_produce in Hsm.
@@ -564,9 +558,7 @@ Section Simple.
       unfold no_traces_have_message_prop.
       unfold has_not_been_sent.
       rewrite <- selected_message_exists_preloaded_not_some_iff_no.
-      apply not_iff_compat.
-      apply (iff_trans proper_sent).
-      symmetry;exact Hconsistency.
+      by apply not_iff_compat, (iff_trans proper_sent).
     Qed.
 
 
@@ -651,7 +643,7 @@ Section Simple.
       unfold has_been_sent_prop,all_traces_have_message_prop in Hbs.
       rewrite Hbs.
       symmetry.
-      exact (has_been_sent_consistency s Hs m).
+      by apply has_been_sent_consistency.
     Qed.
 
     Definition received_messages
@@ -672,7 +664,7 @@ Section Simple.
       unfold has_been_received_prop,all_traces_have_message_prop in Hbs.
       rewrite Hbs.
       symmetry.
-      exact (has_been_received_consistency s Hs m).
+      by apply has_been_received_consistency.
     Qed.
 
     Class ComputableSentMessages := {
@@ -1800,12 +1792,8 @@ Section Composite.
                   (fun i => has_been_sent_stepwise_from_trace
                               (IM i)))
          as [Hinits Hstep].
-    split;[exact Hinits|].
-    (* <<exact Hstep>> doesn't work because [composite_message_selector]
-       pattern matches on the label l, so we instantiate and destruct
-       to let that simplify *)
-    intros l;specialize (Hstep l);destruct l.
-    exact Hstep.
+    split; [done |].
+    by intros l; specialize (Hstep l); destruct l.
   Qed.
 
   Global Instance composite_HasBeenSentCapability
@@ -1855,12 +1843,8 @@ Section Composite.
                   (fun i => has_been_received_stepwise_from_trace
                               (IM i)))
          as [Hinits Hstep].
-    split;[exact Hinits|].
-    (* <<exact Hstep>> doesn't work because [composite_message_selector]
-       pattern matches on the label l, so we instantiate and destruct
-       to let that simplify *)
-    intros l;specialize (Hstep l);destruct l.
-    exact Hstep.
+    split; [done |].
+    by intros l; specialize (Hstep l); destruct l.
   Qed.
 
   Global Instance composite_HasBeenReceivedCapability
@@ -1928,9 +1912,8 @@ Section Composite.
     pose proof (composite_stepwise_props
                   (fun i => (has_been_observed_stepwise_props (IM i))))
          as [Hinits Hstep].
-    split;[exact Hinits|].
-    intros l;specialize (Hstep l);destruct l.
-    exact Hstep.
+    split; [done |].
+    by intros l; specialize (Hstep l); destruct l.
   Qed.
 
   Definition composite_HasBeenObservedCapability_from_stepwise
@@ -2091,7 +2074,7 @@ Section Composite.
     : RelDecision (no_additional_equivocations_constraint Free).
   Proof.
     intros l (s, om).
-    destruct om; [|left; exact I].
+    destruct om; [| by left].
     apply no_additional_equivocations_dec.
   Qed.
 
@@ -2600,7 +2583,7 @@ Qed.
         cut (has_been_received X sf m);[apply (Hno_resend _ _ _ _ _ Hx)|].
         apply (has_been_received_step_update Hx);right.
         erewrite oracle_partial_trace_update.
-        - left;exact Hrecv.
+        - by left.
         - apply has_been_received_stepwise_from_trace.
         - apply valid_trace_add_default_last. apply Htr.
       }
@@ -2615,7 +2598,7 @@ Qed.
        *)
       assert (Decision (trace_has_message (field_selector output) m tr)) as [Hsent|Hnot_sent].
       apply (@Exists_dec _). intros. apply decide_eq.
-      + exact (valid_trace_output_is_valid _ _ _ IHHtr _ Hsent).
+      + by eapply valid_trace_output_is_valid.
       + apply initial_message_is_valid.
         right. apply Htrm.
         split.

@@ -522,7 +522,7 @@ Proof.
            eapply VLSM_full_projection_can_emit; [| done].
            apply forget_annotations_projection.
       * apply HLv.
-      * destruct iom as [im |]; [| exact I].
+      * destruct iom as [im |]; [| done].
         destruct (decide (composite_has_been_observed IM (original_state s) im))
               as [Hobs | Hnobs]; [by left | right; cbn].
         apply message_equivocators_can_emit; [done | done |].

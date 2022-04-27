@@ -344,7 +344,7 @@ Proof.
   rewrite Hoitemi. clear Hoitemi.
   destruct item. simpl in *. destruct l as (i, li). simpl in *.
   destruct oitemi as [itemi'|]; eexists _; eexists _; (split; [done |])
-  ; [| split; [exact I|]]
+  ; [| split; [done |]]
   ; [ destruct Hitemx as [[Hex Hli] [Hinputi [Houtputi [Hdestinationi Hdescriptori]]]]
   ; rewrite Hli; subst; split; [ repeat split|]
     |]
@@ -1107,7 +1107,7 @@ Proof.
       ; [subst eqv
         ; unfold equivocator_descriptors_update in IHtr; rewrite equivocator_descriptors_update_eq in IHtr
         ; simpl in *; rewrite Hfinali; rewrite state_update_eq
-        ; eexists; exact Hj
+        ; eexists; done
         |
         unfold equivocator_descriptors_update in IHtr
         ; rewrite equivocator_descriptors_update_neq in IHtr
@@ -1472,7 +1472,7 @@ Lemma equivocators_total_VLSM_projection_trace_project
       equivocators_total_state_project tr = equivocators_total_trace_project tr.
 Proof.
   induction tr using rev_ind; [done |].
-  rewrite equivocators_total_trace_project_app by (eexists; exact Hpre_tr).
+  rewrite equivocators_total_trace_project_app by (eexists; done).
   rewrite @pre_VLSM_projection_trace_project_app.
   apply finite_valid_trace_from_app_iff in Hpre_tr as [Hpre_tr Hpre_x].
   specialize (IHtr Hpre_tr).
@@ -1999,8 +1999,8 @@ Proof.
       unfold free_sub_free_constraint, lift_sub_label, free_sub_free_state, free_sub_free_index.
       unfold equivocators_no_equivocations_constraint.
       intros [Hno_equiv _].
-      split; [|exact I].
-      destruct om as [m|]; [|exact I].
+      split; [| done ].
+      destruct om as [m|]; [| done].
       left. destruct Hno_equiv as [Hno_equiv | Hfalse]; [| done].
       destruct Hno_equiv as [eqv Hno_equiv].
       by exists (dexist eqv (SubProjectionTraces.free_sub_free_index_obligation_1 eqv)).
@@ -2069,7 +2069,7 @@ Proof.
     { revert HtrX.
       apply VLSM_incl_finite_valid_trace.
       apply constraint_subsumption_incl.
-      intro; intros.  destruct l. destruct som. exact I.
+      by intros [] [].
     }
     apply (VLSM_full_projection_finite_valid_trace Hproj) in HtrX'.
     replace (free_sub_free_state _ _)
