@@ -346,7 +346,7 @@ Section TraceLemmas.
     rewrite list_prefix_map.
     generalize (List.map destination tr); intro l; clear tr.
     destruct n.
-    - simpl. intros [=<-]. by destruct l.
+    - simpl. intros [= <-]. by destruct l.
     - simpl. intro H. symmetry. revert H s.
       apply list_prefix_nth_last.
   Qed.

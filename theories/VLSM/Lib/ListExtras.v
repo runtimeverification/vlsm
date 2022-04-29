@@ -167,11 +167,10 @@ Lemma filter_length_fn {A} P Q
   s (Hfg : Forall (fun a => P a -> Q a) s) :
   length (filter P s) <= length (filter Q s).
 Proof.
-  induction s; simpl.
-  - by lia.
-  - inversion Hfg; subst. specialize (IHs H4).
-    rewrite 2 filter_cons.
-    by destruct (decide (P a)), (decide (Q a)); cbn; itauto lia.
+  induction s; simpl; [lia |].
+  inversion Hfg; subst. specialize (IHs H4).
+  rewrite 2 filter_cons.
+  by destruct (decide (P a)), (decide (Q a)); cbn; itauto lia.
 Qed.
 
 Lemma filter_eq_fn {A} P Q

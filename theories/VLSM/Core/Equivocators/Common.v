@@ -611,11 +611,11 @@ Definition equivocator_vlsm
 
 Lemma equivocator_vlsm_initial_message_preservation
   : strong_full_projection_initial_message_preservation X equivocator_vlsm.
-Proof. by red. Qed.
+Proof. by intro. Qed.
 
 Lemma equivocator_vlsm_initial_message_preservation_rev
   : strong_full_projection_initial_message_preservation equivocator_vlsm X.
-Proof. by red. Qed.
+Proof. by intro. Qed.
 
 Lemma equivocator_vlsm_initial_state_preservation_rev is i s
   (Hs : equivocator_state_project is i = Some s)

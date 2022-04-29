@@ -118,7 +118,7 @@ Qed.
 Lemma set_remove_iff (a b : A) (l : set) :
   NoDup l -> a ∈ set_remove b l <-> a ∈ l /\ a <> b.
 Proof.
-  repeat split.
+  split; [split |].
   - eapply set_remove_1; eauto.
   - eapply set_remove_2; eauto.
   - destruct 1; apply set_remove_3; auto.

@@ -230,9 +230,9 @@ First note that _all_ messages are [valid_message]s for <<Alt>>, as
       pose (s := ``(vs0 Alt) : state).
       exists s.
       assert (valid_state_message_prop Alt s None) as Hs
-        by (apply valid_initial_state;apply proj2_sig).
+          by (apply valid_initial_state, proj2_sig).
       by eapply (valid_generated_state_message Alt) with s None s None (existT second _)
-      ; cbn; rewrite ?state_update_id.
+      ; cbn; [..| rewrite !state_update_id].
     Qed.
 
 (**

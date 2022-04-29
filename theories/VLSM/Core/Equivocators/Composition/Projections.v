@@ -442,10 +442,9 @@ Proof.
   clear Hv Ht Hoitem.
   split; [| by repeat split]; clear Hchar.
   intro eqv.
-  destruct (decide (eqv = (projT1 (l item)))); subst; [done |].
-  rewrite Heqv'. rewrite Hs.
-  rewrite state_update_neq; [| done].
-  unfold proper_descriptor. unfold equivocator_descriptors_update.
+  destruct (decide (eqv = (projT1 (l item)))); [subst; done |].
+  rewrite Heqv', Hs, state_update_neq; [| done].
+  unfold proper_descriptor, equivocator_descriptors_update.
   rewrite equivocator_descriptors_update_neq; [| done].
   apply Hproper.
 Qed.

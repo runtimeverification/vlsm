@@ -1048,7 +1048,7 @@ Proof.
   - rewrite <- exists_finite.
     split; intros [i Hm]; exists i.
     + by exists (exist _ _ Hm).
-    + by destruct Hm as [[im Hinit] [=->]].
+    + by destruct Hm as [[im Hinit] [= ->]].
   - apply @Exists_dec. intro i. apply Hdec_init.
 Qed.
 

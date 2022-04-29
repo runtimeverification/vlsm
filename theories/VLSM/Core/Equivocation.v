@@ -20,7 +20,7 @@ Lemma exists_proj1_sig {A:Type} (P:A -> Prop) (a:A):
   (exists xP:{x | P x}, proj1_sig xP = a) <-> P a.
 Proof.
   split.
-  - by intros [[x Hx] [=->]].
+  - by intros [[x Hx] [= ->]].
   - by intro Ha; exists (exist _ a Ha).
 Qed.
 
@@ -732,7 +732,7 @@ Section Simple.
       split.
       - intro Hin.
         apply sent_messages_full in Hin; [| done].
-        destruct Hin as [[m0 Hm0] [=->]].
+        destruct Hin as [[m0 Hm0] [= ->]].
         by apply (sent_messages_consistency s Hs m).
       - intro H.
         apply (sent_messages_consistency s Hs m) in H.
@@ -1610,7 +1610,7 @@ Proof.
     apply preloaded_weaken_input_valid_transition in Ht.
     erewrite oracle_step_update in Hsent
     ; [| apply has_been_sent_stepwise_from_trace | done].
-    destruct Hsent as [[=->] | Hsent]; auto.
+    destruct Hsent as [[= ->] | Hsent]; auto.
 Qed.
 
 Lemma received_valid
@@ -1631,7 +1631,7 @@ Proof.
     apply preloaded_weaken_input_valid_transition in Ht.
     erewrite oracle_step_update in Hreceived
     ; [| apply has_been_received_stepwise_from_trace | done].
-    destruct Hreceived as [[=->] |]; auto.
+    destruct Hreceived as [[= ->] |]; auto.
 Qed.
 
 Lemma observed_valid
@@ -2623,7 +2623,7 @@ Qed.
         * intro Hsent;destruct Hnot_sent.
           unfold trace_has_message in Hsent.
           rewrite Exists_app, Exists_cons, Exists_nil in Hsent.
-          destruct Hsent as [Hsent | [[=->] | []]]; [done | exfalso].
+          destruct Hsent as [Hsent | [[= ->] | []]]; [done | exfalso].
           apply Hno_resend in Hx as Hx'.
           apply (proj2 Hx');clear Hx'.
           by rewrite (has_been_received_step_update Hx); left.
