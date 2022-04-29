@@ -152,8 +152,7 @@ Qed.
 Lemma equivocators_fixed_equivocations_vlsm_incl_free
   : VLSM_incl equivocators_fixed_equivocations_vlsm (free_composite_vlsm equivocator_IM).
 Proof.
-  apply constraint_subsumption_incl.
-  intro; intros. exact I.
+  by apply constraint_subsumption_incl.
 Qed.
 
 (** Inclusion into the preloaded free composition. *)
@@ -239,7 +238,7 @@ allowed to equivocate is non-empty.
   Lemma fixed_equivocation_constraint_subsumption_alt
     : strong_constraint_subsumption IM full_node_constraint_alt fixed_equivocation_constraint.
   Proof.
-    intros l (s, [m|]) Hc ; [| exact I].
+    intros l (s, [m |]) Hc ; [| done].
     destruct Hc as [Hno_equiv | [i [Hi Hm]]]; [by left |].
     unfold node_generated_without_further_equivocation_alt in Hm.
     right.
@@ -545,7 +544,7 @@ Proof.
         apply (constraint_subsumption_valid_state_message_preservation (equivocator_IM IM))
           with (constraint2 := free_constraint (equivocator_IM IM))
           in Hs as Hs_free
-          ; [|intro x; intros; exact I].
+          ; [| done].
         by exists _om.
       }
       specialize
@@ -995,8 +994,8 @@ Proof.
   - intros l s om [Hs [_ [Hv Hc]]].
     split; [done |].
     destruct Hc as [Hc _].
-    split; [|exact I].
-    destruct om; [| exact I].
+    split; [| done].
+    destruct om; [| done].
     simpl in Hc. simpl.
     destruct Hc as [Hc | Hc ]
     ; [| by right; apply Hseed12].

@@ -51,7 +51,7 @@ Lemma filtering_subsequence_iff
 Proof.
   unfold filtering_subsequence.
   rewrite !ForAll2_forall.
-  setoid_rewrite <- HPQ. split; exact id.
+  by setoid_rewrite <- HPQ.
 Qed.
 
 (** Each element in a [filtering_subsequence] is a position in the base

@@ -33,11 +33,10 @@ Lemma equivocator_state_append_valid l s om base_s
   : equivocator_valid X l (s, om) ->
     equivocator_valid X (equivocator_state_append_label base_s l) (equivocator_state_append base_s s, om).
 Proof.
-  destruct l; cbn; [exact id|..]
+  by destruct l; cbn; [done |..]
   ; (destruct (equivocator_state_project s n) as [sn|] eqn:Hn; [| done])
   ; rewrite (equivocator_state_append_project_2 _ base_s s _ n eq_refl)
-  ; rewrite Hn
-  ; exact id.
+  ; rewrite Hn.
 Qed.
 
 Lemma equivocator_state_append_transition l s om s' om' base_s

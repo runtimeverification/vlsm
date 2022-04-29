@@ -504,7 +504,7 @@ Proof.
         seed)
       (free_constraint sub_IM)
     ) as Hincl.
-  spec Hincl; [intro; intros; exact I|].
+  spec Hincl; [done |].
   match goal with
   |- context [pre_loaded_vlsm ?v _] =>
     apply VLSM_incl_trans with (machine (pre_loaded_with_all_messages_vlsm v))
@@ -621,7 +621,7 @@ Proof.
       destruct (composite_label_sub_projection_option _); [|congruence].
       by inversion HitemX.
   - clear -Hmsg Sub_Free Hlst His IHtr.
-    destruct iom as [m|]; [|exact I].
+    destruct iom as [m|]; [| done].
     simpl in *.
     remember {| input := Some m |} as x.
     assert (Hx : from_sub_projection x).
@@ -856,7 +856,7 @@ Proof.
   simpl in Hl.
   destruct (decide _); [congruence|].
   inversion Hl. subst lY. clear Hl.
-  split; [|exact I].
+  split; [| done].
   cbn in Hv |- *.
   unfold remove_equivocating_state_project.
   rewrite lift_sub_state_to_neq; [apply Hv | done].
@@ -911,9 +911,8 @@ Lemma remove_equivocating_strong_full_projection_initial_state_preservation eqv_
 Proof.
   intros s Hs i.
   unfold remove_equivocating_state_project, lift_sub_state_to.
-  destruct (decide _).
-  - exact (Heqv_is (dexist i s0)).
-  - exact (Hs i).
+  destruct (decide _); [| done].
+  exact (Heqv_is (dexist i s0)).
 Qed.
 
 (**
@@ -951,7 +950,7 @@ Proof.
   revert Hv. destruct l as (i, li).
   destruct_dec_sig i j Hj Heq. subst i.
   simpl. unfold equivocating_IM, sub_IM. simpl.
-  rewrite lift_sub_state_to_eq with (Hi := Hj). exact id.
+  by erewrite lift_sub_state_to_eq.
 Qed.
 
 Lemma lift_sub_to_transition l s om s' om'
@@ -988,7 +987,7 @@ Lemma PreSubFree_PreFree_weak_full_projection
   : VLSM_weak_full_projection PreSubFree PreFree (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
 Proof.
   apply basic_VLSM_weak_full_projection.
-  - split; [|exact I].
+  - split; [| done].
     apply lift_sub_to_valid, Hv.
   - intros l s om s' om' Hv.
     apply lift_sub_to_transition, Hv.
@@ -1306,16 +1305,12 @@ Proof.
   subst.
   unfold sub_IM_A.
   apply dsig_eq. simpl.
-  apply (Hsender_safety m v).
-  - clear -Hsender.
-    unfold sub_IM_sender in Hsender.
-    destruct (sender m) as [_v|] eqn:Hsender_v; [|congruence].
-    case_decide; [|congruence].
-    inversion Hsender; itauto.
-  - clear -Hm.
-    revert Hm.
-    unfold sub_IM, SubProjectionTraces.sub_IM. simpl.
-    exact id.
+  apply (Hsender_safety m v); [| done].
+  clear -Hsender.
+  unfold sub_IM_sender in Hsender.
+  destruct (sender m) as [_v|] eqn:Hsender_v; [|congruence].
+  case_decide; [|congruence].
+  by inversion Hsender; itauto.
 Qed.
 
 Context
@@ -1389,8 +1384,7 @@ Proof.
   unfold composite_label_sub_projection_option in Heql.
   simpl in Heql.
   case_decide; [|congruence].
-  inversion Heql. subst. clear Heql.
-  exact id.
+  by inversion Heql; subst.
 Qed.
 
 Lemma induced_sub_projection_transition_preservation [constraint]
@@ -1427,7 +1421,7 @@ Lemma sub_IM_no_equivocation_preservation
   : composite_no_equivocations_except_from sub_IM
       non_sub_index_authenticated_message l (s, om).
 Proof.
-  destruct om as [m|]; [|exact I].
+  destruct om as [m |]; [| done].
   destruct Hv as [lX [sX [_ [Heqs [_ [Hm [_ Hc]]]]]]].
   cbn in Hc |- *.
   specialize
@@ -1781,7 +1775,7 @@ Lemma lift_sub_free_preloaded_with_full_projection
 Proof.
   apply (basic_VLSM_full_projection_preloaded_with SubFree Free seed seed); intro; intros.
   - done.
-  - split; [|exact I]. apply lift_sub_valid. apply H.
+  - split; [| done]. apply lift_sub_valid, H.
   - by rapply lift_sub_transition.
   - by apply (lift_sub_state_initial IM).
   - by apply (lift_sub_message_initial IM indices).

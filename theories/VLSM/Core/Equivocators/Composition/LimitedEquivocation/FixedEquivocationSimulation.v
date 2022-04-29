@@ -101,8 +101,8 @@ Proof.
   destruct Hv as [Hs [Hom [_ Hc]]].
   apply valid_state_has_fixed_equivocation in Hlift_s.
   split.
-  - split; [|exact I].
-    destruct om as [m|]; [|exact I].
+  - split; [| done].
+    destruct om as [m |]; [| done].
     left.
     apply proj1 in Hc as [Hsent | Hseed].
     + revert Hsent. simpl.
@@ -244,7 +244,7 @@ Proof.
       as Hreplay.
     spec Hreplay.
     { clear -HeqXE. intros i ns s Hi Hs.
-      split; [split; exact I|].
+      split; [by split |].
       apply (VLSM_eq_valid_state HeqXE) in Hs.
       apply valid_state_has_fixed_equivocation in Hs.
       destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
@@ -276,7 +276,7 @@ Proof.
     apply valid_trace_forget_last in Him_etr.
     specialize (Hreplay _ _ Him_etr).
     apply valid_trace_add_default_last in Hreplay.
-    eexists _,_; split; [exact Hreplay|].
+    eexists _,_; split; [done |].
     (*  Having verified the validity part of the conclusion, now we only
         need to show two projection properties, and the no message-equivocation
         constraint for which we employ Lemma [fixed_equivocation_replay_has_message].
@@ -316,7 +316,7 @@ Proof.
       rewrite finite_trace_last_is_last.
       rewrite finite_trace_last_output_is_last in Him_output.
       replace (output _) with (Some im) in Ht.
-      eexists _,_; exact Ht.
+      by eexists _,_.
 Qed.
 
 (** ** The main result
@@ -358,7 +358,7 @@ Proof.
   - intro; intros.
     apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
-    + split; [|exact I].  destruct om as [im|]; [|exact I].
+    + split; [| done].  destruct om as [im |]; [| done].
       destruct Hom as [Hom|Hinitial]; [by left | exfalso].
       by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
@@ -424,7 +424,7 @@ Proof.
   - intro; intros.
     apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
-    + split; [|exact I].  destruct om as [im|]; [|exact I].
+    + split; [| done]. destruct om as [im |]; [| done].
       destruct Hom as [Hom|Hinitial]; [by left | exfalso].
       by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.

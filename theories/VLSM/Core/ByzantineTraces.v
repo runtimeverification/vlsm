@@ -270,8 +270,7 @@ Lifting a [valid_state] of <<PreLoaded>> we obtain a [valid_state] of <<Alt>>.
       assert (valid_state_prop PreLoaded sj) as Hsj
           by (exists om; done); clear Hp.
       induction Hsj using valid_state_prop_ind.
-      - apply initial_state_is_valid.
-        intros [];[exact Hs|exact I].
+      - by apply initial_state_is_valid; intros [].
       - exists om'.
         assert (option_valid_message_prop Alt om0) as Hom0
           by apply alt_option_valid_message.

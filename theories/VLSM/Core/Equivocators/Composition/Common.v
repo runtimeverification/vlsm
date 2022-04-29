@@ -538,8 +538,6 @@ Definition seeded_equivocators_no_equivocation_vlsm
 
 Lemma sub_equivocator_IM_initial_state_commute is
   : composite_initial_state_prop sub_equivocator_IM is <-> composite_initial_state_prop sub_IM_equivocator is.
-Proof.
-  split; exact id.
-Qed.
+Proof. done. Qed.
 
 End equivocators_sub_projections.

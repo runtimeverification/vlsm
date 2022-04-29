@@ -306,7 +306,7 @@ Proof.
     ; destruct Hproper as [destn Hpr]; rewrite Hpr
     ; case_decide; subst
     ; eexists _, _; split; try done.
-    + split; [exact I|].
+    + split; [done |].
       intros.
       split; [apply Hv|].
       specialize (new_machine_label_equivocator_transition_size X Ht) as Ht_size.
@@ -317,7 +317,7 @@ Proof.
       simpl.
       replace (equivocator_state_n s) with (equivocator_state_last destination) by lia.
       by rewrite Hpr.
-    + split; [exact I|].
+    + split; [done |].
       intros.
       specialize (new_machine_label_equivocator_transition_size X Ht) as Ht_size.
       cut (proper_descriptor X (Existing n) s).
@@ -385,7 +385,7 @@ Proof.
       subst.
       replace (equivocator_state_n s) with (equivocator_state_last destination) by lia.
       by rewrite Hpr.
-    + split; [exact I|].
+    + split; [done |].
       intros.
       cbn in Hv.
       destruct (equivocator_state_project s ieqvi) as [sieqvi|] eqn:Hpri
@@ -723,7 +723,7 @@ Proof.
   - inversion Ht. subst. clear Ht.
     apply equivocator_state_project_Some_rev in Hi' as Hlti'.
     rewrite equivocator_state_extend_project_1 by done.
-    eexists; split; [exact Hi'|].
+    eexists; split; [done |].
     rewrite Hi'.
     exists None.
     rewrite decide_False; [done |].
@@ -907,14 +907,14 @@ Proof.
   apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hbtr.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
     as [tr [di [Hbtr_pr Hdi]]].
-  eexists _,_; split; [exact Hbtr_pr|].
+  eexists _,_; split; [done |].
   destruct di as [sn|i].
   - destruct Hdi as [Hsn Htr].
     split; [done |].
     apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Htr.
     by clear -Htr; destruct X.
   - destruct Hdi as [s [Hpr_bs_i Htr]].
-    eexists; split; [exact Hpr_bs_i|].
+    eexists; split; [done |].
     apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Htr.
     by clear -Htr; destruct X.
 Qed.
@@ -947,14 +947,14 @@ Proof.
   apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj1 (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm))) in Hbtr.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
     as [tr [di [Hbtr_pr Hdi]]].
-  eexists _,_; split; [exact Hbtr_pr|].
+  eexists _,_; split; [done |].
   destruct di as [sn|i].
   - destruct Hdi as [Hsn Htr].
     split; [done |].
     apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
     by clear -Htr; destruct X.
   - destruct Hdi as [s [Hpr_bs_i Htr]].
-    eexists; split; [exact Hpr_bs_i|].
+    eexists; split; [done |].
     apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
     by clear -Htr; destruct X.
 Qed.

@@ -1325,7 +1325,7 @@ Lemma VLSM_weak_full_projection_can_produce
 Proof.
   intros [(s0, im) [l Ht]].
   apply VLSM_weak_full_projection_input_valid_transition in Ht.
-  eexists. eexists. exact Ht.
+  by do 2 eexists.
 Qed.
 
 Lemma VLSM_weak_full_projection_can_emit
@@ -2396,7 +2396,7 @@ Proof.
     apply valid_trace_add_default_last in Htr.
     rewrite finite_trace_last_is_last in Htr. simpl in Htr.
     remember (tr ++ _) as tr'.
-    cut (option_valid_message_prop Y (Some m)); [exact id|].
+    cut (option_valid_message_prop Y (Some m)); [done |].
     exists (state_project destination).
     clear Hv Hl lX lY.
     revert tr l input Heqtr'.
@@ -2416,21 +2416,20 @@ Proof.
         rewrite finite_trace_last_is_last in Hs0.
         destruct s_item. simpl in Hs0. subst destination.
         specialize (IHHtr1 _ _ _ _ eq_refl).
-        eexists; exact IHHtr1.
+        by eexists.
     }
     destruct Hs as [_om Hs].
     assert (Hom : option_valid_message_prop Y iom).
     { destruct iom as [im|]; [|apply option_valid_message_None].
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' iom_item Heqiom_tr.
-      - apply (Hmessage _ _ _ (proj1 Ht)); [| done].
-        eexists; exact Hs.
+      - by apply (Hmessage _ _ _ (proj1 Ht)); [eexists |].
       - subst.
         apply valid_trace_get_last in Htr2 as Hs0.
         rewrite finite_trace_last_is_last in Hs0.
         destruct iom_item. simpl in *. subst.
         specialize (IHHtr2 _ _ _ _ eq_refl).
-        eexists; exact IHHtr2.
+        by eexists.
     }
     destruct Hom as [_s Hom].
     apply

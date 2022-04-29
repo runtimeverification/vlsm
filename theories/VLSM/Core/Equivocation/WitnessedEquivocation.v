@@ -540,7 +540,7 @@ Proof.
         (finite_valid_trace_from_to_app PreFree _ _ _ _ _ Htr'' Hitem)
         as Htr''_item.
       eexists is', _.
-      split; [exact (conj Htr''_item Hinit')|].
+      split; [done |].
       apply (strong_trace_witnessing_equivocation_prop_extend_eq _ is tr' (conj Htr' Hinit))
       ; [by split | done..].
     + subst. destruct Hneq as [Hneq Hwneq].
@@ -582,7 +582,7 @@ Proof.
         (finite_valid_trace_from_to_app PreFree _ _ _ _ _ Htr''' Hitem)
         as Htr'''_item.
       eexists is'', _.
-      split; [exact (conj Htr'''_item Hinit')|].
+      split; [done |].
       specialize (Hprefix tr''' []) as Hwitness'''.
       spec Hwitness'''; [apply app_nil_r|].
       specialize (Hwneq _ _ (conj Htr''' Hinit') Hwitness''').

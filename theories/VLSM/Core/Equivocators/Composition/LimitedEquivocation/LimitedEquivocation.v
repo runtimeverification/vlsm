@@ -24,7 +24,7 @@ Lemma equivocator_initial_state_project
   (Hes: vinitial_state_prop (equivocator_vlsm X) es):
   vinitial_state_prop X (equivocator_state_descriptor_project es eqv_descriptor).
 Proof.
-  destruct eqv_descriptor;[exact Heqv|].
+  destruct eqv_descriptor; [done |].
   destruct Heqv as [esn Hesn].
   simpl. rewrite Hesn.
   by eapply equivocator_vlsm_initial_state_preservation_rev.
@@ -86,8 +86,7 @@ Definition equivocators_limited_equivocations_vlsm
 Lemma equivocators_limited_equivocations_vlsm_incl_free
   : VLSM_incl equivocators_limited_equivocations_vlsm FreeE.
 Proof.
-  apply constraint_subsumption_incl.
-  intro; intros. exact I.
+  by apply constraint_subsumption_incl.
 Qed.
 
 (** Inclusion in the preloaded free composition. *)
@@ -157,7 +156,7 @@ Lemma equivocators_limited_valid_trace_is_fixed is s tr
    is s tr.
 Proof.
   intro Htr.
-  split; [| exact (proj2  Htr)].
+  split; [| apply Htr].
   cut
     (forall equivocating, equivocating_validators s ⊆ equivocating ->
       finite_valid_trace_from_to (equivocators_fixed_equivocations_vlsm IM equivocating) is s tr).

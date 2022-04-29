@@ -54,7 +54,7 @@ Lemma SeededXE_Free_full_projection
     (lift_sub_label equivocator_IM equivocating) (lift_sub_state equivocator_IM equivocating).
 Proof.
   apply basic_VLSM_full_projection; intros ? *.
-  - split; [|exact I].
+  - split; [| done].
     apply lift_sub_valid. apply Hv.
   - intros [_ Ht]. revert Ht. apply lift_sub_transition.
   - by intros; apply (lift_sub_state_initial equivocator_IM).
@@ -592,7 +592,7 @@ Lemma PreFreeSubE_PreFreeE_weak_full_projection
   : VLSM_weak_full_projection PreFreeSubE PreFreeE (lift_equivocators_sub_label_to full_replay_state) (lift_equivocators_sub_state_to full_replay_state).
 Proof.
   apply basic_VLSM_weak_full_projection; intros ? *.
-  - split; [apply lift_equivocators_sub_valid; apply Hv|exact I].
+  - by split; [apply lift_equivocators_sub_valid; apply Hv |].
   - intro Ht. apply lift_equivocators_sub_transition; apply Ht.
   - intros.
     rewrite <- replayed_initial_state_from_lift; [| done].
@@ -617,8 +617,8 @@ Local Lemma SeededNoEquiv_subsumption
   no_equivocations_additional_constraint_with_pre_loaded equivocator_IM (free_constraint _) seed (lift_equivocators_sub_label_to full_replay_state l)  (lift_equivocators_sub_state_to full_replay_state s, om).
 Proof.
   intros l s om (Hs & _ & _ & Hc1 & _).
-  split; [|exact I].
-  destruct om as [m|]; [|exact I].
+  split; [| done].
+  destruct om as [m |]; [| done].
   apply (VLSM_incl_valid_state (NoEquivocation.seeded_no_equivocation_incl_preloaded equivocator_IM (free_constraint _) seed)) in Hfull_replay_state.
   specialize (valid_state_project_preloaded_to_preloaded _ equivocator_IM (free_constraint _) full_replay_state)
     as Hfull_replay_state_pr.
@@ -676,7 +676,7 @@ Proof.
       (no_equivocations_additional_constraint_with_pre_loaded equivocator_IM (free_constraint _) seed)
       seed)
       as Hvalid.
-  spec Hvalid; [split; exact I|].
+  spec Hvalid; [done |].
   spec Hvalid; [apply sent_are_valid|].
   specialize (Hvalid _ Hfull_replay_state).
   apply Hvalid; [| done].

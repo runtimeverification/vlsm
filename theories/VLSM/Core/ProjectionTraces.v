@@ -159,8 +159,7 @@ to be all [valid_message]s of <<X>>:
     split.
     { apply Hs'. }
     unfold input_valid.
-    split.
-    { exact (proj2_sig s'). }
+    split; [apply proj2_sig |].
 
     simpl in Hpmp.
     split.
@@ -397,8 +396,7 @@ Lemma valid_message_projection
   : option_valid_message_prop Xj iom.
 Proof.
   apply option_initial_message_is_valid.
-  destruct iom as [m|];[|exact I].
-  by exists (exist _ m HpmX).
+  by destruct iom as [m |]; [exists (exist _ m HpmX)|].
 Qed.
 
 (* The projection of a finite valid trace remains a valid trace *)

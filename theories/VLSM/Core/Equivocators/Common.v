@@ -734,8 +734,8 @@ Lemma newmachine_descriptor_dec (d : MachineDescriptor)
   : Decision (is_newmachine_descriptor d).
 Proof.
   destruct d.
-  - left. exact I.
-  - right. simpl. itauto.
+  - by left.
+  - by right; itauto.
 Qed.
 
 (** Projecting an [equivocator_state] over a [MachineDescriptor].  *)
@@ -812,7 +812,7 @@ Lemma existing_equivocator_label_forget_proper
   (Hs : proper_existing_equivocator_label l s)
   : existing_equivocator_label l.
 Proof.
-  destruct l; [|exact I..].
+  destruct l; [| done..].
   inversion Hs.
 Qed.
 
@@ -865,11 +865,11 @@ Proof.
   destruct l as [sn| ei l| ei l]; cbn in Ht
   ; [inversion Ht; rewrite equivocator_state_extend_size; cbv; lia| ..]
   ; destruct (equivocator_state_project _ _)
-  ; [| inversion Ht; exact id| | inversion Ht; exact id]
+  ; [| by inversion Ht | | by inversion Ht]
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion Ht; subst; clear Ht.
-  - rewrite equivocator_state_update_size. exact id.
-  - rewrite equivocator_state_extend_size. cbv; lia.
+  - by rewrite equivocator_state_update_size.
+  - by rewrite equivocator_state_extend_size; cbv; lia.
 Qed.
 
 Lemma equivocator_transition_cannot_decrease_state_size
@@ -917,8 +917,7 @@ Proof.
   destruct (vtransition _ _ _).
   inversion Ht. subst.
   unfold is_equivocating_state, is_singleton_state.
-  rewrite equivocator_state_update_size.
-  exact id.
+  by rewrite equivocator_state_update_size.
 Qed.
 
 (**
@@ -969,7 +968,7 @@ Proof.
     ; apply IHHbs1 in Hpr as [_omi Hsi]
       ; destruct IHHbs2 as [_som Hom]
       ; specialize (Hgen _ _ Hsi _ _ Hom _ Hv _ _ Hti)
-      ; split; [eexists; exact Hgen| | eexists; exact Hgen|]; intros.
+      ; split; [by eexists | | by eexists |]; intros.
     + destruct_equivocator_state_update_project s i si' i0 Hi0 Hij.
       * done.
       * by inversion H; subst; eexists.

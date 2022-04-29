@@ -74,10 +74,9 @@ Lemma VLSM_projection_has_been_sent_reflect
     forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector output) (field_selector output).
-  - intros. destruct itemX, itemY. simpl in *. subst.
-    split; exact id.
-  - apply (has_been_sent_stepwise_from_trace X).
-  - apply (has_been_sent_stepwise_from_trace Y).
+  - by intros [] [] **; cbn in *; subst.
+  - by apply (has_been_sent_stepwise_from_trace X).
+  - by apply (has_been_sent_stepwise_from_trace Y).
 Qed.
 
 Lemma VLSM_projection_has_been_received_reflect
@@ -87,10 +86,9 @@ Lemma VLSM_projection_has_been_received_reflect
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector input) (field_selector input).
-  - intros. destruct itemX, itemY. simpl in *. subst.
-    split; exact id.
-  - apply (has_been_received_stepwise_from_trace X).
-  - apply (has_been_received_stepwise_from_trace Y).
+  - by intros [] [] **; cbn in *; subst.
+  - by apply (has_been_received_stepwise_from_trace X).
+  - by apply (has_been_received_stepwise_from_trace Y).
 Qed.
 
 Lemma VLSM_projection_has_been_observed_reflect
@@ -102,10 +100,9 @@ Lemma VLSM_projection_has_been_observed_reflect
     forall m, has_been_observed Y (state_project s) m -> has_been_observed X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with item_sends_or_receives item_sends_or_receives.
-  - intros. destruct itemX, itemY. simpl in *. subst.
-    split; exact id.
-  - apply has_been_observed_stepwise_props.
-  - apply has_been_observed_stepwise_props.
+  - by intros [] [] **; cbn in *; subst.
+  - by apply has_been_observed_stepwise_props.
+  - by apply has_been_observed_stepwise_props.
 Qed.
 
 End projection_oracle.
@@ -184,8 +181,7 @@ Lemma VLSM_weak_full_projection_has_been_sent
     forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with (field_selector output) (field_selector output).
-  - intros itemX itemY Hin Hout. destruct itemX, itemY. simpl in Hout. subst. simpl.
-    split; exact id.
+  - by intros [] [] Hin Hout; cbn in *; subst.
   - apply (has_been_sent_stepwise_from_trace X).
   - apply (has_been_sent_stepwise_from_trace Y).
   - apply has_been_sent_dec.
@@ -199,8 +195,7 @@ Lemma VLSM_weak_full_projection_has_been_received
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with (field_selector input) (field_selector input).
-  - intros itemX itemY Hin Hout. destruct itemX, itemY. simpl in Hin. subst. simpl.
-    split; exact id.
+  - by intros [] [] Hin Hout; cbn in *; subst.
   - apply (has_been_received_stepwise_from_trace X).
   - apply (has_been_received_stepwise_from_trace Y).
   - apply has_been_received_dec.
@@ -216,8 +211,7 @@ Lemma VLSM_weak_full_projection_has_been_observed
     forall m, has_been_observed X s m -> has_been_observed Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with item_sends_or_receives item_sends_or_receives.
-  - intros. destruct itemX, itemY. simpl in *. subst.
-    split; exact id.
+  - by intros [] [] **; cbn in *; subst.
   - apply has_been_observed_stepwise_props.
   - apply has_been_observed_stepwise_props.
   - apply has_been_observed_dec.
@@ -436,10 +430,9 @@ Proof.
   remember (s0 i) as s0i. clear s0 Heqs0i.
   remember (s1 i) as s1i. clear s1 Heqs1i.
   spec Hsender_safety i.
-  spec Hsender_safety; [eexists _,_, _; exact Hemitted|].
-  rewrite Hsender_safety in Hj. clear Hsender_safety.
-  subst.
-  eexists _,_, _; exact Hemitted.
+  spec Hsender_safety; [by eexists _,_, _ |].
+  rewrite Hsender_safety in Hj; subst.
+  by eexists _,_, _.
 Qed.
 
 End sender_safety_can_emit_projection.

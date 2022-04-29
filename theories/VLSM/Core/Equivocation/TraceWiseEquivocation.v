@@ -276,7 +276,7 @@ Proof.
   revert Hbs_m.
   apply in_futures_preserving_oracle_from_stepwise with (field_selector output)
   ; [apply has_been_sent_stepwise_from_trace|].
-  eexists; exact Htrv.
+  by eexists.
 Qed.
 
 Lemma initial_state_not_is_equivocating_tracewise
