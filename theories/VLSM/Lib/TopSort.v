@@ -241,19 +241,25 @@ Qed.
 
 End min_predecessors.
 
-Global Instance precedes_P_transitive `{Transitive A preceeds} (P : A -> Prop) : Transitive (precedes_P preceeds P).
+Global Instance precedes_P_transitive
+  `{Transitive A preceeds} (P : A -> Prop)
+  : Transitive (precedes_P preceeds P).
 Proof.
   intros [x Hx] [y Hy] [z Hz]; unfold precedes_P; cbn.
   by etransitivity.
 Qed.
 
-Global Instance precedes_P_irreflexive `{Irreflexive A preceeds} (P : A -> Prop) : Irreflexive (precedes_P preceeds P).
+Global Instance precedes_P_irreflexive
+  `{Irreflexive A preceeds} (P : A -> Prop)
+  : Irreflexive (precedes_P preceeds P).
 Proof.
   intros [x Hx]; unfold precedes_P, complement; cbn.
   by apply irreflexivity.
 Qed.
 
-Global Instance precedes_P_strict `{StrictOrder A preceeds} (P : A -> Prop) : StrictOrder (precedes_P preceeds P).
+Global Instance precedes_P_strict
+  `{StrictOrder A preceeds} (P : A -> Prop)
+  : StrictOrder (precedes_P preceeds P).
 Proof.
   split; typeclasses eauto.
 Qed.
