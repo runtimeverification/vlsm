@@ -286,7 +286,7 @@ Proof.
   { intro i. unfold equivocator_descriptors_update. destruct (decide (i = projT1 (l item))).
     - by subst; rewrite equivocator_descriptors_update_eq.
     - rewrite equivocator_descriptors_update_neq by done; cbn.
-  by rewrite equivocator_state_project_zero.
+      by rewrite equivocator_state_project_zero.
   }
   exists (equivocator_descriptors_update (zero_descriptor IM) (projT1 (l item)) (equivocator_label_descriptor (l (composite_transition_item_projection equivocator_IM item)))).
   split.
