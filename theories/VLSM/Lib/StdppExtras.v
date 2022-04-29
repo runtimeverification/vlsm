@@ -176,6 +176,16 @@ Proof. itauto. Qed.
 Example get_maximal_elements2 : get_maximal_elements Nat.le [1; 4; 2; 4] = [].
 Proof. itauto. Qed.
 
+(**
+Returns all elements <<x>> of a set <<S>> such that <<x>> does not compare less
+than any other element in <<S>> w.r.t to a given precedes relation.
+*)
+Definition get_set_maximal_elements
+  `{HfinSetMessage : FinSet A SetA}
+   (precedes: relation A) `{!RelDecision precedes} (s : SetA)
+   : SetA :=
+    filter (fun a => set_Forall (fun b => ~ precedes a b) s) s.
+
 Lemma filter_ext_elem_of {A} P Q
  `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} (l:list A) :
  (forall a, a ∈ l -> (P a <-> Q a)) ->
