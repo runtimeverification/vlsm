@@ -53,9 +53,9 @@ Proof.
     + apply equivocator_transition_item_project_inv_messages in Hitem'.
       destruct Hitem' as [_ [_ [_ [_ Ha]]]].
       inversion Hjbs; subst.
-      * left. simpl in Ha. simpl.  rewrite Ha. assumption.
-      * specialize (IHtr _ eq_refl H0). right. assumption.
-    + specialize (IHtr i' eq_refl Hjbs). right. assumption.
+      * by left; cbn in *; rewrite Ha.
+      * by right; eapply IHtr.
+    + by right; eapply IHtr.
 Qed.
 
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
@@ -87,8 +87,7 @@ Proof.
   unfold VLSM.l in *.
   subst l.
   specialize (Hpitem _ eq_refl) as [i [lst_i [Hi Hpitem]]].
-  inversion Ht. destruct Hv as [Hsndl Hiom]; subst.
-  eauto.
+  by inversion Ht; destruct Hv as [Hsndl Hiom]; subst; eauto.
 Qed.
 
 (**
@@ -165,8 +164,8 @@ Proof.
   - eexists _. eexists _. repeat split; [..|apply Htr].
     + clear -Hdinitial.
       destruct dfirst as [sn | j].
-      * destruct Hdinitial as [_ Hinit]. assumption.
-      * destruct Hdinitial as [bsj [Hdinitial _]]. exists bsj. assumption.
+      * by destruct Hdinitial.
+      * destruct Hdinitial as [bsj [Hdinitial _]]. by exists bsj.
     + remember (bprefix ++ _) as btr.
       specialize (equivocator_vlsm_trace_project_inv X btr) as Hinv.
       spec Hinv. { by destruct bprefix; subst. }
@@ -211,10 +210,10 @@ Proof.
     (preloaded_equivocator_vlsm_trace_project_valid_item
        _ _ _ Htr _ Hin _ Hsndl)
       as [itemx [[d Hitemx] [trx [Hinx [ifinal [ifirst [Hifirst [Hifinal Htrx]]]]]]]].
-  exists ifinal. exists ifirst. split; [assumption|].
-  split; [assumption|].
+  exists ifinal. exists ifirst. split; [done |].
+  split; [done |].
   exists trx. exists Htrx.
-  apply Exists_exists. exists itemx. split; [assumption|].
+  apply Exists_exists. exists itemx. split; [done |].
   apply equivocator_transition_item_project_inv_messages in Hitemx.
   destruct Hitemx as [_ [_ [_ [_ Hitemx]]]].
   simpl in *.
@@ -267,12 +266,12 @@ Proof.
     split.
     * intros [i [_ Hi]].
       destruct (equivocator_state_project s i) as [si|] eqn:Hsi; [| done].
-      exists i, si. split; assumption.
+      by exists i, si.
     * intros [i [si [Hsi Hi]]]. exists i.
       apply equivocator_state_project_Some_rev in Hsi as Hlti.
       apply up_to_n_full in Hlti.
-      split; [assumption|].
-      rewrite Hsi. assumption.
+      split; [done |].
+      by rewrite Hsi.
   - apply Exists_dec.
     intro i. destruct (equivocator_state_project s i).
     + apply Hdec.
@@ -290,7 +289,7 @@ Proof.
     assert (j = 0) by lia. subst.
     rewrite equivocator_state_project_zero in Hsj.
     inversion Hsj. subst.
-    elim (oracle_no_inits  _ His m). assumption.
+    by elim (oracle_no_inits  _ His m).
   - unfold equivocator_oracle.
     destruct H as [[Hs [_ Hv]] Ht].
     destruct l as [sdesc | idesc l | idesc l].
@@ -299,13 +298,13 @@ Proof.
       split.
       * intros [ins [sins [Hsins Hir]]]. right.
         destruct_equivocator_state_extend_project s sdesc ins Hins
-        ; [exists ins, sins; split; assumption| |congruence].
+        ; [by exists ins, sins | | done].
         inversion Hsins. subst.
-        elim (oracle_no_inits _ Hisdesc msg).  assumption.
+        by elim (oracle_no_inits _ Hisdesc msg).
       * intros [H | [ins [sins [Hsins Hir]]]]; [done |].
-        exists ins, sins. split; [|assumption].
-        rewrite equivocator_state_extend_project_1; [assumption|].
-        apply equivocator_state_project_Some_rev in Hsins. assumption.
+        exists ins, sins. split; [| done].
+        rewrite equivocator_state_extend_project_1; [done |].
+        by apply equivocator_state_project_Some_rev in Hsins.
     + cbn in Hv.
       destruct (equivocator_state_project s idesc) as [sidesc|] eqn:Hidesc; [| done].
       destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn:Htx.
@@ -313,7 +312,7 @@ Proof.
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
       { repeat split
-        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X)|assumption|assumption].
+        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X) | done | done].
         apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
       }
      specialize (existing_false_label_equivocator_state_project_not_same X Ht _ Hidesc)
@@ -330,9 +329,9 @@ Proof.
         --  subst i. simpl in Hsame. rewrite Hs'i in Hsame.
           simpl in Hsame. subst s'i.
           apply oracle_step_update in Hbri.
-          destruct Hbri as [H | Hbri]; [| right; eexists _,_; split; eassumption].
+          destruct Hbri as [H | Hbri]; [| by right; eexists _,_].
           left. revert H. apply Hselector_io.
-        -- right. exists i, s'i. split; [|assumption].
+        -- right. exists i, s'i. split; [| done].
           spec Hnot_same i.
           spec Hnot_same; [lia|]. spec Hnot_same n.
           simpl in Hnot_same. rewrite Hs'i in Hnot_same.
@@ -354,11 +353,11 @@ Proof.
           destruct (decide (idesc = ins)). subst idesc.
           ++ rewrite Hsins in Hidesc. inversion Hidesc. subst sidesc.
             specialize (oracle_step_update (or_intror Hbri)).
-            exists ins, sidesc'. split; [|assumption].
+            exists ins, sidesc'. split; [| done].
             simpl in Hsame.
             destruct_equivocator_state_project s' ins _sidesc' Hins; [|lia].
             by subst.
-          ++ exists ins, sins. split; [|assumption].
+          ++ exists ins, sins. split; [| done].
             spec Hnot_same ins. spec Hnot_same; [lia|]. spec Hnot_same n.
             simpl in Hnot_same. rewrite Hsins in Hnot_same.
             destruct_equivocator_state_project s' ins _sins Hins; [|lia].
@@ -370,7 +369,7 @@ Proof.
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
       { repeat split
-        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X)|assumption|assumption].
+        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X) | done | done].
         apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
       }
       specialize (existing_true_label_equivocator_state_project_not_last X Ht _ Hidesc)
@@ -387,9 +386,9 @@ Proof.
         --  subst i. simpl in Hlast. rewrite Hs'i in Hlast.
           simpl in Hlast. subst s'i.
           apply oracle_step_update in Hbri.
-          destruct Hbri as [H | Hbri]; [| right; eexists _,_; split; eassumption].
+          destruct Hbri as [H | Hbri]; [| by right; eexists _,_].
           left. revert H. apply Hselector_io.
-        -- right. exists i, s'i. split; [|assumption].
+        -- right. exists i, s'i. split; [| done].
           spec Hnot_last i.
           spec Hnot_last; [lia|].
           simpl in Hnot_last. rewrite Hs'i in Hnot_last.
@@ -408,7 +407,7 @@ Proof.
         -- apply equivocator_state_project_Some_rev in Hsins as Hltins.
             spec Hnot_last ins. spec Hnot_last; [lia|].
             simpl in Hnot_last. rewrite Hsins in Hnot_last.
-            exists ins, sins. split; [|assumption].
+            exists ins, sins. split; [| done].
             destruct_equivocator_state_project s' ins _sins Hltins'; [|lia].
             simpl in Hnot_last. congruence.
 Qed.
@@ -540,16 +539,16 @@ Proof.
     destruct Hmsgsi as [i [Heq _]]. subst.
     destruct (equivocator_state_project s i) as [si|] eqn:Hsi; [|inversion Hin].
     specialize (HpsX _ _ Hsi).
-    apply (sent_messages_full X) in Hin; [|assumption].
+    apply (sent_messages_full X) in Hin; [| done].
     destruct Hin as [[m' Hm] Heq]. simpl in Heq. subst m'.
-    apply (sent_messages_consistency X) in Hm; [|assumption].
+    apply (sent_messages_consistency X) in Hm; [| done].
     destruct Hs as [om Hs].
     apply (valid_state_message_has_trace (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hs.
     destruct Hs as [[Hs _] | [is [tr [Htr _]]]].
     + specialize (Hm si []).
       spec Hm.
       { split.
-        - constructor. assumption.
+        - by constructor.
         - revert Hsi Hs. apply (equivocator_vlsm_initial_state_preservation_rev X).
       }
       inversion Hm.
@@ -563,12 +562,12 @@ Proof.
         as [trX [di [Hproject Hdi]]].
       destruct di as [sn | id].
       * apply equivocator_vlsm_trace_project_output_reflecting with trX (Existing i) (NewMachine sn)
-        ; [assumption|].
+        ; [done |].
         apply (Hm sn trX). split; apply Hdi.
       * destruct Hdi as [isid [Hi' HtrX]].
         apply equivocator_vlsm_trace_project_output_reflecting with trX (Existing i) (Existing id)
-        ; [assumption|].
-        apply (Hm isid trX). split; [assumption|].
+        ; [done |].
+        apply (Hm isid trX). split; [done |].
         apply (equivocator_vlsm_initial_state_preservation_rev X _ _ _ Hi'). apply Htr.
   - intros [[m' Hm] Heq]. simpl in Heq. subst m'.
     destruct Hm as [is [tr [Htr Hexists]]].
@@ -590,16 +589,14 @@ Proof.
     + rewrite elem_of_list_fmap.
       exists i. rewrite Hi.
       split; [done |]. apply up_to_n_full.
-      apply equivocator_state_project_Some_rev in Hi. assumption.
+      by apply equivocator_state_project_Some_rev in Hi.
     + specialize (HpsX _ _ Hi). apply (sent_messages_full X); [apply HpsX|].
       assert (Hm : selected_message_exists_in_some_preloaded_traces X (field_selector output) si m)
       ; [| by exists (exist _ m Hm)].
       destruct istart as [sstart | istart].
-      * exists sstart. exists trX. exists Histart. assumption.
+      * by exists sstart, trX, Histart.
       * destruct Histart as [isi [Histart [HtrX HinitX]]].
-        specialize (HinitX (proj2 Htr)).
-        exists isi, trX, (conj HtrX HinitX).
-        assumption.
+        by exists isi, trX, (conj HtrX (HinitX (proj2 Htr))).
 Qed.
 
 (** Finally, we define the [ComputableSentMessages] instance for the
@@ -615,9 +612,8 @@ Program Definition equivocator_ComputableSentMessages
     sent_messages_full := equivocator_sent_messages_full;
   |}.
 Next Obligation.
-  intros.
-  apply has_been_sent_consistency; [| assumption].
-  eapply equivocator_HasBeenSentCapability.
+  by intros; apply has_been_sent_consistency;
+   [eapply equivocator_HasBeenSentCapability|].
 Qed.
 
 End ComputableSentMessages_lifting.

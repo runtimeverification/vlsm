@@ -28,7 +28,7 @@ Proof.
       apply compare_eq in Hcmp as ->. by apply IHx in H as ->.
     + inversion H; subst; cbn. by rewrite compare_eq_refl, IHx.
   - intros x y. generalize dependent x.
-    induction y; intros; destruct x; destruct z; try assumption
+    induction y; intros; destruct x; destruct z; try done
     ; destruct comp; try done
     ; inversion H; clear H; destruct (compare a0 a) eqn:Ha0; try done
     ; inversion H0; clear H0; destruct (compare a a1) eqn:Ha1; try done
@@ -74,14 +74,13 @@ Proof.
   - rewrite elem_of_cons in H0.
     by destruct H0 as [H0 | H0]; subst; try inversion H0; left.
   - destruct (compare msg a) eqn:Hcmp.
-    + apply StrictOrder_Reflexive in Hcmp; subst. right. assumption.
+    + rewrite compare_eq in Hcmp; subst. by right.
     + rewrite elem_of_cons in H0.
       by destruct H0 as [Heq | Hin]; subst; [left | right].
     + rewrite elem_of_cons in H0.
       destruct H0 as [Heq | Hin]; subst.
       * by right; left.
-      * apply IHsigma in Hin. destruct Hin; try (left; assumption).
-        right. right. assumption.
+      * rewrite elem_of_cons. apply IHsigma in Hin as []; itauto.
 Qed.
 
 Lemma add_in_sorted_list_in_rev {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg msg' sigma,
@@ -90,22 +89,9 @@ Lemma add_in_sorted_list_in_rev {A} {compare : A -> A -> comparison} `{CompareSt
 Proof.
   intros. induction sigma; simpl in H0.
   - destruct H0 as [H0 | H0]; subst; [left | inversion H0].
-  - rewrite elem_of_cons in H0.
-    simpl.
-    destruct H0 as [Heq|Heq];destruct (compare msg a) eqn:Hcmp.
-    + apply StrictOrder_Reflexive in Hcmp; subst; left.
-    + subst; left.
-    + by subst; right; apply IHsigma; left.
-    + apply StrictOrder_Reflexive in Hcmp; subst.
-      destruct Heq as [Heq|Heq].
-      * subst; left.
-      * right; assumption.
-    + destruct Heq as [Heq|Heq].
-      * subst; right; left.
-      * right; right; assumption.
-    + destruct Heq as [Heq|Heq].
-      * subst; left.
-      * right; apply IHsigma; right; assumption.
+  - rewrite elem_of_cons in H0; cbn.
+    destruct H0 as [Heq | Heq], (compare msg a) eqn: Hcmp
+    ; rewrite !elem_of_cons; rewrite ?compare_eq in Hcmp; subst; itauto.
 Qed.
 
 Lemma add_in_sorted_list_iff {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg msg' sigma,
@@ -113,8 +99,8 @@ Lemma add_in_sorted_list_iff {A} {compare : A -> A -> comparison} `{CompareStric
   msg = msg' \/ msg' ∈ sigma.
 Proof.
   intros; split.
-  - apply add_in_sorted_list_in; assumption.
-  - apply add_in_sorted_list_in_rev; assumption.
+  - by apply add_in_sorted_list_in.
+  - by apply add_in_sorted_list_in_rev.
 Qed.
 
 Lemma add_in_sorted_list_head {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
@@ -126,8 +112,8 @@ Qed.
 Lemma add_in_sorted_list_tail {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
   sigma ⊆ (add_in_sorted_list_fn compare msg sigma).
 Proof.
-  intros. intros x Hin.
-  apply add_in_sorted_list_iff; try assumption. right. assumption.
+  intros msg sigma x Hin.
+  by apply add_in_sorted_list_iff; right.
 Qed.
 
 Lemma LocallySorted_ForAll2 [A : Type] (R : A -> A -> Prop)
@@ -138,11 +124,9 @@ Proof.
   - constructor.
   - inversion Hl; subst.
     + constructor; [exact I|]. constructor. exact I.
-    + apply IHl in H1. constructor; assumption.
-  - apply proj2 in IHl.
-    spec IHl. { apply fsFurther in Hl; assumption. }
-    destruct l; constructor; [assumption|].
-    inversion Hl. assumption.
+    + apply IHl in H1. by constructor.
+  - apply proj2 in IHl. inversion Hl; subst.
+    destruct l; constructor; auto.
 Qed.
 
 Lemma LocallySorted_filter [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
@@ -150,8 +134,7 @@ Lemma LocallySorted_filter [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
   : forall l, LocallySorted R l -> LocallySorted R (filter P l).
 Proof.
   setoid_rewrite LocallySorted_ForAll2.
-  apply ForAllSuffix2_filter.
-  assumption.
+  by apply ForAllSuffix2_filter.
 Qed.
 
 Lemma LocallySorted_tl {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
@@ -159,7 +142,7 @@ Lemma LocallySorted_tl {A} {compare : A -> A -> comparison} `{CompareStrictOrder
     LocallySorted (compare_lt compare) sigma.
 Proof.
   intros. apply Sorted_LocallySorted_iff in H0.
-  inversion H0; subst; clear H0. apply Sorted_LocallySorted_iff. assumption.
+  inversion H0; subst; clear H0. by apply Sorted_LocallySorted_iff.
 Qed.
 
 Lemma add_in_sorted_list_sorted {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
@@ -169,15 +152,15 @@ Proof.
   intros. apply (@compare_asymmetric_intro _) in H as Hasymm.
   induction H0; simpl; try constructor; destruct (compare msg a) eqn:Hcmpa.
   - constructor.
-  - constructor; try assumption. constructor.
-  - apply Hasymm in Hcmpa. constructor; try assumption. constructor.
-  - constructor; assumption.
-  - constructor; try assumption. constructor; assumption.
+  - constructor; [| done]. constructor.
+  - apply Hasymm in Hcmpa. constructor; [| done]. constructor.
+  - by constructor.
+  - constructor; [| done]. by constructor.
   - apply Hasymm in Hcmpa.
     simpl in IHLocallySorted. destruct (compare msg b) eqn:Hcmpb.
-    + apply StrictOrder_Reflexive in Hcmpb. subst. constructor; assumption.
-    + constructor; assumption.
-    + apply Hasymm in Hcmpb. constructor; assumption.
+    + apply StrictOrder_Reflexive in Hcmpb. subst. by constructor.
+    + by constructor.
+    + apply Hasymm in Hcmpb. by constructor.
 Qed.
 
 (** Sorted lists as sets **)
@@ -187,16 +170,10 @@ Lemma LocallySorted_elem_of_lt {A} {lt : relation A} `{StrictOrder A lt} :
   x ∈ s ->
   lt y x.
 Proof.
-  intros x y s LS IN. generalize dependent x. generalize dependent y.
+  intros x y s LS IN. revert y x LS IN.
   induction s.
-  - intros y LS x IN. inversion IN.
-  - intros y LS x IN.
-    inversion LS; subst.
-    inversion IN; subst.
-    + assumption.
-    + spec IHs a H2 x H3.
-      destruct H as [_ H]; red in H.
-      apply (H y a x H4 IHs).
+  - inversion 2.
+  - do 2 inversion 1; subst; firstorder.
 Qed.
 
 Lemma add_in_sorted_list_existing {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
@@ -230,7 +207,7 @@ Proof.
     specialize (IN1 x1).
     rewrite 2 elem_of_cons in IN1.
     specialize (IN1 (or_introl (eq_refl x1))).
-    destruct IN1; [assumption|].
+    destruct IN1; [done |].
     specialize (IN2 x2).
     rewrite 2 elem_of_cons in IN2.
     specialize (IN2 (or_introl (eq_refl x2))).
@@ -252,7 +229,7 @@ Proof.
     rewrite elem_of_cons in IN1.
     specialize (IN1 (or_intror Hx)).
     rewrite elem_of_cons in IN1.
-    destruct IN1; [|assumption].
+    destruct IN1; [| done].
     subst.
     by apply StrictOrder_Irreflexive in H0.
   - intros x Hx.
@@ -261,7 +238,7 @@ Proof.
     rewrite elem_of_cons in IN2.
     specialize (IN2 (or_intror Hx)).
     rewrite elem_of_cons in IN2.
-    destruct IN2; [|assumption].
+    destruct IN2; [| done].
     subst.
     by apply StrictOrder_Irreflexive in H0.
 Qed.
@@ -311,11 +288,10 @@ Proof.
     split.
     apply LSorted_nil.
     simpl in *.
-    rewrite Hconcat in Hsorted.
-    assumption.
+    by rewrite Hconcat in Hsorted.
   - intros.
     apply Sorted_LocallySorted_iff in Hsorted.
-    apply Sorted_StronglySorted in Hsorted.
+    apply Sorted_StronglySorted in Hsorted; [| done].
     rewrite Hconcat in Hsorted.
     simpl in Hsorted.
     apply StronglySorted_inv in Hsorted.
@@ -323,22 +299,13 @@ Proof.
     specialize (IHalfa beta (alfa ++ beta)).
     spec IHalfa.
     apply Sorted_LocallySorted_iff.
-    apply StronglySorted_Sorted.
-    assumption.
+    by apply StronglySorted_Sorted.
     specialize (IHalfa eq_refl).
     destruct IHalfa.
-    split.
-    + destruct alfa.
-      * apply LSorted_cons1.
-      * apply LSorted_consn.
-        assumption.
-        rewrite Forall_forall in H0.
-        specialize (H0 a0).
-        spec H0.
-        left.
-        assumption.
-    + assumption.
-    + assumption.
+    split; [| done].
+    destruct alfa; constructor; [done |].
+    rewrite Forall_forall in H0.
+    apply H0; left.
 Qed.
 
 Lemma lsorted_pairwise_ordered
@@ -356,14 +323,11 @@ Proof.
   destruct Hconcat as [_ Hneed].
   simpl in Hneed.
   rewrite <- Sorted_LocallySorted_iff in Hneed.
-  apply Sorted_extends in Hneed.
+  apply Sorted_extends in Hneed; [| done].
   rewrite Forall_forall in Hneed.
   specialize (Hneed y).
-  spec Hneed.
-  apply elem_of_app.
-  right; left.
-  assumption.
-  assumption.
+  spec Hneed; [| done].
+  apply elem_of_app; right; left.
 Qed.
 
 Lemma lsorted_pair_wise_unordered
@@ -384,9 +348,9 @@ Proof.
   rewrite elem_of_cons in Hin_y.
   assert (y =x \/ y ∈ (pref1 ++ suf1)). {
     destruct Hin_y as [Hin_y|Hin_y]; [|destruct Hin_y].
-    - right; apply elem_of_app; left; assumption.
-    - left; assumption.
-    - right; apply elem_of_app; right; assumption.
+    - by right; apply elem_of_app; left.
+    - by left.
+    - by right; apply elem_of_app; right.
   }
   clear Hin_y.
   rename H into Hin_y.
@@ -399,10 +363,10 @@ Proof.
       rewrite Hconcat2 in Hconcat1.
       rewrite <- app_assoc in Hconcat1.
       specialize (lsorted_pairwise_ordered l R Hsorted Htransitive y x pref2 suf2 suf1 Hconcat1).
-      intros; right; right; assumption.
+      by intros; right; right.
     * apply elem_of_list_split in H.
       destruct H as [pref2 [suf2 Hconcat2]].
       rewrite Hconcat2 in Hconcat1.
       specialize (lsorted_pairwise_ordered l R Hsorted Htransitive x y pref1 pref2 suf2 Hconcat1).
-      intros; right; left; assumption.
+      by intros; right; left.
 Qed.

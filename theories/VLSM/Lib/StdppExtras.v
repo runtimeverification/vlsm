@@ -24,7 +24,7 @@ Lemma map_skipn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
 Proof.
   revert n; induction l; intros n.
   - by rewrite !skipn_nil.
-  - cbn. destruct n; cbn; auto.
+  - by destruct n; cbn; auto.
 Qed.
 
 Lemma map_firstn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
@@ -130,8 +130,8 @@ Proof.
   setoid_rewrite <-not_true_iff_false.
   setoid_rewrite existsb_Exists.
   apply Exists_last.
-  { intro a; solve_decision. }
-  apply existsb_Exists;assumption.
+  - by typeclasses eauto.
+  - by apply existsb_Exists.
 Qed.
 
 Lemma existsb_forall {A} (f : A -> bool):
@@ -158,8 +158,8 @@ Proof.
   setoid_rewrite <-not_true_iff_false.
   setoid_rewrite existsb_Exists.
   apply Exists_first.
-  { intro a. solve_decision. }
-  apply existsb_Exists;assumption.
+  - typeclasses eauto.
+  - by apply existsb_Exists.
 Qed.
 
 (* Returns all elements X of l such that X does not compare less
@@ -184,19 +184,9 @@ Proof.
   induction l; intros.
   - by rewrite 2 filter_nil.
   - rewrite 2 filter_cons.
-    destruct (decide (P a)); destruct (decide (Q a)).
-    + rewrite IHl; [done |].
-      intros.
-      apply H1.
-      right; assumption.
-    + contradict n.
-      by apply H1; [left |].
-    + contradict n.
-      by apply H1; [left |].
-    + apply IHl.
-      intros.
-      apply H1.
-      right; assumption.
+    setoid_rewrite elem_of_cons in H1.
+    destruct (decide (P a)); destruct (decide (Q a)); [|firstorder ..].
+    rewrite IHl; [done |]. firstorder.
 Qed.
 
 Lemma ext_elem_of_filter {A} P Q
@@ -206,20 +196,8 @@ Lemma ext_elem_of_filter {A} P Q
 Proof.
   intros.
   split; intros.
-  - assert (a ∈ filter P l). {
-      apply elem_of_list_filter.
-      split; assumption.
-    }
-    rewrite H1 in H4.
-    apply elem_of_list_filter in H4.
-    destruct H4; assumption.
-  - assert (a ∈ filter Q l). {
-      apply elem_of_list_filter.
-      split; assumption.
-    }
-    rewrite <- H1 in H4.
-    apply elem_of_list_filter in H4.
-    destruct H4; assumption.
+  - by eapply elem_of_list_filter; rewrite <- H1; apply elem_of_list_filter.
+  - by eapply elem_of_list_filter; rewrite H1; apply elem_of_list_filter.
 Qed.
 
 Lemma filter_complement {X} P Q
@@ -228,22 +206,15 @@ Lemma filter_complement {X} P Q
  filter P l = filter Q l <->
  filter (fun x => ~ P x) l = filter (fun x => ~ Q x) l.
 Proof.
-   split; intros.
-   - specialize (ext_elem_of_filter P Q l H1) as Hext.
-     apply filter_ext_elem_of.
-     intros.
-     specialize (Hext a H2).
-     rewrite Hext. itauto.
-   - specialize (ext_elem_of_filter _ _ l H1) as Hext.
-     apply filter_ext_elem_of. intros.
-     specialize (Hext a H2).
-     destruct (decide (P a)); destruct (decide (Q a)).
-     * itauto.
-     * apply Hext in n.
-       contradict n; assumption.
-     * apply Hext in n.
-       contradict n; assumption.
-     * itauto.
+  split; intros.
+  - specialize (ext_elem_of_filter P Q l H1) as Hext.
+    apply filter_ext_elem_of.
+    intros.
+    specialize (Hext a H2).
+    rewrite Hext. itauto.
+  - apply filter_ext_elem_of. intros.
+    specialize (ext_elem_of_filter _ _ l H1 a H2) as Hext; cbn in Hext.
+    destruct (decide (P a)); destruct (decide (Q a)); itauto.
 Qed.
 
 Lemma NoDup_elem_of_remove A (l l' : list A) a :
@@ -253,14 +224,8 @@ Proof.
   apply NoDup_app in Hnda.
   destruct Hnda as [Hnd [Ha Hnda]].
   apply NoDup_cons in Hnda.
+  setoid_rewrite elem_of_cons in Ha.
   destruct Hnda as [Ha' Hnd']; split.
-  - apply NoDup_app; split; [assumption|split;[|assumption]].
-    intros x Hxl.
-    specialize (Ha x Hxl).
-    intro Hxl'; contradict Ha; right; assumption.
-  - rewrite elem_of_app.
-    intro Hal.
-    destruct Hal as [Hal|Hal]; [| done].
-    specialize (Ha a Hal).
-    contradict Ha; left.
+  - by apply NoDup_app; firstorder.
+  - by rewrite elem_of_app; firstorder.
 Qed.

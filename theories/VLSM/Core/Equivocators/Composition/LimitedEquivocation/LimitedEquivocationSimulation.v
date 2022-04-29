@@ -50,9 +50,9 @@ Proof.
   apply preloaded_constraint_subsumption_stronger.
   apply strong_constraint_subsumption_strongest.
   intros l (s, om) [Hno_equiv Hfixed].
-  split; [assumption|].
+  split; [done |].
   unfold not_heavy.
-  transitivity (sum_weights (remove_dups equivocating)); [|assumption].
+  transitivity (sum_weights (remove_dups equivocating)); [| done].
   remember (composite_transition _ _ _).1. clear Heqc.
   unfold state_has_fixed_equivocation in Hfixed.
   unfold equivocation_fault.
@@ -61,8 +61,7 @@ Proof.
   apply sum_weights_subseteq.
   - apply equivocating_validators_nodup.
   - apply NoDup_remove_dups.
-  - intros i Hi.
-    apply elem_of_remove_dups. apply Hfixed. apply Heq. assumption.
+  - by intros i Hi; apply elem_of_remove_dups, Hfixed, Heq.
 Qed.
 
 End fixed_limited_state_equivocation.
@@ -103,7 +102,7 @@ Proof.
     as (is & s & tr & His & Hs & Htr & Hptr & Houtput).
   exists is, s, tr; split_and?; try itauto.
   revert Hptr; apply VLSM_incl_finite_valid_trace_init_to.
-  apply equivocators_Fixed_incl_Limited; assumption.
+  by apply equivocators_Fixed_incl_Limited.
 Qed.
 
 Section sec_equivocators_simulating_annotated_limited.
@@ -134,10 +133,10 @@ Proof.
   apply valid_trace_get_last in HtrX as HeqsX.
   eapply valid_trace_forget_last, msg_dep_fixed_limited_equivocation
       in HtrX.
-  2-5: eassumption.
+  2-5: done.
   apply limited_equivocators_finite_valid_trace_init_to_rev
      in HtrX as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput)
-  ; [| assumption].
+  ; [| done].
   exists is, s, tr; subst; split_and!; try itauto.
   - by erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last.
   - rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
@@ -175,11 +174,10 @@ Proof.
     in HsX as (isX & trX & HsX & HtrX).
   apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
     as (is & s & tr & _ & Hpr_s & _ & Htr & _)
-  ; [|assumption].
+  ; [| done].
   exists s.
-  subst. split; [assumption|].
-  apply valid_trace_last_pstate in Htr.
-  assumption.
+  subst. split; [done |].
+  by apply valid_trace_last_pstate in Htr.
 Qed.
 
 End limited_equivocation_simulation.

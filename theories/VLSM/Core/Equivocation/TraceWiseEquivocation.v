@@ -101,22 +101,20 @@ Proof.
     apply elem_of_list_filter in Hfilter.
     destruct Hfilter as [Heqv Hdec].
     subst _item.
-    exists im. split; [assumption|].
+    exists im. split; [done |].
     exists prefix, item, suffix.
     apply elem_of_one_element_decompositions in Hdec. simpl in Hdec.
     split; [by subst |].
-    split; [assumption|].
-    unfold item_equivocating_in_trace in Heqv.
-    rewrite Hinput in Heqv.
-    assumption.
+    split; [done |].
+    by unfold item_equivocating_in_trace in Heqv; rewrite Hinput in Heqv.
   - intros [im [Hsender [prefix [item [suffix [Heq_tr [Hinput Heqv]]]]]]].
-    exists im. split; [|assumption]. exists item.
-    split; [|assumption]. exists ((prefix, item), suffix).
+    exists im. split; [| done]. exists item.
+    split; [| done]. exists ((prefix, item), suffix).
     split; [done |].
     apply elem_of_list_filter.
     unfold item_equivocating_in_trace.
     simpl in *.  rewrite Hinput.
-    split; [assumption|].
+    split; [done |].
     by apply elem_of_one_element_decompositions.
 Qed.
 
@@ -125,7 +123,7 @@ Lemma equivocating_senders_in_trace_prefix prefix suffix
 Proof.
   intros v. rewrite !elem_of_equivocating_senders_in_trace.
   intros [m [Hm Heqv]].
-  exists m. split; [assumption|].
+  exists m. split; [done |].
   revert Heqv. apply equivocation_in_trace_prefix.
 Qed.
 
@@ -174,8 +172,8 @@ Lemma is_equivocating_tracewise_no_has_been_sent_equivocating_senders_in_trace
     (Htr : finite_valid_trace_init_to PreFree is s tr),
     v ∈ equivocating_senders_in_trace tr.
 Proof.
-  split; intros Heqv is tr Htr; specialize (Heqv _ _ Htr)
-  ; apply elem_of_equivocating_senders_in_trace; assumption.
+  by split; intros Heqv is tr Htr; specialize (Heqv _ _ Htr)
+  ; apply elem_of_equivocating_senders_in_trace.
 Qed.
 
 (** If any message can only be emitted by node corresponding to its sender
@@ -205,11 +203,11 @@ Proof.
     erewrite <- oracle_initial_trace_update
       with (vlsm := free_composite_vlsm IM); cycle 1.
     - apply composite_has_been_sent_stepwise_props.
-    - eassumption.
-    - eapply has_been_sent_iff_by_sender; eassumption.
+    - done.
+    - by eapply has_been_sent_iff_by_sender.
   }
-  split; [|eassumption].
-  eapply  finite_valid_trace_from_to_app_split; eassumption.
+  split; [| done].
+  by eapply  finite_valid_trace_from_to_app_split.
 Qed.
 
 Lemma transition_is_equivocating_tracewise_char
@@ -221,15 +219,15 @@ Lemma transition_is_equivocating_tracewise_char
     option_bind _ _ sender om = Some v.
 Proof.
   destruct (decide (option_bind _ _ sender om = Some v))
-  ; [intro; right; assumption|].
+  ; [by intro; right |].
   intros Heqv. left. intros is tr [Htr Hinit].
   specialize (extend_right_finite_trace_from_to _ Htr Ht) as Htr'.
   specialize (Heqv _ _ (conj Htr' Hinit)).
   destruct Heqv as [m [Hv [prefix [item [suffix [Heq Heqv]]]]]].
-  exists m. split; [assumption|]. exists prefix.
+  exists m. split; [done |]. exists prefix.
   destruct_list_last suffix suffix' item' Heqsuffix.
   { exfalso. subst. apply app_inj_tail,proj2 in Heq. subst item. apply proj1 in Heqv. simpl in Heqv. subst om. simpl in n. congruence. }
-  exists item, suffix'. split; [|assumption].
+  exists item, suffix'. split; [| done].
   replace (prefix ++ item :: suffix' ++ [item']) with ((prefix ++ item :: suffix') ++ [item']) in Heq.
   - apply app_inj_tail in Heq. apply Heq.
   - by rewrite <- app_assoc.
@@ -243,19 +241,19 @@ Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
   : is_equivocating_tracewise_no_has_been_sent s' v -> is_equivocating_tracewise_no_has_been_sent s v.
 Proof.
   intro Hs'.
-  destruct (transition_is_equivocating_tracewise_char _ _ _ _ _ Ht v Hs')
-  ; [assumption|congruence].
+  by destruct (transition_is_equivocating_tracewise_char _ _ _ _ _ Ht v Hs')
+  ; [|congruence].
 Qed.
 
 Lemma is_equivocating_statewise_implies_is_equivocating_tracewise s v
   : is_equivocating_statewise IM A sender s v -> is_equivocating_tracewise s v.
 Proof.
   intros [j [m [Hm [Hnbs_m Hbr_m]]]] is tr Htr.
-  exists m. split; [assumption|].
+  exists m. split; [done |].
   apply (preloaded_finite_valid_trace_init_to_projection _ j) in Htr as Htrj.
   apply proj1 in Htrj as Hlstj.
   apply finite_valid_trace_from_to_last_pstate in Hlstj.
-  apply proper_received in Hbr_m; [|assumption].
+  apply proper_received in Hbr_m; [| done].
   specialize (Hbr_m _ _ Htrj).
   apply Exists_exists in Hbr_m.
   destruct Hbr_m as [itemj [Hitemj Hinput]].
@@ -264,7 +262,7 @@ Proof.
   simpl in Hinput. rewrite <- Heq_input in Hinput. clear Heq_input.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [prefix [suffix Heq_tr]].
-  exists prefix, item, suffix. split; [assumption|]. split; [assumption|].
+  exists prefix, item, suffix. split; [done |]. split; [done |].
   subst.
   clear -Hnbs_m Htr.
   apply preloaded_finite_valid_trace_init_to_projection with (j := A v) in Htr as Htrv.
@@ -289,7 +287,7 @@ Lemma initial_state_not_is_equivocating_tracewise
 Proof.
   intros Heqv.
   specialize (Heqv s []).
-  spec Heqv. { split; [|assumption]. constructor. apply initial_state_is_valid. assumption. }
+  spec Heqv. { split; [| done]. constructor. by apply initial_state_is_valid. }
   destruct Heqv as [m [_ [prefix [suf [item [Heq _]]]]]].
   destruct prefix; inversion Heq.
 Qed.
@@ -327,8 +325,7 @@ Proof.
   apply elem_of_empty_nil.
   intro v.
   rewrite equivocating_validators_is_equivocating_tracewise_iff.
-  apply initial_state_not_is_equivocating_tracewise.
-  assumption.
+  by apply initial_state_not_is_equivocating_tracewise.
 Qed.
 
 Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validators
@@ -337,11 +334,9 @@ Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validator
   (Hno_sender : option_bind _ _ sender om = None)
   : equivocating_validators s' ⊆ equivocating_validators s.
 Proof.
-  intro v.
-  intro Hs'. apply equivocating_validators_is_equivocating_tracewise_iff in Hs'.
-  apply equivocating_validators_is_equivocating_tracewise_iff.
-  apply transition_receiving_no_sender_reflects_is_equivocating_tracewise with l om s' om'
-  ; assumption.
+  intros v Hs'%equivocating_validators_is_equivocating_tracewise_iff.
+  by eapply equivocating_validators_is_equivocating_tracewise_iff,
+            transition_receiving_no_sender_reflects_is_equivocating_tracewise.
 Qed.
 
 Lemma initial_state_equivocators_weight

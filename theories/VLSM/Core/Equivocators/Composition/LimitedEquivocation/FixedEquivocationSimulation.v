@@ -47,8 +47,7 @@ Lemma no_initial_messages_in_sub_IM
   : forall i m, ~vinitial_message_prop (sub_IM IM equivocating i) m.
 Proof.
   intros [i Hi] m Hinit.
-  apply (no_initial_messages_in_IM i m).
-  assumption.
+  by apply (no_initial_messages_in_IM i m).
 Qed.
 
 (** Messages [sent_by_non_equivocating] nodes in the projection of a valid
@@ -172,7 +171,7 @@ Proof.
     specialize (has_been_sent_examine_one_trace _ _ _ Him_etr im)
       as Hrew.
     unfold has_been_sent in Hrew; cbn; apply Hrew.
-    apply Exists_exists. exists item. split; [|assumption].
+    apply Exists_exists. exists item. split; [| done].
     apply elem_of_list_lookup.
     rewrite StdppExtras.last_last_error in Hlast.
     replace (Some _) with (last im_etr).
@@ -180,7 +179,7 @@ Proof.
     exists (pred (length im_etr)).
     by induction im_etr as [| ?[]].
   - apply last_error_destination_last.
-    rewrite Hlast. simpl. f_equal. assumption.
+    by rewrite Hlast; simpl; f_equal.
 Qed.
 
 (** Messages satisfying the [strong_fixed_equivocation_constraint] have the
@@ -199,20 +198,18 @@ Proof.
   - exists []. exists eqv_state_s.
     split; [constructor|]; eauto.
   - exists []. exists eqv_state_s.
-    split; [constructor; assumption|].
+    split; [by constructor |].
     split; [done |].
-    split; [assumption|].
+    split; [done |].
     apply sent_by_non_equivocating_are_sent in Hsent.
     apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
     apply (VLSM_incl_valid_state HinclE) in Hstate_valid.
     left.
     revert Hsent. subst.
-    specialize
+    by specialize
       (VLSM_projection_has_been_sent_reflect
         (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM)
         eqv_state_s Hstate_valid im) as Hsent.
-    unfold has_been_sent in Hsent. simpl in Hsent.
-    assumption.
   - (*  If <<im>> can be emitted by the free composition of equivocating nodes
         seeded with the messages [sent_by_non_equivocating] in <<s>>, then we can
         use Lemma [seeded_equivocators_finite_valid_trace_init_to_rev] to
@@ -251,10 +248,9 @@ Proof.
       apply (VLSM_eq_valid_state HeqXE) in Hs.
       apply valid_state_has_fixed_equivocation in Hs.
       destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
-      apply
+      by apply
         (equivocating_transition_preserves_fixed_equivocation
           IM equivocating _ _ _ _ _ Ht Hs).
-      assumption.
     }
     spec Hreplay.
     { subst s.
@@ -306,7 +302,7 @@ Proof.
       specialize
         (replayed_trace_from_finite_trace_last IM equivocating eqv_state_s im_eis im_etr (proj2 Him_etr)).
       simpl. intro Hrew. rewrite Hrew. clear Hrew.
-      apply fixed_equivocation_replay_has_message; [assumption|].
+      apply fixed_equivocation_replay_has_message; [done |].
       clear -Him_etr Him_output.
       destruct_list_last im_etr im_ert' item Heqim_etr; [inversion Him_output|].
       apply proj1 in Him_etr.
@@ -347,8 +343,7 @@ Proof.
   *)
   assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   { intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
-    elim (no_initial_messages_in_IM i mi).
-    assumption.
+    by elim (no_initial_messages_in_IM i mi).
   }
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
   specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
@@ -359,12 +354,12 @@ Proof.
     in HtrX
     as (is & His & s & Hs & tr & Htr & Hptr & Houtput).
   - exists is, s, tr; split_and!; try itauto.
-    apply (VLSM_eq_finite_valid_trace_init_to HeqXE); assumption.
+    by apply (VLSM_eq_finite_valid_trace_init_to HeqXE).
   - intro; intros.
     apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
     + split; [|exact I].  destruct om as [im|]; [|exact I].
-      destruct Hom as [Hom|Hinitial]; [left; assumption|exfalso].
+      destruct Hom as [Hom|Hinitial]; [by left | exfalso].
       by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
@@ -411,8 +406,7 @@ Proof.
   assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   {
     intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
-    elim (no_initial_messages_in_IM i mi).
-    assumption.
+    by elim (no_initial_messages_in_IM i mi).
   }
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
   specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
@@ -422,17 +416,16 @@ Proof.
       IM _ _ (equivocators_fixed_equivocations_constraint IM []))
     in HtrX
     as [is [His [s [Hs [tr [Htr [Hptr Houtput]]]]]]].
-  - exists is. split; [assumption|].
-    exists s. split; [assumption|].
-    exists tr. split; [assumption|].
-    split; [|assumption].
-    apply (VLSM_eq_finite_valid_trace_init_to HeqXE).
-    assumption.
+  - exists is. split; [done |].
+    exists s. split; [done |].
+    exists tr. split; [done |].
+    split; [| done].
+    by apply (VLSM_eq_finite_valid_trace_init_to HeqXE).
   - intro; intros.
     apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
     + split; [|exact I].  destruct om as [im|]; [|exact I].
-      destruct Hom as [Hom|Hinitial]; [left; assumption|exfalso].
+      destruct Hom as [Hom|Hinitial]; [by left | exfalso].
       by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
@@ -450,19 +443,17 @@ Proof.
     }
     destruct HcX as [Hsent | Hemitted]; [| done].
     exists []. exists eqv_state_s.
-    split; [constructor; assumption|].
+    split; [by constructor |].
     split; [done |].
-    split; [assumption|].
+    split; [done |].
     apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
     apply (VLSM_incl_valid_state HinclE) in Hstate_valid.
     left.
     revert Hsent. subst.
-    specialize
+    by specialize
       (VLSM_projection_has_been_sent_reflect
         (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM)
         eqv_state_s Hstate_valid im) as Hsent.
-    unfold has_been_sent in Hsent. simpl in Hsent.
-    assumption.
 Qed.
 
 End no_equivocation.

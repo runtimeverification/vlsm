@@ -5,14 +5,10 @@ From VLSM.Lib Require Import Preamble ListExtras SortedLists.
 (** * Stream utility definitions and lemmas *)
 
 Lemma fHere [A:Type] (P: Stream A -> Prop) : forall s, ForAll P s -> P s.
-Proof.
-  destruct 1;assumption.
-Qed.
+Proof. by intros s []. Qed.
 
 Lemma fFurther [A:Type] (P: Stream A -> Prop) : forall s, ForAll P s -> ForAll P (tl s).
-Proof.
-  destruct 1;assumption.
-Qed.
+Proof. by intros s []. Qed.
 
 Lemma ForAll_subsumption [A:Type] (P Q: Stream A -> Prop)
   (HPQ : forall s, P s -> Q s)
@@ -27,13 +23,13 @@ Lemma Exists_Str_nth_tl [A : Type] (P : Stream A -> Prop)
   : forall s, Exists P s <-> exists n, P (Str_nth_tl n s).
 Proof.
   intros s; split.
-  - induction 1; [exists 0; assumption|].
+  - induction 1; [by exists 0 |].
     destruct IHExists as [n Hn].
-    exists (S n). assumption.
+    by exists (S n).
   - intros [n Hn]. revert s Hn.
-    induction n; [apply Here; assumption|].
+    induction n; [by apply Here |].
     intros s Hs. specialize (IHn (tl s) Hs).
-    apply Further. assumption.
+    by apply Further.
 Qed.
 
 Definition Exists1 [A : Type] (P : A -> Prop) := Exists (fun s => P (hd s)).
@@ -43,12 +39,12 @@ Lemma Exists1_exists [A : Type] (P : A -> Prop) s
 Proof.
   split.
   - induction 1.
-    + exists 0. assumption.
+    + by exists 0.
     + destruct IHExists as [n Hp].
-      exists (S n). assumption.
+      by exists (S n).
   - intros [n Hp]. revert s Hp. induction n; intros.
-    + apply Here. assumption.
-    + apply Further, IHn. assumption.
+    + by constructor.
+    + by apply Further, IHn.
 Qed.
 
 Definition ForAll1 [A : Type] (P : A -> Prop) := ForAll (fun s => P (hd s)).
@@ -65,13 +61,11 @@ Lemma ForAll1_forall [A : Type] (P : A -> Prop) s
   : ForAll1 P s <-> forall n, P (Str_nth n s).
 Proof.
   split; intros.
-  - apply ForAll_Str_nth_tl with (m := n) in H.
-    apply fHere in H. assumption.
+  - apply ForAll_Str_nth_tl with (m := n) in H. apply H.
   - apply ForAll_coind with (fun s : Stream A => forall n : nat, P (Str_nth n s))
     ; intros.
-    + specialize (H0 0). assumption.
-    + specialize (H0 (S n)).
-      assumption.
+    + by specialize (H0 0).
+    + by specialize (H0 (S n)).
     + apply H.
 Qed.
 
@@ -90,12 +84,11 @@ Lemma ForAll2_forall [A : Type] (R : A -> A -> Prop) s
 Proof.
   split; intros.
   - apply ForAll_Str_nth_tl with (m := n) in H.
-    apply fHere in H. rewrite tl_nth_tl in H. assumption.
+    apply fHere in H. by rewrite tl_nth_tl in H.
   - apply ForAll_coind with (fun s : Stream A => forall n : nat, R (Str_nth n s) (Str_nth (S n) s))
     ; intros.
-    + specialize (H0 0). assumption.
-    + specialize (H0 (S n)).
-      assumption.
+    + by specialize (H0 0).
+    + by specialize (H0 (S n)).
     + apply H.
 Qed.
 
@@ -128,8 +121,7 @@ Lemma stream_app_assoc
   (n : Stream A)
   : stream_app l (stream_app m n) = stream_app (l ++ m) n.
 Proof.
-  induction l; [done |].
-  simpl. apply f_equal. assumption.
+  by induction l; cbn; f_equal.
 Qed.
 
 Lemma stream_app_f_equal
@@ -140,8 +132,7 @@ Lemma stream_app_f_equal
   (Hs : EqSt s1 s2)
   : EqSt (stream_app l1 s1) (stream_app l2 s2).
 Proof.
-  subst. induction l2; try assumption.
-  simpl. by constructor.
+  by subst; induction l2; [ | constructor].
 Qed.
 
 Lemma stream_app_inj_l
@@ -155,9 +146,7 @@ Proof.
   generalize dependent l2.
   induction l1; intros; destruct l2; try done; try inversion Heq_len.
   inversion Heq.
-  f_equal.
-  specialize (IHl1 l2 H2 H0).
-  assumption.
+  by rewrite (IHl1 l2 H2 H0).
 Qed.
 
 Fixpoint stream_prefix
@@ -179,9 +168,8 @@ Lemma stream_prefix_nth
   : nth_error (stream_prefix s n) i = Some (Str_nth i s).
 Proof.
   revert s n Hi.
-  induction i; intros [a s] [| n] Hi; cbn.
-  1-3: by inversion Hi.
-  apply IHi. lia.
+  induction i; intros [a s] [| n] Hi; [by inversion Hi ..|].
+  by apply IHi; lia.
 Qed.
 
 Lemma stream_prefix_lookup
@@ -193,9 +181,8 @@ Lemma stream_prefix_lookup
   : stream_prefix s n !! i = Some (Str_nth i s).
 Proof.
   revert s n Hi.
-  induction i; intros [a s] [| n] Hi; cbn.
-  1-3: by inversion Hi.
-  apply IHi. lia.
+  induction i; intros [a s] [| n] Hi; [by inversion Hi ..|].
+  by apply IHi; lia.
 Qed.
 
 Lemma stream_prefix_S
@@ -252,15 +239,13 @@ Proof.
     inversion H; subst.
     + exists 0. split; [lia | done].
     + apply IHn in H2 as [k [Hlt Heq]].
-      exists (S k).
-      split; try assumption.
-      lia.
+      exists (S k). split; [lia | done].
   - destruct l as (b, l).
     destruct H as [k [Hlt Heq]].
     destruct k.
     + unfold Str_nth in Heq. simpl in Heq. subst. left.
     + unfold Str_nth in *. simpl in Heq.
-      right. apply IHn. exists k. split; [lia|assumption].
+      right. apply IHn. exists k. split; [lia | done].
 Qed.
 
 Lemma stream_prefix_app_l
@@ -336,8 +321,7 @@ Proof.
     specialize (Hp _ _ Hn).
     specialize (Hi _ _ Hn).
     apply nth_error_nth with (d := hd s) in Hi.
-    rewrite Hi in Hp.
-    assumption.
+    by rewrite Hi in Hp.
 Qed.
 
 Lemma stream_prefix_ForAll2
@@ -353,7 +337,7 @@ Proof.
   - intros Hp n i.
     destruct (decide (n <= S i)).
     + intros. rewrite lookup_ge_None_2 in H0; [done |].
-      rewrite stream_prefix_length. assumption.
+      by rewrite stream_prefix_length.
     + pose proof (stream_prefix_length s n) as Hlen.
       rewrite (Hi n i) by lia.
       rewrite (Hi n (S i)) by lia.
@@ -369,7 +353,7 @@ Lemma ForAll2_transitive_lookup [A : Type] (R : A -> A -> Prop) {HT : Transitive
   : forall l, ForAll2 R l <-> forall m n, m < n -> R (Str_nth m l) (Str_nth n l).
 Proof.
   setoid_rewrite stream_prefix_ForAll2.
-  setoid_rewrite ForAllSuffix2_transitive_lookup; [|assumption].
+  setoid_rewrite ForAllSuffix2_transitive_lookup; [| done].
   intros s.
   specialize (stream_prefix_lookup s) as Hi.
   split.
@@ -380,9 +364,9 @@ Proof.
   - intros Hp n i j a b Hlt Ha Hb.
     apply lookup_lt_Some in Hb as Hltj.
     rewrite stream_prefix_length in Hltj.
-    rewrite Hi in Ha by lia. inversion Ha.
-    rewrite Hi in Hb by lia. inversion Hb.
-    apply Hp. assumption.
+    rewrite Hi in Ha, Hb by lia.
+    inversion Ha; inversion Hb.
+    by apply Hp.
 Qed.
 
 Lemma ForAll2_strict_lookup_rev [A : Type] (R : A -> A -> Prop) {HR : StrictOrder R}
@@ -393,12 +377,12 @@ Proof.
   destruct (decide (n <= m)); [|lia].
   exfalso.
   destruct HR as [HI HT].
-  rewrite ForAll2_transitive_lookup in Hl by assumption.
-  destruct (decide (m = n)).
-  - subst. elim (HI (Str_nth n l)). assumption.
+  rewrite ForAll2_transitive_lookup in Hl by done.
+  destruct (decide (m = n)); subst.
+  - by elim (HI (Str_nth n l)).
   - specialize (Hl n m). spec Hl; [lia|].
     elim (HI (Str_nth n l)).
-    transitivity (Str_nth m l); assumption.
+    by transitivity (Str_nth m l).
 Qed.
 
 Lemma ForAll2_strict_lookup_inj
@@ -408,12 +392,12 @@ Lemma ForAll2_strict_lookup_inj
 Proof.
   intros m n Hmn.
   destruct HR as [HI HT].
-  rewrite ForAll2_transitive_lookup in Hl by assumption.
-  destruct (decide (m = n)); [assumption|].
+  rewrite ForAll2_transitive_lookup in Hl by done.
+  destruct (decide (m = n)); [done |].
   elim (HI (Str_nth n l)).
-  destruct (decide (m < n))
+  by destruct (decide (m < n))
   ; [spec Hl m n|spec Hl n m]; (spec Hl; [lia|])
-  ; rewrite Hmn in Hl; assumption.
+  ; rewrite Hmn in Hl.
 Qed.
 
 Definition stream_suffix
@@ -429,10 +413,9 @@ Lemma stream_suffix_S
   (n : nat)
   : stream_suffix l n = Cons (Str_nth n l) (stream_suffix l (S n)).
 Proof.
-  generalize dependent l. induction n; intros.
+  revert l. induction n; intros.
   - by destruct l.
-  - specialize (IHn (tl l)); simpl in IHn.
-    simpl. assumption.
+  - by apply IHn.
 Qed.
 
 Lemma stream_suffix_nth
@@ -487,9 +470,8 @@ Lemma stream_segment_nth
   : nth_error (stream_segment l n1 n2) (i - n1) = Some (Str_nth i l).
 Proof.
   unfold stream_segment.
-  rewrite list_suffix_nth; try assumption.
-  apply stream_prefix_nth.
-  assumption.
+  rewrite list_suffix_nth; [| done].
+  by apply stream_prefix_nth.
 Qed.
 
 Definition stream_segment_alt
@@ -512,8 +494,8 @@ Proof.
   - specialize (nth_error_None (list_suffix (stream_prefix l n2) n1) k); intros [_ H].
     specialize (nth_error_None (stream_prefix (stream_suffix l n1) (n2 - n1)) k); intros [_ H_alt].
     rewrite H, H_alt; [done | |].
-    + rewrite stream_prefix_length; assumption.
-    + rewrite list_suffix_length. rewrite stream_prefix_length. assumption.
+    + by rewrite stream_prefix_length.
+    + by rewrite list_suffix_length, stream_prefix_length.
   - rewrite stream_prefix_nth, stream_suffix_nth by lia.
     assert (Hle : n1 <= n1 + k) by lia.
     specialize (list_suffix_nth (stream_prefix l n2) n1 (n1 + k) Hle)
@@ -533,10 +515,7 @@ Lemma stream_prefix_segment
 Proof.
   unfold stream_segment.
   rewrite <- (list_prefix_suffix (stream_prefix l n2) n1) at 2.
-  f_equal.
-  symmetry.
-  apply stream_prefix_prefix.
-  assumption.
+  by rewrite stream_prefix_prefix.
 Qed.
 
 Lemma stream_prefix_segment_suffix
@@ -553,9 +532,7 @@ Lemma stream_prefix_segment_suffix
   = l.
 Proof.
   rewrite <- (stream_prefix_suffix l n2) at 4.
-  f_equal.
-  apply stream_prefix_segment.
-  assumption.
+  by rewrite stream_prefix_segment.
 Qed.
 
 Lemma stream_segment_app
@@ -574,11 +551,8 @@ Proof.
   - specialize (list_prefix_suffix (stream_prefix l n2) n1); intro Hl2.
     specialize (stream_prefix_prefix l n1 n2 H12); intro Hl3.
     rewrite Hl3 in Hl2.
-    rewrite <- Hl2 in Hl1.
-    rewrite <- app_assoc in Hl1.
-    apply app_inv_head in Hl1.
-    symmetry.
-    assumption.
+    rewrite <- Hl2, <- app_assoc in Hl1.
+    by apply app_inv_head in Hl1.
   - repeat rewrite app_length.
     unfold stream_segment.
     repeat rewrite list_suffix_length.
@@ -612,14 +586,14 @@ Lemma monotone_nat_stream_find s (Hs : monotone_nat_stream_prop s) (n : nat)
 Proof.
   induction n.
   - destruct (hd s) eqn:Hhd .
-    + right. exists 0. left. assumption.
+    + by right; exists 0; left.
     + left. lia.
   - destruct (decide (hd s <= S n)); [|left; lia].
     right.
     destruct IHn as [Hlt | [k Hk]]
     ; [exists 0; left; cbv in *; lia|].
     destruct (decide (Str_nth (S k) s = S n))
-    ; [exists (S k); left; assumption|].
+    ; [by exists (S k); left|].
     exists k. right.
     specialize (Hs k (S k)).
     spec Hs; lia.
@@ -725,14 +699,12 @@ Lemma FinitelyMany_from_bound
 Proof.
   intros s [n Hn].
   apply Exists_Str_nth_tl.
-  exists n. assumption.
+  by exists n.
 Qed.
 
 Lemma InfinitelyOften_tl s
   : InfinitelyOften s -> InfinitelyOften (tl s).
-Proof.
-  inversion 1. assumption.
-Qed.
+Proof. by inversion 1. Qed.
 
 Definition InfinitelyOften_nth_tl
   : forall n s, InfinitelyOften s -> InfinitelyOften (Str_nth_tl n s)
@@ -747,10 +719,8 @@ Proof.
   cofix IH.
   intros [a s] H.
   inversion H. simpl in H1. apply IH in H1.
-  constructor; [|assumption].
-  apply Exists1_exists in H0 as [n Hn].
-  apply Exists1_exists.
-  exists n. apply HPQ. assumption.
+  constructor; [| done].
+  rewrite Exists1_exists in *. firstorder.
 Qed.
 
 Lemma FinitelyManyBound_impl_rev

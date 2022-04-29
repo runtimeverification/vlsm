@@ -120,13 +120,13 @@ Proof.
       exists s. split; [exact Hproject|].
       exists []. split; [done |]. do 2 (split; [| done]).
       constructor.
-      apply initial_state_is_valid. assumption.
+      by apply initial_state_is_valid.
     }
     apply functional_extensionality_dep_good.
     by subst.
   - destruct IHHtrX1 as [eqv_state_is [Hstate_start_project [eqv_state_s [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _ ]]]]]]].
     destruct IHHtrX2 as [eqv_msg_is [Hmsg_start_project [eqv_msg_s [_ [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg ]]]]]]].
-    exists eqv_state_is. split; [assumption|].
+    exists eqv_state_is. split; [done |].
     apply valid_trace_last_pstate in Hstate_trace as Hstate_valid.
     destruct Ht as [[Hs [Hiom [Hv Hc]]] Ht].
     specialize
@@ -137,10 +137,9 @@ Proof.
       destruct iom as [im|]; [|exact I].
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' item Heqiom_tr.
-      - right. assumption.
+      - by right.
       - left. simpl in *. rewrite <- Hfinal_msg.
-        rewrite finite_trace_last_output_is_last.
-        assumption.
+        by rewrite finite_trace_last_output_is_last.
     }
     specialize (Hreplay _ Hc)
       as [emsg_tr [es [Hmsg_trace_full_replay [Hemsg_tr_pr [Hes_pr Hbs_iom]]]]].
@@ -188,7 +187,7 @@ Proof.
         * rewrite !state_update_neq by congruence.
           simpl. apply Hes_pr_i.
       }
-      split; [assumption|].
+      split; [done |].
       eexists; split; [|split;[split; [exact Happ_extend|]|]].
       - apply valid_trace_forget_last in Happ_extend.
         apply (VLSM_incl_finite_valid_trace_from HinclE) in Happ_extend.
@@ -212,14 +211,13 @@ Proof.
     }
     clear Happ_extend.
     apply valid_trace_last_pstate in Happ.
-    repeat split; [assumption|..|assumption].
+    repeat split; [done |..| done].
     + destruct iom as [im|]; [|apply option_valid_message_None].
       destruct Hbs_iom as [Hbs_iom | Hseeded].
       * apply (preloaded_composite_sent_valid (equivocator_IM IM) _ _ _ Happ _ Hbs_iom).
-      * apply initial_message_is_valid. assumption.
-    + subst el. cbn. rewrite equivocator_state_project_zero.
-      rewrite Hes_pr_eqv. assumption.
-    + apply Hsubsumption; assumption.
+      * by apply initial_message_is_valid.
+    + by subst el; cbn; rewrite equivocator_state_project_zero, Hes_pr_eqv.
+    + by apply Hsubsumption.
 Qed.
 
 End generalized_constraints.
@@ -283,16 +281,15 @@ Proof.
   revert Htr.
   apply VLSM_incl_finite_valid_trace.
   apply basic_VLSM_incl_preloaded_with.
-  1,3-5: intro; intros; assumption.
+  1, 3-5: intro; intros; done.
   intros l s om (Hv & Hc & _).
-  split; [assumption|].
-  split; [|exact I].
-  destruct om; [| exact I].
-  destruct Hc as [Hc | Hc]; [|right; assumption].
+  split; [done |].
+  split; [| done].
+  destruct om; [| done].
+  destruct Hc as [Hc | Hc]; [| by right].
   left.
   destruct Hc as [i Hsent].
-  exists (free_sub_free_index i).
-  subst. assumption.
+  by exists (free_sub_free_index i).
 Qed.
 
 (** Specializing the [generalized_equivocators_finite_valid_trace_init_to_rev]
@@ -311,23 +308,19 @@ Lemma seeded_equivocators_finite_valid_trace_init_to_rev
 Proof.
   apply
     (generalized_equivocators_finite_valid_trace_init_to_rev IM)
-  ; [..|assumption].
-  - intro; intros. split; [|exact I].
+  ; [..| done].
+  - intro; intros. split; [| done].
     destruct om; [|exact I].
-    destruct Hom as [Hsent|Hinitial]; [left;assumption|].
+    destruct Hom as [Hsent|Hinitial]; [by left |].
     right.
-    destruct Hinitial as [[i [[mi Hmi] Him]]|Hseeded]; [exfalso|assumption].
-    elim (no_initial_messages_in_IM i mi).
-    assumption.
+    destruct Hinitial as [[i [[mi Hmi] Him]]|Hseeded]; [exfalso | done].
+    by elim (no_initial_messages_in_IM i mi).
   - clear isX sX trX HtrX.
     intro; intros.
     destruct iom as [im|].
     2: {
-      exists []. exists eqv_state_s.
-      split; [constructor; assumption|].
-      split; [done |].
-      split; [assumption|].
-      exact I.
+      exists [], eqv_state_s.
+      by split; [constructor |].
     }
     specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM IM) (free_constraint _) seed)
       as HinclE.
@@ -349,7 +342,7 @@ Proof.
       (equivocators_total_trace_project_replayed_trace_from
         IM (enum index) eqv_state_s).
     repeat split. simpl.
-    destruct Hfinal_msg as [Hfinal_msg | Hinitial]; [|right; assumption].
+    destruct Hfinal_msg as [Hfinal_msg | Hinitial]; [| by right].
     left.
     apply valid_trace_first_pstate in Hmsg_trace_full_replay as Hfst.
     apply valid_state_has_trace in Hfst as [is_s [tr_s [Htr_s His_s]]].
@@ -366,7 +359,7 @@ Proof.
     apply Exists_app. right.
     unfold VLSM_full_projection_finite_trace_project, pre_VLSM_full_projection_finite_trace_project.
     rewrite! map_app.
-    apply Exists_app. right. simpl. left. assumption.
+    by apply Exists_app; simpl; right; left.
 Qed.
 
 End seeded_all_equivocating.
@@ -402,10 +395,10 @@ Proof.
       IM (fun m => False) no_initial_messages_in_IM
       _ _ _ HtrX)
     as [is [His [s [Hs [tr [Htr_pr [Htr Houtput]]]]]]].
-  exists is. split; [assumption|].
-  exists s. split; [assumption|].
-  exists tr. split; [assumption|].
-  split; [|assumption].
+  exists is; split; [done |].
+  exists s; split; [done |].
+  exists tr; split; [done |].
+  split; [| done].
   unfold composite_no_equivocation_vlsm_with_pre_loaded in Htr.
   remember (no_equivocations_additional_constraint_with_pre_loaded _ _ _)
     as constraint.
@@ -421,9 +414,9 @@ Proof.
   subst.
   clear.
   intros l (s, om) Hc.
-  split; [|exact I].
-  destruct om as [m|]; [|exact I].
-  apply proj1 in Hc. assumption.
+  split; [| done].
+  destruct om as [m|]; [| done].
+  by apply proj1 in Hc.
 Qed.
 
 End all_equivocating.

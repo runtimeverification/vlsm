@@ -9,8 +9,7 @@ Definition set_eq {A} (s1 s2 : set A) : Prop :=
 
 Global Instance set_eq_dec `{EqDecision A} : RelDecision (@set_eq A).
 Proof.
-  intros s1 s2.
-  apply and_dec; apply list_subseteq_dec; assumption.
+  by intros s1 s2; typeclasses eauto.
 Qed.
 
 Lemma set_eq_extract_forall
@@ -25,25 +24,25 @@ Lemma set_eq_proj1 {A} : forall (s1 s2 : set A),
   set_eq s1 s2 ->
   s1 ⊆ s2.
 Proof.
-  intros. destruct H. assumption.
+  by intros s1 s2 [].
 Qed.
 
 Lemma set_eq_proj2 {A} : forall (s1 s2 : set A),
   set_eq s1 s2 ->
   s2 ⊆ s1.
 Proof.
-  intros. destruct H. assumption.
+  by intros s1 s2 [].
 Qed.
 
 Lemma set_eq_refl {A} : forall (s : list A), set_eq s s.
 Proof.
-  induction s;split; intro; intro; assumption.
+  by induction s.
 Qed.
 
 Lemma set_eq_comm {A} : forall s1 s2 : set A,
   set_eq s1 s2 <-> set_eq s2 s1.
 Proof.
-  intros; split; intro; destruct H; split; assumption.
+  firstorder.
 Qed.
 
 Lemma set_eq_tran {A} : forall s1 s2 s3 : set A,
@@ -64,7 +63,7 @@ Proof.
   destruct l as [| hd tl]; [done |].
   destruct H.
   spec H hd (elem_of_list_here hd tl).
-  inversion H.
+  by inversion H.
 Qed.
 
 Lemma set_eq_cons {A} : forall (a : A) (s1 s2 : set A),
@@ -84,17 +83,13 @@ Lemma set_eq_Forall
   (P : A -> Prop)
   : Forall P s1 <-> Forall P s2.
 Proof.
-  split; intros H; rewrite Forall_forall in *; intros x Hx
-  ; apply H.
-  - apply H12; assumption.
-  - apply H12; assumption.
+  rewrite !Forall_forall. firstorder.
 Qed.
 
 Lemma set_union_comm `{EqDecision A}  : forall (s1 s2 : list A),
   set_eq (set_union s1 s2) (set_union s2 s1).
 Proof.
-  intros; split; intro x; intros; apply set_union_iff in H; apply set_union_iff; destruct H;
-  (left ; assumption) || (right; assumption).
+  intros s1 s2; split; intro x; rewrite !set_union_iff; itauto.
 Qed.
 
 Lemma set_union_empty `{EqDecision A}  : forall (s1 s2 : list A),
@@ -117,15 +112,13 @@ Qed.
 Lemma set_union_subseteq_left `{EqDecision A}  : forall (s1 s2 : list A),
   s1 ⊆ (set_union s1 s2).
 Proof.
-  intros; intros x H; apply set_union_intro.
-  left; assumption.
+  by intros; intros x H; apply set_union_intro; left.
 Qed.
 
 Lemma set_union_subseteq_right `{EqDecision A}  : forall (s1 s2 : list A),
   s2 ⊆ (set_union s1 s2).
 Proof.
-  intros; intros x H; apply set_union_intro.
-  right; assumption.
+  by intros; intros x H; apply set_union_intro; right.
 Qed.
 
 Lemma set_union_subseteq_iff `{EqDecision A}  : forall (s1 s2 s : list A),
@@ -167,16 +160,13 @@ Proof.
     destruct Hin as [Hina0 | Hinss].
     + exists a0. rewrite elem_of_cons. by split; [left |].
     + apply IHss in Hinss. destruct Hinss as [x [Hinss Hinx]].
-      exists x. split; try assumption.
-      right. assumption.
+      setoid_rewrite elem_of_cons. eauto.
   - rewrite set_union_iff.
     intros [x [Hx Ha]].
     apply elem_of_cons in Hx.
     destruct Hx; subst.
-    + left. assumption.
-    + right. apply IHss.
-      exists x. split; [|assumption].
-      assumption.
+    + by left.
+    + right. apply IHss. by exists x.
 Qed.
 
 Lemma set_union_iterated_subseteq
@@ -193,9 +183,8 @@ Proof.
   destruct H as [x [Hx Ha]].
   exists x.
   unfold incl in Hincl.
-  split; [|assumption].
-  apply Hincl.
-  assumption.
+  split; [| done].
+  by apply Hincl.
 Qed.
 
 Lemma set_union_empty_left `{EqDecision A}  : forall (s : list A),
@@ -204,8 +193,8 @@ Proof.
   intros. split; intros x Hin.
   - apply set_union_elim in Hin. destruct Hin.
     + inversion H0.
-    + assumption.
-  - apply set_union_intro. right. assumption.
+    + done.
+  - by apply set_union_intro; right.
 Qed.
 
 Lemma map_list_subseteq {A B} : forall (f : B -> A) (s s' : list B),
@@ -215,8 +204,7 @@ intro f; induction s; intros; simpl.
 - apply list_subseteq_nil.
 - assert (s ⊆ s') as Hs. {
     intros b Hs.
-    apply H.
-    right; assumption.
+    by apply H; right.
   }
   spec IHs s' Hs.
   intros b Hs'.
@@ -226,8 +214,7 @@ intro f; induction s; intros; simpl.
     apply elem_of_list_fmap_1.
     apply H.
     left.
-  * apply IHs.
-    assumption.
+  * by apply IHs.
 Qed.
 
 Lemma map_set_eq {A B} (f : B -> A) : forall s s',
@@ -241,7 +228,7 @@ Lemma set_map_nodup {A B} `{EqDecision A} (f : B -> A) : forall (s : set B),
   NoDup (set_map f s).
 Proof.
   induction s; simpl; try constructor.
-  apply set_add_nodup. assumption.
+  by apply set_add_nodup.
 Qed.
 
 Lemma set_map_elem_of {A B} `{EqDecision A} (f : B -> A) : forall x s,
@@ -250,7 +237,7 @@ Lemma set_map_elem_of {A B} `{EqDecision A} (f : B -> A) : forall x s,
 Proof.
   induction s; intros; inversion H; subst; clear H; simpl.
   - by apply set_add_intro2.
-  - apply set_add_intro1. apply IHs. assumption.
+  - by apply set_add_intro1, IHs.
 Qed.
 
 Lemma set_map_exists {A B} `{EqDecision A} (f : B -> A) : forall y s,
@@ -281,14 +268,14 @@ Proof.
   - inversion H0.
   - simpl in H0. apply set_add_elim in H0. destruct H0.
     + subst. apply set_map_elem_of. apply H. left.
-    + apply IHs; try assumption. intros x; intros. apply H. right. assumption.
+    + apply IHs; [| done]. by intros x Hel; apply H; right.
 Qed.
 
 Lemma set_map_eq {A B} `{EqDecision A} (f : B -> A) : forall s s',
   set_eq s s' ->
   set_eq (set_map f s) (set_map f s').
 Proof.
-  intros. split; destruct H; apply set_map_subseteq; assumption.
+  by split; destruct H; apply set_map_subseteq.
 Qed.
 
 Lemma set_map_singleton {A B} `{EqDecision A} (f : B -> A) : forall s a,
@@ -296,9 +283,7 @@ Lemma set_map_singleton {A B} `{EqDecision A} (f : B -> A) : forall s a,
   forall b, b ∈ s -> f b = a.
 Proof.
   intros. apply (set_map_elem_of f) in H0. rewrite H in H0. apply elem_of_cons in H0.
-  destruct H0.
-  - assumption.
-  - inversion H0.
+  destruct H0; [done | inversion H0].
 Qed.
 
 Lemma filter_set_add `{StrictlyComparable X} P
@@ -361,17 +346,16 @@ Proof.
   induction s; intros.
   - constructor.
   - simpl in H0 . destruct (decide (x = a)).
-    + subst. simpl in H. rewrite decide_True in H; auto. constructor; assumption.
+    + cbn in H; subst. constructor; [done |]. by rewrite decide_True in H.
     + rewrite elem_of_cons in H0.
       simpl in H.
       rewrite decide_False in H; auto.
       inversion H; subst.
       constructor.
       * intro Ha; apply (set_remove_3 _ x) in Ha; auto.
-      * apply IHs; [assumption|].
+      * apply IHs; [done |].
         intro Hx.
-        contradict H0.
-        right; assumption.
+        by contradict H0; right.
 Qed.
 
 Lemma set_remove_elem_of_iff `{EqDecision A} :  forall x y (s : list A),
@@ -381,11 +365,11 @@ Lemma set_remove_elem_of_iff `{EqDecision A} :  forall x y (s : list A),
 Proof.
   intros. split; intros.
   - destruct (decide (x = y)).
-    + left. assumption.
-    + right. apply set_remove_3; assumption.
+    + by left.
+    + by right; apply set_remove_3.
   - destruct H1 as [Heq | Hin].
-    + subst; assumption.
-    + apply set_remove_1 in Hin. assumption.
+    + by subst.
+    + by apply set_remove_1 in Hin.
 Qed.
 
 Lemma set_add_length
@@ -400,7 +384,7 @@ Proof.
   simpl.
   destruct (decide (x = a)); [subst; elim Hx; left|].
   simpl. f_equal. apply IHs.
-  intro Hs. elim Hx. right. assumption.
+  by intro Hs; elim Hx; right.
 Qed.
 
 Lemma set_remove_length
@@ -421,14 +405,8 @@ Lemma set_eq_remove `{EqDecision A} : forall x (s1 s2 : list A),
   set_eq s1 s2 ->
   set_eq (set_remove x s1) (set_remove x s2).
 Proof.
-  intros.
-  destruct H1. split; intros a Hin
-  ; apply set_remove_iff; try assumption
-  ; apply set_remove_iff in Hin; try assumption; destruct Hin
-  ; split; try assumption
-  .
-  - apply H1. assumption.
-  - apply H2. assumption.
+  intros x s1 s2 HND1 HND2 [].
+  split; intros a Hin; rewrite set_remove_iff in *; itauto.
 Qed.
 
 Lemma subseteq_remove_union `{EqDecision A} : forall x (s1 s2 : list A),
@@ -439,9 +417,8 @@ Lemma subseteq_remove_union `{EqDecision A} : forall x (s1 s2 : list A),
 Proof.
   intros. intros y Hin. apply set_remove_iff in Hin.
   - apply set_union_intro. destruct Hin. apply set_union_elim in H1.
-    destruct H1; try (left; assumption).
-    right. apply set_remove_3; assumption.
-  - apply set_union_nodup; assumption.
+    rewrite set_remove_iff; itauto.
+  - by apply set_union_nodup.
 Qed.
 
 Lemma set_eq_remove_union_elem_of  `{EqDecision A} : forall x (s1 s2 : list A),
@@ -451,12 +428,11 @@ Lemma set_eq_remove_union_elem_of  `{EqDecision A} : forall x (s1 s2 : list A),
   set_eq (set_union s1 (set_remove x s2)) (set_union s1 s2).
 Proof.
   split; intros msg Hin; apply set_union_iff; apply set_union_iff in Hin
-  ; destruct Hin; try (left; assumption)
-  .
-  - apply set_remove_iff in H2; try assumption. destruct H2. right. assumption.
-  - destruct (decide (msg = x)).
-    + subst. left. assumption.
-    + right. apply set_remove_iff; try assumption. split; assumption.
+  ; destruct Hin; try by left.
+  - apply set_remove_iff in H2; itauto.
+  - destruct (decide (msg = x)); subst.
+    + by left.
+    + by right; apply set_remove_iff.
 Qed.
 
 Lemma set_eq_remove_union_not_elem_of  `{EqDecision A} : forall x (s1 s2 : list A),
@@ -469,21 +445,18 @@ Proof.
   assert (HnodupUs1s2 := H0).
   apply (set_union_nodup _ _ H) in HnodupUs1s2.
   split; intros msg Hin.
-  - apply set_remove_iff; try assumption.
-    apply set_union_iff in Hin.
-    destruct Hin; split.
-    + apply set_union_iff. left. assumption.
-    + intro; subst. apply H1. assumption.
-    + apply set_remove_iff in H2; try assumption.
-      destruct H2. apply set_union_iff. right. assumption.
+  - apply set_remove_iff; [done |].
+    apply set_union_iff in Hin as []; split.
+    + by apply set_union_iff; left.
+    + by intro; subst; apply H1.
+    + apply set_remove_iff in H2 as []; [| done].
+      by apply set_union_iff; right.
     + intro; subst.
       apply set_remove_iff in H2; itauto.
-  - apply set_union_iff; try assumption.
-    apply set_remove_iff in Hin; try assumption.
-    destruct Hin. apply set_union_iff in H2.
-    destruct H2; try (left; assumption).
-    right. apply set_remove_iff; try assumption.
-    split; assumption.
+  - apply set_union_iff.
+    apply set_remove_iff in Hin as []; [| done].
+    apply set_union_iff in H2 as []; [by left |].
+    by right; apply set_remove_iff.
 Qed.
 
 (** An improved version of the [set_diff_nodup] Lemma not requiring [NoDup]
@@ -496,9 +469,8 @@ Proof.
 induction 1 as [|x l H H' IH]; simpl.
 - constructor.
 - case_decide.
-  + apply IH; assumption.
-  + apply set_add_nodup.
-    apply IH.
+  + by apply IH.
+  + by apply set_add_nodup, IH.
 Qed.
 
 Lemma diff_app_nodup `{EqDecision A} : forall (s1 s2 : list A),
@@ -507,11 +479,10 @@ Lemma diff_app_nodup `{EqDecision A} : forall (s1 s2 : list A),
   NoDup ((set_diff s1 s2) ++ s2).
 Proof.
   intros.
-  apply nodup_append; try assumption.
-  - apply set_diff_nodup; try assumption.
-  - intros. apply (set_diff_elim2 a s1); assumption.
-  - intros. intro. apply set_diff_iff in H2. destruct H2.
-    apply H3. assumption.
+  apply nodup_append; [| done | |].
+  - by apply set_diff_nodup.
+  - by intros; apply (set_diff_elim2 a s1).
+  - setoid_rewrite set_diff_iff. itauto.
 Qed.
 
 Lemma add_remove_inverse `{EqDecision X}:
@@ -519,18 +490,11 @@ Lemma add_remove_inverse `{EqDecision X}:
     ~ v ∈ lv ->
     set_remove v (set_add v lv) = lv.
 Proof.
-  induction lv as [|hd tl IHlv]; intros.
-  - simpl.
-    rewrite decide_True; congruence.
-  - simpl. destruct (decide (v = hd)).
-    subst. exfalso; apply H.
-    left.
-    spec IHlv v. spec IHlv.
-    intro Habsurd. apply H.
-    right; assumption.
-    rewrite <- IHlv at 2.
-    simpl.
-    by destruct (decide (v = hd)).
+  induction lv as [| hd tl IHlv]; cbn; intros.
+  - by rewrite decide_True.
+  - rewrite elem_of_cons in H.
+    destruct (decide (v = hd)) eqn: Heq; subst; cbn; [itauto |].
+    rewrite Heq, IHlv; itauto.
 Qed.
 
 Lemma set_union_iterated_empty `{EqDecision A} :
@@ -566,9 +530,7 @@ Proof.
   induction l1.
   - simpl in Hin; itauto.
   - simpl in Hin.
-    apply set_remove_1 in Hin.
-    apply IHl1 in Hin.
-    assumption.
+    by apply set_remove_1, IHl1 in Hin.
 Qed.
 
 Lemma set_prod_nodup `(s1: set A) `(s2: set B):
@@ -581,8 +543,8 @@ Proof.
   + constructor.
   + simpl.
     apply nodup_append.
-    * apply NoDup_fmap;[congruence|assumption].
-    * assumption.
+    * apply NoDup_fmap; [congruence | done].
+    * done.
     * intros [a b].
       rewrite elem_of_list_fmap, elem_of_list_prod.
       intros [_ [[= <- _] _]]. itauto.
@@ -626,8 +588,7 @@ Lemma set_diff_filter_nodup `{EqDecision A} (l r:list A):
   NoDup l -> NoDup (set_diff_filter l r).
 Proof.
   intros H.
-  apply NoDup_filter.
-  assumption.
+  by apply NoDup_filter.
 Qed.
 
 (**
@@ -644,11 +605,7 @@ Proof.
   rewrite 2 filter_cons.
   destruct (decide (~ a0 ∈ a)); destruct (decide (~ a0 ∈ b)).
   - simpl. unfold set_diff_filter in IHl. lia.
-  - contradict n0.
-    intro.
-    contradict n.
-    apply H_subseteq.
-    assumption.
+  - itauto.
   - simpl.
     apply le_S.
     apply IHl.
@@ -674,8 +631,7 @@ Proof.
     destruct (decide (~ new ∈ a)); [tauto|].
     destruct (decide (~ new ∈ b));[|contradict n0; itauto].
     simpl.
-    apply le_n_S.
-    apply len_set_diff_incl_le;assumption.
+    by apply le_n_S, len_set_diff_incl_le.
   - specialize (IHl H);clear H.
     unfold set_diff_filter.
     rewrite 2 filter_cons.
@@ -685,9 +641,7 @@ Proof.
       apply IHl.
     + contradict n.
       apply H_subseteq.
-      destruct (decide (a0 ∈ b)); [assumption|].
-      contradict n0.
-      assumption.
+      by destruct (decide (a0 ∈ b)).
     + simpl.
       apply Nat.lt_lt_succ_r.
       apply IHl.
@@ -705,10 +659,10 @@ Proof.
   - intro x. rewrite 2 elem_of_list_fmap.
     intros [x0 [Hx0 Hin]]. exists x0.
     rewrite set_add_iff. itauto.
-  - split;[|assumption].
+  - split; [| done].
     apply elem_of_list_fmap_1.
     by apply set_add_iff; left.
-  - assumption.
+  - done.
 Qed.
 
 Require Import Setoid.
@@ -757,28 +711,15 @@ Proof.
   unfold incl in *.
   specialize (H1 a). specialize (H1' a).
   split; intros.
-  - assert (a ∈ filter P l). {
-      apply elem_of_list_filter.
-      split; assumption.
-    }
-    specialize (H1 H4).
-    apply elem_of_list_filter in H1.
-    destruct H1; assumption.
-  - assert (a ∈ filter Q l). {
-      apply elem_of_list_filter.
-      split; assumption.
-    }
-    specialize (H1' H4).
-    apply elem_of_list_filter in H1'.
-    destruct H1'; assumption.
+  - by eapply elem_of_list_filter, H1, elem_of_list_filter.
+  - by eapply elem_of_list_filter, H1', elem_of_list_filter.
 Qed.
 
 Lemma subseteq_appr : forall A (l m n : list A), l ⊆ n -> l ⊆ (m ++ n).
 Proof.
   intros A l m n x y yinl.
   apply x in yinl.
-  apply elem_of_app.
-  right; assumption.
+  by apply elem_of_app; right.
 Qed.
 
 Lemma elem_of_union_fold
@@ -800,18 +741,9 @@ Proof.
       unfold fold_right in H.
       rewrite set_union_iff in H.
       destruct H.
-      * exists a.
-        split.
-        assumption.
-        simpl.
-        left.
-      * unfold fold_right in IHhaystack.
-        specialize (IHhaystack a0 H).
-        destruct IHhaystack as [needle [Hin1 Hin2]].
-        exists needle.
-        split.
-        assumption.
-        right; assumption.
+      * setoid_rewrite elem_of_cons. eauto.
+      * destruct (IHhaystack a0 H) as (needle & Hin1 & Hin2).
+        setoid_rewrite elem_of_cons. eauto.
    - generalize dependent a.
      generalize dependent haystack.
      induction haystack.
@@ -824,19 +756,12 @@ Proof.
        destruct H as [needle [Hin Hin2]].
        rewrite elem_of_cons in Hin2.
        destruct Hin2.
-       * simpl.
-         rewrite set_union_iff.
-         left.
-         rewrite <- H.
-         assumption.
+       * cbn. rewrite set_union_iff, <- H; auto.
        * simpl.
          rewrite set_union_iff.
          right.
-         specialize (IHhaystack a0).
          apply IHhaystack.
-         exists needle.
-         split;
-         assumption.
+         by exists needle.
 Qed.
 
 Lemma subseteq_Forall (A:Type) (P : A -> Prop) (l1 l2 : list A) :
@@ -846,7 +771,5 @@ Proof.
   apply Forall_forall.
   rewrite Forall_forall in Hfor.
   intros.
-  apply Hfor.
-  apply Hsub.
-  assumption.
+  by apply Hfor, Hsub.
 Qed.

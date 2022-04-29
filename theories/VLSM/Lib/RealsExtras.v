@@ -1,4 +1,5 @@
 From Coq Require Import Reals RelationClasses.
+From stdpp Require Import prelude.
 
 (** * Real number utility lemmas *)
 
@@ -44,10 +45,7 @@ Proof.
   intros.
   rewrite <- Rplus_0_r.
   unfold Rminus.
-  apply Rplus_le_compat_l.
-  apply Rge_le.
-  apply Ropp_0_le_ge_contravar.
-  assumption.
+  by apply Rplus_le_compat_l, Rge_le, Ropp_0_le_ge_contravar.
 Qed.
 
 Lemma Rminus_lt_r_strict : forall r1 r2,
@@ -56,21 +54,14 @@ Proof.
   intros.
   rewrite <- Rplus_0_r.
   unfold Rminus.
-  apply Rplus_le_compat_l.
-  apply Rge_le.
-  apply Ropp_0_le_ge_contravar.
-  apply Rlt_le in H.
-  assumption.
+  by apply Rplus_le_compat_l, Rge_le, Ropp_0_le_ge_contravar, Rlt_le.
 Qed.
 
 Lemma Rtotal_le_gt : forall x y,
   (x <= y)%R \/ (x > y)%R.
 Proof.
-  intros.
-  destruct (Rtotal_order x y) as [Hlt | [Heq | Hgt]].
-  - left. unfold Rle. left. assumption.
-  - left. unfold Rle. right. assumption.
-  - right. assumption.
+  unfold Rle. intros x y.
+  destruct (Rtotal_order x y) as [Hlt | [Heq | Hgt]]; auto.
 Qed.
 
 Global Instance Rle_transitive : Transitive Rle.

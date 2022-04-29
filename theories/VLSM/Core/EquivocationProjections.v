@@ -57,7 +57,7 @@ Proof.
     as [itemX [HitemX Hpr]].
   apply Exists_exists.
   apply elem_of_list_In in HitemX.
-  exists itemX. split; [assumption|].
+  exists itemX. split; [done |].
   revert Hm.
   unfold pre_VLSM_projection_transition_item_project in Hpr.
   destruct (label_project (l itemX)); [|congruence].
@@ -144,10 +144,8 @@ Proof.
   apply valid_state_has_trace in Hpr_is as [is' [tr_is Hpr_is]].
   exists is', (tr_is ++ (VLSM_weak_full_projection_finite_trace_project Hsimul tr)).
   destruct Hpr_is as [Hpr_is His'].
-  repeat split; [|assumption|].
-  - apply (finite_valid_trace_from_to_app (pre_loaded_with_all_messages_vlsm Y))
-      with (state_project is)
-    ; assumption.
+  repeat split; [| done|].
+  - by eapply (finite_valid_trace_from_to_app (pre_loaded_with_all_messages_vlsm Y)).
   - apply Exists_app. right.
     apply Exists_exists in Hm as [item [Hitem Hm]].
     apply elem_of_list_split in Hitem as [pre [suf Heqtr]].
@@ -155,9 +153,7 @@ Proof.
     setoid_rewrite map_app.
     apply List.Exists_app. right. simpl. left.
     remember  (pre_VLSM_full_projection_trace_item_project _ _ _ _ _) as itemY.
-    specialize (Hselector item itemY). subst. destruct item.
-    apply (Hselector eq_refl eq_refl).
-    assumption.
+    by apply (Hselector item itemY); subst.
 Qed.
 
 Lemma VLSM_weak_full_projection_oracle
@@ -308,10 +304,9 @@ Lemma VLSM_incl_has_been_sent
     forall m, has_been_sent X s m -> has_been_sent Y s m.
 Proof.
   intros s Hs m Hm.
-  eapply
+  by eapply
     (@VLSM_full_projection_has_been_sent _ X Y _ _
-      (VLSM_incl_is_full_projection Hincl))
-  ; assumption.
+      (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
 Lemma VLSM_incl_has_been_received
@@ -321,10 +316,9 @@ Lemma VLSM_incl_has_been_received
     forall m, has_been_received X s m -> has_been_received Y s m.
 Proof.
   intros s Hs m Hm.
-  eapply
+  by eapply
     (@VLSM_full_projection_has_been_received _ X Y _ _
-      (VLSM_incl_is_full_projection Hincl))
-  ; assumption.
+      (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
 Lemma VLSM_incl_has_been_observed
@@ -336,10 +330,9 @@ Lemma VLSM_incl_has_been_observed
     forall m, has_been_observed X s m -> has_been_observed Y s m.
 Proof.
   intros s Hs m Hm.
-  eapply
+  by eapply
     (@VLSM_full_projection_has_been_observed _ X Y _ _
-      (VLSM_incl_is_full_projection Hincl))
-  ; assumption.
+      (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
 Lemma VLSM_incl_has_been_sent_reflect
@@ -349,10 +342,9 @@ Lemma VLSM_incl_has_been_sent_reflect
     forall m, has_been_sent Y s m -> has_been_sent X s m.
 Proof.
   intros s Hs m Hm.
-  eapply
+  by eapply
     (@VLSM_full_projection_has_been_sent_reflect _ X Y _ _
-      (VLSM_incl_is_full_projection Hincl))
-  ; assumption.
+      (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
 Lemma VLSM_incl_has_been_received_reflect
@@ -362,10 +354,9 @@ Lemma VLSM_incl_has_been_received_reflect
     forall m, has_been_received Y s m -> has_been_received X s m.
 Proof.
   intros s Hs m Hm.
-  eapply
+  by eapply
     (@VLSM_full_projection_has_been_received_reflect _ X Y _ _
-      (VLSM_incl_is_full_projection Hincl))
-  ; assumption.
+      (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
 Lemma VLSM_incl_has_been_observed_reflect
@@ -377,10 +368,9 @@ Lemma VLSM_incl_has_been_observed_reflect
     forall m, has_been_observed Y s m -> has_been_observed X s m.
 Proof.
   intros s Hs m Hm.
-  eapply
+  by eapply
     (@VLSM_full_projection_has_been_observed_reflect _ X Y _ _
-      (VLSM_incl_is_full_projection Hincl))
-  ; assumption.
+      (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
 End incl_oracle.
@@ -406,9 +396,7 @@ Lemma same_IM_composite_has_been_sent_preservation s1 m
 Proof.
   specialize (same_IM_preloaded_free_full_projection IM1 IM2 Heq) as Hproj.
   intros Hbs1_m.
-  specialize (VLSM_full_projection_has_been_sent Hproj _ Hs1 m Hbs1_m)
-    as Hbs2_m.
-  assumption.
+  by specialize (VLSM_full_projection_has_been_sent Hproj _ Hs1 m Hbs1_m).
 Qed.
 
 End same_IM_oracle_properties.
