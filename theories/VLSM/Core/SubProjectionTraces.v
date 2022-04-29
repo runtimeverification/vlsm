@@ -1310,7 +1310,7 @@ Proof.
   unfold sub_IM_sender in Hsender.
   destruct (sender m) as [_v|] eqn:Hsender_v; [|congruence].
   case_decide; [|congruence].
-  inversion Hsender; itauto.
+  by inversion Hsender; itauto.
 Qed.
 
 Context

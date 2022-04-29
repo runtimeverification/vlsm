@@ -2628,7 +2628,7 @@ Byzantine fault tolerance analysis.
     induction 1.
     - refine (valid_initial_state_message pre_loaded_with_all_messages_vlsm s Hs om _).
       by destruct om.
-    - eapply valid_generated_state_message; cycle 2; eauto.
+    - by eapply valid_generated_state_message; cycle 2; eauto.
   Qed.
 
   Lemma preloaded_weaken_input_valid_transition

@@ -2584,8 +2584,8 @@ Qed.
         apply (has_been_received_step_update Hx);right.
         erewrite oracle_partial_trace_update.
         - by left.
-        - apply has_been_received_stepwise_from_trace.
-        - apply valid_trace_add_default_last. apply Htr.
+        - by apply has_been_received_stepwise_from_trace.
+        - by apply valid_trace_add_default_last; apply Htr.
       }
       specialize (IHHtr Htrm').
       apply (extend_right_finite_trace_from _ IHHtr).

@@ -845,8 +845,8 @@ Proof.
   - intros s Hs i.
     unfold remove_equivocating_state_project, lift_sub_state_to.
     case_decide as Hi.
-    + exact (Heqv_is (dexist i Hi)).
-    + apply Hs.
+    + by apply (Heqv_is (dexist i Hi)).
+    + by apply Hs.
   - by intros m H2.
 Qed.
 

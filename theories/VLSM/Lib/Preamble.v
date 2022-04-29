@@ -687,8 +687,8 @@ Lemma strictorder_option
   : CompareStrictOrder (option_compare (@compare X _)).
 Proof.
   split.
-  - apply option_compare_reflexive.
-  - apply option_compare_transitive.
+  - by apply option_compare_reflexive.
+  - by apply option_compare_transitive.
 Qed.
 
 (* Now we can have the following for free : *)
@@ -783,8 +783,8 @@ Qed.
 Lemma strictorder_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareStrictOrder (compare_compose X Y).
 Proof.
   split.
-  - apply reflexive_compose.
-  - apply transitive_compose.
+  - by apply reflexive_compose.
+  - by apply transitive_compose.
 Qed.
 
 (* Now we can have the following for free : *)

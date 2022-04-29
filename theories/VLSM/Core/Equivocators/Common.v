@@ -735,7 +735,7 @@ Lemma newmachine_descriptor_dec (d : MachineDescriptor)
 Proof.
   destruct d.
   - by left.
-  - right. simpl. itauto.
+  - by right; itauto.
 Qed.
 
 (** Projecting an [equivocator_state] over a [MachineDescriptor].  *)
@@ -869,7 +869,7 @@ Proof.
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion Ht; subst; clear Ht.
   - by rewrite equivocator_state_update_size.
-  - rewrite equivocator_state_extend_size. cbv; lia.
+  - by rewrite equivocator_state_extend_size; cbv; lia.
 Qed.
 
 Lemma equivocator_transition_cannot_decrease_state_size

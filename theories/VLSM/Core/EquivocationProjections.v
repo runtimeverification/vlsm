@@ -75,8 +75,8 @@ Lemma VLSM_projection_has_been_sent_reflect
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector output) (field_selector output).
   - by intros [] [] **; cbn in *; subst.
-  - apply (has_been_sent_stepwise_from_trace X).
-  - apply (has_been_sent_stepwise_from_trace Y).
+  - by apply (has_been_sent_stepwise_from_trace X).
+  - by apply (has_been_sent_stepwise_from_trace Y).
 Qed.
 
 Lemma VLSM_projection_has_been_received_reflect
@@ -87,8 +87,8 @@ Lemma VLSM_projection_has_been_received_reflect
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector input) (field_selector input).
   - by intros [] [] **; cbn in *; subst.
-  - apply (has_been_received_stepwise_from_trace X).
-  - apply (has_been_received_stepwise_from_trace Y).
+  - by apply (has_been_received_stepwise_from_trace X).
+  - by apply (has_been_received_stepwise_from_trace Y).
 Qed.
 
 Lemma VLSM_projection_has_been_observed_reflect
@@ -101,8 +101,8 @@ Lemma VLSM_projection_has_been_observed_reflect
 Proof.
   apply VLSM_projection_oracle_reflect with item_sends_or_receives item_sends_or_receives.
   - by intros [] [] **; cbn in *; subst.
-  - apply has_been_observed_stepwise_props.
-  - apply has_been_observed_stepwise_props.
+  - by apply has_been_observed_stepwise_props.
+  - by apply has_been_observed_stepwise_props.
 Qed.
 
 End projection_oracle.
