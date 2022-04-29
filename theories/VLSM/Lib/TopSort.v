@@ -241,6 +241,23 @@ Qed.
 
 End min_predecessors.
 
+Global Instance precedes_P_transitive `{Transitive A preceeds} (P : A -> Prop) : Transitive (precedes_P preceeds P).
+Proof.
+  intros [x Hx] [y Hy] [z Hz]; unfold precedes_P; cbn.
+  by etransitivity.
+Qed.
+
+Global Instance precedes_P_irreflexive `{Irreflexive A preceeds} (P : A -> Prop) : Irreflexive (precedes_P preceeds P).
+Proof.
+  intros [x Hx]; unfold precedes_P, complement; cbn.
+  by apply irreflexivity.
+Qed.
+
+Global Instance precedes_P_strict `{StrictOrder A preceeds} (P : A -> Prop) : StrictOrder (precedes_P preceeds P).
+Proof.
+  split; typeclasses eauto.
+Qed.
+
 Section topologically_sorted.
 
 (** ** Topologically sorted lists. Definition and properties. *)
@@ -768,3 +785,66 @@ Proof.
 Qed.
 
 End top_sort.
+
+(** Some of the results above depend on the <<precedes>> relation being a
+[StrictOrder] for a property-defined [sig] type.  However, when the relation
+is strict to begin with, we can obtain simpler statements for these results.
+*)
+Section sec_simple_top_sort.
+
+Context
+  `{EqDecision A}
+  (precedes : A -> A -> Prop)
+  `{!RelDecision precedes}
+  `{!StrictOrder precedes}
+  .
+
+Local Lemma Forall_True : forall l : list A, Forall (fun _ => True) l.
+Proof.
+  by intro; apply Forall_forall.
+Qed.
+
+Corollary simple_topologically_sorted_precedes_closed_remove_last
+  (l : list A)
+  (Hts : topologically_sorted precedes l)
+  (init : list A)
+  (final : A)
+  (Hinit : l = init ++ [final])
+  (Hpc : precedes_closed precedes l)
+  : precedes_closed precedes init.
+Proof.
+  eapply topologically_sorted_precedes_closed_remove_last;
+    [typeclasses eauto | apply Forall_True | done..].
+Qed.
+
+Corollary simple_top_sort_correct : forall l,
+  topological_sorting precedes l (top_sort precedes l).
+Proof.
+  intro; eapply top_sort_correct; [typeclasses eauto | apply Forall_True].
+Qed.
+
+Corollary simple_maximal_element_in l
+  (a : A)
+  (Hmax : get_maximal_element precedes l = Some a) :
+  a ∈ l.
+Proof.
+  eapply maximal_element_in; [typeclasses eauto | apply Forall_True | done].
+Qed.
+
+Corollary simple_get_maximal_element_correct l
+  (a max : A)
+  (Hina : a ∈ l)
+  (Hmax : get_maximal_element precedes l = Some max) :
+  ~ precedes max a.
+Proof.
+  eapply get_maximal_element_correct; [typeclasses eauto | apply Forall_True | done..].
+Qed.
+
+Corollary simple_get_maximal_element_some
+  l (Hne : l <> []) :
+  exists a, get_maximal_element precedes l = Some a.
+Proof.
+  eapply get_maximal_element_some; [apply Forall_True | done].
+Qed.
+
+End sec_simple_top_sort.
