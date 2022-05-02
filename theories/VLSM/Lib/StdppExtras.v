@@ -165,16 +165,26 @@ Qed.
 (* Returns all elements X of l such that X does not compare less
    than any other element w.r.t to the precedes relation *)
 
-Definition get_maximal_elements
+Definition maximal_elements_list
   {A} (precedes: relation A) `{!RelDecision precedes} (l : list A)
   : list A :=
   filter (fun a => Forall (fun b => (~ precedes a b)) l) l.
 
-Example get_maximal_elements1: get_maximal_elements Nat.lt [1; 4; 2; 4] = [4;4].
+Example maximal_elements_list1: maximal_elements_list Nat.lt [1; 4; 2; 4] = [4;4].
 Proof. itauto. Qed.
 
-Example get_maximal_elements2 : get_maximal_elements Nat.le [1; 4; 2; 4] = [].
+Example maximal_elements_list2 : maximal_elements_list Nat.le [1; 4; 2; 4] = [].
 Proof. itauto. Qed.
+
+(**
+Returns all elements <<x>> of a set <<S>> such that <<x>> does not compare less
+than any other element in <<S>> w.r.t to a given precedes relation.
+*)
+Definition maximal_elements_set
+  `{HfinSetMessage : FinSet A SetA}
+   (precedes: relation A) `{!RelDecision precedes} (s : SetA)
+   : SetA :=
+    filter (fun a => set_Forall (fun b => ~ precedes a b) s) s.
 
 Lemma filter_ext_elem_of {A} P Q
  `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} (l:list A) :
