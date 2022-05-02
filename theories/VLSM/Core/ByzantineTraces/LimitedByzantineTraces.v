@@ -96,7 +96,7 @@ Proof.
   cut (tracewise_equivocating_validators sX ⊆ byzantine).
   { intro Hincl.
     unfold tracewise_not_heavy, not_heavy.
-    transitivity (sum_weights (remove_dups byzantine)); [|assumption].
+    transitivity (sum_weights (remove_dups byzantine)); [| done].
     apply sum_weights_subseteq.
     - apply equivocating_validators_nodup.
     - apply NoDup_remove_dups.
@@ -129,10 +129,9 @@ Proof.
                       (lift_sub_state IM non_byzantine (finite_trace_last is pre)) m0).
     { exists i.
       unfold lift_sub_state.
-      rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
-      assumption.
+      by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
     }
-    apply (composite_proper_sent IM) in Hsent; [|assumption].
+    apply (composite_proper_sent IM) in Hsent; [| done].
     apply (VLSM_full_projection_initial_state Hproj) in Hinit.
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
   + specialize (proj1 Hemit) as [i [Hi Hsigned]].
@@ -140,10 +139,8 @@ Proof.
     destruct (decide (i ∈ byzantine)).
       * unfold channel_authenticated_message in Hsigned.
         rewrite Hsender0 in Hsigned.
-        apply Some_inj in Hsigned.
-        subst. assumption.
-      * elim Hi.
-        apply set_diff_intro; [apply elem_of_enum|assumption].
+        by apply Some_inj in Hsigned; subst.
+      * by destruct Hi; apply set_diff_intro; [apply elem_of_enum|].
 Qed.
 
 (** When replacing the byzantine components of a composite [valid_state] with
@@ -166,7 +163,7 @@ Proof.
       as HtX.
     simpl in HtX |- *. rewrite HtX. simpl.
     apply limited_PreNonByzantine_valid_state_lift_not_heavy.
-    eapply input_valid_transition_destination; split; eassumption.
+    by eapply input_valid_transition_destination.
 Qed.
 
 (** By replacing the byzantine components of a composite [valid_state] with
@@ -179,9 +176,9 @@ Lemma limited_PreNonByzantine_vlsm_lift
       (lift_sub_state IM non_byzantine).
 Proof.
   apply basic_VLSM_full_projection; intros ? *.
-  - intros; apply limited_PreNonByzantine_lift_valid; assumption.
-  - intros * []; rapply lift_sub_transition; assumption.
-  - intros; apply (lift_sub_state_initial IM); assumption.
+  - by intros; apply limited_PreNonByzantine_lift_valid.
+  - by intros * []; rapply lift_sub_transition.
+  - by intros; apply (lift_sub_state_initial IM).
   - intros Hv HsY [[sub_i [[im Him] Heqm]] | Hseeded].
     + cbn in Heqm; subst.
       destruct_dec_sig sub_i i Hi Heqsub_i; subst.
@@ -190,7 +187,7 @@ Proof.
       by exists i, (exist _ m Him).
     + destruct Hseeded as (Hsigned & i & Hi & li & si & Hpre_valid).
       apply set_diff_elim2 in Hi.
-      eapply Hvalidator; eassumption.
+      by eapply Hvalidator.
 Qed.
 
 End fixed_limited_selection.
@@ -211,9 +208,8 @@ Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating 
 Proof.
   intros [Hlimit Hfixed].
   eexists _, _; split.
-  - apply (VLSM_full_projection_finite_valid_trace
+  - by apply (VLSM_full_projection_finite_valid_trace
             (limited_PreNonByzantine_vlsm_lift byzantine Hlimit)).
-    exact Hfixed.
   - unfold lift_sub_state.
     rewrite composite_state_sub_projection_lift_to.
     split; [done |].
@@ -241,9 +237,7 @@ Proof.
   apply validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating
     in Hlimited
     as [bs [btr [Hlimited [Hs_pr Htr_pr]]]].
-  exists bs, btr. split; [assumption|].
-  exists byzantine.
-  repeat split; assumption.
+  exists bs, btr; eauto.
 Qed.
 
 End limited_byzantine_traces.
@@ -302,7 +296,7 @@ Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
 Proof.
   destruct sub_l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   repeat split; cbn.
-  - assumption.
+  - done.
   - destruct iom as [im |]; [| apply option_valid_message_None].
     eapply Hvalidator,
       pre_loaded_sub_composite_input_valid_projection, Ht_sub.
@@ -310,15 +304,15 @@ Proof.
     rewrite Hann_s_pr, (lift_sub_state_to_eq _ _ _ _ _ Hi).
     apply Ht_sub.
   - apply Rle_trans with (sum_weights (remove_dups byzantine))
-    ; [| assumption].
+    ; [| done].
     apply sum_weights_subseteq.
     + cut (NoDup (state_annotation ann_s)).
       {
         intro Hnodup.
-        destruct iom as [im |]; [| assumption].
-        apply set_union_nodup_left; assumption.
+        destruct iom as [im |]; [| done].
+        by apply set_union_nodup_left.
       }
-      eapply coeqv_limited_equivocation_state_annotation_nodup; eassumption.
+      by eapply coeqv_limited_equivocation_state_annotation_nodup.
     + apply NoDup_remove_dups.
     + intro; rewrite elem_of_remove_dups; apply Heqv_byzantine.
   - clear -Ht_sub Hann_s_pr.
@@ -369,8 +363,8 @@ Proof.
   subst non_byzantine.
   induction Hbyzantine using finite_valid_trace_rev_ind; [repeat split |].
   - constructor; apply initial_state_is_valid.
-    repeat split; cbn; apply lift_sub_state_initial; assumption.
-  - cbn; apply lift_sub_state_initial; assumption.
+    by repeat split; cbn; apply lift_sub_state_initial.
+  - by cbn; apply lift_sub_state_initial.
   - apply list_subseteq_nil.
   - subst s_reset_byzantine bs btr.
     unfold pre_VLSM_full_projection_finite_trace_project
@@ -395,16 +389,16 @@ Proof.
     end.
     {
       intro Heqv_byzantine.
-      do 2 (split; [| assumption]).
-      apply finite_valid_trace_from_app_iff; split; [assumption |].
+      do 2 (split; [| done]).
+      apply finite_valid_trace_from_app_iff; split; [done |].
       subst x; cbn; apply finite_valid_trace_singleton.
       replace (finite_trace_last _ _) with lst.
       eapply lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited.
-      1-2, 4-5: eassumption.
-      subst lst; apply finite_valid_trace_last_pstate; assumption.
+      1-2, 4-5: done.
+      by subst lst; apply finite_valid_trace_last_pstate.
     }
-    destruct iom as [im |]; [| assumption].
-    apply set_union_subseteq_iff; split; [assumption |].
+    destruct iom as [im |]; [| done].
+    apply set_union_subseteq_iff; split; [done |].
     unfold coeqv_message_equivocators
     ; case_decide as Hnobs; [apply list_subseteq_nil |].
     rewrite (full_node_msg_dep_coequivocating_senders _ _ _ _ Hfull _ _ i li).
@@ -421,16 +415,15 @@ Proof.
       apply composite_has_been_observed_sent_received_iff; left.
       exists _i_im.
       rewrite Hlsti; cbn; unfold lift_sub_state.
-      rewrite (lift_sub_state_to_eq _ _ _ _ _ H_i_im).
-      assumption.
+      by rewrite (lift_sub_state_to_eq _ _ _ _ _ H_i_im).
     + clear -Hsender Hsigned.
       destruct Hsigned as (_i_im & H_i_im & Hauth).
       unfold channel_authenticated_message in Hauth
       ; rewrite Hsender in Hauth.
       apply Some_inj in Hauth; subst _i_im.
       destruct (decide (i_im ∈ byzantine)) as [Hi_im | Hni_im]
-      ; [assumption | contradict H_i_im].
-      apply set_diff_intro; [apply elem_of_enum | assumption].
+      ; [done | contradict H_i_im].
+      apply set_diff_intro; [apply elem_of_enum | done].
 Qed.
 
 (**
@@ -455,9 +448,8 @@ Proof.
   split.
   - intros (byzantine & Hlimited & Hbyzantine).
     apply lift_fixed_byzantine_traces_to_limited in Hbyzantine
-      as [Hbtr Heqv_byzantine]
-    ; [| assumption].
-    eexists _,_, byzantine; do 3 (split; [eassumption |]); split.
+       as [Hbtr Heqv_byzantine] ; [| done].
+    eexists _,_, byzantine; do 3 (split; [done |]); split.
     + extensionality sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; cbn.
       unfold lift_sub_state.
       by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
@@ -465,16 +457,16 @@ Proof.
       rewrite msg_dep_annotate_trace_with_equivocators_project.
       symmetry; apply composite_trace_sub_projection_lift.
   - intros (bs & btr & byzantine & Hbtr & Heqv_byzantine & Hlimited & His_pr & Htr_pr).
-    exists byzantine; split; [assumption |].
+    exists byzantine; split; [done |].
     eapply VLSM_incl_finite_valid_trace
-    ; [apply fixed_non_equivocating_incl_fixed_non_byzantine; assumption |].
+    ; [by apply fixed_non_equivocating_incl_fixed_non_byzantine |].
     apply fixed_non_equivocating_traces_char.
     symmetry in His_pr, Htr_pr.
-    eexists _,_; split; [| split; eassumption].
+    eexists _,_; split; [| done].
     eapply msg_dep_fixed_limited_equivocation_witnessed, proj2 in Hbtr.
-    2-5: eassumption.
+    2-5: done.
     revert Hbtr; apply VLSM_incl_finite_valid_trace.
-    apply fixed_equivocation_vlsm_composition_index_incl; assumption.
+    by apply fixed_equivocation_vlsm_composition_index_incl.
 Qed.
 
 End sec_msg_dep_limited_byzantine_traces.

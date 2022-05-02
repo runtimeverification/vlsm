@@ -1,34 +1,24 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude.
 From Coq Require Import Streams Classical.
 
 Set Implicit Arguments.
 
-Lemma not_exists [A:Type] (P: A -> Prop):
-  (~exists x, P x) -> (forall x, ~P x).
-Proof.
-  intros H x.
-  contradict H.
-  exists x;assumption.
-Qed.
-
 Inductive Eventually [A:Type] (P: Stream A -> Prop) : Stream A -> Prop :=
   | ehere : forall s, P s -> Eventually P s
   | elater : forall s, Eventually P s -> forall a, Eventually P (Cons a s).
-
 
 CoInductive Forever [A:Type] (P: Stream A -> Prop) : Stream A -> Prop :=
   fcons : forall s, P s -> Forever P (tl s) -> Forever P s.
 
 Lemma fhere [A:Type] (P: Stream A -> Prop) : forall s, Forever P s -> P s.
 Proof.
-  destruct 1;assumption.
+  by destruct 1.
 Qed.
 
 Lemma flater [A:Type] (P: Stream A -> Prop) : forall a s, Forever P (Cons a s) -> Forever P s.
 Proof.
-  intros a s.
-  change s with (tl (Cons a s)) at 2.
-  destruct 1;assumption.
+  by inversion 1.
 Qed.
 
 Lemma Eventually_map [A B:Type] (f: A -> B) (P: Stream B -> Prop): forall s,
@@ -38,14 +28,13 @@ Proof.
   - remember (map f s) as fs.
     intro H. revert s Heqfs.
     induction H.
-    + intros s0 ->. apply ehere. assumption.
+    + by intros s0 ->; constructor.
     + intros [a' s'].
       intros. apply elater. apply IHEventually.
-      apply (f_equal (@Streams.tl _)) in Heqfs. assumption.
+      by apply (f_equal (@Streams.tl _)) in Heqfs.
   - induction 1.
-    apply ehere. assumption.
-    rewrite unfold_Stream.
-    apply elater. assumption.
+    + by constructor.
+    + rewrite unfold_Stream. by constructor.
 Qed.
 
 Lemma Forever_map [A B:Type] (f: A -> B) (P: Stream B -> Prop): forall s,
@@ -55,16 +44,11 @@ Proof.
   - cofix lem. destruct s.
     rewrite (unfold_Stream (map f (Cons a s))).
     simpl.
-    inversion 1;subst.
-    constructor.
-    rewrite (unfold_Stream (map f (Cons a s))). assumption.
-    apply lem. assumption.
+    inversion 1; subst; constructor.
+    + by rewrite (unfold_Stream (map f (Cons a s))).
+    + by apply lem.
   - cofix lem. destruct s.
-    inversion 1;subst.
-    constructor.
-    assumption.
-    simpl.
-    apply lem;assumption.
+    inversion 1; subst; constructor; [done |]. by apply lem.
 Qed.
 
 Definition progress [A:Type] (R: A -> A -> Prop) : Stream A -> Prop :=
@@ -76,9 +60,9 @@ Proof.
   cofix not_eventually.
   destruct s.
   constructor.
-  contradict H;apply ehere;assumption.
+  by contradict H; constructor.
   apply not_eventually.
-  contradict H;apply elater;assumption.
+  by contradict H; constructor.
 Qed.
 
 Lemma forever_impl [A:Type] (P Q : Stream A -> Prop):
@@ -127,7 +111,7 @@ Lemma refutation [A:Type] [R:A -> A-> Prop] (HR: well_founded R)
   pose proof (use_eventually H HF).
   destruct H1 as [[a' s'] [Ha' H1']].
   simpl in Ha'.
-  exact (H0 a' Ha' (Cons a' s') (eq_refl a') H1').
+  by eapply H0; eauto.
 Qed.
 
 Lemma forall_forever: forall [A B:Type] (P: A -> Stream B -> Prop) [s: Stream B],
@@ -138,12 +122,9 @@ Proof.
   destruct s.
   intro H.
   constructor.
-  - intro a. specialize (H a). revert H.
-    generalize (Cons b s). destruct 1. assumption.
+  - intro a. by destruct (H a).
   - apply forall_forever.
-    change s with (tl (Cons b s)).
-    intro a. specialize (H a). revert H.
-    generalize (Cons b s). destruct 1. assumption.
+    intro a. by destruct (H a).
 Qed.
 
 Lemma not_forever [A:Type] (P: Stream A -> Prop):
@@ -161,7 +142,7 @@ Proof.
   intro Hprogress.
   apply Classical_Prop.NNPP.
   intro H.
-  pose proof (not_exists _ H);clear H. simpl in H0.
+  pose proof (not_ex_all_not _ _ H); clear H. simpl in H0.
   assert (forall x, Forever (Eventually (fun s => hd s <> x)) s).
   {
     intro x.
@@ -170,8 +151,7 @@ Proof.
     revert H0.
     apply forever_impl, forever_tauto.
     clear. intros s H.
-    apply not_forever in H.
-    assumption.
+    by apply not_forever in H.
   }
   clear H0.
   refine (@refutation _ _ HR s _).
@@ -192,10 +172,9 @@ Proof.
       simpl in H0, H1.
       specialize (IHEventually H1).
       destruct H0.
-      * apply IHEventually. assumption.
-      * apply ehere. assumption.
+      * by apply IHEventually.
+      * by constructor.
   - apply the_lemma.
-    destruct Hprogress;assumption.
-    intro x. specialize (H x).
-    destruct H;assumption.
+    + by destruct Hprogress.
+    + intro x. by destruct (H x).
 Qed.

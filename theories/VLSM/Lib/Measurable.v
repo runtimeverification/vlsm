@@ -17,9 +17,9 @@ Lemma sum_weights_positive
   : (0 <= sum_weights l)%R.
 Proof.
   induction l; try apply Rle_refl.
-  simpl. apply  Rplus_le_le_0_compat; try assumption.
-  destruct (weight a). simpl.
-  apply Rlt_le. assumption.
+  simpl. apply Rplus_le_le_0_compat; [| done].
+  destruct (weight a); cbn.
+  by apply Rlt_le.
 Qed.
 
 Definition weight_proj1_sig (w : pos_R) : R := proj1_sig w.
@@ -40,7 +40,7 @@ Proof.
     pose proof (in_not_in _ _ _ _ H3 H2).
     destruct (decide (v = a)); [done |]. simpl.
     rewrite <- Rplus_assoc. rewrite (Rplus_comm (proj1_sig (weight v)) (proj1_sig (weight a))). rewrite Rplus_assoc.
-    apply Rplus_eq_compat_l. apply IHvs; assumption.
+    by apply Rplus_eq_compat_l, IHvs.
 Qed.
 
 Lemma sum_weights_subseteq
@@ -57,12 +57,12 @@ Proof.
   rewrite Hvs'. simpl.
   apply Rplus_le_compat_l.
   inversion H. subst.  clear H.
-  apply IHvs; try assumption.
-  - apply set_remove_nodup. assumption.
-  - intros v Hv. apply set_remove_iff; try assumption.
+  apply IHvs; [done | |].
+  - by apply set_remove_nodup.
+  - intros v Hv. apply set_remove_iff; [done |].
     split.
-    + apply H1. right. assumption.
-    + intro contra. elim H4. subst. assumption.
+    + by apply H1; right.
+    + by intros ->.
 Qed.
 
 Lemma set_eq_nodup_sum_weight_eq

@@ -57,8 +57,7 @@ Lemma projection_validator_is_message_validator
   : projection_validator_prop -> message_validator_prop.
 Proof.
   intros Hvalidator li si im Hvi.
-  apply Hvalidator in Hvi as (_ & _ & _ & _ & _ & Him & _).
-  assumption.
+  by apply Hvalidator in Hvi as (_ & _ & _ & _ & _ & Him & _).
 Qed.
 
 Lemma projection_validator_messages_transitions
@@ -70,8 +69,7 @@ Proof.
   exists l, s.
   unfold input_valid_transition.
   destruct (transition _ _ ) as (s', om').
-  exists s', om'.
-  repeat split; assumption.
+  by exists s', om'.
 Qed.
 
 Lemma transition_validator_messages
@@ -117,12 +115,10 @@ Proof.
   intros l s im (lX & sX & Hlx & <- & Hv).
   replace (vtransition Y _ _) with
     (state_project (vtransition X lX (sX, im)).1, (vtransition X lX (sX, im)).2).
-  - eapply (VLSM_projection_input_valid_transition Hproji)
-    ; [eassumption|].
+  - eapply (VLSM_projection_input_valid_transition Hproji); [done |].
     by erewrite injective_projections.
   - symmetry.
-    eapply (VLSM_projection_input_valid_transition Hproj)
-    ; [eassumption|].
+    eapply (VLSM_projection_input_valid_transition Hproj); [done |].
     by erewrite injective_projections.
 Qed.
 
@@ -131,17 +127,15 @@ Lemma induced_projection_incl_preloaded_with_all_messages
 Proof.
   apply basic_VLSM_incl.
   - intros is (s & <- & Hs).
-    apply (VLSM_projection_initial_state Hproj).
-    assumption.
+    by apply (VLSM_projection_initial_state Hproj).
   - intros l s m Hv HsY HmX. apply any_message_is_valid_in_preloaded.
   - intros l s om (_ & _ & lX & sX & Hlx & <- & Hv) _ _.
     simpl.
-    eapply (VLSM_projection_input_valid Hproj); eassumption.
+    by eapply (VLSM_projection_input_valid Hproj).
   - intros l s im s' om [[_ [_ HvXi]] HtXi].
     setoid_rewrite <- HtXi.
     symmetry.
-    apply projection_induced_valid_transition_eq.
-    assumption.
+    by apply projection_induced_valid_transition_eq.
 Qed.
 
 (** An alternative formulation of the [projection_validator_prop]erty with a
@@ -167,23 +161,19 @@ Proof.
   intros Hvalidator sY Hs.
   induction Hs using valid_state_prop_ind.
   - apply initial_state_is_valid.
-    exists (state_lift s).
-    split; [apply Hstate_lift|].
-    apply Hinitial_lift.
-    assumption.
+    exists (state_lift s). auto.
   - destruct Ht as [[_ [_ Hvalid]] Htrans].
     specialize (Hvalidator _ _ _ Hvalid IHHs)
       as (lX & sX & HlX & HsX & HvX).
     replace s' with (state_project (vtransition X lX (sX, om)).1).
     + eapply input_valid_transition_destination,
         (VLSM_projection_input_valid_transition Hproji)
-      ; [|split]; [eassumption|eassumption|].
+      ; [|split]; [done | done |].
       by apply injective_projections.
     + assert (HivtX : input_valid_transition X lX (sX, om) (vtransition X lX (sX, om)))
         by firstorder.
       destruct (vtransition _ _ _) as (sX', _om').
-      eapply (VLSM_projection_input_valid_transition Hproj) in HivtX as [_ Hs']
-      ; [|eassumption].
+      eapply (VLSM_projection_input_valid_transition Hproj) in HivtX as [_ Hs']; [| done].
       rewrite HsX in Hs'.
       destruct Y as (TY & MY); cbv in Htrans, Hs'.
       by rewrite Htrans in Hs'; inversion Hs'.
@@ -196,10 +186,10 @@ Proof.
   split; intros Hvalidator l si om Hvalid.
   - apply Hvalidator; [apply Hvalid|].
     apply validator_alt_free_states_are_projection_states
-    ; [assumption|apply Hvalid].
+    ; [done | apply Hvalid].
   - intro HXisi.
     apply Hvalidator.
-    repeat split; [| apply any_message_is_valid_in_preloaded | assumption].
+    repeat split; [| apply any_message_is_valid_in_preloaded | done].
     revert HXisi.
     apply VLSM_incl_valid_state.
     apply induced_projection_incl_preloaded_with_all_messages.
@@ -209,7 +199,7 @@ Lemma validator_free_states_are_projection_states
   : projection_validator_prop ->
     forall s, valid_state_prop PreY s -> valid_state_prop Xi s.
 Proof.
-  rewrite <- projection_validator_prop_alt_iff by assumption.
+  rewrite <- projection_validator_prop_alt_iff by done.
   apply validator_alt_free_states_are_projection_states.
 Qed.
 
@@ -238,9 +228,9 @@ Proof.
     + apply (finite_valid_trace_from_empty Xi), initial_state_is_valid.
       exists (state_lift si).
       auto.
-    + apply (extend_right_finite_trace_from Xi);[assumption|].
+    + apply (extend_right_finite_trace_from Xi); [done |].
       split.
-      * apply induced_projection_valid_is_input_valid; [assumption|].
+      * apply induced_projection_valid_is_input_valid; [done |].
         apply Hvalidator, Hx.
       * replace (sf, _) with (vtransition Y l (finite_trace_last si tr, iom))
           by apply Hx.
@@ -324,7 +314,7 @@ Proof.
     + apply component_state_projection_lift.
     + intros isi; apply (lift_to_composite_state_initial IM).
     + apply component_transition_projection_Some.
-    + assumption.
+    + done.
 Qed.
 
 Definition component_message_validator_prop : Prop :=
@@ -407,8 +397,8 @@ Lemma emittable_from_dependencies_prop_iff m
   : Emittable_from_dependencies_prop m <-> emittable_from_dependencies_prop m.
 Proof.
   unfold emittable_from_dependencies_prop; split.
-  - inversion 1; rewrite Hsender; assumption.
-  - destruct (sender m) eqn:Hsender; [split with v; assumption|inversion 1].
+  - by inversion 1; rewrite Hsender.
+  - destruct (sender m) eqn: Hsender; [by split with v | inversion 1].
 Qed.
 
 (**
@@ -441,9 +431,9 @@ Lemma free_valid_from_valid_dependencies
   : valid_message_prop (free_composite_vlsm IM) m.
 Proof.
   eapply emitted_messages_are_valid, free_valid_preloaded_lifts_can_be_emitted;
-    [| eassumption].
-  intros; apply Hdeps, full_message_dependencies_happens_before, msg_dep_happens_before_iff_one;
-    left ; assumption.
+    [| done].
+  by intros; apply Hdeps, full_message_dependencies_happens_before, msg_dep_happens_before_iff_one;
+  left.
 Qed.
 
 (**
@@ -458,12 +448,12 @@ Proof.
   intros m Hm.
   specialize (Hm m) as Hemit; spec Hemit; [left |].
   inversion Hemit as [v _ Hemit']; clear Hemit.
-  apply free_valid_from_valid_dependencies with (A v); [assumption | clear v Hemit'].
-  eapply FullMessageDependencies_ind; [eassumption |].
+  apply free_valid_from_valid_dependencies with (A v); [done | clear v Hemit'].
+  eapply FullMessageDependencies_ind; [done |].
   intros dm Hdm Hdeps.
-  specialize (Hm dm); spec Hm; [right; assumption |].
+  specialize (Hm dm); spec Hm; [by right |].
   inversion Hm as [v _ ?]; clear Hm.
-  apply free_valid_from_valid_dependencies with (A v); assumption.
+  by apply free_valid_from_valid_dependencies with (A v).
 Qed.
 
 (**
@@ -477,7 +467,7 @@ Lemma valid_free_validating_is_message_validating
     component_message_validator_prop IM (free_constraint IM) i.
 Proof.
   intros i Hvalidating l s im Hv.
-  eapply free_valid_from_all_dependencies_emitable_from_dependencies, Hvalidating; eassumption.
+  by eapply free_valid_from_all_dependencies_emitable_from_dependencies, Hvalidating.
 Qed.
 
 (**
@@ -499,14 +489,14 @@ Proof.
   specialize (Hvalidator l s m Hv).
   inversion Hdm as [|? ? ? Hin]; subst.
   - eapply composite_no_initial_valid_messages_emitted_by_sender in Hvalidator
-      as [v [Hsender Hemit]]; [| eassumption | assumption].
-    exists v; [assumption |].
-    eapply message_dependencies_are_sufficient; [typeclasses eauto | assumption].
+      as [v [Hsender Hemit]]; [| done | done].
+    exists v; [done |].
+    eapply message_dependencies_are_sufficient; [typeclasses eauto | done].
   - apply full_message_dependencies_happens_before in Hin.
     eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender
-      in Hin as [v [Hsender Hemit]]. 2-6: eassumption.
-    exists v; [assumption |].
-    eapply message_dependencies_are_sufficient; [typeclasses eauto | assumption].
+      in Hin as [v [Hsender Hemit]]. 2-6: done.
+    exists v; [done |].
+    by eapply message_dependencies_are_sufficient.
 Qed.
 
 End free_composition_validators.
@@ -563,16 +553,16 @@ Proof.
   (* redcuction to inclusion of finite traces. *)
   apply VLSM_incl_finite_traces_characterization.
   intros s tr [Htr Hs].
-  split; [|assumption].
+  split; [| done].
   (* reverse induction on the length of a trace. *)
   induction tr using rev_ind.
-  - constructor; apply initial_state_is_valid; assumption.
+  - by constructor; apply initial_state_is_valid.
   - apply finite_valid_trace_from_app_iff in Htr as [Htr Hx].
     apply (finite_valid_trace_from_app_iff (mk_vlsm M)).
-    split; [apply IHtr; assumption|].
+    split; [by apply IHtr |].
     apply (first_transition_valid (mk_vlsm M)).
     apply first_transition_valid in Hx as [Hvx Htx].
-    split; [|assumption].
+    split; [| done].
     (* using the [self_validator_vlsm_prop]erty. *)
     revert Hvx; apply Hvalidator.
 Qed.

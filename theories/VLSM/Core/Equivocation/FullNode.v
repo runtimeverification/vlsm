@@ -100,7 +100,7 @@ Section full_node_constraint.
     destruct Hsmi as [si [Hsim Hsi]].
     apply can_emit_iff. exists si.
     revert Hsim.
-    eapply lift_generated_to_seeded; assumption.
+    by eapply lift_generated_to_seeded.
   Qed.
 
   (** if all machines satisty the [cannot_resend_message_stepwise_prop]erty,
@@ -113,13 +113,13 @@ Section full_node_constraint.
         full_node_condition_for_admissible_equivocators
         full_node_condition_for_admissible_equivocators_alt.
   Proof.
-    intros l (s, [m|]) [Hs [_ [_ Hc]]]; [|exact I].
-    destruct Hc as [Hno_equiv | Hfull]; [left; assumption|].
+    intros l (s, [m|]) [Hs [_ [_ Hc]]]; [| done].
+    destruct Hc as [Hno_equiv | Hfull]; [by left |].
     right.
     destruct Hfull as [i [Hi Hfull]].
-    exists i. split; [assumption|].
+    exists i. split; [done |].
     specialize (Hno_resend i).
-    apply node_generated_without_further_equivocation_weaken; [assumption| |assumption].
+    apply node_generated_without_further_equivocation_weaken; [done | | done].
     revert Hs.
     apply VLSM_incl_valid_state.
     apply preloaded_constraint_free_incl.

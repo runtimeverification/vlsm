@@ -84,8 +84,8 @@ Lemma StrictOrder_reexpress_impl {A} (R S: Relation_Definitions.relation A):
 Proof.
   clear.
   intros Hrel [Hirr Htrans]. constructor.
-  revert Hirr;apply Reflexive_reexpress_impl. apply complement_equivalence. assumption.
-  revert Htrans;apply Transitive_reexpress_impl. assumption.
+  - by revert Hirr;apply Reflexive_reexpress_impl; apply complement_equivalence.
+  - by revert Htrans; apply Transitive_reexpress_impl.
 Qed.
 
 (* TODO(traian): remove these definitions and use the standard stdpp ones instead.*)
@@ -186,39 +186,23 @@ Definition mid {X Y Z : Type} (xyz : X * Y * Z) : Y :=
   snd (fst xyz).
 
 Lemma or_and_distr_left : forall A B C, (A /\ B) \/ C <-> (A \/ C) /\ (B \/ C).
-Proof.
-  intros; split; intro.
-  - split; destruct H as [[HA HB] | HC]; (left; assumption) || right; assumption.
-  - destruct H as [Hac Hbc].
-    destruct Hac as [Ha | Hc]; try (right; assumption).
-    destruct Hbc as [Hb | Hc]; try (right; assumption).
-    left. split; assumption.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma and_iff_l {P Q R:Prop} : (P -> (Q <-> R)) -> (P /\ Q <-> P /\ R).
-Proof.
-  firstorder.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma not_ex_all_not
   {A : Type}
   (P : A -> Prop)
   (Hne : ~ (exists a : A, P a))
   : forall a:A, ~ P a.
-Proof.
-  intros a Hpa.
-  apply Hne.
-  exists a.
-  assumption.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma forall_and_commute
   {A : Type}
   (P Q : A -> Prop)
   : ((forall a, P a) /\ (forall a, Q a)) <-> forall a, P a /\ Q a.
-Proof.
-  firstorder.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma mirror_reflect: forall X (f : X -> bool) (P : X -> Prop),
   (forall x : X, f x = true <-> P x) ->
@@ -336,8 +320,8 @@ Lemma predicate_function2_decidable : forall A B (r : A -> B -> Prop) (r_fn : A 
   forall a b, r a b \/ ~r a b.
 Proof.
   intros. destruct (r_fn a b) eqn:Hr.
-  - left. apply H. assumption.
-  - right. apply (predicate_function2_neg _ _ _ _ H). assumption.
+  - by left; apply H.
+  - by right; apply (predicate_function2_neg _ _ _ _ H).
 Qed.
 
 Lemma bool_decide_predicate_function2 {A B} (P : A -> B -> Prop) {P_dec : RelDecision P}:
@@ -562,12 +546,8 @@ Proof.
   - destruct H as [Heq | [Hab | Hba]]; destruct (decide (a = b)); try done.
     + apply HR in Hab. by rewrite Hab.
     + apply HR in Hba. by rewrite Hba, orb_comm.
-  - destruct (decide (a = b)); try (left; assumption).
-    right.
-    apply orb_true_iff in H.
-    destruct H as [H | H]; apply HR in H.
-    + left. assumption.
-    + right. assumption.
+  - destruct (decide (a = b)); [by left | right].
+    by apply orb_true_iff in H as [H | H]; apply HR in H; [left | right].
 Qed.
 
 Instance comparable_dec
@@ -706,7 +686,9 @@ Lemma strictorder_option
   (Xsc : StrictlyComparable X)
   : CompareStrictOrder (option_compare (@compare X _)).
 Proof.
-  split; exact (option_compare_reflexive X) || exact (option_compare_transitive X).
+  split.
+  - by apply option_compare_reflexive.
+  - by apply option_compare_transitive.
 Qed.
 
 (* Now we can have the following for free : *)
@@ -734,13 +716,9 @@ Definition compare_compose (X Y : Type) `{StrictlyComparable X} `{StrictlyCompar
     end.
 
 (* Constructing the inhabited proof *)
-Lemma inhabited_compose {X Y : Type} `{HscX : StrictlyComparable X} `{HscY : StrictlyComparable Y}
-  : X * Y.
-Proof.
-  remember (@inhabited _ HscX ) as x.
-  remember (@inhabited _ HscY) as y.
-  exact (x,y).
-Qed.
+Definition inhabited_compose
+  {X Y : Type} `{HscX : StrictlyComparable X} `{HscY : StrictlyComparable Y}
+  : X * Y := (inhabited, inhabited).
 
 (* Constructing the strictorder proof *)
 Lemma reflexive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareReflexive (compare_compose X Y).
@@ -760,10 +738,8 @@ Lemma compare_compose_lt {X Y : Type} `{StrictlyComparable X} `{StrictlyComparab
 Proof.
   intros x1 x2 y1 y2 c H_12.
   simpl in H_12.
-  destruct (compare x1 x2) eqn:H_x; try (left; assumption).
-  right. split.
-  - by apply StrictOrder_Reflexive in H_x.
-  - by destruct (compare y1 y2) eqn: H_y.
+  rewrite <- compare_eq.
+  destruct (compare x1 x2), (compare y1 y2); auto.
 Qed.
 
 Lemma transitive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareTransitive (compare_compose X Y).
@@ -779,34 +755,36 @@ Proof.
     assert (H_useful' := compare_compose_lt x2 x3 y2 y3 comp H23).
     destruct H_useful as [left | right];
     destruct H_useful' as [left' | right'].
-    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); assumption).
+    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); done).
     by simpl; rewrite H1; subst.
     destruct right'; subst.
     by simpl; rewrite left.
     destruct right; subst.
     by simpl; rewrite left'.
     destruct right; destruct right'; subst.
-    assert (compare y1 y3 = Lt) by (apply (StrictOrder_Transitive y1 y2 y3 Lt); assumption).
+    assert (compare y1 y3 = Lt) by (apply (StrictOrder_Transitive y1 y2 y3 Lt); done).
     by simpl; rewrite compare_eq_refl; simpl in H12; rewrite H1.
   - rewrite <- H_comp in *;
     assert (H_useful := compare_compose_lt x1 x2 y1 y2 comp H12);
     assert (H_useful' := compare_compose_lt x2 x3 y2 y3 comp H23).
     destruct H_useful as [left | right];
     destruct H_useful' as [left' | right'].
-    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); assumption).
+    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); done).
     by simpl; rewrite H1; subst.
     destruct right'; subst.
     by simpl; rewrite left.
     destruct right; subst.
     by simpl; rewrite left'.
     destruct right; destruct right'; subst.
-    assert (compare y1 y3 = Gt) by (apply (StrictOrder_Transitive y1 y2 y3 Gt); assumption).
+    assert (compare y1 y3 = Gt) by (apply (StrictOrder_Transitive y1 y2 y3 Gt); done).
     by simpl; rewrite compare_eq_refl; simpl in H12; rewrite H1.
 Qed.
 
 Lemma strictorder_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareStrictOrder (compare_compose X Y).
 Proof.
-  split; exact reflexive_compose || exact transitive_compose.
+  split.
+  - by apply reflexive_compose.
+  - by apply transitive_compose.
 Qed.
 
 (* Now we can have the following for free : *)
@@ -826,8 +804,7 @@ Definition triple_strictly_comparable_proj1_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : X.
 Proof.
-  destruct HscXYZ as [((x, y), z) _ _].
-  exact x.
+  by destruct HscXYZ as [((x, _), _) _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj1_compare
@@ -870,8 +847,7 @@ Definition triple_strictly_comparable_proj2_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : Y.
 Proof.
-  destruct HscXYZ as [[(x, y) z] _ _].
-  exact y.
+  by destruct HscXYZ as [[(_, y) _] _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj2_compare
@@ -914,8 +890,7 @@ Definition triple_strictly_comparable_proj3_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : Z.
 Proof.
-  destruct HscXYZ as [[(x, y) z] _ _].
-  exact z.
+  by destruct HscXYZ as [[_ z] _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj3_compare
@@ -976,14 +951,13 @@ Lemma not_bounding_impl_liveness
 Proof.
   intros n1.
   specialize (Hdec n1).
-  destruct Hdec as [Hex | Hnex]; try assumption.
+  destruct Hdec as [Hex | Hnex]; [done |].
   specialize (not_ex_all_not _ Hnbound); simpl; clear Hnbound; intro Hnbound.
   specialize (Hnbound n1).
   elim Hnbound.
   intros n2 Hleq HnP.
   apply Hnex.
-  exists n2.
-  split; assumption.
+  by exists n2.
 Qed.
 
 (** optionally extracts an element belonging to first type from a sum type *)
