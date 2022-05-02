@@ -245,7 +245,7 @@ Global Instance precedes_P_transitive
   `{Transitive A preceeds} (P : A -> Prop)
   : Transitive (precedes_P preceeds P).
 Proof.
-  intros [x Hx] [y Hy] [z Hz]; unfold precedes_P; cbn.
+  intros [x Hx] [y Hy] [z Hz]; unfold precedes_P.
   by etransitivity.
 Qed.
 
