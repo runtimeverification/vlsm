@@ -56,7 +56,7 @@ cofix CIH.
 dependent inversion h; subst.
 - rewrite [midp _]trace_destr /=.
   case: (constructive_indefinite_description _ _) => /= x [a1 hm].
-  by apply midpointT_nil => //; case: x a1 hm.
+  by apply: midpointT_nil => //; case: x a1 hm.
 - rewrite [midp _]trace_destr /=.
   by eapply midpointT_delay.
 Qed.
