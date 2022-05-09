@@ -50,24 +50,23 @@ CoInductive bisim : trace -> trace -> Prop :=
 Lemma bisim_refl : forall tr, bisim tr tr.
 Proof.
 cofix CIH.
-case => [a | a b tr]; first exact: bisim_nil.
-by apply: bisim_cons.
+case => [a|a b tr]; first exact: bisim_nil.
+exact: (bisim_cons _ _ (CIH _ )).
 Qed.
 
 Lemma bisim_sym : forall tr1 tr2, bisim tr1 tr2 -> bisim tr2 tr1.
 Proof.
 cofix CIH.
-case => [a | a b tr1] tr2 Hbs; invs Hbs; first exact: bisim_nil.
-by apply: bisim_cons; apply: CIH.
+case => [a|a b tr1] tr2 Hbs; invs Hbs; first exact: bisim_nil.
+exact (bisim_cons _ _ (CIH _ _ H3)).
 Qed.
 
 Lemma bisim_trans : forall tr1 tr2 tr3,
  bisim tr1 tr2 -> bisim tr2 tr3 -> bisim tr1 tr3.
 Proof.
 cofix CIH.
-case => [a | a b tr1] tr2 tr0 Hbs Hbs'; invs Hbs; invs Hbs'; first exact: bisim_nil.
-apply: bisim_cons.
-exact: CIH _ _ _ H3 H4.
+case => [a|a b tr1] tr2 tr0 Hbs Hbs'; invs Hbs; invs Hbs'; first exact: bisim_nil.
+exact: (bisim_cons _ _ (CIH _ _ _ H3 H4)).
 Qed.
 
 Lemma bisim_hd: forall tr0 tr1, bisim tr0 tr1 -> hd tr0 = hd tr1.
@@ -103,10 +102,9 @@ Lemma trace_append_bism : forall tr1 tr2 tr3 tr4,
 Proof.
 cofix CIH.
 move => tr1 tr2 tr3 tr4 [a1 | a1 b1 tr1' tr2' Hbs1'] Hbs2.
-- rewrite !trace_append_nil. exact: Hbs2.
-- rewrite !trace_append_cons.
-  apply: bisim_cons.
-  exact: CIH.
+- rewrite 2!trace_append_nil. exact: Hbs2.
+- rewrite 2!trace_append_cons.
+  exact: (bisim_cons _ _ (CIH _ _ _ _ _ _)).
 Qed.
 
 End Traces.

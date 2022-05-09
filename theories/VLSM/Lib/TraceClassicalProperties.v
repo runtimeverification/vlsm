@@ -58,7 +58,7 @@ dependent inversion h; subst.
   case: (constructive_indefinite_description _ _) => /= x [a1 hm].
   by apply: midpointT_nil => //; case: x a1 hm.
 - rewrite [midp _]trace_destr /=.
-  by eapply midpointT_delay.
+  exact: (@midpointT_delay _ _ p0 p1 (Tcons a b tr) (Tcons a b tr') (followsT_delay a b f) tr tr' f a b (midp f)).
 Qed.
 
 Lemma appendT_assoc_R: forall p1 p2 p3,
@@ -74,7 +74,7 @@ Qed.
 Lemma AppendT_assoc_R: forall (p1 p2 p3 : propT), (p1 *** p2 *** p3) =>> (p1 *** p2) *** p3.
 Proof.
 move => [f1 hf1] [f2 hf2] [f3 hf3] tr0 /= h1.
-by apply: appendT_assoc_R.
+exact: appendT_assoc_R.
 Qed.
 
 End TraceClassicalProperties.
