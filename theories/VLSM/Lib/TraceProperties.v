@@ -168,10 +168,7 @@ Lemma finalTA_hd_append_trace : forall tr0 a,
  finalTA tr0 a -> forall tr1, hd tr1 = a ->
  hd (tr0 +++ tr1) = hd tr0.
 Proof.
-refine (fix IH tr a h {struct h} := _).
-case: tr h => [a0 | a0 b tr1] Hfin tr2 Hhd; invs Hfin.
-- by rewrite trace_append_nil.
-- by rewrite trace_append_cons.
+move => tr a; elim => {tr a} [a tr <- | a b a' tr Hfinal IH tr'] //=.
 Qed.
 
 (** ** Basic trace properties and connectives *)
