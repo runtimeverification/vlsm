@@ -104,7 +104,7 @@ cofix CIH.
 move => tr1 tr2 tr3 tr4 [a1 | a1 b1 tr1' tr2' Hbs1'] Hbs2.
 - rewrite 2!trace_append_nil. exact: Hbs2.
 - rewrite 2!trace_append_cons.
-  exact: (bisim_cons _ _ (CIH _ _ _ _ _ _)).
+  exact/bisim_cons/CIH.
 Qed.
 
 End Traces.
