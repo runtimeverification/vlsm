@@ -1001,19 +1001,19 @@ Qed.
 Lemma lastA_appendA : forall p q a, lastA (appendT p q) a -> lastA q a.
 Proof.
 move => p q a [tr0 [[tr [_ h2]] h1]].
-move: h1 tr h2. induction 1; move => tr0 h0; invs h0.
+move: h1 tr h2; elim => {tr0 a} [a | a b a' tr0 Hfinal IH] tr h0; invs h0.
 - exists (Tnil a). by split; last by apply finalTA_nil.
-- exists (Tcons a b tr). by split; last by apply: finalTA_delay.
-- exact: IHh1 _ H1.
+- exists (Tcons a b tr0). by split; last by apply: finalTA_delay.
+- exact: IH _ H1.
 Qed.
 
 Lemma LastA_AppendA : forall p v, LastA (p *** [|v|]) ->> v.
 Proof.
 move => [p hp] v /= a [tr [[tr' [_ h0]] h1]].
-move: tr a h1 tr' h0. induction 1; move => tr0 h0; invs h0.
+move: h1 tr' h0; elim => {tr a} [a | a b a' tr Hfinal IH] tr0 h0; invs h0.
 - move: H0 => [a0 [h0 h1]]. by invs h1.
 - move: H0 => [a0 [_ h0]]. by invs h0.
-- exact: IHh1 _ H1.
+- exact: IH _ H1.
 Qed.
 
 Lemma LastA_andA : forall p u, ((LastA p) andA u) ->> LastA (p *** [|u|]).
@@ -1065,11 +1065,11 @@ exists (tr2 +++ tr1). split.
   + invs h0. rewrite trace_append_cons.
     exact: (followsT_delay _ _ (CIH _ H4)).
 - move => {H1 h0}; move h0: (hd tr1) h2 => a0 h2.
-  move: tr2 a0 h2 tr1 h0 h1; induction 1 => tr0 h0 h1.
+  move: h2 tr1 h0 h1; elim => {tr2 a0} [a0 | a0 b a1 tr2 Hfinal IH] tr0 h0 h1.
   + by rewrite trace_append_nil.
   + rewrite trace_append_cons.
     apply: finalTA_delay.
-    exact: (IHh2 _ h0 h1).
+    exact: (IH _ h0 h1).
 Qed.
 
 Lemma SingletonT_andA_AppendT : forall u v,
@@ -1108,7 +1108,7 @@ Qed.
 Lemma finalTA_lastdup : forall tr a b,
  finalTA tr a -> finalTA (lastdup tr b) a.
 Proof.
-move => tr a b. induction 1.
+move => tr a b1; elim => {tr a} [a | a1 b2 a2 tr Hfinal IH].
 - rewrite [lastdup _ _]trace_destr /=.
   apply: finalTA_delay. exact: finalTA_nil.
 - rewrite [lastdup _ _]trace_destr /=.
