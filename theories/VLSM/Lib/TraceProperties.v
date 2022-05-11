@@ -699,9 +699,6 @@ move => v [p hp] tr0 /= [tr1 [[a [h0 h2]] h1]].
 by invs h1; invs h2.
 Qed.
 
-Lemma ttA_AppendT_implies : forall p, ([|ttA|] *** p) =>> p.
-Proof. by move => p; apply: SingletonT_AppendT. Qed.
-
 Lemma implies_ttA_AppendT: forall p, p =>> [|ttA|] *** p.
 Proof.
 move => [p hp] tr0 /= htr0.
