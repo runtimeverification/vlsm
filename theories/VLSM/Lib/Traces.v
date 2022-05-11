@@ -51,14 +51,14 @@ Lemma bisim_refl : forall tr, bisim tr tr.
 Proof.
 cofix CIH.
 case => [a|a b tr]; first exact: bisim_nil.
-exact: (bisim_cons _ _ (CIH _ )).
+exact/bisim_cons/CIH.
 Qed.
 
 Lemma bisim_sym : forall tr1 tr2, bisim tr1 tr2 -> bisim tr2 tr1.
 Proof.
 cofix CIH.
 case => [a|a b tr1] tr2 Hbs; invs Hbs; first exact: bisim_nil.
-exact (bisim_cons _ _ (CIH _ _ H3)).
+exact/bisim_cons/CIH.
 Qed.
 
 Lemma bisim_trans : forall tr1 tr2 tr3,
