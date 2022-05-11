@@ -259,7 +259,7 @@ Lemma propT_imp_conseq_R: forall p q0 q1,
  q0 =>> q1 -> p =>> q0 -> p =>> q1.
 Proof.
 move => [p hp] [q0 hq0] [q1 hq1] h0 h1 tr0 /= h2.
-by apply: h0; apply: h1.
+exact/h0/h1.
 Qed.
 
 Lemma propT_imp_andT: forall p q0 q1,
@@ -327,14 +327,14 @@ Lemma singletonT_setoidT : forall u, setoidT (singletonT u).
 Proof.
 move => u tr0 [a [h0 h2]] tr1 h1.
 invs h2; invs h1.
-by apply: nil_singletonT.
+exact: nil_singletonT.
 Qed.
 
 Lemma singletonT_cont : forall u v, u ->> v ->
  forall tr, singletonT u tr -> singletonT v tr.
 Proof.
 move => u v huv tr0 [a [h0 h1]]. invs h1.
-by apply nil_singletonT; apply huv.
+exact/nil_singletonT/huv.
 Qed.
 
 Lemma singletonT_nil: forall u a, singletonT u (Tnil a) -> u a.
@@ -349,7 +349,7 @@ Lemma SingletonT_cont: forall u v, u ->> v -> [|u|] =>> [|v|].
 Proof.
 move => u v h0 tr0 [a [h1 h2]].
 invs h2.
-by apply: nil_singletonT; apply: h0.
+exact/nil_singletonT/h0.
 Qed.
 
 (** ** Duplicate element property *)
@@ -372,14 +372,14 @@ Lemma dupT_cont: forall (u0 u1: propA) b,
 Proof.
 move => u0 u1 b hu tr [a [h0 h1]]. 
 invs h1; invs H1.
-by apply: dupT_singl; apply: hu.
+exact/dupT_singl/hu.
 Qed.
 
 Lemma dupT_setoidT : forall u b, setoidT (dupT u b).
 Proof.
 move => u b tr0 [a [h0 h1]] tr1 h2.
 invs h1; invs H1; invs h2; invs H3.
-by apply: dupT_singl.
+exact/dupT_singl.
 Qed.
 
 Definition DupT (u : propA) (b : B) : propT :=
@@ -484,7 +484,7 @@ move => u0 u1. cofix CIH. case.
   move: H0 => /= H0; invs h0.
   move: H3 => [a' [h1 h2]]. invs h2. move: h1 => [h1 h2].
   apply: followsT_nil => //.
-  by apply: nil_singletonT.
+  exact: nil_singletonT.
 - move => a b tr0 h0; invs h0.
   exact/followsT_delay/CIH.
 Qed.
@@ -498,7 +498,7 @@ move => u0 u1. cofix CIH. case.
   move: H0 => /= H0; invs h0.
   move: H3 => [a' [h1 h2]]. invs h2. move: h1 => [h1 h2].
   apply followsT_nil => //.
-  by apply: nil_singletonT.
+  exact: nil_singletonT.
 - move => a b tr0 h0; invs h0.
   exact/followsT_delay/CIH.
 Qed.
@@ -518,7 +518,7 @@ Lemma followsT_ttA : forall tr, followsT (singletonT ttA) tr tr.
 Proof.
 cofix CIH. case => [a|a b tr0].
 - apply followsT_nil => //.
-  by apply: nil_singletonT.
+  exact: nil_singletonT.
 - exact/followsT_delay/CIH.
 Qed.
 
@@ -651,7 +651,7 @@ Lemma SingletonT_DupT_AppendT_andA_DupT : forall u v b, ([|u|] *** <<v;b>>) =>> 
 Proof.
 move => u v b tr0 [tr1 [[a [h0 h2]] h1]] /=.
 invs h2; invs h1; move: H1 => [a [h1 h2]]; invs h2; invs H1.
-by apply: dupT_singl.
+exact: dupT_singl.
 Qed.
 
 Lemma DupT_andA_AppendT_SingletonT_DupT : forall u v b, <<u andA v;b>> =>> ([|u|] *** <<v;b>>).
@@ -659,30 +659,30 @@ Proof.
 move => u v b tr0 [a [[hu hv] h1]].
 invs h1; invs H1. exists (Tnil a); split; first by apply: nil_singletonT.
 apply: followsT_nil => //.
-by apply: dupT_singl.
+exact: dupT_singl.
 Qed.
 
 Lemma DupT_andA_AppendT_SingletonT : forall u v b, <<u andA v;b>> =>> <<u;b>> *** [|v|].
 Proof.
 move => u v b tr0 [a [[hu hv] h0]].
 invs h0; invs H1. exists (Tcons a b (Tnil a)); split.
-- by apply: dupT_singl.
+- exact: dupT_singl.
 - apply: followsT_delay. apply: followsT_nil => //.
-  by apply: nil_singletonT.
+  exact: nil_singletonT.
 Qed.
 
 Lemma DupT_AppendT_SingletonT_andA_DupT : forall u v b, (<<u;b>> *** [|v|]) =>> <<u andA v;b>>.
 Proof.
 move => u v b tr0 [tr1 [[a [hu h0]] h1]].
 invs h0; invs H1; invs h1; invs H3; move: H1 => [a [hv h0]]; invs h0 => /=.
-by apply: dupT_singl.
+exact: dupT_singl.
 Qed.
 
 Lemma AppendT_andA : forall u v, ([|u|] *** [|v|]) =>> [|u andA v|].
 Proof.
 move => u v tr0 [tr1 [[a [hu h0]] h1]].
 invs h0; invs h1; move: H1 => [a [hv h0]]; invs h0 => /=.
-by apply: nil_singletonT.
+exact: nil_singletonT.
 Qed.
 
 Lemma andA_AppendT: forall u v, [|u andA v|] =>> [|u|] *** [|v|].
@@ -690,7 +690,7 @@ Proof.
 move => u v tr0 [a [[hu hv] h0]].
 invs h0. exists (Tnil a). split; first by apply: nil_singletonT.
 apply: followsT_nil => //.
-by apply: nil_singletonT.
+exact: nil_singletonT.
 Qed.
 
 Lemma SingletonT_AppendT: forall v p, ([|v|] *** p) =>> p.
@@ -703,7 +703,7 @@ Lemma implies_ttA_AppendT: forall p, p =>> [|ttA|] *** p.
 Proof.
 move => [p hp] tr0 /= htr0.
 exists (Tnil (hd tr0)); split.
-- by apply: nil_singletonT.
+- exact: nil_singletonT.
 - exact: followsT_nil.
 Qed.
 
@@ -733,7 +733,7 @@ exists tr0; split => //.
 move: {hp htr0} tr0. cofix CIH.
 case => [a|a b tr0].
 - apply: followsT_nil => //.
-  by apply: nil_singletonT.
+  exact: nil_singletonT.
 - exact/followsT_delay/CIH.
 Qed.
 
@@ -820,7 +820,7 @@ Lemma iterT_appendT_dupT: forall (u : propA) p b tr,
 Proof.
 move => u p b. cofix CIH. move => tr h0 h1; invs h1.
 - apply: followsT_nil => //.
-  by apply: nil_singletonT.
+  exact: nil_singletonT.
 - move: H h0 => [tr1 [_ h1]] _.
   move: tr tr1 tr0 h1 H0. cofix CIH1. 
   move => tr0 tr1 tr2 h0 h1; invs h0.
@@ -987,7 +987,7 @@ Qed.
 Lemma LastA_SingletonT_unfold : forall u, u ->> LastA ([|u|]).
 Proof.
 move => u a h0. exists (Tnil a). split.
--by apply: nil_singletonT.
+- exact: nil_singletonT.
 - exact: finalTA_nil.
 Qed.
 
@@ -1092,7 +1092,8 @@ Proof.
 cofix CIH. move => u tr0 b h0; invs h0.
 - rewrite [lastdup _ _]trace_destr /=.
   move: H0 => [a0 [h0 h1]]. invs h1.
-  apply: followsT_nil => //. by apply: dupT_singl.
+  apply: followsT_nil => //.
+  exact: dupT_singl.
 - rewrite [lastdup _ _]trace_destr /=.
   exact/followsT_delay/CIH.
 Qed.
