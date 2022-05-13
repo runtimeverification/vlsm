@@ -112,9 +112,8 @@ to be all [valid_message]s of <<X>>:
     pose proof (Hps' := input_valid_transition_destination X Hivt).
 
     split.
-    {
-      apply (composite_transition_state_eq IM) in Hivt.
-      by subst; exists (exist _ s' Hps').
+    { 
+      by subst; exists (exist _ s' Hps'); eapply (composite_transition_state_eq IM).
     }
     unfold option_valid_message_prop.
 
