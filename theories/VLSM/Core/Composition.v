@@ -276,6 +276,30 @@ component:
       let (si', om') := vtransition (IM i) li (s i, om) in
       (state_update s i si',  om').
 
+    Lemma composite_transition_state_neq
+      (l : composite_label)
+      (s s' : composite_state)
+      (om om' : option message)
+      (Ht : composite_transition l (s, om) = (s', om'))
+      (i : index)
+      (Hi : i <> projT1 l)
+      : s' i = s i.
+    Proof.
+      destruct l; cbn in Ht; destruct (vtransition _ _ _).
+      by inversion Ht; apply state_update_neq.
+    Qed.
+
+    Lemma composite_transition_state_eq
+      (i : index)
+      (li : vlabel (IM i))
+      (s s' : composite_state)
+      (om om' : option message)
+      (Ht : composite_transition (existT i li) (s, om) = (s', om'))
+      : s' i = fst (vtransition (IM i) li (s i, om)).
+    Proof.
+      cbn in Ht; destruct (vtransition _ _ _); inversion Ht; apply state_update_eq.
+    Qed.
+
 (**
 Given a [composite_label] <<(i, li)>> and a [composite_state]-message
 pair <<(s, om)>>, [composite_valid]ity is defined as [valid]ity in
@@ -320,36 +344,6 @@ the [composite_valid]ity.
       (constraint : composite_label -> composite_state * option message -> Prop)
       : VLSM message
       := mk_vlsm (composite_vlsm_machine constraint).
-
-    Lemma composite_transition_state_neq
-      {constraint : composite_label -> composite_state * option message -> Prop}
-      (l : composite_label)
-      (s s' : composite_state)
-      (om om' : option message)
-      (Ht : input_valid_transition (composite_vlsm constraint) l (s, om) (s', om'))
-      (i : index)
-      (Hi : i <> projT1 l)
-      : s' i = s i.
-    Proof.
-      destruct Ht as [_ Ht]. simpl in Ht. destruct l as (il, l). simpl in Hi.
-      destruct (vtransition (IM il) l (s il, om)) as (si', omi') eqn:Ht'.
-      inversion Ht; subst. by apply state_update_neq.
-    Qed.
-
-    Lemma composite_transition_state_eq
-      {constraint : composite_label -> composite_state * option message -> Prop}
-      (l : composite_label)
-      (s s' : composite_state)
-      (om om' : option message)
-      (Ht : input_valid_transition (composite_vlsm constraint) l (s, om) (s', om'))
-      (il := projT1 l)
-      : s' il = fst (vtransition (IM il) (projT2 l) (s il, om)).
-    Proof.
-      destruct Ht as [_ Ht]. simpl in Ht.
-      unfold il in *. clear il. destruct l as (il, l). simpl.
-      destruct (vtransition (IM il) l (s il, om)) as (si', omi') eqn:Ht'.
-      inversion Ht. apply state_update_eq.
-    Qed.
 
     (** Composite versions for the generic [_apply_plan]-related definitions and
     results.
