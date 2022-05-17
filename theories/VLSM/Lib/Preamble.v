@@ -336,6 +336,20 @@ Proof.
   intros. intros a b. symmetry. apply Is_true_iff_eq_true.
 Qed.
 
+(**
+An element <<m>> is minimal statisfying a predicate <<P>> w.r.t. a
+relation <<R>>, if <<P m>> holds and there is no message in relation with <<m>>
+for which <<P>> holds.
+*)
+Definition minimal_wrt `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
+  P m /\ (forall m', P m' -> ~R m' m).
+
+(**
+An element <<m>> is maximal statisfying a predicate <<P>> w.r.t. a
+relation <<R>> if it is minimal satisfying <<P>> w.r.t. the inverse relation.
+*)
+Definition maximal_wrt `(R : relation A) := minimal_wrt (flip R).
+
 (* Reflexivity of comparison operators *)
 Class CompareReflexive {A} (compare : A -> A -> comparison) : Prop :=
     compare_eq : forall x y, compare x y = Eq <-> x = y.
