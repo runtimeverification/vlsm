@@ -344,7 +344,7 @@ element in S.
 Definition minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
   P m /\ (forall m', P m' -> R m' m -> R m m').
 
-Example minimal_among_le_0 : minimal_among le (fun _ => True) 0.
+Remark minimal_among_le_0 : minimal_among le (const True) 0.
 Proof.
   by split; [| lia].
 Qed.
@@ -353,7 +353,7 @@ Qed.
 Definition strict_minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
   P m /\ (forall m', P m' -> ~ R m' m).
 
-Example strict_minimal_among_lt_0 : minimal_among lt (fun _ => True) 0.
+Remark strict_minimal_among_lt_0 : minimal_among lt (const True) 0.
 Proof.
   by split; [| lia].
 Qed.
