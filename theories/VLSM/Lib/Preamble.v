@@ -337,18 +337,50 @@ Proof.
 Qed.
 
 (**
-An element <<m>> is minimal statisfying a predicate <<P>> w.r.t. a
-relation <<R>>, if <<P m>> holds and there is no message in relation with <<m>>
-for which <<P>> holds.
+A minimal element of a subset <<S>> (defined by a predicate <<P>>) of some
+preordered set is defined as an element of S that is not greater than any other
+element in S.
 *)
-Definition minimal_wrt `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
-  P m /\ (forall m', P m' -> ~R m' m).
+Definition minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
+  P m /\ (forall m', P m' -> R m' m -> R m m').
+
+Example minimal_among_le_0 : minimal_among le (fun _ => True) 0.
+Proof.
+  by split; [| lia].
+Qed.
+
+(** A more concise definition of minimality for strict orders.  *)
+Definition strict_minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
+  P m /\ (forall m', P m' -> ~ R m' m).
+
+Example strict_minimal_among_lt_0 : minimal_among lt (fun _ => True) 0.
+Proof.
+  by split; [| lia].
+Qed.
+
+(** The minimality definitions are equivalent for [Asymmetric] relations. *)
+Lemma asymmetric_minimal_among_iff
+  `(R : relation A) `{!Asymmetric R} (P : A -> Prop)
+  : forall m, minimal_among R P m <-> strict_minimal_among R P m.
+Proof.
+  unfold minimal_among, strict_minimal_among; specialize asymmetry.
+  firstorder.
+Qed.
+
+(** The minimality definitions are equivalent for [StrictOrder]s. *)
+Lemma strict_minimal_among_iff
+  `(R : relation A) `{!StrictOrder R} (P : A -> Prop)
+  : forall m, minimal_among R P m <-> strict_minimal_among R P m.
+Proof.
+  apply asymmetric_minimal_among_iff; typeclasses eauto.
+Qed.
 
 (**
-An element <<m>> is maximal statisfying a predicate <<P>> w.r.t. a
-relation <<R>> if it is minimal satisfying <<P>> w.r.t. the inverse relation.
+Dually, a maximal element is a minimal element w.r.t. the inverse relation.
 *)
-Definition maximal_wrt `(R : relation A) := minimal_wrt (flip R).
+Definition maximal_among `(R : relation A) := minimal_among (flip R).
+
+Definition strict_maximal_among `(R : relation A) := strict_minimal_among (flip R).
 
 (* Reflexivity of comparison operators *)
 Class CompareReflexive {A} (compare : A -> A -> comparison) : Prop :=
