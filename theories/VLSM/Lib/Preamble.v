@@ -336,6 +336,52 @@ Proof.
   intros. intros a b. symmetry. apply Is_true_iff_eq_true.
 Qed.
 
+(**
+A minimal element of a subset <<S>> (defined by a predicate <<P>>) of some
+preordered set is defined as an element of S that is not greater than any other
+element in S.
+*)
+Definition minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
+  P m /\ (forall m', P m' -> R m' m -> R m m').
+
+Remark minimal_among_le_0 : minimal_among le (const True) 0.
+Proof.
+  by split; [| lia].
+Qed.
+
+(** A more concise definition of minimality for strict orders.  *)
+Definition strict_minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
+  P m /\ (forall m', P m' -> ~ R m' m).
+
+Remark strict_minimal_among_lt_0 : minimal_among lt (const True) 0.
+Proof.
+  by split; [| lia].
+Qed.
+
+(** The minimality definitions are equivalent for [Asymmetric] relations. *)
+Lemma asymmetric_minimal_among_iff
+  `(R : relation A) `{!Asymmetric R} (P : A -> Prop)
+  : forall m, minimal_among R P m <-> strict_minimal_among R P m.
+Proof.
+  unfold minimal_among, strict_minimal_among; specialize asymmetry.
+  firstorder.
+Qed.
+
+(** The minimality definitions are equivalent for [StrictOrder]s. *)
+Lemma strict_minimal_among_iff
+  `(R : relation A) `{!StrictOrder R} (P : A -> Prop)
+  : forall m, minimal_among R P m <-> strict_minimal_among R P m.
+Proof.
+  apply asymmetric_minimal_among_iff; typeclasses eauto.
+Qed.
+
+(**
+Dually, a maximal element is a minimal element w.r.t. the inverse relation.
+*)
+Definition maximal_among `(R : relation A) := minimal_among (flip R).
+
+Definition strict_maximal_among `(R : relation A) := strict_minimal_among (flip R).
+
 (* Reflexivity of comparison operators *)
 Class CompareReflexive {A} (compare : A -> A -> comparison) : Prop :=
     compare_eq : forall x y, compare x y = Eq <-> x = y.

@@ -2048,6 +2048,26 @@ Section Composite.
     - by eapply composite_no_initial_valid_messages_emitted_by_sender.
   Qed.
 
+  Lemma composite_emitted_by_validator_have_sender
+      (can_emit_signed : channel_authentication_prop)
+      (A_inj : forall v1 v2, A v1 = A v2 -> v1 = v2)
+    : forall s item,
+        input_valid_transition_item (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
+          s item ->
+      forall v, A v = projT1 (l item) ->
+      forall (m : message), output item = Some m ->
+      sender m = Some v.
+  Proof.
+    intros s item Ht v HAv m Houtput.
+    cut (channel_authenticated_message (A v) m).
+    {
+      unfold channel_authenticated_message; destruct (sender m) as [v' |]; [| done].
+      by cbn; intros Hvv'; apply Some_inj, A_inj in Hvv'; subst.
+    }
+    apply input_valid_transition_preloaded_project_active in Ht as Hti.
+    by rewrite Houtput in Hti; apply can_emit_signed; rewrite HAv; eexists _, _, _.
+  Qed.
+  
   Lemma has_been_sent_iff_by_sender
         (Hsender_safety : sender_safety_alt_prop)
         [is s tr] (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) is s tr)
