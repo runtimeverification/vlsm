@@ -774,10 +774,9 @@ Lemma [basic_VLSM_incl]
     Proof.
       induction Hs using valid_state_prop_ind.
       - by apply initial_state_is_valid, composite_update_initial_state_with_initial.
-      - destruct Ht as [[Hps [Hom Hv]] Ht]; unfold transition in Ht; cbn in Ht.
-        destruct Hv as [Hv _]; cbn in Hv.
-        destruct l as (j, lj).
-        destruct (vtransition _ _ _) as (sj', omj') eqn:Htj.
+      - destruct Ht as [[Hps [Hom [Hv _]]] Ht]; cbn in Ht, Hv.
+        destruct l as [j lj].
+        destruct (vtransition _ _ _) as [sj' omj'] eqn: Htj.
         inversion_clear Ht.
         destruct (decide (i = j)).
         + by subst; rewrite state_update_twice.
@@ -792,9 +791,7 @@ Lemma [basic_VLSM_incl]
       forall l s om, vvalid (IM i) l (s, om) ->
         composite_valid (lift_to_composite_label i l)
           (lift_to_composite_state' cs i s, om).
-    Proof.
-      by intros; unfold lift_to_composite_state'; cbn; rewrite state_update_eq.
-    Qed.
+    Proof. by intros; cbn; rewrite state_update_eq. Qed.
 
     Lemma lift_to_composite_transition_preservation :
       forall (i : index) (cs : composite_state),
@@ -813,7 +810,7 @@ Lemma [basic_VLSM_incl]
       forall (i : index),
           forall m, vinitial_message_prop (IM i) m ->
           composite_initial_message_prop m.
-    Proof.  by intros i m Hm; exists i, (exist _ _ Hm).  Qed.
+    Proof. by intros i m Hm; exists i, (exist _ _ Hm). Qed.
  
     Lemma pre_lift_to_free_weak_full_projection :
       forall (i : index) (cs : composite_state) (P : message -> Prop),
@@ -822,14 +819,14 @@ Lemma [basic_VLSM_incl]
             (pre_loaded_vlsm (IM i) P) (pre_loaded_vlsm free_composite_vlsm P)
             (lift_to_composite_label i) (lift_to_composite_state' cs i).
     Proof.
-      intros.
+      intros i cs P Hvsp.
       apply basic_VLSM_weak_full_projection.
       - intros l s om (_ & _ & Hv) _ _.
         by split; [apply lift_to_composite_valid_preservation |].
-      - by intros * ? * [_ Ht]; apply lift_to_composite_transition_preservation.
+      - by inversion 1; apply lift_to_composite_transition_preservation.
       - by intros s Hs; apply pre_composite_free_update_state_with_initial.
       - intros _ _ m _ _ [Hm | Hp]; apply initial_message_is_valid; [left | by right].
-        + by eapply lift_to_composite_initial_message_preservation.
+        by eapply lift_to_composite_initial_message_preservation.
     Qed.
 
     Lemma lift_to_free_weak_full_projection :
@@ -840,7 +837,7 @@ Lemma [basic_VLSM_incl]
     Proof.
       constructor; intros.
       apply (VLSM_eq_finite_valid_trace_from (vlsm_is_pre_loaded_with_False free_composite_vlsm)),
-        pre_lift_to_free_weak_full_projection.
+            pre_lift_to_free_weak_full_projection.
       - by apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False free_composite_vlsm)).
       - apply (VLSM_eq_finite_valid_trace_from (vlsm_is_pre_loaded_with_False (IM i))).
         by destruct (IM i).
@@ -855,7 +852,7 @@ Lemma [basic_VLSM_incl]
     Proof.
       constructor; intros.
       apply (VLSM_eq_finite_valid_trace_from (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)),
-        pre_lift_to_free_weak_full_projection.
+            pre_lift_to_free_weak_full_projection.
       - by apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)).
       - apply (VLSM_eq_finite_valid_trace_from (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (IM i))).
         by destruct (IM i).
