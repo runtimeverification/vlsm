@@ -255,7 +255,7 @@ by simply setting to <<s>> the  corresponding component of the initial
     Definition lifted_alt_state
         (s : vstate M)
         : vstate Alt
-        := lift_to_composite_state
+        := lift_to_composite_initial_state
              (binary_IM M emit_any_message_vlsm) first s.
 
 (**
@@ -281,7 +281,7 @@ Lifting a [valid_state] of <<PreLoaded>> we obtain a [valid_state] of <<Alt>>.
           by split; [cbn; apply Ht|].
         * simpl.
           replace (lifted_alt_state s first) with s
-            by (unfold lifted_alt_state,lift_to_composite_state
+            by (unfold lifted_alt_state,lift_to_composite_initial_state
                ;rewrite state_update_eq; done).
           apply proj2 in Ht.
           change (vtransition M l (s: vstate M,om0) = (s',om')) in Ht.

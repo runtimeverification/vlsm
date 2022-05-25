@@ -256,7 +256,7 @@ Qed.
 Definition composite_vlsm_induced_projection : VLSM message :=
   projection_induced_vlsm X (type (IM j))
     composite_project_label (fun s => s j)
-    (lift_to_composite_label IM j) (lift_to_composite_state IM j).
+    (lift_to_composite_label IM j) (lift_to_composite_initial_state IM j).
 
 (** The [composite_vlsm_constraint_projection] is [VLSM_eq]ual (trace-equivalent)
 to the [projection_induced_vlsm] by the [composite_project_label] and the
@@ -269,15 +269,15 @@ Proof.
   split.
   - apply basic_VLSM_strong_incl.
     + intros s Hs; cbn in *; red.
-      exists (lift_to_composite_state IM j s).
+      exists (lift_to_composite_initial_state IM j s).
       split; [apply state_update_eq|].
-      by apply (lift_to_composite_state_initial IM).
+      by apply (lift_to_composite_initial_state_preservation IM).
     + by intros m [[im Him] <-].
     + intros l s iom [sX [<- Hv]].
       exists (existT j l), sX.
       by split; [apply composite_project_label_eq|split].
     + intros l s iom s' oom.
-      cbn; unfold lift_to_composite_state at 1; rewrite state_update_eq.
+      cbn; unfold lift_to_composite_initial_state at 1; rewrite state_update_eq.
       intros Ht; setoid_rewrite Ht.
       by rewrite state_update_eq.
   - cbn; apply basic_VLSM_strong_incl.
@@ -289,7 +289,7 @@ Proof.
       case_decide; [| congruence].
       by subst i; apply Some_inj in HlX; cbn in HlX; subst li.
     + intros l s iom s' oom; cbn.
-      unfold lift_to_composite_state at 1;
+      unfold lift_to_composite_initial_state at 1;
       rewrite state_update_eq;
       destruct (vtransition _ _ _) as (si', om').
       by rewrite state_update_eq.
@@ -305,7 +305,7 @@ Qed.
 
 Lemma component_state_projection_lift
   : induced_projection_state_lift_prop X (type (IM j)) (fun s => s j)
-    (lift_to_composite_state IM j).
+    (lift_to_composite_initial_state IM j).
 Proof.
   intros sj.
   apply state_update_eq.
@@ -356,7 +356,7 @@ Lemma induced_component_projection
   : VLSM_projection X
     (projection_induced_vlsm X (type (IM j))
       composite_project_label (fun s => s j)
-      (lift_to_composite_label IM j) (lift_to_composite_state IM j))
+      (lift_to_composite_label IM j) (lift_to_composite_initial_state IM j))
     composite_project_label (fun s => s j).
 Proof.
   apply projection_induced_vlsm_is_projection.
@@ -877,10 +877,10 @@ Lemma projection_friendliness_sufficient_condition_valid_state
   (Hfr : projection_friendliness_sufficient_condition)
   (s : state)
   (Hp : valid_state_prop Xj s)
-  : valid_state_prop X (lift_to_composite_state IM j s).
+  : valid_state_prop X (lift_to_composite_initial_state IM j s).
 Proof.
   induction Hp using valid_state_prop_ind.
-  - by apply initial_state_is_valid, (lift_to_composite_state_initial IM j).
+  - by apply initial_state_is_valid, (lift_to_composite_initial_state_preservation IM j).
   - destruct Ht as [Hvj Ht].
     specialize (Hfr _ _ _ Hvj _ IHHp).
     spec Hfr; [apply state_update_eq|].
@@ -892,7 +892,7 @@ Proof.
     specialize (valid_generated_state_message X _ _ HsX _ _ Hom _ Hfr) as Hgen.
     apply Hgen.
     simpl.
-    unfold lift_to_composite_state at 1.
+    unfold lift_to_composite_initial_state at 1.
     rewrite state_update_eq.
     replace (vtransition (IM j) _ _) with (s', om').
     f_equal.
@@ -907,18 +907,18 @@ projection to be lifted direclty to <<X>>
 *)
 Lemma projection_friendliness_lift_to_composite_vlsm_full_projection
   (Hfr : projection_friendliness_sufficient_condition)
-  : VLSM_full_projection Xj X (lift_to_composite_label IM j) (lift_to_composite_state IM j).
+  : VLSM_full_projection Xj X (lift_to_composite_label IM j) (lift_to_composite_initial_state IM j).
 Proof.
   apply basic_VLSM_full_projection; intro; intros.
   - apply (Hfr _ _ _ Hv); [|apply state_update_eq].
     apply (projection_friendliness_sufficient_condition_valid_state Hfr).
     apply Hv.
   - unfold lift_to_composite_label, vtransition. simpl.
-    unfold lift_to_composite_state at 1. rewrite state_update_eq.
+    unfold lift_to_composite_initial_state at 1. rewrite state_update_eq.
     replace (vtransition (IM j) _ _) with (s', om')
       by (symmetry; apply H).
-    f_equal. unfold lift_to_composite_state. apply state_update_twice.
-  - by apply (lift_to_composite_state_initial IM j).
+    f_equal. unfold lift_to_composite_initial_state. apply state_update_twice.
+  - by apply (lift_to_composite_initial_state_preservation IM j).
   - by destruct Hv as [Hs [Homj [sX [Heqs [HsX [Hom Hv]]]]]].
 Qed.
 
