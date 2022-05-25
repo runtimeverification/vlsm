@@ -215,7 +215,7 @@ Definition annotated_composite_label_lift : vlabel (IM i) -> vlabel AnnotatedFre
 Definition annotated_composite_state_lift : vstate (IM i) -> vstate AnnotatedFree
   := fun si =>
      @Build_annotated_state _ (free_composite_vlsm IM) _
-      (lift_to_composite_initial_state IM i si) (` inhabitant).
+      (lift_to_composite_state' IM i si) (` inhabitant).
 
 Definition annotated_projection_validator_prop_alt : Prop :=
   @projection_validator_prop_alt _ AnnotatedFree (IM i)
@@ -293,7 +293,7 @@ Lemma annotated_composite_induced_projection_initial_lift
     annotated_composite_state_lift.
 Proof.
   split; cbn.
-  - by apply lift_to_composite_initial_state_preservation.
+  - by apply composite_initial_state_prop_lift.
   - by destruct inhabitant.
 Qed.
 

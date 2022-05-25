@@ -312,7 +312,7 @@ Proof.
     + apply component_transition_projection_None.
     + apply component_label_projection_lift.
     + apply component_state_projection_lift.
-    + intros isi; apply (lift_to_composite_initial_state_preservation IM).
+    + intros isi; apply (composite_initial_state_prop_lift IM).
     + apply component_transition_projection_Some.
     + done.
 Qed.
@@ -331,14 +331,14 @@ Proof.
   apply VLSM_eq_trans with
     (machine (projection_induced_vlsm X (type (IM i))
       (composite_project_label IM i) (fun s => s i)
-      (lift_to_composite_label IM i) (lift_to_composite_initial_state IM i)))
+      (lift_to_composite_label IM i) (lift_to_composite_state' IM i)))
   ; simpl; [|apply VLSM_eq_sym, composite_vlsm_constrained_projection_is_induced].
   apply pre_loaded_with_all_messages_validator_proj_eq.
   - apply component_projection_to_preloaded.
   - apply component_transition_projection_None.
   - apply component_label_projection_lift.
   - apply component_state_projection_lift.
-  - intro s. apply (lift_to_composite_initial_state_preservation IM).
+  - intro s. apply (composite_initial_state_prop_lift IM).
   - apply component_transition_projection_Some.
   - intros li si omi Hiv.
     apply Hvalidator in Hiv as (sX & <- & HivX).

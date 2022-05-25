@@ -2424,7 +2424,7 @@ End Composite.
     : has_been_observed (IM i) (s i) m -> composite_has_been_observed IM s m.
   Proof. by exists i. Qed.
 
-  Lemma lift_to_composite_initial_state_observed
+  Lemma composite_has_been_observed_lift
     {message}
     `{finite.Finite index}
     (IM : index -> VLSM message)
@@ -2434,11 +2434,11 @@ End Composite.
     (s : vstate (IM i))
     (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) s)
     (m : message)
-    : composite_has_been_observed IM (lift_to_composite_initial_state IM i s) m <-> has_been_observed (IM i) s m.
+    : composite_has_been_observed IM (lift_to_composite_state' IM i s) m <-> has_been_observed (IM i) s m.
   Proof.
     pose (free_composite_vlsm IM) as Free.
     assert
-      (Hlift_s : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) (lift_to_composite_initial_state IM i s)).
+      (Hlift_s : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) (lift_to_composite_state' IM i s)).
     { revert Hs.  apply valid_state_preloaded_composite_free_lift. }
     split; intros Hobs.
     - apply (proper_observed (IM i)); [done |].
@@ -2465,7 +2465,7 @@ End Composite.
       apply Exists_exists.
       apply Exists_exists in Hobs.
       destruct Hobs as [item [Hitem Hx]].
-      exists (lift_transition_item_to_composite_initial_state IM i item).
+      exists (lift_to_composite_transition_item' IM i item).
       split; [| by destruct item].
       apply elem_of_list_In.
       apply in_map_iff. exists item.
