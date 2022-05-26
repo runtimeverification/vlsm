@@ -33,11 +33,10 @@ Lemma equivocator_state_append_valid l s om base_s
   : equivocator_valid X l (s, om) ->
     equivocator_valid X (equivocator_state_append_label base_s l) (equivocator_state_append base_s s, om).
 Proof.
-  destruct l; cbn; [exact id|..]
-  ; (destruct (equivocator_state_project s n) as [sn|] eqn:Hn; [|contradiction])
+  by destruct l; cbn; [done |..]
+  ; (destruct (equivocator_state_project s n) as [sn|] eqn:Hn; [| done])
   ; rewrite (equivocator_state_append_project_2 _ base_s s _ n eq_refl)
-  ; rewrite Hn
-  ; exact id.
+  ; rewrite Hn.
 Qed.
 
 Lemma equivocator_state_append_transition l s om s' om' base_s
@@ -48,7 +47,7 @@ Lemma equivocator_state_append_transition l s om s' om' base_s
 Proof.
   destruct l; cbn; intros Hv Ht
   ; [inversion_clear Ht; f_equal; apply equivocator_state_append_extend_commute|..]
-  ; (destruct (equivocator_state_project s n) as [sn|] eqn:Hn; [|contradiction])
+  ; (destruct (equivocator_state_project s n) as [sn|] eqn:Hn; [| done])
   ;  rewrite (equivocator_state_append_project_2 _ base_s s _ n eq_refl)
   ;  rewrite Hn
   ;  destruct (vtransition _ _ _) as (sn', _om') eqn:Hti
@@ -73,7 +72,7 @@ Proof.
       None)].
   apply (finite_valid_trace_from_to_singleton (pre_loaded_vlsm (equivocator_vlsm X) seed)).
   repeat split.
-  - assumption.
+  - done.
   - apply option_valid_message_None.
   - apply H.
   - cbn. f_equal. symmetry. apply equivocator_state_append_singleton_is_extend. apply H.
@@ -89,7 +88,7 @@ Lemma equivocator_state_append_transition_initial_state
         (equivocator_state_append base_s s).
 Proof.
   intros Hs. apply in_futures_valid_snd with base_s.
-  apply equivocator_state_append_initial_state_in_futures; assumption.
+  by apply equivocator_state_append_initial_state_in_futures.
 Qed.
 
 Lemma equivocator_state_append_preloaded_with_weak_projection
@@ -102,8 +101,8 @@ Proof.
   apply basic_VLSM_weak_full_projection; intro; intros.
   - apply equivocator_state_append_valid. apply Hv.
   - apply equivocator_state_append_transition; apply H.
-  - apply equivocator_state_append_transition_initial_state; assumption.
-  - apply initial_message_is_valid; assumption.
+  - by apply equivocator_state_append_transition_initial_state.
+  - by apply initial_message_is_valid.
 Qed.
 
 Lemma equivocator_state_append_preloaded_weak_projection
@@ -119,7 +118,7 @@ Proof.
   apply (VLSM_eq_finite_valid_trace_from Heq).
   revert sX trX HtrX.
   apply equivocator_state_append_preloaded_with_weak_projection.
-  apply (VLSM_eq_valid_state Heq). assumption.
+  by apply (VLSM_eq_valid_state Heq).
 Qed.
 
 Lemma equivocator_state_append_weak_projection
@@ -135,7 +134,7 @@ Proof.
   apply (VLSM_eq_finite_valid_trace_from Heq).
   revert sX trX HtrX.
   apply equivocator_state_append_preloaded_with_weak_projection.
-  apply (VLSM_eq_valid_state Heq). assumption.
+  by apply (VLSM_eq_valid_state Heq).
 Qed.
 
 Lemma equivocator_state_append_in_futures
@@ -148,8 +147,8 @@ Proof.
   specialize (equivocator_state_append_preloaded_with_weak_projection seed _ Hbase_s) as Hproj.
   apply (VLSM_weak_full_projection_finite_valid_trace_from_to Hproj) in Htr.
   apply in_futures_trans with (equivocator_state_append base_s is).
-  - apply equivocator_state_append_initial_state_in_futures; assumption.
-  - eexists; exact Htr.
+  - by apply equivocator_state_append_initial_state_in_futures.
+  - by eexists.
 Qed.
 
 Lemma equivocator_state_append_sent_left
@@ -165,7 +164,7 @@ Proof.
   apply (equivocator_state_append_in_futures _ _ Hbase_s) in Hs.
   apply (VLSM_eq_in_futures Heq) in Hs.
   apply (in_futures_preserving_oracle_from_stepwise _ (equivocator_vlsm X) (field_selector output) (equivocator_has_been_sent X))
-  ; [|assumption].
+  ; [| done].
   apply equivocator_has_been_sent_stepwise_props.
 Qed.
 
@@ -178,8 +177,7 @@ Lemma equivocator_state_append_sent_right
 Proof.
   specialize (equivocator_state_append_preloaded_weak_projection _ Hbase_s) as Hproj.
   intros m Hm.
-  specialize (VLSM_weak_full_projection_has_been_sent Hproj _ Hs _ Hm) as HmY.
-  assumption.
+  by specialize (VLSM_weak_full_projection_has_been_sent Hproj _ Hs _ Hm) as HmY.
 Qed.
 
 End equivocator_state_append_projection.

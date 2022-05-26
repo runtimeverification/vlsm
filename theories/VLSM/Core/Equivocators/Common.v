@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Eqdep Vectors.Fin Program.Equality Lia FunctionalExtensionality.
 From VLSM Require Import Lib.Preamble Core.VLSM Core.VLSMProjections.
@@ -22,7 +23,7 @@ Section sec_equivocator_vlsm.
 
 (** The state of such a machine will be abstracted using
 
-1. A [nat]ural <<n>>, stating the number of copies of the original machine
+1. A natural <<n>>, stating the number of copies of the original machine
 2. A state of <<X>> for each 1..n+1
 *)
 Local Definition bounded_state_copies := {n : nat & Fin.t (S n) -> vstate X}.
@@ -57,7 +58,7 @@ Definition equivocator_state_last (es : equivocator_state) := projT1 es.
 Definition equivocator_state_s (es : equivocator_state) := projT2 es.
 
 Lemma equivocator_state_last_n es : equivocator_state_n es = S (equivocator_state_last es).
-Proof. reflexivity. Qed.
+Proof. done. Qed.
 
 Definition mk_singleton_state
   (s : vstate X)
@@ -72,16 +73,15 @@ Local Lemma equivocator_state_projection_irrel (s : equivocator_state)
   : equivocator_state_s s (nat_to_fin li) = equivocator_state_s s (nat_to_fin lj).
 Proof.
   subst i.
-  replace (nat_to_fin li) with (nat_to_fin lj) by apply of_nat_ext.
-  reflexivity.
+  by replace (nat_to_fin li) with (nat_to_fin lj) by apply of_nat_ext.
 Qed.
 
 Local Lemma equivocator_state_eq s (i1 i2 : fin (equivocator_state_n s))
   : fin_to_nat i1 = fin_to_nat i2 -> equivocator_state_s s i1 = equivocator_state_s s i2.
 Proof.
   intro Heq.
-  replace i2 with i1; [reflexivity|].
-  apply (inj fin_to_nat). assumption.
+  replace i2 with i1; [done |].
+  by apply (inj fin_to_nat).
 Qed.
 
 Definition is_singleton_state
@@ -130,24 +130,20 @@ Proof.
   unfold equivocator_state_project.
   case_decide; [|lia].
   f_equal. apply equivocator_state_eq.
-  rewrite !fin_to_nat_to_fin.
-  reflexivity.
+  by rewrite !fin_to_nat_to_fin.
 Qed.
 
 Local Lemma equivocator_state_project_None s i (Hi : ~i < equivocator_state_n s)
   : equivocator_state_project s i = None.
 Proof.
   unfold equivocator_state_project.
-  case_decide; [lia|].
-  reflexivity.
+  by case_decide; [lia |].
 Qed.
 
 Lemma equivocator_state_project_Some_rev s i si
   : equivocator_state_project s i = Some si -> i < equivocator_state_n s.
 Proof.
-  unfold equivocator_state_project.
-  case_decide; [|congruence].
-  intro. assumption.
+  by unfold equivocator_state_project; case_decide.
 Qed.
 
 Lemma equivocator_state_project_None_rev s i
@@ -197,8 +193,7 @@ Proof.
   rewrite <- !(@nat_to_fin_to_nat _ x Hx).
   destruct es1, es2; simpl in *. subst. simpl.
   rewrite (equivocator_state_project_Some (existT x1 v) x Hx) in Hext.
-  inversion Hext.
-  assumption.
+  by inversion Hext.
 Qed.
 
 (** The original state index is present in any equivocator state*)
@@ -212,8 +207,7 @@ Lemma equivocator_state_project_zero (es : equivocator_state)
   : equivocator_state_project es 0 = Some (equivocator_state_zero es).
 Proof.
   unfold equivocator_state_project, equivocator_state_n.
-  case_decide; [|lia].
-  reflexivity.
+  by case_decide; [| lia].
 Qed.
 
 Definition equivocator_state_update
@@ -230,11 +224,11 @@ Definition equivocator_state_update
 
 Lemma equivocator_state_update_size bs i si
   : equivocator_state_n (equivocator_state_update bs i si) = equivocator_state_n bs.
-Proof.  reflexivity.  Qed.
+Proof. done. Qed.
 
 Lemma equivocator_state_update_lst bs i si
   : equivocator_state_last (equivocator_state_update bs i si) = equivocator_state_last bs.
-Proof. reflexivity. Qed.
+Proof. done. Qed.
 
 Lemma equivocator_state_update_project_eq bs i si j
   (Hj : j < equivocator_state_n bs)
@@ -245,11 +239,9 @@ Proof.
   destruct_equivocator_state_project' (equivocator_state_update bs i si) j sj Hi' Hpr ; [|lia].
   rewrite <- Hpr.
   rewrite (equivocator_state_project_Some _ _ Hi').
-  f_equal.
-  subst.
-  clear.
-  simpl. rewrite decide_True; [reflexivity|].
-  rewrite fin_to_nat_to_fin. reflexivity.
+  f_equal; subst; clear; simpl.
+  rewrite decide_True; [done |].
+  by rewrite fin_to_nat_to_fin.
 Qed.
 
 Lemma equivocator_state_update_project_neq bs i si j
@@ -265,12 +257,11 @@ Proof.
     f_equal.
     inversion Hpr.
     rewrite decide_False.
-    + apply equivocator_state_eq. rewrite !fin_to_nat_to_fin. reflexivity.
+    + apply equivocator_state_eq. by rewrite !fin_to_nat_to_fin.
     + intro Hcontra.
       rewrite !fin_to_nat_to_fin in Hcontra. congruence.
   - rewrite Heq in Hj.
-    rewrite (equivocator_state_project_None _ _ Hj).
-    reflexivity.
+    by rewrite (equivocator_state_project_None _ _ Hj).
 Qed.
 
 Local Ltac destruct_equivocator_state_update_project' es i s j Hj Hij Hpr :=
@@ -309,11 +300,11 @@ Qed.
 
 Lemma equivocator_state_extend_size bs s
   : equivocator_state_n (equivocator_state_extend bs s) = S (equivocator_state_n bs).
-Proof. reflexivity. Qed.
+Proof. done. Qed.
 
 Lemma equivocator_state_extend_lst bs s
   : equivocator_state_last (equivocator_state_extend bs s) = equivocator_state_n bs.
-Proof. reflexivity. Qed.
+Proof. done. Qed.
 
 Lemma equivocator_state_extend_project_1 es s i (Hi : i < equivocator_state_n es)
   : equivocator_state_project (equivocator_state_extend es s) i = equivocator_state_project es i.
@@ -329,7 +320,7 @@ Proof.
   destruct (decide _).
   - rewrite fin_to_nat_to_fin in e. lia.
   - apply equivocator_state_eq.
-    rewrite !fin_to_nat_to_fin. reflexivity.
+    by rewrite !fin_to_nat_to_fin.
 Qed.
 
 Lemma equivocator_state_extend_project_2 es s i (Hi : i = equivocator_state_n es)
@@ -341,7 +332,7 @@ Proof.
   rewrite (equivocator_state_project_Some _ _ Hi').
   f_equal.
   cbn.
-  destruct (decide _); [reflexivity|].
+  destruct (decide _); [done |].
   elim n.
   rewrite fin_to_nat_to_fin.
   specialize (equivocator_state_last_n es) as Hes_size.
@@ -353,8 +344,7 @@ Lemma equivocator_state_extend_project_3 es s i (Hi : equivocator_state_n es < i
 Proof.
   remember (equivocator_state_extend _ _) as ex.
   specialize (equivocator_state_extend_size es s) as Hsize.
-  destruct_equivocator_state_project ex i si Hi''; subst; [lia|].
-  reflexivity.
+  by destruct_equivocator_state_project ex i si Hi''; subst; [lia |].
 Qed.
 
 Local Ltac destruct_equivocator_state_extend_project' es s i Hi Hpr :=
@@ -421,8 +411,7 @@ Proof.
   rewrite to_nat_of_nat.
   unfold equivocator_state_n. simpl.
   case_decide; [|lia].
-  apply Hpi.
-  reflexivity.
+  by apply Hpi.
 Qed.
 
 Lemma equivocator_state_append_project_2 s s' i k (Hi : i = k + equivocator_state_n s)
@@ -433,7 +422,7 @@ Proof.
   remember (equivocator_state_append s s') as append.
   destruct_equivocator_state_project' s' k s'k Hk Hprs'
   ; destruct_equivocator_state_project' append i appendi Hi' Hprapp
-  ; [|lia|lia|reflexivity].
+  ; [| lia | lia | done].
   f_equal.
   rewrite (equivocator_state_project_Some _ _ Hi') in Hprapp.
   inversion_clear Hprapp.
@@ -487,10 +476,8 @@ Proof.
   - apply equivocator_state_extend_project_3. lia.
   - rewrite equivocator_state_extend_project_2 by lia.
     rewrite <- equivocator_state_project_zero.
-    replace k with 0 by lia.
-    reflexivity.
-  - rewrite equivocator_state_extend_project_1 by lia.
-    reflexivity.
+    by f_equal; lia.
+  - by rewrite equivocator_state_extend_project_1 by lia.
 Qed.
 
 Lemma equivocator_state_append_extend_commute
@@ -511,12 +498,12 @@ Proof.
     destruct (decide (k = equivocator_state_n es2)).
     + subst.
       rewrite !equivocator_state_extend_project_2
-      ; [reflexivity|reflexivity|].
+      ; [done | done |].
       rewrite equivocator_state_append_size.
       lia.
     + rewrite !equivocator_state_extend_project_1
       ; [rewrite equivocator_state_append_project_2 with (k := k)|lia|]
-      ; [reflexivity|reflexivity|].
+      ; [done | done |].
       rewrite equivocator_state_append_size.
       lia.
   - rewrite equivocator_state_extend_project_1.
@@ -538,16 +525,13 @@ Proof.
   - destruct (decide (n = k)).
     + subst. rewrite equivocator_state_update_size in Hi.
       rewrite equivocator_state_update_project_eq;
-      [|rewrite equivocator_state_append_size; lia
-      | reflexivity
-      ].
+      [| rewrite equivocator_state_append_size; lia | done].
       symmetry.
       apply equivocator_state_update_project_eq; lia.
     + rewrite !equivocator_state_update_project_neq by lia.
       by apply equivocator_state_append_project_2 with (k := k).
-  - rewrite equivocator_state_update_project_neq by lia.
-    rewrite equivocator_state_append_project_1 by lia.
-    reflexivity.
+  - by rewrite equivocator_state_update_project_neq,
+       equivocator_state_append_project_1 by lia.
 Qed.
 
 (* An [equivocator_state] has the [initial_state_prop]erty if it only
@@ -566,8 +550,7 @@ Proof.
   exists (mk_singleton_state (proj1_sig (vs0 X))).
   unfold mk_singleton_state.
   unfold equivocator_initial_state_prop.
-  split; [reflexivity|].
-  simpl. destruct (vs0 X). assumption.
+  by split; [|destruct (vs0 X)].
 Defined.
 
 Instance equivocator_initial_state_inh : Inhabited equivocator_initial_state :=
@@ -628,15 +611,11 @@ Definition equivocator_vlsm
 
 Lemma equivocator_vlsm_initial_message_preservation
   : strong_full_projection_initial_message_preservation X equivocator_vlsm.
-Proof.
-  intro; intros. assumption.
-Qed.
+Proof. by intro. Qed.
 
 Lemma equivocator_vlsm_initial_message_preservation_rev
   : strong_full_projection_initial_message_preservation equivocator_vlsm X.
-Proof.
-  intro; intros. assumption.
-Qed.
+Proof. by intro. Qed.
 
 Lemma equivocator_vlsm_initial_state_preservation_rev is i s
   (Hs : equivocator_state_project is i = Some s)
@@ -644,19 +623,15 @@ Lemma equivocator_vlsm_initial_state_preservation_rev is i s
 Proof.
   intros [Hzero Hinit].
   apply equivocator_state_project_Some_rev in Hs as Hlt_i.
-  assert (i = 0) by (cbv in *; lia). subst i.
-  rewrite equivocator_state_project_zero in Hs. inversion Hs.
-  assumption.
+  replace i with 0 in * by (cbv in *; lia).
+  by rewrite equivocator_state_project_zero in Hs; inversion Hs.
 Qed.
 
 Lemma mk_singleton_initial_state
   (s : vstate X)
   : vinitial_state_prop X s ->
     vinitial_state_prop equivocator_vlsm (mk_singleton_state s).
-  Proof.
-    intro Hs.
-    split;[reflexivity|assumption].
-  Qed.
+Proof. done. Qed.
 
 End sec_equivocator_vlsm.
 
@@ -759,8 +734,8 @@ Lemma newmachine_descriptor_dec (d : MachineDescriptor)
   : Decision (is_newmachine_descriptor d).
 Proof.
   destruct d.
-  - left. exact I.
-  - right. simpl. intuition.
+  - by left.
+  - by right; itauto.
 Qed.
 
 (** Projecting an [equivocator_state] over a [MachineDescriptor].  *)
@@ -808,9 +783,9 @@ Definition existing_descriptor
 Local Instance  existing_descriptor_dec : RelDecision existing_descriptor.
 Proof.
   intros d s. destruct d; simpl.
-  - right. intuition.
+  - right. itauto.
   - destruct_equivocator_state_project s n _sn Hn.
-    + left. eexists; reflexivity.
+    + by left.
     + right. intros [si Hi]. congruence.
 Qed.
 
@@ -823,10 +798,7 @@ Definition existing_equivocator_label_extract
   (Hs : existing_equivocator_label l)
   : vlabel X.
 Proof.
-  destruct l.
-  - contradiction.
-  - exact v.
-  - exact v.
+  by destruct l.
 Defined.
 
 Definition proper_existing_equivocator_label
@@ -840,7 +812,7 @@ Lemma existing_equivocator_label_forget_proper
   (Hs : proper_existing_equivocator_label l s)
   : existing_equivocator_label l.
 Proof.
-  destruct l; [|exact I..].
+  destruct l; [| done..].
   inversion Hs.
 Qed.
 
@@ -849,10 +821,7 @@ Lemma existing_descriptor_proper
   (s : vstate equivocator_vlsm)
   (Hned : existing_descriptor d s)
   : proper_descriptor d s.
-Proof.
-  destruct d; [contradict Hned|].
-  assumption.
-Qed.
+Proof. by destruct d. Qed.
 
 (* TODO: derive some some simpler lemmas about the equivocator operations,
 or a simpler way of defining the equivocator_transition
@@ -875,7 +844,7 @@ Proof.
   unfold is_singleton_state in Hs'.
   destruct l as [sn | ei l | ei l]
   ; [ inversion Ht; subst; rewrite equivocator_state_extend_size in Hs'; cbv in Hs'; lia|..]
-  ; cbn in Hv, Ht;  destruct_equivocator_state_project s ei sei Hei; [|contradiction| |contradiction]
+  ; cbn in Hv, Ht;  destruct_equivocator_state_project s ei sei Hei; [| done | | done]
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion Ht; subst.
   - rewrite equivocator_state_update_size in Hs'. exists l. f_equal. lia.
@@ -896,11 +865,11 @@ Proof.
   destruct l as [sn| ei l| ei l]; cbn in Ht
   ; [inversion Ht; rewrite equivocator_state_extend_size; cbv; lia| ..]
   ; destruct (equivocator_state_project _ _)
-  ; [| inversion Ht; exact id| | inversion Ht; exact id]
+  ; [| by inversion Ht | | by inversion Ht]
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion Ht; subst; clear Ht.
-  - rewrite equivocator_state_update_size. exact id.
-  - rewrite equivocator_state_extend_size. cbv; lia.
+  - by rewrite equivocator_state_update_size.
+  - by rewrite equivocator_state_extend_size; cbv; lia.
 Qed.
 
 Lemma equivocator_transition_cannot_decrease_state_size
@@ -948,8 +917,7 @@ Proof.
   destruct (vtransition _ _ _).
   inversion Ht. subst.
   unfold is_equivocating_state, is_singleton_state.
-  rewrite equivocator_state_update_size.
-  exact id.
+  by rewrite equivocator_state_update_size.
 Qed.
 
 (**
@@ -968,14 +936,14 @@ Lemma preloaded_equivocator_state_projection_preserves_validity
       valid_state_prop (pre_loaded_vlsm X seed) si.
 Proof.
   induction Hbs.
-  - split; [apply option_initial_message_is_valid;assumption|].
+  - split; [by apply option_initial_message_is_valid |].
     intros.
     destruct Hs as [Hn0 Hinit].
     apply equivocator_state_project_Some_rev in H as Hi.
     unfold is_singleton_state in Hn0.
-    assert (i = 0) by lia. subst.
-    rewrite equivocator_state_project_zero in H.
-    inversion H. apply initial_state_is_valid. assumption.
+    replace i with 0 in * by lia.
+    rewrite equivocator_state_project_zero in H; inversion H.
+    by apply initial_state_is_valid.
   - specialize (valid_generated_state_message (pre_loaded_vlsm X seed)) as Hgen.
     apply proj2 in IHHbs1. apply proj1 in IHHbs2.
 
@@ -986,12 +954,12 @@ Proof.
     ; [ inversion_clear Ht; split; [apply option_valid_message_None|]
       ; intros
       ; destruct_equivocator_state_extend_project s sn i Hi
-      ; [ apply IHHbs1 in H; assumption
+      ; [ by apply IHHbs1 in H
       | inversion H; subst; apply initial_state_is_valid; apply Hv
-      | discriminate]
+      | done]
       |..]
     ; cbn in Hv, Ht
-    ; destruct_equivocator_state_project' s i si Hi Hpr; [|contradiction| |contradiction]
+    ; destruct_equivocator_state_project' s i si Hi Hpr; [| done | | done]
     ; destruct (vtransition _ _ _) as (si', _om') eqn:Hti
     ; inversion Ht; subst s' _om'; clear Ht
 
@@ -1000,15 +968,15 @@ Proof.
     ; apply IHHbs1 in Hpr as [_omi Hsi]
       ; destruct IHHbs2 as [_som Hom]
       ; specialize (Hgen _ _ Hsi _ _ Hom _ Hv _ _ Hti)
-      ; split; [eexists; exact Hgen| | eexists; exact Hgen|]; intros.
+      ; split; [by eexists | | by eexists |]; intros.
     + destruct_equivocator_state_update_project s i si' i0 Hi0 Hij.
-      * discriminate.
-      * inversion H. subst. eexists; exact Hgen.
-      * apply IHHbs1 in H. assumption.
+      * done.
+      * by inversion H; subst; eexists.
+      * by apply IHHbs1 in H.
     + destruct_equivocator_state_extend_project s si' i0 Hi0.
-      * apply IHHbs1 in H. assumption.
-      * inversion H. subst. eexists; exact Hgen.
-      * discriminate.
+      * by apply IHHbs1 in H.
+      * by inversion H; subst; eexists.
+      * done.
 Qed.
 
 Lemma preloaded_with_equivocator_state_project_valid_state
@@ -1020,8 +988,7 @@ Lemma preloaded_with_equivocator_state_project_valid_state
     valid_state_prop (pre_loaded_vlsm X seed) si.
 Proof.
   destruct Hbs as [om  Hbs].
-  apply preloaded_equivocator_state_projection_preserves_validity, proj2 in Hbs.
-  assumption.
+  by apply preloaded_equivocator_state_projection_preserves_validity, proj2 in Hbs.
 Qed.
 
 Lemma preloaded_with_equivocator_state_project_valid_message
@@ -1032,8 +999,7 @@ Lemma preloaded_with_equivocator_state_project_valid_message
   option_valid_message_prop (pre_loaded_vlsm X seed) om.
 Proof.
   destruct Hom as [s Hm].
-  apply preloaded_equivocator_state_projection_preserves_validity, proj1 in Hm.
-  assumption.
+  by apply preloaded_equivocator_state_projection_preserves_validity, proj1 in Hm.
 Qed.
 
 Lemma equivocator_state_project_valid_state
@@ -1046,8 +1012,7 @@ Proof.
   apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False equivocator_vlsm)) in Hbs.
   specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
   apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False X)) in Hsi.
-  destruct X as (T, M).
-  assumption.
+  by destruct X.
 Qed.
 
 Lemma equivocator_state_project_valid_message
@@ -1059,12 +1024,11 @@ Proof.
   destruct om as [m|]; [|apply option_valid_message_None].
   specialize (vlsm_is_pre_loaded_with_False_initial_message equivocator_vlsm) as Hinit.
   apply (VLSM_incl_valid_message (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hom
-  ; [| assumption].
+  ; [| done].
   apply preloaded_with_equivocator_state_project_valid_message in Hom.
   specialize (vlsm_is_pre_loaded_with_False_initial_message_rev X) as Hinit_rev.
-  apply (VLSM_incl_valid_message (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
-  ; destruct X as (T, M)
-  ; assumption.
+  by apply (VLSM_incl_valid_message (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
+  ; destruct X.
 Qed.
 
 (**
@@ -1082,8 +1046,7 @@ Proof.
   apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm)) in Hbs.
   specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
   apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X)) in Hsi.
-  destruct X as (T, M).
-  assumption.
+  by destruct X.
 Qed.
 
 (**
@@ -1143,7 +1106,7 @@ Lemma new_machine_label_equivocator_state_project_last
 Proof.
     inversion_clear Ht. simpl.
     destruct_equivocator_state_extend_project s sn (equivocator_state_n s) Hi
-    ; [lia|reflexivity|lia].
+    ; [lia | done | lia].
 Qed.
 
 Lemma new_machine_label_equivocator_state_project_not_last
@@ -1155,7 +1118,7 @@ Lemma new_machine_label_equivocator_state_project_not_last
     equivocator_state_descriptor_project s (Existing ni).
 Proof.
   subst. inversion_clear Ht. simpl.
-  destruct_equivocator_state_extend_project s sn ni Hi; [reflexivity|lia..].
+  destruct_equivocator_state_extend_project s sn ni Hi; [done | lia..].
 Qed.
 
 Lemma existing_true_label_equivocator_state_project_not_last
@@ -1173,7 +1136,7 @@ Proof.
   destruct (vtransition _ _ _) as (si', _om') eqn:Hti.
   inversion Ht; subst s' _om'. clear Ht.
   simpl.
-  destruct_equivocator_state_extend_project s si' ni Hni'; [reflexivity|lia..].
+  destruct_equivocator_state_extend_project s si' ni Hni'; [done | lia..].
 Qed.
 
 Lemma existing_true_label_equivocator_state_project_last
@@ -1190,9 +1153,7 @@ Proof.
   rewrite Hsi in Ht.
   simpl in Hti. rewrite Hti in Ht.
   inversion Ht. subst. clear Ht.
-  split; [reflexivity|].
-  simpl.
-  rewrite equivocator_state_extend_project_2; reflexivity.
+  by cbn; rewrite equivocator_state_extend_project_2.
 Qed.
 
 Lemma existing_false_label_equivocator_state_project_not_same
@@ -1211,8 +1172,7 @@ Proof.
   inversion Ht; subst s' _om'. clear Ht.
   simpl.
   destruct_equivocator_state_update_project s ieqvi si' ni Hni' Hini; [lia..|].
-  destruct_equivocator_state_project s ni sni Hni''; [|lia].
-  reflexivity.
+  by destruct_equivocator_state_project s ni sni Hni''; [|lia].
 Qed.
 
 Lemma existing_false_label_equivocator_state_project_same
@@ -1228,10 +1188,10 @@ Proof.
   cbn in Ht. rewrite Hsi in Ht.
   simpl in Hti. rewrite Hti in Ht.
   inversion Ht; subst s' _oout. clear Ht.
-  split; [reflexivity|].
+  split; [done |].
   simpl.
-  rewrite equivocator_state_update_project_eq; [reflexivity| |reflexivity].
-  apply equivocator_state_project_Some_rev in Hsi. assumption.
+  rewrite equivocator_state_update_project_eq; [done | | done].
+  by apply equivocator_state_project_Some_rev in Hsi.
 Qed.
 
 End equivocator_vlsm_valid_state_projections.

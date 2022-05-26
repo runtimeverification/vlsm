@@ -17,9 +17,9 @@ Lemma sum_weights_positive
   : (0 <= sum_weights l)%R.
 Proof.
   induction l; try apply Rle_refl.
-  simpl. apply  Rplus_le_le_0_compat; try assumption.
-  destruct (weight a). simpl.
-  apply Rlt_le. assumption.
+  simpl. apply Rplus_le_le_0_compat; [| done].
+  destruct (weight a); cbn.
+  by apply Rlt_le.
 Qed.
 
 Definition weight_proj1_sig (w : pos_R) : R := proj1_sig w.
@@ -38,9 +38,9 @@ Proof.
     destruct (decide (a = a)); congruence.
   - inversion H; subst; clear H. simpl.
     pose proof (in_not_in _ _ _ _ H3 H2).
-    destruct (decide (v = a)); [contradiction|]. simpl.
+    destruct (decide (v = a)); [done |]. simpl.
     rewrite <- Rplus_assoc. rewrite (Rplus_comm (proj1_sig (weight v)) (proj1_sig (weight a))). rewrite Rplus_assoc.
-    apply Rplus_eq_compat_l. apply IHvs; assumption.
+    by apply Rplus_eq_compat_l, IHvs.
 Qed.
 
 Lemma sum_weights_subseteq
@@ -53,16 +53,16 @@ Lemma sum_weights_subseteq
 Proof.
   induction vs; intros; try apply sum_weights_positive.
   specialize (sum_weights_in a vs' H0) as Hvs'.
-  spec Hvs'; try (apply H1; left; reflexivity).
+  spec Hvs'; [by apply H1; left |].
   rewrite Hvs'. simpl.
   apply Rplus_le_compat_l.
   inversion H. subst.  clear H.
-  apply IHvs; try assumption.
-  - apply set_remove_nodup. assumption.
-  - intros v Hv. apply set_remove_iff; try assumption.
+  apply IHvs; [done | |].
+  - by apply set_remove_nodup.
+  - intros v Hv. apply set_remove_iff; [done |].
     split.
-    + apply H1. right. assumption.
-    + intro contra. elim H4. subst. assumption.
+    + by apply H1; right.
+    + by intros ->.
 Qed.
 
 Lemma set_eq_nodup_sum_weight_eq
@@ -74,9 +74,7 @@ Lemma set_eq_nodup_sum_weight_eq
     sum_weights lv1 = sum_weights lv2.
 Proof.
   intros lv1 lv2 H_nodup1 H_nodup2 [H_eq_l H_eq_r].
-  assert (H_useful := sum_weights_subseteq lv1 lv2 H_nodup1 H_nodup2 H_eq_l).
-  assert (H_useful' := sum_weights_subseteq lv2 lv1 H_nodup2 H_nodup1 H_eq_r).
-  now apply Rle_antisym.
+  by apply Rle_antisym; apply sum_weights_subseteq.
 Qed.
 
 Lemma sum_weights_app
@@ -85,6 +83,6 @@ Lemma sum_weights_app
   sum_weights (vs ++ vs') = (sum_weights vs + sum_weights vs')%R.
 Proof.
   induction vs; intros; simpl.
-  - rewrite Rplus_0_l. reflexivity.
-  - rewrite IHvs. rewrite Rplus_assoc. reflexivity.
+  - by rewrite Rplus_0_l.
+  - by rewrite IHvs, Rplus_assoc.
 Qed.

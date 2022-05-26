@@ -25,20 +25,19 @@ Proof.
     + inversion_clear Hnodup as [|? ? H1 H2].
       specialize (IHl H2); clear H2.
       simpl.
-      destruct (f a) eqn:Hfa;[|assumption].
+      destruct (f a) eqn: Hfa; [| done].
       apply f_proj_inj in Hfa. subst a.
-      constructor;[|assumption].
+      constructor; [| done].
       contradict H1.
       apply in_map_option in H1.
       destruct H1 as [a [Ha Hfa]].
       apply f_proj_inj in Hfa.
-      subst a.
-      assumption.
+      by subst a.
   - intro b.
     specialize (Hfull (g b)).
     apply in_map_option.
     exists (g b).
-    split;[assumption|].
+    split; [done |].
     apply f_surj.
 Qed.
 
@@ -65,9 +64,8 @@ Lemma left_finite
   : Listing (left_listing sum_finite).
 Proof.
   revert sum_finite.
-  apply map_option_listing with (g:=inl).
-  destruct a;simpl;congruence.
-  reflexivity.
+  apply map_option_listing with (g:=inl); [| done].
+  by destruct a;simpl;congruence.
 Qed.
 
 Lemma right_finite
@@ -75,9 +73,8 @@ Lemma right_finite
   : Listing (right_listing sum_finite).
 Proof.
   revert sum_finite.
-  apply map_option_listing with (g:=inr).
-  destruct a;simpl;congruence.
-  reflexivity.
+  apply map_option_listing with (g:=inr); [| done].
+  by destruct a;simpl;congruence.
 Qed.
 
 End sum_listing.

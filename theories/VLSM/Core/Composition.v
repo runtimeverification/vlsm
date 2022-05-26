@@ -1,5 +1,6 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep.
+From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep Program.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.StreamExtras.
 From VLSM Require Import Core.VLSM Core.Plans Core.VLSMProjections.
 
@@ -39,7 +40,7 @@ machine <<n>>.
 Note that the [composite_state] type is the dependent product type of the
 family of [state] types corresponding to each index.
 *)
-    Definition _composite_state : Type :=
+    Definition composite_state : Type :=
       forall n : index, vstate (IM n).
 
 (**
@@ -48,17 +49,20 @@ A [composite_label] is a pair between an index <<N>> and a [label] of <<IT n>>.
 Note that the [composite_label] type is the dependent sum of the family of
 types <<[@label _ (IT n) | n <- index]>>.
 *)
-    Definition _composite_label
+    Definition composite_label
       : Type
       := sigT (fun n => vlabel (IM n)).
 
-    Definition composite_type : VLSMType message :=
-      {| state := _composite_state
-       ; label := _composite_label
+    (* Declaring this a "canonical structure" will make type checking
+       guess that a VLSMType should be composite_type instead of just
+       failing, if it has to compare composite_state with state or
+       vstate of an unsolved VLSMType or VLSM.
+     *)
+    Canonical Structure composite_type : VLSMType message :=
+      {| state := composite_state
+       ; label := composite_label
       |}.
 
-    Definition composite_state := @state message composite_type.
-    Definition composite_label := @label message composite_type.
     Definition composite_transition_item : Type := @transition_item message composite_type.
 
 (**
@@ -88,7 +92,7 @@ The next few results describe several properties of the [state_update] operation
                (Hneq : j <> i)
       : state_update s i si j = s j.
     Proof.
-      unfold state_update. destruct (decide (j = i)); try contradiction. reflexivity.
+      by unfold state_update; case_decide.
     Qed.
 
     Lemma state_update_eq
@@ -97,9 +101,7 @@ The next few results describe several properties of the [state_update] operation
                (si : vstate (IM i))
       : state_update s i si i = si.
     Proof.
-      unfold state_update.
-      unfold decide, decide_rel.
-      rewrite eq_dec_refl. reflexivity.
+      by unfold state_update, decide, decide_rel; rewrite eq_dec_refl.
     Qed.
 
     Lemma state_update_id
@@ -113,7 +115,7 @@ The next few results describe several properties of the [state_update] operation
       intro j.
       destruct (decide (j = i)).
       - subst. apply state_update_eq.
-      - apply state_update_neq. assumption.
+      - by apply state_update_neq.
     Qed.
 
     Lemma state_update_twice
@@ -126,8 +128,7 @@ The next few results describe several properties of the [state_update] operation
       intro j.
       destruct (decide (j = i)).
       - subst. rewrite state_update_eq. symmetry. apply state_update_eq.
-      - repeat rewrite state_update_neq; try assumption.
-        reflexivity.
+      - by rewrite !state_update_neq.
     Qed.
 
     Lemma state_update_twice_neq
@@ -142,10 +143,9 @@ The next few results describe several properties of the [state_update] operation
       apply functional_extensionality_dep_good.
       intro k.
       destruct (decide (k = j)); destruct (decide (k = i)); subst
-      ; repeat (rewrite state_update_eq ; try (rewrite state_update_neq; try assumption))
-      ; try reflexivity.
-      repeat (rewrite state_update_neq; try assumption).
-      reflexivity.
+      ; repeat (rewrite state_update_eq ; try (rewrite state_update_neq; try done))
+      ; try done.
+      by rewrite !state_update_neq.
     Qed.
   End composite_type.
 
@@ -173,7 +173,7 @@ states have the [initial_state_prop]erty in the corresponding component signatur
     Definition composite_s0 : composite_initial_state.
     Proof.
       exists (fun (n : index) => proj1_sig (vs0 (IM n))).
-      intro i. destruct (vs0 (IM i)) as [s Hs]. assumption.
+      by intro i; destruct (vs0 (IM i)) as [s Hs].
     Defined.
 
     Global Instance composite_initial_state_inh : Inhabited composite_initial_state :=
@@ -190,57 +190,39 @@ iff it has the [initial_message_prop]erty in any of the components.
     Definition option_composite_initial_message_prop : option message -> Prop
       := from_option composite_initial_message_prop True.
 
-(**
-We can always "lift" state <<sj>> from component <<j>> to a composite state by
-updating an initial composite state, say [s0], to <<sj>> on component <<j>>.
-*)
     Definition lift_to_composite_label
       (j : index)
       (lj : vlabel (IM j))
       : composite_label
       := existT j lj.
 
+(**
+We can always "lift" state <<sj>> from component <<j>> to a composite state by
+updating an given composite state to <<sj>> on component <<j>>.
+*)
     Definition lift_to_composite_state
-      (j : index)
-      (sj : vstate (IM j))
-      (s0X := proj1_sig composite_s0)
-      : composite_state
-      := state_update s0X j sj.
-
-    Definition lift_to_composite_transition_item
-      (j : index)
-      (item : vtransition_item (IM j))
-      (s0X := proj1_sig composite_s0)
-      : @transition_item _ composite_type.
-    Proof.
-      destruct item.
-      split.
-      - exact (existT j l).
-      - exact input.
-      - exact (lift_to_composite_state j destination).
-      - exact output.
-    Defined.
-
-    Definition lift_to_composite_state'
       (s : composite_state)
       (j : index)
       (sj : vstate (IM j))
       : composite_state
       := state_update s j sj.
 
-    Definition lift_to_composite_transition_item'
+    Definition lift_to_composite_transition_item
       (s : composite_state)
       (j : index)
-      (item : vtransition_item (IM j))
-      : @transition_item _ composite_type.
-    Proof.
-      destruct item.
-      split.
-      - exact (existT j l).
-      - exact input.
-      - exact (lift_to_composite_state' s j destination).
-      - exact output.
-    Defined.
+      : vtransition_item (IM j) -> composite_transition_item :=
+      pre_VLSM_full_projection_transition_item_project (type (IM j)) composite_type
+        (lift_to_composite_label j) (lift_to_composite_state s j).
+
+(**
+A specialized version of [lift_to_composite_state] using the initial composite
+state as the base for lifting.
+*)
+    Definition lift_to_composite_state'
+      := lift_to_composite_state (proj1_sig composite_s0).
+
+    Definition lift_to_composite_transition_item'
+      := lift_to_composite_transition_item (proj1_sig composite_s0).
 
     (**
     Composite versions for [plan_item] and [plan].
@@ -276,6 +258,30 @@ component:
       let (si', om') := vtransition (IM i) li (s i, om) in
       (state_update s i si',  om').
 
+    Lemma composite_transition_state_neq
+      (l : composite_label)
+      (s s' : composite_state)
+      (om om' : option message)
+      (Ht : composite_transition l (s, om) = (s', om'))
+      (i : index)
+      (Hi : i <> projT1 l)
+      : s' i = s i.
+    Proof.
+      destruct l; cbn in Ht; destruct (vtransition _ _ _).
+      by inversion Ht; apply state_update_neq.
+    Qed.
+
+    Lemma composite_transition_state_eq
+      (i : index)
+      (li : vlabel (IM i))
+      (s s' : composite_state)
+      (om om' : option message)
+      (Ht : composite_transition (existT i li) (s, om) = (s', om'))
+      : s' i = fst (vtransition (IM i) li (s i, om)).
+    Proof.
+      cbn in Ht; destruct (vtransition _ _ _); inversion Ht; apply state_update_eq.
+    Qed.
+
 (**
 Given a [composite_label] <<(i, li)>> and a [composite_state]-message
 pair <<(s, om)>>, [composite_valid]ity is defined as [valid]ity in
@@ -310,46 +316,16 @@ the [composite_valid]ity.
       (constraint : composite_label -> composite_state * option message -> Prop)
       : VLSMMachine composite_type
       :=
-      {|  initial_state_prop := composite_initial_state_prop
-       ;  initial_message_prop := composite_initial_message_prop
-       ;  transition := composite_transition
-       ;  valid := constrained_composite_valid constraint
+      {| initial_state_prop := composite_initial_state_prop
+       ; initial_message_prop := composite_initial_message_prop
+       ; transition := composite_transition
+       ; valid := constrained_composite_valid constraint
       |}.
 
     Definition composite_vlsm
       (constraint : composite_label -> composite_state * option message -> Prop)
       : VLSM message
       := mk_vlsm (composite_vlsm_machine constraint).
-
-    Lemma composite_transition_state_neq
-      {constraint : composite_label -> composite_state * option message -> Prop}
-      (l : composite_label)
-      (s s' : composite_state)
-      (om om' : option message)
-      (Ht : input_valid_transition (composite_vlsm constraint) l (s, om) (s', om'))
-      (i : index)
-      (Hi : i <> projT1 l)
-      : s' i = s i.
-    Proof.
-      destruct Ht as [_ Ht]. simpl in Ht. destruct l as (il, l). simpl in Hi.
-      destruct (vtransition (IM il) l (s il, om)) as (si', omi') eqn:Ht'.
-      inversion Ht. subst omi'. apply state_update_neq. assumption.
-    Qed.
-
-    Lemma composite_transition_state_eq
-      {constraint : composite_label -> composite_state * option message -> Prop}
-      (l : composite_label)
-      (s s' : composite_state)
-      (om om' : option message)
-      (Ht : input_valid_transition (composite_vlsm constraint) l (s, om) (s', om'))
-      (il := projT1 l)
-      : s' il = fst (vtransition (IM il) (projT2 l) (s il, om)).
-    Proof.
-      destruct Ht as [_ Ht]. simpl in Ht.
-      unfold il in *. clear il. destruct l as (il, l). simpl.
-      destruct (vtransition (IM il) l (s il, om)) as (si', omi') eqn:Ht'.
-      inversion Ht. apply state_update_eq.
-    Qed.
 
     (** Composite versions for the generic [_apply_plan]-related definitions and
     results.
@@ -371,20 +347,18 @@ the [composite_valid]ity.
       := (@_apply_plan_last _ composite_type composite_transition start a).
     Definition composite_trace_to_plan := (@_trace_to_plan _ composite_type).
 
-  Lemma lift_to_composite_state_initial
+  Lemma composite_initial_state_prop_lift
     (j : index)
     (sj : vstate (IM j))
     (Hinitj : vinitial_state_prop (IM j) sj)
-    : composite_initial_state_prop (lift_to_composite_state j sj).
+    : composite_initial_state_prop (lift_to_composite_state' j sj).
   Proof.
     intro i.
-    unfold lift_to_composite_state.
-    destruct (decide (i = j)).
-    - subst. rewrite state_update_eq. assumption.
-    - rewrite state_update_neq; try assumption.
-      simpl.
-      destruct (vs0 _) as [s Hs].
-      assumption.
+    unfold lift_to_composite_state'.
+    destruct (decide (i = j)); subst.
+    - by rewrite state_update_eq.
+    - rewrite state_update_neq; cbn; [| done].
+      by destruct (vs0 _) as [s Hs].
   Qed.
 
 (** ** Free VLSM composition
@@ -404,16 +378,16 @@ Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
       := composite_vlsm free_constraint.
 
     Lemma lift_to_composite_vlsm_full_projection j
-      : VLSM_full_projection (IM j) free_composite_vlsm (lift_to_composite_label j) (lift_to_composite_state j).
+      : VLSM_full_projection (IM j) free_composite_vlsm (lift_to_composite_label j) (lift_to_composite_state' j).
     Proof.
       apply basic_VLSM_strong_full_projection; intro; intros.
-      - split; [|exact I]. simpl.
-        unfold lift_to_composite_state. rewrite state_update_eq. apply H.
-      - unfold vtransition. simpl. unfold lift_to_composite_state at 1.
+      - split; [| done]. simpl.
+        unfold lift_to_composite_state'. rewrite state_update_eq. apply H.
+      - unfold vtransition. simpl. unfold lift_to_composite_state' at 1.
         rewrite state_update_eq. replace (vtransition _ _ _) with (s', om').
-        f_equal. unfold lift_to_composite_state. apply state_update_twice.
-      - apply lift_to_composite_state_initial. assumption.
-      - exists j, (exist _ _ H). reflexivity.
+        f_equal. unfold lift_to_composite_state'. apply state_update_twice.
+      - by apply composite_initial_state_prop_lift.
+      - by exists j, (exist _ _ H).
     Qed.
 
     Definition lift_to_composite_finite_trace j
@@ -427,8 +401,7 @@ Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
       (constraint : composite_label -> composite_state  * option message -> Prop)
       : VLSM_incl (composite_vlsm constraint) free_composite_vlsm.
     Proof.
-      apply basic_VLSM_strong_incl; intro; intros; [assumption..| |assumption].
-      split; [apply H|exact I].
+      apply basic_VLSM_strong_incl; firstorder.
     Qed.
 
     Lemma composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages
@@ -436,7 +409,7 @@ Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
       (P : message -> Prop)
       : VLSM_incl (pre_loaded_vlsm (composite_vlsm constraint) P) (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
     Proof.
-      apply basic_VLSM_strong_incl; cbv; intuition.
+      by apply basic_VLSM_strong_incl; cbv; [..|itauto|].
     Qed.
 
     Lemma constraint_free_valid_state_message_preservation
@@ -446,7 +419,7 @@ Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
       : valid_state_message_prop free_composite_vlsm s om.
     Proof.
       revert Hsom.
-      apply (VLSM_incl_valid_state_message (constraint_free_incl constraint)); intro; intros; assumption.
+      by apply (VLSM_incl_valid_state_message (constraint_free_incl constraint)); intro.
     Qed.
 
     Section sec_constraint_subsumption.
@@ -533,10 +506,10 @@ Lemma [basic_VLSM_incl]
       : VLSM_incl X1 X2.
     Proof.
       apply basic_VLSM_incl.
-      - intros s Hs. assumption.
-      - intros _ _ m _ _ Hm. apply initial_message_is_valid. assumption.
+      - by intros s Hs.
+      - by intros _ _ m _ _ Hm; apply initial_message_is_valid.
       - split; [apply Hv | auto].
-      - intros l s om s' om' Ht. apply Ht.
+      - by intros l s om s' om' Ht; apply Ht.
     Qed.
 
     Lemma constraint_subsumption_input_valid
@@ -547,7 +520,7 @@ Lemma [basic_VLSM_incl]
       (Hv : input_valid X1 l (s, om))
       : vvalid X2 l (s, om).
     Proof.
-      split; [apply Hv|apply Hsubsumption]. assumption.
+      by split; [apply Hv | apply Hsubsumption].
     Qed.
 
     Lemma constraint_subsumption_valid_state_message_preservation
@@ -558,10 +531,10 @@ Lemma [basic_VLSM_incl]
       : valid_state_message_prop X2 s om.
     Proof.
       induction Hps.
-      - apply (valid_initial_state_message X2);assumption.
-      - apply (valid_generated_state_message X2) with s _om _s om l; try assumption.
-        apply constraint_subsumption_input_valid; [assumption|].
-        split;[|split];[exists _om|exists _s|];assumption.
+      - by apply valid_initial_state_message.
+      - apply (valid_generated_state_message X2) with s _om _s om l. 1-2, 4: done.
+        apply constraint_subsumption_input_valid; [done |].
+        by split_and!; [exists _om | exists _s|].
     Qed.
 
     Lemma constraint_subsumption_incl
@@ -569,10 +542,10 @@ Lemma [basic_VLSM_incl]
       : VLSM_incl X1 X2.
     Proof.
       apply basic_VLSM_incl; intro; intros.
-      - assumption.
-      - apply initial_message_is_valid. assumption.
-      - apply constraint_subsumption_input_valid; assumption.
-      - apply H.
+      - done.
+      - by apply initial_message_is_valid.
+      - by apply constraint_subsumption_input_valid.
+      - by apply H.
     Qed.
 
     Lemma preloaded_constraint_subsumption_input_valid
@@ -583,16 +556,16 @@ Lemma [basic_VLSM_incl]
       (Hv : input_valid (pre_loaded_with_all_messages_vlsm X1) l (s, om))
       : vvalid X2 l (s, om).
     Proof.
-      split; [apply Hv|apply Hpre_subsumption]. assumption.
+      by split; [apply Hv | apply Hpre_subsumption].
     Qed.
 
     Lemma preloaded_constraint_subsumption_incl
       (Hpre_subsumption : preloaded_constraint_subsumption constraint1 constraint2)
       : VLSM_incl (pre_loaded_with_all_messages_vlsm X1) (pre_loaded_with_all_messages_vlsm X2).
     Proof.
-      apply basic_VLSM_incl; intro; intros; [assumption| | |apply H].
-      - apply initial_message_is_valid. assumption.
-      - apply preloaded_constraint_subsumption_input_valid; assumption.
+      apply basic_VLSM_incl; intro; intros; [done | | | apply H].
+      - by apply initial_message_is_valid.
+      - by apply preloaded_constraint_subsumption_input_valid.
     Qed.
 
     Lemma weak_constraint_subsumption_weakest
@@ -636,8 +609,7 @@ Lemma [basic_VLSM_incl]
       (constraint : composite_label -> composite_state  * option message -> Prop)
       : VLSM_incl (pre_loaded_with_all_messages_vlsm (composite_vlsm constraint)) (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
     Proof.
-      apply preloaded_constraint_subsumption_incl.
-      intro; intros; exact I.
+      by apply preloaded_constraint_subsumption_incl.
     Qed.
 
     (* TODO(traiansf): There are many places where, because the lemma below
@@ -658,40 +630,83 @@ Lemma [basic_VLSM_incl]
       (P Q : message -> Prop)
       (PimpliesQ : forall m, P m -> Q m)
       (j : index)
-      : VLSM_full_projection (pre_loaded_vlsm (IM j) P) (pre_loaded_vlsm free_composite_vlsm Q) (lift_to_composite_label j) (lift_to_composite_state j).
+      : VLSM_full_projection (pre_loaded_vlsm (IM j) P) (pre_loaded_vlsm free_composite_vlsm Q) (lift_to_composite_label j) (lift_to_composite_state' j).
     Proof.
       apply basic_VLSM_full_projection_preloaded_with; intro; intros.
-      - revert m H. assumption.
-      - split; [|exact I]. simpl.
-        unfold lift_to_composite_state. rewrite state_update_eq. apply H.
-      - unfold vtransition. simpl. unfold lift_to_composite_state at 1.
+      - by apply PimpliesQ.
+      - split; cbn; [| done].
+        unfold lift_to_composite_state'. rewrite state_update_eq. apply H.
+      - unfold vtransition. simpl. unfold lift_to_composite_state' at 1.
         rewrite state_update_eq. replace (vtransition (IM j) l _) with (s', om').
-        f_equal. unfold lift_to_composite_state. apply state_update_twice.
-      - apply lift_to_composite_state_initial. assumption.
-      - exists j, (exist _ _ H); reflexivity.
+        f_equal. unfold lift_to_composite_state'. apply state_update_twice.
+      - by apply composite_initial_state_prop_lift.
+      - by exists j, (exist _ _ H).
     Qed.
 
     Lemma lift_to_composite_preloaded_vlsm_full_projection
       (j : index)
-      : VLSM_full_projection (pre_loaded_with_all_messages_vlsm (IM j)) (pre_loaded_with_all_messages_vlsm free_composite_vlsm) (lift_to_composite_label j) (lift_to_composite_state j).
+      : VLSM_full_projection (pre_loaded_with_all_messages_vlsm (IM j)) (pre_loaded_with_all_messages_vlsm free_composite_vlsm) (lift_to_composite_label j) (lift_to_composite_state' j).
     Proof.
       apply basic_VLSM_full_projection_preloaded.
-      - intro; intros. split; [|exact I]. simpl.
-        unfold lift_to_composite_state. rewrite state_update_eq. apply H.
-      - intro; intros. unfold vtransition. simpl. unfold vtransition. simpl. unfold lift_to_composite_state at 1.
+      - intro; intros. split; [| done]. simpl.
+        unfold lift_to_composite_state'. rewrite state_update_eq. apply H.
+      - intro; intros. unfold vtransition. simpl. unfold vtransition. simpl. unfold lift_to_composite_state' at 1.
         rewrite state_update_eq. replace (transition l _) with (s', om').
-        f_equal. unfold lift_to_composite_state. apply state_update_twice.
-      - intro; intros. apply lift_to_composite_state_initial. assumption.
+        f_equal. unfold lift_to_composite_state'. apply state_update_twice.
+      - by intros s H; apply composite_initial_state_prop_lift.
+    Qed.
+
+    (**
+    If all messages described by a predicate <<P>> are valid for the free
+    composition pre-loaded with messages described by a predicate <<Q>>, then
+    any message which can be emitted by a component pre-loaded with <<P>> can
+    also be emitted by the free composition pre-loaded with <<Q>>.
+    *)
+    Lemma valid_preloaded_lifts_can_be_emitted
+      (P Q : message -> Prop)
+      (HPvalid : forall dm, P dm -> valid_message_prop (pre_loaded_vlsm free_composite_vlsm Q) dm)
+      : forall j m, can_emit (pre_loaded_vlsm (IM j) P) m ->
+        can_emit (pre_loaded_vlsm free_composite_vlsm Q) m.
+    Proof.
+      intros j m Hm.
+      eapply VLSM_incl_can_emit.
+      - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
+        itauto.
+      - eapply VLSM_full_projection_can_emit; [| done].
+        apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
+        itauto.
+    Qed.
+
+    (**
+    As a specialization of [valid_preloaded_lifts_can_be_emitted], if all
+    messages described by a predicate <<P>> are valid for the free composition,
+    then any message which can be emitted by a component pre-loaded with <<P>>
+    can also be emitted by the free composition.
+    *)
+    Lemma free_valid_preloaded_lifts_can_be_emitted
+      (P : message -> Prop)
+      (Hdeps : forall dm, P dm -> valid_message_prop free_composite_vlsm dm)
+      : forall i m, can_emit (pre_loaded_vlsm (IM i) P) m ->
+        can_emit free_composite_vlsm m.
+    Proof.
+      intros.
+      eapply VLSM_incl_can_emit.
+      - eapply VLSM_eq_proj2, (vlsm_is_pre_loaded_with_False free_composite_vlsm).
+      - eapply valid_preloaded_lifts_can_be_emitted; [| done].
+        intros dm Hdm.
+        eapply VLSM_incl_valid_message.
+        + apply VLSM_eq_proj1, (vlsm_is_pre_loaded_with_False free_composite_vlsm).
+        + cbv; itauto.
+        + by apply Hdeps.
     Qed.
 
     Lemma valid_state_preloaded_composite_free_lift
       (j : index)
       (sj : vstate (IM j))
       (Hp : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM j)) sj)
-      : valid_state_prop (pre_loaded_with_all_messages_vlsm free_composite_vlsm) (lift_to_composite_state j sj).
+      : valid_state_prop (pre_loaded_with_all_messages_vlsm free_composite_vlsm) (lift_to_composite_state' j sj).
     Proof.
-      apply (VLSM_full_projection_valid_state (lift_to_composite_preloaded_vlsm_full_projection j))
-      ; assumption.
+      by apply (VLSM_full_projection_valid_state (lift_to_composite_preloaded_vlsm_full_projection j)).
     Qed.
 
     Lemma can_emit_composite_free_lift
@@ -702,63 +717,123 @@ Lemma [basic_VLSM_incl]
       (Htrj : can_emit (pre_loaded_vlsm (IM j) P) m)
       : can_emit (pre_loaded_vlsm free_composite_vlsm Q) m.
     Proof.
-      apply (VLSM_full_projection_can_emit (lift_to_composite_generalized_preloaded_vlsm_full_projection _ _ PimpliesQ j)).
-      assumption.
+      eapply VLSM_full_projection_can_emit.
+      - by apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
+      - done.
     Qed.
 
     (** Updating a composite initial state with a component initial state
     yields a composite initial state *)
-    Lemma composite_free_update_initial_state_with_initial
-      (s : vstate free_composite_vlsm)
-      (Hs : vinitial_state_prop free_composite_vlsm s)
+    Lemma composite_update_initial_state_with_initial
+      (s : composite_state)
+      (Hs : composite_initial_state_prop s)
       (i : index)
       (si : vstate (IM i))
       (Hsi : vinitial_state_prop (IM i) si)
-      : vinitial_state_prop free_composite_vlsm (state_update s i si).
+      : composite_initial_state_prop (state_update s i si).
     Proof.
-      intro j. destruct (decide (j = i)).
-      - subst. rewrite state_update_eq. assumption.
-      - rewrite state_update_neq; try assumption. apply Hs.
+      intro j. destruct (decide (j = i)); subst.
+      - by rewrite state_update_eq.
+      - by rewrite state_update_neq.
     Qed.
 
     (** Updating a composite [valid_state] for the free composition with
     a component initial state yields a composite [valid_state] *)
-    Lemma composite_free_update_state_with_initial
-      (s : vstate free_composite_vlsm)
-      (Hs : valid_state_prop free_composite_vlsm s)
+    Lemma pre_composite_free_update_state_with_initial
+      (P : message -> Prop)
+      (s : composite_state)
+      (Hs : valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) s)
       (i : index)
       (si : vstate (IM i))
       (Hsi : vinitial_state_prop (IM i) si)
-      : valid_state_prop free_composite_vlsm (state_update s i si).
+      : valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) (state_update s i si).
     Proof.
-      generalize dependent s. apply valid_state_prop_ind; intros.
-      - remember (state_update s i si) as s'.
-        assert (Hs' : vinitial_state_prop free_composite_vlsm s')
-          by (subst; apply composite_free_update_initial_state_with_initial; assumption).
-        apply initial_state_is_valid.
-        assumption.
-      - destruct Ht as [[Hps [Hom Hv]] Ht].
-        unfold transition in Ht. simpl in Ht.
-        destruct Hv as [Hv _]. simpl in Hv.
-        destruct l as (j, lj).
-        destruct (vtransition (IM j) lj (s j, om)) as (sj', omj') eqn:Htj.
-        inversion Ht. subst s' om'. clear Ht.
+      induction Hs using valid_state_prop_ind.
+      - by apply initial_state_is_valid, composite_update_initial_state_with_initial.
+      - destruct Ht as [[Hps [Hom [Hv _]]] Ht]; cbn in Ht, Hv.
+        destruct l as [j lj].
+        destruct (vtransition _ _ _) as [sj' omj'] eqn: Htj.
+        inversion_clear Ht.
         destruct (decide (i = j)).
-        + subst. rewrite state_update_twice. assumption.
-        + rewrite state_update_twice_neq; try assumption.
-          destruct Hs as [_om Hs].
-          destruct Hom as [_s Hom].
-          specialize
-            (valid_generated_state_message free_composite_vlsm _ _ Hs _ _ Hom  (existT j lj))
-            as Hgen.
-          assert (n' : j <> i) by (intro contra; subst; elim n; reflexivity).
-          spec Hgen.
-          { split; try exact I. simpl. rewrite state_update_neq; assumption. }
-          simpl in Hgen.
-          rewrite state_update_neq in Hgen; try assumption. simpl in *.
-          rewrite Htj in Hgen.
-          eexists _. apply Hgen. reflexivity.
+        + by subst; rewrite state_update_twice.
+        + rewrite state_update_twice_neq by done.
+          apply input_valid_transition_destination with (existT j lj) (state_update s i si) om omj'.
+          by repeat split; [done | done |..]; cbn; rewrite state_update_neq;
+            [..| rewrite Htj |].
     Qed.
+
+    Lemma lift_to_composite_valid_preservation :
+      forall (i : index) (cs : composite_state),
+      forall l s om, vvalid (IM i) l (s, om) ->
+        composite_valid (lift_to_composite_label i l)
+          (lift_to_composite_state cs i s, om).
+    Proof. by intros; cbn; rewrite state_update_eq. Qed.
+
+    Lemma lift_to_composite_transition_preservation :
+      forall (i : index) (cs : composite_state),
+      forall l s om s' om', vtransition (IM i) l (s, om) = (s', om') ->
+        composite_transition (lift_to_composite_label i l)
+          (lift_to_composite_state cs i s, om)
+            =
+          (lift_to_composite_state cs i s', om').
+    Proof.
+      intros; cbn.
+      unfold lift_to_composite_state; rewrite state_update_eq.
+      by replace (vtransition _ _ _) with (s', om'); rewrite state_update_twice.
+    Qed.
+
+    Lemma lift_to_composite_initial_message_preservation :
+      forall (i : index),
+          forall m, vinitial_message_prop (IM i) m ->
+          composite_initial_message_prop m.
+    Proof. by intros i m Hm; exists i, (exist _ _ Hm). Qed.
+ 
+    Lemma pre_lift_to_free_weak_full_projection :
+      forall (i : index) (cs : composite_state) (P : message -> Prop),
+          valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) cs ->
+          VLSM_weak_full_projection
+            (pre_loaded_vlsm (IM i) P) (pre_loaded_vlsm free_composite_vlsm P)
+            (lift_to_composite_label i) (lift_to_composite_state cs i).
+    Proof.
+      intros i cs P Hvsp.
+      apply basic_VLSM_weak_full_projection.
+      - intros l s om (_ & _ & Hv) _ _.
+        by split; [apply lift_to_composite_valid_preservation |].
+      - by inversion 1; apply lift_to_composite_transition_preservation.
+      - by intros s Hs; apply pre_composite_free_update_state_with_initial.
+      - intros _ _ m _ _ [Hm | Hp]; apply initial_message_is_valid; [left | by right].
+        by eapply lift_to_composite_initial_message_preservation.
+    Qed.
+
+    Lemma lift_to_free_weak_full_projection :
+      forall (i : index) (cs : composite_state),
+          valid_state_prop free_composite_vlsm cs ->
+          VLSM_weak_full_projection (IM i) free_composite_vlsm
+            (lift_to_composite_label i) (lift_to_composite_state cs i).
+    Proof.
+      constructor; intros.
+      apply (VLSM_eq_finite_valid_trace_from (vlsm_is_pre_loaded_with_False free_composite_vlsm)),
+            pre_lift_to_free_weak_full_projection.
+      - by apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False free_composite_vlsm)).
+      - apply (VLSM_eq_finite_valid_trace_from (vlsm_is_pre_loaded_with_False (IM i))).
+        by destruct (IM i).
+    Qed.
+
+    Lemma lift_to_preloaded_free_weak_full_projection :
+      forall (i : index) (cs : composite_state),
+          valid_state_prop (pre_loaded_with_all_messages_vlsm free_composite_vlsm) cs ->
+          VLSM_weak_full_projection
+            (pre_loaded_with_all_messages_vlsm (IM i)) (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
+            (lift_to_composite_label i) (lift_to_composite_state cs i).
+    Proof.
+      constructor; intros.
+      apply (VLSM_eq_finite_valid_trace_from (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)),
+            pre_lift_to_free_weak_full_projection.
+      - by apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)).
+      - apply (VLSM_eq_finite_valid_trace_from (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (IM i))).
+        by destruct (IM i).
+    Qed.
+
   End sec_composite_vlsm.
 
 End VLSM_composition.
@@ -809,10 +884,9 @@ Proof.
     destruct (decide (i = j)).
     + subst j.
       rewrite state_update_eq.
-      apply preloaded_protocol_generated with lj (s i) om _om';[assumption| |assumption].
+      apply preloaded_protocol_generated with lj (s i) om _om'; [done | | done].
       apply Hv.
-    + rewrite state_update_neq by assumption.
-      exact IHHproto1.
+    + by rewrite state_update_neq.
 Qed.
 
 Lemma valid_state_project_preloaded
@@ -826,13 +900,12 @@ Proof.
   intros [om Hproto].
   apply valid_state_project_preloaded_to_preloaded.
   exists om.
-  apply preloaded_weaken_valid_state_message_prop.
-  assumption.
+  by apply preloaded_weaken_valid_state_message_prop.
 Qed.
 
 Lemma composite_transition_project_active
       message `{EqDecision index} (IM : index -> VLSM message)
-  : forall (l : label) (s : state) (im : option message) (s' : state) (om : option message),
+  : forall (l : composite_label IM) (s : composite_state IM) (im : option message) (s' : composite_state IM) (om : option message),
       composite_transition IM l (s, im) = (s', om) ->
       vtransition (IM (projT1 l)) (projT2 l) (s (projT1 l), im) = (s' (projT1 l), om).
 Proof.
@@ -842,8 +915,7 @@ Proof.
   destruct (vtransition (IM x) v (s x, im)).
   inversion H.
   f_equal.
-  rewrite state_update_eq.
-  reflexivity.
+  by rewrite state_update_eq.
 Qed.
 
 Lemma input_valid_transition_preloaded_project_active
@@ -897,7 +969,7 @@ Proof.
   - subst j.
     right.
     exists lj.
-    split;[reflexivity|].
+    split; [done |].
     revert Hptrans.
     apply input_valid_transition_preloaded_project_active.
   - left.
@@ -905,8 +977,7 @@ Proof.
     cbn in Htrans.
     destruct (vtransition (IM j) lj (s j, im)).
     inversion_clear Htrans.
-    rewrite state_update_neq by assumption.
-    reflexivity.
+    by rewrite state_update_neq.
 Qed.
 
 Lemma input_valid_transition_project_any {V} (i:V)
@@ -1012,8 +1083,8 @@ Proof.
     ).
   - rewrite <- exists_finite.
     split; intros [i Hm]; exists i.
-    + exists (exist _ _ Hm). reflexivity.
-    + destruct Hm as [[im Hinit] Him]. subst. assumption.
+    + by exists (exist _ _ Hm).
+    + by destruct Hm as [[im Hinit] [= ->]].
   - apply @Exists_dec. intro i. apply Hdec_init.
 Qed.
 
@@ -1048,7 +1119,7 @@ Section composite_plan_properties.
     input_valid Free l (s', input).
   Proof.
     unfold input_valid in *.
-    split; [intuition|intuition|..].
+    split_and!; try itauto.
     unfold valid in *; simpl in *.
     unfold constrained_composite_valid in *.
     unfold composite_valid in *.
@@ -1058,7 +1129,7 @@ Section composite_plan_properties.
     simpl in i.
     unfold i in Heq.
     rewrite <- Heq.
-    assumption.
+    itauto.
   Qed.
 
   (* The effect of the transition is also the same *)
@@ -1080,11 +1151,10 @@ Section composite_plan_properties.
     simpl in i.
     unfold i in Heq.
     rewrite Heq.
-    destruct (vtransition (IM x) v (s' x, input)); [intuition|..].
+    destruct (vtransition (IM x) v (s' x, input)).
+    split; [done|].
     unfold i.
-    rewrite state_update_eq.
-    rewrite state_update_eq.
-    reflexivity.
+    by rewrite !state_update_eq.
   Qed.
 
   Lemma relevant_components_one
@@ -1117,13 +1187,12 @@ Section composite_plan_properties.
         unfold input_valid_transition in *.
         destruct Ht as [Hpr_valid Htrans].
         apply relevant_component_transition with (s' := s') in Hpr_valid.
-        all : intuition.
+        all : itauto.
       }
 
-      apply finite_valid_trace_from_extend.
+      apply finite_valid_trace_from_extend; [| done].
       apply finite_valid_trace_from_empty.
-      apply input_valid_transition_destination in Ht'; assumption.
-      assumption.
+      by apply input_valid_transition_destination in Ht'.
     - simpl.
       specialize (relevant_component_transition2 s s' label_a input_a) as Hrel.
       simpl in Hrel. unfold i in Heq. specialize (Hrel Heq Hprs').
@@ -1134,7 +1203,7 @@ Section composite_plan_properties.
       | let (_, _) := ?t in _ => replace t with (s0, o) in Hrel
       end.
       unfold i.
-      intuition.
+      itauto.
   Qed.
 
   (* Transitioning on some index different from <<i>> does not affect
@@ -1162,9 +1231,7 @@ Section composite_plan_properties.
     match type of eq_trans with
     | (let (si', om') := ?t in _) = _ => destruct t end.
     inversion eq_trans.
-    rewrite state_update_neq.
-    reflexivity.
-    assumption.
+    by rewrite state_update_neq.
   Qed.
 
   (* Same as the previous result, but for multiple transitions. *)
@@ -1179,7 +1246,7 @@ Section composite_plan_properties.
     (res i) = (s i).
   Proof.
     induction a using rev_ind.
-    - simpl; intuition.
+    - simpl; itauto.
     - simpl in *.
       rewrite (composite_apply_plan_app IM).
       destruct (composite_apply_plan IM s a) as (tra, sa) eqn : eq_a; simpl in *.
@@ -1193,12 +1260,11 @@ Section composite_plan_properties.
         intro Hin.
         contradict Hdif.
         apply elem_of_app.
-        left.
-        assumption.
+        by left.
       }
 
       rewrite <- IHa.
-      replace sx with (snd (composite_apply_plan IM sa [x])) by (rewrite eq_x; reflexivity).
+      replace sx with (snd (composite_apply_plan IM sa [x])) by (rewrite eq_x; done).
       apply irrelevant_components_one.
       intros contra.
       rewrite contra in Hdif.
@@ -1226,27 +1292,21 @@ Section composite_plan_properties.
     (forall (i : index), i ∈ li -> (res' i) = res i).
   Proof.
     induction a using rev_ind.
-    - split.
-      apply finite_valid_plan_empty.
-      assumption.
-      simpl. assumption.
+    - by split; [apply finite_valid_plan_empty|].
     - simpl in *.
       apply finite_valid_plan_from_app_iff in Hpr.
       destruct Hpr as [Hrem Hsingle].
 
       spec IHa. {
         remember (List.map (@projT1 _ (fun n : index => vlabel (IM n))) (List.map label_a a)) as small.
-        transitivity a_indices.
+        transitivity a_indices; [| done].
         unfold a_indices.
         intros e H; simpl.
         rewrite 2 map_app, elem_of_app.
-        left; assumption.
-        intuition.
+        itauto.
       }
 
-      spec IHa. {
-        assumption.
-      }
+      spec IHa; [done |].
 
       destruct IHa as [IHapr IHaind].
 
@@ -1254,7 +1314,7 @@ Section composite_plan_properties.
 
       spec Hrel. {
         apply apply_plan_last_valid.
-        all : intuition.
+        all : itauto.
       }
 
       specialize (Hrel x); simpl in *.
@@ -1274,7 +1334,7 @@ Section composite_plan_properties.
       destruct Hrel as [Hrelpr Hrelind].
       split.
       + apply finite_valid_plan_from_app_iff.
-        split; intuition.
+        split; itauto.
       + intros i Hi.
         specialize (IHaind i Hi).
         specialize (Heq i Hi).
@@ -1291,7 +1351,7 @@ Section composite_plan_properties.
           as (trx', sx') eqn : eq_xsa'.
         simpl in *.
         destruct (decide (i = (projT1 (label_a x)))).
-        * rewrite e; intuition.
+        * rewrite e; itauto.
         * specialize (irrelevant_components_one sa) as Hdiff.
           specialize (Hdiff x i n).
 
@@ -1304,8 +1364,7 @@ Section composite_plan_properties.
           replace sx' with (snd (composite_apply_plan IM sa' [x])).
           replace sx with (snd (composite_apply_plan IM sa [x])).
           setoid_rewrite Hdiff.
-          setoid_rewrite Hdiff0.
-          assumption.
+          by setoid_rewrite Hdiff0.
   Qed.
 
 End composite_plan_properties.
@@ -1432,31 +1491,30 @@ Proof.
   apply basic_VLSM_full_projection; intros l **.
   - destruct Hv as [Hs [Hom [Hv Hc]]].
     apply constraint_projection in Hc; cycle 1.
-    + apply (VLSM_incl_valid_state
-              (composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages IM1 constraint1 seed)).
-      assumption.
-    + split; [|assumption].
+    + apply VLSM_incl_valid_state; [| done].
+      apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    + split; [| done].
       clear Hc. revert Hv. destruct l as (i, li). cbn.
       apply same_VLSM_valid_preservation.
   - apply proj2 in H. revert H. destruct l as (i, li). cbn.
     destruct (vtransition (IM1 i) _ _) as (si'1, _om') eqn: Ht1.
     unfold same_IM_state_rew at 1.
-    erewrite same_VLSM_transition_preservation; [|eassumption].
+    erewrite same_VLSM_transition_preservation; [| done].
     inversion 1; subst; clear H.
     f_equal. extensionality j.
     unfold same_IM_state_rew at 2.
     destruct (decide (i = j)).
-    + subst. rewrite !state_update_eq. reflexivity.
-    + rewrite !state_update_neq by congruence. reflexivity.
+    + by subst; rewrite !state_update_eq.
+    + by rewrite !state_update_neq.
   - intros i. apply same_VLSM_initial_state_preservation, H.
   - apply initial_message_is_valid.
-    destruct HmX as [[i [[im Him] Hi]] | Hseed]; [| right; assumption].
+    destruct HmX as [[i [[im Him] Hi]] | Hseed]; [| by right].
     simpl in Hi. subst im.
     cbn. unfold composite_initial_message_prop.
     left. exists i.
     assert (Hm : vinitial_message_prop (IM2 i) m).
     + eapply same_VLSM_initial_message_preservation; eauto.
-    + exists (exist _ m Hm). reflexivity.
+    + by exists (exist _ m Hm).
 Qed.
 
 End sec_same_IM_preloaded_full_projection.
@@ -1489,19 +1547,21 @@ Lemma same_IM_preloaded_free_full_projection
     same_IM_label_rew
     same_IM_state_rew.
 Proof.
-  constructor.
-  intros s1 tr1 Htr1.
-  specialize (same_IM_preloaded_full_projection (free_constraint IM1) (free_constraint IM2))
-    as Hproj.
-  spec Hproj; [intros; exact I|].
-  specialize (Hproj (fun _ => True)).
-  apply
+  constructor; intros.
+  assert
+    (Hproj :
+      VLSM_full_projection
+        (pre_loaded_vlsm (free_composite_vlsm IM1) (const True))
+        (pre_loaded_vlsm (free_composite_vlsm IM2) (const True))
+        same_IM_label_rew
+        same_IM_state_rew)
+    by (apply same_IM_preloaded_full_projection; done).
+  by apply
     (VLSM_eq_finite_valid_trace
       (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM2))),
     (VLSM_full_projection_finite_valid_trace Hproj),
     (VLSM_eq_finite_valid_trace
       (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM1))).
-  assumption.
 Qed.
 
 End sec_same_IM_full_projection.

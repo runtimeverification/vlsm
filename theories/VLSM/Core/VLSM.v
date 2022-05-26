@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Streams.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
@@ -40,12 +41,20 @@ and the [transition] function and [valid] predicate.
 Class VLSMMachine {message : Type} (vtype : VLSMType message) :=
   { initial_state_prop : state -> Prop
   ; initial_state := { s : state | initial_state_prop s }
+  ; s0 : Inhabited initial_state
   ; initial_message_prop : message -> Prop
   ; initial_message := { m : message | initial_message_prop m }
-  ; s0 : Inhabited initial_state
   ; transition : label -> state * option message -> state * option message
   ; valid : label -> state * option message -> Prop
   }.
+(* The & is a "bidirectionality hint", so that typechecking
+   a VLSMMachine record definition will try to use the expected
+   result type to determine [vtype] before typechecking the fields.
+   Without this, the types of the values given for the fields would
+   have to be written so they only mention the state and label type
+   in ways that can be matched with [@state _ ?vtype] and [@label _ ?vtype].
+ *)
+Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
 Definition option_initial_message_prop
   {message : Type} {vtype : VLSMType message} {vmachine : VLSMMachine vtype}
@@ -140,17 +149,14 @@ In Coq, we can define these objects (which we name [transition_item]s) as consis
       : trace_has_message message_selector msg prefix ->
         trace_has_message message_selector msg (prefix ++ suffix).
     Proof.
-      intro Hprefix.
-      apply Exists_app. left. assumption.
+      by intro Hprefix; apply Exists_app; left.
     Qed.
 
     Lemma trace_has_message_observed_iff m tr
       (Hobserved : trace_has_message item_sends_or_receives m tr)
       : trace_has_message (field_selector input) m tr \/ trace_has_message (field_selector output) m tr.
     Proof.
-      unfold trace_has_message in *. rewrite !Exists_exists in *.
-      destruct Hobserved as [item [Hitem [Hm|Hm]]]
-      ; [left|right]; exists item; split; assumption.
+      unfold trace_has_message in *. rewrite !Exists_exists in *. firstorder.
     Qed.
 
     (** Defines a message received but not sent by within the trace. *)
@@ -167,15 +173,6 @@ In Coq, we can define these objects (which we name [transition_item]s) as consis
       (P : message -> Prop)
       : Prop
       := forall m, trace_received_not_sent_before_or_after tr m -> P m.
-
-  (** [proto_run] is used for an alternative definition of [valid_state_message_prop], which
-  takes into account transitions. See 'vlsm_run_prop'.
-  *)
-  Record proto_run : Type := mk_proto_run
-    { start : state
-      ; transitions : list transition_item
-      ; final : state * option message
-    }.
 
   Inductive Trace : Type :=
   | Finite : state -> list transition_item -> Trace
@@ -241,75 +238,62 @@ Section TraceLemmas.
     : finite_trace_last default tr  = s.
   Proof.
     unfold option_map in Hlast.
-    destruct (last_error tr) eqn : eq; try discriminate Hlast.
+    destruct (last_error tr) eqn: eq; [| done].
     inversion Hlast.
     unfold last_error in eq.
-    destruct tr; try discriminate eq.
+    destruct tr; [done |].
     inversion eq.
     unfold finite_trace_last.
-    rewrite last_map. reflexivity.
+    by rewrite last_map.
   Qed.
 
   Lemma finite_trace_last_cons
     s x tl:
     finite_trace_last s (x::tl) = finite_trace_last (destination x) tl.
   Proof.
-    unfold finite_trace_last. rewrite map_cons, unroll_last. reflexivity.
+    by unfold finite_trace_last; rewrite map_cons, unroll_last.
   Qed.
 
   Lemma finite_trace_last_nil
     s:
     finite_trace_last s [] = s.
-  Proof. reflexivity. Qed.
+  Proof. done. Qed.
 
   Lemma finite_trace_last_app
     s t1 t2:
     finite_trace_last s (t1 ++ t2) = finite_trace_last (finite_trace_last s t1) t2.
   Proof.
-    unfold finite_trace_last.
-    rewrite map_app, last_app.
-    reflexivity.
+    by unfold finite_trace_last; rewrite map_app, last_app.
   Qed.
 
   Lemma finite_trace_last_is_last
     s x tl:
     finite_trace_last s (tl++[x]) = destination x.
   Proof.
-    unfold finite_trace_last.
-    rewrite map_app.
-    simpl.
-    rewrite last_is_last.
-    reflexivity.
+    by unfold finite_trace_last; rewrite map_app; cbn; rewrite last_is_last.
   Qed.
 
   Lemma finite_trace_last_output_is_last
     x tl:
     finite_trace_last_output (tl++[x]) = output x.
   Proof.
-    unfold finite_trace_last_output.
-    rewrite map_app.
-    simpl.
-    rewrite last_is_last.
-    reflexivity.
+    by unfold finite_trace_last_output; rewrite map_app; cbn; rewrite last_is_last.
   Qed.
 
   Lemma finite_trace_nth_first
     (si : state) (tr : list transition_item):
     finite_trace_nth si tr 0 = Some si.
-  Proof.
-    reflexivity.
-  Qed.
+  Proof. done. Qed.
 
   Lemma finite_trace_nth_last
     (si : state) (tr : list transition_item):
     finite_trace_nth si tr (length tr) = Some (finite_trace_last si tr).
   Proof.
     unfold finite_trace_nth, finite_trace_last.
-    destruct tr;[reflexivity|].
+    destruct tr; [done |].
     cbn [nth_error length].
     apply nth_error_last.
-    rewrite map_length.
-    reflexivity.
+    by rewrite map_length.
   Qed.
 
   Lemma finite_trace_nth_app1
@@ -337,11 +321,9 @@ Section TraceLemmas.
       rewrite map_app, app_comm_cons.
       rewrite nth_error_app2;simpl length;rewrite map_length;[|solve[auto with arith]].
       destruct n;[exfalso;lia|].
-      replace (S n -length t1) with (S (n - length t1)) by lia.
-      reflexivity.
-    - rewrite finite_trace_nth_app1, finite_trace_nth_last by reflexivity.
-      rewrite PeanoNat.Nat.sub_diag, finite_trace_nth_first.
-      reflexivity.
+      by rewrite (Nat.sub_succ_l (length t1) n); [|lia].
+    - by rewrite finite_trace_nth_app1, finite_trace_nth_last,
+        Nat.sub_diag, finite_trace_nth_first.
   Qed.
 
   Lemma finite_trace_nth_length
@@ -352,9 +334,7 @@ Section TraceLemmas.
     intros H.
     apply nth_error_length in H.
     simpl in H.
-    rewrite map_length in H.
-    apply le_S_n in H.
-    assumption.
+    by rewrite map_length in H; lia.
   Qed.
 
   Lemma finite_trace_last_prefix
@@ -366,7 +346,7 @@ Section TraceLemmas.
     rewrite list_prefix_map.
     generalize (List.map destination tr); intro l; clear tr.
     destruct n.
-    - simpl. intros [=<-]. destruct l;reflexivity.
+    - simpl. intros [= <-]. by destruct l.
     - simpl. intro H. symmetry. revert H s.
       apply list_prefix_nth_last.
   Qed.
@@ -380,15 +360,12 @@ Section TraceLemmas.
     unfold finite_trace_last.
     rewrite list_suffix_map.
     apply list_suffix_last.
-    rewrite map_length.
-    assumption.
+    by rewrite map_length.
   Qed.
 
   Lemma unlock_finite_trace_last s tr:
     finite_trace_last s tr = List.last (List.map destination tr) s.
-  Proof.
-    reflexivity.
-  Qed.
+  Proof. done. Qed.
   Opaque finite_trace_last.
 
 End TraceLemmas.
@@ -420,7 +397,6 @@ or [VLSMType]. Functions [machine] and [type] below achieve this precise purpose
   Definition vvalid := @valid _ _ machine.
   Definition vtransition_item := @transition_item _ type.
   Definition vTrace := @Trace _ type.
-  Definition vproto_run := @proto_run _ type.
 
 End vlsm_projections.
 
@@ -431,7 +407,7 @@ Lemma mk_vlsm_machine
   (X : VLSM message)
   : mk_vlsm (machine X) = X.
 Proof.
-  destruct X as (T, M). reflexivity.
+  by destruct X.
 Qed.
 
   Section VLSM.
@@ -533,9 +509,7 @@ dependent types [valid_state] and [valid_message].
       valid_state_prop s.
     Proof.
       exists None.
-      apply valid_initial_state_message.
-      assumption.
-      exact I.
+      by apply valid_initial_state_message.
     Qed.
 
     Lemma initial_message_is_valid
@@ -544,9 +518,7 @@ dependent types [valid_state] and [valid_message].
       valid_message_prop m.
     Proof.
       exists (proj1_sig (vs0 X)).
-      apply valid_initial_state_message.
-      apply proj2_sig.
-      assumption.
+      apply valid_initial_state_message; [| done]. apply proj2_sig.
     Qed.
 
 (**
@@ -561,9 +533,8 @@ to define a valid message property for optional messages:
       : option_valid_message_prop None.
     Proof.
       exists (proj1_sig (vs0 X)).
-      apply valid_initial_state_message.
+      apply valid_initial_state_message; [| done].
       apply proj2_sig.
-      exact I.
     Qed.
 
     Lemma option_valid_message_Some
@@ -571,7 +542,7 @@ to define a valid message property for optional messages:
       (Hpm : valid_message_prop m)
       : option_valid_message_prop (Some m).
     Proof.
-      destruct Hpm as [s Hpm]. exists s. assumption.
+      destruct Hpm as [s Hpm]. by exists s.
     Qed.
 
     Lemma option_initial_message_is_valid
@@ -579,10 +550,9 @@ to define a valid message property for optional messages:
       (Hinitial : option_initial_message_prop om) :
       option_valid_message_prop om.
     Proof.
-      destruct om;
-      [apply option_valid_message_Some
-      |apply option_valid_message_None].
-      apply initial_message_is_valid;assumption.
+      destruct om.
+      - by apply option_valid_message_Some, initial_message_is_valid.
+      - apply option_valid_message_None.
     Qed.
 
 (** *** Input validity and input valid transitions
@@ -641,8 +611,7 @@ given inputs and that they have a [valid_state] and a [valid_message].
       (Ht : input_valid_transition l som som')
       : input_valid l som.
     Proof.
-      destruct Ht as [Hpv Ht].
-      assumption.
+      by destruct Ht.
     Qed.
 
     Lemma input_valid_can_transition
@@ -651,9 +620,7 @@ given inputs and that they have a [valid_state] and a [valid_message].
       (Hv : input_valid l som)
       : forall som', transition l som = som' ->
         input_valid_transition l som som'.
-    Proof.
-      repeat split; assumption.
-    Qed.
+    Proof. done. Qed.
 
     Lemma input_valid_transition_iff
       (l : label)
@@ -663,11 +630,9 @@ given inputs and that they have a [valid_state] and a [valid_message].
             input_valid_transition l som som'.
     Proof.
       split.
-      - eexists.
-        apply input_valid_can_transition; [assumption|reflexivity].
+      - by eexists; apply input_valid_can_transition.
       - intros [som' Hivt].
-        apply input_valid_transition_valid with som'.
-        assumption.
+        by apply input_valid_transition_valid with som'.
     Qed.
 
 (**
@@ -683,7 +648,7 @@ pre-existing concepts.
           (Ht : input_valid_transition l (s, om) (s',om'))
       : valid_state_prop s.
     Proof.
-      destruct Ht as [[[_om Hp] _] _]. exists _om. assumption.
+      destruct Ht as [[[_om Hp] _] _]. by exists _om.
     Qed.
 
     Lemma input_valid_transition_destination
@@ -695,7 +660,7 @@ pre-existing concepts.
     Proof.
       exists om'.
       destruct Ht as [[[_om Hs] [[_s Hom] Hv]] Ht].
-      apply valid_generated_state_message with s _om _s om l; assumption.
+      by apply valid_generated_state_message with s _om _s om l.
     Qed.
 
     Lemma input_valid_transition_in
@@ -706,7 +671,7 @@ pre-existing concepts.
       : option_valid_message_prop om.
     Proof.
       destruct Ht as [[_ [[_s Hom] _]] _].
-      exists _s. assumption.
+      by exists _s.
     Qed.
 
     Lemma input_valid_transition_outputs_valid_state_message
@@ -717,7 +682,7 @@ pre-existing concepts.
         : valid_state_message_prop s' om'.
     Proof.
       destruct Ht as [[[_om Hps] [[_s Hpm] Hv]] Ht].
-      apply valid_generated_state_message with s _om _s om l; assumption.
+      by apply valid_generated_state_message with s _om _s om l.
     Qed.
 
     Lemma input_valid_transition_out
@@ -728,7 +693,7 @@ pre-existing concepts.
       : option_valid_message_prop om'.
     Proof.
       apply input_valid_transition_outputs_valid_state_message in Ht.
-      exists s'. assumption.
+      by exists s'.
     Qed.
 
     Lemma input_valid_transition_is_valid
@@ -738,8 +703,7 @@ pre-existing concepts.
           (Ht : input_valid_transition l (s, om) (s', om'))
       : valid l (s, om).
     Proof.
-      destruct Ht as [[_ [_ Hv]] _].
-      assumption.
+      by destruct Ht as [[_ [_ Hv]] _].
     Qed.
 
     Lemma input_valid_transition_transition
@@ -748,9 +712,9 @@ pre-existing concepts.
           {om om' : option message}
           (Ht : input_valid_transition l (s, om) (s', om'))
         :  transition l (s, om) = (s', om').
-     Proof.
-      destruct Ht as [_ Ht]. assumption.
-     Qed.
+    Proof.
+      by destruct Ht as [_ Ht].
+    Qed.
 
     Lemma input_valid_state_message_outputs
       (l : label)
@@ -762,7 +726,22 @@ pre-existing concepts.
       : valid_state_message_prop s' om'.
     Proof.
       destruct Hv as [[_om Hs] [[_s Hom] Hv]].
-      apply valid_generated_state_message with s _om _s om l; assumption.
+      by apply valid_generated_state_message with s _om _s om l.
+    Qed.
+
+    (** [transition]s are deterministic, i.e. the final state and output message
+        are determined by the label, initial state and input message of the
+        transition. This is because [transition] is a function.
+
+        Because of the above, [input_valid_transition]s are also deterministic. *)
+
+    Lemma input_valid_transition_deterministic :
+      forall {lbl : label} {s s1 s2 : state} {iom oom1 oom2 : option message},
+        input_valid_transition lbl (s, iom) (s1, oom1) ->
+        input_valid_transition lbl (s, iom) (s2, oom2) ->
+          s1 = s2 /\ oom1 = oom2.
+    Proof.
+      do 2 inversion 1; itauto congruence.
     Qed.
 
     (** For VLSMs initialized with many initial messages such as
@@ -795,7 +774,7 @@ pre-existing concepts.
       : valid_state_message_prop s om .
     Proof.
       destruct Hm as [(s0, om0) [l [[[_om0 Hs0] [[_s0 Hom0] Hv]] Ht]]].
-      apply valid_generated_state_message with s0 _om0 _s0 om0 l; assumption.
+      by apply valid_generated_state_message with s0 _om0 _s0 om0 l.
     Qed.
 
     Definition can_produce_valid
@@ -813,13 +792,11 @@ pre-existing concepts.
     Proof.
       split.
       - intros Hm; inversion Hm; subst.
-        + right. split; assumption.
-        + left.
-          exists (s1, om0). exists l0.
-          repeat split; [..|assumption|assumption]
-          ; eexists; [exact Hps|exact Hpm].
+        + by right.
+        + left. exists (s1, om0), l0.
+          repeat split; try red; eauto.
       - intros [Hem | Him].
-        + apply option_can_produce_valid. assumption.
+        + by apply option_can_produce_valid.
         + constructor; apply Him.
     Qed.
 
@@ -844,8 +821,8 @@ pre-existing concepts.
       : can_emit m <-> exists s, can_produce s m.
     Proof.
       split.
-      - intros [som [l [s Ht]]]. exists s, som, l. assumption.
-      - intros [s [som [l Ht]]]. exists som, l, s. assumption.
+      - intros [som [l [s Ht]]]. by exists s, som, l.
+      - intros [s [som [l Ht]]]. by exists som, l, s.
     Qed.
 
     (** If a VLSM [can_emit] a message <<m>>, then <<m>> is valid.
@@ -859,7 +836,7 @@ pre-existing concepts.
       apply can_emit_iff in Hm.
       destruct Hm as [s Hm].
       apply can_produce_valid in Hm.
-      exists s. assumption.
+      by exists s.
     Qed.
 
     (** A characterization of valid messages in terms of [can_emit]
@@ -872,11 +849,11 @@ pre-existing concepts.
       split.
       - intros [s Hm].
         apply can_produce_valid_iff in Hm as [Hgen | [_ Him]].
-        + right. apply can_emit_iff. exists s. assumption.
-        + left. assumption.
+        + by right; apply can_emit_iff; exists s.
+        + by left.
       - intros [Him | Hm].
-        + apply initial_message_is_valid. assumption.
-        + apply emitted_messages_are_valid. assumption.
+        + by apply initial_message_is_valid.
+        + by apply emitted_messages_are_valid.
     Qed.
 
 (** *** valid state and valid message characterization
@@ -899,14 +876,12 @@ and [valid_message]s, similar to their recursive definition.
       intros; split.
       - intro Hps'. destruct Hps' as [om' Hs].
         inversion Hs; subst.
-        * left. exists (exist _ _ Hs0). reflexivity.
+        * by left; exists (exist _ _ Hs0).
         * right. exists l0. exists (s, om). exists om'.
-          repeat split; try assumption.
-          + exists _om. assumption.
-          + exists _s. assumption.
+          repeat split; try red; eauto.
       - intros [[[s His] Heq] | [l [[s om] [om' [[[_om Hps] [[_s Hpm] Hv]] Ht]]]]]; subst.
-        + exists None. apply valid_initial_state_message; [assumption | exact I].
-        + exists om'. apply valid_generated_state_message with s _om _s om l; assumption.
+        + exists None. by apply valid_initial_state_message.
+        + exists om'. by apply valid_generated_state_message with s _om _s om l.
     Qed.
 
     (** A specialized induction principle for [valid_state_prop].
@@ -930,8 +905,8 @@ and [valid_message]s, similar to their recursive definition.
       intros.
       destruct Hs as [om Hs].
       induction Hs.
-      - apply IHinit. assumption.
-      - apply (IHgen s' l0 om om' s);firstorder.
+      - by apply IHinit.
+      - apply (IHgen s' l0 om om' s); firstorder.
     Qed.
 
     (* valid message characterization - similar to the definition in the report. *)
@@ -946,13 +921,12 @@ and [valid_message]s, similar to their recursive definition.
       intros; split.
       - intros [s' Hpm'].
         inversion Hpm'; subst.
-        + left. exists (exist _ m' Hom). reflexivity.
+        + by left; exists (exist _ m' Hom).
         + right. exists l0. exists (s, om). exists s'.
           firstorder.
       - intros [[[s His] Heq] | [l [[s om] [s' [[[_om Hps] [[_s Hpm] Hv]] Ht]]]]]; subst.
-        + apply initial_message_is_valid. assumption.
-        + exists s'.
-          apply valid_generated_state_message with s _om _s om l; assumption.
+        + by apply initial_message_is_valid.
+        + by exists s'; apply valid_generated_state_message with s _om _s om l.
     Qed.
 
 (** ** Trace Properties
@@ -1030,7 +1004,7 @@ prove or decompose the above properties in proofs.
       vinitial_state_prop X s ->
       finite_valid_trace s [].
     Proof.
-      split;[constructor;apply initial_state_is_valid|];assumption.
+      by split; [constructor; apply initial_state_is_valid |].
     Qed.
 
     Lemma finite_valid_trace_first_valid_transition
@@ -1039,9 +1013,7 @@ prove or decompose the above properties in proofs.
           (te : transition_item)
           (Htr : finite_valid_trace_from s (te :: tr))
       : input_valid_transition (l te) (s, input te) (destination te, output te).
-    Proof.
-      inversion Htr. assumption.
-    Qed.
+    Proof. by inversion Htr. Qed.
 
     Lemma finite_valid_trace_first_pstate
       (s : state)
@@ -1049,8 +1021,7 @@ prove or decompose the above properties in proofs.
       (Htr : finite_valid_trace_from s tr)
       : valid_state_prop s.
     Proof.
-      inversion Htr; subst; [assumption|].
-      apply Ht.
+      by inversion Htr; subst; [|apply Ht].
     Qed.
 
     Lemma finite_valid_trace_tail
@@ -1059,9 +1030,7 @@ prove or decompose the above properties in proofs.
           (te : transition_item)
           (Htr : finite_valid_trace_from s (te :: tr))
       : finite_valid_trace_from (destination te) tr.
-    Proof.
-      inversion Htr. assumption.
-    Qed.
+    Proof. by inversion Htr. Qed.
 
     Lemma finite_valid_trace_last_pstate
       (s : state)
@@ -1071,17 +1040,15 @@ prove or decompose the above properties in proofs.
     Proof.
       generalize dependent s.
       induction tr; intros.
-      - simpl. apply finite_valid_trace_first_pstate with []. assumption.
+      - by apply finite_valid_trace_first_pstate with [].
       - apply finite_valid_trace_tail in Htr.
         apply IHtr in Htr.
         replace
           (finite_trace_last s (a :: tr))
           with (finite_trace_last (destination a) tr)
-        ;[assumption|].
+        ; [done |].
         unfold finite_trace_last.
-        rewrite map_cons.
-        rewrite unroll_last.
-        reflexivity.
+        by rewrite map_cons, unroll_last.
     Qed.
 
     Lemma input_valid_transition_to
@@ -1096,11 +1063,11 @@ prove or decompose the above properties in proofs.
     Proof.
       generalize dependent s. generalize dependent tr.
       induction tr1.
-      - intros tr Heq s Htr. simpl in Heq; subst. inversion Htr; subst. assumption.
+      - by intros tr [= ->] s; inversion 1.
       - specialize (IHtr1 (tr1 ++ [te] ++ tr2) eq_refl).
         intros tr Heq is Htr; subst. inversion Htr; subst.
         rewrite finite_trace_last_cons.
-        apply IHtr1. assumption.
+        by apply IHtr1.
     Qed.
 
     Lemma finite_valid_trace_consecutive_valid_transition
@@ -1116,7 +1083,7 @@ prove or decompose the above properties in proofs.
       rewrite app_assoc in Heq.
       specialize (input_valid_transition_to s tr (tr1 ++ [te1]) tr2 te2 Htr Heq)
         as Ht.
-      rewrite finite_trace_last_is_last in Ht. assumption.
+      by rewrite finite_trace_last_is_last in Ht.
     Qed.
 
 
@@ -1132,10 +1099,8 @@ prove or decompose the above properties in proofs.
       induction Houtput as [item tr' Hm| item tr'];intros;inversion Htr; subst.
       - simpl in Hm.
         subst.
-        apply input_valid_transition_out in Ht.
-        assumption.
-      - apply (IHHoutput s).
-        assumption.
+        by apply input_valid_transition_out in Ht.
+      - by apply (IHHoutput s).
     Qed.
 
     Lemma valid_trace_input_is_valid
@@ -1151,10 +1116,8 @@ prove or decompose the above properties in proofs.
       ;inversion Htr as [|s _tr'  Htr' _is iom oom l Ht ];subst.
       - simpl in Hm.
         subst.
-        apply input_valid_transition_in in Ht.
-        assumption.
-      - apply (IHHinput s).
-        assumption.
+        by apply input_valid_transition_in in Ht.
+      - by apply (IHHinput s).
     Qed.
 
     Lemma valid_trace_observed_is_valid
@@ -1176,12 +1139,10 @@ prove or decompose the above properties in proofs.
 
     Proof.
       split.
-      - intro Htr.
-        inversion Htr.
-        assumption.
+      - by inversion 1.
       - destruct te. simpl. intro Ht.
         apply input_valid_transition_destination in Ht as Hdestination0.
-        constructor; [|assumption]. constructor. assumption.
+        by constructor; [constructor|].
     Qed.
 
     Lemma extend_right_finite_trace_from
@@ -1197,13 +1158,12 @@ prove or decompose the above properties in proofs.
       : finite_valid_trace_from s1 (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
     Proof.
       induction Ht12.
-      - simpl. apply finite_valid_trace_singleton;assumption.
+      - by apply finite_valid_trace_singleton.
       - rewrite <- app_comm_cons.
-        apply finite_valid_trace_from_extend; try assumption.
+        apply finite_valid_trace_from_extend; [| done].
         simpl in IHHt12. apply IHHt12.
         unfold s2 in *; clear s2.
-        rewrite finite_trace_last_cons in Hv23.
-        assumption.
+        by rewrite finite_trace_last_cons in Hv23.
     Qed.
 
 (**
@@ -1222,16 +1182,16 @@ is equal to the former's last state, it is possible to _concatenate_ them into a
       revert s.
       induction ls;intro s.
       - rewrite finite_trace_last_nil. simpl.
-        intuition (eauto using finite_valid_trace_first_pstate, finite_valid_trace_from_empty).
+        itauto (eauto using finite_valid_trace_first_pstate, finite_valid_trace_from_empty).
       - rewrite finite_trace_last_cons. simpl.
         specialize (IHls (destination a)).
         split.
         + intros [Hal Hl'].
           inversion Hal; subst; simpl in *.
-          constructor;[apply IHls;split|];assumption.
+          by constructor; [apply IHls|].
         + inversion 1;subst; simpl in *.
           apply IHls in Htl as [Hl Hl'].
-          split;[constructor|];assumption.
+          by split; [constructor|].
     Qed.
 
     Lemma finite_valid_trace_from_rev_ind
@@ -1291,9 +1251,7 @@ traces.
     Proof.
       specialize (list_prefix_suffix ls n); intro Hdecompose.
       rewrite <- Hdecompose in Htr.
-      apply finite_valid_trace_from_app_iff in Htr.
-      destruct Htr as [Hpr _].
-      assumption.
+      by apply finite_valid_trace_from_app_iff in Htr as [Hpr _].
     Qed.
 
     Lemma finite_valid_trace_from_suffix
@@ -1308,15 +1266,14 @@ traces.
       rewrite <- (list_prefix_suffix ls n) in Htr.
       apply finite_valid_trace_from_app_iff in Htr.
       destruct Htr as [_ Htr].
-      replace (finite_trace_last s (list_prefix ls n)) with nth in Htr;[assumption|].
+      replace (finite_trace_last s (list_prefix ls n)) with nth in Htr; [done |].
       {
         destruct n.
-        - rewrite finite_trace_nth_first in Hnth. injection Hnth as ->.
-          destruct ls;reflexivity.
+        - rewrite finite_trace_nth_first in Hnth.
+          by destruct ls; cbn; congruence.
         - unfold finite_trace_last.
           rewrite list_prefix_map.
-          apply list_prefix_nth_last.
-          assumption.
+          by apply list_prefix_nth_last.
       }
     Qed.
 
@@ -1331,12 +1288,11 @@ traces.
       : finite_valid_trace_from n1th (list_segment ls n1 n2).
     Proof.
       apply finite_valid_trace_from_suffix with s.
-      - apply finite_valid_trace_from_prefix. assumption.
-      - destruct n1;[assumption|].
+      - by apply finite_valid_trace_from_prefix.
+      - destruct n1; [done |].
         unfold finite_trace_nth in Hnth |- *.
         simpl in Hnth |- *.
-        rewrite list_prefix_map.
-        rewrite list_prefix_nth;assumption.
+        by rewrite list_prefix_map, list_prefix_nth.
     Qed.
 
     (* begin hide *)
@@ -1349,7 +1305,7 @@ traces.
       intros item Hitem.
       apply elem_of_list_split in Hitem as (l1 & l2 & Heq).
       eexists _,_.
-      eapply input_valid_transition_to; cbn; eassumption.
+      by eapply input_valid_transition_to; cbn.
     Qed.
 
     Lemma can_emit_from_valid_trace
@@ -1365,7 +1321,7 @@ traces.
       destruct Hm as (item & Hitem & Houtput).
       exists (destination item).
       unfold can_produce; rewrite <- Houtput.
-      eapply can_produce_from_valid_trace; [apply Htr | assumption].
+      eapply can_produce_from_valid_trace; [apply Htr | done].
     Qed.
 
     (* End Hide *)
@@ -1405,10 +1361,9 @@ that include the final state, and give appropriate induction principles.
           finite_valid_trace_from_to s s' [{| l := l; input := iom; destination := s'; output := oom |}].
     Proof.
       intro Ht.
-      constructor;[|assumption].
+      constructor; [| done].
       constructor.
-      apply input_valid_transition_destination in Ht.
-      assumption.
+      by apply input_valid_transition_destination in Ht.
     Qed.
 
     Lemma finite_valid_trace_from_to_forget_last
@@ -1422,9 +1377,8 @@ that include the final state, and give appropriate induction principles.
     Proof.
       induction 1.
       - apply finite_trace_last_nil.
-      - rewrite finite_trace_last_cons; assumption.
+      - by rewrite finite_trace_last_cons.
     Qed.
-
 
     Lemma finite_valid_trace_from_add_last
           s f tr :
@@ -1434,19 +1388,16 @@ that include the final state, and give appropriate induction principles.
     Proof.
       intro Hfrom.
       induction Hfrom.
-      - rewrite finite_trace_last_nil. intros <-.
-        constructor. assumption.
-      - rewrite finite_trace_last_cons. simpl. intro.
-        constructor;auto.
+      - by rewrite finite_trace_last_nil; intros <-; constructor; auto.
+      - by rewrite finite_trace_last_cons; intros <-; constructor; auto.
     Qed.
 
     Lemma finite_valid_trace_from_to_first_pstate
           s f tr : finite_valid_trace_from_to s f tr -> valid_state_prop s.
     Proof.
       intro Htr.
-      apply finite_valid_trace_from_to_forget_last in Htr.
-      apply finite_valid_trace_first_pstate in Htr.
-      assumption.
+      by apply finite_valid_trace_from_to_forget_last,
+               finite_valid_trace_first_pstate in Htr.
     Qed.
 
     Lemma finite_valid_trace_from_to_last_pstate
@@ -1455,8 +1406,7 @@ that include the final state, and give appropriate induction principles.
       intro Htr.
       rewrite <- (finite_valid_trace_from_to_last _ _ _ Htr).
       apply finite_valid_trace_last_pstate.
-      apply finite_valid_trace_from_to_forget_last in Htr.
-      assumption.
+      by apply finite_valid_trace_from_to_forget_last in Htr.
     Qed.
 
     Lemma finite_valid_trace_from_to_app
@@ -1465,9 +1415,7 @@ that include the final state, and give appropriate induction principles.
         -> finite_valid_trace_from_to m f ls'
         -> finite_valid_trace_from_to s f (ls ++ ls').
     Proof.
-      intros Hl Hl';induction Hl;simpl.
-      - trivial.
-      - constructor;auto.
+      by intros Hl Hl'; induction Hl; [|constructor; auto].
     Qed.
 
     Lemma finite_valid_trace_from_to_app_split
@@ -1479,9 +1427,9 @@ that include the final state, and give appropriate induction principles.
     Proof.
       revert s;induction ls;intros s;simpl.
       - rewrite finite_trace_last_nil.
-        intro Htr. split;[|assumption].
+        intro Htr. split; [| done].
         apply finite_valid_trace_from_to_first_pstate in Htr.
-        constructor;assumption.
+        by constructor.
       - rewrite finite_trace_last_cons.
         inversion 1; subst; simpl in *.
         apply IHls in Htl as [].
@@ -1529,7 +1477,7 @@ that include the final state, and give appropriate induction principles.
       : finite_valid_trace_from_to s1 s3 (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
     Proof.
       induction Ht12.
-      - simpl. apply finite_valid_trace_from_to_singleton;assumption.
+      - by apply finite_valid_trace_from_to_singleton.
       - rewrite <- app_comm_cons.
         apply finite_valid_trace_from_to_extend; auto.
     Qed.
@@ -1553,15 +1501,14 @@ that include the final state, and give appropriate induction principles.
       revert sf Htr.
       induction tr using rev_ind;
       intros sf Htr.
-      - inversion Htr;subst. apply Hempty;assumption.
+      - inversion Htr; subst. by apply Hempty.
       - apply finite_valid_trace_from_to_app_split in Htr.
         destruct Htr as [Htr Hstep].
         inversion Hstep;subst.
         inversion Htl;subst.
         revert Ht.
-        apply Hextend; [|assumption].
-        apply IHtr.
-        assumption.
+        apply Hextend; [| done].
+        by apply IHtr.
     Qed.
 
     Lemma finite_valid_trace_init_to_rev_ind
@@ -1582,11 +1529,8 @@ that include the final state, and give appropriate induction principles.
       intros si sf tr Htr.
       destruct Htr as [Htr Hinit].
       induction Htr using finite_valid_trace_from_to_rev_ind.
-      - apply Hempty. assumption.
-      - apply Hextend with s.
-        + apply IHHtr. assumption.
-        + split; assumption.
-        + assumption.
+      - by apply Hempty.
+      - by apply Hextend with s; auto.
     Qed.
 
 (** An inductive valid trace property which also identifies the final message.
@@ -1629,9 +1573,7 @@ over [finite_valid_trace_init_to] traces.
       (is f : state) (om : option message) (tl : list transition_item)
       (Htl : finite_valid_trace_init_to_emit is f om tl)
       : initial_state_prop is.
-    Proof.
-      induction Htl; assumption.
-    Qed.
+    Proof. by induction Htl. Qed.
 
 (** A property characterizing the "emit" message of [finite_valid_trace_init_to_emit].
 
@@ -1653,12 +1595,12 @@ is the output of the last transition.
     Proof.
       unfold empty_initial_message_or_final_output.
       destruct_list_last tl tl' item Heqtl.
-      - inversion Htl; [assumption|].
+      - inversion Htl; [done |].
         destruct tl0; simpl in *; congruence.
       - rewrite <- Heqtl in Htl.
         inversion Htl; [destruct tl'; simpl in *; congruence|].
         revert Heqtl; subst; intro Heqtl.
-        apply app_inj_tail, proj2 in Heqtl. subst. reflexivity.
+        by apply app_inj_tail, proj2 in Heqtl; subst.
     Qed.
 
     Lemma finite_valid_trace_init_to_emit_valid_state_message
@@ -1667,8 +1609,8 @@ is the output of the last transition.
       : valid_state_message_prop f om.
     Proof.
       induction Htl.
-      - apply valid_initial_state_message; assumption.
-      - apply valid_generated_state_message with s _om iom_s iom l0; assumption.
+      - by apply valid_initial_state_message.
+      - by apply valid_generated_state_message with s _om iom_s iom l0.
     Qed.
 
     Lemma finite_valid_trace_init_to_emit_valid_state_message_rev
@@ -1678,7 +1620,7 @@ is the output of the last transition.
         finite_valid_trace_init_to_emit s f om tl.
     Proof.
       induction Hp.
-      - exists s, []. constructor; assumption.
+      - by exists s, []; constructor.
       - destruct IHHp1 as [is [tl Hs]].
         destruct IHHp2 as [om_is [om_tl Hom]].
         eexists; eexists.
@@ -1692,15 +1634,15 @@ is the output of the last transition.
       : finite_valid_trace_init_to s f tl.
     Proof.
       apply finite_valid_trace_init_to_emit_initial_state in Htl as Hinit.
-      split; [|assumption].
+      split; [| done].
       clear Hinit.
       induction Htl.
-      - constructor. apply initial_state_is_valid. assumption.
-      - apply finite_valid_trace_from_to_app with s; [assumption|].
+      - constructor. by apply initial_state_is_valid.
+      - apply finite_valid_trace_from_to_app with s; [done |].
         apply finite_valid_trace_from_to_singleton.
         apply finite_valid_trace_init_to_emit_valid_state_message in Htl1.
         apply finite_valid_trace_init_to_emit_valid_state_message in Htl2.
-        repeat split; [..|assumption|assumption]; eexists; [exact Htl1 | exact Htl2].
+        repeat split; try red; eauto.
     Qed.
 
     Lemma finite_valid_trace_init_to_add_emit
@@ -1709,7 +1651,7 @@ is the output of the last transition.
       : finite_valid_trace_init_to_emit s f (finite_trace_last_output tl) tl.
     Proof.
       induction Htl using finite_valid_trace_init_to_rev_ind.
-      - constructor; [assumption | exact I].
+      - by constructor.
       - rewrite finite_trace_last_output_is_last. simpl.
         destruct Ht as [[_ [[_s Hiom] Hv]] Ht].
         specialize (finite_valid_trace_init_to_emit_valid_state_message_rev _ _ Hiom) as [iom_s [iom_tr Hiom_tr]].
@@ -1744,11 +1686,11 @@ to be used for the trace generating the message received in the last transition.
       apply finite_valid_trace_init_to_add_emit in Htr.
       remember (finite_trace_last_output tr) as om. clear Heqom.
       induction Htr.
-      - apply Hempty. assumption.
+      - by apply Hempty.
       - assert (Hivt : input_valid_transition l0 (s, iom) (s', oom)).
         { apply finite_valid_trace_init_to_emit_valid_state_message in Htr1.
           apply finite_valid_trace_init_to_emit_valid_state_message in Htr2.
-          repeat split; [..|assumption|assumption]; eexists; [exact Htr1 | exact Htr2].
+          repeat split; try red; eauto.
         }
         apply finite_valid_trace_init_to_emit_output in Htr2 as Houtput.
         apply finite_valid_trace_init_to_emit_forget_emit in Htr1.
@@ -1790,10 +1732,10 @@ definitions, mostly reducing them to properties about their finite segments.
     Proof.
       generalize dependent is. generalize dependent tr.
       induction tr1.
-      - intros tr Heq is Htr. simpl in Heq; subst. inversion Htr; subst. inversion Htl; subst. assumption.
+      - intros tr Heq is Htr. simpl in Heq; subst. by inversion Htr; inversion Htl; subst.
       - specialize (IHtr1 (stream_app (tr1 ++ [te1; te2]) tr2) eq_refl).
         intros tr Heq is Htr; subst. inversion Htr; subst.
-        specialize (IHtr1 s Htl). assumption.
+        apply (IHtr1 s Htl).
     Qed.
 
     Lemma infinite_valid_trace_from_app_iff
@@ -1807,20 +1749,19 @@ definitions, mostly reducing them to properties about their finite segments.
     Proof.
       intros. generalize dependent ls'. generalize dependent s.
       induction ls; intros; split.
-      - destruct 1. assumption.
-      - simpl; intros Hls'; split; try assumption. constructor. inversion Hls'; try assumption.
+      - by destruct 1.
+      - simpl; intros Hls'; split; [| done]. constructor. inversion Hls'.
         apply (input_valid_transition_origin Ht).
       - simpl. intros [Htr Htr'].
         destruct a. apply infinite_valid_trace_from_extend.
         + apply IHls. inversion Htr. split. apply Htl.
           unfold s' in Htr'.
-          rewrite finite_trace_last_cons in Htr'.
-          assumption.
+          by rewrite finite_trace_last_cons in Htr'.
         + inversion Htr. apply Ht.
        - inversion 1. subst. specialize (IHls s1). simpl in IHls. specialize (IHls ls'). apply IHls in Htl.
          destruct Htl. split.
-         + constructor; assumption.
-         + unfold s'. rewrite finite_trace_last_cons. assumption.
+         + by constructor.
+         + by unfold s'; rewrite finite_trace_last_cons.
     Qed.
 
     Lemma infinite_valid_trace_from_prefix
@@ -1832,9 +1773,7 @@ definitions, mostly reducing them to properties about their finite segments.
     Proof.
       specialize (stream_prefix_suffix ls n); intro Hdecompose.
       rewrite <- Hdecompose in Htr.
-      apply infinite_valid_trace_from_app_iff in Htr.
-      destruct Htr as [Hpr _].
-      assumption.
+      by apply infinite_valid_trace_from_app_iff in Htr as [Hpr _].
     Qed.
 
     Lemma infinite_valid_trace_from_prefix_rev
@@ -1848,13 +1787,11 @@ definitions, mostly reducing them to properties about their finite segments.
       intros s (a, ls) Hpref.
       assert (Hpref0 := Hpref 1).
       inversion Hpref0; subst.
-      constructor; try assumption.
+      constructor; [| done].
       apply Hls.
       intro n.
       specialize (Hpref (S n)).
-      simpl in Hpref.
-      inversion Hpref; subst.
-      assumption.
+      by inversion Hpref; subst.
     Qed.
 
     Lemma infinite_valid_trace_from_EqSt :
@@ -1864,8 +1801,7 @@ definitions, mostly reducing them to properties about their finite segments.
       apply infinite_valid_trace_from_prefix_rev.
       intro n.
       rewrite <- (stream_prefix_EqSt _ _ Heq n).
-      apply infinite_valid_trace_from_prefix.
-      assumption.
+      by apply infinite_valid_trace_from_prefix.
     Qed.
 
     Lemma infinite_valid_trace_from_segment
@@ -1878,14 +1814,10 @@ definitions, mostly reducing them to properties about their finite segments.
       : finite_valid_trace_from n1th (stream_segment ls n1 n2).
     Proof.
       apply finite_valid_trace_from_suffix with s.
-      - apply infinite_valid_trace_from_prefix. assumption.
-      - destruct n1; try reflexivity.
-        unfold n1th. clear n1th.
-        unfold finite_trace_nth.
-        simpl.
-        rewrite stream_prefix_map.
-        rewrite stream_prefix_nth; try assumption.
-        reflexivity.
+      - by apply infinite_valid_trace_from_prefix.
+      - destruct n1; [done |].
+        subst n1th; unfold finite_trace_nth; cbn.
+        by rewrite stream_prefix_map, stream_prefix_nth.
     Qed.
 
 (** *** valid traces
@@ -1914,17 +1846,13 @@ It inherits some previously introduced definitions, culminating with the
       (tr : Trace)
       (Htr : valid_trace_prop tr)
       : valid_trace_from_prop tr.
-    Proof.
-      destruct tr; simpl; destruct Htr as [Htr Hinit]; assumption.
-    Qed.
+    Proof. by destruct tr, Htr. Qed.
 
     Lemma valid_trace_initial
       (tr : Trace)
       (Htr : valid_trace_prop tr)
       : initial_state_prop (trace_first tr).
-    Proof.
-      destruct tr; simpl; destruct Htr as [Htr Hinit]; assumption.
-    Qed.
+    Proof. by destruct tr, Htr. Qed.
 
     Lemma valid_trace_from_iff
       (tr : Trace)
@@ -1933,9 +1861,9 @@ It inherits some previously introduced definitions, culminating with the
     Proof.
       split.
       - intro Htr; split.
-        + apply valid_trace_from; assumption.
-        + apply valid_trace_initial; assumption.
-      - destruct tr; simpl; intros [Htr Hinit]; split; assumption.
+        + by apply valid_trace_from.
+        + by apply valid_trace_initial.
+      - by destruct tr; cbn; intros [Htr Hinit].
     Qed.
 
 (** Having defined [valid_trace]s, we now connect them to valid states
@@ -1956,11 +1884,11 @@ in <<s>> by outputting <<m>> *)
       apply finite_valid_trace_init_to_emit_output in Htr as Houtput.
       unfold empty_initial_message_or_final_output in Houtput.
       destruct_list_last tr tr' item Heqtr.
-      - left. split; [|assumption]. inversion Htr; [assumption|].
+      - left. split; [| done]. inversion Htr; [done |].
         destruct tl; simpl in *; congruence.
       - right. apply finite_valid_trace_init_to_emit_forget_emit in Htr.
-        eexists _,_. split; [exact Htr|].
-        rewrite finite_trace_last_output_is_last. assumption.
+        eexists _,_.
+        by rewrite finite_trace_last_output_is_last.
     Qed.
 
     (** Giving a trace for [valid_state_prop] can be stated more
@@ -1978,13 +1906,10 @@ in <<s>> by outputting <<m>> *)
       apply valid_state_message_has_trace in Hp.
       destruct Hp as [[Hinit _]|Htrace].
       + exists s, [].
-        split;[|assumption].
+        split;[| done].
         constructor.
-        apply initial_state_is_valid.
-        assumption.
-      + destruct Htrace as [is [tr [Htr _]]].
-        exists is, tr.
-        assumption.
+        by apply initial_state_is_valid.
+      + by destruct Htrace as [is [tr [Htr _]]]; eauto.
     Qed.
 
     (** For any input valid transition there exists a valid trace ending in it. *)
@@ -1999,10 +1924,9 @@ in <<s>> by outputting <<m>> *)
       destruct Hs1 as [s0 [ts Hts]].
       exists s0, ts.
       destruct Hts as [Hts Hinit].
-      repeat split; [|assumption|revert Hts; apply finite_valid_trace_from_to_last].
+      repeat split; [| done | revert Hts; apply finite_valid_trace_from_to_last].
       revert Ht.
-      apply extend_right_finite_trace_from_to.
-      assumption.
+      by apply extend_right_finite_trace_from_to.
     Qed.
 
     Lemma can_emit_has_trace m :
@@ -2014,7 +1938,7 @@ in <<s>> by outputting <<m>> *)
       intros [(s, im) [l [s' Hm]]].
       apply exists_right_finite_trace_from in Hm as [is [tr [Htr _]]].
       apply finite_valid_trace_init_to_forget_last in Htr.
-      eexists is, tr, _; split; [exact Htr|reflexivity].
+      by eexists is, tr, _.
     Qed.
 
     (** Any trace with the 'finite_valid_trace_from' property can be completed
@@ -2034,8 +1958,7 @@ in <<s>> by outputting <<m>> *)
       apply finite_valid_trace_from_to_last in Htrs as Hlast.
       rewrite <- Hlast in Htr.
       apply finite_valid_trace_from_to_forget_last in Htrs.
-      repeat (split || assumption ||
-      apply finite_valid_trace_from_app_iff).
+      repeat (split || done || apply finite_valid_trace_from_app_iff).
     Qed.
 
     (** Any trace with the 'finite_valid_trace_from_to' property can be completed
@@ -2050,14 +1973,14 @@ in <<s>> by outputting <<m>> *)
     Proof.
       assert (valid_state_prop s) as Hs
         by (apply finite_valid_trace_from_to_forget_last,
-            finite_valid_trace_first_pstate in Htr; assumption).
+            finite_valid_trace_first_pstate in Htr; done).
       apply valid_state_has_trace in Hs.
       destruct Hs as [is [trs [Htrs His]]].
       exists is, trs.
       split.
-      - split;[|assumption].
-        apply finite_valid_trace_from_to_app with s;assumption.
-      - apply finite_valid_trace_from_to_last in Htrs;assumption.
+      - split; [| done].
+        by apply finite_valid_trace_from_to_app with s.
+      - by apply finite_valid_trace_from_to_last in Htrs.
     Qed.
 
 (** Another benefit of defining traces is that we can succintly
@@ -2085,10 +2008,8 @@ This relation is often used in stating safety and liveness properties.*)
     Proof.
       unfold in_futures in Hin.
       destruct Hin as [tr Htr].
-      induction Htr.
-      - reflexivity.
-      - apply Ht in Ht0.
-        transitivity s;assumption.
+      induction Htr; [done |].
+      apply Ht in Ht0. by transitivity s.
     Qed.
 
     Instance eq_equiv : @Equivalence state eq := _.
@@ -2106,10 +2027,8 @@ This relation is often used in stating safety and liveness properties.*)
       - specialize (in_futures_preserving (relation_disjunction R eq) Hpre) as Hpreserve.
         spec Hpreserve.
         + intro; intros. left. apply (Ht s3 s4 l0 om1 om2 Hvalid_transition).
-        + spec Hpreserve s1 s2 Hin. destruct Hpreserve; try assumption.
-          elim Hneq. assumption.
-      - intros x1 x2 Heq. subst. intros y1 y2 Heq. subst.
-        split; intro; assumption.
+        + by destruct (Hpreserve s1 s2).
+      - by intros x1 x2 -> y1 y2 ->.
     Qed.
 
     Lemma in_futures_valid_fst
@@ -2118,9 +2037,8 @@ This relation is often used in stating safety and liveness properties.*)
       : valid_state_prop first.
     Proof.
       destruct Hfuture as [tr Htr].
-      apply finite_valid_trace_from_to_forget_last in Htr.
-      apply finite_valid_trace_first_pstate in Htr.
-      assumption.
+      by apply finite_valid_trace_from_to_forget_last,
+         finite_valid_trace_first_pstate in Htr.
     Qed.
 
     (* begin hide *)
@@ -2129,11 +2047,8 @@ This relation is often used in stating safety and liveness properties.*)
       (first: state)
       (Hps : valid_state_prop first)
       : in_futures first first.
-
     Proof.
-      exists [].
-      constructor.
-      assumption.
+      by exists []; constructor.
     Qed.
 
     Lemma in_futures_trans
@@ -2145,7 +2060,7 @@ This relation is often used in stating safety and liveness properties.*)
       destruct H12 as [tr12 Htr12].
       destruct H23 as [tr23 Htr23].
       exists (tr12 ++ tr23).
-      apply finite_valid_trace_from_to_app with second;assumption.
+      by apply finite_valid_trace_from_to_app with second.
     Qed.
 
     Lemma input_valid_transition_in_futures {l s im s' om}
@@ -2153,8 +2068,8 @@ This relation is often used in stating safety and liveness properties.*)
       : in_futures s s'.
     Proof.
       apply finite_valid_trace_singleton in Ht.
-      apply finite_valid_trace_from_add_last with (f := s') in Ht; [|reflexivity].
-      eexists. exact Ht.
+      apply finite_valid_trace_from_add_last with (f := s') in Ht; [| done].
+      by eexists.
     Qed.
 
     Lemma elem_of_trace_in_futures_left is s tr
@@ -2166,8 +2081,7 @@ This relation is often used in stating safety and liveness properties.*)
       exists suf.
       erewrite <- finite_trace_last_is_last.
       eapply finite_valid_trace_from_to_app_split.
-      rewrite <- app_assoc; cbn; rewrite <- Heqtr.
-      eassumption.
+      by rewrite <- app_assoc; cbn; rewrite <- Heqtr.
     Qed.
 
     Lemma elem_of_trace_in_futures_right is s tr
@@ -2179,8 +2093,7 @@ This relation is often used in stating safety and liveness properties.*)
       exists (pre ++ [item]).
       erewrite <- finite_trace_last_is_last.
       eapply finite_valid_trace_from_to_app_split.
-      rewrite <- app_assoc; cbn; rewrite <- Heqtr.
-      eassumption.
+      by rewrite <- app_assoc; cbn; rewrite <- Heqtr.
     Qed.
 
     Lemma in_futures_witness
@@ -2197,8 +2110,7 @@ This relation is often used in stating safety and liveness properties.*)
       destruct Hfutures as [suffix_tr Hsuffix_tr].
       specialize (finite_valid_trace_from_to_app _ _ _ _ _ Hprefix_tr Hsuffix_tr) as Happ.
       apply finite_valid_trace_from_to_forget_last in Happ.
-      assert (Htr : valid_trace_prop (Finite prefix_start (prefix_tr ++ suffix_tr)))
-        by (split;assumption).
+      assert (Htr : valid_trace_prop (Finite prefix_start (prefix_tr ++ suffix_tr))) by done.
       exists (exist _ _ Htr).
       simpl.
       exists (length prefix_tr), (length prefix_tr + length suffix_tr).
@@ -2233,7 +2145,7 @@ This relation is often used in stating safety and liveness properties.*)
       : finite_valid_trace_from first (trace_segment tr n1 n2).
     Proof.
       destruct tr as [s tr | s tr]; simpl in *; destruct Htr as [Htr Hinit].
-      - apply finite_valid_trace_from_segment with s; try assumption.
+      - by apply finite_valid_trace_from_segment with s.
       - inversion Hfirst; subst; clear Hfirst.
         apply (infinite_valid_trace_from_segment s tr Htr n1 n2 Hle).
     Qed.
@@ -2282,45 +2194,40 @@ This relation is often used in stating safety and liveness properties.*)
       destruct tr as [tr Htr]. simpl in *.
       generalize dependent tr. generalize dependent last.
       apply (rev_ind (fun prefix => forall (last : transition_item) (tr : Trace), valid_trace_prop tr -> trace_prefix tr last prefix -> finite_valid_trace (trace_first tr) (prefix ++ [last]))).
-      - intros last tr Htr Hprefix; destruct tr as [ | ]; unfold trace_prefix in Hprefix;   simpl in Hprefix
+      - by intros last tr Htr Hprefix; destruct tr as [ | ]; unfold trace_prefix in Hprefix; simpl in Hprefix
         ; destruct Hprefix as [suffix Heq]; subst; destruct Htr as [Htr Hinit]
-        ; unfold trace_first; simpl; constructor; try assumption
+        ; unfold trace_first; simpl; constructor; try done
         ; inversion Htr; subst; clear Htr
-        ; apply finite_valid_trace_singleton; assumption.
+        ; apply finite_valid_trace_singleton.
       - intros last_p p Hind last tr Htr Hprefix.
         specialize (Hind last_p tr Htr).
         destruct tr as [ | ]; unfold trace_prefix in Hprefix;   simpl in Hprefix
         ; destruct Hprefix as [suffix Heq]; subst; destruct Htr as [Htr Hinit]; simpl; simpl in Hind
-        ; split; try assumption
-        .
+        ; split; try done.
         + assert
             (Hex : exists suffix0 : list transition_item,
                 (p ++ [last_p]) ++ last :: suffix = p ++ last_p :: suffix0
-            ) by (exists (last :: suffix); rewrite <- app_assoc; reflexivity)
+            ) by (exists (last :: suffix); rewrite <- app_assoc; done)
           ; specialize (Hind Hex); clear Hex
           ; destruct Hind as [Hptr _]
           ; destruct last
           ; apply extend_right_finite_trace_from
-          ; try assumption
-          .
-          rewrite <- (app_cons {| l := l0; input := input0; destination := destination0; output := output0 |} suffix) in Htr.
-          rewrite app_assoc in Htr.
-          rewrite <- (app_assoc p _ _) in Htr. simpl in Htr.
-          rewrite <- app_assoc in Htr.
+          ; try done.
+          rewrite <- (app_cons {| l := l0; input := input0; destination := destination0; output := output0 |} suffix),
+                  app_assoc, <- !(app_assoc p _ _) in Htr; cbn in Htr.
           specialize
             (finite_valid_trace_consecutive_valid_transition _ _ _ _ _ _ Htr eq_refl).
           simpl.
-          rewrite finite_trace_last_is_last. trivial.
+          by rewrite finite_trace_last_is_last.
         + assert
             (Hex : exists suffix0 : Stream transition_item,
                 stream_app (p ++ [last_p])  (Cons last suffix) = stream_app p (Cons last_p suffix0)
-            ) by (exists (Cons last suffix); rewrite <- stream_app_assoc; reflexivity)
+            ) by (exists (Cons last suffix); rewrite <- stream_app_assoc; done)
           ; specialize (Hind Hex); clear Hex
           ; destruct Hind as [Hptr _]
           ; destruct last
           ; apply extend_right_finite_trace_from
-          ; try assumption
-          .
+          ; try done.
           rewrite <- stream_app_cons in Htr.
           rewrite stream_app_assoc in Htr.
           rewrite <- (app_assoc p _ _) in Htr. simpl in Htr.
@@ -2336,7 +2243,7 @@ This relation is often used in stating safety and liveness properties.*)
                eq_refl
             ).
           simpl.
-          rewrite finite_trace_last_is_last. trivial.
+          by rewrite finite_trace_last_is_last.
     Qed.
 
 
@@ -2359,18 +2266,18 @@ This relation is often used in stating safety and liveness properties.*)
       remember (trace_prefix_fn tr n) as pref_tr.
       destruct pref_tr as [s l | s l].
       - destruct l as [| item l].
-        + destruct tr as [s' l' | s' l']
+        + by destruct tr as [s' l' | s' l']
           ; destruct Htr as [Htr Hinit]
           ; inversion Heqpref_tr; subst
-          ; (split;[|assumption])
+          ; (split; [| done])
           ; constructor
-          ;  apply initial_state_is_valid;assumption.
+          ; apply initial_state_is_valid.
         + assert (Hnnil : item ::l <> [])
             by (intro Hnil; inversion Hnil).
           specialize (exists_last Hnnil); intros [prefix [last Heq]].
           rewrite Heq in *; clear Hnnil Heq l item.
           replace s with (trace_first (proj1_sig (exist _ tr Htr)))
-          ; try (destruct tr; inversion Heqpref_tr; subst; reflexivity).
+          ; try (by destruct tr; inversion Heqpref_tr; subst).
           apply trace_prefix_valid.
           remember (prefix ++ [last]) as prefix_last. revert Heqprefix_last.
           destruct tr as [s' l' | s' l']
@@ -2382,13 +2289,11 @@ This relation is often used in stating safety and liveness properties.*)
           * specialize (list_prefix_suffix l' n); intro Hl'.
             rewrite <- Hl'. rewrite Heqprefix.
             exists (list_suffix l' n).
-            rewrite <- app_assoc.
-            reflexivity.
+            by rewrite <- app_assoc.
           * specialize (stream_prefix_suffix l' n); intro Hl'.
             rewrite <- Hl'. rewrite Heqprefix.
             exists (stream_suffix l' n).
-            rewrite <- stream_app_assoc.
-            reflexivity.
+            by rewrite <- stream_app_assoc.
       - destruct tr as [s' l' | s' l']; inversion Heqpref_tr.
     Qed.
 
@@ -2403,14 +2308,12 @@ This relation is often used in stating safety and liveness properties.*)
       destruct tr as [s0 l | s0 l]; destruct Htr as [Htr Hinit].
       - specialize (finite_valid_trace_from_suffix s0 l Htr n s Hnth).
         intro Hsuf.
-        apply finite_valid_trace_first_pstate in Hsuf.
-        assumption.
+        by apply finite_valid_trace_first_pstate in Hsuf.
       - assert (Hle : n <= n) by lia.
         specialize (infinite_valid_trace_from_segment s0 l Htr n n Hle)
         ; simpl; intros Hseg.
         inversion Hnth.
-        apply finite_valid_trace_first_pstate in Hseg.
-        assumption.
+        by apply finite_valid_trace_first_pstate in Hseg.
     Qed.
 
     Lemma in_futures_valid_snd
@@ -2421,7 +2324,7 @@ This relation is often used in stating safety and liveness properties.*)
       specialize (in_futures_witness first second Hfutures)
       ; intros [tr [n1 [n2 [Hle [Hn1 Hn2]]]]].
       destruct tr as [tr Htr]; simpl in Hn2.
-      apply valid_trace_nth with tr n2; assumption.
+      by apply valid_trace_nth with tr n2.
     Qed.
 
     Lemma in_futures_witness_reverse
@@ -2437,18 +2340,17 @@ This relation is often used in stating safety and liveness properties.*)
       simpl in *.
       inversion Hle; subst; clear Hle.
       - rewrite Hs1 in Hs2. inversion Hs2; subst; clear Hs2.
-        exists [].
-        constructor. apply valid_trace_nth with tr n2; assumption.
+        exists []. constructor. by apply valid_trace_nth with tr n2.
       - exists (trace_segment tr n1 (S m)).
         apply finite_valid_trace_from_add_last.
-        + apply valid_trace_segment; try assumption. lia.
+        + apply valid_trace_segment; [done | lia | done].
         + { destruct tr as [s tr | s tr]; simpl.
           - simpl in Hs1, Hs2.
             unfold list_segment.
             rewrite finite_trace_last_suffix.
-            apply finite_trace_last_prefix. assumption.
-            rewrite list_prefix_length. lia.
-            apply finite_trace_nth_length in Hs2. lia.
+            by apply finite_trace_last_prefix.
+            apply finite_trace_nth_length in Hs2.
+            rewrite list_prefix_length; lia.
           - unfold stream_segment.
             rewrite unlock_finite_trace_last.
             rewrite list_suffix_map, stream_prefix_map.
@@ -2456,8 +2358,7 @@ This relation is often used in stating safety and liveness properties.*)
             rewrite list_suffix_last.
             + symmetry. rewrite stream_prefix_nth_last.
               unfold Str_nth in Hs2. simpl in Hs2.
-              inversion Hs2; subst.
-              reflexivity.
+              by inversion Hs2; subst.
             + specialize (stream_prefix_length (Streams.map destination tr) (S m)); intro Hpref_len.
               rewrite Hpref_len.
               lia.
@@ -2558,7 +2459,7 @@ Definition valid_trace_add_default_last
   [msg] [X:VLSM msg] [s tr] (Htr: base_prop msg X s tr):
     trace_prop msg X s (finite_trace_last s tr) tr.
 Proof.
-  apply valid_trace_add_last. assumption. reflexivity.
+  by apply valid_trace_add_last.
 Defined.
 
 Instance trace_with_last_valid_trace_from:
@@ -2654,7 +2555,7 @@ Byzantine fault tolerance analysis.
     : valid_state_message_prop pre_loaded_with_all_messages_vlsm (proj1_sig (vs0 X)) om.
   Proof.
     apply valid_initial_state_message;[apply proj2_sig|].
-    destruct om;exact I.
+    by destruct om.
   Qed.
 
   Lemma pre_loaded_with_all_messages_valid_state_message_preservation
@@ -2664,10 +2565,9 @@ Byzantine fault tolerance analysis.
     : valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
   Proof.
     induction Hps.
-    - apply (valid_initial_state_message pre_loaded_with_all_messages_vlsm).
-      assumption.
-      destruct om;exact I.
-    - apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l0; assumption.
+    - apply (valid_initial_state_message pre_loaded_with_all_messages_vlsm); [done |].
+      by destruct om.
+    - by apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l0.
   Qed.
 
   Lemma pre_loaded_with_all_messages_valid_state_prop
@@ -2679,7 +2579,7 @@ Byzantine fault tolerance analysis.
     destruct Hps as [om Hprs].
     exists om.
     apply pre_loaded_with_all_messages_valid_state_message_preservation.
-    intuition.
+    itauto.
   Qed.
   (* end hide *)
 
@@ -2712,15 +2612,13 @@ Byzantine fault tolerance analysis.
     split.
     - intros [om Hvalid].
       induction Hvalid.
-      + apply preloaded_valid_initial_state.
-        assumption.
-      + apply preloaded_protocol_generated with l0 s om om';assumption.
+      + by apply preloaded_valid_initial_state.
+      + by apply preloaded_protocol_generated with l0 s om om'.
     - induction 1.
-      + exists None.
-        apply valid_initial_state_message;[assumption|exact I].
+      + by exists None; apply valid_initial_state_message.
       + exists om'. destruct IHpreloaded_valid_state_prop as [_om Hs].
         specialize (any_message_is_valid_in_preloaded om) as [_s Hom].
-        apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l0;assumption.
+        by apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l0.
   Qed.
 
   Lemma preloaded_weaken_valid_state_message_prop s om:
@@ -2729,10 +2627,8 @@ Byzantine fault tolerance analysis.
   Proof.
     induction 1.
     - refine (valid_initial_state_message pre_loaded_with_all_messages_vlsm s Hs om _).
-      destruct om;exact I.
-    - exact (valid_generated_state_message pre_loaded_with_all_messages_vlsm
-                                _ _ IHvalid_state_message_prop1
-                                _ _ IHvalid_state_message_prop2 l0 Hv _ _ Ht).
+      by destruct om.
+    - by eapply valid_generated_state_message; cycle 2; eauto.
   Qed.
 
   Lemma preloaded_weaken_input_valid_transition
@@ -2742,15 +2638,11 @@ Byzantine fault tolerance analysis.
   Proof.
     unfold input_valid_transition.
     intros [[[_om valid_s] [_ Hvalid]] Htrans].
-    split;[clear Htrans|assumption].
+    split;[clear Htrans | done].
     split.
-    - exists _om.
-      apply preloaded_weaken_valid_state_message_prop.
-      assumption.
+    - by exists _om; apply preloaded_weaken_valid_state_message_prop.
     - clear _om valid_s.
-      split.
-      + apply any_message_is_valid_in_preloaded.
-      + assumption.
+      split; [| done]. apply any_message_is_valid_in_preloaded.
   Qed.
 
   Lemma preloaded_weaken_valid_trace_from s tr
@@ -2762,7 +2654,7 @@ Byzantine fault tolerance analysis.
       destruct H as [om H]. exists om.
       revert H. apply preloaded_weaken_valid_state_message_prop.
     - apply (finite_valid_trace_from_app_iff pre_loaded_with_all_messages_vlsm).
-      split; [assumption|].
+      split; [done |].
       apply (finite_valid_trace_singleton pre_loaded_with_all_messages_vlsm).
       revert Hx. apply preloaded_weaken_input_valid_transition.
   Qed.
@@ -2780,30 +2672,27 @@ Byzantine fault tolerance analysis.
     ; [|apply Htr | | apply Htr]
     ; destruct Htr as [Htr Hinit].
     - inversion Htr; subst.
-      apply (finite_valid_trace_from_to_empty X).
-      apply initial_state_is_valid.
-      assumption.
+      by apply (finite_valid_trace_from_to_empty X), initial_state_is_valid.
     - apply finite_valid_trace_from_to_last in Htr as Hlst.
       apply finite_valid_trace_from_to_app_split in Htr.
       destruct Htr as [Htr Hx].
       specialize (IHtr _ (conj Htr Hinit)).
       spec IHtr.
       {
-        intros. apply Hobs.
-        apply trace_has_message_prefix. assumption.
+        by intros; apply Hobs, trace_has_message_prefix.
       }
       destruct IHtr as [IHtr _];
       apply finite_valid_trace_from_to_forget_last in IHtr.
-      apply finite_valid_trace_from_add_last; [| assumption].
+      apply finite_valid_trace_from_add_last; [| done].
       inversion Hx; subst f tl s'.
-      apply (extend_right_finite_trace_from X); [assumption |].
+      apply (extend_right_finite_trace_from X); [done |].
       destruct Ht as [[_ [_ Hv]] Ht].
       apply finite_valid_trace_last_pstate in IHtr as Hplst.
-      repeat split. 1, 3-4: assumption.
+      repeat split. 1, 3-4: done.
       destruct iom as [m |]; [| apply option_valid_message_None].
       apply option_valid_message_Some, Hobs.
       red; rewrite Exists_app, Exists_cons.
-      subst; cbn; intuition.
+      subst; cbn; itauto.
   Qed.
 
 End pre_loaded_with_all_messages_vlsm.
@@ -2829,10 +2718,7 @@ Proof.
     | context [_ ++ [?item]] => remember item as lstitem
     end.
     exists (trs ++ [lstitem]). exists lstitem.
-    split; [assumption|].
-    split; [apply last_error_is_last|].
-    subst lstitem.
-    split; reflexivity.
+    by rewrite last_error_is_last; subst.
   - intros [is [tr [item [Htr [Hitem [Hs Hm]]]]]].
     destruct_list_last tr tr' item' Heq; [inversion Hitem|].
     clear Heq.
@@ -2907,33 +2793,20 @@ Qed.
 Lemma same_VLSM_valid_preservation l1 s1 om
   : vvalid X1 l1 (s1, om) ->
     vvalid X2 (same_VLSM_label_rew Heq l1) (same_VLSM_state_rew Heq s1, om).
-Proof.
-  unfold same_VLSM_label_rew, same_VLSM_state_rew.
-  revert l1 s1. rewrite Heq.
-  intros. assumption.
-Qed.
+Proof. by subst. Qed.
 
 Lemma same_VLSM_transition_preservation l1 s1 om s1' om'
   : vtransition X1 l1 (s1, om) = (s1', om') ->
     vtransition X2 (same_VLSM_label_rew Heq l1) (same_VLSM_state_rew Heq s1, om) =
       (same_VLSM_state_rew Heq s1', om').
-Proof.
-  unfold same_VLSM_label_rew, same_VLSM_state_rew.
-  revert l1 s1 s1'. rewrite Heq.
-  intros. assumption.
-Qed.
+Proof. by subst. Qed.
 
 Lemma same_VLSM_initial_state_preservation s1
   : vinitial_state_prop X1 s1 -> vinitial_state_prop X2 (same_VLSM_state_rew Heq s1).
-Proof.
-  revert s1. unfold same_VLSM_state_rew. rewrite Heq.
-  intros. assumption.
-Qed.
+Proof. by subst. Qed.
 
 Lemma same_VLSM_initial_message_preservation m
   : vinitial_message_prop X1 m -> vinitial_message_prop X2 m.
-Proof.
-  rewrite Heq. exact id.
-Qed.
+Proof. by subst. Qed.
 
 End same_VLSM.

@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Rdefinitions RIneq.
 From VLSM Require Import Lib.Preamble Lib.Measurable Lib.StdppListSet Lib.RealsExtras.
@@ -62,13 +63,12 @@ Proof.
   unfold tracewise_not_heavy, not_heavy.
   induction Hs using valid_state_prop_ind.
   - replace (equivocation_fault s) with 0%R
-      by (symmetry;apply initial_state_equivocators_weight;assumption).
-    destruct threshold. simpl. apply Rge_le. assumption.
+      by (symmetry;apply initial_state_equivocators_weight; done).
+    destruct threshold. cbn. by apply Rge_le.
   - destruct Ht as [[Hs [Hom [Hv Hw]]] Ht].
     unfold transition in Ht. simpl in Ht.
     unfold limited_equivocation_constraint in Hw. simpl in Hw.
-    rewrite Ht in Hw.
-    assumption.
+    by rewrite Ht in Hw.
 Qed.
 
 End limited_message_equivocation.
@@ -114,11 +114,10 @@ Proof.
   cut (tracewise_equivocating_validators s ⊆ equivocators).
   { intro Hincl.
     unfold tracewise_not_heavy, not_heavy.
-    transitivity (sum_weights (remove_dups equivocators)); [|assumption].
+    transitivity (sum_weights (remove_dups equivocators)); [| done].
     apply sum_weights_subseteq
     ; [apply equivocating_validators_nodup|apply NoDup_remove_dups|].
-    intros i Hi.
-    apply elem_of_remove_dups, Hincl. assumption.
+    by intros i Hi; apply elem_of_remove_dups, Hincl.
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
   { apply VLSM_incl_trans with (machine Free).
@@ -143,12 +142,11 @@ Proof.
   destruct Ht as [(_ & _ & _ & Hc) _].
   destruct Hc as [(i & Hi & Hsenti) | Hemit].
   + assert (Hsent : composite_has_been_sent IM (finite_trace_last is pre) m0)
-      by (exists i; assumption).
-    apply (composite_proper_sent IM) in Hsent; [|assumption].
-    specialize (Hsent _ _ (conj Hpre_pre Hinit)).
-    contradiction.
-  +  apply (SubProjectionTraces.sub_can_emit_sender IM equivocators (fun i => i) sender Hsender_safety _ _ v) in Hemit
-      ; assumption.
+      by (exists i; done).
+    apply (composite_proper_sent IM) in Hsent; [| done].
+    by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
+  +  by apply (SubProjectionTraces.sub_can_emit_sender IM equivocators (fun i => i) sender Hsender_safety _ _ v)
+           in Hemit.
 Qed.
 
 Lemma StrongFixed_incl_Limited : VLSM_incl StrongFixed Limited.
@@ -157,9 +155,8 @@ Proof.
   intros (i, li) (s, om) Hpv.
   unfold limited_equivocation_constraint.
   destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
-  specialize (input_valid_transition_destination StrongFixed (conj Hpv Ht)) as Hs'.
-  apply StrongFixed_valid_state_not_heavy in Hs'.
-  assumption.
+  apply StrongFixed_valid_state_not_heavy.
+  by eapply (input_valid_transition_destination StrongFixed).
 Qed.
 
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
@@ -216,8 +213,8 @@ Lemma traces_exhibiting_limited_equivocation_are_valid
   : forall s tr, fixed_limited_equivocation_prop s tr -> finite_valid_trace Limited s tr.
 Proof.
   intros s tr [equivocators [Hlimited Htr]].
-  eapply VLSM_incl_finite_valid_trace; [| eassumption].
-  apply Fixed_incl_Limited; assumption.
+  eapply VLSM_incl_finite_valid_trace; [| done].
+  by apply Fixed_incl_Limited.
 Qed.
 
 (** Traces having the [strong_trace_witnessing_equivocation_prop]erty, which
@@ -241,13 +238,13 @@ Proof.
   intros is s tr Hstrong Htr Hnot_heavy.
   exists (equivocating_validators s).
   split; cycle 1.
-  - eapply valid_trace_forget_last, strong_witness_has_fixed_equivocation; eassumption.
-  - replace (sum_weights _) with (equivocation_fault s); [assumption|].
+  - by eapply valid_trace_forget_last, strong_witness_has_fixed_equivocation.
+  - replace (sum_weights _) with (equivocation_fault s); [done |].
     apply set_eq_nodup_sum_weight_eq.
     + apply equivocating_validators_nodup.
     + apply NoDup_remove_dups.
     + apply ListSetExtras.set_eq_extract_forall.
-      intro i. rewrite elem_of_remove_dups. intuition.
+      intro i. rewrite elem_of_remove_dups. itauto.
 Qed.
 
 (** Traces with the [strong_trace_witnessing_equivocation_prop]erty, which are
@@ -272,7 +269,7 @@ Proof.
   }
   clear Htr.
   apply valid_trace_add_default_last in Hfree_tr.
-  apply traces_exhibiting_limited_equivocation_are_valid_rev with (finite_trace_last s tr); assumption.
+  by eapply traces_exhibiting_limited_equivocation_are_valid_rev.
 Qed.
 
 (** Any state which is valid for limited equivocation can be produced by
@@ -298,10 +295,9 @@ Proof.
     as [is [tr [Htr Heqv]]].
   exists is, tr.
   apply valid_trace_get_last in Htr as Hlst.
-  split; [assumption|].
+  split; [done |].
   apply full_node_limited_equivocation_valid_state_weight in Hs.
-  apply traces_exhibiting_limited_equivocation_are_valid_rev with s.
-  all: assumption.
+  by eapply traces_exhibiting_limited_equivocation_are_valid_rev.
 Qed.
 
 End has_limited_equivocation.

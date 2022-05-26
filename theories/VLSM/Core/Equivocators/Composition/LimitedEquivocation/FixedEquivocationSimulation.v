@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import FinFun.
 From VLSM Require Import Lib.Preamble Lib.ListExtras.
@@ -46,8 +47,7 @@ Lemma no_initial_messages_in_sub_IM
   : forall i m, ~vinitial_message_prop (sub_IM IM equivocating i) m.
 Proof.
   intros [i Hi] m Hinit.
-  apply (no_initial_messages_in_IM i m).
-  assumption.
+  by apply (no_initial_messages_in_IM i m).
 Qed.
 
 (** Messages [sent_by_non_equivocating] nodes in the projection of a valid
@@ -101,8 +101,8 @@ Proof.
   destruct Hv as [Hs [Hom [_ Hc]]].
   apply valid_state_has_fixed_equivocation in Hlift_s.
   split.
-  - split; [|exact I].
-    destruct om as [m|]; [|exact I].
+  - split; [| done].
+    destruct om as [m |]; [| done].
     left.
     apply proj1 in Hc as [Hsent | Hseed].
     + revert Hsent. simpl.
@@ -117,7 +117,7 @@ Proof.
       simpl.
       exists i.
       unfold lift_equivocators_sub_state_to.
-      case_decide; [contradiction|].
+      case_decide; [done |].
       unfold equivocator_IM.
       change (equivocators_total_state_project _ _ _) with (equivocator_state_zero (eqv_state_s i)) in Hsent.
       revert Hsent.
@@ -171,7 +171,7 @@ Proof.
     specialize (has_been_sent_examine_one_trace _ _ _ Him_etr im)
       as Hrew.
     unfold has_been_sent in Hrew; cbn; apply Hrew.
-    apply Exists_exists. exists item. split; [|assumption].
+    apply Exists_exists. exists item. split; [| done].
     apply elem_of_list_lookup.
     rewrite StdppExtras.last_last_error in Hlast.
     replace (Some _) with (last im_etr).
@@ -179,7 +179,7 @@ Proof.
     exists (pred (length im_etr)).
     by induction im_etr as [| ?[]].
   - apply last_error_destination_last.
-    rewrite Hlast. simpl. f_equal. assumption.
+    by rewrite Hlast; simpl; f_equal.
 Qed.
 
 (** Messages satisfying the [strong_fixed_equivocation_constraint] have the
@@ -196,25 +196,20 @@ Proof.
   intro; intros.
   destruct iom as [im|]; swap 1 2; [|destruct HcX as [Hsent | Hemitted]].
   - exists []. exists eqv_state_s.
-    split; [constructor; assumption|].
-    split; [reflexivity|].
-    split; [assumption|].
-    exact I.
+    split; [constructor|]; eauto.
   - exists []. exists eqv_state_s.
-    split; [constructor; assumption|].
-    split; [reflexivity|].
-    split; [assumption|].
+    split; [by constructor |].
+    split; [done |].
+    split; [done |].
     apply sent_by_non_equivocating_are_sent in Hsent.
     apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
     apply (VLSM_incl_valid_state HinclE) in Hstate_valid.
     left.
     revert Hsent. subst.
-    specialize
+    by specialize
       (VLSM_projection_has_been_sent_reflect
         (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM)
         eqv_state_s Hstate_valid im) as Hsent.
-    unfold has_been_sent in Hsent. simpl in Hsent.
-    assumption.
   - (*  If <<im>> can be emitted by the free composition of equivocating nodes
         seeded with the messages [sent_by_non_equivocating] in <<s>>, then we can
         use Lemma [seeded_equivocators_finite_valid_trace_init_to_rev] to
@@ -249,14 +244,13 @@ Proof.
       as Hreplay.
     spec Hreplay.
     { clear -HeqXE. intros i ns s Hi Hs.
-      split; [split; exact I|].
+      split; [by split |].
       apply (VLSM_eq_valid_state HeqXE) in Hs.
       apply valid_state_has_fixed_equivocation in Hs.
       destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
-      apply
+      by apply
         (equivocating_transition_preserves_fixed_equivocation
           IM equivocating _ _ _ _ _ Ht Hs).
-      assumption.
     }
     spec Hreplay.
     { subst s.
@@ -282,7 +276,7 @@ Proof.
     apply valid_trace_forget_last in Him_etr.
     specialize (Hreplay _ _ Him_etr).
     apply valid_trace_add_default_last in Hreplay.
-    eexists _,_; split; [exact Hreplay|].
+    eexists _,_; split; [done |].
     (*  Having verified the validity part of the conclusion, now we only
         need to show two projection properties, and the no message-equivocation
         constraint for which we employ Lemma [fixed_equivocation_replay_has_message].
@@ -308,7 +302,7 @@ Proof.
       specialize
         (replayed_trace_from_finite_trace_last IM equivocating eqv_state_s im_eis im_etr (proj2 Him_etr)).
       simpl. intro Hrew. rewrite Hrew. clear Hrew.
-      apply fixed_equivocation_replay_has_message; [assumption|].
+      apply fixed_equivocation_replay_has_message; [done |].
       clear -Him_etr Him_output.
       destruct_list_last im_etr im_ert' item Heqim_etr; [inversion Him_output|].
       apply proj1 in Him_etr.
@@ -322,7 +316,7 @@ Proof.
       rewrite finite_trace_last_is_last.
       rewrite finite_trace_last_output_is_last in Him_output.
       replace (output _) with (Some im) in Ht.
-      eexists _,_; exact Ht.
+      by eexists _,_.
 Qed.
 
 (** ** The main result
@@ -348,9 +342,8 @@ Proof.
   hypothesis and conclusion is done to fit the applied lemma.
   *)
   assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
-  { intros m [[i [[mi Hmi] Him]]|Hseeded]; [|contradiction].
-    elim (no_initial_messages_in_IM i mi).
-    assumption.
+  { intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
+    by elim (no_initial_messages_in_IM i mi).
   }
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
   specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
@@ -360,22 +353,21 @@ Proof.
       IM _ _ (equivocators_fixed_equivocations_constraint IM equivocating))
     in HtrX
     as (is & His & s & Hs & tr & Htr & Hptr & Houtput).
-  - exists is, s, tr; intuition.
-    apply (VLSM_eq_finite_valid_trace_init_to HeqXE); assumption.
+  - exists is, s, tr; split_and!; try itauto.
+    by apply (VLSM_eq_finite_valid_trace_init_to HeqXE).
   - intro; intros.
     apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
-    + split; [|exact I].  destruct om as [im|]; [|exact I].
-      destruct Hom as [Hom|Hinitial]; [left; assumption|exfalso].
-      apply no_initial_messages_in_XE in Hinitial. contradiction.
+    + split; [| done].  destruct om as [im |]; [| done].
+      destruct Hom as [Hom|Hinitial]; [by left | exfalso].
+      by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
       simpl.
-      apply
+      by apply
         (zero_descriptor_transition_preserves_fixed_equivocation
           IM equivocating _ _ _ _ _ Het Hes li
         ).
-      reflexivity.
   - apply fixed_equivocation_has_replayable_message_prop.
 Qed.
 
@@ -413,9 +405,8 @@ Lemma no_equivocating_equivocators_finite_valid_trace_init_to_rev
 Proof.
   assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   {
-    intros m [[i [[mi Hmi] Him]]|Hseeded]; [|contradiction].
-    elim (no_initial_messages_in_IM i mi).
-    assumption.
+    intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
+    by elim (no_initial_messages_in_IM i mi).
   }
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
   specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
@@ -425,50 +416,44 @@ Proof.
       IM _ _ (equivocators_fixed_equivocations_constraint IM []))
     in HtrX
     as [is [His [s [Hs [tr [Htr [Hptr Houtput]]]]]]].
-  - exists is. split; [assumption|].
-    exists s. split; [assumption|].
-    exists tr. split; [assumption|].
-    split; [|assumption].
-    apply (VLSM_eq_finite_valid_trace_init_to HeqXE).
-    assumption.
+  - exists is. split; [done |].
+    exists s. split; [done |].
+    exists tr. split; [done |].
+    split; [| done].
+    by apply (VLSM_eq_finite_valid_trace_init_to HeqXE).
   - intro; intros.
     apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
-    + split; [|exact I].  destruct om as [im|]; [|exact I].
-      destruct Hom as [Hom|Hinitial]; [left; assumption|exfalso].
-      apply no_initial_messages_in_XE in Hinitial. contradiction.
+    + split; [| done]. destruct om as [im |]; [| done].
+      destruct Hom as [Hom|Hinitial]; [by left | exfalso].
+      by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
       simpl.
-      apply
+      by apply
         (zero_descriptor_transition_preserves_fixed_equivocation
           IM [] _ _ _ _ _ Het Hes li
         ).
-      reflexivity.
   - clear isX sX trX HtrX. intro; intros.
     specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM []) as HinclE.
     destruct iom as [im|].
     2: {
       exists []. exists eqv_state_s.
-      split; [constructor; assumption|].
-      split; [reflexivity|].
-      split; [assumption|exact I].
+      split; [constructor |]; eauto.
     }
-    destruct HcX as [Hsent | Hemitted]; [|contradiction].
+    destruct HcX as [Hsent | Hemitted]; [| done].
     exists []. exists eqv_state_s.
-    split; [constructor; assumption|].
-    split; [reflexivity|].
-    split; [assumption|].
+    split; [by constructor |].
+    split; [done |].
+    split; [done |].
     apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
     apply (VLSM_incl_valid_state HinclE) in Hstate_valid.
     left.
     revert Hsent. subst.
-    specialize
+    by specialize
       (VLSM_projection_has_been_sent_reflect
         (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM)
         eqv_state_s Hstate_valid im) as Hsent.
-    unfold has_been_sent in Hsent. simpl in Hsent.
-    assumption.
 Qed.
 
 End no_equivocation.

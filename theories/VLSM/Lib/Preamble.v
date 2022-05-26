@@ -84,8 +84,8 @@ Lemma StrictOrder_reexpress_impl {A} (R S: Relation_Definitions.relation A):
 Proof.
   clear.
   intros Hrel [Hirr Htrans]. constructor.
-  revert Hirr;apply Reflexive_reexpress_impl. apply complement_equivalence. assumption.
-  revert Htrans;apply Transitive_reexpress_impl. assumption.
+  - by revert Hirr;apply Reflexive_reexpress_impl; apply complement_equivalence.
+  - by revert Htrans; apply Transitive_reexpress_impl.
 Qed.
 
 (* TODO(traian): remove these definitions and use the standard stdpp ones instead.*)
@@ -106,8 +106,7 @@ Lemma dec_sig_to_exist {A} {P} {P_dec: forall (x:A), Decision (P x)}
             (a: dsig P): exists a' (e: P a'), a = dexist a' e.
 Proof.
   exists (dec_proj1_sig a), (dec_proj2_sig a).
-  apply dec_sig_eq_iff.
-  reflexivity.
+  by apply dec_sig_eq_iff.
 Qed.
 
 Ltac destruct_dec_sig  a a' e H := pose proof (dec_sig_to_exist a) as [a' [e H]].
@@ -122,7 +121,7 @@ Lemma dsig_f_equal
 Proof.
   unfold dexist.
   replace (bool_decide_pack (P i) H1) with (bool_decide_pack (P i) H2)
-  ; [reflexivity|].
+  ; [done |].
   apply proof_irrel.
 Qed.
 
@@ -141,7 +140,7 @@ Proof.
   subst b2 pa1 pa2.
   unfold dexist.
   replace (bool_decide_pack (P a) e1) with (bool_decide_pack (P a) e2)
-  ; [reflexivity|].
+  ; [done |].
   apply proof_irrel.
 Qed.
 
@@ -168,6 +167,8 @@ Proof.
   - right. intro contra. elim n. revert contra. apply dsig_eq.
 Qed.
 
+Arguments dec_sig_sigT_eq_rev {_ _ _ _} _.
+
 Lemma ex_out (A : Type) (P : Prop) (Q : A -> Prop):
   (exists x, P /\ Q x) <-> (P /\ exists x, Q x).
 Proof. firstorder. Qed.
@@ -179,58 +180,39 @@ Definition noneOrAll : option Prop -> Prop := default True.
 Lemma eq_dec_refl A (eq_dec : forall x y : A, {x = y} + {x <> y}) x :
   eq_dec x x = left eq_refl.
 Proof.
-  destruct (eq_dec x x) as [|[]]; trivial.
-  f_equal.
-  now apply K_dec_type with (P := fun prf => prf = eq_refl).
+  destruct (eq_dec x x) as [| []]; [| done].
+  by rewrite K_dec_type with (P := fun prf => prf = eq_refl).
 Qed.
 
 Definition mid {X Y Z : Type} (xyz : X * Y * Z) : Y :=
   snd (fst xyz).
 
 Lemma or_and_distr_left : forall A B C, (A /\ B) \/ C <-> (A \/ C) /\ (B \/ C).
-Proof.
-  intros; split; intro.
-  - split; destruct H as [[HA HB] | HC]; (left; assumption) || right; assumption.
-  - destruct H as [Hac Hbc].
-    destruct Hac as [Ha | Hc]; try (right; assumption).
-    destruct Hbc as [Hb | Hc]; try (right; assumption).
-    left. split; assumption.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma and_iff_l {P Q R:Prop} : (P -> (Q <-> R)) -> (P /\ Q <-> P /\ R).
-Proof.
-  firstorder.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma not_ex_all_not
   {A : Type}
   (P : A -> Prop)
   (Hne : ~ (exists a : A, P a))
   : forall a:A, ~ P a.
-Proof.
-  intros a Hpa.
-  apply Hne.
-  exists a.
-  assumption.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma forall_and_commute
   {A : Type}
   (P Q : A -> Prop)
   : ((forall a, P a) /\ (forall a, Q a)) <-> forall a, P a /\ Q a.
-Proof.
-  firstorder.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma mirror_reflect: forall X (f : X -> bool) (P : X -> Prop),
   (forall x : X, f x = true <-> P x) ->
   (forall x : X, f x = false <-> ~P x).
 Proof.
   split; repeat intro.
-  + rewrite <- H in H1. rewrite H0 in H1. discriminate.
-  + specialize (H x). destruct (f x).
-    exfalso. apply H0. rewrite <- H. reflexivity.
-    reflexivity.
+  + by rewrite <- H, H0 in H1.
+  + apply not_true_is_false. by rewrite <- H in H0.
 Qed.
 
 Theorem mirror_reflect_curry :
@@ -240,11 +222,8 @@ Theorem mirror_reflect_curry :
 Proof.
   intros.
   split; intros.
-  intro H_absurd. apply H in H_absurd.
-  rewrite H0 in H_absurd; discriminate.
-  apply not_true_is_false.
-  intro H_not. apply H in H_not.
-  contradiction.
+  - by rewrite <- H, H0.
+  - apply not_true_is_false. by rewrite H.
 Qed.
 
 Lemma dec_if_true
@@ -255,8 +234,7 @@ Lemma dec_if_true
   (Hp : P x y)
   : (if dec x y then t else e) = t.
 Proof.
-  destruct (dec x y) eqn:Hcmp; try reflexivity.
-  elim n. assumption.
+  by destruct (dec x y).
 Qed.
 
 Lemma dec_if_false
@@ -267,8 +245,7 @@ Lemma dec_if_false
   (Hnp : ~P x y)
   : (if dec x y then t else e) = e.
 Proof.
-  destruct (dec x y) eqn:Hcmp; try reflexivity.
-  elim Hnp. assumption.
+  by destruct (dec x y).
 Qed.
 
 Lemma eq_dec_if_true {A B: Type} (eq_dec : forall x y : A, {x = y} + {x <> y}) : forall (x y : A) (t e : B),
@@ -292,9 +269,8 @@ Lemma dec_match_left
   (Hirrelevance : forall p : P x y, p = Hp)
   : (match dec x y with | left p => t p | right np => e np end) = t Hp.
 Proof.
-  destruct (dec x y) eqn:Hcmp.
-  - rewrite Hirrelevance at 1. reflexivity.
-  - elim n. assumption.
+  destruct (dec x y); [| done].
+  by rewrite Hirrelevance at 1.
 Qed.
 
 Lemma dec_match_right
@@ -306,9 +282,8 @@ Lemma dec_match_right
   (Hirrelevance : forall p : ~P x y, p = Hp)
   : (match dec x y with | left p => t p | right np => e np end) = e Hp.
 Proof.
-  destruct (dec x y) eqn:Hcmp.
-  - elim Hp. assumption.
-  - rewrite Hirrelevance at 1. reflexivity.
+  destruct (dec x y); [done |].
+  by rewrite Hirrelevance at 1.
 Qed.
 
 Class DecidablePred {A} (r : A -> Prop) :=
@@ -329,11 +304,7 @@ Definition predicate_not {A} (p : A -> Prop) : A -> Prop :=
 Lemma predicate_function_neg {A} `{PredicateFunction A} :
   forall a, ~ r a <-> r_fn a = false.
 Proof.
-  intro a; split; intros.
-  apply not_true_iff_false. intro Hnot.
-  apply equiv in Hnot. contradiction.
-  intro Hnot. apply not_true_iff_false in H0.
-  apply H0. apply (equiv a). assumption.
+  by intros; rewrite equiv; destruct (r_fn a).
 Qed.
 
 Class PredicateFunction2 {A B} (r : A -> B -> Prop) (r_fn : A -> B -> bool) : Prop :=
@@ -351,8 +322,8 @@ Lemma predicate_function2_decidable : forall A B (r : A -> B -> Prop) (r_fn : A 
   forall a b, r a b \/ ~r a b.
 Proof.
   intros. destruct (r_fn a b) eqn:Hr.
-  - left. apply H. assumption.
-  - right. apply (predicate_function2_neg _ _ _ _ H). assumption.
+  - by left; apply H.
+  - by right; apply (predicate_function2_neg _ _ _ _ H).
 Qed.
 
 Lemma bool_decide_predicate_function2 {A B} (P : A -> B -> Prop) {P_dec : RelDecision P}:
@@ -367,6 +338,52 @@ Proof.
   intros. intros a b. symmetry. apply Is_true_iff_eq_true.
 Qed.
 
+(**
+A minimal element of a subset <<S>> (defined by a predicate <<P>>) of some
+preordered set is defined as an element of S that is not greater than any other
+element in S.
+*)
+Definition minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
+  P m /\ (forall m', P m' -> R m' m -> R m m').
+
+Remark minimal_among_le_0 : minimal_among le (const True) 0.
+Proof.
+  by split; [| lia].
+Qed.
+
+(** A more concise definition of minimality for strict orders.  *)
+Definition strict_minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
+  P m /\ (forall m', P m' -> ~ R m' m).
+
+Remark strict_minimal_among_lt_0 : minimal_among lt (const True) 0.
+Proof.
+  by split; [| lia].
+Qed.
+
+(** The minimality definitions are equivalent for [Asymmetric] relations. *)
+Lemma asymmetric_minimal_among_iff
+  `(R : relation A) `{!Asymmetric R} (P : A -> Prop)
+  : forall m, minimal_among R P m <-> strict_minimal_among R P m.
+Proof.
+  unfold minimal_among, strict_minimal_among; specialize asymmetry.
+  firstorder.
+Qed.
+
+(** The minimality definitions are equivalent for [StrictOrder]s. *)
+Lemma strict_minimal_among_iff
+  `(R : relation A) `{!StrictOrder R} (P : A -> Prop)
+  : forall m, minimal_among R P m <-> strict_minimal_among R P m.
+Proof.
+  apply asymmetric_minimal_among_iff; typeclasses eauto.
+Qed.
+
+(**
+Dually, a maximal element is a minimal element w.r.t. the inverse relation.
+*)
+Definition maximal_among `(R : relation A) := minimal_among (flip R).
+
+Definition strict_maximal_among `(R : relation A) := strict_minimal_among (flip R).
+
 (* Reflexivity of comparison operators *)
 Class CompareReflexive {A} (compare : A -> A -> comparison) : Prop :=
     compare_eq : forall x y, compare x y = Eq <-> x = y.
@@ -375,36 +392,32 @@ Global Hint Mode CompareReflexive ! - : typeclass_instances.
 (* About reflexive comparison operators *)
 Lemma compare_eq_refl {A} `{CompareReflexive A} :
   forall x, compare x x = Eq.
-Proof. intros; now apply H. Qed.
+Proof. by intros; apply H. Qed.
 
 Lemma compare_eq_lt {A} `{CompareReflexive A} :
   forall x, ~ compare x x = Lt.
 Proof.
-  intros x Hnot.
-  assert (compare x x = Eq) by apply compare_eq_refl.
-  rewrite Hnot in H0; discriminate.
+  by intros x; rewrite compare_eq_refl.
 Qed.
 
 Lemma compare_lt_neq {A} `{CompareReflexive A} :
   forall x y, compare x y = Lt -> x <> y.
 Proof.
   intros x y Hcomp Hnot.
-  subst. now (apply (compare_eq_lt y) in Hcomp).
+  by subst; by apply (compare_eq_lt y) in Hcomp.
 Qed.
 
 Lemma compare_eq_gt {A} `{CompareReflexive A} :
   forall x, ~ compare x x = Gt.
 Proof.
-  intros x Hnot.
-  assert (compare x x = Eq) by apply compare_eq_refl.
-  rewrite Hnot in H0; discriminate.
+  by intros x; rewrite compare_eq_refl.
 Qed.
 
 Lemma compare_gt_neq {A} `{CompareReflexive A} :
   forall x y, compare x y = Gt -> x <> y.
 Proof.
   intros x y H_comp H_not.
-  subst. now apply compare_eq_gt in H_comp.
+  by subst; apply compare_eq_gt in H_comp.
 Qed.
 
 (* Transitivity of comparison operators *)
@@ -427,9 +440,10 @@ Lemma compare_eq_dec {A} `{CompareStrictOrder A} :
   EqDecision A.
 Proof.
   intros x y.
-  destruct (compare x y) eqn:Hxy;
-    (left; apply StrictOrder_Reflexive; assumption)
-    || (right; intro; subst; [now apply compare_eq_lt in Hxy || now apply compare_eq_gt in Hxy]).
+  destruct (compare x y) eqn: Hxy.
+  - by left; apply StrictOrder_Reflexive.
+  - by right; intros ->; apply compare_eq_lt in Hxy.
+  - by right; intros ->; apply compare_eq_gt in Hxy.
 Qed.
 
 Definition eq_bool {X} `{CompareStrictOrder X} (x y : X) : bool :=
@@ -448,12 +462,12 @@ Lemma compare_asymmetric_intro {A} `{CompareStrictOrder A} :
   CompareAsymmetric compare.
 Proof.
   intros. destruct H as [R TR]. intros; split; intros.
-  - destruct (compare y x) eqn:Hyx; try reflexivity; exfalso.
-    + apply R in Hyx; subst. now apply compare_eq_lt in H.
-    + apply (TR _ _ _ _ Hyx) in H. now apply compare_eq_lt in H.
-  - destruct (compare x y) eqn:Hyx; try reflexivity; exfalso.
-    + apply R in Hyx; subst. now apply compare_eq_gt in H.
-    + apply (TR _ _ _ _ Hyx) in H. now apply compare_eq_gt in H.
+  - destruct (compare y x) eqn: Hyx; [| | done].
+    + by apply R in Hyx; subst; apply compare_eq_lt in H.
+    + by apply (TR _ _ _ _ Hyx), compare_eq_lt in H.
+  - destruct (compare x y) eqn: Hyx; [| done |].
+    + by apply R in Hyx; subst; apply compare_eq_gt in H.
+    + by apply (TR _ _ _ _ Hyx), compare_eq_gt in H.
 Qed.
 
 Instance CompareStrictOrder_Asymmetric {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
@@ -477,15 +491,13 @@ Qed.
 Lemma compare_lt_irreflexive {A} `{CompareReflexive A} :
   Irreflexive (compare_lt compare).
 Proof.
-  intros x Hlt.
-  assert (compare x x = Eq) by apply compare_eq_refl.
-  rewrite Hlt in H0; discriminate.
+  intros x; apply compare_eq_lt.
 Qed.
 
 Lemma compare_lt_transitive {A} `{CompareTransitive A} :
   Transitive (compare_lt compare).
 Proof.
-  intros x y z Hxy Hyz; now apply (H _ _ _ _ Hxy Hyz).
+  by intros x y z Hxy Hyz; apply (H _ _ _ _ Hxy Hyz).
 Qed.
 
 Lemma compare_lt_strict_order {A} `{CompareStrictOrder A} :
@@ -493,18 +505,16 @@ Lemma compare_lt_strict_order {A} `{CompareStrictOrder A} :
 Proof.
   destruct H as [R T].
   split.
-  - now apply compare_lt_irreflexive.
-  - now apply compare_lt_transitive.
+  - by apply compare_lt_irreflexive.
+  - by apply compare_lt_transitive.
 Qed.
 
 Lemma compare_lt_asymmetric {A} `{CompareStrictOrder A} :
   Asymmetric (compare_lt compare).
 Proof.
-  intros.
   destruct H as [IR TR].
   intros x y Hxy Hyx. apply (TR _ _ _ _ Hxy) in Hyx.
-  assert (compare x x = Eq) by (apply compare_eq; reflexivity).
-  rewrite Hyx in H; discriminate.
+  by contradict Hyx; destruct (IR x x) as [_ ->].
 Qed.
 
 (* We can easily obtain inhabitants of above Typeclasses using Program Definitions, for instance : *)
@@ -568,9 +578,8 @@ Lemma negb_comparableb `{EqDecision A} (f : A -> A -> bool) (a b : A):
   incomparableb f a b = negb (comparableb f a b).
 Proof.
   unfold incomparableb, comparableb.
-  destruct (decide (a = b));[reflexivity|].
-  rewrite negb_orb.
-  reflexivity.
+  rewrite <- negb_orb.
+  by destruct (decide (a = b)).
 Qed.
 
 Lemma comparable_function
@@ -582,16 +591,11 @@ Lemma comparable_function
 Proof.
   intros a b. unfold comparable. unfold comparableb.
   split; intro.
-  - destruct H as [Heq | [Hab | Hba]]; destruct (decide (a = b)); try reflexivity.
-    + elim n. assumption.
-    + apply HR in Hab. rewrite Hab. reflexivity.
-    + apply HR in Hba. rewrite Hba. rewrite orb_comm. reflexivity.
-  - destruct (decide (a = b)); try (left; assumption).
-    right.
-    apply orb_true_iff in H.
-    destruct H as [H | H]; apply HR in H.
-    + left. assumption.
-    + right. assumption.
+  - destruct H as [Heq | [Hab | Hba]]; destruct (decide (a = b)); try done.
+    + apply HR in Hab. by rewrite Hab.
+    + apply HR in Hba. by rewrite Hba, orb_comm.
+  - destruct (decide (a = b)); [by left | right].
+    by apply orb_true_iff in H as [H | H]; apply HR in H; [left | right].
 Qed.
 
 Instance comparable_dec
@@ -615,13 +619,11 @@ Lemma comparable_function_neg
   : a <> b /\ ~R a b /\ ~R b a.
 Proof.
   unfold comparableb in Hnc.
-  destruct (decide (a = b)); try discriminate Hnc.
-  split; try assumption.
-  destruct (f a b) eqn:Hab; try discriminate Hnc.
-  destruct (f b a) eqn:Hba; try discriminate Hnc.
+  destruct (decide (a = b)); [done |].
+  destruct (f a b) eqn:Hab; [done |].
+  destruct (f b a) eqn:Hba; [done |].
   apply (predicate_function2_neg _ _ _ _ HR) in Hab.
-  apply (predicate_function2_neg _ _ _ _ HR) in Hba.
-  split; assumption.
+  by apply (predicate_function2_neg _ _ _ _ HR) in Hba.
 Qed.
 
 Lemma comparable_function_bool
@@ -641,14 +643,9 @@ Lemma compare_two_cases
     (compare m1 m2 = Gt /\ compare m2 m1 = Lt).
 Proof.
   intros m1 m2.
-  destruct (compare m1 m2) eqn:H_m.
-  left. split; try reflexivity.
-  rewrite compare_eq in H_m. subst.
-  apply compare_eq_refl.
-  right. left; split; try reflexivity.
-  now apply compare_asymmetric.
-  right; right; split; try reflexivity.
-  now apply compare_asymmetric.
+  rewrite (compare_asymmetric m2 m1), <- (compare_asymmetric m1 m2).
+  destruct (compare m1 m2) eqn: Hcmp;
+  rewrite compare_eq in *; auto.
 Qed.
 
 Tactic Notation "case_pair" constr(about_M) constr(m1) constr(m2) :=
@@ -718,9 +715,7 @@ Lemma option_compare_reflexive
   {Xsc : StrictlyComparable X}
   : CompareReflexive (option_compare (@compare X _)).
 Proof.
-  intros [x|] [y|]; simpl; split; intro H; inversion H; try reflexivity.
-  - f_equal. apply StrictOrder_Reflexive in H. assumption.
-  - apply StrictOrder_Reflexive. reflexivity.
+  intros [x |] [y |]; cbn; rewrite ?compare_eq; firstorder congruence.
 Qed.
 
 Lemma option_compare_transitive
@@ -728,10 +723,10 @@ Lemma option_compare_transitive
   {Xsc : StrictlyComparable X}
   : CompareTransitive (option_compare (@compare X _)).
 Proof.
-  intros [x|] [y|] [z|] [| |]; simpl; intros Hxy Hyz; try discriminate; try reflexivity.
-  - apply (StrictOrder_Transitive x y z _); assumption.
-  - apply (StrictOrder_Transitive x y z _); assumption.
-  - apply (StrictOrder_Transitive x y z _); assumption.
+  intros [x|] [y|] [z|] [| |]; simpl; intros Hxy Hyz; try done.
+  - by apply (StrictOrder_Transitive x y z _).
+  - by apply (StrictOrder_Transitive x y z _).
+  - by apply (StrictOrder_Transitive x y z _).
 Qed.
 
 Lemma strictorder_option
@@ -739,7 +734,9 @@ Lemma strictorder_option
   (Xsc : StrictlyComparable X)
   : CompareStrictOrder (option_compare (@compare X _)).
 Proof.
-  split; exact (option_compare_reflexive X) || exact (option_compare_transitive X).
+  split.
+  - by apply option_compare_reflexive.
+  - by apply option_compare_transitive.
 Qed.
 
 (* Now we can have the following for free : *)
@@ -767,28 +764,19 @@ Definition compare_compose (X Y : Type) `{StrictlyComparable X} `{StrictlyCompar
     end.
 
 (* Constructing the inhabited proof *)
-Lemma inhabited_compose {X Y : Type} `{HscX : StrictlyComparable X} `{HscY : StrictlyComparable Y}
-  : X * Y.
-Proof.
-  remember (@inhabited _ HscX ) as x.
-  remember (@inhabited _ HscY) as y.
-  exact (x,y).
-Qed.
+Definition inhabited_compose
+  {X Y : Type} `{HscX : StrictlyComparable X} `{HscY : StrictlyComparable Y}
+  : X * Y := (inhabited, inhabited).
 
 (* Constructing the strictorder proof *)
 Lemma reflexive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareReflexive (compare_compose X Y).
 Proof.
   intros (x1, y1) (x2, y2).
   split; intros.
-  simpl in H1.
-  destruct (compare x1 x2) eqn:H_x;
-    destruct (compare y1 y2) eqn: H_y;
-    try discriminate.
-  apply StrictOrder_Reflexive in H_x;
-    apply StrictOrder_Reflexive in H_y.
-  subst; reflexivity.
-  inversion H1; subst.
-  simpl; do 2 rewrite compare_eq_refl; reflexivity.
+  - simpl in H1.
+    destruct (compare x1 x2) eqn: H_x, (compare y1 y2) eqn: H_y; try done.
+    by apply StrictOrder_Reflexive in H_x; apply StrictOrder_Reflexive in H_y; subst.
+  - inversion H1; subst; cbn. by rewrite !compare_eq_refl.
 Qed.
 
 Lemma compare_compose_lt {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : forall (x1 x2 : X) (y1 y2 : Y) (c : comparison),
@@ -798,52 +786,53 @@ Lemma compare_compose_lt {X Y : Type} `{StrictlyComparable X} `{StrictlyComparab
 Proof.
   intros x1 x2 y1 y2 c H_12.
   simpl in H_12.
-  destruct (compare x1 x2) eqn:H_x; try (left; assumption).
-  right. split. now apply StrictOrder_Reflexive in H_x.
-  destruct (compare y1 y2) eqn:H_y; try discriminate; assumption.
+  rewrite <- compare_eq.
+  destruct (compare x1 x2), (compare y1 y2); auto.
 Qed.
 
 Lemma transitive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareTransitive (compare_compose X Y).
 Proof.
   intros (x1, y1) (x2, y2) (x3, y3) comp H12 H23.
-  destruct comp eqn:H_comp; try
-  (apply reflexive_compose;
-   apply reflexive_compose in H12;
-     apply reflexive_compose in H23;
-     inversion H12; inversion H23; subst; reflexivity).
+  destruct comp eqn:H_comp.
+  - by apply reflexive_compose;
+    apply reflexive_compose in H12;
+    apply reflexive_compose in H23;
+    inversion H12; inversion H23; subst.
   - rewrite <- H_comp in *;
     assert (H_useful := compare_compose_lt x1 x2 y1 y2 comp H12);
     assert (H_useful' := compare_compose_lt x2 x3 y2 y3 comp H23).
     destruct H_useful as [left | right];
     destruct H_useful' as [left' | right'].
-    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); assumption).
-    simpl; rewrite H1; subst; reflexivity.
+    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); done).
+    by simpl; rewrite H1; subst.
     destruct right'; subst.
-    simpl; rewrite left; reflexivity.
+    by simpl; rewrite left.
     destruct right; subst.
-    simpl; rewrite left'; reflexivity.
+    by simpl; rewrite left'.
     destruct right; destruct right'; subst.
-    assert (compare y1 y3 = Lt) by (apply (StrictOrder_Transitive y1 y2 y3 Lt); assumption).
-    simpl; rewrite compare_eq_refl; simpl in H12; rewrite H1; reflexivity.
+    assert (compare y1 y3 = Lt) by (apply (StrictOrder_Transitive y1 y2 y3 Lt); done).
+    by simpl; rewrite compare_eq_refl; simpl in H12; rewrite H1.
   - rewrite <- H_comp in *;
     assert (H_useful := compare_compose_lt x1 x2 y1 y2 comp H12);
     assert (H_useful' := compare_compose_lt x2 x3 y2 y3 comp H23).
     destruct H_useful as [left | right];
     destruct H_useful' as [left' | right'].
-    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); assumption).
-    simpl; rewrite H1; subst; reflexivity.
+    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); done).
+    by simpl; rewrite H1; subst.
     destruct right'; subst.
-    simpl; rewrite left; reflexivity.
+    by simpl; rewrite left.
     destruct right; subst.
-    simpl; rewrite left'; reflexivity.
+    by simpl; rewrite left'.
     destruct right; destruct right'; subst.
-    assert (compare y1 y3 = Gt) by (apply (StrictOrder_Transitive y1 y2 y3 Gt); assumption).
-    simpl; rewrite compare_eq_refl; simpl in H12; rewrite H1; reflexivity.
+    assert (compare y1 y3 = Gt) by (apply (StrictOrder_Transitive y1 y2 y3 Gt); done).
+    by simpl; rewrite compare_eq_refl; simpl in H12; rewrite H1.
 Qed.
 
 Lemma strictorder_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareStrictOrder (compare_compose X Y).
 Proof.
-  split; exact reflexive_compose || exact transitive_compose.
+  split.
+  - by apply reflexive_compose.
+  - by apply transitive_compose.
 Qed.
 
 (* Now we can have the following for free : *)
@@ -863,8 +852,7 @@ Definition triple_strictly_comparable_proj1_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : X.
 Proof.
-  destruct HscXYZ as [((x, y), z) _ _].
-  exact x.
+  by destruct HscXYZ as [((x, _), _) _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj1_compare
@@ -885,8 +873,8 @@ Proof.
       destruct HscXYZ.
       destruct inhabited0 as [(x0, y0) z0].
     split; intro.
-    + apply StrictOrder_Reflexive in H. inversion H. reflexivity.
-    + subst. apply StrictOrder_Reflexive . reflexivity.
+    + by apply compare_eq in H as [=].
+    + by subst; rewrite compare_eq.
   - intros x1 x2 x3 cmp.
     unfold triple_strictly_comparable_proj1_compare.
     destruct HscXYZ.
@@ -907,8 +895,7 @@ Definition triple_strictly_comparable_proj2_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : Y.
 Proof.
-  destruct HscXYZ as [[(x, y) z] _ _].
-  exact y.
+  by destruct HscXYZ as [[(_, y) _] _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj2_compare
@@ -929,8 +916,8 @@ Proof.
       destruct HscXYZ.
       destruct inhabited0 as [(x0, y0) z0].
     split; intro.
-    + apply StrictOrder_Reflexive in H. inversion H. reflexivity.
-    + subst. apply StrictOrder_Reflexive . reflexivity.
+    + by apply compare_eq in H as [=].
+    + by subst; rewrite compare_eq.
   - intros x1 x2 x3 cmp.
     unfold triple_strictly_comparable_proj2_compare.
     destruct HscXYZ.
@@ -951,8 +938,7 @@ Definition triple_strictly_comparable_proj3_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : Z.
 Proof.
-  destruct HscXYZ as [[(x, y) z] _ _].
-  exact z.
+  by destruct HscXYZ as [[_ z] _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj3_compare
@@ -973,8 +959,8 @@ Proof.
       destruct HscXYZ.
       destruct inhabited0 as [(x0, y0) z0].
     split; intro.
-    + apply StrictOrder_Reflexive in H. inversion H. reflexivity.
-    + subst. apply StrictOrder_Reflexive . reflexivity.
+    + by apply compare_eq in H as [=].
+    + by subst; rewrite compare_eq.
   - intros x1 x2 x3 cmp.
     unfold triple_strictly_comparable_proj3_compare.
     destruct HscXYZ.
@@ -1013,14 +999,13 @@ Lemma not_bounding_impl_liveness
 Proof.
   intros n1.
   specialize (Hdec n1).
-  destruct Hdec as [Hex | Hnex]; try assumption.
+  destruct Hdec as [Hex | Hnex]; [done |].
   specialize (not_ex_all_not _ Hnbound); simpl; clear Hnbound; intro Hnbound.
   specialize (Hnbound n1).
   elim Hnbound.
   intros n2 Hleq HnP.
   apply Hnex.
-  exists n2.
-  split; assumption.
+  by exists n2.
 Qed.
 
 (** optionally extracts an element belonging to first type from a sum type *)

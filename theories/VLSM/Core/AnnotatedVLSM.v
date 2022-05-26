@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Validator Composition ProjectionTraces.
@@ -41,8 +42,8 @@ Global Program Instance annotated_initial_state_prop_inhabited
   populate (exist _ {| original_state := ` (vs0 X); state_annotation := ` inhabitant  |} _).
 Next Obligation.
   split; cbn.
-  - destruct (vs0 X); assumption.
-  - destruct inhabitant; assumption.
+  - by destruct (vs0 X).
+  - by destruct inhabitant.
 Qed.
 
 Context
@@ -93,7 +94,7 @@ Lemma annotate_trace_item_project
             annotated_type (type X) id original_state
             (k {| original_state := destination item; state_annotation := annotated_transition_state (l item) (sa, input item) |}).
 Proof.
-  destruct item; reflexivity.
+  by destruct item.
 Qed.
 
 Definition annotate_trace_from (sa : @state _ annotated_type) (tr : list (vtransition_item X))
@@ -105,7 +106,7 @@ Lemma annotate_trace_from_unroll sa item tr
     let sa' := {| original_state := destination item; state_annotation := annotated_transition_state (l item) (sa, input item) |} in
     @Build_transition_item _ annotated_type (l item) (input item) sa' (output item) :: annotate_trace_from sa' tr.
 Proof.
-  destruct item; reflexivity.
+  by destruct item.
 Qed.
 
 Lemma annotate_trace_from_app sa tr1 tr2
@@ -114,21 +115,19 @@ Lemma annotate_trace_from_app sa tr1 tr2
       annotate_trace_from (finite_trace_last sa ( annotate_trace_from sa tr1)) tr2.
 Proof.
   revert sa.
-  induction tr1 as [| item tr1]; [reflexivity | intro sa].
-  rewrite <- app_comm_cons, !annotate_trace_from_unroll
+  induction tr1 as [| item tr1]; [done | intro sa].
+  by rewrite <- app_comm_cons, !annotate_trace_from_unroll
   ; simpl; rewrite IHtr1, finite_trace_last_cons.
-  reflexivity.
 Qed.
 
 Lemma annotate_trace_from_last_original_state sa tr
   : original_state (finite_trace_last sa (annotate_trace_from sa tr)) =
     finite_trace_last (original_state sa) tr.
 Proof.
-  destruct_list_last tr tr' item Heqtr; subst; [reflexivity |].
+  destruct_list_last tr tr' item Heqtr; subst; [done |].
   rewrite annotate_trace_from_app.
   cbn; unfold annotate_trace_item.
-  rewrite! finite_trace_last_is_last.
-  reflexivity.
+  by rewrite! finite_trace_last_is_last.
 Qed.
 
 Definition annotate_trace (s : vstate X) (tr : list (vtransition_item X))
@@ -143,7 +142,7 @@ Lemma annotate_trace_project is tr
 Proof.
   unfold annotate_trace
   ; remember {| original_state := is |} as sa; clear Heqsa; revert sa.
-  induction tr as [| item]; [reflexivity | intro sa].
+  induction tr as [| item]; [done | intro sa].
   setoid_rewrite annotate_trace_item_project; f_equal.
   apply IHtr.
 Qed.
@@ -170,11 +169,11 @@ Definition forget_annotations_projection
   : VLSM_full_projection AnnotatedX X id original_state.
 Proof.
   apply basic_VLSM_strong_full_projection.
-  1, 3-4: cbv; intuition.
+  1, 3-4: cbv; itauto.
   intros l [s a] om [s' a'] om'.
   cbn; unfold annotated_transition; cbn
   ; destruct (vtransition _ _ _) as (_s', _om').
-  inversion 1; reflexivity.
+  by inversion 1.
 Qed.
 
 End sec_annotated_vlsm_projections.
@@ -216,7 +215,7 @@ Definition annotated_composite_label_lift : vlabel (IM i) -> vlabel AnnotatedFre
 Definition annotated_composite_state_lift : vstate (IM i) -> vstate AnnotatedFree
   := fun si =>
      @Build_annotated_state _ (free_composite_vlsm IM) _
-      (lift_to_composite_state IM i si) (` inhabitant).
+      (lift_to_composite_state' IM i si) (` inhabitant).
 
 Definition annotated_projection_validator_prop_alt : Prop :=
   @projection_validator_prop_alt _ AnnotatedFree (IM i)
@@ -232,8 +231,7 @@ Proof.
     unfold annotated_composite_label_project, composite_project_label; cbn.
     case_decide; [| congruence].
     subst _i; cbn; inversion_clear 1.
-    intros (s, ann) om (_ & _ & [Hv _] & _) _ _.
-    assumption.
+    by intros (s, ann) om (_ & _ & [Hv _] & _) _ _.
   - intros [_i _li] li.
     unfold annotated_composite_label_project, composite_project_label; cbn.
     case_decide; [| congruence].
@@ -273,7 +271,7 @@ Proof.
   unfold annotated_transition; cbn
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion 1; clear Ht; subst om' s'X; cbn.
-  rewrite state_update_neq by congruence; reflexivity.
+  by rewrite state_update_neq.
 Qed.
 
 Lemma annotated_composite_induced_projection_label_lift
@@ -295,8 +293,8 @@ Lemma annotated_composite_induced_projection_initial_lift
     annotated_composite_state_lift.
 Proof.
   split; cbn.
-  - apply lift_to_composite_state_initial; assumption.
-  - destruct inhabitant; assumption.
+  - by apply composite_initial_state_prop_lift.
+  - by destruct inhabitant.
 Qed.
 
 Lemma annotated_composite_induced_projection_transition_consistency
@@ -314,8 +312,7 @@ Proof.
   ; intros <- iom sX1' oom1
   ;destruct (vtransition _ _ _) as (si', om').
   inversion_clear 1; intros sX2' oom2; inversion_clear 1.
-  split; [cbn | reflexivity].
-  rewrite !state_update_eq; reflexivity.
+  by cbn; rewrite !state_update_eq.
 Qed.
 
 Definition annotated_composite_induced_projection_transition_Some :=

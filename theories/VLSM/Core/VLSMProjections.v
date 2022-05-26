@@ -1,3 +1,4 @@
+From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import FunctionalExtensionality.
 From VLSM Require Import Core.VLSM.
@@ -109,13 +110,13 @@ Proof.
   specialize (partial_trace_project_extends_left _ _ _ Hsimul _ _ _ _ Hpr _ _ HsX)
     as Hpr_extends_left.
   spec Hpr_extends_left.
-  { rewrite app_nil_r. assumption. }
+  { by rewrite app_nil_r. }
   destruct Hpr_extends_left as [isY [preY [Hpr_tr HsY]]].
   rewrite !app_nil_r in Hpr_tr.
   specialize (VLSM_weak_partial_projection_finite_valid_trace_from _ _ _ _ Hpr_tr HtrX)
     as Hinit_to.
   apply finite_valid_trace_from_app_iff, proj1, finite_valid_trace_last_pstate in Hinit_to.
-  subst sY. assumption.
+  by subst sY.
 Qed.
 
 Lemma VLSM_weak_partial_projection_input_valid_transition
@@ -127,8 +128,8 @@ Proof.
   intros sX itemX sY itemY Hpr HtX.
   apply finite_valid_trace_singleton in HtX.
   apply VLSM_weak_partial_projection_finite_valid_trace_from with (sY := sY) (trY := [itemY]) in HtX
-  ; [|destruct itemX; assumption].
-  inversion HtX. subst. assumption.
+  ; [| by destruct itemX].
+  by inversion_clear HtX.
 Qed.
 
 Lemma VLSM_weak_partial_projection_input_valid
@@ -137,7 +138,7 @@ Lemma VLSM_weak_partial_projection_input_valid
     input_valid Y (l itemY) (sY, input itemY).
 Proof.
   intros sX itemX HitemX sY itemY Hpr.
-  eapply VLSM_weak_partial_projection_input_valid_transition; eassumption.
+  by eapply VLSM_weak_partial_projection_input_valid_transition.
 Qed.
 
 End weak_partial_projection_properties.
@@ -167,13 +168,11 @@ Proof.
     as [isX [preX [Htr'X HsX]]].
   specialize (partial_trace_project_extends_left _ _ _ Hsimul _ _ _ _ Hpr_tr _ _ HsX)
     as Hpr_extends_left.
-  spec Hpr_extends_left.
-  { apply proj1 in Htr'X. assumption. }
+  spec Hpr_extends_left; [by apply proj1 in Htr'X |].
   destruct Hpr_extends_left as [isY [preY [Hpr_tr' HsY]]].
   specialize (VLSM_partial_projection_finite_valid_trace _ _ _ _ Hpr_tr' Htr'X)
     as Hinit_to.
-  apply proj1, finite_valid_trace_from_app_iff, proj2 in Hinit_to.
-  subst sY. assumption.
+  by apply proj1, finite_valid_trace_from_app_iff, proj2 in Hinit_to; subst.
 Qed.
 
 Lemma VLSM_partial_projection_initial_state
@@ -183,7 +182,7 @@ Lemma VLSM_partial_projection_initial_state
 Proof.
   intros sX sY trY Hpr HsX.
   assert (HtrX : finite_valid_trace X sX []).
-  { split; [|assumption].  constructor. apply initial_state_is_valid. assumption. }
+  { split; [| done]. constructor. by apply initial_state_is_valid. }
   apply (VLSM_partial_projection_finite_valid_trace _ _ _ _ Hpr HtrX).
 Qed.
 
@@ -268,7 +267,7 @@ Proof.
   intros [lY HlY].
   unfold pre_VLSM_projection_transition_item_project.
   rewrite HlY.
-  eexists; reflexivity.
+  by eexists.
 Qed.
 
 Lemma pre_VLSM_projection_transition_item_project_is_Some_rev
@@ -279,7 +278,7 @@ Proof.
   intros [itemY HitemY].
   unfold pre_VLSM_projection_transition_item_project in HitemY.
   destruct (label_project (l item)) as [lY|] eqn:HlY; [|congruence].
-  exists lY. assumption.
+  by exists lY.
 Qed.
 
 Lemma pre_VLSM_projection_transition_item_project_infinitely_often
@@ -521,8 +520,7 @@ Lemma strong_projection_valid_message_preservation_weaken
   : strong_projection_valid_message_preservation ->
     weak_projection_valid_message_preservation.
 Proof.
-  intros Hstrong lX lY Hl  s m [_ [Hm _]] HsY. apply Hstrong in Hm.
-  assumption.
+  by intros Hstrong lX lY Hl  s m [_ [Hm%Hstrong _]] HsY.
 Qed.
 
 End VLSM_projection_definitions.
@@ -615,9 +613,7 @@ Proof.
     as [m Hrew].
   unfold VLSM_weak_projection_infinite_trace_project, pre_VLSM_projection_infinite_trace_project.
   replace (stream_prefix _ _) with (VLSM_weak_projection_trace_project Hsimul (stream_prefix trX m)).
-  apply VLSM_weak_projection_finite_valid_trace_from.
-  apply infinite_valid_trace_from_prefix.
-  assumption.
+  by apply VLSM_weak_projection_finite_valid_trace_from, infinite_valid_trace_from_prefix.
 Qed.
 
 Lemma VLSM_weak_projection_infinite_finite_valid_trace_from
@@ -627,8 +623,7 @@ Lemma VLSM_weak_projection_infinite_finite_valid_trace_from
 Proof.
   intros sX trX Hfin HtrX.
   apply VLSM_weak_projection_finite_valid_trace_from.
-  apply infinite_valid_trace_from_prefix with (n := `Hfin) in HtrX.
-  assumption.
+  by apply infinite_valid_trace_from_prefix with (n := `Hfin) in HtrX.
 Qed.
 
 (** Any [VLSM_projection] determines a [VLSM_partial_projection], allowing us
@@ -650,7 +645,7 @@ Lemma VLSM_weak_projection_valid_state
 Proof.
   specialize VLSM_weak_partial_projection_from_projection as Hpart_simul.
   specialize (VLSM_weak_partial_projection_valid_state Hpart_simul) as Hps.
-  intro sX. eapply Hps; reflexivity.
+  by intro sX; eapply Hps.
 Qed.
 
 Lemma VLSM_weak_projection_input_valid_transition
@@ -665,9 +660,8 @@ Proof.
   apply
     (Hivt s {| l := lX; input := im; destination := s'; output := om|}
       (state_project s) {| l := lY; input := im; destination := state_project s'; output := om|})
-  ; [|assumption].
-  simpl. unfold pre_VLSM_projection_transition_item_project.
-  simpl. rewrite H. reflexivity.
+  ; [| done].
+  by cbn; unfold pre_VLSM_projection_transition_item_project; cbn; rewrite H.
 Qed.
 
 Lemma VLSM_weak_projection_input_valid
@@ -676,8 +670,7 @@ Lemma VLSM_weak_projection_input_valid
 Proof.
   intros lX lY Hpr sX im HvX.
   destruct (vtransition X lX (sX, im)) eqn:HtX.
-  eapply VLSM_weak_projection_input_valid_transition, input_valid_can_transition
-  ; eassumption.
+  by eapply VLSM_weak_projection_input_valid_transition, input_valid_can_transition.
 Qed.
 
 Lemma VLSM_weak_projection_finite_valid_trace_from_to
@@ -689,10 +682,8 @@ Proof.
   intros sX s'X trX HtrX.
   apply valid_trace_get_last in HtrX as Hs'X.
   apply valid_trace_forget_last in HtrX. subst.
-  rewrite (final_state_project _ _ _ _ Hsimul).
-  - apply valid_trace_add_default_last. revert HtrX.
-    apply Htr. reflexivity.
-  - assumption.
+  rewrite (final_state_project _ _ _ _ Hsimul); [| done].
+  apply valid_trace_add_default_last. eauto.
 Qed.
 
 Lemma VLSM_weak_projection_in_futures
@@ -804,7 +795,7 @@ Proof.
   specialize VLSM_partial_projection_from_projection as Hpart_simul.
   specialize (VLSM_partial_projection_finite_valid_trace_from Hpart_simul) as Hivt.
   intros sX trX.
-  apply Hivt. simpl. reflexivity.
+  by apply Hivt.
 Qed.
 
 Definition VLSM_projection_weaken : VLSM_weak_projection X Y label_project state_project :=
@@ -854,7 +845,7 @@ Lemma VLSM_projection_initial_state
 Proof.
   specialize VLSM_partial_projection_from_projection as Hpart_simul.
   specialize (VLSM_partial_projection_initial_state Hpart_simul) as His.
-  intro sX. eapply His; reflexivity.
+  by intro sX; eapply His.
 Qed.
 
 Lemma VLSM_projection_finite_valid_trace_init_to
@@ -873,8 +864,8 @@ Lemma VLSM_projection_infinite_valid_trace
 Proof.
   intros sX trX Hinf [HtrX HsX].
   split.
-  - apply VLSM_projection_infinite_valid_trace_from. assumption.
-  - apply VLSM_projection_initial_state. assumption.
+  - by apply VLSM_projection_infinite_valid_trace_from.
+  - by apply VLSM_projection_initial_state.
 Qed.
 
 Lemma VLSM_projection_infinite_finite_valid_trace
@@ -884,8 +875,8 @@ Lemma VLSM_projection_infinite_finite_valid_trace
 Proof.
   intros sX trX Hfin [HtrX HsX].
   split.
-  - apply VLSM_projection_infinite_finite_valid_trace_from. assumption.
-  - apply VLSM_projection_initial_state. assumption.
+  - by apply VLSM_projection_infinite_finite_valid_trace_from.
+  - by apply VLSM_projection_initial_state.
 Qed.
 
 (** ** Projection Friendliness
@@ -931,12 +922,9 @@ Proof.
   exists (finite_trace_last isX trX_s1).
   exists (finite_trace_last isX  (trX_s1 ++ trX_s2)).
   rewrite !VLSM_projection_finite_trace_last,
-    VLSM_projection_trace_project_app.
-  - repeat split.
-    rewrite finite_trace_last_app.
-    eexists; exact HtrX2.
-  - assumption.
-  - assumption.
+    VLSM_projection_trace_project_app; [| done | done].
+  repeat split.
+  by rewrite finite_trace_last_app; eexists.
 Qed.
 
 (** A consequence of the [projection_friendly_prop]erty is that the valid
@@ -953,8 +941,7 @@ Lemma projection_friendly_trace_char
 Proof.
   split; [apply Hfriendly|].
   intros [sX [trX [HtrX [<- <-]]]].
-  apply VLSM_projection_finite_valid_trace.
-  assumption.
+  by apply VLSM_projection_finite_valid_trace.
 Qed.
 
 End projection_friendliness.
@@ -1014,7 +1001,7 @@ Lemma pre_VLSM_full_projection_infinite_trace_project_infinitely_often
   : forall s, InfinitelyOften (is_Some ∘ (Some ∘ label_project ∘ l)) s.
 Proof.
   cofix H. intros (a, s). constructor; simpl; [|apply H].
-  apply Streams.Here. eexists; reflexivity.
+  apply Streams.Here. by eexists.
 Qed.
 
 Lemma pre_VLSM_full_projection_infinite_trace_project_EqSt
@@ -1030,10 +1017,8 @@ Lemma pre_VLSM_full_projection_finite_trace_last
     state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX) (pre_VLSM_full_projection_finite_trace_project trX).
 Proof.
   intros.
-  destruct_list_last trX trX' lst HtrX
-  ; [reflexivity|].
-  setoid_rewrite map_app. simpl. rewrite !finite_trace_last_is_last.
-  reflexivity.
+  destruct_list_last trX trX' lst HtrX; [done |].
+  by setoid_rewrite map_app; cbn; rewrite !finite_trace_last_is_last.
 Qed.
 
 Lemma pre_VLSM_full_projection_finite_trace_last_output :
@@ -1043,9 +1028,8 @@ Lemma pre_VLSM_full_projection_finite_trace_last_output :
     finite_trace_last_output (pre_VLSM_full_projection_finite_trace_project trX).
 Proof.
   intros trX.
-  destruct_list_last trX trX' lst HtrX; [reflexivity|].
-  setoid_rewrite map_app; simpl; rewrite !finite_trace_last_output_is_last.
-  reflexivity.
+  destruct_list_last trX trX' lst HtrX; [done |].
+  by setoid_rewrite map_app; simpl; rewrite !finite_trace_last_output_is_last.
 Qed.
 
 End pre_definitions.
@@ -1250,7 +1234,7 @@ Lemma strong_full_projection_initial_state_preservation_weaken
     weak_full_projection_initial_state_preservation.
 Proof.
   intros Hstrong s Hs. apply Hstrong in Hs.
-  apply initial_state_is_valid. assumption.
+  by apply initial_state_is_valid.
 Qed.
 
 Definition weak_full_projection_initial_message_preservation : Prop :=
@@ -1269,7 +1253,7 @@ Lemma strong_full_projection_initial_message_preservation_weaken
     weak_full_projection_initial_message_preservation.
 Proof.
   intros Hstrong l s m Hv HsY Him. apply Hstrong in Him.
-  apply initial_message_is_valid. assumption.
+  by apply initial_message_is_valid.
 Qed.
 
 End basic_definitions.
@@ -1323,7 +1307,7 @@ Lemma VLSM_full_projection_projection_type
   : VLSM_projection_type X (type Y) (fun l => Some (label_project l)) state_project.
 Proof.
   split; intros.
-  - destruct_list_last trX trX' lstX Heq; [reflexivity|].
+  - destruct_list_last trX trX' lstX Heq; [done |].
     apply (pre_VLSM_full_projection_finite_trace_last _).
 Qed.
 
@@ -1383,17 +1367,14 @@ Lemma VLSM_weak_full_projection_input_valid_transition
   input_valid_transition Y (label_project l) (state_project s,im) (state_project s',om).
 Proof.
   intros.
-  apply (VLSM_weak_projection_input_valid_transition VLSM_weak_full_projection_is_projection)
-    with (lY := label_project l) in H
-  ; [assumption|reflexivity].
+  by apply (VLSM_weak_projection_input_valid_transition VLSM_weak_full_projection_is_projection)
+      with (lY := label_project l) in H.
 Qed.
 
 Lemma VLSM_weak_full_projection_input_valid l s im
   : input_valid X l (s,im) -> input_valid Y (label_project l) (state_project s,im).
 Proof.
-  intros.
-  eapply (VLSM_weak_projection_input_valid VLSM_weak_full_projection_is_projection)
-  ; trivial.
+  by intros; eapply (VLSM_weak_projection_input_valid VLSM_weak_full_projection_is_projection).
 Qed.
 
 Lemma VLSM_weak_full_projection_infinite_valid_trace_from
@@ -1406,8 +1387,7 @@ Proof.
     as Heq.
   apply Streams.sym_EqSt in Heq.
   apply (infinite_valid_trace_from_EqSt Y _ _ _ Heq).
-  apply (VLSM_weak_projection_infinite_valid_trace_from VLSM_weak_full_projection_is_projection sX trX).
-  assumption.
+  by apply (VLSM_weak_projection_infinite_valid_trace_from VLSM_weak_full_projection_is_projection sX trX).
 Qed.
 
 Lemma VLSM_weak_full_projection_can_produce
@@ -1417,7 +1397,7 @@ Lemma VLSM_weak_full_projection_can_produce
 Proof.
   intros [(s0, im) [l Ht]].
   apply VLSM_weak_full_projection_input_valid_transition in Ht.
-  eexists. eexists. exact Ht.
+  by do 2 eexists.
 Qed.
 
 Lemma VLSM_weak_full_projection_can_emit
@@ -1436,7 +1416,7 @@ Lemma VLSM_weak_full_projection_valid_message
 Proof.
   intros Hm.
   apply emitted_messages_are_valid_iff in Hm as [Hinit | Hemit].
-  - apply Hinitial_valid_message in Hinit. apply initial_message_is_valid. assumption.
+  - apply Hinitial_valid_message in Hinit. by apply initial_message_is_valid.
   - apply emitted_messages_are_valid. revert Hemit. apply VLSM_weak_full_projection_can_emit.
 Qed.
 
@@ -1596,8 +1576,7 @@ Proof.
   - left. revert Hgen. apply VLSM_full_projection_can_produce.
   - right. split.
     + revert His. apply VLSM_full_projection_initial_state.
-    + destruct om as [m|]; [|exact I].
-      apply Hmessage. assumption.
+    + destruct om as [m|]; [| done]. by apply Hmessage.
 Qed.
 
 End full_projection_properties.
@@ -1659,10 +1638,7 @@ Lemma VLSM_eq_incl_l
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_eq X Y -> VLSM_incl X Y.
 Proof.
-  intro Heq.
-  intros t Hxt.
-  apply Heq.
-  assumption.
+  intros Heq t Hxt. by apply Heq.
 Qed.
 
 Lemma VLSM_eq_incl_r
@@ -1670,28 +1646,14 @@ Lemma VLSM_eq_incl_r
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_eq X Y -> VLSM_incl Y X.
 Proof.
-  intro Heq.
-  intros t Hyt.
-  apply Heq.
-  assumption.
+  intros Heq t Hyt. by apply Heq.
 Qed.
 
 Lemma VLSM_eq_incl_iff
   (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_eq X Y <-> VLSM_incl X Y /\ VLSM_incl Y X.
-Proof.
-  split.
-  - intro Heq.
-    split.
-    + apply VLSM_eq_incl_l; assumption.
-    + apply VLSM_eq_incl_r; assumption.
-  - intros [Hxy Hyx].
-    intro t.
-    split.
-    + apply Hxy.
-    + apply Hyx.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma VLSM_incl_finite_traces_characterization
   (MX MY : VLSMMachine vtype)
@@ -1702,18 +1664,18 @@ Lemma VLSM_incl_finite_traces_characterization
     finite_valid_trace X s tr -> finite_valid_trace Y s tr.
 Proof.
   split; intros Hincl.
-  - intros. specialize (Hincl (Finite s tr)). apply Hincl. assumption.
+  - intros. by apply (Hincl (Finite s tr)).
   - intros tr Htr.
     destruct tr as [is tr | is tr]; simpl in *.
     + revert Htr. apply Hincl.
     + destruct Htr as [HtrX HisX].
       assert (His_tr: finite_valid_trace X is []).
-      { split; [|assumption]. constructor.
-        apply initial_state_is_valid. assumption.
+      { split; [| done]. constructor.
+        by apply initial_state_is_valid.
       }
       apply Hincl in His_tr.
       destruct His_tr as [_ HisY].
-      split; [|assumption].
+      split; [| done].
       apply infinite_valid_trace_from_prefix_rev.
       intros.
       pose proof (infinite_valid_trace_from_prefix _ _ _ HtrX n) as HfinX.
@@ -1729,15 +1691,15 @@ Lemma VLSM_incl_full_projection_iff
   : VLSM_incl X Y <-> VLSM_full_projection X Y id id.
 Proof.
   assert (Hid : forall tr, tr = pre_VLSM_full_projection_finite_trace_project _ _ id id tr).
-  { induction tr; [reflexivity|]. destruct a. simpl. f_equal. assumption. }
+  { induction tr; [done |]. destruct a. by cbn; f_equal. }
   split.
   - constructor; intros.
     apply (proj1 (VLSM_incl_finite_traces_characterization (machine X) (machine Y)) H) in H0.
-    replace (pre_VLSM_full_projection_finite_trace_project _ _ _ _ trX) with trX; [assumption|].
+    replace (pre_VLSM_full_projection_finite_trace_project _ _ _ _ trX) with trX; [done |].
     apply Hid.
   - intro Hproject. apply VLSM_incl_finite_traces_characterization.
     intros. apply (VLSM_full_projection_finite_valid_trace Hproject) in H.
-    replace (VLSM_full_projection_finite_trace_project Hproject _) with tr in H; [assumption|].
+    replace (VLSM_full_projection_finite_trace_project Hproject _) with tr in H; [done |].
     apply Hid.
 Qed.
 
@@ -1755,9 +1717,9 @@ Lemma VLSM_incl_is_full_projection_finite_trace_project
   : forall tr,
     VLSM_full_projection_finite_trace_project (VLSM_incl_is_full_projection Hincl) tr = tr.
 Proof.
-  induction tr; [reflexivity|].
-  simpl. f_equal; [|assumption].
-  destruct a; reflexivity.
+  induction tr; [done |].
+  simpl. f_equal; [| done].
+  by destruct a.
 Qed.
 
 End VLSM_equality.
@@ -1848,8 +1810,7 @@ Lemma VLSM_incl_finite_valid_trace
 Proof.
   apply (VLSM_full_projection_finite_valid_trace (VLSM_incl_is_full_projection Hincl))
     in Htr.
-  rewrite (VLSM_incl_is_full_projection_finite_trace_project Hincl) in Htr.
-  assumption.
+  by rewrite (VLSM_incl_is_full_projection_finite_trace_project Hincl) in Htr.
 Qed.
 
 Lemma VLSM_incl_finite_valid_trace_init_to
@@ -1860,8 +1821,7 @@ Lemma VLSM_incl_finite_valid_trace_init_to
 Proof.
   apply (VLSM_full_projection_finite_valid_trace_init_to (VLSM_incl_is_full_projection Hincl))
     in Htr.
-  rewrite (VLSM_incl_is_full_projection_finite_trace_project Hincl) in Htr.
-  assumption.
+  by rewrite (VLSM_incl_is_full_projection_finite_trace_project Hincl) in Htr.
 Qed.
 
 Lemma VLSM_incl_valid_state
@@ -1887,8 +1847,7 @@ Lemma VLSM_incl_finite_valid_trace_from
 Proof.
   apply (VLSM_full_projection_finite_valid_trace_from (VLSM_incl_is_full_projection Hincl))
     in Htr.
-  rewrite (VLSM_incl_is_full_projection_finite_trace_project Hincl) in Htr.
-  assumption.
+  by rewrite (VLSM_incl_is_full_projection_finite_trace_project Hincl) in Htr.
 Qed.
 
 Lemma VLSM_incl_finite_valid_trace_from_to
@@ -1899,8 +1858,7 @@ Lemma VLSM_incl_finite_valid_trace_from_to
 Proof.
   apply (VLSM_full_projection_finite_valid_trace_from_to (VLSM_incl_is_full_projection Hincl))
     in Htr.
-  rewrite (VLSM_incl_is_full_projection_finite_trace_project Hincl) in Htr.
-  assumption.
+  by rewrite (VLSM_incl_is_full_projection_finite_trace_project Hincl) in Htr.
 Qed.
 
 Lemma VLSM_incl_in_futures
@@ -1940,8 +1898,7 @@ Lemma VLSM_incl_valid_state_message
   : forall s om, valid_state_message_prop X s om -> valid_state_message_prop Y s om.
 Proof.
   intros s om.
-  apply (VLSM_full_projection_valid_state_message (VLSM_incl_is_full_projection Hincl)).
-  assumption.
+  by apply (VLSM_full_projection_valid_state_message (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
 Lemma VLSM_incl_can_produce
@@ -1965,8 +1922,7 @@ Definition VLSM_incl_valid_message
     valid_message_prop X m -> valid_message_prop Y m.
 Proof.
   intros m [s Hm].
-  exists s. revert Hm. apply VLSM_incl_valid_state_message.
-  assumption.
+  by exists s; revert Hm; apply VLSM_incl_valid_state_message.
 Qed.
 
 Lemma VLSM_incl_infinite_valid_trace_from
@@ -1981,7 +1937,7 @@ Proof.
   apply Streams.ntheq_eqst.
   unfold VLSM_full_projection_infinite_trace_project, pre_VLSM_full_projection_infinite_trace_project.
   intro n. rewrite Streams.Str_nth_map.
-  destruct (Streams.Str_nth _ _). reflexivity.
+  by destruct (Streams.Str_nth _ _).
 Qed.
 
 Lemma VLSM_incl_infinite_valid_trace
@@ -2203,18 +2159,12 @@ Lemma basic_VLSM_projection_type
 Proof.
   constructor.
   intros is tr Htr.
-  induction Htr using finite_valid_trace_from_rev_ind
-  ; [reflexivity|].
-  rewrite (pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project).
-  rewrite finite_trace_last_is_last.
-  rewrite finite_trace_last_app, <- IHHtr.
-  clear IHHtr.
-  simpl.
-  unfold pre_VLSM_projection_transition_item_project.
-  destruct (label_project _) as [lY|] eqn:Hl; [reflexivity|].
-  apply (Htransition_None _ Hl) in Hx.
-  rewrite Hx.
-  reflexivity.
+  induction Htr using finite_valid_trace_from_rev_ind; [done |].
+  rewrite pre_VLSM_projection_finite_trace_project_app,
+    finite_trace_last_is_last, finite_trace_last_app, <- IHHtr; cbn.
+  unfold pre_VLSM_projection_transition_item_project;
+    destruct (label_project _) as [lY |] eqn: Hl; [done |].
+  by rewrite Htransition_None.
 Qed.
 
 End basic_VLSM_projection_type.
@@ -2247,11 +2197,10 @@ Local Lemma basic_VLSM_projection_finite_valid_trace_init_to
   : finite_valid_trace_from_to Y (state_project is) (state_project s) (pre_VLSM_projection_finite_trace_project _ _ label_project state_project tr).
 Proof.
   induction Htr using finite_valid_trace_init_to_rev_strong_ind.
-  - constructor. apply Hstate. assumption.
-  - unfold pre_VLSM_projection_finite_trace_project.
-    rewrite map_option_app.
+  - constructor. by apply Hstate.
+  - unfold pre_VLSM_projection_finite_trace_project; rewrite map_option_app.
     apply finite_valid_trace_from_to_app with (state_project s)
-    ; [assumption|].
+    ; [done |].
     simpl. unfold pre_VLSM_projection_transition_item_project.
     simpl.
     apply valid_trace_last_pstate in IHHtr1.
@@ -2259,14 +2208,12 @@ Proof.
     + apply finite_valid_trace_from_to_singleton.
       assert (Hiom : option_valid_message_prop Y iom).
       { destruct iom as [im|]; [|apply option_valid_message_None].
-        apply (Hmessage _ _ Hl _ _ (proj1 Ht)).
-        assumption.
+        by apply (Hmessage _ _ Hl _ _ (proj1 Ht)).
       }
       specialize (Hvalid _ _ Hl _ _ (proj1 Ht) IHHtr1 Hiom).
-      apply (Htransition_Some _ _ Hl) in Ht.
-      repeat split; assumption.
+      by apply (Htransition_Some _ _ Hl) in Ht.
     + apply (Htransition_None _ Hl) in Ht.
-      rewrite Ht. constructor. assumption.
+      rewrite Ht. by constructor.
 Qed.
 
 Local Lemma basic_VLSM_projection_finite_valid_trace_from
@@ -2287,9 +2234,8 @@ Proof.
   apply valid_trace_get_last in Hs as Heqs.
   apply valid_trace_forget_last, proj1 in Hs.
   rewrite <- (final_state_project X (type Y) label_project state_project Htype)
-    in Happ_pr by assumption.
-  apply valid_trace_forget_last in Happ_pr.
-  subst. assumption.
+    in Happ_pr by done.
+  by apply valid_trace_forget_last in Happ_pr; subst.
 Qed.
 
 (* end hide *)
@@ -2297,9 +2243,8 @@ Qed.
 Lemma basic_VLSM_weak_projection
   : VLSM_weak_projection X Y label_project state_project.
 Proof.
-  constructor.
-  - assumption.
-  - apply basic_VLSM_projection_finite_valid_trace_from.
+  constructor; [done |].
+  apply basic_VLSM_projection_finite_valid_trace_from.
 Qed.
 
 End weak_projection.
@@ -2320,10 +2265,9 @@ Lemma basic_VLSM_projection
   (Hmessage : weak_projection_valid_message_preservation X Y label_project state_project)
   : VLSM_projection X Y label_project state_project.
 Proof.
-  apply basic_VLSM_weak_projection_strengthen; [|assumption].
-  apply basic_VLSM_weak_projection; [|assumption].
-  apply strong_full_projection_initial_state_preservation_weaken.
-  assumption.
+  apply basic_VLSM_weak_projection_strengthen; [| done].
+  apply basic_VLSM_weak_projection; [| done].
+  by apply strong_full_projection_initial_state_preservation_weaken.
 Qed.
 
 End basic_VLSM_projection.
@@ -2341,11 +2285,11 @@ Lemma basic_VLSM_strong_projection
   : VLSM_projection X Y label_project state_project.
 Proof.
   apply basic_VLSM_projection.
-  - apply strong_projection_valid_preservation_weaken. assumption.
-  - apply strong_projection_transition_preservation_Some_weaken. assumption.
-  - apply strong_projection_transition_consistency_None_weaken. assumption.
-  - assumption.
-  - apply strong_projection_valid_message_preservation_weaken. assumption.
+  - by apply strong_projection_valid_preservation_weaken.
+  - by apply strong_projection_transition_preservation_Some_weaken.
+  - by apply strong_projection_transition_consistency_None_weaken.
+  - done.
+  - by apply strong_projection_valid_message_preservation_weaken.
 Qed.
 
 Lemma basic_VLSM_projection_type_preloaded
@@ -2359,17 +2303,12 @@ Proof.
   constructor.
   intros is tr Htr.
   induction Htr using finite_valid_trace_from_rev_ind
-  ; [reflexivity|].
-  rewrite (@pre_VLSM_projection_finite_trace_project_app _ (type (pre_loaded_with_all_messages_vlsm X)) (type Y) label_project state_project).
-  rewrite finite_trace_last_is_last.
-  rewrite finite_trace_last_app, <- IHHtr.
-  clear IHHtr.
-  simpl.
-  unfold pre_VLSM_projection_transition_item_project.
-  destruct (label_project _) as [lY|] eqn:Hl; [reflexivity|].
-  apply proj2, (Htransition_None _ Hl) in Hx.
-  rewrite Hx.
-  reflexivity.
+  ; [done |].
+  rewrite pre_VLSM_projection_finite_trace_project_app,
+    finite_trace_last_is_last, finite_trace_last_app, <- IHHtr; cbn.
+  unfold pre_VLSM_projection_transition_item_project;
+    destruct Hx as  [_ Ht], (label_project _) as [lY|] eqn:Hl; [done |].
+  by rewrite Htransition_None.
 Qed.
 
 Lemma basic_VLSM_projection_preloaded
@@ -2384,15 +2323,14 @@ Lemma basic_VLSM_projection_preloaded
   : VLSM_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project.
 Proof.
   specialize (basic_VLSM_projection_type_preloaded X Y label_project state_project Htransition_None) as Htype.
-  constructor; [assumption|].
+  constructor; [done |].
   intros sX trX HtrX.
   split; [|apply Hstate; apply HtrX].
   induction HtrX using finite_valid_trace_rev_ind.
-  - constructor. apply initial_state_is_valid.
-    apply Hstate; assumption.
-  - rewrite (@pre_VLSM_projection_finite_trace_project_app _ (type (pre_loaded_with_all_messages_vlsm X)) (type Y) label_project state_project).
+  - by constructor; apply initial_state_is_valid, Hstate.
+  - rewrite pre_VLSM_projection_finite_trace_project_app.
     apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm Y)).
-    split; [assumption|].
+    split; [done |].
     simpl. unfold pre_VLSM_projection_transition_item_project.
     simpl.
     apply finite_valid_trace_last_pstate in IHHtrX.
@@ -2405,9 +2343,8 @@ Proof.
         apply (any_message_is_valid_in_preloaded Y).
       }
       apply (Hvalid _ _ Hl) in Hv.
-      apply (Htransition_Some _ _ Hl) in Ht.
-      repeat split; assumption.
-    + apply (finite_valid_trace_from_empty (pre_loaded_with_all_messages_vlsm Y)). assumption.
+      by apply (Htransition_Some _ _ Hl) in Ht.
+    + by apply (finite_valid_trace_from_empty (pre_loaded_with_all_messages_vlsm Y)).
 Qed.
 
 Lemma basic_VLSM_projection_type_preloaded_with
@@ -2421,18 +2358,12 @@ Lemma basic_VLSM_projection_type_preloaded_with
 Proof.
   constructor.
   intros is tr Htr.
-  induction Htr using finite_valid_trace_from_rev_ind
-  ; [reflexivity|].
-  rewrite (@pre_VLSM_projection_finite_trace_project_app _ (type (pre_loaded_vlsm X P)) (type Y) label_project state_project).
-  rewrite finite_trace_last_is_last.
-  rewrite finite_trace_last_app, <- IHHtr.
-  clear IHHtr.
-  simpl.
-  unfold pre_VLSM_projection_transition_item_project.
-  destruct (label_project _) as [lY|] eqn:Hl; [reflexivity|].
-  apply proj2, (Htransition_None _ Hl) in Hx.
-  rewrite Hx.
-  reflexivity.
+  induction Htr using finite_valid_trace_from_rev_ind; [done |].
+  rewrite pre_VLSM_projection_finite_trace_project_app,
+    finite_trace_last_is_last, finite_trace_last_app, <- IHHtr; cbn.
+  unfold pre_VLSM_projection_transition_item_project;
+    destruct Hx, (label_project _) as [lY|] eqn:Hl; [done |].
+  by rewrite Htransition_None.
 Qed.
 
 Lemma basic_VLSM_projection_preloaded_with
@@ -2449,15 +2380,14 @@ Lemma basic_VLSM_projection_preloaded_with
   : VLSM_projection (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project.
 Proof.
   specialize (basic_VLSM_projection_type_preloaded_with X Y P Q label_project state_project Htransition_None) as Htype.
-  constructor; [assumption|].
+  constructor; [done |].
   intros sX trX HtrX.
   split; [|apply Hstate; apply HtrX].
   induction HtrX using finite_valid_trace_rev_ind.
-  - constructor. apply initial_state_is_valid.
-    apply Hstate; assumption.
-  - rewrite (@pre_VLSM_projection_finite_trace_project_app _ (type (pre_loaded_vlsm X P)) (type Y) label_project state_project).
+  - by constructor; apply initial_state_is_valid, Hstate.
+  - rewrite pre_VLSM_projection_finite_trace_project_app.
     apply (finite_valid_trace_from_app_iff (pre_loaded_vlsm Y Q)).
-    split; [assumption|].
+    split; [done |].
     simpl. unfold pre_VLSM_projection_transition_item_project.
     simpl.
     apply finite_valid_trace_last_pstate in IHHtrX.
@@ -2468,12 +2398,11 @@ Proof.
     + apply (finite_valid_trace_singleton (pre_loaded_vlsm Y Q)).
       assert (Hiom : option_valid_message_prop (pre_loaded_vlsm Y Q) iom).
       { destruct iom as [im|]; [|apply option_valid_message_None].
-        apply (Hmessage _ _ Hl) in Hpv; assumption.
+        by apply (Hmessage _ _ Hl) in Hpv.
       }
       apply (Hvalid _ _ Hl) in Hv.
-      apply (Htransition_Some _ _ Hl) in Ht.
-      repeat split; assumption.
-    + apply (finite_valid_trace_from_empty (pre_loaded_vlsm Y Q)). assumption.
+      by apply (Htransition_Some _ _ Hl) in Ht.
+    + by apply (finite_valid_trace_from_empty (pre_loaded_vlsm Y Q)).
 Qed.
 
 
@@ -2518,13 +2447,13 @@ Proof.
   apply proj1 in Hom.
   apply emitted_messages_are_valid_iff in Hom.
   destruct Hom as [Him | Hemit].
-  - apply (Hmessage _ _ _ Hv); assumption.
+  - by apply (Hmessage _ _ _ Hv).
   - apply can_emit_has_trace in Hemit as [is [tr [item [Htr Hm]]]].
     destruct item. simpl in *. subst.
     apply valid_trace_add_default_last in Htr.
     rewrite finite_trace_last_is_last in Htr. simpl in Htr.
     remember (tr ++ _) as tr'.
-    cut (option_valid_message_prop Y (Some m)); [exact id|].
+    cut (option_valid_message_prop Y (Some m)); [done |].
     exists (state_project destination).
     clear Hv Hl lX lY.
     revert tr l input Heqtr'.
@@ -2538,46 +2467,44 @@ Proof.
     { destruct_list_last tr s_tr' s_item Heqtr.
       - subst tr. destruct Htr1 as [Hs His].
         inversion Hs. subst.
-        apply Hstate. assumption.
+        by apply Hstate.
       - subst.
         apply valid_trace_get_last in Htr1 as Hs0.
         rewrite finite_trace_last_is_last in Hs0.
         destruct s_item. simpl in Hs0. subst destination.
         specialize (IHHtr1 _ _ _ _ eq_refl).
-        eexists; exact IHHtr1.
+        by eexists.
     }
     destruct Hs as [_om Hs].
     assert (Hom : option_valid_message_prop Y iom).
     { destruct iom as [im|]; [|apply option_valid_message_None].
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' iom_item Heqiom_tr.
-      - apply (Hmessage _ _ _ (proj1 Ht)); [|assumption].
-        eexists; exact Hs.
+      - by apply (Hmessage _ _ _ (proj1 Ht)); [eexists |].
       - subst.
         apply valid_trace_get_last in Htr2 as Hs0.
         rewrite finite_trace_last_is_last in Hs0.
         destruct iom_item. simpl in *. subst.
         specialize (IHHtr2 _ _ _ _ eq_refl).
-        eexists; exact IHHtr2.
+        by eexists.
     }
     destruct Hom as [_s Hom].
     apply
       (valid_generated_state_message Y _ _ Hs _ _ Hom (label_project l)).
-    + apply Hvalid; [apply Ht|exists _om|exists _s]; assumption.
-    + apply Htransition. assumption.
+    + by apply Hvalid; [apply Ht | exists _om | exists _s].
+    + by apply Htransition.
 Qed.
 
 Lemma basic_VLSM_weak_full_projection : VLSM_weak_full_projection X Y label_project state_project.
 Proof.
   specialize (basic_VLSM_weak_projection X Y (fun l => Some (label_project l)) state_project) as Hproj.
-  spec Hproj; [apply weak_projection_valid_preservation_from_full; assumption|].
-  spec Hproj; [apply weak_projection_transition_preservation_Some_from_full; assumption|].
+  spec Hproj; [by apply weak_projection_valid_preservation_from_full|].
+  spec Hproj; [by apply weak_projection_transition_preservation_Some_from_full|].
   spec Hproj; [apply weak_projection_transition_consistency_None_from_full|].
-  spec Hproj; [assumption|].
+  spec Hproj; [done |].
   spec Hproj; [apply weak_projection_valid_message_preservation_from_full|].
   constructor. intro; intros.
-  apply (VLSM_weak_projection_finite_valid_trace_from Hproj) in H.
-  assumption.
+  by apply (VLSM_weak_projection_finite_valid_trace_from Hproj) in H.
 Qed.
 
 End weak_full_projection.
@@ -2598,10 +2525,9 @@ Lemma basic_VLSM_full_projection
   (Hmessage : weak_full_projection_initial_message_preservation X Y state_project)
   : VLSM_full_projection X Y label_project state_project.
 Proof.
-  apply basic_VLSM_weak_full_projection_strengthen; [|assumption].
-  apply basic_VLSM_weak_full_projection; [|assumption].
-  apply strong_full_projection_initial_state_preservation_weaken.
-  assumption.
+  apply basic_VLSM_weak_full_projection_strengthen; [| done].
+  apply basic_VLSM_weak_full_projection; [| done].
+  by apply strong_full_projection_initial_state_preservation_weaken.
 Qed.
 
 End basic_VLSM_full_projection.
@@ -2618,10 +2544,10 @@ Lemma basic_VLSM_strong_full_projection
   : VLSM_full_projection X Y label_project state_project.
 Proof.
   apply basic_VLSM_full_projection.
-  - apply strong_full_projection_valid_preservation_weaken. assumption.
-  - apply strong_full_projection_transition_preservation_weaken. assumption.
-  - assumption.
-  - apply strong_full_projection_initial_message_preservation_weaken. assumption.
+  - by apply strong_full_projection_valid_preservation_weaken.
+  - by apply strong_full_projection_transition_preservation_weaken.
+  - done.
+  - by apply strong_full_projection_initial_message_preservation_weaken.
 Qed.
 
 Lemma basic_VLSM_full_projection_preloaded
@@ -2638,17 +2564,16 @@ Proof.
   intros sX trX HtrX.
   split; [|apply Hstate; apply HtrX].
   induction HtrX using finite_valid_trace_rev_ind.
-  - constructor. apply initial_state_is_valid.
-    apply Hstate; assumption.
+  - constructor. by apply initial_state_is_valid, Hstate.
   - setoid_rewrite map_app. apply finite_valid_trace_from_app_iff.
-    split; [assumption|].
+    split; [done |].
     simpl. apply (finite_valid_trace_singleton (pre_loaded_with_all_messages_vlsm Y)).
     destruct Hx as [[_ [_ Hv]] Ht].
     apply Hvalid in Hv.
     apply Htransition in Ht.
     rewrite (pre_VLSM_full_projection_finite_trace_last _ _ label_project state_project) in Hv, Ht.
-    repeat split; [..|assumption|assumption].
-    + apply finite_valid_trace_last_pstate in IHHtrX. assumption.
+    repeat split; [.. | done | done].
+    + by apply finite_valid_trace_last_pstate in IHHtrX.
     + apply any_message_is_valid_in_preloaded.
 Qed.
 
@@ -2670,10 +2595,9 @@ Proof.
   apply valid_trace_add_default_last in HtrX.
   split; [|apply Hstate; apply HtrX].
   induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
-  - constructor. apply initial_state_is_valid.
-    apply Hstate; assumption.
+  - constructor. by apply initial_state_is_valid, Hstate.
   - setoid_rewrite map_app. apply finite_valid_trace_from_app_iff.
-    split; [assumption|].
+    split; [done |].
     simpl. apply (finite_valid_trace_singleton (pre_loaded_vlsm Y Q)).
     destruct Ht as [[_ [_ Hv]] Ht].
     apply Hvalid in Hv.
@@ -2681,18 +2605,17 @@ Proof.
     apply valid_trace_get_last in HtrX1. subst s.
     rewrite (pre_VLSM_full_projection_finite_trace_last _ _ label_project state_project) in Hv, Ht.
     simpl.
-    repeat split; [..|assumption|assumption].
-    + apply finite_valid_trace_last_pstate in IHHtrX1. assumption.
+    repeat split; [.. | done | done].
+    + by apply finite_valid_trace_last_pstate in IHHtrX1.
     + destruct iom as [m|]; [|apply option_valid_message_None].
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' iom_lst Heqiom_tr
       ; [apply option_initial_message_is_valid; destruct Heqiom as [Him | Hp]|].
-      * left. revert Him. apply Hmessage.
-      * right. apply PimpliesQ. assumption.
+      * by left; revert Him; apply Hmessage.
+      * by right; auto.
       * apply
           (valid_trace_output_is_valid (pre_loaded_vlsm Y Q) _ _ IHHtrX2 m).
-        setoid_rewrite map_app. apply Exists_app. right.
-        left. assumption.
+        setoid_rewrite map_app. apply Exists_app. by right; left.
 Qed.
 
 (** We instantiate the above for VLSM inclusions
@@ -2715,8 +2638,7 @@ Lemma basic_VLSM_incl
   (Htransition : weak_incl_transition_preservation MX MY)
   : VLSM_incl X Y.
 Proof.
-  apply VLSM_incl_full_projection_iff.
-  apply basic_VLSM_full_projection; assumption.
+  by apply VLSM_incl_full_projection_iff, basic_VLSM_full_projection.
 Qed.
 
 Lemma basic_VLSM_strong_incl
@@ -2726,8 +2648,7 @@ Lemma basic_VLSM_strong_incl
   (Htransition : strong_incl_transition_preservation MX MY)
   : VLSM_incl X Y.
 Proof.
-  apply VLSM_incl_full_projection_iff.
-  apply basic_VLSM_strong_full_projection; assumption.
+  by apply VLSM_incl_full_projection_iff, basic_VLSM_strong_full_projection.
 Qed.
 
 Lemma basic_VLSM_incl_preloaded
@@ -2736,8 +2657,7 @@ Lemma basic_VLSM_incl_preloaded
   (Htransition : strong_incl_transition_preservation MX MY)
   : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y).
 Proof.
-  apply VLSM_incl_full_projection_iff.
-  apply (basic_VLSM_full_projection_preloaded X Y id id); assumption.
+  by apply VLSM_incl_full_projection_iff, (basic_VLSM_full_projection_preloaded X Y id id).
 Qed.
 
 Lemma basic_VLSM_incl_preloaded_with
@@ -2749,8 +2669,8 @@ Lemma basic_VLSM_incl_preloaded_with
   (Hmessage : strong_incl_initial_message_preservation MX MY)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q).
 Proof.
-  apply VLSM_incl_full_projection_iff.
-  apply (basic_VLSM_full_projection_preloaded_with X Y _ _ PimpliesQ id id); assumption.
+  by apply VLSM_incl_full_projection_iff,
+           (basic_VLSM_full_projection_preloaded_with X Y _ _ PimpliesQ id id).
 Qed.
 
 End basic_VLSM_incl.
@@ -2768,11 +2688,11 @@ Lemma pre_loaded_vlsm_incl_relaxed
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
   apply basic_VLSM_incl.
-  1, 3-4: cbv; intuition.
+  1, 3-4: cbv; itauto.
   intros _ _ m _ _ [Him | Hp].
-  - apply initial_message_is_valid; left; assumption.
-  - apply PimpliesQorValid in Hp as [Hq | Hvalid]; [|assumption].
-    apply initial_message_is_valid; right; assumption.
+  - by apply initial_message_is_valid; left.
+  - apply PimpliesQorValid in Hp as [Hq | Hvalid]; [| done].
+    by apply initial_message_is_valid; right.
 Qed.
 
 Lemma pre_loaded_vlsm_incl
@@ -2780,7 +2700,7 @@ Lemma pre_loaded_vlsm_incl
   (PimpliesQ : forall m : message, P m -> Q m)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
-  apply pre_loaded_vlsm_incl_relaxed; intuition.
+  apply pre_loaded_vlsm_incl_relaxed; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_with_valid_eq
@@ -2789,22 +2709,22 @@ Lemma pre_loaded_vlsm_with_valid_eq
   : VLSM_eq (pre_loaded_vlsm X (fun m => P m \/ Q m)) (pre_loaded_vlsm X P).
 Proof.
   apply VLSM_eq_incl_iff; split.
-  - apply pre_loaded_vlsm_incl_relaxed; intuition.
-  - cbv; apply pre_loaded_vlsm_incl; intuition.
+  - apply pre_loaded_vlsm_incl_relaxed; itauto.
+  - cbv; apply pre_loaded_vlsm_incl; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_idem_l
   (P : message -> Prop)
   : VLSM_incl (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_idem_r
   (P : message -> Prop)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm (pre_loaded_vlsm X P) P).
 Proof.
-  apply basic_VLSM_incl_preloaded_with; cbv; intuition.
+  apply basic_VLSM_incl_preloaded_with; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_idem
@@ -2820,13 +2740,13 @@ Qed.
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l
   : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun m => True)).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_r
   : VLSM_incl (pre_loaded_vlsm X (fun m => True)) (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True
@@ -2842,7 +2762,7 @@ Lemma pre_loaded_vlsm_incl_pre_loaded_with_all_messages
   (P : message -> Prop)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False
@@ -2850,7 +2770,7 @@ Lemma vlsm_is_pre_loaded_with_False
 Proof.
   destruct X as (T, M). intro Hpp.
   apply VLSM_eq_incl_iff. simpl.
-  split; apply basic_VLSM_strong_incl; cbv; intuition.
+  split; apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma vlsm_incl_pre_loaded
@@ -2859,31 +2779,31 @@ Lemma vlsm_incl_pre_loaded
 Proof.
   eapply VLSM_incl_trans.
   - eapply VLSM_eq_proj1, vlsm_is_pre_loaded_with_False.
-  - apply pre_loaded_vlsm_incl; contradiction.
+  - by apply pre_loaded_vlsm_incl.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_initial_message
   : strong_full_projection_initial_message_preservation X (pre_loaded_vlsm X (fun m => False)).
 Proof.
-  intros m Hm. left. assumption.
+  by intros m Hm; left.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_initial_message_rev
   : strong_full_projection_initial_message_preservation (pre_loaded_vlsm X (fun m => False)) X.
 Proof.
-  intros m [Hm | Hfalse]; [assumption|contradiction].
+  by intros m [Hm | Hfalse].
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_idem_l
   : VLSM_incl (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)) (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; intuition.
+  apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_idem_r
   : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)).
 Proof.
-  apply basic_VLSM_incl_preloaded; cbv; intuition.
+  apply basic_VLSM_incl_preloaded; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_idem
@@ -2910,7 +2830,7 @@ Lemma pre_loaded_with_all_messages_can_emit
   : can_emit (pre_loaded_with_all_messages_vlsm X) m.
 Proof.
   apply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm X)).
-  rewrite mk_vlsm_machine;assumption.
+  by rewrite mk_vlsm_machine.
 Qed.
 
 End VLSM_incl_preloaded_properties.
@@ -3032,9 +2952,7 @@ Proof.
   intros Hlabel Hstate Htransition lX lY HlX_pr sX1 iom sX1' oom1 Ht1
     sX2' oom2 Ht2.
   apply proj2 in Ht1.
-  eapply Htransition; [eassumption| apply Hlabel| |exact Ht1|exact Ht2].
-  symmetry.
-  apply Hstate.
+  eapply Htransition; [done | auto | symmetry; eauto | done | done].
 Qed.
 
 (** Under transition-consistency assumptions, valid messages of the
@@ -3048,23 +2966,22 @@ Proof.
   split; cycle 1.
   - intros Hm.
     destruct om as [m |].
-    + apply initial_message_is_valid. assumption.
+    + by apply initial_message_is_valid.
     + apply option_valid_message_None.
   - intros [s Hsom].
     induction Hsom.
-    + destruct om as [m |].
-      * assumption.
-      * apply option_valid_message_None.
+    + destruct om as [m |]; [done |].
+      apply option_valid_message_None.
     + destruct Hv as [lX [sX [HlX_pr [HsX_pr [HsX [HomX Hv]]]]]].
       cbn in Ht.
       destruct (vtransition _ _ _) as (_s'X, __om') eqn: H_tX.
       inversion Ht; subst; clear Ht.
       destruct (vtransition X lX (sX, om)) as (s'X, _om') eqn: HtX.
       assert (HivtX : input_valid_transition X lX (sX, om) (s'X, _om'))
-        by (repeat split; assumption).
+        by (split_and!; done).
       replace om' with _om'.
-        * eapply input_valid_transition_out. eassumption.
-        * eapply Htransition_Some; eassumption.
+        * by eapply input_valid_transition_out.
+        * by eapply Htransition_Some.
 Qed.
 
 Context
@@ -3078,19 +2995,16 @@ Lemma projection_induced_vlsm_is_projection
   : VLSM_projection X projection_induced_vlsm label_project state_project.
 Proof.
   apply basic_VLSM_projection; intro; intros.
-  - exists lX, s.
-    split; [assumption|].
-    split; [reflexivity|assumption].
+  - by exists lX, s.
   - specialize (Htransition_Some _ _ H _ _ _ _ H0).
     cbn.
     destruct (vtransition _ _ _) as (s2', om2').
     specialize (Htransition_Some _ _ eq_refl) as [Heqs Heqom].
-    subst. rewrite Heqs. reflexivity.
+    by subst; rewrite Heqs.
   - apply (Htransition_None _ H _ _ _ _ H0).
-  - exists s. split; [reflexivity|assumption].
+  - by exists s.
   - destruct Hv as [_ [Hm _]].
-    apply initial_message_is_valid.
-    assumption.
+    by apply initial_message_is_valid.
 Qed.
 
 (** When we have a [VLSM_projection] to the [projection_induced_vlsm],
@@ -3103,11 +3017,10 @@ Lemma induced_projection_valid_is_input_valid
 Proof.
   intro Hv.
   destruct (id Hv) as (lX & sX & HlX & <- & Hps & Hopm & _).
-  repeat split; [| | assumption].
-  - eapply VLSM_projection_valid_state; eassumption.
+  repeat split; [| | done].
+  - by eapply VLSM_projection_valid_state.
   - destruct om as [m|]; [|apply option_valid_message_None].
-    apply option_initial_message_is_valid.
-    assumption.
+    by apply option_initial_message_is_valid.
 Qed.
 
 Section projection_induced_friendliness.
@@ -3144,11 +3057,9 @@ Lemma induced_projection_trace_lift
     (pre_VLSM_full_projection_finite_trace_project _ _ label_lift state_lift tr)
     = tr.
 Proof.
-  induction tr; [reflexivity|].
+  induction tr; [done |].
   simpl.
-  rewrite induced_projection_transition_item_lift.
-  f_equal.
-  assumption.
+  by rewrite induced_projection_transition_item_lift; f_equal.
 Qed.
 
 (** If there is a way to "lift" valid traces of the [projection_induced_vlsm]
@@ -3161,10 +3072,10 @@ Proof.
   intros Hfull_proj isY trY HtrY.
   exists (state_lift isY).
   exists (VLSM_full_projection_finite_trace_project Hfull_proj trY).
-  intuition.
-  + apply (VLSM_full_projection_finite_valid_trace Hfull_proj).
-    assumption.
-  + apply induced_projection_trace_lift.
+  split_and!.
+  - by apply (VLSM_full_projection_finite_valid_trace Hfull_proj).
+  - done.
+  - by apply induced_projection_trace_lift.
 Qed.
 
 End projection_induced_friendliness.
@@ -3198,13 +3109,13 @@ Proof.
   {
     intros is [s1 [Hs1_pr Hs1]].
     exists s1.
-    split; [assumption|].
-    apply VLSM_incl_initial_state; assumption.
+    split; [done |].
+    by apply VLSM_incl_initial_state.
   }
   intros is tr Htr.
   split; [|apply His, Htr].
   induction Htr using finite_valid_trace_rev_ind
-  ; [apply (finite_valid_trace_from_empty XY2), initial_state_is_valid, His; assumption|].
+  ; [by apply (finite_valid_trace_from_empty XY2), initial_state_is_valid, His |].
   apply (finite_valid_trace_from_app_iff XY2).
   split; [apply IHHtr|].
   apply (finite_valid_trace_singleton XY2).
@@ -3213,17 +3124,16 @@ Proof.
   destruct (vtransition _ _ _) as (_s'X, _oom) eqn:H_tX1.
   inversion Ht. subst. clear Ht.
   destruct (vtransition X1 lX (sX, iom)) as (s'X, _oom) eqn:HtX1.
-  assert (HivtX1 : input_valid_transition X1 lX (sX, iom) (s'X, _oom))
-    by (split; assumption).
+  assert (HivtX1 : input_valid_transition X1 lX (sX, iom) (s'X, _oom)) by done.
   simpl in HsX_pr, H_tX1. rewrite <- HsX_pr in H_tX1.
   apply (Htransition_Some1 _ _ HlX_pr _ _ _ _ HivtX1) in H_tX1
     as [Heq_s'X_pr Heq_oom].
   subst.
   apply (VLSM_incl_input_valid_transition Hincl) in HivtX1.
   repeat split.
-  - eapply finite_valid_trace_last_pstate; eassumption.
-  - apply projection_induced_valid_message_char; [assumption| apply HivtX1].
-  - exists lX, sX. intuition. apply HivtX1.
+  - by eapply finite_valid_trace_last_pstate.
+  - apply projection_induced_valid_message_char; [done | apply HivtX1].
+  - exists lX, sX. split_and!; try itauto. by apply HivtX1.
   - cbn in *. rewrite <- HsX_pr.
     destruct (vtransition X2 _ _) as (_s'X2, _oom) eqn:H_tX2.
     apply (Htransition_Some2 _ _ HlX_pr _ _ _ _ HivtX1) in H_tX2
@@ -3280,8 +3190,7 @@ Proof.
   - apply same_VLSM_valid_preservation.
   - apply same_VLSM_transition_preservation.
   - apply same_VLSM_initial_state_preservation.
-  - apply same_VLSM_initial_message_preservation.
-    assumption.
+  - by apply same_VLSM_initial_message_preservation.
 Qed.
 
 Lemma same_VLSM_preloaded_full_projection
