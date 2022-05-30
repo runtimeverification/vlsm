@@ -1752,7 +1752,7 @@ Proof.
     + intro; apply sub_element_label_project.
     + intro; apply sub_element_state_project.
     + intros ? **; eapply sub_transition_element_project_Some; cycle 2.
-      2,3: setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
+      2-3: setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
       all: done.
 Qed.
 

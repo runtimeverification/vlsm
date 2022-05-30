@@ -363,8 +363,8 @@ Proof.
     + by eapply induced_sub_projection_valid_preservation.
     + split; [| done].
       by apply fixed_non_byzantine_projection_valid_no_equivocations.
-  - intros l s om s' om' [_ Ht].
-    by setoid_rewrite <- induced_sub_projection_transition_preservation.
+  - intros l s om s' om' [_ Ht]; cbn.
+    by apply induced_sub_projection_transition_preservation.
 Qed.
 
 Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_valid
@@ -465,19 +465,17 @@ Qed.
 Lemma pre_loaded_fixed_non_byzantine_incl
   : VLSM_incl pre_loaded_fixed_non_byzantine_vlsm' fixed_non_byzantine_projection.
 Proof.
-  apply basic_VLSM_incl.
+  apply basic_VLSM_incl; cbn.
   - by intro; intros; apply fixed_non_byzantine_projection_initial_state_preservation.
-  - intros l s m Hv _ Him.
-    by apply initial_message_is_valid.
-  - intro; intros.
+  - by intros l s m Hv _ Him; apply initial_message_is_valid.
+  - intros l s om Hv.
     exists (lift_sub_label fixed_byzantine_IM non_byzantine l).
     exists (lift_sub_state fixed_byzantine_IM non_byzantine s).
-    split; [apply composite_label_sub_projection_option_lift|].
-    split; [apply composite_state_sub_projection_lift|].
-    revert Hv.
-    apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
+    split; [apply composite_label_sub_projection_option_lift |].
+    split; [apply composite_state_sub_projection_lift |].
+    by apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
   - intros l s om s' om' [_ Ht].
-    by setoid_rewrite induced_sub_projection_transition_preservation.
+    by apply induced_sub_projection_transition_preservation.
 Qed.
 
 Lemma fixed_non_byzantine_pre_loaded_eq
@@ -724,15 +722,13 @@ Proof.
     split.
     + apply composite_state_sub_projection_lift_to.
     + by apply (lift_sub_state_initial IM).
-  - intro; intros.
-    by apply initial_message_is_valid.
-  - intro; intros.
+  - by intro; intros; apply initial_message_is_valid.
+  - intros l s om Hv HsY HomY.
     exists (lift_sub_label IM (set_diff (enum index) selection) l).
     exists (lift_sub_state IM (set_diff (enum index) selection) s).
-    split; [apply composite_label_sub_projection_option_lift|].
-    split; [apply composite_state_sub_projection_lift|].
-    revert Hv.
-    apply VLSM_full_projection_input_valid.
+    split; [apply composite_label_sub_projection_option_lift |].
+    split; [apply composite_state_sub_projection_lift |].
+    apply @VLSM_full_projection_input_valid; [| done].
     apply fixed_non_byzantine_vlsm_lift_from_initial.
   - intros l s om s' om' [_ Ht].
     by apply induced_sub_projection_transition_preservation.

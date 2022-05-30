@@ -126,16 +126,12 @@ Lemma induced_projection_incl_preloaded_with_all_messages
   : VLSM_incl Xi PreY.
 Proof.
   apply basic_VLSM_incl.
-  - intros is (s & <- & Hs).
-    by apply (VLSM_projection_initial_state Hproj).
+  - by intros is (s & <- & Hs); apply (VLSM_projection_initial_state Hproj).
   - by intros l s m Hv HsY HmX; apply initial_message_is_valid.
-  - intros l s om (_ & _ & lX & sX & Hlx & <- & Hv) _ _.
-    simpl.
-    by eapply (VLSM_projection_input_valid Hproj).
-  - intros l s im s' om [[_ [_ HvXi]] HtXi].
-    setoid_rewrite <- HtXi.
-    symmetry.
-    by apply projection_induced_valid_transition_eq.
+  - by intros l s om (_ & _ & lX & sX & Hlx & <- & Hv) _ _
+    ; simpl; eapply VLSM_projection_input_valid.
+  - intros l s im s' om [[_ [_ HvXi]] HtXi]; cbn.
+    by setoid_rewrite <- HtXi; rewrite <- projection_induced_valid_transition_eq.
 Qed.
 
 (** An alternative formulation of the [projection_validator_prop]erty with a
@@ -335,7 +331,7 @@ Proof.
   - apply component_transition_projection_None.
   - apply component_label_projection_lift.
   - apply component_state_projection_lift.
-  - intro s. apply (composite_initial_state_prop_lift IM).
+  - intro s; apply (composite_initial_state_prop_lift IM).
   - apply component_transition_projection_Some.
   - intros li si omi Hiv.
     apply Hvalidator in Hiv as (sX & <- & HivX).

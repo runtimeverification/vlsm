@@ -2910,18 +2910,16 @@ Lemma projection_induced_valid_message_char
 Proof.
   intros om [s Hsom].
   induction Hsom.
-  + destruct om as [m |]; [done |].
+  - destruct om as [m |]; [done |].
     apply option_valid_message_None.
-  + destruct Hv as [lX [sX [HlX_pr [HsX_pr [HsX [HomX Hv]]]]]].
-    cbn in Ht.
-    destruct (vtransition _ _ _) as (_s'X, __om') eqn: H_tX.
-    inversion Ht; subst; clear Ht.
+  - destruct Hv as (lX & sX & HlX_pr & HsX_pr & HsX & HomX & Hv).
+    cbn in Ht; destruct (vtransition _ _ _) as (_s'X, __om') eqn: H_tX
+    ; inversion Ht; subst; clear Ht.
     destruct (vtransition X lX (sX, om)) as (s'X, _om') eqn: HtX.
     assert (HivtX : input_valid_transition X lX (sX, om) (s'X, _om'))
-      by (split_and!; done).
-    replace om' with _om'.
-      * by eapply input_valid_transition_out.
-      * by eapply Htransition_Some.
+        by (split_and!; done).
+    replace om' with _om' by (eapply Htransition_Some; done).
+    by eapply input_valid_transition_out.
 Qed.
 
 Context
@@ -3060,8 +3058,8 @@ Proof.
   split; [apply IHHtr|].
   apply (finite_valid_trace_singleton XY2).
   destruct Hx as [[_ [_ [lX [sX [HlX_pr [HsX_pr HpvX1]]]]]] Ht].
-  cbn in Ht; destruct (vtransition _ _ _) as (_s'X, _oom) eqn:H_tX1.
-  inversion Ht; subst; clear Ht.
+  cbn in Ht; destruct (vtransition _ _ _) as (_s'X, _oom) eqn:H_tX1
+  ; inversion Ht; subst; clear Ht.
   destruct (vtransition X1 lX (sX, iom)) as (s'X, _oom) eqn:HtX1.
   assert (HivtX1 : input_valid_transition X1 lX (sX, iom) (s'X, _oom)) by done.
   simpl in HsX_pr, H_tX1; rewrite <- HsX_pr in H_tX1.

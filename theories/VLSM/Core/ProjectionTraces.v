@@ -284,14 +284,14 @@ Proof.
       intros Ht; setoid_rewrite Ht.
       by rewrite state_update_eq.
   - cbn; apply basic_VLSM_incl.
-    + intros s [sX [<- HsX]]; cbn. apply HsX.
-    + intros l * (HsXj & HmXj & lX & sX & HlX & <- & HsX & HmX & Hv) Hs _.
+    + by intros s [sX [<- HsX]]; cbn.
+    + intros l * (_ & _ & _ & sX & _ & <- & _ & HmX & _) Hs _.
       by apply initial_message_is_valid; exists (exist _ m HmX).
-    + intros l s iom (_ & _ & (i, li) & sX & HlX & <- & Hv) _ _; cbn.
+    + intros l s iom (_ & _ & [i li] & sX & HlX & <- & Hv) _ _; cbn.
       exists sX; split; [done |].
       unfold composite_project_label in HlX; cbn in *.
       case_decide; [| congruence].
-      by subst i; apply Some_inj in HlX; cbn in HlX; subst li.
+      by inversion HlX; subst.
     + intros l s iom s' oom [_ Ht]; cbn in *.
       unfold lift_to_composite_state' in Ht;
       rewrite state_update_eq in Ht;
