@@ -2829,8 +2829,7 @@ Definition projection_induced_initial_state_prop (sY : @state _ TY) : Prop :=
 Instance projection_induced_initial_state_inh : Inhabited (sig projection_induced_initial_state_prop)
   := populate (exist _ (state_project (` (vs0 X))) (ex_intro _ _ (conj (eq_refl _) (proj2_sig _)))).
 
-Definition projection_induced_initial_message_prop : message -> Prop :=
-  valid_message_prop X.
+Definition projection_induced_initial_message_prop : message -> Prop := const False.
 
 Definition projection_induced_transition
   (lY : @label _ TY)
@@ -2857,6 +2856,9 @@ Definition projection_induced_vlsm_machine : VLSMMachine TY :=
 
 Definition projection_induced_vlsm : VLSM message :=
   mk_vlsm projection_induced_vlsm_machine.
+
+Definition pre_projection_induced_vlsm : VLSM message :=
+  pre_loaded_with_all_messages_vlsm projection_induced_vlsm.
 
 (** <<label_project>> is a left-inverse of <<label_lift>> *)
 Definition induced_projection_label_lift_prop : Prop :=
@@ -2903,28 +2905,23 @@ Qed.
 *)
 Lemma projection_induced_valid_message_char
   (Htransition_Some : weak_projection_transition_consistency_Some)
-  : forall om, option_valid_message_prop projection_induced_vlsm om <->
+  : forall om, option_valid_message_prop projection_induced_vlsm om ->
     option_valid_message_prop X om.
 Proof.
-  split; cycle 1.
-  - intros Hm.
-    destruct om as [m |].
-    + by apply initial_message_is_valid.
-    + apply option_valid_message_None.
-  - intros [s Hsom].
-    induction Hsom.
-    + destruct om as [m |]; [done |].
-      apply option_valid_message_None.
-    + destruct Hv as [lX [sX [HlX_pr [HsX_pr [HsX [HomX Hv]]]]]].
-      cbn in Ht.
-      destruct (vtransition _ _ _) as (_s'X, __om') eqn: H_tX.
-      inversion Ht; subst; clear Ht.
-      destruct (vtransition X lX (sX, om)) as (s'X, _om') eqn: HtX.
-      assert (HivtX : input_valid_transition X lX (sX, om) (s'X, _om'))
-        by (split_and!; done).
-      replace om' with _om'.
-        * by eapply input_valid_transition_out.
-        * by eapply Htransition_Some.
+  intros om [s Hsom].
+  induction Hsom.
+  + destruct om as [m |]; [done |].
+    apply option_valid_message_None.
+  + destruct Hv as [lX [sX [HlX_pr [HsX_pr [HsX [HomX Hv]]]]]].
+    cbn in Ht.
+    destruct (vtransition _ _ _) as (_s'X, __om') eqn: H_tX.
+    inversion Ht; subst; clear Ht.
+    destruct (vtransition X lX (sX, om)) as (s'X, _om') eqn: HtX.
+    assert (HivtX : input_valid_transition X lX (sX, om) (s'X, _om'))
+      by (split_and!; done).
+    replace om' with _om'.
+      * by eapply input_valid_transition_out.
+      * by eapply Htransition_Some.
 Qed.
 
 Context
@@ -2935,7 +2932,7 @@ Context
 
 Lemma projection_induced_vlsm_is_projection
   (Htransition_Some : weak_projection_transition_consistency_Some)
-  : VLSM_projection X projection_induced_vlsm label_project state_project.
+  : VLSM_projection X pre_projection_induced_vlsm label_project state_project.
 Proof.
   apply basic_VLSM_projection; intro; intros.
   - by exists lX, s.
@@ -2954,9 +2951,9 @@ Qed.
 [valid]ity is [input_valid]ity.
 *)
 Lemma induced_projection_valid_is_input_valid
-  (Hproj : VLSM_projection X projection_induced_vlsm label_project state_project)
+  (Hproj : VLSM_projection X pre_projection_induced_vlsm label_project state_project)
   l s om
-  : vvalid projection_induced_vlsm l (s, om) -> input_valid projection_induced_vlsm l (s,om).
+  : vvalid projection_induced_vlsm l (s, om) -> input_valid pre_projection_induced_vlsm l (s,om).
 Proof.
   intro Hv.
   destruct (id Hv) as (lX & sX & HlX & <- & Hps & Hopm & _).
@@ -3009,7 +3006,7 @@ Qed.
 to the original [VLSM], then the induced [VLSM_projection] is friendly.
 *)
 Lemma basic_projection_induces_friendliness
-  : VLSM_full_projection projection_induced_vlsm X label_lift state_lift ->
+  : VLSM_full_projection pre_projection_induced_vlsm X label_lift state_lift ->
     projection_friendly_prop Hproj.
 Proof.
   intros Hfull_proj isY trY HtrY.
@@ -3040,8 +3037,8 @@ Lemma projection_induced_vlsm_incl
   (trace_project := pre_VLSM_projection_trace_project _ _ label_project state_project)
   (label_lift : @label _ TY -> @label _ TX)
   (state_lift : @state _ TY -> @state _ TX)
-  (XY1 : VLSM message := projection_induced_vlsm X1 TY label_project state_project label_lift state_lift)
-  (XY2 : VLSM message := projection_induced_vlsm X2 TY label_project state_project label_lift state_lift)
+  (XY1 : VLSM message := pre_projection_induced_vlsm X1 TY label_project state_project label_lift state_lift)
+  (XY2 : VLSM message := pre_projection_induced_vlsm X2 TY label_project state_project label_lift state_lift)
   (Htransition_Some1 : weak_projection_transition_consistency_Some X1 TY label_project state_project label_lift state_lift)
   (Htransition_Some2 : weak_projection_transition_consistency_Some X2 TY label_project state_project label_lift state_lift)
   : VLSM_incl X1 X2 -> VLSM_incl XY1 XY2.
@@ -3063,19 +3060,18 @@ Proof.
   split; [apply IHHtr|].
   apply (finite_valid_trace_singleton XY2).
   destruct Hx as [[_ [_ [lX [sX [HlX_pr [HsX_pr HpvX1]]]]]] Ht].
-  cbn in Ht.
-  destruct (vtransition _ _ _) as (_s'X, _oom) eqn:H_tX1.
-  inversion Ht. subst. clear Ht.
+  cbn in Ht; destruct (vtransition _ _ _) as (_s'X, _oom) eqn:H_tX1.
+  inversion Ht; subst; clear Ht.
   destruct (vtransition X1 lX (sX, iom)) as (s'X, _oom) eqn:HtX1.
   assert (HivtX1 : input_valid_transition X1 lX (sX, iom) (s'X, _oom)) by done.
-  simpl in HsX_pr, H_tX1. rewrite <- HsX_pr in H_tX1.
+  simpl in HsX_pr, H_tX1; rewrite <- HsX_pr in H_tX1.
   apply (Htransition_Some1 _ _ HlX_pr _ _ _ _ HivtX1) in H_tX1
-    as [Heq_s'X_pr Heq_oom].
-  subst.
+    as [Heq_s'X_pr Heq_oom];
+    subst _oom.
   apply (VLSM_incl_input_valid_transition Hincl) in HivtX1.
   repeat split.
   - by eapply finite_valid_trace_last_pstate.
-  - apply projection_induced_valid_message_char; [done | apply HivtX1].
+  - apply any_message_is_valid_in_preloaded.
   - exists lX, sX. split_and!; try itauto. by apply HivtX1.
   - cbn in *. rewrite <- HsX_pr.
     destruct (vtransition X2 _ _) as (_s'X2, _oom) eqn:H_tX2.
@@ -3099,8 +3095,8 @@ Lemma projection_induced_vlsm_eq
   (trace_project := pre_VLSM_projection_trace_project _ _ label_project state_project)
   (label_lift : @label _ TY -> @label _ TX)
   (state_lift : @state _ TY -> @state _ TX)
-  (XY1 : VLSM message := projection_induced_vlsm X1 TY label_project state_project label_lift state_lift)
-  (XY2 : VLSM message := projection_induced_vlsm X2 TY label_project state_project label_lift state_lift)
+  (XY1 : VLSM message := pre_projection_induced_vlsm X1 TY label_project state_project label_lift state_lift)
+  (XY2 : VLSM message := pre_projection_induced_vlsm X2 TY label_project state_project label_lift state_lift)
   (Htransition_Some1 : weak_projection_transition_consistency_Some X1 TY label_project state_project label_lift state_lift)
   (Htransition_Some2 : weak_projection_transition_consistency_Some X2 TY label_project state_project label_lift state_lift)
   : VLSM_eq X1 X2 -> VLSM_eq XY1 XY2.

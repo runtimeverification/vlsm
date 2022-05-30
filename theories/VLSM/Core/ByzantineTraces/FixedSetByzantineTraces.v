@@ -158,7 +158,7 @@ Definition fixed_byzantine_trace_prop
 Section fixed_byzantine_traces_as_projections.
 
 Definition fixed_non_byzantine_projection : VLSM message :=
-  induced_sub_projection fixed_byzantine_IM non_byzantine non_byzantine_not_equivocating_constraint.
+  pre_induced_sub_projection fixed_byzantine_IM non_byzantine non_byzantine_not_equivocating_constraint.
 
 Lemma fixed_non_byzantine_projection_initial_state_preservation
   : forall s, vinitial_state_prop fixed_non_byzantine_projection s <->
@@ -215,7 +215,7 @@ Qed.
 
 (** Characterization result for the first definition:
 the [fixed_byzantine_trace_prop]erty is equivalent to the
-[finite_valid_trace_prop]erty of the [induced_sub_projection] of the
+[finite_valid_trace_prop]erty of the [pre_induced_sub_projection] of the
 the composition in which a fixed set of nodes were replaced by byzantine nodes
 and the rest are protocol-following to the set of protocol-following nodes.
 *)
@@ -364,7 +364,7 @@ Proof.
     + split; [| done].
       by apply fixed_non_byzantine_projection_valid_no_equivocations.
   - intros l s om s' om' [_ Ht].
-    by apply induced_sub_projection_transition_preservation in Ht.
+    by setoid_rewrite <- induced_sub_projection_transition_preservation.
 Qed.
 
 Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_valid
@@ -468,11 +468,7 @@ Proof.
   apply basic_VLSM_incl.
   - by intro; intros; apply fixed_non_byzantine_projection_initial_state_preservation.
   - intros l s m Hv _ Him.
-    apply initial_message_is_valid.
-    apply (pre_loaded_fixed_non_byzantine_vlsm_lift_initial_message l s m).
-    1,3: done.
-    apply (VLSM_full_projection_valid_state pre_loaded_fixed_non_byzantine_vlsm_lift).
-    by destruct Hv.
+    by apply initial_message_is_valid.
   - intro; intros.
     exists (lift_sub_label fixed_byzantine_IM non_byzantine l).
     exists (lift_sub_state fixed_byzantine_IM non_byzantine s).
@@ -481,8 +477,7 @@ Proof.
     revert Hv.
     apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
   - intros l s om s' om' [_ Ht].
-    revert Ht.
-    apply @induced_sub_projection_transition_preservation.
+    by setoid_rewrite induced_sub_projection_transition_preservation.
 Qed.
 
 Lemma fixed_non_byzantine_pre_loaded_eq
@@ -537,7 +532,7 @@ Context
   (selection_complement := set_diff (enum index) selection)
   (PreNonByzantine : VLSM message := pre_loaded_fixed_non_byzantine_vlsm IM selection A sender)
   (Fixed : VLSM message := fixed_equivocation_vlsm_composition IM selection)
-  (FixedNonEquivocating : VLSM message := induced_sub_projection IM selection_complement (fixed_equivocation_constraint IM selection))
+  (FixedNonEquivocating : VLSM message := pre_induced_sub_projection IM selection_complement (fixed_equivocation_constraint IM selection))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM A sender)
   (Hsender_safety : sender_safety_alt_prop IM A sender :=
@@ -546,7 +541,7 @@ Context
 
 Lemma fixed_non_equivocating_incl_sub_non_equivocating
   : VLSM_incl FixedNonEquivocating
-      (induced_sub_projection IM (set_diff (enum index) selection)
+      (pre_induced_sub_projection IM (set_diff (enum index) selection)
         (sub_IM_not_equivocating_constraint IM
           (set_diff (enum index) selection) A sender)).
 Proof.
@@ -593,8 +588,7 @@ Proof.
     apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating)
        in Hv as (_ & _ & Hv).
     split.
-    + revert Hv.
-      apply induced_sub_projection_valid_preservation.
+    + by eapply induced_sub_projection_valid_preservation.
     + split; [| done].
       apply sub_IM_no_equivocation_preservation in Hv as Hnoequiv.
       2-4: done.
@@ -731,12 +725,7 @@ Proof.
     + apply composite_state_sub_projection_lift_to.
     + by apply (lift_sub_state_initial IM).
   - intro; intros.
-    apply initial_message_is_valid.
-    eapply Hfixed_non_byzantine_vlsm_lift_initial_message.
-    1, 3: done.
-    destruct Hv as [Hv _].
-    eapply VLSM_full_projection_valid_state in Hv; [done |].
-    apply fixed_non_byzantine_vlsm_lift_from_initial.
+    by apply initial_message_is_valid.
   - intro; intros.
     exists (lift_sub_label IM (set_diff (enum index) selection) l).
     exists (lift_sub_state IM (set_diff (enum index) selection) s).

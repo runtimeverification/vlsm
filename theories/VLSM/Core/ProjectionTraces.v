@@ -258,12 +258,15 @@ Definition composite_vlsm_induced_projection : VLSM message :=
     composite_project_label (fun s => s j)
     (lift_to_composite_label IM j) (lift_to_composite_state' IM j).
 
+Definition pre_composite_vlsm_induced_projection : VLSM message :=
+  pre_loaded_with_all_messages_vlsm composite_vlsm_induced_projection.
+
 (** The [composite_vlsm_constraint_projection] is [VLSM_eq]ual (trace-equivalent)
 to the [projection_induced_vlsm] by the [composite_project_label] and the
 projection of the state to the component.
 *)
 Lemma composite_vlsm_constrained_projection_is_induced
-  : VLSM_eq Xj composite_vlsm_induced_projection.
+  : VLSM_eq Xj pre_composite_vlsm_induced_projection.
 Proof.
   apply VLSM_eq_incl_iff.
   split.
@@ -280,19 +283,20 @@ Proof.
       cbn; unfold lift_to_composite_state' at 1; rewrite state_update_eq.
       intros Ht; setoid_rewrite Ht.
       by rewrite state_update_eq.
-  - cbn; apply basic_VLSM_strong_incl.
+  - cbn; apply basic_VLSM_incl.
     + intros s [sX [<- HsX]]; cbn. apply HsX.
-    + by intros m Him; cbn; exists (exist _ m Him).
-    + intros l s iom ((i, li) & sX & HlX & <- & Hv); cbn.
+    + intros l * (HsXj & HmXj & lX & sX & HlX & <- & HsX & HmX & Hv) Hs _.
+      by apply initial_message_is_valid; exists (exist _ m HmX).
+    + intros l s iom (_ & _ & (i, li) & sX & HlX & <- & Hv) _ _; cbn.
       exists sX; split; [done |].
       unfold composite_project_label in HlX; cbn in *.
       case_decide; [| congruence].
       by subst i; apply Some_inj in HlX; cbn in HlX; subst li.
-    + intros l s iom s' oom; cbn.
-      unfold lift_to_composite_state' at 1;
-      rewrite state_update_eq;
+    + intros l s iom s' oom [_ Ht]; cbn in *.
+      unfold lift_to_composite_state' in Ht;
+      rewrite state_update_eq in Ht;
       destruct (vtransition _ _ _) as (si', om').
-      by rewrite state_update_eq.
+      by rewrite state_update_eq in Ht.
 Qed.
 
 Lemma component_label_projection_lift
@@ -354,7 +358,7 @@ projection of the state to the component is indeed a [VLSM_projection].
 *)
 Lemma induced_component_projection
   : VLSM_projection X
-    (projection_induced_vlsm X (type (IM j))
+    (pre_projection_induced_vlsm X (type (IM j))
       composite_project_label (fun s => s j)
       (lift_to_composite_label IM j) (lift_to_composite_state' IM j))
     composite_project_label (fun s => s j).

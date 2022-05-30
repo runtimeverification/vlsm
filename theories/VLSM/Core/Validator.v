@@ -94,7 +94,7 @@ Context
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)
   (label_lift : vlabel Y -> vlabel X)
   (state_lift : vstate Y -> vstate X)
-  (Xi := projection_induced_vlsm X (type Y) label_project state_project label_lift state_lift)
+  (Xi := pre_projection_induced_vlsm X (type Y) label_project state_project label_lift state_lift)
   (Hlabel_lift : induced_projection_label_lift_prop _ _ label_project label_lift)
   (Hstate_lift : induced_projection_state_lift_prop _ _ state_project state_lift)
   (Hinitial_lift : strong_full_projection_initial_state_preservation Y X state_lift)
@@ -128,7 +128,7 @@ Proof.
   apply basic_VLSM_incl.
   - intros is (s & <- & Hs).
     by apply (VLSM_projection_initial_state Hproj).
-  - intros l s m Hv HsY HmX. apply any_message_is_valid_in_preloaded.
+  - by intros l s m Hv HsY HmX; apply initial_message_is_valid.
   - intros l s om (_ & _ & lX & sX & Hlx & <- & Hv) _ _.
     simpl.
     by eapply (VLSM_projection_input_valid Hproj).
@@ -328,11 +328,8 @@ Lemma pre_loaded_with_all_messages_validator_component_proj_eq
   (Hvalidator : component_projection_validator_prop)
   : VLSM_eq PreXi Xi.
 Proof.
-  apply VLSM_eq_trans with
-    (machine (projection_induced_vlsm X (type (IM i))
-      (composite_project_label IM i) (fun s => s i)
-      (lift_to_composite_label IM i) (lift_to_composite_state' IM i)))
-  ; simpl; [|apply VLSM_eq_sym, composite_vlsm_constrained_projection_is_induced].
+  eapply VLSM_eq_trans;
+    [| apply VLSM_eq_sym, composite_vlsm_constrained_projection_is_induced].
   apply pre_loaded_with_all_messages_validator_proj_eq.
   - apply component_projection_to_preloaded.
   - apply component_transition_projection_None.
