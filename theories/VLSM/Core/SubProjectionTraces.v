@@ -190,8 +190,8 @@ Definition composite_label_sub_projection_option
 (** By restricting the components of a composition to a subset we obtain a
 [projection_induced_vlsm].
 *)
-Definition induced_sub_projection : VLSM message :=
-  projection_induced_vlsm X (composite_type sub_IM)
+Definition pre_induced_sub_projection : VLSM message :=
+  pre_projection_induced_vlsm X (composite_type sub_IM)
     composite_label_sub_projection_option
     composite_state_sub_projection
     lift_sub_label lift_sub_state.
@@ -301,11 +301,11 @@ Proof.
   - apply induced_sub_projection_transition_consistency_Some.
 Qed.
 
-(** The [induced_sub_projection] is actually a [VLSM_projection] of the
+(** The [pre_induced_sub_projection] is actually a [VLSM_projection] of the
 original composition.
 *)
 Lemma induced_sub_projection_is_projection
-  : VLSM_projection X induced_sub_projection
+  : VLSM_projection X pre_induced_sub_projection
     composite_label_sub_projection_option
     composite_state_sub_projection.
 Proof.
@@ -315,7 +315,7 @@ Proof.
 Qed.
 
 Lemma induced_sub_projection_valid_projection l s om
-  (Hv : vvalid induced_sub_projection l (s, om))
+  (Hv : vvalid pre_induced_sub_projection l (s, om))
   : exists i, i ∈ sub_index_list /\
     exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, om).
 Proof.
@@ -341,7 +341,7 @@ Proof.
 Qed.
 
 Lemma induced_sub_projection_transition_is_composite l s om
-  : vtransition induced_sub_projection l (s, om) = composite_transition sub_IM l (s, om).
+  : vtransition pre_induced_sub_projection l (s, om) = composite_transition sub_IM l (s, om).
 Proof.
   destruct l as (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
@@ -368,7 +368,7 @@ Context
 
 Lemma induced_sub_projection_constraint_subsumption_incl
   (Hsubsumption : input_valid_constraint_subsumption IM constraint1 constraint2)
-  : VLSM_incl (induced_sub_projection constraint1) (induced_sub_projection constraint2).
+  : VLSM_incl (pre_induced_sub_projection constraint1) (pre_induced_sub_projection constraint2).
 Proof.
   apply projection_induced_vlsm_incl.
   - apply weak_induced_sub_projection_transition_consistency_Some.
@@ -996,7 +996,7 @@ Proof.
 Qed.
 
 (** If the composition constraint only depends on the projection sub-state,
-then valid traces of the [induced_sub_projection] can be lifted to valid traces
+then valid traces of the [pre_induced_sub_projection] can be lifted to valid traces
 of the constrained composition.
 *)
 Lemma induced_sub_projection_lift
@@ -1004,10 +1004,9 @@ Lemma induced_sub_projection_lift
   (Hconstraint_consistency :
     forall s1 s2,
       composite_state_sub_projection IM equivocators s1 = composite_state_sub_projection IM equivocators s2 ->
-      forall l om, constraint l (s1, om) -> constraint l (s2, om)
-    )
-  : VLSM_full_projection
-    (induced_sub_projection IM equivocators constraint)
+      forall l om, constraint l (s1, om) -> constraint l (s2, om))
+   : VLSM_full_projection
+    (pre_induced_sub_projection IM equivocators constraint)
     (composite_vlsm IM constraint)
     (lift_sub_label IM equivocators)
     (lift_sub_state IM equivocators).
@@ -1047,16 +1046,16 @@ Proof.
     destruct Hs as [sX [<- HsX]].
     intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     apply HsX.
-  - by intro.
+  - by intros _ _ m (_ & _ & _ & _ & _ & _ & _ & HmX & _) _ _.
 Qed.
 
 (** A specialization of [basic_projection_induces_friendliness] for
-[induced_sub_projection]s.
+[pre_induced_sub_projection]s.
 *)
 Lemma induced_sub_projection_friendliness
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (Hlift_proj : VLSM_full_projection
-    (induced_sub_projection IM equivocators constraint)
+    (pre_induced_sub_projection IM equivocators constraint)
     (composite_vlsm IM constraint)
     (lift_sub_label IM equivocators)
     (lift_sub_state IM equivocators))
@@ -1375,7 +1374,7 @@ Context
   .
 
 Lemma induced_sub_projection_valid_preservation constraint l s om
-  (Hv : vvalid (induced_sub_projection IM indices constraint) l (s, om))
+  (Hv : vvalid (pre_induced_sub_projection IM indices constraint) l (s, om))
   : composite_valid sub_IM l (s, om).
 Proof.
   destruct Hv as [lX [sX [Heql [Heqs [HsX [Hom [Hv Hc]]]]]]].
@@ -1389,7 +1388,7 @@ Qed.
 
 Lemma induced_sub_projection_transition_preservation [constraint]
   : forall l s om s' om',
-  vtransition (induced_sub_projection IM indices constraint) l (s, om) = (s', om') <->
+  vtransition (pre_induced_sub_projection IM indices constraint) l (s, om) = (s', om') <->
   composite_transition sub_IM l (s, om) = (s', om').
 Proof.
   intros.
@@ -1416,7 +1415,7 @@ Qed.
 
 Lemma sub_IM_no_equivocation_preservation
   l s om
-  (Hv : vvalid (induced_sub_projection IM indices sub_IM_not_equivocating_constraint)
+  (Hv : vvalid (pre_induced_sub_projection IM indices sub_IM_not_equivocating_constraint)
     l (s, om))
   : composite_no_equivocations_except_from sub_IM
       non_sub_index_authenticated_message l (s, om).
@@ -1650,7 +1649,7 @@ Qed.
 (** *** A subcomposition can be projected to one component
 
 In the following we define the [projection_induced_vlsm] to a single component
-of the [induced_sub_projection] of a constrained composition so a subset of its
+of the [pre_induced_sub_projection] of a constrained composition so a subset of its
 components.
 
 Note that, in general, this is not trace-equivalent with the direclty obtained
@@ -1732,14 +1731,17 @@ Qed.
 
 Definition induced_sub_element_projection constraint : VLSM message :=
   projection_induced_vlsm
-    (induced_sub_projection IM indices constraint) (type (IM j))
+    (pre_induced_sub_projection IM indices constraint) (type (IM j))
     sub_label_element_project sub_state_element_project
     sub_element_label sub_element_state.
 
+Definition pre_induced_sub_element_projection constraint : VLSM message :=
+  pre_loaded_with_all_messages_vlsm (induced_sub_element_projection constraint).
+
 Lemma induced_sub_element_projection_is_projection constraint
   : VLSM_projection
-    (induced_sub_projection IM indices constraint)
-    (induced_sub_element_projection constraint)
+    (pre_induced_sub_projection IM indices constraint)
+    (pre_induced_sub_element_projection constraint)
     sub_label_element_project sub_state_element_project.
 Proof.
   apply projection_induced_vlsm_is_projection.
@@ -1749,8 +1751,9 @@ Proof.
   - apply basic_weak_projection_transition_consistency_Some.
     + intro; apply sub_element_label_project.
     + intro; apply sub_element_state_project.
-    + intro; setoid_rewrite induced_sub_projection_transition_is_composite.
-      apply sub_transition_element_project_Some.
+    + intros ? **; eapply sub_transition_element_project_Some; cycle 2.
+      2-3: setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
+      all: done.
 Qed.
 
 End sub_composition_element.

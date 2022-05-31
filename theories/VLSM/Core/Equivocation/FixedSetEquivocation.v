@@ -1035,10 +1035,10 @@ Context
   (non_equivocators := set_diff (finite.enum index) equivocators)
   (Free := free_composite_vlsm IM)
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
-  (FixedNonEquivocating:= induced_sub_projection IM non_equivocators
+  (FixedNonEquivocating:= pre_induced_sub_projection IM non_equivocators
                                 (fixed_equivocation_constraint IM equivocators))
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
-  (StrongFixedNonEquivocating:= induced_sub_projection IM non_equivocators
+  (StrongFixedNonEquivocating:= pre_induced_sub_projection IM non_equivocators
                                 (strong_fixed_equivocation_constraint IM equivocators))
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
