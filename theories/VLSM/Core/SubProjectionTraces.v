@@ -1,8 +1,9 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Lia FinFun Eqdep Program.
+From stdpp Require Import prelude finite.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
-From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator Equivocation EquivocationProjections Equivocation.NoEquivocation.
+From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.
+From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.NoEquivocation.
 
 (** * VLSM Subcomposition *)
 
@@ -1012,8 +1013,7 @@ Lemma induced_sub_projection_lift
     (lift_sub_state IM equivocators).
 Proof.
   apply basic_VLSM_full_projection.
-  - intros l s om (_ & _ & (i, li) & sX & Heql & Heqs & HsX & Hom & Hv & Hc) _ _;
-      cbn in Heqs; subst s.
+  - intros l s om (_ & _ & (i, li) & sX & Heql & [=] & HsX & Hom & Hv & Hc) _ _.
     unfold composite_label_sub_projection_option in Heql; cbn in Heql.
     case_decide as Hi; [| congruence].
     apply Some_inj in Heql; subst l; cbn.
@@ -1022,31 +1022,26 @@ Proof.
     split; [done |].
     eapply Hconstraint_consistency; [| done].
     symmetry; apply composite_state_sub_projection_lift_to.
-  - intros l s om s' om' [_ Ht].
-    revert Ht; cbn;
-    destruct (vtransition _ _ _) as (si', _om');
-    inversion_clear 1.
+  - intros l s om s' om' [_ Ht]; revert Ht; cbn
+    ; destruct (vtransition _ _ _) as [si' _om']
+    ; inversion_clear 1.
     f_equal; extensionality i.
-    destruct l as (sub_j, lj);
-    destruct_dec_sig sub_j j Hj Heqsub_j; subst; cbn;
-    destruct (decide (i = j)); subst.
-    + unfold lift_sub_state.
-      rewrite state_update_eq, lift_sub_state_to_eq with (Hi := Hj).
-      unfold composite_state_sub_projection; cbn.
-      by rewrite state_update_eq.
+    destruct l as [sub_j lj]
+    ; destruct_dec_sig sub_j j Hj Heqsub_j; subst; cbn
+    ; destruct (decide (i = j)); subst.
+    + unfold lift_sub_state, composite_state_sub_projection; cbn.
+      by rewrite state_update_eq, lift_sub_state_to_eq with (Hi := Hj), state_update_eq.
     + rewrite state_update_neq by congruence.
       destruct (decide (i ∈ equivocators)).
       * unfold lift_sub_state.
         rewrite !lift_sub_state_to_eq with (Hi := e).
         unfold composite_state_sub_projection; cbn.
-        rewrite state_update_neq by congruence.
-        by rewrite lift_sub_state_to_eq with (Hi := e).
+        by rewrite state_update_neq, lift_sub_state_to_eq with (Hi := e).
       * by unfold lift_sub_state, lift_sub_state_to; case_decide.
   - intros s Hs.
     apply (lift_sub_state_initial IM).
-    destruct Hs as [sX [<- HsX]].
-    intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
-    apply HsX.
+    destruct Hs as (sX & <- & HsX).
+    by intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; apply HsX.
   - by intros _ ? m (_ & _ & _ & _ & _ & _ & _ & HmX & _) _ _.
 Qed.
 
@@ -1219,32 +1214,26 @@ Lemma sub_can_emit_sender (P : message -> Prop)
 Proof.
   intros m v Hsender Hemit.
   specialize (Hsender_safety m v Hsender).
-  destruct Hemit as [(s, om) [(sub_i, li) [s' Ht]]].
-  destruct_dec_sig sub_i i Hi Heqsub_i.
-  subst. unfold sub_IM, SubProjectionTraces.sub_IM in li. simpl in li.
+  destruct Hemit as [[s om] [[sub_i li] [s' Ht]]].
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+  unfold sub_IM, SubProjectionTraces.sub_IM in li; cbn in li.
   specialize (PreSubFree_PreFree_weak_full_projection IM indices (proj1_sig (composite_s0 IM)))
     as Hproj.
   spec Hproj; [by apply initial_state_is_valid; destruct (composite_s0 IM) |].
-  apply
-    (VLSM_incl_input_valid_transition
-      (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (free_composite_vlsm sub_IM) P))
-    in Ht.
-  apply (VLSM_weak_full_projection_input_valid_transition Hproj) in Ht.
-  clear Hproj.
-  specialize (ProjectionTraces.preloaded_component_projection IM i)
-    as Hproj.
+  apply (VLSM_incl_input_valid_transition
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (free_composite_vlsm sub_IM) P))
+     in Ht.
+  apply (VLSM_weak_full_projection_input_valid_transition Hproj) in Ht; clear Hproj.
+  specialize (ProjectionTraces.preloaded_component_projection IM i) as Hproj.
   remember (lift_sub_state_to _ _ _ s) as sX.
   remember (lift_sub_state_to _ _ _ s') as sX'.
   remember (lift_sub_label _ _ _) as lX.
   specialize (VLSM_projection_input_valid_transition Hproj lX li) as Hproj_t.
-  subst lX. unfold lift_sub_label in Hproj_t.
-  simpl in Hproj_t.
+  subst lX; unfold lift_sub_label in Hproj_t; cbn in Hproj_t.
   spec Hproj_t.
-  { unfold composite_project_label.
-    simpl.
-    case_decide; [|congruence].
-    replace H with (eq_refl (A := index) (x := i)); [done |].
-    by apply Eqdep_dec.UIP_dec.
+  {
+    unfold composite_project_label; cbn.
+    by rewrite decide_True_pi with eq_refl.
   }
   rewrite (Hsender_safety i); [done |]. eexists _; eauto.
 Qed.
@@ -1378,14 +1367,9 @@ Lemma induced_sub_projection_valid_preservation constraint l s om
   (Hv : vvalid (pre_induced_sub_projection IM indices constraint) l (s, om))
   : composite_valid sub_IM l (s, om).
 Proof.
-  destruct Hv as [lX [sX [Heql [Heqs [HsX [Hom [Hv Hc]]]]]]];
-    cbn in Heqs; subst s.
-  revert Hv.
-  destruct lX as (i, lXi).
-  unfold composite_label_sub_projection_option in Heql.
-  simpl in Heql.
-  case_decide; [|congruence].
-  by inversion Heql; subst.
+  destruct Hv as ([i lXi] & sX & Heql & [=] & HsX & Hom & Hv & Hc).
+  unfold composite_label_sub_projection_option in Heql; cbn in Heql.
+  by case_decide; [inversion Heql; subst |].
 Qed.
 
 Lemma induced_sub_projection_transition_preservation [constraint]
@@ -1423,25 +1407,20 @@ Lemma sub_IM_no_equivocation_preservation
       non_sub_index_authenticated_message l (s, om).
 Proof.
   destruct om as [m |]; [| done].
-  destruct Hv as [lX [sX [_ [Heqs [_ [Hm [_ Hc]]]]]]];
-    cbn in Hc, Heqs |- *; subst s.
-  specialize
-    (composite_no_initial_valid_messages_have_sender IM A sender
-      can_emit_signed no_initial_messages_in_IM _ _ Hm)
+  destruct Hv as (lX & sX & _ & [=] & _ & Hm & _ & Hc).
+  specialize (composite_no_initial_valid_messages_have_sender IM A sender
+                can_emit_signed no_initial_messages_in_IM _ _ Hm)
     as Hhas_sender.
-  destruct (sender m) as [v|] eqn:Hsender; [|congruence].
-  clear Hhas_sender.
-  simpl in Hc.
+  destruct (sender m) as [v |] eqn: Hsender; [clear Hhas_sender | congruence].
   apply (emitted_messages_are_valid_iff (composite_vlsm IM sub_IM_not_equivocating_constraint) m)
     in Hm as [[i [[im Him] Heqm]] | Hemitted].
   - by elim (no_initial_messages_in_IM i im).
   - apply (VLSM_incl_can_emit (constraint_preloaded_free_incl _ _)) in Hemitted.
     specialize (can_emit_projection IM A sender Hsender_safety (A v) m) as Hemit.
     spec Hemit; [rewrite Hsender; itauto|].
-    apply Hemit in Hemitted. clear Hemit.
-    case_decide.
-    + left. subst.
-      eexists; exact Hc.
+    apply Hemit in Hemitted; clear Hemit.
+    cbn in Hc; rewrite Hsender in Hc; cbn in Hc; case_decide.
+    + left. subst. eexists; exact Hc.
     + right. exists (A v).
       unfold channel_authenticated_message.
       rewrite Hsender; itauto.
@@ -1746,7 +1725,7 @@ Lemma induced_sub_element_projection_is_projection constraint
     (pre_induced_sub_element_projection constraint)
     sub_label_element_project sub_state_element_project.
 Proof.
-  apply projection_induced_validator_is_projection.
+  apply @projection_induced_validator_is_projection.
   - intros lX HlX s om s' om' [_ Ht].
     apply sub_transition_element_project_None with lX om om'; [done |].
     by setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).

@@ -1,8 +1,9 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude.
 From Coq Require Import FinFun Relations.Relation_Operators Program.Equality.
+From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras FinFunExtras StdppListSet Measurable.
-From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces SubProjectionTraces Equivocation EquivocationProjections.
+From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
+From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
 (** * VLSM Message Dependencies
 
@@ -523,10 +524,9 @@ Definition all_dependencies_emittable_from_dependencies_prop (m : message) : Pro
 The property of requiring that the validity predicate subsumes the
 [all_dependencies_emittable_from_dependencies_prop]erty.
 *)
-Definition valid_all_dependencies_emittable_from_dependencies_prop
-  (i : index) : Prop :=
-    forall l s m, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m) ->
-      all_dependencies_emittable_from_dependencies_prop m.
+Definition valid_all_dependencies_emittable_from_dependencies_prop (i : index) : Prop :=
+  forall l s m, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m) ->
+    all_dependencies_emittable_from_dependencies_prop m.
 
 (**
 If a message can be emitted by a node preloaded with the message's direct
@@ -541,8 +541,7 @@ Lemma free_valid_from_valid_dependencies
       valid_message_prop (free_composite_vlsm IM) dm)
   : valid_message_prop (free_composite_vlsm IM) m.
 Proof.
-  eapply emitted_messages_are_valid, free_valid_preloaded_lifts_can_be_emitted;
-    [| done].
+  eapply emitted_messages_are_valid, free_valid_preloaded_lifts_can_be_emitted; [| done].
   by intros; apply Hdeps, full_message_dependencies_happens_before, msg_dep_happens_before_iff_one;
   left.
 Qed.
@@ -577,8 +576,8 @@ Lemma valid_free_validating_is_message_validating
   : forall i, valid_all_dependencies_emittable_from_dependencies_prop i ->
     component_message_validator_prop IM (free_constraint IM) i.
 Proof.
-  intros i Hvalidating l s im Hv.
-  by eapply free_valid_from_all_dependencies_emitable_from_dependencies, Hvalidating.
+  by intros i Hvalidating l s im Hv
+  ; eapply free_valid_from_all_dependencies_emitable_from_dependencies, Hvalidating.
 Qed.
 
 (**
@@ -595,17 +594,17 @@ Lemma valid_free_validating_equiv_message_validating
   : forall i, component_message_validator_prop IM (free_constraint IM) i <->
   valid_all_dependencies_emittable_from_dependencies_prop i.
 Proof.
-  intros; split; [|apply valid_free_validating_is_message_validating].
+  intros i; split; [| apply valid_free_validating_is_message_validating].
   intros Hvalidator l s m Hv dm Hdm.
   specialize (Hvalidator l s m Hv).
-  inversion Hdm as [|? ? ? Hin]; subst.
+  inversion Hdm as [| ? ? ? Hin]; subst.
   - eapply composite_no_initial_valid_messages_emitted_by_sender in Hvalidator
-      as [v [Hsender Hemit]]; [| done | done].
+        as (v & Hsender & Hemit); [| done | done].
     exists v; [done |].
-    eapply message_dependencies_are_sufficient; [typeclasses eauto | done].
+    by eapply message_dependencies_are_sufficient.
   - apply full_message_dependencies_happens_before in Hin.
-    eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender
-      in Hin as [v [Hsender Hemit]]. 2-6: done.
+    eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender in Hin
+        as (v & Hsender & Hemit); [| done ..].
     exists v; [done |].
     by eapply message_dependencies_are_sufficient.
 Qed.

@@ -1,7 +1,7 @@
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble FinFunExtras.
-From VLSM Require Import Core.VLSM  Core.Equivocation.
-From VLSM Require Import Core.Composition Core.VLSMProjections Core.Validator Core.ProjectionTraces.
+From VLSM.Core Require Import VLSM Equivocation.
+From VLSM.Core Require Import Composition VLSMProjections Validator ProjectionTraces.
 
 (** * VLSM projections and messages properties
 

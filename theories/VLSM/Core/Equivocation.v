@@ -1,10 +1,9 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude finite.
 From Coq Require Import Streams FinFun Rdefinitions.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
-From VLSM Require Import Lib.ListSetExtras Lib.Measurable Lib.FinFunExtras.
-From VLSM Require Import Core.VLSM Core.VLSMProjections.
-From VLSM Require Import Core.Composition Core.ProjectionTraces Core.Validator.
+From stdpp Require Import prelude finite.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
+From VLSM.Lib Require Import ListSetExtras Measurable FinFunExtras.
+From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 
 (** * VLSM Equivocation Definitions **)
 

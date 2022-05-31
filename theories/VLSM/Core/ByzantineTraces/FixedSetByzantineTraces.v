@@ -181,13 +181,9 @@ Lemma fixed_non_byzantine_projection_incl_preloaded
 Proof.
   apply basic_VLSM_strong_incl.
   - by intros s H1; apply fixed_non_byzantine_projection_initial_state_preservation.
-  - by intros m H1; cbv.
-  - by split; [eapply induced_sub_projection_valid_preservation|].
-  - intros l s om s' om'.
-    unfold vtransition, transition, machine.
-    cbn [vtransition transition machine vmachine].
-    unfold projection_induced_validator_machine.
-    unfold pre_loaded_with_all_messages_vlsm_machine.
+  - by intros.
+  - by split; [eapply induced_sub_projection_valid_preservation |].
+  - intros l s om s' om'; cbn.
     (* an ugly trick to get the forward direction from an iff (<->) lemma *)
     by eapply proj1; rapply @induced_sub_projection_transition_preservation.
 Qed.
