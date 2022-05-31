@@ -2,7 +2,7 @@ From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Lia FinFun Eqdep Program.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.ProjectionTraces Core.Composition Core.Equivocation Core.EquivocationProjections Core.Equivocation.NoEquivocation.
+From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator Equivocation EquivocationProjections Equivocation.NoEquivocation.
 
 (** * VLSM Subcomposition *)
 
@@ -188,10 +188,10 @@ Definition composite_label_sub_projection_option
   end.
 
 (** By restricting the components of a composition to a subset we obtain a
-[projection_induced_vlsm].
+[projection_induced_validator].
 *)
 Definition pre_induced_sub_projection : VLSM message :=
-  pre_projection_induced_vlsm X (composite_type sub_IM)
+  pre_projection_induced_validator X (composite_type sub_IM)
     composite_label_sub_projection_option
     composite_state_sub_projection
     lift_sub_label lift_sub_state.
@@ -217,7 +217,7 @@ Proof.
 Qed.
 
 Lemma composite_label_sub_projection_option_lift
-  : induced_projection_label_lift_prop (free_composite_vlsm IM) (composite_type sub_IM)
+  : induced_validator_label_lift_prop (free_composite_vlsm IM) (composite_type sub_IM)
       composite_label_sub_projection_option lift_sub_label.
 Proof.
   intros (sub_i, li).
@@ -232,7 +232,7 @@ Proof.
 Qed.
 
 Lemma composite_state_sub_projection_lift
-  : induced_projection_state_lift_prop (free_composite_vlsm IM) (composite_type sub_IM)
+  : induced_validator_state_lift_prop (free_composite_vlsm IM) (composite_type sub_IM)
       composite_state_sub_projection lift_sub_state.
 Proof.
   intro.
@@ -246,13 +246,13 @@ Lemma composite_trace_sub_projection_lift
     (pre_VLSM_full_projection_finite_trace_project _ _ lift_sub_label lift_sub_state tr)
     = tr.
 Proof.
-  apply (induced_projection_trace_lift (free_composite_vlsm IM)).
+  apply (induced_validator_trace_lift (free_composite_vlsm IM)).
   - apply composite_label_sub_projection_option_lift.
   - apply composite_state_sub_projection_lift.
 Qed.
 
 Lemma induced_sub_projection_transition_consistency_Some
-  : induced_projection_transition_consistency_Some X (composite_type sub_IM)
+  : induced_validator_transition_consistency_Some X (composite_type sub_IM)
       composite_label_sub_projection_option composite_state_sub_projection.
 Proof.
   intros lX1 lX2 lY HlX1_pr HlX2_pr sX1 sX2 HsXeq_pr iom sX1' oom1 Ht1 sX2' oom2 Ht2.
@@ -309,7 +309,7 @@ Lemma induced_sub_projection_is_projection
     composite_label_sub_projection_option
     composite_state_sub_projection.
 Proof.
-  apply projection_induced_vlsm_is_projection.
+  apply projection_induced_validator_is_projection.
   - apply induced_sub_projection_transition_consistency_None.
   - apply weak_induced_sub_projection_transition_consistency_Some.
 Qed.
@@ -370,7 +370,7 @@ Lemma induced_sub_projection_constraint_subsumption_incl
   (Hsubsumption : input_valid_constraint_subsumption IM constraint1 constraint2)
   : VLSM_incl (pre_induced_sub_projection constraint1) (pre_induced_sub_projection constraint2).
 Proof.
-  apply projection_induced_vlsm_incl.
+  apply projection_induced_validator_incl.
   - apply weak_induced_sub_projection_transition_consistency_Some.
   - apply weak_induced_sub_projection_transition_consistency_Some.
   - by apply constraint_subsumption_incl.
@@ -1012,7 +1012,8 @@ Lemma induced_sub_projection_lift
     (lift_sub_state IM equivocators).
 Proof.
   apply basic_VLSM_full_projection.
-  - intros l s om (_ & _ & (i, li) & sX & Heql & Heqs & HsX & Hom & Hv & Hc) _ _.
+  - intros l s om (_ & _ & (i, li) & sX & Heql & Heqs & HsX & Hom & Hv & Hc) _ _;
+      cbn in Heqs; subst s.
     unfold composite_label_sub_projection_option in Heql; cbn in Heql.
     case_decide as Hi; [| congruence].
     apply Some_inj in Heql; subst l; cbn.
@@ -1046,7 +1047,7 @@ Proof.
     destruct Hs as [sX [<- HsX]].
     intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     apply HsX.
-  - by intros _ _ m (_ & _ & _ & _ & _ & _ & _ & HmX & _) _ _.
+  - by intros _ ? m (_ & _ & _ & _ & _ & _ & _ & HmX & _) _ _.
 Qed.
 
 (** A specialization of [basic_projection_induces_friendliness] for
@@ -1239,7 +1240,7 @@ Proof.
   subst lX. unfold lift_sub_label in Hproj_t.
   simpl in Hproj_t.
   spec Hproj_t.
-  { unfold ProjectionTraces.composite_project_label.
+  { unfold composite_project_label.
     simpl.
     case_decide; [|congruence].
     replace H with (eq_refl (A := index) (x := i)); [done |].
@@ -1377,7 +1378,8 @@ Lemma induced_sub_projection_valid_preservation constraint l s om
   (Hv : vvalid (pre_induced_sub_projection IM indices constraint) l (s, om))
   : composite_valid sub_IM l (s, om).
 Proof.
-  destruct Hv as [lX [sX [Heql [Heqs [HsX [Hom [Hv Hc]]]]]]].
+  destruct Hv as [lX [sX [Heql [Heqs [HsX [Hom [Hv Hc]]]]]]];
+    cbn in Heqs; subst s.
   revert Hv.
   destruct lX as (i, lXi).
   unfold composite_label_sub_projection_option in Heql.
@@ -1421,8 +1423,8 @@ Lemma sub_IM_no_equivocation_preservation
       non_sub_index_authenticated_message l (s, om).
 Proof.
   destruct om as [m |]; [| done].
-  destruct Hv as [lX [sX [_ [Heqs [_ [Hm [_ Hc]]]]]]].
-  cbn in Hc |- *.
+  destruct Hv as [lX [sX [_ [Heqs [_ [Hm [_ Hc]]]]]]];
+    cbn in Hc, Heqs |- *; subst s.
   specialize
     (composite_no_initial_valid_messages_have_sender IM A sender
       can_emit_signed no_initial_messages_in_IM _ _ Hm)
@@ -1648,12 +1650,12 @@ Qed.
 
 (** *** A subcomposition can be projected to one component
 
-In the following we define the [projection_induced_vlsm] to a single component
+In the following we define the [projection_induced_validator] to a single component
 of the [pre_induced_sub_projection] of a constrained composition so a subset of its
 components.
 
 Note that, in general, this is not trace-equivalent with the direclty obtained
-[projection_induced_vlsm] of the constrained composition to the corresponding
+[projection_induced_validator] of the constrained composition to the corresponding
 component, as the intermediate induced projection might generate more
 [input_valid_transitions] to be considered as a basis for the next proejction.
 *)
@@ -1730,7 +1732,7 @@ Proof.
 Qed.
 
 Definition induced_sub_element_projection constraint : VLSM message :=
-  projection_induced_vlsm
+  projection_induced_validator
     (pre_induced_sub_projection IM indices constraint) (type (IM j))
     sub_label_element_project sub_state_element_project
     sub_element_label sub_element_state.
@@ -1744,7 +1746,7 @@ Lemma induced_sub_element_projection_is_projection constraint
     (pre_induced_sub_element_projection constraint)
     sub_label_element_project sub_state_element_project.
 Proof.
-  apply projection_induced_vlsm_is_projection.
+  apply projection_induced_validator_is_projection.
   - intros lX HlX s om s' om' [_ Ht].
     apply sub_transition_element_project_None with lX om om'; [done |].
     by setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).

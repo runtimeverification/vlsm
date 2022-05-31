@@ -2,7 +2,7 @@ From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import Reals.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinFunExtras Measurable.
-From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition  ProjectionTraces SubProjectionTraces.
+From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition  Validator ProjectionTraces SubProjectionTraces.
 From VLSM.Core Require Import Equivocation Equivocation.FixedSetEquivocation Equivocation.TraceWiseEquivocation Equivocation.LimitedEquivocation Equivocation.MsgDepFixedSetEquivocation.
 
 (** To allow capturing the two models of limited equivocation described in the

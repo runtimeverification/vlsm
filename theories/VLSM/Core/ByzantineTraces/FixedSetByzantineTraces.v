@@ -186,7 +186,7 @@ Proof.
   - intros l s om s' om'.
     unfold vtransition, transition, machine.
     cbn [vtransition transition machine vmachine].
-    unfold projection_induced_vlsm_machine.
+    unfold projection_induced_validator_machine.
     unfold pre_loaded_with_all_messages_vlsm_machine.
     (* an ugly trick to get the forward direction from an iff (<->) lemma *)
     by eapply proj1; rapply @induced_sub_projection_transition_preservation.
@@ -444,7 +444,7 @@ Proof.
     inversion 1; itauto.
 Qed.
 
-(** Since the [fixed_non_byzantine_projection] is an [induced_projection] of
+(** Since the [fixed_non_byzantine_projection] is an [induced_validator] of
 the composition of [fixed_byzantine_IM] with a
 [non_byzantine_not_equivocating_constraint], its initial_messages and validity
 are derived from valid messages and protocol validity of the larger
@@ -696,7 +696,7 @@ Context
     : weak_full_projection_initial_message_preservation PreNonByzantine Fixed
     (lift_sub_state IM (set_diff (enum index) selection))).
 
-(** Since <<FixedNonEquivocating>> is an [induced_projection] of <<Fixed>>,
+(** Since <<FixedNonEquivocating>> is an [induced_validator] of <<Fixed>>,
 its initial_messages and validity are derived from valid messages and
 protocol validity of the larger composition; therefore, the following
 result becomes very important.
