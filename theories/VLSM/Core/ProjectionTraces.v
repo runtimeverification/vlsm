@@ -254,16 +254,16 @@ Proof.
     + by intros m [[im Him] <-].
     + intros l s iom [sX [<- Hv]].
       exists (existT j l), sX.
-      by split; [apply composite_project_label_eq|split].
+      by split; [apply composite_project_label_eq |..].
     + intros l s iom s' oom.
       cbn; unfold lift_to_composite_state' at 1; rewrite state_update_eq.
       intros Ht; setoid_rewrite Ht.
       by rewrite state_update_eq.
   - cbn; apply basic_VLSM_incl.
     + by intros s [sX [<- HsX]]; cbn.
-    + by intros l * (_ & _ & _ & sX & _ & [=] & _ & HmX & _) _ _
+    + by intros l * (_ & _ & _ & sX & [_ [=] (_ & HmX & _)]) _ _
       ; apply initial_message_is_valid; exists (exist _ m HmX).
-    + intros l s iom (_ & _ & [i li] & sX & HlX & [=] & Hv) _ _.
+    + intros l s iom (_ & _ & [i li] & sX & [HlX [=] Hv]) _ _.
       exists sX; split; [done |].
       unfold composite_project_label in HlX; cbn in *.
       case_decide; [| congruence].
@@ -800,9 +800,8 @@ Proof.
   - apply component_projection_to_preloaded.
   - intros li si omi Hiv.
     apply Hvalidator in Hiv as (sX & <- & HivX).
-    exists (existT j li), sX.
-    unfold composite_project_label; cbn.
-    by rewrite (decide_True_pi eq_refl).
+    exists (existT j li), sX; split; [| done..].
+    by unfold composite_project_label; cbn; rewrite (decide_True_pi eq_refl).
 Qed.
 
 Definition pre_loaded_with_all_messages_validator_component_proj_incl

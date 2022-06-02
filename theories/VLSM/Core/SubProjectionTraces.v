@@ -321,7 +321,7 @@ Lemma induced_sub_projection_valid_projection l s om
     exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, om).
 Proof.
   destruct l as (sub_i, li).
-  destruct Hv as [lX [sX [HlX [Heqs [HsX [Hom Hv]]]]]].
+  destruct Hv as (lX & sX & [HlX Heqs (HsX & Hom & Hv)]).
   destruct lX as [i _li].
   unfold composite_label_sub_projection_option in HlX.
   simpl in HlX.
@@ -1013,7 +1013,7 @@ Lemma induced_sub_projection_lift
     (lift_sub_state IM equivocators).
 Proof.
   apply basic_VLSM_full_projection.
-  - intros l s om (_ & _ & (i, li) & sX & Heql & [=] & HsX & Hom & Hv & Hc) _ _.
+  - intros l s om (_ & _ & (i, li) & sX & [Heql [=] (HsX & Hom & Hv & Hc)]) _ _.
     unfold composite_label_sub_projection_option in Heql; cbn in Heql.
     case_decide as Hi; [| congruence].
     apply Some_inj in Heql; subst l; cbn.
@@ -1042,7 +1042,7 @@ Proof.
     apply (lift_sub_state_initial IM).
     destruct Hs as (sX & <- & HsX).
     by intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; apply HsX.
-  - by intros _ ? m (_ & _ & _ & _ & _ & _ & _ & HmX & _) _ _.
+  - by intros _ ? m (_ & _ & _ & _ & [_ _ (_ & HmX & _)]).
 Qed.
 
 (** A specialization of [basic_projection_induces_friendliness] for
@@ -1367,7 +1367,7 @@ Lemma induced_sub_projection_valid_preservation constraint l s om
   (Hv : vvalid (pre_induced_sub_projection IM indices constraint) l (s, om))
   : composite_valid sub_IM l (s, om).
 Proof.
-  destruct Hv as ([i lXi] & sX & Heql & [=] & HsX & Hom & Hv & Hc).
+  destruct Hv as ([i lXi] & sX & [Heql [=] (HsX & Hom & Hv & Hc)]).
   unfold composite_label_sub_projection_option in Heql; cbn in Heql.
   by case_decide; [inversion Heql; subst |].
 Qed.
@@ -1407,7 +1407,7 @@ Lemma sub_IM_no_equivocation_preservation
       non_sub_index_authenticated_message l (s, om).
 Proof.
   destruct om as [m |]; [| done].
-  destruct Hv as (lX & sX & _ & [=] & _ & Hm & _ & Hc).
+  destruct Hv as (lX & sX & [_ [=] (_ & Hm & _ & Hc)]).
   specialize (composite_no_initial_valid_messages_have_sender IM A sender
                 can_emit_signed no_initial_messages_in_IM _ _ Hm)
     as Hhas_sender.

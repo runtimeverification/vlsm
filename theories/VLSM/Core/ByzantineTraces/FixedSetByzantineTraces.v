@@ -467,9 +467,10 @@ Proof.
   - intros l s om Hv.
     exists (lift_sub_label fixed_byzantine_IM non_byzantine l).
     exists (lift_sub_state fixed_byzantine_IM non_byzantine s).
-    split; [apply composite_label_sub_projection_option_lift |].
-    split; [apply composite_state_sub_projection_lift |].
-    by apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
+    split.
+    + apply composite_label_sub_projection_option_lift.
+    + apply composite_state_sub_projection_lift.
+    + by apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
   - intros l s om s' om' [_ Ht].
     by apply induced_sub_projection_transition_preservation.
 Qed.
@@ -722,10 +723,11 @@ Proof.
   - intros l s om Hv HsY HomY.
     exists (lift_sub_label IM (set_diff (enum index) selection) l).
     exists (lift_sub_state IM (set_diff (enum index) selection) s).
-    split; [apply composite_label_sub_projection_option_lift |].
-    split; [apply composite_state_sub_projection_lift |].
-    apply @VLSM_full_projection_input_valid; [| done].
-    apply fixed_non_byzantine_vlsm_lift_from_initial.
+    split.
+    + apply composite_label_sub_projection_option_lift.
+    + apply composite_state_sub_projection_lift.
+    + apply @VLSM_full_projection_input_valid; [| done].
+      apply fixed_non_byzantine_vlsm_lift_from_initial.
   - intros l s om s' om' [_ Ht].
     by apply induced_sub_projection_transition_preservation.
 Qed.
