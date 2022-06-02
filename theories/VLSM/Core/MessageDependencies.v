@@ -1,8 +1,9 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude.
 From Coq Require Import FinFun Relations.Relation_Operators Program.Equality.
+From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras FinFunExtras StdppListSet Measurable.
-From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces SubProjectionTraces Equivocation EquivocationProjections.
+From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
+From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
 (** * VLSM Message Dependencies
 
@@ -464,3 +465,150 @@ Proof.
 Qed.
 
 End full_message_dependencies_happens_before.
+
+(** ** Basic validation condition for free composition
+
+In this section we show (Lemma [valid_free_validating_is_message_validating])
+that, under [FullMessageDependencies] assumptions, if the validity predicate
+ensures that message itself and all of its dependencies can be emitted using
+only its dependencies, then the input message is valid for the free composition.
+Thus, the node itself is a validator for the free composition.
+*)
+
+Section free_composition_validators.
+
+Context
+  {message : Type}
+  `{finite.Finite index}
+  (IM : index -> VLSM message)
+  `{forall i, HasBeenSentCapability (IM i)}
+  `{forall i, HasBeenReceivedCapability (IM i)}
+  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  {validator : Type}
+  (A : validator -> index)
+  (sender : message -> option validator)
+  .
+
+(**
+The property of a message of having a sender and being emittable by the
+component corresponding to its sender pre-loaded with the dependencies of the
+message.
+*)
+Inductive Emittable_from_dependencies_prop (m : message) : Prop :=
+  | efdp : forall (v : validator) (Hsender : sender m = Some v)
+              (Hemittable : can_emit
+                (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m))
+                m),
+               Emittable_from_dependencies_prop m.
+
+Definition emittable_from_dependencies_prop (m : message) : Prop :=
+  match sender m with
+  | None => False
+  | Some v => can_emit (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m)) m
+  end.
+
+Lemma emittable_from_dependencies_prop_iff m
+  : Emittable_from_dependencies_prop m <-> emittable_from_dependencies_prop m.
+Proof.
+  unfold emittable_from_dependencies_prop; split.
+  - by inversion 1; rewrite Hsender.
+  - destruct (sender m) eqn: Hsender; [by split with v | inversion 1].
+Qed.
+
+(**
+The property of a message that both itself and all of its dependencies are
+emittable from their dependencies.
+*)
+Definition all_dependencies_emittable_from_dependencies_prop (m : message) : Prop :=
+  forall dm, dm ∈ m :: full_message_dependencies m -> Emittable_from_dependencies_prop dm.
+
+(**
+The property of requiring that the validity predicate subsumes the
+[all_dependencies_emittable_from_dependencies_prop]erty.
+*)
+Definition valid_all_dependencies_emittable_from_dependencies_prop (i : index) : Prop :=
+  forall l s m, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m) ->
+    all_dependencies_emittable_from_dependencies_prop m.
+
+(**
+If a message can be emitted by a node preloaded with the message's direct
+dependencies, and if all the dependencies of the message are valid for the
+free composition, then the message itself is valid for the free composition.
+*)
+Lemma free_valid_from_valid_dependencies
+  m i
+  (Hm : can_emit (pre_loaded_vlsm (IM i) (fun dm => dm ∈ message_dependencies m)) m)
+  (Hdeps :
+    forall dm, dm ∈ full_message_dependencies m ->
+      valid_message_prop (free_composite_vlsm IM) dm)
+  : valid_message_prop (free_composite_vlsm IM) m.
+Proof.
+  eapply emitted_messages_are_valid, free_valid_preloaded_lifts_can_be_emitted; [| done].
+  by intros; apply Hdeps, full_message_dependencies_happens_before, msg_dep_happens_before_iff_one;
+  left.
+Qed.
+
+(**
+Any message with the [all_dependencies_emittable_from_dependencies_prop]erty
+is valid for the free composition.
+*)
+Lemma free_valid_from_all_dependencies_emitable_from_dependencies :
+  forall m,
+    all_dependencies_emittable_from_dependencies_prop m ->
+      valid_message_prop (free_composite_vlsm IM) m.
+Proof.
+  intros m Hm.
+  specialize (Hm m) as Hemit; spec Hemit; [left |].
+  inversion Hemit as [v _ Hemit']; clear Hemit.
+  apply free_valid_from_valid_dependencies with (A v); [done | clear v Hemit'].
+  eapply FullMessageDependencies_ind; [done |].
+  intros dm Hdm Hdeps.
+  specialize (Hm dm); spec Hm; [by right |].
+  inversion Hm as [v _ ?]; clear Hm.
+  by apply free_valid_from_valid_dependencies with (A v).
+Qed.
+
+(**
+If a node in a composition satisfies the
+[valid_all_dependencies_emittable_from_dependencies_prop]erty, then it also has
+the [component_message_validator_prop]erty, that is, it is a validator for the
+free composition.
+*)
+Lemma valid_free_validating_is_message_validating
+  : forall i, valid_all_dependencies_emittable_from_dependencies_prop i ->
+    component_message_validator_prop IM (free_constraint IM) i.
+Proof.
+  by intros i Hvalidating l s im Hv
+  ; eapply free_valid_from_all_dependencies_emitable_from_dependencies, Hvalidating.
+Qed.
+
+(**
+Under several additional (but regularly used) assumptions, including the
+[MessageDependencies] assumptions, the [channel_authentication_prop]erty and the
+[no_initial_messages_in_IM_prop]erty, we can show that the
+[component_message_validator_prop]erty is fully equivalent to the
+[valid_all_dependencies_emittable_from_dependencies_prop]erty.
+*)
+Lemma valid_free_validating_equiv_message_validating
+  `{forall i, MessageDependencies message_dependencies (IM i)}
+  (Hchannel : channel_authentication_prop  IM A sender)
+  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
+  : forall i, component_message_validator_prop IM (free_constraint IM) i <->
+  valid_all_dependencies_emittable_from_dependencies_prop i.
+Proof.
+  intros i; split; [| apply valid_free_validating_is_message_validating].
+  intros Hvalidator l s m Hv dm Hdm.
+  specialize (Hvalidator l s m Hv).
+  inversion Hdm as [| ? ? ? Hin]; subst.
+  - eapply composite_no_initial_valid_messages_emitted_by_sender in Hvalidator
+        as (v & Hsender & Hemit); [| done | done].
+    exists v; [done |].
+    by eapply message_dependencies_are_sufficient.
+  - apply full_message_dependencies_happens_before in Hin.
+    eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender in Hin
+        as (v & Hsender & Hemit); [| done ..].
+    exists v; [done |].
+    by eapply message_dependencies_are_sufficient.
+Qed.
+
+End free_composition_validators.
