@@ -471,8 +471,8 @@ End full_message_dependencies_happens_before.
 In this section we show (Lemma [valid_free_validating_is_message_validating])
 that, under [FullMessageDependencies] assumptions, if the validity predicate
 ensures that message itself and all of its dependencies can be emitted using
-only its dependencies, then the input message is valid for the free composition,
-thus the node itself is a validator for the free composition.
+only its dependencies, then the input message is valid for the free composition.
+Thus, the node itself is a validator for the free composition.
 *)
 
 Section free_composition_validators.
