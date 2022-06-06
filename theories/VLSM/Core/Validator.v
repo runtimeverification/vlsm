@@ -604,14 +604,17 @@ Context
   (PreXi := pre_loaded_with_all_messages_vlsm (IM i))
   .
 
-Definition composite_project_label
-  (l : composite_label IM) : option (vlabel (IM i))
-  :=
+Definition composite_project_label (l : composite_label IM)
+  : option (vlabel (IM i)) :=
   match decide (i = (projT1 l)) with
   | left e => Some (eq_rect_r _ (projT2 l) e)
   | _ => None
   end.
 
+(**
+The specialization of the more abstract [projection_induced_validator] to the
+projection from a composition to a component.
+*)
 Definition composite_vlsm_induced_validator : VLSM message :=
   projection_induced_validator X (type (IM i))
     composite_project_label (fun s => s i)
@@ -682,6 +685,162 @@ Proof.
 Qed.
 
 End component_projection_validator.
+
+Section sec_component_projection_validator_alt.
+(**
+** Direct definition of induced validator from composition to component
+
+In this section we provide a definition of the induced validator from a
+composition to a component obtained by strengthening the component instead of
+deriving its elements via the projection [composite_vlsm_induced_projection_validator].
+
+We then show this VLSM and some of its pre-loaded variants are [VLSM_eq]ual
+(trace-equivalent) to the corresponding variants of the 
+[composite_vlsm_induced_validator].
+*)
+
+Context
+  {message : Type}
+  `{EqDecision index}
+  (IM : index -> VLSM message)
+  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+  (X := composite_vlsm IM constraint)
+  (i : index)
+  (PreXi := pre_loaded_with_all_messages_vlsm (IM i))
+  .
+
+(**
+[projection_valid]ity is defined as the projection of [input_valid]ity of <<X>>:
+*)
+Definition composite_vlsm_induced_projection_valid
+  (li : vlabel (IM i))
+  (siomi : vstate (IM i) * option message)
+  :=
+  let (si, omi) := siomi in
+  exists (s : vstate X),
+    s i = si /\ input_valid X (existT i li) (s, omi).
+
+(**
+Since the [composite_vlsm_induced_projection_valid]ity is derived from
+[input_valid]ity, which in turn depends on [valid]ity in the component, it is
+easy to see that it implies [valid]ity in the component.
+*)
+Lemma projection_valid_implies_valid
+  (li : vlabel (IM i))
+  (siomi : vstate (IM i) * option message)
+  (Hcomposite : composite_vlsm_induced_projection_valid li siomi)
+  : vvalid (IM i) li siomi.
+Proof. by destruct siomi, Hcomposite as (s & <- & _ & _ & []). Qed.
+
+(**
+We define the induced projection validator of <<X>> to index <<i>> as the [VLSM]
+obtained by changing the validity predicate of <<IM i>> to
+[composite_vlsm_induced_projection_valid].
+*)
+Definition composite_vlsm_induced_projection_validator_machine
+  : VLSMMachine (type (IM i)) :=
+{|
+  initial_state_prop := vinitial_state_prop (IM i);
+  initial_message_prop := vinitial_message_prop (IM i);
+  s0 := populate (vs0 (IM i));
+  transition :=  vtransition (IM i);
+  valid := composite_vlsm_induced_projection_valid;
+|}.
+
+Definition composite_vlsm_induced_projection_validator : VLSM message :=
+  mk_vlsm composite_vlsm_induced_projection_validator_machine.
+
+Definition pre_composite_vlsm_induced_projection_validator : VLSM message :=
+  pre_loaded_with_all_messages_vlsm composite_vlsm_induced_projection_validator.
+
+Lemma preloaded_composite_vlsm_induced_projection_validator_iff
+  (P : message -> Prop)
+  (Hinits : forall m,  vinitial_message_prop (IM i) m -> P m)
+  : VLSM_eq
+      (pre_loaded_vlsm composite_vlsm_induced_projection_validator P)
+      (pre_loaded_vlsm (composite_vlsm_induced_validator IM constraint i) P).
+Proof.
+  apply VLSM_eq_incl_iff; split; cbn; apply basic_VLSM_strong_incl.
+  - intros s Hs; cbn in *; red.
+    exists (lift_to_composite_state' IM i s).
+    split; [apply state_update_eq|].
+    by apply (composite_initial_state_prop_lift IM).
+  - by intros m [Him | Hpm]; right; [apply Hinits| ].
+  - intros l s iom [sX [<- Hv]].
+    exists (existT i l), sX.
+    by split; [apply composite_project_label_eq |..].
+  - intros l s iom s' oom.
+    cbn; unfold lift_to_composite_state' at 1; rewrite state_update_eq.
+    intros Ht; setoid_rewrite Ht.
+    by rewrite state_update_eq.
+  (* second implication *)
+  - by intros s [sX [<- HsX]]; cbn.
+  - by intros m [| Hm]; [| right].
+  - intros l s iom ([j li] & sX & [HlX [=] Hv]).
+    exists sX; split; [done |].
+    unfold composite_project_label in HlX; cbn in *.
+    case_decide; [| congruence].
+    by inversion HlX; subst.
+  - intros l s iom s' oom Ht; cbn in *.
+    unfold lift_to_composite_state' in Ht;
+    rewrite state_update_eq in Ht;
+    destruct (vtransition _ _ _) as (si', om').
+    by rewrite state_update_eq in Ht.
+Qed.
+
+Lemma pre_composite_vlsm_induced_projection_validator_iff
+  : VLSM_eq
+      pre_composite_vlsm_induced_projection_validator
+      (pre_composite_vlsm_induced_validator IM constraint i).
+Proof.
+  eapply VLSM_eq_trans;
+    [apply pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True |].
+  eapply VLSM_eq_trans;
+    [by apply preloaded_composite_vlsm_induced_projection_validator_iff |].
+  apply VLSM_eq_sym,
+    (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True
+      (composite_vlsm_induced_validator IM constraint i)).
+Qed.
+
+Lemma component_projection :
+  VLSM_projection X pre_composite_vlsm_induced_projection_validator
+    (composite_project_label IM i) (fun s => s i).
+Proof.
+  eapply VLSM_projection_eq_trans.
+  - apply composite_projection_induced_validator_is_projection.
+  - apply VLSM_eq_sym, pre_composite_vlsm_induced_projection_validator_iff.
+Qed.
+
+Lemma composite_vlsm_induced_projection_validator_iff
+  (Hno_inits : forall m, ~vinitial_message_prop (IM i) m)
+  : VLSM_eq
+      composite_vlsm_induced_projection_validator
+      (composite_vlsm_induced_validator IM constraint i).
+Proof.
+  eapply VLSM_eq_trans;
+    [apply (vlsm_is_pre_loaded_with_False composite_vlsm_induced_projection_validator)|].
+  eapply VLSM_eq_trans;
+    [by apply preloaded_composite_vlsm_induced_projection_validator_iff |].
+  apply VLSM_eq_sym,
+    (vlsm_is_pre_loaded_with_False
+      (composite_vlsm_induced_validator IM constraint i)).
+Qed.
+
+Definition valid_preloaded_composite_vlsm_induced_projection_validator
+  : VLSM message :=
+  pre_loaded_vlsm composite_vlsm_induced_projection_validator (valid_message_prop X).
+
+Lemma valid_preloaded_composite_vlsm_induced_projection_validator_iff
+  : VLSM_eq
+      valid_preloaded_composite_vlsm_induced_projection_validator
+      pre_composite_vlsm_induced_projection_validator.
+Proof.
+  apply VLSM_eq_sym, pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm.
+  intros _ _ m (_ & _ & _ & _ & _ & Hm & _).
+  by apply initial_message_is_valid; right.
+Qed.
+
+End sec_component_projection_validator_alt.
 
 (** ** VLSM self-validation *)
 
