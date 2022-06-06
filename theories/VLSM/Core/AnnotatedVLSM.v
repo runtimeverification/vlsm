@@ -289,7 +289,7 @@ Proof.
 Qed.
 
 Lemma annotated_composite_induced_validator_initial_lift
-  : strong_full_projection_initial_state_preservation (IM i) AnnotatedFree
+  : strong_projection_initial_state_preservation (IM i) AnnotatedFree
     annotated_composite_state_lift.
 Proof.
   split; cbn.

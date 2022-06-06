@@ -2,14 +2,12 @@ From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMInclusion VLSMProjections.VLSMEmbedding.
 
-(** ** VLSM Inclusion and Equality
+(** * VLSM Equality
 
-We can also define VLSM _inclusion_  and _equality_ in terms of traces.
+We can also define VLSM _equality_ in terms of traces.
 When both VLSMs have the same state and label types they also share the
 same [Trace] type, and sets of traces can be compared without conversion.
-- VLSM X is _included_ in VLSM Y if every [valid_trace] available to X
-is also available to Y.
-- VLSM X and VLSM Y are _equal_ if their [valid_trace]s are exactly the same.
+Then VLSM X and VLSM Y are _equal_ if their [valid_trace]s are exactly the same.
 *)
 
 Section VLSM_equality.

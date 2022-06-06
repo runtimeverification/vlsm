@@ -431,7 +431,7 @@ Context
   (Xi := pre_projection_induced_validator X (type Y) label_project state_project label_lift state_lift)
   (Hlabel_lift : induced_validator_label_lift_prop _ _ label_project label_lift)
   (Hstate_lift : induced_validator_state_lift_prop _ _ state_project state_lift)
-  (Hinitial_lift : strong_full_projection_initial_state_preservation Y X state_lift)
+  (Hinitial_lift : strong_projection_initial_state_preservation Y X state_lift)
   (Htransition_consistency : induced_validator_transition_consistency_Some _ _ label_project state_project)
   (Htransition_Some  : weak_projection_transition_consistency_Some _ _ label_project state_project label_lift state_lift
     := basic_weak_projection_transition_consistency_Some _ _ _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency)

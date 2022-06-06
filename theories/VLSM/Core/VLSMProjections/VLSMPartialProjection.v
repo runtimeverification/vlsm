@@ -3,17 +3,9 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM.
 
-
-(** * VLSM (partial) projections and inclusions
-
-This section introduces several types VLSM projections: [VLSM_partial_projection],
-[VLSM_projection], [VLSM_full_projection], as well as [VLSM_incl]usion and
-[VLSM_eq]uality.
-*)
-
 Section VLSM_partial_projection.
 
-(** ** VLSM partial projections
+(** * VLSM partial projections
 
 A generic notion of VLSM projection. We say that VLSM X partially projects to
 VLSM Y (sharing the same messages) if there exists a partial map <<partial_trace_project>>

@@ -908,7 +908,7 @@ Qed.
 
 Lemma remove_equivocating_strong_full_projection_initial_state_preservation eqv_is
   (Heqv_is : composite_initial_state_prop (sub_IM IM equivocators) eqv_is)
-  : strong_full_projection_initial_state_preservation Free Free (remove_equivocating_state_project eqv_is).
+  : strong_projection_initial_state_preservation Free Free (remove_equivocating_state_project eqv_is).
 Proof.
   intros s Hs i.
   unfold remove_equivocating_state_project, lift_sub_state_to.
@@ -935,7 +935,7 @@ Proof.
 Qed.
 
 Lemma preloaded_lift_sub_state_to_initial_state
-  : weak_full_projection_initial_state_preservation PreSubFree PreFree (lift_sub_state_to IM equivocators base_s).
+  : weak_projection_initial_state_preservation PreSubFree PreFree (lift_sub_state_to IM equivocators base_s).
 Proof.
   apply valid_state_has_trace in Hbase_s as Htr.
   destruct Htr as [is [tr Htr]].

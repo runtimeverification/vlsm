@@ -5,21 +5,21 @@ From VLSM.Core Require Import VLSM VLSMProjections.VLSMProjection.
 
 Section VLSM_full_projection.
 
-(** ** VLSM full projections
+(** * VLSM full projections (embeddings)
 
 A VLSM projection guaranteeing the existence of projection for all labels and
 states, and the full correspondence between [transition_item]s.
-We say that VLSM X fully projects to VLSM Y (sharing the same messages)
-if there exists maps <<label_project>> taking X-labels to Y-labels
+We say that VLSM X fully projects (embeds) into VLSM Y (sharing the same messages)
+if there exist maps <<label_project>> taking X-labels to Y-labels
 and <<state_project>> taking X-states to Y-states, such that the
-[finite_valid_trace_prop]erty is preserved bu the trace
+[finite_valid_trace_prop]erty is preserved by the trace
 transformation induced by the label and state projection functions,
 in which each X-[transition_item] is projected to an Y-[transition_item]
 preserving the messages and transforming labels and states accordingly.
 
-Besides [VLSM_incl]usions, which are a prototypical example of VLSM full
-projections, we can also prove "lifting" relations between components and the
-composition that they are part of as being full projections (see, e.g.,
+Besides [VLSM_incl]usions, which are a prototypical example of VLSM embeddings,
+we can also prove "lifting" relations between components and the composition
+that they are part of as being full projections (see, e.g.,
 [lift_to_composite_vlsm_full_projection] or [projection_friendliness_lift_to_composite_vlsm_full_projection]).
 *)
 
