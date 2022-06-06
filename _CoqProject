@@ -24,6 +24,11 @@ theories/VLSM/Lib/FinSetExtras.v
 theories/VLSM/Core/VLSM.v
 theories/VLSM/Core/Composition.v
 theories/VLSM/Core/Plans.v
+theories/VLSM/Core/VLSMProjections/VLSMPartialProjection.v
+theories/VLSM/Core/VLSMProjections/VLSMProjection.v
+theories/VLSM/Core/VLSMProjections/VLSMEmbedding.v
+theories/VLSM/Core/VLSMProjections/VLSMInclusion.v
+theories/VLSM/Core/VLSMProjections/VLSMEquality.v
 theories/VLSM/Core/VLSMProjections.v
 theories/VLSM/Core/Validator.v
 theories/VLSM/Core/MessageDependencies.v
