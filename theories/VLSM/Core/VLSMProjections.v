@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From Coq Require Import FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
 From VLSM.Core Require Import VLSM.
-From VLSM.Core.VLSMProjections Require Export VLSMPartialProjection VLSMProjection.
+From VLSM.Core.VLSMProjections Require Export VLSMPartialProjection VLSMTotalProjection.
 From VLSM.Core.VLSMProjections Require Export VLSMEmbedding VLSMInclusion VLSMEquality.
 
 Section same_VLSM_full_projection.
@@ -28,7 +28,7 @@ End same_VLSM_full_projection.
 
 Section transitivity_props.
 
-Lemma pre_VLSM_projection_trace_project_trans
+Lemma pre_VLSM_projection_finite_trace_project_trans
   {message}
   (TX TY TZ : VLSMType message)
   (project_labelXY : @label _ TX -> option (@label _ TY))
@@ -36,13 +36,13 @@ Lemma pre_VLSM_projection_trace_project_trans
   (project_labelYZ : @label _ TY -> option (@label _ TZ))
   (project_stateYZ : @state _ TY -> @state _ TZ)
   : forall trX,
-    pre_VLSM_projection_trace_project TX TZ
+    pre_VLSM_projection_finite_trace_project TX TZ
       (mbind project_labelYZ ∘ project_labelXY)
       (project_stateYZ ∘ project_stateXY)
       trX
       =
-    pre_VLSM_projection_trace_project TY TZ project_labelYZ project_stateYZ
-      (pre_VLSM_projection_trace_project TX TY project_labelXY project_stateXY
+    pre_VLSM_projection_finite_trace_project TY TZ project_labelYZ project_stateYZ
+      (pre_VLSM_projection_finite_trace_project TX TY project_labelXY project_stateXY
         trX).
 Proof.
   induction trX; [done |]; destruct a; cbn;
@@ -68,7 +68,7 @@ Lemma VLSM_projection_trans
     (project_stateYZ ∘ project_stateXY).
 Proof.
   constructor; [split |]; intros sX trX HtrX; cbn;
-    setoid_rewrite pre_VLSM_projection_trace_project_trans.
+    setoid_rewrite pre_VLSM_projection_finite_trace_project_trans.
   - rewrite <- !final_state_project; [done | apply ProjXY | done | apply ProjYZ |].
     by eapply (VLSM_projection_finite_valid_trace_from ProjXY).
   - by eapply (VLSM_projection_finite_valid_trace ProjYZ),
@@ -90,7 +90,7 @@ Lemma VLSM_projection_embedding_trans
 Proof.
   apply VLSM_full_projection_is_projection in ProjYZ.
   replace (fmap project_labelYZ ∘ project_labelXY)
-    with (mbind (λ l : vlabel Y, Some (project_labelYZ l)) ∘ project_labelXY).
+    with (mbind (Some ∘ project_labelYZ) ∘ project_labelXY).
   - by apply VLSM_projection_trans.
   - by extensionality x.
 Qed.
@@ -110,7 +110,7 @@ Lemma VLSM_embedding_projection_trans
 Proof.
   apply VLSM_full_projection_is_projection in ProjXY.
   replace (project_labelYZ ∘ project_labelXY)
-    with (mbind project_labelYZ ∘ (λ l : vlabel X, Some (project_labelXY l))).
+    with (mbind project_labelYZ ∘ (Some ∘ project_labelXY)).
   - by apply VLSM_projection_trans.
   - by extensionality x.
 Qed.

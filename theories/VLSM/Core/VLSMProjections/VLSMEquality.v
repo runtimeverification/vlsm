@@ -2,7 +2,7 @@ From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMInclusion VLSMProjections.VLSMEmbedding.
 
-(** * VLSM Equality
+(** * VLSM Projections : VLSM Equality
 
 We can also define VLSM _equality_ in terms of traces.
 When both VLSMs have the same state and label types they also share the

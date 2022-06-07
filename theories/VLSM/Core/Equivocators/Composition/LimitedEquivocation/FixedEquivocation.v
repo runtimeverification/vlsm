@@ -1305,10 +1305,10 @@ Proof.
       by rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
     }
     apply Hsim in HtrX.
-    remember (pre_VLSM_projection_trace_project _ _ _ _ _) as tr.
+    remember (pre_VLSM_projection_finite_trace_project _ _ _ _ _) as tr.
     replace tr with (equivocators_total_trace_project IM trX); [done |].
     subst. symmetry.
-    apply (equivocators_total_VLSM_projection_trace_project IM (proj1 Hpre_tr)).
+    apply (equivocators_total_VLSM_projection_finite_trace_project IM (proj1 Hpre_tr)).
 Qed.
 
 End from_equivocators_to_nodes.

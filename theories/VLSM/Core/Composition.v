@@ -211,7 +211,7 @@ updating an given composite state to <<sj>> on component <<j>>.
       (s : composite_state)
       (j : index)
       : vtransition_item (IM j) -> composite_transition_item :=
-      pre_VLSM_full_projection_trace_item_project (type (IM j)) composite_type
+      pre_VLSM_full_projection_transition_item_project (type (IM j)) composite_type
         (lift_to_composite_label j) (lift_to_composite_state s j).
 
 (**

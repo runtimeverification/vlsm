@@ -257,7 +257,7 @@ Qed.
 
 Definition finite_trace_projection_list (tr : list (composite_transition_item IM))
   : list (vtransition_item (IM j)) :=
-  @pre_VLSM_projection_trace_project _ (composite_type IM) _
+  @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _
     (composite_project_label IM j) (fun s => s j) tr.
 
 Lemma preloaded_valid_state_projection
@@ -272,7 +272,7 @@ Lemma preloaded_finite_valid_trace_projection
   (s : composite_state IM)
   (trx : list (composite_transition_item IM))
   (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s trx)
-   : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (VLSM_projection_trace_project preloaded_component_projection trx).
+   : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (VLSM_projection_finite_trace_project preloaded_component_projection trx).
 Proof.
   revert Htr. apply (VLSM_projection_finite_valid_trace_from preloaded_component_projection).
 Qed.
@@ -281,7 +281,7 @@ Lemma preloaded_finite_valid_trace_from_to_projection
   (s s' : composite_state IM)
   (trx : list (composite_transition_item IM))
   (Htr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s s' trx)
-   : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (s' j) (VLSM_projection_trace_project preloaded_component_projection trx).
+   : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (s' j) (VLSM_projection_finite_trace_project preloaded_component_projection trx).
 Proof.
   revert Htr. apply (VLSM_projection_finite_valid_trace_from_to preloaded_component_projection).
 Qed.
@@ -290,7 +290,7 @@ Lemma preloaded_finite_valid_trace_init_to_projection
   (s s' : composite_state IM)
   (trx : list (composite_transition_item IM))
   (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s s' trx)
-   : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (s' j) (VLSM_projection_trace_project preloaded_component_projection trx).
+   : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (s' j) (VLSM_projection_finite_trace_project preloaded_component_projection trx).
 Proof.
   revert Htr. apply (VLSM_projection_finite_valid_trace_init_to preloaded_component_projection).
 Qed.
@@ -347,7 +347,7 @@ Lemma finite_trace_projection_list_in
   (itemX : composite_transition_item IM)
   (HitemX : itemX ∈ tr)
   (j := projT1 (l itemX))
-  : (@Build_transition_item _ (type (IM j)) (projT2 (l itemX)) (input itemX) (destination itemX j) (output itemX)) ∈ (VLSM_projection_trace_project (preloaded_component_projection IM j) tr).
+  : (@Build_transition_item _ (type (IM j)) (projT2 (l itemX)) (input itemX) (destination itemX j) (output itemX)) ∈ (VLSM_projection_finite_trace_project (preloaded_component_projection IM j) tr).
 Proof.
   apply elem_of_map_option.
   exists itemX. split; [done |].
@@ -363,7 +363,7 @@ Lemma finite_trace_projection_list_in_rev
   (tr : list (composite_transition_item IM))
   (j : index)
   (itemj : vtransition_item (IM j))
-  (Hitemj : itemj ∈ (VLSM_projection_trace_project (preloaded_component_projection IM j) tr))
+  (Hitemj : itemj ∈ (VLSM_projection_finite_trace_project (preloaded_component_projection IM j) tr))
   : exists (itemX : composite_transition_item IM), itemX ∈ tr /\
     output itemX = output itemj /\
     input itemX = input itemj /\

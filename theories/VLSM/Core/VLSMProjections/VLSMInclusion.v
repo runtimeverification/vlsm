@@ -1,8 +1,8 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From VLSM.Core Require Import VLSM VLSMProjections.VLSMEmbedding VLSMProjections.VLSMProjection.
+From VLSM.Core Require Import VLSM VLSMProjections.VLSMEmbedding VLSMProjections.VLSMTotalProjection.
 
-(** * VLSM Inclusion
+(** * VLSM Projections : VLSM Inclusion
 
 When both VLSMs have the same state and label types they also share the
 same [Trace] type, and sets of traces can be compared without conversion.

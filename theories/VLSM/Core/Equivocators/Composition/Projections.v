@@ -857,7 +857,7 @@ Proof.
     destruct Hproject_tr as [trX0 [HtrX0 HtrX]].
     specialize (IHtr _ _ HtrX0).
     unfold finite_trace_projection_list in Hproject_tri.
-    rewrite @pre_VLSM_projection_trace_project_app in Hproject_tri.
+    rewrite @pre_VLSM_projection_finite_trace_project_app in Hproject_tri.
     apply equivocator_vlsm_trace_project_app in Hproject_tri.
     destruct Hproject_tri as [eqv_final' [trXi' [project_xi [HtrXi' [Hproject_xi HeqtrXi]]]]].
     assert (Hfinal'i : final_descriptors' i = eqv_final' /\ finite_trace_projection_list IM i projectx = project_xi).
@@ -1464,15 +1464,15 @@ Proof.
   by inversion Htr1_pr; subst.
 Qed.
 
-Lemma equivocators_total_VLSM_projection_trace_project
+Lemma equivocators_total_VLSM_projection_finite_trace_project
   {s tr}
   (Hpre_tr : finite_valid_trace_from PreFreeE s tr)
-  : @pre_VLSM_projection_trace_project _ (type PreFreeE) _ equivocators_total_label_project
+  : @pre_VLSM_projection_finite_trace_project _ (type PreFreeE) _ equivocators_total_label_project
       equivocators_total_state_project tr = equivocators_total_trace_project tr.
 Proof.
   induction tr using rev_ind; [done |].
   rewrite equivocators_total_trace_project_app by (eexists; done).
-  rewrite @pre_VLSM_projection_trace_project_app.
+  rewrite @pre_VLSM_projection_finite_trace_project_app.
   apply finite_valid_trace_from_app_iff in Hpre_tr as [Hpre_tr Hpre_x].
   specialize (IHtr Hpre_tr).
   rewrite IHtr.
@@ -2035,7 +2035,7 @@ Proof.
       simpl.
       unfold pre_VLSM_projection_transition_item_project,
         composite_label_sub_projection_option,
-        pre_VLSM_full_projection_trace_item_project.
+        pre_VLSM_full_projection_transition_item_project.
       simpl.
       case_decide as Hla; [|contradict Hla; apply elem_of_enum].
       f_equal; [| done].
@@ -2169,10 +2169,10 @@ Proof.
       by rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
     }
     apply Hsim in Htr.
-    remember (pre_VLSM_projection_trace_project _ _ _ _ _) as tr.
+    remember (pre_VLSM_projection_finite_trace_project _ _ _ _ _) as tr.
     replace tr with (equivocators_total_trace_project IM trX); [done |].
     subst. symmetry.
-    apply (equivocators_total_VLSM_projection_trace_project IM (proj1 Hpre_tr)).
+    apply (equivocators_total_VLSM_projection_finite_trace_project IM (proj1 Hpre_tr)).
 Qed.
 
 Lemma preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection
@@ -2190,10 +2190,10 @@ Proof.
       by rewrite (equivocators_total_trace_project_characterization IM (proj1 Htr)).
     }
     apply Hsim in Htr as Hpr.
-    remember (pre_VLSM_projection_trace_project _ _ _ _ _) as tr.
+    remember (pre_VLSM_projection_finite_trace_project _ _ _ _ _) as tr.
     replace tr with (equivocators_total_trace_project IM trX); [done |].
     subst. symmetry.
-    apply (equivocators_total_VLSM_projection_trace_project IM (proj1 Htr)).
+    apply (equivocators_total_VLSM_projection_finite_trace_project IM (proj1 Htr)).
 Qed.
 
 End equivocators_composition_vlsm_projection.
