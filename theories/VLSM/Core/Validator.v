@@ -542,7 +542,7 @@ Section pre_loaded_with_all_messages_validator_proj.
 We can show that <<PreY>> is included in <<Xi>> by applying the meta-lemma
 [VLSM_incl_finite_traces_characterization], and by induction on the length
 of a trace. The [projection_validator_prop]erty is used to translate
-[input_valid]ity for the PreY machine into the [projection_valid]ity.
+[input_valid]ity for the PreY machine into the [pre_projection_induced_validator].
 *)
 Lemma pre_loaded_with_all_messages_validator_proj_incl
   : VLSM_incl PreY Xi.
@@ -710,7 +710,8 @@ Context
   .
 
 (**
-[projection_valid]ity is defined as the projection of [input_valid]ity of <<X>>:
+The [composite_vlsm_induced_projection_valid]ity is defined as the projection of
+the [input_valid]ity of <<X>>:
 *)
 Definition composite_vlsm_induced_projection_valid
   (li : vlabel (IM i))

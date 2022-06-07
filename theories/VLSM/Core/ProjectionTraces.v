@@ -6,171 +6,69 @@ From VLSM.Core Require Import VLSM Plans Composition VLSMProjections Validator.
 
 Section projections.
 
-(** * Composite VLSM projections
+(** * Composite VLSM induced projections
 
-In this section we define a VLSM representing the projection of a composite VLSM
-to a single node ([composite_vlsm_constrained_projection]), and we study the
-relation between their traces.
+In this section we define a VLSM representing the induced projection of a
+composite VLSM to a single node ([composite_vlsm_induced_projection]), and we
+study the relation between their traces.
 
-Let us fix an indexed set of VLSMs <<IM>> and their composition <<X>> using <<constraint>>.
-
+Let us fix an indexed set of VLSMs <<IM>> and their composition <<X>>
+using <<constraint>>.
 *)
 
-  Context {message : Type}
-          `{EqDecision index}
-          (IM : index -> VLSM message)
-          (T := composite_type IM)
-          (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-          (X := composite_vlsm IM constraint)
+Context
+  {message : Type}
+  `{EqDecision index}
+  (IM : index -> VLSM message)
+  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+  (X := composite_vlsm IM constraint)
   .
 
+Definition composite_vlsm_induced_projection j : VLSM message :=
+  pre_loaded_vlsm (IM j) (valid_message_prop X).
 
-  Definition projected_state_prop (j : index) (sj : vstate (IM j)) := exists (s : valid_state X), proj1_sig s j = sj.
-  Definition projected_states (j : index) := { sj : vstate (IM j) | projected_state_prop j sj }.
+Lemma composite_vlsm_induced_projection_is_projection :
+  forall j,
+    VLSM_projection X (composite_vlsm_induced_projection j)
+      (composite_project_label IM j) (fun s => s j).
+Proof.
+  intro; apply basic_VLSM_projection.
+  - intros (i, li) lY HlX s om (_ & _ & Hv & _) _ _.
+    by unfold composite_project_label in HlX; cbn in HlX;
+      case_decide; inversion HlX; subst; clear HlX; cbn in *.
+  - intros (i, li) lY HlX s om s' om' [_ Ht].
+    unfold composite_project_label in HlX; cbn in HlX;
+      case_decide; inversion HlX; subst; clear HlX; cbn in *.
+    unfold vtransition in Ht; destruct (transition _ _) as (si', _om').
+    by inversion Ht; rewrite state_update_eq.
+  - intros (i, li) HlX s om s' om' [_ Ht].
+      unfold composite_project_label in HlX; cbn in HlX;
+      case_decide; inversion HlX; cbn in *.
+    destruct (vtransition _ _ _); inversion Ht.
+    by rewrite state_update_neq.
+  - by intros sX HsX; specialize (HsX j).
+  - intros (i, li) lY HlX s m (_ & Hm & _ & _) _.
+    by apply initial_message_is_valid; right.
+Qed.
 
-(**
-The definition [VLSM1_projection_valid] is deprecated and should not be used.
-*)
-  Definition VLSM1_projection_valid
-             (i : index)
-             (li : vlabel (IM i))
-             (siomi : vstate (IM i) * option message)
-    := vvalid (IM i) li siomi
-       /\ projected_state_prop i (fst (vtransition (IM i) li siomi))
-       /\ option_valid_message_prop X (snd (vtransition (IM i) li siomi)).
-
-
-(**
-The [VLSMType] of a projection of <<X>> to component <<i>> is the
-type of the <<i>>th component of <<X>>.
-We defined the signature of the projection to be the same as that of the component,
-with the exception that the [initial_message]s for the projection are defined
-to be all [valid_message]s of <<X>>:
-
-*)
-
-(**
-[projection_valid]ity is defined as the projection of [input_valid]ity of <<X>>:
-*)
-
-  Definition projection_valid
-    (i : index)
-    (li : vlabel (IM i))
-    (siomi : vstate (IM i) * option message)
-    :=
-    let (si, omi) := siomi in
-    exists (s : vstate X),
-      s i = si /\ input_valid X (existT i li) (s, omi).
-
-  (**
-   The following two lemmas ([projection_valid_impl_VLSM1_projection_valid]
-   and [VLSM1_projection_valid_impl_projection_valid]) relate the definition
-   of validity in a projection VLSM to the original definition from the VLSM1
-   paper: the conclusion is that the VLSM1 definition is weaker.
-   *)
-
-
-  Lemma projection_valid_impl_VLSM1_projection_valid
-        (i : index)
-        (li : vlabel (IM i))
-        (siomi : vstate (IM i) * option message)
-    :
-      projection_valid i li siomi -> VLSM1_projection_valid i li siomi.
-  Proof.
-    unfold projection_valid.
-    unfold VLSM1_projection_valid.
-    destruct siomi as [si omi].
-    intros [s [Hsi Hpv]].
-    destruct (id Hpv) as [Hs [Homi Hvalid]].
-    simpl in Hvalid.
-    unfold constrained_composite_valid in Hvalid.
-    destruct Hvalid as [Hcvalid Hconstraint].
-    simpl in Hcvalid.
-    split.
-    { subst si. apply Hcvalid. }
-    unfold projected_state_prop.
-    unfold vvalid in Hcvalid.
-    unfold valid_state.
-    remember (@composite_label _ index IM) as CL in |-.
-    remember (existT i li) as er.
-    remember (vtransition X er (s,omi)) as sm'.
-    remember (fst sm') as s'.
-
-    destruct sm' as [s'' om'].
-    simpl in Heqs'. subst s''.
-
-    assert (Hivt : input_valid_transition X er (s,omi) (s', om')).
-    {
-      unfold input_valid_transition.
-      split.
-      { apply Hpv. }
-      unfold vtransition in Heqsm'.
-      symmetry.
-      apply Heqsm'.
-    }
-
-    pose proof (Hps' := input_valid_transition_destination X Hivt).
-
-    split.
-    { 
-      by subst; exists (exist _ s' Hps'); eapply (composite_transition_state_eq IM).
-    }
-    unfold option_valid_message_prop.
-
-    fold (vstate X).
-    assert (Hveq: snd (vtransition (IM i) li (si, omi)) = snd (vtransition X er (s, omi))).
-    {
-      rewrite Heqer.
-      destruct (vtransition (IM i) li (si, omi)) eqn:Heq1.
-      destruct (vtransition X (existT i li) (s, omi)) eqn:Heq2.
-      simpl.
-      unfold vtransition in Heq2. unfold transition in Heq2. unfold machine in Heq2.
-      simpl in Heq2.
-      by rewrite Hsi, Heq1 in Heq2; inversion Heq2.
-    }
-    rewrite Hveq.
-    rewrite <- Heqsm'.
-    exists s'. simpl.
-    by apply input_valid_transition_outputs_valid_state_message in Hivt.
-  Qed.
-
-  Lemma VLSM1_projection_valid_impl_projection_valid
-        (i : index)
-        (li : vlabel (IM i))
-        (siomi : vstate (IM i) * option message)
-    :
-      VLSM1_projection_valid i li siomi ->
-      (exists s : valid_state X,
-          proj1_sig s i = (fst siomi)
-          /\ constraint (existT i li) (proj1_sig s, (snd siomi))) ->
-      option_valid_message_prop X (snd siomi) ->
-      projection_valid i li siomi.
-  Proof.
-    unfold projection_valid.
-    unfold VLSM1_projection_valid.
-    destruct siomi as [si omi].
-    intros H Hpsp Hpmp.
-    simpl in Hpsp.
-    unfold projected_state_prop in H.
-    destruct H as [Hvalid [[s Hs] Homp]].
-    destruct Hpsp as [s' [Hs' Hconstraint]].
-    exists (proj1_sig s').
-    split.
-    { apply Hs'. }
-    unfold input_valid.
-    split; [apply proj2_sig |].
-
-    simpl in Hpmp.
-    split.
-    { apply Hpmp. }
-    unfold valid. unfold machine. simpl.
-    unfold constrained_composite_valid.
-    unfold composite_valid.
-    rewrite <- Hs' in Hvalid.
-    split.
-    { apply Hvalid. }
-    apply Hconstraint.
-  Qed.
+Lemma composite_vlsm_induced_projection_composition_iff :
+  VLSM_eq X (composite_vlsm composite_vlsm_induced_projection constraint).
+Proof.
+  apply VLSM_eq_incl_iff; split.
+  - apply basic_VLSM_strong_incl; [| | by intro..].
+    + by intros s Hs i; specialize (Hs i).
+    + intros ? (i & [im Him] & <-).
+      assert (Him' : vinitial_message_prop (composite_vlsm_induced_projection i) im)
+        by (left; done).
+      by exists i, (exist _ _ Him').
+  - apply basic_VLSM_incl.
+    + by intros s Hs i; specialize (Hs i).
+    + intros _ _ m _ _ (i & [im [Him | HX]] & <-); [| done].
+      apply initial_message_is_valid.
+      by exists i, (exist _ _ Him).
+    + by intros ? ? ? (_ & _ & ?).
+    + by intros ? ? ? ? ? [_ ?].
+Qed.
 
 End projections.
 
@@ -410,7 +308,6 @@ Section fixed_projection.
 Context {message : Type}
         `{EqDecision index}
         (IM : index -> VLSM message)
-        (T := composite_type IM)
         (constraint : composite_label IM -> composite_state IM * option message -> Prop)
         (X := composite_vlsm IM constraint)
 .
@@ -568,7 +465,8 @@ Qed.
 
 (**
 We say that the component <<j>> of X is a validator for received messages if
-if [valid]ity in the component (for reachable states) implies [projection_valid]ity.
+if [valid]ity in the component (for reachable states) implies validity in the
+[composite_vlsm_induced_projection_validator].
 *)
 Definition component_projection_validator_prop :=
   forall (lj : vlabel (IM j)) (sj : vstate (IM j)) (omi : option message),
@@ -626,7 +524,6 @@ Section projection_friendliness_sufficient_condition.
 Context {message : Type}
         `{EqDecision index}
         (IM : index -> VLSM message)
-        (T := composite_type IM)
         (constraint : composite_label IM -> composite_state IM * option message -> Prop)
         (X := composite_vlsm IM constraint)
 .
