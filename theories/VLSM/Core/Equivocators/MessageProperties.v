@@ -260,22 +260,20 @@ Lemma equivocator_oracle_dec
   : RelDecision equivocator_oracle.
 Proof.
   intros s m.
-  apply (Decision_iff
-           (P:=Exists (fun i => match equivocator_state_project s i with None => False | Some si => oracle si m end) (up_to_n_listing (equivocator_state_n s)))).
-  - unfold equivocator_oracle. rewrite Exists_exists.
-    split.
-    * intros [i [_ Hi]].
-      destruct (equivocator_state_project s i) as [si|] eqn:Hsi; [| done].
-      by exists i, si.
-    * intros [i [si [Hsi Hi]]]. exists i.
-      apply equivocator_state_project_Some_rev in Hsi as Hlti.
-      apply up_to_n_full in Hlti.
-      split; [done |].
-      by rewrite Hsi.
-  - apply Exists_dec.
-    intro i. destruct (equivocator_state_project s i).
-    + apply Hdec.
-    + apply False_dec.
+  eapply
+    (Decision_iff
+      (P := Exists
+        (fun i =>
+          from_option (fun si => oracle si m) False
+            (equivocator_state_project s i)) _)).
+  - split; unfold equivocator_oracle; rewrite Exists_exists; cycle 1.
+    + intros (i & si & Hsi & Hi); exists i.
+      split; [| by rewrite Hsi].
+      by eapply up_to_n_full, equivocator_state_project_Some_rev.
+    + intros (i & _ & Hi); exists i.
+      by destruct (equivocator_state_project s i); [eexists |].
+  - apply Exists_dec; intro i.
+    destruct (equivocator_state_project s i); [apply Hdec | typeclasses eauto]. 
 Qed.
 
 Lemma equivocator_oracle_stepwise_props

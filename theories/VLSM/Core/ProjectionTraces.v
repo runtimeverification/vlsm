@@ -419,7 +419,7 @@ Qed.
 
 Definition finite_trace_projection_list (tr : list (composite_transition_item IM))
   : list (vtransition_item (IM j)) :=
-  @pre_VLSM_projection_trace_project _ (composite_type IM) _
+  @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _
     (composite_project_label IM j) (fun s => s j) tr.
 
 Lemma preloaded_valid_state_projection

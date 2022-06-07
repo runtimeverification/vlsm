@@ -863,7 +863,7 @@ the equivocator component of a Fixed valid state with initial states is
 still a Fixed valid state.
 *)
 Lemma fixed_equivocator_lifting_initial_state
-  : weak_full_projection_initial_state_preservation EquivPreloadedBase Fixed (lift_sub_state_to IM equivocators base_s).
+  : weak_projection_initial_state_preservation EquivPreloadedBase Fixed (lift_sub_state_to IM equivocators base_s).
 Proof.
   intros eqv_is Heqv_is.
   apply (VLSM_incl_valid_state (StrongFixed_incl_Fixed IM equivocators)).
