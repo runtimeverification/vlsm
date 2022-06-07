@@ -136,7 +136,7 @@ Context
   (TY : VLSMType message)
   (label_project : vlabel X -> option (@label _ TY))
   (state_project : vstate X -> @state _ TY)
-  (trace_project := pre_VLSM_projection_trace_project _ _ label_project state_project)
+  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   (label_lift : @label _ TY -> vlabel X)
   (state_lift : @state _ TY -> vstate X)
   .
@@ -292,18 +292,18 @@ Lemma induced_validator_transition_item_lift
   (item : @transition_item _ TY)
   : @pre_VLSM_projection_transition_item_project _ (type X) _
     label_project state_project
-    (pre_VLSM_full_projection_trace_item_project _ _ label_lift state_lift item)
+    (pre_VLSM_full_projection_transition_item_project _ _ label_lift state_lift item)
     = Some item.
 Proof.
   destruct item.
-  unfold pre_VLSM_full_projection_trace_item_project,
+  unfold pre_VLSM_full_projection_transition_item_project,
          pre_VLSM_projection_transition_item_project.
   by cbn; rewrite Hlabel_lift, Hstate_lift.
 Qed.
 
 Lemma induced_validator_trace_lift
   (tr : list (@transition_item _ TY))
-  : @pre_VLSM_projection_trace_project _ (type X) _
+  : @pre_VLSM_projection_finite_trace_project _ (type X) _
     label_project state_project
     (pre_VLSM_full_projection_finite_trace_project _ _ label_lift state_lift tr)
     = tr.
@@ -345,7 +345,7 @@ Lemma projection_induced_validator_incl
   (TY : VLSMType message)
   (label_project : @label _ TX -> option (@label _ TY))
   (state_project : @state _ TX -> @state _ TY)
-  (trace_project := pre_VLSM_projection_trace_project _ _ label_project state_project)
+  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   (label_lift : @label _ TY -> @label _ TX)
   (state_lift : @state _ TY -> @state _ TX)
   (XY1 : VLSM message := pre_projection_induced_validator X1 TY label_project state_project label_lift state_lift)
@@ -398,7 +398,7 @@ Lemma projection_induced_validator_eq
   (TY : VLSMType message)
   (label_project : @label _ TX -> option (@label _ TY))
   (state_project : @state _ TX -> @state _ TY)
-  (trace_project := pre_VLSM_projection_trace_project _ _ label_project state_project)
+  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   (label_lift : @label _ TY -> @label _ TX)
   (state_lift : @state _ TY -> @state _ TX)
   (XY1 : VLSM message := pre_projection_induced_validator X1 TY label_project state_project label_lift state_lift)

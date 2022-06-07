@@ -25,7 +25,7 @@ theories/VLSM/Core/VLSM.v
 theories/VLSM/Core/Composition.v
 theories/VLSM/Core/Plans.v
 theories/VLSM/Core/VLSMProjections/VLSMPartialProjection.v
-theories/VLSM/Core/VLSMProjections/VLSMProjection.v
+theories/VLSM/Core/VLSMProjections/VLSMTotalProjection.v
 theories/VLSM/Core/VLSMProjections/VLSMEmbedding.v
 theories/VLSM/Core/VLSMProjections/VLSMInclusion.v
 theories/VLSM/Core/VLSMProjections/VLSMEquality.v

@@ -1,11 +1,12 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
+From Coq Require Import FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
-From VLSM.Core Require Import VLSM VLSMProjections.VLSMProjection.
+From VLSM.Core Require Import VLSM VLSMProjections.VLSMTotalProjection.
 
 Section VLSM_full_projection.
 
-(** * VLSM full projections (embeddings)
+(** * VLSM Projections : VLSM Full Projection (Embedding)
 
 A VLSM projection guaranteeing the existence of projection for all labels and
 states, and the full correspondence between [transition_item]s.
@@ -32,7 +33,7 @@ Context
   (state_project : @state _ TX -> @state _ TY)
   .
 
-Definition pre_VLSM_full_projection_trace_item_project
+Definition pre_VLSM_full_projection_transition_item_project
   : @transition_item _ TX -> @transition_item _ TY
   :=
   fun item =>
@@ -44,11 +45,11 @@ Definition pre_VLSM_full_projection_trace_item_project
 
 Definition pre_VLSM_full_projection_finite_trace_project
   : list (@transition_item _ TX) -> list (@transition_item _ TY)
-  := map pre_VLSM_full_projection_trace_item_project.
+  := map pre_VLSM_full_projection_transition_item_project.
 
 Definition pre_VLSM_full_projection_infinite_trace_project
   : Streams.Stream (@transition_item _ TX) -> Streams.Stream (@transition_item _ TY)
-  := Streams.map pre_VLSM_full_projection_trace_item_project.
+  := Streams.map pre_VLSM_full_projection_transition_item_project.
 
 Lemma pre_VLSM_full_projection_infinite_trace_project_infinitely_often
   : forall s, InfinitelyOften (is_Some ∘ (Some ∘ label_project ∘ l)) s.
@@ -131,7 +132,7 @@ Definition weak_full_projection_valid_preservation : Prop :=
 
 Lemma weak_projection_valid_preservation_from_full
   : weak_full_projection_valid_preservation ->
-    weak_projection_valid_preservation X Y (fun l => Some (label_project l)) state_project.
+    weak_projection_valid_preservation X Y (Some ∘ label_project) state_project.
 Proof.
   intros Hvalid lX lY Hl.
   inversion_clear Hl. apply Hvalid.
@@ -143,7 +144,7 @@ Definition strong_full_projection_valid_preservation : Prop :=
 
 Lemma strong_projection_valid_preservation_from_full
   : strong_full_projection_valid_preservation ->
-    strong_projection_valid_preservation X Y (fun l => Some (label_project l)) state_project.
+    strong_projection_valid_preservation X Y (Some ∘ label_project) state_project.
 Proof.
   intros Hvalid lX lY Hl.
   inversion_clear Hl. apply Hvalid.
@@ -164,17 +165,15 @@ Definition weak_full_projection_transition_preservation : Prop :=
 
 Lemma weak_projection_transition_preservation_Some_from_full
   : weak_full_projection_transition_preservation ->
-    weak_projection_transition_preservation_Some X Y (fun l => Some (label_project l)) state_project.
+    weak_projection_transition_preservation_Some X Y (Some ∘ label_project) state_project.
 Proof.
   intros Htransition lX lY Hl.
   inversion_clear Hl. apply Htransition.
 Qed.
 
 Lemma weak_projection_transition_consistency_None_from_full
-  : weak_projection_transition_consistency_None _ _ (fun l => Some (label_project l)) state_project.
-Proof.
-  congruence.
-Qed.
+  : weak_projection_transition_consistency_None _ _ (Some ∘ label_project) state_project.
+Proof. inversion 1. Qed.
 
 Definition strong_full_projection_transition_preservation : Prop :=
   forall l s om s' om',
@@ -183,17 +182,15 @@ Definition strong_full_projection_transition_preservation : Prop :=
 
 Lemma strong_projection_transition_preservation_Some_from_full
   : strong_full_projection_transition_preservation ->
-    strong_projection_transition_preservation_Some X Y (fun l => Some (label_project l)) state_project.
+    strong_projection_transition_preservation_Some X Y (Some ∘ label_project) state_project.
 Proof.
   intros Htransition lX lY Hl.
   inversion_clear Hl. apply Htransition.
 Qed.
 
 Lemma strong_projection_transition_consistency_None_from_full
-  : strong_projection_transition_consistency_None _ _ (fun l => Some (label_project l)) state_project.
-Proof.
-  congruence.
-Qed.
+  : strong_projection_transition_consistency_None _ _ (Some ∘ label_project) state_project.
+Proof. inversion 1. Qed.
 
 Lemma strong_full_projection_transition_preservation_weaken
   : strong_full_projection_transition_preservation ->
@@ -224,13 +221,13 @@ Qed.
 
 End basic_definitions.
 
-Definition VLSM_full_projection_trace_item_project
+Definition VLSM_full_projection_transition_item_project
   {message : Type}
   {X Y : VLSM message}
   {label_project : vlabel X -> vlabel Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_full_projection X Y label_project state_project)
-  := pre_VLSM_full_projection_trace_item_project _ _  label_project state_project
+  := pre_VLSM_full_projection_transition_item_project _ _  label_project state_project
   .
 
 Definition VLSM_full_projection_finite_trace_project
@@ -270,7 +267,7 @@ Lemma VLSM_full_projection_projection_type
   (X Y : VLSM message)
   (label_project : vlabel X -> vlabel Y)
   (state_project : vstate X -> vstate Y)
-  : VLSM_projection_type X (type Y) (fun l => Some (label_project l)) state_project.
+  : VLSM_projection_type X (type Y) (Some ∘ label_project) state_project.
 Proof.
   split; intros.
   - destruct_list_last trX trX' lstX Heq; [done |].
@@ -303,7 +300,7 @@ Definition VLSM_weak_full_projection_finite_valid_trace_from
 to lift to VLSM full projections the generic results proved about VLSM projections.
 *)
 Lemma VLSM_weak_full_projection_is_projection
-  : VLSM_weak_projection X Y (fun l => Some (label_project l)) state_project.
+  : VLSM_weak_projection X Y (Some ∘ label_project) state_project.
 Proof.
   split.
   - apply VLSM_full_projection_projection_type.
@@ -413,7 +410,7 @@ Definition VLSM_full_projection_finite_valid_trace
 to lift to VLSM full projections the generic results proved about VLSM projections.
 *)
 Lemma VLSM_full_projection_is_projection
-  : VLSM_projection X Y (fun l => Some (label_project l)) state_project.
+  : VLSM_projection X Y (Some ∘ label_project) state_project.
 Proof.
   split.
   - apply VLSM_full_projection_projection_type.
@@ -642,7 +639,7 @@ Qed.
 
 Lemma basic_VLSM_weak_full_projection : VLSM_weak_full_projection X Y label_project state_project.
 Proof.
-  specialize (basic_VLSM_weak_projection X Y (fun l => Some (label_project l)) state_project) as Hproj.
+  specialize (basic_VLSM_weak_projection X Y (Some ∘ label_project) state_project) as Hproj.
   spec Hproj; [by apply weak_projection_valid_preservation_from_full|].
   spec Hproj; [by apply weak_projection_transition_preservation_Some_from_full|].
   spec Hproj; [apply weak_projection_transition_consistency_None_from_full|].

@@ -5,7 +5,7 @@ From VLSM.Core Require Import VLSM.
 
 Section VLSM_partial_projection.
 
-(** * VLSM partial projections
+(** * VLSM Projections : VLSM Partial Projection
 
 A generic notion of VLSM projection. We say that VLSM X partially projects to
 VLSM Y (sharing the same messages) if there exists a partial map <<partial_trace_project>>

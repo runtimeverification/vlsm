@@ -242,7 +242,7 @@ Qed.
 
 Lemma composite_trace_sub_projection_lift
   (tr : list (composite_transition_item sub_IM))
-  : @pre_VLSM_projection_trace_project _ (composite_type IM) _
+  : @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _
     composite_label_sub_projection_option composite_state_sub_projection
     (pre_VLSM_full_projection_finite_trace_project _ _ lift_sub_label lift_sub_state tr)
     = tr.
@@ -384,7 +384,7 @@ Definition from_sub_projection : composite_transition_item IM -> Prop :=
 
 Definition finite_trace_sub_projection
   : list (composite_transition_item IM) -> list (composite_transition_item sub_IM) :=
-  @pre_VLSM_projection_trace_project _ (composite_type IM) _ composite_label_sub_projection_option composite_state_sub_projection.
+  @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _ composite_label_sub_projection_option composite_state_sub_projection.
 
 Section sub_projection_with_no_equivocation_constraints.
 
@@ -419,7 +419,7 @@ Definition finite_trace_sub_projection_app
   : finite_trace_sub_projection (tr1 ++ tr2) =
     finite_trace_sub_projection tr1 ++ finite_trace_sub_projection tr2
   :=
-  @pre_VLSM_projection_trace_project_app _ (composite_type IM) _ composite_label_sub_projection_option composite_state_sub_projection tr1 tr2.
+  @pre_VLSM_projection_finite_trace_project_app _ (composite_type IM) _ composite_label_sub_projection_option composite_state_sub_projection tr1 tr2.
 
 Lemma X_incl_Pre : VLSM_incl X Pre.
 Proof.
