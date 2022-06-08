@@ -275,18 +275,12 @@ Proof.
 Qed.
 
 Lemma annotated_composite_induced_validator_label_lift
-  : induced_validator_label_lift_prop _ _
-    annotated_composite_label_project annotated_composite_label_lift.
-Proof.
-  apply component_label_projection_lift with (constraint := free_constraint IM).
-Qed.
+  : induced_validator_label_lift_prop annotated_composite_label_project annotated_composite_label_lift.
+Proof. apply component_label_projection_lift. Qed.
 
 Lemma annotated_composite_induced_validator_state_lift
-  : induced_validator_state_lift_prop _ _
-    annotated_composite_state_project annotated_composite_state_lift.
-Proof.
-  intros si; apply state_update_eq.
-Qed.
+  : induced_validator_state_lift_prop annotated_composite_state_project annotated_composite_state_lift.
+Proof. intros si; apply state_update_eq. Qed.
 
 Lemma annotated_composite_induced_validator_initial_lift
   : strong_projection_initial_state_preservation (IM i) AnnotatedFree
@@ -315,16 +309,12 @@ Proof.
   by cbn; rewrite !state_update_eq.
 Qed.
 
-Definition annotated_composite_induced_validator_transition_Some :=
-  basic_weak_projection_transition_consistency_Some _ _ _ _ _ _
-    annotated_composite_induced_validator_label_lift
-    annotated_composite_induced_validator_state_lift
-    annotated_composite_induced_validator_transition_consistency.
-
 Definition annotated_composite_induced_validator_is_projection :=
   projection_induced_validator_is_projection _ _ _ _ _ _
-    annotated_composite_induced_validator_transition_None
-    annotated_composite_induced_validator_transition_Some.
+    annotated_composite_induced_validator_label_lift
+    annotated_composite_induced_validator_state_lift
+    annotated_composite_induced_validator_transition_consistency
+    annotated_composite_induced_validator_transition_None.
 
 Lemma annotated_projection_validator_prop_alt_iff
   : annotated_projection_validator_prop_alt <-> annotated_projection_validator_prop.

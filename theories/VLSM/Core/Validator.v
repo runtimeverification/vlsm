@@ -130,6 +130,27 @@ then the induced VLSM is a [VLSM_projection] of the source one.
 *)
 Section sec_projection_induced_validator.
 
+Section sec_projection_induced_validator_pre_definitions.
+
+Context
+  {message : Type}
+  {TX TY : VLSMType message}
+  (label_project : @label _ TX -> option (@label _ TY))
+  (state_project : @state _ TX -> @state _ TY)
+  (label_lift : @label _ TY -> @label _ TX)
+  (state_lift : @state _ TY -> @state _ TX)
+  .
+
+(** <<label_project>> is a left-inverse of <<label_lift>> *)
+Definition induced_validator_label_lift_prop : Prop :=
+  forall lY, label_project (label_lift lY) = Some lY.
+
+(** <<state_project>> is a left-inverse of <<state_lift>> *)
+Definition induced_validator_state_lift_prop : Prop :=
+  forall sY, state_project (state_lift sY) = sY.
+
+End sec_projection_induced_validator_pre_definitions.
+
 Context
   {message : Type}
   (X : VLSM message)
@@ -198,14 +219,6 @@ Qed.
 
 Section sec_projection_induced_validator_as_projection.
 
-(** <<label_project>> is a left-inverse of <<label_lift>> *)
-Definition induced_validator_label_lift_prop : Prop :=
-  forall lY, label_project (label_lift lY) = Some lY.
-
-(** <<state_project>> is a left-inverse of <<state_lift>> *)
-Definition induced_validator_state_lift_prop : Prop :=
-  forall sY, state_project (state_lift sY) = sY.
-
 (** Transitions through states and labels with the same projections using the
 same message should lead to the same output message and states with the same
 projections.
@@ -217,18 +230,19 @@ Definition induced_validator_transition_consistency_Some : Prop :=
   forall sX2' oom2, vtransition X lX2 (sX2, iom) = (sX2', oom2) ->
   state_project sX1' = state_project sX2' /\ oom1 = oom2.
 
-(** A weaker version of [induced_validator_transition_consistency_Some] *)
-Definition weak_projection_transition_consistency_Some
+(** A weaker version of [induced_validator_transition_consistency_Some].
+Only used locally.
+*)
+Local Definition weak_projection_transition_consistency_Some
   : Prop :=
   forall lX lY, label_project lX = Some lY ->
   forall s1 om s1' om1', input_valid_transition X lX (s1, om) (s1', om1') ->
   forall s2' om2', vtransition X (label_lift lY) (state_lift (state_project s1), om) = (s2', om2') ->
   state_project s1' = state_project s2' /\ om1' = om2'.
-(* TODO(traiansf): remove the definition above and assume the properties
-deriving it in the next lemma instead. *)
 
-Lemma basic_weak_projection_transition_consistency_Some
-  : induced_validator_label_lift_prop -> induced_validator_state_lift_prop ->
+Local Lemma basic_weak_projection_transition_consistency_Some
+  : induced_validator_label_lift_prop label_project label_lift ->
+    induced_validator_state_lift_prop state_project state_lift ->
     induced_validator_transition_consistency_Some ->
     weak_projection_transition_consistency_Some.
 Proof.
@@ -236,11 +250,18 @@ Proof.
   eapply Htrans; [done | auto | symmetry; eauto | done | done].
 Qed.
 
+Context
+  (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
+  (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
+  (Htransition_consistency : induced_validator_transition_consistency_Some)
+  (Htransition_Some  : weak_projection_transition_consistency_Some
+    := basic_weak_projection_transition_consistency_Some Hlabel_lift Hstate_lift Htransition_consistency)
+  .
+
 (** Under transition-consistency assumptions, valid messages of the
 [projection_induced_validator] coincide with those of the source [VLSM].
 *)
 Lemma projection_induced_valid_message_char
-  (Htransition_Some : weak_projection_transition_consistency_Some)
   : forall om, option_valid_message_prop projection_induced_validator om ->
     option_valid_message_prop X om.
 Proof.
@@ -264,7 +285,6 @@ Context
   .
 
 Lemma projection_induced_validator_is_projection
-  (Htransition_Some : weak_projection_transition_consistency_Some)
   : VLSM_projection X pre_projection_induced_validator label_project state_project.
 Proof.
   apply basic_VLSM_projection; intro; intros.
@@ -280,12 +300,7 @@ Qed.
 Section projection_induced_friendliness.
 
 Context
-  (Hlabel_lift : induced_validator_label_lift_prop)
-  (Hstate_lift : induced_validator_state_lift_prop)
-  (Htransition_consistency : induced_validator_transition_consistency_Some)
-  (Htransition_Some  : weak_projection_transition_consistency_Some
-    := basic_weak_projection_transition_consistency_Some Hlabel_lift Hstate_lift Htransition_consistency)
-  (Hproj := projection_induced_validator_is_projection Htransition_Some)
+  (Hproj := projection_induced_validator_is_projection)
   .
 
 Lemma induced_validator_transition_item_lift
@@ -350,8 +365,14 @@ Lemma projection_induced_validator_incl
   (state_lift : @state _ TY -> @state _ TX)
   (XY1 : VLSM message := pre_projection_induced_validator X1 TY label_project state_project label_lift state_lift)
   (XY2 : VLSM message := pre_projection_induced_validator X2 TY label_project state_project label_lift state_lift)
-  (Htransition_Some1 : weak_projection_transition_consistency_Some X1 TY label_project state_project label_lift state_lift)
-  (Htransition_Some2 : weak_projection_transition_consistency_Some X2 TY label_project state_project label_lift state_lift)
+  (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
+  (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
+  (Htransition_consistency1 : induced_validator_transition_consistency_Some X1 TY label_project state_project)
+  (Htransition_consistency2 : induced_validator_transition_consistency_Some X2 TY label_project state_project)
+  (Htransition_Some1
+    := basic_weak_projection_transition_consistency_Some X1 TY _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency1)
+  (Htransition_Some2
+    := basic_weak_projection_transition_consistency_Some X2 TY _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency2)
   : VLSM_incl X1 X2 -> VLSM_incl XY1 XY2.
 Proof.
   intros Hincl.
@@ -403,13 +424,15 @@ Lemma projection_induced_validator_eq
   (state_lift : @state _ TY -> @state _ TX)
   (XY1 : VLSM message := pre_projection_induced_validator X1 TY label_project state_project label_lift state_lift)
   (XY2 : VLSM message := pre_projection_induced_validator X2 TY label_project state_project label_lift state_lift)
-  (Htransition_Some1 : weak_projection_transition_consistency_Some X1 TY label_project state_project label_lift state_lift)
-  (Htransition_Some2 : weak_projection_transition_consistency_Some X2 TY label_project state_project label_lift state_lift)
+  (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
+  (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
+  (Htransition_consistency1 : induced_validator_transition_consistency_Some X1 TY label_project state_project)
+  (Htransition_consistency2 : induced_validator_transition_consistency_Some X2 TY label_project state_project)
   : VLSM_eq X1 X2 -> VLSM_eq XY1 XY2.
 Proof.
   intro Heq; apply VLSM_eq_incl_iff; split.
-  - by apply (projection_induced_validator_incl MX1 MX2 TY); [| | apply VLSM_eq_proj1].
-  - by apply (projection_induced_validator_incl MX2 MX1 TY); [| | apply VLSM_eq_proj2].
+  - by apply (projection_induced_validator_incl MX1 MX2 TY); [..| apply VLSM_eq_proj1].
+  - by apply (projection_induced_validator_incl MX2 MX1 TY); [..| apply VLSM_eq_proj2].
 Qed.
 
 (** ** Projection validators and Byzantine behavior
@@ -429,13 +452,13 @@ Context
   (label_lift : vlabel Y -> vlabel X)
   (state_lift : vstate Y -> vstate X)
   (Xi := pre_projection_induced_validator X (type Y) label_project state_project label_lift state_lift)
-  (Hlabel_lift : induced_validator_label_lift_prop _ _ label_project label_lift)
-  (Hstate_lift : induced_validator_state_lift_prop _ _ state_project state_lift)
+  (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
+  (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
   (Hinitial_lift : strong_projection_initial_state_preservation Y X state_lift)
   (Htransition_consistency : induced_validator_transition_consistency_Some _ _ label_project state_project)
   (Htransition_Some  : weak_projection_transition_consistency_Some _ _ label_project state_project label_lift state_lift
     := basic_weak_projection_transition_consistency_Some _ _ _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency)
-  (Hproji := projection_induced_validator_is_projection _ _ _ _ _ _ Htransition_None Htransition_Some)
+  (Hproji := projection_induced_validator_is_projection _ _ _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency Htransition_None)
   (PreY := pre_loaded_with_all_messages_vlsm Y)
   (Hproj : VLSM_projection X PreY label_project state_project)
   .
@@ -633,12 +656,12 @@ Proof.
 Qed.
 
 Lemma component_label_projection_lift
-  : induced_validator_label_lift_prop X (type (IM i)) composite_project_label
+  : induced_validator_label_lift_prop composite_project_label
     (lift_to_composite_label IM i).
 Proof. by intros lj; apply composite_project_label_eq. Qed.
 
 Lemma component_state_projection_lift
-  : induced_validator_state_lift_prop X (type (IM i)) (fun s => s i)
+  : induced_validator_state_lift_prop (fun s : composite_state IM => s i)
     (lift_to_composite_state' IM i).
 Proof. by intros sj; apply state_update_eq. Qed.
 
@@ -677,11 +700,10 @@ Lemma composite_projection_induced_validator_is_projection :
     composite_project_label (fun s => s i).
 Proof.
   apply projection_induced_validator_is_projection.
+  - apply component_label_projection_lift.
+  - apply component_state_projection_lift.
+  - apply component_transition_projection_Some.
   - apply component_transition_projection_None.
-  - apply basic_weak_projection_transition_consistency_Some.
-    + apply component_label_projection_lift.
-    + apply component_state_projection_lift.
-    + apply component_transition_projection_Some.
 Qed.
 
 End component_projection_validator.
