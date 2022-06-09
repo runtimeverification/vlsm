@@ -220,23 +220,16 @@ Qed.
 Lemma composite_label_sub_projection_option_lift
   : induced_validator_label_lift_prop composite_label_sub_projection_option lift_sub_label.
 Proof.
-  intros (sub_i, li).
-  destruct_dec_sig sub_i i Hi Heqsub_i.
-  subst.
-  unfold lift_sub_label, composite_label_sub_projection_option.
-  simpl.
-  case_decide; [| done].
-  unfold composite_label_sub_projection.
-  f_equal. simpl.
+  intros [sub_i li].
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+  unfold lift_sub_label, composite_label_sub_projection_option, composite_label_sub_projection; cbn.
+  case_decide; [f_equal | done].
   by apply (@dec_sig_sigT_eq _ _ sub_index_prop_dec (fun i => vlabel (IM i))).
 Qed.
 
 Lemma composite_state_sub_projection_lift
   : induced_validator_state_lift_prop composite_state_sub_projection lift_sub_state.
-Proof.
-  intro.
-  apply composite_state_sub_projection_lift_to.
-Qed.
+Proof. by intro; apply composite_state_sub_projection_lift_to. Qed.
 
 Lemma composite_trace_sub_projection_lift
   (tr : list (composite_transition_item sub_IM))

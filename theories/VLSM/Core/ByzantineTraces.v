@@ -242,9 +242,7 @@ Using the above, it is straight-forward to show that:
     Lemma alt_proj_option_valid_message
         (m : option message)
         : option_valid_message_prop Alt1 m.
-    Proof.
-        apply any_message_is_valid_in_preloaded.
-    Qed.
+    Proof. apply any_message_is_valid_in_preloaded. Qed.
 
 (**
 Next we define the "lifing" of a [state] <<s>> from <<M>> to <<Alt>>,

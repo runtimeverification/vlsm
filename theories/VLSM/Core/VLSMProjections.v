@@ -29,7 +29,7 @@ End same_VLSM_full_projection.
 Section transitivity_props.
 
 Lemma pre_VLSM_projection_finite_trace_project_trans
-  {message}
+  {message : Type}
   (TX TY TZ : VLSMType message)
   (project_labelXY : @label _ TX -> option (@label _ TY))
   (project_stateXY : @state _ TX -> @state _ TY)
@@ -72,7 +72,7 @@ Proof.
   - rewrite <- !final_state_project; [done | apply ProjXY | done | apply ProjYZ |].
     by eapply (VLSM_projection_finite_valid_trace_from ProjXY).
   - by eapply (VLSM_projection_finite_valid_trace ProjYZ),
-      (VLSM_projection_finite_valid_trace ProjXY).
+              (VLSM_projection_finite_valid_trace ProjXY).
 Qed.
 
 Lemma VLSM_projection_embedding_trans
@@ -90,7 +90,7 @@ Lemma VLSM_projection_embedding_trans
 Proof.
   apply VLSM_full_projection_is_projection in ProjYZ.
   replace (fmap project_labelYZ ∘ project_labelXY)
-    with (mbind (Some ∘ project_labelYZ) ∘ project_labelXY).
+     with (mbind (Some ∘ project_labelYZ) ∘ project_labelXY).
   - by apply VLSM_projection_trans.
   - by extensionality x.
 Qed.
@@ -110,7 +110,7 @@ Lemma VLSM_embedding_projection_trans
 Proof.
   apply VLSM_full_projection_is_projection in ProjXY.
   replace (project_labelYZ ∘ project_labelXY)
-    with (mbind project_labelYZ ∘ (Some ∘ project_labelXY)).
+     with (mbind project_labelYZ ∘ (Some ∘ project_labelXY)).
   - by apply VLSM_projection_trans.
   - by extensionality x.
 Qed.
@@ -149,7 +149,7 @@ Proof.
   constructor; intros sX trX HtrX.
   setoid_rewrite pre_VLSM_full_projection_finite_trace_project_trans.
   by eapply (VLSM_full_projection_finite_valid_trace ProjYZ),
-    (VLSM_full_projection_finite_valid_trace ProjXY).
+            (VLSM_full_projection_finite_valid_trace ProjXY).
 Qed.
 
 Lemma VLSM_projection_incl_trans
