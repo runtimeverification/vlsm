@@ -199,7 +199,7 @@ Qed.
 Section sec_fixed_non_byzantine_projection.
 
 Definition fixed_non_byzantine_projection : VLSM message :=
-  induced_sub_projection fixed_byzantine_IM non_byzantine non_byzantine_not_equivocating_constraint.
+  pre_induced_sub_projection fixed_byzantine_IM non_byzantine non_byzantine_not_equivocating_constraint.
 
 Lemma fixed_non_byzantine_projection_initial_state_preservation
   : forall s, vinitial_state_prop fixed_non_byzantine_projection s <->
@@ -292,7 +292,7 @@ Context
   (selection_complement := set_diff (enum index) selection)
   (Fixed : VLSM message := fixed_equivocation_vlsm_composition IM selection)
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM selection)
-  (FixedNonEquivocating : VLSM message := induced_sub_projection IM selection_complement (fixed_equivocation_constraint IM selection))
+  (FixedNonEquivocating : VLSM message := pre_induced_sub_projection IM selection_complement (fixed_equivocation_constraint IM selection))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM A sender)
   (Hsender_safety : sender_safety_alt_prop IM A sender :=
@@ -378,7 +378,7 @@ Qed.
 
 Lemma fixed_non_equivocating_incl_sub_non_equivocating
   : VLSM_incl FixedNonEquivocating
-      (induced_sub_projection IM (set_diff (enum index) selection)
+      (pre_induced_sub_projection IM (set_diff (enum index) selection)
         (sub_IM_not_equivocating_constraint IM
           (set_diff (enum index) selection) A sender)).
 Proof.
@@ -626,8 +626,8 @@ Proof.
     + by eapply induced_sub_projection_valid_preservation.
     + split; [| done].
       by apply fixed_non_byzantine_projection_valid_no_equivocations.
-  - intros l s om s' om' [_ Ht].
-    by apply induced_sub_projection_transition_preservation in Ht.
+  - intros l s om s' om' [_ Ht]; cbn.
+    by apply induced_sub_projection_transition_preservation.
 Qed.
 
 Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_valid
@@ -707,7 +707,7 @@ Proof.
     inversion 1; itauto.
 Qed.
 
-(** Since the [fixed_non_byzantine_projection] is an [induced_projection] of
+(** Since the [fixed_non_byzantine_projection] is an [induced_validator] of
 the composition of [fixed_byzantine_IM] with a
 [non_byzantine_not_equivocating_constraint], its initial_messages and validity
 are derived from valid messages and protocol validity of the larger
@@ -728,24 +728,18 @@ Qed.
 Lemma pre_loaded_fixed_non_byzantine_incl
   : VLSM_incl pre_loaded_fixed_non_byzantine_vlsm' fixed_non_byzantine_projection.
 Proof.
-  apply basic_VLSM_incl.
+  apply basic_VLSM_incl; cbn.
   - by intro; intros; apply fixed_non_byzantine_projection_initial_state_preservation.
-  - intros l s m Hv _ Him.
-    apply initial_message_is_valid.
-    apply (pre_loaded_fixed_non_byzantine_vlsm_lift_initial_message l s m).
-    1,3: done.
-    apply (VLSM_full_projection_valid_state pre_loaded_fixed_non_byzantine_vlsm_lift).
-    by destruct Hv.
-  - intro; intros.
+  - by intros l s m Hv _ Him; apply initial_message_is_valid.
+  - intros l s om Hv.
     exists (lift_sub_label fixed_byzantine_IM non_byzantine l).
     exists (lift_sub_state fixed_byzantine_IM non_byzantine s).
-    split; [apply composite_label_sub_projection_option_lift|].
-    split; [apply composite_state_sub_projection_lift|].
-    revert Hv.
-    apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
+    split.
+    + apply composite_label_sub_projection_option_lift.
+    + apply composite_state_sub_projection_lift.
+    + by apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
   - intros l s om s' om' [_ Ht].
-    revert Ht.
-    apply @induced_sub_projection_transition_preservation.
+    by apply induced_sub_projection_transition_preservation.
 Qed.
 
 Lemma fixed_non_byzantine_pre_loaded_eq
@@ -800,7 +794,7 @@ Context
   (selection_complement := set_diff (enum index) selection)
   (PreNonByzantine : VLSM message := pre_loaded_fixed_non_byzantine_vlsm IM selection A sender)
   (Fixed : VLSM message := fixed_equivocation_vlsm_composition IM selection)
-  (FixedNonEquivocating : VLSM message := induced_sub_projection IM selection_complement (fixed_equivocation_constraint IM selection))
+  (FixedNonEquivocating : VLSM message := pre_induced_sub_projection IM selection_complement (fixed_equivocation_constraint IM selection))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM A sender)
   (Hsender_safety : sender_safety_alt_prop IM A sender :=
@@ -826,8 +820,7 @@ Proof.
     apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating)
        in Hv as (_ & _ & Hv).
     split.
-    + revert Hv.
-      apply induced_sub_projection_valid_preservation.
+    + by eapply induced_sub_projection_valid_preservation.
     + split; [| done].
       apply sub_IM_no_equivocation_preservation in Hv as Hnoequiv.
       2-4: done.
@@ -937,7 +930,7 @@ Context
     : weak_full_projection_initial_message_preservation PreNonByzantine Fixed
     (lift_sub_state IM (set_diff (enum index) selection))).
 
-(** Since <<FixedNonEquivocating>> is an [induced_projection] of <<Fixed>>,
+(** Since <<FixedNonEquivocating>> is an [induced_validator] of <<Fixed>>,
 its initial_messages and validity are derived from valid messages and
 protocol validity of the larger composition; therefore, the following
 result becomes very important.
@@ -963,21 +956,15 @@ Proof.
     split.
     + apply composite_state_sub_projection_lift_to.
     + by apply (lift_sub_state_initial IM).
-  - intro; intros.
-    apply initial_message_is_valid.
-    eapply Hfixed_non_byzantine_vlsm_lift_initial_message.
-    1, 3: done.
-    destruct Hv as [Hv _].
-    eapply VLSM_full_projection_valid_state in Hv; [done |].
-    apply fixed_non_byzantine_vlsm_lift_from_initial.
-  - intro; intros.
+  - by intro; intros; apply initial_message_is_valid.
+  - intros l s om Hv HsY HomY.
     exists (lift_sub_label IM (set_diff (enum index) selection) l).
     exists (lift_sub_state IM (set_diff (enum index) selection) s).
-    split; [apply composite_label_sub_projection_option_lift|].
-    split; [apply composite_state_sub_projection_lift|].
-    revert Hv.
-    apply VLSM_full_projection_input_valid.
-    apply fixed_non_byzantine_vlsm_lift_from_initial.
+    split.
+    + apply composite_label_sub_projection_option_lift.
+    + apply composite_state_sub_projection_lift.
+    + apply @VLSM_full_projection_input_valid; [| done].
+      apply fixed_non_byzantine_vlsm_lift_from_initial.
   - intros l s om s' om' [_ Ht].
     by apply induced_sub_projection_transition_preservation.
 Qed.

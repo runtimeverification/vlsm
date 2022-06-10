@@ -256,12 +256,12 @@ Proof.
   - intro; intros; apply any_message_is_valid_in_preloaded.
 Qed.
 
-Definition annotated_composite_induced_projection : VLSM message
-  := projection_induced_vlsm AnnotatedFree (type (IM i))
+Definition annotated_composite_induced_validator : VLSM message
+  := projection_induced_validator AnnotatedFree (type (IM i))
     annotated_composite_label_project annotated_composite_state_project
     annotated_composite_label_lift annotated_composite_state_lift.
 
-Lemma annotated_composite_induced_projection_transition_None
+Lemma annotated_composite_induced_validator_transition_None
   : weak_projection_transition_consistency_None _ _ annotated_composite_label_project annotated_composite_state_project.
 Proof.
   intros [j lj].
@@ -274,22 +274,22 @@ Proof.
   by rewrite state_update_neq.
 Qed.
 
-Lemma annotated_composite_induced_projection_label_lift
-  : induced_projection_label_lift_prop _ _
+Lemma annotated_composite_induced_validator_label_lift
+  : induced_validator_label_lift_prop _ _
     annotated_composite_label_project annotated_composite_label_lift.
 Proof.
   apply component_label_projection_lift with (constraint := free_constraint IM).
 Qed.
 
-Lemma annotated_composite_induced_projection_state_lift
-  : induced_projection_state_lift_prop _ _
+Lemma annotated_composite_induced_validator_state_lift
+  : induced_validator_state_lift_prop _ _
     annotated_composite_state_project annotated_composite_state_lift.
 Proof.
   intros si; apply state_update_eq.
 Qed.
 
-Lemma annotated_composite_induced_projection_initial_lift
-  : strong_full_projection_initial_state_preservation (IM i) AnnotatedFree
+Lemma annotated_composite_induced_validator_initial_lift
+  : strong_projection_initial_state_preservation (IM i) AnnotatedFree
     annotated_composite_state_lift.
 Proof.
   split; cbn.
@@ -297,8 +297,8 @@ Proof.
   - by destruct inhabitant.
 Qed.
 
-Lemma annotated_composite_induced_projection_transition_consistency
-  : induced_projection_transition_consistency_Some _ _
+Lemma annotated_composite_induced_validator_transition_consistency
+  : induced_validator_transition_consistency_Some _ _
     annotated_composite_label_project annotated_composite_state_project.
 Proof.
   intros [i1 li1] [i2 li2] li.
@@ -315,27 +315,27 @@ Proof.
   by cbn; rewrite !state_update_eq.
 Qed.
 
-Definition annotated_composite_induced_projection_transition_Some :=
+Definition annotated_composite_induced_validator_transition_Some :=
   basic_weak_projection_transition_consistency_Some _ _ _ _ _ _
-    annotated_composite_induced_projection_label_lift
-    annotated_composite_induced_projection_state_lift
-    annotated_composite_induced_projection_transition_consistency.
+    annotated_composite_induced_validator_label_lift
+    annotated_composite_induced_validator_state_lift
+    annotated_composite_induced_validator_transition_consistency.
 
-Definition annotated_composite_induced_projection_is_projection :=
-  projection_induced_vlsm_is_projection _ _ _ _ _ _
-    annotated_composite_induced_projection_transition_None
-    annotated_composite_induced_projection_transition_Some.
+Definition annotated_composite_induced_validator_is_projection :=
+  projection_induced_validator_is_projection _ _ _ _ _ _
+    annotated_composite_induced_validator_transition_None
+    annotated_composite_induced_validator_transition_Some.
 
 Lemma annotated_projection_validator_prop_alt_iff
   : annotated_projection_validator_prop_alt <-> annotated_projection_validator_prop.
 Proof.
   apply projection_validator_prop_alt_iff.
+  - apply annotated_composite_induced_validator_transition_None.
+  - apply annotated_composite_induced_validator_label_lift.
+  - apply annotated_composite_induced_validator_state_lift.
+  - apply annotated_composite_induced_validator_initial_lift.
+  - apply annotated_composite_induced_validator_transition_consistency.
   - apply annotated_composite_preloaded_projection.
-  - apply annotated_composite_induced_projection_transition_None.
-  - apply annotated_composite_induced_projection_label_lift.
-  - apply annotated_composite_induced_projection_state_lift.
-  - apply annotated_composite_induced_projection_initial_lift.
-  - apply annotated_composite_induced_projection_transition_consistency.
 Qed.
 
 End sec_composite_annotated_vlsm_projections.

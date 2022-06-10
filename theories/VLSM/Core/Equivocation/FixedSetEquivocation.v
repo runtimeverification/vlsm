@@ -1,8 +1,9 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude finite.
 From Coq Require Import FinFun FunctionalExtensionality.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces Core.Equivocation Core.Equivocation.NoEquivocation.
+From stdpp Require Import prelude finite.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
+From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
+From VLSM.Core Require Import SubProjectionTraces Equivocation Equivocation.NoEquivocation.
 
 (** * Fixed Set Equivocation
 
@@ -862,7 +863,7 @@ the equivocator component of a Fixed valid state with initial states is
 still a Fixed valid state.
 *)
 Lemma fixed_equivocator_lifting_initial_state
-  : weak_full_projection_initial_state_preservation EquivPreloadedBase Fixed (lift_sub_state_to IM equivocators base_s).
+  : weak_projection_initial_state_preservation EquivPreloadedBase Fixed (lift_sub_state_to IM equivocators base_s).
 Proof.
   intros eqv_is Heqv_is.
   apply (VLSM_incl_valid_state (StrongFixed_incl_Fixed IM equivocators)).
@@ -1035,10 +1036,10 @@ Context
   (non_equivocators := set_diff (finite.enum index) equivocators)
   (Free := free_composite_vlsm IM)
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
-  (FixedNonEquivocating:= induced_sub_projection IM non_equivocators
+  (FixedNonEquivocating:= pre_induced_sub_projection IM non_equivocators
                                 (fixed_equivocation_constraint IM equivocators))
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
-  (StrongFixedNonEquivocating:= induced_sub_projection IM non_equivocators
+  (StrongFixedNonEquivocating:= pre_induced_sub_projection IM non_equivocators
                                 (strong_fixed_equivocation_constraint IM equivocators))
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
