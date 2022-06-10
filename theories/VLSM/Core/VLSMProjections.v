@@ -202,8 +202,6 @@ Lemma VLSM_incl_projection_trans
   (ProjYZ : VLSM_projection Y Z project_labelYZ project_stateYZ)
   : VLSM_projection X Z project_labelYZ project_stateYZ.
 Proof.
-  change project_labelYZ with (project_labelYZ ∘ id).
-  change project_stateYZ with (project_stateYZ ∘ id).
   apply (VLSM_embedding_projection_trans X Y Z); [| done].
   by apply VLSM_incl_is_full_projection in ProjXY.
 Qed.
@@ -221,8 +219,6 @@ Lemma VLSM_incl_embedding_trans
   (ProjYZ : VLSM_full_projection Y Z project_labelYZ project_stateYZ)
   : VLSM_full_projection X Z project_labelYZ project_stateYZ.
 Proof.
-  change project_labelYZ with (project_labelYZ ∘ id).
-  change project_stateYZ with (project_stateYZ ∘ id).
   apply (VLSM_embedding_trans X Y Z); [| done].
   by apply VLSM_incl_is_full_projection in ProjXY.
 Qed.
