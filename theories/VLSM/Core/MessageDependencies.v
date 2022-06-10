@@ -69,10 +69,25 @@ relation.
 Definition msg_dep_rel : relation message :=
   fun m1 m2 => m1 ∈ message_dependencies m2.
 
-(** The transitive closure ([clos_trans_1n]) of the [msg_dep_rel]ation is a
-happens-before relation.
+(** The transitive closure of the [msg_dep_rel]ation is a happens-before
+relation.
 *)
 Definition msg_dep_happens_before : relation message := flip (clos_trans_1n _ (flip msg_dep_rel)).
+
+(** The relaxed (local) full node condition for a given <<message_dependencies>>
+function requires that a state (receiving the message) is aware of all
+of <<m>>'s dependencies.
+*)
+Definition relaxed_message_dependencies_full_node_condition
+  (s : vstate X)
+  (m : message)
+  : Prop :=
+  forall dm, dm ∈ message_dependencies m ->
+  exists obs_m, has_been_observed X s obs_m /\ msg_dep_happens_before dm obs_m.
+
+Definition relaxed_message_dependencies_full_node_condition_prop : Prop :=
+  forall l s m,
+  vvalid X l (s, Some m) -> relaxed_message_dependencies_full_node_condition s m.
 
 (** Unrolling one the [msg_dep_happens_before] relation one step. *)
 Lemma msg_dep_happens_before_iff_one x z

@@ -167,6 +167,8 @@ Proof.
   - right. intro contra. elim n. revert contra. apply dsig_eq.
 Qed.
 
+Arguments dec_sig_sigT_eq_rev {_ _ _ _} _.
+
 Lemma ex_out (A : Type) (P : Prop) (Q : A -> Prop):
   (exists x, P /\ Q x) <-> (P /\ exists x, Q x).
 Proof. firstorder. Qed.

@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep.
+From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep Program.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.StreamExtras.
 From VLSM Require Import Core.VLSM Core.Plans Core.VLSMProjections.
 
@@ -1462,7 +1462,9 @@ Definition same_IM_state_rew
   : composite_state IM2 :=
   fun i => same_VLSM_state_rew (Heq i) (s1 i).
 
-Section pre_loaded_constrained.
+Definition same_IM_sym : forall i, IM2 i = IM1 i := fun i => eq_sym (Heq i).
+
+Section sec_same_IM_constrained.
 
 Context
   (constraint1 : composite_label IM1 -> composite_state IM1 * option message -> Prop)
@@ -1471,10 +1473,15 @@ Context
     : forall s1, valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1 ->
       forall l1 om, constraint1 l1 (s1,om) ->
     constraint2 (same_IM_label_rew l1) (same_IM_state_rew s1, om))
+  .
+
+Section sec_same_IM_preloaded_full_projection.
+
+Context
   (seed : message -> Prop)
   .
 
-Lemma same_IM_full_projection
+Lemma same_IM_preloaded_full_projection
   : VLSM_full_projection
     (pre_loaded_vlsm (composite_vlsm IM1 constraint1) seed)
     (pre_loaded_vlsm (composite_vlsm IM2 constraint2) seed)
@@ -1510,7 +1517,28 @@ Proof.
     + by exists (exist _ m Hm).
 Qed.
 
-End pre_loaded_constrained.
+End sec_same_IM_preloaded_full_projection.
+
+Lemma same_IM_full_projection
+  : VLSM_full_projection
+    (composite_vlsm IM1 constraint1)
+    (composite_vlsm IM2 constraint2)
+    same_IM_label_rew
+    same_IM_state_rew.
+Proof.
+  constructor.
+  intros s1 tr1 Htr1.
+  apply
+    (VLSM_eq_finite_valid_trace
+      (vlsm_is_pre_loaded_with_False (composite_vlsm IM2 constraint2))),
+    (VLSM_full_projection_finite_valid_trace
+      (same_IM_preloaded_full_projection (fun _ => False))),
+    (VLSM_eq_finite_valid_trace
+      (vlsm_is_pre_loaded_with_False (composite_vlsm IM1 constraint1))).
+  assumption.
+Qed.
+
+End sec_same_IM_constrained.
 
 Lemma same_IM_preloaded_free_full_projection
   : VLSM_full_projection
@@ -1519,21 +1547,47 @@ Lemma same_IM_preloaded_free_full_projection
     same_IM_label_rew
     same_IM_state_rew.
 Proof.
-  constructor.
-  intros s1 tr1 Htr1.
-  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM1)) as Heq1.
-  apply (VLSM_eq_finite_valid_trace Heq1) in Htr1.
-  clear Heq1.
-  specialize (same_IM_full_projection (free_constraint IM1) (free_constraint IM2))
-    as Hproj.
-  spec Hproj; [done |].
-  specialize (Hproj (fun _ => True)).
-  apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr1.
-  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM2)) as Heq2.
-  by apply (VLSM_eq_finite_valid_trace Heq2).
+  constructor; intros.
+  assert
+    (Hproj :
+      VLSM_full_projection
+        (pre_loaded_vlsm (free_composite_vlsm IM1) (const True))
+        (pre_loaded_vlsm (free_composite_vlsm IM2) (const True))
+        same_IM_label_rew
+        same_IM_state_rew)
+    by (apply same_IM_preloaded_full_projection; done).
+  by apply
+    (VLSM_eq_finite_valid_trace
+      (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM2))),
+    (VLSM_full_projection_finite_valid_trace Hproj),
+    (VLSM_eq_finite_valid_trace
+      (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM1))).
 Qed.
 
 End sec_same_IM_full_projection.
 
 Arguments same_IM_label_rew {_ _ _ _} _ _ : assert.
 Arguments same_IM_state_rew {_ _ _ _} _ _ _ : assert.
+Arguments same_IM_sym {_ _ _ _} _ _ : assert.
+
+Lemma same_IM_state_rew_12
+  {message : Type}
+  `{EqDecision index}
+  {IM1 IM2 : index -> VLSM message}
+  (Heq : forall i, IM1 i = IM2 i)
+  : forall s : composite_state IM1,
+    same_IM_state_rew (same_IM_sym Heq) (same_IM_state_rew Heq s) = s.
+Proof.
+  intro; extensionality i; apply same_VLSM_state_rew_12.
+Qed.
+
+Lemma same_IM_state_rew_21
+  {message : Type}
+  `{EqDecision index}
+  {IM1 IM2 : index -> VLSM message}
+  (Heq : forall i, IM1 i = IM2 i)
+  : forall s : composite_state IM2,
+    same_IM_state_rew Heq (same_IM_state_rew (same_IM_sym Heq) s) = s.
+Proof.
+  intro; extensionality i; apply same_VLSM_state_rew_21.
+Qed.

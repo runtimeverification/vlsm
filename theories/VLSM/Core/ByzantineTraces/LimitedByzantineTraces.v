@@ -7,6 +7,8 @@ From VLSM.Core Require Import Validator Equivocation Equivocation.FixedSetEquivo
 From VLSM.Core Require Import Equivocation.LimitedEquivocation Equivocation.LimitedEquivocation.
 From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation Equivocation.TraceWiseEquivocation.
 
+(*
+
 (** * VLSM Compositions with byzantine nodes of limited weight
 
 In this module we define and study protocol executions allowing a
@@ -20,7 +22,7 @@ projections of traces of the composition of the regular nodes under a
 composition constraint allowing only a limited amount of equivocation.
 *)
 
-Section limited_byzantine_traces.
+Section sec_limited_byzantine_traces.
 
 Context
   {message : Type}
@@ -65,6 +67,26 @@ Context
   `{forall i, MessageDependencies message_dependencies (IM i)}
   (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
   .
+
+Program Definition limited_equivocating_traces_are_byzantine is tr
+  (Htr : finite_valid_trace Limited is tr)
+  (equivocators := state_annotation (finite_trace_last is tr))
+  : limited_byzantine_trace :=
+  existT (exist _ equivocators _)
+    (fixed_equivocating_traces_are_byzantine_traces IM equivocators Datatypes.id sender no_initial_messages_in_IM Hchannel (original_state is) (pre_VLSM_full_projection_finite_trace_project
+    (type Limited) (composite_type IM) Datatypes.id original_state
+    tr) _).
+Next Obligation.
+  intros; cbn.
+  eapply msg_dep_fixed_limited_equivocation_witnessed; eassumption.
+Qed.
+Next Obligation.
+  intros; cbn.
+  eapply msg_dep_fixed_limited_equivocation_witnessed; eassumption.
+Qed.
+
+
+End sec_limited_byzantine_traces.
 
 (** ** Assuming the byzantine nodes are known
 We will first fix a selection of <<byzantine>> nodes of limited weight and
@@ -470,3 +492,4 @@ Proof.
 Qed.
 
 End sec_msg_dep_limited_byzantine_traces.
+*)

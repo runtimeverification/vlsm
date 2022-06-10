@@ -1472,7 +1472,7 @@ Lemma equivocators_total_VLSM_projection_trace_project
 Proof.
   induction tr using rev_ind; [done |].
   rewrite equivocators_total_trace_project_app by (eexists; done).
-  rewrite @pre_VLSM_projection_finite_trace_project_app.
+  rewrite pre_VLSM_projection_finite_trace_project_app.
   apply finite_valid_trace_from_app_iff in Hpre_tr as [Hpre_tr Hpre_x].
   specialize (IHtr Hpre_tr).
   rewrite IHtr.

@@ -2766,6 +2766,30 @@ Context
   (Heq : X1 = X2)
   .
 
+Lemma same_VLSM_label_rew_12 (l1 : vlabel X1)
+  : same_VLSM_label_rew (eq_sym Heq) (same_VLSM_label_rew Heq l1) = l1.
+Proof.
+  subst; reflexivity.
+Qed.
+
+Lemma same_VLSM_label_rew_21 (l2 : vlabel X2)
+  : same_VLSM_label_rew Heq (same_VLSM_label_rew (eq_sym Heq) l2) = l2.
+Proof.
+  subst; reflexivity.
+Qed.
+
+Lemma same_VLSM_state_rew_12 (s1 : vstate X1)
+  : same_VLSM_state_rew (eq_sym Heq) (same_VLSM_state_rew Heq s1) = s1.
+Proof.
+  subst; reflexivity.
+Qed.
+
+Lemma same_VLSM_state_rew_21 (s2 : vstate X2)
+  : same_VLSM_state_rew Heq (same_VLSM_state_rew (eq_sym Heq) s2) = s2.
+Proof.
+  subst; reflexivity.
+Qed.
+
 Lemma same_VLSM_valid_preservation l1 s1 om
   : vvalid X1 l1 (s1, om) ->
     vvalid X2 (same_VLSM_label_rew Heq l1) (same_VLSM_state_rew Heq s1, om).
