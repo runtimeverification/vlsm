@@ -13,13 +13,24 @@ The Transition Input Validation property validates an input corresponding to
 a projection by ensuring that that input can be "lifted" to the original vlsm.
 *)
 
-Record InputValidation
+Section sec_input_validation_definitions.
+
+Context
   `{X : VLSM message}
   {TY : VLSMType message}
-  `(label_project : vlabel X -> option (@label _ TY))
-  (state_project : vstate X -> @state _ TY)
-  (lY : @label _ TY)
-  (sY : @state _ TY)
+  .
+
+Local Notation labelTY := (@label _ TY).
+Local Notation stateTY := (@state _ TY).
+
+Context
+  (label_project : vlabel X -> option labelTY)
+  (state_project : vstate X -> stateTY)
+  .
+
+Record InputValidation
+  (lY : labelTY)
+  (sY : stateTY)
   (om : option message)
   (lX : vlabel X)
   (sX : vstate X)
@@ -31,12 +42,8 @@ Record InputValidation
 }.
 
 Record TransitionValidation
-  `{X : VLSM message}
-  {TY : VLSMType message}
-  `(label_project : vlabel X -> option (@label _ TY))
-  (state_project : vstate X -> @state _ TY)
-  (lY : @label _ TY)
-  (sY : @state _ TY)
+  (lY : labelTY)
+  (sY : stateTY)
   (om : option message)
   (lX : vlabel X)
   (sX : vstate X)
@@ -44,12 +51,14 @@ Record TransitionValidation
   (om' : option message)
   : Prop :=
 {
-  tv_tiv :> InputValidation label_project state_project lY sY om lX sX;
+  tv_tiv :> InputValidation lY sY om lX sX;
   tv_transition : vtransition X lX (sX, om) = (sX', om');
   tv_tiv_transition : input_valid_transition X lX (sX, om) (sX', om') :=
-    conj (lifted_transition_input_valid label_project state_project lY sY om lX sX tv_tiv)
+    conj (lifted_transition_input_valid lY sY om lX sX tv_tiv)
       tv_transition
 }.
+
+End sec_input_validation_definitions.
 
 Section projection_validator.
 
@@ -135,10 +144,18 @@ Section sec_projection_induced_validator_pre_definitions.
 Context
   {message : Type}
   {TX TY : VLSMType message}
-  (label_project : @label _ TX -> option (@label _ TY))
-  (state_project : @state _ TX -> @state _ TY)
-  (label_lift : @label _ TY -> @label _ TX)
-  (state_lift : @state _ TY -> @state _ TX)
+  .
+
+Local Notation labelTX := (@label _ TX).
+Local Notation stateTX := (@state _ TX).
+Local Notation labelTY := (@label _ TY).
+Local Notation stateTY := (@state _ TY).
+
+Context
+  (label_project : labelTX -> option labelTY)
+  (state_project : stateTX -> stateTY)
+  (label_lift : labelTY -> labelTX)
+  (state_lift : stateTY -> stateTX)
   .
 
 (** <<label_project>> is a left-inverse of <<label_lift>> *)
@@ -155,14 +172,21 @@ Context
   {message : Type}
   (X : VLSM message)
   (TY : VLSMType message)
-  (label_project : vlabel X -> option (@label _ TY))
-  (state_project : vstate X -> @state _ TY)
-  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
-  (label_lift : @label _ TY -> vlabel X)
-  (state_lift : @state _ TY -> vstate X)
   .
 
-Definition projection_induced_initial_state_prop (sY : @state _ TY) : Prop :=
+Local Notation labelTY := (@label _ TY).
+Local Notation stateTY := (@state _ TY).
+Local Notation transition_itemTY := (@transition_item _ TY).
+
+Context
+  (label_project : vlabel X -> option labelTY)
+  (state_project : vstate X -> stateTY)
+  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
+  (label_lift : labelTY -> vlabel X)
+  (state_lift : stateTY -> vstate X)
+  .
+
+Definition projection_induced_initial_state_prop (sY : stateTY) : Prop :=
   exists sX, state_project sX = sY /\ vinitial_state_prop X sX.
 
 Instance projection_induced_initial_state_inh : Inhabited (sig projection_induced_initial_state_prop)
@@ -171,16 +195,16 @@ Instance projection_induced_initial_state_inh : Inhabited (sig projection_induce
 Definition projection_induced_initial_message_prop : message -> Prop := const False.
 
 Definition projection_induced_transition
-  (lY : @label _ TY)
-  (somY : @state _ TY * option message)
-  : @state _ TY * option message :=
+  (lY : labelTY)
+  (somY : stateTY * option message)
+  : stateTY * option message :=
   let (sY, om) := somY in
   let (s'X, om') := vtransition X (label_lift lY) (state_lift sY, om) in
   (state_project s'X, om').
 
 Definition projection_induced_valid
-  (lY : @label _ TY)
-  (somY : @state _ TY * option message)
+  (lY : labelTY)
+  (somY : stateTY * option message)
   : Prop :=
   exists lX sX, InputValidation label_project state_project lY somY.1 somY.2 lX sX.
 
@@ -304,9 +328,8 @@ Context
   .
 
 Lemma induced_validator_transition_item_lift
-  (item : @transition_item _ TY)
-  : @pre_VLSM_projection_transition_item_project _ (type X) _
-    label_project state_project
+  (item : transition_itemTY)
+  : pre_VLSM_projection_transition_item_project _ _ label_project state_project
     (pre_VLSM_full_projection_transition_item_project _ _ label_lift state_lift item)
     = Some item.
 Proof.
@@ -317,9 +340,8 @@ Proof.
 Qed.
 
 Lemma induced_validator_trace_lift
-  (tr : list (@transition_item _ TY))
-  : @pre_VLSM_projection_finite_trace_project _ (type X) _
-    label_project state_project
+  (tr : list transition_itemTY)
+  : pre_VLSM_projection_finite_trace_project _ _ label_project state_project
     (pre_VLSM_full_projection_finite_trace_project _ _ label_lift state_lift tr)
     = tr.
 Proof.
@@ -348,39 +370,52 @@ End sec_projection_induced_validator_as_projection.
 
 End sec_projection_induced_validator.
 
+Section sec_projection_induced_validator_incl.
+
+Context
+  {message : Type}
+  {TX : VLSMType message}
+  (TY : VLSMType message)
+  .
+
+Local Notation labelTX := (@label _ TX).
+Local Notation stateTX := (@state _ TX).
+Local Notation labelTY := (@label _ TY).
+Local Notation stateTY := (@state _ TY).
+
+Context
+  (label_project : labelTX -> option labelTY)
+  (state_project : stateTX -> stateTY)
+  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
+  (label_lift : labelTY -> labelTX)
+  (state_lift : stateTY -> stateTX)
+  (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
+  (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
+  .
+
 (** Under [weak_projection_transition_consistency_Some] assumptions,
 [VLSM_incl]usion between source [VLSM]s implies [VLSM_incl]usion between
 their projections induced by the same maps.
 *)
 Lemma projection_induced_validator_incl
-  {message : Type}
-  {TX : VLSMType message}
   (MX1 MX2 : VLSMMachine TX)
   (X1 := mk_vlsm MX1) (X2 := mk_vlsm MX2)
-  (TY : VLSMType message)
-  (label_project : @label _ TX -> option (@label _ TY))
-  (state_project : @state _ TX -> @state _ TY)
-  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
-  (label_lift : @label _ TY -> @label _ TX)
-  (state_lift : @state _ TY -> @state _ TX)
   (XY1 : VLSM message :=
     pre_projection_induced_validator X1 TY label_project state_project label_lift state_lift)
   (XY2 : VLSM message :=
     pre_projection_induced_validator X2 TY label_project state_project label_lift state_lift)
-  (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
-  (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
   (Htransition_consistency1 :
     induced_validator_transition_consistency_Some X1 TY label_project state_project)
   (Htransition_consistency2 :
     induced_validator_transition_consistency_Some X2 TY label_project state_project)
-  (Htransition_Some1 :=
-    basic_weak_projection_transition_consistency_Some
-      X1 TY _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency1)
-  (Htransition_Some2 :=
-    basic_weak_projection_transition_consistency_Some
-      X2 TY _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency2)
   : VLSM_incl X1 X2 -> VLSM_incl XY1 XY2.
 Proof.
+  pose (Htransition_Some1 :=
+    basic_weak_projection_transition_consistency_Some
+      X1 TY _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency1).
+  pose (Htransition_Some2 :=
+    basic_weak_projection_transition_consistency_Some
+      X2 TY _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency2).
   intros Hincl.
   apply VLSM_incl_finite_traces_characterization.
   assert (His : forall s, vinitial_state_prop XY1 s -> vinitial_state_prop XY2 s).
@@ -418,22 +453,12 @@ Qed.
 their projections induced by the same maps.
 *)
 Lemma projection_induced_validator_eq
-  {message : Type}
-  {TX : VLSMType message}
-  (MX1 MX2: VLSMMachine TX)
+  (MX1 MX2 : VLSMMachine TX)
   (X1 := mk_vlsm MX1) (X2 := mk_vlsm MX2)
-  (TY : VLSMType message)
-  (label_project : @label _ TX -> option (@label _ TY))
-  (state_project : @state _ TX -> @state _ TY)
-  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
-  (label_lift : @label _ TY -> @label _ TX)
-  (state_lift : @state _ TY -> @state _ TX)
   (XY1 : VLSM message :=
     pre_projection_induced_validator X1 TY label_project state_project label_lift state_lift)
   (XY2 : VLSM message :=
     pre_projection_induced_validator X2 TY label_project state_project label_lift state_lift)
-  (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
-  (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
   (Htransition_consistency1 :
     induced_validator_transition_consistency_Some X1 TY label_project state_project)
   (Htransition_consistency2 :
@@ -441,9 +466,11 @@ Lemma projection_induced_validator_eq
   : VLSM_eq X1 X2 -> VLSM_eq XY1 XY2.
 Proof.
   intro Heq; apply VLSM_eq_incl_iff; split.
-  - by apply (projection_induced_validator_incl MX1 MX2 TY); [..| apply VLSM_eq_proj1].
-  - by apply (projection_induced_validator_incl MX2 MX1 TY); [..| apply VLSM_eq_proj2].
+  - by apply (projection_induced_validator_incl MX1 MX2); [..| apply VLSM_eq_proj1].
+  - by apply (projection_induced_validator_incl MX2 MX1); [..| apply VLSM_eq_proj2].
 Qed.
+
+End sec_projection_induced_validator_incl.
 
 (** ** Projection validators and Byzantine behavior
 
@@ -799,33 +826,31 @@ Lemma preloaded_composite_vlsm_induced_projection_validator_iff
       (pre_loaded_vlsm composite_vlsm_induced_projection_validator P)
       (pre_loaded_vlsm (composite_vlsm_induced_validator IM constraint i) P).
 Proof.
-  apply VLSM_eq_incl_iff; split.
-  - cbn; apply basic_VLSM_strong_incl.
-    + intros s Hs; cbn in *; red.
-      exists (lift_to_composite_state' IM i s).
-      split; [apply state_update_eq |].
-      by apply (composite_initial_state_prop_lift IM).
-    + by intros m [Him | Hpm]; right; [apply Hinits |].
-    + intros l s iom [sX [<- Hv]].
-      exists (existT i l), sX.
-      by split; [apply composite_project_label_eq |..].
-    + intros l s iom s' oom.
-      cbn; unfold lift_to_composite_state' at 1; rewrite state_update_eq.
-      intros Ht; setoid_rewrite Ht.
-      by rewrite state_update_eq.
-  - cbn; apply basic_VLSM_strong_incl.
-    + by intros s [sX [<- HsX]]; cbn.
-    + by intros m [| Hm]; [| right].
-    + intros l s iom ([j li] & sX & [HlX [=] Hv]).
-      exists sX; split; [done |].
-      unfold composite_project_label in HlX; cbn in *.
-      case_decide; [| congruence].
-      by inversion HlX; subst.
-    + intros l s iom s' oom Ht; cbn in *.
-      unfold lift_to_composite_state' in Ht;
+  apply VLSM_eq_incl_iff; split; cbn; apply basic_VLSM_strong_incl.
+  - intros s Hs; cbn in *; red.
+    exists (lift_to_composite_state' IM i s).
+    split; [apply state_update_eq |].
+    by apply (composite_initial_state_prop_lift IM).
+  - by intros m [Him | Hpm]; right; [apply Hinits |].
+  - intros l s iom [sX [<- Hv]].
+    exists (existT i l), sX.
+    by split; [apply composite_project_label_eq |..].
+  - intros l s iom s' oom.
+    cbn; unfold lift_to_composite_state' at 1; rewrite state_update_eq.
+    intros Ht; setoid_rewrite Ht.
+    by rewrite state_update_eq.
+  - by intros s [sX [<- HsX]]; cbn.
+  - by intros m [| Hm]; [| right].
+  - intros l s iom ([j li] & sX & [HlX [=] Hv]).
+    exists sX; split; [done |].
+    unfold composite_project_label in HlX; cbn in *.
+    case_decide; [| congruence].
+    by inversion HlX; subst.
+  - intros l s iom s' oom Ht; cbn in *.
+    unfold lift_to_composite_state' in Ht;
       rewrite state_update_eq in Ht;
       destruct (vtransition _ _ _) as (si', om').
-      by rewrite state_update_eq in Ht.
+    by rewrite state_update_eq in Ht.
 Qed.
 
 Lemma pre_composite_vlsm_induced_projection_validator_iff

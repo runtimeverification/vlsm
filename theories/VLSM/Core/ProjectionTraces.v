@@ -13,7 +13,7 @@ composite VLSM to a single node ([composite_vlsm_induced_projection]), and we
 study the relation between their traces.
 
 Let us fix an indexed set of VLSMs <<IM>> and their composition <<X>>
-using <<constraint>>.
+constrained using the <<constraint>> predicate.
 *)
 
 Context
