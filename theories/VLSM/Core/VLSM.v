@@ -745,7 +745,7 @@ pre-existing concepts.
     Qed.
 
     (** For VLSMs initialized with many initial messages such as
-    the [composite_vlsm_constrained_projection] or the [pre_loaded_with_all_messages_vlsm],
+    the [composite_vlsm_induced_projection] or the [pre_loaded_with_all_messages_vlsm],
     the question of whether a [VLSM] [can_emit] a message <<m>> becomes more
     useful than that whether <<m>> is a [valid_message].
     *)

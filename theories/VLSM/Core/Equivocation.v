@@ -2079,7 +2079,7 @@ Section Composite.
     assert
       (Htr_pr : finite_valid_trace_init_to
         (pre_loaded_with_all_messages_vlsm (IM i))
-        (is i) (s i) (VLSM_projection_trace_project (preloaded_component_projection IM i) tr)).
+        (is i) (s i) (VLSM_projection_finite_trace_project (preloaded_component_projection IM i) tr)).
     {
       by apply (VLSM_projection_finite_valid_trace_init_to (preloaded_component_projection IM i)).
     }

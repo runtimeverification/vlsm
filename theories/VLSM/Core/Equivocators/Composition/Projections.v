@@ -1464,7 +1464,7 @@ Proof.
   by inversion Htr1_pr; subst.
 Qed.
 
-Lemma equivocators_total_VLSM_projection_trace_project
+Lemma equivocators_total_VLSM_projection_finite_trace_project
   {s tr}
   (Hpre_tr : finite_valid_trace_from PreFreeE s tr)
   : @pre_VLSM_projection_finite_trace_project _ (type PreFreeE) _ equivocators_total_label_project
@@ -2172,7 +2172,7 @@ Proof.
     remember (pre_VLSM_projection_finite_trace_project _ _ _ _ _) as tr.
     replace tr with (equivocators_total_trace_project IM trX); [done |].
     subst. symmetry.
-    apply (equivocators_total_VLSM_projection_trace_project IM (proj1 Hpre_tr)).
+    eapply (equivocators_total_VLSM_projection_finite_trace_project IM), Hpre_tr.
 Qed.
 
 Lemma preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection
@@ -2193,7 +2193,7 @@ Proof.
     remember (pre_VLSM_projection_finite_trace_project _ _ _ _ _) as tr.
     replace tr with (equivocators_total_trace_project IM trX); [done |].
     subst. symmetry.
-    apply (equivocators_total_VLSM_projection_trace_project IM (proj1 Htr)).
+    eapply equivocators_total_VLSM_projection_finite_trace_project, Htr.
 Qed.
 
 End equivocators_composition_vlsm_projection.
