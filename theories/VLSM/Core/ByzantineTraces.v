@@ -242,10 +242,7 @@ Using the above, it is straight-forward to show that:
     Lemma alt_proj_option_valid_message
         (m : option message)
         : option_valid_message_prop Alt1 m.
-    Proof.
-        apply valid_message_projection.
-        apply alt_option_valid_message.
-    Qed.
+    Proof. apply any_message_is_valid_in_preloaded. Qed.
 
 (**
 Next we define the "lifing" of a [state] <<s>> from <<M>> to <<Alt>>,
@@ -353,7 +350,7 @@ Lemma validator_component_byzantine_fault_tolerance
     (i : index)
     (Hvalidator: component_projection_validator_prop IM constraint i)
     : forall tr, byzantine_trace_prop (IM i) tr ->
-        valid_trace_prop (composite_vlsm_constrained_projection IM constraint i) tr.
+        valid_trace_prop (pre_composite_vlsm_induced_projection_validator IM constraint i) tr.
 Proof.
     intros tr Htr.
     apply

@@ -509,7 +509,7 @@ End weak_projection_properties.
 
 Section projection_properties.
 
-Definition VLSM_projection_trace_project
+Definition VLSM_projection_finite_trace_project
   {message : Type}
   {X Y : VLSM message}
   {label_project : vlabel X -> option (vlabel Y)}
@@ -556,32 +556,37 @@ Context
   (Hsimul : VLSM_projection X Y label_project state_project)
   .
 
-Definition VLSM_projection_trace_project_app
-  : forall l1 l2, VLSM_projection_trace_project Hsimul (l1 ++ l2) =
-    VLSM_projection_trace_project Hsimul l1 ++ VLSM_projection_trace_project Hsimul l2
+Definition VLSM_projection_finite_trace_project_app
+  : forall l1 l2, VLSM_projection_finite_trace_project Hsimul (l1 ++ l2) =
+    VLSM_projection_finite_trace_project Hsimul l1 ++ VLSM_projection_finite_trace_project Hsimul l2
   := pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project.
 
-Definition VLSM_projection_trace_project_app_rev
-  : forall l l1' l2', VLSM_projection_trace_project Hsimul l = l1' ++ l2' ->
-    exists l1 l2, l = l1 ++ l2 /\
-      VLSM_projection_trace_project Hsimul l1 = l1' /\
-      VLSM_projection_trace_project Hsimul l2 = l2'
+Definition VLSM_projection_finite_trace_project_app_rev
+  : forall l l1' l2', VLSM_projection_finite_trace_project Hsimul l = l1' ++ l2' ->
+    exists l1 l2,
+      l = l1 ++ l2 /\
+      VLSM_projection_finite_trace_project Hsimul l1 = l1' /\
+      VLSM_projection_finite_trace_project Hsimul l2 = l2'
   := pre_VLSM_projection_finite_trace_project_app_rev _ _ label_project state_project.
 
-Definition VLSM_projection_trace_project_in
-  : forall itemX itemY, pre_VLSM_projection_transition_item_project _ _ label_project state_project itemX = Some itemY ->
-    forall trX, In itemX trX -> In itemY (VLSM_projection_trace_project Hsimul trX)
+Definition VLSM_projection_finite_trace_project_in
+  : forall itemX itemY,
+      pre_VLSM_projection_transition_item_project _ _ label_project state_project itemX = Some itemY ->
+    forall trX,
+      In itemX trX -> In itemY (VLSM_projection_finite_trace_project Hsimul trX)
   := pre_VLSM_projection_finite_trace_project_in _ _ label_project state_project.
 
 Definition VLSM_projection_finite_trace_last
   : forall sX trX,
-    finite_valid_trace_from X sX trX ->
-    state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX) (VLSM_projection_trace_project Hsimul trX)
+      finite_valid_trace_from X sX trX ->
+      state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX)
+        (VLSM_projection_finite_trace_project Hsimul trX)
   := final_state_project _ _ _ _ Hsimul.
 
 Definition VLSM_projection_finite_valid_trace
   : forall sX trX,
-    finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX) (VLSM_projection_trace_project Hsimul trX)
+      finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX)
+        (VLSM_projection_finite_trace_project Hsimul trX)
   := trace_project_preserves_valid_trace _ _ _ _ Hsimul.
 
 (** Any [VLSM_projection] determines a [VLSM_partial_projection], allowing us
@@ -599,7 +604,8 @@ Qed.
 
 Lemma VLSM_projection_finite_valid_trace_from
   : forall sX trX,
-    finite_valid_trace_from X sX trX -> finite_valid_trace_from Y (state_project sX) (VLSM_projection_trace_project Hsimul trX).
+      finite_valid_trace_from X sX trX ->
+      finite_valid_trace_from Y (state_project sX) (VLSM_projection_finite_trace_project Hsimul trX).
 Proof.
   specialize VLSM_partial_projection_from_projection as Hpart_simul.
   specialize (VLSM_partial_projection_finite_valid_trace_from Hpart_simul) as Hivt.
@@ -629,7 +635,9 @@ Definition VLSM_projection_input_valid
 
 Definition VLSM_projection_finite_valid_trace_from_to
   : forall sX s'X trX,
-    finite_valid_trace_from_to X sX s'X trX -> finite_valid_trace_from_to Y (state_project sX) (state_project s'X) (VLSM_projection_trace_project Hsimul trX)
+      finite_valid_trace_from_to X sX s'X trX ->
+      finite_valid_trace_from_to Y (state_project sX) (state_project s'X)
+        (VLSM_projection_finite_trace_project Hsimul trX)
   := VLSM_weak_projection_finite_valid_trace_from_to VLSM_projection_weaken.
 
 Definition VLSM_projection_in_futures
@@ -659,7 +667,9 @@ Qed.
 
 Lemma VLSM_projection_finite_valid_trace_init_to
   : forall sX s'X trX,
-    finite_valid_trace_init_to X sX s'X trX -> finite_valid_trace_init_to Y (state_project sX) (state_project s'X) (VLSM_projection_trace_project Hsimul trX).
+      finite_valid_trace_init_to X sX s'X trX ->
+      finite_valid_trace_init_to Y (state_project sX) (state_project s'X)
+        (VLSM_projection_finite_trace_project Hsimul trX).
 Proof.
   intros. destruct H as [H Hinit]. split.
   - revert H. apply VLSM_projection_finite_valid_trace_from_to.
@@ -706,7 +716,7 @@ Definition projection_friendly_prop
     exists (sX : vstate X) (trX : list (vtransition_item X)),
       finite_valid_trace X sX trX
       /\ state_project sX = sY
-      /\ VLSM_projection_trace_project Hsimul trX = trY.
+      /\ VLSM_projection_finite_trace_project Hsimul trX = trY.
 
 Lemma projection_friendly_in_futures
   (Hfr : projection_friendly_prop)
@@ -721,8 +731,8 @@ Proof.
   apply valid_trace_get_last in Htr as Heq_s2.
   apply valid_trace_forget_last in Htr.
   apply Hfr in Htr as [isX [trX [Htr [His Htr_pr]]]].
-  apply VLSM_projection_trace_project_app_rev in Htr_pr
-    as [trX_s1 [trX_s2 [HeqtrX [Htr_s1_pr Htr_s2_pr]]]].
+  apply VLSM_projection_finite_trace_project_app_rev in Htr_pr
+    as (trX_s1 & trX_s2 & HeqtrX & Htr_s1_pr & Htr_s2_pr).
   subst.
   destruct Htr as [HtrX HisX].
   apply finite_valid_trace_from_app_iff in HtrX as HtrX12.
@@ -731,7 +741,7 @@ Proof.
   exists (finite_trace_last isX trX_s1).
   exists (finite_trace_last isX  (trX_s1 ++ trX_s2)).
   rewrite !VLSM_projection_finite_trace_last,
-    VLSM_projection_trace_project_app; [| done | done].
+    VLSM_projection_finite_trace_project_app; [| done | done].
   repeat split.
   by rewrite finite_trace_last_app; eexists.
 Qed.
@@ -746,7 +756,7 @@ Lemma projection_friendly_trace_char
     exists (sX : vstate X) (trX : list (vtransition_item X)),
       finite_valid_trace X sX trX
       /\ state_project sX = sY
-      /\ VLSM_projection_trace_project Hsimul trX = trY.
+      /\ VLSM_projection_finite_trace_project Hsimul trX = trY.
 Proof.
   split; [apply Hfriendly|].
   intros [sX [trX [HtrX [<- <-]]]].

@@ -218,27 +218,18 @@ Proof.
 Qed.
 
 Lemma composite_label_sub_projection_option_lift
-  : induced_validator_label_lift_prop (free_composite_vlsm IM) (composite_type sub_IM)
-      composite_label_sub_projection_option lift_sub_label.
+  : induced_validator_label_lift_prop composite_label_sub_projection_option lift_sub_label.
 Proof.
-  intros (sub_i, li).
-  destruct_dec_sig sub_i i Hi Heqsub_i.
-  subst.
-  unfold lift_sub_label, composite_label_sub_projection_option.
-  simpl.
-  case_decide; [| done].
-  unfold composite_label_sub_projection.
-  f_equal. simpl.
+  intros [sub_i li].
+  destruct_dec_sig sub_i i Hi Heqsub_i; subst.
+  unfold lift_sub_label, composite_label_sub_projection_option, composite_label_sub_projection; cbn.
+  case_decide; [f_equal | done].
   by apply (@dec_sig_sigT_eq _ _ sub_index_prop_dec (fun i => vlabel (IM i))).
 Qed.
 
 Lemma composite_state_sub_projection_lift
-  : induced_validator_state_lift_prop (free_composite_vlsm IM) (composite_type sub_IM)
-      composite_state_sub_projection lift_sub_state.
-Proof.
-  intro.
-  apply composite_state_sub_projection_lift_to.
-Qed.
+  : induced_validator_state_lift_prop composite_state_sub_projection lift_sub_state.
+Proof. by intro; apply composite_state_sub_projection_lift_to. Qed.
 
 Lemma composite_trace_sub_projection_lift
   (tr : list (composite_transition_item sub_IM))
@@ -291,17 +282,6 @@ Proof.
   - by rewrite !state_update_neq.
 Qed.
 
-Lemma weak_induced_sub_projection_transition_consistency_Some
-  : weak_projection_transition_consistency_Some X (composite_type sub_IM)
-      composite_label_sub_projection_option composite_state_sub_projection
-      lift_sub_label lift_sub_state.
-Proof.
-  apply basic_weak_projection_transition_consistency_Some.
-  - apply composite_label_sub_projection_option_lift.
-  - apply composite_state_sub_projection_lift.
-  - apply induced_sub_projection_transition_consistency_Some.
-Qed.
-
 (** The [pre_induced_sub_projection] is actually a [VLSM_projection] of the
 original composition.
 *)
@@ -311,8 +291,10 @@ Lemma induced_sub_projection_is_projection
     composite_state_sub_projection.
 Proof.
   apply projection_induced_validator_is_projection.
+  - apply composite_label_sub_projection_option_lift.
+  - apply composite_state_sub_projection_lift.
+  - apply induced_sub_projection_transition_consistency_Some.
   - apply induced_sub_projection_transition_consistency_None.
-  - apply weak_induced_sub_projection_transition_consistency_Some.
 Qed.
 
 Lemma induced_sub_projection_valid_projection l s om
@@ -372,8 +354,10 @@ Lemma induced_sub_projection_constraint_subsumption_incl
   : VLSM_incl (pre_induced_sub_projection constraint1) (pre_induced_sub_projection constraint2).
 Proof.
   apply projection_induced_validator_incl.
-  - apply weak_induced_sub_projection_transition_consistency_Some.
-  - apply weak_induced_sub_projection_transition_consistency_Some.
+  - apply composite_label_sub_projection_option_lift.
+  - apply composite_state_sub_projection_lift.
+  - apply induced_sub_projection_transition_consistency_Some.
+  - apply induced_sub_projection_transition_consistency_Some.
   - by apply constraint_subsumption_incl.
 Qed.
 
@@ -1059,10 +1043,10 @@ Lemma induced_sub_projection_friendliness
 Proof.
   by eapply basic_projection_induces_friendliness.
   Unshelve.
-  - apply induced_sub_projection_transition_consistency_None.
   - apply composite_label_sub_projection_option_lift.
   - apply composite_state_sub_projection_lift.
   - apply induced_sub_projection_transition_consistency_Some.
+  - apply induced_sub_projection_transition_consistency_None.
 Qed.
 
 End lift_sub_state_to_preloaded.
@@ -1726,15 +1710,14 @@ Lemma induced_sub_element_projection_is_projection constraint
     sub_label_element_project sub_state_element_project.
 Proof.
   apply @projection_induced_validator_is_projection.
+  - intro; apply sub_element_label_project.
+  - intro; apply sub_element_state_project.
+  - intros ? **; eapply sub_transition_element_project_Some; cycle 2.
+    2-3: setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
+    all: done.
   - intros lX HlX s om s' om' [_ Ht].
     apply sub_transition_element_project_None with lX om om'; [done |].
     by setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
-  - apply basic_weak_projection_transition_consistency_Some.
-    + intro; apply sub_element_label_project.
-    + intro; apply sub_element_state_project.
-    + intros ? **; eapply sub_transition_element_project_Some; cycle 2.
-      2-3: setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
-      all: done.
 Qed.
 
 End sub_composition_element.
