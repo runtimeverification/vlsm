@@ -56,7 +56,7 @@ Definition limited_byzantine_trace_prop
 
 Context
   {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (limited_constraint := limited_equivocation_constraint IM sender)
+  (limited_constraint := tracewise_limited_equivocation_constraint IM sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
   (Hvalidator: forall i : index, component_message_validator_prop IM limited_constraint i)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -143,6 +143,8 @@ Proof.
       * by destruct Hi; apply set_diff_intro; [apply elem_of_enum|].
 Qed.
 
+Existing Instance Htracewise_BasicEquivocation.
+
 (** When replacing the byzantine components of a composite [valid_state] with
 initial states for those machines validity of transitions for the non-byzantine
 components is preserved.
@@ -155,15 +157,17 @@ Proof.
   intros l s om Hv HsY HomY.
   repeat split.
   - apply lift_sub_valid, Hv.
-  - unfold limited_constraint, limited_equivocation_constraint.
+  - reduce.
     destruct
       (composite_transition (sub_IM IM non_byzantine) l (s, om))
       as (s', om') eqn: Ht.
     apply (lift_sub_transition IM non_byzantine) in Ht
       as HtX.
     simpl in HtX |- *. rewrite HtX. simpl.
-    apply limited_PreNonByzantine_valid_state_lift_not_heavy.
-    by eapply input_valid_transition_destination.
+    change (is_equivocating_tracewise_no_has_been_sent _ _ _) with is_equivocating.
+    by eapply tracewise_not_heavy_LimitedEquivocationProp_iff,
+      limited_PreNonByzantine_valid_state_lift_not_heavy,
+      input_valid_transition_destination.
 Qed.
 
 (** By replacing the byzantine components of a composite [valid_state] with
