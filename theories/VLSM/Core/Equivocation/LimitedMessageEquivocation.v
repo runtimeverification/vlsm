@@ -395,3 +395,81 @@ Proof.
 Qed.
 
 End has_limited_equivocation.
+
+Section sec_full_node_limited_equivocation_message_validation.
+
+Context
+  {message : Type}
+  `{finite.Finite index}
+  `{ReachableThreshold index}
+  (IM : index -> VLSM message)
+  (sender : message -> option index)
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
+  `{forall i, HasBeenSentCapability (IM i)}
+  `{forall i, HasBeenReceivedCapability (IM i)}
+  `{forall i, MessageDependencies message_dependencies (IM i)}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i))
+  (Hchannel_authentication : channel_authentication_prop IM id sender)
+  .
+
+Lemma full_node_limited_equivocation_weak_full_projection :
+  forall s, valid_state_prop (tracewise_limited_equivocation_vlsm_composition IM sender) s ->
+  forall m i, can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m ->
+  (forall msg, msg ∈ message_dependencies m -> composite_has_been_observed IM s msg) ->
+    VLSM_weak_full_projection
+      ((pre_loaded_vlsm (IM i) (λ msg : message, msg ∈ message_dependencies m)))
+      (tracewise_limited_equivocation_vlsm_composition IM sender)
+      (lift_to_composite_label IM i)
+      (lift_to_composite_state IM s i).
+Proof.
+Admitted.
+
+Lemma full_node_limited_equivocation_message_validation :
+  forall s, valid_state_prop (tracewise_limited_equivocation_vlsm_composition IM sender) s ->
+  forall l m, vvalid (tracewise_limited_equivocation_vlsm_composition IM sender) l (s, Some m) ->
+  (exists i, can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m) ->
+  valid_message_prop (tracewise_limited_equivocation_vlsm_composition IM sender) m.
+Proof.
+  intros s Hs (j, lj) m Hpv [i Hemit_m]; cbn in *.
+  destruct (id Hpv) as [Hvi Hlimited].
+  apply Hchannel_authentication in Hemit_m as Hauth_m;
+    unfold channel_authenticated_message in Hauth_m.
+  destruct (sender m) as [_i |] eqn:Hsender_m; [| done].
+  apply Some_inj in Hauth_m; cbn in Hauth_m; subst _i.
+  eapply message_dependencies_are_sufficient in Hemit_m; [| done].
+  apply can_emit_has_trace in Hemit_m as (is_m & tr_m & item_m & Htr_m & Hemit_m).
+  specialize (Hfull _ _ _ _ Hvi).
+  destruct (decide (composite_has_been_observed IM s m)) as [| Hnobs];
+    [by eapply composite_observed_valid |].
+  unfold limited_equivocation_constraint, not_heavy in Hlimited.
+  destruct (composite_transition _ _ _) as (s', om') eqn:Ht; cbn in Hlimited.
+  assert (Hpti : input_valid_transition (pre_loaded_with_all_messages_vlsm (IM j)) lj (s j, Some m) (s' j, om')).
+  {
+    change j with (@projT1 _ (fun j => vlabel (IM j)) (existT j lj)).
+    eapply input_valid_transition_preloaded_project_active; split; [| done].
+    split_and!; [| apply any_message_is_valid_in_preloaded |].
+    - eapply VLSM_incl_valid_state; [apply vlsm_incl_pre_loaded_with_all_messages_vlsm |].
+      exact Hs.
+    - done.
+  }
+  assert (Heqv_i : is_equivocating_tracewise_no_has_been_sent IM id sender s' i).
+  {
+    eapply is_equivocating_tracewise_no_has_been_sent_iff;
+      [by apply channel_authentication_sender_safety |].
+    eapply is_equivocating_statewise_implies_is_equivocating_tracewise.
+    exists j, m; split_and!;
+      [done | | by eapply has_been_received_step_update; [ | left]].
+    unfold has_not_been_sent; contradict Hnobs; exists i.
+    eapply has_been_observed_sent_received_iff;
+      [by eapply valid_state_project_preloaded | right].
+    cbn in Ht; destruct (vtransition _ _ _) as (si', _om') eqn: Hti.
+    inversion Ht; subst; clear Ht; cbn in Hnobs.
+    destruct (decide (i = j)); [subst | by rewrite state_update_neq in Hnobs].
+    rewrite state_update_eq in Hnobs, Hpti.
+    eapply has_been_sent_step_update in Hnobs as []; [| done..].
+    by eapply input_valid_transition_received_not_resent in Hpti.
+  }
+Admitted.
+
+End sec_full_node_limited_equivocation_message_validation.
