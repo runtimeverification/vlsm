@@ -63,7 +63,7 @@ Lemma limited_equivocation_valid_state s
     LimitedEquivocationProp s.
 Proof.
   intros Hs; apply valid_state_prop_iff in Hs
-    as [[[is His] ->] | (l & (s', om') & om & [(_ & _ & _ & Hv) Ht])].
+    as [[[is His] ->] | (l & [s' om'] & om & [(_ & _ & _ & Hv) Ht])].
   - exists []; [constructor |..].
     + by intros v Hv; contradict Hv; apply Hno_initial_equivocation.
     + by destruct threshold; apply Rge_le.
@@ -239,9 +239,9 @@ Qed.
 Lemma StrongFixed_incl_Limited : VLSM_incl StrongFixed Limited.
 Proof.
   apply constraint_subsumption_incl.
-  intros (i, li) (s, om) Hpv.
+  intros [i li] [s om] Hpv.
   unfold limited_equivocation_constraint.
-  destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
+  destruct (composite_transition _ _ _) as [s' om'] eqn: Ht.
   by eapply tracewise_not_heavy_LimitedEquivocationProp_iff,
     StrongFixed_valid_state_not_heavy,
     (input_valid_transition_destination StrongFixed).
@@ -351,7 +351,7 @@ Proof.
   intros s tr Hstrong Htr.
   eapply traces_exhibiting_limited_equivocation_are_valid_rev; [done.. | |].
   - apply valid_trace_add_default_last.
-    eapply VLSM_incl_finite_valid_trace; [ |done].
+    eapply VLSM_incl_finite_valid_trace; [| done].
     apply constraint_free_incl.
   - apply tracewise_not_heavy_LimitedEquivocationProp_iff,
       full_node_limited_equivocation_valid_state_weight,
@@ -371,14 +371,11 @@ Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
     exists is tr, finite_trace_last is tr = s /\ fixed_limited_equivocation_prop is tr.
 Proof.
   intros s Hs.
-  assert (Hfree_s : valid_state_prop (free_composite_vlsm IM) s). {
-    revert Hs.
-    apply VLSM_incl_valid_state.
-    apply constraint_free_incl.
-   }
+  assert (Hfree_s : valid_state_prop (free_composite_vlsm IM) s)
+    by (revert Hs; apply VLSM_incl_valid_state, constraint_free_incl).
   destruct
     (free_has_strong_trace_witnessing_equivocation_prop IM id sender _ s Hfree_s)
-    as [is [tr [Htr Heqv]]].
+    as (is & tr & Htr & Heqv).
   exists is, tr.
   apply valid_trace_get_last in Htr as Hlst.
   split; [done |].

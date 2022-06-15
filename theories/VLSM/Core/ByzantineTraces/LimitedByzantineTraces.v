@@ -158,12 +158,10 @@ Proof.
   repeat split.
   - apply lift_sub_valid, Hv.
   - reduce.
-    destruct
-      (composite_transition (sub_IM IM non_byzantine) l (s, om))
-      as (s', om') eqn: Ht.
-    apply (lift_sub_transition IM non_byzantine) in Ht
-      as HtX.
-    simpl in HtX |- *. rewrite HtX. simpl.
+    destruct (composite_transition (sub_IM IM non_byzantine) l (s, om))
+      as [s' om'] eqn: Ht.
+    apply (lift_sub_transition IM non_byzantine) in Ht as HtX.
+    simpl in HtX |- *; rewrite HtX; simpl.
     change (is_equivocating_tracewise_no_has_been_sent _ _ _) with is_equivocating.
     by eapply tracewise_not_heavy_LimitedEquivocationProp_iff,
       limited_PreNonByzantine_valid_state_lift_not_heavy,
