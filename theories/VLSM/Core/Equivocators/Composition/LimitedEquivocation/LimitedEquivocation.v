@@ -289,7 +289,7 @@ Section sec_equivocators_projection_constrained_limited.
 
 Context
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   (message_dependencies : message -> set message)
   (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
