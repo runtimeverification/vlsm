@@ -147,7 +147,7 @@ End sec_equivocators_simulating_annotated_limited.
 Context
   (sender : message -> option index)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
   (message_dependencies : message -> set message)
   .
 

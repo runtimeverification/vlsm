@@ -28,7 +28,93 @@ state, the amount of equivocation would only grow with the weight of the
 sender of the message (if that wasn't already known as an equivocator).
 *)
 
-Section limited_message_equivocation.
+Section sec_limited_message_equivocation.
+
+Context
+  {message : Type}
+  `{EqDecision index}
+  `{ReachableThreshold validator}
+  (IM : index -> VLSM message)
+  (equivocating : composite_state IM -> validator -> Prop)
+  (Hno_initial_equivocation :
+    forall s, composite_initial_state_prop IM s ->
+    forall v, ~ equivocating s v)
+  .
+
+Inductive LimitedEquivocationProp (s : composite_state IM) : Prop :=
+  limited_equivocation :
+    forall (vs : set validator)
+      (Hnodup_vs : NoDup vs)
+      (Heqv_vs : forall v, equivocating s v -> v ∈ vs)
+      (Hlimited : (sum_weights vs <= proj1_sig threshold)%R),
+      LimitedEquivocationProp s.
+
+Definition limited_equivocation_constraint
+  (l : composite_label IM)
+  (som : composite_state IM * option message)
+  : Prop :=
+  LimitedEquivocationProp (composite_transition IM l som).1.
+
+Definition limited_equivocation_composite_vlsm : VLSM message :=
+  composite_vlsm IM limited_equivocation_constraint.
+
+Lemma limited_equivocation_valid_state s
+  : valid_state_prop limited_equivocation_composite_vlsm s ->
+    LimitedEquivocationProp s.
+Proof.
+  intros Hs; apply valid_state_prop_iff in Hs
+    as [[[is His] ->] | (l & [s' om'] & om & [(_ & _ & _ & Hv) Ht])].
+  - exists []; [constructor |..].
+    + by intros v Hv; contradict Hv; apply Hno_initial_equivocation.
+    + by destruct threshold; apply Rge_le.
+  - by cbv in Hv, Ht; rewrite Ht in Hv.
+Qed.
+
+End sec_limited_message_equivocation.
+
+Section sec_basic_limited_message_equivocation.
+
+Context
+  {message : Type}
+  `{EqDecision index}
+  `{EqDecision validator}
+  (IM : index -> VLSM message)
+  `{BasicEquivocation (composite_state IM) validator}
+  .
+
+Definition basic_limited_equivocation_constraint :=
+  limited_equivocation_constraint IM is_equivocating.
+
+Definition basic_limited_equivocation_composite_vlsm : VLSM message :=
+  limited_equivocation_composite_vlsm IM is_equivocating.
+
+Lemma LimitedEquivocationProp_impl_not_heavy :
+  forall s, LimitedEquivocationProp IM is_equivocating s -> not_heavy s.
+Proof.
+  intros s [].
+  apply Rle_trans with (sum_weights vs); [| done].
+  apply sum_weights_subseteq; [apply equivocating_validators_nodup | done |].
+  intros v Hv; apply Heqv_vs.
+  by eapply elem_of_list_filter in Hv as [].
+Qed.
+
+Definition basic_equivocation_state_validators_comprehensive_prop : Prop :=
+  forall s v, is_equivocating s v -> v ∈ state_validators s.
+
+Lemma not_heavy_impl_LimitedEquivocationProp
+  (Hcomprehensive : basic_equivocation_state_validators_comprehensive_prop)
+  : forall s, not_heavy s -> LimitedEquivocationProp IM is_equivocating s.
+Proof.
+  intros s Hs; exists (equivocating_validators s);
+    [apply equivocating_validators_nodup | | done].
+  intros v Hv; apply elem_of_list_filter; split; [done |].
+  by apply Hcomprehensive.
+Qed.
+
+End sec_basic_limited_message_equivocation.
+
+Section tracewise_limited_message_equivocation.
+
 Context
   {message : Type}
   `{finite.Finite index}
@@ -38,40 +124,41 @@ Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   (Free := free_composite_vlsm IM)
   (sender : message -> option index)
-  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM id sender)}
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index
     := equivocation_dec_tracewise IM id sender)
-  (tracewise_not_heavy := @not_heavy _ _ _ _ Htracewise_BasicEquivocation)
   .
 
-Definition limited_equivocation_constraint
-  (l : composite_label IM)
-  (som : composite_state IM * option message)
-  :=
-  tracewise_not_heavy (fst (composite_transition IM l som)).
+Existing Instance Htracewise_BasicEquivocation.
 
+Lemma tracewise_basic_equivocation_state_validators_comprehensive_prop :
+  basic_equivocation_state_validators_comprehensive_prop IM.
+Proof. intros s v _; cbn; apply elem_of_enum. Qed.
 
-Definition limited_equivocation_vlsm_composition
-  :=
-  composite_vlsm IM limited_equivocation_constraint.
+Definition tracewise_limited_equivocation_constraint :=
+  basic_limited_equivocation_constraint IM.
+
+Definition tracewise_limited_equivocation_vlsm_composition : VLSM message :=
+  basic_limited_equivocation_composite_vlsm IM.
 
 Lemma full_node_limited_equivocation_valid_state_weight s
-  : valid_state_prop limited_equivocation_vlsm_composition s ->
-    tracewise_not_heavy s.
+  : valid_state_prop tracewise_limited_equivocation_vlsm_composition s ->
+    LimitedEquivocationProp IM is_equivocating s.
 Proof.
-  intro Hs.
-  unfold tracewise_not_heavy, not_heavy.
-  induction Hs using valid_state_prop_ind.
-  - replace (equivocation_fault s) with 0%R
-      by (symmetry;apply initial_state_equivocators_weight; done).
-    destruct threshold. cbn. by apply Rge_le.
-  - destruct Ht as [[Hs [Hom [Hv Hw]]] Ht].
-    unfold transition in Ht. simpl in Ht.
-    unfold limited_equivocation_constraint in Hw. simpl in Hw.
-    by rewrite Ht in Hw.
+  apply limited_equivocation_valid_state.
+  by intros; apply initial_state_not_is_equivocating_tracewise. 
 Qed.
 
-End limited_message_equivocation.
+Lemma tracewise_not_heavy_LimitedEquivocationProp_iff :
+  forall s, not_heavy s <-> LimitedEquivocationProp IM is_equivocating s.
+Proof.
+  intros; split.
+  - apply not_heavy_impl_LimitedEquivocationProp,
+      tracewise_basic_equivocation_state_validators_comprehensive_prop.
+  - apply LimitedEquivocationProp_impl_not_heavy.
+Qed.
+
+End tracewise_limited_message_equivocation.
 
 Section fixed_limited_message_equivocation.
 
@@ -100,7 +187,7 @@ Context
   (sender : message -> option index)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index
     := equivocation_dec_tracewise IM (fun i => i) sender)
   (tracewise_not_heavy := @not_heavy _ _ _ _ Htracewise_BasicEquivocation)
@@ -152,11 +239,12 @@ Qed.
 Lemma StrongFixed_incl_Limited : VLSM_incl StrongFixed Limited.
 Proof.
   apply constraint_subsumption_incl.
-  intros (i, li) (s, om) Hpv.
+  intros [i li] [s om] Hpv.
   unfold limited_equivocation_constraint.
-  destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
-  apply StrongFixed_valid_state_not_heavy.
-  by eapply (input_valid_transition_destination StrongFixed).
+  destruct (composite_transition _ _ _) as [s' om'] eqn: Ht.
+  by eapply tracewise_not_heavy_LimitedEquivocationProp_iff,
+    StrongFixed_valid_state_not_heavy,
+    (input_valid_transition_destination StrongFixed).
 Qed.
 
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
@@ -202,7 +290,7 @@ Context
   (sender : message -> option index)
   (message_dependencies : message -> set message)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
   .
 
 (** Traces with the [fixed_limited_equivocation_prop]erty are valid for the
@@ -261,15 +349,13 @@ Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
     finite_valid_trace Limited s tr -> fixed_limited_equivocation_prop s tr.
 Proof.
   intros s tr Hstrong Htr.
-  apply proj1 in Htr as Hnot_heavy.
-  apply finite_valid_trace_last_pstate, full_node_limited_equivocation_valid_state_weight in Hnot_heavy.
-  assert (Hfree_tr : finite_valid_trace (free_composite_vlsm IM) s tr). {
-    revert Htr. apply VLSM_incl_finite_valid_trace.
+  eapply traces_exhibiting_limited_equivocation_are_valid_rev; [done.. | |].
+  - apply valid_trace_add_default_last.
+    eapply VLSM_incl_finite_valid_trace; [| done].
     apply constraint_free_incl.
-  }
-  clear Htr.
-  apply valid_trace_add_default_last in Hfree_tr.
-  by eapply traces_exhibiting_limited_equivocation_are_valid_rev.
+  - apply tracewise_not_heavy_LimitedEquivocationProp_iff,
+      full_node_limited_equivocation_valid_state_weight,
+      finite_valid_trace_last_pstate with (X := Limited), Htr.
 Qed.
 
 (** Any state which is valid for limited equivocation can be produced by
@@ -285,19 +371,17 @@ Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
     exists is tr, finite_trace_last is tr = s /\ fixed_limited_equivocation_prop is tr.
 Proof.
   intros s Hs.
-  assert (Hfree_s : valid_state_prop (free_composite_vlsm IM) s). {
-    revert Hs.
-    apply VLSM_incl_valid_state.
-    apply constraint_free_incl.
-   }
+  assert (Hfree_s : valid_state_prop (free_composite_vlsm IM) s)
+    by (revert Hs; apply VLSM_incl_valid_state, constraint_free_incl).
   destruct
     (free_has_strong_trace_witnessing_equivocation_prop IM id sender _ s Hfree_s)
-    as [is [tr [Htr Heqv]]].
+    as (is & tr & Htr & Heqv).
   exists is, tr.
   apply valid_trace_get_last in Htr as Hlst.
   split; [done |].
-  apply full_node_limited_equivocation_valid_state_weight in Hs.
-  by eapply traces_exhibiting_limited_equivocation_are_valid_rev.
+  eapply traces_exhibiting_limited_equivocation_are_valid_rev; [done.. |].
+  by apply tracewise_not_heavy_LimitedEquivocationProp_iff,
+    full_node_limited_equivocation_valid_state_weight.
 Qed.
 
 End has_limited_equivocation.
