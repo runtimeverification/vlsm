@@ -124,7 +124,7 @@ Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   (Free := free_composite_vlsm IM)
   (sender : message -> option index)
-  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM Datatypes.id sender)}
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM id sender)}
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index
     := equivocation_dec_tracewise IM id sender)
   .

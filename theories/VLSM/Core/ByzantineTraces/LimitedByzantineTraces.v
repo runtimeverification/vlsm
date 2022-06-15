@@ -157,7 +157,7 @@ Proof.
   intros l s om Hv HsY HomY.
   repeat split.
   - apply lift_sub_valid, Hv.
-  - reduce.
+  - hnf.
     destruct (composite_transition (sub_IM IM non_byzantine) l (s, om))
       as [s' om'] eqn: Ht.
     apply (lift_sub_transition IM non_byzantine) in Ht as HtX.
