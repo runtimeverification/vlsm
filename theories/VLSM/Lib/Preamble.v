@@ -88,6 +88,38 @@ Proof.
   - by revert Htrans; apply Transitive_reexpress_impl.
 Qed.
 
+(** If the a relation <<R>> reflects a predicate <<P>>, then its
+transitive closure will also reflect it. *)
+Lemma tc_reflect
+  `(R : relation A)
+  (P : A -> Prop)
+  (Hreflects : forall dm m, R dm m -> P m -> P dm)
+  : forall dm m, tc R dm m -> P m -> P dm.
+Proof.
+  intros dm m Hdm.
+  clear -Hdm Hreflects.
+  induction Hdm; firstorder.
+Qed.
+
+(** [tc] characterization in terms of the last transitivity step *)
+Lemma tc_r_iff `(R : relation A) :
+  forall x z, tc R x z <-> R x z \/ exists y, tc R x y /\ R y z.
+Proof.
+  split.
+  - intros Htc; apply tc_nsteps in Htc as (n & Hn & Hsteps).
+    induction Hsteps; [lia |].
+    destruct n; [inversion Hsteps; subst; by left |].
+    spec IHHsteps; [lia |]; right; destruct IHHsteps as [Hyz | (y0 & Hyy0 & Hy0z)].
+    + by exists y; split; [constructor |].
+    + exists y0; split; [| done].
+      apply tc_nsteps.
+      apply tc_nsteps in Hyy0 as (m & Hm & Hyy0).
+      exists (S m); split; [lia |].
+      by econstructor.
+  - intros [Hxz | (y & Hxy & Hyz)]; [by constructor |].
+    by eapply tc_r.
+Qed.
+
 (* TODO(traian): remove these definitions and use the standard stdpp ones instead.*)
 Definition dec_sig {A} (P : A -> Prop) {P_dec : forall x, Decision (P x)} : Type
   := dsig P.

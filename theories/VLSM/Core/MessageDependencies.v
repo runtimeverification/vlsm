@@ -72,24 +72,14 @@ Definition msg_dep_rel : relation message :=
 (** The transitive closure ([clos_trans_1n]) of the [msg_dep_rel]ation is a
 happens-before relation.
 *)
-Definition msg_dep_happens_before : relation message := flip (clos_trans_1n _ (flip msg_dep_rel)).
+Definition msg_dep_happens_before : relation message := tc msg_dep_rel.
 
 (** Unrolling one the [msg_dep_happens_before] relation one step. *)
 Lemma msg_dep_happens_before_iff_one x z
   : msg_dep_happens_before x z <->
     msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
 Proof.
-  split.
-  - inversion 1; subst; eauto.
-  - by intros [Hxz | [y [Hxy Hyz]]]; econstructor.
-Qed.
-
-Global Instance msg_dep_happens_before_transitive : Transitive msg_dep_happens_before.
-Proof.
-  apply flip_Transitive.
-  intros m1 m2 m3 .
-  rewrite <- !Relations.Operators_Properties.clos_trans_t1n_iff.
-  apply t_trans.
+  apply tc_r_iff.
 Qed.
 
 (** If the [msg_dep_rel]ation reflects a predicate <<P>>, then
@@ -99,9 +89,7 @@ Lemma msg_dep_happens_before_reflect
   (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
   : forall dm m, msg_dep_happens_before dm m -> P m -> P dm.
 Proof.
-  intros dm m Hdm.
-  clear -Hdm Hreflects.
-  induction Hdm; firstorder.
+  by apply tc_reflect.
 Qed.
 
 (** In the absence of initial messages, and if [msg_dep_rel]ation reflects
