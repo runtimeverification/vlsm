@@ -116,6 +116,17 @@ Proof.
     by eapply tc_r.
 Qed.
 
+Lemma tc_wf_projected `{R1 : relation A} `(R2 : relation B) `{!Transitive R2} (f : A → B) :
+  (∀ x y, R1 x y → R2 (f x) (f y)) →
+  wf R2 → wf (tc R1).
+Proof.
+  intros Hpreserve.
+  apply wf_projected with f.
+  induction 1; [by apply Hpreserve |].
+  transitivity (f y); [| done].
+  by apply Hpreserve.
+Qed.
+
 (* TODO(traian): remove these definitions and use the standard stdpp ones instead.*)
 Definition dec_sig {A} (P : A -> Prop) {P_dec : forall x, Decision (P x)} : Type
   := dsig P.
