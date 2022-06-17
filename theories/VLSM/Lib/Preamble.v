@@ -116,7 +116,8 @@ Proof.
     by eapply tc_r.
 Qed.
 
-Lemma tc_wf_projected `{R1 : relation A} `(R2 : relation B) `{!Transitive R2} (f : A → B) :
+Lemma tc_wf_projected
+  `{R1 : relation A} `(R2 : relation B) `{!Transitive R2} (f : A → B) :
   (∀ x y, R1 x y → R2 (f x) (f y)) →
   wf R2 → wf (tc R1).
 Proof.

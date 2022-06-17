@@ -409,9 +409,9 @@ Lemma msg_dep_rel_full_message_dependecies_subset :
     full_message_dependencies x ⊆ full_message_dependencies y.
 Proof.
   intros; intros z Hz.
-    apply full_message_dependencies_happens_before.
-    transitivity x; [by apply full_message_dependencies_happens_before |].
-    by constructor.
+  apply full_message_dependencies_happens_before.
+  transitivity x; [by apply full_message_dependencies_happens_before |].
+  by constructor.
 Qed.
 
 Lemma msg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies).
