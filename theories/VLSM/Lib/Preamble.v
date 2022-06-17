@@ -95,11 +95,7 @@ Lemma tc_reflect
   (P : A -> Prop)
   (Hreflects : forall dm m, R dm m -> P m -> P dm)
   : forall dm m, tc R dm m -> P m -> P dm.
-Proof.
-  intros dm m Hdm.
-  clear -Hdm Hreflects.
-  induction Hdm; firstorder.
-Qed.
+Proof. induction 1; firstorder. Qed.
 
 (** [tc] characterization in terms of the last transitivity step *)
 Lemma tc_r_iff `(R : relation A) :

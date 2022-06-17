@@ -78,9 +78,7 @@ Definition msg_dep_happens_before : relation message := tc msg_dep_rel.
 Lemma msg_dep_happens_before_iff_one x z
   : msg_dep_happens_before x z <->
     msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
-Proof.
-  apply tc_r_iff.
-Qed.
+Proof. apply tc_r_iff. Qed.
 
 (** If the [msg_dep_rel]ation reflects a predicate <<P>>, then
 [msg_dep_happens_before] will also reflect it. *)
@@ -88,9 +86,7 @@ Lemma msg_dep_happens_before_reflect
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
   : forall dm m, msg_dep_happens_before dm m -> P m -> P dm.
-Proof.
-  by apply tc_reflect.
-Qed.
+Proof. by apply tc_reflect. Qed.
 
 (** In the absence of initial messages, and if [msg_dep_rel]ation reflects
 the pre-loaded message property, then it also reflects the
