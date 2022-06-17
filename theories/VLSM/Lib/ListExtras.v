@@ -2128,29 +2128,33 @@ Proof.
   by intros A l; unfold lastn; rewrite take_0.
 Qed.
 
+Lemma lastn_ge :
+  forall {A : Type} (n : nat) (l : list A),
+    length l <= n -> lastn n l = l.
+Proof.
+  intros A n l Hge.
+  unfold lastn.
+  rewrite take_ge.
+  - by rewrite rev_involutive.
+  - by rewrite rev_length.
+Qed.
+
+Lemma lastn_app_le :
+  forall {A : Type} (n : nat) (l1 l2 : list A),
+    n <= length l2 -> lastn n (l1 ++ l2) = lastn n l2.
+Proof.
+  intros A n l1 l2 Hlt.
+  unfold lastn.
+  rewrite rev_app_distr, take_app_le; [done |].
+  rewrite rev_length; lia.
+Qed.
+
 Lemma lastn_cons :
   forall {A : Type} (n : nat) (h : A) (t : list A),
     lastn n (h :: t) = if decide (S (length t) <= n) then h :: t else lastn n t.
 Proof.
   intros A n h t.
   case_decide; subst.
-  - unfold lastn. replace (S (length t)) with (length (rev (h :: t))).
-    + rewrite take_ge.
-      * by rewrite rev_involutive.
-      * by cbn; rewrite app_length, rev_length; cbn; lia.
-    + by rewrite rev_length.
-  - destruct n as [| n']; cbn.
-    + by rewrite !take_0.
-    + rewrite take_app_le; [done |]. rewrite rev_length; lia.
-Qed.
-
-Lemma lastn_ge :
-  forall {A : Type} (n : nat) (l : list A),
-    length l <= n -> lastn n l = l.
-Proof.
-  intros A n l Hle.
-  unfold lastn.
-  rewrite take_ge.
-  - by rewrite rev_involutive.
-  - by rewrite rev_length.
+  - by rewrite lastn_ge; cbn; [| lia].
+  - by rewrite (lastn_app_le _ [h] t); [| lia].
 Qed.
