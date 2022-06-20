@@ -1565,22 +1565,23 @@ Inductive CompositeValidTransitionNext (s1 s2 : composite_state IM) : Prop :=
 Lemma composite_valid_transition_next :
   forall l s1 iom s2 oom,
     composite_valid_transition l s1 iom s2 oom -> CompositeValidTransitionNext s1 s2.
-Proof. by intros * [Hv Ht]; esplit. Qed.
+Proof. by intros * [Hv Ht]; econstructor. Qed.
 
 Lemma composite_valid_transition_next_iff s1 s2 :
   CompositeValidTransitionNext s1 s2
     <->
   exists l iom oom, composite_valid_transition l s1 iom s2 oom.
 Proof.
-  split; [| by intros (l & iom & oom & ?); eapply composite_valid_transition_next].
-  by intros []; eexists _, _, _; split.
+  split.
+  - by intros []; eexists _, _, _; split.
+  - by intros (l & iom & oom & ?); eapply composite_valid_transition_next.
 Qed.
 
 Lemma CompositeValidTransitionNext_reachable_iff s1 s2 :
   CompositeValidTransitionNext s1 s2 <-> ValidTransitionNext RFree s1 s2.
 Proof.
   rewrite composite_valid_transition_next_iff, valid_transition_next_iff.
-  firstorder.
+  by firstorder.
 Qed.
 
 Lemma composite_valid_transition_projection :
@@ -1589,7 +1590,7 @@ Lemma composite_valid_transition_projection :
     valid_transition (IM (projT1 l)) (projT2 l) (s1 (projT1 l)) iom (s2 (projT1 l)) oom /\
     s2 = state_update IM s1 (projT1 l) (s2 (projT1 l)).
 Proof.
-  intros (i, li) * [Hv Ht].
+  intros [i li] * [Hv Ht].
   unfold valid_transition; cbn in Ht |- *; destruct (vtransition _ _ _).
   by inversion_clear Ht; rewrite state_update_eq.
 Qed.
@@ -1611,7 +1612,7 @@ Proof.
   intros s2 Hs2 s1 Hs1.
   apply composite_valid_transition_next_iff in Hs1 as ((i, li) & iom & oom & Hs1).
   apply composite_valid_transition_projection, proj1, valid_transition_next in Hs1; cbn in Hs1.
-  contradict Hs1; apply not_ValidTransitionNext_initial, Hs2.
+  by contradict Hs1; apply not_ValidTransitionNext_initial, Hs2.
 Qed.
 
 Lemma composite_quasi_unique_transition_to_state :
@@ -1621,7 +1622,7 @@ Lemma composite_quasi_unique_transition_to_state :
   projT1 l1 = projT1 l2 ->
   l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
-  intros ? (i, li1) * Ht1 (_i, li2) * Ht2 [=]; subst _i.
+  intros ? [i li1] * Ht1 [_i li2] * Ht2 [=]; subst _i.
   apply composite_valid_transition_projection in Ht1, Ht2; cbn in Ht1, Ht2.
   destruct Ht1 as [Ht1 Heq_s], Ht2 as [Ht2 Heqs].
   rewrite Heq_s in Heqs at 1; clear Heq_s.
@@ -1636,18 +1637,16 @@ Lemma CompositeValidTransitionNext_reflects_rechability :
   forall s1 s2, CompositeValidTransitionNext s1 s2 ->
     valid_state_prop RFree s2 -> valid_state_prop RFree s1.
 Proof.
-  intros s1 s2 Hnext Hs2.
-  revert s1 Hnext.
-  induction Hs2 using valid_state_prop_ind; intros;
+  intros s1 s2 Hnext Hs2; revert s1 Hnext.
+  induction Hs2 using valid_state_prop_ind; intros s1 Hnext;
     [by contradict Hnext; apply not_CompositeValidTransitionNext_initial |].
   apply composite_valid_transition_next_iff in Hnext
-    as ((j, lj) & iom & oom & Hnext).
-  destruct l as (i, li).
+    as ([j lj] & iom & oom & Hnext).
+  destruct l as [i li].
   destruct (decide (i = j)).
   - subst; apply input_valid_transition_forget_input in Ht as Hvt.
     apply composite_valid_transition_reachable_iff in Hvt.
-    specialize (composite_quasi_unique_transition_to_state Hnext Hvt eq_refl)
-      as Heq.
+    specialize (composite_quasi_unique_transition_to_state Hnext Hvt eq_refl) as Heq.
     destruct_and! Heq; subst.
     by eapply input_valid_transition_origin.
   - apply input_valid_transition_forget_input in Ht as Hti.
@@ -1676,8 +1675,7 @@ Proof.
     + by cbn; rewrite state_update_neq.
     + cbn; rewrite state_update_neq by done.
       replace (vtransition _ _ _) with (s' i, om').
-      f_equal.
-      extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
+      f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
       destruct (decide (i = k)); [|destruct (decide (j = k))].
       * by subst; rewrite state_update_eq, Heq_s', state_update_neq.
       * by subst; rewrite state_update_neq, state_update_eq.
@@ -1690,6 +1688,6 @@ Definition composite_valid_transitions_from_to : relation (composite_state IM) :
 Lemma composite_valid_transitions_from_to_reflects_rechability :
   forall s1 s2, composite_valid_transitions_from_to s1 s2 ->
     valid_state_prop RFree s2 -> valid_state_prop RFree s1.
-Proof. apply tc_reflect, CompositeValidTransitionNext_reflects_rechability. Qed.
+Proof. by apply tc_reflect, CompositeValidTransitionNext_reflects_rechability. Qed.
 
 End sec_composite_succ.

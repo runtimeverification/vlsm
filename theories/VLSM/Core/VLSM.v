@@ -2799,18 +2799,19 @@ Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : state) : Prop :=
 Lemma ValidTransitionNext_preloaded_iff
   `(X : VLSM message) (R := pre_loaded_with_all_messages_vlsm X) :
   forall s1 s2, ValidTransitionNext X s1 s2 <-> ValidTransitionNext R s1 s2.
-Proof. by intros; split; intros []; esplit. Qed.
+Proof. by intros; split; intros []; econstructor. Qed.
 
 Lemma valid_transition_next `(X : VLSM message) :
   forall l s1 iom s2 oom,
     valid_transition X l s1 iom s2 oom -> ValidTransitionNext X s1 s2.
-Proof. by intros * [Hv Ht]; esplit. Qed.
+Proof. by intros * [Hv Ht]; econstructor. Qed.
 
 Lemma valid_transition_next_iff `(X : VLSM message) s1 s2 :
   ValidTransitionNext X s1 s2 <-> exists l iom oom, valid_transition X l s1 iom s2 oom.
 Proof.
-  split; [| by intros (l & iom & oom & ?); eapply valid_transition_next].
-  by intros []; eexists _, _, _; split.
+  split.
+  - by intros []; eexists _, _, _; split.
+  - by intros (l & iom & oom & ?); eapply valid_transition_next.
 Qed.
 
 Lemma input_valid_transition_forget_input `(X : VLSM message) :
@@ -2852,7 +2853,7 @@ Context
 Lemma history_unique_trace_to_reachable :
   forall is s tr, finite_valid_trace_init_to R is s tr ->
   forall is' tr', finite_valid_trace_init_to R is' s tr' ->
-  is' = is /\ tr' = tr.
+    is' = is /\ tr' = tr.
 Proof.
   intros is s tr Htr; induction Htr using finite_valid_trace_init_to_rev_ind;
     intros is' tr' [Htr' His'].
@@ -2876,5 +2877,5 @@ Proof.
       specialize (IHHtr _ _  (conj Htr' His')).
       by destruct_and! IHHtr; subst.
 Qed.
- 
+
 End sec_history_vlsm.
