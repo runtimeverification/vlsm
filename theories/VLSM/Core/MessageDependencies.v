@@ -72,25 +72,13 @@ Definition msg_dep_rel : relation message :=
 (** The transitive closure ([clos_trans_1n]) of the [msg_dep_rel]ation is a
 happens-before relation.
 *)
-Definition msg_dep_happens_before : relation message := flip (clos_trans_1n _ (flip msg_dep_rel)).
+Definition msg_dep_happens_before : relation message := tc msg_dep_rel.
 
 (** Unrolling one the [msg_dep_happens_before] relation one step. *)
 Lemma msg_dep_happens_before_iff_one x z
   : msg_dep_happens_before x z <->
     msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
-Proof.
-  split.
-  - inversion 1; subst; eauto.
-  - by intros [Hxz | [y [Hxy Hyz]]]; econstructor.
-Qed.
-
-Global Instance msg_dep_happens_before_transitive : Transitive msg_dep_happens_before.
-Proof.
-  apply flip_Transitive.
-  intros m1 m2 m3 .
-  rewrite <- !Relations.Operators_Properties.clos_trans_t1n_iff.
-  apply t_trans.
-Qed.
+Proof. apply tc_r_iff. Qed.
 
 (** If the [msg_dep_rel]ation reflects a predicate <<P>>, then
 [msg_dep_happens_before] will also reflect it. *)
@@ -98,11 +86,7 @@ Lemma msg_dep_happens_before_reflect
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
   : forall dm m, msg_dep_happens_before dm m -> P m -> P dm.
-Proof.
-  intros dm m Hdm.
-  clear -Hdm Hreflects.
-  induction Hdm; firstorder.
-Qed.
+Proof. by apply tc_reflect. Qed.
 
 (** In the absence of initial messages, and if [msg_dep_rel]ation reflects
 the pre-loaded message property, then it also reflects the
@@ -420,32 +404,29 @@ Qed.
 
 Global Instance msg_dep_happens_before_strict : StrictOrder (msg_dep_happens_before message_dependencies) := {}.
 
+Lemma msg_dep_rel_full_message_dependecies_subset :
+  forall x y : message, msg_dep_rel message_dependencies x y ->
+    full_message_dependencies x ⊆ full_message_dependencies y.
+Proof.
+  intros; intros z Hz.
+  apply full_message_dependencies_happens_before.
+  transitivity x; [by apply full_message_dependencies_happens_before |].
+  by constructor.
+Qed.
+
 Lemma msg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies).
 Proof.
-  cut (forall n m, length (full_message_dependencies m) < n -> Acc (msg_dep_happens_before message_dependencies) m).
-  {
-    intros Hn m.
-    apply (Hn (S (length (full_message_dependencies m)))).
-    lia.
-  }
-  induction n as [|n IHn]; [lia|].
-  intros m Hm.
-  constructor.
-  intros dm Hdm.
-  apply IHn.
-  unfold lt.
-  transitivity (length (full_message_dependencies m)); [|lia].
-  rewrite <- (cons_length dm).
+  apply tc_wf_projected with (<) (fun m => length (full_message_dependencies m));
+    [typeclasses eauto | | apply Wf_nat.lt_wf ].
+  intros; unfold lt.
+  change (S _) with (length (x :: full_message_dependencies x)).
   apply NoDup_subseteq_length.
   - constructor.
     + apply full_message_dependencies_irreflexive.
     + apply full_message_dependencies_nodups.
-  - intros m' Hm'. apply elem_of_cons in Hm' as [-> | Hm'].
-    + by apply full_message_dependencies_happens_before.
-    + revert Hm'.
-      setoid_rewrite full_message_dependencies_happens_before.
-      intro Hm'dm.
-      by transitivity dm.
+  - intros z Hz; inversion Hz; subst;
+      [| by eapply msg_dep_rel_full_message_dependecies_subset].
+    by apply full_message_dependencies_happens_before; constructor.
 Qed.
 
 Lemma FullMessageDependencies_ind
