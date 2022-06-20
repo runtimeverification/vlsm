@@ -44,7 +44,7 @@ license:
 
 supported_coq_versions:
   text: 8.15
-  opam: '{>= "8.15"}'
+  opam: '{>= "8.15" & <= "8.16~"}'
 
 dependencies:
 - opam:
@@ -80,7 +80,7 @@ build: |-
 
   ```shell
   opam repo add coq-released https://coq.inria.fr/opam/released
-  opam install coq.8.15.1 coq-stdpp.1.7.0 coq-itauto
+  opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto
   ```
 
   To build the project when you have all dependencies installed, do:
