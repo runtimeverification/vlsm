@@ -27,7 +27,7 @@ To install the project dependencies via [opam](https://opam.ocaml.org/doc/Instal
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq.8.15.1 coq-stdpp.1.7.0 coq-itauto
+opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto
 ```
 
 To build the project when you have all dependencies installed, do:

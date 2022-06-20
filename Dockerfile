@@ -49,7 +49,7 @@ RUN    opam init --auto-setup --yes --jobs=${NJOBS} --compiler=${COMPILER} --dis
 
 # From: https://github.com/coq-community/docker-coq/blob/master/Dockerfile
 
-ENV COQ_VERSION="8.15.1"
+ENV COQ_VERSION="8.15.2"
 ENV STDPP_VERSION="1.7.0"
 ENV COQ_OPAM="coq coq-stdpp coq-itauto"
 
