@@ -2108,3 +2108,53 @@ Proof.
   intros.
   by rewrite elem_of_list_In, in_prod_iff, <- !elem_of_list_In.
 Qed.
+
+(** ** The function [lastn] and its properties *)
+
+Definition lastn {A : Type} (n : nat) (l : list A) : list A :=
+  rev (firstn n (rev l)).
+
+Lemma lastn_nil :
+  forall {A : Type} (n : nat),
+    lastn n (@nil A) = [].
+Proof.
+  by intros A n; unfold lastn; cbn; rewrite firstn_nil.
+Qed.
+
+Lemma lastn_0 :
+  forall {A : Type} (l : list A),
+    lastn 0 l = [].
+Proof.
+  by intros A l; unfold lastn; rewrite take_0.
+Qed.
+
+Lemma lastn_ge :
+  forall {A : Type} (n : nat) (l : list A),
+    length l <= n -> lastn n l = l.
+Proof.
+  intros A n l Hge.
+  unfold lastn.
+  rewrite take_ge.
+  - by rewrite rev_involutive.
+  - by rewrite rev_length.
+Qed.
+
+Lemma lastn_app_le :
+  forall {A : Type} (n : nat) (l1 l2 : list A),
+    n <= length l2 -> lastn n (l1 ++ l2) = lastn n l2.
+Proof.
+  intros A n l1 l2 Hlt.
+  unfold lastn.
+  rewrite rev_app_distr, take_app_le; [done |].
+  rewrite rev_length; lia.
+Qed.
+
+Lemma lastn_cons :
+  forall {A : Type} (n : nat) (h : A) (t : list A),
+    lastn n (h :: t) = if decide (S (length t) <= n) then h :: t else lastn n t.
+Proof.
+  intros A n h t.
+  case_decide; subst.
+  - by rewrite lastn_ge; cbn; [| lia].
+  - by rewrite (lastn_app_le _ [h] t); [| lia].
+Qed.
