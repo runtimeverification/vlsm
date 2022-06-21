@@ -2786,3 +2786,106 @@ Lemma same_VLSM_initial_message_preservation m
 Proof. by subst. Qed.
 
 End same_VLSM.
+
+Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
+  {
+    vt_valid : vvalid X l (s1, iom);
+    vt_transition : vtransition X l (s1, iom) = (s2, oom)
+  }.
+
+Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : state) : Prop :=
+| transition_next :
+    forall l iom oom (Ht : ValidTransition X l s1 iom s2 oom),
+      ValidTransitionNext X s1 s2.
+
+Section SecValidTransitionProps.
+
+Context
+  `(X : VLSM message)
+  (R := pre_loaded_with_all_messages_vlsm X)
+  .
+
+Lemma ValidTransition_preloaded_iff :
+  forall l s1 iom s2 oom,
+    ValidTransition X l s1 iom s2 oom <-> ValidTransition R l s1 iom s2 oom.
+Proof. by firstorder. Qed.
+
+Lemma ValidTransitionNext_preloaded_iff :
+  forall s1 s2, ValidTransitionNext X s1 s2 <-> ValidTransitionNext R s1 s2.
+Proof.
+  by intros; split; intros []; econstructor; apply ValidTransition_preloaded_iff.
+Qed.
+
+Lemma valid_transition_next :
+  forall l s1 iom s2 oom,
+    ValidTransition X l s1 iom s2 oom -> ValidTransitionNext X s1 s2.
+Proof. by intros * [Hv Ht]; econstructor. Qed.
+
+Lemma input_valid_transition_forget_input :
+  forall l s1 iom s2 oom,
+    input_valid_transition X l (s1, iom) (s2, oom) ->
+    ValidTransition X l s1 iom s2 oom.
+Proof. by firstorder. Qed.
+
+End SecValidTransitionProps.
+
+Class HistoryVLSM `(X : VLSM message) : Prop :=
+  {
+    not_ValidTransitionNext_initial :
+      forall s2, vinitial_state_prop X s2 ->
+      forall s1, ~ ValidTransitionNext X s1 s2;
+    unique_transition_to_state :
+      forall [s : vstate X],
+      forall [l1 s1 iom1 oom1], ValidTransition X l1 s1 iom1 s oom1 ->
+      forall [l2 s2 iom2 oom2], ValidTransition X l2 s2 iom2 s oom2 ->
+      l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2
+  }.
+
+Global Hint Mode HistoryVLSM - ! : typeclass_instances.
+
+#[export] Instance preloaded_history_vlsm
+  `{HistoryVLSM message X} : HistoryVLSM (pre_loaded_with_all_messages_vlsm X).
+Proof.
+  split; intros.
+  - rewrite <- ValidTransitionNext_preloaded_iff.
+    by apply not_ValidTransitionNext_initial.
+  - by eapply (@unique_transition_to_state _ X);
+      [| apply ValidTransition_preloaded_iff..].
+Qed.
+
+Section sec_history_vlsm.
+
+Context
+  `{HistoryVLSM message X}
+  (R := pre_loaded_with_all_messages_vlsm X)
+  .
+
+Lemma history_unique_trace_to_reachable :
+  forall is s tr, finite_valid_trace_init_to R is s tr ->
+  forall is' tr', finite_valid_trace_init_to R is' s tr' ->
+    is' = is /\ tr' = tr.
+Proof.
+  intros is s tr Htr; induction Htr using finite_valid_trace_init_to_rev_ind;
+    intros is' tr' [Htr' His'].
+  - destruct_list_last tr' tr'' item Heqtr'; [by inversion Htr' | subst].
+    apply finite_valid_trace_from_to_app_split in Htr' as [_ Hitem].
+    inversion Hitem; inversion Htl; subst.
+    destruct Ht as [(_ & _ & Hv) Ht].
+    exfalso; clear His'; eapply @not_ValidTransitionNext_initial;
+      [| done | esplit; done].
+    typeclasses eauto.
+  - destruct_list_last tr' tr'' item Heqtr'; subst tr'.
+    + inversion Htr'; subst; clear Htr'.
+      destruct Ht as [(_ & _ & Hv) Ht].
+      exfalso; eapply @not_ValidTransitionNext_initial; [| done | esplit; done].
+      typeclasses eauto.
+    + apply finite_valid_trace_from_to_app_split in Htr' as [Htr' Hitem].
+      inversion Hitem; inversion Htl; subst; clear Hitem Htl.
+      apply input_valid_transition_forget_input in Ht, Ht0.
+      specialize (unique_transition_to_state Ht Ht0) as Heqs.
+      destruct_and! Heqs; subst.
+      specialize (IHHtr _ _  (conj Htr' His')).
+      by destruct_and! IHHtr; subst.
+Qed.
+
+End sec_history_vlsm.
