@@ -1549,57 +1549,47 @@ Context
   (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
-Definition composite_valid_transition l s1 iom s2 oom : Prop :=
-  composite_valid IM l (s1, iom) /\ composite_transition IM l (s1, iom) = (s2, oom).
+Record CompositeValidTransition l s1 iom s2 oom : Prop :=
+  {
+    cvt_valid : composite_valid IM l (s1, iom);
+    cvt_transition : composite_transition IM l (s1, iom) = (s2, oom)
+  }.
 
 Lemma composite_valid_transition_reachable_iff l s1 iom s2 oom :
-  composite_valid_transition l s1 iom s2 oom <-> valid_transition RFree l s1 iom s2 oom.
-Proof. firstorder. Qed.
+  CompositeValidTransition l s1 iom s2 oom <-> ValidTransition RFree l s1 iom s2 oom.
+Proof. by firstorder. Qed.
 
 Inductive CompositeValidTransitionNext (s1 s2 : composite_state IM) : Prop :=
 | composite_transition_next : forall l iom oom,
-    composite_valid IM l (s1, iom) ->
-    composite_transition IM l (s1, iom) = (s2, oom) ->
+    CompositeValidTransition l s1 iom s2 oom ->
     CompositeValidTransitionNext s1 s2.
 
 Lemma composite_valid_transition_next :
   forall l s1 iom s2 oom,
-    composite_valid_transition l s1 iom s2 oom -> CompositeValidTransitionNext s1 s2.
+    CompositeValidTransition l s1 iom s2 oom -> CompositeValidTransitionNext s1 s2.
 Proof. by intros * [Hv Ht]; econstructor. Qed.
-
-Lemma composite_valid_transition_next_iff s1 s2 :
-  CompositeValidTransitionNext s1 s2
-    <->
-  exists l iom oom, composite_valid_transition l s1 iom s2 oom.
-Proof.
-  split.
-  - by intros []; eexists _, _, _; split.
-  - by intros (l & iom & oom & ?); eapply composite_valid_transition_next.
-Qed.
 
 Lemma CompositeValidTransitionNext_reachable_iff s1 s2 :
   CompositeValidTransitionNext s1 s2 <-> ValidTransitionNext RFree s1 s2.
 Proof.
-  rewrite composite_valid_transition_next_iff, valid_transition_next_iff.
-  by firstorder.
+  by split; intros []; econstructor; apply composite_valid_transition_reachable_iff.
 Qed.
 
 Lemma composite_valid_transition_projection :
   forall l s1 iom s2 oom,
-    composite_valid_transition l s1 iom s2 oom ->
-    valid_transition (IM (projT1 l)) (projT2 l) (s1 (projT1 l)) iom (s2 (projT1 l)) oom /\
+    CompositeValidTransition l s1 iom s2 oom ->
+    ValidTransition (IM (projT1 l)) (projT2 l) (s1 (projT1 l)) iom (s2 (projT1 l)) oom /\
     s2 = state_update IM s1 (projT1 l) (s2 (projT1 l)).
 Proof.
-  intros [i li] * [Hv Ht].
-  unfold valid_transition; cbn in Ht |- *; destruct (vtransition _ _ _).
-  by inversion_clear Ht; rewrite state_update_eq.
+  intros [i li] * [Hv Ht]; cbn in Ht; destruct (vtransition _ _ _) eqn:Hti.
+  by inversion Ht; subst; cbn; rewrite state_update_eq; repeat split.
 Qed.
 
 Lemma composite_valid_transition_projection_inv :
   forall i li si1 iom si2 oom,
-    valid_transition (IM i) li si1 iom si2 oom ->
+    ValidTransition (IM i) li si1 iom si2 oom ->
     forall s1, s1 i = si1 -> forall s2, s2 = state_update IM s1 i si2 ->
-    composite_valid_transition (existT i li) s1 iom s2 oom.
+    CompositeValidTransition (existT i li) s1 iom s2 oom.
 Proof.
   intros * [Hv Ht] s1 <- s2 ->; split; [done |].
   by cbn; replace (vtransition _ _ _) with (si2, oom).
@@ -1609,16 +1599,15 @@ Lemma not_CompositeValidTransitionNext_initial :
   forall s2, composite_initial_state_prop IM s2 ->
   forall s1, ~ CompositeValidTransitionNext s1 s2.
 Proof.
-  intros s2 Hs2 s1 Hs1.
-  apply composite_valid_transition_next_iff in Hs1 as ((i, li) & iom & oom & Hs1).
+  intros s2 Hs2 s1 [* Hs1].
   apply composite_valid_transition_projection, proj1, valid_transition_next in Hs1; cbn in Hs1.
   by contradict Hs1; apply not_ValidTransitionNext_initial, Hs2.
 Qed.
 
 Lemma composite_quasi_unique_transition_to_state :
   forall [s],
-  forall [l1 s1 iom1 oom1], composite_valid_transition l1 s1 iom1 s oom1 ->
-  forall [l2 s2 iom2 oom2], composite_valid_transition l2 s2 iom2 s oom2 ->
+  forall [l1 s1 iom1 oom1], CompositeValidTransition l1 s1 iom1 s oom1 ->
+  forall [l2 s2 iom2 oom2], CompositeValidTransition l2 s2 iom2 s oom2 ->
   projT1 l1 = projT1 l2 ->
   l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
@@ -1640,8 +1629,7 @@ Proof.
   intros s1 s2 Hnext Hs2; revert s1 Hnext.
   induction Hs2 using valid_state_prop_ind; intros s1 Hnext;
     [by contradict Hnext; apply not_CompositeValidTransitionNext_initial |].
-  apply composite_valid_transition_next_iff in Hnext
-    as ([j lj] & iom & oom & Hnext).
+  destruct Hnext as [[j lj] iom oom Hnext].
   destruct l as [i li].
   destruct (decide (i = j)).
   - subst; apply input_valid_transition_forget_input in Ht as Hvt.
@@ -1659,8 +1647,7 @@ Proof.
     specialize (IHHs2 (state_update IM s j (s1 j))).
     spec IHHs2.
     {
-      apply composite_valid_transition_next_iff.
-      exists (existT j lj), iom, oom.
+      split with (existT j lj) iom oom.
       apply composite_valid_transition_projection_inv with (s1 j) (s' j).
       - by split.
       - apply state_update_eq.

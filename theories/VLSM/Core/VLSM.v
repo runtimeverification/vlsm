@@ -2787,38 +2787,47 @@ Proof. by subst. Qed.
 
 End same_VLSM.
 
-Definition valid_transition `(X : VLSM message) l s1 iom s2 oom : Prop :=
-  vvalid X l (s1, iom) /\ vtransition X l (s1, iom) = (s2, oom).
+Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
+  {
+    vt_valid : vvalid X l (s1, iom);
+    vt_transition : vtransition X l (s1, iom) = (s2, oom)
+  }.
 
 Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : state) : Prop :=
-| transition_next : forall l iom oom,
-    vvalid X l (s1, iom) ->
-    vtransition X l (s1, iom) = (s2, oom) ->
-    ValidTransitionNext X s1 s2.
+| transition_next :
+    forall l iom oom (Ht : ValidTransition X l s1 iom s2 oom),
+      ValidTransitionNext X s1 s2.
 
-Lemma ValidTransitionNext_preloaded_iff
-  `(X : VLSM message) (R := pre_loaded_with_all_messages_vlsm X) :
-  forall s1 s2, ValidTransitionNext X s1 s2 <-> ValidTransitionNext R s1 s2.
-Proof. by intros; split; intros []; econstructor. Qed.
+Section SecValidTransitionProps.
 
-Lemma valid_transition_next `(X : VLSM message) :
+Context
+  `(X : VLSM message)
+  (R := pre_loaded_with_all_messages_vlsm X)
+  .
+
+Lemma ValidTransition_preloaded_iff :
   forall l s1 iom s2 oom,
-    valid_transition X l s1 iom s2 oom -> ValidTransitionNext X s1 s2.
-Proof. by intros * [Hv Ht]; econstructor. Qed.
+    ValidTransition X l s1 iom s2 oom <-> ValidTransition R l s1 iom s2 oom.
+Proof. by firstorder. Qed.
 
-Lemma valid_transition_next_iff `(X : VLSM message) s1 s2 :
-  ValidTransitionNext X s1 s2 <-> exists l iom oom, valid_transition X l s1 iom s2 oom.
+Lemma ValidTransitionNext_preloaded_iff :
+  forall s1 s2, ValidTransitionNext X s1 s2 <-> ValidTransitionNext R s1 s2.
 Proof.
-  split.
-  - by intros []; eexists _, _, _; split.
-  - by intros (l & iom & oom & ?); eapply valid_transition_next.
+  by intros; split; intros []; econstructor; apply ValidTransition_preloaded_iff.
 Qed.
 
-Lemma input_valid_transition_forget_input `(X : VLSM message) :
+Lemma valid_transition_next :
+  forall l s1 iom s2 oom,
+    ValidTransition X l s1 iom s2 oom -> ValidTransitionNext X s1 s2.
+Proof. by intros * [Hv Ht]; econstructor. Qed.
+
+Lemma input_valid_transition_forget_input :
   forall l s1 iom s2 oom,
     input_valid_transition X l (s1, iom) (s2, oom) ->
-    valid_transition X l s1 iom s2 oom.
-Proof. by intros * [(_ & _ & Hv) Ht]. Qed.
+    ValidTransition X l s1 iom s2 oom.
+Proof. by firstorder. Qed.
+
+End SecValidTransitionProps.
 
 Class HistoryVLSM `(X : VLSM message) : Prop :=
   {
@@ -2827,8 +2836,8 @@ Class HistoryVLSM `(X : VLSM message) : Prop :=
       forall s1, ~ ValidTransitionNext X s1 s2;
     unique_transition_to_state :
       forall [s : vstate X],
-      forall [l1 s1 iom1 oom1], valid_transition X l1 s1 iom1 s oom1 ->
-      forall [l2 s2 iom2 oom2], valid_transition X l2 s2 iom2 s oom2 ->
+      forall [l1 s1 iom1 oom1], ValidTransition X l1 s1 iom1 s oom1 ->
+      forall [l2 s2 iom2 oom2], ValidTransition X l2 s2 iom2 s oom2 ->
       l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2
   }.
 
@@ -2840,7 +2849,8 @@ Proof.
   split; intros.
   - rewrite <- ValidTransitionNext_preloaded_iff.
     by apply not_ValidTransitionNext_initial.
-  - by eapply (@unique_transition_to_state _ X).
+  - by eapply (@unique_transition_to_state _ X);
+      [| apply ValidTransition_preloaded_iff..].
 Qed.
 
 Section sec_history_vlsm.
