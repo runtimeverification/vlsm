@@ -2834,7 +2834,7 @@ Class HistoryVLSM `(X : VLSM message) : Prop :=
 
 Global Hint Mode HistoryVLSM - ! : typeclass_instances.
 
-Global Instance preloaded_history_vlsm
+#[export] Instance preloaded_history_vlsm
   `{HistoryVLSM message X} : HistoryVLSM (pre_loaded_with_all_messages_vlsm X).
 Proof.
   split; intros.
