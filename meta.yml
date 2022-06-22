@@ -43,8 +43,8 @@ license:
   file: LICENSE.md
 
 supported_coq_versions:
-  text: 8.15
-  opam: '{>= "8.15" & <= "8.16~"}'
+  text: 8.15 or later
+  opam: '{>= "8.15"}'
 
 dependencies:
 - opam:
