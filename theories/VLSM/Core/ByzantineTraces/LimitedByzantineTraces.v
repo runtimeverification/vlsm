@@ -367,7 +367,7 @@ Proof.
   - constructor; apply initial_state_is_valid.
     by repeat split; cbn; apply lift_sub_state_initial.
   - by cbn; apply lift_sub_state_initial.
-  - apply list_subseteq_nil.
+  - by apply list_subseteq_nil.
   - subst s_reset_byzantine bs btr.
     unfold pre_VLSM_full_projection_finite_trace_project
     ; rewrite !map_app; setoid_rewrite annotate_trace_from_app; cbn
@@ -376,7 +376,9 @@ Proof.
     destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i
     ; destruct IHHbyzantine as [[Htr0_ann Hsi_ann] Htr0_eqv_byzantine]
     ; cbn in Htr0_eqv_byzantine |- *.
-    remember (@finite_trace_last _(annotated_type (free_composite_vlsm IM) (set index)) _ _)
+    unfold msg_dep_annotate_trace_with_equivocators,
+     coeqv_annotate_trace_with_equivocators, annotate_trace in Htr0_eqv_byzantine.
+    remember (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) (set index)) _ _)
           as lst.
     assert (Hlsti : original_state lst = lift_sub_state IM (set_diff (enum index) byzantine)
                                           (finite_trace_last si tr0)).
