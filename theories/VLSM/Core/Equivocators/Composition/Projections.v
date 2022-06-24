@@ -1,5 +1,5 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
-From Coq Require Import FinFun FunctionalExtensionality Program.
+From Coq Require Import FinFun FunctionalExtensionality.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet FinExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
@@ -1305,10 +1305,8 @@ Proof.
         destruct l as (i, li).
         simpl in *.
         destruct Hchar1 as [[Hex Heq_l] [Heq_input [Heq_output [Hpr_s Heq_descli]]]].
-        inversion Heq_l. subst ix.
-        simpl_existT. subst lix input output.
+        simplify_eq.
         destruct Hchar2 as [Hvx_pr Htx_pr].
-        rewrite Hpr_s.
         apply finite_valid_trace_from_to_singleton.
         repeat split
         ; [| apply any_message_is_valid_in_preloaded | done | done].
