@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep Program.
+From Coq Require Import Streams FunctionalExtensionality FinFun.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.StreamExtras.
 From VLSM Require Import Core.VLSM Core.Plans Core.VLSMProjections.
 
@@ -1613,10 +1613,10 @@ Lemma CompositeValidTransitionsFromTo_trace : forall s s' tr,
   finite_valid_trace_from_to RFree s s' tr ->
   CompositeValidTransitionsFromTo s s' tr.
 Proof.
-  induction 1 using finite_valid_trace_from_to_rev_ind; [constructor |].
-  remember {| destination := sf |} as item;
-    replace sf with (destination item) by (subst; done);
-    econstructor; [done |]; subst.
+  induction 1 using finite_valid_trace_from_to_rev_ind; [by constructor |].
+  remember {| destination := sf |} as item.
+  replace sf with (destination item) by (subst; done).
+  econstructor; [done |]; subst.
   by apply composite_valid_transition_reachable_iff, input_valid_transition_forget_input.
 Qed.
 
@@ -1662,9 +1662,9 @@ Qed.
 
 Lemma CompositeValidTransition_reflects_rechability :
   forall l s1 iom s2 oom,
-    CompositeValidTransition IM l s1 iom s2 oom ->
-    valid_state_prop RFree s2 ->
-    input_valid_transition RFree l (s1, iom) (s2, oom).
+  CompositeValidTransition IM l s1 iom s2 oom ->
+  valid_state_prop RFree s2 ->
+  input_valid_transition RFree l (s1, iom) (s2, oom).
 Proof.
   intros * Hnext Hs2; revert l s1 iom oom Hnext.
   induction Hs2 using valid_state_prop_ind; intros * Hnext.
@@ -1675,7 +1675,7 @@ Proof.
     + subst; apply input_valid_transition_forget_input in Ht as Hvt.
       apply composite_valid_transition_reachable_iff in Hvt.
       specialize (composite_quasi_unique_transition_to_state Hnext Hvt eq_refl) as Heq.
-      by destruct_and! Heq; simpl_existT; subst.
+      by destruct_and! Heq; simplify_eq.
     + apply input_valid_transition_forget_input in Ht as Hti.
       apply composite_valid_transition_reachable_iff,
         composite_valid_transition_projection in Hti;
@@ -1688,13 +1688,14 @@ Proof.
       {
         apply composite_valid_transition_projection_inv with (s1 j) (s' j).
         - by split.
-        - apply state_update_eq.
+        - by apply state_update_eq.
         - rewrite state_update_twice.
           symmetry; apply state_update_id.
           apply f_equal with (f := fun s => s j) in Heqs'.
           by rewrite state_update_eq, state_update_neq in Heqs'.
       }
-      assert (Hss1 : input_valid_transition RFree (existT i li) (state_update IM s j (s1 j), om) (s1, om')).
+      assert (Hss1 : input_valid_transition RFree (existT i li)
+                  (state_update IM s j (s1 j), om) (s1, om')).
       {
         repeat split; [apply IHHs2 | apply any_message_is_valid_in_preloaded |..].
         - by cbn; rewrite state_update_neq.
@@ -1708,10 +1709,9 @@ Proof.
       }
       repeat split; cbn.
       * by eapply input_valid_transition_destination.
-      * apply any_message_is_valid_in_preloaded.
+      * by apply any_message_is_valid_in_preloaded.
       * done.
-      * replace (vtransition _ _ _) with (s' j, oom).
-        by f_equal.
+      * by replace (vtransition _ _ _) with (s' j, oom); f_equal.
 Qed.
 
 Lemma CompositeValidTransitionNext_reflects_rechability :

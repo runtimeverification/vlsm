@@ -1,5 +1,5 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
-From Coq Require Import FunctionalExtensionality Lia FinFun Eqdep Program.
+From Coq Require Import FunctionalExtensionality Lia FinFun.
 From stdpp Require Import prelude finite.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
 From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.
@@ -311,13 +311,11 @@ Proof.
   unfold composite_label_sub_projection in HlX.
   simpl in HlX.
   apply Some_inj in HlX.
-  inversion HlX. subst.
-  simpl_existT. subst.
+  simplify_eq.
   exists i.
   split; [done |].
-  cbn in Hv.
-  exists li, (sX i).
-  repeat split; [|apply any_message_is_valid_in_preloaded|apply Hv].
+  exists _li, (sX i).
+  repeat split; [|apply any_message_is_valid_in_preloaded| apply Hv].
   apply (VLSM_projection_valid_state (preloaded_component_projection IM i)).
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))).
   by apply (VLSM_incl_valid_state (constraint_free_incl IM constraint)).
