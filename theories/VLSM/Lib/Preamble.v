@@ -603,20 +603,14 @@ Lemma Comparable_comparable_iff :
     Comparable R a b <-> comparable R a b.
 Proof.
   split; [by intros []; firstorder|].
-  intros [|[|]].
-  - by constructor 1.
-  - by constructor 2.
-  - by constructor 3.
+  by intros [|[|]]; constructor.
 Qed.
 
 Lemma tc_Comparable :
   forall A (R : relation A) (a b : A),
     Comparable R a b -> Comparable (tc R) a b.
 Proof.
-  intros *; inversion 1.
-  - by constructor 1.
-  - by constructor 2; constructor.
-  - by constructor 3; constructor.
+  by intros *; inversion 1; repeat constructor.
 Qed.
 
 Lemma comparable_commutative

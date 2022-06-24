@@ -316,8 +316,8 @@ Lemma full_node_is_sent_locally_equivocating_weaker s v:
   full_node_is_locally_equivocating s v ->
   full_node_is_sent_locally_equivocating s v.
 Proof.
-  intros (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]); exists m1, m2;
-    constructor; [done.. |].
+  intros (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]).
+  exists m1, m2; constructor; [done.. |].
   by contradict Hncomp; apply tc_Comparable.
 Qed.
 
@@ -325,8 +325,8 @@ Lemma full_node_is_locally_equivocating_stronger s v:
   full_node_is_locally_equivocating s v ->
   msg_dep_is_locally_equivocating s v.
 Proof.
-  intros (m1 & m2 & []); exists m1, m2; constructor; [done | done | | | done];
-    by constructor 1.
+  intros (m1 & m2 & []).
+  by exists m1, m2; constructor; [| | constructor | constructor |].
 Qed.
 
 (**
@@ -522,8 +522,8 @@ Lemma composite_HasBeenRecursivelyObserved_iff : forall s m,
   exists i, HasBeenRecursivelyObserved (IM i) message_dependencies (s i) m.
 Proof.
   split; [| by intros []; eapply composite_HasBeenRecursivelyObserved_lift].
-  intros [[i Hobsi] |m' [i Hobsi] Hmm']; exists i;
-    [by constructor 1 | by econstructor 2].
+  intros [[i Hobsi] |m' [i Hobsi] Hmm'];
+    exists i; [by constructor 1 | by econstructor 2].
 Qed.
 
 (**
@@ -586,8 +586,8 @@ Proof.
   }
   destruct Hobs as [Hobs | m' Hobs Hhb]; [done |].
   destruct Hobs as [i Hobs]; exists i.
-  eapply msg_dep_full_node_happens_before_reflects_has_been_observed; try done.
-  by apply valid_state_project_preloaded_to_preloaded.
+  by eapply msg_dep_full_node_happens_before_reflects_has_been_observed
+  ; [| | apply valid_state_project_preloaded_to_preloaded | |].
 Qed.
 
 Lemma msg_dep_locally_is_globally_equivocating

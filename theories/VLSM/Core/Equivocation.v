@@ -1603,7 +1603,8 @@ Proof.
   eapply has_been_sent_examine_one_trace, Exists_exists in Hsent
     as (item_z & Hitem_z & Hz); [| done].
   apply elem_of_list_split in Hitem_z as (pre_z & suf_z & ->).
-  eapply proj1, valid_trace_forget_last, input_valid_transition_to in Htr; [| done].
+  destruct Htr as [Htr _].
+  eapply valid_trace_forget_last, input_valid_transition_to in Htr; [| done].
   cbn in Hz; rewrite Hz in Htr.
   by eexists _,_,_.
 Qed.
