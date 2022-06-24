@@ -88,6 +88,14 @@ Proof.
   - by revert Htrans; apply Transitive_reexpress_impl.
 Qed.
 
+Lemma transitive_tc_idempotent `(Transitive A R) :
+  forall a b, R a b <-> tc R a b.
+Proof.
+  split; [by constructor |].
+  induction 1; [done |].
+  by etransitivity.
+Qed.
+
 (** If the a relation <<R>> reflects a predicate <<P>>, then its
 transitive closure will also reflect it. *)
 Lemma tc_reflect
@@ -577,6 +585,11 @@ Proof.
   apply compare_eq_dec.
 Qed.
 
+Inductive Comparable `(R : relation A) : relation A :=
+| comparable_eq : forall a b, a = b -> Comparable R a b
+| comparable_ab : forall a b, R a b -> Comparable R a b
+| comparable_ba : forall a b, R b a -> Comparable R a b.
+
 Definition comparable
   {A : Type}
   (R : A -> A -> Prop)
@@ -584,6 +597,27 @@ Definition comparable
   : Prop
   :=
   a = b \/ R a b \/ R b a.
+
+Lemma Comparable_comparable_iff :
+  forall A (R : relation A) (a b : A),
+    Comparable R a b <-> comparable R a b.
+Proof.
+  split; [by intros []; firstorder|].
+  intros [|[|]].
+  - by constructor 1.
+  - by constructor 2.
+  - by constructor 3.
+Qed.
+
+Lemma tc_Comparable :
+  forall A (R : relation A) (a b : A),
+    Comparable R a b -> Comparable (tc R) a b.
+Proof.
+  intros *; inversion 1.
+  - by constructor 1.
+  - by constructor 2; constructor.
+  - by constructor 3; constructor.
+Qed.
 
 Lemma comparable_commutative
    {A : Type}

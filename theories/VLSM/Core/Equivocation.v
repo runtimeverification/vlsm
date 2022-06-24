@@ -1583,6 +1583,49 @@ Global Program Instance HasBeenObservedCapability_from_sent_received
 
 End sent_received_observed_capabilities.
 
+Lemma sent_can_emit
+  [message]
+  (X : VLSM message)
+  `{HasBeenSentCapability message X}
+  (s : state)
+  (Hs : valid_state_prop X s)
+  (m : message)
+  (Hsent : has_been_sent X s m) :
+  can_emit X m.
+Proof.
+  apply valid_state_has_trace in Hs as (is & tr & Htr).
+  assert (Hpre_tr: finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X) is s tr).
+  {
+    clear -Htr; destruct X;
+      by eapply VLSM_incl_finite_valid_trace_init_to;
+        [apply vlsm_incl_pre_loaded_with_all_messages_vlsm |].
+  }
+  eapply has_been_sent_examine_one_trace, Exists_exists in Hsent
+    as (item_z & Hitem_z & Hz); [| done].
+  apply elem_of_list_split in Hitem_z as (pre_z & suf_z & ->).
+  eapply proj1, valid_trace_forget_last, input_valid_transition_to in Htr; [| done].
+  cbn in Hz; rewrite Hz in Htr.
+  by eexists _,_,_.
+Qed.
+
+Lemma preloaded_sent_can_emit
+  [message]
+  (X : VLSM message)
+  `{HasBeenSentCapability message X}
+  (s : state)
+  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (m : message)
+  (Hsent : has_been_sent X s m) :
+  can_emit (pre_loaded_with_all_messages_vlsm X) m.
+Proof.
+  pose (Heq := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X).
+  rewrite (VLSM_eq_can_emit Heq).
+  eapply sent_can_emit; [by apply (VLSM_eq_valid_state Heq) |].
+  Unshelve.
+  2: by cbn; apply preloaded_HasBeenSentCapability.
+  done.
+Qed.
+
 Lemma sent_valid
     [message]
     (X : VLSM message)
@@ -1593,15 +1636,7 @@ Lemma sent_valid
     (Hsent : has_been_sent X s m) :
     valid_message_prop X m.
 Proof.
-  induction Hs using valid_state_prop_ind.
-  - contradict Hsent.
-    eapply oracle_no_inits; [| done].
-    apply has_been_sent_stepwise_from_trace.
-  - apply input_valid_transition_out in Ht as Hom'.
-    apply preloaded_weaken_input_valid_transition in Ht.
-    erewrite oracle_step_update in Hsent
-    ; [| apply has_been_sent_stepwise_from_trace | done].
-    destruct Hsent as [[= ->] | Hsent]; auto.
+  by apply emitted_messages_are_valid_iff; right; eapply sent_can_emit.
 Qed.
 
 Lemma received_valid

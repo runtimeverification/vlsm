@@ -212,6 +212,159 @@ Qed.
 
 End sec_message_dependencies.
 
+(** ** Local Equivocation Based on Message Dependencies
+
+Inspired by the definitions of observability and local equivocation given for
+the ELMO protocol, we introduce abstract notions for local equivocation based
+on message dependencies.
+*)
+Section sec_message_dependencies_equivocation.
+
+Context
+  {message : Type}
+  (X : VLSM message)
+  `{!HasBeenSentCapability X}
+  `{!HasBeenReceivedCapability X}
+  (message_dependencies : message -> set message)
+  `(sender : message -> option validator)
+  (R := pre_loaded_with_all_messages_vlsm X)
+  .
+
+(**
+A message can be recursively observed in a state if it either has been directly
+observed in the state (as sent or received), or it [msg_dep_happens_before]
+a directly observed message.
+*)
+Inductive HasBeenRecursivelyObserved (s : vstate X) (m : message) : Prop :=
+| hbro_directly :
+    has_been_observed X s m ->
+    HasBeenRecursivelyObserved s m
+| hbro_indirectly :
+    forall m',
+      has_been_observed X s m' ->
+      msg_dep_happens_before message_dependencies m m' ->
+      HasBeenRecursivelyObserved s m.
+
+(**
+A pair of messages constitutes a (local) evidence of equivocation for a
+validator <<v>> in a state <<s>> is both messages have <<v>> as a sender,
+each message [HasBeenRecursivelyObserved] in <<s>>, and the messages are not
+comparable through the [msg_dep_happens_before] relation.
+*)
+Record MsgDepLocalEquivocationEvidence
+  (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
+  {
+    mdlee_sender1 : sender m1 = Some v;
+    mdlee_sender2 : sender m2 = Some v;
+    mdlee_observed1 : HasBeenRecursivelyObserved s m1;
+    mdlee_observed2 : HasBeenRecursivelyObserved s m2;
+    mdlee_incomparable : ~ Comparable (msg_dep_happens_before message_dependencies) m1 m2;
+  }.
+
+Definition msg_dep_is_locally_equivocating (s : vstate X) (v : validator) : Prop :=
+  exists m1 m2, MsgDepLocalEquivocationEvidence s v m1 m2.
+
+(**
+Under the full-node assumptions, due to Lemma [msg_dep_full_node_happens_before_reflects_has_been_observed],
+we can give a simpler alternative to [MsgDepLocalEquivocationEvidence] which
+only requires that each message [has_been_observed] directly in the state.
+*)
+Record FullNodeLocalEquivocationEvidence
+  (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
+  {
+    fnlee_sender1 : sender m1 = Some v;
+    fnlee_sender2 : sender m2 = Some v;
+    fnlee_observed1 : has_been_observed X s m1;
+    fnlee_observed2 : has_been_observed X s m2;
+    fnlee_incomparable : ~ Comparable (msg_dep_happens_before message_dependencies) m1 m2;
+  }.
+
+Definition full_node_is_locally_equivocating (s : vstate X) (v : validator) : Prop :=
+  exists m1 m2, FullNodeLocalEquivocationEvidence s v m1 m2.
+
+(**
+If the states and messages are more tightly coupled (e.g., there is a unique 
+state from which a given message can be emitted), then the sent messages of
+a state would be totally ordered by the [msg_dep_rel]ation.
+*)
+Definition has_been_sent_msg_dep_comparable_prop : Prop :=
+  forall (s : vstate X), valid_state_prop R s ->
+  forall (m1 m2 : message),
+    has_been_sent X s m1 ->
+    has_been_sent X s m2 ->
+    Comparable (msg_dep_rel message_dependencies) m1 m2.
+
+(**
+We present yet another definition for local evidence of equivocation assuming
+both full-node and the [has_been_sent_msg_dep_comparable_prop]erty.
+*)
+Record FullNodeSentLocalEquivocationEvidence
+  (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
+  {
+    fnclee_sender1 : sender m1 = Some v;
+    fnclee_sender2 : sender m2 = Some v;
+    fnclee_observed1 : has_been_observed X s m1;
+    fnclee_observed2 : has_been_observed X s m2;
+    fnclee_incomparable : ~ Comparable (msg_dep_rel message_dependencies) m1 m2;
+  }.
+
+Definition full_node_is_sent_locally_equivocating
+  (s : vstate X) (v : validator) : Prop :=
+  exists m1 m2, FullNodeSentLocalEquivocationEvidence s v m1 m2.
+
+Lemma full_node_is_sent_locally_equivocating_weaker s v:
+  full_node_is_locally_equivocating s v ->
+  full_node_is_sent_locally_equivocating s v.
+Proof.
+  intros (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]); exists m1, m2;
+    constructor; [done.. |].
+  by contradict Hncomp; apply tc_Comparable.
+Qed.
+
+Lemma full_node_is_locally_equivocating_stronger s v:
+  full_node_is_locally_equivocating s v ->
+  msg_dep_is_locally_equivocating s v.
+Proof.
+  intros (m1 & m2 & []); exists m1, m2; constructor; [done | done | | | done];
+    by constructor 1.
+Qed.
+
+(**
+Under [MessageDependencies] and full-node assumptions, any message which
+[HasBeenRecursivelyObserved] in a state, [has_been_observed] in that state, too.
+*)
+Lemma full_node_HasBeenRecursivelyObserved_is_observed
+  `{!MessageDependencies message_dependencies X}
+  (Hfull : message_dependencies_full_node_condition_prop message_dependencies X)
+  : forall s, valid_state_prop R s ->
+    forall m, HasBeenRecursivelyObserved s m <-> has_been_observed X s m.
+Proof.
+  intros s Hs m; split; [| by intros; constructor].
+  intros [Hobs | m' Hobs Hhb]; [done |].
+  by eapply msg_dep_full_node_happens_before_reflects_has_been_observed.
+Qed.
+
+(**
+Under [MessageDependencies] and full-node assumptions, the two notions of
+local equivocation defined above are equivalent.
+*)
+Lemma full_node_is_locally_equivocating_iff
+  `{!MessageDependencies message_dependencies X}
+  (Hfull : message_dependencies_full_node_condition_prop message_dependencies X)
+  : forall s, valid_state_prop R s ->
+    forall v,
+      msg_dep_is_locally_equivocating s v
+        <->
+      full_node_is_locally_equivocating s v.
+Proof.
+  intros s Hs v; split; [| apply full_node_is_locally_equivocating_stronger].
+  intros (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]); exists m1, m2;
+    split; [done | done | | | done];
+    by apply full_node_HasBeenRecursivelyObserved_is_observed.
+Qed.
+
+End sec_message_dependencies_equivocation.
+
 (* Given the VLSM for which it's defined, the other arguments (message,
 message_dependencies function, [HasBeenSentCapability] and
 [HasBeenReceivedCapability]) can be inferred from that.
@@ -316,6 +469,172 @@ Proof.
 Qed.
 
 End sec_composite_message_dependencies.
+
+(** ** Global Equivocation Based on Message Dependencies
+
+Inspired by the definitions of observability and global equivocation given for
+the ELMO protocol, we introduce abstract notions for global equivocation based
+on message dependencies.
+*)
+
+Section sec_composite_message_dependencies_equivocation.
+
+Context
+  {message : Type}
+  (message_dependencies : message -> set message)
+  `{EqDecision index}
+  (IM : index -> VLSM message)
+  `{forall i, HasBeenSentCapability (IM i)}
+  `{forall i, HasBeenReceivedCapability (IM i)}
+  `(sender : message -> option validator)
+  (Free := free_composite_vlsm IM)
+  (RFree := pre_loaded_with_all_messages_vlsm Free)
+  .
+
+(**
+A message can be recursively observed in a composite state if it either has been
+directly observed in the state (as sent or received), or it
+[msg_dep_happens_before] a directly observed message.
+*)
+Inductive CompositeHasBeenRecursivelyObserved
+  (s : composite_state IM) (m : message) : Prop :=
+| chbro_directly :
+    composite_has_been_observed IM s m ->
+    CompositeHasBeenRecursivelyObserved s m
+| chbro_indirectly :
+    forall m',
+      composite_has_been_observed IM s m' ->
+      msg_dep_happens_before message_dependencies m m' ->
+      CompositeHasBeenRecursivelyObserved s m.
+
+Lemma composite_HasBeenRecursivelyObserved_lift : forall s m i,
+  HasBeenRecursivelyObserved (IM i) message_dependencies (s i) m ->
+  CompositeHasBeenRecursivelyObserved s m.
+Proof.
+  intros s m i [].
+  - by constructor 1; eexists.
+  - by econstructor 2; [eexists |].
+Qed.
+
+Lemma composite_HasBeenRecursivelyObserved_iff : forall s m,
+  CompositeHasBeenRecursivelyObserved s m
+    <->
+  exists i, HasBeenRecursivelyObserved (IM i) message_dependencies (s i) m.
+Proof.
+  split; [| by intros []; eapply composite_HasBeenRecursivelyObserved_lift].
+  intros [[i Hobsi] |m' [i Hobsi] Hmm']; exists i;
+    [by constructor 1 | by econstructor 2].
+Qed.
+
+(**
+A messages constitutes a (global) evidence of equivocation for a
+validator <<v>> in a composite state <<s>> is the messages has <<v>> as a sender,
+it [CompositeHasBeenRecursivelyObserved] in <<s>>, but not
+[composite_has_been_sent] in <<s>>.
+*)
+Record MsgDepGlobalEquivocationEvidence
+  (s : composite_state IM) (v : validator) (m : message) : Prop :=
+  {
+    mdgee_sender : sender m = Some v;
+    mdgee_rec_observed : CompositeHasBeenRecursivelyObserved s m;
+    mdgee_not_sent : ~ composite_has_been_sent IM s m;
+  }.
+
+Definition msg_dep_is_globally_equivocating
+  (s : composite_state IM) (v : validator) : Prop :=
+  exists m : message, MsgDepGlobalEquivocationEvidence s v m.
+
+(**
+Under the full-node assumptions, due to Lemma [msg_dep_full_node_happens_before_reflects_has_been_observed],
+we can give a simpler alternative to [MsgDepGlobalEquivocationEvidence] which
+only requires that the message [composite_has_been_received] in the state.
+*)
+Record FullNodeGlobalEquivocationEvidence
+  (s : composite_state IM) (v : validator) (m : message) : Prop :=
+  {
+    fngee_sender : sender m = Some v;
+    fngee_received : composite_has_been_received IM s m;
+    fngee_not_sent : ~ composite_has_been_sent IM s m;
+  }.
+
+Definition full_node_is_globally_equivocating
+  (s : composite_state IM) (v : validator) : Prop :=
+  exists m : message, FullNodeGlobalEquivocationEvidence s v m.
+
+Lemma full_node_is_globally_equivocating_stronger s v:
+  full_node_is_globally_equivocating s v ->
+  msg_dep_is_globally_equivocating s v.
+Proof.
+  intros [m []]; exists m; constructor; [done | | done].
+  by constructor 1; apply composite_has_been_observed_sent_received_iff; right.
+Qed.
+
+Lemma full_node_is_globally_equivocating_iff
+  `{forall i, MessageDependencies message_dependencies (IM i)}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  : forall s, valid_state_prop RFree s ->
+    forall v,
+      msg_dep_is_globally_equivocating s v
+        <->
+      full_node_is_globally_equivocating s v.
+Proof.
+  intros s Hs v; split; [| apply full_node_is_globally_equivocating_stronger].
+  intros [m [Hsender Hobs Hnsent]]; exists m; split; [done | | done].
+  cut (composite_has_been_observed IM s m).
+  {
+    by rewrite composite_has_been_observed_sent_received_iff; intros [].
+  }
+  destruct Hobs as [Hobs | m' Hobs Hhb]; [done |].
+  destruct Hobs as [i Hobs]; exists i.
+  eapply msg_dep_full_node_happens_before_reflects_has_been_observed; try done.
+  by apply valid_state_project_preloaded_to_preloaded.
+Qed.
+
+Lemma msg_dep_locally_is_globally_equivocating
+  (A : validator -> index)
+  (Hsafety : sender_safety_alt_prop IM A sender)
+  (Hsent_comparable :
+    forall i, has_been_sent_msg_dep_comparable_prop (IM i) message_dependencies)
+  : forall s, valid_state_prop RFree s ->
+    forall i v,
+    msg_dep_is_locally_equivocating (IM i) message_dependencies sender (s i) v ->
+    msg_dep_is_globally_equivocating s v.
+Proof.
+  intros s Hs i v (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]).
+  apply valid_state_has_trace in Hs as Htr.
+  destruct Htr as (? & ? & ?).
+  destruct (decide (has_been_sent (IM (A v)) (s (A v)) m1));
+    [destruct (decide (has_been_sent (IM (A v)) (s (A v)) m2)) |]; cycle 1.
+  1,2: eexists; split;
+      [..| by contradict n; eapply has_been_sent_iff_by_sender];
+      [done | by eapply composite_HasBeenRecursivelyObserved_lift].
+  contradict Hncomp; eapply tc_Comparable, Hsent_comparable; [| done..].
+  by eapply valid_state_project_preloaded_to_preloaded.
+Qed.
+
+Lemma full_node_sent_locally_is_globally_equivocating
+  (A : validator -> index)
+  (Hsafety : sender_safety_alt_prop IM A sender)
+  (Hsent_comparable :
+    forall i, has_been_sent_msg_dep_comparable_prop (IM i) message_dependencies)
+  : forall s, valid_state_prop RFree s ->
+    forall i v,
+    full_node_is_sent_locally_equivocating (IM i) message_dependencies sender (s i) v ->
+    msg_dep_is_globally_equivocating s v.
+Proof.
+  intros s Hs i v (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]).
+  apply valid_state_has_trace in Hs as Htr.
+  destruct Htr as (? & ? & ?).
+  destruct (decide (has_been_sent (IM (A v)) (s (A v)) m1));
+    [destruct (decide (has_been_sent (IM (A v)) (s (A v)) m2)) |]; cycle 1.
+  1,2: eexists; split; cycle 2; 
+      [by contradict n; eapply has_been_sent_iff_by_sender | done |];
+      by constructor 1; eexists.
+  contradict Hncomp; eapply Hsent_comparable; [| done..].
+  by eapply valid_state_project_preloaded_to_preloaded.
+Qed.
+
+End sec_composite_message_dependencies_equivocation.
 
 Section sec_sub_composite_message_dependencies.
 
