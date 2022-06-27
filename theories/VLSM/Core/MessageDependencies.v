@@ -258,7 +258,7 @@ Record MsgDepLocalEquivocationEvidence
     mdlee_sender2 : sender m2 = Some v;
     mdlee_observed1 : HasBeenRecursivelyObserved s m1;
     mdlee_observed2 : HasBeenRecursivelyObserved s m2;
-    mdlee_incomparable : ~ Comparable (msg_dep_happens_before message_dependencies) m1 m2;
+    mdlee_incomparable : ~ comparable (msg_dep_happens_before message_dependencies) m1 m2;
   }.
 
 Definition msg_dep_is_locally_equivocating (s : vstate X) (v : validator) : Prop :=
@@ -277,7 +277,7 @@ Record FullNodeLocalEquivocationEvidence
     fnlee_sender2 : sender m2 = Some v;
     fnlee_observed1 : has_been_observed X s m1;
     fnlee_observed2 : has_been_observed X s m2;
-    fnlee_incomparable : ~ Comparable (msg_dep_happens_before message_dependencies) m1 m2;
+    fnlee_incomparable : ~ comparable (msg_dep_happens_before message_dependencies) m1 m2;
   }.
 
 Definition full_node_is_locally_equivocating (s : vstate X) (v : validator) : Prop :=
@@ -293,7 +293,7 @@ Definition has_been_sent_msg_dep_comparable_prop : Prop :=
   forall (m1 m2 : message),
     has_been_sent X s m1 ->
     has_been_sent X s m2 ->
-    Comparable (msg_dep_rel message_dependencies) m1 m2.
+    comparable (msg_dep_rel message_dependencies) m1 m2.
 
 (**
 We present yet another definition for local evidence of equivocation assuming
@@ -306,7 +306,7 @@ Record FullNodeSentLocalEquivocationEvidence
     fnclee_sender2 : sender m2 = Some v;
     fnclee_observed1 : has_been_observed X s m1;
     fnclee_observed2 : has_been_observed X s m2;
-    fnclee_incomparable : ~ Comparable (msg_dep_rel message_dependencies) m1 m2;
+    fnclee_incomparable : ~ comparable (msg_dep_rel message_dependencies) m1 m2;
   }.
 
 Definition full_node_is_sent_locally_equivocating
@@ -319,7 +319,7 @@ Lemma full_node_is_sent_locally_equivocating_weaker s v:
 Proof.
   intros (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]).
   exists m1, m2; constructor; [done.. |].
-  by contradict Hncomp; apply tc_Comparable.
+  by contradict Hncomp; apply tc_comparable.
 Qed.
 
 Lemma full_node_is_locally_equivocating_stronger s v:
@@ -611,7 +611,7 @@ Proof.
   1,2: eexists; split;
       [..| by contradict n; eapply has_been_sent_iff_by_sender];
       [done | by eapply composite_HasBeenRecursivelyObserved_lift].
-  contradict Hncomp; eapply tc_Comparable, Hsent_comparable; [| done..].
+  contradict Hncomp; eapply tc_comparable, Hsent_comparable; [| done..].
   by eapply valid_state_project_preloaded_to_preloaded.
 Qed.
 

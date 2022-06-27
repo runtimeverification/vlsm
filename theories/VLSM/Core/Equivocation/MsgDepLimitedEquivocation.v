@@ -143,6 +143,21 @@ Definition msg_dep_message_equivocators :=
 Definition msg_dep_annotate_trace_with_equivocators :=
   coeqv_annotate_trace_with_equivocators IM sender msg_dep_coequivocating_senders.
 
+Lemma msg_dep_annotate_trace_with_equivocators_app : forall sa tr1 tr2,
+  msg_dep_annotate_trace_with_equivocators sa (tr1 ++ tr2)
+    =
+  msg_dep_annotate_trace_with_equivocators sa tr1 ++
+    annotate_trace_from (free_composite_vlsm IM) (set validator)
+      (coeqv_composite_transition_message_equivocators IM sender msg_dep_coequivocating_senders)
+      (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) (set validator)) {| original_state := sa; state_annotation := ` inhabitant |} (msg_dep_annotate_trace_with_equivocators sa tr1)) tr2.
+Proof. by intros; apply annotate_trace_from_app. Qed.
+
+Lemma msg_dep_annotate_trace_with_equivocators_last_original_state : forall s s' tr,
+  original_state (finite_trace_last s (msg_dep_annotate_trace_with_equivocators s' tr))
+    =
+  finite_trace_last (original_state s) tr.
+Proof. by intros; apply annotate_trace_from_last_original_state. Qed.
+
 Definition msg_dep_composite_transition_message_equivocators :=
   coeqv_composite_transition_message_equivocators IM sender msg_dep_coequivocating_senders.
 
@@ -184,9 +199,6 @@ Definition full_node_coequivocating_senders (s : composite_state IM) (m : messag
 
 Definition full_node_limited_equivocation_vlsm : VLSM message :=
   coeqv_limited_equivocation_vlsm IM sender full_node_coequivocating_senders.
-
-Definition full_node_composite_transition_message_equivocators :=
-  coeqv_composite_transition_message_equivocators IM sender full_node_coequivocating_senders.
 
 End sec_full_node_limited_equivocation.
 
@@ -243,9 +255,13 @@ Qed.
 Lemma full_node_msg_dep_composite_transition_message_equivocators
   i li (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om))
-  : full_node_composite_transition_message_equivocators IM sender (existT i li) (s, om)
+  : coeqv_composite_transition_message_equivocators
+      IM sender (full_node_coequivocating_senders IM)
+      (existT i li) (s, om)
       =
-    msg_dep_composite_transition_message_equivocators IM full_message_dependencies sender (existT i li) (s, om).
+    msg_dep_composite_transition_message_equivocators
+      IM full_message_dependencies sender
+      (existT i li) (s, om).
 Proof.
   destruct om as [m |]; [| done]; cbn; f_equal.
   unfold coeqv_message_equivocators.
@@ -259,7 +275,7 @@ Lemma msg_dep_full_node_valid_iff l (s : @state _ (annotated_type (free_composit
     vvalid (full_node_limited_equivocation_vlsm IM sender) l (s, om).
 Proof.
   cbn; unfold annotated_valid, coeqv_limited_equivocation_constraint; destruct l as [i li].
-  setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
+  rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
 Qed.
 
 Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
@@ -269,7 +285,7 @@ Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_com
 Proof.
   cbn; unfold annotated_transition;
     destruct (vtransition _ _ _) as (s', om'), l as (i, li).
-  setoid_rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
+ rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
 Qed.
 
 Lemma msg_dep_full_node_limited_equivocation_vlsm_incl :
@@ -641,8 +657,8 @@ Proof.
   induction Htr using finite_valid_trace_init_to_rev_strong_ind.
   - split; [| apply list_subseteq_nil].
     by constructor; apply initial_state_is_valid.
-  - setoid_rewrite annotate_trace_from_app; cbn
-    ; unfold annotate_trace_item; rewrite !finite_trace_last_is_last; cbn.
+  - rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.
+    unfold annotate_trace_item; rewrite !finite_trace_last_is_last; cbn.
     split; cycle 1.
     + eapply fixed_transition_preserves_annotation_equivocators
       ; [done | done | apply IHHtr1].
@@ -658,12 +674,12 @@ Proof.
         ; [by apply option_initial_message_is_valid |].
         destruct iom as [im |]; [| apply option_valid_message_None].
         eapply valid_trace_output_is_valid; [done |].
-        setoid_rewrite annotate_trace_from_app.
+        rewrite @msg_dep_annotate_trace_with_equivocators_app.
         apply Exists_app; right.
         destruct iom_item.
         apply Exists_exists; eexists; split; [left | done].
-      * destruct l as [i li]; cbn
-        ; rewrite annotate_trace_from_last_original_state; cbn.
+      * destruct l as [i li]; cbn.
+        rewrite msg_dep_annotate_trace_with_equivocators_last_original_state; cbn.
         replace (finite_trace_last _ _) with s
              by (apply valid_trace_get_last in Htr1; congruence).
         apply Ht.
@@ -682,7 +698,7 @@ Proof.
               ; [done | done | apply IHHtr1].
            ++ intro; apply elem_of_remove_dups.
       * destruct l as [i li]; cbn; unfold annotated_transition; cbn.
-        rewrite !annotate_trace_from_last_original_state; cbn.
+        rewrite !msg_dep_annotate_trace_with_equivocators_last_original_state; cbn.
         replace (finite_trace_last _ _) with s
              by (apply valid_trace_get_last in Htr1; congruence).
         by destruct Ht as [_ Ht]; cbn in Ht

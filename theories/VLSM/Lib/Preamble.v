@@ -585,120 +585,43 @@ Proof.
   apply compare_eq_dec.
 Qed.
 
-Inductive Comparable `(R : relation A) : relation A :=
-| comparable_eq : forall a b, a = b -> Comparable R a b
-| comparable_ab : forall a b, R a b -> Comparable R a b
-| comparable_ba : forall a b, R b a -> Comparable R a b.
+Definition comparable `(R : relation A) : relation A :=
+  fun x y => exists c, CompSpec (=) R  x y c.
 
-Definition comparable
-  {A : Type}
-  (R : A -> A -> Prop)
-  (a b : A)
-  : Prop
-  :=
-  a = b \/ R a b \/ R b a.
+Lemma tc_CompSpec :
+  forall A (Peq Plt : relation A) (a b : A) (c : comparison),
+  CompSpec Peq Plt a b c -> CompSpec Peq (tc Plt) a b c.
+Proof. by intros *; inversion 1; subst; repeat constructor. Qed.
 
-Lemma Comparable_comparable_iff :
+Lemma tc_comparable :
   forall A (R : relation A) (a b : A),
-    Comparable R a b <-> comparable R a b.
-Proof.
-  split; [by intros []; firstorder|].
-  by intros [|[|]]; constructor.
+    comparable R a b -> comparable (tc R) a b.
+Proof. 
+  by intros *; inversion 1; subst; econstructor; apply tc_CompSpec.
 Qed.
 
-Lemma tc_Comparable :
-  forall A (R : relation A) (a b : A),
-    Comparable R a b -> Comparable (tc R) a b.
+#[export] Instance comparable_symmetric {A : Type} (R : A -> A -> Prop) :
+  Symmetric (comparable R).
 Proof.
-  by intros *; inversion 1; repeat constructor.
+  intros a b; intros [c Hc]; subst; inversion Hc; subst.
+  - by eexists.
+  - by exists Gt; constructor.
+  - by exists Lt; constructor.
 Qed.
 
-Lemma comparable_commutative
-   {A : Type}
-   (R : A -> A -> Prop)
-   (a b : A) :
-   comparable R a b <-> comparable R b a.
-Proof.
-  firstorder.
-Qed.
+#[export] Instance comparable_reflexive {A : Type} (R : A -> A -> Prop) :
+  Reflexive (comparable R).
+Proof. by intro; exists Eq; constructor. Qed.
 
-Definition comparableb
-  `{EqDecision A}
-  (f : A -> A -> bool)
-  (a b : A)
-  : bool
-  :=
-  if decide (a = b) then true
-  else orb (f a b) (f b a).
-
-Definition incomparableb
-  `{EqDecision A}
-  (f : A -> A -> bool)
-  (a b : A)
-  : bool
-  :=
-  if decide (a = b) then false
-  else andb (negb (f a b)) (negb (f b a)).
-
-Lemma negb_comparableb `{EqDecision A} (f : A -> A -> bool) (a b : A):
-  incomparableb f a b = negb (comparableb f a b).
-Proof.
-  unfold incomparableb, comparableb.
-  rewrite <- negb_orb.
-  by destruct (decide (a = b)).
-Qed.
-
-Lemma comparable_function
-  `{EqDecision A}
-  (f : A -> A -> bool)
-  (R : A -> A -> Prop)
-  (HR : PredicateFunction2 R f)
-  : PredicateFunction2 (comparable R) (comparableb f).
-Proof.
-  intros a b. unfold comparable. unfold comparableb.
-  split; intro.
-  - destruct H as [Heq | [Hab | Hba]]; destruct (decide (a = b)); try done.
-    + apply HR in Hab. by rewrite Hab.
-    + apply HR in Hba. by rewrite Hba, orb_comm.
-  - destruct (decide (a = b)); [by left | right].
-    by apply orb_true_iff in H as [H | H]; apply HR in H; [left | right].
-Qed.
-
-Instance comparable_dec
-  `{EqDecision A}
-  (R : A -> A -> Prop)
-  {HR : RelDecision R}
-  : RelDecision (comparable R).
+#[export] Instance comparable_dec
+  `(R : relation A) `{EqDecision A} `{!RelDecision R} :
+  RelDecision (comparable R).
 Proof.
   intros a b.
-  eapply reflect_dec.
-  apply iff_reflect, comparable_function, bool_decide_predicate_function2.
-Qed.
-
-Lemma comparable_function_neg
-  `{EqDecision A}
-  (f : A -> A -> bool)
-  (R : A -> A -> Prop)
-  (HR : PredicateFunction2 R f)
-  (a b : A)
-  (Hnc : comparableb f a b = false)
-  : a <> b /\ ~R a b /\ ~R b a.
-Proof.
-  unfold comparableb in Hnc.
-  destruct (decide (a = b)); [done |].
-  destruct (f a b) eqn:Hab; [done |].
-  destruct (f b a) eqn:Hba; [done |].
-  apply (predicate_function2_neg _ _ _ _ HR) in Hab.
-  by apply (predicate_function2_neg _ _ _ _ HR) in Hba.
-Qed.
-
-Lemma comparable_function_bool
-  `{EqDecision A}
-  (f : A -> A -> bool)
-  : PredicateFunction2 (comparable f) (comparableb f).
-Proof.
-  apply comparable_function.
-  apply Is_true_predicate_function2.
+  destruct (decide (a = b)); [by subst; left |].
+  destruct (decide (R a b)); [by left; exists Lt; constructor |].
+  destruct (decide (R b a)); [by left; exists Gt; constructor |].
+  by right; intros [c Hc]; inversion Hc.
 Qed.
 
 Lemma compare_two_cases

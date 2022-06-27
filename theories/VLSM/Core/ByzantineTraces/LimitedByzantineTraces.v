@@ -369,10 +369,9 @@ Proof.
   - by cbn; apply lift_sub_state_initial.
   - by apply list_subseteq_nil.
   - subst s_reset_byzantine bs btr.
-    unfold pre_VLSM_full_projection_finite_trace_project
-    ; rewrite !map_app; setoid_rewrite annotate_trace_from_app; cbn
-    ; unfold annotate_trace_item; cbn
-    ; rewrite finite_trace_last_is_last; cbn.
+    unfold pre_VLSM_full_projection_finite_trace_project; rewrite !map_app. 
+    rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.
+    unfold annotate_trace_item; cbn; rewrite finite_trace_last_is_last; cbn.
     destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i
     ; destruct IHHbyzantine as [[Htr0_ann Hsi_ann] Htr0_eqv_byzantine]
     ; cbn in Htr0_eqv_byzantine |- *.
@@ -383,7 +382,7 @@ Proof.
     assert (Hlsti : original_state lst = lift_sub_state IM (set_diff (enum index) byzantine)
                                           (finite_trace_last si tr0)).
     {
-      subst lst; rewrite annotate_trace_from_last_original_state; symmetry.
+      subst lst; rewrite msg_dep_annotate_trace_with_equivocators_last_original_state; symmetry.
       apply (pre_VLSM_full_projection_finite_trace_last _ _
               (lift_sub_label IM (set_diff (enum index) byzantine))
               (lift_sub_state IM (set_diff (enum index) byzantine))).

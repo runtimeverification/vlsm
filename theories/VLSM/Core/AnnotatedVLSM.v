@@ -120,8 +120,8 @@ Proof.
   ; simpl; rewrite IHtr1, finite_trace_last_cons.
 Qed.
 
-Lemma annotate_trace_from_last_original_state sa tr
-  : original_state (finite_trace_last sa (annotate_trace_from sa tr)) =
+Lemma annotate_trace_from_last_original_state sa sa' tr
+  : original_state (finite_trace_last sa (annotate_trace_from sa' tr)) =
     finite_trace_last (original_state sa) tr.
 Proof.
   destruct_list_last tr tr' item Heqtr; subst; [done |].
@@ -133,6 +133,11 @@ Qed.
 Definition annotate_trace (s : vstate X) (tr : list (vtransition_item X))
   : list (@transition_item _ annotated_type) :=
   annotate_trace_from {| original_state := s; state_annotation := ` inhabitant |} tr.
+
+Lemma annotate_trace_last_original_state s s' tr
+  : original_state (finite_trace_last s (annotate_trace s' tr)) =
+    finite_trace_last (original_state s) tr.
+Proof. apply annotate_trace_from_last_original_state. Qed.
 
 Lemma annotate_trace_project is tr
   : pre_VLSM_full_projection_finite_trace_project
