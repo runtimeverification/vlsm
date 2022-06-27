@@ -172,7 +172,7 @@ Proof.
   eapply VLSM_incl_in_futures in Hfutures as Hpre_futures
   ; [| apply constraint_preloaded_free_incl].
   apply (VLSM_projection_in_futures (preloaded_component_projection IM i)) in Hpre_futures.
-  eapply message_dependencies_are_necessary, has_been_observed_sent_received_iff
+  eapply message_dependencies_are_necessary, has_been_directly_observed_sent_received_iff
     in Hproduce as [Hreceived| Hsent]; [..| done | typeclasses eauto]; cycle 1.
   + left; exists i; split; [done |].
     eapply in_futures_preserving_oracle_from_stepwise
@@ -210,7 +210,7 @@ Proof.
       apply no_initial_messages_in_IM.
     }
     destruct Hemit as ((sX, iom) & (sub_i, li) & sX' & HtX).
-    eapply (preloaded_composite_observed_valid _ _ _ sX').
+    eapply (preloaded_composite_directly_observed_valid _ _ _ sX').
     + by eapply input_valid_transition_destination.
     + exists sub_i. destruct_dec_sig sub_i i Hi Heqsub_i; subst.
       eapply message_dependencies_are_necessary; [typeclasses eauto | | done].
@@ -360,7 +360,7 @@ Proof.
     eapply VLSM_incl_can_emit.
     {
       apply pre_loaded_vlsm_incl_relaxed
-        with (P := fun dm => composite_has_been_observed IM s dm \/ dm ∈ message_dependencies m).
+        with (P := fun dm => composite_has_been_directly_observed IM s dm \/ dm ∈ message_dependencies m).
       intros m0 [Hsent_m0 | Hdep_m0]; [itauto |].
       left; exists i.
       by specialize (Hv _ Hdep_m0) as [Hsent | Hreceived]; [left | right].

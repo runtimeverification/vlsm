@@ -55,26 +55,26 @@ Section NoEquivocationInvariants.
     message
     (X: VLSM message)
     `{HasBeenSentCapability message X}
-    `{HasBeenObservedCapability message X}
+    `{HasBeenDirectlyObservedCapability message X}
     (Henforced: forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s,om) -> no_equivocations X l (s,om))
   .
 
 (**
 A VLSM that enforces the [no_equivocations] constraint and also supports
-[has_been_observed] obeys the [observed_were_sent] invariant which states that
-any message that tests as [has_been_observed] in a state also tests as
+[has_been_directly_observed] obeys the [observed_were_sent] invariant which states that
+any message that tests as [has_been_directly_observed] in a state also tests as
 [has_been_sent] in the same state.
 *)
 
   Definition observed_were_sent (s: state) : Prop :=
-    forall msg, has_been_observed X s msg -> has_been_sent X s msg.
+    forall msg, has_been_directly_observed X s msg -> has_been_sent X s msg.
 
   Lemma observed_were_sent_initial s:
     vinitial_state_prop X s ->
     observed_were_sent s.
   Proof.
     intros Hinitial msg Hsend.
-    by apply has_been_observed_no_inits in Hsend.
+    by apply has_been_directly_observed_no_inits in Hsend.
   Qed.
 
   Lemma observed_were_sent_preserved l s im s' om:
@@ -85,7 +85,7 @@ any message that tests as [has_been_observed] in a state also tests as
     intros Hptrans Hprev msg Hobs.
     specialize (Hprev msg).
     apply preloaded_weaken_input_valid_transition in Hptrans.
-    eapply (oracle_step_update (has_been_observed_stepwise_props X) _ _ _ _ _ Hptrans) in Hobs.
+    eapply (oracle_step_update (has_been_directly_observed_stepwise_props X) _ _ _ _ _ Hptrans) in Hobs.
     simpl in Hobs.
     specialize (Henforced l s (Some msg)).
     rewrite (oracle_step_update (has_been_sent_stepwise_from_trace X) _ _ _ _ _ Hptrans).
@@ -191,9 +191,9 @@ Definition composite_no_equivocations
 (** ** Composite No-Equivocation Invariants
 
 A VLSM composition whose constraint subsumes the [no_equivocations] constraint
-and also supports [has_been_recevied] (or [has_been_observed]) obeys an
+and also supports [has_been_recevied] (or [has_been_directly_observed]) obeys an
 invariant that any message that tests as [has_been_received]
-(resp. [has_been_observed]) in a state also tests as [has_been_sent]
+(resp. [has_been_directly_observed]) in a state also tests as [has_been_sent]
 in the same state.
  *)
 Section CompositeNoEquivocationInvariants.
@@ -204,14 +204,14 @@ Section CompositeNoEquivocationInvariants.
     .
 
   Definition composite_observed_were_sent (s: state) : Prop :=
-    forall msg, composite_has_been_observed IM s msg -> composite_has_been_sent IM s msg.
+    forall msg, composite_has_been_directly_observed IM s msg -> composite_has_been_sent IM s msg.
 
   Lemma composite_observed_were_sent_invariant s:
     valid_state_prop X s ->
     composite_observed_were_sent s.
   Proof.
     intros Hs m.
-    rewrite composite_has_been_observed_sent_received_iff.
+    rewrite composite_has_been_directly_observed_sent_received_iff.
     intros Hobs.
     cut (has_been_sent X s m); [done |].
     apply (observed_were_sent_invariant message X); [|done ..].

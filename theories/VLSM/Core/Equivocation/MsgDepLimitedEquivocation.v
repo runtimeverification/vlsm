@@ -30,7 +30,7 @@ Context
 
 Definition coeqv_message_equivocators (s : composite_state IM) (m : message)
   : set validator :=
-  if decide (composite_has_been_observed IM s m)
+  if decide (composite_has_been_directly_observed IM s m)
   then (* no additional equivocation *)
     []
   else (* m itself and all its non-observed dependencies are equivocating. *)
@@ -128,7 +128,7 @@ Context
 
 Definition not_observed_happens_before_dependencies (s : composite_state IM) (m : message)
   : set message :=
-  filter (fun dm => ~composite_has_been_observed IM s dm) (full_message_dependencies m).
+  filter (fun dm => ~composite_has_been_directly_observed IM s dm) (full_message_dependencies m).
 
 Definition msg_dep_coequivocating_senders (s : composite_state IM) (m : message)
   : set validator :=
@@ -234,7 +234,7 @@ Proof.
   setoid_rewrite elem_of_map_option; setoid_rewrite elem_of_list_filter.
   intros v (dm & [Hnobs Hdm]  & _).
   contradict Hnobs; exists i.
-  eapply msg_dep_full_node_input_valid_happens_before_has_been_observed;
+  eapply msg_dep_full_node_input_valid_happens_before_has_been_directly_observed;
     [typeclasses eauto | apply Hfull | done |].
   by apply full_message_dependencies_happens_before.
 Qed.
@@ -356,7 +356,7 @@ Context
 Lemma equivocating_messages_are_equivocator_emitted
   s im
   (Him : can_emit (free_composite_vlsm IM) im)
-  (Hnobserved : ¬ composite_has_been_observed IM s im) :
+  (Hnobserved : ¬ composite_has_been_directly_observed IM s im) :
     exists j,
       j ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im)
         /\
@@ -381,14 +381,14 @@ Qed.
 Lemma equivocating_messages_dependencies_are_observed_or_equivocator_emitted
   s im
   (Him : can_emit (free_composite_vlsm IM) im)
-  (Hnobserved : ¬ composite_has_been_observed IM s im)
+  (Hnobserved : ¬ composite_has_been_directly_observed IM s im)
   : forall dm, msg_dep_happens_before message_dependencies dm im ->
-    composite_has_been_observed IM s dm \/
+    composite_has_been_directly_observed IM s dm \/
     exists dm_i, dm_i ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im) /\
       can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm.
 Proof.
   intros dm Hdm.
-  destruct (decide (composite_has_been_observed IM s dm)) as [Hobs | Hnobs]
+  destruct (decide (composite_has_been_directly_observed IM s dm)) as [Hobs | Hnobs]
   ; [by left | right].
   cut (exists i, sender dm = Some i /\
                  can_emit (pre_loaded_with_all_messages_vlsm (IM i)) dm).
@@ -410,7 +410,7 @@ Lemma message_equivocators_can_emit (s : vstate Limited) im
   (Hs : valid_state_prop
           (fixed_equivocation_vlsm_composition IM (state_annotation s))
           (original_state s))
-  (Hnobserved : ¬ composite_has_been_observed IM (original_state s) im)
+  (Hnobserved : ¬ composite_has_been_directly_observed IM (original_state s) im)
   (HLemit : can_emit (free_composite_vlsm IM) im)
   : can_emit
       (equivocators_composition_for_observed IM
@@ -511,9 +511,9 @@ Proof.
         ; [apply set_union_subseteq_left | done].
       * destruct iom as [im |]
         ; [apply option_valid_message_Some|apply option_valid_message_None].
-        destruct (decide (composite_has_been_observed IM (original_state s) im))
+        destruct (decide (composite_has_been_directly_observed IM (original_state s) im))
               as [Hobs | Hnobs].
-        -- eapply composite_observed_valid; [| done].
+        -- eapply composite_directly_observed_valid; [| done].
            revert Hs; apply VLSM_incl_valid_state.
            apply fixed_equivocation_vlsm_composition_index_incl,
                  set_union_subseteq_left.
@@ -541,7 +541,7 @@ Proof.
            apply forget_annotations_projection.
       * apply HLv.
       * destruct iom as [im |]; [| done].
-        destruct (decide (composite_has_been_observed IM (original_state s) im))
+        destruct (decide (composite_has_been_directly_observed IM (original_state s) im))
               as [Hobs | Hnobs]; [by left | right; cbn].
         apply message_equivocators_can_emit; [done | done |].
         apply emitted_messages_are_valid_iff in HLim

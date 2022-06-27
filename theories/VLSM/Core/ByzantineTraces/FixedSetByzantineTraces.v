@@ -633,7 +633,7 @@ Proof.
     destruct Hc as [_ [_ [Hc _]]].
     destruct Hc as [Hsent | Hseeded].
     + left.
-      apply composite_has_been_observed_sent_received_iff.
+      apply composite_has_been_directly_observed_sent_received_iff.
       left.
       simpl in Hsent. clear -Hsent.
       destruct Hsent as [sub_i Hsenti].

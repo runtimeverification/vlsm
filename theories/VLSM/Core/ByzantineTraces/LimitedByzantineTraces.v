@@ -415,7 +415,7 @@ Proof.
     + contradict Hnobs.
       destruct Hsent as [sub_i_im Hsent]; cbn in Hsent |- *
       ; destruct_dec_sig sub_i_im _i_im H_i_im Heqsub_i_im; subst sub_i_im.
-      apply composite_has_been_observed_sent_received_iff; left.
+      apply composite_has_been_directly_observed_sent_received_iff; left.
       exists _i_im.
       rewrite Hlsti; cbn; unfold lift_sub_state.
       by rewrite (lift_sub_state_to_eq _ _ _ _ _ H_i_im).
