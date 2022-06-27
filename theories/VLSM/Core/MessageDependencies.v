@@ -232,8 +232,8 @@ Context
 
 (**
 A message can be recursively observed in a state if it either has been directly
-observed in the state (as sent or received), or it [msg_dep_happens_before]
-a directly observed message.
+observed in the state (as sent or received), or it happens before (in the sense
+of the [msg_dep_happens_before] relation) a directly observed message.
 *)
 Inductive HasBeenRecursivelyObserved (s : vstate X) (m : message) : Prop :=
 | hbro_directly :
@@ -247,9 +247,9 @@ Inductive HasBeenRecursivelyObserved (s : vstate X) (m : message) : Prop :=
 
 (**
 A pair of messages constitutes a (local) evidence of equivocation for a
-validator <<v>> in a state <<s>> is both messages have <<v>> as a sender,
-each message [HasBeenRecursivelyObserved] in <<s>>, and the messages are not
-comparable through the [msg_dep_happens_before] relation.
+validator <<v>> in a state <<s>> if both messages have <<v>> as a sender, have
+been (recursively) observed in <<s>> (see [HasBeenRecursivelyObserved]), and are
+not comparable according to the [msg_dep_happens_before] relation.
 *)
 Record MsgDepLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
@@ -265,9 +265,10 @@ Definition msg_dep_is_locally_equivocating (s : vstate X) (v : validator) : Prop
   exists m1 m2, MsgDepLocalEquivocationEvidence s v m1 m2.
 
 (**
-Under the full-node assumptions, due to Lemma [msg_dep_full_node_happens_before_reflects_has_been_observed],
-we can give a simpler alternative to [MsgDepLocalEquivocationEvidence] which
-only requires that each message [has_been_observed] directly in the state.
+Under the full-node assumptions, we can give a simpler alternative to
+[MsgDepLocalEquivocationEvidence] which only requires that each message
+[has_been_observed] directly in the state. This relies on Lemma
+[msg_dep_full_node_happens_before_reflects_has_been_observed].
 *)
 Record FullNodeLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
@@ -285,7 +286,7 @@ Definition full_node_is_locally_equivocating (s : vstate X) (v : validator) : Pr
 (**
 If the states and messages are more tightly coupled (e.g., there is a unique 
 state from which a given message can be emitted), then the sent messages of
-a state would be totally ordered by the [msg_dep_rel]ation.
+a state would be totally ordered by [msg_dep_rel].
 *)
 Definition has_been_sent_msg_dep_comparable_prop : Prop :=
   forall (s : vstate X), valid_state_prop R s ->
@@ -296,7 +297,7 @@ Definition has_been_sent_msg_dep_comparable_prop : Prop :=
 
 (**
 We present yet another definition for local evidence of equivocation assuming
-both full-node and the [has_been_sent_msg_dep_comparable_prop]erty.
+both full-node and [has_been_sent_msg_dep_comparable_prop].
 *)
 Record FullNodeSentLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
@@ -345,7 +346,7 @@ Proof.
 Qed.
 
 (**
-Under [MessageDependencies] and full-node assumptions, the two notions of
+Assuming [MessageDependencies] and full-node, the two notions of
 local equivocation defined above are equivalent.
 *)
 Lemma full_node_is_locally_equivocating_iff
@@ -528,9 +529,10 @@ Qed.
 
 (**
 A messages constitutes a (global) evidence of equivocation for a
-validator <<v>> in a composite state <<s>> is the messages has <<v>> as a sender,
-it [CompositeHasBeenRecursivelyObserved] in <<s>>, but not
-[composite_has_been_sent] in <<s>>.
+validator <<v>> in a composite state <<s>> if the message has <<v>> as a sender,
+it has been (recursively) observed in [composite_state] <<s>>, (see 
+[CompositeHasBeenRecursivelyObserved]), but it wasn't observed as sent in <<s>>
+(see [composite_has_been_sent]).
 *)
 Record MsgDepGlobalEquivocationEvidence
   (s : composite_state IM) (v : validator) (m : message) : Prop :=
@@ -545,9 +547,10 @@ Definition msg_dep_is_globally_equivocating
   exists m : message, MsgDepGlobalEquivocationEvidence s v m.
 
 (**
-Under the full-node assumptions, due to Lemma [msg_dep_full_node_happens_before_reflects_has_been_observed],
-we can give a simpler alternative to [MsgDepGlobalEquivocationEvidence] which
-only requires that the message [composite_has_been_received] in the state.
+Under the full-node assumption, we can give a simpler alternative to
+[MsgDepGlobalEquivocationEvidence] which only requires that the message has been
+received in the [composite_state] (see [composite_has_been_received]) (due to
+the Lemma [msg_dep_full_node_happens_before_reflects_has_been_observed]).
 *)
 Record FullNodeGlobalEquivocationEvidence
   (s : composite_state IM) (v : validator) (m : message) : Prop :=
