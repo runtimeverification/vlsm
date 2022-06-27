@@ -231,24 +231,24 @@ Context
   .
 
 (**
-A message can be recursively observed in a state if it either has been directly
+A message can be indirectly observed in a state if it either has been directly
 observed in the state (as sent or received), or it happens before (in the sense
 of the [msg_dep_happens_before] relation) a directly observed message.
 *)
-Inductive HasBeenRecursivelyObserved (s : vstate X) (m : message) : Prop :=
+Inductive HasBeenIndirectlyObserved (s : vstate X) (m : message) : Prop :=
 | hbro_directly :
     has_been_observed X s m ->
-    HasBeenRecursivelyObserved s m
+    HasBeenIndirectlyObserved s m
 | hbro_indirectly :
     forall m',
       has_been_observed X s m' ->
       msg_dep_happens_before message_dependencies m m' ->
-      HasBeenRecursivelyObserved s m.
+      HasBeenIndirectlyObserved s m.
 
 (**
 A pair of messages constitutes a (local) evidence of equivocation for a
 validator <<v>> in a state <<s>> if both messages have <<v>> as a sender, have
-been (recursively) observed in <<s>> (see [HasBeenRecursivelyObserved]), and are
+been (indirectly) observed in <<s>> (see [HasBeenIndirectlyObserved]), and are
 not comparable according to the [msg_dep_happens_before] relation.
 *)
 Record MsgDepLocalEquivocationEvidence
@@ -256,8 +256,8 @@ Record MsgDepLocalEquivocationEvidence
   {
     mdlee_sender1 : sender m1 = Some v;
     mdlee_sender2 : sender m2 = Some v;
-    mdlee_observed1 : HasBeenRecursivelyObserved s m1;
-    mdlee_observed2 : HasBeenRecursivelyObserved s m2;
+    mdlee_observed1 : HasBeenIndirectlyObserved s m1;
+    mdlee_observed2 : HasBeenIndirectlyObserved s m2;
     mdlee_incomparable : ~ comparable (msg_dep_happens_before message_dependencies) m1 m2;
   }.
 
@@ -332,13 +332,13 @@ Qed.
 
 (**
 Under [MessageDependencies] and full-node assumptions, any message which
-[HasBeenRecursivelyObserved] in a state, [has_been_observed] in that state, too.
+[HasBeenIndirectlyObserved] in a state, [has_been_observed] in that state, too.
 *)
-Lemma full_node_HasBeenRecursivelyObserved_is_observed
+Lemma full_node_HasBeenIndirectlyObserved_is_observed
   `{!MessageDependencies message_dependencies X}
   (Hfull : message_dependencies_full_node_condition_prop message_dependencies X)
   : forall s, valid_state_prop R s ->
-    forall m, HasBeenRecursivelyObserved s m <-> has_been_observed X s m.
+    forall m, HasBeenIndirectlyObserved s m <-> has_been_observed X s m.
 Proof.
   intros s Hs m; split; [| by intros; constructor].
   intros [Hobs | m' Hobs Hhb]; [done |].
@@ -361,7 +361,7 @@ Proof.
   intros s Hs v; split; [| apply full_node_is_locally_equivocating_stronger].
   intros (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]); exists m1, m2;
     split; [done | done | | | done];
-    by apply full_node_HasBeenRecursivelyObserved_is_observed.
+    by apply full_node_HasBeenIndirectlyObserved_is_observed.
 Qed.
 
 End sec_message_dependencies_equivocation.
@@ -493,36 +493,36 @@ Context
   .
 
 (**
-A message can be recursively observed in a composite state if it either has been
+A message can be indirectly observed in a composite state if it either has been
 directly observed in the state (as sent or received), or it
 [msg_dep_happens_before] a directly observed message.
 *)
-Inductive CompositeHasBeenRecursivelyObserved
+Inductive CompositeHasBeenIndirectlyObserved
   (s : composite_state IM) (m : message) : Prop :=
 | chbro_directly :
     composite_has_been_observed IM s m ->
-    CompositeHasBeenRecursivelyObserved s m
+    CompositeHasBeenIndirectlyObserved s m
 | chbro_indirectly :
     forall m',
       composite_has_been_observed IM s m' ->
       msg_dep_happens_before message_dependencies m m' ->
-      CompositeHasBeenRecursivelyObserved s m.
+      CompositeHasBeenIndirectlyObserved s m.
 
-Lemma composite_HasBeenRecursivelyObserved_lift : forall s m i,
-  HasBeenRecursivelyObserved (IM i) message_dependencies (s i) m ->
-  CompositeHasBeenRecursivelyObserved s m.
+Lemma composite_HasBeenIndirectlyObserved_lift : forall s m i,
+  HasBeenIndirectlyObserved (IM i) message_dependencies (s i) m ->
+  CompositeHasBeenIndirectlyObserved s m.
 Proof.
   intros s m i [].
   - by constructor 1; eexists.
   - by econstructor 2; [eexists |].
 Qed.
 
-Lemma composite_HasBeenRecursivelyObserved_iff : forall s m,
-  CompositeHasBeenRecursivelyObserved s m
+Lemma composite_HasBeenIndirectlyObserved_iff : forall s m,
+  CompositeHasBeenIndirectlyObserved s m
     <->
-  exists i, HasBeenRecursivelyObserved (IM i) message_dependencies (s i) m.
+  exists i, HasBeenIndirectlyObserved (IM i) message_dependencies (s i) m.
 Proof.
-  split; [| by intros []; eapply composite_HasBeenRecursivelyObserved_lift].
+  split; [| by intros []; eapply composite_HasBeenIndirectlyObserved_lift].
   intros [[i Hobsi] |m' [i Hobsi] Hmm'];
     exists i; [by constructor 1 | by econstructor 2].
 Qed.
@@ -530,15 +530,15 @@ Qed.
 (**
 A messages constitutes a (global) evidence of equivocation for a
 validator <<v>> in a composite state <<s>> if the message has <<v>> as a sender,
-it has been (recursively) observed in [composite_state] <<s>>, (see 
-[CompositeHasBeenRecursivelyObserved]), but it wasn't observed as sent in <<s>>
+it has been (indirectly) observed in [composite_state] <<s>>, (see 
+[CompositeHasBeenIndirectlyObserved]), but it wasn't observed as sent in <<s>>
 (see [composite_has_been_sent]).
 *)
 Record MsgDepGlobalEquivocationEvidence
   (s : composite_state IM) (v : validator) (m : message) : Prop :=
   {
     mdgee_sender : sender m = Some v;
-    mdgee_rec_observed : CompositeHasBeenRecursivelyObserved s m;
+    mdgee_rec_observed : CompositeHasBeenIndirectlyObserved s m;
     mdgee_not_sent : ~ composite_has_been_sent IM s m;
   }.
 
@@ -610,7 +610,7 @@ Proof.
     [destruct (decide (has_been_sent (IM (A v)) (s (A v)) m2)) |]; cycle 1.
   1,2: eexists; split;
       [..| by contradict n; eapply has_been_sent_iff_by_sender];
-      [done | by eapply composite_HasBeenRecursivelyObserved_lift].
+      [done | by eapply composite_HasBeenIndirectlyObserved_lift].
   contradict Hncomp; eapply tc_comparable, Hsent_comparable; [| done..].
   by eapply valid_state_project_preloaded_to_preloaded.
 Qed.
