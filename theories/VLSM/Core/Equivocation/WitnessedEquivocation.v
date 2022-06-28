@@ -679,7 +679,7 @@ Lemma equivocators_can_emit_free m
   l s
   (Hv : composite_valid IM l (s, Some m))
   : can_emit
-    (equivocators_composition_for_observed IM (equivocating_validators sf) s)
+    (equivocators_composition_for_directly_observed IM (equivocating_validators sf) s)
     m.
 Proof.
     apply emitted_messages_are_valid_iff in Hmsg
@@ -696,7 +696,7 @@ Proof.
         (@lift_to_composite_generalized_preloaded_vlsm_full_projection
           message (sub_index (equivocating_validators sf)) _ (sub_IM IM (equivocating_validators sf))
           (λ msg : message, msg ∈ message_dependencies m)
-          (composite_has_been_observed IM s))
+          (composite_has_been_directly_observed IM s))
         as Hproj.
       spec Hproj.
       { intros dm Hdm.
@@ -777,10 +777,10 @@ Proof.
     simpl in Heqv.
     assert (Hpre_s : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) s).
     { by apply proj1, finite_valid_trace_from_to_last_pstate in Hpre_tr. }
-    destruct (@decide _ (composite_has_been_observed_dec IM s im)).
+    destruct (@decide _ (composite_has_been_directly_observed_dec IM s im)).
     { repeat split
       ; [done | apply option_valid_message_Some | done | | done].
-      - by apply (composite_observed_valid IM _ s).
+      - by apply (composite_directly_observed_valid IM _ s).
       - by left.
     }
     assert (Hequivocating_v : v ∈ equivocating_validators sf).
@@ -790,7 +790,7 @@ Proof.
       split; [done |].
       intros Him_output.
       elim n.
-      apply composite_has_been_observed_sent_received_iff.
+      apply composite_has_been_directly_observed_sent_received_iff.
       left.
       specialize (proper_sent Free _ Hpre_s im) as Hsent_s.
       apply proj2 in Hsent_s. apply Hsent_s. clear Hsent_s.

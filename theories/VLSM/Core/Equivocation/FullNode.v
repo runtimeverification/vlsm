@@ -22,7 +22,7 @@ Section full_node_constraint.
   [node_generated_without_further_equivocation] by node <<i>> if the message
   can be produced by node <<i>> pre_loaded with all messages in a trace in which
   all message equivocation is done through messages causing
-  [no_additional_equivocations] to state <<s>> (message [has_been_observed] in <<s>>).
+  [no_additional_equivocations] to state <<s>> (message [has_been_directly_observed] in <<s>>).
   *)
   Definition node_generated_without_further_equivocation
     (s : composite_state IM)
@@ -31,7 +31,7 @@ Section full_node_constraint.
     : Prop
     := exists (si : vstate (IM i)),
       can_produce (pre_loaded_with_all_messages_vlsm (IM i)) si m /\
-      state_received_not_sent_invariant (IM i) si (composite_has_been_observed IM s).
+      state_received_not_sent_invariant (IM i) si (composite_has_been_directly_observed IM s).
 
   (**
   Similar to the condition above, but now the message is required to be
@@ -43,7 +43,7 @@ Section full_node_constraint.
     (m : message)
     (i : index)
     : Prop
-    := can_emit (pre_loaded_vlsm (IM i) (composite_has_been_observed IM s)) m.
+    := can_emit (pre_loaded_vlsm (IM i) (composite_has_been_directly_observed IM s)) m.
 
   (**
   The equivocation-based abstract definition of the full node condition
@@ -60,7 +60,7 @@ Section full_node_constraint.
     match om with
     | None => True
     | Some m =>
-      composite_has_been_observed IM s m \/
+      composite_has_been_directly_observed IM s m \/
       exists (i : index), admissible_index s i /\ node_generated_without_further_equivocation s m i
     end.
 
@@ -77,7 +77,7 @@ Section full_node_constraint.
     match om with
     | None => True
     | Some m =>
-      composite_has_been_observed IM s m \/
+      composite_has_been_directly_observed IM s m \/
       exists (i : index), admissible_index s i /\
       node_generated_without_further_equivocation_alt s m i
     end.

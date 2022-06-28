@@ -46,7 +46,7 @@ End no_equivocations.
 
 In this section we show that under [no_equivocations] assumptions:
 
-- for any valid state all messages [observed_were_sent].
+- for any valid state all messages [directly_observed_were_sent].
 - the [pre_loaded_with_all_messages_vlsm] is equal to the [no_equivocations] VLSM.
 
 *)
@@ -55,37 +55,37 @@ Section NoEquivocationInvariants.
     message
     (X: VLSM message)
     `{HasBeenSentCapability message X}
-    `{HasBeenObservedCapability message X}
+    `{HasBeenDirectlyObservedCapability message X}
     (Henforced: forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s,om) -> no_equivocations X l (s,om))
   .
 
 (**
 A VLSM that enforces the [no_equivocations] constraint and also supports
-[has_been_observed] obeys the [observed_were_sent] invariant which states that
-any message that tests as [has_been_observed] in a state also tests as
-[has_been_sent] in the same state.
+[has_been_directly_observed] obeys the [directly_observed_were_sent] invariant which states that
+any message that [has_been_directly_observed] in a state, [has_been_sent] in
+the same state, too.
 *)
 
-  Definition observed_were_sent (s: state) : Prop :=
-    forall msg, has_been_observed X s msg -> has_been_sent X s msg.
+  Definition directly_observed_were_sent (s: state) : Prop :=
+    forall msg, has_been_directly_observed X s msg -> has_been_sent X s msg.
 
-  Lemma observed_were_sent_initial s:
+  Lemma directly_observed_were_sent_initial s:
     vinitial_state_prop X s ->
-    observed_were_sent s.
+    directly_observed_were_sent s.
   Proof.
     intros Hinitial msg Hsend.
-    by apply has_been_observed_no_inits in Hsend.
+    by apply has_been_directly_observed_no_inits in Hsend.
   Qed.
 
-  Lemma observed_were_sent_preserved l s im s' om:
+  Lemma directly_observed_were_sent_preserved l s im s' om:
     input_valid_transition X l (s,im) (s',om) ->
-    observed_were_sent s ->
-    observed_were_sent s'.
+    directly_observed_were_sent s ->
+    directly_observed_were_sent s'.
   Proof.
     intros Hptrans Hprev msg Hobs.
     specialize (Hprev msg).
     apply preloaded_weaken_input_valid_transition in Hptrans.
-    eapply (oracle_step_update (has_been_observed_stepwise_props X) _ _ _ _ _ Hptrans) in Hobs.
+    eapply (oracle_step_update (has_been_directly_observed_stepwise_props X) _ _ _ _ _ Hptrans) in Hobs.
     simpl in Hobs.
     specialize (Henforced l s (Some msg)).
     rewrite (oracle_step_update (has_been_sent_stepwise_from_trace X) _ _ _ _ _ Hptrans).
@@ -99,14 +99,14 @@ any message that tests as [has_been_observed] in a state also tests as
   Qed.
 
   (* TODO(wkolowski): make notation uniform accross the file. *)
-  Lemma observed_were_sent_invariant s:
+  Lemma directly_observed_were_sent_invariant s:
     valid_state_prop X s ->
-    observed_were_sent s.
+    directly_observed_were_sent s.
   Proof.
     intro Hproto.
     induction Hproto using valid_state_prop_ind.
-    - by apply observed_were_sent_initial.
-    - by eapply observed_were_sent_preserved.
+    - by apply directly_observed_were_sent_initial.
+    - by eapply directly_observed_were_sent_preserved.
   Qed.
 
   (**
@@ -191,9 +191,9 @@ Definition composite_no_equivocations
 (** ** Composite No-Equivocation Invariants
 
 A VLSM composition whose constraint subsumes the [no_equivocations] constraint
-and also supports [has_been_recevied] (or [has_been_observed]) obeys an
+and also supports [has_been_recevied] (or [has_been_directly_observed]) obeys an
 invariant that any message that tests as [has_been_received]
-(resp. [has_been_observed]) in a state also tests as [has_been_sent]
+(resp. [has_been_directly_observed]) in a state also tests as [has_been_sent]
 in the same state.
  *)
 Section CompositeNoEquivocationInvariants.
@@ -203,18 +203,18 @@ Section CompositeNoEquivocationInvariants.
     (Hsubsumed: preloaded_constraint_subsumption IM constraint composite_no_equivocations)
     .
 
-  Definition composite_observed_were_sent (s: state) : Prop :=
-    forall msg, composite_has_been_observed IM s msg -> composite_has_been_sent IM s msg.
+  Definition composite_directly_observed_were_sent (s: state) : Prop :=
+    forall msg, composite_has_been_directly_observed IM s msg -> composite_has_been_sent IM s msg.
 
-  Lemma composite_observed_were_sent_invariant s:
+  Lemma composite_directly_observed_were_sent_invariant s:
     valid_state_prop X s ->
-    composite_observed_were_sent s.
+    composite_directly_observed_were_sent s.
   Proof.
     intros Hs m.
-    rewrite composite_has_been_observed_sent_received_iff.
+    rewrite composite_has_been_directly_observed_sent_received_iff.
     intros Hobs.
     cut (has_been_sent X s m); [done |].
-    apply (observed_were_sent_invariant message X); [|done ..].
+    apply (directly_observed_were_sent_invariant message X); [|done ..].
     by intros l s0 om; apply Hsubsumed.
   Qed.
 

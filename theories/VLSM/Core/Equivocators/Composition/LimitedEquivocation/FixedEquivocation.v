@@ -600,10 +600,10 @@ Proof.
   by apply _equivocators_valid_trace_project.
 Qed.
 
-(** A message sent by a non-state-equivocating machine can be observed in any
-projection of the final state.
+(** A message sent by a non-state-equivocating machine can be directly observed
+in any projection of the final state.
 *)
-Lemma not_equivocating_sent_message_has_been_observed_in_projection
+Lemma not_equivocating_sent_message_has_been_directly_observed_in_projection
   (is: vstate XE)
   (tr: list (composite_transition_item (equivocator_IM IM)))
   (Htr: finite_valid_trace XE is tr)
@@ -615,7 +615,7 @@ Lemma not_equivocating_sent_message_has_been_observed_in_projection
   (Hm: field_selector output m item)
   (descriptors: equivocator_descriptors IM)
   (Hdescriptors: proper_fixed_equivocator_descriptors descriptors lst)
-  : has_been_observed Free (equivocators_state_project IM descriptors lst) m.
+  : has_been_directly_observed Free (equivocators_state_project IM descriptors lst) m.
 Proof.
   destruct (free_equivocators_valid_trace_project descriptors is tr Hdescriptors Htr)
     as [trX [initial_descriptors [_ [Htr_project [Hfinal_state HtrX_Free]]]]].
@@ -636,7 +636,7 @@ Proof.
   { apply (finite_valid_trace_last_pstate (pre_loaded_with_all_messages_vlsm Free)).
     apply HtrX_Pre.
   }
-  rewrite (has_been_observed_sent_received_iff Free) by done.
+  rewrite (has_been_directly_observed_sent_received_iff Free) by done.
   right. apply proper_sent; [done |].
   apply has_been_sent_consistency; [typeclasses eauto | done |].
   exists (equivocators_state_project IM initial_descriptors is), trX,
@@ -734,7 +734,7 @@ Lemma equivocators_trace_sub_item_input_is_seeded_or_sub_previously_sent
   (lst_trX := equivocators_state_project IM descriptors s)
   : trace_sub_item_input_is_seeded_or_sub_previously_sent
     (equivocator_IM IM) equivocating
-    (composite_has_been_observed IM lst_trX) tr.
+    (composite_has_been_directly_observed IM lst_trX) tr.
 Proof.
   intros pre item suf m Heq Hm Hitem.
   destruct (free_equivocators_valid_trace_project descriptors is tr Hproper Htr)
@@ -760,7 +760,7 @@ Proof.
   apply finite_valid_trace_from_app_iff in Htr as Hpre. destruct Hpre as [Hpre _].
   apply finite_valid_trace_from_app_iff in Hpre. destruct Hpre as [Hpre Hivt].
   apply first_transition_valid in Hivt.
-  destruct (composite_has_been_observed_dec IM lst_trX m) as [|Heqv]
+  destruct (composite_has_been_directly_observed_dec IM lst_trX m) as [|Heqv]
   ; [by left | right].
   assert (Hsuf_free : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) (finite_trace_last is pre) ([item] ++ suf)).
   { revert Hsuf. apply VLSM_incl_finite_valid_trace_from.
@@ -834,10 +834,10 @@ Proof.
     composite_label_sub_projection_option.
   case_decide as Hl; [by eexists |].
   contradict Heqv.
-  apply composite_has_been_observed_free_iff.
+  apply composite_has_been_directly_observed_free_iff.
   eapply in_futures_preserving_oracle_from_stepwise; cycle 2
-  ; [|apply has_been_observed_stepwise_props|].
-  - by eapply not_equivocating_sent_message_has_been_observed_in_projection; cycle 1.
+  ; [|apply has_been_directly_observed_stepwise_props|].
+  - by eapply not_equivocating_sent_message_has_been_directly_observed_in_projection; cycle 1.
   - subst lst_trX. subst s. simpl. simpl in Hfinal_state.
     rewrite Hfinal_state. subst trX.
     rewrite finite_trace_last_app.
@@ -924,11 +924,11 @@ Qed.
 
 (**
 As a consequence of the [equivocator_vlsm_trace_project_reflect_non_equivocating]
-lemma, if a message emmited by a trace cannot be observed in a projection
-of the trace's final state, then it must be that it was emitted by one of
-the nodes allowed to equivocate.
+lemma, if a message emmited by a trace cannot be directly observed in a
+projection of the trace's final state, then it must be that it was emitted by
+one of the nodes allowed to equivocate.
 *)
-Lemma projection_has_not_been_observed_is_equivocating
+Lemma projection_has_not_been_directly_observed_is_equivocating
   (is: composite_state (equivocator_IM IM))
   (tr: list (composite_transition_item (equivocator_IM IM)))
   (Htr: finite_valid_trace XE is tr)
@@ -937,7 +937,7 @@ Lemma projection_has_not_been_observed_is_equivocating
   (Hproper: proper_fixed_equivocator_descriptors descriptors s)
   (sX := equivocators_state_project IM descriptors s)
   (m: message)
-  (Hno: ~ composite_has_been_observed IM sX m)
+  (Hno: ~ composite_has_been_directly_observed IM sX m)
   : forall item : composite_transition_item (equivocator_IM IM),
       item ∈ tr -> output item = Some m -> (projT1 (l item)) ∈ equivocating.
 Proof.
@@ -946,7 +946,7 @@ Proof.
   intros item Hitem Houtput.
   destruct (decide ((projT1 (l item)) ∈ equivocating)); [done |].
   elim Hno. clear Hno.
-  apply composite_has_been_observed_sent_received_iff.
+  apply composite_has_been_directly_observed_sent_received_iff.
   left.
   assert (HtrX_free : finite_valid_trace (pre_loaded_with_all_messages_vlsm Free) (equivocators_state_project IM initial_descriptors is) trX).
   {
@@ -1055,16 +1055,16 @@ The intermediary results above allow us to prove that the
 The core of this result is proving that given a [valid_state] <<s>> of the
 composition of equivocators with no message equivocation and fixed state
 equivocation, a message which [has_been_sent] for that state but not
-[has_been_observed] for a projection of that state <<sx>>, can nevertheless be
+[has_been_directly_observed] for a projection of that state <<sx>>, can nevertheless be
 generated by the composition of the nodes allowed to equivocate, pre-loaded with
-the messages observed in the state <<sx>>.
+the messages directly observed in the state <<sx>>.
 
 To prove that, we consider a trace witness for the mesage having been sent,
-we use [projection_has_not_been_observed_is_equivocating] to derive that
+we use [projection_has_not_been_directly_observed_is_equivocating] to derive that
 it must have been sent by one of the machines allowed to equivocate, from this
 we derive that it can be sent by the restriction of the composition of
 equivocators to just the equivocating nodes, pre-loaded with the messages
-observed in the projection, then we use
+directly observed in the projection, then we use
 the [seeded_equivocators_valid_trace_project] result to reach our conclusion.
 *)
 Lemma fixed_equivocation_constraint_has_constraint_has_been_sent_prop
@@ -1073,7 +1073,7 @@ Lemma fixed_equivocation_constraint_has_constraint_has_been_sent_prop
 Proof.
   unfold constraint_has_been_sent_prop. intros.
   remember (equivocators_state_project _ _ _) as sX.
-  destruct (composite_has_been_observed_dec IM sX m)
+  destruct (composite_has_been_directly_observed_dec IM sX m)
   ; [by left | right].
   clear l.
   unfold no_additional_equivocations in n.
@@ -1098,13 +1098,13 @@ Proof.
 
   (* Phase II (a): The restriction of tr to the equivocators allowed to
     state-equivocate is valid for the corresponding composition
-    pre-loaded with the messages observed in the projection sX of s.
+    pre-loaded with the messages directly observed in the projection sX of s.
   *)
 
   specialize
     (finite_valid_trace_sub_projection (equivocator_IM IM) equivocating
       (equivocators_fixed_equivocations_constraint IM equivocating)
-      (composite_has_been_observed IM sX)
+      (composite_has_been_directly_observed IM sX)
     ) as Hproject.
   spec Hproject is tr.
   spec Hproject.
@@ -1153,7 +1153,7 @@ Proof.
 
   rewrite <- (valid_trace_get_last Htr) in Hdescriptors, n.
   specialize
-    (projection_has_not_been_observed_is_equivocating _ _ (valid_trace_forget_last Htr)
+    (projection_has_not_been_directly_observed_is_equivocating _ _ (valid_trace_forget_last Htr)
       _ Hdescriptors
       _ n item
     ) as Hitem_equivocating.
@@ -1171,10 +1171,10 @@ Proof.
   and leverage the result from Phase II (a)
   to derive that the resulting projection is valid.
   *)
-  unfold equivocators_composition_for_observed, pre_loaded_free_equivocating_vlsm_composition.
+  unfold equivocators_composition_for_directly_observed, pre_loaded_free_equivocating_vlsm_composition.
 specialize
     (seeded_equivocators_valid_trace_project IM equivocating
-      (composite_has_been_observed IM sX)
+      (composite_has_been_directly_observed IM sX)
       (composite_state_sub_projection (equivocator_IM IM) equivocating is)
       (finite_trace_sub_projection (equivocator_IM IM) equivocating tr)
       Hproject

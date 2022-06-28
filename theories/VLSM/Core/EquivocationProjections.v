@@ -6,7 +6,7 @@ From VLSM.Core Require Import Composition VLSMProjections Validator ProjectionTr
 (** * VLSM projections and messages properties
 
 In this section we show that messages properties (oracles like [has_been_sent],
-[has_been_received], and [has_been_observed]) are reflected and, in some cases,
+[has_been_received], and [has_been_directly_observed]) are reflected and, in some cases,
 preserved by VLSM projections.
 *)
 
@@ -91,18 +91,18 @@ Proof.
   - by apply (has_been_received_stepwise_from_trace Y).
 Qed.
 
-Lemma VLSM_projection_has_been_observed_reflect
+Lemma VLSM_projection_has_been_directly_observed_reflect
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_observed Y (state_project s) m -> has_been_observed X s m.
+    forall m, has_been_directly_observed Y (state_project s) m -> has_been_directly_observed X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with item_sends_or_receives item_sends_or_receives.
   - by intros [] [] **; cbn in *; subst.
-  - by apply has_been_observed_stepwise_props.
-  - by apply has_been_observed_stepwise_props.
+  - by apply has_been_directly_observed_stepwise_props.
+  - by apply has_been_directly_observed_stepwise_props.
 Qed.
 
 End projection_oracle.
@@ -202,20 +202,20 @@ Proof.
   - apply has_been_received_dec.
 Qed.
 
-Lemma VLSM_weak_full_projection_has_been_observed
+Lemma VLSM_weak_full_projection_has_been_directly_observed
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_observed X s m -> has_been_observed Y (state_project s) m.
+    forall m, has_been_directly_observed X s m -> has_been_directly_observed Y (state_project s) m.
 Proof.
   apply VLSM_weak_full_projection_oracle with item_sends_or_receives item_sends_or_receives.
   - by intros [] [] **; cbn in *; subst.
-  - apply has_been_observed_stepwise_props.
-  - apply has_been_observed_stepwise_props.
-  - apply has_been_observed_dec.
-  - apply has_been_observed_dec.
+  - apply has_been_directly_observed_stepwise_props.
+  - apply has_been_directly_observed_stepwise_props.
+  - apply has_been_directly_observed_dec.
+  - apply has_been_directly_observed_dec.
 Qed.
 
 End weak_full_projection_oracle.
@@ -245,14 +245,14 @@ Definition VLSM_full_projection_has_been_received
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m
   := VLSM_weak_full_projection_has_been_received (VLSM_full_projection_weaken Hsimul).
 
-Definition VLSM_full_projection_has_been_observed
+Definition VLSM_full_projection_has_been_directly_observed
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_observed X s m -> has_been_observed Y (state_project s) m
-  := VLSM_weak_full_projection_has_been_observed (VLSM_full_projection_weaken Hsimul).
+    forall m, has_been_directly_observed X s m -> has_been_directly_observed Y (state_project s) m
+  := VLSM_weak_full_projection_has_been_directly_observed (VLSM_full_projection_weaken Hsimul).
 
 Definition VLSM_full_projection_has_been_sent_reflect
   `{HasBeenSentCapability message X}
@@ -268,14 +268,14 @@ Definition VLSM_full_projection_has_been_received_reflect
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m
   := VLSM_projection_has_been_received_reflect  (VLSM_full_projection_is_projection Hsimul).
 
-Definition VLSM_full_projection_has_been_observed_reflect
+Definition VLSM_full_projection_has_been_directly_observed_reflect
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_observed Y (state_project s) m -> has_been_observed X s m
-  := VLSM_projection_has_been_observed_reflect  (VLSM_full_projection_is_projection Hsimul).
+    forall m, has_been_directly_observed Y (state_project s) m -> has_been_directly_observed X s m
+  := VLSM_projection_has_been_directly_observed_reflect  (VLSM_full_projection_is_projection Hsimul).
 
 End full_projection_oracle.
 
@@ -315,17 +315,17 @@ Proof.
       (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
-Lemma VLSM_incl_has_been_observed
+Lemma VLSM_incl_has_been_directly_observed
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_observed X s m -> has_been_observed Y s m.
+    forall m, has_been_directly_observed X s m -> has_been_directly_observed Y s m.
 Proof.
   intros s Hs m Hm.
   by eapply
-    (@VLSM_full_projection_has_been_observed _ X Y _ _
+    (@VLSM_full_projection_has_been_directly_observed _ X Y _ _
       (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
@@ -353,17 +353,17 @@ Proof.
       (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
-Lemma VLSM_incl_has_been_observed_reflect
+Lemma VLSM_incl_has_been_directly_observed_reflect
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_observed Y s m -> has_been_observed X s m.
+    forall m, has_been_directly_observed Y s m -> has_been_directly_observed X s m.
 Proof.
   intros s Hs m Hm.
   by eapply
-    (@VLSM_full_projection_has_been_observed_reflect _ X Y _ _
+    (@VLSM_full_projection_has_been_directly_observed_reflect _ X Y _ _
       (VLSM_incl_is_full_projection Hincl)).
 Qed.
 

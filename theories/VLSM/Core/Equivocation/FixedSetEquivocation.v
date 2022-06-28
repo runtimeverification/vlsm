@@ -51,20 +51,20 @@ Definition pre_loaded_free_equivocating_vlsm_composition
 
 (**
 Given a composite state <<s>>, we define the composition of equivocators
-preloaded with the messages observed in s.
+preloaded with the messages directly observed in s.
 *)
-Definition equivocators_composition_for_observed s
-  := pre_loaded_free_equivocating_vlsm_composition (composite_has_been_observed IM s).
+Definition equivocators_composition_for_directly_observed s
+  := pre_loaded_free_equivocating_vlsm_composition (composite_has_been_directly_observed IM s).
 
 (**
 The fixed equivocation constraint for the regular composition of nodes
-stipulates that a message can be received either if it [has_been_observed]
+stipulates that a message can be received either if it [has_been_directly_observed]
 or it can be emited by the free composition of equivocators pre-loaded with
-the messages observed in the current state.
+the messages directly observed in the current state.
 *)
 Definition fixed_equivocation s m
-  := composite_has_been_observed IM s m \/
-    can_emit (equivocators_composition_for_observed s) m.
+  := composite_has_been_directly_observed IM s m \/
+    can_emit (equivocators_composition_for_directly_observed s) m.
 
 Definition fixed_equivocation_constraint
   (l : composite_label IM)
@@ -129,11 +129,11 @@ Proof.
   destruct Hsent as [i [Hi Hsent]]. by exists i.
 Qed.
 
-Lemma sent_by_non_equivocating_are_observed s m
+Lemma sent_by_non_equivocating_are_directly_observed s m
   (Hsent : sent_by_non_equivocating s m)
-  : composite_has_been_observed IM s m.
+  : composite_has_been_directly_observed IM s m.
 Proof.
-  apply composite_has_been_observed_sent_received_iff; left.
+  apply composite_has_been_directly_observed_sent_received_iff; left.
   by apply sent_by_non_equivocating_are_sent.
 Qed.
 
@@ -161,15 +161,16 @@ Definition strong_fixed_equivocation_vlsm_composition : VLSM message
 
 
 (** The composition of equivocators pre-loaded with only the messages sent by
-non-equivcators is included in that pre-loaded with all observed messages.
+non-equivcators is included in that pre-loaded with all the directly observed
+messages.
 *)
 Lemma Equivocators_Strong_Fixed_incl base_s
   : VLSM_incl
       (equivocators_composition_for_sent base_s)
-      (equivocators_composition_for_observed base_s).
+      (equivocators_composition_for_directly_observed base_s).
 Proof.
   apply pre_loaded_vlsm_incl.
-  apply sent_by_non_equivocating_are_observed.
+  apply sent_by_non_equivocating_are_directly_observed.
 Qed.
 
 (** [strong_fixed_equivocation_constraint]  is stronger than
@@ -179,7 +180,7 @@ Lemma strong_fixed_equivocation_subsumption s m
   : strong_fixed_equivocation s m -> fixed_equivocation s m.
 Proof.
   intros [Hobs | Hemit]; [left|right].
-  - revert Hobs. apply sent_by_non_equivocating_are_observed.
+  - revert Hobs. apply sent_by_non_equivocating_are_directly_observed.
   - revert Hemit. apply VLSM_incl_can_emit.
     apply Equivocators_Strong_Fixed_incl.
 Qed.
@@ -219,11 +220,11 @@ Context
   (Hincl : indices1 ⊆ indices2)
   .
 
-Lemma equivocators_composition_for_observed_index_incl_full_projection
+Lemma equivocators_composition_for_directly_observed_index_incl_full_projection
   (s: state)
   : VLSM_full_projection
-    (equivocators_composition_for_observed IM indices1 s)
-    (equivocators_composition_for_observed IM indices2 s)
+    (equivocators_composition_for_directly_observed IM indices1 s)
+    (equivocators_composition_for_directly_observed IM indices2 s)
     (lift_sub_incl_label IM _ _ Hincl) (lift_sub_incl_state IM _ _).
 Proof.
   by apply lift_sub_incl_preloaded_full_projection.
@@ -237,7 +238,7 @@ Proof.
   intros s m [Hobs | Hemit]; [by left |].
   right.
   specialize
-    (equivocators_composition_for_observed_index_incl_full_projection s)
+    (equivocators_composition_for_directly_observed_index_incl_full_projection s)
     as Hproj.
   by apply (VLSM_full_projection_can_emit Hproj) in Hemit.
 Qed.
@@ -380,7 +381,7 @@ We then restate (some of) these lemmas without the extra assumption.
 
 Context
   (base_s s : composite_state IM)
-  (Hobs_s_protocol : forall m, composite_has_been_observed IM s m ->
+  (Hobs_s_protocol : forall m, composite_has_been_directly_observed IM s m ->
     strong_fixed_equivocation IM equivocators base_s m)
   .
 
@@ -486,7 +487,7 @@ Lemma fixed_finite_valid_trace_sub_projection_helper
     (composite_state_sub_projection IM equivocators si)
     (composite_state_sub_projection IM equivocators s)
     (finite_trace_sub_projection IM equivocators tr) /\
-    forall m, composite_has_been_observed IM s m ->
+    forall m, composite_has_been_directly_observed IM s m ->
       strong_fixed_equivocation IM equivocators base_s m.
 Proof.
   induction Htr using finite_valid_trace_init_to_rev_ind.
@@ -495,8 +496,8 @@ Proof.
       apply (composite_initial_state_sub_projection IM equivocators si) in Hsi.
       by apply initial_state_is_valid.
     + intros m Hobs; exfalso.
-      eapply (@has_been_observed_no_inits _ Free); [done |].
-      by apply composite_has_been_observed_free_iff.
+      eapply (@has_been_directly_observed_no_inits _ Free); [done |].
+      by apply composite_has_been_directly_observed_free_iff.
   - apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht as Hpre_t.
     assert (Hfuture_s : in_futures PreFree s base_s).
     {
@@ -507,10 +508,10 @@ Proof.
     specialize (IHHtr Hfuture_s) as [Htr_pr Htr_obs].
     split; cycle 1.
     + intros m Hobs.
-      eapply @has_been_observed_step_update with (msg := m) (vlsm := Free) in Hpre_t.
-      apply composite_has_been_observed_free_iff,Hpre_t in Hobs.
+      eapply @has_been_directly_observed_step_update with (msg := m) (vlsm := Free) in Hpre_t.
+      apply composite_has_been_directly_observed_free_iff,Hpre_t in Hobs.
       destruct Hobs as [Hitem | Hobs]
-      ; [| by apply composite_has_been_observed_free_iff, Htr_obs in Hobs].
+      ; [| by apply composite_has_been_directly_observed_free_iff, Htr_obs in Hobs].
       apply valid_trace_last_pstate in Htr.
       apply valid_trace_last_pstate in Htr_pr.
       destruct Hitem as [Hm | Hm]; subst.
@@ -562,14 +563,14 @@ Proof.
 Qed.
 
 (**
-Any message observed in a Fixed valid state has either been sent by the
+Any message directly observed in a Fixed valid state has either been sent by the
 non-equivocating nodes, or it can be generated by the equivocating nodes
 using only the messages sent by the non-equivocating nodes.
 *)
-Lemma fixed_observed_has_strong_fixed_equivocation f
+Lemma fixed_directly_observed_has_strong_fixed_equivocation f
   (Hf : valid_state_prop Fixed f)
   m
-  (Hobs: composite_has_been_observed IM f m)
+  (Hobs: composite_has_been_directly_observed IM f m)
   : strong_fixed_equivocation IM equivocators f m.
 Proof.
   apply (VLSM_incl_valid_state Fixed_incl_Preloaded) in Hf as Hfuture.
@@ -605,7 +606,7 @@ Lemma fixed_input_has_strong_fixed_equivocation
 Proof.
   apply fixed_input_has_strong_fixed_equivocation_helper with (base_s := s) in Ht
   ; [done |].
-  apply fixed_observed_has_strong_fixed_equivocation.
+  apply fixed_directly_observed_has_strong_fixed_equivocation.
   apply Ht.
 Qed.
 
@@ -622,7 +623,7 @@ Proof.
   - intros m Hobs. apply in_futures_preserves_strong_fixed_equivocation with s.
     + apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht.
       by eapply (input_valid_transition_in_futures PreFree).
-    + by apply fixed_observed_has_strong_fixed_equivocation.
+    + by apply fixed_directly_observed_has_strong_fixed_equivocation.
   - apply input_valid_transition_in_futures in Ht.
     revert Ht. apply fixed_valid_state_sub_projection.
   - apply in_futures_refl. apply input_valid_transition_destination in Ht.
@@ -661,13 +662,13 @@ Context
 
 (**
 Given a Fixed valid state, the composition of the equivocators
-preloaded with all the observed messages in the state is not stronger
+preloaded with all the directly observed messages in the state is not stronger
 than that preloaded with only the messages sent by non-equivocators.
 *)
 Lemma Equivocators_Fixed_Strong_incl base_s
   (Hbase_s : valid_state_prop Fixed base_s)
   : VLSM_incl
-      (equivocators_composition_for_observed IM equivocators base_s)
+      (equivocators_composition_for_directly_observed IM equivocators base_s)
       (equivocators_composition_for_sent IM equivocators base_s).
 Proof.
   apply basic_VLSM_incl.
@@ -675,7 +676,7 @@ Proof.
   - intros l s m Hv HsY [Hinit | Hobs]
     ; [by apply initial_message_is_valid; left |].
     apply strong_fixed_equivocation_eqv_valid_message.
-    by apply fixed_observed_has_strong_fixed_equivocation.
+    by apply fixed_directly_observed_has_strong_fixed_equivocation.
   - by intros l s om (_ & _ & Hv) _ _.
   - by destruct 1.
 Qed.
@@ -683,7 +684,7 @@ Qed.
 Lemma Equivocators_Fixed_Strong_eq base_s
   (Hbase_s : valid_state_prop Fixed base_s)
   : VLSM_eq
-      (equivocators_composition_for_observed IM equivocators base_s)
+      (equivocators_composition_for_directly_observed IM equivocators base_s)
       (equivocators_composition_for_sent IM equivocators base_s).
 Proof.
   apply VLSM_eq_incl_iff. split.
@@ -730,7 +731,7 @@ nodes.
 
 In this section we essentially prove that given a Fixed valid state <<s>>,
 any valid trace over the composition of equivocators pre-loaded with the
-messages observed in <<s>> can be "lifted" to a Fixed valid trace in which
+messages directly observed in <<s>> can be "lifted" to a Fixed valid trace in which
 the non-equivocators remain in their corresponding component-state given by <<s>>
 (Lemma [EquivPreloadedBase_Fixed_weak_full_projection]).
 *)
@@ -872,13 +873,13 @@ Proof.
   apply (VLSM_incl_valid_state (Fixed_incl_StrongFixed IM equivocators)).
 Qed.
 
-Lemma lift_sub_state_to_sent_are_observed s
+Lemma lift_sub_state_to_sent_are_directly_observed s
   : forall m, sent_by_non_equivocating IM equivocators base_s m ->
-    composite_has_been_observed IM (lift_sub_state_to IM equivocators base_s s) m.
+    composite_has_been_directly_observed IM (lift_sub_state_to IM equivocators base_s s) m.
 Proof.
   intros m Hsent.
   apply (lift_sub_state_to_sent_by_non_equivocating_iff base_s s m) in Hsent.
-  revert Hsent. apply sent_by_non_equivocating_are_observed.
+  revert Hsent. apply sent_by_non_equivocating_are_directly_observed.
 Qed.
 
 Lemma strong_fixed_equivocation_lift_sub_state_to s
@@ -944,8 +945,8 @@ Proof.
   - intros l s m Hv HsY [[(i, Hi) [[im Him] Heqm]] | Hm].
     + apply initial_message_is_valid.
       by exists i, (exist _ im Him).
-    + clear HsY. eapply composite_observed_valid; [done |].
-      by eapply sent_by_non_equivocating_are_observed.
+    + clear HsY. eapply composite_directly_observed_valid; [done |].
+      by eapply sent_by_non_equivocating_are_directly_observed.
 Qed.
 
 End fixed_equivocator_lifting.
