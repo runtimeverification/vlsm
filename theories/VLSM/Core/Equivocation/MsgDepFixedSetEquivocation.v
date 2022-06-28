@@ -354,7 +354,7 @@ Lemma full_node_fixed_equivocation_constraint_subsumption
 Proof.
   intros l [s [m |]] (_ & Hm & Hv & Hc); [| itauto]
   ; destruct Hc as [Hsent | Heqv]; [left | right].
-  - revert Hsent; apply sent_by_non_equivocating_are_observed.
+  - revert Hsent; apply sent_by_non_equivocating_are_directly_observed.
   - destruct l as [i li], Heqv as (j & Hsender & HAj).
     apply Hfull in Hv.
     eapply VLSM_incl_can_emit.

@@ -679,7 +679,7 @@ Lemma equivocators_can_emit_free m
   l s
   (Hv : composite_valid IM l (s, Some m))
   : can_emit
-    (equivocators_composition_for_observed IM (equivocating_validators sf) s)
+    (equivocators_composition_for_directly_observed IM (equivocating_validators sf) s)
     m.
 Proof.
     apply emitted_messages_are_valid_iff in Hmsg

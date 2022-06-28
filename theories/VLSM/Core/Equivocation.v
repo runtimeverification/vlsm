@@ -1354,8 +1354,8 @@ In protocols like the CBC full node protocol, validators often
 work with the set of all messages they have directly observed,
 which includes the messages the node sent itself along with
 messages that were received.
-The [has_been_directly_observed] oracle holds for a message if the
-message was sent or received in any transition.
+The [has_been_directly_observed] oracle tells whether the given message was sent
+or received during any trace leading to the given state.
 *)
 
 Class HasBeenDirectlyObservedCapability {message} (vlsm: VLSM message) :=
@@ -1920,8 +1920,8 @@ Section Composite.
 
 
   (**
-  A message [has_been_directly_observed] for a composite state if it
-  [has_been_directly_observed] for any of its components.
+  A message [has_been_directly_observed] in a composite state if it
+  [has_been_directly_observed] in any of its components.
   *)
   Definition composite_has_been_directly_observed
     (s : composite_state IM)
@@ -1929,7 +1929,7 @@ Section Composite.
     : Prop
     := exists (i : index), has_been_directly_observed (IM i) (s i) m.
 
-  (** 'composite_has_been_directly_observed' is decidable. *)
+  (** [composite_has_been_directly_observed] is decidable. *)
   Lemma composite_has_been_directly_observed_dec : RelDecision composite_has_been_directly_observed.
   Proof.
     intros s m.

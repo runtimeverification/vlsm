@@ -302,11 +302,11 @@ both full-node and [has_been_sent_msg_dep_comparable_prop].
 Record FullNodeSentLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
   {
-    fnclee_sender1 : sender m1 = Some v;
-    fnclee_sender2 : sender m2 = Some v;
-    fnclee_observed1 : has_been_directly_observed X s m1;
-    fnclee_observed2 : has_been_directly_observed X s m2;
-    fnclee_incomparable : ~ comparable (msg_dep_rel message_dependencies) m1 m2;
+    fnslee_sender1 : sender m1 = Some v;
+    fnslee_sender2 : sender m2 = Some v;
+    fnslee_observed1 : has_been_directly_observed X s m1;
+    fnslee_observed2 : has_been_directly_observed X s m2;
+    fnslee_incomparable : ~ comparable (msg_dep_rel message_dependencies) m1 m2;
   }.
 
 Definition full_node_is_sent_locally_equivocating
@@ -334,7 +334,7 @@ Qed.
 Under [MessageDependencies] and full-node assumptions, any message which
 [HasBeenObserved] in a state, [has_been_directly_observed] in that state, too.
 *)
-Lemma full_node_HasBeenObserved_is_observed
+Lemma full_node_HasBeenObserved_is_directly_observed
   `{!MessageDependencies message_dependencies X}
   (Hfull : message_dependencies_full_node_condition_prop message_dependencies X)
   : forall s, valid_state_prop R s ->
@@ -361,7 +361,7 @@ Proof.
   intros s Hs v; split; [| apply full_node_is_locally_equivocating_stronger].
   intros (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]); exists m1, m2;
     split; [done | done | | | done];
-    by apply full_node_HasBeenObserved_is_observed.
+    by apply full_node_HasBeenObserved_is_directly_observed.
 Qed.
 
 End sec_message_dependencies_equivocation.
@@ -493,8 +493,8 @@ Context
   .
 
 (**
-A message can be indirectly observed in a composite state if it either has been
-directly observed in the state (as sent or received), or it
+A message can be (indirectly) observed in a composite state if it either has
+been directly observed in the state (as sent or received), or it
 [msg_dep_happens_before] a directly observed message.
 *)
 Inductive CompositeHasBeenObserved

@@ -126,13 +126,13 @@ Context
   (sender : message -> option validator)
   .
 
-Definition not_observed_happens_before_dependencies (s : composite_state IM) (m : message)
+Definition not_directly_observed_happens_before_dependencies (s : composite_state IM) (m : message)
   : set message :=
   filter (fun dm => ~composite_has_been_directly_observed IM s dm) (full_message_dependencies m).
 
 Definition msg_dep_coequivocating_senders (s : composite_state IM) (m : message)
   : set validator :=
-  map_option sender (not_observed_happens_before_dependencies s m).
+  map_option sender (not_directly_observed_happens_before_dependencies s m).
 
 Definition msg_dep_limited_equivocation_vlsm : VLSM message :=
   coeqv_limited_equivocation_vlsm IM sender msg_dep_coequivocating_senders.
@@ -368,7 +368,7 @@ Proof.
   apply Hchannel in Him as Hsender.
   exists j; subst; cbn.
   unfold msg_dep_message_equivocators, coeqv_message_equivocators,
-         msg_dep_coequivocating_senders, not_observed_happens_before_dependencies
+         msg_dep_coequivocating_senders, not_directly_observed_happens_before_dependencies
   ; rewrite decide_False by done; cbn.
   unfold channel_authenticated_message in Hsender
   ; destruct (sender im) as [_j |]; [| inversion Hsender]
@@ -378,7 +378,7 @@ Proof.
   - by eapply message_dependencies_are_sufficient; [typeclasses eauto|].
 Qed.
 
-Lemma equivocating_messages_dependencies_are_observed_or_equivocator_emitted
+Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
   s im
   (Him : can_emit (free_composite_vlsm IM) im)
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im)
@@ -396,7 +396,7 @@ Proof.
     intros (i & Hsender & Hemit).
     exists i; split; [| done].
     unfold msg_dep_message_equivocators, coeqv_message_equivocators,
-           msg_dep_coequivocating_senders, not_observed_happens_before_dependencies
+           msg_dep_coequivocating_senders, not_directly_observed_happens_before_dependencies
     ; rewrite decide_False, elem_of_app, !elem_of_map_option by done.
     right; exists dm; rewrite elem_of_list_filter
     ; setoid_rewrite full_message_dependencies_happens_before
@@ -413,7 +413,7 @@ Lemma message_equivocators_can_emit (s : vstate Limited) im
   (Hnobserved : ¬ composite_has_been_directly_observed IM (original_state s) im)
   (HLemit : can_emit (free_composite_vlsm IM) im)
   : can_emit
-      (equivocators_composition_for_observed IM
+      (equivocators_composition_for_directly_observed IM
         (set_union (state_annotation s)
           (msg_dep_message_equivocators IM full_message_dependencies sender
             (original_state s) im))
@@ -421,7 +421,7 @@ Lemma message_equivocators_can_emit (s : vstate Limited) im
       im.
 Proof.
   eapply VLSM_full_projection_can_emit.
-  - apply equivocators_composition_for_observed_index_incl_full_projection
+  - apply equivocators_composition_for_directly_observed_index_incl_full_projection
      with (Hincl := set_union_subseteq_right (state_annotation s) (msg_dep_message_equivocators
                       IM full_message_dependencies sender (original_state s) im)).
   - specialize (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
@@ -435,7 +435,7 @@ Proof.
       (well_founded_ind (msg_dep_happens_before_wf message_dependencies full_message_dependencies))
     ; intros Hdm.
     apply emitted_messages_are_valid_iff.
-    specialize (equivocating_messages_dependencies_are_observed_or_equivocator_emitted
+    specialize (equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
                   _ _ HLemit Hnobserved _ Hdm)
             as [Hobs_dm | (dm_i & Hdm_i & Hemit_dm)]
     ; [by left; right | right].
@@ -601,7 +601,7 @@ Proof.
   destruct Ht as [(Hs & Him & Hv & [Hobs | Hemitted]) Ht]
   ; [done | intros eqv Heqv].
   unfold msg_dep_coequivocating_senders,
-         not_observed_happens_before_dependencies in Heqv
+         not_directly_observed_happens_before_dependencies in Heqv
   ; rewrite elem_of_app, !elem_of_map_option in Heqv
   ; setoid_rewrite elem_of_list_singleton in Heqv
   ; setoid_rewrite elem_of_list_filter in Heqv.
@@ -618,7 +618,7 @@ Proof.
     {
       intros [Hobserved | Hemitted_msg].
       - contradict Hnobserved_msg.
-        by eapply sent_by_non_equivocating_are_observed.
+        by eapply sent_by_non_equivocating_are_directly_observed.
       - eapply VLSM_incl_can_emit in Hemitted_msg
         ; [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
         apply can_emit_composite_project in Hemitted_msg as [sub_i Hemitted_msg].
