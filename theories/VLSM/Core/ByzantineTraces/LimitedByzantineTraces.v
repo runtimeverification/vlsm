@@ -375,10 +375,8 @@ Proof.
     destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i
     ; destruct IHHbyzantine as [[Htr0_ann Hsi_ann] Htr0_eqv_byzantine]
     ; cbn in Htr0_eqv_byzantine |- *.
-    unfold msg_dep_annotate_trace_with_equivocators,
-     coeqv_annotate_trace_with_equivocators, annotate_trace in Htr0_eqv_byzantine.
     remember (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) (set index)) _ _)
-          as lst.
+     as lst in Htr0_eqv_byzantine at 1 |- * at 1 2 3 4 5 6.
     assert (Hlsti : original_state lst = lift_sub_state IM (set_diff (enum index) byzantine)
                                           (finite_trace_last si tr0)).
     {
