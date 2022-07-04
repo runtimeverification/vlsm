@@ -6,7 +6,11 @@ From VLSM.Core Require Import VLSM.
 From VLSM.Core.VLSMProjections Require Export VLSMPartialProjection VLSMTotalProjection.
 From VLSM.Core.VLSMProjections Require Export VLSMEmbedding VLSMInclusion VLSMEquality.
 
+(** * VLSM Projection Properties *)
+
 Section same_VLSM_full_projection.
+
+(** ** Same VLSM full projection *)
 
 Context
   {message : Type}
@@ -27,6 +31,8 @@ Qed.
 End same_VLSM_full_projection.
 
 Section transitivity_props.
+
+(** ** Transitivity properties *)
 
 Lemma pre_VLSM_projection_finite_trace_project_trans
   {message : Type}

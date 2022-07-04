@@ -3,15 +3,14 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
 
-
 Section VLSM_projection.
 
-(** * VLSM Projections : VLSM (Total) Projection
+(** * VLSM Total Projections
 
 A VLSM projection guaranteeing the existence of projection for all states and
-traces. We say that VLSM X projects to VLSM Y (sharing the same messages) if
-there exists maps <<state_project>> taking X-states to Y-states,
-and <<trace_project>>, taking list of transitions from X to Y, such that:
+traces. We say that VLSM <<X>> projects to VLSM <<Y>> (sharing the same messages) if
+there exists maps <<state_project>> taking <<X>>-states to <<Y>>-states,
+and <<trace_project>>, taking list of transitions from <<X>> to <<Y>>, such that:
 
 - state and [trace_project_preserves_valid_trace]s.
 
@@ -154,6 +153,8 @@ Record VLSM_projection_type
         finite_valid_trace_from X sX trX ->
         state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX) (trace_project trX)
   }.
+
+(** ** Projection definitions and properties *)
 
 Section projection_type_properties.
 
@@ -698,7 +699,7 @@ Proof.
   - by apply VLSM_projection_initial_state.
 Qed.
 
-(** ** Projection Friendliness
+(** ** Projection friendliness
 
 A projection is friendly if all the valid traces of the projection are
 projections of the valid traces of the source VLSM.

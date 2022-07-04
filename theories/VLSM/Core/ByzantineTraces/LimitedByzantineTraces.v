@@ -7,7 +7,7 @@ From VLSM.Core Require Import Validator Equivocation Equivocation.FixedSetEquivo
 From VLSM.Core Require Import Equivocation.LimitedEquivocation Equivocation.LimitedEquivocation.
 From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation Equivocation.TraceWiseEquivocation.
 
-(** * VLSM Compositions with byzantine nodes of limited weight
+(** * VLSM Compositions with Byzantine nodes of limited weight
 
 In this module we define and study protocol executions allowing a
 (weight-)limited amount of byzantine faults.
