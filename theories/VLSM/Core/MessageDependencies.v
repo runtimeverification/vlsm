@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From Coq Require Import FinFun Relations.Relation_Operators Program.Equality.
-From stdpp Require Import prelude.
+From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras FinFunExtras StdppListSet Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
@@ -37,7 +37,7 @@ Definition message_dependencies_full_node_condition
 through two properties:
 
 - Necessity: All dependent messeges for a message <<m>>m are required to be
-directly observed by any state emitting the message <<m>>.
+directly observed by origin state of a transition emitting the message <<m>>.
 
 - Sufficiency: A message can be produced by the machine pre-loaded with its
 dependencies.
@@ -48,7 +48,8 @@ constitutes the _full node assumption_.
 Class MessageDependencies
   :=
   { message_dependencies_are_necessary (m : message)
-      `(can_produce (pre_loaded_with_all_messages_vlsm X) s m)
+      `(input_valid_transition (pre_loaded_with_all_messages_vlsm X)
+          lX (s,im) (s', Some m))
       : message_dependencies_full_node_condition s m
   ; message_dependencies_are_sufficient (m : message)
       `(can_emit (pre_loaded_with_all_messages_vlsm X) m)
@@ -110,13 +111,20 @@ Proof.
     contradict Hinit; apply no_initial_messages_in_X.
   - apply (directly_observed_valid (pre_loaded_vlsm X P) s).
     + exists (Some m). by apply can_produce_valid.
-    + cut (has_been_directly_observed X s dm).
+    + destruct Hproduce as ((pre_s, im) & l & Ht).
+    cut (has_been_directly_observed X pre_s dm).
       {
-        intros [Hsent | Hreceived]; [left | right]; auto.
+        intros.
+        eapply has_been_directly_observed_step_update; [| by right].
+        by apply
+          (VLSM_incl_input_valid_transition
+            (vlsm_incl_pre_loaded_with_all_messages_vlsm
+              (pre_loaded_vlsm X P))).
       }
-      apply message_dependencies_are_necessary with m; [| done].
-      revert Hproduce
-      ; apply VLSM_incl_can_produce, pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    eapply message_dependencies_are_necessary; [| done].
+    by apply
+      (VLSM_incl_input_valid_transition
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages X P)).
 Qed.
 
 (** Under [MessageDependencies] assumptions, if a message [has_been_sent]
@@ -133,10 +141,21 @@ Proof.
   revert m Hsent; induction Hs using valid_state_prop_ind; intro m.
   - intro Hbs; contradict Hbs; eapply oracle_no_inits; [| done].
     apply has_been_sent_stepwise_from_trace.
-  - rewrite has_been_sent_step_update by done; intros [-> | Hrcv] dm Hdm.
-    + eapply message_dependencies_are_necessary; [by eexists _,_ | done].
-    + rewrite has_been_directly_observed_step_update by done; right.
-      by eapply IHHs.
+  - rewrite has_been_sent_step_update by done; intros [-> | Hrcv] dm Hdm;
+      rewrite has_been_directly_observed_step_update by done; right.
+    + by eapply message_dependencies_are_necessary.
+    + by eapply IHHs.
+Qed.
+
+Lemma ram_transition_preserves_message_dependencies_full_node_condition
+  `{MessageDependencies}
+  `(input_valid_transition (pre_loaded_with_all_messages_vlsm X) lX (s, im) (s', om)) :
+  forall m, message_dependencies_full_node_condition s m ->
+    message_dependencies_full_node_condition s' m.
+Proof.
+  intros m Hm dm Hdm.
+  eapply has_been_directly_observed_step_update; [done |].
+  by right; apply Hm.
 Qed.
 
 (** If the [valid]ity predicate has the [message_dependencies_full_node_condition_prop]erty,
@@ -244,6 +263,35 @@ Inductive HasBeenObserved (s : vstate X) (m : message) : Prop :=
       has_been_directly_observed X s m' ->
       msg_dep_happens_before message_dependencies m m' ->
       HasBeenObserved s m.
+
+(**
+A relation capturing the messages <<m1>> directly observed at the moment of
+emitting a message <<m2>>.
+
+Note that this might be different from the [msg_dep_rel]ation: on one hand,
+[msg_dep_rel] does not require that <<m2>> is emitted from a ram transition;
+on the other hand, it might be that a message can be emitted from a state containing
+more than its required depdendencies.
+*)
+Inductive DirectlyObservedBeforeSend (m1 m2 : message) : Prop :=
+| directly_observed_before_send :
+    forall (s : vstate X) (item : vtransition_item X),
+      input_valid_transition_item (pre_loaded_with_all_messages_vlsm X) s item ->
+      has_been_directly_observed X s m1 ->
+      output item = Some m2 ->
+      DirectlyObservedBeforeSend m1 m2.
+
+Lemma DirectlyObservedBeforeSend_subsumes_msg_dep_rel
+  `{!MessageDependencies message_dependencies X} :
+  forall m, can_emit (pre_loaded_with_all_messages_vlsm X) m ->
+  forall dm, msg_dep_rel message_dependencies dm m ->
+    DirectlyObservedBeforeSend dm m.
+Proof.
+  intros m ((s, im) & l & s' & Ht) dm Hdm.
+  constructor 1 with s {| l := l; input := im; destination := s'; output := Some m |};
+    [done | | done].
+  by eapply message_dependencies_are_necessary.
+Qed.
 
 (**
 A pair of messages constitutes a (local) evidence of equivocation for a
@@ -391,18 +439,12 @@ Global Instance composite_message_dependencies
   : MessageDependencies message_dependencies (free_composite_vlsm IM).
 Proof.
   split.
-  - intros m s ((is, iom) & (i, li) & Ht) dm Hdm.
+  - intros m (i, li) is iom s Ht dm Hdm.
     apply composite_has_been_directly_observed_free_iff.
+    apply input_valid_transition_preloaded_project_active in Ht; cbn in Ht.
     eapply composite_has_been_directly_observed_from_component.
-    eapply message_dependencies_are_necessary; [typeclasses eauto | | done].
-    exists (is i, iom), li.
-    revert Ht.
-    apply
-      (VLSM_projection_input_valid_transition (preloaded_component_projection IM _))
-      with (lY := li).
-    unfold composite_project_label; cbn.
-    case_decide as Heqi; [| done].
-    by replace Heqi with (@eq_refl index i) by (apply Eqdep_dec.UIP_dec; done).
+    eapply message_dependencies_are_necessary;
+      [typeclasses eauto | exact Ht | done].
   - intros m Hemit.
     apply can_emit_composite_project in Hemit as [j Hemitj].
     eapply message_dependencies_are_sufficient in Hemitj; [|typeclasses eauto].
@@ -483,7 +525,7 @@ Section sec_composite_message_dependencies_equivocation.
 Context
   {message : Type}
   (message_dependencies : message -> set message)
-  `{EqDecision index}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -525,6 +567,94 @@ Proof.
   split; [| by intros []; eapply composite_HasBeenObserved_lift].
   intros [[i Hobsi] |m' [i Hobsi] Hmm'];
     exists i; [by constructor 1 | by econstructor 2].
+Qed.
+
+(**
+Lifting [DirectlyObservedBeforeSend] to a composition. The advantage of this
+definition is that RHS can be emitted by any of the machines in the composition.
+*)
+Inductive CompositeDirectlyObservedBeforeSend (m1 m2 : message) : Prop :=
+| composite_directly_observed_before_send :
+    forall (s : composite_state IM) (item : composite_transition_item IM)
+      (i := projT1 (l item)),
+      input_valid_transition_item RFree s item ->
+      has_been_directly_observed (IM i) (s i) m1 ->
+      output item = Some m2 ->
+      CompositeDirectlyObservedBeforeSend m1 m2.
+
+Lemma composite_DirectlyObservedBeforeSend_lift :
+  forall (i : index) (m1 m2 : message),
+    DirectlyObservedBeforeSend (IM i) m1 m2 ->
+    CompositeDirectlyObservedBeforeSend m1 m2.
+Proof.
+  inversion 1 as [? ? Ht Hobs Houtput].
+  eapply VLSM_full_projection_input_valid_transition in Ht;
+    [| apply lift_to_composite_preloaded_vlsm_full_projection].
+  constructor 1 with (lift_to_composite_state' IM i s)
+    (lift_to_composite_transition_item' IM i item);
+    destruct item; cbn in *; [done | | done].
+  by unfold lift_to_composite_state'; rewrite state_update_eq.
+Qed.
+
+Lemma composite_DirectlyObservedBeforeSend_iff m1 m2 : 
+  CompositeDirectlyObservedBeforeSend m1 m2
+    <->
+  exists i, DirectlyObservedBeforeSend (IM i) m1 m2.
+Proof.
+  split; [| by intros []; eapply composite_DirectlyObservedBeforeSend_lift].
+  inversion 1 as [? ? ? Ht Hobsi Houtput]; exists i.
+  apply input_valid_transition_preloaded_project_active in Ht.
+  subst i; destruct item, l as (i, li); cbn in *.
+  by constructor 1 with (s i)
+    {| l := li; input := input; destination := destination i; output := output |}.
+Qed.
+
+Lemma CompositeDirectlyObservedBeforeSend_subsumes_msg_dep_rel
+  `{forall i, MessageDependencies message_dependencies (IM i)} :
+  forall m, can_emit RFree m ->
+  forall dm, msg_dep_rel message_dependencies dm m ->
+    CompositeDirectlyObservedBeforeSend dm m.
+Proof.
+  intros m Hm dm Hdm; apply can_emit_composite_project in Hm as [j Hjm].
+  by eapply composite_DirectlyObservedBeforeSend_lift,
+    DirectlyObservedBeforeSend_subsumes_msg_dep_rel;
+    cycle 1.
+Qed.
+
+(**
+Similarly to the [msg_dep_happens_before], we define the transitive closure
+of the [CompositeDirectlyObservedBeforeSend] relation.
+*)
+Definition composite_observed_before_send : relation message :=
+  tc (CompositeDirectlyObservedBeforeSend).
+
+Lemma composite_observed_before_send_subsumes_msg_dep_rel
+  `{forall i, MessageDependencies message_dependencies (IM i)} :
+  forall m, can_emit Free m ->
+  forall dm, msg_dep_rel message_dependencies dm m ->
+    composite_observed_before_send dm m.
+Proof.
+  intros m Hm dm Hdm; constructor.
+  eapply CompositeDirectlyObservedBeforeSend_subsumes_msg_dep_rel; [| done].
+  eapply VLSM_incl_can_emit; [| done].
+  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+Qed.
+
+Lemma composite_observed_before_send_subsumes_happens_before
+  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
+  `{forall i, MessageDependencies message_dependencies (IM i)} :
+  forall m, can_emit Free m ->
+  forall dm, msg_dep_happens_before message_dependencies dm m ->
+    composite_observed_before_send dm m.
+Proof.
+  intros m Hm dm Hdm.
+  induction Hdm; [by eapply composite_observed_before_send_subsumes_msg_dep_rel |].
+  transitivity y; [| by apply IHHdm].
+  eapply composite_observed_before_send_subsumes_msg_dep_rel; [| done].
+  by eapply emitted_messages_are_valid,
+    msg_dep_reflects_happens_before_free_validity,
+    emitted_messages_are_valid_iff
+    in Hm as [(i & [] & <-)|]; [exfalso; eapply no_initial_messages_in_IM |..].
 Qed.
 
 (**
@@ -703,7 +833,7 @@ Context
   `{FullMessageDependencies _ message_dependencies full_message_dependencies}
   .
 
-Global Instance msg_dep_happens_before_dec :
+#[export] Instance msg_dep_happens_before_dec :
  RelDecision (msg_dep_happens_before message_dependencies).
 Proof.
  refine
@@ -715,7 +845,7 @@ Proof.
   by rewrite <- full_message_dependencies_happens_before.
 Qed.
 
-Global Instance msg_dep_happens_before_irrefl :
+#[export] Instance msg_dep_happens_before_irrefl :
   Irreflexive (msg_dep_happens_before message_dependencies).
 Proof.
   intros m Hm.
@@ -724,7 +854,7 @@ Proof.
   apply full_message_dependencies_irreflexive.
 Qed.
 
-Global Instance msg_dep_happens_before_strict : StrictOrder (msg_dep_happens_before message_dependencies) := {}.
+#[export] Instance msg_dep_happens_before_strict : StrictOrder (msg_dep_happens_before message_dependencies) := {}.
 
 Lemma msg_dep_rel_full_message_dependecies_subset :
   forall x y : message, msg_dep_rel message_dependencies x y ->
