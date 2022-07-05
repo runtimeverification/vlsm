@@ -6,16 +6,16 @@ From VLSM.Core Require Import VLSM VLSMProjections.VLSMTotalProjection.
 
 Section VLSM_full_projection.
 
-(** * VLSM Projections : VLSM Full Projection (Embedding)
+(** * VLSM Full Projection (Embedding)
 
 A VLSM projection guaranteeing the existence of projection for all labels and
 states, and the full correspondence between [transition_item]s.
-We say that VLSM X fully projects (embeds) into VLSM Y (sharing the same messages)
-if there exist maps <<label_project>> taking X-labels to Y-labels
-and <<state_project>> taking X-states to Y-states, such that the
+We say that VLSM <<X>> fully projects (embeds) into VLSM <<Y>> (sharing the same messages)
+if there exist maps <<label_project>> taking <<X>>-labels to <<Y>>-labels
+and <<state_project>> taking <<X>>-states to <<Y>>-states, such that the
 [finite_valid_trace_prop]erty is preserved by the trace
 transformation induced by the label and state projection functions,
-in which each X-[transition_item] is projected to an Y-[transition_item]
+in which each <<X>>-[transition_item] is projected to an <<Y>>-[transition_item]
 preserving the messages and transforming labels and states accordingly.
 
 Besides [VLSM_incl]usions, which are a prototypical example of VLSM embeddings,
@@ -276,6 +276,8 @@ Qed.
 
 Section weak_projection_properties.
 
+(** ** Weak projection properties *)
+
 Context
   {message : Type}
   {X Y : VLSM message}
@@ -386,6 +388,8 @@ Qed.
 End weak_projection_properties.
 
 Section full_projection_properties.
+
+(** ** Full projection properties *)
 
 Context
   {message : Type}
@@ -562,6 +566,8 @@ like <<X>>'s [transition].
 
 Section basic_VLSM_full_projection.
 
+(** ** Basic full VLSM projection *)
+
 Context
   {message : Type}
   (X Y : VLSM message)
@@ -575,6 +581,8 @@ Context
   .
 
 Section weak_full_projection.
+
+(** ** Weak full VLSM projection *)
 
 Context
   (Hstate : weak_projection_initial_state_preservation X Y state_project)

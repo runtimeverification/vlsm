@@ -2,12 +2,12 @@ From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMEmbedding VLSMProjections.VLSMTotalProjection.
 
-(** * VLSM Projections : VLSM Inclusion
+(** * VLSM Inclusion
 
 When both VLSMs have the same state and label types they also share the
 same [Trace] type, and sets of traces can be compared without conversion.
-Then VLSM X is _included_ in VLSM Y if every [valid_trace] available to X
-is also available to Y.
+Then VLSM <<X>> is _included_ in VLSM <<Y>> if every [valid_trace] available to <<X>>
+is also available to <<Y>>.
 *)
 Section VLSM_inclusion.
   Context
@@ -112,6 +112,8 @@ Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
 
 Section VLSM_incl_preservation.
 
+(** ** VLSM inclusion preservation *)
+
 Context
   {message : Type}
   {T : VLSMType message}
@@ -144,6 +146,8 @@ Definition strong_incl_initial_message_preservation : Prop :=
 End VLSM_incl_preservation.
 
 Section VLSM_incl_properties.
+
+(** ** VLSM inclusion properties *)
 
 Context
   {message : Type} [vtype : VLSMType message]

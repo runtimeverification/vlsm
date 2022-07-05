@@ -2,12 +2,12 @@ From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMInclusion VLSMProjections.VLSMEmbedding.
 
-(** * VLSM Projections : VLSM Equality
+(** * VLSM Trace Equality
 
 We can also define VLSM _equality_ in terms of traces.
 When both VLSMs have the same state and label types they also share the
 same [Trace] type, and sets of traces can be compared without conversion.
-Then VLSM X and VLSM Y are _equal_ if their [valid_trace]s are exactly the same.
+Then VLSM <<X>> and VLSM <<Y>> are _equal_ if their [valid_trace]s are exactly the same.
 *)
 
 Section VLSM_equality.
@@ -81,6 +81,8 @@ Proof.
 Qed.
 
 Section VLSM_eq_properties.
+
+(** ** VLSM equality properties *)
 
 Context
   {message : Type} [vtype : VLSMType message]
@@ -241,6 +243,8 @@ Qed.
 End VLSM_eq_properties.
 
 Section VLSM_incl_preloaded_properties.
+
+(** ** Inclusion properties for pre-loaded VLSMs *)
 
 Context
   {message : Type}

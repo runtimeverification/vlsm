@@ -5,21 +5,21 @@ From VLSM.Core Require Import VLSM.
 
 Section VLSM_partial_projection.
 
-(** * VLSM Projections : VLSM Partial Projection
+(** * VLSM Partial Projections
 
-A generic notion of VLSM projection. We say that VLSM X partially projects to
-VLSM Y (sharing the same messages) if there exists a partial map <<partial_trace_project>>
-from traces over X (pairs of state and list of transitions from that state)
-to traces over Y such that:
+A generic notion of VLSM projection. We say that VLSM <<X>> partially projects to
+VLSM <<Y>> (sharing the same messages) if there exists a partial map <<partial_trace_project>>
+from traces over <<X>> (pairs of state and list of transitions from that state)
+to traces over <<Y>> such that:
 
 - [partial_trace_project_preserves_valid_trace]s, if the projection is defined.
 
 - The projection operation is stable to adding valid prefixes (property
 [partial_trace_project_extends_left]). More precisely, if the projection of a
-trace (sX, tX) yields (sY, tY), then for any trace (s'X, preX) ending in sX
-such that (s'X, preX ++ tX) is a valid trace, then there exists a
-trace (s'Y, preY) ending in sY such that (s'X, preX ++ tX) projects
-to (s'Y, preY ++ tY).
+trace <<(sX, tX)>> yields <<(sY, tY)>>, then for any trace <<(s'X, preX)>> ending in <<sX>>
+such that <<(s'X, preX ++ tX)>> is a valid trace, then there exists a
+trace <<(s'Y, preY)>> ending in <<sY>> such that <<(s'X, preX ++ tX)>> projects
+to <<(s'Y, preY ++ tY)>>.
 
 Proper examples of partial projections (which are not [VLSM_projection]s) are
 the projections from the compositions of equivocators to the composition
@@ -75,6 +75,8 @@ Record VLSM_partial_projection
   }.
 
 Section weak_partial_projection_properties.
+
+(** ** Weak partial projection properties *)
 
 Context
   {message : Type}
@@ -136,6 +138,8 @@ Qed.
 End weak_partial_projection_properties.
 
 Section partial_projection_properties.
+
+(** ** Partial projection properties *)
 
 Context
   {message : Type}

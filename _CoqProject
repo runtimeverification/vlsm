@@ -1,5 +1,7 @@
 -Q theories/VLSM VLSM
+
 -arg -w -arg -deprecated-instance-without-locality
+-arg -w -arg -future-coercion-class-field
 
 theories/VLSM/Lib/Preamble.v
 theories/VLSM/Lib/SsrExport.v
