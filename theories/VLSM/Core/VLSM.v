@@ -2053,7 +2053,7 @@ This relation is often used in stating safety and liveness properties.*)
 
     #[export] Instance in_futures_trans : Transitive in_futures.
     Proof.
-      intros first second third [tr12 Htr12] [tr23 Htr23].
+      intros s1 s2 s3 [tr12 Htr12] [tr23 Htr23].
       by eexists; eapply finite_valid_trace_from_to_app.
     Qed.
 

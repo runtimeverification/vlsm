@@ -166,18 +166,18 @@ Lemma sent_by_non_equivocating_msg_dep_rel_strong_fixed_equivocation
     sent_by_non_equivocating  IM equivocators s m ->
     strong_fixed_equivocation IM equivocators s dm.
 Proof.
-  intros s Hs dm m Hdm [i [Hni Hsent]].
+  intros s Hs dm m Hdm (i & Hni & Hsent).
   apply (messages_sent_from_component_produced_previously IM Hs) in Hsent
     as (destination & Hfutures & Hproduce).
   eapply VLSM_incl_in_futures in Hfutures as Hpre_futures
   ; [| apply constraint_preloaded_free_incl].
   apply (VLSM_projection_in_futures (preloaded_component_projection IM i)) in Hpre_futures.
-  destruct Hproduce as ((pre_destination, im) & l & Hti).
+  destruct Hproduce as ([pre_destination im] & l & Hti).
   eapply message_dependencies_are_necessary in Hti as Hobs; [| typeclasses eauto].
   eapply ram_transition_preserves_message_dependencies_full_node_condition
     in Hobs; [| done..].
   eapply has_been_directly_observed_sent_received_iff
-    in Hobs as [Hreceived| Hsent]; [..| done]; cycle 1.
+    in Hobs as [Hreceived | Hsent]; [.. | done]; cycle 1.
   + left; exists i; split; [done |].
     eapply in_futures_preserving_oracle_from_stepwise
     ; [apply has_been_sent_stepwise_from_trace | done | done].
@@ -185,7 +185,7 @@ Proof.
   + apply in_futures_valid_fst in Hfutures as Hdestination.
     specialize (received_component_received_previously IM Hdestination Hreceived)
       as (s_item_dm & [] & Ht & Hfutures_dm & <- & Hinput);
-      destruct l0 as (i, li); cbn in Hinput; subst input; cbn in *.
+      destruct l0 as [i li]; cbn in Hinput; subst input; cbn in *.
       apply input_valid_transition_in_futures in Ht as Hfutures_t; cbn in Hfutures_t
       ; destruct Ht as [(_ & _ & _ & Hc) _].
       eapply in_futures_preserves_strong_fixed_equivocation; [| apply Hc].
@@ -218,7 +218,7 @@ Proof.
     + by eapply input_valid_transition_destination.
     + exists sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
       cut (input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i))
-        li (sX (dexist i Hi), iom) (sX' (dexist i Hi), Some m)).
+            li (sX (dexist i Hi), iom) (sX' (dexist i Hi), Some m)).
       {
         intro Hti; eapply has_been_directly_observed_step_update; [done |].
         by right; unfold sub_IM in *; eapply message_dependencies_are_necessary.
