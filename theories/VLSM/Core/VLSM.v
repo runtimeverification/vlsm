@@ -2051,16 +2051,10 @@ This relation is often used in stating safety and liveness properties.*)
       by exists []; constructor.
     Qed.
 
-    Lemma in_futures_trans
-      (first second third : state)
-      (H12: in_futures first second)
-      (H23 : in_futures second third)
-      : in_futures first third.
+    #[export] Instance in_futures_trans : Transitive in_futures.
     Proof.
-      destruct H12 as [tr12 Htr12].
-      destruct H23 as [tr23 Htr23].
-      exists (tr12 ++ tr23).
-      by apply finite_valid_trace_from_to_app with second.
+      intros s1 s2 s3 [tr12 Htr12] [tr23 Htr23].
+      by eexists; eapply finite_valid_trace_from_to_app.
     Qed.
 
     Lemma input_valid_transition_in_futures {l s im s' om}
