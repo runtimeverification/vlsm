@@ -16,10 +16,10 @@ Section sec_message_dependencies.
 
 Context
   {message : Type}
-  (message_dependencies : message -> set message)
   (X : VLSM message)
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
+  (message_dependencies : message -> set message)
   .
 
 (** The (local) full node condition for a given <<message_dependencies>> function
@@ -278,7 +278,7 @@ Definition observed_before_send (m1 m2 : message) : Prop :=
   exists s item, ObservedBeforeSendTransition s item m1 m2.
 
 Lemma observed_before_send_subsumes_msg_dep_rel
-  `{!MessageDependencies message_dependencies X} :
+  `{!MessageDependencies X message_dependencies} :
   forall m, can_emit (pre_loaded_with_all_messages_vlsm X) m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
     observed_before_send dm m.
@@ -378,8 +378,8 @@ Under [MessageDependencies] and full-node assumptions, any message which
 [HasBeenObserved] in a state, [has_been_directly_observed] in that state, too.
 *)
 Lemma full_node_HasBeenObserved_is_directly_observed
-  `{!MessageDependencies message_dependencies X}
-  (Hfull : message_dependencies_full_node_condition_prop message_dependencies X)
+  `{!MessageDependencies X message_dependencies}
+  (Hfull : message_dependencies_full_node_condition_prop X message_dependencies)
   : forall s, valid_state_prop R s ->
     forall m, HasBeenObserved s m <-> has_been_directly_observed X s m.
 Proof.
@@ -393,8 +393,8 @@ Assuming [MessageDependencies] and full-node, the two notions of
 local equivocation defined above are equivalent.
 *)
 Lemma full_node_is_locally_equivocating_iff
-  `{!MessageDependencies message_dependencies X}
-  (Hfull : message_dependencies_full_node_condition_prop message_dependencies X)
+  `{!MessageDependencies X message_dependencies}
+  (Hfull : message_dependencies_full_node_condition_prop X message_dependencies)
   : forall s, valid_state_prop R s ->
     forall v,
       msg_dep_is_locally_equivocating s v
@@ -413,25 +413,25 @@ End sec_message_dependencies_equivocation.
 message_dependencies function, [HasBeenSentCapability] and
 [HasBeenReceivedCapability]) can be inferred from that.
 *)
-Global Hint Mode MessageDependencies - - ! - - : typeclass_instances.
+Global Hint Mode MessageDependencies - ! - - - : typeclass_instances.
 
 Section sec_composite_message_dependencies.
 
 Context
   {message : Type}
-  (message_dependencies : message -> set message)
   `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{forall i, MessageDependencies message_dependencies (IM i)}
+  (message_dependencies : message -> set message)
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   .
 
 (** If all of the components satisfy the [MessageDependencies] assumptions,
 then their free composition will also do so.
 *)
 Global Instance composite_message_dependencies
-  : MessageDependencies message_dependencies (free_composite_vlsm IM).
+  : MessageDependencies (free_composite_vlsm IM) message_dependencies.
 Proof.
   split.
   - intros m [i li] is iom s Ht dm Hdm.
@@ -516,11 +516,11 @@ Section sec_composite_message_dependencies_equivocation.
 
 Context
   {message : Type}
-  (message_dependencies : message -> set message)
   `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
+  (message_dependencies : message -> set message)
   `(sender : message -> option validator)
   (Free := free_composite_vlsm IM)
   (RFree := pre_loaded_with_all_messages_vlsm Free)
@@ -624,7 +624,7 @@ Proof.
 Qed.
 
 Lemma composite_observed_before_send_subsumes_msg_dep_rel
-  `{forall i, MessageDependencies message_dependencies (IM i)} :
+  `{forall i, MessageDependencies (IM i) message_dependencies} :
   forall m, can_emit RFree m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
     composite_observed_before_send dm m.
@@ -643,7 +643,7 @@ Definition tc_composite_observed_before_send : relation message :=
   tc (composite_observed_before_send).
 
 Lemma tc_composite_observed_before_send_subsumes_msg_dep_rel
-  `{forall i, MessageDependencies message_dependencies (IM i)} :
+  `{forall i, MessageDependencies (IM i) message_dependencies} :
   forall m, can_emit Free m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
     tc_composite_observed_before_send dm m.
@@ -656,7 +656,7 @@ Qed.
 
 Lemma tc_composite_observed_before_send_subsumes_happens_before
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  `{forall i, MessageDependencies message_dependencies (IM i)} :
+  `{forall i, MessageDependencies (IM i) message_dependencies} :
   forall m, can_emit Free m ->
   forall dm, msg_dep_happens_before message_dependencies dm m ->
     tc_composite_observed_before_send dm m.
@@ -717,8 +717,8 @@ Proof.
 Qed.
 
 Lemma full_node_is_globally_equivocating_iff
-  `{forall i, MessageDependencies message_dependencies (IM i)}
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  `{forall i, MessageDependencies (IM i) message_dependencies}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   : forall s, valid_state_prop RFree s ->
     forall v,
       msg_dep_is_globally_equivocating s v
@@ -787,12 +787,12 @@ Section sec_sub_composite_message_dependencies.
 
 Context
   {message : Type}
-  (message_dependencies : message -> set message)
   `{EqDecision index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{forall i, MessageDependencies message_dependencies (IM i)}
+  (message_dependencies : message -> set message)
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   (indices : set index)
   .
 
@@ -1037,7 +1037,7 @@ Under several additional (but regularly used) assumptions, including the
 [valid_all_dependencies_emittable_from_dependencies_prop]erty.
 *)
 Lemma valid_free_validating_equiv_message_validating
-  `{forall i, MessageDependencies message_dependencies (IM i)}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hchannel : channel_authentication_prop  IM A sender)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   : forall i, component_message_validator_prop IM (free_constraint IM) i <->
@@ -1052,7 +1052,7 @@ Proof.
     exists v; [done |].
     by eapply message_dependencies_are_sufficient.
   - apply full_message_dependencies_happens_before in Hin.
-    eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender in Hin
+    eapply @msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender in Hin
         as (v & Hsender & Hemit); [| done ..].
     exists v; [done |].
     by eapply message_dependencies_are_sufficient.

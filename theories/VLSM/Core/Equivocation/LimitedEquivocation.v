@@ -311,8 +311,8 @@ the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma traces_exhibiting_limited_equivocation_are_valid_rev
   (Hke : WitnessedEquivocationCapability IM id sender)
-  `{forall i, MessageDependencies message_dependencies (IM i)}
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  `{forall i, MessageDependencies (IM i) message_dependencies}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM id sender)
   (Htracewise_basic_equivocation : BasicEquivocation (composite_state IM) index
@@ -341,8 +341,8 @@ have the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
   (Hke : WitnessedEquivocationCapability IM id sender)
-  `{forall i, MessageDependencies message_dependencies (IM i)}
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  `{forall i, MessageDependencies (IM i) message_dependencies}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM id sender)
   : forall s tr, strong_trace_witnessing_equivocation_prop IM id sender s tr ->
@@ -363,8 +363,8 @@ a trace having the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
   (Hke : WitnessedEquivocationCapability IM id sender)
-  `{forall i, MessageDependencies message_dependencies (IM i)}
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  `{forall i, MessageDependencies (IM i) message_dependencies}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM id sender)
   : forall s, valid_state_prop Limited s ->
