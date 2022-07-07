@@ -258,7 +258,7 @@ Inductive HasBeenObserved (s : vstate X) (m : message) : Prop :=
       HasBeenObserved s m.
 
 (**
-A relation capturing the messages <<m1>> directly observed at the moment of
+A relation capturing the messages <<m1>> observed at the moment of
 emitting a message <<m2>>.
 
 Note that this might be different from the [msg_dep_rel]ation: on the one hand,
@@ -266,26 +266,26 @@ Note that this might be different from the [msg_dep_rel]ation: on the one hand,
 on the other hand, it might be that a message can be emitted from a state containing
 more than its required depdendencies.
 *)
-Record DirectlyObservedBeforeSendTransition
+Record ObservedBeforeSendTransition
   (s : vstate X) (item : vtransition_item X) (m1 m2 : message) : Prop :=
   {
     dobst_transition : input_valid_transition_item R s item;
     dobst_output_m2 : output item = Some m2;
-    dobst_observed_m1 : has_been_directly_observed X s m1;
+    dobst_observed_m1 : HasBeenObserved s m1;
   }.
 
-Definition directly_observed_before_send (m1 m2 : message) : Prop :=
-  exists s item, DirectlyObservedBeforeSendTransition s item m1 m2.
+Definition observed_before_send (m1 m2 : message) : Prop :=
+  exists s item, ObservedBeforeSendTransition s item m1 m2.
 
-Lemma directly_observed_before_send_subsumes_msg_dep_rel
+Lemma observed_before_send_subsumes_msg_dep_rel
   `{!MessageDependencies message_dependencies X} :
   forall m, can_emit (pre_loaded_with_all_messages_vlsm X) m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
-    directly_observed_before_send dm m.
+    observed_before_send dm m.
 Proof.
   intros m ([s im] & l & s' & Ht) dm Hdm.
   exists s, {| l := l; input := im; destination := s'; output := Some m |}.
-  by constructor; [..| eapply message_dependencies_are_necessary].
+  by constructor; [..| constructor; eapply message_dependencies_are_necessary].
 Qed.
 
 (**
@@ -565,24 +565,24 @@ Qed.
 Lifting [DirectlyObservedBeforeSend] to a composition. The advantage of this
 definition is that RHS can be emitted by any of the machines in the composition.
 *)
-Record CompositeDirectlyObservedBeforeSendTransition
+Record CompositeObservedBeforeSendTransition
   (s : composite_state IM) (item : composite_transition_item IM) (m1 m2 : message)
   : Prop :=
   {
     cdobst_transition : input_valid_transition_item RFree s item;
     cdobst_output_m2 : output item = Some m2;
     cdobst_observed_m1 : 
-      has_been_directly_observed (IM (projT1 (l item))) (s (projT1 (l item))) m1;
+      HasBeenObserved (IM (projT1 (l item))) message_dependencies (s (projT1 (l item))) m1;
   }.
 
-Definition composite_directly_observed_before_send (m1 m2 : message) : Prop :=
-  exists s item, CompositeDirectlyObservedBeforeSendTransition s item m1 m2.
+Definition composite_observed_before_send (m1 m2 : message) : Prop :=
+  exists s item, CompositeObservedBeforeSendTransition s item m1 m2.
 
-Lemma composite_DirectlyObservedBeforeSendTransition_lift :
+Lemma composite_ObservedBeforeSendTransition_lift :
   forall (i : index) (s : vstate (IM i)) (item : vtransition_item (IM i))
     (m1 m2 : message),
-  DirectlyObservedBeforeSendTransition (IM i) s item m1 m2 ->
-  CompositeDirectlyObservedBeforeSendTransition
+  ObservedBeforeSendTransition (IM i) message_dependencies s item m1 m2 ->
+  CompositeObservedBeforeSendTransition
     (lift_to_composite_state' IM i s)
     (lift_to_composite_transition_item' IM i item) m1 m2.
 Proof.
@@ -593,78 +593,78 @@ Proof.
     by unfold lift_to_composite_state'; rewrite state_update_eq.
 Qed.
 
-Lemma composite_directly_observed_before_send_lift :
+Lemma composite_observed_before_send_lift :
   forall (i : index) (m1 m2 : message),
-    directly_observed_before_send (IM i) m1 m2 ->
-    composite_directly_observed_before_send m1 m2.
+    observed_before_send (IM i) message_dependencies m1 m2 ->
+    composite_observed_before_send m1 m2.
 Proof.
   intros * (s & item & Hobs).
-  by eexists _, _; apply composite_DirectlyObservedBeforeSendTransition_lift.
+  by eexists _, _; apply composite_ObservedBeforeSendTransition_lift.
 Qed.
 
-Lemma composite_DirectlyObservedBeforeSendTransition_project :
+Lemma composite_ObservedBeforeSendTransition_project :
   forall (s : composite_state IM) (item : composite_transition_item IM)
     (m1 m2 : message) (i := projT1 (l item)),
-  CompositeDirectlyObservedBeforeSendTransition s item m1 m2 ->
-  DirectlyObservedBeforeSendTransition (IM i)
+  CompositeObservedBeforeSendTransition s item m1 m2 ->
+  ObservedBeforeSendTransition (IM i) message_dependencies
     (s i) (composite_transition_item_projection IM item) m1 m2.
 Proof.
   by intros * []; constructor;
     [eapply input_valid_transition_preloaded_project_active |..].
 Qed.
 
-Lemma composite_directly_observed_before_send_iff m1 m2 : 
-  composite_directly_observed_before_send m1 m2
+Lemma composite_observed_before_send_iff m1 m2 : 
+  composite_observed_before_send m1 m2
     <->
-  exists i, directly_observed_before_send (IM i) m1 m2.
+  exists i, observed_before_send (IM i) message_dependencies m1 m2.
 Proof.
-  split; [| by intros []; eapply composite_directly_observed_before_send_lift].
+  split; [| by intros []; eapply composite_observed_before_send_lift].
   intros (s & item & Hcomp); eexists (projT1 (l item)), _, _.
-  by apply composite_DirectlyObservedBeforeSendTransition_project.
+  by apply composite_ObservedBeforeSendTransition_project.
 Qed.
 
-Lemma composite_directly_observed_before_send_subsumes_msg_dep_rel
+Lemma composite_observed_before_send_subsumes_msg_dep_rel
   `{forall i, MessageDependencies message_dependencies (IM i)} :
   forall m, can_emit RFree m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
-    composite_directly_observed_before_send dm m.
+    composite_observed_before_send dm m.
 Proof.
   intros m Hm dm Hdm.
   apply can_emit_composite_project in Hm as [j Hjm].
-  by eapply composite_directly_observed_before_send_lift,
-    directly_observed_before_send_subsumes_msg_dep_rel.
+  by eapply composite_observed_before_send_lift,
+    observed_before_send_subsumes_msg_dep_rel.
 Qed.
 
 (**
 Similarly to the [msg_dep_happens_before], we define the transitive closure
-of the [composite_directly_observed_before_send] relation.
+of the [composite_observed_before_send] relation.
 *)
-Definition composite_observed_before_send : relation message :=
-  tc (composite_directly_observed_before_send).
+Definition tc_composite_observed_before_send : relation message :=
+  tc (composite_observed_before_send).
 
-Lemma composite_observed_before_send_subsumes_msg_dep_rel
+Lemma tc_composite_observed_before_send_subsumes_msg_dep_rel
   `{forall i, MessageDependencies message_dependencies (IM i)} :
   forall m, can_emit Free m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
-    composite_observed_before_send dm m.
+    tc_composite_observed_before_send dm m.
 Proof.
   intros m Hm dm Hdm; constructor.
-  eapply composite_directly_observed_before_send_subsumes_msg_dep_rel; [| done].
+  eapply composite_observed_before_send_subsumes_msg_dep_rel; [| done].
   eapply VLSM_incl_can_emit; [| done].
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
-Lemma composite_observed_before_send_subsumes_happens_before
+Lemma tc_composite_observed_before_send_subsumes_happens_before
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   `{forall i, MessageDependencies message_dependencies (IM i)} :
   forall m, can_emit Free m ->
   forall dm, msg_dep_happens_before message_dependencies dm m ->
-    composite_observed_before_send dm m.
+    tc_composite_observed_before_send dm m.
 Proof.
   intros m Hm dm Hdm.
-  induction Hdm; [by eapply composite_observed_before_send_subsumes_msg_dep_rel |].
+  induction Hdm; [by eapply tc_composite_observed_before_send_subsumes_msg_dep_rel |].
   transitivity y; [| by apply IHHdm].
-  eapply composite_observed_before_send_subsumes_msg_dep_rel; [| done].
+  eapply tc_composite_observed_before_send_subsumes_msg_dep_rel; [| done].
   by eapply emitted_messages_are_valid,
     msg_dep_reflects_happens_before_free_validity,
     emitted_messages_are_valid_iff
