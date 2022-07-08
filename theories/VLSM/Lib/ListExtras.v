@@ -947,6 +947,14 @@ Proof.
     lia.
 Qed.
 
+Lemma list_lookup_lt [A] (is : list A) :
+  forall i, is_Some(is !! i) ->
+  forall j, j < i -> is_Some (is !! j).
+Proof.
+  intros; apply lookup_lt_is_Some.
+  by etransitivity; [| apply lookup_lt_is_Some].
+Qed.
+
 Lemma list_suffix_lookup
   {A : Type}
   (s : list A)
@@ -2157,4 +2165,80 @@ Proof.
   case_decide; subst.
   - by rewrite lastn_ge; cbn; [| lia].
   - by rewrite (lastn_app_le _ [h] t); [| lia].
+Qed.
+
+Program Definition not_null_element `{EqDecision A} [l : list A] (Hl : l <> [])
+  : dsig (fun i => i ∈ l) :=
+  dexist (is_Some_proj (proj2 (head_is_Some l) Hl)) _.
+Next Obligation.
+  intros; cbn.
+  generalize (proj2 (head_is_Some l) Hl); intros [a Ha].
+  unfold is_Some_proj; cbn; rewrite Ha.
+  destruct l; [done |].
+  by apply Some_inj in Ha; subst; left.
+Qed.
+
+Program Definition element_of_subseteq `{EqDecision A} [l1 l2 : list A] (Hsub : l1 ⊆ l2)
+  (di : dsig (fun i => i ∈ l1)) : dsig (fun i => i ∈ l2) :=
+  dexist (` di) _.
+Next Obligation.
+  intros; cbn.
+  by destruct_dec_sig di i Hi Heq; subst; apply Hsub.
+Qed.
+
+Definition element_of_filter `{EqDecision A}
+  [P : A -> Prop] `{∀ x, Decision (P x)} [l : list A]
+  : dsig (fun i => i ∈ filter P l) -> dsig (fun i => i ∈ l) :=
+  element_of_subseteq (list_filter_subseteq P l).
+
+Lemma list_difference_singleton_not_in `{EqDecision A} :
+  forall (l : list A) (a : A), a ∉ l →
+    list_difference l [a] = l.
+Proof.
+  intros l a; induction l; [done |].
+  rewrite not_elem_of_cons; intros [Hna0 Hnal]; cbn.
+  case_decide as Ha0; [by apply elem_of_list_singleton in Ha0 |].
+  by rewrite IHl.
+Qed.
+
+Lemma list_difference_singleton_length_in `{EqDecision A} :
+  forall (l : list A) (a : A), a ∈ l →
+    length (list_difference l [a]) < length l.
+Proof.
+  intros l a; induction l; [inversion 1 |].
+  cbn; case_decide as Ha0; rewrite elem_of_list_singleton in Ha0.
+  - subst; intros _.
+    destruct (decide (a ∈ l)).
+    + etransitivity; [by apply IHl | lia].
+    + by rewrite list_difference_singleton_not_in; [lia |].
+  - inversion 1; [done |]; subst; cbn.
+    by spec IHl; [| lia].
+Qed.
+
+Lemma longer_subseteq_has_dups `{EqDecision A} :
+  forall l1 l2 : list A, l1 ⊆ l2 → length l1 > length l2 →
+  exists (i1 i2 : nat) (a : A), i1 ≠ i2 ∧ l1 !! i1 = Some a /\ l1 !! i2 = Some a.
+Proof.
+  induction l1; [inversion 2 |].
+  intros l2 Hl12 Hlen12.
+  destruct (decide (a ∈ l1)).
+  - exists 0.
+    apply elem_of_list_lookup_1 in e as [i2 Hi2].
+    by exists (S i2), a.
+  - specialize (IHl1 (list_difference l2 [a])).
+    spec IHl1.
+    {
+      intros x Hx.
+      apply elem_of_list_difference.
+      rewrite elem_of_list_singleton.
+      split; [| by contradict n; subst].
+      by apply Hl12; right.
+    }
+    cbn in Hlen12.
+    assert (Ha : a ∈ l2) by (apply Hl12; left).
+    specialize (list_difference_singleton_length_in _ _ Ha) as Hlen'.
+    spec IHl1; [lia |].
+    destruct IHl1 as (i1 & i2 & a' & Hi12 & Hli1 & Hli2).
+    exists (S i1), (S i2), a'.
+    by cbn; split; [congruence |].
 Qed.
