@@ -257,6 +257,39 @@ Inductive HasBeenObserved (s : vstate X) (m : message) : Prop :=
       msg_dep_happens_before message_dependencies m m' ->
       HasBeenObserved s m.
 
+Lemma transition_preserves_HasBeenObserved :
+  forall l s im s' om, input_valid_transition R l (s,im) (s',om) ->
+  forall msg, HasBeenObserved s msg -> HasBeenObserved s' msg.
+Proof.
+  intros * Ht msg Hbefore; inversion Hbefore as [Hobs | m Hobs Hdep].
+  - by constructor; eapply has_been_directly_observed_step_update; [| right].
+  - by econstructor 2; [| done]; eapply has_been_directly_observed_step_update; [| right].
+Qed.
+
+Lemma HasBeenObserved_step_update :
+  forall l s im s' om, input_valid_transition R l (s,im) (s',om) ->
+  forall msg,
+    HasBeenObserved s' msg
+      <->
+    (exists m, (im = Some m \/ om = Some m) /\
+      (msg = m \/ msg_dep_happens_before message_dependencies msg m))
+        \/
+      HasBeenObserved s msg.
+Proof.
+  intros * Ht msg; split.
+  - inversion 1 as [Hobs' | m' Hobs' Hdep];
+      (eapply has_been_directly_observed_step_update in Hobs'; [| done]);
+      destruct Hobs' as [Hnow | Hbefore].
+    + by left; exists msg; split; [| left].
+    + by right; constructor.
+    + by left; exists m'; split; [| right].
+    + by right; econstructor 2.
+  - intros [(m & Hnow & [<- | Hdep]) | Hbefore].
+    + by constructor; eapply has_been_directly_observed_step_update; [| left].
+    + by econstructor 2; [| done]; eapply has_been_directly_observed_step_update; [| left].
+    + by eapply transition_preserves_HasBeenObserved.
+Qed.
+
 (**
 A relation capturing the messages <<m1>> observed at the moment of
 emitting a message <<m2>>.
@@ -559,6 +592,41 @@ Proof.
   split; [| by intros []; eapply composite_HasBeenObserved_lift].
   intros [[i Hobsi] |m' [i Hobsi] Hmm'];
     exists i; [by constructor 1 | by econstructor 2].
+Qed.
+
+Lemma transition_preserves_CompositeHasBeenObserved :
+  forall l s im s' om, input_valid_transition RFree l (s,im) (s',om) ->
+  forall msg, CompositeHasBeenObserved s msg -> CompositeHasBeenObserved s' msg.
+Proof.
+  specialize (composite_has_been_directly_observed_stepwise_props IM (free_constraint IM)) as [].
+  intros * Ht msg Hbefore; inversion Hbefore as [Hobs | m Hobs Hdep].
+  - by constructor; eapply oracle_step_update; [| right].
+  - by econstructor 2; [| done]; eapply oracle_step_update; [| right].
+Qed.
+
+Lemma CompositeHasBeenObserved_step_update :
+  forall l s im s' om, input_valid_transition RFree l (s,im) (s',om) ->
+  forall msg,
+    CompositeHasBeenObserved s' msg
+      <->
+    (exists m, (im = Some m \/ om = Some m) /\
+      (msg = m \/ msg_dep_happens_before message_dependencies msg m))
+        \/
+      CompositeHasBeenObserved s msg.
+Proof.
+  specialize (composite_has_been_directly_observed_stepwise_props IM (free_constraint IM)) as [].
+  intros * Ht msg; split.
+  - inversion 1 as [Hobs' | m' Hobs' Hdep];
+      (eapply oracle_step_update in Hobs'; [| done]);
+      destruct Hobs' as [Hnow | Hbefore].
+    + by left; exists msg; split; [| left].
+    + by right; constructor.
+    + by left; exists m'; split; [| right].
+    + by right; econstructor 2.
+  - intros [(m & Hnow & [<- | Hdep]) | Hbefore].
+    + by constructor; eapply oracle_step_update; [| left].
+    + by econstructor 2; [| done]; eapply oracle_step_update; [| left].
+    + by eapply transition_preserves_CompositeHasBeenObserved.
 Qed.
 
 (**
@@ -1059,3 +1127,91 @@ Proof.
 Qed.
 
 End free_composition_validators.
+
+Section sec_CompositeHasBeenObserved_dec.
+
+Context
+  `{EqDecision message}
+  `{finite.Finite index}
+  (IM : index -> VLSM message)
+  `{forall i, ComputableSentMessages (IM i)}
+  `{forall i, ComputableReceivedMessages (IM i)}
+  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  .
+
+Definition composite_received_messages_fn (s : composite_state IM) : list message :=
+  concat (map (fun i => received_messages_fn (IM i) (s i)) (enum index)).
+
+Definition composite_sent_messages_fn (s : composite_state IM) : list message :=
+  concat (map (fun i => sent_messages_fn (IM i) (s i)) (enum index)).
+
+Definition composite_observed_messages_fn (s : composite_state IM) : list message :=
+  composite_sent_messages_fn s ++ composite_received_messages_fn s.
+
+Lemma composite_has_been_received_iff_fn :
+  forall (s : composite_state IM) (m : message),
+    composite_has_been_received IM s m
+      <->
+    m ∈ composite_received_messages_fn s.
+Proof.
+  intros s m; split.
+  - intros [i Hobsi].
+    apply elem_of_list_In, in_concat.
+    exists (received_messages_fn (IM i) (s i)); split; [| by apply elem_of_list_In].
+    by apply in_map_iff; eexists; (split; [| apply elem_of_list_In, elem_of_enum]).
+  - intros Hi.
+    apply elem_of_list_In, in_concat in Hi as (li & Hi & Hm).
+    apply in_map_iff in Hi as (i & <- & _).
+    apply elem_of_list_In in Hm.
+    by exists i.
+Qed.
+
+Lemma composite_has_been_sent_iff_fn :
+  forall (s : composite_state IM) (m : message),
+    composite_has_been_sent IM s m
+      <->
+    m ∈ composite_sent_messages_fn s.
+Proof.
+  intros s m; split.
+  - intros [i Hobsi].
+    apply elem_of_list_In, in_concat.
+    exists (sent_messages_fn (IM i) (s i)); split; [| by apply elem_of_list_In].
+    by apply in_map_iff; eexists; (split; [| apply elem_of_list_In, elem_of_enum]).
+  - intros Hi.
+    apply elem_of_list_In, in_concat in Hi as (li & Hi & Hm).
+    apply in_map_iff in Hi as (i & <- & _).
+    apply elem_of_list_In in Hm.
+    by exists i.
+Qed.
+
+Lemma composite_has_been_directly_observed_iff_fn :
+  forall (s : composite_state IM) (m : message),
+    composite_has_been_directly_observed IM s m
+      <->
+    m ∈ composite_observed_messages_fn s.
+Proof.
+  intros s m; rewrite composite_has_been_directly_observed_sent_received_iff.
+  unfold composite_observed_messages_fn; rewrite elem_of_app.
+  by rewrite composite_has_been_sent_iff_fn, composite_has_been_received_iff_fn.
+Qed.
+
+#[export] Instance CompositeHasBeenObserved_dec :
+  RelDecision (CompositeHasBeenObserved IM message_dependencies).
+Proof.
+  intros s m.
+  destruct (decide (composite_has_been_directly_observed IM s m));
+    [by left; constructor |].
+  destruct (decide (Exists (fun m' => m ∈ full_message_dependencies m')
+                      (composite_observed_messages_fn s))).
+  - left.
+    apply Exists_exists in e as (m' & Hobsm' & Hmm').
+    constructor 2 with m';
+      [by apply composite_has_been_directly_observed_iff_fn |].
+    by apply full_message_dependencies_happens_before.
+  - right; inversion 1; [by contradict n |].
+    contradict n0; apply Exists_exists; exists m'; split;
+      [by apply composite_has_been_directly_observed_iff_fn |].
+    by apply full_message_dependencies_happens_before.
+Qed.
+
+End sec_CompositeHasBeenObserved_dec.

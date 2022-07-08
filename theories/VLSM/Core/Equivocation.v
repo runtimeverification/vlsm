@@ -765,7 +765,7 @@ Section Simple.
         apply (Htrace is tr Htr Hex).
     Qed.
 
-    Definition ComputableSentMessages_HasBeenSentCapability
+    #[export] Instance ComputableSentMessages_HasBeenSentCapability
       {Hsm : ComputableSentMessages}
       `{EqDecision message}
       : HasBeenSentCapability
@@ -865,7 +865,7 @@ Section Simple.
       by rewrite exists_proj1_sig.
     Qed.
 
-    Definition ComputableReceivedMessages_HasBeenReceivedCapability
+    #[export] Instance ComputableReceivedMessages_HasBeenReceivedCapability
       {Hsm : ComputableReceivedMessages}
       `{EqDecision message}
       : HasBeenReceivedCapability
