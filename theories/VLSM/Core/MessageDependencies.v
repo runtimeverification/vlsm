@@ -258,7 +258,7 @@ Inductive HasBeenObserved (s : vstate X) (m : message) : Prop :=
       HasBeenObserved s m.
 
 Lemma transition_preserves_HasBeenObserved :
-  forall l s im s' om, input_valid_transition R l (s,im) (s',om) ->
+  forall l s im s' om, input_valid_transition R l (s, im) (s', om) ->
   forall msg, HasBeenObserved s msg -> HasBeenObserved s' msg.
 Proof.
   intros * Ht msg Hbefore; inversion Hbefore as [Hobs | m Hobs Hdep].
@@ -267,7 +267,7 @@ Proof.
 Qed.
 
 Lemma HasBeenObserved_step_update :
-  forall l s im s' om, input_valid_transition R l (s,im) (s',om) ->
+  forall l s im s' om, input_valid_transition R l (s, im) (s', om) ->
   forall msg,
     HasBeenObserved s' msg
       <->
@@ -318,7 +318,7 @@ Lemma observed_before_send_subsumes_msg_dep_rel
 Proof.
   intros m ([s im] & l & s' & Ht) dm Hdm.
   exists s, {| l := l; input := im; destination := s'; output := Some m |}.
-  by constructor; [..| constructor; eapply message_dependencies_are_necessary].
+  by constructor; [.. | constructor; eapply message_dependencies_are_necessary].
 Qed.
 
 (**
@@ -595,10 +595,10 @@ Proof.
 Qed.
 
 Lemma transition_preserves_CompositeHasBeenObserved :
-  forall l s im s' om, input_valid_transition RFree l (s,im) (s',om) ->
+  forall l s im s' om, input_valid_transition RFree l (s, im) (s', om) ->
   forall msg, CompositeHasBeenObserved s msg -> CompositeHasBeenObserved s' msg.
 Proof.
-  specialize (composite_has_been_directly_observed_stepwise_props IM (free_constraint IM)) as [].
+  destruct (composite_has_been_directly_observed_stepwise_props IM (free_constraint IM)) as [].
   intros * Ht msg Hbefore; inversion Hbefore as [Hobs | m Hobs Hdep].
   - by constructor; eapply oracle_step_update; [| right].
   - by econstructor 2; [| done]; eapply oracle_step_update; [| right].
@@ -614,7 +614,7 @@ Lemma CompositeHasBeenObserved_step_update :
         \/
       CompositeHasBeenObserved s msg.
 Proof.
-  specialize (composite_has_been_directly_observed_stepwise_props IM (free_constraint IM)) as [].
+  destruct (composite_has_been_directly_observed_stepwise_props IM (free_constraint IM)) as [].
   intros * Ht msg; split.
   - inversion 1 as [Hobs' | m' Hobs' Hdep];
       (eapply oracle_step_update in Hobs'; [| done]);
@@ -634,8 +634,7 @@ Lifting [DirectlyObservedBeforeSend] to a composition. The advantage of this
 definition is that RHS can be emitted by any of the machines in the composition.
 *)
 Record CompositeObservedBeforeSendTransition
-  (s : composite_state IM) (item : composite_transition_item IM) (m1 m2 : message)
-  : Prop :=
+  (s : composite_state IM) (item : composite_transition_item IM) (m1 m2 : message) : Prop :=
   {
     cdobst_transition : input_valid_transition_item RFree s item;
     cdobst_output_m2 : output item = Some m2;
@@ -657,8 +656,7 @@ Proof.
   intros * []; constructor; [| done |].
   - by eapply VLSM_full_projection_input_valid_transition in dobst_transition0;
       [| apply lift_to_composite_preloaded_vlsm_full_projection].
-  - destruct item; cbn in *.
-    by unfold lift_to_composite_state'; rewrite state_update_eq.
+  - by destruct item; cbn in *; unfold lift_to_composite_state'; rewrite state_update_eq.
 Qed.
 
 Lemma composite_observed_before_send_lift :
