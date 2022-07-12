@@ -666,215 +666,6 @@ Section Simple.
       by apply has_been_received_consistency.
     Qed.
 
-    Class ComputableSentMessages := {
-      sent_messages_fn : vstate vlsm -> list message;
-
-      sent_messages_full :
-        forall (s : vstate vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
-          m ∈ (sent_messages_fn s) <-> exists (sm : sent_messages s), proj1_sig sm = m;
-
-      sent_messages_consistency :
-        forall
-          (s : vstate vlsm)
-          (Hs : valid_state_prop pre_vlsm s)
-          (m : message),
-          selected_messages_consistency_prop (field_selector output) s m
-    }.
-
-    Lemma ComputableSentMessages_initial_state_empty
-      {Hrm : ComputableSentMessages}
-      (s : vinitial_state vlsm)
-      : sent_messages_fn (proj1_sig s) = [].
-    Proof.
-      assert (Hps : valid_state_prop pre_vlsm (proj1_sig s))
-        by (apply initial_state_is_valid; apply proj2_sig).
-      destruct s as [s Hs]. simpl in *.
-      destruct (sent_messages_fn s) as [|m l] eqn: Hsm; [done |].
-      specialize (sent_messages_full s Hps m) as Hl. apply proj1 in Hl.
-      spec Hl; [by rewrite Hsm; left |].
-      destruct Hl as [[m0 Hm] Heq]. simpl in Heq. subst m0.
-      apply sent_messages_consistency in Hm; [| done].
-      by apply selected_message_exists_in_all_traces_initial_state in Hm.
-    Qed.
-
-    Definition ComputableSentMessages_has_been_sent
-      {Hsm : ComputableSentMessages}
-      (s : vstate vlsm)
-      (m : message)
-      : Prop
-      :=
-      m ∈ (sent_messages_fn s).
-
-    Global Instance computable_sent_message_has_been_sent_dec
-      {Hsm : ComputableSentMessages}
-      `{EqDecision message}
-      : RelDecision ComputableSentMessages_has_been_sent :=
-      fun s m => decide_rel _ _ (sent_messages_fn s).
-
-    Lemma ComputableSentMessages_has_been_sent_proper
-      {Hsm : ComputableSentMessages}
-      (s : state)
-      (Hs : valid_state_prop pre_vlsm s)
-      (m : message)
-      : has_been_sent_prop ComputableSentMessages_has_been_sent s m.
-    Proof.
-      unfold has_been_sent_prop. unfold all_traces_have_message_prop.
-      unfold ComputableSentMessages_has_been_sent.
-      split.
-      - intro Hin.
-        apply sent_messages_full in Hin; [| done].
-        destruct Hin as [[m0 Hm0] [= ->]].
-        by apply (sent_messages_consistency s Hs m).
-      - intro H.
-        apply (sent_messages_consistency s Hs m) in H.
-        apply sent_messages_full; [done |].
-        by exists (exist _ m H).
-    Qed.
-
-    Definition ComputableSentMessages_has_not_been_sent
-      {Hsm : ComputableSentMessages}
-      (s : vstate vlsm)
-      (m : message)
-      : Prop
-      :=
-      ~ ComputableSentMessages_has_been_sent s m.
-
-    Lemma ComputableSentMessages_has_not_been_sent_proper
-      {Hsm : ComputableSentMessages}
-      (s : state)
-      (Hs : valid_state_prop pre_vlsm s)
-      (m : message)
-      : has_not_been_sent_prop ComputableSentMessages_has_not_been_sent s m.
-    Proof.
-      unfold has_not_been_sent_prop. unfold no_traces_have_message_prop.
-      unfold ComputableSentMessages_has_not_been_sent.
-      unfold ComputableSentMessages_has_been_sent.
-      split.
-      - intro Hin.
-        cut (~ selected_message_exists_in_some_preloaded_traces (field_selector output) s m).
-        { intros Hno is tr Htr Hexists.
-          contradict Hno. by exists is, tr, Htr.
-        }
-        contradict Hin.
-        apply sent_messages_full; [done |].
-        by exists (exist _ m Hin).
-      - intros Htrace Hin.
-        apply sent_messages_full in Hin; [| done].
-        destruct Hin as [[m0 Hm] Heq];simpl in Heq;subst m0.
-        destruct Hm as [is [tr [Htr Hex]]].
-        apply (Htrace is tr Htr Hex).
-    Qed.
-
-    #[export] Instance ComputableSentMessages_HasBeenSentCapability
-      {Hsm : ComputableSentMessages}
-      `{EqDecision message}
-      : HasBeenSentCapability
-      :=
-      {|
-        has_been_sent := ComputableSentMessages_has_been_sent;
-        proper_sent := ComputableSentMessages_has_been_sent_proper;
-        proper_not_sent := ComputableSentMessages_has_not_been_sent_proper
-      |}.
-
-    Class ComputableReceivedMessages := {
-      received_messages_fn : vstate vlsm -> list message;
-
-      received_messages_full :
-        forall (s : vstate vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
-          m ∈ (received_messages_fn s) <-> exists (sm : received_messages s), proj1_sig sm = m;
-
-      received_messages_consistency :
-        forall
-          (s : vstate vlsm)
-          (Hs : valid_state_prop pre_vlsm s)
-          (m : message),
-          selected_messages_consistency_prop (field_selector input) s m
-    }.
-
-    Lemma ComputableReceivedMessages_initial_state_empty
-      {Hrm : ComputableReceivedMessages}
-      (s : vinitial_state vlsm)
-      : received_messages_fn (proj1_sig s) = [].
-    Proof.
-      assert (Hps : valid_state_prop pre_vlsm (proj1_sig s))
-        by (apply initial_state_is_valid;apply proj2_sig).
-      destruct s as [s Hs]. simpl in *.
-      destruct (received_messages_fn s) as [|m l] eqn: Hrcv; [done |].
-      specialize (received_messages_full s Hps m) as Hl. apply proj1 in Hl.
-      spec Hl; [by rewrite Hrcv; left |].
-      destruct Hl as [[m0 Hm] Heq]. simpl in Heq. subst m0.
-      apply received_messages_consistency in Hm; [| done].
-      by apply selected_message_exists_in_all_traces_initial_state in Hm.
-    Qed.
-
-    Definition ComputableReceivedMessages_has_been_received
-      {Hsm : ComputableReceivedMessages}
-      (s : vstate vlsm)
-      (m : message)
-      : Prop
-      :=
-      m ∈ (received_messages_fn s).
-
-    Global Instance ComputableReceivedMessages_has_been_received_dec
-      {Hsm : ComputableReceivedMessages}
-      `{EqDecision message}
-      : RelDecision ComputableReceivedMessages_has_been_received
-      := fun s m => decide_rel _ _ (received_messages_fn s).
-
-    Lemma ComputableReceivedMessages_has_been_received_proper
-      {Hsm : ComputableReceivedMessages}
-      (s : state)
-      (Hs : valid_state_prop pre_vlsm s)
-      (m : message)
-      : has_been_received_prop ComputableReceivedMessages_has_been_received s m.
-    Proof.
-      unfold has_been_received_prop. unfold all_traces_have_message_prop.
-      unfold ComputableReceivedMessages_has_been_received.
-      split.
-      - intro Hin.
-        apply received_messages_full in Hin; [| done].
-        destruct Hin as [[m0 Hm] Heq];simpl in Heq;subst m0.
-        by apply received_messages_consistency.
-      - intro H. apply received_messages_full; [done |].
-        apply (received_messages_consistency s Hs m) in H.
-        by exists (exist _ m H).
-    Qed.
-
-    Definition ComputableReceivedMessages_has_not_been_received
-      {Hsm : ComputableReceivedMessages}
-      (s : vstate vlsm)
-      (m : message)
-      : Prop
-      :=
-      ~ ComputableReceivedMessages_has_been_received s m.
-
-    Lemma ComputableReceivedMessages_has_not_been_received_proper
-      {Hsm : ComputableReceivedMessages}
-      (s : state)
-      (Hs : valid_state_prop pre_vlsm s)
-      (m : message)
-      : has_not_been_received_prop ComputableReceivedMessages_has_not_been_received s m.
-    Proof.
-      unfold has_not_been_received_prop. unfold no_traces_have_message_prop.
-      unfold ComputableReceivedMessages_has_not_been_received.
-      unfold ComputableReceivedMessages_has_been_received.
-      rewrite <- selected_message_exists_preloaded_not_some_iff_no.
-      apply not_iff_compat.
-      rewrite received_messages_full; [| done].
-      unfold received_messages.
-      by rewrite exists_proj1_sig.
-    Qed.
-
-    #[export] Instance ComputableReceivedMessages_HasBeenReceivedCapability
-      {Hsm : ComputableReceivedMessages}
-      `{EqDecision message}
-      : HasBeenReceivedCapability
-      :=
-      {|
-        has_been_received := ComputableReceivedMessages_has_been_received;
-        proper_received := ComputableReceivedMessages_has_been_received_proper;
-        proper_not_received := ComputableReceivedMessages_has_not_been_received_proper
-      |}.
 End Simple.
 
 Global Hint Mode HasBeenSentCapability - ! : typeclass_instances.
@@ -1582,6 +1373,166 @@ Global Program Instance HasBeenDirectlyObservedCapability_from_sent_received
   Qed.
 
 End sent_received_observed_capabilities.
+
+Record ComputableMessagesOracle `(vlsm : VLSM message)
+  (oracle_fn : vstate vlsm -> set message)
+  (message_selector : message -> transition_item -> Prop) : Prop :=
+{
+  cmo_stepwise_props :
+    oracle_stepwise_props message_selector (fun s m => m ∈ oracle_fn s);
+}.
+
+Class ComputableSentMessages `(vlsm : VLSM message) := {
+  sent_messages_fn : vstate vlsm -> list message;
+  csm_computable_oracle :
+    ComputableMessagesOracle vlsm sent_messages_fn (field_selector output);
+}.
+
+Class ComputableReceivedMessages `(vlsm : VLSM message) := {
+  received_messages_fn : vstate vlsm -> list message;
+  crm_computable_oracle :
+    ComputableMessagesOracle vlsm received_messages_fn (field_selector input);
+}.
+
+Section sec_computable_sent_received_observed.
+
+Context
+  `(vlsm : VLSM message).
+
+Lemma ComputableMessagesOracle_initial_state_empty
+  `(Hrm : ComputableMessagesOracle vlsm oracle_fn message_selector)
+  (s : vstate vlsm)
+  (Hs : vinitial_state_prop vlsm s)
+  : oracle_fn s = [].
+Proof.
+  apply elem_of_nil_inv; intro.
+  by eapply oracle_no_inits in Hs; [| by apply cmo_stepwise_props]; cbn in Hs.
+Qed.
+
+Definition computable_messages_oracle_rel
+  `(Hrm : ComputableMessagesOracle vlsm oracle_fn message_selector)
+  (s : vstate vlsm)
+  (m : message)
+  : Prop :=
+  m ∈ oracle_fn s.
+
+Definition computable_messages_oracle_rel_dec
+  `(Hrm : ComputableMessagesOracle vlsm oracle_fn message_selector)
+  `{EqDecision message}
+  : RelDecision (computable_messages_oracle_rel Hrm) :=
+  fun s m => decide_rel _ _ (oracle_fn s).
+
+Lemma ComputableSentMessages_initial_state_empty
+  `{!ComputableSentMessages vlsm}
+  (s : vinitial_state vlsm)
+  : sent_messages_fn (proj1_sig s) = [].
+Proof.
+  by eapply ComputableMessagesOracle_initial_state_empty;
+    [apply csm_computable_oracle | destruct s].
+Qed.
+
+Definition ComputableSentMessages_has_been_sent
+  `{!ComputableSentMessages vlsm}
+  := computable_messages_oracle_rel csm_computable_oracle.
+
+#[export] Instance computable_sent_message_has_been_sent_dec
+  `{!ComputableSentMessages vlsm}
+  `{EqDecision message}
+  : RelDecision ComputableSentMessages_has_been_sent :=
+  computable_messages_oracle_rel_dec csm_computable_oracle.
+
+#[export] Instance ComputableSentMessages_HasBeenSentCapability
+  `{!ComputableSentMessages vlsm}
+  `{EqDecision message}
+  : HasBeenSentCapability vlsm.
+Proof.
+  eapply HasBeenSentCapability_from_stepwise; [| apply csm_computable_oracle].
+  typeclasses eauto.
+Defined.
+
+Lemma has_been_sent_messages_fn_iff
+  `{!ComputableSentMessages vlsm}
+  `{EqDecision message}
+  : forall (s : vstate vlsm) (m : message),
+      m ∈ sent_messages_fn s
+        <->
+      has_been_sent vlsm s m.
+Proof. done. Qed.
+
+Lemma ComputableReceivedMessages_initial_state_empty
+  `{!ComputableReceivedMessages vlsm}
+  (s : vinitial_state vlsm)
+  : received_messages_fn (proj1_sig s) = [].
+Proof.
+  by eapply ComputableMessagesOracle_initial_state_empty;
+    [apply crm_computable_oracle | destruct s].
+Qed.
+
+Definition ComputableReceivedMessages_has_been_sent
+  `{!ComputableReceivedMessages vlsm}
+  := computable_messages_oracle_rel crm_computable_oracle.
+
+#[export] Instance computable_received_message_has_been_sent_dec
+  `{!ComputableReceivedMessages vlsm}
+  `{EqDecision message}
+  : RelDecision ComputableReceivedMessages_has_been_sent :=
+  computable_messages_oracle_rel_dec crm_computable_oracle.
+
+#[export] Instance ComputableReceivedMessages_HasBeenReceivedCapability
+  `{!ComputableReceivedMessages vlsm}
+  `{EqDecision message}
+  : HasBeenReceivedCapability vlsm.
+Proof.
+  eapply HasBeenReceivedCapability_from_stepwise; [| apply crm_computable_oracle].
+  typeclasses eauto.
+Defined.
+
+Lemma has_been_received_messages_fn_iff
+  `{!ComputableReceivedMessages vlsm}
+  `{EqDecision message}
+  : forall (s : vstate vlsm) (m : message),
+      m ∈ received_messages_fn s
+        <->
+      has_been_received vlsm s m.
+Proof. done. Qed.
+
+Section sec_computable_observed.
+
+Context
+  `{EqDecision message}
+  `{!ComputableSentMessages vlsm}
+  `{!ComputableReceivedMessages vlsm}
+  .
+
+Definition directly_observed_messages_fn (s : vstate vlsm) : list message :=
+  sent_messages_fn s ++ received_messages_fn s.
+
+Lemma directly_observed_messages_fn_iff :
+  forall (s : vstate vlsm), valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
+  forall (m : message),
+    m ∈ directly_observed_messages_fn s
+      <->
+    has_been_directly_observed vlsm s m.
+Proof.
+  by intros; split; setoid_rewrite elem_of_app;
+    rewrite has_been_received_messages_fn_iff, has_been_sent_messages_fn_iff.
+Qed.
+
+Lemma com_computable_oracle :
+  ComputableMessagesOracle vlsm directly_observed_messages_fn item_sends_or_receives.
+Proof.
+  constructor; constructor; intros.
+  - setoid_rewrite directly_observed_messages_fn_iff; [| by apply initial_state_is_valid].
+    by apply has_been_directly_observed_stepwise_props.
+  - setoid_rewrite directly_observed_messages_fn_iff.
+    + by apply has_been_directly_observed_stepwise_props.
+    + by eapply input_valid_transition_destination.
+    + by eapply input_valid_transition_origin.
+Qed.
+
+End sec_computable_observed.
+
+End sec_computable_sent_received_observed.
 
 Lemma sent_can_emit
   [message]
@@ -2506,6 +2457,99 @@ End Composite.
       apply elem_of_list_In in Hitem.
       by destruct item.
   Qed.
+
+Section sec_CompositeComputableMessages.
+
+Context
+  `{EqDecision message}
+  `{finite.Finite index}
+  (IM : index -> VLSM message)
+  (indexed_oracle_fn : forall i, vstate (IM i) -> set message)
+  (indexed_message_selector : forall i, message -> vtransition_item (IM i) -> Prop)
+  (Free := free_composite_vlsm IM)
+  .
+
+Definition composite_oracle_fn (s : composite_state IM) : set message :=
+  concat (map (fun i => indexed_oracle_fn i (s i)) (enum index)).
+
+Lemma elem_of_composite_oracle_fn :
+  forall (s : composite_state IM) (m : message),
+    m ∈ composite_oracle_fn s <-> exists i, m ∈ indexed_oracle_fn i (s i).
+Proof.
+  intros; split; setoid_rewrite elem_of_list_In; setoid_rewrite in_concat;
+    setoid_rewrite in_map_iff.
+  - by intros (? & (? & <- & _) & ?); eexists.
+  - by intros []; repeat esplit; [apply elem_of_list_In, elem_of_enum |].
+Qed.
+
+Lemma composite_computable_messages_oracle
+   (Hcmos : forall i,
+      ComputableMessagesOracle (IM i)
+        (indexed_oracle_fn i) (indexed_message_selector i))
+  : ComputableMessagesOracle Free composite_oracle_fn
+      (composite_message_selector IM (message_selectors := indexed_message_selector)).
+Proof.
+  constructor; constructor; intros; setoid_rewrite elem_of_composite_oracle_fn;
+    apply composite_stepwise_props
+      with (message_selectors := indexed_message_selector)
+        (oracles := fun (i : index) (s : vstate (IM i)) (m : message) =>
+          m ∈ indexed_oracle_fn i s); [| done | | done];
+    intro; apply Hcmos.
+Qed.
+
+End sec_CompositeComputableMessages.
+
+Section sec_composite_computable_sent_received_observed.
+
+Context
+  `{EqDecision message}
+  `{finite.Finite index}
+  (IM : index -> VLSM message)
+  `{forall i, ComputableSentMessages (IM i)}
+  `{forall i, ComputableReceivedMessages (IM i)}
+  .
+
+Definition composite_received_messages_fn : composite_state IM -> list message :=
+  composite_oracle_fn IM (fun i => received_messages_fn).
+
+Definition composite_sent_messages_fn : composite_state IM -> list message :=
+  composite_oracle_fn IM (fun i => sent_messages_fn).
+
+Definition composite_observed_messages_fn (s : composite_state IM) : list message :=
+  composite_sent_messages_fn s ++ composite_received_messages_fn s.
+
+Lemma composite_has_been_received_iff_fn :
+  forall (s : composite_state IM) (m : message),
+    composite_has_been_received IM s m
+      <->
+    m ∈ composite_received_messages_fn s.
+Proof.
+  intros; setoid_rewrite elem_of_composite_oracle_fn.
+  by split; intros [i Hi]; exists i; apply has_been_received_messages_fn_iff.
+Qed.
+
+Lemma composite_has_been_sent_iff_fn :
+  forall (s : composite_state IM) (m : message),
+    composite_has_been_sent IM s m
+      <->
+    m ∈ composite_sent_messages_fn s.
+Proof.
+  intros; setoid_rewrite elem_of_composite_oracle_fn.
+  by split; intros [i Hi]; exists i; apply has_been_sent_messages_fn_iff.
+Qed.
+
+Lemma composite_has_been_directly_observed_iff_fn :
+  forall (s : composite_state IM) (m : message),
+    composite_has_been_directly_observed IM s m
+      <->
+    m ∈ composite_observed_messages_fn s.
+Proof.
+  intros s m; rewrite composite_has_been_directly_observed_sent_received_iff.
+  unfold composite_observed_messages_fn; rewrite elem_of_app.
+  by rewrite composite_has_been_sent_iff_fn, composite_has_been_received_iff_fn.
+Qed.
+
+End sec_composite_computable_sent_received_observed.
 
 Section cannot_resend_message.
 Context

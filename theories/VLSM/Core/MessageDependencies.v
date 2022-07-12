@@ -1134,73 +1134,17 @@ Context
   (IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
   .
 
-Definition composite_received_messages_fn (s : composite_state IM) : list message :=
-  concat (map (fun i => received_messages_fn (IM i) (s i)) (enum index)).
-
-Definition composite_sent_messages_fn (s : composite_state IM) : list message :=
-  concat (map (fun i => sent_messages_fn (IM i) (s i)) (enum index)).
-
-Definition composite_observed_messages_fn (s : composite_state IM) : list message :=
-  composite_sent_messages_fn s ++ composite_received_messages_fn s.
-
-Lemma composite_has_been_received_iff_fn :
-  forall (s : composite_state IM) (m : message),
-    composite_has_been_received IM s m
-      <->
-    m ∈ composite_received_messages_fn s.
-Proof.
-  intros s m; split.
-  - intros [i Hobsi].
-    apply elem_of_list_In, in_concat.
-    exists (received_messages_fn (IM i) (s i)); split; [| by apply elem_of_list_In].
-    by apply in_map_iff; eexists; (split; [| apply elem_of_list_In, elem_of_enum]).
-  - intros Hi.
-    apply elem_of_list_In, in_concat in Hi as (li & Hi & Hm).
-    apply in_map_iff in Hi as (i & <- & _).
-    apply elem_of_list_In in Hm.
-    by exists i.
-Qed.
-
-Lemma composite_has_been_sent_iff_fn :
-  forall (s : composite_state IM) (m : message),
-    composite_has_been_sent IM s m
-      <->
-    m ∈ composite_sent_messages_fn s.
-Proof.
-  intros s m; split.
-  - intros [i Hobsi].
-    apply elem_of_list_In, in_concat.
-    exists (sent_messages_fn (IM i) (s i)); split; [| by apply elem_of_list_In].
-    by apply in_map_iff; eexists; (split; [| apply elem_of_list_In, elem_of_enum]).
-  - intros Hi.
-    apply elem_of_list_In, in_concat in Hi as (li & Hi & Hm).
-    apply in_map_iff in Hi as (i & <- & _).
-    apply elem_of_list_In in Hm.
-    by exists i.
-Qed.
-
-Lemma composite_has_been_directly_observed_iff_fn :
-  forall (s : composite_state IM) (m : message),
-    composite_has_been_directly_observed IM s m
-      <->
-    m ∈ composite_observed_messages_fn s.
-Proof.
-  intros s m; rewrite composite_has_been_directly_observed_sent_received_iff.
-  unfold composite_observed_messages_fn; rewrite elem_of_app.
-  by rewrite composite_has_been_sent_iff_fn, composite_has_been_received_iff_fn.
-Qed.
-
-#[export] Instance CompositeHasBeenObserved_dec :
-  RelDecision (CompositeHasBeenObserved IM message_dependencies).
+#[export] Instance CompositeHasBeenObserved_dec
+  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  : RelDecision (CompositeHasBeenObserved IM message_dependencies).
 Proof.
   intros s m.
   destruct (decide (composite_has_been_directly_observed IM s m));
     [by left; constructor |].
   destruct (decide (Exists (fun m' => m ∈ full_message_dependencies m')
-                      (composite_observed_messages_fn s))).
+                      (composite_observed_messages_fn IM s))).
   - left.
     apply Exists_exists in e as (m' & Hobsm' & Hmm').
     constructor 2 with m';

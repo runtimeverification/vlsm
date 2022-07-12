@@ -20,12 +20,12 @@ Qed.
 
 Lemma up_to_n_full
   (n : nat)
-  : forall i, i < n -> i ∈ up_to_n_listing n.
+  : forall i, i < n <-> i ∈ up_to_n_listing n.
 Proof.
-  induction n; intros i Hi.
-  - inversion Hi.
-  - simpl.
-    destruct (decide (n <= i)).
-    + assert (i = n) by lia. subst i.  left.
-    + right. apply IHn. lia.
+  induction n; intro i; split; intro Hi; [inversion Hi | inversion Hi |..].
+  - destruct (decide (n <= i)).
+    + by replace n with i by lia; left.
+    + right; apply IHn; lia.
+  - inversion Hi; subst; [lia |].
+    transitivity n; [by apply IHn | lia].
 Qed.

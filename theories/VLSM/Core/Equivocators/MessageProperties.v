@@ -497,12 +497,9 @@ Section ComputableSentMessages_lifting.
 (** ** Lifting the [ComputableSentMessages] property *)
 
 Context
-  {Hsent_messages : ComputableSentMessages X}
+  `{!ComputableSentMessages X}
   `(EqDecision message)
-  (Hbeen_sent_X := @ComputableSentMessages_HasBeenSentCapability message X Hsent_messages)
   .
-
-Existing Instance Hbeen_sent_X.
 
 (** We define the [sent_messages_fn] for the [equivocator_vlsm] as the
 union of all [sent_messages_fn] for its internal machines.
@@ -516,102 +513,39 @@ Definition equivocator_sent_messages_fn
       (fun i =>
         match equivocator_state_project s i with
         | None => []
-        | Some si => sent_messages_fn X si
+        | Some si => sent_messages_fn si
         end)
       (up_to_n_listing (equivocator_state_n s))).
 
-(** [equivocator_sent_messages_fn] captures all [sent_messages] for that state.
-*)
-Lemma equivocator_sent_messages_full
-  (s : vstate equivocator_vlsm)
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) s)
-  (m : message)
-  : m ∈ (equivocator_sent_messages_fn s)
-  <-> exists (sm : sent_messages equivocator_vlsm s), proj1_sig sm = m.
+Lemma equivocator_has_been_sent_messages_fn_iff :
+  forall (s : vstate equivocator_vlsm) (m : message),
+    equivocator_has_been_sent s m
+      <->
+    m ∈ equivocator_sent_messages_fn s.
 Proof.
-  specialize (preloaded_equivocator_state_project_valid_state _ _ Hs) as HpsX.
-  split.
-  - intro Hin. apply set_union_in_iterated in Hin.
-    apply Exists_exists in Hin as [msgsi [Hmsgsi Hin]].
-    apply elem_of_list_fmap in Hmsgsi.
-    destruct Hmsgsi as [i [Heq _]]. subst.
-    destruct (equivocator_state_project s i) as [si|] eqn:Hsi; [|inversion Hin].
-    specialize (HpsX _ _ Hsi).
-    apply (sent_messages_full X) in Hin; [| done].
-    destruct Hin as [[m' Hm] Heq]. simpl in Heq. subst m'.
-    apply (sent_messages_consistency X) in Hm; [| done].
-    destruct Hs as [om Hs].
-    apply (valid_state_message_has_trace (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hs.
-    destruct Hs as [[Hs _] | [is [tr [Htr _]]]].
-    + specialize (Hm si []).
-      spec Hm.
-      { split.
-        - by constructor.
-        - revert Hsi Hs. apply (equivocator_vlsm_initial_state_preservation_rev X).
-      }
-      inversion Hm.
-    + apply valid_trace_get_last in Htr as Hlst.
-      assert (Hbm : selected_message_exists_in_some_preloaded_traces equivocator_vlsm (field_selector output) s m)
-      ; [| by exists (exist _ m Hbm)].
-      exists is. exists tr. exists Htr.
-      subst s.
-      destruct
-        (preloaded_equivocator_vlsm_trace_project_valid _ _ _ _ (proj1 Htr) _ _ Hsi)
-        as [trX [di [Hproject Hdi]]].
-      destruct di as [sn | id].
-      * apply equivocator_vlsm_trace_project_output_reflecting with trX (Existing i) (NewMachine sn)
-        ; [done |].
-        apply (Hm sn trX). split; apply Hdi.
-      * destruct Hdi as [isid [Hi' HtrX]].
-        apply equivocator_vlsm_trace_project_output_reflecting with trX (Existing i) (Existing id)
-        ; [done |].
-        apply (Hm isid trX). split; [done |].
-        apply (equivocator_vlsm_initial_state_preservation_rev X _ _ _ Hi'). apply Htr.
-  - intros [[m' Hm] Heq]. simpl in Heq. subst m'.
-    destruct Hm as [is [tr [Htr Hexists]]].
-    destruct
-      (equivocator_vlsm_trace_project_output_reflecting_inv _ _ (proj1 (valid_trace_forget_last Htr)) _ Hexists)
-      as [ifinal [istart [_ [_ [trX [Hproject HexistsX]]]]]].
-    assert (Hntr : tr <> []) by (intro contra; subst; inversion Hexists).
-    destruct ifinal as [sfinal | i]
-    ; [
-      rewrite equivocator_vlsm_trace_project_on_new_machine in Hproject
-      ; inversion Hproject; subst; inversion HexistsX
-      |].
-    specialize
-      (preloaded_equivocator_vlsm_valid_trace_project_inv2 _ _ _ _ Hntr (proj1 Htr) _ _ _ Hproject)
-      as [si [Hi Histart]].
-    apply set_union_in_iterated. apply Exists_exists.
-    exists (sent_messages_fn X si).
-    split.
-    + rewrite elem_of_list_fmap.
-      exists i. rewrite Hi.
-      split; [done |]. apply up_to_n_full.
-      by apply equivocator_state_project_Some_rev in Hi.
-    + specialize (HpsX _ _ Hi). apply (sent_messages_full X); [apply HpsX|].
-      assert (Hm : selected_message_exists_in_some_preloaded_traces X (field_selector output) si m)
-      ; [| by exists (exist _ m Hm)].
-      destruct istart as [sstart | istart].
-      * by exists sstart, trX, Histart.
-      * destruct Histart as [isi [Histart [HtrX HinitX]]].
-        by exists isi, trX, (conj HtrX (HinitX (proj2 Htr))).
+  intros; split.
+  - intros (i & si & Hsi & Hbs).
+    apply set_union_in_iterated, Exists_exists.
+    eexists; split; [| by eapply has_been_sent_messages_fn_iff].
+    apply elem_of_list_fmap; exists i; split; [by rewrite Hsi |].
+    by eapply up_to_n_full, equivocator_state_project_Some_rev.
+  - intros Hm; apply set_union_in_iterated, Exists_exists in Hm
+      as (senti & Hsenti & Hm).
+    apply elem_of_list_fmap in Hsenti as (i & -> & Hi).
+    apply up_to_n_full in Hi.
+    destruct (equivocator_state_project s i) as [si |] eqn:Hsi;
+      [| inversion Hm].
+    by exists i, si; split; [| apply has_been_sent_messages_fn_iff].
 Qed.
 
-(** Finally, we define the [ComputableSentMessages] instance for the
-[equivocator_vlsm].
-Note that we can reuse the consistency property proved above since
-[ComputableSentMessages] for <<X>> implies [HasBeenSentCapability].
-*)
-Program Definition equivocator_ComputableSentMessages
-  : ComputableSentMessages equivocator_vlsm
-  :=
-  {|
-    sent_messages_fn := equivocator_sent_messages_fn;
-    sent_messages_full := equivocator_sent_messages_full;
-  |}.
-Next Obligation.
-  by intros; apply has_been_sent_consistency;
-   [eapply equivocator_HasBeenSentCapability|].
+Lemma equivocator_ComputableSentMessages :
+  ComputableSentMessages equivocator_vlsm.
+Proof.
+  constructor 1 with equivocator_sent_messages_fn; constructor; constructor.
+  - intros; rewrite <- equivocator_has_been_sent_messages_fn_iff.
+    by eapply equivocator_has_been_sent_stepwise_props.
+  - intros; setoid_rewrite <- equivocator_has_been_sent_messages_fn_iff.
+    by eapply equivocator_has_been_sent_stepwise_props.
 Qed.
 
 End ComputableSentMessages_lifting.
