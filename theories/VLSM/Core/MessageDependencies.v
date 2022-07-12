@@ -271,28 +271,27 @@ Lemma HasBeenObserved_step_update :
   forall msg,
     HasBeenObserved s' msg
       <->
+    HasBeenObserved s msg \/
     (exists m, (im = Some m \/ om = Some m) /\
-      (msg = m \/ msg_dep_happens_before message_dependencies msg m))
-        \/
-      HasBeenObserved s msg.
+      (msg = m \/ msg_dep_happens_before message_dependencies msg m)).
 Proof.
   intros * Ht msg; split.
   - inversion 1 as [Hobs' | m' Hobs' Hdep];
       (eapply has_been_directly_observed_step_update in Hobs'; [| done]);
       destruct Hobs' as [Hnow | Hbefore].
-    + by left; exists msg; split; [| left].
-    + by right; constructor.
-    + by left; exists m'; split; [| right].
-    + by right; econstructor 2.
-  - intros [(m & Hnow & [<- | Hdep]) | Hbefore].
+    + by right; exists msg; split; [| left].
+    + by left; constructor.
+    + by right; exists m'; split; [| right].
+    + by left; econstructor 2.
+  - intros [Hbefore | (m & Hnow & [<- | Hdep])].
+    + by eapply transition_preserves_HasBeenObserved.
     + by constructor; eapply has_been_directly_observed_step_update; [| left].
     + by econstructor 2; [| done]; eapply has_been_directly_observed_step_update; [| left].
-    + by eapply transition_preserves_HasBeenObserved.
 Qed.
 
 (**
-A relation capturing the messages <<m1>> observed at the moment of
-emitting a message <<m2>>.
+Message <<m1>> is in relation [ObservedBeforeSendTransition] with message <<m2>>
+if it [HasBeenObserved] in a state from which <<m2>> ca be emitted.
 
 Note that this might be different from the [msg_dep_rel]ation: on the one hand,
 [msg_dep_rel] does not require that <<m2>> is emitted from a ram transition;
@@ -301,11 +300,11 @@ more than its required depdendencies.
 *)
 Record ObservedBeforeSendTransition
   (s : vstate X) (item : vtransition_item X) (m1 m2 : message) : Prop :=
-  {
-    dobst_transition : input_valid_transition_item R s item;
-    dobst_output_m2 : output item = Some m2;
-    dobst_observed_m1 : HasBeenObserved s m1;
-  }.
+{
+  dobst_transition : input_valid_transition_item R s item;
+  dobst_output_m2 : output item = Some m2;
+  dobst_observed_m1 : HasBeenObserved s m1;
+}.
 
 Definition observed_before_send (m1 m2 : message) : Prop :=
   exists s item, ObservedBeforeSendTransition s item m1 m2.
@@ -329,13 +328,13 @@ not comparable according to the [msg_dep_happens_before] relation.
 *)
 Record MsgDepLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
-  {
-    mdlee_sender1 : sender m1 = Some v;
-    mdlee_sender2 : sender m2 = Some v;
-    mdlee_observed1 : HasBeenObserved s m1;
-    mdlee_observed2 : HasBeenObserved s m2;
-    mdlee_incomparable : ~ comparable (msg_dep_happens_before message_dependencies) m1 m2;
-  }.
+{
+  mdlee_sender1 : sender m1 = Some v;
+  mdlee_sender2 : sender m2 = Some v;
+  mdlee_observed1 : HasBeenObserved s m1;
+  mdlee_observed2 : HasBeenObserved s m2;
+  mdlee_incomparable : ~ comparable (msg_dep_happens_before message_dependencies) m1 m2;
+}.
 
 Definition msg_dep_is_locally_equivocating (s : vstate X) (v : validator) : Prop :=
   exists m1 m2, MsgDepLocalEquivocationEvidence s v m1 m2.
@@ -348,13 +347,13 @@ Under the full-node assumptions, we can give a simpler alternative to
 *)
 Record FullNodeLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
-  {
-    fnlee_sender1 : sender m1 = Some v;
-    fnlee_sender2 : sender m2 = Some v;
-    fnlee_observed1 : has_been_directly_observed X s m1;
-    fnlee_observed2 : has_been_directly_observed X s m2;
-    fnlee_incomparable : ~ comparable (msg_dep_happens_before message_dependencies) m1 m2;
-  }.
+{
+  fnlee_sender1 : sender m1 = Some v;
+  fnlee_sender2 : sender m2 = Some v;
+  fnlee_observed1 : has_been_directly_observed X s m1;
+  fnlee_observed2 : has_been_directly_observed X s m2;
+  fnlee_incomparable : ~ comparable (msg_dep_happens_before message_dependencies) m1 m2;
+}.
 
 Definition full_node_is_locally_equivocating (s : vstate X) (v : validator) : Prop :=
   exists m1 m2, FullNodeLocalEquivocationEvidence s v m1 m2.
@@ -377,13 +376,13 @@ both full-node and [has_been_sent_msg_dep_comparable_prop].
 *)
 Record FullNodeSentLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
-  {
-    fnslee_sender1 : sender m1 = Some v;
-    fnslee_sender2 : sender m2 = Some v;
-    fnslee_observed1 : has_been_directly_observed X s m1;
-    fnslee_observed2 : has_been_directly_observed X s m2;
-    fnslee_incomparable : ~ comparable (msg_dep_rel message_dependencies) m1 m2;
-  }.
+{
+  fnslee_sender1 : sender m1 = Some v;
+  fnslee_sender2 : sender m2 = Some v;
+  fnslee_observed1 : has_been_directly_observed X s m1;
+  fnslee_observed2 : has_been_directly_observed X s m2;
+  fnslee_incomparable : ~ comparable (msg_dep_rel message_dependencies) m1 m2;
+}.
 
 Definition full_node_is_sent_locally_equivocating
   (s : vstate X) (v : validator) : Prop :=
@@ -609,24 +608,23 @@ Lemma CompositeHasBeenObserved_step_update :
   forall msg,
     CompositeHasBeenObserved s' msg
       <->
+    CompositeHasBeenObserved s msg \/
     (exists m, (im = Some m \/ om = Some m) /\
-      (msg = m \/ msg_dep_happens_before message_dependencies msg m))
-        \/
-      CompositeHasBeenObserved s msg.
+      (msg = m \/ msg_dep_happens_before message_dependencies msg m)).
 Proof.
   destruct (composite_has_been_directly_observed_stepwise_props IM (free_constraint IM)) as [].
   intros * Ht msg; split.
   - inversion 1 as [Hobs' | m' Hobs' Hdep];
       (eapply oracle_step_update in Hobs'; [| done]);
       destruct Hobs' as [Hnow | Hbefore].
-    + by left; exists msg; split; [| left].
-    + by right; constructor.
-    + by left; exists m'; split; [| right].
-    + by right; econstructor 2.
-  - intros [(m & Hnow & [<- | Hdep]) | Hbefore].
+    + by right; exists msg; split; [| left].
+    + by left; constructor.
+    + by right; exists m'; split; [| right].
+    + by left; econstructor 2.
+  - intros [Hbefore | (m & Hnow & [<- | Hdep])].
+    + by eapply transition_preserves_CompositeHasBeenObserved.
     + by constructor; eapply oracle_step_update; [| left].
     + by econstructor 2; [| done]; eapply oracle_step_update; [| left].
-    + by eapply transition_preserves_CompositeHasBeenObserved.
 Qed.
 
 (**
@@ -635,12 +633,12 @@ definition is that RHS can be emitted by any of the machines in the composition.
 *)
 Record CompositeObservedBeforeSendTransition
   (s : composite_state IM) (item : composite_transition_item IM) (m1 m2 : message) : Prop :=
-  {
-    cdobst_transition : input_valid_transition_item RFree s item;
-    cdobst_output_m2 : output item = Some m2;
-    cdobst_observed_m1 : 
-      HasBeenObserved (IM (projT1 (l item))) message_dependencies (s (projT1 (l item))) m1;
-  }.
+{
+  cdobst_transition : input_valid_transition_item RFree s item;
+  cdobst_output_m2 : output item = Some m2;
+  cdobst_observed_m1 : 
+    HasBeenObserved (IM (projT1 (l item))) message_dependencies (s (projT1 (l item))) m1;
+}.
 
 Definition composite_observed_before_send (m1 m2 : message) : Prop :=
   exists s item, CompositeObservedBeforeSendTransition s item m1 m2.
@@ -746,11 +744,11 @@ it has been (indirectly) observed in [composite_state] <<s>>, (see
 *)
 Record MsgDepGlobalEquivocationEvidence
   (s : composite_state IM) (v : validator) (m : message) : Prop :=
-  {
-    mdgee_sender : sender m = Some v;
-    mdgee_rec_observed : CompositeHasBeenObserved s m;
-    mdgee_not_sent : ~ composite_has_been_sent IM s m;
-  }.
+{
+  mdgee_sender : sender m = Some v;
+  mdgee_rec_observed : CompositeHasBeenObserved s m;
+  mdgee_not_sent : ~ composite_has_been_sent IM s m;
+}.
 
 Definition msg_dep_is_globally_equivocating
   (s : composite_state IM) (v : validator) : Prop :=
@@ -764,11 +762,11 @@ the Lemma [msg_dep_full_node_happens_before_reflects_has_been_directly_observed]
 *)
 Record FullNodeGlobalEquivocationEvidence
   (s : composite_state IM) (v : validator) (m : message) : Prop :=
-  {
-    fngee_sender : sender m = Some v;
-    fngee_received : composite_has_been_received IM s m;
-    fngee_not_sent : ~ composite_has_been_sent IM s m;
-  }.
+{
+  fngee_sender : sender m = Some v;
+  fngee_received : composite_has_been_received IM s m;
+  fngee_not_sent : ~ composite_has_been_sent IM s m;
+}.
 
 Definition full_node_is_globally_equivocating
   (s : composite_state IM) (v : validator) : Prop :=
