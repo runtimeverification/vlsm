@@ -523,28 +523,27 @@ Lemma equivocator_has_been_sent_messages_fn_iff :
       <->
     m ∈ equivocator_sent_messages_fn s.
 Proof.
-  intros; split.
+  split.
   - intros (i & si & Hsi & Hbs).
     apply set_union_in_iterated, Exists_exists.
     eexists; split; [| by eapply has_been_sent_messages_fn_iff].
     apply elem_of_list_fmap; exists i; split; [by rewrite Hsi |].
     by eapply up_to_n_full, equivocator_state_project_Some_rev.
-  - intros Hm; apply set_union_in_iterated, Exists_exists in Hm
-      as (senti & Hsenti & Hm).
+  - intros Hm.
+    apply set_union_in_iterated, Exists_exists in Hm as (senti & Hsenti & Hm).
     apply elem_of_list_fmap in Hsenti as (i & -> & Hi).
     apply up_to_n_full in Hi.
-    destruct (equivocator_state_project s i) as [si |] eqn:Hsi;
-      [| inversion Hm].
+    destruct (equivocator_state_project s i) as [si |] eqn: Hsi; [| inversion Hm].
     by exists i, si; split; [| apply has_been_sent_messages_fn_iff].
 Qed.
 
 Lemma equivocator_ComputableSentMessages :
   ComputableSentMessages equivocator_vlsm.
 Proof.
-  constructor 1 with equivocator_sent_messages_fn; constructor; constructor.
-  - intros; rewrite <- equivocator_has_been_sent_messages_fn_iff.
+  constructor 1 with equivocator_sent_messages_fn; do 2 constructor; intros.
+  - rewrite <- equivocator_has_been_sent_messages_fn_iff.
     by eapply equivocator_has_been_sent_stepwise_props.
-  - intros; setoid_rewrite <- equivocator_has_been_sent_messages_fn_iff.
+  - rewrite <- !equivocator_has_been_sent_messages_fn_iff.
     by eapply equivocator_has_been_sent_stepwise_props.
 Qed.
 

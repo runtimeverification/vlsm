@@ -434,9 +434,8 @@ Lemma full_node_is_locally_equivocating_iff
       full_node_is_locally_equivocating s v.
 Proof.
   intros s Hs v; split; [| apply full_node_is_locally_equivocating_stronger].
-  intros (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]); exists m1, m2;
-    split; [done | done | | | done];
-    by apply full_node_HasBeenObserved_is_directly_observed.
+  intros (m1 & m2 & [Hsender1 Hsender2 Hobs1 Hobs2 Hncomp]).
+  by exists m1, m2; split; rewrite <- ?full_node_HasBeenObserved_is_directly_observed.
 Qed.
 
 End sec_message_dependencies_equivocation.
@@ -795,8 +794,7 @@ Proof.
   {
     by rewrite composite_has_been_directly_observed_sent_received_iff; intros [].
   }
-  destruct Hobs as [Hobs | m' Hobs Hhb]; [done |].
-  destruct Hobs as [i Hobs]; exists i.
+  destruct Hobs as [Hobs | m' [i Hobs] Hhb]; [done | exists i].
   by eapply msg_dep_full_node_happens_before_reflects_has_been_directly_observed
   ; [| | apply valid_state_project_preloaded_to_preloaded | |].
 Qed.
@@ -1145,13 +1143,13 @@ Proof.
                       (composite_observed_messages_fn IM s))).
   - left.
     apply Exists_exists in e as (m' & Hobsm' & Hmm').
-    constructor 2 with m';
-      [by apply composite_has_been_directly_observed_iff_fn |].
-    by apply full_message_dependencies_happens_before.
+    constructor 2 with m'.
+    + by apply composite_has_been_directly_observed_iff_fn.
+    + by apply full_message_dependencies_happens_before.
   - right; inversion 1; [by contradict n |].
-    contradict n0; apply Exists_exists; exists m'; split;
-      [by apply composite_has_been_directly_observed_iff_fn |].
-    by apply full_message_dependencies_happens_before.
+    contradict n0; apply Exists_exists; exists m'; split.
+    + by apply composite_has_been_directly_observed_iff_fn.
+    + by apply full_message_dependencies_happens_before.
 Qed.
 
 End sec_CompositeHasBeenObserved_dec.

@@ -2135,8 +2135,8 @@ Lemma list_difference_singleton_length_in `{EqDecision A} :
   forall (l : list A) (a : A), a ∈ l ->
     length (list_difference l [a]) < length l.
 Proof.
-  intros l a; induction l; [by inversion 1 |].
-  cbn; case_decide as Ha0; rewrite elem_of_list_singleton in Ha0.
+  intros l a; induction l; cbn; [by inversion 1 |].
+  case_decide as Ha0; rewrite elem_of_list_singleton in Ha0.
   - subst; intros _.
     destruct (decide (a ∈ l)).
     + by etransitivity; [apply IHl | lia].

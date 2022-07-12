@@ -22,10 +22,7 @@ Lemma up_to_n_full
   (n : nat)
   : forall i, i < n <-> i ∈ up_to_n_listing n.
 Proof.
-  induction n; intro i; split; intro Hi; [inversion Hi | inversion Hi |..].
-  - destruct (decide (n <= i)).
-    + by replace n with i by lia; left.
-    + right; apply IHn; lia.
-  - inversion Hi; subst; [lia |].
-    transitivity n; [by apply IHn | lia].
+  induction n; split; inversion 1; subst; cbn; [left | | lia |].
+  - by right; apply IHn.
+  - by transitivity n; [apply IHn | lia].
 Qed.

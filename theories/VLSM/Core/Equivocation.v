@@ -1374,7 +1374,8 @@ Global Program Instance HasBeenDirectlyObservedCapability_from_sent_received
 
 End sent_received_observed_capabilities.
 
-Record ComputableMessagesOracle `(vlsm : VLSM message)
+Record ComputableMessagesOracle
+  `(vlsm : VLSM message)
   (oracle_fn : vstate vlsm -> set message)
   (message_selector : message -> transition_item -> Prop) : Prop :=
 {
@@ -1406,7 +1407,7 @@ Lemma ComputableMessagesOracle_initial_state_empty
   : oracle_fn s = [].
 Proof.
   apply elem_of_nil_inv; intro.
-  by eapply oracle_no_inits in Hs; [| by apply cmo_stepwise_props]; cbn in Hs.
+  by eapply oracle_no_inits in Hs; [| apply cmo_stepwise_props]; cbn in Hs.
 Qed.
 
 Definition computable_messages_oracle_rel
@@ -1433,7 +1434,8 @@ Qed.
 
 Definition ComputableSentMessages_has_been_sent
   `{!ComputableSentMessages vlsm}
-  := computable_messages_oracle_rel csm_computable_oracle.
+  : vstate vlsm → message → Prop :=
+  computable_messages_oracle_rel csm_computable_oracle.
 
 #[export] Instance computable_sent_message_has_been_sent_dec
   `{!ComputableSentMessages vlsm}
@@ -1446,8 +1448,9 @@ Definition ComputableSentMessages_has_been_sent
   `{EqDecision message}
   : HasBeenSentCapability vlsm.
 Proof.
-  eapply HasBeenSentCapability_from_stepwise; [| apply csm_computable_oracle].
-  typeclasses eauto.
+  eapply HasBeenSentCapability_from_stepwise; cycle 1.
+  - apply csm_computable_oracle.
+  - typeclasses eauto.
 Defined.
 
 Lemma has_been_sent_messages_fn_iff
@@ -1470,6 +1473,7 @@ Qed.
 
 Definition ComputableReceivedMessages_has_been_sent
   `{!ComputableReceivedMessages vlsm}
+  : vstate vlsm → message → Prop
   := computable_messages_oracle_rel crm_computable_oracle.
 
 #[export] Instance computable_received_message_has_been_sent_dec
@@ -1483,8 +1487,9 @@ Definition ComputableReceivedMessages_has_been_sent
   `{EqDecision message}
   : HasBeenReceivedCapability vlsm.
 Proof.
-  eapply HasBeenReceivedCapability_from_stepwise; [| apply crm_computable_oracle].
-  typeclasses eauto.
+  eapply HasBeenReceivedCapability_from_stepwise; cycle 1.
+  - apply crm_computable_oracle.
+  - typeclasses eauto.
 Defined.
 
 Lemma has_been_received_messages_fn_iff
@@ -1521,9 +1526,10 @@ Qed.
 Lemma com_computable_oracle :
   ComputableMessagesOracle vlsm directly_observed_messages_fn item_sends_or_receives.
 Proof.
-  constructor; constructor; intros.
-  - setoid_rewrite directly_observed_messages_fn_iff; [| by apply initial_state_is_valid].
-    by apply has_been_directly_observed_stepwise_props.
+  do 2 constructor; intros.
+  - setoid_rewrite directly_observed_messages_fn_iff.
+    + by apply has_been_directly_observed_stepwise_props.
+    + by apply initial_state_is_valid.
   - setoid_rewrite directly_observed_messages_fn_iff.
     + by apply has_been_directly_observed_stepwise_props.
     + by eapply input_valid_transition_destination.
@@ -2489,12 +2495,13 @@ Lemma composite_computable_messages_oracle
   : ComputableMessagesOracle Free composite_oracle_fn
       (composite_message_selector IM (message_selectors := indexed_message_selector)).
 Proof.
-  constructor; constructor; intros; setoid_rewrite elem_of_composite_oracle_fn;
-    apply composite_stepwise_props
-      with (message_selectors := indexed_message_selector)
-        (oracles := fun (i : index) (s : vstate (IM i)) (m : message) =>
-          m ∈ indexed_oracle_fn i s); [| done | | done];
-    intro; apply Hcmos.
+  do 2 constructor; intros
+  ; setoid_rewrite elem_of_composite_oracle_fn
+  ; apply composite_stepwise_props
+     with (message_selectors := indexed_message_selector)
+          (oracles := fun (i : index) (s : vstate (IM i)) (m : message) =>
+            m ∈ indexed_oracle_fn i s)
+  ; [| done | | done]; intro; apply Hcmos.
 Qed.
 
 End sec_CompositeComputableMessages.
@@ -2524,7 +2531,7 @@ Lemma composite_has_been_received_iff_fn :
       <->
     m ∈ composite_received_messages_fn s.
 Proof.
-  intros; setoid_rewrite elem_of_composite_oracle_fn.
+  setoid_rewrite elem_of_composite_oracle_fn.
   by split; intros [i Hi]; exists i; apply has_been_received_messages_fn_iff.
 Qed.
 
@@ -2534,7 +2541,7 @@ Lemma composite_has_been_sent_iff_fn :
       <->
     m ∈ composite_sent_messages_fn s.
 Proof.
-  intros; setoid_rewrite elem_of_composite_oracle_fn.
+  setoid_rewrite elem_of_composite_oracle_fn.
   by split; intros [i Hi]; exists i; apply has_been_sent_messages_fn_iff.
 Qed.
 
@@ -2544,9 +2551,10 @@ Lemma composite_has_been_directly_observed_iff_fn :
       <->
     m ∈ composite_observed_messages_fn s.
 Proof.
-  intros s m; rewrite composite_has_been_directly_observed_sent_received_iff.
-  unfold composite_observed_messages_fn; rewrite elem_of_app.
-  by rewrite composite_has_been_sent_iff_fn, composite_has_been_received_iff_fn.
+  intros s m.
+  unfold composite_observed_messages_fn.
+  by rewrite elem_of_app, composite_has_been_directly_observed_sent_received_iff,
+     composite_has_been_sent_iff_fn, composite_has_been_received_iff_fn.
 Qed.
 
 End sec_composite_computable_sent_received_observed.

@@ -256,9 +256,7 @@ Lemma list_suffix_lookup
   (Hi : n <= i)
   : list_suffix s n !! (i - n) = s !! i.
 Proof.
-  revert s n Hi.
-  induction i; intros [|a s] [|n] Hi; try done; [lia |].
-  simpl. apply IHi. lia.
+  revert s n Hi; induction i; intros [| a s] [| n] Hi; cbn; try done; [| apply IHi]; lia.
 Qed.
 
 Lemma longer_subseteq_has_dups `{EqDecision A} :
@@ -279,50 +277,36 @@ Proof.
       by split; [apply Hl12; right | by contradict n; subst].
     + cbn in Hlen12.
       assert (Ha : a ∈ l2) by (apply Hl12; left).
-      specialize (list_difference_singleton_length_in _ _ Ha) as Hlen'. lia.
+      specialize (list_difference_singleton_length_in _ _ Ha) as Hlen'; lia.
 Qed.
 
 Lemma ForAllSuffix2_lookup [A : Type] (R : A -> A -> Prop) l
   : ForAllSuffix2 R l <-> forall n a b, l !! n = Some a -> l !! (S n) = Some b -> R a b.
 Proof.
   split.
-  - intros Hall n. apply ForAll_list_suffix with (m := n) in Hall.
-    specialize (list_suffix_lookup l n n) as Hn.
-    spec Hn; [lia|]. rewrite <- Hn. clear Hn.
-    specialize (list_suffix_lookup l n (S n)) as Hn.
-    spec Hn; [lia|]. rewrite <- Hn. clear Hn.
-    replace (n - n) with 0 by lia.
-    replace (S n - n) with 1 by lia.
-    revert Hall. generalize (list_suffix l n).
-    intros l0 Hall a b Ha Hb.
-    destruct l0 as [|_a l0]; inversion Ha; subst _a; clear Ha.
-    destruct l0 as [|_b l0]; inversion Hb; subst _b; clear Hb.
-    by apply fsHere in Hall.
-  - apply
-      (ForAllSuffix_induction
-        (fun l => match l with | a :: b :: _ => R a b | _ => True end)
-        (fun l => (∀ (n : nat) (a b : A),
-          l !! n = Some a → l !! (S n) = Some b → R a b))); intros.
-    + destruct l0 as [| a [| b l0']]; [done | done |].
-      by apply (H 0).
-    + by apply (H (S n)).
+  - induction 1; cbn; [inversion 2 |].
+    destruct n as [| n']; cbn.
+    + by destruct l; do 2 inversion 1; subst.
+    + by intros; eapply IHForAllSuffix.
+  - induction l as [| a [| b l']]; cbn.
+    + by constructor.
+    + by repeat constructor.
+    + constructor.
+      * by apply (H 0).
+      * by apply IHl; intro n; apply (H (S n)).
 Qed.
 
-Lemma ForAllSuffix2_transitive_lookup [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
-  : forall l, ForAllSuffix2 R l <-> forall m n a b, m < n -> l !! m = Some a -> l !! n = Some b -> R a b.
+Lemma ForAllSuffix2_transitive_lookup
+  [A : Type] (R : A -> A -> Prop) {HT : Transitive R} (l : list A)
+  : ForAllSuffix2 R l <-> forall m n a b, m < n -> l !! m = Some a -> l !! n = Some b -> R a b.
 Proof.
-  intro l.
   rewrite ForAllSuffix2_lookup.
-  split; intro Hall.
-  2: { intros n a b.  apply Hall.  lia.  }
+  split; intro Hall; [| by intros n a b; apply Hall; lia].
   intros m n a b Hlt.
-  apply le_plus_dec in Hlt as [k Hlt].
-  subst n. revert a b. induction k; simpl; [apply Hall|].
+  apply le_plus_dec in Hlt as [k Hlt]; subst n.
+  revert a b; induction k; cbn; [apply Hall |].
   intros a b Ha Hb.
-  assert (Hlt : k + S m < length l).
-  { apply lookup_lt_Some in Hb. lia. }
+  assert (Hlt : k + S m < length l) by (apply lookup_lt_Some in Hb; lia).
   apply lookup_lt_is_Some in Hlt as [c Hc].
-  specialize (Hall _ _ _ Hc Hb).
-  specialize (IHk  _ _ Ha Hc).
-  by transitivity c.
+  by transitivity c; [apply IHk | eapply Hall].
 Qed.
