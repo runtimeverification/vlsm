@@ -501,10 +501,10 @@ Context
   `(EqDecision message)
   .
 
-(** We define the [sent_messages_fn] for the [equivocator_vlsm] as the
-union of all [sent_messages_fn] for its internal machines.
+(** We define the [sent_messages_set] for the [equivocator_vlsm] as the
+union of all [sent_messages_set] for its internal machines.
 *)
-Definition equivocator_sent_messages_fn
+Definition equivocator_sent_messages_set
   (s : vstate equivocator_vlsm)
   : set message
   :=
@@ -513,20 +513,20 @@ Definition equivocator_sent_messages_fn
       (fun i =>
         match equivocator_state_project s i with
         | None => []
-        | Some si => sent_messages_fn si
+        | Some si => sent_messages_set si
         end)
       (up_to_n_listing (equivocator_state_n s))).
 
-Lemma equivocator_has_been_sent_messages_fn_iff :
+Lemma equivocator_elem_of_sent_messages_set :
   forall (s : vstate equivocator_vlsm) (m : message),
     equivocator_has_been_sent s m
       <->
-    m ∈ equivocator_sent_messages_fn s.
+    m ∈ equivocator_sent_messages_set s.
 Proof.
   split.
   - intros (i & si & Hsi & Hbs).
     apply set_union_in_iterated, Exists_exists.
-    eexists; split; [| by eapply has_been_sent_messages_fn_iff].
+    eexists; split; [| by eapply elem_of_sent_messages_set].
     apply elem_of_list_fmap; exists i; split; [by rewrite Hsi |].
     by eapply up_to_n_full, equivocator_state_project_Some_rev.
   - intros Hm.
@@ -534,16 +534,16 @@ Proof.
     apply elem_of_list_fmap in Hsenti as (i & -> & Hi).
     apply up_to_n_full in Hi.
     destruct (equivocator_state_project s i) as [si |] eqn: Hsi; [| inversion Hm].
-    by exists i, si; split; [| apply has_been_sent_messages_fn_iff].
+    by exists i, si; split; [| apply elem_of_sent_messages_set].
 Qed.
 
 Lemma equivocator_ComputableSentMessages :
   ComputableSentMessages equivocator_vlsm.
 Proof.
-  constructor 1 with equivocator_sent_messages_fn; do 2 constructor; intros.
-  - rewrite <- equivocator_has_been_sent_messages_fn_iff.
+  constructor 1 with equivocator_sent_messages_set; constructor; intros.
+  - rewrite <- equivocator_elem_of_sent_messages_set.
     by eapply equivocator_has_been_sent_stepwise_props.
-  - rewrite <- !equivocator_has_been_sent_messages_fn_iff.
+  - rewrite <- !equivocator_elem_of_sent_messages_set.
     by eapply equivocator_has_been_sent_stepwise_props.
 Qed.
 

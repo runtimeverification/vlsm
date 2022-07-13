@@ -32,7 +32,7 @@ Class ReachableThreshold V `{Hm : Measurable V} :=
 
 (** Assuming a set of <<state>>s, and a set of <<validator>>s,
 which is [Measurable] and has a [ReachableThreshold], we can define
-[BasicEquivocation] starting from a computable [is_equivocating_fn]
+[BasicEquivocation] starting from an [is_equivocating] relation
 deciding whether a validator is equivocating in a state.
 
 To avoid a [Finite] constraint on the entire set of validators, we will
@@ -1374,61 +1374,73 @@ Global Program Instance HasBeenDirectlyObservedCapability_from_sent_received
 
 End sent_received_observed_capabilities.
 
-Record ComputableMessagesOracle
+Definition computable_messages_oracle
   `(vlsm : VLSM message)
-  (oracle_fn : vstate vlsm -> set message)
+  (oracle_set : vstate vlsm -> set message)
   (message_selector : message -> transition_item -> Prop) : Prop :=
+    oracle_stepwise_props message_selector (fun s m => m ∈ oracle_set s).
+
+Class ComputableSentMessages `(vlsm : VLSM message) :=
 {
-  cmo_stepwise_props :
-    oracle_stepwise_props message_selector (fun s m => m ∈ oracle_fn s);
-}.
-
-Class ComputableSentMessages `(vlsm : VLSM message) := {
-  sent_messages_fn : vstate vlsm -> list message;
+  sent_messages_set : vstate vlsm -> list message;
   csm_computable_oracle :
-    ComputableMessagesOracle vlsm sent_messages_fn (field_selector output);
+    computable_messages_oracle vlsm sent_messages_set (field_selector output);
 }.
 
-Class ComputableReceivedMessages `(vlsm : VLSM message) := {
-  received_messages_fn : vstate vlsm -> list message;
+Global Hint Mode ComputableSentMessages - ! : typeclass_instances.
+
+Class ComputableReceivedMessages `(vlsm : VLSM message) :=
+{
+  received_messages_set : vstate vlsm -> list message;
   crm_computable_oracle :
-    ComputableMessagesOracle vlsm received_messages_fn (field_selector input);
+    computable_messages_oracle vlsm received_messages_set (field_selector input);
 }.
+
+Global Hint Mode ComputableReceivedMessages - ! : typeclass_instances.
+
+(** ** Properties of Computable Message Oracles
+
+  In this section we prove several generic results about [computable_messages_oracle]s,
+  derive [HasBeenSentCapability] and [HasBeenReceivedCapability] from
+  [ComputableSentMessages] and [ComputableReceivedMessages] and some basic results
+  about computable (directly) observed messages.
+*)
+
 
 Section sec_computable_sent_received_observed.
 
 Context
   `(vlsm : VLSM message).
 
-Lemma ComputableMessagesOracle_initial_state_empty
-  `(Hrm : ComputableMessagesOracle vlsm oracle_fn message_selector)
+Lemma computable_messages_oracle_initial_state_empty
+  `(Hrm : computable_messages_oracle vlsm oracle_set message_selector)
   (s : vstate vlsm)
   (Hs : vinitial_state_prop vlsm s)
-  : oracle_fn s = [].
+  : oracle_set s = [].
 Proof.
   apply elem_of_nil_inv; intro.
-  by eapply oracle_no_inits in Hs; [| apply cmo_stepwise_props]; cbn in Hs.
+  by eapply oracle_no_inits in Hs; [| apply Hrm]; cbn in Hs.
 Qed.
 
 Definition computable_messages_oracle_rel
-  `(Hrm : ComputableMessagesOracle vlsm oracle_fn message_selector)
+  `(Hrm : computable_messages_oracle vlsm oracle_set message_selector)
   (s : vstate vlsm)
   (m : message)
   : Prop :=
-  m ∈ oracle_fn s.
+  m ∈ oracle_set s.
 
 Definition computable_messages_oracle_rel_dec
-  `(Hrm : ComputableMessagesOracle vlsm oracle_fn message_selector)
+  `(Hrm : computable_messages_oracle vlsm oracle_set message_selector)
   `{EqDecision message}
   : RelDecision (computable_messages_oracle_rel Hrm) :=
-  fun s m => decide_rel _ _ (oracle_fn s).
+  fun s m => decide_rel _ _ (oracle_set s).
 
 Lemma ComputableSentMessages_initial_state_empty
   `{!ComputableSentMessages vlsm}
   (s : vinitial_state vlsm)
-  : sent_messages_fn (proj1_sig s) = [].
+  : sent_messages_set (proj1_sig s) = [].
 Proof.
-  by eapply ComputableMessagesOracle_initial_state_empty;
+  by eapply computable_messages_oracle_initial_state_empty;
     [apply csm_computable_oracle | destruct s].
 Qed.
 
@@ -1453,11 +1465,11 @@ Proof.
   - typeclasses eauto.
 Defined.
 
-Lemma has_been_sent_messages_fn_iff
+Lemma elem_of_sent_messages_set
   `{!ComputableSentMessages vlsm}
   `{EqDecision message}
   : forall (s : vstate vlsm) (m : message),
-      m ∈ sent_messages_fn s
+      m ∈ sent_messages_set s
         <->
       has_been_sent vlsm s m.
 Proof. done. Qed.
@@ -1465,9 +1477,9 @@ Proof. done. Qed.
 Lemma ComputableReceivedMessages_initial_state_empty
   `{!ComputableReceivedMessages vlsm}
   (s : vinitial_state vlsm)
-  : received_messages_fn (proj1_sig s) = [].
+  : received_messages_set (proj1_sig s) = [].
 Proof.
-  by eapply ComputableMessagesOracle_initial_state_empty;
+  by eapply computable_messages_oracle_initial_state_empty;
     [apply crm_computable_oracle | destruct s].
 Qed.
 
@@ -1492,14 +1504,21 @@ Proof.
   - typeclasses eauto.
 Defined.
 
-Lemma has_been_received_messages_fn_iff
+Lemma has_been_received_messages_set_iff
   `{!ComputableReceivedMessages vlsm}
   `{EqDecision message}
   : forall (s : vstate vlsm) (m : message),
-      m ∈ received_messages_fn s
+      m ∈ received_messages_set s
         <->
       has_been_received vlsm s m.
 Proof. done. Qed.
+
+(** *** Computable (Directly) Observed Messages
+
+  We here derive [directly_observed_messages_set] from [ComputableSentMessages]
+  and [ComputableReceivedMessages] and relate it to the [has_been_directly_observed]
+  predicate.
+*)
 
 Section sec_computable_observed.
 
@@ -1509,28 +1528,28 @@ Context
   `{!ComputableReceivedMessages vlsm}
   .
 
-Definition directly_observed_messages_fn (s : vstate vlsm) : list message :=
-  sent_messages_fn s ++ received_messages_fn s.
+Definition directly_observed_messages_set (s : vstate vlsm) : list message :=
+  sent_messages_set s ++ received_messages_set s.
 
-Lemma directly_observed_messages_fn_iff :
+Lemma directly_observed_messages_set_iff :
   forall (s : vstate vlsm), valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
   forall (m : message),
-    m ∈ directly_observed_messages_fn s
+    m ∈ directly_observed_messages_set s
       <->
     has_been_directly_observed vlsm s m.
 Proof.
   by intros; split; setoid_rewrite elem_of_app;
-    rewrite has_been_received_messages_fn_iff, has_been_sent_messages_fn_iff.
+    rewrite has_been_received_messages_set_iff, elem_of_sent_messages_set.
 Qed.
 
 Lemma com_computable_oracle :
-  ComputableMessagesOracle vlsm directly_observed_messages_fn item_sends_or_receives.
+  computable_messages_oracle vlsm directly_observed_messages_set item_sends_or_receives.
 Proof.
-  do 2 constructor; intros.
-  - setoid_rewrite directly_observed_messages_fn_iff.
+  constructor; intros.
+  - setoid_rewrite directly_observed_messages_set_iff.
     + by apply has_been_directly_observed_stepwise_props.
     + by apply initial_state_is_valid.
-  - setoid_rewrite directly_observed_messages_fn_iff.
+  - setoid_rewrite directly_observed_messages_set_iff.
     + by apply has_been_directly_observed_stepwise_props.
     + by eapply input_valid_transition_destination.
     + by eapply input_valid_transition_origin.
@@ -2470,17 +2489,17 @@ Context
   `{EqDecision message}
   `{finite.Finite index}
   (IM : index -> VLSM message)
-  (indexed_oracle_fn : forall i, vstate (IM i) -> set message)
+  (indexed_oracle_set : forall i, vstate (IM i) -> set message)
   (indexed_message_selector : forall i, message -> vtransition_item (IM i) -> Prop)
   (Free := free_composite_vlsm IM)
   .
 
-Definition composite_oracle_fn (s : composite_state IM) : set message :=
-  concat (map (fun i => indexed_oracle_fn i (s i)) (enum index)).
+Definition composite_oracle_set (s : composite_state IM) : set message :=
+  concat (map (fun i => indexed_oracle_set i (s i)) (enum index)).
 
-Lemma elem_of_composite_oracle_fn :
+Lemma elem_of_composite_oracle_set :
   forall (s : composite_state IM) (m : message),
-    m ∈ composite_oracle_fn s <-> exists i, m ∈ indexed_oracle_fn i (s i).
+    m ∈ composite_oracle_set s <-> exists i, m ∈ indexed_oracle_set i (s i).
 Proof.
   intros; split; setoid_rewrite elem_of_list_In; setoid_rewrite in_concat;
     setoid_rewrite in_map_iff.
@@ -2490,17 +2509,17 @@ Qed.
 
 Lemma composite_computable_messages_oracle
    (Hcmos : forall i,
-      ComputableMessagesOracle (IM i)
-        (indexed_oracle_fn i) (indexed_message_selector i))
-  : ComputableMessagesOracle Free composite_oracle_fn
+      computable_messages_oracle (IM i)
+        (indexed_oracle_set i) (indexed_message_selector i))
+  : computable_messages_oracle Free composite_oracle_set
       (composite_message_selector IM (message_selectors := indexed_message_selector)).
 Proof.
-  do 2 constructor; intros
-  ; setoid_rewrite elem_of_composite_oracle_fn
+  constructor; intros
+  ; setoid_rewrite elem_of_composite_oracle_set
   ; apply composite_stepwise_props
      with (message_selectors := indexed_message_selector)
           (oracles := fun (i : index) (s : vstate (IM i)) (m : message) =>
-            m ∈ indexed_oracle_fn i s)
+            m ∈ indexed_oracle_set i s)
   ; [| done | | done]; intro; apply Hcmos.
 Qed.
 
@@ -2516,45 +2535,45 @@ Context
   `{forall i, ComputableReceivedMessages (IM i)}
   .
 
-Definition composite_received_messages_fn : composite_state IM -> list message :=
-  composite_oracle_fn IM (fun i => received_messages_fn).
+Definition composite_received_messages_set : composite_state IM -> list message :=
+  composite_oracle_set IM (fun i => received_messages_set).
 
-Definition composite_sent_messages_fn : composite_state IM -> list message :=
-  composite_oracle_fn IM (fun i => sent_messages_fn).
+Definition composite_sent_messages_set : composite_state IM -> list message :=
+  composite_oracle_set IM (fun i => sent_messages_set).
 
-Definition composite_observed_messages_fn (s : composite_state IM) : list message :=
-  composite_sent_messages_fn s ++ composite_received_messages_fn s.
+Definition composite_observed_messages_set (s : composite_state IM) : list message :=
+  composite_sent_messages_set s ++ composite_received_messages_set s.
 
-Lemma composite_has_been_received_iff_fn :
+Lemma elem_of_composite_received_messages_set :
   forall (s : composite_state IM) (m : message),
     composite_has_been_received IM s m
       <->
-    m ∈ composite_received_messages_fn s.
+    m ∈ composite_received_messages_set s.
 Proof.
-  setoid_rewrite elem_of_composite_oracle_fn.
-  by split; intros [i Hi]; exists i; apply has_been_received_messages_fn_iff.
+  setoid_rewrite elem_of_composite_oracle_set.
+  by split; intros [i Hi]; exists i; apply has_been_received_messages_set_iff.
 Qed.
 
-Lemma composite_has_been_sent_iff_fn :
+Lemma elem_of_composite_sent_messages_set :
   forall (s : composite_state IM) (m : message),
     composite_has_been_sent IM s m
       <->
-    m ∈ composite_sent_messages_fn s.
+    m ∈ composite_sent_messages_set s.
 Proof.
-  setoid_rewrite elem_of_composite_oracle_fn.
-  by split; intros [i Hi]; exists i; apply has_been_sent_messages_fn_iff.
+  setoid_rewrite elem_of_composite_oracle_set.
+  by split; intros [i Hi]; exists i; apply elem_of_sent_messages_set.
 Qed.
 
-Lemma composite_has_been_directly_observed_iff_fn :
+Lemma elem_of_composite_observed_messages_set :
   forall (s : composite_state IM) (m : message),
     composite_has_been_directly_observed IM s m
       <->
-    m ∈ composite_observed_messages_fn s.
+    m ∈ composite_observed_messages_set s.
 Proof.
   intros s m.
-  unfold composite_observed_messages_fn.
+  unfold composite_observed_messages_set.
   by rewrite elem_of_app, composite_has_been_directly_observed_sent_received_iff,
-     composite_has_been_sent_iff_fn, composite_has_been_received_iff_fn.
+     elem_of_composite_sent_messages_set, elem_of_composite_received_messages_set.
 Qed.
 
 End sec_composite_computable_sent_received_observed.

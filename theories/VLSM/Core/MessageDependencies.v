@@ -291,12 +291,13 @@ Qed.
 
 (**
 Message <<m1>> is in relation [ObservedBeforeSendTransition] with message <<m2>>
-if it [HasBeenObserved] in a state from which <<m2>> ca be emitted.
+if it [HasBeenObserved] in a state from which <<m2>> can be emitted in the next
+step.
 
-Note that this might be different from the [msg_dep_rel]ation: on the one hand,
-[msg_dep_rel] does not require that <<m2>> is emitted from a ram transition;
-on the other hand, it might be that a message can be emitted from a state containing
-more than its required depdendencies.
+Note that we use [HasBeenObserved] instead of [has_been_directly_observed], which
+extends direct observability in a state (sent or received on a trace leading to
+that state) with the transitive closure of the [msg_dep_rel] (to include any
+message depending on a directly observed one).
 *)
 Record ObservedBeforeSendTransition
   (s : vstate X) (item : vtransition_item X) (m1 m2 : message) : Prop :=
@@ -1140,15 +1141,15 @@ Proof.
   destruct (decide (composite_has_been_directly_observed IM s m));
     [by left; constructor |].
   destruct (decide (Exists (fun m' => m ∈ full_message_dependencies m')
-                      (composite_observed_messages_fn IM s))).
+                      (composite_observed_messages_set IM s))).
   - left.
     apply Exists_exists in e as (m' & Hobsm' & Hmm').
     constructor 2 with m'.
-    + by apply composite_has_been_directly_observed_iff_fn.
+    + by apply elem_of_composite_observed_messages_set.
     + by apply full_message_dependencies_happens_before.
   - right; inversion 1; [by contradict n |].
     contradict n0; apply Exists_exists; exists m'; split.
-    + by apply composite_has_been_directly_observed_iff_fn.
+    + by apply elem_of_composite_observed_messages_set.
     + by apply full_message_dependencies_happens_before.
 Qed.
 
