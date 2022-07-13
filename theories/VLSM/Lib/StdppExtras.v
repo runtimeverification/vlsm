@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import ListExtras.
+From VLSM.Lib Require Import Preamble ListExtras.
 
 Lemma elem_of_take {A : Type} (l : list A) (n : nat) (x : A) :
   elem_of x (take n l) -> elem_of x l.
@@ -238,4 +238,75 @@ Proof.
   destruct Hnda as [Ha' Hnd']; split.
   - by apply NoDup_app; firstorder.
   - by rewrite elem_of_app; firstorder.
+Qed.
+
+Lemma list_lookup_lt [A] (is : list A) :
+  forall i, is_Some (is !! i) ->
+  forall j, j < i -> is_Some (is !! j).
+Proof.
+  intros; apply lookup_lt_is_Some.
+  by etransitivity; [| apply lookup_lt_is_Some].
+Qed.
+
+Lemma list_suffix_lookup
+  {A : Type}
+  (s : list A)
+  (n : nat)
+  (i : nat)
+  (Hi : n <= i)
+  : list_suffix s n !! (i - n) = s !! i.
+Proof.
+  revert s n Hi; induction i; intros [| a s] [| n] Hi; cbn; try done; [| apply IHi]; lia.
+Qed.
+
+Lemma longer_subseteq_has_dups `{EqDecision A} :
+  forall l1 l2 : list A, l1 ⊆ l2 -> length l1 > length l2 ->
+  exists (i1 i2 : nat) (a : A), i1 ≠ i2 ∧ l1 !! i1 = Some a /\ l1 !! i2 = Some a.
+Proof.
+  induction l1; [inversion 2 |].
+  intros l2 Hl12 Hlen12.
+  destruct (decide (a ∈ l1)).
+  - exists 0.
+    apply elem_of_list_lookup_1 in e as [i2 Hi2].
+    by exists (S i2), a.
+  - edestruct (IHl1 (list_difference l2 [a]))
+           as (i1 & i2 & a' & Hi12 & Hli1 & Hli2); cycle 2.
+    + exists (S i1), (S i2), a'; cbn; itauto.
+    + intros x Hx.
+      rewrite elem_of_list_difference, elem_of_list_singleton.
+      by split; [apply Hl12; right | by contradict n; subst].
+    + cbn in Hlen12.
+      assert (Ha : a ∈ l2) by (apply Hl12; left).
+      specialize (list_difference_singleton_length_in _ _ Ha) as Hlen'; lia.
+Qed.
+
+Lemma ForAllSuffix2_lookup [A : Type] (R : A -> A -> Prop) l
+  : ForAllSuffix2 R l <-> forall n a b, l !! n = Some a -> l !! (S n) = Some b -> R a b.
+Proof.
+  split.
+  - induction 1; cbn; [inversion 2 |].
+    destruct n as [| n']; cbn.
+    + by destruct l; do 2 inversion 1; subst.
+    + by intros; eapply IHForAllSuffix.
+  - induction l as [| a [| b l']]; cbn.
+    + by constructor.
+    + by repeat constructor.
+    + constructor.
+      * by apply (H 0).
+      * by apply IHl; intro n; apply (H (S n)).
+Qed.
+
+Lemma ForAllSuffix2_transitive_lookup
+  [A : Type] (R : A -> A -> Prop) {HT : Transitive R} (l : list A)
+  : ForAllSuffix2 R l <-> forall m n a b, m < n -> l !! m = Some a -> l !! n = Some b -> R a b.
+Proof.
+  rewrite ForAllSuffix2_lookup.
+  split; intro Hall; [| by intros n a b; apply Hall; lia].
+  intros m n a b Hlt.
+  apply le_plus_dec in Hlt as [k Hlt]; subst n.
+  revert a b; induction k; cbn; [apply Hall |].
+  intros a b Ha Hb.
+  assert (Hlt : k + S m < length l) by (apply lookup_lt_Some in Hb; lia).
+  apply lookup_lt_is_Some in Hlt as [c Hc].
+  by transitivity c; [apply IHk | eapply Hall].
 Qed.

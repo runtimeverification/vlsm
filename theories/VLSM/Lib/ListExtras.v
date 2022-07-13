@@ -947,19 +947,6 @@ Proof.
     lia.
 Qed.
 
-Lemma list_suffix_lookup
-  {A : Type}
-  (s : list A)
-  (n : nat)
-  (i : nat)
-  (Hi : n <= i)
-  : list_suffix s n !! (i - n) = s !! i.
-Proof.
-  revert s n Hi.
-  induction i; intros [|a s] [|n] Hi; try done; [lia |].
-  simpl. apply IHi. lia.
-Qed.
-
 Lemma list_suffix_last
   {A : Type}
   (l : list A)
@@ -1897,32 +1884,6 @@ Qed.
 Definition ForAllSuffix2 [A : Type] (R : A -> A -> Prop) : list A -> Prop :=
   ForAllSuffix (fun l => match l with | a :: b :: _ => R a b | _ => True end).
 
-Lemma ForAllSuffix2_lookup [A : Type] (R : A -> A -> Prop) l
-  : ForAllSuffix2 R l <-> forall n a b, l !! n = Some a -> l !! (S n) = Some b -> R a b.
-Proof.
-  split.
-  - intros Hall n. apply ForAll_list_suffix with (m := n) in Hall.
-    specialize (list_suffix_lookup l n n) as Hn.
-    spec Hn; [lia|]. rewrite <- Hn. clear Hn.
-    specialize (list_suffix_lookup l n (S n)) as Hn.
-    spec Hn; [lia|]. rewrite <- Hn. clear Hn.
-    replace (n - n) with 0 by lia.
-    replace (S n - n) with 1 by lia.
-    revert Hall. generalize (list_suffix l n).
-    intros l0 Hall a b Ha Hb.
-    destruct l0 as [|_a l0]; inversion Ha; subst _a; clear Ha.
-    destruct l0 as [|_b l0]; inversion Hb; subst _b; clear Hb.
-    by apply fsHere in Hall.
-  - apply
-      (ForAllSuffix_induction
-        (fun l => match l with | a :: b :: _ => R a b | _ => True end)
-        (fun l => (∀ (n : nat) (a b : A),
-          l !! n = Some a → l !! (S n) = Some b → R a b))); intros.
-    + destruct l0 as [| a [| b l0']]; [done | done |].
-      by apply (H 0).
-    + by apply (H (S n)).
-Qed.
-
 Lemma fsFurther2_transitive [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
   : forall a b l, ForAllSuffix2 R (a::b::l) -> ForAllSuffix2 R (a::l).
 Proof.
@@ -1931,25 +1892,6 @@ Proof.
   - inversion H3. subst.
     constructor; [| done].
     by transitivity b.
-Qed.
-
-Lemma ForAllSuffix2_transitive_lookup [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
-  : forall l, ForAllSuffix2 R l <-> forall m n a b, m < n -> l !! m = Some a -> l !! n = Some b -> R a b.
-Proof.
-  intro l.
-  rewrite ForAllSuffix2_lookup.
-  split; intro Hall.
-  2: { intros n a b.  apply Hall.  lia.  }
-  intros m n a b Hlt.
-  apply le_plus_dec in Hlt as [k Hlt].
-  subst n. revert a b. induction k; simpl; [apply Hall|].
-  intros a b Ha Hb.
-  assert (Hlt : k + S m < length l).
-  { apply lookup_lt_Some in Hb. lia. }
-  apply lookup_lt_is_Some in Hlt as [c Hc].
-  specialize (Hall _ _ _ Hc Hb).
-  specialize (IHk  _ _ Ha Hc).
-  by transitivity c.
 Qed.
 
 Lemma ForAllSuffix2_filter [A : Type] (R : A -> A -> Prop) `{HT : Transitive _ R}
@@ -2157,4 +2099,47 @@ Proof.
   case_decide; subst.
   - by rewrite lastn_ge; cbn; [| lia].
   - by rewrite (lastn_app_le _ [h] t); [| lia].
+Qed.
+
+Program Definition not_null_element
+  `{EqDecision A} [l : list A] (Hl : l <> []) : dsig (fun i => i ∈ l) :=
+    dexist (is_Some_proj (proj2 (head_is_Some l) Hl)) _.
+Next Obligation.
+  by intros A ? [| h t] ?; [| left].
+Qed.
+
+Program Definition element_of_subseteq
+  `{EqDecision A} [l1 l2 : list A] (Hsub : l1 ⊆ l2)
+  (di : dsig (fun i => i ∈ l1)) : dsig (fun i => i ∈ l2) :=
+    dexist (` di) _.
+Next Obligation.
+  by intros; cbn; destruct_dec_sig di i Hi Heq; subst; apply Hsub.
+Qed.
+
+Definition element_of_filter
+  `{EqDecision A} [P : A -> Prop] `{∀ x, Decision (P x)} [l : list A]
+  : dsig (fun i => i ∈ filter P l) -> dsig (fun i => i ∈ l) :=
+  element_of_subseteq (list_filter_subseteq P l).
+
+Lemma list_difference_singleton_not_in `{EqDecision A} :
+  forall (l : list A) (a : A), a ∉ l ->
+    list_difference l [a] = l.
+Proof.
+  intros l a; induction l; [done |].
+  rewrite not_elem_of_cons; intros [Hna0 Hnal]; cbn.
+  case_decide as Ha0; [by apply elem_of_list_singleton in Ha0 |].
+  by rewrite IHl.
+Qed.
+
+Lemma list_difference_singleton_length_in `{EqDecision A} :
+  forall (l : list A) (a : A), a ∈ l ->
+    length (list_difference l [a]) < length l.
+Proof.
+  intros l a; induction l; cbn; [by inversion 1 |].
+  case_decide as Ha0; rewrite elem_of_list_singleton in Ha0.
+  - subst; intros _.
+    destruct (decide (a ∈ l)).
+    + by etransitivity; [apply IHl | lia].
+    + by rewrite list_difference_singleton_not_in; [lia |].
+  - by inversion 1; subst; [done |]; cbn; spec IHl; [| lia].
 Qed.

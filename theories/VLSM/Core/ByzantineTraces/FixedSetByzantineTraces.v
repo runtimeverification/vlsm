@@ -616,8 +616,8 @@ Section validator_fixed_set_byzantine.
 
 Context
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies message_dependencies (IM i)}
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  `{forall i, MessageDependencies (IM i) message_dependencies}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
 
 Lemma fixed_non_byzantine_vlsm_lift_valid

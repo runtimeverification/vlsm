@@ -13,7 +13,7 @@ Context
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies message_dependencies (IM i)}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   (equivocators : set index)
   .
 
@@ -333,7 +333,7 @@ Qed.
 Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  `{forall i, MessageDependencies message_dependencies (IM i)}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   .
 
 Lemma fixed_full_node_equivocation_incl
@@ -354,7 +354,7 @@ Proof.
 Qed.
 
 Lemma full_node_fixed_equivocation_constraint_subsumption
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (Hsender_safety : sender_safety_alt_prop IM A sender)
   : input_valid_constraint_subsumption IM
       full_node_fixed_set_equivocation_constraint
@@ -396,7 +396,7 @@ Proof.
 Qed.
 
 Lemma full_node_fixed_equivocation_incl
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (Hsender_safety : sender_safety_alt_prop IM A sender)
   : VLSM_incl
       (composite_vlsm IM full_node_fixed_set_equivocation_constraint)
@@ -408,7 +408,7 @@ Qed.
 
 Lemma full_node_fixed_equivocation_eq
   (Hchannel : channel_authentication_prop IM A sender)
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   : VLSM_eq
       (composite_vlsm IM full_node_fixed_set_equivocation_constraint)
       (composite_vlsm IM (fixed_equivocation_constraint IM equivocators)).

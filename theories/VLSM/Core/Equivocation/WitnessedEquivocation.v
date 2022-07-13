@@ -644,8 +644,8 @@ Context
     := equivocation_dec_tracewise IM id sender)
   (Hke : WitnessedEquivocationCapability IM id sender)
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies message_dependencies (IM i)}
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  `{forall i, MessageDependencies (IM i) message_dependencies}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM id sender)
   (Hsender_safety : sender_safety_alt_prop IM id sender :=

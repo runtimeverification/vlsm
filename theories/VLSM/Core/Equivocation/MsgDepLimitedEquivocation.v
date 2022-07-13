@@ -216,9 +216,9 @@ Context
   (A : validator -> index)
   (sender : message -> option validator)
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies message_dependencies (IM i)}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   `{FullMessageDependencies message message_dependencies full_message_dependencies}
-  (Hfull : forall i, message_dependencies_full_node_condition_prop message_dependencies (IM i))
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
 
 Lemma full_node_msg_dep_coequivocating_senders s m i li
@@ -341,7 +341,7 @@ Context
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies message_dependencies (IM i)}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   (full_message_dependencies : message -> set message)
   `{FullMessageDependencies message message_dependencies full_message_dependencies}
   `{ReachableThreshold index}
