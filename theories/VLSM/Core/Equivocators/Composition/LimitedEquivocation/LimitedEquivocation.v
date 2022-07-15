@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Lia Reals Lra.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinExtras FinFunExtras Measurable.

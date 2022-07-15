@@ -7,7 +7,7 @@ From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.ListSe
 Definition pos_R := {r : R | (r > 0)%R}.
 
 Class Measurable V := { weight : V -> pos_R}.
-Global Hint Mode Measurable ! : typeclass_instances.
+#[global] Hint Mode Measurable ! : typeclass_instances.
 
 Definition sum_weights `{Measurable V} (l : list V) : R :=
   fold_right (fun v r => (proj1_sig (weight v) + r)%R) 0%R l.

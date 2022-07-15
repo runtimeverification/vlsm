@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Vectors.Fin FunctionalExtensionality Arith.Compare_dec Lia Program.Equality.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
@@ -425,7 +425,7 @@ of the internal machines.
 *)
 Definition equivocator_has_been_received  := equivocator_oracle (has_been_received X).
 
-Global Instance equivocator_has_been_received_dec
+#[global] Instance equivocator_has_been_received_dec
   : RelDecision equivocator_has_been_received
   := equivocator_oracle_dec (has_been_received X) _.
 
@@ -444,7 +444,7 @@ Qed.
 
 (** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm].
 *)
-Global Instance equivocator_HasBeenReceivedCapability
+#[global] Instance equivocator_HasBeenReceivedCapability
   : HasBeenReceivedCapability equivocator_vlsm
   := HasBeenReceivedCapability_from_stepwise (vlsm := equivocator_vlsm)
     equivocator_has_been_received_dec
@@ -465,7 +465,7 @@ of the internal machines.
 *)
 Definition equivocator_has_been_sent  := equivocator_oracle (has_been_sent X).
 
-Global Instance equivocator_has_been_sent_dec
+#[global] Instance equivocator_has_been_sent_dec
   : RelDecision equivocator_has_been_sent
   := equivocator_oracle_dec (has_been_sent X) _.
 
@@ -484,7 +484,7 @@ Qed.
 
 (** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm].
 *)
-Global Instance equivocator_HasBeenSentCapability
+#[global] Instance equivocator_HasBeenSentCapability
   : HasBeenSentCapability equivocator_vlsm
   := HasBeenSentCapability_from_stepwise (vlsm := equivocator_vlsm)
     equivocator_has_been_sent_dec

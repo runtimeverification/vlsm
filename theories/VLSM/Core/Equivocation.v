@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From Coq Require Import Streams FinFun Rdefinitions.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
@@ -668,8 +668,8 @@ Section Simple.
 
 End Simple.
 
-Global Hint Mode HasBeenSentCapability - ! : typeclass_instances.
-Global Hint Mode HasBeenReceivedCapability - ! : typeclass_instances.
+#[global] Hint Mode HasBeenSentCapability - ! : typeclass_instances.
+#[global] Hint Mode HasBeenReceivedCapability - ! : typeclass_instances.
 
 (** *** Stepwise consistency properties for [state_message_oracle]
 
@@ -784,7 +784,7 @@ Section TraceFromStepwise.
     (oracle_props : oracle_stepwise_props selector oracle)
     .
 
-  Local Lemma H_valid_trace_prop
+  #[local] Lemma H_valid_trace_prop
         [s0 s tr]
         (Htr: finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) s0 s tr):
     forall m,
@@ -1008,7 +1008,7 @@ Proof.
   by destruct (has_been_sent_stepwise_from_trace vlsm).
 Qed.
 
-Global Instance preloaded_HasBeenSentCapability
+#[global] Instance preloaded_HasBeenSentCapability
       [message : Type]
       (vlsm: VLSM message)
       `{HasBeenSentCapability message vlsm}
@@ -1086,7 +1086,7 @@ Proof.
   by destruct (has_been_received_stepwise_from_trace vlsm).
 Qed.
 
-Global Instance preloaded_HasBeenReceivedCapability
+#[global] Instance preloaded_HasBeenReceivedCapability
       {message : Type}
       (vlsm: VLSM message)
       `{HasBeenReceivedCapability message vlsm}
@@ -1159,7 +1159,7 @@ Arguments has_been_directly_observed {message} vlsm {_}.
 Arguments has_been_directly_observed_dec {message} vlsm {_}.
 Arguments has_been_directly_observed_stepwise_props {message} vlsm {_}.
 
-Global Hint Mode HasBeenDirectlyObservedCapability - ! : typeclass_instances.
+#[global] Hint Mode HasBeenDirectlyObservedCapability - ! : typeclass_instances.
 
 Definition has_been_directly_observed_no_inits `[HasBeenDirectlyObservedCapability message vlsm]
   := oracle_no_inits (has_been_directly_observed_stepwise_props vlsm).
@@ -1346,7 +1346,7 @@ Proof.
       by apply Exists_or; left.
 Qed.
 
-Global Program Instance HasBeenDirectlyObservedCapability_from_sent_received
+#[global] Program Instance HasBeenDirectlyObservedCapability_from_sent_received
   : HasBeenDirectlyObservedCapability vlsm
   :=
   { has_been_directly_observed := has_been_directly_observed_from_sent_received;
@@ -1804,7 +1804,7 @@ Section Composite.
     by intros l; specialize (Hstep l); destruct l.
   Qed.
 
-  Global Instance composite_HasBeenSentCapability
+  #[global] Instance composite_HasBeenSentCapability
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
     : HasBeenSentCapability X :=
@@ -1855,7 +1855,7 @@ Section Composite.
     by intros l; specialize (Hstep l); destruct l.
   Qed.
 
-  Global Instance composite_HasBeenReceivedCapability
+  #[global] Instance composite_HasBeenReceivedCapability
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
     : HasBeenReceivedCapability X :=
@@ -1863,7 +1863,7 @@ Section Composite.
       composite_has_been_received_dec
       (composite_has_been_received_stepwise_props constraint).
 
-  Global Instance composite_HasBeenDirectlyObservedCapability
+  #[global] Instance composite_HasBeenDirectlyObservedCapability
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
     : HasBeenDirectlyObservedCapability X :=

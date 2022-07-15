@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun FunctionalExtensionality.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.ListSetExtras.
@@ -293,7 +293,7 @@ Definition not_equivocating_equivocator_descriptors
     (eqv : index),
     existing_descriptor (IM eqv) (eqv_descriptors eqv) (s eqv).
 
-Global Instance not_equivocating_equivocator_descriptors_dec
+#[global] Instance not_equivocating_equivocator_descriptors_dec
   : RelDecision not_equivocating_equivocator_descriptors.
 Proof.
   intros eqv_descriptors s.

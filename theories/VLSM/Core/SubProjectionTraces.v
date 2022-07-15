@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From Coq Require Import FunctionalExtensionality Lia FinFun.
 From stdpp Require Import prelude finite.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
@@ -18,7 +18,7 @@ Context
 
 Definition sub_index_prop (i : index) : Prop := i ∈ sub_index_list.
 
-Local Program Instance sub_index_prop_dec
+#[local] Program Instance sub_index_prop_dec
   (i : index)
   : Decision (sub_index_prop i).
 Next Obligation.
@@ -386,7 +386,7 @@ Next Obligation.
   itauto.
 Qed.
 
-Global Instance stdpp_finite_sub_index
+#[global] Instance stdpp_finite_sub_index
   : finite.Finite sub_index.
 Proof.
   exists (remove_dups sub_index_list_annotate).
@@ -1885,7 +1885,7 @@ Context
   (selection_complement : set index := set_diff (enum index) selection)
   .
 
-Global Instance update_IM_complement_Hbs
+#[global] Instance update_IM_complement_Hbs
   `{forall i : index, HasBeenSentCapability (IM i)}
   : forall sub_i : sub_index selection_complement,
     HasBeenSentCapability (sub_IM updated_IM selection_complement sub_i).

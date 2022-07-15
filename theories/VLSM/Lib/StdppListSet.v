@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 
 Section fst_defs.
@@ -49,7 +49,7 @@ Proof.
   - by intros ->; destruct (decide (b = a0)); rewrite !elem_of_cons; itauto.
 Qed.
 
-Local Hint Resolve set_add_intro1 set_add_intro2 : core.
+#[local] Hint Resolve set_add_intro1 set_add_intro2 : core.
 
 Lemma set_add_intro :
   forall (a b : A) (x : set), a = b \/ a ∈ x -> a ∈ set_add b x.

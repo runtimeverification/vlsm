@@ -11,8 +11,8 @@ Section TraceClassicalProperties.
 
 Context {A B : Type}.
 
-Local Notation trace := (@trace A B).
-Local Notation propT := (@propT A B).
+#[local] Notation trace := (@trace A B).
+#[local] Notation propT := (@propT A B).
 
 (** ** Relating finiteness and infiniteness *)
 

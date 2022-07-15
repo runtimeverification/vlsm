@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import FinFun.
 From VLSM.Lib Require Import Preamble ListExtras.
@@ -20,8 +20,8 @@ Context
   {TY : VLSMType message}
   .
 
-Local Notation labelTY := (@label _ TY).
-Local Notation stateTY := (@state _ TY).
+#[local] Notation labelTY := (@label _ TY).
+#[local] Notation stateTY := (@state _ TY).
 
 Context
   (label_project : vlabel X -> option labelTY)
@@ -146,10 +146,10 @@ Context
   {TX TY : VLSMType message}
   .
 
-Local Notation labelTX := (@label _ TX).
-Local Notation stateTX := (@state _ TX).
-Local Notation labelTY := (@label _ TY).
-Local Notation stateTY := (@state _ TY).
+#[local] Notation labelTX := (@label _ TX).
+#[local] Notation stateTX := (@state _ TX).
+#[local] Notation labelTY := (@label _ TY).
+#[local] Notation stateTY := (@state _ TY).
 
 Context
   (label_project : labelTX -> option labelTY)
@@ -174,9 +174,9 @@ Context
   (TY : VLSMType message)
   .
 
-Local Notation labelTY := (@label _ TY).
-Local Notation stateTY := (@state _ TY).
-Local Notation transition_itemTY := (@transition_item _ TY).
+#[local] Notation labelTY := (@label _ TY).
+#[local] Notation stateTY := (@state _ TY).
+#[local] Notation transition_itemTY := (@transition_item _ TY).
 
 Context
   (label_project : vlabel X -> option labelTY)
@@ -257,14 +257,14 @@ Definition induced_validator_transition_consistency_Some : Prop :=
 (** A weaker version of [induced_validator_transition_consistency_Some].
 Only used locally.
 *)
-Local Definition weak_projection_transition_consistency_Some
+#[local] Definition weak_projection_transition_consistency_Some
   : Prop :=
   forall lX lY, label_project lX = Some lY ->
   forall s1 om s1' om1', input_valid_transition X lX (s1, om) (s1', om1') ->
   forall s2' om2', vtransition X (label_lift lY) (state_lift (state_project s1), om) = (s2', om2') ->
   state_project s1' = state_project s2' /\ om1' = om2'.
 
-Local Lemma basic_weak_projection_transition_consistency_Some
+#[local] Lemma basic_weak_projection_transition_consistency_Some
   : induced_validator_label_lift_prop label_project label_lift ->
     induced_validator_state_lift_prop state_project state_lift ->
     induced_validator_transition_consistency_Some ->
@@ -378,10 +378,10 @@ Context
   (TY : VLSMType message)
   .
 
-Local Notation labelTX := (@label _ TX).
-Local Notation stateTX := (@state _ TX).
-Local Notation labelTY := (@label _ TY).
-Local Notation stateTY := (@state _ TY).
+#[local] Notation labelTX := (@label _ TX).
+#[local] Notation stateTX := (@state _ TX).
+#[local] Notation labelTY := (@label _ TY).
+#[local] Notation stateTY := (@state _ TY).
 
 Context
   (label_project : labelTX -> option labelTY)

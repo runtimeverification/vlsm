@@ -14,7 +14,7 @@ Section TraceProperties.
 
 Context {A B : Type}.
 
-Local Notation trace := (@trace A B).
+#[local] Notation trace := (@trace A B).
 
 (** We want to reason about trace properties that do not distinguish
 bisimilar traces; these are called _setoid_ properties. *)
@@ -224,7 +224,7 @@ let: exist f0 h0 := p1 in
 let: exist f1 h1 := p2 in
 exist _ (fun tr => f0 tr /\ f1 tr) (andT_setoidT h0 h1).
 
-Local Infix "andT" := AndT (at level 60, right associativity).
+#[local] Infix "andT" := AndT (at level 60, right associativity).
 
 Lemma orT_setoidT : forall f0 f1,
  setoidT f0 -> setoidT f1 ->
@@ -240,12 +240,12 @@ let: exist f0 h0 := p1 in
 let: exist f1 h1 := p2 in
 exist _ (fun tr => f0 tr \/ f1 tr) (orT_setoidT h0 h1).
 
-Local Infix "orT" := OrT (at level 60, right associativity).
+#[local] Infix "orT" := OrT (at level 60, right associativity).
 
 Definition propT_imp (p1 p2: propT) : Prop :=
 forall tr, satisfyT p1 tr -> satisfyT p2 tr.
 
-Local Infix "=>>" := propT_imp (at level 60, right associativity).
+#[local] Infix "=>>" := propT_imp (at level 60, right associativity).
 
 Lemma propT_imp_conseq_L: forall p0 p1 q, p0 =>> p1 -> p1 =>> q -> p0 =>> q.
 Proof.
@@ -304,11 +304,11 @@ Definition ffA : propA := fun a => False.
 
 Definition propA_imp (u1 u2: propA) : Prop := forall a, u1 a -> u2 a.
 
-Local Infix "->>" := propA_imp (at level 60, right associativity).
+#[local] Infix "->>" := propA_imp (at level 60, right associativity).
 
 Definition andA (u1 u2: propA) : propA := fun a => u1 a /\ u2 a.
 
-Local Infix "andA" := andA (at level 60, right associativity).
+#[local] Infix "andA" := andA (at level 60, right associativity).
 
 Definition exA {T : Type} (u: T -> propA) : propA :=
 fun st => exists x, u x st.
@@ -340,7 +340,7 @@ Proof. by move => u st [a [h0 h1]]; invs h1. Qed.
 Definition SingletonT (u: propA) : propT :=
 exist _ (singletonT u) (@singletonT_setoidT u).
 
-Local Notation "[| p |]" := (SingletonT p) (at level 80).
+#[local] Notation "[| p |]" := (SingletonT p) (at level 80).
 
 Lemma SingletonT_cont: forall u v, u ->> v -> [|u|] =>> [|v|].
 Proof.
@@ -377,7 +377,7 @@ Qed.
 Definition DupT (u : propA) (b : B) : propT :=
 exist _ (dupT u b) (@dupT_setoidT u b).
 
-Local Notation "<< p ; b >>" := (DupT p b) (at level 80).
+#[local] Notation "<< p ; b >>" := (DupT p b) (at level 80).
 
 Lemma DupT_cont: forall u v b, u ->> v -> <<u;b>> =>> <<v;b>>.
 Proof.
@@ -522,7 +522,7 @@ a prefix for which [p1] holds, and [p2] holds for the suffix. *)
 Definition appendT (p1 p2: trace -> Prop) : trace -> Prop :=
 fun tr => exists tr', p1 tr' /\ followsT p2 tr' tr.
 
-Local Infix "*+*" := appendT (at level 60, right associativity).
+#[local] Infix "*+*" := appendT (at level 60, right associativity).
 
 Lemma appendT_cont : forall (p0 p1 q0 q1 : trace -> Prop),
  (forall tr, p0 tr -> p1 tr) ->
@@ -601,7 +601,7 @@ let: exist f0 h0 := p1 in
 let: exist f1 h1 := p2 in
 exist _ (appendT f0 f1) (appendT_setoidT h1).
 
-Local Infix "***" := AppendT (at level 60, right associativity).
+#[local] Infix "***" := AppendT (at level 60, right associativity).
 
 Lemma AppendT_assoc_L: forall p1 p2 p3, ((p1 *** p2) *** p3) =>> (p1 *** p2 *** p3).
 Proof.

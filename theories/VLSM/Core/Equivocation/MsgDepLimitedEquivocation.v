@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From Coq Require Import Reals.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinFunExtras Measurable.
@@ -52,7 +52,7 @@ Definition coeqv_limited_equivocation_constraint
   : Prop :=
   (sum_weights (coeqv_composite_transition_message_equivocators l som) <= proj1_sig threshold)%R.
 
-Global Instance empty_validators_inhabited : Inhabited {s : set validator | s = empty_set}
+#[global] Instance empty_validators_inhabited : Inhabited {s : set validator | s = empty_set}
   := populate (exist _ _ eq_refl).
 
 Definition coeqv_limited_equivocation_vlsm : VLSM message :=

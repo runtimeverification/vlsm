@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From Coq Require Import FinFun FunctionalExtensionality.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
@@ -111,7 +111,7 @@ Section strong_fixed_equivocation.
 Definition sent_by_non_equivocating s m
   := exists i, i ∉ equivocating /\ has_been_sent (IM i) (s i) m.
 
-Global Instance sent_by_non_equivocating_dec : RelDecision sent_by_non_equivocating.
+#[global] Instance sent_by_non_equivocating_dec : RelDecision sent_by_non_equivocating.
 Proof.
   intros s m.
   apply @Decision_iff with (P := Exists (fun i => has_been_sent (IM i) (s i) m) (filter (fun i => i ∉ equivocating) (enum index))).
@@ -386,7 +386,7 @@ Context
   .
 
 (** See Lemma [fixed_input_has_strong_fixed_equivocation] below. *)
-Local Lemma fixed_input_has_strong_fixed_equivocation_helper
+#[local] Lemma fixed_input_has_strong_fixed_equivocation_helper
   l m
   (Hv : input_valid Fixed l (s, Some m))
   : strong_fixed_equivocation IM equivocators base_s m.
@@ -404,7 +404,7 @@ Proof.
       * by apply emitted_messages_are_valid.
 Qed.
 
-Local Lemma fixed_input_valid_transition_sub_projection_helper
+#[local] Lemma fixed_input_valid_transition_sub_projection_helper
   (Hs_pr: valid_state_prop (equivocators_composition_for_sent IM equivocators base_s)
     (composite_state_sub_projection IM equivocators s))
   l
@@ -439,7 +439,7 @@ Proof.
 Qed.
 
 (** See Lemma [fixed_output_has_strong_fixed_equivocation] below. *)
-Local Lemma fixed_output_has_strong_fixed_equivocation_helper
+#[local] Lemma fixed_output_has_strong_fixed_equivocation_helper
   (Hs_pr: valid_state_prop (equivocators_composition_for_sent IM equivocators base_s)
     (composite_state_sub_projection IM equivocators s))
   sf

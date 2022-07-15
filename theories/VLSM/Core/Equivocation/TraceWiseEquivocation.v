@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Rdefinitions.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
@@ -39,7 +39,7 @@ Definition item_equivocating_in_trace
   : Prop
   := from_option (fun m => ~trace_has_message (field_selector output) m tr) False (input item).
 
-Local Instance item_equivocating_in_trace_dec : RelDecision item_equivocating_in_trace.
+#[local] Instance item_equivocating_in_trace_dec : RelDecision item_equivocating_in_trace.
 Proof.
   intros item tr.
   destruct item. destruct input as [m|]
@@ -298,7 +298,7 @@ Context
   `{finite.Finite validator}
   .
 
-Local Program Instance equivocation_dec_tracewise
+#[local] Program Instance equivocation_dec_tracewise
   : BasicEquivocation (composite_state IM) validator :=
   {
     state_validators := fun _ => enum validator;

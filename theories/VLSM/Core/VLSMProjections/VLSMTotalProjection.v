@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
@@ -837,7 +837,7 @@ Context
   (Hmessage : weak_projection_valid_message_preservation X Y label_project state_project)
   .
 
-Local Lemma basic_VLSM_projection_finite_valid_trace_init_to
+#[local] Lemma basic_VLSM_projection_finite_valid_trace_init_to
   is s tr
   (Htr : finite_valid_trace_init_to X is s tr)
   : finite_valid_trace_from_to Y (state_project is) (state_project s) (pre_VLSM_projection_finite_trace_project _ _ label_project state_project tr).
@@ -863,7 +863,7 @@ Proof.
       rewrite Ht. by constructor.
 Qed.
 
-Local Lemma basic_VLSM_projection_finite_valid_trace_from
+#[local] Lemma basic_VLSM_projection_finite_valid_trace_from
   (s : state)
   (ls : list transition_item)
   (Hpxt : finite_valid_trace_from X s ls)

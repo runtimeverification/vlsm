@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Eqdep Vectors.Fin Program.Equality Lia FunctionalExtensionality.
 From VLSM Require Import Lib.Preamble Core.VLSM Core.VLSMProjections.
@@ -26,7 +26,7 @@ Section sec_equivocator_vlsm.
 1. A natural <<n>>, stating the number of copies of the original machine
 2. A state of <<X>> for each 1..n+1
 *)
-Local Definition bounded_state_copies := {n : nat & Fin.t (S n) -> vstate X}.
+#[local] Definition bounded_state_copies := {n : nat & Fin.t (S n) -> vstate X}.
 
 (** To preserve determinism we need to enhance the labels to indicate what copy
 of the machine will be used for a transition.
@@ -66,7 +66,7 @@ Definition mk_singleton_state
   :=
   existT 0 (fun _ => s).
 
-Local Lemma equivocator_state_projection_irrel (s : equivocator_state)
+#[local] Lemma equivocator_state_projection_irrel (s : equivocator_state)
   i (li : i < (equivocator_state_n s))
   j (lj : j < (equivocator_state_n s))
   (Heq : i = j)
@@ -76,7 +76,7 @@ Proof.
   by replace (nat_to_fin li) with (nat_to_fin lj) by apply of_nat_ext.
 Qed.
 
-Local Lemma equivocator_state_eq s (i1 i2 : fin (equivocator_state_n s))
+#[local] Lemma equivocator_state_eq s (i1 i2 : fin (equivocator_state_n s))
   : fin_to_nat i1 = fin_to_nat i2 -> equivocator_state_s s i1 = equivocator_state_s s i2.
 Proof.
   intro Heq.
@@ -101,7 +101,7 @@ Definition is_equivocating_state
   : Prop
   := not (is_singleton_state s).
 
-Global Instance is_equivocating_state_dec
+#[global] Instance is_equivocating_state_dec
   (s : equivocator_state)
   : Decision (is_equivocating_state s).
 Proof.
@@ -124,7 +124,7 @@ Definition equivocator_state_project
   | _ =>  None
   end.
 
-Local Lemma equivocator_state_project_Some s i (Hi : i < equivocator_state_n s)
+#[local] Lemma equivocator_state_project_Some s i (Hi : i < equivocator_state_n s)
   : equivocator_state_project s i = Some (equivocator_state_s s (nat_to_fin Hi)).
 Proof.
   unfold equivocator_state_project.
@@ -133,7 +133,7 @@ Proof.
   by rewrite !fin_to_nat_to_fin.
 Qed.
 
-Local Lemma equivocator_state_project_None s i (Hi : ~i < equivocator_state_n s)
+#[local] Lemma equivocator_state_project_None s i (Hi : ~i < equivocator_state_n s)
   : equivocator_state_project s i = None.
 Proof.
   unfold equivocator_state_project.
@@ -154,12 +154,12 @@ Proof.
   intro. lia.
 Qed.
 
-Local Ltac destruct_equivocator_state_project' es i si Hi Hpr :=
+#[local] Ltac destruct_equivocator_state_project' es i si Hi Hpr :=
   destruct (equivocator_state_project es i) as [si|] eqn:Hpr
   ; [ specialize (equivocator_state_project_Some_rev _ _ _ Hpr) as Hi
     | specialize (equivocator_state_project_None_rev _ _ Hpr) as Hi ].
 
-Local Ltac destruct_equivocator_state_project es i si Hi :=
+#[local] Ltac destruct_equivocator_state_project es i si Hi :=
   let Hpr := fresh "Hpr" in
   destruct_equivocator_state_project' es i si Hi Hpr
   ; clear Hpr.
@@ -264,7 +264,7 @@ Proof.
     by rewrite (equivocator_state_project_None _ _ Hj).
 Qed.
 
-Local Ltac destruct_equivocator_state_update_project' es i s j Hj Hij Hpr :=
+#[local] Ltac destruct_equivocator_state_update_project' es i s j Hj Hij Hpr :=
   let Hsize := fresh "Hsize" in
   pose proof (equivocator_state_update_size es i s) as Hsize
   ; destruct (decide (j < equivocator_state_n es)) as [Hj | Hj]
@@ -276,7 +276,7 @@ Local Ltac destruct_equivocator_state_update_project' es i s j Hj Hij Hpr :=
   ; rewrite Hpr in *
   ; clear Hsize.
 
-Local Ltac destruct_equivocator_state_update_project es i s j Hj Hij :=
+#[local] Ltac destruct_equivocator_state_update_project es i s j Hj Hij :=
   let Hpr := fresh "Hpr" in
   destruct_equivocator_state_update_project' es i s j Hj Hij Hpr
   ; clear Hpr.
@@ -347,7 +347,7 @@ Proof.
   by destruct_equivocator_state_project ex i si Hi''; subst; [lia |].
 Qed.
 
-Local Ltac destruct_equivocator_state_extend_project' es s i Hi Hpr :=
+#[local] Ltac destruct_equivocator_state_extend_project' es s i Hi Hpr :=
   let Hni := fresh "Hni" in
   let Hni' := fresh "Hni" in
   destruct (decide (i < equivocator_state_n es)) as [Hi | Hni]
@@ -358,7 +358,7 @@ Local Ltac destruct_equivocator_state_extend_project' es s i Hi Hpr :=
     | specialize (equivocator_state_extend_project_3 es s i Hi) as Hpr]
   ; rewrite Hpr in *.
 
-Local Ltac destruct_equivocator_state_extend_project es s i Hi :=
+#[local] Ltac destruct_equivocator_state_extend_project es s i Hi :=
   let Hpr := fresh "Hpr" in
   destruct_equivocator_state_extend_project' es s i Hi Hpr
   ; clear Hpr.
@@ -444,7 +444,7 @@ Proof.
   lia.
 Qed.
 
-Local Ltac destruct_equivocator_state_append_project' es es' i Hi k Hk Hpr :=
+#[local] Ltac destruct_equivocator_state_append_project' es es' i Hi k Hk Hpr :=
   let Hi' := fresh "Hi" in
   destruct (decide (i < equivocator_state_n es)) as [Hi| Hi']; swap 1 2;
   [ destruct (decide (i < equivocator_state_n es + equivocator_state_n es')) as [Hi|Hi];
@@ -458,7 +458,7 @@ Local Ltac destruct_equivocator_state_append_project' es es' i Hi k Hk Hpr :=
   ; rewrite Hpr in *
   .
 
-Local Ltac destruct_equivocator_state_append_project es es' i Hi k Hk :=
+#[local] Ltac destruct_equivocator_state_append_project es es' i Hi k Hk :=
   let Hpr := fresh "Hpr" in
   destruct_equivocator_state_append_project' es es' i Hi k Hk Hpr
   ; clear Hpr.
@@ -780,7 +780,7 @@ Definition existing_descriptor
   | _ => False
   end.
 
-Local Instance  existing_descriptor_dec : RelDecision existing_descriptor.
+#[local] Instance  existing_descriptor_dec : RelDecision existing_descriptor.
 Proof.
   intros d s. destruct d; simpl.
   - right. itauto.

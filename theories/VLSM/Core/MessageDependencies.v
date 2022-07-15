@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From Coq Require Import FinFun Relations.Relation_Operators Program.Equality.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras FinFunExtras StdppListSet Measurable.
@@ -224,7 +224,7 @@ Qed.
 
 End sec_message_dependencies.
 
-(** ** Local Equivocation Based on Message Dependencies
+(** ** #[local] Equivocation Based on Message Dependencies
 
 Inspired by the definitions of observability and local equivocation given for
 the ELMO protocol, we introduce abstract notions for local equivocation based
@@ -445,7 +445,7 @@ End sec_message_dependencies_equivocation.
 message_dependencies function, [HasBeenSentCapability] and
 [HasBeenReceivedCapability]) can be inferred from that.
 *)
-Global Hint Mode MessageDependencies - ! - - - : typeclass_instances.
+#[global] Hint Mode MessageDependencies - ! - - - : typeclass_instances.
 
 Section sec_composite_message_dependencies.
 
@@ -462,7 +462,7 @@ Context
 (** If all of the components satisfy the [MessageDependencies] assumptions,
 then their free composition will also do so.
 *)
-Global Instance composite_message_dependencies
+#[global] Instance composite_message_dependencies
   : MessageDependencies (free_composite_vlsm IM) message_dependencies.
 Proof.
   split.
@@ -537,7 +537,7 @@ Qed.
 
 End sec_composite_message_dependencies.
 
-(** ** Global Equivocation Based on Message Dependencies
+(** ** #[global] Equivocation Based on Message Dependencies
 
 Inspired by the definitions of observability and global equivocation given for
 the ELMO protocol, we introduce abstract notions for global equivocation based
@@ -899,7 +899,7 @@ End sec_full_message_dependencies.
 
 (* given the message type, we can usually look up the functions for
 message dependencies *)
-Global Hint Mode FullMessageDependencies ! - - : typeclass_instances.
+#[global] Hint Mode FullMessageDependencies ! - - : typeclass_instances.
 
 Section full_message_dependencies_happens_before.
 
