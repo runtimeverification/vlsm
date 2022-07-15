@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMEmbedding VLSMProjections.VLSMTotalProjection.
 
@@ -21,7 +21,7 @@ Definition VLSM_incl_part
   :=
   forall t : Trace,
     valid_trace_prop X t -> valid_trace_prop Y t.
-Local Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
+#[local] Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
 
 Lemma VLSM_incl_refl
   (MX : VLSMMachine vtype)

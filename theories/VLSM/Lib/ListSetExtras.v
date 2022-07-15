@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
 
@@ -7,7 +7,7 @@ From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
 Definition set_eq {A} (s1 s2 : set A) : Prop :=
   s1 ⊆ s2 /\ s2 ⊆ s1.
 
-Global Instance set_eq_dec `{EqDecision A} : RelDecision (@set_eq A).
+#[global] Instance set_eq_dec `{EqDecision A} : RelDecision (@set_eq A).
 Proof.
   by intros s1 s2; typeclasses eauto.
 Qed.

@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import Streams FunctionalExtensionality FinFun.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.StreamExtras.
@@ -176,7 +176,7 @@ states have the [initial_state_prop]erty in the corresponding component signatur
       by intro i; destruct (vs0 (IM i)) as [s Hs].
     Defined.
 
-    Global Instance composite_initial_state_inh : Inhabited composite_initial_state :=
+    #[global] Instance composite_initial_state_inh : Inhabited composite_initial_state :=
       {| inhabitant := composite_s0 |}.
 
 (**
@@ -1036,8 +1036,8 @@ This instantiates the regular composition using the [bool] type as an <<index>>.
   Definition first : binary_index := true.
   Definition second : binary_index := false.
 
-  Global Instance binary_index_dec :  EqDecision binary_index := _.
-  Global Instance binary_index_inhabited : Inhabited binary_index
+  #[global] Instance binary_index_dec :  EqDecision binary_index := _.
+  #[global] Instance binary_index_inhabited : Inhabited binary_index
     :=
     populate first.
 

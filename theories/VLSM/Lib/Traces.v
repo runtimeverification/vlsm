@@ -80,7 +80,7 @@ match tr with
 | Tcons a b tr0 => Tcons a b (trace_append tr0 tr')
 end.
 
-Local Infix "+++" := trace_append (at level 60, right associativity).
+#[local] Infix "+++" := trace_append (at level 60, right associativity).
 
 Lemma trace_append_nil : forall a tr, (Tnil a) +++ tr = tr.
 Proof.

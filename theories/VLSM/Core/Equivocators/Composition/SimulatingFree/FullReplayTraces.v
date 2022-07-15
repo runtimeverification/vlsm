@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Lia Program.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.FinExtras Lib.FinFunExtras.
@@ -612,7 +612,7 @@ Context
   (Hfull_replay_state : valid_state_prop SeededAllXE full_replay_state)
   .
 
-Local Lemma SeededNoEquiv_subsumption
+#[local] Lemma SeededNoEquiv_subsumption
   : forall l s om, input_valid SeededXE l (s, om) ->
   no_equivocations_additional_constraint_with_pre_loaded equivocator_IM (free_constraint _) seed (lift_equivocators_sub_label_to full_replay_state l)  (lift_equivocators_sub_state_to full_replay_state s, om).
 Proof.
@@ -645,7 +645,7 @@ Proof.
   - by right.
 Qed.
 
-Local Lemma sent_are_valid
+#[local] Lemma sent_are_valid
   : forall m, seed m -> valid_message_prop SeededAllXE m.
 Proof.
   by intros m Hm; apply initial_message_is_valid; right.

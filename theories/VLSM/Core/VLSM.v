@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. Local Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Streams.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
@@ -2445,8 +2445,8 @@ Class TraceWithLast
    valid_trace_forget_last: forall [msg] [X: VLSM msg] [s f tr],
      trace_prop X s f tr -> base_prop X s tr
   }.
-Global Hint Mode TraceWithLast - ! : typeclass_instances.
-Global Hint Mode TraceWithLast ! - : typeclass_instances.
+#[global] Hint Mode TraceWithLast - ! : typeclass_instances.
+#[global] Hint Mode TraceWithLast ! - : typeclass_instances.
 
 Definition valid_trace_add_default_last
   `{TraceWithLast base_prop trace_prop}
@@ -2479,7 +2479,7 @@ Class TraceWithStart
  {valid_trace_first_pstate:
     forall [tr], trace_prop tr -> valid_state_prop X start
  }.
-Global Hint Mode TraceWithStart - - - ! : typeclass_instances.
+#[global] Hint Mode TraceWithStart - - - ! : typeclass_instances.
 
 Instance trace_with_start_valid_trace_from message (X: VLSM message) s:
   TraceWithStart s (finite_valid_trace_from X s)
@@ -2835,7 +2835,7 @@ Class HistoryVLSM `(X : VLSM message) : Prop :=
       l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2
   }.
 
-Global Hint Mode HistoryVLSM - ! : typeclass_instances.
+#[global] Hint Mode HistoryVLSM - ! : typeclass_instances.
 
 #[export] Instance preloaded_history_vlsm
   `{HistoryVLSM message X} : HistoryVLSM (pre_loaded_with_all_messages_vlsm X).
