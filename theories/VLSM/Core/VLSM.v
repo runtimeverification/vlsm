@@ -33,7 +33,7 @@ These are the properties for initial states ([initial_state_prop])
 and initial messages ([initial_message_prop]),
 from which we can immediately define the dependent
 types [initial_state] (as [state]s having the [initial_state_prop]erty) and
-[intial_message] (as <<message>>s having the [initial_message_prop]erty),
+[initial_message] (as <<message>>s having the [initial_message_prop]erty),
 a witness [s0] to nonemptiness of the [initial_state] set,
 and the [transition] function and [valid] predicate.
 *)
@@ -1698,7 +1698,7 @@ to be used for the trace generating the message received in the last transition.
         apply (Hextend _ _ _ IHHtr1 Htr1 _ _ _ _ Houtput IHHtr2 Htr2 _ _ _ Hivt).
     Qed.
 
-(** *** Infinite [protcol_trace]s *)
+(** *** Infinite [protocol_trace]s *)
 
 (** We now define [infinite_valid_trace]s. The definitions
 resemble their finite counterparts, adapted to the technical
@@ -1983,7 +1983,7 @@ in <<s>> by outputting <<m>> *)
       - by apply finite_valid_trace_from_to_last in Htrs.
     Qed.
 
-(** Another benefit of defining traces is that we can succintly
+(** Another benefit of defining traces is that we can succinctly
 describe indirect transitions between arbitrary pairs of states.
 
 We say that state <<second>> is in state <<first>>'s futures if
@@ -2361,7 +2361,7 @@ This relation is often used in stating safety and liveness properties.*)
     (* end hide *)
 
 (**
-Stating livness properties will require quantifying over complete
+Stating liveness properties will require quantifying over complete
 executions of the protocol. To make this possible, we will now define
 _complete_ [valid_trace]s.
 
@@ -2729,7 +2729,7 @@ Qed.
 If we know that two VLSMs are provably equal, we could try rewriting by them.
 However, that gets usually quite technical. To go around that, we will prove
 that there is a [VLSMProjections.VLSM_full_projection] between them which will
-allow trace-based results to be easily moved betweent the two VLSMs.
+allow trace-based results to be easily moved between the two VLSMs.
 
 Below are some preliminary results; the actual projection is given in
 [VLSMProjections.same_VLSM_full_projection].

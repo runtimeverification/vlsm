@@ -10,10 +10,10 @@ and equivalent with traces on the corresponding pre-loaded VLSM
 (Lemmas [byzantine_pre_loaded_with_all_messages] and [pre_loaded_with_all_messages_alt_eq]).
 
 Note that, contrary to what one might think, the [byzantine_trace_prop]erty
-does not only capture traces exhibiting byzantine behavior, but also all
+does not only capture traces exhibiting byzantine behaviour, but also all
 [valid_trace]s (consequence of Lemma [vlsm_incl_pre_loaded_with_all_messages_vlsm]).
 Therefore to avoid confusion we will call _proper byzantine traces_,
-or _traces exhibiting byzantine behavior_ the collection of traces with
+or _traces exhibiting byzantine behaviour_ the collection of traces with
 the [byzantine_trace_prop]erty but without the [valid_trace_prop]erty.
 
 In the remainder of this section, we fix a (regular) VLSM <<M>> with
@@ -33,7 +33,7 @@ Context
 The first definition says that a trace has the [byzantine_trace_prop]erty
 if it is the projection of
 a trace which can be obtained by freely composing <<M>> with an arbitrary
-VLSM <<M'>> (of a signatulre <<S'>> and type <<T'>> over the same set of <<message>>s).
+VLSM <<M'>> (of a signature <<S'>> and type <<T'>> over the same set of <<message>>s).
 
 Below, [binary_free_composition_fst] represents the projection of
 the free composition between <<M>> and <<M'>> to the component corresponding
@@ -208,7 +208,7 @@ of <<Alt1>> into <<Preloaded>>
 
 (**
 To prove the reverse inclusion (between <<PreLoaded>> and <<Alt1>>) we will use the
-[basic_VLSM_incl] meta-result about proving inclusions bewteen
+[basic_VLSM_incl] meta-result about proving inclusions between
 VLSMs which states that
 - if all [valid] messages in the first are [valid_message]s in the second, and
 - if all [valid_state]s in the first are also [valid_state]s in the second,
@@ -245,7 +245,7 @@ Using the above, it is straight-forward to show that:
     Proof. apply any_message_is_valid_in_preloaded. Qed.
 
 (**
-Next we define the "lifing" of a [state] <<s>> from <<M>> to <<Alt>>,
+Next we define the "lifting" of a [state] <<s>> from <<M>> to <<Alt>>,
 by simply setting to <<s>> the  corresponding component of the initial
 (composed) state [s0] of <<Alt>>.
 *)

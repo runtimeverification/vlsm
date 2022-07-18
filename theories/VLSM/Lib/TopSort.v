@@ -15,7 +15,7 @@ among the current elements, then recurses on the remaining elements.
 To begin with, we assume an unconstrained <<precedes>> function to say
 whether an element precedes another.  The proofs will show that if
 <<precedes>> determines a strict order on the set of elements in the list,
-then the [top_sort] algoritm produces a linear extension of that ordering
+then the [top_sort] algorithm produces a linear extension of that ordering
 (Lemmas [top_sort_precedes] and [top_sort_precedes_before]).
 *)
 
@@ -43,7 +43,7 @@ Proof.
 Qed.
 
 (**
-Finds an element minimizing [count_predecessesors] in <<min :: remainder>>
+Finds an element minimizing [count_predecessors] in <<min :: remainder>>
 *)
 
 Fixpoint min_predecessors
@@ -286,7 +286,7 @@ Context
   (Hts : topologically_sorted)
   .
 
-(** If <<l>> is [topologically_sorted], then for any occurences
+(** If <<l>> is [topologically_sorted], then for any occurrences
 of <<a>> and <<b>> in <<l>> such that <<a precedes b>> it must be that
 the occurrence of <<a>> is before that of <<b>>.
 
@@ -317,7 +317,7 @@ Qed.
 
 (**
 If <<a>> and <<b>> are in a [topologically_sorted] list <<lts>> and <<a precedes b>>
-then there is an <<a>> before any occurence of <<b>> in <<lts>>.
+then there is an <<a>> before any occurrence of <<b>> in <<lts>>.
 *)
 Corollary top_sort_before
   (a b : A)
@@ -435,7 +435,7 @@ Section top_sort.
 
 Context {A} `{EqDecision A} (precedes : relation A) `{!RelDecision precedes}.
 
-(** Iteratively extracts <<n>> elements with minimal number of precessors
+(** Iteratively extracts <<n>> elements with minimal number of predecessors
 from a given list.
  *)
 
@@ -632,7 +632,7 @@ Proof.
 Qed.
 
 (** <<lts>> is a [topological_sorting] of <<l>> if it has the same elements as <<l>>
-and is [toplogically_sorted].
+and is [topologically_sorted].
 *)
 Definition topological_sorting
   (l lts : list A)

@@ -209,7 +209,7 @@ Definition fitering_subsequence_stream_filter_map
   : Stream B
   := map (fun k => f (dexist _ (filtering_subsequence_witness P s ss Hfs k))) nat_sequence.
 
-(** Connecting prefixes of [fitering_subsequence_stream_filter_map] with [list_filter_map]s on
+(** Connecting prefixes of [filtering_subsequence_stream_filter_map] with [list_filter_map]s on
 prefixes.
 *)
 Lemma fitering_subsequence_stream_filter_map_prefix
@@ -406,7 +406,7 @@ Proof.
 Qed.
 
 (** Given as stream <<s>> for which predicate <<P>> holds [InfinitelyOften]
-produces the streams of all its position at which <<P>> holds in a stricly
+produces the streams of all its position at which <<P>> holds in a strictly
 increasing order (shifted by the given argument <<n>>).
 *)
 CoFixpoint stream_filter_positions (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat) : Stream nat :=
@@ -507,7 +507,7 @@ Proof.
 Qed.
 
 (** A restatement of [filtering_subsequence_stream_filter_map] based on the
-[InfinitelyOften] predicate, using the [stream_filter_positions_fitering_subsequence].
+[InfinitelyOften] predicate, using the [stream_filter_positions_filtering_subsequence].
 *)
 Definition stream_filter_map
   [B : Type]
@@ -577,7 +577,7 @@ Definition bounded_stream_map_option
 
 End stream_map_option.
 
-(** For a totally defined function, [stream_map_option] correspondes to the
+(** For a totally defined function, [stream_map_option] corresponds to the
 regular [map] on streams.
 *)
 Lemma stream_map_option_EqSt [A B : Type] (f : A -> B)

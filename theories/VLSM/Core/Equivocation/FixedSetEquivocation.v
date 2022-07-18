@@ -59,7 +59,7 @@ Definition equivocators_composition_for_directly_observed s
 (**
 The fixed equivocation constraint for the regular composition of nodes
 stipulates that a message can be received either if it [has_been_directly_observed]
-or it can be emited by the free composition of equivocators pre-loaded with
+or it can be emitted by the free composition of equivocators pre-loaded with
 the messages directly observed in the current state.
 *)
 Definition fixed_equivocation s m
@@ -99,7 +99,7 @@ Qed.
 
 A seemingly stronger fixed equivocation constraint requires that a received
 message either [has_been_sent] by a non-equivocating node
-or it can be emited by the free composition of equivocators pre-loaded with
+or it can be emitted by the free composition of equivocators pre-loaded with
 messages which have been sent by non-equivocating nodes.
 
 We say seemingly because, as shown by the [Fixed_eq_StrongFixed] result,
@@ -161,7 +161,7 @@ Definition strong_fixed_equivocation_vlsm_composition : VLSM message
 
 
 (** The composition of equivocators pre-loaded with only the messages sent by
-non-equivcators is included in that pre-loaded with all the directly observed
+non-equivocators is included in that pre-loaded with all the directly observed
 messages.
 *)
 Lemma Equivocators_Strong_Fixed_incl base_s
@@ -722,11 +722,11 @@ End Fixed_eq_StrongFixed.
 
 
 
-(** ** Changing the behavior of equivocators within a trace
+(** ** Changing the behaviour of equivocators within a trace
 
 By noting that the satisfaction of the [fixed_equivocation_constraint] actually
 only depends on the messages sent by non-equivocating nodes, it makes it much
-easier to establish results related to changing the behavior of equivocating
+easier to establish results related to changing the behaviour of equivocating
 nodes.
 
 In this section we essentially prove that given a Fixed valid state <<s>>,

@@ -472,7 +472,7 @@ Qed.
 
 End sec_projection_induced_validator_incl.
 
-(** ** Projection validators and Byzantine behavior
+(** ** Projection validators and Byzantine behaviour
 
 In the sequel we assume that the [projection_induced_validator_is_projection] and
 that initial states of <<Y>> can be lifted to <<X>>.
@@ -637,7 +637,7 @@ Qed.
 Given that any projection is included in the [pre_loaded_with_all_messages_vlsm]
 of its component (Lemma [proj_pre_loaded_with_all_messages_incl]), we conclude
 that <<PreY>> and <<Xi>> are trace-equal.  This means that all the
-byzantine behavior of a component which is a validator
+byzantine behaviour of a component which is a validator
 is exhibited by its corresponding projection.
 *)
 Lemma pre_loaded_with_all_messages_validator_proj_eq
@@ -934,7 +934,7 @@ is trace-equal to its associated [pre_loaded_with_all_messages_vlsm], basically
 meaning (due to Lemma [byzantine_pre_loaded_with_all_messages]) that all traces
 with the [byzantine_trace_prop]erty associated to self-validator VLSMs are also
 [valid_trace]s for that VLSM, meaning that the VLSM cannot exhibit
-byzantine behavior.
+byzantine behaviour.
 *)
 
 Context

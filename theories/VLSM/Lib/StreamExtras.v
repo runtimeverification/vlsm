@@ -296,7 +296,7 @@ Proof.
   by revert l; induction n; intros [a l]; cbn; rewrite ?IHn.
 Qed.
 
-(** The following two of lemmas connect forall quantifiers looking at one
+(** The following two lemmas connect forall quantifiers looking at one
 element or two consecutive elements at a time with corresponding list
 quantifiers applied on their finite prefixes.
 *)
