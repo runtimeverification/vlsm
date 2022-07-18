@@ -2,6 +2,8 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 
+(** * Std++ Related Results **)
+
 Lemma elem_of_take {A : Type} (l : list A) (n : nat) (x : A) :
   elem_of x (take n l) -> elem_of x l.
 Proof.
