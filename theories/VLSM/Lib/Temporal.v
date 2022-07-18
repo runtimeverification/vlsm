@@ -2,6 +2,8 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From Coq Require Import Streams Classical.
 
+(** *Header placeholder **)
+
 Set Implicit Arguments.
 
 Inductive Eventually [A:Type] (P: Stream A -> Prop) : Stream A -> Prop :=
