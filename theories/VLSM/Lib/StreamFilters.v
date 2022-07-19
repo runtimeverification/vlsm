@@ -515,7 +515,7 @@ Definition stream_filter_map
   (s : Stream A)
   (Hinf : InfinitelyOften P s)
   : Stream B :=
-  filtering_subsequence_stream_filter_map P f _ _ (filtering_subsequence_stream_filter_map s Hinf).
+  filtering_subsequence_stream_filter_map P f _ _ (stream_filter_positions_filtering_subsequence s Hinf).
 
 (** Stream filtering is obtained as a specialization of [stream_filter_map].
 *)
@@ -561,7 +561,7 @@ Qed.
 
 Program Definition stream_map_option_prefix_ex
   (Hinf : InfinitelyOften P s)
-  (Hfs := filtering_subsequence_stream_filter_map _ _ Hinf)
+  (Hfs := stream_filter_positions_filtering_subsequence _ _ Hinf)
   (k : nat)
   : { n | stream_prefix (stream_map_option Hinf) k = map_option f (stream_prefix s n)} :=
   let (n, Heq) := (fitering_subsequence_stream_filter_map_prefix_ex P (fun k => is_Some_proj (proj2_dsig k)) _ _ Hfs k) in
