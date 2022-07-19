@@ -751,7 +751,7 @@ Definition equivocator_state_descriptor_project
 
  (** Whether a [MachineDescriptor] can be used to project an
  [equivocator_state] to a regular [state].
- The [NewMachine] descriptor signals that an equivocation has occured
+ The [NewMachine] descriptor signals that an equivocation has occurred
  starting a new machine, thus we require the argument to be initial.
  For an [Existing] descriptor, the index of the descriptor must
  refer to an existing machine in the current state.
@@ -1051,7 +1051,7 @@ Qed.
 
 (**
 Next couple of lemmas characterize the projections of a [equivocator_state]
-after taking a transition in terms of the preceeeding state.
+after taking a transition in terms of the preceding state.
 
 These are simpler version of the results concerning the projection of
 states from the composition of equivocators over [equivocation_descriptors].

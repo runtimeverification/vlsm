@@ -578,7 +578,7 @@ Qed.
 (**
 The result below shows that the [projection_friendliness_sufficient_condition]
 might be too strong, in the sense that it allows any trace from the
-projection to be lifted direclty to <<X>>
+projection to be lifted directly to <<X>>
 (all other machines stay in their initial state).
 *)
 Lemma projection_friendliness_lift_to_composite_vlsm_full_projection

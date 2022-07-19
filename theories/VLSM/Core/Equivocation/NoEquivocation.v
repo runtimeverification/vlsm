@@ -110,7 +110,7 @@ the same state, too.
   Qed.
 
   (**
-  If the [valid]itiy function satisfies the [no_equivocations] constraint then
+  If the [valid]ity function satisfies the [no_equivocations] constraint then
   it doesn't matter if we preload the composition with some initial messages,
   since all messages must be sent before being received, which means that
   one cannot use the new messages to create additional traces.
@@ -191,7 +191,7 @@ Definition composite_no_equivocations
 (** ** Composite No-Equivocation Invariants
 
 A VLSM composition whose constraint subsumes the [no_equivocations] constraint
-and also supports [has_been_recevied] (or [has_been_directly_observed]) obeys an
+and also supports [has_been_received] (or [has_been_directly_observed]) obeys an
 invariant that any message that tests as [has_been_received]
 (resp. [has_been_directly_observed]) in a state also tests as [has_been_sent]
 in the same state.

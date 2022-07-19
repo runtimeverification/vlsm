@@ -31,7 +31,7 @@ Context
   .
 
 (** An item is equivocating in a trace containing it if it receives
-a message which has not been previosly sent in that thace.
+a message which has not been previously sent in that trace.
 *)
 Definition item_equivocating_in_trace
   (item : composite_transition_item IM)

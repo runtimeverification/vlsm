@@ -103,7 +103,7 @@ Section full_node_constraint.
     by eapply lift_generated_to_seeded.
   Qed.
 
-  (** if all machines satisty the [cannot_resend_message_stepwise_prop]erty,
+  (** if all machines satisfy the [cannot_resend_message_stepwise_prop]erty,
   then the [full_node_condition_for_admissible_equivocators] is stronger than
   the [full_node_condition_for_admissible_equivocators_alt].
   *)

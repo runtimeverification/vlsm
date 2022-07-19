@@ -137,7 +137,7 @@ Qed.
     as a sent message somewhere along the way.
 
     The existence of such oracles, which practically imply endowing states with history,
-    is necessary if we are to detect equivocation using a composition constaint, as these
+    is necessary if we are to detect equivocation using a composition constraint, as these
     constraints act upon states, not traces.
  **)
 
@@ -364,13 +364,13 @@ Section Simple.
     Qed.
 
 (** Checks if all [valid_trace]s leading to a certain state contain a certain message.
-    The [message_selector] argument specifices whether we're looking for received or sent
+    The [message_selector] argument specifies whether we're looking for received or sent
     messages.
 
     Notably, the [valid_trace]s over which we are iterating belong to the preloaded
     version of the target VLSM. This is because we want VLSMs to have oracles which
     are valid irrespective of the composition they take part in. As we know,
-    the behaviour preloaded VLSMs includes behaviours of its projections in any
+    the behavior preloaded VLSMs includes behaviors of its projections in any
     composition. **)
 
     Definition all_traces_have_message_prop
@@ -490,7 +490,7 @@ Section Simple.
       by apply Exists_app; right; left.
     Qed.
 
-    (** Sufficent condition for 'proper_sent' avoiding the
+    (** Sufficient condition for 'proper_sent' avoiding the
     'pre_loaded_with_all_messages_vlsm'
     *)
     Lemma specialized_proper_sent
@@ -676,7 +676,7 @@ End Simple.
  The above definitions like [all_traces_have_message_prop]
  connect a [state_message_oracle] to a predicate on
  [transition_item] by relating the oracle holding on a state
- to a satsifying transition existing in all traces.
+ to a satisfying transition existing in all traces.
 
  This is equivalent to two local properties,
  one is that the oracle cannot only for any initial state,
@@ -767,10 +767,10 @@ Qed.
    begins with a lemma using induction along a trace to
    prove that given a [finite_valid_trace] to a state,
    the oracle holds at that state for some message iff
-   a satsifying transition item exists in the trace.
+   a satisfying transition item exists in the trace.
 
    The theorems for [all_traces_have_message_prop]
-   and [no_traces_have_message_prop] are mostly rearraning
+   and [no_traces_have_message_prop] are mostly rearranging
    quantifiers to use this lemma, also using [valid_state_prop]
    to choose a trace to the state for the directions where
    one is not given.
@@ -1947,7 +1947,7 @@ Section Composite.
 
   (** Definitions for safety and nontriviality of the [sender] function.
       Safety means that if we designate a validator as the sender
-      of a certain messsage, then it is impossible for other components
+      of a certain message, then it is impossible for other components
       to produce that message
 
       Weak/strong nontriviality say that each validator should

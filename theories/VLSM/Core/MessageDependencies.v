@@ -36,7 +36,7 @@ Definition message_dependencies_full_node_condition
 [MessageDependencies] characterize a <<message_dependencies>> function
 through two properties:
 
-- Necessity: All dependent messeges for a message <<m>>m are required to be
+- Necessity: All dependent messages for a message <<m>>m are required to be
 directly observed by origin state of a transition emitting the message <<m>>.
 
 - Sufficiency: A message can be produced by the machine pre-loaded with its

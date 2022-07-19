@@ -1615,10 +1615,10 @@ In the following we define the [projection_induced_validator] to a single compon
 of the [pre_induced_sub_projection] of a constrained composition so a subset of its
 components.
 
-Note that, in general, this is not trace-equivalent with the direclty obtained
+Note that, in general, this is not trace-equivalent with the directly obtained
 [projection_induced_validator] of the constrained composition to the corresponding
 component, as the intermediate induced projection might generate more
-[input_valid_transitions] to be considered as a basis for the next proejction.
+[input_valid_transitions] to be considered as a basis for the next projection.
 *)
 
 Definition sub_label_element_project

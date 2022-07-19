@@ -245,7 +245,7 @@ state as the base for lifting.
 The [transition] function for the [composite_vlsm] takes a transition in
 the component selected by the index in the given [composite_label]
 with the contained label,
-and returnes the produced message together with the state updated on that
+and returns the produced message together with the state updated on that
 component:
 *)
     Definition composite_transition
@@ -997,7 +997,7 @@ Proof.
   apply input_valid_transition_preloaded_project_any.
 Qed.
 
-(** If a message can be emitted by a composition, then it can be emited by one of the
+(** If a message can be emitted by a composition, then it can be emitted by one of the
 components.
 *)
 Lemma can_emit_composite_project

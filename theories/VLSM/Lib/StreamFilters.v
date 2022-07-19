@@ -198,7 +198,7 @@ Qed.
 a function <<f>> transforming elements with property <<P>>, we can define the
 filtering of <<s>> by <<P>> mapped through the function <<f>>.
 *)
-Definition fitering_subsequence_stream_filter_map
+Definition filtering_subsequence_stream_filter_map
   {A B : Type}
   (P : A -> Prop)
   {Pdec : forall a, Decision (P a)}
@@ -209,7 +209,7 @@ Definition fitering_subsequence_stream_filter_map
   : Stream B
   := map (fun k => f (dexist _ (filtering_subsequence_witness P s ss Hfs k))) nat_sequence.
 
-(** Connecting prefixes of [fitering_subsequence_stream_filter_map] with [list_filter_map]s on
+(** Connecting prefixes of [filtering_subsequence_stream_filter_map] with [list_filter_map]s on
 prefixes.
 *)
 Lemma fitering_subsequence_stream_filter_map_prefix
@@ -223,7 +223,7 @@ Lemma fitering_subsequence_stream_filter_map_prefix
   (n : nat)
   (pre_filter_map := list_filter_map P f (stream_prefix s n))
   (m := length pre_filter_map)
-  : stream_prefix (fitering_subsequence_stream_filter_map P f s ss Hfs) m = pre_filter_map.
+  : stream_prefix (filtering_subsequence_stream_filter_map P f s ss Hfs) m = pre_filter_map.
 Proof.
   subst m pre_filter_map.
   induction n; [done |].
@@ -238,7 +238,7 @@ Proof.
   rewrite stream_prefix_S.
   rewrite IHn.
   f_equal. f_equal.
-  unfold fitering_subsequence_stream_filter_map.
+  unfold filtering_subsequence_stream_filter_map.
   rewrite Str_nth_map.
   f_equal. apply dsig_eq.
   simpl. rewrite nat_sequence_nth.
@@ -257,7 +257,7 @@ Program Definition fitering_subsequence_stream_filter_map_prefix_ex
   (ss : Stream nat)
   (Hfs : filtering_subsequence P s ss)
   (m : nat)
-  : { n : nat | stream_prefix (fitering_subsequence_stream_filter_map P f s ss Hfs) m = list_filter_map P f (stream_prefix s n) } :=
+  : { n : nat | stream_prefix (filtering_subsequence_stream_filter_map P f s ss Hfs) m = list_filter_map P f (stream_prefix s n) } :=
   match m with
   | 0 => exist _ 0 _
   | S m => exist _ (S (Str_nth m ss)) _
@@ -406,7 +406,7 @@ Proof.
 Qed.
 
 (** Given as stream <<s>> for which predicate <<P>> holds [InfinitelyOften]
-produces the streams of all its position at which <<P>> holds in a stricly
+produces the streams of all its position at which <<P>> holds in a strictly
 increasing order (shifted by the given argument <<n>>).
 *)
 CoFixpoint stream_filter_positions (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat) : Stream nat :=
@@ -477,7 +477,7 @@ Qed.
 
 (** [stream_filter_positions] produces a [filtering_sequence].
 *)
-Lemma stream_filter_positions_fitering_subsequence
+Lemma stream_filter_positions_filtering_subsequence
   (s : Stream A) (Hinf : InfinitelyOften P s)
   : filtering_subsequence P s (stream_filter_positions s Hinf 0).
 Proof.
@@ -507,7 +507,7 @@ Proof.
 Qed.
 
 (** A restatement of [filtering_subsequence_stream_filter_map] based on the
-[InfinitelyOften] predicate, using the [stream_filter_positions_fitering_subsequence].
+[InfinitelyOften] predicate, using the [stream_filter_positions_filtering_subsequence].
 *)
 Definition stream_filter_map
   [B : Type]
@@ -515,7 +515,7 @@ Definition stream_filter_map
   (s : Stream A)
   (Hinf : InfinitelyOften P s)
   : Stream B :=
-  fitering_subsequence_stream_filter_map P f _ _ (stream_filter_positions_fitering_subsequence s Hinf).
+  filtering_subsequence_stream_filter_map P f _ _ (stream_filter_positions_filtering_subsequence s Hinf).
 
 (** Stream filtering is obtained as a specialization of [stream_filter_map].
 *)
@@ -561,7 +561,7 @@ Qed.
 
 Program Definition stream_map_option_prefix_ex
   (Hinf : InfinitelyOften P s)
-  (Hfs := stream_filter_positions_fitering_subsequence _ _ Hinf)
+  (Hfs := stream_filter_positions_filtering_subsequence _ _ Hinf)
   (k : nat)
   : { n | stream_prefix (stream_map_option Hinf) k = map_option f (stream_prefix s n)} :=
   let (n, Heq) := (fitering_subsequence_stream_filter_map_prefix_ex P (fun k => is_Some_proj (proj2_dsig k)) _ _ Hfs k) in
@@ -577,7 +577,7 @@ Definition bounded_stream_map_option
 
 End stream_map_option.
 
-(** For a totally defined function, [stream_map_option] correspondes to the
+(** For a totally defined function, [stream_map_option] corresponds to the
 regular [map] on streams.
 *)
 Lemma stream_map_option_EqSt [A B : Type] (f : A -> B)

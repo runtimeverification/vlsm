@@ -295,14 +295,14 @@ Qed.
 (** ** Strongly witnessed equivocation *)
 
 (** A stronger [trace_witnessing_equivocation_prop]erty requires that any
-prefix of a trace is witnessing equivocation for its correspondin final state.
+prefix of a trace is witnessing equivocation for its corresponding final state.
 *)
 Definition strong_trace_witnessing_equivocation_prop is tr :=
     forall prefix suffix, prefix ++ suffix = tr ->
       trace_witnessing_equivocation_prop is prefix.
 
 (** An advantage of the [strong_trace_witnessing_equivocation_prop]erty
-is that is guantees monotonicity of [equivocating_validators] along the trace.
+is that it guarantees monotonicity of [equivocating_validators] along the trace.
 *)
 Lemma strong_witness_equivocating_validators_prefix_monotonicity
   (is s : composite_state IM)
