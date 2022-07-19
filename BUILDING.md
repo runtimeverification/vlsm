@@ -49,17 +49,17 @@ Choose "y", in order to allow opam to modify `~/.profile`.
 opam switch create coq-8.15 --packages=ocaml-variants.4.13.1+options,ocaml-option-flambda
 ```
 
+### Update the current shell environment
+
+```shell
+eval $(opam env)
+```
+
 ### Install the project dependencies via opam
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
 opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto
-```
-
-### Update the current shell environment
-
-```shell
-eval $(opam env)
 ```
 
 ### Clone the project repository
