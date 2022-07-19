@@ -131,15 +131,12 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
       finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   apply valid_trace_get_last in HtrX as HeqsX.
-  eapply valid_trace_forget_last, msg_dep_fixed_limited_equivocation
-      in HtrX.
-  2-4: done.
-  apply limited_equivocators_finite_valid_trace_init_to_rev
-     in HtrX as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput)
-  ; [| done].
+  eapply valid_trace_forget_last, msg_dep_fixed_limited_equivocation in HtrX; [| done ..].
+  apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
+     as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput); [| done].
   exists is, s, tr; subst; split_and!; try itauto.
   - by erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last.
-  - rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
+  - by rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
 Qed.
 
 End sec_equivocators_simulating_annotated_limited.
