@@ -616,6 +616,7 @@ Section validator_fixed_set_byzantine.
 
 Context
   (message_dependencies : message -> set message)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
@@ -655,7 +656,7 @@ Proof.
       apply Some_inj in Hsigned.
       specialize (Hsender_safety _ _ Hsender _ Hiom) as Heq_v.
       rewrite Hsigned in Heq_v. subst _v.
-      eapply message_dependencies_are_sufficient in Hiom; [|typeclasses eauto].
+      eapply message_dependencies_are_sufficient in Hiom.
       revert Hiom.
       rewrite set_diff_iff in Hi.
       apply not_and_r in Hi as [Hi | Hi]; [elim Hi; apply elem_of_enum|].

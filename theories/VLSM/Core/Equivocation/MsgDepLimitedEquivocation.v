@@ -216,8 +216,8 @@ Context
   (A : validator -> index)
   (sender : message -> option validator)
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies (IM i) message_dependencies}
   `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
 
@@ -341,9 +341,9 @@ Context
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies (IM i) message_dependencies}
   (full_message_dependencies : message -> set message)
   `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   `{ReachableThreshold index}
   (sender : message -> option index)
   (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
@@ -375,7 +375,7 @@ Proof.
   ; apply Some_inj in Hsender; cbn in Hsender; subst.
   split.
   - by rewrite elem_of_app; left; left.
-  - by eapply message_dependencies_are_sufficient; [typeclasses eauto|].
+  - by eapply message_dependencies_are_sufficient.
 Qed.
 
 Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
@@ -441,7 +441,7 @@ Proof.
     ; [by left; right | right].
     eapply sub_valid_preloaded_lifts_can_be_emitted
     ; [done | |]; cycle 1.
-    + eapply message_dependencies_are_sufficient; [typeclasses eauto | done].
+    + by eapply message_dependencies_are_sufficient.
     + intros dm' Hdm'; apply Hind.
       * by apply msg_dep_happens_before_iff_one; left.
       * transitivity dm; [| done].

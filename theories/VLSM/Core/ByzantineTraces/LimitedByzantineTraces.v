@@ -62,6 +62,7 @@ Context
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
   (message_dependencies : message -> set message)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
@@ -253,9 +254,9 @@ Context
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies (IM i) message_dependencies}
   (full_message_dependencies : message -> set message)
   `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   `{ReachableThreshold index}
   (sender : message -> option index)
   (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
@@ -465,7 +466,7 @@ Proof.
     symmetry in His_pr, Htr_pr.
     eexists _,_; split; [| done].
     eapply msg_dep_fixed_limited_equivocation_witnessed, proj2 in Hbtr.
-    2-5: done.
+    2-4: done.
     revert Hbtr; apply VLSM_incl_finite_valid_trace.
     by apply fixed_equivocation_vlsm_composition_index_incl.
 Qed.

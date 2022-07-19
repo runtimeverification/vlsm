@@ -109,9 +109,9 @@ Section sec_equivocators_simulating_annotated_limited.
 
 Context
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies (IM i) message_dependencies}
   (full_message_dependencies : message -> set message)
   `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (sender : message -> option index)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
@@ -133,7 +133,7 @@ Proof.
   apply valid_trace_get_last in HtrX as HeqsX.
   eapply valid_trace_forget_last, msg_dep_fixed_limited_equivocation
       in HtrX.
-  2-5: done.
+  2-4: done.
   apply limited_equivocators_finite_valid_trace_init_to_rev
      in HtrX as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput)
   ; [| done].
@@ -158,6 +158,7 @@ state-equivocation constraint.
 *)
 Lemma limited_equivocators_valid_state_rev
   (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
