@@ -430,7 +430,7 @@ Qed.
 (**
 Under full-message dependencies and full node assumptions, if all components are
 validators for the [msg_dep_limited_equivocation_vlsm] associated to their
-composition, then the traces exposed limited Byzantine behaviour coincide with
+composition, then the traces exposed limited Byzantine behavior coincide with
 the traces exposed to limited equivocation.
 *)
 Lemma msg_dep_validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr

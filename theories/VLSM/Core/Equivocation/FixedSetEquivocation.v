@@ -722,11 +722,11 @@ End Fixed_eq_StrongFixed.
 
 
 
-(** ** Changing the behaviour of equivocators within a trace
+(** ** Changing the behavior of equivocators within a trace
 
 By noting that the satisfaction of the [fixed_equivocation_constraint] actually
 only depends on the messages sent by non-equivocating nodes, it makes it much
-easier to establish results related to changing the behaviour of equivocating
+easier to establish results related to changing the behavior of equivocating
 nodes.
 
 In this section we essentially prove that given a Fixed valid state <<s>>,

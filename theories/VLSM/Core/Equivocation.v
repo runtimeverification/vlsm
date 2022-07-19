@@ -370,7 +370,7 @@ Section Simple.
     Notably, the [valid_trace]s over which we are iterating belong to the preloaded
     version of the target VLSM. This is because we want VLSMs to have oracles which
     are valid irrespective of the composition they take part in. As we know,
-    the behaviour preloaded VLSMs includes behaviours of its projections in any
+    the behavior preloaded VLSMs includes behaviors of its projections in any
     composition. **)
 
     Definition all_traces_have_message_prop

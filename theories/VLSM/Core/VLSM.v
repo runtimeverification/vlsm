@@ -2500,8 +2500,8 @@ Given a VLSM <<X>>, we introduce the _pre-loaded_ version of it,
 which is identical to <<X>>, except that it is endowed with the
 whole message universe as its initial messages. The high degree
 of freedom allowed to the _pre-loaded_ version lets it experience
-everything experienced by <<X>> but also other types of behaviour,
-including _Byzantine_ behaviour, which makes it a useful concept in
+everything experienced by <<X>> but also other types of behavior,
+including _Byzantine_ behavior, which makes it a useful concept in
 Byzantine fault tolerance analysis.
 *)
 

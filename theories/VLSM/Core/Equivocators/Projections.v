@@ -250,7 +250,7 @@ descriptor of a projection operation in terms of the input descriptor
 are Existing, then the output index must be less than the input), while also
 guaranteeing that the output state of such a projection has a size less than
 the index of the input descriptor in case that output descriptor becomes
-NewMachine (signalling that the projection is complete).
+NewMachine (signaling that the projection is complete).
 
 This property is crucial for establishing an invariant on known equivocators
 (see [full_node_limited_equivocation_constraint_known_equivocators]).

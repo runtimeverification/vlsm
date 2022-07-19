@@ -10,10 +10,10 @@ and equivalent with traces on the corresponding pre-loaded VLSM
 (Lemmas [byzantine_pre_loaded_with_all_messages] and [pre_loaded_with_all_messages_alt_eq]).
 
 Note that, contrary to what one might think, the [byzantine_trace_prop]erty
-does not only capture traces exhibiting byzantine behaviour, but also all
+does not only capture traces exhibiting byzantine behavior, but also all
 [valid_trace]s (consequence of Lemma [vlsm_incl_pre_loaded_with_all_messages_vlsm]).
 Therefore to avoid confusion we will call _proper byzantine traces_,
-or _traces exhibiting byzantine behaviour_ the collection of traces with
+or _traces exhibiting byzantine behavior_ the collection of traces with
 the [byzantine_trace_prop]erty but without the [valid_trace_prop]erty.
 
 In the remainder of this section, we fix a (regular) VLSM <<M>> with
