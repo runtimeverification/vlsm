@@ -477,7 +477,7 @@ Qed.
 
 (** [stream_filter_positions] produces a [filtering_sequence].
 *)
-Lemma filtering_subsequence_stream_filter_map
+Lemma stream_filter_positions_filtering_subsequence
   (s : Stream A) (Hinf : InfinitelyOften P s)
   : filtering_subsequence P s (stream_filter_positions s Hinf 0).
 Proof.

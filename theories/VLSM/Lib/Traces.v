@@ -16,7 +16,7 @@ Context {A B : Type}.
 
 (** This definition is similar to that for lazy lists from Chapter 13
 of the #<a href="https://github.com/coq-community/coq-art">Coq'Art book</a>#.
-However, to support traces following labelled transition relations, constructors
+However, to support traces following labeled transition relations, constructors
 have additional elements. *)
 
 CoInductive trace : Type :=
