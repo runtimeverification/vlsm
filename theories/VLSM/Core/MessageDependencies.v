@@ -7,11 +7,18 @@ From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProje
 
 (** * VLSM Message Dependencies
 
-An abstract framework for the full-node condition.
-Assumes that each message has an associated set of [message_dependencies].
+  An abstract framework for the full-node condition.
+  Assumes that each message has an associated set of <<message_dependencies>>.
+*)
 
-Membership to the [message_dependencies] of a message induces a dependency
-relation whose transitive closure is a happens-before relation.
+(**
+  Given a <<message_dependencies>> function, we can define a (direct) message
+  dependency relation [msg_dep_rel] as follows:
+  message <<m1>> is a (direct) dependency of message <<m2>> if <<m1>> belongs
+  to the <<message_dependencies>> of <<m2>>.
+
+  The transitive closure of such a relation is a happens-before relation which
+  we denote by [msg_dep_happens_before].
 *)
 Definition msg_dep_rel
   `(message_dependencies : message -> set message) : relation message :=
