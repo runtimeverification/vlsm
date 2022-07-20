@@ -10,8 +10,8 @@ From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProje
 An abstract framework for the full-node condition.
 Assumes that each message has an associated set of [message_dependencies].
 
-Membership to the message_dependencies of a message induces a dependency
-relation; whose transitive closure is a happens-before relation.
+Membership to the [message_dependencies] of a message induces a dependency
+relation whose transitive closure is a happens-before relation.
 *)
 Definition msg_dep_rel
   `(message_dependencies : message -> set message) : relation message :=
@@ -48,7 +48,7 @@ dependencies.
 Additionally, we require that the induced [msg_dep_happens_before] relation
 is irreflexive (i.e., a message cannot recursively observe itself).
 
-The [MessageDependencies], together with [message_dependencies_full_node_condition_prop],
+[MessageDependencies], together with [message_dependencies_full_node_condition_prop],
 constitute the _strict full node assumption_.
 *)
 Class MessageDependencies
@@ -133,13 +133,11 @@ Proof.
       eapply VLSM_incl_has_been_directly_observed
         with HasBeenSentCapability0 HasBeenReceivedCapability0; cycle 2.
       * eapply @message_dependencies_are_necessary; [done | | done].
-        by apply
-          (VLSM_incl_can_produce
-            (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
+        by apply (VLSM_incl_can_produce
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
       * by apply basic_VLSM_incl_preloaded; cbv.
-      * apply
-          (VLSM_incl_valid_state
-            (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
+      * apply (VLSM_incl_valid_state
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
         by eexists; eapply can_produce_valid.
 Qed.
 
@@ -158,8 +156,7 @@ Proof.
     apply has_been_sent_stepwise_from_trace.
   - rewrite has_been_sent_step_update by done; intros [-> | Hrcv] dm Hdm.
     + by eapply message_dependencies_are_necessary; [eexists _, _ |].
-    + eapply has_been_directly_observed_step_update; [done |]; right.
-      by eapply IHHs.
+    + by eapply has_been_directly_observed_step_update; [done |]; right; eapply IHHs.
 Qed.
 
 Lemma ram_transition_preserves_message_dependencies_full_node_condition
@@ -350,12 +347,10 @@ Proof.
   exists s, {| l := l; input := im; destination := s'; output := Some m |}.
   constructor; [done.. |].
   eapply @message_dependencies_are_necessary in Hdm as Hobs; [| done | by eexists _, _].
-  eapply has_been_directly_observed_step_update in Hobs as [[|Hout]|];
-    [..| done]; cycle 2.
-  - by do 2 constructor 1.
-  - by subst; cbn; constructor 2.
-  - apply Some_inj in Hout; subst dm.
-    by contradict Hdm; apply tc_reflect_irreflexive.
+  eapply has_been_directly_observed_step_update in Hobs as [[| Hout] |]; [..| done]; cycle 2.
+  - by do 2 constructor.
+  - by subst; cbn; constructor.
+  - by contradict Hdm; inversion Hout; apply tc_reflect_irreflexive.
 Qed.
 
 (**
@@ -715,9 +710,10 @@ Lemma composite_observed_before_send_iff m1 m2 :
     <->
   exists i, observed_before_send (IM i) message_dependencies m1 m2.
 Proof.
-  split; [| by intros []; eapply composite_observed_before_send_lift].
-  intros (s & item & Hcomp); eexists (projT1 (l item)), _, _.
-  by apply composite_ObservedBeforeSendTransition_project.
+  split.
+  - intros (s & item & Hcomp); eexists (projT1 (l item)), _, _.
+    by apply composite_ObservedBeforeSendTransition_project.
+  - by intros []; eapply composite_observed_before_send_lift.
 Qed.
 
 Lemma composite_observed_before_send_subsumes_msg_dep_rel

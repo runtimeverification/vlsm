@@ -465,8 +465,7 @@ Proof.
     apply fixed_non_equivocating_traces_char.
     symmetry in His_pr, Htr_pr.
     eexists _,_; split; [| done].
-    eapply msg_dep_fixed_limited_equivocation_witnessed, proj2 in Hbtr.
-    2-4: done.
+    eapply msg_dep_fixed_limited_equivocation_witnessed in Hbtr as [_ Hbtr]; [| done..].
     revert Hbtr; apply VLSM_incl_finite_valid_trace.
     by apply fixed_equivocation_vlsm_composition_index_incl.
 Qed.
