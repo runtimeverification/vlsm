@@ -1,5 +1,6 @@
 all: Makefile.coq
 	@+$(MAKE) -f Makefile.coq all
+	scripts/all-comment-ratio.sh > COMMENT-RATIO.md
 
 clean: Makefile.coq
 	@+$(MAKE) -f Makefile.coq cleanall
