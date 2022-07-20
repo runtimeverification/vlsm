@@ -644,6 +644,7 @@ Context
     := equivocation_dec_tracewise IM id sender)
   (Hke : WitnessedEquivocationCapability IM id sender)
   (message_dependencies : message -> set message)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -690,7 +691,7 @@ Proof.
     apply can_emit_composite_project in Hiom as [_v Hiom].
     specialize (Hsender_safety _ _ Hsender _ Hiom) as Heq_v. simpl in Heq_v.
     subst _v.
-    eapply message_dependencies_are_sufficient in Hiom; [|typeclasses eauto].
+    eapply message_dependencies_are_sufficient in Hiom.
     unfold pre_loaded_free_equivocating_vlsm_composition, free_equivocating_vlsm_composition.
       specialize
         (@lift_to_composite_generalized_preloaded_vlsm_full_projection

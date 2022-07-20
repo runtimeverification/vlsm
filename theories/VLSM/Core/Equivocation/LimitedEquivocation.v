@@ -311,6 +311,7 @@ the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma traces_exhibiting_limited_equivocation_are_valid_rev
   (Hke : WitnessedEquivocationCapability IM id sender)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -341,6 +342,7 @@ have the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
   (Hke : WitnessedEquivocationCapability IM id sender)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -363,6 +365,7 @@ a trace having the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
   (Hke : WitnessedEquivocationCapability IM id sender)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)

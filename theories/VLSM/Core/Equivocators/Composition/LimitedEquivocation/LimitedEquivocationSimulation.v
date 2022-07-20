@@ -109,9 +109,9 @@ Section sec_equivocators_simulating_annotated_limited.
 
 Context
   (message_dependencies : message -> set message)
-  `{forall i, MessageDependencies (IM i) message_dependencies}
   (full_message_dependencies : message -> set message)
   `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{forall i, MessageDependencies (IM i) message_dependencies}
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (sender : message -> option index)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
@@ -131,15 +131,12 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
       finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   apply valid_trace_get_last in HtrX as HeqsX.
-  eapply valid_trace_forget_last, msg_dep_fixed_limited_equivocation
-      in HtrX.
-  2-5: done.
-  apply limited_equivocators_finite_valid_trace_init_to_rev
-     in HtrX as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput)
-  ; [| done].
+  eapply valid_trace_forget_last, msg_dep_fixed_limited_equivocation in HtrX; [| done ..].
+  apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
+     as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput); [| done].
   exists is, s, tr; subst; split_and!; try itauto.
   - by erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last.
-  - rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
+  - by rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
 Qed.
 
 End sec_equivocators_simulating_annotated_limited.
@@ -158,6 +155,7 @@ state-equivocation constraint.
 *)
 Lemma limited_equivocators_valid_state_rev
   (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)

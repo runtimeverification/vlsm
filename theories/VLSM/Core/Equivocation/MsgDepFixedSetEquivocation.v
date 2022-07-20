@@ -7,14 +7,14 @@ From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Compositi
 Section msg_dep_fixed_set_equivocation.
 
 Context
-  {message : Type}
+  `(IM : index -> VLSM message)
+  (message_dependencies : message -> set message)
+  (equivocators : set index)
   `{finite.Finite index}
-  (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (message_dependencies : message -> set message)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
-  (equivocators : set index)
   .
 
 Definition equivocator_can_emit (m : message) : Prop :=
@@ -172,10 +172,7 @@ Proof.
   eapply VLSM_incl_in_futures in Hfutures as Hpre_futures
   ; [| apply constraint_preloaded_free_incl].
   apply (VLSM_projection_in_futures (preloaded_component_projection IM i)) in Hpre_futures.
-  destruct Hproduce as ([pre_destination im] & l & Hti).
-  eapply message_dependencies_are_necessary in Hti as Hobs; [| typeclasses eauto].
-  eapply ram_transition_preserves_message_dependencies_full_node_condition
-    in Hobs; [| done..].
+  eapply message_dependencies_are_necessary in Hproduce as Hobs.
   eapply has_been_directly_observed_sent_received_iff
     in Hobs as [Hreceived | Hsent]; [.. | done]; cycle 1.
   + left; exists i; split; [done |].
@@ -185,7 +182,7 @@ Proof.
   + apply in_futures_valid_fst in Hfutures as Hdestination.
     specialize (received_component_received_previously IM Hdestination Hreceived)
       as (s_item_dm & [] & Ht & Hfutures_dm & <- & Hinput);
-      destruct l0 as [i li]; cbn in Hinput; subst input; cbn in *.
+      destruct l as [i li]; cbn in Hinput; subst input; cbn in *.
       apply input_valid_transition_in_futures in Ht as Hfutures_t; cbn in Hfutures_t
       ; destruct Ht as [(_ & _ & _ & Hc) _].
       eapply in_futures_preserves_strong_fixed_equivocation; [| apply Hc].
@@ -217,13 +214,9 @@ Proof.
     eapply (preloaded_composite_directly_observed_valid _ _ _ sX').
     + by eapply input_valid_transition_destination.
     + exists sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
-      cut (input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i))
-            li (sX (dexist i Hi), iom) (sX' (dexist i Hi), Some m)).
-      {
-        intro Hti; eapply has_been_directly_observed_step_update; [done |].
-        by right; unfold sub_IM in *; eapply message_dependencies_are_necessary.
-      }
-      eapply (VLSM_projection_input_valid_transition (single_equivocator_projection s i Hi))
+      eapply message_dependencies_are_necessary; [| done].
+      eexists _, _
+      ; eapply (VLSM_projection_input_valid_transition (single_equivocator_projection s i Hi))
       ; [| done].
       unfold sub_label_element_project; cbn.
       by rewrite (decide_True_pi eq_refl).
@@ -331,8 +324,9 @@ Proof.
 Qed.
 
 Context
-  `{forall i, HasBeenReceivedCapability (IM i)}
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
+  `{forall i, HasBeenReceivedCapability (IM i)}
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   .
 
@@ -379,7 +373,7 @@ Proof.
         with (Hj := HAj) (P := fun dm => dm ∈ message_dependencies m).
       itauto.
     }
-    eapply message_dependencies_are_sufficient with (X := IM (A j)); [typeclasses eauto |].
+    eapply message_dependencies_are_sufficient.
     cut (exists k, can_emit (pre_loaded_with_all_messages_vlsm (IM k)) m).
     {
       intros [k Hk].
