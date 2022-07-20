@@ -26,6 +26,9 @@ coqdoc: $(DOCGLOBFILES) $(DOCVFILES) $(CSSFILES) $(JSFILES) $(HTMLFILES)
 	$(HIDE)cp $(CSSFILES) $(JSFILES) $(COQDOCDIR)
 .PHONY: coqdoc
 
+RATIOS.md: $(DOCVFILES)
+	@scripts/all-comment-ratio.sh > RATIOS.md
+
 # requires https://github.com/cpitclaudel/alectryon
 alectryon: $(ALECTRYONHTMLFILES)
 .PHONY: alectryon
