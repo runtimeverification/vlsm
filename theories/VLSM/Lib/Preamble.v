@@ -136,6 +136,10 @@ Proof.
   by apply Hpreserve.
 Qed.
 
+Lemma tc_reflect_irreflexive
+  `(R : relation A) `{!Irreflexive (tc R)} : Irreflexive R.
+Proof. by intros ? ?; eapply irreflexivity with (R := tc R); [| constructor]. Qed.
+
 (* TODO(traian): remove these definitions and use the standard stdpp ones instead.*)
 Definition dec_sig {A} (P : A -> Prop) {P_dec : forall x, Decision (P x)} : Type
   := dsig P.
@@ -596,7 +600,7 @@ Proof. by intros *; inversion 1; subst; repeat constructor. Qed.
 Lemma tc_comparable :
   forall A (R : relation A) (a b : A),
     comparable R a b -> comparable (tc R) a b.
-Proof. 
+Proof.
   by intros *; inversion 1; subst; econstructor; apply tc_CompSpec.
 Qed.
 

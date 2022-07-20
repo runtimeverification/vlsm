@@ -355,7 +355,7 @@ Proof.
   - by do 2 constructor 1.
   - by subst; cbn; constructor 2.
   - apply Some_inj in Hout; subst dm.
-    by exfalso; eapply irreflexivity; [done |]; constructor.
+    by contradict Hdm; apply tc_reflect_irreflexive.
 Qed.
 
 (**
@@ -397,7 +397,7 @@ Definition full_node_is_locally_equivocating (s : vstate X) (v : validator) : Pr
   exists m1 m2, FullNodeLocalEquivocationEvidence s v m1 m2.
 
 (**
-If the states and messages are more tightly coupled (e.g., there is a unique 
+If the states and messages are more tightly coupled (e.g., there is a unique
 state from which a given message can be emitted), then the sent messages of
 a state would be totally ordered by [msg_dep_rel].
 *)
@@ -771,7 +771,7 @@ Qed.
 (**
 A messages constitutes a (global) evidence of equivocation for a
 validator <<v>> in a composite state <<s>> if the message has <<v>> as a sender,
-it has been (indirectly) observed in [composite_state] <<s>>, (see 
+it has been (indirectly) observed in [composite_state] <<s>>, (see
 [CompositeHasBeenObserved]), but it wasn't observed as sent in <<s>>
 (see [composite_has_been_sent]).
 *)
