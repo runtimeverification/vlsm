@@ -7,26 +7,36 @@ From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProje
 
 (** * VLSM Message Dependencies
 
-An abstract framework for the full-node condition.
-Assumes that each message has an associated set of [message_dependencies].
-
+  An abstract framework for the full-node condition.
+  Assumes that each message has an associated set of <<message_dependencies>>.
 *)
 
-Section sec_message_dependencies.
+(**
+  Given a <<message_dependencies>> function, we can define a (direct) message
+  dependency relation [msg_dep_rel] as follows:
+  message <<m1>> is a (direct) dependency of message <<m2>> if <<m1>> belongs
+  to the <<message_dependencies>> of <<m2>>.
 
-Context
-  {message : Type}
-  (X : VLSM message)
-  `{HasBeenSentCapability message X}
-  `{HasBeenReceivedCapability message X}
-  (message_dependencies : message -> set message)
-  .
+  The transitive closure of such a relation is a happens-before relation which
+  we denote by [msg_dep_happens_before].
+*)
+Definition msg_dep_rel
+  `(message_dependencies : message -> set message) : relation message :=
+  fun m1 m2 => m1 ∈ message_dependencies m2.
+
+Definition msg_dep_happens_before
+  `(message_dependencies : message -> set message) : relation message :=
+  tc (msg_dep_rel message_dependencies).
 
 (** The (local) full node condition for a given <<message_dependencies>> function
 requires that a state (receiving the message) has previously directly observed
 all of <<m>>'s dependencies.
 *)
 Definition message_dependencies_full_node_condition
+  `(X : VLSM message)
+  (message_dependencies : message -> set message)
+  `{HasBeenSentCapability message X}
+  `{HasBeenReceivedCapability message X}
   (s : vstate X)
   (m : message)
   : Prop :=
@@ -42,19 +52,45 @@ directly observed by origin state of a transition emitting the message <<m>>.
 - Sufficiency: A message can be produced by the machine pre-loaded with its
 dependencies.
 
-Together with [message_dependencies_full_node_condition_prop], it
-constitutes the _full node assumption_.
+Additionally, we require that the induced [msg_dep_happens_before] relation
+is irreflexive (i.e., a message cannot recursively observe itself).
+
+[MessageDependencies], together with [message_dependencies_full_node_condition_prop],
+constitute the _strict full node assumption_.
 *)
 Class MessageDependencies
+  `(X : VLSM message)
+  (message_dependencies : message -> set message)
+  `{!HasBeenSentCapability X}
+  `{!HasBeenReceivedCapability X}
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   :=
   { message_dependencies_are_necessary (m : message)
-      `(input_valid_transition (pre_loaded_with_all_messages_vlsm X)
-          lX (s,im) (s', Some m))
-      : message_dependencies_full_node_condition s m
+      `(can_produce (pre_loaded_with_all_messages_vlsm X) s' m)
+      : message_dependencies_full_node_condition X message_dependencies s' m
   ; message_dependencies_are_sufficient (m : message)
       `(can_emit (pre_loaded_with_all_messages_vlsm X) m)
       : can_emit (pre_loaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
   }.
+
+(* Given the VLSM for which it's defined, the other arguments (message,
+message_dependencies function, [HasBeenSentCapability] and
+[HasBeenReceivedCapability]) can be inferred from that.
+*)
+#[global] Hint Mode MessageDependencies - ! - - - - : typeclass_instances.
+
+Section sec_message_dependencies.
+
+Context
+  `(X : VLSM message)
+  (message_dependencies : message -> set message)
+  `{!HasBeenSentCapability X}
+  `{!HasBeenReceivedCapability X}
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
+  `{!MessageDependencies X message_dependencies}
+  (msg_dep_rel := msg_dep_rel message_dependencies)
+  (msg_dep_happens_before := msg_dep_happens_before message_dependencies)
+  .
 
 (** A VLSM has the [message_dependencies_full_node_condition_prop]
 if the validity of receiving a message in a state implies the
@@ -62,18 +98,8 @@ if the validity of receiving a message in a state implies the
 *)
 Definition message_dependencies_full_node_condition_prop : Prop :=
   forall l s m,
-  vvalid X l (s, Some m) -> message_dependencies_full_node_condition s m.
-
-(** Membership to the message_dependencies of a message induces a dependency
-relation.
-*)
-Definition msg_dep_rel : relation message :=
-  fun m1 m2 => m1 ∈ message_dependencies m2.
-
-(** The transitive closure ([clos_trans_1n]) of the [msg_dep_rel]ation is a
-happens-before relation.
-*)
-Definition msg_dep_happens_before : relation message := tc msg_dep_rel.
+  vvalid X l (s, Some m) ->
+  message_dependencies_full_node_condition X message_dependencies s m.
 
 (** Unrolling one the [msg_dep_happens_before] relation one step. *)
 Lemma msg_dep_happens_before_iff_one x z
@@ -94,7 +120,6 @@ the pre-loaded message property, then it also reflects the
 [valid_message_prop]erty.
 *)
 Lemma msg_dep_reflects_validity
-  `{MessageDependencies}
   (no_initial_messages_in_X : forall m, ~ vinitial_message_prop X m)
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
@@ -111,20 +136,22 @@ Proof.
     contradict Hinit; apply no_initial_messages_in_X.
   - apply (directly_observed_valid (pre_loaded_vlsm X P) s).
     + by exists (Some m); apply can_produce_valid.
-    + destruct Hproduce as ((pre_s, im) & l & Ht).
-      eapply has_been_directly_observed_step_update.
-      * by eapply (VLSM_incl_input_valid_transition
-                  (vlsm_incl_pre_loaded_with_all_messages_vlsm (pre_loaded_vlsm X P))).
-      * right. eapply message_dependencies_are_necessary; [| done].
-        by apply (VLSM_incl_input_valid_transition
-                  (pre_loaded_vlsm_incl_pre_loaded_with_all_messages X P)).
+    + destruct X.
+      eapply VLSM_incl_has_been_directly_observed
+        with HasBeenSentCapability0 HasBeenReceivedCapability0; cycle 2.
+      * eapply @message_dependencies_are_necessary; [done | | done].
+        by apply (VLSM_incl_can_produce
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
+      * by apply basic_VLSM_incl_preloaded; cbv.
+      * apply (VLSM_incl_valid_state
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
+        by eexists; eapply can_produce_valid.
 Qed.
 
 (** Under [MessageDependencies] assumptions, if a message [has_been_sent]
 in a state <<s>>, then any of its direct dependencies [has_been_directly_observed].
 *)
 Lemma msg_dep_has_been_sent
-  `{MessageDependencies}
   s
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
   m
@@ -134,17 +161,15 @@ Proof.
   revert m Hsent; induction Hs using valid_state_prop_ind; intro m.
   - intro Hbs; contradict Hbs; eapply oracle_no_inits; [| done].
     apply has_been_sent_stepwise_from_trace.
-  - rewrite has_been_sent_step_update by done; intros [-> | Hrcv] dm Hdm;
-      rewrite has_been_directly_observed_step_update by done; right.
-    + by eapply message_dependencies_are_necessary.
-    + by eapply IHHs.
+  - rewrite has_been_sent_step_update by done; intros [-> | Hrcv] dm Hdm.
+    + by eapply message_dependencies_are_necessary; [eexists _, _ |].
+    + by eapply has_been_directly_observed_step_update; [done |]; right; eapply IHHs.
 Qed.
 
 Lemma ram_transition_preserves_message_dependencies_full_node_condition
-  `{MessageDependencies}
   `(input_valid_transition (pre_loaded_with_all_messages_vlsm X) lX (s, im) (s', om)) :
-  forall m, message_dependencies_full_node_condition s m ->
-    message_dependencies_full_node_condition s' m.
+  forall m, message_dependencies_full_node_condition X message_dependencies s m ->
+    message_dependencies_full_node_condition X message_dependencies s' m.
 Proof.
   intros m Hm dm Hdm.
   eapply has_been_directly_observed_step_update; [done |].
@@ -176,7 +201,6 @@ Qed.
 the [msg_dep_rel]ation reflects the [has_been_directly_observed] predicate.
 *)
 Lemma msg_dep_full_node_reflects_has_been_directly_observed
-  `{MessageDependencies}
   (Hfull : message_dependencies_full_node_condition_prop)
   s
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
@@ -192,7 +216,6 @@ Qed.
 reflects the [has_been_directly_observed] predicate.
 *)
 Lemma msg_dep_full_node_happens_before_reflects_has_been_directly_observed
-  `{MessageDependencies}
   (Hfull : message_dependencies_full_node_condition_prop)
   s
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
@@ -208,7 +231,6 @@ Qed.
 then any of its happens-before dependencies [has_been_directly_observed] in that state.
 *)
 Lemma msg_dep_full_node_input_valid_happens_before_has_been_directly_observed
-  `{MessageDependencies}
   (Hfull : message_dependencies_full_node_condition_prop)
   l s m
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m))
@@ -235,10 +257,11 @@ Section sec_message_dependencies_equivocation.
 Context
   {message : Type}
   (X : VLSM message)
-  `{!HasBeenSentCapability X}
-  `{!HasBeenReceivedCapability X}
   (message_dependencies : message -> set message)
   `(sender : message -> option validator)
+  `{!HasBeenSentCapability X}
+  `{!HasBeenReceivedCapability X}
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   (R := pre_loaded_with_all_messages_vlsm X)
   .
 
@@ -299,12 +322,23 @@ extends direct observability in a state (sent or received on a trace leading to
 that state) with the transitive closure of the [msg_dep_rel] (to include any
 message depending on a directly observed one).
 *)
+Inductive ObservedBeforeStateOrMessage
+  : message -> vstate X -> option message -> Prop :=
+| observed_before_state (m : message) (s : vstate X) (_oim : option message) :
+    HasBeenObserved s m ->
+    ObservedBeforeStateOrMessage m s _oim
+| observed_is_message (m : message) (_s : vstate X) :
+    ObservedBeforeStateOrMessage m _s (Some m)
+| observed_before_message (m : message) (_s : vstate X) (im : message) :
+    msg_dep_happens_before message_dependencies m im ->
+    ObservedBeforeStateOrMessage m _s (Some im).
+
 Record ObservedBeforeSendTransition
   (s : vstate X) (item : vtransition_item X) (m1 m2 : message) : Prop :=
 {
   dobst_transition : input_valid_transition_item R s item;
   dobst_output_m2 : output item = Some m2;
-  dobst_observed_m1 : HasBeenObserved s m1;
+  dobst_observed_m1 : ObservedBeforeStateOrMessage m1 s (input item);
 }.
 
 Definition observed_before_send (m1 m2 : message) : Prop :=
@@ -318,7 +352,12 @@ Lemma observed_before_send_subsumes_msg_dep_rel
 Proof.
   intros m ([s im] & l & s' & Ht) dm Hdm.
   exists s, {| l := l; input := im; destination := s'; output := Some m |}.
-  by constructor; [.. | constructor; eapply message_dependencies_are_necessary].
+  constructor; [done.. |].
+  eapply @message_dependencies_are_necessary in Hdm as Hobs; [| done | by eexists _, _].
+  eapply has_been_directly_observed_step_update in Hobs as [[| Hout] |]; [..| done]; cycle 2.
+  - by do 2 constructor.
+  - by subst; cbn; constructor.
+  - by contradict Hdm; inversion Hout; apply tc_reflect_irreflexive.
 Qed.
 
 (**
@@ -360,7 +399,7 @@ Definition full_node_is_locally_equivocating (s : vstate X) (v : validator) : Pr
   exists m1 m2, FullNodeLocalEquivocationEvidence s v m1 m2.
 
 (**
-If the states and messages are more tightly coupled (e.g., there is a unique 
+If the states and messages are more tightly coupled (e.g., there is a unique
 state from which a given message can be emitted), then the sent messages of
 a state would be totally ordered by [msg_dep_rel].
 *)
@@ -441,21 +480,16 @@ Qed.
 
 End sec_message_dependencies_equivocation.
 
-(* Given the VLSM for which it's defined, the other arguments (message,
-message_dependencies function, [HasBeenSentCapability] and
-[HasBeenReceivedCapability]) can be inferred from that.
-*)
-#[global] Hint Mode MessageDependencies - ! - - - : typeclass_instances.
-
 Section sec_composite_message_dependencies.
 
 Context
   {message : Type}
+  `(IM : index -> VLSM message)
+  (message_dependencies : message -> set message)
   `{finite.Finite index}
-  (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (message_dependencies : message -> set message)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   .
 
@@ -466,14 +500,14 @@ then their free composition will also do so.
   : MessageDependencies (free_composite_vlsm IM) message_dependencies.
 Proof.
   split.
-  - intros m [i li] is iom s Ht dm Hdm.
+  - intros m s' ((s, iom) & [i li] & Ht) dm Hdm.
     apply composite_has_been_directly_observed_free_iff.
     apply input_valid_transition_preloaded_project_active in Ht; cbn in Ht.
     eapply composite_has_been_directly_observed_from_component.
-    by eapply message_dependencies_are_necessary; [| cbn |].
+    by eapply message_dependencies_are_necessary; [eexists _, _; cbn |].
   - intros m Hemit.
     apply can_emit_composite_project in Hemit as [j Hemitj].
-    eapply message_dependencies_are_sufficient in Hemitj; [| typeclasses eauto].
+    eapply message_dependencies_are_sufficient in Hemitj.
     eapply VLSM_full_projection_can_emit; [| done].
     by apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
 Qed.
@@ -548,12 +582,13 @@ Section sec_composite_message_dependencies_equivocation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
-  (IM : index -> VLSM message)
-  `{forall i, HasBeenSentCapability (IM i)}
-  `{forall i, HasBeenReceivedCapability (IM i)}
+  `(IM : index -> VLSM message)
   (message_dependencies : message -> set message)
   `(sender : message -> option validator)
+  `{finite.Finite index}
+  `{forall i, HasBeenSentCapability (IM i)}
+  `{forall i, HasBeenReceivedCapability (IM i)}
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   (Free := free_composite_vlsm IM)
   (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
@@ -636,8 +671,8 @@ Record CompositeObservedBeforeSendTransition
 {
   cdobst_transition : input_valid_transition_item RFree s item;
   cdobst_output_m2 : output item = Some m2;
-  cdobst_observed_m1 : 
-    HasBeenObserved (IM (projT1 (l item))) message_dependencies (s (projT1 (l item))) m1;
+  cdobst_observed_m1 :
+    ObservedBeforeStateOrMessage (IM (projT1 (l item))) message_dependencies m1 (s (projT1 (l item))) (input item);
 }.
 
 Definition composite_observed_before_send (m1 m2 : message) : Prop :=
@@ -677,14 +712,15 @@ Proof.
     [eapply input_valid_transition_preloaded_project_active |..].
 Qed.
 
-Lemma composite_observed_before_send_iff m1 m2 : 
+Lemma composite_observed_before_send_iff m1 m2 :
   composite_observed_before_send m1 m2
     <->
   exists i, observed_before_send (IM i) message_dependencies m1 m2.
 Proof.
-  split; [| by intros []; eapply composite_observed_before_send_lift].
-  intros (s & item & Hcomp); eexists (projT1 (l item)), _, _.
-  by apply composite_ObservedBeforeSendTransition_project.
+  split.
+  - intros (s & item & Hcomp); eexists (projT1 (l item)), _, _.
+    by apply composite_ObservedBeforeSendTransition_project.
+  - by intros []; eapply composite_observed_before_send_lift.
 Qed.
 
 Lemma composite_observed_before_send_subsumes_msg_dep_rel
@@ -738,7 +774,7 @@ Qed.
 (**
 A messages constitutes a (global) evidence of equivocation for a
 validator <<v>> in a composite state <<s>> if the message has <<v>> as a sender,
-it has been (indirectly) observed in [composite_state] <<s>>, (see 
+it has been (indirectly) observed in [composite_state] <<s>>, (see
 [CompositeHasBeenObserved]), but it wasn't observed as sent in <<s>>
 (see [composite_has_been_sent]).
 *)
@@ -850,13 +886,14 @@ Section sec_sub_composite_message_dependencies.
 
 Context
   {message : Type}
+  `(IM : index -> VLSM message)
+  (message_dependencies : message -> set message)
+  (indices : set index)
   `{EqDecision index}
-  (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (message_dependencies : message -> set message)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
-  (indices : set index)
   .
 
 Lemma msg_dep_reflects_sub_free_validity

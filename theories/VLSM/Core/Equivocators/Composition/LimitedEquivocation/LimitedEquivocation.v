@@ -245,9 +245,9 @@ Section sec_equivocators_projection_annotated_limited.
 
 Context
   (message_dependencies : message -> set message)
-  (HMsgDep : forall i, MessageDependencies (IM i) message_dependencies)
   (full_message_dependencies : message -> set message)
   (HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies)
+  (HMsgDep : forall i, MessageDependencies (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
   .
