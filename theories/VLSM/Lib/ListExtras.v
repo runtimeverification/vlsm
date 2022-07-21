@@ -2096,7 +2096,7 @@ Proof.
   by rewrite rev_length; lia.
 Qed.
 
-(** [astn] either skips the head of the list or not, depending on how big a suffix we want. *)
+(** [lastn] either skips the head of the list or not, depending on how big a suffix we want. *)
 Lemma lastn_cons :
   forall {A : Type} (n : nat) (h : A) (t : list A),
     lastn n (h :: t) = if decide (S (length t) <= n) then h :: t else lastn n t.
@@ -2139,18 +2139,6 @@ Proof.
   intros A n l.
   unfold lastn.
   by rewrite rev_length, take_length, rev_length.
-Qed.
-
-(** If the <<n>>-th element of <<l>> is <<x>>, then we can decompose long enough
-    suffixes of <<l>> into <<x>> and a suffix shorter by 1. *)
-Lemma lastn_decomposition :
-  forall {A : Type} (n : nat) (l : list A) (x : A),
-    l !! n = Some x -> lastn (length l - n) l = x :: lastn (length l - S n) l.
-Proof.
-  intros A n l x H.
-  unfold lastn.
-  rewrite <- rev_length, <- !skipn_rev, rev_involutive.
-  by apply drop_S.
 Qed.
 
 Program Definition not_null_element
