@@ -2053,9 +2053,11 @@ Qed.
 
 (** ** The function [lastn] and its properties *)
 
+(** [lastn] returns a suffix of length <<n>> from the list <<l>>. *)
 Definition lastn {A : Type} (n : nat) (l : list A) : list A :=
   rev (firstn n (rev l)).
 
+(** If the list is [[]], then the result of [lastn] is also [[]]. *)
 Lemma lastn_nil :
   forall {A : Type} (n : nat),
     lastn n (@nil A) = [].
@@ -2063,6 +2065,7 @@ Proof.
   by intros A n; unfold lastn; cbn; rewrite firstn_nil.
 Qed.
 
+(** If <<n>> is zero, then the result of [lastn] is [[]]. *)
 Lemma lastn_0 :
   forall {A : Type} (l : list A),
     lastn 0 l = [].
@@ -2070,6 +2073,7 @@ Proof.
   by intros A l; unfold lastn; rewrite take_0.
 Qed.
 
+(** If <<n>> is greater than the length of the list, [lastn] returns the whole list. *)
 Lemma lastn_ge :
   forall {A : Type} (n : nat) (l : list A),
     length l <= n -> lastn n l = l.
@@ -2081,6 +2085,7 @@ Proof.
   - by rewrite rev_length.
 Qed.
 
+(** [lastn] skips the prefix of the list as long as the suffix is long enough. *)
 Lemma lastn_app_le :
   forall {A : Type} (n : nat) (l1 l2 : list A),
     n <= length l2 -> lastn n (l1 ++ l2) = lastn n l2.
@@ -2088,9 +2093,10 @@ Proof.
   intros A n l1 l2 Hlt.
   unfold lastn.
   rewrite rev_app_distr, take_app_le; [done |].
-  rewrite rev_length; lia.
+  by rewrite rev_length; lia.
 Qed.
 
+(** [lastn] either skips the head of the list or not, depending on how big a suffix we want. *)
 Lemma lastn_cons :
   forall {A : Type} (n : nat) (h : A) (t : list A),
     lastn n (h :: t) = if decide (S (length t) <= n) then h :: t else lastn n t.
@@ -2099,6 +2105,40 @@ Proof.
   case_decide; subst.
   - by rewrite lastn_ge; cbn; [| lia].
   - by rewrite (lastn_app_le _ [h] t); [| lia].
+Qed.
+
+(** If <<l1>> is a prefix of <<l2>>, then the reverse of <<l1>> is a suffix of <<l2>>. *)
+Lemma suffix_rev :
+  forall {A : Type} (l1 l2 : list A),
+    prefix l1 l2 -> suffix (rev l1) (rev l2).
+Proof.
+  intros A l1 l2 [l ->].
+  rewrite rev_app_distr.
+  by exists (rev l).
+Qed.
+
+(** If <<n1>> is less than (or equal to) <<n2>>, then <<lastn n1 l>> is shorter than
+    <<lastn n2 l>> and therefore is its suffix. *)
+Lemma suffix_lastn :
+  forall {A : Type} (l : list A) (n1 n2 : nat),
+    n1 <= n2 -> suffix (lastn n1 l) (lastn n2 l).
+Proof.
+  intros A l n1 n2 Hle.
+  unfold lastn.
+  apply suffix_rev.
+  exists (take (n2 - n1) (drop n1 (rev l))).
+  rewrite take_take_drop.
+  by f_equal; lia.
+Qed.
+
+(** The length of <<lastn n l>> is the smaller of <<n>> and the length of <<l>>. *)
+Lemma length_lastn :
+  forall {A : Type} (n : nat) (l : list A),
+    length (lastn n l) = min n (length l).
+Proof.
+  intros A n l.
+  unfold lastn.
+  by rewrite rev_length, take_length, rev_length.
 Qed.
 
 Program Definition not_null_element
