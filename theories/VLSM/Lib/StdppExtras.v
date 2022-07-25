@@ -324,3 +324,25 @@ Proof.
   rewrite <- rev_length, <- !skipn_rev, rev_involutive.
   by apply drop_S.
 Qed.
+
+(**
+  When a list contains two elements, either they are equal or we can split
+  the list into three parts separated by the elements (and this can be done
+  in two ways, depending on the order of the elements).
+*)
+Lemma elem_of_list_split_2 :
+  forall {A : Type} (l : list A) (x y : A),
+    x ∈ l -> y ∈ l ->
+      x = y \/ exists l1 l2 l3 : list A,
+        l = l1 ++ x :: l2 ++ y :: l3 \/ l = l1 ++ y :: l2 ++ x :: l3.
+Proof.
+  intros A x y l Hx Hy.
+  apply elem_of_list_split in Hx as (l1 & l2 & ->).
+  rewrite elem_of_app, elem_of_cons in Hy.
+  destruct Hy as [Hy | [-> | Hy]]; [| by left |].
+  - apply elem_of_list_split in Hy as (l11 & l12 & ->).
+    right; exists l11, l12, l2; right; cbn.
+    by rewrite <- app_assoc.
+  - apply elem_of_list_split in Hy as (l21 & l22 & ->).
+    by right; exists l1, l21, l22; left; cbn.
+Qed.
