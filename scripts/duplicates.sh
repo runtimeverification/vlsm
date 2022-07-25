@@ -1,8 +1,9 @@
 #!/bin/sh
-is_int() { test "$@" -eq "$@" 2> /dev/null; } 
-DUPLICATES=$(find . -iname "*.v" -type f -printf "%f\n" | sort | uniq -cd) # a list of the duplicate filenames and their frequencies
+BASE=$(dirname $0)
 echo "| Number of occurrences | Filename | Paths |"
 echo "|:----------------------|:---------|:------|"
+is_int() { test "$@" -eq "$@" 2> /dev/null; } 
+DUPLICATES=$(find . -iname "*.v" -type f -printf "%f\n" | sort | uniq -cd) # a list of the duplicate filenames and their frequencies
 for i in $DUPLICATES
   do
     echo  -n " | $i " 
