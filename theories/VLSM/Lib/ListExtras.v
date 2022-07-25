@@ -126,17 +126,6 @@ Proof.
     apply incl_tl. apply incl_refl.
 Qed.
 
-Lemma filter_in {A} P `{∀ (x:A), Decision (P x)} x s :
-  In x s ->
-  P x ->
-  In x (filter P s).
-Proof.
-  intros.
-  apply elem_of_list_In.
-  apply elem_of_list_In in H0.
-  apply elem_of_list_filter; auto.
-Qed.
-
 Lemma filter_incl {A} P `{∀ (x:A), Decision (P x)} s1 s2 :
   incl s1 s2 ->
   incl (filter P s1) (filter P s2).
