@@ -756,7 +756,7 @@ Context
   `{!StrictOrder precedes}
   .
 
-Lemma Forall_True : forall l : list A, Forall (fun _ => True) l.
+[#local] Lemma Forall_True : forall l : list A, Forall (fun _ => True) l.
 Proof.
   by intro; apply Forall_forall.
 Qed.
