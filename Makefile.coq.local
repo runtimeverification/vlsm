@@ -30,7 +30,7 @@ RATIOS.md: $(DOCVFILES)
 	@scripts/all-comment-ratio.sh > RATIOS.md
 
 DUPLICATES.md: $(DOCVFILES)
-	@scripts/duplicates.sh > DUPLICATES.md
+	@scripts/duplicate-filenames.sh > DUPLICATES.md
 
 # requires https://github.com/cpitclaudel/alectryon
 alectryon: $(ALECTRYONHTMLFILES)
