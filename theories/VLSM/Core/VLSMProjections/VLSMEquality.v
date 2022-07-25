@@ -11,10 +11,11 @@ Then VLSM <<X>> and VLSM <<Y>> are _equal_ if their [valid_trace]s are exactly t
 *)
 
 Section VLSM_equality.
-  Context
-    {message : Type}
-    {vtype : VLSMType message}
-    .
+
+Context
+  {message : Type}
+  {vtype : VLSMType message}
+  .
 
 Definition VLSM_eq_part
   (MX MY : VLSMMachine vtype)

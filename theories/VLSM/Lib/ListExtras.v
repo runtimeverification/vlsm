@@ -1812,10 +1812,10 @@ Among the definitions, the more useful are [ForAllSuffix2] and [ExistsSuffix2]
 as they allow us to quantify over relations between consecutive elements.
 *)
 
-  Context
-    [A : Type]
-    (P : list A -> Prop)
-    .
+Context
+  [A : Type]
+  (P : list A -> Prop)
+  .
 
 Inductive ExistsSuffix : list A -> Prop :=
   | SHere : forall l, P l -> ExistsSuffix l

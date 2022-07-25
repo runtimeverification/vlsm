@@ -600,9 +600,10 @@ Proof.
 Qed.
 
 Section pre_loaded_with_all_messages_validator_proj.
-  Context
-    (Hvalidator : projection_validator_prop Y label_project state_project)
-    .
+
+Context
+  (Hvalidator : projection_validator_prop Y label_project state_project)
+  .
 
 (**
 We can show that <<PreY>> is included in <<Xi>> by applying the meta-lemma
