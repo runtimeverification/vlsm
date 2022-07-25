@@ -331,7 +331,7 @@ Qed.
   in two ways, depending on the order of the elements).
 *)
 Lemma elem_of_list_split_2 :
-  forall {A : Type} {x y : A} {l : list A},
+  forall {A : Type} (l : list A) (x y : A),
     x ∈ l -> y ∈ l ->
       x = y \/ exists l1 l2 l3 : list A,
         l = l1 ++ x :: l2 ++ y :: l3 \/ l = l1 ++ y :: l2 ++ x :: l3.
