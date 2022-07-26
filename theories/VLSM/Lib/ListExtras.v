@@ -525,10 +525,10 @@ Lemma list_prefix_suffix
   (l : list A)
   (n : nat)
   : list_prefix l n ++ list_suffix l n = l.
-  Proof.
-    revert n. induction l; intros [|n]. 1-3: done.
-    cbn. f_equal. apply IHl.
-  Qed.
+Proof.
+  revert n. induction l; intros [|n]. 1-3: done.
+  cbn. f_equal. apply IHl.
+Qed.
 
 Definition list_segment
   {A : Type}
