@@ -5,10 +5,10 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet FinExtras.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.Equivocation.
 From VLSM Require Import Core.Equivocation.NoEquivocation Core.Equivocation.FullNode Core.Equivocation.FixedSetEquivocation.
 From VLSM Require Import Core.SubProjectionTraces Core.ProjectionTraces.
-From VLSM Require Import Core.Equivocators.Common Core.Equivocators.Projections.
+From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
 From VLSM Require Import Core.Equivocators.MessageProperties.
-From VLSM Require Import Core.Equivocators.Composition.Common.
-From VLSM Require Import Core.Equivocators.Composition.Projections.
+From VLSM Require Import Core.Equivocators.Composition.EquivocatorsComposition.
+From VLSM Require Import Core.Equivocators.Composition.EquivocatorsCompositionProjections.
 
 (** * VLSM Equivocators Fixed Equivocation *)
 

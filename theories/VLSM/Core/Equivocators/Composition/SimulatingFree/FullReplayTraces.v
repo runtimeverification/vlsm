@@ -4,9 +4,9 @@ From Coq Require Import FinFun Lia Program.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.FinExtras Lib.FinFunExtras.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces.
 From VLSM Require Import Core.Equivocation Core.Equivocation.NoEquivocation.
-From VLSM Require Import Core.Equivocators.Common Core.Equivocators.Projections Core.Equivocators.EquivocatorReplay.
-From VLSM Require Import Core.Equivocators.MessageProperties Core.Equivocators.Composition.Common.
-From VLSM Require Import Core.Equivocators.Composition.Projections Core.Plans.
+From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections Core.Equivocators.EquivocatorReplay.
+From VLSM Require Import Core.Equivocators.MessageProperties Core.Equivocators.Composition.EquivocatorsComposition.
+From VLSM Require Import Core.Equivocators.Composition.EquivocatorsCompositionProjections Core.Plans.
 
 (** * VLSM Equivocator Full Replay Traces
 
