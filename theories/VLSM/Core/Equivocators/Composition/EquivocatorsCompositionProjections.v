@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet FinExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation.
 From VLSM.Core.Equivocation Require Import NoEquivocation.
-From VLSM.Core.Equivocators Require Import Common Projections MessageProperties Composition.Common.
+From VLSM.Core.Equivocators Require Import Equivocators EquivocatorsProjections MessageProperties Composition.EquivocatorsComposition.
 
 (** * VLSM Equivocator Composition Projections *)
 
@@ -368,12 +368,12 @@ Proof.
       * by rewrite !state_update_neq.
     + by unfold equivocator_descriptors_update; rewrite equivocator_descriptors_update_eq.
     + subst. specialize (Hchar _ eq_refl) as [Hvx Htx].
-      unfold equivocators_state_project. unfold Common.equivocators_state_project.
+      unfold equivocators_state_project. unfold EquivocatorsComposition.equivocators_state_project.
       unfold equivocator_descriptors_update.
       rewrite equivocator_descriptors_update_eq.
       by rewrite Hli in Hvx.
     + subst. specialize (Hchar _ eq_refl) as [Hvx Htx].
-      unfold equivocators_state_project. unfold Common.equivocators_state_project.
+      unfold equivocators_state_project. unfold EquivocatorsComposition.equivocators_state_project.
       unfold equivocator_descriptors_update.
       rewrite equivocator_descriptors_update_eq.
       simpl in *. rewrite Hli in Htx. rewrite Htx. f_equal.
@@ -392,7 +392,7 @@ Proof.
       * by rewrite !state_update_neq.
     + by unfold equivocator_descriptors_update; rewrite equivocator_descriptors_update_eq.
     + extensionality eqv.
-      unfold equivocators_state_project. unfold Common.equivocators_state_project.
+      unfold equivocators_state_project. unfold EquivocatorsComposition.equivocators_state_project.
       unfold equivocator_descriptors_update.
       destruct (decide (eqv = i)); subst.
       * by rewrite state_update_eq, equivocator_descriptors_update_eq.
@@ -2043,7 +2043,7 @@ Proof.
       by apply
         (@dec_sig_sigT_eq _ _
           (sub_index_prop_dec (enum index))
-          (fun n => vlabel (Common.equivocator_IM IM n))
+          (fun n => vlabel (EquivocatorsComposition.equivocator_IM IM n))
           i li li
         ).
     }
@@ -2058,7 +2058,7 @@ Proof.
     specialize (sub_composition_all_full_projection_rev IM (free_constraint IM)) as Hproj.
     assert (HtrX' : finite_valid_trace (composite_vlsm (SubProjectionTraces.sub_IM IM (finite.enum index))
       (free_sub_free_constraint IM (free_constraint IM)))
-      (Common.equivocators_state_project
+      (EquivocatorsComposition.equivocators_state_project
         (SubProjectionTraces.sub_IM IM (finite.enum index))
         (λ i : sub_index (finite.enum index), initial_descriptors (` i))
         (composite_state_sub_projection equivocator_IM (finite.enum index) s))
@@ -2070,7 +2070,7 @@ Proof.
     }
     apply (VLSM_full_projection_finite_valid_trace Hproj) in HtrX'.
     replace (free_sub_free_state _ _)
-      with (Common.equivocators_state_project IM initial_descriptors s)
+      with (EquivocatorsComposition.equivocators_state_project IM initial_descriptors s)
       in HtrX'
     ; [replace (VLSM_full_projection_finite_trace_project _ _) with trX
       in HtrX'|]

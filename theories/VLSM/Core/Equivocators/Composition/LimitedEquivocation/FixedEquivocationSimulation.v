@@ -4,10 +4,10 @@ From Coq Require Import FinFun.
 From VLSM Require Import Lib.Preamble Lib.ListExtras.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces.
 From VLSM Require Import Core.Equivocation Core.EquivocationProjections Core.Equivocation.FixedSetEquivocation Core.Equivocation.NoEquivocation.
-From VLSM Require Import Core.Equivocators.Common Core.Equivocators.Projections.
+From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
 From VLSM Require Import Core.Equivocators.MessageProperties.
-From VLSM Require Import Core.Equivocators.Composition.Common.
-From VLSM Require Import Core.Equivocators.Composition.Projections.
+From VLSM Require Import Core.Equivocators.Composition.EquivocatorsComposition.
+From VLSM Require Import Core.Equivocators.Composition.EquivocatorsCompositionProjections.
 From VLSM Require Import Core.Equivocators.Composition.SimulatingFree.FullReplayTraces.
 From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
 From VLSM Require Import Core.Equivocators.Composition.SimulatingFree.SimulatingFree.
