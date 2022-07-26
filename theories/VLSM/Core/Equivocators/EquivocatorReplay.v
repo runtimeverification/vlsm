@@ -1,5 +1,5 @@
 From stdpp Require Import prelude.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Equivocators.Common.
+From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Equivocators.Equivocators.
 From VLSM Require Import Core.Equivocation Core.EquivocationProjections Core.Equivocators.MessageProperties.
 
 (** * Equivocator State Append Determines a Projection

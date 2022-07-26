@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet FinExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation.
 From VLSM.Core.Equivocation Require Import NoEquivocation.
-From VLSM.Core.Equivocators Require Import Common Projections MessageProperties Composition.Common.
+From VLSM.Core.Equivocators Require Import Equivocators Projections MessageProperties Composition.LimitedEquivocation.LimitedStateEquivocation.
 
 (** * VLSM Equivocator Composition Projections *)
 

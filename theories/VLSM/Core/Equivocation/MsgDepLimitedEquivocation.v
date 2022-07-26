@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinF
 From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition.
 From VLSM.Core Require Import Validator ProjectionTraces SubProjectionTraces Equivocation.
 From VLSM.Core.Equivocation Require Import FixedSetEquivocation TraceWiseEquivocation.
-From VLSM.Core.Equivocation Require Import LimitedEquivocation MsgDepFixedSetEquivocation.
+From VLSM.Core.Equivocation Require Import LimitedMessageEquivocation MsgDepFixedSetEquivocation.
 
 (** To allow capturing the two models of limited equivocation described in the
     sections below, we first define a notion of limited equivocation parameterized

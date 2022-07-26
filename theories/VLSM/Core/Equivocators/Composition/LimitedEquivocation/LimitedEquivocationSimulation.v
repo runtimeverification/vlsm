@@ -4,10 +4,10 @@ From Coq Require Import FinFun Reals.
 From VLSM Require Import Lib.StdppListSet Lib.FinFunExtras.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces Core.AnnotatedVLSM.
 From VLSM Require Import Core.Equivocation Core.EquivocationProjections Core.Equivocation.FixedSetEquivocation Core.Equivocation.NoEquivocation.
-From VLSM Require Import Lib.Measurable Core.Equivocation.TraceWiseEquivocation Core.Equivocation.LimitedEquivocation Core.Equivocation.MsgDepLimitedEquivocation.
+From VLSM Require Import Lib.Measurable Core.Equivocation.TraceWiseEquivocation Core.Equivocation.LimitedMessageEquivocation Core.Equivocation.MsgDepLimitedEquivocation.
 From VLSM Require Import MessageDependencies Core.Equivocation.WitnessedEquivocation.
-From VLSM Require Import Core.Equivocators.Composition.Common Core.Equivocators.Composition.Projections.
-From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.LimitedEquivocation.
+From VLSM Require Import Core.Equivocators.Composition.EquivocatorsComposition Core.Equivocators.Composition.EquivocatorsCompositionProjections.
+From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.LimitedStateEquivocation.
 From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocationSimulation.
 From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
 

@@ -4,7 +4,7 @@ From Coq Require Import FinFun FunctionalExtensionality.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.ListSetExtras.
 From VLSM Require Import Lib.FinExtras Lib.FinFunExtras Lib.Measurable.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Plans Core.Composition Core.Equivocation Core.SubProjectionTraces Core.Equivocation.NoEquivocation.
-From VLSM Require Import Core.Equivocators.Common Core.Equivocators.Projections.
+From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
 From VLSM Require Import Core.Equivocators.MessageProperties.
 
 (** * VLSM Equivocator Composition
