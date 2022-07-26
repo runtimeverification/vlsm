@@ -290,27 +290,28 @@ Section binary_free_composition_projections.
 This projections are used in defining the [byzantine_trace_prop]erties.
 
 *)
-  Context
-    {message : Type}
-    (M1 M2 : VLSM message)
-    .
+Context
+  {message : Type}
+  (M1 M2 : VLSM message)
+  .
 
-  Definition binary_free_composition_fst : VLSM message :=
-    pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (free_constraint _) first.
+Definition binary_free_composition_fst : VLSM message :=
+  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (free_constraint _) first.
 
-  Definition binary_free_composition_snd : VLSM message :=
-    pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (free_constraint _) second.
+Definition binary_free_composition_snd : VLSM message :=
+  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (free_constraint _) second.
 
 End binary_free_composition_projections.
 
 Section fixed_projection.
 
-Context {message : Type}
-        `{EqDecision index}
-        (IM : index -> VLSM message)
-        (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-        (X := composite_vlsm IM constraint)
-.
+Context
+  {message : Type}
+  `{EqDecision index}
+  (IM : index -> VLSM message)
+  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+  (X := composite_vlsm IM constraint)
+  .
 
 (** ** Projection traces are Byzantine
 

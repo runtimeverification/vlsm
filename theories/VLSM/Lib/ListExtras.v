@@ -525,10 +525,10 @@ Lemma list_prefix_suffix
   (l : list A)
   (n : nat)
   : list_prefix l n ++ list_suffix l n = l.
-  Proof.
-    revert n. induction l; intros [|n]. 1-3: done.
-    cbn. f_equal. apply IHl.
-  Qed.
+Proof.
+  revert n. induction l; intros [|n]. 1-3: done.
+  cbn. f_equal. apply IHl.
+Qed.
 
 Definition list_segment
   {A : Type}
@@ -1812,10 +1812,10 @@ Among the definitions, the more useful are [ForAllSuffix2] and [ExistsSuffix2]
 as they allow us to quantify over relations between consecutive elements.
 *)
 
-  Context
-    [A : Type]
-    (P : list A -> Prop)
-    .
+Context
+  [A : Type]
+  (P : list A -> Prop)
+  .
 
 Inductive ExistsSuffix : list A -> Prop :=
   | SHere : forall l, P l -> ExistsSuffix l

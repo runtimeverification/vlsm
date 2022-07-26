@@ -10,10 +10,11 @@ Then VLSM <<X>> is _included_ in VLSM <<Y>> if every [valid_trace] available to 
 is also available to <<Y>>.
 *)
 Section VLSM_inclusion.
-  Context
-    {message : Type}
-    {vtype : VLSMType message}
-    .
+
+Context
+  {message : Type}
+  {vtype : VLSMType message}
+  .
 
 Definition VLSM_incl_part
   (MX MY : VLSMMachine vtype)

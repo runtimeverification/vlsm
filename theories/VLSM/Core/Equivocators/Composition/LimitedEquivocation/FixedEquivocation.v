@@ -202,20 +202,20 @@ Context setting the stage for, and instantiating the
 It requires that the nodes have [has_been_sent] and [has_been_received]
 capabilities, that the number of nodes is finite
 *)
-  Context
-    `{EqDecision message}
-    `{finite.Finite index}
-    (IM : index -> VLSM message)
-    `{forall i : index, HasBeenSentCapability (IM i)}
-    `{forall i : index, HasBeenReceivedCapability (IM i)}
-    (equivocator_IM := equivocator_IM IM)
-    (equivocating : set index)
-    (admissible_index := fun s i => i ∈ equivocating)
-    (full_node_constraint
-      := full_node_condition_for_admissible_equivocators IM admissible_index)
-    (full_node_constraint_alt
-      := full_node_condition_for_admissible_equivocators_alt IM admissible_index)
-    .
+Context
+  `{EqDecision message}
+  `{finite.Finite index}
+  (IM : index -> VLSM message)
+  `{forall i : index, HasBeenSentCapability (IM i)}
+  `{forall i : index, HasBeenReceivedCapability (IM i)}
+  (equivocator_IM := equivocator_IM IM)
+  (equivocating : set index)
+  (admissible_index := fun s i => i ∈ equivocating)
+  (full_node_constraint
+    := full_node_condition_for_admissible_equivocators IM admissible_index)
+  (full_node_constraint_alt
+    := full_node_condition_for_admissible_equivocators_alt IM admissible_index)
+  .
 
 
 (**
@@ -224,41 +224,41 @@ requires that equality on messages is decidable and that the set of VLSMs
 allowed to equivocate is non-empty.
 *)
 
-  Context
-    (equivocating_index : Type := sub_index equivocating)
-    (equivocating_IM := sub_IM IM equivocating)
-    (fixed_equivocation_constraint : composite_label IM  -> composite_state IM * option message -> Prop
-      := fixed_equivocation_constraint IM equivocating)
-    (Free := free_composite_vlsm IM)
-    .
+Context
+  (equivocating_index : Type := sub_index equivocating)
+  (equivocating_IM := sub_IM IM equivocating)
+  (fixed_equivocation_constraint : composite_label IM  -> composite_state IM * option message -> Prop
+    := fixed_equivocation_constraint IM equivocating)
+  (Free := free_composite_vlsm IM)
+  .
 
-  (**
-  The [full_node_constraint_alt] is stronger than the [fixed_equivocation_constraint].
-  *)
-  Lemma fixed_equivocation_constraint_subsumption_alt
-    : strong_constraint_subsumption IM full_node_constraint_alt fixed_equivocation_constraint.
-  Proof.
-    intros l (s, [m |]) Hc ; [| done].
-    destruct Hc as [Hno_equiv | [i [Hi Hm]]]; [by left |].
-    unfold node_generated_without_further_equivocation_alt in Hm.
-    right.
-    eapply can_emit_composite_free_lift with (j := dexist i Hi); [| done].
-    itauto.
-  Qed.
+(**
+The [full_node_constraint_alt] is stronger than the [fixed_equivocation_constraint].
+*)
+Lemma fixed_equivocation_constraint_subsumption_alt
+  : strong_constraint_subsumption IM full_node_constraint_alt fixed_equivocation_constraint.
+Proof.
+  intros l (s, [m |]) Hc ; [| done].
+  destruct Hc as [Hno_equiv | [i [Hi Hm]]]; [by left |].
+  unfold node_generated_without_further_equivocation_alt in Hm.
+  right.
+  eapply can_emit_composite_free_lift with (j := dexist i Hi); [| done].
+  itauto.
+Qed.
 
-  (** If all nodes have the [cannot_resend_message_stepwise_prop]erty, then the
-  full node constraint is stronger than the [fixed_equivocation_constraint].
+(** If all nodes have the [cannot_resend_message_stepwise_prop]erty, then the
+full node constraint is stronger than the [fixed_equivocation_constraint].
 
-  (by reduction to the result above)
-  *)
-  Lemma fixed_equivocation_constraint_subsumption
-    (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i))
-    : preloaded_constraint_subsumption IM full_node_constraint fixed_equivocation_constraint.
-  Proof.
-    intros l (s, om) Hv.
-    apply fixed_equivocation_constraint_subsumption_alt.
-    by eapply full_node_condition_for_admissible_equivocators_subsumption.
-  Qed.
+(by reduction to the result above)
+*)
+Lemma fixed_equivocation_constraint_subsumption
+  (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i))
+  : preloaded_constraint_subsumption IM full_node_constraint fixed_equivocation_constraint.
+Proof.
+  intros l (s, om) Hv.
+  apply fixed_equivocation_constraint_subsumption_alt.
+  by eapply full_node_condition_for_admissible_equivocators_subsumption.
+Qed.
 
 End fixed_equivocation_with_fullnode.
 

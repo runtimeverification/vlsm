@@ -16,10 +16,11 @@ regular machine X, and then, at any moment:
 *)
 
 Section sec_equivocator_vlsm.
-  Context
-    {message : Type}
-    (X : VLSM message)
-    .
+
+Context
+  {message : Type}
+  (X : VLSM message)
+  .
 
 (** The state of such a machine will be abstracted using
 
