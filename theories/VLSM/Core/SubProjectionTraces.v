@@ -4,6 +4,7 @@ From stdpp Require Import prelude finite.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
 From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.
 From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.NoEquivocation.
+From VLSM Require Import Lib.Preamble Lib.StdppExtras.
 
 (** * VLSM Subcomposition *)
 

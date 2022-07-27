@@ -5,6 +5,7 @@ From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
 From VLSM Require Import Lib.ListSetExtras Lib.Measurable.
 From VLSM Require Import Core.VLSM Core.Composition Core.ProjectionTraces.
 From VLSM Require Import Core.Equivocation Core.Equivocation.NoEquivocation Core.Equivocation.FixedSetEquivocation.
+From VLSM Require Import Lib.Preamble Lib.StdppExtras.
 
 (** * VLSM Trace-wise Equivocation
 

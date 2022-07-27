@@ -4,6 +4,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
 From VLSM.Lib Require Import ListSetExtras Measurable FinFunExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
+From VLSM Require Import Lib.Preamble Lib.StdppExtras.
 
 (** * VLSM Equivocation Definitions **)
 

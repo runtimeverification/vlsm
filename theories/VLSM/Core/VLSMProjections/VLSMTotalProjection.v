@@ -2,6 +2,7 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
+From VLSM Require Import Lib.Preamble Lib.StdppExtras.
 
 Section VLSM_projection.
 

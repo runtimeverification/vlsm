@@ -261,6 +261,30 @@ Proof.
   revert s n Hi; induction i; intros [| a s] [| n] Hi; cbn; try done; [| apply IHi]; lia.
 Qed.
 
+Lemma list_difference_singleton_not_in `{EqDecision A} :
+  forall (l : list A) (a : A), a ∉ l ->
+    list_difference l [a] = l.
+Proof.
+  intros l a; induction l; [done |].
+  rewrite not_elem_of_cons; intros [Hna0 Hnal]; cbn.
+  case_decide as Ha0; [by apply elem_of_list_singleton in Ha0 |].
+  by rewrite IHl.
+Qed.
+
+
+Lemma list_difference_singleton_length_in `{EqDecision A} :
+  forall (l : list A) (a : A), a ∈ l ->
+    length (list_difference l [a]) < length l.
+Proof.
+  intros l a; induction l; cbn; [by inversion 1 |].
+  case_decide as Ha0; rewrite elem_of_list_singleton in Ha0.
+  - subst; intros _.
+    destruct (decide (a ∈ l)).
+    + by etransitivity; [apply IHl | lia].
+    + by rewrite list_difference_singleton_not_in; [lia |].
+  - by inversion 1; subst; [done |]; cbn; spec IHl; [| lia].
+Qed.
+
 Lemma longer_subseteq_has_dups `{EqDecision A} :
   forall l1 l2 : list A, l1 ⊆ l2 -> length l1 > length l2 ->
   exists (i1 i2 : nat) (a : A), i1 ≠ i2 ∧ l1 !! i1 = Some a /\ l1 !! i2 = Some a.
@@ -558,14 +582,135 @@ Proof.
   destruct (Nat.max_spec_le a (list_max l)) as [[H ->] | [H ->]]; itauto lia.
 Qed.
 
-Lemma list_difference_singleton_not_in `{EqDecision A} :
-  forall (l : list A) (a : A), a ∉ l ->
-    list_difference l [a] = l.
+Lemma in_map_option
+  {A B : Type}
+  (f : A -> option B)
+  (l : list A)
+  (b : B)
+  : In b (map_option f l) <-> exists a : A, In a l /\ f a = Some b.
 Proof.
-  intros l a; induction l; [done |].
-  rewrite not_elem_of_cons; intros [Hna0 Hnal]; cbn.
-  case_decide as Ha0; [by apply elem_of_list_singleton in Ha0 |].
-  by rewrite IHl.
+  setoid_rewrite <- elem_of_list_In; apply elem_of_map_option.
+Qed.
+
+Lemma elem_of_map_option_rev
+  {A B : Type}
+  (f : A -> option B)
+  (a : A)
+  (b : B)
+  (Hab : f a = Some b)
+  (l : list A)
+  : a ∈ l -> b ∈ map_option f l.
+Proof.
+  intro Ha; apply elem_of_map_option; exists a; itauto.
+Qed.
+
+Lemma in_map_option_rev
+  {A B : Type}
+  (f : A -> option B)
+  (a : A)
+  (b : B)
+  (Hab : f a = Some b)
+  (l : list A)
+  : In a l -> In b (map_option f l).
+Proof.
+  by setoid_rewrite <- elem_of_list_In; apply elem_of_map_option_rev.
+Qed.
+
+Lemma map_option_subseteq
+  {A B : Type}
+  (f : A -> option B)
+  (l1 l2 : list A)
+  (Hincl : l1 ⊆ l2)
+  : (map_option f l1) ⊆ (map_option f l2).
+Proof.
+  intros b. rewrite !elem_of_map_option. firstorder.
+Qed.
+
+Lemma elem_of_cat_option
+  {A : Type}
+  (l : list (option A))
+  (a : A)
+  : a ∈ (cat_option l) <-> exists b : (option A), b ∈ l /\ b = Some a.
+Proof.
+  apply elem_of_map_option.
+Qed.
+
+Lemma in_cat_option
+  {A : Type}
+  (l : list (option A))
+  (a : A)
+  : In a (cat_option l) <-> exists b : (option A), In b l /\ b = Some a.
+Proof.
+  apply in_map_option.
+Qed.
+
+Lemma map_option_incl
+  {A B : Type}
+  (f : A -> option B)
+  (l1 l2 : list A)
+  (Hincl : incl l1 l2)
+  : incl (map_option f l1) (map_option f l2).
+Proof.
+  intro b. repeat rewrite in_map_option.
+  firstorder.
+Qed.
+
+Lemma list_max_elem_of_exists2
+   (l : list nat)
+   (Hne : l <> []) :
+   (list_max l) ∈ l.
+Proof.
+  destruct (list_max l) eqn : eq_max.
+  - destruct l;[itauto congruence|].
+    specialize (list_max_le (n :: l) 0) as Hle.
+    destruct Hle as [Hle _].
+    rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
+    rewrite Forall_forall in Hle.
+    specialize (Hle n). spec Hle. left.
+    assert (Hn0: n = 0) by lia.
+    rewrite Hn0; left.
+  - specialize (list_max_elem_of_exists l) as Hmax.
+    rewrite <- eq_max; itauto lia.
+Qed.
+
+Lemma mode_not_empty
+  `{EqDecision A}
+  (l : list A)
+  (Hne : l <> []) :
+  mode l <> [].
+Proof.
+  destruct l; [done |].
+  remember (a :: l) as l'.
+  remember (List.map (count_occ decide_eq l') l') as occurrences.
+
+  assert (Hmaxp: list_max occurrences > 0). {
+    rewrite Heqoccurrences, Heql'; cbn.
+    rewrite decide_True; [lia | done].
+  }
+
+  assert (exists a, (count_occ decide_eq l' a) = list_max occurrences). {
+    assert (In (list_max occurrences) occurrences) by (apply list_max_exists; done).
+    rewrite Heqoccurrences, in_map_iff in H.
+    destruct H as (x & Heq & Hin).
+    rewrite Heqoccurrences. eauto.
+  }
+
+  assert (exists a, In a (mode l')). {
+    destruct H.
+    exists x.
+    specialize (count_occ_In decide_eq l' x).
+    intros.
+    destruct H0 as [_ H1].
+    rewrite H in H1.
+    specialize (H1 Hmaxp).
+    unfold mode.
+    apply filter_in; [done |].
+    by rewrite H, Heqoccurrences.
+  }
+  destruct H.
+  intros contra.
+  rewrite contra in H0.
+  destruct H0; inversion H0.
 Qed.
 
 (**

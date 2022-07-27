@@ -1,5 +1,5 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import base tactics.
+From stdpp Require Import finite.
 From Coq Require Import FinFun.
 From VLSM Require Import Lib.Preamble.
 
@@ -1000,40 +1000,6 @@ Proof.
   destruct i; firstorder. apply H. lia.
 Qed.
 
-Lemma elem_of_map_option_rev
-  {A B : Type}
-  (f : A -> option B)
-  (a : A)
-  (b : B)
-  (Hab : f a = Some b)
-  (l : list A)
-  : a ∈ l -> b ∈ map_option f l.
-Proof.
-  intro Ha; apply elem_of_map_option; exists a; itauto.
-Qed.
-
-Lemma in_map_option
-  {A B : Type}
-  (f : A -> option B)
-  (l : list A)
-  (b : B)
-  : In b (map_option f l) <-> exists a : A, In a l /\ f a = Some b.
-Proof.
-  setoid_rewrite <- elem_of_list_In; apply elem_of_map_option.
-Qed.
-
-Lemma in_map_option_rev
-  {A B : Type}
-  (f : A -> option B)
-  (a : A)
-  (b : B)
-  (Hab : f a = Some b)
-  (l : list A)
-  : In a l -> In b (map_option f l).
-Proof.
-  by setoid_rewrite <- elem_of_list_In; apply elem_of_map_option_rev.
-Qed.
-
 (** [map_option] can be expressed as a [list_filter_map].
 *)
 Lemma map_option_as_filter
@@ -1101,26 +1067,6 @@ Proof.
   unfold id in *.
   apply H.
   all : itauto.
-Qed.
-
-Lemma in_cat_option
-  {A : Type}
-  (l : list (option A))
-  (a : A)
-  : In a (cat_option l) <-> exists b : (option A), In b l /\ b = Some a.
-Proof.
-  apply in_map_option.
-Qed.
-
-Lemma map_option_incl
-  {A B : Type}
-  (f : A -> option B)
-  (l1 l2 : list A)
-  (Hincl : incl l1 l2)
-  : incl (map_option f l1) (map_option f l2).
-Proof.
-  intro b. repeat rewrite in_map_option.
-  firstorder.
 Qed.
 
 Lemma nth_error_eq
@@ -1324,24 +1270,6 @@ Proof.
     spec Hmax. lia. rewrite <- eq_max. itauto.
 Qed.
 
-Lemma list_max_elem_of_exists2
-   (l : list nat)
-   (Hne : l <> []) :
-   (list_max l) ∈ l.
-Proof.
-  destruct (list_max l) eqn : eq_max.
-  - destruct l;[itauto congruence|].
-    specialize (list_max_le (n :: l) 0) as Hle.
-    destruct Hle as [Hle _].
-    rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
-    rewrite Forall_forall in Hle.
-    specialize (Hle n). spec Hle. left.
-    assert (Hn0: n = 0) by lia.
-    rewrite Hn0; left.
-  - specialize (list_max_elem_of_exists l) as Hmax.
-    rewrite <- eq_max; itauto lia.
-Qed.
-
 (* Returns all values which occur with maximum frequency in the given list.
    Note that these values are returned with their original multiplicity. *)
 
@@ -1353,46 +1281,6 @@ Definition mode
 
 Example mode1 : mode [1; 1; 2; 3; 3] = [1; 1; 3; 3].
 Proof. itauto. Qed.
-
-Lemma mode_not_empty
-  `{EqDecision A}
-  (l : list A)
-  (Hne : l <> []) :
-  mode l <> [].
-Proof.
-  destruct l; [done |].
-  remember (a :: l) as l'.
-  remember (List.map (count_occ decide_eq l') l') as occurrences.
-
-  assert (Hmaxp: list_max occurrences > 0). {
-    rewrite Heqoccurrences, Heql'; cbn.
-    rewrite decide_True; [lia | done].
-  }
-
-  assert (exists a, (count_occ decide_eq l' a) = list_max occurrences). {
-    assert (In (list_max occurrences) occurrences) by (apply list_max_exists; done).
-    rewrite Heqoccurrences, in_map_iff in H.
-    destruct H as (x & Heq & Hin).
-    rewrite Heqoccurrences. eauto.
-  }
-
-  assert (exists a, In a (mode l')). {
-    destruct H.
-    exists x.
-    specialize (count_occ_In decide_eq l' x).
-    intros.
-    destruct H0 as [_ H1].
-    rewrite H in H1.
-    specialize (H1 Hmaxp).
-    unfold mode.
-    apply filter_in; [done |].
-    by rewrite H, Heqoccurrences.
-  }
-  destruct H.
-  intros contra.
-  rewrite contra in H0.
-  destruct H0; inversion H0.
-Qed.
 
 (* Computes the list suff which satisfies <<pref ++ suff = l>> or
    reports that no such list exists. *)
@@ -1742,16 +1630,6 @@ Proof.
     + right. intro Hsub'. elim n. apply Hsub'. left.
 Qed.
 
-Lemma map_option_subseteq
-  {A B : Type}
-  (f : A -> option B)
-  (l1 l2 : list A)
-  (Hincl : l1 ⊆ l2)
-  : (map_option f l1) ⊆ (map_option f l2).
-Proof.
-  intros b. rewrite !elem_of_map_option. firstorder.
-Qed.
-
 Lemma elem_of_empty_nil [X:Type] (l:list X) :
   (forall v, v ∉ l) -> l = [].
 Proof.
@@ -1775,15 +1653,6 @@ Proof.
   exfalso.
   specialize (H a (elem_of_list_here _ _)).
   inversion H.
-Qed.
-
-Lemma elem_of_cat_option
-  {A : Type}
-  (l : list (option A))
-  (a : A)
-  : a ∈ (cat_option l) <-> exists b : (option A), b ∈ l /\ b = Some a.
-Proof.
-  apply elem_of_map_option.
 Qed.
 
 Lemma Listing_NoDup {A} {l : list A} : Listing l -> NoDup l.
@@ -1927,16 +1796,3 @@ Definition element_of_filter
   `{EqDecision A} [P : A -> Prop] `{∀ x, Decision (P x)} [l : list A]
   : dsig (fun i => i ∈ filter P l) -> dsig (fun i => i ∈ l) :=
   element_of_subseteq (list_filter_subseteq P l).
-
-Lemma list_difference_singleton_length_in `{EqDecision A} :
-  forall (l : list A) (a : A), a ∈ l ->
-    length (list_difference l [a]) < length l.
-Proof.
-  intros l a; induction l; cbn; [by inversion 1 |].
-  case_decide as Ha0; rewrite elem_of_list_singleton in Ha0.
-  - subst; intros _.
-    destruct (decide (a ∈ l)).
-    + by etransitivity; [apply IHl | lia].
-    + by rewrite list_difference_singleton_not_in; [lia |].
-  - by inversion 1; subst; [done |]; cbn; spec IHl; [| lia].
-Qed.

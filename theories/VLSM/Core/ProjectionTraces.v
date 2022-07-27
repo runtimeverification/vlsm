@@ -3,6 +3,7 @@ From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StreamExtras ListExtras.
 From VLSM.Core Require Import VLSM Plans Composition VLSMProjections Validator.
+From VLSM Require Import Lib.Preamble Lib.StdppExtras.
 
 Section projections.
 
