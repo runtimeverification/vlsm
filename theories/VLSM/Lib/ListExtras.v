@@ -1,5 +1,5 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude finite.
+From stdpp Require Import base tactics.
 From Coq Require Import FinFun.
 From VLSM Require Import Lib.Preamble.
 
@@ -126,78 +126,6 @@ Proof.
     apply incl_tl. apply incl_refl.
 Qed.
 
-Lemma filter_in {A} P `{∀ (x:A), Decision (P x)} x s :
-  In x s ->
-  P x ->
-  In x (filter P s).
-Proof.
-  intros.
-  apply elem_of_list_In.
-  apply elem_of_list_In in H0.
-  apply elem_of_list_filter; auto.
-Qed.
-
-Lemma filter_incl {A} P `{∀ (x:A), Decision (P x)} s1 s2 :
-  incl s1 s2 ->
-  incl (filter P s1) (filter P s2).
-Proof.
-  induction s1; intros; intro x; intros.
-  - contradict H1; auto.
-  - rewrite filter_cons in H1.
-    destruct (decide (P a)).
-    + destruct H1.
-      * subst. apply filter_in; [| done]. by apply H0; left.
-      * apply IHs1; [| done]. by intros y HIn; apply H0; right.
-    + apply IHs1; [| done]. by intros y HIn; apply H0; right.
-Qed.
-
-Lemma filter_incl_fn {A} P Q
-  `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} :
-  (forall a, P a -> Q a) ->
-  forall s, incl (filter P s) (filter Q s).
-Proof.
-  induction s; simpl.
-  - by apply incl_refl.
-  - intros x HIn. rewrite filter_cons in *.
-    by destruct (decide (P a)), (decide (Q a)); cbn in *; itauto.
-Qed.
-
-Lemma filter_length_fn {A} P Q
-  `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)}
-  s (Hfg : Forall (fun a => P a -> Q a) s) :
-  length (filter P s) <= length (filter Q s).
-Proof.
-  induction s; simpl; [lia |].
-  inversion Hfg; subst. specialize (IHs H4).
-  rewrite 2 filter_cons.
-  by destruct (decide (P a)), (decide (Q a)); cbn; itauto lia.
-Qed.
-
-Lemma filter_eq_fn {A} P Q
- `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} s :
-  (forall a, In a s -> P a <-> Q a) ->
-  filter P s = filter Q s.
-Proof.
-  induction s; intros; [done |].
-  assert (IHs' : forall a : A, In a s -> P a <-> Q a).
-  { by intros; apply H1; right. }
-  apply IHs in IHs'. clear IHs.
-  erewrite !filter_cons, decide_ext; cycle 1.
-  - by apply H1; left.
-  - by rewrite IHs'.
-Qed.
-
-Lemma Forall_filter_nil {A} P `{∀ (x:A), Decision (P x)} l :
- Forall (fun a : A => ~ P a) l <-> filter P l = [].
-Proof.
-  rewrite Forall_forall.
-  split; intro Hnone.
-  - induction l; [done |].
-    setoid_rewrite elem_of_cons in Hnone.
-    cbn. rewrite decide_False; auto.
-  - intros x Hel Px. contradict Hel. eapply filter_nil_not_elem_of; eauto.
-Qed.
-
 Lemma Exists_first
   {A : Type}
   (l : list A)
@@ -311,23 +239,6 @@ Lemma append_nodup_right {A}:
 Proof.
   induction l1; cbn; intros; [done |].
   inversion H. auto.
-Qed.
-
-Lemma nodup_append {A} : forall (l1 l2 : list A),
-  NoDup l1 ->
-  NoDup l2 ->
-  (forall a, a ∈ l1 -> ~ a ∈ l2) ->
-  (forall a, a ∈ l2 -> ~ a ∈ l1) ->
-  NoDup (l1 ++ l2).
-Proof.
-  induction l1; simpl; intros; [done |].
-  inversion H; subst; clear H. constructor.
-  - intro. apply elem_of_app in H. destruct H as [Inl1 | InL2].
-    + by apply H5.
-    + by apply (H1 a); [left |].
-  - apply IHl1; [done | done | |]; intros.
-    + by apply H1; right.
-    + apply H2 in H. rewrite elem_of_cons in H. itauto.
 Qed.
 
 Lemma last_is_last {A} : forall (l : list A) (x dummy: A),
@@ -660,38 +571,6 @@ Proof.
   - rewrite IHl1. f_equal; apply list_annotate_pi.
 Qed.
 
-Lemma elem_of_list_annotate_forget
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  (xP : dsig P)
-  (Hin : xP ∈ (list_annotate P l Hs))
-  : (proj1_sig xP) ∈ l.
-Proof.
-  induction l.
-  - inversion Hin.
-  - rewrite list_annotate_unroll,elem_of_cons in Hin.
-    destruct Hin as [Heq | Hin].
-    + subst xP. left.
-    + by right; apply (IHl (Forall_tl Hs)).
-Qed.
-
-Lemma elem_of_list_annotate
-  `{EqDecision A}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  (xP : dsig P)
-  : xP ∈ (list_annotate P l Hs) <-> (` xP) ∈ l.
-Proof.
-  split; [apply elem_of_list_annotate_forget |].
-  destruct_dec_sig xP x HPx HeqxP; subst; cbn.
-  induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
-Qed.
-
 Lemma nth_error_list_annotate
   {A : Type}
   (P : A -> Prop)
@@ -773,33 +652,6 @@ Proof.
       ; subst; clear Hin2.
       specialize (IHl n0 eq_refl n3 eq_refl).
       lia.
-Qed.
-
-Lemma nth_error_filter
-  {A} P `{∀ (x:A), Decision (P x)}
-  (l : list A)
-  (n : nat)
-  (a : A)
-  (Hnth : nth_error (filter P l) n = Some a)
-  : exists (nth : nat),
-    nth_error_filter_index P l n = Some nth
-    /\ nth_error l nth = Some a.
-Proof.
-  generalize dependent a. generalize dependent n.
-  induction l.
-  - intros; simpl in Hnth. destruct n; inversion Hnth.
-  - intros. rewrite filter_cons in Hnth. simpl. destruct (decide (P a)).
-    + destruct n.
-      * inversion Hnth; subst. by exists 0.
-      * simpl in Hnth.
-        specialize (IHl n a0 Hnth).
-        destruct IHl as [nth [Hnth' Ha0]].
-        exists (S nth).
-        by rewrite Hnth'.
-    + specialize (IHl n a0 Hnth).
-      destruct IHl as [nth [Hnth' Ha0]].
-      exists (S nth).
-      by rewrite Hnth'.
 Qed.
 
 Fixpoint Forall_filter
@@ -1148,19 +1000,6 @@ Proof.
   destruct i; firstorder. apply H. lia.
 Qed.
 
-Lemma elem_of_map_option
-  {A B : Type}
-  (f : A -> option B)
-  (l : list A)
-  (b : B)
-  : b ∈ map_option f l <-> exists a : A, a ∈ l /\ f a = Some b.
-Proof.
-  induction l as [| h t]; cbn.
-  - setoid_rewrite elem_of_nil. firstorder.
-  - destruct (f h) eqn: Heq; setoid_rewrite elem_of_cons
-    ; firstorder; subst; itauto (eauto || congruence).
-Qed.
-
 Lemma elem_of_map_option_rev
   {A B : Type}
   (f : A -> option B)
@@ -1300,27 +1139,6 @@ Proof.
     apply IHl1.
     intro n.
     apply (Hnth (S n)).
-Qed.
-
-Lemma occurrences_ordering
-  {A : Type}
-  (a b : A)
-  (la1 la2 lb1 lb2 : list A)
-  (Heq : la1 ++ a :: la2 = lb1 ++ b :: lb2)
-  (Ha : ~a ∈ (b :: lb2))
-  : exists lab : list A, lb1 = la1 ++ a :: lab.
-Proof.
-  generalize dependent lb2. generalize dependent la2.
-  generalize dependent b. generalize dependent lb1.
-  generalize dependent a.
-  induction la1; intros; destruct lb1 as [|b0 lb1]; simpl in *
-  ; inversion Heq; subst.
-  - contradict Ha. left.
-  - by exists lb1.
-  - contradict Ha. rewrite elem_of_cons, elem_of_app, elem_of_cons; auto.
-  - specialize (IHla1 a0 lb1 b la2 lb2 H1 Ha).
-    destruct IHla1 as [la0b Hla0b].
-    by exists la0b; subst.
 Qed.
 
 (* TODO remove (we have Exists_first) *)
@@ -1504,16 +1322,6 @@ Proof.
     simpl. lia.
   - specialize (list_max_exists l) as Hmax.
     spec Hmax. lia. rewrite <- eq_max. itauto.
-Qed.
-
-Lemma list_max_elem_of_exists
-   (l : list nat)
-   (nz : list_max l > 0) :
-   (list_max l) ∈ l.
-Proof.
-  induction l; simpl in *; [lia |].
-  rewrite elem_of_cons.
-  destruct (Nat.max_spec_le a (list_max l)) as [[H ->] | [H ->]]; itauto lia.
 Qed.
 
 Lemma list_max_elem_of_exists2
@@ -1934,47 +1742,6 @@ Proof.
     + right. intro Hsub'. elim n. apply Hsub'. left.
 Qed.
 
-Lemma filter_subseteq {A} P `{∀ (x:A), Decision (P x)} (s1 s2 : list A) :
-  s1 ⊆ s2 ->
-  (filter P s1) ⊆ (filter P s2).
-Proof.
-induction s1; intros; intro x; intros.
-  - contradict H1.
-    rewrite filter_nil; intro Hx. inversion Hx.
-  - rewrite filter_cons in H1.
-    destruct (decide (P a)).
-    + rewrite elem_of_cons in H1.
-      destruct H1.
-      * subst; apply elem_of_list_filter.
-        split; [done |].
-        apply H0; left.
-      * apply IHs1; [| done]. by intros y Hel; apply H0; right.
-    + apply IHs1; [| done]. by intros y Hel; apply H0; right.
-Qed.
-
-Lemma filter_subseteq_fn {A} P Q
-  `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} :
-  (forall a, P a -> Q a) ->
-  forall (s : list A), filter P s ⊆ filter Q s.
-Proof.
-induction s; simpl.
-  - rewrite filter_nil; intros x Hx; inversion Hx.
-  - intro x; intros.
-    rewrite filter_cons in H2.
-    destruct (decide (P a)).
-    + rewrite elem_of_cons in H2.
-      rewrite filter_cons.
-      destruct (decide (Q a)).
-      * destruct H2.
-        -- subst; left.
-        -- by right; apply IHs.
-      * itauto.
-    + rewrite filter_cons.
-      destruct (decide (Q a)).
-      -- by right; apply IHs.
-      -- by apply IHs.
-Qed.
-
 Lemma map_option_subseteq
   {A B : Type}
   (f : A -> option B)
@@ -2160,16 +1927,6 @@ Definition element_of_filter
   `{EqDecision A} [P : A -> Prop] `{∀ x, Decision (P x)} [l : list A]
   : dsig (fun i => i ∈ filter P l) -> dsig (fun i => i ∈ l) :=
   element_of_subseteq (list_filter_subseteq P l).
-
-Lemma list_difference_singleton_not_in `{EqDecision A} :
-  forall (l : list A) (a : A), a ∉ l ->
-    list_difference l [a] = l.
-Proof.
-  intros l a; induction l; [done |].
-  rewrite not_elem_of_cons; intros [Hna0 Hnal]; cbn.
-  case_decide as Ha0; [by apply elem_of_list_singleton in Ha0 |].
-  by rewrite IHl.
-Qed.
 
 Lemma list_difference_singleton_length_in `{EqDecision A} :
   forall (l : list A) (a : A), a ∈ l ->
