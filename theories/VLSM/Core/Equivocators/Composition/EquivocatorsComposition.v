@@ -1,12 +1,11 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun FunctionalExtensionality.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.ListSetExtras.
+From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.ListSetExtras Lib.StdppExtras.
 From VLSM Require Import Lib.FinExtras Lib.FinFunExtras Lib.Measurable.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Plans Core.Composition Core.Equivocation Core.SubProjectionTraces Core.Equivocation.NoEquivocation.
 From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
 From VLSM Require Import Core.Equivocators.MessageProperties.
-From VLSM Require Import Lib.Preamble Lib.StdppExtras.
 
 (** * VLSM Equivocator Composition
 
