@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import Streams FunctionalExtensionality FinFun.
+From Coq Require Import Streams FunctionalExtensionality FinFun Eqdep_dec.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.StreamExtras.
 From VLSM Require Import Core.VLSM Core.Plans Core.VLSMProjections.
 
@@ -102,7 +102,9 @@ Lemma state_update_eq
            (si : vstate (IM i))
   : state_update s i si i = si.
 Proof.
-  by unfold state_update, decide, decide_rel; rewrite eq_dec_refl.
+  unfold state_update.
+  case_decide; [| done].
+  by replace H with (eq_refl i) by (apply K_dec_type; done).
 Qed.
 
 Lemma state_update_id

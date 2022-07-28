@@ -235,18 +235,13 @@ Proof. itauto congruence. Qed.
 Definition inb {A} (Aeq_dec : forall x y:A, {x = y} + {x <> y}) (x : A) (xs : list A) :=
   if in_dec Aeq_dec x xs then true else false.
 
-Lemma in_function {A}  (Aeq_dec : forall x y:A, {x = y} + {x <> y}) :
-  PredicateFunction2 (@In A) (inb Aeq_dec).
-Proof.
-  by intros x xs; unfold inb; destruct (in_dec Aeq_dec x xs).
-Qed.
-
 Lemma in_correct `{EqDecision X} :
   forall (l : list X) (x : X),
     In x l <-> inb decide_eq x l = true.
 Proof.
   intros s msg.
-  apply in_function.
+  unfold inb.
+  destruct (in_dec _ _ _); itauto congruence.
 Qed.
 
 Lemma in_correct_refl `{EqDecision X} :
@@ -271,16 +266,14 @@ Definition inclb
   : bool
   := forallb (fun x : A => inb decide_eq x l2) l1.
 
-Lemma incl_function `{EqDecision A} : PredicateFunction2 (@incl A) (inclb).
+Lemma incl_correct `{EqDecision A}
+  (l1 l2 : list A)
+  : incl l1 l2 <-> inclb l1 l2 = true.
 Proof.
-  intros l1 l2. unfold inclb. rewrite forallb_forall.
+  unfold inclb.
+  rewrite forallb_forall.
   by split; intros Hincl x Hx; apply in_correct; apply Hincl.
 Qed.
-
-Definition incl_correct `{EqDecision A}
-  (l1 l2 : list A)
-  : incl l1 l2 <-> inclb l1 l2 = true
-  := incl_function l1 l2.
 
 Lemma map_incl {A B} (f : B -> A) : forall s s',
   incl s s' ->
@@ -378,8 +371,9 @@ Lemma is_member_correct' {W} `{StrictlyComparable W}
   : forall l (w : W), is_member w l = false <-> ~ In w l.
 Proof.
   intros.
-  apply mirror_reflect.
-  intros; apply is_member_correct.
+  rewrite <- is_member_correct.
+  split; [congruence |].
+  apply not_true_is_false.
 Qed.
 
 Lemma In_app_comm {X} : forall l1 l2 (x : X), In x (l1 ++ l2) <-> In x (l2 ++ l1).
