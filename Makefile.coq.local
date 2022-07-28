@@ -3,6 +3,7 @@ DOCGLOBFILES = $(DOCVFILES:.v=.glob)
 DPDFILES = $(DOCVFILES:.v=.dpd)
 DOTFILES = $(DOCVFILES:.v=.dot)
 SVGFILES = $(DOCVFILES:.v=.svg)
+DOCVOFILES = $(DOCVFILES:.v=.vo)
 
 CSSFILES = resources/coqdoc.css resources/coqdocjs.css
 JSFILES = resources/config.js resources/coqdocjs.js
@@ -25,6 +26,10 @@ coqdoc: $(DOCGLOBFILES) $(DOCVFILES) $(CSSFILES) $(JSFILES) $(HTMLFILES)
 	$(SHOW)'COPY resources'
 	$(HIDE)cp $(CSSFILES) $(JSFILES) $(COQDOCDIR)
 .PHONY: coqdoc
+
+axioms: $(DOCVOFILES)
+	@scripts/axiom-diagnostics.sh "${COQLIBS}" "${path}"
+.PHONY: axioms
 
 RATIOS.md: $(DOCVFILES)
 	@scripts/all-comment-ratio.sh > RATIOS.md
