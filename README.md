@@ -51,3 +51,20 @@ make   # or make -j <number-of-cores-on-your-machine>
 
 - [latest coqdoc presentation of the Coq files](https://runtimeverification.github.io/vlsm-docs/latest/coqdoc/toc.html)
 - [latest Alectryon presentation the Coq files](https://runtimeverification.github.io/vlsm-docs/latest/alectryon/toc.html)
+
+## Axiom use analysis
+
+To do basic axiom use analysis for the project as a whole, run the
+following command in the project root directory:
+
+```shell
+make validate
+```
+
+To do detailed axiom use analysis for all files in a certain directory,
+for example `theories/VLSM/Core`, run the following command in the project
+root directory:
+
+```shell
+make axioms path=theories/VLSM/Core
+```
