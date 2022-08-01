@@ -1,5 +1,5 @@
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble FinFunExtras.
+From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM Equivocation.
 From VLSM.Core Require Import Composition VLSMProjections Validator ProjectionTraces.
 

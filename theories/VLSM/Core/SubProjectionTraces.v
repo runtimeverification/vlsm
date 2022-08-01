@@ -1,5 +1,5 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From Coq Require Import FunctionalExtensionality Lia FinFun.
+From Coq Require Import FunctionalExtensionality Lia.
 From stdpp Require Import prelude finite.
 From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet StdppExtras.
 From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.

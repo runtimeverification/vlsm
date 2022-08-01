@@ -665,8 +665,6 @@ Proof.
   - done.
 Qed.
 
-Require Import Setoid.
-
 Add Parametric Relation A : (set A) (@set_eq A)
  reflexivity proved by (@set_eq_refl A)
  transitivity proved by (@set_eq_tran A) as set_eq_rel.
