@@ -58,13 +58,13 @@ Proof.
   lia.
 Qed.
 
-Lemma intersection_size1
+(*Lemma intersection_size1
   (X Y : C) :
   size (X ∩ Y) <= size X.
 Proof.
   apply (subseteq_size (X ∩ Y) X).
   set_solver.
-Qed.
+Qed.*)
 
 Lemma intersection_size2
   (X Y : C) :
