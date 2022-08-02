@@ -16,22 +16,22 @@ Context {A B : Type}.
 
 (** ** Relating finiteness and infiniteness *)
 
-Lemma not_infiniteT_finiteT : forall tr : trace,
+(*Lemma not_infiniteT_finiteT : forall tr : trace,
  ~ infiniteT tr -> finiteT tr.
 Proof.
 move => tr Hnot.
 case: (classic (finiteT tr)) => Hinf //.
 case: Hnot.
 exact: not_finiteT_infiniteT.
-Qed.
+Qed.*)
 
-Lemma finiteT_infiniteT : forall tr : trace,
+(*Lemma finiteT_infiniteT : forall tr : trace,
  finiteT tr \/ infiniteT tr.
 Proof.
 move => tr.
 case: (classic (finiteT tr)) => Hinf; first by left.
 right; exact: not_finiteT_infiniteT.
-Qed.
+Qed.*)
 
 Definition finiteT_infiniteT_dec (tr : trace) : { finiteT tr }+{ infiniteT tr } :=
 match excluded_middle_informative (finiteT tr) with
@@ -71,10 +71,10 @@ exists (midp h2); split.
 - exact: (midpointT_after (midpointT_midp h2)).
 Qed.
 
-Lemma AppendT_assoc_R: forall (p1 p2 p3 : propT), (p1 *** p2 *** p3) =>> (p1 *** p2) *** p3.
+(*Lemma AppendT_assoc_R: forall (p1 p2 p3 : propT), (p1 *** p2 *** p3) =>> (p1 *** p2) *** p3.
 Proof.
 move => [f1 hf1] [f2 hf2] [f3 hf3] tr0 /= h1.
 exact: appendT_assoc_R.
-Qed.
+Qed.*)
 
 End TraceClassicalProperties.
