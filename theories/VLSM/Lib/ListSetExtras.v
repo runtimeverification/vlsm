@@ -27,12 +27,12 @@ Proof.
   by intros s1 s2 [].
 Qed.
 
-Lemma set_eq_proj2 {A} : forall (s1 s2 : set A),
+(*Lemma set_eq_proj2 {A} : forall (s1 s2 : set A),
   set_eq s1 s2 ->
   s2 ⊆ s1.
 Proof.
   by intros s1 s2 [].
-Qed.
+Qed.*)
 
 Lemma set_eq_refl {A} : forall (s : list A), set_eq s s.
 Proof.
@@ -76,7 +76,7 @@ Proof.
   firstorder.
 Qed.
 
-Lemma set_eq_Forall
+(*Lemma set_eq_Forall
   {A : Type}
   (s1 s2 : set A)
   (H12 : set_eq s1 s2)
@@ -84,7 +84,7 @@ Lemma set_eq_Forall
   : Forall P s1 <-> Forall P s2.
 Proof.
   rewrite !Forall_forall. firstorder.
-Qed.
+Qed.*)
 
 Lemma set_union_comm `{EqDecision A}  : forall (s1 s2 : list A),
   set_eq (set_union s1 s2) (set_union s2 s1).
@@ -92,14 +92,14 @@ Proof.
   intros s1 s2; split; intro x; rewrite !set_union_iff; itauto.
 Qed.
 
-Lemma set_union_empty `{EqDecision A}  : forall (s1 s2 : list A),
+(*Lemma set_union_empty `{EqDecision A}  : forall (s1 s2 : list A),
   set_union s1 s2 = [] ->
   s1 = [] /\ s2 = [].
 Proof.
   intros.
   destruct s2; [done |].
   by cbn in H; apply set_add_not_empty in H.
-Qed.
+Qed.*)
 
 Lemma set_union_nodup_left `{EqDecision A} (l l' : set A)
   : NoDup l -> NoDup (set_union l l').
@@ -169,7 +169,7 @@ Proof.
     + right. apply IHss. by exists x.
 Qed.
 
-Lemma set_union_iterated_subseteq
+(*Lemma set_union_iterated_subseteq
   `{EqDecision A}
   (ss ss': list (set A))
   (Hincl : ss ⊆ ss') :
@@ -185,9 +185,9 @@ Proof.
   unfold incl in Hincl.
   split; [| done].
   by apply Hincl.
-Qed.
+Qed.*)
 
-Lemma set_union_empty_left `{EqDecision A}  : forall (s : list A),
+(*Lemma set_union_empty_left `{EqDecision A}  : forall (s : list A),
   NoDup s -> set_eq (set_union [] s) s.
 Proof.
   intros. split; intros x Hin.
@@ -195,7 +195,7 @@ Proof.
     + inversion H0.
     + done.
   - by apply set_union_intro; right.
-Qed.
+Qed.*)
 
 Lemma map_list_subseteq {A B} : forall (f : B -> A) (s s' : list B),
   s ⊆ s' -> (map f s) ⊆ (map f s').
@@ -278,15 +278,15 @@ Proof.
   by split; destruct H; apply set_map_subseteq.
 Qed.
 
-Lemma set_map_singleton {A B} `{EqDecision A} (f : B -> A) : forall s a,
+(*Lemma set_map_singleton {A B} `{EqDecision A} (f : B -> A) : forall s a,
   set_map f s = [a] ->
   forall b, b ∈ s -> f b = a.
 Proof.
   intros. apply (set_map_elem_of f) in H0. rewrite H in H0. apply elem_of_cons in H0.
   destruct H0; [done | inversion H0].
-Qed.
+Qed.*)
 
-Lemma filter_set_add `{StrictlyComparable X} P
+(*Lemma filter_set_add `{StrictlyComparable X} P
   `{∀ (x:X), Decision (P x)} :
   forall (l:list X) x, ~ P x ->
   filter P l = filter P (set_add x l).
@@ -295,7 +295,7 @@ Proof.
   - by rewrite decide_False.
   - destruct (decide (x = hd)); cbn; [done |].
     by destruct (decide (P hd)); rewrite <- (IHl).
-Qed.
+Qed.*)
 
 Lemma set_add_ignore `{StrictlyComparable X} :
   forall (l : list X) (x : X),
@@ -307,16 +307,16 @@ Proof.
   - rewrite IHl; [| done]. by destruct (decide (x = hd)).
 Qed.
 
-Lemma set_add_new `{EqDecision A}:
+(*Lemma set_add_new `{EqDecision A}:
   forall (x:A) l, ~x ∈ l -> set_add x l = l++[x].
 Proof.
   induction l; cbn; [done |]; intros H_not_in.
   rewrite decide_False; cycle 1.
   - by intros ->; apply H_not_in; left.
   - rewrite elem_of_cons in H_not_in. rewrite IHl; itauto.
-Qed.
+Qed.*)
 
-Lemma set_remove_not_elem_of `{EqDecision A} : forall x (s : list A),
+(*Lemma set_remove_not_elem_of `{EqDecision A} : forall x (s : list A),
   ~ x ∈ s ->
   set_remove x s = s.
 Proof.
@@ -324,7 +324,7 @@ Proof.
   rewrite decide_False; cycle 1.
   + by intros ->; contradict H; left.
   + rewrite IHs; [done |]. rewrite elem_of_cons in H. itauto.
-Qed.
+Qed.*)
 
 Lemma set_remove_elim `{EqDecision A} : forall x (s : list A),
   NoDup s -> ~ x ∈ (set_remove x s).
@@ -338,7 +338,7 @@ Proof.
   by intros x y s ->; cbn; rewrite decide_True.
 Qed.
 
-Lemma set_remove_nodup_1 `{EqDecision A} : forall x (s : list A),
+(*Lemma set_remove_nodup_1 `{EqDecision A} : forall x (s : list A),
   NoDup (set_remove x s) ->
   ~ x ∈ (set_remove x s) ->
   NoDup s.
@@ -356,7 +356,7 @@ Proof.
       * apply IHs; [done |].
         intro Hx.
         by contradict H0; right.
-Qed.
+Qed.*)
 
 Lemma set_remove_elem_of_iff `{EqDecision A} :  forall x y (s : list A),
   NoDup s ->
@@ -409,7 +409,7 @@ Proof.
   split; intros a Hin; rewrite set_remove_iff in *; itauto.
 Qed.
 
-Lemma subseteq_remove_union `{EqDecision A} : forall x (s1 s2 : list A),
+(*Lemma subseteq_remove_union `{EqDecision A} : forall x (s1 s2 : list A),
   NoDup s1 ->
   NoDup s2 ->
   (set_remove x (set_union s1 s2)) ⊆
@@ -419,7 +419,7 @@ Proof.
   - apply set_union_intro. destruct Hin. apply set_union_elim in H1.
     rewrite set_remove_iff; itauto.
   - by apply set_union_nodup.
-Qed.
+Qed.*)
 
 Lemma set_eq_remove_union_elem_of  `{EqDecision A} : forall x (s1 s2 : list A),
   NoDup s1 ->
@@ -463,7 +463,7 @@ Qed.
 for the second argument.
 *)
 (* TODO(palmskog): consider submitting a PR to Coq's stdlib. *)
-Lemma set_diff_nodup' `{EqDecision A} (l l' : list A)
+(*Lemma set_diff_nodup' `{EqDecision A} (l l' : list A)
   : NoDup l -> NoDup (set_diff l l').
 Proof.
 induction 1 as [|x l H H' IH]; simpl.
@@ -471,7 +471,7 @@ induction 1 as [|x l H H' IH]; simpl.
 - case_decide.
   + by apply IH.
   + by apply set_add_nodup, IH.
-Qed.
+Qed.*)
 
 Lemma diff_app_nodup `{EqDecision A} : forall (s1 s2 : list A),
   NoDup s1 ->
@@ -497,7 +497,7 @@ Proof.
     rewrite Heq, IHlv; itauto.
 Qed.
 
-Lemma set_union_iterated_empty `{EqDecision A} :
+(*Lemma set_union_iterated_empty `{EqDecision A} :
   forall ss : list (set A),
     (forall s : list A, s ∈ ss -> s = []) -> fold_right set_union [] ss = [].
 Proof.
@@ -505,7 +505,7 @@ Proof.
   rewrite IHss; cycle 1.
   - by intros s Hel; apply H; right.
   - by cbn; apply H; left.
-Qed.
+Qed.*)
 
 (** For each element X of l1, exactly one occurrence of X is removed
    from l2. If no such occurrence exists, nothing happens. *)
@@ -513,11 +513,11 @@ Qed.
 Definition set_remove_list `{EqDecision A} (l1 l2 : list A) : list A :=
   fold_right set_remove l2 l1.
 
-Example set_remove_list1 : set_remove_list [3;1;3] [1;1;2;3;3;3;3] = [1;2;3;3].
-Proof. done. Qed.
+(*Example set_remove_list1 : set_remove_list [3;1;3] [1;1;2;3;3;3;3] = [1;2;3;3].
+Proof. done. Qed.*)
 
-Example set_remove_list2 : set_remove_list [4] [1;2;3] = [1;2;3].
-Proof. done. Qed.
+(*Example set_remove_list2 : set_remove_list [4] [1;2;3] = [1;2;3].
+Proof. done. Qed.*)
 
 Lemma set_remove_list_1
   `{EqDecision A}
@@ -533,7 +533,7 @@ Proof.
     by apply set_remove_1, IHl1 in Hin.
 Qed.
 
-Lemma set_prod_nodup `(s1: set A) `(s2: set B):
+(*Lemma set_prod_nodup `(s1: set A) `(s2: set B):
   NoDup s1 ->
   NoDup s2 ->
   NoDup (set_prod s1 s2).
@@ -551,7 +551,7 @@ Proof.
     * intros [a b].
       rewrite elem_of_list_prod, elem_of_list_fmap.
       intros [Ha _] [_ [[= Hax _] _]]. congruence.
-Qed.
+Qed.*)
 
 (** An alternative to [set_diff].
     Unlike [set_diff], the result may contain
@@ -569,7 +569,7 @@ Definition set_diff_filter `{EqDecision A} (l r : list A) :=
    The characteristic membership property, parallel to
    [set_diff_iff].
  *)
-Lemma set_diff_filter_iff `{EqDecision A} (a:A) l r:
+(*Lemma set_diff_filter_iff `{EqDecision A} (a:A) l r:
   a ∈ (set_diff_filter l r) <-> (a ∈ l /\ ~a ∈ r).
 Proof.
   induction l;simpl.
@@ -582,14 +582,14 @@ Proof.
       split; itauto congruence.
     * rewrite elem_of_cons.
       split;itauto congruence.
-Qed.
+Qed.*)
 
-Lemma set_diff_filter_nodup `{EqDecision A} (l r:list A):
+(*Lemma set_diff_filter_nodup `{EqDecision A} (l r:list A):
   NoDup l -> NoDup (set_diff_filter l r).
 Proof.
   intros H.
   by apply NoDup_filter.
-Qed.
+Qed.*)
 
 (**
    Prove that subtracting a superset cannot produce
@@ -682,7 +682,7 @@ Add Parametric Morphism A : (@elem_of_list A)
   with signature @eq A ==> @list_subseteq A ==> Basics.impl as set_elem_of_subseteq.
 Proof. firstorder. Qed.
 
-Lemma set_union_iterated_preserves_prop
+(*Lemma set_union_iterated_preserves_prop
   `{EqDecision A}
   (ss : list (set A))
   (P : A -> Prop)
@@ -694,7 +694,7 @@ Proof.
   destruct H as [s [Hins Hina]].
   apply Hp with (s := s).
   itauto.
-Qed.
+Qed.*)
 
 Lemma filter_set_eq {X} P Q
  `{∀ (x:X), Decision (P x)} `{∀ (x:X), Decision (Q x)}
