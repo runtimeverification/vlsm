@@ -41,7 +41,7 @@ Proof.
   by apply filtering_subsequence_sorted in Hfs.
 Qed.
 
-Lemma filtering_subsequence_iff
+(*Lemma filtering_subsequence_iff
   {A : Type}
   (P Q : A -> Prop)
   (HPQ : forall a, P a <-> Q a)
@@ -52,7 +52,7 @@ Proof.
   unfold filtering_subsequence.
   rewrite !ForAll2_forall.
   by setoid_rewrite <- HPQ.
-Qed.
+Qed.*)
 
 (** Each element in a [filtering_subsequence] is a position in the base
 stream for which the predicate holds.
@@ -276,7 +276,7 @@ Next Obligation.
   by apply filtering_subsequence_prefix_length.
 Qed.
 
-Lemma stream_filter_Forall
+(*Lemma stream_filter_Forall
   {A : Type}
   (P : A -> Prop)
   (s : Stream A)
@@ -291,7 +291,7 @@ Proof.
   unfold stream_subsequence.
   rewrite Str_nth_map.
   by apply filtering_subsequence_witness.
-Qed.
+Qed.*)
 
 (** ** Obtaining [filtering_sequences] for streams
 
@@ -383,7 +383,7 @@ Proof.
   rewrite Heq. simpl. lia.
 Qed.
 
-Lemma stream_filter_fst_pos_nth_tl_has_property
+(*Lemma stream_filter_fst_pos_nth_tl_has_property
   (s : Stream A)
   (n : nat)
   (sn := Str_nth_tl n s)
@@ -403,7 +403,7 @@ Proof.
   subst i.
   rewrite <- Str_nth_plus.
   apply Hnp. simpl in *. lia.
-Qed.
+Qed.*)
 
 (** Given as stream <<s>> for which predicate <<P>> holds [InfinitelyOften]
 produces the streams of all its position at which <<P>> holds in a strictly
@@ -463,7 +463,7 @@ Proof.
     replace (n0 + S (k + kn)) with (S (n0 + kn + k)) by lia. eauto.
 Qed.
 
-Lemma stream_filter_positions_monotone
+(*Lemma stream_filter_positions_monotone
   (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat)
   : monotone_nat_stream_prop (stream_filter_positions s Hinf n).
 Proof.
@@ -473,7 +473,7 @@ Proof.
   intros.
   constructor; simpl; [|apply H].
   apply stream_filter_fst_pos_le.
-Qed.
+Qed.*)
 
 (** [stream_filter_positions] produces a [filtering_sequence].
 *)
@@ -519,11 +519,11 @@ Definition stream_filter_map
 
 (** Stream filtering is obtained as a specialization of [stream_filter_map].
 *)
-Definition stream_filter
+(*Definition stream_filter
   (s : Stream A)
   (Hinf : InfinitelyOften P s)
   : Stream A :=
-  stream_filter_map proj1_sig s Hinf.
+  stream_filter_map proj1_sig s Hinf.*)
 
 End stream_filter_positions.
 
@@ -547,7 +547,7 @@ Definition stream_map_option
   : Stream B :=
   stream_filter_map P (fun k : dsig P => is_Some_proj (proj2_dsig k)) s Hinf.
 
-Lemma stream_map_option_prefix
+(*Lemma stream_map_option_prefix
   (Hinf : InfinitelyOften P s)
   (n : nat)
   (map_opt_pre := map_option f (stream_prefix s n))
@@ -557,7 +557,7 @@ Proof.
   subst map_opt_pre m.
   rewrite !(map_option_as_filter f (stream_prefix s n)).
   apply fitering_subsequence_stream_filter_map_prefix.
-Qed.
+Qed.*)
 
 Program Definition stream_map_option_prefix_ex
   (Hinf : InfinitelyOften P s)
@@ -570,10 +570,10 @@ Next Obligation.
   by intros; cbn; rewrite !map_option_as_filter.
 Qed.
 
-Definition bounded_stream_map_option
+(*Definition bounded_stream_map_option
   (Hfin : FinitelyManyBound P s)
   : list B :=
-  map_option f (stream_prefix s (` Hfin)).
+  map_option f (stream_prefix s (` Hfin)).*)
 
 End stream_map_option.
 
