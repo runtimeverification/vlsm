@@ -1067,7 +1067,7 @@ Proof.
   unfold id in *.
   apply H.
   all : itauto.
-Qed.
+Qed.*)
 
 Lemma nth_error_eq
   {A : Type}
@@ -1085,7 +1085,7 @@ Proof.
     apply IHl1.
     intro n.
     apply (Hnth (S n)).
-Qed.*)
+Qed.
 
 (* TODO remove (we have Exists_first) *)
 (*Lemma exists_first
