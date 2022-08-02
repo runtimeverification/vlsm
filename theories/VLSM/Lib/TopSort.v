@@ -135,7 +135,7 @@ Proof.
   by destruct (decide (precedes a a)).
 Qed.
 
-Lemma precedes_asymmetric
+(*Lemma precedes_asymmetric
   (a b : A)
   (Ha : P a)
   (Hb : P b)
@@ -148,7 +148,7 @@ Proof.
       (exist P a Ha) (exist P b Hb)
       Hab Hba
     ).
-Qed.
+Qed.*)
 
 Lemma precedes_transitive
   (a b c : A)
@@ -340,7 +340,7 @@ Qed.
 As a corollary of the above, if <<a precedes b>> then <<a>> can be found before
 <<b>> in l.
 *)
-Corollary top_sort_precedes
+(*Corollary top_sort_precedes
   (a b : A)
   (Hab : precedes a b)
   (Ha : a ∈ l)
@@ -354,7 +354,7 @@ Proof.
   destruct Ha12 as [l1 [l2 Ha12]].
   subst l12.
   exists l1, l2, l3. by rewrite Hb', <- app_assoc.
-Qed.
+Qed.*)
 
 End topologically_sorted_fixed_list.
 End topologically_sorted.
@@ -761,7 +761,7 @@ Proof.
   by intro; apply Forall_forall.
 Qed.
 
-Corollary simple_topologically_sorted_precedes_closed_remove_last
+(*Corollary simple_topologically_sorted_precedes_closed_remove_last
   (l : list A)
   (Hts : topologically_sorted precedes l)
   (init : list A)
@@ -772,36 +772,36 @@ Corollary simple_topologically_sorted_precedes_closed_remove_last
 Proof.
   eapply topologically_sorted_precedes_closed_remove_last;
     [typeclasses eauto | apply Forall_True | done..].
-Qed.
+Qed.*)
 
-Corollary simple_top_sort_correct : forall l,
+(*Corollary simple_top_sort_correct : forall l,
   topological_sorting precedes l (top_sort precedes l).
 Proof.
   intro; eapply top_sort_correct; [typeclasses eauto | apply Forall_True].
-Qed.
+Qed.*)
 
-Corollary simple_maximal_element_in l
+(*Corollary simple_maximal_element_in l
   (a : A)
   (Hmax : get_maximal_element precedes l = Some a) :
   a ∈ l.
 Proof.
   eapply maximal_element_in; [typeclasses eauto | apply Forall_True | done].
-Qed.
+Qed.*)
 
-Corollary simple_get_maximal_element_correct l
+(*Corollary simple_get_maximal_element_correct l
   (a max : A)
   (Hina : a ∈ l)
   (Hmax : get_maximal_element precedes l = Some max) :
   ~ precedes max a.
 Proof.
   eapply get_maximal_element_correct; [typeclasses eauto | apply Forall_True | done..].
-Qed.
+Qed.*)
 
-Corollary simple_get_maximal_element_some
+(*Corollary simple_get_maximal_element_some
   l (Hne : l <> []) :
   exists a, get_maximal_element precedes l = Some a.
 Proof.
   eapply get_maximal_element_some; [apply Forall_True | done].
-Qed.
+Qed.*)
 
 End sec_simple_top_sort.
