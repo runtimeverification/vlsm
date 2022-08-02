@@ -11,12 +11,12 @@ Fixpoint up_to_n_listing
   | S n' => n' :: up_to_n_listing n'
   end.
 
-Lemma up_to_n_listing_length
+(*Lemma up_to_n_listing_length
   (n : nat)
   : length (up_to_n_listing n) = n.
 Proof.
   induction n; simpl; congruence.
-Qed.
+Qed.*)
 
 Lemma up_to_n_full
   (n : nat)
