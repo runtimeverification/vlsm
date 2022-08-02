@@ -58,13 +58,13 @@ Fixpoint add_in_sorted_list_fn {A} (compare : A -> A -> comparison) (x : A) (l :
     end
   end.
 
-Lemma add_in_sorted_list_no_empty {A} (compare : A -> A -> comparison) : forall msg sigma,
+(*Lemma add_in_sorted_list_no_empty {A} (compare : A -> A -> comparison) : forall msg sigma,
   add_in_sorted_list_fn compare msg sigma <> [].
 Proof.
   unfold not. intros. destruct sigma; simpl in H.
   - inversion H.
   - destruct (compare msg a); inversion H.
-Qed.
+Qed.*)
 
 Lemma add_in_sorted_list_in {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg msg' sigma,
   msg' ∈ (add_in_sorted_list_fn compare msg sigma) ->
@@ -176,7 +176,7 @@ Proof.
   - do 2 inversion 1; subst; firstorder.
 Qed.
 
-Lemma add_in_sorted_list_existing {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
+(*Lemma add_in_sorted_list_existing {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
   LocallySorted (compare_lt compare) sigma ->
   msg ∈ sigma ->
   add_in_sorted_list_fn compare msg sigma = sigma.
@@ -192,7 +192,7 @@ Proof.
       apply (@LocallySorted_elem_of_lt _ _ compare_lt_strict_order msg a sigma H0) in Hin.
       unfold compare_lt in Hin. apply compare_asymmetric in Hin.
       rewrite Hin in Hcmp. inversion Hcmp.
-Qed.
+Qed.*)
 
 Lemma set_eq_first_equal {A}  {lt : relation A} `{StrictOrder A lt} :
   forall x1 x2 s1 s2,
@@ -330,7 +330,7 @@ Proof.
   apply elem_of_app; right; left.
 Qed.
 
-Lemma lsorted_pair_wise_unordered
+(*Lemma lsorted_pair_wise_unordered
   {A : Type}
   (l : list A)
   (R : A -> A -> Prop)
@@ -369,4 +369,4 @@ Proof.
       rewrite Hconcat2 in Hconcat1.
       specialize (lsorted_pairwise_ordered l R Hsorted Htransitive x y pref1 pref2 suf2 Hconcat1).
       by intros; right; left.
-Qed.
+Qed.*)
