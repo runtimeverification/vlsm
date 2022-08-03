@@ -147,7 +147,7 @@ Proof.
   assert (forall x, Forever (Eventually (fun s => hd s <> x)) s).
   {
     intro x.
-    assert (∀ n : A, ¬ Eventually (Forever (λ s : Stream A, hd s = n)) s) by firstorder.
+    assert (forall n : A, ¬ Eventually (Forever (fun s : Stream A => hd s = n)) s) by firstorder.
     specialize (H0 x).
     apply not_eventually in H0.
     revert H0.

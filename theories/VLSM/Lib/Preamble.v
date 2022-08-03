@@ -219,6 +219,17 @@ Proof.
   - right. intro contra. elim n. revert contra. apply dsig_eq.
 Qed.
 
+(* https://coq.discourse.group/t/writing-equality-decision-that-reduces-dec-x-x-for-opaque-x/551/2 *)
+
+Lemma eq_dec_refl :
+  forall {A : Type} (eq_dec : forall x y : A, {x = y} + {x <> y}) (x : A),
+    eq_dec x x = left eq_refl.
+Proof.
+  intros A eq_dec x.
+  destruct (eq_dec x x); [| done].
+  by rewrite K_dec_type with (P := fun prf => prf = eq_refl).
+Qed.
+
 (**
 A minimal element of a subset <<S>> (defined by a predicate <<P>>) of some
 preordered set is defined as an element of S that is not greater than any other
