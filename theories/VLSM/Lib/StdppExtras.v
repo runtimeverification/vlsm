@@ -145,25 +145,6 @@ Proof.
   by rewrite existsb_Exists, <- Forall_Exists_neg, Forall_forall.
 Qed.
 
-(*Lemma existsb_first
-  {A : Type}
-  (l : list A)
-  (f : A -> bool)
-  (Hsomething : existsb f l = true) :
-  exists (prefix : list A)
-         (suffix : list A)
-         (first : A),
-         (f first = true) /\
-         l = prefix ++ [first] ++ suffix /\
-         (existsb f prefix = false).
-Proof.
-  setoid_rewrite <-not_true_iff_false.
-  setoid_rewrite existsb_Exists.
-  apply Exists_first.
-  - typeclasses eauto.
-  - by apply existsb_Exists.
-Qed.*)
-
 (* Returns all elements X of l such that X does not compare less
    than any other element w.r.t to the precedes relation *)
 
@@ -172,11 +153,11 @@ Definition maximal_elements_list
   : list A :=
   filter (fun a => Forall (fun b => (~ precedes a b)) l) l.
 
-(*Example maximal_elements_list1: maximal_elements_list Nat.lt [1; 4; 2; 4] = [4;4].
-Proof. itauto. Qed.*)
+Example maximal_elements_list1: maximal_elements_list Nat.lt [1; 4; 2; 4] = [4;4].
+Proof. itauto. Qed.
 
-(*Example maximal_elements_list2 : maximal_elements_list Nat.le [1; 4; 2; 4] = [].
-Proof. itauto. Qed.*)
+Example maximal_elements_list2 : maximal_elements_list Nat.le [1; 4; 2; 4] = [].
+Proof. itauto. Qed.
 
 (**
 Returns all elements <<x>> of a set <<S>> such that <<x>> does not compare less
@@ -229,38 +210,6 @@ Proof.
     destruct (decide (P a)); destruct (decide (Q a)); itauto.
 Qed.
 
-(*Lemma NoDup_elem_of_remove A (l l' : list A) a :
-  NoDup (l ++ a :: l') -> NoDup (l ++ l') /\ a ∉ (l ++ l').
-Proof.
-  intros Hnda.
-  apply NoDup_app in Hnda.
-  destruct Hnda as [Hnd [Ha Hnda]].
-  apply NoDup_cons in Hnda.
-  setoid_rewrite elem_of_cons in Ha.
-  destruct Hnda as [Ha' Hnd']; split.
-  - by apply NoDup_app; firstorder.
-  - by rewrite elem_of_app; firstorder.
-Qed.*)
-
-(*Lemma list_lookup_lt [A] (is : list A) :
-  forall i, is_Some (is !! i) ->
-  forall j, j < i -> is_Some (is !! j).
-Proof.
-  intros; apply lookup_lt_is_Some.
-  by etransitivity; [| apply lookup_lt_is_Some].
-Qed.*)
-
-(*Lemma list_suffix_lookup
-  {A : Type}
-  (s : list A)
-  (n : nat)
-  (i : nat)
-  (Hi : n <= i)
-  : list_suffix s n !! (i - n) = s !! i.
-Proof.
-  revert s n Hi; induction i; intros [| a s] [| n] Hi; cbn; try done; [| apply IHi]; lia.
-Qed.*)
-
 Lemma list_difference_singleton_not_in `{EqDecision A} :
   forall (l : list A) (a : A), a ∉ l ->
     list_difference l [a] = l.
@@ -284,27 +233,6 @@ Proof.
     + by rewrite list_difference_singleton_not_in; [lia |].
   - by inversion 1; subst; [done |]; cbn; spec IHl; [| lia].
 Qed.
-
-(*Lemma longer_subseteq_has_dups `{EqDecision A} :
-  forall l1 l2 : list A, l1 ⊆ l2 -> length l1 > length l2 ->
-  exists (i1 i2 : nat) (a : A), i1 ≠ i2 ∧ l1 !! i1 = Some a /\ l1 !! i2 = Some a.
-Proof.
-  induction l1; [inversion 2 |].
-  intros l2 Hl12 Hlen12.
-  destruct (decide (a ∈ l1)).
-  - exists 0.
-    apply elem_of_list_lookup_1 in e as [i2 Hi2].
-    by exists (S i2), a.
-  - edestruct (IHl1 (list_difference l2 [a]))
-           as (i1 & i2 & a' & Hi12 & Hli1 & Hli2); cycle 2.
-    + exists (S i1), (S i2), a'; cbn; itauto.
-    + intros x Hx.
-      rewrite elem_of_list_difference, elem_of_list_singleton.
-      by split; [apply Hl12; right | by contradict n; subst].
-    + cbn in Hlen12.
-      assert (Ha : a ∈ l2) by (apply Hl12; left).
-      specialize (list_difference_singleton_length_in _ _ Ha) as Hlen'; lia.
-Qed.*)
 
 Lemma ForAllSuffix2_lookup [A : Type] (R : A -> A -> Prop) l
   : ForAllSuffix2 R l <-> forall n a b, l !! n = Some a -> l !! (S n) = Some b -> R a b.
@@ -336,18 +264,6 @@ Proof.
   apply lookup_lt_is_Some in Hlt as [c Hc].
   by transitivity c; [apply IHk | eapply Hall].
 Qed.
-
-(** If the <<n>>-th element of <<l>> is <<x>>, then we can decompose long enough
-    suffixes of <<l>> into <<x>> and a suffix shorter by 1. *)
-(*Lemma lastn_length_cons :
-  forall {A : Type} (n : nat) (l : list A) (x : A),
-    l !! n = Some x -> lastn (length l - n) l = x :: lastn (length l - S n) l.
-Proof.
-  intros A n l x H.
-  unfold lastn.
-  rewrite <- rev_length, <- !skipn_rev, rev_involutive.
-  by apply drop_S.
-Qed.*)
 
 Lemma filter_in {A} P `{∀ (x:A), Decision (P x)} x s :
   In x s ->
@@ -712,25 +628,3 @@ Proof.
   rewrite contra in H0.
   destruct H0; inversion H0.
 Qed.
-
-(**
-  When a list contains two elements, either they are equal or we can split
-  the list into three parts separated by the elements (and this can be done
-  in two ways, depending on the order of the elements).
-*)
-(*Lemma elem_of_list_split_2 :
-  forall {A : Type} (l : list A) (x y : A),
-    x ∈ l -> y ∈ l ->
-      x = y \/ exists l1 l2 l3 : list A,
-        l = l1 ++ x :: l2 ++ y :: l3 \/ l = l1 ++ y :: l2 ++ x :: l3.
-Proof.
-  intros A x y l Hx Hy.
-  apply elem_of_list_split in Hx as (l1 & l2 & ->).
-  rewrite elem_of_app, elem_of_cons in Hy.
-  destruct Hy as [Hy | [-> | Hy]]; [| by left |].
-  - apply elem_of_list_split in Hy as (l11 & l12 & ->).
-    right; exists l11, l12, l2; right; cbn.
-    by rewrite <- app_assoc.
-  - apply elem_of_list_split in Hy as (l21 & l22 & ->).
-    by right; exists l1, l21, l22; left; cbn.
-Qed.*)

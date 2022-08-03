@@ -58,14 +58,6 @@ Fixpoint add_in_sorted_list_fn {A} (compare : A -> A -> comparison) (x : A) (l :
     end
   end.
 
-(*Lemma add_in_sorted_list_no_empty {A} (compare : A -> A -> comparison) : forall msg sigma,
-  add_in_sorted_list_fn compare msg sigma <> [].
-Proof.
-  unfold not. intros. destruct sigma; simpl in H.
-  - inversion H.
-  - destruct (compare msg a); inversion H.
-Qed.*)
-
 Lemma add_in_sorted_list_in {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg msg' sigma,
   msg' ∈ (add_in_sorted_list_fn compare msg sigma) ->
   msg = msg' \/ msg' ∈ sigma.
@@ -175,24 +167,6 @@ Proof.
   - inversion 2.
   - do 2 inversion 1; subst; firstorder.
 Qed.
-
-(*Lemma add_in_sorted_list_existing {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
-  LocallySorted (compare_lt compare) sigma ->
-  msg ∈ sigma ->
-  add_in_sorted_list_fn compare msg sigma = sigma.
-Proof.
-  induction sigma; intros.
-  - inversion H1.
-  - rewrite elem_of_cons in H1.
-    destruct H1 as [Heq | Hin].
-    + by subst; simpl; rewrite compare_eq_refl.
-    + apply LocallySorted_tl in H0 as LS.
-      spec IHsigma LS Hin. simpl.
-      destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma. 1, 3: done.
-      apply (@LocallySorted_elem_of_lt _ _ compare_lt_strict_order msg a sigma H0) in Hin.
-      unfold compare_lt in Hin. apply compare_asymmetric in Hin.
-      rewrite Hin in Hcmp. inversion Hcmp.
-Qed.*)
 
 Lemma set_eq_first_equal {A}  {lt : relation A} `{StrictOrder A lt} :
   forall x1 x2 s1 s2,
@@ -329,44 +303,3 @@ Proof.
   spec Hneed; [| done].
   apply elem_of_app; right; left.
 Qed.
-
-(*Lemma lsorted_pair_wise_unordered
-  {A : Type}
-  (l : list A)
-  (R : A -> A -> Prop)
-  (Hsorted : LocallySorted R l)
-  (Htransitive : Transitive R)
-  (x y : A)
-  (Hin_x : x ∈ l)
-  (Hin_y : y ∈ l) :
-  x = y \/ R x y \/ R y x.
-Proof.
-  apply elem_of_list_split in Hin_x.
-  destruct Hin_x as [pref1 [suf1 Hconcat1]].
-  rewrite Hconcat1 in Hin_y.
-  apply elem_of_app in Hin_y.
-  rewrite elem_of_cons in Hin_y.
-  assert (y =x \/ y ∈ (pref1 ++ suf1)). {
-    destruct Hin_y as [Hin_y|Hin_y]; [|destruct Hin_y].
-    - by right; apply elem_of_app; left.
-    - by left.
-    - by right; apply elem_of_app; right.
-  }
-  clear Hin_y.
-  rename H into Hin_y.
-  destruct Hin_y as [Hin_y|Hin_y].
-  - symmetry in Hin_y.
-    itauto.
-  - apply elem_of_app in Hin_y; destruct Hin_y.
-    * apply elem_of_list_split in H.
-      destruct H as [pref2 [suf2 Hconcat2]].
-      rewrite Hconcat2 in Hconcat1.
-      rewrite <- app_assoc in Hconcat1.
-      specialize (lsorted_pairwise_ordered l R Hsorted Htransitive y x pref2 suf2 suf1 Hconcat1).
-      by intros; right; right.
-    * apply elem_of_list_split in H.
-      destruct H as [pref2 [suf2 Hconcat2]].
-      rewrite Hconcat2 in Hconcat1.
-      specialize (lsorted_pairwise_ordered l R Hsorted Htransitive x y pref1 pref2 suf2 Hconcat1).
-      by intros; right; left.
-Qed.*)

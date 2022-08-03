@@ -116,19 +116,6 @@ Lemma refutation [A:Type] [R:A -> A-> Prop] (HR: well_founded R)
   by eapply H0; eauto.
 Qed.
 
-(*Lemma forall_forever: forall [A B:Type] (P: A -> Stream B -> Prop) [s: Stream B],
-    (forall (a:A), Forever (P a) s) -> Forever (fun s => forall a, P a s) s.
-Proof.
-  intros A B P.
-  cofix forall_forever.
-  destruct s.
-  intro H.
-  constructor.
-  - intro a. by destruct (H a).
-  - apply forall_forever.
-    intro a. by destruct (H a).
-Qed.*)
-
 Lemma not_forever [A:Type] (P: Stream A -> Prop):
   forall s, ~Forever P s -> Eventually (fun s => ~ P s) s.
 Proof.
