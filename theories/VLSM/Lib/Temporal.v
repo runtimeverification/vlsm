@@ -144,10 +144,10 @@ Proof.
   intro Hprogress.
   apply Classical_Prop.NNPP.
   intro H.
-  pose proof (not_ex_all_not _ _ H); clear H. simpl in H0.
   assert (forall x, Forever (Eventually (fun s => hd s <> x)) s).
   {
     intro x.
+    assert (forall n : A, ¬ Eventually (Forever (fun s : Stream A => hd s = n)) s) by firstorder.
     specialize (H0 x).
     apply not_eventually in H0.
     revert H0.
@@ -155,7 +155,7 @@ Proof.
     clear. intros s H.
     by apply not_forever in H.
   }
-  clear H0.
+  clear H; rename H0 into H.
   refine (@refutation _ _ HR s _).
   revert s Hprogress H.
   cofix the_lemma.

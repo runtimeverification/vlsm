@@ -17,7 +17,7 @@ Lemma set_eq_extract_forall
   (l1 l2 : set A)
   : set_eq l1 l2 <-> forall a, (a ∈ l1 <-> a ∈ l2).
 Proof.
-  unfold set_eq. apply forall_and_commute.
+  unfold set_eq. firstorder.
 Qed.
 
 Lemma set_eq_proj1 {A} : forall (s1 s2 : set A),
