@@ -130,18 +130,13 @@ Proof. itauto congruence. Qed.
 Definition inb {A} (Aeq_dec : forall x y:A, {x = y} + {x <> y}) (x : A) (xs : list A) :=
   if in_dec Aeq_dec x xs then true else false.
 
-Lemma in_function {A}  (Aeq_dec : forall x y:A, {x = y} + {x <> y}) :
-  PredicateFunction2 (@In A) (inb Aeq_dec).
-Proof.
-  by intros x xs; unfold inb; destruct (in_dec Aeq_dec x xs).
-Qed.
-
 Lemma in_correct `{EqDecision X} :
   forall (l : list X) (x : X),
     In x l <-> inb decide_eq x l = true.
 Proof.
   intros s msg.
-  apply in_function.
+  unfold inb.
+  destruct (in_dec _ _ _); itauto congruence.
 Qed.
 
 Lemma in_correct_refl `{EqDecision X} :
@@ -166,9 +161,12 @@ Definition inclb
   : bool
   := forallb (fun x : A => inb decide_eq x l2) l1.
 
-Lemma incl_function `{EqDecision A} : PredicateFunction2 (@incl A) (inclb).
+Lemma incl_correct `{EqDecision A}
+  (l1 l2 : list A)
+  : incl l1 l2 <-> inclb l1 l2 = true.
 Proof.
-  intros l1 l2. unfold inclb. rewrite forallb_forall.
+  unfold inclb.
+  rewrite forallb_forall.
   by split; intros Hincl x Hx; apply in_correct; apply Hincl.
 Qed.
 
