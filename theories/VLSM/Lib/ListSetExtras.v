@@ -27,6 +27,13 @@ Proof.
   by intros s1 s2 [].
 Qed.
 
+Lemma set_eq_proj2 {A} : forall (s1 s2 : set A),
+  set_eq s1 s2 ->
+  s2 ⊆ s1.
+Proof.
+  by intros s1 s2 [].
+Qed.
+
 Lemma set_eq_refl {A} : forall (s : list A), set_eq s s.
 Proof.
   by induction s.
@@ -69,10 +76,29 @@ Proof.
   firstorder.
 Qed.
 
+Lemma set_eq_Forall
+  {A : Type}
+  (s1 s2 : set A)
+  (H12 : set_eq s1 s2)
+  (P : A -> Prop)
+  : Forall P s1 <-> Forall P s2.
+Proof.
+  rewrite !Forall_forall. firstorder.
+Qed.
+
 Lemma set_union_comm `{EqDecision A}  : forall (s1 s2 : list A),
   set_eq (set_union s1 s2) (set_union s2 s1).
 Proof.
   intros s1 s2; split; intro x; rewrite !set_union_iff; itauto.
+Qed.
+
+Lemma set_union_empty `{EqDecision A}  : forall (s1 s2 : list A),
+  set_union s1 s2 = [] ->
+  s1 = [] /\ s2 = [].
+Proof.
+  intros.
+  destruct s2; [done |].
+  by cbn in H; apply set_add_not_empty in H.
 Qed.
 
 Lemma set_union_nodup_left `{EqDecision A} (l l' : set A)
@@ -232,6 +258,25 @@ Proof.
   induction l as [|hd tl IHl]; inversion 1; subst; cbn.
   - by rewrite decide_True.
   - rewrite IHl; [| done]. by destruct (decide (x = hd)).
+Qed.
+
+Lemma set_add_new `{EqDecision A}:
+  forall (x:A) l, ~x ∈ l -> set_add x l = l++[x].
+Proof.
+  induction l; cbn; [done |]; intros H_not_in.
+  rewrite decide_False; cycle 1.
+  - by intros ->; apply H_not_in; left.
+  - rewrite elem_of_cons in H_not_in. rewrite IHl; itauto.
+Qed.
+
+Lemma set_remove_not_elem_of `{EqDecision A} : forall x (s : list A),
+  ~ x ∈ s ->
+  set_remove x s = s.
+Proof.
+  induction s; cbn; intros; [done |].
+  rewrite decide_False; cycle 1.
+  + by intros ->; contradict H; left.
+  + rewrite IHs; [done |]. rewrite elem_of_cons in H. itauto.
 Qed.
 
 Lemma set_remove_elim `{EqDecision A} : forall x (s : list A),
