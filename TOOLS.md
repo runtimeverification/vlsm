@@ -36,9 +36,7 @@ To minimize a single file's list of Coq require sentences, run the script `minim
 ./../coq-tools/minimize-requires.py file.v --in-place .bak
 ```
 
-In the single file case, all the projects `-Q` or `-R` options must be manually passed to the script.
-
-To instead minimize the requires in the entire project without the need to manually pass paths, run the script from the directory where the `_CoqProject` file lives:
+In this single file case, all the project's `-Q`/`-R` options must be manually passed to the script. To instead minimize the require sentences in the entire project without the need to manually pass any paths, run the script from the directory where the `_CoqProject` file lives:
 
 ```shell
 ./../coq-tools/minimize-requires.py --all -f _CoqProject
