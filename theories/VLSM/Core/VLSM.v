@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From Coq Require Import Lists.Streams.
+From Coq Require Import Streams.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
 
 (** * VLSM Basics

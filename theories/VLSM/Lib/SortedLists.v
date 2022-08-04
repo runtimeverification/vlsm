@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From Coq Require Import Sorting.Sorting.
+From Coq Require Import Sorting.
 From VLSM.Lib Require Import Preamble ListExtras ListSetExtras.
 
 (** * Sorted list utility functions and lemmas **)

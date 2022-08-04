@@ -1,5 +1,5 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From Coq Require Import Reals.Reals.
+From Coq Require Import Reals.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras Measurable StdppExtras.
 From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition SubProjectionTraces.

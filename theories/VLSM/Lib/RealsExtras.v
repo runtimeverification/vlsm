@@ -1,4 +1,4 @@
-From Coq Require Import Reals.Reals.
+From Coq Require Import Reals.
 From stdpp Require Import prelude.
 
 (** * Real number utility lemmas *)

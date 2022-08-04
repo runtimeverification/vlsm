@@ -1,7 +1,7 @@
-From Coq Require Export Program.Tactics.
+From Coq Require Export Tactics.
 Obligation Tactic := idtac.
 From stdpp Require Import prelude.
-From Coq Require Import Logic.Eqdep_dec.
+From Coq Require Import Eqdep_dec.
 
 (** * General utility definitions, lemmas, and tactics *)
 

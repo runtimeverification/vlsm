@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import Lists.Streams Logic.FunctionalExtensionality Logic.Eqdep_dec.
+From Coq Require Import Streams FunctionalExtensionality Eqdep_dec.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections.
 
