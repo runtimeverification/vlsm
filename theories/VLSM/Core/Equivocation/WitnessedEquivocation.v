@@ -2,7 +2,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import SubProjectionTraces MessageDependencies Equivocation.
-From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.FixedSetEquivocation Equivocation.TraceWiseEquivocation.
+From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquivocation.
 
 (** * Witnessed equivocation
 
