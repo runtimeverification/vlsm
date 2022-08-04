@@ -1,7 +1,7 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.prelude.
-Require Import Coq.Lists.Streams.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StreamExtras.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude.
+From Coq Require Import Lists.Streams.
+From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
 
 (** * VLSM Basics
 
@@ -15,7 +15,7 @@ This module provides basic VLSM infrastructure.
 The type of a VLSM is a triple consisting of the underlying types of
 messages, states, and labels.
 
-In Coq it is defined as a Class taking <<message>> as parameter and having
+InFrom Coq Require Import it is defined as a Class taking <<message>> as parameter and having
 [state] and [label] as fields.  <<message>> is a parameter to allow it to be
 easily shared by multiple VLSMs during composition.
 *)

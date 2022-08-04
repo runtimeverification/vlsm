@@ -1,7 +1,7 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.finite.
-Require Import Coq.Logic.FinFun.
-Require Import VLSM.Lib.Preamble.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import finite.
+From Coq Require Import Logic.FinFun.
+From VLSM.Lib Require Import Preamble.
 
 (** * Utility lemmas about lists *)
 

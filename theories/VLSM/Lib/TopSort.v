@@ -1,6 +1,6 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.prelude.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.ListSetExtras VLSM.Lib.StdppListSet VLSM.Lib.StdppExtras.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude.
+From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet StdppExtras.
 
 (** * Topological sorting implementation *)
 

@@ -1,7 +1,7 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.prelude.
-Require Import Coq.Sorting.Sorting Coq.Classes.RelationClasses Coq.Relations.Relations Coq.Structures.Orders.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet VLSM.Lib.ListSetExtras.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude.
+From Coq Require Import Sorting.Sorting Classes.RelationClasses Relations.Relations Structures.Orders.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras.
 
 (** * Sorted list utility functions and lemmas **)
 

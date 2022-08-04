@@ -1,14 +1,14 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.prelude stdpp.finite.
-Require Import Coq.Logic.FinFun Coq.micromega.Lia Coq.Reals.Reals Coq.micromega.Lra.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet VLSM.Lib.ListSetExtras VLSM.Lib.FinExtras VLSM.Lib.FinFunExtras VLSM.Lib.Measurable.
-Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.ProjectionTraces VLSM.Core.AnnotatedVLSM.
-Require Import VLSM.Core.Equivocation VLSM.Core.Equivocation.TraceWiseEquivocation.
-Require Import VLSM.Core.Equivocation.NoEquivocation VLSM.Core.Equivocation.LimitedMessageEquivocation VLSM.Core.Equivocation.MsgDepLimitedEquivocation.
-Require Import VLSM.Core.Equivocators.Equivocators VLSM.Core.Equivocators.EquivocatorsProjections.
-Require Import VLSM.Core.Equivocators.MessageProperties VLSM.Core.Equivocators.Composition.EquivocatorsComposition.
-Require Import VLSM.Core.Equivocators.Composition.EquivocatorsCompositionProjections VLSM.Core.MessageDependencies.
-Require Import VLSM.Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude finite.
+From Coq Require Import Logic.FinFun micromega.Lia Reals.Reals micromega.Lra.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinExtras FinFunExtras Measurable.
+From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces AnnotatedVLSM.
+From VLSM.Core Require Import Equivocation Equivocation.TraceWiseEquivocation.
+From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.LimitedMessageEquivocation Equivocation.MsgDepLimitedEquivocation.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
+From VLSM.Core Require Import Equivocators.MessageProperties Equivocators.Composition.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections MessageDependencies.
+From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
 
 (** * VLSM Limited Equivocation *)
 Definition composite_constraint

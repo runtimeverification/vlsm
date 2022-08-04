@@ -1,6 +1,6 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.prelude.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppExtras VLSM.Lib.StdppListSet.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude.
+From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
 
 (** * List set utility definitions and lemmas *)
 
@@ -383,7 +383,7 @@ Qed.
 (** An improved version of the [set_diff_nodup] Lemma not requiring [NoDup]
 for the second argument.
 *)
-(* TODO(palmskog): consider submitting a PR to Coq's stdlib. *)
+(* TODO(palmskog): consider submitting a PR toFrom Coq Require Import s stdlib. *)
 
 Lemma diff_app_nodup `{EqDecision A} : forall (s1 s2 : list A),
   NoDup s1 ->
@@ -526,7 +526,7 @@ Proof.
   - done.
 Qed.
 
-Require Import Coq.Setoids.Setoid.
+From Coq Require Import Setoids.Setoid.
 
 Add Parametric Relation A : (set A) (@set_eq A)
  reflexivity proved by (@set_eq_refl A)

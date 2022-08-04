@@ -1,9 +1,9 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.prelude stdpp.finite.
-Require Import Coq.Logic.FunctionalExtensionality.
-Require Import VLSM.Lib.Preamble VLSM.Lib.StdppListSet VLSM.Lib.FinFunExtras VLSM.Lib.ListExtras.
-Require Import VLSM.Core.VLSM VLSM.Core.MessageDependencies VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.ProjectionTraces VLSM.Core.SubProjectionTraces VLSM.Core.ByzantineTraces.
-Require Import VLSM.Core.Validator VLSM.Core.Equivocation VLSM.Core.EquivocationProjections VLSM.Core.Equivocation.NoEquivocation VLSM.Core.Equivocation.FixedSetEquivocation.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude finite.
+From Coq Require Import Logic.FunctionalExtensionality.
+From VLSM.Lib Require Import Preamble StdppListSet FinFunExtras ListExtras.
+From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces SubProjectionTraces ByzantineTraces.
+From VLSM.Core Require Import Validator Equivocation EquivocationProjections Equivocation.NoEquivocation Equivocation.FixedSetEquivocation.
 
 (** * VLSM Compositions with a fixed set of byzantine nodes
 

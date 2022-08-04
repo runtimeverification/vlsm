@@ -1,9 +1,9 @@
-Require Import stdpp.prelude.
-Require Import Coq.Logic.FinFun Coq.Reals.Rdefinitions Coq.Logic.FunctionalExtensionality.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet VLSM.Lib.ListSetExtras VLSM.Lib.Measurable.
-Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.ProjectionTraces.
-Require Import VLSM.Core.SubProjectionTraces VLSM.Core.MessageDependencies VLSM.Core.Equivocation.
-Require Import VLSM.Core.Equivocation.NoEquivocation VLSM.Core.Equivocation.FixedSetEquivocation VLSM.Core.Equivocation.TraceWiseEquivocation.
+From stdpp Require Import prelude.
+From Coq Require Import Logic.FinFun Reals.Rdefinitions Logic.FunctionalExtensionality.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras Measurable.
+From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
+From VLSM.Core Require Import SubProjectionTraces MessageDependencies Equivocation.
+From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.FixedSetEquivocation Equivocation.TraceWiseEquivocation.
 
 (** * Witnessed equivocation
 

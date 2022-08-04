@@ -1,15 +1,15 @@
-Require Import stdpp.prelude stdpp.finite.
-Require Import Coq.Logic.FinFun Coq.micromega.Lia Coq.Logic.FunctionalExtensionality.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.FinExtras VLSM.Lib.FinFunExtras.
-Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.ProjectionTraces VLSM.Core.SubProjectionTraces.
-Require Import VLSM.Core.Equivocation VLSM.Core.Equivocation.NoEquivocation.
-Require Import VLSM.Core.Equivocators.Equivocators VLSM.Core.Equivocators.EquivocatorsProjections.
-Require Import VLSM.Core.Equivocators.MessageProperties.
-Require Import VLSM.Core.Equivocators.Composition.EquivocatorsComposition.
-Require Import VLSM.Core.Equivocators.Composition.EquivocatorsCompositionProjections.
-Require Import VLSM.Core.Equivocators.Composition.SimulatingFree.FullReplayTraces.
-Require Import VLSM.Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
-Require Import VLSM.Core.Plans.
+From stdpp Require Import prelude finite.
+From Coq Require Import Logic.FinFun micromega.Lia Logic.FunctionalExtensionality.
+From VLSM.Lib Require Import Preamble ListExtras FinExtras FinFunExtras.
+From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces SubProjectionTraces.
+From VLSM.Core Require Import Equivocation Equivocation.NoEquivocation.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
+From VLSM.Core Require Import Equivocators.MessageProperties.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
+From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplayTraces.
+From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
+From VLSM.Core Require Import Plans.
 
 (** * Equivocators simulating regular nodes
 

@@ -1,8 +1,8 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import Coq.Lists.Streams Coq.Logic.FunctionalExtensionality Coq.Logic.FinFun Coq.Logic.Eqdep.
-Require Import stdpp.prelude.
-Require Import VLSM.Lib.Preamble VLSM.Lib.StreamExtras VLSM.Lib.ListExtras VLSM.Lib.StdppExtras.
-Require Import VLSM.Core.VLSM VLSM.Core.Plans VLSM.Core.Composition VLSM.Core.VLSMProjections VLSM.Core.Validator.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From Coq Require Import Lists.Streams Logic.FunctionalExtensionality Logic.FinFun Logic.Eqdep.
+From stdpp Require Import prelude.
+From VLSM.Lib Require Import Preamble StreamExtras ListExtras StdppExtras.
+From VLSM.Core Require Import VLSM Plans Composition VLSMProjections Validator.
 
 Section projections.
 

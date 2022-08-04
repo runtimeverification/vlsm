@@ -1,13 +1,13 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.prelude stdpp.finite.
-Require Import Coq.Lists.Streams Coq.Logic.FunctionalExtensionality Coq.Logic.FinFun Coq.Logic.Eqdep_dec.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet VLSM.Lib.StreamExtras.
-Require Import VLSM.Core.VLSM VLSM.Core.Plans VLSM.Core.VLSMProjections.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude finite.
+From Coq Require Import Lists.Streams Logic.FunctionalExtensionality Logic.FinFun Logic.Eqdep_dec.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet StreamExtras.
+From VLSM.Core Require Import VLSM Plans VLSMProjections.
 
 (** * VLSM Composition *)
 
 (**
-This module provides Coq definitions for composite VLSMs and their projections
+This module providesFrom Coq Require Import definitions for composite VLSMs and their projections
 to components.
 *)
 

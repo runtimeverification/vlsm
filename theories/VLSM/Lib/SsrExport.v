@@ -1,6 +1,6 @@
 (** * SSReflect exports *)
 
-Require Export Coq.ssr.ssreflect.
+From Coq Require Export ssr.ssreflect.
 #[export] Set SsrOldRewriteGoalsOrder.
 #[export] Set Asymmetric Patterns.
 #[export] Set Bullet Behavior "None".

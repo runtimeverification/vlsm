@@ -1,16 +1,16 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.prelude.
-Require Import Coq.Logic.FinFun.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras.
-Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.ProjectionTraces VLSM.Core.SubProjectionTraces.
-Require Import VLSM.Core.Equivocation VLSM.Core.EquivocationProjections VLSM.Core.Equivocation.FixedSetEquivocation VLSM.Core.Equivocation.NoEquivocation.
-Require Import VLSM.Core.Equivocators.Equivocators VLSM.Core.Equivocators.EquivocatorsProjections.
-Require Import VLSM.Core.Equivocators.MessageProperties.
-Require Import VLSM.Core.Equivocators.Composition.EquivocatorsComposition.
-Require Import VLSM.Core.Equivocators.Composition.EquivocatorsCompositionProjections.
-Require Import VLSM.Core.Equivocators.Composition.SimulatingFree.FullReplayTraces.
-Require Import VLSM.Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
-Require Import VLSM.Core.Equivocators.Composition.SimulatingFree.SimulatingFree.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude.
+From Coq Require Import Logic.FinFun.
+From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces SubProjectionTraces.
+From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.FixedSetEquivocation Equivocation.NoEquivocation.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
+From VLSM.Core Require Import Equivocators.MessageProperties.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
+From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplayTraces.
+From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
+From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.SimulatingFree.
 
 (** * VLSM Equivocators Simulating fixed-set equivocation composition
 
@@ -175,7 +175,7 @@ Proof.
     apply elem_of_list_lookup.
     rewrite StdppExtras.last_last_error in Hlast.
     replace (Some _) with (last im_etr).
-    clear. (* TODO: replace with stdpp.list.last_lookup once it becomes available *)
+    clear. (* TODO: replace withFrom stdpp Require Import list.last_lookup once it becomes available *)
     exists (pred (length im_etr)).
     by induction im_etr as [| ?[]].
   - apply last_error_destination_last.

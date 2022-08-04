@@ -1,11 +1,11 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import Coq.Reals.Reals.
-Require Import stdpp.prelude stdpp.finite.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet VLSM.Lib.ListSetExtras VLSM.Lib.FinFunExtras VLSM.Lib.Measurable VLSM.Lib.StdppExtras.
-Require Import VLSM.Core.VLSM VLSM.Core.AnnotatedVLSM VLSM.Core.MessageDependencies VLSM.Core.VLSMProjections VLSM.Core.Composition.
-Require Import VLSM.Core.Validator VLSM.Core.ProjectionTraces VLSM.Core.SubProjectionTraces VLSM.Core.Equivocation.
-Require Import VLSM.Core.Equivocation.FixedSetEquivocation VLSM.Core.Equivocation.TraceWiseEquivocation.
-Require Import VLSM.Core.Equivocation.LimitedMessageEquivocation VLSM.Core.Equivocation.MsgDepFixedSetEquivocation.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From Coq Require Import Reals.Reals.
+From stdpp Require Import prelude finite.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinFunExtras Measurable StdppExtras.
+From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition.
+From VLSM.Core Require Import Validator ProjectionTraces SubProjectionTraces Equivocation.
+From VLSM.Core Require Import Equivocation.FixedSetEquivocation Equivocation.TraceWiseEquivocation.
+From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation Equivocation.MsgDepFixedSetEquivocation.
 
 (** To allow capturing the two models of limited equivocation described in the
     sections below, we first define a notion of limited equivocation parameterized

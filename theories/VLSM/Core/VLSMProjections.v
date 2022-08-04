@@ -1,10 +1,10 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import stdpp.prelude.
-Require Import Coq.Logic.FunctionalExtensionality.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StreamExtras VLSM.Lib.StreamFilters.
-Require Import VLSM.Core.VLSM.
-Require Export VLSM.Core.VLSMProjections.VLSMPartialProjection VLSM.Core.VLSMProjections.VLSMTotalProjection.
-Require Export VLSM.Core.VLSMProjections.VLSMEmbedding VLSM.Core.VLSMProjections.VLSMInclusion VLSM.Core.VLSMProjections.VLSMEquality.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From stdpp Require Import prelude.
+From Coq Require Import Logic.FunctionalExtensionality.
+From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
+From VLSM.Core Require Import VLSM.
+From VLSM.Core Require Export VLSMProjections.VLSMPartialProjection VLSMProjections.VLSMTotalProjection.
+From VLSM.Core Require Export VLSMProjections.VLSMEmbedding VLSMProjections.VLSMInclusion VLSMProjections.VLSMEquality.
 
 (** * VLSM Projection Properties *)
 

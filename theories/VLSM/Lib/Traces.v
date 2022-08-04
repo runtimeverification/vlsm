@@ -1,4 +1,4 @@
-Require Import VLSM.Lib.SsrExport.
+From VLSM.Lib Require Import SsrExport.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

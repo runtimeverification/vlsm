@@ -1,5 +1,5 @@
-Require Import Coq.Reals.Reals Coq.Classes.RelationClasses.
-Require Import stdpp.prelude.
+From Coq Require Import Reals.Reals Classes.RelationClasses.
+From stdpp Require Import prelude.
 
 (** * Real number utility lemmas *)
 

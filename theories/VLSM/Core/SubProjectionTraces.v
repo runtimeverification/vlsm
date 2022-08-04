@@ -1,9 +1,9 @@
-Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-Require Import Coq.Logic.FunctionalExtensionality Coq.micromega.Lia Coq.Logic.FinFun.
-Require Import stdpp.prelude stdpp.finite.
-Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet VLSM.Lib.StdppExtras.
-Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.ProjectionTraces VLSM.Core.Composition VLSM.Core.Validator.
-Require Import VLSM.Core.Equivocation VLSM.Core.EquivocationProjections VLSM.Core.Equivocation.NoEquivocation.
+From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From Coq Require Import Logic.FunctionalExtensionality micromega.Lia Logic.FinFun.
+From stdpp Require Import prelude finite.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
+From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.
+From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.NoEquivocation.
 
 (** * VLSM Subcomposition *)
 
