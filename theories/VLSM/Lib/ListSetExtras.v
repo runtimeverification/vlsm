@@ -462,7 +462,7 @@ Qed.
 (** An improved version of the [set_diff_nodup] Lemma not requiring [NoDup]
 for the second argument.
 *)
-(* TODO(palmskog): consider submitting a PR toFrom Coq Require Import s stdlib. *)
+(* TODO(palmskog): consider submitting a PR to Coq's stdlib. *)
 Lemma set_diff_nodup' `{EqDecision A} (l l' : list A)
   : NoDup l -> NoDup (set_diff l l').
 Proof.

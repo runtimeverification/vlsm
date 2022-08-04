@@ -1,4 +1,4 @@
-From Coq Require Export Tactics.
+From Coq Require Export Program.Tactics.
 Obligation Tactic := idtac.
 From stdpp Require Import prelude.
 From Coq Require Import Eqdep_dec.
@@ -140,7 +140,7 @@ Lemma tc_reflect_irreflexive
   `(R : relation A) `{!Irreflexive (tc R)} : Irreflexive R.
 Proof. by intros ? ?; eapply irreflexivity with (R := tc R); [| constructor]. Qed.
 
-(* TODO(traian): remove these definitions and use the standardFrom stdpp Require Import ones instead.*)
+(* TODO(traian): remove these definitions and use the standard stdpp ones instead.*)
 Definition dec_sig {A} (P : A -> Prop) {P_dec : forall x, Decision (P x)} : Type
   := dsig P.
 

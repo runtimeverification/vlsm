@@ -7,7 +7,7 @@ From VLSM.Core Require Import VLSM Plans VLSMProjections.
 (** * VLSM Composition *)
 
 (**
-This module providesFrom Coq Require Import definitions for composite VLSMs and their projections
+This module provides Coq definitions for composite VLSMs and their projections
 to components.
 *)
 

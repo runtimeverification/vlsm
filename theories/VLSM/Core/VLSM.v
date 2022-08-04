@@ -15,7 +15,7 @@ This module provides basic VLSM infrastructure.
 The type of a VLSM is a triple consisting of the underlying types of
 messages, states, and labels.
 
-InFrom Coq Require Import it is defined as a Class taking <<message>> as parameter and having
+In Coq it is defined as a Class taking <<message>> as parameter and having
 [state] and [label] as fields.  <<message>> is a parameter to allow it to be
 easily shared by multiple VLSMs during composition.
 *)
