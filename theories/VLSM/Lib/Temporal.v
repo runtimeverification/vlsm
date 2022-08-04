@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From Coq Require Import Streams Classical.
+From Coq Require Import Lists.Streams Logic.Classical.
 
 (** * Temporal Logic Predicates and Results **)
 

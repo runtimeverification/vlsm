@@ -1,5 +1,5 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From Coq Require Import Streams Rdefinitions.
+From Coq Require Import Lists.Streams Reals.Rdefinitions.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
 From VLSM.Lib Require Import ListSetExtras Measurable.

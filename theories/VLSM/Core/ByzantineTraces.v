@@ -1,5 +1,6 @@
 From stdpp Require Import prelude.
-From VLSM Require Import Lib.Preamble Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.Validator.
+From VLSM.Lib Require Import Preamble.
+From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 
 (** * VLSM Byzantine Traces
 

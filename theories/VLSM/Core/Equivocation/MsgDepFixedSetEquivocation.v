@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppListSet.
-From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition Equivocation FixedSetEquivocation ProjectionTraces SubProjectionTraces.
+From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition Equivocation Equivocation.FixedSetEquivocation ProjectionTraces SubProjectionTraces.
 
 Section msg_dep_fixed_set_equivocation.
 

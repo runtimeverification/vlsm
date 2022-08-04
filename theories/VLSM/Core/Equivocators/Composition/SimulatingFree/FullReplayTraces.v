@@ -1,12 +1,12 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import FinFun Program.
-From VLSM Require Import Lib.Preamble Lib.ListExtras.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.SubProjectionTraces.
-From VLSM Require Import Core.Equivocation Core.Equivocation.NoEquivocation.
-From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections Core.Equivocators.EquivocatorReplay.
-From VLSM Require Import Core.Equivocators.MessageProperties Core.Equivocators.Composition.EquivocatorsComposition.
-From VLSM Require Import Core.Equivocators.Composition.EquivocatorsCompositionProjections Core.Plans.
+From Coq Require Import Logic.FinFun Program.Program.
+From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM.Core Require Import VLSM VLSMProjections Composition SubProjectionTraces.
+From VLSM.Core Require Import Equivocation Equivocation.NoEquivocation.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections Equivocators.EquivocatorReplay.
+From VLSM.Core Require Import Equivocators.MessageProperties Equivocators.Composition.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections Plans.
 
 (** * VLSM Equivocator Full Replay Traces
 

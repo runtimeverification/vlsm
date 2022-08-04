@@ -1,14 +1,14 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From VLSM Require Import Lib.Preamble Lib.ListExtras.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces.
-From VLSM Require Import Core.Equivocation Core.EquivocationProjections Core.Equivocation.FixedSetEquivocation Core.Equivocation.NoEquivocation.
-From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
-From VLSM Require Import Core.Equivocators.Composition.EquivocatorsComposition.
-From VLSM Require Import Core.Equivocators.Composition.EquivocatorsCompositionProjections.
-From VLSM Require Import Core.Equivocators.Composition.SimulatingFree.FullReplayTraces.
-From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
-From VLSM Require Import Core.Equivocators.Composition.SimulatingFree.SimulatingFree.
+From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces SubProjectionTraces.
+From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.FixedSetEquivocation Equivocation.NoEquivocation.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
+From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplayTraces.
+From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
+From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.SimulatingFree.
 
 (** * VLSM Equivocators Simulating fixed-set equivocation composition
 
@@ -173,7 +173,7 @@ Proof.
     apply elem_of_list_lookup.
     rewrite StdppExtras.last_last_error in Hlast.
     replace (Some _) with (last im_etr).
-    clear. (* TODO: replace with stdpp.list.last_lookup once it becomes available *)
+    clear. (* TODO: replace withFrom stdpp Require Import list.last_lookup once it becomes available *)
     exists (pred (length im_etr)).
     by induction im_etr as [| ?[]].
   - apply last_error_destination_last.
