@@ -43,3 +43,20 @@ In this single file case, all the project's `-Q`/`-R` options must be manually p
 ```
 
 Note that the results of running the script must be manually validated. If the script removes dependencies which are actually used, they will need to be added back manually.
+
+### Axiom use analysis
+
+To do basic axiom use analysis for the project as a whole, run the
+following command in the project root directory:
+
+```shell
+make validate
+```
+
+To do detailed axiom use analysis for all files in a certain directory,
+for example `theories/CBC`, run the following command in the project
+root directory:
+
+```shell
+make axioms path=theories/CBC
+```
