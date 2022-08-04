@@ -1,6 +1,5 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From Coq Require Import FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMTotalProjection.
 

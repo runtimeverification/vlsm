@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras.
-From VLSM.Core Require Import VLSM VLSMProjections Validator Composition ProjectionTraces.
+From VLSM.Core Require Import VLSM VLSMProjections Validator Composition.
 
 (** * State-annotated VLSMs
 

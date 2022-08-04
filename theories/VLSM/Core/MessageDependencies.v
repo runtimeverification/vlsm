@@ -1,8 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From Coq Require Import FinFun Relations.Relation_Operators Program.Equality.
-From stdpp Require Import prelude finite.
-From VLSM.Lib Require Import Preamble ListExtras FinFunExtras StdppListSet Measurable.
-From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
+From stdpp Require Import prelude.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
+From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
 (** * VLSM Message Dependencies

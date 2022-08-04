@@ -1,5 +1,4 @@
 From stdpp Require Import prelude.
-From Coq Require Import FinFun.
 From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition.
 From VLSM Require Import Core.Equivocation.
 

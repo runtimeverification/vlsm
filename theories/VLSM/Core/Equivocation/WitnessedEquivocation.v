@@ -1,7 +1,6 @@
 From stdpp Require Import prelude.
-From Coq Require Import FinFun Rdefinitions FunctionalExtensionality.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras Measurable.
-From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras.
+From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import SubProjectionTraces MessageDependencies Equivocation.
 From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquivocation.
 

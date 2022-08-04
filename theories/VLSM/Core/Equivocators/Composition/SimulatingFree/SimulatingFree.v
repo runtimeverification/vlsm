@@ -1,15 +1,12 @@
 From stdpp Require Import prelude finite.
-From Coq Require Import FinFun Lia FunctionalExtensionality.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.FinExtras Lib.FinFunExtras.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces.
+From Coq Require Import FinFun FunctionalExtensionality.
+From VLSM Require Import Lib.Preamble Lib.ListExtras.
+From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.SubProjectionTraces.
 From VLSM Require Import Core.Equivocation Core.Equivocation.NoEquivocation.
-From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
-From VLSM Require Import Core.Equivocators.MessageProperties.
+From VLSM Require Import Core.Equivocators.Equivocators.
 From VLSM Require Import Core.Equivocators.Composition.EquivocatorsComposition.
 From VLSM Require Import Core.Equivocators.Composition.EquivocatorsCompositionProjections.
 From VLSM Require Import Core.Equivocators.Composition.SimulatingFree.FullReplayTraces.
-From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
-From VLSM Require Import Core.Plans.
 
 (** * Equivocators simulating regular nodes
 
