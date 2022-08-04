@@ -173,7 +173,7 @@ Proof.
     apply elem_of_list_lookup.
     rewrite StdppExtras.last_last_error in Hlast.
     replace (Some _) with (last im_etr).
-    clear. (* TODO: replace withFrom stdpp Require Import list.last_lookup once it becomes available *)
+    clear. (* TODO: replace with stdpp list.last_lookup once it becomes available *)
     exists (pred (length im_etr)).
     by induction im_etr as [| ?[]].
   - apply last_error_destination_last.
