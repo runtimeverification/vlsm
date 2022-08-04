@@ -1,5 +1,5 @@
 From stdpp Require Import prelude finite.
-From Coq Require Import Logic.FinFun Logic.FunctionalExtensionality.
+From Coq Require Import FinFun FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition SubProjectionTraces.
 From VLSM.Core Require Import Equivocation Equivocation.NoEquivocation.
