@@ -1,5 +1,5 @@
-From Coq Require Import Classical ClassicalEpsilon.
-From VLSM Require Import Lib.SsrExport Lib.Traces Lib.TraceProperties.
+Require Import Coq.Logic.Classical Coq.Logic.ClassicalEpsilon.
+Require Import VLSM.Lib.SsrExport VLSM.Lib.Traces VLSM.Lib.TraceProperties.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

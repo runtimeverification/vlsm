@@ -1,16 +1,16 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude.
-From Coq Require Import FinFun.
-From VLSM Require Import Lib.Preamble Lib.ListExtras.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.SubProjectionTraces.
-From VLSM Require Import Core.Equivocation Core.EquivocationProjections Core.Equivocation.FixedSetEquivocation Core.Equivocation.NoEquivocation.
-From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
-From VLSM Require Import Core.Equivocators.MessageProperties.
-From VLSM Require Import Core.Equivocators.Composition.EquivocatorsComposition.
-From VLSM Require Import Core.Equivocators.Composition.EquivocatorsCompositionProjections.
-From VLSM Require Import Core.Equivocators.Composition.SimulatingFree.FullReplayTraces.
-From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
-From VLSM Require Import Core.Equivocators.Composition.SimulatingFree.SimulatingFree.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude.
+Require Import Coq.Logic.FinFun.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras.
+Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.ProjectionTraces VLSM.Core.SubProjectionTraces.
+Require Import VLSM.Core.Equivocation VLSM.Core.EquivocationProjections VLSM.Core.Equivocation.FixedSetEquivocation VLSM.Core.Equivocation.NoEquivocation.
+Require Import VLSM.Core.Equivocators.Equivocators VLSM.Core.Equivocators.EquivocatorsProjections.
+Require Import VLSM.Core.Equivocators.MessageProperties.
+Require Import VLSM.Core.Equivocators.Composition.EquivocatorsComposition.
+Require Import VLSM.Core.Equivocators.Composition.EquivocatorsCompositionProjections.
+Require Import VLSM.Core.Equivocators.Composition.SimulatingFree.FullReplayTraces.
+Require Import VLSM.Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
+Require Import VLSM.Core.Equivocators.Composition.SimulatingFree.SimulatingFree.
 
 (** * VLSM Equivocators Simulating fixed-set equivocation composition
 

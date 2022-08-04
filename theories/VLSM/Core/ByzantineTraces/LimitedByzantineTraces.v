@@ -1,11 +1,11 @@
-From stdpp Require Import prelude finite.
-From Coq Require Import FunctionalExtensionality Reals.
-From VLSM.Lib Require Import Preamble StdppListSet Measurable FinFunExtras StdppExtras ListSetExtras.
-From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM ByzantineTraces FixedSetByzantineTraces.
-From VLSM.Core Require Import Validator Equivocation Equivocation.FixedSetEquivocation.
-From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation Equivocation.LimitedMessageEquivocation.
-From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation Equivocation.TraceWiseEquivocation.
+Require Import stdpp.prelude stdpp.finite.
+Require Import Coq.Logic.FunctionalExtensionality Coq.Reals.Reals.
+Require Import VLSM.Lib.Preamble VLSM.Lib.StdppListSet VLSM.Lib.Measurable VLSM.Lib.FinFunExtras VLSM.Lib.StdppExtras VLSM.Lib.ListSetExtras.
+Require Import VLSM.Core.VLSM VLSM.Core.MessageDependencies VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.ProjectionTraces.
+Require Import VLSM.Core.SubProjectionTraces VLSM.Core.AnnotatedVLSM VLSM.Core.ByzantineTraces VLSM.Core.ByzantineTraces.FixedSetByzantineTraces.
+Require Import VLSM.Core.Validator VLSM.Core.Equivocation VLSM.Core.Equivocation.FixedSetEquivocation.
+Require Import VLSM.Core.Equivocation.LimitedMessageEquivocation VLSM.Core.Equivocation.LimitedMessageEquivocation.
+Require Import VLSM.Core.Equivocation.MsgDepLimitedEquivocation VLSM.Core.Equivocation.TraceWiseEquivocation.
 
 (** * VLSM Compositions with Byzantine nodes of limited weight
 

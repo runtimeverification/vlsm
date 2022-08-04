@@ -1,14 +1,14 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude finite.
-From Coq Require Import FinFun.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet FinExtras.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.Equivocation.
-From VLSM Require Import Core.Equivocation.NoEquivocation Core.Equivocation.FullNode Core.Equivocation.FixedSetEquivocation.
-From VLSM Require Import Core.SubProjectionTraces Core.ProjectionTraces.
-From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
-From VLSM Require Import Core.Equivocators.MessageProperties.
-From VLSM Require Import Core.Equivocators.Composition.EquivocatorsComposition.
-From VLSM Require Import Core.Equivocators.Composition.EquivocatorsCompositionProjections.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude stdpp.finite.
+Require Import Coq.Logic.FinFun.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet VLSM.Lib.FinExtras.
+Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.Equivocation.
+Require Import VLSM.Core.Equivocation.NoEquivocation VLSM.Core.Equivocation.FullNode VLSM.Core.Equivocation.FixedSetEquivocation.
+Require Import VLSM.Core.SubProjectionTraces VLSM.Core.ProjectionTraces.
+Require Import VLSM.Core.Equivocators.Equivocators VLSM.Core.Equivocators.EquivocatorsProjections.
+Require Import VLSM.Core.Equivocators.MessageProperties.
+Require Import VLSM.Core.Equivocators.Composition.EquivocatorsComposition.
+Require Import VLSM.Core.Equivocators.Composition.EquivocatorsCompositionProjections.
 
 (** * VLSM Equivocators Fixed Equivocation *)
 

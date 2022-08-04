@@ -1,10 +1,10 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude.
-From Coq Require Import Vectors.Fin FunctionalExtensionality Arith.Compare_dec Lia Program.Equality.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
-From VLSM Require Import Lib.ListSetExtras Lib.FinExtras.
-From VLSM Require Import Core.VLSM Core.Equivocation.
-From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude.
+Require Import Coq.Vectors.Fin Coq.Logic.FunctionalExtensionality Coq.Arith.Compare_dec Coq.micromega.Lia Coq.Program.Equality.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet.
+Require Import VLSM.Lib.ListSetExtras VLSM.Lib.FinExtras.
+Require Import VLSM.Core.VLSM VLSM.Core.Equivocation.
+Require Import VLSM.Core.Equivocators.Equivocators VLSM.Core.Equivocators.EquivocatorsProjections.
 
 (** * VLSM Message Properties *)
 

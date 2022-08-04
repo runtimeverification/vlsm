@@ -1,8 +1,8 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude finite.
-From Coq Require Import Relations.Relation_Operators.
-From VLSM.Lib Require Import Preamble StdppListSet FinFunExtras.
-From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition Equivocation FixedSetEquivocation ProjectionTraces SubProjectionTraces.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude stdpp.finite.
+Require Import Coq.Relations.Relation_Operators.
+Require Import VLSM.Lib.Preamble VLSM.Lib.StdppListSet VLSM.Lib.FinFunExtras.
+Require Import VLSM.Core.VLSM VLSM.Core.MessageDependencies VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.Equivocation VLSM.Core.Equivocation.FixedSetEquivocation VLSM.Core.ProjectionTraces VLSM.Core.SubProjectionTraces.
 
 Section msg_dep_fixed_set_equivocation.
 

@@ -1,7 +1,7 @@
-From stdpp Require Import prelude.
-From Coq Require Import Eqdep Lia.
-From VLSM Require Import Lib.Preamble Lib.ListExtras.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Equivocators.Equivocators.
+Require Import stdpp.prelude.
+Require Import Coq.Logic.Eqdep Coq.micromega.Lia.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras.
+Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Equivocators.Equivocators.
 
 (** * VLSM Projecting Equivocator Traces *)
 

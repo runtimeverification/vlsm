@@ -1,6 +1,6 @@
-From stdpp Require Import prelude.
-From Coq Require Import Streams Sorted.
-From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists.
+Require Import stdpp.prelude.
+Require Import Coq.Lists.Streams Coq.Sorting.Sorted.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppExtras VLSM.Lib.SortedLists.
 
 (** * Stream utility definitions and lemmas *)
 

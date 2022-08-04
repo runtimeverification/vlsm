@@ -1,9 +1,9 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From Coq Require Import FinFun Relations.Relation_Operators Program.Equality.
-From stdpp Require Import prelude finite.
-From VLSM.Lib Require Import Preamble ListExtras FinFunExtras StdppListSet Measurable.
-From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import Coq.Logic.FinFun Coq.Relations.Relation_Operators Coq.Program.Equality.
+Require Import stdpp.prelude stdpp.finite.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.FinFunExtras VLSM.Lib.StdppListSet VLSM.Lib.Measurable.
+Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.Validator VLSM.Core.ProjectionTraces.
+Require Import VLSM.Core.SubProjectionTraces VLSM.Core.Equivocation VLSM.Core.EquivocationProjections.
 
 (** * VLSM Message Dependencies
 

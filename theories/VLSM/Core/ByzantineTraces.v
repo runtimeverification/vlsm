@@ -1,6 +1,6 @@
-From stdpp Require Import prelude.
-From Coq Require Import FinFun.
-From VLSM Require Import Lib.Preamble Core.VLSM Core.VLSMProjections Core.Composition Core.ProjectionTraces Core.Validator.
+Require Import stdpp.prelude.
+Require Import Coq.Logic.FinFun.
+Require Import VLSM.Lib.Preamble VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.ProjectionTraces VLSM.Core.Validator.
 
 (** * VLSM Byzantine Traces
 

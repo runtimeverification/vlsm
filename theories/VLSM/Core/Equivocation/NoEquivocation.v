@@ -1,7 +1,7 @@
-From stdpp Require Import prelude.
-From Coq Require Import FunctionalExtensionality FinFun.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StreamExtras.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.Equivocation.
+Require Import stdpp.prelude.
+Require Import Coq.Logic.FunctionalExtensionality Coq.Logic.FinFun.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StreamExtras.
+Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.Equivocation.
 
 (** * VLSM No Equivocation Composition Constraints *)
 

@@ -1,7 +1,7 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude.
-From Coq Require Import Eqdep Vectors.Fin Program.Equality Lia FunctionalExtensionality.
-From VLSM Require Import Lib.Preamble Core.VLSM Core.VLSMProjections.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude.
+Require Import Coq.Logic.Eqdep Coq.Vectors.Fin Coq.Program.Equality Coq.micromega.Lia Coq.Logic.FunctionalExtensionality.
+Require Import VLSM.Lib.Preamble VLSM.Core.VLSM VLSM.Core.VLSMProjections.
 
 (** * VLSM Equivocation
 

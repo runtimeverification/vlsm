@@ -1,7 +1,7 @@
-From stdpp Require Import prelude.
-From Coq Require Import FinFun.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition.
-From VLSM Require Import Core.Equivocation.
+Require Import stdpp.prelude.
+Require Import Coq.Logic.FinFun.
+Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition.
+Require Import VLSM.Core.Equivocation.
 
 Section full_node_constraint.
 

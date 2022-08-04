@@ -1,11 +1,11 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude finite.
-From Coq Require Import FinFun Rdefinitions.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet.
-From VLSM Require Import Lib.ListSetExtras Lib.Measurable.
-From VLSM Require Import Core.VLSM Core.Composition Core.ProjectionTraces.
-From VLSM Require Import Core.Equivocation Core.Equivocation.NoEquivocation Core.Equivocation.FixedSetEquivocation.
-From VLSM Require Import Lib.Preamble Lib.StdppExtras.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude stdpp.finite.
+Require Import Coq.Logic.FinFun Coq.Reals.Rdefinitions.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet.
+Require Import VLSM.Lib.ListSetExtras VLSM.Lib.Measurable.
+Require Import VLSM.Core.VLSM VLSM.Core.Composition VLSM.Core.ProjectionTraces.
+Require Import VLSM.Core.Equivocation VLSM.Core.Equivocation.NoEquivocation VLSM.Core.Equivocation.FixedSetEquivocation.
+Require Import VLSM.Lib.Preamble VLSM.Lib.StdppExtras.
 
 (** * VLSM Trace-wise Equivocation
 

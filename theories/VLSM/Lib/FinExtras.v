@@ -1,4 +1,4 @@
-From stdpp Require Import prelude.
+Require Import stdpp.prelude.
 
 (** * Finite type utility definitions and lemmas *)
 

@@ -1,6 +1,6 @@
-From stdpp Require Import prelude finite.
-From Coq Require Import FinFun.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppExtras.
+Require Import stdpp.prelude stdpp.finite.
+Require Import Coq.Logic.FinFun.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppExtras.
 
 (** * Finite function utility definitions and lemmas *)
 

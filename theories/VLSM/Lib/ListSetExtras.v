@@ -1,6 +1,6 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppExtras VLSM.Lib.StdppListSet.
 
 (** * List set utility definitions and lemmas *)
 
@@ -526,7 +526,7 @@ Proof.
   - done.
 Qed.
 
-Require Import Setoid.
+Require Import Coq.Setoids.Setoid.
 
 Add Parametric Relation A : (set A) (@set_eq A)
  reflexivity proved by (@set_eq_refl A)

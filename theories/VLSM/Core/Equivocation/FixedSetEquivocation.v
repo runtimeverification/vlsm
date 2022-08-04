@@ -1,9 +1,9 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From Coq Require Import FinFun FunctionalExtensionality.
-From stdpp Require Import prelude finite.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
-From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces Equivocation Equivocation.NoEquivocation.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import Coq.Logic.FinFun Coq.Logic.FunctionalExtensionality.
+Require Import stdpp.prelude stdpp.finite.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet.
+Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Composition VLSM.Core.Validator VLSM.Core.ProjectionTraces.
+Require Import VLSM.Core.SubProjectionTraces VLSM.Core.Equivocation VLSM.Core.Equivocation.NoEquivocation.
 
 (** * Fixed Set Equivocation
 

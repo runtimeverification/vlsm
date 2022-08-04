@@ -1,6 +1,6 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude.
-From VLSM.Core Require Import VLSM VLSMProjections.VLSMEmbedding VLSMProjections.VLSMTotalProjection.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude.
+Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections.VLSMEmbedding VLSM.Core.VLSMProjections.VLSMTotalProjection.
 
 (** * VLSM Inclusion
 

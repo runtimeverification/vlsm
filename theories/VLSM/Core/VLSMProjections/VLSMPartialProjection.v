@@ -1,7 +1,7 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble.
-From VLSM.Core Require Import VLSM.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude.
+Require Import VLSM.Lib.Preamble.
+Require Import VLSM.Core.VLSM.
 
 Section VLSM_partial_projection.
 

@@ -1,6 +1,6 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude.
-From VLSM Require Import Lib.ListExtras Core.VLSM.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude.
+Require Import VLSM.Lib.ListExtras VLSM.Core.VLSM.
 
 (** * VLSM Plans *)
 

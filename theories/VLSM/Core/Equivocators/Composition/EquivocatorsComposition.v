@@ -1,11 +1,11 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
-From stdpp Require Import prelude finite.
-From Coq Require Import FinFun FunctionalExtensionality.
-From VLSM Require Import Lib.Preamble Lib.ListExtras Lib.StdppListSet Lib.ListSetExtras Lib.StdppExtras.
-From VLSM Require Import Lib.FinExtras Lib.FinFunExtras Lib.Measurable.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Plans Core.Composition Core.Equivocation Core.SubProjectionTraces Core.Equivocation.NoEquivocation.
-From VLSM Require Import Core.Equivocators.Equivocators Core.Equivocators.EquivocatorsProjections.
-From VLSM Require Import Core.Equivocators.MessageProperties.
+Require Import Cdcl.Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+Require Import stdpp.prelude stdpp.finite.
+Require Import Coq.Logic.FinFun Coq.Logic.FunctionalExtensionality.
+Require Import VLSM.Lib.Preamble VLSM.Lib.ListExtras VLSM.Lib.StdppListSet VLSM.Lib.ListSetExtras VLSM.Lib.StdppExtras.
+Require Import VLSM.Lib.FinExtras VLSM.Lib.FinFunExtras VLSM.Lib.Measurable.
+Require Import VLSM.Core.VLSM VLSM.Core.VLSMProjections VLSM.Core.Plans VLSM.Core.Composition VLSM.Core.Equivocation VLSM.Core.SubProjectionTraces VLSM.Core.Equivocation.NoEquivocation.
+Require Import VLSM.Core.Equivocators.Equivocators VLSM.Core.Equivocators.EquivocatorsProjections.
+Require Import VLSM.Core.Equivocators.MessageProperties.
 
 (** * VLSM Equivocator Composition
 
