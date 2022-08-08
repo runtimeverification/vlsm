@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
-From VLSM Require Import Lib.Preamble.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.Equivocation.
+From VLSM.Lib Require Import Preamble.
+From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
 
 (** * VLSM No Equivocation Composition Constraints *)
 

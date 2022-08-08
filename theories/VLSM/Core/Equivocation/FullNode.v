@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition.
-From VLSM Require Import Core.Equivocation.
+From VLSM.Core Require Import VLSM VLSMProjections Composition.
+From VLSM.Core Require Import Equivocation.
 
 Section full_node_constraint.
 

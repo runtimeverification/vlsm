@@ -2,7 +2,7 @@ From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
 From VLSM.Lib Require Import Preamble StdppListSet Measurable ListSetExtras.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM FixedSetByzantineTraces.
+From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM ByzantineTraces.FixedSetByzantineTraces.
 From VLSM.Core Require Import Validator Equivocation Equivocation.FixedSetEquivocation.
 From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation.
 From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation Equivocation.TraceWiseEquivocation.

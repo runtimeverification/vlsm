@@ -1,5 +1,5 @@
 From Coq Require Import Program.Equality.
-From VLSM Require Import Lib.SsrExport Lib.Traces.
+From VLSM.Lib Require Import SsrExport Traces.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

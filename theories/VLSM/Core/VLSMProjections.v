@@ -2,8 +2,8 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From Coq Require Import FunctionalExtensionality.
 From VLSM.Core Require Import VLSM.
-From VLSM.Core.VLSMProjections Require Export VLSMPartialProjection VLSMTotalProjection.
-From VLSM.Core.VLSMProjections Require Export VLSMEmbedding VLSMInclusion VLSMEquality.
+From VLSM.Core Require Export VLSMPartialProjection VLSMTotalProjection.
+From VLSM.Core Require Export VLSMEmbedding VLSMInclusion VLSMEquality.
 
 (** * VLSM Projection Properties *)
 

@@ -1,15 +1,16 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import FinFun Reals.
-From VLSM Require Import Lib.StdppListSet.
-From VLSM Require Import Core.VLSM Core.VLSMProjections Core.Composition Core.AnnotatedVLSM.
-From VLSM Require Import Core.Equivocation Core.Equivocation.FixedSetEquivocation.
-From VLSM Require Import Lib.Measurable Core.Equivocation.TraceWiseEquivocation Core.Equivocation.LimitedMessageEquivocation Core.Equivocation.MsgDepLimitedEquivocation.
-From VLSM Require Import MessageDependencies Core.Equivocation.WitnessedEquivocation.
-From VLSM Require Import Core.Equivocators.Composition.EquivocatorsComposition Core.Equivocators.Composition.EquivocatorsCompositionProjections.
-From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.LimitedStateEquivocation.
-From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocationSimulation.
-From VLSM Require Import Core.Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
+From VLSM.Lib Require Import StdppListSet.
+From VLSM.Core Require Import VLSM VLSMProjections Composition AnnotatedVLSM.
+From VLSM.Core Require Import Equivocation Equivocation.FixedSetEquivocation.
+From VLSM.Lib Require Import Measurable.
+From VLSM.Core Require Import Equivocation.TraceWiseEquivocation Equivocation.LimitedMessageEquivocation Equivocation.MsgDepLimitedEquivocation.
+From VLSM.Core Require Import MessageDependencies Equivocation.WitnessedEquivocation.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition Equivocators.Composition.EquivocatorsCompositionProjections.
+From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.LimitedStateEquivocation.
+From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocationSimulation.
+From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
 
 (** * VLSM Equivocators Simulating limited message equivocation traces
 

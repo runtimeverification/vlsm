@@ -4,8 +4,9 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 From VLSM.Core Require Import SubProjectionTraces Equivocation.
-From VLSM.Core.Equivocation Require Import NoEquivocation.
-From VLSM.Core.Equivocators Require Import Equivocators EquivocatorsProjections Composition.EquivocatorsComposition MessageProperties.
+From VLSM.Core Require Import Equivocation.NoEquivocation.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition Equivocators.MessageProperties.
 
 (** * VLSM Equivocator Composition Projections *)
 

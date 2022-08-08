@@ -1,7 +1,8 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From Coq Require Import Eqdep Vectors.Fin FunctionalExtensionality.
-From VLSM Require Import Lib.Preamble Core.VLSM Core.VLSMProjections.
+From Coq Require Import Eqdep Fin FunctionalExtensionality.
+From VLSM.Lib Require Import Preamble.
+From VLSM.Core Require Import VLSM VLSMProjections.
 
 (** * VLSM Equivocation
 
