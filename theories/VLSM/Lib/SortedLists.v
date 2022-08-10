@@ -18,7 +18,7 @@ Fixpoint list_compare {A} (compare : A -> A -> comparison)
     end
   end.
 
-Instance list_compare_strict_order {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+#[export] Instance list_compare_strict_order {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
   CompareStrictOrder (@list_compare A compare).
 Proof.
   intros. destruct H as [R T].

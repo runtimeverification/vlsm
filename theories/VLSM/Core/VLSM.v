@@ -2456,7 +2456,7 @@ Proof.
   by apply valid_trace_add_last.
 Defined.
 
-Instance trace_with_last_valid_trace_from:
+#[export] Instance trace_with_last_valid_trace_from:
   TraceWithLast (@finite_valid_trace_from) (@finite_valid_trace_from_to)
   := {valid_trace_add_last := @finite_valid_trace_from_add_last;
       valid_trace_get_last := @finite_valid_trace_from_to_last;
@@ -2464,7 +2464,7 @@ Instance trace_with_last_valid_trace_from:
       valid_trace_forget_last := @finite_valid_trace_from_to_forget_last;
      }.
 
-Instance trace_with_last_valid_trace_init:
+#[export] Instance trace_with_last_valid_trace_init:
   TraceWithLast (@finite_valid_trace) (@finite_valid_trace_init_to)
   := {valid_trace_add_last := @finite_valid_trace_init_add_last;
       valid_trace_get_last := @finite_valid_trace_init_to_last;
@@ -2481,16 +2481,16 @@ Class TraceWithStart
  }.
 #[global] Hint Mode TraceWithStart - - - ! : typeclass_instances.
 
-Instance trace_with_start_valid_trace_from message (X: VLSM message) s:
+#[export] Instance trace_with_start_valid_trace_from message (X: VLSM message) s:
   TraceWithStart s (finite_valid_trace_from X s)
   := {valid_trace_first_pstate := finite_valid_trace_first_pstate X s}.
-Instance trace_with_start_valid_trace message (X: VLSM message) s:
+#[export] Instance trace_with_start_valid_trace message (X: VLSM message) s:
   TraceWithStart s (finite_valid_trace X s)
   := {valid_trace_first_pstate tr H := valid_trace_first_pstate (proj1 H)}.
-Instance trace_with_start_valid_trace_from_to message (X: VLSM message) s f:
+#[export] Instance trace_with_start_valid_trace_from_to message (X: VLSM message) s f:
   TraceWithStart s (finite_valid_trace_from_to X s f)
   := {valid_trace_first_pstate tr H := valid_trace_first_pstate (valid_trace_forget_last H)}.
-Instance trace_with_start_valid_trace_init_to message (X: VLSM message) s f:
+#[export] Instance trace_with_start_valid_trace_init_to message (X: VLSM message) s f:
   TraceWithStart s (finite_valid_trace_init_to X s f)
   := {valid_trace_first_pstate tr H := valid_trace_first_pstate (valid_trace_forget_last H)}.
 

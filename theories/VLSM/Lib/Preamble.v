@@ -50,7 +50,7 @@ Proof. firstorder. Qed.
 Lemma Decision_not : forall {P}, Decision P -> Decision (~P).
 Proof. firstorder. Qed.
 
-Instance bool_decision {b:bool} : Decision b :=
+#[export] Instance bool_decision {b:bool} : Decision b :=
   match b return {b}+{~b} with
           | true => left I
           | false => right (fun H => H)
@@ -356,7 +356,7 @@ Proof.
     + by apply (TR _ _ _ _ Hyx), compare_eq_gt in H.
 Qed.
 
-Instance CompareStrictOrder_Asymmetric {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
+#[export] Instance CompareStrictOrder_Asymmetric {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
 Proof.
   apply compare_asymmetric_intro.
 Defined.
@@ -418,7 +418,7 @@ Class StrictlyComparable (X : Type) : Type :=
    }.
 #[global] Hint Mode StrictlyComparable ! : typeclass_instances.
 
-Instance strictly_comparable_eq_dec `{StrictlyComparable M}
+#[export] Instance strictly_comparable_eq_dec `{StrictlyComparable M}
   : EqDecision M.
 Proof.
   intros x y.
@@ -569,7 +569,7 @@ Proof.
 Qed.
 
 (* Now we can have the following for free : *)
-Instance OptionStrictlyComparable
+#[export] Instance OptionStrictlyComparable
   (X : Type)
   {Xsc : StrictlyComparable X}
   : StrictlyComparable (option X) :=
@@ -665,13 +665,13 @@ Proof.
 Qed.
 
 (* Now we can have the following for free : *)
-Instance ComposeStrictlyComparable (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y} : StrictlyComparable (X * Y) :=
+#[export] Instance ComposeStrictlyComparable (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y} : StrictlyComparable (X * Y) :=
   { inhabited := inhabited_compose;
     compare := compare_compose X Y;
     compare_strictorder := strictorder_compose;
   }.
 
-Instance TripleStrictlyComparable (X Y Z : Type) `{StrictlyComparable X} `{StrictlyComparable Y} `{StrictlyComparable Z} : StrictlyComparable (X * Y * Z) :=
+#[export] Instance TripleStrictlyComparable (X Y Z : Type) `{StrictlyComparable X} `{StrictlyComparable Y} `{StrictlyComparable Z} : StrictlyComparable (X * Y * Z) :=
   { inhabited := inhabited_compose;
     compare := compare_compose (X * Y) Z;
     compare_strictorder := strictorder_compose;
