@@ -24,14 +24,14 @@ Example:
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
 ```
 
-- in case of [`Stdlib`](https://coq.inria.fr/distrib/current/stdlib/) imports, the pattern should not include the full logical paths
+- in case of [Stdlib](https://coq.inria.fr/distrib/current/stdlib/) imports, the pattern should not include the full logical paths
 
 Example:
 ```coq
 From Coq Require Import FunctionalExtensionality Lia.
 ```
 
-- exception to the rule regarding `stdlib` imports: Imports from `Program` preserve their entire path.
+- exception to the rule regarding [Stdlib](https://coq.inria.fr/distrib/current/stdlib/) imports: Imports from `Program` preserve their entire path.
 
 Example:
 ```coq
