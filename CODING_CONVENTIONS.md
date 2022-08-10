@@ -12,6 +12,32 @@ Try to keep your lines at most 80 characters long.
 
 ## Coq source files
 
+### Require-Imports 
+
+- general pattern: 
+```coq
+From VLSM.X Require Import Module_Name1 Module_Name2.
+``` 
+
+Example:
+```coq
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
+```
+
+- in case of `stdlib` imports, the pattern should not include the full logical paths
+
+Example:
+```coq
+From Coq Require Import FunctionalExtensionality Lia.
+```
+
+- exception to the rule regarding `stdlib` imports: Imports from `Program` preserve their entire path.
+
+Example:
+```coq
+From Coq Require Export Program.Tactics.
+```
+
 ### Sections
 
 - C-style name
