@@ -24,7 +24,7 @@ Example:
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
 ```
 
-- in case of `stdlib` imports, the pattern should not include the full logical paths
+- in case of [`Stdlib`](https://coq.inria.fr/distrib/current/stdlib/) imports, the pattern should not include the full logical paths
 
 Example:
 ```coq
