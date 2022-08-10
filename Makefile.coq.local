@@ -28,7 +28,7 @@ coqdoc: $(DOCGLOBFILES) $(DOCVFILES) $(CSSFILES) $(JSFILES) $(HTMLFILES)
 .PHONY: coqdoc
 
 axioms: $(DOCVOFILES)
-	@scripts/axiom-diagnostics.sh "${COQLIBS}" "${path}"
+	@scripts/axiom-diagnostics.sh "${COQLIBS}" "${path}" "${keep_tmp}"
 .PHONY: axioms
 
 RATIOS.md: $(DOCVFILES)

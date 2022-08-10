@@ -6,6 +6,7 @@ then
   echo "Usage:"
   echo "make axioms"
   echo "make axioms path=path_to_source_directory"
+  echo "make axioms path=path_to_source_directory keep_tmp=true"
   exit
 fi
 
@@ -18,6 +19,14 @@ then
   dir=.
 else
   dir=$2
+fi
+
+# If argument $3 is set to true, then keep it. Otherwise set it to false.
+if [[ $3 ]] && [ $3 == true ]
+then
+  keep_tmp=true
+else
+  keep_tmp=false
 fi
 
 # Create a temporary directory to hold intermediate results.
@@ -71,5 +80,8 @@ sed -r \
 `# Simpler notice when no axioms were used.` \
 -e 's/Closed under the global context/No Axioms/'
 
-# Delete the temporary directory.
-rm -rf "$tmp"
+# Delete the temporary directory (unless user wants to keep it).
+if [ $keep_tmp == false ]
+then
+  rm -rf "$tmp"
+fi
