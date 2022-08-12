@@ -5,6 +5,8 @@ From Coq Require Import Eqdep_dec.
 
 (** * General utility definitions, lemmas, and tactics *)
 
+(** Tactics for specializing hypotheses *)
+
 Tactic Notation "spec" hyp(H) :=
   match type of H with ?a -> _ =>
   let H1 := fresh in (assert (H1: a);
@@ -24,22 +26,22 @@ Tactic Notation "spec" hyp(H) constr(a) constr(b) constr(c) constr(d) :=
 Tactic Notation "spec" hyp(H) constr(a) constr(b) constr(c) constr(d) constr(e) :=
   (generalize (H a b c d e); clear H; intro H).
 
-Notation decide_eq := (fun x y => decide (x = y)).
+(** Basic logic *)
 
 Lemma Is_true_iff_eq_true: forall x: bool, x = true <-> x.
 Proof.
-  split. apply Is_true_eq_left. apply Is_true_eq_true.
+  split.
+  - apply Is_true_eq_left.
+  - apply Is_true_eq_true.
 Qed.
 
 Lemma and_proper_l (A B C : Prop) : ((A -> (B <-> C)) -> ((A /\ B) <-> (A /\ C))).
-Proof.
-  firstorder.
-Qed.
+Proof. firstorder. Qed.
 
 Lemma impl_proper (A B C : Prop) : ((A -> (B <-> C)) -> ((A -> B) <-> (A -> C))).
-Proof.
-  firstorder.
-Qed.
+Proof. firstorder. Qed.
+
+(** Decidable propositions *)
 
 Lemma Decision_iff : forall {P Q}, (P <-> Q) -> Decision P -> Decision Q.
 Proof. firstorder. Qed.
@@ -50,43 +52,15 @@ Proof. firstorder. Qed.
 Lemma Decision_not : forall {P}, Decision P -> Decision (~P).
 Proof. firstorder. Qed.
 
-#[export] Instance bool_decision {b:bool} : Decision b :=
-  match b return {b}+{~b} with
-          | true => left I
-          | false => right (fun H => H)
-  end.
+#[export] Instance bool_decision {b : bool} : Decision b :=
+match b with
+| true => left I
+| false => right (fun H => H)
+end.
 
-(* Some relation facts *)
-Lemma Reflexive_reexpress_impl {A} (R S: Relation_Definitions.relation A):
-  relation_equivalence R S -> Reflexive R -> Reflexive S.
-Proof.
-  clear;firstorder.
-Qed.
+Notation decide_eq := (fun x y => decide (x = y)).
 
-Lemma complement_equivalence {A}:
-  Morphisms.Proper (Morphisms.respectful relation_equivalence relation_equivalence) (@complement A).
-Proof.
-  clear;firstorder.
-Qed.
-
-Lemma Transitive_reexpress_impl {A} (R S: Relation_Definitions.relation A):
-  relation_equivalence R S -> Transitive R -> Transitive S.
-Proof.
-  clear.
-  unfold relation_equivalence, predicate_equivalence; simpl.
-  intros Hrel HtransR x y z.
-  rewrite <- !Hrel.
-  apply HtransR.
-Qed.
-
-Lemma StrictOrder_reexpress_impl {A} (R S: Relation_Definitions.relation A):
-  relation_equivalence R S -> StrictOrder R -> StrictOrder S.
-Proof.
-  clear.
-  intros Hrel [Hirr Htrans]. constructor.
-  - by revert Hirr;apply Reflexive_reexpress_impl; apply complement_equivalence.
-  - by revert Htrans; apply Transitive_reexpress_impl.
-Qed.
+(** Lemmas about transitive closure *)
 
 Lemma transitive_tc_idempotent `(Transitive A R) :
   forall a b, R a b <-> tc R a b.
@@ -96,8 +70,10 @@ Proof.
   by etransitivity.
 Qed.
 
-(** If the a relation <<R>> reflects a predicate <<P>>, then its
-transitive closure will also reflect it. *)
+(**
+  If the a relation <<R>> reflects a predicate <<P>>, then its transitive
+  closure will also reflect it.
+*)
 Lemma tc_reflect
   `(R : relation A)
   (P : A -> Prop)
@@ -105,7 +81,7 @@ Lemma tc_reflect
   : forall dm m, tc R dm m -> P m -> P dm.
 Proof. induction 1; firstorder. Qed.
 
-(** [tc] characterization in terms of the last transitivity step *)
+(** Characterization of [tc] in terms of the last transitivity step. *)
 Lemma tc_r_iff `(R : relation A) :
   forall x z, tc R x z <-> R x z \/ exists y, tc R x y /\ R y z.
 Proof.
@@ -139,6 +115,8 @@ Qed.
 Lemma tc_reflect_irreflexive
   `(R : relation A) `{!Irreflexive (tc R)} : Irreflexive R.
 Proof. by intros ? ?; eapply irreflexivity with (R := tc R); [| constructor]. Qed.
+
+(** Equality of dependent pairs *)
 
 Lemma dec_sig_to_exist {A} {P} {P_dec : forall x : A, Decision (P x)} (a : dsig P)
   : exists (a' : A) (e : P a'), a = dexist a' e.
@@ -200,10 +178,12 @@ Proof.
   by rewrite K_dec_type with (P := fun prf => prf = eq_refl).
 Qed.
 
+(** Minimal elements *)
+
 (**
-A minimal element of a subset <<S>> (defined by a predicate <<P>>) of some
-preordered set is defined as an element of S that is not greater than any other
-element in S.
+  A minimal element of a subset <<S>> (defined by a predicate <<P>>) of some
+  preordered set is defined as an element of S that is not greater than any other
+  element in S.
 *)
 Definition minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
   P m /\ (forall m', P m' -> R m' m -> R m m').
@@ -213,7 +193,7 @@ Proof.
   by split; [| lia].
 Qed.
 
-(** A more concise definition of minimality for strict orders.  *)
+(** A more concise definition of minimality for strict orders. *)
 Definition strict_minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
   P m /\ (forall m', P m' -> ~ R m' m).
 
@@ -239,19 +219,20 @@ Proof.
   apply asymmetric_minimal_among_iff; typeclasses eauto.
 Qed.
 
-(**
-Dually, a maximal element is a minimal element w.r.t. the inverse relation.
-*)
+(** Dually, a maximal element is a minimal element w.r.t. the inverse relation. *)
 Definition maximal_among `(R : relation A) := minimal_among (flip R).
 
 Definition strict_maximal_among `(R : relation A) := strict_minimal_among (flip R).
 
-(* Reflexivity of comparison operators *)
-Class CompareReflexive {A} (compare : A -> A -> comparison) : Prop :=
-    compare_eq : forall x y, compare x y = Eq <-> x = y.
-#[global] Hint Mode CompareReflexive ! - : typeclass_instances.
+(** Comparison operators *)
 
 (* About reflexive comparison operators *)
+
+Class CompareReflexive {A} (compare : A -> A -> comparison) : Prop :=
+  compare_eq : forall x y, compare x y = Eq <-> x = y.
+
+#[global] Hint Mode CompareReflexive ! - : typeclass_instances.
+
 Lemma compare_eq_refl {A} `{CompareReflexive A} :
   forall x, compare x x = Eq.
 Proof. by intros; apply H. Qed.
@@ -266,7 +247,7 @@ Lemma compare_lt_neq {A} `{CompareReflexive A} :
   forall x y, compare x y = Lt -> x <> y.
 Proof.
   intros x y Hcomp Hnot.
-  by subst; by apply (compare_eq_lt y) in Hcomp.
+  by subst; apply (compare_eq_lt y) in Hcomp.
 Qed.
 
 Lemma compare_eq_gt {A} `{CompareReflexive A} :
@@ -283,9 +264,10 @@ Proof.
 Qed.
 
 (* Transitivity of comparison operators *)
+
 Class CompareTransitive {A} (compare : A -> A -> comparison) : Prop :=
-  compare_transitive :
-    forall x y z comp, compare x y = comp -> compare y z = comp -> compare x z = comp.
+  compare_transitive : forall x y z c, compare x y = c -> compare y z = c -> compare x z = c.
+
 #[global] Hint Mode CompareTransitive ! - : typeclass_instances.
 
 (* Strict-orderedness of comparison operators *)
@@ -294,15 +276,15 @@ Class CompareStrictOrder {A} (compare : A -> A -> comparison) : Prop :=
   StrictOrder_Reflexive :> CompareReflexive compare;
   StrictOrder_Transitive :> CompareTransitive compare;
 }.
+
 #[global] Hint Mode CompareStrictOrder ! - : typeclass_instances.
 
 (* Strictly-ordered comparisons give decidable equality *)
-Lemma compare_eq_dec {A} `{CompareStrictOrder A} :
-  EqDecision A.
+Lemma compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
 Proof.
   intros x y.
   destruct (compare x y) eqn: Hxy.
-  - by left; apply StrictOrder_Reflexive.
+  - by left; apply compare_eq.
   - by right; intros ->; apply compare_eq_lt in Hxy.
   - by right; intros ->; apply compare_eq_gt in Hxy.
 Qed.
@@ -310,13 +292,15 @@ Qed.
 (* Asymmetry of comparison operators *)
 Class CompareAsymmetric {A} (compare : A -> A -> comparison) : Prop :=
   compare_asymmetric : forall x y, compare x y = Lt <-> compare y x = Gt.
+
 #[global] Hint Mode CompareAsymmetric ! - : typeclass_instances.
 
 (* Strictly-ordered comparisons give asymmetry *)
 Lemma compare_asymmetric_intro {A} `{CompareStrictOrder A} :
   CompareAsymmetric compare.
 Proof.
-  intros. destruct H as [R TR]. intros; split; intros.
+  destruct H as [R TR].
+  intros; split; intros.
   - destruct (compare y x) eqn: Hyx; [| | done].
     + by apply R in Hyx; subst; apply compare_eq_lt in H.
     + by apply (TR _ _ _ _ Hyx), compare_eq_lt in H.

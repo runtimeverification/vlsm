@@ -29,7 +29,7 @@ Proof.
     + inversion H; subst; cbn. by rewrite compare_eq_refl, IHx.
   - intros x y. generalize dependent x.
     induction y; intros; destruct x; destruct z; try done
-    ; destruct comp; try done
+    ; destruct c; try done
     ; inversion H; clear H; destruct (compare a0 a) eqn:Ha0; try done
     ; inversion H0; clear H0; destruct (compare a a1) eqn:Ha1; try done
     ; try apply (IHy _ _ _ H2) in H1; try apply (T _ _ _ _ Ha0) in Ha1
@@ -149,18 +149,19 @@ Lemma add_in_sorted_list_sorted {A} {compare : A -> A -> comparison} `{CompareSt
     LocallySorted (compare_lt compare) sigma ->
   LocallySorted (compare_lt compare) (add_in_sorted_list_fn compare msg sigma).
 Proof.
-  intros. apply (@compare_asymmetric_intro _) in H as Hasymm.
-  induction H0; simpl; try constructor; destruct (compare msg a) eqn:Hcmpa.
-  - constructor.
-  - constructor; [| done]. constructor.
-  - apply Hasymm in Hcmpa. constructor; [| done]. constructor.
+  induction 1; cbn; try constructor; destruct (compare msg a) eqn: Hcmpa.
   - by constructor.
-  - constructor; [| done]. by constructor.
-  - apply Hasymm in Hcmpa.
-    simpl in IHLocallySorted. destruct (compare msg b) eqn:Hcmpb.
-    + apply StrictOrder_Reflexive in Hcmpb. subst. by constructor.
+  - by constructor; [constructor |].
+  - rewrite <- compare_asymmetric in Hcmpa.
+    by constructor; [constructor |].
+  - by constructor.
+  - by constructor; [constructor |].
+  - rewrite <- compare_asymmetric in Hcmpa.
+    cbn in IHLocallySorted.
+    destruct (compare msg b) eqn: Hcmpb.
+    + rewrite compare_eq in Hcmpb. by constructor.
     + by constructor.
-    + apply Hasymm in Hcmpb. by constructor.
+    + rewrite compare_asymmetric in Hcmpa. by constructor.
 Qed.
 
 (** Sorted lists as sets **)
