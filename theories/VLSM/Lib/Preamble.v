@@ -140,42 +140,14 @@ Lemma tc_reflect_irreflexive
   `(R : relation A) `{!Irreflexive (tc R)} : Irreflexive R.
 Proof. by intros ? ?; eapply irreflexivity with (R := tc R); [| constructor]. Qed.
 
-(* TODO(traian): remove these definitions and use the standard stdpp ones instead.*)
-Definition dec_sig {A} (P : A -> Prop) {P_dec : forall x, Decision (P x)} : Type
-  := dsig P.
-
-Definition dec_proj1_sig
-  `{P_dec : forall x : A, Decision (P x)} : dsig P -> A := @proj1_sig _ _.
-
-Definition dec_proj2_sig `{P_dec : forall x: A, Decision (P x)} := @proj2_dsig A P P_dec.
-
-Definition dec_sig_eq_iff `{P_dec : forall x: A, Decision (P x)} := @dsig_eq A P P_dec.
-
-(** destructs a dec_sig element into a dexist construct
-*)
-
-Lemma dec_sig_to_exist {A} {P} {P_dec: forall (x:A), Decision (P x)}
-            (a: dsig P): exists a' (e: P a'), a = dexist a' e.
+Lemma dec_sig_to_exist {A} {P} {P_dec : forall x : A, Decision (P x)} (a : dsig P)
+  : exists (a' : A) (e : P a'), a = dexist a' e.
 Proof.
-  exists (dec_proj1_sig a), (dec_proj2_sig a).
-  by apply dec_sig_eq_iff.
+  exists (proj1_sig a), (proj2_dsig a).
+  by apply dsig_eq.
 Qed.
 
-Ltac destruct_dec_sig  a a' e H := pose proof (dec_sig_to_exist a) as [a' [e H]].
-
-Lemma dsig_f_equal
-  `{P_dec : forall x: A, Decision (P x)}
-  (T : A -> Type)
-  (s : forall (i : dsig P), T (proj1_sig i))
-  i
-  (H1 H2 : P i)
-  : s (dexist i H1) = s (dexist i H2).
-Proof.
-  unfold dexist.
-  replace (bool_decide_pack (P i) H1) with (bool_decide_pack (P i) H2)
-  ; [done |].
-  apply proof_irrel.
-Qed.
+Ltac destruct_dec_sig a a' e H := pose proof (dec_sig_to_exist a) as (a' & e & H).
 
 Lemma dec_sig_sigT_eq
   {A} (P : A -> Prop) {P_dec : forall x, Decision (P x)}
@@ -191,8 +163,7 @@ Lemma dec_sig_sigT_eq
 Proof.
   subst b2 pa1 pa2.
   unfold dexist.
-  replace (bool_decide_pack (P a) e1) with (bool_decide_pack (P a) e2)
-  ; [done |].
+  replace (bool_decide_pack (P a) e1) with (bool_decide_pack (P a) e2); [done |].
   apply proof_irrel.
 Qed.
 
@@ -211,12 +182,11 @@ Proof.
   subst pa1 pa2.
   unfold dexist.
   replace (bool_decide_pack (P a) e1) with (bool_decide_pack (P a) e2)
-  ; [|apply proof_irrel].
+  ; [| apply proof_irrel].
   apply inj_pair2_eq_dec.
-  intros x y.
-  destruct (decide (` x = ` y)).
-  - left. revert e. apply dsig_eq.
-  - right. intro contra. elim n. revert contra. apply dsig_eq.
+  intros x y; destruct (decide (` x = ` y)).
+  - by left; apply dsig_eq.
+  - by right; intros ->.
 Qed.
 
 (* https://coq.discourse.group/t/writing-equality-decision-that-reduces-dec-x-x-for-opaque-x/551/2 *)
@@ -314,17 +284,16 @@ Qed.
 
 (* Transitivity of comparison operators *)
 Class CompareTransitive {A} (compare : A -> A -> comparison) : Prop :=
-    compare_transitive : forall x y z comp, compare x y = comp ->
-                                       compare y z = comp ->
-                                       compare x z = comp.
+  compare_transitive :
+    forall x y z comp, compare x y = comp -> compare y z = comp -> compare x z = comp.
 #[global] Hint Mode CompareTransitive ! - : typeclass_instances.
 
 (* Strict-orderedness of comparison operators *)
 Class CompareStrictOrder {A} (compare : A -> A -> comparison) : Prop :=
-  {
-    StrictOrder_Reflexive :> CompareReflexive compare;
-    StrictOrder_Transitive :> CompareTransitive compare;
-  }.
+{
+  StrictOrder_Reflexive :> CompareReflexive compare;
+  StrictOrder_Transitive :> CompareTransitive compare;
+}.
 #[global] Hint Mode CompareStrictOrder ! - : typeclass_instances.
 
 (* Strictly-ordered comparisons give decidable equality *)
@@ -340,7 +309,7 @@ Qed.
 
 (* Asymmetry of comparison operators *)
 Class CompareAsymmetric {A} (compare : A -> A -> comparison) : Prop :=
-    compare_asymmetric : forall x y, compare x y = Lt <-> compare y x = Gt.
+  compare_asymmetric : forall x y, compare x y = Lt <-> compare y x = Gt.
 #[global] Hint Mode CompareAsymmetric ! - : typeclass_instances.
 
 (* Strictly-ordered comparisons give asymmetry *)
@@ -403,19 +372,13 @@ Proof.
   by contradict Hyx; destruct (IR x x) as [_ ->].
 Qed.
 
-(* We can easily obtain inhabitants of above Typeclasses using Program Definitions, for instance : *)
-Program Definition make_compare_lt_asymmetric {A} `{CompareStrictOrder A} : Asymmetric (compare_lt compare).
-Proof.
-  exact compare_lt_asymmetric.
-Defined.
-
 (* A generic type class for inhabited types with a strictly ordered comparison operator *)
 Class StrictlyComparable (X : Type) : Type :=
-   {
-     inhabited : X;
-     compare : X -> X -> comparison;
-     compare_strictorder :> CompareStrictOrder compare;
-   }.
+{
+  inhabited : X;
+  compare : X -> X -> comparison;
+  compare_strictorder :> CompareStrictOrder compare;
+}.
 #[global] Hint Mode StrictlyComparable ! : typeclass_instances.
 
 #[export] Instance strictly_comparable_eq_dec `{StrictlyComparable M}
@@ -426,7 +389,7 @@ Proof.
 Qed.
 
 Definition comparable `(R : relation A) : relation A :=
-  fun x y => exists c, CompSpec (=) R  x y c.
+  fun x y => exists c, CompSpec (=) R x y c.
 
 Lemma tc_CompSpec :
   forall A (Peq Plt : relation A) (a b : A) (c : comparison),
@@ -477,9 +440,16 @@ Proof.
   rewrite compare_eq in *; auto.
 Qed.
 
-Tactic Notation "case_pair" constr(about_M) constr(m1) constr(m2) :=
-  assert (H_fresh := @compare_two_cases _ about_M m1 m2);
-  destruct H_fresh as [[H_eq1 H_eq2] | [[H_lt H_gt] | [H_gt H_lt]]].
+Lemma CompOpp_compare `{Hsc : StrictlyComparable M} :
+  forall m1 m2 : M,
+    CompOpp (compare m1 m2) = compare m2 m1.
+Proof.
+  intros m1 m2.
+  destruct (compare m1 m2) eqn: Hcmp; symmetry; cbn.
+  - by rewrite compare_eq in *.
+  - by rewrite compare_asymmetric in Hcmp.
+  - by rewrite <- compare_asymmetric in Hcmp.
+Qed.
 
 #[local] Obligation Tactic := Tactics.program_simpl.
 Program Definition sigify_compare {X} `{StrictlyComparable X} (P : X -> Prop) : {x | P x} -> {x | P x} -> comparison := _.

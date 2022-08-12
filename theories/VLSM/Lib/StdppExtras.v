@@ -534,7 +534,7 @@ Lemma elem_of_list_annotate
   : xP ∈ (list_annotate P l Hs) <-> (` xP) ∈ l.
 Proof.
   split; [apply elem_of_list_annotate_forget |].
-  destruct_dec_sig xP x HPx HeqxP; subst; cbn.
+  destruct xP as [x Hpx]; cbn.
   induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
 Qed.
 
