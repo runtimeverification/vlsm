@@ -272,10 +272,8 @@ Proof.
   intros l w.
   induction l as [| hd tl IHl]; cbn.
   - itauto congruence.
-  - destruct (compare w hd) eqn: Hcmp.
-    + rewrite compare_eq in Hcmp. itauto.
-    + rewrite <- compare_eq. rewrite compare_asymmetric in Hcmp. itauto congruence.
-    + rewrite <- compare_eq. rewrite <- compare_asymmetric in Hcmp. itauto congruence.
+  - rewrite compare_asymmetric, <- compare_eq.
+    destruct (compare hd w) eqn: Hcmp; cbn; itauto congruence.
 Qed.
 
 Lemma is_member_correct' {W} `{StrictlyComparable W}

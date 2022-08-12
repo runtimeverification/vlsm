@@ -35,10 +35,10 @@ Proof.
   - apply Is_true_eq_true.
 Qed.
 
-Lemma and_proper_l (A B C : Prop) : ((A -> (B <-> C)) -> ((A /\ B) <-> (A /\ C))).
+Lemma and_proper_l (A B C : Prop) : (A -> (B <-> C)) -> (A /\ B) <-> (A /\ C).
 Proof. firstorder. Qed.
 
-Lemma impl_proper (A B C : Prop) : ((A -> (B <-> C)) -> ((A -> B) <-> (A -> C))).
+Lemma impl_proper (A B C : Prop) : (A -> (B <-> C)) -> (A -> B) <-> (A -> C).
 Proof. firstorder. Qed.
 
 (** Decidable propositions *)
@@ -71,7 +71,7 @@ Proof.
 Qed.
 
 (**
-  If the a relation <<R>> reflects a predicate <<P>>, then its transitive
+  If a relation <<R>> reflects a predicate <<P>>, then its transitive
   closure will also reflect it.
 *)
 Lemma tc_reflect
@@ -291,7 +291,7 @@ Qed.
 
 (* Asymmetry of comparison operators *)
 Class CompareAsymmetric {A} (compare : A -> A -> comparison) : Prop :=
-  compare_asymmetric : forall x y, compare x y = Lt <-> compare y x = Gt.
+  compare_asymmetric : forall x y, compare x y = CompOpp (compare y x).
 
 #[global] Hint Mode CompareAsymmetric ! - : typeclass_instances.
 
@@ -300,13 +300,17 @@ Lemma compare_asymmetric_intro {A} `{CompareStrictOrder A} :
   CompareAsymmetric compare.
 Proof.
   destruct H as [R TR].
-  intros; split; intros.
-  - destruct (compare y x) eqn: Hyx; [| | done].
-    + by apply R in Hyx; subst; apply compare_eq_lt in H.
-    + by apply (TR _ _ _ _ Hyx), compare_eq_lt in H.
-  - destruct (compare x y) eqn: Hyx; [| done |].
-    + by apply R in Hyx; subst; apply compare_eq_gt in H.
-    + by apply (TR _ _ _ _ Hyx), compare_eq_gt in H.
+  intros x y.
+  destruct (compare y x) eqn: Hyx.
+  - by rewrite compare_eq in *.
+  - destruct (compare x y) eqn: Hxy; cbn; [| | done].
+    + apply compare_eq in Hxy; subst. by apply compare_eq_lt in Hyx.
+    + assert (compare x x = Lt) by (eapply compare_transitive; done).
+      by apply compare_eq_lt in H.
+  - destruct (compare x y) eqn: Hxy; cbn; [| done |].
+    + apply compare_eq in Hxy; subst. by apply compare_eq_gt in Hyx.
+    + assert (compare x x = Gt) by (eapply compare_transitive; done).
+      by apply compare_eq_gt in H.
 Qed.
 
 #[export] Instance CompareStrictOrder_Asymmetric {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
@@ -322,8 +326,8 @@ Definition compare_lt {A} (compare : A -> A -> comparison) (x y : A) : Prop :=
   (compare : A -> A -> comparison) {Hord : CompareStrictOrder compare}
   : RelDecision (compare_lt compare).
 Proof.
-  intros x y.
-  unfold compare_lt. destruct (compare x y); [right| left| right]; congruence.
+  intros x y; unfold compare_lt.
+  typeclasses eauto.
 Qed.
 
 (* A series of properties about compare_lt *)
@@ -336,13 +340,12 @@ Qed.
 Lemma compare_lt_transitive {A} `{CompareTransitive A} :
   Transitive (compare_lt compare).
 Proof.
-  by intros x y z Hxy Hyz; apply (H _ _ _ _ Hxy Hyz).
+  by intros x y z Hxy Hyz; eapply compare_transitive.
 Qed.
 
 Lemma compare_lt_strict_order {A} `{CompareStrictOrder A} :
   StrictOrder (compare_lt compare).
 Proof.
-  destruct H as [R T].
   split.
   - by apply compare_lt_irreflexive.
   - by apply compare_lt_transitive.
@@ -351,9 +354,8 @@ Qed.
 Lemma compare_lt_asymmetric {A} `{CompareStrictOrder A} :
   Asymmetric (compare_lt compare).
 Proof.
-  destruct H as [IR TR].
-  intros x y Hxy Hyx. apply (TR _ _ _ _ Hxy) in Hyx.
-  by contradict Hyx; destruct (IR x x) as [_ ->].
+  unfold compare_lt; intros x y Hxy Hyx.
+  by eapply (compare_eq_lt x), compare_transitive.
 Qed.
 
 (* A generic type class for inhabited types with a strictly ordered comparison operator *)
@@ -365,8 +367,7 @@ Class StrictlyComparable (X : Type) : Type :=
 }.
 #[global] Hint Mode StrictlyComparable ! : typeclass_instances.
 
-#[export] Instance strictly_comparable_eq_dec `{StrictlyComparable M}
-  : EqDecision M.
+#[export] Instance strictly_comparable_eq_dec `{StrictlyComparable M} : EqDecision M.
 Proof.
   intros x y.
   apply compare_eq_dec.
@@ -411,32 +412,9 @@ Proof.
   by right; intros [c Hc]; inversion Hc.
 Qed.
 
-Lemma compare_two_cases
-  `{Hsc : StrictlyComparable M}
-  : forall m1 m2 : M,
-    (compare m1 m2 = Eq /\ compare m2 m1 = Eq) \/
-    (compare m1 m2 = Lt /\ compare m2 m1 = Gt) \/
-    (compare m1 m2 = Gt /\ compare m2 m1 = Lt).
-Proof.
-  intros m1 m2.
-  rewrite (compare_asymmetric m2 m1), <- (compare_asymmetric m1 m2).
-  destruct (compare m1 m2) eqn: Hcmp;
-  rewrite compare_eq in *; auto.
-Qed.
-
-Lemma CompOpp_compare `{Hsc : StrictlyComparable M} :
-  forall m1 m2 : M,
-    CompOpp (compare m1 m2) = compare m2 m1.
-Proof.
-  intros m1 m2.
-  destruct (compare m1 m2) eqn: Hcmp; symmetry; cbn.
-  - by rewrite compare_eq in *.
-  - by rewrite compare_asymmetric in Hcmp.
-  - by rewrite <- compare_asymmetric in Hcmp.
-Qed.
-
 #[local] Obligation Tactic := Tactics.program_simpl.
-Program Definition sigify_compare {X} `{StrictlyComparable X} (P : X -> Prop) : {x | P x} -> {x | P x} -> comparison := _.
+Program Definition sigify_compare
+  {X} `{StrictlyComparable X} (P : X -> Prop) : {x | P x} -> {x | P x} -> comparison := _.
 Next Obligation.
   exact (compare X0 X1).
 Defined.
@@ -535,16 +513,11 @@ Qed.
 (* Composing StrictlyComparable types *)
 (* Constructing the compare function *)
 Definition compare_compose (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y} : (X * Y) -> (X * Y) -> comparison :=
-  fun p1 p2 =>
-    match p1, p2 with
-    | (x1, y1), (x2, y2) => match compare x1 x2 with
-                           | Eq => match compare y1 y2 with
-                                  | Eq => Eq
-                                  | _ => compare y1 y2
-                                  end
-                           | _ => compare x1 x2
-                           end
-    end.
+  fun '(x1, y1) '(x2, y2) =>
+  match compare x1 x2 with
+  | Eq => compare y1 y2
+  | c => c
+  end.
 
 (* Constructing the inhabited proof *)
 Definition inhabited_compose

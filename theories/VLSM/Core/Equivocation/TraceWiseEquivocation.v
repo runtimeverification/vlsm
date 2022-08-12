@@ -189,7 +189,7 @@ Proof.
     is_equivocating_tracewise_no_has_been_sent.
   apply forall_proper; intros is.
   apply forall_proper; intros.
-  apply impl_proper; intros [].
+  apply forall_proper; intros [].
   apply exist_proper; intros.
   apply and_proper_l; intro.
   apply exist_proper; intro prefix.

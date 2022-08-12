@@ -152,16 +152,16 @@ Proof.
   induction 1; cbn; try constructor; destruct (compare msg a) eqn: Hcmpa.
   - by constructor.
   - by constructor; [constructor |].
-  - rewrite <- compare_asymmetric in Hcmpa.
-    by constructor; [constructor |].
+  - constructor; [constructor | red].
+    by rewrite compare_asymmetric, Hcmpa.
   - by constructor.
   - by constructor; [constructor |].
-  - rewrite <- compare_asymmetric in Hcmpa.
-    cbn in IHLocallySorted.
+  - cbn in IHLocallySorted.
     destruct (compare msg b) eqn: Hcmpb.
     + rewrite compare_eq in Hcmpb. by constructor.
+    + constructor; [done | red].
+      by rewrite compare_asymmetric, Hcmpa.
     + by constructor.
-    + rewrite compare_asymmetric in Hcmpa. by constructor.
 Qed.
 
 (** Sorted lists as sets **)
@@ -191,8 +191,8 @@ Proof.
       spec IHsigma LS Hin. simpl.
       destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma. 1, 3: done.
       apply (@LocallySorted_elem_of_lt _ _ compare_lt_strict_order msg a sigma H0) in Hin.
-      unfold compare_lt in Hin. apply compare_asymmetric in Hin.
-      rewrite Hin in Hcmp. inversion Hcmp.
+      unfold compare_lt in Hin.
+      by rewrite compare_asymmetric, Hcmp in Hin; inversion Hin.
 Qed.
 
 Lemma set_eq_first_equal {A}  {lt : relation A} `{StrictOrder A lt} :
