@@ -363,10 +363,7 @@ Proof.
   - repeat split.
     + by unfold equivocator_descriptors_update; rewrite equivocator_descriptors_update_eq.
     + by unfold equivocator_descriptors_update; rewrite equivocator_descriptors_update_eq.
-    + extensionality j.
-      destruct (decide (j = i)).
-      * by subst; rewrite state_update_eq.
-      * by rewrite !state_update_neq.
+    + by extensionality j; state_update i j.
     + by unfold equivocator_descriptors_update; rewrite equivocator_descriptors_update_eq.
     + subst. specialize (Hchar _ eq_refl) as [Hvx Htx].
       unfold equivocators_state_project. unfold EquivocatorsComposition.equivocators_state_project.
@@ -387,10 +384,7 @@ Proof.
   - repeat split.
     + by unfold equivocator_descriptors_update; rewrite equivocator_descriptors_update_eq.
     + by unfold equivocator_descriptors_update; rewrite equivocator_descriptors_update_eq.
-    + extensionality j.
-      destruct (decide (j = i)).
-      * by subst; rewrite state_update_eq.
-      * by rewrite !state_update_neq.
+    + by extensionality j; state_update i j.
     + by unfold equivocator_descriptors_update; rewrite equivocator_descriptors_update_eq.
     + extensionality eqv.
       unfold equivocators_state_project. unfold EquivocatorsComposition.equivocators_state_project.
@@ -886,7 +880,7 @@ Proof.
         split; [done |].
         simpl. destruct x. simpl in *. destruct l as (i, li). simpl in *.
         unfold pre_VLSM_projection_transition_item_project, composite_project_label. simpl.
-        destruct (decide (i = i)); [|congruence].
+        destruct (decide (i = i)); [| done].
         f_equal.
         replace e with (@eq_refl _ i) by (apply Eqdep_dec.UIP_dec; done). clear e.
         destruct item'.

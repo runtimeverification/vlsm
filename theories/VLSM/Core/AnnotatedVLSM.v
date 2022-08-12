@@ -246,8 +246,7 @@ Proof.
     ; unfold annotated_transition; cbn
     ; destruct (vtransition _ _ _) as (si', om').
     intros [_ Ht]; inversion Ht.
-    f_equal; symmetry.
-    apply state_update_eq.
+    by state_update_simpl.
   - intros [j lj].
     unfold annotated_composite_label_project, composite_project_label; cbn.
     case_decide as Hij; [congruence |].
@@ -256,7 +255,7 @@ Proof.
     ; unfold annotated_transition; cbn
     ; destruct (vtransition _ _ _) as (si', om').
     intros [_ Ht]; inversion Ht.
-    apply state_update_neq; congruence.
+    by state_update_simpl.
   - intros [s ann] [Hs _]; cbn; apply Hs.
   - intro; intros; apply any_message_is_valid_in_preloaded.
 Qed.
@@ -276,7 +275,7 @@ Proof.
   unfold annotated_transition; cbn
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion 1; clear Ht; subst om' s'X; cbn.
-  by rewrite state_update_neq.
+  by state_update_simpl.
 Qed.
 
 Lemma annotated_composite_induced_validator_label_lift
@@ -311,7 +310,7 @@ Proof.
   ; intros <- iom sX1' oom1
   ;destruct (vtransition _ _ _) as (si', om').
   inversion_clear 1; intros sX2' oom2; inversion_clear 1.
-  by cbn; rewrite !state_update_eq.
+  by cbn; state_update_simpl.
 Qed.
 
 Definition annotated_composite_induced_validator_is_projection :=

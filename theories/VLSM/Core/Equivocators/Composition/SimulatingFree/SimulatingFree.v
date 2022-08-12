@@ -179,10 +179,7 @@ Proof.
         intro i.
         unfold equivocators_total_state_project at 1.
         unfold equivocators_state_project.
-        destruct (decide (i = eqv)).
-        * by subst; rewrite !state_update_eq.
-        * rewrite !state_update_neq by congruence.
-          simpl. apply Hes_pr_i.
+        by state_update i eqv; [| apply Hes_pr_i].
       }
       split; [done |].
       eexists; split; [| split; [split; [done |] |]].

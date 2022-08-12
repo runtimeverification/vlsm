@@ -432,10 +432,9 @@ Proof.
     apply functional_extensionality_dep. intro sub_j.
     destruct_dec_sig sub_j j Hj Heqsub_j. subst.
     unfold composite_state_sub_projection at 2. simpl.
-    destruct (decide (j = i)).
-    + by subst; rewrite sub_IM_state_update_eq, state_update_eq.
-    + rewrite !state_update_neq; [done ..|].
-      by inversion 1.
+    state_update i j.
+    + by rewrite sub_IM_state_update_eq.
+    + by rewrite !state_update_neq; [done .. | inversion 1].
 Qed.
 
 (** See Lemma [fixed_output_has_strong_fixed_equivocation] below. *)
@@ -828,10 +827,9 @@ Proof.
     destruct (vtransition _ _ _) as (si', _om');
     inversion_clear 1.
     f_equal; extensionality j.
-    destruct (decide (i = j)); subst.
+    state_update i j.
     + by rewrite lift_sub_state_to_neq, !state_update_eq.
-    + unfold lift_sub_state_to.
-      by rewrite state_update_neq, state_update_neq.
+    + by unfold lift_sub_state_to; rewrite state_update_neq.
   - intros [i liX].
     unfold remove_equivocating_state_project;
     unfold remove_equivocating_label_project; cbn.
@@ -841,9 +839,7 @@ Proof.
     inversion_clear 1.
     extensionality j.
     unfold lift_sub_state_to.
-    case_decide as Hj; [done |].
-    destruct (decide (i = j)); [by contradict Hj; subst |].
-    apply state_update_neq. congruence.
+    by case_decide; [| state_update i j].
   - intros s Hs i.
     unfold remove_equivocating_state_project, lift_sub_state_to.
     case_decide as Hi.

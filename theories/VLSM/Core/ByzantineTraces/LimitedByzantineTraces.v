@@ -330,7 +330,7 @@ Proof.
     destruct (decide (i = j)) as [| Hij]; subst.
     + unfold lift_sub_state.
       by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi), !state_update_eq.
-    + rewrite state_update_neq by congruence.
+    + state_update_simpl.
       unfold lift_sub_state.
       destruct (decide (j ∈ set_diff (enum index) byzantine)) as [Hj |].
       * by rewrite !(lift_sub_state_to_eq _ _ _ _ _ Hj), sub_IM_state_update_neq.

@@ -1675,7 +1675,7 @@ Proof.
   rewrite Heq_s in Heqs at 1; clear Heq_s.
   specialize (unique_transition_to_state Ht1 Ht2) as Heq;
     destruct_and! Heq; subst; repeat split.
-  extensionality j; destruct (decide (i = j)); [by subst |].
+  extensionality j; state_update i j; [done |].
   apply f_equal with (f := fun s => s j) in Heqs.
   by state_update_simpl.
 Qed.

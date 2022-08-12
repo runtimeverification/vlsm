@@ -465,12 +465,10 @@ Proof.
   replace (equivocator_transition _ _ _) with
     (equivocator_state_append (full_replay_state i) _si', _om').
   f_equal.
-  apply functional_extensionality_dep. intro j.
-  destruct (decide (i = j)).
-  - subst. rewrite state_update_eq.
-    by rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi), state_update_eq.
-  - rewrite state_update_neq by congruence.
-    unfold lift_equivocators_sub_state_to.
+  extensionality j.
+  state_update i j.
+  - by rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi), state_update_eq.
+  - unfold lift_equivocators_sub_state_to.
     destruct (decide _); [| done].
     rewrite state_update_neq; [done |].
     intro Hcontra. apply dsig_eq in Hcontra. simpl in Hcontra. congruence.

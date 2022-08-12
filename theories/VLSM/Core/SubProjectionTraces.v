@@ -166,11 +166,8 @@ Lemma lift_sub_state_to_neq_state_update
 Proof.
   symmetry.
   apply functional_extensionality_dep. intro j.
-  destruct (decide (j = i)).
-  - subst. rewrite state_update_eq.
-    unfold lift_sub_state_to. case_decide; [done |].
-    apply state_update_eq.
-  - by unfold lift_sub_state_to; rewrite !state_update_neq.
+  unfold lift_sub_state_to.
+  by state_update i j; case_decide.
 Qed.
 
 Section sec_induced_sub_projection.
@@ -277,9 +274,7 @@ Proof.
   subst.
   unfold composite_state_sub_projection in HsXeq_pr |- *.
   simpl in HsXeq_pr |- *.
-  destruct (decide (i = j)).
-  - by subst; rewrite !state_update_eq.
-  - by rewrite !state_update_neq.
+  by state_update i j.
 Qed.
 
 (** The [pre_induced_sub_projection] is actually a [VLSM_projection] of the
@@ -332,10 +327,9 @@ Proof.
   f_equal; extensionality sub_k.
   destruct_dec_sig sub_k k Hk Heqsub_k; subst.
   unfold composite_state_sub_projection; cbn.
-  destruct (decide (i = k)); subst.
-  + by rewrite state_update_eq, sub_IM_state_update_eq.
-  + rewrite sub_IM_state_update_neq, state_update_neq by congruence.
-    apply lift_sub_state_to_eq.
+  state_update i k.
+  + by rewrite sub_IM_state_update_eq.
+  + by erewrite sub_IM_state_update_neq, lift_sub_state_to_eq.
 Qed.
 
 End sec_induced_sub_projection.
@@ -450,11 +444,9 @@ Proof.
   extensionality sub_j.
   destruct_dec_sig sub_j j Hj Heqj.
   subst sub_j. unfold composite_state_sub_projection at 2.
-  destruct (decide (j = i)).
-  - subst.
-    simpl. rewrite state_update_eq.
-    apply sub_IM_state_update_eq.
-  - rewrite! state_update_neq; cbn; [done | done | by inversion 1].
+  cbn; state_update i j.
+  - apply sub_IM_state_update_eq.
+  - by rewrite! state_update_neq; cbn; [| inversion 1].
 Qed.
 
 Lemma valid_sub_projection
@@ -763,16 +755,12 @@ Proof.
   clear _Hi; destruct (transition _ _) as (si', _om'); inversion_clear 1.
   f_equal.
   extensionality j.
-  destruct (decide (i = j)).
-  - subst.
-    rewrite state_update_eq.
-    unfold lift_sub_state, lift_sub_state_to. simpl.
+  state_update i j.
+  - unfold lift_sub_state, lift_sub_state_to.
     by case_decide; rewrite ?sub_IM_state_update_eq.
-  - rewrite state_update_neq by congruence.
-    unfold lift_sub_state, lift_sub_state_to. simpl.
+  - unfold lift_sub_state, lift_sub_state_to.
     case_decide; [| done].
-    rewrite state_update_neq; [done |].
-    by inversion 1.
+    by rewrite state_update_neq; [| inversion 1].
 Qed.
 
 End sub_composition.
@@ -862,9 +850,8 @@ Proof.
   f_equal.
   apply functional_extensionality_dep.
   intro j.
-  destruct (decide (i = j)).
-  - subst. rewrite state_update_eq.
-    by rewrite lift_sub_state_to_neq, state_update_eq.
+  state_update i j.
+  - by rewrite lift_sub_state_to_neq, state_update_eq.
   - by unfold lift_sub_state_to; rewrite !state_update_neq.
 Qed.
 
@@ -950,13 +937,11 @@ Proof.
   inversion_clear 1.
   f_equal.
   apply functional_extensionality_dep. intro i.
-  destruct (decide (i = j)).
+  state_update i j.
   - by subst; rewrite lift_sub_state_to_eq with (Hi := Hj), !state_update_eq.
-  - rewrite state_update_neq by congruence.
-    destruct (decide (i ∈ equivocators)).
+  - destruct (decide (i ∈ equivocators)).
     + rewrite !lift_sub_state_to_eq with (Hi := e).
-      rewrite state_update_neq; [done |].
-      by inversion 1.
+      by rewrite state_update_neq; [| inversion 1].
     + by rewrite !lift_sub_state_to_neq.
 Qed.
 
@@ -1013,7 +998,7 @@ Proof.
     ; destruct (decide (i = j)); subst.
     + unfold lift_sub_state, composite_state_sub_projection; cbn.
       by rewrite state_update_eq, lift_sub_state_to_eq with (Hi := Hj), state_update_eq.
-    + rewrite state_update_neq by congruence.
+    + state_update_simpl.
       destruct (decide (i ∈ equivocators)).
       * unfold lift_sub_state.
         rewrite !lift_sub_state_to_eq with (Hi := e).

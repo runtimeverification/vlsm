@@ -39,12 +39,12 @@ Proof.
     unfold composite_project_label in HlX; cbn in HlX;
       case_decide; inversion HlX; subst; clear HlX; cbn in *.
     unfold vtransition in Ht; destruct (transition _ _) as (si', _om').
-    by inversion Ht; rewrite state_update_eq.
+    by inversion Ht; state_update_simpl.
   - intros [i li] HlX s om s' om' [_ Ht].
       unfold composite_project_label in HlX; cbn in HlX;
       case_decide; inversion HlX; cbn in *.
     destruct (vtransition _ _ _); inversion Ht.
-    by rewrite state_update_neq.
+    by state_update_simpl.
   - by intros sX HsX; specialize (HsX j).
   - intros [i li] lY HlX s m (_ & Hm & _ & _) _.
     by apply initial_message_is_valid; right.
@@ -95,10 +95,10 @@ Proof.
   - apply H0.
   - destruct (vtransition _ _ _) as [si' _om']
     ; inversion H0; subst; clear H0.
-    by rewrite state_update_eq.
+    by state_update_simpl.
   - destruct (vtransition _ _ _) as [si' _om']
     ; inversion H0; subst; clear H0.
-    by rewrite state_update_neq.
+    by state_update_simpl.
 Qed.
 
 Definition composite_transition_item_projection_from_eq
@@ -226,7 +226,7 @@ Proof.
   destruct (vtransition _ _ _) as (si', om') eqn:Htj.
   inversion Ht. subst; clear Ht.
   simpl in Hi.
-  by rewrite state_update_neq.
+  by state_update_simpl.
 Qed.
 
 End PreLoadedProjectionTraces.

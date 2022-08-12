@@ -144,8 +144,7 @@ Proof.
   destruct l as (j, lj).
   destruct (vtransition (equivocator_IM j) lj (s0 j, iom)) as (sj', om') eqn:Htj.
   inversion Ht. subst. clear Ht.
-  destruct (decide (i = j)); [| by rewrite state_update_neq in Hsi].
-  subst. rewrite state_update_eq in Hsi.
+  state_update i j; [| done].
   by revert Hsi; apply equivocator_transition_reflects_singleton_state with iom oom lj.
 Qed.
 
@@ -158,10 +157,7 @@ Proof.
   destruct (equivocator_transition _ _ _) as (sj', om') eqn:Htj.
   apply equivocator_transition_cannot_decrease_state_size in Htj.
   inversion Ht. subst. clear Ht.
-  intro eqv.
-  destruct (decide (j = eqv)); subst.
-  - by rewrite state_update_eq.
-  - by rewrite state_update_neq.
+  by intro eqv; state_update j eqv.
 Qed.
 
 Lemma equivocators_plan_cannot_decrease_state_size
@@ -408,7 +404,7 @@ Lemma equivocator_descriptors_update_neq
   (Hneq : j <> i)
   : equivocator_descriptors_update s i si j = s j.
 Proof.
-  unfold equivocator_descriptors_update. destruct (decide (j = i)); congruence.
+  unfold equivocator_descriptors_update. by case_decide.
 Qed.
 
 (**
@@ -424,9 +420,8 @@ Lemma equivocator_descriptors_update_eq_rew
   : equivocator_descriptors_update s i si j = eq_rect_r (fun i => MachineDescriptor (IM i)) si Heq.
 Proof.
   unfold equivocator_descriptors_update.
-  destruct (decide (j = i)); [|congruence]. subst.
-  f_equal.
-  by apply Eqdep_dec.UIP_dec.
+  case_decide; [| done].
+  by f_equal; apply Eqdep_dec.UIP_dec.
 Qed.
 
 Lemma equivocator_descriptors_update_eq

@@ -73,12 +73,8 @@ Proof.
   destruct l as (eqv, leqv).
   destruct (equivocator_transition _ _ _) as (si', _om') eqn:Hti.
   inversion Ht. subst. clear Ht.
-  destruct (decide (i = eqv)).
-  - subst. rewrite state_update_eq in Hi.
-    apply
-      (zero_descriptor_transition_reflects_equivocating_state
-        (IM eqv) _ _ _ _ _ Hti _ Hzero Hi).
-  - by rewrite state_update_neq in Hi.
+  state_update i eqv; [| done].
+  apply (zero_descriptor_transition_reflects_equivocating_state (IM eqv) _ _ _ _ _ Hti _ Hzero Hi).
 Qed.
 
 (**

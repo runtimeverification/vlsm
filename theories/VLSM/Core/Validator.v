@@ -731,7 +731,7 @@ Proof.
   destruct (vtransition _ _ _) as [si' om'].
   intros sX1' oom1 Ht1; inversion Ht1; subst; clear Ht1.
   intros sX2' oom2 Ht2; inversion Ht2; subst; clear Ht2.
-  by rewrite !state_update_eq.
+  by state_update_simpl.
 Qed.
 
 (** The [projection_induced_validator] by the [composite_project_label] and the
@@ -837,7 +837,7 @@ Proof.
   - intros l s iom s' oom.
     cbn; unfold lift_to_composite_state' at 1; rewrite state_update_eq.
     intros Ht; setoid_rewrite Ht.
-    by rewrite state_update_eq.
+    by state_update_simpl.
   - by intros s [sX [<- HsX]]; cbn.
   - by intros m [| Hm]; [| right].
   - intros l s iom ([j li] & sX & [HlX [=] Hv]).
@@ -849,7 +849,7 @@ Proof.
     unfold lift_to_composite_state' in Ht;
       rewrite state_update_eq in Ht;
       destruct (vtransition _ _ _) as (si', om').
-    by rewrite state_update_eq in Ht.
+    by state_update_simpl.
 Qed.
 
 Lemma pre_composite_vlsm_induced_projection_validator_iff

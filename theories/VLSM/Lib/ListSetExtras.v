@@ -294,7 +294,7 @@ Proof.
   induction l as [|hd tl IHl]; intros x H_false; cbn.
   - by rewrite decide_False.
   - destruct (decide (x = hd)); cbn; [done |].
-    by destruct (decide (P hd)); rewrite <- (IHl).
+    by destruct (decide (P hd)); rewrite <- IHl.
 Qed.
 
 Lemma set_add_ignore `{StrictlyComparable X} :
@@ -304,7 +304,7 @@ Lemma set_add_ignore `{StrictlyComparable X} :
 Proof.
   induction l as [|hd tl IHl]; inversion 1; subst; cbn.
   - by rewrite decide_True.
-  - rewrite IHl; [| done]. by destruct (decide (x = hd)).
+  - by case_decide; [| rewrite IHl].
 Qed.
 
 Lemma set_add_new `{EqDecision A}:
