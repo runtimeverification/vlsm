@@ -68,13 +68,4 @@ Proof.
   by destruct a;simpl;congruence.
 Qed.
 
-Lemma right_finite
-  (sum_finite : Listing sum_listing)
-  : Listing (right_listing sum_finite).
-Proof.
-  revert sum_finite.
-  apply map_option_listing with (g:=inr); [| done].
-  by destruct a;simpl;congruence.
-Qed.
-
 End sum_listing.

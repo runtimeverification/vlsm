@@ -336,10 +336,6 @@ Proof.
   right; left.
 Qed.
 
-(**
-As a corollary of the above, if <<a precedes b>> then <<a>> can be found before
-<<b>> in l.
-*)
 Corollary top_sort_precedes
   (a b : A)
   (Hab : precedes a b)
