@@ -319,7 +319,8 @@ Proof.
       by apply compare_eq_gt in Hxx.
 Qed.
 
-#[export] Instance CompareStrictOrder_Asymmetric {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
+#[export] Instance CompareStrictOrder_Asymmetric
+  {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
 Proof.
   apply compare_asymmetric_intro.
 Defined.
@@ -429,7 +430,8 @@ Next Obligation.
   exact (compare X0 X1).
 Defined.
 
-Definition dsigify_compare {X} `{StrictlyComparable X} (P : X -> Prop) {Pdec : forall x, Decision (P x)}
+Definition dsigify_compare
+  {X} `{StrictlyComparable X} (P : X -> Prop) {Pdec : forall x, Decision (P x)}
   : dsig P -> dsig P -> comparison :=
   fun x y => compare (proj1_sig x) (proj1_sig y).
 
@@ -534,7 +536,9 @@ Definition inhabited_compose
   {X Y : Type} `{HscX : StrictlyComparable X} `{HscY : StrictlyComparable Y}
   : X * Y := (inhabited, inhabited).
 
-Lemma reflexive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareReflexive (compare_compose X Y).
+Lemma reflexive_compose
+  {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y}
+  : CompareReflexive (compare_compose X Y).
 Proof.
   intros [x1 y1] [x2 y2].
   split.
@@ -576,7 +580,9 @@ Proof.
     + by rewrite compare_eq_refl; eapply compare_transitive.
 Qed.
 
-Lemma strictorder_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareStrictOrder (compare_compose X Y).
+Lemma strictorder_compose
+  {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y}
+  : CompareStrictOrder (compare_compose X Y).
 Proof.
   split.
   - by apply reflexive_compose.
