@@ -295,6 +295,14 @@ Class CompareAsymmetric {A} (compare : A -> A -> comparison) : Prop :=
 
 #[global] Hint Mode CompareAsymmetric ! - : typeclass_instances.
 
+Lemma compare_asymmetric' {A} `{CompareAsymmetric A} :
+  forall x y, compare x y = Lt <-> compare y x = Gt.
+Proof.
+  intros x y.
+  rewrite compare_asymmetric.
+  destruct (compare y x); cbn; firstorder congruence.
+Qed.
+
 (* Strictly-ordered comparisons give asymmetry *)
 Lemma compare_asymmetric_intro {A} `{CompareStrictOrder A} :
   CompareAsymmetric compare.
@@ -330,7 +338,8 @@ Proof.
   typeclasses eauto.
 Qed.
 
-(* A series of properties about compare_lt *)
+(* A series of properties about [compare_lt] *)
+
 Lemma compare_lt_irreflexive {A} `{CompareReflexive A} :
   Irreflexive (compare_lt compare).
 Proof.
