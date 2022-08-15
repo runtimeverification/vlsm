@@ -329,7 +329,7 @@ Proof.
   rewrite ForAllSuffix2_lookup.
   split; intro Hall; [| by intros n a b; apply Hall; lia].
   intros m n a b Hlt.
-  apply le_plus_dec in Hlt as [k Hlt]; subst n.
+  apply nat_le_sum in Hlt as [k ->]; rewrite plus_comm.
   revert a b; induction k; cbn; [apply Hall |].
   intros a b Ha Hb.
   assert (Hlt : k + S m < length l) by (apply lookup_lt_Some in Hb; lia).

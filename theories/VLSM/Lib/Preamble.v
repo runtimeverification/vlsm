@@ -5,7 +5,7 @@ From Coq Require Import Eqdep_dec.
 
 (** * General utility definitions, lemmas, and tactics *)
 
-(** Tactics for specializing hypotheses *)
+(** ** Tactics for specializing hypotheses *)
 
 Tactic Notation "spec" hyp(H) :=
   match type of H with ?a -> _ =>
@@ -26,7 +26,7 @@ Tactic Notation "spec" hyp(H) constr(a) constr(b) constr(c) constr(d) :=
 Tactic Notation "spec" hyp(H) constr(a) constr(b) constr(c) constr(d) constr(e) :=
   (generalize (H a b c d e); clear H; intro H).
 
-(** Basic logic *)
+(** ** Basic logic *)
 
 Lemma Is_true_iff_eq_true: forall x: bool, x = true <-> x.
 Proof.
@@ -41,7 +41,7 @@ Proof. firstorder. Qed.
 Lemma impl_proper (A B C : Prop) : (A -> (B <-> C)) -> (A -> B) <-> (A -> C).
 Proof. firstorder. Qed.
 
-(** Decidable propositions *)
+(** ** Decidable propositions *)
 
 Lemma Decision_iff : forall {P Q}, (P <-> Q) -> Decision P -> Decision Q.
 Proof. firstorder. Qed.
@@ -60,7 +60,7 @@ end.
 
 Notation decide_eq := (fun x y => decide (x = y)).
 
-(** Lemmas about transitive closure *)
+(** ** Lemmas about transitive closure *)
 
 Lemma transitive_tc_idempotent `(Transitive A R) :
   forall a b, R a b <-> tc R a b.
@@ -116,13 +116,12 @@ Lemma tc_reflect_irreflexive
   `(R : relation A) `{!Irreflexive (tc R)} : Irreflexive R.
 Proof. by intros ? ?; eapply irreflexivity with (R := tc R); [| constructor]. Qed.
 
-(** Equality of dependent pairs *)
+(** ** Equality of dependent pairs *)
 
 Lemma dec_sig_to_exist {A} {P} {P_dec : forall x : A, Decision (P x)} (a : dsig P)
   : exists (a' : A) (e : P a'), a = dexist a' e.
 Proof.
-  exists (proj1_sig a), (proj2_dsig a).
-  by apply dsig_eq.
+  by exists (proj1_sig a), (proj2_dsig a); apply dsig_eq.
 Qed.
 
 Ltac destruct_dec_sig a a' e H := pose proof (dec_sig_to_exist a) as (a' & e & H).
@@ -178,7 +177,7 @@ Proof.
   by rewrite K_dec_type with (P := fun prf => prf = eq_refl).
 Qed.
 
-(** Minimal elements *)
+(** ** Minimal elements *)
 
 (**
   A minimal element of a subset <<S>> (defined by a predicate <<P>>) of some
@@ -224,9 +223,9 @@ Definition maximal_among `(R : relation A) := minimal_among (flip R).
 
 Definition strict_maximal_among `(R : relation A) := strict_minimal_among (flip R).
 
-(** Comparison operators *)
+(** ** Comparison operators *)
 
-(* About reflexive comparison operators *)
+(** *** Reflexive comparison operators *)
 
 Class CompareReflexive {A} (compare : A -> A -> comparison) : Prop :=
   compare_eq : forall x y, compare x y = Eq <-> x = y.
@@ -263,14 +262,15 @@ Proof.
   by subst; apply compare_eq_gt in H_comp.
 Qed.
 
-(* Transitivity of comparison operators *)
+(** *** Transitive comparison operators *)
 
 Class CompareTransitive {A} (compare : A -> A -> comparison) : Prop :=
   compare_transitive : forall x y z c, compare x y = c -> compare y z = c -> compare x z = c.
 
 #[global] Hint Mode CompareTransitive ! - : typeclass_instances.
 
-(* Strict-orderedness of comparison operators *)
+(** *** Comparison operators that correspond to a strict order *)
+
 Class CompareStrictOrder {A} (compare : A -> A -> comparison) : Prop :=
 {
   StrictOrder_Reflexive :> CompareReflexive compare;
@@ -279,17 +279,17 @@ Class CompareStrictOrder {A} (compare : A -> A -> comparison) : Prop :=
 
 #[global] Hint Mode CompareStrictOrder ! - : typeclass_instances.
 
-(* Strictly-ordered comparisons give decidable equality *)
+(** Strictly-ordered comparisons entail decidable equality. *)
 Lemma compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
 Proof.
-  intros x y.
-  destruct (compare x y) eqn: Hxy.
+  intros x y; destruct (compare x y) eqn: Hxy.
   - by left; apply compare_eq.
   - by right; intros ->; apply compare_eq_lt in Hxy.
   - by right; intros ->; apply compare_eq_gt in Hxy.
 Qed.
 
-(* Asymmetry of comparison operators *)
+(** *** Asymmetric comparison operators *)
+
 Class CompareAsymmetric {A} (compare : A -> A -> comparison) : Prop :=
   compare_asymmetric : forall x y, compare x y = CompOpp (compare y x).
 
@@ -303,22 +303,20 @@ Proof.
   destruct (compare y x); cbn; firstorder congruence.
 Qed.
 
-(* Strictly-ordered comparisons give asymmetry *)
+(** Strictly-ordered comparisons are asymmetric. *)
 Lemma compare_asymmetric_intro {A} `{CompareStrictOrder A} :
   CompareAsymmetric compare.
 Proof.
-  destruct H as [R TR].
-  intros x y.
-  destruct (compare y x) eqn: Hyx.
+  intros x y; destruct (compare y x) eqn: Hyx.
   - by rewrite compare_eq in *.
   - destruct (compare x y) eqn: Hxy; cbn; [| | done].
     + apply compare_eq in Hxy; subst. by apply compare_eq_lt in Hyx.
-    + assert (compare x x = Lt) by (eapply compare_transitive; done).
-      by apply compare_eq_lt in H.
+    + assert (Hxx : compare x x = Lt) by (eapply compare_transitive; done).
+      by apply compare_eq_lt in Hxx.
   - destruct (compare x y) eqn: Hxy; cbn; [| done |].
     + apply compare_eq in Hxy; subst. by apply compare_eq_gt in Hyx.
-    + assert (compare x x = Gt) by (eapply compare_transitive; done).
-      by apply compare_eq_gt in H.
+    + assert (Hxx : compare x x = Gt) by (eapply compare_transitive; done).
+      by apply compare_eq_gt in Hxx.
 Qed.
 
 #[export] Instance CompareStrictOrder_Asymmetric {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
@@ -326,7 +324,7 @@ Proof.
   apply compare_asymmetric_intro.
 Defined.
 
-(* Defining a compare_lt predicate from a compare operator *)
+(** [compare_lt] is the relation that corresponds to <<compare>>. *)
 Definition compare_lt {A} (compare : A -> A -> comparison) (x y : A) : Prop :=
   compare x y = Lt.
 
@@ -338,7 +336,7 @@ Proof.
   typeclasses eauto.
 Qed.
 
-(* A series of properties about [compare_lt] *)
+(** *** Properties of [compare_lt] *)
 
 Lemma compare_lt_irreflexive {A} `{CompareReflexive A} :
   Irreflexive (compare_lt compare).
@@ -367,7 +365,8 @@ Proof.
   by eapply (compare_eq_lt x), compare_transitive.
 Qed.
 
-(* A generic type class for inhabited types with a strictly ordered comparison operator *)
+(** ** Strictly ordered inhabited types *)
+
 Class StrictlyComparable (X : Type) : Type :=
 {
   inhabited : X;
@@ -421,6 +420,8 @@ Proof.
   by right; intros [c Hc]; inversion Hc.
 Qed.
 
+(** *** Comparison for subtypes *)
+
 #[local] Obligation Tactic := Tactics.program_simpl.
 Program Definition sigify_compare
   {X} `{StrictlyComparable X} (P : X -> Prop) : {x | P x} -> {x | P x} -> comparison := _.
@@ -466,7 +467,8 @@ Definition dsigify_compare_strictly_comparable
 
 #[local] Obligation Tactic := idtac.
 
-(* StrictlyComparable option type *)
+(** *** Comparison for options *)
+
 Definition option_compare
   {X : Type}
   (compare : X -> X -> comparison)
@@ -493,10 +495,10 @@ Lemma option_compare_transitive
   {Xsc : StrictlyComparable X}
   : CompareTransitive (option_compare (@compare X _)).
 Proof.
-  intros [x|] [y|] [z|] [| |]; simpl; intros Hxy Hyz; try done.
-  - by apply (StrictOrder_Transitive x y z _).
-  - by apply (StrictOrder_Transitive x y z _).
-  - by apply (StrictOrder_Transitive x y z _).
+  intros [x |] [y |] [z |] [| |]; simpl; intros Hxy Hyz; try done.
+  - by apply (compare_transitive x y z).
+  - by apply (compare_transitive x y z).
+  - by apply (compare_transitive x y z).
 Qed.
 
 Lemma strictorder_option
@@ -509,88 +511,69 @@ Proof.
   - by apply option_compare_transitive.
 Qed.
 
-(* Now we can have the following for free : *)
 #[export] Instance OptionStrictlyComparable
-  (X : Type)
-  {Xsc : StrictlyComparable X}
-  : StrictlyComparable (option X) :=
-  { inhabited := None;
-    compare := option_compare compare;
-    compare_strictorder := strictorder_option Xsc;
-  }.
+  (X : Type) {Xsc : StrictlyComparable X} : StrictlyComparable (option X) :=
+{
+  inhabited := None;
+  compare := option_compare compare;
+  compare_strictorder := strictorder_option Xsc;
+}.
 
-(* Composing StrictlyComparable types *)
-(* Constructing the compare function *)
-Definition compare_compose (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y} : (X * Y) -> (X * Y) -> comparison :=
+(** *** Comparison for pairs *)
+
+Definition compare_compose
+  (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y}
+  : (X * Y) -> (X * Y) -> comparison :=
   fun '(x1, y1) '(x2, y2) =>
   match compare x1 x2 with
   | Eq => compare y1 y2
   | c => c
   end.
 
-(* Constructing the inhabited proof *)
 Definition inhabited_compose
   {X Y : Type} `{HscX : StrictlyComparable X} `{HscY : StrictlyComparable Y}
   : X * Y := (inhabited, inhabited).
 
-(* Constructing the strictorder proof *)
 Lemma reflexive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareReflexive (compare_compose X Y).
 Proof.
-  intros (x1, y1) (x2, y2).
-  split; intros.
-  - simpl in H1.
-    destruct (compare x1 x2) eqn: H_x, (compare y1 y2) eqn: H_y; try done.
-    by apply StrictOrder_Reflexive in H_x; apply StrictOrder_Reflexive in H_y; subst.
-  - inversion H1; subst; cbn. by rewrite !compare_eq_refl.
+  intros [x1 y1] [x2 y2].
+  split.
+  - cbn; intros Hcmp.
+    destruct (compare x1 x2) eqn: Hx, (compare y1 y2) eqn: Hy; try done.
+    by apply compare_eq in Hx, Hy; subst.
+  - by intros [= -> ->]; cbn; rewrite !compare_eq_refl.
 Qed.
 
-Lemma compare_compose_lt {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : forall (x1 x2 : X) (y1 y2 : Y) (c : comparison),
-  compare_compose X Y (x1, y1) (x2, y2) = c ->
-  compare x1 x2 = c \/
-  x1 = x2 /\ compare y1 y2 = c.
+Lemma compare_compose_lt
+  {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} :
+    forall (x1 x2 : X) (y1 y2 : Y) (c : comparison),
+      compare_compose X Y (x1, y1) (x2, y2) = c ->
+        compare x1 x2 = c \/ x1 = x2 /\ compare y1 y2 = c.
 Proof.
-  intros x1 x2 y1 y2 c H_12.
-  simpl in H_12.
+  intros x1 x2 y1 y2 c Hcmp; cbn in Hcmp.
   rewrite <- compare_eq.
-  destruct (compare x1 x2), (compare y1 y2); auto.
+  by destruct (compare x1 x2), (compare y1 y2); auto.
 Qed.
 
-Lemma transitive_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareTransitive (compare_compose X Y).
+Lemma transitive_compose
+  {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y}
+  : CompareTransitive (compare_compose X Y).
 Proof.
-  intros (x1, y1) (x2, y2) (x3, y3) comp H12 H23.
-  destruct comp eqn:H_comp.
-  - by apply reflexive_compose;
-    apply reflexive_compose in H12;
-    apply reflexive_compose in H23;
-    inversion H12; inversion H23; subst.
-  - rewrite <- H_comp in *;
-    assert (H_useful := compare_compose_lt x1 x2 y1 y2 comp H12);
-    assert (H_useful' := compare_compose_lt x2 x3 y2 y3 comp H23).
-    destruct H_useful as [left | right];
-    destruct H_useful' as [left' | right'].
-    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); done).
-    by simpl; rewrite H1; subst.
-    destruct right'; subst.
-    by simpl; rewrite left.
-    destruct right; subst.
-    by simpl; rewrite left'.
-    destruct right; destruct right'; subst.
-    assert (compare y1 y3 = Lt) by (apply (StrictOrder_Transitive y1 y2 y3 Lt); done).
-    by simpl; rewrite compare_eq_refl; simpl in H12; rewrite H1.
-  - rewrite <- H_comp in *;
-    assert (H_useful := compare_compose_lt x1 x2 y1 y2 comp H12);
-    assert (H_useful' := compare_compose_lt x2 x3 y2 y3 comp H23).
-    destruct H_useful as [left | right];
-    destruct H_useful' as [left' | right'].
-    assert (compare x1 x3 = comp) by (apply (StrictOrder_Transitive x1 x2 x3 comp left left'); done).
-    by simpl; rewrite H1; subst.
-    destruct right'; subst.
-    by simpl; rewrite left.
-    destruct right; subst.
-    by simpl; rewrite left'.
-    destruct right; destruct right'; subst.
-    assert (compare y1 y3 = Gt) by (apply (StrictOrder_Transitive y1 y2 y3 Gt); done).
-    by simpl; rewrite compare_eq_refl; simpl in H12; rewrite H1.
+  intros [x1 y1] [x2 y2] [x3 y3] comp H12 H23.
+  destruct comp eqn: H_comp.
+  - by apply reflexive_compose; apply reflexive_compose in H12, H23; congruence.
+  - destruct (compare_compose_lt x1 x2 y1 y2 Lt H12) as [left | [-> right]],
+             (compare_compose_lt x2 x3 y2 y3 Lt H23) as [left' | [-> right']]; cbn.
+    + by replace (compare x1 x3) with Lt by (symmetry; eapply compare_transitive; done).
+    + by rewrite left.
+    + by rewrite left'.
+    + by rewrite compare_eq_refl; eapply compare_transitive.
+  - destruct (compare_compose_lt x1 x2 y1 y2 Gt H12) as [left | [-> right]],
+             (compare_compose_lt x2 x3 y2 y3 Gt H23) as [left' | [-> right']]; cbn.
+    + by replace (compare x1 x3) with Gt by (symmetry; eapply compare_transitive; done).
+    + by rewrite left.
+    + by rewrite left'.
+    + by rewrite compare_eq_refl; eapply compare_transitive.
 Qed.
 
 Lemma strictorder_compose {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : CompareStrictOrder (compare_compose X Y).
@@ -600,29 +583,33 @@ Proof.
   - by apply transitive_compose.
 Qed.
 
-(* Now we can have the following for free : *)
-#[export] Instance ComposeStrictlyComparable (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y} : StrictlyComparable (X * Y) :=
-  { inhabited := inhabited_compose;
-    compare := compare_compose X Y;
-    compare_strictorder := strictorder_compose;
-  }.
+#[export] Instance ComposeStrictlyComparable
+  (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y} : StrictlyComparable (X * Y) :=
+{
+  inhabited := inhabited_compose;
+  compare := compare_compose X Y;
+  compare_strictorder := strictorder_compose;
+}.
 
-#[export] Instance TripleStrictlyComparable (X Y Z : Type) `{StrictlyComparable X} `{StrictlyComparable Y} `{StrictlyComparable Z} : StrictlyComparable (X * Y * Z) :=
-  { inhabited := inhabited_compose;
-    compare := compare_compose (X * Y) Z;
-    compare_strictorder := strictorder_compose;
-  }.
+(** *** Comparison for triples, with some helper functions *)
+
+#[export] Instance TripleStrictlyComparable
+  (X Y Z : Type) `{StrictlyComparable X} `{StrictlyComparable Y} `{StrictlyComparable Z}
+  : StrictlyComparable (X * Y * Z) :=
+{
+  inhabited := inhabited_compose;
+  compare := compare_compose (X * Y) Z;
+  compare_strictorder := strictorder_compose;
+}.
 
 Definition triple_strictly_comparable_proj1_inhabited
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  : X.
+  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} : X.
 Proof.
   by destruct HscXYZ as [((x, _), _) _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj1_compare
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  (x1 x2 : X) : comparison.
+  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} (x1 x2 : X) : comparison.
 Proof.
   destruct HscXYZ as [((x, y), z) compare _].
   exact (compare (x1, y, z) (x2, y, z)).
@@ -632,40 +619,29 @@ Lemma triple_strictly_comparable_proj1_strictorder
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : CompareStrictOrder (@triple_strictly_comparable_proj1_compare X Y Z HscXYZ).
 Proof.
+  destruct HscXYZ, inhabited0 as [[x0 y0] z0].
   split.
-  - intros x y.
-      unfold triple_strictly_comparable_proj1_compare.
-      destruct HscXYZ.
-      destruct inhabited0 as [(x0, y0) z0].
-    split; intro.
-    + by apply compare_eq in H as [=].
-    + by subst; rewrite compare_eq.
-  - intros x1 x2 x3 cmp.
-    unfold triple_strictly_comparable_proj1_compare.
-    destruct HscXYZ.
-    destruct inhabited0 as [(x0, y0) z0].
-    apply StrictOrder_Transitive.
+  - by intros x y; cbn; rewrite compare_eq; firstorder congruence.
+  - by intros x1 x2 x3 cmp; cbn; apply compare_transitive.
 Qed.
 
 Definition triple_strictly_comparable_proj1
   {X Y Z} (HscT :  StrictlyComparable (X * Y * Z))
-  : StrictlyComparable X
-  :=
-  {| inhabited := triple_strictly_comparable_proj1_inhabited;
-    compare := triple_strictly_comparable_proj1_compare;
-    compare_strictorder := triple_strictly_comparable_proj1_strictorder;
-  |}.
+  : StrictlyComparable X :=
+{|
+  inhabited := triple_strictly_comparable_proj1_inhabited;
+  compare := triple_strictly_comparable_proj1_compare;
+  compare_strictorder := triple_strictly_comparable_proj1_strictorder;
+|}.
 
 Definition triple_strictly_comparable_proj2_inhabited
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  : Y.
+  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} : Y.
 Proof.
   by destruct HscXYZ as [[(_, y) _] _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj2_compare
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  (y1 y2 : Y) : comparison.
+  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} (y1 y2 : Y) : comparison.
 Proof.
   destruct HscXYZ as [[(x, y) z] compare _].
   exact (compare (x, y1, z) (x, y2, z)).
@@ -675,40 +651,29 @@ Lemma triple_strictly_comparable_proj2_strictorder
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : CompareStrictOrder (@triple_strictly_comparable_proj2_compare X Y Z HscXYZ).
 Proof.
+  destruct HscXYZ, inhabited0 as [[x0 y0] z0].
   split.
-  - intros x y.
-      unfold triple_strictly_comparable_proj2_compare.
-      destruct HscXYZ.
-      destruct inhabited0 as [(x0, y0) z0].
-    split; intro.
-    + by apply compare_eq in H as [=].
-    + by subst; rewrite compare_eq.
-  - intros x1 x2 x3 cmp.
-    unfold triple_strictly_comparable_proj2_compare.
-    destruct HscXYZ.
-    destruct inhabited0 as [(x0, y0) z0].
-    apply StrictOrder_Transitive.
+  - by intros x y; cbn; rewrite compare_eq; firstorder congruence.
+  - by intros x1 x2 x3 cmp; cbn; apply compare_transitive.
 Qed.
 
 Definition triple_strictly_comparable_proj2
   {X Y Z} (HscT :  StrictlyComparable (X * Y * Z))
-  : StrictlyComparable Y
-  :=
-  {| inhabited := triple_strictly_comparable_proj2_inhabited;
-    compare := triple_strictly_comparable_proj2_compare;
-    compare_strictorder := triple_strictly_comparable_proj2_strictorder;
-  |}.
+  : StrictlyComparable Y :=
+{|
+  inhabited := triple_strictly_comparable_proj2_inhabited;
+  compare := triple_strictly_comparable_proj2_compare;
+  compare_strictorder := triple_strictly_comparable_proj2_strictorder;
+|}.
 
 Definition triple_strictly_comparable_proj3_inhabited
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  : Z.
+  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} : Z.
 Proof.
   by destruct HscXYZ as [[_ z] _ _].
 Defined.
 
 Definition triple_strictly_comparable_proj3_compare
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  (z1 z2 : Z) : comparison.
+  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} (z1 z2 : Z) : comparison.
 Proof.
   destruct HscXYZ as [[(x, y) z] compare _].
   exact (compare (x, y, z1) (x, y, z2)).
@@ -718,30 +683,22 @@ Lemma triple_strictly_comparable_proj3_strictorder
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
   : CompareStrictOrder (@triple_strictly_comparable_proj3_compare X Y Z HscXYZ).
 Proof.
+  destruct HscXYZ, inhabited0 as [[x0 y0] z0].
   split.
-  - intros x y.
-      unfold triple_strictly_comparable_proj3_compare.
-      destruct HscXYZ.
-      destruct inhabited0 as [(x0, y0) z0].
-    split; intro.
-    + by apply compare_eq in H as [=].
-    + by subst; rewrite compare_eq.
-  - intros x1 x2 x3 cmp.
-    unfold triple_strictly_comparable_proj3_compare.
-    destruct HscXYZ.
-    destruct inhabited0 as [(x0, y0) z0].
-    apply StrictOrder_Transitive.
+  - by intros x y; cbn; rewrite compare_eq; firstorder congruence.
+  - by intros x1 x2 x3 cmp; cbn; apply compare_transitive.
 Qed.
 
 Definition triple_strictly_comparable_proj3
   {X Y Z} (HscT :  StrictlyComparable (X * Y * Z))
-  : StrictlyComparable Z
-  :=
-  {| inhabited := triple_strictly_comparable_proj3_inhabited;
-    compare := triple_strictly_comparable_proj3_compare;
-    compare_strictorder := triple_strictly_comparable_proj3_strictorder;
-  |}.
+  : StrictlyComparable Z :=
+{|
+  inhabited := triple_strictly_comparable_proj3_inhabited;
+  compare := triple_strictly_comparable_proj3_compare;
+  compare_strictorder := triple_strictly_comparable_proj3_strictorder;
+|}.
 
+(** ** Liveness *)
 
 Definition bounding (P : nat -> Prop)
   :=  {n1 : nat | forall (n2 : nat), n1 <= n2 -> ~P n2}.
@@ -772,38 +729,24 @@ Proof.
   by exists n2.
 Qed.
 
-(** optionally extracts an element belonging to first type from a sum type *)
-Definition sum_project_left
-  {A B : Type}
-  (x : A + B)
-  : option A
-  :=
+(** ** Misc *)
+
+(** Extracts the left element from a sum, if possible. *)
+Definition sum_project_left {A B : Type} (x : A + B) : option A :=
   match x with
   | inl a => Some a
   | inr _ => None
   end.
 
-(** optionally extracts an element belonging to second type from a sum type *)
-Definition sum_project_right
-  {A B : Type}
-  (x : A + B)
-  : option B
-  :=
+(** Extracts the right element from a sum, if possible. *)
+Definition sum_project_right {A B : Type} (x : A + B) : option B :=
   match x with
   | inl _ => None
   | inr b => Some b
   end.
 
-Program Definition le_plus_dec {m n} (Hle : m <= n)
-  : { k | k + m = n} :=
+Program Definition not_lt_plus_dec {m n} (Hnlt : ~n < m) : {k | k + m = n} :=
   exist _ (n - m) _.
 Next Obligation.
-  simpl. lia.
-Qed.
-
-Program Definition not_lt_plus_dec {m n} (Hnlt : ~n < m)
-  : {k | k + m = n} :=
-  le_plus_dec _.
-Next Obligation.
-  lia.
+  cbn; lia.
 Qed.
