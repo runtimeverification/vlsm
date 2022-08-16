@@ -327,14 +327,11 @@ Proof.
     ; destruct (vtransition _ _ _) as (si', om')
     ; inversion_clear 1.
     do 2 f_equal; extensionality j.
-    destruct (decide (i = j)) as [| Hij]; subst.
-    + unfold lift_sub_state.
-      by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi), !state_update_eq.
-    + state_update_simpl.
-      unfold lift_sub_state.
-      destruct (decide (j ∈ set_diff (enum index) byzantine)) as [Hj |].
+    state_update i j; unfold lift_sub_state.
+    + by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi), !state_update_eq.
+    + destruct (decide (j ∈ set_diff (enum index) byzantine)) as [Hj |].
       * by rewrite !(lift_sub_state_to_eq _ _ _ _ _ Hj), sub_IM_state_update_neq.
-      * by rewrite !lift_sub_state_to_neq.
+      * by state_update_simpl.
 Qed.
 
 (** Considering a trace with the [fixed_byzantine_trace_alt_prop]erty for a

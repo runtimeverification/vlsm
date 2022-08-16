@@ -51,7 +51,7 @@ Proof.
   destruct (equivocator_transition _ _ _).
   inversion Ht; subst.
   apply elem_of_list_filter, proj1 in Hi.
-  rewrite state_update_neq in Hi by done.
+  state_update_simpl.
   by apply Hs, elem_of_list_filter; split; [| apply elem_of_enum].
 Qed.
 
@@ -683,7 +683,8 @@ Proof.
   match type of Ht with
   | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn:Hti
   end.
-  inversion Ht. subst. rewrite state_update_eq in Hsingleton_d_item. clear Ht.
+  inversion Ht; subst; clear Ht.
+  state_update_simpl.
   specialize (equivocator_transition_no_equivocation_zero_descriptor (IM x) _ _ _ _ _ Hv Hti Hsingleton_d_item)
     as [li Hsndv].
   unfold equivocators_transition_item_project in Hpr.
@@ -695,7 +696,7 @@ Proof.
   unfold eq_rect_r in Hpr. simpl in Hpr.
   rewrite Heqv_descriptors'' in Hpr.
   unfold equivocator_vlsm_transition_item_project in Hpr.
-  rewrite state_update_eq in Hpr.
+  state_update_simpl.
   rewrite equivocator_state_project_zero in Hpr.
   rewrite decide_True in Hpr by done.
   inversion Hpr. subst. clear Hpr.

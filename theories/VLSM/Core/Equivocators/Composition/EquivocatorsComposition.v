@@ -340,9 +340,7 @@ Lemma proper_equivocator_descriptors_state_update_eqv
 Proof.
   intro eqv'.
   specialize (Hproper eqv').
-  destruct (decide (eqv' = eqv)); subst.
-  - by rewrite state_update_eq in Hproper.
-  - by rewrite state_update_neq in Hproper.
+  by state_update eqv eqv'.
 Qed.
 
 Definition equivocators_state_project
@@ -477,10 +475,8 @@ Lemma equivocators_state_project_state_update_eqv
   equivocators_state_project eqv_descriptors (state_update equivocator_IM s eqv seqv)
   = state_update IM (equivocators_state_project eqv_descriptors s) eqv si.
 Proof.
-  apply functional_extensionality_dep.
-  intro ieqv.
-  unfold equivocators_state_project.
-  unfold state_update.
+  cbn; extensionality ieqv.
+  unfold equivocators_state_project, state_update.
   by case_decide; subst.
 Qed.
 
@@ -512,6 +508,11 @@ Proof.
 Qed.
 
 End fully_equivocating_composition.
+
+#[export] Hint Rewrite @equivocator_descriptors_update_eq : state_update.
+#[export] Hint Rewrite @equivocator_descriptors_update_id using done : state_update.
+#[export] Hint Rewrite @equivocator_descriptors_update_neq using done : state_update.
+#[export] Hint Rewrite @equivocators_state_project_state_update_eqv using done : state_update.
 
 Section equivocators_sub_projections.
 

@@ -232,7 +232,7 @@ Proof.
   assert (valid_state_message_prop Alt s None) as Hs
       by (apply valid_initial_state, proj2_sig).
   by eapply (valid_generated_state_message Alt) with s None s None (existT second _)
-  ; cbn; [..| rewrite !state_update_id].
+  ; cbn; state_update_simpl.
 Qed.
 
 (**

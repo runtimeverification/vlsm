@@ -845,20 +845,18 @@ End VLSM_composition.
 (**
   A nice little tactic for dealing with [state_update].
 *)
+
+Create HintDb state_update.
+
+#[export] Hint Rewrite @state_update_neq using done : state_update.
+#[export] Hint Rewrite @state_update_id using done : state_update.
+#[export] Hint Rewrite @state_update_eq : state_update.
+
+#[export] Hint Unfold lift_to_composite_state : state_update.
+#[export] Hint Unfold lift_to_composite_state' : state_update.
+
 Ltac state_update_simpl :=
-repeat match goal with
-| |- context [state_update _ _ ?i _ ?i] => rewrite (state_update_eq _ _ i)
-| Heq : ?i <> ?j |- context [state_update _ _ ?i _ ?j] =>
-  rewrite (state_update_neq _ _ i _ j) by done
-| Heq : ?j <> ?i |- context [state_update _ _ ?i _ ?j] =>
-  rewrite (state_update_neq _ _ i _ j) by done
-| H : context [state_update _ _ ?i _ ?i] |- _ => rewrite (state_update_eq _ _ i) in H
-| Heq : ?i <> ?j, H : context [state_update _ _ ?i _ ?j] |- _ =>
-  rewrite (state_update_neq _ _ i _ j) in H by done
-| Heq : ?j <> ?i, H : context [state_update _ _ ?i _ ?j] |- _ =>
-  rewrite (state_update_neq _ _ i _ j) in H by done
-(*   | |- context [state_update _ _ ?i _ ?j] => destruct (decide (i = j)); subst *)
-end.
+  autounfold with state_update in *; autorewrite with state_update in *.
 
 Ltac state_update i j :=
   destruct (decide (i = j)); subst; state_update_simpl.
@@ -1716,12 +1714,11 @@ Proof.
       assert (Hss1 : input_valid_transition RFree (existT i li)
                   (state_update IM s j (s1 j), om) (s1, om')).
       {
-        repeat split; [apply IHHs2 | apply any_message_is_valid_in_preloaded |..].
-        - by cbn; state_update_simpl.
-        - cbn; state_update_simpl.
-          replace (vtransition _ _ _) with (s' i, om').
-          f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
-          by rewrite Heq_s'; state_update i k; state_update j k.
+        repeat split; [apply IHHs2 | apply any_message_is_valid_in_preloaded |..]
+        ; cbn; state_update_simpl; [done |].
+        replace (vtransition _ _ _) with (s' i, om').
+        f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
+        by rewrite Heq_s'; state_update i k; state_update j k.
       }
       repeat split; cbn.
       * by eapply input_valid_transition_destination.

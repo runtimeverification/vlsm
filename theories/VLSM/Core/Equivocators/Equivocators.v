@@ -2,7 +2,7 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From Coq Require Import Eqdep Fin FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble.
-From VLSM.Core Require Import VLSM VLSMProjections.
+From VLSM.Core Require Import VLSM VLSMProjections Composition.
 
 (** * VLSM Equivocation
 
@@ -446,6 +446,23 @@ Proof.
   lia.
 Qed.
 
+Hint Rewrite @equivocator_state_update_size : state_update.
+Hint Rewrite @equivocator_state_update_lst : state_update.
+Hint Rewrite @equivocator_state_update_project_eq using first [done | lia] : state_update.
+Hint Rewrite @equivocator_state_update_project_neq using first [done | lia] : state_update.
+
+Hint Rewrite @equivocator_state_extend_size using done : state_update.
+Hint Rewrite @equivocator_state_extend_lst using done : state_update.
+Hint Rewrite @equivocator_state_extend_project_1 using first [done | lia] : state_update.
+Hint Rewrite @equivocator_state_extend_project_2 using first [done | lia] : state_update.
+Hint Rewrite @equivocator_state_extend_project_3 using first [done | lia] : state_update.
+
+Hint Rewrite @equivocator_state_append_size using done : state_update.
+Hint Rewrite @equivocator_state_append_lst using done : state_update.
+Hint Rewrite @equivocator_state_append_project_1 using first [done | lia] : state_update.
+Hint Rewrite @equivocator_state_append_project_2 using first [done | lia] : state_update.
+Hint Rewrite @equivocator_state_append_project_3 using first [done | lia] : state_update.
+
 #[local] Ltac destruct_equivocator_state_append_project' es es' i Hi k Hk Hpr :=
   let Hi' := fresh "Hi" in
   destruct (decide (i < equivocator_state_n es)) as [Hi| Hi']; swap 1 2;
@@ -492,25 +509,18 @@ Proof.
   intro i.
   destruct_equivocator_state_append_project es1 (equivocator_state_extend es2 s) i Hi k Hk.
   - apply equivocator_state_extend_project_3.
-    rewrite equivocator_state_append_size.
-    rewrite equivocator_state_extend_size in Hi.
-    lia.
-  - subst.
-    rewrite equivocator_state_extend_size in Hi.
+    by state_update_simpl; lia.
+  - subst. state_update_simpl.
     destruct (decide (k = equivocator_state_n es2)).
     + subst.
       rewrite !equivocator_state_extend_project_2
       ; [done | done |].
-      rewrite equivocator_state_append_size.
-      lia.
+      by state_update_simpl; lia.
     + rewrite !equivocator_state_extend_project_1
       ; [rewrite equivocator_state_append_project_2 with (k := k)|lia|]
       ; [done | done |].
-      rewrite equivocator_state_append_size.
-      lia.
-  - rewrite equivocator_state_extend_project_1.
-    + by apply equivocator_state_append_project_1.
-    + rewrite equivocator_state_append_size. lia.
+      by state_update_simpl; lia.
+  - by rewrite equivocator_state_extend_project_1; state_update_simpl; [| lia].
 Qed.
 
 Lemma equivocator_state_append_update_commute es1 es2 s n
@@ -520,20 +530,16 @@ Proof.
   apply equivocator_state_project_ext.
   intro i.
   destruct_equivocator_state_append_project es1 (equivocator_state_update es2 n s) i Hi k Hk.
-  - apply equivocator_state_project_None.
-    rewrite equivocator_state_update_size in *.
-    rewrite equivocator_state_append_size.
-    lia.
+  - rewrite equivocator_state_project_None; [done |].
+    by state_update_simpl.
   - destruct (decide (n = k)).
-    + subst. rewrite equivocator_state_update_size in Hi.
+    + subst. state_update_simpl.
       rewrite equivocator_state_update_project_eq;
       [| rewrite equivocator_state_append_size; lia | done].
-      symmetry.
-      apply equivocator_state_update_project_eq; lia.
-    + rewrite !equivocator_state_update_project_neq by lia.
+      by state_update_simpl.
+    + state_update_simpl.
       by apply equivocator_state_append_project_2 with (k := k).
-  - by rewrite equivocator_state_update_project_neq,
-       equivocator_state_append_project_1 by lia.
+  - by state_update_simpl.
 Qed.
 
 (* An [equivocator_state] has the [initial_state_prop]erty if it only
@@ -636,6 +642,23 @@ Lemma mk_singleton_initial_state
 Proof. done. Qed.
 
 End sec_equivocator_vlsm.
+
+#[export] Hint Rewrite @equivocator_state_update_size : state_update.
+#[export] Hint Rewrite @equivocator_state_update_lst : state_update.
+#[export] Hint Rewrite @equivocator_state_update_project_eq using first [done | lia] : state_update.
+#[export] Hint Rewrite @equivocator_state_update_project_neq using first [done | lia] : state_update.
+
+#[export] Hint Rewrite @equivocator_state_extend_size using done : state_update.
+#[export] Hint Rewrite @equivocator_state_extend_lst using done : state_update.
+#[export] Hint Rewrite @equivocator_state_extend_project_1 using first [done | lia] : state_update.
+#[export] Hint Rewrite @equivocator_state_extend_project_2 using first [done | lia] : state_update.
+#[export] Hint Rewrite @equivocator_state_extend_project_3 using first [done | lia] : state_update.
+
+#[export] Hint Rewrite @equivocator_state_append_size using done : state_update.
+#[export] Hint Rewrite @equivocator_state_append_lst using done : state_update.
+#[export] Hint Rewrite @equivocator_state_append_project_1 using first [done | lia] : state_update.
+#[export] Hint Rewrite @equivocator_state_append_project_2 using first [done | lia] : state_update.
+#[export] Hint Rewrite @equivocator_state_append_project_3 using first [done | lia] : state_update.
 
 Arguments Spawn {_ _} _: assert.
 Arguments ContinueWith {_ _} _ _: assert.
@@ -848,9 +871,9 @@ Proof.
   ; [ inversion Ht; subst; rewrite equivocator_state_extend_size in Hs'; cbv in Hs'; lia|..]
   ; cbn in Hv, Ht;  destruct_equivocator_state_project s ei sei Hei; [| done | | done]
   ; destruct (vtransition _ _ _) as (si', om')
-  ; inversion Ht; subst.
-  - rewrite equivocator_state_update_size in Hs'. exists l. f_equal. lia.
-  - rewrite equivocator_state_extend_size in Hs'. lia.
+  ; inversion Ht; subst; state_update_simpl.
+  - exists l. f_equal. lia.
+  - lia.
 Qed.
 
 (** If the state obtained after one transition has no equivocation, then
@@ -864,14 +887,12 @@ Lemma equivocator_transition_reflects_singleton_state
   : is_singleton_state X s' -> is_singleton_state X s.
 Proof.
   unfold is_singleton_state.
-  destruct l as [sn| ei l| ei l]; cbn in Ht
+  by destruct l as [sn| ei l| ei l]; cbn in Ht
   ; [inversion Ht; rewrite equivocator_state_extend_size; cbv; lia| ..]
   ; destruct (equivocator_state_project _ _)
   ; [| by inversion Ht | | by inversion Ht]
   ; destruct (vtransition _ _ _) as (si', om')
-  ; inversion Ht; subst; clear Ht.
-  - by rewrite equivocator_state_update_size.
-  - by rewrite equivocator_state_extend_size; cbv; lia.
+  ; inversion Ht; subst; clear Ht; state_update_simpl.
 Qed.
 
 Lemma equivocator_transition_cannot_decrease_state_size
@@ -889,8 +910,8 @@ Proof.
   ; [|inversion Ht; lia| |inversion Ht; lia]
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion Ht; subst; clear Ht.
-  - rewrite equivocator_state_update_size. lia.
-  - rewrite Hex_size. lia.
+  - by state_update_simpl.
+  - by rewrite Hex_size; lia.
 Qed.
 
 Lemma equivocator_transition_preserves_equivocating_state
@@ -919,7 +940,7 @@ Proof.
   destruct (vtransition _ _ _).
   inversion Ht. subst.
   unfold is_equivocating_state, is_singleton_state.
-  by rewrite equivocator_state_update_size.
+  by state_update_simpl.
 Qed.
 
 (**
@@ -1097,7 +1118,7 @@ Proof.
   rewrite Hv in Ht.
   destruct (vtransition _ _ _).
   inversion Ht. subst.
-  apply equivocator_state_update_size.
+  by state_update_simpl.
 Qed.
 
 Lemma new_machine_label_equivocator_state_project_last

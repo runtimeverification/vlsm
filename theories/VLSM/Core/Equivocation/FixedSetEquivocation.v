@@ -431,10 +431,8 @@ Proof.
     clear.
     apply functional_extensionality_dep. intro sub_j.
     destruct_dec_sig sub_j j Hj Heqsub_j. subst.
-    unfold composite_state_sub_projection at 2. simpl.
-    state_update i j.
-    + by rewrite sub_IM_state_update_eq.
-    + by rewrite !state_update_neq; [done .. | inversion 1].
+    unfold composite_state_sub_projection at 2.
+    by state_update i j.
 Qed.
 
 (** See Lemma [fixed_output_has_strong_fixed_equivocation] below. *)
@@ -533,7 +531,7 @@ Proof.
         inversion_clear Ht; clear -Hl.
         extensionality sub_j; destruct_dec_sig sub_j j Hj Heqsub_j;
         subst; unfold composite_state_sub_projection.
-        by rewrite state_update_neq; [|contradict Hl; subst].
+        by state_update i j.
 Qed.
 
 (**
@@ -827,9 +825,7 @@ Proof.
     destruct (vtransition _ _ _) as (si', _om');
     inversion_clear 1.
     f_equal; extensionality j.
-    state_update i j.
-    + by rewrite lift_sub_state_to_neq, !state_update_eq.
-    + by unfold lift_sub_state_to; rewrite state_update_neq.
+    by state_update i j.
   - intros [i liX].
     unfold remove_equivocating_state_project;
     unfold remove_equivocating_label_project; cbn.
@@ -930,13 +926,12 @@ Proof.
     destruct (vtransition _ _ _) as (si', _om');
     intros [_ Ht]; inversion_clear Ht.
     f_equal. extensionality i.
-    destruct (decide (i = j)); subst.
+    state_update i j.
     + by rewrite lift_sub_state_to_eq with (Hi := Hj), !state_update_eq.
-    + rewrite state_update_neq by congruence.
-      destruct (decide (i ∈ equivocators)).
+    + destruct (decide (i ∈ equivocators)).
       * rewrite !lift_sub_state_to_eq with (Hi := e), state_update_neq; [done |].
         by intros Hcontra%dsig_eq.
-      * by rewrite !lift_sub_state_to_neq.
+      * by state_update_simpl.
   - by intros s H2; apply fixed_equivocator_lifting_initial_state.
   - intros l s m Hv HsY [[(i, Hi) [[im Him] Heqm]] | Hm].
     + apply initial_message_is_valid.
