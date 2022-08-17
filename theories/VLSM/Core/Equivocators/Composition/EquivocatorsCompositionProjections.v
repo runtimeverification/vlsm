@@ -1565,7 +1565,7 @@ Proof.
       ; destruct (decide ((proj1_sig i) = projT1 (l item))).
       * rewrite equivocator_descriptors_update_eq_rew with (Heq := e).
         assert (e1 : i = (dexist (projT1 (l item)) Hl)).
-        { by apply dec_sig_eq_iff. }
+        { by apply dsig_eq. }
         subst i.
         rewrite equivocator_descriptors_update_eq_rew with (Heq := eq_refl).
         simpl in e. replace e with (eq_refl (projT1 (l item))); [done |].
@@ -1574,7 +1574,7 @@ Proof.
         by intros ->.
       * rewrite equivocator_descriptors_update_eq_rew with (Heq := e).
         assert (e1 : i = (dexist (projT1 (l item)) Hl)).
-        { by apply dec_sig_eq_iff. }
+        { by apply dsig_eq. }
         subst i.
         rewrite equivocator_descriptors_update_eq_rew with (Heq := eq_refl).
         simpl in e. replace e with (eq_refl (projT1 (l item))); [done |].
@@ -1902,7 +1902,7 @@ Hint Unfold equivocator_descriptors_update : state_update.
 Definition free_sub_free_equivocator_descriptors
   (descriptors : equivocator_descriptors IM)
   : equivocator_descriptors sub_IM
-  := fun i => descriptors (dec_proj1_sig i).
+  := fun i => descriptors (proj1_sig i).
 
 Lemma equivocators_no_equivocations_vlsm_X_vlsm_partial_projection
   (final_descriptors : equivocator_descriptors IM)

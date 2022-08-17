@@ -194,13 +194,13 @@ Proof.
           apply NoDup_app in Hnodup as (_ & Hnodup & _).
           eapply Hnodup; [done |].
           rewrite elem_of_list_singleton.
-          by apply dec_sig_eq_iff; cbn.
+          by apply dsig_eq.
         }
         rewrite IHl, decide_True.
         -- rewrite (sub_IM_state_pi is _Hix Hix); symmetry.
            apply equivocator_state_append_singleton_is_extend, (His (dexist i Hix)).
         -- rewrite elem_of_app, elem_of_list_singleton; right.
-           by apply dec_sig_eq_iff; cbn.
+           by apply dsig_eq.
       * case_decide.
         -- rewrite decide_True; rewrite ?elem_of_app; itauto.
         -- rewrite decide_False; [done |].

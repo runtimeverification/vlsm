@@ -399,9 +399,8 @@ Proof.
   clear -Hp Hnp. rewrite Str_nth_plus, Nat.add_comm in Hp.
   split; [done |].
   intros i [Hlt_i Hilt].
-  apply le_plus_dec in Hlt_i as [i' Hi].
-  subst i.
-  rewrite <- Str_nth_plus.
+  apply nat_le_sum in Hlt_i as [i' ->].
+  rewrite plus_comm, <- Str_nth_plus.
   apply Hnp. simpl in *. lia.
 Qed.
 
@@ -501,8 +500,8 @@ Proof.
     rewrite Heq. simpl.
     split; [lia|].
     intros i [Hle Hlt].
-    apply le_plus_dec in Hle as [k' Hle]. subst i.
-    rewrite <- Str_nth_tl_plus. simpl.
+    apply nat_le_sum in Hle as [k' ->].
+    rewrite plus_comm, <- Str_nth_tl_plus. simpl.
     apply Hnp. lia.
 Qed.
 
