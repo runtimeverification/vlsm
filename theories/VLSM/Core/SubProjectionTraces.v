@@ -25,8 +25,7 @@ Next Obligation.
   intros; apply decide_rel; typeclasses eauto.
 Qed.
 
-Definition sub_index : Type
-  := dec_sig sub_index_prop.
+Definition sub_index : Type := dsig sub_index_prop.
 
 Definition sub_IM
   (ei : sub_index)
@@ -39,8 +38,9 @@ Lemma sub_IM_state_pi
   (e1 e2 : sub_index_prop i)
   : s (dexist i e1) = s (dexist i e2).
 Proof.
-  unfold composite_state in s. simpl in s.
-  apply (dsig_f_equal (fun i => vstate (IM i)) s).
+  unfold dexist.
+  replace (bool_decide_pack _ e1) with (bool_decide_pack _ e2); [done |].
+  apply proof_irrel.
 Qed.
 
 Lemma sub_IM_state_update_eq
@@ -1101,8 +1101,8 @@ Definition lift_sub_incl_label
   : composite_label sub_IM2
   :=
   let sub1_i := projT1 l in
-  let i := dec_proj1_sig sub1_i in
-  let H1i := dec_proj2_sig sub1_i in
+  let i := proj1_sig sub1_i in
+  let H1i := proj2_dsig sub1_i in
   let H2i := Hincl _ H1i in
   existT (dexist i H2i) (projT2 l).
 
@@ -1254,7 +1254,7 @@ Proof.
   case_decide; [| done].
   simpl.
   f_equal.
-  apply dec_sig_eq_iff; itauto.
+  apply dsig_eq; itauto.
 Qed.
 
 Lemma sub_IM_preserves_no_initial_messages
