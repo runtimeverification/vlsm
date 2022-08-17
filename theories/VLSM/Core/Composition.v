@@ -843,7 +843,7 @@ End sec_composite_vlsm.
 End VLSM_composition.
 
 (**
-  A nice little tactic for dealing with [state_update].
+  Hint database and tactic for dealing with updates and lifting via [state_update].
 *)
 
 Create HintDb state_update.
@@ -857,9 +857,6 @@ Create HintDb state_update.
 
 Ltac state_update_simpl :=
   autounfold with state_update in *; autorewrite with state_update in *.
-
-Ltac state_update i j :=
-  destruct (decide (i = j)); subst; state_update_simpl.
 
 (**
    These basic projection lemmas relate
