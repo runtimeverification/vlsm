@@ -872,7 +872,7 @@ Proof.
   destruct Htr as (? & ? & ?).
   destruct (decide (has_been_sent (IM (A v)) (s (A v)) m1));
     [destruct (decide (has_been_sent (IM (A v)) (s (A v)) m2)) |]; cycle 1.
-  1,2: eexists; split; cycle 2; 
+  1,2: eexists; split; cycle 2;
       [by contradict n; eapply has_been_sent_iff_by_sender | done |];
       by constructor 1; eexists.
   contradict Hncomp; eapply Hsent_comparable; [| done..].

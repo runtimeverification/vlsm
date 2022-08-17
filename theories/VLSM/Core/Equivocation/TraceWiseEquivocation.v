@@ -314,7 +314,7 @@ Proof.
   unfold equivocating_validators.
   simpl.
   rewrite elem_of_list_filter.
-  itauto (apply elem_of_enum). 
+  itauto (apply elem_of_enum).
 Qed.
 
 Lemma equivocating_validators_empty_in_initial_state
