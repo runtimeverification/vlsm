@@ -47,7 +47,7 @@ Context {message : Type}
   (equivocators_no_equivocations_vlsm := equivocators_no_equivocations_vlsm IM)
 .
 
-Hint Unfold equivocator_descriptors_update : state_update.
+#[local] Hint Unfold equivocator_descriptors_update : state_update.
 
 Lemma SeededXE_Free_full_projection
   (Hseed : forall m, seed m -> valid_message_prop FreeE m)

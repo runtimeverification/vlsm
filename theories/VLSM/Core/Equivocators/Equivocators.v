@@ -446,22 +446,22 @@ Proof.
   lia.
 Qed.
 
-Hint Rewrite @equivocator_state_update_size : state_update.
-Hint Rewrite @equivocator_state_update_lst : state_update.
-Hint Rewrite @equivocator_state_update_project_eq using first [done | lia] : state_update.
-Hint Rewrite @equivocator_state_update_project_neq using first [done | lia] : state_update.
+#[local] Hint Rewrite @equivocator_state_update_size : state_update.
+#[local] Hint Rewrite @equivocator_state_update_lst : state_update.
+#[local] Hint Rewrite @equivocator_state_update_project_eq using first [done | lia] : state_update.
+#[local] Hint Rewrite @equivocator_state_update_project_neq using first [done | lia] : state_update.
 
-Hint Rewrite @equivocator_state_extend_size using done : state_update.
-Hint Rewrite @equivocator_state_extend_lst using done : state_update.
-Hint Rewrite @equivocator_state_extend_project_1 using first [done | lia] : state_update.
-Hint Rewrite @equivocator_state_extend_project_2 using first [done | lia] : state_update.
-Hint Rewrite @equivocator_state_extend_project_3 using first [done | lia] : state_update.
+#[local] Hint Rewrite @equivocator_state_extend_size using done : state_update.
+#[local] Hint Rewrite @equivocator_state_extend_lst using done : state_update.
+#[local] Hint Rewrite @equivocator_state_extend_project_1 using first [done | lia] : state_update.
+#[local] Hint Rewrite @equivocator_state_extend_project_2 using first [done | lia] : state_update.
+#[local] Hint Rewrite @equivocator_state_extend_project_3 using first [done | lia] : state_update.
 
-Hint Rewrite @equivocator_state_append_size using done : state_update.
-Hint Rewrite @equivocator_state_append_lst using done : state_update.
-Hint Rewrite @equivocator_state_append_project_1 using first [done | lia] : state_update.
-Hint Rewrite @equivocator_state_append_project_2 using first [done | lia] : state_update.
-Hint Rewrite @equivocator_state_append_project_3 using first [done | lia] : state_update.
+#[local] Hint Rewrite @equivocator_state_append_size using done : state_update.
+#[local] Hint Rewrite @equivocator_state_append_lst using done : state_update.
+#[local] Hint Rewrite @equivocator_state_append_project_1 using first [done | lia] : state_update.
+#[local] Hint Rewrite @equivocator_state_append_project_2 using first [done | lia] : state_update.
+#[local] Hint Rewrite @equivocator_state_append_project_3 using first [done | lia] : state_update.
 
 #[local] Ltac destruct_equivocator_state_append_project' es es' i Hi k Hk Hpr :=
   let Hi' := fresh "Hi" in

@@ -167,11 +167,11 @@ Proof.
   by destruct (decide (i = j)); subst; state_update_simpl; case_decide.
 Qed.
 
-Hint Rewrite @sub_IM_state_update_eq using done : state_update.
-Hint Rewrite @sub_IM_state_update_neq using done : state_update.
-Hint Rewrite @lift_sub_state_to_eq using done : state_update.
-Hint Rewrite @lift_sub_state_to_neq using done : state_update.
-Hint Rewrite @lift_sub_state_to_neq_state_update using done : state_update.
+#[local] Hint Rewrite @sub_IM_state_update_eq using done : state_update.
+#[local] Hint Rewrite @sub_IM_state_update_neq using done : state_update.
+#[local] Hint Rewrite @lift_sub_state_to_eq using done : state_update.
+#[local] Hint Rewrite @lift_sub_state_to_neq using done : state_update.
+#[local] Hint Rewrite @lift_sub_state_to_neq_state_update using done : state_update.
 
 Section sec_induced_sub_projection.
 
@@ -1521,8 +1521,8 @@ Proof.
   case_decide; congruence.
 Qed.
 
-Hint Rewrite @sub_element_state_eq : state_update.
-Hint Rewrite @sub_element_state_neq using done : state_update.
+#[local] Hint Rewrite @sub_element_state_eq : state_update.
+#[local] Hint Rewrite @sub_element_state_neq using done : state_update.
 
 Lemma preloaded_sub_element_full_projection
   (P Q : message -> Prop)
@@ -1673,6 +1673,9 @@ Proof.
 Qed.
 
 End sub_composition_element.
+
+#[export] Hint Rewrite @sub_element_state_eq : state_update.
+#[export] Hint Rewrite @sub_element_state_neq using done : state_update.
 
 Section sub_composition_preloaded_lift.
 

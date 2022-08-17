@@ -28,7 +28,7 @@ Context {message : Type}
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
-Hint Unfold equivocator_descriptors_update : state_update.
+#[local] Hint Unfold equivocator_descriptors_update : state_update.
 
 (** Given a [transition_item] <<item>> in the compositions of equivocators
 of components [IM] and an [equivocator_descriptors], if the descriptors
@@ -1897,7 +1897,7 @@ Context {message : Type}
   (sub_IM := sub_IM IM (finite.enum index))
   .
 
-Hint Unfold equivocator_descriptors_update : state_update.
+#[local] Hint Unfold equivocator_descriptors_update : state_update.
 
 Definition free_sub_free_equivocator_descriptors
   (descriptors : equivocator_descriptors IM)
