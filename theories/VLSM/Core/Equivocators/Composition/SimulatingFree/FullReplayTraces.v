@@ -47,6 +47,8 @@ Context {message : Type}
   (equivocators_no_equivocations_vlsm := equivocators_no_equivocations_vlsm IM)
 .
 
+#[local] Hint Unfold equivocator_descriptors_update : state_update.
+
 Lemma SeededXE_Free_full_projection
   (Hseed : forall m, seed m -> valid_message_prop FreeE m)
   : VLSM_full_projection SeededXE
@@ -184,10 +186,9 @@ Proof.
     ; destruct (composite_apply_plan _ _ _) as (aitems, afinal); simpl in *.
     spec IHl i; destruct_dec_sig x ix Hix Heqx; subst x; simpl in *.
     case_decide as _Hix; cycle 1.
-    + rewrite state_update_neq; congruence.
-    + destruct (decide (ix = i)).
-      * subst ix; rewrite state_update_eq.
-        rewrite decide_False in IHl.
+    + by destruct (decide (i = ix)); subst; equivocator_state_update_simpl.
+    + destruct (decide (ix = i)); subst; equivocator_state_update_simpl.
+      * rewrite decide_False in IHl.
         2: {
           intro Heqv.
           apply NoDup_app in Hnodup as (_ & Hnodup & _).
@@ -200,8 +201,7 @@ Proof.
            apply equivocator_state_append_singleton_is_extend, (His (dexist i Hix)).
         -- rewrite elem_of_app, elem_of_list_singleton; right.
            by apply dsig_eq.
-      * rewrite state_update_neq by congruence.
-        case_decide.
+      * case_decide.
         -- rewrite decide_True; rewrite ?elem_of_app; itauto.
         -- rewrite decide_False; [done |].
            intros [Hin | Hx]%elem_of_app; [ done |].
@@ -243,15 +243,12 @@ Proof.
     specialize (IHl (` x)).
     cbn. unfold equivocators_transition_item_project; simpl.
     unfold equivocator_vlsm_transition_item_project. rewrite Heqv_x.
-    simpl. rewrite state_update_eq.
-    rewrite equivocator_state_extend_project_1 by lia.
+    simpl; equivocator_state_update_simpl.
+    rewrite decide_False by lia.
     destruct_equivocator_state_project (lfinal (` x)) n lfinal_x_n Hltn'; [|lia].
-    rewrite equivocator_state_extend_lst, decide_False by lia.
-    by rewrite equivocator_descriptors_update_id.
+    by equivocator_state_update_simpl.
   - intro i. apply proj2 in IHl. specialize (IHl i).
-    destruct (decide (` x = i)).
-    + subst. rewrite state_update_eq, equivocator_state_extend_size. lia.
-    + by rewrite state_update_neq.
+    by destruct (decide (i = `x)); subst; equivocator_state_update_simpl; [lia |].
 Qed.
 
 Lemma equivocator_state_project_replayed_initial_state_from_left full_replay_state is
@@ -275,13 +272,11 @@ Proof.
   simpl in *.
   rewrite finite_trace_last_is_last. simpl.
   intros i j Hj.
-  destruct (decide (` x = i)); subst.
-  - rewrite state_update_eq.
-    specialize (IHl (` x) j Hj).
-    destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [|lia].
-    rewrite equivocator_state_extend_project_1; [done |].
-    by apply equivocator_state_project_Some_rev in IHl as Hltj'.
-  - rewrite state_update_neq; auto.
+  destruct (decide (`x = i)); subst; equivocator_state_update_simpl; [| auto].
+  specialize (IHl (` x) j Hj).
+  destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [|lia].
+  rewrite equivocator_state_extend_project_1; [done |].
+  by apply equivocator_state_project_Some_rev in IHl as Hltj'.
 Qed.
 
 Lemma equivocator_state_descriptor_project_replayed_initial_state_from_left full_replay_state is
@@ -409,7 +404,7 @@ Proof.
   rewrite equivocator_state_append_lst.
   by destruct li as [sn_d| id li| id li]; simpl
   ; rewrite !decide_False by lia
-  ; rewrite equivocator_descriptors_update_id.
+  ; equivocator_state_update_simpl.
 Qed.
 
 Lemma equivocators_total_trace_project_replayed_trace_from full_replay_state is tr
@@ -458,22 +453,19 @@ Proof.
     ) as Hlift.
   cbn in Ht.
   destruct (equivocator_transition _ _ _) as (_si', _om').
-  inversion Ht. subst s' om'. clear Ht. rewrite state_update_eq in Hlift.
+  inversion Ht; subst s' om'; clear Ht.
+  equivocator_state_update_simpl.
   specialize (Hlift eq_refl).
   cbn.
   rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
   replace (equivocator_transition _ _ _) with
     (equivocator_state_append (full_replay_state i) _si', _om').
-  f_equal.
-  apply functional_extensionality_dep. intro j.
-  destruct (decide (i = j)).
-  - subst. rewrite state_update_eq.
-    by rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi), state_update_eq.
-  - rewrite state_update_neq by congruence.
-    unfold lift_equivocators_sub_state_to.
+  f_equal; extensionality j.
+  destruct (decide (i = j)); subst; equivocator_state_update_simpl.
+  - by rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi), state_update_eq.
+  - unfold lift_equivocators_sub_state_to.
     destruct (decide _); [| done].
-    rewrite state_update_neq; [done |].
-    intro Hcontra. apply dsig_eq in Hcontra. simpl in Hcontra. congruence.
+    by rewrite state_update_neq; [| inversion 1].
 Qed.
 
 Section pre_loaded_constrained_projection.

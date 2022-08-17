@@ -39,12 +39,12 @@ Proof.
     unfold composite_project_label in HlX; cbn in HlX;
       case_decide; inversion HlX; subst; clear HlX; cbn in *.
     unfold vtransition in Ht; destruct (transition _ _) as (si', _om').
-    by inversion Ht; rewrite state_update_eq.
+    by inversion Ht; state_update_simpl.
   - intros [i li] HlX s om s' om' [_ Ht].
       unfold composite_project_label in HlX; cbn in HlX;
       case_decide; inversion HlX; cbn in *.
     destruct (vtransition _ _ _); inversion Ht.
-    by rewrite state_update_neq.
+    by state_update_simpl.
   - by intros sX HsX; specialize (HsX j).
   - intros [i li] lY HlX s m (_ & Hm & _ & _) _.
     by apply initial_message_is_valid; right.
@@ -95,10 +95,10 @@ Proof.
   - apply H0.
   - destruct (vtransition _ _ _) as [si' _om']
     ; inversion H0; subst; clear H0.
-    by rewrite state_update_eq.
+    by state_update_simpl.
   - destruct (vtransition _ _ _) as [si' _om']
     ; inversion H0; subst; clear H0.
-    by rewrite state_update_neq.
+    by state_update_simpl.
 Qed.
 
 Definition composite_transition_item_projection_from_eq
@@ -224,9 +224,8 @@ Proof.
   simpl in Hv. simpl in Ht. cbn in Ht.
   destruct l as [il l].
   destruct (vtransition _ _ _) as (si', om') eqn:Htj.
-  inversion Ht. subst; clear Ht.
-  simpl in Hi.
-  by rewrite state_update_neq.
+  inversion Ht; subst; clear Ht.
+  by state_update_simpl.
 Qed.
 
 End PreLoadedProjectionTraces.
@@ -559,7 +558,7 @@ Proof.
   - by apply initial_state_is_valid, (composite_initial_state_prop_lift IM j).
   - destruct Ht as [Hvj Ht].
     specialize (Hfr _ _ _ Hvj _ IHHp).
-    spec Hfr; [apply state_update_eq|].
+    spec Hfr; [apply state_update_eq |].
     exists om'.
     destruct Hvj as [_ [_ Hvj]].
     apply (projection_valid_implies_composition_valid_message IM) in Hvj as Hom.
@@ -569,7 +568,7 @@ Proof.
     apply Hgen.
     simpl.
     unfold lift_to_composite_state' at 1.
-    rewrite state_update_eq.
+    state_update_simpl.
     replace (vtransition (IM j) _ _) with (s', om').
     f_equal.
     apply state_update_twice.
@@ -586,11 +585,12 @@ Lemma projection_friendliness_lift_to_composite_vlsm_full_projection
   : VLSM_full_projection Xj X (lift_to_composite_label IM j) (lift_to_composite_state' IM j).
 Proof.
   apply basic_VLSM_full_projection; intro; intros.
-  - apply (Hfr _ _ _ Hv); [|apply state_update_eq].
+  - apply (Hfr _ _ _ Hv); [| apply state_update_eq].
     apply (projection_friendliness_sufficient_condition_valid_state Hfr).
     apply Hv.
   - unfold lift_to_composite_label, vtransition. simpl.
-    unfold lift_to_composite_state' at 1. rewrite state_update_eq.
+    unfold lift_to_composite_state' at 1.
+    state_update_simpl.
     replace (vtransition (IM j) _ _) with (s', om')
       by (symmetry; apply H).
     f_equal. unfold lift_to_composite_state'. apply state_update_twice.

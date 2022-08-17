@@ -232,7 +232,7 @@ Proof.
   assert (valid_state_message_prop Alt s None) as Hs
       by (apply valid_initial_state, proj2_sig).
   by eapply (valid_generated_state_message Alt) with s None s None (existT second _)
-  ; cbn; [..| rewrite !state_update_id].
+  ; cbn; state_update_simpl.
 Qed.
 
 (**
@@ -278,8 +278,7 @@ Proof.
       by split; [cbn; apply Ht|].
     * simpl.
       replace (lifted_alt_state s first) with s
-        by (unfold lifted_alt_state,lift_to_composite_state'
-           ; rewrite state_update_eq; done).
+        by (unfold lifted_alt_state,lift_to_composite_state'; state_update_simpl; done).
       apply proj2 in Ht.
       change (vtransition M l (s: vstate M,om0) = (s',om')) in Ht.
       rewrite Ht.

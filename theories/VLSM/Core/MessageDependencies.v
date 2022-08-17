@@ -688,7 +688,7 @@ Proof.
   intros * []; constructor; [| done |].
   - by eapply VLSM_full_projection_input_valid_transition in dobst_transition0;
       [| apply lift_to_composite_preloaded_vlsm_full_projection].
-  - by destruct item; cbn in *; unfold lift_to_composite_state'; rewrite state_update_eq.
+  - by destruct item; cbn in *; state_update_simpl.
 Qed.
 
 Lemma composite_observed_before_send_lift :

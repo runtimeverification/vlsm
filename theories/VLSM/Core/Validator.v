@@ -713,7 +713,7 @@ Lemma component_transition_projection_None
 Proof.
   intros [j lj] HlX sX iom s'X oom [_ Ht]; cbn in Ht.
   destruct (vtransition _ _ _) as (si', om'); inversion Ht; subst.
-  apply state_update_neq.
+  destruct (decide (i = j)); subst; state_update_simpl; [| done].
   unfold composite_project_label in HlX; cbn in HlX.
   by case_decide.
 Qed.
@@ -731,7 +731,7 @@ Proof.
   destruct (vtransition _ _ _) as [si' om'].
   intros sX1' oom1 Ht1; inversion Ht1; subst; clear Ht1.
   intros sX2' oom2 Ht2; inversion Ht2; subst; clear Ht2.
-  by rewrite !state_update_eq.
+  by state_update_simpl.
 Qed.
 
 (** The [projection_induced_validator] by the [composite_project_label] and the
@@ -828,16 +828,17 @@ Proof.
   apply VLSM_eq_incl_iff; split; cbn; apply basic_VLSM_strong_incl.
   - intros s Hs; cbn in *; red.
     exists (lift_to_composite_state' IM i s).
-    split; [apply state_update_eq |].
+    split; [by state_update_simpl |].
     by apply (composite_initial_state_prop_lift IM).
   - by intros m [Him | Hpm]; right; [apply Hinits |].
   - intros l s iom [sX [<- Hv]].
     exists (existT i l), sX.
     by split; [apply composite_project_label_eq |..].
   - intros l s iom s' oom.
-    cbn; unfold lift_to_composite_state' at 1; rewrite state_update_eq.
+    cbn; unfold lift_to_composite_state' at 1.
+    state_update_simpl.
     intros Ht; setoid_rewrite Ht.
-    by rewrite state_update_eq.
+    by state_update_simpl.
   - by intros s [sX [<- HsX]]; cbn.
   - by intros m [| Hm]; [| right].
   - intros l s iom ([j li] & sX & [HlX [=] Hv]).
@@ -847,9 +848,9 @@ Proof.
     by inversion HlX; subst.
   - intros l s iom s' oom Ht; cbn in *.
     unfold lift_to_composite_state' in Ht;
-      rewrite state_update_eq in Ht;
+      state_update_simpl;
       destruct (vtransition _ _ _) as (si', om').
-    by rewrite state_update_eq in Ht.
+    by state_update_simpl.
 Qed.
 
 Lemma pre_composite_vlsm_induced_projection_validator_iff

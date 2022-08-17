@@ -35,10 +35,10 @@ Lemma sum_weights_in
 Proof.
   induction vs; intros; inversion H0; subst; clear H0.
   - inversion H; subst; clear H. simpl. apply Rplus_eq_compat_l.
-    destruct (decide (a = a)); congruence.
+    by rewrite decide_True.
   - inversion H; subst; clear H. simpl.
     pose proof (in_not_in _ _ _ _ H3 H2).
-    destruct (decide (v = a)); [done |]. simpl.
+    rewrite decide_False; [| done]. simpl.
     rewrite <- Rplus_assoc. rewrite (Rplus_comm (proj1_sig (weight v)) (proj1_sig (weight a))). rewrite Rplus_assoc.
     by apply Rplus_eq_compat_l, IHvs.
 Qed.

@@ -843,6 +843,22 @@ End sec_composite_vlsm.
 End VLSM_composition.
 
 (**
+  Hint database and tactic for dealing with updates and lifting via [state_update].
+*)
+
+Create HintDb state_update.
+
+#[export] Hint Rewrite @state_update_neq using done : state_update.
+#[export] Hint Rewrite @state_update_id using done : state_update.
+#[export] Hint Rewrite @state_update_eq : state_update.
+
+#[export] Hint Unfold lift_to_composite_state : state_update.
+#[export] Hint Unfold lift_to_composite_state' : state_update.
+
+Ltac state_update_simpl :=
+  autounfold with state_update in *; autorewrite with state_update in *.
+
+(**
    These basic projection lemmas relate
    the [valid_state_prop] and [input_valid_transition] of
    a composite VLSM back to those conditions holding
@@ -885,12 +901,8 @@ Proof.
     simpl in Ht. unfold vtransition in Ht. simpl in Ht.
     destruct (vtransition (IM j) _ _) as (si', _om') eqn:Hti.
     inversion_clear Ht.
-    destruct (decide (i = j)).
-    + subst j.
-      rewrite state_update_eq.
-      apply preloaded_protocol_generated with lj (s i) om _om'; [done | | done].
-      apply Hv.
-    + by rewrite state_update_neq.
+    destruct (decide (i = j)); subst; state_update_simpl; [| done].
+    by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
 Qed.
 
 Lemma valid_state_project_preloaded
@@ -919,7 +931,7 @@ Proof.
   destruct (vtransition (IM x) v (s x, im)).
   inversion H.
   f_equal.
-  by rewrite state_update_eq.
+  by state_update_simpl.
 Qed.
 
 Lemma input_valid_transition_preloaded_project_active
@@ -981,7 +993,7 @@ Proof.
     cbn in Htrans.
     destruct (vtransition (IM j) lj (s j, im)).
     inversion_clear Htrans.
-    by rewrite state_update_neq.
+    by state_update_simpl.
 Qed.
 
 Lemma input_valid_transition_project_any {V} (i:V)
@@ -1159,7 +1171,7 @@ Proof.
   destruct (vtransition (IM x) v (s' x, input)).
   split; [done|].
   unfold i.
-  by rewrite !state_update_eq.
+  by state_update_simpl.
 Qed.
 
 Lemma relevant_components_one
@@ -1236,7 +1248,7 @@ Proof.
   match type of eq_trans with
   | (let (si', om') := ?t in _) = _ => destruct t end.
   inversion eq_trans.
-  by rewrite state_update_neq.
+  by state_update_simpl.
 Qed.
 
 (* Same as the previous result, but for multiple transitions. *)
@@ -1501,9 +1513,7 @@ Proof.
     inversion 1; subst; clear H.
     f_equal. extensionality j.
     unfold same_IM_state_rew at 2.
-    destruct (decide (i = j)).
-    + by subst; rewrite !state_update_eq.
-    + by rewrite !state_update_neq.
+    by destruct (decide (i = j)); subst; state_update_simpl.
   - intros i. apply same_VLSM_initial_state_preservation, H.
   - apply initial_message_is_valid.
     destruct HmX as [[i [[im Him] Hi]] | Hseed]; [| by right].
@@ -1593,7 +1603,7 @@ Lemma composite_valid_transition_projection :
     s2 = state_update IM s1 (projT1 l) (s2 (projT1 l)).
 Proof.
   intros [i li] * [Hv Ht]; cbn in Ht; destruct (vtransition _ _ _) eqn:Hti.
-  by inversion Ht; subst; cbn; rewrite state_update_eq; repeat split.
+  by inversion Ht; subst; cbn; state_update_simpl.
 Qed.
 
 Lemma composite_valid_transition_projection_inv :
@@ -1660,9 +1670,10 @@ Proof.
   rewrite Heq_s in Heqs at 1; clear Heq_s.
   specialize (unique_transition_to_state Ht1 Ht2) as Heq;
     destruct_and! Heq; subst; repeat split.
-  extensionality j; destruct (decide (i = j)); [by subst |].
+  extensionality j.
+  destruct (decide (i = j)); subst; [done |].
   apply f_equal with (f := fun s => s j) in Heqs.
-  by rewrite !state_update_neq in Heqs.
+  by state_update_simpl.
 Qed.
 
 Lemma CompositeValidTransition_reflects_rechability :
@@ -1687,30 +1698,26 @@ Proof.
         cbn in Hti; destruct Hti as [[Hvi Hti] Heqs'].
       apply composite_valid_transition_projection in Hnext;
         cbn in Hnext; destruct Hnext as [[Hvj Htj] Heq_s'].
-      rewrite Heq_s', state_update_neq in Heqs' by done.
+      rewrite Heq_s' in Heqs'; state_update_simpl.
       specialize (IHHs2 (existT j lj) (state_update IM s j (s1 j)) iom oom).
       spec IHHs2.
       {
-        apply composite_valid_transition_projection_inv with (s1 j) (s' j).
-        - by split.
-        - by apply state_update_eq.
+        apply composite_valid_transition_projection_inv with (s1 j) (s' j); [done | |].
+        - by state_update_simpl.
         - rewrite state_update_twice.
           symmetry; apply state_update_id.
           apply f_equal with (f := fun s => s j) in Heqs'.
-          by rewrite state_update_eq, state_update_neq in Heqs'.
+          by state_update_simpl.
       }
       assert (Hss1 : input_valid_transition RFree (existT i li)
                   (state_update IM s j (s1 j), om) (s1, om')).
       {
-        repeat split; [apply IHHs2 | apply any_message_is_valid_in_preloaded |..].
-        - by cbn; rewrite state_update_neq.
-        - cbn; rewrite state_update_neq by done.
-          replace (vtransition _ _ _) with (s' i, om').
-          f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
-          destruct (decide (i = k)); [|destruct (decide (j = k))].
-          + by subst; rewrite state_update_eq, Heq_s', state_update_neq.
-          + by subst; rewrite state_update_neq, state_update_eq.
-          + by rewrite !state_update_neq in Heqs' |- *.
+        repeat split; [apply IHHs2 | apply any_message_is_valid_in_preloaded |..]
+        ; cbn; state_update_simpl; [done |].
+        replace (vtransition _ _ _) with (s' i, om').
+        f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
+        rewrite Heq_s'.
+        by destruct (decide (i = k)), (decide (j = k)); subst; state_update_simpl.
       }
       repeat split; cbn.
       * by eapply input_valid_transition_destination.

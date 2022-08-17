@@ -130,7 +130,7 @@ Proof.
     cbn; unfold sub_IM, sub_state_element_project; cbn.
     rewrite (sub_IM_state_pi sX Hj Hi).
     destruct (vtransition _ _ _) as (sj', _om'); inversion_clear 1.
-    f_equal; symmetry; apply sub_IM_state_update_eq.
+    f_equal; symmetry. apply sub_IM_state_update_eq.
   - intros [sub_i li] HlX_pr sX om sX' om' [_ HtX].
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     unfold sub_label_element_project in HlX_pr; cbn in HlX_pr.
@@ -138,7 +138,7 @@ Proof.
     cbn in HtX; destruct (vtransition _ _ _) as (si', _om').
     inversion_clear HtX.
     unfold sub_state_element_project.
-    rewrite sub_IM_state_update_neq; congruence.
+    by state_update_simpl.
   - by intros sX HsX; apply (HsX (dexist j Hj)).
   - intro; intros; apply any_message_is_valid_in_preloaded.
 Qed.
