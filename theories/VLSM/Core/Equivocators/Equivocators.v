@@ -446,27 +446,6 @@ Proof.
   lia.
 Qed.
 
-#[local] Hint Rewrite @equivocator_state_update_size : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_update_lst : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_update_project_eq using first [done | lia] : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_update_project_neq using first [done | lia] : equivocator_state_update.
-
-#[local] Hint Rewrite @equivocator_state_extend_size using done : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_extend_lst using done : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_extend_project_1 using first [done | lia] : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_extend_project_2 using first [done | lia] : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_extend_project_3 using first [done | lia] : equivocator_state_update.
-
-#[local] Hint Rewrite @equivocator_state_append_size using done : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_append_lst using done : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_append_project_1 using first [done | lia] : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_append_project_2 using first [done | lia] : equivocator_state_update.
-#[local] Hint Rewrite @equivocator_state_append_project_3 using first [done | lia] : equivocator_state_update.
-
-#[local] Ltac equivocator_state_update_simpl :=
-  autounfold with state_update in *;
-  autorewrite with equivocator_state_update state_update in *.
-
 #[local] Ltac destruct_equivocator_state_append_project' es es' i Hi k Hk Hpr :=
   let Hi' := fresh "Hi" in
   destruct (decide (i < equivocator_state_n es)) as [Hi| Hi']; swap 1 2;
@@ -512,19 +491,22 @@ Proof.
   apply equivocator_state_project_ext.
   intro i.
   destruct_equivocator_state_append_project es1 (equivocator_state_extend es2 s) i Hi k Hk.
-  - apply equivocator_state_extend_project_3.
-    by equivocator_state_update_simpl; lia.
-  - subst. equivocator_state_update_simpl.
+  - rewrite equivocator_state_extend_size in Hi.
+    apply equivocator_state_extend_project_3.
+    by rewrite equivocator_state_append_size; lia.
+  - subst; rewrite equivocator_state_extend_size in Hi.
     destruct (decide (k = equivocator_state_n es2)).
     + subst.
       rewrite !equivocator_state_extend_project_2
       ; [done | done |].
-      by equivocator_state_update_simpl; lia.
+      by rewrite equivocator_state_append_size; lia.
     + rewrite !equivocator_state_extend_project_1
       ; [rewrite equivocator_state_append_project_2 with (k := k)|lia|]
       ; [done | done |].
-      by equivocator_state_update_simpl; lia.
-  - by rewrite equivocator_state_extend_project_1; equivocator_state_update_simpl; [| lia].
+      by rewrite equivocator_state_append_size; lia.
+  - rewrite equivocator_state_extend_project_1.
+    + by rewrite equivocator_state_append_project_1.
+    + by rewrite equivocator_state_append_size; lia.
 Qed.
 
 Lemma equivocator_state_append_update_commute es1 es2 s n
@@ -534,16 +516,17 @@ Proof.
   apply equivocator_state_project_ext.
   intro i.
   destruct_equivocator_state_append_project es1 (equivocator_state_update es2 n s) i Hi k Hk.
-  - rewrite equivocator_state_project_None; [done |].
-    by equivocator_state_update_simpl.
+  - apply equivocator_state_project_None.
+    by rewrite equivocator_state_update_size, equivocator_state_append_size in *; lia.
   - destruct (decide (n = k)).
-    + subst. equivocator_state_update_simpl.
+    + subst; rewrite equivocator_state_update_size in Hi.
       rewrite equivocator_state_update_project_eq;
       [| rewrite equivocator_state_append_size; lia | done].
-      by equivocator_state_update_simpl.
-    + equivocator_state_update_simpl.
+      by rewrite equivocator_state_update_project_eq; [| lia |].
+    + rewrite !equivocator_state_update_project_neq by lia.
       by apply equivocator_state_append_project_2 with (k := k).
-  - by equivocator_state_update_simpl.
+  - by rewrite equivocator_state_update_project_neq,
+      equivocator_state_append_project_1 by lia.
 Qed.
 
 (* An [equivocator_state] has the [initial_state_prop]erty if it only
