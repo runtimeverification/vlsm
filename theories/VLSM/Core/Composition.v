@@ -901,7 +901,7 @@ Proof.
     simpl in Ht. unfold vtransition in Ht. simpl in Ht.
     destruct (vtransition (IM j) _ _) as (si', _om') eqn:Hti.
     inversion_clear Ht.
-    state_update i j; [| done].
+    destruct (decide (i = j)); subst; state_update_simpl; [| done].
     by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
 Qed.
 
@@ -1513,7 +1513,7 @@ Proof.
     inversion 1; subst; clear H.
     f_equal. extensionality j.
     unfold same_IM_state_rew at 2.
-    by state_update i j.
+    by destruct (decide (i = j)); subst; state_update_simpl.
   - intros i. apply same_VLSM_initial_state_preservation, H.
   - apply initial_message_is_valid.
     destruct HmX as [[i [[im Him] Hi]] | Hseed]; [| by right].
@@ -1670,7 +1670,8 @@ Proof.
   rewrite Heq_s in Heqs at 1; clear Heq_s.
   specialize (unique_transition_to_state Ht1 Ht2) as Heq;
     destruct_and! Heq; subst; repeat split.
-  extensionality j; state_update i j; [done |].
+  extensionality j.
+  destruct (decide (i = j)); subst; [done |].
   apply f_equal with (f := fun s => s j) in Heqs.
   by state_update_simpl.
 Qed.
@@ -1715,7 +1716,8 @@ Proof.
         ; cbn; state_update_simpl; [done |].
         replace (vtransition _ _ _) with (s' i, om').
         f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
-        by rewrite Heq_s'; state_update i k; state_update j k.
+        rewrite Heq_s'.
+        by destruct (decide (i = k)), (decide (j = k)); subst; state_update_simpl.
       }
       repeat split; cbn.
       * by eapply input_valid_transition_destination.

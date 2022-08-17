@@ -144,7 +144,7 @@ Proof.
   destruct l as (j, lj).
   destruct (vtransition (equivocator_IM j) lj (s0 j, iom)) as (sj', om') eqn:Htj.
   inversion Ht. subst. clear Ht.
-  state_update i j; [| done].
+  destruct (decide (i = j)); subst; state_update_simpl; [| done].
   by revert Hsi; apply equivocator_transition_reflects_singleton_state with iom oom lj.
 Qed.
 
@@ -153,11 +153,12 @@ Lemma equivocators_transition_cannot_decrease_state_size
   (Ht: composite_transition equivocator_IM l (s, iom) = (s', oom))
   : forall eqv, equivocator_state_n (s eqv) <= equivocator_state_n (s' eqv).
 Proof.
-  destruct l as (j, lj). cbn in Ht.
-  destruct (equivocator_transition _ _ _) as (sj', om') eqn:Htj.
+  intro eqv.
+  destruct l as [j lj]; cbn in Ht.
+  destruct (equivocator_transition _ _ _) as [sj' om'] eqn: Htj.
   apply equivocator_transition_cannot_decrease_state_size in Htj.
-  inversion Ht. subst. clear Ht.
-  by intro eqv; state_update j eqv.
+  inversion Ht; subst; clear Ht.
+  by destruct (decide (j = eqv)); subst; state_update_simpl.
 Qed.
 
 Lemma equivocators_plan_cannot_decrease_state_size
@@ -340,7 +341,7 @@ Lemma proper_equivocator_descriptors_state_update_eqv
 Proof.
   intro eqv'.
   specialize (Hproper eqv').
-  by state_update eqv eqv'.
+  by destruct (decide (eqv = eqv')); subst; state_update_simpl.
 Qed.
 
 Definition equivocators_state_project

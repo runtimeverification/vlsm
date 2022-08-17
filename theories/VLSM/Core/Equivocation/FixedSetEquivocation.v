@@ -432,7 +432,7 @@ Proof.
     apply functional_extensionality_dep. intro sub_j.
     destruct_dec_sig sub_j j Hj Heqsub_j. subst.
     unfold composite_state_sub_projection at 2.
-    by state_update i j.
+    by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
 (** See Lemma [fixed_output_has_strong_fixed_equivocation] below. *)
@@ -531,7 +531,7 @@ Proof.
         inversion_clear Ht; clear -Hl.
         extensionality sub_j; destruct_dec_sig sub_j j Hj Heqsub_j;
         subst; unfold composite_state_sub_projection.
-        by state_update i j.
+        by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
 (**
@@ -825,7 +825,7 @@ Proof.
     destruct (vtransition _ _ _) as (si', _om');
     inversion_clear 1.
     f_equal; extensionality j.
-    by state_update i j.
+    by destruct (decide (i = j)); subst; state_update_simpl.
   - intros [i liX].
     unfold remove_equivocating_state_project;
     unfold remove_equivocating_label_project; cbn.
@@ -835,7 +835,8 @@ Proof.
     inversion_clear 1.
     extensionality j.
     unfold lift_sub_state_to.
-    by case_decide; [| state_update i j].
+    case_decide; [done |].
+    by destruct (decide (i = j)); subst; state_update_simpl.
   - intros s Hs i.
     unfold remove_equivocating_state_project, lift_sub_state_to.
     case_decide as Hi.
@@ -925,8 +926,8 @@ Proof.
     rewrite lift_sub_state_to_eq with (Hi := Hj);
     destruct (vtransition _ _ _) as (si', _om');
     intros [_ Ht]; inversion_clear Ht.
-    f_equal. extensionality i.
-    state_update i j.
+    f_equal; extensionality i.
+    destruct (decide (i = j)); subst; state_update_simpl.
     + by rewrite lift_sub_state_to_eq with (Hi := Hj), !state_update_eq.
     + destruct (decide (i ∈ equivocators)).
       * rewrite !lift_sub_state_to_eq with (Hi := e), state_update_neq; [done |].

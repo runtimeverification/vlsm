@@ -179,7 +179,7 @@ Proof.
         intro i.
         unfold equivocators_total_state_project at 1.
         unfold equivocators_state_project.
-        by state_update i eqv; [| apply Hes_pr_i].
+        by destruct (decide (i = eqv)); subst; state_update_simpl; [| apply Hes_pr_i].
       }
       split; [done |].
       eexists; split; [| split; [split; [done |] |]].

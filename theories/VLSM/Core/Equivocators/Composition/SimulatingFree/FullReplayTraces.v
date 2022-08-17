@@ -186,8 +186,8 @@ Proof.
     ; destruct (composite_apply_plan _ _ _) as (aitems, afinal); simpl in *.
     spec IHl i; destruct_dec_sig x ix Hix Heqx; subst x; simpl in *.
     case_decide as _Hix; cycle 1.
-    + by state_update i ix.
-    + state_update ix i.
+    + by destruct (decide (i = ix)); subst; state_update_simpl.
+    + destruct (decide (ix = i)); subst; state_update_simpl.
       * rewrite decide_False in IHl.
         2: {
           intro Heqv.
@@ -248,7 +248,7 @@ Proof.
     destruct_equivocator_state_project (lfinal (` x)) n lfinal_x_n Hltn'; [|lia].
     by state_update_simpl.
   - intro i. apply proj2 in IHl. specialize (IHl i).
-    by state_update (` x) i; [lia |].
+    by destruct (decide (i = `x)); subst; state_update_simpl; [lia |].
 Qed.
 
 Lemma equivocator_state_project_replayed_initial_state_from_left full_replay_state is
@@ -272,7 +272,7 @@ Proof.
   simpl in *.
   rewrite finite_trace_last_is_last. simpl.
   intros i j Hj.
-  state_update (` x) i; [| auto].
+  destruct (decide (`x = i)); subst; state_update_simpl; [| auto].
   specialize (IHl (` x) j Hj).
   destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [|lia].
   rewrite equivocator_state_extend_project_1; [done |].
@@ -460,9 +460,8 @@ Proof.
   rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
   replace (equivocator_transition _ _ _) with
     (equivocator_state_append (full_replay_state i) _si', _om').
-  f_equal.
-  extensionality j.
-  state_update i j.
+  f_equal; extensionality j.
+  destruct (decide (i = j)); subst; state_update_simpl.
   - by rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi), state_update_eq.
   - unfold lift_equivocators_sub_state_to.
     destruct (decide _); [| done].

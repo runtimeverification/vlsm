@@ -713,7 +713,7 @@ Lemma component_transition_projection_None
 Proof.
   intros [j lj] HlX sX iom s'X oom [_ Ht]; cbn in Ht.
   destruct (vtransition _ _ _) as (si', om'); inversion Ht; subst.
-  state_update i j; [| done].
+  destruct (decide (i = j)); subst; state_update_simpl; [| done].
   unfold composite_project_label in HlX; cbn in HlX.
   by case_decide.
 Qed.

@@ -327,7 +327,8 @@ Proof.
     ; destruct (vtransition _ _ _) as (si', om')
     ; inversion_clear 1.
     do 2 f_equal; extensionality j.
-    state_update i j; unfold lift_sub_state.
+    unfold lift_sub_state.
+    destruct (decide (i = j)); subst; state_update_simpl.
     + by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi), !state_update_eq.
     + destruct (decide (j ∈ set_diff (enum index) byzantine)) as [Hj |].
       * by rewrite !(lift_sub_state_to_eq _ _ _ _ _ Hj), sub_IM_state_update_neq.

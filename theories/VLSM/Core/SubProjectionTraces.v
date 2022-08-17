@@ -164,7 +164,7 @@ Proof.
   symmetry.
   extensionality j.
   unfold lift_sub_state_to.
-  by state_update i j; case_decide.
+  by destruct (decide (i = j)); subst; state_update_simpl; case_decide.
 Qed.
 
 Hint Rewrite @sub_IM_state_update_eq using done : state_update.
@@ -275,7 +275,7 @@ Proof.
   subst.
   unfold composite_state_sub_projection in HsXeq_pr |- *.
   simpl in HsXeq_pr |- *.
-  by state_update i j.
+  by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
 (** The [pre_induced_sub_projection] is actually a [VLSM_projection] of the
@@ -328,7 +328,7 @@ Proof.
   f_equal; extensionality sub_k.
   destruct_dec_sig sub_k k Hk Heqsub_k; subst.
   unfold composite_state_sub_projection; cbn.
-  state_update i k; [done |].
+  destruct (decide (i = k)); subst; state_update_simpl; [done |].
   apply lift_sub_state_to_eq.
 Qed.
 
@@ -443,8 +443,8 @@ Proof.
   f_equal.
   extensionality sub_j.
   destruct_dec_sig sub_j j Hj Heqj.
-  subst sub_j. unfold composite_state_sub_projection at 2.
-  by cbn; state_update i j.
+  unfold composite_state_sub_projection at 2.
+  by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
 Lemma valid_sub_projection
@@ -751,9 +751,9 @@ Proof.
   case_decide as _Hi; [| done].
   rewrite (sub_IM_state_pi s _Hi Hi).
   clear _Hi; destruct (transition _ _) as (si', _om'); inversion_clear 1.
-  f_equal.
-  by extensionality j; state_update i j; unfold lift_sub_state, lift_sub_state_to
-  ; case_decide; state_update_simpl.
+  f_equal; extensionality j.
+  unfold lift_sub_state, lift_sub_state_to.
+  by destruct (decide (i = j)); subst; state_update_simpl; case_decide; state_update_simpl.
 Qed.
 
 End sub_composition.
@@ -847,7 +847,7 @@ Proof.
   destruct (vtransition _ _ _) as (si', _om').
   inversion_clear Ht.
   f_equal; extensionality j.
-  by state_update i j.
+  by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
 Lemma remove_equivocating_strong_projection_transition_consistency_None eqv_is
@@ -864,7 +864,7 @@ Proof.
   extensionality j.
   unfold remove_equivocating_state_project, lift_sub_state_to.
   case_decide; [done |].
-  by state_update i j.
+  by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
 Lemma remove_equivocating_strong_full_projection_initial_state_preservation eqv_is
@@ -928,7 +928,7 @@ Proof.
   destruct (transition _ _) as (si', _om').
   inversion_clear 1.
   f_equal; extensionality i.
-  state_update i j.
+  destruct (decide (i = j)); subst; state_update_simpl.
   - by rewrite lift_sub_state_to_eq with (Hi := Hj); state_update_simpl.
   - destruct (decide (i ∈ equivocators)).
     + by rewrite !lift_sub_state_to_eq with (Hi := e); state_update_simpl.
@@ -1107,7 +1107,8 @@ Proof.
   rewrite (sub_IM_state_pi s H_i Hi).
   destruct (transition _ _) as (si', _om'); inversion_clear 1; f_equal.
   extensionality sub2_j; destruct_dec_sig sub2_j j Hj Heqsub2_j; subst.
-  by state_update i j; unfold lift_sub_incl_state; cbn; case_decide; state_update_simpl.
+  unfold lift_sub_incl_state.
+  by destruct (decide (i = j)); subst; state_update_simpl; cbn; case_decide; state_update_simpl.
 Qed.
 
 Lemma lift_sub_incl_full_projection
@@ -1338,7 +1339,7 @@ Proof.
   ; unfold composite_state_sub_projection
   ; simpl
   ; unfold sub_IM
-  ; (state_update i j; [done |])
+  ; (destruct (decide (i = j)); subst; state_update_simpl; [done |])
   ; unfold lift_sub_state
   ; rewrite (lift_sub_state_to_eq _ _ _ _ _ Hj)
   ; itauto.
@@ -1429,7 +1430,8 @@ Proof.
     ; inversion_clear 1; f_equal.
     extensionality sub_j; destruct_dec_sig sub_j j Hj Heqj; subst sub_j
     ; unfold composite_state_sub_projection at 2; cbn.
-    by state_update i j; unfold free_sub_free_index; state_update_simpl.
+    unfold free_sub_free_index.
+    by destruct (decide (i = j)); subst; state_update_simpl.
   - by intros s Hs; rapply (composite_initial_state_sub_projection IM).
   - intros m [[i Hi] | Hseed]; [left | by right].
     by exists (free_sub_free_index i).
@@ -1447,7 +1449,8 @@ Proof.
     ; cbn; destruct (transition _ _) as (si', _om'); inversion_clear 1.
     f_equal; extensionality sub_j; destruct_dec_sig sub_j j Hj Heqj; subst sub_j
     ; unfold composite_state_sub_projection at 2; cbn.
-    by state_update i j; by unfold free_sub_free_index; state_update_simpl.
+    unfold free_sub_free_index.
+    by destruct (decide (i = j)); subst; state_update_simpl.
   - by intros s Hs; rapply (composite_initial_state_sub_projection IM).
   - by intros m [i Hi]; exists (free_sub_free_index i).
 Qed.
@@ -1468,7 +1471,8 @@ Proof.
     ; rewrite (sub_IM_state_pi s (free_sub_free_index_obligation_1 i) Hi)
     ; destruct (vtransition _ _ _) as (si', _om'); inversion_clear 1.
     f_equal; extensionality j; unfold free_sub_free_state at 2.
-    by state_update i j; unfold free_sub_free_index, sub_IM; state_update_simpl.
+    unfold free_sub_free_index, sub_IM.
+    by destruct (decide (i = j)); subst; state_update_simpl.
   - intros s Hi i; rapply Hi.
   - by intros m [[i Hi] Him]; exists i.
 Qed.
@@ -1536,7 +1540,7 @@ Proof.
     intro Ht; replace (vtransition _ _ _) with (s', om'); f_equal.
     extensionality sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
-    by state_update i j.
+    by destruct (decide (i = j)); subst; state_update_simpl.
   - intros sj Hsj sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     destruct (decide (i = j)); subst.

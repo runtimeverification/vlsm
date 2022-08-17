@@ -354,24 +354,24 @@ Proof.
   - repeat split.
     + by state_update_simpl.
     + by state_update_simpl.
-    + by extensionality j; state_update i j.
+    + by extensionality j; destruct (decide (i = j)); subst; state_update_simpl.
     + by state_update_simpl.
     + subst. specialize (Hchar _ eq_refl) as [Hvx Htx].
       unfold equivocators_state_project, EquivocatorsComposition.equivocators_state_project.
-      state_update_simpl.
-      by rewrite Hli in Hvx.
+      rewrite Hli in Hvx.
+      by state_update_simpl.
     + subst. specialize (Hchar _ eq_refl) as [Hvx Htx].
       unfold equivocators_state_project, EquivocatorsComposition.equivocators_state_project.
       state_update_simpl.
       simpl in *. rewrite Hli in Htx. rewrite Htx. f_equal.
-      by extensionality eqv; state_update i eqv.
+      by extensionality eqv; destruct (decide (i = eqv)); subst; state_update_simpl.
   - repeat split.
     + by state_update_simpl.
     + by state_update_simpl.
-    + by extensionality j; state_update i j.
+    + by extensionality j; destruct (decide (i = j)); subst; state_update_simpl.
     + by state_update_simpl.
     + unfold equivocators_state_project, EquivocatorsComposition.equivocators_state_project.
-      by extensionality eqv; state_update i eqv.
+      by extensionality eqv; destruct (decide (i = eqv)); subst; state_update_simpl.
 Qed.
 
 Lemma equivocators_transition_item_project_proper_characterization
@@ -416,8 +416,8 @@ Proof.
   clear Hv Ht Hoitem.
   split; [| by repeat split]; clear Hchar.
   intro eqv.
-  state_update eqv (projT1 (l item)); [done |].
-  by rewrite Heqv', Hs; state_update_simpl.
+  rewrite Heqv', Hs.
+  by destruct (decide (eqv = projT1 (l item))); subst; state_update_simpl.
 Qed.
 
 Lemma equivocators_transition_item_project_inv_characterization
@@ -1069,7 +1069,8 @@ Proof.
     ; inversion Hproject_x; subst; clear Hproject_x
     ; inversion Heqproject_x; subst; clear Heqproject_x
     ; intro eqv; specialize (IHtr eqv)
-    ; (state_update i eqv; cbn in *; [rewrite ?Hfinali; eexists |]; done).
+    ; (destruct (decide (i = eqv)); subst; state_update_simpl
+       ; cbn in *; [rewrite ?Hfinali; eexists |]; done).
 Qed.
 
 (**
@@ -1130,7 +1131,7 @@ Proof.
   remember (equivocator_descriptors_update (zero_descriptor IM) i eqv_final) as final_descriptors.
   assert (Hfinal_descriptors : not_equivocating_equivocator_descriptors IM final_descriptors final).
   { intro eqv. subst final_descriptors.
-    state_update i eqv; [done |].
+    destruct (decide (i = eqv)); subst; state_update_simpl; [done |].
     apply zero_descriptor_proper.
   }
   exists final_descriptors.
