@@ -400,7 +400,7 @@ Proof.
   split; [done |].
   intros i [Hlt_i Hilt].
   apply nat_le_sum in Hlt_i as [i' ->].
-  rewrite plus_comm, <- Str_nth_plus.
+  rewrite Nat.add_comm, <- Str_nth_plus.
   apply Hnp. simpl in *. lia.
 Qed.
 
@@ -501,7 +501,7 @@ Proof.
     split; [lia|].
     intros i [Hle Hlt].
     apply nat_le_sum in Hle as [k' ->].
-    rewrite plus_comm, <- Str_nth_tl_plus. simpl.
+    rewrite Nat.add_comm, <- Str_nth_tl_plus. simpl.
     apply Hnp. lia.
 Qed.
 
