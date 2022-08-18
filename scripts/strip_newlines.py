@@ -2,7 +2,7 @@
 import sys
 import os
 
-sys.path.insert(0, '/home/dafina/vlsm/coq-tools')
+sys.path.insert(0, './coq-tools')
 from strip_newlines import strip_newlines
 
 def getListOfFiles(dirName):
@@ -18,7 +18,7 @@ def getListOfFiles(dirName):
 
 
 def main():
-    dirName = '/home/dafina/vlsm/theories/VLSM'
+    dirName = './theories/VLSM'
     listOfFiles = getListOfFiles(dirName)
     for f in listOfFiles:
         if f.endswith(".v"):
