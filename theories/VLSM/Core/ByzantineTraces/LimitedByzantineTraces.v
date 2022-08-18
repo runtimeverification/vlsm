@@ -368,7 +368,7 @@ Proof.
   - by cbn; apply lift_sub_state_initial.
   - by apply list_subseteq_nil.
   - subst s_reset_byzantine bs btr.
-    unfold pre_VLSM_full_projection_finite_trace_project; rewrite !map_app. 
+    unfold pre_VLSM_full_projection_finite_trace_project; rewrite !map_app.
     rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.
     unfold annotate_trace_item; cbn; rewrite finite_trace_last_is_last; cbn.
     destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i

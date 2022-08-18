@@ -1139,7 +1139,7 @@ Lemma midpointT_before: forall p0 p1 tr0 tr1 (h: followsT (appendT p0 p1) tr0 tr
 Proof.
 cofix CIH. dependent inversion h; subst.
 - move => tr' hm.
-  invs hm; invs H; invs a0; invs H; invs h.  
+  invs hm; invs H; invs a0; invs H; invs h.
   apply: followsT_nil => //.
   by inversion H1.
 - subst; move => [a0|a0 b0 tr0] hm; first by inversion hm.
