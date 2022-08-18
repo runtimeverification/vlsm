@@ -271,7 +271,6 @@ Proof.
   by rewrite IHl.
 Qed.
 
-
 Lemma list_difference_singleton_length_in `{EqDecision A} :
   forall (l : list A) (a : A), a ∈ l ->
     length (list_difference l [a]) < length l.

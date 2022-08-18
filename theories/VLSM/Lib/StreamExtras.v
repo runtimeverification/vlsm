@@ -108,7 +108,6 @@ Definition stream_app
   :=
   fold_right (@Cons A) suffix prefix.
 
-
 Definition stream_app_cons {A}
   (a : A)
   (l : Stream A)

@@ -283,7 +283,6 @@ Qed.
   destruct_equivocator_state_update_project' es i s j Hj Hij Hpr
   ; clear Hpr.
 
-
 (**
 Extends an [equivocator_state] with a new state of the original machine.
 *)

@@ -317,7 +317,6 @@ Qed.
 
 End VLSM_incl_properties.
 
-
 (** We instantiate the above for VLSM inclusions
 *)
 Section basic_VLSM_incl.
