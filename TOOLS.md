@@ -60,3 +60,15 @@ root directory:
 ```shell
 make axioms path=theories/CBC
 ```
+
+## Striping newlines 
+
+To strip consecutive newlines exceeding a certain number, run the `strip-newlines.py` script, passing as command line argument `max + 1` (where max is the maximum number of consecutive newlines you want to accept). 
+
+In case you pass a negative number as argument, the content will remain unchanged, and if the argument you pass is `0`, then all strings of consecutive newlines will be replaced by a single space.
+
+For example, if you want to limit the number of consecutive newlines to 1, run:
+
+```shell
+python scripts/strip-newlines.py 2
+```
