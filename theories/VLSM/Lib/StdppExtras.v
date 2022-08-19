@@ -322,8 +322,8 @@ Proof.
       * by apply IHl; intro n; apply (H (S n)).
 Qed.
 
-Lemma stdpp_nat_le_sum (x y : nat) : x ≤ y ↔ ∃ z, y = x + z.
-  Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
+Lemma stdpp_nat_le_sum (x y : nat) : x <= y <-> exists z, y = x + z.
+Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
 
 Lemma ForAllSuffix2_transitive_lookup
   [A : Type] (R : A -> A -> Prop) {HT : Transitive R} (l : list A)
