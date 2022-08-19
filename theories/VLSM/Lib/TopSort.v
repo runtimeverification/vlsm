@@ -88,7 +88,7 @@ Proof.
     setoid_rewrite Forall_forall in IHl'.
     destruct H as [Heq | Hin]; subst.
     + simpl. destruct (decide (count_predecessors a < count_predecessors a0)).
-      * transitivity (count_predecessors a); [| lia]. 
+      * transitivity (count_predecessors a); [| lia].
         by apply IHl'; left.
       * by apply IHl'; left.
     + simpl. destruct (decide (count_predecessors a < count_predecessors a0)).

@@ -200,13 +200,12 @@ Lemma set_map_size_upper_bound
 Proof.
   unfold set_map.
   remember (f <$> elements X) as fX.
-  specialize (list_to_set_size (A := B) fX) as Hsize.
-  assert (length fX = size X). {
-    unfold size. unfold set_size. simpl.
-    subst fX.
-    apply fmap_length.
-  }
-  lia.
+  set (x := size (list_to_set _)).
+  cut (x <= length fX); [|by apply list_to_set_size].
+  enough (length fX = size X) by lia.
+  unfold size, set_size.
+  simpl; subst fX.
+  by apply fmap_length.
 Qed.
 
 End map.

@@ -146,7 +146,7 @@ Lemma full_node_limited_equivocation_valid_state_weight s
     LimitedEquivocationProp IM is_equivocating s.
 Proof.
   apply limited_equivocation_valid_state.
-  by intros; apply initial_state_not_is_equivocating_tracewise. 
+  by intros; apply initial_state_not_is_equivocating_tracewise.
 Qed.
 
 Lemma tracewise_not_heavy_LimitedEquivocationProp_iff :

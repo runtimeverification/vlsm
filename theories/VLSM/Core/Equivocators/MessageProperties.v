@@ -271,7 +271,7 @@ Proof.
     + intros (i & _ & Hi); exists i.
       by destruct (equivocator_state_project s i); [eexists |].
   - apply Exists_dec; intro i.
-    destruct (equivocator_state_project s i); [apply Hdec | typeclasses eauto]. 
+    destruct (equivocator_state_project s i); [apply Hdec | typeclasses eauto].
 Qed.
 
 Lemma equivocator_oracle_stepwise_props
