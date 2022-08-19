@@ -280,7 +280,7 @@ Class CompareStrictOrder {A} (compare : A -> A -> comparison) : Prop :=
 #[global] Hint Mode CompareStrictOrder ! - : typeclass_instances.
 
 (** Strictly-ordered comparisons entail decidable equality. *)
-Lemma compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
+#[export] Instance compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
 Proof.
   intros x y; destruct (compare x y) eqn: Hxy.
   - by left; apply compare_eq.
@@ -304,7 +304,7 @@ Proof.
 Qed.
 
 (** Strictly-ordered comparisons are asymmetric. *)
-Lemma compare_asymmetric_intro {A} `{CompareStrictOrder A} :
+#[export] Instance compare_asymmetric_intro {A} `{CompareStrictOrder A} :
   CompareAsymmetric compare.
 Proof.
   intros x y; destruct (compare y x) eqn: Hyx.
@@ -318,12 +318,6 @@ Proof.
     + assert (Hxx : compare x x = Gt) by (eapply compare_transitive; done).
       by apply compare_eq_gt in Hxx.
 Qed.
-
-#[export] Instance CompareStrictOrder_Asymmetric
-  {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
-Proof.
-  apply compare_asymmetric_intro.
-Defined.
 
 (** [compare_lt] is the relation that corresponds to <<compare>>. *)
 Definition compare_lt {A} (compare : A -> A -> comparison) (x y : A) : Prop :=
@@ -376,11 +370,7 @@ Class StrictlyComparable (X : Type) : Type :=
 }.
 #[global] Hint Mode StrictlyComparable ! : typeclass_instances.
 
-#[export] Instance strictly_comparable_eq_dec `{StrictlyComparable M} : EqDecision M.
-Proof.
-  intros x y.
-  apply compare_eq_dec.
-Qed.
+Coercion compare_strictorder : StrictlyComparable >-> CompareStrictOrder.
 
 Definition comparable `(R : relation A) : relation A :=
   fun x y => exists c, CompSpec (=) R x y c.
