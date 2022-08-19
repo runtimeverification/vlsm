@@ -95,7 +95,7 @@ Lemma is_singleton_state_dec
   (s : equivocator_state)
   : Decision (is_singleton_state s).
 Proof.
-  apply nat_eq_dec.
+  apply Nat.eq_dec.
 Qed.
 
 Definition is_equivocating_state
