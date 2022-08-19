@@ -1599,7 +1599,6 @@ Proof.
   - apply IHl. by eapply fsFurther2_transitive.
 Qed.
 
-
 Lemma list_subseteq_tran : forall (A : Type) (l m n : list A),
  l ⊆ m → m ⊆ n → l ⊆ n.
 Proof.

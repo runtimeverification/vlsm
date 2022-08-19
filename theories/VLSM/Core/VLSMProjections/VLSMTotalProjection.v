@@ -228,7 +228,6 @@ Qed.
 
 End projection_transition_consistency_None.
 
-
 Section VLSM_projection_definitions.
 
 Context

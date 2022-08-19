@@ -189,7 +189,6 @@ equivocate, and then shows that this constraint is stronger than the
 [fixed_equivocation_constraint].
 *)
 
-
 (**
 Context setting the stage for, and instantiating the
 [full_node_condition_for_admissible_equivocators].
@@ -210,7 +209,6 @@ Context
   (full_node_constraint_alt
     := full_node_condition_for_admissible_equivocators_alt IM admissible_index)
   .
-
 
 (**
 Context for the [fixed_equivocation_constraint]. Additionally to the above it
@@ -1041,7 +1039,6 @@ Proof.
     apply VLSM_incl_valid_state.
     apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
-
 
 (**
 The intermediary results above allow us to prove that the

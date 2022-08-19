@@ -159,7 +159,6 @@ Definition strong_fixed_equivocation_constraint
 Definition strong_fixed_equivocation_vlsm_composition : VLSM message
   := composite_vlsm IM strong_fixed_equivocation_constraint.
 
-
 (** The composition of equivocators pre-loaded with only the messages sent by
 non-equivocators is included in that pre-loaded with all the directly observed
 messages.
@@ -377,7 +376,6 @@ for all Fixed valid states.
 
 We then restate (some of) these lemmas without the extra assumption.
 *)
-
 
 Context
   (base_s s : composite_state IM)
@@ -716,8 +714,6 @@ Proof.
 Qed.
 
 End Fixed_eq_StrongFixed.
-
-
 
 (** ** Changing the behavior of equivocators within a trace
 

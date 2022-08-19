@@ -561,7 +561,6 @@ Proof.
   by apply not_iff_compat, (iff_trans proper_sent).
 Qed.
 
-
 Class HasBeenReceivedCapability := {
   has_been_received: state_message_oracle;
   has_been_received_dec :> RelDecision has_been_received;
@@ -1409,7 +1408,6 @@ Global Hint Mode ComputableReceivedMessages - ! : typeclass_instances.
   [ComputableSentMessages] and [ComputableReceivedMessages] and some basic results
   about computable (directly) observed messages.
 *)
-
 
 Section sec_computable_sent_received_observed.
 
@@ -2827,7 +2825,6 @@ Context
   (X := composite_vlsm IM constraint)
   (PreX := pre_loaded_with_all_messages_vlsm X)
   .
-
 
 (**
 Under [HasBeenReceivedCapability] assumptions, and given the fact that

@@ -549,8 +549,6 @@ End full_projection_properties.
 
 End VLSM_full_projection.
 
-
-
 (** It is natural to look for sufficient conditions for VLSM projections
 which are easy to verify in a practical setting. One such result is the following.
 

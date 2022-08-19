@@ -84,7 +84,6 @@ Proof.
   - apply elater. apply flater in H. auto.
 Qed.
 
-
 Lemma forever_tauto [A:Type] (P: Stream A -> Prop):
   (forall s, P s) -> forall s, Forever P s.
 Proof.

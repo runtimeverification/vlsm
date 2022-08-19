@@ -118,7 +118,6 @@ Context
   (Hsimul : VLSM_weak_full_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
-
 Section selectors.
 
 Context

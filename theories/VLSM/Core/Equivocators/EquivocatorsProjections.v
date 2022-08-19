@@ -1070,7 +1070,6 @@ Proof.
   apply (equivocator_vlsm_initial_state_preservation_rev X _ _ _ Hisi).
 Qed.
 
-
 Definition equivocator_label_zero_project (l : equivocator_label X) : option (vlabel X) :=
   match l with
   | ContinueWith 0 li => Some li
