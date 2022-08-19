@@ -18,7 +18,7 @@ def getListOfFiles(dirName):
 
 
 def main():
-    dirName = './theories/VLSM'
+    dirName = './theories'
     listOfFiles = getListOfFiles(dirName)
     for f in listOfFiles:
         if f.endswith(".v"):
