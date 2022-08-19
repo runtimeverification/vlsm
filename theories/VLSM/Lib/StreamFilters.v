@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
-From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras.
+From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras.
 
 (**
 Given a predicate <<P>> and a stream <<s>>, a stream of naturals <<ns>>
@@ -399,7 +399,7 @@ Proof.
   clear -Hp Hnp. rewrite Str_nth_plus, Nat.add_comm in Hp.
   split; [done |].
   intros i [Hlt_i Hilt].
-  apply nat_le_sum in Hlt_i as [i' ->].
+  apply stdpp_nat_le_sum in Hlt_i as [i' ->].
   rewrite Nat.add_comm, <- Str_nth_plus.
   apply Hnp. simpl in *. lia.
 Qed.
@@ -500,7 +500,7 @@ Proof.
     rewrite Heq. simpl.
     split; [lia|].
     intros i [Hle Hlt].
-    apply nat_le_sum in Hle as [k' ->].
+    apply stdpp_nat_le_sum in Hle as [k' ->].
     rewrite Nat.add_comm, <- Str_nth_tl_plus. simpl.
     apply Hnp. lia.
 Qed.
