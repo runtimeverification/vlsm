@@ -61,7 +61,7 @@ root directory:
 make axioms path=theories/CBC
 ```
 
-## Striping newlines 
+## Stripping newlines 
 
 To strip consecutive newlines exceeding a certain number, run the `strip-newlines.py` script, passing as command line argument `max + 1` (where max is the maximum number of consecutive newlines you want to accept). 
 
