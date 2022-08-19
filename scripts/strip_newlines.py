@@ -5,9 +5,11 @@ import os
 sys.path.insert(0, './coq-tools')
 from strip_newlines import strip_newlines
 
-
 def main():
-    max_consecutive_newlines = int(sys.argv[1])
+    try:
+        max_consecutive_newlines = int(sys.argv[1])
+    except ValueError:
+        print("The argument must be a positive number!")
     dirName = './theories'
     for subdir, dirs, files in os.walk(dirName):
         for f in files:
@@ -17,7 +19,6 @@ def main():
                     file.seek(0)
                     file.write(strip_newlines(content, max_consecutive_newlines))
                     file.truncate()
-
 
 if __name__ == "__main__":
     main()
