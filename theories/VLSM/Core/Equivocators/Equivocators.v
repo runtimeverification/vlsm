@@ -95,7 +95,7 @@ Lemma is_singleton_state_dec
   (s : equivocator_state)
   : Decision (is_singleton_state s).
 Proof.
-  apply nat_eq_dec.
+  apply Nat.eq_dec.
 Qed.
 
 Definition is_equivocating_state
@@ -282,7 +282,6 @@ Qed.
   let Hpr := fresh "Hpr" in
   destruct_equivocator_state_update_project' es i s j Hj Hij Hpr
   ; clear Hpr.
-
 
 (**
 Extends an [equivocator_state] with a new state of the original machine.

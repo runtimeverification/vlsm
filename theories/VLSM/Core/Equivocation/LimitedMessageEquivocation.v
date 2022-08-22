@@ -170,7 +170,6 @@ limited message equivocation, then any valid trace for the fixed equivocation
 constraint is also a trace under the limited equivocation constraint.
 *)
 
-
 Context
   {message : Type}
   `{finite.Finite index}

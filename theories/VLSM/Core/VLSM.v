@@ -1086,7 +1086,6 @@ Proof.
   by rewrite finite_trace_last_is_last in Ht.
 Qed.
 
-
 Lemma valid_trace_output_is_valid
   (is : state)
   (tr : list transition_item)
@@ -2239,7 +2238,6 @@ Proof.
       simpl.
       by rewrite finite_trace_last_is_last.
 Qed.
-
 
 Definition build_trace_prefix_valid
       {tr : valid_trace}

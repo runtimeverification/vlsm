@@ -18,7 +18,6 @@ can be lifted (each separately) from the original machine to the
 [equivocator_vlsm].
 *)
 
-
 Context
   {message : Type}
   (X : VLSM message)

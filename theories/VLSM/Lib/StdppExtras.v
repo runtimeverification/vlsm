@@ -271,7 +271,6 @@ Proof.
   by rewrite IHl.
 Qed.
 
-
 Lemma list_difference_singleton_length_in `{EqDecision A} :
   forall (l : list A) (a : A), a ∈ l ->
     length (list_difference l [a]) < length l.
@@ -322,6 +321,9 @@ Proof.
       * by apply IHl; intro n; apply (H (S n)).
 Qed.
 
+Lemma stdpp_nat_le_sum (x y : nat) : x <= y <-> exists z, y = x + z.
+Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
+
 Lemma ForAllSuffix2_transitive_lookup
   [A : Type] (R : A -> A -> Prop) {HT : Transitive R} (l : list A)
   : ForAllSuffix2 R l <-> forall m n a b, m < n -> l !! m = Some a -> l !! n = Some b -> R a b.
@@ -329,7 +331,7 @@ Proof.
   rewrite ForAllSuffix2_lookup.
   split; intro Hall; [| by intros n a b; apply Hall; lia].
   intros m n a b Hlt.
-  apply nat_le_sum in Hlt as [k ->]; rewrite plus_comm.
+  apply stdpp_nat_le_sum in Hlt as [k ->]; rewrite Nat.add_comm.
   revert a b; induction k; cbn; [apply Hall |].
   intros a b Ha Hb.
   assert (Hlt : k + S m < length l) by (apply lookup_lt_Some in Hb; lia).

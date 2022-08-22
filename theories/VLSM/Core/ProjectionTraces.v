@@ -523,7 +523,6 @@ Context {message : Type}
         (X := composite_vlsm IM constraint)
 .
 
-
 (** ** A sufficient condition for the [projection_friendly_prop]erty. *)
 
 Context

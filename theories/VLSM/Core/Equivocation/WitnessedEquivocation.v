@@ -708,7 +708,6 @@ Proof.
       by apply (VLSM_full_projection_can_emit Hproj).
 Qed.
 
-
 (** *** Main result of the section
 
 Any Free valid trace with the

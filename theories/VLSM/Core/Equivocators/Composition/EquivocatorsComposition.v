@@ -86,7 +86,6 @@ Next Obligation.
   apply NoDup_enum.
 Qed.
 
-
 Lemma equivocating_indices_equivocating_validators
   : forall s, set_eq (equivocating_validators s) (equivocating_indices (enum index) s).
 Proof.
@@ -265,7 +264,6 @@ from the composition of equivocators to the composition of their corresponding
 nodes.
 *)
 Definition equivocator_descriptors : Type := forall (eqv : index), MachineDescriptor (IM eqv).
-
 
 (**
 Generalizes the [proper_descriptor] definition to [equivocator_descriptors].

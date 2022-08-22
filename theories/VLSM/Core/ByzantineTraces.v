@@ -112,7 +112,6 @@ Definition all_messages_transition
     : @state _ all_messages_type * option message
     := (tt, Some l).
 
-
 (**
 
 The [valid]ity predicate specifies that all transitions are valid
@@ -358,7 +357,6 @@ Proof.
     revert Htr.
     simpl. apply byzantine_pre_loaded_with_all_messages.
 Qed.
-
 
 (** ** Byzantine fault tolerance for a composition of validators
 
