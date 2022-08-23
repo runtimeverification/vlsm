@@ -280,7 +280,7 @@ Class CompareStrictOrder {A} (compare : A -> A -> comparison) : Prop :=
 #[global] Hint Mode CompareStrictOrder ! - : typeclass_instances.
 
 (** Strictly-ordered comparisons entail decidable equality. *)
-Lemma compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
+#[export] Instance compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
 Proof.
   intros x y; destruct (compare x y) eqn: Hxy.
   - by left; apply compare_eq.
@@ -304,7 +304,7 @@ Proof.
 Qed.
 
 (** Strictly-ordered comparisons are asymmetric. *)
-Lemma compare_asymmetric_intro {A} `{CompareStrictOrder A} :
+#[export] Instance compare_asymmetric_intro {A} `{CompareStrictOrder A} :
   CompareAsymmetric compare.
 Proof.
   intros x y; destruct (compare y x) eqn: Hyx.
@@ -318,12 +318,6 @@ Proof.
     + assert (Hxx : compare x x = Gt) by (eapply compare_transitive; done).
       by apply compare_eq_gt in Hxx.
 Qed.
-
-#[export] Instance CompareStrictOrder_Asymmetric
-  {A} (compare : A -> A -> comparison) `{CompareStrictOrder A compare} : CompareAsymmetric compare.
-Proof.
-  apply compare_asymmetric_intro.
-Defined.
 
 (** [compare_lt] is the relation that corresponds to <<compare>>. *)
 Definition compare_lt {A} (compare : A -> A -> comparison) (x y : A) : Prop :=
@@ -376,11 +370,7 @@ Class StrictlyComparable (X : Type) : Type :=
 }.
 #[global] Hint Mode StrictlyComparable ! : typeclass_instances.
 
-#[export] Instance strictly_comparable_eq_dec `{StrictlyComparable M} : EqDecision M.
-Proof.
-  intros x y.
-  apply compare_eq_dec.
-Qed.
+#[export] Existing Instance compare_strictorder.
 
 Definition comparable `(R : relation A) : relation A :=
   fun x y => exists c, CompSpec (=) R x y c.
@@ -621,9 +611,9 @@ Proof.
   exact (compare (x1, y, z) (x2, y, z)).
 Defined.
 
-Lemma triple_strictly_comparable_proj1_strictorder
+#[export] Instance triple_strictly_comparable_proj1_strictorder
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  : CompareStrictOrder (@triple_strictly_comparable_proj1_compare X Y Z HscXYZ).
+  : CompareStrictOrder (@triple_strictly_comparable_proj1_compare X Y Z HscXYZ) | 100.
 Proof.
   destruct HscXYZ, inhabited0 as [[x0 y0] z0].
   split.
@@ -653,9 +643,9 @@ Proof.
   exact (compare (x, y1, z) (x, y2, z)).
 Defined.
 
-Lemma triple_strictly_comparable_proj2_strictorder
+#[export] Instance triple_strictly_comparable_proj2_strictorder
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  : CompareStrictOrder (@triple_strictly_comparable_proj2_compare X Y Z HscXYZ).
+  : CompareStrictOrder (@triple_strictly_comparable_proj2_compare X Y Z HscXYZ) | 100.
 Proof.
   destruct HscXYZ, inhabited0 as [[x0 y0] z0].
   split.
@@ -685,9 +675,9 @@ Proof.
   exact (compare (x, y, z1) (x, y, z2)).
 Defined.
 
-Lemma triple_strictly_comparable_proj3_strictorder
+#[export] Instance triple_strictly_comparable_proj3_strictorder
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  : CompareStrictOrder (@triple_strictly_comparable_proj3_compare X Y Z HscXYZ).
+  : CompareStrictOrder (@triple_strictly_comparable_proj3_compare X Y Z HscXYZ) | 100.
 Proof.
   destruct HscXYZ, inhabited0 as [[x0 y0] z0].
   split.
