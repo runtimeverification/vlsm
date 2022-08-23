@@ -380,7 +380,7 @@ Next Obligation.
   itauto.
 Qed.
 
-#[global] Instance stdpp_finite_sub_index
+#[export] Instance stdpp_finite_sub_index
   : finite.Finite sub_index.
 Proof.
   exists (remove_dups sub_index_list_annotate).
@@ -1842,7 +1842,7 @@ Context
   (selection_complement : set index := set_diff (enum index) selection)
   .
 
-#[global] Instance update_IM_complement_Hbs
+#[export] Instance update_IM_complement_Hbs
   `{forall i : index, HasBeenSentCapability (IM i)}
   : forall sub_i : sub_index selection_complement,
     HasBeenSentCapability (sub_IM updated_IM selection_complement sub_i).
