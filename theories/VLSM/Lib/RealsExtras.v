@@ -64,7 +64,7 @@ Proof.
   destruct (Rtotal_order x y) as [Hlt | [Heq | Hgt]]; auto.
 Qed.
 
-#[global] Instance Rle_transitive : Transitive Rle.
+#[extern] Instance Rle_transitive : Transitive Rle.
 Proof.
   intros x y z.
   apply Rle_trans.

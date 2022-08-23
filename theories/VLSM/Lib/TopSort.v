@@ -229,7 +229,7 @@ Qed.
 
 End min_predecessors.
 
-#[global] Instance precedes_P_transitive
+#[extern] Instance precedes_P_transitive
   `{Transitive A preceeds} (P : A -> Prop)
   : Transitive (precedes_P preceeds P).
 Proof.
@@ -237,7 +237,7 @@ Proof.
   by etransitivity.
 Qed.
 
-#[global] Instance precedes_P_irreflexive
+#[extern] Instance precedes_P_irreflexive
   `{Irreflexive A preceeds} (P : A -> Prop)
   : Irreflexive (precedes_P preceeds P).
 Proof.
@@ -245,7 +245,7 @@ Proof.
   by apply irreflexivity.
 Qed.
 
-#[global] Instance precedes_P_strict
+#[extern] Instance precedes_P_strict
   `{StrictOrder A preceeds} (P : A -> Prop)
   : StrictOrder (precedes_P preceeds P).
 Proof.

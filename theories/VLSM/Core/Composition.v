@@ -180,7 +180,7 @@ Proof.
   by intro i; destruct (vs0 (IM i)) as [s Hs].
 Defined.
 
-#[global] Instance composite_initial_state_inh : Inhabited composite_initial_state :=
+#[extern] Instance composite_initial_state_inh : Inhabited composite_initial_state :=
   {| inhabitant := composite_s0 |}.
 
 (**
@@ -1052,8 +1052,8 @@ Definition binary_index : Set := bool.
 Definition first : binary_index := true.
 Definition second : binary_index := false.
 
-#[global] Instance binary_index_dec :  EqDecision binary_index := _.
-#[global] Instance binary_index_inhabited : Inhabited binary_index
+#[extern] Instance binary_index_dec :  EqDecision binary_index := _.
+#[extern] Instance binary_index_inhabited : Inhabited binary_index
   :=
   populate first.
 

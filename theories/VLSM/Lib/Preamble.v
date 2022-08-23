@@ -329,7 +329,7 @@ Defined.
 Definition compare_lt {A} (compare : A -> A -> comparison) (x y : A) : Prop :=
   compare x y = Lt.
 
-#[global] Instance compare_lt_dec [A : Type]
+#[extern] Instance compare_lt_dec [A : Type]
   (compare : A -> A -> comparison) {Hord : CompareStrictOrder compare}
   : RelDecision (compare_lt compare).
 Proof.

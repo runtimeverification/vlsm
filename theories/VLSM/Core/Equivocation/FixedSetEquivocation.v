@@ -111,7 +111,7 @@ Section strong_fixed_equivocation.
 Definition sent_by_non_equivocating s m
   := exists i, i ∉ equivocating /\ has_been_sent (IM i) (s i) m.
 
-#[global] Instance sent_by_non_equivocating_dec : RelDecision sent_by_non_equivocating.
+#[extern] Instance sent_by_non_equivocating_dec : RelDecision sent_by_non_equivocating.
 Proof.
   intros s m.
   apply @Decision_iff with (P := Exists (fun i => has_been_sent (IM i) (s i) m) (filter (fun i => i ∉ equivocating) (enum index))).

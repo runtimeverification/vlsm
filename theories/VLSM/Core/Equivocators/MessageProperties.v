@@ -423,7 +423,7 @@ of the internal machines.
 *)
 Definition equivocator_has_been_received  := equivocator_oracle (has_been_received X).
 
-#[global] Instance equivocator_has_been_received_dec
+#[extern] Instance equivocator_has_been_received_dec
   : RelDecision equivocator_has_been_received
   := equivocator_oracle_dec (has_been_received X) _.
 
@@ -442,7 +442,7 @@ Qed.
 
 (** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm].
 *)
-#[global] Instance equivocator_HasBeenReceivedCapability
+#[extern] Instance equivocator_HasBeenReceivedCapability
   : HasBeenReceivedCapability equivocator_vlsm
   := HasBeenReceivedCapability_from_stepwise (vlsm := equivocator_vlsm)
     equivocator_has_been_received_dec
@@ -463,7 +463,7 @@ of the internal machines.
 *)
 Definition equivocator_has_been_sent  := equivocator_oracle (has_been_sent X).
 
-#[global] Instance equivocator_has_been_sent_dec
+#[extern] Instance equivocator_has_been_sent_dec
   : RelDecision equivocator_has_been_sent
   := equivocator_oracle_dec (has_been_sent X) _.
 
@@ -482,7 +482,7 @@ Qed.
 
 (** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm].
 *)
-#[global] Instance equivocator_HasBeenSentCapability
+#[extern] Instance equivocator_HasBeenSentCapability
   : HasBeenSentCapability equivocator_vlsm
   := HasBeenSentCapability_from_stepwise (vlsm := equivocator_vlsm)
     equivocator_has_been_sent_dec

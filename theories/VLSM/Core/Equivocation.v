@@ -1011,7 +1011,7 @@ Proof.
   by destruct (has_been_sent_stepwise_from_trace vlsm).
 Qed.
 
-#[global] Instance preloaded_HasBeenSentCapability
+#[extern] Instance preloaded_HasBeenSentCapability
       [message : Type]
       (vlsm: VLSM message)
       `{HasBeenSentCapability message vlsm}
@@ -1089,7 +1089,7 @@ Proof.
   by destruct (has_been_received_stepwise_from_trace vlsm).
 Qed.
 
-#[global] Instance preloaded_HasBeenReceivedCapability
+#[extern] Instance preloaded_HasBeenReceivedCapability
       {message : Type}
       (vlsm: VLSM message)
       `{HasBeenReceivedCapability message vlsm}
@@ -1349,7 +1349,7 @@ Proof.
       by apply Exists_or; left.
 Qed.
 
-#[global] Program Instance HasBeenDirectlyObservedCapability_from_sent_received
+#[extern] Program Instance HasBeenDirectlyObservedCapability_from_sent_received
   : HasBeenDirectlyObservedCapability vlsm
   :=
   { has_been_directly_observed := has_been_directly_observed_from_sent_received;
@@ -1808,7 +1808,7 @@ Proof.
   by intros l; specialize (Hstep l); destruct l.
 Qed.
 
-#[global] Instance composite_HasBeenSentCapability
+#[extern] Instance composite_HasBeenSentCapability
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   : HasBeenSentCapability X :=
@@ -1859,7 +1859,7 @@ Proof.
   by intros l; specialize (Hstep l); destruct l.
 Qed.
 
-#[global] Instance composite_HasBeenReceivedCapability
+#[extern] Instance composite_HasBeenReceivedCapability
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   : HasBeenReceivedCapability X :=
@@ -1867,7 +1867,7 @@ Qed.
     composite_has_been_received_dec
     (composite_has_been_received_stepwise_props constraint).
 
-#[global] Instance composite_HasBeenDirectlyObservedCapability
+#[extern] Instance composite_HasBeenDirectlyObservedCapability
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   : HasBeenDirectlyObservedCapability X :=

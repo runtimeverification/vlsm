@@ -103,7 +103,7 @@ Definition is_equivocating_state
   : Prop
   := not (is_singleton_state s).
 
-#[global] Instance is_equivocating_state_dec
+#[extern] Instance is_equivocating_state_dec
   (s : equivocator_state)
   : Decision (is_equivocating_state s).
 Proof.

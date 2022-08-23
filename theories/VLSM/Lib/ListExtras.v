@@ -1606,7 +1606,7 @@ Proof.
   by apply Hmn, Hlm.
 Qed.
 
-#[global] Instance list_subseteq_dec `{EqDecision A} : RelDecision (@subseteq (list A) _).
+#[extern] Instance list_subseteq_dec `{EqDecision A} : RelDecision (@subseteq (list A) _).
 Proof.
   intros x.
   induction x.
