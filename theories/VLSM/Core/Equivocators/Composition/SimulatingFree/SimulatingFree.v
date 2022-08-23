@@ -3,7 +3,7 @@ From Coq Require Import FinFun FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition SubProjectionTraces.
 From VLSM.Core Require Import Equivocation Equivocation.NoEquivocation.
-From VLSM.Core Require Import Equivocators.Equivocators.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
 From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplayTraces.

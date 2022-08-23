@@ -7,7 +7,7 @@ From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
 Definition set_eq {A} (s1 s2 : set A) : Prop :=
   s1 ⊆ s2 /\ s2 ⊆ s1.
 
-#[global] Instance set_eq_dec `{EqDecision A} : RelDecision (@set_eq A).
+#[export] Instance set_eq_dec `{EqDecision A} : RelDecision (@set_eq A).
 Proof.
   by intros s1 s2; typeclasses eauto.
 Qed.

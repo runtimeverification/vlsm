@@ -288,7 +288,7 @@ Definition not_equivocating_equivocator_descriptors
     (eqv : index),
     existing_descriptor (IM eqv) (eqv_descriptors eqv) (s eqv).
 
-#[global] Instance not_equivocating_equivocator_descriptors_dec
+#[export] Instance not_equivocating_equivocator_descriptors_dec
   : RelDecision not_equivocating_equivocator_descriptors.
 Proof.
   intros eqv_descriptors s.

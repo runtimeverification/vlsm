@@ -37,7 +37,7 @@ Context
 Definition annotated_initial_state_prop (sa : annotated_state) :=
   vinitial_state_prop X (original_state sa) /\ initial_annotation_prop (state_annotation sa).
 
-#[global] Program Instance annotated_initial_state_prop_inhabited
+#[export] Program Instance annotated_initial_state_prop_inhabited
   : Inhabited (sig annotated_initial_state_prop) :=
   populate (exist _ {| original_state := ` (vs0 X); state_annotation := ` inhabitant  |} _).
 Next Obligation.
