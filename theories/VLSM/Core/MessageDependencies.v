@@ -495,7 +495,7 @@ Context
 (** If all of the components satisfy the [MessageDependencies] assumptions,
 then their free composition will also do so.
 *)
-#[global] Instance composite_message_dependencies
+#[export] Instance composite_message_dependencies
   : MessageDependencies (free_composite_vlsm IM) message_dependencies.
 Proof.
   split.

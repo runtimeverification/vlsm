@@ -4,7 +4,7 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
 From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.FullNode Equivocation.FixedSetEquivocation.
 From VLSM.Core Require Import SubProjectionTraces ProjectionTraces.
-From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
 
