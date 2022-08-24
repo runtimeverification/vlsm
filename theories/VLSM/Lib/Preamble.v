@@ -236,32 +236,6 @@ Lemma compare_eq_refl {A} `{CompareReflexive A} :
   forall x, compare x x = Eq.
 Proof. by intros; apply H. Qed.
 
-Lemma compare_eq_lt {A} `{CompareReflexive A} :
-  forall x, ~ compare x x = Lt.
-Proof.
-  by intros x; rewrite compare_eq_refl.
-Qed.
-
-Lemma compare_lt_neq {A} `{CompareReflexive A} :
-  forall x y, compare x y = Lt -> x <> y.
-Proof.
-  intros x y Hcomp Hnot.
-  by subst; apply (compare_eq_lt y) in Hcomp.
-Qed.
-
-Lemma compare_eq_gt {A} `{CompareReflexive A} :
-  forall x, ~ compare x x = Gt.
-Proof.
-  by intros x; rewrite compare_eq_refl.
-Qed.
-
-Lemma compare_gt_neq {A} `{CompareReflexive A} :
-  forall x y, compare x y = Gt -> x <> y.
-Proof.
-  intros x y H_comp H_not.
-  by subst; apply compare_eq_gt in H_comp.
-Qed.
-
 (** *** Transitive comparison operators *)
 
 Class CompareTransitive {A} (compare : A -> A -> comparison) : Prop :=
@@ -284,8 +258,8 @@ Class CompareStrictOrder {A} (compare : A -> A -> comparison) : Prop :=
 Proof.
   intros x y; destruct (compare x y) eqn: Hxy.
   - by left; apply compare_eq.
-  - by right; intros ->; apply compare_eq_lt in Hxy.
-  - by right; intros ->; apply compare_eq_gt in Hxy.
+  - by right; intros ->; rewrite compare_eq_refl in Hxy.
+  - by right; intros ->; rewrite compare_eq_refl in Hxy.
 Qed.
 
 (** *** Asymmetric comparison operators *)
@@ -310,13 +284,13 @@ Proof.
   intros x y; destruct (compare y x) eqn: Hyx.
   - by rewrite compare_eq in *.
   - destruct (compare x y) eqn: Hxy; cbn; [| | done].
-    + apply compare_eq in Hxy; subst. by apply compare_eq_lt in Hyx.
+    + apply compare_eq in Hxy; subst. by rewrite compare_eq_refl in Hyx.
     + assert (Hxx : compare x x = Lt) by (eapply compare_transitive; done).
-      by apply compare_eq_lt in Hxx.
+      by rewrite compare_eq_refl in Hxx.
   - destruct (compare x y) eqn: Hxy; cbn; [| done |].
-    + apply compare_eq in Hxy; subst. by apply compare_eq_gt in Hyx.
+    + apply compare_eq in Hxy; subst. by rewrite compare_eq_refl in Hyx.
     + assert (Hxx : compare x x = Gt) by (eapply compare_transitive; done).
-      by apply compare_eq_gt in Hxx.
+      by rewrite compare_eq_refl in Hxx.
 Qed.
 
 (** [compare_lt] is the relation that corresponds to <<compare>>. *)
@@ -336,7 +310,7 @@ Qed.
 Lemma compare_lt_irreflexive {A} `{CompareReflexive A} :
   Irreflexive (compare_lt compare).
 Proof.
-  intros x; apply compare_eq_lt.
+  by intros x; compute; rewrite compare_eq_refl.
 Qed.
 
 Lemma compare_lt_transitive {A} `{CompareTransitive A} :
@@ -357,7 +331,8 @@ Lemma compare_lt_asymmetric {A} `{CompareStrictOrder A} :
   Asymmetric (compare_lt compare).
 Proof.
   unfold compare_lt; intros x y Hxy Hyx.
-  by eapply (compare_eq_lt x), compare_transitive.
+  assert (Hxx : compare x x = Lt) by (eapply compare_transitive; eauto).
+  by rewrite compare_eq_refl in Hxx.
 Qed.
 
 (** ** Strictly ordered inhabited types *)
