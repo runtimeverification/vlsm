@@ -573,7 +573,7 @@ Qed.
   compare_strictorder := strictorder_compose;
 }.
 
-Definition triple_strictly_comparable_proj1_inhabited
+(* Definition triple_strictly_comparable_proj1_inhabited
   {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} : X.
 Proof.
   by destruct HscXYZ as [((x, _), _) _ _].
@@ -667,7 +667,7 @@ Definition triple_strictly_comparable_proj3
   inhabited := triple_strictly_comparable_proj3_inhabited;
   compare := triple_strictly_comparable_proj3_compare;
   compare_strictorder := triple_strictly_comparable_proj3_strictorder;
-|}.
+|}. *)
 
 (** ** Liveness *)
 
