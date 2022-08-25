@@ -486,7 +486,7 @@ Qed.
   compare_strictorder := strictorder_option Xsc;
 }.
 
-(** *** Comparison for pairs *)
+(** *** Comparison for pairs and triples *)
 
 Definition compare_compose
   (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y}
@@ -561,8 +561,6 @@ Qed.
   compare := compare_compose X Y;
   compare_strictorder := strictorder_compose;
 }.
-
-(** *** Comparison for triples, with some helper functions *)
 
 #[export] Instance TripleStrictlyComparable
   (X Y Z : Type) `{StrictlyComparable X} `{StrictlyComparable Y} `{StrictlyComparable Z}
