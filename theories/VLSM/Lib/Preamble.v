@@ -486,7 +486,7 @@ Qed.
   compare_strictorder := strictorder_option Xsc;
 }.
 
-(** *** Comparison for pairs *)
+(** *** Comparison for pairs and triples *)
 
 Definition compare_compose
   (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y}
@@ -562,8 +562,6 @@ Qed.
   compare_strictorder := strictorder_compose;
 }.
 
-(** *** Comparison for triples, with some helper functions *)
-
 #[export] Instance TripleStrictlyComparable
   (X Y Z : Type) `{StrictlyComparable X} `{StrictlyComparable Y} `{StrictlyComparable Z}
   : StrictlyComparable (X * Y * Z) :=
@@ -572,102 +570,6 @@ Qed.
   compare := compare_compose (X * Y) Z;
   compare_strictorder := strictorder_compose;
 }.
-
-Definition triple_strictly_comparable_proj1_inhabited
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} : X.
-Proof.
-  by destruct HscXYZ as [((x, _), _) _ _].
-Defined.
-
-Definition triple_strictly_comparable_proj1_compare
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} (x1 x2 : X) : comparison.
-Proof.
-  destruct HscXYZ as [((x, y), z) compare _].
-  exact (compare (x1, y, z) (x2, y, z)).
-Defined.
-
-#[export] Instance triple_strictly_comparable_proj1_strictorder
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  : CompareStrictOrder (@triple_strictly_comparable_proj1_compare X Y Z HscXYZ) | 100.
-Proof.
-  destruct HscXYZ, inhabited0 as [[x0 y0] z0].
-  split.
-  - by intros x y; cbn; rewrite compare_eq; firstorder congruence.
-  - by intros x1 x2 x3 cmp; cbn; apply compare_transitive.
-Qed.
-
-Definition triple_strictly_comparable_proj1
-  {X Y Z} (HscT :  StrictlyComparable (X * Y * Z))
-  : StrictlyComparable X :=
-{|
-  inhabited := triple_strictly_comparable_proj1_inhabited;
-  compare := triple_strictly_comparable_proj1_compare;
-  compare_strictorder := triple_strictly_comparable_proj1_strictorder;
-|}.
-
-Definition triple_strictly_comparable_proj2_inhabited
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} : Y.
-Proof.
-  by destruct HscXYZ as [[(_, y) _] _ _].
-Defined.
-
-Definition triple_strictly_comparable_proj2_compare
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} (y1 y2 : Y) : comparison.
-Proof.
-  destruct HscXYZ as [[(x, y) z] compare _].
-  exact (compare (x, y1, z) (x, y2, z)).
-Defined.
-
-#[export] Instance triple_strictly_comparable_proj2_strictorder
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  : CompareStrictOrder (@triple_strictly_comparable_proj2_compare X Y Z HscXYZ) | 100.
-Proof.
-  destruct HscXYZ, inhabited0 as [[x0 y0] z0].
-  split.
-  - by intros x y; cbn; rewrite compare_eq; firstorder congruence.
-  - by intros x1 x2 x3 cmp; cbn; apply compare_transitive.
-Qed.
-
-Definition triple_strictly_comparable_proj2
-  {X Y Z} (HscT :  StrictlyComparable (X * Y * Z))
-  : StrictlyComparable Y :=
-{|
-  inhabited := triple_strictly_comparable_proj2_inhabited;
-  compare := triple_strictly_comparable_proj2_compare;
-  compare_strictorder := triple_strictly_comparable_proj2_strictorder;
-|}.
-
-Definition triple_strictly_comparable_proj3_inhabited
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} : Z.
-Proof.
-  by destruct HscXYZ as [[_ z] _ _].
-Defined.
-
-Definition triple_strictly_comparable_proj3_compare
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)} (z1 z2 : Z) : comparison.
-Proof.
-  destruct HscXYZ as [[(x, y) z] compare _].
-  exact (compare (x, y, z1) (x, y, z2)).
-Defined.
-
-#[export] Instance triple_strictly_comparable_proj3_strictorder
-  {X Y Z} `{HscXYZ : StrictlyComparable (X * Y * Z)}
-  : CompareStrictOrder (@triple_strictly_comparable_proj3_compare X Y Z HscXYZ) | 100.
-Proof.
-  destruct HscXYZ, inhabited0 as [[x0 y0] z0].
-  split.
-  - by intros x y; cbn; rewrite compare_eq; firstorder congruence.
-  - by intros x1 x2 x3 cmp; cbn; apply compare_transitive.
-Qed.
-
-Definition triple_strictly_comparable_proj3
-  {X Y Z} (HscT :  StrictlyComparable (X * Y * Z))
-  : StrictlyComparable Z :=
-{|
-  inhabited := triple_strictly_comparable_proj3_inhabited;
-  compare := triple_strictly_comparable_proj3_compare;
-  compare_strictorder := triple_strictly_comparable_proj3_strictorder;
-|}.
 
 (** ** Liveness *)
 
