@@ -147,8 +147,7 @@ Proof.
     itauto.
   - apply Exists_cons in Hsomething.
     destruct Hsomething;[exfalso;tauto|].
-    specialize (IHl H);clear H.
-    destruct IHl as [prefix [suffix [first [Hf [-> Hnone_before]]]]].
+    destruct (IHl H) as (prefix & suffix & first & Hf & -> & Hnone_before).
     exists (a :: prefix), suffix, first.
     rewrite Exists_cons.
     itauto.
@@ -307,10 +306,8 @@ Proof.
   - destruct l; inversion Hlast. symmetry in H0.
     apply length_zero_iff_nil in H0. by subst.
   - destruct l; inversion Hlast.
-    specialize (IHn l H0 _last). rewrite unroll_last.
-    simpl. rewrite IHn. f_equal.
-    destruct l; inversion H0.
-    by rewrite !unroll_last.
+    rewrite unroll_last; cbn.
+    by erewrite IHn.
 Qed.
 
 Fixpoint list_suffix
@@ -373,10 +370,7 @@ Proof.
       inversion Hlen.
       itauto.
     }
-    specialize (IHleft_len right left H (left ++ right) eq_refl).
-    rewrite Hsplit.
-    simpl.
-    by rewrite IHleft_len.
+    by rewrite Hsplit; cbn; erewrite IHleft_len.
 Qed.
 
 Lemma list_prefix_map
@@ -629,21 +623,17 @@ Proof.
         - lia.
         - destruct (nth_error_filter_index P l n2); inversion Hin2.
         - assert (Hle' : n1 <= n2) by lia.
-          specialize (IHl n1 n2 Hle').
           destruct (nth_error_filter_index P l n1) eqn:Hin1'; inversion Hin1;
           subst; clear Hin1.
           destruct (nth_error_filter_index P l n2) eqn:Hin2'; inversion Hin2
           ; subst; clear Hin2.
-          specialize (IHl in1 eq_refl in2 eq_refl).
-          lia.
+          by eapply le_n_S, IHl.
         }
-    + specialize (IHl n1 n2 Hle).
-      destruct (nth_error_filter_index P l n1) eqn:Hin1'; inversion Hin1
+    + destruct (nth_error_filter_index P l n1) eqn:Hin1'; inversion Hin1
       ; subst; clear Hin1.
       destruct (nth_error_filter_index P l n2) eqn:Hin2'; inversion Hin2
       ; subst; clear Hin2.
-      specialize (IHl n0 eq_refl n3 eq_refl).
-      lia.
+      by eapply le_n_S, IHl.
 Qed.
 
 Fixpoint Forall_filter
@@ -749,10 +739,8 @@ Lemma nth_error_length
   : S n <= length l.
 Proof.
   generalize dependent a. generalize dependent l.
-  induction n; intros [|a l] b Hnth; simpl; inversion Hnth.
-  - lia.
-  - specialize (IHn l b H0).
-    lia.
+  induction n; intros [| a l] b Hnth; simpl; inversion Hnth; [lia |].
+  by eapply le_n_S, IHn.
 Qed.
 
 Lemma list_prefix_nth_last
@@ -767,11 +755,9 @@ Proof.
   specialize (nth_error_length l n nth Hnth); intro Hlen.
   specialize (list_prefix_length l (S n) Hlen); intro Hpref_len.
   symmetry in Hpref_len.
-  specialize (list_prefix_nth l (S n) n); intro Hpref.
-  rewrite <- Hpref in Hnth.
-  - specialize (nth_error_last (list_prefix l (S n)) n Hpref_len _last); intro Hlast.
-    rewrite Hlast in Hnth. by inversion Hnth.
-  - constructor.
+  rewrite <- (list_prefix_nth l (S n) n) in Hnth; [| lia].
+  rewrite (nth_error_last (list_prefix l (S n)) n Hpref_len _last) in Hnth.
+  by inversion Hnth.
 Qed.
 
 Lemma list_suffix_nth
@@ -799,15 +785,10 @@ Lemma list_suffix_last
   (_default : A)
   : List.last (list_suffix l i) _default  = List.last l _default.
 Proof.
-  revert l Hlt. induction i; intros [|a l] Hlt; try done.
-  simpl in Hlt.
-  assert (Hlt': i < length l) by lia.
-  specialize (IHi l Hlt').
-  rewrite unroll_last. simpl.
-  rewrite IHi.
-  destruct l.
-  - inversion Hlt; lia.
-  - by rewrite unroll_last, unroll_last.
+  revert l Hlt; induction i; intros [| a l] Hlt; try done.
+  rewrite unroll_last; cbn; rewrite IHi; [| cbn in Hlt; lia].
+  destruct l; [cbn in Hlt; lia |].
+  by rewrite !unroll_last.
 Qed.
 
 Lemma list_suffix_last_default
@@ -946,18 +927,14 @@ Proof.
     subst. exists [], []. repeat split.
   - simpl in Happ_rev.
     destruct (f a) eqn:Hfa; swap 1 2.
-    + specialize (IHl _ _ Happ_rev) as [_l1 [l2 [Hl [H_l1 Hl2]]]].
-      subst.
-      exists (a :: _l1), l2. by cbn; rewrite Hfa.
-    + destruct l1' as [|_b l1']; swap 1 2.
-      * change (_b :: l1') with ([_b] ++ l1') in Happ_rev.
-        rewrite <- app_assoc in Happ_rev. inversion Happ_rev.
-        subst _b.
-        specialize (IHl _ _ H1) as [_l1 [l2 [Hl [H_l1 Hl2]]]].
-        subst.
+    + destruct (IHl _ _ Happ_rev) as (_l1 & l2 & -> & <- & <-).
+      exists (a :: _l1), l2.
+      by cbn; rewrite Hfa.
+    + destruct l1' as [| _b l1'].
+      * exists [], (a :: l). by cbn; rewrite Hfa.
+      * inversion Happ_rev; subst.
+        destruct (IHl _ _ H1) as (_l1 & l2 & -> & <- & <-).
         exists (a :: _l1), l2. by cbn; rewrite Hfa.
-      * simpl in Happ_rev. subst.
-        exists [], (a :: l). by cbn; rewrite Hfa.
 Qed.
 
 Lemma map_option_length
@@ -968,9 +945,8 @@ Lemma map_option_length
   : length (map_option f l) = length l.
 Proof.
   induction l; [done |].
-  inversion Hfl; subst.
-  spec IHl H2; cbn.
-  destruct (f a); cbn; congruence.
+  inversion Hfl; subst; cbn.
+  by destruct (f a); cbn; rewrite IHl.
 Qed.
 
 Lemma map_option_nth
@@ -1054,11 +1030,7 @@ Lemma cat_option_nth
   (dummya : A)
   : Some (nth i (cat_option l) dummya) = (nth i l (Some dummya)).
 Proof.
-  specialize (@map_option_nth (option A) A id l). simpl in *.
-  intros.
-  unfold id in *.
-  apply H.
-  all : itauto.
+  by apply (@map_option_nth (option A) A id).
 Qed.
 
 Lemma nth_error_eq
@@ -1069,14 +1041,11 @@ Lemma nth_error_eq
 Proof.
   generalize dependent l2.
   induction l1; intros [| a2 l2] Hnth; [done |..].
-  - specialize (Hnth 0); simpl in Hnth. inversion Hnth.
-  - specialize (Hnth 0); simpl in Hnth. inversion Hnth.
-  - assert (H0 := Hnth 0). simpl in H0.
-    inversion H0; subst.
-    f_equal.
-    apply IHl1.
-    intro n.
-    apply (Hnth (S n)).
+  - by specialize (Hnth 0); inversion Hnth.
+  - by specialize (Hnth 0); inversion Hnth.
+  - f_equal.
+    + by specialize (Hnth 0); inversion Hnth.
+    + apply IHl1. intros n. by apply (Hnth (S n)).
 Qed.
 
 (* TODO remove (we have Exists_first) *)
@@ -1098,10 +1067,9 @@ Proof.
   - destruct (Pdec a).
     + exists [], l, a. rewrite Exists_nil. itauto.
     + assert (Hl : Exists P l) by (inversion Hsomething; subst; done).
-      specialize (IHl Hl).
-      destruct IHl as [prefix [suffix [first [Hfirst [Heq Hprefix]]]]].
-      exists (a :: prefix), suffix, first. split_and!; subst; [done | done |].
-      by inversion 1; subst.
+      destruct (IHl Hl) as (prefix & suffix & first & Hfirst & -> & Hprefix).
+      exists (a :: prefix), suffix, first.
+      by split_and!; [| | inversion 1].
 Qed.
 
 Lemma in_fast
@@ -1145,8 +1113,7 @@ Proof.
   - inversion H; subst; [done |].
     apply elem_of_list_fmap in H2 as [x0 [Heq Hin]].
     destruct x0 as ((prex0,x0),sufx0).
-    specialize (IHl prex0 x0 sufx0).
-    apply IHl in Hin.
+    apply (IHl prex0 x0 sufx0) in Hin.
     by inversion Heq; subst.
   - destruct pre.
     + inversion H. left.
@@ -1250,16 +1217,13 @@ Lemma list_max_exists2
    (Hne : l <> []) :
    In (list_max l) l.
 Proof.
-  destruct (list_max l) eqn : eq_max.
-  - destruct l;[itauto congruence|].
-    specialize (list_max_le (n :: l) 0) as Hle.
-    destruct Hle as [Hle _].
-    rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
-    rewrite Forall_forall in Hle.
-    specialize (Hle n). spec Hle; [left |].
-    simpl. lia.
-  - specialize (list_max_exists l) as Hmax.
-    spec Hmax. lia. rewrite <- eq_max. itauto.
+  destruct (list_max l) eqn: eq_max.
+  - destruct l; cbn; [itauto congruence |].
+    destruct (list_max_le (n :: l) 0) as [Hle _].
+    rewrite eq_max, Forall_forall in Hle.
+    specialize (Hle ltac:(lia) n ltac:(left)).
+    lia.
+  - rewrite <- eq_max. apply (list_max_exists l). lia.
 Qed.
 
 (* Returns all values which occur with maximum frequency in the given list.
@@ -1340,9 +1304,7 @@ Proof.
        destruct (complete_prefix l l0) eqn : eq_cp; [| done].
        inversion H; subst.
        f_equal.
-       specialize (IHl l0 suff).
-       spec IHl; [| done].
-       by rewrite eq_cp.
+       by erewrite IHl.
 Qed.
 
 (* Computes the list pref which satisfies <<pref ++ suff = l>> or
@@ -1611,14 +1573,12 @@ Proof.
   intros x.
   induction x.
   - left. apply list_subseteq_nil.
-  - intro y. specialize (IHx y) as [Hsub | Hnsub].
-    2: {
-      right. intro Hsub. elim Hnsub.
+  - intro y. destruct (IHx y) as [Hsub | Hnsub]; cycle 1.
+    + right. intro Hsub. elim Hnsub.
       by intros b Hb; apply Hsub; right.
-    }
-    destruct (decide (a ∈ y)).
-    + left. intros b Hb. inversion Hb; subst; [done |]. by apply Hsub.
-    + right. intro Hsub'. elim n. apply Hsub'. left.
+    + destruct (decide (a ∈ y)).
+      * left. intros b Hb. inversion Hb; subst; [done |]. by apply Hsub.
+      * right. intro Hsub'. elim n. apply Hsub'. left.
 Qed.
 
 Lemma elem_of_empty_nil [X:Type] (l:list X) :

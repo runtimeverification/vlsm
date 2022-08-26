@@ -187,9 +187,8 @@ Proof.
   - rewrite elem_of_cons in H1.
     destruct H1 as [Heq | Hin].
     + by subst; simpl; rewrite compare_eq_refl.
-    + apply LocallySorted_tl in H0 as LS.
-      spec IHsigma LS Hin. simpl.
-      destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma. 1, 3: done.
+    + apply LocallySorted_tl in H0 as LS; cbn.
+      destruct (compare msg a) eqn: Hcmp; [done | | by rewrite IHsigma].
       apply (@LocallySorted_elem_of_lt _ _ compare_lt_strict_order msg a sigma H0) in Hin.
       unfold compare_lt in Hin.
       by rewrite compare_asymmetric, Hcmp in Hin; inversion Hin.
@@ -203,44 +202,24 @@ Lemma set_eq_first_equal {A}  {lt : relation A} `{StrictOrder A lt} :
   x1 = x2 /\ set_eq s1 s2.
 Proof.
   intros x1 x2 s1 s2 LS1 LS2 [IN1 IN2].
-  assert (x12 : x1 = x2).
+  replace x1 with x2 in *; cycle 1.
   {
-    specialize (IN1 x1).
-    rewrite 2 elem_of_cons in IN1.
-    specialize (IN1 (or_introl (eq_refl x1))).
-    destruct IN1; [done |].
-    specialize (IN2 x2).
-    rewrite 2 elem_of_cons in IN2.
-    specialize (IN2 (or_introl (eq_refl x2))).
-    destruct IN2; [by subst |].
-    pose proof (LocallySorted_elem_of_lt x2 x1 s1 LS1 H1).
-    pose proof (LocallySorted_elem_of_lt x1 x2 s2 LS2 H0).
-    pose proof (StrictOrder_Irreflexive x1) as ltIrr.
-    destruct H as [Hirr Htr].
-    pose proof (Htr x1 x2 x1 H2 H3) as Hlt.
-    unfold complement in ltIrr.
-    itauto.
+    specialize (IN1 x1); specialize (IN2 x2).
+    rewrite 2!elem_of_cons in IN1, IN2.
+    intuition.
+    exfalso; apply (StrictOrder_Irreflexive x1).
+    by transitivity x2; eapply LocallySorted_elem_of_lt.
   }
-  subst.
-  split; [done |].
-  split.
+  repeat split.
   - intros x Hx.
     pose proof (LocallySorted_elem_of_lt x _ _ LS1 Hx).
-    specialize (IN1 x).
-    rewrite elem_of_cons in IN1.
-    specialize (IN1 (or_intror Hx)).
-    rewrite elem_of_cons in IN1.
-    destruct IN1; [| done].
-    subst.
+    specialize (IN1 x); rewrite !elem_of_cons in IN1.
+    intuition; subst.
     by apply StrictOrder_Irreflexive in H0.
   - intros x Hx.
     pose proof (LocallySorted_elem_of_lt x _ _ LS2 Hx).
-    specialize (IN2 x).
-    rewrite elem_of_cons in IN2.
-    specialize (IN2 (or_intror Hx)).
-    rewrite elem_of_cons in IN2.
-    destruct IN2; [| done].
-    subst.
+    specialize (IN2 x); rewrite !elem_of_cons in IN2.
+    intuition; subst.
     by apply StrictOrder_Irreflexive in H0.
 Qed.
 
@@ -252,22 +231,18 @@ Lemma set_equality_predicate {A}  {lt : relation A} `{StrictOrder A lt} :
 Proof.
   intros s1 s2 LS1 LS2 . rename H into SO.
   assert (SO' := SO). destruct SO' as [IR TR].
-  split.
-  - generalize dependent s2. induction s1; destruct s2.
-    + by intros.
-    + intros. destruct H. exfalso. pose proof (H0 a).
-      rewrite elem_of_cons in H1.
-      specialize (H1 (or_introl (eq_refl a))).
-      inversion H1.
-    + intros. destruct H. exfalso. pose proof (H a).
-      rewrite elem_of_cons in H1.
-      specialize (H1 (or_introl (eq_refl a))).
-      inversion H1.
-    + intros. apply (set_eq_first_equal a a0 s1 s2 LS1 LS2) in H. destruct H; subst.
-      apply Sorted_LocallySorted_iff in LS1. apply Sorted_inv in LS1. destruct LS1 as [LS1 _]. apply Sorted_LocallySorted_iff in LS1.
-      apply Sorted_LocallySorted_iff in LS2. apply Sorted_inv in LS2. destruct LS2 as [LS2 _]. apply Sorted_LocallySorted_iff in LS2.
-      by apply (IHs1 LS1 s2 LS2) in H0; subst.
-  - intros. subst. easy.
+  split; [| by intros ->].
+  generalize dependent s2. induction s1; destruct s2.
+  - by intros.
+  - intros LS2 [_ H]. exfalso. eapply not_elem_of_nil, H. left.
+  - intros LS2 [H _]. exfalso. eapply not_elem_of_nil, H. left.
+  - intros.
+    apply (set_eq_first_equal a a0 s1 s2 LS1 LS2) in H as [-> H]; f_equal.
+    apply IHs1; [| | done].
+    + apply Sorted_LocallySorted_iff, Sorted_inv in LS1 as [LS1 _].
+      by apply Sorted_LocallySorted_iff.
+    + apply Sorted_LocallySorted_iff, Sorted_inv in LS2 as [LS2 _].
+      by apply Sorted_LocallySorted_iff.
 Qed.
 
 (* Transitive isn't necessary but makes the proof simpler. *)
@@ -290,23 +265,14 @@ Proof.
     apply LSorted_nil.
     simpl in *.
     by rewrite Hconcat in Hsorted.
-  - intros.
-    apply Sorted_LocallySorted_iff in Hsorted.
-    apply Sorted_StronglySorted in Hsorted; [| done].
-    rewrite Hconcat in Hsorted.
-    simpl in Hsorted.
-    apply StronglySorted_inv in Hsorted.
-    destruct Hsorted.
-    specialize (IHalfa beta (alfa ++ beta)).
-    spec IHalfa.
-    apply Sorted_LocallySorted_iff.
-    by apply StronglySorted_Sorted.
-    specialize (IHalfa eq_refl).
-    destruct IHalfa.
+  - cbn; intros beta l Hsorted ->.
+    apply Sorted_LocallySorted_iff, Sorted_StronglySorted, StronglySorted_inv
+      in Hsorted as [HSS HF]; [| done].
+    apply StronglySorted_Sorted, Sorted_LocallySorted_iff in HSS.
+    destruct (IHalfa _ _ HSS eq_refl).
     split; [| done].
     destruct alfa; constructor; [done |].
-    rewrite Forall_forall in H0.
-    apply H0; left.
+    by eapply Forall_forall in HF; [| left].
 Qed.
 
 Lemma lsorted_pairwise_ordered
@@ -326,9 +292,7 @@ Proof.
   rewrite <- Sorted_LocallySorted_iff in Hneed.
   apply Sorted_extends in Hneed; [| done].
   rewrite Forall_forall in Hneed.
-  specialize (Hneed y).
-  spec Hneed; [| done].
-  apply elem_of_app; right; left.
+  apply Hneed, elem_of_app; right; left.
 Qed.
 
 Lemma lsorted_pair_wise_unordered
@@ -363,11 +327,9 @@ Proof.
       destruct H as [pref2 [suf2 Hconcat2]].
       rewrite Hconcat2 in Hconcat1.
       rewrite <- app_assoc in Hconcat1.
-      specialize (lsorted_pairwise_ordered l R Hsorted Htransitive y x pref2 suf2 suf1 Hconcat1).
-      by intros; right; right.
-    * apply elem_of_list_split in H.
-      destruct H as [pref2 [suf2 Hconcat2]].
-      rewrite Hconcat2 in Hconcat1.
-      specialize (lsorted_pairwise_ordered l R Hsorted Htransitive x y pref1 pref2 suf2 Hconcat1).
-      by intros; right; left.
+      intros; right; right.
+      by eapply lsorted_pairwise_ordered; [| | apply Hconcat1].
+    * apply elem_of_list_split in H as (pref2 & suf2 & ->).
+      intros; right; left.
+      by eapply lsorted_pairwise_ordered; [| | apply Hconcat1].
 Qed.

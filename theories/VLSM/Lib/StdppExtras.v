@@ -107,14 +107,13 @@ Proof.
     rewrite Exists_nil.
     itauto.
   - apply Exists_app in Hsomething.
-    destruct Hsomething.
-    2:{ inversion H; [done |]. inversion H1. }
-    specialize (IHl H);clear H.
-    destruct IHl as [prefix [suffix [last [Hf [-> Hnone_after]]]]].
-    exists prefix, (suffix ++ [x]), last.
-    simpl. rewrite app_assoc_reverse. simpl.
-    rewrite Exists_app. rewrite Exists_cons. rewrite Exists_nil.
-    itauto.
+    destruct Hsomething; cycle 1.
+    + inversion H; [done |]. inversion H1.
+    + destruct (IHl H) as (prefix & suffix & last & Hf & -> & Hnone_after).
+      exists prefix, (suffix ++ [x]), last.
+      cbn; rewrite app_assoc_reverse; cbn.
+      rewrite Exists_app, Exists_cons, Exists_nil.
+      itauto.
 Qed.
 
 Lemma existsb_last
@@ -219,13 +218,10 @@ Lemma filter_complement {X} P Q
  filter (fun x => ~ P x) l = filter (fun x => ~ Q x) l.
 Proof.
   split; intros.
-  - specialize (ext_elem_of_filter P Q l H1) as Hext.
-    apply filter_ext_elem_of.
-    intros.
-    specialize (Hext a H2).
-    rewrite Hext. itauto.
-  - apply filter_ext_elem_of. intros.
-    specialize (ext_elem_of_filter _ _ l H1 a H2) as Hext; cbn in Hext.
+  - apply filter_ext_elem_of; intros a Hin.
+    by rewrite (ext_elem_of_filter P Q).
+  - apply filter_ext_elem_of; intros a Hin.
+    pose (ext_elem_of_filter _ _ l H1 a Hin) as Hext; cbn in Hext.
     destruct (decide (P a)); destruct (decide (Q a)); itauto.
 Qed.
 
@@ -302,7 +298,7 @@ Proof.
       by split; [apply Hl12; right | by contradict n; subst].
     + cbn in Hlen12.
       assert (Ha : a ∈ l2) by (apply Hl12; left).
-      specialize (list_difference_singleton_length_in _ _ Ha) as Hlen'; lia.
+      pose (list_difference_singleton_length_in _ _ Ha) as Hlen'; lia.
 Qed.
 
 Lemma ForAllSuffix2_lookup [A : Type] (R : A -> A -> Prop) l
@@ -379,7 +375,7 @@ Lemma filter_length_fn {A} P Q
   length (filter P s) <= length (filter Q s).
 Proof.
   induction s; simpl; [lia |].
-  inversion Hfg; subst. specialize (IHs H4).
+  inversion Hfg; subst.
   rewrite 2 filter_cons.
   by destruct (decide (P a)), (decide (Q a)); cbn; itauto lia.
 Qed.
@@ -415,12 +411,10 @@ Proof.
     + destruct n.
       * inversion Hnth; subst. by exists 0.
       * simpl in Hnth.
-        specialize (IHl n a0 Hnth).
-        destruct IHl as [nth [Hnth' Ha0]].
+        destruct (IHl n a0 Hnth) as (nth & Hnth' & Ha0).
         exists (S nth).
         by rewrite Hnth'.
-    + specialize (IHl n a0 Hnth).
-      destruct IHl as [nth [Hnth' Ha0]].
+    + destruct (IHl n a0 Hnth) as (nth & Hnth' & Ha0).
       exists (S nth).
       by rewrite Hnth'.
 Qed.
@@ -569,8 +563,7 @@ Proof.
   - contradict Ha. left.
   - by exists lb1.
   - contradict Ha. rewrite elem_of_cons, elem_of_app, elem_of_cons; auto.
-  - specialize (IHla1 a0 lb1 b la2 lb2 H1 Ha).
-    destruct IHla1 as [la0b Hla0b].
+  - edestruct IHla1 as [la0b ?]; [done | done |].
     by exists la0b; subst.
 Qed.
 
@@ -664,15 +657,11 @@ Lemma list_max_elem_of_exists2
 Proof.
   destruct (list_max l) eqn : eq_max.
   - destruct l;[itauto congruence|].
-    specialize (list_max_le (n :: l) 0) as Hle.
-    destruct Hle as [Hle _].
-    rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
-    rewrite Forall_forall in Hle.
-    specialize (Hle n). spec Hle. left.
-    assert (Hn0: n = 0) by lia.
-    rewrite Hn0; left.
-  - specialize (list_max_elem_of_exists l) as Hmax.
-    rewrite <- eq_max; itauto lia.
+    destruct (list_max_le (n :: l) 0) as [Hle _].
+    rewrite eq_max, Forall_forall in Hle.
+    replace n with 0; [left |].
+    apply le_n_0_eq, Hle; [done | by left].
+  - rewrite <- eq_max. apply (list_max_elem_of_exists l). lia.
 Qed.
 
 Lemma mode_not_empty
@@ -700,13 +689,10 @@ Proof.
   assert (exists a, In a (mode l')). {
     destruct H.
     exists x.
-    specialize (count_occ_In decide_eq l' x).
-    intros.
-    destruct H0 as [_ H1].
+    destruct (count_occ_In decide_eq l' x) as [_ H1].
     rewrite H in H1.
-    specialize (H1 Hmaxp).
     unfold mode.
-    apply filter_in; [done |].
+    apply filter_in; [by apply H1 |].
     by rewrite H, Heqoccurrences.
   }
   destruct H.

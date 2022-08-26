@@ -103,6 +103,7 @@ Qed.
 
 Lemma refutation [A:Type] [R:A -> A-> Prop] (HR: well_founded R)
       [s]: ~ Forever (fun s => Eventually (fun x => R (hd x) (hd s)) s) s.
+Proof.
   remember (hd s) as x.
   revert s Heqx.
   specialize (HR x).
@@ -146,36 +147,32 @@ Proof.
   assert (forall x, Forever (Eventually (fun s => hd s <> x)) s).
   {
     intro x.
-    assert (forall n : A, ¬ Eventually (Forever (fun s : Stream A => hd s = n)) s) by firstorder.
-    specialize (H0 x).
+    assert (¬ Eventually (Forever (fun s : Stream A => hd s = x)) s) by firstorder.
     apply not_eventually in H0.
     revert H0.
     apply forever_impl, forever_tauto.
     clear. intros s H.
-    by apply not_forever in H.
+    by apply not_forever.
   }
   clear H; rename H0 into H.
   refine (@refutation _ _ HR s _).
   revert s Hprogress H.
   cofix the_lemma.
   constructor.
-  - destruct s.
-    simpl.
+  - destruct s; cbn.
     generalize (eq_refl : hd (Cons a s) = a).
     specialize (H a).
-    destruct H as [x H _]. revert Hprogress.
-    clear s.
-    induction H;intro Hprogress.
-    + destruct s. simpl in H. simpl in H |- *. congruence.
-    + simpl. intro. subst a0.
-      apply elater.
-      inversion Hprogress; subst s0.
-      simpl in H0, H1.
-      specialize (IHEventually H1).
+    destruct H as [x H _].
+    revert Hprogress; clear s.
+    induction H; intro Hprogress; cbn.
+    + by destruct s.
+    + intros ->.
+      constructor 2.
+      inversion Hprogress; subst; cbn in *.
       destruct H0.
       * by apply IHEventually.
       * by constructor.
   - apply the_lemma.
     + by destruct Hprogress.
-    + intro x. by destruct (H x).
+    + by intro x; destruct (H x).
 Qed.

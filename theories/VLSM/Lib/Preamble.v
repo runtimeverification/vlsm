@@ -89,7 +89,7 @@ Proof.
   - intros Htc; apply tc_nsteps in Htc as (n & Hn & Hsteps).
     induction Hsteps; [lia |].
     destruct n; [inversion Hsteps; subst; by left |].
-    spec IHHsteps; [lia |]; right; destruct IHHsteps as [Hyz | (y0 & Hyy0 & Hy0z)].
+    right; destruct IHHsteps as [Hyz | (y0 & Hyy0 & Hy0z)]; [lia | |].
     + by exists y; split; [constructor |].
     + exists y0; split; [| done].
       apply tc_nsteps.
@@ -205,10 +205,7 @@ Qed.
 Lemma asymmetric_minimal_among_iff
   `(R : relation A) `{!Asymmetric R} (P : A -> Prop)
   : forall m, minimal_among R P m <-> strict_minimal_among R P m.
-Proof.
-  unfold minimal_among, strict_minimal_among; specialize asymmetry.
-  firstorder.
-Qed.
+Proof. firstorder. Qed.
 
 (** The minimality definitions are equivalent for [StrictOrder]s. *)
 Lemma strict_minimal_among_iff
@@ -568,8 +565,7 @@ Lemma not_bounding_impl_liveness
   : liveness P.
 Proof.
   intros n1.
-  specialize (Hdec n1).
-  destruct Hdec as [Hex | Hnex]; [done |].
+  destruct (Hdec n1) as [Hex | Hnex]; [done |].
   contradiction Hnbound.
   exists n1.
   intros n2 Hleq HnP.

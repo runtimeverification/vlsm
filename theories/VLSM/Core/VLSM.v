@@ -1064,10 +1064,9 @@ Proof.
   generalize dependent s. generalize dependent tr.
   induction tr1.
   - by intros tr [= ->] s; inversion 1.
-  - specialize (IHtr1 (tr1 ++ [te] ++ tr2) eq_refl).
-    intros tr Heq is Htr; subst. inversion Htr; subst.
+  - intros tr Heq is Htr; subst; inversion Htr; subst.
     rewrite finite_trace_last_cons.
-    by apply IHtr1.
+    by apply (IHtr1 (tr1 ++ [te] ++ tr2)).
 Qed.
 
 Lemma finite_valid_trace_consecutive_valid_transition
@@ -1081,9 +1080,8 @@ Lemma finite_valid_trace_consecutive_valid_transition
 Proof.
   change ([te1; te2] ++ tr2) with ([te1] ++ [te2] ++ tr2) in Heq.
   rewrite app_assoc in Heq.
-  specialize (input_valid_transition_to s tr (tr1 ++ [te1]) tr2 te2 Htr Heq)
-    as Ht.
-  by rewrite finite_trace_last_is_last in Ht.
+  erewrite <- finite_trace_last_is_last.
+  by apply (input_valid_transition_to s tr (tr1 ++ [te1]) tr2).
 Qed.
 
 Lemma valid_trace_output_is_valid
@@ -1183,7 +1181,6 @@ Proof.
   - rewrite finite_trace_last_nil. simpl.
     itauto (eauto using finite_valid_trace_first_pstate, finite_valid_trace_from_empty).
   - rewrite finite_trace_last_cons. simpl.
-    specialize (IHls (destination a)).
     split.
     + intros [Hal Hl'].
       inversion Hal; subst; simpl in *.
@@ -1248,8 +1245,7 @@ Lemma finite_valid_trace_from_prefix
   (n : nat)
   : finite_valid_trace_from s (list_prefix ls n).
 Proof.
-  specialize (list_prefix_suffix ls n); intro Hdecompose.
-  rewrite <- Hdecompose in Htr.
+  rewrite <- (list_prefix_suffix ls n) in Htr.
   by apply finite_valid_trace_from_app_iff in Htr as [Hpr _].
 Qed.
 
@@ -1653,7 +1649,8 @@ Proof.
   - by constructor.
   - rewrite finite_trace_last_output_is_last. simpl.
     destruct Ht as [[_ [[_s Hiom] Hv]] Ht].
-    specialize (finite_valid_trace_init_to_emit_valid_state_message_rev _ _ Hiom) as [iom_s [iom_tr Hiom_tr]].
+    destruct (finite_valid_trace_init_to_emit_valid_state_message_rev _ _ Hiom)
+      as (iom_s & iom_tr & Hiom_tr).
     apply (finite_valid_trace_init_to_emit_extend _ _ _ _ IHHtl _ _ _ _ Hiom_tr _ Hv _ _ Ht).
 Qed.
 
@@ -1732,9 +1729,8 @@ Proof.
   generalize dependent is. generalize dependent tr.
   induction tr1.
   - intros tr Heq is Htr. simpl in Heq; subst. by inversion Htr; inversion Htl; subst.
-  - specialize (IHtr1 (stream_app (tr1 ++ [te1; te2]) tr2) eq_refl).
-    intros tr Heq is Htr; subst. inversion Htr; subst.
-    apply (IHtr1 s Htl).
+  - intros tr Heq is Htr; subst; inversion Htr; subst.
+    by apply (IHtr1 (stream_app (tr1 ++ [te1; te2]) tr2) eq_refl s).
 Qed.
 
 Lemma infinite_valid_trace_from_app_iff
@@ -1757,10 +1753,10 @@ Proof.
       unfold s' in Htr'.
       by rewrite finite_trace_last_cons in Htr'.
     + inversion Htr. apply Ht.
-   - inversion 1. subst. specialize (IHls s1). simpl in IHls. specialize (IHls ls'). apply IHls in Htl.
-     destruct Htl. split.
-     + by constructor.
-     + by unfold s'; rewrite finite_trace_last_cons.
+  - inversion 1; subst.
+    apply (IHls s1 ls') in Htl as []; split.
+    + by constructor.
+    + by unfold s'; rewrite finite_trace_last_cons.
 Qed.
 
 Lemma infinite_valid_trace_from_prefix
@@ -1770,8 +1766,7 @@ Lemma infinite_valid_trace_from_prefix
   (n : nat)
   : finite_valid_trace_from s (stream_prefix ls n).
 Proof.
-  specialize (stream_prefix_suffix ls n); intro Hdecompose.
-  rewrite <- Hdecompose in Htr.
+  rewrite <- (stream_prefix_suffix ls n) in Htr.
   by apply infinite_valid_trace_from_app_iff in Htr as [Hpr _].
 Qed.
 
@@ -1789,8 +1784,7 @@ Proof.
   constructor; [| done].
   apply Hls.
   intro n.
-  specialize (Hpref (S n)).
-  by inversion Hpref; subst.
+  by specialize (Hpref (S n)); inversion Hpref; subst.
 Qed.
 
 Lemma infinite_valid_trace_from_EqSt :
@@ -2023,10 +2017,8 @@ Lemma in_futures_strict_preserving
   : R s1 s2.
 Proof.
   apply (StrictOrder_PreOrder eq_equiv) in Hpre.
-  - specialize (in_futures_preserving (relation_disjunction R eq) Hpre) as Hpreserve.
-    spec Hpreserve.
-    + intro; intros. left. apply (Ht s3 s4 l0 om1 om2 Hvalid_transition).
-    + by destruct (Hpreserve s1 s2).
+  - destruct (in_futures_preserving (relation_disjunction R eq) Hpre) with s1 s2; [| done..].
+    by intros s3 s4 lbl om1 om2; left; eapply Ht.
   - by intros x1 x2 -> y1 y2 ->.
 Qed.
 
@@ -2097,11 +2089,10 @@ Lemma in_futures_witness
     /\ trace_nth (proj1_sig tr) n1 = Some first
     /\ trace_nth (proj1_sig tr) n2 = Some second.
 Proof.
-  specialize (in_futures_valid_fst first second Hfutures); intro Hps.
-  apply valid_state_has_trace in Hps.
-  destruct Hps as [prefix_start [prefix_tr [Hprefix_tr Hinit]]].
+  assert (Hps := in_futures_valid_fst first second Hfutures).
+  apply valid_state_has_trace in Hps as (prefix_start & prefix_tr & Hprefix_tr & Hinit).
   destruct Hfutures as [suffix_tr Hsuffix_tr].
-  specialize (finite_valid_trace_from_to_app _ _ _ _ _ Hprefix_tr Hsuffix_tr) as Happ.
+  assert (Happ := finite_valid_trace_from_to_app _ _ _ _ _ Hprefix_tr Hsuffix_tr).
   apply finite_valid_trace_from_to_forget_last in Happ.
   assert (Htr : valid_trace_prop (Finite prefix_start (prefix_tr ++ suffix_tr))) by done.
   exists (exist _ _ Htr).
@@ -2254,7 +2245,7 @@ Lemma trace_prefix_fn_valid
       (n : nat)
   : valid_trace_prop (trace_prefix_fn tr n).
 Proof.
-  specialize (trace_prefix_valid (exist _ tr Htr)); simpl; intro Hpref.
+  assert (Hpref := trace_prefix_valid (exist _ tr Htr)); cbn in Hpref.
   remember (trace_prefix_fn tr n) as pref_tr.
   destruct pref_tr as [s l | s l].
   - destruct l as [| item l].
@@ -2266,7 +2257,7 @@ Proof.
       ; apply initial_state_is_valid.
     + assert (Hnnil : item ::l <> [])
         by (intro Hnil; inversion Hnil).
-      specialize (exists_last Hnnil); intros [prefix [last Heq]].
+      specialize (exists_last Hnnil); intros (prefix & last & Heq).
       rewrite Heq in *; clear Hnnil Heq l item.
       replace s with (trace_first (proj1_sig (exist _ tr Htr)))
       ; try (by destruct tr; inversion Heqpref_tr; subst).
@@ -2278,12 +2269,10 @@ Proof.
       ; clear Heqpref_tr
       ; simpl
       ; intro Heqprefix.
-      * specialize (list_prefix_suffix l' n); intro Hl'.
-        rewrite <- Hl'. rewrite Heqprefix.
+      * rewrite <- (list_prefix_suffix l' n), Heqprefix.
         exists (list_suffix l' n).
         by rewrite <- app_assoc.
-      * specialize (stream_prefix_suffix l' n); intro Hl'.
-        rewrite <- Hl'. rewrite Heqprefix.
+      * rewrite <- (stream_prefix_suffix l' n), Heqprefix.
         exists (stream_suffix l' n).
         by rewrite <- stream_app_assoc.
   - destruct tr as [s' l' | s' l']; inversion Heqpref_tr.
@@ -2298,14 +2287,9 @@ Lemma valid_trace_nth
   : valid_state_prop s.
 Proof.
   destruct tr as [s0 l | s0 l]; destruct Htr as [Htr Hinit].
-  - specialize (finite_valid_trace_from_suffix s0 l Htr n s Hnth).
-    intro Hsuf.
-    by apply finite_valid_trace_first_pstate in Hsuf.
-  - assert (Hle : n <= n) by lia.
-    specialize (infinite_valid_trace_from_segment s0 l Htr n n Hle)
-    ; simpl; intros Hseg.
-    inversion Hnth.
-    by apply finite_valid_trace_first_pstate in Hseg.
+  - by eapply finite_valid_trace_first_pstate, finite_valid_trace_from_suffix.
+  - inversion Hnth.
+    by eapply finite_valid_trace_first_pstate, infinite_valid_trace_from_segment.
 Qed.
 
 Lemma in_futures_valid_snd
@@ -2313,10 +2297,8 @@ Lemma in_futures_valid_snd
   (Hfutures: in_futures first second)
   : valid_state_prop second.
 Proof.
-  specialize (in_futures_witness first second Hfutures)
-  ; intros [tr [n1 [n2 [Hle [Hn1 Hn2]]]]].
-  destruct tr as [tr Htr]; simpl in Hn2.
-  by apply valid_trace_nth with tr n2.
+  destruct (in_futures_witness first second Hfutures) as ([tr Htr] & n1 & n2 & Hle & Hn1 & Hn2).
+  by eapply valid_trace_nth.
 Qed.
 
 Lemma in_futures_witness_reverse
@@ -2351,9 +2333,7 @@ Proof.
         + symmetry. rewrite stream_prefix_nth_last.
           unfold Str_nth in Hs2. simpl in Hs2.
           by inversion Hs2; subst.
-        + specialize (stream_prefix_length (Streams.map destination tr) (S m)); intro Hpref_len.
-          rewrite Hpref_len.
-          lia.
+        + rewrite stream_prefix_length. lia.
       }
 Qed.
 (* end hide *)
@@ -2609,7 +2589,7 @@ Proof.
   - induction 1.
     + by exists None; apply valid_initial_state_message.
     + exists om'. destruct IHpreloaded_valid_state_prop as [_om Hs].
-      specialize (any_message_is_valid_in_preloaded om) as [_s Hom].
+      destruct (any_message_is_valid_in_preloaded om) as [_s Hom].
       by apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l0.
 Qed.
 
@@ -2668,23 +2648,19 @@ Proof.
   - apply finite_valid_trace_from_to_last in Htr as Hlst.
     apply finite_valid_trace_from_to_app_split in Htr.
     destruct Htr as [Htr Hx].
-    specialize (IHtr _ (conj Htr Hinit)).
-    spec IHtr.
-    {
-      by intros; apply Hobs, trace_has_message_prefix.
-    }
-    destruct IHtr as [IHtr _];
-    apply finite_valid_trace_from_to_forget_last in IHtr.
-    apply finite_valid_trace_from_add_last; [| done].
-    inversion Hx; subst f tl s'.
-    apply (extend_right_finite_trace_from X); [done |].
-    destruct Ht as [[_ [_ Hv]] Ht].
-    apply finite_valid_trace_last_pstate in IHtr as Hplst.
-    repeat split. 1, 3-4: done.
-    destruct iom as [m |]; [| apply option_valid_message_None].
-    apply option_valid_message_Some, Hobs.
-    red; rewrite Exists_app, Exists_cons.
-    subst; cbn; itauto.
+    destruct (IHtr _ (conj Htr Hinit)) as [IHtr' _].
+    + by intros; apply Hobs, trace_has_message_prefix.
+    + apply finite_valid_trace_from_to_forget_last in IHtr'.
+      apply finite_valid_trace_from_add_last; [| done].
+      inversion Hx; subst f tl s'.
+      apply (extend_right_finite_trace_from X); [done |].
+      destruct Ht as [(_ & _ & Hv) Ht].
+      apply finite_valid_trace_last_pstate in IHtr' as Hplst.
+      repeat split; [done | | done | done].
+      destruct iom as [m |]; [| apply option_valid_message_None].
+      apply option_valid_message_Some, Hobs.
+      red; rewrite Exists_app, Exists_cons.
+      subst; cbn; itauto.
 Qed.
 
 End pre_loaded_with_all_messages_vlsm.
@@ -2874,10 +2850,8 @@ Proof.
     + apply finite_valid_trace_from_to_app_split in Htr' as [Htr' Hitem].
       inversion Hitem; inversion Htl; subst; clear Hitem Htl.
       apply input_valid_transition_forget_input in Ht, Ht0.
-      specialize (unique_transition_to_state Ht Ht0) as Heqs.
-      destruct_and! Heqs; subst.
-      specialize (IHHtr _ _  (conj Htr' His')).
-      by destruct_and! IHHtr; subst.
+      destruct (unique_transition_to_state Ht Ht0) as (-> & -> & -> & ->).
+      by destruct (IHHtr _ _  (conj Htr' His')); subst.
 Qed.
 
 End sec_history_vlsm.

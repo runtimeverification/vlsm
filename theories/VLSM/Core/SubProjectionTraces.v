@@ -494,7 +494,7 @@ Proof.
     itauto.
   - match goal with
     |- context [pre_loaded_with_all_messages_vlsm ?v] =>
-      specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True v) as Hincl
+      assert (Hincl := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True v)
     end.
     by apply VLSM_eq_incl_iff, proj2 in Hincl.
 Qed.
@@ -559,11 +559,9 @@ Proof.
   apply (finite_valid_trace_singleton Xj).
   inversion Hx; subst. simpl in *.
   destruct Ht as [Hv Ht].
-  specialize (transition_sub_projection _ _ _ _ _ Ht Hlx)
-    as Htj.
+  assert (Htj := transition_sub_projection _ _ _ _ _ Ht Hlx).
   destruct Hv as [_ [_ [Hv Hc]]].
-  specialize (valid_sub_projection _ _ _ Hv Hlx)
-    as Hvj.
+  assert (Hvj := valid_sub_projection _ _ _ Hv Hlx).
   rewrite <- (finite_trace_sub_projection_last_state s tr Htr) in Htj, Hvj.
   repeat split; [done | | done | | done].
   - destruct iom as [m|]; [|apply (option_valid_message_None Xj)].

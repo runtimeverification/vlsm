@@ -52,11 +52,9 @@ Lemma sum_weights_subseteq
   (sum_weights vs <= sum_weights vs')%R.
 Proof.
   induction vs; intros; try apply sum_weights_positive.
-  specialize (sum_weights_in a vs' H0) as Hvs'.
-  spec Hvs'; [by apply H1; left |].
-  rewrite Hvs'. simpl.
+  rewrite (sum_weights_in a vs'); simpl; [| done | by apply H1; left].
   apply Rplus_le_compat_l.
-  inversion H. subst.  clear H.
+  inversion H; subst; clear H.
   apply IHvs; [done | |].
   - by apply set_remove_nodup.
   - intros v Hv. apply set_remove_iff; [done |].

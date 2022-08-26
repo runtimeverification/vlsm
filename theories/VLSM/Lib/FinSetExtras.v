@@ -33,8 +33,8 @@ Lemma union_size_ge_average
   (X Y : C) :
   2 * size (X ∪ Y) >= size X + size Y.
 Proof.
-  specialize (union_size_ge_size1 X Y) as Hx.
-  specialize (union_size_ge_size2 X Y) as Hy.
+  pose (union_size_ge_size1 X Y) as Hx.
+  pose (union_size_ge_size2 X Y) as Hy.
   lia.
 Qed.
 
@@ -52,9 +52,8 @@ Lemma union_size_le_sum
   (X Y : C) :
   size (X ∪ Y) <= size X + size Y.
 Proof.
-  specialize (size_union_alt X Y) as Halt.
-  rewrite Halt.
-  specialize (difference_size_le_self Y X).
+  rewrite (size_union_alt X Y).
+  pose (difference_size_le_self Y X).
   lia.
 Qed.
 
@@ -74,32 +73,36 @@ Proof.
   set_solver.
 Qed.
 
+Lemma union_difference_r_sub :
+  forall X Y : C,
+    Y ⊆ X -> Y ∪ (X ∖ Y) ≡ X.
+Proof.
+  intros; apply set_equiv_equivalence; intros a.
+  split; intros Ha; [set_solver |].
+  destruct (@decide (a ∈ Y)).
+  - apply elem_of_dec_slow.
+  - apply elem_of_union. left. itauto.
+  - apply elem_of_union. right. set_solver.
+Qed.
+
+Lemma size_difference_sub :
+  forall X Y : C,
+    Y ⊆ X -> size Y + size (X ∖ Y) = size X.
+Proof.
+  intros X Y Hsub.
+  pose (size_union Y (X ∖ Y)) as Hun.
+  rewrite (union_difference_r_sub X Y Hsub) in Hun.
+  symmetry; apply Hun.
+  rewrite elem_of_disjoint; setoid_rewrite elem_of_difference.
+  itauto.
+Qed.
+
 Lemma difference_size_subset
   (X Y : C)
   (Hsub : Y ⊆ X) :
   (Z.of_nat (size (X ∖ Y)) = Z.of_nat (size X) - Z.of_nat (size Y))%Z.
 Proof.
-  assert (Htemp : Y ∪ (X ∖ Y) ≡ X). {
-    apply set_equiv_equivalence.
-    intros a.
-    split; intros Ha.
-    - set_solver.
-    - destruct (@decide (a ∈ Y)).
-      apply elem_of_dec_slow.
-      + apply elem_of_union. left. itauto.
-      + apply elem_of_union. right. set_solver.
-  }
-  assert (Htemp2 : size Y + size (X ∖ Y) = size X). {
-    specialize (size_union Y (X ∖ Y)) as Hun.
-    spec Hun. {
-      apply elem_of_disjoint.
-      intros a Ha Ha2.
-      apply elem_of_difference in Ha2.
-      itauto.
-    }
-    rewrite Htemp in Hun.
-    itauto.
-  }
+  pose (size_difference_sub X Y Hsub).
   lia.
 Qed.
 
@@ -114,17 +117,15 @@ Lemma difference_size
   (X Y : C) :
   (Z.of_nat (size (X ∖ Y)) = Z.of_nat (size X) - Z.of_nat (size (X ∩ Y)))%Z.
 Proof.
-  rewrite difference_with_intersection.
-  specialize (difference_size_subset X (X ∩ Y)) as Hdif.
-  set_solver.
+  by rewrite difference_with_intersection, (difference_size_subset X (X ∩ Y)); [| set_solver].
 Qed.
 
 Lemma difference_size_ge_disjoint_case
   (X Y : C) :
   size (X ∖ Y) >= size X - size Y.
 Proof.
-  specialize (difference_size X Y).
-  specialize (intersection_size2 X Y).
+  pose (difference_size X Y).
+  pose (intersection_size2 X Y).
   lia.
 Qed.
 
@@ -132,13 +133,11 @@ Lemma list_to_set_size
   (l : list A) :
   size (list_to_set l (C := C)) <= length l.
 Proof.
-  induction l.
-  - simpl.
-    rewrite size_empty. lia.
-  - simpl.
-    specialize (union_size_le_sum ({[a]}) (list_to_set l)) as Hun_size.
-    rewrite size_singleton in Hun_size.
-    lia.
+  induction l; cbn.
+  - by rewrite size_empty.
+  - etransitivity.
+    + apply union_size_le_sum.
+    + by rewrite size_singleton; lia.
 Qed.
 
 End general.

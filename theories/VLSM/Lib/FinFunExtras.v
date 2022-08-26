@@ -22,19 +22,16 @@ Proof.
   - clear Hfull.
     induction A_listing as [|a l IHl].
     + constructor.
-    + inversion_clear Hnodup as [|? ? H1 H2].
-      specialize (IHl H2); clear H2.
-      simpl.
-      destruct (f a) eqn: Hfa; [| done].
-      apply f_proj_inj in Hfa. subst a.
-      constructor; [| done].
+    + inversion_clear Hnodup as [| ? ? H1 H2]; cbn.
+      destruct (f a) eqn: Hfa; [| by apply IHl].
+      apply f_proj_inj in Hfa; subst a.
+      constructor; [| by apply IHl].
       contradict H1.
       apply in_map_option in H1.
       destruct H1 as [a [Ha Hfa]].
       apply f_proj_inj in Hfa.
       by subst a.
   - intro b.
-    specialize (Hfull (g b)).
     apply in_map_option.
     exists (g b).
     split; [done |].

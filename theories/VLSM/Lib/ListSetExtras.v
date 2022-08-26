@@ -54,16 +54,15 @@ Proof.
   split; apply PreOrder_Transitive with s2; apply H || apply H0.
 Qed.
 
-Lemma set_eq_empty_iff
-  {A}
-  : forall (l : list A),
+Lemma set_eq_empty_iff :
+  forall {A : Type} (l : list A),
     set_eq l [] <-> l = [].
 Proof.
-  split; intros; [|subst; apply set_eq_refl].
+  split; intros; [| subst; apply set_eq_refl].
   destruct l as [| hd tl]; [done |].
-  destruct H.
-  spec H hd (elem_of_list_here hd tl).
-  by inversion H.
+  destruct H as [H _].
+  exfalso; eapply not_elem_of_nil.
+  apply H; left.
 Qed.
 
 Lemma set_eq_cons {A} : forall (a : A) (s1 s2 : set A),
@@ -198,23 +197,15 @@ Proof.
 Qed.
 
 Lemma map_list_subseteq {A B} : forall (f : B -> A) (s s' : list B),
-  s ⊆ s' -> (map f s) ⊆ (map f s').
+  s ⊆ s' -> map f s ⊆ map f s'.
 Proof.
-intro f; induction s; intros; simpl.
-- apply list_subseteq_nil.
-- assert (s ⊆ s') as Hs. {
-    intros b Hs.
-    by apply H; right.
-  }
-  spec IHs s' Hs.
-  intros b Hs'.
-  apply elem_of_cons in Hs'.
-  destruct Hs'.
-  * subst.
-    apply elem_of_list_fmap_1.
-    apply H.
-    left.
-  * by apply IHs.
+  induction s; intros s' Hsub; simpl.
+  - apply list_subseteq_nil.
+  - intros b Hs'.
+    apply elem_of_cons in Hs' as [-> | Hs'].
+    * by apply elem_of_list_fmap_1, Hsub; left.
+    * apply IHs; [| done].
+      by intros x Hin; apply Hsub; right.
 Qed.
 
 Lemma map_set_eq {A B} (f : B -> A) : forall s s',
@@ -632,20 +623,17 @@ Proof.
     destruct (decide (~ new ∈ b));[|contradict n0; itauto].
     simpl.
     by apply le_n_S, len_set_diff_incl_le.
-  - specialize (IHl H);clear H.
-    unfold set_diff_filter.
+  - unfold set_diff_filter.
     rewrite 2 filter_cons.
-    destruct (decide (~ a0 ∈ a)); destruct (decide (~ a0 ∈ b)).
-    + simpl.
-      rewrite <- Nat.succ_lt_mono.
-      apply IHl.
+    destruct (decide (~ a0 ∈ a)); destruct (decide (~ a0 ∈ b)); cbn.
+    + rewrite <- Nat.succ_lt_mono.
+      by apply IHl.
     + contradict n.
       apply H_subseteq.
       by destruct (decide (a0 ∈ b)).
-    + simpl.
-      apply Nat.lt_lt_succ_r.
-      apply IHl.
-    + apply IHl.
+    + apply Nat.lt_lt_succ_r.
+      by apply IHl.
+    + by apply IHl.
 Qed.
 
 Lemma len_set_diff_map_set_add `{EqDecision B} (new:B) `{EqDecision A} (f: B -> A)
@@ -707,7 +695,6 @@ Proof.
   unfold set_eq in H1.
   destruct H1 as [H1 H1'].
   unfold incl in *.
-  specialize (H1 a). specialize (H1' a).
   split; intros.
   - by eapply elem_of_list_filter, H1, elem_of_list_filter.
   - by eapply elem_of_list_filter, H1', elem_of_list_filter.

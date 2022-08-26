@@ -1209,16 +1209,9 @@ Proof.
     apply finite_valid_trace_from_empty.
     by apply input_valid_transition_destination in Ht'.
   - simpl.
-    specialize (relevant_component_transition2 s s' label_a input_a) as Hrel.
-    simpl in Hrel. unfold i in Heq. specialize (Hrel Heq Hprs').
-    match type of Hrel with
-    | let (_, _) := ?t in _ => replace t with (s1, o0) in Hrel
-    end.
-    match type of Hrel with
-    | let (_, _) := ?t in _ => replace t with (s0, o) in Hrel
-    end.
-    unfold i.
-    itauto.
+    assert (Hrel := relevant_component_transition2 s s' label_a input_a Heq Hprs').
+    destruct (vtransition _ _ _), (vtransition _ _ _); unfold i.
+    itauto congruence.
 Qed.
 
 (* Transitioning on some index different from <<i>> does not affect
@@ -1321,15 +1314,13 @@ Proof.
       itauto.
     }
 
-    spec IHa; [done |].
+    destruct (IHa Hrem) as [IHapr IHaind].
 
-    destruct IHa as [IHapr IHaind].
-
-    specialize (relevant_components_one (snd (apply_plan Free s a)) (snd (apply_plan Free s' a))) as Hrel.
+    assert (Hrel := relevant_components_one (snd (apply_plan Free s a)) (snd (apply_plan Free s' a))).
 
     spec Hrel. {
       apply apply_plan_last_valid.
-      all : itauto.
+      all: itauto.
     }
 
     specialize (Hrel x); simpl in *.
@@ -1355,31 +1346,20 @@ Proof.
       specialize (Heq i Hi).
       rewrite !apply_plan_app.
       simpl in *.
-      destruct (apply_plan Free s' a)
-        as (tra', sa') eqn : eq_as'.
-      destruct (apply_plan Free s a)
-        as (tra, sa) eqn : eq_as.
+      destruct (apply_plan Free s' a) as [tra' sa'] eqn: eq_as'.
+      destruct (apply_plan Free s a) as [tra sa] eqn: eq_as.
       simpl in *.
-      destruct (apply_plan Free sa [x])
-        as (trx, sx) eqn : eq_xsa.
-      destruct (apply_plan Free sa' [x])
-        as (trx', sx') eqn : eq_xsa'.
+      destruct (apply_plan Free sa [x]) as [trx sx] eqn: eq_xsa.
+      destruct (apply_plan Free sa' [x]) as [trx' sx'] eqn : eq_xsa'.
       simpl in *.
       destruct (decide (i = (projT1 (label_a x)))).
       * rewrite e; itauto.
-      * specialize (irrelevant_components_one sa) as Hdiff.
-        specialize (Hdiff x i n).
-
-        specialize (irrelevant_components_one sa') as Hdiff0.
-        specialize (Hdiff0 x i n).
-        simpl in *.
-        apply (f_equal snd) in eq_xsa.
-        apply (f_equal snd) in eq_xsa'.
-
+      * simpl in *.
+        apply (f_equal snd) in eq_xsa, eq_xsa'.
         replace sx' with (snd (composite_apply_plan IM sa' [x])).
         replace sx with (snd (composite_apply_plan IM sa [x])).
-        setoid_rewrite Hdiff.
-        by setoid_rewrite Hdiff0.
+        by setoid_rewrite (irrelevant_components_one sa x i n)
+        ; setoid_rewrite (irrelevant_components_one sa' x i n).
 Qed.
 
 End composite_plan_properties.
@@ -1398,7 +1378,7 @@ Lemma empty_composition_no_index
   (i : index)
   : False.
 Proof.
-  specialize (elem_of_enum i); rewrite Hempty_index; apply not_elem_of_nil.
+  by apply (not_elem_of_nil i); rewrite <- Hempty_index; apply elem_of_enum.
 Qed.
 
 Lemma empty_composition_single_state
@@ -1534,7 +1514,7 @@ Lemma same_IM_preloaded_free_full_projection
 Proof.
   constructor.
   intros s1 tr1 Htr1.
-  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM1)) as Heq1.
+  assert (Heq1 := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM1)).
   apply (VLSM_eq_finite_valid_trace Heq1) in Htr1.
   clear Heq1.
   specialize (same_IM_full_projection (free_constraint IM1) (free_constraint IM2))
@@ -1542,7 +1522,7 @@ Proof.
   spec Hproj; [done |].
   specialize (Hproj (fun _ => True)).
   apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr1.
-  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM2)) as Heq2.
+  assert (Heq2 := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM2)).
   by apply (VLSM_eq_finite_valid_trace Heq2).
 Qed.
 
@@ -1666,9 +1646,8 @@ Proof.
   apply composite_valid_transition_projection in Ht1, Ht2; cbn in Ht1, Ht2.
   destruct Ht1 as [Ht1 Heq_s], Ht2 as [Ht2 Heqs].
   rewrite Heq_s in Heqs at 1; clear Heq_s.
-  specialize (unique_transition_to_state Ht1 Ht2) as Heq;
-    destruct_and! Heq; subst; repeat split.
-  extensionality j.
+  assert (Heq := unique_transition_to_state Ht1 Ht2); destruct_and! Heq; subst.
+  repeat split; extensionality j.
   destruct (decide (i = j)); subst; [done |].
   apply f_equal with (f := fun s => s j) in Heqs.
   by state_update_simpl.
@@ -1688,8 +1667,8 @@ Proof.
     destruct (decide (i = j)).
     + subst; apply input_valid_transition_forget_input in Ht as Hvt.
       apply composite_valid_transition_reachable_iff in Hvt.
-      specialize (composite_quasi_unique_transition_to_state Hnext Hvt eq_refl) as Heq.
-      by destruct_and! Heq; simplify_eq.
+      by assert (Heq := composite_quasi_unique_transition_to_state Hnext Hvt eq_refl)
+      ; destruct_and! Heq; simplify_eq.
     + apply input_valid_transition_forget_input in Ht as Hti.
       apply composite_valid_transition_reachable_iff,
         composite_valid_transition_projection in Hti;

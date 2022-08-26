@@ -91,8 +91,7 @@ Proof.
   - destruct Hk as [Heq | Hk]; subst; [by exists k |].
     exfalso. apply proj2 in Hfs.
     rewrite ForAll2_forall in Hfs.
-    specialize (Hfs k) as [_ [_ Hfs]].
-    by elim (Hfs n).
+    firstorder.
 Qed.
 
 (** Prefixes of the filtering subsequence expressed as filters.
@@ -129,15 +128,12 @@ Proof.
       by apply filtering_subsequence_sorted in Hfs.
     + destruct H as [Hpa [_a [Hlt H_a]]].
       subst _a.
-      specialize (filtering_subsequence_witness_rev _ _ _ Hfs _ Hpa)
-        as [k' Hk'].
-      subst.
+      destruct (filtering_subsequence_witness_rev _ _ _ Hfs _ Hpa) as [k' ->].
       exists k'.
       split; [| done].
       apply filtering_subsequence_sorted in Hfs.
       apply monotone_nat_stream_prop_from_successor in Hfs.
-      specialize (monotone_nat_stream_rev _ Hfs k' k) as Hle.
-      feed specialize Hle; lia.
+      apply le_n_S, (monotone_nat_stream_rev _ Hfs); lia.
 Qed.
 
 Lemma filtering_subsequence_prefix_length
@@ -150,20 +146,15 @@ Lemma filtering_subsequence_prefix_length
   (m : nat)
   : length (filter P (stream_prefix s (S (Str_nth m ss)))) = S m.
 Proof.
-  specialize (filtering_subsequence_prefix_is_filter _ _ _ Hfs m) as Hfilter.
+  pose (filtering_subsequence_prefix_is_filter _ _ _ Hfs m) as Hfilter.
   apply f_equal with (f := length) in Hfilter.
-  rewrite stream_prefix_length in Hfilter.
-  rewrite! stream_prefix_S, filter_app in Hfilter.
-  unfold filter at 2 in Hfilter. simpl in Hfilter.
+  rewrite stream_prefix_length, !stream_prefix_S, filter_app in Hfilter.
+  unfold filter at 2 in Hfilter; cbn in Hfilter.
   rewrite nat_sequence_nth in Hfilter.
   rewrite stream_prefix_S, filter_app.
   unfold filter at 2. simpl.
-  specialize (filtering_subsequence_witness _ _ _ Hfs m) as Hm.
-  rewrite decide_True in Hfilter by done.
-  rewrite decide_True by done.
-  rewrite app_length, Nat.add_comm in Hfilter. simpl in Hfilter.
-  rewrite app_length, Nat.add_comm. simpl.
-  rewrite Hfilter.
+  assert (Hm : P (Str_nth (Str_nth m ss) s)) by (apply filtering_subsequence_witness; done).
+  rewrite Hfilter, !decide_True, !app_length, 2!Nat.add_comm by done; cbn.
   f_equal.
   clear -Hfs.
   generalize (Str_nth m ss).
@@ -184,13 +175,11 @@ Lemma filtering_subsequence_prefix_is_filter_last
   (Hn : P (Str_nth n s))
   : Str_nth (length (filter P (stream_prefix s n))) ss = n.
 Proof.
-  specialize (filtering_subsequence_witness_rev _ _ _ Hfs _ Hn) as [k Heqn].
+  destruct (filtering_subsequence_witness_rev _ _ _ Hfs _ Hn) as [k Heqn].
   replace (length _) with k; [by subst |].
-  specialize (filtering_subsequence_prefix_length _ _ _ Hfs k) as Hlength.
-  rewrite! stream_prefix_S, filter_app in Hlength.
-  unfold filter at 2 in Hlength. simpl in Hlength.
-  rewrite decide_True in Hlength by (subst; done).
-  rewrite app_length, Nat.add_comm in Hlength. simpl in Hlength.
+  pose (filtering_subsequence_prefix_length _ _ _ Hfs k) as Hlength.
+  rewrite! stream_prefix_S, filter_app in Hlength; cbn in Hlength.
+  rewrite decide_True, app_length, Nat.add_comm in Hlength by (subst; done); cbn in Hlength.
   by inversion Hlength; subst.
 Qed.
 
@@ -265,7 +254,7 @@ Program Definition fitering_subsequence_stream_filter_map_prefix_ex
 Next Obligation. done. Qed.
 Next Obligation.
   intros. subst.
-  specialize (fitering_subsequence_stream_filter_map_prefix P f _ _ Hfs (S (Str_nth m ss))) as Heq.
+  pose (fitering_subsequence_stream_filter_map_prefix P f _ _ Hfs (S (Str_nth m ss))) as Heq.
   remember (S m) as Sm.
   simpl in *.
   rewrite <- Heq.
@@ -355,9 +344,9 @@ Proof.
     exists 0. split_and!; f_equal; [lia | done | lia].
   - destruct (decide _); simpl.
     + exists 0. split_and!; f_equal; [lia | done | lia].
-    + specialize (H (tl s) Hev (S n)) as (k & Heq & Hp & Hnp).
-      exists (S k). rewrite Heq.
-      split; [f_equal; lia|].
+    + destruct (H (tl s) Hev (S n)) as (k & -> & Hp & Hnp).
+      exists (S k).
+      split; [f_equal; lia |].
       split; [done |].
       intros. destruct i; [done |].
       apply Hnp. lia.
@@ -392,11 +381,9 @@ Lemma stream_filter_fst_pos_nth_tl_has_property
   : P (Str_nth fpair.1 s) /\
     forall i, n <= i < fpair.1 -> ~ P (Str_nth i s).
 Proof.
-  specialize (stream_filter_fst_pos_characterization sn Hev n)
-    as [k [Heq [Hp Hnp]]].
-  subst sn fpair.
-  rewrite Heq.
-  clear -Hp Hnp. rewrite Str_nth_plus, Nat.add_comm in Hp.
+  destruct (stream_filter_fst_pos_characterization sn Hev n) as (k & Heq & Hp & Hnp).
+  subst sn fpair; rewrite Heq; clear -Hp Hnp.
+  rewrite Str_nth_plus, Nat.add_comm in Hp.
   split; [done |].
   intros i [Hlt_i Hilt].
   apply stdpp_nat_le_sum in Hlt_i as [i' ->].
@@ -428,15 +415,14 @@ Lemma stream_filter_positions_Str_nth_tl
 Proof.
   induction n.
   - simpl. rewrite (stream_filter_positions_unroll s Hinf n0).
-    specialize
-      (stream_filter_fst_pos_characterization s (fHere _ s Hinf) n0)
-        as [k [Heq [Hp _]]].
-    assert (Hk : (stream_filter_fst_pos s (fHere (Exists1 P) s Hinf) n0).1 = n0 + k).
-    { by rewrite Heq. }
-    assert (Htl : (stream_filter_fst_pos s (fHere (Exists1 P) s Hinf) n0).2 = Str_nth_tl (S k) s).
-    { by rewrite Heq. }
-    exists k.
-    rewrite Hk. simpl. simpl in Htl. rewrite <- Htl. eauto.
+    destruct (stream_filter_fst_pos_characterization s (fHere _ s Hinf) n0)
+      as (k & Heq & Hp & _).
+    assert (Hk : (stream_filter_fst_pos s (fHere (Exists1 P) s Hinf) n0).1 = n0 + k)
+      by (rewrite Heq; done).
+    assert (Htl : (stream_filter_fst_pos s (fHere (Exists1 P) s Hinf) n0).2 = Str_nth_tl (S k) s)
+      by (rewrite Heq; done).
+    exists k. cbn in *.
+    rewrite Hk, <- Htl. eauto.
   - replace
       (Str_nth_tl (S n) (stream_filter_positions s Hinf n0))
       with (tl (Str_nth_tl n (stream_filter_positions s Hinf n0)))
@@ -444,21 +430,18 @@ Proof.
     destruct IHn as [kn [Hinfn [Hsn Hpn]]].
     rewrite Hsn.
     simpl. rewrite (stream_filter_positions_unroll (Str_nth_tl kn (tl s)) Hinfn (S (n0 + kn))).
-    specialize
-      (stream_filter_fst_pos_characterization (Str_nth_tl kn (tl s)) (fHere _ _ Hinfn) (S (n0 + kn)))
-        as [k [Heq [Hp _]]].
+    destruct (stream_filter_fst_pos_characterization
+      (Str_nth_tl kn (tl s)) (fHere _ _ Hinfn) (S (n0 + kn))) as (k & Heq & Hp & _).
     match type of Heq with
     | ?pair = (?f, ?s) =>
       assert (Hk : pair.1 = f) by (rewrite Heq; done);
       assert (Htl : pair.2 = s) by (rewrite Heq; done)
     end.
-    simpl in Hk.  rewrite Hk.
-    simpl in Htl.
-    exists (S (k + kn)).
-    simpl.
+    cbn in *; rewrite Hk.
+    exists (S (k + kn)); cbn.
     rewrite tl_nth_tl, Str_nth_tl_plus in Htl.
-    rewrite Str_nth_plus in Hp.
     rewrite <- Htl.
+    rewrite Str_nth_plus in Hp.
     replace (n0 + S (k + kn)) with (S (n0 + kn + k)) by lia. eauto.
 Qed.
 
@@ -481,23 +464,23 @@ Lemma stream_filter_positions_filtering_subsequence
   : filtering_subsequence P s (stream_filter_positions s Hinf 0).
 Proof.
   split.
-  - specialize (stream_filter_fst_pos_characterization s (fHere (Exists1 P) s Hinf) 0)
-      as [k [Heq [Hpk Hnp]]].
+  - destruct (stream_filter_fst_pos_characterization s (fHere (Exists1 P) s Hinf) 0)
+      as (k & Heq & Hpk & Hnp).
     simpl in Heq.
     by rewrite stream_filter_positions_unroll; cbn; rewrite Heq.
   - apply ForAll2_forall.
     intro n.
-    specialize (stream_filter_positions_Str_nth_tl s Hinf 0 n) as Hnth_tl.
+    assert (Hnth_tl := stream_filter_positions_Str_nth_tl s Hinf 0 n).
     simpl in Hnth_tl.
     remember (stream_filter_positions s Hinf 0).
     destruct Hnth_tl as [kn [Hnth_inf [Hnth Hnth_p]]].
     unfold Str_nth. simpl. rewrite <- tl_nth_tl.
     rewrite stream_filter_positions_unroll in Hnth.
-    specialize (stream_filter_fst_pos_characterization (Str_nth_tl kn (tl s)) (fHere _ _ Hnth_inf) (S kn))
-      as [k [Heq [Hpk Hnp]]].
+    destruct (stream_filter_fst_pos_characterization (Str_nth_tl kn (tl s)) (fHere _ _ Hnth_inf) (S kn))
+      as (k & Heq & Hpk & Hnp).
     rewrite Hnth; simpl.
     split; [done |].
-    rewrite Heq. simpl.
+    rewrite Heq; cbn.
     split; [lia|].
     intros i [Hle Hlt].
     apply stdpp_nat_le_sum in Hle as [k' ->].
@@ -591,18 +574,15 @@ Proof.
   rewrite (proj2_sig Hrew).
   replace (` Hrew) with (S n); [done |].
   simpl. f_equal. clear.
-  cut
-    (forall k, Streams.Str_nth n
-      (stream_filter_positions (is_Some ∘ (Some ∘ f)) s Hinf k) = k + n).
-  { intros Hk. specialize (Hk 0). simpl in Hk. congruence.  }
+  cut (forall k, Streams.Str_nth n (stream_filter_positions (is_Some ∘ (Some ∘ f)) s Hinf k) = k + n).
+  { by intros ->. }
   revert s Hinf.
   assert (Hfirst : forall s Hinf k,
     (stream_filter_fst_pos (is_Some ∘ (Some ∘ f)) s (fHere _ _ Hinf) k).1 = k).
   { intros.
     match goal with
     |- fst (stream_filter_fst_pos ?P s ?Hex k) = k =>
-      specialize (stream_filter_fst_pos_characterization P s Hex k)
-        as [_k [Heq1 [_ H_k]]]
+      destruct (stream_filter_fst_pos_characterization P s Hex k) as (_k & Heq1 & _ & H_k)
     end.
     rewrite Heq1.
     simpl.
