@@ -119,7 +119,7 @@ Proof.
     (fold_right _apply_plan_folder (@pair state _ afinal []) (rev a'))
     as (final, items) eqn:Ha'.
   clear - Ha'.
-  specialize (_apply_plan_folder_additive afinal (rev a') aitems) as Hadd.
+  assert (Hadd := _apply_plan_folder_additive afinal (rev a') aitems).
   rewrite Ha' in Hadd.
   by rewrite Hadd, rev_app_distr.
 Qed.
@@ -204,7 +204,7 @@ Lemma finite_valid_plan_from_app_iff
   : finite_valid_plan_from s a /\ finite_valid_plan_from s_a b <-> finite_valid_plan_from s (a ++ b).
 Proof.
   unfold finite_valid_plan_from.
-  specialize (apply_plan_app s a b) as Happ.
+  assert (Happ := apply_plan_app s a b).
   specialize (apply_plan_last s a) as Hlst.
   destruct (apply_plan s a) as (aitems, afinal) eqn:Ha.
   subst s_a.
@@ -337,7 +337,7 @@ Proof.
       by subst a; apply Hvalid.
     + unfold finite_valid_plan_from.
       specialize (Hvalid a [] x).
-      rewrite app_assoc in Hvalid. rewrite app_nil_r in Hvalid.
+      rewrite app_assoc, app_nil_r in Hvalid.
       specialize (Hvalid eq_refl).
       remember (snd (apply_plan s a)) as sa.
       unfold apply_plan, _apply_plan. simpl.
@@ -347,7 +347,7 @@ Proof.
       apply Forall_inv in Hinput_ai. simpl in Hinput_ai.
       unfold finite_valid_plan_from in Ha.
       apply finite_valid_trace_last_pstate in Ha.
-      specialize (apply_plan_last s a) as Hlst.
+      assert (Hlst := apply_plan_last s a).
       simpl in Hlst, Ha.
       setoid_rewrite Hlst in Ha. setoid_rewrite <- Heqsa in Ha.
       repeat constructor; [|done ..].

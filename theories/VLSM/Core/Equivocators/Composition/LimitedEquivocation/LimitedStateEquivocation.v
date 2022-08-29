@@ -93,20 +93,16 @@ Qed.
 Lemma equivocators_limited_equivocations_vlsm_incl_preloaded_free
   : VLSM_incl equivocators_limited_equivocations_vlsm PreFreeE.
 Proof.
-  specialize equivocators_limited_equivocations_vlsm_incl_free as Hincl1.
-  specialize (vlsm_incl_pre_loaded_with_all_messages_vlsm FreeE)
-    as Hincl2.
-  revert Hincl1 Hincl2.
-  apply VLSM_incl_trans.
+  eapply VLSM_incl_trans.
+  - by apply equivocators_limited_equivocations_vlsm_incl_free.
+  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm FreeE).
 Qed.
 
 (** Inclusion of preloaded machine in the preloaded free composition. *)
 Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free
   : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm) PreFreeE.
 Proof.
-  apply basic_VLSM_incl_preloaded; intros ? *.
-  1, 3: itauto.
-  by destruct 1.
+  by apply basic_VLSM_incl_preloaded; intros ? *; [| destruct 1 |].
 Qed.
 
 (**
@@ -136,8 +132,8 @@ Proof.
     replace (Equivocation.equivocating_validators is) with (@nil index).
     + by destruct threshold as [t Ht]; simpl; apply Rge_le.
     + symmetry. apply set_eq_empty_iff.
-      specialize (equivocating_indices_equivocating_validators IM is).
-      by rewrite equivocating_indices_initially_empty.
+      rewrite <- (equivocating_indices_initially_empty IM (enum index) is); [| done].
+      by apply (equivocating_indices_equivocating_validators IM is).
   - replace s with
     (fst (composite_transition equivocator_IM l (s0, oim))); [assumption|].
     by simpl in *; rewrite Ht.
@@ -164,8 +160,7 @@ Proof.
   induction Htr using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
   - apply (finite_valid_trace_from_to_empty (equivocators_fixed_equivocations_vlsm IM equivocating)).
     by apply initial_state_is_valid.
-  - specialize (equivocating_indices_equivocating_validators IM)
-      as Heq.
+  - assert (Heq := equivocating_indices_equivocating_validators IM).
     destruct (Heq sf) as [_ Hsf_incl].
     specialize (IHHtr equivocating).
     spec IHHtr.
@@ -221,9 +216,8 @@ Proof.
   apply equivocators_limited_valid_trace_is_fixed in Hfixed_tr.
   apply valid_trace_last_pstate in Hfixed_tr as Hfixed_last.
   apply valid_trace_forget_last in Hfixed_tr.
-  specialize
-    (fixed_equivocators_valid_trace_project IM (equivocating_validators (finite_trace_last is tr))
-      final_descriptors is tr) as Hpr.
+  assert (Hpr := fixed_equivocators_valid_trace_project IM
+    (equivocating_validators (finite_trace_last is tr)) final_descriptors is tr).
   feed specialize Hpr; [| done |].
   - by eapply not_equivocating_equivocator_descriptors_proper_fixed.
   - destruct Hpr as [trX [initial_descriptors [Hinitial_descriptors [Hpr [Hlst_pr Hpr_fixed]]]]].
@@ -233,8 +227,7 @@ Proof.
     split; [| done].
     apply valid_trace_add_default_last, valid_trace_last_pstate, valid_state_limited_equivocation in Htr.
     transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
-    specialize (equivocating_indices_equivocating_validators IM
-                 (finite_trace_last is tr)) as Heq.
+    assert (Heq := equivocating_indices_equivocating_validators IM (finite_trace_last is tr)).
     apply sum_weights_subseteq.
     + apply NoDup_remove_dups.
     + apply equivocating_validators_nodup.
@@ -318,12 +311,11 @@ Lemma limited_equivocators_valid_trace_project
     equivocators_state_project final_descriptors final_state = final_stateX /\
     finite_valid_trace Limited isX trX.
 Proof.
-  specialize
-    (equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
-      final_descriptors is tr Hproper Htr)
-      as [trX [initial_descriptors [Hinitial_descriptors [Hpr [Hlst_pr Hpr_limited]]]]].
+  destruct (equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
+    final_descriptors is tr Hproper Htr)
+    as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_limited).
   exists trX, initial_descriptors.
-  repeat split. 1-3: done.
+  repeat split; [done | done | done | |].
   - by eapply traces_exhibiting_limited_equivocation_are_valid.
   - by destruct Hpr_limited as [equivs Hpr_limited]; apply Hpr_limited.
 Qed.
@@ -371,10 +363,9 @@ Proof.
     { revert HtrX. apply VLSM_incl_finite_valid_trace.
       apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
     }
-    specialize
-     (VLSM_partial_projection_finite_valid_trace (limited_equivocators_vlsm_partial_projection (zero_descriptor IM))
-       sX trX (equivocators_state_project (zero_descriptor IM) sX) (equivocators_total_trace_project IM trX))
-       as Hsim.
+    assert (Hsim := VLSM_partial_projection_finite_valid_trace
+      (limited_equivocators_vlsm_partial_projection (zero_descriptor IM)) sX trX
+      (equivocators_state_project (zero_descriptor IM) sX) (equivocators_total_trace_project IM trX)).
     spec Hsim.
     { simpl. rewrite decide_True by apply zero_descriptor_not_equivocating.
       by rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).

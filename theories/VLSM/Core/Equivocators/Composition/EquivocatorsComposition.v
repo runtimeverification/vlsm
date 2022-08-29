@@ -58,11 +58,9 @@ Lemma equivocating_indices_initially_empty
   (Hs : composite_initial_state_prop equivocator_IM s)
   : equivocating_indices index_listing s = [].
 Proof.
-  apply Forall_filter_nil.
-  apply Forall_forall.
+  apply Forall_filter_nil, Forall_forall.
   intros i _.
-  spec Hs i.
-  destruct Hs as [Hs _].
+  destruct (Hs i) as [Hs' _].
   congruence.
 Qed.
 
@@ -191,7 +189,7 @@ Lemma equivocators_pre_trace_cannot_decrease_state_size
   : forall eqv, equivocator_state_n (s eqv) <= equivocator_state_n (s' eqv).
 Proof.
   apply trace_to_plan_to_trace_from_to in Htr.
-  specialize (equivocators_plan_cannot_decrease_state_size s (trace_to_plan Pre tr)) as Hmon.
+  assert (Hmon := equivocators_plan_cannot_decrease_state_size s (trace_to_plan Pre tr)).
   by replace (composite_apply_plan _ _ _) with (tr, s') in Hmon.
 Qed.
 
@@ -224,9 +222,9 @@ Lemma equivocators_no_equivocations_vlsm_incl_equivocators_free
   : VLSM_incl equivocators_no_equivocations_vlsm equivocators_free_vlsm.
 Proof.
   apply basic_VLSM_incl.
-  - cbv; intros s Hn n; specialize (Hn n); split_and!; itauto.
+  - by intros s Hn n.
   - by intro; intros; apply initial_message_is_valid.
-  - split; [| done]. apply Hv.
+  - by split; [apply Hv |].
   - by destruct 1.
 Qed.
 
@@ -364,7 +362,7 @@ Lemma lift_initial_to_equivocators_state
 Proof.
   unfold vinitial_state_prop in *. simpl in *.
   unfold composite_initial_state_prop in *.
-  by intro i; spec Hs i.
+  by intro i; split; [| apply Hs].
 Qed.
 
 Definition newmachine_descriptors_list
@@ -486,15 +484,14 @@ Lemma equivocators_initial_state_project
   (Heqv : proper_equivocator_descriptors eqv_descriptors es)
   : vinitial_state_prop Free (equivocators_state_project eqv_descriptors es).
 Proof.
-  intro eqv. specialize (Hes eqv).
-  unfold equivocator_IM in Hes.
-  unfold equivocators_state_project.
+  intro eqv.
+    unfold equivocators_state_project.
   specialize (Heqv eqv).
   destruct (eqv_descriptors eqv) as [sn | i]; [done |].
   destruct Heqv as [es_eqv_i Hes_eqv_i].
-  simpl. rewrite Hes_eqv_i. simpl.
-  revert Hes_eqv_i Hes.
-  apply equivocator_vlsm_initial_state_preservation_rev.
+  cbn; rewrite Hes_eqv_i; cbn.
+  specialize (Hes eqv).
+  by eapply equivocator_vlsm_initial_state_preservation_rev.
 Qed.
 
 Lemma equivocators_initial_message

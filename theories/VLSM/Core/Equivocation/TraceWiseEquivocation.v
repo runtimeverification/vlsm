@@ -79,9 +79,9 @@ Proof.
   apply elem_of_list_fmap in Hitem as [((pre, _item), _suf) [Heq_item Hitem]].
   apply elem_of_list_filter, proj2, elem_of_one_element_decompositions in Hitem.
   subst tr _item.
-  spec Hinput_none item.
-  spec Hinput_none. { apply elem_of_app. right. apply elem_of_app. left. left. }
-  congruence.
+  contradict Hmsg.
+  rewrite Hinput_none; [done |].
+  by cbn; rewrite elem_of_app, elem_of_cons; right; left.
 Qed.
 
 Lemma elem_of_equivocating_senders_in_trace
@@ -172,8 +172,7 @@ Lemma is_equivocating_tracewise_no_has_been_sent_equivocating_senders_in_trace
     (Htr : finite_valid_trace_init_to PreFree is s tr),
     v ∈ equivocating_senders_in_trace tr.
 Proof.
-  by split; intros Heqv is tr Htr; specialize (Heqv _ _ Htr)
-  ; apply elem_of_equivocating_senders_in_trace.
+  by split; intros Heqv is tr Htr; eapply elem_of_equivocating_senders_in_trace, Heqv.
 Qed.
 
 (** If any message can only be emitted by node corresponding to its sender
@@ -221,12 +220,16 @@ Proof.
   destruct (decide (option_bind _ _ sender om = Some v))
   ; [by intro; right |].
   intros Heqv. left. intros is tr [Htr Hinit].
-  specialize (extend_right_finite_trace_from_to _ Htr Ht) as Htr'.
-  specialize (Heqv _ _ (conj Htr' Hinit)).
-  destruct Heqv as [m [Hv [prefix [item [suffix [Heq Heqv]]]]]].
+  assert (Htr' := extend_right_finite_trace_from_to _ Htr Ht).
+  destruct (Heqv _ _ (conj Htr' Hinit)) as (m & Hv & prefix & item & suffix & Heq & Heqv').
   exists m. split; [done |]. exists prefix.
   destruct_list_last suffix suffix' item' Heqsuffix.
-  { exfalso. subst. apply app_inj_tail,proj2 in Heq. subst item. apply proj1 in Heqv. simpl in Heqv. subst om. simpl in n. congruence. }
+  {
+    exfalso. subst.
+    apply app_inj_tail, proj2 in Heq; subst item.
+    apply proj1 in Heqv'; cbn in Heqv'.
+    subst om. cbn in n. congruence.
+  }
   exists item, suffix'. split; [| done].
   replace (prefix ++ item :: suffix' ++ [item']) with ((prefix ++ item :: suffix') ++ [item']) in Heq.
   - apply app_inj_tail in Heq. apply Heq.
@@ -255,8 +258,7 @@ Proof.
   apply finite_valid_trace_from_to_last_pstate in Hlstj.
   apply proper_received in Hbr_m; [| done].
   specialize (Hbr_m _ _ Htrj).
-  apply Exists_exists in Hbr_m.
-  destruct Hbr_m as [itemj [Hitemj Hinput]].
+  apply Exists_exists in Hbr_m as (itemj & Hitemj & Hinput).
   apply (finite_trace_projection_list_in_rev IM) in Hitemj
     as [item [Hitem [_ [Heq_input _]]]].
   simpl in Hinput. rewrite <- Heq_input in Hinput. clear Heq_input.
@@ -286,10 +288,9 @@ Lemma initial_state_not_is_equivocating_tracewise
   : ~ is_equivocating_tracewise_no_has_been_sent s v.
 Proof.
   intros Heqv.
-  specialize (Heqv s []).
-  spec Heqv. { split; [| done]. constructor. by apply initial_state_is_valid. }
-  destruct Heqv as [m [_ [prefix [suf [item [Heq _]]]]]].
-  destruct prefix; inversion Heq.
+  destruct (Heqv s []) as (m & _ & prefix & suf & item & Heq & _).
+  - by split; [| done]; constructor; apply initial_state_is_valid.
+  - by destruct prefix; inversion Heq.
 Qed.
 
 Context
@@ -355,9 +356,8 @@ Lemma composite_transition_no_sender_equivocators_weight
   (Hno_sender : option_bind _ _ sender om = None)
   : (equivocation_fault s' <= equivocation_fault s)%R.
 Proof.
-  specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators _ _ _ _ _ Ht Hno_sender) as Heqv.
-  revert Heqv.
   apply incl_equivocating_validators_equivocation_fault.
+  by eapply input_valid_transition_receiving_no_sender_reflects_equivocating_validators.
 Qed.
 
 End tracewise_equivocation.

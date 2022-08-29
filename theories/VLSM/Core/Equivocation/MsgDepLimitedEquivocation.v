@@ -424,8 +424,8 @@ Proof.
   - apply equivocators_composition_for_directly_observed_index_incl_full_projection
      with (Hincl := set_union_subseteq_right (state_annotation s) (msg_dep_message_equivocators
                       IM full_message_dependencies sender (original_state s) im)).
-  - specialize (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
-            as (j & Heqv_j & Hemitj).
+  - destruct (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
+      as (j & Heqv_j & Hemitj).
     eapply sub_valid_preloaded_lifts_can_be_emitted
     ; [done | | done]; cbn; intros dm H_dm.
     assert (Hdm : msg_dep_happens_before message_dependencies dm im)
@@ -435,9 +435,9 @@ Proof.
       (well_founded_ind (msg_dep_happens_before_wf message_dependencies full_message_dependencies))
     ; intros Hdm.
     apply emitted_messages_are_valid_iff.
-    specialize (equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
+    destruct (equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
                   _ _ HLemit Hnobserved _ Hdm)
-            as [Hobs_dm | (dm_i & Hdm_i & Hemit_dm)]
+      as [Hobs_dm | (dm_i & Hdm_i & Hemit_dm)]
     ; [by left; right | right].
     eapply sub_valid_preloaded_lifts_can_be_emitted
     ; [done | |]; cycle 1.

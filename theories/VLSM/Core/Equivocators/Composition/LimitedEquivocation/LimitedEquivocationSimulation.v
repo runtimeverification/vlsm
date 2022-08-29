@@ -57,12 +57,10 @@ Proof.
   remember (composite_transition _ _ _).1. clear Heqc.
   unfold state_has_fixed_equivocation in Hfixed.
   unfold equivocation_fault.
-  specialize (equivocating_indices_equivocating_validators IM c)
-    as Heq.
   apply sum_weights_subseteq.
   - apply equivocating_validators_nodup.
   - apply NoDup_remove_dups.
-  - by intros i Hi; apply elem_of_remove_dups, Hfixed, Heq.
+  - by intros i Hi; eapply elem_of_remove_dups, Hfixed, equivocating_indices_equivocating_validators.
 Qed.
 
 End fixed_limited_state_equivocation.
@@ -97,9 +95,8 @@ Proof.
   destruct HtrX as (equivocating & Hlimited & HtrX).
   eapply VLSM_incl_finite_valid_trace, valid_trace_add_default_last in HtrX
   ; [|eapply VLSM_eq_proj1,Fixed_eq_StrongFixed].
-  specialize
-    (fixed_equivocators_finite_valid_trace_init_to_rev IM _
-      no_initial_messages_in_IM _ _ _ HtrX)
+  destruct (fixed_equivocators_finite_valid_trace_init_to_rev
+    IM _ no_initial_messages_in_IM _ _ _ HtrX)
     as (is & s & tr & His & Hs & Htr & Hptr & Houtput).
   exists is, s, tr; split_and?; try itauto.
   revert Hptr; apply VLSM_incl_finite_valid_trace_init_to.

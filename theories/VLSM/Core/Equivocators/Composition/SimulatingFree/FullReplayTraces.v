@@ -264,8 +264,8 @@ Proof.
   intro l.
   induction l using rev_ind; simpl; [done |].
   rewrite map_app, (composite_apply_plan_app equivocator_IM).
-  specialize (composite_apply_plan_last equivocator_IM full_replay_state (map (initial_new_machine_transition_item is) l))
-    as Hlst.
+  assert (Hlst := composite_apply_plan_last equivocator_IM full_replay_state
+                    (map (initial_new_machine_transition_item is) l)).
   destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn:Hplanl.
   destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn:Hplana.
   inversion_clear Hplana.
@@ -274,9 +274,9 @@ Proof.
   intros i j Hj.
   destruct (decide (`x = i)); subst; equivocator_state_update_simpl; [| auto].
   specialize (IHl (` x) j Hj).
-  destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [|lia].
   rewrite equivocator_state_extend_project_1; [done |].
-  by apply equivocator_state_project_Some_rev in IHl as Hltj'.
+  destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [|lia].
+  by eapply equivocator_state_project_Some_rev.
 Qed.
 
 Lemma equivocator_state_descriptor_project_replayed_initial_state_from_left full_replay_state is
@@ -392,8 +392,7 @@ Proof.
   destruct (eqv_descriptors _) eqn:Heqv_l; [done |].
   destruct Heqv_descriptors as [s_l_n Hs_l_n].
   apply equivocator_state_project_Some_rev in Hs_l_n as Hltn.
-  specialize (lift_equivocators_sub_state_to_size full_replay_state destination i)
-    as Hltsize.
+  assert (Hltsize := lift_equivocators_sub_state_to_size full_replay_state destination i).
   unfold equivocators_transition_item_project. simpl.
   rewrite Heqv_l.
   simpl.
@@ -423,15 +422,9 @@ Lemma lift_equivocators_sub_valid
   : composite_valid equivocator_IM (lift_equivocators_sub_label_to full_replay_state  l)
       (lift_equivocators_sub_state_to full_replay_state s, om).
 Proof.
-  destruct l as (sub_i, li).
-  destruct_dec_sig sub_i i Hi Heqsub_i. subst sub_i.
-  specialize
-    (equivocator_state_append_valid (IM i) li
-      (s (dexist i Hi)) om
-      (full_replay_state i) Hv
-    ) as Hlift.
-  cbn.
-  by rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
+  destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst; cbn.
+  rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
+  by apply equivocator_state_append_valid.
 Qed.
 
 Lemma lift_equivocators_sub_transition
@@ -445,12 +438,8 @@ Lemma lift_equivocators_sub_transition
 Proof.
   destruct l as (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i. subst sub_i.
-  specialize
-    (equivocator_state_append_transition (IM i) li
-      (s (dexist i Hi)) om
-      (s' (dexist i Hi)) om'
-      (full_replay_state i) Hv
-    ) as Hlift.
+  assert (Hlift := equivocator_state_append_transition (IM i) li
+    (s (dexist i Hi)) om (s' (dexist i Hi)) om' (full_replay_state i) Hv).
   cbn in Ht.
   destruct (equivocator_transition _ _ _) as (_si', _om').
   inversion Ht; subst s' om'; clear Ht.
@@ -500,13 +489,11 @@ Proof.
   cut (forall l, incl l (enum (sub_index equivocating)) ->
     finite_valid_plan_from SeededCE
       full_replay_state (map (initial_new_machine_transition_item is) l)).
-  { intros Hplan. specialize (Hplan _ (incl_refl _)).
-    by unfold finite_valid_plan_from in Hplan.
-  }
+  { by intros Hplan; apply (Hplan _ (incl_refl _)). }
   intro l.
   induction l using rev_ind; intros Hincl.
   - by constructor.
-  - spec IHl.  { intros i Hi. by apply Hincl, in_app_iff; left. }
+  - spec IHl. { intros i Hi. by apply Hincl, in_app_iff; left. }
     rewrite map_app.
     apply finite_valid_plan_from_app_iff.
     split; [done |].
@@ -570,7 +557,7 @@ Lemma SeededXE_PreFreeE_weak_full_projection
 Proof.
   constructor.
   intros sX trX HtrX.
-  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True FreeE) as Heq.
+  assert (Heq := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True FreeE).
   apply (VLSM_eq_finite_valid_trace_from Heq).
   revert sX trX HtrX.
   apply lift_equivocators_sub_weak_projection; [done | | | done].
@@ -589,7 +576,7 @@ Proof.
   - intros.
     rewrite <- replayed_initial_state_from_lift; [| done].
     apply finite_valid_trace_last_pstate.
-    specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True FreeE) as Heq.
+    assert (Heq := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True FreeE).
     apply (VLSM_eq_finite_valid_trace_from Heq).
     apply replayed_initial_state_from_valid; [done | | done].
     by apply (VLSM_eq_valid_state Heq).
@@ -612,18 +599,14 @@ Proof.
   split; [| done].
   destruct om as [m |]; [| done].
   apply (VLSM_incl_valid_state (NoEquivocation.seeded_no_equivocation_incl_preloaded equivocator_IM (free_constraint _) seed)) in Hfull_replay_state.
-  specialize (valid_state_project_preloaded_to_preloaded _ equivocator_IM (free_constraint _) full_replay_state)
-    as Hfull_replay_state_pr.
-  pose (no_equivocations_additional_constraint_with_pre_loaded
-          sub_equivocator_IM (free_constraint sub_equivocator_IM) seed)
-        as constraint.
-  specialize
-    (pre_loaded_vlsm_incl_pre_loaded_with_all_messages
-      (composite_vlsm sub_equivocator_IM constraint)
-      seed) as Hincl.
+  assert (Hfull_replay_state_pr := valid_state_project_preloaded_to_preloaded _ equivocator_IM
+    (free_constraint _) full_replay_state).
+  pose (constraint := no_equivocations_additional_constraint_with_pre_loaded
+          sub_equivocator_IM (free_constraint sub_equivocator_IM) seed).
+  assert (Hincl := pre_loaded_vlsm_incl_pre_loaded_with_all_messages
+    (composite_vlsm sub_equivocator_IM constraint) seed).
   apply (VLSM_incl_valid_state Hincl) in Hs.
-  specialize (valid_state_project_preloaded_to_preloaded _ sub_equivocator_IM constraint s)
-    as Hs_pr.
+  assert (Hs_pr := valid_state_project_preloaded_to_preloaded _ sub_equivocator_IM constraint s).
   simpl in Hc1.
   destruct Hc1 as [Hsub_sent | Hseeded].
   - destruct Hsub_sent as [sub_i Hsent].
@@ -663,16 +646,11 @@ Lemma sub_replayed_trace_from_valid_equivocating
       full_replay_state (replayed_trace_from full_replay_state is tr).
 Proof.
   unfold composite_no_equivocation_vlsm_with_pre_loaded in SeededAllXE.
-  specialize
-    (sub_preloaded_replayed_trace_from_valid_equivocating
-      (no_equivocations_additional_constraint_with_pre_loaded equivocator_IM (free_constraint _) seed)
-      seed)
-      as Hvalid.
-  spec Hvalid; [done |].
-  spec Hvalid; [apply sent_are_valid|].
-  specialize (Hvalid _ Hfull_replay_state).
-  apply Hvalid; [| done].
-  by intros; apply SeededNoEquiv_subsumption.
+  apply (sub_preloaded_replayed_trace_from_valid_equivocating
+    (no_equivocations_additional_constraint_with_pre_loaded equivocator_IM (free_constraint _) seed))
+  ; [done | | done | | done].
+  - apply sent_are_valid.
+  - by intros; apply SeededNoEquiv_subsumption.
 Qed.
 
 End seeded_no_equiv.

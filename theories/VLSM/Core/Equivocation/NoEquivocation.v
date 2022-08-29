@@ -83,7 +83,6 @@ Lemma directly_observed_were_sent_preserved l s im s' om:
   directly_observed_were_sent s'.
 Proof.
   intros Hptrans Hprev msg Hobs.
-  specialize (Hprev msg).
   apply preloaded_weaken_input_valid_transition in Hptrans.
   eapply (oracle_step_update (has_been_directly_observed_stepwise_props X) _ _ _ _ _ Hptrans) in Hobs.
   simpl in Hobs.
@@ -261,9 +260,9 @@ Proof.
   unfold composite_no_equivocation_vlsm_with_pre_loaded.
   match goal with
   |- VLSM_incl (pre_loaded_vlsm ?v _) _ =>
-    specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True v) as Hprev
+    assert (Hprev := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True v)
   end.
-  apply VLSM_eq_incl_iff in Hprev. apply proj2 in Hprev.
+  apply VLSM_eq_incl_iff, proj2 in Hprev.
   match type of Hprev with
   | VLSM_incl (mk_vlsm ?m) _ => apply VLSM_incl_trans with m
   end
@@ -299,7 +298,7 @@ Proof.
   unfold SeededNoeqvFalse.
   unfold composite_no_equivocation_vlsm_with_pre_loaded.
   match goal with
-  |- VLSM_eq (pre_loaded_vlsm ?m _) _ => specialize (vlsm_is_pre_loaded_with_False m) as Heq
+  |- VLSM_eq (pre_loaded_vlsm ?m _) _ => assert (Heq := vlsm_is_pre_loaded_with_False m)
   end.
   apply VLSM_eq_sym in Heq.
   match type of Heq with
@@ -307,9 +306,9 @@ Proof.
   end
   ; [done |].
   apply VLSM_eq_incl_iff.
-  specialize (constraint_subsumption_incl IM) as Hincl.
+  assert (Hincl := constraint_subsumption_incl IM).
   unfold no_equivocations_additional_constraint_with_pre_loaded.
-  split;apply Hincl;intros l [s [m|]] Hpv; apply Hpv.
+  split; apply Hincl; intros l [s [m |]] Hpv; apply Hpv.
 Qed.
 
 End seeded_composite_vlsm_no_equivocation.

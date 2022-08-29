@@ -234,12 +234,9 @@ Lemma fixed_equivocation_index_incl_subsumption
     fixed_equivocation IM indices1 s m ->
     fixed_equivocation IM indices2 s m.
 Proof.
-  intros s m [Hobs | Hemit]; [by left |].
-  right.
-  specialize
-    (equivocators_composition_for_directly_observed_index_incl_full_projection s)
-    as Hproj.
-  by apply (VLSM_full_projection_can_emit Hproj) in Hemit.
+  intros s m [Hobs | Hemit]; [by left | right].
+  eapply VLSM_full_projection_can_emit; [| done].
+  by apply equivocators_composition_for_directly_observed_index_incl_full_projection.
 Qed.
 
 Lemma fixed_equivocation_constraint_index_incl_subsumption
@@ -454,16 +451,13 @@ Proof.
     apply in_futures_preserving_oracle_from_stepwise with (field_selector output) (sf (projT1 l))
     ; [apply has_been_sent_stepwise_from_trace | done |].
     apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht.
-    specialize (VLSM_projection_input_valid_transition
-      (preloaded_component_projection IM (projT1 l)) l (projT2 l)) as Hproject.
-    spec Hproject.
-    { unfold composite_project_label.
-      destruct (decide _); [| by elim n0].
-      replace e with (eq_refl (A := index) (x := projT1 l)); [done |].
-      by apply Eqdep_dec.UIP_dec.
-    }
-    specialize (Hproject _ _ _ _ Ht).
-    by apply (has_been_sent_step_update Hproject); left.
+    eapply (has_been_sent_step_update); [| by left].
+    apply (VLSM_projection_input_valid_transition
+      (preloaded_component_projection IM (projT1 l)) l (projT2 l)); [| done].
+    unfold composite_project_label.
+    destruct (decide _); [| done].
+    replace e with (eq_refl (A := index) (x := projT1 l)); [done |].
+    by apply Eqdep_dec.UIP_dec.
 Qed.
 
 End fixed_finite_valid_trace_sub_projection_helper_lemmas.
@@ -497,10 +491,10 @@ Proof.
     assert (Hfuture_s : in_futures PreFree s base_s).
     {
       destruct Hfuture as [tr' Htr'].
-      specialize (finite_valid_trace_from_to_extend _ _ _ _ Htr' _ _ _ _ Hpre_t) as Htr''.
-      by eexists.
+      eexists.
+      by apply (finite_valid_trace_from_to_extend _ _ _ _ Htr' _ _ _ _ Hpre_t).
     }
-    specialize (IHHtr Hfuture_s) as [Htr_pr Htr_obs].
+    destruct (IHHtr Hfuture_s) as [Htr_pr Htr_obs].
     split; cycle 1.
     + intros m Hobs.
       eapply @has_been_directly_observed_step_update with (msg := m) (vlsm := Free) in Hpre_t.
@@ -552,7 +546,7 @@ Proof.
   apply fixed_finite_valid_trace_sub_projection_helper with (base_s := f) in Htr as Htr_pr.
   - split; [apply Htr_pr|].
     apply proj2 in Htr.
-    by specialize (composite_initial_state_sub_projection IM equivocators is Htr).
+    by rapply (composite_initial_state_sub_projection IM equivocators is Htr).
   - apply in_futures_refl. apply valid_trace_last_pstate in Htr.
     by apply (VLSM_incl_valid_state Fixed_incl_Preloaded).
 Qed.
@@ -978,10 +972,8 @@ Lemma strong_fixed_equivocation_constraint_no_equivocators
 Proof.
   intros.
   destruct som as (s, [m |]); [| done].
-  simpl.
-  specialize (strong_fixed_equivocation_no_equivocators s m).
-  unfold composite_no_equivocations, composite_no_equivocations_except_from, sent_except_from. simpl.
-  itauto.
+  unfold composite_no_equivocations, composite_no_equivocations_except_from, sent_except_from; cbn.
+  rewrite (strong_fixed_equivocation_no_equivocators s m); itauto.
 Qed.
 
 Lemma strong_fixed_equivocation_vlsm_composition_no_equivocators

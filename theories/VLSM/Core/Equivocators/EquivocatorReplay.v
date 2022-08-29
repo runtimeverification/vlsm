@@ -111,13 +111,12 @@ Lemma equivocator_state_append_preloaded_weak_projection
   : VLSM_weak_full_projection (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
         (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
-  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (equivocator_vlsm X)) as Heq.
+  assert (Heq := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (equivocator_vlsm X)).
   constructor.
   intros sX trX HtrX.
   apply (VLSM_eq_finite_valid_trace_from Heq) in HtrX.
   apply (VLSM_eq_finite_valid_trace_from Heq).
-  revert sX trX HtrX.
-  apply equivocator_state_append_preloaded_with_weak_projection.
+  apply equivocator_state_append_preloaded_with_weak_projection; [| done].
   by apply (VLSM_eq_valid_state Heq).
 Qed.
 
@@ -127,13 +126,12 @@ Lemma equivocator_state_append_weak_projection
   : VLSM_weak_full_projection (equivocator_vlsm X) (equivocator_vlsm X)
         (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
-  specialize (vlsm_is_pre_loaded_with_False (equivocator_vlsm X)) as Heq.
+  assert (Heq := vlsm_is_pre_loaded_with_False (equivocator_vlsm X)).
   constructor.
   intros sX trX HtrX.
   apply (VLSM_eq_finite_valid_trace_from Heq) in HtrX.
   apply (VLSM_eq_finite_valid_trace_from Heq).
-  revert sX trX HtrX.
-  apply equivocator_state_append_preloaded_with_weak_projection.
+  apply equivocator_state_append_preloaded_with_weak_projection; [| done].
   by apply (VLSM_eq_valid_state Heq).
 Qed.
 
@@ -144,7 +142,7 @@ Lemma equivocator_state_append_in_futures
   : in_futures (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s (equivocator_state_append base_s s).
 Proof.
   apply valid_state_has_trace in Hs as [is [tr [Htr His]]].
-  specialize (equivocator_state_append_preloaded_with_weak_projection seed _ Hbase_s) as Hproj.
+  assert (Hproj := equivocator_state_append_preloaded_with_weak_projection seed _ Hbase_s).
   apply (VLSM_weak_full_projection_finite_valid_trace_from_to Hproj) in Htr.
   apply in_futures_trans with (equivocator_state_append base_s is).
   - by apply equivocator_state_append_initial_state_in_futures.
@@ -158,11 +156,10 @@ Lemma equivocator_state_append_sent_left
   : forall m, equivocator_has_been_sent X base_s m ->
     equivocator_has_been_sent X (equivocator_state_append base_s s) m.
 Proof.
-  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (equivocator_vlsm X)) as Heq.
+  assert (Heq := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (equivocator_vlsm X)).
   apply (VLSM_eq_valid_state Heq) in Hbase_s.
-  apply (VLSM_eq_valid_state Heq) in Hs.
-  apply (equivocator_state_append_in_futures _ _ Hbase_s) in Hs.
-  apply (VLSM_eq_in_futures Heq) in Hs.
+  apply (VLSM_eq_valid_state Heq), (equivocator_state_append_in_futures _ _ Hbase_s),
+    (VLSM_eq_in_futures Heq) in Hs.
   apply (in_futures_preserving_oracle_from_stepwise _ (equivocator_vlsm X) (field_selector output) (equivocator_has_been_sent X))
   ; [| done].
   apply equivocator_has_been_sent_stepwise_props.
@@ -175,7 +172,7 @@ Lemma equivocator_state_append_sent_right
   : forall m, equivocator_has_been_sent X s m ->
     equivocator_has_been_sent X (equivocator_state_append base_s s) m.
 Proof.
-  specialize (equivocator_state_append_preloaded_weak_projection _ Hbase_s) as Hproj.
+  assert (Hproj := equivocator_state_append_preloaded_weak_projection _ Hbase_s).
   intros m Hm.
   by specialize (VLSM_weak_full_projection_has_been_sent Hproj _ Hs _ Hm) as HmY.
 Qed.

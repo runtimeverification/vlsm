@@ -192,10 +192,9 @@ Lemma no_equivocating_equivocator_transition_item_project
 Proof.
   destruct item.
   unfold VLSM.l, VLSM.input, VLSM.output, VLSM.destination in *.
-  specialize
-    (equivocator_transition_no_equivocation_zero_descriptor X _ _ _ _ _ Hv Ht Hno_equiv_item)
+  destruct (equivocator_transition_no_equivocation_zero_descriptor X _ _ _ _ _ Hv Ht Hno_equiv_item)
     as [li Heq_eqvi].
-  subst. simpl. repeat split.
+  by subst; cbn.
 Qed.
 
 (** For every valid transition there exists a (non-equivocating)
@@ -308,17 +307,16 @@ Proof.
     + split; [done |].
       intros.
       split; [apply Hv|].
-      specialize (new_machine_label_equivocator_transition_size X Ht) as Ht_size.
-      specialize (equivocator_state_last_n X destination) as Hlst_size.
-      split; [lia|].
-      rewrite <-
-        (new_machine_label_equivocator_state_project_last X Ht).
+      assert (Ht_size := new_machine_label_equivocator_transition_size X Ht).
+      assert (Hlst_size := equivocator_state_last_n X destination).
+      split; [lia |].
+      rewrite <- (new_machine_label_equivocator_state_project_last X Ht).
       simpl.
       replace (equivocator_state_n s) with (equivocator_state_last destination) by lia.
       by rewrite Hpr.
     + split; [done |].
       intros.
-      specialize (new_machine_label_equivocator_transition_size X Ht) as Ht_size.
+      assert (Ht_size := new_machine_label_equivocator_transition_size X Ht).
       cut (proper_descriptor X (Existing n) s).
       { intros [_sn Hpr']. split_and!; [by eexists _sn | lia |].
         apply equivocator_state_project_Some_rev in Hpr'.
@@ -328,7 +326,7 @@ Proof.
       }
       simpl.
       apply equivocator_state_project_Some_rev in Hpr as Hn.
-      specialize (equivocator_state_last_n X destination) as Hlst_size.
+      assert (Hlst_size := equivocator_state_last_n X destination).
       by destruct_equivocator_state_project s n _sn Hn'; [eexists | lia].
     + simpl.
       split; [repeat split|].
@@ -358,8 +356,8 @@ Proof.
         by simpl; rewrite Hpr.
       }
       simpl.
-      specialize (existing_false_label_equivocator_transition_size X Ht _ Hpri) as Ht_size.
-      specialize (equivocator_state_last_n X destination) as Hlst_size.
+      assert (Ht_size := existing_false_label_equivocator_transition_size X Ht _ Hpri).
+      assert (Hlst_size := equivocator_state_last_n X destination).
       destruct_equivocator_state_project s n _sn Hn; [by eexists |].
       apply equivocator_state_project_Some_rev in Hpr.
       lia.
@@ -370,9 +368,9 @@ Proof.
       destruct (equivocator_state_project s ieqvi) as [sieqvi|] eqn:Hpri
       ; [| done].
       split; [by eexists |].
-      specialize (existing_true_label_equivocator_transition_size X Ht _ Hpri) as Ht_size.
-      specialize (equivocator_state_last_n X destination) as Hlst_size.
-      specialize (existing_true_label_equivocator_state_project_last X Ht _ Hpri) as Ht_pr.
+      assert (Ht_size := existing_true_label_equivocator_transition_size X Ht _ Hpri).
+      assert (Hlst_size := equivocator_state_last_n X destination).
+      assert (Ht_pr := existing_true_label_equivocator_state_project_last X Ht _ Hpri).
       apply equivocator_state_project_Some_rev in Hpri as Hlt.
       split; [lia|].
       simpl in *.
@@ -380,7 +378,7 @@ Proof.
       rewrite Hpri in *.
       split; [done |].
       destruct (vtransition _ _ _).
-      specialize (Ht_pr _ _ eq_refl) as [Heqo Heqs0].
+      destruct (Ht_pr _ _ eq_refl) as [Heqo Heqs0].
       subst.
       replace (equivocator_state_n s) with (equivocator_state_last destination) by lia.
       by rewrite Hpr.
@@ -398,8 +396,8 @@ Proof.
         by cbn; rewrite Hpr.
       }
       simpl.
-      specialize (existing_true_label_equivocator_transition_size X Ht _ Hpri) as Ht_size.
-      specialize (equivocator_state_last_n X destination) as Hlst_size.
+      assert (Ht_size := existing_true_label_equivocator_transition_size X Ht _ Hpri).
+      assert (Hlst_size := equivocator_state_last_n X destination).
       destruct_equivocator_state_project s n _sn Hn; [by eexists |].
       apply equivocator_state_project_Some_rev in Hpr.
       lia.
@@ -417,14 +415,11 @@ Lemma equivocator_transition_item_project_preserves_equivocating_indices
   : is_equivocating_state X s \/ is_newmachine_descriptor X idescriptor ->
     is_equivocating_state X (destination item) \/ is_newmachine_descriptor X descriptor.
 Proof.
-  specialize
-    (equivocator_transition_item_project_proper_characterization item _ Hproper)
-    as Hchar.
+  assert (Hchar := equivocator_transition_item_project_proper_characterization item _ Hproper).
   destruct item. simpl in *.
   destruct Hchar as [_oitemx [_deqv' [_Hpr [Hchar1 Hchar2]]] ].
   rewrite Hproject in _Hpr. inversion _Hpr. subst _oitemx _deqv'. clear _Hpr.
-  specialize (Hchar2 _ Hv Ht).
-  destruct Hchar2 as [Hdeqv' Hchar2].
+  destruct (Hchar2 _ Hv Ht) as [Hdeqv' Hchar2'].
   destruct l as [sn| j l| j l]; simpl in *
   ; [left; inversion_clear Ht;  cbv; lia| ..]
   ; (destruct oitem as [itemx |]
@@ -434,7 +429,7 @@ Proof.
       |])
   ; cbn in Hv
   ; (destruct (equivocator_state_project s j) as [sj|] eqn:Hsj; [| done]).
-  - specialize (existing_false_label_equivocator_transition_size X Ht _ Hsj) as Ht_size.
+  - assert (Ht_size := existing_false_label_equivocator_transition_size X Ht _ Hsj).
     intros [Heqv | Heqv]; [clear -Ht_size Heqv; cbv in *; lia|].
     right.
     unfold equivocator_vlsm_transition_item_project in Hproject.
@@ -442,7 +437,7 @@ Proof.
     destruct (equivocator_state_project destination deqvi); [| done].
     case_decide; [congruence|].
     inversion Hproject. subst. inversion Heqv.
-  - specialize (existing_true_label_equivocator_transition_size X Ht _ Hsj) as Ht_size.
+  - assert (Ht_size := existing_true_label_equivocator_transition_size X Ht _ Hsj).
     left. unfold is_equivocating_state, is_singleton_state. rewrite Ht_size.
     cbv; lia.
 Qed.
@@ -551,18 +546,14 @@ Proof.
   - by exists dstart, [], tr, eq_refl, Hproject.
   - rewrite <- app_comm_cons in Hproject.
     apply equivocator_vlsm_trace_project_cons in Hproject.
-    destruct Hproject as [da [prefixa [tr' [Ha [Hproject Heq]]]]].
-    spec IHbprefix tr' da Hproject.
-    destruct IHbprefix as [dmiddle [prefix' [suffix [Hprefix [Hsuffix Htr']]]]].
-    exists dmiddle.
-    exists (prefixa ++ prefix'). exists suffix.
+    destruct Hproject as (da & prefixa & tr' & Ha & Hproject & Heq).
+    destruct (IHbprefix tr' da Hproject) as (dmiddle & prefix' & suffix & Hprefix & Hsuffix & Htr').
+    exists dmiddle, (prefixa ++ prefix'), suffix.
     repeat split; [| done |].
     + simpl. rewrite Hprefix.
       simpl in Ha.
-      destruct (equivocator_vlsm_transition_item_project a da)
-        as [(oitem', i)|]
-      ; [|congruence].
-      by destruct oitem' as [item'|]; inversion Ha; subst.
+      destruct (equivocator_vlsm_transition_item_project a da) as [[oitem' i] |]; [| done].
+      by destruct oitem' as [item' |]; inversion Ha; subst.
     + by subst; rewrite app_assoc.
 Qed.
 
@@ -584,8 +575,7 @@ Proof.
     destruct (equivocator_vlsm_trace_project bprefix dmiddle) as [(prefix', dstart')|]
       eqn:Hprefix'
     ; [|congruence].
-    specialize (IHbprefix prefix' dstart' eq_refl).
-    simpl. rewrite IHbprefix.
+    simpl. rewrite (IHbprefix prefix' dstart' eq_refl).
     by destruct (equivocator_vlsm_transition_item_project a dstart') as [[[item' |] i] |]
     ; inversion Hprefix; subst.
 Qed.
@@ -623,16 +613,16 @@ Proof.
   ; inversion Hitem; subst; simpl; repeat split; eexists _; repeat split; exists s'j
   ; (repeat split; [done..|])
   ; destruct (vtransition X _ _) as (s'j', _oom) eqn:Hti.
-  - specialize (existing_false_label_equivocator_state_project_same X Ht _ Heqs'j _ _ Hti)
+  - destruct (existing_false_label_equivocator_state_project_same X Ht _ Heqs'j _ _ Hti)
       as [Heq_oom Heqs'j'].
     by subst; simpl; rewrite Heqsi.
-  - specialize (existing_true_label_equivocator_state_project_last X Ht _ Heqs'j _ _ Hti)
+  - destruct (existing_true_label_equivocator_state_project_last X Ht _ Heqs'j _ _ Hti)
       as [Heq_oom Heqs'j'].
     subst. simpl.
     replace (equivocator_state_n s') with  (equivocator_state_last s)
     ; [by rewrite Heqsi |].
-    specialize (existing_true_label_equivocator_transition_size X Ht _ Heqs'j) as Ht_size.
-    specialize (equivocator_state_last_n X s) as Hs_lst.
+    assert (Ht_size := existing_true_label_equivocator_transition_size X Ht _ Heqs'j).
+    assert (Hs_lst := equivocator_state_last_n X s).
     lia.
 Qed.
 
@@ -668,34 +658,34 @@ Proof.
     by rewrite equivocator_state_extend_lst,
                equivocator_state_extend_project_2 in Heqsi.
   - eexists; split; [done |].
-    specialize (new_machine_label_equivocator_state_project_not_last X Ht i) as Hn.
+    assert (Hn := new_machine_label_equivocator_state_project_not_last X Ht i).
     simpl in Hn. rewrite Heqsi in Hn.
-    specialize (new_machine_label_equivocator_transition_size X Ht) as Ht_size.
-    specialize (equivocator_state_last_n X s) as Hs_lst.
+    assert (Ht_size := new_machine_label_equivocator_transition_size X Ht).
+    assert (Hs_lst := equivocator_state_last_n X s).
     apply equivocator_state_project_Some_rev in Heqsi.
-    spec Hn; [lia|].
+    spec Hn; [lia |].
     simpl in Hn.
     destruct_equivocator_state_project s' i s'i Hi; [|lia].
     by subst.
   - eexists; split; [done |].
     cbn in Hv.
     destruct (equivocator_state_project s' id) as [s'id|] eqn:Hpr; [| done].
-    specialize (existing_false_label_equivocator_state_project_not_same X Ht _ Hpr i) as Hn.
+    assert (Hn := existing_false_label_equivocator_state_project_not_same X Ht _ Hpr i).
     simpl in Hn. rewrite Heqsi in Hn.
-    specialize (existing_false_label_equivocator_transition_size X Ht _ Hpr) as Ht_size.
-    specialize (equivocator_state_last_n X s) as Hs_lst.
+    assert (Ht_size := existing_false_label_equivocator_transition_size X Ht _ Hpr).
+    assert (Hs_lst := equivocator_state_last_n X s).
     apply equivocator_state_project_Some_rev in Heqsi.
-    spec Hn; [lia|].
+    spec Hn; [lia |].
     spec Hn n.
-    destruct_equivocator_state_project s' i s'i Hi; [|lia].
+    destruct_equivocator_state_project s' i s'i Hi; [| lia].
     by simpl in Hn; subst.
   - eexists; split; [done |].
     cbn in Hv.
     destruct (equivocator_state_project s' id) as [s'id|] eqn:Hpr; [| done].
-    specialize (existing_true_label_equivocator_state_project_not_last X Ht _ Hpr i) as Hn.
+    assert (Hn := existing_true_label_equivocator_state_project_not_last X Ht _ Hpr i).
     simpl in Hn. rewrite Heqsi in Hn.
-    specialize (existing_true_label_equivocator_transition_size X Ht _ Hpr) as Ht_size.
-    specialize (equivocator_state_last_n X s) as Hs_lst.
+    assert (Ht_size := existing_true_label_equivocator_transition_size X Ht _ Hpr).
+    assert (Hs_lst := equivocator_state_last_n X s).
     apply equivocator_state_project_Some_rev in Heqsi.
     spec Hn; [lia|].
     destruct_equivocator_state_project s' i s'i Hi; [|lia].
@@ -730,14 +720,14 @@ Proof.
     lia.
   - cbn in Hv. destruct (equivocator_state_project s' j) as [s'j|] eqn:Heqs'j
     ; [| done].
-    specialize (existing_false_label_equivocator_transition_size X Ht _ Heqs'j) as Ht_size.
+    assert (Ht_size := existing_false_label_equivocator_transition_size X Ht _ Heqs'j).
     apply equivocator_state_project_Some_rev in Hi' as Hlti'.
     destruct_equivocator_state_project s i' si Hlti; [|lia].
     eexists; split; [done |].
     by destruct (decide _); subst; eexists _.
   - cbn in Hv. destruct (equivocator_state_project s' j) as [s'j|] eqn:Heqs'j
     ; [| done].
-    specialize (existing_true_label_equivocator_transition_size X Ht _ Heqs'j) as Ht_size.
+    assert (Ht_size := existing_true_label_equivocator_transition_size X Ht _ Heqs'j).
     apply equivocator_state_project_Some_rev in Hi' as Hlti'.
     destruct_equivocator_state_project s i' si Hlti; [|lia].
     eexists; split; [done |].
@@ -781,28 +771,28 @@ Proof.
   destruct l as [sn| _i' lx| _i' lx]; simpl in Hsndl; inversion Hsndl; subst
   ; cbn in Hv
   ; (destruct (equivocator_state_project s' _i) as [s'i|] eqn:Heqs'i; [| done]).
-  - specialize (existing_false_label_equivocator_transition_size X Ht _ Heqs'i) as Ht_size.
-    specialize (existing_false_label_equivocator_state_project_same X Ht _ Heqs'i) as Ht_pr.
+  - assert (Ht_size := existing_false_label_equivocator_transition_size X Ht _ Heqs'i).
+    assert (Ht_pr := existing_false_label_equivocator_state_project_same X Ht _ Heqs'i).
     simpl in Ht_pr.
     destruct (vtransition X _ _) as (si', _oom) eqn:Hti.
-    specialize (Ht_pr _ _ eq_refl) as [Heq_oom Heqsi'].
+    destruct (Ht_pr _ _ eq_refl) as [Heq_oom Heqsi'].
     exists _i.
     simpl.
     apply equivocator_state_project_Some_rev in Heqs'i as Hlti.
     destruct_equivocator_state_project s _i si Hi; [|lia].
     simpl in Heqsi'. subst si.
     rewrite decide_True; eauto.
-  - specialize (existing_true_label_equivocator_transition_size X Ht _ Heqs'i) as Ht_size.
-    specialize (existing_true_label_equivocator_state_project_last X Ht _ Heqs'i) as Ht_pr.
+  - assert (Ht_size := existing_true_label_equivocator_transition_size X Ht _ Heqs'i).
+    assert (Ht_pr := existing_true_label_equivocator_state_project_last X Ht _ Heqs'i).
     cbn in Ht. rewrite Heqs'i in Ht.
     simpl in Ht_pr.
     destruct (vtransition X _ _) as (si', _oom) eqn:Hti.
-    specialize (Ht_pr _ _ eq_refl) as [Heq_oom Heqsi'].
+    destruct (Ht_pr _ _ eq_refl) as [Heq_oom Heqsi'].
     exists (equivocator_state_n s').
     simpl.
     destruct_equivocator_state_project s (equivocator_state_n s') s_lst Hlst; [|lia].
     simpl in Heqsi'. subst s_lst. eexists; split; [done |].
-    specialize (equivocator_state_last_n X s) as Hs_lst.
+    assert (Hs_lst := equivocator_state_last_n X s).
     rewrite decide_True by lia.
     by eexists.
 Qed.
@@ -837,33 +827,31 @@ Proof.
     constructor. revert Hj. by apply preloaded_with_equivocator_state_project_valid_state.
   - remember {| l := l; input := iom; |} as item.
     destruct Ht as [[Hs' [Hiom Hv]] Ht].
-    specialize (IHHbtr Hj) as [tlX [di' [Htl_pr Hdi]]].
+    destruct (IHHbtr Hj) as (tlX & di' & Htl_pr & Hdi).
     change (item :: tl) with ([item] ++ tl).
     unfold equivocator_vlsm_trace_project.
     rewrite foldr_app. replace (foldr _ _ tl) with (Some (tlX, di')).
     simpl.
     destruct di' as [sn| i]; [by eexists _, _ |].
     destruct Hdi as [si [Heqsi HltX]].
-    specialize (equivocator_transition_item_project_proper_characterization item (Existing i))
-      as Hchar.
-    spec Hchar.
-    {  subst item.  simpl. rewrite Heqsi. by eexists. }
-    destruct Hchar as [oitem [descriptor' [Hitem_pr [Hchar1 Hchar2]]]].
+    assert (Hchar := equivocator_transition_item_project_proper_characterization item (Existing i)).
+    spec Hchar. { by subst; cbn; rewrite Heqsi; eexists. }
+    destruct Hchar as (oitem & descriptor' & Hitem_pr & Hchar1 & Hchar2).
     rewrite Hitem_pr.
     subst item.
-    specialize (Hchar2 _ Hv Ht) as [Hproper' [Hprevious Hchar2]].
+    destruct (Hchar2 _ Hv Ht) as (Hproper' & Hprevious & Hchar2').
     destruct oitem as [itemX|]; eexists _,_; split; [done | | done |].
-    2: { simpl in *. rewrite Heqsi in Hchar2.
-         destruct descriptor' as [sn | i']; simpl in Hchar2.
+    2: { simpl in *. rewrite Heqsi in Hchar2'.
+         destruct descriptor' as [sn | i']; simpl in Hchar2'.
          - by subst si.
          - destruct Hproper' as [s'i' Hproper'].
-            rewrite Hproper' in Hchar2.
-            simpl in Hchar2. subst s'i'. by exists si.
+            rewrite Hproper' in Hchar2'.
+            simpl in Hchar2'. subst s'i'. by exists si.
     }
-    simpl in Hchar1. rewrite Heqsi in Hchar1.
-    destruct Hchar1 as [[Hex Hl] [Heqiom [Hoom [Hsi Hdl]]]]. subst.
-    destruct (equivocator_label_descriptor l) as [sn | i'] eqn:Hd; simpl in Hchar2.
-    + specialize (Hchar2 _ eq_refl) as [HvX HtX].
+    simpl in Hchar1; rewrite Heqsi in Hchar1.
+    destruct Hchar1 as [[Hex Hl] [Heqiom [Hoom [Hsi Hdl]]]]; subst.
+    destruct (equivocator_label_descriptor l) as [sn | i'] eqn:Hd; simpl in Hchar2'.
+    + destruct (Hchar2' _ eq_refl) as [HvX HtX].
       split; [apply Hproper'|].
       destruct itemX. simpl in *.
       rewrite Heqsi in Hitem_pr. subst.
@@ -872,8 +860,8 @@ Proof.
       * by apply initial_state_is_valid.
       * by apply preloaded_with_equivocator_state_project_valid_message.
     + destruct Hproper' as [s'i' Heqs'i']; rewrite Heqs'i' in *.
-      simpl in Hchar2.
-      specialize (Hchar2 _ eq_refl) as [HvX HtX].
+      simpl in Hchar2'.
+      destruct (Hchar2' _ eq_refl) as [HvX HtX].
       eexists _; split; [done |].
       destruct itemX. simpl in *.
       subst.
@@ -904,8 +892,8 @@ Lemma equivocator_vlsm_trace_project_valid
     end.
 Proof.
   apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hbtr.
-  specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
-    as [tr [di [Hbtr_pr Hdi]]].
+  destruct (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
+    as (tr & di & Hbtr_pr & Hdi).
   eexists _,_; split; [done |].
   destruct di as [sn|i].
   - destruct Hdi as [Hsn Htr].
@@ -944,8 +932,8 @@ Lemma preloaded_equivocator_vlsm_trace_project_valid
     end.
 Proof.
   apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj1 (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm))) in Hbtr.
-  specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
-    as [tr [di [Hbtr_pr Hdi]]].
+  destruct (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
+    as (tr & di & Hbtr_pr & Hdi).
   eexists _,_; split; [done |].
   destruct di as [sn|i].
   - destruct Hdi as [Hsn Htr].
@@ -1014,18 +1002,12 @@ Proof.
   - remember {| l := l; input := iom; destination := s; output := oom |} as item.
     simpl.
     destruct Ht as [[_ [_ Hv]] Ht].
-    specialize
-      (equivocator_valid_transition_project_inv4 l s s' iom oom Hv Ht i)
-      as Hitem.
-    replace
-      {| input := iom |}
-      with item in Hitem.
-    specialize (Hitem _ Hi) as [si' [Hsi' Hitem]].
-    specialize (IHHbtr i si' Hsi') as [tr Htr].
+    assert (Hitem := equivocator_valid_transition_project_inv4 l s s' iom oom Hv Ht i).
+    replace {| input := iom |} with item in Hitem.
+    destruct (Hitem _ Hi) as (si' & Hsi' & Hitem').
+    destruct (IHHbtr i si' Hsi') as [tr Htr].
     rewrite Htr.
-    destruct Hitem as [oitem Hoitem].
-    rewrite Hoitem.
-    destruct oitem as [itemx|].
+    destruct Hitem' as [[itemx |] ->].
     + by exists (itemx :: tr).
     + by exists tr.
 Qed.
@@ -1053,17 +1035,15 @@ Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
       (vinitial_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is -> vinitial_state_prop (pre_loaded_with_all_messages_vlsm X) isi)
     end.
 Proof.
-  specialize (equivocator_vlsm_trace_project_inv _ Hntr j) as Hj.
+  assert (Hj := equivocator_vlsm_trace_project_inv _ Hntr j).
   spec Hj; [done |].
-  specialize (Hj is) as [fsj Hfsj].
-  replace (finite_trace_last _ _) with fs in Hfsj
-    by (symmetry;apply (valid_trace_get_last Htr)).
+  destruct (Hj is) as [fsj Hfsj].
+  replace (finite_trace_last _ _) with fs in Hfsj by (symmetry;apply (valid_trace_get_last Htr)).
   exists fsj. split; [done |].
-  specialize
-    (preloaded_equivocator_vlsm_trace_project_valid _ _ _ Htr _ _ Hfsj)
-    as [trX' [di' [HtrX' Hdi]]].
+  destruct (preloaded_equivocator_vlsm_trace_project_valid _ _ _ Htr _ _ Hfsj)
+    as (trX' & di' & HtrX' & Hdi).
   rewrite HtrX in HtrX'.
-  inversion HtrX'. subst di' trX'.  clear HtrX'.
+  inversion HtrX'; subst di' trX'; clear HtrX'.
   destruct di as [sn|n]; repeat split; [apply Hdi..|].
   destruct Hdi as [isi [Hisi HtrX']].
   exists isi. repeat split; [done.. |].

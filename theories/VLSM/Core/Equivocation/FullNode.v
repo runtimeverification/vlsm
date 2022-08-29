@@ -117,10 +117,8 @@ Proof.
   right.
   destruct Hfull as [i [Hi Hfull]].
   exists i. split; [done |].
-  specialize (Hno_resend i).
   apply node_generated_without_further_equivocation_weaken; [done | | done].
-  revert Hs.
-  apply VLSM_incl_valid_state.
+  apply VLSM_incl_valid_state; [| done].
   apply preloaded_constraint_free_incl.
 Qed.
 

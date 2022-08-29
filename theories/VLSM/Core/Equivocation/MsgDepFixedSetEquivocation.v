@@ -179,16 +179,16 @@ Proof.
     ; [apply has_been_sent_stepwise_from_trace | done | done].
   + by eapply in_futures_valid_fst.
   + apply in_futures_valid_fst in Hfutures as Hdestination.
-    specialize (received_component_received_previously IM Hdestination Hreceived)
+    destruct (received_component_received_previously IM Hdestination Hreceived)
       as (s_item_dm & [] & Ht & Hfutures_dm & <- & Hinput);
       destruct l as [i li]; cbn in Hinput; subst input; cbn in *.
-      apply input_valid_transition_in_futures in Ht as Hfutures_t; cbn in Hfutures_t
-      ; destruct Ht as [(_ & _ & _ & Hc) _].
-      eapply in_futures_preserves_strong_fixed_equivocation; [| apply Hc].
-      eapply VLSM_incl_in_futures.
-      * apply constraint_preloaded_free_incl
-         with (constraint := strong_fixed_equivocation_constraint IM equivocators).
-      * by do 2 (eapply in_futures_trans; [done |]).
+    apply input_valid_transition_in_futures in Ht as Hfutures_t; cbn in Hfutures_t
+    ; destruct Ht as [(_ & _ & _ & Hc) _].
+    eapply in_futures_preserves_strong_fixed_equivocation; [| apply Hc].
+    eapply VLSM_incl_in_futures.
+    * apply constraint_preloaded_free_incl
+       with (constraint := strong_fixed_equivocation_constraint IM equivocators).
+    * by do 2 (eapply in_futures_trans; [done |]).
 Qed.
 
 Lemma msg_dep_rel_reflects_strong_fixed_equivocation
@@ -364,7 +364,7 @@ Proof.
         with (P := fun dm => composite_has_been_directly_observed IM s dm \/ dm ∈ message_dependencies m).
       intros m0 [Hsent_m0 | Hdep_m0]; [itauto |].
       left; exists i.
-      by specialize (Hv _ Hdep_m0) as [Hsent | Hreceived]; [left | right].
+      by destruct (Hv _ Hdep_m0) as [Hsent | Hreceived]; [left | right].
     }
     eapply VLSM_full_projection_can_emit.
     {

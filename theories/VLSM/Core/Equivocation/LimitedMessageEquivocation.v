@@ -214,8 +214,7 @@ Proof.
   apply (VLSM_incl_finite_valid_trace_init_to StrongFixedinclPreFree) in Htr as Hpre_tr.
   intros v Hv.
   apply equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
-  specialize (Hvs' _ _ Hpre_tr).
-  destruct Hvs' as [m0 [Hsender0 [pre [item [suf [Heqtr [Hm0 Heqv]]]]]]].
+  destruct (Hvs' _ _ Hpre_tr) as (m0 & Hsender0 & pre & item & suf & Heqtr & Hm0 & Heqv).
   rewrite Heqtr in Htr.
   destruct Htr as [Htr Hinit].
   change (pre ++ item::suf) with (pre ++ [item] ++ suf) in Htr.
@@ -227,12 +226,11 @@ Proof.
   inversion Hitem; subst; clear Htl Hitem. simpl in Hm0. subst.
   destruct Ht as [(_ & _ & _ & Hc) _].
   destruct Hc as [(i & Hi & Hsenti) | Hemit].
-  + assert (Hsent : composite_has_been_sent IM (finite_trace_last is pre) m0)
-      by (exists i; done).
+  + assert (Hsent : composite_has_been_sent IM (finite_trace_last is pre) m0) by (exists i; done).
     apply (composite_proper_sent IM) in Hsent; [| done].
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
-  +  by apply (SubProjectionTraces.sub_can_emit_sender IM equivocators (fun i => i) sender Hsender_safety _ _ v)
-           in Hemit.
+  + by apply (SubProjectionTraces.sub_can_emit_sender
+      IM equivocators (fun i => i) sender Hsender_safety _ _ v) in Hemit.
 Qed.
 
 Lemma StrongFixed_incl_Limited : VLSM_incl StrongFixed Limited.
@@ -248,11 +246,9 @@ Qed.
 
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
 Proof.
-  specialize (Fixed_eq_StrongFixed IM equivocators)
-    as Heq.
-  apply VLSM_eq_proj1 in Heq.
   apply VLSM_incl_trans with (machine StrongFixed).
-  - apply Heq.
+  - assert (Heq := Fixed_eq_StrongFixed IM equivocators).
+    apply VLSM_eq_proj1 in Heq. done.
   - apply StrongFixed_incl_Limited.
 Qed.
 
