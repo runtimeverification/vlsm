@@ -414,8 +414,7 @@ Proof.
   intros sX trX Hinf HtrX.
   apply infinite_valid_trace_from_prefix_rev.
   intros n.
-
-  specialize
+  destruct
     (stream_map_option_prefix_ex (pre_VLSM_projection_transition_item_project _ _ label_project state_project) trX
     (pre_VLSM_projection_transition_item_project_infinitely_often _ _ label_project state_project trX Hinf)
     n)
@@ -452,9 +451,10 @@ Lemma VLSM_weak_projection_valid_state
   : forall sX,
     valid_state_prop X sX -> valid_state_prop Y (state_project sX).
 Proof.
-  specialize VLSM_weak_partial_projection_from_projection as Hpart_simul.
-  specialize (VLSM_weak_partial_projection_valid_state Hpart_simul) as Hps.
-  by intro sX; eapply Hps.
+  intro sX.
+  eapply VLSM_weak_partial_projection_valid_state.
+  - by eapply VLSM_weak_partial_projection_from_projection.
+  - done.
 Qed.
 
 Lemma VLSM_weak_projection_input_valid_transition
@@ -463,11 +463,10 @@ Lemma VLSM_weak_projection_input_valid_transition
     input_valid_transition X lX (s, im) (s', om ) ->
     input_valid_transition Y lY (state_project s, im) (state_project s', om).
 Proof.
-  specialize VLSM_weak_partial_projection_from_projection as Hpart_simul.
-  specialize (VLSM_weak_partial_projection_input_valid_transition Hpart_simul) as Hivt.
   intros.
-  apply
-    (Hivt s {| l := lX; input := im; destination := s'; output := om|}
+  apply (VLSM_weak_partial_projection_input_valid_transition
+    VLSM_weak_partial_projection_from_projection s
+    {| l := lX; input := im; destination := s'; output := om|}
       (state_project s) {| l := lY; input := im; destination := state_project s'; output := om|})
   ; [| done].
   by cbn; unfold pre_VLSM_projection_transition_item_project; cbn; rewrite H.
@@ -486,13 +485,15 @@ Lemma VLSM_weak_projection_finite_valid_trace_from_to
   : forall sX s'X trX,
     finite_valid_trace_from_to X sX s'X trX -> finite_valid_trace_from_to Y (state_project sX) (state_project s'X) (VLSM_weak_projection_trace_project Hsimul trX).
 Proof.
-  specialize VLSM_weak_partial_projection_from_projection as Hpart_simul.
-  specialize (VLSM_weak_partial_projection_finite_valid_trace_from Hpart_simul) as Htr.
   intros sX s'X trX HtrX.
   apply valid_trace_get_last in HtrX as Hs'X.
   apply valid_trace_forget_last in HtrX. subst.
   rewrite (final_state_project _ _ _ _ Hsimul); [| done].
-  apply valid_trace_add_default_last. eauto.
+  apply valid_trace_add_default_last.
+  eapply VLSM_weak_partial_projection_finite_valid_trace_from; [| |].
+  - eapply VLSM_weak_partial_projection_from_projection.
+  - done.
+  - done.
 Qed.
 
 Lemma VLSM_weak_projection_in_futures
@@ -607,10 +608,10 @@ Lemma VLSM_projection_finite_valid_trace_from
       finite_valid_trace_from X sX trX ->
       finite_valid_trace_from Y (state_project sX) (VLSM_projection_finite_trace_project Hsimul trX).
 Proof.
-  specialize VLSM_partial_projection_from_projection as Hpart_simul.
-  specialize (VLSM_partial_projection_finite_valid_trace_from Hpart_simul) as Hivt.
   intros sX trX.
-  by apply Hivt.
+  eapply VLSM_partial_projection_finite_valid_trace_from.
+  - by apply VLSM_partial_projection_from_projection.
+  - done.
 Qed.
 
 Definition VLSM_projection_weaken : VLSM_weak_projection X Y label_project state_project :=
@@ -660,9 +661,10 @@ Definition VLSM_projection_infinite_finite_valid_trace_from
 Lemma VLSM_projection_initial_state
   : forall sX, vinitial_state_prop X sX -> vinitial_state_prop Y (state_project sX).
 Proof.
-  specialize VLSM_partial_projection_from_projection as Hpart_simul.
-  specialize (VLSM_partial_projection_initial_state Hpart_simul) as His.
-  by intro sX; eapply His.
+  intro sX.
+  eapply VLSM_partial_projection_initial_state.
+  - by apply VLSM_partial_projection_from_projection.
+  - done.
 Qed.
 
 Lemma VLSM_projection_finite_valid_trace_init_to
@@ -871,16 +873,13 @@ Proof.
   apply valid_trace_add_default_last in Hpxt.
   apply valid_trace_first_pstate in Hpxt as Hs.
   apply valid_state_has_trace in Hs as [is_s [tr_s Hs]].
-  specialize (finite_valid_trace_from_to_app X _ _ _ _ _ (proj1 Hs) Hpxt) as Happ.
-  specialize (basic_VLSM_projection_finite_valid_trace_init_to _ _ _ (conj Happ (proj2 Hs)))
-    as Happ_pr.
-
+  assert (Happ := finite_valid_trace_from_to_app X _ _ _ _ _ (proj1 Hs) Hpxt).
+  assert (Happ_pr := basic_VLSM_projection_finite_valid_trace_init_to _ _ _ (conj Happ (proj2 Hs))).
   rewrite (pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project) in Happ_pr.
   apply finite_valid_trace_from_to_app_split, proj2 in Happ_pr.
   apply valid_trace_get_last in Hs as Heqs.
   apply valid_trace_forget_last, proj1 in Hs.
-  rewrite <- (final_state_project X (type Y) label_project state_project Htype)
-    in Happ_pr by done.
+  rewrite <- (final_state_project X (type Y) label_project state_project Htype)in Happ_pr by done.
   by apply valid_trace_forget_last in Happ_pr; subst.
 Qed.
 

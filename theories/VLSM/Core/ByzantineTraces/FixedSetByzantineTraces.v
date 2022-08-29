@@ -416,7 +416,7 @@ Proof.
     { apply (valid_initial_state_message X); [| done].
       by destruct (composite_s0 fixed_byzantine_IM).
     }
-    specialize (valid_generated_state_message X _ _ Hs0 _ _ Hs0) as Hgen.
+    assert (Hgen := valid_generated_state_message X _ _ Hs0 _ _ Hs0).
     unfold non_byzantine in Hi.
     rewrite set_diff_iff in Hi.
     apply not_and_r in Hi as [Hi | Hi]; [elim Hi; apply elem_of_enum|].
@@ -605,10 +605,8 @@ Corollary fixed_equivocating_traces_are_byzantine is tr
 Proof.
   intro Htr.
   apply (VLSM_incl_finite_valid_trace fixed_non_equivocating_incl_fixed_non_byzantine).
-  specialize
-    (induced_sub_projection_is_projection
-      IM (set_diff (enum index) selection) (fixed_equivocation_constraint IM selection))
-    as Hproj.
+  assert (Hproj := induced_sub_projection_is_projection IM
+    (set_diff (enum index) selection) (fixed_equivocation_constraint IM selection)).
   by apply (VLSM_projection_finite_valid_trace Hproj).
 Qed.
 
@@ -654,8 +652,7 @@ Proof.
       unfold channel_authenticated_message in Hsigned.
       destruct (sender m) as [v|] eqn:Hsender; simpl in Hsigned; [|congruence].
       apply Some_inj in Hsigned.
-      specialize (Hsender_safety _ _ Hsender _ Hiom) as Heq_v.
-      rewrite Hsigned in Heq_v. subst _v.
+      replace _v with i in * by (rewrite <- Hsigned, <- (Hsender_safety _ _ Hsender _ Hiom); done).
       eapply message_dependencies_are_sufficient in Hiom.
       revert Hiom.
       rewrite set_diff_iff in Hi.
@@ -669,10 +666,10 @@ Proof.
       subst sub_j.
       simpl in Hv.
       unfold sub_IM in Hv. simpl in Hv.
-      specialize (Hfull j _ _ _ Hv _ Hdm).
       exists j.
       unfold lift_sub_state.
-      by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hj).
+      rewrite (lift_sub_state_to_eq _ _ _ _ _ Hj).
+      by eapply Hfull.
 Qed.
 
 Lemma preloaded_non_byzantine_vlsm_lift

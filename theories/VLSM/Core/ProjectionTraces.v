@@ -45,7 +45,7 @@ Proof.
       case_decide; inversion HlX; cbn in *.
     destruct (vtransition _ _ _); inversion Ht.
     by state_update_simpl.
-  - by intros sX HsX; specialize (HsX j).
+  - by intros sX HsX; apply (HsX j).
   - intros [i li] lY HlX s m (_ & Hm & _ & _) _.
     by apply initial_message_is_valid; right.
 Qed.
@@ -55,12 +55,12 @@ Lemma composite_vlsm_induced_projection_composition_iff :
 Proof.
   apply VLSM_eq_incl_iff; split.
   - apply basic_VLSM_strong_incl; [| | by intro..].
-    + by intros s Hs i; specialize (Hs i).
+    + by intros s Hs i; apply (Hs i).
     + intros ? (i & [im Him] & <-).
       assert (Him' : vinitial_message_prop (composite_vlsm_induced_projection i) im) by (left; done).
       by exists i, (exist _ _ Him').
   - apply basic_VLSM_incl.
-    + by intros s Hs i; specialize (Hs i).
+    + by intros s Hs i; apply (Hs i).
     + intros _ _ m _ _ (i & [im [Him | HX]] & <-); [| done].
       apply initial_message_is_valid.
       by exists i, (exist _ _ Him).
@@ -202,11 +202,11 @@ Lemma pre_loaded_with_all_messages_projection_input_valid_transition_eq
   (Hl : projT1 l = j)
   : input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (s1 (projT1 l), om1) (s2 (projT1 l), om2).
 Proof.
-  specialize
-    (VLSM_projection_input_valid_transition preloaded_component_projection l) as Hivt.
-  subst j. specialize (Hivt (projT2 l)).
+  assert (Hivt := VLSM_projection_input_valid_transition preloaded_component_projection l).
+  subst j.
   apply Hivt; [| done].
-  unfold composite_project_label. destruct (decide _); [| by elim n].
+  unfold composite_project_label.
+  destruct (decide _); [| by elim n].
   replace e with (eq_refl (A := index) (x := projT1 l)); [done |].
   by apply Eqdep_dec.UIP_dec.
 Qed.
@@ -560,17 +560,12 @@ Proof.
     spec Hfr; [apply state_update_eq |].
     exists om'.
     destruct Hvj as [_ [_ Hvj]].
-    apply (projection_valid_implies_composition_valid_message IM) in Hvj as Hom.
+    apply (projection_valid_implies_composition_valid_message IM) in Hvj as [_s Hom].
     destruct IHHp as [_om HsX].
-    destruct Hom as [_s Hom].
-    specialize (valid_generated_state_message X _ _ HsX _ _ Hom _ Hfr) as Hgen.
-    apply Hgen.
-    simpl.
-    unfold lift_to_composite_state' at 1.
-    state_update_simpl.
+    apply (valid_generated_state_message X _ _ HsX _ _ Hom _ Hfr).
+    cbn; unfold lift_to_composite_state' at 1; state_update_simpl.
     replace (vtransition (IM j) _ _) with (s', om').
-    f_equal.
-    apply state_update_twice.
+    by rewrite state_update_twice.
 Qed.
 
 (**

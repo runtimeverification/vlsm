@@ -752,8 +752,8 @@ Lemma list_prefix_nth_last
   (_last : A)
   : nth = List.last (list_prefix l (S n)) _last.
 Proof.
-  specialize (nth_error_length l n nth Hnth); intro Hlen.
-  specialize (list_prefix_length l (S n) Hlen); intro Hpref_len.
+  assert (Hlen := nth_error_length l n nth Hnth).
+  assert (Hpref_len := list_prefix_length l (S n) Hlen).
   symmetry in Hpref_len.
   rewrite <- (list_prefix_nth l (S n) n) in Hnth; [| lia].
   rewrite (nth_error_last (list_prefix l (S n)) n Hpref_len _last) in Hnth.
@@ -827,13 +827,13 @@ Lemma list_segment_app
   : list_segment l n1 n2 ++ list_segment l n2 n3 = list_segment l n1 n3.
 Proof.
   assert (Hle : n1 <= n3) by lia.
-  specialize (list_prefix_segment_suffix l n1 n3 Hle); intro Hl1.
-  specialize (list_prefix_segment_suffix l n2 n3 H23); intro Hl2.
+  assert (Hl1 := list_prefix_segment_suffix l n1 n3 Hle).
+  assert (Hl2 := list_prefix_segment_suffix l n2 n3 H23).
   rewrite <- Hl2 in Hl1 at 4. clear Hl2.
   repeat rewrite app_assoc in Hl1.
   apply app_inv_tail in Hl1.
-  specialize (list_prefix_suffix (list_prefix l n2) n1); intro Hl2.
-  specialize (list_prefix_prefix l n1 n2 H12); intro Hl3.
+  assert (Hl2 := list_prefix_suffix (list_prefix l n2) n1).
+  assert (Hl3 := list_prefix_prefix l n1 n2 H12).
   rewrite Hl3 in Hl2.
   rewrite <- Hl2 in Hl1.
   rewrite <- app_assoc in Hl1.
@@ -849,23 +849,14 @@ Lemma list_segment_singleton
   : list_segment l n (S n) = [a].
 Proof.
   unfold list_segment.
-  assert (Hle : S n <= length l)
-    by (apply nth_error_length in Hnth; done).
-  assert (Hlt : n < length (list_prefix l (S n)))
-    by (rewrite list_prefix_length; try constructor; done).
-  specialize (list_suffix_last (list_prefix l (S n)) n Hlt a); intro Hlast1.
-  specialize (list_prefix_nth_last l n a Hnth a); intro Hlast2.
-  rewrite <- Hlast2 in Hlast1.
-  specialize (list_suffix_length (list_prefix l (S n)) n).
-  rewrite list_prefix_length; [| done].
-  intro Hlength.
-  assert (Hs: S n - n = 1) by lia.
-  rewrite Hs in Hlength.
-  remember (list_suffix (list_prefix l (S n)) n) as x.
-  clear -Hlength Hlast1.
-  destruct x; inversion Hlength.
-  destruct x; inversion H0.
-  by simpl in Hlast1; subst.
+  assert (Hle : S n <= length l) by (apply nth_error_length in Hnth; done).
+  assert (Hlt : n < length (list_prefix l (S n))) by (rewrite list_prefix_length; lia).
+  assert (Hlast1 := list_suffix_last (list_prefix l (S n)) n Hlt a).
+  assert (Hlength := list_suffix_length (list_prefix l (S n)) n).
+  rewrite <- (list_prefix_nth_last l n a Hnth a) in Hlast1.
+  rewrite list_prefix_length in Hlength; [| done].
+  replace (S n - n) with 1 in * by lia.
+  by destruct (list_suffix (list_prefix l (S n)) n) as [| ? [| ? ?]]; cbn in *; [| congruence |].
 Qed.
 
 Lemma nth_error_map
@@ -1045,7 +1036,7 @@ Proof.
   - by specialize (Hnth 0); inversion Hnth.
   - f_equal.
     + by specialize (Hnth 0); inversion Hnth.
-    + apply IHl1. intros n. by apply (Hnth (S n)).
+    + by apply IHl1; intros n; apply (Hnth (S n)).
 Qed.
 
 (* TODO remove (we have Exists_first) *)
@@ -1221,8 +1212,7 @@ Proof.
   - destruct l; cbn; [itauto congruence |].
     destruct (list_max_le (n :: l) 0) as [Hle _].
     rewrite eq_max, Forall_forall in Hle.
-    specialize (Hle ltac:(lia) n ltac:(left)).
-    lia.
+    by left; apply Nat.le_0_r, Hle; [| left].
   - rewrite <- eq_max. apply (list_max_exists l). lia.
 Qed.
 
@@ -1558,7 +1548,7 @@ Proof.
   induction l; cbn; [done |].
   case_decide.
   - by inversion Hl.
-  - apply IHl. by eapply fsFurther2_transitive.
+  - by eapply IHl, fsFurther2_transitive.
 Qed.
 
 Lemma list_subseteq_tran : forall (A : Type) (l m n : list A),

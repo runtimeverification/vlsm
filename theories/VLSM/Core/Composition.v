@@ -1259,28 +1259,18 @@ Proof.
     rewrite (composite_apply_plan_app IM).
     destruct (composite_apply_plan IM s a) as (tra, sa) eqn : eq_a; simpl in *.
     destruct (composite_apply_plan IM sa [x]) as (trx, sx) eqn : eq_x; simpl in *.
-
     unfold a_indices in Hdif.
     rewrite map_app in Hdif.
     rewrite map_app in Hdif.
-
-    spec IHa. {
-      intro Hin.
+    rewrite <- IHa; cycle 1.
+    + intro Hin.
       contradict Hdif.
-      apply elem_of_app.
-      by left.
-    }
-
-    rewrite <- IHa.
-    replace sx with (snd (composite_apply_plan IM sa [x])) by (rewrite eq_x; done).
-    apply irrelevant_components_one.
-    intros contra.
-    rewrite contra in Hdif.
-
-    rewrite elem_of_app in Hdif; simpl in Hdif.
-    contradict Hdif.
-    subst.
-    right; left.
+      by apply elem_of_app; left.
+    + replace sx with (snd (composite_apply_plan IM sa [x])) by (rewrite eq_x; done).
+      apply irrelevant_components_one.
+      intros ->.
+      rewrite elem_of_app in Hdif; cbn in Hdif; contradict Hdif.
+      by subst; right; left.
 Qed.
 
 (* Same as relevant_components_one but for multiple transitions *)
@@ -1299,67 +1289,41 @@ Lemma relevant_components
   finite_valid_plan_from Free s' a /\
   (forall (i : index), i ∈ li -> (res' i) = res i).
 Proof.
-  induction a using rev_ind.
-  - by split; [apply finite_valid_plan_empty|].
-  - simpl in *.
-    apply finite_valid_plan_from_app_iff in Hpr.
-    destruct Hpr as [Hrem Hsingle].
-
-    spec IHa. {
-      remember (List.map (@projT1 _ (fun n : index => vlabel (IM n))) (List.map label_a a)) as small.
-      transitivity a_indices; [| done].
-      unfold a_indices.
-      intros e H; simpl.
-      rewrite 2 map_app, elem_of_app.
-      itauto.
-    }
-
-    destruct (IHa Hrem) as [IHapr IHaind].
-
-    assert (Hrel := relevant_components_one (snd (apply_plan Free s a)) (snd (apply_plan Free s' a))).
-
-    spec Hrel. {
-      apply apply_plan_last_valid.
-      all: itauto.
-    }
-
-    specialize (Hrel x); simpl in *.
-
-    spec Hrel. {
-      specialize (IHaind (projT1 (label_a x))).
-      symmetry.
-      apply IHaind.
-      specialize (Hincl (projT1 (label_a x))).
-      apply Hincl.
+  induction a using rev_ind; [by split; [apply finite_valid_plan_empty |] | cbn in *].
+  apply finite_valid_plan_from_app_iff in Hpr as [Hrem Hsingle].
+  destruct (IHa) as [IHapr IHaind]; [| done |].
+  - transitivity a_indices; [| done].
+    unfold a_indices.
+    intros e H; simpl.
+    rewrite 2 map_app, elem_of_app.
+    itauto.
+  - edestruct (relevant_components_one (snd (apply_plan Free s a)) (snd (apply_plan Free s' a)))
+      as [Hrelpr Hrelind].
+    + by apply apply_plan_last_valid.
+    + symmetry.
+      apply (IHaind (projT1 (label_a x))).
+      apply (Hincl (projT1 (label_a x))).
       unfold a_indices.
       rewrite 2 map_app, elem_of_app.
       right; left.
-    }
-
-    specialize (Hrel Hsingle).
-    destruct Hrel as [Hrelpr Hrelind].
-    split.
-    + apply finite_valid_plan_from_app_iff.
-      split; itauto.
-    + intros i Hi.
-      specialize (IHaind i Hi).
-      specialize (Heq i Hi).
+    + itauto.
+    + split; [apply finite_valid_plan_from_app_iff; itauto |].
+      intros i Hi.
       rewrite !apply_plan_app.
-      simpl in *.
       destruct (apply_plan Free s' a) as [tra' sa'] eqn: eq_as'.
       destruct (apply_plan Free s a) as [tra sa] eqn: eq_as.
-      simpl in *.
+      cbn in *.
       destruct (apply_plan Free sa [x]) as [trx sx] eqn: eq_xsa.
       destruct (apply_plan Free sa' [x]) as [trx' sx'] eqn : eq_xsa'.
-      simpl in *.
+      cbn in *.
       destruct (decide (i = (projT1 (label_a x)))).
       * rewrite e; itauto.
-      * simpl in *.
-        apply (f_equal snd) in eq_xsa, eq_xsa'.
+      * apply (f_equal snd) in eq_xsa, eq_xsa'.
         replace sx' with (snd (composite_apply_plan IM sa' [x])).
         replace sx with (snd (composite_apply_plan IM sa [x])).
-        by setoid_rewrite (irrelevant_components_one sa x i n)
+        setoid_rewrite (irrelevant_components_one sa x i n)
         ; setoid_rewrite (irrelevant_components_one sa' x i n).
+        by apply IHaind.
 Qed.
 
 End composite_plan_properties.
@@ -1515,15 +1479,12 @@ Proof.
   constructor.
   intros s1 tr1 Htr1.
   assert (Heq1 := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM1)).
-  apply (VLSM_eq_finite_valid_trace Heq1) in Htr1.
-  clear Heq1.
-  specialize (same_IM_full_projection (free_constraint IM1) (free_constraint IM2))
-    as Hproj.
-  spec Hproj; [done |].
-  specialize (Hproj (fun _ => True)).
-  apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr1.
+  apply (VLSM_eq_finite_valid_trace Heq1) in Htr1; clear Heq1.
   assert (Heq2 := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM2)).
-  by apply (VLSM_eq_finite_valid_trace Heq2).
+  apply (VLSM_eq_finite_valid_trace Heq2).
+  assert (Hproj := same_IM_full_projection (free_constraint IM1) (free_constraint IM2)
+                     ltac:(done) (fun _ => True)).
+  by apply (VLSM_full_projection_finite_valid_trace Hproj).
 Qed.
 
 End sec_same_IM_full_projection.
@@ -1676,31 +1637,27 @@ Proof.
       apply composite_valid_transition_projection in Hnext;
         cbn in Hnext; destruct Hnext as [[Hvj Htj] Heq_s'].
       rewrite Heq_s' in Heqs'; state_update_simpl.
-      specialize (IHHs2 (existT j lj) (state_update IM s j (s1 j)) iom oom).
-      spec IHHs2.
-      {
-        apply composite_valid_transition_projection_inv with (s1 j) (s' j); [done | |].
-        - by state_update_simpl.
-        - rewrite state_update_twice.
-          symmetry; apply state_update_id.
-          apply f_equal with (f := fun s => s j) in Heqs'.
-          by state_update_simpl.
-      }
-      assert (Hss1 : input_valid_transition RFree (existT i li)
-                  (state_update IM s j (s1 j), om) (s1, om')).
-      {
-        repeat split; [apply IHHs2 | apply any_message_is_valid_in_preloaded |..]
-        ; cbn; state_update_simpl; [done |].
-        replace (vtransition _ _ _) with (s' i, om').
-        f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
-        rewrite Heq_s'.
-        by destruct (decide (i = k)), (decide (j = k)); subst; state_update_simpl.
-      }
-      repeat split; cbn.
-      * by eapply input_valid_transition_destination.
+      repeat split; cbn; cycle 1.
       * by apply any_message_is_valid_in_preloaded.
       * done.
       * by replace (vtransition _ _ _) with (s' j, oom); f_equal.
+      * apply (@input_valid_transition_destination _ RFree
+                  (existT i li) (state_update IM s j (s1 j)) s1 om om').
+        repeat split; cycle 1.
+        -- by apply any_message_is_valid_in_preloaded.
+        -- by cbn; state_update_simpl.
+        -- cbn; state_update_simpl.
+           replace (vtransition _ _ _) with (s' i, om').
+           f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
+           rewrite Heq_s'.
+           by destruct (decide (i = k)), (decide (j = k)); subst; state_update_simpl.
+        -- apply (IHHs2 (existT j lj) (state_update IM s j (s1 j)) iom oom).
+           apply composite_valid_transition_projection_inv with (s1 j) (s' j)
+           ; [done | by state_update_simpl |].
+           rewrite state_update_twice.
+           symmetry; apply state_update_id.
+           apply f_equal with (f := fun s => s j) in Heqs'.
+           by state_update_simpl.
 Qed.
 
 Lemma CompositeValidTransitionNext_reflects_rechability :

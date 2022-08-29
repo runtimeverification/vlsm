@@ -347,11 +347,9 @@ Lemma VLSM_weak_full_projection_infinite_valid_trace_from
     infinite_valid_trace_from Y (state_project sX) (VLSM_weak_full_projection_infinite_trace_project Hsimul trX).
 Proof.
   intros.
-  specialize (pre_VLSM_full_projection_infinite_trace_project_EqSt _ _ label_project state_project trX)
-    as Heq.
-  apply Streams.sym_EqSt in Heq.
-  apply (infinite_valid_trace_from_EqSt Y _ _ _ Heq).
-  by apply (VLSM_weak_projection_infinite_valid_trace_from VLSM_weak_full_projection_is_projection sX trX).
+  eapply (infinite_valid_trace_from_EqSt Y).
+  - apply Streams.sym_EqSt, pre_VLSM_full_projection_infinite_trace_project_EqSt.
+  - by rapply (VLSM_weak_projection_infinite_valid_trace_from VLSM_weak_full_projection_is_projection).
 Qed.
 
 Lemma VLSM_weak_full_projection_can_produce
@@ -619,8 +617,7 @@ Proof.
         apply valid_trace_get_last in Htr1 as Hs0.
         rewrite finite_trace_last_is_last in Hs0.
         destruct s_item. simpl in Hs0. subst destination.
-        specialize (IHHtr1 _ _ _ _ eq_refl).
-        by eexists.
+        by eexists; eapply IHHtr1.
     }
     destruct Hs as [_om Hs].
     assert (Hom : option_valid_message_prop Y iom).
@@ -632,8 +629,8 @@ Proof.
         apply valid_trace_get_last in Htr2 as Hs0.
         rewrite finite_trace_last_is_last in Hs0.
         destruct iom_item. simpl in *. subst.
-        specialize (IHHtr2 _ _ _ _ eq_refl).
-        by eexists.
+        by eexists; eapply IHHtr2.
+        
     }
     destruct Hom as [_s Hom].
     apply
@@ -644,14 +641,15 @@ Qed.
 
 Lemma basic_VLSM_weak_full_projection : VLSM_weak_full_projection X Y label_project state_project.
 Proof.
-  specialize (basic_VLSM_weak_projection X Y (Some ∘ label_project) state_project) as Hproj.
-  spec Hproj; [by apply weak_projection_valid_preservation_from_full|].
-  spec Hproj; [by apply weak_projection_transition_preservation_Some_from_full|].
-  spec Hproj; [apply weak_projection_transition_consistency_None_from_full|].
-  spec Hproj; [done |].
-  spec Hproj; [apply weak_projection_valid_message_preservation_from_full|].
-  constructor. intro; intros.
-  by apply (VLSM_weak_projection_finite_valid_trace_from Hproj) in H.
+  constructor; intros sX trX H.
+  cut (VLSM_weak_projection X Y (Some ∘ label_project) state_project).
+  - by intros Hproj; apply (VLSM_weak_projection_finite_valid_trace_from Hproj).
+  - apply (basic_VLSM_weak_projection X Y (Some ∘ label_project) state_project).
+    + by apply weak_projection_valid_preservation_from_full.
+    + by apply weak_projection_transition_preservation_Some_from_full.
+    + by apply weak_projection_transition_consistency_None_from_full.
+    + done.
+    + apply weak_projection_valid_message_preservation_from_full.
 Qed.
 
 End weak_full_projection.

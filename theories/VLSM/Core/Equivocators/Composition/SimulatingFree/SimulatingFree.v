@@ -109,7 +109,7 @@ Proof.
   assert (HinclE : VLSM_incl CE PreFreeE)
     by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
-  - specialize (lift_initial_to_equivocators_state IM _ His) as Hs.
+  - assert (Hs := lift_initial_to_equivocators_state IM _ His).
     remember (lift_to_equivocators_state IM is) as s.
     cut (equivocators_state_project IM (zero_descriptor IM) s = is).
     { intro Hproject.
@@ -126,9 +126,8 @@ Proof.
     exists eqv_state_is. split; [done |].
     apply valid_trace_last_pstate in Hstate_trace as Hstate_valid.
     destruct Ht as [[Hs [Hiom [Hv Hc]]] Ht].
-    specialize
-      (Hreplayable _ _ _ HtrX1 _ Hstate_valid Hstate_final_project _ _ _ Hmsg_trace iom)
-      as Hreplay.
+    assert
+      (Hreplay := Hreplayable _ _ _ HtrX1 _ Hstate_valid Hstate_final_project _ _ _ Hmsg_trace iom).
     spec Hreplay.
     { clear -Heqiom Hfinal_msg.
       destruct iom as [im|]; [| done].
@@ -138,27 +137,24 @@ Proof.
       - left. simpl in *. rewrite <- Hfinal_msg.
         by rewrite finite_trace_last_output_is_last.
     }
-    specialize (Hreplay _ Hc)
-      as [emsg_tr [es [Hmsg_trace_full_replay [Hemsg_tr_pr [Hes_pr Hbs_iom]]]]].
+    destruct (Hreplay _ Hc)
+      as (emsg_tr & es & Hmsg_trace_full_replay & Hemsg_tr_pr & Hes_pr & Hbs_iom).
     intros .
-    specialize
-      (finite_valid_trace_from_to_app CE  _ _ _ _ _ (proj1 Hstate_trace) Hmsg_trace_full_replay)
-      as Happ.
-    specialize
-      (extend_right_finite_trace_from_to CE Happ) as Happ_extend.
-    destruct l as (eqv, li).
+    assert (Happ :=
+      finite_valid_trace_from_to_app CE  _ _ _ _ _ (proj1 Hstate_trace) Hmsg_trace_full_replay).
+    assert (Happ_extend := extend_right_finite_trace_from_to CE Happ).
+    destruct l as [eqv li].
     pose
       (@existT _ (fun i : index => vlabel (equivocator_IM IM i)) eqv (ContinueWith 0 li))
       as el.
-    destruct (vtransition CE el (es, iom))
-      as (es', om') eqn:Hesom'.
+    destruct (vtransition CE el (es, iom)) as [es' om'] eqn: Hesom'.
     specialize (Happ_extend  el iom es' om').
     apply valid_trace_get_last in Happ as Heqes.
     assert (Hes_pr_i : forall i, equivocators_total_state_project IM es i = s i)
       by (rewrite <- Hes_pr; done).
     exists es'.
     assert (Het := Hesom').
-    specialize (Hes_pr_i eqv) as Hes_pr_eqv.
+    assert (Hes_pr_eqv := Hes_pr_i eqv).
     cbn in Hesom', Hes_pr_eqv.
     rewrite equivocator_state_project_zero in Hesom', Hes_pr_eqv.
     cbn in Hesom', Hes_pr_eqv.
@@ -316,14 +312,11 @@ Proof.
       exists [], eqv_state_s.
       by split; [constructor |].
     }
-    specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM IM) (free_constraint _) seed)
-      as HinclE.
+    assert (HinclE := NoEquivocation.seeded_no_equivocation_incl_preloaded
+      (equivocator_IM IM) (free_constraint _) seed).
     apply valid_trace_forget_last in Hmsg_trace.
-    specialize
-      (replayed_trace_from_valid_equivocating
-       _ Hstate_valid _ _ Hmsg_trace
-      )
-      as Hmsg_trace_full_replay.
+    assert (Hmsg_trace_full_replay := replayed_trace_from_valid_equivocating
+      _ Hstate_valid _ _ Hmsg_trace).
     remember (all_equivocating_replayed_trace_from _ _ _ ) as emsg_tr.
     apply valid_trace_add_default_last in Hmsg_trace_full_replay.
     eexists _,_; split; [done |].
@@ -340,12 +333,10 @@ Proof.
     left.
     apply valid_trace_first_pstate in Hmsg_trace_full_replay as Hfst.
     apply valid_state_has_trace in Hfst as [is_s [tr_s [Htr_s His_s]]].
-    specialize (finite_valid_trace_from_to_app SeededXE _ _ _ _ _ Htr_s Hmsg_trace_full_replay) as Happ.
+    assert (Happ := finite_valid_trace_from_to_app SeededXE _ _ _ _ _ Htr_s Hmsg_trace_full_replay).
     apply (VLSM_incl_finite_valid_trace_from_to HinclE) in Happ.
-    specialize (@has_been_sent_examine_one_trace _ FreeE _ _ _ _ (conj Happ His_s) im)
-      as Hrew.
+    assert (Hrew := @has_been_sent_examine_one_trace _ FreeE _ _ _ _ (conj Happ His_s) im).
     unfold has_been_sent in Hrew; cbn in Hrew; apply Hrew.
-
     apply Exists_app. right.
     destruct_list_last eqv_msg_tr eqv_msg_tr' itemX Heqv_msg_tr
     ; [inversion Hfinal_msg|].
@@ -382,13 +373,11 @@ Lemma equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  specialize (vlsm_is_pre_loaded_with_False Free) as Heq.
+  assert (Heq := vlsm_is_pre_loaded_with_False Free).
   apply (VLSM_eq_finite_valid_trace_init_to Heq) in HtrX.
-  specialize
-    (seeded_equivocators_finite_valid_trace_init_to_rev
-      IM (fun m => False) no_initial_messages_in_IM
-      _ _ _ HtrX)
-    as [is [His [s [Hs [tr [Htr_pr [Htr Houtput]]]]]]].
+  destruct (seeded_equivocators_finite_valid_trace_init_to_rev
+              IM (fun m => False) no_initial_messages_in_IM _ _ _ HtrX)
+    as (is & His & s & Hs & tr & Htr_pr & Htr & Houtput).
   exists is; split; [done |].
   exists s; split; [done |].
   exists tr; split; [done |].
@@ -397,8 +386,7 @@ Proof.
   remember (no_equivocations_additional_constraint_with_pre_loaded _ _ _)
     as constraint.
   clear Heq.
-  specialize (vlsm_is_pre_loaded_with_False (composite_vlsm (equivocator_IM IM) constraint))
-    as Heq.
+  assert (Heq := vlsm_is_pre_loaded_with_False (composite_vlsm (equivocator_IM IM) constraint)).
   apply (VLSM_eq_finite_valid_trace_init_to Heq) in Htr.
   revert Htr.
   apply VLSM_incl_finite_valid_trace_init_to.

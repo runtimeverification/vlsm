@@ -104,13 +104,11 @@ Proof.
     - intros i Hi. apply elem_of_remove_dups, Hincl, Hi.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
-  specialize (preloaded_non_byzantine_vlsm_lift IM byzantine (fun i => i) sender)
-    as Hproj.
+  assert (Hproj := preloaded_non_byzantine_vlsm_lift IM byzantine (fun i => i) sender).
   apply (VLSM_full_projection_finite_valid_trace_init_to Hproj) in Htr as Hpre_tr.
   intros v Hv.
   apply equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
-  specialize (Hvs' _ _ Hpre_tr).
-  destruct Hvs' as [m0 [Hsender0 [preX [itemX [sufX [Htr_pr [Hm0 Heqv]]]]]]].
+  destruct (Hvs' _ _ Hpre_tr) as (m0 & Hsender0 & preX & itemX & sufX & Htr_pr & Hm0 & Heqv).
   apply map_eq_app in Htr_pr as [pre [item_suf [Heqtr [Hpre_pr Hitem_suf_pr]]]].
   apply map_eq_cons in Hitem_suf_pr as [item [suf [Heqitem_suf [Hitem_pr Hsuf_pr]]]].
   subst tr item_suf. clear Hsuf_pr.
@@ -135,13 +133,12 @@ Proof.
     apply (composite_proper_sent IM) in Hsent; [| done].
     apply (VLSM_full_projection_initial_state Hproj) in Hinit.
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
-  + specialize (proj1 Hemit) as [i [Hi Hsigned]].
-    subst.
+  + destruct (proj1 Hemit) as (i & Hi & Hsigned); subst.
     destruct (decide (i ∈ byzantine)).
-      * unfold channel_authenticated_message in Hsigned.
-        rewrite Hsender0 in Hsigned.
-        by apply Some_inj in Hsigned; subst.
-      * by destruct Hi; apply set_diff_intro; [apply elem_of_enum|].
+    * unfold channel_authenticated_message in Hsigned.
+      rewrite Hsender0 in Hsigned.
+      by apply Some_inj in Hsigned; subst.
+    * by destruct Hi; apply set_diff_intro; [apply elem_of_enum |].
 Qed.
 
 Existing Instance Htracewise_BasicEquivocation.

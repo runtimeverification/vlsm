@@ -397,22 +397,17 @@ Proof.
   destruct H as [Htr Hs].
   induction Htr using finite_valid_trace_from_rev_ind.
   - by apply (finite_valid_trace_from_empty X), initial_state_is_valid.
-  - specialize (IHHtr Hs) as IHtr; clear IHHtr.
-    apply (extend_right_finite_trace_from X); [done |].
+  - apply (extend_right_finite_trace_from X); [by apply IHHtr |].
     destruct Hx as [Hvx Htx].
     split; [| done].
-    apply finite_valid_trace_last_pstate in IHtr.
-    simpl in *.
-    match type of IHtr with
-    | valid_state_prop _ ?s => remember s as lst
-    end.
+    specialize (IHHtr Hs); apply finite_valid_trace_last_pstate in IHHtr.
     split; [done |].
-    repeat split; [|apply Hvx|apply Hvx].
+    repeat split; [| apply Hvx | apply Hvx].
     destruct Hvx as [Hlst [_ [Hv _]]].
-    destruct l as (i, li). simpl in *.
+    destruct l as [i li]; cbn in *.
     destruct iom as [im |]; [| apply option_valid_message_None].
-    assert (Hlsti := valid_state_project_preloaded_to_preloaded _ IM constraint lst i Hlst).
-    eapply Hvalidator; split; [done |]; split; [| done].
+    assert (Hlsti := valid_state_project_preloaded_to_preloaded _ IM constraint (finite_trace_last s tr) i Hlst).
+    eapply Hvalidator; repeat split; [done | | done].
     eexists _.
     apply (pre_loaded_with_all_messages_message_valid_initial_state_message (IM i)).
 Qed.

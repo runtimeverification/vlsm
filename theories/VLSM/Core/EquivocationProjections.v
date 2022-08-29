@@ -50,11 +50,9 @@ Proof.
   apply (VLSM_projection_finite_valid_trace_init_to Hsimul) in HtrX.
   apply (VLSM_projection_valid_state Hsimul) in Hs as HsY.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseY _ HsY m) in Hm.
-  specialize (Hm _ _ HtrX).
-  apply Exists_exists in Hm as [itemY [HitemY Hm]].
-  apply elem_of_list_In in HitemY.
-  apply pre_VLSM_projection_finite_trace_project_in_iff in HitemY
-    as [itemX [HitemX Hpr]].
+  specialize (Hm _ _ HtrX); apply Exists_exists in Hm as (itemY & HitemY & Hm).
+  apply elem_of_list_In, pre_VLSM_projection_finite_trace_project_in_iff in HitemY
+    as (itemX & HitemX & Hpr).
   apply Exists_exists.
   apply elem_of_list_In in HitemX.
   exists itemX. split; [done |].
@@ -387,9 +385,9 @@ Lemma same_IM_composite_has_been_sent_preservation s1 m
   : composite_has_been_sent IM1 s1 m ->
     composite_has_been_sent IM2 (same_IM_state_rew Heq s1) m.
 Proof.
-  specialize (same_IM_preloaded_free_full_projection IM1 IM2 Heq) as Hproj.
   intros Hbs1_m.
-  by specialize (VLSM_full_projection_has_been_sent Hproj _ Hs1 m Hbs1_m).
+  assert (Hproj := same_IM_preloaded_free_full_projection IM1 IM2 Heq).
+  rapply (VLSM_full_projection_has_been_sent Hproj _ Hs1 m Hbs1_m).
 Qed.
 
 End same_IM_oracle_properties.
@@ -419,19 +417,12 @@ Lemma can_emit_projection
 Proof.
   destruct (sender m) as [v|] eqn:Hsender; simpl in Hj; [|congruence].
   apply Some_inj in Hj.
-  specialize (Hsender_safety _ _ Hsender).
-  intros [(s0,om0) [(i, li) [s1 Hemitted]]].
-  specialize (preloaded_component_projection IM i) as Hproj.
-  specialize (VLSM_projection_input_valid_transition Hproj (existT i li) li)
-    as Htransition.
+  intros [[s0 om0] [[i li] [s1 Hemitted]]].
+  assert (Hproj := preloaded_component_projection IM i).
+  assert (Htransition := VLSM_projection_input_valid_transition Hproj (existT i li) li).
   spec Htransition; [apply (composite_project_label_eq IM)|].
-  apply Htransition in Hemitted. clear Htransition.
-  remember (s0 i) as s0i. clear s0 Heqs0i.
-  remember (s1 i) as s1i. clear s1 Heqs1i.
-  spec Hsender_safety i.
-  spec Hsender_safety; [by eexists _,_, _ |].
-  rewrite Hsender_safety in Hj; subst.
-  by eexists _,_, _.
+  apply Htransition in Hemitted; clear Htransition.
+  by rewrite (Hsender_safety _ _ Hsender i) in Hj; subst; eexists _, _, _.
 Qed.
 
 End sender_safety_can_emit_projection.

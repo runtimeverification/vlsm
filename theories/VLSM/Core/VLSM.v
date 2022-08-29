@@ -1782,8 +1782,7 @@ Proof.
   assert (Hpref0 := Hpref 1).
   inversion Hpref0; subst.
   constructor; [| done].
-  apply Hls.
-  intro n.
+  apply Hls; intro n.
   by specialize (Hpref (S n)); inversion Hpref; subst.
 Qed.
 
@@ -2257,7 +2256,7 @@ Proof.
       ; apply initial_state_is_valid.
     + assert (Hnnil : item ::l <> [])
         by (intro Hnil; inversion Hnil).
-      specialize (exists_last Hnnil); intros (prefix & last & Heq).
+      destruct (exists_last Hnnil) as (prefix & last & Heq).
       rewrite Heq in *; clear Hnnil Heq l item.
       replace s with (trace_first (proj1_sig (exist _ tr Htr)))
       ; try (by destruct tr; inversion Heqpref_tr; subst).

@@ -313,7 +313,7 @@ Proof.
   - by exists lX, s.
   - specialize (Htransition_Some _ _ H _ _ _ _ H0); cbn.
     destruct (vtransition _ _ _) as [s2' om2'].
-    by specialize (Htransition_Some _ _ eq_refl) as [-> ->].
+    by destruct (Htransition_Some _ _ eq_refl) as [-> ->].
   - by eapply Htransition_None.
   - by exists s.
   - by destruct Hv as [_ [Hm _]]; apply initial_message_is_valid.
@@ -559,8 +559,7 @@ Proof.
   - apply initial_state_is_valid.
     exists (state_lift s). auto.
   - destruct Ht as [[_ [_ Hvalid]] Htrans].
-    specialize (Hvalidator _ _ _ Hvalid IHHs)
-      as (lX & sX & [HlX HsX HvX]).
+    destruct (Hvalidator _ _ _ Hvalid IHHs) as (lX & sX & [HlX HsX HvX]).
     replace s' with (state_project (vtransition X lX (sX, om)).1).
     + eapply input_valid_transition_destination,
         (VLSM_projection_input_valid_transition Hproji)
@@ -570,9 +569,8 @@ Proof.
         by firstorder.
       destruct (vtransition _ _ _) as (sX', _om').
       eapply (VLSM_projection_input_valid_transition Hproj) in HivtX as [_ Hs']; [| done].
-      rewrite HsX in Hs'.
-      destruct Y as (TY & MY); cbv in Htrans, Hs'.
-      by rewrite Htrans in Hs'; inversion Hs'.
+      rewrite HsX in Hs'; cbv in Htrans, Hs'; rewrite Htrans in Hs'.
+      by inversion Hs'.
 Qed.
 
 (** Below we show that the two definitions above are actually equivalent. *)

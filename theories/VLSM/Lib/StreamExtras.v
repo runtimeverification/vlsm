@@ -316,9 +316,9 @@ Proof.
     + by apply stream_prefix_nth.
   - intros Hp n.
     assert (Hn : n < S n) by lia.
-    specialize (Hp _ _ Hn).
-    erewrite <- nth_error_nth with (d := hd s); [done |].
-    by apply stream_prefix_nth.
+    erewrite <- nth_error_nth with (d := hd s).
+    + by apply Hp.
+    + by apply stream_prefix_nth.
 Qed.
 
 Lemma stream_prefix_ForAll2
@@ -562,7 +562,7 @@ Lemma monotone_nat_stream_rev
 Proof.
   intros n1 n2 Hle.
   destruct (decide (n1 <= n2)); [lia |].
-  specialize (Hs n2 n1); lia.
+  by specialize (Hs n2 n1); lia.
 Qed.
 
 Lemma monotone_nat_stream_find s (Hs : monotone_nat_stream_prop s) (n : nat)
@@ -579,7 +579,7 @@ Proof.
     destruct (decide (Str_nth (S k) s = S n))
     ; [by exists (S k); left|].
     exists k. right.
-    specialize (Hs k (S k)); lia.
+    by specialize (Hs k (S k)); lia.
 Qed.
 
 Definition monotone_nat_stream :=

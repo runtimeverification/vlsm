@@ -129,8 +129,8 @@ Lemma precedes_irreflexive
   (Ha : P a)
   : ~ precedes a a.
 Proof.
-  specialize (StrictOrder_Irreflexive (exist P a Ha)).
-  by unfold complement, precedes_P; cbn.
+  assert (H := StrictOrder_Irreflexive (exist P a Ha)).
+  by unfold complement, precedes_P in H; cbn in H.
 Qed.
 
 Lemma precedes_asymmetric
@@ -208,9 +208,9 @@ Lemma min_predecessors_zero
   : count_predecessors min = 0.
 Proof.
   assert (Hl' : l <> []) by (intro H; rewrite Hl in H; inversion H).
-  pose (count_predecessors_zero Hl') as Hx.
+  assert (Hx := count_predecessors_zero Hl').
   apply Exists_exists in Hx as (x & Hinx & Hcountx).
-  specialize (min_predecessors_correct l' a); simpl; intro Hall.
+  assert (Hall := min_predecessors_correct l' a); cbn in Hall.
   rewrite Forall_forall in Hall.
   apply Nat.le_0_r.
   rewrite <- Hcountx.
@@ -293,16 +293,12 @@ Lemma topologically_sorted_occurrences_ordering
   (Heqb : l = lb1 ++ [b] ++ lb2)
   : exists (lab : list A), lb1 = la1 ++ a :: lab.
 Proof.
-  assert (Hpa : P a).
-  { rewrite Forall_forall in Hl. apply Hl. rewrite Heqa, !elem_of_app, elem_of_list_singleton. auto. }
-  specialize (Hts a b Hab lb1 lb2 Heqb).
-  rewrite Heqa in Heqb.
-  assert (Ha : a ∉ (b :: lb2)).
-  { intro Ha. apply Hts.
-    apply elem_of_cons in Ha as []; subst; [| done].
-    by apply (precedes_irreflexive precedes P b Hpa) in Hab.
-  }
-  by apply (occurrences_ordering a b la1 la2 lb1 lb2 Heqb Ha).
+  apply (occurrences_ordering a b la1 la2 lb1 lb2); [by cbn in *; congruence |].
+  intro Ha. apply (Hts a b Hab lb1 lb2); [done |].
+  apply elem_of_cons in Ha as []; subst; [| done].
+  apply (precedes_irreflexive precedes P b) in Hab; [done |].
+  rewrite Forall_forall in Hl; apply Hl.
+  by rewrite Heqb, !elem_of_app, elem_of_list_singleton; auto.
 Qed.
 
 (**
@@ -401,16 +397,14 @@ Proof.
   subst l.
   intros b Hb a Hab.
   assert (Hb' : b ∈ (init ++ [final])) by (apply elem_of_app; left; done).
-  specialize (Hpc b Hb' a Hab).
-  apply elem_of_app in Hpc.
-  destruct Hpc as [Ha | Ha]; [done |].
+  specialize (Hpc b Hb' a Hab); apply elem_of_app in Hpc as [Ha | Ha]; [done |].
   rewrite elem_of_list_singleton in Ha; subst final.
   apply elem_of_list_split in Hb' as  (l1 & l2 & Heq).
   destruct (topologically_sorted_occurrences_ordering precedes
              (init ++ [a]) P Hl Hts a b Hab init [] eq_refl l1 l2 Heq)
         as [lab Hlab].
-  rewrite Hlab in Heq. apply (f_equal length) in Heq.
-  rewrite !app_length in Heq. cbn in Heq. lia.
+  apply (f_equal length) in Heq.
+  by rewrite Hlab, !app_length in Heq; cbn in Heq; lia.
 Qed.
 
 Section top_sort.
@@ -460,20 +454,17 @@ Proof.
   - subst. by apply set_eq_cons, IHn.
   - specialize (min_predecessors_in precedes (a :: l) l a).
     rewrite <- Heqmin. simpl. intros [Heq | Hin]; [done |].
-    specialize (set_remove_length min l Hin).
-    rewrite <- Heql'. rewrite <- H0. intro Hlen.
+    assert (Hlen := set_remove_length min l Hin).
+    rewrite <- Heql', <- H0 in *.
     specialize (IHn (a :: l') Hlen).
-    split; intros x Hx; rewrite elem_of_cons in Hx;
-      destruct Hx as [Heq|Hinx]; try (subst x).
-    + right. apply IHn. left.
-    + destruct (decide (x = min)); try subst x.
-      * left.
-      * right; apply IHn; right. rewrite Heql'.
-        by apply set_remove_3.
+    split; intros x Hx; apply elem_of_cons in Hx as [-> | Hinx].
+    + by right; apply IHn; left.
+    + destruct (decide (x = min)); [subst x; left |].
+      right; apply IHn; right. rewrite Heql'.
+      by apply set_remove_3.
     + by right.
-    + apply IHn in Hinx.
-      apply elem_of_cons in Hinx as [-> | Hinx]; [left |].
-      right. subst. by apply set_remove_1 in Hinx.
+    + apply IHn, elem_of_cons in Hinx as [-> | Hinx]; [left |].
+      by right; subst; apply set_remove_1 in Hinx.
 Qed.
 
 Lemma top_sort_nodup
@@ -662,7 +653,6 @@ Proof.
   destruct top_sort_correct as [Hseteq Htop].
   unfold topologically_sorted in Htop.
   intros contra.
-  specialize (Htop max a contra).
   assert (Hinmax: max ∈ l) by (apply maximal_element_in; itauto).
   assert (Hinatop : a ∈ (top_sort l)) by (apply Hseteq; itauto).
   apply elem_of_list_split in Hinatop as (prefA & sufA & HeqA).
@@ -679,7 +669,7 @@ Proof.
     rewrite <- app_assoc in Hlast; cbn in Hlast.
     assert (a' = max) as -> by itauto congruence.
     rewrite Heq in HeqA.
-    exfalso; apply (Htop prefA (l' ++ [max]) HeqA), elem_of_app.
+    exfalso; apply (Htop max a contra prefA (l' ++ [max]) HeqA), elem_of_app.
     right; left.
 Qed.
 

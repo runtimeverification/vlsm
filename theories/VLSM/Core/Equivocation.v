@@ -359,9 +359,8 @@ Proof.
     by (apply initial_state_is_valid; done).
   assert (Htr : finite_valid_trace_init_to pre_vlsm s s []).
   { by split; [constructor |]. }
-  specialize (Hselected s [] Htr).
   unfold trace_has_message in Hselected.
-  by rewrite Exists_nil in Hselected.
+  by eapply Exists_nil, Hselected.
 Qed.
 
 (** Checks if all [valid_trace]s leading to a certain state contain a certain message.
@@ -638,7 +637,7 @@ Lemma sent_messages_proper
   : has_been_sent s m <-> exists (m' : sent_messages s), proj1_sig m' = m.
 Proof.
   unfold sent_messages. rewrite exists_proj1_sig.
-  specialize (proper_sent s Hs m) as Hbs.
+  assert (Hbs := proper_sent s Hs m).
   unfold has_been_sent_prop,all_traces_have_message_prop in Hbs.
   rewrite Hbs.
   symmetry.
@@ -659,7 +658,7 @@ Lemma received_messages_proper
   : has_been_received s m <-> exists (m' : received_messages s), proj1_sig m' = m.
 Proof.
   unfold received_messages. rewrite exists_proj1_sig.
-  specialize (proper_received s Hs m) as Hbs.
+  assert (Hbs := proper_received s Hs m).
   unfold has_been_received_prop,all_traces_have_message_prop in Hbs.
   rewrite Hbs.
   symmetry.
@@ -720,11 +719,11 @@ Proof.
     unfold trace_has_message.
     rewrite Exists_nil.
     itauto.
-  - intro m. specialize (IHHtr m).
+  - intro m.
     unfold trace_has_message.
     rewrite Exists_cons.
     apply (Horacle.(oracle_step_update)) with (msg:=m) in Ht.
-    itauto.
+    rewrite IHHtr. itauto.
 Qed.
 
 Lemma oracle_initial_trace_update
@@ -814,7 +813,7 @@ Proof.
     apply valid_state_has_trace in Hproto.
     destruct Hproto as [s0 [tr Htr]].
     apply (H_valid_trace_prop Htr).
-    by specialize (H_all_traces s0 tr Htr).
+    by apply (H_all_traces s0 tr Htr).
 Qed.
 
 Lemma prove_none_have_message_from_stepwise:
@@ -832,8 +831,7 @@ Proof.
   - intros H_no_traces.
     apply valid_state_has_trace in Hproto.
     destruct Hproto as [s0 [tr Htr]].
-    specialize (H_no_traces s0 tr Htr).
-    contradict H_no_traces.
+    specialize (H_no_traces s0 tr Htr); contradict H_no_traces.
     by apply (H_valid_trace_prop Htr).
 Qed.
 
@@ -895,8 +893,7 @@ Proof.
   assert (Hproto : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
     by (apply initial_state_is_valid; done).
   apply Horacle_all_have in Horacle;[| done].
-  specialize (Horacle s nil).
-  eapply Exists_nil;apply Horacle;clear Horacle.
+  eapply Exists_nil, Horacle.
   by split; [constructor |].
 Qed.
 
@@ -911,9 +908,7 @@ Proof.
   assert (valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
     by (apply valid_trace_last_pstate in Htr; done).
   split.
-  - intros Horacle.
-    apply Horacle_all_have in Horacle; [| done].
-    by specialize (Horacle is tr Htr).
+  - by intros Horacle; eapply Horacle_all_have.
   - intro Hexists.
     apply dec_stable.
     intro Hnot.
@@ -1264,21 +1259,19 @@ Lemma has_been_directly_observed_sent_received_iff
   (m : message)
   : has_been_directly_observed vlsm s m <-> has_been_received vlsm s m \/ has_been_sent vlsm s m.
 Proof.
-  specialize
+  assert (Hall :=
     (prove_all_have_message_from_stepwise message vlsm  item_sends_or_receives
-    (has_been_directly_observed vlsm) (has_been_directly_observed_stepwise_props _) _ Hs m) as Hall.
+    (has_been_directly_observed vlsm) (has_been_directly_observed_stepwise_props _) _ Hs m)).
   split.
   - intro Hobs. destruct Hall as [Hall _]. specialize (Hall Hobs).
     apply consistency_from_valid_state_proj2 in Hall; [| done].
     destruct Hall as [is [tr [Htr Hexists]]].
     apply Exists_or_inv in Hexists.
-    destruct Hexists as [Hsent | Hreceived].
-    + left. specialize (has_been_received_consistency vlsm _ Hs m) as Hcons.
-      apply proper_received; [done |].
-      apply Hcons. by exists is, tr, Htr.
-    + right. specialize (has_been_sent_consistency vlsm _ Hs m) as Hcons.
-      apply proper_sent; [done |].
-      apply Hcons. by exists is, tr, Htr.
+    destruct Hexists as [Hsent | Hreceived]; [left | right].
+    + apply proper_received, (has_been_received_consistency vlsm _ Hs m); [done |].
+      by exists is, tr, Htr.
+    + apply proper_sent, (has_been_sent_consistency vlsm _ Hs m); [done |].
+      by exists is, tr, Htr.
   - intros [Hreceived | Hsent]; apply Hall; intros is tr Htr.
     + apply proper_received in Hreceived; [| done].
       apply Exists_or. left.
@@ -1822,8 +1815,7 @@ Lemma composite_proper_sent
   (m : message)
   : has_been_sent_prop (free_composite_vlsm IM) composite_has_been_sent s m.
 Proof.
-  specialize (proper_sent (free_composite_vlsm IM)) as Hproper_sent.
-  by apply Hproper_sent.
+  by rapply (proper_sent (free_composite_vlsm IM)).
 Qed.
 
 Section composite_has_been_received.
@@ -1880,9 +1872,8 @@ Lemma preloaded_composite_has_been_received_stepwise_props
   : has_been_received_stepwise_props (vlsm := X) composite_has_been_received.
 Proof.
   unfold has_been_received_stepwise_props.
-  specialize (composite_stepwise_props
-                (fun i => has_been_received_stepwise_from_trace (IM i)))
-       as [Hinits Hstep].
+  edestruct (composite_stepwise_props (fun i => has_been_received_stepwise_from_trace (IM i)))
+    as [Hinits Hstep].
   split; [done |].
   by intros l; specialize (Hstep l); destruct l.
 Qed.
@@ -1983,11 +1974,10 @@ Lemma sender_safety_alt_iff
   : sender_safety_prop <-> sender_safety_alt_prop.
 Proof.
   split; intros Hsender_safety m; intros.
-  - specialize (Hsender_safety m v Hsender).
-    destruct (decide (i = A v)); [done |].
-    by elim (Hsender_safety _ n).
-  - intro Hemit. elim Hdif.
-    by specialize (Hsender_safety m v Hsender _ Hemit).
+  - destruct (decide (i = A v)); [done |].
+    by elim (Hsender_safety m v Hsender _ n).
+  - intro Hemit; elim Hdif; symmetry.
+    by apply (Hsender_safety m v Hsender _ Hemit).
 Qed.
 
 Definition channel_authenticated_message (node_idx : index) (m : message) : Prop :=
@@ -2195,7 +2185,7 @@ Lemma sent_component_sent_previously
     output item = Some m.
 Proof.
   clear -Hs Horacle.
-  specialize
+  destruct
     (oracle_component_selected_previously
       (fun i => has_been_sent_stepwise_from_trace (IM i))
       Hs Horacle)
@@ -2218,7 +2208,7 @@ Lemma received_component_received_previously
     input item = Some m.
 Proof.
   clear -Hs Horacle.
-  specialize
+  destruct
     (oracle_component_selected_previously
       (fun i => has_been_received_stepwise_from_trace (IM i))
       Hs Horacle)
@@ -2238,7 +2228,7 @@ Lemma messages_sent_from_component_produced_previously
     in_futures X s_m s /\
     can_produce (pre_loaded_with_all_messages_vlsm (IM i)) (s_m i) m.
 Proof.
-  specialize (sent_component_sent_previously Hs Hsent)
+  destruct (sent_component_sent_previously Hs Hsent)
     as (s_item & [] & Ht & Hfutures & <- & Houtput)
   ; destruct l as [i li]; cbn in *; subst output.
   exists destination; split; [done |].
@@ -2459,10 +2449,9 @@ Proof.
     apply composite_has_been_directly_observed_free_iff, proper_directly_observed in Hobs
     ; [| done].
     apply (VLSM_full_projection_finite_valid_trace_init_to (lift_to_composite_preloaded_vlsm_full_projection IM i)) in Htr as Hpre_tr.
-    specialize (Hobs _ _ Hpre_tr).
     apply Exists_exists.
-    apply Exists_exists in Hobs.
-    destruct Hobs as [composite_item [Hcomposite_item Hx]].
+    specialize (Hobs _ _ Hpre_tr).
+    apply Exists_exists in Hobs as [composite_item [Hcomposite_item Hx]].
     apply elem_of_list_fmap_2 in Hcomposite_item as [item [Hcomposite_item Hitem]].
     exists item.
     split; [done |].
@@ -2607,8 +2596,7 @@ Proof.
   { by apply proj1, valid_trace_last_pstate in Htr. }
   split; intros [Hbrm Hnbsm].
   - apply proper_received in Hbrm; [| done].
-    specialize (Hbrm is tr Htr).
-    split; [done |].
+    split; [by apply (Hbrm is tr Htr) |].
     intro Hbsm. elim Hnbsm.
     apply proper_sent; [done |].
     by apply has_been_sent_consistency; [..|exists is, tr, Htr].
@@ -2658,13 +2646,13 @@ Proof.
   destruct Hfuture as [tr2 Htr2].
   induction Htr2; [done |].
   apply IHHtr2;clear IHHtr2.
-  specialize (has_been_received_step_update Ht m) as Hrupd.
-  specialize (has_been_sent_step_update Ht m) as Hmupd.
   destruct Hm as [Hr Hs].
-  eapply or_intror in Hr; apply Hrupd in Hr.
+  assert (Hrecv : has_been_received X s m)
+    by (eapply has_been_received_step_update; [| right]; done).
   split; [done |].
-  intros [-> |]%Hmupd; [| by apply Hs].
-  by apply Hno_resend in Ht as [_ []].
+  rewrite (has_been_sent_step_update Ht m).
+  intros [-> |]; [| by apply Hs].
+  by apply Hno_resend in Ht as [].
 Qed.
 
 Context
@@ -2750,15 +2738,11 @@ Lemma lift_preloaded_state_to_seeded
 Proof.
   apply valid_state_has_trace in Hs as Htr.
   destruct Htr as [is [tr Htr]].
-  specialize (lift_preloaded_trace_to_seeded P tr) as Hlift.
-  spec Hlift.
-  { revert Hequiv_s.
-    by apply state_received_not_sent_invariant_trace_iff with is.
-  }
-  specialize (Hlift _ (valid_trace_forget_last Htr)).
-  apply proj1 in Hlift.
-  apply finite_valid_trace_last_pstate in Hlift.
-  by rewrite <- (valid_trace_get_last Htr).
+  rewrite <- (valid_trace_get_last Htr).
+  apply (finite_valid_trace_last_pstate (pre_loaded_vlsm X P)).
+  apply (lift_preloaded_trace_to_seeded P tr).
+  - by revert Hequiv_s; apply state_received_not_sent_invariant_trace_iff with is.
+  - by apply (valid_trace_forget_last Htr).
 Qed.
 
 Lemma lift_generated_to_seeded
@@ -2773,8 +2757,7 @@ Proof.
   apply non_empty_valid_trace_from_can_produce in Hgen.
   destruct Hgen as [is [tr [item [Htr Hgen]]]].
   exists is, tr, item. split; [| done].
-  specialize (lift_preloaded_trace_to_seeded P tr) as Hlift.
-  apply Hlift; [| done].
+  apply (lift_preloaded_trace_to_seeded P tr); [| done].
   revert Hequiv_s.
   apply state_received_not_sent_invariant_trace_iff with is.
   apply valid_trace_add_last; [done |].
@@ -2846,7 +2829,7 @@ Proof.
   apply valid_trace_last_pstate in Htr as Hspre.
   intros.
   eapply composite_received_valid; [done |].
-  specialize (proper_received _ s Hspre m) as Hproper.
+  assert (Hproper := proper_received _ s Hspre m).
   apply proj2 in Hproper. apply Hproper.
   apply has_been_received_consistency; [typeclasses eauto | done |].
   by exists is, tr, Htr.
@@ -2879,19 +2862,14 @@ Proof.
 
   unfold selected_message_exists_in_all_preloaded_traces in Hhbr.
   unfold specialized_selected_message_exists_in_all_traces in Hhbr.
-  specialize (Hhbr ist tr).
   unfold finite_valid_trace_init_to in Hhbr.
   unfold finite_valid_trace_init_to in Hetr.
   destruct Hetr as [Hfptf Hisp].
   pose proof (Hfptf' := preloaded_weaken_finite_valid_trace_from_to _ _ _ _ Hfptf).
-  specialize (Hhbr (conj Hfptf' Hisp)).
-  clear Hfptf'.
-
   unfold trace_has_message in Hhbr. unfold field_selector in Hhbr.
-  apply Exists_exists in Hhbr.
-  destruct Hhbr as [tritem [Htritemin Hintritem]].
-  apply elem_of_list_split in Htritemin.
-  destruct Htritemin as [l1 [l2 Heqtr]].
+  specialize (Hhbr ist tr ltac:(done))
+  ; apply Exists_exists in Hhbr as (tritem & Htritemin & Hintritem).
+  apply elem_of_list_split in Htritemin as (l1 & l2 & Heqtr).
   rewrite Heqtr in Hfptf.
   apply (finite_valid_trace_from_to_app_split X) in Hfptf.
   destruct Hfptf as [Htr1 Htr2].
@@ -2916,20 +2894,15 @@ Proof.
 
   unfold selected_message_exists_in_all_preloaded_traces in Hhbr.
   unfold specialized_selected_message_exists_in_all_traces in Hhbr.
-  specialize (Hhbr ist tr).
-  unfold finite_valid_trace_init_to in Hhbr.
   unfold finite_valid_trace_init_to in Hetr.
   destruct Hetr as [Hfptf Hisp].
-  specialize (Hhbr (conj Hfptf Hisp)).
-
-  unfold trace_has_message in Hhbr. unfold field_selector in Hhbr.
-  apply Exists_exists in Hhbr.
-  destruct Hhbr as [tritem [Htritemin Hintritem]].
-  apply elem_of_list_split in Htritemin.
-  destruct Htritemin as [l1 [l2 Heqtr]].
+  unfold finite_valid_trace_init_to, trace_has_message, field_selector in Hhbr.
+  specialize (Hhbr ist tr ltac:(done))
+  ; apply Exists_exists in Hhbr as (tritem & Htritemin & Hintritem).
+  apply elem_of_list_split in Htritemin as (l1 & l2 & Heqtr).
   rewrite Heqtr in Hfptf.
-  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm X)) in Hfptf.
-  destruct Hfptf as [Htr1 Htr2].
+  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm X))
+    in Hfptf as [Htr1 Htr2].
   destruct tritem eqn:Heqtritem.
   simpl in Hintritem. subst input.
   eexists. eexists. eexists.

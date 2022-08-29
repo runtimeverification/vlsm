@@ -470,13 +470,11 @@ Lemma Xj_incl_Pre_Sub_Free
 Proof.
   subst Xj.
   unfold composite_no_equivocation_vlsm_with_pre_loaded.
-  specialize
-    (preloaded_constraint_subsumption_incl sub_IM
+  assert (Hincl :=
+    preloaded_constraint_subsumption_incl sub_IM
       (no_equivocations_additional_constraint_with_pre_loaded sub_IM
-        (free_constraint sub_IM)
-        seed)
-      (free_constraint sub_IM)
-    ) as Hincl.
+      (free_constraint sub_IM) seed)
+      (free_constraint sub_IM)).
   spec Hincl; [done |].
   match goal with
   |- context [pre_loaded_vlsm ?v _] =>
@@ -568,19 +566,17 @@ Proof.
     apply (option_valid_message_Some Xj).
     clear -Hmsg m Hlx IHtr tr.
     remember {| input := Some m |} as x.
-    specialize (Hmsg tr x []).
     assert (Hx : from_sub_projection x).
     { unfold from_sub_projection at 1, pre_VLSM_projection_in_projection, composite_label_sub_projection_option.
       subst. by case_decide.
     }
-    rewrite Heqx in Hmsg.
-    specialize (Hmsg m eq_refl eq_refl).
+    specialize (Hmsg tr x []); rewrite Heqx in Hmsg; specialize (Hmsg m eq_refl eq_refl).
     spec Hmsg; [by subst |].
     destruct Hmsg as [Hseed | [item [Hitem [Hout Hsub_item]]]]
     ; [by apply (initial_message_is_valid Xj); right |].
     apply (valid_trace_output_is_valid Xj _ _ IHtr).
     apply Exists_exists.
-    specialize
+    destruct
       (@pre_VLSM_projection_transition_item_project_is_Some _ (composite_type IM) _
         composite_label_sub_projection_option composite_state_sub_projection
         item Hsub_item)
@@ -599,8 +595,7 @@ Proof.
     { unfold from_sub_projection at 1, pre_VLSM_projection_in_projection, composite_label_sub_projection_option.
       by subst; case_decide.
     }
-     specialize (Hmsg tr x []). rewrite Heqx in Hmsg.
-    specialize (Hmsg m eq_refl eq_refl).
+     specialize (Hmsg tr x []); rewrite Heqx in Hmsg; specialize (Hmsg m eq_refl eq_refl).
     spec Hmsg; [by subst |].
     destruct Hmsg as [Hseed | [item [Hitem [Hout Hsub_item]]]]; [by right |].
     left.
@@ -640,11 +635,11 @@ Lemma valid_state_sub_projection
   : valid_state_prop Xj (composite_state_sub_projection s).
 Proof.
   apply valid_state_has_trace in Hps.
-  destruct Hps as [is [tr Htr]].
+  destruct Hps as (is & tr & Htr).
   specialize (Hs _ _ (VLSM_incl_finite_valid_trace_init_to X_incl_Pre _ _ _ Htr)).
   apply valid_trace_get_last in Htr as Hlst.
   apply valid_trace_forget_last in Htr.
-  specialize (finite_trace_sub_projection_last_state _ _ (proj1 Htr)) as Hlst'.
+  assert (Hlst' := finite_trace_sub_projection_last_state _ _ (proj1 Htr)).
   apply (finite_valid_trace_sub_projection _ _ Hs) in Htr as Hptr.
   - destruct Hptr as [Hptr _]. apply finite_valid_trace_last_pstate in Hptr.
     by cbn in *; rewrite Hlst' in Hptr; subst.
@@ -663,7 +658,7 @@ Proof.
   assert (Hpre := proj1 Htr).
   apply finite_valid_trace_from_app_iff in Hpre.
   destruct Hpre as [Hpre _].
-  specialize (finite_trace_sub_projection_last_state _ _ Hpre) as Hpre_lst.
+  assert (Hpre_lst := finite_trace_sub_projection_last_state _ _ Hpre).
   apply finite_valid_trace_sub_projection in Htr.
   - destruct Htr as [Htr His].
     rewrite finite_trace_sub_projection_app in Htr.
@@ -671,8 +666,7 @@ Proof.
     destruct Htr as [_ Htr].
     subst s. simpl in *.
     by rewrite Hpre_lst in Htr.
-  - specialize (Hmsg is (pre ++ tr)).
-    apply Hmsg.
+  - apply (Hmsg is (pre ++ tr)).
     apply (VLSM_incl_finite_valid_trace_init_to X_incl_Pre).
     apply valid_trace_add_last; [done |].
     rewrite finite_trace_last_app.
@@ -1160,29 +1154,25 @@ Lemma sub_can_emit_sender (P : message -> Prop)
     A v ∈ indices.
 Proof.
   intros m v Hsender Hemit.
-  specialize (Hsender_safety m v Hsender).
   destruct Hemit as [[s om] [[sub_i li] [s' Ht]]].
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   unfold sub_IM, SubProjectionTraces.sub_IM in li; cbn in li.
-  specialize (PreSubFree_PreFree_weak_full_projection IM indices (proj1_sig (composite_s0 IM)))
-    as Hproj.
+  assert (Hproj := PreSubFree_PreFree_weak_full_projection IM indices (proj1_sig (composite_s0 IM))).
   spec Hproj; [by apply initial_state_is_valid; destruct (composite_s0 IM) |].
   apply (VLSM_incl_input_valid_transition
           (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (free_composite_vlsm sub_IM) P))
      in Ht.
   apply (VLSM_weak_full_projection_input_valid_transition Hproj) in Ht; clear Hproj.
-  specialize (ProjectionTraces.preloaded_component_projection IM i) as Hproj.
+  assert (Hproj := ProjectionTraces.preloaded_component_projection IM i).
   remember (lift_sub_state_to _ _ _ s) as sX.
   remember (lift_sub_state_to _ _ _ s') as sX'.
   remember (lift_sub_label _ _ _) as lX.
-  specialize (VLSM_projection_input_valid_transition Hproj lX li) as Hproj_t.
+  assert (Hproj_t := VLSM_projection_input_valid_transition Hproj lX li).
   subst lX; unfold lift_sub_label in Hproj_t; cbn in Hproj_t.
-  spec Hproj_t.
-  {
-    unfold composite_project_label; cbn.
-    by rewrite decide_True_pi with eq_refl.
-  }
-  rewrite (Hsender_safety i); [done |]. eexists _; eauto.
+  rewrite (Hsender_safety m v Hsender i); [done |].
+  do 3 eexists _; apply Hproj_t; [| done].
+  unfold composite_project_label; cbn.
+  by rewrite decide_True_pi with eq_refl.
 Qed.
 
 (** *** Sender and sender-safety specialized for the subcomposition *)
@@ -1352,22 +1342,21 @@ Lemma sub_IM_no_equivocation_preservation
 Proof.
   destruct om as [m |]; [| done].
   destruct Hv as (lX & sX & [_ [=] (_ & Hm & _ & Hc)]).
-  specialize (composite_no_initial_valid_messages_have_sender IM A sender
-                can_emit_signed no_initial_messages_in_IM _ _ Hm)
-    as Hhas_sender.
+  assert (Hhas_sender := composite_no_initial_valid_messages_have_sender IM A sender
+    can_emit_signed no_initial_messages_in_IM _ _ Hm).
   destruct (sender m) as [v |] eqn: Hsender; [clear Hhas_sender | congruence].
   apply (emitted_messages_are_valid_iff (composite_vlsm IM sub_IM_not_equivocating_constraint) m)
     in Hm as [[i [[im Him] Heqm]] | Hemitted].
   - by elim (no_initial_messages_in_IM i im).
   - apply (VLSM_incl_can_emit (constraint_preloaded_free_incl _ _)) in Hemitted.
-    specialize (can_emit_projection IM A sender Hsender_safety (A v) m) as Hemit.
-    spec Hemit; [rewrite Hsender; itauto|].
-    apply Hemit in Hemitted; clear Hemit.
-    cbn in Hc; rewrite Hsender in Hc; cbn in Hc; case_decide.
-    + left. subst. eexists; exact Hc.
-    + right. exists (A v).
-      unfold channel_authenticated_message.
-      rewrite Hsender; itauto.
+    assert (Hemit := can_emit_projection IM A sender Hsender_safety (A v) m).
+    apply Hemit in Hemitted; clear Hemit; cycle 1.
+    + rewrite Hsender; itauto.
+    + cbn in Hc; rewrite Hsender in Hc; cbn in Hc; case_decide.
+      * by left; subst; eexists; exact Hc.
+      * right. exists (A v).
+        unfold channel_authenticated_message.
+        rewrite Hsender; itauto.
 Qed.
 
 End sub_composition_sender.
@@ -1775,11 +1764,9 @@ Lemma can_emit_with_more
   : can_emit (pre_loaded_vlsm (IM j) P) m -> can_emit (pre_loaded_vlsm SubFree Q) m.
 Proof.
   intro Hemit.
-  specialize
-    (lift_to_composite_generalized_preloaded_vlsm_full_projection
-      (sub_IM IM indices) _ _ PimpliesQ (dexist j Hj))
-    as Hproj.
-  by apply (VLSM_full_projection_can_emit Hproj).
+  eapply (VLSM_full_projection_can_emit); [| done].
+  by apply (lift_to_composite_generalized_preloaded_vlsm_full_projection
+             (sub_IM IM indices) _ _ PimpliesQ (dexist j Hj)).
 Qed.
 
 End sub_composition_preloaded_lift.

@@ -277,7 +277,8 @@ Proof.
     destruct (decide (a ∈ l)).
     + by etransitivity; [apply IHl | lia].
     + by rewrite list_difference_singleton_not_in; [lia |].
-  - by inversion 1; subst; [done |]; cbn; spec IHl; [| lia].
+  - inversion 1; subst; [done |]; cbn.
+    by apply le_n_S, IHl.
 Qed.
 
 Lemma longer_subseteq_has_dups `{EqDecision A} :

@@ -101,16 +101,12 @@ Proof.
   destruct HsX as [isX [trX HtrX]].
   apply finite_valid_trace_init_to_last in HtrX as HsX.
   apply finite_valid_trace_init_to_forget_last, proj1 in HtrX.
-  specialize (partial_trace_project_extends_left _ _ _ Hsimul _ _ _ _ Hpr _ _ HsX)
-    as Hpr_extends_left.
-  spec Hpr_extends_left.
-  { by rewrite app_nil_r. }
-  destruct Hpr_extends_left as [isY [preY [Hpr_tr HsY]]].
-  rewrite !app_nil_r in Hpr_tr.
-  specialize (VLSM_weak_partial_projection_finite_valid_trace_from _ _ _ _ Hpr_tr HtrX)
-    as Hinit_to.
-  apply finite_valid_trace_from_app_iff, proj1, finite_valid_trace_last_pstate in Hinit_to.
-  by subst sY.
+  destruct (partial_trace_project_extends_left _ _ _ Hsimul _ _ _ _ Hpr _ _ HsX)
+    as (isY & preY & Hpr_tr & HsY).
+  - by rewrite app_nil_r.
+  - rewrite !app_nil_r in Hpr_tr; subst sY.
+    by eapply finite_valid_trace_last_pstate, finite_valid_trace_from_app_iff,
+      VLSM_weak_partial_projection_finite_valid_trace_from.
 Qed.
 
 Lemma VLSM_weak_partial_projection_input_valid_transition
@@ -160,15 +156,11 @@ Lemma VLSM_partial_projection_finite_valid_trace_from
     finite_valid_trace_from X sX trX -> finite_valid_trace_from Y sY trY.
 Proof.
   intros sX trX sY trY Hpr_tr HtrX.
-  apply (finite_valid_trace_from_complete_left X) in HtrX
-    as [isX [preX [Htr'X HsX]]].
-  specialize (partial_trace_project_extends_left _ _ _ Hsimul _ _ _ _ Hpr_tr _ _ HsX)
-    as Hpr_extends_left.
-  spec Hpr_extends_left; [by apply proj1 in Htr'X |].
-  destruct Hpr_extends_left as [isY [preY [Hpr_tr' HsY]]].
-  specialize (VLSM_partial_projection_finite_valid_trace _ _ _ _ Hpr_tr' Htr'X)
-    as Hinit_to.
-  by apply proj1, finite_valid_trace_from_app_iff, proj2 in Hinit_to; subst.
+  apply (finite_valid_trace_from_complete_left X) in HtrX as (isX & preX & Htr'X & HsX).
+  destruct (partial_trace_project_extends_left _ _ _ Hsimul _ _ _ _ Hpr_tr _ _ HsX)
+    as (isY & preY & Hpr_tr' & <-).
+  - apply Htr'X.
+  - by eapply finite_valid_trace_from_app_iff, VLSM_partial_projection_finite_valid_trace.
 Qed.
 
 Lemma VLSM_partial_projection_initial_state
