@@ -119,7 +119,8 @@ Section tracewise_limited_message_equivocation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   `{ReachableThreshold index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
@@ -127,7 +128,6 @@ Context
   (Free := free_composite_vlsm IM)
   (sender : message -> option index)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM id sender)}
-  `{FinSet index Ci}
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM id sender)
   .
@@ -136,7 +136,7 @@ Existing Instance Htracewise_BasicEquivocation.
 
 Lemma tracewise_basic_equivocation_state_validators_comprehensive_prop :
   basic_equivocation_state_validators_comprehensive_prop IM.
-Proof. intros s v _; cbn; apply elem_of_list_to_set, elem_of_enum. 
+Proof. intros s v _; cbn; apply elem_of_list_to_set, elem_of_enum.
 Qed.
 
 Definition tracewise_limited_equivocation_constraint :=
@@ -177,7 +177,7 @@ constraint is also a trace under the limited equivocation constraint.
 Context
   `{FinSet index Ci}
   {message : Type}
-  `{finite.Finite index}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -247,9 +247,8 @@ Proof.
   intros [i li] [s om] Hpv.
   unfold limited_equivocation_constraint.
   destruct (composite_transition _ _ _) as [s' om'] eqn: Ht.
-  apply tracewise_not_heavy_LimitedEquivocationProp_iff. unfold not_heavy. 
-  apply StrongFixed_valid_state_not_heavy
-    ,(input_valid_transition_destination StrongFixed).
+  apply tracewise_not_heavy_LimitedEquivocationProp_iff. unfold not_heavy.
+  by eapply StrongFixed_valid_state_not_heavy, input_valid_transition_destination.
 Qed.
 
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
@@ -276,7 +275,8 @@ induced by a subset of indices whose weight is less than the allowed
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -316,7 +316,6 @@ are valid for the free composition and whose final state is [not_heavy] have
 the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma traces_exhibiting_limited_equivocation_are_valid_rev
-  `{FinSet index Ci}
   (Hke : WitnessedEquivocationCapability IM id sender)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
@@ -337,7 +336,7 @@ Proof.
   - by eapply valid_trace_forget_last, strong_witness_has_fixed_equivocation.
   - replace (sum_weights _) with (equivocation_fault s); [done |].
     apply set_eq_nodup_sum_weight_eq.
-    + apply equivocating_validators_nodup.
+    + apply NoDup_elements.
     + apply NoDup_remove_dups.
     + apply ListSetExtras.set_eq_extract_forall.
       intro i. rewrite elem_of_remove_dups. itauto.
