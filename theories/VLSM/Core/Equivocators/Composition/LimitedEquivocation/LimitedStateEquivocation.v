@@ -49,7 +49,7 @@ Section limited_state_equivocation.
 
 Context {message : Type}
   `{FinSet index Ci}
-  `{finite.Finite index}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
@@ -134,15 +134,13 @@ Proof.
   - subst s.
     unfold not_heavy, Equivocation.not_heavy,
       equivocation_fault, Equivocation.equivocation_fault.
-    replace (elements (Equivocation.equivocating_validators is)) with (@nil index).
+    replace (elements _) with (@nil index).
     + by destruct threshold as [t Ht]; simpl; apply Rge_le.
-    + symmetry. apply set_eq_empty_iff.
+    + symmetry. apply elements_empty_iff.
       specialize (equivocating_indices_equivocating_validators IM is).
-      rewrite equivocating_indices_initially_empty.
-      * rewrite set_eq_fin_set. simpl. replace (elements (∅)) with (@nil index).
-        unfold Equivocation.equivocating_validators. cbn.
-    apply H11.
-  - replace s with 
+      rewrite equivocating_indices_initially_empty; [ | done].
+      by cbn; intros Heq; split; intro; apply Heq.
+  - replace s with
     (fst (composite_transition equivocator_IM l (s0, oim))); [assumption|].
     by simpl in *; rewrite Ht.
 Qed.
@@ -169,17 +167,17 @@ Proof.
   - apply (finite_valid_trace_from_to_empty (equivocators_fixed_equivocations_vlsm IM equivocating)).
     by apply initial_state_is_valid.
   - specialize (equivocating_indices_equivocating_validators IM)
-      as Heq. destruct (Heq sf) as [_ Hsf_incl].
+      as Heq.
     specialize (IHHtr equivocating).
     spec IHHtr.
     { apply proj2 in Ht.
       specialize (equivocators_transition_preserves_equivocating_indices IM (enum index)  _ _ _ _ _ Ht)
         as Hincl'.
-      clear -Hincl Hincl' Heq Hsf_incl.
-      specialize (Heq s) as [Hincl_s _].
-      transitivity (equivocating_validators sf); [| done].
-      transitivity (equivocating_indices IM (enum index) sf); [| done].
-      by transitivity (equivocating_indices IM (enum index) s).
+      clear -Hincl Hincl' Heq.
+      transitivity (elements (equivocating_validators sf)); [| done].
+      intro x; rewrite! elem_of_elements; intro Hx.
+      apply Heq, elem_of_list_to_set, Hincl'.
+      by apply Heq, elem_of_list_to_set in Hx.
     }
     apply
       (finite_valid_trace_from_to_app
@@ -196,7 +194,8 @@ Proof.
         by eapply composite_sent_valid.
       + replace (composite_transition _ _ _) with (sf, oom).
         unfold state_has_fixed_equivocation.
-        by transitivity (equivocating_validators sf).
+        transitivity (elements (equivocating_validators sf)); [| done].
+        by intros x Hx; apply elem_of_elements, Heq, elem_of_list_to_set.
 Qed.
 
 (** Projections of valid traces for the composition of equivocators
