@@ -182,7 +182,7 @@ Proof.
       + elim Hnv; apply elem_of_elements, (equivocating_validators_is_equivocating_tracewise_iff IM A sender), H13.
       + destruct om as [m|]; simpl in Hom; [|congruence].
         * apply (equivocating_validators_is_equivocating_tracewise_iff IM A sender).
-          exists m. repeat split; [done |].
+          exists m. repeat split; [done |]. 
         intros is tr [Htr Hinit] Hwitness.
         specialize (extend_right_finite_trace_from_to _ Htr Ht) as Htr'.
         specialize (Hv _ _ (conj Htr' Hinit)).
@@ -515,7 +515,7 @@ Proof.
     + spec IHn (length tr').
       rewrite app_length in Hn. simpl in Hn.
       spec IHn; [lia|].
-      spec IHn is tr'.
+      spec IHn is tr'. 
       specialize (NoDup_subseteq_length (equivocating_validators_nodup s') (proj2 Heq))
         as Hlen1.
       match type of Hlen1 with

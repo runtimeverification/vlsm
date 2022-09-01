@@ -315,7 +315,7 @@ Qed.
 are valid for the free composition and whose final state is [not_heavy] have
 the [fixed_limited_equivocation_prop]erty.
 *)
-(*Lemma traces_exhibiting_limited_equivocation_are_valid_rev
+Lemma traces_exhibiting_limited_equivocation_are_valid_rev
   `{FinSet index Ci}
   (Hke : WitnessedEquivocationCapability IM id sender)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
@@ -341,13 +341,13 @@ Proof.
     + apply NoDup_remove_dups.
     + apply ListSetExtras.set_eq_extract_forall.
       intro i. rewrite elem_of_remove_dups. itauto.
-Qed.*)
+Qed.
 
 (** Traces with the [strong_trace_witnessing_equivocation_prop]erty, which are
 valid for the composition using a [limited_equivocation_constraint]
 have the [fixed_limited_equivocation_prop]erty.
 *)
-(*Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
+Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
   (Hke : WitnessedEquivocationCapability IM id sender)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
@@ -365,11 +365,11 @@ Proof.
   - apply tracewise_not_heavy_LimitedEquivocationProp_iff,
       full_node_limited_equivocation_valid_state_weight,
       finite_valid_trace_last_pstate with (X := Limited), Htr.
-Qed.*)
+Qed.
 
 (** Any state which is valid for limited equivocation can be produced by
-a trace having the [fixed_limited_equivocation_prop]erty.
-*)
+a trace having the [fixed_limited_equivocation_prop]erty. *)
+
 Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
   (Hke : WitnessedEquivocationCapability IM id sender)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
