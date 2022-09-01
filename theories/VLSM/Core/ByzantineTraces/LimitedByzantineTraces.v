@@ -25,7 +25,7 @@ Section limited_byzantine_traces.
 Context
   `{FinSet index Ci}
   {message : Type}
-  `{finite.Finite index}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
@@ -77,7 +77,6 @@ selection.
 Section fixed_limited_selection.
 
 Context
-  `{FinSet index Ci}
   (byzantine: set index)
   (non_byzantine : set index := set_diff (enum index) byzantine)
   (Hlimit: (sum_weights (remove_dups byzantine) <= `threshold)%R)
@@ -96,12 +95,12 @@ Lemma limited_PreNonByzantine_valid_state_lift_not_heavy s
   (sX := lift_sub_state IM non_byzantine s)
   : tracewise_not_heavy sX.
 Proof.
-  cut (tracewise_equivocating_validators sX ⊆ byzantine).
+  cut (elements (tracewise_equivocating_validators sX) ⊆ byzantine).
   { intro Hincl.
     unfold tracewise_not_heavy, not_heavy.
     transitivity (sum_weights (remove_dups byzantine)); [| done].
     apply sum_weights_subseteq.
-    - apply equivocating_validators_nodup.
+    - apply NoDup_elements.
     - apply NoDup_remove_dups.
     - intros i Hi. apply elem_of_remove_dups, Hincl, Hi.
   }
@@ -109,7 +108,7 @@ Proof.
   specialize (preloaded_non_byzantine_vlsm_lift IM byzantine (fun i => i) sender)
     as Hproj.
   apply (VLSM_full_projection_finite_valid_trace_init_to Hproj) in Htr as Hpre_tr.
-  intros v Hv.
+  intros v Hv; apply elem_of_elements in Hv.
   apply equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
   specialize (Hvs' _ _ Hpre_tr).
   destruct Hvs' as [m0 [Hsender0 [preX [itemX [sufX [Htr_pr [Hm0 Heqv]]]]]]].
