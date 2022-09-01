@@ -69,53 +69,50 @@ Qed.
 Section equivocating_indices_BasicEquivocation.
 
 Context
+  `{FinSet index Ci}
   `{ReachableThreshold index}
   .
 
-Program Instance equivocating_indices_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index
+Program Instance equivocating_indices_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci
   := {
     is_equivocating := fun s v => v ∈ (equivocating_indices (enum index) s) ;
-    state_validators := fun s => enum index
+    state_validators := fun s => list_to_set(enum index)
   }.
 Next Obligation.
   intro. intros.
   typeclasses eauto.
 Qed.
-Next Obligation.
-  intros.
-  apply NoDup_enum.
-Qed.
 
 Lemma equivocating_indices_equivocating_validators
-  : forall s, set_eq (equivocating_validators s) (equivocating_indices (enum index) s).
+  : forall s, equivocating_validators s ≡@{Ci} list_to_set(equivocating_indices (enum index) s).
 Proof.
-  intro s.
-  apply set_eq_extract_forall. intro.
+  intros s.
+  apply set_eq_fin_set. 
   unfold equivocating_validators, is_equivocating.
   simpl.
   split; intro Hin.
-  - by apply elem_of_list_filter in Hin as [Hin Hel].
-  - by apply elem_of_list_filter; auto using elem_of_enum.
+  - rewrite !elem_of_elements, elem_of_filter, !elem_of_list_to_set.
+    intros [Hins _]. apply Hins.
+  - rewrite !elem_of_elements, elem_of_filter, !elem_of_list_to_set.
+    intros Hins. split.
+    + apply Hins.
+    + auto using elem_of_enum.
 Qed.
 
 Lemma eq_equivocating_indices_equivocation_fault
 : forall s1 s2,
-  set_eq (equivocating_indices (enum index) s1) (equivocating_indices (enum index) s2) ->
+  list_to_set (equivocating_indices (enum index) s1) ≡@{Ci} list_to_set (equivocating_indices (enum index) s2) ->
   equivocation_fault s1 = equivocation_fault s2.
 Proof.
   intros s1 s2 Heq.
   apply
     (set_eq_nodup_sum_weight_eq
-      (equivocating_validators s1)
-      (equivocating_validators s2)
+      (elements(equivocating_validators s1))
+      (elements(equivocating_validators s2))
     ).
-  - apply NoDup_filter.
-    apply state_validators_nodup.
-  - apply NoDup_filter.
-    apply state_validators_nodup.
-  - rewrite equivocating_indices_equivocating_validators, Heq.
-    apply set_eq_comm.
-    apply equivocating_indices_equivocating_validators.
+  - apply NoDup_elements.
+  - apply NoDup_elements.
+  - apply set_eq_fin_set. rewrite !equivocating_indices_equivocating_validators. apply Heq.
 Qed.
 
 End equivocating_indices_BasicEquivocation.

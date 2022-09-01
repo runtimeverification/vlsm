@@ -23,6 +23,7 @@ composition constraint allowing only a limited amount of equivocation.
 Section limited_byzantine_traces.
 
 Context
+  `{FinSet index Ci}
   {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
@@ -76,14 +77,15 @@ selection.
 Section fixed_limited_selection.
 
 Context
+  `{FinSet index Ci}
   (byzantine: set index)
   (non_byzantine : set index := set_diff (enum index) byzantine)
   (Hlimit: (sum_weights (remove_dups byzantine) <= `threshold)%R)
   (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine (λ i : index, i) sender)
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
-  (tracewise_not_heavy := @not_heavy _ _ _ _ Htracewise_BasicEquivocation)
-  (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ Htracewise_BasicEquivocation)
+  (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
+  (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
   .
 
 (** When replacing the byzantine components of a composite [valid_state] with

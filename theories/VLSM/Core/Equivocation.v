@@ -53,24 +53,23 @@ is lower than the [threshold] set for the <<validator>>s type.
 **)
 
 Class BasicEquivocation
-  (state validator : Type)
+  (state validator Cm : Type)
   {measurable_V : Measurable validator}
   {reachable_threshold : ReachableThreshold validator}
+  `{FinSet validator Cm}
   :=
   { is_equivocating (s : state) (v : validator) : Prop
   ; is_equivocating_dec : RelDecision is_equivocating
 
     (** retrieves a set containing all possible validators for a state. **)
 
-  ; state_validators (s : state) : set validator
-
-  ; state_validators_nodup : forall (s : state), NoDup (state_validators s)
+  ; state_validators (s : state) : Cm
 
     (** All validators which are equivocating in a given composite state **)
 
   ; equivocating_validators
       (s : state)
-      : list validator
+      : Cm
       := filter (fun v => is_equivocating s v) (state_validators s)
 
      (** The equivocation fault sum: the sum of the weights of equivocating
@@ -80,34 +79,24 @@ Class BasicEquivocation
       (s : state)
       : R
       :=
-      sum_weights (equivocating_validators s)
+      sum_weights (elements (equivocating_validators s))
 
   ; not_heavy
       (s : state)
       := (equivocation_fault s <= proj1_sig threshold)%R
  }.
 
-Lemma equivocating_validators_nodup
-  `{Heqv: BasicEquivocation st validator }
-  (s : st)
-  : NoDup (equivocating_validators s).
-Proof.
-  apply NoDup_filter. apply state_validators_nodup.
-Qed.
-
 Lemma eq_equivocating_validators_equivocation_fault
-  `{Heqv: BasicEquivocation st validator }
-  `{EqDecision validator}
-  : forall s1 s2,
-    set_eq (equivocating_validators s1) (equivocating_validators s2) ->
+   `{BasicEquivocation st validator Cm}
+   : forall s1 s2,
+    equivocating_validators s1 ≡@{Cm} equivocating_validators s2 ->
     equivocation_fault s1 = equivocation_fault s2.
 Proof.
   intros.
-  apply (set_eq_nodup_sum_weight_eq
-          (equivocating_validators s1)
-          (equivocating_validators s2))
-  ; [| | done]
-  ; apply equivocating_validators_nodup.
+  apply set_eq_nodup_sum_weight_eq.
+  - apply NoDup_elements.
+  - apply NoDup_elements.
+  - apply set_eq_fin_set, H8.
 Qed.
 
 Lemma incl_equivocating_validators_equivocation_fault
@@ -117,12 +106,11 @@ Lemma incl_equivocating_validators_equivocation_fault
     (equivocating_validators s1) ⊆ (equivocating_validators s2) ->
     (equivocation_fault s1 <= equivocation_fault s2)%R.
 Proof.
-  intros.
-  apply (sum_weights_subseteq
-          (equivocating_validators s1)
-          (equivocating_validators s2))
-  ; [| | done]
-  ; apply equivocating_validators_nodup.
+  intros s1 s2 H_incl.
+  apply sum_weights_subseteq.
+  - apply NoDup_elements.
+  - apply NoDup_elements.
+  - intro. setoid_rewrite elem_of_elements. apply H_incl. 
 Qed.
 
 (** *** State-message oracles and endowing states with history
@@ -2154,6 +2142,7 @@ Context
     `{finite.Finite validator}
     {measurable_V : Measurable validator}
     {threshold_V : ReachableThreshold validator}
+    `{FinSet validator Cm}
     .
 (** For the equivocation sum fault to be computable, we require that
     our is_equivocating property is decidable. The current implementation
@@ -2162,17 +2151,16 @@ Context
 
 Definition equivocation_dec_statewise
    (Hdec : RelDecision is_equivocating_statewise)
-    : BasicEquivocation (composite_state IM) (validator)
+    : BasicEquivocation (composite_state IM) validator Cm
   :=
   {|
-    state_validators := fun _ => enum validator;
-    state_validators_nodup := fun _ => NoDup_enum validator;
+    state_validators := fun _ => list_to_set (enum validator);
     is_equivocating := is_equivocating_statewise;
     is_equivocating_dec := Hdec
   |}.
 
 Definition equivocation_fault_constraint
-  (Dec : BasicEquivocation (composite_state IM) validator)
+  (Dec : BasicEquivocation (composite_state IM) validator Cm)
   (l : composite_label IM)
   (som : composite_state IM * option message)
   : Prop

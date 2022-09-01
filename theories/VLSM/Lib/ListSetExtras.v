@@ -20,6 +20,12 @@ Proof.
   unfold set_eq. firstorder.
 Qed.
 
+Lemma set_eq_fin_set `{FinSet A Cm} (s1 s2 : Cm) :
+  s1 ≡ s2 <-> set_eq (elements s1) (elements s2).
+Proof.
+  rewrite set_eq_extract_forall, set_equiv. by setoid_rewrite elem_of_elements.
+Qed.
+
 Lemma set_eq_proj1 {A} : forall (s1 s2 : set A),
   set_eq s1 s2 ->
   s1 ⊆ s2.
