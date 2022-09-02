@@ -96,8 +96,7 @@ Proof.
   apply sum_weights_subseteq.
   - by apply NoDup_elements.
   - by apply Hnodup_vs.
-  - by intros v Hv; apply Heqv_vs; apply elem_of_elements, elem_of_filter in Hv;
-    destruct Hv as [Hsv _]; apply Hsv.
+  - by intros v Hv; apply elem_of_elements, elem_of_filter in Hv; apply Heqv_vs, Hv.
 Qed.
 
 Definition basic_equivocation_state_validators_comprehensive_prop : Prop :=
@@ -136,8 +135,7 @@ Existing Instance Htracewise_BasicEquivocation.
 
 Lemma tracewise_basic_equivocation_state_validators_comprehensive_prop :
   basic_equivocation_state_validators_comprehensive_prop IM.
-Proof. by intros s v _; cbn; apply elem_of_list_to_set, elem_of_enum.
-Qed.
+Proof. by intros s v _; cbn; apply elem_of_list_to_set, elem_of_enum. Qed.
 
 Definition tracewise_limited_equivocation_constraint :=
   basic_limited_equivocation_constraint IM.
@@ -205,12 +203,11 @@ Proof.
   cut (elements(tracewise_equivocating_validators s) ⊆ equivocators).
   { intro Hincl.
     unfold tracewise_not_heavy, not_heavy.
-    transitivity (sum_weights (remove_dups equivocators)).
-    - apply sum_weights_subseteq.
-      + by apply NoDup_elements.
-      + by apply NoDup_remove_dups.
-      + by intros i Hi; apply elem_of_remove_dups, Hincl; unfold tracewise_equivocating_validators; apply Hi.
-    - by apply Hlimited.
+    transitivity (sum_weights (remove_dups equivocators)); [| done].
+    apply sum_weights_subseteq.
+    - by apply NoDup_elements.
+    - by apply NoDup_remove_dups.
+    - by intros i Hi; apply elem_of_remove_dups, Hincl; unfold tracewise_equivocating_validators; apply Hi.
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
   { apply VLSM_incl_trans with (machine Free).
@@ -247,8 +244,8 @@ Proof.
   intros [i li] [s om] Hpv.
   unfold limited_equivocation_constraint.
   destruct (composite_transition _ _ _) as [s' om'] eqn: Ht.
-  by apply tracewise_not_heavy_LimitedEquivocationProp_iff; unfold not_heavy;
-  eapply StrongFixed_valid_state_not_heavy, input_valid_transition_destination.
+  by eapply tracewise_not_heavy_LimitedEquivocationProp_iff,
+    StrongFixed_valid_state_not_heavy, input_valid_transition_destination.
 Qed.
 
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
@@ -306,9 +303,8 @@ Lemma traces_exhibiting_limited_equivocation_are_valid
   : forall s tr, fixed_limited_equivocation_prop s tr -> finite_valid_trace Limited s tr.
 Proof.
   intros s tr [equivocators [Hlimited Htr]].
-  eapply VLSM_incl_finite_valid_trace; [| done]. apply Fixed_incl_Limited.
-  - by apply Hlimited.
-  - by apply Hsender_safety.
+  eapply VLSM_incl_finite_valid_trace; [| done].
+  by apply Fixed_incl_Limited.
 Qed.
 
 (** Traces having the [strong_trace_witnessing_equivocation_prop]erty, which
@@ -381,7 +377,7 @@ Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
 Proof.
   intros s Hs.
   assert (Hfree_s : valid_state_prop (free_composite_vlsm IM) s)
-    by (revert Hs; apply VLSM_incl_valid_state, constraint_free_incl). 
+    by (revert Hs; apply VLSM_incl_valid_state, constraint_free_incl).
   destruct
     (free_has_strong_trace_witnessing_equivocation_prop IM id sender _ s Hfree_s)
     as (is & tr & Htr & Heqv).

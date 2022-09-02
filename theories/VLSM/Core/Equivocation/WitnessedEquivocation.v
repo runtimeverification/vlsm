@@ -100,7 +100,8 @@ Proof.
   simpl.
   split; [inversion 1|].
   intros [m [_ Hmsg]].
-  by elim (no_equivocation_in_empty_trace PreFree m). symmetry. apply elements_empty_iff, Hempty.
+  - by elim (no_equivocation_in_empty_trace PreFree m).
+  - by symmetry; apply elements_empty_iff, Hempty.
 Qed.
 
 (** For any trace having the [trace_witnessing_equivocation_prop]erty,
@@ -173,8 +174,7 @@ Lemma equivocating_validators_step_update
       ~ trace_has_message (field_selector output) m tr).
 Proof.
   intro Hv.
-  destruct (decide (v ∈ elements (equivocating_validators s)))
-    as [Hnv | Hnv]
+  destruct (decide (v ∈ elements (equivocating_validators s))) as [Hnv | Hnv]
   ; rewrite elem_of_elements in Hnv; [by left | right].
   apply equivocating_validators_is_equivocating_tracewise_iff in Hv.
   destruct (transition_is_equivocating_tracewise_char IM A sender  _ _ _ _ _ Ht _ Hv)
@@ -197,10 +197,9 @@ Proof.
     apply Hwitness. exists m'. split; [done |].
     exists prefix, item, suffix'.
     split; [| done].
-    change (item :: suffix' ++ [item'])
-      with ([item] ++ suffix' ++ [item']) in Heq.
-    rewrite !app_assoc in Heq.
-    by apply app_inj_tail in Heq; rewrite <- !app_assoc in Heq; apply Heq.
+    change (item :: suffix' ++ [item']) with ([item] ++ suffix' ++ [item']) in Heq.
+    rewrite !app_assoc in Heq; apply app_inj_tail in Heq; rewrite <- !app_assoc in Heq.
+    by destruct Heq as [-> _].
 Qed.
 
 (**
@@ -557,8 +556,7 @@ Proof.
       spec IHm.
       {
         rewrite Hneq.
-        setoid_rewrite size_union;
-          [by rewrite size_singleton; unfold size; lia |].
+        setoid_rewrite size_union; [by rewrite size_singleton; unfold size; lia |].
         by intro v'; rewrite elem_of_singleton; intros ->.
       }
       spec IHm is' tr''.

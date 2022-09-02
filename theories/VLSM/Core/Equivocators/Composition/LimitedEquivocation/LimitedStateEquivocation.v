@@ -136,13 +136,11 @@ Proof.
       equivocation_fault, Equivocation.equivocation_fault.
     replace (elements _) with (@nil index).
     + by destruct threshold as [t Ht]; simpl; apply Rge_le.
-    + by symmetry; apply elements_empty_iff;
-      specialize (equivocating_indices_equivocating_validators IM is);
-      rewrite equivocating_indices_initially_empty; [ | done];
-      cbn; intros Heq; split; intro; apply Heq.
-  - by replace s with
-    (fst (composite_transition equivocator_IM l (s0, oim))); [assumption|];
-    simpl in *; rewrite Ht.
+    + symmetry; apply elements_empty_iff; cbn.
+      specialize (equivocating_indices_equivocating_validators IM is).
+      by rewrite equivocating_indices_initially_empty.
+  - by replace s with (fst (composite_transition equivocator_IM l (s0, oim))); [done |]
+    ; cbn in *; rewrite Ht.
 Qed.
 
 (** A valid valid trace for the composition of equivocators with limited

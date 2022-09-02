@@ -62,7 +62,9 @@ Proof.
   apply sum_weights_subseteq.
   - apply NoDup_elements.
   - apply NoDup_remove_dups.
-  - intros i Hi; apply elem_of_remove_dups; apply elem_of_elements in Hi; rewrite Heq in Hi. apply elem_of_list_to_set in Hi; apply Hfixed, Hi.
+  - intros i Hi.
+    apply elem_of_elements in Hi; rewrite Heq in Hi; apply elem_of_list_to_set in Hi.
+    by apply elem_of_remove_dups, Hfixed, Hi.
 Qed.
 
 End fixed_limited_state_equivocation.

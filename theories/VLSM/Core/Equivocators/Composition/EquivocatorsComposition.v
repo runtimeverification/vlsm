@@ -90,13 +90,10 @@ Proof.
   apply set_eq_fin_set. 
   unfold equivocating_validators, is_equivocating.
   simpl.
-  split; intro Hin.
-  - rewrite !elem_of_elements, elem_of_filter, !elem_of_list_to_set.
-    intros [Hins _]. apply Hins.
-  - rewrite !elem_of_elements, elem_of_filter, !elem_of_list_to_set.
-    intros Hins. split.
-    + apply Hins.
-    + auto using elem_of_enum.
+  split; intro Hin
+  ; rewrite !elem_of_elements, elem_of_filter, !elem_of_list_to_set.
+  - by intros [].
+  - by split; auto using elem_of_enum.
 Qed.
 
 Lemma eq_equivocating_indices_equivocation_fault
@@ -105,14 +102,10 @@ Lemma eq_equivocating_indices_equivocation_fault
   equivocation_fault s1 = equivocation_fault s2.
 Proof.
   intros s1 s2 Heq.
-  apply
-    (set_eq_nodup_sum_weight_eq
-      (elements(equivocating_validators s1))
-      (elements(equivocating_validators s2))
-    ).
-  - apply NoDup_elements.
-  - apply NoDup_elements.
-  - apply set_eq_fin_set. rewrite !equivocating_indices_equivocating_validators. apply Heq.
+  apply set_eq_nodup_sum_weight_eq.
+  - by apply NoDup_elements.
+  - by apply NoDup_elements.
+  - by apply set_eq_fin_set; rewrite !equivocating_indices_equivocating_validators.
 Qed.
 
 End equivocating_indices_BasicEquivocation.

@@ -716,7 +716,7 @@ Proof.
   constructor; intros sX trX HtrX.
   eapply traces_exhibiting_limited_equivocation_are_valid.
   - by apply Hsender_safety.
-  - by apply msg_dep_fixed_limited_equivocation, HtrX.
+  - by apply msg_dep_fixed_limited_equivocation.
 Qed.
 
 End sec_msg_dep_fixed_limited_equivocation.
