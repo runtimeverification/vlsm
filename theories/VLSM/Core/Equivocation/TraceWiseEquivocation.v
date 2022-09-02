@@ -321,9 +321,9 @@ Lemma equivocating_validators_empty_in_initial_state
   : equivocating_validators s ≡@{Cm} ∅.
 Proof.
   intro v. split.
-  - rewrite equivocating_validators_is_equivocating_tracewise_iff.
-    by apply initial_state_not_is_equivocating_tracewise with (v := v) in His.
-  - intro HV. contradict HV. apply not_elem_of_empty.
+  - by rewrite equivocating_validators_is_equivocating_tracewise_iff;
+    apply initial_state_not_is_equivocating_tracewise with (v := v) in His.
+  - by intro HV; contradict HV; apply not_elem_of_empty.
 Qed.
 
 Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validators

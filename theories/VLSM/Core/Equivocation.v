@@ -94,9 +94,9 @@ Lemma eq_equivocating_validators_equivocation_fault
 Proof.
   intros.
   apply set_eq_nodup_sum_weight_eq.
-  - apply NoDup_elements.
-  - apply NoDup_elements.
-  - apply set_eq_fin_set, H8.
+  - by apply NoDup_elements.
+  - by apply NoDup_elements.
+  - by apply set_eq_fin_set, H8.
 Qed.
 
 Lemma incl_equivocating_validators_equivocation_fault
@@ -108,9 +108,9 @@ Lemma incl_equivocating_validators_equivocation_fault
 Proof.
   intros s1 s2 H_incl.
   apply sum_weights_subseteq.
-  - apply NoDup_elements.
-  - apply NoDup_elements.
-  - intro. setoid_rewrite elem_of_elements. apply H_incl. 
+  - by apply NoDup_elements.
+  - by apply NoDup_elements.
+  - by intro; setoid_rewrite elem_of_elements; apply H_incl. 
 Qed.
 
 (** *** State-message oracles and endowing states with history

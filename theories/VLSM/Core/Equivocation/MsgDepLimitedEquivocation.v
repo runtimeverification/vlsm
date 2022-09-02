@@ -715,8 +715,8 @@ Lemma annotated_limited_incl_constrained_limited
 Proof.
   constructor; intros sX trX HtrX.
   eapply traces_exhibiting_limited_equivocation_are_valid.
-  - apply Hsender_safety.
-  - apply msg_dep_fixed_limited_equivocation, HtrX.
+  - by apply Hsender_safety.
+  - by apply msg_dep_fixed_limited_equivocation, HtrX.
 Qed.
 
 End sec_msg_dep_fixed_limited_equivocation.

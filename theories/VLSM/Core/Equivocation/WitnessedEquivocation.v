@@ -200,7 +200,7 @@ Proof.
     change (item :: suffix' ++ [item'])
       with ([item] ++ suffix' ++ [item']) in Heq.
     rewrite !app_assoc in Heq.
-    apply app_inj_tail in Heq. rewrite <- !app_assoc in Heq. apply Heq.
+    by apply app_inj_tail in Heq; rewrite <- !app_assoc in Heq; apply Heq.
 Qed.
 
 (**
@@ -254,10 +254,10 @@ Proof.
   - destruct om as [m|]; [|inversion Heq_v]. simpl in Heq_v.
     destruct (decide (set_eq (elements (equivocating_validators s)) (elements (equivocating_validators s'))))
     ; [apply set_eq_fin_set in s0; left;split; [done |]|].
-    + apply
+    + by apply
         (input_valid_transition_reflects_trace_witnessing_equivocation_prop
-          _ _ _ (conj Htr Hinit) _ Hwitness).
-      by subst; intros ? ?; apply s0.
+          _ _ _ (conj Htr Hinit) _ Hwitness);
+      subst; intros ? ?; apply s0.
     + right. exists m; split; [done |]. exists v; split; [done |].
       specialize (equivocating_validators_step_update _ _ _ _ _ Ht) as Honly_v.
       simpl in Honly_v.
@@ -282,10 +282,10 @@ Proof.
           as [Hveqv | Hveqv]; rewrite elem_of_elements in Hveqv;
         [by right | left].
         apply elem_of_singleton.
-        apply Honly_v in Hv'.
-        destruct Hv' as [|[_m [Heq_m [Heq_v' _]]]]; [by subst |].
+        by apply Honly_v in Hv';
+        destruct Hv' as [|[_m [Heq_m [Heq_v' _]]]]; [by subst |];
         congruence.
-      * apply elem_of_union in Hv' as [Heq_v' | Hs'0]
+      * by apply elem_of_union in Hv' as [Heq_v' | Hs'0]
         ; [by apply elem_of_singleton in Heq_v'; subst v' | by apply Hincl].
   - specialize (Hreflect eq_refl).
     left. split.

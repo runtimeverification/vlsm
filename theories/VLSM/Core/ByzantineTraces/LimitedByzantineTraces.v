@@ -100,9 +100,9 @@ Proof.
     unfold tracewise_not_heavy, not_heavy.
     transitivity (sum_weights (remove_dups byzantine)); [| done].
     apply sum_weights_subseteq.
-    - apply NoDup_elements.
-    - apply NoDup_remove_dups.
-    - intros i Hi. apply elem_of_remove_dups, Hincl, Hi.
+    - by apply NoDup_elements.
+    - by apply NoDup_remove_dups.
+    - by intros i Hi; apply elem_of_remove_dups, Hincl, Hi.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
   specialize (preloaded_non_byzantine_vlsm_lift IM byzantine (fun i => i) sender)
