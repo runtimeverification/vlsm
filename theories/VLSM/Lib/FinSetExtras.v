@@ -4,6 +4,124 @@ From VLSM.Lib Require Import Preamble.
 
 (** * Finite set utility definitions and lemmas *)
 
+Definition set_prod_type A C D : Type := C * (A -> D).
+
+Section set_prod_type_props.
+
+#[local] Instance set_prod_elem_of
+  `{ElemOf A C}
+  `{ElemOf B D}
+  : ElemOf (A * B) (set_prod_type A C D) :=
+  fun a_b Xa_HXb => a_b.1 ∈ Xa_HXb.1 /\ a_b.2 ∈ Xa_HXb.2 a_b.1.
+
+#[local] Instance set_prod_empty A `{Empty C} `{Empty D}: Empty (set_prod_type A C D)
+  := (∅, (λ _, ∅)).
+
+#[local] Instance set_prod_singleton
+  `{Singleton A C} `{Singleton B D} : Singleton (A * B) (set_prod_type A C D)
+  := λ a_b, ({[a_b.1]}, (λ _, {[a_b.2]})).
+
+#[local] Instance set_prod_union
+  `{ElemOf A C} `{!RelDecision (∈@{C})} `{Union C} `{Union D} : Union (set_prod_type A C D) :=
+  λ X Y,
+    ( X.1 ∪ Y.1,
+      λ a,
+      if decide (a ∈ X.1)
+        then if decide (a ∈ Y.1) then X.2 a ∪ Y.2 a else X.2 a
+        else if decide (a ∈ Y.1) then Y.2 a else X.2 a ∪ Y.2 a).
+
+#[local] Instance set_prod_intersection A `{Intersection C} `{Intersection D}
+  : Intersection (set_prod_type A C D) :=
+  λ X Y, ( X.1 ∩ Y.1, (λ a, X.2 a ∩ Y.2 a)).
+
+#[local] Instance set_prod_difference
+  `{ElemOf A C} `{!RelDecision (∈@{C})} `{Difference C} `{Difference D} : Difference (set_prod_type A C D) :=
+  λ X Y, ( X.1, (λ a, if (decide (a ∈ Y.1)) then X.2 a ∖ Y.2 a else X.2 a)).
+
+
+#[local] Instance set_prod_elements `{Elements A C} `{Elements B D} : Elements (A * B) (set_prod_type A C D) :=
+  λ X, mjoin (fmap (λ a, fmap (λ b, (a, b)) (elements (X.2 a))) (elements X.1)).
+
+#[local] Instance set_prod_semiset `{SemiSet A C} `{SemiSet B D} `{!RelDecision (∈@{C})} : SemiSet (A * B) (set_prod_type A C D).
+Proof.
+  constructor.
+  - intros (a, b) [Ha Hb]; revert Ha; apply not_elem_of_empty.
+  - intros (a, b) (c, d); split.
+    + intros [Ha Hb]; cbn in *; apply elem_of_singleton in Ha, Hb; congruence.
+    + by inversion 1; split; cbn; apply elem_of_singleton.
+  - intros (X, fXD) (Y, fYD) (a, b); split.
+    + intros [Ha Hb]; cbn in *; apply elem_of_union in Ha.
+      destruct (decide (a ∈ X)); [destruct (decide (a ∈ Y)) |];
+        [apply elem_of_union in Hb as [] |..].
+      * by left; split.
+      * by right; split.
+      * by left; split.
+      * destruct Ha as [|Ha]; [done |].
+        rewrite decide_True in Hb by done.
+        by right; split.
+    + intros [[HaX HbX] | [HaY HbY]]; unfold union, set_prod_union; cbn in *;
+        (split; [apply elem_of_union|]); [by left | | by right |]; cbn.
+      * rewrite decide_True by done.
+        by case_decide; [apply elem_of_union; left |].
+      * by case_decide; rewrite decide_True; [apply elem_of_union; right |..].
+Qed.
+
+#[local] Instance set_prod_set `{Set_ A C} `{Set_ B D} `{!RelDecision (∈@{C})} : Set_ (A * B) (set_prod_type A C D).
+Proof.
+  constructor.
+  - typeclasses eauto.
+  - intros (X, fXD) (Y, fYD) (a, b); split.
+    + by intros [Ha Hb]; cbn in *; apply elem_of_intersection in Ha as [], Hb as [].
+    + by intros [[HaX HbX] [HaY HbY]]; split; cbn in *; apply elem_of_intersection.
+  - intros (X, fXD) (Y, fYD) (a, b); split.
+    + intros [Ha Hb]; cbn in *; case_decide as Hy.
+      * apply elem_of_difference in Hb as [? Hnb].
+        by split; [| contradict Hnb; destruct Hnb].
+      * by split; [| contradict Hy; destruct Hy].
+    + intros [[HaX HbX] Hnab]; unfold difference, set_prod_difference; cbn in *.
+      split; [done |]; cbn.
+      case_decide; [| done].
+      apply elem_of_difference; split; [done |].
+      by contradict Hnab.
+Qed.
+
+#[local] Instance fin_set_elem_of_dec `{FinSet A C} : RelDecision (∈@{C}).
+Proof. by apply elem_of_dec_slow. Qed.
+
+Instance set_prod_fin_set `{FinSet A C} `{FinSet B D} : FinSet (A * B) (set_prod_type A C D).
+Proof.
+  constructor.
+  - typeclasses eauto.
+  - intros (X, fXD) (a, b).
+    unfold elements, set_prod_elements; rewrite elem_of_list_join.
+    setoid_rewrite elem_of_list_fmap; cbn.
+    split.
+    + intros (l & Hab & _a & -> & Ha).
+      apply elem_of_list_fmap in Hab as (_b & [= <- <-] & Hb).
+      by apply elem_of_elements in Ha, Hb.
+    + intros [Ha Hb]; cbn in *.
+      eexists; split; [| by exists a; split; [|apply elem_of_elements]].
+      apply elem_of_list_fmap.
+      by eexists; split; [| apply elem_of_elements].
+  - intros (X, fXD); unfold elements, set_prod_elements; cbn.
+    generalize (list_to_set_elements X), (NoDup_elements X).
+    generalize (elements X) as lA; intros lA; revert X.
+    induction lA; [by constructor |]; intros X Hequiv Hnodup; cbn.
+    generalize (NoDup_elements (fXD a)).
+    generalize (elements (fXD a)) as lB; induction lB; intros HnodupB;
+      [by eapply IHlA; [| inversion Hnodup] |]; cbn.
+    constructor; [| by apply IHlB; inversion HnodupB].
+    rewrite elem_of_app; intros [HB | HA].
+    + apply elem_of_list_fmap in HB as (b & [= ->] & Hb).
+      by inversion HnodupB.
+    + apply elem_of_list_join in HA as (l & Haa0 & Hl).
+      apply elem_of_list_fmap in Hl as (_a & -> & Ha).
+      apply elem_of_list_fmap in Haa0 as (b & [= <- ->] & Hb).
+      by inversion Hnodup.
+Qed.
+
+End set_prod_type_props.
+
 Section fin_set.
 
 Context
