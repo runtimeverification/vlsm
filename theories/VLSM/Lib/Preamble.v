@@ -335,11 +335,10 @@ Proof.
   by rewrite compare_eq_refl in Hxx.
 Qed.
 
-(** ** Strictly ordered inhabited types *)
+(** ** Strictly ordered types *)
 
 Class StrictlyComparable (X : Type) : Type :=
 {
-  inhabited : X;
   compare : X -> X -> comparison;
   compare_strictorder :> CompareStrictOrder compare;
 }.
@@ -421,7 +420,6 @@ Qed.
   {Inh : Inhabited (dsig P)}
   : StrictlyComparable (dsig P) :=
 {
-  inhabited := inhabitant;
   compare := dsig_compare P;
   compare_strictorder := CompareStrictOrder_dsig_compare P
 }.
@@ -467,7 +465,6 @@ Qed.
 #[export] Instance StrictlyComparable_option
   (X : Type) `{StrictlyComparable X} : StrictlyComparable (option X) :=
 {
-  inhabited := None;
   compare := option_compare X;
   compare_strictorder := CompareStrictOrder_option_compare _;
 }.
@@ -482,10 +479,6 @@ Definition pair_compare
   | Eq => compare y1 y2
   | c => c
   end.
-
-Definition pair_compare_inhabited
-  {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} : X * Y :=
-    (inhabited, inhabited).
 
 Lemma pair_compare_reflexive
   (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y}
@@ -541,7 +534,6 @@ Qed.
 #[export] Instance StrictlyComparable_pair
   (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y} : StrictlyComparable (X * Y) :=
 {
-  inhabited := pair_compare_inhabited;
   compare := pair_compare X Y;
   compare_strictorder := CompareStrictOrder_pair_compare;
 }.
@@ -550,7 +542,6 @@ Qed.
   (X Y Z : Type) `{StrictlyComparable X} `{StrictlyComparable Y} `{StrictlyComparable Z}
   : StrictlyComparable (X * Y * Z) :=
 {
-  inhabited := pair_compare_inhabited;
   compare := pair_compare (X * Y) Z;
   compare_strictorder := CompareStrictOrder_pair_compare;
 }.
