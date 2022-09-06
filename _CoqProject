@@ -21,6 +21,7 @@ theories/VLSM/Lib/TraceProperties.v
 theories/VLSM/Lib/TraceClassicalProperties.v
 theories/VLSM/Lib/Measurable.v
 theories/VLSM/Lib/FinSetExtras.v
+theories/VLSM/Lib/StdppListFinSet.v
 
 theories/VLSM/Core/VLSM.v
 theories/VLSM/Core/Composition.v
