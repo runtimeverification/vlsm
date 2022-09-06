@@ -1053,9 +1053,7 @@ Definition first : binary_index := true.
 Definition second : binary_index := false.
 
 #[export] Instance binary_index_dec :  EqDecision binary_index := _.
-#[export] Instance binary_index_inhabited : Inhabited binary_index
-  :=
-  populate first.
+#[export] Instance binary_index_inhabited : Inhabited binary_index := populate first.
 
 Definition binary_IM
   (i : binary_index)
