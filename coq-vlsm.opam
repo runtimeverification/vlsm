@@ -18,8 +18,8 @@ depends: [
   "dune" {>= "2.5"}
   "coq" {>= "8.15"}
   "coq-stdpp" {>= "1.7.0"}
-  "coq-equations"
-  "coq-itauto"
+  "coq-itauto" 
+  "coq-equations" 
 ]
 
 tags: [
@@ -39,6 +39,7 @@ authors: [
   "Lucas Peña"
   "Grigore Roșu"
   "Traian Șerbănuță"
+  "Dafina Trufas"
   "Jan Tušil"
   "Vlad Zamfir"
 ]

@@ -11,6 +11,7 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
 - Additional dependencies:
   - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0
   - [Itauto](https://gitlab.inria.fr/fbesson/itauto)
+  - [Coq-Equations](https://github.com/mattam82/Coq-Equations)
 - Coq namespace: `VLSM`
 - Related publication(s):
   - [VLSM: Validating Labelled State Transition and Message Production Systems](https://arxiv.org/abs/2202.12662) doi:[10.48550/arXiv.2202.12662](https://doi.org/10.48550/arXiv.2202.12662)
@@ -31,7 +32,7 @@ To install the project dependencies via opam, do:
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto
+opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto coq-equations
 ```
 
 To build the project when you have all dependencies installed, do:
