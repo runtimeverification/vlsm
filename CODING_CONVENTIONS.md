@@ -12,12 +12,12 @@ Try to keep your lines at most 80 characters long.
 
 ## Coq source files
 
-### Require-Imports 
+### Require-Imports
 
-- general pattern: 
+- general pattern:
 ```coq
 From VLSM.X Require Import Module_Name1 Module_Name2.
-``` 
+```
 
 Example:
 ```coq
@@ -36,6 +36,18 @@ From Coq Require Import FunctionalExtensionality Lia.
 Example:
 ```coq
 From Coq Require Export Program.Tactics.
+```
+
+#### Using the `Equations` plugin
+
+To allow using features of `Equations`, such as `inspect` and the `eq:` notation,
+which have not been released yet, we require users of the `Equations` plugin to write
+```
+From VLSM.Lib Require Import EquationsExtras
+```
+instead of
+```
+From Equations Require Import Equations
 ```
 
 ### Sections
