@@ -49,5 +49,6 @@ Report [issues on GitHub](https://github.com/runtimeverification/vlsm/issues).
 - Lucas Peña
 - Grigore Roșu
 - Traian Șerbănuță
+- Dafina Trufas
 - Jan Tušil
 - Vlad Zamfir
