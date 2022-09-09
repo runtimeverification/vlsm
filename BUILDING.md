@@ -25,18 +25,18 @@ sudo apt-get update
 
 ### Install opam (unless already installed)
 
-```shell 
-bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)" 
+```shell
+bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"
 opam init
 ```
 
 Install the unzip and bubblewrap tools:
 
 ```shell
-sudo apt-get install unzip 
+sudo apt-get install unzip
 sudo apt-get install -y bubblewrap
 ```
-   
+
 If you encounter the error "Sandboxing is not working on your platform ubuntu", then disable the sandboxing by choosing "Y".
 
 Run again: `opam init`
@@ -64,7 +64,7 @@ opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto
 
 ### Clone the project repository
 
-```shell 
+```shell
 git clone https://github.com/runtimeverification/vlsm
 ```
 
@@ -114,7 +114,7 @@ opam install coq-itauto
 
 ### Clone the project repository
 
-```shell 
+```shell
 git clone https://github.com/runtimeverification/vlsm
 ```
 
@@ -127,7 +127,7 @@ make -j $(nproc)
 
 ## Editor instructions
 
-We recommend using the Visual Studio Code editor, which you can download and install from [here](https://code.visualstudio.com/). 
+We recommend using the Visual Studio Code editor, which you can download and install from [here](https://code.visualstudio.com/).
 
 After installing Visual Studio Code, you need to install the **Remote - WSL** extension. Click the *Connect to WSL* button, to open a new editor window in the WSL environment and open the project folder from inside this window.
 

@@ -30,6 +30,7 @@ authors:
 - name: Lucas Peña
 - name: Grigore Roșu
 - name: Traian Șerbănuță
+- name: Dafina Trufas
 - name: Jan Tušil
 - name: Vlad Zamfir
 
@@ -56,6 +57,10 @@ dependencies:
     name: coq-itauto
   description: |-
     [Itauto](https://gitlab.inria.fr/fbesson/itauto)
+- opam:
+    name: coq-equations
+  description: |-
+    [Coq-Equations](https://github.com/mattam82/Coq-Equations)
 
 namespace: VLSM
 
@@ -84,7 +89,7 @@ build: |-
 
   ```shell
   opam repo add coq-released https://coq.inria.fr/opam/released
-  opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto
+  opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto coq-equations
   ```
 
   To build the project when you have all dependencies installed, do:
