@@ -335,11 +335,10 @@ Proof.
   by rewrite compare_eq_refl in Hxx.
 Qed.
 
-(** ** Strictly ordered inhabited types *)
+(** ** Strictly ordered types *)
 
 Class StrictlyComparable (X : Type) : Type :=
 {
-  inhabited : X;
   compare : X -> X -> comparison;
   compare_strictorder :> CompareStrictOrder compare;
 }.
@@ -388,60 +387,48 @@ Qed.
 
 (** *** Comparison for subtypes *)
 
-#[local] Obligation Tactic := Tactics.program_simpl.
-Program Definition sigify_compare
-  {X} `{StrictlyComparable X} (P : X -> Prop) : {x | P x} -> {x | P x} -> comparison := _.
-Next Obligation.
-  exact (compare X0 X1).
-Defined.
-
-Definition dsigify_compare
+Definition dsig_compare
   {X} `{StrictlyComparable X} (P : X -> Prop) {Pdec : forall x, Decision (P x)}
-  : dsig P -> dsig P -> comparison :=
-  fun x y => compare (proj1_sig x) (proj1_sig y).
+  (x y : dsig P) : comparison :=
+    compare (`x) (`y).
 
-Lemma dsigify_compare_reflexive
+Lemma dsig_compare_reflexive
   {X} `{StrictlyComparable X} (P : X -> Prop) {Pdec : forall x, Decision (P x)}
-  : CompareReflexive (dsigify_compare P).
+  : CompareReflexive (dsig_compare P).
 Proof.
-  intros x y. rewrite dsig_eq. apply compare_strictorder.
+  now intros x y; unfold dsig_compare; rewrite dsig_eq, compare_eq.
 Qed.
 
-Lemma dsigify_compare_transitive
+Lemma dsig_compare_transitive
   {X} `{StrictlyComparable X} (P : X -> Prop) {Pdec : forall x, Decision (P x)}
-  : CompareTransitive (dsigify_compare P).
+  : CompareTransitive (dsig_compare P).
 Proof.
-  intros x y z. apply compare_strictorder.
+  now intros x y z; unfold dsig_compare; apply compare_transitive.
 Qed.
 
-Lemma dsigify_compare_strictorder
+Lemma CompareStrictOrder_dsig_compare
   {X} `{StrictlyComparable X} (P : X -> Prop) {Pdec : forall x, Decision (P x)}
-  : CompareStrictOrder (dsigify_compare P).
+  : CompareStrictOrder (dsig_compare P).
 Proof.
   split.
-  - apply dsigify_compare_reflexive.
-  - apply dsigify_compare_transitive.
+  - apply dsig_compare_reflexive.
+  - apply dsig_compare_transitive.
 Qed.
 
-Definition dsigify_compare_strictly_comparable
+#[export] Instance StrictlyComparable_dsig
   {X} `{StrictlyComparable X} (P : X -> Prop) {Pdec : forall x, Decision (P x)}
   {Inh : Inhabited (dsig P)}
   : StrictlyComparable (dsig P) :=
-  {| inhabited := inhabitant
-  ; compare := dsigify_compare P
-  ; compare_strictorder := dsigify_compare_strictorder P
-  |}.
-
-#[local] Obligation Tactic := idtac.
+{
+  compare := dsig_compare P;
+  compare_strictorder := CompareStrictOrder_dsig_compare P
+}.
 
 (** *** Comparison for options *)
 
 Definition option_compare
-  {X : Type}
-  (compare : X -> X -> comparison)
-  (ox oy : option X)
-  : comparison
-  :=
+  (X : Type) `{StrictlyComparable X}
+  (ox oy : option X) : comparison :=
   match ox, oy with
   | None, None => Eq
   | None, _ => Lt
@@ -450,17 +437,15 @@ Definition option_compare
   end.
 
 Lemma option_compare_reflexive
-  (X : Type)
-  {Xsc : StrictlyComparable X}
-  : CompareReflexive (option_compare (@compare X _)).
+  (X : Type) `{StrictlyComparable X}
+  : CompareReflexive (option_compare X).
 Proof.
   intros [x |] [y |]; cbn; rewrite ?compare_eq; firstorder congruence.
 Qed.
 
 Lemma option_compare_transitive
-  (X : Type)
-  {Xsc : StrictlyComparable X}
-  : CompareTransitive (option_compare (@compare X _)).
+  (X : Type) `{StrictlyComparable X}
+  : CompareTransitive (option_compare X).
 Proof.
   intros [x |] [y |] [z |] [| |]; simpl; intros Hxy Hyz; try done.
   - by apply (compare_transitive x y z).
@@ -468,27 +453,25 @@ Proof.
   - by apply (compare_transitive x y z).
 Qed.
 
-Lemma strictorder_option
-  {X: Type}
-  (Xsc : StrictlyComparable X)
-  : CompareStrictOrder (option_compare (@compare X _)).
+Lemma CompareStrictOrder_option_compare
+  (X : Type) `{StrictlyComparable X}
+  : CompareStrictOrder (option_compare X).
 Proof.
   split.
   - by apply option_compare_reflexive.
   - by apply option_compare_transitive.
 Qed.
 
-#[export] Instance OptionStrictlyComparable
-  (X : Type) {Xsc : StrictlyComparable X} : StrictlyComparable (option X) :=
+#[export] Instance StrictlyComparable_option
+  (X : Type) `{StrictlyComparable X} : StrictlyComparable (option X) :=
 {
-  inhabited := None;
-  compare := option_compare compare;
-  compare_strictorder := strictorder_option Xsc;
+  compare := option_compare X;
+  compare_strictorder := CompareStrictOrder_option_compare _;
 }.
 
 (** *** Comparison for pairs and triples *)
 
-Definition compare_compose
+Definition pair_compare
   (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y}
   : (X * Y) -> (X * Y) -> comparison :=
   fun '(x1, y1) '(x2, y2) =>
@@ -497,78 +480,70 @@ Definition compare_compose
   | c => c
   end.
 
-Definition inhabited_compose
-  {X Y : Type} `{HscX : StrictlyComparable X} `{HscY : StrictlyComparable Y}
-  : X * Y := (inhabited, inhabited).
-
-Lemma reflexive_compose
-  {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y}
-  : CompareReflexive (compare_compose X Y).
+Lemma pair_compare_reflexive
+  (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y}
+  : CompareReflexive (pair_compare X Y).
 Proof.
-  intros [x1 y1] [x2 y2].
-  split.
-  - cbn; intros Hcmp.
-    destruct (compare x1 x2) eqn: Hx, (compare y1 y2) eqn: Hy; try done.
+  intros [x1 y1] [x2 y2]; split; cbn.
+  - destruct (compare x1 x2) eqn: Hx, (compare y1 y2) eqn: Hy; intros [=].
     by apply compare_eq in Hx, Hy; subst.
   - by intros [= -> ->]; cbn; rewrite !compare_eq_refl.
 Qed.
 
-Lemma compare_compose_lt
+Lemma pair_compare_lt
   {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y} :
     forall (x1 x2 : X) (y1 y2 : Y) (c : comparison),
-      compare_compose X Y (x1, y1) (x2, y2) = c ->
+      pair_compare X Y (x1, y1) (x2, y2) = c ->
         compare x1 x2 = c \/ x1 = x2 /\ compare y1 y2 = c.
 Proof.
-  intros x1 x2 y1 y2 c Hcmp; cbn in Hcmp.
+  cbn; intros x1 x2 y1 y2 c Hcmp.
   rewrite <- compare_eq.
   by destruct (compare x1 x2), (compare y1 y2); auto.
 Qed.
 
-Lemma transitive_compose
+Lemma pair_compare_transitive
   {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y}
-  : CompareTransitive (compare_compose X Y).
+  : CompareTransitive (pair_compare X Y).
 Proof.
   intros [x1 y1] [x2 y2] [x3 y3] comp H12 H23.
   destruct comp eqn: H_comp.
-  - by apply reflexive_compose; apply reflexive_compose in H12, H23; congruence.
-  - destruct (compare_compose_lt x1 x2 y1 y2 Lt H12) as [left | [-> right]],
-             (compare_compose_lt x2 x3 y2 y3 Lt H23) as [left' | [-> right']]; cbn.
+  - by apply pair_compare_reflexive; apply pair_compare_reflexive in H12, H23; congruence.
+  - destruct (pair_compare_lt x1 x2 y1 y2 Lt H12) as [left | [-> right]],
+             (pair_compare_lt x2 x3 y2 y3 Lt H23) as [left' | [-> right']]; cbn.
     + by replace (compare x1 x3) with Lt by (symmetry; eapply compare_transitive; done).
     + by rewrite left.
     + by rewrite left'.
     + by rewrite compare_eq_refl; eapply compare_transitive.
-  - destruct (compare_compose_lt x1 x2 y1 y2 Gt H12) as [left | [-> right]],
-             (compare_compose_lt x2 x3 y2 y3 Gt H23) as [left' | [-> right']]; cbn.
+  - destruct (pair_compare_lt x1 x2 y1 y2 Gt H12) as [left | [-> right]],
+             (pair_compare_lt x2 x3 y2 y3 Gt H23) as [left' | [-> right']]; cbn.
     + by replace (compare x1 x3) with Gt by (symmetry; eapply compare_transitive; done).
     + by rewrite left.
     + by rewrite left'.
     + by rewrite compare_eq_refl; eapply compare_transitive.
 Qed.
 
-Lemma strictorder_compose
+Lemma CompareStrictOrder_pair_compare
   {X Y : Type} `{StrictlyComparable X} `{StrictlyComparable Y}
-  : CompareStrictOrder (compare_compose X Y).
+  : CompareStrictOrder (pair_compare X Y).
 Proof.
   split.
-  - by apply reflexive_compose.
-  - by apply transitive_compose.
+  - by apply pair_compare_reflexive.
+  - by apply pair_compare_transitive.
 Qed.
 
-#[export] Instance ComposeStrictlyComparable
+#[export] Instance StrictlyComparable_pair
   (X Y : Type) `{StrictlyComparable X} `{StrictlyComparable Y} : StrictlyComparable (X * Y) :=
 {
-  inhabited := inhabited_compose;
-  compare := compare_compose X Y;
-  compare_strictorder := strictorder_compose;
+  compare := pair_compare X Y;
+  compare_strictorder := CompareStrictOrder_pair_compare;
 }.
 
 #[export] Instance TripleStrictlyComparable
   (X Y Z : Type) `{StrictlyComparable X} `{StrictlyComparable Y} `{StrictlyComparable Z}
   : StrictlyComparable (X * Y * Z) :=
 {
-  inhabited := inhabited_compose;
-  compare := compare_compose (X * Y) Z;
-  compare_strictorder := strictorder_compose;
+  compare := pair_compare (X * Y) Z;
+  compare_strictorder := CompareStrictOrder_pair_compare;
 }.
 
 (** ** Liveness *)
