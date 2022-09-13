@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun RIneq.
-From VLSM.Lib Require Import Preamble Measurable StdppListSet RealsExtras.
+From VLSM.Lib Require Import Preamble Measurable StdppListSet RealsExtras ListSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections MessageDependencies Composition Equivocation Equivocation.FixedSetEquivocation Equivocation.TraceWiseEquivocation.
 From VLSM.Core Require Import Equivocation.WitnessedEquivocation.
 
@@ -93,9 +93,10 @@ Lemma LimitedEquivocationProp_impl_not_heavy :
 Proof.
   intros s [].
   apply Rle_trans with (sum_weights vs); [| done].
-  apply sum_weights_subseteq; [apply equivocating_validators_nodup | done |].
-  intros v Hv; apply Heqv_vs.
-  by eapply elem_of_list_filter in Hv as [].
+  apply sum_weights_subseteq.
+  - by apply NoDup_elements.
+  - by apply Hnodup_vs.
+  - by intros v Hv; apply elem_of_elements, elem_of_filter in Hv; apply Heqv_vs, Hv.
 Qed.
 
 Definition basic_equivocation_state_validators_comprehensive_prop : Prop :=
@@ -105,10 +106,10 @@ Lemma not_heavy_impl_LimitedEquivocationProp
   (Hcomprehensive : basic_equivocation_state_validators_comprehensive_prop)
   : forall s, not_heavy s -> LimitedEquivocationProp IM is_equivocating s.
 Proof.
-  intros s Hs; exists (equivocating_validators s);
-    [apply equivocating_validators_nodup | | done].
-  intros v Hv; apply elem_of_list_filter; split; [done |].
-  by apply Hcomprehensive.
+  intros s Hs; exists (elements(equivocating_validators s));
+    [by apply NoDup_elements | | done].
+  by intros v Hv; apply elem_of_elements, elem_of_filter; split; [done |];
+  apply Hcomprehensive.
 Qed.
 
 End sec_basic_limited_message_equivocation.
@@ -117,7 +118,8 @@ Section tracewise_limited_message_equivocation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   `{ReachableThreshold index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
@@ -125,7 +127,7 @@ Context
   (Free := free_composite_vlsm IM)
   (sender : message -> option index)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM id sender)}
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM id sender)
   .
 
@@ -133,7 +135,7 @@ Existing Instance Htracewise_BasicEquivocation.
 
 Lemma tracewise_basic_equivocation_state_validators_comprehensive_prop :
   basic_equivocation_state_validators_comprehensive_prop IM.
-Proof. intros s v _; cbn; apply elem_of_enum. Qed.
+Proof. by intros s v _; cbn; apply elem_of_list_to_set, elem_of_enum. Qed.
 
 Definition tracewise_limited_equivocation_constraint :=
   basic_limited_equivocation_constraint IM.
@@ -171,8 +173,9 @@ constraint is also a trace under the limited equivocation constraint.
 *)
 
 Context
+  `{FinSet index Ci}
   {message : Type}
-  `{finite.Finite index}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -187,23 +190,24 @@ Context
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
-  (tracewise_not_heavy := @not_heavy _ _ _ _ Htracewise_BasicEquivocation)
-  (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ Htracewise_BasicEquivocation)
+  (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
+  (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
   .
 
 Lemma StrongFixed_valid_state_not_heavy s
   (Hs : valid_state_prop StrongFixed s)
   : tracewise_not_heavy s.
 Proof.
-  cut (tracewise_equivocating_validators s ⊆ equivocators).
+  cut (elements(tracewise_equivocating_validators s) ⊆ equivocators).
   { intro Hincl.
     unfold tracewise_not_heavy, not_heavy.
     transitivity (sum_weights (remove_dups equivocators)); [| done].
-    apply sum_weights_subseteq
-    ; [apply equivocating_validators_nodup|apply NoDup_remove_dups|].
-    by intros i Hi; apply elem_of_remove_dups, Hincl.
+    apply sum_weights_subseteq.
+    - by apply NoDup_elements.
+    - by apply NoDup_remove_dups.
+    - by intros i Hi; apply elem_of_remove_dups, Hincl; unfold tracewise_equivocating_validators; apply Hi.
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
   { apply VLSM_incl_trans with (machine Free).
@@ -212,8 +216,7 @@ Proof.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
   apply (VLSM_incl_finite_valid_trace_init_to StrongFixedinclPreFree) in Htr as Hpre_tr.
-  intros v Hv.
-  apply equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
+  intros v Hv. apply elem_of_elements, equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
   specialize (Hvs' _ _ Hpre_tr).
   destruct Hvs' as [m0 [Hsender0 [pre [item [suf [Heqtr [Hm0 Heqv]]]]]]].
   rewrite Heqtr in Htr.
@@ -242,8 +245,7 @@ Proof.
   unfold limited_equivocation_constraint.
   destruct (composite_transition _ _ _) as [s' om'] eqn: Ht.
   by eapply tracewise_not_heavy_LimitedEquivocationProp_iff,
-    StrongFixed_valid_state_not_heavy,
-    (input_valid_transition_destination StrongFixed).
+    StrongFixed_valid_state_not_heavy, input_valid_transition_destination.
 Qed.
 
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
@@ -270,7 +272,8 @@ induced by a subset of indices whose weight is less than the allowed
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -315,21 +318,21 @@ Lemma traces_exhibiting_limited_equivocation_are_valid_rev
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM id sender)
-  (Htracewise_basic_equivocation : BasicEquivocation (composite_state IM) index
+  (Htracewise_basic_equivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
-  (tracewise_not_heavy := @not_heavy _ _ _ _ Htracewise_basic_equivocation)
+    (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_basic_equivocation)
   : forall is s tr, strong_trace_witnessing_equivocation_prop IM id sender is tr ->
     finite_valid_trace_init_to (free_composite_vlsm IM) is s tr ->
     tracewise_not_heavy s ->
     fixed_limited_equivocation_prop is tr.
 Proof.
   intros is s tr Hstrong Htr Hnot_heavy.
-  exists (equivocating_validators s).
+  exists (elements(equivocating_validators s)).
   split; cycle 1.
   - by eapply valid_trace_forget_last, strong_witness_has_fixed_equivocation.
   - replace (sum_weights _) with (equivocation_fault s); [done |].
     apply set_eq_nodup_sum_weight_eq.
-    + apply equivocating_validators_nodup.
+    + apply NoDup_elements.
     + apply NoDup_remove_dups.
     + apply ListSetExtras.set_eq_extract_forall.
       intro i. rewrite elem_of_remove_dups. itauto.
@@ -360,8 +363,8 @@ Proof.
 Qed.
 
 (** Any state which is valid for limited equivocation can be produced by
-a trace having the [fixed_limited_equivocation_prop]erty.
-*)
+a trace having the [fixed_limited_equivocation_prop]erty. *)
+
 Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
   (Hke : WitnessedEquivocationCapability IM id sender)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}

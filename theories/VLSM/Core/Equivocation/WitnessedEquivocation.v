@@ -35,13 +35,14 @@ Context
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   `{finite.Finite validator}
+  `{FinSet validator Cm}
   (A : validator -> index)
   (sender : message -> option validator)
   (Free := free_composite_vlsm IM)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   `{ReachableThreshold validator}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cm
     := equivocation_dec_tracewise IM A sender)
   (equivocating_validators := equivocating_validators (BasicEquivocation := Htracewise_BasicEquivocation))
   .
@@ -60,9 +61,9 @@ Lemma equivocating_senders_in_trace_witnessing_equivocation_prop
   is tr
   (Htr : trace_witnessing_equivocation_prop is tr)
   (s := finite_trace_last is tr)
-  : set_eq (equivocating_validators s) (equivocating_senders_in_trace IM sender tr).
+  : set_eq (elements (equivocating_validators s)) (equivocating_senders_in_trace IM sender tr).
 Proof.
-  split; intros v Hv; [apply Htr in Hv| apply Htr].
+  split; intros v Hv; [apply elem_of_elements, Htr in Hv | apply elem_of_elements, Htr].
   - by apply elem_of_equivocating_senders_in_trace.
   - by eapply elem_of_equivocating_senders_in_trace.
 Qed.
@@ -94,11 +95,13 @@ Proof.
   specialize (equivocating_validators_empty_in_initial_state IM A sender s Hs) as Hempty.
   intros v.
   unfold finite_trace_last. simpl.
-  replace (equivocating_validators s) with (@nil validator).
+  rewrite <- elem_of_elements.
+  replace (elements (equivocating_validators s)) with (@nil validator).
   simpl.
   split; [inversion 1|].
   intros [m [_ Hmsg]].
-  by elim (no_equivocation_in_empty_trace PreFree m).
+  - by elim (no_equivocation_in_empty_trace PreFree m).
+  - by symmetry; apply elements_empty_iff, Hempty.
 Qed.
 
 (** For any trace having the [trace_witnessing_equivocation_prop]erty,
@@ -171,15 +174,14 @@ Lemma equivocating_validators_step_update
       ~ trace_has_message (field_selector output) m tr).
 Proof.
   intro Hv.
-  destruct (decide (v ∈ equivocating_validators s))
-    as [e | Hnv]
-  ; [by left |].
-  right. apply equivocating_validators_is_equivocating_tracewise_iff in Hv.
+  destruct (decide (v ∈ elements (equivocating_validators s))) as [Hnv | Hnv]
+  ; rewrite elem_of_elements in Hnv; [by left | right].
+  apply equivocating_validators_is_equivocating_tracewise_iff in Hv.
   destruct (transition_is_equivocating_tracewise_char IM A sender  _ _ _ _ _ Ht _ Hv)
-    as [| Hom]
-  ; [by elim Hnv; apply (equivocating_validators_is_equivocating_tracewise_iff IM A sender) |].
+    as [| Hom];
+    [by contradict Hnv; apply equivocating_validators_is_equivocating_tracewise_iff |].
   destruct om as [m|]; simpl in Hom; [|congruence].
-  exists m. repeat split; [done |].
+  exists m; split_and!; [done.. |].
   intros is tr [Htr Hinit] Hwitness.
   specialize (extend_right_finite_trace_from_to _ Htr Ht) as Htr'.
   specialize (Hv _ _ (conj Htr' Hinit)).
@@ -195,10 +197,9 @@ Proof.
     apply Hwitness. exists m'. split; [done |].
     exists prefix, item, suffix'.
     split; [| done].
-    change (item :: suffix' ++ [item'])
-      with ([item] ++ suffix' ++ [item']) in Heq.
-    rewrite !app_assoc in Heq.
-    apply app_inj_tail in Heq. rewrite <- !app_assoc in Heq. apply Heq.
+    change (item :: suffix' ++ [item']) with ([item] ++ suffix' ++ [item']) in Heq.
+    rewrite !app_assoc in Heq; apply app_inj_tail in Heq; rewrite <- !app_assoc in Heq.
+    by destruct Heq as [-> _].
 Qed.
 
 (**
@@ -225,13 +226,13 @@ Lemma equivocating_validators_witness_last_char
   (Htr_item : finite_valid_trace_init_to PreFree is s' (tr ++ [item]))
   (Hwitness : trace_witnessing_equivocation_prop is (tr ++ [item]))
   (s := finite_trace_last is tr)
-  : set_eq (equivocating_validators s) (equivocating_validators s')
+  : equivocating_validators s ≡@{Cm} equivocating_validators s'
     /\ trace_witnessing_equivocation_prop is tr
     \/
     (exists m, om = Some m /\
      exists v, sender m = Some v /\
      v ∉ equivocating_validators s /\
-     set_eq (equivocating_validators s') (set_add v (equivocating_validators s)) /\
+     equivocating_validators s' ≡@{Cm} {[ v ]} ∪ (equivocating_validators s) /\
      forall (is : composite_state IM) (tr : list transition_item),
         finite_valid_trace_init_to PreFree is s tr ->
         trace_witnessing_equivocation_prop is tr ->
@@ -250,21 +251,23 @@ Proof.
   remember (finite_trace_last is tr) as s.
   destruct (option_bind _ _ sender om) as [v|] eqn:Heq_v.
   - destruct om as [m|]; [|inversion Heq_v]. simpl in Heq_v.
-    destruct (decide (set_eq (equivocating_validators s) (equivocating_validators s')))
-    ; [left;split; [done |]|].
-    + apply
+    destruct (decide (set_eq (elements (equivocating_validators s)) (elements (equivocating_validators s'))))
+    ; [apply set_eq_fin_set in s0; left;split; [done |]|].
+    + by apply
         (input_valid_transition_reflects_trace_witnessing_equivocation_prop
-          _ _ _ (conj Htr Hinit) _ Hwitness).
-      subst. apply s0.
-    + right. exists m; split; [done |]. exists v. split; [done |].
+          _ _ _ (conj Htr Hinit) _ Hwitness);
+      subst; intros ? ?; apply s0.
+    + right. exists m; split; [done |]. exists v; split; [done |].
       specialize (equivocating_validators_step_update _ _ _ _ _ Ht) as Honly_v.
       simpl in Honly_v.
       assert (Hv : exists v, v ∈ equivocating_validators s' /\ v ∉ equivocating_validators s).
-      { apply Exists_exists.
+      {
+        setoid_rewrite <- elem_of_elements.
+        apply Exists_exists.
         apply neg_Forall_Exists_neg; [intro; apply elem_of_list_dec|].
         intro all. elim n.
-        split; [done |].
-        by rewrite Forall_forall in all.
+        split; [| by rewrite Forall_forall in all].
+        by unfold set_eq, subseteq, list_subseteq; setoid_rewrite elem_of_elements.
       }
       destruct Hv as [v' [Heqv Hneqv]].
       apply Honly_v in Heqv as Heq_v'.
@@ -272,18 +275,20 @@ Proof.
       inversion Heq_m. subst _m. clear Heq_m.
       assert (v' = v) by congruence. subst v'. clear Heq_v'.
       split; [done |]. split; [| by subst].
-      split; intros v' Hv'.
-      * destruct (decide (v' ∈ equivocating_validators s))
-        ; [by apply set_add_intro1 |].
-        apply set_add_intro2.
-        apply Honly_v in Hv'.
-        destruct Hv' as [|[_m [Heq_m [Heq_v' _]]]]; [by subst |].
+      intro v'; split; intro Hv'.
+      * apply elem_of_union.
+        destruct (decide (v' ∈ elements (equivocating_validators s)))
+          as [Hveqv | Hveqv]; rewrite elem_of_elements in Hveqv;
+        [by right | left].
+        apply elem_of_singleton.
+        by apply Honly_v in Hv';
+        destruct Hv' as [|[_m [Heq_m [Heq_v' _]]]]; [by subst |];
         congruence.
-      * apply set_add_elim in Hv' as [Heq_v' | Hs'0]
-        ; [by subst v' | by apply Hincl].
+      * by apply elem_of_union in Hv' as [Heq_v' | Hs'0]
+        ; [by apply elem_of_singleton in Heq_v'; subst v' | by apply Hincl].
   - specialize (Hreflect eq_refl).
     left. split.
-    + by subst.
+    + by subst; intro v; split; [apply Hincl | apply Hreflect].
     + apply
       (input_valid_transition_reflects_trace_witnessing_equivocation_prop
         _ _ _ (conj Htr Hinit) _ Hwitness
@@ -352,7 +357,7 @@ Lemma strong_trace_witnessing_equivocation_prop_extend_eq
   (Hprefix : strong_trace_witnessing_equivocation_prop is' tr'')
   item
   (Hwitness : trace_witnessing_equivocation_prop is (tr' ++ [item]))
-  (Heq: set_eq (equivocating_validators s) (equivocating_validators (destination item)))
+  (Heq: equivocating_validators s ≡@{Cm} equivocating_validators (destination item))
   : strong_trace_witnessing_equivocation_prop is' (tr'' ++ [item]).
 Proof.
   intros prefix suffix Heq_tr''_item.
@@ -409,7 +414,7 @@ Lemma strong_trace_witnessing_equivocation_prop_extend_neq
   (Hwneq: ¬ trace_has_message (field_selector output) msg tr)
   v
   (Hsender: sender msg = Some v)
-  (Hneq: set_eq (equivocating_validators (destination item)) (set_add v (equivocating_validators s)))
+  (Hneq: equivocating_validators (destination item) ≡@{Cm} {[ v ]} ∪ (equivocating_validators s))
   : strong_trace_witnessing_equivocation_prop is (tr ++ [item]).
 Proof.
   intros prefix suffix Heq_tr''_item.
@@ -422,7 +427,7 @@ Proof.
     apply valid_trace_get_last in Htr as Hlst'.
     split.
     + intros Hv'. apply Hneq in Hv'.
-      apply set_add_iff in Hv'.
+      apply elem_of_union in Hv'; rewrite elem_of_singleton in Hv'.
       rewrite <- Hlst' in Hv'.
       destruct Hv' as [Heq_v | Hv'].
       * subst.
@@ -434,7 +439,7 @@ Proof.
         by apply equivocation_in_trace_prefix.
     + intros [m [? Heqv]].
       apply equivocation_in_trace_last_char in Heqv.
-      apply Hneq. apply set_add_iff.
+      apply Hneq, elem_of_union; rewrite elem_of_singleton.
       destruct Heqv as [Heqv | Heqv].
       * rewrite <- Hlst'.
         right.
@@ -475,12 +480,12 @@ Proof.
   subst s.
   apply finite_valid_trace_init_to_forget_last in Htr.
   remember (length tr) as n.
-  remember (length (equivocating_validators (finite_trace_last is tr))) as m.
+  remember (set_size (equivocating_validators (finite_trace_last is tr))) as m.
   revert m n is tr Heqm Heqn Htr Hwitness.
   pose
     (fun m n =>
     forall is tr,
-    m = length (equivocating_validators (finite_trace_last is tr)) ->
+    m = set_size (equivocating_validators (finite_trace_last is tr)) ->
     n = length tr ->
     finite_valid_trace PreFree is tr ->
     trace_witnessing_equivocation_prop is tr ->
@@ -500,7 +505,7 @@ Proof.
     split.
     + by apply finite_valid_trace_init_add_last.
     + intros prefix suffix Heq_tr.
-      apply app_eq_nil  in Heq_tr. destruct Heq_tr. subst.
+      apply app_eq_nil in Heq_tr. destruct Heq_tr. subst.
       apply initial_state_witnessing_equivocation_prop. apply Htr.
   - rewrite finite_trace_last_is_last.
     intros ? Hn Htr'_item Hwitness.
@@ -516,15 +521,7 @@ Proof.
       rewrite app_length in Hn. simpl in Hn.
       spec IHn; [lia|].
       spec IHn is tr'.
-      specialize (NoDup_subseteq_length (equivocating_validators_nodup s') (proj2 Heq))
-        as Hlen1.
-      match type of Hlen1 with
-      | _ <= length (equivocating_validators ?st) =>
-        pose st as s
-      end.
-      specialize (NoDup_subseteq_length (equivocating_validators_nodup s) (proj1 Heq))
-        as Hlen2.
-      spec IHn ; [by subst s m; apply Nat.le_antisymm |].
+      spec IHn; [by subst m; setoid_rewrite Heq |].
       specialize (IHn eq_refl).
       destruct Htr'_item as [Htr'_item Hinit].
       apply finite_valid_trace_from_to_app_split in Htr'_item.
@@ -555,15 +552,12 @@ Proof.
         by subst.
       }
       destruct Hwitness' as [is' [tr''[Htr'' Hwitness']]].
-      spec IHm (length (equivocating_validators s)) (length tr'').
+      spec IHm (set_size (equivocating_validators s)) (length tr'').
       spec IHm.
       {
-        assert (Hnodup_v_s : NoDup (set_add v (equivocating_validators s))).
-        { apply set_add_nodup. apply equivocating_validators_nodup.
-        }
-        specialize (NoDup_subseteq_length Hnodup_v_s (proj2 Hneq))
-          as Hlen1.
-        by rewrite <- set_add_length in Hlen1.
+        rewrite Hneq.
+        setoid_rewrite size_union; [by rewrite size_singleton; unfold size; lia |].
+        by intro v'; rewrite elem_of_singleton; intros ->.
       }
       spec IHm is' tr''.
       apply finite_valid_trace_init_to_last in Htr'' as Htr''_lst.
@@ -631,7 +625,8 @@ Section witnessed_equivocation_fixed_set.
 
 Context
   `{EqDecision message}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -639,7 +634,7 @@ Context
   (sender : message -> option index)
   `{ReachableThreshold index}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM id sender)}
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM id sender)
   (Hke : WitnessedEquivocationCapability IM id sender)
   (message_dependencies : message -> set message)
@@ -668,7 +663,7 @@ when there are no [equivocating_validators].
 Definition equivocating_validators_fixed_equivocation_constraint
   (s : composite_state IM)
   :=
-  fixed_equivocation_constraint IM (equivocating_validators s).
+  fixed_equivocation_constraint IM (elements(equivocating_validators s)).
 
 Lemma equivocators_can_emit_free m
   (Hmsg : valid_message_prop Free m)
@@ -679,7 +674,7 @@ Lemma equivocators_can_emit_free m
   l s
   (Hv : composite_valid IM l (s, Some m))
   : can_emit
-    (equivocators_composition_for_directly_observed IM (equivocating_validators sf) s)
+    (equivocators_composition_for_directly_observed IM (elements(equivocating_validators sf)) s)
     m.
 Proof.
     apply emitted_messages_are_valid_iff in Hmsg
@@ -694,7 +689,7 @@ Proof.
     unfold pre_loaded_free_equivocating_vlsm_composition, free_equivocating_vlsm_composition.
       specialize
         (@lift_to_composite_generalized_preloaded_vlsm_full_projection
-          message (sub_index (equivocating_validators sf)) _ (sub_IM IM (equivocating_validators sf))
+          message (sub_index (elements(equivocating_validators sf))) _ (sub_IM IM (elements(equivocating_validators sf)))
           (λ msg : message, msg ∈ message_dependencies m)
           (composite_has_been_directly_observed IM s))
         as Hproj.
@@ -704,7 +699,8 @@ Proof.
         apply (Hfull _ _ _ _ Hv) in Hdm.
         by exists i.
       }
-      spec Hproj (@dexist _ _ (fun v => sub_index_prop_dec (equivocating_validators sf) v) v Hequivocating_v).
+      apply elem_of_elements in Hequivocating_v.
+      spec Hproj (@dexist _ _ (fun v => sub_index_prop_dec (elements(equivocating_validators sf)) v) v Hequivocating_v).
       by apply (VLSM_full_projection_can_emit Hproj).
 Qed.
 
@@ -723,11 +719,11 @@ induction hypothesis in terms of the final state after the last transition.
 Lemma strong_witness_has_fixed_equivocation is s tr
   (Htr : finite_valid_trace_init_to (free_composite_vlsm IM) is s tr)
   (Heqv: strong_trace_witnessing_equivocation_prop IM id sender is tr)
-  : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM (equivocating_validators s)) is s tr.
+  : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM (elements(equivocating_validators s))) is s tr.
 Proof.
   split; [|apply Htr].
   induction Htr using finite_valid_trace_init_to_rev_ind.
-  - eapply (finite_valid_trace_from_to_empty (fixed_equivocation_vlsm_composition IM (equivocating_validators si))).
+  - eapply (finite_valid_trace_from_to_empty (fixed_equivocation_vlsm_composition IM (elements(equivocating_validators si)))).
     by apply initial_state_is_valid.
   - spec IHHtr.
     { intros prefix. intros.
@@ -749,10 +745,11 @@ Proof.
     }
     assert
       (Htr_sf : finite_valid_trace_from_to
-        (fixed_equivocation_vlsm_composition IM (equivocating_validators sf)) si s tr).
+        (fixed_equivocation_vlsm_composition IM (elements (equivocating_validators sf))) si s tr).
     { revert IHHtr.
-      by apply VLSM_incl_finite_valid_trace_from_to,
+      apply VLSM_incl_finite_valid_trace_from_to,
                fixed_equivocation_vlsm_composition_index_incl.
+      by intro; rewrite !elem_of_elements; apply Hincl.
     }
     clear IHHtr.
     apply (extend_right_finite_trace_from_to _ Htr_sf).

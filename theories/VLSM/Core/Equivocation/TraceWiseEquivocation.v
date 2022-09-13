@@ -296,36 +296,34 @@ Context
   `{ReachableThreshold validator}
   `{RelDecision _ _ is_equivocating_tracewise_no_has_been_sent}
   `{finite.Finite validator}
+  `{FinSet validator Cm}
   .
 
 #[local] Program Instance equivocation_dec_tracewise
-  : BasicEquivocation (composite_state IM) validator :=
+  : BasicEquivocation (composite_state IM) validator Cm:=
   {
-    state_validators := fun _ => enum validator;
+    state_validators := fun _ => list_to_set (enum validator);
     is_equivocating := is_equivocating_tracewise_no_has_been_sent;
   }.
-Next Obligation.
-  intro; apply NoDup_enum.
-Qed.
 
 Lemma equivocating_validators_is_equivocating_tracewise_iff s v
   : v ∈ (equivocating_validators s) <-> is_equivocating_tracewise_no_has_been_sent s v.
 Proof.
   unfold equivocating_validators.
   simpl.
-  rewrite elem_of_list_filter.
+  rewrite elem_of_filter, elem_of_list_to_set.
   itauto (apply elem_of_enum).
 Qed.
 
 Lemma equivocating_validators_empty_in_initial_state
   (s : composite_state IM)
   (His : composite_initial_state_prop IM s)
-  : equivocating_validators s = [].
+  : equivocating_validators s ≡@{Cm} ∅.
 Proof.
-  apply elem_of_empty_nil.
-  intro v.
-  rewrite equivocating_validators_is_equivocating_tracewise_iff.
-  by apply initial_state_not_is_equivocating_tracewise.
+  intro v. split.
+  - rewrite equivocating_validators_is_equivocating_tracewise_iff.
+    by apply initial_state_not_is_equivocating_tracewise with (v := v) in His.
+  - by intro HV; contradict HV; apply not_elem_of_empty.
 Qed.
 
 Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validators
@@ -344,7 +342,7 @@ Lemma initial_state_equivocators_weight
   (Hs : composite_initial_state_prop IM s)
   : equivocation_fault s = 0%R.
 Proof.
-  apply equivocating_validators_empty_in_initial_state in Hs.
+  apply equivocating_validators_empty_in_initial_state, elements_empty_iff in Hs.
   unfold equivocation_fault.
   by rewrite Hs.
 Qed.

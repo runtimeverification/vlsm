@@ -60,9 +60,11 @@ Proof.
   specialize (equivocating_indices_equivocating_validators IM c)
     as Heq.
   apply sum_weights_subseteq.
-  - apply equivocating_validators_nodup.
+  - apply NoDup_elements.
   - apply NoDup_remove_dups.
-  - by intros i Hi; apply elem_of_remove_dups, Hfixed, Heq.
+  - intros i Hi.
+    apply elem_of_elements in Hi; rewrite Heq in Hi; apply elem_of_list_to_set in Hi.
+    by apply elem_of_remove_dups, Hfixed, Hi.
 Qed.
 
 End fixed_limited_state_equivocation.
