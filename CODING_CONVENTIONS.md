@@ -38,9 +38,9 @@ Example:
 From Coq Require Export Program.Tactics.
 ```
 
-#### Using the [Equations](https://github.com/mattam82/Coq-Equations) plugin
+#### Using the Equations plugin
 
-To allow using features of `Equations`, such as `inspect` and the `eq:` notation,
+To allow using important features of [Equations](https://github.com/mattam82/Coq-Equations), such as `inspect` and the `eq:` notation,
 which have not been released yet, we require users of the `Equations` plugin to write
 ```coq
 From VLSM.Lib Require Import EquationsExtras.
