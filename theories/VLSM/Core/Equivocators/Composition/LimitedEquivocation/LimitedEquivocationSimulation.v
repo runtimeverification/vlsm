@@ -62,7 +62,8 @@ Proof.
   - apply NoDup_elements.
   - apply NoDup_remove_dups.
   - intros i Hi.
-    apply elem_of_elements in Hi; rewrite equivocating_indices_equivocating_validators in Hi; apply elem_of_list_to_set in Hi.
+    rewrite equivocating_indices_equivocating_validators in Hi.
+    apply elem_of_elements, elem_of_list_to_set in Hi.
     by apply elem_of_remove_dups, Hfixed, Hi.
 Qed.
 

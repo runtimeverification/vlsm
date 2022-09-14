@@ -284,12 +284,11 @@ Proof.
       * by apply elem_of_union in Hv' as [Heq_v' | Hs'0]
         ; [by apply elem_of_singleton in Heq_v'; subst v' | by apply Hincl].
   - left; split.
-    + subst; intro v; split; [by apply Hincl | by intros Hvs'; apply (input_valid_transition_receiving_no_sender_reflects_equivocating_validators IM A sender _ _ _ _ _ Ht); [by apply Heq_v | by apply Hvs']].
-    + apply
-      (input_valid_transition_reflects_trace_witnessing_equivocation_prop
-        _ _ _ (conj Htr Hinit) _ Hwitness
-      ).
-    apply (input_valid_transition_receiving_no_sender_reflects_equivocating_validators IM A sender _ _ _ _ _ Ht), Heq_v.
+    + subst; intro v; split; [by apply Hincl |].
+      intros Hvs'.
+      by eapply input_valid_transition_receiving_no_sender_reflects_equivocating_validators.
+    + eapply input_valid_transition_reflects_trace_witnessing_equivocation_prop; [done | done |].
+      by eapply input_valid_transition_receiving_no_sender_reflects_equivocating_validators.
 Qed.
 
 (** ** Strongly witnessed equivocation *)

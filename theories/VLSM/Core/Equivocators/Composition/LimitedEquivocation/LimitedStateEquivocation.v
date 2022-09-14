@@ -192,7 +192,8 @@ Proof.
       + replace (composite_transition _ _ _) with (sf, oom).
         unfold state_has_fixed_equivocation.
         transitivity (elements (equivocating_validators sf)); [| done].
-        by intros x Hx; apply elem_of_elements, equivocating_indices_equivocating_validators, elem_of_list_to_set.
+        intros x Hx.
+        by apply elem_of_elements, equivocating_indices_equivocating_validators, elem_of_list_to_set.
 Qed.
 
 (** Projections of valid traces for the composition of equivocators
