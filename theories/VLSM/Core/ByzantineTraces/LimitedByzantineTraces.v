@@ -57,7 +57,7 @@ Definition limited_byzantine_trace_prop
 
 Context
   {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (limited_constraint := tracewise_limited_equivocation_constraint IM sender)
+  (limited_constraint := tracewise_limited_equivocation_constraint IM (Ci := Ci) sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
   (Hvalidator: forall i : index, component_message_validator_prop IM limited_constraint i)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)

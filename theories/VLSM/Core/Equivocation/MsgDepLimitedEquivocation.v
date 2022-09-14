@@ -336,7 +336,8 @@ Section sec_msg_dep_fixed_limited_equivocation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -710,7 +711,7 @@ Lemma annotated_limited_incl_constrained_limited
   {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   : VLSM_full_projection
       Limited
-      (tracewise_limited_equivocation_vlsm_composition IM sender)
+      (tracewise_limited_equivocation_vlsm_composition IM sender (Ci := Ci))
       Datatypes.id original_state.
 Proof.
   constructor; intros sX trX HtrX.

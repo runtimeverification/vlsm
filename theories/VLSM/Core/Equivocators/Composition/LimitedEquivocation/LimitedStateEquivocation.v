@@ -137,8 +137,9 @@ Proof.
     replace (elements _) with (@nil index).
     + by destruct threshold as [t Ht]; simpl; apply Rge_le.
     + symmetry; apply elements_empty_iff; cbn.
-      specialize (equivocating_indices_equivocating_validators IM is).
-      by rewrite equivocating_indices_initially_empty.
+      etransitivity.
+      * by apply equivocating_indices_equivocating_validators.
+      * by rewrite equivocating_indices_initially_empty.
   - by replace s with (fst (composite_transition equivocator_IM l (s0, oim))); [done |]
     ; cbn in *; rewrite Ht.
 Qed.
@@ -164,18 +165,16 @@ Proof.
   induction Htr using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
   - apply (finite_valid_trace_from_to_empty (equivocators_fixed_equivocations_vlsm IM equivocating)).
     by apply initial_state_is_valid.
-  - specialize (equivocating_indices_equivocating_validators IM)
-      as Heq.
-    specialize (IHHtr equivocating).
+  - specialize (IHHtr equivocating).
     spec IHHtr.
     { apply proj2 in Ht.
       specialize (equivocators_transition_preserves_equivocating_indices IM (enum index)  _ _ _ _ _ Ht)
         as Hincl'.
-      clear -Hincl Hincl' Heq.
+      clear -Hincl Hincl'.
       transitivity (elements (equivocating_validators sf)); [| done].
       intro x; rewrite! elem_of_elements; intro Hx.
-      apply Heq, elem_of_list_to_set, Hincl'.
-      by apply Heq, elem_of_list_to_set in Hx.
+      apply equivocating_indices_equivocating_validators, elem_of_list_to_set, Hincl'.
+      by apply equivocating_indices_equivocating_validators, elem_of_list_to_set in Hx.
     }
     apply
       (finite_valid_trace_from_to_app
@@ -193,7 +192,7 @@ Proof.
       + replace (composite_transition _ _ _) with (sf, oom).
         unfold state_has_fixed_equivocation.
         transitivity (elements (equivocating_validators sf)); [| done].
-        by intros x Hx; apply elem_of_elements, Heq, elem_of_list_to_set.
+        by intros x Hx; apply elem_of_elements, equivocating_indices_equivocating_validators, elem_of_list_to_set.
 Qed.
 
 (** Projections of valid traces for the composition of equivocators
@@ -233,8 +232,6 @@ Proof.
     split; [| done].
     apply valid_trace_add_default_last, valid_trace_last_pstate, valid_state_limited_equivocation in Htr.
     transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
-    specialize (equivocating_indices_equivocating_validators IM
-                 (finite_trace_last is tr)) as Heq.
     apply sum_weights_subseteq.
     + apply NoDup_remove_dups.
     + apply NoDup_elements.
@@ -289,7 +286,7 @@ Section sec_equivocators_projection_constrained_limited.
 
 Context
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) sender)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   (message_dependencies : message -> set message)
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
