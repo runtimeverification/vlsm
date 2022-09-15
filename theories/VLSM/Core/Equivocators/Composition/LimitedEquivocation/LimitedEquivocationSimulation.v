@@ -29,7 +29,7 @@ Section fixed_limited_state_equivocation.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -74,7 +74,7 @@ Section limited_equivocation_simulation.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}

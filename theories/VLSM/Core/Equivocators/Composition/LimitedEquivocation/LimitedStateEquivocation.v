@@ -47,9 +47,10 @@ Qed.
 
 Section limited_state_equivocation.
 
-Context {message : Type}
+Context
+  {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}

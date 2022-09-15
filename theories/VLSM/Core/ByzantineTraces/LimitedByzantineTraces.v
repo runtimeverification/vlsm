@@ -23,9 +23,9 @@ composition constraint allowing only a limited amount of equivocation.
 Section limited_byzantine_traces.
 
 Context
-  `{FinSet index Ci}
   {message : Type}
-  `{@finite.Finite index _}
+  `{FinSet index Ci}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}

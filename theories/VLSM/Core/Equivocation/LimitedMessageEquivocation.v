@@ -119,7 +119,7 @@ Section tracewise_limited_message_equivocation.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   `{ReachableThreshold index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
@@ -173,9 +173,9 @@ constraint is also a trace under the limited equivocation constraint.
 *)
 
 Context
-  `{FinSet index Ci}
   {message : Type}
-  `{@finite.Finite index _}
+  `{FinSet index Ci}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -273,7 +273,7 @@ induced by a subset of indices whose weight is less than the allowed
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}

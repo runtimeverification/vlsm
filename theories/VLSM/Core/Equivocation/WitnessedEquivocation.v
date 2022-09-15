@@ -621,7 +621,7 @@ Section witnessed_equivocation_fixed_set.
 Context
   `{EqDecision message}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
