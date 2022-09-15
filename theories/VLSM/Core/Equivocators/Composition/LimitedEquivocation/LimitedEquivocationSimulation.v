@@ -28,12 +28,13 @@ Section fixed_limited_state_equivocation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   `{IndThreshold : ReachableThreshold index}
-  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM)
+  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM (Ci := Ci))
   (equivocating : list index)
   (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM equivocating)
   .
@@ -57,13 +58,12 @@ Proof.
   remember (composite_transition _ _ _).1. clear Heqc.
   unfold state_has_fixed_equivocation in Hfixed.
   unfold equivocation_fault.
-  specialize (equivocating_indices_equivocating_validators IM c)
-    as Heq.
   apply sum_weights_subseteq.
   - apply NoDup_elements.
   - apply NoDup_remove_dups.
   - intros i Hi.
-    apply elem_of_elements in Hi; rewrite Heq in Hi; apply elem_of_list_to_set in Hi.
+    rewrite equivocating_indices_equivocating_validators in Hi.
+    apply elem_of_elements, elem_of_list_to_set in Hi.
     by apply elem_of_remove_dups, Hfixed, Hi.
 Qed.
 
@@ -73,12 +73,13 @@ Section limited_equivocation_simulation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   `{IndThreshold : ReachableThreshold index}
-  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM)
+  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM (Ci := Ci))
   .
 
 (** If a trace has the [fixed_limited_equivocation_prop]erty, then it can be
@@ -147,7 +148,7 @@ End sec_equivocators_simulating_annotated_limited.
 Context
   (sender : message -> option index)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) sender)
   (message_dependencies : message -> set message)
   .
 
@@ -157,7 +158,7 @@ the composition of equivocators under a no message-equivocation and limited
 state-equivocation constraint.
 *)
 Lemma limited_equivocators_valid_state_rev
-  (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender)
+  (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender (Cm := Ci))
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
