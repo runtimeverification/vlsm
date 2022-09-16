@@ -48,7 +48,7 @@ Qed.
 Section limited_state_equivocation.
 
 Context {message : Type}
-  `{FinSet index Ci}
+  `{ReachableThreshold index Ci}
   `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
@@ -60,14 +60,13 @@ Context {message : Type}
   (equivocator_descriptors_update := equivocator_descriptors_update IM)
   (proper_equivocator_descriptors := proper_equivocator_descriptors IM)
   (sender : message -> option index)
-  `{ReachableThreshold index}
   (Heqv_idx_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci
     := equivocating_indices_BasicEquivocation IM)
   (FreeE : VLSM message := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
-  (not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ Heqv_idx_BasicEquivocation)
-  (equivocating_validators := @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Heqv_idx_BasicEquivocation)
-  (equivocation_fault := @equivocation_fault _ _ _ _ _ _ _ _ _ _ _ _ _ _ Heqv_idx_BasicEquivocation)
+  (not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Heqv_idx_BasicEquivocation)
+  (equivocating_validators := @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Heqv_idx_BasicEquivocation)
+  (equivocation_fault := @equivocation_fault _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Heqv_idx_BasicEquivocation)
   .
 
 Definition equivocators_limited_equivocations_constraint
@@ -133,12 +132,12 @@ Proof.
   destruct Hs as [[(is, His) Heq_s] | [l [(s0, oim) [oom' [[_ [_ [_ [_ Hlimited]]]] Ht]]]]].
   - subst s.
     unfold not_heavy, Equivocation.not_heavy,
-      equivocation_fault, Equivocation.equivocation_fault.
-    replace (elements _) with (@nil index).
-    + by destruct threshold as [t Ht]; simpl; apply Rge_le.
-    + symmetry; apply elements_empty_iff; cbn.
-      specialize (equivocating_indices_equivocating_validators IM is).
-      by rewrite equivocating_indices_initially_empty.
+      equivocation_fault, Equivocation.equivocation_fault. simpl.
+    destruct threshold as [t Ht]; simpl; apply Rge_le.
+    specialize (equivocating_indices_equivocating_validators IM is).
+    rewrite equivocating_indices_initially_empty; intros Heqv_is.
+     simpl in Heqv_is; apply sum_weights_empty in Heqv_is;
+      [by rewrite <- Heqv_is in Ht |..]. done.
   - by replace s with (fst (composite_transition equivocator_IM l (s0, oim))); [done |]
     ; cbn in *; rewrite Ht.
 Qed.
@@ -185,7 +184,7 @@ Proof.
       apply (finite_valid_trace_singleton (equivocators_fixed_equivocations_vlsm IM equivocating)).
       apply valid_trace_last_pstate in IHHtr.
       destruct Ht as [[_ [_ [Hv [[Hno_equiv _] Hno_heavy]]]] Ht].
-      repeat split; [done | | done | done | | done].
+      repeat split; [done | | done | done | |].
       + destruct iom as [m|]; [|apply option_valid_message_None].
         destruct Hno_equiv as [Hsent | Hfalse]; [| done].
         simpl in Hsent.
@@ -194,6 +193,7 @@ Proof.
         unfold state_has_fixed_equivocation.
         transitivity (elements (equivocating_validators sf)); [| done].
         by intros x Hx; apply elem_of_elements, Heq, elem_of_list_to_set.
+      + done.
 Qed.
 
 (** Projections of valid traces for the composition of equivocators
@@ -229,24 +229,23 @@ Proof.
   - destruct Hpr as [trX [initial_descriptors [Hinitial_descriptors [Hpr [Hlst_pr Hpr_fixed]]]]].
     exists trX, initial_descriptors.
     repeat split; [apply Hinitial_descriptors | done | done |].
-    exists (elements (equivocating_validators (finite_trace_last is tr))).
+    exists (equivocating_validators (finite_trace_last is tr)).
     split; [| done].
     apply valid_trace_add_default_last, valid_trace_last_pstate, valid_state_limited_equivocation in Htr.
     transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
     specialize (equivocating_indices_equivocating_validators IM
                  (finite_trace_last is tr)) as Heq.
-    apply sum_weights_subseteq.
-    + apply NoDup_remove_dups.
-    + apply NoDup_elements.
-    + by intros i Hi; apply elem_of_remove_dups.
+    unfold equivocation_fault; by apply sum_weights_subseteq.
 Qed.
 
 Section sec_equivocators_projection_annotated_limited.
 
 Context
-  (message_dependencies : message -> set message)
-  (full_message_dependencies : message -> set message)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
+  (full_message_dependencies : message -> Cm)
   (HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies)
+  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   (HMsgDep : forall i, MessageDependencies (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
@@ -280,7 +279,7 @@ Proof.
   ; [| done].
   exists trX, initial_descriptors.
   cbn; split_and?; try itauto.
-  by eapply msg_dep_limited_fixed_equivocation.
+  eapply msg_dep_limited_fixed_equivocation.
 Qed.
 
 End sec_equivocators_projection_annotated_limited.
@@ -288,10 +287,11 @@ End sec_equivocators_projection_annotated_limited.
 Section sec_equivocators_projection_constrained_limited.
 
 Context
+  `{FinSet message Cm}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
-  (message_dependencies : message -> set message)
+  (message_dependencies : message -> Cm)
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
 
@@ -377,7 +377,7 @@ Proof.
        as Hsim.
     spec Hsim.
     { simpl. rewrite decide_True by apply zero_descriptor_not_equivocating.
-      by rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
+    by rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
     }
     apply Hsim in HtrX.
     remember (pre_VLSM_projection_finite_trace_project _ _ _ _ _) as tr.

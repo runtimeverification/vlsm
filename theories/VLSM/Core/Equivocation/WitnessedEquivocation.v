@@ -35,12 +35,11 @@ Context
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   `{finite.Finite validator}
-  `{FinSet validator Cm}
   (A : validator -> index)
   (sender : message -> option validator)
   (Free := free_composite_vlsm IM)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
-  `{ReachableThreshold validator}
+  `{ReachableThreshold validator Cm}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cm
     := equivocation_dec_tracewise IM A sender)
@@ -624,20 +623,18 @@ by the [equivocating_validators] of its final state.
 Section witnessed_equivocation_fixed_set.
 
 Context
-  `{EqDecision message}
-  `{FinSet index Ci}
+  `{FinSet message Cm}
+  `{ReachableThreshold index Ci}
   `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (Free := free_composite_vlsm IM)
-  (sender : message -> option index)
-  `{ReachableThreshold index}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM id sender)}
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM id sender)
   (Hke : WitnessedEquivocationCapability IM id sender)
-  (message_dependencies : message -> set message)
+  (message_dependencies : message -> Cm)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)

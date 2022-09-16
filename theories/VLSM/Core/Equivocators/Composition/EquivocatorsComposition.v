@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import FinFun FunctionalExtensionality.
+From Coq Require Import FinFun FunctionalExtensionality Reals.
 From VLSM.Lib Require Import Preamble ListSetExtras StdppExtras.
 From VLSM.Lib Require Import FinExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Plans Composition Equivocation SubProjectionTraces Equivocation.NoEquivocation.
@@ -69,8 +69,7 @@ Qed.
 Section equivocating_indices_BasicEquivocation.
 
 Context
-  `{FinSet index Ci}
-  `{ReachableThreshold index}
+  `{ReachableThreshold index Ci}
   .
 
 Program Instance equivocating_indices_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci
@@ -101,11 +100,25 @@ Lemma eq_equivocating_indices_equivocation_fault
   list_to_set (equivocating_indices (enum index) s1) ≡@{Ci} list_to_set (equivocating_indices (enum index) s2) ->
   equivocation_fault s1 = equivocation_fault s2.
 Proof.
+  intros s1 s2 Heq. rewrite <- !equivocating_indices_equivocating_validators in Heq. unfold equivocation_fault.
+  apply set_eq_fin_set in Heq. unfold set_eq in Heq. destruct Heq.
+  apply sum_weights_subseteq_list in H11. apply sum_weights_subseteq_list in H12.
+  apply Rle_antisym; [apply H11 | apply H12 | ..].
+  - by apply NoDup_elements. 
+  - by apply NoDup_elements.
+  - by apply NoDup_elements.
+  - by apply NoDup_elements.
+Qed.
+
+Lemma eq_equivocating_indices_equivocation_fault'
+: forall s1 s2,
+  list_to_set (equivocating_indices (enum index) s1) ≡@{Ci} list_to_set (equivocating_indices (enum index) s2) ->
+  equivocation_fault s1 = equivocation_fault s2.
+Proof.
   intros s1 s2 Heq.
-  apply set_eq_nodup_sum_weight_eq.
-  - by apply NoDup_elements.
-  - by apply NoDup_elements.
-  - by apply set_eq_fin_set; rewrite !equivocating_indices_equivocating_validators.
+  apply Rle_antisym.
+  - by apply sum_weights_subseteq; intro i; rewrite <- !equivocating_indices_equivocating_validators in Heq; apply Heq.
+  - by apply sum_weights_subseteq; intro i; rewrite <- !equivocating_indices_equivocating_validators in Heq; apply Heq.
 Qed.
 
 End equivocating_indices_BasicEquivocation.

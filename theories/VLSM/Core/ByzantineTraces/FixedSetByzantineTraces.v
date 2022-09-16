@@ -615,7 +615,8 @@ Qed.
 Section validator_fixed_set_byzantine.
 
 Context
-  (message_dependencies : message -> set message)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)

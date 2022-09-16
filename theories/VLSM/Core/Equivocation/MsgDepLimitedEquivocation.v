@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From Coq Require Import Reals.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras Measurable StdppExtras.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras Measurable StdppExtras ListFinSetExtras.
 From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition SubProjectionTraces.
 From VLSM.Core Require Import Equivocation.FixedSetEquivocation Equivocation.LimitedMessageEquivocation.
 From VLSM.Core Require Import Equivocation.MsgDepFixedSetEquivocation Equivocation.TraceWiseEquivocation.
@@ -21,46 +21,45 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{EqDecision validator}
-  `{ReachableThreshold validator}
+  `{ReachableThreshold validator Cv}
   (A : validator -> index)
   (sender : message -> option validator)
-  (coequivocating_senders : composite_state IM -> message -> set validator)
+  (coequivocating_senders : composite_state IM -> message -> Cv)
   .
 
 Definition coeqv_message_equivocators (s : composite_state IM) (m : message)
-  : set validator :=
+  : Cv :=
   if decide (composite_has_been_directly_observed IM s m)
   then (* no additional equivocation *)
-    []
+    ∅
   else (* m itself and all its non-observed dependencies are equivocating. *)
-    map_option sender [m] ++ coequivocating_senders s m.
+    list_to_set (map_option sender [m] ++ (elements (coequivocating_senders s m))).
 
 Definition coeqv_composite_transition_message_equivocators
   (l : composite_label IM)
-  (som : annotated_state (free_composite_vlsm IM) (set validator) * option message)
-  : set validator :=
+  (som : annotated_state (free_composite_vlsm IM) Cv * option message)
+  : Cv :=
   match som with
   | (sa, None) => state_annotation sa
   | (sa, Some m) =>
-    set_union (state_annotation sa) (coeqv_message_equivocators (original_state sa) m)
+    (state_annotation sa) ∪ (coeqv_message_equivocators (original_state sa) m)
   end.
 
 Definition coeqv_limited_equivocation_constraint
   (l : composite_label IM)
-  (som : annotated_state (free_composite_vlsm IM) (set validator) * option message)
+  (som : annotated_state (free_composite_vlsm IM) Cv * option message)
   : Prop :=
   (sum_weights (coeqv_composite_transition_message_equivocators l som) <= proj1_sig threshold)%R.
 
-#[export] Instance empty_validators_inhabited : Inhabited {s : set validator | s = empty_set}
+#[export] Instance empty_validators_inhabited : Inhabited {s : Cv | s = ∅}
   := populate (exist _ _ eq_refl).
 
 Definition coeqv_limited_equivocation_vlsm : VLSM message :=
-  annotated_vlsm (free_composite_vlsm IM) (set validator) (fun s => s = empty_set)
+  annotated_vlsm (free_composite_vlsm IM) Cv (fun s => s = ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
 
 Definition coeqv_annotate_trace_with_equivocators :=
-  annotate_trace (free_composite_vlsm IM) (set validator) (fun s => s = empty_set)
+  annotate_trace (free_composite_vlsm IM) Cv (fun s => s = ∅)
     coeqv_composite_transition_message_equivocators.
 
 Lemma coeqv_limited_equivocation_transition_state_annotation_incl [l s iom s' oom]
@@ -69,19 +68,18 @@ Lemma coeqv_limited_equivocation_transition_state_annotation_incl [l s iom s' oo
 Proof.
   cbn; unfold annotated_transition; destruct (vtransition _ _ _) as (_s', _om').
   inversion 1; cbn.
-  by destruct iom as [m |]; [apply set_union_subseteq_left |].
+  destruct iom as [m |]; [by apply set_union_subseteq_left | done].
 Qed.
 
 Lemma coeqv_limited_equivocation_state_annotation_nodup s
   : valid_state_prop coeqv_limited_equivocation_vlsm s ->
-    NoDup (state_annotation s).
+    NoDup (elements (state_annotation s)).
 Proof.
   induction 1 using valid_state_prop_ind.
-  - destruct s, Hs as [_ ->]; cbn in *; constructor.
+  - by destruct s, Hs as [_ ->]; cbn in *; apply NoDup_elements.
   - destruct Ht as [_ Ht]; cbn in Ht.
     unfold annotated_transition in Ht
-    ; destruct (vtransition _ _ _); inversion Ht.
-    by destruct om as [m |]; cbn; [apply set_union_nodup_left |].
+    ; destruct (vtransition _ _ _); inversion Ht; apply NoDup_elements.
 Qed.
 
 Lemma coeqv_limited_equivocation_state_not_heavy s
@@ -90,7 +88,7 @@ Lemma coeqv_limited_equivocation_state_not_heavy s
 Proof.
   induction 1 using valid_state_prop_ind.
   - destruct s, Hs as [_ ->], threshold; cbn in *.
-    by apply Rge_le.
+    rewrite sum_weights_empty. apply Rge_le; done. done.
   - destruct Ht as [(_ & _ & _ & Hc) Ht]
     ; cbn in Ht; unfold annotated_transition in Ht; destruct (vtransition _ _ _)
     ; inversion_clear Ht.
@@ -98,15 +96,15 @@ Proof.
 Qed.
 
 Definition coeqv_limited_equivocation_projection_validator_prop : index -> Prop :=
-  annotated_projection_validator_prop IM (fun s => s = empty_set)
+  annotated_projection_validator_prop IM (fun s => s = ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
 
 Definition coeqv_limited_equivocation_message_validator_prop : index -> Prop :=
-  annotated_message_validator_prop IM (fun s => s = empty_set)
+  annotated_message_validator_prop IM (fun s => s = ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
 
 Definition coeqv_limited_equivocation_projection_validator_prop_alt : index -> Prop :=
-  annotated_projection_validator_prop_alt IM (fun s => s = empty_set)
+  annotated_projection_validator_prop_alt IM (fun s => s = ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
 
 End sec_coequivocating_senders_limited_equivocation.
@@ -119,20 +117,20 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (full_message_dependencies : message -> set message)
-  `{EqDecision validator}
-  `{ReachableThreshold validator}
+  `{FinSet message Cm}
+  (full_message_dependencies : message -> Cm)
+  `{ReachableThreshold validator Cv}
   (A : validator -> index)
   (sender : message -> option validator)
   .
 
 Definition not_directly_observed_happens_before_dependencies (s : composite_state IM) (m : message)
-  : set message :=
+  : Cm :=
   filter (fun dm => ~composite_has_been_directly_observed IM s dm) (full_message_dependencies m).
 
 Definition msg_dep_coequivocating_senders (s : composite_state IM) (m : message)
-  : set validator :=
-  map_option sender (not_directly_observed_happens_before_dependencies s m).
+  : Cv :=
+  list_to_set (map_option sender (elements (not_directly_observed_happens_before_dependencies s m))).
 
 Definition msg_dep_limited_equivocation_vlsm : VLSM message :=
   coeqv_limited_equivocation_vlsm IM sender msg_dep_coequivocating_senders.
@@ -147,9 +145,9 @@ Lemma msg_dep_annotate_trace_with_equivocators_app : forall sa tr1 tr2,
   msg_dep_annotate_trace_with_equivocators sa (tr1 ++ tr2)
     =
   msg_dep_annotate_trace_with_equivocators sa tr1 ++
-    annotate_trace_from (free_composite_vlsm IM) (set validator)
+    annotate_trace_from (free_composite_vlsm IM) Cv
       (coeqv_composite_transition_message_equivocators IM sender msg_dep_coequivocating_senders)
-      (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) (set validator)) {| original_state := sa; state_annotation := ` inhabitant |} (msg_dep_annotate_trace_with_equivocators sa tr1)) tr2.
+      (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) Cv) {| original_state := sa; state_annotation := ` inhabitant |} (msg_dep_annotate_trace_with_equivocators sa tr1)) tr2.
 Proof. by intros; apply annotate_trace_from_app. Qed.
 
 Lemma msg_dep_annotate_trace_with_equivocators_last_original_state : forall s s' tr,
@@ -174,9 +172,7 @@ Lemma msg_dep_annotate_trace_with_equivocators_project s tr
   : pre_VLSM_full_projection_finite_trace_project (type msg_dep_limited_equivocation_vlsm)
     (composite_type IM) Datatypes.id original_state
     (msg_dep_annotate_trace_with_equivocators s tr) = tr.
-Proof.
-  apply (annotate_trace_project (free_composite_vlsm IM) (set validator)).
-Qed.
+Proof. by apply (annotate_trace_project (free_composite_vlsm IM) Cv). Qed.
 
 End sec_msg_dep_limited_equivocation.
 
@@ -188,14 +184,13 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{EqDecision validator}
-  `{ReachableThreshold validator}
+  `{ReachableThreshold validator Cv}
   (A : validator -> index)
   (sender : message -> option validator)
   .
 
 Definition full_node_coequivocating_senders (s : composite_state IM) (m : message)
-  : set validator := [].
+  : Cv := ∅.
 
 Definition full_node_limited_equivocation_vlsm : VLSM message :=
   coeqv_limited_equivocation_vlsm IM sender full_node_coequivocating_senders.

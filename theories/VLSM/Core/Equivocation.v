@@ -25,9 +25,9 @@ Qed.
 
 (** ** Basic equivocation **)
 
-Class ReachableThreshold V `{Hm : Measurable V} :=
+Class ReachableThreshold V Cv `{Hm : Measurable V} `{FinSet V Cv}:=
   { threshold : {r | (r >= 0)%R}
-  ; reachable_threshold : exists (vs:list V), NoDup vs /\ (sum_weights vs > proj1_sig threshold)%R
+  ; reachable_threshold : exists (vs:Cv), (sum_weights vs > proj1_sig threshold)%R
   }.
 
 (** Assuming a set of <<state>>s, and a set of <<validator>>s,
@@ -55,8 +55,7 @@ is lower than the [threshold] set for the <<validator>>s type.
 Class BasicEquivocation
   (state validator Cm : Type)
   {measurable_V : Measurable validator}
-  {reachable_threshold : ReachableThreshold validator}
-  `{FinSet validator Cm}
+  `{ReachableThreshold validator Cm}
   :=
   { is_equivocating (s : state) (v : validator) : Prop
   ; is_equivocating_dec : RelDecision is_equivocating
@@ -79,7 +78,7 @@ Class BasicEquivocation
       (s : state)
       : R
       :=
-      sum_weights (elements (equivocating_validators s))
+      sum_weights (equivocating_validators s)
 
   ; not_heavy
       (s : state)
@@ -92,11 +91,7 @@ Lemma eq_equivocating_validators_equivocation_fault
     equivocating_validators s1 ≡@{Cm} equivocating_validators s2 ->
     equivocation_fault s1 = equivocation_fault s2.
 Proof.
-  intros.
-  apply set_eq_nodup_sum_weight_eq.
-  - by apply NoDup_elements.
-  - by apply NoDup_elements.
-  - by apply set_eq_fin_set, H8.
+  by intros; apply sum_weights_proper.
 Qed.
 
 Lemma incl_equivocating_validators_equivocation_fault
@@ -107,10 +102,7 @@ Lemma incl_equivocating_validators_equivocation_fault
     (equivocation_fault s1 <= equivocation_fault s2)%R.
 Proof.
   intros s1 s2 H_incl.
-  apply sum_weights_subseteq.
-  - by apply NoDup_elements.
-  - by apply NoDup_elements.
-  - by intro; setoid_rewrite elem_of_elements; apply H_incl. 
+  by apply sum_weights_subseteq.
 Qed.
 
 (** *** State-message oracles and endowing states with history
@@ -2141,8 +2133,7 @@ Qed.
 Context
     `{finite.Finite validator}
     {measurable_V : Measurable validator}
-    {threshold_V : ReachableThreshold validator}
-    `{FinSet validator Cm}
+    `{ReachableThreshold validator Cm}
     .
 (** For the equivocation sum fault to be computable, we require that
     our is_equivocating property is decidable. The current implementation

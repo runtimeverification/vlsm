@@ -23,14 +23,13 @@ composition constraint allowing only a limited amount of equivocation.
 Section limited_byzantine_traces.
 
 Context
-  `{FinSet index Ci}
   {message : Type}
+  `{ReachableThreshold index Ci}
   `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   (sender : message -> option index)
-  `{ReachableThreshold index}
   .
 
 (**
@@ -41,10 +40,10 @@ of <<byzantine>> nodes whose added weight is below the [ReachableThreshold].
 Definition fixed_limited_byzantine_trace_prop
   (s : composite_state IM)
   (tr : list (composite_transition_item IM))
-  (byzantine : set index)
+  (byzantine : Ci)
   : Prop
-  := (sum_weights (remove_dups byzantine) <= `threshold)%R /\
-     fixed_byzantine_trace_alt_prop IM byzantine (fun i => i) sender s tr.
+  := (sum_weights (byzantine) <= `threshold)%R /\
+     fixed_byzantine_trace_alt_prop IM (elements byzantine) (fun i => i) sender s tr.
 
 (** The union of traces with the [fixed_limited_byzantine_trace_prop]erty over
 all possible selections of (limited) byzantine nodes.
@@ -56,13 +55,14 @@ Definition limited_byzantine_trace_prop
   exists byzantine, fixed_limited_byzantine_trace_prop s tr byzantine.
 
 Context
+  `{FinSet message Cm}
   {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   (limited_constraint := tracewise_limited_equivocation_constraint IM sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
   (Hvalidator: forall i : index, component_message_validator_prop IM limited_constraint i)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
-  (message_dependencies : message -> set message)
+  (message_dependencies : message -> Cm)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
@@ -77,14 +77,15 @@ selection.
 Section fixed_limited_selection.
 
 Context
-  (byzantine: set index)
-  (non_byzantine : set index := set_diff (enum index) byzantine)
-  (Hlimit: (sum_weights (remove_dups byzantine) <= `threshold)%R)
-  (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine (λ i : index, i) sender)
+  `{FinSet index Ci}
+  (byzantine: Ci)
+  (non_byzantine : Ci := list_to_set (set_diff (enum index) (elements byzantine)))
+  (Hlimit: (sum_weights (byzantine) <= `threshold)%R)
+  (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM (elements byzantine) (λ i : index, i) sender)
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
-  (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
-  (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
+  (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
+  (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
   .
 
 (** When replacing the byzantine components of a composite [valid_state] with
@@ -203,12 +204,12 @@ equivocation composition such that the projection of the two traces to
 the <<non-byzantine>> nodes coincide.
 *)
 Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating s tr byzantine
-  (not_byzantine : set index := set_diff (enum index) byzantine)
-  : fixed_limited_byzantine_trace_prop s tr byzantine ->
+  (not_byzantine : Ci := list_to_set (set_diff (enum index) byzantine))
+  : fixed_limited_byzantine_trace_prop s tr (list_to_set byzantine) ->
     exists bs btr,
       finite_valid_trace Limited bs btr /\
-      composite_state_sub_projection IM not_byzantine s = composite_state_sub_projection IM not_byzantine bs /\
-      finite_trace_sub_projection IM not_byzantine tr = finite_trace_sub_projection IM not_byzantine btr.
+      composite_state_sub_projection IM (elements not_byzantine) s = composite_state_sub_projection IM (elements not_byzantine) bs /\
+      finite_trace_sub_projection IM (elements not_byzantine) tr = finite_trace_sub_projection IM (elements not_byzantine) btr.
 Proof.
   intros [Hlimit Hfixed].
   eexists _, _; split.

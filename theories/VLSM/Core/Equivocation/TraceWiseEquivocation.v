@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Rdefinitions.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet Measurable.
 From VLSM.Core Require Import VLSM Composition ProjectionTraces.
 From VLSM.Core Require Import Equivocation.
 From VLSM.Lib Require Import Preamble StdppExtras.
@@ -293,10 +293,9 @@ Proof.
 Qed.
 
 Context
-  `{ReachableThreshold validator}
+  `{ReachableThreshold validator Cm}
   `{RelDecision _ _ is_equivocating_tracewise_no_has_been_sent}
   `{finite.Finite validator}
-  `{FinSet validator Cm}
   .
 
 #[local] Program Instance equivocation_dec_tracewise
@@ -344,7 +343,7 @@ Lemma initial_state_equivocators_weight
 Proof.
   apply equivocating_validators_empty_in_initial_state, elements_empty_iff in Hs.
   unfold equivocation_fault.
-  by rewrite Hs.
+  by apply sum_weights_empty, elements_empty_iff.
 Qed.
 
 Lemma composite_transition_no_sender_equivocators_weight

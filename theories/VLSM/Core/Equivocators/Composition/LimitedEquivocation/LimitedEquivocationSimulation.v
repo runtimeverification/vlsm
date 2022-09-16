@@ -28,14 +28,14 @@ Section fixed_limited_state_equivocation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{ReachableThreshold index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{IndThreshold : ReachableThreshold index}
   (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM)
-  (equivocating : list index)
-  (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM equivocating)
+  (equivocating : Ci)
+  (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM (elements equivocating))
   .
 
 (** If the total weight of the equivocators allowed to state-equivocate is less
@@ -44,7 +44,7 @@ the fixed state-equivocation constraint are also valid w.r.t. the
 limited state-equivocation constraint.
 *)
 Lemma equivocators_Fixed_incl_Limited
-  (Hlimited : (sum_weights (remove_dups equivocating) <= `threshold)%R)
+  (Hlimited : (sum_weights (equivocating) <= `threshold)%R)
   : VLSM_incl Fixed Limited.
 Proof.
   apply constraint_subsumption_incl.
@@ -53,18 +53,16 @@ Proof.
   intros l (s, om) [Hno_equiv Hfixed].
   split; [done |].
   unfold not_heavy.
-  transitivity (sum_weights (remove_dups equivocating)); [| done].
+  transitivity (sum_weights (equivocating)); [| done].
   remember (composite_transition _ _ _).1. clear Heqc.
   unfold state_has_fixed_equivocation in Hfixed.
   unfold equivocation_fault.
   specialize (equivocating_indices_equivocating_validators IM c)
     as Heq.
   apply sum_weights_subseteq.
-  - apply NoDup_elements.
-  - apply NoDup_remove_dups.
-  - intros i Hi.
-    apply elem_of_elements in Hi; rewrite Heq in Hi; apply elem_of_list_to_set in Hi.
-    by apply elem_of_remove_dups, Hfixed, Hi.
+  intros i Hi.
+  apply elem_of_elements in Hi; rewrite Heq in Hi; apply elem_of_elements, elem_of_list_to_set in Hi.
+  by apply elem_of_elements; apply Hfixed, Hi.
 Qed.
 
 End fixed_limited_state_equivocation.
@@ -73,11 +71,11 @@ Section limited_equivocation_simulation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{ReachableThreshold index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{IndThreshold : ReachableThreshold index}
   (XE : VLSM message := equivocators_limited_equivocations_vlsm IM)
   .
 
@@ -118,7 +116,7 @@ Context
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (sender : message -> option index)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
-  .
+  . 
 
 Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation_rev
   isX sX trX
@@ -145,10 +143,11 @@ Qed.
 End sec_equivocators_simulating_annotated_limited.
 
 Context
+  `{FinSet message Cm}
   (sender : message -> option index)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
-  (message_dependencies : message -> set message)
+  (message_dependencies : message -> Cm)
   .
 
 (** Any valid state for the composition of reqular nodes under a limited
