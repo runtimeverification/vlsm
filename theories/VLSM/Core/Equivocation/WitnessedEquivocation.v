@@ -660,7 +660,7 @@ when there are no [equivocating_validators].
 Definition equivocating_validators_fixed_equivocation_constraint
   (s : composite_state IM)
   :=
-  fixed_equivocation_constraint IM (elements(equivocating_validators s)).
+  fixed_equivocation_constraint IM (equivocating_validators s).
 
 Lemma equivocators_can_emit_free m
   (Hmsg : valid_message_prop Free m)
@@ -671,7 +671,7 @@ Lemma equivocators_can_emit_free m
   l s
   (Hv : composite_valid IM l (s, Some m))
   : can_emit
-    (equivocators_composition_for_directly_observed IM (elements(equivocating_validators sf)) s)
+    (equivocators_composition_for_directly_observed IM (equivocating_validators sf) s)
     m.
 Proof.
     apply emitted_messages_are_valid_iff in Hmsg
@@ -716,11 +716,11 @@ induction hypothesis in terms of the final state after the last transition.
 Lemma strong_witness_has_fixed_equivocation is s tr
   (Htr : finite_valid_trace_init_to (free_composite_vlsm IM) is s tr)
   (Heqv: strong_trace_witnessing_equivocation_prop IM id sender is tr)
-  : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM (elements(equivocating_validators s))) is s tr.
+  : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM (equivocating_validators s)) is s tr.
 Proof.
   split; [|apply Htr].
   induction Htr using finite_valid_trace_init_to_rev_ind.
-  - eapply (finite_valid_trace_from_to_empty (fixed_equivocation_vlsm_composition IM (elements(equivocating_validators si)))).
+  - eapply (finite_valid_trace_from_to_empty (fixed_equivocation_vlsm_composition IM (equivocating_validators si))).
     by apply initial_state_is_valid.
   - spec IHHtr.
     { intros prefix. intros.
@@ -742,7 +742,7 @@ Proof.
     }
     assert
       (Htr_sf : finite_valid_trace_from_to
-        (fixed_equivocation_vlsm_composition IM (elements (equivocating_validators sf))) si s tr).
+        (fixed_equivocation_vlsm_composition IM (equivocating_validators sf)) si s tr).
     { revert IHHtr.
       apply VLSM_incl_finite_valid_trace_from_to,
                fixed_equivocation_vlsm_composition_index_incl.
@@ -792,7 +792,7 @@ Proof.
     }
     specialize (equivocators_can_emit_free _ Hiom _ Hsender _ Hequivocating_v  _ _ Hv) as Hemit_im.
     repeat split
-    ; [done |  | done | by right | done].
+    ; [done | | done | by right | done].
     apply emitted_messages_are_valid.
     specialize
       (EquivPreloadedBase_Fixed_weak_full_projection IM _ _ Hs') as Hproj.

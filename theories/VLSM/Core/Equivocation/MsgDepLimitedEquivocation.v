@@ -222,9 +222,13 @@ Lemma full_node_msg_dep_coequivocating_senders s m i li
 Proof.
   cut (forall v, v ∉@{ Cv } msg_dep_coequivocating_senders IM full_message_dependencies sender s m).
   {
-    intros Hv. apply set_choose_or_empty.
+    intros Hv.
     destruct (elements (msg_dep_coequivocating_senders (Cv := Cv) IM full_message_dependencies sender s m)).
-    cycle 1. apply set_choose_or_empty.
+    (** 
+      @traiansf @palmskog @wkolowski I did destruct on elements, but now the proof doesn't
+      can be completed as before and I don't know how to adapt it.
+    *)
+    Admitted. (*
     ; [| contradiction (Hv v); left].
   }
   setoid_rewrite elem_of_map_option; setoid_rewrite elem_of_list_filter.
@@ -233,7 +237,7 @@ Proof.
   eapply msg_dep_full_node_input_valid_happens_before_has_been_directly_observed;
     [typeclasses eauto | apply Hfull | done |].
   by apply full_message_dependencies_happens_before.
-Qed.
+Qed.*)
 
 Lemma annotated_free_input_valid_projection
   iprop `{Inhabited (sig iprop)} constr trans
@@ -262,8 +266,18 @@ Proof.
   destruct om as [m |]; [| done]; cbn; f_equal.
   unfold coeqv_message_equivocators.
   case_decide as Hobs; [done |]; f_equal.
-  symmetry. eapply full_node_msg_dep_coequivocating_senders.
-Qed.
+  symmetry.
+  Admitted. (*eapply full_node_msg_dep_coequivocating_senders.
+  (**
+    @traiansf @palmskog @wkolowski I here's a failure with this message:
+    "map_option sender [m] ++
+      elements
+        (msg_dep_coequivocating_senders IM full_message_dependencies sender
+          (original_state s) m) =
+      map_option sender [m] ++
+      elements (full_node_coequivocating_senders IM (original_state s) m)"
+  *)
+Qed.*)
 
 Lemma msg_dep_full_node_valid_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
@@ -274,7 +288,24 @@ Proof.
   rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
 Qed.
 
-Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
+(**
+  @traiansf @palmskog @wkolowski I don't figure out what's wrong with the following 4 lemmas.
+  For the first one, I get this error message:
+  "Unable to unify H11 with
+  (fix list_to_set
+      (A C : Type) (H : Singleton A C) (H0 : Empty C) 
+      (H1 : Union C) (l : list A) {struct l} : C :=
+      match l with
+      | [] => ∅
+      | x :: l0 => {[x]} ∪ list_to_set A C H H0 H1 l0
+      end) validator Cv H12 H11 H13
+     (map_option sender
+        (elements
+           (not_directly_observed_happens_before_dependencies IM
+              full_message_dependencies s0 m)))."
+*)
+
+(*Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
   : vtransition (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender) l (s, om) =
     vtransition (full_node_limited_equivocation_vlsm IM sender) l (s, om).
@@ -324,7 +355,7 @@ Proof.
   apply VLSM_eq_incl_iff; split.
   - apply full_node_msg_dep_limited_equivocation_vlsm_incl.
   - apply msg_dep_full_node_limited_equivocation_vlsm_incl.
-Qed.
+Qed. *)
 
 End sec_full_node_msg_dep_limited_equivocation_equivalence.
 
@@ -350,7 +381,13 @@ Context
     channel_authentication_sender_safety _ _ _ Hchannel)
   .
 
-Lemma equivocating_messages_are_equivocator_emitted
+(**
+  @traiansf @palmskog @wkolowski the following 2 lemmas fail in the same way.
+  I think here's a problem related to having 2 different instances of EqDecision message, but I don't
+  figure out why and how to solve it.
+*)
+
+(*Lemma equivocating_messages_are_equivocator_emitted
   s im
   (Him : can_emit (free_composite_vlsm IM) im)
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im) :
@@ -373,9 +410,9 @@ Proof.
   split.
   - by rewrite elem_of_app; left; left.
   - by eapply message_dependencies_are_sufficient.
-Qed.
+Qed. *)
 
-Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
+(*Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
   s im
   (Him : can_emit (free_composite_vlsm IM) im)
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im)
@@ -401,7 +438,7 @@ Proof.
   }
   apply emitted_messages_are_valid in Him.
   by eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender.
-Qed.
+Qed.*)
 
 Lemma message_equivocators_can_emit (s : vstate Limited) im
   (Hs : valid_state_prop
@@ -418,13 +455,14 @@ Lemma message_equivocators_can_emit (s : vstate Limited) im
       im.
 Proof.
   eapply VLSM_full_projection_can_emit.
-  - apply equivocators_composition_for_directly_observed_index_incl_full_projection
-     with (Hincl := set_union_subseteq_right (state_annotation s) (msg_dep_message_equivocators
-                      IM full_message_dependencies sender (original_state s) im)).
-  - specialize (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
-            as (j & Heqv_j & Hemitj).
-    eapply sub_valid_preloaded_lifts_can_be_emitted
-    ; [done | | done]; cbn; intros dm H_dm.
+  - apply equivocators_composition_for_directly_observed_index_incl_full_projection.
+  - eapply sub_valid_preloaded_lifts_can_be_emitted.
+    * apply elem_of_elements.
+    (**
+      @traiansf @palmskog @wkolowski I don't know how to prove the goals generated by eapply here.
+    *)
+    Admitted. 
+    (*; [done | | done]; cbn; intros dm H_dm.
     assert (Hdm : msg_dep_happens_before message_dependencies dm im)
         by (apply msg_dep_happens_before_iff_one; left; done).
     clear H_dm; revert dm Hdm.
@@ -443,13 +481,13 @@ Proof.
       * by apply msg_dep_happens_before_iff_one; left.
       * transitivity dm; [| done].
         by apply msg_dep_happens_before_iff_one; left.
-Qed.
+Qed.*)
 
 Lemma msg_dep_fixed_limited_equivocation_witnessed
   is tr
   (Htr : finite_valid_trace Limited is tr)
   (equivocators := state_annotation (finite_trace_last is tr))
-  (Fixed := fixed_equivocation_vlsm_composition IM (elements equivocators))
+  (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
   : (sum_weights equivocators <= `threshold)%R
       /\
     finite_valid_trace Fixed
@@ -463,7 +501,11 @@ Proof.
             finite_valid_trace_last_pstate, Htr.
   - apply valid_trace_add_default_last in Htr.
     induction Htr using finite_valid_trace_init_to_rev_ind.
-    + apply elem_of_elements in Fixed.
+    + Admitted.
+    (**
+      @traiansf @palmskog @wkolowski I don't manage to use the same tactics as before here.
+    *)
+    (*
     apply initial_state_is_valid.
     setoid_rewrite map_app.
     apply finite_valid_trace_from_app_iff; split.
@@ -538,7 +580,7 @@ Proof.
         ; [clear Heqim; contradict Hmj; apply no_initial_messages_in_IM |].
         eapply VLSM_full_projection_can_emit; [| done].
         apply forget_annotations_projection.
-Qed.
+Qed.*)
 
 Corollary msg_dep_fixed_limited_equivocation is tr
   : finite_valid_trace Limited is tr ->
@@ -575,13 +617,18 @@ Lemma fixed_transition_preserves_annotation_equivocators
       (@finite_trace_last _ (type Limited)
         {| original_state := is; state_annotation := empty_set |}
         (annotate_trace_from (free_composite_vlsm IM)
-          (set index)
+          Ci
           (msg_dep_composite_transition_message_equivocators IM full_message_dependencies sender)
           {| original_state := is; state_annotation := empty_set |} tr), iom)
     ⊆ equivocators.
 Proof.
   destruct iom as [im |]; [| done].
-  apply set_union_subseteq_iff; split; [done | cbn].
+  (**
+    @traiansf @palmskog @wkolowski I added a version for finsets of the lemma set_union_subseteq_iff,
+    but it seems I still cannot apply it.
+  *)
+  Admitted.
+  (*apply ListFinSetExtras.set_union_subseteq_iff. split; [done | cbn].
   rewrite annotate_trace_from_last_original_state; cbn.
   replace (finite_trace_last _ _) with s
        by (apply valid_trace_get_last in Htr1; congruence).
@@ -624,7 +671,7 @@ Proof.
       ; [done | done |].
       apply VLSM_incl_valid_state; [| done].
       apply Fixed_incl_StrongFixed.
-Qed.
+Qed.*)
 
 Lemma msg_dep_limited_fixed_equivocation
   (is : vstate (free_composite_vlsm IM)) (tr : list (composite_transition_item IM))
@@ -644,8 +691,12 @@ Proof.
   end
   ; [itauto |].
   induction Htr using finite_valid_trace_init_to_rev_strong_ind.
-  - split. [| apply list_subseteq_nil].
-    by constructor; apply initial_state_is_valid.
+  - split.
+    + by constructor; apply initial_state_is_valid.
+    (**
+      @traiansf @palmskog @wkolowski there are some subgoals I didn't manage to prove here.
+    *)
+    + admit.
   - rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.
     unfold annotate_trace_item; rewrite !finite_trace_last_is_last; cbn.
     split; cycle 1.
@@ -672,20 +723,15 @@ Proof.
         replace (finite_trace_last _ _) with s
              by (apply valid_trace_get_last in Htr1; congruence).
         apply Ht.
-      * apply Rle_trans with (sum_weights (remove_dups equivocators))
+      * apply Rle_trans with (sum_weights equivocators)
         ; [| done].
         apply sum_weights_subseteq.
         -- destruct iom as [im|]; cycle 1.
-           ++ eapply coeqv_limited_equivocation_state_annotation_nodup.
-              apply finite_valid_trace_last_pstate, IHHtr1.
-           ++ apply set_union_nodup_left.
-              eapply coeqv_limited_equivocation_state_annotation_nodup.
-              apply finite_valid_trace_last_pstate, IHHtr1.
-        -- apply NoDup_remove_dups.
-        -- transitivity equivocators.
-           ++ eapply fixed_transition_preserves_annotation_equivocators
-              ; [done | done | apply IHHtr1].
-           ++ intro; apply elem_of_remove_dups.
+           ++ admit. 
+             (* apply finite_valid_trace_last_pstate, IHHtr1. *)
+           ++ admit. 
+              (*eapply coeqv_limited_equivocation_state_annotation_nodup.
+              apply finite_valid_trace_last_pstate, IHHtr1.*)
       * destruct l as [i li]; cbn; unfold annotated_transition; cbn.
         rewrite !msg_dep_annotate_trace_with_equivocators_last_original_state; cbn.
         replace (finite_trace_last _ _) with s
@@ -693,7 +739,8 @@ Proof.
         by destruct Ht as [_ Ht]; cbn in Ht
         ; destruct (vtransition _ _ _) as (si', om')
         ; inversion Ht.
-Qed.
+    Admitted.
+(*Qed.*)
 
 Lemma annotated_limited_incl_constrained_limited
   {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}

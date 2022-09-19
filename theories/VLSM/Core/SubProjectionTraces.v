@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From Coq Require Import FunctionalExtensionality Lia.
 From stdpp Require Import prelude finite.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras StdppListFinSet.
 From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.
 From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.NoEquivocation.
 
@@ -1487,19 +1487,19 @@ Section sub_composition_element.
 
 Context
   {message : Type}
-  `{EqDecision index}
+  `{FinSet index Ci}
   (IM : index -> VLSM message)
-  (indices : set index)
+  (indices : Ci)
   (j : index)
-  (Hj : j ∈ indices)
+  (Hj : j ∈ elements indices)
   .
 
 Definition sub_element_label (l : vlabel (IM j))
-  : composite_label (sub_IM IM indices) :=
+  : composite_label (sub_IM IM (elements indices)) :=
   existT (dexist j Hj) l.
 
 Definition sub_element_state (s : vstate (IM j)) sub_i
-  : vstate (sub_IM IM indices sub_i) :=
+  : vstate (sub_IM IM (elements indices) sub_i) :=
   match (decide (` sub_i = j)) with
   | left e =>
     eq_rect_r (λ j : index, vstate (IM j)) s e
@@ -1528,7 +1528,7 @@ Lemma preloaded_sub_element_full_projection
   (P Q : message -> Prop)
   (PimpliesQ : forall m, P m -> Q m)
   (PrePXj := pre_loaded_vlsm (IM j) P)
-  (PreQSubFree := pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q)
+  (PreQSubFree := pre_loaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q)
   : VLSM_full_projection PrePXj PreQSubFree sub_element_label sub_element_state.
 Proof.
   apply basic_VLSM_full_projection_preloaded_with; [done |..].
@@ -1552,9 +1552,9 @@ Qed.
 
 Lemma sub_valid_preloaded_lifts_can_be_emitted
   (P Q : message -> Prop)
-  (HPvalid : forall dm, P dm -> valid_message_prop (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q) dm)
+  (HPvalid : forall dm, P dm -> valid_message_prop (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q) dm)
   : forall m, can_emit (pre_loaded_vlsm (IM j) P) m ->
-    can_emit (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q) m.
+    can_emit (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q) m.
 Proof.
   intros m Hm.
   eapply VLSM_incl_can_emit.
@@ -1578,7 +1578,7 @@ component, as the intermediate induced projection might generate more
 *)
 
 Definition sub_label_element_project
-  (l : composite_label (sub_IM IM indices))
+  (l : composite_label (sub_IM IM (elements indices)))
   : option (vlabel (IM j)) :=
   match decide (j = ` (projT1 l)) with
   | left e => Some (eq_rect_r (fun j => vlabel (IM j)) (projT2 l) e)
@@ -1586,12 +1586,12 @@ Definition sub_label_element_project
   end.
 
 Definition sub_state_element_project
-  (s : composite_state (sub_IM IM indices))
+  (s : composite_state (sub_IM IM (elements indices)))
   : vstate (IM j) := s (dexist j Hj).
 
 Lemma sub_transition_element_project_None
   : forall lX, sub_label_element_project lX = None ->
-    forall s om s' om', composite_transition (sub_IM IM indices) lX (s, om) = (s', om') ->
+    forall s om s' om', composite_transition (sub_IM IM (elements indices)) lX (s, om) = (s', om') ->
     sub_state_element_project s' = sub_state_element_project s.
 Proof.
   intros (sub_i,li) HlX s om s' om' HtX.
@@ -1627,9 +1627,9 @@ Lemma sub_transition_element_project_Some :
   forall sX1 sX2,
     sub_state_element_project sX1 = sub_state_element_project sX2 ->
   forall iom sX1' oom1,
-    composite_transition (sub_IM IM indices) lX1 (sX1, iom) = (sX1', oom1) ->
+    composite_transition (sub_IM IM (elements indices)) lX1 (sX1, iom) = (sX1', oom1) ->
   forall sX2' oom2,
-    composite_transition (sub_IM IM indices) lX2 (sX2, iom) = (sX2', oom2) ->
+    composite_transition (sub_IM IM (elements indices)) lX2 (sX2, iom) = (sX2', oom2) ->
       sub_state_element_project sX1' = sub_state_element_project sX2' /\ oom1 = oom2.
 Proof.
   intros [sub_j1 lj1] [sub_j2 lj2] lj.
@@ -1648,7 +1648,7 @@ Qed.
 
 Definition induced_sub_element_projection constraint : VLSM message :=
   projection_induced_validator
-    (pre_induced_sub_projection IM indices constraint) (type (IM j))
+    (pre_induced_sub_projection IM (elements indices) constraint) (type (IM j))
     sub_label_element_project sub_state_element_project
     sub_element_label sub_element_state.
 
@@ -1657,7 +1657,7 @@ Definition pre_induced_sub_element_projection constraint : VLSM message :=
 
 Lemma induced_sub_element_projection_is_projection constraint
   : VLSM_projection
-    (pre_induced_sub_projection IM indices constraint)
+    (pre_induced_sub_projection IM (elements indices) constraint)
     (pre_induced_sub_element_projection constraint)
     sub_label_element_project sub_state_element_project.
 Proof.
@@ -1829,7 +1829,7 @@ Definition update_IM
   (replacement_IM : sub_index (elements selection) -> VLSM message)
   (i : index)
   : VLSM message :=
-  match decide (i ∈ selection) with
+  match decide (i ∈ elements selection) with
   | left i_in => replacement_IM (@dexist _ (sub_index_prop (elements selection)) _ i i_in)
   | _ => IM i
   end.
@@ -1838,22 +1838,22 @@ for fixed-set equivocation model, similar to the one for byzantine traces.
 *)
 
 Context
-  (replacement_IM : sub_index selection -> VLSM message)
+  (replacement_IM : sub_index (elements selection) -> VLSM message)
   (updated_IM := update_IM replacement_IM)
-  (selection_complement : set index := set_diff (enum index) selection)
+  (selection_complement : Ci := set_diff (list_to_set (enum index)) (list_to_set (elements selection)))
   .
 
 #[export] Instance update_IM_complement_Hbs
   `{forall i : index, HasBeenSentCapability (IM i)}
-  : forall sub_i : sub_index selection_complement,
-    HasBeenSentCapability (sub_IM updated_IM selection_complement sub_i).
+  : forall sub_i : sub_index (elements selection_complement),
+    HasBeenSentCapability (sub_IM updated_IM (elements selection_complement) sub_i).
 Proof.
   intros sub_i.
   unfold sub_IM, updated_IM, update_IM.
   case_decide as Hi; [|typeclasses eauto].
   contradict Hi.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i; simpl.
-  by eapply set_diff_elim2.
+  by apply elem_of_elements in Hi; apply set_diff_elim2 in Hi; contradict Hi; apply elem_of_list_to_set.
 Qed.
 
 End update_IM.

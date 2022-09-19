@@ -178,8 +178,8 @@ Context
   (Free := free_composite_vlsm IM)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   (equivocators : Ci)
-  (Fixed := fixed_equivocation_vlsm_composition IM (elements equivocators))
-  (StrongFixed := strong_fixed_equivocation_vlsm_composition IM (elements equivocators))
+  (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
+  (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
   (sender : message -> option index)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
@@ -198,11 +198,14 @@ Proof.
   { intro Hincl.
     unfold tracewise_not_heavy, not_heavy, equivocation_fault.
     unfold tracewise_equivocating_validators in Hincl. apply sum_weights_subseteq in Hincl.
+    (**
+      @traiansf @palmskog @wkolowski I don't manage to prove this subgoal.
+    *)
     admit.
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
   { apply VLSM_incl_trans with (machine Free).
-    - apply (constraint_free_incl IM (strong_fixed_equivocation_constraint IM (elements equivocators))).
+    - apply (constraint_free_incl IM (strong_fixed_equivocation_constraint IM equivocators)).
     - apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
@@ -243,7 +246,7 @@ Qed.
 
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
 Proof.
-  specialize (Fixed_eq_StrongFixed IM (elements equivocators))
+  specialize (Fixed_eq_StrongFixed IM equivocators)
     as Heq.
   apply VLSM_eq_proj1 in Heq.
   apply VLSM_incl_trans with (machine StrongFixed).
@@ -276,7 +279,7 @@ Definition fixed_limited_equivocation_prop
   (s : composite_state IM)
   (tr : list (composite_transition_item IM))
   : Prop
-  := exists (equivocators : Ci) (Fixed := fixed_equivocation_vlsm_composition IM (elements equivocators)),
+  := exists (equivocators : Ci) (Fixed := fixed_equivocation_vlsm_composition IM equivocators),
     (sum_weights equivocators <= `threshold)%R /\
     finite_valid_trace Fixed s tr.
 
