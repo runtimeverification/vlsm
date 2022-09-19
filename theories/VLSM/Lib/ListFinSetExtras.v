@@ -22,8 +22,12 @@ Lemma set_union_subseteq_left :
     forall (s1 s2 : set), s1 ⊆ (set_union s1 s2).
 Proof. by intros s1 s2 x Hincl; apply set_union_intro; left. Qed.
 
-Lemma elem_of_submseteq' : 
+Lemma elem_of_submseteq' :
   forall (a : A) (s1 s2 : set), a ∈ s1 -> s1 ⊆ s2 -> a ∈ s2.
 Proof. by intros a s1 s2 Ha Hincl; apply Hincl. Qed.
+
+Lemma empty_subseteq :
+  forall (s : set), ∅ ⊆ s.
+Proof. by intros s x Hin; contradict Hin; apply not_elem_of_empty. Qed.
 
 End defs.

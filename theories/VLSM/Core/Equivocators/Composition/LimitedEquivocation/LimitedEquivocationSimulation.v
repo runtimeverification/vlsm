@@ -109,9 +109,11 @@ Qed.
 Section sec_equivocators_simulating_annotated_limited.
 
 Context
-  (message_dependencies : message -> set message)
-  (full_message_dependencies : message -> set message)
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
+  (full_message_dependencies : message -> Cm)
+  `{FinSet index Ci}
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (sender : message -> option index)
@@ -126,7 +128,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
       equivocators_total_state_project IM s = original_state sX /\
       equivocators_total_trace_project IM tr =
         pre_VLSM_full_projection_finite_trace_project
-          (annotated_type (free_composite_vlsm IM) (set index)) (composite_type IM) Datatypes.id original_state
+          (annotated_type (free_composite_vlsm IM) Ci) (composite_type IM) Datatypes.id original_state
           trX /\
       finite_valid_trace_init_to XE is s tr /\
       finite_trace_last_output trX = finite_trace_last_output tr.
@@ -137,8 +139,8 @@ Proof.
      as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput); [| done].
   exists is, s, tr; subst; split_and!; try itauto.
   - by erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last.
-  - by rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
-Qed.
+  - Admitted. (*rewrite <- Houtput. apply pre_VLSM_full_projection_finite_trace_last_output.
+Qed.*)
 
 End sec_equivocators_simulating_annotated_limited.
 

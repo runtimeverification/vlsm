@@ -1,6 +1,6 @@
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
-From VLSM.Lib Require Import Preamble StdppListSet Measurable ListSetExtras RealsExtras.
+From VLSM.Lib Require Import Preamble StdppListSet Measurable ListSetExtras RealsExtras ListFinSetExtras.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM ByzantineTraces.FixedSetByzantineTraces.
 From VLSM.Core Require Import Validator Equivocation Equivocation.FixedSetEquivocation.
@@ -213,12 +213,11 @@ Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating 
 Proof.
   intros [Hlimit Hfixed].
   eexists _, _; split.
-  - by apply (VLSM_full_projection_finite_valid_trace
-            (limited_PreNonByzantine_vlsm_lift byzantine Hlimit)).
+  - 
   - unfold lift_sub_state.
-    rewrite composite_state_sub_projection_lift_to.
-    split; [done |].
-    symmetry. apply composite_trace_sub_projection_lift.
+    split.
+    + 
+    + by symmetry; apply composite_trace_sub_projection_lift.
 Qed.
 
 (** ** The main result
@@ -251,15 +250,16 @@ Section sec_msg_dep_limited_byzantine_traces.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet message Cm}
+  `{ReachableThreshold index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (message_dependencies : message -> set message)
-  (full_message_dependencies : message -> set message)
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  (message_dependencies : message -> Cm)
+  (full_message_dependencies : message -> Cm)
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
-  `{ReachableThreshold index}
   (sender : message -> option index)
   (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -280,12 +280,12 @@ introduce equivocators from the non-byzantine nodes, then the transition is vali
 for weight-limited equivocation.
 *)
 Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
-  (byzantine: set index)
-  (non_byzantine := set_diff (enum index) byzantine)
-  (Hlimited: (sum_weights (remove_dups byzantine) <= `threshold)%R)
+  (byzantine: Ci)
+  (non_byzantine := set_diff (enum index) (elements byzantine))
+  (Hlimited: (sum_weights byzantine <= `threshold)%R)
   sub_l sub_s iom sub_sf oom
   (Ht_sub : input_valid_transition
-      (pre_loaded_fixed_non_byzantine_vlsm IM byzantine Datatypes.id sender)
+      (pre_loaded_fixed_non_byzantine_vlsm IM (elements byzantine) Datatypes.id sender)
       sub_l (sub_s, iom) (sub_sf, oom))
   ann_s
   (Hann_s : valid_state_prop Limited ann_s)
@@ -295,7 +295,7 @@ Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
   (Heqv_byzantine : ann' ⊆ byzantine)
   : input_valid_transition Limited
       (lift_sub_label IM non_byzantine sub_l) (ann_s, iom)
-      (Build_annotated_state (free_composite_vlsm IM) (set index)
+      (Build_annotated_state (free_composite_vlsm IM) Ci
         (lift_sub_state IM non_byzantine sub_sf) ann',
       oom).
 Proof.
@@ -308,18 +308,10 @@ Proof.
   - unfold lift_sub_state in Hann_s_pr.
     rewrite Hann_s_pr, (lift_sub_state_to_eq _ _ _ _ _ Hi).
     apply Ht_sub.
-  - apply Rle_trans with (sum_weights (remove_dups byzantine))
+  - apply Rle_trans with (sum_weights byzantine)
     ; [| done].
     apply sum_weights_subseteq.
-    + cut (NoDup (state_annotation ann_s)).
-      {
-        intro Hnodup.
-        destruct iom as [im |]; [| done].
-        by apply set_union_nodup_left.
-      }
-      by eapply coeqv_limited_equivocation_state_annotation_nodup.
-    + apply NoDup_remove_dups.
-    + intro; rewrite elem_of_remove_dups; apply Heqv_byzantine.
+    by intro; apply Heqv_byzantine.
   - clear -Ht_sub Hann_s_pr.
     destruct Ht_sub as [_ Ht_sub]; revert Ht_sub
     ; unfold annotated_transition; cbn
@@ -332,7 +324,7 @@ Proof.
     unfold lift_sub_state.
     destruct (decide (i = j)); subst; state_update_simpl.
     + by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi), !state_update_eq.
-    + destruct (decide (j ∈ set_diff (enum index) byzantine)) as [Hj |].
+    + destruct (decide (j ∈ set_diff (enum index) (elements byzantine))) as [Hj |].
       * by rewrite !(lift_sub_state_to_eq _ _ _ _ _ Hj), sub_IM_state_update_neq.
       * by state_update_simpl.
 Qed.
@@ -345,20 +337,20 @@ is included in <<byzantine>>.
 Lemma lift_fixed_byzantine_traces_to_limited
   (s: composite_state IM)
   (tr: list (composite_transition_item IM))
-  (byzantine: set index)
-  (non_byzantine := set_diff (enum index) byzantine)
-  (Hlimited: (sum_weights (remove_dups byzantine) <= `threshold)%R)
+  (byzantine: Ci)
+  (non_byzantine := set_diff (enum index) (elements byzantine))
+  (Hlimited: (sum_weights byzantine <= `threshold)%R)
   (Hbyzantine:
-    fixed_byzantine_trace_alt_prop IM byzantine Datatypes.id sender s tr)
+    fixed_byzantine_trace_alt_prop IM (elements byzantine) Datatypes.id sender s tr)
   (s_reset_byzantine :=
     lift_sub_state IM non_byzantine
       (composite_state_sub_projection IM non_byzantine s))
-  (bs := Build_annotated_state (free_composite_vlsm IM) (set index) s_reset_byzantine (` inhabitant))
+  (bs := Build_annotated_state (free_composite_vlsm IM) Ci s_reset_byzantine (` inhabitant))
   (btr :=
     msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender
       s_reset_byzantine
       (pre_VLSM_full_projection_finite_trace_project _ _
-        (lift_sub_label IM non_byzantine) (lift_sub_state IM (set_diff (enum index) byzantine))
+        (lift_sub_label IM non_byzantine) (lift_sub_state IM (set_diff (enum index) (elements byzantine)))
         (finite_trace_sub_projection IM non_byzantine tr)))
   : finite_valid_trace Limited bs btr /\
     state_annotation (@finite_trace_last _ (type Limited) bs btr) ⊆ byzantine.
@@ -368,11 +360,9 @@ Proof.
   - constructor; apply initial_state_is_valid.
     by repeat split; cbn; apply lift_sub_state_initial.
   - by cbn; apply lift_sub_state_initial.
-  - by apply list_subseteq_nil.
   - subst s_reset_byzantine bs btr.
-    unfold pre_VLSM_full_projection_finite_trace_project; rewrite !map_app.
-    rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.
-    unfold annotate_trace_item; cbn; rewrite finite_trace_last_is_last; cbn.
+    unfold pre_VLSM_full_projection_finite_trace_project. cbn. 
+     rewrite finite_trace_last_is_last; cbn.
     destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i
     ; destruct IHHbyzantine as [[Htr0_ann Hsi_ann] Htr0_eqv_byzantine]
     ; cbn in Htr0_eqv_byzantine |- *.

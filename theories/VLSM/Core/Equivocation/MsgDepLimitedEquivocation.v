@@ -201,29 +201,30 @@ Section sec_full_node_msg_dep_limited_equivocation_equivalence.
 
 Context
   {message : Type}
+  `{FinSet message Cm}
   `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (full_message_dependencies : message -> set message)
-  `{EqDecision validator}
-  `{ReachableThreshold validator}
+  (full_message_dependencies : message -> Cm)
+  `{ReachableThreshold validator Cv}
   (A : validator -> index)
   (sender : message -> option validator)
-  (message_dependencies : message -> set message)
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  (message_dependencies : message -> Cm)
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
 
 Lemma full_node_msg_dep_coequivocating_senders s m i li
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, Some m))
-  : msg_dep_coequivocating_senders IM full_message_dependencies sender s m = [].
+  : msg_dep_coequivocating_senders IM full_message_dependencies sender s m =@{Cv} ∅.
 Proof.
-  cut (forall v, v ∉ msg_dep_coequivocating_senders IM full_message_dependencies sender s m).
+  cut (forall v, v ∉@{ Cv } msg_dep_coequivocating_senders IM full_message_dependencies sender s m).
   {
-    intros Hv.
-    by destruct (msg_dep_coequivocating_senders IM full_message_dependencies sender s m)
+    intros Hv. apply set_choose_or_empty.
+    destruct (elements (msg_dep_coequivocating_senders (Cv := Cv) IM full_message_dependencies sender s m)).
+    cycle 1. apply set_choose_or_empty.
     ; [| contradiction (Hv v); left].
   }
   setoid_rewrite elem_of_map_option; setoid_rewrite elem_of_list_filter.
@@ -237,7 +238,7 @@ Qed.
 Lemma annotated_free_input_valid_projection
   iprop `{Inhabited (sig iprop)} constr trans
   i li s om
-  : input_valid (annotated_vlsm (free_composite_vlsm IM) (set validator) iprop constr trans) (existT i li) (s, om) ->
+  : input_valid (annotated_vlsm (free_composite_vlsm IM) Cv iprop constr trans) (existT i li) (s, om) ->
     input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om).
 Proof.
   intro Hvalid.
@@ -248,7 +249,7 @@ Proof.
 Qed.
 
 Lemma full_node_msg_dep_composite_transition_message_equivocators
-  i li (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
+  i li (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om))
   : coeqv_composite_transition_message_equivocators
       IM sender (full_node_coequivocating_senders IM)
@@ -261,10 +262,10 @@ Proof.
   destruct om as [m |]; [| done]; cbn; f_equal.
   unfold coeqv_message_equivocators.
   case_decide as Hobs; [done |]; f_equal.
-  by symmetry; eapply full_node_msg_dep_coequivocating_senders.
+  symmetry. eapply full_node_msg_dep_coequivocating_senders.
 Qed.
 
-Lemma msg_dep_full_node_valid_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
+Lemma msg_dep_full_node_valid_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
   : vvalid (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender) l (s, om) <->
     vvalid (full_node_limited_equivocation_vlsm IM sender) l (s, om).
@@ -273,7 +274,7 @@ Proof.
   rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
 Qed.
 
-Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
+Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
   : vtransition (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender) l (s, om) =
     vtransition (full_node_limited_equivocation_vlsm IM sender) l (s, om).
@@ -331,15 +332,16 @@ Section sec_msg_dep_fixed_limited_equivocation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet message Cm}
+  `{ReachableThreshold index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (message_dependencies : message -> set message)
-  (full_message_dependencies : message -> set message)
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  (message_dependencies : message -> Cm)
+  (full_message_dependencies : message -> Cm)
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
-  `{ReachableThreshold index}
   (sender : message -> option index)
   (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -447,8 +449,8 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
   is tr
   (Htr : finite_valid_trace Limited is tr)
   (equivocators := state_annotation (finite_trace_last is tr))
-  (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
-  : (sum_weights (remove_dups equivocators) <= `threshold)%R
+  (Fixed := fixed_equivocation_vlsm_composition IM (elements equivocators))
+  : (sum_weights equivocators <= `threshold)%R
       /\
     finite_valid_trace Fixed
       (original_state is)
@@ -457,20 +459,12 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
         tr).
 Proof.
   split.
-  - rewrite set_eq_nodup_sum_weight_eq
-       with (lv2 := state_annotation (finite_trace_last is tr)).
-    + apply coeqv_limited_equivocation_state_not_heavy,
+  - apply coeqv_limited_equivocation_state_not_heavy,
             finite_valid_trace_last_pstate, Htr.
-    + apply NoDup_remove_dups.
-    + apply coeqv_limited_equivocation_state_annotation_nodup,
-            finite_valid_trace_last_pstate, Htr.
-    + apply set_eq_extract_forall.
-      setoid_rewrite elem_of_remove_dups.
-      itauto.
-  - split; [| apply Htr].
-    apply valid_trace_add_default_last in Htr.
-    induction Htr using finite_valid_trace_init_to_rev_ind
-    ; [constructor; apply initial_state_is_valid; apply Hsi |].
+  - apply valid_trace_add_default_last in Htr.
+    induction Htr using finite_valid_trace_init_to_rev_ind.
+    + apply elem_of_elements in Fixed.
+    apply initial_state_is_valid.
     setoid_rewrite map_app.
     apply finite_valid_trace_from_app_iff; split.
     + revert IHHtr.
@@ -650,7 +644,7 @@ Proof.
   end
   ; [itauto |].
   induction Htr using finite_valid_trace_init_to_rev_strong_ind.
-  - split; [| apply list_subseteq_nil].
+  - split. [| apply list_subseteq_nil].
     by constructor; apply initial_state_is_valid.
   - rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.
     unfold annotate_trace_item; rewrite !finite_trace_last_is_last; cbn.

@@ -961,10 +961,9 @@ Proof.
       | left Hdec => left _
       | right Hdec => right _
       end).
-  - admit.
+  - apply elem_of_dec_slow.
   - by rewrite <- full_message_dependencies_happens_before.
   - by rewrite <- full_message_dependencies_happens_before.
-  Admitted.
 Qed.
 
 #[export] Instance msg_dep_happens_before_irrefl :
@@ -1041,7 +1040,7 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   {validator : Type}
   (A : validator -> index)
   (sender : message -> option validator)
@@ -1078,7 +1077,7 @@ The property of a message that both itself and all of its dependencies are
 emittable from their dependencies.
 *)
 Definition all_dependencies_emittable_from_dependencies_prop (m : message) : Prop :=
-  forall dm, dm ∈ m :: full_message_dependencies m -> Emittable_from_dependencies_prop dm.
+  forall dm, dm ∈ m :: elements (full_message_dependencies m) -> Emittable_from_dependencies_prop dm.
 
 (**
 The property of requiring that the validity predicate subsumes the
@@ -1121,7 +1120,7 @@ Proof.
   apply free_valid_from_valid_dependencies with (A v); [done | clear v Hemit'].
   eapply FullMessageDependencies_ind; [done |].
   intros dm Hdm Hdeps.
-  specialize (Hm dm); spec Hm; [by right |].
+  specialize (Hm dm); spec Hm; [by right; apply elem_of_elements |].
   inversion Hm as [v _ ?]; clear Hm.
   by apply free_valid_from_valid_dependencies with (A v).
 Qed.
@@ -1162,7 +1161,7 @@ Proof.
         as (v & Hsender & Hemit); [| done | done].
     exists v; [done |].
     by eapply message_dependencies_are_sufficient.
-  - apply full_message_dependencies_happens_before in Hin.
+  - apply elem_of_elements, full_message_dependencies_happens_before in Hin.
     eapply @msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender in Hin
         as (v & Hsender & Hemit); [| done ..].
     exists v; [done |].
@@ -1183,23 +1182,23 @@ Context
   .
 
 #[export] Instance CompositeHasBeenObserved_dec
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   : RelDecision (CompositeHasBeenObserved IM message_dependencies).
 Proof.
   intros s m.
   destruct (decide (composite_has_been_directly_observed IM s m));
     [by left; constructor |].
-  destruct (decide (Exists (fun m' => m ∈ full_message_dependencies m')
+  destruct (decide (Exists (fun m' => m ∈ elements (full_message_dependencies m'))
                       (composite_observed_messages_set IM s))).
   - left.
     apply Exists_exists in e as (m' & Hobsm' & Hmm').
     constructor 2 with m'.
     + by apply elem_of_composite_observed_messages_set.
-    + by apply full_message_dependencies_happens_before.
+    + by apply full_message_dependencies_happens_before; apply elem_of_elements in Hmm'.
   - right; inversion 1; [by contradict n |].
     contradict n0; apply Exists_exists; exists m'; split.
     + by apply elem_of_composite_observed_messages_set.
-    + by apply full_message_dependencies_happens_before.
+    + by apply elem_of_elements; apply full_message_dependencies_happens_before.
 Qed.
 
 End sec_CompositeHasBeenObserved_dec.

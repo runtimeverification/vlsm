@@ -68,10 +68,11 @@ Section fixed_byzantine_traces.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
-  (byzantine : set index)
+  (byzantine : Ci)
   {validator : Type}
   (A : validator -> index)
   (sender : message -> option validator)
@@ -87,7 +88,7 @@ corresponding to the indices in a given <<byzantine>> with byzantine nodes,
 i.e., nodes which can emit any (signed) message.
 *)
 Definition fixed_byzantine_IM : index -> VLSM message :=
-  update_IM IM byzantine (fun i => emit_any_signed_message_vlsm A sender (` i)).
+  update_IM IM (elements byzantine) (fun i => emit_any_signed_message_vlsm A sender (` i)).
 
 Lemma fixed_byzantine_IM_no_initial_messages
   : forall i m, ~vinitial_message_prop (fixed_byzantine_IM i) m.
@@ -124,11 +125,11 @@ Proof.
   exists i.
   unfold fixed_byzantine_IM, update_IM.
   simpl.
-  by rewrite decide_True.
+  by rewrite decide_True; [| apply elem_of_elements, Hi].
 Defined.
 
 Context
-  (non_byzantine : set index := set_diff (enum index) byzantine)
+  (non_byzantine : Ci := list_to_set (set_diff (enum index) (elements byzantine)))
   .
 
 (** Constraint requiring only that the non-byzantine nodes are not equivocating.
@@ -236,7 +237,7 @@ signed by the nodes in the <<byzantine>>.
 Section fixed_byzantine_traces_as_pre_loaded.
 
 Definition fixed_set_signed_message (m : message) : Prop :=
-  non_sub_index_authenticated_message non_byzantine A sender m /\
+  non_sub_index_authenticated_message (elements non_byzantine) A sender m /\
   (exists i, i ∈ non_byzantine /\ exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
 
 (**
@@ -516,11 +517,12 @@ Section fixed_non_equivocating_vs_byzantine.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
-  (selection : set index)
+  (selection : Ci)
   {validator : Type}
   (A : validator -> index)
   (sender : message -> option validator)

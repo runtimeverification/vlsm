@@ -1819,17 +1819,18 @@ Section update_IM.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
-  (selection : set index)
+  (selection : Ci)
   .
 
 Definition update_IM
-  (replacement_IM : sub_index selection -> VLSM message)
+  (replacement_IM : sub_index (elements selection) -> VLSM message)
   (i : index)
   : VLSM message :=
   match decide (i ∈ selection) with
-  | left i_in => replacement_IM (@dexist _ (sub_index_prop selection) _ i i_in)
+  | left i_in => replacement_IM (@dexist _ (sub_index_prop (elements selection)) _ i i_in)
   | _ => IM i
   end.
 (* TODO(bmmoore): use the definition above to provide an alternate definition

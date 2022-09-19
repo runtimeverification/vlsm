@@ -245,7 +245,6 @@ Context
   (message_dependencies : message -> Cm)
   (full_message_dependencies : message -> Cm)
   (HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies)
-  `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   (HMsgDep : forall i, MessageDependencies (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
@@ -279,7 +278,7 @@ Proof.
   ; [| done].
   exists trX, initial_descriptors.
   cbn; split_and?; try itauto.
-  eapply msg_dep_limited_fixed_equivocation.
+  by eapply msg_dep_limited_fixed_equivocation; [| | |].
 Qed.
 
 End sec_equivocators_projection_annotated_limited.
