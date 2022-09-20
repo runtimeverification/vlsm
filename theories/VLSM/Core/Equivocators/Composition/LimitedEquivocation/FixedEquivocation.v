@@ -235,10 +235,10 @@ Proof.
   destruct Hc as [Hno_equiv | [i [Hi Hm]]]; [by left |].
   unfold node_generated_without_further_equivocation_alt in Hm.
   right.
-  eapply can_emit_composite_free_lift. 
-  Admitted. (*[itauto | done].
-  itauto.
-Qed.*)
+  unfold admissible_index in Hi; apply elem_of_elements in Hi.
+  by eapply can_emit_composite_free_lift with (j := dexist i Hi);
+    cycle 1; [done | itauto].
+Qed.
 
 (** If all nodes have the [cannot_resend_message_stepwise_prop]erty, then the
 full node constraint is stronger than the [fixed_equivocation_constraint].
@@ -312,12 +312,14 @@ Lemma not_equivocating_equivocator_descriptors_proper_fixed
 Proof.
   apply not_equivocating_equivocator_descriptors_proper in Heqv_descriptors as Hproper.
   split; [done |].
-  intros i Hi.
-  destruct (eqv_descriptors i). Admitted. (*[done |].
+  intros i Hi; rewrite <- elem_of_elements in Hi.
+  specialize (not_equivocating_index_has_singleton_state IM (elements equivocating) _ Hs _ Hi)
+    as Hzero; unfold is_singleton_state in Hzero.
+  specialize (Heqv_descriptors i); destruct (eqv_descriptors i); [done |].
   destruct Heqv_descriptors as [s_i_n Heqv_descriptors].
   apply equivocator_state_project_Some_rev in Heqv_descriptors.
   f_equal; lia.
-Qed.*)
+Qed.
 
 (**
 Projections of (valid) traces of the composition of equivocators preserve
@@ -640,9 +642,8 @@ Proof.
 
   assert (Hsingleton_d_item : is_singleton_state (IM (projT1 (VLSM.l item))) (destination item (projT1 (VLSM.l item)))).
   {
-    apply (not_equivocating_index_has_singleton_state IM (elements equivocating)).
-    Admitted.
-    (* [| apply elem_of_elements; done].
+    apply (not_equivocating_index_has_singleton_state IM (elements equivocating));
+      [| by rewrite elem_of_elements].
     apply proj1 in Htr.
     rewrite app_assoc in Htr.
     apply finite_valid_trace_from_app_iff in Htr.
@@ -701,7 +702,7 @@ Proof.
   inversion Hpr. subst. clear Hpr.
   inversion Hpr_pre_item. subst. clear Hpr_pre_item.
   by constructor.
-Qed.*)
+Qed.
 
 (**
 Consider a [valid_trace] for the composition of equivocators with
@@ -910,11 +911,8 @@ Proof.
   spec Hex.
   {
     apply (not_equivocating_index_has_singleton_state _ (elements equivocating));
-     [| by contradict Hno_equiv_item; apply elem_of_elements].
-     (**
-      I don't know how to finish this subgoal.
-      The tactic which was used before seems useless now.
-     *)
+     [| by rewrite elem_of_elements].
+     by apply finite_valid_trace_last_pstate in Hitem.
   }
   destruct item as (l, iom, s, oom). apply first_transition_valid in Hitem. simpl in Hitem.
   destruct Hitem as [[Hs [Hiom [Hv Hc]]] Ht].
@@ -923,8 +921,7 @@ Proof.
   simpl in Hpr_item. rewrite Hex in Hpr_item.
   inversion_clear Hpr_item.
   by constructor.
-  Admitted.
-(* Qed. *)
+Qed.
 
 (**
 As a consequence of the [equivocator_vlsm_trace_project_reflect_non_equivocating]
@@ -1235,8 +1232,9 @@ specialize
 
   unfold pre_VLSM_projection_transition_item_project,
     composite_label_sub_projection_option.
-  case_decide; [by constructor |]. Admitted.
-(*Qed.*)
+  apply elem_of_elements in Hitem_equivocating.
+  by case_decide; [constructor |].
+Qed.
 
 (**
 Main result of this section, stating that traces which are valid for the
