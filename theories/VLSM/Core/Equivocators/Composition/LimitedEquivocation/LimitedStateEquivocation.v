@@ -222,7 +222,7 @@ Proof.
   apply valid_trace_last_pstate in Hfixed_tr as Hfixed_last.
   apply valid_trace_forget_last in Hfixed_tr.
   specialize
-    (fixed_equivocators_valid_trace_project IM (elements (equivocating_validators (finite_trace_last is tr)))
+    (fixed_equivocators_valid_trace_project IM (equivocating_validators (finite_trace_last is tr))
       final_descriptors is tr) as Hpr.
   feed specialize Hpr; [| done |].
   - by eapply not_equivocating_equivocator_descriptors_proper_fixed.
