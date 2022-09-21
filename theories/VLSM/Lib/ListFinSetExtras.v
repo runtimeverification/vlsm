@@ -42,4 +42,6 @@ Lemma empty_subseteq :
   forall (s : set), ∅ ⊆ s.
 Proof. by intros s x Hin; contradict Hin; apply not_elem_of_empty. Qed.
 
+#[export] Instance elem_of_dec : RelDecision (@elem_of A C _) := elem_of_dec_slow.
+
 End defs.

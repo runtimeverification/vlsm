@@ -1031,13 +1031,13 @@ Context
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (equivocators : Ci)
-  (non_equivocators := set_diff (finite.enum index) (elements equivocators))
+  (non_equivocators := list_to_set (enum index) ∖ equivocators)
   (Free := free_composite_vlsm IM)
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
-  (FixedNonEquivocating:= pre_induced_sub_projection IM non_equivocators
+  (FixedNonEquivocating:= pre_induced_sub_projection IM (elements non_equivocators)
                                 (fixed_equivocation_constraint IM equivocators))
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
-  (StrongFixedNonEquivocating:= pre_induced_sub_projection IM non_equivocators
+  (StrongFixedNonEquivocating:= pre_induced_sub_projection IM (elements non_equivocators)
                                 (strong_fixed_equivocation_constraint IM equivocators))
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
@@ -1048,8 +1048,8 @@ to valid traces of the constrained composition.
 *)
 Lemma lift_strong_fixed_non_equivocating
   : VLSM_full_projection StrongFixedNonEquivocating StrongFixed
-    (lift_sub_label IM non_equivocators)
-    (lift_sub_state IM non_equivocators).
+    (lift_sub_label IM (elements non_equivocators))
+    (lift_sub_state IM (elements non_equivocators)).
 Proof.
   apply induced_sub_projection_lift.
   intros s1 s2 Heq l om.
@@ -1063,12 +1063,15 @@ Proof.
     - right. revert Hemit.
       by apply VLSM_incl_can_emit, pre_loaded_vlsm_incl.
   }
-  clear -Heq.
+  clear m.
   intros m [i [Hi Hsent]].
   exists i. split; [done |].
   replace (s2 i) with (s1 i); [done |].
-  assert (Hi' : i ∈ non_equivocators)
-    by (apply set_diff_intro; [apply elem_of_enum | done]).
+  assert (Hi' : i ∈ (elements non_equivocators)).
+  {
+    apply elem_of_elements, elem_of_difference. rewrite elem_of_list_to_set.
+    by split; [apply elem_of_enum | rewrite <- elem_of_elements].
+  }
   by eapply f_equal_dep with (x := dexist i Hi') in Heq.
 Qed.
 
@@ -1078,8 +1081,8 @@ to valid traces of the constrained composition.
 *)
 Lemma lift_fixed_non_equivocating
   : VLSM_full_projection FixedNonEquivocating Fixed
-    (lift_sub_label IM non_equivocators)
-    (lift_sub_state IM non_equivocators).
+    (lift_sub_label IM (elements non_equivocators))
+    (lift_sub_state IM (elements non_equivocators)).
 Proof.
   constructor.
   intros sX trX Htr.
@@ -1095,7 +1098,7 @@ Qed.
 
 Lemma fixed_non_equivocating_projection_friendliness
   : projection_friendly_prop
-      (induced_sub_projection_is_projection IM non_equivocators
+      (induced_sub_projection_is_projection IM (elements non_equivocators)
         (fixed_equivocation_constraint IM equivocators)).
 Proof.
   apply induced_sub_projection_friendliness.
@@ -1110,8 +1113,8 @@ Lemma fixed_non_equivocating_traces_char is tr
   : finite_valid_trace FixedNonEquivocating is tr <->
     exists eis etr,
     finite_valid_trace Fixed eis etr /\
-    composite_state_sub_projection IM non_equivocators eis = is /\
-    finite_trace_sub_projection IM non_equivocators etr = tr.
+    composite_state_sub_projection IM (elements non_equivocators) eis = is /\
+    finite_trace_sub_projection IM (elements non_equivocators) etr = tr.
 Proof.
   apply (projection_friendly_trace_char (induced_sub_projection_is_projection _ _ _)).
   apply fixed_non_equivocating_projection_friendliness.

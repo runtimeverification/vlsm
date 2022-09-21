@@ -961,7 +961,6 @@ Proof.
       | left Hdec => left _
       | right Hdec => right _
       end).
-  - apply elem_of_dec_slow.
   - by rewrite <- full_message_dependencies_happens_before.
   - by rewrite <- full_message_dependencies_happens_before.
 Qed.

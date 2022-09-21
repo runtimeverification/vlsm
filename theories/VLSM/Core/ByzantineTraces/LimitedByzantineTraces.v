@@ -43,7 +43,7 @@ Definition fixed_limited_byzantine_trace_prop
   (byzantine : Ci)
   : Prop
   := (sum_weights (byzantine) <= `threshold)%R /\
-     fixed_byzantine_trace_alt_prop IM (elements byzantine) (fun i => i) sender s tr.
+     fixed_byzantine_trace_alt_prop IM byzantine (fun i => i) sender s tr.
 
 (** The union of traces with the [fixed_limited_byzantine_trace_prop]erty over
 all possible selections of (limited) byzantine nodes.
@@ -77,11 +77,10 @@ selection.
 Section fixed_limited_selection.
 
 Context
-  `{FinSet index Ci}
   (byzantine: Ci)
-  (non_byzantine : Ci := list_to_set (set_diff (enum index) (elements byzantine)))
+  (non_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
   (Hlimit: (sum_weights (byzantine) <= `threshold)%R)
-  (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM (elements byzantine) (λ i : index, i) sender)
+  (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine (λ i : index, i) sender)
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
   (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
@@ -93,23 +92,23 @@ initial states for those machines we obtain a state which is [not_heavy].
 *)
 Lemma limited_PreNonByzantine_valid_state_lift_not_heavy s
   (Hs : valid_state_prop PreNonByzantine s)
-  (sX := lift_sub_state IM non_byzantine s)
+  (sX := lift_sub_state IM (elements non_byzantine) s)
   : tracewise_not_heavy sX.
 Proof.
-  cut (elements (tracewise_equivocating_validators sX) ⊆ byzantine).
+  cut (tracewise_equivocating_validators sX ⊆ byzantine).
   { intro Hincl.
     unfold tracewise_not_heavy, not_heavy.
-    transitivity (sum_weights (remove_dups byzantine)); [| done].
-    apply sum_weights_subseteq.
+    transitivity (sum_weights byzantine); [| done].
+    apply sum_weights_subseteq_list.
     - by apply NoDup_elements.
-    - by apply NoDup_remove_dups.
-    - by intros i Hi; apply elem_of_remove_dups, Hincl, Hi.
+    - by apply NoDup_elements.
+    - intros i Hi. apply elem_of_elements, Hincl, elem_of_elements, Hi.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
   specialize (preloaded_non_byzantine_vlsm_lift IM byzantine (fun i => i) sender)
     as Hproj.
   apply (VLSM_full_projection_finite_valid_trace_init_to Hproj) in Htr as Hpre_tr.
-  intros v Hv; apply elem_of_elements in Hv.
+  intros v Hv.
   apply equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
   specialize (Hvs' _ _ Hpre_tr).
   destruct Hvs' as [m0 [Hsender0 [preX [itemX [sufX [Htr_pr [Hm0 Heqv]]]]]]].
@@ -129,7 +128,7 @@ Proof.
   destruct Hc as [[sub_i Hsenti] | Hemit].
   + destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i.
     assert (Hsent : composite_has_been_sent IM
-                      (lift_sub_state IM non_byzantine (finite_trace_last is pre)) m0).
+                      (lift_sub_state IM (elements non_byzantine) (finite_trace_last is pre)) m0).
     { exists i.
       unfold lift_sub_state.
       by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
@@ -143,7 +142,8 @@ Proof.
       * unfold channel_authenticated_message in Hsigned.
         rewrite Hsender0 in Hsigned.
         by apply Some_inj in Hsigned; subst.
-      * by destruct Hi; apply set_diff_intro; [apply elem_of_enum|].
+      * by rewrite elem_of_elements in Hi; contradict Hi; apply elem_of_difference; split;
+        [apply elem_of_list_to_set, elem_of_enum |].
 Qed.
 
 Existing Instance Htracewise_BasicEquivocation.
@@ -154,16 +154,16 @@ components is preserved.
 *)
 Lemma limited_PreNonByzantine_lift_valid
   : weak_full_projection_valid_preservation PreNonByzantine Limited
-    (lift_sub_label IM non_byzantine)
-    (lift_sub_state IM non_byzantine).
+    (lift_sub_label IM (elements non_byzantine))
+    (lift_sub_state IM (elements non_byzantine)).
 Proof.
   intros l s om Hv HsY HomY.
   repeat split.
   - apply lift_sub_valid, Hv.
   - hnf.
-    destruct (composite_transition (sub_IM IM non_byzantine) l (s, om))
+    destruct (composite_transition (sub_IM IM (elements non_byzantine)) l (s, om))
       as [s' om'] eqn: Ht.
-    apply (lift_sub_transition IM non_byzantine) in Ht as HtX.
+    apply (lift_sub_transition IM (elements non_byzantine)) in Ht as HtX.
     simpl in HtX |- *; rewrite HtX; simpl.
     change (is_equivocating_tracewise_no_has_been_sent _ _ _) with is_equivocating.
     by eapply tracewise_not_heavy_LimitedEquivocationProp_iff,
@@ -177,8 +177,8 @@ we obtain valid traces for the <<Limited>> equivocation composition.
 *)
 Lemma limited_PreNonByzantine_vlsm_lift
   : VLSM_full_projection PreNonByzantine Limited
-      (lift_sub_label IM non_byzantine)
-      (lift_sub_state IM non_byzantine).
+      (lift_sub_label IM (elements non_byzantine))
+      (lift_sub_state IM (elements non_byzantine)).
 Proof.
   apply basic_VLSM_full_projection; intros ? *.
   - by intros; apply limited_PreNonByzantine_lift_valid.
@@ -191,7 +191,7 @@ Proof.
       apply initial_message_is_valid.
       by exists i, (exist _ m Him).
     + destruct Hseeded as (Hsigned & i & Hi & li & si & Hpre_valid).
-      apply set_diff_elim2 in Hi.
+      apply elem_of_difference in Hi.
       by eapply Hvalidator.
 Qed.
 
@@ -204,8 +204,8 @@ equivocation composition such that the projection of the two traces to
 the <<non-byzantine>> nodes coincide.
 *)
 Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating s tr byzantine
-  (not_byzantine : Ci := list_to_set (set_diff (enum index) byzantine))
-  : fixed_limited_byzantine_trace_prop s tr (list_to_set byzantine) ->
+  (not_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
+  : fixed_limited_byzantine_trace_prop s tr byzantine ->
     exists bs btr,
       finite_valid_trace Limited bs btr /\
       composite_state_sub_projection IM (elements not_byzantine) s = composite_state_sub_projection IM (elements not_byzantine) bs /\
@@ -213,11 +213,12 @@ Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating 
 Proof.
   intros [Hlimit Hfixed].
   eexists _, _; split.
-  - 
-  - unfold lift_sub_state.
-    split.
-    + 
-    + by symmetry; apply composite_trace_sub_projection_lift.
+  - by apply (VLSM_full_projection_finite_valid_trace
+      (limited_PreNonByzantine_vlsm_lift byzantine Hlimit)).
+- unfold lift_sub_state.
+  rewrite composite_state_sub_projection_lift_to.
+  split; [done |].
+  by symmetry; apply composite_trace_sub_projection_lift.
 Qed.
 
 (** ** The main result
@@ -231,10 +232,10 @@ Lemma validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
   : limited_byzantine_trace_prop s tr ->
     exists bs btr,
       finite_valid_trace Limited bs btr /\
-      exists selection (selection_complement := set_diff (enum index) selection),
-      (sum_weights (remove_dups selection) <= `threshold)%R /\
-      composite_state_sub_projection IM selection_complement s = composite_state_sub_projection IM selection_complement bs /\
-      finite_trace_sub_projection IM selection_complement tr = finite_trace_sub_projection IM selection_complement btr.
+      exists (selection : Ci) (selection_complement := difference (list_to_set (enum index)) selection),
+      (sum_weights selection <= `threshold)%R /\
+      composite_state_sub_projection IM (elements selection_complement) s = composite_state_sub_projection IM (elements selection_complement) bs /\
+      finite_trace_sub_projection IM (elements selection_complement) tr = finite_trace_sub_projection IM (elements selection_complement) btr.
 Proof.
   intros [byzantine Hlimited].
   apply proj1 in Hlimited as Hlimit.
@@ -258,7 +259,7 @@ Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   (message_dependencies : message -> Cm)
   (full_message_dependencies : message -> Cm)
-  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
+  `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (sender : message -> option index)
   (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
@@ -281,22 +282,22 @@ for weight-limited equivocation.
 *)
 Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
   (byzantine: Ci)
-  (non_byzantine := set_diff (enum index) (elements byzantine))
+  (non_byzantine := difference (list_to_set (enum index)) byzantine)
   (Hlimited: (sum_weights byzantine <= `threshold)%R)
   sub_l sub_s iom sub_sf oom
   (Ht_sub : input_valid_transition
-      (pre_loaded_fixed_non_byzantine_vlsm IM (elements byzantine) Datatypes.id sender)
+      (pre_loaded_fixed_non_byzantine_vlsm IM byzantine Datatypes.id sender)
       sub_l (sub_s, iom) (sub_sf, oom))
   ann_s
   (Hann_s : valid_state_prop Limited ann_s)
-  (Hann_s_pr : original_state ann_s = lift_sub_state IM non_byzantine sub_s)
+  (Hann_s_pr : original_state ann_s = lift_sub_state IM (elements non_byzantine) sub_s)
   (ann' := msg_dep_composite_transition_message_equivocators IM full_message_dependencies sender
-      (lift_sub_label IM non_byzantine sub_l) (ann_s, iom))
+      (lift_sub_label IM (elements non_byzantine) sub_l) (ann_s, iom))
   (Heqv_byzantine : ann' ⊆ byzantine)
   : input_valid_transition Limited
-      (lift_sub_label IM non_byzantine sub_l) (ann_s, iom)
+      (lift_sub_label IM (elements non_byzantine) sub_l) (ann_s, iom)
       (Build_annotated_state (free_composite_vlsm IM) Ci
-        (lift_sub_state IM non_byzantine sub_sf) ann',
+        (lift_sub_state IM (elements non_byzantine) sub_sf) ann',
       oom).
 Proof.
   destruct sub_l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
@@ -324,9 +325,7 @@ Proof.
     unfold lift_sub_state.
     destruct (decide (i = j)); subst; state_update_simpl.
     + by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi), !state_update_eq.
-    + destruct (decide (j ∈ set_diff (enum index) (elements byzantine))) as [Hj |].
-      * by rewrite !(lift_sub_state_to_eq _ _ _ _ _ Hj), sub_IM_state_update_neq.
-      * by state_update_simpl.
+    + by unfold lift_sub_state_to; case_decide as Hj; [rewrite sub_IM_state_update_neq |].
 Qed.
 
 (** Considering a trace with the [fixed_byzantine_trace_alt_prop]erty for a
@@ -338,20 +337,20 @@ Lemma lift_fixed_byzantine_traces_to_limited
   (s: composite_state IM)
   (tr: list (composite_transition_item IM))
   (byzantine: Ci)
-  (non_byzantine := set_diff (enum index) (elements byzantine))
+  (non_byzantine := difference (list_to_set (enum index)) byzantine)
   (Hlimited: (sum_weights byzantine <= `threshold)%R)
   (Hbyzantine:
-    fixed_byzantine_trace_alt_prop IM (elements byzantine) Datatypes.id sender s tr)
+    fixed_byzantine_trace_alt_prop IM byzantine Datatypes.id sender s tr)
   (s_reset_byzantine :=
-    lift_sub_state IM non_byzantine
-      (composite_state_sub_projection IM non_byzantine s))
+    lift_sub_state IM (elements non_byzantine)
+      (composite_state_sub_projection IM (elements non_byzantine) s))
   (bs := Build_annotated_state (free_composite_vlsm IM) Ci s_reset_byzantine (` inhabitant))
   (btr :=
-    msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender
+    msg_dep_annotate_trace_with_equivocators (Cv := Ci) IM full_message_dependencies sender
       s_reset_byzantine
       (pre_VLSM_full_projection_finite_trace_project _ _
-        (lift_sub_label IM non_byzantine) (lift_sub_state IM (set_diff (enum index) (elements byzantine)))
-        (finite_trace_sub_projection IM non_byzantine tr)))
+        (lift_sub_label IM (elements non_byzantine)) (lift_sub_state IM (elements non_byzantine))
+        (finite_trace_sub_projection IM (elements non_byzantine) tr)))
   : finite_valid_trace Limited bs btr /\
     state_annotation (@finite_trace_last _ (type Limited) bs btr) ⊆ byzantine.
 Proof.
@@ -361,13 +360,18 @@ Proof.
     by repeat split; cbn; apply lift_sub_state_initial.
   - by cbn; apply lift_sub_state_initial.
   - subst s_reset_byzantine bs btr.
-    unfold pre_VLSM_full_projection_finite_trace_project. cbn. 
-     rewrite finite_trace_last_is_last; cbn.
-    destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i
+    unfold pre_VLSM_full_projection_finite_trace_project. cbn.
+    apply empty_subseteq.
+  - (*subst btr. setoid_rewrite map_app; setoid_rewrite msg_dep_annotate_trace_with_equivocators_app.
+    cbn. unfold annotate_trace_item. cbn. admit.
+     rewrite finite_trace_last_is_last; cbn.*)
+    
+    subst bs btr; destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i
     ; destruct IHHbyzantine as [[Htr0_ann Hsi_ann] Htr0_eqv_byzantine]
     ; cbn in Htr0_eqv_byzantine |- *.
-    remember (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) (set index)) _ _)
-     as lst in Htr0_eqv_byzantine at 1 |- * at 1 2 3 4 5 6.
+    setoid_rewrite map_app; setoid_rewrite msg_dep_annotate_trace_with_equivocators_app.
+    Admitted. (*repeat split; [| done |].
+    remember (finite_trace_last _ _) as lst in Htr0_eqv_byzantine. at 1. |- * at 1 2 3 4 5 6.
     assert (Hlsti : original_state lst = lift_sub_state IM (set_diff (enum index) byzantine)
                                           (finite_trace_last si tr0)).
     {
@@ -416,7 +420,7 @@ Proof.
       destruct (decide (i_im ∈ byzantine)) as [Hi_im | Hni_im]
       ; [done | contradict H_i_im].
       apply set_diff_intro; [apply elem_of_enum | done].
-Qed.
+Qed.*)
 
 (**
 Under full-message dependencies and full node assumptions, if all components are
@@ -426,14 +430,14 @@ the traces exposed to limited equivocation.
 *)
 Lemma msg_dep_validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
   : limited_byzantine_trace_prop IM sender s tr <->
-    exists bs btr selection (selection_complement := set_diff (enum index) selection),
+    exists bs btr selection (selection_complement := difference (list_to_set (enum index)) selection),
       finite_valid_trace Limited bs btr /\
       state_annotation (finite_trace_last bs btr) ⊆ selection /\
-      (sum_weights (remove_dups selection) <= `threshold)%R /\
-      composite_state_sub_projection IM selection_complement s =
-        composite_state_sub_projection IM selection_complement (original_state bs) /\
-      finite_trace_sub_projection IM selection_complement tr =
-        finite_trace_sub_projection IM selection_complement
+      (sum_weights selection <= `threshold)%R /\
+      composite_state_sub_projection IM (elements selection_complement) s =
+        composite_state_sub_projection IM (elements selection_complement) (original_state bs) /\
+      finite_trace_sub_projection IM (elements selection_complement) tr =
+        finite_trace_sub_projection IM (elements selection_complement)
           (pre_VLSM_full_projection_finite_trace_project
             (type Limited) (composite_type IM) Datatypes.id original_state btr).
 Proof.
@@ -457,7 +461,8 @@ Proof.
     eexists _,_; split; [| done].
     eapply msg_dep_fixed_limited_equivocation_witnessed in Hbtr as [_ Hbtr]; [| done..].
     revert Hbtr; apply VLSM_incl_finite_valid_trace.
-    by apply fixed_equivocation_vlsm_composition_index_incl.
+    apply fixed_equivocation_vlsm_composition_index_incl.
+    by intro; rewrite !elem_of_elements; apply Heqv_byzantine.
 Qed.
 
 End sec_msg_dep_limited_byzantine_traces.

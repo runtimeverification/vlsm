@@ -1840,7 +1840,7 @@ for fixed-set equivocation model, similar to the one for byzantine traces.
 Context
   (replacement_IM : sub_index (elements selection) -> VLSM message)
   (updated_IM := update_IM replacement_IM)
-  (selection_complement : Ci := set_diff (list_to_set (enum index)) (list_to_set (elements selection)))
+  (selection_complement : Ci := set_diff (list_to_set (enum index)) selection)
   .
 
 #[export] Instance update_IM_complement_Hbs
@@ -1853,7 +1853,7 @@ Proof.
   case_decide as Hi; [|typeclasses eauto].
   contradict Hi.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i; simpl.
-  by apply elem_of_elements in Hi; apply set_diff_elim2 in Hi; contradict Hi; apply elem_of_list_to_set.
+  by apply elem_of_elements, set_diff_elim2 in Hi; rewrite elem_of_elements.
 Qed.
 
 End update_IM.
