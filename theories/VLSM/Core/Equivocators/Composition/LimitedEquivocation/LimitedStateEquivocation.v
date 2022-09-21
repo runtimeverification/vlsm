@@ -49,7 +49,7 @@ Section limited_state_equivocation.
 
 Context {message : Type}
   `{ReachableThreshold index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
@@ -163,18 +163,16 @@ Proof.
   induction Htr using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
   - apply (finite_valid_trace_from_to_empty (equivocators_fixed_equivocations_vlsm IM equivocating)).
     by apply initial_state_is_valid.
-  - specialize (equivocating_indices_equivocating_validators IM)
-      as Heq.
-    specialize (IHHtr equivocating).
+  - specialize (IHHtr equivocating).
     spec IHHtr.
     { apply proj2 in Ht.
       specialize (equivocators_transition_preserves_equivocating_indices IM (enum index)  _ _ _ _ _ Ht)
         as Hincl'.
-      clear -Hincl Hincl' Heq.
+      clear -Hincl Hincl'.
       transitivity (elements (equivocating_validators sf)); [| done].
       intro x; rewrite! elem_of_elements; intro Hx.
-      apply Heq, elem_of_list_to_set, Hincl'.
-      by apply Heq, elem_of_list_to_set in Hx.
+      apply equivocating_indices_equivocating_validators, elem_of_list_to_set, Hincl'.
+      by apply equivocating_indices_equivocating_validators, elem_of_list_to_set in Hx.
     }
     apply
       (finite_valid_trace_from_to_app
@@ -192,7 +190,7 @@ Proof.
       + replace (composite_transition _ _ _) with (sf, oom).
         unfold state_has_fixed_equivocation.
         transitivity (elements (equivocating_validators sf)); [| done].
-        by intros x Hx; apply elem_of_elements, Heq, elem_of_list_to_set.
+        by intros x Hx; apply elem_of_elements, equivocating_indices_equivocating_validators, elem_of_list_to_set.
       + done.
 Qed.
 
@@ -288,7 +286,7 @@ Section sec_equivocators_projection_constrained_limited.
 Context
   `{FinSet message Cm}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) sender)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   (message_dependencies : message -> Cm)
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)

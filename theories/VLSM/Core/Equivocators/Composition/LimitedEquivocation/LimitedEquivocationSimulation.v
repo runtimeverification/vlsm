@@ -29,11 +29,11 @@ Section fixed_limited_state_equivocation.
 Context
   {message : Type}
   `{ReachableThreshold index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM)
+  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM (Ci := Ci))
   (equivocating : Ci)
   (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM (elements equivocating))
   .
@@ -57,12 +57,10 @@ Proof.
   remember (composite_transition _ _ _).1. clear Heqc.
   unfold state_has_fixed_equivocation in Hfixed.
   unfold equivocation_fault.
-  specialize (equivocating_indices_equivocating_validators IM c)
-    as Heq.
   apply sum_weights_subseteq.
   intros i Hi.
-  apply elem_of_elements in Hi; rewrite Heq in Hi; apply elem_of_elements, elem_of_list_to_set in Hi.
-  by apply elem_of_elements; apply Hfixed, Hi.
+  apply elem_of_elements, Hfixed. rewrite <- @elem_of_list_to_set with (C := Ci) by typeclasses eauto.
+  by eapply equivocating_indices_equivocating_validators.
 Qed.
 
 End fixed_limited_state_equivocation.
@@ -72,11 +70,11 @@ Section limited_equivocation_simulation.
 Context
   {message : Type}
   `{ReachableThreshold index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM)
+  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM (Ci := Ci))
   .
 
 (** If a trace has the [fixed_limited_equivocation_prop]erty, then it can be
@@ -97,10 +95,8 @@ Proof.
   destruct HtrX as (equivocating & Hlimited & HtrX).
   eapply VLSM_incl_finite_valid_trace, valid_trace_add_default_last in HtrX
   ; [|eapply VLSM_eq_proj1,Fixed_eq_StrongFixed].
-  specialize
-    (fixed_equivocators_finite_valid_trace_init_to_rev IM _
-      no_initial_messages_in_IM _ _ _ HtrX)
-    as (is & s & tr & His & Hs & Htr & Hptr & Houtput).
+  eapply fixed_equivocators_finite_valid_trace_init_to_rev in HtrX
+    as (is & s & tr & His & Hs & Htr & Hptr & Houtput); [| done].
   exists is, s, tr; split_and?; try itauto.
   revert Hptr; apply VLSM_incl_finite_valid_trace_init_to.
   by apply equivocators_Fixed_incl_Limited.
@@ -148,7 +144,7 @@ Context
   `{FinSet message Cm}
   (sender : message -> option index)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) sender)
   (message_dependencies : message -> Cm)
   .
 
@@ -158,7 +154,7 @@ the composition of equivocators under a no message-equivocation and limited
 state-equivocation constraint.
 *)
 Lemma limited_equivocators_valid_state_rev
-  (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender)
+  (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender (Cm := Ci))
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)

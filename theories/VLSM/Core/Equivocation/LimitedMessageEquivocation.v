@@ -116,7 +116,7 @@ Section tracewise_limited_message_equivocation.
 Context
   {message : Type}
   `{ReachableThreshold index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -171,7 +171,7 @@ constraint is also a trace under the limited equivocation constraint.
 Context
   {message : Type}
   `{ReachableThreshold index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -183,7 +183,7 @@ Context
   (sender : message -> option index)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Ci := Ci) IM sender)
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
   (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
@@ -269,7 +269,7 @@ induced by a subset of indices whose weight is less than the allowed
 Context
   {message : Type}
   `{ReachableThreshold index Ci}
-  `{@finite.Finite index _}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -288,7 +288,7 @@ Context
   `{FinSet message Cm}
   (message_dependencies : message -> Cm)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Ci := Ci) IM sender)
   .
 
 (** Traces with the [fixed_limited_equivocation_prop]erty are valid for the
@@ -308,7 +308,7 @@ are valid for the free composition and whose final state is [not_heavy] have
 the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma traces_exhibiting_limited_equivocation_are_valid_rev
-  (Hke : WitnessedEquivocationCapability IM id sender)
+  (Hke : WitnessedEquivocationCapability IM id sender (Cm := Ci))
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
@@ -317,7 +317,7 @@ Lemma traces_exhibiting_limited_equivocation_are_valid_rev
   (Htracewise_basic_equivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
     (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_basic_equivocation)
-  : forall is s tr, strong_trace_witnessing_equivocation_prop IM id sender is tr ->
+  : forall is s tr, strong_trace_witnessing_equivocation_prop IM id sender is tr (Cm := Ci) ->
     finite_valid_trace_init_to (free_composite_vlsm IM) is s tr ->
     tracewise_not_heavy s ->
     fixed_limited_equivocation_prop is tr.
@@ -334,13 +334,13 @@ valid for the composition using a [limited_equivocation_constraint]
 have the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
-  (Hke : WitnessedEquivocationCapability IM id sender)
+  (Hke : WitnessedEquivocationCapability IM id sender (Cm := Ci))
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM id sender)
-  : forall s tr, strong_trace_witnessing_equivocation_prop IM id sender s tr ->
+  : forall s tr, strong_trace_witnessing_equivocation_prop IM id sender s tr (Cm := Ci) ->
     finite_valid_trace Limited s tr -> fixed_limited_equivocation_prop s tr.
 Proof.
   intros s tr Hstrong Htr.
@@ -357,7 +357,7 @@ Qed.
 a trace having the [fixed_limited_equivocation_prop]erty. *)
 
 Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
-  (Hke : WitnessedEquivocationCapability IM id sender)
+  (Hke : WitnessedEquivocationCapability IM id sender (Cm := Ci))
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
