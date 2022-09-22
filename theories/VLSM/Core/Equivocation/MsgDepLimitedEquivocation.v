@@ -208,36 +208,32 @@ Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   (full_message_dependencies : message -> Cm)
   `{ReachableThreshold validator Cv}
+  `{!LeibnizEquiv Cv}
   (A : validator -> index)
   (sender : message -> option validator)
   (message_dependencies : message -> Cm)
-  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
+  `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
+  (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
+  (FullNodeLimited := full_node_limited_equivocation_vlsm IM sender)
   .
 
 Lemma full_node_msg_dep_coequivocating_senders s m i li
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, Some m))
-  : msg_dep_coequivocating_senders IM full_message_dependencies sender s m =@{Cv} ∅.
+  : msg_dep_coequivocating_senders IM full_message_dependencies sender s m ≡@{Cv} ∅.
 Proof.
-  cut (forall v, v ∉@{ Cv } msg_dep_coequivocating_senders IM full_message_dependencies sender s m).
-  {
-    intros Hv.
-    destruct (elements (msg_dep_coequivocating_senders (Cv := Cv) IM full_message_dependencies sender s m)).
-    (** 
-      @traiansf @palmskog @wkolowski I did destruct on elements, but now the proof doesn't
-      can be completed as before and I don't know how to adapt it.
-    *)
-    Admitted. (*
-    ; [| contradiction (Hv v); left].
-  }
-  setoid_rewrite elem_of_map_option; setoid_rewrite elem_of_list_filter.
-  intros v (dm & [Hnobs Hdm]  & _).
+  intro; split; intro Hx; [| by contradict Hx; apply not_elem_of_empty].
+  exfalso; contradict Hx.
+  unfold msg_dep_coequivocating_senders;
+    rewrite elem_of_list_to_set, elem_of_map_option.
+  setoid_rewrite elem_of_elements; setoid_rewrite elem_of_filter.
+  intros (dm & [Hnobs Hdm]  & _).
   contradict Hnobs; exists i.
   eapply msg_dep_full_node_input_valid_happens_before_has_been_directly_observed;
     [typeclasses eauto | apply Hfull | done |].
   by apply full_message_dependencies_happens_before.
-Qed.*)
+Qed.
 
 Lemma annotated_free_input_valid_projection
   iprop `{Inhabited (sig iprop)} constr trans
@@ -258,67 +254,57 @@ Lemma full_node_msg_dep_composite_transition_message_equivocators
   : coeqv_composite_transition_message_equivocators
       IM sender (full_node_coequivocating_senders IM)
       (existT i li) (s, om)
-      =
+      ≡
     msg_dep_composite_transition_message_equivocators
       IM full_message_dependencies sender
       (existT i li) (s, om).
 Proof.
-  destruct om as [m |]; [| done]; cbn; f_equal.
-  unfold coeqv_message_equivocators.
-  case_decide as Hobs; [done |]; f_equal.
-  symmetry.
-  Admitted. (*eapply full_node_msg_dep_coequivocating_senders.
-  (**
-    @traiansf @palmskog @wkolowski I here's a failure with this message:
-    "map_option sender [m] ++
-      elements
-        (msg_dep_coequivocating_senders IM full_message_dependencies sender
-          (original_state s) m) =
-      map_option sender [m] ++
-      elements (full_node_coequivocating_senders IM (original_state s) m)"
-  *)
-Qed.*)
+  destruct om as [m |]; [| done]; cbn; apply sets.union_proper; [done |].
+  unfold coeqv_message_equivocators, msg_dep_coequivocating_senders.
+  case_decide as Hobs; [done |].
+  remember (list_to_set (map_option _ _)) as equivs.
+  cut (equivs ≡@{Cv} ∅); [by intros -> |].
+  by subst; eapply full_node_msg_dep_coequivocating_senders.
+Qed.
 
 Lemma msg_dep_full_node_valid_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
-  : vvalid (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender) l (s, om) <->
-    vvalid (full_node_limited_equivocation_vlsm IM sender) l (s, om).
+  : vvalid Limited l (s, om) <-> vvalid FullNodeLimited l (s, om).
 Proof.
   cbn; unfold annotated_valid, coeqv_limited_equivocation_constraint; destruct l as [i li].
-  rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
+  replace (sum_weights _) with (sum_weights
+  (coeqv_composite_transition_message_equivocators IM sender
+     (full_node_coequivocating_senders IM) (existT i li) 
+     (s, om))); [itauto |].
+  by apply sum_weights_proper, full_node_msg_dep_composite_transition_message_equivocators.
 Qed.
 
-(**
-  @traiansf @palmskog @wkolowski I don't figure out what's wrong with the following 4 lemmas.
-  For the first one, I get this error message:
-  "Unable to unify H11 with
-  (fix list_to_set
-      (A C : Type) (H : Singleton A C) (H0 : Empty C) 
-      (H1 : Union C) (l : list A) {struct l} : C :=
-      match l with
-      | [] => ∅
-      | x :: l0 => {[x]} ∪ list_to_set A C H H0 H1 l0
-      end) validator Cv H12 H11 H13
-     (map_option sender
-        (elements
-           (not_directly_observed_happens_before_dependencies IM
-              full_message_dependencies s0 m)))."
-*)
+(*
+#[local] Instance state_annotated_with_Cv_Equiv : Equiv (@state _ (annotated_type (free_composite_vlsm IM) Cv)) :=
+  fun s1 s2 => original_state s1 = original_state s2 /\ state_annotation s1 ≡ state_annotation s2.
 
-(*Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
+#[local] Instance message_Equiv : Equiv message := (=).
+
+Lemma vtransition_Limited_Proper : Proper ((=) ==> (≡) ==> (≡)) (vtransition Limited).
+Proof.
+  intros _l [i li] -> ([_s ann1], _om) ([s ann2], om) [[Heqv_s Heqv_ann] Heqv_om]; cbn in *.
+  inversion Heqv_om as [_m m Heq_m|]; subst; [cbv in Heq_m; subst _m|];
+    unfold annotated_transition; cbn; destruct (vtransition _ _ _) as (si', om'); [| done].
+*)  
+
+Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
-  : vtransition (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender) l (s, om) =
-    vtransition (full_node_limited_equivocation_vlsm IM sender) l (s, om).
+  : vtransition Limited l (s, om) = vtransition FullNodeLimited l (s, om).
 Proof.
   cbn; unfold annotated_transition;
     destruct (vtransition _ _ _) as (s', om'), l as (i, li).
- rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
+  do 2 f_equal.
+  destruct om as [m |]; [symmetry | done].
+  by apply leibniz_equiv, full_node_msg_dep_composite_transition_message_equivocators.
 Qed.
 
 Lemma msg_dep_full_node_limited_equivocation_vlsm_incl :
-  VLSM_incl
-    (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
-    (full_node_limited_equivocation_vlsm IM sender).
+  VLSM_incl Limited FullNodeLimited.
 Proof.
   apply basic_VLSM_incl.
   - by intros s Hs.
@@ -332,9 +318,7 @@ Proof.
 Qed.
 
 Lemma full_node_msg_dep_limited_equivocation_vlsm_incl :
-  VLSM_incl
-    (full_node_limited_equivocation_vlsm IM sender)
-    (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender).
+  VLSM_incl FullNodeLimited Limited.
 Proof.
   apply basic_VLSM_incl.
   - by intros s Hs.
@@ -348,14 +332,12 @@ Proof.
 Qed.
 
 Lemma full_node_msg_dep_limited_equivocation_vlsm_eq :
-  VLSM_eq
-    (full_node_limited_equivocation_vlsm IM sender)
-    (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender).
+  VLSM_eq FullNodeLimited Limited.
 Proof.
   apply VLSM_eq_incl_iff; split.
   - apply full_node_msg_dep_limited_equivocation_vlsm_incl.
   - apply msg_dep_full_node_limited_equivocation_vlsm_incl.
-Qed. *)
+Qed.
 
 End sec_full_node_msg_dep_limited_equivocation_equivalence.
 
@@ -371,7 +353,7 @@ Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   (message_dependencies : message -> Cm)
   (full_message_dependencies : message -> Cm)
-  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
+  `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (sender : message -> option index)
   (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
@@ -381,18 +363,12 @@ Context
     channel_authentication_sender_safety _ _ _ Hchannel)
   .
 
-(**
-  @traiansf @palmskog @wkolowski the following 2 lemmas fail in the same way.
-  I think here's a problem related to having 2 different instances of EqDecision message, but I don't
-  figure out why and how to solve it.
-*)
-
-(*Lemma equivocating_messages_are_equivocator_emitted
+Lemma equivocating_messages_are_equivocator_emitted
   s im
   (Him : can_emit (free_composite_vlsm IM) im)
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im) :
-    exists j,
-      j ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im)
+    exists j : index,
+      j ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci))
         /\
       can_emit (pre_loaded_vlsm (IM j) (fun dm => msg_dep_rel message_dependencies dm im)) im.
 Proof.
@@ -408,17 +384,17 @@ Proof.
   ; destruct (sender im) as [_j |]; [| inversion Hsender]
   ; apply Some_inj in Hsender; cbn in Hsender; subst.
   split.
-  - by rewrite elem_of_app; left; left.
+  - by rewrite elem_of_list_to_set, elem_of_app; left; left.
   - by eapply message_dependencies_are_sufficient.
-Qed. *)
+Qed.
 
-(*Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
+Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
   s im
   (Him : can_emit (free_composite_vlsm IM) im)
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im)
   : forall dm, msg_dep_happens_before message_dependencies dm im ->
     composite_has_been_directly_observed IM s dm \/
-    exists dm_i, dm_i ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im) /\
+    exists dm_i, dm_i ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci)) /\
       can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm.
 Proof.
   intros dm Hdm.
@@ -431,14 +407,15 @@ Proof.
     exists i; split; [| done].
     unfold msg_dep_message_equivocators, coeqv_message_equivocators,
            msg_dep_coequivocating_senders, not_directly_observed_happens_before_dependencies
-    ; rewrite decide_False, elem_of_app, !elem_of_map_option by done.
-    right; exists dm; rewrite elem_of_list_filter
+    ; rewrite decide_False, elem_of_list_to_set, elem_of_app, elem_of_elements, elem_of_list_to_set,
+        !elem_of_map_option by done.
+    right; exists dm; rewrite elem_of_elements, elem_of_filter
     ; setoid_rewrite full_message_dependencies_happens_before
     ; itauto.
   }
   apply emitted_messages_are_valid in Him.
   by eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender.
-Qed.*)
+Qed.
 
 Lemma message_equivocators_can_emit (s : vstate Limited) im
   (Hs : valid_state_prop

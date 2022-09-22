@@ -364,6 +364,7 @@ Proof.
   - revert Hsent; apply sent_by_non_equivocating_are_directly_observed.
   - destruct l as [i li], Heqv as (j & Hsender & HAj).
     apply Hfull in Hv.
+    apply elem_of_elements in HAj.
     eapply VLSM_incl_can_emit.
     {
       apply pre_loaded_vlsm_incl_relaxed
@@ -375,27 +376,23 @@ Proof.
     eapply VLSM_full_projection_can_emit.
     {
       apply preloaded_sub_element_full_projection
-        with (P := fun dm => dm ∈ message_dependencies m);
+        with (Hj := HAj) (P := fun dm => dm ∈ message_dependencies m);
       itauto.
     }
     apply message_dependencies_are_sufficient.
     cut (exists k, can_emit (pre_loaded_with_all_messages_vlsm (IM k)) m).
     {
       intros [k Hk].
-      replace (A j) with k.
-      (** 
-        @traiansf @palmskog @wkolowski I don't manage to prove this subgoal. Could you help me?
-      *)
-      - admit. 
-      - by symmetry; eapply Hsender_safety.
+      replace (A j) with k; [done |].
+      by symmetry; eapply Hsender_safety.
     }
-    eapply @can_emit_composite_project.
+    eapply @can_emit_composite_project
+      with (constraint := full_node_fixed_set_equivocation_constraint).
     apply (VLSM_incl_can_emit
             (vlsm_incl_pre_loaded_with_all_messages_vlsm (composite_vlsm IM _))).
-    apply emitted_messages_are_valid_iff in Hm as [[k [[im Him] Heqm]] | Hemit];
-    [by clear Heqm; contradict Him; apply no_initial_messages_in_IM |..].
-    Admitted.
-(* Qed. *)
+    by apply emitted_messages_are_valid_iff in Hm as [[k [[im Him] Heqm]] | Hemit];
+      [clear Heqm; contradict Him; apply no_initial_messages_in_IM |..].
+Qed.
 
 Lemma full_node_fixed_equivocation_incl
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)

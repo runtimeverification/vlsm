@@ -175,11 +175,12 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
   (equivocators : Ci)
+  (Free := free_composite_vlsm IM)
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
+  (PreFree := pre_loaded_with_all_messages_vlsm Free)
+  (Hlimited : (sum_weights equivocators <= `threshold)%R )
   (sender : message -> option index)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
@@ -195,13 +196,8 @@ Lemma StrongFixed_valid_state_not_heavy s
   : tracewise_not_heavy s.
 Proof.
   cut (tracewise_equivocating_validators s ⊆ equivocators).
-  { intro Hincl.
-    unfold tracewise_not_heavy, not_heavy, equivocation_fault.
-    unfold tracewise_equivocating_validators in Hincl. apply sum_weights_subseteq in Hincl.
-    (**
-      @traiansf @palmskog @wkolowski I don't manage to prove this subgoal.
-    *)
-    admit.
+  { intro Hincl; unfold tracewise_not_heavy, not_heavy.
+    by etransitivity; [apply sum_weights_subseteq |].
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
   { apply VLSM_incl_trans with (machine Free).
@@ -231,8 +227,7 @@ Proof.
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
   + by apply (SubProjectionTraces.sub_can_emit_sender IM (elements equivocators) (fun i => i) sender Hsender_safety _ _ v)
            in Hemit; [apply elem_of_elements in Hemit | done].
-  Admitted.
-(*Qed.*)
+Qed.
 
 Lemma StrongFixed_incl_Limited : VLSM_incl StrongFixed Limited.
 Proof.

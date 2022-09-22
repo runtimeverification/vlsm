@@ -108,8 +108,7 @@ Context
   `{FinSet message Cm}
   (message_dependencies : message -> Cm)
   (full_message_dependencies : message -> Cm)
-  `{FinSet index Ci}
-  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
+  `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (sender : message -> option index)
@@ -133,10 +132,10 @@ Proof.
   eapply valid_trace_forget_last, msg_dep_fixed_limited_equivocation in HtrX; [| done ..].
   apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
      as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput); [| done].
-  exists is, s, tr; subst; split_and!; try itauto.
+  exists is, s, tr; subst; split_and!; [done | | done | done |].
   - by erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last.
-  - Admitted. (*rewrite <- Houtput. apply pre_VLSM_full_projection_finite_trace_last_output.
-Qed.*)
+  - by rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
+Qed.
 
 End sec_equivocators_simulating_annotated_limited.
 
