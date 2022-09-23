@@ -328,6 +328,8 @@ Proof.
     + by unfold lift_sub_state_to; case_decide as Hj; [rewrite sub_IM_state_update_neq |].
 Qed.
 
+Existing Instance elem_of_dec_slow.
+
 (** Considering a trace with the [fixed_byzantine_trace_alt_prop]erty for a
 set <<byzantine>> of indices of bounded weight, its subtrace corresponding to
 the non-byzantine nodes is of limited equivocation and its set of equivocators
@@ -359,26 +361,23 @@ Proof.
   - constructor; apply initial_state_is_valid.
     by repeat split; cbn; apply lift_sub_state_initial.
   - by cbn; apply lift_sub_state_initial.
+  - by apply empty_subseteq.
   - subst s_reset_byzantine bs btr.
-    unfold pre_VLSM_full_projection_finite_trace_project. cbn.
-    apply empty_subseteq.
-  - (*subst btr. setoid_rewrite map_app; setoid_rewrite msg_dep_annotate_trace_with_equivocators_app.
-    cbn. unfold annotate_trace_item. cbn. admit.
-     rewrite finite_trace_last_is_last; cbn.*)
-    
-    subst bs btr; destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i
+    unfold pre_VLSM_full_projection_finite_trace_project; rewrite !map_app.
+    rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.
+    unfold annotate_trace_item; cbn; rewrite finite_trace_last_is_last; cbn.
+    destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i
     ; destruct IHHbyzantine as [[Htr0_ann Hsi_ann] Htr0_eqv_byzantine]
     ; cbn in Htr0_eqv_byzantine |- *.
-    setoid_rewrite map_app; setoid_rewrite msg_dep_annotate_trace_with_equivocators_app.
-    Admitted. (*repeat split; [| done |].
-    remember (finite_trace_last _ _) as lst in Htr0_eqv_byzantine. at 1. |- * at 1 2 3 4 5 6.
-    assert (Hlsti : original_state lst = lift_sub_state IM (set_diff (enum index) byzantine)
+    remember (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) _) _ _)
+     as lst in Htr0_eqv_byzantine at 1 |- * at 1 2 3 4 5 6.
+    assert (Hlsti : original_state lst = lift_sub_state IM (elements (list_to_set (enum index) ∖ byzantine))
                                           (finite_trace_last si tr0)).
     {
       subst lst; rewrite msg_dep_annotate_trace_with_equivocators_last_original_state; symmetry.
       apply (pre_VLSM_full_projection_finite_trace_last _ _
-              (lift_sub_label IM (set_diff (enum index) byzantine))
-              (lift_sub_state IM (set_diff (enum index) byzantine))).
+              (lift_sub_label IM _)
+              (lift_sub_state IM _)).
     }
     match goal with
     |- _ /\ ?B => cut B
@@ -396,14 +395,14 @@ Proof.
     destruct iom as [im |]; [| done].
     apply set_union_subseteq_iff; split; [done |].
     unfold coeqv_message_equivocators
-    ; case_decide as Hnobs; [apply list_subseteq_nil |].
+    ; case_decide as Hnobs; [apply empty_subseteq |].
     rewrite (full_node_msg_dep_coequivocating_senders _ _ _ _ Hfull _ _ i li).
     2: cbn; rewrite Hlsti
     ; eapply @pre_loaded_sub_composite_input_valid_projection, Hx.
-    rewrite app_nil_r; cbn.
-    destruct (sender im) as [i_im |] eqn: Hsender
-    ; [| apply list_subseteq_nil].
-    intro _i_im; rewrite elem_of_list_singleton; intro; subst _i_im.
+    rewrite elements_empty, app_nil_r; cbn.
+    intro _i_im; rewrite elem_of_list_to_set.
+    destruct (sender im) as [i_im |] eqn: Hsender; [| inversion 1].
+    rewrite elem_of_list_singleton; intro; subst _i_im.
     destruct Hx as [(_ & _ & _ & [Hsent | [Hsigned _]] & _) _].
     + contradict Hnobs.
       destruct Hsent as [sub_i_im Hsent]; cbn in Hsent |- *
@@ -412,15 +411,15 @@ Proof.
       exists _i_im.
       rewrite Hlsti; cbn; unfold lift_sub_state.
       by rewrite (lift_sub_state_to_eq _ _ _ _ _ H_i_im).
-    + clear -Hsender Hsigned.
-      destruct Hsigned as (_i_im & H_i_im & Hauth).
+    + destruct Hsigned as (_i_im & H_i_im & Hauth).
       unfold channel_authenticated_message in Hauth
       ; rewrite Hsender in Hauth.
       apply Some_inj in Hauth; subst _i_im.
       destruct (decide (i_im ∈ byzantine)) as [Hi_im | Hni_im]
       ; [done | contradict H_i_im].
-      apply set_diff_intro; [apply elem_of_enum | done].
-Qed.*)
+      eapply elem_of_elements, elem_of_difference.
+      by split; [apply elem_of_list_to_set, elem_of_enum|].
+Qed.
 
 (**
 Under full-message dependencies and full node assumptions, if all components are
