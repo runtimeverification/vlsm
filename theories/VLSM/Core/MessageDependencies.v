@@ -24,7 +24,7 @@ Definition msg_dep_rel
   fun m1 m2 => m1 ∈ message_dependencies m2.
 
 Definition msg_dep_happens_before
-`{FinSet message Cm} `(message_dependencies : message -> Cm) : relation message :=
+  `{FinSet message Cm} `(message_dependencies : message -> Cm) : relation message :=
   tc (msg_dep_rel message_dependencies).
 
 (** The (local) full node condition for a given <<message_dependencies>> function

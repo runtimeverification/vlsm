@@ -374,7 +374,7 @@ Proof.
        as Hsim.
     spec Hsim.
     { simpl. rewrite decide_True by apply zero_descriptor_not_equivocating.
-    by rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
+      by rewrite (equivocators_total_trace_project_characterization IM (proj1 Hpre_tr)).
     }
     apply Hsim in HtrX.
     remember (pre_VLSM_projection_finite_trace_project _ _ _ _ _) as tr.

@@ -963,7 +963,7 @@ Context
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   .
 
-(*Lemma strong_fixed_equivocation_no_equivocators
+(* Lemma strong_fixed_equivocation_no_equivocators
   : forall s m,
   strong_fixed_equivocation IM [] s m <-> composite_has_been_sent IM s m.
 Proof.
