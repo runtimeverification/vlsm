@@ -24,6 +24,7 @@ theories/VLSM/Lib/FinSetExtras.v
 theories/VLSM/Lib/StdppListFinSet.v
 theories/VLSM/Lib/EquationsExtras.v
 theories/VLSM/Lib/NatExtras.v
+theories/VLSM/Lib/AlternativeFinSet.v
 
 theories/VLSM/Core/VLSM.v
 theories/VLSM/Core/Composition.v
