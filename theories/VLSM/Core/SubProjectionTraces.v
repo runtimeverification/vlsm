@@ -188,8 +188,9 @@ Definition composite_label_sub_projection_option
   | _ => None
   end.
 
-(** By restricting the components of a composition to a subset we obtain a
-[projection_induced_validator].
+(**
+  By restricting the components of a composition to a subset we obtain a
+  [projection_induced_validator].
 *)
 Definition pre_induced_sub_projection : VLSM message :=
   pre_projection_induced_validator X (composite_type sub_IM)
@@ -278,8 +279,9 @@ Proof.
   by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
-(** The [pre_induced_sub_projection] is actually a [VLSM_projection] of the
-original composition.
+(**
+  The [pre_induced_sub_projection] is actually a [VLSM_projection] of the
+  original composition.
 *)
 Lemma induced_sub_projection_is_projection
   : VLSM_projection X pre_induced_sub_projection
@@ -500,10 +502,10 @@ Proof.
 Qed.
 
 (**
-Property of a composite trace requiring that every message received in an
-transition involving a machine in the chosen subset must either belong to
-the set specified by [seed], or it must [have_been_sent] by some machine
-in the chosen subset (prior to it being received).
+  Property of a composite trace requiring that every message received in an
+  transition involving a machine in the chosen subset must either belong to
+  the set specified by [seed], or it must [have_been_sent] by some machine
+  in the chosen subset (prior to it being received).
 *)
 Definition trace_sub_item_input_is_seeded_or_sub_previously_sent
   (tr : list (composite_transition_item IM))
@@ -775,19 +777,19 @@ Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%functi
 
 (** ** Lifting a trace from a sub-composition to the full composition
 
-In this section we first show that given a valid state for a composition of
-all nodes we can reset some of its state-components to initial states for those
-components without losing the valid state property.
+  In this section we first show that given a valid state for a composition of
+  all nodes we can reset some of its state-components to initial states for those
+  components without losing the valid state property.
 
-The set of nodes for which the reset operation will happen is <<equivocators>>.
+  The set of nodes for which the reset operation will happen is <<equivocators>>.
 
-We then show that a similar result holds for replacing the equivocator
-components with the components corresponding to any valid state of the
-composition of just the equivocators.
+  We then show that a similar result holds for replacing the equivocator
+  components with the components corresponding to any valid state of the
+  composition of just the equivocators.
 
-We proving those results for compositions pre-loaded with all messages
-(Lemmas [reset_equivocating_transitions_preloaded_projection] and
-[PreSubFree_PreFree_weak_full_projection]).
+  We proving those results for compositions pre-loaded with all messages
+  (Lemmas [reset_equivocating_transitions_preloaded_projection] and
+  [PreSubFree_PreFree_weak_full_projection]).
 *)
 
 Section lift_sub_state_to_preloaded.
@@ -806,13 +808,11 @@ Context
   (Hbase_s : valid_state_prop PreFree base_s)
   .
 
-(** A partial label projection function which only keeps non-equivocating transitions.
-*)
+(** A partial label projection function which only keeps non-equivocating transitions. *)
 Definition remove_equivocating_label_project (l : composite_label IM) : option (composite_label IM)
   := if decide (projT1 l ∈ equivocators) then None else Some l.
 
-(** Replaces the state components of the given state with those of <<eqv_is>>.
-*)
+(** Replaces the state components of the given state with those of <<eqv_is>>. *)
 Definition remove_equivocating_state_project eqv_is
   : composite_state IM -> composite_state IM
   := fun s => lift_sub_state_to IM equivocators s eqv_is.
@@ -878,11 +878,11 @@ Proof.
 Qed.
 
 (**
-Given any valid trace for the composition of all nodes and an initial state
-for the composition of just the equivocators, the trace obtained by resetting
-the components corresponding to the equivocators to those of the given initial
-state and removing the transitions corresponding to the equivocators is
-still a valid trace.
+  Given any valid trace for the composition of all nodes and an initial state
+  for the composition of just the equivocators, the trace obtained by resetting
+  the components corresponding to the equivocators to those of the given initial
+  state and removing the transitions corresponding to the equivocators is
+  still a valid trace.
 *)
 Lemma remove_equivocating_transitions_preloaded_projection eqv_is
   (Heqv_is : composite_initial_state_prop (sub_IM IM equivocators) eqv_is)
@@ -936,11 +936,11 @@ Proof.
 Qed.
 
 (**
-Given any valid state for the composition of all nodes and a valid trace
-for the composition of just the equivocators, the trace obtained by completing
-the state-components from the trace with the components from the given
-valid state is a valid trace for the composition of all nodes.
-**)
+  Given any valid state for the composition of all nodes and a valid trace
+  for the composition of just the equivocators, the trace obtained by completing
+  the state-components from the trace with the components from the given
+  valid state is a valid trace for the composition of all nodes.
+*)
 Lemma PreSubFree_PreFree_weak_full_projection
   : VLSM_weak_full_projection PreSubFree PreFree (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
 Proof.
@@ -953,9 +953,10 @@ Proof.
   - intro; intros; apply any_message_is_valid_in_preloaded.
 Qed.
 
-(** If the composition constraint only depends on the projection sub-state,
-then valid traces of the [pre_induced_sub_projection] can be lifted to valid traces
-of the constrained composition.
+(**
+  If the composition constraint only depends on the projection sub-state,
+  then valid traces of the [pre_induced_sub_projection] can be lifted to valid traces
+  of the constrained composition.
 *)
 Lemma induced_sub_projection_lift
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
@@ -1001,8 +1002,9 @@ Proof.
   - by intros _ ? m (_ & _ & _ & _ & [_ _ (_ & HmX & _)]).
 Qed.
 
-(** A specialization of [basic_projection_induces_friendliness] for
-[pre_induced_sub_projection]s.
+(**
+  A specialization of [basic_projection_induces_friendliness] for
+  [pre_induced_sub_projection]s.
 *)
 Lemma induced_sub_projection_friendliness
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
@@ -1152,8 +1154,9 @@ Context
   (Hsender_safety : sender_safety_alt_prop IM A sender)
   .
 
-(** If a sub-composition [can_emit] a message then its sender must be one of
-the components of the sub-composition.
+(**
+  If a sub-composition [can_emit] a message then its sender must be one of
+  the components of the sub-composition.
 *)
 Lemma sub_can_emit_sender (P : message -> Prop)
   : forall m v,
@@ -1281,8 +1284,9 @@ Qed.
 
 (** ** No-equivocation results for sub-composition *)
 
-(** Constraining (only) a subset of the nodes of a composition to not message-
-equivocate.
+(**
+  Constraining (only) a subset of the nodes of a composition to not message-
+  equivocate.
 *)
 Definition sub_IM_not_equivocating_constraint
   (l : composite_label IM)
@@ -1377,9 +1381,9 @@ End sub_composition_sender.
 Section sub_composition_all.
 (** ** A subcomposition with all the components
 
-If taking the subset of indices used for the sub-composition to be the entire
-set of indices, the obtained sub-composition is trace-equivalent with the
-original composition.
+  If taking the subset of indices used for the sub-composition to be the entire
+  set of indices, the obtained sub-composition is trace-equivalent with the
+  original composition.
 *)
 
 Context
@@ -1483,7 +1487,8 @@ Section sub_composition_element.
 
 (** ** Relating a sub-composition with one of its components
 
-*** A component can be lifted to a free subcomposition *)
+  *** A component can be lifted to a free subcomposition
+*)
 
 Context
   {message : Type}
@@ -1567,14 +1572,14 @@ Qed.
 
 (** *** A subcomposition can be projected to one component
 
-In the following we define the [projection_induced_validator] to a single component
-of the [pre_induced_sub_projection] of a constrained composition so a subset of its
-components.
+  In the following we define the [projection_induced_validator] to a single component
+  of the [pre_induced_sub_projection] of a constrained composition so a subset of its
+  components.
 
-Note that, in general, this is not trace-equivalent with the directly obtained
-[projection_induced_validator] of the constrained composition to the corresponding
-component, as the intermediate induced projection might generate more
-[input_valid_transitions] to be considered as a basis for the next projection.
+  Note that, in general, this is not trace-equivalent with the directly obtained
+  [projection_induced_validator] of the constrained composition to the corresponding
+  component, as the intermediate induced projection might generate more
+  [input_valid_transitions] to be considered as a basis for the next projection.
 *)
 
 Definition sub_label_element_project
@@ -1725,8 +1730,9 @@ Proof.
     (VLSM_eq_finite_valid_trace (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True SubFree)).
 Qed.
 
-(** Deriving reachable-validity for the component from the input validity
-w.r.t. a sub_composition preloaded with messages.
+(**
+  Deriving reachable-validity for the component from the input validity
+  w.r.t. a sub_composition preloaded with messages.
 *)
 Lemma pre_loaded_sub_composite_input_valid_projection constraint Q
   i Hi li sub_s im
@@ -1765,8 +1771,9 @@ Proof.
   apply (VLSM_full_projection_can_emit lift_sub_preloaded_free_full_projection).
 Qed.
 
-(** If a node can emit a message, it can also emit it in a subcomposition with
-other nodes, and starting with more pre-loaded messages.
+(**
+  If a node can emit a message, it can also emit it in a subcomposition with
+  other nodes, and starting with more pre-loaded messages.
 *)
 Lemma can_emit_with_more
   (j : index)
@@ -1790,8 +1797,8 @@ Section empty_sub_composition.
 
 (** ** A subcomposition with no components
 
-If taking the subset of indices used for the sub-composition to be the empty
-set of indices, the obtained sub-composition is an empty composition.
+  If taking the subset of indices used for the sub-composition to be the empty
+  set of indices, the obtained sub-composition is an empty composition.
 *)
 
 Context
@@ -1803,8 +1810,9 @@ Context
   (Hno_indices : indices = [])
   .
 
-(** If a sub-composition [can_emit] a message then its sender must be one of
-the components of the sub-composition.
+(**
+  If a sub-composition [can_emit] a message then its sender must be one of
+  the components of the sub-composition.
 *)
 Lemma sub_no_indices_no_can_emit (P : message -> Prop)
   : forall m, ~ can_emit (pre_loaded_vlsm (free_composite_vlsm sub_IM) P) m.

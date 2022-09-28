@@ -7,24 +7,24 @@ Section VLSM_projection.
 
 (** * VLSM Total Projections
 
-A VLSM projection guaranteeing the existence of projection for all states and
-traces. We say that VLSM <<X>> projects to VLSM <<Y>> (sharing the same messages) if
-there exists maps <<state_project>> taking <<X>>-states to <<Y>>-states,
-and <<trace_project>>, taking list of transitions from <<X>> to <<Y>>, such that:
+  A VLSM projection guaranteeing the existence of projection for all states and
+  traces. We say that VLSM <<X>> projects to VLSM <<Y>> (sharing the same messages) if
+  there exists maps <<state_project>> taking <<X>>-states to <<Y>>-states,
+  and <<trace_project>>, taking list of transitions from <<X>> to <<Y>>, such that:
 
-- state and [trace_project_preserves_valid_trace]s.
+  - state and [trace_project_preserves_valid_trace]s.
 
-- [trace_project_app]: trace projection commutes with concatenation of traces
+  - [trace_project_app]: trace projection commutes with concatenation of traces
 
-- [final_state_project]: state projection commutes with [finite_trace_last]
+  - [final_state_project]: state projection commutes with [finite_trace_last]
 
-Proper examples of total projections (which are not [VLSM_full_projection]s)
-are projections in which some of transitions might be dropped, such as
-the projection of a composition to one of the components ([component_projection])
-or the projection of the compositions of equivocators to the composition of
-regular nodes using the particular [MachineDescriptor] which select the
-first (original) node instance for each equivocator (e.g.,
-[equivocators_no_equivocations_vlsm_X_vlsm_projection]).
+  Proper examples of total projections (which are not [VLSM_full_projection]s)
+  are projections in which some of transitions might be dropped, such as
+  the projection of a composition to one of the components ([component_projection])
+  or the projection of the compositions of equivocators to the composition of
+  regular nodes using the particular [MachineDescriptor] which select the
+  first (original) node instance for each equivocator (e.g.,
+  [equivocators_no_equivocations_vlsm_X_vlsm_projection]).
 *)
 
 Section pre_definitions.
@@ -177,8 +177,9 @@ Context
   (Hsimul : VLSM_projection_type X (type Y) label_project state_project)
   .
 
-(** Any [VLSM_projection_type] determines a [VLSM_partial_projection_type], allowing us
-to lift to VLSM projection the generic results proved about VLSM partial projections.
+(**
+  Any [VLSM_projection_type] determines a [VLSM_partial_projection_type], allowing us
+  to lift to VLSM projection the generic results proved about VLSM partial projections.
 *)
 Lemma VLSM_partial_projection_type_from_projection
   : VLSM_partial_projection_type X Y (VLSM_partial_trace_project_from_projection label_project state_project).
@@ -204,9 +205,10 @@ Context
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   .
 
-(** When a label cannot be projected, and thus the transition will not be
-preserved by the projection, the state projections of the states between and
-after the transition must coincide.
+(**
+  When a label cannot be projected, and thus the transition will not be
+  preserved by the projection, the state projections of the states between and
+  after the transition must coincide.
 *)
 Definition weak_projection_transition_consistency_None : Prop :=
   forall lX, label_project lX = None ->
@@ -238,12 +240,13 @@ Context
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   .
 
-(** Similarly to the [VLSM_partial_projection] case we distinguish two types of
-projections: [VLSM_weak_projection] and [VLSM_projection], distinguished by the
-fact that the weak projections are not required to preserve initial states.
+(**
+  Similarly to the [VLSM_partial_projection] case we distinguish two types of
+  projections: [VLSM_weak_projection] and [VLSM_projection], distinguished by the
+  fact that the weak projections are not required to preserve initial states.
 
-Although we don't have proper examples of [VLSM_weak_projection]s, they are a
-support base for [VLSM_weak_full_projection]s for which we have proper examples.
+  Although we don't have proper examples of [VLSM_weak_projection]s, they are a
+  support base for [VLSM_weak_full_projection]s for which we have proper examples.
 *)
 Record VLSM_weak_projection :=
   { weak_projection_type :> VLSM_projection_type X (type Y) label_project state_project
@@ -435,8 +438,9 @@ Proof.
   by apply infinite_valid_trace_from_prefix with (n := `Hfin) in HtrX.
 Qed.
 
-(** Any [VLSM_projection] determines a [VLSM_partial_projection], allowing us
-to lift to VLSM projection the generic results proved about VLSM partial projections.
+(**
+  Any [VLSM_projection] determines a [VLSM_partial_projection], allowing us
+  to lift to VLSM projection the generic results proved about VLSM partial projections.
 *)
 Lemma VLSM_weak_partial_projection_from_projection
   : VLSM_weak_partial_projection X Y (VLSM_partial_trace_project_from_projection label_project state_project).
@@ -589,8 +593,9 @@ Definition VLSM_projection_finite_valid_trace
         (VLSM_projection_finite_trace_project Hsimul trX)
   := trace_project_preserves_valid_trace _ _ _ _ Hsimul.
 
-(** Any [VLSM_projection] determines a [VLSM_partial_projection], allowing us
-to lift to VLSM projection the generic results proved about VLSM partial projections.
+(**
+  Any [VLSM_projection] determines a [VLSM_partial_projection], allowing us
+  to lift to VLSM projection the generic results proved about VLSM partial projections.
 *)
 Lemma VLSM_partial_projection_from_projection
   : VLSM_partial_projection X Y (VLSM_partial_trace_project_from_projection label_project state_project).
@@ -700,14 +705,16 @@ Qed.
 
 (** ** Projection friendliness
 
-A projection is friendly if all the valid traces of the projection are
-projections of the valid traces of the source VLSM.
+  A projection is friendly if all the valid traces of the projection are
+  projections of the valid traces of the source VLSM.
 *)
 
 Section projection_friendliness.
 
-(** We axiomatize projection friendliness as the converse of
-[VLSM_projection_finite_valid_trace] *)
+(**
+  We axiomatize projection friendliness as the converse of
+  [VLSM_projection_finite_valid_trace]
+*)
 Definition projection_friendly_prop
   := forall
     (sY : vstate Y)
@@ -746,9 +753,10 @@ Proof.
   by rewrite finite_trace_last_app; eexists.
 Qed.
 
-(** A consequence of the [projection_friendly_prop]erty is that the valid
-traces of the projection are precisely the projections of all the valid traces
-of the source VLSM.
+(**
+  A consequence of the [projection_friendly_prop]erty is that the valid
+  traces of the projection are precisely the projections of all the valid traces
+  of the source VLSM.
 *)
 Lemma projection_friendly_trace_char
   (Hfriendly : projection_friendly_prop)
@@ -770,15 +778,15 @@ End projection_properties.
 End VLSM_projection.
 
 (**
-For VLSM <<X>> to project to a VLSM <<Y>>, the following set of conditions is sufficient:
-- <<X>>'s [initial_state]s project to <<Y>>'s [initial state]s
-- Every message <<m>> (including the empty one) which can be input to a
-  projectable [input_valid] transition in <<X>>, is a [valid_message]
-  in <<Y>>
-- <<X>>'s [input_valid] is included in <<Y>>'s [valid].
-- For all projectable [input_valid] inputs (in <<X>>), <<Y>>'s [transition]
-  acts like <<X>>'s [transition].
-- All non-projectable transitions preserve the projected state
+  For VLSM <<X>> to project to a VLSM <<Y>>, the following set of conditions is sufficient:
+  - <<X>>'s [initial_state]s project to <<Y>>'s [initial state]s
+  - Every message <<m>> (including the empty one) which can be input to a
+    projectable [input_valid] transition in <<X>>, is a [valid_message]
+    in <<Y>>
+  - <<X>>'s [input_valid] is included in <<Y>>'s [valid].
+  - For all projectable [input_valid] inputs (in <<X>>), <<Y>>'s [transition]
+    acts like <<X>>'s [transition].
+  - All non-projectable transitions preserve the projected state
 *)
 
 Section basic_VLSM_projection.

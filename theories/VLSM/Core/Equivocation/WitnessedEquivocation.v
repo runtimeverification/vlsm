@@ -6,25 +6,25 @@ From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquiv
 
 (** * Witnessed equivocation
 
-Although [is_equivocating_tracewise] provides a very precise notion of
-equivocation, it does not guarantee the monotonicity of the set of equivocators
-along a trace.
+  Although [is_equivocating_tracewise] provides a very precise notion of
+  equivocation, it does not guarantee the monotonicity of the set of equivocators
+  along a trace.
 
-The witnessed equivocation assumption is a possible way to address this issue.
+  The witnessed equivocation assumption is a possible way to address this issue.
 
-Starting from the (reasonable) assumption that for any state <<s>>, there is
-a trace ending in <<s>> whose [equivocating_senders_in_trace] are precisely
-the equivocators of <<s>> (the [WitnessedEquivocationCapability]),
-we can show that for each Free valid state there exists
-a valid trace with the [strong_trace_witnessing_equivocation_prop]erty,
-i.e., a trace whose every prefix is a witness for its corresponding end state
-(Lemma [free_has_strong_trace_witnessing_equivocation_prop]).
-In particular, the set of equivocators is monotonically increasing for such a
-trace (Lemma [strong_witness_equivocating_validators_prefix_monotonicity]).
+  Starting from the (reasonable) assumption that for any state <<s>>, there is
+  a trace ending in <<s>> whose [equivocating_senders_in_trace] are precisely
+  the equivocators of <<s>> (the [WitnessedEquivocationCapability]),
+  we can show that for each Free valid state there exists
+  a valid trace with the [strong_trace_witnessing_equivocation_prop]erty,
+  i.e., a trace whose every prefix is a witness for its corresponding end state
+  (Lemma [free_has_strong_trace_witnessing_equivocation_prop]).
+  In particular, the set of equivocators is monotonically increasing for such a
+  trace (Lemma [strong_witness_equivocating_validators_prefix_monotonicity]).
 
-We then use this result to show that any Free valid state is also a valid
-state for the composition of nodes under the [fixed_equivocation_constraint]
-induced by its set of equivocators.
+  We then use this result to show that any Free valid state is also a valid
+  state for the composition of nodes under the [fixed_equivocation_constraint]
+  induced by its set of equivocators.
 *)
 Section witnessed_equivocation.
 
@@ -47,8 +47,9 @@ Context
   (equivocating_validators := equivocating_validators (BasicEquivocation := Htracewise_BasicEquivocation))
   .
 
-(** A trace witnesses the equivocation of its final state <<s>> if its set of
-equivocators is precisely that of the [equivocating_validators] of <<s>>.
+(**
+  A trace witnesses the equivocation of its final state <<s>> if its set of
+  equivocators is precisely that of the [equivocating_validators] of <<s>>.
 *)
 Definition trace_witnessing_equivocation_prop
   is tr
@@ -69,8 +70,8 @@ Proof.
 Qed.
 
 (**
-A composition of VLSMs has the witnessed equivocation capability if towards any
-valid states there exist a trace witnessing its equivocation.
+  A composition of VLSMs has the witnessed equivocation capability if towards any
+  valid states there exist a trace witnessing its equivocation.
 *)
 Class WitnessedEquivocationCapability
   :=
@@ -103,8 +104,9 @@ Proof.
   - by symmetry; apply elements_empty_iff, equivocating_validators_empty_in_initial_state.
 Qed.
 
-(** For any trace having the [trace_witnessing_equivocation_prop]erty,
-its final transition is monotonic w.r.t. the [equivocating_validators].
+(**
+  For any trace having the [trace_witnessing_equivocation_prop]erty,
+  its final transition is monotonic w.r.t. the [equivocating_validators].
 *)
 Lemma equivocating_validators_witness_monotonicity
   (is s : composite_state IM)
@@ -126,11 +128,11 @@ Proof.
 Qed.
 
 (**
-Given a trace with the [trace_witnessing_equivocation_prop]erty,
-if the [equivocating_validators] for the destination of its last transition
-are  included in the [equivocating_validators] for the source of its last
-transition, the the trace without its last transition also has the
-[trace_witnessing_equivocation_prop]erty.
+  Given a trace with the [trace_witnessing_equivocation_prop]erty,
+  if the [equivocating_validators] for the destination of its last transition
+  are  included in the [equivocating_validators] for the source of its last
+  transition, the the trace without its last transition also has the
+  [trace_witnessing_equivocation_prop]erty.
 *)
 Lemma input_valid_transition_reflects_trace_witnessing_equivocation_prop
   (is s: composite_state IM)
@@ -155,9 +157,9 @@ Proof.
 Qed.
 
 (**
-An equivocator for the destination of a transition is either an equivocation
-for the source as well, or it is the sender of the received message and that
-message is not sent by any trace witnessing the source of the transition.
+  An equivocator for the destination of a transition is either an equivocation
+  for the source as well, or it is the sender of the received message and that
+  message is not sent by any trace witnessing the source of the transition.
 *)
 Lemma equivocating_validators_step_update
     l s om s' om'
@@ -202,17 +204,17 @@ Proof.
 Qed.
 
 (**
-Given a non-empty trace with the [trace_witnessing_equivocation_prop]erty,
-there are two disjoint possibilities concerning its last transition.
+  Given a non-empty trace with the [trace_witnessing_equivocation_prop]erty,
+  there are two disjoint possibilities concerning its last transition.
 
-(1) either it preserves the set of [equivocating_validators] and, in that case,
-the trace without the last transition has the
-[trace_witnessing_equivocation_prop]erty as well; or
+  (1) either it preserves the set of [equivocating_validators] and, in that case,
+  the trace without the last transition has the
+  [trace_witnessing_equivocation_prop]erty as well; or
 
-(2) The set of [equivocating_validators] of its destination is obtained
-by adding the sender of the message received in the transition to the
-set of [equivocating_validators] of its source, and, in that case, that message
-is not sent by any trace witnessing the source of the transition.
+  (2) The set of [equivocating_validators] of its destination is obtained
+  by adding the sender of the message received in the transition to the
+  set of [equivocating_validators] of its source, and, in that case, that message
+  is not sent by any trace witnessing the source of the transition.
 *)
 Lemma equivocating_validators_witness_last_char
   (is : composite_state IM)
@@ -293,15 +295,17 @@ Qed.
 
 (** ** Strongly witnessed equivocation *)
 
-(** A stronger [trace_witnessing_equivocation_prop]erty requires that any
-prefix of a trace is witnessing equivocation for its corresponding final state.
+(**
+  A stronger [trace_witnessing_equivocation_prop]erty requires that any
+  prefix of a trace is witnessing equivocation for its corresponding final state.
 *)
 Definition strong_trace_witnessing_equivocation_prop is tr :=
     forall prefix suffix, prefix ++ suffix = tr ->
       trace_witnessing_equivocation_prop is prefix.
 
-(** An advantage of the [strong_trace_witnessing_equivocation_prop]erty
-is that it guarantees monotonicity of [equivocating_validators] along the trace.
+(**
+  An advantage of the [strong_trace_witnessing_equivocation_prop]erty
+  is that it guarantees monotonicity of [equivocating_validators] along the trace.
 *)
 Lemma strong_witness_equivocating_validators_prefix_monotonicity
   (is s : composite_state IM)
@@ -338,10 +342,10 @@ Proof.
 Qed.
 
 (**
-The next two lemmas show that the [strong_trace_witnessing_equivocation_prop]erty
-is preserved by transitions in both the cases yielded by Lemma
-[equivocating_validators_witness_last_char] as part of the induction step in
-the proof of Lemma [preloaded_has_strong_trace_witnessing_equivocation_prop].
+  The next two lemmas show that the [strong_trace_witnessing_equivocation_prop]erty
+  is preserved by transitions in both the cases yielded by Lemma
+  [equivocating_validators_witness_last_char] as part of the induction step in
+  the proof of Lemma [preloaded_has_strong_trace_witnessing_equivocation_prop].
 *)
 Lemma strong_trace_witnessing_equivocation_prop_extend_eq
   s
@@ -448,20 +452,21 @@ Proof.
     apply (Hprefix _ _ Heq_tr'').
 Qed.
 
-(** Proving that any state <<s>> has the [strong_trace_witnessing_equivocation_prop]erty
-proceeds via a more technical double induction over both:
+(**
+  Proving that any state <<s>> has the [strong_trace_witnessing_equivocation_prop]erty
+  proceeds via a more technical double induction over both:
 
-(1) the length of a trace witnessing the equivocation of <<s>>; and
-(2) the size of the set of equivocators of <<s>>.
+  (1) the length of a trace witnessing the equivocation of <<s>>; and
+  (2) the size of the set of equivocators of <<s>>.
 
-For the induction step we assume that the witnessing trace leading to <<s>> is
-of the form <<tr ++ [item>>. By Lemma [equivocating_validators_witness_last_char]
-we know that either <<tr>> is also a witnessing trace, in which case we can use
-the induction hypothesis via property (1), or the set of equivocators for the
-last state of <<tr>> is strictly included in that of <<s>>, allowing us to use
-the induction hypothesis via property (2).
+  For the induction step we assume that the witnessing trace leading to <<s>> is
+  of the form <<tr ++ [item>>. By Lemma [equivocating_validators_witness_last_char]
+  we know that either <<tr>> is also a witnessing trace, in which case we can use
+  the induction hypothesis via property (1), or the set of equivocators for the
+  last state of <<tr>> is strictly included in that of <<s>>, allowing us to use
+  the induction hypothesis via property (2).
 
-The conclusion then follows by the two helper lemmas above.
+  The conclusion then follows by the two helper lemmas above.
 *)
 Lemma preloaded_has_strong_trace_witnessing_equivocation_prop s
   (Hs : valid_state_prop PreFree s)
@@ -583,10 +588,11 @@ Proof.
       by apply Hextend; subst.
 Qed.
 
-(** A version of Lemma [preloaded_has_strong_trace_witnessing_equivocation_prop]
-guaranteeing that for any [valid_state] w.r.t. the Free composition there is
-a trace ending in that state which is valid w.r.t. the Free composition and
-it has the [strong_trace_witnessing_equivocation_prop]erty.
+(**
+  A version of Lemma [preloaded_has_strong_trace_witnessing_equivocation_prop]
+  guaranteeing that for any [valid_state] w.r.t. the Free composition there is
+  a trace ending in that state which is valid w.r.t. the Free composition and
+  it has the [strong_trace_witnessing_equivocation_prop]erty.
 *)
 Lemma free_has_strong_trace_witnessing_equivocation_prop s
   (Hs : valid_state_prop Free s)
@@ -609,12 +615,12 @@ End witnessed_equivocation.
 
 (** ** Witnessed equivocation and fixed-set equivocation
 
-The main result of this module is that, under witnessed equivocation
-assumptions, any trace with the [strong_trace_witnessing_equivocation_prop]erty
-which is valid for the free composition (guaranteed to exist by
-Lemma [free_has_strong_trace_witnessing_equivocation_prop]) is also valid
-for the composition constrained by the [fixed_equivocation_constrained] induced
-by the [equivocating_validators] of its final state.
+  The main result of this module is that, under witnessed equivocation
+  assumptions, any trace with the [strong_trace_witnessing_equivocation_prop]erty
+  which is valid for the free composition (guaranteed to exist by
+  Lemma [free_has_strong_trace_witnessing_equivocation_prop]) is also valid
+  for the composition constrained by the [fixed_equivocation_constrained] induced
+  by the [equivocating_validators] of its final state.
 *)
 Section witnessed_equivocation_fixed_set.
 
@@ -648,11 +654,11 @@ Context
 Existing Instance Htracewise_BasicEquivocation.
 
 (**
-Given the fact that the set of [equivocating_validators] can be empty,
-and the definition of the [fixed_equivocation_constraint] requires
-a non-empty set (to allow the composition of equivocators to exist),
-we default the constraint to the [composite_no_equivocation] one
-when there are no [equivocating_validators].
+  Given the fact that the set of [equivocating_validators] can be empty,
+  and the definition of the [fixed_equivocation_constraint] requires
+  a non-empty set (to allow the composition of equivocators to exist),
+  we default the constraint to the [composite_no_equivocation] one
+  when there are no [equivocating_validators].
 *)
 Definition equivocating_validators_fixed_equivocation_constraint
   (s : composite_state IM)
@@ -700,15 +706,15 @@ Qed.
 
 (** *** Main result of the section
 
-Any Free valid trace with the
-[strong_trace_witnessing_equivocation_prop]erty is also valid w.r.t. the
-composition using the [equivocating_validators_fixed_equivocation_constraint]
-induced by its final state.
+  Any Free valid trace with the
+  [strong_trace_witnessing_equivocation_prop]erty is also valid w.r.t. the
+  composition using the [equivocating_validators_fixed_equivocation_constraint]
+  induced by its final state.
 
-The proof proceeds by induction on the valid trace property.
-Lemmas [equivocating_validators_witness_monotonicity] and
-[fixed_equivocation_vlsm_composition_index_incl] are used to restate the
-induction hypothesis in terms of the final state after the last transition.
+  The proof proceeds by induction on the valid trace property.
+  Lemmas [equivocating_validators_witness_monotonicity] and
+  [fixed_equivocation_vlsm_composition_index_incl] are used to restate the
+  induction hypothesis in terms of the final state after the last transition.
 *)
 Lemma strong_witness_has_fixed_equivocation is s tr
   (Htr : finite_valid_trace_init_to (free_composite_vlsm IM) is s tr)
@@ -793,9 +799,9 @@ Proof.
 Qed.
 
 (**
-As a corollary of the above, every valid state for the free composition is
-also a valid state for the composition with the
-[equivocating_validators_fixed_equivocation_constraint] induced by it.
+  As a corollary of the above, every valid state for the free composition is
+  also a valid state for the composition with the
+  [equivocating_validators_fixed_equivocation_constraint] induced by it.
 *)
 Lemma equivocating_validators_fixed_equivocation_characterization
   (Hke : WitnessedEquivocationCapability IM id sender (Cm := Ci))

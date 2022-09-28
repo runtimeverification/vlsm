@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From Coq Require Import Sorting.
 From VLSM.Lib Require Import Preamble ListExtras ListSetExtras.
 
-(** * Sorted list utility functions and lemmas **)
+(** * Sorted list utility functions and lemmas *)
 
 Fixpoint list_compare {A} (compare : A -> A -> comparison)
     (l1 l2 : list A) : comparison :=
@@ -164,7 +164,7 @@ Proof.
     + by constructor.
 Qed.
 
-(** Sorted lists as sets **)
+(** Sorted lists as sets *)
 Lemma LocallySorted_elem_of_lt {A} {lt : relation A} `{StrictOrder A lt} :
   forall x y s,
   LocallySorted lt (y :: s) ->

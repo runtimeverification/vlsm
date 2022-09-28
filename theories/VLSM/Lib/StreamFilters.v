@@ -3,9 +3,9 @@ From Coq Require Import Streams Sorted.
 From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras.
 
 (**
-Given a predicate <<P>> and a stream <<s>>, a stream of naturals <<ns>>
-determines a [filtering_subsequence] for <<P>> on <<s>> if it corresponds to
-the list of positions in <<ss>> where <<P>> holds, increasingly ordered.
+  Given a predicate <<P>> and a stream <<s>>, a stream of naturals <<ns>>
+  determines a [filtering_subsequence] for <<P>> on <<s>> if it corresponds to
+  the list of positions in <<ss>> where <<P>> holds, increasingly ordered.
 *)
 Definition filtering_subsequence
   {A : Type}
@@ -54,8 +54,9 @@ Proof.
   by setoid_rewrite <- HPQ.
 Qed.
 
-(** Each element in a [filtering_subsequence] is a position in the base
-stream for which the predicate holds.
+(**
+  Each element in a [filtering_subsequence] is a position in the base
+  stream for which the predicate holds.
 *)
 Lemma filtering_subsequence_witness
   {A : Type}
@@ -70,8 +71,9 @@ Proof.
   apply Hfs.
 Qed.
 
-(** For each position in the base stream for which the predicate holds is
-present in the [filtering_subsequence].
+(**
+  For each position in the base stream for which the predicate holds is
+  present in the [filtering_subsequence].
 *)
 Lemma filtering_subsequence_witness_rev
   {A : Type}
@@ -95,8 +97,7 @@ Proof.
     by elim (Hfs n).
 Qed.
 
-(** Prefixes of the filtering subsequence expressed as filters.
-*)
+(** Prefixes of the filtering subsequence expressed as filters. *)
 Lemma filtering_subsequence_prefix_is_filter
   {A : Type}
   (P : A -> Prop)
@@ -194,9 +195,10 @@ Proof.
   by inversion Hlength; subst.
 Qed.
 
-(** Given a [filtering_subsequence] for property <<P>> over a stream <<s>> and
-a function <<f>> transforming elements with property <<P>>, we can define the
-filtering of <<s>> by <<P>> mapped through the function <<f>>.
+(**
+  Given a [filtering_subsequence] for property <<P>> over a stream <<s>> and
+  a function <<f>> transforming elements with property <<P>>, we can define the
+  filtering of <<s>> by <<P>> mapped through the function <<f>>.
 *)
 Definition filtering_subsequence_stream_filter_map
   {A B : Type}
@@ -209,8 +211,9 @@ Definition filtering_subsequence_stream_filter_map
   : Stream B
   := map (fun k => f (dexist _ (filtering_subsequence_witness P s ss Hfs k))) nat_sequence.
 
-(** Connecting prefixes of [filtering_subsequence_stream_filter_map] with [list_filter_map]s on
-prefixes.
+(**
+  Connecting prefixes of [filtering_subsequence_stream_filter_map] with [list_filter_map]s on
+  prefixes.
 *)
 Lemma fitering_subsequence_stream_filter_map_prefix
   {A B : Type}
@@ -295,16 +298,16 @@ Qed.
 
 (** ** Obtaining [filtering_sequences] for streams
 
-Given a stream, a decidable predicate on its elements, and a guarantee that the
-predicates holds [InfinitelyOften] on the elements of the stream, we can
-(coinductively) obtain a [filtering_sequence].
+  Given a stream, a decidable predicate on its elements, and a guarantee that the
+  predicates holds [InfinitelyOften] on the elements of the stream, we can
+  (coinductively) obtain a [filtering_sequence].
 
-The approach below follows closely the one proposed by the following paper,
-except that instead of obtaining the filtered sequence itself we obtain the
-stream of all positions corresponding to the filtered sequence.
+  The approach below follows closely the one proposed by the following paper,
+  except that instead of obtaining the filtered sequence itself we obtain the
+  stream of all positions corresponding to the filtered sequence.
 
-Yves Bertot. Filters on Co-Inductive streams: an application to Eratosthenes’ sieve. RR-5343, INRIA.
-2004, pp.21. ffinria-00070658 https://hal.inria.fr/inria-00070658/document
+  Yves Bertot. Filters on Co-Inductive streams: an application to Eratosthenes’ sieve. RR-5343, INRIA.
+  2004, pp.21. ffinria-00070658 https://hal.inria.fr/inria-00070658/document
 *)
 
 Section stream_filter_positions.
@@ -315,13 +318,14 @@ Context
   {Pdec : forall a, Decision (P a)}
   .
 
-(** Given a stream <<s>> and a proof that there exists an element of <<s>> for
-which <<P>> holds, computes the first position of <<s>> in which <<P>> holds
-(shifted by the given argument <<n>>) and the remainder of <<s>> after that
-position.
+(**
+  Given a stream <<s>> and a proof that there exists an element of <<s>> for
+  which <<P>> holds, computes the first position of <<s>> in which <<P>> holds
+  (shifted by the given argument <<n>>) and the remainder of <<s>> after that
+  position.
 
-The definition iterates looking for the first position in which <<P>> holds,
-termination being ensured by the fact that [Exists1] is inductive.
+  The definition iterates looking for the first position in which <<P>> holds,
+  termination being ensured by the fact that [Exists1] is inductive.
 *)
 Fixpoint stream_filter_fst_pos
   (s : Stream A)
@@ -404,9 +408,10 @@ Proof.
   apply Hnp. simpl in *. lia.
 Qed.
 
-(** Given as stream <<s>> for which predicate <<P>> holds [InfinitelyOften]
-produces the streams of all its position at which <<P>> holds in a strictly
-increasing order (shifted by the given argument <<n>>).
+(**
+  Given as stream <<s>> for which predicate <<P>> holds [InfinitelyOften]
+  produces the streams of all its position at which <<P>> holds in a strictly
+  increasing order (shifted by the given argument <<n>>).
 *)
 CoFixpoint stream_filter_positions (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat) : Stream nat :=
   let fpair := stream_filter_fst_pos _ (fHere _ _ Hinf) n in
@@ -474,8 +479,7 @@ Proof.
   apply stream_filter_fst_pos_le.
 Qed.
 
-(** [stream_filter_positions] produces a [filtering_sequence].
-*)
+(** [stream_filter_positions] produces a [filtering_sequence]. *)
 Lemma stream_filter_positions_filtering_subsequence
   (s : Stream A) (Hinf : InfinitelyOften P s)
   : filtering_subsequence P s (stream_filter_positions s Hinf 0).
@@ -505,8 +509,9 @@ Proof.
     apply Hnp. lia.
 Qed.
 
-(** A restatement of [filtering_subsequence_stream_filter_map] based on the
-[InfinitelyOften] predicate, using the [stream_filter_positions_filtering_subsequence].
+(**
+  A restatement of [filtering_subsequence_stream_filter_map] based on the
+  [InfinitelyOften] predicate, using the [stream_filter_positions_filtering_subsequence].
 *)
 Definition stream_filter_map
   [B : Type]
@@ -516,8 +521,7 @@ Definition stream_filter_map
   : Stream B :=
   filtering_subsequence_stream_filter_map P f _ _ (stream_filter_positions_filtering_subsequence s Hinf).
 
-(** Stream filtering is obtained as a specialization of [stream_filter_map].
-*)
+(** Stream filtering is obtained as a specialization of [stream_filter_map]. *)
 Definition stream_filter
   (s : Stream A)
   (Hinf : InfinitelyOften P s)
@@ -530,9 +534,9 @@ Section stream_map_option.
 
 (** ** Mapping a partial function on a stream
 
-Given a partial function <<f>> which is [InfinitelyOften] defined on the
-elements of a stream <<s>>, we can define the stream of the defined mapped
-values of <<s>> through <<f>> as a particular [stream_filter_map].
+  Given a partial function <<f>> which is [InfinitelyOften] defined on the
+  elements of a stream <<s>>, we can define the stream of the defined mapped
+  values of <<s>> through <<f>> as a particular [stream_filter_map].
 *)
 Context
   [A B : Type]
@@ -576,8 +580,9 @@ Definition bounded_stream_map_option
 
 End stream_map_option.
 
-(** For a totally defined function, [stream_map_option] corresponds to the
-regular [map] on streams.
+(**
+  For a totally defined function, [stream_map_option] corresponds to the
+  regular [map] on streams.
 *)
 Lemma stream_map_option_EqSt [A B : Type] (f : A -> B)
   : forall s (Hinf : InfinitelyOften (is_Some ∘ (Some ∘ f)) s),

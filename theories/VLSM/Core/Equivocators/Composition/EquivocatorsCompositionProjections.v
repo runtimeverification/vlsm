@@ -30,13 +30,14 @@ Context {message : Type}
 
 #[local] Hint Unfold equivocator_descriptors_update : state_update.
 
-(** Given a [transition_item] <<item>> in the compositions of equivocators
-of components [IM] and an [equivocator_descriptors], if the descriptors
-are all valid in the destination of the transition this returns a
-set of updated descriptors for corresponding positions in the origin state
-of the transition, and if the transition was an in-place change to an
-exisitng alternative it also returns a projected transition item in
-the plain composition of [IM].
+(**
+  Given a [transition_item] <<item>> in the compositions of equivocators
+  of components [IM] and an [equivocator_descriptors], if the descriptors
+  are all valid in the destination of the transition this returns a
+  set of updated descriptors for corresponding positions in the origin state
+  of the transition, and if the transition was an in-place change to an
+  exisitng alternative it also returns a projected transition item in
+  the plain composition of [IM].
 *)
 Definition equivocators_transition_item_project
   (eqv_descriptors : equivocator_descriptors)
@@ -118,8 +119,8 @@ Proof.
 Qed.
 
 (**
-[zero_descriptor]s are preserved when projecting [transition_item]s of the
-composition of equivocators.
+  [zero_descriptor]s are preserved when projecting [transition_item]s of the
+  composition of equivocators.
 *)
 Lemma equivocators_transition_item_project_preserves_zero_descriptors
   (descriptors : equivocator_descriptors)
@@ -198,8 +199,8 @@ Proof.
 Qed.
 
 (**
-A generalization of [no_equivocating_equivocator_transition_item_project] to
-the composition of equivocators.
+  A generalization of [no_equivocating_equivocator_transition_item_project] to
+  the composition of equivocators.
 *)
 Lemma no_equivocating_equivocators_transition_item_project
   (eqv_descriptors : equivocator_descriptors)
@@ -524,10 +525,10 @@ Proof.
 Qed.
 
 (**
-The projection of an [equivocators] trace is obtained by traversing the
-trace from right to left guided by the descriptors produced by
-[equivocators_transition_item_project] and gathering all non-empty
-[transition_item]s it produces.
+  The projection of an [equivocators] trace is obtained by traversing the
+  trace from right to left guided by the descriptors produced by
+  [equivocators_transition_item_project] and gathering all non-empty
+  [transition_item]s it produces.
 *)
 Definition equivocators_trace_project
   (eqv_descriptors : equivocator_descriptors)
@@ -573,9 +574,9 @@ Proof.
 Qed.
 
 (**
-For every [transition_item] of the projection of a trace over the composition
-of equivocators, there exists a corresponding item in the original trace
-which projects to it.
+  For every [transition_item] of the projection of a trace over the composition
+  of equivocators, there exists a corresponding item in the original trace
+  which projects to it.
 
 *)
 Lemma equivocators_trace_project_app_inv_item
@@ -638,9 +639,7 @@ Proof.
         by simpl; rewrite Hpr_x_item.
 Qed.
 
-(**
-A corrollary of the above, reflecting a split in the projection to the original trace.
-*)
+(** A corrollary of the above, reflecting a split in the projection to the original trace. *)
 Lemma equivocators_trace_project_app_inv
   (tr : list (composite_transition_item equivocator_IM))
   (ieqv_descriptors eqv_descriptors : equivocator_descriptors)
@@ -709,8 +708,9 @@ Proof.
     revert IHHtr Hx_preserves. apply transitivity.
 Qed.
 
-(** The state and descriptors obtained after applying [equivocators_trace_project]
-on a pre-loaded valid trace satisfy the [previous_state_descriptor_prop]erty.
+(**
+  The state and descriptors obtained after applying [equivocators_trace_project]
+  on a pre-loaded valid trace satisfy the [previous_state_descriptor_prop]erty.
 *)
 Lemma equivocators_trace_project_from_state_descriptors
   (descriptors idescriptors : equivocator_descriptors)
@@ -792,11 +792,11 @@ Proof.
 Qed.
 
 (**
-We can project a trace over the composition of equivocators in two ways:
-(1) first project on a equivocator component, then project the equivocator to the original component
-(2) first projects to the composition of original components, then project to one of them
+  We can project a trace over the composition of equivocators in two ways:
+  (1) first project on a equivocator component, then project the equivocator to the original component
+  (2) first projects to the composition of original components, then project to one of them
 
-The result below says that the two ways lead to the same result.
+  The result below says that the two ways lead to the same result.
 *)
 Lemma equivocators_trace_project_finite_trace_projection_list_commute
   (i : index)
@@ -889,8 +889,8 @@ Proof.
 Qed.
 
 (**
-A generalization of [equivocators_transition_item_project_preserves_zero_descriptors]
-to full (valid) traces
+  A generalization of [equivocators_transition_item_project_preserves_zero_descriptors]
+  to full (valid) traces
 *)
 Lemma equivocators_trace_project_preserves_zero_descriptors
   (is : composite_state equivocator_IM)
@@ -1074,8 +1074,8 @@ Proof.
 Qed.
 
 (**
-A corrollary of [preloaded_equivocators_valid_trace_from_project] selecting
-only the [proper_equivocator_descriptors] property.
+  A corrollary of [preloaded_equivocators_valid_trace_from_project] selecting
+  only the [proper_equivocator_descriptors] property.
 *)
 Lemma preloaded_equivocators_valid_trace_project_proper_initial
   (is : composite_state equivocator_IM)
@@ -1187,9 +1187,10 @@ Proof.
   simpl in *. congruence.
 Qed.
 
-(** Projecting a pre-loaded valid trace of the composition of equivocators
-using [proper_equivocator_descriptors] one obtains a pre-loaded valid trace
-of the free composition of nodes.
+(**
+  Projecting a pre-loaded valid trace of the composition of equivocators
+  using [proper_equivocator_descriptors] one obtains a pre-loaded valid trace
+  of the free composition of nodes.
 *)
 Lemma pre_equivocators_valid_trace_project
   (is final_state : vstate equivocators_no_equivocations_vlsm)
@@ -1367,8 +1368,9 @@ Proof.
   by exists preX, trX, initial_descriptors.
 Qed.
 
-(** The projection of an composite equivocator state using [zero_descriptor]s
-which is guaranteed to always succeed.
+(**
+  The projection of an composite equivocator state using [zero_descriptor]s
+  which is guaranteed to always succeed.
 *)
 Definition equivocators_total_state_project := equivocators_state_project (zero_descriptor IM).
 
@@ -1382,8 +1384,9 @@ Definition equivocators_total_trace_project
   :=
   from_option fst [] (equivocators_trace_project (zero_descriptor IM) tr).
 
-(** The projection of an composite equivocator trace using [zero_descriptor]s
-which is guaranteed to always succeed.
+(**
+  The projection of an composite equivocator trace using [zero_descriptor]s
+  which is guaranteed to always succeed.
 *)
 Lemma equivocators_total_trace_project_characterization
   {s tr}
@@ -1497,17 +1500,17 @@ Context
   .
 
 (**
-A generalization of [equivocators_trace_project_finite_trace_projection_list_commute]
-to projections over a set of indices.
+  A generalization of [equivocators_trace_project_finite_trace_projection_list_commute]
+  to projections over a set of indices.
 
-We can project a trace over the composition of equivocators in two ways:
+  We can project a trace over the composition of equivocators in two ways:
 
-- first project to a subset of equivocator components, then project that to the corresponding subset of the composition of the original components
+  - first project to a subset of equivocator components, then project that to the corresponding subset of the composition of the original components
 
-- first project to the composition of original components, then project to a subset of them
+  - first project to the composition of original components, then project to a subset of them
 
-The results below (fist for a single item, then for the full trace say that the
-two ways lead to the same result.
+  The results below (fist for a single item, then for the full trace say that the
+  two ways lead to the same result.
 *)
 Lemma equivocators_trace_project_finite_trace_sub_projection_item_commute
   (item: composite_transition_item (equivocator_IM IM))

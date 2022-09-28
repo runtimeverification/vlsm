@@ -9,24 +9,24 @@ From VLSM.Core Require Import Equivocators.MessageProperties.
 
 (** * VLSM Equivocator Composition
 
-Given a composition <<X>> of VLSMs, we can model equivocator behavior by
-creating an _equivocator composition_ which replaces each component of <<X>>
-with its equivocator version and strengthens the composition constraint to
-allow no (additional) equivocations, that is, all messages being received
-must have been previously sent by one of the (equivocator) VLSMs in the
-composition.
+  Given a composition <<X>> of VLSMs, we can model equivocator behavior by
+  creating an _equivocator composition_ which replaces each component of <<X>>
+  with its equivocator version and strengthens the composition constraint to
+  allow no (additional) equivocations, that is, all messages being received
+  must have been previously sent by one of the (equivocator) VLSMs in the
+  composition.
 *)
 
 (** ** Extracting equivocator traces from equivocator composition traces
-To recover the equivocator trace for the regular composition <<X>> from
-the traces of the equivocator composition, we'll assume that only the
-first state copy of each machine is observable in the composition
-and we ignore the activity corresponding to any other state copy,
-including the forks.
+  To recover the equivocator trace for the regular composition <<X>> from
+  the traces of the equivocator composition, we'll assume that only the
+  first state copy of each machine is observable in the composition
+  and we ignore the activity corresponding to any other state copy,
+  including the forks.
 
-This amounts to removing from the trace all transitions in which the
-state copy index is not 1, forgetting the additional components of
-the label, and keeping only the copy of index 1 for each machine.
+  This amounts to removing from the trace all transitions in which the
+  state copy index is not 1, forgetting the additional components of
+  the label, and keeping only the copy of index 1 for each machine.
 *)
 
 Section fully_equivocating_composition.
@@ -111,8 +111,8 @@ Qed.
 End equivocating_indices_BasicEquivocation.
 
 (**
-The statement below is obvious a transition cannot make an already equivocating
-component non-equivocating.
+  The statement below is obvious a transition cannot make an already equivocating
+  component non-equivocating.
 *)
 Lemma equivocators_transition_preserves_equivocating_indices
   (index_listing : list index)
@@ -246,20 +246,20 @@ Proof.
 Qed.
 
 (**
-An indexed set of [MachineDescriptor]s, one for each equivocating machine in
-the composition.
+  An indexed set of [MachineDescriptor]s, one for each equivocating machine in
+  the composition.
 
-This will be used to project [composite_state]s and [composite_transition_item]s
-from the composition of equivocators to the composition of their corresponding
-nodes.
+  This will be used to project [composite_state]s and [composite_transition_item]s
+  from the composition of equivocators to the composition of their corresponding
+  nodes.
 *)
 Definition equivocator_descriptors : Type := forall (eqv : index), MachineDescriptor (IM eqv).
 
 (**
-Generalizes the [proper_descriptor] definition to [equivocator_descriptors].
-Basically, an indexed set is proper w.r.t. a [composite_state] one can obtain
-through it a valid projection of the [composite_state] to the non-equivocating
-universe.
+  Generalizes the [proper_descriptor] definition to [equivocator_descriptors].
+  Basically, an indexed set is proper w.r.t. a [composite_state] one can obtain
+  through it a valid projection of the [composite_state] to the non-equivocating
+  universe.
 *)
 Definition proper_equivocator_descriptors
   (eqv_descriptors : equivocator_descriptors)
@@ -365,8 +365,8 @@ Definition newmachine_descriptors_list
    (fun i => newmachine_descriptor_dec (IM i) (descriptors i)) index_listing.
 
 (**
-A very useful operation on [equivocator_descriptors]s is updating the state corresponding
-to a component:
+  A very useful operation on [equivocator_descriptors]s is updating the state corresponding
+  to a component:
 *)
 Definition equivocator_descriptors_update
   (s : equivocator_descriptors)
@@ -380,9 +380,7 @@ Definition equivocator_descriptors_update
   | _ => s j
   end.
 
-(**
-The next few results describe several properties of the [equivocator_descriptors_update] operation.
-*)
+(** The next few results describe several properties of the [equivocator_descriptors_update] operation. *)
 Lemma equivocator_descriptors_update_neq
   (s : equivocator_descriptors)
   (i : index)
@@ -395,8 +393,8 @@ Proof.
 Qed.
 
 (**
-A generalized version of [equivocator_descriptors_update_eq] parametric on the
-hypothesis equating the indices.
+  A generalized version of [equivocator_descriptors_update_eq] parametric on the
+  hypothesis equating the indices.
 *)
 Lemma equivocator_descriptors_update_eq_rew
   (s : equivocator_descriptors)

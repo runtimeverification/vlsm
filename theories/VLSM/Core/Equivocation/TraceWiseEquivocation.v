@@ -8,12 +8,12 @@ From VLSM.Lib Require Import Preamble StdppExtras.
 
 (** * VLSM Trace-wise Equivocation
 
-In this section we define a more precise notion of message equivocation,
-based on analyzing (all) traces leading to a state. Although in some cases
-we might be able to actually compute this, its purpose is more to identify
-the ideal notion of detectable equivocation which would be used to
-establish the connection between limited (observed) message equivocation
-and limited state equivocation.
+  In this section we define a more precise notion of message equivocation,
+  based on analyzing (all) traces leading to a state. Although in some cases
+  we might be able to actually compute this, its purpose is more to identify
+  the ideal notion of detectable equivocation which would be used to
+  establish the connection between limited (observed) message equivocation
+  and limited state equivocation.
 *)
 
 Section tracewise_equivocation.
@@ -30,8 +30,9 @@ Context
   (PreFree := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
   .
 
-(** An item is equivocating in a trace containing it if it receives
-a message which has not been previously sent in that trace.
+(**
+  An item is equivocating in a trace containing it if it receives
+  a message which has not been previously sent in that trace.
 *)
 Definition item_equivocating_in_trace
   (item : composite_transition_item IM)
@@ -48,8 +49,9 @@ Proof.
   typeclasses eauto.
 Qed.
 
-(** Given a trace, we can precisely identify the validators equivocating
-in that trace based on identifying every [item_equivocating_in_trace].
+(**
+  Given a trace, we can precisely identify the validators equivocating
+  in that trace based on identifying every [item_equivocating_in_trace].
 *)
 Definition equivocating_senders_in_trace
   (tr : list (composite_transition_item IM))
@@ -127,13 +129,14 @@ Proof.
   revert Heqv. apply equivocation_in_trace_prefix.
 Qed.
 
-(** An alternative definition for detecting equivocation in a certain state,
-    which checks that for _every_ valid trace (using any messages) reaching
-    that state there exists an equivocation involving the given validator.
+(**
+  An alternative definition for detecting equivocation in a certain state,
+  which checks that for _every_ valid trace (using any messages) reaching
+  that state there exists an equivocation involving the given validator.
 
-    Notably, this definition is not generally equivalent to [is_equivocating_statewise],
-    which does not verify the order in which receiving and sending occurred.
-**)
+  Notably, this definition is not generally equivalent to [is_equivocating_statewise],
+  which does not verify the order in which receiving and sending occurred.
+*)
 Definition is_equivocating_tracewise
   (s : composite_state IM)
   (v : validator)
@@ -149,9 +152,10 @@ Definition is_equivocating_tracewise
   /\ input elem = Some m
   /\ ~has_been_sent (IM j) (lprefix j) m.
 
-(** A possibly friendlier version using a previously defined primitive.
-    Note that this definition does not require the [HasBeenSentCapability].
-**)
+(**
+  A possibly friendlier version using a previously defined primitive.
+  Note that this definition does not require the [HasBeenSentCapability].
+*)
 Definition is_equivocating_tracewise_no_has_been_sent
   (s : composite_state IM)
   (v : validator)
@@ -176,9 +180,10 @@ Proof.
   ; apply elem_of_equivocating_senders_in_trace.
 Qed.
 
-(** If any message can only be emitted by node corresponding to its sender
-([sender_safety_alt_prop]), then [is_equivocating_tracewise] is equivalent
-to [is_equivocating_tracewise_no_has_been_sent].
+(**
+  If any message can only be emitted by node corresponding to its sender
+  ([sender_safety_alt_prop]), then [is_equivocating_tracewise] is equivalent
+  to [is_equivocating_tracewise_no_has_been_sent].
 *)
 Lemma is_equivocating_tracewise_no_has_been_sent_iff
   (Hsender_safety : sender_safety_alt_prop IM A sender)

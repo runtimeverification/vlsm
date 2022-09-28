@@ -7,25 +7,25 @@ From VLSM.Core Require Import Equivocation.WitnessedEquivocation.
 
 (** * VLSM Limited Message Equivocation
 
-In this section we define the notion of limited (message-based) equivocation.
+  In this section we define the notion of limited (message-based) equivocation.
 
-This notion is slightly harder to define than that of fixed-set equivocation,
-because, while for the latter we fix a set and let only the nodes belonging to
-that set to equivocate, in the case of limited equivocation, the set of nodes
-equivocating can change dynamically, each node being virtually allowed to
-equivocate as long as the weight of all nodes currently equivocating does
-not pass a certain threshold.
+  This notion is slightly harder to define than that of fixed-set equivocation,
+  because, while for the latter we fix a set and let only the nodes belonging to
+  that set to equivocate, in the case of limited equivocation, the set of nodes
+  equivocating can change dynamically, each node being virtually allowed to
+  equivocate as long as the weight of all nodes currently equivocating does
+  not pass a certain threshold.
 
-As we need to be able to measure the amount of equivocation in a given state
-to design a composition constraint preventing equivocation weight from passing
-the threshold, we need an appropriate measure of equivocation.
-We here choose [is_equivocating_tracewise] as this measure.
+  As we need to be able to measure the amount of equivocation in a given state
+  to design a composition constraint preventing equivocation weight from passing
+  the threshold, we need an appropriate measure of equivocation.
+  We here choose [is_equivocating_tracewise] as this measure.
 
-Moreover, to further limit the amount of equivocation allowed when producing
-a message, we assume a full-node-like  condition to be satisfied by all nodes.
-This  guarantees that whenever a message not-previously send is received in a
-state, the amount of equivocation would only grow with the weight of the
-sender of the message (if that wasn't already known as an equivocator).
+  Moreover, to further limit the amount of equivocation allowed when producing
+  a message, we assume a full-node-like  condition to be satisfied by all nodes.
+  This  guarantees that whenever a message not-previously send is received in a
+  state, the amount of equivocation would only grow with the weight of the
+  sender of the message (if that wasn't already known as an equivocator).
 *)
 
 Section sec_limited_message_equivocation.
@@ -166,10 +166,10 @@ Section fixed_limited_message_equivocation.
 
 (** ** Fixed Message Equivocation implies Limited Message Equivocation
 
-In this section we show that if the set of allowed equivocators for a fixed
-equivocation constraint is of weight smaller than the threshold accepted for
-limited message equivocation, then any valid trace for the fixed equivocation
-constraint is also a trace under the limited equivocation constraint.
+  In this section we show that if the set of allowed equivocators for a fixed
+  equivocation constraint is of weight smaller than the threshold accepted for
+  limited message equivocation, then any valid trace for the fixed equivocation
+  constraint is also a trace under the limited equivocation constraint.
 *)
 
 Context
@@ -264,10 +264,10 @@ Section has_limited_equivocation.
 
 (** ** Limited Equivocation derived from Fixed Equivocation
 
-We say that a trace has the [fixed_limited_equivocation_prop]erty if it is
-valid for the composition using a [generalized_fixed_equivocation_constraint]
-induced by a subset of indices whose weight is less than the allowed
-[ReachableThreshold].
+  We say that a trace has the [fixed_limited_equivocation_prop]erty if it is
+  valid for the composition using a [generalized_fixed_equivocation_constraint]
+  induced by a subset of indices whose weight is less than the allowed
+  [ReachableThreshold].
 *)
 
 Context
@@ -295,8 +295,9 @@ Context
   (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Ci := Ci) IM sender)
   .
 
-(** Traces with the [fixed_limited_equivocation_prop]erty are valid for the
-composition using a [limited_equivocation_constraint].
+(**
+  Traces with the [fixed_limited_equivocation_prop]erty are valid for the
+  composition using a [limited_equivocation_constraint].
 *)
 Lemma traces_exhibiting_limited_equivocation_are_valid
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
@@ -307,9 +308,10 @@ Proof.
   by apply Fixed_incl_Limited.
 Qed.
 
-(** Traces having the [strong_trace_witnessing_equivocation_prop]erty, which
-are valid for the free composition and whose final state is [not_heavy] have
-the [fixed_limited_equivocation_prop]erty.
+(**
+  Traces having the [strong_trace_witnessing_equivocation_prop]erty, which
+  are valid for the free composition and whose final state is [not_heavy] have
+  the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma traces_exhibiting_limited_equivocation_are_valid_rev
   (Hke : WitnessedEquivocationCapability IM id sender (Cm := Ci))
@@ -338,9 +340,10 @@ Proof.
       intro i. rewrite elem_of_remove_dups. itauto.
 Qed.
 
-(** Traces with the [strong_trace_witnessing_equivocation_prop]erty, which are
-valid for the composition using a [limited_equivocation_constraint]
-have the [fixed_limited_equivocation_prop]erty.
+(**
+  Traces with the [strong_trace_witnessing_equivocation_prop]erty, which are
+  valid for the composition using a [limited_equivocation_constraint]
+  have the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
   (Hke : WitnessedEquivocationCapability IM id sender (Cm := Ci))
@@ -362,8 +365,10 @@ Proof.
       finite_valid_trace_last_pstate with (X := Limited), Htr.
 Qed.
 
-(** Any state which is valid for limited equivocation can be produced by
-a trace having the [fixed_limited_equivocation_prop]erty. *)
+(**
+  Any state which is valid for limited equivocation can be produced by
+  a trace having the [fixed_limited_equivocation_prop]erty.
+*)
 
 Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
   (Hke : WitnessedEquivocationCapability IM id sender (Cm := Ci))

@@ -20,8 +20,10 @@ Proof.
   by destruct l; [left | right].
 Qed.
 
-(** A list is either null or it can be decomposed into an initial prefix
-and a last element *)
+(**
+  A list is either null or it can be decomposed into an initial prefix
+  and a last element
+*)
 Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a::nil)}} + {l = nil} .
 Proof.
@@ -30,8 +32,9 @@ Proof.
   - by left; apply exists_last in n.
 Qed.
 
-(** destructs a list in @l@ in either null or a prefix @l'@ and
-a last element @a@ with an equation @Heq@ stating that @l = l' ++ [a]@
+(**
+  destructs a list in @l@ in either null or a prefix @l'@ and
+  a last element @a@ with an equation @Heq@ stating that @l = l' ++ [a]@
 *)
 Ltac destruct_list_last l l' a Heq :=
  destruct (has_last_or_null l) as [[l' [a Heq]] | Heq]; rewrite Heq in *; swap 1 2.
@@ -249,7 +252,7 @@ Proof.
   by intros; rewrite last_is_last.
 Qed.
 
-(** Polymorphic list library **)
+(** Polymorphic list library *)
 
 Fixpoint is_member {W} `{StrictlyComparable W} (w : W) (l : list W) : bool :=
   match l with
@@ -657,8 +660,8 @@ Proof.
 Defined.
 
 (**
-Produces the sublist of elements of a list filtered by a decidable predicate
-each of them paired with the proof that it satisfies the predicate.
+  Produces the sublist of elements of a list filtered by a decidable predicate
+  each of them paired with the proof that it satisfies the predicate.
 *)
 Definition filter_annotate
   {A : Type}
@@ -702,8 +705,9 @@ Proof.
   by simpl; rewrite! filter_annotate_unroll, IHl1; case_decide.
 Qed.
 
-(** Filters a list through a predicate, then transforms each element using a
-function which depends on the fact that the predicate holds.
+(**
+  Filters a list through a predicate, then transforms each element using a
+  function which depends on the fact that the predicate holds.
 *)
 Definition list_filter_map
   {A B : Type}
@@ -992,8 +996,7 @@ Proof.
   destruct i; firstorder. apply H. lia.
 Qed.
 
-(** [map_option] can be expressed as a [list_filter_map].
-*)
+(** [map_option] can be expressed as a [list_filter_map]. *)
 Lemma map_option_as_filter
   {A B : Type}
   (f : A -> option B)
@@ -1493,11 +1496,11 @@ Section suffix_quantifiers.
 
 (** ** Quantifiers for all suffixes
 
-In this section we define list quantifiers similar to [Streams.ForAll] and
-[Streams.Exists] and prove several properties about them.
+  In this section we define list quantifiers similar to [Streams.ForAll] and
+  [Streams.Exists] and prove several properties about them.
 
-Among the definitions, the more useful are [ForAllSuffix2] and [ExistsSuffix2]
-as they allow us to quantify over relations between consecutive elements.
+  Among the definitions, the more useful are [ForAllSuffix2] and [ExistsSuffix2]
+  as they allow us to quantify over relations between consecutive elements.
 *)
 
 Context
@@ -1744,8 +1747,10 @@ Proof.
   by exists (rev l).
 Qed.
 
-(** If <<n1>> is less than (or equal to) <<n2>>, then <<lastn n1 l>> is shorter than
-    <<lastn n2 l>> and therefore is its suffix. *)
+(**
+  If <<n1>> is less than (or equal to) <<n2>>, then <<lastn n1 l>> is shorter than
+  <<lastn n2 l>> and therefore is its suffix. 
+*)
 Lemma suffix_lastn :
   forall {A : Type} (l : list A) (n1 n2 : nat),
     n1 <= n2 -> suffix (lastn n1 l) (lastn n2 l).

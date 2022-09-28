@@ -11,11 +11,11 @@ Section equivocator_vlsm_message_properties.
 
 (** ** Lifting properties about sent messages to the equivocators
 
-In this section we first prove some general properties about sent messages
-being preserved and reflected by the [equivocator_vlsm], and then we show
-that the [HasBeenSentCapability] and the [ComputableSentMessages]
-can be lifted (each separately) from the original machine to the
-[equivocator_vlsm].
+  In this section we first prove some general properties about sent messages
+  being preserved and reflected by the [equivocator_vlsm], and then we show
+  that the [HasBeenSentCapability] and the [ComputableSentMessages]
+  can be lifted (each separately) from the original machine to the
+  [equivocator_vlsm].
 *)
 
 Context
@@ -26,8 +26,8 @@ Context
   .
 
 (**
-If a projection of an [equivocator_vlsm] trace [output]s a message, then
-the original trace must do so too.
+  If a projection of an [equivocator_vlsm] trace [output]s a message, then
+  the original trace must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting
   (tr: list (vtransition_item equivocator_vlsm))
@@ -89,9 +89,9 @@ Proof.
 Qed.
 
 (**
-For any [transition_item] in a valid trace segment of an
-[equivocator_vlsm] there exists a projection of that trace containing
-the projection of the item.
+  For any [transition_item] in a valid trace segment of an
+  [equivocator_vlsm] there exists a projection of that trace containing
+  the projection of the item.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item
   (bs bf : vstate equivocator_vlsm)
@@ -174,8 +174,8 @@ Proof.
 Qed.
 
 (**
-If an [equivocator_vlsm]'s valid trace segment [output]s a message, then
-one of its projections must do so too.
+  If an [equivocator_vlsm]'s valid trace segment [output]s a message, then
+  one of its projections must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting_inv
   (is: vstate equivocator_vlsm)
@@ -243,8 +243,9 @@ Definition equivocator_selector
       |}
   end.
 
-(** We define [equivocator_oracle] for the [equivocator_vlsm] as being the oracle for any
-of the internal machines.
+(**
+  We define [equivocator_oracle] for the [equivocator_vlsm] as being the oracle for any
+  of the internal machines.
 *)
 Definition equivocator_oracle
   (s : vstate equivocator_vlsm)
@@ -418,8 +419,9 @@ Context
   `{HasBeenReceivedCapability message X}
   .
 
-(** We define [has_been_received] for the [equivocator_vlsm] as being received by any
-of the internal machines.
+(**
+  We define [has_been_received] for the [equivocator_vlsm] as being received by any
+  of the internal machines.
 *)
 Definition equivocator_has_been_received  := equivocator_oracle (has_been_received X).
 
@@ -440,8 +442,7 @@ Proof.
     itauto congruence.
 Qed.
 
-(** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm].
-*)
+(** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm]. *)
 #[export] Instance equivocator_HasBeenReceivedCapability
   : HasBeenReceivedCapability equivocator_vlsm
   := HasBeenReceivedCapability_from_stepwise (vlsm := equivocator_vlsm)
@@ -458,8 +459,9 @@ Context
   `{HasBeenSentCapability message X}
   .
 
-(** We define [has_been_sent] for the [equivocator_vlsm] as being sent by any
-of the internal machines.
+(**
+  We define [has_been_sent] for the [equivocator_vlsm] as being sent by any
+  of the internal machines.
 *)
 Definition equivocator_has_been_sent  := equivocator_oracle (has_been_sent X).
 
@@ -480,8 +482,7 @@ Proof.
     itauto congruence.
 Qed.
 
-(** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm].
-*)
+(** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm]. *)
 #[export] Instance equivocator_HasBeenSentCapability
   : HasBeenSentCapability equivocator_vlsm
   := HasBeenSentCapability_from_stepwise (vlsm := equivocator_vlsm)
@@ -499,8 +500,9 @@ Context
   `(EqDecision message)
   .
 
-(** We define the [sent_messages_set] for the [equivocator_vlsm] as the
-union of all [sent_messages_set] for its internal machines.
+(**
+  We define the [sent_messages_set] for the [equivocator_vlsm] as the
+  union of all [sent_messages_set] for its internal machines.
 *)
 Definition equivocator_sent_messages_set
   (s : vstate equivocator_vlsm)

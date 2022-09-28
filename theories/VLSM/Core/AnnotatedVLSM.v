@@ -5,10 +5,10 @@ From VLSM.Core Require Import VLSM VLSMProjections Validator Composition.
 
 (** * State-annotated VLSMs
 
-This module describes the VLSM obtained by augmenting the states of an existing
-VLSM with annotations and providing additional validity constraints taking into
-account the annotations, and a function for updating the annotations following a
-transition.
+  This module describes the VLSM obtained by augmenting the states of an existing
+  VLSM with annotations and providing additional validity constraints taking into
+  account the annotations, and a function for updating the annotations following a
+  transition.
 *)
 
 Section sec_annotated_vlsm.

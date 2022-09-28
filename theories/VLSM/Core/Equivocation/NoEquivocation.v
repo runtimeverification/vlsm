@@ -11,12 +11,13 @@ Context
   (vlsm : VLSM message)
   .
 
-(** An equivocating transition can be prevented by checking that the message
-    to be received [has_been_sent] previously in the state about to receive it.
+(**
+  An equivocating transition can be prevented by checking that the message
+  to be received [has_been_sent] previously in the state about to receive it.
 
-    However, since we might allow certain other messages, such as initial
-    messages, we give a slightly more general definition, that of
-    [no_equivocation_except_from] those specified by a given predicate.
+  However, since we might allow certain other messages, such as initial
+  messages, we give a slightly more general definition, that of
+  [no_equivocation_except_from] those specified by a given predicate.
 *)
 
 Definition no_equivocations_except_from
@@ -28,8 +29,9 @@ Definition no_equivocations_except_from
   let (s, om) := som in
   from_option (fun m => has_been_sent vlsm s m \/ exception m) True om.
 
-(** The [no_equivocations] constraint does not allow any exceptions
-(messages being received must have been previously sent).
+(**
+  The [no_equivocations] constraint does not allow any exceptions
+  (messages being received must have been previously sent).
 *)
 Definition no_equivocations
   `{HasBeenSentCapability message vlsm}
@@ -43,10 +45,10 @@ End no_equivocations.
 
 (** ** No-Equivocation Invariants
 
-In this section we show that under [no_equivocations] assumptions:
+  In this section we show that under [no_equivocations] assumptions:
 
-- for any valid state all messages [directly_observed_were_sent].
-- the [pre_loaded_with_all_messages_vlsm] is equal to the [no_equivocations] VLSM.
+  - for any valid state all messages [directly_observed_were_sent].
+  - the [pre_loaded_with_all_messages_vlsm] is equal to the [no_equivocations] VLSM.
 
 *)
 Section NoEquivocationInvariants.
@@ -60,10 +62,10 @@ Context
   .
 
 (**
-A VLSM that enforces the [no_equivocations] constraint and also supports
-[has_been_directly_observed] obeys the [directly_observed_were_sent] invariant which states that
-any message that [has_been_directly_observed] in a state, [has_been_sent] in
-the same state, too.
+  A VLSM that enforces the [no_equivocations] constraint and also supports
+  [has_been_directly_observed] obeys the [directly_observed_were_sent] invariant which states that
+  any message that [has_been_directly_observed] in a state, [has_been_sent] in
+  the same state, too.
 *)
 
 Definition directly_observed_were_sent (s: state) : Prop :=
@@ -110,10 +112,10 @@ Proof.
 Qed.
 
 (**
-If the [valid]ity function satisfies the [no_equivocations] constraint then
-it doesn't matter if we preload the composition with some initial messages,
-since all messages must be sent before being received, which means that
-one cannot use the new messages to create additional traces.
+  If the [valid]ity function satisfies the [no_equivocations] constraint then
+  it doesn't matter if we preload the composition with some initial messages,
+  since all messages must be sent before being received, which means that
+  one cannot use the new messages to create additional traces.
 *)
 Lemma no_equivocations_preloaded_traces
   (is : state)
@@ -177,9 +179,10 @@ Definition composite_no_equivocations_except_from
   :=
   sent_except_from exception som.1 som.2.
 
-(** The [composite_no_equivocations] constraint requires that
-messages being received must have been previously sent by a
-machine in the composition.
+(**
+  The [composite_no_equivocations] constraint requires that
+  messages being received must have been previously sent by a
+  machine in the composition.
 *)
 Definition composite_no_equivocations
   (l : composite_label IM)
@@ -190,11 +193,11 @@ Definition composite_no_equivocations
 
 (** ** Composite No-Equivocation Invariants
 
-A VLSM composition whose constraint subsumes the [no_equivocations] constraint
-and also supports [has_been_received] (or [has_been_directly_observed]) obeys an
-invariant that any message that tests as [has_been_received]
-(resp. [has_been_directly_observed]) in a state also tests as [has_been_sent]
-in the same state.
+  A VLSM composition whose constraint subsumes the [no_equivocations] constraint
+  and also supports [has_been_received] (or [has_been_directly_observed]) obeys an
+  invariant that any message that tests as [has_been_received]
+  (resp. [has_been_directly_observed]) in a state also tests as [has_been_sent]
+  in the same state.
  *)
 Section CompositeNoEquivocationInvariants.
 
@@ -225,10 +228,10 @@ Section seeded_composite_vlsm_no_equivocation.
 
 (** ** Pre-loading a VLSM composition with no equivocations constraint
 
-When adding initial messages to a VLSM composition with a no equivocation
-constraint, we cannot simply use the [pre_loaded_vlsm] construct
-because the no-equivocation constraint must also be altered to reflect that
-the newly added initial messages are safe to be received at all times.
+  When adding initial messages to a VLSM composition with a no equivocation
+  constraint, we cannot simply use the [pre_loaded_vlsm] construct
+  because the no-equivocation constraint must also be altered to reflect that
+  the newly added initial messages are safe to be received at all times.
 *)
 
 Context
