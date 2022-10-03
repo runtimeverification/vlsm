@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 
 (** * Real number utility lemmas *)
 
-(** This lemma is needed in fault_weight_state_backwards **)
+(** This lemma is needed in fault_weight_state_backwards *)
 Lemma Rplusminus_assoc : forall r1 r2 r3,
   (r1 + r2 - r3)%R = (r1 + (r2 - r3))%R.
 Proof.
@@ -11,7 +11,7 @@ Proof.
   apply Rplus_assoc.
 Qed.
 
-(** This lemma is needed in fault_weight_state_sorted_subset **)
+(** This lemma is needed in fault_weight_state_sorted_subset *)
 Lemma Rplusminus_assoc_r : forall r1 r2 r3,
   (r1 - r2 + r3)%R = (r1 + (- r2 + r3))%R.
 Proof.
@@ -19,7 +19,7 @@ Proof.
   apply Rplus_assoc.
 Qed.
 
-(** This lemma is needed in fault_weight_state_sorted_subset **)
+(** This lemma is needed in fault_weight_state_sorted_subset *)
 Lemma Rplus_opp_l : forall r, (Ropp r + r)%R = 0%R.
 Proof.
   intros.
@@ -27,7 +27,7 @@ Proof.
   apply Rplus_opp_r.
 Qed.
 
-(** This lemma is needed in fault_weight_state_sorted_subset **)
+(** This lemma is needed in fault_weight_state_sorted_subset *)
 Lemma Rplus_ge_reg_neg_r : forall r1 r2 r3,
   (r2 <= 0)%R -> (r3 <= r1 + r2)%R -> (r3 <= r1)%R.
 Proof.
@@ -38,7 +38,7 @@ Proof.
   apply (Rplus_ge_reg_neg_r r1 r2 r3 H H0).
 Qed.
 
-(** This lemma is needed in fault_weight_state_sorted_subset **)
+(** This lemma is needed in fault_weight_state_sorted_subset *)
 Lemma Rminus_lt_r : forall r1 r2,
   (0 <= r2)%R -> (r1 - r2 <= r1)%R.
 Proof.

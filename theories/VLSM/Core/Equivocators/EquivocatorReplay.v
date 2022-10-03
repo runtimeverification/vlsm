@@ -4,11 +4,11 @@ From VLSM.Core Require Import Equivocation EquivocationProjections Equivocators.
 
 (** * Equivocator State Append Determines a Projection
 
-In this module, we show that we can "append" two equivocator traces by
-simulating the second at the end of the first.
+  In this module, we show that we can "append" two equivocator traces by
+  simulating the second at the end of the first.
 
-The transformation on the states of the second trace is obtained by
-[equivocator_state_append]ing each state to the last state of the first trace.
+  The transformation on the states of the second trace is obtained by
+  [equivocator_state_append]ing each state to the last state of the first trace.
 *)
 
 Section equivocator_state_append_projection.

@@ -7,12 +7,12 @@ Section projections.
 
 (** * Composite VLSM induced projections
 
-In this section we define a VLSM representing the induced projection of a
-composite VLSM to a single node ([composite_vlsm_induced_projection]), and we
-study the relation between their traces.
+  In this section we define a VLSM representing the induced projection of a
+  composite VLSM to a single node ([composite_vlsm_induced_projection]), and we
+  study the relation between their traces.
 
-Let us fix an indexed set of VLSMs <<IM>> and their composition <<X>>
-constrained using the <<constraint>> predicate.
+  Let us fix an indexed set of VLSMs <<IM>> and their composition <<X>>
+  constrained using the <<constraint>> predicate.
 *)
 
 Context
@@ -285,7 +285,7 @@ Section binary_free_composition_projections.
 
 (** ** Projections of Free composition of two VLSMs
 
-This projections are used in defining the [byzantine_trace_prop]erties.
+  This projections are used in defining the [byzantine_trace_prop]erties.
 
 *)
 Context
@@ -313,15 +313,15 @@ Context
 
 (** ** Projection traces are Byzantine
 
-Let us fix an index <<j>> and let <<Xj>> be the projection of <<X>> on
-component <<j>>.
+  Let us fix an index <<j>> and let <<Xj>> be the projection of <<X>> on
+  component <<j>>.
 
-In this section we establish some basic properties for projections, building up
-to Lemma [proj_pre_loaded_with_all_messages_incl], which guarantees that all
-[valid_trace]s of <<Xj>> are also [valid_trace]s for the
-[pre_loaded_with_all_messages_vlsm] associated to the component <<IM j>>.
-In particular this ensures that the byzantine traces of <<IM j>> include all
-[valid_trace]s of <<Xj>> (see Lemma [pre_loaded_with_all_messages_alt_eq]).
+  In this section we establish some basic properties for projections, building up
+  to Lemma [proj_pre_loaded_with_all_messages_incl], which guarantees that all
+  [valid_trace]s of <<Xj>> are also [valid_trace]s for the
+  [pre_loaded_with_all_messages_vlsm] associated to the component <<IM j>>.
+  In particular this ensures that the byzantine traces of <<IM j>> include all
+  [valid_trace]s of <<Xj>> (see Lemma [pre_loaded_with_all_messages_alt_eq]).
 
 *)
 
@@ -405,8 +405,8 @@ Proof.
 Qed.
 
 (**
-Interestingly enough, <<Xj>> cannot produce any additional messages than
-the initial ones available from <<X>>.
+  Interestingly enough, <<Xj>> cannot produce any additional messages than
+  the initial ones available from <<X>>.
 *)
 Lemma valid_message_projection_rev :
   forall m, can_emit Xj m -> can_emit X m.
@@ -417,9 +417,9 @@ Proof.
 Qed.
 
 (**
-As a stepping stone towards proving trace inclusion between <<Xj>> and
-the [pre_loaded_with_all_messages_vlsm] associated to <<IM j>>, we prove that the
-[valid_state_message_prop]erty is transferred.
+  As a stepping stone towards proving trace inclusion between <<Xj>> and
+  the [pre_loaded_with_all_messages_vlsm] associated to <<IM j>>, we prove that the
+  [valid_state_message_prop]erty is transferred.
 *)
 Lemma proj_pre_loaded_with_all_messages_valid_state_message_preservation
   (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
@@ -435,9 +435,7 @@ Proof.
     simpl. eapply (projection_valid_implies_valid IM). exact Hv.
 Qed.
 
-(**
-We can now finally prove the main result for this section:
-*)
+(** We can now finally prove the main result for this section: *)
 Lemma proj_pre_loaded_with_all_messages_incl
   (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
   : VLSM_incl Xj PreLoaded.
@@ -459,9 +457,9 @@ Proof.
 Qed.
 
 (**
-We say that the component <<j>> of X is a validator for received messages if
-if [valid]ity in the component (for reachable states) implies validity in the
-[composite_vlsm_induced_projection_validator].
+  We say that the component <<j>> of X is a validator for received messages if
+  if [valid]ity in the component (for reachable states) implies validity in the
+  [composite_vlsm_induced_projection_validator].
 *)
 Definition component_projection_validator_prop :=
   forall (lj : vlabel (IM j)) (sj : vstate (IM j)) (omi : option message),
@@ -484,9 +482,10 @@ Qed.
 Definition component_message_validator_prop : Prop :=
   @message_validator_prop _ X (IM j).
 
-(** Assuming the [component_projection_validator_prop]erty, the component
-[pre_loaded_with_all_messages_vlsm] is [VLSM_eq]ual (trace-equivalent) with
-its corresponding [projection_induced_validator].
+(**
+  Assuming the [component_projection_validator_prop]erty, the component
+  [pre_loaded_with_all_messages_vlsm] is [VLSM_eq]ual (trace-equivalent) with
+  its corresponding [projection_induced_validator].
 *)
 Lemma pre_loaded_with_all_messages_validator_component_proj_eq
   (Hvalidator : component_projection_validator_prop)
@@ -531,9 +530,9 @@ Context
   .
 
 (**
-This condition states that [input_valid]ity in a projection <<Xj>>
-can be lifted to any [valid_state] in <<X>> which projects to the
-corresponding <<Xj>> state.
+  This condition states that [input_valid]ity in a projection <<Xj>>
+  can be lifted to any [valid_state] in <<X>> which projects to the
+  corresponding <<Xj>> state.
 *)
 
 Definition projection_friendliness_sufficient_condition
@@ -574,10 +573,10 @@ Proof.
 Qed.
 
 (**
-The result below shows that the [projection_friendliness_sufficient_condition]
-might be too strong, in the sense that it allows any trace from the
-projection to be lifted directly to <<X>>
-(all other machines stay in their initial state).
+  The result below shows that the [projection_friendliness_sufficient_condition]
+  might be too strong, in the sense that it allows any trace from the
+  projection to be lifted directly to <<X>>
+  (all other machines stay in their initial state).
 *)
 Lemma projection_friendliness_lift_to_composite_vlsm_full_projection
   (Hfr : projection_friendliness_sufficient_condition)

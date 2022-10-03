@@ -465,8 +465,9 @@ Proof.
     by right; apply set_remove_iff.
 Qed.
 
-(** An improved version of the [set_diff_nodup] Lemma not requiring [NoDup]
-for the second argument.
+(**
+  An improved version of the [set_diff_nodup] Lemma not requiring [NoDup]
+  for the second argument.
 *)
 (* TODO(palmskog): consider submitting a PR to Coq's stdlib. *)
 Lemma set_diff_nodup' `{EqDecision A} (l l' : list A)
@@ -513,8 +514,10 @@ Proof.
   - by cbn; apply H; left.
 Qed.
 
-(** For each element X of l1, exactly one occurrence of X is removed
-   from l2. If no such occurrence exists, nothing happens. *)
+(**
+  For each element X of l1, exactly one occurrence of X is removed
+  from l2. If no such occurrence exists, nothing happens. 
+*)
 
 Definition set_remove_list `{EqDecision A} (l1 l2 : list A) : list A :=
   fold_right set_remove l2 l1.
@@ -559,21 +562,22 @@ Proof.
       intros [Ha _] [_ [[= Hax _] _]]. congruence.
 Qed.
 
-(** An alternative to [set_diff].
-    Unlike [set_diff], the result may contain
-    duplicates if the first argument list <<l>> does.
+(**
+  An alternative to [set_diff].
+  Unlike [set_diff], the result may contain
+  duplicates if the first argument list <<l>> does.
 
-    This definition exists to make proving
-    [len_set_diff_decrease] more convenient,
-    because <<length>> of <<filter>> can be simplified
-    step by step while doing induction over <<l>>.
+  This definition exists to make proving
+  [len_set_diff_decrease] more convenient,
+  because <<length>> of <<filter>> can be simplified
+  step by step while doing induction over <<l>>.
  *)
 Definition set_diff_filter `{EqDecision A} (l r : list A) :=
   filter (.∉ r) l.
 
 (**
-   The characteristic membership property, parallel to
-   [set_diff_iff].
+  The characteristic membership property, parallel to
+  [set_diff_iff].
  *)
 Lemma set_diff_filter_iff `{EqDecision A} (a:A) l r:
   a ∈ (set_diff_filter l r) <-> (a ∈ l /\ ~a ∈ r).
@@ -598,9 +602,9 @@ Proof.
 Qed.
 
 (**
-   Prove that subtracting a superset cannot produce
-   a smaller result.
-   This lemma is used to prove [len_set_diff_decrease].
+  Prove that subtracting a superset cannot produce
+  a smaller result.
+  This lemma is used to prove [len_set_diff_decrease].
  *)
 Lemma len_set_diff_incl_le `{EqDecision A} (l a b: list A)
       (H_subseteq: forall x, x ∈ b -> x ∈ a):
@@ -619,9 +623,9 @@ Proof.
 Qed.
 
 (**
-   Prove that strictly increasing the set to be subtracted,
-   by adding an element actually found in <<l>> will decrease
-   the size of the result.
+  Prove that strictly increasing the set to be subtracted,
+  by adding an element actually found in <<l>> will decrease
+  the size of the result.
  *)
 Lemma len_set_diff_decrease `{EqDecision A} (new:A) (l a b: list A)
       (H_subseteq: forall x, x ∈ b -> x ∈ a)

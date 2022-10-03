@@ -6,14 +6,14 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition.
 
 (** * VLSM Equivocation
 
-An [equivocator_vlsm] for a given [VLSM] <<X>> is a VLSM which starts as a
-regular machine X, and then, at any moment:
-- can spawn a new machine in a (potentially) different initial state.
-- can perform [valid] [transition]s on any of its internal machines
-- can fork any of its internal machines by duplicating its state and then using
-  the given label and message to [transition] on the new fork.
+  An [equivocator_vlsm] for a given [VLSM] <<X>> is a VLSM which starts as a
+  regular machine X, and then, at any moment:
+  - can spawn a new machine in a (potentially) different initial state.
+  - can perform [valid] [transition]s on any of its internal machines
+  - can fork any of its internal machines by duplicating its state and then using
+    the given label and message to [transition] on the new fork.
 
-  Note that we only allow forking if a transition is then taken on the neq fork.
+    Note that we only allow forking if a transition is then taken on the neq fork.
 *)
 
 Section sec_equivocator_vlsm.
@@ -23,22 +23,24 @@ Context
   (X : VLSM message)
   .
 
-(** The state of such a machine will be abstracted using
+(**
+  The state of such a machine will be abstracted using
 
-1. A natural <<n>>, stating the number of copies of the original machine
-2. A state of <<X>> for each 1..n+1
+  1. A natural <<n>>, stating the number of copies of the original machine
+  2. A state of <<X>> for each 1..n+1
 *)
 #[local] Definition bounded_state_copies := {n : nat & Fin.t (S n) -> vstate X}.
 
-(** To preserve determinism we need to enhance the labels to indicate what copy
-of the machine will be used for a transition.
-To achieve this, we'll define the following label variants:
+(**
+  To preserve determinism we need to enhance the labels to indicate what copy
+  of the machine will be used for a transition.
+  To achieve this, we'll define the following label variants:
 
-- [Spawn] <<s>> to extend the state with a new machine initialized with <<s>>
-- [ContinueWith] <<n>> <<l>>, to transition on copy <<n>> using label <<l>>
-- [ForkWith] <<n>> <<l>>, to extend the state with a new machine initialized
-  with the current state of machine <<n>> and to transition on that copy
-  using label <<l>>.
+  - [Spawn] <<s>> to extend the state with a new machine initialized with <<s>>
+  - [ContinueWith] <<n>> <<l>>, to transition on copy <<n>> using label <<l>>
+  - [ForkWith] <<n>> <<l>>, to extend the state with a new machine initialized
+    with the current state of machine <<n>> and to transition on that copy
+    using label <<l>>.
 *)
 Inductive EquivocatorLabel : Type :=
   | Spawn : vstate X -> EquivocatorLabel
@@ -112,9 +114,9 @@ Proof.
 Qed.
 
 (**
-Attempts to obtain the state of the internal machine with index <<i>>
-from an [equivocator_state]. Fails when index <<i>> does not refer to a
-machine.
+  Attempts to obtain the state of the internal machine with index <<i>>
+  from an [equivocator_state]. Fails when index <<i>> does not refer to a
+  machine.
 *)
 Definition equivocator_state_project
   (bs : equivocator_state)
@@ -166,8 +168,9 @@ Qed.
   destruct_equivocator_state_project' es i si Hi Hpr
   ; clear Hpr.
 
-(** Extensionality result, reducing the proof of the equality of two
-[equivocator_state]s to the equality of their projections.
+(**
+  Extensionality result, reducing the proof of the equality of two
+  [equivocator_state]s to the equality of their projections.
 *)
 Lemma equivocator_state_project_ext es1 es2
   (Hext : forall i, equivocator_state_project es1 i = equivocator_state_project es2 i)
@@ -283,9 +286,7 @@ Qed.
   destruct_equivocator_state_update_project' es i s j Hj Hij Hpr
   ; clear Hpr.
 
-(**
-Extends an [equivocator_state] with a new state of the original machine.
-*)
+(** Extends an [equivocator_state] with a new state of the original machine. *)
 Program Definition equivocator_state_extend
   (bs : equivocator_state)
   (s : vstate X)
@@ -713,25 +714,27 @@ Context
   (equivocator_vlsm := equivocator_vlsm X)
   .
 
-(** When projecting an equivocator trace on one copy, we start from its final
-state and trace back transitions, making sure to follow [ForkWith] transitions
-back to their original copy and to stop on [Spawn] transitions.
+(**
+  When projecting an equivocator trace on one copy, we start from its final
+  state and trace back transitions, making sure to follow [ForkWith] transitions
+  back to their original copy and to stop on [Spawn] transitions.
 
-To do that we need to track the current copy, or whether we already reached
-the initial state.
+  To do that we need to track the current copy, or whether we already reached
+  the initial state.
 
-- [NewMachine] <<s>> indicates that a [Spawn] <<s>> was already reached for the
-  copy being tracked
-- [Existing] <<i>> indicates that we're currently tracking copy <<i>>
+  - [NewMachine] <<s>> indicates that a [Spawn] <<s>> was already reached for the
+    copy being tracked
+  - [Existing] <<i>> indicates that we're currently tracking copy <<i>>
 *)
 Inductive MachineDescriptor : Type
   :=
   | NewMachine : vstate X -> MachineDescriptor
   | Existing : nat -> MachineDescriptor.
 
-(** The [MachineDescriptor] associated to an [equivocator_label] tells us
-which copy should we continue with if the current transition is relevant
-for the copy we're tracking.
+(**
+  The [MachineDescriptor] associated to an [equivocator_label] tells us
+  which copy should we continue with if the current transition is relevant
+  for the copy we're tracking.
 *)
 Definition equivocator_label_descriptor (l : equivocator_label X) : MachineDescriptor :=
   match l with
@@ -764,12 +767,13 @@ Definition equivocator_state_descriptor_project
   | Existing j => default (equivocator_state_zero s) (equivocator_state_project s j)
   end.
 
- (** Whether a [MachineDescriptor] can be used to project an
- [equivocator_state] to a regular [state].
- The [NewMachine] descriptor signals that an equivocation has occurred
- starting a new machine, thus we require the argument to be initial.
- For an [Existing] descriptor, the index of the descriptor must
- refer to an existing machine in the current state.
+ (**
+   Whether a [MachineDescriptor] can be used to project an
+   [equivocator_state] to a regular [state].
+   The [NewMachine] descriptor signals that an equivocation has occurred
+   starting a new machine, thus we require the argument to be initial.
+   For an [Existing] descriptor, the index of the descriptor must
+   refer to an existing machine in the current state.
  *)
 Definition proper_descriptor
   (d : MachineDescriptor)
@@ -844,8 +848,9 @@ or a simpler way of defining the equivocator_transition
 equivocator_transition inside of so many proofs.
 *)
 
-(** If the state obtained after one transition has no equivocation, then
-the descriptor of the label of the transition must be Existing 0 false
+(**
+  If the state obtained after one transition has no equivocation, then
+  the descriptor of the label of the transition must be Existing 0 false
 *)
 Lemma equivocator_transition_no_equivocation_zero_descriptor
   (iom oom: option message)
@@ -866,8 +871,9 @@ Proof.
   - lia.
 Qed.
 
-(** If the state obtained after one transition has no equivocation, then
-the state prior to the transition has no equivocation as well.
+(**
+  If the state obtained after one transition has no equivocation, then
+  the state prior to the transition has no equivocation as well.
 *)
 Lemma equivocator_transition_reflects_singleton_state
   (iom oom: option message)
@@ -934,9 +940,9 @@ Proof.
 Qed.
 
 (**
-Valid messages in the [equivocator_vlsm] are also valid in the
-original machine.  All components of a valid state in the
-[equivocator_vlsm] are also valid in the original machine.
+  Valid messages in the [equivocator_vlsm] are also valid in the
+  original machine.  All components of a valid state in the
+  [equivocator_vlsm] are also valid in the original machine.
 *)
 Lemma preloaded_equivocator_state_projection_preserves_validity
   (seed : message -> Prop)
@@ -1045,9 +1051,9 @@ Proof.
 Qed.
 
 (**
-All components of valid states of the [pre_loaded_with_all_messages_vlsm] corresponding
-to an [equivocator_vlsm] are also valid for the [pre_loaded_with_all_messages_vlsm]
-corresponding to the original machine.
+  All components of valid states of the [pre_loaded_with_all_messages_vlsm] corresponding
+  to an [equivocator_vlsm] are also valid for the [pre_loaded_with_all_messages_vlsm]
+  corresponding to the original machine.
 *)
 Lemma preloaded_equivocator_state_project_valid_state
   (bs : vstate equivocator_vlsm)
@@ -1063,15 +1069,15 @@ Proof.
 Qed.
 
 (**
-Next couple of lemmas characterize the projections of a [equivocator_state]
-after taking a transition in terms of the preceding state.
+  Next couple of lemmas characterize the projections of a [equivocator_state]
+  after taking a transition in terms of the preceding state.
 
-These are simpler version of the results concerning the projection of
-states from the composition of equivocators over [equivocation_descriptors].
+  These are simpler version of the results concerning the projection of
+  states from the composition of equivocators over [equivocation_descriptors].
 
-These results are used for characterizing the projection of the [destination]
-of a [transition_item] in an equivocator trace in
-[equivocator_transition_item_project_proper_characterization].
+  These results are used for characterizing the projection of the [destination]
+  of a [transition_item] in an equivocator trace in
+  [equivocator_transition_item_project_proper_characterization].
 *)
 
 Lemma new_machine_label_equivocator_transition_size

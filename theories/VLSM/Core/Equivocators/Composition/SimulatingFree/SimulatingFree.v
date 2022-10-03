@@ -10,20 +10,20 @@ From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplay
 
 (** * Equivocators simulating regular nodes
 
-In this module we prove a general simulation result parameterized by
-constraints with good properties, then we instantiate the general result for
-the free composition of regular nodes.
+  In this module we prove a general simulation result parameterized by
+  constraints with good properties, then we instantiate the general result for
+  the free composition of regular nodes.
 *)
 
 Section generalized_constraints.
 
 (** ** Generic simulation
 
-In this section we prove a general simulation result, namely that a composition
-of equivocators constrained by a <<constraintE>> can simulate a composition of
-the corresponding regular nodes constrained by a <<constraintX>> if they are
-related through the [zero_descriptor_constraint_lifting_prop]erty and the
-[replayable_message_prop].
+  In this section we prove a general simulation result, namely that a composition
+  of equivocators constrained by a <<constraintE>> can simulate a composition of
+  the corresponding regular nodes constrained by a <<constraintX>> if they are
+  related through the [zero_descriptor_constraint_lifting_prop]erty and the
+  [replayable_message_prop].
 *)
 
 Context
@@ -48,9 +48,10 @@ Definition last_in_trace_except_from {T} exception (tr : list (@transition_item 
       \/ exception im
     end.
 
-(** A property requiring that <<constraintE>> holds for any transition using
-an original copy of an equivocator if the message is initial or [has_been_sent]
-for the given state.
+(**
+  A property requiring that <<constraintE>> holds for any transition using
+  an original copy of an equivocator if the message is initial or [has_been_sent]
+  for the given state.
 *)
 Definition zero_descriptor_constraint_lifting_prop : Prop :=
   forall
@@ -59,14 +60,15 @@ Definition zero_descriptor_constraint_lifting_prop : Prop :=
     eqv li,
     constraintE (existT eqv (ContinueWith 0 li)) (es, om).
 
-(** The [replayable_message_prop]erty plays an important role in designing a
-general, abstract, proof for trace simulation (Lemma
-[generalized_equivocators_finite_valid_trace_init_to_rev]), as it specifies
-that given a message <<m>> received in a regular node-composition state <<s>>
-for which the constraint <<constraintX>> is satisfied, then any trace of the
-equivocators-composition (constrained by <<constraintE>>>) producing <<m>>
-can be "replayed" on top of an equivocators-composition state corresponding
-to <<s>>, with no transitions being performed on the original copies.
+(**
+  The [replayable_message_prop]erty plays an important role in designing a
+  general, abstract, proof for trace simulation (Lemma
+  [generalized_equivocators_finite_valid_trace_init_to_rev]), as it specifies
+  that given a message <<m>> received in a regular node-composition state <<s>>
+  for which the constraint <<constraintX>> is satisfied, then any trace of the
+  equivocators-composition (constrained by <<constraintE>>>) producing <<m>>
+  can be "replayed" on top of an equivocators-composition state corresponding
+  to <<s>>, with no transitions being performed on the original copies.
 *)
 Definition replayable_message_prop : Prop :=
   forall si s tr
@@ -86,14 +88,15 @@ Definition replayable_message_prop : Prop :=
       equivocators_total_state_project IM lst_msg_tr = s /\
       sent_except_from (equivocator_IM IM) (vinitial_message_prop CE) lst_msg_tr iom.
 
-(** The main result of this section, showing that every trace of the
-composition of regular nodes can be obtained as a [zero_descriptor] projection
-of a valid trace for the composition of equivocators.
+(**
+  The main result of this section, showing that every trace of the
+  composition of regular nodes can be obtained as a [zero_descriptor] projection
+  of a valid trace for the composition of equivocators.
 
-The proof proceeds by replaying the transitions of the trace on the original
-copy of the machines, replaying traces corresponding to the messages between
-those transition through equivocation to guarantee the no-message-equivocation
-constraint.
+  The proof proceeds by replaying the transitions of the trace on the original
+  copy of the machines, replaying traces corresponding to the messages between
+  those transition through equivocation to guarantee the no-message-equivocation
+  constraint.
 *)
 Lemma generalized_equivocators_finite_valid_trace_init_to_rev
   (Hsubsumption : zero_descriptor_constraint_lifting_prop)
@@ -218,12 +221,12 @@ End generalized_constraints.
 
 (** ** VLSM Equivocators Simulating Free Composite
 
-In this section we show that the composition of equivocators with no-message
-equivocation can simulate the free composition of regular nodes.
+  In this section we show that the composition of equivocators with no-message
+  equivocation can simulate the free composition of regular nodes.
 
-To allow reusing this result in the proof for simulating fixed equivocation,
-we first prove an intermediate result, where both the composite VLSMs are
-pre-loaded with the same set of messages.
+  To allow reusing this result in the proof for simulating fixed equivocation,
+  we first prove an intermediate result, where both the composite VLSMs are
+  pre-loaded with the same set of messages.
 *)
 Section seeded_all_equivocating.
 
@@ -239,11 +242,12 @@ Context {message : Type}
   (SeededFree := pre_loaded_vlsm Free seed)
   .
 
-(** Since [replayed_trace_from] was defined for a subset of the equivocators, we
-here define a specialized version of it when the set of all equivocators is used.
+(**
+  Since [replayed_trace_from] was defined for a subset of the equivocators, we
+  here define a specialized version of it when the set of all equivocators is used.
 
-We then restate some of the lemmas concering [replayed_trace_from] for the new
-definition.
+  We then restate some of the lemmas concering [replayed_trace_from] for the new
+  definition.
 *)
 Definition all_equivocating_replayed_trace_from
   (full_replay_state : composite_state (equivocator_IM IM))
@@ -286,9 +290,10 @@ Proof.
   by exists (free_sub_free_index i).
 Qed.
 
-(** Specializing the [generalized_equivocators_finite_valid_trace_init_to_rev]
-result using the [free_constraint] for the composition of regular nodes
-and the no-message-equivocation constraint for the composition of equivocators.
+(**
+  Specializing the [generalized_equivocators_finite_valid_trace_init_to_rev]
+  result using the [free_constraint] for the composition of regular nodes
+  and the no-message-equivocation constraint for the composition of equivocators.
 *)
 Lemma seeded_equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -369,8 +374,9 @@ Context {message : Type}
   (XE : VLSM message := equivocators_no_equivocations_vlsm IM)
   .
 
-(** Further specializing [seeded_equivocators_finite_valid_trace_init_to_rev]
-to remove the pre-loading operation.
+(**
+  Further specializing [seeded_equivocators_finite_valid_trace_init_to_rev]
+  to remove the pre-loading operation.
 *)
 Lemma equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)

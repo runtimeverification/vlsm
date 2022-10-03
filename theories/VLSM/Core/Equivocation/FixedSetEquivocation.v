@@ -7,15 +7,15 @@ From VLSM.Core Require Import SubProjectionTraces Equivocation Equivocation.NoEq
 
 (** * Fixed Set Equivocation
 
-In this section we define fixed equivocation for the regular composition.
+  In this section we define fixed equivocation for the regular composition.
 
-Assuming that a only a fixed subset of the nodes (here called equivocating)
-are allowed to equivocate, inspired by the results leading to
-Lemma [equivocators_valid_trace_from_project] which links state equivocation
-to free composition, we can say that a message can be produced by a network
-of nodes allowed to equivocate, if it can be produced by their free composition
-[free_equivocating_vlsm_composition] preloaded with the current information
-(messages) available to it at the moment of production.
+  Assuming that a only a fixed subset of the nodes (here called equivocating)
+  are allowed to equivocate, inspired by the results leading to
+  Lemma [equivocators_valid_trace_from_project] which links state equivocation
+  to free composition, we can say that a message can be produced by a network
+  of nodes allowed to equivocate, if it can be produced by their free composition
+  [free_equivocating_vlsm_composition] preloaded with the current information
+  (messages) available to it at the moment of production.
 *)
 
 Section fixed_equivocation_without_fullnode.
@@ -34,33 +34,33 @@ Context
   .
 
 (**
-[free_equivocating_vlsm_composition] is the free composition of the subset of
-nodes which are allowed to equivocate.
+  [free_equivocating_vlsm_composition] is the free composition of the subset of
+  nodes which are allowed to equivocate.
 *)
 Definition free_equivocating_vlsm_composition
   : VLSM message
   := @free_composite_vlsm message equivocating_index _ equivocating_IM.
 
 (**
-[pre_loaded_free_equivocating_vlsm_composition] preloads the free composition
-of equivocating nodes all with the messages given by the <<messageSet>>.
+  [pre_loaded_free_equivocating_vlsm_composition] preloads the free composition
+  of equivocating nodes all with the messages given by the <<messageSet>>.
 *)
 Definition pre_loaded_free_equivocating_vlsm_composition
   (messageSet : message -> Prop)
   := pre_loaded_vlsm free_equivocating_vlsm_composition messageSet.
 
 (**
-Given a composite state <<s>>, we define the composition of equivocators
-preloaded with the messages directly observed in s.
+  Given a composite state <<s>>, we define the composition of equivocators
+  preloaded with the messages directly observed in s.
 *)
 Definition equivocators_composition_for_directly_observed s
   := pre_loaded_free_equivocating_vlsm_composition (composite_has_been_directly_observed IM s).
 
 (**
-The fixed equivocation constraint for the regular composition of nodes
-stipulates that a message can be received either if it [has_been_directly_observed]
-or it can be emitted by the free composition of equivocators pre-loaded with
-the messages directly observed in the current state.
+  The fixed equivocation constraint for the regular composition of nodes
+  stipulates that a message can be received either if it [has_been_directly_observed]
+  or it can be emitted by the free composition of equivocators pre-loaded with
+  the messages directly observed in the current state.
 *)
 Definition fixed_equivocation s m
   := composite_has_been_directly_observed IM s m \/
@@ -74,9 +74,10 @@ Definition fixed_equivocation_constraint
   let (s, om) := som in
   from_option (fixed_equivocation s) True om.
 
-(** Composition of regular VLSMs under the [fixed_equivocation_constraint]s.
+(**
+  Composition of regular VLSMs under the [fixed_equivocation_constraint]s.
 
-In the remainder of this module we will refer to this as the <<Fixed>> VLSM.
+  In the remainder of this module we will refer to this as the <<Fixed>> VLSM.
 *)
 Definition fixed_equivocation_vlsm_composition : VLSM message
   := composite_vlsm IM fixed_equivocation_constraint.
@@ -97,14 +98,14 @@ Qed.
 
 (** ** A (seemingly) stronger definition for fixed-set equivocation
 
-A seemingly stronger fixed equivocation constraint requires that a received
-message either [has_been_sent] by a non-equivocating node
-or it can be emitted by the free composition of equivocators pre-loaded with
-messages which have been sent by non-equivocating nodes.
+  A seemingly stronger fixed equivocation constraint requires that a received
+  message either [has_been_sent] by a non-equivocating node
+  or it can be emitted by the free composition of equivocators pre-loaded with
+  messages which have been sent by non-equivocating nodes.
 
-We say seemingly because, as shown by the [Fixed_eq_StrongFixed] result,
-the compositions constrained by the two [fixed_equivocation_constraint]s
-are trace-equivalent.
+  We say seemingly because, as shown by the [Fixed_eq_StrongFixed] result,
+  the compositions constrained by the two [fixed_equivocation_constraint]s
+  are trace-equivalent.
 *)
 Section strong_fixed_equivocation.
 
@@ -138,8 +139,8 @@ Proof.
 Qed.
 
 (**
-Given a composite state <<s>>, we define the composition of equivocators
-preloaded with the messages sent by non-equivocating nodes in s.
+  Given a composite state <<s>>, we define the composition of equivocators
+  preloaded with the messages sent by non-equivocating nodes in s.
 *)
 Definition equivocators_composition_for_sent s
   := pre_loaded_free_equivocating_vlsm_composition (sent_by_non_equivocating s).
@@ -159,9 +160,10 @@ Definition strong_fixed_equivocation_constraint
 Definition strong_fixed_equivocation_vlsm_composition : VLSM message
   := composite_vlsm IM strong_fixed_equivocation_constraint.
 
-(** The composition of equivocators pre-loaded with only the messages sent by
-non-equivocators is included in that pre-loaded with all the directly observed
-messages.
+(**
+  The composition of equivocators pre-loaded with only the messages sent by
+  non-equivocators is included in that pre-loaded with all the directly observed
+  messages.
 *)
 Lemma Equivocators_Strong_Fixed_incl base_s
   : VLSM_incl
@@ -172,8 +174,9 @@ Proof.
   apply sent_by_non_equivocating_are_directly_observed.
 Qed.
 
-(** [strong_fixed_equivocation_constraint]  is stronger than
-the [fixed_equivocation_constraint].
+(**
+  [strong_fixed_equivocation_constraint]  is stronger than
+  the [fixed_equivocation_constraint].
 *)
 Lemma strong_fixed_equivocation_subsumption s m
   : strong_fixed_equivocation s m -> fixed_equivocation s m.
@@ -266,15 +269,15 @@ End fixed_equivocation_index_incl.
 
 (** ** Restricting Fixed valid traces to only the equivocators
 
-In this section we study the properties of Fixed valid traces
-when projected to the composition of equivocator nodes.
+  In this section we study the properties of Fixed valid traces
+  when projected to the composition of equivocator nodes.
 
-The main result, Lemma [fixed_finite_valid_trace_sub_projection]
-is a strengthening of Lemma [finite_valid_trace_sub_projection] for the
-[fixed_equivocation_constraint], showing that, when restricting
-a Fixed valid trace to only the transitions belonging to the equivocators,
-the obtained trace is valid for the composition of equivocators pre-loaded
-only with those messages sent by the non-equivocators in the original trace.
+  The main result, Lemma [fixed_finite_valid_trace_sub_projection]
+  is a strengthening of Lemma [finite_valid_trace_sub_projection] for the
+  [fixed_equivocation_constraint], showing that, when restricting
+  a Fixed valid trace to only the transitions belonging to the equivocators,
+  the obtained trace is valid for the composition of equivocators pre-loaded
+  only with those messages sent by the non-equivocators in the original trace.
 *)
 Section fixed_equivocator_sub_projection.
 
@@ -368,13 +371,13 @@ Qed.
 Section fixed_finite_valid_trace_sub_projection_helper_lemmas.
 
 (**
-The results in this section are not meant to be used directly. They are just
-sub-lemmas of [fixed_finite_valid_trace_sub_projection_helper].
+  The results in this section are not meant to be used directly. They are just
+  sub-lemmas of [fixed_finite_valid_trace_sub_projection_helper].
 
-We make an assumption (<<Hobs_s_protocol>>) which is later shown to hold
-for all Fixed valid states.
+  We make an assumption (<<Hobs_s_protocol>>) which is later shown to hold
+  for all Fixed valid states.
 
-We then restate (some of) these lemmas without the extra assumption.
+  We then restate (some of) these lemmas without the extra assumption.
 *)
 
 Context
@@ -469,9 +472,9 @@ Qed.
 End fixed_finite_valid_trace_sub_projection_helper_lemmas.
 
 (**
-Using the lemmas above we can now prove (by induction) a generic result,
-which has as part of the conclusion the "observability implies strong_fixed_equivocation"
-hypothesis assumed in the above section.
+  Using the lemmas above we can now prove (by induction) a generic result,
+  which has as part of the conclusion the "observability implies strong_fixed_equivocation"
+  hypothesis assumed in the above section.
 *)
 Lemma fixed_finite_valid_trace_sub_projection_helper
   si s tr
@@ -533,13 +536,13 @@ Proof.
 Qed.
 
 (**
-Main result of this section: when restricting a Fixed valid trace to only
-the transitions belonging to the equivocators, the obtained trace is valid
-for the composition of equivocators pre-loaded with messages sent by the
-non-equivocators in the original trace.
+  Main result of this section: when restricting a Fixed valid trace to only
+  the transitions belonging to the equivocators, the obtained trace is valid
+  for the composition of equivocators pre-loaded with messages sent by the
+  non-equivocators in the original trace.
 
-This is a simple corollary of Lemma [fixed_finite_valid_trace_sub_projection_helper]
-proved above.
+  This is a simple corollary of Lemma [fixed_finite_valid_trace_sub_projection_helper]
+  proved above.
 *)
 Lemma fixed_finite_valid_trace_sub_projection is f tr
   (Htr : finite_valid_trace_init_to Fixed is f tr)
@@ -558,9 +561,9 @@ Proof.
 Qed.
 
 (**
-Any message directly observed in a Fixed valid state has either been sent by the
-non-equivocating nodes, or it can be generated by the equivocating nodes
-using only the messages sent by the non-equivocating nodes.
+  Any message directly observed in a Fixed valid state has either been sent by the
+  non-equivocating nodes, or it can be generated by the equivocating nodes
+  using only the messages sent by the non-equivocating nodes.
 *)
 Lemma fixed_directly_observed_has_strong_fixed_equivocation f
   (Hf : valid_state_prop Fixed f)
@@ -591,8 +594,9 @@ Proof.
   by rewrite <- (finite_trace_sub_projection_last_state IM _ _ _ _ Htr).
 Qed.
 
-(** The input of a Fixed input valid transition has the [strong_fixed_equivocation]
-property.
+(**
+  The input of a Fixed input valid transition has the [strong_fixed_equivocation]
+  property.
 *)
 Lemma fixed_input_has_strong_fixed_equivocation
   l s m
@@ -605,8 +609,9 @@ Proof.
   apply Ht.
 Qed.
 
-(** The output of a Fixed input valid transition has the [strong_fixed_equivocation]
-property for its destination.
+(**
+  The output of a Fixed input valid transition has the [strong_fixed_equivocation]
+  property for its destination.
 *)
 Lemma fixed_output_has_strong_fixed_equivocation
   l s iom sf om
@@ -628,16 +633,17 @@ Qed.
 
 End fixed_equivocator_sub_projection.
 
-(** [strong_fixed_equivocation_constraint] is not actually stronger
+(**
+  [strong_fixed_equivocation_constraint] is not actually stronger
 
-In this section we show that the compositions of nodes using
-the [fixed_equivocation_constraint] and the [strong_fixed_equivocation]
-are trace-equivalent.
+  In this section we show that the compositions of nodes using
+  the [fixed_equivocation_constraint] and the [strong_fixed_equivocation]
+  are trace-equivalent.
 
-The importance of this result is that we can reduce the complexity of proofs
-involving fixed equivocation by using the [strong_fixed_equivocation] constraint
-in the hypotheses of a lemma and the "weaker" [fixed_equivocation_constraint]
-in the conclusion.
+  The importance of this result is that we can reduce the complexity of proofs
+  involving fixed equivocation by using the [strong_fixed_equivocation] constraint
+  in the hypotheses of a lemma and the "weaker" [fixed_equivocation_constraint]
+  in the conclusion.
 *)
 
 Section Fixed_eq_StrongFixed.
@@ -656,9 +662,9 @@ Context
   .
 
 (**
-Given a Fixed valid state, the composition of the equivocators
-preloaded with all the directly observed messages in the state is not stronger
-than that preloaded with only the messages sent by non-equivocators.
+  Given a Fixed valid state, the composition of the equivocators
+  preloaded with all the directly observed messages in the state is not stronger
+  than that preloaded with only the messages sent by non-equivocators.
 *)
 Lemma Equivocators_Fixed_Strong_incl base_s
   (Hbase_s : valid_state_prop Fixed base_s)
@@ -687,8 +693,9 @@ Proof.
   - apply Equivocators_Strong_Fixed_incl.
 Qed.
 
-(** The subsumption between [fixed_equivocation_constraint] and
-[strong_fixed_equivocation_constraint] holds under [input_valid] assumptions.
+(**
+  The subsumption between [fixed_equivocation_constraint] and
+  [strong_fixed_equivocation_constraint] holds under [input_valid] assumptions.
 *)
 Lemma fixed_strong_equivocation_subsumption
   : input_valid_constraint_subsumption IM
@@ -717,16 +724,16 @@ End Fixed_eq_StrongFixed.
 
 (** ** Changing the behavior of equivocators within a trace
 
-By noting that the satisfaction of the [fixed_equivocation_constraint] actually
-only depends on the messages sent by non-equivocating nodes, it makes it much
-easier to establish results related to changing the behavior of equivocating
-nodes.
+  By noting that the satisfaction of the [fixed_equivocation_constraint] actually
+  only depends on the messages sent by non-equivocating nodes, it makes it much
+  easier to establish results related to changing the behavior of equivocating
+  nodes.
 
-In this section we essentially prove that given a Fixed valid state <<s>>,
-any valid trace over the composition of equivocators pre-loaded with the
-messages directly observed in <<s>> can be "lifted" to a Fixed valid trace in which
-the non-equivocators remain in their corresponding component-state given by <<s>>
-(Lemma [EquivPreloadedBase_Fixed_weak_full_projection]).
+  In this section we essentially prove that given a Fixed valid state <<s>>,
+  any valid trace over the composition of equivocators pre-loaded with the
+  messages directly observed in <<s>> can be "lifted" to a Fixed valid trace in which
+  the non-equivocators remain in their corresponding component-state given by <<s>>
+  (Lemma [EquivPreloadedBase_Fixed_weak_full_projection]).
 *)
 Section fixed_equivocator_lifting.
 
@@ -743,8 +750,9 @@ Context
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
-(** Replacing the state corresponding to the equivocators does not affect the
-[sent_by_non_equivocating] property.
+(**
+  Replacing the state corresponding to the equivocators does not affect the
+  [sent_by_non_equivocating] property.
 *)
 Lemma lift_sub_state_to_sent_by_non_equivocating_iff s eqv_is m
   : sent_by_non_equivocating IM equivocators s m <->
@@ -754,8 +762,9 @@ Proof.
   ; revert Hsent; rewrite lift_sub_state_to_neq.
 Qed.
 
-(** The property above induces trace-equality for the corresponding
-[equivocators_composition_for_sent] compositions.
+(**
+  The property above induces trace-equality for the corresponding
+  [equivocators_composition_for_sent] compositions.
 *)
 Lemma restrict_observed_to_non_equivocating_incl s eqv_is
   : VLSM_incl
@@ -777,8 +786,9 @@ Proof.
   apply lift_sub_state_to_sent_by_non_equivocating_iff.
 Qed.
 
-(** Replacing the state corresponding to the equivocators does not affect the
-[strong_fixed_equivocation] property.
+(**
+  Replacing the state corresponding to the equivocators does not affect the
+  [strong_fixed_equivocation] property.
 *)
 Lemma lift_sub_state_to_strong_fixed_equivocation s eqv_is m
   : strong_fixed_equivocation IM equivocators s m <->
@@ -793,10 +803,11 @@ Proof.
     apply restrict_observed_to_non_equivocating_incl_rev.
 Qed.
 
-(** The operation of replacing the state corresponding to the equivocators
-with a given initial state and removing all transitions belonging to
-non-equivocators in a trace induces a self-[VLSM_projection] on the
-fixed equivocation composition VLSM.
+(**
+  The operation of replacing the state corresponding to the equivocators
+  with a given initial state and removing all transitions belonging to
+  non-equivocators in a trace induces a self-[VLSM_projection] on the
+  fixed equivocation composition VLSM.
 *)
 Lemma remove_equivocating_transitions_fixed_projection eqv_is
   (Heqv_is : composite_initial_state_prop (sub_IM IM equivocators) eqv_is)
@@ -848,9 +859,9 @@ Context
   .
 
 (**
-As a corollary of the above projection result, the state obtained by replacing
-the equivocator component of a Fixed valid state with initial states is
-still a Fixed valid state.
+  As a corollary of the above projection result, the state obtained by replacing
+  the equivocator component of a Fixed valid state with initial states is
+  still a Fixed valid state.
 *)
 Lemma fixed_equivocator_lifting_initial_state
   : weak_projection_initial_state_preservation EquivPreloadedBase Fixed (lift_sub_state_to IM equivocators base_s).
@@ -882,20 +893,20 @@ Qed.
 
 (** *** Main result of the section
 
-Given a valid state <<s>> for the <<Fixed>> composition (composition of
-nodes where only the <<equivocators>> are allowed to message-equivocate),
-we can "lift" any trace of the free composition of just the equivocators
-pre-loaded with the messages observed in <<s>> to a trace over the <<Fixed>>
-composition by simply setting the non-equivocating state components to those
-of <<s>>.
+  Given a valid state <<s>> for the <<Fixed>> composition (composition of
+  nodes where only the <<equivocators>> are allowed to message-equivocate),
+  we can "lift" any trace of the free composition of just the equivocators
+  pre-loaded with the messages observed in <<s>> to a trace over the <<Fixed>>
+  composition by simply setting the non-equivocating state components to those
+  of <<s>>.
 
-This result is important for establishing the connection between limited
-equivocation and fixed equivocation (Lemma [strong_witness_has_fixed_equivocation]).
+  This result is important for establishing the connection between limited
+  equivocation and fixed equivocation (Lemma [strong_witness_has_fixed_equivocation]).
 
-We prove this as a [VLSM_weak_full_projection] between the free composition of
-equivocators pre-loaded with the messages observed in <<s>> and the <<Fixed>>
-composition of all nodes. Note that this is a strengthening of Lemma
-[PreSubFree_PreFree_weak_full_projection].
+  We prove this as a [VLSM_weak_full_projection] between the free composition of
+  equivocators pre-loaded with the messages observed in <<s>> and the <<Fixed>>
+  composition of all nodes. Note that this is a strengthening of Lemma
+  [PreSubFree_PreFree_weak_full_projection].
 *)
 Lemma EquivPreloadedBase_Fixed_weak_full_projection
   (no_initial_messages_for_equivocators : forall i m, i ∈ equivocators -> ~vinitial_message_prop (IM i) m)
@@ -941,9 +952,9 @@ End fixed_equivocator_lifting.
 
 (** ** Fixed equivocation over an empty set
 
-If the set of nodes allowed to equivocate is empty, intuitively, it follows
-that no message equivocation is allowed, since that would mean that at least
-one node would equivocate.
+  If the set of nodes allowed to equivocate is empty, intuitively, it follows
+  that no message equivocation is allowed, since that would mean that at least
+  one node would equivocate.
 *)
 Section fixed_equivocation_no_equivocators.
 
@@ -1033,9 +1044,10 @@ Context
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
-(** All valid traces in the induced projection of the composition under the
-strong fixed-equivocation constraint to the non-equivocating nodes can be lifted
-to valid traces of the constrained composition.
+(**
+  All valid traces in the induced projection of the composition under the
+  strong fixed-equivocation constraint to the non-equivocating nodes can be lifted
+  to valid traces of the constrained composition.
 *)
 Lemma lift_strong_fixed_non_equivocating
   : VLSM_full_projection StrongFixedNonEquivocating StrongFixed
@@ -1063,9 +1075,10 @@ Proof.
   by eapply f_equal_dep with (x := dexist i Hi') in Heq.
 Qed.
 
-(** All valid traces in the induced projection of the composition under the
-fixed-equivocation constraint to the non-equivocating nodes can be lifted
-to valid traces of the constrained composition.
+(**
+  All valid traces in the induced projection of the composition under the
+  fixed-equivocation constraint to the non-equivocating nodes can be lifted
+  to valid traces of the constrained composition.
 *)
 Lemma lift_fixed_non_equivocating
   : VLSM_full_projection FixedNonEquivocating Fixed
@@ -1093,9 +1106,10 @@ Proof.
   apply lift_fixed_non_equivocating.
 Qed.
 
-(** The valid traces of the induced projection of the composition under the
-fixed-equivocation constraint to the non-equivocating nodes are precisely
-projections of traces of the constrained composition.
+(**
+  The valid traces of the induced projection of the composition under the
+  fixed-equivocation constraint to the non-equivocating nodes are precisely
+  projections of traces of the constrained composition.
 *)
 Lemma fixed_non_equivocating_traces_char is tr
   : finite_valid_trace FixedNonEquivocating is tr <->

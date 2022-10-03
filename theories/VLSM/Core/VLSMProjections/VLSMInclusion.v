@@ -4,10 +4,10 @@ From VLSM.Core Require Import VLSM VLSMProjections.VLSMEmbedding VLSMProjections
 
 (** * VLSM Inclusion
 
-When both VLSMs have the same state and label types they also share the
-same [Trace] type, and sets of traces can be compared without conversion.
-Then VLSM <<X>> is _included_ in VLSM <<Y>> if every [valid_trace] available to <<X>>
-is also available to <<Y>>.
+  When both VLSMs have the same state and label types they also share the
+  same [Trace] type, and sets of traces can be compared without conversion.
+  Then VLSM <<X>> is _included_ in VLSM <<Y>> if every [valid_trace] available to <<X>>
+  is also available to <<Y>>.
 *)
 Section VLSM_inclusion.
 
@@ -67,8 +67,9 @@ Proof.
       apply (Hincl _ _ (conj HfinX HisX)).
 Qed.
 
-(** A [VLSM_incl]usion is equivalent to a [VLSM_full_projection] in which both the
-label and state projection functions are identities.
+(**
+  A [VLSM_incl]usion is equivalent to a [VLSM_full_projection] in which both the
+  label and state projection functions are identities.
 *)
 Lemma VLSM_incl_full_projection_iff
   (MX MY : VLSMMachine vtype)
@@ -317,8 +318,7 @@ Qed.
 
 End VLSM_incl_properties.
 
-(** We instantiate the above for VLSM inclusions
-*)
+(** We instantiate the above for VLSM inclusions *)
 Section basic_VLSM_incl.
 
 Context

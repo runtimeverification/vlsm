@@ -2,7 +2,7 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 
-(** * Std++ Related Results **)
+(** * Std++ Related Results *)
 
 Lemma elem_of_take {A : Type} (l : list A) (n : nat) (x : A) :
   elem_of x (take n l) -> elem_of x l.
@@ -179,8 +179,8 @@ Example maximal_elements_list2 : maximal_elements_list Nat.le [1; 4; 2; 4] = [].
 Proof. itauto. Qed.
 
 (**
-Returns all elements <<x>> of a set <<S>> such that <<x>> does not compare less
-than any other element in <<S>> w.r.t to a given precedes relation.
+  Returns all elements <<x>> of a set <<S>> such that <<x>> does not compare less
+  than any other element in <<S>> w.r.t to a given precedes relation.
 *)
 Definition maximal_elements_set
   `{HfinSetMessage : FinSet A SetA}
@@ -339,8 +339,10 @@ Proof.
   by transitivity c; [apply IHk | eapply Hall].
 Qed.
 
-(** If the <<n>>-th element of <<l>> is <<x>>, then we can decompose long enough
-    suffixes of <<l>> into <<x>> and a suffix shorter by 1. *)
+(**
+  If the <<n>>-th element of <<l>> is <<x>>, then we can decompose long enough
+  suffixes of <<l>> into <<x>> and a suffix shorter by 1. 
+*)
 Lemma lastn_length_cons :
   forall {A : Type} (n : nat) (l : list A) (x : A),
     l !! n = Some x -> lastn (length l - n) l = x :: lastn (length l - S n) l.

@@ -14,14 +14,14 @@ From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.Fixed
 
 (** * VLSM Equivocators Simulating limited message equivocation traces
 
-In this module we show that the composition of equivocators with no-message
-equivocation and limited state-equivocation can simulate all traces with the
-[fixed_limited_equivocation_prop]erty.
+  In this module we show that the composition of equivocators with no-message
+  equivocation and limited state-equivocation can simulate all traces with the
+  [fixed_limited_equivocation_prop]erty.
 
-As a corollary we show that any state which is valid for the composition
-of regular nodes using a [limited_equivocation_constraint] can be
-obtained as the projection of a valid state for the composition of
-equivocators with no message equivocation and limited state equivocation.
+  As a corollary we show that any state which is valid for the composition
+  of regular nodes using a [limited_equivocation_constraint] can be
+  obtained as the projection of a valid state for the composition of
+  equivocators with no message equivocation and limited state equivocation.
 *)
 
 Section fixed_limited_state_equivocation.
@@ -39,10 +39,11 @@ Context
   (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM equivocating)
   .
 
-(** If the total weight of the equivocators allowed to state-equivocate is less
-than the [threshold], then traces of equivocators which are valid w.r.t
-the fixed state-equivocation constraint are also valid w.r.t. the
-limited state-equivocation constraint.
+(**
+  If the total weight of the equivocators allowed to state-equivocate is less
+  than the [threshold], then traces of equivocators which are valid w.r.t
+  the fixed state-equivocation constraint are also valid w.r.t. the
+  limited state-equivocation constraint.
 *)
 Lemma equivocators_Fixed_incl_Limited
   (Hlimited : (sum_weights (remove_dups equivocating) <= `threshold)%R)
@@ -82,9 +83,10 @@ Context
   (XE : VLSM message := equivocators_limited_equivocations_vlsm IM (Ci := Ci))
   .
 
-(** If a trace has the [fixed_limited_equivocation_prop]erty, then it can be
-simulated by the composition of equivocators with no message-equivocation and
-limited state-equivocation.
+(**
+  If a trace has the [fixed_limited_equivocation_prop]erty, then it can be
+  simulated by the composition of equivocators with no message-equivocation and
+  limited state-equivocation.
 *)
 Lemma limited_equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -152,10 +154,11 @@ Context
   (message_dependencies : message -> set message)
   .
 
-(** Any valid state for the composition of reqular nodes under a limited
-message-equivocation constraint is the projection of a valid state of
-the composition of equivocators under a no message-equivocation and limited
-state-equivocation constraint.
+(**
+  Any valid state for the composition of reqular nodes under a limited
+  message-equivocation constraint is the projection of a valid state of
+  the composition of equivocators under a no message-equivocation and limited
+  state-equivocation constraint.
 *)
 Lemma limited_equivocators_valid_state_rev
   (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender (Cm := Ci))

@@ -5,25 +5,27 @@ From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet Stdp
 (** * Topological sorting implementation *)
 
 (**
-This module implements an algorithm producing a linear extension for a
-given partial order using an approach similar to that of Kahn's topological
-sorting algorithm.
+  This module implements an algorithm producing a linear extension for a
+  given partial order using an approach similar to that of Kahn's topological
+  sorting algorithm.
 
-The algorithm extracts an element with a minimal number of predecessors
-among the current elements, then recurses on the remaining elements.
+  The algorithm extracts an element with a minimal number of predecessors
+  among the current elements, then recurses on the remaining elements.
 
-To begin with, we assume an unconstrained <<precedes>> function to say
-whether an element precedes another.  The proofs will show that if
-<<precedes>> determines a strict order on the set of elements in the list,
-then the [top_sort] algorithm produces a linear extension of that ordering
-(Lemmas [top_sort_precedes] and [top_sort_precedes_before]).
+  To begin with, we assume an unconstrained <<precedes>> function to say
+  whether an element precedes another.  The proofs will show that if
+  <<precedes>> determines a strict order on the set of elements in the list,
+  then the [top_sort] algorithm produces a linear extension of that ordering
+  (Lemmas [top_sort_precedes] and [top_sort_precedes_before]).
 *)
 
 Section min_predecessors.
 (** ** Finding an element with a minimal number of predecessors *)
 
-(** For this section we will fix a list <<l>> and count the predecessors
-occurring in that list. *)
+(**
+  For this section we will fix a list <<l>> and count the predecessors
+  occurring in that list.
+*)
 
 Context {A} (precedes : relation A) `{!RelDecision precedes} (l : list A).
 
@@ -42,9 +44,7 @@ Proof.
   apply Ha.
 Qed.
 
-(**
-Finds an element minimizing [count_predecessors] in <<min :: remainder>>
-*)
+(** Finds an element minimizing [count_predecessors] in <<min :: remainder>> *)
 
 Fixpoint min_predecessors
   (remainder : list A)
@@ -101,8 +101,10 @@ Proof.
         -- by apply IHl'; right.
 Qed.
 
-(** Given <<P>> a property on <<A>>, [precedes_P] is the relation
-induced by <<precedes>> on the subset of <<A>> determined by <<P>>. *)
+(**
+  Given <<P>> a property on <<A>>, [precedes_P] is the relation
+  induced by <<precedes>> on the subset of <<A>> determined by <<P>>.
+*)
 
 Definition precedes_P
   (P : A -> Prop)
@@ -110,11 +112,12 @@ Definition precedes_P
   : Prop
   := precedes (proj1_sig x) (proj1_sig y).
 
-(** In what follows, let us fix a property <<P>> satisfied by all elements
-of <<l>>, such that [precedes_P] <<P>> is a [StrictOrder].
+(**
+  In what follows, let us fix a property <<P>> satisfied by all elements
+  of <<l>>, such that [precedes_P] <<P>> is a [StrictOrder].
 
-Consequently, this means that <<precedes>> is a [StrictOrder] on the
-elements of <<l>>.
+  Consequently, this means that <<precedes>> is a [StrictOrder] on the
+  elements of <<l>>.
 *)
 
 Context
@@ -123,8 +126,10 @@ Context
   {Hso : StrictOrder (precedes_P P)}
   .
 
-(** Next we derive easier to work with formulations for the [StrictOrder]
-properties associated with [precedes_P]. *)
+(**
+  Next we derive easier to work with formulations for the [StrictOrder]
+  properties associated with [precedes_P].
+*)
 Lemma precedes_irreflexive
   (a : A)
   (Ha : P a)
@@ -166,8 +171,9 @@ Proof.
     ).
 Qed.
 
-(** If <<precedes>> is a [StrictOrder] on <<l>>, then there must exist an
-element of <<l>> with no predecessors in <<l>>.
+(**
+  If <<precedes>> is a [StrictOrder] on <<l>>, then there must exist an
+  element of <<l>> with no predecessors in <<l>>.
 *)
 Lemma count_predecessors_zero
   (Hl : l <> [])
@@ -206,8 +212,8 @@ Proof.
 Qed.
 
 (**
-Hence, computing [min_predecessors] on <<l>> yields an element with
-no predecessors.
+  Hence, computing [min_predecessors] on <<l>> yields an element with
+  no predecessors.
 *)
 Lemma min_predecessors_zero
   (l' : list A)
@@ -259,8 +265,8 @@ Section topologically_sorted.
 Context {A} (precedes : relation A) `{!RelDecision precedes} (l : list A).
 
 (**
-We say that a list <<l>> is [topologically_sorted] w.r.t a <<precedes>>
-relation iff <<a precedes b>> implies that <<a>> cannot occur after <<b>> in <<l>>.
+  We say that a list <<l>> is [topologically_sorted] w.r.t a <<precedes>>
+  relation iff <<a precedes b>> implies that <<a>> cannot occur after <<b>> in <<l>>.
 *)
 Definition topologically_sorted
   :=
@@ -271,8 +277,9 @@ Definition topologically_sorted
     (Heq : l = l1 ++ [b] ++ l2)
     , ~a ∈ l2.
 
-(** The following properties assume that <<precedes>> determines a [StrictOrder]
-on the list
+(**
+  The following properties assume that <<precedes>> determines a [StrictOrder]
+  on the list
 *)
 Context
   (P : A -> Prop)
@@ -286,12 +293,13 @@ Context
   (Hts : topologically_sorted)
   .
 
-(** If <<l>> is [topologically_sorted], then for any occurrences
-of <<a>> and <<b>> in <<l>> such that <<a precedes b>> it must be that
-the occurrence of <<a>> is before that of <<b>>.
+(**
+  If <<l>> is [topologically_sorted], then for any occurrences
+  of <<a>> and <<b>> in <<l>> such that <<a precedes b>> it must be that
+  the occurrence of <<a>> is before that of <<b>>.
 
-Hence all occurrences of <<a>> must be before all occurrences of <<b>> in
-a [topologically_sorted] list.
+  Hence all occurrences of <<a>> must be before all occurrences of <<b>> in
+  a [topologically_sorted] list.
 *)
 Lemma topologically_sorted_occurrences_ordering
   (a b : A)
@@ -316,8 +324,8 @@ Proof.
 Qed.
 
 (**
-If <<a>> and <<b>> are in a [topologically_sorted] list <<lts>> and <<a precedes b>>
-then there is an <<a>> before any occurrence of <<b>> in <<lts>>.
+  If <<a>> and <<b>> are in a [topologically_sorted] list <<lts>> and <<a precedes b>>
+  then there is an <<a>> before any occurrence of <<b>> in <<lts>>.
 *)
 Corollary top_sort_before
   (a b : A)
@@ -337,8 +345,8 @@ Proof.
 Qed.
 
 (**
-As a corollary of the above, if <<a precedes b>> then <<a>> can be found before
-<<b>> in l.
+  As a corollary of the above, if <<a precedes b>> then <<a>> can be found before
+  <<b>> in l.
 *)
 Corollary top_sort_precedes
   (a b : A)
@@ -435,8 +443,9 @@ Section top_sort.
 
 Context {A} `{EqDecision A} (precedes : relation A) `{!RelDecision precedes}.
 
-(** Iteratively extracts <<n>> elements with minimal number of predecessors
-from a given list.
+(**
+  Iteratively extracts <<n>> elements with minimal number of predecessors
+  from a given list.
  *)
 
 Fixpoint top_sort_n
@@ -453,15 +462,13 @@ Fixpoint top_sort_n
     min :: top_sort_n n' l''
   end.
 
-(** Repeats the procedure above to order all elements from the input list.
-*)
+(** Repeats the procedure above to order all elements from the input list. *)
 Definition top_sort
   (l : list A)
   : list A
   := top_sort_n (length l) l.
 
-(** The result of [top_sort] and its input are equal as sets.
-*)
+(** The result of [top_sort] and its input are equal as sets. *)
 Lemma top_sort_set_eq
   (l : list A)
   : set_eq l (top_sort l).
@@ -549,8 +556,9 @@ Context
   (Hl : Forall P l)
   .
 
-(** Under the assumption that <<precedes>> induces a [StrictOrder] on the elements of
-<<l>>, [top_sort] <<l>> is [topologically_sorted].
+(**
+  Under the assumption that <<precedes>> induces a [StrictOrder] on the elements of
+  <<l>>, [top_sort] <<l>> is [topologically_sorted].
 
 *)
 Lemma top_sort_sorted : topologically_sorted precedes (top_sort l).
@@ -631,8 +639,9 @@ Proof.
         rewrite <- Hlenl', H4, elem_of_app, !elem_of_cons. itauto.
 Qed.
 
-(** <<lts>> is a [topological_sorting] of <<l>> if it has the same elements as <<l>>
-and is [topologically_sorted].
+(**
+  <<lts>> is a [topological_sorting] of <<l>> if it has the same elements as <<l>>
+  and is [topologically_sorted].
 *)
 Definition topological_sorting
   (l lts : list A)
@@ -743,9 +752,10 @@ Qed.
 
 End top_sort.
 
-(** Some of the results above depend on the <<precedes>> relation being a
-[StrictOrder] for a property-defined [sig] type.  However, when the relation
-is strict to begin with, we can obtain simpler statements for these results.
+(**
+  Some of the results above depend on the <<precedes>> relation being a
+  [StrictOrder] for a property-defined [sig] type.  However, when the relation
+  is strict to begin with, we can obtain simpler statements for these results.
 *)
 Section sec_simple_top_sort.
 

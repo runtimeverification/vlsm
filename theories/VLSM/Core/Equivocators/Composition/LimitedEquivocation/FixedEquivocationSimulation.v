@@ -12,16 +12,16 @@ From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.Simulating
 
 (** * VLSM Equivocators Simulating fixed-set equivocation composition
 
-In this module we show that the composition of equivocators with no
-message-equivocation and fixed-set state-equivocation can simulate the
-fixed-set message-equivocation composition of regular nodes.
+  In this module we show that the composition of equivocators with no
+  message-equivocation and fixed-set state-equivocation can simulate the
+  fixed-set message-equivocation composition of regular nodes.
 
-The proof is based on [generalized_equivocators_finite_valid_trace_init_to_rev],
-but also reuses [seeded_equivocators_finite_valid_trace_init_to_rev] to
-lift a trace of the free subcomposition of equivocating nodes generating a
-message (given by the fixed message-equivocation constraint) to a trace of the
-subcomposition of equivocating equivocators with no message-equivocation,
-which is then used to satisfy the [replayable_message_prop]erty.
+  The proof is based on [generalized_equivocators_finite_valid_trace_init_to_rev],
+  but also reuses [seeded_equivocators_finite_valid_trace_init_to_rev] to
+  lift a trace of the free subcomposition of equivocating nodes generating a
+  message (given by the fixed message-equivocation constraint) to a trace of the
+  subcomposition of equivocating equivocators with no message-equivocation,
+  which is then used to satisfy the [replayable_message_prop]erty.
 *)
 
 Section fixed_equivocating.
@@ -48,9 +48,10 @@ Proof.
   by apply (no_initial_messages_in_IM i m).
 Qed.
 
-(** Messages [sent_by_non_equivocating] nodes in the projection of a valid
-state for the fixed-set state-equivocation composition of equivocators with no
-message-equivocation are valid for that composition of equivocators.
+(**
+  Messages [sent_by_non_equivocating] nodes in the projection of a valid
+  state for the fixed-set state-equivocation composition of equivocators with no
+  message-equivocation are valid for that composition of equivocators.
 *)
 Lemma fixed_equivocating_messages_sent_by_non_equivocating_are_valid
   eqv_state_s
@@ -77,8 +78,9 @@ Proof.
       _ Heqv_state_s m).
 Qed.
 
-(** This is the constraint counterpart of the [weak_full_projection_valid_preservation]
-property (for the [equivocators_fixed_equivocations_constraint]).
+(**
+  This is the constraint counterpart of the [weak_full_projection_valid_preservation]
+  property (for the [equivocators_fixed_equivocations_constraint]).
  *)
 Lemma fixed_equivocating_non_equivocating_constraint_lifting
   eqv_state_s
@@ -134,7 +136,8 @@ Proof.
     by subst.
 Qed.
 
-(** A message that can be generated from a state <<s>> of the free composition
+(**
+  A message that can be generated from a state <<s>> of the free composition
   of equivocating equivocators pre-loaded with all messages has the
   [composite_has_been_sent] property for the state obtained upon "appending"
   state <<s>> to valid state for the composition of all equivocators.
@@ -180,8 +183,9 @@ Proof.
     by rewrite Hlast; simpl; f_equal.
 Qed.
 
-(** Messages satisfying the [strong_fixed_equivocation_constraint] have the
-[replayable_message_prop]erty for the [equivocators_fixed_equivocations_constraint].
+(**
+  Messages satisfying the [strong_fixed_equivocation_constraint] have the
+  [replayable_message_prop]erty for the [equivocators_fixed_equivocations_constraint].
 *)
 Lemma fixed_equivocation_has_replayable_message_prop
   : replayable_message_prop IM (λ _ : message, False)
@@ -319,11 +323,11 @@ Qed.
 
 (** ** The main result
 
-The main result, showing that fixed-set message-equivocation traces can be
-simulated by fixed-set state-equivocation traces is obtained by instantiating
-Lemma [generalized_equivocators_finite_valid_trace_init_to_rev], discharing
-the most complex assumption of the lemma (about [replayable_message_prop])
-with Lemma [fixed_equivocation_has_replayable_message_prop].
+  The main result, showing that fixed-set message-equivocation traces can be
+  simulated by fixed-set state-equivocation traces is obtained by instantiating
+  Lemma [generalized_equivocators_finite_valid_trace_init_to_rev], discharing
+  the most complex assumption of the lemma (about [replayable_message_prop])
+  with Lemma [fixed_equivocation_has_replayable_message_prop].
 *)
 Lemma fixed_equivocators_finite_valid_trace_init_to_rev
   isX sX trX
@@ -373,9 +377,9 @@ End fixed_equivocating.
 
 (** ** No-equivocation simulation as a particular case of fixed-set simulation
 
-In this section we show that traces of the composition of nodes  with no
-message-equivocation can be simulated by the composition of equivocators with
-no message-equivocation in which no component is allowed to state-equivocate.
+  In this section we show that traces of the composition of nodes  with no
+  message-equivocation can be simulated by the composition of equivocators with
+  no message-equivocation in which no component is allowed to state-equivocate.
 *)
 
 Section no_equivocation.

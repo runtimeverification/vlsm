@@ -5,15 +5,15 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
 From VLSM.Lib Require Import ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 
-(** * VLSM Equivocation Definitions **)
+(** * VLSM Equivocation Definitions *)
 
 (**
- This module is dedicated to building the vocabulary for discussing equivocation.
- Equivocation occurs on the receipt of a message which has not been previously sent.
- The designated sender (validator) of the message is then said to be equivocating.
- Our main purpose is to keep track of equivocating senders in a composite context
- and limit equivocation by means of a composition constraint.
-**)
+  This module is dedicated to building the vocabulary for discussing equivocation.
+  Equivocation occurs on the receipt of a message which has not been previously sent.
+  The designated sender (validator) of the message is then said to be equivocating.
+  Our main purpose is to keep track of equivocating senders in a composite context
+  and limit equivocation by means of a composition constraint.
+*)
 
 Lemma exists_proj1_sig {A:Type} (P:A -> Prop) (a:A):
   (exists xP:{x | P x}, proj1_sig xP = a) <-> P a.
@@ -23,34 +23,35 @@ Proof.
   - by intro Ha; exists (exist _ a Ha).
 Qed.
 
-(** ** Basic equivocation **)
+(** ** Basic equivocation *)
 
 Class ReachableThreshold V `{Hm : Measurable V} :=
   { threshold : {r | (r >= 0)%R}
   ; reachable_threshold : exists (vs:list V), NoDup vs /\ (sum_weights vs > proj1_sig threshold)%R
   }.
 
-(** Assuming a set of <<state>>s, and a set of <<validator>>s,
-which is [Measurable] and has a [ReachableThreshold], we can define
-[BasicEquivocation] starting from an [is_equivocating] relation
-deciding whether a validator is equivocating in a state.
+(**
+  Assuming a set of <<state>>s, and a set of <<validator>>s,
+  which is [Measurable] and has a [ReachableThreshold], we can define
+  [BasicEquivocation] starting from an [is_equivocating] relation
+  deciding whether a validator is equivocating in a state.
 
-To avoid a [Finite] constraint on the entire set of validators, we will
-assume that there is a finite set of validators for each state, which
-can be retrieved through the [state_validators] function.
-This can be taken to be entire set of validators when that is finite,
-or the set of senders for all messages in the state for
-[state_encapsulating_messages].
+  To avoid a [Finite] constraint on the entire set of validators, we will
+  assume that there is a finite set of validators for each state, which
+  can be retrieved through the [state_validators] function.
+  This can be taken to be entire set of validators when that is finite,
+  or the set of senders for all messages in the state for
+  [state_encapsulating_messages].
 
-This allows us to determine the [equivocating_validators] for a given
-state as those equivocating in that state.
+  This allows us to determine the [equivocating_validators] for a given
+  state as those equivocating in that state.
 
-The [equivocation_fault] is determined the as the sum of weights of the
-[equivocating_validators].
+  The [equivocation_fault] is determined the as the sum of weights of the
+  [equivocating_validators].
 
-We call a state [not_heavy] if its corresponding [equivocation_fault]
-is lower than the [threshold] set for the <<validator>>s type.
-**)
+  We call a state [not_heavy] if its corresponding [equivocation_fault]
+  is lower than the [threshold] set for the <<validator>>s type.
+*)
 
 Class BasicEquivocation
   (state validator Cm : Type)
@@ -61,19 +62,21 @@ Class BasicEquivocation
   { is_equivocating (s : state) (v : validator) : Prop
   ; is_equivocating_dec : RelDecision is_equivocating
 
-    (** retrieves a set containing all possible validators for a state. **)
+    (** retrieves a set containing all possible validators for a state. *)
 
   ; state_validators (s : state) : Cm
 
-    (** All validators which are equivocating in a given composite state **)
+    (** All validators which are equivocating in a given composite state *)
 
   ; equivocating_validators
       (s : state)
       : Cm
       := filter (fun v => is_equivocating s v) (state_validators s)
 
-     (** The equivocation fault sum: the sum of the weights of equivocating
-     validators **)
+     (**
+       The equivocation fault sum: the sum of the weights of equivocating
+       validators 
+     *)
 
   ; equivocation_fault
       (s : state)
@@ -115,19 +118,19 @@ Qed.
 
 (** *** State-message oracles and endowing states with history
 
-    Our first step is to define some useful concepts in the context of a single VLSM.
+  Our first step is to define some useful concepts in the context of a single VLSM.
 
-    Apart from basic definitions of equivocation, we introduce the concept of a
-    [state_message_oracle]. Such an oracle can, given a state and a message,
-    decide whether the message has been sent (or received) in the history leading
-    to the current state. Formally, we say that a [message] <m> [has_been_sent]
-    if we're in  [state] <s> iff every valid trace which produces <s> contains <m>
-    as a sent message somewhere along the way.
+  Apart from basic definitions of equivocation, we introduce the concept of a
+  [state_message_oracle]. Such an oracle can, given a state and a message,
+  decide whether the message has been sent (or received) in the history leading
+  to the current state. Formally, we say that a [message] <m> [has_been_sent]
+  if we're in  [state] <s> iff every valid trace which produces <s> contains <m>
+  as a sent message somewhere along the way.
 
-    The existence of such oracles, which practically imply endowing states with history,
-    is necessary if we are to detect equivocation using a composition constraint, as these
-    constraints act upon states, not traces.
- **)
+  The existence of such oracles, which practically imply endowing states with history,
+  is necessary if we are to detect equivocation using a composition constraint, as these
+  constraints act upon states, not traces.
+ *)
 
 Section Simple.
 
@@ -137,7 +140,7 @@ Context
   (pre_vlsm := pre_loaded_with_all_messages_vlsm vlsm)
   .
 
-(** The following property detects equivocation in a given trace for a given message. **)
+(** The following property detects equivocation in a given trace for a given message. *)
 
 Definition equivocation_in_trace
   (msg : message)
@@ -216,11 +219,13 @@ Proof.
     + by exists tr, item, [].
 Qed.
 
-(** We intend to give define several message oracles: [has_been_sent], [has_not_been_sent],
-    [has_been_received] and [has_not_been_received]. To avoid repetition, we give
-    build some generic definitions first. **)
+(**
+  We intend to give define several message oracles: [has_been_sent], [has_not_been_sent],
+  [has_been_received] and [has_not_been_received]. To avoid repetition, we give
+  build some generic definitions first. 
+*)
 
-(** General signature of a message oracle **)
+(** General signature of a message oracle *)
 
 Definition state_message_oracle
   := vstate vlsm -> message -> Prop.
@@ -300,8 +305,7 @@ Proof.
   apply selected_message_exists_not_some_iff_no.
 Qed.
 
-(** Sufficient condition for 'specialized_selected_message_exists_in_some_traces'
-*)
+(** Sufficient condition for 'specialized_selected_message_exists_in_some_traces' *)
 Lemma specialized_selected_message_exists_in_some_traces_from
   (X : VLSM message)
   (message_selector : message -> transition_item -> Prop)
@@ -352,15 +356,17 @@ Proof.
   by rewrite Exists_nil in Hselected.
 Qed.
 
-(** Checks if all [valid_trace]s leading to a certain state contain a certain message.
-    The [message_selector] argument specifies whether we're looking for received or sent
-    messages.
+(**
+  Checks if all [valid_trace]s leading to a certain state contain a certain message.
+  The [message_selector] argument specifies whether we're looking for received or sent
+  messages.
 
-    Notably, the [valid_trace]s over which we are iterating belong to the preloaded
-    version of the target VLSM. This is because we want VLSMs to have oracles which
-    are valid irrespective of the composition they take part in. As we know,
-    the behavior preloaded VLSMs includes behaviors of its projections in any
-    composition. **)
+  Notably, the [valid_trace]s over which we are iterating belong to the preloaded
+  version of the target VLSM. This is because we want VLSMs to have oracles which
+  are valid irrespective of the composition they take part in. As we know,
+  the behavior preloaded VLSMs includes behaviors of its projections in any
+  composition. 
+*)
 
 Definition all_traces_have_message_prop
   (message_selector : message -> transition_item -> Prop)
@@ -392,17 +398,19 @@ Definition has_been_received_prop : state_message_oracle -> state -> message -> 
 Definition has_not_been_received_prop : state_message_oracle -> state -> message -> Prop
   := (no_traces_have_message_prop (field_selector input)).
 
-(** Per the vocabulary of the official VLSM document, we say that VLSMs endowed
-    with a [state_message_oracle] for sent messages have the [has_been_sent] capability.
-    Capabilities for receiving messages are treated analogously, so we omit mentioning
-    them explicitly.
+(**
+  Per the vocabulary of the official VLSM document, we say that VLSMs endowed
+  with a [state_message_oracle] for sent messages have the [has_been_sent] capability.
+  Capabilities for receiving messages are treated analogously, so we omit mentioning
+  them explicitly.
 
-    Notably, we also define the [has_not_been_sent] oracle, which decides if a message
-    has definitely not been sent, on any of the traces producing a current state.
+  Notably, we also define the [has_not_been_sent] oracle, which decides if a message
+  has definitely not been sent, on any of the traces producing a current state.
 
-    Furthermore, we require a [sent_excluded_middle] property, which stipulates
-    that any argument to the oracle should return true in exactly one of
-    [has_been_sent] and [has_not_been_sent]. **)
+  Furthermore, we require a [sent_excluded_middle] property, which stipulates
+  that any argument to the oracle should return true in exactly one of
+  [has_been_sent] and [has_not_been_sent]. 
+*)
 
 Class HasBeenSentCapability := {
   has_been_sent: state_message_oracle;
@@ -424,8 +432,10 @@ Class HasBeenSentCapability := {
            has_not_been_sent_prop has_not_been_sent s m;
 }.
 
-(** Reverse implication for 'selected_messages_consistency_prop'
-always holds. *)
+(**
+  Reverse implication for 'selected_messages_consistency_prop'
+  always holds.
+*)
 Lemma consistency_from_valid_state_proj2
   (s : state)
   (Hs: valid_state_prop pre_vlsm s)
@@ -479,8 +489,9 @@ Proof.
   by apply Exists_app; right; left.
 Qed.
 
-(** Sufficient condition for 'proper_sent' avoiding the
-'pre_loaded_with_all_messages_vlsm'
+(**
+  Sufficient condition for 'proper_sent' avoiding the
+  'pre_loaded_with_all_messages_vlsm'
 *)
 Lemma specialized_proper_sent
   `{HasBeenSentCapability}
@@ -506,8 +517,9 @@ Proof.
   apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
-(** 'proper_sent' condition specialized to regular vlsm traces
-(avoiding 'pre_loaded_with_all_messages_vlsm')
+(**
+  'proper_sent' condition specialized to regular vlsm traces
+  (avoiding 'pre_loaded_with_all_messages_vlsm')
 *)
 Lemma specialized_proper_sent_rev
   `{HasBeenSentCapability}
@@ -661,18 +673,18 @@ End Simple.
 
 (** *** Stepwise consistency properties for [state_message_oracle]
 
- The above definitions like [all_traces_have_message_prop]
- connect a [state_message_oracle] to a predicate on
- [transition_item] by relating the oracle holding on a state
- to a satisfying transition existing in all traces.
+  The above definitions like [all_traces_have_message_prop]
+  connect a [state_message_oracle] to a predicate on
+  [transition_item] by relating the oracle holding on a state
+  to a satisfying transition existing in all traces.
 
- This is equivalent to two local properties,
- one is that the oracle cannot only for any initial state,
- the other is that the oracle judgement is appropriately
- related for the starting and [destination] states of
- any [input_valid_transition].
+  This is equivalent to two local properties,
+  one is that the oracle cannot only for any initial state,
+  the other is that the oracle judgement is appropriately
+  related for the starting and [destination] states of
+  any [input_valid_transition].
 
- These conditions are defined in the record [oracle_stepwise_props]
+  These conditions are defined in the record [oracle_stepwise_props]
  *)
 
 Record oracle_stepwise_props
@@ -751,17 +763,17 @@ Proof.
 Qed.
 
 (**
-   Proving the trace properties from the stepwise properties
-   begins with a lemma using induction along a trace to
-   prove that given a [finite_valid_trace] to a state,
-   the oracle holds at that state for some message iff
-   a satisfying transition item exists in the trace.
+  Proving the trace properties from the stepwise properties
+  begins with a lemma using induction along a trace to
+  prove that given a [finite_valid_trace] to a state,
+  the oracle holds at that state for some message iff
+  a satisfying transition item exists in the trace.
 
-   The theorems for [all_traces_have_message_prop]
-   and [no_traces_have_message_prop] are mostly rearranging
-   quantifiers to use this lemma, also using [valid_state_prop]
-   to choose a trace to the state for the directions where
-   one is not given.
+  The theorems for [all_traces_have_message_prop]
+  and [no_traces_have_message_prop] are mostly rearranging
+  quantifiers to use this lemma, also using [valid_state_prop]
+  to choose a trace to the state for the directions where
+  one is not given.
  *)
 Section TraceFromStepwise.
 
@@ -855,10 +867,10 @@ Qed.
 End TraceFromStepwise.
 
 (**
-   The stepwise properties are proven from the trace properties
-   by considering the empty trace to prove the [oracle_no_inits]
-   property, and by considering a trace that ends with the given
-   [input_valid_transition] to prove the [oracle_step_update] property.
+  The stepwise properties are proven from the trace properties
+  by considering the empty trace to prove the [oracle_no_inits]
+  property, and by considering a trace that ends with the given
+  [input_valid_transition] to prove the [oracle_step_update] property.
  *)
 Section StepwiseFromTrace.
 
@@ -947,17 +959,17 @@ End StepwiseFromTrace.
 
 (** ** Stepwise view of [HasBeenSentCapability]
 
-This reduces the proof obligations in [HasBeenSentCapability]
-to proving the stepwise properties of [oracle_stepwise_props].
-[has_been_step_stepwise_props] is a specialization of [oracle_stepwise_props]
-to the right <<message_selector>>.
+  This reduces the proof obligations in [HasBeenSentCapability]
+  to proving the stepwise properties of [oracle_stepwise_props].
+  [has_been_step_stepwise_props] is a specialization of [oracle_stepwise_props]
+  to the right <<message_selector>>.
 
-There are also lemmas for accessing the stepwise properties about
-a [has_been_sent] predicate given an instance of [HasBeenSentCapability], to allow using
-[HasBeenSentCapability_from_stepwise] to define a [HasBeenSentCapability]
-for composite VLSMs, or for proofs (e.g, about invariants) where
-these are more convenient.
- **)
+  There are also lemmas for accessing the stepwise properties about
+  a [has_been_sent] predicate given an instance of [HasBeenSentCapability], to allow using
+  [HasBeenSentCapability_from_stepwise] to define a [HasBeenSentCapability]
+  for composite VLSMs, or for proofs (e.g, about invariants) where
+  these are more convenient.
+ *)
 
 Definition has_been_sent_stepwise_props
        [message] [vlsm: VLSM message] (has_been_sent_pred: state_message_oracle vlsm) : Prop :=
@@ -1132,12 +1144,12 @@ Qed.
 
 (** ** A state message oracle for messages sent or received
 
-In protocols like the CBC full node protocol, validators often
-work with the set of all messages they have directly observed,
-which includes the messages the node sent itself along with
-messages that were received.
-The [has_been_directly_observed] oracle tells whether the given message was sent
-or received during any trace leading to the given state.
+  In protocols like the CBC full node protocol, validators often
+  work with the set of all messages they have directly observed,
+  which includes the messages the node sent itself along with
+  messages that were received.
+  The [has_been_directly_observed] oracle tells whether the given message was sent
+  or received during any trace leading to the given state.
 *)
 
 Class HasBeenDirectlyObservedCapability {message} (vlsm: VLSM message) :=
@@ -1200,8 +1212,9 @@ Proof.
   - apply proper_not_directly_observed.
 Qed.
 
-(** A received message introduces no additional equivocations to a state
-    if it has already been observed in s.
+(**
+  A received message introduces no additional equivocations to a state
+  if it has already been observed in s.
 *)
 Definition no_additional_equivocations
   {message : Type}
@@ -1213,8 +1226,7 @@ Definition no_additional_equivocations
   :=
   has_been_directly_observed vlsm s m.
 
-(** [no_additional_equivocations] is decidable.
-*)
+(** [no_additional_equivocations] is decidable. *)
 
 Lemma no_additional_equivocations_dec
   {message : Type}
@@ -1642,18 +1654,18 @@ Qed.
 
 (** *** Equivocation in compositions
 
- We now move on to a composite context. Each component of our composition
-    will have [has_been_sent] and [has_been_received] capabilities.
+  We now move on to a composite context. Each component of our composition
+     will have [has_been_sent] and [has_been_received] capabilities.
 
-    We introduce [validator]s along with their respective [Weight]s, the
-    [A] function which maps validators to indices of component VLSMs and
-    the [sender] function which maps messages to their (unique) designated
-    sender (if any).
+     We introduce [validator]s along with their respective [Weight]s, the
+     [A] function which maps validators to indices of component VLSMs and
+     the [sender] function which maps messages to their (unique) designated
+     sender (if any).
 
-    For the equivocation fault sum to be computable, we also require that
-    the number of [validator]s and the number of machines in the
-    composition are both finite. See [finite_index], [finite_validator].
-**)
+     For the equivocation fault sum to be computable, we also require that
+     the number of [validator]s and the number of machines in the
+     composition are both finite. See [finite_index], [finite_validator].
+*)
 
 Section Composite.
 
@@ -1765,8 +1777,10 @@ Qed.
 
 End StepwiseProps.
 
-(** A message 'has_been_sent' for a composite state if it 'has_been_sent' for any of
-its components.*)
+(**
+  A message 'has_been_sent' for a composite state if it 'has_been_sent' for any of
+  its components
+*)
 Definition composite_has_been_sent
   (s : composite_state IM)
   (m : message)
@@ -1816,8 +1830,10 @@ Qed.
 
 Section composite_has_been_received.
 
-(** A message 'has_been_received' for a composite state if it 'has_been_received' for any of
-its components.*)
+(**
+  A message 'has_been_received' for a composite state if it 'has_been_received' for any of
+  its components
+*)
 Definition composite_has_been_received
   (s : composite_state IM)
   (m : message)
@@ -1887,8 +1903,8 @@ Definition preloaded_composite_HasBeenReceivedCapability
 End composite_has_been_received.
 
 (**
-A message [has_been_directly_observed] in a composite state if it
-[has_been_directly_observed] in any of its components.
+  A message [has_been_directly_observed] in a composite state if it
+  [has_been_directly_observed] in any of its components.
 *)
 Definition composite_has_been_directly_observed
   (s : composite_state IM)
@@ -1936,15 +1952,16 @@ Context
 Definition node_signed_message (node_idx : index) (m : message) : Prop :=
   option_map A (sender m) = Some node_idx.
 
-(** Definitions for safety and nontriviality of the [sender] function.
-    Safety means that if we designate a validator as the sender
-    of a certain message, then it is impossible for other components
-    to produce that message
+(**
+  Definitions for safety and nontriviality of the [sender] function.
+  Safety means that if we designate a validator as the sender
+  of a certain message, then it is impossible for other components
+  to produce that message
 
-    Weak/strong nontriviality say that each validator should
-    be designated sender for at least one/all its valid
-    messages.
-**)
+  Weak/strong nontriviality say that each validator should
+  be designated sender for at least one/all its valid
+  messages.
+*)
 Definition sender_safety_prop : Prop :=
   forall
   (m : message)
@@ -1954,9 +1971,11 @@ Definition sender_safety_prop : Prop :=
          (Hdif : j <> A v),
          ~can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 
- (** An alternative, possibly friendlier, formulation. Note that it is
-     slightly weaker, in that it does not require that the sender
-     is able to send the message. **)
+ (**
+   An alternative, possibly friendlier, formulation. Note that it is
+   slightly weaker, in that it does not require that the sender
+   is able to send the message. 
+ *)
 
 Definition sender_safety_alt_prop : Prop :=
   forall
@@ -1981,10 +2000,11 @@ Qed.
 Definition channel_authenticated_message (node_idx : index) (m : message) : Prop :=
   option_map A (sender m) = Some node_idx.
 
-(** The [channel_authentication_prop]erty requires that any sent message must
-be originating with its <<sender>>.
-Note that we don't require that <<sender>> is total, but rather that it is
-defined for all messages which can be emitted.
+(**
+  The [channel_authentication_prop]erty requires that any sent message must
+  be originating with its <<sender>>.
+  Note that we don't require that <<sender>> is total, but rather that it is
+  defined for all messages which can be emitted.
 *)
 Definition channel_authentication_prop : Prop :=
   forall i m,
@@ -2099,9 +2119,11 @@ Proof.
   apply no_additional_equivocations_dec.
 Qed.
 
- (** We say that a validator <v> (with associated component <i>) is equivocating wrt.
- to another component <j>, if there exists a message which [has_been_received] by
- <j> but [has_not_been_sent] by <i> **)
+ (**
+   We say that a validator <v> (with associated component <i>) is equivocating wrt.
+   to another component <j>, if there exists a message which [has_been_received] by
+   <j> but [has_not_been_sent] by <i> 
+ *)
 
 Definition equivocating_wrt
   (v : validator)
@@ -2115,7 +2137,7 @@ Definition equivocating_wrt
   has_not_been_sent  (IM i) sv m /\
   has_been_received  (IM j) sj m.
 
-(** We can now decide whether a validator is equivocating in a certain state. **)
+(** We can now decide whether a validator is equivocating in a certain state. *)
 
 Definition is_equivocating_statewise
   (s : composite_state IM)
@@ -2144,10 +2166,12 @@ Context
     {threshold_V : ReachableThreshold validator}
     `{FinSet validator Cm}
     .
-(** For the equivocation sum fault to be computable, we require that
-    our is_equivocating property is decidable. The current implementation
-    refers to [is_equivocating_statewise], but this might change
-    in the future **)
+(**
+  For the equivocation sum fault to be computable, we require that
+  our is_equivocating property is decidable. The current implementation
+  refers to [is_equivocating_statewise], but this might change
+  in the future 
+*)
 
 Definition equivocation_dec_statewise
    (Hdec : RelDecision is_equivocating_statewise)
@@ -2627,9 +2651,7 @@ Proof.
   ; apply (state_received_not_sent_trace_iff m s is tr Htr).
 Qed.
 
-(**
-A sent message cannot have been previously sent or received.
-*)
+(** A sent message cannot have been previously sent or received. *)
 Definition cannot_resend_message_stepwise_prop : Prop :=
   forall l s oim s' m,
     input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s,oim) (s',Some m) ->
@@ -2815,13 +2837,13 @@ Context
   .
 
 (**
-Under [HasBeenReceivedCapability] assumptions, and given the fact that
-any valid state <<s>> has a valid trace leading to it,
-in which all (received) messages are valid, it follows that
-any message which [has_been_received] for state <<s>> is valid.
+  Under [HasBeenReceivedCapability] assumptions, and given the fact that
+  any valid state <<s>> has a valid trace leading to it,
+  in which all (received) messages are valid, it follows that
+  any message which [has_been_received] for state <<s>> is valid.
 
-Hence, given any pre_loaded trace leading to <<s>>, all messages received
-within it must be valid, thus the trace itself is valid.
+  Hence, given any pre_loaded trace leading to <<s>>, all messages received
+  within it must be valid, thus the trace itself is valid.
 *)
 Lemma all_pre_traces_to_valid_state_are_valid
   s

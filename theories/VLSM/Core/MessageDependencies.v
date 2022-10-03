@@ -27,9 +27,10 @@ Definition msg_dep_happens_before
   `(message_dependencies : message -> set message) : relation message :=
   tc (msg_dep_rel message_dependencies).
 
-(** The (local) full node condition for a given <<message_dependencies>> function
-requires that a state (receiving the message) has previously directly observed
-all of <<m>>'s dependencies.
+(**
+  The (local) full node condition for a given <<message_dependencies>> function
+  requires that a state (receiving the message) has previously directly observed
+  all of <<m>>'s dependencies.
 *)
 Definition message_dependencies_full_node_condition
   `(X : VLSM message)
@@ -42,20 +43,20 @@ Definition message_dependencies_full_node_condition
   forall dm, dm ∈ message_dependencies m -> has_been_directly_observed X s dm.
 
 (**
-[MessageDependencies] characterize a <<message_dependencies>> function
-through two properties:
+  [MessageDependencies] characterize a <<message_dependencies>> function
+  through two properties:
 
-- Necessity: All dependent messages for a message <<m>>m are required to be
-directly observed by origin state of a transition emitting the message <<m>>.
+  - Necessity: All dependent messages for a message <<m>>m are required to be
+  directly observed by origin state of a transition emitting the message <<m>>.
 
-- Sufficiency: A message can be produced by the machine pre-loaded with its
-dependencies.
+  - Sufficiency: A message can be produced by the machine pre-loaded with its
+  dependencies.
 
-Additionally, we require that the induced [msg_dep_happens_before] relation
-is irreflexive (i.e., a message cannot recursively observe itself).
+  Additionally, we require that the induced [msg_dep_happens_before] relation
+  is irreflexive (i.e., a message cannot recursively observe itself).
 
-[MessageDependencies], together with [message_dependencies_full_node_condition_prop],
-constitute the _strict full node assumption_.
+  [MessageDependencies], together with [message_dependencies_full_node_condition_prop],
+  constitute the _strict full node assumption_.
 *)
 Class MessageDependencies
   `(X : VLSM message)
@@ -91,9 +92,10 @@ Context
   (msg_dep_happens_before := msg_dep_happens_before message_dependencies)
   .
 
-(** A VLSM has the [message_dependencies_full_node_condition_prop]
-if the validity of receiving a message in a state implies the
-[message_dependencies_full_node_condition] for that state and message
+(**
+  A VLSM has the [message_dependencies_full_node_condition_prop]
+  if the validity of receiving a message in a state implies the
+  [message_dependencies_full_node_condition] for that state and message
 *)
 Definition message_dependencies_full_node_condition_prop : Prop :=
   forall l s m,
@@ -106,17 +108,20 @@ Lemma msg_dep_happens_before_iff_one x z
     msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
 Proof. apply tc_r_iff. Qed.
 
-(** If the [msg_dep_rel]ation reflects a predicate <<P>>, then
-[msg_dep_happens_before] will also reflect it. *)
+(**
+  If the [msg_dep_rel]ation reflects a predicate <<P>>, then
+  [msg_dep_happens_before] will also reflect it.
+*)
 Lemma msg_dep_happens_before_reflect
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
   : forall dm m, msg_dep_happens_before dm m -> P m -> P dm.
 Proof. by apply tc_reflect. Qed.
 
-(** In the absence of initial messages, and if [msg_dep_rel]ation reflects
-the pre-loaded message property, then it also reflects the
-[valid_message_prop]erty.
+(**
+  In the absence of initial messages, and if [msg_dep_rel]ation reflects
+  the pre-loaded message property, then it also reflects the
+  [valid_message_prop]erty.
 *)
 Lemma msg_dep_reflects_validity
   (no_initial_messages_in_X : forall m, ~ vinitial_message_prop X m)
@@ -147,8 +152,9 @@ Proof.
         by eexists; eapply can_produce_valid.
 Qed.
 
-(** Under [MessageDependencies] assumptions, if a message [has_been_sent]
-in a state <<s>>, then any of its direct dependencies [has_been_directly_observed].
+(**
+  Under [MessageDependencies] assumptions, if a message [has_been_sent]
+  in a state <<s>>, then any of its direct dependencies [has_been_directly_observed].
 *)
 Lemma msg_dep_has_been_sent
   s
@@ -175,9 +181,10 @@ Proof.
   by right; apply Hm.
 Qed.
 
-(** If the [valid]ity predicate has the [message_dependencies_full_node_condition_prop]erty,
-then if a message [has_been_received] in a state <<s>>, any of its direct
-dependencies [has_been_directly_observed].
+(**
+  If the [valid]ity predicate has the [message_dependencies_full_node_condition_prop]erty,
+  then if a message [has_been_received] in a state <<s>>, any of its direct
+  dependencies [has_been_directly_observed].
 *)
 Lemma full_node_has_been_received
   (Hfull : message_dependencies_full_node_condition_prop)
@@ -196,8 +203,9 @@ Proof.
     + by eapply IHHs.
 Qed.
 
-(** By combining Lemmas [msg_dep_has_been_sent] and [full_node_has_been_received],
-the [msg_dep_rel]ation reflects the [has_been_directly_observed] predicate.
+(**
+  By combining Lemmas [msg_dep_has_been_sent] and [full_node_has_been_received],
+  the [msg_dep_rel]ation reflects the [has_been_directly_observed] predicate.
 *)
 Lemma msg_dep_full_node_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
@@ -211,8 +219,9 @@ Proof.
   - by eapply full_node_has_been_received.
 Qed.
 
-(** Under full-node assumptions, the [msg_dep_happens_before] relation
-reflects the [has_been_directly_observed] predicate.
+(**
+  Under full-node assumptions, the [msg_dep_happens_before] relation
+  reflects the [has_been_directly_observed] predicate.
 *)
 Lemma msg_dep_full_node_happens_before_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
@@ -226,8 +235,9 @@ Proof.
   by apply msg_dep_full_node_reflects_has_been_directly_observed.
 Qed.
 
-(** Under full-node assumptions, it it is valid to receive a message in a state
-then any of its happens-before dependencies [has_been_directly_observed] in that state.
+(**
+  Under full-node assumptions, it it is valid to receive a message in a state
+  then any of its happens-before dependencies [has_been_directly_observed] in that state.
 *)
 Lemma msg_dep_full_node_input_valid_happens_before_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
@@ -245,11 +255,11 @@ Qed.
 
 End sec_message_dependencies.
 
-(** ** #[local] Equivocation Based on Message Dependencies
+(** ** Equivocation Based on Message Dependencies
 
-Inspired by the definitions of observability and local equivocation given for
-the ELMO protocol, we introduce abstract notions for local equivocation based
-on message dependencies.
+  Inspired by the definitions of observability and local equivocation given for
+  the ELMO protocol, we introduce abstract notions for local equivocation based
+  on message dependencies.
 *)
 Section sec_message_dependencies_equivocation.
 
@@ -265,9 +275,9 @@ Context
   .
 
 (**
-A message can be (indirectly) observed in a state if it either has been directly
-observed in the state (as sent or received), or it happens before (in the sense
-of the [msg_dep_happens_before] relation) a directly observed message.
+  A message can be (indirectly) observed in a state if it either has been directly
+  observed in the state (as sent or received), or it happens before (in the sense
+  of the [msg_dep_happens_before] relation) a directly observed message.
 *)
 Inductive HasBeenObserved (s : vstate X) (m : message) : Prop :=
 | hbo_directly :
@@ -312,14 +322,14 @@ Proof.
 Qed.
 
 (**
-Message <<m1>> is in relation [ObservedBeforeSendTransition] with message <<m2>>
-if it [HasBeenObserved] in a state from which <<m2>> can be emitted in the next
-step.
+  Message <<m1>> is in relation [ObservedBeforeSendTransition] with message <<m2>>
+  if it [HasBeenObserved] in a state from which <<m2>> can be emitted in the next
+  step.
 
-Note that we use [HasBeenObserved] instead of [has_been_directly_observed], which
-extends direct observability in a state (sent or received on a trace leading to
-that state) with the transitive closure of the [msg_dep_rel] (to include any
-message depending on a directly observed one).
+  Note that we use [HasBeenObserved] instead of [has_been_directly_observed], which
+  extends direct observability in a state (sent or received on a trace leading to
+  that state) with the transitive closure of the [msg_dep_rel] (to include any
+  message depending on a directly observed one).
 *)
 Inductive ObservedBeforeStateOrMessage
   : message -> vstate X -> option message -> Prop :=
@@ -360,10 +370,10 @@ Proof.
 Qed.
 
 (**
-A pair of messages constitutes a (local) evidence of equivocation for a
-validator <<v>> in a state <<s>> if both messages have <<v>> as a sender, have
-been (indirectly) observed in <<s>> (see [HasBeenObserved]), and are
-not comparable according to the [msg_dep_happens_before] relation.
+  A pair of messages constitutes a (local) evidence of equivocation for a
+  validator <<v>> in a state <<s>> if both messages have <<v>> as a sender, have
+  been (indirectly) observed in <<s>> (see [HasBeenObserved]), and are
+  not comparable according to the [msg_dep_happens_before] relation.
 *)
 Record MsgDepLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
@@ -379,10 +389,10 @@ Definition msg_dep_is_locally_equivocating (s : vstate X) (v : validator) : Prop
   exists m1 m2, MsgDepLocalEquivocationEvidence s v m1 m2.
 
 (**
-Under the full-node assumptions, we can give a simpler alternative to
-[MsgDepLocalEquivocationEvidence] which only requires that each message
-[has_been_directly_observed] directly in the state. This relies on Lemma
-[msg_dep_full_node_happens_before_reflects_has_been_directly_observed].
+  Under the full-node assumptions, we can give a simpler alternative to
+  [MsgDepLocalEquivocationEvidence] which only requires that each message
+  [has_been_directly_observed] directly in the state. This relies on Lemma
+  [msg_dep_full_node_happens_before_reflects_has_been_directly_observed].
 *)
 Record FullNodeLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
@@ -398,9 +408,9 @@ Definition full_node_is_locally_equivocating (s : vstate X) (v : validator) : Pr
   exists m1 m2, FullNodeLocalEquivocationEvidence s v m1 m2.
 
 (**
-If the states and messages are more tightly coupled (e.g., there is a unique
-state from which a given message can be emitted), then the sent messages of
-a state would be totally ordered by [msg_dep_rel].
+  If the states and messages are more tightly coupled (e.g., there is a unique
+  state from which a given message can be emitted), then the sent messages of
+  a state would be totally ordered by [msg_dep_rel].
 *)
 Definition has_been_sent_msg_dep_comparable_prop : Prop :=
   forall (s : vstate X), valid_state_prop R s ->
@@ -410,8 +420,8 @@ Definition has_been_sent_msg_dep_comparable_prop : Prop :=
     comparable (msg_dep_rel message_dependencies) m1 m2.
 
 (**
-We present yet another definition for local evidence of equivocation assuming
-both full-node and [has_been_sent_msg_dep_comparable_prop].
+  We present yet another definition for local evidence of equivocation assuming
+  both full-node and [has_been_sent_msg_dep_comparable_prop].
 *)
 Record FullNodeSentLocalEquivocationEvidence
   (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
@@ -445,8 +455,8 @@ Proof.
 Qed.
 
 (**
-Under [MessageDependencies] and full-node assumptions, any message which
-[HasBeenObserved] in a state, [has_been_directly_observed] in that state, too.
+  Under [MessageDependencies] and full-node assumptions, any message which
+  [HasBeenObserved] in a state, [has_been_directly_observed] in that state, too.
 *)
 Lemma full_node_HasBeenObserved_is_directly_observed
   `{!MessageDependencies X message_dependencies}
@@ -460,8 +470,8 @@ Proof.
 Qed.
 
 (**
-Assuming [MessageDependencies] and full-node, the two notions of
-local equivocation defined above are equivalent.
+  Assuming [MessageDependencies] and full-node, the two notions of
+  local equivocation defined above are equivalent.
 *)
 Lemma full_node_is_locally_equivocating_iff
   `{!MessageDependencies X message_dependencies}
@@ -492,8 +502,9 @@ Context
   `{forall i, MessageDependencies (IM i) message_dependencies}
   .
 
-(** If all of the components satisfy the [MessageDependencies] assumptions,
-then their free composition will also do so.
+(**
+  If all of the components satisfy the [MessageDependencies] assumptions,
+  then their free composition will also do so.
 *)
 #[export] Instance composite_message_dependencies
   : MessageDependencies (free_composite_vlsm IM) message_dependencies.
@@ -572,9 +583,9 @@ End sec_composite_message_dependencies.
 
 (** ** #[global] Equivocation Based on Message Dependencies
 
-Inspired by the definitions of observability and global equivocation given for
-the ELMO protocol, we introduce abstract notions for global equivocation based
-on message dependencies.
+  Inspired by the definitions of observability and global equivocation given for
+  the ELMO protocol, we introduce abstract notions for global equivocation based
+  on message dependencies.
 *)
 
 Section sec_composite_message_dependencies_equivocation.
@@ -593,9 +604,9 @@ Context
   .
 
 (**
-A message can be (indirectly) observed in a composite state if it either has
-been directly observed in the state (as sent or received), or it
-[msg_dep_happens_before] a directly observed message.
+  A message can be (indirectly) observed in a composite state if it either has
+  been directly observed in the state (as sent or received), or it
+  [msg_dep_happens_before] a directly observed message.
 *)
 Inductive CompositeHasBeenObserved
   (s : composite_state IM) (m : message) : Prop :=
@@ -662,8 +673,8 @@ Proof.
 Qed.
 
 (**
-Lifting [DirectlyObservedBeforeSend] to a composition. The advantage of this
-definition is that RHS can be emitted by any of the machines in the composition.
+  Lifting [DirectlyObservedBeforeSend] to a composition. The advantage of this
+  definition is that RHS can be emitted by any of the machines in the composition.
 *)
 Record CompositeObservedBeforeSendTransition
   (s : composite_state IM) (item : composite_transition_item IM) (m1 m2 : message) : Prop :=
@@ -735,8 +746,8 @@ Proof.
 Qed.
 
 (**
-Similarly to the [msg_dep_happens_before], we define the transitive closure
-of the [composite_observed_before_send] relation.
+  Similarly to the [msg_dep_happens_before], we define the transitive closure
+  of the [composite_observed_before_send] relation.
 *)
 Definition tc_composite_observed_before_send : relation message :=
   tc (composite_observed_before_send).
@@ -771,11 +782,11 @@ Proof.
 Qed.
 
 (**
-A messages constitutes a (global) evidence of equivocation for a
-validator <<v>> in a composite state <<s>> if the message has <<v>> as a sender,
-it has been (indirectly) observed in [composite_state] <<s>>, (see
-[CompositeHasBeenObserved]), but it wasn't observed as sent in <<s>>
-(see [composite_has_been_sent]).
+  A messages constitutes a (global) evidence of equivocation for a
+  validator <<v>> in a composite state <<s>> if the message has <<v>> as a sender,
+  it has been (indirectly) observed in [composite_state] <<s>>, (see
+  [CompositeHasBeenObserved]), but it wasn't observed as sent in <<s>>
+  (see [composite_has_been_sent]).
 *)
 Record MsgDepGlobalEquivocationEvidence
   (s : composite_state IM) (v : validator) (m : message) : Prop :=
@@ -790,10 +801,10 @@ Definition msg_dep_is_globally_equivocating
   exists m : message, MsgDepGlobalEquivocationEvidence s v m.
 
 (**
-Under the full-node assumption, we can give a simpler alternative to
-[MsgDepGlobalEquivocationEvidence] which only requires that the message has been
-received in the [composite_state] (see [composite_has_been_received]) (due to
-the Lemma [msg_dep_full_node_happens_before_reflects_has_been_directly_observed]).
+  Under the full-node assumption, we can give a simpler alternative to
+  [MsgDepGlobalEquivocationEvidence] which only requires that the message has been
+  received in the [composite_state] (see [composite_has_been_received]) (due to
+  the Lemma [msg_dep_full_node_happens_before_reflects_has_been_directly_observed]).
 *)
 Record FullNodeGlobalEquivocationEvidence
   (s : composite_state IM) (v : validator) (m : message) : Prop :=
@@ -1014,11 +1025,11 @@ End full_message_dependencies_happens_before.
 
 (** ** Basic validation condition for free composition
 
-In this section we show (Lemma [valid_free_validating_is_message_validating])
-that, under [FullMessageDependencies] assumptions, if the validity predicate
-ensures that message itself and all of its dependencies can be emitted using
-only its dependencies, then the input message is valid for the free composition.
-Thus, the node itself is a validator for the free composition.
+  In this section we show (Lemma [valid_free_validating_is_message_validating])
+  that, under [FullMessageDependencies] assumptions, if the validity predicate
+  ensures that message itself and all of its dependencies can be emitted using
+  only its dependencies, then the input message is valid for the free composition.
+  Thus, the node itself is a validator for the free composition.
 *)
 
 Section free_composition_validators.
@@ -1036,9 +1047,9 @@ Context
   .
 
 (**
-The property of a message of having a sender and being emittable by the
-component corresponding to its sender pre-loaded with the dependencies of the
-message.
+  The property of a message of having a sender and being emittable by the
+  component corresponding to its sender pre-loaded with the dependencies of the
+  message.
 *)
 Inductive Emittable_from_dependencies_prop (m : message) : Prop :=
   | efdp : forall (v : validator) (Hsender : sender m = Some v)
@@ -1062,24 +1073,24 @@ Proof.
 Qed.
 
 (**
-The property of a message that both itself and all of its dependencies are
-emittable from their dependencies.
+  The property of a message that both itself and all of its dependencies are
+  emittable from their dependencies.
 *)
 Definition all_dependencies_emittable_from_dependencies_prop (m : message) : Prop :=
   forall dm, dm ∈ m :: full_message_dependencies m -> Emittable_from_dependencies_prop dm.
 
 (**
-The property of requiring that the validity predicate subsumes the
-[all_dependencies_emittable_from_dependencies_prop]erty.
+  The property of requiring that the validity predicate subsumes the
+  [all_dependencies_emittable_from_dependencies_prop]erty.
 *)
 Definition valid_all_dependencies_emittable_from_dependencies_prop (i : index) : Prop :=
   forall l s m, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m) ->
     all_dependencies_emittable_from_dependencies_prop m.
 
 (**
-If a message can be emitted by a node preloaded with the message's direct
-dependencies, and if all the dependencies of the message are valid for the
-free composition, then the message itself is valid for the free composition.
+  If a message can be emitted by a node preloaded with the message's direct
+  dependencies, and if all the dependencies of the message are valid for the
+  free composition, then the message itself is valid for the free composition.
 *)
 Lemma free_valid_from_valid_dependencies
   m i
@@ -1095,8 +1106,8 @@ Proof.
 Qed.
 
 (**
-Any message with the [all_dependencies_emittable_from_dependencies_prop]erty
-is valid for the free composition.
+  Any message with the [all_dependencies_emittable_from_dependencies_prop]erty
+  is valid for the free composition.
 *)
 Lemma free_valid_from_all_dependencies_emitable_from_dependencies :
   forall m,
@@ -1115,10 +1126,10 @@ Proof.
 Qed.
 
 (**
-If a node in a composition satisfies the
-[valid_all_dependencies_emittable_from_dependencies_prop]erty, then it also has
-the [component_message_validator_prop]erty, that is, it is a validator for the
-free composition.
+  If a node in a composition satisfies the
+  [valid_all_dependencies_emittable_from_dependencies_prop]erty, then it also has
+  the [component_message_validator_prop]erty, that is, it is a validator for the
+  free composition.
 *)
 Lemma valid_free_validating_is_message_validating
   : forall i, valid_all_dependencies_emittable_from_dependencies_prop i ->
@@ -1129,11 +1140,11 @@ Proof.
 Qed.
 
 (**
-Under several additional (but regularly used) assumptions, including the
-[MessageDependencies] assumptions, the [channel_authentication_prop]erty and the
-[no_initial_messages_in_IM_prop]erty, we can show that the
-[component_message_validator_prop]erty is fully equivalent to the
-[valid_all_dependencies_emittable_from_dependencies_prop]erty.
+  Under several additional (but regularly used) assumptions, including the
+  [MessageDependencies] assumptions, the [channel_authentication_prop]erty and the
+  [no_initial_messages_in_IM_prop]erty, we can show that the
+  [component_message_validator_prop]erty is fully equivalent to the
+  [valid_all_dependencies_emittable_from_dependencies_prop]erty.
 *)
 Lemma valid_free_validating_equiv_message_validating
   `{forall i, MessageDependencies (IM i) message_dependencies}

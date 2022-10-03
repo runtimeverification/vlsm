@@ -112,8 +112,8 @@ Proof.
 Qed.
 
 (**
-Inclusion in the composition of equivocators with no message equivocation
-(no restriction on state equivocation).
+  Inclusion in the composition of equivocators with no message equivocation
+  (no restriction on state equivocation).
 *)
 Lemma equivocators_limited_equivocations_vlsm_incl_no_equivocations
   : VLSM_incl equivocators_limited_equivocations_vlsm (equivocators_no_equivocations_vlsm IM).
@@ -122,8 +122,9 @@ Proof.
   by intros l [s om] (_ & _ & _ & Hc & _).
 Qed.
 
-(** A valid state for a VLSM satisfying the limited equivocation assumption
-has limited equivocation.
+(**
+  A valid state for a VLSM satisfying the limited equivocation assumption
+  has limited equivocation.
 *)
 Lemma valid_state_limited_equivocation
   (s : composite_state equivocator_IM)
@@ -145,11 +146,12 @@ Proof.
     ; cbn in *; rewrite Ht.
 Qed.
 
-(** A valid valid trace for the composition of equivocators with limited
-state-equivocation and no message-equivocation is also a valid valid trace
-for the composition of equivocators with no message-equivocation and fixed-set
-state-equivocation, where the fixed set is given by the state-equivocators
-measured for the final state of the trace.
+(**
+  A valid valid trace for the composition of equivocators with limited
+  state-equivocation and no message-equivocation is also a valid valid trace
+  for the composition of equivocators with no message-equivocation and fixed-set
+  state-equivocation, where the fixed set is given by the state-equivocators
+  measured for the final state of the trace.
 *)
 Lemma equivocators_limited_valid_trace_is_fixed is s tr
   : finite_valid_trace_init_to equivocators_limited_equivocations_vlsm is s tr ->
@@ -197,9 +199,10 @@ Proof.
         by apply elem_of_elements, equivocating_indices_equivocating_validators, elem_of_list_to_set.
 Qed.
 
-(** Projections of valid traces for the composition of equivocators
-with limited state-equivocation and no message-equivocation have the
-[fixed_limited_equivocation_prop]erty.
+(**
+  Projections of valid traces for the composition of equivocators
+  with limited state-equivocation and no message-equivocation have the
+  [fixed_limited_equivocation_prop]erty.
 *)
 Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
   (final_descriptors : equivocator_descriptors)
@@ -251,9 +254,10 @@ Context
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
   .
 
-(** Projections of valid traces for the composition of equivocators
-with limited state-equivocation and no message-equivocation can be
-annotated with equivocators to obtain a limited-message equivocation trace.
+(**
+  Projections of valid traces for the composition of equivocators
+  with limited state-equivocation and no message-equivocation can be
+  annotated with equivocators to obtain a limited-message equivocation trace.
 *)
 Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation
   (final_descriptors : equivocator_descriptors)
@@ -294,11 +298,12 @@ Context
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
 
-(** If each of the nodes satisfy the [message_dependencies_full_node_condition_prop]erty,
-then projections of valid traces for the composition of equivocators
-with limited state-equivocation and no message-equivocation are also valid
-traces for the composition of regular nodes with limited
-message-equivocation.
+(**
+  If each of the nodes satisfy the [message_dependencies_full_node_condition_prop]erty,
+  then projections of valid traces for the composition of equivocators
+  with limited state-equivocation and no message-equivocation are also valid
+  traces for the composition of regular nodes with limited
+  message-equivocation.
 *)
 Lemma limited_equivocators_valid_trace_project
   (final_descriptors : equivocator_descriptors)
@@ -327,9 +332,10 @@ Proof.
   - by destruct Hpr_limited as [equivs Hpr_limited]; apply Hpr_limited.
 Qed.
 
-(** The above result formalized as a relation between the corresponding
-composite VLSMs. It yields a [VLSM_partial_projection] because for invalid
-[equivocator_descriptors] one might not be able to obtain a trace projection.
+(**
+  The above result formalized as a relation between the corresponding
+  composite VLSMs. It yields a [VLSM_partial_projection] because for invalid
+  [equivocator_descriptors] one might not be able to obtain a trace projection.
 *)
 Lemma limited_equivocators_vlsm_partial_projection
   (final_descriptors : equivocator_descriptors)
@@ -354,9 +360,10 @@ Proof.
     by inversion _Htr_project; subst.
 Qed.
 
-(** In the case of using the original machine copy for projecting each node, we
-are guaranteed to obtain a trace projection for each trace, hence the relation
-above strengthens to a [VLSM_projection].
+(**
+  In the case of using the original machine copy for projecting each node, we
+  are guaranteed to obtain a trace projection for each trace, hence the relation
+  above strengthens to a [VLSM_projection].
 *)
 Lemma limited_equivocators_vlsm_projection
   : VLSM_projection equivocators_limited_equivocations_vlsm Limited

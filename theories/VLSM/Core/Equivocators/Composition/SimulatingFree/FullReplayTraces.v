@@ -10,13 +10,13 @@ From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionPr
 
 (** * VLSM Equivocator Full Replay Traces
 
-In this section we show that given a trace of equivocators, one can "replay"
-that at the end of an existing trace, by first equivocating for each initial
-state and then performing each transition, but appropriately "shifted".
+  In this section we show that given a trace of equivocators, one can "replay"
+  that at the end of an existing trace, by first equivocating for each initial
+  state and then performing each transition, but appropriately "shifted".
 
-To make the results more general, we take the trace to be replayed to be
-produced by a restricted set of equivocators pre-loaded with messages
-satisfying some conditions.
+  To make the results more general, we take the trace to be replayed to be
+  produced by a restricted set of equivocators pre-loaded with messages
+  satisfying some conditions.
 *)
 
 Section all_equivocating.
@@ -67,8 +67,8 @@ Proof.
 Qed.
 
 (**
-Given a <<base_s>>tate to replay on, the replay label corresponding to a
-given transition label is obtained as the [equivocator_state_append_label].
+  Given a <<base_s>>tate to replay on, the replay label corresponding to a
+  given transition label is obtained as the [equivocator_state_append_label].
 *)
 Definition lift_equivocators_sub_label_to
   (base_s : composite_state equivocator_IM)
@@ -80,9 +80,9 @@ Definition lift_equivocators_sub_label_to
   existT i (equivocator_state_append_label (IM i) (base_s i) li).
 
 (**
-Given a <<base_s>>tate to replay on, the replay state corresponding to a
-destination state in a transition by appending its components to the
-base state using [equivocator_state_append].
+  Given a <<base_s>>tate to replay on, the replay state corresponding to a
+  destination state in a transition by appending its components to the
+  base state using [equivocator_state_append].
 *)
 Definition lift_equivocators_sub_state_to
   (base_s : composite_state equivocator_IM)
@@ -140,8 +140,9 @@ Definition spawn_initial_state
 Definition replayed_initial_state_from full_replay_state is :=
   fst (composite_apply_plan equivocator_IM full_replay_state (spawn_initial_state is)).
 
-(** The final state obtained after replaying an initial state is precisely
-the lifting of that initial state over the given base state.
+(**
+  The final state obtained after replaying an initial state is precisely
+  the lifting of that initial state over the given base state.
 *)
 Lemma replayed_initial_state_from_lift
   (full_replay_state : composite_state equivocator_IM)
@@ -208,8 +209,9 @@ Proof.
            by rewrite elem_of_list_singleton, dsig_eq in Hx.
 Qed.
 
-(** For any [equivocator_descriptors] corresponding to the base state
-the projection of the replaying of an initial state is empty.
+(**
+  For any [equivocator_descriptors] corresponding to the base state
+  the projection of the replaying of an initial state is empty.
 *)
 Lemma equivocators_trace_project_replayed_initial_state_from full_replay_state is
   (eqv_descriptors: equivocator_descriptors)
@@ -470,13 +472,13 @@ Qed.
 
 Section pre_loaded_constrained_projection.
 (**
-By replaying a [valid_trace] on top of a [valid_state] we obtain a
-[valid_trace]. We derive this as a more general [VLSM_weak_full_projection]
-result for a class of VLSM parameterized by a constraint having "good"
-properties and pre-loaded with a seed, to allow deriving the
-[VLSM_weak_full_projection] result for both the free composition of equivocators
-and for the no message equivocation composition of equivocators (free, or with
-an additional fixed-set state-equivocation constraint).
+  By replaying a [valid_trace] on top of a [valid_state] we obtain a
+  [valid_trace]. We derive this as a more general [VLSM_weak_full_projection]
+  result for a class of VLSM parameterized by a constraint having "good"
+  properties and pre-loaded with a seed, to allow deriving the
+  [VLSM_weak_full_projection] result for both the free composition of equivocators
+  and for the no message equivocation composition of equivocators (free, or with
+  an additional fixed-set state-equivocation constraint).
 *)
 
 Context
@@ -643,8 +645,9 @@ Proof.
   by intros m Hm; apply initial_message_is_valid; right.
 Qed.
 
-(** Here we specialize the generic [lift_equivocators_sub_weak_projection]
-result for the [equivocators_no_equivocations_constraint].
+(**
+  Here we specialize the generic [lift_equivocators_sub_weak_projection]
+  result for the [equivocators_no_equivocations_constraint].
 *)
 Lemma SeededXE_SeededNoEquiv_weak_full_projection
   : VLSM_weak_full_projection SeededXE SeededAllXE (lift_equivocators_sub_label_to full_replay_state) (lift_equivocators_sub_state_to full_replay_state).

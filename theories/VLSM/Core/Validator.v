@@ -4,11 +4,11 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition (* Equivocation M
 
 (** * VLSM Projection Validators
 
-In the sequel we fix VLSMs <<X>> and <<Y>> and some <<label_project>>
-and <state_project>> [VLSM_projection] mappings from <<X>> to <<Y>>.
+  In the sequel we fix VLSMs <<X>> and <<Y>> and some <<label_project>>
+  and <state_project>> [VLSM_projection] mappings from <<X>> to <<Y>>.
 
-The Transition Input Validation property validates an input corresponding to
-a projection by ensuring that that input can be "lifted" to the original vlsm.
+  The Transition Input Validation property validates an input corresponding to
+  a projection by ensuring that that input can be "lifted" to the original vlsm.
 *)
 
 Section sec_input_validation_definitions.
@@ -69,9 +69,9 @@ Context
   .
 
 (**
-We say that <<Y>> is a validator <<X>> w.r.t. the projection determined
-by <<label_project>> and <<state_project>> if [input_valid]ity in the
-component (for reachable states) implies [TransitionInputValidation].
+  We say that <<Y>> is a validator <<X>> w.r.t. the projection determined
+  by <<label_project>> and <<state_project>> if [input_valid]ity in the
+  component (for reachable states) implies [TransitionInputValidation].
 *)
 Definition projection_validator_prop :=
   forall li si omi,
@@ -79,17 +79,18 @@ Definition projection_validator_prop :=
     exists lX sX, InputValidation label_project state_project li si omi lX sX.
 
 (**
-We say that <<Y>> is a [transition_validator] if any [valid]
-transition (from a reachable state) in <<Y>> can be "lifted" to
-an [input_valid_transition] in <<X>>.
+  We say that <<Y>> is a [transition_validator] if any [valid]
+  transition (from a reachable state) in <<Y>> can be "lifted" to
+  an [input_valid_transition] in <<X>>.
 *)
 Definition transition_validator :=
   forall lY sY omi, input_valid PreY lY (sY, omi) ->
   exists lX sX sX' om',
     TransitionValidation label_project state_project lY sY omi lX sX sX' om'.
 
-(** A message validator can check within a component whether the message
-is valid for the composition.
+(**
+  A message validator can check within a component whether the message
+  is valid for the composition.
 *)
 Definition message_validator_prop :=
   forall li si im,
@@ -125,15 +126,15 @@ End projection_validator.
 
 (** ** Induced VLSM validators
 
-Given an existing [VLSM], a target [VLSM_type], a <<state_project>>ion map, and
-a partial <<label_project>>ion map, and some corresponding reverse maps
-<<state_lift>> and <<label_lift>> we can build a new VLSM over the target type,
-induced by the source VLSM, its missing components being defined based on the
-source components.
+  Given an existing [VLSM], a target [VLSM_type], a <<state_project>>ion map, and
+  a partial <<label_project>>ion map, and some corresponding reverse maps
+  <<state_lift>> and <<label_lift>> we can build a new VLSM over the target type,
+  induced by the source VLSM, its missing components being defined based on the
+  source components.
 
-If additionally some consistency ([weak_projection_transition_consistency_None]
-and [weak_projection_transition_consistency_Some]) properties are satisfied,
-then the induced VLSM is a [VLSM_projection] of the source one.
+  If additionally some consistency ([weak_projection_transition_consistency_None]
+  and [weak_projection_transition_consistency_Some]) properties are satisfied,
+  then the induced VLSM is a [VLSM_projection] of the source one.
 *)
 Section sec_projection_induced_validator.
 
@@ -223,8 +224,9 @@ Lemma projection_induced_validator_is_validating :
   projection_validator_prop pre_projection_induced_validator label_project state_project.
 Proof. by intros li si omi (_ & _ & Hv). Qed.
 
-(** When we have a [VLSM_projection] to the [projection_induced_validator],
-[valid]ity is [input_valid]ity.
+(**
+  When we have a [VLSM_projection] to the [projection_induced_validator],
+  [valid]ity is [input_valid]ity.
 *)
 Lemma induced_validator_valid_is_input_valid
   (Hproj : VLSM_projection X pre_projection_induced_validator label_project state_project)
@@ -241,9 +243,10 @@ Qed.
 
 Section sec_projection_induced_validator_as_projection.
 
-(** Transitions through states and labels with the same projections using the
-same message should lead to the same output message and states with the same
-projections.
+(**
+  Transitions through states and labels with the same projections using the
+  same message should lead to the same output message and states with the same
+  projections.
 *)
 Definition induced_validator_transition_consistency_Some : Prop :=
   forall lX1 lX2 lY, label_project lX1 = Some lY -> label_project lX2 = Some lY ->
@@ -252,8 +255,9 @@ Definition induced_validator_transition_consistency_Some : Prop :=
   forall sX2' oom2, vtransition X lX2 (sX2, iom) = (sX2', oom2) ->
   state_project sX1' = state_project sX2' /\ oom1 = oom2.
 
-(** A weaker version of [induced_validator_transition_consistency_Some].
-Only used locally.
+(**
+  A weaker version of [induced_validator_transition_consistency_Some].
+  Only used locally.
 *)
 #[local] Definition weak_projection_transition_consistency_Some
   : Prop :=
@@ -280,8 +284,9 @@ Context
     := basic_weak_projection_transition_consistency_Some Hlabel_lift Hstate_lift Htransition_consistency)
   .
 
-(** Under transition-consistency assumptions, valid messages of the
-[projection_induced_validator] coincide with those of the source [VLSM].
+(**
+  Under transition-consistency assumptions, valid messages of the
+  [projection_induced_validator] coincide with those of the source [VLSM].
 *)
 Lemma projection_induced_valid_message_char
   : forall om, option_valid_message_prop projection_induced_validator om ->
@@ -347,8 +352,9 @@ Proof.
   by rewrite induced_validator_transition_item_lift; f_equal.
 Qed.
 
-(** If there is a way to "lift" valid traces of the [projection_induced_validator]
-to the original [VLSM], then the induced [VLSM_projection] is friendly.
+(**
+  If there is a way to "lift" valid traces of the [projection_induced_validator]
+  to the original [VLSM], then the induced [VLSM_projection] is friendly.
 *)
 Lemma basic_projection_induces_friendliness
   : VLSM_full_projection pre_projection_induced_validator X label_lift state_lift ->
@@ -391,9 +397,10 @@ Context
   (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
   .
 
-(** Under [weak_projection_transition_consistency_Some] assumptions,
-[VLSM_incl]usion between source [VLSM]s implies [VLSM_incl]usion between
-their projections induced by the same maps.
+(**
+  Under [weak_projection_transition_consistency_Some] assumptions,
+  [VLSM_incl]usion between source [VLSM]s implies [VLSM_incl]usion between
+  their projections induced by the same maps.
 *)
 Lemma projection_induced_validator_incl
   (MX1 MX2 : VLSMMachine TX)
@@ -446,9 +453,10 @@ Proof.
     congruence.
 Qed.
 
-(** Under [weak_projection_transition_consistency_Some] assumptions,
-[VLSM_eq]uality between source [VLSM]s implies [VLSM_eq]uality between
-their projections induced by the same maps.
+(**
+  Under [weak_projection_transition_consistency_Some] assumptions,
+  [VLSM_eq]uality between source [VLSM]s implies [VLSM_eq]uality between
+  their projections induced by the same maps.
 *)
 Lemma projection_induced_validator_eq
   (MX1 MX2 : VLSMMachine TX)
@@ -472,8 +480,8 @@ End sec_projection_induced_validator_incl.
 
 (** ** Projection validators and Byzantine behavior
 
-In the sequel we assume that the [projection_induced_validator_is_projection] and
-that initial states of <<Y>> can be lifted to <<X>>.
+  In the sequel we assume that the [projection_induced_validator_is_projection] and
+  that initial states of <<Y>> can be lifted to <<X>>.
 *)
 
 Section induced_validator_validators.
@@ -504,9 +512,10 @@ Context
   (Hproj : VLSM_projection X PreY label_project state_project)
   .
 
-(** If there is a [VLSM_projection] from <<X>> to <<PreY>> and the
-[projection_induced_validator_is_projection], then a [transition] [valid] for the
-[projection_induced_validator] has the same output as the transition on <<Y>>.
+(**
+  If there is a [VLSM_projection] from <<X>> to <<PreY>> and the
+  [projection_induced_validator_is_projection], then a [transition] [valid] for the
+  [projection_induced_validator] has the same output as the transition on <<Y>>.
 *)
 Lemma projection_induced_valid_transition_eq
   : forall l s om, vvalid Xi l (s, om) ->
@@ -534,12 +543,13 @@ Proof.
     by setoid_rewrite <- HtXi; rewrite <- projection_induced_valid_transition_eq.
 Qed.
 
-(** An alternative formulation of the [projection_validator_prop]erty with a
-seemingly stronger hypothesis, states that <<Y>> is a validator for <<X>> if
-for any <<li>>, <<si>>, <<iom>> such that <<li valid (si, iom)>> in <<Y>>
-and <<si>> is a valid state in the induced projection <<Xi>>,
-implies that <<li valid (si, om)>> in the induced projection <<Xi>>
-(i.e., [projection_induced_valid]ity).
+(**
+  An alternative formulation of the [projection_validator_prop]erty with a
+  seemingly stronger hypothesis, states that <<Y>> is a validator for <<X>> if
+  for any <<li>>, <<si>>, <<iom>> such that <<li valid (si, iom)>> in <<Y>>
+  and <<si>> is a valid state in the induced projection <<Xi>>,
+  implies that <<li valid (si, om)>> in the induced projection <<Xi>>
+  (i.e., [projection_induced_valid]ity).
 *)
 Definition projection_validator_prop_alt :=
   forall li si iom,
@@ -547,8 +557,9 @@ Definition projection_validator_prop_alt :=
     valid_state_prop Xi si ->
     vvalid Xi li (si, iom).
 
-(** Under validator assumptions, all reachable states for component <<Y>> are
-valid states in the induced projection <<Xi>>.
+(**
+  Under validator assumptions, all reachable states for component <<Y>> are
+  valid states in the induced projection <<Xi>>.
 *)
 Lemma validator_alt_free_states_are_projection_states
   : projection_validator_prop_alt ->
@@ -604,10 +615,10 @@ Context
   .
 
 (**
-We can show that <<PreY>> is included in <<Xi>> by applying the meta-lemma
-[VLSM_incl_finite_traces_characterization], and by induction on the length
-of a trace. The [projection_validator_prop]erty is used to translate
-[input_valid]ity for the PreY machine into the [pre_projection_induced_validator].
+  We can show that <<PreY>> is included in <<Xi>> by applying the meta-lemma
+  [VLSM_incl_finite_traces_characterization], and by induction on the length
+  of a trace. The [projection_validator_prop]erty is used to translate
+  [input_valid]ity for the PreY machine into the [pre_projection_induced_validator].
 *)
 Lemma pre_loaded_with_all_messages_validator_proj_incl
   : VLSM_incl PreY Xi.
@@ -633,11 +644,11 @@ Proof.
 Qed.
 
 (**
-Given that any projection is included in the [pre_loaded_with_all_messages_vlsm]
-of its component (Lemma [proj_pre_loaded_with_all_messages_incl]), we conclude
-that <<PreY>> and <<Xi>> are trace-equal.  This means that all the
-byzantine behavior of a component which is a validator
-is exhibited by its corresponding projection.
+  Given that any projection is included in the [pre_loaded_with_all_messages_vlsm]
+  of its component (Lemma [proj_pre_loaded_with_all_messages_incl]), we conclude
+  that <<PreY>> and <<Xi>> are trace-equal.  This means that all the
+  byzantine behavior of a component which is a validator
+  is exhibited by its corresponding projection.
 *)
 Lemma pre_loaded_with_all_messages_validator_proj_eq
   : VLSM_eq PreY Xi.
@@ -653,8 +664,8 @@ End induced_validator_validators.
 
 (** ** Validator properties for the [component_projection].
 
-In this section we specialize the validator-related results to the
-components of a composition.
+  In this section we specialize the validator-related results to the
+  components of a composition.
 *)
 
 Section component_projection_validator.
@@ -677,8 +688,8 @@ Definition composite_project_label (l : composite_label IM)
   end.
 
 (**
-The specialization of the more abstract [projection_induced_validator] to the
-projection from a composition to a component.
+  The specialization of the more abstract [projection_induced_validator] to the
+  projection from a composition to a component.
 *)
 Definition composite_vlsm_induced_validator : VLSM message :=
   projection_induced_validator X (type (IM i))
@@ -734,8 +745,9 @@ Proof.
   by state_update_simpl.
 Qed.
 
-(** The [projection_induced_validator] by the [composite_project_label] and the
-projection of the state to the component is indeed a [VLSM_projection].
+(**
+  The [projection_induced_validator] by the [composite_project_label] and the
+  projection of the state to the component is indeed a [VLSM_projection].
 *)
 Lemma composite_projection_induced_validator_is_projection :
   VLSM_projection X pre_composite_vlsm_induced_validator
@@ -752,15 +764,15 @@ End component_projection_validator.
 
 Section sec_component_projection_validator_alt.
 (**
-** Direct definition of induced validator from composition to component
+  ** Direct definition of induced validator from composition to component
 
-In this section we provide a definition of the induced validator from a
-composition to a component obtained by strengthening the component instead of
-deriving its elements via the projection [composite_vlsm_induced_projection_validator].
+  In this section we provide a definition of the induced validator from a
+  composition to a component obtained by strengthening the component instead of
+  deriving its elements via the projection [composite_vlsm_induced_projection_validator].
 
-We then show this VLSM and some of its pre-loaded variants are [VLSM_eq]ual
-(trace-equivalent) to the corresponding variants of the
-[composite_vlsm_induced_validator].
+  We then show this VLSM and some of its pre-loaded variants are [VLSM_eq]ual
+  (trace-equivalent) to the corresponding variants of the
+  [composite_vlsm_induced_validator].
 *)
 
 Context
@@ -774,8 +786,8 @@ Context
   .
 
 (**
-The [composite_vlsm_induced_projection_valid]ity is defined as the projection of
-the [input_valid]ity of <<X>>:
+  The [composite_vlsm_induced_projection_valid]ity is defined as the projection of
+  the [input_valid]ity of <<X>>:
 *)
 Definition composite_vlsm_induced_projection_valid
   (li : vlabel (IM i))
@@ -786,9 +798,9 @@ Definition composite_vlsm_induced_projection_valid
     s i = si /\ input_valid X (existT i li) (s, omi).
 
 (**
-Since the [composite_vlsm_induced_projection_valid]ity is derived from
-[input_valid]ity, which in turn depends on [valid]ity in the component, it is
-easy to see that it implies [valid]ity in the component.
+  Since the [composite_vlsm_induced_projection_valid]ity is derived from
+  [input_valid]ity, which in turn depends on [valid]ity in the component, it is
+  easy to see that it implies [valid]ity in the component.
 *)
 Lemma projection_valid_implies_valid
   (li : vlabel (IM i))
@@ -798,9 +810,9 @@ Lemma projection_valid_implies_valid
 Proof. by destruct siomi, Hcomposite as (s & <- & _ & _ & []). Qed.
 
 (**
-We define the induced projection validator of <<X>> to index <<i>> as the [VLSM]
-obtained by changing the validity predicate of <<IM i>> to
-[composite_vlsm_induced_projection_valid].
+  We define the induced projection validator of <<X>> to index <<i>> as the [VLSM]
+  obtained by changing the validity predicate of <<IM i>> to
+  [composite_vlsm_induced_projection_valid].
 *)
 Definition composite_vlsm_induced_projection_validator_machine
   : VLSMMachine (type (IM i)) :=
@@ -917,10 +929,10 @@ Context
   .
 
 (**
-Let us fix a (regular) VLSM <<X>>. <<X>> is a self-validator if for any
-arguments satisfying [valid] where the state is reachable in the
-[pre_loaded_with_all_messages_vlsm], the arguments are also
-a [valid_state] and [valid_message] for the original VLSM.
+  Let us fix a (regular) VLSM <<X>>. <<X>> is a self-validator if for any
+  arguments satisfying [valid] where the state is reachable in the
+  [pre_loaded_with_all_messages_vlsm], the arguments are also
+  a [valid_state] and [valid_message] for the original VLSM.
 *)
 
 Definition self_validator_vlsm_prop :=
@@ -929,12 +941,12 @@ Definition self_validator_vlsm_prop :=
     input_valid X l (s, om).
 
 (**
-In the sequel we will show that a VLSM with the [self_validator_vlsm_prop]erty
-is trace-equal to its associated [pre_loaded_with_all_messages_vlsm], basically
-meaning (due to Lemma [byzantine_pre_loaded_with_all_messages]) that all traces
-with the [byzantine_trace_prop]erty associated to self-validator VLSMs are also
-[valid_trace]s for that VLSM, meaning that the VLSM cannot exhibit
-byzantine behavior.
+  In the sequel we will show that a VLSM with the [self_validator_vlsm_prop]erty
+  is trace-equal to its associated [pre_loaded_with_all_messages_vlsm], basically
+  meaning (due to Lemma [byzantine_pre_loaded_with_all_messages]) that all traces
+  with the [byzantine_trace_prop]erty associated to self-validator VLSMs are also
+  [valid_trace]s for that VLSM, meaning that the VLSM cannot exhibit
+  byzantine behavior.
 *)
 
 Context
@@ -943,12 +955,12 @@ Context
   .
 
 (**
-Let <<PreX>> be the [pre_loaded_with_all_messages_vlsm] associated to X.
-From Lemma [vlsm_incl_pre_loaded_with_all_messages_vlsm] we know that <<X>> is
-included in <<PreX>>.
+  Let <<PreX>> be the [pre_loaded_with_all_messages_vlsm] associated to X.
+  From Lemma [vlsm_incl_pre_loaded_with_all_messages_vlsm] we know that <<X>> is
+  included in <<PreX>>.
 
-To prove the converse we use the [self_validator_vlsm_prop]erty to
-verify the conditions of meta-lemma [VLSM_incl_finite_traces_characterization].
+  To prove the converse we use the [self_validator_vlsm_prop]erty to
+  verify the conditions of meta-lemma [VLSM_incl_finite_traces_characterization].
 *)
 
 Lemma pre_loaded_with_all_messages_self_validator_vlsm_incl
@@ -973,9 +985,7 @@ Proof.
     revert Hvx; apply Hvalidator.
 Qed.
 
-(**
-We conclude that <<X>> and <<PreX>> are trace-equal.
-*)
+(** We conclude that <<X>> and <<PreX>> are trace-equal. *)
 
 Lemma pre_loaded_with_all_messages_self_validator_vlsm_eq
   : VLSM_eq PreX X.

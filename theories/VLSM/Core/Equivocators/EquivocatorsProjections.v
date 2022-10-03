@@ -7,15 +7,15 @@ From VLSM.Core Require Import VLSM VLSMProjections Equivocators.Equivocators.
 Section equivocator_vlsm_projections.
 
 (**
-Given an [equivocator_vlsm] trace ending in a state <<s>>, we can obtain a
-trace in the original vlsm leading to the <<si>>, the  <<i>>th internal
-state in <<s>>, by extracting a path leading to si.
+  Given an [equivocator_vlsm] trace ending in a state <<s>>, we can obtain a
+  trace in the original vlsm leading to the <<si>>, the  <<i>>th internal
+  state in <<s>>, by extracting a path leading to si.
 
-This section is devoting to formalizing this projects studying its
-properties. In particular, we show that given a [valid_trace] for
-the [equivocator_vlsm], we can always extract such a trace for any valid
-index, and, furthermore, that the trace extracted is valid for the
-original machine.
+  This section is devoting to formalizing this projects studying its
+  properties. In particular, we show that given a [valid_trace] for
+  the [equivocator_vlsm], we can always extract such a trace for any valid
+  index, and, furthermore, that the trace extracted is valid for the
+  original machine.
 *)
 
 Context
@@ -25,11 +25,12 @@ Context
   (MachineDescriptor := MachineDescriptor X)
   .
 
-(** Given a [transition_item] <<item>> for the [equivocator_vlsm] and a
-[MachineDescriptor] referring to a position in the [destination] of <<item>>,
-it returns a transition item for the original machine (if the descriptor
-matches the copy affected by this transition) and a new machine descriptor
-referring to a position in the state prior to the transition.
+(**
+  Given a [transition_item] <<item>> for the [equivocator_vlsm] and a
+  [MachineDescriptor] referring to a position in the [destination] of <<item>>,
+  it returns a transition item for the original machine (if the descriptor
+  matches the copy affected by this transition) and a new machine descriptor
+  referring to a position in the state prior to the transition.
 *)
 Definition equivocator_vlsm_transition_item_project
   (item : vtransition_item equivocator_vlsm)
@@ -62,8 +63,8 @@ Definition equivocator_vlsm_transition_item_project
   end.
 
 (**
-Since equivocators always have machine 0, We can always project a 'valid'
-equivocator 'transition item' to component 0.
+  Since equivocators always have machine 0, We can always project a 'valid'
+  equivocator 'transition item' to component 0.
 *)
 Lemma equivocators_vlsm_transition_item_project_zero_descriptor
   (item : vtransition_item equivocator_vlsm)
@@ -86,9 +87,7 @@ Proof.
     by eexists.
 Qed.
 
-(**
-An injectivity result for [equivocator_vlsm_transition_item_project].
-*)
+(** An injectivity result for [equivocator_vlsm_transition_item_project]. *)
 Lemma equivocator_vlsm_transition_item_project_some_inj
   {item : vtransition_item equivocator_vlsm}
   {itemX itemX' : vtransition_item X}
@@ -118,8 +117,8 @@ Proof.
 Qed.
 
 (**
-[equivocator_vlsm_transition_item_project] only fails for an out-of-range
-descriptor.
+  [equivocator_vlsm_transition_item_project] only fails for an out-of-range
+  descriptor.
 *)
 Lemma equivocator_transition_item_project_inv_none
   (item : vtransition_item equivocator_vlsm)
@@ -150,8 +149,8 @@ Proof.
 Qed.
 
 (**
-If [equivocator_vlsm_transition_item_project] produces a transition item,
-then that item has the same [input] and [output] as the argument item.
+  If [equivocator_vlsm_transition_item_project] produces a transition item,
+  then that item has the same [input] and [output] as the argument item.
 *)
 Lemma equivocator_transition_item_project_inv_messages
   (item : vtransition_item equivocator_vlsm)
@@ -174,9 +173,9 @@ Proof.
 Qed.
 
 (**
-If the 'destination' of a 'valid' equivocator 'transition_item' is singleton,
-then by projecting the item to component 0 we actually obtain a
-'transition_item' for the original machine.
+  If the 'destination' of a 'valid' equivocator 'transition_item' is singleton,
+  then by projecting the item to component 0 we actually obtain a
+  'transition_item' for the original machine.
 *)
 Lemma no_equivocating_equivocator_transition_item_project
   (item : vtransition_item equivocator_vlsm)
@@ -198,10 +197,11 @@ Proof.
   subst. simpl. repeat split.
 Qed.
 
-(** For every valid transition there exists a (non-equivocating)
-[MachineDescriptor] for its destination such that by projecting
-the transition item through that descriptor we obtain the transition
-item corresponding to the input transition.
+(**
+  For every valid transition there exists a (non-equivocating)
+  [MachineDescriptor] for its destination such that by projecting
+  the transition item through that descriptor we obtain the transition
+  item corresponding to the input transition.
 *)
 Lemma exists_equivocator_transition_item_project
   (item : vtransition_item equivocator_vlsm)
@@ -233,26 +233,27 @@ Proof.
     by rewrite (equivocator_state_last_n _ s), decide_True.
 Qed.
 
-(** This property attempts to characterize the descriptor obtained after
-applying an equivocator projection (trace, transition_item) function in
-terms of the input descriptor and the resulting state.
+(**
+  This property attempts to characterize the descriptor obtained after
+  applying an equivocator projection (trace, transition_item) function in
+  terms of the input descriptor and the resulting state.
 
-It is assumed that the original_descriptor is a proper descriptor
-w.r.t. the final state of the trace/transition on which
-[equivocator_vlsm_transition_item_project] or [equivocator_vlsm_trace_project]
-was applied. In particular this makes s_descriptor a proper descriptor for
-the state s (see the lemmas above and below).
+  It is assumed that the original_descriptor is a proper descriptor
+  w.r.t. the final state of the trace/transition on which
+  [equivocator_vlsm_transition_item_project] or [equivocator_vlsm_trace_project]
+  was applied. In particular this makes s_descriptor a proper descriptor for
+  the state s (see the lemmas above and below).
 
-What this property adds is the fact that it constrains more the output
-descriptor of a projection operation in terms of the input descriptor
-(if the input is Newmachine, the output must be Newmachine, if both
-are Existing, then the output index must be less than the input), while also
-guaranteeing that the output state of such a projection has a size less than
-the index of the input descriptor in case that output descriptor becomes
-NewMachine (signaling that the projection is complete).
+  What this property adds is the fact that it constrains more the output
+  descriptor of a projection operation in terms of the input descriptor
+  (if the input is Newmachine, the output must be Newmachine, if both
+  are Existing, then the output index must be less than the input), while also
+  guaranteeing that the output state of such a projection has a size less than
+  the index of the input descriptor in case that output descriptor becomes
+  NewMachine (signaling that the projection is complete).
 
-This property is crucial for establishing an invariant on known equivocators
-(see [full_node_limited_equivocation_constraint_known_equivocators]).
+  This property is crucial for establishing an invariant on known equivocators
+  (see [full_node_limited_equivocation_constraint_known_equivocators]).
 *)
 Definition previous_state_descriptor_prop
   (original_descriptor : MachineDescriptor)
@@ -467,10 +468,10 @@ Proof.
 Qed.
 
 (**
-The projection of an [equivocator_vlsm] trace is obtained by traversing the
-trace from right to left guided by the descriptors produced by
-[equivocator_vlsm_transition_item_project] and gathering all non-empty
-[transition_item]s it produces.
+  The projection of an [equivocator_vlsm] trace is obtained by traversing the
+  trace from right to left guided by the descriptors produced by
+  [equivocator_vlsm_transition_item_project] and gathering all non-empty
+  [transition_item]s it produces.
 *)
 Definition equivocator_vlsm_trace_project
   (tr : list (vtransition_item equivocator_vlsm))
@@ -493,8 +494,8 @@ Definition equivocator_vlsm_trace_project
     tr.
 
 (**
-Projecting on a [NewMachine] descriptor yields an empty trace and the same
-descriptor.
+  Projecting on a [NewMachine] descriptor yields an empty trace and the same
+  descriptor.
 *)
 Lemma equivocator_vlsm_trace_project_on_new_machine
   (tr : list (vtransition_item equivocator_vlsm))
@@ -504,8 +505,9 @@ Proof.
   by induction tr; simpl; rewrite ?IHtr.
 Qed.
 
-(** [equivocator_vlsm_trace_project] acts like a morphism w.r.t. concatenation
-(single element in left operand case).
+(**
+  [equivocator_vlsm_trace_project] acts like a morphism w.r.t. concatenation
+  (single element in left operand case).
 *)
 Lemma equivocator_vlsm_trace_project_cons
   (bprefix : vtransition_item equivocator_vlsm)
@@ -532,8 +534,7 @@ Proof.
   - by exists []; exists tr; cbn; rewrite Hprefix.
 Qed.
 
-(** [equivocator_vlsm_trace_project] acts like a morphism w.r.t. concatenation
-*)
+(** [equivocator_vlsm_trace_project] acts like a morphism w.r.t. concatenation *)
 Lemma equivocator_vlsm_trace_project_app
   (bprefix bsuffix : list (vtransition_item equivocator_vlsm))
   (dlast dstart : MachineDescriptor)
@@ -566,8 +567,9 @@ Proof.
     + by subst; rewrite app_assoc.
 Qed.
 
-(** [equivocator_vlsm_trace_project] acts like a morphism w.r.t. concatenation
-(converse)
+(**
+  [equivocator_vlsm_trace_project] acts like a morphism w.r.t. concatenation
+  (converse)
 *)
 Lemma equivocator_vlsm_trace_project_app_inv
   (bprefix bsuffix : list (vtransition_item equivocator_vlsm))
@@ -590,9 +592,7 @@ Proof.
     ; inversion Hprefix; subst.
 Qed.
 
-(**
-Next we prove some inversion properties for [equivocator_vlsm_transition_item_project].
-*)
+(** Next we prove some inversion properties for [equivocator_vlsm_transition_item_project]. *)
 Lemma equivocator_valid_transition_project_inv2
   (l : vlabel equivocator_vlsm)
   (s' s: vstate equivocator_vlsm)
@@ -808,8 +808,8 @@ Proof.
 Qed.
 
 (**
-The projection of a segment of an [equivocator_vlsm] valid trace
-is defined and a valid trace segment in the original vlsm.
+  The projection of a segment of an [equivocator_vlsm] valid trace
+  is defined and a valid trace segment in the original vlsm.
 *)
 Lemma preloaded_with_equivocator_vlsm_trace_project_valid
   (seed : message -> Prop)
@@ -919,9 +919,9 @@ Proof.
 Qed.
 
 (**
-The projection of a segment of a valid trace from the [pre_loaded_with_all_messages_vlsm]
-corresponding to the [equivocator_vlsm] is defined and it is a valid
-trace segment in the [pre_loaded_with_all_messages_vlsm] corresponding to the original vlsm.
+  The projection of a segment of a valid trace from the [pre_loaded_with_all_messages_vlsm]
+  corresponding to the [equivocator_vlsm] is defined and it is a valid
+  trace segment in the [pre_loaded_with_all_messages_vlsm] corresponding to the original vlsm.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid
   (bs be : vstate equivocator_vlsm)
@@ -959,8 +959,8 @@ Proof.
 Qed.
 
 (**
-If [equivocator_vlsm_trace_project] does not fail, then the index of the
-machine descriptor is valid for the last state of the trace argument.
+  If [equivocator_vlsm_trace_project] does not fail, then the index of the
+  machine descriptor is valid for the last state of the trace argument.
 *)
 Lemma equivocator_vlsm_trace_project_inv
   (tr: list transition_item)
@@ -994,8 +994,8 @@ Proof.
 Qed.
 
 (**
-Projecting a valid trace segment on an index which is valid for the
-first state of the trace does not fail and yields the same index.
+  Projecting a valid trace segment on an index which is valid for the
+  first state of the trace does not fail and yields the same index.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid_inv
   (bs : vstate equivocator_vlsm)
@@ -1030,9 +1030,7 @@ Proof.
     + by exists tr.
 Qed.
 
-(**
-An inversion lemma about projections of a valid trace
-*)
+(** An inversion lemma about projections of a valid trace *)
 Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
   (is fs: state)
   (tr: list transition_item)

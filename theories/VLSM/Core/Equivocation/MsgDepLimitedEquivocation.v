@@ -7,10 +7,11 @@ From VLSM.Core Require Import Equivocation.FixedSetEquivocation Equivocation.Lim
 From VLSM.Core Require Import Equivocation.MsgDepFixedSetEquivocation Equivocation.TraceWiseEquivocation.
 From VLSM.Core Require Import Validator ProjectionTraces Equivocation.
 
-(** To allow capturing the two models of limited equivocation described in the
-    sections below, we first define a notion of limited equivocation parameterized
-    on a function yielding the set of equivocators induced by a received message,
-    other that the message sender.
+(**
+  To allow capturing the two models of limited equivocation described in the
+  sections below, we first define a notion of limited equivocation parameterized
+  on a function yielding the set of equivocators induced by a received message,
+  other that the message sender.
 *)
 
 Section sec_coequivocating_senders_limited_equivocation.

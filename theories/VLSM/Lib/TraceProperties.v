@@ -7,8 +7,10 @@ Import Prenex Implicits.
 
 (** * Core properties of possibly-infinite traces *)
 
-(** The property encodings and many specific properties are adapted from the paper
-#<a href="https://arxiv.org/abs/1412.6579">A Hoare logic for the coinductive trace-based big-step semantics of While</a>#. *)
+(**
+  The property encodings and many specific properties are adapted from the paper
+  #<a href="https://arxiv.org/abs/1412.6579">A Hoare logic for the coinductive trace-based big-step semantics of While</a>#.
+*)
 
 Section TraceProperties.
 
@@ -16,8 +18,10 @@ Context {A B : Type}.
 
 #[local] Notation trace := (@trace A B).
 
-(** We want to reason about trace properties that do not distinguish
-bisimilar traces; these are called _setoid_ properties. *)
+(**
+  We want to reason about trace properties that do not distinguish
+  bisimilar traces; these are called _setoid_ properties.
+*)
 
 Definition setoidT (p : trace -> Prop) :=
 forall tr0, p tr0 -> forall tr1, bisim tr0 tr1 -> p tr1.
@@ -387,8 +391,10 @@ Qed.
 
 (** ** Follows property *)
 
-(** The follows property holds for two traces when the first is a
-prefix of the second, and [p] holds for the suffix. *)
+(**
+  The follows property holds for two traces when the first is a
+  prefix of the second, and [p] holds for the suffix.
+*)
 
 CoInductive followsT (p : trace -> Prop) : trace -> trace -> Prop :=
 | followsT_nil : forall a tr,
@@ -516,8 +522,10 @@ Qed.
 
 (** ** Append property *)
 
-(** The append property holds for a trace whenever it has
-a prefix for which [p1] holds, and [p2] holds for the suffix. *)
+(**
+  The append property holds for a trace whenever it has
+  a prefix for which [p1] holds, and [p2] holds for the suffix.
+*)
 
 Definition appendT (p1 p2: trace -> Prop) : trace -> Prop :=
 fun tr => exists tr', p1 tr' /\ followsT p2 tr' tr.
@@ -1119,8 +1127,10 @@ Qed.
 
 (** ** Midpoint property *)
 
-(** This property identifies a trace that is both a suffix of [tr0] and a prefix of [tr1],
-and is the stepping stone to showing the right associativity of the append property. *)
+(**
+  This property identifies a trace that is both a suffix of [tr0] and a prefix of [tr1],
+  and is the stepping stone to showing the right associativity of the append property.
+*)
 
 CoInductive midpointT (p0 p1: trace -> Prop) (tr0 tr1: trace) (h: followsT (appendT p0 p1) tr0 tr1) : trace -> Prop :=
 | midpointT_nil : forall tr,

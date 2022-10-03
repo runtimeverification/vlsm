@@ -11,11 +11,12 @@ Context
   {message : Type}
   {T : VLSMType message}.
 
-(** A plan is a (sequence of actions) which can be attempted on a
-given state to yield a trace.
-A [plan_item] is a singleton plan, and contains a label and an input
-which would allow to transition from any given state
-(note that we don't address validity for now)
+(**
+  A plan is a (sequence of actions) which can be attempted on a
+  given state to yield a trace.
+  A [plan_item] is a singleton plan, and contains a label and an input
+  which would allow to transition from any given state
+  (note that we don't address validity for now)
 *)
 Record plan_item :=
   { label_a : label;
@@ -32,16 +33,18 @@ Context
   {transition : label -> state * option message -> state * option message}
   .
 
-(** If we don't concern ourselves with the validity of the traces obtained
-upon applying a plan, then a [VLSMType] and a [transition] function
-suffice for defining plan application and related results.
-The advantage of this approach is that the same definition works for
-pre_loaded versions as well as for all constrained variants of a composition.
+(**
+  If we don't concern ourselves with the validity of the traces obtained
+  upon applying a plan, then a [VLSMType] and a [transition] function
+  suffice for defining plan application and related results.
+  The advantage of this approach is that the same definition works for
+  pre_loaded versions as well as for all constrained variants of a composition.
 *)
 
-(** Applying a plan (list of [plan_item]s) to a state we obtain a
-final state and a trace. We define that in the [_apply_plan] definition below
-using a folding operation on the [_apply_plan_folder] function.
+(**
+  Applying a plan (list of [plan_item]s) to a state we obtain a
+  final state and a trace. We define that in the [_apply_plan] definition below
+  using a folding operation on the [_apply_plan_folder] function.
 *)
 Definition _apply_plan_folder
   (a : plan_item)
@@ -164,9 +167,9 @@ Context
   .
 
 (**
-We define several notations useful when we want to use the results above
-for a specific [VLSM], by instantiating the generic definitions with the
-corresponding [type] and [transition].
+  We define several notations useful when we want to use the results above
+  for a specific [VLSM], by instantiating the generic definitions with the
+  corresponding [type] and [transition].
 *)
 
 Definition vplan_item := (@plan_item _ (type X)).
@@ -188,8 +191,9 @@ Definition apply_plan_last
   : finite_trace_last start (fst after_a) = snd after_a
   := (@_apply_plan_last _ (type X) (vtransition X) start a).
 
-(** A plan is valid w.r.t. a state if by applying it to that state we
-obtain a valid trace sequence.
+(**
+  A plan is valid w.r.t. a state if by applying it to that state we
+  obtain a valid trace sequence.
 *)
 Definition finite_valid_plan_from
   (s : vstate X)
@@ -234,8 +238,9 @@ Proof.
   by apply finite_valid_trace_last_pstate.
 Qed.
 
-(** By extracting a plan from a [valid_trace] based on a state <<s>>
-and reapplying the plan to the same state <<s>> we obtain the original trace
+(**
+  By extracting a plan from a [valid_trace] based on a state <<s>>
+  and reapplying the plan to the same state <<s>> we obtain the original trace
 *)
 Lemma trace_to_plan_to_trace_from_to
   (s s' : vstate X)
@@ -264,8 +269,9 @@ Proof.
   by rewrite Htr.
 Qed.
 
-(** The plan extracted from a valid trace is valid w.r.t. the starting
-state of the trace.
+(**
+  The plan extracted from a valid trace is valid w.r.t. the starting
+  state of the trace.
 *)
 Lemma finite_valid_trace_from_to_plan
   (s : vstate X)

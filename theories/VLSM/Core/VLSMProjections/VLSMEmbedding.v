@@ -7,20 +7,20 @@ Section VLSM_full_projection.
 
 (** * VLSM Full Projection (Embedding)
 
-A VLSM projection guaranteeing the existence of projection for all labels and
-states, and the full correspondence between [transition_item]s.
-We say that VLSM <<X>> fully projects (embeds) into VLSM <<Y>> (sharing the same messages)
-if there exist maps <<label_project>> taking <<X>>-labels to <<Y>>-labels
-and <<state_project>> taking <<X>>-states to <<Y>>-states, such that the
-[finite_valid_trace_prop]erty is preserved by the trace
-transformation induced by the label and state projection functions,
-in which each <<X>>-[transition_item] is projected to an <<Y>>-[transition_item]
-preserving the messages and transforming labels and states accordingly.
+  A VLSM projection guaranteeing the existence of projection for all labels and
+  states, and the full correspondence between [transition_item]s.
+  We say that VLSM <<X>> fully projects (embeds) into VLSM <<Y>> (sharing the same messages)
+  if there exist maps <<label_project>> taking <<X>>-labels to <<Y>>-labels
+  and <<state_project>> taking <<X>>-states to <<Y>>-states, such that the
+  [finite_valid_trace_prop]erty is preserved by the trace
+  transformation induced by the label and state projection functions,
+  in which each <<X>>-[transition_item] is projected to an <<Y>>-[transition_item]
+  preserving the messages and transforming labels and states accordingly.
 
-Besides [VLSM_incl]usions, which are a prototypical example of VLSM embeddings,
-we can also prove "lifting" relations between components and the composition
-that they are part of as being full projections (see, e.g.,
-[lift_to_composite_vlsm_full_projection] or [projection_friendliness_lift_to_composite_vlsm_full_projection]).
+  Besides [VLSM_incl]usions, which are a prototypical example of VLSM embeddings,
+  we can also prove "lifting" relations between components and the composition
+  that they are part of as being full projections (see, e.g.,
+  [lift_to_composite_vlsm_full_projection] or [projection_friendliness_lift_to_composite_vlsm_full_projection]).
 *)
 
 Section pre_definitions.
@@ -96,17 +96,18 @@ Context
   (state_project : vstate X -> vstate Y)
   .
 
-(** Similarly to [VLSM_partial_projection]s and [VLSM_projection]s, we
-distinguish two types of projections: [VLSM_weak_full_projection] and
-[VLSM_full_projection], distinguished by the fact that the weak projections
-are not required to preserve initial states.
+(**
+  Similarly to [VLSM_partial_projection]s and [VLSM_projection]s, we
+  distinguish two types of projections: [VLSM_weak_full_projection] and
+  [VLSM_full_projection], distinguished by the fact that the weak projections
+  are not required to preserve initial states.
 
-Proper examples of [VLSM_weak_full_projection] are presented in Lemmas
-[PreSubFree_PreFree_weak_full_projection] and
-[EquivPreloadedBase_Fixed_weak_full_projection], which show that a trace over
-a subset of nodes can be replayed on top of a valid state for the full
-composition. Note that in this case, the initial state of the trace not
-translated to an initial state but rather to a regular valid state.
+  Proper examples of [VLSM_weak_full_projection] are presented in Lemmas
+  [PreSubFree_PreFree_weak_full_projection] and
+  [EquivPreloadedBase_Fixed_weak_full_projection], which show that a trace over
+  a subset of nodes can be replayed on top of a valid state for the full
+  composition. Note that in this case, the initial state of the trace not
+  translated to an initial state but rather to a regular valid state.
 *)
 Record VLSM_weak_full_projection
   :=
@@ -297,8 +298,9 @@ Definition VLSM_weak_full_projection_finite_valid_trace_from
   :=
   (weak_full_trace_project_preserves_valid_trace _ _ _ _ Hsimul).
 
-(** Any [VLSM_full_projection] determines a [VLSM_projection], allowing us
-to lift to VLSM full projections the generic results proved about VLSM projections.
+(**
+  Any [VLSM_full_projection] determines a [VLSM_projection], allowing us
+  to lift to VLSM full projections the generic results proved about VLSM projections.
 *)
 Lemma VLSM_weak_full_projection_is_projection
   : VLSM_weak_projection X Y (Some ∘ label_project) state_project.
@@ -409,8 +411,9 @@ Definition VLSM_full_projection_finite_valid_trace
     finite_valid_trace Y (state_project s) (VLSM_full_projection_finite_trace_project Hsimul tr)
   := full_trace_project_preserves_valid_trace _ _ _ _ Hsimul.
 
-(** Any [VLSM_full_projection] determines a [VLSM_projection], allowing us
-to lift to VLSM full projections the generic results proved about VLSM projections.
+(**
+  Any [VLSM_full_projection] determines a [VLSM_projection], allowing us
+  to lift to VLSM full projections the generic results proved about VLSM projections.
 *)
 Lemma VLSM_full_projection_is_projection
   : VLSM_projection X Y (Some ∘ label_project) state_project.
@@ -549,16 +552,17 @@ End full_projection_properties.
 
 End VLSM_full_projection.
 
-(** It is natural to look for sufficient conditions for VLSM projections
-which are easy to verify in a practical setting. One such result is the following.
+(**
+  It is natural to look for sufficient conditions for VLSM projections
+  which are easy to verify in a practical setting. One such result is the following.
 
-For VLSM <<X>> to fully-project to a VLSM <<Y>>, the following set of conditions is sufficient:
-- <<X>>'s [initial_state]s project to <<Y>>'s [initial state]s
-- Every message <<m>> (including the empty one) which can be input to
-  an [input_valid] transition in <<X>>, is a [valid_message] in <<Y>>
-- <<X>>'s [input_valid] is included in <<Y>>'s [valid].
-- For all [input_valid] inputs (in <<X>>), <<Y>>'s [transition] acts
-like <<X>>'s [transition].
+  For VLSM <<X>> to fully-project to a VLSM <<Y>>, the following set of conditions is sufficient:
+  - <<X>>'s [initial_state]s project to <<Y>>'s [initial state]s
+  - Every message <<m>> (including the empty one) which can be input to
+    an [input_valid] transition in <<X>>, is a [valid_message] in <<Y>>
+  - <<X>>'s [input_valid] is included in <<Y>>'s [valid].
+  - For all [input_valid] inputs (in <<X>>), <<Y>>'s [transition] acts
+  like <<X>>'s [transition].
 *)
 
 Section basic_VLSM_full_projection.

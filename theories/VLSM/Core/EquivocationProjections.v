@@ -5,9 +5,9 @@ From VLSM.Core Require Import Composition VLSMProjections Validator ProjectionTr
 
 (** * VLSM projections and messages properties
 
-In this section we show that messages properties (oracles like [has_been_sent],
-[has_been_received], and [has_been_directly_observed]) are reflected and, in some cases,
-preserved by VLSM projections.
+  In this section we show that messages properties (oracles like [has_been_sent],
+  [has_been_received], and [has_been_directly_observed]) are reflected and, in some cases,
+  preserved by VLSM projections.
 *)
 
 Section projection_oracle.
@@ -31,10 +31,11 @@ Context
     forall m, selectorX m itemX <-> selectorY m itemY)
   .
 
-(** Given the fact that all traces leading to a state in X project to traces
-leading to its projection in Y, and since all messages in a trace projection
-come from the original trace, it follows that any oracle for Y with the same
-selector is reflected to X.
+(**
+  Given the fact that all traces leading to a state in X project to traces
+  leading to its projection in Y, and since all messages in a trace projection
+  come from the original trace, it follows that any oracle for Y with the same
+  selector is reflected to X.
 *)
 Lemma VLSM_projection_oracle_reflect
   (oracleX : vstate X -> message -> Prop)
@@ -379,8 +380,9 @@ Context
   (Heq : forall i, IM1 i = IM2 i)
   .
 
-(** If two indexed sets of VLSMs are extensionally-equal, then the
-[has_been_sent] predicate is preserved through the [same_IM_state_rew] map.
+(**
+  If two indexed sets of VLSMs are extensionally-equal, then the
+  [has_been_sent] predicate is preserved through the [same_IM_state_rew] map.
 *)
 Lemma same_IM_composite_has_been_sent_preservation s1 m
   (Hs1 : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1)
@@ -410,9 +412,10 @@ Context
   (Hj : option_map A (sender m) = Some j)
   .
 
-(** Under [sender_safety_alt_prop]erty assumptions, if a message can be emitted
-by the free composition (pre-loaded with all messages), then it can also be
-emitted by the node corresponding to its sender (pre-loaded with all messages).
+(**
+  Under [sender_safety_alt_prop]erty assumptions, if a message can be emitted
+  by the free composition (pre-loaded with all messages), then it can also be
+  emitted by the node corresponding to its sender (pre-loaded with all messages).
 *)
 Lemma can_emit_projection
   : can_emit PreFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.

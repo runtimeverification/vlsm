@@ -7,15 +7,15 @@ From VLSM.Core Require Import VLSM Plans VLSMProjections.
 (** * VLSM Composition *)
 
 (**
-This module provides Coq definitions for composite VLSMs and their projections
-to components.
+  This module provides Coq definitions for composite VLSMs and their projections
+  to components.
 *)
 
 Section VLSM_composition.
 
 (**
-Let us fix a type for <<message>>s, and an <<index>> type for the VLSM components
-such that equality on <<index>> is decidable.
+  Let us fix a type for <<message>>s, and an <<index>> type for the VLSM components
+  such that equality on <<index>> is decidable.
 *)
 
 Context
@@ -28,27 +28,27 @@ Section composite_type.
 
 (** ** The type of a composite VLSM
 
-Let IM be a family of VLSMs indexed by <<index>>. Note that all
-[VLSM]s share the same type of <<message>>s.
+  Let IM be a family of VLSMs indexed by <<index>>. Note that all
+  [VLSM]s share the same type of <<message>>s.
 
 *)
 
 (**
-A [composite_state] is an indexed family of [state]s, yielding for each
-index <<n>> a [state] of [type] <<IT n>>, the [VLSMType] corresponding to
-machine <<n>>.
+  A [composite_state] is an indexed family of [state]s, yielding for each
+  index <<n>> a [state] of [type] <<IT n>>, the [VLSMType] corresponding to
+  machine <<n>>.
 
-Note that the [composite_state] type is the dependent product type of the
-family of [state] types corresponding to each index.
+  Note that the [composite_state] type is the dependent product type of the
+  family of [state] types corresponding to each index.
 *)
 Definition composite_state : Type :=
   forall n : index, vstate (IM n).
 
 (**
-A [composite_label] is a pair between an index <<N>> and a [label] of <<IT n>>.
+  A [composite_label] is a pair between an index <<N>> and a [label] of <<IT n>>.
 
-Note that the [composite_label] type is the dependent sum of the family of
-types <<[@label _ (IT n) | n <- index]>>.
+  Note that the [composite_label] type is the dependent sum of the family of
+  types <<[@label _ (IT n) | n <- index]>>.
 *)
 Definition composite_label
   : Type
@@ -67,8 +67,8 @@ Canonical Structure composite_type : VLSMType message :=
 Definition composite_transition_item : Type := @transition_item message composite_type.
 
 (**
-A very useful operation on [composite_state]s is updating the state corresponding
-to a component:
+  A very useful operation on [composite_state]s is updating the state corresponding
+  to a component:
 *)
 Definition state_update
            (s : composite_state)
@@ -82,9 +82,7 @@ Definition state_update
   | _ => s j
   end.
 
-(**
-The next few results describe several properties of the [state_update] operation.
-*)
+(** The next few results describe several properties of the [state_update] operation. *)
 Lemma state_update_neq
            (s : composite_state)
            (i : index)
@@ -156,14 +154,14 @@ End composite_type.
 Section sec_composite_vlsm.
 (** ** Constrained VLSM composition
 
-Assume an non-empty <<index>> type and let <<IT>> be
-an <<index>>ed family of [VLSMType]s, and for each index <<i>>, let <<IM i>> be
-a [VLSMMachine] of type <<IT i>>.
+  Assume an non-empty <<index>> type and let <<IT>> be
+  an <<index>>ed family of [VLSMType]s, and for each index <<i>>, let <<IM i>> be
+  a [VLSMMachine] of type <<IT i>>.
 *)
 
 (**
-A [composite_state] has the [initial_state_prop]erty if all of its component
-states have the [initial_state_prop]erty in the corresponding component signature.
+  A [composite_state] has the [initial_state_prop]erty if all of its component
+  states have the [initial_state_prop]erty in the corresponding component signature.
 *)
 Definition composite_initial_state_prop
            (s : composite_state)
@@ -184,8 +182,8 @@ Defined.
   {| inhabitant := composite_s0 |}.
 
 (**
-A message has the [initial_message_prop]erty in the composite
-iff it has the [initial_message_prop]erty in any of the components.
+  A message has the [initial_message_prop]erty in the composite
+  iff it has the [initial_message_prop]erty in any of the components.
 *)
 Definition composite_initial_message_prop (m : message) : Prop
   :=
@@ -201,8 +199,8 @@ Definition lift_to_composite_label
   := existT j lj.
 
 (**
-We can always "lift" state <<sj>> from component <<j>> to a composite state by
-updating an given composite state to <<sj>> on component <<j>>.
+  We can always "lift" state <<sj>> from component <<j>> to a composite state by
+  updating an given composite state to <<sj>> on component <<j>>.
 *)
 Definition lift_to_composite_state
   (s : composite_state)
@@ -219,8 +217,8 @@ Definition lift_to_composite_transition_item
     (lift_to_composite_label j) (lift_to_composite_state s j).
 
 (**
-A specialized version of [lift_to_composite_state] using the initial composite
-state as the base for lifting.
+  A specialized version of [lift_to_composite_state] using the initial composite
+  state as the base for lifting.
 *)
 Definition lift_to_composite_state'
   := lift_to_composite_state (proj1_sig composite_s0).
@@ -228,9 +226,7 @@ Definition lift_to_composite_state'
 Definition lift_to_composite_transition_item'
   := lift_to_composite_transition_item (proj1_sig composite_s0).
 
-(**
-Composite versions for [plan_item] and [plan].
-*)
+(** Composite versions for [plan_item] and [plan]. *)
 Definition composite_plan_item := @plan_item _ composite_type.
 Definition composite_plan := list composite_plan_item.
 
@@ -246,11 +242,11 @@ Proof.
 Defined.
 
 (**
-The [transition] function for the [composite_vlsm] takes a transition in
-the component selected by the index in the given [composite_label]
-with the contained label,
-and returns the produced message together with the state updated on that
-component:
+  The [transition] function for the [composite_vlsm] takes a transition in
+  the component selected by the index in the given [composite_label]
+  with the contained label,
+  and returns the produced message together with the state updated on that
+  component:
 *)
 Definition composite_transition
   (l : composite_label)
@@ -287,9 +283,9 @@ Proof.
 Qed.
 
 (**
-Given a [composite_label] <<(i, li)>> and a [composite_state]-message
-pair <<(s, om)>>, [composite_valid]ity is defined as [valid]ity in
-the <<i>>th component <<IM i>>.
+  Given a [composite_label] <<(i, li)>> and a [composite_state]-message
+  pair <<(s, om)>>, [composite_valid]ity is defined as [valid]ity in
+  the <<i>>th component <<IM i>>.
 *)
 Definition composite_valid
   (l : composite_label)
@@ -301,12 +297,12 @@ Definition composite_valid
   vvalid (IM i) li (s i, om).
 
 (**
-A <<constraint>> for a composite VLSM is a [valid]ity condition defined
-directly on [composite_label]s and [composite_state]s, thus being able to
-impose a global condition.
+  A <<constraint>> for a composite VLSM is a [valid]ity condition defined
+  directly on [composite_label]s and [composite_state]s, thus being able to
+  impose a global condition.
 
-[constrained_composite_valid]ity interposes such a <<constraint>> on top of
-the [composite_valid]ity.
+  [constrained_composite_valid]ity interposes such a <<constraint>> on top of
+  the [composite_valid]ity.
 *)
 
 Definition constrained_composite_valid
@@ -331,8 +327,9 @@ Definition composite_vlsm
   : VLSM message
   := mk_vlsm (composite_vlsm_machine constraint).
 
-(** Composite versions for the generic [_apply_plan]-related definitions and
-results.
+(**
+  Composite versions for the generic [_apply_plan]-related definitions and
+  results.
 *)
 Definition composite_apply_plan := (@_apply_plan _ composite_type composite_transition).
 Definition composite_apply_plan_app
@@ -367,9 +364,9 @@ Qed.
 
 (** ** Free VLSM composition
 
-The [free_constraint] is defined to be [True] for all inputs.
-Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
-[free_constraint].
+  The [free_constraint] is defined to be [True] for all inputs.
+  Thus, the [free_composite_vlsm] is the [composite_vlsm] using the
+  [free_constraint].
 *)
 
 Definition free_constraint
@@ -430,8 +427,8 @@ Section sec_constraint_subsumption.
 (** ** Constraint subsumption *)
 
 (**
-A <<constraint1>> is subsumed by <<constraint2>> if <<constraint1>> is stronger
-than <<constraint2>> for any input.
+  A <<constraint1>> is subsumed by <<constraint2>> if <<constraint1>> is stronger
+  than <<constraint2>> for any input.
 *)
 Definition strong_constraint_subsumption
     (constraint1 constraint2 : composite_label -> composite_state * option message -> Prop)
@@ -440,17 +437,17 @@ Definition strong_constraint_subsumption
       constraint1 l som -> constraint2 l som.
 
 (**
-A weaker version of [strong_constraint_subsumption] requiring [input_valid]ity
-w.r.t. [pre_loaded_with_all_messages_vlsm] as a precondition for the subsumption
-property.
+  A weaker version of [strong_constraint_subsumption] requiring [input_valid]ity
+  w.r.t. [pre_loaded_with_all_messages_vlsm] as a precondition for the subsumption
+  property.
 
-This definition is useful in proving [VLSM_incl]usions between [VLSM]s
-pre-loaded with all messages (Lemma [preloaded_constraint_subsumption_incl]).
+  This definition is useful in proving [VLSM_incl]usions between [VLSM]s
+  pre-loaded with all messages (Lemma [preloaded_constraint_subsumption_incl]).
 
-Although there are currently no explicit cases for its usage, it might be more
-useful than the [strong_constraint_subsumption] property in cases where proving
-constraint subsumption relies on the state being valid and/or the message
-being valid.
+  Although there are currently no explicit cases for its usage, it might be more
+  useful than the [strong_constraint_subsumption] property in cases where proving
+  constraint subsumption relies on the state being valid and/or the message
+  being valid.
 *)
 Definition preloaded_constraint_subsumption
     (constraint1 constraint2 : composite_label -> composite_state * option message -> Prop)
@@ -460,15 +457,15 @@ Definition preloaded_constraint_subsumption
         constraint2 l som.
 
 (**
-A weaker version of [preloaded_constraint_subsumption] requiring [input_valid]ity
-as a precondition for the subsumption property.
+  A weaker version of [preloaded_constraint_subsumption] requiring [input_valid]ity
+  as a precondition for the subsumption property.
 
-This definition is usually useful in proving [VLSM_incl]usions between regular
-[VLSM]s (Lemma [constraint_subsumption_incl]).
+  This definition is usually useful in proving [VLSM_incl]usions between regular
+  [VLSM]s (Lemma [constraint_subsumption_incl]).
 
-It is more useful than the [strong_constraint_subsumption] property in cases
-where proving constraint subsumption relies on the state/message being valid
-and/or the message being valid (e.g., Lemma [Fixed_incl_StrongFixed]).
+  It is more useful than the [strong_constraint_subsumption] property in cases
+  where proving constraint subsumption relies on the state/message being valid
+  and/or the message being valid (e.g., Lemma [Fixed_incl_StrongFixed]).
 *)
 Definition input_valid_constraint_subsumption
     (constraint1 constraint2 : composite_label -> composite_state * option message -> Prop)
@@ -477,8 +474,8 @@ Definition input_valid_constraint_subsumption
       input_valid (composite_vlsm constraint1) l som -> constraint2 l som.
 
 (**
-The weakest form [constraint_subsumption] also requires that the input
-state and message are valid for the composition under the second constraint.
+  The weakest form [constraint_subsumption] also requires that the input
+  state and message are valid for the composition under the second constraint.
 *)
 Definition weak_input_valid_constraint_subsumption
     (constraint1 constraint2 : composite_label -> composite_state * option message -> Prop)
@@ -496,12 +493,12 @@ Context
   .
 
 (**
-Let <<X1>>, <<X2>> be two compositions of the same family of VLSMs but with
-constraints <<constraint1>> and <<constraint2>>, respectively. Further assume
-that <<constraint1>> is subsumed by <<constraint2>>.
+  Let <<X1>>, <<X2>> be two compositions of the same family of VLSMs but with
+  constraints <<constraint1>> and <<constraint2>>, respectively. Further assume
+  that <<constraint1>> is subsumed by <<constraint2>>.
 
-We will show that <<X1>> is trace-included into <<X2>> by applying
-Lemma [basic_VLSM_incl]
+  We will show that <<X1>> is trace-included into <<X2>> by applying
+  Lemma [basic_VLSM_incl]
 *)
 
 (* begin hide *)
@@ -661,10 +658,10 @@ Proof.
 Qed.
 
 (**
-If all messages described by a predicate <<P>> are valid for the free
-composition pre-loaded with messages described by a predicate <<Q>>, then
-any message which can be emitted by a component pre-loaded with <<P>> can
-also be emitted by the free composition pre-loaded with <<Q>>.
+  If all messages described by a predicate <<P>> are valid for the free
+  composition pre-loaded with messages described by a predicate <<Q>>, then
+  any message which can be emitted by a component pre-loaded with <<P>> can
+  also be emitted by the free composition pre-loaded with <<Q>>.
 *)
 Lemma valid_preloaded_lifts_can_be_emitted
   (P Q : message -> Prop)
@@ -682,10 +679,10 @@ Proof.
 Qed.
 
 (**
-As a specialization of [valid_preloaded_lifts_can_be_emitted], if all
-messages described by a predicate <<P>> are valid for the free composition,
-then any message which can be emitted by a component pre-loaded with <<P>>
-can also be emitted by the free composition.
+  As a specialization of [valid_preloaded_lifts_can_be_emitted], if all
+  messages described by a predicate <<P>> are valid for the free composition,
+  then any message which can be emitted by a component pre-loaded with <<P>>
+  can also be emitted by the free composition.
 *)
 Lemma free_valid_preloaded_lifts_can_be_emitted
   (P : message -> Prop)
@@ -726,8 +723,10 @@ Proof.
   - done.
 Qed.
 
-(** Updating a composite initial state with a component initial state
-yields a composite initial state *)
+(**
+  Updating a composite initial state with a component initial state
+  yields a composite initial state
+*)
 Lemma composite_update_initial_state_with_initial
   (s : composite_state)
   (Hs : composite_initial_state_prop s)
@@ -741,8 +740,10 @@ Proof.
   - by rewrite state_update_neq.
 Qed.
 
-(** Updating a composite [valid_state] for the free composition with
-a component initial state yields a composite [valid_state] *)
+(**
+  Updating a composite [valid_state] for the free composition with
+  a component initial state yields a composite [valid_state]
+*)
 Lemma pre_composite_free_update_state_with_initial
   (P : message -> Prop)
   (s : composite_state)
@@ -842,9 +843,7 @@ End sec_composite_vlsm.
 
 End VLSM_composition.
 
-(**
-  Hint database and tactic for dealing with updates and lifting via [state_update].
-*)
+(** Hint database and tactic for dealing with updates and lifting via [state_update]. *)
 
 Create HintDb state_update.
 
@@ -859,30 +858,30 @@ Ltac state_update_simpl :=
   autounfold with state_update in *; autorewrite with state_update in *.
 
 (**
-   These basic projection lemmas relate
-   the [valid_state_prop] and [input_valid_transition] of
-   a composite VLSM back to those conditions holding
-   over projections to individual components of the state.
+  These basic projection lemmas relate
+  the [valid_state_prop] and [input_valid_transition] of
+  a composite VLSM back to those conditions holding
+  over projections to individual components of the state.
 
-   Because the composition may have validly produced
-   messages that are not valid for an individual
-   component (by interaction between components),
-   We cannot just use properties [valid_state_message_prop (IM i)]
-   or [input_valid_transition (IM i)].
-   For simplicity these lemmas use
-   [pre_loaded_with_all_messages_vlsm (IM i)].
+  Because the composition may have validly produced
+  messages that are not valid for an individual
+  component (by interaction between components),
+  We cannot just use properties [valid_state_message_prop (IM i)]
+  or [input_valid_transition (IM i)].
+  For simplicity these lemmas use
+  [pre_loaded_with_all_messages_vlsm (IM i)].
 
-   This does not precisely reflect the set of
-   messages and transitions that can actually be
-   seen in projections of transitions of the composite VLSM,
-   but seems to be the best we can do with a result
-   type that doesn't mention the other components or
-   the composition constraint of the composite.
+  This does not precisely reflect the set of
+  messages and transitions that can actually be
+  seen in projections of transitions of the composite VLSM,
+  but seems to be the best we can do with a result
+  type that doesn't mention the other components or
+  the composition constraint of the composite.
 
-   Later in this file a
-   [composite_constrained_projection_vlsm] is defined
-   that shares the states of [IM i] which is more
-   precise.
+  Later in this file a
+  [composite_constrained_projection_vlsm] is defined
+  that shares the states of [IM i] which is more
+  precise.
  *)
 
 Lemma valid_state_project_preloaded_to_preloaded
@@ -1013,8 +1012,9 @@ Proof.
   apply input_valid_transition_preloaded_project_any.
 Qed.
 
-(** If a message can be emitted by a composition, then it can be emitted by one of the
-components.
+(**
+  If a message can be emitted by a composition, then it can be emitted by one of the
+  components.
 *)
 Lemma can_emit_composite_project
   {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
@@ -1036,10 +1036,10 @@ Section binary_free_composition.
 
 (** ** Free composition of two VLSMs
 
-This serves an example of how composition can be built, but is also being
-used in defining the [byzantine_trace_prop]erties.
+  This serves an example of how composition can be built, but is also being
+  used in defining the [byzantine_trace_prop]erties.
 
-This instantiates the regular composition using the [bool] type as an <<index>>.
+  This instantiates the regular composition using the [bool] type as an <<index>>.
 
 *)
 Context
@@ -1074,8 +1074,8 @@ Section composite_decidable_initial_message.
 
 (** ** Composite decidable initial message
 
-Here we show that if the [initial_message_prop]erty is decidable for every
-component, then it is decidable for a finite composition as well.
+  Here we show that if the [initial_message_prop]erty is decidable for every
+  component, then it is decidable for a finite composition as well.
 
 *)
 
@@ -1116,9 +1116,10 @@ Context
 
 (** ** Composite Plan Properties
 
-   The following results concern facts about applying a [plan Free] <<P>>
-   to a [vstate Free] <<s'>>, knowing its effects on a different [vstate Free] <<s>>
-   which shares some relevant features with <<s'>>. *)
+  The following results concern facts about applying a [plan Free] <<P>>
+  to a [vstate Free] <<s'>>, knowing its effects on a different [vstate Free] <<s>>
+  which shares some relevant features with <<s'>>. 
+*)
 
 (* A transition on component <<i>> is [input_valid] from <<s'>> if it is
    [input_valid] from <<s>> and their <<i>>'th components are equal. *)
@@ -1454,9 +1455,9 @@ End empty_composition_properties.
 
 (** ** Properties of extensionally-equal indexed compositions
 
-If two indexed sets of VLSMs are extensionally-equal, then we can establish a
-[VLSM_full_projection] between their compositions with subsumable constraints
-(and pre-loaded with the same set of messages).
+  If two indexed sets of VLSMs are extensionally-equal, then we can establish a
+  [VLSM_full_projection] between their compositions with subsumable constraints
+  (and pre-loaded with the same set of messages).
 *)
 Section sec_same_IM_full_projection.
 
