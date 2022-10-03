@@ -22,7 +22,7 @@ Qed.
 
 (**
   A list is either null or it can be decomposed into an initial prefix
-  and a last element
+  and a last element.
 *)
 Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a::nil)}} + {l = nil} .
@@ -33,8 +33,8 @@ Proof.
 Qed.
 
 (**
-  destructs a list in @l@ in either null or a prefix @l'@ and
-  a last element @a@ with an equation @Heq@ stating that @l = l' ++ [a]@
+  destructs a list in <<l>> in either null or a prefix <<l'>> and
+  a last element <<a>> with an equation <<Heq>> stating that <<l = l' ++ [a]>>.
 *)
 Ltac destruct_list_last l l' a Heq :=
  destruct (has_last_or_null l) as [[l' [a Heq]] | Heq]; rewrite Heq in *; swap 1 2.
@@ -1010,7 +1010,7 @@ Proof.
   - simpl. destruct (f x); [| done]. by elim n.
 Qed.
 
-(* Unpack list of [option A] into list of [A] *)
+(** Unpack list of [option A] into list of [A] *)
 Definition cat_option {A : Type} : list (option A) -> list A :=
   @map_option (option A) A id.
 
@@ -1265,9 +1265,10 @@ Proof.
     spec Hmax. lia. rewrite <- eq_max. itauto.
 Qed.
 
-(* Returns all values which occur with maximum frequency in the given list.
-   Note that these values are returned with their original multiplicity. *)
-
+(**
+  Returns all values which occur with maximum frequency in the given list.
+  Note that these values are returned with their original multiplicity.
+*)
 Definition mode
   `{EqDecision A}
   (l : list A) : list A  :=
@@ -1277,9 +1278,10 @@ Definition mode
 Example mode1 : mode [1; 1; 2; 3; 3] = [1; 1; 3; 3].
 Proof. itauto. Qed.
 
-(* Computes the list suff which satisfies <<pref ++ suff = l>> or
-   reports that no such list exists. *)
-
+(**
+  Computes the list suff which satisfies <<pref ++ suff = l>> or
+  reports that no such list exists.
+*)
 Fixpoint complete_prefix
   `{EqDecision A}
   (l pref : list A) : option (list A) :=
@@ -1348,9 +1350,10 @@ Proof.
        by rewrite eq_cp.
 Qed.
 
-(* Computes the list pref which satisfies <<pref ++ suff = l>> or
-   reports that no such list exists. *)
-
+(**
+  Computes the list <<pref>> which satisfies <<pref ++ suff = l>> or
+  reports that no such list exists.
+*)
 Definition complete_suffix
   `{EqDecision A}
   (l suff : list A) : option (list A) :=
@@ -1455,14 +1458,15 @@ Proof.
   - apply PeanoNat.Nat.add_le_lt_mono; firstorder.
 Qed.
 
-(* Nearly the natural induction principle for fold_left.
-   Useful if you can think of [[fold_left f]] as transforming
-   a list into a [[B -> B]] function, and can describe the
-   effect with a [[P : list A -> relation B]].
-   The assumption [[Hstep]] could be weakened by replacing [[r]]
-   with [[fold_left f l (f x a)]], but that isn't useful in
-   natural examples.
- *)
+(**
+  Nearly the natural induction principle for [fold_left].
+  Useful if you can think of [fold_left f] as transforming
+  a list into a [B -> B] function, and can describe the
+  effect with a [P : list A -> relation B].
+  The assumption [Hstep] could be weakened by replacing [r]
+  with [fold_left f l (f x a)], but that isn't useful in
+  natural examples.
+*)
 Lemma fold_left_ind
       [A B:Type] (f: B -> A -> B) (P : list A -> B -> B -> Prop)
       (Hstart : forall x, P nil x x)
@@ -1477,9 +1481,10 @@ Proof.
   apply Hstep, IHl.
 Qed.
 
-(* An induction principle for fold_left which
-   decomposes the list from the right
- *)
+(**
+  An induction principle for [fold_left] which
+  decomposes the list from the right.
+*)
 Lemma fold_left_ind_rev
       [A B:Type] (f: B -> A -> B) (x0: B)
       (P : list A -> B -> Prop)
