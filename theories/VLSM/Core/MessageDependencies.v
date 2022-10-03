@@ -255,7 +255,7 @@ Qed.
 
 End sec_message_dependencies.
 
-(** ** #[local] Equivocation Based on Message Dependencies
+(** ** Equivocation Based on Message Dependencies
 
   Inspired by the definitions of observability and local equivocation given for
   the ELMO protocol, we introduce abstract notions for local equivocation based

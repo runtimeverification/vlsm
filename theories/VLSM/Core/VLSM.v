@@ -442,15 +442,11 @@ Existing Instance MachineX.
   - if <<m>> is a <<message>> with the [initial_message_prop]erty,
     then <<(>>[s0, Some]<< m)>> has the [valid_state_message_prop]erty;
   - for all [state]s <<s>>, [option]al <<message>> <<om>>, and [label] <<l>>:
-
     - if there is an (optional) <<message>> <<_om>> such that <<(s, _om)>>
       has the [valid_state_message_prop]erty;
-
     - and if there is a [state] <<_s>> such that <<(_s, om)>> has the
       [valid_state_message_prop]erty;
-
     - and if <<l>> [valid] <<(s, om)>>,
-
     - then [transition] <<l (s, om)>> has the [valid_state_message_prop]erty.
 *)
 
@@ -480,13 +476,11 @@ Definition valid_initial_state
   := valid_initial_state_message s Hs None I.
 
 (**
-
   The [valid_state_prop]erty and the [valid_message_prop]erty are now
   definable as simple projections of the above definition.
 
   Moreover, we use these derived properties to define the corresponding
   dependent types [valid_state] and [valid_message].
-
 *)
 
 Definition valid_state_prop (s : state) :=
