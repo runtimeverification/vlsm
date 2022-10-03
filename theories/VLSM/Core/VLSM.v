@@ -8,9 +8,9 @@ From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
   This module provides basic VLSM infrastructure.
 *)
 
-(** ** VLSM definition
+(** ** VLSM definition *)
 
-  *** The type of a VLSM
+(** *** The type of a VLSM
 
   The type of a VLSM is a triple consisting of the underlying types of
   messages, states, and labels.
@@ -987,7 +987,7 @@ Opaque finite_valid_trace.
 (**
   This is a bit more useful than the small proof suggests,
   because applying it always leaves just one subgoal.
-  The tactical <<split;[constructor;apply initial_state_is_valid|];assumption>>
+  The tactical <<by split;[constructor;apply initial_state_is_valid|]>>
   only works if the assumption is available, which may require
   an <<assert>> and writing out the full VLSM and state expressions
   as part of the proof script.
@@ -1692,7 +1692,7 @@ Proof.
     apply (Hextend _ _ _ IHHtr1 Htr1 _ _ _ _ Houtput IHHtr2 Htr2 _ _ _ Hivt).
 Qed.
 
-(** *** Infinite [protocol_trace]s *)
+(** *** Infinite protocol traces *)
 
 (**
   We now define [infinite_valid_trace]s. The definitions
@@ -1815,7 +1815,7 @@ Proof.
     by rewrite stream_prefix_map, stream_prefix_nth.
 Qed.
 
-(** *** valid traces
+(** *** Valid traces
 
   Finally, we define [Trace] as a sum-type of its finite/infinite variants.
   It inherits some previously introduced definitions, culminating with the

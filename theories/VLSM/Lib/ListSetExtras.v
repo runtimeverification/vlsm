@@ -569,7 +569,7 @@ Qed.
 
   This definition exists to make proving
   [len_set_diff_decrease] more convenient,
-  because <<length>> of <<filter>> can be simplified
+  because [length] of [filter] can be simplified
   step by step while doing induction over <<l>>.
  *)
 Definition set_diff_filter `{EqDecision A} (l r : list A) :=

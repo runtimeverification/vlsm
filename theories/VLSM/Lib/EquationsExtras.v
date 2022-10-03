@@ -1,5 +1,7 @@
 From Equations Require Export Equations.
 
+(** * Equations utility definitions *)
+
 (* Definition of [inspect] available in Equations as of version 1.3+8.16.
   Notation <<eq:>> not yet available (exists only in examples).
 *)

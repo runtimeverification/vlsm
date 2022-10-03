@@ -763,15 +763,15 @@ Qed.
 End component_projection_validator.
 
 Section sec_component_projection_validator_alt.
-(**
-  ** Direct definition of induced validator from composition to component
 
-  In this section we provide a definition of the induced validator from a
+(** ** Direct definition of induced validator from composition to component
+
+  In this section, we provide a definition of the induced validator from a
   composition to a component obtained by strengthening the component instead of
   deriving its elements via the projection [composite_vlsm_induced_projection_validator].
 
-  We then show this VLSM and some of its pre-loaded variants are [VLSM_eq]ual
-  (trace-equivalent) to the corresponding variants of the
+  We then show this VLSM and some of its pre-loaded variants are
+  [VLSM_eq]ual (trace-equivalent) to the corresponding variants of the
   [composite_vlsm_induced_validator].
 *)
 
@@ -934,7 +934,6 @@ Context
   [pre_loaded_with_all_messages_vlsm], the arguments are also
   a [valid_state] and [valid_message] for the original VLSM.
 *)
-
 Definition self_validator_vlsm_prop :=
   forall (l : label) (s : state) (om : option message),
     input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
