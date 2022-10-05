@@ -1222,9 +1222,10 @@ Proof.
     itauto.
 Qed.
 
-(* Transitioning on some index different from <<i>> does not affect
-   component i. *)
-
+(**
+  Transitioning on some index different from <<i>> does not affect
+  component <<i>>.
+*)
 Lemma irrelevant_components_one
   (s : state)
   (ai : composite_plan_item IM)
@@ -1250,8 +1251,10 @@ Proof.
   by state_update_simpl.
 Qed.
 
-(* Same as the previous result, but for multiple transitions. *)
-
+(**
+  Same as [irrelevant_components_one], but for
+  multiple transitions.
+*)
 Lemma irrelevant_components
   (s : state)
   (a : composite_plan IM)

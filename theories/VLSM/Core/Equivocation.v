@@ -61,29 +61,19 @@ Class BasicEquivocation
   :=
   { is_equivocating (s : state) (v : validator) : Prop
   ; is_equivocating_dec : RelDecision is_equivocating
-
-    (** retrieves a set containing all possible validators for a state. *)
-
+  (** retrieves a set containing all possible validators for a state *)
   ; state_validators (s : state) : Cm
-
-    (** All validators which are equivocating in a given composite state *)
-
+  (** all validators which are equivocating in a given composite state *)
   ; equivocating_validators
       (s : state)
       : Cm
       := filter (fun v => is_equivocating s v) (state_validators s)
-
-     (**
-       The equivocation fault sum: the sum of the weights of equivocating
-       validators 
-     *)
-
+  (** equivocation fault sum: the sum of the weights of equivocating validators *)
   ; equivocation_fault
       (s : state)
       : R
       :=
       sum_weights (elements (equivocating_validators s))
-
   ; not_heavy
       (s : state)
       := (equivocation_fault s <= proj1_sig threshold)%R
@@ -130,7 +120,7 @@ Qed.
   The existence of such oracles, which practically imply endowing states with history,
   is necessary if we are to detect equivocation using a composition constraint, as these
   constraints act upon states, not traces.
- *)
+*)
 
 Section Simple.
 
@@ -140,8 +130,10 @@ Context
   (pre_vlsm := pre_loaded_with_all_messages_vlsm vlsm)
   .
 
-(** The following property detects equivocation in a given trace for a given message. *)
-
+(**
+  The following property detects equivocation in a given
+  trace for a given message.
+*)
 Definition equivocation_in_trace
   (msg : message)
   (tr : list (vtransition_item vlsm))
@@ -220,9 +212,9 @@ Proof.
 Qed.
 
 (**
-  We intend to give define several message oracles: [has_been_sent], [has_not_been_sent],
-  [has_been_received] and [has_not_been_received]. To avoid repetition, we give
-  build some generic definitions first. 
+  We intend to give define several message oracles: [has_been_sent],
+  [has_not_been_sent], [has_been_received] and [has_not_been_received].
+  To avoid repetition, we give build some generic definitions first.
 *)
 
 (** General signature of a message oracle *)
@@ -518,8 +510,8 @@ Proof.
 Qed.
 
 (**
-  'proper_sent' condition specialized to regular vlsm traces
-  (avoiding 'pre_loaded_with_all_messages_vlsm')
+  [proper_sent] condition specialized to regular VLSM traces
+  (avoiding [pre_loaded_with_all_messages_vlsm]).
 *)
 Lemma specialized_proper_sent_rev
   `{HasBeenSentCapability}
@@ -685,7 +677,7 @@ End Simple.
   any [input_valid_transition].
 
   These conditions are defined in the record [oracle_stepwise_props]
- *)
+*)
 
 Record oracle_stepwise_props
        [message] [vlsm: VLSM message]
@@ -774,7 +766,7 @@ Qed.
   quantifiers to use this lemma, also using [valid_state_prop]
   to choose a trace to the state for the directions where
   one is not given.
- *)
+*)
 Section TraceFromStepwise.
 
 Context
@@ -871,7 +863,7 @@ End TraceFromStepwise.
   by considering the empty trace to prove the [oracle_no_inits]
   property, and by considering a trace that ends with the given
   [input_valid_transition] to prove the [oracle_step_update] property.
- *)
+*)
 Section StepwiseFromTrace.
 
 Context
@@ -969,7 +961,7 @@ End StepwiseFromTrace.
   [HasBeenSentCapability_from_stepwise] to define a [HasBeenSentCapability]
   for composite VLSMs, or for proofs (e.g, about invariants) where
   these are more convenient.
- *)
+*)
 
 Definition has_been_sent_stepwise_props
        [message] [vlsm: VLSM message] (has_been_sent_pred: state_message_oracle vlsm) : Prop :=
@@ -1655,16 +1647,16 @@ Qed.
 (** *** Equivocation in compositions
 
   We now move on to a composite context. Each component of our composition
-     will have [has_been_sent] and [has_been_received] capabilities.
+  will have [has_been_sent] and [has_been_received] capabilities.
 
-     We introduce [validator]s along with their respective [Weight]s, the
-     [A] function which maps validators to indices of component VLSMs and
-     the [sender] function which maps messages to their (unique) designated
-     sender (if any).
+  We introduce [validator]s along with their respective [weight]s, the
+  [A] function which maps validators to indices of component VLSMs and
+  the [sender] function which maps messages to their (unique) designated
+  sender (if any).
 
-     For the equivocation fault sum to be computable, we also require that
-     the number of [validator]s and the number of machines in the
-     composition are both finite. See [finite_index], [finite_validator].
+  For the equivocation fault sum to be computable, we also require that
+  the number of [validator]s and the number of machines in the
+  composition are both finite. See [finite_index], [finite_validator].
 *)
 
 Section Composite.
@@ -1778,8 +1770,8 @@ Qed.
 End StepwiseProps.
 
 (**
-  A message 'has_been_sent' for a composite state if it 'has_been_sent' for any of
-  its components
+  A message [has_been_sent] for a composite state if it [has_been_sent]
+  for any of its components.
 *)
 Definition composite_has_been_sent
   (s : composite_state IM)
@@ -1787,7 +1779,7 @@ Definition composite_has_been_sent
   : Prop
   := exists (i : index), has_been_sent (IM i) (s i) m.
 
-(** 'composite_has_been_sent' is decidable. *)
+(** [composite_has_been_sent] is decidable. *)
 Lemma composite_has_been_sent_dec : RelDecision composite_has_been_sent.
 Proof.
   intros s m.
@@ -1831,8 +1823,8 @@ Qed.
 Section composite_has_been_received.
 
 (**
-  A message 'has_been_received' for a composite state if it 'has_been_received' for any of
-  its components
+  A message [has_been_received] for a composite state
+  if it [has_been_received] for any of its components.
 *)
 Definition composite_has_been_received
   (s : composite_state IM)
@@ -1840,7 +1832,7 @@ Definition composite_has_been_received
   : Prop
   := exists (i : index), has_been_received (IM i) (s i) m.
 
-(** 'composite_has_been_received' is decidable. *)
+(** [composite_has_been_received] is decidable. *)
 Lemma composite_has_been_received_dec : RelDecision composite_has_been_received.
 Proof.
   intros s m.
@@ -2166,11 +2158,12 @@ Context
     {threshold_V : ReachableThreshold validator}
     `{FinSet validator Cm}
     .
+
 (**
   For the equivocation sum fault to be computable, we require that
   our is_equivocating property is decidable. The current implementation
   refers to [is_equivocating_statewise], but this might change
-  in the future 
+  in the future.
 *)
 
 Definition equivocation_dec_statewise
@@ -2797,8 +2790,8 @@ End cannot_resend_message.
 Section has_been_sent_irrelevance.
 
 (**
-  As we have several ways of obtaining the 'has_been_sent' property, we need to
-  sometime show that they are equivalent.
+  Since we have several ways of obtaining the [has_been_sent] property,
+  we sometimes need to show that they are equivalent.
 *)
 
 Context

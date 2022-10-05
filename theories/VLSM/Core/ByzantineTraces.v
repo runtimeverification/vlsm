@@ -29,7 +29,6 @@ Context
     .
 
 (**
-
   The first definition says that a trace has the [byzantine_trace_prop]erty
   if it is the projection of
   a trace which can be obtained by freely composing <<M>> with an arbitrary
@@ -39,7 +38,6 @@ Context
   the free composition between <<M>> and <<M'>> to the component corresponding
   to <<M>>.
 *)
-
 Definition byzantine_trace_prop
     (tr : vTrace M) :=
     exists (M' : VLSM message)
@@ -47,11 +45,9 @@ Definition byzantine_trace_prop
         valid_trace_prop Proj tr.
 
 (**
-
   The first result says that all traces with the [byzantine_trace_prop]erty
   for a VLSM <<M>> are traces of the [pre_loaded_with_all_messages_vlsm] associated to <<M>>:
 *)
-
 Lemma byzantine_pre_loaded_with_all_messages
     (PreLoaded := pre_loaded_with_all_messages_vlsm M)
     (tr : vTrace M)
@@ -88,7 +84,6 @@ Definition all_messages_type : VLSMType message :=
     |}.
 
 (**
-
   The [emit_any_message_vlsm] signature further says that the (single) state is
   initial and no messages are initial.
   It takes as parameter a <<message>> to ensure that the sets of labels and
@@ -101,22 +96,16 @@ Instance all_messages_state_inh : Inhabited (sig  (fun s: @state _ all_messages_
   {| inhabitant := all_messages_s0 |}.
 
 (**
-
   The [transition] function of the [emit_any_message_vlsm] generates the
   message given as a label:
 *)
-
 Definition all_messages_transition
     (l : @label _ all_messages_type)
     (som : @state _ all_messages_type * option message)
     : @state _ all_messages_type * option message
     := (tt, Some l).
 
-(**
-
-  The [valid]ity predicate specifies that all transitions are valid
-
-*)
+(** The [valid]ity predicate specifies that all transitions are valid *)
 Definition all_messages_valid
     (l : @label _ all_messages_type)
     (som : @state _ all_messages_type * option message)
@@ -136,14 +125,11 @@ Definition emit_any_message_vlsm
     := mk_vlsm emit_any_message_vlsm_machine.
 
 (**
-
   Using the VLSM defined above, we can define the [alternate_byzantine_trace_prop]erty
   of a trace <<tr>> for the VLSM <<M>> as being a trace in the projection
   of the free composition between <<M>> and the [emit_any_message_vlsm],
   to the component corresponding to <<M>>:
-
 *)
-
 Definition alternate_byzantine_trace_prop
     (tr : vTrace M)
     (Proj := binary_free_composition_fst M emit_any_message_vlsm)
@@ -151,14 +137,11 @@ Definition alternate_byzantine_trace_prop
     valid_trace_prop Proj tr.
 
 (**
-
   Since the [byzantine_trace_prop]erty was referring to the free composition
   to any other VLSM, we can instantiate that definition to the
   [emit_any_message_vlsm] to derive that a trace with the
   [alternate_byzantine_trace_prop]erty also has the [byzantine_trace_prop]erty.
-
 *)
-
 Lemma byzantine_alt_byzantine
     (tr : vTrace M)
     (Halt : alternate_byzantine_trace_prop tr)
@@ -179,7 +162,6 @@ Qed.
   equivalence it is enough to close the circle by proving the
   [VLSM_incl]usion between the [pre_loaded_with_all_messages_vlsm] and the projection VLSM used
   in the definition of the [alternate_byzantine_trace_prop]erty.
-
 *)
 
 Section pre_loaded_with_all_messages_byzantine_alt.
@@ -194,11 +176,12 @@ Context
   Let <<PreLoaded>> denote the [pre_loaded_with_all_messages_vlsm] of <<M>>, <<Alt>> denote
   the free composition of <<M>> with the [emit_any_message_vlsm],
   and <<Alt1>> denote the projection of <<Alt>> to the component of <<M>>.
-
-  First, note that using the results above it is easy to prove the inclusion
-  of <<Alt1>> into <<Preloaded>>
 *)
 
+(**
+  First, note that using the results above it is easy to prove the inclusion
+  of <<Alt1>> into <<Preloaded>>.
+*)
 Lemma alt_pre_loaded_with_all_messages_incl
     : VLSM_incl Alt1 PreLoaded.
 Proof.
@@ -208,12 +191,13 @@ Qed.
 (**
   To prove the reverse inclusion (between <<PreLoaded>> and <<Alt1>>) we will use the
   [basic_VLSM_incl] meta-result about proving inclusions between
-  VLSMs which states that
+  VLSMs which states that:
+
   - if all [valid] messages in the first are [valid_message]s in the second, and
-  - if all [valid_state]s in the first are also [valid_state]s in the second,
-  - and if all [input_valid_transition]s in the first are also [input_valid_transition]s
-  in the second,
-  - then the first VLSM is included in the second.
+  - if all [valid_state]s in the first are also [valid_state]s in the second, and
+  - if all [input_valid_transition]s in the first are also
+    [input_valid_transition]s in the second, then
+  - the first VLSM is included in the second.
 
   We will tackle each of these properties in the sequel.
 
@@ -235,7 +219,6 @@ Proof.
 Qed.
 
 (** Using the above, it is straight-forward to show that: *)
-
 Lemma alt_proj_option_valid_message
     (m : option message)
     : option_valid_message_prop Alt1 m.
@@ -252,7 +235,10 @@ Definition lifted_alt_state
     := lift_to_composite_state'
          (binary_IM M emit_any_message_vlsm) first s.
 
-(** Lifting a [valid_state] of <<PreLoaded>> we obtain a [valid_state] of <<Alt>>. *)
+(**
+  Lifting a [valid_state] of <<PreLoaded>> we obtain
+  a [valid_state] of <<Alt>>.
+*)
 Lemma preloaded_alt_valid_state
     (sj : state)
     (om : option message)
@@ -285,7 +271,6 @@ Qed.
   Finally, we can use [basic_VLSM_incl] together with the
   results above to show that <<Preloaded>> is included in <<Alt1>>.
 *)
-
 Lemma pre_loaded_with_all_messages_alt_incl
     : VLSM_incl PreLoaded Alt1.
 Proof.
@@ -316,7 +301,6 @@ End pre_loaded_with_all_messages_byzantine_alt.
   Finally, we can conclude that the two definitions for byzantine traces are
   equivalent:
 *)
-
 Lemma byzantine_alt_byzantine_iff
     (tr : vTrace M)
     : alternate_byzantine_trace_prop tr <-> byzantine_trace_prop tr.
@@ -380,7 +364,6 @@ Context
   Since we know that <<PreloadedX>> contains precisely the byzantine traces
   of <<X>>, we just need to show that <<PreLoadedX>> is
   included in <<X>> to prove our main result.
-
 *)
 Lemma validator_pre_loaded_with_all_messages_incl
     : VLSM_incl PreLoadedX X.

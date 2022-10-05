@@ -136,8 +136,7 @@ Definition non_byzantine_not_equivocating_constraint
   : composite_label fixed_byzantine_IM -> composite_state fixed_byzantine_IM * option message -> Prop :=
   sub_IM_not_equivocating_constraint fixed_byzantine_IM non_byzantine A sender.
 
-(**
-  The first definition of the [fixed_byzantine_trace_prop]erty:
+(** *** First definition of the fixed byzantine trace property
 
   Fixed byzantine traces are projections to the subset of protocol-following nodes
   of traces which are valid for the composition in which a fixed set of nodes
@@ -153,7 +152,7 @@ Definition fixed_byzantine_trace_prop
   composite_state_sub_projection fixed_byzantine_IM non_byzantine bis = is /\
   finite_trace_sub_projection fixed_byzantine_IM non_byzantine btr = tr.
 
-(** ** Byzantine traces characterization as projections. *)
+(** ** Byzantine traces characterization as projections *)
 
 Section fixed_byzantine_traces_as_projections.
 
@@ -489,8 +488,7 @@ Qed.
 
 End fixed_byzantine_traces_as_pre_loaded.
 
-(**
-  The second fixed byzantine trace definition.
+(** *** Second fixed byzantine trace definition
 
   Given the equivalence results from Lemmas [fixed_byzantine_trace_char1],
   [fixed_non_byzantine_pre_loaded_eq], and
