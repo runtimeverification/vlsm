@@ -114,7 +114,26 @@ Qed.
 
 Lemma tc_reflect_irreflexive
   `(R : relation A) `{!Irreflexive (tc R)} : Irreflexive R.
-Proof. by intros ? ?; eapply irreflexivity with (R := tc R); [| constructor]. Qed.
+Proof.
+ intros ? ?.
+ by eapply irreflexivity with (R := tc R); [| constructor].
+Qed.
+
+Lemma Proper_reflects_Irreflexive
+  `(R1 : relation A) `(R2 : relation B) (f : A -> B)
+  : Proper (R1 ==> R2) f -> Irreflexive R2 -> Irreflexive R1.
+Proof.
+  intros Hproper Hirreflexive x Hx.
+  by apply Hirreflexive with (f x), Hproper.
+Qed.
+
+Lemma Proper_tc
+  `(R1 : relation A) `(R2 : relation B) (f : A -> B) `{!Transitive R2}
+  : Proper (R1 ==> R2) f -> Proper (tc R1 ==> R2) f.
+Proof.
+  intros Hproper x y Hxy; induction Hxy; [by apply Hproper |].
+  by etransitivity; [apply Hproper |].
+Qed.
 
 (** ** Equality of dependent pairs *)
 
@@ -596,5 +615,5 @@ Definition sum_project_right {A B : Type} (x : A + B) : option B :=
 Program Definition not_lt_plus_dec {m n} (Hnlt : ~n < m) : {k | k + m = n} :=
   exist _ (n - m) _.
 Next Obligation.
-  cbn; lia.
+  by cbn; lia.
 Qed.
