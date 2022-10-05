@@ -205,7 +205,7 @@ Definition trace_last (tr : Trace) : option state
     end.
 
 (**
-  Next function extract the nth state of a trace, where the sequence of
+  This function extracts the nth state of a trace, where the sequence of
   states of a trace is obtained by appending the all destination
   states in the transition list/stream to the initial state of the trace.
 *)
@@ -818,7 +818,6 @@ Proof.
 Qed.
 
 (** If a VLSM [can_emit] a message <<m>>, then <<m>> is valid. *)
-
 Lemma emitted_messages_are_valid
   (m : message)
   (Hm : can_emit m)
@@ -846,7 +845,7 @@ Proof.
     + by apply emitted_messages_are_valid.
 Qed.
 
-(** *** valid state and valid message characterization
+(** *** Valid state and valid message characterization
 
   The definition and results below show that the mutually-recursive definitions
   for [valid_state]s and [valid_message]s can be derived from the
@@ -900,8 +899,7 @@ Proof.
   - apply (IHgen s' l0 om om' s); firstorder.
 Qed.
 
-(* valid message characterization - similar to the definition in the report. *)
-
+(** Valid message characterization. *)
 Lemma valid_message_prop_iff :
   forall m' : message,
     valid_message_prop m'
@@ -932,7 +930,7 @@ Qed.
   the infinite case.
 *)
 
-(** *** Finite [valid_trace]s
+(** *** Finite valid traces
 
   A [finite_valid_trace_from] a [state] <<start>> is a pair <<(start, steps)>> where <<steps>>
   is a list of [transition_item]s, and is inductively defined by:
@@ -970,10 +968,9 @@ Definition finite_valid_trace_singleton :
            _ _ _ _ Hptrans.
 
 (**
-  To complete our definition of a finite valid trace, we must also guarantee that <<start>> is an
-  initial state according to the protocol.
+  To complete our definition of a finite valid trace, we must also guarantee
+  that <<start>> is an initial state according to the protocol.
 *)
-
 Definition finite_valid_trace (s : state) (ls : list transition_item) : Prop :=
   finite_valid_trace_from s ls /\ initial_state_prop s.
 
@@ -988,10 +985,10 @@ Opaque finite_valid_trace.
   This is a bit more useful than the small proof suggests,
   because applying it always leaves just one subgoal.
   The tactical <<by split;[constructor;apply initial_state_is_valid|]>>
-  only works if the assumption is available, which may require
-  an <<assert>> and writing out the full VLSM and state expressions
+  only works if the premise is available in the context, which may
+  require an <<assert>> and writing out the full VLSM and state expressions
   as part of the proof script.
- *)
+*)
 Lemma finite_valid_trace_empty (s : state):
   vinitial_state_prop X s ->
   finite_valid_trace s [].

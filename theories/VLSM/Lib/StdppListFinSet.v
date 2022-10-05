@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 
-(** * Finite set implementation of list set interface *)
+(** * Finite set implementation of a list set interface *)
 
 Section fst_defs.
 
