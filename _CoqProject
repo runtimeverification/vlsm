@@ -2,13 +2,17 @@
 
 -arg -w -arg -future-coercion-class-field
 
-theories/VLSM/Lib/Preamble.v
 theories/VLSM/Lib/SsrExport.v
+theories/VLSM/Lib/Preamble.v
+theories/VLSM/Lib/EquationsExtras.v
+theories/VLSM/Lib/NatExtras.v
+theories/VLSM/Lib/ListExtras.v
 theories/VLSM/Lib/StdppExtras.v
 theories/VLSM/Lib/StdppListSet.v
-theories/VLSM/Lib/ListExtras.v
 theories/VLSM/Lib/ListSetExtras.v
 theories/VLSM/Lib/SortedLists.v
+theories/VLSM/Lib/FinSetExtras.v
+theories/VLSM/Lib/StdppListFinSet.v
 theories/VLSM/Lib/FinExtras.v
 theories/VLSM/Lib/FinFunExtras.v
 theories/VLSM/Lib/RealsExtras.v
@@ -20,13 +24,8 @@ theories/VLSM/Lib/Traces.v
 theories/VLSM/Lib/TraceProperties.v
 theories/VLSM/Lib/TraceClassicalProperties.v
 theories/VLSM/Lib/Measurable.v
-theories/VLSM/Lib/FinSetExtras.v
-theories/VLSM/Lib/StdppListFinSet.v
-theories/VLSM/Lib/EquationsExtras.v
-theories/VLSM/Lib/NatExtras.v
 
 theories/VLSM/Core/VLSM.v
-theories/VLSM/Core/Composition.v
 theories/VLSM/Core/Plans.v
 theories/VLSM/Core/VLSMProjections/VLSMPartialProjection.v
 theories/VLSM/Core/VLSMProjections/VLSMTotalProjection.v
@@ -34,15 +33,19 @@ theories/VLSM/Core/VLSMProjections/VLSMEmbedding.v
 theories/VLSM/Core/VLSMProjections/VLSMInclusion.v
 theories/VLSM/Core/VLSMProjections/VLSMEquality.v
 theories/VLSM/Core/VLSMProjections.v
+theories/VLSM/Core/Composition.v
 theories/VLSM/Core/Validator.v
-theories/VLSM/Core/MessageDependencies.v
 theories/VLSM/Core/ProjectionTraces.v
-theories/VLSM/Core/SubProjectionTraces.v
-theories/VLSM/Core/AnnotatedVLSM.v
-
 theories/VLSM/Core/Equivocation.v
 theories/VLSM/Core/EquivocationProjections.v
 theories/VLSM/Core/Equivocation/NoEquivocation.v
+theories/VLSM/Core/SubProjectionTraces.v
+theories/VLSM/Core/MessageDependencies.v
+theories/VLSM/Core/AnnotatedVLSM.v
+theories/VLSM/Core/ByzantineTraces.v
+theories/VLSM/Core/TraceableVLSM.v
+theories/VLSM/Core/FinSetMessageDependencies.v
+
 theories/VLSM/Core/Equivocation/FixedSetEquivocation.v
 theories/VLSM/Core/Equivocation/MsgDepFixedSetEquivocation.v
 theories/VLSM/Core/Equivocation/TraceWiseEquivocation.v
@@ -63,6 +66,7 @@ theories/VLSM/Core/Equivocators/Composition/LimitedEquivocation/FixedEquivocatio
 theories/VLSM/Core/Equivocators/Composition/LimitedEquivocation/FixedEquivocationSimulation.v
 theories/VLSM/Core/Equivocators/Composition/LimitedEquivocation/LimitedStateEquivocation.v
 theories/VLSM/Core/Equivocators/Composition/LimitedEquivocation/LimitedEquivocationSimulation.v
-theories/VLSM/Core/ByzantineTraces.v
+
 theories/VLSM/Core/ByzantineTraces/FixedSetByzantineTraces.v
 theories/VLSM/Core/ByzantineTraces/LimitedByzantineTraces.v
+theories/VLSM/Core/TraceableVLSM/MinimalEquivocationTrace.v
