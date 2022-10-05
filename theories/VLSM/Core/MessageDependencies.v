@@ -1201,3 +1201,44 @@ Proof.
 Qed.
 
 End sec_CompositeHasBeenObserved_dec.
+
+Section sec_msg_dep_is_globally_equivocating_props.
+
+Context
+  {message}
+  `{EqDecision index}
+  (IM : index -> VLSM message)
+  `{forall i, HasBeenSentCapability (IM i)}
+  `{forall i, HasBeenReceivedCapability (IM i)}
+  (message_dependencies : message -> list message)
+  `(sender : message -> option validator)
+  (A : validator -> index)
+  (Hauth : channel_authentication_prop IM A sender)
+  (Hsender_safety := channel_authentication_sender_safety _ _ _ Hauth)
+  (Free := free_composite_vlsm IM)
+  (RFree := pre_loaded_with_all_messages_vlsm Free)
+  .
+
+(**
+  Input valid transitions preserve (global) evidence of equivocation on
+  components not touched by the transitions.
+*)
+Lemma input_valid_transition_preserves_msg_dep_is_globally_equivocating :
+  forall (s : composite_state IM) (item : composite_transition_item IM),
+    input_valid_transition_item RFree s item ->
+    forall j, destination item j = s j ->
+    forall v, A v = j ->
+      msg_dep_is_globally_equivocating IM message_dependencies sender s v ->
+      msg_dep_is_globally_equivocating IM message_dependencies sender (destination item) v.
+Proof.
+  intros s item Ht j Hsj v Hv [m []].
+  exists m; constructor; [done |..].
+  - by eapply transition_preserves_CompositeHasBeenObserved.
+  - contradict mdgee_not_sent0.
+    apply exists_right_finite_trace_from in Ht as (is & tr & Htr & _).
+    eapply has_been_sent_iff_by_sender in mdgee_not_sent0; [| done..].
+    rewrite Hv, Hsj in mdgee_not_sent0.
+    by eexists.
+Qed.
+
+End sec_msg_dep_is_globally_equivocating_props.
