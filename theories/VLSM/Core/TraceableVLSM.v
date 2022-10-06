@@ -37,6 +37,32 @@ Proof.
   by apply transition_monotonicity, ValidTransitionNext_preloaded_iff.
 Qed.
 
+Lemma transition_monotone_in_futures
+  `(X : VLSM message) `{TransitionMonotoneVLSM _ X}
+  [s sf : vstate X] (Hfutures : in_futures X s sf) :
+  state_size s <= state_size sf.
+Proof.
+  destruct Hfutures as [tr Htr].
+  induction Htr; [done |].
+  apply input_valid_transition_forget_input,
+    valid_transition_next, transition_monotonicity in Ht.
+  by lia.
+Qed.
+
+Lemma transition_monotone_empty_trace
+  `(X : VLSM message) `{TransitionMonotoneVLSM _ X} :
+  forall [s : vstate X] [tr : list (vtransition_item X)],
+    finite_valid_trace_from_to X s s tr -> tr = [].
+Proof.
+  intros s tr Htr; remember s as f; rewrite Heqf in Htr at 1.
+  induction Htr using finite_valid_trace_from_to_ind; [done | subst].
+  assert (state_size s <= state_size s')
+    by (apply transition_monotone_in_futures; [| eexists]; done).
+  apply input_valid_transition_forget_input,
+    valid_transition_next, transition_monotonicity in Ht.
+  by lia.
+Qed.
+
 (**
   A class characterizing VLSMs with reversible transitions. A VLSM is traceable
   when given a ram-state, one can compute a set of ram-transitions leading to it.
