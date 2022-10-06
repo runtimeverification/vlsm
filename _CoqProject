@@ -70,3 +70,9 @@ theories/VLSM/Core/Equivocators/Composition/LimitedEquivocation/LimitedEquivocat
 theories/VLSM/Core/ByzantineTraces/FixedSetByzantineTraces.v
 theories/VLSM/Core/ByzantineTraces/LimitedByzantineTraces.v
 theories/VLSM/Core/TraceableVLSM/MinimalEquivocationTrace.v
+
+theories/VLSM/Core/ELMO/BaseELMO.v
+theories/VLSM/Core/ELMO/UMO.v
+theories/VLSM/Core/ELMO/MO.v
+theories/VLSM/Core/ELMO/ELMO.v
+theories/VLSM/Core/ELMO/AllELMO.v
