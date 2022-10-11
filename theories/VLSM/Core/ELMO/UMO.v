@@ -32,12 +32,13 @@ Definition UMOComponent_initial_state_prop (i : Address) (st : UMOComponentState
 Definition UMOComponent_initial_state_type (i : Address) : Type :=
   {st : UMOComponentState | UMOComponent_initial_state_prop i st}.
 
-(* FIXME: non-Prop parts should not be built with tactics *)
-Definition UMOComponent_initial_state (i : Address) : UMOComponent_initial_state_type i.
-Proof.
-  split with (MkState [] i). by compute.
+Program Definition UMOComponent_initial_state
+  (i : Address) : UMOComponent_initial_state_type i := MkState [] i.
+Next Obligation.
+  by compute.
 Defined.
 
+#[export]
 Instance Inhabited_UMOComponent_initial_state_type
   (i : Address)
   : Inhabited (UMOComponent_initial_state_type i)
@@ -103,6 +104,7 @@ Proof.
   inversion 1. by destruct s; cbn in *; subst.
 Qed.
 
+#[export]
 Instance HasBeenSentCapability_UMOComponent
   (i : Address) : HasBeenSentCapability (UMOComponent i).
 Proof.
@@ -117,6 +119,7 @@ Proof.
       unfold Message; rewrite elem_of_cons. firstorder congruence.
 Defined.
 
+#[export]
 Instance HasBeenReceivedCapability_UMOComponent
   (i : Address) : HasBeenReceivedCapability (UMOComponent i).
 Proof.
@@ -131,6 +134,7 @@ Proof.
     + rewrite decide_False; cbn; firstorder congruence.
 Defined.
 
+#[export]
 Instance HasBeenDirectlyObservedCapability_UMOComponent
   (i : Address) : HasBeenDirectlyObservedCapability (UMOComponent i) :=
     HasBeenDirectlyObservedCapability_from_sent_received (UMOComponent i).
