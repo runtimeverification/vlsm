@@ -1015,12 +1015,11 @@ Lemma induced_sub_projection_friendliness
     (lift_sub_state IM equivocators))
   : projection_friendly_prop (induced_sub_projection_is_projection IM equivocators constraint).
 Proof.
-  by eapply basic_projection_induces_friendliness.
-  Unshelve.
-  - apply composite_label_sub_projection_option_lift.
-  - apply composite_state_sub_projection_lift.
-  - apply induced_sub_projection_transition_consistency_Some.
-  - apply induced_sub_projection_transition_consistency_None.
+  unshelve eapply basic_projection_induces_friendliness; [| | | | done].
+  - by apply composite_label_sub_projection_option_lift.
+  - by apply composite_state_sub_projection_lift.
+  - by apply induced_sub_projection_transition_consistency_Some.
+  - by apply induced_sub_projection_transition_consistency_None.
 Qed.
 
 End lift_sub_state_to_preloaded.

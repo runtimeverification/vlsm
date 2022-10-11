@@ -1,7 +1,11 @@
 From Coq Require Import Reals.
 From stdpp Require Import prelude.
 
-(** * Real number utility lemmas *)
+(** * Real number utility definitions and lemmas *)
+
+(** Sum a list of real numbers. *)
+Definition list_sum_R : list R -> R :=
+  foldr Rplus 0%R.
 
 (** This lemma is needed in fault_weight_state_backwards *)
 Lemma Rplusminus_assoc : forall r1 r2 r3,

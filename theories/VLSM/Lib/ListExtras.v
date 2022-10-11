@@ -1669,6 +1669,18 @@ Proof.
   by apply submseteq_length, NoDup_submseteq.
 Qed.
 
+Lemma submseteq_tail_l [A] (x:A) l1 l2 :
+  x :: l1 ⊆+ l2 -> l1 ⊆+ l2.
+Proof.
+  by apply submseteq_trans, submseteq_cons.
+Qed.
+
+Lemma submseteq_list_subseteq [A] (l1 l2 : list A):
+  l1 ⊆+ l2 -> l1 ⊆ l2.
+Proof.
+  by intros H ? Hx; eapply elem_of_submseteq.
+Qed.
+
 Lemma take_app_inv :
   forall [A : Type] (n : nat) (l l' : list A) (x : A),
     take n l = l' ++ [x] -> exists n' : nat, n = S n'.

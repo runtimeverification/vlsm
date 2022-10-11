@@ -9,26 +9,8 @@ From VLSM.Core Require Import BaseELMO UMO MO.
 
 Create HintDb ELMO_hints.
 
-(* FIXME: move to utility module *)
-Lemma submseteq_tail_l [A] (x:A) l1 l2 :
-  x :: l1 ⊆+ l2 -> l1 ⊆+ l2.
-Proof.
-  by apply submseteq_trans, submseteq_cons.
-Qed.
-
-(* FIXME: move to utility module *)
-Lemma submseteq_list_subseteq [A] (l1 l2 : list A):
-  l1 ⊆+ l2 -> l1 ⊆ l2.
-Proof.
-  by intros H ? Hx; eapply elem_of_submseteq.
-Qed.
-
 #[local]
 Hint Resolve submseteq_tail_l : ELMO_hints.
-
-(* FIXME: move to utility module *)
-Definition list_sum_R : list R -> R :=
-  foldr Rplus 0%R.
 
 (** * ELMO Protocol Definitions and Properties
 
@@ -231,6 +213,7 @@ Defined.
 Definition local_equivocators_full (s : State) : Address -> Prop :=
   local_equivocators_full_obs (obs s).
 
+#[export]
 Instance local_equivocators_full_dec : RelDecision local_equivocators_full :=
   fun s a => local_equivocators_full_obs_dec (obs s) a.
 
@@ -340,6 +323,7 @@ Definition ELMOComponent (i : index) : VLSM Message :=
   vmachine := ELMOComponentMachine i;
 |}.
 
+#[export]
 Instance ComputableSentMessages_ELMOComponent
   (i : index) : ComputableSentMessages (ELMOComponent i).
 Proof.
@@ -354,6 +338,7 @@ Proof.
       by firstorder congruence.
 Defined.
 
+#[export]
 Instance ComputableReceivedMessages_ELMOComponent
   (i : index) : ComputableReceivedMessages (ELMOComponent i).
 Proof.
@@ -368,6 +353,7 @@ Proof.
     + by rewrite decide_False; cbn; firstorder congruence.
 Defined.
 
+#[export]
 Instance HasBeenDirectlyObservedCapability_ELMOComponent
   (i : index) : HasBeenDirectlyObservedCapability (ELMOComponent i) :=
     HasBeenDirectlyObservedCapability_from_sent_received (ELMOComponent i).
@@ -1354,6 +1340,7 @@ Proof.
         replace s0 with s in * by (apply eq_State; done); eauto.
 Defined.
 
+#[export]
 Instance ELMO_global_equivocators_dec : RelDecision ELMO_global_equivocators.
 Proof.
   intros s a.
