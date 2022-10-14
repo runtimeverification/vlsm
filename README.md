@@ -14,7 +14,7 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
   - [Coq-Equations](https://github.com/mattam82/Coq-Equations)
 - Coq namespace: `VLSM`
 - Related publication(s):
-  - [VLSM: Validating Labelled State Transition and Message Production Systems](https://arxiv.org/abs/2202.12662) doi:[10.48550/arXiv.2202.12662](https://doi.org/10.48550/arXiv.2202.12662)
+  - [Validating Labelled State Transition and Message Production Systems: A Theory for Modelling Faulty Distributed Systems](https://arxiv.org/abs/2202.12662) doi:[10.48550/arXiv.2202.12662](https://doi.org/10.48550/arXiv.2202.12662)
 
 ## Working with the project online
 

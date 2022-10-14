@@ -18,7 +18,7 @@ description: |-
 publications:
 - pub_doi: 10.48550/arXiv.2202.12662
   pub_url: https://arxiv.org/abs/2202.12662
-  pub_title: 'VLSM: Validating Labelled State Transition and Message Production Systems'
+  pub_title: 'Validating Labelled State Transition and Message Production Systems: A Theory for Modelling Faulty Distributed Systems'
 
 authors:
 - name: Mihai Calancea
