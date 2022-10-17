@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters StdppExtras.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
 
-Section VLSM_projection.
+Section sec_VLSM_projection.
 
 (** * VLSM Total Projections
 
@@ -27,7 +27,7 @@ Section VLSM_projection.
   [equivocators_no_equivocations_vlsm_X_vlsm_projection]).
 *)
 
-Section pre_definitions.
+Section sec_pre_definitions.
 
 Context
   {message : Type}
@@ -138,7 +138,7 @@ Definition pre_VLSM_projection_finite_trace_project_in
     forall trX, In itemX trX -> In itemY (pre_VLSM_projection_finite_trace_project trX)
   := in_map_option_rev _.
 
-End pre_definitions.
+End sec_pre_definitions.
 
 Record VLSM_projection_type
   {message : Type}
@@ -156,7 +156,7 @@ Record VLSM_projection_type
 
 (** ** Projection definitions and properties *)
 
-Section projection_type_properties.
+Section sec_projection_type_properties.
 
 Definition VLSM_partial_trace_project_from_projection
   {message : Type}
@@ -192,9 +192,9 @@ Proof.
     apply H1.
 Qed.
 
-End projection_type_properties.
+End sec_projection_type_properties.
 
-Section projection_transition_consistency_None.
+Section sec_projection_transition_consistency_None.
 
 Context
   {message : Type}
@@ -228,9 +228,9 @@ Proof.
   apply (Hstrong lX Hl _ _ _ _ (proj2 Ht)).
 Qed.
 
-End projection_transition_consistency_None.
+End sec_projection_transition_consistency_None.
 
-Section VLSM_projection_definitions.
+Section sec_VLSM_projection_definitions.
 
 Context
   {message : Type}
@@ -335,9 +335,9 @@ Proof.
   by intros Hstrong lX lY Hl  s m [_ [Hm%Hstrong _]] HsY.
 Qed.
 
-End VLSM_projection_definitions.
+End sec_VLSM_projection_definitions.
 
-Section weak_projection_properties.
+Section sec_weak_projection_properties.
 
 Definition VLSM_weak_projection_trace_project
   {message : Type}
@@ -509,9 +509,9 @@ Proof.
   apply VLSM_weak_projection_finite_valid_trace_from_to.
 Qed.
 
-End weak_projection_properties.
+End sec_weak_projection_properties.
 
-Section projection_properties.
+Section sec_projection_properties.
 
 Definition VLSM_projection_finite_trace_project
   {message : Type}
@@ -709,7 +709,7 @@ Qed.
   projections of the valid traces of the source VLSM.
 *)
 
-Section projection_friendliness.
+Section sec_projection_friendliness.
 
 (**
   We axiomatize projection friendliness as the converse of
@@ -771,11 +771,11 @@ Proof.
   by apply VLSM_projection_finite_valid_trace.
 Qed.
 
-End projection_friendliness.
+End sec_projection_friendliness.
 
-End projection_properties.
+End sec_projection_properties.
 
-End VLSM_projection.
+End sec_VLSM_projection.
 
 (**
   For VLSM <<X>> to project to a VLSM <<Y>>, the following set of conditions is sufficient:
@@ -789,9 +789,9 @@ End VLSM_projection.
   - All non-projectable transitions preserve the projected state
 *)
 
-Section basic_VLSM_projection.
+Section sec_basic_VLSM_projection.
 
-Section basic_VLSM_projection_type.
+Section sec_basic_VLSM_projection_type.
 
 Context
   {message : Type}
@@ -820,7 +820,7 @@ Proof.
   by rewrite Hx.
 Qed.
 
-End basic_VLSM_projection_type.
+End sec_basic_VLSM_projection_type.
 
 Context
   {message : Type}
@@ -837,7 +837,7 @@ Context
     basic_VLSM_projection_type X (type Y) label_project state_project Htransition_None)
   .
 
-Section weak_projection.
+Section sec_weak_projection.
 
 Context
   (Hstate : weak_projection_initial_state_preservation X Y state_project)
@@ -901,7 +901,7 @@ Proof.
   apply basic_VLSM_projection_finite_valid_trace_from.
 Qed.
 
-End weak_projection.
+End sec_weak_projection.
 
 Lemma basic_VLSM_weak_projection_strengthen
   (Hweak : VLSM_weak_projection X Y label_project state_project)
@@ -924,7 +924,7 @@ Proof.
   by apply strong_projection_initial_state_preservation_weaken.
 Qed.
 
-End basic_VLSM_projection.
+End sec_basic_VLSM_projection.
 
 Lemma basic_VLSM_strong_projection
   {message : Type}

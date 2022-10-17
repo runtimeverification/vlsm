@@ -10,7 +10,7 @@ From VLSM.Core Require Import Composition VLSMProjections Validator ProjectionTr
   preserved by VLSM projections.
 *)
 
-Section projection_oracle.
+Section sec_projection_oracle.
 (** ** [VLSM_projection]s reflect message properties *)
 
 Context
@@ -21,7 +21,7 @@ Context
   (Hsimul : VLSM_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
-Section selectors.
+Section sec_selectors.
 
 Context
   (selectorX : message -> vtransition_item X -> Prop)
@@ -66,7 +66,7 @@ Proof.
   by apply Hselector.
 Qed.
 
-End selectors.
+End sec_selectors.
 
 Lemma VLSM_projection_has_been_sent_reflect
   `{HasBeenSentCapability message X}
@@ -106,9 +106,9 @@ Proof.
   - by apply has_been_directly_observed_stepwise_props.
 Qed.
 
-End projection_oracle.
+End sec_projection_oracle.
 
-Section weak_full_projection_oracle.
+Section sec_weak_full_projection_oracle.
 (** ** [VLSM_weak_full_projection]s preserve message properties *)
 
 Context
@@ -119,7 +119,7 @@ Context
   (Hsimul : VLSM_weak_full_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
-Section selectors.
+Section sec_selectors.
 
 Context
   (selectorX : message -> vtransition_item X -> Prop)
@@ -172,7 +172,7 @@ Proof.
   apply VLSM_weak_full_projection_selected_message_exists_in_some_preloaded_traces.
 Qed.
 
-End selectors.
+End sec_selectors.
 
 Lemma VLSM_weak_full_projection_has_been_sent
   `{HasBeenSentCapability message X}
@@ -218,9 +218,9 @@ Proof.
   - apply has_been_directly_observed_dec.
 Qed.
 
-End weak_full_projection_oracle.
+End sec_weak_full_projection_oracle.
 
-Section full_projection_oracle.
+Section sec_full_projection_oracle.
 (** ** [VLSM_full_projection]s both preserve and reflect message properties *)
 
 Context
@@ -277,9 +277,9 @@ Definition VLSM_full_projection_has_been_directly_observed_reflect
     forall m, has_been_directly_observed Y (state_project s) m -> has_been_directly_observed X s m
   := VLSM_projection_has_been_directly_observed_reflect  (VLSM_full_projection_is_projection Hsimul).
 
-End full_projection_oracle.
+End sec_full_projection_oracle.
 
-Section incl_oracle.
+Section sec_incl_oracle.
 (** ** [VLSM_incl]usions both preserve and reflect message properties *)
 
 Context
@@ -367,9 +367,9 @@ Proof.
       (VLSM_incl_is_full_projection Hincl)).
 Qed.
 
-End incl_oracle.
+End sec_incl_oracle.
 
-Section same_IM_oracle_properties.
+Section sec_same_IM_oracle_properties.
 
 Context
   {message : Type}
@@ -394,9 +394,9 @@ Proof.
   by specialize (VLSM_full_projection_has_been_sent Hproj _ Hs1 m Hbs1_m).
 Qed.
 
-End same_IM_oracle_properties.
+End sec_same_IM_oracle_properties.
 
-Section sender_safety_can_emit_projection.
+Section sec_sender_safety_can_emit_projection.
 
 Context
   {message : Type}
@@ -437,4 +437,4 @@ Proof.
   by eexists _,_, _.
 Qed.
 
-End sender_safety_can_emit_projection.
+End sec_sender_safety_can_emit_projection.

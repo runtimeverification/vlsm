@@ -677,7 +677,7 @@ Proof.
   by inversion Hlast.
 Qed.
 
-Section infinitely_often.
+Section sec_infinitely_often.
 
 Context
   [A : Type]
@@ -710,7 +710,7 @@ Definition InfinitelyOften_nth_tl
   : forall n s, InfinitelyOften s -> InfinitelyOften (Str_nth_tl n s)
   := (@ForAll_Str_nth_tl _ (Exists1 P)).
 
-End infinitely_often.
+End sec_infinitely_often.
 
 Lemma InfinitelyOften_impl [A : Type] (P Q : A -> Prop) (HPQ : forall a, P a -> Q a)
   : forall s, InfinitelyOften P s -> InfinitelyOften Q s.

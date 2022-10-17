@@ -52,11 +52,11 @@ From Equations Require Import Equations.
 
 ### Sections
 
-- C-style name
+- C-style name prefixed with "sec_"
 
 Example:
 ```coq
-Section step_relations.
+Section sec_step_relations.
 ```
 
 ### Type classes

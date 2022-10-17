@@ -45,7 +45,7 @@ Proof.
   refine (fun i => equivocator_initial_state_project _ _ _ (Heqv i) (Hes i)).
 Qed.
 
-Section limited_state_equivocation.
+Section sec_limited_state_equivocation.
 
 Context
   {message : Type}
@@ -394,4 +394,4 @@ Qed.
 
 End sec_equivocators_projection_constrained_limited.
 
-End limited_state_equivocation.
+End sec_limited_state_equivocation.

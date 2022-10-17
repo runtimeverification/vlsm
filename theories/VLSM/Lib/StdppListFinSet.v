@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 
 (** * Finite set implementation of a list set interface *)
 
-Section fst_defs.
+Section sec_fst_defs.
 
 Context `{FinSet A C}.
 
@@ -148,11 +148,11 @@ Proof.
   - by intros []; apply set_diff_intro.
 Qed.
 
-End fst_defs.
+End sec_fst_defs.
 
 Arguments set : clear implicits.
 
-Section other_defs.
+Section sec_other_defs.
 
 Context 
   `{FinSet A C}
@@ -163,4 +163,4 @@ Context
 Definition set_prod (X : C) (Y : D) : CD :=
   list_to_set (list_prod (elements X) (elements Y)).
 
-End other_defs.
+End sec_other_defs.

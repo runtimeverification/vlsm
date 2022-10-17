@@ -20,7 +20,7 @@ From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation Equivocatio
   composition constraint allowing only a limited amount of equivocation.
 *)
 
-Section limited_byzantine_traces.
+Section sec_limited_byzantine_traces.
 
 Context
   {message : Type}
@@ -75,7 +75,7 @@ Context
   selection.
 *)
 
-Section fixed_limited_selection.
+Section sec_fixed_limited_selection.
 
 Context
   (byzantine: set index)
@@ -198,7 +198,7 @@ Proof.
       by eapply Hvalidator.
 Qed.
 
-End fixed_limited_selection.
+End sec_fixed_limited_selection.
 
 (**
   Given a trace with the [fixed_limited_byzantine_trace_prop]erty for a selection
@@ -248,7 +248,7 @@ Proof.
   exists bs, btr; eauto.
 Qed.
 
-End limited_byzantine_traces.
+End sec_limited_byzantine_traces.
 
 Section sec_msg_dep_limited_byzantine_traces.
 

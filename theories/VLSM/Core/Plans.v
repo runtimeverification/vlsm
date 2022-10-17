@@ -5,7 +5,7 @@ From VLSM.Core Require Import VLSM.
 
 (** * VLSM Plans *)
 
-Section plans.
+Section sec_plans.
 
 Context
   {message : Type}
@@ -23,9 +23,9 @@ Record plan_item :=
     input_a : option message
   }.
 
-End plans.
+End sec_plans.
 
-Section apply_plans.
+Section sec_apply_plans.
 
 Context
   {message : Type}
@@ -157,9 +157,9 @@ Definition _messages_a
   list message :=
   ListExtras.cat_option (List.map input_a a).
 
-End apply_plans.
+End sec_apply_plans.
 
-Section valid_plans.
+Section sec_valid_plans.
 
 Context
   {message : Type}
@@ -432,4 +432,4 @@ Proof.
   - by apply Hpreserves.
 Qed.
 
-End valid_plans.
+End sec_valid_plans.

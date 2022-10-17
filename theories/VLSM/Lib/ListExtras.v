@@ -1497,7 +1497,7 @@ Proof.
   - by rewrite fold_left_app; apply Hstep.
 Qed.
 
-Section suffix_quantifiers.
+Section sec_suffix_quantifiers.
 
 (** ** Quantifiers for all suffixes
 
@@ -1546,7 +1546,7 @@ Proof.
     + by eapply IHl, InvIsStable.
 Qed.
 
-End suffix_quantifiers.
+End sec_suffix_quantifiers.
 
 Lemma ForAllSuffix_subsumption [A : Type] (P Q : list A -> Prop)
   (HPQ : forall l, P l -> Q l)

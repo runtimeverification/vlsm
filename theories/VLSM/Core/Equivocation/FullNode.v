@@ -2,7 +2,7 @@ From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import Equivocation.
 
-Section full_node_constraint.
+Section sec_full_node_constraint.
 
 Context
   `{EqDecision message}
@@ -125,4 +125,4 @@ Proof.
   apply preloaded_constraint_free_incl.
 Qed.
 
-End full_node_constraint.
+End sec_full_node_constraint.

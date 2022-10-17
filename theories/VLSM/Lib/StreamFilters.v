@@ -310,7 +310,7 @@ Qed.
   2004, pp.21. ffinria-00070658 https://hal.inria.fr/inria-00070658/document
 *)
 
-Section stream_filter_positions.
+Section sec_stream_filter_positions.
 
 Context
   [A : Type]
@@ -528,9 +528,9 @@ Definition stream_filter
   : Stream A :=
   stream_filter_map proj1_sig s Hinf.
 
-End stream_filter_positions.
+End sec_stream_filter_positions.
 
-Section stream_map_option.
+Section sec_stream_map_option.
 
 (** ** Mapping a partial function on a stream
 
@@ -578,7 +578,7 @@ Definition bounded_stream_map_option
   : list B :=
   map_option f (stream_prefix s (` Hfin)).
 
-End stream_map_option.
+End sec_stream_map_option.
 
 (**
   For a totally defined function, [stream_map_option] corresponds to the

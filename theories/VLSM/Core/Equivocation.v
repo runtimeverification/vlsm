@@ -122,7 +122,7 @@ Qed.
   constraints act upon states, not traces.
 *)
 
-Section Simple.
+Section sec_simple.
 
 Context
   {message : Type}
@@ -658,7 +658,7 @@ Proof.
   by apply has_been_received_consistency.
 Qed.
 
-End Simple.
+End sec_simple.
 
 #[global] Hint Mode HasBeenSentCapability - ! : typeclass_instances.
 #[global] Hint Mode HasBeenReceivedCapability - ! : typeclass_instances.
@@ -767,7 +767,7 @@ Qed.
   to choose a trace to the state for the directions where
   one is not given.
 *)
-Section TraceFromStepwise.
+Section sec_trace_from_stepwise.
 
 Context
   (message : Type)
@@ -856,7 +856,7 @@ Proof.
   by eapply oracle_partial_trace_update; [| | right].
 Qed.
 
-End TraceFromStepwise.
+End sec_trace_from_stepwise.
 
 (**
   The stepwise properties are proven from the trace properties
@@ -864,7 +864,7 @@ End TraceFromStepwise.
   property, and by considering a trace that ends with the given
   [input_valid_transition] to prove the [oracle_step_update] property.
 *)
-Section StepwiseFromTrace.
+Section sec_stepwise_from_trace.
 
 Context
   (message : Type)
@@ -947,7 +947,7 @@ Proof.
   refine oracle_step_property_from_trace.
 Defined.
 
-End StepwiseFromTrace.
+End sec_stepwise_from_trace.
 
 (** ** Stepwise view of [HasBeenSentCapability]
 
@@ -1240,7 +1240,7 @@ Definition no_additional_equivocations_constraint
   let (s, om) := som in
   from_option (no_additional_equivocations vlsm s) True om.
 
-Section sent_received_observed_capabilities.
+Section sec_sent_received_observed_capabilities.
 
 Context
   {message : Type}
@@ -1367,7 +1367,7 @@ Proof.
   - by apply consistency_from_valid_state_proj2.
 Qed.
 
-End sent_received_observed_capabilities.
+End sec_sent_received_observed_capabilities.
 
 Definition computable_messages_oracle
   `(vlsm : VLSM message)
@@ -1659,7 +1659,7 @@ Qed.
   composition are both finite. See [finite_index], [finite_validator].
 *)
 
-Section Composite.
+Section sec_composite.
 
 Context
   {message : Type}
@@ -1670,7 +1670,7 @@ Context
   `{forall i : index, (HasBeenReceivedCapability (IM i))}
   .
 
-Section StepwiseProps.
+Section sec_stepwise_props.
 
 Context
   [message_selectors: forall i : index, message -> vtransition_item (IM i) -> Prop]
@@ -1767,7 +1767,7 @@ Proof.
   by split_and!; [|exists suf|..].
 Qed.
 
-End StepwiseProps.
+End sec_stepwise_props.
 
 (**
   A message [has_been_sent] for a composite state if it [has_been_sent]
@@ -1820,7 +1820,7 @@ Proof.
   by apply Hproper_sent.
 Qed.
 
-Section composite_has_been_received.
+Section sec_composite_has_been_received.
 
 (**
   A message [has_been_received] for a composite state
@@ -1892,7 +1892,7 @@ Definition preloaded_composite_HasBeenReceivedCapability
     composite_has_been_received_dec
     (preloaded_composite_has_been_received_stepwise_props constraint seed).
 
-End composite_has_been_received.
+End sec_composite_has_been_received.
 
 (**
   A message [has_been_directly_observed] in a composite state if it
@@ -2399,7 +2399,7 @@ Proof.
     apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
-End Composite.
+End sec_composite.
 
 Lemma composite_has_been_directly_observed_sent_received_iff
   {message}
@@ -2586,7 +2586,7 @@ Qed.
 
 End sec_composite_computable_sent_received_observed.
 
-Section cannot_resend_message.
+Section sec_cannot_resend_message.
 
 Context
   {message : Type}
@@ -2785,9 +2785,9 @@ Proof.
   by destruct Hgen as [-> [<- _]].
 Qed.
 
-End cannot_resend_message.
+End sec_cannot_resend_message.
 
-Section has_been_sent_irrelevance.
+Section sec_has_been_sent_irrelevance.
 
 (**
   Since we have several ways of obtaining the [has_been_sent] property,
@@ -2814,9 +2814,9 @@ Proof.
   by apply proper_sent.
 Qed.
 
-End has_been_sent_irrelevance.
+End sec_has_been_sent_irrelevance.
 
-Section all_traces_to_valid_state_are_valid.
+Section sec_all_traces_to_valid_state_are_valid.
 
 Context
   {message : Type}
@@ -2855,9 +2855,9 @@ Proof.
   by exists is, tr, Htr.
 Qed.
 
-End all_traces_to_valid_state_are_valid.
+End sec_all_traces_to_valid_state_are_valid.
 
-Section has_been_received_in_state.
+Section sec_has_been_received_in_state.
 
 Context
   {message : Type}
@@ -2939,4 +2939,4 @@ Proof.
   by split; [| apply  Htr2].
 Qed.
 
-End has_been_received_in_state.
+End sec_has_been_received_in_state.

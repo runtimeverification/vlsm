@@ -16,7 +16,7 @@ From VLSM.Lib Require Import Preamble StdppExtras.
   and limited state equivocation.
 *)
 
-Section tracewise_equivocation.
+Section sec_tracewise_equivocation.
 
 Context
   `{EqDecision message}
@@ -363,4 +363,4 @@ Proof.
   apply incl_equivocating_validators_equivocation_fault.
 Qed.
 
-End tracewise_equivocation.
+End sec_tracewise_equivocation.

@@ -58,7 +58,7 @@ Record TransitionValidation
 
 End sec_input_validation_definitions.
 
-Section projection_validator.
+Section sec_projection_validator.
 
 Context
   `{X : VLSM message}
@@ -122,7 +122,7 @@ Proof.
   by eexists _, _.
 Qed.
 
-End projection_validator.
+End sec_projection_validator.
 
 (** ** Induced VLSM validators
 
@@ -324,7 +324,7 @@ Proof.
   - by destruct Hv as [_ [Hm _]]; apply initial_message_is_valid.
 Qed.
 
-Section projection_induced_friendliness.
+Section sec_projection_induced_friendliness.
 
 Context
   (Hproj := projection_induced_validator_is_projection)
@@ -368,7 +368,7 @@ Proof.
   - by apply induced_validator_trace_lift.
 Qed.
 
-End projection_induced_friendliness.
+End sec_projection_induced_friendliness.
 
 End sec_projection_induced_validator_as_projection.
 
@@ -484,7 +484,7 @@ End sec_projection_induced_validator_incl.
   that initial states of <<Y>> can be lifted to <<X>>.
 *)
 
-Section induced_validator_validators.
+Section sec_induced_validator_validators.
 
 Context
   `{X : VLSM message}
@@ -608,7 +608,7 @@ Proof.
   by apply validator_alt_free_states_are_projection_states.
 Qed.
 
-Section pre_loaded_with_all_messages_validator_proj.
+Section sec_pre_loaded_with_all_messages_validator_proj.
 
 Context
   (Hvalidator : projection_validator_prop Y label_project state_project)
@@ -658,9 +658,9 @@ Proof.
   - apply induced_validator_incl_preloaded_with_all_messages.
 Qed.
 
-End pre_loaded_with_all_messages_validator_proj.
+End sec_pre_loaded_with_all_messages_validator_proj.
 
-End induced_validator_validators.
+End sec_induced_validator_validators.
 
 (** ** Validator properties for the [component_projection].
 
@@ -668,7 +668,7 @@ End induced_validator_validators.
   components of a composition.
 *)
 
-Section component_projection_validator.
+Section sec_component_projection_validator.
 
 Context
   {message : Type}
@@ -760,7 +760,7 @@ Proof.
   - apply component_transition_projection_None.
 Qed.
 
-End component_projection_validator.
+End sec_component_projection_validator.
 
 Section sec_component_projection_validator_alt.
 
@@ -921,7 +921,7 @@ End sec_component_projection_validator_alt.
 
 (** ** VLSM self-validation *)
 
-Section self_validator_vlsm.
+Section sec_self_validator_vlsm.
 
 Context
   {message : Type}
@@ -996,4 +996,4 @@ Proof.
     apply Hincl.
 Qed.
 
-End self_validator_vlsm.
+End sec_self_validator_vlsm.

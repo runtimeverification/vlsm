@@ -24,7 +24,7 @@ From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.Fixed
   equivocators with no message equivocation and limited state equivocation.
 *)
 
-Section fixed_limited_state_equivocation.
+Section sec_fixed_limited_state_equivocation.
 
 Context
   {message : Type}
@@ -68,9 +68,9 @@ Proof.
     by apply elem_of_remove_dups, Hfixed, Hi.
 Qed.
 
-End fixed_limited_state_equivocation.
+End sec_fixed_limited_state_equivocation.
 
-Section limited_equivocation_simulation.
+Section sec_limited_equivocation_simulation.
 
 Context
   {message : Type}
@@ -185,4 +185,4 @@ Proof.
   by apply valid_trace_last_pstate in Htr.
 Qed.
 
-End limited_equivocation_simulation.
+End sec_limited_equivocation_simulation.

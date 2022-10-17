@@ -12,7 +12,7 @@ From VLSM.Core Require Import VLSM MessageDependencies FinSetMessageDependencies
   type with decidable equality.
 *)
 
-Section BaseELMO.
+Section sec_BaseELMO.
 
 Context
   {Address : Type}
@@ -485,7 +485,7 @@ Proof.
   now destruct (decide (isReceive ob)).
 Qed.
 
-End BaseELMO.
+End sec_BaseELMO.
 
 Notation "s <+> ob" := (addObservation ob s) (left associativity, at level 50).
 Notation "s <++> obs" := (addObservations obs s) (left associativity, at level 50).

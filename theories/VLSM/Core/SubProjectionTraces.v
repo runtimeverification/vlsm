@@ -7,7 +7,7 @@ From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.
 
 (** * VLSM Subcomposition *)
 
-Section sub_composition.
+Section sec_sub_composition.
 
 Context
   {message : Type}
@@ -336,7 +336,7 @@ Qed.
 
 End sec_induced_sub_projection.
 
-Section induced_sub_projection_subsumption.
+Section sec_induced_sub_projection_subsumption.
 
 Context
   (constraint1 : composite_label IM -> composite_state IM * option message -> Prop)
@@ -355,7 +355,7 @@ Proof.
   - by apply constraint_subsumption_incl.
 Qed.
 
-End induced_sub_projection_subsumption.
+End sec_induced_sub_projection_subsumption.
 
 Definition from_sub_projection : composite_transition_item IM -> Prop :=
   @pre_VLSM_projection_in_projection _ (composite_type IM) _ composite_label_sub_projection_option.
@@ -364,7 +364,7 @@ Definition finite_trace_sub_projection
   : list (composite_transition_item IM) -> list (composite_transition_item sub_IM) :=
   @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _ composite_label_sub_projection_option composite_state_sub_projection.
 
-Section sub_projection_with_no_equivocation_constraints.
+Section sec_sub_projection_with_no_equivocation_constraints.
 
 Context
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
@@ -683,7 +683,7 @@ Proof.
     by unfold lst; subst.
 Qed.
 
-End sub_projection_with_no_equivocation_constraints.
+End sec_sub_projection_with_no_equivocation_constraints.
 
 Lemma lift_sub_state_initial
   (s : composite_state sub_IM)
@@ -758,7 +758,7 @@ Proof.
   by destruct (decide (i = j)); subst; state_update_simpl; case_decide; state_update_simpl.
 Qed.
 
-End sub_composition.
+End sec_sub_composition.
 
 #[export] Hint Rewrite @sub_IM_state_update_eq using done : state_update.
 #[export] Hint Rewrite @sub_IM_state_update_neq using done : state_update.
@@ -792,7 +792,7 @@ Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%functi
   [PreSubFree_PreFree_weak_full_projection]).
 *)
 
-Section lift_sub_state_to_preloaded.
+Section sec_lift_sub_state_to_preloaded.
 
 Context
   {message : Type}
@@ -1022,9 +1022,9 @@ Proof.
   - by apply induced_sub_projection_transition_consistency_None.
 Qed.
 
-End lift_sub_state_to_preloaded.
+End sec_lift_sub_state_to_preloaded.
 
-Section sub_composition_incl.
+Section sec_sub_composition_incl.
 
 Context
   {message : Type}
@@ -1136,9 +1136,9 @@ Proof.
   - by apply lift_sub_incl_message_initial.
 Qed.
 
-End sub_composition_incl.
+End sec_sub_composition_incl.
 
-Section sub_composition_sender.
+Section sec_sub_composition_sender.
 
 Context
   {message : Type}
@@ -1375,9 +1375,9 @@ Proof.
       rewrite Hsender; itauto.
 Qed.
 
-End sub_composition_sender.
+End sec_sub_composition_sender.
 
-Section sub_composition_all.
+Section sec_sub_composition_all.
 (** ** A subcomposition with all the components
 
   If taking the subset of indices used for the sub-composition to be the entire
@@ -1480,9 +1480,9 @@ Proof.
   - by intros m [[i Hi] Him]; exists i.
 Qed.
 
-End sub_composition_all.
+End sec_sub_composition_all.
 
-Section sub_composition_element.
+Section sec_sub_composition_element.
 
 (** ** Relating a sub-composition with one of its components
 
@@ -1676,12 +1676,12 @@ Proof.
     by setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
 Qed.
 
-End sub_composition_element.
+End sec_sub_composition_element.
 
 #[export] Hint Rewrite @sub_element_state_eq : state_update.
 #[export] Hint Rewrite @sub_element_state_neq using done : state_update.
 
-Section sub_composition_preloaded_lift.
+Section sec_sub_composition_preloaded_lift.
 
 Context
   {message : Type}
@@ -1790,9 +1790,9 @@ Proof.
   by apply (VLSM_full_projection_can_emit Hproj).
 Qed.
 
-End sub_composition_preloaded_lift.
+End sec_sub_composition_preloaded_lift.
 
-Section empty_sub_composition.
+Section sec_empty_sub_composition.
 
 (** ** A subcomposition with no components
 
@@ -1820,9 +1820,9 @@ Proof.
   intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; inversion Hi.
 Qed.
 
-End empty_sub_composition.
+End sec_empty_sub_composition.
 
-Section update_IM.
+Section sec_update_IM.
 
 Context
   {message : Type}
@@ -1862,4 +1862,4 @@ Proof.
   by eapply set_diff_elim2.
 Qed.
 
-End update_IM.
+End sec_update_IM.

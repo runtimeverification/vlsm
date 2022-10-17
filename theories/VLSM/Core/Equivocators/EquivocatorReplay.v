@@ -11,7 +11,7 @@ From VLSM.Core Require Import Equivocation EquivocationProjections Equivocators.
   [equivocator_state_append]ing each state to the last state of the first trace.
 *)
 
-Section equivocator_state_append_projection.
+Section sec_equivocator_state_append_projection.
 
 Context
   {message : Type}
@@ -180,4 +180,4 @@ Proof.
   by specialize (VLSM_weak_full_projection_has_been_sent Hproj _ Hs _ Hm) as HmY.
 Qed.
 
-End equivocator_state_append_projection.
+End sec_equivocator_state_append_projection.

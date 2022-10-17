@@ -26,7 +26,7 @@ From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquiv
   state for the composition of nodes under the [fixed_equivocation_constraint]
   induced by its set of equivocators.
 *)
-Section witnessed_equivocation.
+Section sec_witnessed_equivocation.
 
 Context
   `{EqDecision message}
@@ -81,7 +81,7 @@ Class WitnessedEquivocationCapability
       trace_witnessing_equivocation_prop is tr
   }.
 
-Section witnessed_equivocation_properties.
+Section sec_witnessed_equivocation_properties.
 
 Context
   (Hke : WitnessedEquivocationCapability)
@@ -609,9 +609,9 @@ Proof.
   by exists is, tr.
 Qed.
 
-End witnessed_equivocation_properties.
+End sec_witnessed_equivocation_properties.
 
-End witnessed_equivocation.
+End sec_witnessed_equivocation.
 
 (** ** Witnessed equivocation and fixed-set equivocation
 
@@ -622,7 +622,7 @@ End witnessed_equivocation.
   for the composition constrained by the [fixed_equivocation_constrained] induced
   by the [equivocating_validators] of its final state.
 *)
-Section witnessed_equivocation_fixed_set.
+Section sec_witnessed_equivocation_fixed_set.
 
 Context
   `{EqDecision message}
@@ -819,4 +819,4 @@ Proof.
   by apply strong_witness_has_fixed_equivocation.
 Qed.
 
-End witnessed_equivocation_fixed_set.
+End sec_witnessed_equivocation_fixed_set.

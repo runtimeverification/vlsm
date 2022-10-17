@@ -24,7 +24,7 @@ From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.Simulating
   which is then used to satisfy the [replayable_message_prop]erty.
 *)
 
-Section fixed_equivocating.
+Section sec_fixed_equivocating.
 
 Context {message : Type}
   {index : Type}
@@ -373,7 +373,7 @@ Proof.
   - apply fixed_equivocation_has_replayable_message_prop.
 Qed.
 
-End fixed_equivocating.
+End sec_fixed_equivocating.
 
 (** ** No-equivocation simulation as a particular case of fixed-set simulation
 
@@ -382,7 +382,7 @@ End fixed_equivocating.
   no message-equivocation in which no component is allowed to state-equivocate.
 *)
 
-Section no_equivocation.
+Section sec_no_equivocation.
 
 Context {message : Type}
   `{finite.Finite index}
@@ -458,4 +458,4 @@ Proof.
         eqv_state_s Hstate_valid im) as Hsent.
 Qed.
 
-End no_equivocation.
+End sec_no_equivocation.

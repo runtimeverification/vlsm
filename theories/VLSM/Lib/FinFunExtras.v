@@ -41,7 +41,7 @@ Proof.
     apply f_surj.
 Qed.
 
-Section sum_listing.
+Section sec_sum_listing.
 (** 'Listing' for the sum type implies 'Listing' for each projection *)
 
 Context
@@ -77,4 +77,4 @@ Proof.
   by destruct a;simpl;congruence.
 Qed.
 
-End sum_listing.
+End sec_sum_listing.

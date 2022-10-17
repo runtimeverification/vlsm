@@ -706,7 +706,7 @@ Ltac destruct_equivocator_state_extend_project es s i Hi :=
   destruct_equivocator_state_extend_project' es s i Hi Hpr
   ; clear Hpr.
 
-Section equivocator_vlsm_valid_state_projections.
+Section sec_equivocator_vlsm_valid_state_projections.
 
 Context
   {message : Type}
@@ -1213,7 +1213,7 @@ Proof.
   by apply equivocator_state_project_Some_rev in Hsi.
 Qed.
 
-End equivocator_vlsm_valid_state_projections.
+End sec_equivocator_vlsm_valid_state_projections.
 
 Arguments NewMachine {_ _} _: assert.
 Arguments Existing {_ _} _ : assert.

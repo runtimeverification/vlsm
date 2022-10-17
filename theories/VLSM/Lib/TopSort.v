@@ -19,7 +19,7 @@ From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet Stdp
   (Lemmas [top_sort_precedes] and [top_sort_precedes_before]).
 *)
 
-Section min_predecessors.
+Section sec_min_predecessors.
 (** ** Finding an element with a minimal number of predecessors *)
 
 (**
@@ -233,7 +233,7 @@ Proof.
   lia.
 Qed.
 
-End min_predecessors.
+End sec_min_predecessors.
 
 #[export] Instance precedes_P_transitive
   `{Transitive A preceeds} (P : A -> Prop)
@@ -258,7 +258,7 @@ Proof.
   split; typeclasses eauto.
 Qed.
 
-Section topologically_sorted.
+Section sec_topologically_sorted.
 
 (** ** Topologically sorted lists. Definition and properties. *)
 
@@ -286,7 +286,7 @@ Context
   {Hso : StrictOrder (precedes_P precedes P)}
   .
 
-Section topologically_sorted_fixed_list.
+Section sec_topologically_sorted_fixed_list.
 
 Context
   (Hl : Forall P l)
@@ -364,8 +364,8 @@ Proof.
   exists l1, l2, l3. by rewrite Hb', <- app_assoc.
 Qed.
 
-End topologically_sorted_fixed_list.
-End topologically_sorted.
+End sec_topologically_sorted_fixed_list.
+End sec_topologically_sorted.
 
 Lemma toplogically_sorted_remove_last
   {A : Type}
@@ -438,7 +438,7 @@ Proof.
   rewrite !app_length in Heq. cbn in Heq. lia.
 Qed.
 
-Section top_sort.
+Section sec_top_sort.
 (** ** The topological sorting algorithm *)
 
 Context {A} `{EqDecision A} (precedes : relation A) `{!RelDecision precedes}.
@@ -750,7 +750,7 @@ Proof.
        (min_predecessors precedes (a :: l0) l0 a)). itauto.
 Qed.
 
-End top_sort.
+End sec_top_sort.
 
 (**
   Some of the results above depend on the <<precedes>> relation being a

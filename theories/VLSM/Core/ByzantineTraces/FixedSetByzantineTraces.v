@@ -23,7 +23,7 @@ From VLSM.Core Require Import Validator Equivocation EquivocationProjections Equ
   protocol it suffices to consider equivocating nodes.
 *)
 
-Section emit_any_signed_message_vlsm.
+Section sec_emit_any_signed_message_vlsm.
 
 (** ** A machine which can emit any valid message for a given node
 
@@ -61,9 +61,9 @@ Definition emit_any_signed_message_vlsm_machine
 Definition emit_any_signed_message_vlsm
     := mk_vlsm emit_any_signed_message_vlsm_machine.
 
-End emit_any_signed_message_vlsm.
+End sec_emit_any_signed_message_vlsm.
 
-Section fixed_byzantine_traces.
+Section sec_fixed_byzantine_traces.
 
 Context
   {message : Type}
@@ -154,7 +154,7 @@ Definition fixed_byzantine_trace_prop
 
 (** ** Byzantine traces characterization as projections *)
 
-Section fixed_byzantine_traces_as_projections.
+Section sec_fixed_byzantine_traces_as_projections.
 
 Definition fixed_non_byzantine_projection : VLSM message :=
   pre_induced_sub_projection fixed_byzantine_IM non_byzantine non_byzantine_not_equivocating_constraint.
@@ -225,7 +225,7 @@ Proof.
   apply fixed_non_byzantine_projection_friendliness.
 Qed.
 
-End fixed_byzantine_traces_as_projections.
+End sec_fixed_byzantine_traces_as_projections.
 
 (** ** Fixed Byzantine traces as traces pre-loaded with signed messages
 
@@ -234,7 +234,7 @@ End fixed_byzantine_traces_as_projections.
   signed by the nodes in the <<byzantine>>.
 *)
 
-Section fixed_byzantine_traces_as_pre_loaded.
+Section sec_fixed_byzantine_traces_as_pre_loaded.
 
 Definition fixed_set_signed_message (m : message) : Prop :=
   non_sub_index_authenticated_message non_byzantine A sender m /\
@@ -486,7 +486,7 @@ Proof.
   - apply pre_loaded_fixed_non_byzantine_incl.
 Qed.
 
-End fixed_byzantine_traces_as_pre_loaded.
+End sec_fixed_byzantine_traces_as_pre_loaded.
 
 (** *** Second fixed byzantine trace definition
 
@@ -505,7 +505,7 @@ Definition fixed_byzantine_trace_alt_prop is tr : Prop :=
     (composite_state_sub_projection IM non_byzantine is)
     (finite_trace_sub_projection IM non_byzantine tr).
 
-End fixed_byzantine_traces.
+End sec_fixed_byzantine_traces.
 
 (** ** Relation between Byzantine nodes and equivocators
 
@@ -515,7 +515,7 @@ End fixed_byzantine_traces.
   allows them to locally verify the authenticity of a received message.
 *)
 
-Section fixed_non_equivocating_vs_byzantine.
+Section sec_fixed_non_equivocating_vs_byzantine.
 
 Context
   {message : Type}
@@ -616,7 +616,7 @@ Proof.
   by apply (VLSM_projection_finite_valid_trace Hproj).
 Qed.
 
-Section validator_fixed_set_byzantine.
+Section sec_validator_fixed_set_byzantine.
 
 Context
   (message_dependencies : message -> set message)
@@ -691,7 +691,7 @@ Proof.
   - by intro; intros; apply (lift_sub_state_initial IM).
 Qed.
 
-Section assuming_initial_messages_lift.
+Section sec_assuming_initial_messages_lift.
 
 Context
   (Hfixed_non_byzantine_vlsm_lift_initial_message
@@ -747,7 +747,7 @@ Proof.
   - apply fixed_non_equivocating_incl_fixed_non_byzantine.
 Qed.
 
-End assuming_initial_messages_lift.
+End sec_assuming_initial_messages_lift.
 
 Context
   (Hvalidator:
@@ -812,6 +812,6 @@ Proof.
     by apply fixed_non_equivocating_traces_char.
 Qed.
 
-End validator_fixed_set_byzantine.
+End sec_validator_fixed_set_byzantine.
 
-End fixed_non_equivocating_vs_byzantine.
+End sec_fixed_non_equivocating_vs_byzantine.

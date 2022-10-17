@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppExtras.
 From VLSM.Core Require Import VLSM Composition VLSMProjections Validator.
 
-Section projections.
+Section sec_projections.
 
 (** * Composite VLSM induced projections
 
@@ -68,11 +68,11 @@ Proof.
     + by intros ? ? ? ? ? [_ ?].
 Qed.
 
-End projections.
+End sec_projections.
 
 (** ** VLSM Projection Traces *)
 
-Section PreLoadedProjectionTraces.
+Section sec_pre_loaded_projection_traces.
 
 Context
   {message : Type}
@@ -228,9 +228,9 @@ Proof.
   by state_update_simpl.
 Qed.
 
-End PreLoadedProjectionTraces.
+End sec_pre_loaded_projection_traces.
 
-Section ProjectionTraces_membership.
+Section sec_projection_traces_membership.
 
 Context
   {message : Type}
@@ -279,9 +279,9 @@ Proof.
   by inversion Hly.
 Qed.
 
-End ProjectionTraces_membership.
+End sec_projection_traces_membership.
 
-Section binary_free_composition_projections.
+Section sec_binary_free_composition_projections.
 
 (** ** Projections of Free composition of two VLSMs
 
@@ -299,9 +299,9 @@ Definition binary_free_composition_fst : VLSM message :=
 Definition binary_free_composition_snd : VLSM message :=
   pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (free_constraint _) second.
 
-End binary_free_composition_projections.
+End sec_binary_free_composition_projections.
 
-Section fixed_projection.
+Section sec_fixed_projection.
 
 Context
   {message : Type}
@@ -511,9 +511,9 @@ Definition pre_loaded_with_all_messages_validator_component_proj_incl
   : VLSM_incl (pre_loaded_with_all_messages_vlsm (IM j)) Xj :=
   VLSM_eq_proj1 (pre_loaded_with_all_messages_validator_component_proj_eq Hvalidator).
 
-End fixed_projection.
+End sec_fixed_projection.
 
-Section projection_friendliness_sufficient_condition.
+Section sec_projection_friendliness_sufficient_condition.
 
 Context {message : Type}
         `{EqDecision index}
@@ -596,4 +596,4 @@ Proof.
   - by destruct Hv as [Hs [Homj [sX [Heqs [HsX [Hom Hv]]]]]].
 Qed.
 
-End projection_friendliness_sufficient_condition.
+End sec_projection_friendliness_sufficient_condition.
