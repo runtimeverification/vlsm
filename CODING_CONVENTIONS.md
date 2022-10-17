@@ -59,6 +59,8 @@ Example:
 Section sec_step_relations.
 ```
 
+The role of the "sec_" prefix is to prevent name collisions for crossreferences in coqdoc documentation. It should not appear in names of non-sections.
+
 ### Type classes
 
 - CamelCase name
