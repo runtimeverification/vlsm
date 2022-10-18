@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM.
 
-Section VLSM_partial_projection.
+Section sec_VLSM_partial_projection.
 
 (** * VLSM Partial Projections
 
@@ -75,7 +75,7 @@ Record VLSM_partial_projection
         finite_valid_trace X sX trX -> finite_valid_trace Y sY trY
   }.
 
-Section weak_partial_projection_properties.
+Section sec_weak_partial_projection_properties.
 
 (** ** Weak partial projection properties *)
 
@@ -136,9 +136,9 @@ Proof.
   by eapply VLSM_weak_partial_projection_input_valid_transition.
 Qed.
 
-End weak_partial_projection_properties.
+End sec_weak_partial_projection_properties.
 
-Section partial_projection_properties.
+Section sec_partial_projection_properties.
 
 (** ** Partial projection properties *)
 
@@ -204,6 +204,6 @@ Definition VLSM_partial_projection_input_valid_transition
 Definition VLSM_partial_projection_input_valid
   := VLSM_weak_partial_projection_input_valid VLSM_partial_projection_weaken.
 
-End partial_projection_properties.
+End sec_partial_projection_properties.
 
-End VLSM_partial_projection.
+End sec_VLSM_partial_projection.

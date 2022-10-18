@@ -7,7 +7,7 @@ From VLSM.Core Require Export VLSMEmbedding VLSMInclusion VLSMEquality.
 
 (** * VLSM Projection Properties *)
 
-Section same_VLSM_full_projection.
+Section sec_same_VLSM_full_projection.
 
 (** ** Same VLSM full projection *)
 
@@ -27,9 +27,9 @@ Proof.
   - by apply same_VLSM_initial_message_preservation.
 Qed.
 
-End same_VLSM_full_projection.
+End sec_same_VLSM_full_projection.
 
-Section transitivity_props.
+Section sec_transitivity_props.
 
 (** ** Transitivity properties *)
 
@@ -284,4 +284,4 @@ Lemma VLSM_eq_embedding_trans
   : VLSM_full_projection X Z project_labelYZ project_stateYZ.
 Proof. by apply VLSM_incl_embedding_trans; [apply VLSM_eq_proj1 |]. Qed.
 
-End transitivity_props.
+End sec_transitivity_props.

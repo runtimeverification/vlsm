@@ -10,7 +10,7 @@ From VLSM.Core Require Import VLSM VLSMProjections.VLSMInclusion VLSMProjections
   Then VLSM <<X>> and VLSM <<Y>> are _equal_ if their [valid_trace]s are exactly the same.
 *)
 
-Section VLSM_equality.
+Section sec_VLSM_equality.
 
 Context
   {message : Type}
@@ -47,7 +47,7 @@ Lemma VLSM_eq_incl_iff
   : VLSM_eq X Y <-> VLSM_incl X Y /\ VLSM_incl Y X.
 Proof. firstorder. Qed.
 
-End VLSM_equality.
+End sec_VLSM_equality.
 
 Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
 
@@ -81,7 +81,7 @@ Proof.
   firstorder.
 Qed.
 
-Section VLSM_eq_properties.
+Section sec_VLSM_eq_properties.
 
 (** ** VLSM equality properties *)
 
@@ -241,9 +241,9 @@ Proof.
   - apply (VLSM_incl_valid_trace VLSM_eq_proj2).
 Qed.
 
-End VLSM_eq_properties.
+End sec_VLSM_eq_properties.
 
-Section VLSM_incl_preloaded_properties.
+Section sec_VLSM_incl_preloaded_properties.
 
 (** ** Inclusion properties for pre-loaded VLSMs *)
 
@@ -333,4 +333,4 @@ Proof.
   split; (apply VLSM_incl_valid_state_message; [|cbv;tauto]); apply Heq.
 Qed.
 
-End VLSM_incl_preloaded_properties.
+End sec_VLSM_incl_preloaded_properties.

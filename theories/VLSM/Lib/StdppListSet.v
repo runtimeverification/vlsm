@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 
-Section fst_defs.
+Section sec_fst_defs.
 
 Context `{EqDecision A}.
 
@@ -206,11 +206,11 @@ Proof.
   - by case_decide; [done |]; apply set_add_nodup.
 Qed.
 
-End fst_defs.
+End sec_fst_defs.
 
 Arguments set : clear implicits.
 
-Section other_defs.
+Section sec_other_defs.
 
 Definition set_prod : forall {A B : Type}, set A -> set B -> set (A * B) :=
   list_prod.
@@ -221,4 +221,4 @@ Definition set_fold_right {A B : Type} (f : A -> B -> B) (x : set A) (b : B) : B
 Definition set_map {A B : Type} `{EqDecision B} (f : A -> B) (x : set A) : set B :=
   set_fold_right (fun a => set_add (f a)) x empty_set.
 
-End other_defs.
+End sec_other_defs.

@@ -22,7 +22,7 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces 
 
 (** ** Definition and basic properties *)
 
-Section ByzantineTraces.
+Section sec_byzantine_traces.
 Context
     {message : Type}
     (M : VLSM message)
@@ -164,7 +164,7 @@ Qed.
   in the definition of the [alternate_byzantine_trace_prop]erty.
 *)
 
-Section pre_loaded_with_all_messages_byzantine_alt.
+Section sec_pre_loaded_with_all_messages_byzantine_alt.
 
 Context
     (PreLoaded := pre_loaded_with_all_messages_vlsm M)
@@ -295,7 +295,7 @@ Proof.
     - apply alt_pre_loaded_with_all_messages_incl.
 Qed.
 
-End pre_loaded_with_all_messages_byzantine_alt.
+End sec_pre_loaded_with_all_messages_byzantine_alt.
 
 (**
   Finally, we can conclude that the two definitions for byzantine traces are
@@ -310,7 +310,7 @@ Proof.
     - by apply pre_loaded_with_all_messages_alt_incl, byzantine_pre_loaded_with_all_messages.
 Qed.
 
-End ByzantineTraces.
+End sec_byzantine_traces.
 
 (** ** Byzantine fault tolerance for a single validator
 
@@ -343,7 +343,7 @@ Qed.
   traces obtained upon placing this composition in any, possibly adversarial,
   context) are [valid_trace]s of <<X>>.
 *)
-Section composite_validator_byzantine_traces.
+Section sec_composite_validator_byzantine_traces.
 
 Context
   {message : Type}
@@ -409,4 +409,4 @@ Proof.
   by apply byzantine_alt_byzantine_iff in Hbyz.
 Qed.
 
-End composite_validator_byzantine_traces.
+End sec_composite_validator_byzantine_traces.

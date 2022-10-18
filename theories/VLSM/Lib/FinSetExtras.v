@@ -4,12 +4,12 @@ From VLSM.Lib Require Import Preamble.
 
 (** * Finite set utility definitions and lemmas *)
 
-Section fin_set.
+Section sec_fin_set.
 
 Context
   `{FinSet A C}.
 
-Section general.
+Section sec_general.
 
 Lemma union_size_ge_size1
   (X Y : C) :
@@ -141,9 +141,9 @@ Proof.
     lia.
 Qed.
 
-End general.
+End sec_general.
 
-Section filter.
+Section sec_filter.
 
 Context
   (P P2 : A → Prop)
@@ -171,11 +171,11 @@ Proof.
   itauto.
 Qed.
 
-End filter.
+End sec_filter.
 
-End fin_set.
+End sec_fin_set.
 
-Section map.
+Section sec_map.
 
 Context
   `{FinSet A C}
@@ -208,4 +208,4 @@ Proof.
   by apply fmap_length.
 Qed.
 
-End map.
+End sec_map.

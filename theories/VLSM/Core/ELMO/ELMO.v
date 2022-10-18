@@ -18,7 +18,7 @@ Hint Resolve submseteq_tail_l : ELMO_hints.
   the ELMO protocol.
 *)
 
-Section ELMO.
+Section sec_ELMO.
 
 Context
   {Address : Type}
@@ -400,7 +400,7 @@ Proof.
   by inversion 1.
 Qed.
 
-Section ELMOComponent_Lemmas.
+Section sec_ELMOComponent_lemmas.
 
 (** ** Component lemmas *)
 
@@ -1164,7 +1164,7 @@ Proof.
   - by left; eapply ELMOComponent_sentMessages_of_ram_trace.
 Qed.
 
-End ELMOComponent_Lemmas.
+End sec_ELMOComponent_lemmas.
 
 Section sec_TraceableVLSM_ELMOComponent.
 
@@ -1297,7 +1297,7 @@ Qed.
 
 End sec_MessageDependencies_ELMOComponent.
 
-Section ELMOProtocol.
+Section sec_ELMOProtocol.
 
 Context `{Inhabited index}.
 
@@ -3028,6 +3028,6 @@ Proof.
   - by repeat split; [| apply option_valid_message_None | apply Hvt].
 Qed.
 
-End ELMOProtocol.
+End sec_ELMOProtocol.
 
-End ELMO.
+End sec_ELMO.

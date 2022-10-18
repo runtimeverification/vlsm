@@ -924,7 +924,7 @@ Qed.
 
 End sec_sub_composite_message_dependencies.
 
-Section sec_full_message_dependencies.
+Section sec_FullMessageDependencies.
 
 Context
   {message : Type}
@@ -942,13 +942,13 @@ Class FullMessageDependencies
       : forall m, NoDup (full_message_dependencies m)
   }.
 
-End sec_full_message_dependencies.
+End sec_FullMessageDependencies.
 
 (* given the message type, we can usually look up the functions for
 message dependencies *)
 #[global] Hint Mode FullMessageDependencies ! - - : typeclass_instances.
 
-Section full_message_dependencies_happens_before.
+Section sec_FullMessageDependencies_happens_before.
 
 Context
   `{EqDecision message}
@@ -1021,7 +1021,7 @@ Proof.
   by transitivity dm; apply full_message_dependencies_happens_before.
 Qed.
 
-End full_message_dependencies_happens_before.
+End sec_FullMessageDependencies_happens_before.
 
 (** ** Basic validation condition for free composition
 
@@ -1032,7 +1032,7 @@ End full_message_dependencies_happens_before.
   Thus, the node itself is a validator for the free composition.
 *)
 
-Section free_composition_validators.
+Section sec_free_composition_validators.
 
 Context
   {message : Type}
@@ -1168,7 +1168,7 @@ Proof.
     by eapply message_dependencies_are_sufficient.
 Qed.
 
-End free_composition_validators.
+End sec_free_composition_validators.
 
 Section sec_CompositeHasBeenObserved_dec.
 

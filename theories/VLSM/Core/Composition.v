@@ -11,7 +11,7 @@ From VLSM.Core Require Import VLSM Plans VLSMProjections.
   to components.
 *)
 
-Section VLSM_composition.
+Section sec_VLSM_composition.
 
 (**
   Let us fix a type for <<message>>s, and an <<index>> type for the VLSM components
@@ -24,7 +24,7 @@ Context
   (IM : index -> VLSM message)
   .
 
-Section composite_type.
+Section sec_composite_type.
 
 (** ** The type of a composite VLSM
 
@@ -149,7 +149,7 @@ Proof.
   by rewrite !state_update_neq.
 Qed.
 
-End composite_type.
+End sec_composite_type.
 
 Section sec_composite_vlsm.
 (** ** Constrained VLSM composition
@@ -841,7 +841,7 @@ Qed.
 
 End sec_composite_vlsm.
 
-End VLSM_composition.
+End sec_VLSM_composition.
 
 (** Hint database and tactic for dealing with updates and lifting via [state_update]. *)
 
@@ -1032,7 +1032,7 @@ Proof.
   revert Ht. apply input_valid_transition_preloaded_project_active.
 Qed.
 
-Section binary_free_composition.
+Section sec_binary_free_composition.
 
 (** ** Free composition of two VLSMs
 
@@ -1068,9 +1068,9 @@ Definition binary_free_composition
   : VLSM message
   := free_composite_vlsm binary_IM.
 
-End binary_free_composition.
+End sec_binary_free_composition.
 
-Section composite_decidable_initial_message.
+Section sec_composite_decidable_initial_message.
 
 (** ** Composite decidable initial message
 
@@ -1102,9 +1102,9 @@ Proof.
   - apply @Exists_dec. intro i. apply Hdec_init.
 Qed.
 
-End composite_decidable_initial_message.
+End sec_composite_decidable_initial_message.
 
-Section composite_plan_properties.
+Section sec_composite_plan_properties.
 
 Context
   {message : Type}
@@ -1386,9 +1386,9 @@ Proof.
         by setoid_rewrite Hdiff0.
 Qed.
 
-End composite_plan_properties.
+End sec_composite_plan_properties.
 
-Section empty_composition_properties.
+Section sec_empty_composition_properties.
 
 Context {message : Type}
   `{finite.Finite index}
@@ -1454,7 +1454,7 @@ Proof.
   intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
-End empty_composition_properties.
+End sec_empty_composition_properties.
 
 (** ** Properties of extensionally-equal indexed compositions
 
@@ -1481,7 +1481,7 @@ Definition same_IM_state_rew
   : composite_state IM2 :=
   fun i => same_VLSM_state_rew (Heq i) (s1 i).
 
-Section pre_loaded_constrained.
+Section sec_pre_loaded_constrained.
 
 Context
   (constraint1 : composite_label IM1 -> composite_state IM1 * option message -> Prop)
@@ -1527,7 +1527,7 @@ Proof.
     + by exists (exist _ m Hm).
 Qed.
 
-End pre_loaded_constrained.
+End sec_pre_loaded_constrained.
 
 Lemma same_IM_preloaded_free_full_projection
   : VLSM_full_projection

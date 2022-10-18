@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMTotalProjection.
 
-Section VLSM_full_projection.
+Section sec_VLSM_full_projection.
 
 (** * VLSM Full Projection (Embedding)
 
@@ -23,7 +23,7 @@ Section VLSM_full_projection.
   [lift_to_composite_vlsm_full_projection] or [projection_friendliness_lift_to_composite_vlsm_full_projection]).
 *)
 
-Section pre_definitions.
+Section sec_pre_definitions.
 
 Context
   {message : Type}
@@ -85,9 +85,9 @@ Proof.
   by setoid_rewrite map_app; simpl; rewrite !finite_trace_last_output_is_last.
 Qed.
 
-End pre_definitions.
+End sec_pre_definitions.
 
-Section basic_definitions.
+Section sec_basic_definitions.
 
 Context
   {message : Type}
@@ -219,7 +219,7 @@ Proof.
   by apply initial_message_is_valid.
 Qed.
 
-End basic_definitions.
+End sec_basic_definitions.
 
 Definition VLSM_full_projection_transition_item_project
   {message : Type}
@@ -274,7 +274,7 @@ Proof.
     apply (pre_VLSM_full_projection_finite_trace_last _).
 Qed.
 
-Section weak_projection_properties.
+Section sec_weak_projection_properties.
 
 (** ** Weak projection properties *)
 
@@ -386,9 +386,9 @@ Proof.
   - apply emitted_messages_are_valid. revert Hemit. apply VLSM_weak_full_projection_can_emit.
 Qed.
 
-End weak_projection_properties.
+End sec_weak_projection_properties.
 
-Section full_projection_properties.
+Section sec_full_projection_properties.
 
 (** ** Full projection properties *)
 
@@ -548,9 +548,9 @@ Proof.
     + destruct om as [m|]; [| done]. by apply Hmessage.
 Qed.
 
-End full_projection_properties.
+End sec_full_projection_properties.
 
-End VLSM_full_projection.
+End sec_VLSM_full_projection.
 
 (**
   It is natural to look for sufficient conditions for VLSM projections
@@ -565,7 +565,7 @@ End VLSM_full_projection.
   like <<X>>'s [transition].
 *)
 
-Section basic_VLSM_full_projection.
+Section sec_basic_VLSM_full_projection.
 
 (** ** Basic full VLSM projection *)
 
@@ -581,7 +581,7 @@ Context
   (Htransition : weak_full_projection_transition_preservation X Y label_project state_project)
   .
 
-Section weak_full_projection.
+Section sec_weak_full_projection.
 
 (** ** Weak full VLSM projection *)
 
@@ -658,7 +658,7 @@ Proof.
   by apply (VLSM_weak_projection_finite_valid_trace_from Hproj) in H.
 Qed.
 
-End weak_full_projection.
+End sec_weak_full_projection.
 
 Lemma basic_VLSM_weak_full_projection_strengthen
   (Hweak : VLSM_weak_full_projection X Y label_project state_project)
@@ -681,7 +681,7 @@ Proof.
   by apply strong_projection_initial_state_preservation_weaken.
 Qed.
 
-End basic_VLSM_full_projection.
+End sec_basic_VLSM_full_projection.
 
 Lemma basic_VLSM_strong_full_projection
   {message : Type}

@@ -18,7 +18,7 @@ From VLSM.Core Require Import SubProjectionTraces Equivocation Equivocation.NoEq
   (messages) available to it at the moment of production.
 *)
 
-Section fixed_equivocation_without_fullnode.
+Section sec_fixed_equivocation_without_fullnode.
 
 Context
   {message : Type}
@@ -107,7 +107,7 @@ Qed.
   the compositions constrained by the two [fixed_equivocation_constraint]s
   are trace-equivalent.
 *)
-Section strong_fixed_equivocation.
+Section sec_strong_fixed_equivocation.
 
 Definition sent_by_non_equivocating s m
   := exists i, i ∉ equivocating /\ has_been_sent (IM i) (s i) m.
@@ -205,12 +205,12 @@ Proof.
   apply strong_fixed_equivocation_constraint_subsumption.
 Qed.
 
-End strong_fixed_equivocation.
+End sec_strong_fixed_equivocation.
 
-End fixed_equivocation_without_fullnode.
+End sec_fixed_equivocation_without_fullnode.
 
 (** ** Extending the set of nodes allowed to equivocate *)
-Section fixed_equivocation_index_incl.
+Section sec_fixed_equivocation_index_incl.
 
 Context
   {message : Type}
@@ -265,7 +265,7 @@ Proof.
   apply fixed_equivocation_constraint_index_incl_subsumption.
 Qed.
 
-End fixed_equivocation_index_incl.
+End sec_fixed_equivocation_index_incl.
 
 (** ** Restricting Fixed valid traces to only the equivocators
 
@@ -279,7 +279,7 @@ End fixed_equivocation_index_incl.
   the obtained trace is valid for the composition of equivocators pre-loaded
   only with those messages sent by the non-equivocators in the original trace.
 *)
-Section fixed_equivocator_sub_projection.
+Section sec_fixed_equivocator_sub_projection.
 
 Context
   {message : Type}
@@ -368,7 +368,7 @@ Proof.
   - by apply emitted_messages_are_valid in Hemit.
 Qed.
 
-Section fixed_finite_valid_trace_sub_projection_helper_lemmas.
+Section sec_fixed_finite_valid_trace_sub_projection_helper_lemmas.
 
 (**
   The results in this section are not meant to be used directly. They are just
@@ -469,7 +469,7 @@ Proof.
     by apply (has_been_sent_step_update Hproject); left.
 Qed.
 
-End fixed_finite_valid_trace_sub_projection_helper_lemmas.
+End sec_fixed_finite_valid_trace_sub_projection_helper_lemmas.
 
 (**
   Using the lemmas above we can now prove (by induction) a generic result,
@@ -631,7 +631,7 @@ Proof.
   - done.
 Qed.
 
-End fixed_equivocator_sub_projection.
+End sec_fixed_equivocator_sub_projection.
 
 (**
   [strong_fixed_equivocation_constraint] is not actually stronger
@@ -646,7 +646,7 @@ End fixed_equivocator_sub_projection.
   in the conclusion.
 *)
 
-Section Fixed_eq_StrongFixed.
+Section sec_Fixed_eq_StrongFixed.
 
 Context
   {message : Type}
@@ -720,7 +720,7 @@ Proof.
   - apply StrongFixed_incl_Fixed.
 Qed.
 
-End Fixed_eq_StrongFixed.
+End sec_Fixed_eq_StrongFixed.
 
 (** ** Changing the behavior of equivocators within a trace
 
@@ -735,7 +735,7 @@ End Fixed_eq_StrongFixed.
   the non-equivocators remain in their corresponding component-state given by <<s>>
   (Lemma [EquivPreloadedBase_Fixed_weak_full_projection]).
 *)
-Section fixed_equivocator_lifting.
+Section sec_fixed_equivocator_lifting.
 
 Context
   {message : Type}
@@ -948,7 +948,7 @@ Proof.
       by eapply sent_by_non_equivocating_are_directly_observed.
 Qed.
 
-End fixed_equivocator_lifting.
+End sec_fixed_equivocator_lifting.
 
 (** ** Fixed equivocation over an empty set
 
@@ -956,7 +956,7 @@ End fixed_equivocator_lifting.
   that no message equivocation is allowed, since that would mean that at least
   one node would equivocate.
 *)
-Section fixed_equivocation_no_equivocators.
+Section sec_fixed_equivocation_no_equivocators.
 
 Context
   {message : Type}
@@ -1022,9 +1022,9 @@ Proof.
   - apply strong_fixed_equivocation_vlsm_composition_no_equivocators.
 Qed.
 
-End fixed_equivocation_no_equivocators.
+End sec_fixed_equivocation_no_equivocators.
 
-Section fixed_non_equivocator_lifting.
+Section sec_fixed_non_equivocator_lifting.
 
 Context
   {message : Type}
@@ -1122,4 +1122,4 @@ Proof.
   apply fixed_non_equivocating_projection_friendliness.
 Qed.
 
-End fixed_non_equivocator_lifting.
+End sec_fixed_non_equivocator_lifting.

@@ -11,7 +11,7 @@ From VLSM.Core Require Import BaseELMO.
   the UMO protocol.
 *)
 
-Section UMO.
+Section sec_UMO.
 
 Context
   {Address : Type}
@@ -285,7 +285,7 @@ Qed.
   another (named [Ri]) for dealing with reachable states.
 *)
 
-Section UMOComponent_Lemmas.
+Section sec_UMOComponent_lemmas.
 
 (**
   [Ui] is a notation for an [UMOComponent] of address [i].
@@ -1394,7 +1394,7 @@ Inductive sent_comparable : Message -> Message -> Prop :=
 Definition incomparable (m1 m2 : Message) : Prop :=
   adr (state m1) = adr (state m2) /\ ~ sent_comparable m1 m2.
 
-End UMOComponent_Lemmas.
+End sec_UMOComponent_lemmas.
 
 #[export]
 Instance sent_comparable_sym : Symmetric sent_comparable.
@@ -1419,7 +1419,7 @@ Defined.
 Instance incomparable_sym : Symmetric incomparable.
 Proof. by intros x y []; constructor. Defined.
 
-Section UMOProtocol.
+Section sec_UMOProtocol.
 
 Context
   (index : Type)
@@ -1711,8 +1711,8 @@ Proof.
     (preloaded_valid_state_projection _ _ _ Hvsp).
 Qed.
 
-End UMOProtocol.
+End sec_UMOProtocol.
 
-End UMO.
+End sec_UMO.
 
 Arguments UMO_reachable_ind' [Address]%type_scope (C P Hinit Hextend)%function_scope s Hs.

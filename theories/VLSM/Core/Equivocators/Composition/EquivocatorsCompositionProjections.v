@@ -10,7 +10,7 @@ From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition E
 
 (** * VLSM Equivocator Composition Projections *)
 
-Section equivocators_composition_projections.
+Section sec_equivocators_composition_projections.
 
 Context {message : Type}
   `{finite.Finite index}
@@ -1487,9 +1487,9 @@ Proof.
     by apply valid_trace_forget_last in HtrX.
 Qed.
 
-End equivocators_composition_projections.
+End sec_equivocators_composition_projections.
 
-Section equivocators_composition_sub_projections.
+Section sec_equivocators_composition_sub_projections.
 
 Context
   {message : Type}
@@ -1670,7 +1670,7 @@ Proof.
     apply finite_trace_sub_projection_app.
 Qed.
 
-Section seeded_equivocators_valid_trace_project.
+Section sec_seeded_equivocators_valid_trace_project.
 
 Context
   (seed : message -> Prop)
@@ -1878,11 +1878,11 @@ Proof.
     by inversion _Htr_project; subst.
 Qed.
 
-End seeded_equivocators_valid_trace_project.
+End sec_seeded_equivocators_valid_trace_project.
 
-End equivocators_composition_sub_projections.
+End sec_equivocators_composition_sub_projections.
 
-Section equivocators_composition_vlsm_projection.
+Section sec_equivocators_composition_vlsm_projection.
 
 Context {message : Type}
   `{finite.Finite index}
@@ -2148,4 +2148,4 @@ Proof.
     eapply equivocators_total_VLSM_projection_finite_trace_project, Htr.
 Qed.
 
-End equivocators_composition_vlsm_projection.
+End sec_equivocators_composition_vlsm_projection.

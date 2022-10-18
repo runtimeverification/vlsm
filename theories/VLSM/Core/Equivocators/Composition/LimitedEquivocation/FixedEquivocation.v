@@ -181,7 +181,7 @@ Qed.
 
 End sec_equivocators_fixed_equivocations_vlsm.
 
-Section fixed_equivocation_with_fullnode.
+Section sec_fixed_equivocation_with_fullnode.
 
 (**
   This section instantiates the [full_node_condition_for_admissible_equivocators]
@@ -252,9 +252,9 @@ Proof.
   by eapply full_node_condition_for_admissible_equivocators_subsumption.
 Qed.
 
-End fixed_equivocation_with_fullnode.
+End sec_fixed_equivocation_with_fullnode.
 
-Section from_equivocators_to_nodes.
+Section sec_from_equivocators_to_nodes.
 
 (** ** From composition of equivocators to composition of simple nodes
 
@@ -1303,9 +1303,9 @@ Proof.
     apply (equivocators_total_VLSM_projection_finite_trace_project IM (proj1 Hpre_tr)).
 Qed.
 
-End from_equivocators_to_nodes.
+End sec_from_equivocators_to_nodes.
 
-Section all_equivocating.
+Section sec_all_equivocating.
 
 (** ** Fixed Equivocation for all Equivocators
 
@@ -1357,4 +1357,4 @@ Proof.
     apply strong_constraint_subsumption_fixed_all.
 Qed.
 
-End all_equivocating.
+End sec_all_equivocating.

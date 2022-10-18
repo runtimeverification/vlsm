@@ -114,7 +114,7 @@ Qed.
 
 End sec_basic_limited_message_equivocation.
 
-Section tracewise_limited_message_equivocation.
+Section sec_tracewise_limited_message_equivocation.
 
 Context
   {message : Type}
@@ -160,9 +160,9 @@ Proof.
   - apply LimitedEquivocationProp_impl_not_heavy.
 Qed.
 
-End tracewise_limited_message_equivocation.
+End sec_tracewise_limited_message_equivocation.
 
-Section fixed_limited_message_equivocation.
+Section sec_fixed_limited_message_equivocation.
 
 (** ** Fixed Message Equivocation implies Limited Message Equivocation
 
@@ -258,9 +258,9 @@ Proof.
   - apply StrongFixed_incl_Limited.
 Qed.
 
-End fixed_limited_message_equivocation.
+End sec_fixed_limited_message_equivocation.
 
-Section has_limited_equivocation.
+Section sec_has_limited_equivocation.
 
 (** ** Limited Equivocation derived from Fixed Equivocation
 
@@ -394,4 +394,4 @@ Proof.
     full_node_limited_equivocation_valid_state_weight.
 Qed.
 
-End has_limited_equivocation.
+End sec_has_limited_equivocation.

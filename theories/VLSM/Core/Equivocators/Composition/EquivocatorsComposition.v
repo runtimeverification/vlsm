@@ -29,7 +29,7 @@ From VLSM.Core Require Import Equivocators.MessageProperties.
   the label, and keeping only the copy of index 1 for each machine.
 *)
 
-Section fully_equivocating_composition.
+Section sec_fully_equivocating_composition.
 
 Context {message : Type}
   `{finite.Finite index}
@@ -66,7 +66,7 @@ Proof.
   congruence.
 Qed.
 
-Section equivocating_indices_BasicEquivocation.
+Section sec_equivocating_indices_BasicEquivocation.
 
 Context
   `{FinSet index Ci}
@@ -108,7 +108,7 @@ Proof.
   - by apply set_eq_fin_set; rewrite !equivocating_indices_equivocating_validators.
 Qed.
 
-End equivocating_indices_BasicEquivocation.
+End sec_equivocating_indices_BasicEquivocation.
 
 (**
   The statement below is obvious a transition cannot make an already equivocating
@@ -494,14 +494,14 @@ Proof.
   by exists eqv, emi.
 Qed.
 
-End fully_equivocating_composition.
+End sec_fully_equivocating_composition.
 
 #[export] Hint Rewrite @equivocator_descriptors_update_eq : state_update.
 #[export] Hint Rewrite @equivocator_descriptors_update_id using done : state_update.
 #[export] Hint Rewrite @equivocator_descriptors_update_neq using done : state_update.
 #[export] Hint Rewrite @equivocators_state_project_state_update_eqv using done : state_update.
 
-Section equivocators_sub_projections.
+Section sec_equivocators_sub_projections.
 
 Context {message : Type}
   `{EqDecision index}
@@ -523,4 +523,4 @@ Lemma sub_equivocator_IM_initial_state_commute is
   : composite_initial_state_prop sub_equivocator_IM is <-> composite_initial_state_prop sub_IM_equivocator is.
 Proof. done. Qed.
 
-End equivocators_sub_projections.
+End sec_equivocators_sub_projections.

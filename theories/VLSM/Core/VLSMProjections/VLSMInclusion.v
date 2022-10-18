@@ -9,7 +9,7 @@ From VLSM.Core Require Import VLSM VLSMProjections.VLSMEmbedding VLSMProjections
   Then VLSM <<X>> is _included_ in VLSM <<Y>> if every [valid_trace] available to <<X>>
   is also available to <<Y>>.
 *)
-Section VLSM_inclusion.
+Section sec_VLSM_inclusion.
 
 Context
   {message : Type}
@@ -108,11 +108,11 @@ Proof.
   by destruct a.
 Qed.
 
-End VLSM_inclusion.
+End sec_VLSM_inclusion.
 
 Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
 
-Section VLSM_incl_preservation.
+Section sec_VLSM_incl_preservation.
 
 (** ** VLSM inclusion preservation *)
 
@@ -145,9 +145,9 @@ Definition weak_incl_initial_message_preservation : Prop :=
 Definition strong_incl_initial_message_preservation : Prop :=
   strong_full_projection_initial_message_preservation X Y.
 
-End VLSM_incl_preservation.
+End sec_VLSM_incl_preservation.
 
-Section VLSM_incl_properties.
+Section sec_VLSM_incl_properties.
 
 (** ** VLSM inclusion properties *)
 
@@ -316,10 +316,10 @@ Proof.
   - apply VLSM_incl_infinite_valid_trace.
 Qed.
 
-End VLSM_incl_properties.
+End sec_VLSM_incl_properties.
 
 (** We instantiate the above for VLSM inclusions *)
-Section basic_VLSM_incl.
+Section sec_basic_VLSM_incl.
 
 Context
   {message : Type}
@@ -371,9 +371,9 @@ Proof.
            (basic_VLSM_full_projection_preloaded_with X Y _ _ PimpliesQ id id).
 Qed.
 
-End basic_VLSM_incl.
+End sec_basic_VLSM_incl.
 
-Section VLSM_incl_preloaded_properties.
+Section sec_VLSM_incl_preloaded_properties.
 
 Context
   {message : Type}
@@ -491,4 +491,4 @@ Proof.
   by destruct X.
 Qed.
 
-End VLSM_incl_preloaded_properties.
+End sec_VLSM_incl_preloaded_properties.

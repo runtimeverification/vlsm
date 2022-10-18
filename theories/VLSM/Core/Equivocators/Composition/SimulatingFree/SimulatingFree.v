@@ -15,7 +15,7 @@ From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplay
   the free composition of regular nodes.
 *)
 
-Section generalized_constraints.
+Section sec_generalized_constraints.
 
 (** ** Generic simulation
 
@@ -217,7 +217,7 @@ Proof.
     + by apply Hsubsumption.
 Qed.
 
-End generalized_constraints.
+End sec_generalized_constraints.
 
 (** ** VLSM Equivocators Simulating Free Composite
 
@@ -228,7 +228,7 @@ End generalized_constraints.
   we first prove an intermediate result, where both the composite VLSMs are
   pre-loaded with the same set of messages.
 *)
-Section seeded_all_equivocating.
+Section sec_seeded_all_equivocating.
 
 Context {message : Type}
   `{finite.Finite index}
@@ -361,9 +361,9 @@ Proof.
     by apply Exists_app; simpl; right; left.
 Qed.
 
-End seeded_all_equivocating.
+End sec_seeded_all_equivocating.
 
-Section all_equivocating.
+Section sec_all_equivocating.
 
 Context {message : Type}
   {index : Type}
@@ -419,4 +419,4 @@ Proof.
   by apply proj1 in Hc.
 Qed.
 
-End all_equivocating.
+End sec_all_equivocating.

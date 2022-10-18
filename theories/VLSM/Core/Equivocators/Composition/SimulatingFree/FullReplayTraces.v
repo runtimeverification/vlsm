@@ -19,7 +19,7 @@ From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionPr
   satisfying some conditions.
 *)
 
-Section all_equivocating.
+Section sec_all_equivocating.
 
 Context {message : Type}
   `{finite.Finite index}
@@ -470,7 +470,7 @@ Proof.
     by rewrite state_update_neq; [| inversion 1].
 Qed.
 
-Section pre_loaded_constrained_projection.
+Section sec_pre_loaded_constrained_projection.
 (**
   By replaying a [valid_trace] on top of a [valid_state] we obtain a
   [valid_trace]. We derive this as a more general [VLSM_weak_full_projection]
@@ -563,7 +563,7 @@ Proof.
   by apply (VLSM_weak_full_projection_finite_valid_trace_from lift_equivocators_sub_weak_projection).
 Qed.
 
-End pre_loaded_constrained_projection.
+End sec_pre_loaded_constrained_projection.
 
 Lemma SeededXE_PreFreeE_weak_full_projection
   (full_replay_state : composite_state equivocator_IM)
@@ -598,7 +598,7 @@ Proof.
   - intros. apply any_message_is_valid_in_preloaded.
 Qed.
 
-Section seeded_no_equiv.
+Section sec_seeded_no_equiv.
 
 Context
   (SeededAllXE : VLSM message := composite_no_equivocation_vlsm_with_pre_loaded equivocator_IM (free_constraint _) seed)
@@ -678,6 +678,6 @@ Proof.
   by intros; apply SeededNoEquiv_subsumption.
 Qed.
 
-End seeded_no_equiv.
+End sec_seeded_no_equiv.
 
-End all_equivocating.
+End sec_all_equivocating.

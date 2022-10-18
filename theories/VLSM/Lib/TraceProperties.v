@@ -12,7 +12,7 @@ Import Prenex Implicits.
   #<a href="https://arxiv.org/abs/1412.6579">A Hoare logic for the coinductive trace-based big-step semantics of While</a>#.
 *)
 
-Section TraceProperties.
+Section sec_trace_properties.
 
 Context {A B : Type}.
 
@@ -1166,7 +1166,7 @@ cofix CIH. dependent inversion h; subst => tr0 hm.
   exact: followsT_delay _ _ (CIH _ _ _ _ h1 _ _).
 Qed.
 
-End TraceProperties.
+End sec_trace_properties.
 
 (** ** Trace property operators and notations *)
 

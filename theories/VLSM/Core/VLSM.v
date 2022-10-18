@@ -98,7 +98,7 @@ Definition pre_loaded_vlsm
   :=
   {| vmachine := VLSMMachine_pre_loaded_with_messages (vmachine X) initial |}.
 
-Section Traces.
+Section sec_traces.
 
 Context
   {message : Type}
@@ -217,13 +217,13 @@ Definition trace_nth (tr : Trace)
     | Infinite s st => Some (Str_nth n (Cons s (Streams.map destination st)))
     end.
 
-End Traces.
+End sec_traces.
 
 Arguments transition_item {message} {T} , {message} T.
 Arguments field_selector {_} {T} _ msg item / .
 Arguments item_sends_or_receives {_} {_} msg item /.
 
-Section TraceLemmas.
+Section sec_trace_lemmas.
 
 Context
   [message : Type]
@@ -368,9 +368,9 @@ Lemma unlock_finite_trace_last s tr:
 Proof. done. Qed.
 Opaque finite_trace_last.
 
-End TraceLemmas.
+End sec_trace_lemmas.
 
-Section vlsm_projections.
+Section sec_vlsm_projections.
 
 Context
   {message : Type}
@@ -398,7 +398,7 @@ Definition vvalid := @valid _ _ machine.
 Definition vtransition_item := @transition_item _ type.
 Definition vTrace := @Trace _ type.
 
-End vlsm_projections.
+End sec_vlsm_projections.
 
 Ltac unfold_vtransition H := (unfold vtransition in H; simpl in H).
 
@@ -410,7 +410,7 @@ Proof.
   by destruct X.
 Qed.
 
-Section VLSM.
+Section sec_VLSM.
 
 (** In this section we assume a fixed [VLSM]. *)
 
@@ -2411,7 +2411,7 @@ Class VLSM_vdecidable :=
   { valid_decidable : forall l som, {valid l som} + {~valid l som}
   }.
 (* end hide *)
-End VLSM.
+End sec_VLSM.
 
 (**
   Make all arguments of [valid_state_prop_ind] explicit
@@ -2505,7 +2505,7 @@ Class TraceWithStart
   Byzantine fault tolerance analysis.
 *)
 
-Section pre_loaded_with_all_messages_vlsm.
+Section sec_pre_loaded_with_all_messages_vlsm.
 
 Context
   {message : Type}
@@ -2689,7 +2689,7 @@ Proof.
     subst; cbn; itauto.
 Qed.
 
-End pre_loaded_with_all_messages_vlsm.
+End sec_pre_loaded_with_all_messages_vlsm.
 
 Lemma non_empty_valid_trace_from_can_produce
   `(X : VLSM message)
@@ -2734,13 +2734,13 @@ Qed.
   Below are some preliminary results; the actual projection is given in
   [VLSMProjections.same_VLSM_full_projection].
 *)
-Section same_VLSM.
+Section sec_same_VLSM.
 
 Context
   {message : Type}
   .
 
-Section definitions.
+Section sec_definitions.
 
 Context
   [X1 X2 : VLSM message]
@@ -2753,7 +2753,7 @@ Definition same_VLSM_label_rew (l1 : vlabel X1) : vlabel X2 :=
 Definition same_VLSM_state_rew (s1 : vstate X1) : vstate X2 :=
   eq_rect X1 _ s1 _ Heq.
 
-End definitions.
+End sec_definitions.
 
 Context
   (X1 X2 : VLSM message)
@@ -2779,7 +2779,7 @@ Lemma same_VLSM_initial_message_preservation m
   : vinitial_message_prop X1 m -> vinitial_message_prop X2 m.
 Proof. by subst. Qed.
 
-End same_VLSM.
+End sec_same_VLSM.
 
 Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
   {
@@ -2792,7 +2792,7 @@ Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : state) : Prop :=
     forall l iom oom (Ht : ValidTransition X l s1 iom s2 oom),
       ValidTransitionNext X s1 s2.
 
-Section SecValidTransitionProps.
+Section sec_valid_transition_props.
 
 Context
   `(X : VLSM message)
@@ -2821,7 +2821,7 @@ Lemma input_valid_transition_forget_input :
     ValidTransition X l s1 iom s2 oom.
 Proof. by firstorder. Qed.
 
-End SecValidTransitionProps.
+End sec_valid_transition_props.
 
 Class HistoryVLSM `(X : VLSM message) : Prop :=
   {

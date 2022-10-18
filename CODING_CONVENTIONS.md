@@ -52,11 +52,17 @@ From Equations Require Import Equations.
 
 ### Sections
 
-- C-style name
+- C-style name prefixed with "sec_" (the role of the prefix is to prevent name collisions for cross-references in coqdoc documentation; it should not appear in names of non-sections)
+- parts of section names can still be in CamelCase if it refers to an identifier written in CamelCase
 
 Example:
 ```coq
-Section step_relations.
+Section sec_step_relations.
+```
+
+Example (`ELMOComponent` is a previously defined identifier):
+```coq
+Section sec_ELMOComponent_lemmas.
 ```
 
 ### Type classes

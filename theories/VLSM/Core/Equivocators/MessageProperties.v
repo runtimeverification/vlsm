@@ -7,7 +7,7 @@ From VLSM.Core Require Import Equivocators.Equivocators Equivocators.Equivocator
 
 (** * VLSM Message Properties *)
 
-Section equivocator_vlsm_message_properties.
+Section sec_equivocator_vlsm_message_properties.
 
 (** ** Lifting properties about sent messages to the equivocators
 
@@ -218,7 +218,7 @@ Proof.
   congruence.
 Qed.
 
-Section oracle_lifting.
+Section sec_oracle_lifting.
 
 Context
   selector
@@ -409,9 +409,9 @@ Proof.
             simpl in Hnot_last. congruence.
 Qed.
 
-End oracle_lifting.
+End sec_oracle_lifting.
 
-Section has_been_received_lifting.
+Section sec_has_been_received_lifting.
 
 (** ** Lifting the [HasBeenReceivedCapability] *)
 
@@ -449,9 +449,9 @@ Qed.
     equivocator_has_been_received_dec
     equivocator_has_been_received_stepwise_props.
 
-End has_been_received_lifting.
+End sec_has_been_received_lifting.
 
-Section has_been_sent_lifting.
+Section sec_has_been_sent_lifting.
 
 (** ** Lifting the [HasBeenSentCapability] *)
 
@@ -489,9 +489,9 @@ Qed.
     equivocator_has_been_sent_dec
     equivocator_has_been_sent_stepwise_props.
 
-End has_been_sent_lifting.
+End sec_has_been_sent_lifting.
 
-Section ComputableSentMessages_lifting.
+Section sec_ComputableSentMessages_lifting.
 
 (** ** Lifting the [ComputableSentMessages] property *)
 
@@ -547,6 +547,6 @@ Proof.
     by eapply equivocator_has_been_sent_stepwise_props.
 Qed.
 
-End ComputableSentMessages_lifting.
+End sec_ComputableSentMessages_lifting.
 
-End equivocator_vlsm_message_properties.
+End sec_equivocator_vlsm_message_properties.

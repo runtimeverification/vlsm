@@ -12,7 +12,7 @@ From VLSM.Core Require Import BaseELMO UMO.
   the MO protocol.
 *)
 
-Section MO.
+Section sec_MO.
 
 Context
   {Address : Type}
@@ -41,7 +41,7 @@ Inductive MO_msg_valid (P : Address -> Prop) : Message -> Prop :=
     forall m mr : Message,
       MO_msg_valid P m -> MO_msg_valid P mr -> MO_msg_valid P (m <*> MkObservation Receive mr).
 
-Section alternative_definition_of_validity.
+Section sec_alternative_definition_of_validity.
 
 (** ** Alternative definition of validity
 
@@ -364,7 +364,7 @@ Proof.
       by constructor 2; apply IH; [unfold sizeMessage; cbn; lia |].
 Qed.
 
-End alternative_definition_of_validity.
+End sec_alternative_definition_of_validity.
 
 Inductive MOComponentValid (P : Address -> Prop) : Label -> State -> option Message -> Prop :=
 | MOCV_Receive :
@@ -395,7 +395,7 @@ Definition MOComponent (P : Address -> Prop) (i : Address) : VLSM Message :=
   vmachine := MOComponentMachine P i;
 |}.
 
-Section MOComponent_Lemmas.
+Section sec_MOComponent_lemmas.
 
 (** ** Component lemmas
 
@@ -790,9 +790,9 @@ Proof.
     ; rewrite ?H12, ?H22 in Hsuf; lia.
 Qed.
 
-End MOComponent_Lemmas.
+End sec_MOComponent_lemmas.
 
-Section MOProtocol.
+Section sec_MOProtocol.
 
 Context
   (index : Type)
@@ -1363,9 +1363,9 @@ Proof.
   by intros l Hrobs; apply rec_obs_size_desc, Nat.lt_irrefl in Hrobs.
 Qed.
 
-End MOProtocol.
+End sec_MOProtocol.
 
-End MO.
+End sec_MO.
 
 Arguments rec_obs_send_inv : clear implicits.
 Arguments rec_obs_recv_inv : clear implicits.

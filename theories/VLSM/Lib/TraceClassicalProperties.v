@@ -7,7 +7,7 @@ Import Prenex Implicits.
 
 (** * Properties of possibly-infinite traces requiring classical logic *)
 
-Section TraceClassicalProperties.
+Section sec_trace_classical_properties.
 
 Context {A B : Type}.
 
@@ -77,4 +77,4 @@ move => [f1 hf1] [f2 hf2] [f3 hf3] tr0 /= h1.
 exact: appendT_assoc_R.
 Qed.
 
-End TraceClassicalProperties.
+End sec_trace_classical_properties.

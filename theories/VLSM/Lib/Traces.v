@@ -8,7 +8,7 @@ Import Prenex Implicits.
 
 Ltac invs h := inversion h; subst => {h}.
 
-Section Traces.
+Section sec_traces.
 
 Context {A B : Type}.
 
@@ -109,6 +109,6 @@ move => tr1 tr2 tr3 tr4 [a1 | a1 b1 tr1' tr2' Hbs1'] Hbs2.
   exact/bisim_cons/CIH.
 Qed.
 
-End Traces.
+End sec_traces.
 
 Infix "+++" := trace_append (at level 60, right associativity).

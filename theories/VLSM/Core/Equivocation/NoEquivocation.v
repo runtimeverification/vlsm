@@ -4,7 +4,7 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
 
 (** * VLSM No Equivocation Composition Constraints *)
 
-Section no_equivocations.
+Section sec_no_equivocations.
 
 Context
   {message : Type}
@@ -41,7 +41,7 @@ Definition no_equivocations
   :=
   no_equivocations_except_from (fun m => False) l som.
 
-End no_equivocations.
+End sec_no_equivocations.
 
 (** ** No-Equivocation Invariants
 
@@ -51,7 +51,7 @@ End no_equivocations.
   - the [pre_loaded_with_all_messages_vlsm] is equal to the [no_equivocations] VLSM.
 
 *)
-Section NoEquivocationInvariants.
+Section sec_no_equivocation_invariants.
 
 Context
   message
@@ -157,9 +157,9 @@ Proof.
   by apply VLSM_eq_incl_iff.
 Qed.
 
-End NoEquivocationInvariants.
+End sec_no_equivocation_invariants.
 
-Section CompositeNoEquivocation.
+Section sec_composite_no_equivocation.
 
 Context
   {message : Type}
@@ -199,7 +199,7 @@ Definition composite_no_equivocations
   (resp. [has_been_directly_observed]) in a state also tests as [has_been_sent]
   in the same state.
  *)
-Section CompositeNoEquivocationInvariants.
+Section sec_composite_no_equivocation_invariants.
 
 Context
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -222,9 +222,9 @@ Proof.
   by intros l s0 om; apply Hsubsumed.
 Qed.
 
-End CompositeNoEquivocationInvariants.
+End sec_composite_no_equivocation_invariants.
 
-Section seeded_composite_vlsm_no_equivocation.
+Section sec_seeded_composite_vlsm_no_equivocation.
 
 (** ** Pre-loading a VLSM composition with no equivocations constraint
 
@@ -238,7 +238,7 @@ Context
   (X := free_composite_vlsm IM)
   .
 
-Section seeded_composite_vlsm_no_equivocation_definition.
+Section sec_seeded_composite_vlsm_no_equivocation_definition.
 
 Context
   (seed : message -> Prop)
@@ -279,7 +279,7 @@ Proof.
   by apply preloaded_constraint_subsumption_incl.
 Qed.
 
-End seeded_composite_vlsm_no_equivocation_definition.
+End sec_seeded_composite_vlsm_no_equivocation_definition.
 
 (** Adds a no-equivocations condition on top of an existing constraint. *)
 Definition no_equivocations_additional_constraint
@@ -315,6 +315,6 @@ Proof.
   split;apply Hincl;intros l [s [m|]] Hpv; apply Hpv.
 Qed.
 
-End seeded_composite_vlsm_no_equivocation.
+End sec_seeded_composite_vlsm_no_equivocation.
 
-End CompositeNoEquivocation.
+End sec_composite_no_equivocation.

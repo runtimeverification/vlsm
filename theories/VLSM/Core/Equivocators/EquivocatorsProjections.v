@@ -4,7 +4,7 @@ From VLSM.Core Require Import VLSM VLSMProjections Equivocators.Equivocators.
 
 (** * VLSM Projecting Equivocator Traces *)
 
-Section equivocator_vlsm_projections.
+Section sec_equivocator_vlsm_projections.
 
 (**
   Given an [equivocator_vlsm] trace ending in a state <<s>>, we can obtain a
@@ -1113,4 +1113,4 @@ Proof.
   - apply H.
 Qed.
 
-End equivocator_vlsm_projections.
+End sec_equivocator_vlsm_projections.

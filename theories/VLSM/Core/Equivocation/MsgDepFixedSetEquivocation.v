@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppListSet.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition Equivocation Equivocation.FixedSetEquivocation ProjectionTraces SubProjectionTraces.
 
-Section msg_dep_fixed_set_equivocation.
+Section sec_msg_dep_fixed_set_equivocation.
 
 Context
   `(IM : index -> VLSM message)
@@ -279,7 +279,7 @@ Proof.
   - by apply strong_msg_dep_fixed_equivocation_incl.
 Qed.
 
-End msg_dep_fixed_set_equivocation.
+End sec_msg_dep_fixed_set_equivocation.
 
 Section sec_full_node_fixed_set_equivocation.
 
