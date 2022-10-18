@@ -11,6 +11,7 @@ From VLSM.Core Require Import Composition VLSMProjections Validator ProjectionTr
 *)
 
 Section sec_projection_oracle.
+
 (** ** [VLSM_projection]s reflect message properties *)
 
 Context
@@ -109,6 +110,7 @@ Qed.
 End sec_projection_oracle.
 
 Section sec_weak_full_projection_oracle.
+
 (** ** [VLSM_weak_full_projection]s preserve message properties *)
 
 Context
@@ -221,6 +223,7 @@ Qed.
 End sec_weak_full_projection_oracle.
 
 Section sec_full_projection_oracle.
+
 (** ** [VLSM_full_projection]s both preserve and reflect message properties *)
 
 Context
@@ -280,6 +283,7 @@ Definition VLSM_full_projection_has_been_directly_observed_reflect
 End sec_full_projection_oracle.
 
 Section sec_incl_oracle.
+
 (** ** [VLSM_incl]usions both preserve and reflect message properties *)
 
 Context

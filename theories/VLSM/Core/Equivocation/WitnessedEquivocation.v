@@ -26,6 +26,7 @@ From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquiv
   state for the composition of nodes under the [fixed_equivocation_constraint]
   induced by its set of equivocators.
 *)
+
 Section sec_witnessed_equivocation.
 
 Context
@@ -293,9 +294,8 @@ Proof.
       by eapply input_valid_transition_receiving_no_sender_reflects_equivocating_validators.
 Qed.
 
-(** ** Strongly witnessed equivocation *)
+(** ** Strongly witnessed equivocation
 
-(**
   A stronger [trace_witnessing_equivocation_prop]erty requires that any
   prefix of a trace is witnessing equivocation for its corresponding final state.
 *)
@@ -622,6 +622,7 @@ End sec_witnessed_equivocation.
   for the composition constrained by the [fixed_equivocation_constrained] induced
   by the [equivocating_validators] of its final state.
 *)
+
 Section sec_witnessed_equivocation_fixed_set.
 
 Context
@@ -716,6 +717,7 @@ Qed.
   [fixed_equivocation_vlsm_composition_index_incl] are used to restate the
   induction hypothesis in terms of the final state after the last transition.
 *)
+
 Lemma strong_witness_has_fixed_equivocation is s tr
   (Htr : finite_valid_trace_init_to (free_composite_vlsm IM) is s tr)
   (Heqv: strong_trace_witnessing_equivocation_prop (Cm := Ci) IM id sender is tr)

@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble.
 
 (** * Utility lemmas about lists *)
 
-(** A list is empty if it has no members *)
+(** A list is empty if it has no members. *)
 Lemma empty_nil [X:Type] (l:list X) :
   (forall v, ~In v l) -> l = [].
 Proof.
@@ -14,7 +14,7 @@ Proof.
   simpl. intro H. elim (H a). by left.
 Qed.
 
-(** It is decidable whether a list is null or not *)
+(** It is decidable whether a list is null or not. *)
 Lemma null_dec {S} (l : list S) : Decision (l = []).
 Proof.
   by destruct l; [left | right].
@@ -33,7 +33,7 @@ Proof.
 Qed.
 
 (**
-  destructs a list in <<l>> in either null or a prefix <<l'>> and
+  Destructs a list in <<l>> in either null or a prefix <<l'>> and
   a last element <<a>> with an equation <<Heq>> stating that <<l = l' ++ [a]>>.
 *)
 Ltac destruct_list_last l l' a Heq :=
@@ -1010,7 +1010,7 @@ Proof.
   - simpl. destruct (f x); [| done]. by elim n.
 Qed.
 
-(** Unpack list of [option A] into list of [A] *)
+(** Unpack list of [option A] into list of [A]. *)
 Definition cat_option {A : Type} : list (option A) -> list A :=
   @map_option (option A) A id.
 
@@ -1404,7 +1404,7 @@ Proof.
   apply rev_involutive.
 Qed.
 
-(** elements belonging to first type in a list of a sum type *)
+(** Elements belonging to first type in a list of a sum type. *)
 Definition list_sum_project_left
   {A B : Type}
   (x : list (A + B))
@@ -1412,7 +1412,7 @@ Definition list_sum_project_left
   :=
   map_option sum_project_left x.
 
-(** elements belonging to second type in a list of a sum type *)
+(** Elements belonging to second type in a list of a sum type. *)
 Definition list_sum_project_right
   {A B : Type}
   (x : list (A + B))
@@ -1766,7 +1766,7 @@ Qed.
 
 (**
   If <<n1>> is less than (or equal to) <<n2>>, then <<lastn n1 l>> is shorter than
-  <<lastn n2 l>> and therefore is its suffix. 
+  <<lastn n2 l>> and therefore is its suffix.
 *)
 Lemma suffix_lastn :
   forall {A : Type} (l : list A) (n1 n2 : nat),

@@ -55,9 +55,9 @@ Definition equivocator_type : VLSMType message :=
 Definition equivocator_state : Type := @state message equivocator_type.
 Definition equivocator_label : Type := @label message equivocator_type.
 
-(** the number of machine copies in the given state *)
+(** The number of machine copies in the given state. *)
 Definition equivocator_state_n (es : equivocator_state) := S (projT1 es).
-(** the index of the last machine copies in the given state *)
+(** The index of the last machine copies in the given state. *)
 Definition equivocator_state_last (es : equivocator_state) := projT1 es.
 Definition equivocator_state_s (es : equivocator_state) := projT2 es.
 
@@ -201,7 +201,7 @@ Proof.
   by inversion Hext.
 Qed.
 
-(** The original state index is present in any equivocator state*)
+(** The original state index is present in any equivocator state. *)
 Lemma Hzero (s : equivocator_state) : 0 < equivocator_state_n s.
 Proof. pose proof (equivocator_state_last_n s). lia. Qed.
 
@@ -225,7 +225,7 @@ Definition equivocator_state_update
     (equivocator_state_last bs)
 	  (fun j => if  decide (i = j) then si else equivocator_state_s bs j).
 
-(** Some basic properties for 'equivocator_state_update' *)
+(** Some basic properties for [equivocator_state_update]. *)
 
 Lemma equivocator_state_update_size bs i si
   : equivocator_state_n (equivocator_state_update bs i si) = equivocator_state_n bs.
@@ -529,8 +529,9 @@ Proof.
       equivocator_state_append_project_1 by lia.
 Qed.
 
-(* An [equivocator_state] has the [initial_state_prop]erty if it only
-contains one state of original machine, and that state is initial.
+(*
+  An [equivocator_state] has the [initial_state_prop]erty if it only
+  contains one state of original machine, and that state is initial.
 *)
 Definition equivocator_initial_state_prop
   (bs : equivocator_state)
@@ -756,7 +757,7 @@ Proof.
   - by right; itauto.
 Qed.
 
-(** Projecting an [equivocator_state] over a [MachineDescriptor].  *)
+(** Projecting an [equivocator_state] over a [MachineDescriptor]. *)
 Definition equivocator_state_descriptor_project
   (s : equivocator_state X)
   (descriptor : MachineDescriptor)
@@ -767,14 +768,14 @@ Definition equivocator_state_descriptor_project
   | Existing j => default (equivocator_state_zero s) (equivocator_state_project s j)
   end.
 
- (**
-   Whether a [MachineDescriptor] can be used to project an
-   [equivocator_state] to a regular [state].
-   The [NewMachine] descriptor signals that an equivocation has occurred
-   starting a new machine, thus we require the argument to be initial.
-   For an [Existing] descriptor, the index of the descriptor must
-   refer to an existing machine in the current state.
- *)
+(**
+  Whether a [MachineDescriptor] can be used to project an
+  [equivocator_state] to a regular [state].
+  The [NewMachine] descriptor signals that an equivocation has occurred
+  starting a new machine, thus we require the argument to be initial.
+  For an [Existing] descriptor, the index of the descriptor must
+  refer to an existing machine in the current state.
+*)
 Definition proper_descriptor
   (d : MachineDescriptor)
   (s : vstate equivocator_vlsm)
@@ -842,10 +843,11 @@ Lemma existing_descriptor_proper
   : proper_descriptor d s.
 Proof. by destruct d. Qed.
 
-(* TODO: derive some some simpler lemmas about the equivocator operations,
-or a simpler way of defining the equivocator_transition
-- it's not nice to need to pick apart these cases from inside
-equivocator_transition inside of so many proofs.
+(*
+  TODO: derive some some simpler lemmas about the equivocator operations,
+  or a simpler way of defining the equivocator_transition - it's not nice
+  to need to pick apart these cases from inside equivocator_transition inside
+  of so many proofs.
 *)
 
 (**
@@ -966,7 +968,8 @@ Proof.
   - specialize (valid_generated_state_message (pre_loaded_vlsm X seed)) as Hgen.
     apply proj2 in IHHbs1. apply proj1 in IHHbs2.
 
-    (* destruction tactic for a valid equivocator transition
+    (*
+      destruction tactic for a valid equivocator transition
       vtransition equivocator_vlsm l (s, om) = (s', om')
     *)
     destruct l as [sn|i l|i l]

@@ -18,6 +18,7 @@ From VLSM.Core Require Import Equivocators.MessageProperties.
 *)
 
 (** ** Extracting equivocator traces from equivocator composition traces
+
   To recover the equivocator trace for the regular composition <<X>> from
   the traces of the equivocator composition, we'll assume that only the
   first state copy of each machine is observable in the composition
@@ -366,7 +367,7 @@ Definition newmachine_descriptors_list
 
 (**
   A very useful operation on [equivocator_descriptors]s is updating the state corresponding
-  to a component:
+  to a component.
 *)
 Definition equivocator_descriptors_update
   (s : equivocator_descriptors)
@@ -380,7 +381,11 @@ Definition equivocator_descriptors_update
   | _ => s j
   end.
 
-(** The next few results describe several properties of the [equivocator_descriptors_update] operation. *)
+(**
+  The next few results describe several properties of the
+  [equivocator_descriptors_update] operation.
+*)
+
 Lemma equivocator_descriptors_update_neq
   (s : equivocator_descriptors)
   (i : index)

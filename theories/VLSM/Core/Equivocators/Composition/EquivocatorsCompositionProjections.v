@@ -577,7 +577,6 @@ Qed.
   For every [transition_item] of the projection of a trace over the composition
   of equivocators, there exists a corresponding item in the original trace
   which projects to it.
-
 *)
 Lemma equivocators_trace_project_app_inv_item
   (tr : list (composite_transition_item equivocator_IM))
@@ -890,7 +889,7 @@ Qed.
 
 (**
   A generalization of [equivocators_transition_item_project_preserves_zero_descriptors]
-  to full (valid) traces
+  to full (valid) traces.
 *)
 Lemma equivocators_trace_project_preserves_zero_descriptors
   (is : composite_state equivocator_IM)

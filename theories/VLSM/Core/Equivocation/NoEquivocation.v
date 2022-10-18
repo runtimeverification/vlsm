@@ -49,8 +49,8 @@ End sec_no_equivocations.
 
   - for any valid state all messages [directly_observed_were_sent].
   - the [pre_loaded_with_all_messages_vlsm] is equal to the [no_equivocations] VLSM.
-
 *)
+
 Section sec_no_equivocation_invariants.
 
 Context
@@ -198,7 +198,8 @@ Definition composite_no_equivocations
   invariant that any message that tests as [has_been_received]
   (resp. [has_been_directly_observed]) in a state also tests as [has_been_sent]
   in the same state.
- *)
+*)
+
 Section sec_composite_no_equivocation_invariants.
 
 Context

@@ -8,9 +8,7 @@ From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProje
 
   An abstract framework for the full-node condition.
   Assumes that each message has an associated set of <<message_dependencies>>.
-*)
 
-(**
   Given a <<message_dependencies>> function, we can define a (direct) message
   dependency relation [msg_dep_rel] as follows:
   message <<m1>> is a (direct) dependency of message <<m2>> if <<m1>> belongs
@@ -73,9 +71,10 @@ Class MessageDependencies
       : can_emit (pre_loaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
   }.
 
-(* Given the VLSM for which it's defined, the other arguments (message,
-message_dependencies function, [HasBeenSentCapability] and
-[HasBeenReceivedCapability]) can be inferred from that.
+(*
+  Given the VLSM for which it's defined, the other arguments (message,
+  message_dependencies function, [HasBeenSentCapability] and
+  [HasBeenReceivedCapability]) can be inferred from that.
 *)
 #[global] Hint Mode MessageDependencies - ! - - - - : typeclass_instances.
 
@@ -261,6 +260,7 @@ End sec_message_dependencies.
   the ELMO protocol, we introduce abstract notions for local equivocation based
   on message dependencies.
 *)
+
 Section sec_message_dependencies_equivocation.
 
 Context
@@ -581,7 +581,7 @@ Qed.
 
 End sec_composite_message_dependencies.
 
-(** ** #[global] Equivocation Based on Message Dependencies
+(** ** Global Equivocation Based on Message Dependencies
 
   Inspired by the definitions of observability and global equivocation given for
   the ELMO protocol, we introduce abstract notions for global equivocation based
@@ -944,8 +944,7 @@ Class FullMessageDependencies
 
 End sec_FullMessageDependencies.
 
-(* given the message type, we can usually look up the functions for
-message dependencies *)
+(* given the message type, we can usually look up the functions for message dependencies *)
 #[global] Hint Mode FullMessageDependencies ! - - : typeclass_instances.
 
 Section sec_FullMessageDependencies_happens_before.

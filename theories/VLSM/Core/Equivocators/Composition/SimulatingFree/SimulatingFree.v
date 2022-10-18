@@ -228,6 +228,7 @@ End sec_generalized_constraints.
   we first prove an intermediate result, where both the composite VLSMs are
   pre-loaded with the same set of messages.
 *)
+
 Section sec_seeded_all_equivocating.
 
 Context {message : Type}

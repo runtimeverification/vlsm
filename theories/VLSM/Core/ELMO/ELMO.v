@@ -118,7 +118,7 @@ Qed.
   (This lemma needs no assumption about [UMOComponentValid] because
   reachability is the same anyway, because [UMOComponentValid]
   returns the state unchanged on invalid input.)
- *)
+*)
 Lemma full_node_VLSM_reachable
   (VM : VLSMMachine ELMOComponentType)
   (V := mk_vlsm VM)
@@ -691,9 +691,11 @@ Proof.
     simpl; intros; apply elem_of_receivedMessages_addObservation; constructor; auto.
 Qed.
 
-(** Little lemmas used while proving equivalence between
-    [local_equivocators], [local_equivocators_simple],
-    and [local_equivocators_full] *)
+(**
+  Little lemmas used while proving equivalence between
+  [local_equivocators], [local_equivocators_simple],
+  and [local_equivocators_full].
+*)
 Lemma received_in_messages (s : State) :
   forall msg, msg ∈ receivedMessages s -> msg ∈ messages s.
 Proof.
@@ -1578,8 +1580,10 @@ Proof.
   - apply ELMO_channel_authentication_prop.
 Qed.
 
-(** The shallow and deeper version of [global_equivocators] agree on
-    states which are reachable in [ELMOProtocol]. *)
+(**
+  The shallow and deeper version of [global_equivocators] agree on
+  states which are reachable in [ELMOProtocol].
+*)
 
 Lemma ELMO_global_equivocators_iff_simple :
   forall (s : vstate ELMOProtocol) (a : Address),
@@ -1607,7 +1611,7 @@ Qed.
 (**
    [global_equivocators_simple] is equivalent to an instance
    of the generic definition [full_node_is_globally_equivocating].
- *)
+*)
 Lemma global_equivocators_simple_iff_full_node_equivocation :
   forall (s : vstate ELMOProtocol) (a : Address),
     full_node_is_globally_equivocating ELMOComponent Message_sender s a
@@ -1630,9 +1634,7 @@ Qed.
   through claims about [m ∈ messages (s k)] rather
   than directly relating [rec_obs] and
   [CompositeHasBeenObserved].
- *)
 
-(**
   It might be possible to use something weaker than [UMO_reachable full_node]
   to prove
   [CompositeHasBeenObserved ELMOComponent (elements ∘ Message_dependencies) s m
@@ -1641,7 +1643,7 @@ Qed.
   and [rec_obs] only into received messages so we need some deep structural
   assumption about what [Send] observations are allowed, even recursively
   within observations of observations.
- *)
+*)
 Lemma ELMO_CHBO_in_messages :
   forall s,
     (forall k, UMO_reachable full_node (s k)) ->
@@ -1777,9 +1779,8 @@ Proof.
       by hnf; replace (composite_transition _ _ _) with (sf, oom).
 Qed.
 
-(** *** Validators *)
+(** *** Validators
 
-(**
   Due to the validity predicate, a transition must have either a non-empty
   input or a non-empty output, the distinction being made by the label.
 *)

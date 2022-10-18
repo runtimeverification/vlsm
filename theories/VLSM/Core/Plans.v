@@ -14,9 +14,10 @@ Context
 (**
   A plan is a (sequence of actions) which can be attempted on a
   given state to yield a trace.
+
   A [plan_item] is a singleton plan, and contains a label and an input
   which would allow to transition from any given state
-  (note that we don't address validity for now)
+  (note that we don't address validity for now).
 *)
 Record plan_item :=
   { label_a : label;
@@ -39,9 +40,7 @@ Context
   suffice for defining plan application and related results.
   The advantage of this approach is that the same definition works for
   pre_loaded versions as well as for all constrained variants of a composition.
-*)
 
-(**
   Applying a plan (list of [plan_item]s) to a state we obtain a
   final state and a trace. We define that in the [_apply_plan] definition below
   using a folding operation on the [_apply_plan_folder] function.
@@ -240,7 +239,7 @@ Qed.
 
 (**
   By extracting a plan from a [valid_trace] based on a state <<s>>
-  and reapplying the plan to the same state <<s>> we obtain the original trace
+  and reapplying the plan to the same state <<s>> we obtain the original trace.
 *)
 Lemma trace_to_plan_to_trace_from_to
   (s s' : vstate X)
@@ -407,10 +406,12 @@ Definition ensures
   forall (s : vstate X),
   (valid_state_prop X s -> P s -> finite_valid_plan_from s a).
 
- (* If some property of a state guarantees a plan `b` applied to the state is valid,
-    and this property is preserved by the application of some other plan `a`,
-    then these two plans can be composed and the application of `a ++ b` will also
-    be valid. *)
+(*
+  If some property of a state guarantees a plan `b` applied to the state is valid,
+  and this property is preserved by the application of some other plan `a`,
+  then these two plans can be composed and the application of `a ++ b` will also
+  be valid.
+*)
 
 Lemma plan_independence
   (a b : plan)

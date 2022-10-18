@@ -14,7 +14,7 @@ Class FinSetFullMessageDependencies
       : forall m, m ∉ full_message_dependencies m
   }.
 
-(** Given the message type, we can usually look up the functions for message dependencies *)
+(** Given the message type, we can usually look up the functions for message dependencies. *)
 #[global] Hint Mode FinSetFullMessageDependencies ! - - - - - - - - - - - - : typeclass_instances.
 
 #[export] Instance full_message_dependencies_from_fin_set

@@ -2,9 +2,8 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble.
 
-(** * Natural number utility definitions and lemmas *)
+(** * Natural number utility definitions and lemmas
 
-(**
   Given a decidable property on naturals and a bound, finds the
   largest natural (not larger the than bound) for which the property holds.
 *)

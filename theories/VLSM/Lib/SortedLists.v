@@ -164,7 +164,8 @@ Proof.
     + by constructor.
 Qed.
 
-(** Sorted lists as sets *)
+(** ** Sorted lists as sets *)
+
 Lemma LocallySorted_elem_of_lt {A} {lt : relation A} `{StrictOrder A lt} :
   forall x y s,
   LocallySorted lt (y :: s) ->
@@ -270,7 +271,7 @@ Proof.
   - intros. subst. easy.
 Qed.
 
-(* Transitive isn't necessary but makes the proof simpler. *)
+(* [Transitive] isn't necessary but makes the proof simpler. *)
 
 Lemma lsorted_app
   {A : Type}

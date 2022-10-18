@@ -212,8 +212,8 @@ Definition filtering_subsequence_stream_filter_map
   := map (fun k => f (dexist _ (filtering_subsequence_witness P s ss Hfs k))) nat_sequence.
 
 (**
-  Connecting prefixes of [filtering_subsequence_stream_filter_map] with [list_filter_map]s on
-  prefixes.
+  Connecting prefixes of [filtering_subsequence_stream_filter_map] with
+  [list_filter_map]s on prefixes.
 *)
 Lemma fitering_subsequence_stream_filter_map_prefix
   {A B : Type}
@@ -538,6 +538,7 @@ Section sec_stream_map_option.
   elements of a stream <<s>>, we can define the stream of the defined mapped
   values of <<s>> through <<f>> as a particular [stream_filter_map].
 *)
+
 Context
   [A B : Type]
   (f : A -> option B)

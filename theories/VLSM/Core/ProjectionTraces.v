@@ -81,7 +81,7 @@ Context
   (j : index)
   .
 
-(* The projection of a preloaded finite valid trace remains a preloaded valid trace *)
+(* The projection of a preloaded finite valid trace remains a preloaded valid trace. *)
 Lemma preloaded_component_projection :
   VLSM_projection
     (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
@@ -286,7 +286,6 @@ Section sec_binary_free_composition_projections.
 (** ** Projections of Free composition of two VLSMs
 
   This projections are used in defining the [byzantine_trace_prop]erties.
-
 *)
 Context
   {message : Type}
@@ -435,7 +434,7 @@ Proof.
     simpl. eapply (projection_valid_implies_valid IM). exact Hv.
 Qed.
 
-(** We can now finally prove the main result for this section: *)
+(** We can now finally prove the main result for this section. *)
 Lemma proj_pre_loaded_with_all_messages_incl
   (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
   : VLSM_incl Xj PreLoaded.
@@ -522,7 +521,7 @@ Context {message : Type}
         (X := composite_vlsm IM constraint)
 .
 
-(** ** A sufficient condition for the [projection_friendly_prop]erty. *)
+(** ** A sufficient condition for the [projection_friendly_prop]erty *)
 
 Context
   (j : index)

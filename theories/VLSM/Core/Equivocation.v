@@ -5,9 +5,8 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
 From VLSM.Lib Require Import ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 
-(** * VLSM Equivocation Definitions *)
+(** * VLSM Equivocation Definitions
 
-(**
   This module is dedicated to building the vocabulary for discussing equivocation.
   Equivocation occurs on the receipt of a message which has not been previously sent.
   The designated sender (validator) of the message is then said to be equivocating.
@@ -297,7 +296,7 @@ Proof.
   apply selected_message_exists_not_some_iff_no.
 Qed.
 
-(** Sufficient condition for 'specialized_selected_message_exists_in_some_traces' *)
+(** Sufficient condition for [specialized_selected_message_exists_in_some_traces]. *)
 Lemma specialized_selected_message_exists_in_some_traces_from
   (X : VLSM message)
   (message_selector : message -> transition_item -> Prop)
@@ -357,7 +356,7 @@ Qed.
   version of the target VLSM. This is because we want VLSMs to have oracles which
   are valid irrespective of the composition they take part in. As we know,
   the behavior preloaded VLSMs includes behaviors of its projections in any
-  composition. 
+  composition.
 *)
 
 Definition all_traces_have_message_prop
@@ -401,7 +400,7 @@ Definition has_not_been_received_prop : state_message_oracle -> state -> message
 
   Furthermore, we require a [sent_excluded_middle] property, which stipulates
   that any argument to the oracle should return true in exactly one of
-  [has_been_sent] and [has_not_been_sent]. 
+  [has_been_sent] and [has_not_been_sent].
 *)
 
 Class HasBeenSentCapability := {
@@ -482,8 +481,8 @@ Proof.
 Qed.
 
 (**
-  Sufficient condition for 'proper_sent' avoiding the
-  'pre_loaded_with_all_messages_vlsm'
+  Sufficient condition for [proper_sent] avoiding the
+  [pre_loaded_with_all_messages_vlsm].
 *)
 Lemma specialized_proper_sent
   `{HasBeenSentCapability}
@@ -676,7 +675,7 @@ End sec_simple.
   related for the starting and [destination] states of
   any [input_valid_transition].
 
-  These conditions are defined in the record [oracle_stepwise_props]
+  These conditions are defined in the record [oracle_stepwise_props].
 *)
 
 Record oracle_stepwise_props
@@ -767,6 +766,7 @@ Qed.
   to choose a trace to the state for the directions where
   one is not given.
 *)
+
 Section sec_trace_from_stepwise.
 
 Context
@@ -864,6 +864,7 @@ End sec_trace_from_stepwise.
   property, and by considering a trace that ends with the given
   [input_valid_transition] to prove the [oracle_step_update] property.
 *)
+
 Section sec_stepwise_from_trace.
 
 Context
@@ -1206,7 +1207,7 @@ Qed.
 
 (**
   A received message introduces no additional equivocations to a state
-  if it has already been observed in s.
+  if it has already been observed in <<s>>.
 *)
 Definition no_additional_equivocations
   {message : Type}
@@ -1963,11 +1964,11 @@ Definition sender_safety_prop : Prop :=
          (Hdif : j <> A v),
          ~can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 
- (**
-   An alternative, possibly friendlier, formulation. Note that it is
-   slightly weaker, in that it does not require that the sender
-   is able to send the message. 
- *)
+(**
+  An alternative, possibly friendlier, formulation. Note that it is
+  slightly weaker, in that it does not require that the sender
+  is able to send the message. 
+*)
 
 Definition sender_safety_alt_prop : Prop :=
   forall
@@ -2111,11 +2112,11 @@ Proof.
   apply no_additional_equivocations_dec.
 Qed.
 
- (**
-   We say that a validator <v> (with associated component <i>) is equivocating wrt.
-   to another component <j>, if there exists a message which [has_been_received] by
-   <j> but [has_not_been_sent] by <i> 
- *)
+(**
+  We say that a validator <v> (with associated component <i>) is equivocating wrt.
+  to another component <j>, if there exists a message which [has_been_received] by
+  <j> but [has_not_been_sent] by <i>.
+*)
 
 Definition equivocating_wrt
   (v : validator)
@@ -2724,10 +2725,11 @@ Proof.
     repeat split;try apply Hx;
     [by apply finite_valid_trace_last_pstate |].
     destruct iom as [m|];[|apply option_valid_message_None].
-    (* If m was sent during tr, it is valid because it was
-       produced in a valid (by IHHtr) trace.
-       If m was not sent during tr,
-     *)
+    (*
+      If m was sent during tr, it is valid because it was
+      produced in a valid (by IHHtr) trace.
+      If m was not sent during tr,
+    *)
     assert (Decision (trace_has_message (field_selector output) m tr)) as [Hsent|Hnot_sent].
     apply (@Exists_dec _). intros. apply decide_eq.
     + by eapply valid_trace_output_is_valid.

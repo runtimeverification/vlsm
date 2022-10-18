@@ -571,14 +571,14 @@ Qed.
   [len_set_diff_decrease] more convenient,
   because [length] of [filter] can be simplified
   step by step while doing induction over <<l>>.
- *)
+*)
 Definition set_diff_filter `{EqDecision A} (l r : list A) :=
   filter (.∉ r) l.
 
 (**
   The characteristic membership property, parallel to
   [set_diff_iff].
- *)
+*)
 Lemma set_diff_filter_iff `{EqDecision A} (a:A) l r:
   a ∈ (set_diff_filter l r) <-> (a ∈ l /\ ~a ∈ r).
 Proof.
@@ -605,7 +605,7 @@ Qed.
   Prove that subtracting a superset cannot produce
   a smaller result.
   This lemma is used to prove [len_set_diff_decrease].
- *)
+*)
 Lemma len_set_diff_incl_le `{EqDecision A} (l a b: list A)
       (H_subseteq: forall x, x ∈ b -> x ∈ a):
   length (set_diff_filter l a) <= length (set_diff_filter l b).
@@ -626,7 +626,7 @@ Qed.
   Prove that strictly increasing the set to be subtracted,
   by adding an element actually found in <<l>> will decrease
   the size of the result.
- *)
+*)
 Lemma len_set_diff_decrease `{EqDecision A} (new:A) (l a b: list A)
       (H_subseteq: forall x, x ∈ b -> x ∈ a)
       (H_new_is_new: new ∈ a /\ ~new ∈ b)

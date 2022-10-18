@@ -42,7 +42,7 @@ Proof.
 Qed.
 
 Section sec_sum_listing.
-(** 'Listing' for the sum type implies 'Listing' for each projection *)
+(** [Listing] for the sum type implies [Listing] for each projection *)
 
 Context
   {Left Right : Type}

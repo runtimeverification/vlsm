@@ -70,6 +70,7 @@ Context
   .
 
 (** ** Assuming the byzantine nodes are known
+
   We will first fix a selection of <<byzantine>> nodes of limited weight and
   analyze traces with the [fixed_limited_byzantine_trace_prop]erty w.r.t. that
   selection.
