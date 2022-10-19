@@ -99,7 +99,8 @@ Lemma limited_PreNonByzantine_valid_state_lift_not_heavy s
   : tracewise_not_heavy sX.
 Proof.
   cut (elements (tracewise_equivocating_validators sX) ⊆ byzantine).
-  { intro Hincl.
+  {
+    intro Hincl.
     unfold tracewise_not_heavy, not_heavy.
     transitivity (sum_weights (remove_dups byzantine)); [| done].
     apply sum_weights_subseteq.
@@ -129,23 +130,24 @@ Proof.
   inversion Hitem; subst; clear Htl Hitem. simpl in Hm0. subst.
   destruct Ht as [[_ [_ [_ [Hc _]]]] _].
   destruct Hc as [[sub_i Hsenti] | Hemit].
-  + destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i.
+  - destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i.
     assert (Hsent : composite_has_been_sent IM
                       (lift_sub_state IM non_byzantine (finite_trace_last is pre)) m0).
-    { exists i.
+    {
+      exists i.
       unfold lift_sub_state.
       by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
     }
     apply (composite_proper_sent IM) in Hsent; [| done].
     apply (VLSM_full_projection_initial_state Hproj) in Hinit.
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
-  + specialize (proj1 Hemit) as [i [Hi Hsigned]].
+  - specialize (proj1 Hemit) as [i [Hi Hsigned]].
     subst.
     destruct (decide (i ∈ byzantine)).
-      * unfold channel_authenticated_message in Hsigned.
-        rewrite Hsender0 in Hsigned.
-        by apply Some_inj in Hsigned; subst.
-      * by destruct Hi; apply set_diff_intro; [apply elem_of_enum|].
+    + unfold channel_authenticated_message in Hsigned.
+      rewrite Hsender0 in Hsigned.
+      by apply Some_inj in Hsigned; subst.
+    + by destruct Hi; apply set_diff_intro; [apply elem_of_enum |].
 Qed.
 
 Existing Instance Htracewise_BasicEquivocation.
@@ -161,17 +163,16 @@ Lemma limited_PreNonByzantine_lift_valid
     (lift_sub_state IM non_byzantine).
 Proof.
   intros l s om Hv HsY HomY.
-  repeat split.
-  - apply lift_sub_valid, Hv.
-  - hnf.
-    destruct (composite_transition (sub_IM IM non_byzantine) l (s, om))
-      as [s' om'] eqn: Ht.
-    apply (lift_sub_transition IM non_byzantine) in Ht as HtX.
-    simpl in HtX |- *; rewrite HtX; simpl.
-    change (is_equivocating_tracewise_no_has_been_sent _ _ _) with is_equivocating.
-    by eapply tracewise_not_heavy_LimitedEquivocationProp_iff,
-      limited_PreNonByzantine_valid_state_lift_not_heavy,
-      input_valid_transition_destination.
+  repeat split; [by apply lift_sub_valid, Hv |].
+  hnf.
+  destruct (composite_transition (sub_IM IM non_byzantine) l (s, om))
+    as [s' om'] eqn: Ht.
+  apply (lift_sub_transition IM non_byzantine) in Ht as HtX.
+  simpl in HtX |- *; rewrite HtX; simpl.
+  change (is_equivocating_tracewise_no_has_been_sent _ _ _) with is_equivocating.
+  by eapply tracewise_not_heavy_LimitedEquivocationProp_iff,
+    limited_PreNonByzantine_valid_state_lift_not_heavy,
+    input_valid_transition_destination.
 Qed.
 
 (**

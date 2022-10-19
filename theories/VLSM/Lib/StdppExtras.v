@@ -433,7 +433,7 @@ Lemma filter_subseteq {A} P `{∀ (x:A), Decision (P x)} (s1 s2 : list A) :
   s1 ⊆ s2 ->
   (filter P s1) ⊆ (filter P s2).
 Proof.
-induction s1; intros; intro x; intros.
+  induction s1; intros; intro x; intros.
   - contradict H1.
     rewrite filter_nil; intro Hx. inversion Hx.
   - rewrite filter_cons in H1.
@@ -452,22 +452,21 @@ Lemma filter_subseteq_fn {A} P Q
   (forall a, P a -> Q a) ->
   forall (s : list A), filter P s ⊆ filter Q s.
 Proof.
-induction s; simpl.
+  induction s; simpl.
   - rewrite filter_nil; intros x Hx; inversion Hx.
   - intro x; intros.
     rewrite filter_cons in H2.
     destruct (decide (P a)).
     + rewrite elem_of_cons in H2.
       rewrite filter_cons.
-      destruct (decide (Q a)).
-      * destruct H2.
-        -- subst; left.
-        -- by right; apply IHs.
-      * itauto.
+      destruct (decide (Q a)); [| itauto].
+      destruct H2.
+      * by subst; left.
+      * by right; apply IHs.
     + rewrite filter_cons.
       destruct (decide (Q a)).
-      -- by right; apply IHs.
-      -- by apply IHs.
+      * by right; apply IHs.
+      * by apply IHs.
 Qed.
 
 Lemma filter_incl {A} P `{∀ (x:A), Decision (P x)} s1 s2 :

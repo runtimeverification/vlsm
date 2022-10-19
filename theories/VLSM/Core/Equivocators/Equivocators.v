@@ -1126,9 +1126,9 @@ Lemma new_machine_label_equivocator_state_project_last
   : equivocator_state_descriptor_project s' (Existing (equivocator_state_n s)) =
     equivocator_state_descriptor_project s (NewMachine sn).
 Proof.
-    inversion_clear Ht. simpl.
-    destruct_equivocator_state_extend_project s sn (equivocator_state_n s) Hi
-    ; [lia | done | lia].
+  inversion_clear Ht. simpl.
+  destruct_equivocator_state_extend_project s sn (equivocator_state_n s) Hi
+  ; [lia | done | lia].
 Qed.
 
 Lemma new_machine_label_equivocator_state_project_not_last

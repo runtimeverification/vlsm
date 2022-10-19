@@ -255,11 +255,9 @@ Proof.
           [| done | by eexists _, _].
         eapply has_been_directly_observed_step_update in Hobs; [| done].
         eexists s_j, _; constructor; [done.. |]; cbn.
-        destruct Hobs as [[| Houtput] |]; subst.
-        -- by constructor.
-        -- apply Some_inj in Houtput; subst m_j.
-           contradict Hdm; apply tc_reflect_irreflexive; typeclasses eauto.
-        -- by constructor; econstructor 2.
+        destruct Hobs as [[| Houtput] |]; subst; [by constructor | | by do 2 econstructor].
+        apply Some_inj in Houtput; subst m_j.
+        contradict Hdm; apply tc_reflect_irreflexive; typeclasses eauto.
 Qed.
 
 (**

@@ -617,36 +617,34 @@ Proof.
   generalize dependent in1.
   generalize dependent n2.
   generalize dependent n1.
-  induction l; intros.
-  - inversion Hin1.
-  - simpl in Hin1. simpl in Hin2.
-    destruct (decide (P a)).
-    + destruct n1; destruct n2.
-      * by inversion Hin1; inversion Hin2; subst.
-      * destruct (nth_error_filter_index P l n2)
-        ; inversion Hin1; inversion Hin2; subst.
-        lia.
-      * inversion Hle.
-      * { destruct in1, in2.
-        - lia.
-        - lia.
-        - destruct (nth_error_filter_index P l n2); inversion Hin2.
-        - assert (Hle' : n1 <= n2) by lia.
-          specialize (IHl n1 n2 Hle').
-          destruct (nth_error_filter_index P l n1) eqn:Hin1'; inversion Hin1;
-          subst; clear Hin1.
-          destruct (nth_error_filter_index P l n2) eqn:Hin2'; inversion Hin2
-          ; subst; clear Hin2.
-          specialize (IHl in1 eq_refl in2 eq_refl).
-          lia.
-        }
-    + specialize (IHl n1 n2 Hle).
-      destruct (nth_error_filter_index P l n1) eqn:Hin1'; inversion Hin1
-      ; subst; clear Hin1.
-      destruct (nth_error_filter_index P l n2) eqn:Hin2'; inversion Hin2
-      ; subst; clear Hin2.
-      specialize (IHl n0 eq_refl n3 eq_refl).
+  induction l; intros; [by inversion Hin1 |].
+  simpl in Hin1. simpl in Hin2.
+  destruct (decide (P a)).
+  - destruct n1; destruct n2.
+    + by inversion Hin1; inversion Hin2; subst.
+    + destruct (nth_error_filter_index P l n2)
+      ; inversion Hin1; inversion Hin2; subst.
       lia.
+    + inversion Hle.
+    + destruct in1, in2.
+      * lia.
+      * lia.
+      * destruct (nth_error_filter_index P l n2); inversion Hin2.
+      * assert (Hle' : n1 <= n2) by lia.
+        specialize (IHl n1 n2 Hle').
+        destruct (nth_error_filter_index P l n1) eqn:Hin1'; inversion Hin1;
+        subst; clear Hin1.
+        destruct (nth_error_filter_index P l n2) eqn:Hin2'; inversion Hin2
+        ; subst; clear Hin2.
+        specialize (IHl in1 eq_refl in2 eq_refl).
+        lia.
+  - specialize (IHl n1 n2 Hle).
+    destruct (nth_error_filter_index P l n1) eqn:Hin1'; inversion Hin1
+    ; subst; clear Hin1.
+    destruct (nth_error_filter_index P l n2) eqn:Hin2'; inversion Hin2
+    ; subst; clear Hin2.
+    specialize (IHl n0 eq_refl n3 eq_refl).
+    lia.
 Qed.
 
 Fixpoint Forall_filter
@@ -1619,14 +1617,12 @@ Proof.
   intros x.
   induction x.
   - left. apply list_subseteq_nil.
-  - intro y. specialize (IHx y) as [Hsub | Hnsub].
-    2: {
-      right. intro Hsub. elim Hnsub.
+  - intro y. destruct (IHx y) as [Hsub | Hnsub].
+    + destruct (decide (a ∈ y)).
+      * left. intros b Hb. inversion Hb; subst; [done |]. by apply Hsub.
+      * right. intro Hsub'. elim n. apply Hsub'. left.
+    + right. intro Hsub. elim Hnsub.
       by intros b Hb; apply Hsub; right.
-    }
-    destruct (decide (a ∈ y)).
-    + left. intros b Hb. inversion Hb; subst; [done |]. by apply Hsub.
-    + right. intro Hsub'. elim n. apply Hsub'. left.
 Qed.
 
 Lemma elem_of_empty_nil [X:Type] (l:list X) :

@@ -186,8 +186,8 @@ Lemma VLSM_partial_projection_type_from_projection
 Proof.
   split; intros; inversion H; subst; clear H.
   exists (state_project s'X), (trace_project preX).  split.
-  + simpl. f_equal. f_equal. apply pre_VLSM_projection_finite_trace_project_app.
-  + symmetry. apply (final_state_project _ _ _ _ Hsimul).
+  - simpl. f_equal. f_equal. apply pre_VLSM_projection_finite_trace_project_app.
+  - symmetry. apply (final_state_project _ _ _ _ Hsimul).
     apply (finite_valid_trace_from_app_iff  X) in H1.
     apply H1.
 Qed.
@@ -417,7 +417,6 @@ Proof.
   intros sX trX Hinf HtrX.
   apply infinite_valid_trace_from_prefix_rev.
   intros n.
-
   specialize
     (stream_map_option_prefix_ex (pre_VLSM_projection_transition_item_project _ _ label_project state_project) trX
     (pre_VLSM_projection_transition_item_project_infinitely_often _ _ label_project state_project trX Hinf)
@@ -849,25 +848,24 @@ Context
   (Htr : finite_valid_trace_init_to X is s tr)
   : finite_valid_trace_from_to Y (state_project is) (state_project s) (pre_VLSM_projection_finite_trace_project _ _ label_project state_project tr).
 Proof.
-  induction Htr using finite_valid_trace_init_to_rev_strong_ind.
-  - constructor. by apply Hstate.
-  - unfold pre_VLSM_projection_finite_trace_project.
-    rewrite map_option_app.
-    apply finite_valid_trace_from_to_app with (state_project s)
-    ; [done |].
-    simpl. unfold pre_VLSM_projection_transition_item_project.
-    simpl.
-    apply valid_trace_last_pstate in IHHtr1.
-    destruct (label_project l) as [lY|] eqn:Hl.
-    + apply finite_valid_trace_from_to_singleton.
-      assert (Hiom : option_valid_message_prop Y iom).
-      { destruct iom as [im|]; [|apply option_valid_message_None].
-        by apply (Hmessage _ _ Hl _ _ (proj1 Ht)).
-      }
-      specialize (Hvalid _ _ Hl _ _ (proj1 Ht) IHHtr1 Hiom).
-      by apply (Htransition_Some _ _ Hl) in Ht.
-    + apply (Htransition_None _ Hl) in Ht.
-      rewrite Ht. by constructor.
+  induction Htr using finite_valid_trace_init_to_rev_strong_ind; [by constructor; apply Hstate |].
+  unfold pre_VLSM_projection_finite_trace_project.
+  rewrite map_option_app.
+  apply finite_valid_trace_from_to_app with (state_project s)
+  ; [done |].
+  simpl. unfold pre_VLSM_projection_transition_item_project.
+  simpl.
+  apply valid_trace_last_pstate in IHHtr1.
+  destruct (label_project l) as [lY |] eqn: Hl; cycle 1.
+  - by apply (Htransition_None _ Hl) in Ht; rewrite Ht; constructor.
+  - apply finite_valid_trace_from_to_singleton.
+    assert (Hiom : option_valid_message_prop Y iom).
+    {
+      destruct iom as [im|]; [|apply option_valid_message_None].
+      by apply (Hmessage _ _ Hl _ _ (proj1 Ht)).
+    }
+    specialize (Hvalid _ _ Hl _ _ (proj1 Ht) IHHtr1 Hiom).
+    by apply (Htransition_Some _ _ Hl) in Ht.
 Qed.
 
 #[local] Lemma basic_VLSM_projection_finite_valid_trace_from
@@ -882,7 +880,6 @@ Proof.
   specialize (finite_valid_trace_from_to_app X _ _ _ _ _ (proj1 Hs) Hpxt) as Happ.
   specialize (basic_VLSM_projection_finite_valid_trace_init_to _ _ _ (conj Happ (proj2 Hs)))
     as Happ_pr.
-
   rewrite (pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project) in Happ_pr.
   apply finite_valid_trace_from_to_app_split, proj2 in Happ_pr.
   apply valid_trace_get_last in Hs as Heqs.

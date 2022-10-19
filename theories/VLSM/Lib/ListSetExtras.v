@@ -197,30 +197,21 @@ Lemma set_union_empty_left `{EqDecision A}  : forall (s : list A),
   NoDup s -> set_eq (set_union [] s) s.
 Proof.
   intros. split; intros x Hin.
-  - apply set_union_elim in Hin. destruct Hin.
-    + inversion H0.
-    + done.
+  - by apply set_union_elim in Hin as []; [inversion H0 |].
   - by apply set_union_intro; right.
 Qed.
 
 Lemma map_list_subseteq {A B} : forall (f : B -> A) (s s' : list B),
   s ⊆ s' -> (map f s) ⊆ (map f s').
 Proof.
-intro f; induction s; intros; simpl.
-- apply list_subseteq_nil.
-- assert (s ⊆ s') as Hs. {
-    intros b Hs.
-    by apply H; right.
-  }
-  spec IHs s' Hs.
-  intros b Hs'.
-  apply elem_of_cons in Hs'.
-  destruct Hs'.
-  * subst.
-    apply elem_of_list_fmap_1.
-    apply H.
-    left.
-  * by apply IHs.
+  intro f; induction s; intros; simpl.
+  - apply list_subseteq_nil.
+  - assert (Hs : s ⊆ s') by (intros b Hs; apply H; right; done).
+    spec IHs s' Hs.
+    intros b Hs'.
+    apply elem_of_cons in Hs'.
+    destruct Hs' as [-> |]; [| by apply IHs].
+    by apply elem_of_list_fmap_1, H; left.
 Qed.
 
 Lemma map_set_eq {A B} (f : B -> A) : forall s s',
@@ -328,8 +319,8 @@ Lemma set_remove_not_elem_of `{EqDecision A} : forall x (s : list A),
 Proof.
   induction s; cbn; intros; [done |].
   rewrite decide_False; cycle 1.
-  + by intros ->; contradict H; left.
-  + rewrite IHs; [done |]. rewrite elem_of_cons in H. itauto.
+  - by intros ->; contradict H; left.
+  - rewrite IHs; [done |]. rewrite elem_of_cons in H. itauto.
 Qed.
 
 Lemma set_remove_elim `{EqDecision A} : forall x (s : list A),
@@ -473,11 +464,11 @@ Qed.
 Lemma set_diff_nodup' `{EqDecision A} (l l' : list A)
   : NoDup l -> NoDup (set_diff l l').
 Proof.
-induction 1 as [|x l H H' IH]; simpl.
-- constructor.
-- case_decide.
-  + by apply IH.
-  + by apply set_add_nodup, IH.
+  induction 1 as [|x l H H' IH]; simpl.
+  - constructor.
+  - case_decide.
+    + by apply IH.
+    + by apply set_add_nodup, IH.
 Qed.
 
 Lemma diff_app_nodup `{EqDecision A} : forall (s1 s2 : list A),
@@ -547,19 +538,15 @@ Lemma set_prod_nodup `(s1: set A) `(s2: set B):
   NoDup s2 ->
   NoDup (set_prod s1 s2).
 Proof.
-  intros Hs1 HS2.
-  induction Hs1.
-  + constructor.
-  + simpl.
-    apply nodup_append.
-    * apply NoDup_fmap; [congruence | done].
-    * done.
-    * intros [a b].
-      rewrite elem_of_list_fmap, elem_of_list_prod.
-      intros [_ [[= <- _] _]]. itauto.
-    * intros [a b].
-      rewrite elem_of_list_prod, elem_of_list_fmap.
-      intros [Ha _] [_ [[= Hax _] _]]. congruence.
+  intros Hs1 H22; induction Hs1; cbn; [by constructor |].
+  apply nodup_append; [| done | |].
+  - by apply NoDup_fmap; [congruence |].
+  - intros [a b].
+    rewrite elem_of_list_fmap, elem_of_list_prod.
+    by intros [_ [[= <- _] _]] [].
+  - intros [a b].
+    rewrite elem_of_list_prod, elem_of_list_fmap.
+    by intros [Ha _] [_ [[= -> _] _]].
 Qed.
 
 (**
@@ -588,17 +575,16 @@ Proof.
   - unfold set_diff_filter in *.
     rewrite filter_cons.
     destruct (decide (~ a0 ∈ r)).
-    * rewrite 2 elem_of_cons, IHl.
+    + rewrite 2 elem_of_cons, IHl.
       split; itauto congruence.
-    * rewrite elem_of_cons.
+    + rewrite elem_of_cons.
       split;itauto congruence.
 Qed.
 
 Lemma set_diff_filter_nodup `{EqDecision A} (l r:list A):
   NoDup l -> NoDup (set_diff_filter l r).
 Proof.
-  intros H.
-  by apply NoDup_filter.
+  by intros H; apply NoDup_filter.
 Qed.
 
 (**

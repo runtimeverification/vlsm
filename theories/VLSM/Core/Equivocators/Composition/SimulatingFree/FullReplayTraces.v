@@ -178,34 +178,31 @@ Proof.
   }
   induction l using rev_ind; intros.
   - case_decide; [| done].
-    rewrite decide_False; [done |]. intro Hin. inversion Hin.
+    by rewrite decide_False; [| inversion 1].
   - spec IHl; [apply incl_app_inv in Hincl; apply Hincl |].
     spec IHl; [apply NoDup_app in Hnodup; apply Hnodup |].
     subst tr_full_replay_is.
     rewrite map_app, (composite_apply_plan_app equivocator_IM); simpl in *
     ; destruct (composite_apply_plan _ _ _) as (aitems, afinal); simpl in *.
     spec IHl i; destruct_dec_sig x ix Hix Heqx; subst x; simpl in *.
-    case_decide as _Hix; cycle 1.
-    + by destruct (decide (i = ix)); subst; equivocator_state_update_simpl.
-    + destruct (decide (ix = i)); subst; equivocator_state_update_simpl.
-      * rewrite decide_False in IHl.
-        2: {
-          intro Heqv.
-          apply NoDup_app in Hnodup as (_ & Hnodup & _).
-          eapply Hnodup; [done |].
-          rewrite elem_of_list_singleton.
-          by apply dsig_eq.
-        }
-        rewrite IHl, decide_True.
+    case_decide as _Hix; cycle 1;
+      destruct (decide (ix = i)); subst; equivocator_state_update_simpl; [done | done | |].
+    + rewrite decide_False in IHl.
+      * rewrite IHl, decide_True.
         -- rewrite (sub_IM_state_pi is _Hix Hix); symmetry.
            apply equivocator_state_append_singleton_is_extend, (His (dexist i Hix)).
         -- rewrite elem_of_app, elem_of_list_singleton; right.
            by apply dsig_eq.
-      * case_decide.
-        -- rewrite decide_True; rewrite ?elem_of_app; itauto.
-        -- rewrite decide_False; [done |].
-           intros [Hin | Hx]%elem_of_app; [ done |].
-           by rewrite elem_of_list_singleton, dsig_eq in Hx.
+      * intro Heqv.
+        apply NoDup_app in Hnodup as (_ & Hnodup & _).
+        eapply Hnodup; [done |].
+        rewrite elem_of_list_singleton.
+        by apply dsig_eq.
+    + case_decide.
+      * rewrite decide_True; rewrite ?elem_of_app; itauto.
+      * rewrite decide_False; [done |].
+        intros [Hin | Hx]%elem_of_app; [ done |].
+        by rewrite elem_of_list_singleton, dsig_eq in Hx.
 Qed.
 
 (**
@@ -627,16 +624,15 @@ Proof.
   specialize (valid_state_project_preloaded_to_preloaded _ sub_equivocator_IM constraint s)
     as Hs_pr.
   simpl in Hc1.
-  destruct Hc1 as [Hsub_sent | Hseeded].
-  - destruct Hsub_sent as [sub_i Hsent].
-    destruct_dec_sig sub_i i Hi Heqsub_i.
-    left. exists i.
-    simpl. rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
-    subst. unfold SubProjectionTraces.sub_IM in Hsent. cbn in Hsent |-*.
-    apply equivocator_state_append_sent_right; [..|done].
-    + by apply Hfull_replay_state_pr.
-    + by apply (Hs_pr (dexist i Hi) Hs).
-  - by right.
+  destruct Hc1 as [Hsub_sent | Hseeded]; [| by right].
+  destruct Hsub_sent as [sub_i Hsent].
+  destruct_dec_sig sub_i i Hi Heqsub_i.
+  left. exists i.
+  simpl. rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
+  subst. unfold SubProjectionTraces.sub_IM in Hsent. cbn in Hsent |-*.
+  apply equivocator_state_append_sent_right; [..|done].
+  - by apply Hfull_replay_state_pr.
+  - by apply (Hs_pr (dexist i Hi) Hs).
 Qed.
 
 #[local] Lemma sent_are_valid

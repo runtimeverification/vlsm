@@ -865,8 +865,8 @@ Proof.
   intros; split.
   - intro Hps'. destruct Hps' as [om' Hs].
     inversion Hs; subst.
-    * by left; exists (exist _ _ Hs0).
-    * right. exists l0. exists (s, om). exists om'.
+    + by left; exists (exist _ _ Hs0).
+    + right. exists l0. exists (s, om). exists om'.
       repeat split; try red; eauto.
   - intros [[[s His] Heq] | [l [[s om] [om' [[[_om Hps] [[_s Hpm] Hv]] Ht]]]]]; subst.
     + exists None. by apply valid_initial_state_message.
@@ -1125,11 +1125,10 @@ Lemma first_transition_valid
   : finite_valid_trace_from s [te] <-> input_valid_transition (l te) (s, input te) (destination te, output te).
 
 Proof.
-  split.
-  - by inversion 1.
-  - destruct te. simpl. intro Ht.
-    apply input_valid_transition_destination in Ht as Hdestination0.
-    by constructor; [constructor|].
+  split; [by inversion 1 |].
+  destruct te. simpl. intro Ht.
+  apply input_valid_transition_destination in Ht as Hdestination0.
+  by constructor; [constructor |].
 Qed.
 
 Lemma extend_right_finite_trace_from
@@ -1255,14 +1254,12 @@ Proof.
   apply finite_valid_trace_from_app_iff in Htr.
   destruct Htr as [_ Htr].
   replace (finite_trace_last s (list_prefix ls n)) with nth in Htr; [done |].
-  {
-    destruct n.
-    - rewrite finite_trace_nth_first in Hnth.
-      by destruct ls; cbn; congruence.
-    - unfold finite_trace_last.
-      rewrite list_prefix_map.
-      by apply list_prefix_nth_last.
-  }
+  destruct n.
+  - rewrite finite_trace_nth_first in Hnth.
+    by destruct ls; cbn; congruence.
+  - unfold finite_trace_last.
+    rewrite list_prefix_map.
+    by apply list_prefix_nth_last.
 Qed.
 
 Lemma finite_valid_trace_from_segment
@@ -1637,12 +1634,12 @@ Lemma finite_valid_trace_init_to_add_emit
   (Htl : finite_valid_trace_init_to s f tl)
   : finite_valid_trace_init_to_emit s f (finite_trace_last_output tl) tl.
 Proof.
-  induction Htl using finite_valid_trace_init_to_rev_ind.
-  - by constructor.
-  - rewrite finite_trace_last_output_is_last. simpl.
-    destruct Ht as [[_ [[_s Hiom] Hv]] Ht].
-    specialize (finite_valid_trace_init_to_emit_valid_state_message_rev _ _ Hiom) as [iom_s [iom_tr Hiom_tr]].
-    apply (finite_valid_trace_init_to_emit_extend _ _ _ _ IHHtl _ _ _ _ Hiom_tr _ Hv _ _ Ht).
+  induction Htl using finite_valid_trace_init_to_rev_ind; [by constructor |].
+  rewrite finite_trace_last_output_is_last. simpl.
+  destruct Ht as [[_ [[_s Hiom] Hv]] Ht].
+  destruct (finite_valid_trace_init_to_emit_valid_state_message_rev _ _ Hiom)
+    as [iom_s [iom_tr Hiom_tr]].
+  apply (finite_valid_trace_init_to_emit_extend _ _ _ _ IHHtl _ _ _ _ Hiom_tr _ Hv _ _ Ht).
 Qed.
 
 (**
@@ -1746,10 +1743,10 @@ Proof.
       unfold s' in Htr'.
       by rewrite finite_trace_last_cons in Htr'.
     + inversion Htr. apply Ht.
-   - inversion 1. subst. specialize (IHls s1). simpl in IHls. specialize (IHls ls'). apply IHls in Htl.
-     destruct Htl. split.
-     + by constructor.
-     + by unfold s'; rewrite finite_trace_last_cons.
+  - inversion 1. subst. specialize (IHls s1). simpl in IHls. specialize (IHls ls'). apply IHls in Htl.
+    destruct Htl. split.
+    + by constructor.
+    + by unfold s'; rewrite finite_trace_last_cons.
 Qed.
 
 Lemma infinite_valid_trace_from_prefix
@@ -1896,11 +1893,11 @@ Proof using.
   destruct Hp as [_om Hp].
   apply valid_state_message_has_trace in Hp.
   destruct Hp as [[Hinit _]|Htrace].
-  + exists s, [].
+  - exists s, [].
     split;[| done].
     constructor.
     by apply initial_state_is_valid.
-  + by destruct Htrace as [is [tr [Htr _]]]; eauto.
+  - by destruct Htrace as [is [tr [Htr _]]]; eauto.
 Qed.
 
 (** For any input valid transition there exists a valid trace ending in it. *)
@@ -2254,7 +2251,8 @@ Lemma trace_prefix_fn_valid
 Proof.
   specialize (trace_prefix_valid (exist _ tr Htr)); simpl; intro Hpref.
   remember (trace_prefix_fn tr n) as pref_tr.
-  destruct pref_tr as [s l | s l].
+  destruct pref_tr as [s l | s l]; cycle 1.
+  - destruct tr as [s' l' | s' l']; inversion Heqpref_tr.
   - destruct l as [| item l].
     + by destruct tr as [s' l' | s' l']
       ; destruct Htr as [Htr Hinit]
@@ -2284,7 +2282,6 @@ Proof.
         rewrite <- Hl'. rewrite Heqprefix.
         exists (stream_suffix l' n).
         by rewrite <- stream_app_assoc.
-  - destruct tr as [s' l' | s' l']; inversion Heqpref_tr.
 Qed.
 
 Lemma valid_trace_nth
@@ -2332,27 +2329,25 @@ Proof.
   - rewrite Hs1 in Hs2. inversion Hs2; subst; clear Hs2.
     exists []. constructor. by apply valid_trace_nth with tr n2.
   - exists (trace_segment tr n1 (S m)).
-    apply finite_valid_trace_from_add_last.
-    + apply valid_trace_segment; [done | lia | done].
-    + { destruct tr as [s tr | s tr]; simpl.
-      - simpl in Hs1, Hs2.
-        unfold list_segment.
-        rewrite finite_trace_last_suffix.
-        by apply finite_trace_last_prefix.
-        apply finite_trace_nth_length in Hs2.
-        rewrite list_prefix_length; lia.
-      - unfold stream_segment.
-        rewrite unlock_finite_trace_last.
-        rewrite list_suffix_map, stream_prefix_map.
-        simpl in Hs2.
-        rewrite list_suffix_last.
-        + symmetry. rewrite stream_prefix_nth_last.
-          unfold Str_nth in Hs2. simpl in Hs2.
-          by inversion Hs2; subst.
-        + specialize (stream_prefix_length (Streams.map destination tr) (S m)); intro Hpref_len.
-          rewrite Hpref_len.
-          lia.
-      }
+    apply finite_valid_trace_from_add_last; [by apply valid_trace_segment; [| lia |] |].
+    destruct tr as [s tr | s tr]; simpl.
+    + simpl in Hs1, Hs2.
+      unfold list_segment.
+      rewrite finite_trace_last_suffix.
+      by apply finite_trace_last_prefix.
+      apply finite_trace_nth_length in Hs2.
+      rewrite list_prefix_length; lia.
+    + unfold stream_segment.
+      rewrite unlock_finite_trace_last.
+      rewrite list_suffix_map, stream_prefix_map.
+      simpl in Hs2.
+      rewrite list_suffix_last.
+      * symmetry. rewrite stream_prefix_nth_last.
+        unfold Str_nth in Hs2. simpl in Hs2.
+        by inversion Hs2; subst.
+      * specialize (stream_prefix_length (Streams.map destination tr) (S m)); intro Hpref_len.
+        rewrite Hpref_len.
+        lia.
 Qed.
 (* end hide *)
 

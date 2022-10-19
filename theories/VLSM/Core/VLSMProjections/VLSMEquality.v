@@ -290,10 +290,10 @@ Proof.
   apply VLSM_eq_incl_iff; split; cbn;
     [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
   apply basic_VLSM_incl.
-  + by intro; intros **.
-  + by intros l s m Hv _ _; eapply Hvalidating.
-  + by intros l s om (_ & _ & ?).
-  + by intros l s om s' om' [_ Ht].
+  - by intro; intros **.
+  - by intros l s m Hv _ _; eapply Hvalidating.
+  - by intros l s om (_ & _ & ?).
+  - by intros l s om s' om' [_ Ht].
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False

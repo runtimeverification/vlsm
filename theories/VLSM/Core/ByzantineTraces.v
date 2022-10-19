@@ -54,16 +54,9 @@ Lemma byzantine_pre_loaded_with_all_messages
     (Hbyz : byzantine_trace_prop tr)
     : valid_trace_prop PreLoaded tr.
 Proof.
-    destruct Hbyz as [M' Htr].
-    simpl in Htr.
-    apply
-        (proj_pre_loaded_with_all_messages_incl
-            (binary_IM M M')
-            (free_constraint _)
-            first
-            tr
-            Htr
-        ).
+  destruct Hbyz as [M' Htr].
+  simpl in Htr.
+  apply (proj_pre_loaded_with_all_messages_incl (binary_IM M M') (free_constraint _) first tr Htr).
 Qed.
 
 (** ** An alternative definition
@@ -252,9 +245,9 @@ Proof.
     cut (input_valid_transition Alt (existT first l) (lifted_alt_state s,om0) (lifted_alt_state s', om'))
       ;[apply input_valid_transition_outputs_valid_state_message|].
     split.
-    * split_and!; [done ..|].
+    + split_and!; [done ..|].
       by split; [cbn; apply Ht|].
-    * simpl.
+    + simpl.
       replace (lifted_alt_state s first) with s
         by (unfold lifted_alt_state,lift_to_composite_state'; state_update_simpl; done).
       apply proj2 in Ht.
@@ -287,9 +280,9 @@ Lemma pre_loaded_with_all_messages_alt_eq
     : VLSM_eq PreLoaded Alt1
     .
 Proof.
-    split.
-    - apply pre_loaded_with_all_messages_alt_incl.
-    - apply alt_pre_loaded_with_all_messages_incl.
+  split.
+  - apply pre_loaded_with_all_messages_alt_incl.
+  - apply alt_pre_loaded_with_all_messages_incl.
 Qed.
 
 End sec_pre_loaded_with_all_messages_byzantine_alt.
@@ -302,9 +295,9 @@ Lemma byzantine_alt_byzantine_iff
     (tr : vTrace M)
     : alternate_byzantine_trace_prop tr <-> byzantine_trace_prop tr.
 Proof.
-    split; intros.
-    - by apply byzantine_alt_byzantine.
-    - by apply pre_loaded_with_all_messages_alt_incl, byzantine_pre_loaded_with_all_messages.
+  split; intros.
+  - by apply byzantine_alt_byzantine.
+  - by apply pre_loaded_with_all_messages_alt_incl, byzantine_pre_loaded_with_all_messages.
 Qed.
 
 End sec_byzantine_traces.
@@ -325,12 +318,12 @@ Lemma validator_component_byzantine_fault_tolerance
     : forall tr, byzantine_trace_prop (IM i) tr ->
         valid_trace_prop (pre_composite_vlsm_induced_projection_validator IM constraint i) tr.
 Proof.
-    intros tr Htr.
-    apply
-        (VLSM_incl_valid_trace
-            (pre_loaded_with_all_messages_validator_component_proj_incl _ _ _ Hvalidator)).
-    revert Htr.
-    simpl. apply byzantine_pre_loaded_with_all_messages.
+  intros tr Htr.
+  apply
+      (VLSM_incl_valid_trace
+          (pre_loaded_with_all_messages_validator_component_proj_incl _ _ _ Hvalidator)).
+  revert Htr.
+  simpl. apply byzantine_pre_loaded_with_all_messages.
 Qed.
 
 (** ** Byzantine fault tolerance for a composition of validators
