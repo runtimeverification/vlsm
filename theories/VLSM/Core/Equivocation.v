@@ -338,8 +338,7 @@ Lemma selected_message_exists_in_all_traces_initial_state
   : ~ selected_message_exists_in_all_preloaded_traces message_selector s m.
 Proof.
   intro Hselected.
-  assert (Hps : valid_state_prop pre_vlsm s)
-    by (apply initial_state_is_valid; done).
+  assert (Hps : valid_state_prop pre_vlsm s) by (apply initial_state_is_valid; done).
   assert (Htr : finite_valid_trace_init_to pre_vlsm s s []) by (split; [constructor |]; done).
   specialize (Hselected s [] Htr).
   unfold trace_has_message in Hselected.

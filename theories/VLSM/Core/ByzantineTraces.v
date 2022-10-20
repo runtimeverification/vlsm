@@ -54,9 +54,8 @@ Lemma byzantine_pre_loaded_with_all_messages
     (Hbyz : byzantine_trace_prop tr)
     : valid_trace_prop PreLoaded tr.
 Proof.
-  destruct Hbyz as [M' Htr].
-  simpl in Htr.
-  apply (proj_pre_loaded_with_all_messages_incl (binary_IM M M') (free_constraint _) first tr Htr).
+  destruct Hbyz as [M' Htr]; simpl in Htr.
+  by apply (proj_pre_loaded_with_all_messages_incl _ _ _ _ Htr).
 Qed.
 
 (** ** An alternative definition

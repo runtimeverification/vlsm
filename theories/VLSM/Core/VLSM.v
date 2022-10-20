@@ -1743,8 +1743,8 @@ Proof.
       unfold s' in Htr'.
       by rewrite finite_trace_last_cons in Htr'.
     + inversion Htr. apply Ht.
-  - inversion 1. subst. specialize (IHls s1). simpl in IHls. specialize (IHls ls'). apply IHls in Htl.
-    destruct Htl. split.
+  - inversion 1; subst.
+    apply (IHls s1 ls') in Htl as []; split.
     + by constructor.
     + by unfold s'; rewrite finite_trace_last_cons.
 Qed.
