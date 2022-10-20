@@ -767,11 +767,13 @@ End sec_sub_composition.
 #[export] Hint Rewrite @lift_sub_state_to_neq_state_update using done : state_update.
 
 Arguments sub_IM_state_pi {_ _ _ _ _ _} _ _ _.
-(* make initial arguments of lift_sub_transition not maximally inserted,
-   so tactics like rapply lift_sub_transition
-   do not try to guess those arguments before looking at the goal,
-   and we don't have to always write rapply @lift_sub_transition.
- *)
+
+(*
+  Make initial arguments of lift_sub_transition not maximally inserted,
+  so tactics like rapply lift_sub_transition
+  do not try to guess those arguments before looking at the goal,
+  and we don't have to always write rapply @lift_sub_transition.
+*)
 Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%function_scope
   sub_index_list%list_scope l s om s' om' Ht.
 
@@ -1281,9 +1283,8 @@ Proof.
   revert Hs; apply preloaded_valid_state_projection with (j := dexist (A v) Hv).
 Qed.
 
-(** ** No-equivocation results for sub-composition *)
+(** ** No-equivocation results for sub-composition
 
-(**
   Constraining (only) a subset of the nodes of a composition to not message-
   equivocate.
 *)
@@ -1378,6 +1379,7 @@ Qed.
 End sec_sub_composition_sender.
 
 Section sec_sub_composition_all.
+
 (** ** A subcomposition with all the components
 
   If taking the subset of indices used for the sub-composition to be the entire
@@ -1839,8 +1841,10 @@ Definition update_IM
   | left i_in => replacement_IM (@dexist _ (sub_index_prop selection) _ i i_in)
   | _ => IM i
   end.
-(* TODO(bmmoore): use the definition above to provide an alternate definition
-for fixed-set equivocation model, similar to the one for byzantine traces.
+
+(*
+  TODO(bmmoore): use the definition above to provide an alternate definition
+  for fixed-set equivocation model, similar to the one for byzantine traces.
 *)
 
 Context

@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From VLSM.Core Require Import VLSM VLSMProjections Composition (* Equivocation MessageDependencies*).
+From VLSM.Core Require Import VLSM VLSMProjections Composition.
 
 (** * VLSM Projection Validators
 
@@ -8,7 +8,7 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition (* Equivocation M
   and <state_project>> [VLSM_projection] mappings from <<X>> to <<Y>>.
 
   The Transition Input Validation property validates an input corresponding to
-  a projection by ensuring that that input can be "lifted" to the original vlsm.
+  a projection by ensuring that that input can be "lifted" to the original VLSM.
 *)
 
 Section sec_input_validation_definitions.
@@ -136,6 +136,7 @@ End sec_projection_validator.
   and [weak_projection_transition_consistency_Some]) properties are satisfied,
   then the induced VLSM is a [VLSM_projection] of the source one.
 *)
+
 Section sec_projection_induced_validator.
 
 Section sec_projection_induced_validator_pre_definitions.
@@ -787,7 +788,7 @@ Context
 
 (**
   The [composite_vlsm_induced_projection_valid]ity is defined as the projection of
-  the [input_valid]ity of <<X>>:
+  the [input_valid]ity of <<X>>.
 *)
 Definition composite_vlsm_induced_projection_valid
   (li : vlabel (IM i))

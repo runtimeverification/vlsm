@@ -48,9 +48,7 @@ Section sec_alternative_definition_of_validity.
   The above constructors of [MO_msg_valid] may not be the most readable,
   so we will provide an alternative version of this inductive
   definition (called [MO_msg_valid_alt]) and prove them equivalent.
-*)
 
-(**
   If [MO_msg_valid_alt_sends] holds for <<m>>, then every possible suffix of
   observations from <<m>> is the same as the observations from a message <<m'>>
   which was the next message that was sent after the suffix. Also, the addresses
@@ -844,9 +842,11 @@ Definition lift_to_MO_trace
 #[local] Hint Unfold lift_to_MO_state : state_update.
 #[local] Hint Unfold lift_to_MO_trace : state_update.
 
-(** We can also lift properties from MO components to the MO protocol, among
-    them [valid_state_prop], [valid_message_prop], [input_valid_transition]
-    and the various kinds of traces. *)
+(**
+  We can also lift properties from MO components to the MO protocol, among
+  them [valid_state_prop], [valid_message_prop], [input_valid_transition]
+  and the various kinds of traces.
+*)
 
 Lemma lift_to_MO :
   forall (us : MO_state) (Hus : valid_state_prop MO us) (i : index),

@@ -185,7 +185,7 @@ End sec_annotated_vlsm_projections.
 
 Section sec_composite_annotated_vlsm_projections.
 
-(** ** Specializing [projection_validator_prop]erties to annotated compositions.  *)
+(** ** Specializing [projection_validator_prop]erties to annotated compositions. *)
 
 Context
   {message : Type}

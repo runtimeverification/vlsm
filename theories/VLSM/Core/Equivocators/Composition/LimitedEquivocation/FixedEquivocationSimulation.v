@@ -81,7 +81,7 @@ Qed.
 (**
   This is the constraint counterpart of the [weak_full_projection_valid_preservation]
   property (for the [equivocators_fixed_equivocations_constraint]).
- *)
+*)
 Lemma fixed_equivocating_non_equivocating_constraint_lifting
   eqv_state_s
   (Heqv_state_s : valid_state_prop XE eqv_state_s)
@@ -212,11 +212,12 @@ Proof.
       (VLSM_projection_has_been_sent_reflect
         (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM)
         eqv_state_s Hstate_valid im) as Hsent.
-  - (*  If <<im>> can be emitted by the free composition of equivocating nodes
-        seeded with the messages [sent_by_non_equivocating] in <<s>>, then we can
-        use Lemma [seeded_equivocators_finite_valid_trace_init_to_rev] to
-        simulate that trace in the equivocator-composition of equivocating
-        nodes with no-messages equivocation.
+  - (*
+      If <<im>> can be emitted by the free composition of equivocating nodes
+      seeded with the messages [sent_by_non_equivocating] in <<s>>, then we can
+      use Lemma [seeded_equivocators_finite_valid_trace_init_to_rev] to
+      simulate that trace in the equivocator-composition of equivocating
+      nodes with no-messages equivocation.
     *)
     apply can_emit_has_trace in Hemitted
         as [im_is [im_tr [im_item [Him_tr Him_item]]]].
@@ -229,13 +230,14 @@ Proof.
       as (im_eis & Him_eis & im_es & Him_es & im_etr & Him_etr_pr & Him_etr & Him_output).
     rewrite finite_trace_last_output_is_last in Him_output.
     rewrite Him_item in Him_output.
-    (*  We will use Lemma
-        [sub_preloaded_replayed_trace_from_valid_equivocating] to replay
-        the trace obtained above on top of the given state, thus ensuring that
-        state-equivocation is only introduced for the equivocating nodes.
-        We will used Lemmas [fixed_equivocating_messages_sent_by_non_equivocating_are_valid]
-        and [fixed_equivocating_non_equivocating_constraint_lifting] to satisfy
-        the hypotheses of the replay lemma.
+    (*
+      We will use Lemma
+      [sub_preloaded_replayed_trace_from_valid_equivocating] to replay
+      the trace obtained above on top of the given state, thus ensuring that
+      state-equivocation is only introduced for the equivocating nodes.
+      We will used Lemmas [fixed_equivocating_messages_sent_by_non_equivocating_are_valid]
+      and [fixed_equivocating_non_equivocating_constraint_lifting] to satisfy
+      the hypotheses of the replay lemma.
     *)
     specialize
       (sub_preloaded_replayed_trace_from_valid_equivocating
@@ -279,9 +281,10 @@ Proof.
     specialize (Hreplay _ _ Him_etr).
     apply valid_trace_add_default_last in Hreplay.
     eexists _,_; split; [done |].
-    (*  Having verified the validity part of the conclusion, now we only
-        need to show two projection properties, and the no message-equivocation
-        constraint for which we employ Lemma [fixed_equivocation_replay_has_message].
+    (*
+      Having verified the validity part of the conclusion, now we only
+      need to show two projection properties, and the no message-equivocation
+      constraint for which we employ Lemma [fixed_equivocation_replay_has_message].
     *)
     repeat split.
     + apply
@@ -340,8 +343,8 @@ Lemma fixed_equivocators_finite_valid_trace_init_to_rev
       finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   (*
-  Since the base result works with pre-loaded vlsms, some massaging of the
-  hypothesis and conclusion is done to fit the applied lemma.
+    Since the base result works with pre-loaded vlsms, some massaging of the
+    hypothesis and conclusion is done to fit the applied lemma.
   *)
   assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   { intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].

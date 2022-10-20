@@ -47,13 +47,14 @@ Class VLSMMachine {message : Type} (vtype : VLSMType message) :=
   ; transition : label -> state * option message -> state * option message
   ; valid : label -> state * option message -> Prop
   }.
+
 (* The & is a "bidirectionality hint", so that typechecking
    a VLSMMachine record definition will try to use the expected
    result type to determine [vtype] before typechecking the fields.
    Without this, the types of the values given for the fields would
    have to be written so they only mention the state and label type
    in ways that can be matched with [@state _ ?vtype] and [@label _ ?vtype].
- *)
+*)
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
 Definition option_initial_message_prop
@@ -81,9 +82,10 @@ Definition decidable_initial_messages_prop
   For technical reasons, e.g., the need to easily talk about VLSMs over
   the same set of messages and about VLSMs of the same type (over the same
   set of messages, labels and states), the VLSM definition is split into
-  two parts, [VLSMType] and [VLSMMachine], which are
-  packaged together by the following definition.
+  two parts, [VLSMType] and [VLSMMachine], which are packaged together by
+  the following definition.
 *)
+
 Record VLSM (message : Type) : Type :=
   mk_vlsm { vtype : VLSMType message; vmachine : VLSMMachine vtype }.
 Arguments vtype [message] v.
@@ -515,7 +517,7 @@ Qed.
 
 (**
   As often times we work with optional valid messages, it is convenient
-  to define a valid message property for optional messages:
+  to define a valid message property for optional messages.
 *)
 
 Definition option_valid_message_prop (om : option message) :=
@@ -626,11 +628,9 @@ Proof.
 Qed.
 
 (**
-
   The next couple of lemmas relate the two definitions above with
   pre-existing concepts.
-
- *)
+*)
 Lemma input_valid_transition_origin
       {l : label}
       {s s' : state}
@@ -829,7 +829,7 @@ Proof.
   by exists s.
 Qed.
 
-(** A characterization of valid messages in terms of [can_emit] *)
+(** A characterization of valid messages in terms of [can_emit]. *)
 
 Lemma emitted_messages_are_valid_iff
   (m : message)
@@ -881,7 +881,7 @@ Qed.
   [input_valid_transition], rather than than having everything exploded
   as [valid_state_message_prop] assumptions over witnesses <<_s>>
   and <<_om>>, and a spurious inductive assumption <<P _s>>.
- *)
+*)
 Lemma valid_state_prop_ind
   (P : state -> Prop)
   (IHinit : forall (s : state) (Hs : initial_state_prop s), P s)
@@ -923,9 +923,7 @@ Qed.
   Note that it is unnecessary to specify the source state of the transition,
   as it is implied by the preceding [transition_item] (or by the <<start>> state,
   if such an item doesn't exist).
-*)
 
-(**
   We will now split our groundwork for defining traces into the finite case and
   the infinite case.
 *)
@@ -982,9 +980,10 @@ Opaque finite_valid_trace.
 *)
 
 (**
-  This is a bit more useful than the small proof suggests,
+  [finite_valid_trace_empty] is a bit more useful than the small proof suggests,
   because applying it always leaves just one subgoal.
-  The tactical <<by split;[constructor;apply initial_state_is_valid|]>>
+
+  The tactical <<by split; [constructor; apply initial_state_is_valid |]>>
   only works if the premise is available in the context, which may
   require an <<assert>> and writing out the full VLSM and state expressions
   as part of the proof script.
@@ -1313,26 +1312,24 @@ Proof.
   eapply can_produce_from_valid_trace; [apply Htr | done].
 Qed.
 
-(* End Hide *)
+(* end hide *)
 
-(** ** Finite [valid_trace]s with a final state *)
+(** ** Finite [valid_trace]s with a final state
 
-(**
   It is often necessary to refer to know ending state of a [finite_valid_trace_from].
   This is either the [destination] of the [last] [transition_item] in the trace, or
   the starting state.
+
   To avoid repeating reasoning about [last], we define variants of
   [finite_valid_trace_from] and [finite_valid_trace]
   that include the final state, and give appropriate induction principles.
- *)
 
-(**
   The final state of a finite portion of a valid trace.
   This is defined over [finite_valid_trace_from] because
   an initial state is necessary in case <<tr>> is empty,
   and this allows the definition to have only one non-implicit
   parameter.
- *)
+*)
 
 Inductive finite_valid_trace_from_to : state -> state -> list transition_item -> Prop :=
 | finite_valid_trace_from_to_empty : forall (s : state)
@@ -1689,9 +1686,8 @@ Proof.
     apply (Hextend _ _ _ IHHtr1 Htr1 _ _ _ _ Houtput IHHtr2 Htr2 _ _ _ Hivt).
 Qed.
 
-(** *** Infinite protocol traces *)
+(** *** Infinite protocol traces
 
-(**
   We now define [infinite_valid_trace]s. The definitions
   resemble their finite counterparts, adapted to the technical
   necessities of defining infinite objects. Notably, <<steps>> is
@@ -1890,7 +1886,7 @@ Qed.
   simply than [valid_state_message_has_trace], because we don't need a
   disjunction because we are not making claims about [output]
   messages.
- *)
+*)
 Lemma valid_state_has_trace
       (s : state)
       (Hp : valid_state_prop s):
@@ -1937,8 +1933,8 @@ Proof.
 Qed.
 
 (**
-  Any trace with the 'finite_valid_trace_from' property can be completed
-  (to the left) to start in an initial stat
+  Any trace with the [finite_valid_trace_from] property can be completed
+  (to the left) to start in an initial state.
 *)
 Lemma finite_valid_trace_from_complete_left
   (s : state)
@@ -1959,8 +1955,8 @@ Proof.
 Qed.
 
 (**
-  Any trace with the 'finite_valid_trace_from_to' property can be completed
-  (to the left) to start in an initial stat
+  Any trace with the [finite_valid_trace_from_to] property can be completed
+  (to the left) to start in an initial state.
 *)
 Lemma finite_valid_trace_from_to_complete_left
   (s f : state)
@@ -1990,7 +1986,7 @@ Qed.
   there exists a finite (possibly empty) valid trace that begins
   with <<first>> and ends in <<second>>.
 
-  This relation is often used in stating safety and liveness properties
+  This relation is often used in stating safety and liveness properties.
 *)
 
 Definition in_futures
@@ -2391,14 +2387,17 @@ Definition complete_trace_prop (tr : Trace) : Prop
 
 (* begin hide *)
 
-(* Implicitly, the state itself must be in the trace, and minimally the last element of the trace *)
-(* Also implicitly, the trace leading up to the state is finite *)
-(* Defining equivocation on these trace definitions *)
+(*
+  Implicitly, the state itself must be in the trace, and minimally the last
+  element of the trace. Also implicitly, the trace leading up to the state
+  is finite.
 
-(* Section 7 :
-   A message m received by a valid state s with a transition label l in a
-   valid execution trace is called "an equivocation" if it wasn't produced
-   in that trace
+  Defining equivocation on these trace definitions
+
+  Section 7:
+  A message m received by a valid state s with a transition label l in a
+  valid execution trace is called "an equivocation" if it wasn't produced
+  in that trace
 *)
 
 (* 6.2.2 Equivocation-free as a composition constraint *)
@@ -2415,9 +2414,9 @@ End sec_VLSM.
 
 (**
   Make all arguments of [valid_state_prop_ind] explicit
-  so it will work with the <<induction using>> tactic.
-  (closing the section added <<{message}>> as an implicit argument)
- *)
+  so it will work with the <<induction using>> tactic
+  (closing the section added <<{message}>> as an implicit argument).
+*)
 Arguments valid_state_message_prop_ind : clear implicits.
 Arguments valid_state_prop_ind : clear implicits.
 Arguments finite_valid_trace_from_to_ind : clear implicits.

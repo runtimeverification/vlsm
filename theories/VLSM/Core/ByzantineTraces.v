@@ -46,7 +46,7 @@ Definition byzantine_trace_prop
 
 (**
   The first result says that all traces with the [byzantine_trace_prop]erty
-  for a VLSM <<M>> are traces of the [pre_loaded_with_all_messages_vlsm] associated to <<M>>:
+  for a VLSM <<M>> are traces of the [pre_loaded_with_all_messages_vlsm] associated to <<M>>.
 *)
 Lemma byzantine_pre_loaded_with_all_messages
     (PreLoaded := pre_loaded_with_all_messages_vlsm M)
@@ -85,9 +85,8 @@ Definition all_messages_type : VLSMType message :=
 
 (**
   The [emit_any_message_vlsm] signature further says that the (single) state is
-  initial and no messages are initial.
-  It takes as parameter a <<message>> to ensure that the sets of labels and
-  messages are both non-empty.
+  initial and no messages are initial. It takes as parameter a <<message>> to
+  ensure that the sets of labels and messages are both non-empty.
 *)
 
 Definition all_messages_s0 := exist (fun s: @state _ all_messages_type => True) tt I.
@@ -97,7 +96,7 @@ Instance all_messages_state_inh : Inhabited (sig  (fun s: @state _ all_messages_
 
 (**
   The [transition] function of the [emit_any_message_vlsm] generates the
-  message given as a label:
+  message given as a label.
 *)
 Definition all_messages_transition
     (l : @label _ all_messages_type)
@@ -105,7 +104,7 @@ Definition all_messages_transition
     : @state _ all_messages_type * option message
     := (tt, Some l).
 
-(** The [valid]ity predicate specifies that all transitions are valid *)
+(** The [valid]ity predicate specifies that all transitions are valid. *)
 Definition all_messages_valid
     (l : @label _ all_messages_type)
     (som : @state _ all_messages_type * option message)
@@ -128,7 +127,7 @@ Definition emit_any_message_vlsm
   Using the VLSM defined above, we can define the [alternate_byzantine_trace_prop]erty
   of a trace <<tr>> for the VLSM <<M>> as being a trace in the projection
   of the free composition between <<M>> and the [emit_any_message_vlsm],
-  to the component corresponding to <<M>>:
+  to the component corresponding to <<M>>.
 *)
 Definition alternate_byzantine_trace_prop
     (tr : vTrace M)
@@ -176,9 +175,7 @@ Context
   Let <<PreLoaded>> denote the [pre_loaded_with_all_messages_vlsm] of <<M>>, <<Alt>> denote
   the free composition of <<M>> with the [emit_any_message_vlsm],
   and <<Alt1>> denote the projection of <<Alt>> to the component of <<M>>.
-*)
 
-(**
   First, note that using the results above it is easy to prove the inclusion
   of <<Alt1>> into <<Preloaded>>.
 *)
@@ -285,7 +282,7 @@ Proof.
     + apply alt_option_valid_message.
 Qed.
 
-(** Hence, <<Preloaded>> and <<Alt1>> are actually trace-equal: *)
+(** Hence, <<Preloaded>> and <<Alt1>> are actually trace-equal. *)
 Lemma pre_loaded_with_all_messages_alt_eq
     : VLSM_eq PreLoaded Alt1
     .
@@ -299,7 +296,7 @@ End sec_pre_loaded_with_all_messages_byzantine_alt.
 
 (**
   Finally, we can conclude that the two definitions for byzantine traces are
-  equivalent:
+  equivalent.
 *)
 Lemma byzantine_alt_byzantine_iff
     (tr : vTrace M)
@@ -397,7 +394,7 @@ Qed.
 
 (**
   Finally, we can conclude that a composition of validator components can
-  resist any kind of external influence:
+  resist any kind of external influence.
 *)
 Lemma composite_validator_byzantine_traces_are_not_byzantine
     (tr : vTrace X)

@@ -251,7 +251,7 @@ Qed.
   refers to traces, and [valid_initial_state_message] means that
   [valid_state_message_prop] includes some pairs that do not appear in any
   transition.
- *)
+*)
 Lemma VLSM_incl_valid_state_message
   (Hmessage : strong_incl_initial_message_preservation MX MY)
   : forall s om, valid_state_message_prop X s om -> valid_state_message_prop Y s om.

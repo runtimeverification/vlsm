@@ -41,9 +41,11 @@ with Message : Type := MkMessage
   state : State;
 }.
 
-(** [State]s, [Observation]s and [Message]s are printed like ordinary inductive
-    types, using their constructor names, instead of as records with the
-    {| ... |} notation. *)
+(**
+  [State]s, [Observation]s and [Message]s are printed like ordinary inductive
+  types, using their constructor names, instead of as records with the
+  {| ... |} notation.
+*)
 #[export] Unset Printing Records.
 
 (** Two states are equal when they have equal observations and equal addresses. *)
@@ -243,8 +245,10 @@ Proof.
   by intros [].
 Qed.
 
-(** Adding a single observation is compatible with adding many observations at
-    once, in the obvious way. *)
+(**
+  Adding a single observation is compatible with adding many observations at
+  once, in the obvious way.
+*)
 Lemma addObservations_app :
   forall (s : State) (ob : Observation) (obs' : list Observation),
     s <+> ob <++> obs' = s <++> (obs' ++ [ob]).

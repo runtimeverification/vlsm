@@ -51,7 +51,7 @@ Definition pre_loaded_free_equivocating_vlsm_composition
 
 (**
   Given a composite state <<s>>, we define the composition of equivocators
-  preloaded with the messages directly observed in s.
+  preloaded with the messages directly observed in <<s>>.
 *)
 Definition equivocators_composition_for_directly_observed s
   := pre_loaded_free_equivocating_vlsm_composition (composite_has_been_directly_observed IM s).
@@ -107,6 +107,7 @@ Qed.
   the compositions constrained by the two [fixed_equivocation_constraint]s
   are trace-equivalent.
 *)
+
 Section sec_strong_fixed_equivocation.
 
 Definition sent_by_non_equivocating s m
@@ -140,7 +141,7 @@ Qed.
 
 (**
   Given a composite state <<s>>, we define the composition of equivocators
-  preloaded with the messages sent by non-equivocating nodes in s.
+  preloaded with the messages sent by non-equivocating nodes in <<s>>.
 *)
 Definition equivocators_composition_for_sent s
   := pre_loaded_free_equivocating_vlsm_composition (sent_by_non_equivocating s).
@@ -175,7 +176,7 @@ Proof.
 Qed.
 
 (**
-  [strong_fixed_equivocation_constraint]  is stronger than
+  [strong_fixed_equivocation_constraint] is stronger than
   the [fixed_equivocation_constraint].
 *)
 Lemma strong_fixed_equivocation_subsumption s m
@@ -210,6 +211,7 @@ End sec_strong_fixed_equivocation.
 End sec_fixed_equivocation_without_fullnode.
 
 (** ** Extending the set of nodes allowed to equivocate *)
+
 Section sec_fixed_equivocation_index_incl.
 
 Context
@@ -279,6 +281,7 @@ End sec_fixed_equivocation_index_incl.
   the obtained trace is valid for the composition of equivocators pre-loaded
   only with those messages sent by the non-equivocators in the original trace.
 *)
+
 Section sec_fixed_equivocator_sub_projection.
 
 Context
@@ -386,7 +389,7 @@ Context
     strong_fixed_equivocation IM equivocators base_s m)
   .
 
-(** See Lemma [fixed_input_has_strong_fixed_equivocation] below. *)
+(** See the lemma [fixed_input_has_strong_fixed_equivocation] below. *)
 #[local] Lemma fixed_input_has_strong_fixed_equivocation_helper
   l m
   (Hv : input_valid Fixed l (s, Some m))
@@ -436,7 +439,7 @@ Proof.
     by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
-(** See Lemma [fixed_output_has_strong_fixed_equivocation] below. *)
+(** See the lemma [fixed_output_has_strong_fixed_equivocation] below. *)
 #[local] Lemma fixed_output_has_strong_fixed_equivocation_helper
   (Hs_pr: valid_state_prop (equivocators_composition_for_sent IM equivocators base_s)
     (composite_state_sub_projection IM equivocators s))
@@ -634,7 +637,7 @@ Qed.
 End sec_fixed_equivocator_sub_projection.
 
 (**
-  [strong_fixed_equivocation_constraint] is not actually stronger
+  [strong_fixed_equivocation_constraint] is not actually stronger/
 
   In this section we show that the compositions of nodes using
   the [fixed_equivocation_constraint] and the [strong_fixed_equivocation]
@@ -733,8 +736,9 @@ End sec_Fixed_eq_StrongFixed.
   any valid trace over the composition of equivocators pre-loaded with the
   messages directly observed in <<s>> can be "lifted" to a Fixed valid trace in which
   the non-equivocators remain in their corresponding component-state given by <<s>>
-  (Lemma [EquivPreloadedBase_Fixed_weak_full_projection]).
+  (lemma [EquivPreloadedBase_Fixed_weak_full_projection]).
 *)
+
 Section sec_fixed_equivocator_lifting.
 
 Context

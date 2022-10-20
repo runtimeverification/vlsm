@@ -310,9 +310,7 @@ Qed.
 (**
   We next show that the [fixed_non_byzantine_projection] and
   [pre_loaded_fixed_non_byzantine_vlsm'] are [VLSM_eq]ual.
-*)
 
-(**
   The validity of [fixed_non_byzantine_projection] subsumes
   the constraint of [pre_loaded_fixed_non_byzantine_vlsm'].
 *)

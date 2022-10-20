@@ -4,9 +4,8 @@ From Coq Require Import Streams FunctionalExtensionality Eqdep_dec.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections.
 
-(** * VLSM Composition *)
+(** * VLSM Composition
 
-(**
   This module provides Coq definitions for composite VLSMs and their projections
   to components.
 *)
@@ -31,9 +30,6 @@ Section sec_composite_type.
   Let IM be a family of VLSMs indexed by <<index>>. Note that all
   [VLSM]s share the same type of <<message>>s.
 
-*)
-
-(**
   A [composite_state] is an indexed family of [state]s, yielding for each
   index <<n>> a [state] of [type] <<IT n>>, the [VLSMType] corresponding to
   machine <<n>>.
@@ -54,11 +50,12 @@ Definition composite_label
   : Type
   := sigT (fun n => vlabel (IM n)).
 
-(* Declaring this a "canonical structure" will make type checking
-   guess that a VLSMType should be composite_type instead of just
-   failing, if it has to compare composite_state with state or
-   vstate of an unsolved VLSMType or VLSM.
- *)
+(*
+  Declaring this a "canonical structure" will make type checking
+  guess that a VLSMType should be composite_type instead of just
+  failing, if it has to compare composite_state with state or
+  vstate of an unsolved VLSMType or VLSM.
+*)
 Canonical Structure composite_type : VLSMType message :=
   {| state := composite_state
    ; label := composite_label
@@ -68,7 +65,7 @@ Definition composite_transition_item : Type := @transition_item message composit
 
 (**
   A very useful operation on [composite_state]s is updating the state corresponding
-  to a component:
+  to a component.
 *)
 Definition state_update
            (s : composite_state)
@@ -152,6 +149,7 @@ Qed.
 End sec_composite_type.
 
 Section sec_composite_vlsm.
+
 (** ** Constrained VLSM composition
 
   Assume an non-empty <<index>> type and let <<IT>> be
@@ -244,9 +242,8 @@ Defined.
 (**
   The [transition] function for the [composite_vlsm] takes a transition in
   the component selected by the index in the given [composite_label]
-  with the contained label,
-  and returns the produced message together with the state updated on that
-  component:
+  with the contained label, and returns the produced message together with
+  the state updated on that component.
 *)
 Definition composite_transition
   (l : composite_label)
@@ -424,9 +421,9 @@ Proof.
 Qed.
 
 Section sec_constraint_subsumption.
-(** ** Constraint subsumption *)
 
-(**
+(** ** Constraint subsumption
+
   A <<constraint1>> is subsumed by <<constraint2>> if <<constraint1>> is stronger
   than <<constraint2>> for any input.
 *)
@@ -498,7 +495,7 @@ Context
   that <<constraint1>> is subsumed by <<constraint2>>.
 
   We will show that <<X1>> is trace-included into <<X2>> by applying
-  Lemma [basic_VLSM_incl]
+  the lemma [basic_VLSM_incl].
 *)
 
 (* begin hide *)
@@ -613,7 +610,8 @@ Proof.
   by apply preloaded_constraint_subsumption_incl.
 Qed.
 
-(* TODO(traiansf): There are many places where, because the lemma below
+(*
+  TODO(traiansf): There are many places where, because the lemma below
   was missing, it was either reproved locally, or multiple VLSM_incl_
   lemmas were used to achieve a similar result. It would be nice to
   find those usages and use this lemma instad.
@@ -725,7 +723,7 @@ Qed.
 
 (**
   Updating a composite initial state with a component initial state
-  yields a composite initial state
+  yields a composite initial state.
 *)
 Lemma composite_update_initial_state_with_initial
   (s : composite_state)
@@ -742,7 +740,7 @@ Qed.
 
 (**
   Updating a composite [valid_state] for the free composition with
-  a component initial state yields a composite [valid_state]
+  a component initial state yields a composite [valid_state].
 *)
 Lemma pre_composite_free_update_state_with_initial
   (P : message -> Prop)
@@ -882,7 +880,7 @@ Ltac state_update_simpl :=
   [composite_constrained_projection_vlsm] is defined
   that shares the states of [IM i] which is more
   precise.
- *)
+*)
 
 Lemma valid_state_project_preloaded_to_preloaded
       message `{EqDecision index} (IM : index -> VLSM message) constraint
@@ -1040,8 +1038,8 @@ Section sec_binary_free_composition.
   used in defining the [byzantine_trace_prop]erties.
 
   This instantiates the regular composition using the [bool] type as an <<index>>.
-
 *)
+
 Context
   {message : Type}
   (M1 M2 : VLSM message)
@@ -1076,7 +1074,6 @@ Section sec_composite_decidable_initial_message.
 
   Here we show that if the [initial_message_prop]erty is decidable for every
   component, then it is decidable for a finite composition as well.
-
 *)
 
 Context
@@ -1148,7 +1145,7 @@ Proof.
   itauto.
 Qed.
 
-(* The effect of the transition is also the same *)
+(* The effect of the transition is also the same. *)
 
 Lemma relevant_component_transition2
   (s s' : vstate Free)
@@ -1294,7 +1291,7 @@ Proof.
     right; left.
 Qed.
 
-(* Same as relevant_components_one but for multiple transitions *)
+(* Same as relevant_components_one but for multiple transitions. *)
 
 Lemma relevant_components
   (s s' : vstate Free)
@@ -1462,6 +1459,7 @@ End sec_empty_composition_properties.
   [VLSM_full_projection] between their compositions with subsumable constraints
   (and pre-loaded with the same set of messages).
 *)
+
 Section sec_same_IM_full_projection.
 
 Context

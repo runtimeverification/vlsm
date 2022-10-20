@@ -2,9 +2,8 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet StdppExtras.
 
-(** * Topological sorting implementation *)
+(** * Topological sorting implementation
 
-(**
   This module implements an algorithm producing a linear extension for a
   given partial order using an approach similar to that of Kahn's topological
   sorting algorithm.
@@ -20,9 +19,9 @@ From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet Stdp
 *)
 
 Section sec_min_predecessors.
-(** ** Finding an element with a minimal number of predecessors *)
 
-(**
+(** ** Finding an element with a minimal number of predecessors
+
   For this section we will fix a list <<l>> and count the predecessors
   occurring in that list.
 *)
@@ -44,7 +43,7 @@ Proof.
   apply Ha.
 Qed.
 
-(** Finds an element minimizing [count_predecessors] in <<min :: remainder>> *)
+(** Finds an element minimizing [count_predecessors] in <<min :: remainder>>. *)
 
 Fixpoint min_predecessors
   (remainder : list A)
@@ -194,7 +193,7 @@ Proof.
       apply Exists_exists in IHl0.
       destruct IHl0 as [x [Hin Hlen]].
       destruct (decide (precedes a x)).
-      * left. (* inversion H2; subst. *)
+      * left.
         specialize (Forall_forall P l0); intros [Hall _].
         specialize (Hall HPl0 x Hin).
         match goal with |- ?X = 0  => cut (X <= 0) end.
@@ -260,7 +259,7 @@ Qed.
 
 Section sec_topologically_sorted.
 
-(** ** Topologically sorted lists. Definition and properties. *)
+(** ** Definition and properties of topologically sorted lists *)
 
 Context {A} (precedes : relation A) `{!RelDecision precedes} (l : list A).
 
@@ -279,7 +278,7 @@ Definition topologically_sorted
 
 (**
   The following properties assume that <<precedes>> determines a [StrictOrder]
-  on the list
+  on the list.
 *)
 Context
   (P : A -> Prop)
@@ -439,6 +438,7 @@ Proof.
 Qed.
 
 Section sec_top_sort.
+
 (** ** The topological sorting algorithm *)
 
 Context {A} `{EqDecision A} (precedes : relation A) `{!RelDecision precedes}.
@@ -446,7 +446,7 @@ Context {A} `{EqDecision A} (precedes : relation A) `{!RelDecision precedes}.
 (**
   Iteratively extracts <<n>> elements with minimal number of predecessors
   from a given list.
- *)
+*)
 
 Fixpoint top_sort_n
   (n : nat)
@@ -559,7 +559,6 @@ Context
 (**
   Under the assumption that <<precedes>> induces a [StrictOrder] on the elements of
   <<l>>, [top_sort] <<l>> is [topologically_sorted].
-
 *)
 Lemma top_sort_sorted : topologically_sorted precedes (top_sort l).
 Proof.

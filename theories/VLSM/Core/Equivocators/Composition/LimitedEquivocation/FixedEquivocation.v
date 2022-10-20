@@ -188,9 +188,7 @@ Section sec_fixed_equivocation_with_fullnode.
   by choosing the admissible indices to be the fixed set of nodes allowed to
   equivocate, and then shows that this constraint is stronger than the
   [fixed_equivocation_constraint].
-*)
 
-(**
   Context setting the stage for, and instantiating the
   [full_node_condition_for_admissible_equivocators].
   It requires that the nodes have [has_been_sent] and [has_been_received]
@@ -239,9 +237,8 @@ Qed.
 
 (**
   If all nodes have the [cannot_resend_message_stepwise_prop]erty, then the
-  full node constraint is stronger than the [fixed_equivocation_constraint].
-
-  (by reduction to the result above)
+  full node constraint is stronger than the [fixed_equivocation_constraint]
+  (by reduction to the result above).
 *)
 Lemma fixed_equivocation_constraint_subsumption
   (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i))
@@ -1069,13 +1066,9 @@ Proof.
   ; [by left | right].
   clear l.
   unfold no_additional_equivocations in n.
-
   (* Phase I: exhibiting a [valid_trace] ending in tr s and sending m *)
-
   apply valid_state_has_trace in Hs.
   destruct Hs as [is [tr Htr]].
-  (* subst s *)
-
   assert (Htr'pre : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm FreeE) is s tr).
   { revert Htr. apply VLSM_incl_finite_valid_trace_init_to.
     apply VLSM_incl_trans with (machine FreeE).
@@ -1087,12 +1080,11 @@ Proof.
   { by apply valid_trace_last_pstate in Htr'pre. }
   apply proper_sent in Hm; [| done]. clear Hplst.
   specialize (Hm is tr Htr'pre).
-
-  (* Phase II (a): The restriction of tr to the equivocators allowed to
+  (*
+    Phase II (a): The restriction of tr to the equivocators allowed to
     state-equivocate is valid for the corresponding composition
     pre-loaded with the messages directly observed in the projection sX of s.
   *)
-
   specialize
     (finite_valid_trace_sub_projection (equivocator_IM IM) equivocating
       (equivocators_fixed_equivocations_constraint IM equivocating)
@@ -1111,15 +1103,12 @@ Proof.
 
   rewrite HeqsX in n.
   clear HeqsX.
-  (* Phase III (a):
-     Obtain a projection trXm of tr outputing m using a final_descriptor_m
-  *)
+  (* Phase III (a): Obtain a projection trXm of tr outputing m using a final_descriptor_m *)
 
   apply (equivocators_trace_project_output_reflecting_iff _ _ _ (proj1 (valid_trace_forget_last Htr'pre))) in Hm
     as (final_descriptors_m & initial_descriptors_m & trXm & Hfinal_descriptors_m & Hproject_trXm & Hex).
 
-  (* Identify the item outputing m in trXm an its corresponding item in tr.
-  *)
+  (* Identify the item outputing m in trXm an its corresponding item in tr. *)
 
   apply Exists_exists in Hex.
   destruct Hex as [output_itemX [Hin Houtput_select]].
@@ -1141,7 +1130,7 @@ Proof.
   inversion Hpr_item. subst output_itemX pre_descriptors. clear Hpr_item deqv'.
   simpl in Houtput_select.
 
-  (* show that that item must be specifying a transition for an equivocating node*)
+  (* show that that item must be specifying a transition for an equivocating node *)
 
   rewrite <- (valid_trace_get_last Htr) in Hdescriptors, n.
   specialize
@@ -1156,15 +1145,16 @@ Proof.
     right. left. left. }
   spec Hitem_equivocating Houtput_select.
 
-  (* Phase III (b):
-  Consider a projection trX' obtained using the final_descriptor_m as above,
-  but first restricting the nodes to just the equivocators allowed to equivocate.
-  We will show that we can use [seeded_equivocators_valid_trace_project]
-  and leverage the result from Phase II (a)
-  to derive that the resulting projection is valid.
+  (*
+    Phase III (b):
+    Consider a projection trX' obtained using the final_descriptor_m as above,
+    but first restricting the nodes to just the equivocators allowed to equivocate.
+    We will show that we can use [seeded_equivocators_valid_trace_project]
+    and leverage the result from Phase II (a)
+    to derive that the resulting projection is valid.
   *)
   unfold equivocators_composition_for_directly_observed, pre_loaded_free_equivocating_vlsm_composition.
-specialize
+  specialize
     (seeded_equivocators_valid_trace_project IM equivocating
       (composite_has_been_directly_observed IM sX)
       (composite_state_sub_projection (equivocator_IM IM) equivocating is)
@@ -1195,7 +1185,8 @@ specialize
     as [trX' [initial_descriptors' [_ [Hpr_tr' [_ HtrX]]]]].
   clear Htr'pre Hproject.
 
-  (* State that by restricting trXm to the subset of equivocating nodes
+  (*
+    State that by restricting trXm to the subset of equivocating nodes
     we obtain the same trX' trace.
   *)
 

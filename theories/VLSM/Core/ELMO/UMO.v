@@ -435,8 +435,10 @@ Proof.
   by eapply UMOComponent_valid_transition_size.
 Qed.
 
-(** A [finite_valid_trace] is either empty or its final state is bigger than
-    its initial state. *)
+(**
+  A [finite_valid_trace] is either empty or its final state is bigger than
+  its initial state.
+*)
 
 Lemma finite_valid_trace_from_to_size_Ri :
   forall (s1 s2 : State) (tr : list transition_item),
@@ -1038,9 +1040,8 @@ Proof.
     [apply UMO_reachable_Ui |..].
 Qed.
 
-(** ** Observability *)
+(** ** Observability
 
-(**
   Message [m1] is directly observable in message [m2] if [m1] is an element
   of the list of observation of [m2]'s state.
 
@@ -1088,8 +1089,10 @@ Proof.
   by unfold Message; rewrite Hsuf, map_app, elem_of_app; right.
 Qed.
 
-(** [m] is directly observable in state [s] extended with new observation [ob]
-    iff [m] is the message of [ob] or [m] is directly observable in [s]. *)
+(**
+  [m] is directly observable in state [s] extended with new observation [ob]
+  iff [m] is the message of [ob] or [m] is directly observable in [s].
+*)
 Lemma directly_observable_addObservation :
   forall (m : Message) (s : State) (ob : Observation),
     directly_observable m (MkMessage (s <+> ob))
@@ -1461,9 +1464,11 @@ Definition lift_to_UMO_trace
     pre_VLSM_full_projection_finite_trace_project
       _ _ (lift_to_UMO_label i) (lift_to_UMO_state us i) tr.
 
-(** We can also lift properties from UMO components to the UMO protocol, among
-    them [valid_state_prop], [valid_message_prop], [input_valid_transition]
-    and the various kinds of traces. *)
+(**
+  We can also lift properties from UMO components to the UMO protocol, among
+  them [valid_state_prop], [valid_message_prop], [input_valid_transition]
+  and the various kinds of traces.
+*)
 
 Lemma lift_to_UMO :
   forall (us : UMO_state) (Hus : valid_state_prop UMO us) (i : index),

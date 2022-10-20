@@ -9,7 +9,7 @@ Section sec_equivocator_vlsm_projections.
 (**
   Given an [equivocator_vlsm] trace ending in a state <<s>>, we can obtain a
   trace in the original vlsm leading to the <<si>>, the  <<i>>th internal
-  state in <<s>>, by extracting a path leading to si.
+  state in <<s>>, by extracting a path leading to <<si>>.
 
   This section is devoting to formalizing this projects studying its
   properties. In particular, we show that given a [valid_trace] for
@@ -63,8 +63,8 @@ Definition equivocator_vlsm_transition_item_project
   end.
 
 (**
-  Since equivocators always have machine 0, We can always project a 'valid'
-  equivocator 'transition item' to component 0.
+  Since equivocators always have machine 0, We can always project a [valid]
+  equivocator [transition item] to component 0.
 *)
 Lemma equivocators_vlsm_transition_item_project_zero_descriptor
   (item : vtransition_item equivocator_vlsm)
@@ -173,9 +173,9 @@ Proof.
 Qed.
 
 (**
-  If the 'destination' of a 'valid' equivocator 'transition_item' is singleton,
+  If the [destination] of a [valid] equivocator [transition_item] is singleton,
   then by projecting the item to component 0 we actually obtain a
-  'transition_item' for the original machine.
+  [transition_item] for the original machine.
 *)
 Lemma no_equivocating_equivocator_transition_item_project
   (item : vtransition_item equivocator_vlsm)
@@ -534,7 +534,7 @@ Proof.
   - by exists []; exists tr; cbn; rewrite Hprefix.
 Qed.
 
-(** [equivocator_vlsm_trace_project] acts like a morphism w.r.t. concatenation *)
+(** [equivocator_vlsm_trace_project] acts like a morphism w.r.t. concatenation. *)
 Lemma equivocator_vlsm_trace_project_app
   (bprefix bsuffix : list (vtransition_item equivocator_vlsm))
   (dlast dstart : MachineDescriptor)
@@ -569,7 +569,7 @@ Qed.
 
 (**
   [equivocator_vlsm_trace_project] acts like a morphism w.r.t. concatenation
-  (converse)
+  (converse).
 *)
 Lemma equivocator_vlsm_trace_project_app_inv
   (bprefix bsuffix : list (vtransition_item equivocator_vlsm))
@@ -809,7 +809,7 @@ Qed.
 
 (**
   The projection of a segment of an [equivocator_vlsm] valid trace
-  is defined and a valid trace segment in the original vlsm.
+  is defined and a valid trace segment in the original VLSM.
 *)
 Lemma preloaded_with_equivocator_vlsm_trace_project_valid
   (seed : message -> Prop)
@@ -1030,7 +1030,7 @@ Proof.
     + by exists tr.
 Qed.
 
-(** An inversion lemma about projections of a valid trace *)
+(** An inversion lemma about projections of a valid trace. *)
 Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
   (is fs: state)
   (tr: list transition_item)

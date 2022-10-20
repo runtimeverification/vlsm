@@ -28,7 +28,6 @@ Context {message : Type}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   (seed : message -> Prop)
   (equivocating : list index)
-  (* abbreviations *)
   (equiv_index : Type := sub_index equivocating)
   (equivocator_descriptors := equivocator_descriptors IM)
   (equivocators_state_project := equivocators_state_project IM)
@@ -118,7 +117,7 @@ Proof.
   rewrite equivocator_state_append_size. lia.
 Qed.
 
-(** The plan item corresponding to an initial state equivocation *)
+(** The plan item corresponding to an initial state equivocation. *)
 Definition initial_new_machine_transition_item
   (is : composite_state sub_equivocator_IM)
   (eqv : equiv_index)
@@ -471,6 +470,7 @@ Proof.
 Qed.
 
 Section sec_pre_loaded_constrained_projection.
+
 (**
   By replaying a [valid_trace] on top of a [valid_state] we obtain a
   [valid_trace]. We derive this as a more general [VLSM_weak_full_projection]

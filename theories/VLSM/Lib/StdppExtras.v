@@ -164,8 +164,10 @@ Proof.
   - by apply existsb_Exists.
 Qed.
 
-(* Returns all elements X of l such that X does not compare less
-   than any other element w.r.t to the precedes relation *)
+(*
+  Returns all elements <<X>> of <<l>> such that <<X>> does not compare less
+  than any other element w.r.t to the precedes relation.
+*)
 
 Definition maximal_elements_list
   {A} (precedes: relation A) `{!RelDecision precedes} (l : list A)
@@ -341,7 +343,7 @@ Qed.
 
 (**
   If the <<n>>-th element of <<l>> is <<x>>, then we can decompose long enough
-  suffixes of <<l>> into <<x>> and a suffix shorter by 1. 
+  suffixes of <<l>> into <<x>> and a suffix shorter by 1.
 *)
 Lemma lastn_length_cons :
   forall {A : Type} (n : nat) (l : list A) (x : A),

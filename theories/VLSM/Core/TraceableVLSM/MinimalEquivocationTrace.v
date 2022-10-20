@@ -499,8 +499,9 @@ Qed.
 
 (**
   We would like to formalize the following idea:
-    If all possible transitions to the given state are send transitions, then
-    at least one of the sent messages must not have been previously observed.
+
+  If all possible transitions to the given state are send transitions, then
+  at least one of the sent messages must not have been previously observed.
 
   To do so, we will prove the following statement matching more closely the
   definition of [minimal_equivocation_choice]:
