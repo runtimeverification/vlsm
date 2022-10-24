@@ -24,10 +24,11 @@ Qed.
 
 (** ** Basic equivocation *)
 
-Class ReachableThreshold V `{Hm : Measurable V} :=
-  { threshold : {r | (r >= 0)%R}
-  ; reachable_threshold : exists (vs:list V), NoDup vs /\ (sum_weights vs > proj1_sig threshold)%R
-  }.
+Class ReachableThreshold V `{Hm : Measurable V} : Set :=
+{
+  threshold : {r | (r >= 0)%R};
+  reachable_threshold : exists (vs :list V), NoDup vs /\ (sum_weights vs > proj1_sig threshold)%R;
+}.
 
 (**
   Assuming a set of <<state>>s, and a set of <<validator>>s,
@@ -57,26 +58,20 @@ Class BasicEquivocation
   {measurable_V : Measurable validator}
   {reachable_threshold : ReachableThreshold validator}
   `{FinSet validator Cm}
-  :=
-  { is_equivocating (s : state) (v : validator) : Prop
-  ; is_equivocating_dec : RelDecision is_equivocating
+  : Type :=
+{
+  is_equivocating (s : state) (v : validator) : Prop;
+  is_equivocating_dec : RelDecision is_equivocating;
   (** retrieves a set containing all possible validators for a state *)
-  ; state_validators (s : state) : Cm
+  state_validators (s : state) : Cm;
   (** all validators which are equivocating in a given composite state *)
-  ; equivocating_validators
-      (s : state)
-      : Cm
-      := filter (fun v => is_equivocating s v) (state_validators s)
+  equivocating_validators (s : state) : Cm :=
+    filter (fun v => is_equivocating s v) (state_validators s);
   (** equivocation fault sum: the sum of the weights of equivocating validators *)
-  ; equivocation_fault
-      (s : state)
-      : R
-      :=
-      sum_weights (elements (equivocating_validators s))
-  ; not_heavy
-      (s : state)
-      := (equivocation_fault s <= proj1_sig threshold)%R
- }.
+  equivocation_fault (s : state) : R :=
+    sum_weights (elements (equivocating_validators s));
+  not_heavy (s : state) : Prop := (equivocation_fault s <= proj1_sig threshold)%R
+}.
 
 Lemma eq_equivocating_validators_equivocation_fault
    `{BasicEquivocation st validator Cm}
@@ -401,20 +396,20 @@ Definition has_not_been_received_prop : state_message_oracle -> state -> message
   [has_been_sent] and [has_not_been_sent].
 *)
 
-Class HasBeenSentCapability := {
-  has_been_sent: state_message_oracle;
+Class HasBeenSentCapability : Type :=
+{
+  has_been_sent : state_message_oracle;
   has_been_sent_dec :> RelDecision has_been_sent;
 
-  proper_sent:
+  proper_sent :
     forall (s : state)
            (Hs : valid_state_prop pre_vlsm s)
            (m : message),
            (has_been_sent_prop has_been_sent s m);
+  has_not_been_sent: state_message_oracle :=
+    fun (s : state) (m : message) => ~ has_been_sent s m;
 
-  has_not_been_sent: state_message_oracle
-    := fun (s : state) (m : message) => ~ has_been_sent s m;
-
-  proper_not_sent:
+  proper_not_sent :
     forall (s : state)
            (Hs : valid_state_prop pre_vlsm s)
            (m : message),
@@ -548,20 +543,21 @@ Proof.
   by apply not_iff_compat, (iff_trans proper_sent).
 Qed.
 
-Class HasBeenReceivedCapability := {
+Class HasBeenReceivedCapability : Type :=
+{
   has_been_received: state_message_oracle;
   has_been_received_dec :> RelDecision has_been_received;
 
-  proper_received:
+  proper_received :
     forall (s : state)
            (Hs : valid_state_prop pre_vlsm s)
            (m : message),
            (has_been_received_prop has_been_received s m);
 
-  has_not_been_received: state_message_oracle
-    := fun (s : state) (m : message) => ~ has_been_received s m;
+  has_not_been_received : state_message_oracle :=
+    fun (s : state) (m : message) => ~ has_been_received s m;
 
-  proper_not_received:
+  proper_not_received :
     forall (s : state)
            (Hs : valid_state_prop pre_vlsm s)
            (m : message),
@@ -1141,12 +1137,13 @@ Qed.
   or received during any trace leading to the given state.
 *)
 
-Class HasBeenDirectlyObservedCapability {message} (vlsm: VLSM message) :=
-  {
+Class HasBeenDirectlyObservedCapability {message} (vlsm : VLSM message) : Type :=
+{
   has_been_directly_observed: state_message_oracle vlsm;
   has_been_directly_observed_dec :> RelDecision has_been_directly_observed;
   has_been_directly_observed_stepwise_props: oracle_stepwise_props item_sends_or_receives has_been_directly_observed;
-  }.
+}.
+
 Arguments has_been_directly_observed {message} vlsm {_}.
 Arguments has_been_directly_observed_dec {message} vlsm {_}.
 Arguments has_been_directly_observed_stepwise_props {message} vlsm {_}.
@@ -1371,7 +1368,7 @@ Definition computable_messages_oracle
   (message_selector : message -> transition_item -> Prop) : Prop :=
     oracle_stepwise_props message_selector (fun s m => m ∈ oracle_set s).
 
-Class ComputableSentMessages `(vlsm : VLSM message) :=
+Class ComputableSentMessages `(vlsm : VLSM message) : Type :=
 {
   sent_messages_set : vstate vlsm -> list message;
   csm_computable_oracle :
@@ -1380,7 +1377,7 @@ Class ComputableSentMessages `(vlsm : VLSM message) :=
 
 Global Hint Mode ComputableSentMessages - ! : typeclass_instances.
 
-Class ComputableReceivedMessages `(vlsm : VLSM message) :=
+Class ComputableReceivedMessages `(vlsm : VLSM message) : Type :=
 {
   received_messages_set : vstate vlsm -> list message;
   crm_computable_oracle :

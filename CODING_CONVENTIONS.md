@@ -68,13 +68,15 @@ Section sec_ELMOComponent_lemmas.
 ### Type classes
 
 - CamelCase name
-- field declaration with C-style naming on separate line
+- field declaration with C-style naming on separate line, with 2 spaces of indentation
+- the `;` in the last field should not be omitted
 
 Example:
 ```coq
-Class TotalOrder {A} (R : relation A) : Prop := {
+Class TotalOrder {A} (R : relation A) : Prop :=
+{
   total_order_partial :> PartialOrder R;
-  total_order_trichotomy :> Trichotomy (strict R)
+  total_order_trichotomy :> Trichotomy (strict R);
 }.
 ```
 

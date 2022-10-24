@@ -20,10 +20,11 @@ From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
   easily shared by multiple VLSMs during composition.
 *)
 
-Class VLSMType (message : Type) :=
-  { state : Type
-  ; label : Type
-  }.
+Class VLSMType (message : Type) : Type :=
+{
+  state : Type;
+  label : Type;
+}.
 
 (** *** VLSM class definition
 
@@ -38,15 +39,16 @@ Class VLSMType (message : Type) :=
   and the [transition] function and [valid] predicate.
 *)
 
-Class VLSMMachine {message : Type} (vtype : VLSMType message) :=
-  { initial_state_prop : state -> Prop
-  ; initial_state := { s : state | initial_state_prop s }
-  ; s0 : Inhabited initial_state
-  ; initial_message_prop : message -> Prop
-  ; initial_message := { m : message | initial_message_prop m }
-  ; transition : label -> state * option message -> state * option message
-  ; valid : label -> state * option message -> Prop
-  }.
+Class VLSMMachine {message : Type} (vtype : VLSMType message) : Type :=
+{
+  initial_state_prop : state -> Prop;
+  initial_state := { s : state | initial_state_prop s };
+  s0 : Inhabited initial_state;
+  initial_message_prop : message -> Prop;
+  initial_message := { m : message | initial_message_prop m };
+  transition : label -> state * option message -> state * option message;
+  valid : label -> state * option message -> Prop;
+}.
 
 (* The & is a "bidirectionality hint", so that typechecking
    a VLSMMachine record definition will try to use the expected
@@ -2406,9 +2408,11 @@ Definition composition_constraint : Type :=
 
 (* Decidable VLSMs *)
 
-Class VLSM_vdecidable :=
-  { valid_decidable : forall l som, {valid l som} + {~valid l som}
-  }.
+Class VLSM_vdecidable : Type :=
+{
+  valid_decidable : forall l som, {valid l som} + {~valid l som}
+}.
+
 (* end hide *)
 End sec_VLSM.
 
@@ -2431,19 +2435,22 @@ Arguments extend_right_finite_trace_from [message] (X) [s1] [ts] (Ht12) [l3] [io
 Arguments extend_right_finite_trace_from_to [message] (X) [s1] [s2] [ts] (Ht12) [l3] [iom3] [s3] [oom3] (Hv23).
 
 Class TraceWithLast
-      (base_prop : forall {message} (X: VLSM message),
-      @state _ (@type _ X) -> list transition_item -> Prop)
-      (trace_prop : forall {message} (X: VLSM message),
-        state -> state -> list transition_item -> Prop) :=
-  {valid_trace_add_last: forall [msg] [X: VLSM msg] [s f tr],
-     base_prop X s tr -> finite_trace_last s tr = f -> trace_prop X s f tr;
-   valid_trace_get_last: forall [msg] [X: VLSM msg] [s f tr],
-     trace_prop X s f tr -> finite_trace_last s tr = f;
-   valid_trace_last_pstate: forall [msg] [X: VLSM msg] [s f tr],
-     trace_prop X s f tr -> valid_state_prop X f;
-   valid_trace_forget_last: forall [msg] [X: VLSM msg] [s f tr],
-     trace_prop X s f tr -> base_prop X s tr
-  }.
+  (base_prop : forall {message} (X : VLSM message),
+    @state _ (@type _ X) -> list transition_item -> Prop)
+  (trace_prop : forall {message} (X : VLSM message),
+    state -> state -> list transition_item -> Prop)
+  : Prop :=
+{
+  valid_trace_add_last : forall [msg] [X: VLSM msg] [s f tr],
+    base_prop X s tr -> finite_trace_last s tr = f -> trace_prop X s f tr;
+  valid_trace_get_last : forall [msg] [X: VLSM msg] [s f tr],
+    trace_prop X s f tr -> finite_trace_last s tr = f;
+  valid_trace_last_pstate : forall [msg] [X: VLSM msg] [s f tr],
+    trace_prop X s f tr -> valid_state_prop X f;
+  valid_trace_forget_last : forall [msg] [X: VLSM msg] [s f tr],
+    trace_prop X s f tr -> base_prop X s tr;
+}.
+
 #[global] Hint Mode TraceWithLast - ! : typeclass_instances.
 #[global] Hint Mode TraceWithLast ! - : typeclass_instances.
 
@@ -2472,12 +2479,15 @@ Defined.
      }.
 
 Class TraceWithStart
-     {message} {X : VLSM message}
-     (start : @state message (type X))
-     (trace_prop : list (transition_item (type X)) -> Prop) :=
- {valid_trace_first_pstate:
+  {message} {X : VLSM message}
+  (start : @state message (type X))
+  (trace_prop : list (transition_item (type X)) -> Prop)
+  : Prop :=
+{
+  valid_trace_first_pstate :
     forall [tr], trace_prop tr -> valid_state_prop X start
- }.
+}.
+
 #[global] Hint Mode TraceWithStart - - - ! : typeclass_instances.
 
 #[export] Instance trace_with_start_valid_trace_from message (X: VLSM message) s:
@@ -2823,16 +2833,16 @@ Proof. by firstorder. Qed.
 End sec_valid_transition_props.
 
 Class HistoryVLSM `(X : VLSM message) : Prop :=
-  {
-    not_ValidTransitionNext_initial :
-      forall s2, vinitial_state_prop X s2 ->
-      forall s1, ~ ValidTransitionNext X s1 s2;
-    unique_transition_to_state :
-      forall [s : vstate X],
-      forall [l1 s1 iom1 oom1], ValidTransition X l1 s1 iom1 s oom1 ->
-      forall [l2 s2 iom2 oom2], ValidTransition X l2 s2 iom2 s oom2 ->
-      l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2
-  }.
+{
+  not_ValidTransitionNext_initial :
+    forall s2, vinitial_state_prop X s2 ->
+    forall s1, ~ ValidTransitionNext X s1 s2;
+  unique_transition_to_state :
+    forall [s : vstate X],
+    forall [l1 s1 iom1 oom1], ValidTransition X l1 s1 iom1 s oom1 ->
+    forall [l2 s2 iom2 oom2], ValidTransition X l2 s2 iom2 s oom2 ->
+    l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2;
+}.
 
 #[global] Hint Mode HistoryVLSM - ! : typeclass_instances.
 

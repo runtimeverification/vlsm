@@ -62,14 +62,15 @@ Class MessageDependencies
   `{!HasBeenSentCapability X}
   `{!HasBeenReceivedCapability X}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
-  :=
-  { message_dependencies_are_necessary (m : message)
-      `(can_produce (pre_loaded_with_all_messages_vlsm X) s' m)
-      : message_dependencies_full_node_condition X message_dependencies s' m
-  ; message_dependencies_are_sufficient (m : message)
-      `(can_emit (pre_loaded_with_all_messages_vlsm X) m)
-      : can_emit (pre_loaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
-  }.
+  : Prop :=
+{
+  message_dependencies_are_necessary (m : message)
+    `(can_produce (pre_loaded_with_all_messages_vlsm X) s' m)
+    : message_dependencies_full_node_condition X message_dependencies s' m;
+  message_dependencies_are_sufficient (m : message)
+    `(can_emit (pre_loaded_with_all_messages_vlsm X) m)
+    : can_emit (pre_loaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
+}.
 
 (*
   Given the VLSM for which it's defined, the other arguments (message,
@@ -934,14 +935,15 @@ Context
 Class FullMessageDependencies
   (message_dependencies : message -> set message)
   (full_message_dependencies : message -> set message)
-  :=
-  { full_message_dependencies_happens_before
-      : forall dm m, dm ∈ full_message_dependencies m <-> msg_dep_happens_before message_dependencies dm m
-  ; full_message_dependencies_irreflexive
-      : forall m, m ∉ full_message_dependencies m
-  ; full_message_dependencies_nodups
-      : forall m, NoDup (full_message_dependencies m)
-  }.
+  : Prop :=
+{
+  full_message_dependencies_happens_before :
+    forall dm m, dm ∈ full_message_dependencies m <-> msg_dep_happens_before message_dependencies dm m;
+  full_message_dependencies_irreflexive :
+    forall m, m ∉ full_message_dependencies m;
+  full_message_dependencies_nodups :
+    forall m, NoDup (full_message_dependencies m);
+}.
 
 End sec_FullMessageDependencies.
 

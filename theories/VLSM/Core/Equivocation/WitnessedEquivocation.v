@@ -74,13 +74,13 @@ Qed.
   A composition of VLSMs has the witnessed equivocation capability if towards any
   valid states there exist a trace witnessing its equivocation.
 *)
-Class WitnessedEquivocationCapability
-  :=
-  { is_equivocating_tracewise_witness :
+Class WitnessedEquivocationCapability : Prop :=
+{
+  is_equivocating_tracewise_witness :
     forall s, valid_state_prop PreFree s ->
     exists is tr, finite_valid_trace_init_to PreFree is s tr /\
       trace_witnessing_equivocation_prop is tr
-  }.
+}.
 
 Section sec_witnessed_equivocation_properties.
 
