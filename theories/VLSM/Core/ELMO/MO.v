@@ -84,9 +84,9 @@ Definition MO_msg_valid_alt_recvs' (valid : Message -> Prop) (m : Message) : Pro
 *)
 Inductive MO_msg_valid_alt (P : Address -> Prop) (m : Message) : Prop :=
 {
-    P_adr_state : P (adr (state m));
-    MO_msg_valid_alt_sends' : MO_msg_valid_alt_sends m;
-    MO_msg_valid_alt_recvs'' : MO_msg_valid_alt_recvs' (MO_msg_valid_alt P) m;
+  P_adr_state : P (adr (state m));
+  MO_msg_valid_alt_sends' : MO_msg_valid_alt_sends m;
+  MO_msg_valid_alt_recvs'' : MO_msg_valid_alt_recvs' (MO_msg_valid_alt P) m;
 }.
 
 (**
