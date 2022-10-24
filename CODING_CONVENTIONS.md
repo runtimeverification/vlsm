@@ -96,18 +96,20 @@ Program Instance base_params (p : param) : BaseParams := {
 }.
 ```
 
-### Inductive types
+### Inductive and CoInductive types
 
 - C-style type name
 - CamelCase constructors
-- one space indentation for each constructor declaration
+- to avoid name clashes, constructor names can be prefixed with an abbreviation of the type name
+- no indentation in constructor declarations
+- the first `|` in constructor declarations should not be omitted
 
 Example:
 ```coq
 Inductive lv_event_type : Type :=
- | State
- | Sent
- | Received.
+| State
+| Sent
+| Received.
 ```
 
 ### Definitions

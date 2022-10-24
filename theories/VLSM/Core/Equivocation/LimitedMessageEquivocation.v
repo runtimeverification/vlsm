@@ -42,7 +42,7 @@ Context
   .
 
 Inductive LimitedEquivocationProp (s : composite_state IM) : Prop :=
-  limited_equivocation :
+| limited_equivocation :
     forall (vs : set validator)
       (Hnodup_vs : NoDup vs)
       (Heqv_vs : forall v, equivocating s v -> v ∈ vs)

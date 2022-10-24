@@ -7,11 +7,11 @@ From Coq Require Import Streams Classical.
 Set Implicit Arguments.
 
 Inductive Eventually [A:Type] (P: Stream A -> Prop) : Stream A -> Prop :=
-  | ehere : forall s, P s -> Eventually P s
-  | elater : forall s, Eventually P s -> forall a, Eventually P (Cons a s).
+| ehere : forall s, P s -> Eventually P s
+| elater : forall s, Eventually P s -> forall a, Eventually P (Cons a s).
 
 CoInductive Forever [A:Type] (P: Stream A -> Prop) : Stream A -> Prop :=
-  fcons : forall s, P s -> Forever P (tl s) -> Forever P s.
+| fcons : forall s, P s -> Forever P (tl s) -> Forever P s.
 
 Lemma fhere [A:Type] (P: Stream A -> Prop) : forall s, Forever P s -> P s.
 Proof.

@@ -63,8 +63,8 @@ match l, om with
 end.
 
 Inductive UMOComponentValid : Label -> State -> option Message -> Prop :=
- | OCV_Send    : forall st : State, UMOComponentValid Send st None
- | OCV_Receive : forall (st : State) (msg : Message), UMOComponentValid Receive st (Some msg).
+| OCV_Send    : forall st : State, UMOComponentValid Send st None
+| OCV_Receive : forall (st : State) (msg : Message), UMOComponentValid Receive st (Some msg).
 
 Ltac invert_UMOComponentValid :=
 repeat match goal with
