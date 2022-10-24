@@ -415,14 +415,14 @@ Lemma dsig_compare_reflexive
   {X} `{StrictlyComparable X} (P : X -> Prop) {Pdec : forall x, Decision (P x)}
   : CompareReflexive (dsig_compare P).
 Proof.
-  now intros x y; unfold dsig_compare; rewrite dsig_eq, compare_eq.
+  by intros x y; unfold dsig_compare; rewrite dsig_eq, compare_eq.
 Qed.
 
 Lemma dsig_compare_transitive
   {X} `{StrictlyComparable X} (P : X -> Prop) {Pdec : forall x, Decision (P x)}
   : CompareTransitive (dsig_compare P).
 Proof.
-  now intros x y z; unfold dsig_compare; apply compare_transitive.
+  by intros x y z; unfold dsig_compare; apply compare_transitive.
 Qed.
 
 Lemma CompareStrictOrder_dsig_compare
