@@ -390,7 +390,7 @@ Lemma sentMessages_addObservation :
 Proof.
   intros s ob.
   unfold sentMessages, sentMessages'; cbn.
-  now destruct (decide (isSend ob)).
+  by destruct (decide (isSend ob)).
 Qed.
 
 (**
@@ -429,7 +429,7 @@ Lemma receivedMessages_addObservation :
 Proof.
   intros s ob.
   unfold receivedMessages, receivedMessages'; cbn.
-  now destruct (decide (isReceive ob)).
+  by destruct (decide (isReceive ob)).
 Qed.
 
 Lemma elem_of_messages :
@@ -457,7 +457,7 @@ Qed.
 Lemma messages_addObservation :
   forall (s : State) (ob : Observation),
     messages (s <+> ob) = message ob :: messages s.
-Proof. easy. Qed.
+Proof. done. Qed.
 
 (**
   An address in [receivedAddresses (s <+> ob)] is either in
@@ -486,7 +486,7 @@ Lemma receivedAddresses_addObservation :
 Proof.
   intros s ob.
   unfold receivedAddresses; cbn.
-  now destruct (decide (isReceive ob)).
+  by destruct (decide (isReceive ob)).
 Qed.
 
 End sec_base_ELMO.
