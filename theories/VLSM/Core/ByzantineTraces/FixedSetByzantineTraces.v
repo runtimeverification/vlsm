@@ -102,12 +102,11 @@ Lemma fixed_byzantine_IM_preserves_channel_authentication
 Proof.
   unfold fixed_byzantine_IM, update_IM. simpl.
   intros i m Hm.
-  case_decide.
-  - destruct Hm as [(s0, om) [l [s1 [[_ [_ Hv]] Ht]]]].
-    cbn in Hv, Ht.
-    unfold signed_messages_valid, channel_authenticated_message in Hv.
-    by inversion Ht; subst.
-  - by apply can_emit_signed.
+  case_decide; [| by apply can_emit_signed].
+  destruct Hm as [(s0, om) [l [s1 [[_ [_ Hv]] Ht]]]].
+  cbn in Hv, Ht.
+  unfold signed_messages_valid, channel_authenticated_message in Hv.
+  by inversion Ht; subst.
 Qed.
 
 Definition fixed_byzantine_IM_sender_safety
@@ -328,20 +327,19 @@ Proof.
       fixed_byzantine_IM_no_initial_messages fixed_byzantine_IM_preserves_channel_authentication)
     in Hv as Hnoequiv.
   destruct om as [m|]; [| done].
-  destruct Hnoequiv as [Hsent|Hseeded].
-  - by left.
-  - right.
-    split; [done |].
-    apply induced_sub_projection_valid_projection in Hv
-      as [i [Hi [li [si Hv]]]].
-    exists i.
-    split; [done |].
-    revert li si Hv.
-    unfold fixed_byzantine_IM, update_IM. simpl.
-    apply set_diff_elim2 in Hi.
-    rewrite decide_False by done.
-    intros.
-    by exists li, si.
+  destruct Hnoequiv as [Hsent | Hseeded]; [by left |].
+  right.
+  split; [done |].
+  apply induced_sub_projection_valid_projection in Hv
+    as [i [Hi [li [si Hv]]]].
+  exists i.
+  split; [done |].
+  revert li si Hv.
+  unfold fixed_byzantine_IM, update_IM. simpl.
+  apply set_diff_elim2 in Hi.
+  rewrite decide_False by done.
+  intros.
+  by exists li, si.
 Qed.
 
 Lemma fixed_non_byzantine_pre_loaded_incl
@@ -372,25 +370,24 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_valid
 Proof.
   intros (sub_i, li) s om (HsX & HomX & Hv & Hc & _) HsY HomY.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
-  split.
-  - by apply lift_sub_valid.
-  - clear -Hsender_safety Hc HsX.
-    cbn; destruct om as [m |]; [| done].
-    destruct (sender m) as [v |] eqn: Hsender; [| done]; cbn.
-    case_decide as HAv; [| done].
-    cbn in Hc; destruct Hc as [Hsent | Hseeded].
-    + unfold lift_sub_state.
-      rewrite (lift_sub_state_to_eq _ _ _ _ _ HAv).
-      apply (sub_IM_has_been_sent_iff_by_sender fixed_byzantine_IM non_byzantine
-              A sender fixed_byzantine_IM_sender_safety)
-      ; [| done | done].
-      eapply (VLSM_incl_valid_state); [| done].
-      eapply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
-    + contradict HAv; clear -Hseeded Hsender.
-      destruct Hseeded as [(i & Hi & Hm) _].
-      unfold channel_authenticated_message in Hm.
-      rewrite Hsender in Hm.
-      by inversion Hm; subst.
+  split; [by apply lift_sub_valid |].
+  clear -Hsender_safety Hc HsX.
+  cbn; destruct om as [m |]; [| done].
+  destruct (sender m) as [v |] eqn: Hsender; [| done]; cbn.
+  case_decide as HAv; [| done].
+  cbn in Hc; destruct Hc as [Hsent | Hseeded].
+  - unfold lift_sub_state.
+    rewrite (lift_sub_state_to_eq _ _ _ _ _ HAv).
+    apply (sub_IM_has_been_sent_iff_by_sender fixed_byzantine_IM non_byzantine
+            A sender fixed_byzantine_IM_sender_safety)
+    ; [| done | done].
+    eapply (VLSM_incl_valid_state); [| done].
+    eapply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  - contradict HAv; clear -Hseeded Hsender.
+    destruct Hseeded as [(i & Hi & Hm) _].
+    unfold channel_authenticated_message in Hm.
+    rewrite Hsender in Hm.
+    by inversion Hm; subst.
 Qed.
 
 Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_initial_message

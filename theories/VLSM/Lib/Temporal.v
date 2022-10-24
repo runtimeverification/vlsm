@@ -103,6 +103,7 @@ Qed.
 
 Lemma refutation [A:Type] [R:A -> A-> Prop] (HR: well_founded R)
       [s]: ~ Forever (fun s => Eventually (fun x => R (hd x) (hd s)) s) s.
+Proof.
   remember (hd s) as x.
   revert s Heqx.
   specialize (HR x).

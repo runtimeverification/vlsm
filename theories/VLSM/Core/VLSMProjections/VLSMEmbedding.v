@@ -271,8 +271,8 @@ Lemma VLSM_full_projection_projection_type
   : VLSM_projection_type X (type Y) (Some ∘ label_project) state_project.
 Proof.
   split; intros.
-  - destruct_list_last trX trX' lstX Heq; [done |].
-    apply (pre_VLSM_full_projection_finite_trace_last _).
+  destruct_list_last trX trX' lstX Heq; [done |].
+  apply (pre_VLSM_full_projection_finite_trace_last _).
 Qed.
 
 Section sec_weak_projection_properties.
@@ -598,53 +598,53 @@ Proof.
   apply proj2 in Hv as Hom.
   apply proj1 in Hom.
   apply emitted_messages_are_valid_iff in Hom.
-  destruct Hom as [Him | Hemit].
-  - by apply (Hmessage _ _ _ Hv).
-  - apply can_emit_has_trace in Hemit as [is [tr [item [Htr Hm]]]].
-    destruct item. simpl in *. subst.
-    apply valid_trace_add_default_last in Htr.
-    rewrite finite_trace_last_is_last in Htr. simpl in Htr.
-    remember (tr ++ _) as tr'.
-    cut (option_valid_message_prop Y (Some m)); [done |].
-    exists (state_project destination).
-    clear Hv Hl lX lY.
-    revert tr l input Heqtr'.
-    generalize (Some m) as om.
-    induction Htr using finite_valid_trace_init_to_rev_strong_ind
-    ; intros; [destruct tr; simpl in *; congruence|].
-    apply app_inj_tail in Heqtr' as [Heqtr Heqitem].
-    subst tr0.
-    inversion Heqitem. subst l0 input oom. clear Heqitem.
-    assert (Hs : valid_state_prop Y (state_project s0)).
-    { destruct_list_last tr s_tr' s_item Heqtr.
-      - subst tr. destruct Htr1 as [Hs His].
-        inversion Hs. subst.
-        by apply Hstate.
-      - subst.
-        apply valid_trace_get_last in Htr1 as Hs0.
-        rewrite finite_trace_last_is_last in Hs0.
-        destruct s_item. simpl in Hs0. subst destination.
-        specialize (IHHtr1 _ _ _ _ eq_refl).
-        by eexists.
-    }
-    destruct Hs as [_om Hs].
-    assert (Hom : option_valid_message_prop Y iom).
-    { destruct iom as [im|]; [|apply option_valid_message_None].
-      unfold empty_initial_message_or_final_output in Heqiom.
-      destruct_list_last iom_tr iom_tr' iom_item Heqiom_tr.
-      - by apply (Hmessage _ _ _ (proj1 Ht)); [eexists |].
-      - subst.
-        apply valid_trace_get_last in Htr2 as Hs0.
-        rewrite finite_trace_last_is_last in Hs0.
-        destruct iom_item. simpl in *. subst.
-        specialize (IHHtr2 _ _ _ _ eq_refl).
-        by eexists.
-    }
-    destruct Hom as [_s Hom].
-    apply
-      (valid_generated_state_message Y _ _ Hs _ _ Hom (label_project l)).
-    + by apply Hvalid; [apply Ht | exists _om | exists _s].
-    + by apply Htransition.
+  destruct Hom as [Him | Hemit]; [by apply (Hmessage _ _ _ Hv) |].
+  apply can_emit_has_trace in Hemit as [is [tr [item [Htr Hm]]]].
+  destruct item. simpl in *. subst.
+  apply valid_trace_add_default_last in Htr.
+  rewrite finite_trace_last_is_last in Htr. simpl in Htr.
+  remember (tr ++ _) as tr'.
+  cut (option_valid_message_prop Y (Some m)); [done |].
+  exists (state_project destination).
+  clear Hv Hl lX lY.
+  revert tr l input Heqtr'.
+  generalize (Some m) as om.
+  induction Htr using finite_valid_trace_init_to_rev_strong_ind
+  ; intros; [destruct tr; simpl in *; congruence|].
+  apply app_inj_tail in Heqtr' as [Heqtr Heqitem].
+  subst tr0.
+  inversion Heqitem. subst l0 input oom. clear Heqitem.
+  assert (Hs : valid_state_prop Y (state_project s0)).
+  {
+    destruct_list_last tr s_tr' s_item Heqtr.
+    - subst tr. destruct Htr1 as [Hs His].
+      inversion Hs. subst.
+      by apply Hstate.
+    - subst.
+      apply valid_trace_get_last in Htr1 as Hs0.
+      rewrite finite_trace_last_is_last in Hs0.
+      destruct s_item. simpl in Hs0. subst destination.
+      specialize (IHHtr1 _ _ _ _ eq_refl).
+      by eexists.
+  }
+  destruct Hs as [_om Hs].
+  assert (Hom : option_valid_message_prop Y iom).
+  {
+    destruct iom as [im|]; [|apply option_valid_message_None].
+    unfold empty_initial_message_or_final_output in Heqiom.
+    destruct_list_last iom_tr iom_tr' iom_item Heqiom_tr.
+    - by apply (Hmessage _ _ _ (proj1 Ht)); [eexists |].
+    - subst.
+      apply valid_trace_get_last in Htr2 as Hs0.
+      rewrite finite_trace_last_is_last in Hs0.
+      destruct iom_item. simpl in *. subst.
+      specialize (IHHtr2 _ _ _ _ eq_refl).
+      by eexists.
+  }
+  destruct Hom as [_s Hom].
+  apply (valid_generated_state_message Y _ _ Hs _ _ Hom (label_project l)).
+  - by apply Hvalid; [apply Ht | exists _om | exists _s].
+  - by apply Htransition.
 Qed.
 
 Lemma basic_VLSM_weak_full_projection : VLSM_weak_full_projection X Y label_project state_project.

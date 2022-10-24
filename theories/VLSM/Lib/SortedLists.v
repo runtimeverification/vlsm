@@ -183,17 +183,16 @@ Lemma add_in_sorted_list_existing {A} {compare : A -> A -> comparison} `{Compare
   msg ∈ sigma ->
   add_in_sorted_list_fn compare msg sigma = sigma.
 Proof.
-  induction sigma; intros.
-  - inversion H1.
-  - rewrite elem_of_cons in H1.
-    destruct H1 as [Heq | Hin].
-    + by subst; simpl; rewrite compare_eq_refl.
-    + apply LocallySorted_tl in H0 as LS.
-      spec IHsigma LS Hin. simpl.
-      destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma. 1, 3: done.
-      apply (@LocallySorted_elem_of_lt _ _ compare_lt_strict_order msg a sigma H0) in Hin.
-      unfold compare_lt in Hin.
-      by rewrite compare_asymmetric, Hcmp in Hin; inversion Hin.
+  induction sigma; intros; [inversion H1 |].
+  rewrite elem_of_cons in H1.
+  destruct H1 as [Heq | Hin].
+  - by subst; simpl; rewrite compare_eq_refl.
+  - apply LocallySorted_tl in H0 as LS.
+    spec IHsigma LS Hin. simpl.
+    destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma. 1, 3: done.
+    apply (@LocallySorted_elem_of_lt _ _ compare_lt_strict_order msg a sigma H0) in Hin.
+    unfold compare_lt in Hin.
+    by rewrite compare_asymmetric, Hcmp in Hin; inversion Hin.
 Qed.
 
 Lemma set_eq_first_equal {A}  {lt : relation A} `{StrictOrder A lt} :
@@ -253,22 +252,23 @@ Lemma set_equality_predicate {A}  {lt : relation A} `{StrictOrder A lt} :
 Proof.
   intros s1 s2 LS1 LS2 . rename H into SO.
   assert (SO' := SO). destruct SO' as [IR TR].
-  split.
-  - generalize dependent s2. induction s1; destruct s2.
-    + by intros.
-    + intros. destruct H. exfalso. pose proof (H0 a).
-      rewrite elem_of_cons in H1.
-      specialize (H1 (or_introl (eq_refl a))).
-      inversion H1.
-    + intros. destruct H. exfalso. pose proof (H a).
-      rewrite elem_of_cons in H1.
-      specialize (H1 (or_introl (eq_refl a))).
-      inversion H1.
-    + intros. apply (set_eq_first_equal a a0 s1 s2 LS1 LS2) in H. destruct H; subst.
-      apply Sorted_LocallySorted_iff in LS1. apply Sorted_inv in LS1. destruct LS1 as [LS1 _]. apply Sorted_LocallySorted_iff in LS1.
-      apply Sorted_LocallySorted_iff in LS2. apply Sorted_inv in LS2. destruct LS2 as [LS2 _]. apply Sorted_LocallySorted_iff in LS2.
-      by apply (IHs1 LS1 s2 LS2) in H0; subst.
-  - intros. subst. easy.
+  split; [| by intros ->].
+  generalize dependent s2.
+  induction s1; destruct s2; intros; [done | | |].
+  - destruct H. exfalso. pose proof (H0 a).
+    rewrite elem_of_cons in H1.
+    specialize (H1 (or_introl (eq_refl a))).
+    inversion H1.
+  - destruct H. exfalso. pose proof (H a).
+    rewrite elem_of_cons in H1.
+    specialize (H1 (or_introl (eq_refl a))).
+    inversion H1.
+  - apply (set_eq_first_equal a a0 s1 s2 LS1 LS2) in H. destruct H; subst.
+    apply Sorted_LocallySorted_iff, Sorted_inv in LS1 as [LS1 _].
+    apply Sorted_LocallySorted_iff in LS1.
+    apply Sorted_LocallySorted_iff, Sorted_inv in LS2 as [LS2 _].
+    apply Sorted_LocallySorted_iff in LS2.
+    by apply (IHs1 LS1 s2 LS2) in H0; subst.
 Qed.
 
 (* [Transitive] isn't necessary but makes the proof simpler. *)
@@ -356,19 +356,17 @@ Proof.
   }
   clear Hin_y.
   rename H into Hin_y.
-  destruct Hin_y as [Hin_y|Hin_y].
-  - symmetry in Hin_y.
-    itauto.
-  - apply elem_of_app in Hin_y; destruct Hin_y.
-    * apply elem_of_list_split in H.
-      destruct H as [pref2 [suf2 Hconcat2]].
-      rewrite Hconcat2 in Hconcat1.
-      rewrite <- app_assoc in Hconcat1.
-      specialize (lsorted_pairwise_ordered l R Hsorted Htransitive y x pref2 suf2 suf1 Hconcat1).
-      by intros; right; right.
-    * apply elem_of_list_split in H.
-      destruct H as [pref2 [suf2 Hconcat2]].
-      rewrite Hconcat2 in Hconcat1.
-      specialize (lsorted_pairwise_ordered l R Hsorted Htransitive x y pref1 pref2 suf2 Hconcat1).
-      by intros; right; left.
+  destruct Hin_y as [Hin_y | Hin_y]; [by left |].
+  apply elem_of_app in Hin_y; destruct Hin_y.
+  - apply elem_of_list_split in H.
+    destruct H as [pref2 [suf2 Hconcat2]].
+    rewrite Hconcat2 in Hconcat1.
+    rewrite <- app_assoc in Hconcat1.
+    specialize (lsorted_pairwise_ordered l R Hsorted Htransitive y x pref2 suf2 suf1 Hconcat1).
+    by intros; right; right.
+  - apply elem_of_list_split in H.
+    destruct H as [pref2 [suf2 Hconcat2]].
+    rewrite Hconcat2 in Hconcat1.
+    specialize (lsorted_pairwise_ordered l R Hsorted Htransitive x y pref1 pref2 suf2 Hconcat1).
+    by intros; right; left.
 Qed.

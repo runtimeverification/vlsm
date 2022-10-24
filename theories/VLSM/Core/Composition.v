@@ -716,9 +716,8 @@ Lemma can_emit_composite_free_lift
   (Htrj : can_emit (pre_loaded_vlsm (IM j) P) m)
   : can_emit (pre_loaded_vlsm free_composite_vlsm Q) m.
 Proof.
-  eapply VLSM_full_projection_can_emit.
-  - by apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
-  - done.
+  eapply VLSM_full_projection_can_emit; [| done].
+  by apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
 Qed.
 
 (**
@@ -940,15 +939,12 @@ Lemma input_valid_transition_preloaded_project_active
                          (s (projT1 l), im) (s' (projT1 l), om).
 Proof.
   intro Hptrans.
-  destruct Hptrans as [Hpvalid Htrans].
-  split.
-  - destruct Hpvalid as [Hproto_s [_ Hcvalid]].
-    split;[|split].
-    + revert Hproto_s.
-      apply valid_state_project_preloaded_to_preloaded.
-    + apply any_message_is_valid_in_preloaded.
-    + destruct l. apply Hcvalid.
-  - revert Htrans; rapply composite_transition_project_active.
+  destruct Hptrans as [[Hproto_s [_ Hcvalid]] Htrans].
+  split; [| by eapply composite_transition_project_active].
+  split; [| split].
+  - by eapply valid_state_project_preloaded_to_preloaded.
+  - by apply any_message_is_valid_in_preloaded.
+  - by destruct l; apply Hcvalid.
 Qed.
 
 Lemma input_valid_transition_project_active

@@ -415,8 +415,8 @@ Proof.
 move => p [a|a b tr0] tr1 h.
 - by left; exists tr1, a; inversion h.
 - case: tr1 h => [a0|a0 b0 tr1] h.
-  * by left; exists (Tnil a); exists a; inversion h.
-  * by right; exists tr0, tr1, a, b; inversion h.
+  + by left; exists (Tnil a); exists a; inversion h.
+  + by right; exists tr0, tr1, a, b; inversion h.
 Defined.
 
 Lemma followsT_setoidT : forall (p : trace -> Prop) (hp: forall tr0, p tr0 -> forall tr1, bisim tr0 tr1 -> p tr1),
@@ -938,7 +938,7 @@ move: tr1 tr0 h0 h1. cofix CIH. move => tr0 tr1 h0; invs h0 => h0.
   move: {H} tr tr0 tr1 H0 h0. cofix CIH2. move => tr0 tr1 tr2 h0; invs h0 => h0.
   + rewrite (followsT_hd h0).
     exact: followsT_nil _ (CIH _ _ H0 h0).
-  - invs h0.
+  + invs h0.
     exact: followsT_delay _ _ (CIH2 _ _ _ H H4).
 Qed.
 
