@@ -19,10 +19,11 @@ Context
   which would allow to transition from any given state
   (note that we don't address validity for now).
 *)
-Record plan_item :=
-  { label_a : label;
-    input_a : option message
-  }.
+Record plan_item : Type :=
+{
+  label_a : label;
+  input_a : option message;
+}.
 
 End sec_plans.
 

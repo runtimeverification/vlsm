@@ -110,19 +110,23 @@ Context
   composition. Note that in this case, the initial state of the trace not
   translated to an initial state but rather to a regular valid state.
 *)
-Record VLSM_weak_full_projection
-  :=
-  { weak_full_trace_project_preserves_valid_trace :
-      forall sX trX,
-        finite_valid_trace_from X sX trX -> finite_valid_trace_from Y (state_project sX) (pre_VLSM_full_projection_finite_trace_project _ _ label_project state_project trX)
-  }.
+Record VLSM_weak_full_projection : Prop :=
+{
+  weak_full_trace_project_preserves_valid_trace :
+    forall sX trX,
+      finite_valid_trace_from X sX trX ->
+      finite_valid_trace_from Y (state_project sX)
+        (pre_VLSM_full_projection_finite_trace_project _ _ label_project state_project trX);
+}.
 
-Record VLSM_full_projection
-  :=
-  { full_trace_project_preserves_valid_trace :
-      forall sX trX,
-        finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX) (pre_VLSM_full_projection_finite_trace_project _ _ label_project state_project trX)
-  }.
+Record VLSM_full_projection : Prop :=
+{
+  full_trace_project_preserves_valid_trace :
+    forall sX trX,
+      finite_valid_trace X sX trX ->
+      finite_valid_trace Y (state_project sX)
+        (pre_VLSM_full_projection_finite_trace_project _ _ label_project state_project trX);
+}.
 
 Definition weak_full_projection_valid_preservation : Prop :=
   forall (l : label) (s : state) (om : option message)

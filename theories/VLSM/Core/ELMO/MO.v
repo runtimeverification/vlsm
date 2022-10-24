@@ -1247,8 +1247,7 @@ Record local_equivocators (s : State) (i : Address) : Prop :=
   lceqv_adr2 : adr (state (message lceqv_ob2)) = i;
   lceqv_rec_obs1 : rec_obs s lceqv_ob1;
   lceqv_rec_obs2 : rec_obs s lceqv_ob2;
-  lceqv_incomparable :
-    incomparable (message lceqv_ob1) (message lceqv_ob2);
+  lceqv_incomparable : incomparable (message lceqv_ob1) (message lceqv_ob2);
 }.
 Set Warnings "cannot-define-projection".
 

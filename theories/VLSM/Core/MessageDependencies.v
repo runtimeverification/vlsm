@@ -682,7 +682,8 @@ Record CompositeObservedBeforeSendTransition
   cdobst_transition : input_valid_transition_item RFree s item;
   cdobst_output_m2 : output item = Some m2;
   cdobst_observed_m1 :
-    ObservedBeforeStateOrMessage (IM (projT1 (l item))) message_dependencies m1 (s (projT1 (l item))) (input item);
+    ObservedBeforeStateOrMessage (IM (projT1 (l item))) message_dependencies m1
+      (s (projT1 (l item))) (input item);
 }.
 
 Definition composite_observed_before_send (m1 m2 : message) : Prop :=

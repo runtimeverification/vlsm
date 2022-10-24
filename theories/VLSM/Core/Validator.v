@@ -36,7 +36,7 @@ Record InputValidation
 {
   tiv_label_project : label_project lX = Some lY;
   tiv_state_project : state_project sX = sY;
-  lifted_transition_input_valid : input_valid X lX (sX, om)
+  lifted_transition_input_valid : input_valid X lX (sX, om);
 }.
 
 Record TransitionValidation
@@ -52,8 +52,7 @@ Record TransitionValidation
   tv_tiv :> InputValidation lY sY om lX sX;
   tv_transition : vtransition X lX (sX, om) = (sX', om');
   tv_tiv_transition : input_valid_transition X lX (sX, om) (sX', om') :=
-    conj (lifted_transition_input_valid lY sY om lX sX tv_tiv)
-      tv_transition
+    conj (lifted_transition_input_valid lY sY om lX sX tv_tiv) tv_transition;
 }.
 
 End sec_input_validation_definitions.

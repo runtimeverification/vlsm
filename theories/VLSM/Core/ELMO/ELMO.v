@@ -1366,7 +1366,7 @@ Record global_equivocators_simple (s : composite_state ELMOComponent) (a : Addre
   ges_m : Message;
   ges_adr : adr (state ges_m) = a;
   ges_recv : composite_has_been_received ELMOComponent s ges_m;
-  ges_not_sent : not (composite_has_been_sent ELMOComponent s ges_m)
+  ges_not_sent : not (composite_has_been_sent ELMOComponent s ges_m);
 }.
 Set Warnings "cannot-define-projection".
 

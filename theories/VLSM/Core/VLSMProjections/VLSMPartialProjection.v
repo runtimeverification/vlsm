@@ -30,18 +30,20 @@ Section sec_VLSM_partial_projection.
 Record VLSM_partial_projection_type
   {message : Type}
   (X Y : VLSM message)
-  (partial_trace_project : vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y)))
-  :=
-  { partial_trace_project_extends_left :
-      forall sX trX sY trY,
-      partial_trace_project (sX, trX) = Some (sY, trY) ->
-      forall s'X preX,
-        finite_trace_last s'X preX = sX ->
-        finite_valid_trace_from X s'X (preX ++ trX) ->
-        exists s'Y preY,
-          partial_trace_project (s'X, preX ++ trX) = Some (s'Y, preY ++ trY) /\
-          finite_trace_last s'Y preY = sY
-  }.
+  (partial_trace_project :
+    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y)))
+  : Prop :=
+{
+  partial_trace_project_extends_left :
+    forall sX trX sY trY,
+    partial_trace_project (sX, trX) = Some (sY, trY) ->
+    forall s'X preX,
+      finite_trace_last s'X preX = sX ->
+      finite_valid_trace_from X s'X (preX ++ trX) ->
+      exists s'Y preY,
+        partial_trace_project (s'X, preX ++ trX) = Some (s'Y, preY ++ trY) /\
+        finite_trace_last s'Y preY = sY;
+}.
 
 (**
   We define two kinds of partial projection: [VLSM_weak_partial_projection]
@@ -54,26 +56,30 @@ Record VLSM_partial_projection_type
 Record VLSM_weak_partial_projection
   {message : Type}
   (X Y : VLSM message)
-  (partial_trace_project : vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y)))
-  :=
-  { weak_partial_projection_type :> VLSM_partial_projection_type X Y partial_trace_project
-  ; weak_partial_trace_project_preserves_valid_trace :
-      forall sX trX sY trY,
-        partial_trace_project (sX, trX) = Some (sY, trY) ->
-        finite_valid_trace_from X sX trX -> finite_valid_trace_from Y sY trY
-  }.
+  (partial_trace_project :
+    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y)))
+  : Prop :=
+{
+  weak_partial_projection_type :> VLSM_partial_projection_type X Y partial_trace_project;
+  weak_partial_trace_project_preserves_valid_trace :
+    forall sX trX sY trY,
+      partial_trace_project (sX, trX) = Some (sY, trY) ->
+      finite_valid_trace_from X sX trX -> finite_valid_trace_from Y sY trY;
+}.
 
 Record VLSM_partial_projection
   {message : Type}
   (X Y : VLSM message)
-  (partial_trace_project : vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y)))
-  :=
-  { partial_projection_type :> VLSM_partial_projection_type X Y partial_trace_project
-  ; partial_trace_project_preserves_valid_trace :
-      forall sX trX sY trY,
-        partial_trace_project (sX, trX) = Some (sY, trY) ->
-        finite_valid_trace X sX trX -> finite_valid_trace Y sY trY
-  }.
+  (partial_trace_project :
+    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y)))
+  : Prop :=
+{
+  partial_projection_type :> VLSM_partial_projection_type X Y partial_trace_project;
+  partial_trace_project_preserves_valid_trace :
+    forall sX trX sY trY,
+      partial_trace_project (sX, trX) = Some (sY, trY) ->
+      finite_valid_trace X sX trX -> finite_valid_trace Y sY trY;
+}.
 
 Section sec_weak_partial_projection_properties.
 

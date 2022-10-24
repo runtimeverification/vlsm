@@ -1560,10 +1560,10 @@ Context
   .
 
 Record CompositeValidTransition l s1 iom s2 oom : Prop :=
-  {
-    cvt_valid : composite_valid IM l (s1, iom);
-    cvt_transition : composite_transition IM l (s1, iom) = (s2, oom)
-  }.
+{
+  cvt_valid : composite_valid IM l (s1, iom);
+  cvt_transition : composite_transition IM l (s1, iom) = (s2, oom);
+}.
 
 Definition composite_valid_transition_item
   (s : composite_state IM) (item : composite_transition_item IM) : Prop :=

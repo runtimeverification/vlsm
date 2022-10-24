@@ -140,12 +140,12 @@ Record CompositeLatestSentObservedIn
   (s' : composite_state IM)  (i : index)  (j : index)
   (s : composite_state IM) (item : composite_transition_item IM) (m : message)
   : Prop :=
-  {
-    clsoi_destructor :
-      head (composite_state_destructor IM state_destructor s' i) = Some (item, s);
-    clsoi_output : output item = Some m;
-    clsoi_observed : HasBeenObserved (IM j) message_dependencies (s j) m;
-  }.
+{
+  clsoi_destructor :
+    head (composite_state_destructor IM state_destructor s' i) = Some (item, s);
+  clsoi_output : output item = Some m;
+  clsoi_observed : HasBeenObserved (IM j) message_dependencies (s j) m;
+}.
 
 (**
   Characterizes the fact that:
