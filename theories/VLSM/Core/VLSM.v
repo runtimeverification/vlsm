@@ -42,10 +42,10 @@ Class VLSMType (message : Type) : Type :=
 Class VLSMMachine {message : Type} (vtype : VLSMType message) : Type :=
 {
   initial_state_prop : state -> Prop;
-  initial_state := { s : state | initial_state_prop s };
+  initial_state : Type := {s : state | initial_state_prop s};
   s0 : Inhabited initial_state;
   initial_message_prop : message -> Prop;
-  initial_message := { m : message | initial_message_prop m };
+  initial_message : Type := {m : message | initial_message_prop m};
   transition : label -> state * option message -> state * option message;
   valid : label -> state * option message -> Prop;
 }.
