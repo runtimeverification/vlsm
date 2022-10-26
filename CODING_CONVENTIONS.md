@@ -143,6 +143,7 @@ Lemma sync_some (s : vstate X) (from to : index) :
 - CamelCase for constructor name
 - field declaration with C-style naming on separate line, with 2 spaces of indentation
 - the `;` in the last field should not be omitted
+- the sort annotation should not be omitted
 
 Example:
 ```coq
