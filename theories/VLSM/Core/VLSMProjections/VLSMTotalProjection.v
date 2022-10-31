@@ -152,8 +152,7 @@ Record VLSM_projection_type
   final_state_project :
     forall sX trX,
       finite_valid_trace_from X sX trX ->
-        state_project (finite_trace_last sX trX)
-          =
+        state_project (finite_trace_last sX trX) =
         finite_trace_last (state_project sX) (trace_project trX);
 }.
 
