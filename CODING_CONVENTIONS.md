@@ -103,7 +103,7 @@ Program Instance base_params (p : param) : BaseParams := {
 - to avoid name clashes, constructor names can be prefixed with an abbreviation of the type name followed by `_`
 - no indentation in constructor declarations
 - the first `|` in constructor declarations should not be omitted
-- it's preferred to include the sort annotation
+- it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
