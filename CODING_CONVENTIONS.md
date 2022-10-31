@@ -96,13 +96,14 @@ Program Instance base_params (p : param) : BaseParams := {
 }.
 ```
 
-### Inductive and CoInductive types
+### Inductive and coinductive types
 
 - C-style type name
 - CamelCase constructors
-- to avoid name clashes, constructor names can be prefixed with an abbreviation of the type name
+- to avoid name clashes, constructor names can be prefixed with an abbreviation of the type name followed by `_`
 - no indentation in constructor declarations
 - the first `|` in constructor declarations should not be omitted
+- it's preferred to include the sort annotation
 
 Example:
 ```coq
