@@ -19,10 +19,11 @@ Context
   (annotation : Type)
   .
 
-Record annotated_state :=
-  { original_state : vstate X
-  ; state_annotation : annotation
-  }.
+Record annotated_state : Type :=
+{
+  original_state : vstate X;
+  state_annotation : annotation;
+}.
 
 Definition annotated_type : VLSMType message :=
   {| label := vlabel X;

@@ -674,19 +674,24 @@ End sec_simple.
 *)
 
 Record oracle_stepwise_props
-       [message] [vlsm: VLSM message]
-       (message_selector: message -> transition_item -> Prop)
-       (oracle: state_message_oracle vlsm) : Prop :=
-  {oracle_no_inits: forall (s: vstate vlsm),
-      initial_state_prop (VLSMMachine:=vmachine vlsm) s ->
-      forall m, ~oracle s m;
-   oracle_step_update:
-       forall l s im s' om,
-         input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s,im) (s',om) ->
-         forall msg, oracle s' msg <->
-                     (message_selector msg {|l:=l; input:=im; destination:=s'; output:=om|}
-                      \/ oracle s msg)
-  }.
+  [message] [vlsm : VLSM message]
+  (message_selector : message -> transition_item -> Prop)
+  (oracle : state_message_oracle vlsm)
+  : Prop :=
+{
+  oracle_no_inits :
+    forall (s : vstate vlsm),
+      initial_state_prop (VLSMMachine := vmachine vlsm) s ->
+      forall m, ~ oracle s m;
+  oracle_step_update:
+    forall l s im s' om,
+      input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
+      forall msg,
+      oracle s' msg
+        <->
+      message_selector msg {| l := l; input := im; destination := s'; output := om |} \/ oracle s msg;
+}.
+
 Arguments oracle_no_inits {message} {vlsm} {message_selector} {oracle} _.
 Arguments oracle_step_update {message} {vlsm} {message_selector} {oracle} _.
 

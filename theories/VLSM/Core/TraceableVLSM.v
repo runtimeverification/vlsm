@@ -373,7 +373,7 @@ Record ChoosingWell
     forall (i : index) (n : nat),
       choose s' Hs' indices = (i, n) ->
       ~ vinitial_state_prop (IM i) (s' i) ->
-      is_Some (composite_state_destructor s' i !! n)
+      is_Some (composite_state_destructor s' i !! n);
 }.
 
 Lemma choosing_well_position_exists :

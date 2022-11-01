@@ -147,12 +147,14 @@ Record VLSM_projection_type
   (label_project : vlabel X -> option (@label _ TY))
   (state_project : vstate X -> @state _ TY)
   (trace_project := pre_VLSM_projection_finite_trace_project (type X) TY label_project state_project)
-  :=
-  { final_state_project :
-      forall sX trX,
-        finite_valid_trace_from X sX trX ->
-        state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX) (trace_project trX)
-  }.
+  : Prop :=
+{
+  final_state_project :
+    forall sX trX,
+      finite_valid_trace_from X sX trX ->
+        state_project (finite_trace_last sX trX) =
+        finite_trace_last (state_project sX) (trace_project trX);
+}.
 
 (** ** Projection definitions and properties *)
 
@@ -248,19 +250,22 @@ Context
   Although we don't have proper examples of [VLSM_weak_projection]s, they are a
   support base for [VLSM_weak_full_projection]s for which we have proper examples.
 *)
-Record VLSM_weak_projection :=
-  { weak_projection_type :> VLSM_projection_type X (type Y) label_project state_project
-  ; weak_trace_project_preserves_valid_trace :
-      forall sX trX,
-        finite_valid_trace_from X sX trX -> finite_valid_trace_from Y (state_project sX) (trace_project trX)
-  }.
+Record VLSM_weak_projection : Prop :=
+{
+  weak_projection_type :> VLSM_projection_type X (type Y) label_project state_project;
+  weak_trace_project_preserves_valid_trace :
+    forall sX trX,
+      finite_valid_trace_from X sX trX ->
+      finite_valid_trace_from Y (state_project sX) (trace_project trX);
+}.
 
-Record VLSM_projection :=
-  { projection_type :> VLSM_projection_type X (type Y) label_project state_project
-  ; trace_project_preserves_valid_trace :
-      forall sX trX,
-        finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX) (trace_project trX)
-  }.
+Record VLSM_projection : Prop :=
+{
+  projection_type :> VLSM_projection_type X (type Y) label_project state_project;
+  trace_project_preserves_valid_trace :
+    forall sX trX,
+      finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX) (trace_project trX);
+}.
 
 Definition weak_projection_initial_state_preservation : Prop :=
   forall s : state,

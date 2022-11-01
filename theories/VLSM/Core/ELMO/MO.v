@@ -84,9 +84,9 @@ Definition MO_msg_valid_alt_recvs' (valid : Message -> Prop) (m : Message) : Pro
 *)
 Inductive MO_msg_valid_alt (P : Address -> Prop) (m : Message) : Prop :=
 {
-    P_adr_state : P (adr (state m));
-    MO_msg_valid_alt_sends' : MO_msg_valid_alt_sends m;
-    MO_msg_valid_alt_recvs'' : MO_msg_valid_alt_recvs' (MO_msg_valid_alt P) m;
+  P_adr_state : P (adr (state m));
+  MO_msg_valid_alt_sends' : MO_msg_valid_alt_sends m;
+  MO_msg_valid_alt_recvs'' : MO_msg_valid_alt_recvs' (MO_msg_valid_alt P) m;
 }.
 
 (**
@@ -1247,8 +1247,7 @@ Record local_equivocators (s : State) (i : Address) : Prop :=
   lceqv_adr2 : adr (state (message lceqv_ob2)) = i;
   lceqv_rec_obs1 : rec_obs s lceqv_ob1;
   lceqv_rec_obs2 : rec_obs s lceqv_ob2;
-  lceqv_incomparable :
-    incomparable (message lceqv_ob1) (message lceqv_ob2);
+  lceqv_incomparable : incomparable (message lceqv_ob1) (message lceqv_ob2);
 }.
 Set Warnings "cannot-define-projection".
 

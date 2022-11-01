@@ -141,11 +141,15 @@ Lemma sync_some (s : vstate X) (from to : index) :
 
 - C-style name
 - CamelCase for constructor name
-- field declaration with C-style naming on separate line
+- field declaration with C-style naming on separate line, with 2 spaces of indentation
+- the `;` in the last field should not be omitted
+- the sort annotation should not be omitted
+- it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
-Record simp_lv_event : Type := SimpObs {
+Record simp_lv_event : Type := SimpObs
+{
   get_simp_event_type : simp_lv_event_type;
   get_simp_event_subject : index;
   get_simp_event_state : (@state index index_listing);
