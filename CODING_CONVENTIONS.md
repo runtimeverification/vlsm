@@ -144,7 +144,7 @@ Lemma sync_some (s : vstate X) (from to : index) :
 - field declaration with C-style naming on separate line, with 2 spaces of indentation
 - the `;` in the last field should not be omitted
 - the sort annotation should not be omitted
-- it's preferred to include the sort annotation
+- it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
