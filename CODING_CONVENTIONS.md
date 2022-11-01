@@ -70,7 +70,7 @@ Section sec_ELMOComponent_lemmas.
 - CamelCase name
 - field declaration with C-style naming on separate line, with 2 spaces of indentation
 - the `;` in the last field should not be omitted
-- the sort annotation should not be omitted
+- it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
@@ -146,7 +146,6 @@ Lemma sync_some (s : vstate X) (from to : index) :
 - CamelCase for constructor name
 - field declaration with C-style naming on separate line, with 2 spaces of indentation
 - the `;` in the last field should not be omitted
-- the sort annotation should not be omitted
 - it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
