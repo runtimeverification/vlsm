@@ -7,12 +7,16 @@ Class FinSetFullMessageDependencies
   `{HfinSetMessage : FinSet message Cm}
   (message_dependencies : message -> Cm)
   (full_message_dependencies : message -> Cm)
-  :=
-  { fin_set_full_message_dependencies_happens_before
-      : forall dm m, dm ∈ full_message_dependencies m <-> msg_dep_happens_before (elements ∘ message_dependencies) dm m
-  ; fin_set_full_message_dependencies_irreflexive
-      : forall m, m ∉ full_message_dependencies m
-  }.
+  : Prop :=
+{
+  fin_set_full_message_dependencies_happens_before :
+    forall dm m,
+      dm ∈ full_message_dependencies m
+        <->
+      msg_dep_happens_before (elements ∘ message_dependencies) dm m;
+  fin_set_full_message_dependencies_irreflexive :
+    forall m, m ∉ full_message_dependencies m
+}.
 
 (** Given the message type, we can usually look up the functions for message dependencies. *)
 #[global] Hint Mode FinSetFullMessageDependencies ! - - - - - - - - - - - - : typeclass_instances.

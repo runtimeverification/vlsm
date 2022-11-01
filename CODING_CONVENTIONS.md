@@ -68,13 +68,16 @@ Section sec_ELMOComponent_lemmas.
 ### Type classes
 
 - CamelCase name
-- field declaration with C-style naming on separate line
+- field declaration with C-style naming on separate line, with 2 spaces of indentation
+- the `;` in the last field should not be omitted
+- it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
-Class TotalOrder {A} (R : relation A) : Prop := {
+Class TotalOrder {A} (R : relation A) : Prop :=
+{
   total_order_partial :> PartialOrder R;
-  total_order_trichotomy :> Trichotomy (strict R)
+  total_order_trichotomy :> Trichotomy (strict R);
 }.
 ```
 
@@ -143,7 +146,6 @@ Lemma sync_some (s : vstate X) (from to : index) :
 - CamelCase for constructor name
 - field declaration with C-style naming on separate line, with 2 spaces of indentation
 - the `;` in the last field should not be omitted
-- the sort annotation should not be omitted
 - it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:

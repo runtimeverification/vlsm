@@ -20,7 +20,7 @@ From VLSM.Core Require Import VLSM Composition VLSMEmbedding.
 (**
   A class with a measure of size for states which is monotonic for valid transitions.
 *)
-Class TransitionMonotoneVLSM `(X : VLSM message) (state_size : vstate X -> nat) :=
+Class TransitionMonotoneVLSM `(X : VLSM message) (state_size : vstate X -> nat) : Prop :=
 {
   transition_monotonicity :
     forall s1 s2 : vstate X, ValidTransitionNext X s1 s2 -> state_size s1 < state_size s2
@@ -74,7 +74,8 @@ Qed.
 Class TraceableVLSM
   `(X : VLSM message)
   (state_destructor : vstate X -> list (vtransition_item X * vstate X))
-  (state_size : vstate X -> nat) :=
+  (state_size : vstate X -> nat)
+  : Prop :=
 {
   tv_monotone :> TransitionMonotoneVLSM X state_size;
   tv_state_destructor_destination :
@@ -88,7 +89,7 @@ Class TraceableVLSM
         input_valid_transition_item (pre_loaded_with_all_messages_vlsm X) s item;
   tv_state_destructor_initial :
     forall (s : vstate X) (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s),
-      vinitial_state_prop X s <-> state_destructor s = []
+      vinitial_state_prop X s <-> state_destructor s = [];
 }.
 
 #[global] Hint Mode TraceableVLSM - ! - - : typeclass_instances.
