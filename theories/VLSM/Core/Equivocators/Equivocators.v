@@ -43,9 +43,9 @@ Context
     using label <<l>>.
 *)
 Inductive EquivocatorLabel : Type :=
-  | Spawn : vstate X -> EquivocatorLabel
-  | ContinueWith : nat -> vlabel X -> EquivocatorLabel
-  | ForkWith : nat -> vlabel X -> EquivocatorLabel.
+| Spawn : vstate X -> EquivocatorLabel
+| ContinueWith : nat -> vlabel X -> EquivocatorLabel
+| ForkWith : nat -> vlabel X -> EquivocatorLabel.
 
 Definition equivocator_type : VLSMType message :=
   {| state := bounded_state_copies ;
@@ -727,10 +727,9 @@ Context
     copy being tracked
   - [Existing] <<i>> indicates that we're currently tracking copy <<i>>
 *)
-Inductive MachineDescriptor : Type
-  :=
-  | NewMachine : vstate X -> MachineDescriptor
-  | Existing : nat -> MachineDescriptor.
+Inductive MachineDescriptor : Type :=
+| NewMachine : vstate X -> MachineDescriptor
+| Existing : nat -> MachineDescriptor.
 
 (**
   The [MachineDescriptor] associated to an [equivocator_label] tells us

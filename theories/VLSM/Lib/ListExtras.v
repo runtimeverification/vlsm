@@ -1512,12 +1512,12 @@ Context
   .
 
 Inductive ExistsSuffix : list A -> Prop :=
-  | SHere : forall l, P l -> ExistsSuffix l
-  | SFurther : forall a l, ExistsSuffix l -> ExistsSuffix (a :: l).
+| SHere : forall l, P l -> ExistsSuffix l
+| SFurther : forall a l, ExistsSuffix l -> ExistsSuffix (a :: l).
 
 Inductive ForAllSuffix : list A -> Prop :=
-  | SNil : P [] -> ForAllSuffix []
-  | SHereAndFurther : forall a l, P (a :: l) -> ForAllSuffix l -> ForAllSuffix (a :: l).
+| SNil : P [] -> ForAllSuffix []
+| SHereAndFurther : forall a l, P (a :: l) -> ForAllSuffix l -> ForAllSuffix (a :: l).
 
 Lemma fsHere : forall l, ForAllSuffix l -> P l.
 Proof. by inversion 1. Qed.

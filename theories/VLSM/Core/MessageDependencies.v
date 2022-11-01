@@ -1051,11 +1051,11 @@ Context
   message.
 *)
 Inductive Emittable_from_dependencies_prop (m : message) : Prop :=
-  | efdp : forall (v : validator) (Hsender : sender m = Some v)
-              (Hemittable : can_emit
-                (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m))
-                m),
-               Emittable_from_dependencies_prop m.
+| efdp : forall (v : validator) (Hsender : sender m = Some v)
+            (Hemittable : can_emit
+              (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m))
+              m),
+             Emittable_from_dependencies_prop m.
 
 Definition emittable_from_dependencies_prop (m : message) : Prop :=
   match sender m with

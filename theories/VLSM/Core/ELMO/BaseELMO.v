@@ -22,8 +22,8 @@ Context
 
 (** Messages can be labeled as either sent or received. *)
 Inductive Label : Type :=
- | Receive
- | Send.
+| Receive
+| Send.
 
 Inductive State : Type := MkState
 {
