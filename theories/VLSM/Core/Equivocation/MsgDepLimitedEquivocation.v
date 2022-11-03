@@ -254,8 +254,9 @@ Proof.
   intro Hvalid.
   eapply (VLSM_projection_input_valid (preloaded_component_projection IM i))
   ; [apply (composite_project_label_eq IM) |].
-  by apply (VLSM_incl_input_valid (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))),
-        (VLSM_full_projection_input_valid (forget_annotations_projection (free_composite_vlsm IM) _ _ _)).
+  by apply
+    (VLSM_incl_input_valid (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))),
+    (VLSM_full_projection_input_valid (forget_annotations_projection (free_composite_vlsm IM) _ _ _)).
 Qed.
 
 Lemma full_node_msg_dep_composite_transition_message_equivocators

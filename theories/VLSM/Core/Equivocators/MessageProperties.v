@@ -314,7 +314,8 @@ Proof.
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
       { repeat split
-        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X) | done | done].
+        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X)
+          | done | done].
         apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
       }
       specialize (existing_false_label_equivocator_state_project_not_same X Ht _ Hidesc)
@@ -371,7 +372,8 @@ Proof.
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
       { repeat split
-        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X) | done | done].
+        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X)
+          | done | done].
         apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
       }
       specialize (existing_true_label_equivocator_state_project_not_last X Ht _ Hidesc)

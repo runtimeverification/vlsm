@@ -392,7 +392,8 @@ Proof.
 Qed.
 
 Lemma equivocator_state_append_lst es1 es2
-  : equivocator_state_last (equivocator_state_append es1 es2) = equivocator_state_last es2 + equivocator_state_n es1.
+  : equivocator_state_last (equivocator_state_append es1 es2) =
+    equivocator_state_last es2 + equivocator_state_n es1.
 Proof. destruct es1, es2. cbn. unfold equivocator_state_n. simpl. lia. Qed.
 
 Lemma equivocator_state_append_project_1 s s' i (Hi : i < equivocator_state_n s)

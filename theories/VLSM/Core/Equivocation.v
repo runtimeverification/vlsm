@@ -2459,8 +2459,8 @@ Lemma composite_has_been_directly_observed_lift
     has_been_directly_observed (IM i) s m.
 Proof.
   pose (free_composite_vlsm IM) as Free.
-  assert
-    (Hlift_s : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) (lift_to_composite_state' IM i s)).
+  assert (Hlift_s :
+    valid_state_prop (pre_loaded_with_all_messages_vlsm Free) (lift_to_composite_state' IM i s)).
   { revert Hs.  apply valid_state_preloaded_composite_free_lift. }
   split; intros Hobs.
   - apply (proper_directly_observed (IM i)); [done |].

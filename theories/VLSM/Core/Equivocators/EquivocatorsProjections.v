@@ -1111,7 +1111,8 @@ Proof.
     + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|]; inversion H0.
     + rewrite equivocator_state_project_zero in H0.
       by destruct (vtransition _ _ _); inversion_clear H0.
-    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|]; inversion_clear H0.
+    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|];
+        inversion_clear H0.
   - apply H.
   - by apply equivocator_state_project_valid_message.
 Qed.
@@ -1129,9 +1130,12 @@ Proof.
   - unfold equivocator_label_zero_project in H.
     destruct lX as [sn| [|i] lX | [|i] lX]; inversion H; subst; cbn in H0.
     + by inversion H0.
-    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|]; inversion_clear H0.
-    + by rewrite equivocator_state_project_zero in H0; destruct (vtransition _ _ _); inversion_clear H0.
-    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|]; inversion_clear H0.
+    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|];
+        inversion_clear H0.
+    + by rewrite equivocator_state_project_zero in H0; destruct (vtransition _ _ _);
+        inversion_clear H0.
+    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|];
+        inversion_clear H0.
   - apply H.
 Qed.
 

@@ -456,7 +456,8 @@ Proof.
   apply functional_extensionality_dep_good.
   intro j.
   destruct (decide (j = i)).
-  - subst. rewrite equivocator_descriptors_update_eq. symmetry. apply equivocator_descriptors_update_eq.
+  - subst. rewrite equivocator_descriptors_update_eq. symmetry.
+    apply equivocator_descriptors_update_eq.
   - by rewrite !equivocator_descriptors_update_neq.
 Qed.
 

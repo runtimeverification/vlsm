@@ -231,7 +231,8 @@ Proof.
   destruct Heqv as [m [Hv [prefix [item [suffix [Heq Heqv]]]]]].
   exists m. split; [done |]. exists prefix.
   destruct_list_last suffix suffix' item' Heqsuffix.
-  { exfalso. subst. apply app_inj_tail,proj2 in Heq. subst item. apply proj1 in Heqv. simpl in Heqv. subst om. simpl in n. congruence. }
+  { exfalso. subst. apply app_inj_tail,proj2 in Heq. subst item. apply proj1 in Heqv. simpl in Heqv.
+    subst om. simpl in n. congruence. }
   exists item, suffix'. split; [| done].
   replace (prefix ++ item :: suffix' ++ [item']) with ((prefix ++ item :: suffix') ++ [item']) in Heq.
   - apply app_inj_tail in Heq. apply Heq.
@@ -360,7 +361,8 @@ Lemma composite_transition_no_sender_equivocators_weight
   (Hno_sender : option_bind _ _ sender om = None)
   : (equivocation_fault s' <= equivocation_fault s)%R.
 Proof.
-  specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators _ _ _ _ _ Ht Hno_sender) as Heqv.
+  specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators
+    _ _ _ _ _ Ht Hno_sender) as Heqv.
   revert Heqv.
   apply incl_equivocating_validators_equivocation_fault.
 Qed.

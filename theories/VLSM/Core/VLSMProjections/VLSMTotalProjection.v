@@ -1011,7 +1011,8 @@ Proof.
   split; [|apply Hstate; apply HtrX].
   induction HtrX using finite_valid_trace_rev_ind.
   - constructor. by apply initial_state_is_valid, Hstate.
-  - rewrite (@pre_VLSM_projection_finite_trace_project_app _ (type (pre_loaded_with_all_messages_vlsm X)) (type Y) label_project state_project).
+  - rewrite (@pre_VLSM_projection_finite_trace_project_app _
+      (type (pre_loaded_with_all_messages_vlsm X)) (type Y) label_project state_project).
     apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm Y)).
     split; [done |].
     simpl. unfold pre_VLSM_projection_transition_item_project.
@@ -1076,7 +1077,8 @@ Proof.
   split; [|apply Hstate; apply HtrX].
   induction HtrX using finite_valid_trace_rev_ind.
   - constructor. by apply initial_state_is_valid, Hstate.
-  - rewrite (@pre_VLSM_projection_finite_trace_project_app _ (type (pre_loaded_vlsm X P)) (type Y) label_project state_project).
+  - rewrite (@pre_VLSM_projection_finite_trace_project_app _
+      (type (pre_loaded_vlsm X P)) (type Y) label_project state_project).
     apply (finite_valid_trace_from_app_iff (pre_loaded_vlsm Y Q)).
     split; [done |].
     simpl. unfold pre_VLSM_projection_transition_item_project.

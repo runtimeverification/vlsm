@@ -252,7 +252,8 @@ Proof.
   remember (finite_trace_last is tr) as s.
   destruct (option_bind _ _ sender om) as [v|] eqn:Heq_v.
   - destruct om as [m|]; [|inversion Heq_v]. simpl in Heq_v.
-    destruct (decide (set_eq (elements (equivocating_validators s)) (elements (equivocating_validators s'))))
+    destruct (decide (set_eq (elements (equivocating_validators s))
+      (elements (equivocating_validators s'))))
     ; [apply set_eq_fin_set in s0; left;split; [done |]|].
     + by apply
         (input_valid_transition_reflects_trace_witnessing_equivocation_prop
@@ -691,7 +692,8 @@ Proof.
     unfold pre_loaded_free_equivocating_vlsm_composition, free_equivocating_vlsm_composition.
       specialize
         (@lift_to_composite_generalized_preloaded_vlsm_full_projection
-          message (sub_index (elements(equivocating_validators sf))) _ (sub_IM IM (elements(equivocating_validators sf)))
+          message (sub_index (elements(equivocating_validators sf))) _
+          (sub_IM IM (elements(equivocating_validators sf)))
           (λ msg : message, msg ∈ message_dependencies m)
           (composite_has_been_directly_observed IM s))
         as Hproj.
@@ -702,7 +704,8 @@ Proof.
         by exists i.
       }
       apply elem_of_elements in Hequivocating_v.
-      spec Hproj (@dexist _ _ (fun v => sub_index_prop_dec (elements(equivocating_validators sf)) v) v Hequivocating_v).
+      spec Hproj (@dexist _ _
+        (fun v => sub_index_prop_dec (elements(equivocating_validators sf)) v) v Hequivocating_v).
       by apply (VLSM_full_projection_can_emit Hproj).
 Qed.
 

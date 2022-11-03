@@ -126,8 +126,10 @@ Proof.
     }
     apply functional_extensionality_dep_good.
     by subst.
-  - destruct IHHtrX1 as [eqv_state_is [Hstate_start_project [eqv_state_s [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _ ]]]]]]].
-    destruct IHHtrX2 as [eqv_msg_is [Hmsg_start_project [eqv_msg_s [_ [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg ]]]]]]].
+  - destruct IHHtrX1 as [eqv_state_is [Hstate_start_project [eqv_state_s
+      [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _ ]]]]]]].
+    destruct IHHtrX2 as [eqv_msg_is [Hmsg_start_project [eqv_msg_s [_
+      [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg ]]]]]]].
     exists eqv_state_is. split; [done |].
     apply valid_trace_last_pstate in Hstate_trace as Hstate_valid.
     destruct Ht as [[Hs [Hiom [Hv Hc]]] Ht].
@@ -330,7 +332,8 @@ Proof.
       exists [], eqv_state_s.
       by split; [constructor |].
     }
-    specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM IM) (free_constraint _) seed)
+    specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded
+      (equivocator_IM IM) (free_constraint _) seed)
       as HinclE.
     apply valid_trace_forget_last in Hmsg_trace.
     specialize

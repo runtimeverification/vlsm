@@ -152,7 +152,8 @@ Inductive UMO_reachable (C : State -> Message -> Prop) : State -> Prop :=
 | reach_send :
     forall s, UMO_reachable C s -> UMO_reachable C (s <+> MkObservation Send (MkMessage s))
 | reach_recv :
-    forall s msg, C s msg -> UMO_reachable C s -> UMO_reachable C (s <+> MkObservation Receive msg).
+    forall s msg, C s msg -> UMO_reachable C s ->
+      UMO_reachable C (s <+> MkObservation Receive msg).
 
 (**
   An alternative induction principle for [UMO_reachable]

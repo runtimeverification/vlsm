@@ -1176,13 +1176,14 @@ Proof.
   }
   exists final_descriptors.
   subst final.
-  assert (Hfinal_descriptors_proper : proper_equivocator_descriptors final_descriptors (finite_trace_last is tr)).
+  assert (Hfinal_descriptors_proper :
+    proper_equivocator_descriptors final_descriptors (finite_trace_last is tr)).
   { by apply not_equivocating_equivocator_descriptors_proper. }
   destruct (preloaded_equivocators_valid_trace_from_project  _ _ _ Hfinal_descriptors_proper Htr)
     as [trX [initial_descriptors [Hproject_tr _]]].
   exists initial_descriptors, trX. split; [done |]. split; [done |].
-  specialize
-    (equivocators_trace_project_finite_trace_projection_list_commute i final_descriptors initial_descriptors
+  specialize (equivocators_trace_project_finite_trace_projection_list_commute
+    i final_descriptors initial_descriptors
       eqv_init tr trX trXi Hproject_tr)
     as Hcommute.
   assert (Hfinali : final_descriptors i = eqv_final).
@@ -1257,7 +1258,8 @@ Proof.
     exists final_descriptors. split; [done |].
     exists [].
     repeat (split; [done |]).
-    cut (vinitial_state_prop (free_composite_vlsm IM) (equivocators_state_project final_descriptors is)).
+    cut (vinitial_state_prop (free_composite_vlsm IM)
+      (equivocators_state_project final_descriptors is)).
     { intro Hinit. split; [| done]. constructor. by apply initial_state_is_valid. }
     apply (equivocators_initial_state_project IM); [| done].
     apply Htr.
