@@ -19,7 +19,9 @@ ALECTRYONDIR = docs/alectryon
 ALECTRYONHTMLFLAGS = --frontend coqdoc --webpage-style windowed
 ALECTRYONHTMLFILES = $(DOCVFILES:.v=.alectryon.html)
 
-coqdoc: $(DOCGLOBFILES) $(DOCVFILES) $(CSSFILES) $(JSFILES) $(HTMLFILES)
+# depend on DOCVOFILES rather than DOCGLOBFILES
+# due to bug described in https://github.com/coq/coq/pull/16757
+coqdoc: $(DOCVOFILES) $(DOCVFILES) $(CSSFILES) $(JSFILES) $(HTMLFILES)
 	$(SHOW)'COQDOC -d $(COQDOCDIR)'
 	$(HIDE)mkdir -p $(COQDOCDIR)
 	$(HIDE)$(COQDOC) $(COQDOCHTMLFLAGS) $(COQDOCLIBS) -d $(COQDOCDIR) $(DOCVFILES)
@@ -41,7 +43,7 @@ DUPLICATES.md: $(DOCVFILES)
 alectryon: $(ALECTRYONHTMLFILES)
 .PHONY: alectryon
 
-# requires https://github.com/palmskog/rvdpdgraph/tree/v8.13
+# requires https://github.com/palmskog/rvdpdgraph/tree/v8.15
 rvdpd: $(SVGFILES)
 .PHONY: rvdpd
 
