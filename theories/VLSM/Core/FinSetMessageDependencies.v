@@ -26,9 +26,9 @@ Class FinSetFullMessageDependencies
   : FullMessageDependencies (elements ∘ message_dependencies) (elements ∘ full_message_dependencies).
 Proof.
   constructor.
-  - setoid_rewrite elem_of_elements; apply fin_set_full_message_dependencies_happens_before.
-  - setoid_rewrite elem_of_elements; apply fin_set_full_message_dependencies_irreflexive.
-  - intro; apply NoDup_elements.
+  - by setoid_rewrite elem_of_elements; apply fin_set_full_message_dependencies_happens_before.
+  - by setoid_rewrite elem_of_elements; apply fin_set_full_message_dependencies_irreflexive.
+  - by intro; apply NoDup_elements.
 Qed.
 
 Definition fin_set_msg_dep_happens_before

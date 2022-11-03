@@ -110,14 +110,12 @@ Proof.
   apply finite_valid_trace_init_to_forget_last, proj1 in HtrX.
   specialize (partial_trace_project_extends_left _ _ _ Hsimul _ _ _ _ Hpr _ _ HsX)
     as Hpr_extends_left.
-  spec Hpr_extends_left.
-  { by rewrite app_nil_r. }
+  spec Hpr_extends_left; [by rewrite app_nil_r |].
   destruct Hpr_extends_left as [isY [preY [Hpr_tr HsY]]].
   rewrite !app_nil_r in Hpr_tr.
   specialize (VLSM_weak_partial_projection_finite_valid_trace_from _ _ _ _ Hpr_tr HtrX)
     as Hinit_to.
-  apply finite_valid_trace_from_app_iff, proj1, finite_valid_trace_last_pstate in Hinit_to.
-  by subst sY.
+  by apply finite_valid_trace_from_app_iff, proj1, finite_valid_trace_last_pstate in Hinit_to; subst.
 Qed.
 
 Lemma VLSM_weak_partial_projection_input_valid_transition
@@ -184,9 +182,9 @@ Lemma VLSM_partial_projection_initial_state
     vinitial_state_prop X sX -> vinitial_state_prop Y sY.
 Proof.
   intros sX sY trY Hpr HsX.
-  assert (HtrX : finite_valid_trace X sX []).
-  { split; [| done]. constructor. by apply initial_state_is_valid. }
-  apply (VLSM_partial_projection_finite_valid_trace _ _ _ _ Hpr HtrX).
+  eapply VLSM_partial_projection_finite_valid_trace; [done |].
+  split; [| done].
+  by constructor; apply initial_state_is_valid.
 Qed.
 
 Definition VLSM_partial_projection_weaken : VLSM_weak_partial_projection X Y trace_project :=

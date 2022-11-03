@@ -40,10 +40,10 @@ Lemma equivocator_vlsm_trace_project_output_reflecting
 Proof.
   revert trX i HtrX Hjbs.
   induction tr; intros.
-  - inversion HtrX. subst. inversion Hjbs.
+  - by inversion HtrX; subst; inversion Hjbs.
   - simpl in HtrX.
     destruct (equivocator_vlsm_trace_project _ tr j) as [(trX', i')|]
-      eqn:Htr; [|congruence].
+      eqn: Htr; [| by congruence].
     specialize (IHtr trX').
     destruct (equivocator_vlsm_transition_item_project _ a i') as [[[item'|] i'']|]
       eqn:Hitem'
@@ -112,7 +112,7 @@ Lemma preloaded_equivocator_vlsm_trace_project_valid_item
           equivocator_vlsm_trace_project _ btr dfinal = Some (tr, dfirst).
 Proof.
   specialize (preloaded_equivocator_vlsm_valid_trace_project_inv2 X bs bf btr) as Hinv2.
-  spec Hinv2. { intro contra. subst. inversion Hitem. }
+  spec Hinv2; [by intro contra; subst; inversion Hitem |].
   spec Hinv2 Hbtr.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
@@ -137,7 +137,7 @@ Proof.
   specialize
     (equivocator_vlsm_trace_project_app_inv _ [bitem] bsuffix (Existing i) (Existing idl) dsuffix [itemx] suffix)
     as Hsuffix'.
-  spec Hsuffix'.  { by simpl; rewrite Hitemx. }
+  spec Hsuffix'; [by cbn; rewrite Hitemx |].
   subst dsuffix.
   spec Hsuffix' Hsuffix.
   subst bitem.
@@ -159,14 +159,14 @@ Proof.
   specialize (Hinv2 _ _ _ Htr) as [bfi [Hdfinal Hdinitial]].
   split.
   - apply elem_of_app. right. left.
-  - eexists _. eexists _. repeat split; [..|apply Htr].
+  - eexists _, _. repeat split; [.. | by apply Htr].
     + clear -Hdinitial.
       destruct dfirst as [sn | j].
       * by destruct Hdinitial.
-      * destruct Hdinitial as [bsj [Hdinitial _]]. by exists bsj.
+      * by destruct Hdinitial as [bsj [Hdinitial _]]; exists bsj.
     + remember (bprefix ++ _) as btr.
       specialize (equivocator_vlsm_trace_project_inv X btr) as Hinv.
-      spec Hinv. { by destruct bprefix; subst. }
+      spec Hinv; [by destruct bprefix; subst |].
       spec Hinv i.
       spec Hinv; [by subst; eexists |].
       specialize (Hinv bs) as [lst_i Hlst_i].
@@ -197,12 +197,9 @@ Proof.
   destruct (equivocator_label_descriptor (l item)) as [sn | i] eqn:Hsndl.
   - destruct item. destruct l; inversion Hsndl.
     subst. simpl in *.
-    specialize
-      (preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
-         _ _ Htr _ Hin _ eq_refl)
-      as Hitem.
-    simpl in Hitem.
-    destruct Hitem as [_ [Hcontra _]]. congruence.
+    by destruct (preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
+      _ _ Htr _ Hin _ eq_refl)
+      as  [_ [Hcontra _]]; cbn in *; congruence.
   - apply valid_trace_add_default_last in Htr.
     specialize
     (preloaded_equivocator_vlsm_trace_project_valid_item
@@ -215,7 +212,7 @@ Proof.
   apply equivocator_transition_item_project_inv_messages in Hitemx.
   destruct Hitemx as [_ [_ [_ [_ Hitemx]]]].
   simpl in *.
-  congruence.
+  by congruence.
 Qed.
 
 Section sec_oracle_lifting.
@@ -272,7 +269,7 @@ Proof.
     + intros (i & _ & Hi); exists i.
       by destruct (equivocator_state_project s i); [eexists |].
   - apply Exists_dec; intro i.
-    destruct (equivocator_state_project s i); [apply Hdec | typeclasses eauto].
+    by destruct (equivocator_state_project s i); [apply Hdec | typeclasses eauto].
 Qed.
 
 Lemma equivocator_oracle_stepwise_props
@@ -308,9 +305,10 @@ Proof.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
-      { repeat split
-        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X) | done | done].
-        apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
+      {
+        repeat split; [| | done..].
+        - by apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
+        - by eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X).
       }
       specialize (existing_false_label_equivocator_state_project_not_same X Ht _ Hidesc)
         as Hnot_same.
@@ -327,13 +325,13 @@ Proof.
            simpl in Hsame. subst s'i.
            apply oracle_step_update in Hbri.
            destruct Hbri as [H | Hbri]; [| by right; eexists _,_].
-           left. revert H. apply Hselector_io.
+           by left; revert H; apply Hselector_io.
         -- right. exists i, s'i. split; [| done].
            spec Hnot_same i.
            spec Hnot_same; [lia|]. spec Hnot_same n.
            simpl in Hnot_same. rewrite Hs'i in Hnot_same.
            destruct_equivocator_state_project s i si Hlti'; [|lia].
-           simpl in Hnot_same. congruence.
+           by cbn in Hnot_same; congruence.
       * apply proj2 in oracle_step_update.
         apply equivocator_state_project_Some_rev in Hidesc as Hltidesc.
         intros [Heq_im | [ins [sins [Hsins Hbri]]]].
@@ -352,22 +350,22 @@ Proof.
               specialize (oracle_step_update (or_intror Hbri)).
               exists ins, sidesc'. split; [| done].
               simpl in Hsame.
-              destruct_equivocator_state_project s' ins _sidesc' Hins; [|lia].
-              by subst.
+              by destruct_equivocator_state_project s' ins _sidesc' Hins; [subst |lia].
            ++ exists ins, sins. split; [| done].
               spec Hnot_same ins. spec Hnot_same; [lia|]. spec Hnot_same n.
               simpl in Hnot_same. rewrite Hsins in Hnot_same.
               destruct_equivocator_state_project s' ins _sins Hins; [|lia].
-              simpl in Hnot_same. congruence.
+              cbn in Hnot_same; congruence.
     + cbn in Hv.
       destruct (equivocator_state_project s idesc) as [sidesc|] eqn:Hidesc; [| done].
       destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn:Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
-      { repeat split
-        ; [..| eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X) | done | done].
-        apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
+      {
+        repeat split; [| | done..].
+        - by apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
+        - by eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X).
       }
       specialize (existing_true_label_equivocator_state_project_not_last X Ht _ Hidesc)
         as Hnot_last.
@@ -384,14 +382,13 @@ Proof.
            simpl in Hlast. subst s'i.
            apply oracle_step_update in Hbri.
            destruct Hbri as [H | Hbri]; [| by right; eexists _,_].
-           left. revert H. apply Hselector_io.
+           by left; revert H; apply Hselector_io.
         -- right. exists i, s'i. split; [| done].
            spec Hnot_last i.
            spec Hnot_last; [lia|].
            simpl in Hnot_last. rewrite Hs'i in Hnot_last.
            destruct_equivocator_state_project s i si Hlti'; [|lia].
-           simpl in Hnot_last.
-           congruence.
+           by cbn in Hnot_last; congruence.
       * apply proj2 in oracle_step_update.
         intros [Heq_im | [ins [sins [Hsins Hbri]]]].
         -- unfold equivocator_selector in Heq_im. simpl in Heq_im.
@@ -406,7 +403,7 @@ Proof.
            simpl in Hnot_last. rewrite Hsins in Hnot_last.
            exists ins, sins. split; [| done].
            destruct_equivocator_state_project s' ins _sins Hltins'; [|lia].
-           simpl in Hnot_last. congruence.
+           by cbn in Hnot_last; congruence.
 Qed.
 
 End sec_oracle_lifting.
@@ -434,12 +431,10 @@ Lemma equivocator_has_been_received_stepwise_props
 Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
-    ; [|apply has_been_received_stepwise_from_trace].
-    cbv; itauto.
-  - intros s item; destruct item, l; cbn.
-    2,3:itauto.
-    intros [(_ & _ & _ & Him) _]; simpl in Him; subst.
-    itauto congruence.
+    ; [| by apply has_been_received_stepwise_from_trace].
+    by cbv; itauto.
+  - intros s item; destruct item, l; cbn; [| by itauto..].
+    by intros [(_ & _ & _ & Him) _]; simpl in Him; subst; itauto congruence.
 Qed.
 
 (** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm]. *)
@@ -474,12 +469,10 @@ Lemma equivocator_has_been_sent_stepwise_props
 Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
-    ; [|apply has_been_sent_stepwise_from_trace].
-    cbv; itauto.
-  - intros s item; destruct item, l; cbn.
-    2,3:itauto.
-    intros [_ Ht]; inversion_clear Ht.
-    itauto congruence.
+    ; [| by apply has_been_sent_stepwise_from_trace].
+    by cbv; itauto.
+  - intros s item; destruct item, l; cbn; [| by itauto..].
+    by intros [_ Ht]; inversion_clear Ht; itauto congruence.
 Qed.
 
 (** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm]. *)

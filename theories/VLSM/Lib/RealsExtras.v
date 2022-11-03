@@ -10,22 +10,18 @@ Definition list_sum_R : list R -> R :=
 Lemma Rplusminus_assoc : forall r1 r2 r3,
   (r1 + r2 - r3)%R = (r1 + (r2 - r3))%R.
 Proof.
-  intros. unfold Rminus.
-  apply Rplus_assoc.
+  by intros; unfold Rminus; apply Rplus_assoc.
 Qed.
 
 Lemma Rplusminus_assoc_r : forall r1 r2 r3,
   (r1 - r2 + r3)%R = (r1 + (- r2 + r3))%R.
 Proof.
-  intros. unfold Rminus.
-  apply Rplus_assoc.
+  by intros; unfold Rminus; apply Rplus_assoc.
 Qed.
 
 Lemma Rplus_opp_l : forall r, (Ropp r + r)%R = 0%R.
 Proof.
-  intros.
-  rewrite Rplus_comm.
-  apply Rplus_opp_r.
+  by intros; rewrite Rplus_comm, Rplus_opp_r.
 Qed.
 
 Lemma Rplus_ge_reg_neg_r : forall r1 r2 r3,
@@ -33,9 +29,9 @@ Lemma Rplus_ge_reg_neg_r : forall r1 r2 r3,
 Proof.
   intros.
   apply Rge_le.
-  apply Rle_ge in H.
-  apply Rle_ge in H0.
-  apply (Rplus_ge_reg_neg_r r1 r2 r3 H H0).
+  eapply Rplus_ge_reg_neg_r.
+  - by apply Rle_ge in H.
+  - by apply Rle_ge in H0.
 Qed.
 
 Lemma Rminus_lt_r : forall r1 r2,
@@ -60,11 +56,10 @@ Lemma Rtotal_le_gt : forall x y,
   (x <= y)%R \/ (x > y)%R.
 Proof.
   unfold Rle. intros x y.
-  destruct (Rtotal_order x y) as [Hlt | [Heq | Hgt]]; auto.
+  by destruct (Rtotal_order x y) as [Hlt | [Heq | Hgt]]; auto.
 Qed.
 
 #[export] Instance Rle_transitive : Transitive Rle.
 Proof.
-  intros x y z.
-  apply Rle_trans.
+  by intros x y z; apply Rle_trans.
 Qed.

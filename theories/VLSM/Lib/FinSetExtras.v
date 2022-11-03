@@ -17,7 +17,7 @@ Lemma union_size_ge_size1
 Proof.
   apply subseteq_size.
   apply subseteq_union.
-  set_solver.
+  by set_solver.
 Qed.
 
 Lemma union_size_ge_size2
@@ -26,7 +26,7 @@ Lemma union_size_ge_size2
 Proof.
   apply subseteq_size.
   apply subseteq_union.
-  set_solver.
+  by set_solver.
 Qed.
 
 Lemma union_size_ge_average
@@ -35,7 +35,7 @@ Lemma union_size_ge_average
 Proof.
   specialize (union_size_ge_size1 X Y) as Hx.
   specialize (union_size_ge_size2 X Y) as Hy.
-  lia.
+  by lia.
 Qed.
 
 Lemma difference_size_le_self
@@ -45,7 +45,8 @@ Proof.
   apply subseteq_size.
   apply elem_of_subseteq.
   intros x Hx.
-  apply elem_of_difference in Hx. itauto.
+  apply elem_of_difference in Hx.
+  by itauto.
 Qed.
 
 Lemma union_size_le_sum
@@ -55,7 +56,7 @@ Proof.
   specialize (size_union_alt X Y) as Halt.
   rewrite Halt.
   specialize (difference_size_le_self Y X).
-  lia.
+  by lia.
 Qed.
 
 Lemma intersection_size1
@@ -63,7 +64,7 @@ Lemma intersection_size1
   size (X ∩ Y) <= size X.
 Proof.
   apply (subseteq_size (X ∩ Y) X).
-  set_solver.
+  by set_solver.
 Qed.
 
 Lemma intersection_size2
@@ -71,7 +72,7 @@ Lemma intersection_size2
   size (X ∩ Y) <= size Y.
 Proof.
   apply (subseteq_size (X ∩ Y) Y).
-  set_solver.
+  by set_solver.
 Qed.
 
 Lemma difference_size_subset
@@ -79,35 +80,38 @@ Lemma difference_size_subset
   (Hsub : Y ⊆ X) :
   (Z.of_nat (size (X ∖ Y)) = Z.of_nat (size X) - Z.of_nat (size Y))%Z.
 Proof.
-  assert (Htemp : Y ∪ (X ∖ Y) ≡ X). {
+  assert (Htemp : Y ∪ (X ∖ Y) ≡ X).
+  {
     apply set_equiv_equivalence.
     intros a.
     split; intros Ha.
-    - set_solver.
+    - by set_solver.
     - destruct (@decide (a ∈ Y)).
       apply elem_of_dec_slow.
-      + apply elem_of_union. left. itauto.
-      + apply elem_of_union. right. set_solver.
+      + by apply elem_of_union; left; itauto.
+      + by apply elem_of_union; right; set_solver.
   }
-  assert (Htemp2 : size Y + size (X ∖ Y) = size X). {
+  assert (Htemp2 : size Y + size (X ∖ Y) = size X).
+  {
     specialize (size_union Y (X ∖ Y)) as Hun.
-    spec Hun. {
+    spec Hun.
+    {
       apply elem_of_disjoint.
       intros a Ha Ha2.
       apply elem_of_difference in Ha2.
-      itauto.
+      by itauto.
     }
     rewrite Htemp in Hun.
-    itauto.
+    by itauto.
   }
-  lia.
+  by lia.
 Qed.
 
 Lemma difference_with_intersection
   (X Y : C) :
   X ∖ Y ≡ X ∖ (X ∩ Y).
 Proof.
-  set_solver.
+  by set_solver.
 Qed.
 
 Lemma difference_size
@@ -116,7 +120,7 @@ Lemma difference_size
 Proof.
   rewrite difference_with_intersection.
   specialize (difference_size_subset X (X ∩ Y)) as Hdif.
-  set_solver.
+  by set_solver.
 Qed.
 
 Lemma difference_size_ge_disjoint_case
@@ -125,20 +129,17 @@ Lemma difference_size_ge_disjoint_case
 Proof.
   specialize (difference_size X Y).
   specialize (intersection_size2 X Y).
-  lia.
+  by lia.
 Qed.
 
 Lemma list_to_set_size
   (l : list A) :
   size (list_to_set l (C := C)) <= length l.
 Proof.
-  induction l.
-  - simpl.
-    rewrite size_empty. lia.
-  - simpl.
-    specialize (union_size_le_sum ({[a]}) (list_to_set l)) as Hun_size.
-    rewrite size_singleton in Hun_size.
-    lia.
+  induction l; cbn.
+  - by rewrite size_empty; lia.
+  - specialize (union_size_le_sum ({[a]}) (list_to_set l)) as Hun_size.
+    by rewrite size_singleton in Hun_size; lia.
 Qed.
 
 End sec_general.
@@ -158,7 +159,7 @@ Proof.
   intros a HaX.
   apply elem_of_filter in HaX.
   apply elem_of_filter.
-  set_solver.
+  by set_solver.
 Qed.
 
 Lemma filter_subprop
@@ -168,7 +169,7 @@ Proof.
   intros a HaP.
   apply elem_of_filter in HaP.
   apply elem_of_filter.
-  itauto.
+  by itauto.
 Qed.
 
 End sec_filter.
@@ -190,7 +191,7 @@ Proof.
   intros a Ha.
   apply elem_of_map in Ha.
   apply elem_of_map.
-  firstorder.
+  by firstorder.
 Qed.
 
 Lemma set_map_size_upper_bound

@@ -129,7 +129,7 @@ Proof.
   destruct item. subst i. destruct l as (i, li).
   simpl. unfold pre_VLSM_projection_transition_item_project, composite_project_label.
   simpl.
-  destruct (decide _); [|congruence].
+  destruct (decide _); [| by congruence].
   f_equal. unfold composite_transition_item_projection, composite_transition_item_projection_from_eq.
   simpl.
   f_equal.
@@ -270,11 +270,11 @@ Proof.
   apply elem_of_map_option in Hitemj as [itemX [HitemX HitemX_pr]].
   exists itemX. split; [done |].
   unfold pre_VLSM_projection_transition_item_project in HitemX_pr.
-  destruct (composite_project_label _ _ _) as [lY|] eqn:Hly; [|congruence].
+  destruct (composite_project_label _ _ _) as [lY |] eqn: Hly; [| by congruence].
   inversion HitemX_pr. subst. clear HitemX_pr.
   repeat split.
   unfold composite_project_label in Hly.
-  case_decide; [|congruence].
+  case_decide; [| by congruence].
   exists H.
   by inversion Hly.
 Qed.
@@ -339,7 +339,7 @@ Proof.
   destruct (id Hv) as [sX [Hsi [Hps [Hopm _]]]]; subst.
   repeat split; [| | done].
   - by eapply (VLSM_projection_valid_state (component_projection _ constraint j)).
-  - apply any_message_is_valid_in_preloaded.
+  - by apply any_message_is_valid_in_preloaded.
 Qed.
 
 Lemma projection_valid_implies_composition_valid_message
@@ -428,10 +428,9 @@ Lemma proj_pre_loaded_with_all_messages_valid_state_message_preservation
   : valid_state_message_prop PreLoaded s om.
 Proof.
   induction Hps.
-  - apply (valid_initial_state_message PreLoaded); [done |].
-    by destruct om.
-  - apply (valid_generated_state_message PreLoaded) with s _om _s om l. 1-2, 4: done.
-    simpl. eapply (projection_valid_implies_valid IM). exact Hv.
+  - by apply (valid_initial_state_message PreLoaded); [| destruct om].
+  - apply (valid_generated_state_message PreLoaded) with s _om _s om l; [done.. | | done].
+    by cbn; eapply (projection_valid_implies_valid IM), Hv.
 Qed.
 
 (** We can now finally prove the main result for this section. *)
@@ -442,8 +441,8 @@ Proof.
   apply (basic_VLSM_incl (machine Xj) (machine PreLoaded)); intro; intros.
   - done.
   - by apply initial_message_is_valid.
-  - unfold vvalid; cbn. eapply (projection_valid_implies_valid IM), Hv.
-  - apply H.
+  - by unfold vvalid; cbn; eapply (projection_valid_implies_valid IM), Hv.
+  - by apply H.
 Qed.
 
 Lemma component_projection_to_preloaded :
@@ -451,8 +450,8 @@ Lemma component_projection_to_preloaded :
     (composite_project_label IM j) (fun s => s j).
 Proof.
   eapply VLSM_projection_incl_trans.
-  - apply component_projection.
-  - apply proj_pre_loaded_with_all_messages_incl.
+  - by apply component_projection.
+  - by apply proj_pre_loaded_with_all_messages_incl.
 Qed.
 
 (**
@@ -493,12 +492,12 @@ Proof.
   eapply VLSM_eq_trans;
     [| apply VLSM_eq_sym, pre_composite_vlsm_induced_projection_validator_iff].
   apply pre_loaded_with_all_messages_validator_proj_eq.
-  - apply component_transition_projection_None.
-  - apply component_label_projection_lift.
-  - apply component_state_projection_lift.
-  - intro s; apply (composite_initial_state_prop_lift IM).
-  - apply component_transition_projection_Some.
-  - apply component_projection_to_preloaded.
+  - by apply component_transition_projection_None.
+  - by apply component_label_projection_lift.
+  - by apply component_state_projection_lift.
+  - by intro s; apply (composite_initial_state_prop_lift IM).
+  - by apply component_transition_projection_Some.
+  - by apply component_projection_to_preloaded.
   - intros li si omi Hiv.
     apply Hvalidator in Hiv as (sX & <- & HivX).
     exists (existT j li), sX; split; [| done..].
@@ -555,7 +554,7 @@ Proof.
   - by apply initial_state_is_valid, (composite_initial_state_prop_lift IM j).
   - destruct Ht as [Hvj Ht].
     specialize (Hfr _ _ _ Hvj _ IHHp).
-    spec Hfr; [apply state_update_eq |].
+    spec Hfr; [by apply state_update_eq |].
     exists om'.
     destruct Hvj as [_ [_ Hvj]].
     apply (projection_valid_implies_composition_valid_message IM) in Hvj as Hom.
@@ -568,7 +567,7 @@ Proof.
     state_update_simpl.
     replace (vtransition (IM j) _ _) with (s', om').
     f_equal.
-    apply state_update_twice.
+    by applystate_update_twice.
 Qed.
 
 (**
@@ -582,15 +581,14 @@ Lemma projection_friendliness_lift_to_composite_vlsm_full_projection
   : VLSM_full_projection Xj X (lift_to_composite_label IM j) (lift_to_composite_state' IM j).
 Proof.
   apply basic_VLSM_full_projection; intro; intros.
-  - apply (Hfr _ _ _ Hv); [| apply state_update_eq].
-    apply (projection_friendliness_sufficient_condition_valid_state Hfr).
-    apply Hv.
+  - apply (Hfr _ _ _ Hv); [| by apply state_update_eq].
+    by apply (projection_friendliness_sufficient_condition_valid_state Hfr), Hv.
   - unfold lift_to_composite_label, vtransition. simpl.
     unfold lift_to_composite_state' at 1.
     state_update_simpl.
     replace (vtransition (IM j) _ _) with (s', om')
       by (symmetry; apply H).
-    f_equal. unfold lift_to_composite_state'. apply state_update_twice.
+    by rewrite state_update_twice.
   - by apply (composite_initial_state_prop_lift IM j).
   - by destruct Hv as [Hs [Homj [sX [Heqs [HsX [Hom Hv]]]]]].
 Qed.

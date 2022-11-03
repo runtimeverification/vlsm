@@ -49,7 +49,7 @@ Lemma find_largest_nat_with_property_bounded_None
 Proof.
   induction bound; simp find_largest_nat_with_property_bounded; [by split; [lia |] |].
   case_decide as HP; split; [done | | |].
-  - intro Hmax; contradict HP; apply Hmax; lia.
+  - by intro Hmax; contradict HP; apply Hmax; lia.
   - intros.
     destruct (decide (n < bound)); [by eapply IHbound |].
     by replace n with bound; [| lia].
@@ -102,11 +102,11 @@ Proof.
       simplify_list_eq.
       by inversion 1; [| eapply Hfirst].
     + intros (Hi & Hposi & Hfirst).
-      apply elem_of_cons in Hi as [<- | Hi]; [congruence |].
+      apply elem_of_cons in Hi as [<- | Hi]; [by congruence |].
       apply elem_of_list_split in Hi as (prefix' & suffix & ->).
       by erewrite Hfirst in Hpos; [| rewrite app_comm_cons | left].
     + intros (Hi & Hposi & Hfirst).
-      apply elem_of_cons in Hi as [<- | Hi]; [congruence |].
+      apply elem_of_cons in Hi as [<- | Hi]; [by congruence |].
       apply IHindices; [done |].
       split_and!; [done.. |].
       intros prefix suffix -> j Hj.

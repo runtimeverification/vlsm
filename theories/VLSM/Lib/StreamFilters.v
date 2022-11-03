@@ -24,8 +24,9 @@ Lemma filtering_subsequence_sorted
   (Hfs : filtering_subsequence P s ns)
   : ForAll2 lt ns.
 Proof.
-  apply proj2 in Hfs. revert Hfs. apply ForAll2_subsumption.
-  intros. apply H.
+  destruct Hfs as [_ Hfs].
+  revert Hfs; apply ForAll2_subsumption.
+  by intros a b H; apply H.
 Qed.
 
 Lemma filtering_subsequence_prefix_sorted
@@ -67,8 +68,8 @@ Lemma filtering_subsequence_witness
   (k : nat)
   : P (Str_nth (Str_nth k ss) s).
 Proof.
-  apply proj2 in Hfs. rewrite ForAll2_forall in Hfs.
-  apply Hfs.
+  destruct Hfs as [_ Hfs].
+  by rewrite ForAll2_forall in Hfs; apply Hfs.
 Qed.
 
 (**
@@ -89,7 +90,7 @@ Proof.
   apply monotone_nat_stream_prop_from_successor in Hss_sorted.
   apply monotone_nat_stream_find with (n := n) in Hss_sorted.
   destruct Hss_sorted  as [Hlt | [k Hk]].
-  - destruct Hfs as [Hfs _]. by elim (Hfs n).
+  - by destruct Hfs as [Hfs _]; elim (Hfs n).
   - destruct Hk as [Heq | Hk]; subst; [by exists k |].
     exfalso. apply proj2 in Hfs.
     rewrite ForAll2_forall in Hfs.
@@ -113,8 +114,8 @@ Proof.
   apply (@set_equality_predicate _ lt _).
   - by apply filtering_subsequence_prefix_sorted with P s.
   - apply LocallySorted_filter.
-    + unfold Transitive. lia.
-    + apply nat_sequence_prefix_sorted.
+    + by typeclasses eauto.
+    + by apply nat_sequence_prefix_sorted.
   - unfold ListSetExtras.set_eq, subseteq, list_subseteq.
     setoid_rewrite elem_of_list_filter.
     setoid_rewrite elem_of_stream_prefix.
@@ -126,19 +127,17 @@ Proof.
       eexists; split; [| done].
       destruct (decide (i = k)); [subst; lia|].
       cut (Str_nth i ss < Str_nth k ss); [lia|].
-      apply ForAll2_transitive_lookup; [unfold Transitive; lia| | lia].
+      apply ForAll2_transitive_lookup; [by typeclasses eauto | | lia].
       by apply filtering_subsequence_sorted in Hfs.
     + destruct H as [Hpa [_a [Hlt H_a]]].
       subst _a.
-      specialize (filtering_subsequence_witness_rev _ _ _ Hfs _ Hpa)
-        as [k' Hk'].
-      subst.
+      destruct (filtering_subsequence_witness_rev _ _ _ Hfs _ Hpa) as [k' ->].
       exists k'.
       split; [| done].
       apply filtering_subsequence_sorted in Hfs.
       apply monotone_nat_stream_prop_from_successor in Hfs.
       specialize (monotone_nat_stream_rev _ Hfs k' k) as Hle.
-      feed specialize Hle; lia.
+      by feed specialize Hle; lia.
 Qed.
 
 Lemma filtering_subsequence_prefix_length
@@ -356,15 +355,15 @@ Proof.
   intros.
   destruct Hev; simpl.
   - destruct (decide _); [| done].
-    exists 0. split_and!; f_equal; [lia | done | lia].
+    by exists 0; split_and!; f_equal; [lia | | lia].
   - destruct (decide _); simpl.
-    + exists 0. split_and!; f_equal; [lia | done | lia].
+    + by exists 0; split_and!; f_equal; [lia | | lia].
     + specialize (H (tl s) Hev (S n)) as (k & Heq & Hp & Hnp).
       exists (S k). rewrite Heq.
       split; [f_equal; lia|].
       split; [done |].
       intros. destruct i; [done |].
-      apply Hnp. lia.
+      by apply Hnp; lia.
 Qed.
 
 Lemma stream_filter_fst_pos_infinitely_often
@@ -373,8 +372,8 @@ Lemma stream_filter_fst_pos_infinitely_often
   (n : nat)
   : InfinitelyOften P s -> InfinitelyOften P (stream_filter_fst_pos s Hev n).2.
 Proof.
-  destruct (stream_filter_fst_pos_characterization s Hev n) as [k [Heq _]].
-  rewrite Heq. apply InfinitelyOften_nth_tl.
+  destruct (stream_filter_fst_pos_characterization s Hev n) as (k & -> & _).
+  by apply InfinitelyOften_nth_tl.
 Qed.
 
 Lemma stream_filter_fst_pos_le
@@ -383,8 +382,8 @@ Lemma stream_filter_fst_pos_le
   (n : nat)
   : n <= (stream_filter_fst_pos s Hev n).1.
 Proof.
-  destruct (stream_filter_fst_pos_characterization s Hev n) as [k [Heq _]].
-  rewrite Heq. simpl. lia.
+  destruct (stream_filter_fst_pos_characterization s Hev n) as (k & -> & _).
+  by cbn; lia.
 Qed.
 
 Lemma stream_filter_fst_pos_nth_tl_has_property
@@ -405,7 +404,7 @@ Proof.
   intros i [Hlt_i Hilt].
   apply stdpp_nat_le_sum in Hlt_i as [i' ->].
   rewrite Nat.add_comm, <- Str_nth_plus.
-  apply Hnp. simpl in *. lia.
+  by apply Hnp; cbn in *; lia.
 Qed.
 
 (**
@@ -441,7 +440,7 @@ Proof.
     assert (Htl : (stream_filter_fst_pos s (fHere (Exists1 P) s Hinf) n0).2 = Str_nth_tl (S k) s).
     { by rewrite Heq. }
     exists k.
-    rewrite Hk. simpl. simpl in Htl. rewrite <- Htl. eauto.
+    by rewrite Hk; cbn in *; rewrite <- Htl; eauto.
   - replace
       (Str_nth_tl (S n) (stream_filter_positions s Hinf n0))
       with (tl (Str_nth_tl n (stream_filter_positions s Hinf n0)))
@@ -464,7 +463,7 @@ Proof.
     rewrite tl_nth_tl, Str_nth_tl_plus in Htl.
     rewrite Str_nth_plus in Hp.
     rewrite <- Htl.
-    replace (n0 + S (k + kn)) with (S (n0 + kn + k)) by lia. eauto.
+    by replace (n0 + S (k + kn)) with (S (n0 + kn + k)) by lia; eauto.
 Qed.
 
 Lemma stream_filter_positions_monotone
@@ -475,8 +474,8 @@ Proof.
   revert s Hinf n.
   cofix H.
   intros.
-  constructor; simpl; [|apply H].
-  apply stream_filter_fst_pos_le.
+  constructor; simpl; [| by apply H].
+  by apply stream_filter_fst_pos_le.
 Qed.
 
 (** [stream_filter_positions] produces a [filtering_sequence]. *)
@@ -506,7 +505,7 @@ Proof.
     intros i [Hle Hlt].
     apply stdpp_nat_le_sum in Hle as [k' ->].
     rewrite Nat.add_comm, <- Str_nth_tl_plus. simpl.
-    apply Hnp. lia.
+    by apply Hnp; lia.
 Qed.
 
 (**
@@ -560,7 +559,7 @@ Lemma stream_map_option_prefix
 Proof.
   subst map_opt_pre m.
   rewrite !(map_option_as_filter f (stream_prefix s n)).
-  apply fitering_subsequence_stream_filter_map_prefix.
+  by apply fitering_subsequence_stream_filter_map_prefix.
 Qed.
 
 Program Definition stream_map_option_prefix_ex
@@ -613,14 +612,10 @@ Proof.
     rewrite Heq1.
     simpl.
     destruct _k; [lia|].
-    exfalso. apply (H_k 0); [lia | by eexists].
+    by exfalso; apply (H_k 0); [lia | eexists].
   }
   induction n; intros; rewrite stream_filter_positions_unroll; unfold Streams.Str_nth; simpl.
-  - replace (k + 0) with k by lia.
-    apply Hfirst.
+  - by rewrite Hfirst; lia.
   - unfold Streams.Str_nth in IHn.
-    rewrite IHn.
-    simpl. replace (k + S n) with (S (k + n)) by lia.
-    f_equal. f_equal.
-    apply Hfirst.
+    by rewrite IHn, Hfirst; lia.
 Qed.

@@ -21,9 +21,9 @@ Lemma same_VLSM_full_projection
   : VLSM_full_projection X1 X2 (same_VLSM_label_rew Heq) (same_VLSM_state_rew Heq).
 Proof.
   apply basic_VLSM_strong_full_projection; intro.
-  - apply same_VLSM_valid_preservation.
-  - apply same_VLSM_transition_preservation.
-  - apply same_VLSM_initial_state_preservation.
+  - by apply same_VLSM_valid_preservation.
+  - by apply same_VLSM_transition_preservation.
+  - by apply same_VLSM_initial_state_preservation.
   - by apply same_VLSM_initial_message_preservation.
 Qed.
 

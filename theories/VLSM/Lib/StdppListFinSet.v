@@ -144,7 +144,7 @@ Lemma set_diff_iff a l l' :
   a ∈ set_diff l l' <-> a ∈ l /\ ~ a ∈ l'.
 Proof.
   split.
-  - eauto using set_diff_elim1, set_diff_elim2.
+  - by eauto using set_diff_elim1, set_diff_elim2.
   - by intros []; apply set_diff_intro.
 Qed.
 

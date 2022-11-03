@@ -55,18 +55,18 @@ Lemma sum_weights_subseteq
   vs ⊆ vs' ->
   (sum_weights vs <= sum_weights vs')%R.
 Proof.
-  induction vs; intros; try apply sum_weights_positive.
+  induction vs; intros; [by apply sum_weights_positive |].
   specialize (sum_weights_in a vs' H0) as Hvs'.
   spec Hvs'; [by apply H1; left |].
-  rewrite Hvs'. simpl.
+  rewrite Hvs'; cbn.
   apply Rplus_le_compat_l.
-  inversion H. subst.  clear H.
-  apply IHvs; [done | |].
-  - by apply set_remove_nodup.
-  - intros v Hv. apply set_remove_iff; [done |].
-    split.
-    + by apply H1; right.
-    + by intros ->.
+  inversion H; subst; clear H.
+  apply IHvs; [done | by apply set_remove_nodup |].
+  intros v Hv.
+  apply set_remove_iff; [done |].
+  split.
+  - by apply H1; right.
+  - by intros ->.
 Qed.
 
 Lemma set_eq_nodup_sum_weight_eq
