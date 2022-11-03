@@ -166,11 +166,11 @@ Proof.
   - intros Hs sub_i.
     destruct Hs as [sX [HeqsX Hinitial]].
     subst.
-    apply Hinitial.
+  - by apply Hinitial.
   - intros Hs.
     exists (lift_sub_state fixed_byzantine_IM non_byzantine s).
     split.
-    + apply composite_state_sub_projection_lift_to.
+    + by apply composite_state_sub_projection_lift_to.
     + by apply (lift_sub_state_initial fixed_byzantine_IM non_byzantine).
 Qed.
 
@@ -199,12 +199,12 @@ Proof.
   apply induced_sub_projection_friendliness.
   apply induced_sub_projection_lift.
   intros s1 s2 Heq l om.
-  destruct om as [m|]; [|itauto].
+  destruct om as [m |]; [| by itauto].
   cbn.
-  destruct (sender m) as [v|]; [|itauto].
+  destruct (sender m) as [v |]; [| by itauto].
   simpl.
-  case_decide as HAv; [|itauto].
-  replace (s2 (A v)) with (s1 (A v)); [itauto|].
+  case_decide as HAv; [| by itauto].
+  replace (s2 (A v)) with (s1 (A v)); [by itauto |].
   exact (equal_f_dep Heq (dexist (A v) HAv)).
 Qed.
 
@@ -221,7 +221,7 @@ Lemma fixed_byzantine_trace_char1 is tr
 Proof.
   apply and_comm.
   apply (projection_friendly_trace_char (induced_sub_projection_is_projection _ _ _)).
-  apply fixed_non_byzantine_projection_friendliness.
+  by apply fixed_non_byzantine_projection_friendliness.
 Qed.
 
 End sec_fixed_byzantine_traces_as_projections.
@@ -273,7 +273,7 @@ Qed.
 Lemma non_byzantine_nodes_same_sym
   : forall sub_i, sub_IM IM non_byzantine sub_i = sub_IM fixed_byzantine_IM non_byzantine sub_i.
 Proof.
-  intro. symmetry. apply non_byzantine_nodes_same.
+  by intro; symmetry; apply non_byzantine_nodes_same.
 Qed.
 
 Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection
@@ -287,8 +287,8 @@ Proof.
   intros s1 Hs1 l1 om [Hom _].
   split; [| done].
   destruct om as [m |]; [| done].
-  destruct Hom as [Hsent | Hseeded]; [left | by right].
-  by eapply same_IM_composite_has_been_sent_preservation.
+  destruct Hom as [Hsent | Hseeded]; [| by right].
+  by left; eapply same_IM_composite_has_been_sent_preservation.
 Qed.
 
 Lemma pre_loaded_fixed_non_byzantine_vlsm_full_projection'
@@ -302,8 +302,8 @@ Proof.
   intros s1 Hs1 l1 om [Hom _].
   split; [| done].
   destruct om as [m |]; [| done].
-  destruct Hom as [Hsent | Hseeded]; [left | by right].
-  by eapply same_IM_composite_has_been_sent_preservation.
+  destruct Hom as [Hsent | Hseeded]; [| by right].
+  by left; eapply same_IM_composite_has_been_sent_preservation.
 Qed.
 
 (**
@@ -382,7 +382,7 @@ Proof.
             A sender fixed_byzantine_IM_sender_safety)
     ; [| done | done].
     eapply (VLSM_incl_valid_state); [| done].
-    eapply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by eapply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   - contradict HAv; clear -Hseeded Hsender.
     destruct Hseeded as [(i & Hi & Hm) _].
     unfold channel_authenticated_message in Hm.
@@ -434,7 +434,7 @@ Proof.
     simpl.
     rewrite @decide_True by done.
     cbn. unfold all_messages_transition.
-    inversion 1; itauto.
+    by inversion 1; itauto.
 Qed.
 
 (**
@@ -466,19 +466,18 @@ Proof.
     exists (lift_sub_label fixed_byzantine_IM non_byzantine l).
     exists (lift_sub_state fixed_byzantine_IM non_byzantine s).
     split.
-    + apply composite_label_sub_projection_option_lift.
-    + apply composite_state_sub_projection_lift.
+    + by apply composite_label_sub_projection_option_lift.
+    + by apply composite_state_sub_projection_lift.
     + by apply (VLSM_full_projection_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
-  - intros l s om s' om' [_ Ht].
-    by apply induced_sub_projection_transition_preservation.
+  - by intros l s om s' om' [_ Ht]; apply induced_sub_projection_transition_preservation.
 Qed.
 
 Lemma fixed_non_byzantine_pre_loaded_eq
   : VLSM_eq fixed_non_byzantine_projection pre_loaded_fixed_non_byzantine_vlsm'.
 Proof.
   apply VLSM_eq_incl_iff. split.
-  - apply fixed_non_byzantine_pre_loaded_incl.
-  - apply pre_loaded_fixed_non_byzantine_incl.
+  - by apply fixed_non_byzantine_pre_loaded_incl.
+  - by apply pre_loaded_fixed_non_byzantine_incl.
 Qed.
 
 End sec_fixed_byzantine_traces_as_pre_loaded.
@@ -567,24 +566,22 @@ Lemma fixed_non_equivocating_incl_fixed_non_byzantine
 Proof.
   apply basic_VLSM_incl.
   - intros s (sX & <- & Hinitial) sub_i.
-    apply Hinitial.
+  - by apply Hinitial.
   - intro; intros.
     apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating)
       in Hv as (Hs & _ & Hv).
-    apply sub_IM_no_equivocation_preservation in Hv as Hnoeqv.
-    2-4: done.
+    apply sub_IM_no_equivocation_preservation in Hv as Hnoeqv; [| done..].
     destruct Hnoeqv as [Hsent | Hseeded].
     + by eapply preloaded_composite_sent_valid.
     + apply initial_message_is_valid.
-      by right; split; [|eapply induced_sub_projection_valid_projection; apply Hv].
+      by right; split; [| eapply induced_sub_projection_valid_projection, Hv].
   - intros l s om Hv.
     apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating)
        in Hv as (_ & _ & Hv).
     split.
     + by eapply induced_sub_projection_valid_preservation.
     + split; [| done].
-      apply sub_IM_no_equivocation_preservation in Hv as Hnoequiv.
-      2-4: done.
+      apply sub_IM_no_equivocation_preservation in Hv as Hnoequiv; [| done..].
       destruct om as [m |]; [| done].
       destruct Hnoequiv as [Hsent|Hseeded]; [by left | right].
       by split; [|eapply induced_sub_projection_valid_projection; apply Hv].
@@ -627,7 +624,7 @@ Lemma fixed_non_byzantine_vlsm_lift_valid
 Proof.
   intros l s om Hv HsY HomY.
   split.
-  - apply lift_sub_valid. apply Hv.
+  - by apply lift_sub_valid, Hv.
   - destruct om as [m|]; [| done].
     apply proj2 in Hv as Hc.
     destruct Hc as [_ [_ [Hc _]]].
@@ -651,14 +648,14 @@ Proof.
       apply can_emit_composite_project in Hiom as [_v Hiom].
       destruct Hseeded as [[i [Hi Hsigned]] _].
       unfold channel_authenticated_message in Hsigned.
-      destruct (sender m) as [v|] eqn:Hsender; simpl in Hsigned; [|congruence].
+      destruct (sender m) as [v |] eqn: Hsender; simpl in Hsigned; [| by congruence].
       apply Some_inj in Hsigned.
       specialize (Hsender_safety _ _ Hsender _ Hiom) as Heq_v.
       rewrite Hsigned in Heq_v. subst _v.
       eapply message_dependencies_are_sufficient in Hiom.
       revert Hiom.
       rewrite set_diff_iff in Hi.
-      apply not_and_r in Hi as [Hi | Hi]; [elim Hi; apply elem_of_enum|].
+      apply not_and_r in Hi as [Hi | Hi]; [by elim Hi; apply elem_of_enum |].
       apply dec_stable in Hi.
       apply can_emit_with_more; [done |].
       intros dm Hdm.
@@ -681,7 +678,7 @@ Lemma preloaded_non_byzantine_vlsm_lift
 Proof.
   apply basic_VLSM_strong_full_projection; [| | | done].
   - intros l s om [Hv _].
-    by split; [apply lift_sub_valid|].
+  - by split; [apply lift_sub_valid |].
   - by intro; intros; rapply lift_sub_transition.
   - by intro; intros; apply (lift_sub_state_initial IM).
 Qed.
@@ -708,7 +705,7 @@ Proof.
   - by intro; intros; apply fixed_non_byzantine_vlsm_lift_valid.
   - by intro; intros * []; rapply lift_sub_transition.
   - by intro; intros; apply (lift_sub_state_initial IM).
-  - intros; apply Hfixed_non_byzantine_vlsm_lift_initial_message.
+  - by intros; apply Hfixed_non_byzantine_vlsm_lift_initial_message.
 Qed.
 
 Lemma fixed_non_byzantine_incl_fixed_non_equivocating_from_initial
@@ -718,17 +715,17 @@ Proof.
   - intro; intros.
     exists (lift_sub_state IM (set_diff (enum index) selection) s).
     split.
-    + apply composite_state_sub_projection_lift_to.
+    + by apply composite_state_sub_projection_lift_to.
     + by apply (lift_sub_state_initial IM).
   - by intro; intros; apply initial_message_is_valid.
   - intros l s om Hv HsY HomY.
     exists (lift_sub_label IM (set_diff (enum index) selection) l).
     exists (lift_sub_state IM (set_diff (enum index) selection) s).
     split.
-    + apply composite_label_sub_projection_option_lift.
-    + apply composite_state_sub_projection_lift.
+    + by apply composite_label_sub_projection_option_lift.
+    + by apply composite_state_sub_projection_lift.
     + apply @VLSM_full_projection_input_valid; [| done].
-      apply fixed_non_byzantine_vlsm_lift_from_initial.
+      by apply fixed_non_byzantine_vlsm_lift_from_initial.
   - intros l s om s' om' [_ Ht].
     by apply induced_sub_projection_transition_preservation.
 Qed.
@@ -738,8 +735,8 @@ Lemma fixed_non_byzantine_eq_fixed_non_equivocating_from_initial
 Proof.
   apply VLSM_eq_incl_iff.
   split.
-  - apply fixed_non_byzantine_incl_fixed_non_equivocating_from_initial.
-  - apply fixed_non_equivocating_incl_fixed_non_byzantine.
+  - by apply fixed_non_byzantine_incl_fixed_non_equivocating_from_initial.
+  - by apply fixed_non_equivocating_incl_fixed_non_byzantine.
 Qed.
 
 End sec_assuming_initial_messages_lift.
@@ -778,7 +775,7 @@ Lemma validator_fixed_non_byzantine_eq_fixed_non_equivocating
   : VLSM_eq PreNonByzantine FixedNonEquivocating.
 Proof.
   apply fixed_non_byzantine_eq_fixed_non_equivocating_from_initial.
-  apply validator_fixed_non_byzantine_vlsm_lift_initial_message.
+  by apply validator_fixed_non_byzantine_vlsm_lift_initial_message.
 Qed.
 
 (** ** The main result

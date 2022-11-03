@@ -56,8 +56,8 @@ Lemma SeededXE_Free_full_projection
 Proof.
   apply basic_VLSM_full_projection; intros ? *.
   - split; [| done].
-    apply lift_sub_valid. apply Hv.
-  - intros [_ Ht]. revert Ht. apply lift_sub_transition.
+    by apply lift_sub_valid, Hv.
+  - by intros [_ Ht]; revert Ht; apply lift_sub_transition.
   - by intros; apply (lift_sub_state_initial equivocator_IM).
   - intros; destruct HmX as [Hinit|Hseeded]; [| by apply Hseed].
     apply initial_message_is_valid.
@@ -114,7 +114,7 @@ Proof.
   intro i.
   unfold lift_equivocators_sub_state_to.
   destruct (decide _); [|lia].
-  rewrite equivocator_state_append_size. lia.
+  by rewrite equivocator_state_append_size; lia.
 Qed.
 
 (** The plan item corresponding to an initial state equivocation. *)
@@ -174,13 +174,13 @@ Proof.
     unfold lift_equivocators_sub_state_to.
     case_decide; [| done].
     rewrite decide_True; [done |].
-    apply elem_of_enum.
+    by apply elem_of_enum.
   }
   induction l using rev_ind; intros.
   - case_decide; [| done].
     by rewrite decide_False; [| inversion 1].
-  - spec IHl; [apply incl_app_inv in Hincl; apply Hincl |].
-    spec IHl; [apply NoDup_app in Hnodup; apply Hnodup |].
+  - spec IHl; [by apply incl_app_inv in Hincl; apply Hincl |].
+    spec IHl; [by apply NoDup_app in Hnodup; apply Hnodup |].
     subst tr_full_replay_is.
     rewrite map_app, (composite_apply_plan_app equivocator_IM); simpl in *
     ; destruct (composite_apply_plan _ _ _) as (aitems, afinal); simpl in *.
@@ -190,7 +190,7 @@ Proof.
     + rewrite decide_False in IHl.
       * rewrite IHl, decide_True.
         -- rewrite (sub_IM_state_pi is _Hix Hix); symmetry.
-           apply equivocator_state_append_singleton_is_extend, (His (dexist i Hix)).
+           by apply equivocator_state_append_singleton_is_extend, (His (dexist i Hix)).
         -- rewrite elem_of_app, elem_of_list_singleton; right.
            by apply dsig_eq.
       * intro Heqv.
@@ -231,7 +231,7 @@ Proof.
   split.
   - apply equivocators_trace_project_app_iff.
     exists [],[],eqv_descriptors.
-    repeat split; [|apply IHl].
+    repeat split; [| by apply IHl].
     specialize (Heqv_descriptors (` x)).
     unfold existing_descriptor in Heqv_descriptors.
     destruct (eqv_descriptors (` x)) eqn:Heqv_x; [done |].
@@ -270,7 +270,7 @@ Proof.
   simpl in *.
   rewrite finite_trace_last_is_last. simpl.
   intros i j Hj.
-  destruct (decide (`x = i)); subst; equivocator_state_update_simpl; [| auto].
+  destruct (decide (`x = i)); subst; equivocator_state_update_simpl; [| by auto].
   specialize (IHl (` x) j Hj).
   destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [|lia].
   rewrite equivocator_state_extend_project_1; [done |].
@@ -325,7 +325,7 @@ Proof.
   unfold replayed_trace_from.
   destruct_list_last tr tr' lst Htr.
   - simpl. rewrite app_nil_r.
-    apply equivocator_state_project_replayed_initial_state_from_left.
+    by apply equivocator_state_project_replayed_initial_state_from_left.
   - unfold pre_VLSM_full_projection_finite_trace_project.
     rewrite map_app, app_assoc. simpl.
     rewrite finite_trace_last_is_last.
@@ -361,7 +361,7 @@ Proof.
   apply functional_extensionality_dep.
   intro i.
   apply equivocator_state_descriptor_project_replayed_trace_from_left.
-  apply zero_descriptor_not_equivocating.
+  by apply zero_descriptor_not_equivocating.
 Qed.
 
 Lemma equivocators_trace_project_replayed_trace_from_left full_replay_state is tr
@@ -411,7 +411,7 @@ Proof.
   unfold equivocators_total_trace_project.
   rewrite equivocators_trace_project_replayed_trace_from_left
   ; [done |].
-  apply zero_descriptor_not_equivocating.
+  by apply zero_descriptor_not_equivocating.
 Qed.
 
 Lemma lift_equivocators_sub_valid
@@ -505,23 +505,21 @@ Proof.
   intro l.
   induction l using rev_ind; intros Hincl.
   - by constructor.
-  - spec IHl.  { intros i Hi. by apply Hincl, in_app_iff; left. }
+  - spec IHl; [by intros i Hi; apply Hincl, in_app_iff; left |].
     rewrite map_app.
     apply finite_valid_plan_from_app_iff.
     split; [done |].
     apply finite_valid_trace_singleton. simpl.
     repeat split.
-    + revert IHl. apply apply_plan_last_valid.
-    + apply option_valid_message_None.
-    + apply His.
+    + by apply apply_plan_last_valid.
+    + by apply option_valid_message_None.
+    + by apply His.
     + apply Hconstraint_none.
-      * clear -x. by destruct_dec_sig x i Hi Hx; subst.
+      * by destruct_dec_sig x i Hi Hx; subst.
       * apply finite_valid_trace_last_pstate in IHl.
         remember (finite_trace_last _ _) as lst.
-        replace ((apply_plan _ _ _).2) with lst
-        ; [done |].
-        subst.
-        apply apply_plan_last.
+        replace ((apply_plan _ _ _).2) with lst; [done |].
+        by subst; apply apply_plan_last.
 Qed.
 
 Lemma lift_initial_message
@@ -538,10 +536,10 @@ Lemma lift_equivocators_sub_weak_projection
 Proof.
   apply basic_VLSM_weak_full_projection; intros ? *.
   - split.
-    + apply lift_equivocators_sub_valid. apply Hv.
+    + by apply lift_equivocators_sub_valid, Hv.
     + by apply Hsubsumption.
-  - intros Ht. apply lift_equivocators_sub_transition; apply Ht.
-  - intro. rewrite <- replayed_initial_state_from_lift; [| done].
+  - by intros Ht; apply lift_equivocators_sub_transition; apply Ht.
+  - intro; rewrite <- replayed_initial_state_from_lift; [| done].
     by apply finite_valid_trace_last_pstate, replayed_initial_state_from_valid.
   - by intros; apply lift_initial_message.
 Qed.
@@ -584,7 +582,7 @@ Lemma PreFreeSubE_PreFreeE_weak_full_projection
 Proof.
   apply basic_VLSM_weak_full_projection; intros ? *.
   - by split; [apply lift_equivocators_sub_valid; apply Hv |].
-  - intro Ht. apply lift_equivocators_sub_transition; apply Ht.
+  - by intro Ht; apply lift_equivocators_sub_transition; apply Ht.
   - intros.
     rewrite <- replayed_initial_state_from_lift; [| done].
     apply finite_valid_trace_last_pstate.
@@ -592,7 +590,7 @@ Proof.
     apply (VLSM_eq_finite_valid_trace_from Heq).
     apply replayed_initial_state_from_valid; [done | | done].
     by apply (VLSM_eq_valid_state Heq).
-  - intros. apply any_message_is_valid_in_preloaded.
+  - by intros; apply any_message_is_valid_in_preloaded.
 Qed.
 
 Section sec_seeded_no_equiv.
@@ -668,7 +666,7 @@ Proof.
       seed)
       as Hvalid.
   spec Hvalid; [done |].
-  spec Hvalid; [apply sent_are_valid|].
+  spec Hvalid; [by apply sent_are_valid |].
   specialize (Hvalid _ Hfull_replay_state).
   apply Hvalid; [| done].
   by intros; apply SeededNoEquiv_subsumption.

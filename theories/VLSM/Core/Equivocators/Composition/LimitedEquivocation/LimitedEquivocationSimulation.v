@@ -60,8 +60,8 @@ Proof.
   unfold state_has_fixed_equivocation in Hfixed.
   unfold equivocation_fault.
   apply sum_weights_subseteq.
-  - apply NoDup_elements.
-  - apply NoDup_remove_dups.
+  - by apply NoDup_elements.
+  - by apply NoDup_remove_dups.
   - intros i Hi.
     rewrite equivocating_indices_equivocating_validators in Hi.
     apply elem_of_elements, elem_of_list_to_set in Hi.
@@ -101,7 +101,7 @@ Lemma limited_equivocators_finite_valid_trace_init_to_rev
 Proof.
   destruct HtrX as (equivocating & Hlimited & HtrX).
   eapply VLSM_incl_finite_valid_trace, valid_trace_add_default_last in HtrX
-  ; [|eapply VLSM_eq_proj1,Fixed_eq_StrongFixed].
+  ; [| by eapply VLSM_eq_proj1,Fixed_eq_StrongFixed].
   specialize
     (fixed_equivocators_finite_valid_trace_init_to_rev IM _
       no_initial_messages_in_IM _ _ _ HtrX)

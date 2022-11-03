@@ -46,14 +46,14 @@ Lemma equivocator_state_append_transition l s om s' om' base_s
       (equivocator_state_append base_s s, om) = (equivocator_state_append base_s s', om').
 Proof.
   destruct l; cbn; intros Hv Ht
-  ; [inversion_clear Ht; f_equal; apply equivocator_state_append_extend_commute|..]
+  ; [by inversion_clear Ht; f_equal; apply equivocator_state_append_extend_commute | ..]
   ; (destruct (equivocator_state_project s n) as [sn|] eqn:Hn; [| done])
   ;  rewrite (equivocator_state_append_project_2 _ base_s s _ n eq_refl)
   ;  rewrite Hn
   ;  destruct (vtransition _ _ _) as (sn', _om') eqn:Hti
   ;  inversion_clear Ht; f_equal.
-  - apply equivocator_state_append_update_commute.
-  - apply equivocator_state_append_extend_commute.
+  - by apply equivocator_state_append_update_commute.
+  - by apply equivocator_state_append_extend_commute.
 Qed.
 
 Lemma equivocator_state_append_initial_state_in_futures
@@ -73,9 +73,10 @@ Proof.
   apply (finite_valid_trace_from_to_singleton (pre_loaded_vlsm (equivocator_vlsm X) seed)).
   repeat split.
   - done.
-  - apply option_valid_message_None.
-  - apply H.
-  - cbn. f_equal. symmetry. apply equivocator_state_append_singleton_is_extend. apply H.
+  - by apply option_valid_message_None.
+  - by apply H.
+  - cbn. f_equal. symmetry.
+    by apply equivocator_state_append_singleton_is_extend, H.
 Qed.
 
 Lemma equivocator_state_append_transition_initial_state
@@ -99,8 +100,8 @@ Lemma equivocator_state_append_preloaded_with_weak_projection
         (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
   apply basic_VLSM_weak_full_projection; intro; intros.
-  - apply equivocator_state_append_valid. apply Hv.
-  - apply equivocator_state_append_transition; apply H.
+  - by apply equivocator_state_append_valid, Hv.
+  - by apply equivocator_state_append_transition; apply H.
   - by apply equivocator_state_append_transition_initial_state.
   - by apply initial_message_is_valid.
 Qed.

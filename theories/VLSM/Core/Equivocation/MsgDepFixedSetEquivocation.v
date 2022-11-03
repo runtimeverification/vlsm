@@ -46,7 +46,7 @@ Lemma messages_with_valid_dependences_can_be_emitted s dm
   (Hemitted: can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
   : can_emit (equivocators_composition_for_sent IM equivocators s) dm.
 Proof.
-  eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient
+  by eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient
   ; itauto eauto.
 Qed.
 
@@ -59,7 +59,7 @@ Proof.
   apply Hdeps.
   transitivity dm; [done |].
   apply msg_dep_happens_before_iff_one.
-  itauto.
+  by itauto.
 Qed.
 
 Lemma dependencies_are_valid s m
@@ -80,8 +80,8 @@ Proof.
   ; [| done | done].
   intros dm0 Hdm0.
   apply Hind with dm; [done | | done].
-  - clear -Heqv Hdm; revert dm m Hdm Heqv.
-    apply msg_dep_rel_reflects_dependencies_with_non_equivocating_senders_were_sent.
+  clear -Heqv Hdm; revert dm m Hdm Heqv.
+  by apply msg_dep_rel_reflects_dependencies_with_non_equivocating_senders_were_sent.
 Qed.
 
 Lemma msg_dep_strong_fixed_equivocation_subsumption s m
@@ -93,7 +93,7 @@ Proof.
   cut (forall dm, msg_dep_rel message_dependencies dm m -> valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm)
   ; [| by apply dependencies_are_valid].
   intro Hdeps; right.
-  apply messages_with_valid_dependences_can_be_emitted with i; itauto.
+  by apply messages_with_valid_dependences_can_be_emitted with i; itauto.
 Qed.
 
 Lemma msg_dep_strong_fixed_equivocation_constraint_subsumption
@@ -125,22 +125,22 @@ Proof.
   - intros [sub_i li] lY HlX_pr sX om sX' om' [_ HtX]; revert HtX.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     unfold sub_label_element_project in HlX_pr; cbn in HlX_pr.
-    case_decide as Heqij; [|congruence].
+    case_decide as Heqij; [| by congruence].
     subst i; cbv in HlX_pr; apply Some_inj in HlX_pr; subst li.
     cbn; unfold sub_IM, sub_state_element_project; cbn.
     rewrite (sub_IM_state_pi sX Hj Hi).
     destruct (vtransition _ _ _) as (sj', _om'); inversion_clear 1.
-    f_equal; symmetry. apply sub_IM_state_update_eq.
+    by f_equal; symmetry; apply sub_IM_state_update_eq.
   - intros [sub_i li] HlX_pr sX om sX' om' [_ HtX].
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     unfold sub_label_element_project in HlX_pr; cbn in HlX_pr.
-    case_decide as Heqij; [congruence|].
+    case_decide as Heqij; [by congruence |].
     cbn in HtX; destruct (vtransition _ _ _) as (si', _om').
     inversion_clear HtX.
     unfold sub_state_element_project.
     by state_update_simpl.
   - by intros sX HsX; apply (HsX (dexist j Hj)).
-  - intro; intros; apply any_message_is_valid_in_preloaded.
+  - by intro; intros; apply any_message_is_valid_in_preloaded.
 Qed.
 
 Lemma equivocators_composition_can_emit_sender s m
@@ -174,11 +174,11 @@ Proof.
   eapply message_dependencies_are_necessary in Hproduce as Hobs.
   eapply has_been_directly_observed_sent_received_iff
     in Hobs as [Hreceived | Hsent]; [.. | done]; cycle 1.
-  + left; exists i; split; [done |].
-    eapply in_futures_preserving_oracle_from_stepwise
-    ; [apply has_been_sent_stepwise_from_trace | done | done].
-  + by eapply in_futures_valid_fst.
-  + apply in_futures_valid_fst in Hfutures as Hdestination.
+  - left; exists i; split; [done |].
+    by eapply in_futures_preserving_oracle_from_stepwise
+    ; [apply has_been_sent_stepwise_from_trace | |].
+  - by eapply in_futures_valid_fst.
+  - apply in_futures_valid_fst in Hfutures as Hdestination.
     specialize (received_component_received_previously IM Hdestination Hreceived)
       as (s_item_dm & [] & Ht & Hfutures_dm & <- & Hinput);
       destruct l as [i li]; cbn in Hinput; subst input; cbn in *.
@@ -186,9 +186,9 @@ Proof.
       ; destruct Ht as [(_ & _ & _ & Hc) _].
       eapply in_futures_preserves_strong_fixed_equivocation; [| apply Hc].
       eapply VLSM_incl_in_futures.
-      * apply constraint_preloaded_free_incl
+      + by apply constraint_preloaded_free_incl
          with (constraint := strong_fixed_equivocation_constraint IM equivocators).
-      * by do 2 (eapply in_futures_trans; [done |]).
+      + by do 2 (eapply in_futures_trans; [done |]).
 Qed.
 
 Lemma msg_dep_rel_reflects_strong_fixed_equivocation
@@ -207,7 +207,7 @@ Proof.
       ; [| by left | by right].
       destruct_dec_sig sub_j j Hj Heqsub_j; subst.
       clear -Him no_initial_messages_in_IM; contradict Him.
-      apply no_initial_messages_in_IM.
+      by apply no_initial_messages_in_IM.
     }
     destruct Hemit as ((sX, iom) & (sub_i, li) & sX' & HtX).
     eapply (preloaded_composite_directly_observed_valid _ _ _ sX').
@@ -319,7 +319,7 @@ Proof.
   destruct (sender m) as [v |]; [| congruence].
   eexists; split; [done |].
   replace (A v) with i; [done |].
-  congruence.
+  by congruence.
 Qed.
 
 Context
@@ -336,7 +336,7 @@ Lemma fixed_full_node_equivocation_incl
       (composite_vlsm IM full_node_fixed_set_equivocation_constraint).
 Proof.
   eapply VLSM_incl_trans.
-  - apply Fixed_incl_StrongFixed.
+  - by apply Fixed_incl_StrongFixed.
   - eapply VLSM_incl_trans.
     + by eapply strong_msg_dep_fixed_equivocation_incl.
     + apply constraint_subsumption_incl
@@ -355,7 +355,7 @@ Lemma full_node_fixed_equivocation_constraint_subsumption
 Proof.
   intros l [s [m |]] (_ & Hm & Hv & Hc); [| itauto]
   ; destruct Hc as [Hsent | Heqv]; [left | right].
-  - revert Hsent; apply sent_by_non_equivocating_are_directly_observed.
+  - by revert Hsent; apply sent_by_non_equivocating_are_directly_observed.
   - destruct l as [i li], Heqv as (j & Hsender & HAj).
     apply Hfull in Hv.
     eapply VLSM_incl_can_emit.
@@ -368,9 +368,8 @@ Proof.
     }
     eapply VLSM_full_projection_can_emit.
     {
-      apply @preloaded_sub_element_full_projection
-        with (Hj := HAj) (P := fun dm => dm ∈ message_dependencies m).
-      itauto.
+      by apply @preloaded_sub_element_full_projection
+        with (Hj := HAj) (P := fun dm => dm ∈ message_dependencies m); itauto.
     }
     eapply message_dependencies_are_sufficient.
     cut (exists k, can_emit (pre_loaded_with_all_messages_vlsm (IM k)) m).
@@ -385,7 +384,7 @@ Proof.
             (vlsm_incl_pre_loaded_with_all_messages_vlsm (composite_vlsm IM _))).
     apply emitted_messages_are_valid_iff in Hm as [[k [[im Him] Heqm]] | Hemit]
     ; [| done].
-    clear Heqm; contradict Him; apply no_initial_messages_in_IM.
+    by clear Heqm; contradict Him; apply no_initial_messages_in_IM.
 Qed.
 
 Lemma full_node_fixed_equivocation_incl

@@ -131,8 +131,8 @@ Proof.
     split; [| done].
     rapply extend_right_finite_trace_from; [done |].
     apply finite_valid_trace_last_pstate in IHtr as Hs.
-    cut (option_valid_message_prop X iom);[firstorder|].
-    destruct iom as [m|];[|apply option_valid_message_None].
+    cut (option_valid_message_prop X iom); [by firstorder |].
+    destruct iom as [m |]; [| by apply option_valid_message_None].
     destruct Hx as [Hv _].
     apply Henforced in Hv.
     destruct Hv as [Hbsm | []].
@@ -144,7 +144,7 @@ Lemma preloaded_incl_no_equivocations
 Proof.
   specialize no_equivocations_preloaded_traces.
   clear -X. destruct X as [T [S M]].
-  apply VLSM_incl_finite_traces_characterization.
+  by apply VLSM_incl_finite_traces_characterization.
 Qed.
 
 Lemma preloaded_eq_no_equivocations
@@ -313,7 +313,7 @@ Proof.
   apply VLSM_eq_incl_iff.
   specialize (constraint_subsumption_incl IM) as Hincl.
   unfold no_equivocations_additional_constraint_with_pre_loaded.
-  split;apply Hincl;intros l [s [m|]] Hpv; apply Hpv.
+  by split; apply Hincl; intros l [s [m |]] Hpv; apply Hpv.
 Qed.
 
 End sec_seeded_composite_vlsm_no_equivocation.

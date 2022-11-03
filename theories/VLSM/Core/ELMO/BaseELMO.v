@@ -72,17 +72,17 @@ Qed.
 
 (** [Label]s, [State]s, [Observation]s and [Message]s have decidable equality. *)
 #[export] Instance EqDecision_Label : EqDecision Label.
-Proof. intros x y; unfold Decision; decide equality. Defined.
+Proof. by intros x y; unfold Decision; decide equality. Defined.
 
 #[local] Lemma State_eq_dec : forall x y : State, {x = y} + {x <> y}
 with Observation_eq_dec : forall x y : Observation, {x = y} + {x <> y}
 with Message_eq_dec : forall x y : Message, {x = y} + {x <> y}.
 Proof.
   - intros x y; decide equality.
-    + apply EqDecision0.
-    + decide equality.
-  - do 2 decide equality.
-  - intros x y; decide equality.
+    + by apply EqDecision0.
+    + by decide equality.
+  - by do 2 decide equality.
+  - by intros x y; decide equality.
 Defined.
 
 #[export] Instance EqDecision_State : EqDecision State := State_eq_dec.
@@ -154,9 +154,8 @@ Lemma addObservation_ind (P : State -> Prop)
   forall obs, P obs.
 Proof.
   intros [obs a].
-  induction obs using addObservation'_ind.
-  - done.
-  - by apply (Hadd ob) in IHobs.
+  induction obs using addObservation'_ind; [done |].
+  by apply (Hadd ob) in IHobs.
 Qed.
 
 Lemma addObservation_rec (P : State -> Set)
@@ -309,12 +308,12 @@ end.
 
 #[export] Instance isSend_dec (ob : Observation) : Decision (isSend ob).
 Proof.
-  destruct ob as [[] m]; cbn; typeclasses eauto.
+  by destruct ob as [[] m]; cbn; typeclasses eauto.
 Defined.
 
 #[export] Instance isReceive_dec (ob : Observation) : Decision (isReceive ob).
 Proof.
-  destruct ob as [[] m]; cbn; typeclasses eauto.
+  by destruct ob as [[] m]; cbn; typeclasses eauto.
 Defined.
 
 Definition messages' (obs : list Observation) : list Message :=
@@ -546,7 +545,7 @@ Proof.
   induction s using addObservation_ind; inversion 1; subst.
   - by destruct ob as [? []]; unfold sizeState; cbn; lia.
   - etransitivity; [by apply IHs |].
-    destruct s, ob as [? []]; unfold sizeState; cbn; lia.
+    by destruct s, ob as [? []]; unfold sizeState; cbn; lia.
 Qed.
 
 Lemma messages_sizeState :
