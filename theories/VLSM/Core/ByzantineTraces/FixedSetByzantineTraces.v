@@ -562,7 +562,7 @@ Proof.
   case_decide as HAv; [| done].
   unfold sub_IM; cbn.
   apply (VLSM_incl_valid_state (constraint_free_incl IM
-    fixed_equivocation_constraint IM selection))) in Hs.
+    (fixed_equivocation_constraint IM selection))) in Hs.
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm
     (free_composite_vlsm IM))) in Hs.
   assert (Hpre_si : forall i, valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i)).
