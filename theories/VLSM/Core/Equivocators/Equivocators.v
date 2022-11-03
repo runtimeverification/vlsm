@@ -110,7 +110,7 @@ Definition is_equivocating_state
   : Decision (is_equivocating_state s).
 Proof.
   apply Decision_not.
-  by is_singleton_state_dec.
+  by apply is_singleton_state_dec.
 Qed.
 
 (**
@@ -322,7 +322,7 @@ Proof.
   destruct (decide _).
   - by rewrite fin_to_nat_to_fin in e; lia.
   - apply equivocator_state_eq.
-    by !rewrite !fin_to_nat_to_fin.
+    by rewrite !fin_to_nat_to_fin.
 Qed.
 
 Lemma equivocator_state_extend_project_2 es s i (Hi : i = equivocator_state_n es)

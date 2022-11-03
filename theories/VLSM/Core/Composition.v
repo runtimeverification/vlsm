@@ -679,7 +679,7 @@ Proof.
   intros j m Hm.
   eapply VLSM_incl_can_emit.
   - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
-  - by itauto.
+    by itauto.
   - eapply VLSM_full_projection_can_emit; [| done].
     apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
     by itauto.

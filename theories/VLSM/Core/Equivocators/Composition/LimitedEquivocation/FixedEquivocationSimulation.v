@@ -199,7 +199,7 @@ Proof.
   destruct iom as [im|]; swap 1 2; [|destruct HcX as [Hsent | Hemitted]].
   - exists [], eqv_state_s.
     by split; [constructor | eauto].
-  - exists []. eqv_state_s.
+  - exists []. exists eqv_state_s.
     split; [by constructor |].
     split; [done |].
     split; [done |].

@@ -194,7 +194,7 @@ Lemma equivocators_transition_item_project_proper
   : is_Some (equivocators_transition_item_project eqv_descriptors item).
 Proof.
   apply equivocators_transition_item_project_proper_descriptor.
-  by Hproper.
+  by apply Hproper.
 Qed.
 
 (**

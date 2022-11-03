@@ -166,7 +166,7 @@ Proof.
   - intros Hs sub_i.
     destruct Hs as [sX [HeqsX Hinitial]].
     subst.
-  - by apply Hinitial.
+    by apply Hinitial.
   - intros Hs.
     exists (lift_sub_state fixed_byzantine_IM non_byzantine s).
     split.
@@ -566,7 +566,7 @@ Lemma fixed_non_equivocating_incl_fixed_non_byzantine
 Proof.
   apply basic_VLSM_incl.
   - intros s (sX & <- & Hinitial) sub_i.
-  - by apply Hinitial.
+    by apply Hinitial.
   - intro; intros.
     apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating)
       in Hv as (Hs & _ & Hv).
@@ -678,7 +678,7 @@ Lemma preloaded_non_byzantine_vlsm_lift
 Proof.
   apply basic_VLSM_strong_full_projection; [| | | done].
   - intros l s om [Hv _].
-  - by split; [apply lift_sub_valid |].
+    by split; [apply lift_sub_valid |].
   - by intro; intros; rapply lift_sub_transition.
   - by intro; intros; apply (lift_sub_state_initial IM).
 Qed.

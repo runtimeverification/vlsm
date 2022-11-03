@@ -567,7 +567,7 @@ Proof.
     state_update_simpl.
     replace (vtransition (IM j) _ _) with (s', om').
     f_equal.
-    by applystate_update_twice.
+    by apply state_update_twice.
 Qed.
 
 (**

@@ -704,7 +704,7 @@ Proof.
   - intro m.
     unfold trace_has_message.
     rewrite Exists_nil.
-  - by itauto.
+    by itauto.
   - intro m. specialize (IHHtr m).
     unfold trace_has_message.
     rewrite Exists_cons.

@@ -1561,7 +1561,7 @@ Proof.
   intros m Hm.
   eapply VLSM_incl_can_emit.
   - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
-  - by itauto.
+    by itauto.
   - eapply VLSM_full_projection_can_emit; [| done].
     apply preloaded_sub_element_full_projection.
     by itauto.
