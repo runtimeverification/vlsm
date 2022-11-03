@@ -182,8 +182,10 @@ Definition latest_composite_observed_before_send
   Transitive (latest_composite_observed_before_send s').
 Proof.
   intros i j k
-    (s_i & item_i & m_i & s_j & item_j & m_j & [Hdestruct_i Houtput_i Hdestruct_j Houtput_j Hij])
-    (_s_j & _item_j & _m_j & s_k & item_k & m_k & [H_destruct_j H_output_j Hdestruct_k Houtput_k Hjk]).
+    (s_i & item_i & m_i & s_j & item_j & m_j
+      & [Hdestruct_i Houtput_i Hdestruct_j Houtput_j Hij])
+    (_s_j & _item_j & _m_j & s_k & item_k & m_k
+      & [H_destruct_j H_output_j Hdestruct_k Houtput_k Hjk]).
   eexists _, _, _, _, _, _; constructor; [done.. |].
   etransitivity; [done |].
   rewrite Hdestruct_j in H_destruct_j; inversion H_destruct_j;

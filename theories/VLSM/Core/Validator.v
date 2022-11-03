@@ -231,7 +231,8 @@ Proof. by intros li si omi (_ & _ & Hv). Qed.
 Lemma induced_validator_valid_is_input_valid
   (Hproj : VLSM_projection X pre_projection_induced_validator label_project state_project)
   l s om
-  : vvalid projection_induced_validator l (s, om) -> input_valid pre_projection_induced_validator l (s,om).
+  : vvalid projection_induced_validator l (s, om) ->
+      input_valid pre_projection_induced_validator l (s,om).
 Proof.
   intro Hv.
   destruct (id Hv) as (lX & sX & [HlX  HsX (Hps & Hopm & _)]); cbn in HsX; subst.
@@ -280,8 +281,9 @@ Context
   (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
   (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
   (Htransition_consistency : induced_validator_transition_consistency_Some)
-  (Htransition_Some  : weak_projection_transition_consistency_Some
-    := basic_weak_projection_transition_consistency_Some Hlabel_lift Hstate_lift Htransition_consistency)
+  (Htransition_Some : weak_projection_transition_consistency_Some :=
+    basic_weak_projection_transition_consistency_Some
+      Hlabel_lift Hstate_lift Htransition_consistency)
   .
 
 (**
@@ -494,7 +496,8 @@ Context
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)
   (label_lift : vlabel Y -> vlabel X)
   (state_lift : vstate Y -> vstate X)
-  (Xi := pre_projection_induced_validator X (type Y) label_project state_project label_lift state_lift)
+  (Xi := pre_projection_induced_validator X (type Y)
+          label_project state_project label_lift state_lift)
   (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
   (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
   (Hinitial_lift : strong_projection_initial_state_preservation Y X state_lift)

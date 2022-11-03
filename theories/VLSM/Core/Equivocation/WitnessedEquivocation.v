@@ -45,7 +45,8 @@ Context
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cm
     := equivocation_dec_tracewise IM A sender)
-  (equivocating_validators := equivocating_validators (BasicEquivocation := Htracewise_BasicEquivocation))
+  (equivocating_validators :=
+    equivocating_validators (BasicEquivocation := Htracewise_BasicEquivocation))
   .
 
 (**
@@ -580,9 +581,8 @@ Proof.
       spec Hwitness'''; [apply app_nil_r|].
       specialize (Hwneq _ _ (conj Htr''' Hinit') Hwitness''').
       remember {| input := Some msg |} as item.
-      specialize
-        (strong_trace_witnessing_equivocation_prop_extend_neq _ _ _ (conj Htr''' Hinit') Hprefix item msg)
-        as Hextend.
+      specialize (strong_trace_witnessing_equivocation_prop_extend_neq
+        _ _ _ (conj Htr''' Hinit') Hprefix item msg) as Hextend.
       spec Hextend; [by subst |].
       specialize (Hextend Hwneq _ Hsender).
       by apply Hextend; subst.
@@ -649,7 +649,8 @@ Context
   (Free_has_sender :=
     composite_no_initial_valid_messages_have_sender IM id sender
       can_emit_signed no_initial_messages_in_IM (free_constraint IM))
-  (equivocating_validators := equivocating_validators (BasicEquivocation := Htracewise_BasicEquivocation))
+  (equivocating_validators :=
+    equivocating_validators (BasicEquivocation := Htracewise_BasicEquivocation))
   .
 
 Existing Instance Htracewise_BasicEquivocation.
@@ -721,11 +722,13 @@ Qed.
 Lemma strong_witness_has_fixed_equivocation is s tr
   (Htr : finite_valid_trace_init_to (free_composite_vlsm IM) is s tr)
   (Heqv: strong_trace_witnessing_equivocation_prop (Cm := Ci) IM id sender is tr)
-  : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM (elements(equivocating_validators s))) is s tr.
+  : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM
+      (elements(equivocating_validators s))) is s tr.
 Proof.
   split; [|apply Htr].
   induction Htr using finite_valid_trace_init_to_rev_ind.
-  - eapply (finite_valid_trace_from_to_empty (fixed_equivocation_vlsm_composition IM (elements(equivocating_validators si)))).
+  - eapply (finite_valid_trace_from_to_empty (fixed_equivocation_vlsm_composition IM
+      (elements(equivocating_validators si)))).
     by apply initial_state_is_valid.
   - spec IHHtr.
     { intros prefix. intros.
@@ -816,7 +819,8 @@ Proof.
   destruct
     (free_has_strong_trace_witnessing_equivocation_prop IM id sender _ s Hs)
     as [is [tr [Htr Heqv]]].
-  cut (finite_valid_trace_from_to (composite_vlsm IM (equivocating_validators_fixed_equivocation_constraint s)) is s tr).
+  cut (finite_valid_trace_from_to (composite_vlsm IM
+    (equivocating_validators_fixed_equivocation_constraint s)) is s tr).
   { by intro Htr'; apply finite_valid_trace_from_to_last_pstate in Htr'. }
   by apply strong_witness_has_fixed_equivocation.
 Qed.

@@ -274,8 +274,10 @@ Proof.
   apply proj1, finite_valid_trace_from_to_app_split,proj1
     , preloaded_finite_valid_trace_from_to_projection with (j := A v)
     , finite_valid_trace_from_to_last in Htr.
-  rewrite (VLSMTotalProjection.VLSM_projection_finite_trace_project_app (preloaded_component_projection IM (A v))) in Htrv.
-  apply proj1, (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (IM (A v)))),proj2 in Htrv.
+  rewrite (VLSMTotalProjection.VLSM_projection_finite_trace_project_app
+    (preloaded_component_projection IM (A v))) in Htrv.
+  apply proj1, (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (IM (A v))))
+    in Htrv as [_ Htrv].
   rewrite Htr in Htrv.
   intro Hbs_m. elim Hnbs_m. clear Hnbs_m.
   revert Hbs_m.

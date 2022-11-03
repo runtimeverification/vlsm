@@ -2,8 +2,10 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces SubProjectionTraces.
-From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.FixedSetEquivocation Equivocation.NoEquivocation.
-From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections Equivocators.MessageProperties.
+From VLSM.Core Require Import Equivocation EquivocationProjections.
+From VLSM.Core Require Import Equivocation.FixedSetEquivocation Equivocation.NoEquivocation.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
+From VLSM.Core Require Import Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
 From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplayTraces.
@@ -119,7 +121,8 @@ Proof.
       unfold lift_equivocators_sub_state_to.
       case_decide; [done |].
       unfold equivocator_IM.
-      change (equivocators_total_state_project _ _ _) with (equivocator_state_zero (eqv_state_s i)) in Hsent.
+      change (equivocators_total_state_project _ _ _)
+        with (equivocator_state_zero (eqv_state_s i)) in Hsent.
       revert Hsent.
       apply
         (VLSM_projection_has_been_sent_reflect
@@ -296,16 +299,15 @@ Proof.
         IM equivocating eqv_state_s im_eis im_etr).
     + apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
       apply (VLSM_incl_valid_state HinclE) in Hstate_valid as Hstate_pre.
-      specialize
-        (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM (sub_IM IM equivocating))
-          (free_constraint _)
-          (sent_by_non_equivocating IM equivocating
-                    s)
-        ) as Hsub_incl.
+      specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded
+        (equivocator_IM (sub_IM IM equivocating))
+        (free_constraint _)
+          (sent_by_non_equivocating IM equivocating s))
+        as Hsub_incl.
       apply (VLSM_incl_finite_valid_trace Hsub_incl) in Him_etr.
       left.
-      specialize
-        (replayed_trace_from_finite_trace_last IM equivocating eqv_state_s im_eis im_etr (proj2 Him_etr)).
+      specialize (replayed_trace_from_finite_trace_last IM equivocating eqv_state_s
+        im_eis im_etr (proj2 Him_etr)).
       simpl. intro Hrew. rewrite Hrew. clear Hrew.
       apply fixed_equivocation_replay_has_message; [done |].
       clear -Him_etr Him_output.
@@ -313,10 +315,9 @@ Proof.
       apply proj1 in Him_etr.
       replace (im_ert' ++ [item]) with (im_ert' ++ [item] ++ []) in Him_etr
         by (rewrite app_assoc; apply app_nil_r).
-      specialize
-        (input_valid_transition_to
-          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (equivocator_IM (sub_IM IM equivocating))))
-          _ _ _ _ _ Him_etr eq_refl)
+      specialize (input_valid_transition_to (pre_loaded_with_all_messages_vlsm
+        (free_composite_vlsm (equivocator_IM (sub_IM IM equivocating))))
+        _ _ _ _ _ Him_etr eq_refl)
         as Ht.
       rewrite finite_trace_last_is_last.
       rewrite finite_trace_last_output_is_last in Him_output.
@@ -346,7 +347,8 @@ Proof.
     Since the base result works with pre-loaded vlsms, some massaging of the
     hypothesis and conclusion is done to fit the applied lemma.
   *)
-  assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
+  assert (no_initial_messages_in_XE :
+    forall m, ~ vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   { intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).
   }
@@ -408,7 +410,8 @@ Lemma no_equivocating_equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
+  assert (no_initial_messages_in_XE :
+    forall m, ~ vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   {
     intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).

@@ -316,16 +316,19 @@ Proof.
   by intros m [Hm | Hfalse].
 Qed.
 
-Lemma pre_loaded_with_all_messages_vlsm_idem
-  : VLSM_eq (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)) (pre_loaded_with_all_messages_vlsm X).
+Lemma pre_loaded_with_all_messages_vlsm_idem :
+  VLSM_eq
+    (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X))
+    (pre_loaded_with_all_messages_vlsm X).
 Proof.
   apply VLSM_eq_incl_iff; split; cbn.
   - apply pre_loaded_with_all_messages_vlsm_idem_l.
   - apply pre_loaded_with_all_messages_vlsm_idem_r.
 Qed.
 
-Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om
-  : valid_state_message_prop X s om <-> valid_state_message_prop (pre_loaded_vlsm X (fun m => False)) s om.
+Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om :
+  valid_state_message_prop X s om <->
+  valid_state_message_prop (pre_loaded_vlsm X (fun m => False)) s om.
 Proof.
   pose proof vlsm_is_pre_loaded_with_False as Heq.
   apply VLSM_eq_incl_iff in Heq.

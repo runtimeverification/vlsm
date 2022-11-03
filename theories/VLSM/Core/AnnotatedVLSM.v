@@ -48,8 +48,10 @@ Next Obligation.
 Qed.
 
 Context
-  (annotated_constraint : @label _ annotated_type -> annotated_state * option message -> Prop)
-  (annotated_transition_state : @label _ annotated_type -> annotated_state * option message -> annotation)
+  (annotated_constraint :
+    @label _ annotated_type -> annotated_state * option message -> Prop)
+  (annotated_transition_state :
+    @label _ annotated_type -> annotated_state * option message -> annotation)
   .
 
 Definition annotated_valid
@@ -80,8 +82,13 @@ Definition annotate_trace_item
   (k : annotated_state -> list (@transition_item _ annotated_type))
   (sa : annotated_state)
   : list (@transition_item _ annotated_type) :=
-    let sa' := {| original_state := destination item; state_annotation := annotated_transition_state (l item) (sa, input item) |} in
-    @Build_transition_item _ annotated_type (l item) (input item) sa' (output item) :: k sa'.
+    let sa' :=
+      {|
+        original_state := destination item;
+        state_annotation := annotated_transition_state (l item) (sa, input item);
+      |}
+    in
+      @Build_transition_item _ annotated_type (l item) (input item) sa' (output item) :: k sa'.
 
 Lemma annotate_trace_item_project
   (item : vtransition_item X)
@@ -93,7 +100,8 @@ Lemma annotate_trace_item_project
       = item ::
         pre_VLSM_full_projection_finite_trace_project
             annotated_type (type X) id original_state
-            (k {| original_state := destination item; state_annotation := annotated_transition_state (l item) (sa, input item) |}).
+            (k {| original_state := destination item;
+                  state_annotation := annotated_transition_state (l item) (sa, input item) |}).
 Proof.
   by destruct item.
 Qed.
@@ -104,8 +112,15 @@ Definition annotate_trace_from (sa : @state _ annotated_type) (tr : list (vtrans
 
 Lemma annotate_trace_from_unroll sa item tr
   : annotate_trace_from sa (item :: tr) =
-    let sa' := {| original_state := destination item; state_annotation := annotated_transition_state (l item) (sa, input item) |} in
-    @Build_transition_item _ annotated_type (l item) (input item) sa' (output item) :: annotate_trace_from sa' tr.
+    let sa' :=
+      {|
+        original_state := destination item;
+        state_annotation := annotated_transition_state (l item) (sa, input item)
+      |}
+    in
+      @Build_transition_item _ annotated_type (l item) (input item) sa' (output item)
+        ::
+      annotate_trace_from sa' tr.
 Proof.
   by destruct item.
 Qed.
@@ -166,9 +181,15 @@ Context
   {annotation : Type}
   (initial_annotation_prop : annotation -> Prop)
   `{Inhabited (sig initial_annotation_prop)}
-  (annotated_constraint : @label _ (annotated_type X annotation) -> annotated_state X annotation  * option message -> Prop)
-  (annotated_transition_state : @label _ (annotated_type X annotation) -> annotated_state X annotation * option message -> annotation)
-  (AnnotatedX : VLSM message := annotated_vlsm X annotation initial_annotation_prop annotated_constraint annotated_transition_state)
+  (annotated_constraint :
+    @label _ (annotated_type X annotation) ->
+      annotated_state X annotation  * option message -> Prop)
+  (annotated_transition_state :
+    @label _ (annotated_type X annotation) ->
+      annotated_state X annotation * option message -> annotation)
+  (AnnotatedX : VLSM message :=
+    annotated_vlsm X annotation initial_annotation_prop annotated_constraint
+      annotated_transition_state)
   .
 
 Definition forget_annotations_projection
@@ -196,9 +217,15 @@ Context
   {annotation : Type}
   (initial_annotation_prop : annotation -> Prop)
   `{Inhabited (sig initial_annotation_prop)}
-  (annotated_constraint : @label _ (annotated_type Free annotation) -> annotated_state Free annotation  * option message -> Prop)
-  (annotated_transition_state : @label _ (annotated_type Free annotation) -> annotated_state Free annotation * option message -> annotation)
-  (AnnotatedFree : VLSM message := annotated_vlsm Free annotation initial_annotation_prop annotated_constraint annotated_transition_state)
+  (annotated_constraint :
+    @label _ (annotated_type Free annotation) ->
+      annotated_state Free annotation  * option message -> Prop)
+  (annotated_transition_state :
+    @label _ (annotated_type Free annotation) ->
+      annotated_state Free annotation * option message -> annotation)
+  (AnnotatedFree : VLSM message :=
+    annotated_vlsm Free annotation initial_annotation_prop annotated_constraint
+      annotated_transition_state)
   (i : index)
   .
 
@@ -266,8 +293,9 @@ Definition annotated_composite_induced_validator : VLSM message
     annotated_composite_label_project annotated_composite_state_project
     annotated_composite_label_lift annotated_composite_state_lift.
 
-Lemma annotated_composite_induced_validator_transition_None
-  : weak_projection_transition_consistency_None _ _ annotated_composite_label_project annotated_composite_state_project.
+Lemma annotated_composite_induced_validator_transition_None :
+  weak_projection_transition_consistency_None _ _ annotated_composite_label_project
+    annotated_composite_state_project.
 Proof.
   intros [j lj].
   unfold annotated_composite_label_project, composite_project_label; cbn.

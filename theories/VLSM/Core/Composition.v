@@ -376,7 +376,8 @@ Definition free_composite_vlsm : VLSM message
   := composite_vlsm free_constraint.
 
 Lemma lift_to_composite_vlsm_full_projection j
-  : VLSM_full_projection (IM j) free_composite_vlsm (lift_to_composite_label j) (lift_to_composite_state' j).
+  : VLSM_full_projection (IM j) free_composite_vlsm (lift_to_composite_label j)
+      (lift_to_composite_state' j).
 Proof.
   apply basic_VLSM_strong_full_projection; intro; intros.
   - split; [| done]. simpl.
@@ -405,7 +406,9 @@ Qed.
 Lemma composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages
   (constraint : composite_label -> composite_state  * option message -> Prop)
   (P : message -> Prop)
-  : VLSM_incl (pre_loaded_vlsm (composite_vlsm constraint) P) (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
+  : VLSM_incl
+      (pre_loaded_vlsm (composite_vlsm constraint) P)
+      (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
 Proof.
   by apply basic_VLSM_strong_incl; cbv; [..|itauto|].
 Qed.
@@ -604,8 +607,10 @@ Qed.
 End sec_constraint_subsumption.
 
 Lemma preloaded_constraint_free_incl
-  (constraint : composite_label -> composite_state  * option message -> Prop)
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm (composite_vlsm constraint)) (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
+  (constraint : composite_label -> composite_state  * option message -> Prop) :
+    VLSM_incl
+      (pre_loaded_with_all_messages_vlsm (composite_vlsm constraint))
+      (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
 Proof.
   by apply preloaded_constraint_subsumption_incl.
 Qed.
@@ -629,7 +634,9 @@ Lemma lift_to_composite_generalized_preloaded_vlsm_full_projection
   (P Q : message -> Prop)
   (PimpliesQ : forall m, P m -> Q m)
   (j : index)
-  : VLSM_full_projection (pre_loaded_vlsm (IM j) P) (pre_loaded_vlsm free_composite_vlsm Q) (lift_to_composite_label j) (lift_to_composite_state' j).
+  : VLSM_full_projection
+      (pre_loaded_vlsm (IM j) P) (pre_loaded_vlsm free_composite_vlsm Q)
+      (lift_to_composite_label j) (lift_to_composite_state' j).
 Proof.
   apply basic_VLSM_full_projection_preloaded_with; intro; intros.
   - by apply PimpliesQ.
@@ -642,9 +649,12 @@ Proof.
   - by exists j, (exist _ _ H).
 Qed.
 
-Lemma lift_to_composite_preloaded_vlsm_full_projection
-  (j : index)
-  : VLSM_full_projection (pre_loaded_with_all_messages_vlsm (IM j)) (pre_loaded_with_all_messages_vlsm free_composite_vlsm) (lift_to_composite_label j) (lift_to_composite_state' j).
+Lemma lift_to_composite_preloaded_vlsm_full_projection (j : index) :
+  VLSM_full_projection
+    (pre_loaded_with_all_messages_vlsm (IM j))
+    (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
+    (lift_to_composite_label j)
+    (lift_to_composite_state' j).
 Proof.
   apply basic_VLSM_full_projection_preloaded.
   - intro; intros. split; [| done]. simpl.
@@ -703,7 +713,9 @@ Lemma valid_state_preloaded_composite_free_lift
   (j : index)
   (sj : vstate (IM j))
   (Hp : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM j)) sj)
-  : valid_state_prop (pre_loaded_with_all_messages_vlsm free_composite_vlsm) (lift_to_composite_state' j sj).
+  : valid_state_prop
+      (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
+      (lift_to_composite_state' j sj).
 Proof.
   by apply (VLSM_full_projection_valid_state (lift_to_composite_preloaded_vlsm_full_projection j)).
 Qed.
@@ -823,16 +835,21 @@ Qed.
 
 Lemma lift_to_preloaded_free_weak_full_projection :
   forall (i : index) (cs : composite_state),
-      valid_state_prop (pre_loaded_with_all_messages_vlsm free_composite_vlsm) cs ->
-      VLSM_weak_full_projection
-        (pre_loaded_with_all_messages_vlsm (IM i)) (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
-        (lift_to_composite_label i) (lift_to_composite_state cs i).
+    valid_state_prop (pre_loaded_with_all_messages_vlsm free_composite_vlsm) cs ->
+    VLSM_weak_full_projection
+      (pre_loaded_with_all_messages_vlsm (IM i))
+      (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
+      (lift_to_composite_label i)
+      (lift_to_composite_state cs i).
 Proof.
   constructor; intros.
-  apply (VLSM_eq_finite_valid_trace_from (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)),
-        pre_lift_to_free_weak_full_projection.
-  - by apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)).
-  - apply (VLSM_eq_finite_valid_trace_from (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (IM i))).
+  apply (VLSM_eq_finite_valid_trace_from
+    (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)).
+  apply pre_lift_to_free_weak_full_projection.
+  - by apply (VLSM_eq_valid_state
+      (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)).
+  - apply (VLSM_eq_finite_valid_trace_from
+      (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (IM i))).
     by destruct (IM i).
 Qed.
 
@@ -916,8 +933,9 @@ Proof.
 Qed.
 
 Lemma composite_transition_project_active
-      message `{EqDecision index} (IM : index -> VLSM message)
-  : forall (l : composite_label IM) (s : composite_state IM) (im : option message) (s' : composite_state IM) (om : option message),
+  message `{EqDecision index} (IM : index -> VLSM message) :
+  forall (l : composite_label IM) (s : composite_state IM) (im : option message)
+    (s' : composite_state IM) (om : option message),
       composite_transition IM l (s, im) = (s', om) ->
       vtransition (IM (projT1 l)) (projT2 l) (s (projT1 l), im) = (s' (projT1 l), om).
 Proof.
@@ -1322,7 +1340,8 @@ Proof.
 
     destruct IHa as [IHapr IHaind].
 
-    specialize (relevant_components_one (snd (apply_plan Free s a)) (snd (apply_plan Free s' a))) as Hrel.
+    specialize (relevant_components_one (snd (apply_plan Free s a))
+      (snd (apply_plan Free s' a))) as Hrel.
 
     spec Hrel. {
       apply apply_plan_last_valid.
@@ -1532,7 +1551,8 @@ Lemma same_IM_preloaded_free_full_projection
 Proof.
   constructor.
   intros s1 tr1 Htr1.
-  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM1)) as Heq1.
+  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True
+    (free_composite_vlsm IM1)) as Heq1.
   apply (VLSM_eq_finite_valid_trace Heq1) in Htr1.
   clear Heq1.
   specialize (same_IM_full_projection (free_constraint IM1) (free_constraint IM2))
@@ -1540,7 +1560,8 @@ Proof.
   spec Hproj; [done |].
   specialize (Hproj (fun _ => True)).
   apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr1.
-  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (free_composite_vlsm IM2)) as Heq2.
+  specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True
+    (free_composite_vlsm IM2)) as Heq2.
   by apply (VLSM_eq_finite_valid_trace Heq2).
 Qed.
 

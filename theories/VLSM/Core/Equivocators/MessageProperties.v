@@ -72,7 +72,8 @@ Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hbtr.
+  apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm equivocator_vlsm))
+    in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
   inversion Hbsuffix. subst s' tl bitem.
@@ -117,7 +118,8 @@ Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm equivocator_vlsm)) in Hbtr.
+  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm equivocator_vlsm))
+    in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
   inversion Hbsuffix; subst s' f bitem tl.
@@ -134,8 +136,8 @@ Proof.
   exists itemx. split; [eexists; apply Hitemx|].
   remember (Existing i) as dsuffix.
   remember {| input := iom |} as bitem.
-  specialize
-    (equivocator_vlsm_trace_project_app_inv _ [bitem] bsuffix (Existing i) (Existing idl) dsuffix [itemx] suffix)
+  specialize (equivocator_vlsm_trace_project_app_inv
+    _ [bitem] bsuffix (Existing i) (Existing idl) dsuffix [itemx] suffix)
     as Hsuffix'.
   spec Hsuffix'.  { by simpl; rewrite Hitemx. }
   subst dsuffix.
@@ -222,7 +224,10 @@ Section sec_oracle_lifting.
 
 Context
   selector
-  (Hselector_io : forall l1 l2 s1 s2 im om m, selector m  {| l:= l1; input := im; destination := s1; output := om |} <-> selector m  {| l:= l2; input := im; destination := s2; output := om |})
+  (Hselector_io :
+    forall l1 l2 s1 s2 im om m,
+      selector m  {| l:= l1; input := im; destination := s1; output := om |} <->
+      selector m  {| l:= l2; input := im; destination := s2; output := om |})
   oracle
   (Hdec : RelDecision oracle)
   (Hstepwise : oracle_stepwise_props (vlsm := X) selector oracle).

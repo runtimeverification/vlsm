@@ -293,9 +293,8 @@ Program Definition equivocator_state_extend
   : equivocator_state
   :=
   existT (S (equivocator_state_last bs))
-    (fun j =>
-      if decide (S (equivocator_state_last bs) = j) then s else equivocator_state_s bs (@of_nat_lt j (S (equivocator_state_last bs)) _)
-    ).
+    (fun j => if decide (S (equivocator_state_last bs) = j)
+              then s else equivocator_state_s bs (@of_nat_lt j (S (equivocator_state_last bs)) _)).
 Next Obligation.
   intros. specialize (fin_to_nat_lt j).  lia.
 Qed.
@@ -437,7 +436,8 @@ Proof.
   apply Hpi. lia.
 Qed.
 
-Lemma equivocator_state_append_project_3 s s' i (Hi : ~i < equivocator_state_n s + equivocator_state_n s')
+Lemma equivocator_state_append_project_3
+  s s' i (Hi : ~ i < equivocator_state_n s + equivocator_state_n s')
   : equivocator_state_project (equivocator_state_append s s') i = None.
 Proof.
   apply equivocator_state_project_None.
@@ -633,20 +633,28 @@ End sec_equivocator_vlsm.
 
 #[export] Hint Rewrite @equivocator_state_update_size : equivocator_state_update.
 #[export] Hint Rewrite @equivocator_state_update_lst : equivocator_state_update.
-#[export] Hint Rewrite @equivocator_state_update_project_eq using first [done | lia] : equivocator_state_update.
-#[export] Hint Rewrite @equivocator_state_update_project_neq using first [done | lia] : equivocator_state_update.
+#[export] Hint Rewrite @equivocator_state_update_project_eq using first [done | lia]
+  : equivocator_state_update.
+#[export] Hint Rewrite @equivocator_state_update_project_neq using first [done | lia]
+  : equivocator_state_update.
 
 #[export] Hint Rewrite @equivocator_state_extend_size using done : equivocator_state_update.
 #[export] Hint Rewrite @equivocator_state_extend_lst using done : equivocator_state_update.
-#[export] Hint Rewrite @equivocator_state_extend_project_1 using first [done | lia] : equivocator_state_update.
-#[export] Hint Rewrite @equivocator_state_extend_project_2 using first [done | lia] : equivocator_state_update.
-#[export] Hint Rewrite @equivocator_state_extend_project_3 using first [done | lia] : equivocator_state_update.
+#[export] Hint Rewrite @equivocator_state_extend_project_1 using first [done | lia]
+  : equivocator_state_update.
+#[export] Hint Rewrite @equivocator_state_extend_project_2 using first [done | lia]
+  : equivocator_state_update.
+#[export] Hint Rewrite @equivocator_state_extend_project_3 using first [done | lia]
+  : equivocator_state_update.
 
 #[export] Hint Rewrite @equivocator_state_append_size using done : equivocator_state_update.
 #[export] Hint Rewrite @equivocator_state_append_lst using done : equivocator_state_update.
-#[export] Hint Rewrite @equivocator_state_append_project_1 using first [done | lia] : equivocator_state_update.
-#[export] Hint Rewrite @equivocator_state_append_project_2 using first [done | lia] : equivocator_state_update.
-#[export] Hint Rewrite @equivocator_state_append_project_3 using first [done | lia] : equivocator_state_update.
+#[export] Hint Rewrite @equivocator_state_append_project_1 using first [done | lia]
+  : equivocator_state_update.
+#[export] Hint Rewrite @equivocator_state_append_project_2 using first [done | lia]
+  : equivocator_state_update.
+#[export] Hint Rewrite @equivocator_state_append_project_3 using first [done | lia]
+  : equivocator_state_update.
 
 Ltac equivocator_state_update_simpl :=
   autounfold with state_update in *;
@@ -1044,8 +1052,8 @@ Lemma equivocator_state_project_valid_message
 Proof.
   destruct om as [m|]; [|apply option_valid_message_None].
   specialize (vlsm_is_pre_loaded_with_False_initial_message equivocator_vlsm) as Hinit.
-  apply (VLSM_incl_valid_message (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hom
-  ; [| done].
+  apply (VLSM_incl_valid_message (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm)))
+    in Hom; [| done].
   apply preloaded_with_equivocator_state_project_valid_message in Hom.
   specialize (vlsm_is_pre_loaded_with_False_initial_message_rev X) as Hinit_rev.
   by apply (VLSM_incl_valid_message (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
@@ -1061,10 +1069,12 @@ Lemma preloaded_equivocator_state_project_valid_state
   (bs : vstate equivocator_vlsm)
   (Hbs : valid_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs)
   : forall i si,
-    equivocator_state_project bs i = Some si -> valid_state_prop (pre_loaded_with_all_messages_vlsm X) si.
+    equivocator_state_project bs i = Some si ->
+      valid_state_prop (pre_loaded_with_all_messages_vlsm X) si.
 Proof.
   intros i si Hpr.
-  apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm)) in Hbs.
+  apply (VLSM_eq_valid_state
+    (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm)) in Hbs.
   specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
   apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X)) in Hsi.
   by destruct X.

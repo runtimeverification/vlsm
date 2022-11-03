@@ -2,8 +2,10 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble StdppListSet FinFunExtras ListExtras.
-From VLSM.Core Require Import VLSM MessageDependencies ProjectionTraces VLSMProjections Composition SubProjectionTraces ByzantineTraces.
-From VLSM.Core Require Import Validator Equivocation EquivocationProjections Equivocation.NoEquivocation Equivocation.FixedSetEquivocation.
+From VLSM.Core Require Import VLSM MessageDependencies ProjectionTraces VLSMProjections.
+From VLSM.Core Require Import Composition SubProjectionTraces ByzantineTraces.
+From VLSM.Core Require Import Validator Equivocation EquivocationProjections.
+From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.FixedSetEquivocation.
 
 (** * VLSM Compositions with a fixed set of byzantine nodes
 
@@ -132,8 +134,9 @@ Context
 
 (** Constraint requiring only that the non-byzantine nodes are not equivocating. *)
 Definition non_byzantine_not_equivocating_constraint
-  : composite_label fixed_byzantine_IM -> composite_state fixed_byzantine_IM * option message -> Prop :=
-  sub_IM_not_equivocating_constraint fixed_byzantine_IM non_byzantine A sender.
+  : composite_label fixed_byzantine_IM ->
+    composite_state fixed_byzantine_IM * option message -> Prop :=
+      sub_IM_not_equivocating_constraint fixed_byzantine_IM non_byzantine A sender.
 
 (** *** First definition of the fixed byzantine trace property
 
@@ -147,16 +150,18 @@ Definition fixed_byzantine_trace_prop
   (tr : list (composite_transition_item (sub_IM fixed_byzantine_IM non_byzantine)))
   : Prop :=
   exists bis btr,
-  finite_valid_trace (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint) bis btr /\
-  composite_state_sub_projection fixed_byzantine_IM non_byzantine bis = is /\
-  finite_trace_sub_projection fixed_byzantine_IM non_byzantine btr = tr.
+    finite_valid_trace
+      (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint) bis btr /\
+    composite_state_sub_projection fixed_byzantine_IM non_byzantine bis = is /\
+    finite_trace_sub_projection fixed_byzantine_IM non_byzantine btr = tr.
 
 (** ** Byzantine traces characterization as projections *)
 
 Section sec_fixed_byzantine_traces_as_projections.
 
 Definition fixed_non_byzantine_projection : VLSM message :=
-  pre_induced_sub_projection fixed_byzantine_IM non_byzantine non_byzantine_not_equivocating_constraint.
+  pre_induced_sub_projection fixed_byzantine_IM non_byzantine
+    non_byzantine_not_equivocating_constraint.
 
 Lemma fixed_non_byzantine_projection_initial_state_preservation
   : forall s, vinitial_state_prop fixed_non_byzantine_projection s <->
@@ -174,8 +179,11 @@ Proof.
     + by apply (lift_sub_state_initial fixed_byzantine_IM non_byzantine).
 Qed.
 
-Lemma fixed_non_byzantine_projection_incl_preloaded
-  : VLSM_incl fixed_non_byzantine_projection (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM fixed_byzantine_IM non_byzantine))).
+Lemma fixed_non_byzantine_projection_incl_preloaded :
+  VLSM_incl
+    fixed_non_byzantine_projection
+    (pre_loaded_with_all_messages_vlsm
+      (free_composite_vlsm (sub_IM fixed_byzantine_IM non_byzantine))).
 Proof.
   apply basic_VLSM_strong_incl.
   - by intros s H1; apply fixed_non_byzantine_projection_initial_state_preservation.
@@ -237,7 +245,8 @@ Section sec_fixed_byzantine_traces_as_pre_loaded.
 
 Definition fixed_set_signed_message (m : message) : Prop :=
   non_sub_index_authenticated_message non_byzantine A sender m /\
-  (exists i, i ∈ non_byzantine /\ exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
+  (exists i, i ∈ non_byzantine /\
+    exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
 
 (**
   Given that we're only looking at the composition of nodes in the
@@ -253,10 +262,12 @@ Definition fixed_set_signed_message (m : message) : Prop :=
 *)
 
 Definition pre_loaded_fixed_non_byzantine_vlsm' : VLSM message :=
-  composite_no_equivocation_vlsm_with_pre_loaded (sub_IM fixed_byzantine_IM non_byzantine) (free_constraint _) fixed_set_signed_message.
+  composite_no_equivocation_vlsm_with_pre_loaded (sub_IM fixed_byzantine_IM non_byzantine)
+    (free_constraint _) fixed_set_signed_message.
 
 Definition pre_loaded_fixed_non_byzantine_vlsm : VLSM message :=
-  composite_no_equivocation_vlsm_with_pre_loaded (sub_IM IM non_byzantine) (free_constraint _) fixed_set_signed_message.
+  composite_no_equivocation_vlsm_with_pre_loaded (sub_IM IM non_byzantine) (free_constraint _)
+    fixed_set_signed_message.
 
 Lemma non_byzantine_nodes_same
   : forall sub_i, sub_IM fixed_byzantine_IM non_byzantine sub_i = sub_IM IM non_byzantine sub_i.
@@ -444,10 +455,12 @@ Qed.
   are derived from valid messages and protocol validity of the larger
   composition; therefore, the following simple result becomes very important.
 *)
-Lemma pre_loaded_fixed_non_byzantine_vlsm_lift
-  : VLSM_full_projection pre_loaded_fixed_non_byzantine_vlsm' (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint)
-      (lift_sub_label fixed_byzantine_IM non_byzantine)
-      (lift_sub_state fixed_byzantine_IM non_byzantine).
+Lemma pre_loaded_fixed_non_byzantine_vlsm_lift :
+  VLSM_full_projection
+    pre_loaded_fixed_non_byzantine_vlsm'
+    (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint)
+    (lift_sub_label fixed_byzantine_IM non_byzantine)
+    (lift_sub_state fixed_byzantine_IM non_byzantine).
 Proof.
   apply basic_VLSM_full_projection.
   - by intro; intros; apply pre_loaded_fixed_non_byzantine_vlsm_lift_valid.
@@ -525,7 +538,8 @@ Context
   (selection_complement := set_diff (enum index) selection)
   (PreNonByzantine : VLSM message := pre_loaded_fixed_non_byzantine_vlsm IM selection A sender)
   (Fixed : VLSM message := fixed_equivocation_vlsm_composition IM selection)
-  (FixedNonEquivocating : VLSM message := pre_induced_sub_projection IM selection_complement (fixed_equivocation_constraint IM selection))
+  (FixedNonEquivocating : VLSM message :=
+    pre_induced_sub_projection IM selection_complement (fixed_equivocation_constraint IM selection))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM A sender)
   (Hsender_safety : sender_safety_alt_prop IM A sender :=
@@ -796,8 +810,10 @@ Lemma validator_fixed_byzantine_traces_equivocation_char bis btr
   : fixed_byzantine_trace_alt_prop IM selection A sender bis btr <->
     exists eis etr,
       finite_valid_trace Fixed eis etr /\
-      composite_state_sub_projection IM selection_complement eis = composite_state_sub_projection IM selection_complement bis /\
-      finite_trace_sub_projection IM selection_complement etr = finite_trace_sub_projection IM selection_complement btr.
+      composite_state_sub_projection IM selection_complement eis =
+      composite_state_sub_projection IM selection_complement bis /\
+      finite_trace_sub_projection IM selection_complement etr =
+      finite_trace_sub_projection IM selection_complement btr.
 Proof.
   unfold fixed_byzantine_trace_alt_prop.
   split; intros Htr.

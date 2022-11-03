@@ -231,7 +231,9 @@ Context
   {X Y : VLSM message}
   {label_project : vlabel X -> vlabel Y}
   {state_project : vstate X -> vstate Y}
-  (Hsimul : VLSM_full_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
+  (Hsimul :
+    VLSM_full_projection (pre_loaded_with_all_messages_vlsm X)
+      (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
 Definition VLSM_full_projection_has_been_sent

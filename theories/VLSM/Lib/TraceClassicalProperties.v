@@ -49,8 +49,9 @@ match followsT_dec h with
   Tcons a b (@midp _ _ _ _ H)
 end.
 
-Lemma midpointT_midp : forall (p0 p1: trace -> Prop) tr0 tr1 (h : followsT (appendT p0 p1) tr0 tr1),
- midpointT h (midp h).
+Lemma midpointT_midp :
+  forall (p0 p1: trace -> Prop) tr0 tr1 (h : followsT (appendT p0 p1) tr0 tr1),
+    midpointT h (midp h).
 Proof.
 cofix CIH.
 dependent inversion h; subst.
@@ -58,7 +59,8 @@ dependent inversion h; subst.
   case: (constructive_indefinite_description _ _) => /= x [a1 hm].
   by apply: midpointT_nil => //; case: x a1 hm.
 - rewrite [midp _]trace_destr /=.
-  exact: (@midpointT_delay _ _ p0 p1 (Tcons a b tr) (Tcons a b tr') (followsT_delay a b f) tr tr' f a b (midp f)).
+  exact: (@midpointT_delay _ _ p0 p1 (Tcons a b tr) (Tcons a b tr')
+    (followsT_delay a b f) tr tr' f a b (midp f)).
 Qed.
 
 Lemma appendT_assoc_R: forall p1 p2 p3,

@@ -2,10 +2,12 @@ From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
 From VLSM.Lib Require Import Preamble StdppListSet Measurable ListSetExtras RealsExtras.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM ByzantineTraces.FixedSetByzantineTraces.
-From VLSM.Core Require Import Validator Equivocation Equivocation.FixedSetEquivocation.
+From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM Validator Equivocation.
+From VLSM.Core Require Import ByzantineTraces.FixedSetByzantineTraces.
+From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
 From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation.
-From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation Equivocation.TraceWiseEquivocation.
+From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation.
+From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 
 (** * VLSM Compositions with Byzantine nodes of limited weight
 
@@ -57,7 +59,8 @@ Definition limited_byzantine_trace_prop
   exists byzantine, fixed_limited_byzantine_trace_prop s tr byzantine.
 
 Context
-  {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
+  {is_equivocating_tracewise_no_has_been_sent_dec :
+    RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   (limited_constraint := tracewise_limited_equivocation_constraint IM (Ci := Ci) sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
   (Hvalidator: forall i : index, component_message_validator_prop IM limited_constraint i)
@@ -86,7 +89,8 @@ Context
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
   (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
-  (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
+  (tracewise_equivocating_validators :=
+    @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
   .
 
 (**
@@ -213,8 +217,10 @@ Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating 
   : fixed_limited_byzantine_trace_prop s tr byzantine ->
     exists bs btr,
       finite_valid_trace Limited bs btr /\
-      composite_state_sub_projection IM not_byzantine s = composite_state_sub_projection IM not_byzantine bs /\
-      finite_trace_sub_projection IM not_byzantine tr = finite_trace_sub_projection IM not_byzantine btr.
+      composite_state_sub_projection IM not_byzantine s =
+      composite_state_sub_projection IM not_byzantine bs /\
+      finite_trace_sub_projection IM not_byzantine tr =
+      finite_trace_sub_projection IM not_byzantine btr.
 Proof.
   intros [Hlimit Hfixed].
   eexists _, _; split.
@@ -238,9 +244,11 @@ Lemma validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
     exists bs btr,
       finite_valid_trace Limited bs btr /\
       exists selection (selection_complement := set_diff (enum index) selection),
-      (sum_weights (remove_dups selection) <= `threshold)%R /\
-      composite_state_sub_projection IM selection_complement s = composite_state_sub_projection IM selection_complement bs /\
-      finite_trace_sub_projection IM selection_complement tr = finite_trace_sub_projection IM selection_complement btr.
+        (sum_weights (remove_dups selection) <= `threshold)%R /\
+        composite_state_sub_projection IM selection_complement s =
+        composite_state_sub_projection IM selection_complement bs /\
+        finite_trace_sub_projection IM selection_complement tr =
+        finite_trace_sub_projection IM selection_complement btr.
 Proof.
   intros [byzantine Hlimited].
   apply proj1 in Hlimited as Hlimit.

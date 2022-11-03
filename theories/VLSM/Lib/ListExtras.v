@@ -557,8 +557,10 @@ Lemma list_annotate_app
   (P : A -> Prop)
   {Pdec : forall a, Decision (P a)}
   (l1 l2 : list A)
-  (Hs : Forall P (l1 ++ l2))
-  : list_annotate P (l1 ++ l2) Hs = list_annotate P l1 (proj1 (proj1 (@Forall_app _ P l1 l2) Hs)) ++ list_annotate P l2 (proj2 (proj1 (@Forall_app _ P l1 l2) Hs)).
+  (Hs : Forall P (l1 ++ l2)) :
+    list_annotate P (l1 ++ l2) Hs =
+    list_annotate P l1 (proj1 (proj1 (@Forall_app _ P l1 l2) Hs)) ++
+    list_annotate P l2 (proj2 (proj1 (@Forall_app _ P l1 l2) Hs)).
 Proof.
   induction l1; [apply list_annotate_pi|].
   simpl. f_equal.
@@ -1425,7 +1427,8 @@ Proof.
   simpl. rewrite IHl. apply andb_false_r.
 Qed.
 
-Definition Listing_finite_transparent `{EqDecision A} {l : list A} (finite_l : Listing l) : finite.Finite A.
+Definition Listing_finite_transparent
+  `{EqDecision A} {l : list A} (finite_l : Listing l) : finite.Finite A.
 Proof.
   exists l.
   - apply NoDup_ListNoDup. apply finite_l.

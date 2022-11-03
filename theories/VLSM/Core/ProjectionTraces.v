@@ -177,7 +177,8 @@ Qed.
 Lemma preloaded_finite_valid_trace_from_to_projection
   (s s' : composite_state IM)
   (trx : list (composite_transition_item IM))
-  (Htr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s s' trx)
+  (Htr : finite_valid_trace_from_to
+          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s s' trx)
    : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (s' j)
       (VLSM_projection_finite_trace_project preloaded_component_projection trx).
 Proof.
@@ -187,7 +188,8 @@ Qed.
 Lemma preloaded_finite_valid_trace_init_to_projection
   (s s' : composite_state IM)
   (trx : list (composite_transition_item IM))
-  (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s s' trx)
+  (Htr : finite_valid_trace_init_to
+          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s s' trx)
    : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (s' j)
       (VLSM_projection_finite_trace_project preloaded_component_projection trx).
 Proof.
@@ -198,9 +200,11 @@ Lemma pre_loaded_with_all_messages_projection_input_valid_transition_eq
   (s1 s2 : composite_state IM)
   (om1 om2 : option message)
   (l : label)
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
+  (Ht : input_valid_transition
+          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
   (Hl : projT1 l = j)
-  : input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (s1 (projT1 l), om1) (s2 (projT1 l), om2).
+  : input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
+      (projT2 l) (s1 (projT1 l), om1) (s2 (projT1 l), om2).
 Proof.
   specialize
     (VLSM_projection_input_valid_transition preloaded_component_projection l) as Hivt.
@@ -215,7 +219,8 @@ Lemma pre_loaded_with_all_messages_projection_input_valid_transition_neq
   [s1 s2 : composite_state IM]
   [om1 om2 : option message]
   [l : label]
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
+  (Ht : input_valid_transition
+          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
   [i : index]
   (Hi : i <> projT1 l)
   : s1 i = s2 i.
@@ -244,8 +249,11 @@ Lemma finite_trace_projection_list_in
   (tr : list (composite_transition_item IM))
   (itemX : composite_transition_item IM)
   (HitemX : itemX ∈ tr)
-  (j := projT1 (l itemX))
-  : (@Build_transition_item _ (type (IM j)) (projT2 (l itemX)) (input itemX) (destination itemX j) (output itemX)) ∈ (VLSM_projection_finite_trace_project (preloaded_component_projection IM j) tr).
+  (j := projT1 (l itemX)) :
+    @Build_transition_item _ (type (IM j)) (projT2 (l itemX)) (input itemX) (destination itemX j)
+      (output itemX)
+      ∈
+    VLSM_projection_finite_trace_project (preloaded_component_projection IM j) tr.
 Proof.
   apply elem_of_map_option.
   exists itemX; split; [done |].

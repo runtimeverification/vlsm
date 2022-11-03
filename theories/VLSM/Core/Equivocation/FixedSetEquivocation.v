@@ -116,7 +116,8 @@ Definition sent_by_non_equivocating s m
 #[export] Instance sent_by_non_equivocating_dec : RelDecision sent_by_non_equivocating.
 Proof.
   intros s m.
-  apply @Decision_iff with (P := Exists (fun i => has_been_sent (IM i) (s i) m) (filter (fun i => i ∉ equivocating) (enum index))).
+  apply @Decision_iff with (P := Exists (fun i => has_been_sent (IM i) (s i) m)
+    (filter (fun i => i ∉ equivocating) (enum index))).
   - rewrite Exists_exists. apply exist_proper. intro i.
     rewrite elem_of_list_filter. apply and_iff_compat_r.
     split; [intros [Hi Hl]; done | split; [done |]].
@@ -305,8 +306,9 @@ Proof.
   apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).
 Qed.
 
-Definition preloaded_Fixed_incl_Preloaded : VLSM_incl (pre_loaded_with_all_messages_vlsm Fixed) (pre_loaded_with_all_messages_vlsm Free)
-  := preloaded_constraint_free_incl _ _.
+Definition preloaded_Fixed_incl_Preloaded :
+  VLSM_incl (pre_loaded_with_all_messages_vlsm Fixed) (pre_loaded_with_all_messages_vlsm Free) :=
+    preloaded_constraint_free_incl _ _.
 
 Definition StrongFixed_incl_Free : VLSM_incl StrongFixed Free := constraint_free_incl _ _.
 
@@ -815,7 +817,8 @@ Qed.
 *)
 Lemma remove_equivocating_transitions_fixed_projection eqv_is
   (Heqv_is : composite_initial_state_prop (sub_IM IM equivocators) eqv_is)
-  : VLSM_projection StrongFixed StrongFixed (remove_equivocating_label_project IM equivocators) (remove_equivocating_state_project IM equivocators eqv_is).
+  : VLSM_projection StrongFixed StrongFixed (remove_equivocating_label_project IM equivocators)
+      (remove_equivocating_state_project IM equivocators eqv_is).
 Proof.
   apply basic_VLSM_strong_projection.
   - intros [i liX] lY.
@@ -867,8 +870,9 @@ Context
   the equivocator component of a Fixed valid state with initial states is
   still a Fixed valid state.
 *)
-Lemma fixed_equivocator_lifting_initial_state
-  : weak_projection_initial_state_preservation EquivPreloadedBase Fixed (lift_sub_state_to IM equivocators base_s).
+Lemma fixed_equivocator_lifting_initial_state :
+  weak_projection_initial_state_preservation EquivPreloadedBase Fixed
+    (lift_sub_state_to IM equivocators base_s).
 Proof.
   intros eqv_is Heqv_is.
   apply (VLSM_incl_valid_state (StrongFixed_incl_Fixed IM equivocators)).
@@ -913,8 +917,10 @@ Qed.
   [PreSubFree_PreFree_weak_full_projection].
 *)
 Lemma EquivPreloadedBase_Fixed_weak_full_projection
-  (no_initial_messages_for_equivocators : forall i m, i ∈ equivocators -> ~vinitial_message_prop (IM i) m)
-  : VLSM_weak_full_projection EquivPreloadedBase Fixed (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
+  (no_initial_messages_for_equivocators :
+    forall i m, i ∈ equivocators -> ~ vinitial_message_prop (IM i) m)
+  : VLSM_weak_full_projection EquivPreloadedBase Fixed
+      (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
 Proof.
   apply basic_VLSM_weak_full_projection.
   - intros l s om Hv HsY HomY. split.
@@ -1005,12 +1011,12 @@ Lemma strong_fixed_equivocation_vlsm_composition_no_equivocators
 Proof.
   apply VLSM_eq_incl_iff.
   split.
-  - apply (constraint_subsumption_incl IM (strong_fixed_equivocation_constraint IM []) (composite_no_equivocations IM)).
+  - apply constraint_subsumption_incl.
     apply preloaded_constraint_subsumption_stronger.
     apply strong_constraint_subsumption_strongest.
     intros l som.
     by rewrite strong_fixed_equivocation_constraint_no_equivocators.
-  - apply (constraint_subsumption_incl IM (composite_no_equivocations IM) (strong_fixed_equivocation_constraint IM [])).
+  - apply constraint_subsumption_incl.
     apply preloaded_constraint_subsumption_stronger.
     apply strong_constraint_subsumption_strongest.
     intros l som.

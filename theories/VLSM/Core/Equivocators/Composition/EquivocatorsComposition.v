@@ -3,7 +3,9 @@ From stdpp Require Import prelude finite.
 From Coq Require Import FinFun FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble ListSetExtras StdppExtras.
 From VLSM.Lib Require Import FinExtras Measurable.
-From VLSM.Core Require Import VLSM VLSMProjections Plans Composition Equivocation SubProjectionTraces Equivocation.NoEquivocation.
+From VLSM.Core Require Import VLSM VLSMProjections Plans Composition Equivocation.
+From VLSM.Core Require Import SubProjectionTraces.
+From VLSM.Core Require Import Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators.
 From VLSM.Core Require Import Equivocators.MessageProperties.
 
@@ -74,7 +76,8 @@ Context
   `{ReachableThreshold index}
   .
 
-Program Instance equivocating_indices_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci
+Program Instance equivocating_indices_BasicEquivocation :
+  BasicEquivocation (composite_state equivocator_IM) index Ci
   := {
     is_equivocating := fun s v => v ∈ (equivocating_indices (enum index) s) ;
     state_validators := fun s => list_to_set(enum index)
@@ -97,10 +100,11 @@ Proof.
   - by split; auto using elem_of_enum.
 Qed.
 
-Lemma eq_equivocating_indices_equivocation_fault
-: forall s1 s2,
-  list_to_set (equivocating_indices (enum index) s1) ≡@{Ci} list_to_set (equivocating_indices (enum index) s2) ->
-  equivocation_fault s1 = equivocation_fault s2.
+Lemma eq_equivocating_indices_equivocation_fault :
+  forall s1 s2,
+    list_to_set (equivocating_indices (enum index) s1) ≡@{Ci}
+    list_to_set (equivocating_indices (enum index) s2) ->
+      equivocation_fault s1 = equivocation_fault s2.
 Proof.
   intros s1 s2 Heq.
   apply set_eq_nodup_sum_weight_eq.
@@ -221,16 +225,20 @@ Proof.
   - by destruct 1.
 Qed.
 
-Lemma equivocators_no_equivocations_vlsm_incl_PreFree
-  : VLSM_incl equivocators_no_equivocations_vlsm (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
+Lemma equivocators_no_equivocations_vlsm_incl_PreFree :
+  VLSM_incl
+    equivocators_no_equivocations_vlsm
+    (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
 Proof.
   apply VLSM_incl_trans with (machine equivocators_free_vlsm).
   apply equivocators_no_equivocations_vlsm_incl_equivocators_free.
   apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
-Lemma preloaded_equivocators_no_equivocations_vlsm_incl_PreFree
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm) (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
+Lemma preloaded_equivocators_no_equivocations_vlsm_incl_PreFree :
+  VLSM_incl
+    (pre_loaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm)
+    (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
 Proof.
   apply basic_VLSM_incl_preloaded.
   1,3: by intro.
@@ -283,7 +291,8 @@ Definition not_equivocating_equivocator_descriptors
   : RelDecision not_equivocating_equivocator_descriptors.
 Proof.
   intros eqv_descriptors s.
-  apply @Decision_iff with (P := (Forall (fun eqv => existing_descriptor (IM eqv) (eqv_descriptors eqv) (s eqv)) (enum index))).
+  apply @Decision_iff with (P :=
+    Forall (fun eqv => existing_descriptor (IM eqv) (eqv_descriptors eqv) (s eqv)) (enum index)).
   - rewrite Forall_forall. apply forall_proper. intros.
     split; [| done].
     intro Henum. apply Henum, elem_of_enum.
@@ -520,12 +529,13 @@ Context {message : Type}
 
 Definition seeded_equivocators_no_equivocation_vlsm
   (seed : message -> Prop)
-  : VLSM message
-  :=
-  composite_no_equivocation_vlsm_with_pre_loaded sub_equivocator_IM (free_constraint sub_equivocator_IM) seed.
+  : VLSM message :=
+  composite_no_equivocation_vlsm_with_pre_loaded
+    sub_equivocator_IM (free_constraint sub_equivocator_IM) seed.
 
-Lemma sub_equivocator_IM_initial_state_commute is
-  : composite_initial_state_prop sub_equivocator_IM is <-> composite_initial_state_prop sub_IM_equivocator is.
+Lemma sub_equivocator_IM_initial_state_commute is :
+  composite_initial_state_prop sub_equivocator_IM is <->
+  composite_initial_state_prop sub_IM_equivocator is.
 Proof. done. Qed.
 
 End sec_equivocators_sub_projections.
