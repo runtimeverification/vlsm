@@ -324,8 +324,9 @@ Lemma in_futures_preserves_sent_by_non_equivocating s base_s
 Proof.
   intros m (i & Hi & Hsent).
   exists i; split; [done |].
+  revert Hsent.
   eapply in_futures_preserving_oracle_from_stepwise
-  ; [apply has_been_sent_stepwise_from_trace | | done].
+  ; [by apply has_been_sent_stepwise_props |].
   by apply (VLSM_projection_in_futures (preloaded_component_projection IM i)).
 Qed.
 
@@ -458,7 +459,7 @@ Proof.
     apply (VLSM_projection_in_futures
       (preloaded_component_projection IM (projT1 l))) in Hfuture.
     apply in_futures_preserving_oracle_from_stepwise with (field_selector output) (sf (projT1 l))
-    ; [apply has_been_sent_stepwise_from_trace | done |].
+    ; [apply has_been_sent_stepwise_props | done |].
     apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht.
     specialize (VLSM_projection_input_valid_transition
       (preloaded_component_projection IM (projT1 l)) l (projT2 l)) as Hproject.

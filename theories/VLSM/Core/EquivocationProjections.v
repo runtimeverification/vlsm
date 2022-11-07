@@ -77,8 +77,8 @@ Lemma VLSM_projection_has_been_sent_reflect
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector output) (field_selector output).
   - by intros [] [] **; cbn in *; subst.
-  - by apply (has_been_sent_stepwise_from_trace X).
-  - by apply (has_been_sent_stepwise_from_trace Y).
+  - by apply (has_been_sent_stepwise_props X).
+  - by apply (has_been_sent_stepwise_props Y).
 Qed.
 
 Lemma VLSM_projection_has_been_received_reflect
@@ -89,8 +89,8 @@ Lemma VLSM_projection_has_been_received_reflect
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector input) (field_selector input).
   - by intros [] [] **; cbn in *; subst.
-  - by apply (has_been_received_stepwise_from_trace X).
-  - by apply (has_been_received_stepwise_from_trace Y).
+  - by apply (has_been_received_stepwise_props X).
+  - by apply (has_been_received_stepwise_props Y).
 Qed.
 
 Lemma VLSM_projection_has_been_directly_observed_reflect
@@ -184,8 +184,8 @@ Lemma VLSM_weak_full_projection_has_been_sent
 Proof.
   apply VLSM_weak_full_projection_oracle with (field_selector output) (field_selector output).
   - by intros [] [] Hin Hout; cbn in *; subst.
-  - apply (has_been_sent_stepwise_from_trace X).
-  - apply (has_been_sent_stepwise_from_trace Y).
+  - apply (has_been_sent_stepwise_props X).
+  - apply (has_been_sent_stepwise_props Y).
   - apply has_been_sent_dec.
   - apply has_been_sent_dec.
 Qed.
@@ -198,8 +198,8 @@ Lemma VLSM_weak_full_projection_has_been_received
 Proof.
   apply VLSM_weak_full_projection_oracle with (field_selector input) (field_selector input).
   - by intros [] [] Hin Hout; cbn in *; subst.
-  - apply (has_been_received_stepwise_from_trace X).
-  - apply (has_been_received_stepwise_from_trace Y).
+  - apply (has_been_received_stepwise_props X).
+  - apply (has_been_received_stepwise_props Y).
   - apply has_been_received_dec.
   - apply has_been_received_dec.
 Qed.

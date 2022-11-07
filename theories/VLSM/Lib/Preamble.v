@@ -26,6 +26,11 @@ Tactic Notation "spec" hyp(H) constr(a) constr(b) constr(c) constr(d) :=
 Tactic Notation "spec" hyp(H) constr(a) constr(b) constr(c) constr(d) constr(e) :=
   (generalize (H a b c d e); clear H; intro H).
 
+(** ** Tactics for unfolding terms *)
+Tactic Notation "hnf_in" uconstr(T) :=
+  let t := fresh in
+  set (t := T); hnf in (value of t); subst t.
+
 (** ** Basic logic *)
 
 Lemma Is_true_iff_eq_true: forall x: bool, x = true <-> x.

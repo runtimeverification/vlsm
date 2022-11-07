@@ -108,7 +108,7 @@ Qed.
 Instance HasBeenSentCapability_UMOComponent
   (i : Address) : HasBeenSentCapability (UMOComponent i).
 Proof.
-  eapply HasBeenSentCapability_from_stepwise with (fun s m => m ∈ sentMessages s)
+  apply Build_HasBeenSentCapability with (fun s m => m ∈ sentMessages s)
   ; [intros s m; typeclasses eauto | split].
   - by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil.
   - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
@@ -123,7 +123,7 @@ Defined.
 Instance HasBeenReceivedCapability_UMOComponent
   (i : Address) : HasBeenReceivedCapability (UMOComponent i).
 Proof.
-  eapply HasBeenReceivedCapability_from_stepwise with (fun s m => m ∈ receivedMessages s)
+  eapply Build_HasBeenReceivedCapability with (fun s m => m ∈ receivedMessages s)
   ; [intros s m; typeclasses eauto | split].
   - by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil.
   - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.

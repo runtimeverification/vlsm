@@ -430,11 +430,11 @@ Definition equivocator_has_been_received  := equivocator_oracle (has_been_receiv
   := equivocator_oracle_dec (has_been_received X) _.
 
 Lemma equivocator_has_been_received_stepwise_props
-  : has_been_received_stepwise_props (vlsm := equivocator_vlsm) equivocator_has_been_received.
+  : oracle_stepwise_props (field_selector input) equivocator_has_been_received.
 Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
-    ; [|apply has_been_received_stepwise_from_trace].
+    ; [|apply has_been_received_stepwise_props].
     cbv; itauto.
   - intros s item; destruct item, l; cbn.
     2,3:itauto.
@@ -445,7 +445,8 @@ Qed.
 (** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm]. *)
 #[export] Instance equivocator_HasBeenReceivedCapability
   : HasBeenReceivedCapability equivocator_vlsm
-  := HasBeenReceivedCapability_from_stepwise (vlsm := equivocator_vlsm)
+  := Build_HasBeenReceivedCapability equivocator_vlsm
+    equivocator_has_been_received
     equivocator_has_been_received_dec
     equivocator_has_been_received_stepwise_props.
 
@@ -470,11 +471,11 @@ Definition equivocator_has_been_sent  := equivocator_oracle (has_been_sent X).
   := equivocator_oracle_dec (has_been_sent X) _.
 
 Lemma equivocator_has_been_sent_stepwise_props
-  : has_been_sent_stepwise_props (vlsm := equivocator_vlsm) equivocator_has_been_sent.
+  : oracle_stepwise_props (field_selector output) equivocator_has_been_sent.
 Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
-    ; [|apply has_been_sent_stepwise_from_trace].
+    ; [|apply has_been_sent_stepwise_props].
     cbv; itauto.
   - intros s item; destruct item, l; cbn.
     2,3:itauto.
@@ -485,7 +486,9 @@ Qed.
 (** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm]. *)
 #[export] Instance equivocator_HasBeenSentCapability
   : HasBeenSentCapability equivocator_vlsm
-  := HasBeenSentCapability_from_stepwise (vlsm := equivocator_vlsm)
+  := Build_HasBeenSentCapability
+    equivocator_vlsm
+    equivocator_has_been_sent
     equivocator_has_been_sent_dec
     equivocator_has_been_sent_stepwise_props.
 

@@ -90,7 +90,7 @@ Proof.
   eapply (oracle_step_update (has_been_directly_observed_stepwise_props X) _ _ _ _ _ Hptrans) in Hobs.
   simpl in Hobs.
   specialize (Henforced l s (Some msg)).
-  rewrite (oracle_step_update (has_been_sent_stepwise_from_trace X) _ _ _ _ _ Hptrans).
+  rewrite (has_been_sent_step_update Hptrans).
   destruct Hptrans as [Hv _].
   destruct Hobs as [[Hin|Hout]|Hobs]; subst.
   - (* by [no_equivocations], the incoming message [im] was previously sent *)
