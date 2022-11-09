@@ -1144,7 +1144,7 @@ Proof.
       _ n item
     ) as Hitem_equivocating.
   clear Hdescriptors n.
-  spec Hitem_equivocating; [by subst; rewrite !elem_of_app; right; left; left |].
+  spec Hitem_equivocating; [by rewrite Heqtr, !elem_of_app, elem_of_cons; auto |].
   spec Hitem_equivocating Houtput_select.
 
   (*

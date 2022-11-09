@@ -441,20 +441,20 @@ Proof.
         ).
   - clear isX sX trX HtrX. intro; intros.
     specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM []) as HinclE.
-    destruct iom as [im |]; [| by exists [], eqv_state_s; split; [constructor |]; eauto].
-    destruct HcX as [Hsent | Hemitted]; [| done].
-    exists []. exists eqv_state_s.
-    split; [by constructor |].
-    split; [done |].
-    split; [done |].
-    apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
-    apply (VLSM_incl_valid_state HinclE) in Hstate_valid.
-    left.
-    revert Hsent. subst.
-    by specialize
-      (VLSM_projection_has_been_sent_reflect
-        (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM)
-        eqv_state_s Hstate_valid im) as Hsent.
+    destruct iom as [im |]; [| by exists [], eqv_state_s; split; constructor].
+    + destruct HcX as [Hsent | Hemitted]; [| done].
+      exists []. exists eqv_state_s.
+      split; [by constructor |].
+      split; [done |].
+      split; [done |].
+      apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
+      apply (VLSM_incl_valid_state HinclE) in Hstate_valid.
+      left.
+      revert Hsent. subst.
+      by specialize
+        (VLSM_projection_has_been_sent_reflect
+          (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM)
+          eqv_state_s Hstate_valid im) as Hsent.
 Qed.
 
 End sec_no_equivocation.

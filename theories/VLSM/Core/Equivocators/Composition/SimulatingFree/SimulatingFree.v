@@ -315,7 +315,7 @@ Proof.
     by elim (no_initial_messages_in_IM i mi).
   - clear isX sX trX HtrX.
     intro; intros.
-    destruct iom as [im |]; [| by exists [], eqv_state_s; split; [constructor |]].
+    destruct iom as [im |]; [| by exists [], eqv_state_s; split; constructor].
     specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM IM) (free_constraint _) seed)
       as HinclE.
     apply valid_trace_forget_last in Hmsg_trace.

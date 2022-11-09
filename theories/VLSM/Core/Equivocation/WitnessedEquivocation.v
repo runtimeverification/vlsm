@@ -525,7 +525,11 @@ Proof.
       destruct Htr'_item as [Htr'_item Hinit].
       apply finite_valid_trace_from_to_app_split in Htr'_item.
       destruct Htr'_item as [Htr' Hitem].
-      spec IHn; [by split; [| done]; apply finite_valid_trace_from_to_forget_last in Htr' |].
+      spec IHn.
+      {
+        split; [| done].
+        by apply finite_valid_trace_from_to_forget_last in Htr'.
+      }
       spec IHn Hwitness'.
       destruct IHn as [is' [tr'' [[Htr'' Hinit'] Hprefix]]].
       specialize
@@ -750,7 +754,7 @@ Proof.
         (tr ++ [{| l := l; input := iom; destination := sf; output := oom |}])
         []).
     spec Heqv; [by apply app_nil_r |].
-    destruct iom as [im|]; [| by repeat split; [| apply option_valid_message_None | ..]].
+    destruct iom as [im |]; [| by repeat split; auto using option_valid_message_None].
     apply Free_has_sender in Hiom as _Hsender.
     destruct (sender im) as [v|] eqn:Hsender; [| by congruence].
     clear _Hsender.
