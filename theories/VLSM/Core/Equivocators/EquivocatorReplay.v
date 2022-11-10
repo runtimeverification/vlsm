@@ -31,7 +31,9 @@ Definition equivocator_state_append_label
 
 Lemma equivocator_state_append_valid l s om base_s
   : equivocator_valid X l (s, om) ->
-    equivocator_valid X (equivocator_state_append_label base_s l) (equivocator_state_append base_s s, om).
+    equivocator_valid X
+      (equivocator_state_append_label base_s l)
+      (equivocator_state_append base_s s, om).
 Proof.
   by destruct l; cbn; [done |..]
   ; (destruct (equivocator_state_project s n) as [sn|] eqn:Hn; [| done])
@@ -62,7 +64,8 @@ Lemma equivocator_state_append_initial_state_in_futures
     (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
     s
     : vinitial_state_prop (equivocator_vlsm X) s ->
-      in_futures (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s (equivocator_state_append base_s s).
+      in_futures (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s
+        (equivocator_state_append base_s s).
 Proof.
   exists
     [(@Build_transition_item _ (type (equivocator_vlsm X))
@@ -95,8 +98,9 @@ Lemma equivocator_state_append_preloaded_with_weak_projection
   (seed : message -> Prop)
   (base_s : equivocator_state X)
   (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
-  : VLSM_weak_full_projection (pre_loaded_vlsm (equivocator_vlsm X) seed) (pre_loaded_vlsm (equivocator_vlsm X) seed)
-        (equivocator_state_append_label base_s) (equivocator_state_append base_s).
+  : VLSM_weak_full_projection (pre_loaded_vlsm (equivocator_vlsm X) seed)
+      (pre_loaded_vlsm (equivocator_vlsm X) seed)
+      (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
   apply basic_VLSM_weak_full_projection; intro; intros.
   - apply equivocator_state_append_valid. apply Hv.
@@ -108,8 +112,9 @@ Qed.
 Lemma equivocator_state_append_preloaded_weak_projection
   (base_s : equivocator_state X)
   (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
-  : VLSM_weak_full_projection (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
-        (equivocator_state_append_label base_s) (equivocator_state_append base_s).
+  : VLSM_weak_full_projection (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
+      (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
+      (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
   specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (equivocator_vlsm X)) as Heq.
   constructor.
@@ -163,8 +168,8 @@ Proof.
   apply (VLSM_eq_valid_state Heq) in Hs.
   apply (equivocator_state_append_in_futures _ _ Hbase_s) in Hs.
   apply (VLSM_eq_in_futures Heq) in Hs.
-  apply (in_futures_preserving_oracle_from_stepwise _ (equivocator_vlsm X) (field_selector output) (equivocator_has_been_sent X))
-  ; [| done].
+  apply (in_futures_preserving_oracle_from_stepwise _ (equivocator_vlsm X) (field_selector output)
+    (equivocator_has_been_sent X)); [| done].
   apply equivocator_has_been_sent_stepwise_props.
 Qed.
 

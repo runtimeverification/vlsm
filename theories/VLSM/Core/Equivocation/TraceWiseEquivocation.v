@@ -231,7 +231,8 @@ Proof.
   destruct Heqv as [m [Hv [prefix [item [suffix [Heq Heqv]]]]]].
   exists m. split; [done |]. exists prefix.
   destruct_list_last suffix suffix' item' Heqsuffix.
-  { exfalso. subst. apply app_inj_tail,proj2 in Heq. subst item. apply proj1 in Heqv. simpl in Heqv. subst om. simpl in n. congruence. }
+  { exfalso. subst. apply app_inj_tail,proj2 in Heq. subst item. apply proj1 in Heqv. simpl in Heqv.
+    subst om. simpl in n. congruence. }
   exists item, suffix'. split; [| done].
   replace (prefix ++ item :: suffix' ++ [item']) with ((prefix ++ item :: suffix') ++ [item']) in Heq.
   - apply app_inj_tail in Heq. apply Heq.
@@ -274,8 +275,10 @@ Proof.
   apply proj1, finite_valid_trace_from_to_app_split,proj1
     , preloaded_finite_valid_trace_from_to_projection with (j := A v)
     , finite_valid_trace_from_to_last in Htr.
-  rewrite (VLSMTotalProjection.VLSM_projection_finite_trace_project_app (preloaded_component_projection IM (A v))) in Htrv.
-  apply proj1, (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (IM (A v)))),proj2 in Htrv.
+  rewrite (VLSMTotalProjection.VLSM_projection_finite_trace_project_app
+    (preloaded_component_projection IM (A v))) in Htrv.
+  apply proj1, (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (IM (A v))))
+    in Htrv as [_ Htrv].
   rewrite Htr in Htrv.
   intro Hbs_m. elim Hnbs_m. clear Hnbs_m.
   revert Hbs_m.
@@ -358,7 +361,8 @@ Lemma composite_transition_no_sender_equivocators_weight
   (Hno_sender : option_bind _ _ sender om = None)
   : (equivocation_fault s' <= equivocation_fault s)%R.
 Proof.
-  specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators _ _ _ _ _ Ht Hno_sender) as Heqv.
+  specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators
+    _ _ _ _ _ Ht Hno_sender) as Heqv.
   revert Heqv.
   apply incl_equivocating_validators_equivocation_fault.
 Qed.

@@ -938,7 +938,9 @@ Class FullMessageDependencies
   : Prop :=
 {
   full_message_dependencies_happens_before :
-    forall dm m, dm ∈ full_message_dependencies m <-> msg_dep_happens_before message_dependencies dm m;
+    forall dm m,
+      dm ∈ full_message_dependencies m <->
+      msg_dep_happens_before message_dependencies dm m;
   full_message_dependencies_irreflexive :
     forall m, m ∉ full_message_dependencies m;
   full_message_dependencies_nodups :
@@ -980,7 +982,8 @@ Proof.
   apply full_message_dependencies_irreflexive.
 Qed.
 
-#[export] Instance msg_dep_happens_before_strict : StrictOrder (msg_dep_happens_before message_dependencies) := {}.
+#[export] Instance msg_dep_happens_before_strict :
+  StrictOrder (msg_dep_happens_before message_dependencies) := {}.
 
 Lemma msg_dep_rel_full_message_dependecies_subset :
   forall x y : message, msg_dep_rel message_dependencies x y ->

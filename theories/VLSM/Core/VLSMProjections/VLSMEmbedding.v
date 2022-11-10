@@ -60,7 +60,9 @@ Qed.
 
 Lemma pre_VLSM_full_projection_infinite_trace_project_EqSt
   : forall s (Hinf := pre_VLSM_full_projection_infinite_trace_project_infinitely_often s),
-  Streams.EqSt (pre_VLSM_full_projection_infinite_trace_project s) (pre_VLSM_projection_infinite_trace_project _ _ (Some ∘ label_project) state_project s Hinf).
+  Streams.EqSt
+    (pre_VLSM_full_projection_infinite_trace_project s)
+    (pre_VLSM_projection_infinite_trace_project _ _ (Some ∘ label_project) state_project s Hinf).
 Proof.
   intros.
   apply stream_map_option_EqSt.
@@ -68,7 +70,8 @@ Qed.
 
 Lemma pre_VLSM_full_projection_finite_trace_last
   : forall sX trX,
-    state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX) (pre_VLSM_full_projection_finite_trace_project trX).
+    state_project (finite_trace_last sX trX) =
+    finite_trace_last (state_project sX) (pre_VLSM_full_projection_finite_trace_project trX).
 Proof.
   intros.
   destruct_list_last trX trX' lst HtrX; [done |].
@@ -293,13 +296,16 @@ Context
 
 Definition VLSM_weak_full_projection_finite_trace_last
   : forall sX trX,
-    state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX) (VLSM_weak_full_projection_finite_trace_project Hsimul trX)
+    state_project (finite_trace_last sX trX)
+      =
+    finite_trace_last (state_project sX) (VLSM_weak_full_projection_finite_trace_project Hsimul trX)
   := pre_VLSM_full_projection_finite_trace_last _ _ label_project state_project.
 
 Definition VLSM_weak_full_projection_finite_valid_trace_from
   : forall s tr,
     finite_valid_trace_from X s tr ->
-    finite_valid_trace_from Y (state_project s) (VLSM_weak_full_projection_finite_trace_project Hsimul tr)
+    finite_valid_trace_from Y (state_project s)
+      (VLSM_weak_full_projection_finite_trace_project Hsimul tr)
   :=
   (weak_full_trace_project_preserves_valid_trace _ _ _ _ Hsimul).
 
@@ -324,7 +330,8 @@ Definition VLSM_weak_full_projection_finite_valid_trace_from_to
     (s f : vstate X)
     (tr : list (vtransition_item X))
     (Htr : finite_valid_trace_from_to X s f tr),
-    finite_valid_trace_from_to Y (state_project s) (state_project f) (VLSM_weak_full_projection_finite_trace_project Hsimul tr)
+    finite_valid_trace_from_to Y (state_project s) (state_project f)
+      (VLSM_weak_full_projection_finite_trace_project Hsimul tr)
   := VLSM_weak_projection_finite_valid_trace_from_to VLSM_weak_full_projection_is_projection.
 
 Definition VLSM_weak_full_projection_in_futures
@@ -351,14 +358,16 @@ Qed.
 Lemma VLSM_weak_full_projection_infinite_valid_trace_from
   : forall sX trX,
     infinite_valid_trace_from X sX trX ->
-    infinite_valid_trace_from Y (state_project sX) (VLSM_weak_full_projection_infinite_trace_project Hsimul trX).
+    infinite_valid_trace_from Y
+      (state_project sX) (VLSM_weak_full_projection_infinite_trace_project Hsimul trX).
 Proof.
   intros.
-  specialize (pre_VLSM_full_projection_infinite_trace_project_EqSt _ _ label_project state_project trX)
-    as Heq.
+  specialize (pre_VLSM_full_projection_infinite_trace_project_EqSt
+    _ _ label_project state_project trX) as Heq.
   apply Streams.sym_EqSt in Heq.
   apply (infinite_valid_trace_from_EqSt Y _ _ _ Heq).
-  by apply (VLSM_weak_projection_infinite_valid_trace_from VLSM_weak_full_projection_is_projection sX trX).
+  by apply (VLSM_weak_projection_infinite_valid_trace_from
+    VLSM_weak_full_projection_is_projection sX trX).
 Qed.
 
 Lemma VLSM_weak_full_projection_can_produce
@@ -407,7 +416,8 @@ Context
 
 Definition VLSM_full_projection_finite_trace_last
   : forall sX trX,
-    state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX) (VLSM_full_projection_finite_trace_project Hsimul trX)
+    state_project (finite_trace_last sX trX) =
+    finite_trace_last (state_project sX) (VLSM_full_projection_finite_trace_project Hsimul trX)
   := pre_VLSM_full_projection_finite_trace_last _ _ label_project state_project.
 
 Definition VLSM_full_projection_finite_valid_trace
@@ -441,7 +451,8 @@ Definition VLSM_full_projection_finite_valid_trace_init_to
     (s f : vstate X)
     (tr : list (vtransition_item X))
     (Htr : finite_valid_trace_init_to X s f tr),
-    finite_valid_trace_init_to Y (state_project s) (state_project f) (VLSM_full_projection_finite_trace_project Hsimul tr)
+    finite_valid_trace_init_to Y (state_project s) (state_project f)
+      (VLSM_full_projection_finite_trace_project Hsimul tr)
   := VLSM_projection_finite_valid_trace_init_to VLSM_full_projection_is_projection.
 
 Definition VLSM_full_projection_initial_state
@@ -464,7 +475,8 @@ Definition VLSM_full_projection_finite_valid_trace_from_to
     (s f : vstate X)
     (tr : list (vtransition_item X))
     (Htr : finite_valid_trace_from_to X s f tr),
-    finite_valid_trace_from_to Y (state_project s) (state_project f) (VLSM_full_projection_finite_trace_project Hsimul tr)
+    finite_valid_trace_from_to Y (state_project s) (state_project f)
+      (VLSM_full_projection_finite_trace_project Hsimul tr)
   := VLSM_weak_full_projection_finite_valid_trace_from_to VLSM_full_projection_weaken.
 
 Definition VLSM_full_projection_in_futures
@@ -504,13 +516,15 @@ Definition VLSM_full_projection_valid_message
 Definition VLSM_full_projection_trace_project (t : vTrace X) : vTrace Y :=
   match t with
   | Finite s tr => Finite (state_project s) (VLSM_full_projection_finite_trace_project Hsimul tr)
-  | Infinite s tr => Infinite (state_project s) (VLSM_full_projection_infinite_trace_project Hsimul tr)
+  | Infinite s tr =>
+      Infinite (state_project s) (VLSM_full_projection_infinite_trace_project Hsimul tr)
   end.
 
 Definition VLSM_full_projection_infinite_valid_trace_from
   s ls
   : infinite_valid_trace_from X s ls ->
-    infinite_valid_trace_from Y (state_project s) (VLSM_full_projection_infinite_trace_project Hsimul ls)
+    infinite_valid_trace_from Y (state_project s)
+      (VLSM_full_projection_infinite_trace_project Hsimul ls)
   := VLSM_weak_full_projection_infinite_valid_trace_from VLSM_full_projection_weaken s ls.
 
 Lemma VLSM_full_projection_infinite_valid_trace
@@ -714,7 +728,8 @@ Lemma basic_VLSM_full_projection_preloaded
   (Hvalid : strong_full_projection_valid_preservation X Y label_project state_project)
   (Htransition : strong_full_projection_transition_preservation  X Y label_project state_project)
   (Hstate : strong_projection_initial_state_preservation X Y state_project)
-  : VLSM_full_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project.
+  : VLSM_full_projection (pre_loaded_with_all_messages_vlsm X)
+      (pre_loaded_with_all_messages_vlsm Y) label_project state_project.
 Proof.
   constructor.
   intros sX trX HtrX.

@@ -88,7 +88,8 @@ Section sec_weak_partial_projection_properties.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {trace_project : vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y))}
+  {trace_project :
+    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y))}
   (Hsimul : VLSM_weak_partial_projection X Y trace_project)
   .
 
@@ -151,7 +152,8 @@ Section sec_partial_projection_properties.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {trace_project : vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y))}
+  {trace_project :
+    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y))}
   (Hsimul : VLSM_partial_projection X Y trace_project)
   .
 
@@ -191,7 +193,8 @@ Qed.
 
 Definition VLSM_partial_projection_weaken : VLSM_weak_partial_projection X Y trace_project :=
   {| weak_partial_projection_type := partial_projection_type _ _ _ Hsimul
-  ;  weak_partial_trace_project_preserves_valid_trace := VLSM_partial_projection_finite_valid_trace_from
+  ;  weak_partial_trace_project_preserves_valid_trace :=
+       VLSM_partial_projection_finite_valid_trace_from
   |}.
 
 Definition VLSM_partial_projection_valid_state

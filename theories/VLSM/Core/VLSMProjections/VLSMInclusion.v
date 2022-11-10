@@ -450,14 +450,18 @@ Proof.
   apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
-Lemma pre_loaded_with_all_messages_vlsm_idem_l
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)) (pre_loaded_with_all_messages_vlsm X).
+Lemma pre_loaded_with_all_messages_vlsm_idem_l :
+  VLSM_incl
+    (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X))
+    (pre_loaded_with_all_messages_vlsm X).
 Proof.
   apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
-Lemma pre_loaded_with_all_messages_vlsm_idem_r
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)).
+Lemma pre_loaded_with_all_messages_vlsm_idem_r :
+  VLSM_incl
+    (pre_loaded_with_all_messages_vlsm X)
+    (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)).
 Proof.
   apply basic_VLSM_incl_preloaded; cbv; itauto.
 Qed.

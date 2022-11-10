@@ -58,7 +58,8 @@ Context
   (X: VLSM message)
   `{HasBeenSentCapability message X}
   `{HasBeenDirectlyObservedCapability message X}
-  (Henforced: forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s,om) -> no_equivocations X l (s,om))
+  (Henforced : forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
+    no_equivocations X l (s,om))
   .
 
 (**
@@ -87,8 +88,8 @@ Proof.
   intros Hptrans Hprev msg Hobs.
   specialize (Hprev msg).
   apply preloaded_weaken_input_valid_transition in Hptrans.
-  eapply (oracle_step_update (has_been_directly_observed_stepwise_props X) _ _ _ _ _ Hptrans) in Hobs.
-  simpl in Hobs.
+  eapply (oracle_step_update (has_been_directly_observed_stepwise_props X) _ _ _ _ _ Hptrans)
+    in Hobs; simpl in Hobs.
   specialize (Henforced l s (Some msg)).
   rewrite (oracle_step_update (has_been_sent_stepwise_from_trace X) _ _ _ _ _ Hptrans).
   destruct Hptrans as [Hv _].
@@ -259,8 +260,9 @@ Definition composite_no_equivocation_vlsm_with_pre_loaded
   :=
   pre_loaded_vlsm (composite_vlsm IM no_equivocations_additional_constraint_with_pre_loaded) seed.
 
-Lemma seeded_no_equivocation_incl_preloaded
-  : VLSM_incl composite_no_equivocation_vlsm_with_pre_loaded (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)).
+Lemma seeded_no_equivocation_incl_preloaded :
+  VLSM_incl composite_no_equivocation_vlsm_with_pre_loaded
+    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)).
 Proof.
   unfold composite_no_equivocation_vlsm_with_pre_loaded.
   match goal with

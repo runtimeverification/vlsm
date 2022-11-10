@@ -2,10 +2,12 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From Coq Require Import Reals.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras Measurable StdppExtras.
-From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition SubProjectionTraces.
-From VLSM.Core Require Import Equivocation.FixedSetEquivocation Equivocation.LimitedMessageEquivocation.
-From VLSM.Core Require Import Equivocation.MsgDepFixedSetEquivocation Equivocation.TraceWiseEquivocation.
-From VLSM.Core Require Import Validator ProjectionTraces Equivocation.
+From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition.
+From VLSM.Core Require Import Validator ProjectionTraces SubProjectionTraces Equivocation.
+From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
+From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation.
+From VLSM.Core Require Import Equivocation.MsgDepFixedSetEquivocation.
+From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 
 (**
   To allow capturing the two models of limited equivocation described in the
@@ -150,7 +152,9 @@ Lemma msg_dep_annotate_trace_with_equivocators_app : forall sa tr1 tr2,
   msg_dep_annotate_trace_with_equivocators sa tr1 ++
     annotate_trace_from (free_composite_vlsm IM) (set validator)
       (coeqv_composite_transition_message_equivocators IM sender msg_dep_coequivocating_senders)
-      (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) (set validator)) {| original_state := sa; state_annotation := ` inhabitant |} (msg_dep_annotate_trace_with_equivocators sa tr1)) tr2.
+      (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) (set validator))
+        {| original_state := sa; state_annotation := ` inhabitant |}
+        (msg_dep_annotate_trace_with_equivocators sa tr1)) tr2.
 Proof. by intros; apply annotate_trace_from_app. Qed.
 
 Lemma msg_dep_annotate_trace_with_equivocators_last_original_state : forall s s' tr,
@@ -243,14 +247,16 @@ Qed.
 Lemma annotated_free_input_valid_projection
   iprop `{Inhabited (sig iprop)} constr trans
   i li s om
-  : input_valid (annotated_vlsm (free_composite_vlsm IM) (set validator) iprop constr trans) (existT i li) (s, om) ->
+  : input_valid (annotated_vlsm (free_composite_vlsm IM) (set validator) iprop constr trans)
+      (existT i li) (s, om) ->
     input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om).
 Proof.
   intro Hvalid.
   eapply (VLSM_projection_input_valid (preloaded_component_projection IM i))
   ; [apply (composite_project_label_eq IM) |].
-  by apply (VLSM_incl_input_valid (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))),
-        (VLSM_full_projection_input_valid (forget_annotations_projection (free_composite_vlsm IM) _ _ _)).
+  by apply
+    (VLSM_incl_input_valid (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))),
+    (VLSM_full_projection_input_valid (forget_annotations_projection (free_composite_vlsm IM) _ _ _)).
 Qed.
 
 Lemma full_node_msg_dep_composite_transition_message_equivocators
@@ -270,8 +276,10 @@ Proof.
   by symmetry; eapply full_node_msg_dep_coequivocating_senders.
 Qed.
 
-Lemma msg_dep_full_node_valid_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
-  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
+Lemma msg_dep_full_node_valid_iff
+  l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
+  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
+           (projT2 l) (original_state s (projT1 l), om))
   : vvalid (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender) l (s, om) <->
     vvalid (full_node_limited_equivocation_vlsm IM sender) l (s, om).
 Proof.
@@ -279,8 +287,10 @@ Proof.
   rewrite full_node_msg_dep_composite_transition_message_equivocators; itauto.
 Qed.
 
-Lemma msg_dep_full_node_transition_iff l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
-  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l) (original_state s (projT1 l), om))
+Lemma msg_dep_full_node_transition_iff
+  l (s : @state _ (annotated_type (free_composite_vlsm IM) (set validator))) om
+  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
+           (projT2 l) (original_state s (projT1 l), om))
   : vtransition (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender) l (s, om) =
     vtransition (full_node_limited_equivocation_vlsm IM sender) l (s, om).
 Proof.
@@ -709,7 +719,8 @@ Proof.
 Qed.
 
 Lemma annotated_limited_incl_constrained_limited
-  {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
+  {is_equivocating_tracewise_no_has_been_sent_dec :
+    RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   : VLSM_full_projection
       Limited
       (tracewise_limited_equivocation_vlsm_composition IM sender (Ci := Ci))

@@ -1,15 +1,19 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import FinFun Reals.
-From VLSM.Lib Require Import StdppListSet RealsExtras.
+From VLSM.Lib Require Import StdppListSet RealsExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition AnnotatedVLSM.
-From VLSM.Core Require Import Equivocation Equivocation.FixedSetEquivocation.
-From VLSM.Lib Require Import Measurable.
-From VLSM.Core Require Import Equivocation.TraceWiseEquivocation Equivocation.LimitedMessageEquivocation Equivocation.MsgDepLimitedEquivocation.
-From VLSM.Core Require Import MessageDependencies Equivocation.WitnessedEquivocation.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition Equivocators.Composition.EquivocatorsCompositionProjections.
+From VLSM.Core Require Import Equivocation MessageDependencies.
+From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
+From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation.
+From VLSM.Core Require Import Equivocation.WitnessedEquivocation.
+From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation.
+From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
 From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.LimitedStateEquivocation.
-From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocationSimulation.
+From VLSM.Core Require Import
+  Equivocators.Composition.LimitedEquivocation.FixedEquivocationSimulation.
 From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
 
 (** * VLSM Equivocators Simulating limited message equivocation traces
@@ -125,14 +129,15 @@ Context
 
 Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation_rev
   isX sX trX
-  (HtrX : finite_valid_trace_init_to (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender) isX sX trX)
+  (HtrX : finite_valid_trace_init_to (msg_dep_limited_equivocation_vlsm IM
+            full_message_dependencies sender) isX sX trX)
   : exists is s tr,
       equivocators_total_state_project IM is = original_state isX /\
       equivocators_total_state_project IM s = original_state sX /\
       equivocators_total_trace_project IM tr =
         pre_VLSM_full_projection_finite_trace_project
-          (annotated_type (free_composite_vlsm IM) (set index)) (composite_type IM) Datatypes.id original_state
-          trX /\
+          (annotated_type (free_composite_vlsm IM) (set index)) (composite_type IM)
+            Datatypes.id original_state trX /\
       finite_valid_trace_init_to XE is s tr /\
       finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.

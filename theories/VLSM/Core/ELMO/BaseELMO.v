@@ -673,7 +673,8 @@ Proof.
         -- destruct m as [state_m].
            apply Hindm, elem_of_map in Hb as (y & -> & Hy).
            by eexists; split; [| left; right].
-        -- cut (msg_dep_happens_before (elements ∘ Message_dependencies) dm (MkMessage (MkState os a))).
+        -- cut (msg_dep_happens_before (elements ∘ Message_dependencies) dm
+                (MkMessage (MkState os a))).
            {
              intros (z & -> & Hz)%Hindos%elem_of_map.
              by eexists; split; [| right].

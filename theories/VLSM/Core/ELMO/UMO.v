@@ -152,7 +152,8 @@ Inductive UMO_reachable (C : State -> Message -> Prop) : State -> Prop :=
 | reach_send :
     forall s, UMO_reachable C s -> UMO_reachable C (s <+> MkObservation Send (MkMessage s))
 | reach_recv :
-    forall s msg, C s msg -> UMO_reachable C s -> UMO_reachable C (s <+> MkObservation Receive msg).
+    forall s msg, C s msg -> UMO_reachable C s ->
+      UMO_reachable C (s <+> MkObservation Receive msg).
 
 (**
   An alternative induction principle for [UMO_reachable]
@@ -1557,7 +1558,8 @@ Fixpoint UMO_state2trace_aux
 match is with
 | [] => []
 | i :: is' =>
-  UMO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++ UMOComponent_state2trace us i
+  UMO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++
+  UMOComponent_state2trace us i
 end.
 
 Definition UMO_state2trace
@@ -1585,7 +1587,8 @@ Proof.
         apply Hall. rewrite elem_of_cons. by intros [].
       * apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
         apply pre_composite_free_update_state_with_initial; [| by compute].
-        by apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
+        by apply (VLSM_eq_valid_state
+          (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
     + replace us with (state_update U us i (us i)) at 2 by (state_update_simpl; done).
       apply lift_to_RUMO_finite_valid_trace_from_to; [done |].
       apply (valid_state_project_preloaded_to_preloaded _ _ _ us i) in Hvsp as Hvsp'.

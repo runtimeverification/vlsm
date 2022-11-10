@@ -71,7 +71,8 @@ Lemma equivocators_vlsm_transition_item_project_zero_descriptor
   s
   (Ht : vtransition equivocator_vlsm (l item) (s, input item) = (destination item, output item))
   (Hv : vvalid equivocator_vlsm (l item) (s, input item))
-  : exists oitem, equivocator_vlsm_transition_item_project item (Existing 0) = Some (oitem, Existing 0).
+  : exists oitem, equivocator_vlsm_transition_item_project item (Existing 0) =
+      Some (oitem, Existing 0).
 Proof.
   destruct item.
   destruct l; cbn in Hv, Ht |- *.
@@ -95,8 +96,10 @@ Lemma equivocator_vlsm_transition_item_project_some_inj
   (idescriptor := Existing i)
   (idescriptor' := Existing i')
   {odescriptor odescriptor' : MachineDescriptor}
-  (HitemX : equivocator_vlsm_transition_item_project item idescriptor = Some (Some itemX, odescriptor))
-  (HitemX' : equivocator_vlsm_transition_item_project item idescriptor' = Some (Some itemX', odescriptor'))
+  (HitemX : equivocator_vlsm_transition_item_project item idescriptor =
+    Some (Some itemX, odescriptor))
+  (HitemX' : equivocator_vlsm_transition_item_project item idescriptor' =
+    Some (Some itemX', odescriptor'))
   : i = i' /\ itemX = itemX' /\ odescriptor = odescriptor'.
 Proof.
   destruct item.
@@ -186,8 +189,10 @@ Lemma no_equivocating_equivocator_transition_item_project
   : exists (Hex : existing_equivocator_label _ (l item)),
     equivocator_vlsm_transition_item_project item (Existing 0) =
       Some (Some
-        {| l := existing_equivocator_label_extract _ (l item) Hex; input := input item; output := output item; destination := equivocator_state_descriptor_project (destination item) (Existing 0) |}
-        , Existing 0).
+        {| l := existing_equivocator_label_extract _ (l item) Hex;
+           input := input item; output := output item;
+           destination := equivocator_state_descriptor_project (destination item) (Existing 0)
+        |}, Existing 0).
 Proof.
   destruct item.
   unfold VLSM.l, VLSM.input, VLSM.output, VLSM.destination in *.
@@ -214,7 +219,12 @@ Lemma exists_equivocator_transition_item_project
       existing_descriptor X dest_eqv (destination item) /\
         equivocator_vlsm_transition_item_project item dest_eqv = Some
           (Some
-            {| l := existing_equivocator_label_extract _ (l item) (existing_equivocator_label_forget_proper _ Hs); input := input item; output := output item; destination := equivocator_state_descriptor_project (destination item) dest_eqv |} , equivocator_label_descriptor (l item)).
+            {| l := existing_equivocator_label_extract _ (l item)
+                (existing_equivocator_label_forget_proper _ Hs);
+               input := input item;
+               output := output item;
+               destination := equivocator_state_descriptor_project (destination item) dest_eqv
+            |}, equivocator_label_descriptor (l item)).
 Proof.
   destruct item. simpl in *.
   destruct l as [sn| i l| i l]
@@ -277,7 +287,8 @@ Lemma equivocator_transition_item_project_proper_characterization
     equivocator_vlsm_transition_item_project item descriptor = Some (oitem, descriptor')
     /\ match oitem with
       | Some itemx =>
-        (exists (Hex : existing_equivocator_label _ (l item)), l itemx = existing_equivocator_label_extract _ (l item) Hex) /\
+        (exists (Hex : existing_equivocator_label _ (l item)),
+          l itemx = existing_equivocator_label_extract _ (l item) Hex) /\
         input item = input itemx /\ output item = output itemx /\
         (equivocator_state_descriptor_project (destination item) descriptor = destination itemx)
         /\ descriptor' = equivocator_label_descriptor (l item)
@@ -296,7 +307,8 @@ Lemma equivocator_transition_item_project_proper_characterization
           vvalid X (l itemx) (sx, input itemx) /\
           vtransition X (l itemx) (sx, input itemx) = (destination itemx, output itemx)
       | None =>
-        equivocator_state_descriptor_project (destination item) descriptor = equivocator_state_descriptor_project s descriptor'
+        equivocator_state_descriptor_project (destination item) descriptor =
+        equivocator_state_descriptor_project s descriptor'
       end.
 Proof.
   destruct item. simpl. simpl in Hproper.
@@ -429,7 +441,8 @@ Proof.
   destruct l as [sn| j l| j l]; simpl in *
   ; [left; inversion_clear Ht;  cbv; lia| ..]
   ; (destruct oitem as [itemx |]
-    ; [intros Heqv; left; destruct itemx; destruct Hchar1 as [[_ Hl] [Hinput [Houtput [Hdest Heq_deqv']]]]
+    ; [intros Heqv; left; destruct itemx; destruct Hchar1
+        as [[_ Hl] [Hinput [Houtput [Hdest Heq_deqv']]]]
       ; subst; apply (equivocator_transition_preserves_equivocating_state X _ _ _ _ _ Ht)
       ; destruct Heqv as [Heqv|Heqv]; done
       |])
@@ -453,7 +466,8 @@ Lemma equivocator_transition_item_project_inv_characterization
   (itemx : vtransition_item X)
   (descriptor descriptor' : MachineDescriptor)
   (Hitem : equivocator_vlsm_transition_item_project item descriptor = Some (Some itemx, descriptor'))
-  : (exists (Hex : existing_equivocator_label _ (l item)), l itemx = existing_equivocator_label_extract _ (l item) Hex) /\
+  : (exists (Hex : existing_equivocator_label _ (l item)), l itemx =
+      existing_equivocator_label_extract _ (l item) Hex) /\
     input item = input itemx /\ output item = output itemx /\
     (equivocator_state_descriptor_project (destination item) descriptor = destination itemx)
     /\ descriptor' = equivocator_label_descriptor (l item)
@@ -903,18 +917,21 @@ Lemma equivocator_vlsm_trace_project_valid
       finite_valid_trace_from_to X s ej tr
     end.
 Proof.
-  apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hbtr.
+  apply (VLSM_incl_finite_valid_trace_from_to
+    (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hbtr.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
     as [tr [di [Hbtr_pr Hdi]]].
   eexists _,_; split; [done |].
   destruct di as [sn|i].
   - destruct Hdi as [Hsn Htr].
     split; [done |].
-    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Htr.
+    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2
+      (vlsm_is_pre_loaded_with_False X))) in Htr.
     by clear -Htr; destruct X.
   - destruct Hdi as [s [Hpr_bs_i Htr]].
     eexists; split; [done |].
-    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Htr.
+    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X)))
+      in Htr.
     by clear -Htr; destruct X.
 Qed.
 
@@ -943,18 +960,21 @@ Lemma preloaded_equivocator_vlsm_trace_project_valid
       finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) s ej tr
     end.
 Proof.
-  apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj1 (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm))) in Hbtr.
+  apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj1
+    (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm))) in Hbtr.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
     as [tr [di [Hbtr_pr Hdi]]].
   eexists _,_; split; [done |].
   destruct di as [sn|i].
   - destruct Hdi as [Hsn Htr].
     split; [done |].
-    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
+    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2
+      (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
     by clear -Htr; destruct X.
   - destruct Hdi as [s [Hpr_bs_i Htr]].
     eexists; split; [done |].
-    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
+    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2
+      (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
     by clear -Htr; destruct X.
 Qed.
 
@@ -1048,7 +1068,8 @@ Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
     | Existing i =>
       exists isi, equivocator_state_project is i = Some isi /\
       finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) isi fsj trX /\
-      (vinitial_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is -> vinitial_state_prop (pre_loaded_with_all_messages_vlsm X) isi)
+      (vinitial_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is ->
+        vinitial_state_prop (pre_loaded_with_all_messages_vlsm X) isi)
     end.
 Proof.
   specialize (equivocator_vlsm_trace_project_inv _ Hntr j) as Hj.
@@ -1087,16 +1108,18 @@ Proof.
   - unfold equivocator_label_zero_project in H.
     destruct lX as [sn| [|i] lX | [|i] lX]; inversion H; subst; cbn in H0.
     + by inversion H0.
-    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|]; inversion_clear H0.
+    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|]; inversion H0.
     + rewrite equivocator_state_project_zero in H0.
       by destruct (vtransition _ _ _); inversion_clear H0.
-    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|]; inversion_clear H0.
+    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|];
+        inversion_clear H0.
   - apply H.
   - by apply equivocator_state_project_valid_message.
 Qed.
 
-Lemma preloaded_equivocator_zero_projection
-  : VLSM_projection (pre_loaded_with_all_messages_vlsm equivocator_vlsm) (pre_loaded_with_all_messages_vlsm X)
+Lemma preloaded_equivocator_zero_projection :
+  VLSM_projection
+    (pre_loaded_with_all_messages_vlsm equivocator_vlsm) (pre_loaded_with_all_messages_vlsm X)
     equivocator_label_zero_project equivocator_state_zero.
 Proof.
   apply basic_VLSM_projection_preloaded; intro; intros.
@@ -1107,9 +1130,12 @@ Proof.
   - unfold equivocator_label_zero_project in H.
     destruct lX as [sn| [|i] lX | [|i] lX]; inversion H; subst; cbn in H0.
     + by inversion H0.
-    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|]; inversion_clear H0.
-    + by rewrite equivocator_state_project_zero in H0; destruct (vtransition _ _ _); inversion_clear H0.
-    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|]; inversion_clear H0.
+    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|];
+        inversion_clear H0.
+    + by rewrite equivocator_state_project_zero in H0; destruct (vtransition _ _ _);
+        inversion_clear H0.
+    + by destruct (equivocator_state_project _ _); [destruct (vtransition _ _ _)|];
+        inversion_clear H0.
   - apply H.
 Qed.
 
