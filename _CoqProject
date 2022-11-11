@@ -18,6 +18,7 @@ theories/VLSM/Lib/FinExtras.v
 theories/VLSM/Lib/FinFunExtras.v
 theories/VLSM/Lib/RealsExtras.v
 theories/VLSM/Lib/TopSort.v
+theories/VLSM/Lib/NeList.v
 theories/VLSM/Lib/StreamExtras.v
 theories/VLSM/Lib/StreamFilters.v
 theories/VLSM/Lib/Temporal.v

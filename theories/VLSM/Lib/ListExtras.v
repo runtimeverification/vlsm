@@ -15,7 +15,7 @@ Proof.
 Qed.
 
 (** It is decidable whether a list is null or not. *)
-Lemma null_dec {S} (l : list S) : Decision (l = []).
+#[export] Instance null_dec {S} (l : list S) : Decision (l = []).
 Proof.
   by destruct l; [left | right].
 Qed.

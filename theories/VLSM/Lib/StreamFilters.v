@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
-From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras.
+From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras NeList.
 
 (**
   Given a predicate <<P>> and a stream <<s>>, a stream of naturals <<ns>>
@@ -193,6 +193,17 @@ Proof.
   rewrite app_length, Nat.add_comm in Hlength. simpl in Hlength.
   by inversion Hlength; subst.
 Qed.
+
+Definition filtering_subsequence_stream_filter_concat
+  {A B : Type}
+  (P : A -> Prop)
+  {Pdec : forall a, Decision (P a)}
+  (f : dsig P -> ne_list B)
+  (s : Stream A)
+  (ss : Stream nat)
+  (Hfs : filtering_subsequence P s ss)
+  : Stream B
+  := stream_concat (fun n => f (dexist _ (filtering_subsequence_witness P s ss Hfs n))).
 
 (**
   Given a [filtering_subsequence] for property <<P>> over a stream <<s>> and

@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
-From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists.
+From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists NeList.
 
 (** * Stream utility definitions and lemmas *)
 
@@ -718,3 +718,15 @@ Proof.
   rewrite ForAll1_forall in Hn.
   by firstorder.
 Qed.
+
+Definition stream_prepend {A} (nel : ne_list A) (s : Stream A) : Stream A :=
+  (cofix prepend (xs : ne_list A) :=
+    match xs with
+    | ne_one a => Cons a s
+    | ne_cons a nel' => Cons a (prepend nel')
+    end) nel.
+
+Definition stream_concat {B} (f : nat -> ne_list B) : Stream B :=
+  (cofix concat (n : nat) :=
+    stream_prepend (f n) (concat (S n))
+  ) 0.
