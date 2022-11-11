@@ -176,7 +176,7 @@ Definition msg_dep_limited_equivocation_projection_validator_prop_alt :=
   coeqv_limited_equivocation_projection_validator_prop_alt IM sender msg_dep_coequivocating_senders.
 
 Lemma msg_dep_annotate_trace_with_equivocators_project s tr
-  : pre_VLSM_full_projection_finite_trace_project (type msg_dep_limited_equivocation_vlsm)
+  : pre_VLSM_embedding_finite_trace_project (type msg_dep_limited_equivocation_vlsm)
     (composite_type IM) Datatypes.id original_state
     (msg_dep_annotate_trace_with_equivocators s tr) = tr.
 Proof.
@@ -256,7 +256,7 @@ Proof.
   ; [apply (composite_project_label_eq IM) |].
   by apply
     (VLSM_incl_input_valid (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))),
-    (VLSM_full_projection_input_valid (forget_annotations_projection (free_composite_vlsm IM) _ _ _)).
+    (VLSM_embedding_input_valid (forget_annotations_projection (free_composite_vlsm IM) _ _ _)).
 Qed.
 
 Lemma full_node_msg_dep_composite_transition_message_equivocators
@@ -432,8 +432,8 @@ Lemma message_equivocators_can_emit (s : vstate Limited) im
         (original_state s))
       im.
 Proof.
-  eapply VLSM_full_projection_can_emit.
-  - apply equivocators_composition_for_directly_observed_index_incl_full_projection
+  eapply VLSM_embedding_can_emit.
+  - apply equivocators_composition_for_directly_observed_index_incl_embedding
      with (Hincl := set_union_subseteq_right (state_annotation s) (msg_dep_message_equivocators
                       IM full_message_dependencies sender (original_state s) im)).
   - specialize (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
@@ -469,7 +469,7 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
       /\
     finite_valid_trace Fixed
       (original_state is)
-      (pre_VLSM_full_projection_finite_trace_project
+      (pre_VLSM_embedding_finite_trace_project
         (type Limited) (composite_type IM) Datatypes.id original_state
         tr).
 Proof.
@@ -497,16 +497,16 @@ Proof.
              Ht.
     + apply finite_valid_trace_singleton.
       unfold input_valid_transition, input_valid.
-      change (map _ _) with (pre_VLSM_full_projection_finite_trace_project (type Limited)
+      change (map _ _) with (pre_VLSM_embedding_finite_trace_project (type Limited)
                               (composite_type IM) Datatypes.id original_state tr).
-      rewrite <- pre_VLSM_full_projection_finite_trace_last.
+      rewrite <- pre_VLSM_embedding_finite_trace_last.
       assert (Hs : valid_state_prop
                     (fixed_equivocation_vlsm_composition IM (state_annotation s))
                     (original_state s)).
       {
         replace s with (finite_trace_last si tr) at 2
              by (apply valid_trace_get_last in Htr; done).
-        rewrite (pre_VLSM_full_projection_finite_trace_last
+        rewrite (pre_VLSM_embedding_finite_trace_last
                   (type Limited) (composite_type IM) Datatypes.id original_state si tr).
         by apply finite_valid_trace_last_pstate.
       }
@@ -532,9 +532,9 @@ Proof.
         -- revert HLim.
            setoid_rewrite emitted_messages_are_valid_iff.
            intros [Hinit | Hemit]; [by left | right].
-           eapply VLSM_weak_full_projection_can_emit.
+           eapply VLSM_weak_embedding_can_emit.
            {
-             eapply EquivPreloadedBase_Fixed_weak_full_projection
+             eapply EquivPreloadedBase_Fixed_weak_embedding
                with (base_s := original_state s).
              - revert Hs; apply VLSM_incl_valid_state.
                apply fixed_equivocation_vlsm_composition_index_incl,
@@ -549,7 +549,7 @@ Proof.
                set_union_subseteq_left.
            }
            apply message_equivocators_can_emit; [done | done |].
-           eapply VLSM_full_projection_can_emit; [| done].
+           eapply VLSM_embedding_can_emit; [| done].
            apply forget_annotations_projection.
       * apply HLv.
       * destruct iom as [im |]; [| done].
@@ -559,7 +559,7 @@ Proof.
         apply emitted_messages_are_valid_iff in HLim
           as [[j [[mj Hmj] Heqim]] | Hemit]
         ; [clear Heqim; contradict Hmj; apply no_initial_messages_in_IM |].
-        eapply VLSM_full_projection_can_emit; [| done].
+        eapply VLSM_embedding_can_emit; [| done].
         apply forget_annotations_projection.
 Qed.
 
@@ -567,7 +567,7 @@ Corollary msg_dep_fixed_limited_equivocation is tr
   : finite_valid_trace Limited is tr ->
     fixed_limited_equivocation_prop IM
       (original_state is)
-      (pre_VLSM_full_projection_finite_trace_project
+      (pre_VLSM_embedding_finite_trace_project
         (type Limited) (composite_type IM) Datatypes.id original_state
         tr).
 Proof.
@@ -721,7 +721,7 @@ Qed.
 Lemma annotated_limited_incl_constrained_limited
   {is_equivocating_tracewise_no_has_been_sent_dec :
     RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  : VLSM_full_projection
+  : VLSM_embedding
       Limited
       (tracewise_limited_equivocation_vlsm_composition IM sender (Ci := Ci))
       Datatypes.id original_state.

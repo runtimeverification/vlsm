@@ -234,7 +234,7 @@ Lemma composite_trace_sub_projection_lift
   (tr : list (composite_transition_item sub_IM))
   : @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _
     composite_label_sub_projection_option composite_state_sub_projection
-    (pre_VLSM_full_projection_finite_trace_project _ _ lift_sub_label lift_sub_state tr)
+    (pre_VLSM_embedding_finite_trace_project _ _ lift_sub_label lift_sub_state tr)
     = tr.
 Proof.
   apply (induced_validator_trace_lift (free_composite_vlsm IM)).
@@ -802,7 +802,7 @@ Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%functi
 
   We proving those results for compositions pre-loaded with all messages
   (Lemmas [reset_equivocating_transitions_preloaded_projection] and
-  [PreSubFree_PreFree_weak_full_projection]).
+  [PreSubFree_PreFree_weak_embedding]).
 *)
 
 Section sec_lift_sub_state_to_preloaded.
@@ -883,7 +883,7 @@ Proof.
   by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
-Lemma remove_equivocating_strong_full_projection_initial_state_preservation eqv_is
+Lemma remove_equivocating_strong_embedding_initial_state_preservation eqv_is
   (Heqv_is : composite_initial_state_prop (sub_IM IM equivocators) eqv_is) :
   strong_projection_initial_state_preservation Free Free
     (remove_equivocating_state_project eqv_is).
@@ -910,7 +910,7 @@ Proof.
   - apply remove_equivocating_strong_projection_valid_preservation.
   - apply remove_equivocating_strong_projection_transition_preservation_Some.
   - apply remove_equivocating_strong_projection_transition_consistency_None.
-  - by apply remove_equivocating_strong_full_projection_initial_state_preservation.
+  - by apply remove_equivocating_strong_embedding_initial_state_preservation.
 Qed.
 
 Lemma preloaded_lift_sub_state_to_initial_state :
@@ -962,11 +962,11 @@ Qed.
   the state-components from the trace with the components from the given
   valid state is a valid trace for the composition of all nodes.
 *)
-Lemma PreSubFree_PreFree_weak_full_projection :
-  VLSM_weak_full_projection PreSubFree PreFree
+Lemma PreSubFree_PreFree_weak_embedding :
+  VLSM_weak_embedding PreSubFree PreFree
     (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
 Proof.
-  apply basic_VLSM_weak_full_projection.
+  apply basic_VLSM_weak_embedding.
   - split; [| done].
     apply lift_sub_to_valid, Hv.
   - intros l s om s' om' Hv.
@@ -988,13 +988,13 @@ Lemma induced_sub_projection_lift
         =
       composite_state_sub_projection IM equivocators s2 ->
         forall l om, constraint l (s1, om) -> constraint l (s2, om))
-   : VLSM_full_projection
+   : VLSM_embedding
     (pre_induced_sub_projection IM equivocators constraint)
     (composite_vlsm IM constraint)
     (lift_sub_label IM equivocators)
     (lift_sub_state IM equivocators).
 Proof.
-  apply basic_VLSM_full_projection.
+  apply basic_VLSM_embedding.
   - intros l s om (_ & _ & (i, li) & sX & [Heql [=] (HsX & Hom & Hv & Hc)]) _ _.
     unfold composite_label_sub_projection_option in Heql; cbn in Heql.
     case_decide as Hi; [| congruence].
@@ -1032,7 +1032,7 @@ Qed.
 *)
 Lemma induced_sub_projection_friendliness
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (Hlift_proj : VLSM_full_projection
+  (Hlift_proj : VLSM_embedding
     (pre_induced_sub_projection IM equivocators constraint)
     (composite_vlsm IM constraint)
     (lift_sub_label IM equivocators)
@@ -1138,11 +1138,11 @@ Proof.
   by destruct (decide (i = j)); subst; state_update_simpl; cbn; case_decide; state_update_simpl.
 Qed.
 
-Lemma lift_sub_incl_full_projection :
-  VLSM_full_projection (free_composite_vlsm sub_IM1) (free_composite_vlsm sub_IM2)
+Lemma lift_sub_incl_embedding :
+  VLSM_embedding (free_composite_vlsm sub_IM1) (free_composite_vlsm sub_IM2)
     lift_sub_incl_label lift_sub_incl_state.
 Proof.
-  apply basic_VLSM_strong_full_projection; intro; intros.
+  apply basic_VLSM_strong_embedding; intro; intros.
   - split; [| done].
     apply lift_sub_incl_valid. apply H.
   - by apply lift_sub_incl_transition.
@@ -1150,15 +1150,15 @@ Proof.
   - by apply lift_sub_incl_message_initial.
 Qed.
 
-Lemma lift_sub_incl_preloaded_full_projection
+Lemma lift_sub_incl_preloaded_embedding
   (P Q : message -> Prop)
   (Hpq : forall m, P m -> Q m)
-  : VLSM_full_projection
+  : VLSM_embedding
       (pre_loaded_vlsm (free_composite_vlsm sub_IM1) P)
       (pre_loaded_vlsm (free_composite_vlsm sub_IM2) Q)
       lift_sub_incl_label lift_sub_incl_state.
 Proof.
-  apply basic_VLSM_full_projection_preloaded_with; [done |..]; intro; intros.
+  apply basic_VLSM_embedding_preloaded_with; [done |..]; intro; intros.
   - split; [| done].
     apply lift_sub_incl_valid. apply H.
   - by apply lift_sub_incl_transition.
@@ -1198,13 +1198,13 @@ Proof.
   destruct Hemit as [[s om] [[sub_i li] [s' Ht]]].
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   unfold sub_IM, SubProjectionTraces.sub_IM in li; cbn in li.
-  specialize (PreSubFree_PreFree_weak_full_projection IM indices (proj1_sig (composite_s0 IM)))
+  specialize (PreSubFree_PreFree_weak_embedding IM indices (proj1_sig (composite_s0 IM)))
     as Hproj.
   spec Hproj; [by apply initial_state_is_valid; destruct (composite_s0 IM) |].
   apply (VLSM_incl_input_valid_transition
           (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (free_composite_vlsm sub_IM) P))
      in Ht.
-  apply (VLSM_weak_full_projection_input_valid_transition Hproj) in Ht; clear Hproj.
+  apply (VLSM_weak_embedding_input_valid_transition Hproj) in Ht; clear Hproj.
   specialize (ProjectionTraces.preloaded_component_projection IM i) as Hproj.
   remember (lift_sub_state_to _ _ _ s) as sX.
   remember (lift_sub_state_to _ _ _ s') as sX'.
@@ -1450,11 +1450,11 @@ Context
   (SubX := composite_vlsm sub_IM (free_sub_free_constraint constraint))
   .
 
-Lemma preloaded_sub_composition_all_full_projection (seed : message -> Prop) :
-  VLSM_full_projection (pre_loaded_vlsm X seed) (pre_loaded_vlsm SubX seed)
+Lemma preloaded_sub_composition_all_embedding (seed : message -> Prop) :
+  VLSM_embedding (pre_loaded_vlsm X seed) (pre_loaded_vlsm SubX seed)
     free_sub_free_label  (composite_state_sub_projection IM (enum index)).
 Proof.
-  apply basic_VLSM_strong_full_projection.
+  apply basic_VLSM_strong_embedding.
   - intros [i li] *; auto.
   - intros [i li] *; cbn.
     unfold sub_IM, SubProjectionTraces.sub_IM at 2; cbn
@@ -1470,11 +1470,11 @@ Proof.
     by exists (free_sub_free_index i).
 Qed.
 
-Lemma sub_composition_all_full_projection :
-  VLSM_full_projection X SubX free_sub_free_label
+Lemma sub_composition_all_embedding :
+  VLSM_embedding X SubX free_sub_free_label
     (composite_state_sub_projection IM (enum index)).
 Proof.
-  apply basic_VLSM_strong_full_projection.
+  apply basic_VLSM_strong_embedding.
   - intros [i li] *; auto.
   - intros [i li] *
     ; cbn; unfold vtransition
@@ -1489,10 +1489,10 @@ Proof.
   - by intros m [i Hi]; exists (free_sub_free_index i).
 Qed.
 
-Lemma sub_composition_all_full_projection_rev
-  : VLSM_full_projection SubX X (lift_sub_label IM (enum index)) free_sub_free_state.
+Lemma sub_composition_all_embedding_rev
+  : VLSM_embedding SubX X (lift_sub_label IM (enum index)) free_sub_free_state.
 Proof.
-  apply basic_VLSM_strong_full_projection.
+  apply basic_VLSM_strong_embedding.
   - intros [sub_i li] * [Hv Hc]; split; [| done].
     destruct_dec_sig sub_i i Hi Heqi; subst sub_i; cbn in *
     ; unfold sub_IM, SubProjectionTraces.sub_IM in Hc; cbn in Hc
@@ -1559,14 +1559,14 @@ Qed.
 #[local] Hint Rewrite @sub_element_state_eq : state_update.
 #[local] Hint Rewrite @sub_element_state_neq using done : state_update.
 
-Lemma preloaded_sub_element_full_projection
+Lemma preloaded_sub_element_embedding
   (P Q : message -> Prop)
   (PimpliesQ : forall m, P m -> Q m)
   (PrePXj := pre_loaded_vlsm (IM j) P)
   (PreQSubFree := pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) Q)
-  : VLSM_full_projection PrePXj PreQSubFree sub_element_label sub_element_state.
+  : VLSM_embedding PrePXj PreQSubFree sub_element_label sub_element_state.
 Proof.
-  apply basic_VLSM_full_projection_preloaded_with; [done |..].
+  apply basic_VLSM_embedding_preloaded_with; [done |..].
   - intros l s om Hv.
     split; [cbn | done].
     by rewrite sub_element_state_eq with (H_j := Hj).
@@ -1596,8 +1596,8 @@ Proof.
   eapply VLSM_incl_can_emit.
   - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
     itauto.
-  - eapply VLSM_full_projection_can_emit; [| done].
-    apply preloaded_sub_element_full_projection.
+  - eapply VLSM_embedding_can_emit; [| done].
+    apply preloaded_sub_element_embedding.
     itauto.
 Qed.
 
@@ -1726,12 +1726,12 @@ Context
   (PreSubFree := pre_loaded_with_all_messages_vlsm SubFree)
   .
 
-Lemma lift_sub_free_preloaded_with_full_projection
+Lemma lift_sub_free_preloaded_with_embedding
   (seed : message -> Prop)
-  : VLSM_full_projection (pre_loaded_vlsm SubFree seed) (pre_loaded_vlsm Free seed)
+  : VLSM_embedding (pre_loaded_vlsm SubFree seed) (pre_loaded_vlsm Free seed)
     (lift_sub_label IM indices) (lift_sub_state IM indices).
 Proof.
-  apply (basic_VLSM_full_projection_preloaded_with SubFree Free seed seed); intro; intros.
+  apply (basic_VLSM_embedding_preloaded_with SubFree Free seed seed); intro; intros.
   - done.
   - split; [| done]. apply lift_sub_valid, H.
   - by rapply lift_sub_transition.
@@ -1739,26 +1739,26 @@ Proof.
   - by apply (lift_sub_message_initial IM indices).
 Qed.
 
-Lemma lift_sub_free_full_projection
-  : VLSM_full_projection SubFree Free
+Lemma lift_sub_free_embedding
+  : VLSM_embedding SubFree Free
     (lift_sub_label IM indices) (lift_sub_state IM indices).
 Proof.
   constructor.
   intros sX trX HtrX.
   by apply (VLSM_eq_finite_valid_trace (vlsm_is_pre_loaded_with_False Free)),
-    (VLSM_full_projection_finite_valid_trace (lift_sub_free_preloaded_with_full_projection _)),
+    (VLSM_embedding_finite_valid_trace (lift_sub_free_preloaded_with_embedding _)),
     (VLSM_eq_finite_valid_trace (vlsm_is_pre_loaded_with_False SubFree)).
 Qed.
 
-Lemma lift_sub_preloaded_free_full_projection
-  : VLSM_full_projection PreSubFree PreFree
+Lemma lift_sub_preloaded_free_embedding
+  : VLSM_embedding PreSubFree PreFree
     (lift_sub_label IM indices) (lift_sub_state IM indices).
 Proof.
   constructor.
   intros sX trX HtrX.
   by apply (VLSM_eq_finite_valid_trace
     (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True Free)),
-    (VLSM_full_projection_finite_valid_trace (lift_sub_free_preloaded_with_full_projection _)),
+    (VLSM_embedding_finite_valid_trace (lift_sub_free_preloaded_with_embedding _)),
     (VLSM_eq_finite_valid_trace (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True SubFree)).
 Qed.
 
@@ -1781,7 +1781,7 @@ Proof.
         (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM indices)))
         (existT (dexist i Hi) li) (sub_s, Some im)).
   {
-    apply (VLSM_full_projection_input_valid lift_sub_preloaded_free_full_projection).
+    apply (VLSM_embedding_input_valid lift_sub_preloaded_free_embedding).
   }
   eapply VLSM_incl_input_valid; [| done].
   apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
@@ -1800,7 +1800,7 @@ Proof.
   intro Hemit.
   apply can_emit_projection with validator A sender; [done | done|].
   revert Hemit.
-  apply (VLSM_full_projection_can_emit lift_sub_preloaded_free_full_projection).
+  apply (VLSM_embedding_can_emit lift_sub_preloaded_free_embedding).
 Qed.
 
 (**
@@ -1817,10 +1817,10 @@ Lemma can_emit_with_more
 Proof.
   intro Hemit.
   specialize
-    (lift_to_composite_generalized_preloaded_vlsm_full_projection
+    (lift_to_composite_generalized_preloaded_VLSM_embedding
       (sub_IM IM indices) _ _ PimpliesQ (dexist j Hj))
     as Hproj.
-  by apply (VLSM_full_projection_can_emit Hproj).
+  by apply (VLSM_embedding_can_emit Hproj).
 Qed.
 
 End sec_sub_composition_preloaded_lift.

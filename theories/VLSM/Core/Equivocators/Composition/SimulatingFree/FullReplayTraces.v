@@ -49,13 +49,13 @@ Context {message : Type}
 
 #[local] Hint Unfold equivocator_descriptors_update : state_update.
 
-Lemma SeededXE_Free_full_projection
+Lemma SeededXE_Free_embedding
   (Hseed : forall m, seed m -> valid_message_prop FreeE m)
-  : VLSM_full_projection SeededXE
+  : VLSM_embedding SeededXE
     (composite_vlsm equivocator_IM (free_constraint equivocator_IM))
     (lift_sub_label equivocator_IM equivocating) (lift_sub_state equivocator_IM equivocating).
 Proof.
-  apply basic_VLSM_full_projection; intros ? *.
+  apply basic_VLSM_embedding; intros ? *.
   - split; [| done].
     apply lift_sub_valid. apply Hv.
   - intros [_ Ht]. revert Ht. apply lift_sub_transition.
@@ -301,7 +301,7 @@ Qed.
 
 Definition replayed_trace_from full_replay_state is tr :=
   replayed_initial_state_from full_replay_state is ++
-  pre_VLSM_full_projection_finite_trace_project (type FreeSubE) (type FreeE)
+  pre_VLSM_embedding_finite_trace_project (type FreeSubE) (type FreeE)
     (lift_equivocators_sub_label_to full_replay_state)
     (lift_equivocators_sub_state_to full_replay_state) tr.
 
@@ -314,7 +314,7 @@ Proof.
   - unfold replayed_trace_from. cbn.
     rewrite app_nil_r.
     by apply replayed_initial_state_from_lift.
-  - unfold replayed_trace_from, pre_VLSM_full_projection_finite_trace_project.
+  - unfold replayed_trace_from, pre_VLSM_embedding_finite_trace_project.
     by rewrite map_app, app_assoc; cbn; rewrite !finite_trace_last_is_last.
 Qed.
 
@@ -330,7 +330,7 @@ Proof.
   destruct_list_last tr tr' lst Htr.
   - simpl. rewrite app_nil_r.
     apply equivocator_state_project_replayed_initial_state_from_left.
-  - unfold pre_VLSM_full_projection_finite_trace_project.
+  - unfold pre_VLSM_embedding_finite_trace_project.
     rewrite map_app, app_assoc. simpl.
     rewrite finite_trace_last_is_last.
     simpl.
@@ -379,7 +379,7 @@ Proof.
   exists [],[],eqv_descriptors.
   repeat split; [| by apply equivocators_trace_project_replayed_initial_state_from].
   induction tr using rev_ind; [done |].
-  unfold pre_VLSM_full_projection_finite_trace_project.
+  unfold pre_VLSM_embedding_finite_trace_project.
   rewrite map_app.
   apply equivocators_trace_project_app_iff.
   exists [],[], eqv_descriptors.
@@ -474,10 +474,10 @@ Section sec_pre_loaded_constrained_projection.
 
 (**
   By replaying a [valid_trace] on top of a [valid_state] we obtain a
-  [valid_trace]. We derive this as a more general [VLSM_weak_full_projection]
+  [valid_trace]. We derive this as a more general [VLSM_weak_embedding]
   result for a class of VLSM parameterized by a constraint having "good"
   properties and pre-loaded with a seed, to allow deriving the
-  [VLSM_weak_full_projection] result for both the free composition of equivocators
+  [VLSM_weak_embedding] result for both the free composition of equivocators
   and for the no message equivocation composition of equivocators (free, or with
   an additional fixed-set state-equivocation constraint).
 *)
@@ -543,11 +543,11 @@ Proof.
 Qed.
 
 Lemma lift_equivocators_sub_weak_projection :
-  VLSM_weak_full_projection SeededXE SeededCE
+  VLSM_weak_embedding SeededXE SeededCE
     (lift_equivocators_sub_label_to full_replay_state)
     (lift_equivocators_sub_state_to full_replay_state).
 Proof.
-  apply basic_VLSM_weak_full_projection; intros ? *.
+  apply basic_VLSM_weak_embedding; intros ? *.
   - split.
     + apply lift_equivocators_sub_valid. apply Hv.
     + by apply Hsubsumption.
@@ -568,15 +568,15 @@ Proof.
   apply finite_valid_trace_from_app_iff.
   split; [by apply replayed_initial_state_from_valid |].
   rewrite replayed_initial_state_from_lift by done.
-  by apply (VLSM_weak_full_projection_finite_valid_trace_from lift_equivocators_sub_weak_projection).
+  by apply (VLSM_weak_embedding_finite_valid_trace_from lift_equivocators_sub_weak_projection).
 Qed.
 
 End sec_pre_loaded_constrained_projection.
 
-Lemma SeededXE_PreFreeE_weak_full_projection
+Lemma SeededXE_PreFreeE_weak_embedding
   (full_replay_state : composite_state equivocator_IM)
   (Hfull_replay_state : valid_state_prop PreFreeE  full_replay_state)
-  : VLSM_weak_full_projection SeededXE PreFreeE
+  : VLSM_weak_embedding SeededXE PreFreeE
       (lift_equivocators_sub_label_to full_replay_state)
       (lift_equivocators_sub_state_to full_replay_state).
 Proof.
@@ -590,14 +590,14 @@ Proof.
   - by apply (VLSM_eq_valid_state Heq) in Hfull_replay_state.
 Qed.
 
-Lemma PreFreeSubE_PreFreeE_weak_full_projection
+Lemma PreFreeSubE_PreFreeE_weak_embedding
   (full_replay_state : composite_state equivocator_IM)
   (Hfull_replay_state : valid_state_prop PreFreeE  full_replay_state)
-  : VLSM_weak_full_projection PreFreeSubE PreFreeE
+  : VLSM_weak_embedding PreFreeSubE PreFreeE
       (lift_equivocators_sub_label_to full_replay_state)
       (lift_equivocators_sub_state_to full_replay_state).
 Proof.
-  apply basic_VLSM_weak_full_projection; intros ? *.
+  apply basic_VLSM_weak_embedding; intros ? *.
   - by split; [apply lift_equivocators_sub_valid; apply Hv |].
   - intro Ht. apply lift_equivocators_sub_transition; apply Ht.
   - intros.
@@ -665,8 +665,8 @@ Qed.
   Here we specialize the generic [lift_equivocators_sub_weak_projection]
   result for the [equivocators_no_equivocations_constraint].
 *)
-Lemma SeededXE_SeededNoEquiv_weak_full_projection :
-  VLSM_weak_full_projection SeededXE SeededAllXE
+Lemma SeededXE_SeededNoEquiv_weak_embedding :
+  VLSM_weak_embedding SeededXE SeededAllXE
     (lift_equivocators_sub_label_to full_replay_state)
     (lift_equivocators_sub_state_to full_replay_state).
 Proof.

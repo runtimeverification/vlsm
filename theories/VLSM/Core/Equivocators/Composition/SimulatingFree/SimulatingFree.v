@@ -262,13 +262,13 @@ Definition all_equivocating_replayed_trace_from
   : list (composite_transition_item (equivocator_IM IM))
   :=
   let
-    Hproj := sub_composition_all_full_projection (equivocator_IM IM)
+    Hproj := sub_composition_all_embedding (equivocator_IM IM)
               (equivocators_no_equivocations_constraint IM)
   in
     replayed_trace_from IM (enum index)
       full_replay_state
       (composite_state_sub_projection (equivocator_IM IM) (enum index) is)
-      (VLSM_full_projection_finite_trace_project Hproj tr).
+      (VLSM_embedding_finite_trace_project Hproj tr).
 
 Lemma replayed_trace_from_valid_equivocating
   (full_replay_state : composite_state (equivocator_IM IM))
@@ -283,10 +283,10 @@ Proof.
     (sub_replayed_trace_from_valid_equivocating IM seed
       (enum index) _ Hfull_replay_state
     ).
-  pose (Hproj := preloaded_sub_composition_all_full_projection (equivocator_IM IM)
+  pose (Hproj := preloaded_sub_composition_all_embedding (equivocator_IM IM)
     (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM)
     (free_constraint _) seed) seed).
-  apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr.
+  apply (VLSM_embedding_finite_valid_trace Hproj) in Htr.
   revert Htr.
   apply VLSM_incl_finite_valid_trace.
   apply basic_VLSM_incl_preloaded_with.
@@ -369,7 +369,7 @@ Proof.
     ; [inversion Hfinal_msg|].
     rewrite finite_trace_last_output_is_last in Hfinal_msg.
     apply Exists_app. right.
-    unfold VLSM_full_projection_finite_trace_project, pre_VLSM_full_projection_finite_trace_project.
+    unfold VLSM_embedding_finite_trace_project, pre_VLSM_embedding_finite_trace_project.
     rewrite! map_app.
     by apply Exists_app; simpl; right; left.
 Qed.

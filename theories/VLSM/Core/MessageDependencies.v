@@ -519,8 +519,8 @@ Proof.
   - intros m Hemit.
     apply can_emit_composite_project in Hemit as [j Hemitj].
     eapply message_dependencies_are_sufficient in Hemitj.
-    eapply VLSM_full_projection_can_emit; [| done].
-    by apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
+    eapply VLSM_embedding_can_emit; [| done].
+    by apply lift_to_composite_generalized_preloaded_VLSM_embedding.
 Qed.
 
 Lemma msg_dep_reflects_free_validity
@@ -699,8 +699,8 @@ Lemma composite_ObservedBeforeSendTransition_lift :
     (lift_to_composite_transition_item' IM i item) m1 m2.
 Proof.
   intros * []; constructor; [| done |].
-  - by eapply VLSM_full_projection_input_valid_transition in dobst_transition0;
-      [| apply lift_to_composite_preloaded_vlsm_full_projection].
+  - by eapply VLSM_embedding_input_valid_transition in dobst_transition0;
+      [| apply lift_to_composite_preloaded_VLSM_embedding].
   - by destruct item; cbn in *; state_update_simpl.
 Qed.
 

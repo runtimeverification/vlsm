@@ -305,13 +305,13 @@ Proof.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_initial_message
-  : strong_full_projection_initial_message_preservation X (pre_loaded_vlsm X (fun m => False)).
+  : strong_embedding_initial_message_preservation X (pre_loaded_vlsm X (fun m => False)).
 Proof.
   by intros m Hm; left.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_initial_message_rev
-  : strong_full_projection_initial_message_preservation (pre_loaded_vlsm X (fun m => False)) X.
+  : strong_embedding_initial_message_preservation (pre_loaded_vlsm X (fun m => False)) X.
 Proof.
   by intros m [Hm | Hfalse].
 Qed.

@@ -691,7 +691,7 @@ Proof.
     eapply message_dependencies_are_sufficient in Hiom.
     unfold pre_loaded_free_equivocating_vlsm_composition, free_equivocating_vlsm_composition.
       specialize
-        (@lift_to_composite_generalized_preloaded_vlsm_full_projection
+        (@lift_to_composite_generalized_preloaded_VLSM_embedding
           message (sub_index (elements(equivocating_validators sf))) _
           (sub_IM IM (elements(equivocating_validators sf)))
           (λ msg : message, msg ∈ message_dependencies m)
@@ -706,7 +706,7 @@ Proof.
       apply elem_of_elements in Hequivocating_v.
       spec Hproj (@dexist _ _
         (fun v => sub_index_prop_dec (elements(equivocating_validators sf)) v) v Hequivocating_v).
-      by apply (VLSM_full_projection_can_emit Hproj).
+      by apply (VLSM_embedding_can_emit Hproj).
 Qed.
 
 (** *** Main result of the section
@@ -799,10 +799,10 @@ Proof.
     ; [done |  | done | by right | done].
     apply emitted_messages_are_valid.
     specialize
-      (EquivPreloadedBase_Fixed_weak_full_projection IM _ _ Hs') as Hproj.
+      (EquivPreloadedBase_Fixed_weak_embedding IM _ _ Hs') as Hproj.
     spec Hproj.
     { intros.  apply no_initial_messages_in_IM. }
-    apply (VLSM_weak_full_projection_can_emit Hproj).
+    apply (VLSM_weak_embedding_can_emit Hproj).
     by apply (VLSM_incl_can_emit (Equivocators_Fixed_Strong_incl IM _  _ Hs')).
 Qed.
 

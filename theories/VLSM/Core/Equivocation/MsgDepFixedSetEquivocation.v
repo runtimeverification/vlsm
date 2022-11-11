@@ -371,9 +371,9 @@ Proof.
       left; exists i.
       by specialize (Hv _ Hdep_m0) as [Hsent | Hreceived]; [left | right].
     }
-    eapply VLSM_full_projection_can_emit.
+    eapply VLSM_embedding_can_emit.
     {
-      apply @preloaded_sub_element_full_projection
+      apply @preloaded_sub_element_embedding
         with (Hj := HAj) (P := fun dm => dm ∈ message_dependencies m).
       itauto.
     }

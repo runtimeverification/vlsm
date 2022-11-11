@@ -607,11 +607,11 @@ Definition equivocator_vlsm
   mk_vlsm equivocator_vlsm_machine.
 
 Lemma equivocator_vlsm_initial_message_preservation
-  : strong_full_projection_initial_message_preservation X equivocator_vlsm.
+  : strong_embedding_initial_message_preservation X equivocator_vlsm.
 Proof. by intro. Qed.
 
 Lemma equivocator_vlsm_initial_message_preservation_rev
-  : strong_full_projection_initial_message_preservation equivocator_vlsm X.
+  : strong_embedding_initial_message_preservation equivocator_vlsm X.
 Proof. by intro. Qed.
 
 Lemma equivocator_vlsm_initial_state_preservation_rev is i s

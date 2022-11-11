@@ -135,7 +135,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
       equivocators_total_state_project IM is = original_state isX /\
       equivocators_total_state_project IM s = original_state sX /\
       equivocators_total_trace_project IM tr =
-        pre_VLSM_full_projection_finite_trace_project
+        pre_VLSM_embedding_finite_trace_project
           (annotated_type (free_composite_vlsm IM) (set index)) (composite_type IM)
             Datatypes.id original_state trX /\
       finite_valid_trace_init_to XE is s tr /\
@@ -146,8 +146,8 @@ Proof.
   apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
      as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput); [| done].
   exists is, s, tr; subst; split_and!; try itauto.
-  - by erewrite Hpr_s, <- pre_VLSM_full_projection_finite_trace_last.
-  - by rewrite <- Houtput; apply pre_VLSM_full_projection_finite_trace_last_output.
+  - by erewrite Hpr_s, <- pre_VLSM_embedding_finite_trace_last.
+  - by rewrite <- Houtput; apply pre_VLSM_embedding_finite_trace_last_output.
 Qed.
 
 End sec_equivocators_simulating_annotated_limited.

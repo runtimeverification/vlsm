@@ -239,8 +239,8 @@ Proof.
   intros s' Hs' s item i.
   unfold composite_state_destructor; rewrite elem_of_list_fmap.
   intros ([itemi si] & [=-> ->] & Hin).
-  eapply (VLSM_weak_full_projection_input_valid_transition
-           (lift_to_preloaded_free_weak_full_projection IM i s' Hs')).
+  eapply (VLSM_weak_embedding_input_valid_transition
+           (lift_to_preloaded_free_weak_embedding IM i s' Hs')).
   eapply @tv_state_destructor_transition; [done | | done].
   by eapply valid_state_project_preloaded_to_preloaded.
 Qed.

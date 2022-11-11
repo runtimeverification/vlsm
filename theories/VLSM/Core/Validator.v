@@ -335,11 +335,11 @@ Context
 Lemma induced_validator_transition_item_lift
   (item : transition_itemTY)
   : pre_VLSM_projection_transition_item_project _ _ label_project state_project
-    (pre_VLSM_full_projection_transition_item_project _ _ label_lift state_lift item)
+    (pre_VLSM_embedding_transition_item_project _ _ label_lift state_lift item)
     = Some item.
 Proof.
   destruct item.
-  unfold pre_VLSM_full_projection_transition_item_project,
+  unfold pre_VLSM_embedding_transition_item_project,
          pre_VLSM_projection_transition_item_project.
   by cbn; rewrite Hlabel_lift, Hstate_lift.
 Qed.
@@ -347,7 +347,7 @@ Qed.
 Lemma induced_validator_trace_lift
   (tr : list transition_itemTY)
   : pre_VLSM_projection_finite_trace_project _ _ label_project state_project
-    (pre_VLSM_full_projection_finite_trace_project _ _ label_lift state_lift tr)
+    (pre_VLSM_embedding_finite_trace_project _ _ label_lift state_lift tr)
     = tr.
 Proof.
   induction tr; cbn; [done |].
@@ -359,13 +359,13 @@ Qed.
   to the original [VLSM], then the induced [VLSM_projection] is friendly.
 *)
 Lemma basic_projection_induces_friendliness
-  : VLSM_full_projection pre_projection_induced_validator X label_lift state_lift ->
+  : VLSM_embedding pre_projection_induced_validator X label_lift state_lift ->
     projection_friendly_prop Hproj.
 Proof.
   intros Hfull_proj isY trY HtrY.
-  exists (state_lift isY), (VLSM_full_projection_finite_trace_project Hfull_proj trY).
+  exists (state_lift isY), (VLSM_embedding_finite_trace_project Hfull_proj trY).
   split_and!.
-  - by apply (VLSM_full_projection_finite_valid_trace Hfull_proj).
+  - by apply (VLSM_embedding_finite_valid_trace Hfull_proj).
   - done.
   - by apply induced_validator_trace_lift.
 Qed.

@@ -2209,8 +2209,8 @@ Proof.
     {
       apply (VLSM_incl_valid_state Hincl) in Hsimis as Hsimis_pre.
       destruct Htr_m as [Htr_m _].
-      apply (VLSM_weak_full_projection_finite_valid_trace_from_to
-        (lift_to_preloaded_free_weak_full_projection ELMOComponent i_m _ Hs_pre)) in Htr_m.
+      apply (VLSM_weak_embedding_finite_valid_trace_from_to
+        (lift_to_preloaded_free_weak_embedding ELMOComponent i_m _ Hs_pre)) in Htr_m.
       state_update_simpl.
       apply Forall_forall; intros d Hd.
       apply elem_of_cons in Hd as [-> | Hd]; [by subst |].
@@ -2311,7 +2311,7 @@ Proof.
     finite_valid_trace_from_to ELMOProtocol
       (lift_to_composite_state ELMOComponent s i_m is_m)
       (lift_to_composite_state ELMOComponent s i_m (state m))
-      (pre_VLSM_full_projection_finite_trace_project
+      (pre_VLSM_embedding_finite_trace_project
       _ _ (lift_to_composite_label ELMOComponent i_m) (lift_to_composite_state ELMOComponent s i_m)
       tr_m)).
   {
@@ -2557,7 +2557,7 @@ Lemma lift_receive_trace
       composite_has_been_directly_observed ELMOComponent sigma msg) :
   finite_valid_trace_from_to ELMOProtocol
     sigma (lift_to_composite_state ELMOComponent sigma i_m (state m))
-    (pre_VLSM_full_projection_finite_trace_project
+    (pre_VLSM_embedding_finite_trace_project
       _ _ (lift_to_composite_label ELMOComponent i_m)
       (lift_to_composite_state ELMOComponent sigma i_m)
       tr_m)
@@ -2568,7 +2568,7 @@ Lemma lift_receive_trace
       <->
     global_equivocators_simple sigma a.
 Proof.
-  remember (pre_VLSM_full_projection_finite_trace_project _ _ _ _ _) as tr.
+  remember (pre_VLSM_embedding_finite_trace_project _ _ _ _ _) as tr.
   remember (sigma i_m) as si_m.
   remember (state m) as sm; clear Heqsm.
   revert Heqsi_m Htr_m_inputs_in_sigma Htr_m_receive tr Heqtr.
