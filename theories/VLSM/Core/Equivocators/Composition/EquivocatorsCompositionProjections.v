@@ -1985,9 +1985,9 @@ Proof.
       as [Hnot_equiv [initial_descriptors [Htr_project Hs_project]]].
     apply not_equivocating_equivocator_descriptors_proper in Hnot_equiv as Hproper.
 
-    specialize (sub_composition_all_full_projection equivocator_IM
+    specialize (sub_composition_all_embedding equivocator_IM
       (equivocators_no_equivocations_constraint IM)) as Hproj.
-    apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr.
+    apply (VLSM_embedding_finite_valid_trace Hproj) in Htr.
     specialize
       (false_composite_no_equivocation_vlsm_with_pre_loaded
         (SubProjectionTraces.sub_IM equivocator_IM (enum index))
@@ -2001,7 +2001,7 @@ Proof.
             (SubProjectionTraces.sub_IM equivocator_IM (enum index))
             (free_constraint _)))
         (composite_state_sub_projection equivocator_IM (finite.enum index) s)
-        (VLSM_full_projection_finite_trace_project Hproj tr)
+        (VLSM_embedding_finite_trace_project Hproj tr)
     ).
     { revert Htr.
       apply VLSM_incl_finite_valid_trace.
@@ -2032,7 +2032,7 @@ Proof.
    spec Hproject.
    { clear -Hproper. intro sub_i.
       destruct_dec_sig sub_i i Hi Heqsub_i. subst.
-      rewrite <- (VLSM_full_projection_finite_trace_last Hproj).
+      rewrite <- (VLSM_embedding_finite_trace_last Hproj).
       apply Hproper.
     }
     destruct Hproject  as [_trX [_initial_descriptors [_ [_Htr_project [_ HtrX]]]]].
@@ -2044,14 +2044,14 @@ Proof.
       as Hcommute.
     spec Hcommute.
     { replace (finite_trace_sub_projection _ _ _)
-        with (VLSM_full_projection_finite_trace_project Hproj tr)
+        with (VLSM_embedding_finite_trace_project Hproj tr)
       ; [done |].
       clear.
       induction tr; [done |].
       simpl.
       unfold pre_VLSM_projection_transition_item_project,
         composite_label_sub_projection_option,
-        pre_VLSM_full_projection_transition_item_project.
+        pre_VLSM_embedding_transition_item_project.
       simpl.
       case_decide as Hla; [|contradict Hla; apply elem_of_enum].
       f_equal; [| done].
@@ -2073,7 +2073,7 @@ Proof.
         (free_composite_vlsm (SubProjectionTraces.sub_IM IM (finite.enum index))))
       as Heq.
     apply (VLSM_eq_finite_valid_trace Heq) in HtrX.
-    specialize (sub_composition_all_full_projection_rev IM (free_constraint IM)) as Hproj.
+    specialize (sub_composition_all_embedding_rev IM (free_constraint IM)) as Hproj.
     assert (HtrX' : finite_valid_trace
       (composite_vlsm (SubProjectionTraces.sub_IM IM (finite.enum index))
       (free_sub_free_constraint IM (free_constraint IM)))
@@ -2087,11 +2087,11 @@ Proof.
       apply constraint_subsumption_incl.
       by intros [] [].
     }
-    apply (VLSM_full_projection_finite_valid_trace Hproj) in HtrX'.
+    apply (VLSM_embedding_finite_valid_trace Hproj) in HtrX'.
     replace (free_sub_free_state _ _)
       with (EquivocatorsComposition.equivocators_state_project IM initial_descriptors s)
       in HtrX'
-    ; [replace (VLSM_full_projection_finite_trace_project _ _) with trX
+    ; [replace (VLSM_embedding_finite_trace_project _ _) with trX
       in HtrX'|]
     ; [done | | done].
     clear.

@@ -585,11 +585,11 @@ Qed.
   projection to be lifted directly to <<X>>
   (all other machines stay in their initial state).
 *)
-Lemma projection_friendliness_lift_to_composite_vlsm_full_projection
+Lemma projection_friendliness_lift_to_composite_VLSM_embedding
   (Hfr : projection_friendliness_sufficient_condition)
-  : VLSM_full_projection Xj X (lift_to_composite_label IM j) (lift_to_composite_state' IM j).
+  : VLSM_embedding Xj X (lift_to_composite_label IM j) (lift_to_composite_state' IM j).
 Proof.
-  apply basic_VLSM_full_projection; intro; intros.
+  apply basic_VLSM_embedding; intro; intros.
   - apply (Hfr _ _ _ Hv); [| apply state_update_eq].
     apply (projection_friendliness_sufficient_condition_valid_state Hfr).
     apply Hv.

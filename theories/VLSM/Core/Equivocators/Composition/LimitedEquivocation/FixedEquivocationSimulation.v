@@ -81,7 +81,7 @@ Proof.
 Qed.
 
 (**
-  This is the constraint counterpart of the [weak_full_projection_valid_preservation]
+  This is the constraint counterpart of the [weak_embedding_valid_preservation]
   property (for the [equivocators_fixed_equivocations_constraint]).
 *)
 Lemma fixed_equivocating_non_equivocating_constraint_lifting
@@ -111,8 +111,8 @@ Proof.
       apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
       apply (VLSM_incl_valid_state (seeded_no_equivocation_incl_preloaded IM equivocating _)) in Hs.
       by specialize
-        (VLSM_weak_full_projection_has_been_sent
-          (PreFreeSubE_PreFreeE_weak_full_projection IM _ _ Heqv_state_s)
+        (VLSM_weak_embedding_has_been_sent
+          (PreFreeSubE_PreFreeE_weak_embedding IM _ _ Heqv_state_s)
           _ Hs m
           ).
     + destruct Hseed as [i [Hi Hsent]].
@@ -163,12 +163,12 @@ Proof.
   apply non_empty_valid_trace_from_can_produce in Him
      as (im_eis & im_etr & item & Him_etr & Hlast & Heqs & Him).
   specialize
-    (PreFreeSubE_PreFreeE_weak_full_projection IM equivocating _ Heqv_state_s)
+    (PreFreeSubE_PreFreeE_weak_embedding IM equivocating _ Heqv_state_s)
     as Hproj.
   apply valid_trace_add_default_last in Him_etr.
   apply valid_trace_last_pstate in Him_etr as Him_etr_lst.
   specialize
-    (VLSM_weak_full_projection_has_been_sent Hproj _ Him_etr_lst im) as Hsent.
+    (VLSM_weak_embedding_has_been_sent Hproj _ Him_etr_lst im) as Hsent.
   unfold has_been_sent in Hsent. simpl in Hsent.
   replace s with (finite_trace_last im_eis im_etr).
   - apply Hsent.

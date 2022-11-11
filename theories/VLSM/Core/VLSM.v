@@ -2751,11 +2751,11 @@ Qed.
 
   If we know that two VLSMs are provably equal, we could try rewriting by them.
   However, that gets usually quite technical. To go around that, we will prove
-  that there is a [VLSMProjections.VLSM_full_projection] between them which will
+  that there is a [VLSMProjections.VLSM_embedding] between them which will
   allow trace-based results to be easily moved between the two VLSMs.
 
   Below are some preliminary results; the actual projection is given in
-  [VLSMProjections.same_VLSM_full_projection].
+  [VLSMProjections.same_VLSM_embedding].
 *)
 Section sec_same_VLSM.
 

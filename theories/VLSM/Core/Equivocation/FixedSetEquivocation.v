@@ -225,14 +225,14 @@ Context
   (Hincl : indices1 ⊆ indices2)
   .
 
-Lemma equivocators_composition_for_directly_observed_index_incl_full_projection
+Lemma equivocators_composition_for_directly_observed_index_incl_embedding
   (s: state)
-  : VLSM_full_projection
+  : VLSM_embedding
     (equivocators_composition_for_directly_observed IM indices1 s)
     (equivocators_composition_for_directly_observed IM indices2 s)
     (lift_sub_incl_label IM _ _ Hincl) (lift_sub_incl_state IM _ _).
 Proof.
-  by apply lift_sub_incl_preloaded_full_projection.
+  by apply lift_sub_incl_preloaded_embedding.
 Qed.
 
 Lemma fixed_equivocation_index_incl_subsumption
@@ -243,9 +243,9 @@ Proof.
   intros s m [Hobs | Hemit]; [by left |].
   right.
   specialize
-    (equivocators_composition_for_directly_observed_index_incl_full_projection s)
+    (equivocators_composition_for_directly_observed_index_incl_embedding s)
     as Hproj.
-  by apply (VLSM_full_projection_can_emit Hproj) in Hemit.
+  by apply (VLSM_embedding_can_emit Hproj) in Hemit.
 Qed.
 
 Lemma fixed_equivocation_constraint_index_incl_subsumption
@@ -738,7 +738,7 @@ End sec_Fixed_eq_StrongFixed.
   any valid trace over the composition of equivocators pre-loaded with the
   messages directly observed in <<s>> can be "lifted" to a Fixed valid trace in which
   the non-equivocators remain in their corresponding component-state given by <<s>>
-  (lemma [EquivPreloadedBase_Fixed_weak_full_projection]).
+  (lemma [EquivPreloadedBase_Fixed_weak_embedding]).
 *)
 
 Section sec_fixed_equivocator_lifting.
@@ -911,18 +911,18 @@ Qed.
   This result is important for establishing the connection between limited
   equivocation and fixed equivocation (Lemma [strong_witness_has_fixed_equivocation]).
 
-  We prove this as a [VLSM_weak_full_projection] between the free composition of
+  We prove this as a [VLSM_weak_embedding] between the free composition of
   equivocators pre-loaded with the messages observed in <<s>> and the <<Fixed>>
   composition of all nodes. Note that this is a strengthening of Lemma
-  [PreSubFree_PreFree_weak_full_projection].
+  [PreSubFree_PreFree_weak_embedding].
 *)
-Lemma EquivPreloadedBase_Fixed_weak_full_projection
+Lemma EquivPreloadedBase_Fixed_weak_embedding
   (no_initial_messages_for_equivocators :
     forall i m, i ∈ equivocators -> ~ vinitial_message_prop (IM i) m)
-  : VLSM_weak_full_projection EquivPreloadedBase Fixed
+  : VLSM_weak_embedding EquivPreloadedBase Fixed
       (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
 Proof.
-  apply basic_VLSM_weak_full_projection.
+  apply basic_VLSM_weak_embedding.
   - intros l s om Hv HsY HomY. split.
     + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
       destruct_dec_sig i j Hj Heq; subst i; cbn; unfold sub_IM; cbn.
@@ -1060,7 +1060,7 @@ Context
   to valid traces of the constrained composition.
 *)
 Lemma lift_strong_fixed_non_equivocating
-  : VLSM_full_projection StrongFixedNonEquivocating StrongFixed
+  : VLSM_embedding StrongFixedNonEquivocating StrongFixed
     (lift_sub_label IM non_equivocators)
     (lift_sub_state IM non_equivocators).
 Proof.
@@ -1091,7 +1091,7 @@ Qed.
   to valid traces of the constrained composition.
 *)
 Lemma lift_fixed_non_equivocating
-  : VLSM_full_projection FixedNonEquivocating Fixed
+  : VLSM_embedding FixedNonEquivocating Fixed
     (lift_sub_label IM non_equivocators)
     (lift_sub_state IM non_equivocators).
 Proof.
@@ -1100,7 +1100,7 @@ Proof.
   apply
     (VLSM_incl_finite_valid_trace
       (StrongFixed_incl_Fixed IM equivocators)).
-  apply (VLSM_full_projection_finite_valid_trace lift_strong_fixed_non_equivocating).
+  apply (VLSM_embedding_finite_valid_trace lift_strong_fixed_non_equivocating).
   revert Htr.
   apply VLSM_incl_finite_valid_trace.
   apply induced_sub_projection_constraint_subsumption_incl.

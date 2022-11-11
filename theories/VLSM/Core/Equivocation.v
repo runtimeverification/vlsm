@@ -2467,8 +2467,8 @@ Proof.
     intros is tr Htr.
     apply composite_has_been_directly_observed_free_iff, proper_directly_observed in Hobs
     ; [| done].
-    apply (VLSM_full_projection_finite_valid_trace_init_to
-      (lift_to_composite_preloaded_vlsm_full_projection IM i)) in Htr as Hpre_tr.
+    apply (VLSM_embedding_finite_valid_trace_init_to
+      (lift_to_composite_preloaded_VLSM_embedding IM i)) in Htr as Hpre_tr.
     specialize (Hobs _ _ Hpre_tr).
     apply Exists_exists.
     apply Exists_exists in Hobs.
@@ -2483,8 +2483,8 @@ Proof.
     apply proper_directly_observed in Hobs ; [| done].
     apply has_been_directly_observed_consistency in Hobs; [| typeclasses eauto | done].
     destruct Hobs as [is [tr [Htr Hobs]]].
-    apply (VLSM_full_projection_finite_valid_trace_init_to
-      (lift_to_composite_preloaded_vlsm_full_projection IM i)) in Htr as Hpre_tr.
+    apply (VLSM_embedding_finite_valid_trace_init_to
+      (lift_to_composite_preloaded_VLSM_embedding IM i)) in Htr as Hpre_tr.
     eexists. eexists. exists Hpre_tr.
     apply Exists_exists.
     apply Exists_exists in Hobs.

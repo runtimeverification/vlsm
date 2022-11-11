@@ -18,7 +18,7 @@ Section sec_VLSM_projection.
 
   - [final_state_project]: state projection commutes with [finite_trace_last]
 
-  Proper examples of total projections (which are not [VLSM_full_projection]s)
+  Proper examples of total projections (which are not [VLSM_embedding]s)
   are projections in which some of transitions might be dropped, such as
   the projection of a composition to one of the components ([component_projection])
   or the projection of the compositions of equivocators to the composition of
@@ -250,7 +250,7 @@ Context
   fact that the weak projections are not required to preserve initial states.
 
   Although we don't have proper examples of [VLSM_weak_projection]s, they are a
-  support base for [VLSM_weak_full_projection]s for which we have proper examples.
+  support base for [VLSM_weak_embedding]s for which we have proper examples.
 *)
 Record VLSM_weak_projection : Prop :=
 {
