@@ -80,7 +80,7 @@ Proof.
   apply elem_of_list_fmap in Hitem as [((pre, _item), _suf) [Heq_item Hitem]].
   apply elem_of_list_filter, proj2, elem_of_one_element_decompositions in Hitem.
   subst tr _item.
-  spec Hinput_none item.
+  specialize (Hinput_none item).
   spec Hinput_none; [| by congruence].
   by apply elem_of_app; right; apply elem_of_app; do 2 left.
 Qed.

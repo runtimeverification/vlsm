@@ -209,7 +209,7 @@ Proof.
   destruct H1 as [Heq | Hin].
   - by subst; simpl; rewrite compare_eq_refl.
   - apply LocallySorted_tl in H0 as LS.
-    spec IHsigma LS Hin. simpl.
+    specialize (IHsigma LS Hin). simpl.
     destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma; [done | | done].
     apply (@LocallySorted_elem_of_lt _ _ compare_lt_strict_order msg a sigma H0) in Hin.
     unfold compare_lt in Hin.

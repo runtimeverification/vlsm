@@ -762,7 +762,7 @@ Proof.
     specialize (IHtr _ Htr).
     specialize (equivocators_transition_item_project_proper_characterization descriptors x)
       as Hproperx.
-    spec Hproperx Hdescriptors.
+    specialize (Hproperx Hdescriptors).
     destruct Hproperx as [oitem [final_descriptors' [Hprojectx [Hitemx Hproperx]]]].
     specialize (Hproperx (finite_trace_last is tr)).
     rewrite equivocators_trace_project_app_iff in Hproject_tr.
@@ -784,7 +784,7 @@ Proof.
 
     destruct l as (i, li). simpl in *.
     destruct (decide (i = eqv)).
-    + subst. spec His_tr eqv. spec Htr_x eqv.
+    + subst. specialize (His_tr eqv). specialize (Htr_x eqv).
       destruct (descriptors eqv) eqn:Hvin_desc_eqv;
         [by simpl in Hex_new; rewrite Hex_new in Hex_new' |].
       destruct (final_descriptors' eqv) eqn:Hfin_desc_eqv'.
@@ -814,7 +814,7 @@ Proof.
     (equivocators_trace_project_preserves_equivocating_indices _ _ _ _ _ _
       Htr Hproper Hproject_tr
     ) as Hincl.
-  intros eqv Heqv. spec Hincl eqv Heqv.
+  intros eqv Heqv. specialize (Hincl eqv Heqv).
   apply set_union_iff in Hincl.
   clear Heqv.
   destruct Hincl as [|Heqv]; [done |].
@@ -977,7 +977,7 @@ Proof.
     as Hproperx.
   unfold final_state in Hproper.
   rewrite finite_trace_last_is_last in Hproper.
-  spec Hproperx Hproper.
+  specialize (Hproperx Hproper).
   destruct Hproperx as [oitem [final_descriptors' [Hprojectx [Hitemx Hproperx]]]].
   specialize (Hproperx (finite_trace_last is tr)).
   unfold equivocators_trace_project.
@@ -1016,7 +1016,7 @@ Proof.
       (zero_descriptor IM) is tr
     ) as Hproject.
   simpl in Hproject. spec Hproject; [by apply zero_descriptor_proper |].
-  spec Hproject Htr.
+  specialize (Hproject Htr).
   destruct Hproject as [trX [initial_descriptors [Hproject _]]].
   exists trX.
   replace initial_descriptors with (zero_descriptor IM) in Hproject; [done |].
@@ -1184,7 +1184,7 @@ Proof.
     as Hcommute.
   assert (Hfinali : final_descriptors i = eqv_final) by (subst; state_update_simpl; done).
   rewrite Hfinali in Hcommute.
-  spec Hcommute Hprojecti.
+  specialize (Hcommute Hprojecti).
   destruct Hcommute as [Hiniti Hcommute].
   clear -Hex Hcommute. subst.
   apply Exists_exists in Hex. destruct Hex as [x [Hx Hm]].
@@ -1510,7 +1510,7 @@ Proof.
     (preloaded_equivocators_valid_trace_from_project (zero_descriptor IM) sX trX)
     as Hproject.
   simpl in Hproject; spec Hproject; [by apply zero_descriptor_proper |].
-  spec Hproject Hpre_tr.
+  specialize (Hproject Hpre_tr).
   destruct Hproject as [_trX [initial_descriptors [_Htr_pr [_ Hlst]]]].
   rewrite Htr_pr in _Htr_pr.
   by inversion _Htr_pr; subst.
@@ -1809,7 +1809,7 @@ Proof.
       final_descriptors lst) as Hproperx.
     unfold final_state in Hproper. rewrite Htr_lst in Hproper.
     rewrite finite_trace_last_is_last in Hproper.
-    spec Hproperx Hproper.
+    specialize (Hproperx Hproper).
     destruct Hproperx as [oitem [final_descriptors' [Hprojectx [Hitemx Hproperx]]]].
     specialize (Hproperx (finite_trace_last is tr')).
     apply equivocators_trace_project_app_iff in Hpr_trX.

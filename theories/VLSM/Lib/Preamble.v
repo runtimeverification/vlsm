@@ -5,26 +5,10 @@ From Coq Require Import Eqdep_dec.
 
 (** * General utility definitions, lemmas, and tactics *)
 
-(** ** Tactics for specializing hypotheses *)
-
 Tactic Notation "spec" hyp(H) :=
   match type of H with ?a -> _ =>
   let H1 := fresh in (assert (H1: a);
   [|generalize (H H1); clear H H1; intro H]) end.
-Tactic Notation "spec_save" hyp(H) :=
-  match type of H with ?a -> _ =>
-  let H1 := fresh in (assert (H1: a);
-  [|generalize (H H1); clear H; intro H]) end.
-Tactic Notation "spec" hyp(H) constr(a) :=
-  (generalize (H a); clear H; intro H).
-Tactic Notation "spec" hyp(H) constr(a) constr(b) :=
-  (generalize (H a b); clear H; intro H).
-Tactic Notation "spec" hyp(H) constr(a) constr(b) constr(c) :=
-  (generalize (H a b c); clear H; intro H).
-Tactic Notation "spec" hyp(H) constr(a) constr(b) constr(c) constr(d) :=
-  (generalize (H a b c d); clear H; intro H).
-Tactic Notation "spec" hyp(H) constr(a) constr(b) constr(c) constr(d) constr(e) :=
-  (generalize (H a b c d e); clear H; intro H).
 
 (** ** Basic logic *)
 

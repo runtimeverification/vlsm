@@ -64,7 +64,7 @@ Proof.
   apply Forall_filter_nil.
   apply Forall_forall.
   intros i _.
-  spec Hs i.
+  specialize (Hs i).
   destruct Hs as [Hs _].
   by congruence.
 Qed.
@@ -362,7 +362,7 @@ Lemma lift_initial_to_equivocators_state
 Proof.
   unfold vinitial_state_prop in *. simpl in *.
   unfold composite_initial_state_prop in *.
-  by intro i; spec Hs i.
+  by intro i; specialize (Hs i).
 Qed.
 
 Definition newmachine_descriptors_list

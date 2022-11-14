@@ -268,7 +268,7 @@ Proof.
       apply (VLSM_incl_valid_message (VLSM_eq_proj1 HeqXE)); [by left|].
       by apply (fixed_equivocating_messages_sent_by_non_equivocating_are_valid eqv_state_s).
     }
-    spec Hreplay eqv_state_s.
+    specialize (Hreplay eqv_state_s).
     spec Hreplay.
     { by apply (VLSM_eq_valid_state HeqXE), (VLSM_eq_valid_state HeqXE). }
     spec Hreplay.

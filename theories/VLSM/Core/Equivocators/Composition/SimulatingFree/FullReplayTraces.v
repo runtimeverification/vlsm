@@ -172,7 +172,7 @@ Proof.
     intros Hcut; specialize (Hcut _ (incl_refl _) ltac:(apply NoDup_enum)).
     unfold replayed_initial_state_from, composite_apply_plan.
     rewrite _apply_plan_last; extensionality i.
-    spec Hcut i; unfold composite_apply_plan in Hcut; unfold spawn_initial_state
+    specialize (Hcut i); unfold composite_apply_plan in Hcut; unfold spawn_initial_state
     ; simpl in *; rewrite Hcut.
     unfold lift_equivocators_sub_state_to.
     case_decide; [| done].
@@ -187,7 +187,7 @@ Proof.
     subst tr_full_replay_is.
     rewrite map_app, (composite_apply_plan_app equivocator_IM); simpl in *
     ; destruct (composite_apply_plan _ _ _) as (aitems, afinal); simpl in *.
-    spec IHl i; destruct_dec_sig x ix Hix Heqx; subst x; simpl in *.
+    specialize (IHl i); destruct_dec_sig x ix Hix Heqx; subst x; simpl in *.
     case_decide as _Hix; cycle 1;
       destruct (decide (ix = i)); subst; equivocator_state_update_simpl; [done | done | |].
     + rewrite decide_False in IHl.
@@ -289,7 +289,7 @@ Lemma equivocator_state_descriptor_project_replayed_initial_state_from_left full
     equivocator_state_descriptor_project (lst i) (eqv_descriptors i) =
     equivocator_state_descriptor_project (full_replay_state i) (eqv_descriptors i).
 Proof.
-  intro i. spec Heqv_descriptors i.
+  intro i. specialize (Heqv_descriptors i).
   unfold equivocator_state_descriptor_project.
   unfold existing_descriptor in Heqv_descriptors.
   destruct (eqv_descriptors i) as [sn|ji]; [done |].
@@ -348,7 +348,7 @@ Lemma equivocator_state_descriptor_project_replayed_trace_from_left full_replay_
     equivocator_state_descriptor_project (lst i) (eqv_descriptors i) =
     equivocator_state_descriptor_project (full_replay_state i) (eqv_descriptors i).
 Proof.
-  intro i. spec Heqv_descriptors i.
+  intro i. specialize (Heqv_descriptors i).
   unfold equivocator_state_descriptor_project.
   unfold existing_descriptor in Heqv_descriptors.
   destruct (eqv_descriptors i) as [sn|ji]; [done |].
