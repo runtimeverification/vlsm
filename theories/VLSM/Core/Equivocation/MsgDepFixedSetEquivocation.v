@@ -1,7 +1,8 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppListSet.
-From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition Equivocation Equivocation.FixedSetEquivocation ProjectionTraces SubProjectionTraces.
+From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition Equivocation.
+From VLSM.Core Require Import Equivocation.FixedSetEquivocation ProjectionTraces SubProjectionTraces.
 
 Section sec_msg_dep_fixed_set_equivocation.
 
@@ -90,7 +91,8 @@ Lemma msg_dep_strong_fixed_equivocation_subsumption s m
     strong_fixed_equivocation IM equivocators s m.
 Proof.
   intros  [Hsent | [[i [Hi Hemit]] Heqv]]; [by left |].
-  cut (forall dm, msg_dep_rel message_dependencies dm m -> valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm)
+  cut (forall dm, msg_dep_rel message_dependencies dm m ->
+    valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm)
   ; [| by apply dependencies_are_valid].
   intro Hdeps; right.
   by apply messages_with_valid_dependences_can_be_emitted with i; itauto.
@@ -160,7 +162,8 @@ Qed.
 
 Lemma sent_by_non_equivocating_msg_dep_rel_strong_fixed_equivocation
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  : forall s, valid_state_prop (composite_vlsm IM (strong_fixed_equivocation_constraint IM equivocators)) s ->
+  : forall s, valid_state_prop (composite_vlsm IM
+      (strong_fixed_equivocation_constraint IM equivocators)) s ->
     forall dm m, msg_dep_rel message_dependencies dm m ->
     sent_by_non_equivocating  IM equivocators s m ->
     strong_fixed_equivocation IM equivocators s dm.
@@ -193,7 +196,8 @@ Qed.
 
 Lemma msg_dep_rel_reflects_strong_fixed_equivocation
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  : forall s, valid_state_prop (composite_vlsm IM (strong_fixed_equivocation_constraint IM equivocators)) s ->
+  : forall s, valid_state_prop (composite_vlsm IM
+      (strong_fixed_equivocation_constraint IM equivocators)) s ->
     forall dm m, msg_dep_rel message_dependencies dm m ->
     strong_fixed_equivocation IM equivocators s m ->
     strong_fixed_equivocation IM equivocators s dm.
@@ -339,8 +343,8 @@ Proof.
   - by apply Fixed_incl_StrongFixed.
   - eapply VLSM_incl_trans.
     + by eapply strong_msg_dep_fixed_equivocation_incl.
-    + apply constraint_subsumption_incl
-       with (constraint1 := msg_dep_fixed_set_equivocation_constraint IM message_dependencies equivocators).
+    + eapply constraint_subsumption_incl with (constraint1 :=
+        msg_dep_fixed_set_equivocation_constraint IM message_dependencies equivocators).
       apply preloaded_constraint_subsumption_stronger.
       apply strong_constraint_subsumption_strongest.
       by apply msg_dep_full_node_fixed_set_equivocation_constraint_subsumption.
@@ -361,14 +365,15 @@ Proof.
     eapply VLSM_incl_can_emit.
     {
       apply pre_loaded_vlsm_incl_relaxed
-        with (P := fun dm => composite_has_been_directly_observed IM s dm \/ dm ∈ message_dependencies m).
+        with (P := fun dm => composite_has_been_directly_observed IM s dm \/
+          dm ∈ message_dependencies m).
       intros m0 [Hsent_m0 | Hdep_m0]; [itauto |].
       left; exists i.
       by specialize (Hv _ Hdep_m0) as [Hsent | Hreceived]; [left | right].
     }
-    eapply VLSM_full_projection_can_emit.
+    eapply VLSM_embedding_can_emit.
     {
-      by apply @preloaded_sub_element_full_projection
+      by apply @preloaded_sub_element_embedding
         with (Hj := HAj) (P := fun dm => dm ∈ message_dependencies m); itauto.
     }
     eapply message_dependencies_are_sufficient.

@@ -519,8 +519,8 @@ Proof.
   - intros m Hemit.
     apply can_emit_composite_project in Hemit as [j Hemitj].
     eapply message_dependencies_are_sufficient in Hemitj.
-    eapply VLSM_full_projection_can_emit; [| done].
-    by apply lift_to_composite_generalized_preloaded_vlsm_full_projection.
+    eapply VLSM_embedding_can_emit; [| done].
+    by apply lift_to_composite_generalized_preloaded_VLSM_embedding.
 Qed.
 
 Lemma msg_dep_reflects_free_validity
@@ -699,8 +699,8 @@ Lemma composite_ObservedBeforeSendTransition_lift :
     (lift_to_composite_transition_item' IM i item) m1 m2.
 Proof.
   intros * []; constructor; [| done |].
-  - by eapply VLSM_full_projection_input_valid_transition in dobst_transition0;
-      [| apply lift_to_composite_preloaded_vlsm_full_projection].
+  - by eapply VLSM_embedding_input_valid_transition in dobst_transition0;
+      [| apply lift_to_composite_preloaded_VLSM_embedding].
   - by destruct item; cbn in *; state_update_simpl.
 Qed.
 
@@ -938,7 +938,9 @@ Class FullMessageDependencies
   : Prop :=
 {
   full_message_dependencies_happens_before :
-    forall dm m, dm ∈ full_message_dependencies m <-> msg_dep_happens_before message_dependencies dm m;
+    forall dm m,
+      dm ∈ full_message_dependencies m <->
+      msg_dep_happens_before message_dependencies dm m;
   full_message_dependencies_irreflexive :
     forall m, m ∉ full_message_dependencies m;
   full_message_dependencies_nodups :
@@ -980,7 +982,8 @@ Proof.
   by apply full_message_dependencies_irreflexive.
 Qed.
 
-#[export] Instance msg_dep_happens_before_strict : StrictOrder (msg_dep_happens_before message_dependencies) := {}.
+#[export] Instance msg_dep_happens_before_strict :
+  StrictOrder (msg_dep_happens_before message_dependencies) := {}.
 
 Lemma msg_dep_rel_full_message_dependecies_subset :
   forall x y : message, msg_dep_rel message_dependencies x y ->

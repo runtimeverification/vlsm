@@ -34,13 +34,15 @@ Context
   (seed : message -> Prop)
   (constraintX : composite_label IM -> composite_state IM * option message -> Prop)
   (CX := pre_loaded_vlsm (composite_vlsm IM constraintX) seed)
-  (constraintE : composite_label (equivocator_IM IM) -> composite_state (equivocator_IM IM) * option message -> Prop)
+  (constraintE : composite_label (equivocator_IM IM) ->
+                  composite_state (equivocator_IM IM) * option message -> Prop)
   (CE := pre_loaded_vlsm (composite_vlsm (equivocator_IM IM) constraintE) seed)
   (FreeE := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   .
 
-Definition last_in_trace_except_from {T} exception (tr : list (@transition_item message T)) iom : Prop :=
+Definition last_in_trace_except_from
+  {T} exception (tr : list (@transition_item message T)) iom : Prop :=
     match iom with
     | None => True
     | Some im =>
@@ -123,8 +125,10 @@ Proof.
       by apply initial_state_is_valid.
     }
     by apply functional_extensionality_dep_good; subst.
-  - destruct IHHtrX1 as [eqv_state_is [Hstate_start_project [eqv_state_s [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _ ]]]]]]].
-    destruct IHHtrX2 as [eqv_msg_is [Hmsg_start_project [eqv_msg_s [_ [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg ]]]]]]].
+  - destruct IHHtrX1 as [eqv_state_is [Hstate_start_project [eqv_state_s
+      [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _ ]]]]]]].
+    destruct IHHtrX2 as [eqv_msg_is [Hmsg_start_project [eqv_msg_s [_
+      [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg ]]]]]]].
     exists eqv_state_is. split; [done |].
     apply valid_trace_last_pstate in Hstate_trace as Hstate_valid.
     destruct Ht as [[Hs [Hiom [Hv Hc]]] Ht].
@@ -237,7 +241,8 @@ Context {message : Type}
   (FreeE := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (seed : message -> Prop)
-  (SeededXE : VLSM message := composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed)
+  (SeededXE : VLSM message :=
+    composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed)
   (Free := free_composite_vlsm IM)
   (SeededFree := pre_loaded_vlsm Free seed)
   .
@@ -255,11 +260,14 @@ Definition all_equivocating_replayed_trace_from
   (tr : list (composite_transition_item (equivocator_IM IM)))
   : list (composite_transition_item (equivocator_IM IM))
   :=
-  let Hproj := sub_composition_all_full_projection (equivocator_IM IM) (equivocators_no_equivocations_constraint IM) in
-  replayed_trace_from IM (enum index)
-    full_replay_state
-    (composite_state_sub_projection (equivocator_IM IM) (enum index) is)
-    (VLSM_full_projection_finite_trace_project Hproj tr).
+  let
+    Hproj := sub_composition_all_embedding (equivocator_IM IM)
+              (equivocators_no_equivocations_constraint IM)
+  in
+    replayed_trace_from IM (enum index)
+      full_replay_state
+      (composite_state_sub_projection (equivocator_IM IM) (enum index) is)
+      (VLSM_embedding_finite_trace_project Hproj tr).
 
 Lemma replayed_trace_from_valid_equivocating
   (full_replay_state : composite_state (equivocator_IM IM))
@@ -274,8 +282,10 @@ Proof.
     (sub_replayed_trace_from_valid_equivocating IM seed
       (enum index) _ Hfull_replay_state
     ).
-  pose (Hproj := preloaded_sub_composition_all_full_projection (equivocator_IM IM) (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed) seed).
-  apply (VLSM_full_projection_finite_valid_trace Hproj) in Htr.
+  pose (Hproj := preloaded_sub_composition_all_embedding (equivocator_IM IM)
+    (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM)
+    (free_constraint _) seed) seed).
+  apply (VLSM_embedding_finite_valid_trace Hproj) in Htr.
   revert Htr.
   apply VLSM_incl_finite_valid_trace.
   apply basic_VLSM_incl_preloaded_with; [done | | by intro..].
@@ -316,8 +326,8 @@ Proof.
   - clear isX sX trX HtrX.
     intro; intros.
     destruct iom as [im |]; [| by exists [], eqv_state_s; split; constructor].
-    specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM IM) (free_constraint _) seed)
-      as HinclE.
+    specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded
+      (equivocator_IM IM) (free_constraint _) seed) as HinclE.
     apply valid_trace_forget_last in Hmsg_trace.
     specialize
       (replayed_trace_from_valid_equivocating
@@ -340,7 +350,8 @@ Proof.
     left.
     apply valid_trace_first_pstate in Hmsg_trace_full_replay as Hfst.
     apply valid_state_has_trace in Hfst as [is_s [tr_s [Htr_s His_s]]].
-    specialize (finite_valid_trace_from_to_app SeededXE _ _ _ _ _ Htr_s Hmsg_trace_full_replay) as Happ.
+    specialize (finite_valid_trace_from_to_app SeededXE _ _ _ _ _ Htr_s Hmsg_trace_full_replay)
+      as Happ.
     apply (VLSM_incl_finite_valid_trace_from_to HinclE) in Happ.
     specialize (@has_been_sent_examine_one_trace _ FreeE _ _ _ _ (conj Happ His_s) im)
       as Hrew.
@@ -351,7 +362,7 @@ Proof.
     ; [by inversion Hfinal_msg |].
     rewrite finite_trace_last_output_is_last in Hfinal_msg.
     apply Exists_app. right.
-    unfold VLSM_full_projection_finite_trace_project, pre_VLSM_full_projection_finite_trace_project.
+    unfold VLSM_embedding_finite_trace_project, pre_VLSM_embedding_finite_trace_project.
     rewrite! map_app.
     by apply Exists_app; simpl; right; left.
 Qed.

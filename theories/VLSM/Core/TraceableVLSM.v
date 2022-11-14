@@ -207,7 +207,8 @@ Proof.
   - inversion 1 as [| ? ? Hna _]; subst; cbn.
     rewrite state_update_eq.
     replace (foldr Nat.add 0 (map (λ i : index, state_size i (s i)) l))
-       with (foldr Nat.add 0 (map (λ i : index, state_size i (lift_to_composite_state IM s a si i)) l))
+       with (foldr Nat.add 0 (map (λ i : index,
+               state_size i (lift_to_composite_state IM s a si i)) l))
     ; [lia |].
     revert Hna; clear; induction l; [done |].
     intros []%not_elem_of_cons.
@@ -236,8 +237,8 @@ Proof.
   intros s' Hs' s item i.
   unfold composite_state_destructor; rewrite elem_of_list_fmap.
   intros ([itemi si] & [=-> ->] & Hin).
-  eapply (VLSM_weak_full_projection_input_valid_transition
-           (lift_to_preloaded_free_weak_full_projection IM i s' Hs')).
+  eapply (VLSM_weak_embedding_input_valid_transition
+           (lift_to_preloaded_free_weak_embedding IM i s' Hs')).
   eapply @tv_state_destructor_transition; [done | | done].
   by eapply valid_state_project_preloaded_to_preloaded.
 Qed.
@@ -469,7 +470,8 @@ Equations indexed_composite_state_to_trace
       | (right _) eq: Hni => (s', [])
       |  (left _) eq: Hi with inspect (decide (composite_state_destructor s' i_n.1 = [])) =>
         | (right _) eq: Hn  => (s', [])
-        |  (left _) eq: Hnn => indexed_composite_state_to_trace choose s' Hs' (StdppListSet.set_remove i_n.1 indices).
+        |  (left _) eq: Hnn => indexed_composite_state_to_trace choose s' Hs'
+                                 (StdppListSet.set_remove i_n.1 indices).
 Next Obligation.
   by cbn; intros; eapply input_valid_transition_origin, composite_state_destructor_lookup_reachable.
 Qed.
@@ -480,7 +482,8 @@ Next Obligation.
 Qed.
 Next Obligation.
   intros.
-  cut (S (length (StdppListSet.set_remove i_n.1 indices)) <= length indices); [unfold indices; lia |].
+  cut (S (length (StdppListSet.set_remove i_n.1 indices)) <= length indices);
+    [unfold indices; lia |].
   by rewrite <- set_remove_length; [lia |].
 Qed.
 
@@ -540,8 +543,8 @@ Proof.
     + subst; eapply Hind; [done | | | done | done].
       * by apply StdppListSet.set_remove_nodup.
       * by apply set_remove_preserves_not_in_indices_initial.
-    + replace i with j in *
-        by (destruct (decide (i = j)); [| contradict n; subst; apply StdppListSet.set_remove_3]; done).
+    + replace i with j in * by (destruct (decide (i = j));
+        [| contradict n; subst; apply StdppListSet.set_remove_3]; done).
       by erewrite indexed_composite_state_to_trace_reflects_initiality_1;
         [..| done]; apply composite_tv_state_destructor_initial.
   - by intros; subst; clear Heq1; contradict Hdestruct;

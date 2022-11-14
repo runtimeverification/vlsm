@@ -259,7 +259,10 @@ Program Definition fitering_subsequence_stream_filter_map_prefix_ex
   (ss : Stream nat)
   (Hfs : filtering_subsequence P s ss)
   (m : nat)
-  : { n : nat | stream_prefix (filtering_subsequence_stream_filter_map P f s ss Hfs) m = list_filter_map P f (stream_prefix s n) } :=
+  : {n : nat |
+      stream_prefix (filtering_subsequence_stream_filter_map P f s ss Hfs) m =
+      list_filter_map P f (stream_prefix s n)}
+  :=
   match m with
   | 0 => exist _ 0 _
   | S m => exist _ (S (Str_nth m ss)) _
@@ -305,8 +308,8 @@ Qed.
   except that instead of obtaining the filtered sequence itself we obtain the
   stream of all positions corresponding to the filtered sequence.
 
-  Yves Bertot. Filters on Co-Inductive streams: an application to Eratosthenes’ sieve. RR-5343, INRIA.
-  2004, pp.21. ffinria-00070658 https://hal.inria.fr/inria-00070658/document
+  Yves Bertot. Filters on Co-Inductive streams: an application to Eratosthenes’ sieve.
+  RR-5343, INRIA. 2004, pp.21. ffinria-00070658 https://hal.inria.fr/inria-00070658/document
 *)
 
 Section sec_stream_filter_positions.
@@ -412,14 +415,17 @@ Qed.
   produces the streams of all its position at which <<P>> holds in a strictly
   increasing order (shifted by the given argument <<n>>).
 *)
-CoFixpoint stream_filter_positions (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat) : Stream nat :=
+CoFixpoint stream_filter_positions
+  (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat) : Stream nat :=
   let fpair := stream_filter_fst_pos _ (fHere _ _ Hinf) n in
-  Cons fpair.1 (stream_filter_positions fpair.2 (stream_filter_fst_pos_infinitely_often _ (fHere _ _ Hinf) n Hinf)  (S fpair.1)).
+  Cons fpair.1 (stream_filter_positions fpair.2
+    (stream_filter_fst_pos_infinitely_often _ (fHere _ _ Hinf) n Hinf)  (S fpair.1)).
 
 Lemma stream_filter_positions_unroll (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat)
   (fpair := stream_filter_fst_pos _ (fHere _ _ Hinf) n)
   : stream_filter_positions s Hinf n =
-    Cons fpair.1 (stream_filter_positions fpair.2 (stream_filter_fst_pos_infinitely_often _ (fHere _ _ Hinf) n Hinf)  (S fpair.1)).
+    Cons fpair.1 (stream_filter_positions fpair.2
+      (stream_filter_fst_pos_infinitely_often _ (fHere _ _ Hinf) n Hinf)  (S fpair.1)).
 Proof.
   by rewrite <- recons at 1.
 Qed.
@@ -427,8 +433,9 @@ Qed.
 Lemma stream_filter_positions_Str_nth_tl
   (s : Stream A) (Hinf : InfinitelyOften P s) (n0 : nat) (n : nat)
   : exists kn (Hinf' : InfinitelyOften P (Str_nth_tl (S kn) s)),
-    Str_nth_tl n (stream_filter_positions s Hinf n0) = Cons (n0 + kn) (stream_filter_positions (Str_nth_tl (S kn) s) Hinf' (S (n0 + kn)))
-    /\ P (Str_nth kn s).
+    Str_nth_tl n (stream_filter_positions s Hinf n0) =
+    Cons (n0 + kn) (stream_filter_positions (Str_nth_tl (S kn) s) Hinf' (S (n0 + kn))) /\
+    P (Str_nth kn s).
 Proof.
   induction n.
   - simpl. rewrite (stream_filter_positions_unroll s Hinf n0).
@@ -496,7 +503,8 @@ Proof.
     destruct Hnth_tl as [kn [Hnth_inf [Hnth Hnth_p]]].
     unfold Str_nth. simpl. rewrite <- tl_nth_tl.
     rewrite stream_filter_positions_unroll in Hnth.
-    specialize (stream_filter_fst_pos_characterization (Str_nth_tl kn (tl s)) (fHere _ _ Hnth_inf) (S kn))
+    specialize (stream_filter_fst_pos_characterization
+      (Str_nth_tl kn (tl s)) (fHere _ _ Hnth_inf) (S kn))
       as [k [Heq [Hpk Hnp]]].
     rewrite Hnth; simpl.
     split; [done |].
@@ -518,7 +526,8 @@ Definition stream_filter_map
   (s : Stream A)
   (Hinf : InfinitelyOften P s)
   : Stream B :=
-  filtering_subsequence_stream_filter_map P f _ _ (stream_filter_positions_filtering_subsequence s Hinf).
+  filtering_subsequence_stream_filter_map P f _ _
+    (stream_filter_positions_filtering_subsequence s Hinf).
 
 (** Stream filtering is obtained as a specialization of [stream_filter_map]. *)
 Definition stream_filter
@@ -567,8 +576,9 @@ Program Definition stream_map_option_prefix_ex
   (Hfs := stream_filter_positions_filtering_subsequence _ _ Hinf)
   (k : nat)
   : { n | stream_prefix (stream_map_option Hinf) k = map_option f (stream_prefix s n)} :=
-  let (n, Heq) := (fitering_subsequence_stream_filter_map_prefix_ex P (fun k => is_Some_proj (proj2_dsig k)) _ _ Hfs k) in
-  exist _ n _.
+  let (n, Heq) := (fitering_subsequence_stream_filter_map_prefix_ex P
+                    (fun k => is_Some_proj (proj2_dsig k)) _ _ Hfs k)
+  in exist _ n _.
 Next Obligation.
   by intros; cbn; rewrite !map_option_as_filter.
 Qed.

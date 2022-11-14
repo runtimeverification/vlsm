@@ -683,7 +683,8 @@ Record oracle_stepwise_props
       forall msg,
       oracle s' msg
         <->
-      message_selector msg {| l := l; input := im; destination := s'; output := om |} \/ oracle s msg;
+      message_selector msg
+        {| l := l; input := im; destination := s'; output := om |} \/ oracle s msg;
 }.
 
 Arguments oracle_no_inits {message} {vlsm} {message_selector} {oracle} _.
@@ -1137,7 +1138,8 @@ Class HasBeenDirectlyObservedCapability {message} (vlsm : VLSM message) : Type :
 {
   has_been_directly_observed: state_message_oracle vlsm;
   has_been_directly_observed_dec :> RelDecision has_been_directly_observed;
-  has_been_directly_observed_stepwise_props: oracle_stepwise_props item_sends_or_receives has_been_directly_observed;
+  has_been_directly_observed_stepwise_props :
+    oracle_stepwise_props item_sends_or_receives has_been_directly_observed;
 }.
 
 Arguments has_been_directly_observed {message} vlsm {_}.
@@ -1157,7 +1159,8 @@ Definition has_been_directly_observed_step_update `{HasBeenDirectlyObservedCapab
       ((im = Some msg \/ om = Some msg) \/ has_been_directly_observed vlsm s msg)
   := oracle_step_update (has_been_directly_observed_stepwise_props vlsm).
 
-Lemma proper_directly_observed {message} (vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm}:
+Lemma proper_directly_observed
+  {message} (vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :
   forall (s:state),
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
@@ -1168,7 +1171,8 @@ Proof.
   by apply has_been_directly_observed_stepwise_props.
 Qed.
 
-Lemma proper_not_directly_observed `(vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm}:
+Lemma proper_not_directly_observed
+  `(vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :
   forall (s:state),
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
@@ -1338,8 +1342,8 @@ Qed.
   :=
   { has_been_directly_observed := has_been_directly_observed_from_sent_received;
     has_been_directly_observed_dec := has_been_directly_observed_from_sent_received_dec;
-
-    has_been_directly_observed_stepwise_props := has_been_directly_observed_from_sent_received_stepwise_props
+    has_been_directly_observed_stepwise_props :=
+      has_been_directly_observed_from_sent_received_stepwise_props
   }.
 
 Lemma has_been_directly_observed_consistency
@@ -1899,7 +1903,8 @@ Definition composite_has_been_directly_observed
 Lemma composite_has_been_directly_observed_dec : RelDecision composite_has_been_directly_observed.
 Proof.
   intros s m.
-  apply (Decision_iff (P:=List.Exists (fun i => has_been_directly_observed (IM i) (s i) m) (enum index))).
+  apply (Decision_iff
+    (P := List.Exists (fun i => has_been_directly_observed (IM i) (s i) m) (enum index))).
   - by rewrite Exists_finite.
   - by typeclasses eauto.
 Qed.
@@ -2073,9 +2078,10 @@ Proof.
 Qed.
 
 Lemma has_been_sent_iff_by_sender
-      (Hsender_safety : sender_safety_alt_prop)
-      [is s tr] (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) is s tr)
-      [m v] (Hsender : sender m = Some v):
+  (Hsender_safety : sender_safety_alt_prop) [is s tr]
+  (Htr : finite_valid_trace_init_to
+    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) is s tr)
+  [m v] (Hsender : sender m = Some v) :
   composite_has_been_sent s m <-> has_been_sent (IM (A v)) (s (A v)) m.
 Proof.
   split; [| by exists (A v)].
@@ -2400,7 +2406,8 @@ Lemma composite_has_been_directly_observed_sent_received_iff
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   (s : composite_state IM)
   (m : message)
-  : composite_has_been_directly_observed IM s m <-> composite_has_been_sent IM s m \/ composite_has_been_received IM s m.
+  : composite_has_been_directly_observed IM s m <->
+    composite_has_been_sent IM s m \/ composite_has_been_received IM s m.
 Proof.
   split.
   - by intros [i [Hs|Hr]]; [left | right]; exists i.
@@ -2415,7 +2422,9 @@ Lemma composite_has_been_directly_observed_free_iff
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   (s : vstate (free_composite_vlsm IM))
   (m : message)
-  : composite_has_been_directly_observed IM s m <-> has_been_directly_observed (free_composite_vlsm IM) s m.
+  : composite_has_been_directly_observed IM s m
+      <->
+    has_been_directly_observed (free_composite_vlsm IM) s m.
 Proof.
   unfold has_been_directly_observed; cbn; unfold has_been_directly_observed_from_sent_received; cbn.
   by apply composite_has_been_directly_observed_sent_received_iff.
@@ -2443,18 +2452,21 @@ Lemma composite_has_been_directly_observed_lift
   (s : vstate (IM i))
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) s)
   (m : message)
-  : composite_has_been_directly_observed IM (lift_to_composite_state' IM i s) m <-> has_been_directly_observed (IM i) s m.
+  : composite_has_been_directly_observed IM (lift_to_composite_state' IM i s) m
+      <->
+    has_been_directly_observed (IM i) s m.
 Proof.
   pose (free_composite_vlsm IM) as Free.
-  assert
-    (Hlift_s : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) (lift_to_composite_state' IM i s)).
+  assert (Hlift_s :
+    valid_state_prop (pre_loaded_with_all_messages_vlsm Free) (lift_to_composite_state' IM i s)).
   { revert Hs.  apply valid_state_preloaded_composite_free_lift. }
   split; intros Hobs.
   - apply (proper_directly_observed (IM i)); [done |].
     intros is tr Htr.
     apply composite_has_been_directly_observed_free_iff, proper_directly_observed in Hobs
     ; [| done].
-    apply (VLSM_full_projection_finite_valid_trace_init_to (lift_to_composite_preloaded_vlsm_full_projection IM i)) in Htr as Hpre_tr.
+    apply (VLSM_embedding_finite_valid_trace_init_to
+      (lift_to_composite_preloaded_VLSM_embedding IM i)) in Htr as Hpre_tr.
     specialize (Hobs _ _ Hpre_tr).
     apply Exists_exists.
     apply Exists_exists in Hobs.
@@ -2469,7 +2481,8 @@ Proof.
     apply proper_directly_observed in Hobs ; [| done].
     apply has_been_directly_observed_consistency in Hobs; [| by typeclasses eauto | done].
     destruct Hobs as [is [tr [Htr Hobs]]].
-    apply (VLSM_full_projection_finite_valid_trace_init_to (lift_to_composite_preloaded_vlsm_full_projection IM i)) in Htr as Hpre_tr.
+    apply (VLSM_embedding_finite_valid_trace_init_to
+      (lift_to_composite_preloaded_VLSM_embedding IM i)) in Htr as Hpre_tr.
     eexists. eexists. exists Hpre_tr.
     apply Exists_exists.
     apply Exists_exists in Hobs.

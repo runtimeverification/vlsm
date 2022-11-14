@@ -18,8 +18,9 @@ Fixpoint list_compare {A} (compare : A -> A -> comparison)
     end
   end.
 
-#[export] Instance list_compare_strict_order {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
-  CompareStrictOrder (@list_compare A compare).
+#[export] Instance list_compare_strict_order
+  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+    CompareStrictOrder (@list_compare A compare).
 Proof.
   intros. destruct H as [R T].
   split.
@@ -48,7 +49,8 @@ Proof.
   by intros; apply compare_eq_dec.
 Qed.
 
-Fixpoint add_in_sorted_list_fn {A} (compare : A -> A -> comparison) (x : A) (l : list A) : list A :=
+Fixpoint add_in_sorted_list_fn
+  {A} (compare : A -> A -> comparison) (x : A) (l : list A) : list A :=
   match l with
   | [] => [x]
   | h :: t =>
@@ -67,9 +69,11 @@ Proof.
   - by destruct (compare msg a); inversion H.
 Qed.
 
-Lemma add_in_sorted_list_in {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg msg' sigma,
-  msg' ∈ (add_in_sorted_list_fn compare msg sigma) ->
-  msg = msg' \/ msg' ∈ sigma.
+Lemma add_in_sorted_list_in
+  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+  forall msg msg' sigma,
+    msg' ∈ (add_in_sorted_list_fn compare msg sigma) ->
+    msg = msg' \/ msg' ∈ sigma.
 Proof.
   intros. induction sigma; simpl in H0.
   - rewrite elem_of_cons in H0.
@@ -85,9 +89,11 @@ Proof.
         by apply IHsigma in Hin as []; itauto.
 Qed.
 
-Lemma add_in_sorted_list_in_rev {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg msg' sigma,
-  msg = msg' \/ msg' ∈ sigma ->
-  msg' ∈ (add_in_sorted_list_fn compare msg sigma).
+Lemma add_in_sorted_list_in_rev
+  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+  forall msg msg' sigma,
+    msg = msg' \/ msg' ∈ sigma ->
+    msg' ∈ (add_in_sorted_list_fn compare msg sigma).
 Proof.
   intros. induction sigma; simpl in H0.
   - by destruct H0 as [H0 | H0]; subst; [left | inversion H0].
@@ -96,23 +102,29 @@ Proof.
     ; rewrite !elem_of_cons; rewrite ?compare_eq in Hcmp; subst; itauto.
 Qed.
 
-Lemma add_in_sorted_list_iff {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg msg' sigma,
-  msg' ∈ (add_in_sorted_list_fn compare msg sigma) <->
-  msg = msg' \/ msg' ∈ sigma.
+Lemma add_in_sorted_list_iff
+  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+  forall msg msg' sigma,
+    msg' ∈ (add_in_sorted_list_fn compare msg sigma) <->
+    msg = msg' \/ msg' ∈ sigma.
 Proof.
   intros; split.
   - by apply add_in_sorted_list_in.
   - by apply add_in_sorted_list_in_rev.
 Qed.
 
-Lemma add_in_sorted_list_head {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
-  msg ∈ (add_in_sorted_list_fn compare msg sigma).
+Lemma add_in_sorted_list_head
+  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+  forall msg sigma,
+    msg ∈ (add_in_sorted_list_fn compare msg sigma).
 Proof.
   by intros; apply add_in_sorted_list_iff; left.
 Qed.
 
-Lemma add_in_sorted_list_tail {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
-  sigma ⊆ (add_in_sorted_list_fn compare msg sigma).
+Lemma add_in_sorted_list_tail
+  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+  forall msg sigma,
+    sigma ⊆ (add_in_sorted_list_fn compare msg sigma).
 Proof.
   intros msg sigma x Hin.
   by apply add_in_sorted_list_iff; right.
@@ -139,7 +151,9 @@ Proof.
   by apply ForAllSuffix2_filter.
 Qed.
 
-Lemma LocallySorted_tl {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
+Lemma LocallySorted_tl
+  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+  forall msg sigma,
     LocallySorted (compare_lt compare) (msg :: sigma) ->
     LocallySorted (compare_lt compare) sigma.
 Proof.
@@ -148,9 +162,11 @@ Proof.
   by apply Sorted_LocallySorted_iff.
 Qed.
 
-Lemma add_in_sorted_list_sorted {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
+Lemma add_in_sorted_list_sorted
+  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+  forall msg sigma,
     LocallySorted (compare_lt compare) sigma ->
-  LocallySorted (compare_lt compare) (add_in_sorted_list_fn compare msg sigma).
+    LocallySorted (compare_lt compare) (add_in_sorted_list_fn compare msg sigma).
 Proof.
   induction 1; cbn; try constructor; destruct (compare msg a) eqn: Hcmpa.
   - by constructor.
@@ -181,10 +197,12 @@ Proof.
   - by do 2 inversion 1; subst; firstorder.
 Qed.
 
-Lemma add_in_sorted_list_existing {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} : forall msg sigma,
-  LocallySorted (compare_lt compare) sigma ->
-  msg ∈ sigma ->
-  add_in_sorted_list_fn compare msg sigma = sigma.
+Lemma add_in_sorted_list_existing
+  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
+  forall msg sigma,
+    LocallySorted (compare_lt compare) sigma ->
+    msg ∈ sigma ->
+    add_in_sorted_list_fn compare msg sigma = sigma.
 Proof.
   induction sigma; intros; [by inversion H1 |].
   rewrite elem_of_cons in H1.

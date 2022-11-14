@@ -154,7 +154,8 @@ Inductive UMO_reachable (C : State -> Message -> Prop) : State -> Prop :=
 | reach_send :
     forall s, UMO_reachable C s -> UMO_reachable C (s <+> MkObservation Send (MkMessage s))
 | reach_recv :
-    forall s msg, C s msg -> UMO_reachable C s -> UMO_reachable C (s <+> MkObservation Receive msg).
+    forall s msg, C s msg -> UMO_reachable C s ->
+      UMO_reachable C (s <+> MkObservation Receive msg).
 
 (**
   An alternative induction principle for [UMO_reachable]
@@ -1460,7 +1461,7 @@ Definition lift_to_UMO_state
 Definition lift_to_UMO_trace
   (us : UMO_state) (i : index) (tr : list (vtransition_item (U i)))
   : list UMO_transition_item :=
-    pre_VLSM_full_projection_finite_trace_project
+    pre_VLSM_embedding_finite_trace_project
       _ _ (lift_to_UMO_label i) (lift_to_UMO_state us i) tr.
 
 (**
@@ -1471,8 +1472,8 @@ Definition lift_to_UMO_trace
 
 Lemma lift_to_UMO :
   forall (us : UMO_state) (Hus : valid_state_prop UMO us) (i : index),
-    VLSM_weak_full_projection (U i) UMO (lift_to_UMO_label i) (lift_to_UMO_state us i).
-Proof. by intros; apply lift_to_free_weak_full_projection. Qed.
+    VLSM_weak_embedding (U i) UMO (lift_to_UMO_label i) (lift_to_UMO_state us i).
+Proof. by intros; apply lift_to_free_weak_embedding. Qed.
 
 Lemma lift_to_UMO_valid_state_prop :
   forall (i : index) (s : State) (us : UMO_state),
@@ -1480,7 +1481,7 @@ Lemma lift_to_UMO_valid_state_prop :
       valid_state_prop UMO (lift_to_UMO_state us i s).
 Proof.
   intros is s us Hvsp.
-  by eapply VLSM_weak_full_projection_valid_state, lift_to_UMO.
+  by eapply VLSM_weak_embedding_valid_state, lift_to_UMO.
 Qed.
 
 Lemma lift_to_UMO_valid_message_prop :
@@ -1490,7 +1491,7 @@ Lemma lift_to_UMO_valid_message_prop :
 Proof.
   intros i [] Hovmp; cycle 1.
   - exists (fun i => MkState [] (idx i)). by constructor; compute.
-  - eapply VLSM_weak_full_projection_valid_message.
+  - eapply VLSM_weak_embedding_valid_message.
     + by apply (lift_to_UMO (fun i => MkState [] (idx i))); exists None; constructor.
     + by inversion 1.
     + by apply Hovmp.
@@ -1506,7 +1507,7 @@ Lemma lift_to_UMO_input_valid_transition :
         (lift_to_UMO_state us i s2, oom).
 Proof.
   intros i lbl s1 s2 iom oom us Hivt.
-  by apply @VLSM_weak_full_projection_input_valid_transition, lift_to_UMO.
+  by apply @VLSM_weak_embedding_input_valid_transition, lift_to_UMO.
 Qed.
 
 Lemma lift_to_UMO_finite_valid_trace_from_to :
@@ -1517,15 +1518,15 @@ Lemma lift_to_UMO_finite_valid_trace_from_to :
         UMO (lift_to_UMO_state us i s1) (lift_to_UMO_state us i s2) (lift_to_UMO_trace us i tr).
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
-  by eapply (VLSM_weak_full_projection_finite_valid_trace_from_to (lift_to_UMO _ Hvsp i)).
+  by eapply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_UMO _ Hvsp i)).
 Qed.
 
 (** We could prove the same lifting lemmas for [RUMO], but we won't need them. *)
 
 Lemma lift_to_RUMO
   (us : UMO_state) (Hus : valid_state_prop RUMO us) (i : index) :
-  VLSM_weak_full_projection (R i) RUMO (lift_to_UMO_label i) (lift_to_UMO_state us i).
-Proof. by apply lift_to_preloaded_free_weak_full_projection. Qed.
+  VLSM_weak_embedding (R i) RUMO (lift_to_UMO_label i) (lift_to_UMO_state us i).
+Proof. by apply lift_to_preloaded_free_weak_embedding. Qed.
 
 Lemma lift_to_RUMO_finite_valid_trace_from_to :
   forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (R i))) (us : UMO_state),
@@ -1535,7 +1536,7 @@ Lemma lift_to_RUMO_finite_valid_trace_from_to :
         RUMO (lift_to_UMO_state us i s1) (lift_to_UMO_state us i s2) (lift_to_UMO_trace us i tr).
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
-  by apply (VLSM_weak_full_projection_finite_valid_trace_from_to (lift_to_RUMO _ Hvsp i)).
+  by apply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_RUMO _ Hvsp i)).
 Qed.
 
 (**
@@ -1556,7 +1557,8 @@ Fixpoint UMO_state2trace_aux
 match is with
 | [] => []
 | i :: is' =>
-  UMO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++ UMOComponent_state2trace us i
+  UMO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++
+  UMOComponent_state2trace us i
 end.
 
 Definition UMO_state2trace
@@ -1585,7 +1587,8 @@ Proof.
         apply Hall. rewrite elem_of_cons. by intros [].
       * apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
         apply pre_composite_free_update_state_with_initial; [| by compute].
-        by apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
+        by apply (VLSM_eq_valid_state
+          (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
     + replace us with (state_update U us i (us i)) at 2 by (state_update_simpl; done).
       apply lift_to_RUMO_finite_valid_trace_from_to; [done |].
       apply (valid_state_project_preloaded_to_preloaded _ _ _ us i) in Hvsp as Hvsp'.

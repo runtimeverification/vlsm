@@ -2,10 +2,12 @@ From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
 From VLSM.Lib Require Import Preamble StdppListSet Measurable ListSetExtras RealsExtras.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM ByzantineTraces.FixedSetByzantineTraces.
-From VLSM.Core Require Import Validator Equivocation Equivocation.FixedSetEquivocation.
+From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM Validator Equivocation.
+From VLSM.Core Require Import ByzantineTraces.FixedSetByzantineTraces.
+From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
 From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation.
-From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation Equivocation.TraceWiseEquivocation.
+From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation.
+From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 
 (** * VLSM Compositions with Byzantine nodes of limited weight
 
@@ -57,7 +59,8 @@ Definition limited_byzantine_trace_prop
   exists byzantine, fixed_limited_byzantine_trace_prop s tr byzantine.
 
 Context
-  {is_equivocating_tracewise_no_has_been_sent_dec : RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
+  {is_equivocating_tracewise_no_has_been_sent_dec :
+    RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   (limited_constraint := tracewise_limited_equivocation_constraint IM (Ci := Ci) sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
   (Hvalidator: forall i : index, component_message_validator_prop IM limited_constraint i)
@@ -86,7 +89,8 @@ Context
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
   (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
-  (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
+  (tracewise_equivocating_validators :=
+    @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
   .
 
 (**
@@ -111,7 +115,7 @@ Proof.
   apply valid_state_has_trace in Hs as [is [tr Htr]].
   specialize (preloaded_non_byzantine_vlsm_lift IM byzantine (fun i => i) sender)
     as Hproj.
-  apply (VLSM_full_projection_finite_valid_trace_init_to Hproj) in Htr as Hpre_tr.
+  apply (VLSM_embedding_finite_valid_trace_init_to Hproj) in Htr as Hpre_tr.
   intros v Hv; apply elem_of_elements in Hv.
   apply equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
   specialize (Hvs' _ _ Hpre_tr).
@@ -124,7 +128,7 @@ Proof.
   destruct Htr as [Htr Hinit].
   apply (finite_valid_trace_from_to_app_split PreNonByzantine) in Htr.
   destruct Htr as [Hpre Hitem].
-  apply (VLSM_full_projection_finite_valid_trace_from_to Hproj) in Hpre as Hpre_pre.
+  apply (VLSM_embedding_finite_valid_trace_from_to Hproj) in Hpre as Hpre_pre.
   apply valid_trace_last_pstate in Hpre_pre as Hs_pre.
   apply (finite_valid_trace_from_to_app_split PreNonByzantine), proj1 in Hitem.
   inversion Hitem; subst; clear Htl Hitem. simpl in Hm0. subst.
@@ -139,7 +143,7 @@ Proof.
       by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
     }
     apply (composite_proper_sent IM) in Hsent; [| done].
-    apply (VLSM_full_projection_initial_state Hproj) in Hinit.
+    apply (VLSM_embedding_initial_state Hproj) in Hinit.
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
   - specialize (proj1 Hemit) as [i [Hi Hsigned]].
     subst.
@@ -158,7 +162,7 @@ Existing Instance Htracewise_BasicEquivocation.
   components is preserved.
 *)
 Lemma limited_PreNonByzantine_lift_valid
-  : weak_full_projection_valid_preservation PreNonByzantine Limited
+  : weak_embedding_valid_preservation PreNonByzantine Limited
     (lift_sub_label IM non_byzantine)
     (lift_sub_state IM non_byzantine).
 Proof.
@@ -181,11 +185,11 @@ Qed.
   we obtain valid traces for the <<Limited>> equivocation composition.
 *)
 Lemma limited_PreNonByzantine_vlsm_lift
-  : VLSM_full_projection PreNonByzantine Limited
+  : VLSM_embedding PreNonByzantine Limited
       (lift_sub_label IM non_byzantine)
       (lift_sub_state IM non_byzantine).
 Proof.
-  apply basic_VLSM_full_projection; intros ? *.
+  apply basic_VLSM_embedding; intros ? *.
   - by intros; apply limited_PreNonByzantine_lift_valid.
   - by intros * []; rapply lift_sub_transition.
   - by intros; apply (lift_sub_state_initial IM).
@@ -213,12 +217,14 @@ Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating 
   : fixed_limited_byzantine_trace_prop s tr byzantine ->
     exists bs btr,
       finite_valid_trace Limited bs btr /\
-      composite_state_sub_projection IM not_byzantine s = composite_state_sub_projection IM not_byzantine bs /\
-      finite_trace_sub_projection IM not_byzantine tr = finite_trace_sub_projection IM not_byzantine btr.
+      composite_state_sub_projection IM not_byzantine s =
+      composite_state_sub_projection IM not_byzantine bs /\
+      finite_trace_sub_projection IM not_byzantine tr =
+      finite_trace_sub_projection IM not_byzantine btr.
 Proof.
   intros [Hlimit Hfixed].
   eexists _, _; split.
-  - by apply (VLSM_full_projection_finite_valid_trace
+  - by apply (VLSM_embedding_finite_valid_trace
             (limited_PreNonByzantine_vlsm_lift byzantine Hlimit)).
   - unfold lift_sub_state.
     rewrite composite_state_sub_projection_lift_to.
@@ -238,9 +244,11 @@ Lemma validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
     exists bs btr,
       finite_valid_trace Limited bs btr /\
       exists selection (selection_complement := set_diff (enum index) selection),
-      (sum_weights (remove_dups selection) <= `threshold)%R /\
-      composite_state_sub_projection IM selection_complement s = composite_state_sub_projection IM selection_complement bs /\
-      finite_trace_sub_projection IM selection_complement tr = finite_trace_sub_projection IM selection_complement btr.
+        (sum_weights (remove_dups selection) <= `threshold)%R /\
+        composite_state_sub_projection IM selection_complement s =
+        composite_state_sub_projection IM selection_complement bs /\
+        finite_trace_sub_projection IM selection_complement tr =
+        finite_trace_sub_projection IM selection_complement btr.
 Proof.
   intros [byzantine Hlimited].
   apply proj1 in Hlimited as Hlimit.
@@ -362,7 +370,7 @@ Lemma lift_fixed_byzantine_traces_to_limited
   (btr :=
     msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender
       s_reset_byzantine
-      (pre_VLSM_full_projection_finite_trace_project _ _
+      (pre_VLSM_embedding_finite_trace_project _ _
         (lift_sub_label IM non_byzantine) (lift_sub_state IM (set_diff (enum index) byzantine))
         (finite_trace_sub_projection IM non_byzantine tr)))
   : finite_valid_trace Limited bs btr /\
@@ -375,7 +383,7 @@ Proof.
   - by cbn; apply lift_sub_state_initial.
   - by apply list_subseteq_nil.
   - subst s_reset_byzantine bs btr.
-    unfold pre_VLSM_full_projection_finite_trace_project; rewrite !map_app.
+    unfold pre_VLSM_embedding_finite_trace_project; rewrite !map_app.
     rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.
     unfold annotate_trace_item; cbn; rewrite finite_trace_last_is_last; cbn.
     destruct l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i
@@ -387,7 +395,7 @@ Proof.
                                           (finite_trace_last si tr0)).
     {
       subst lst; rewrite msg_dep_annotate_trace_with_equivocators_last_original_state; symmetry.
-      apply (pre_VLSM_full_projection_finite_trace_last _ _
+      apply (pre_VLSM_embedding_finite_trace_last _ _
               (lift_sub_label IM (set_diff (enum index) byzantine))
               (lift_sub_state IM (set_diff (enum index) byzantine))).
     }
@@ -445,7 +453,7 @@ Lemma msg_dep_validator_limited_non_byzantine_traces_are_limited_non_equivocatin
         composite_state_sub_projection IM selection_complement (original_state bs) /\
       finite_trace_sub_projection IM selection_complement tr =
         finite_trace_sub_projection IM selection_complement
-          (pre_VLSM_full_projection_finite_trace_project
+          (pre_VLSM_embedding_finite_trace_project
             (type Limited) (composite_type IM) Datatypes.id original_state btr).
 Proof.
   split.

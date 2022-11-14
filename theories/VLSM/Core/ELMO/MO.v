@@ -835,7 +835,7 @@ Definition lift_to_MO_state
 Definition lift_to_MO_trace
   (us : MO_state) (i : index) (tr : list (vtransition_item (M i)))
   : list MO_transition_item :=
-    pre_VLSM_full_projection_finite_trace_project
+    pre_VLSM_embedding_finite_trace_project
       _ _ (lift_to_MO_label i) (lift_to_MO_state us i) tr.
 
 #[local] Hint Rewrite @state_update_twice : state_update.
@@ -852,8 +852,8 @@ Definition lift_to_MO_trace
 
 Lemma lift_to_MO :
   forall (us : MO_state) (Hus : valid_state_prop MO us) (i : index),
-    VLSM_weak_full_projection (M i) MO (lift_to_MO_label i) (lift_to_MO_state us i).
-Proof. by intros; apply lift_to_free_weak_full_projection. Qed.
+    VLSM_weak_embedding (M i) MO (lift_to_MO_label i) (lift_to_MO_state us i).
+Proof. by intros; apply lift_to_free_weak_embedding. Qed.
 
 Lemma lift_to_MO_valid_state_prop :
   forall (i : index) (s : State) (us : MO_state),
@@ -861,7 +861,7 @@ Lemma lift_to_MO_valid_state_prop :
       valid_state_prop MO (lift_to_MO_state us i s).
 Proof.
   intros is s us Hvsp.
-  by eapply VLSM_weak_full_projection_valid_state, lift_to_MO.
+  by eapply VLSM_weak_embedding_valid_state, lift_to_MO.
 Qed.
 
 Lemma lift_to_MO_valid_message_prop :
@@ -871,7 +871,7 @@ Lemma lift_to_MO_valid_message_prop :
 Proof.
   intros i [] Hovmp; cycle 1.
   - by exists (``(vs0 MO)); constructor.
-  - eapply VLSM_weak_full_projection_valid_message.
+  - eapply VLSM_weak_embedding_valid_message.
     + by apply (lift_to_MO (``(vs0 MO))); exists None; constructor.
     + by inversion 1.
     + by apply Hovmp.
@@ -887,7 +887,7 @@ Lemma lift_to_MO_input_valid_transition :
         (lift_to_MO_state us i s2, oom).
 Proof.
   intros i lbl s1 s2 iom oom us Hivt.
-  by apply @VLSM_weak_full_projection_input_valid_transition, lift_to_MO.
+  by apply @VLSM_weak_embedding_input_valid_transition, lift_to_MO.
 Qed.
 
 Lemma lift_to_MO_finite_valid_trace_from_to :
@@ -898,15 +898,15 @@ Lemma lift_to_MO_finite_valid_trace_from_to :
         MO (lift_to_MO_state us i s1) (lift_to_MO_state us i s2) (lift_to_MO_trace us i tr).
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
-  by eapply (VLSM_weak_full_projection_finite_valid_trace_from_to (lift_to_MO _ Hvsp i)).
+  by eapply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_MO _ Hvsp i)).
 Qed.
 
 (** We could prove the same lifting lemmas for [RMO], but we won't need them. *)
 
 Lemma lift_to_RMO
   (us : MO_state) (Hus : valid_state_prop RMO us) (i : index) :
-  VLSM_weak_full_projection (RM i) RMO (lift_to_MO_label i) (lift_to_MO_state us i).
-Proof. by apply lift_to_preloaded_free_weak_full_projection. Qed.
+  VLSM_weak_embedding (RM i) RMO (lift_to_MO_label i) (lift_to_MO_state us i).
+Proof. by apply lift_to_preloaded_free_weak_embedding. Qed.
 
 Lemma lift_to_RMO_valid_state_prop :
   forall (i : index) (s : State) (us : MO_state),
@@ -914,7 +914,7 @@ Lemma lift_to_RMO_valid_state_prop :
       valid_state_prop RMO (lift_to_MO_state us i s).
 Proof.
   intros is s us Hvsp.
-  by eapply VLSM_weak_full_projection_valid_state, lift_to_RMO.
+  by eapply VLSM_weak_embedding_valid_state, lift_to_RMO.
 Qed.
 
 Lemma lift_to_RMO_valid_message_prop :
@@ -924,7 +924,7 @@ Lemma lift_to_RMO_valid_message_prop :
 Proof.
   intros i [] Hovmp; cycle 1.
   - by exists (``(vs0 MO)); constructor.
-  - eapply VLSM_weak_full_projection_valid_message.
+  - eapply VLSM_weak_embedding_valid_message.
     + by apply (lift_to_RMO (``(vs0 MO))); exists None; constructor.
     + by inversion 1.
     + by apply Hovmp.
@@ -940,7 +940,7 @@ Lemma lift_to_RMO_input_valid_transition :
         (lift_to_MO_state us i s2, oom).
 Proof.
   intros i lbl s1 s2 iom oom us Hivt.
-  by apply @VLSM_weak_full_projection_input_valid_transition, lift_to_RMO.
+  by apply @VLSM_weak_embedding_input_valid_transition, lift_to_RMO.
 Qed.
 
 Lemma lift_to_RMO_finite_valid_trace_from_to :
@@ -951,7 +951,7 @@ Lemma lift_to_RMO_finite_valid_trace_from_to :
         RMO (lift_to_MO_state us i s1) (lift_to_MO_state us i s2) (lift_to_MO_trace us i tr).
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
-  by apply (VLSM_weak_full_projection_finite_valid_trace_from_to (lift_to_RMO _ Hvsp i)).
+  by apply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_RMO _ Hvsp i)).
 Qed.
 
 (** *** Lifting lemmas for validating theorem *)
@@ -1055,7 +1055,7 @@ Proof.
   induction Hfvt using finite_valid_trace_from_to_rev_ind; cbn;
     [by apply finite_valid_trace_lift_RM_to_MO |].
   constructor; [| by apply initial_state_prop_lift_RM_to_MO].
-  unfold lift_to_MO_trace, pre_VLSM_full_projection_finite_trace_project.
+  unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project.
   rewrite map_app.
   eapply finite_valid_trace_from_to_app; cbn; [by apply IHHfvt |].
   apply valid_trace_add_last; [| done].
@@ -1077,7 +1077,7 @@ Qed.
 
 Lemma lift_RM_to_MO :
   forall i : index,
-    VLSM_full_projection (RM i) MO (lift_to_MO_label i) (lift_to_MO_state (``(vs0 MO)) i).
+    VLSM_embedding (RM i) MO (lift_to_MO_label i) (lift_to_MO_state (``(vs0 MO)) i).
 Proof.
   constructor; intros.
   by eapply valid_trace_forget_last, lift_to_MO_finite_valid_trace_init_to,
@@ -1151,7 +1151,7 @@ Proof.
   apply input_valid_transition_iff in Hiv as [[s m] Ht].
   apply exists_right_finite_trace_from in Ht as (s' & tr & Hfvt & Hlast).
   apply lift_to_MO_finite_valid_trace_init_to in Hfvt as [Hfvt _].
-  unfold lift_to_MO_trace, pre_VLSM_full_projection_finite_trace_project in Hfvt;
+  unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project in Hfvt;
     rewrite map_app in Hfvt.
   apply finite_valid_trace_from_to_app_split in Hfvt as [_ Hfvt].
   remember (finite_trace_last _ _) as ftl.
@@ -1162,7 +1162,7 @@ Proof.
   apply valid_trace_forget_last, first_transition_valid in Hfvt; cbn in *.
   destruct Hfvt as [[Hvps [Hovmp [Hv1 Hv2]]] Ht]; cbn in Hv1, Hv2.
   unfold lift_to_MO_trace in Heqftl; cbn in Heqftl.
-  rewrite <- pre_VLSM_full_projection_finite_trace_last, Hlast in Heqftl.
+  rewrite <- pre_VLSM_embedding_finite_trace_last, Hlast in Heqftl.
   exists ftl; split; [| done].
   by rewrite Heqftl; state_update_simpl.
 Qed.

@@ -2,7 +2,9 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun RIneq.
 From VLSM.Lib Require Import Preamble Measurable StdppListSet RealsExtras ListSetExtras.
-From VLSM.Core Require Import VLSM VLSMProjections MessageDependencies Composition Equivocation Equivocation.FixedSetEquivocation Equivocation.TraceWiseEquivocation.
+From VLSM.Core Require Import VLSM VLSMProjections MessageDependencies Composition Equivocation.
+From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
+From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 From VLSM.Core Require Import Equivocation.WitnessedEquivocation.
 
 (** * VLSM Limited Message Equivocation
@@ -193,7 +195,8 @@ Context
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
   (tracewise_not_heavy := @not_heavy _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
-  (tracewise_equivocating_validators := @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
+  (tracewise_equivocating_validators :=
+    @equivocating_validators _ _ _ _ _ _ _ _ _ _ _ _ _ _ Htracewise_BasicEquivocation)
   .
 
 Lemma StrongFixed_valid_state_not_heavy s
@@ -207,7 +210,7 @@ Proof.
     apply sum_weights_subseteq.
     - by apply NoDup_elements.
     - by apply NoDup_remove_dups.
-    - by intros i Hi; apply elem_of_remove_dups, Hincl; unfold tracewise_equivocating_validators; apply Hi.
+    - by intros i Hi; apply elem_of_remove_dups, Hincl, Hi.
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
   {
@@ -217,7 +220,8 @@ Proof.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
   apply (VLSM_incl_finite_valid_trace_init_to StrongFixedinclPreFree) in Htr as Hpre_tr.
-  intros v Hv. apply elem_of_elements, equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
+  intros v Hv.
+  apply elem_of_elements, equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
   specialize (Hvs' _ _ Hpre_tr).
   destruct Hvs' as [m0 [Hsender0 [pre [item [suf [Heqtr [Hm0 Heqv]]]]]]].
   rewrite Heqtr in Htr.
@@ -235,8 +239,8 @@ Proof.
       by (exists i; done).
     apply (composite_proper_sent IM) in Hsent; [| done].
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
-  +  by apply (SubProjectionTraces.sub_can_emit_sender IM equivocators (fun i => i) sender Hsender_safety _ _ v)
-           in Hemit.
+  + by apply (SubProjectionTraces.sub_can_emit_sender IM equivocators (fun i => i)
+      sender Hsender_safety _ _ v) in Hemit.
 Qed.
 
 Lemma StrongFixed_incl_Limited : VLSM_incl StrongFixed Limited.
@@ -285,9 +289,10 @@ Definition fixed_limited_equivocation_prop
   (s : composite_state IM)
   (tr : list (composite_transition_item IM))
   : Prop
-  := exists (equivocators : list index) (Fixed := fixed_equivocation_vlsm_composition IM equivocators),
-    (sum_weights (remove_dups equivocators) <= `threshold)%R /\
-    finite_valid_trace Fixed s tr.
+  :=
+    exists equivocators : list index,
+      (sum_weights (remove_dups equivocators) <= `threshold)%R /\
+      finite_valid_trace (fixed_equivocation_vlsm_composition IM equivocators) s tr.
 
 Context
   (sender : message -> option index)

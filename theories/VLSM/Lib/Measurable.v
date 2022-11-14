@@ -43,7 +43,7 @@ Proof.
   - inversion H; subst; clear H. simpl.
     pose proof (in_not_in _ _ _ _ H3 H2).
     rewrite decide_False; [| done]. simpl.
-    rewrite <- Rplus_assoc. rewrite (Rplus_comm (proj1_sig (weight v)) (proj1_sig (weight a))). rewrite Rplus_assoc.
+    rewrite <- Rplus_assoc, (Rplus_comm (proj1_sig (weight v))), Rplus_assoc.
     by apply Rplus_eq_compat_l, IHvs.
 Qed.
 

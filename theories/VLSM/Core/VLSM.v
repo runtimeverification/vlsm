@@ -1124,7 +1124,8 @@ Qed.
 Lemma first_transition_valid
   (s : state)
   (te : transition_item)
-  : finite_valid_trace_from s [te] <-> input_valid_transition (l te) (s, input te) (destination te, output te).
+  : finite_valid_trace_from s [te] <->
+    input_valid_transition (l te) (s, input te) (destination te, output te).
 
 Proof.
   split; [by inversion 1 |].
@@ -1143,7 +1144,8 @@ Lemma extend_right_finite_trace_from
   (s3 : state)
   (oom3 : option message)
   (Hv23 : input_valid_transition l3 (s2, iom3) (s3, oom3))
-  : finite_valid_trace_from s1 (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
+  : finite_valid_trace_from s1
+      (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
 Proof.
   induction Ht12.
   - by apply finite_valid_trace_singleton.
@@ -1161,7 +1163,8 @@ Qed.
   [finite_valid_trace].
 *)
 
-Lemma finite_valid_trace_from_app_iff (s : state) (ls ls' : list transition_item) (s' := finite_trace_last s ls)
+Lemma finite_valid_trace_from_app_iff
+  (s : state) (ls ls' : list transition_item) (s' := finite_trace_last s ls)
   : finite_valid_trace_from s ls /\ finite_valid_trace_from s' ls'
     <->
     finite_valid_trace_from s (ls ++ ls').
@@ -1338,7 +1341,8 @@ Inductive finite_valid_trace_from_to : state -> state -> list transition_item ->
     (Htl : finite_valid_trace_from_to s f tl)
     (s' : state) (iom oom : option message) (l : label)
     (Ht : input_valid_transition l (s', iom) (s, oom)),
-    finite_valid_trace_from_to s' f ({| l := l; input := iom; destination := s; output := oom |} :: tl).
+    finite_valid_trace_from_to s' f
+      ({| l := l; input := iom; destination := s; output := oom |} :: tl).
 
 Lemma finite_valid_trace_from_to_singleton s s' iom oom l
     : input_valid_transition l (s, iom) (s', oom) ->
@@ -1458,7 +1462,8 @@ Lemma extend_right_finite_trace_from_to
   (s3 : state)
   (oom3 : option message)
   (Hv23 : input_valid_transition l3 (s2, iom3) (s3, oom3))
-  : finite_valid_trace_from_to s1 s3 (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
+  : finite_valid_trace_from_to s1 s3
+      (ts ++ [{| l := l3; destination := s3; input := iom3; output := oom3 |}]).
 Proof.
   induction Ht12.
   - by apply finite_valid_trace_from_to_singleton.
@@ -1537,7 +1542,8 @@ Qed.
   a stronger induction principle ([finite_valid_trace_init_to_rev_strong_ind])
   over [finite_valid_trace_init_to] traces.
 *)
-Inductive finite_valid_trace_init_to_emit : state -> state -> option message -> list transition_item -> Prop :=
+Inductive finite_valid_trace_init_to_emit
+  : state -> state -> option message -> list transition_item -> Prop :=
 | finite_valid_trace_init_to_emit_empty : forall (is : state) (om : option message)
     (His : initial_state_prop is)
     (Him : option_initial_message_prop om),
@@ -1552,7 +1558,8 @@ Inductive finite_valid_trace_init_to_emit : state -> state -> option message -> 
       (Hv : valid l (s, iom))
       (s' : state) (oom : option message)
       (Ht : transition l (s, iom) = (s', oom)),
-      finite_valid_trace_init_to_emit is s' oom (tl ++ [{| l := l; input := iom; destination := s'; output := oom |}]).
+      finite_valid_trace_init_to_emit is s' oom
+        (tl ++ [{| l := l; input := iom; destination := s'; output := oom |}]).
 
 Lemma finite_valid_trace_init_to_emit_initial_state
   (is f : state) (om : option message) (tl : list transition_item)
@@ -1567,7 +1574,8 @@ Proof. by induction Htl. Qed.
   the message to be initial; or (2) the trace is not empty, and the message
   is the output of the last transition.
 *)
-Definition empty_initial_message_or_final_output (tl : list transition_item) (om : option message) : Prop.
+Definition empty_initial_message_or_final_output
+  (tl : list transition_item) (om : option message) : Prop.
 Proof.
   destruct (has_last_or_null tl) as [[_ [item _]] | _].
   - exact (output item  = om).
@@ -1699,7 +1707,8 @@ CoInductive infinite_valid_trace_from :
     (Htl : infinite_valid_trace_from s tl)
     (s' : state) (iom oom : option message) (l : label)
     (Ht : input_valid_transition l (s', iom) (s, oom)),
-    infinite_valid_trace_from  s' (Cons {| l := l; input := iom; destination := s; output := oom |}  tl).
+    infinite_valid_trace_from  s'
+      (Cons {| l := l; input := iom; destination := s; output := oom |}  tl).
 
 Definition infinite_valid_trace (s : state) (st : Stream transition_item)
   := infinite_valid_trace_from s st /\ initial_state_prop s.
@@ -1783,7 +1792,8 @@ Proof.
 Qed.
 
 Lemma infinite_valid_trace_from_EqSt :
-  forall s tl1 tl2, EqSt tl1 tl2 -> infinite_valid_trace_from s tl1 -> infinite_valid_trace_from s tl2.
+  forall s tl1 tl2,
+    EqSt tl1 tl2 -> infinite_valid_trace_from s tl1 -> infinite_valid_trace_from s tl2.
 Proof.
   intros s tl1 tl2 Heq Htl1.
   apply infinite_valid_trace_from_prefix_rev.
@@ -1907,7 +1917,8 @@ Qed.
 Lemma exists_right_finite_trace_from
   l s1 iom s2 oom
   (Ht : input_valid_transition l (s1, iom) (s2, oom))
-  : exists s0 ts, finite_valid_trace_init_to s0 s2 (ts ++ [{| l := l; destination := s2; input := iom; output := oom |}])
+  : exists s0 ts, finite_valid_trace_init_to s0 s2
+      (ts ++ [{| l := l; destination := s2; input := iom; output := oom |}])
     /\ finite_trace_last s0 ts = s1.
 Proof.
   apply input_valid_transition_origin in Ht as Hs1.
@@ -2181,8 +2192,10 @@ Lemma trace_prefix_valid
 Proof.
   destruct tr as [tr Htr]. simpl in *.
   generalize dependent tr. generalize dependent last.
-  apply (rev_ind (fun prefix => forall (last : transition_item) (tr : Trace), valid_trace_prop tr -> trace_prefix tr last prefix -> finite_valid_trace (trace_first tr) (prefix ++ [last]))).
-  - by intros last tr Htr Hprefix; destruct tr as [ | ]; unfold trace_prefix in Hprefix; simpl in Hprefix
+  apply (rev_ind (fun prefix => forall (last : transition_item) (tr : Trace),
+    valid_trace_prop tr -> trace_prefix tr last prefix ->
+      finite_valid_trace (trace_first tr) (prefix ++ [last]))).
+  - by intros last tr Htr Hprefix; destruct tr; unfold trace_prefix in Hprefix; simpl in Hprefix
     ; destruct Hprefix as [suffix Heq]; subst; destruct Htr as [Htr Hinit]
     ; unfold trace_first; simpl; constructor; try done
     ; inversion Htr; subst; clear Htr
@@ -2201,8 +2214,8 @@ Proof.
       ; destruct last
       ; apply extend_right_finite_trace_from
       ; try done.
-      rewrite <- (app_cons {| l := l0; input := input0; destination := destination0; output := output0 |} suffix),
-              app_assoc, <- !(app_assoc p _ _) in Htr; cbn in Htr.
+      rewrite <- (app_cons {| l := l0; input := input0; destination := destination0;
+        output := output0 |} suffix), app_assoc, <- !(app_assoc p _ _) in Htr; cbn in Htr.
       specialize
         (finite_valid_trace_consecutive_valid_transition _ _ _ _ _ _ Htr eq_refl).
       simpl.
@@ -2222,7 +2235,8 @@ Proof.
       specialize
         (infinite_valid_trace_consecutive_valid_transition
            s
-           (stream_app (p ++ [last_p; {| l := l0; input := input0; destination := destination0; output := output0 |}]) suffix)
+           (stream_app (p ++ [last_p; {| l := l0; input := input0; destination := destination0;
+            output := output0 |}]) suffix)
            suffix
            p
            last_p
@@ -2423,8 +2437,8 @@ Arguments finite_valid_trace_from_to_rev_ind : clear implicits.
 Arguments finite_valid_trace_init_to_rev_ind : clear implicits.
 Arguments finite_valid_trace_init_to_rev_strong_ind : clear implicits.
 
-Arguments extend_right_finite_trace_from [message] (X) [s1] [ts] (Ht12) [l3] [iom3] [s3] [oom3] (Hv23).
-Arguments extend_right_finite_trace_from_to [message] (X) [s1] [s2] [ts] (Ht12) [l3] [iom3] [s3] [oom3] (Hv23).
+Arguments extend_right_finite_trace_from [message] (X) [s1 ts] (Ht12) [l3 iom3 s3 oom3] (Hv23).
+Arguments extend_right_finite_trace_from_to [message] (X) [s1 s2 ts] (Ht12) [l3 iom3 s3 oom3] (Hv23).
 
 Class TraceWithLast
   (base_prop : forall {message} (X : VLSM message),
@@ -2528,12 +2542,12 @@ Definition pre_loaded_with_all_messages_vlsm
   := mk_vlsm pre_loaded_with_all_messages_vlsm_machine.
 
 (**
-  A message which can be emitted during a protocol run of
-  the [pre_loaded_with_all_messages_vlsm] is called a [byzantine_message], because
-  as shown by Lemmas [byzantine_pre_loaded_with_all_messages] and [pre_loaded_with_all_messages_alt_eq],
-  byzantine traces for a [VLSM] are precisely the valid traces
-  of the [pre_loaded_with_all_messages_vlsm], hence a byzantine message is any message
-  which a byzantine trace [can_emit].
+  A message which can be emitted during a protocol run of the
+  [pre_loaded_with_all_messages_vlsm] is called a [byzantine_message],
+  because as shown by [byzantine_pre_loaded_with_all_messages] and
+  [pre_loaded_with_all_messages_alt_eq], byzantine traces for a [VLSM]
+  are precisely the valid traces of the [pre_loaded_with_all_messages_vlsm],
+  hence a byzantine message is any message which a byzantine trace [can_emit].
 *)
 
 Definition byzantine_message_prop
@@ -2722,11 +2736,11 @@ Qed.
 
   If we know that two VLSMs are provably equal, we could try rewriting by them.
   However, that gets usually quite technical. To go around that, we will prove
-  that there is a [VLSMProjections.VLSM_full_projection] between them which will
+  that there is a [VLSMProjections.VLSM_embedding] between them which will
   allow trace-based results to be easily moved between the two VLSMs.
 
   Below are some preliminary results; the actual projection is given in
-  [VLSMProjections.same_VLSM_full_projection].
+  [VLSMProjections.same_VLSM_embedding].
 *)
 Section sec_same_VLSM.
 
