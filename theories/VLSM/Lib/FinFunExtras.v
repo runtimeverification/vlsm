@@ -7,8 +7,8 @@ From VLSM.Lib Require Import Preamble ListExtras StdppExtras.
 Lemma listing_from_finite (A : Type) `{finite.Finite A} : Listing (enum A).
 Proof.
   constructor.
-  - apply NoDup_ListNoDup, NoDup_enum.
-  - intro a. apply elem_of_list_In, elem_of_enum.
+  - by apply NoDup_ListNoDup, NoDup_enum.
+  - by intro a; apply elem_of_list_In, elem_of_enum.
 Qed.
 
 Lemma map_option_listing
@@ -37,7 +37,7 @@ Proof.
     apply in_map_option.
     exists (g b).
     split; [done |].
-    apply f_surj.
+    by apply f_surj.
 Qed.
 
 Section sec_sum_listing.

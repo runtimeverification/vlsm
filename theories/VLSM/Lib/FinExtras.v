@@ -15,7 +15,7 @@ Lemma up_to_n_listing_length
   (n : nat)
   : length (up_to_n_listing n) = n.
 Proof.
-  induction n; simpl; congruence.
+  by induction n; simpl; congruence.
 Qed.
 
 Lemma up_to_n_full

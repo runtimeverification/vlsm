@@ -40,7 +40,7 @@ Lemma zero_predecessors
 Proof.
   apply length_zero_iff_nil in Ha.
   apply Forall_filter_nil in Ha.
-  apply Ha.
+  by apply Ha.
 Qed.
 
 (** Finds an element minimizing [count_predecessors] in <<min :: remainder>>. *)
@@ -68,9 +68,8 @@ Proof.
   induction l'.
   - by intros; left.
   - intro a0. simpl.
-    destruct (decide (count_predecessors a < count_predecessors a0));
-    [specialize (IHl' a)|specialize (IHl' a0)];
-    destruct IHl'; rewrite elem_of_cons; itauto.
+    by destruct (decide (count_predecessors a < count_predecessors a0));
+      [destruct (IHl' a) | destruct (IHl' a0)]; rewrite elem_of_cons; itauto.
 Qed.
 
 Lemma min_predecessors_correct
@@ -82,7 +81,7 @@ Lemma min_predecessors_correct
 Proof.
   unfold mins; clear mins. unfold min; clear min. generalize dependent a.
   induction l'; intros; rewrite Forall_forall; intros.
-  - simpl in H; inversion H; subst; [simpl; lia|inversion H2].
+  - by simpl in H; inversion H; subst; cbn; [lia | inversion H2].
   - rewrite elem_of_cons in H.
     setoid_rewrite Forall_forall in IHl'.
     destruct H as [Heq | Hin]; subst.
@@ -224,9 +223,7 @@ Proof.
   specialize (min_predecessors_correct l' a); simpl; intro Hall.
   rewrite Forall_forall in Hall.
   rewrite Hl in Hinx.
-  specialize (Hall x Hinx).
-  unfold min.
-  lia.
+  by specialize (Hall x Hinx); unfold min; lia.
 Qed.
 
 End sec_min_predecessors.
@@ -251,7 +248,7 @@ Qed.
   `{StrictOrder A preceeds} (P : A -> Prop)
   : StrictOrder (precedes_P preceeds P).
 Proof.
-  split; typeclasses eauto.
+  by split; typeclasses eauto.
 Qed.
 
 Section sec_topologically_sorted.
@@ -334,10 +331,8 @@ Proof.
   apply elem_of_list_split in Ha.
   destruct Ha as [la1 [la2 Ha]].
   specialize (topologically_sorted_occurrences_ordering a b Hab la1 la2 Ha l1 l2 Heq).
-  intros [lab Hlab].
-  subst.
-  rewrite elem_of_app.
-  right; left.
+  intros [lab ->].
+  by rewrite elem_of_app; right; left.
 Qed.
 
 (**
@@ -355,9 +350,9 @@ Proof.
   destruct Hb as [l12 [l3 Hb']].
   specialize (top_sort_before a b Hab Ha l12 l3 Hb').
   intros Ha12. apply elem_of_list_split in Ha12.
-  destruct Ha12 as [l1 [l2 Ha12]].
-  subst l12.
-  exists l1, l2, l3. by rewrite Hb', <- app_assoc.
+  destruct Ha12 as [l1 [l2 ->]].
+  exists l1, l2, l3.
+  by rewrite Hb', <- app_assoc.
 Qed.
 
 End sec_topologically_sorted_fixed_list.
@@ -431,7 +426,7 @@ Proof.
              (init ++ [a]) P Hl Hts a b Hab init [] eq_refl l1 l2 Heq)
         as [lab Hlab].
   rewrite Hlab in Heq. apply (f_equal length) in Heq.
-  rewrite !app_length in Heq. cbn in Heq. lia.
+  by rewrite !app_length in Heq; cbn in Heq; lia.
 Qed.
 
 Section sec_top_sort.
@@ -478,7 +473,7 @@ Proof.
   remember (min_predecessors precedes (a :: l) l a) as min.
   remember (set_remove min l) as l'.
   destruct (decide (min = a)); try rewrite e.
-  - subst. by apply set_eq_cons, IHn.
+  - by subst; apply set_eq_cons, IHn.
   - specialize (min_predecessors_in precedes (a :: l) l a).
     rewrite <- Heqmin. simpl. intros [Heq | Hin]; [done |].
     specialize (IHn (a :: l')).
@@ -487,17 +482,17 @@ Proof.
     specialize (IHn Hlen).
     split; intros x Hx; rewrite elem_of_cons in Hx;
       destruct Hx as [Heq|Hinx]; try (subst x).
-    + right. apply IHn. left.
+    + by right; apply IHn; left.
     + destruct (decide (x = min)); try subst x.
-      * left.
+      * by left.
       * specialize (set_remove_3 _ _ l Hinx n1).
         rewrite <- Heql'. intro Hinx'.
         by right; apply IHn; right.
     + by right.
     + apply IHn in Hinx.
       rewrite elem_of_cons in Hinx.
-      destruct Hinx as [-> | Hinx]; [left |].
-      right. subst. by apply set_remove_1 in Hinx.
+      destruct Hinx as [-> | Hinx]; [left | right]; subst.
+      by apply set_remove_1 in Hinx.
 Qed.
 
 Lemma top_sort_nodup
@@ -509,8 +504,7 @@ Proof.
   remember (length l) as len.
   generalize dependent l.
   induction len; intros.
-  - symmetry in Heqlen. apply length_zero_iff_nil in Heqlen. subst l.
-    constructor.
+  - by cbn; symmetry in Heqlen; apply length_zero_iff_nil in Heqlen; subst.
   - destruct l as [| a l]; [by constructor |].
     simpl.
     assert (Hl' : NoDup l) by (inversion Hl; done).
@@ -561,9 +555,10 @@ Lemma top_sort_sorted : topologically_sorted precedes (top_sort l).
 Proof.
   intro a; intros.
   intro Ha2.
-  assert (Ha : a ∈ l). {
+  assert (Ha : a ∈ l).
+  {
     apply top_sort_set_eq.
-    rewrite Heq. simpl. rewrite elem_of_app, elem_of_cons. auto.
+    by cbn in Heq; rewrite Heq, elem_of_app, elem_of_cons; auto.
   }
   unfold top_sort in Heq.
   remember (length l) as n.
@@ -647,8 +642,8 @@ Definition topological_sorting
 Corollary top_sort_correct : topological_sorting l (top_sort l).
 Proof.
   split.
-  - apply top_sort_set_eq.
-  - apply top_sort_sorted.
+  - by apply top_sort_set_eq.
+  - by apply top_sort_sorted.
 Qed.
 
 (** ** Maximal elements *)
@@ -661,28 +656,26 @@ Lemma maximal_element_in
   a ∈ l.
 Proof.
   unfold get_maximal_element in Hmax.
-  assert (exists l', l' ++ [a] = top_sort l). {
-    destruct l.
-    - simpl in Hmax. itauto congruence.
-    - specialize (@exists_last _ (top_sort (a0 :: l0))) as Hlast.
-      spec Hlast. unfold top_sort. simpl. itauto congruence.
-      destruct Hlast as [l' [a' Heq]].
-      rewrite Heq in Hmax.
-      rewrite Heq.
-      exists l'.
-      specialize (last_error_is_last l' a') as Hlast.
-      itauto congruence.
+  assert (exists l', l' ++ [a] = top_sort l).
+  {
+    destruct l; [by simpl in Hmax; itauto congruence |].
+    specialize (@exists_last _ (top_sort (a0 :: l0))) as Hlast.
+    spec Hlast. unfold top_sort. simpl. itauto congruence.
+    destruct Hlast as [l' [a' Heq]].
+    rewrite Heq in Hmax.
+    rewrite Heq.
+    exists l'.
+    specialize (last_error_is_last l' a') as Hlast.
+    by itauto congruence.
   }
-  assert (a ∈ (top_sort l)). {
-    destruct H as [l' Heq].
-    rewrite <- Heq.
-    apply elem_of_app.
-    right. left.
+  assert (a ∈ (top_sort l)).
+  {
+    destruct H as [l' <-].
+    by apply elem_of_app; right; left.
   }
   specialize (top_sort_correct) as [Htop _].
   destruct Htop as [_ Htop].
-  specialize (Htop a H0).
-  itauto.
+  by specialize (Htop a H0); itauto.
 Qed.
 
 Lemma get_maximal_element_correct
@@ -710,8 +703,7 @@ Proof.
     unfold Irreflexive in Hirr. unfold complement in Hirr.
     unfold Reflexive in Hirr.
     assert (P max) by (eapply Forall_forall; done).
-    specialize (Hirr (exist _ max H)).
-    itauto.
+    by specialize (Hirr (exist _ max H)); itauto.
   - rewrite HeqA in Hmax.
     specialize (@exists_last _ (a0 :: sufA)) as Hex.
     spec Hex. itauto congruence.
@@ -725,9 +717,7 @@ Proof.
     rewrite Heq in HeqA.
     specialize (Htop HeqA).
     subst a'.
-    contradict Htop.
-    apply elem_of_app.
-    right. left.
+    by contradict Htop; apply elem_of_app; right; left.
 Qed.
 
 Lemma get_maximal_element_some
@@ -735,15 +725,14 @@ Lemma get_maximal_element_some
   exists a, get_maximal_element = Some a.
 Proof.
   unfold get_maximal_element.
-  destruct l.
-  - congruence.
-  - simpl.
-    exists (List.last
-       (top_sort_n (length l0)
-          (if decide (min_predecessors precedes (a :: l0) l0 a = a)
-           then l0
-           else a :: set_remove (min_predecessors precedes (a :: l0) l0 a) l0))
-       (min_predecessors precedes (a :: l0) l0 a)). itauto.
+  destruct l; cbn; [by congruence |].
+  exists (List.last
+     (top_sort_n (length l0)
+        (if decide (min_predecessors precedes (a :: l0) l0 a = a)
+         then l0
+         else a :: set_remove (min_predecessors precedes (a :: l0) l0 a) l0))
+     (min_predecessors precedes (a :: l0) l0 a)).
+  by itauto.
 Qed.
 
 End sec_top_sort.
@@ -776,14 +765,14 @@ Corollary simple_topologically_sorted_precedes_closed_remove_last
   (Hpc : precedes_closed precedes l)
   : precedes_closed precedes init.
 Proof.
-  eapply topologically_sorted_precedes_closed_remove_last;
-    [typeclasses eauto | apply Forall_True | done..].
+  by eapply topologically_sorted_precedes_closed_remove_last;
+    [typeclasses eauto | apply Forall_True | ..].
 Qed.
 
 Corollary simple_top_sort_correct : forall l,
   topological_sorting precedes l (top_sort precedes l).
 Proof.
-  intro; eapply top_sort_correct; [typeclasses eauto | apply Forall_True].
+  by intro; eapply top_sort_correct; [typeclasses eauto | apply Forall_True].
 Qed.
 
 Corollary simple_maximal_element_in l
@@ -791,7 +780,7 @@ Corollary simple_maximal_element_in l
   (Hmax : get_maximal_element precedes l = Some a) :
   a ∈ l.
 Proof.
-  eapply maximal_element_in; [typeclasses eauto | apply Forall_True | done].
+  by eapply maximal_element_in; [typeclasses eauto | apply Forall_True |].
 Qed.
 
 Corollary simple_get_maximal_element_correct l
@@ -800,14 +789,14 @@ Corollary simple_get_maximal_element_correct l
   (Hmax : get_maximal_element precedes l = Some max) :
   ~ precedes max a.
 Proof.
-  eapply get_maximal_element_correct; [typeclasses eauto | apply Forall_True | done..].
+  by eapply get_maximal_element_correct; [typeclasses eauto | apply Forall_True | ..].
 Qed.
 
 Corollary simple_get_maximal_element_some
   l (Hne : l <> []) :
   exists a, get_maximal_element precedes l = Some a.
 Proof.
-  eapply get_maximal_element_some; [apply Forall_True | done].
+  by eapply get_maximal_element_some; [apply Forall_True |].
 Qed.
 
 End sec_simple_top_sort.

@@ -44,9 +44,8 @@ Lemma transition_monotone_in_futures
 Proof.
   destruct Hfutures as [tr Htr].
   induction Htr; [done |].
-  apply input_valid_transition_forget_input,
-    valid_transition_next, transition_monotonicity in Ht.
-  by lia.
+  by apply input_valid_transition_forget_input,
+    valid_transition_next, transition_monotonicity in Ht; lia.
 Qed.
 
 Lemma transition_monotone_empty_trace
@@ -58,9 +57,8 @@ Proof.
   induction Htr using finite_valid_trace_from_to_ind; [done | subst].
   assert (state_size s <= state_size s')
     by (apply transition_monotone_in_futures; [| eexists]; done).
-  apply input_valid_transition_forget_input,
-    valid_transition_next, transition_monotonicity in Ht.
-  by lia.
+  by apply input_valid_transition_forget_input,
+    valid_transition_next, transition_monotonicity in Ht; lia.
 Qed.
 
 (**
@@ -296,7 +294,7 @@ Proof.
   apply composite_tv_state_destructor_state_update in Hdestruct as Heqs'; [| done].
   intros j Hinit; destruct (decide (i = j)); subst; [| by state_update_simpl].
   apply composite_tv_state_destructor_initial in Hinit; [| done].
-  rewrite Hinit in Hdestruct; inversion Hdestruct.
+  by rewrite Hinit in Hdestruct; inversion Hdestruct.
 Qed.
 
 Lemma composite_tv_state_destructor_size :
@@ -420,7 +418,7 @@ Lemma composite_tv_state_destructor_preserves_not_in_indices_initial  :
 Proof.
   intros s' Hs' * Heq indices Hinits' j Hj.
   by erewrite composite_tv_state_destructor_reflects_initiality;
-    [apply Hinits' | done | eapply elem_of_list_lookup_2 | apply Hinits'].
+    [apply Hinits' | | eapply elem_of_list_lookup_2 | apply Hinits'].
 Qed.
 
 (**

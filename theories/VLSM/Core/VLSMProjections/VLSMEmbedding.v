@@ -54,8 +54,8 @@ Definition pre_VLSM_embedding_infinite_trace_project
 Lemma pre_VLSM_embedding_infinite_trace_project_infinitely_often
   : forall s, InfinitelyOften (is_Some ∘ (Some ∘ label_project ∘ l)) s.
 Proof.
-  cofix H. intros (a, s). constructor; simpl; [|apply H].
-  apply Streams.Here. by eexists.
+  cofix H. intros (a, s). constructor; simpl; [| by apply H].
+  by apply Streams.Here; eexists.
 Qed.
 
 Lemma pre_VLSM_embedding_infinite_trace_project_EqSt
@@ -65,7 +65,7 @@ Lemma pre_VLSM_embedding_infinite_trace_project_EqSt
     (pre_VLSM_projection_infinite_trace_project _ _ (Some ∘ label_project) state_project s Hinf).
 Proof.
   intros.
-  apply stream_map_option_EqSt.
+  by apply stream_map_option_EqSt.
 Qed.
 
 Lemma pre_VLSM_embedding_finite_trace_last
@@ -142,8 +142,8 @@ Lemma weak_projection_valid_preservation_from_full
   : weak_embedding_valid_preservation ->
     weak_projection_valid_preservation X Y (Some ∘ label_project) state_project.
 Proof.
-  intros Hvalid lX lY Hl.
-  inversion_clear Hl. apply Hvalid.
+  intros Hvalid lX lY Hl; inversion_clear Hl.
+  by apply Hvalid.
 Qed.
 
 Definition strong_embedding_valid_preservation : Prop :=
@@ -155,7 +155,8 @@ Lemma strong_projection_valid_preservation_from_full
     strong_projection_valid_preservation X Y (Some ∘ label_project) state_project.
 Proof.
   intros Hvalid lX lY Hl.
-  inversion_clear Hl. apply Hvalid.
+  inversion_clear Hl.
+  by apply Hvalid.
 Qed.
 
 Lemma strong_embedding_valid_preservation_weaken
@@ -163,7 +164,7 @@ Lemma strong_embedding_valid_preservation_weaken
     weak_embedding_valid_preservation.
 Proof.
   intros Hstrong l s om Hpv Hs Hom.
-  apply Hstrong. apply Hpv.
+  by apply Hstrong, Hpv.
 Qed.
 
 Definition weak_embedding_transition_preservation : Prop :=
@@ -175,13 +176,13 @@ Lemma weak_projection_transition_preservation_Some_from_full
   : weak_embedding_transition_preservation ->
     weak_projection_transition_preservation_Some X Y (Some ∘ label_project) state_project.
 Proof.
-  intros Htransition lX lY Hl.
-  inversion_clear Hl. apply Htransition.
+  intros Htransition lX lY Hl; inversion_clear Hl.
+  by apply Htransition.
 Qed.
 
 Lemma weak_projection_transition_consistency_None_from_full
   : weak_projection_transition_consistency_None _ _ (Some ∘ label_project) state_project.
-Proof. inversion 1. Qed.
+Proof. by inversion 1. Qed.
 
 Definition strong_embedding_transition_preservation : Prop :=
   forall l s om s' om',
@@ -193,7 +194,8 @@ Lemma strong_projection_transition_preservation_Some_from_full
     strong_projection_transition_preservation_Some X Y (Some ∘ label_project) state_project.
 Proof.
   intros Htransition lX lY Hl.
-  inversion_clear Hl. apply Htransition.
+  inversion_clear Hl.
+  by apply Htransition.
 Qed.
 
 Lemma strong_projection_transition_consistency_None_from_full
@@ -205,7 +207,7 @@ Lemma strong_embedding_transition_preservation_weaken
     weak_embedding_transition_preservation.
 Proof.
   intros Hstrong l s om s' om' Ht.
-  apply Hstrong. apply Ht.
+  by apply Hstrong, Ht.
 Qed.
 
 Definition weak_embedding_initial_message_preservation : Prop :=
@@ -223,7 +225,8 @@ Lemma strong_embedding_initial_message_preservation_weaken
   : strong_embedding_initial_message_preservation ->
     weak_embedding_initial_message_preservation.
 Proof.
-  intros Hstrong l s m Hv HsY Him. apply Hstrong in Him.
+  intros Hstrong l s m Hv HsY Him.
+  apply Hstrong in Him.
   by apply initial_message_is_valid.
 Qed.
 
@@ -279,7 +282,7 @@ Lemma VLSM_embedding_projection_type
 Proof.
   split; intros.
   destruct_list_last trX trX' lstX Heq; [done |].
-  apply (pre_VLSM_embedding_finite_trace_last _).
+  by apply pre_VLSM_embedding_finite_trace_last.
 Qed.
 
 Section sec_weak_projection_properties.
@@ -317,8 +320,8 @@ Lemma VLSM_weak_embedding_is_projection
   : VLSM_weak_projection X Y (Some ∘ label_project) state_project.
 Proof.
   split.
-  - apply VLSM_embedding_projection_type.
-  - apply VLSM_weak_embedding_finite_valid_trace_from.
+  - by apply VLSM_embedding_projection_type.
+  - by apply VLSM_weak_embedding_finite_valid_trace_from.
 Qed.
 
 Definition VLSM_weak_embedding_valid_state
@@ -386,7 +389,7 @@ Lemma VLSM_weak_embedding_can_emit
 Proof.
   repeat rewrite can_emit_iff.
   intros [s Hsm]. exists (state_project s). revert Hsm.
-  apply VLSM_weak_embedding_can_produce.
+  by apply VLSM_weak_embedding_can_produce.
 Qed.
 
 Lemma VLSM_weak_embedding_valid_message
@@ -396,8 +399,9 @@ Lemma VLSM_weak_embedding_valid_message
 Proof.
   intros Hm.
   apply emitted_messages_are_valid_iff in Hm as [Hinit | Hemit].
-  - apply Hinitial_valid_message in Hinit. by apply initial_message_is_valid.
-  - apply emitted_messages_are_valid. revert Hemit. apply VLSM_weak_embedding_can_emit.
+  - apply Hinitial_valid_message in Hinit.
+    by apply initial_message_is_valid.
+  - by apply emitted_messages_are_valid, VLSM_weak_embedding_can_emit.
 Qed.
 
 End sec_weak_projection_properties.
@@ -434,8 +438,8 @@ Lemma VLSM_embedding_is_projection
   : VLSM_projection X Y (Some ∘ label_project) state_project.
 Proof.
   split.
-  - apply VLSM_embedding_projection_type.
-  - apply VLSM_embedding_finite_valid_trace.
+  - by apply VLSM_embedding_projection_type.
+  - by apply VLSM_embedding_finite_valid_trace.
 Qed.
 
 Definition VLSM_embedding_finite_valid_trace_from
@@ -463,7 +467,7 @@ Definition VLSM_embedding_initial_state
 Lemma VLSM_embedding_weaken
   : VLSM_weak_embedding X Y label_project state_project.
 Proof.
-  constructor. apply VLSM_embedding_finite_valid_trace_from.
+  by constructor; apply VLSM_embedding_finite_valid_trace_from.
 Qed.
 
 Definition VLSM_embedding_valid_state
@@ -533,8 +537,8 @@ Lemma VLSM_embedding_infinite_valid_trace
     infinite_valid_trace Y (state_project s) (VLSM_embedding_infinite_trace_project Hsimul ls).
 Proof.
   intros [Htr His]. split.
-  - revert Htr. apply VLSM_embedding_infinite_valid_trace_from.
-  - revert His. apply VLSM_embedding_initial_state.
+  - by apply VLSM_embedding_infinite_valid_trace_from.
+  - by apply VLSM_embedding_initial_state.
 Qed.
 
 Lemma VLSM_embedding_valid_trace
@@ -543,8 +547,8 @@ Lemma VLSM_embedding_valid_trace
     valid_trace_prop Y (VLSM_embedding_trace_project t).
 Proof.
   intros [s tr | s tr]; simpl.
-  - apply VLSM_embedding_finite_valid_trace.
-  - apply VLSM_embedding_infinite_valid_trace.
+  - by apply VLSM_embedding_finite_valid_trace.
+  - by apply VLSM_embedding_infinite_valid_trace.
 Qed.
 
 (**
@@ -561,10 +565,10 @@ Proof.
   intros s om Hsom.
   apply option_can_produce_valid_iff.
   apply option_can_produce_valid_iff in Hsom as [Hgen | [His Him]].
-  - left. revert Hgen. apply VLSM_embedding_can_produce.
-  - right. split.
-    + revert His. apply VLSM_embedding_initial_state.
-    + destruct om as [m|]; [| done]. by apply Hmessage.
+  - by left; apply VLSM_embedding_can_produce.
+  - right; split.
+    + by apply VLSM_embedding_initial_state.
+    + by destruct om as [m |]; [apply Hmessage |].
 Qed.
 
 End sec_embedding_properties.
@@ -628,7 +632,7 @@ Proof.
   revert tr l input Heqtr'.
   generalize (Some m) as om.
   induction Htr using finite_valid_trace_init_to_rev_strong_ind
-  ; intros; [destruct tr; simpl in *; congruence|].
+  ; intros; [by destruct tr; simpl in *; congruence |].
   apply app_inj_tail in Heqtr' as [Heqtr Heqitem].
   subst tr0.
   inversion Heqitem. subst l0 input oom. clear Heqitem.
@@ -648,7 +652,7 @@ Proof.
   destruct Hs as [_om Hs].
   assert (Hom : option_valid_message_prop Y iom).
   {
-    destruct iom as [im|]; [|apply option_valid_message_None].
+    destruct iom as [im |]; [| by apply option_valid_message_None].
     unfold empty_initial_message_or_final_output in Heqiom.
     destruct_list_last iom_tr iom_tr' iom_item Heqiom_tr.
     - by apply (Hmessage _ _ _ (proj1 Ht)); [eexists |].
@@ -670,9 +674,9 @@ Proof.
   specialize (basic_VLSM_weak_projection X Y (Some ∘ label_project) state_project) as Hproj.
   spec Hproj; [by apply weak_projection_valid_preservation_from_full|].
   spec Hproj; [by apply weak_projection_transition_preservation_Some_from_full|].
-  spec Hproj; [apply weak_projection_transition_consistency_None_from_full|].
+  spec Hproj; [by apply weak_projection_transition_consistency_None_from_full |].
   spec Hproj; [done |].
-  spec Hproj; [apply weak_projection_valid_message_preservation_from_full|].
+  spec Hproj; [by apply weak_projection_valid_message_preservation_from_full |].
   constructor. intro; intros.
   by apply (VLSM_weak_projection_finite_valid_trace_from Hproj) in H.
 Qed.
@@ -686,8 +690,8 @@ Lemma basic_VLSM_weak_embedding_strengthen
 Proof.
   constructor. intros sX trX [HtrX HsX].
   split.
-  - revert HtrX. apply (VLSM_weak_embedding_finite_valid_trace_from Hweak).
-  - revert HsX. apply Hstate.
+  - by apply (VLSM_weak_embedding_finite_valid_trace_from Hweak).
+  - by apply Hstate.
 Qed.
 
 Lemma basic_VLSM_embedding
@@ -733,9 +737,9 @@ Lemma basic_VLSM_embedding_preloaded
 Proof.
   constructor.
   intros sX trX HtrX.
-  split; [|apply Hstate; apply HtrX].
+  split; [| by apply Hstate; apply HtrX].
   induction HtrX using finite_valid_trace_rev_ind.
-  - constructor. by apply initial_state_is_valid, Hstate.
+  - by constructor; apply initial_state_is_valid, Hstate.
   - setoid_rewrite map_app. apply finite_valid_trace_from_app_iff.
     split; [done |].
     simpl. apply (finite_valid_trace_singleton (pre_loaded_with_all_messages_vlsm Y)).
@@ -745,7 +749,7 @@ Proof.
     rewrite (pre_VLSM_embedding_finite_trace_last _ _ label_project state_project) in Hv, Ht.
     repeat split; [.. | done | done].
     + by apply finite_valid_trace_last_pstate in IHHtrX.
-    + apply any_message_is_valid_in_preloaded.
+    + by apply any_message_is_valid_in_preloaded.
 Qed.
 
 Lemma basic_VLSM_embedding_preloaded_with
@@ -764,9 +768,9 @@ Proof.
   constructor.
   intros sX trX HtrX.
   apply valid_trace_add_default_last in HtrX.
-  split; [|apply Hstate; apply HtrX].
+  split; [| by apply Hstate; apply HtrX].
   induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
-  - constructor. by apply initial_state_is_valid, Hstate.
+  - by constructor; apply initial_state_is_valid, Hstate.
   - setoid_rewrite map_app. apply finite_valid_trace_from_app_iff.
     split; [done |].
     simpl. apply (finite_valid_trace_singleton (pre_loaded_vlsm Y Q)).
@@ -778,7 +782,7 @@ Proof.
     simpl.
     repeat split; [.. | done | done].
     + by apply finite_valid_trace_last_pstate in IHHtrX1.
-    + destruct iom as [m|]; [|apply option_valid_message_None].
+    + destruct iom as [m |]; [| by apply option_valid_message_None].
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' iom_lst Heqiom_tr
       ; [apply option_initial_message_is_valid; destruct Heqiom as [Him | Hp]|].
@@ -786,5 +790,6 @@ Proof.
       * by right; auto.
       * apply
           (valid_trace_output_is_valid (pre_loaded_vlsm Y Q) _ _ IHHtrX2 m).
-        setoid_rewrite map_app. apply Exists_app. by right; left.
+        setoid_rewrite map_app.
+        by apply Exists_app; right; left.
 Qed.

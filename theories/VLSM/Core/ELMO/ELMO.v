@@ -332,7 +332,7 @@ Proof.
   - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
     destruct l, im; cbn in *; [| by exfalso; inversion Hv..|];
     inversion_clear Ht; destruct s; cbn.
-    + rewrite decide_False; cbn; firstorder congruence.
+    + by rewrite decide_False; cbn; firstorder congruence.
     + rewrite decide_True by done; cbn.
       unfold Message; rewrite elem_of_cons.
       by firstorder congruence.
@@ -786,9 +786,9 @@ Lemma local_equivocators_iff_full (s : State) :
   forall a, local_equivocators s a <-> local_equivocators_full s a.
 Proof.
   intros Hs a.
-  rewrite local_equivocators_iff_simple
-  ; [apply local_equivocators_simple_iff_full |]
-  ; revert Hs; apply UMO_reachable_impl; itauto.
+  by rewrite local_equivocators_iff_simple;
+    [apply local_equivocators_simple_iff_full |];
+    revert Hs; apply UMO_reachable_impl; itauto.
 Qed.
 
 (**
@@ -1216,7 +1216,7 @@ Qed.
   TraceableVLSM Ei ELMOComponent_state_destructor sizeState.
 Proof.
   constructor.
-  - typeclasses eauto.
+  - by typeclasses eauto.
   - by intros [[| [[] ?] ?] ?] *; [inversion 1 |..];
       intro Hitem; apply elem_of_list_singleton in Hitem;
       inversion_clear Hitem.
@@ -1357,7 +1357,7 @@ Proof.
     - by destruct Hequ as (m & Hadr & (k & l & Hrec_obs) & Hnot_sent); eauto.
   }
   pose proof @rec_obs_exists_dec.
-  typeclasses eauto.
+  by typeclasses eauto.
 Defined.
 
 Set Warnings "-cannot-define-projection".
@@ -1575,9 +1575,9 @@ Lemma ELMO_state_to_minimal_equivocation_trace_equivocation_monotonic :
         (destination item) v.
 Proof.
   eapply state_to_minimal_equivocation_trace_equivocation_monotonic.
-  - intro; apply MessageDependencies_ELMOComponent.
-  - typeclasses eauto.
-  - apply ELMO_channel_authentication_prop.
+  - by intro; apply MessageDependencies_ELMOComponent.
+  - by typeclasses eauto.
+  - by apply ELMO_channel_authentication_prop.
 Qed.
 
 (**
@@ -1597,7 +1597,7 @@ Proof.
   - destruct Hequiv as (m & Hadr & (k & l & Hrobs) & Hnot_sent).
     enough (composite_has_been_received _ s m) by (econstructor; done).
     assert (m ∈ messages (s k)) as Hm.
-    + by apply full_node_messages_iff_rec_obs;[| eexists].
+    + by apply full_node_messages_iff_rec_obs; [| eexists].
     + by apply elem_of_messages in Hm as [|];
         [contradict Hnot_sent |]; exists k.
   - destruct Hequiv as [m Hadr [i_rec Hrecv] Hnot_sent].
@@ -1691,7 +1691,7 @@ Proof.
   rewrite ELMO_global_equivocators_iff_msg_dep_equivocation by done.
   rewrite <- global_equivocators_simple_iff_full_node_equivocation by done.
   pose proof @ELMOComponent_message_dependencies_full_node_condition.
-  by rewrite full_node_is_globally_equivocating_iff;[| typeclasses eauto |..].
+  by rewrite full_node_is_globally_equivocating_iff; [| typeclasses eauto |..].
 Qed.
 
 (**
@@ -1756,7 +1756,7 @@ Proof.
     apply Forall_forall; intros item Hitem m Hobs.
     eapply directly_observed_valid; [done |].
     unshelve eapply EquivocationProjections.VLSM_incl_has_been_directly_observed_reflect; cycle 3;
-      [apply preloaded_constraint_free_incl |..| typeclasses eauto | typeclasses eauto].
+      [by apply preloaded_constraint_free_incl | .. | by typeclasses eauto | by typeclasses eauto].
     - by generalize Hs; apply VLSM_incl_valid_state, vlsm_incl_pre_loaded_with_all_messages_vlsm.
     - eapply has_been_directly_observed_examine_one_trace; [done |].
       by apply Exists_exists; eexists; cbn; eauto.
@@ -2057,7 +2057,7 @@ Proof.
     unfold ELMO_global_constraint.
     replace (composite_transition _ _ _) with (state_update ELMOComponent sf i si, oom).
     unfold ELMO_not_heavy, not_heavy; etransitivity; [| done].
-    apply sum_weights_subseteq; [apply NoDup_elements.. |].
+    apply sum_weights_subseteq; [by apply NoDup_elements.. |].
     by intro; rewrite !elem_of_elements; apply Hsfisi_eqvs.
   }
   apply (VLSM_incl_finite_valid_trace_init_to Hincl) in Htr_min as Htr_min_pre.
@@ -2099,7 +2099,7 @@ Proof.
   destruct (decide (i_a = i)); [by subst; right | left].
   contradict ges_not_sent.
   eapply has_been_sent_iff_by_sender in ges_not_sent; cycle 1.
-  - apply channel_authentication_sender_safety, ELMO_channel_authentication_prop.
+  - by apply channel_authentication_sender_safety, ELMO_channel_authentication_prop.
   - done.
   - done.
   - rewrite ges_adr, ELMO_A_inv in ges_not_sent by done.
@@ -2188,9 +2188,9 @@ Proof.
     Forall (fun item => forall m, item_sends_or_receives m item ->
       valid_message_prop ELMOProtocol m) tr_m).
   {
-    eapply Forall_impl; cbn; [apply Hall_messages_observed |].
+    eapply Forall_impl; cbn; [by apply Hall_messages_observed |].
     intros item Hobs dm Hdm.
-    eapply directly_observed_valid; [apply Hs |].
+    eapply directly_observed_valid; [by apply Hs |].
     by apply Hobs, elem_of_messages in Hdm as []; [left | right]; eexists i.
   }
   assert (Heqis_m : is_m = MkState [] (idx i_m))
@@ -2338,7 +2338,7 @@ Proof.
       unfold ELMO_not_heavy, not_heavy.
       etransitivity; [| done].
       apply sum_weights_subseteq; [by apply NoDup_elements.. |].
-      intro; rewrite !elem_of_elements; apply Hsf_bounded_eqv.
+      by intro; rewrite !elem_of_elements; apply Hsf_bounded_eqv.
     - cbn; state_update_simpl.
       replace (UMOComponent_transition _ _ _) with (sf, oom).
       by rewrite state_update_twice.
@@ -2347,10 +2347,10 @@ Proof.
     (input_valid_transition ELMOProtocol (existT i_m Send)
       (lift_to_composite_state ELMOComponent s i_m (state m), None)
       (lift_to_composite_state ELMOComponent s i_m (state m <+> MkObservation Send m), Some m)
-    ); [apply input_valid_transition_out |].
+    ); [by apply input_valid_transition_out |].
   repeat split.
   - by apply finite_valid_trace_from_to_last_pstate in Htr_m_lift.
-  - apply option_valid_message_None.
+  - by apply option_valid_message_None.
   - by constructor.
   - by cbn; state_update_simpl; rewrite state_update_twice; destruct m.
 Qed.
@@ -2583,7 +2583,7 @@ Proof.
     by (eapply Htr_m_inputs_in_sigma;
       [apply elem_of_app; right; apply elem_of_list_singleton |]; done).
   edestruct IHHtr_m as [Htr Hall];
-    [..| split; [eapply finite_valid_trace_from_to_app; [apply Htr |] |]].
+    [..| split; [eapply finite_valid_trace_from_to_app; [by apply Htr |] |]].
   - done.
   - intros item msg Hitem Hmsg.
     by eapply Htr_m_inputs_in_sigma; [apply elem_of_app; left |].
@@ -2891,7 +2891,7 @@ Proof.
         unfold local_equivocation_limit_ok, not_heavy in Hlocal_ok.
         unfold ELMO_not_heavy, not_heavy.
         etransitivity; [| done].
-        apply sum_weights_subseteq; [apply NoDup_elements.. |].
+        apply sum_weights_subseteq; [by apply NoDup_elements.. |].
         intros x; rewrite !elem_of_elements.
         unfold equivocating_validators, is_equivocating; cbn.
         apply filter_subprop; intros; rewrite <- Heq_i in *.
@@ -2997,7 +2997,7 @@ Proof.
         -- split; [| by left].
            intros [| [_ Hnsnd]]; [done |].
            by contradict Hnsnd; exists i_m; state_update_simpl; left.
-      * etransitivity; [apply Hchi_eqvs |].
+      * etransitivity; [by apply Hchi_eqvs |].
         rewrite Heqi; split.
         -- by intros Heqv; eapply local_equivocators_full_step_update; [constructor | left].
         -- intros Heqv.
@@ -3023,8 +3023,8 @@ Proof.
   inversion Hvi; subst; inversion Hti as [Heqs'i]; subst;
     symmetry in Heqs'i; destruct (Htransitions _ Heqs'i) as [Hvs'0 Hvt0];
     inversion Hvt0 as [? ? ? ? Hvt | ? ? ? ? Hvt].
-  - repeat split; [done | | apply Hvt..].
-    eapply composite_received_valid; [apply Hs' |].
+  - repeat split; [done | | by apply Hvt..].
+    eapply composite_received_valid; [by apply Hs' |].
     by eexists; eapply has_been_received_step_update; [| left].
   - by repeat split; [| apply option_valid_message_None | apply Hvt].
 Qed.

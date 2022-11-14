@@ -106,7 +106,7 @@ Definition message_dependencies_full_node_condition_prop : Prop :=
 Lemma msg_dep_happens_before_iff_one x z
   : msg_dep_happens_before x z <->
     msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
-Proof. apply tc_r_iff. Qed.
+Proof. by apply tc_r_iff. Qed.
 
 (**
   If the [msg_dep_rel]ation reflects a predicate <<P>>, then
@@ -137,7 +137,7 @@ Proof.
   - rewrite emitted_messages_are_valid_iff; left; right.
     apply Hreflects with m; [done |].
     destruct Hinit as [Hinit | Hp]; [| done].
-    contradict Hinit; apply no_initial_messages_in_X.
+    by contradict Hinit; apply no_initial_messages_in_X.
   - apply (directly_observed_valid (pre_loaded_vlsm X P) s).
     + by exists (Some m); apply can_produce_valid.
     + destruct X.
@@ -165,7 +165,7 @@ Lemma msg_dep_has_been_sent
 Proof.
   revert m Hsent; induction Hs using valid_state_prop_ind; intro m.
   - intro Hbs; contradict Hbs; eapply oracle_no_inits; [| done].
-    apply has_been_sent_stepwise_from_trace.
+    by apply has_been_sent_stepwise_from_trace.
   - rewrite has_been_sent_step_update by done; intros [-> | Hrcv] dm Hdm.
     + by eapply message_dependencies_are_necessary; [eexists _, _ |].
     + by eapply has_been_directly_observed_step_update; [done |]; right; eapply IHHs.
@@ -196,7 +196,7 @@ Lemma full_node_has_been_received
 Proof.
   revert m Hreceived; induction Hs using valid_state_prop_ind; intro m.
   - intro Hbr; contradict Hbr; eapply oracle_no_inits; [| done].
-    apply has_been_received_stepwise_from_trace.
+    by apply has_been_received_stepwise_from_trace.
   - rewrite has_been_received_step_update by done; intros [-> | Hrcv] dm Hdm
     ; rewrite has_been_directly_observed_step_update by done; right.
     + by eapply Hfull; [apply Ht|].
@@ -247,10 +247,10 @@ Lemma msg_dep_full_node_input_valid_happens_before_has_been_directly_observed
     has_been_directly_observed X s dm.
 Proof.
   intro dm; rewrite msg_dep_happens_before_iff_one; intros [Hdm | (dm' & Hdm' & Hdm)].
-  - eapply Hfull; [apply Hvalid | done].
+  - by eapply Hfull; [apply Hvalid |].
   - eapply msg_dep_happens_before_reflect; [| done |].
-    + apply msg_dep_full_node_reflects_has_been_directly_observed; [apply Hfull | apply Hvalid].
-    + eapply Hfull; [apply Hvalid | done].
+    + by apply msg_dep_full_node_reflects_has_been_directly_observed; [apply Hfull | apply Hvalid].
+    + by eapply Hfull; [apply Hvalid |].
 Qed.
 
 End sec_message_dependencies.
@@ -532,7 +532,8 @@ Proof.
   intros dm m Hdm.
   rewrite !emitted_messages_are_valid_iff.
   intros [[i [[im Him] _]] | Hemit]
-  ; [contradict Him; apply no_initial_messages_in_IM | right].
+  ; [by contradict Him; apply no_initial_messages_in_IM |].
+  right.
   pose proof (vlsm_is_pre_loaded_with_False X) as XeqXFalse.
   apply (VLSM_eq_can_emit XeqXFalse).
   cut (valid_message_prop (pre_loaded_vlsm X (fun _ => False)) dm).
@@ -540,17 +541,16 @@ Proof.
     clear -no_initial_messages_in_IM.
     rewrite emitted_messages_are_valid_iff.
     intros [[[i [[im Him] _]] | Hpreloaded] | Hemit]; try itauto.
-    contradict Him; apply no_initial_messages_in_IM.
+    by contradict Him; apply no_initial_messages_in_IM.
   }
   eapply msg_dep_reflects_validity.
-  - apply composite_message_dependencies.
+  - by apply composite_message_dependencies.
   - intros _ [i [[im Him] _]].
-    contradict Him; apply no_initial_messages_in_IM.
-  - itauto.
+    by contradict Him; apply no_initial_messages_in_IM.
+  - by itauto.
   - done.
   - apply emitted_messages_are_valid_iff.
-    apply (VLSM_eq_can_emit XeqXFalse) in Hemit.
-    auto.
+    by apply (VLSM_eq_can_emit XeqXFalse) in Hemit; auto.
 Qed.
 
 Lemma msg_dep_reflects_happens_before_free_validity
@@ -635,7 +635,7 @@ Lemma composite_HasBeenObserved_iff : forall s m,
   exists i, HasBeenObserved (IM i) message_dependencies (s i) m.
 Proof.
   split; [| by intros []; eapply composite_HasBeenObserved_lift].
-  intros [[i Hobsi] |m' [i Hobsi] Hmm'];
+  by intros [[i Hobsi] | m' [i Hobsi] Hmm'];
     exists i; [by constructor 1 | by econstructor 2].
 Qed.
 
@@ -918,10 +918,10 @@ Lemma msg_dep_reflects_sub_free_validity
     valid_message_prop (pre_loaded_vlsm X P) dm.
 Proof.
   eapply msg_dep_reflects_validity; [| | done].
-  - typeclasses eauto.
+  - by typeclasses eauto.
   - intros m [sub_i [[im Him] Heqm]].
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
-    contradict Him; apply no_initial_messages_in_IM.
+    by contradict Him; apply no_initial_messages_in_IM.
 Qed.
 
 End sec_sub_composite_message_dependencies.
@@ -979,7 +979,7 @@ Proof.
   intros m Hm.
   contradict Hm.
   rewrite <- full_message_dependencies_happens_before.
-  apply full_message_dependencies_irreflexive.
+  by apply full_message_dependencies_irreflexive.
 Qed.
 
 #[export] Instance msg_dep_happens_before_strict :
@@ -998,13 +998,13 @@ Qed.
 Lemma msg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies).
 Proof.
   apply tc_wf_projected with (<) (fun m => length (full_message_dependencies m));
-    [typeclasses eauto | | apply Wf_nat.lt_wf ].
+    [by typeclasses eauto | | by apply Wf_nat.lt_wf ].
   intros; unfold lt.
   change (S _) with (length (x :: full_message_dependencies x)).
   apply NoDup_subseteq_length.
   - constructor.
-    + apply full_message_dependencies_irreflexive.
-    + apply full_message_dependencies_nodups.
+    + by apply full_message_dependencies_irreflexive.
+    + by apply full_message_dependencies_nodups.
   - intros z Hz; inversion Hz; subst;
       [| by eapply msg_dep_rel_full_message_dependecies_subset].
     by apply full_message_dependencies_happens_before; constructor.
@@ -1074,7 +1074,7 @@ Lemma emittable_from_dependencies_prop_iff m
 Proof.
   unfold emittable_from_dependencies_prop; split.
   - by inversion 1; rewrite Hsender.
-  - destruct (sender m) eqn: Hsender; [by split with v | inversion 1].
+  - by destruct (sender m) eqn: Hsender; [exists v | inversion 1].
 Qed.
 
 (**
@@ -1107,7 +1107,7 @@ Lemma free_valid_from_valid_dependencies
 Proof.
   eapply emitted_messages_are_valid, free_valid_preloaded_lifts_can_be_emitted; [| done].
   by intros; apply Hdeps, full_message_dependencies_happens_before, msg_dep_happens_before_iff_one;
-  left.
+    left.
 Qed.
 
 (**
@@ -1122,7 +1122,8 @@ Proof.
   intros m Hm.
   specialize (Hm m) as Hemit; spec Hemit; [left |].
   inversion Hemit as [v _ Hemit']; clear Hemit.
-  apply free_valid_from_valid_dependencies with (A v); [done | clear v Hemit'].
+  apply free_valid_from_valid_dependencies with (A v); [done |].
+  clear v Hemit'.
   eapply FullMessageDependencies_ind; [done |].
   intros dm Hdm Hdeps.
   specialize (Hm dm); spec Hm; [by right |].

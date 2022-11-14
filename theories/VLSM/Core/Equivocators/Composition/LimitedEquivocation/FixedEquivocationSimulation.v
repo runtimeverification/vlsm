@@ -129,7 +129,7 @@ Proof.
           (preloaded_equivocator_zero_projection (IM i))).
       apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
       revert Heqv_state_s.
-      apply (VLSM_projection_valid_state (preloaded_component_projection (equivocator_IM IM) i)).
+      by apply (VLSM_projection_valid_state (preloaded_component_projection (equivocator_IM IM) i)).
   - destruct (composite_transition _ _ _) as (s', om') eqn:Ht'.
     apply
       (equivocating_transition_preserves_fixed_equivocation
@@ -200,8 +200,8 @@ Proof.
   specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM equivocating) as HinclE.
   intro; intros.
   destruct iom as [im|]; swap 1 2; [|destruct HcX as [Hsent | Hemitted]].
-  - exists []. exists eqv_state_s.
-    split; [constructor|]; eauto.
+  - exists [], eqv_state_s.
+    by split; [constructor | eauto].
   - exists []. exists eqv_state_s.
     split; [by constructor |].
     split; [done |].
@@ -290,13 +290,13 @@ Proof.
       constraint for which we employ Lemma [fixed_equivocation_replay_has_message].
     *)
     repeat split.
-    + apply
+    + by apply
       (equivocators_total_trace_project_replayed_trace_from
         IM equivocating eqv_state_s im_eis im_etr).
     + subst s.
-      apply
-      (equivocators_total_state_project_replayed_trace_from
-        IM equivocating eqv_state_s im_eis im_etr).
+      by apply
+        (equivocators_total_state_project_replayed_trace_from
+          IM equivocating eqv_state_s im_eis im_etr).
     + apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
       apply (VLSM_incl_valid_state HinclE) in Hstate_valid as Hstate_pre.
       specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded
@@ -311,7 +311,7 @@ Proof.
       simpl. intro Hrew. rewrite Hrew. clear Hrew.
       apply fixed_equivocation_replay_has_message; [done |].
       clear -Him_etr Him_output.
-      destruct_list_last im_etr im_ert' item Heqim_etr; [inversion Him_output|].
+      destruct_list_last im_etr im_ert' item Heqim_etr; [by inversion Him_output |].
       apply proj1 in Him_etr.
       replace (im_ert' ++ [item]) with (im_ert' ++ [item] ++ []) in Him_etr
         by (rewrite app_assoc; apply app_nil_r).
@@ -375,7 +375,7 @@ Proof.
         (zero_descriptor_transition_preserves_fixed_equivocation
           IM equivocating _ _ _ _ _ Het Hes li
         ).
-  - apply fixed_equivocation_has_replayable_message_prop.
+  - by apply fixed_equivocation_has_replayable_message_prop.
 Qed.
 
 End sec_fixed_equivocating.
@@ -444,11 +444,7 @@ Proof.
         ).
   - clear isX sX trX HtrX. intro; intros.
     specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM []) as HinclE.
-    destruct iom as [im|].
-    2: {
-      exists []. exists eqv_state_s.
-      split; [constructor |]; eauto.
-    }
+    destruct iom as [im |]; [| by exists [], eqv_state_s; split; constructor].
     destruct HcX as [Hsent | Hemitted]; [| done].
     exists []. exists eqv_state_s.
     split; [by constructor |].

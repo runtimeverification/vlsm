@@ -43,10 +43,9 @@ Definition item_equivocating_in_trace
 #[local] Instance item_equivocating_in_trace_dec : RelDecision item_equivocating_in_trace.
 Proof.
   intros item tr.
-  destruct item. destruct input as [m|]
-  ; [|right; itauto].
+  destruct item. destruct input as [m |]; [| by right; itauto].
   unfold item_equivocating_in_trace, trace_has_message, field_selector; cbn.
-  typeclasses eauto.
+  by typeclasses eauto.
 Qed.
 
 (**
@@ -82,8 +81,8 @@ Proof.
   apply elem_of_list_filter, proj2, elem_of_one_element_decompositions in Hitem.
   subst tr _item.
   spec Hinput_none item.
-  spec Hinput_none. { apply elem_of_app. right. apply elem_of_app. left. left. }
-  congruence.
+  spec Hinput_none; [| by congruence].
+  by apply elem_of_app; right; apply elem_of_app; do 2 left.
 Qed.
 
 Lemma elem_of_equivocating_senders_in_trace
@@ -126,7 +125,7 @@ Proof.
   intros v. rewrite !elem_of_equivocating_senders_in_trace.
   intros [m [Hm Heqv]].
   exists m. split; [done |].
-  revert Heqv. apply equivocation_in_trace_prefix.
+  by apply equivocation_in_trace_prefix.
 Qed.
 
 (**
@@ -207,7 +206,7 @@ Proof.
     intros.
     erewrite <- oracle_initial_trace_update
       with (vlsm := free_composite_vlsm IM); cycle 1.
-    - apply composite_has_been_sent_stepwise_props.
+    - by apply composite_has_been_sent_stepwise_props.
     - done.
     - by eapply has_been_sent_iff_by_sender.
   }
@@ -247,8 +246,7 @@ Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
   : is_equivocating_tracewise_no_has_been_sent s' v -> is_equivocating_tracewise_no_has_been_sent s v.
 Proof.
   intro Hs'.
-  by destruct (transition_is_equivocating_tracewise_char _ _ _ _ _ Ht v Hs')
-  ; [|congruence].
+  by destruct (transition_is_equivocating_tracewise_char _ _ _ _ _ Ht v Hs'); [| congruence].
 Qed.
 
 Lemma is_equivocating_statewise_implies_is_equivocating_tracewise s v
@@ -282,9 +280,8 @@ Proof.
   rewrite Htr in Htrv.
   intro Hbs_m. elim Hnbs_m. clear Hnbs_m.
   revert Hbs_m.
-  apply in_futures_preserving_oracle_from_stepwise with (field_selector output)
-  ; [apply has_been_sent_stepwise_from_trace|].
-  by eexists.
+  apply in_futures_preserving_oracle_from_stepwise with (field_selector output); [| by eexists].
+  by apply has_been_sent_stepwise_from_trace.
 Qed.
 
 Lemma initial_state_not_is_equivocating_tracewise
@@ -295,9 +292,9 @@ Lemma initial_state_not_is_equivocating_tracewise
 Proof.
   intros Heqv.
   specialize (Heqv s []).
-  spec Heqv. { split; [| done]. constructor. by apply initial_state_is_valid. }
+  spec Heqv; [by split; [| done]; constructor; apply initial_state_is_valid |].
   destruct Heqv as [m [_ [prefix [suf [item [Heq _]]]]]].
-  destruct prefix; inversion Heq.
+  by destruct prefix; inversion Heq.
 Qed.
 
 Context
@@ -320,7 +317,7 @@ Proof.
   unfold equivocating_validators.
   simpl.
   rewrite elem_of_filter, elem_of_list_to_set.
-  itauto (apply elem_of_enum).
+  by itauto (apply elem_of_enum).
 Qed.
 
 Lemma equivocating_validators_empty_in_initial_state
@@ -363,8 +360,7 @@ Lemma composite_transition_no_sender_equivocators_weight
 Proof.
   specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators
     _ _ _ _ _ Ht Hno_sender) as Heqv.
-  revert Heqv.
-  apply incl_equivocating_validators_equivocation_fault.
+  by apply incl_equivocating_validators_equivocation_fault.
 Qed.
 
 End sec_tracewise_equivocation.

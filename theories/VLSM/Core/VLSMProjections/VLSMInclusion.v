@@ -29,7 +29,7 @@ Lemma VLSM_incl_refl
   (X := mk_vlsm MX)
   : VLSM_incl X X.
 Proof.
-  firstorder.
+  by firstorder.
 Qed.
 
 Lemma VLSM_incl_trans
@@ -37,7 +37,7 @@ Lemma VLSM_incl_trans
   (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
   : VLSM_incl X Y -> VLSM_incl Y Z -> VLSM_incl X Z.
 Proof.
-  firstorder.
+  by firstorder.
 Qed.
 
 Lemma VLSM_incl_finite_traces_characterization
@@ -49,14 +49,15 @@ Lemma VLSM_incl_finite_traces_characterization
     finite_valid_trace X s tr -> finite_valid_trace Y s tr.
 Proof.
   split; intros Hincl.
-  - intros. by apply (Hincl (Finite s tr)).
+  - by intros; apply (Hincl (Finite s tr)).
   - intros tr Htr.
     destruct tr as [is tr | is tr]; simpl in *.
-    + revert Htr. apply Hincl.
+    + by apply Hincl.
     + destruct Htr as [HtrX HisX].
       assert (His_tr: finite_valid_trace X is []).
-      { split; [| done]. constructor.
-        by apply initial_state_is_valid.
+      {
+        split; [| done].
+        by constructor; apply initial_state_is_valid.
       }
       apply Hincl in His_tr.
       destruct His_tr as [_ HisY].
@@ -64,7 +65,7 @@ Proof.
       apply infinite_valid_trace_from_prefix_rev.
       intros.
       pose proof (infinite_valid_trace_from_prefix _ _ _ HtrX n) as HfinX.
-      apply (Hincl _ _ (conj HfinX HisX)).
+      by apply Hincl.
 Qed.
 
 (**
@@ -77,16 +78,19 @@ Lemma VLSM_incl_embedding_iff
   : VLSM_incl X Y <-> VLSM_embedding X Y id id.
 Proof.
   assert (Hid : forall tr, tr = pre_VLSM_embedding_finite_trace_project _ _ id id tr).
-  { induction tr; [done |]. destruct a. by cbn; f_equal. }
+  {
+    induction tr; [done |].
+    by destruct a; cbn; f_equal.
+  }
   split.
   - constructor; intros.
     apply (proj1 (VLSM_incl_finite_traces_characterization (machine X) (machine Y)) H) in H0.
     replace (pre_VLSM_embedding_finite_trace_project _ _ _ _ trX) with trX; [done |].
-    apply Hid.
+    by apply Hid.
   - intro Hproject. apply VLSM_incl_finite_traces_characterization.
     intros. apply (VLSM_embedding_finite_valid_trace Hproject) in H.
     replace (VLSM_embedding_finite_trace_project Hproject _) with tr in H; [done |].
-    apply Hid.
+    by apply Hid.
 Qed.
 
 Definition VLSM_incl_is_embedding
@@ -188,14 +192,14 @@ Lemma VLSM_incl_valid_state
   (Hs : valid_state_prop X s)
   : valid_state_prop Y s.
 Proof.
-  revert Hs. apply (VLSM_embedding_valid_state (VLSM_incl_is_embedding Hincl)).
+  by apply (VLSM_embedding_valid_state (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 Lemma VLSM_incl_initial_state
   (is : vstate X)
   : vinitial_state_prop X is -> vinitial_state_prop Y is.
 Proof.
-  apply (VLSM_embedding_initial_state (VLSM_incl_is_embedding Hincl)).
+  by apply (VLSM_embedding_initial_state (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 Lemma VLSM_incl_finite_valid_trace_from
@@ -224,7 +228,7 @@ Lemma VLSM_incl_in_futures
   (s1 s2 : vstate X)
   : in_futures X s1 s2 -> in_futures Y s1 s2.
 Proof.
-  apply (VLSM_embedding_in_futures (VLSM_incl_is_embedding Hincl)).
+  by apply (VLSM_embedding_in_futures (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 Lemma VLSM_incl_input_valid_transition
@@ -232,8 +236,7 @@ Lemma VLSM_incl_input_valid_transition
   input_valid_transition X l (s,im) (s',om) ->
   input_valid_transition Y l (s,im) (s',om).
 Proof.
-  apply
-    (VLSM_embedding_input_valid_transition (VLSM_incl_is_embedding Hincl)).
+  by apply (VLSM_embedding_input_valid_transition (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 Lemma VLSM_incl_input_valid
@@ -241,8 +244,7 @@ Lemma VLSM_incl_input_valid
   input_valid X l (s,im) ->
   input_valid Y l (s,im).
 Proof.
-  apply
-    (VLSM_embedding_input_valid (VLSM_incl_is_embedding Hincl)).
+  by apply (VLSM_embedding_input_valid (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 (**
@@ -265,14 +267,14 @@ Lemma VLSM_incl_can_produce
   (om : option message)
   : option_can_produce X s om -> option_can_produce Y s om.
 Proof.
-  apply (VLSM_embedding_can_produce (VLSM_incl_is_embedding Hincl)).
+  by apply (VLSM_embedding_can_produce (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 Lemma VLSM_incl_can_emit
   (m : message)
   : can_emit X m -> can_emit Y m.
 Proof.
-  apply (VLSM_embedding_can_emit (VLSM_incl_is_embedding Hincl)).
+  by apply (VLSM_embedding_can_emit (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 Definition VLSM_incl_valid_message
@@ -304,16 +306,16 @@ Lemma VLSM_incl_infinite_valid_trace
   : infinite_valid_trace X s ls -> infinite_valid_trace Y s ls.
 Proof.
   intros [Htr His]. split.
-  - revert Htr. apply VLSM_incl_infinite_valid_trace_from.
-  - revert His. apply VLSM_incl_initial_state.
+  - by apply VLSM_incl_infinite_valid_trace_from.
+  - by apply VLSM_incl_initial_state.
 Qed.
 
 Lemma VLSM_incl_valid_trace
   : forall t, valid_trace_prop X t -> valid_trace_prop Y t.
 Proof.
   intros [s tr | s tr]; simpl.
-  - apply VLSM_incl_finite_valid_trace.
-  - apply VLSM_incl_infinite_valid_trace.
+  - by apply VLSM_incl_finite_valid_trace.
+  - by apply VLSM_incl_infinite_valid_trace.
 Qed.
 
 End sec_VLSM_incl_properties.
@@ -384,8 +386,9 @@ Lemma vlsm_incl_pre_loaded_with_all_messages_vlsm
   : VLSM_incl X (pre_loaded_with_all_messages_vlsm X).
 Proof.
   apply VLSM_incl_finite_traces_characterization.
-  intros. split; [|apply H].
-  apply preloaded_weaken_valid_trace_from. destruct X. apply H.
+  intros. split; [| by apply H].
+  apply preloaded_weaken_valid_trace_from.
+  by destruct X; apply H.
 Qed.
 
 Lemma pre_loaded_vlsm_incl_relaxed
@@ -393,8 +396,7 @@ Lemma pre_loaded_vlsm_incl_relaxed
   (PimpliesQorValid : forall m : message, P m -> Q m \/ valid_message_prop (pre_loaded_vlsm X Q) m)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
-  apply basic_VLSM_incl.
-  1, 3-4: cbv; itauto.
+  apply basic_VLSM_incl; cycle 1; [| by cbv; itauto..].
   intros _ _ m _ _ [Him | Hp].
   - by apply initial_message_is_valid; left.
   - apply PimpliesQorValid in Hp as [Hq | Hvalid]; [| done].
@@ -406,40 +408,40 @@ Lemma pre_loaded_vlsm_incl
   (PimpliesQ : forall m : message, P m -> Q m)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
 Proof.
-  apply pre_loaded_vlsm_incl_relaxed; itauto.
+  by apply pre_loaded_vlsm_incl_relaxed; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_idem_l
   (P : message -> Prop)
   : VLSM_incl (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; itauto.
+  by apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_idem_r
   (P : message -> Prop)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm (pre_loaded_vlsm X P) P).
 Proof.
-  apply basic_VLSM_incl_preloaded_with; cbv; itauto.
+  by apply basic_VLSM_incl_preloaded_with; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l
   : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun m => True)).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; itauto.
+  by apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_r
   : VLSM_incl (pre_loaded_vlsm X (fun m => True)) (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; itauto.
+  by apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_vlsm_incl_pre_loaded_with_all_messages
   (P : message -> Prop)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; itauto.
+  by apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma vlsm_incl_pre_loaded
@@ -447,7 +449,7 @@ Lemma vlsm_incl_pre_loaded
   : VLSM_incl X (pre_loaded_vlsm X P).
 Proof.
   eapply VLSM_incl_trans; [| by apply pre_loaded_vlsm_incl].
-  apply basic_VLSM_strong_incl; cbv; itauto.
+  by apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_idem_l :
@@ -455,7 +457,7 @@ Lemma pre_loaded_with_all_messages_vlsm_idem_l :
     (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X))
     (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply basic_VLSM_strong_incl; cbv; itauto.
+  by apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_idem_r :
@@ -463,7 +465,7 @@ Lemma pre_loaded_with_all_messages_vlsm_idem_r :
     (pre_loaded_with_all_messages_vlsm X)
     (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)).
 Proof.
-  apply basic_VLSM_incl_preloaded; cbv; itauto.
+  by apply basic_VLSM_incl_preloaded; cbv; itauto.
 Qed.
 
 Lemma pre_loaded_with_all_messages_can_emit
@@ -480,9 +482,8 @@ Lemma preloaded_weaken_finite_valid_trace_from
   : finite_valid_trace_from X from tr ->
     finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) from tr.
 Proof.
-  intros; eapply VLSM_incl_finite_valid_trace_from;
-    [apply vlsm_incl_pre_loaded_with_all_messages_vlsm |].
-  by destruct X.
+  by intros; eapply VLSM_incl_finite_valid_trace_from;
+    [apply vlsm_incl_pre_loaded_with_all_messages_vlsm | destruct X].
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from_to
@@ -490,9 +491,8 @@ Lemma preloaded_weaken_finite_valid_trace_from_to
   : finite_valid_trace_from_to X from to tr ->
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) from to tr.
 Proof.
-  intros; eapply VLSM_incl_finite_valid_trace_from_to;
-    [apply vlsm_incl_pre_loaded_with_all_messages_vlsm |].
-  by destruct X.
+  by intros; eapply VLSM_incl_finite_valid_trace_from_to;
+    [apply vlsm_incl_pre_loaded_with_all_messages_vlsm | destruct X].
 Qed.
 
 End sec_VLSM_incl_preloaded_properties.

@@ -111,7 +111,7 @@ Proof.
   intros s Hs; exists (elements(equivocating_validators s));
     [by apply NoDup_elements | | done].
   by intros v Hv; apply elem_of_elements, elem_of_filter; split; [done |];
-  apply Hcomprehensive.
+    apply Hcomprehensive.
 Qed.
 
 End sec_basic_limited_message_equivocation.
@@ -157,9 +157,9 @@ Lemma tracewise_not_heavy_LimitedEquivocationProp_iff :
   forall s, not_heavy s <-> LimitedEquivocationProp IM is_equivocating s.
 Proof.
   intros; split.
-  - apply not_heavy_impl_LimitedEquivocationProp,
+  - by apply not_heavy_impl_LimitedEquivocationProp,
       tracewise_basic_equivocation_state_validators_comprehensive_prop.
-  - apply LimitedEquivocationProp_impl_not_heavy.
+  - by apply LimitedEquivocationProp_impl_not_heavy.
 Qed.
 
 End sec_tracewise_limited_message_equivocation.
@@ -213,9 +213,10 @@ Proof.
     - by intros i Hi; apply elem_of_remove_dups, Hincl, Hi.
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
-  { apply VLSM_incl_trans with (machine Free).
-    - apply (constraint_free_incl IM (strong_fixed_equivocation_constraint IM equivocators)).
-    - apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  {
+    apply VLSM_incl_trans with (machine Free).
+    - by apply (constraint_free_incl IM (strong_fixed_equivocation_constraint IM equivocators)).
+    - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
   apply (VLSM_incl_finite_valid_trace_init_to StrongFixedinclPreFree) in Htr as Hpre_tr.
@@ -258,8 +259,8 @@ Proof.
     as Heq.
   apply VLSM_eq_proj1 in Heq.
   apply VLSM_incl_trans with (machine StrongFixed).
-  - apply Heq.
-  - apply StrongFixed_incl_Limited.
+  - by apply Heq.
+  - by apply StrongFixed_incl_Limited.
 Qed.
 
 End sec_fixed_limited_message_equivocation.
@@ -339,10 +340,10 @@ Proof.
   - by eapply valid_trace_forget_last, strong_witness_has_fixed_equivocation.
   - replace (sum_weights _) with (equivocation_fault s); [done |].
     apply set_eq_nodup_sum_weight_eq.
-    + apply NoDup_elements.
-    + apply NoDup_remove_dups.
+    + by apply NoDup_elements.
+    + by apply NoDup_remove_dups.
     + apply ListSetExtras.set_eq_extract_forall.
-      intro i. rewrite elem_of_remove_dups. itauto.
+      by intro i; rewrite elem_of_remove_dups; itauto.
 Qed.
 
 (**
@@ -364,8 +365,8 @@ Proof.
   eapply traces_exhibiting_limited_equivocation_are_valid_rev; [done.. | |].
   - apply valid_trace_add_default_last.
     eapply VLSM_incl_finite_valid_trace; [| done].
-    apply constraint_free_incl.
-  - apply tracewise_not_heavy_LimitedEquivocationProp_iff,
+    by apply constraint_free_incl.
+  - by apply tracewise_not_heavy_LimitedEquivocationProp_iff,
       full_node_limited_equivocation_valid_state_weight,
       finite_valid_trace_last_pstate with (X := Limited), Htr.
 Qed.

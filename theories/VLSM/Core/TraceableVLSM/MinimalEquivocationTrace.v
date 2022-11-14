@@ -248,7 +248,7 @@ Proof.
       spec Hchannel_i; [by eexists _, _, _ |].
       specialize (Hchannel j m_j) as Hchannel_j.
       spec Hchannel_j; [by eexists _, _, _ |].
-      congruence.
+      by congruence.
     + apply Some_inj in H_output as <-.
       apply tc_r_iff in Hbefore as [Hdm | (m' & Hbefore & Hdm)].
       * by eapply composite_observed_before_send_subsumes_msg_dep_rel;
@@ -259,7 +259,7 @@ Proof.
         eexists s_j, _; constructor; [done.. |]; cbn.
         destruct Hobs as [[| Houtput] |]; subst; [by constructor | | by do 2 econstructor].
         apply Some_inj in Houtput; subst m_j.
-        contradict Hdm; apply tc_reflect_irreflexive; typeclasses eauto.
+        by contradict Hdm; apply tc_reflect_irreflexive; typeclasses eauto.
 Qed.
 
 (**
@@ -542,7 +542,7 @@ Proof.
       [| done..].
     rewrite find_largest_nat_with_property_bounded_None in Hsent_not_obs, Hnot_send.
     rewrite composite_tv_state_destructor_initial in Hinitial;
-      [| typeclasses eauto | done].
+      [| by typeclasses eauto | done].
     destruct composite_state_destructor as [| [item s]] eqn: Hdestruct;
       [done | clear Hinitial]; cbn in *.
     specialize (Hnot_send 0); spec Hnot_send; [lia |].

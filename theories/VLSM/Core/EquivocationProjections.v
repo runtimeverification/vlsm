@@ -62,7 +62,7 @@ Proof.
   exists itemX. split; [done |].
   revert Hm.
   unfold pre_VLSM_projection_transition_item_project in Hpr.
-  destruct (label_project (l itemX)); [|congruence].
+  destruct (label_project (l itemX)); [| by congruence].
   inversion Hpr.
   by apply Hselector.
 Qed.
@@ -170,8 +170,7 @@ Proof.
   apply (VLSM_weak_embedding_valid_state Hsimul) in Hs as HsY.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseY _ HsY m).
   apply (selected_messages_consistency_prop_from_stepwise _ _ _ _ HstepwiseY HoracleY_dec _ HsY).
-  revert Hm.
-  apply VLSM_weak_embedding_selected_message_exists_in_some_preloaded_traces.
+  by apply VLSM_weak_embedding_selected_message_exists_in_some_preloaded_traces.
 Qed.
 
 End sec_selectors.
@@ -184,10 +183,10 @@ Lemma VLSM_weak_embedding_has_been_sent
 Proof.
   apply VLSM_weak_embedding_oracle with (field_selector output) (field_selector output).
   - by intros [] [] Hin Hout; cbn in *; subst.
-  - apply (has_been_sent_stepwise_from_trace X).
-  - apply (has_been_sent_stepwise_from_trace Y).
-  - apply has_been_sent_dec.
-  - apply has_been_sent_dec.
+  - by apply (has_been_sent_stepwise_from_trace X).
+  - by apply (has_been_sent_stepwise_from_trace Y).
+  - by apply has_been_sent_dec.
+  - by apply has_been_sent_dec.
 Qed.
 
 Lemma VLSM_weak_embedding_has_been_received
@@ -198,10 +197,10 @@ Lemma VLSM_weak_embedding_has_been_received
 Proof.
   apply VLSM_weak_embedding_oracle with (field_selector input) (field_selector input).
   - by intros [] [] Hin Hout; cbn in *; subst.
-  - apply (has_been_received_stepwise_from_trace X).
-  - apply (has_been_received_stepwise_from_trace Y).
-  - apply has_been_received_dec.
-  - apply has_been_received_dec.
+  - by apply (has_been_received_stepwise_from_trace X).
+  - by apply (has_been_received_stepwise_from_trace Y).
+  - by apply has_been_received_dec.
+  - by apply has_been_received_dec.
 Qed.
 
 Lemma VLSM_weak_embedding_has_been_directly_observed
@@ -214,10 +213,10 @@ Lemma VLSM_weak_embedding_has_been_directly_observed
 Proof.
   apply VLSM_weak_embedding_oracle with item_sends_or_receives item_sends_or_receives.
   - by intros [] [] **; cbn in *; subst.
-  - apply has_been_directly_observed_stepwise_props.
-  - apply has_been_directly_observed_stepwise_props.
-  - apply has_been_directly_observed_dec.
-  - apply has_been_directly_observed_dec.
+  - by apply has_been_directly_observed_stepwise_props.
+  - by apply has_been_directly_observed_stepwise_props.
+  - by apply has_been_directly_observed_dec.
+  - by apply has_been_directly_observed_dec.
 Qed.
 
 End sec_weak_embedding_oracle.
@@ -426,14 +425,14 @@ Context
 Lemma can_emit_projection
   : can_emit PreFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 Proof.
-  destruct (sender m) as [v|] eqn:Hsender; simpl in Hj; [|congruence].
+  destruct (sender m) as [v|] eqn:Hsender; simpl in Hj; [| by congruence].
   apply Some_inj in Hj.
   specialize (Hsender_safety _ _ Hsender).
   intros [(s0,om0) [(i, li) [s1 Hemitted]]].
   specialize (preloaded_component_projection IM i) as Hproj.
   specialize (VLSM_projection_input_valid_transition Hproj (existT i li) li)
     as Htransition.
-  spec Htransition; [apply (composite_project_label_eq IM)|].
+  spec Htransition; [by apply (composite_project_label_eq IM) |].
   apply Htransition in Hemitted. clear Htransition.
   remember (s0 i) as s0i. clear s0 Heqs0i.
   remember (s1 i) as s1i. clear s1 Heqs1i.

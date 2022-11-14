@@ -85,15 +85,15 @@ Definition fixed_equivocation_vlsm_composition : VLSM message
 Lemma fixed_equivocation_vlsm_composition_incl_free
   : VLSM_incl fixed_equivocation_vlsm_composition Free.
 Proof.
-  apply constraint_free_incl.
+  by apply constraint_free_incl.
 Qed.
 
 Lemma fixed_equivocation_vlsm_composition_incl_preloaded_free
   : VLSM_incl fixed_equivocation_vlsm_composition (pre_loaded_with_all_messages_vlsm Free).
 Proof.
   apply VLSM_incl_trans with (machine Free).
-  - apply fixed_equivocation_vlsm_composition_incl_free.
-  - apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  - by apply fixed_equivocation_vlsm_composition_incl_free.
+  - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** ** A (seemingly) stronger definition for fixed-set equivocation
@@ -121,15 +121,15 @@ Proof.
   - rewrite Exists_exists. apply exist_proper. intro i.
     rewrite elem_of_list_filter. apply and_iff_compat_r.
     split; [intros [Hi Hl]; done | split; [done |]].
-    apply elem_of_enum.
-  - apply Exists_dec. intro i. apply has_been_sent_dec.
+    by apply elem_of_enum.
+  - by apply Exists_dec; intro i; apply has_been_sent_dec.
 Qed.
 
 Lemma sent_by_non_equivocating_are_sent s m
   (Hsent : sent_by_non_equivocating s m)
   : composite_has_been_sent IM s m.
 Proof.
-  destruct Hsent as [i [Hi Hsent]]. by exists i.
+  by destruct Hsent as [i [Hi Hsent]]; exists i.
 Qed.
 
 Lemma sent_by_non_equivocating_are_directly_observed s m
@@ -173,7 +173,7 @@ Lemma Equivocators_Strong_Fixed_incl base_s
       (equivocators_composition_for_directly_observed base_s).
 Proof.
   apply pre_loaded_vlsm_incl.
-  apply sent_by_non_equivocating_are_directly_observed.
+  by apply sent_by_non_equivocating_are_directly_observed.
 Qed.
 
 (**
@@ -184,9 +184,9 @@ Lemma strong_fixed_equivocation_subsumption s m
   : strong_fixed_equivocation s m -> fixed_equivocation s m.
 Proof.
   intros [Hobs | Hemit]; [left|right].
-  - revert Hobs. apply sent_by_non_equivocating_are_directly_observed.
+  - by apply sent_by_non_equivocating_are_directly_observed.
   - revert Hemit. apply VLSM_incl_can_emit.
-    apply Equivocators_Strong_Fixed_incl.
+    by apply Equivocators_Strong_Fixed_incl.
 Qed.
 
 Lemma strong_fixed_equivocation_constraint_subsumption
@@ -204,7 +204,7 @@ Proof.
   apply constraint_subsumption_incl.
   apply preloaded_constraint_subsumption_stronger.
   apply strong_constraint_subsumption_strongest.
-  apply strong_fixed_equivocation_constraint_subsumption.
+  by apply strong_fixed_equivocation_constraint_subsumption.
 Qed.
 
 End sec_strong_fixed_equivocation.
@@ -254,7 +254,7 @@ Lemma fixed_equivocation_constraint_index_incl_subsumption
     (fixed_equivocation_constraint IM indices2).
 Proof.
   intros l (s, [m |]); [| done].
-  apply fixed_equivocation_index_incl_subsumption.
+  by apply fixed_equivocation_index_incl_subsumption.
 Qed.
 
 Lemma fixed_equivocation_vlsm_composition_index_incl
@@ -265,7 +265,7 @@ Proof.
   apply constraint_subsumption_incl.
   apply preloaded_constraint_subsumption_stronger.
   apply strong_constraint_subsumption_strongest.
-  apply fixed_equivocation_constraint_index_incl_subsumption.
+  by apply fixed_equivocation_constraint_index_incl_subsumption.
 Qed.
 
 End sec_fixed_equivocation_index_incl.
@@ -302,8 +302,8 @@ Definition Fixed_incl_Free : VLSM_incl Fixed Free := constraint_free_incl _ _.
 
 Lemma Fixed_incl_Preloaded : VLSM_incl Fixed (pre_loaded_with_all_messages_vlsm Free).
 Proof.
-  eapply VLSM_incl_trans; [apply Fixed_incl_Free|].
-  apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).
+  eapply VLSM_incl_trans; [by apply Fixed_incl_Free |].
+  by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).
 Qed.
 
 Definition preloaded_Fixed_incl_Preloaded :
@@ -314,8 +314,8 @@ Definition StrongFixed_incl_Free : VLSM_incl StrongFixed Free := constraint_free
 
 Lemma StrongFixed_incl_Preloaded : VLSM_incl StrongFixed (pre_loaded_with_all_messages_vlsm Free).
 Proof.
-  eapply VLSM_incl_trans; [apply StrongFixed_incl_Free|].
-  apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).
+  eapply VLSM_incl_trans; [by apply StrongFixed_incl_Free |].
+  by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).
 Qed.
 
 Lemma in_futures_preserves_sent_by_non_equivocating s base_s
@@ -326,9 +326,9 @@ Lemma in_futures_preserves_sent_by_non_equivocating s base_s
 Proof.
   intros m (i & Hi & Hsent).
   exists i; split; [done |].
-  eapply in_futures_preserving_oracle_from_stepwise
-  ; [apply has_been_sent_stepwise_from_trace | | done].
-  by apply (VLSM_projection_in_futures (preloaded_component_projection IM i)).
+  eapply in_futures_preserving_oracle_from_stepwise; [| | done].
+  - by apply has_been_sent_stepwise_from_trace.
+  - by apply (VLSM_projection_in_futures (preloaded_component_projection IM i)).
 Qed.
 
 Lemma in_futures_preserves_can_emit_by_equivocators_composition_for_sent s base_s
@@ -402,7 +402,7 @@ Proof.
   - right.
     clear -Hemit Hobs_s_protocol. revert Hemit.
     apply VLSM_incl_can_emit; simpl.
-    apply basic_VLSM_incl; intros s0 **; [done | | apply Hv | apply H].
+    apply basic_VLSM_incl; intros s0 **; [done | | by apply Hv | by apply H].
     destruct HmX as [Him | Hobs].
     + by apply initial_message_is_valid; left.
     + apply Hobs_s_protocol in Hobs as [Hsent | Hemit].
@@ -426,10 +426,10 @@ Proof.
   repeat split.
   - done.
   - apply proj1 in Ht.
-    destruct iom as [im|]; [|apply option_valid_message_None].
+    destruct iom as [im |]; [| by apply option_valid_message_None].
     apply strong_fixed_equivocation_eqv_valid_message.
-    apply (fixed_input_has_strong_fixed_equivocation_helper _ _ Ht).
-  - apply Ht.
+    by apply (fixed_input_has_strong_fixed_equivocation_helper _ _ Ht).
+  - by apply Ht.
   - apply proj2 in Ht. simpl in Ht.
     simpl. unfold sub_IM at 2. simpl. unfold composite_state_sub_projection at 1. simpl.
     destruct (vtransition _ _ _) as (si', om').
@@ -460,7 +460,7 @@ Proof.
     apply (VLSM_projection_in_futures
       (preloaded_component_projection IM (projT1 l))) in Hfuture.
     apply in_futures_preserving_oracle_from_stepwise with (field_selector output) (sf (projT1 l))
-    ; [apply has_been_sent_stepwise_from_trace | done |].
+    ; [by apply has_been_sent_stepwise_from_trace | done |].
     apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht.
     specialize (VLSM_projection_input_valid_transition
       (preloaded_component_projection IM (projT1 l)) l (projT2 l)) as Hproject.
@@ -524,7 +524,7 @@ Proof.
       cbn; unfold pre_VLSM_projection_transition_item_project;
       cbn; unfold composite_label_sub_projection_option.
       case_decide as Hl.
-      * eapply finite_valid_trace_from_to_app; [apply Htr_pr |].
+      * eapply finite_valid_trace_from_to_app; [by apply Htr_pr |].
         apply finite_valid_trace_from_to_singleton.
         apply valid_trace_last_pstate in Htr_pr.
         by apply fixed_input_valid_transition_sub_projection_helper.
@@ -558,7 +558,7 @@ Lemma fixed_finite_valid_trace_sub_projection is f tr
               (finite_trace_sub_projection IM equivocators tr).
 Proof.
   apply fixed_finite_valid_trace_sub_projection_helper with (base_s := f) in Htr as Htr_pr.
-  - split; [apply Htr_pr|].
+  - split; [by apply Htr_pr |].
     apply proj2 in Htr.
     by specialize (composite_initial_state_sub_projection IM equivocators is Htr).
   - apply in_futures_refl. apply valid_trace_last_pstate in Htr.
@@ -610,8 +610,7 @@ Lemma fixed_input_has_strong_fixed_equivocation
 Proof.
   apply fixed_input_has_strong_fixed_equivocation_helper with (base_s := s) in Ht
   ; [done |].
-  apply fixed_directly_observed_has_strong_fixed_equivocation.
-  apply Ht.
+  by apply fixed_directly_observed_has_strong_fixed_equivocation, Ht.
 Qed.
 
 (**
@@ -630,7 +629,7 @@ Proof.
       by eapply (input_valid_transition_in_futures PreFree).
     + by apply fixed_directly_observed_has_strong_fixed_equivocation.
   - apply input_valid_transition_in_futures in Ht.
-    revert Ht. apply fixed_valid_state_sub_projection.
+    by apply fixed_valid_state_sub_projection.
   - apply in_futures_refl. apply input_valid_transition_destination in Ht.
     by apply (VLSM_incl_valid_state Fixed_incl_Preloaded).
   - done.
@@ -695,7 +694,7 @@ Lemma Equivocators_Fixed_Strong_eq base_s
 Proof.
   apply VLSM_eq_incl_iff. split.
   - by apply Equivocators_Fixed_Strong_incl.
-  - apply Equivocators_Strong_Fixed_incl.
+  - by apply Equivocators_Strong_Fixed_incl.
 Qed.
 
 (**
@@ -721,8 +720,8 @@ Qed.
 Lemma Fixed_eq_StrongFixed : VLSM_eq Fixed StrongFixed.
 Proof.
   apply VLSM_eq_incl_iff. split.
-  - apply Fixed_incl_StrongFixed.
-  - apply StrongFixed_incl_Fixed.
+  - by apply Fixed_incl_StrongFixed.
+  - by apply StrongFixed_incl_Fixed.
 Qed.
 
 End sec_Fixed_eq_StrongFixed.
@@ -779,7 +778,7 @@ Lemma restrict_observed_to_non_equivocating_incl s eqv_is
       (lift_sub_state_to IM equivocators s eqv_is)).
 Proof.
   apply pre_loaded_vlsm_incl.
-  apply lift_sub_state_to_sent_by_non_equivocating_iff.
+  by apply lift_sub_state_to_sent_by_non_equivocating_iff.
 Qed.
 
 Lemma restrict_observed_to_non_equivocating_incl_rev s eqv_is
@@ -789,7 +788,7 @@ Lemma restrict_observed_to_non_equivocating_incl_rev s eqv_is
     (equivocators_composition_for_sent IM equivocators s).
 Proof.
   apply pre_loaded_vlsm_incl.
-  apply lift_sub_state_to_sent_by_non_equivocating_iff.
+  by apply lift_sub_state_to_sent_by_non_equivocating_iff.
 Qed.
 
 (**
@@ -801,12 +800,12 @@ Lemma lift_sub_state_to_strong_fixed_equivocation s eqv_is m
     strong_fixed_equivocation IM equivocators (lift_sub_state_to IM equivocators s eqv_is) m.
 Proof.
   split; intros [Hs | Hs]; [left|right|left|right]; revert Hs.
-  - apply lift_sub_state_to_sent_by_non_equivocating_iff.
+  - by apply lift_sub_state_to_sent_by_non_equivocating_iff.
   - apply VLSM_incl_can_emit.
-    apply restrict_observed_to_non_equivocating_incl.
-  - apply lift_sub_state_to_sent_by_non_equivocating_iff.
+    by apply restrict_observed_to_non_equivocating_incl.
+  - by apply lift_sub_state_to_sent_by_non_equivocating_iff.
   - apply VLSM_incl_can_emit.
-    apply restrict_observed_to_non_equivocating_incl_rev.
+    by apply restrict_observed_to_non_equivocating_incl_rev.
 Qed.
 
 (**
@@ -843,7 +842,7 @@ Proof.
   - intros [i liX].
     unfold remove_equivocating_state_project;
     unfold remove_equivocating_label_project; cbn.
-    case_decide as Hi; [|congruence].
+    case_decide as Hi; [| by congruence].
     intros _ s om s' om';
     destruct (vtransition _ _ _) as (si', _om') eqn: Hti;
     inversion_clear 1.
@@ -877,8 +876,7 @@ Proof.
   intros eqv_is Heqv_is.
   apply (VLSM_incl_valid_state (StrongFixed_incl_Fixed IM equivocators)).
   apply (VLSM_projection_valid_state (remove_equivocating_transitions_fixed_projection _ Heqv_is)).
-  revert Hbase_s.
-  apply (VLSM_incl_valid_state (Fixed_incl_StrongFixed IM equivocators)).
+  by apply (VLSM_incl_valid_state (Fixed_incl_StrongFixed IM equivocators)).
 Qed.
 
 Lemma lift_sub_state_to_sent_are_directly_observed s
@@ -887,7 +885,7 @@ Lemma lift_sub_state_to_sent_are_directly_observed s
 Proof.
   intros m Hsent.
   apply (lift_sub_state_to_sent_by_non_equivocating_iff base_s s m) in Hsent.
-  revert Hsent. apply sent_by_non_equivocating_are_directly_observed.
+  by eapply sent_by_non_equivocating_are_directly_observed.
 Qed.
 
 Lemma strong_fixed_equivocation_lift_sub_state_to s
@@ -989,7 +987,7 @@ Proof.
     left.
     destruct Hsent as [i Hsent].
     exists i.
-    rewrite elem_of_nil. itauto.
+    by rewrite elem_of_nil; itauto.
 Qed.
 
 Lemma strong_fixed_equivocation_constraint_no_equivocators
@@ -1001,8 +999,8 @@ Proof.
   destruct som as (s, [m |]); [| done].
   simpl.
   specialize (strong_fixed_equivocation_no_equivocators s m).
-  unfold composite_no_equivocations, composite_no_equivocations_except_from, sent_except_from. simpl.
-  itauto.
+  unfold composite_no_equivocations, composite_no_equivocations_except_from, sent_except_from.
+  by cbn; itauto.
 Qed.
 
 Lemma strong_fixed_equivocation_vlsm_composition_no_equivocators
@@ -1028,8 +1026,8 @@ Lemma fixed_equivocation_vlsm_composition_no_equivocators
       (composite_vlsm IM (composite_no_equivocations IM)).
 Proof.
   eapply VLSM_eq_trans.
-  - apply Fixed_eq_StrongFixed.
-  - apply strong_fixed_equivocation_vlsm_composition_no_equivocators.
+  - by apply Fixed_eq_StrongFixed.
+  - by apply strong_fixed_equivocation_vlsm_composition_no_equivocators.
 Qed.
 
 End sec_fixed_equivocation_no_equivocators.
@@ -1066,13 +1064,13 @@ Lemma lift_strong_fixed_non_equivocating
 Proof.
   apply induced_sub_projection_lift.
   intros s1 s2 Heq l om.
-  destruct om as [m|]; [|itauto].
+  destruct om as [m |]; [| by itauto].
   cut
     (forall m, sent_by_non_equivocating IM equivocators s1 m ->
       sent_by_non_equivocating IM equivocators s2 m).
   {
     intros Hsent_impl [[j [Hj Hsent]] | Hemit].
-    - left. apply Hsent_impl. by exists j.
+    - by left; apply Hsent_impl; exists j.
     - right. revert Hemit.
       by apply VLSM_incl_can_emit, pre_loaded_vlsm_incl.
   }
@@ -1081,7 +1079,7 @@ Proof.
   exists i. split; [done |].
   replace (s2 i) with (s1 i); [done |].
   assert (Hi' : i ∈ non_equivocators)
-    by (apply set_diff_intro; [apply elem_of_enum | done]).
+    by (apply set_diff_intro; [apply elem_of_enum |]; done).
   by eapply f_equal_dep with (x := dexist i Hi') in Heq.
 Qed.
 
@@ -1104,7 +1102,7 @@ Proof.
   revert Htr.
   apply VLSM_incl_finite_valid_trace.
   apply induced_sub_projection_constraint_subsumption_incl.
-  apply fixed_strong_equivocation_subsumption.
+  by apply fixed_strong_equivocation_subsumption.
 Qed.
 
 Lemma fixed_non_equivocating_projection_friendliness
@@ -1113,7 +1111,7 @@ Lemma fixed_non_equivocating_projection_friendliness
         (fixed_equivocation_constraint IM equivocators)).
 Proof.
   apply induced_sub_projection_friendliness.
-  apply lift_fixed_non_equivocating.
+  by apply lift_fixed_non_equivocating.
 Qed.
 
 (**
@@ -1129,7 +1127,7 @@ Lemma fixed_non_equivocating_traces_char is tr
     finite_trace_sub_projection IM non_equivocators etr = tr.
 Proof.
   apply (projection_friendly_trace_char (induced_sub_projection_is_projection _ _ _)).
-  apply fixed_non_equivocating_projection_friendliness.
+  by apply fixed_non_equivocating_projection_friendliness.
 Qed.
 
 End sec_fixed_non_equivocator_lifting.
