@@ -1615,7 +1615,7 @@ Definition sub_label_element_project
   : option (vlabel (IM j)) :=
   match decide (j = ` (projT1 l)) with
   | left e => Some (eq_rect_r (fun j => vlabel (IM j)) (projT2 l) e)
-  | in_right => None
+  | right _ => None
   end.
 
 Definition sub_state_element_project
