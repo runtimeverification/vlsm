@@ -720,13 +720,66 @@ Proof.
 Qed.
 
 Definition stream_prepend {A} (nel : ne_list A) (s : Stream A) : Stream A :=
-  (cofix prepend (xs : ne_list A) :=
-    match xs with
-    | ne_one a => Cons a s
-    | ne_cons a nel' => Cons a (prepend nel')
-    end) nel.
+  (cofix prepend (l : ne_list A) :=
+    Cons (ne_list_hd l) (from_option prepend s (ne_list_tl l))) nel.
 
-Definition stream_concat {B} (f : nat -> ne_list B) : Stream B :=
-  (cofix concat (n : nat) :=
-    stream_prepend (f n) (concat (S n))
-  ) 0.
+CoFixpoint stream_concat {A} (s : Stream (ne_list A)) : Stream A :=
+  match s with Cons a s' => stream_prepend a (stream_concat s') end.
+
+Lemma stream_prepend_prefix {A} (nel : ne_list A) (s : Stream A) :
+  stream_prefix (stream_prepend nel s) (ne_list_length nel) = ne_list_to_list nel.
+Proof.
+  by induction nel; [| cbn; f_equal].
+Qed.
+
+Lemma stream_prepend_prefix_l
+  {A : Type}
+  (l : ne_list A)
+  (s : Stream A)
+  (n : nat)
+  (Hle : n <= ne_list_length l)
+  : stream_prefix (stream_prepend l s) n = list_prefix (ne_list_to_list l) n.
+Proof.
+  revert n Hle; induction l; intros [| n] Hle; cbn; [done | | done |].
+  - by cbn in Hle; replace n with 0 by lia.
+  - by cbn in *; rewrite IHl; [| cbv in *; lia].
+Qed.
+
+Lemma stream_prepend_prefix_r
+  {A : Type}
+  (l : ne_list A)
+  (s : Stream A)
+  (n : nat)
+  (Hge : n >= ne_list_length l)
+  : stream_prefix (stream_prepend l s) n = ne_list_to_list l ++ stream_prefix s (n - ne_list_length l).
+Proof.
+  revert l Hge s.
+  induction n.
+  - intros [| a l] Hge s; cbn in *; lia.
+  - intros [| a l] Hge s; cbn in *; [by replace (n - 0) with n by lia |].
+    by rewrite <- IHn; [| cbv in *; lia].
+Qed.
+
+Lemma stream_eq_hd_tl {A} (s s' : Stream A) :
+  hd s = hd s' -> tl s = tl s' -> s = s'.
+Proof. by destruct s, s'; cbn; intros -> ->. Qed.
+
+Lemma stream_concat_unroll {A} (a : ne_list A) (s : Stream (ne_list A)) :
+  stream_concat (Cons a s) = stream_prepend a (stream_concat s).
+Proof. by apply stream_eq_hd_tl. Qed.
+
+Lemma stream_concat_prefix {A} (s : Stream (ne_list A)) n len
+  (prefix := mjoin (List.map ne_list_to_list (stream_prefix s n)))
+  : len = length prefix ->
+    stream_prefix (stream_concat s) len = prefix.
+Proof.
+  intros ->; revert s prefix; induction n; [done |]; intros []; cbn.
+  rewrite app_length.
+  assert (length (ne_list_to_list n0) +
+  length (mjoin (List.map ne_list_to_list (stream_prefix s n)))
+  ≥ length (ne_list_to_list n0)) by lia.
+  rewrite stream_concat_unroll, stream_prepend_prefix_r by done.
+  rewrite <- IHn at 2.
+  do 2 f_equal.
+  apply minus_plus.
+Qed.

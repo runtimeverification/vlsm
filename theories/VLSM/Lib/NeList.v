@@ -1,5 +1,7 @@
 From stdpp Require Import prelude.
+From VLSM.Lib Require Import ListExtras StdppExtras.
 
+(** A straight-forward inductive definition of non-empty lists. *)
 Inductive ne_list (A : Type) : Type :=
 | ne_one : A -> ne_list A
 | ne_cons : A -> ne_list A -> ne_list A.
@@ -13,6 +15,12 @@ Definition ne_list_hd {A} (l : ne_list A) : A :=
   match l with
   | ne_one a => a
   | ne_cons a _ => a
+  end.
+
+Definition ne_list_tl {A} (l : ne_list A) : option (ne_list A) :=
+  match l with
+  | ne_one _ => None
+  | ne_cons _ tl => Some tl
   end.
 
 Definition ne_list_foldr {A B} (f : A -> B -> B) (b : B) (l : ne_list A) :=
@@ -61,7 +69,6 @@ Inductive ne_list_equiv `{Equiv A} : Equiv (ne_list A) :=
   | ne_cons_equiv x y l k : x ≡ y → l ≡ k → x ::: l ≡ y ::: k.
 #[export] Existing Instance ne_list_equiv.
 
-
 Definition ne_list_to_list {A} (nel : ne_list A) : list A :=
   ne_list_foldr cons [] nel.
 
@@ -71,7 +78,7 @@ Lemma ne_list_to_list_unroll {A} (a : A) (nel : ne_list A) :
   ne_list_to_list (a ::: nel) = a :: ne_list_to_list nel.
 Proof. done. Qed.
 
-Definition ne_list_tl {A} (l : ne_list A) : list A :=
+Definition ne_list_to_list_tl {A} (l : ne_list A) : list A :=
   match l with
   | ne_one _ => []
   | ne_cons _ nel => ne_list_to_list nel
@@ -87,6 +94,7 @@ Lemma list_to_ne_list_unroll {A} (a : A) l :
   list_to_ne_list (a :: l) = Some (ne_list_option_cons a (list_to_ne_list l)).
 Proof. done. Qed.
 
+(** A definition of non-empty lists based on lists. *)
 Record NeList (A : Type) : Type :=
 {
   nl_hd : A;
@@ -99,7 +107,7 @@ Arguments nl_tl {_} _ : assert.
 Definition ne_list_to_NeList {A} (l : ne_list A) : NeList A :=
 {|
   nl_hd := ne_list_hd l;
-  nl_tl := ne_list_tl l;
+  nl_tl := ne_list_to_list_tl l;
 |}.
 
 Definition NeList_to_ne_list {A} (l : NeList A) : ne_list A :=
@@ -109,7 +117,7 @@ Lemma NeList_to_ne_list_unroll {A} (a b : A) (l : list A) :
   NeList_to_ne_list {| nl_hd := a; nl_tl := b :: l |}
     =
   ne_cons a (NeList_to_ne_list {| nl_hd := b; nl_tl := l|}).
-Proof. done. Qed. 
+Proof. done. Qed.
 
 Lemma NeList_to_ne_list_to_list {A} :
   forall (l : NeList A),
@@ -144,7 +152,7 @@ Lemma ne_list_to_NeList_to_ne_list {A} :
   NeList_to_ne_list (ne_list_to_NeList l) = l.
 Proof.
   intros []; [done |].
-  unfold ne_list_to_NeList, NeList_to_ne_list, nl_hd, nl_tl, ne_list_hd, ne_list_tl.
+  unfold ne_list_to_NeList, NeList_to_ne_list, nl_hd, nl_tl, ne_list_hd, ne_list_to_list_tl.
   by rewrite ne_list_to_list_to_nelist.
 Qed.
 
@@ -161,3 +169,82 @@ Proof.
   unfold elem_of, elem_of_ne_list; cbn.
   typeclasses eauto.
 Qed.
+
+Definition ne_list_from_non_empty_list {A} (l : list A) : l <> [] -> ne_list A :=
+  match l with
+  | [] => fun H => False_rect _ (H eq_refl)
+  | a :: l' => fun _ => NeList_to_ne_list {| nl_hd := a; nl_tl := l' |}
+  end.
+
+Definition list_function_restriction {A B} (f : A -> list B)
+  (da : dsig (fun a => f a <> [])) : ne_list B :=
+  ne_list_from_non_empty_list (f (` da)) (proj2_dsig da).
+
+Lemma list_filter_map_mbind
+  {A B : Type}
+  (f : A -> list B)
+  (P := fun a => f a <> [])
+  (f' := list_function_restriction f)
+  (l : list A)
+  : mjoin (map ne_list_to_list (list_filter_map P f' l)) = mbind f l.
+Proof.
+  induction l using rev_ind; [done |].
+  rewrite mbind_app, list_filter_map_app, map_app, mjoin_app, IHl.
+  cbn; clear IHl.
+  f_equal; rewrite app_nil_r.
+  destruct (decide _); cbn; cycle 1.
+  - symmetry; destruct (decide (f x = [])); [done |].
+    by contradict n.
+  - subst f' P; unfold list_function_restriction, ne_list_from_non_empty_list; cbn in p.
+    remember (proj2_dsig _) as Hp; clear HeqHp; cbn in Hp.
+    unfold proj1_sig, dexist.
+    destruct (f x); [done |].
+    by rewrite NeList_to_ne_list_to_list, app_nil_r.
+Qed.
+
+(**
+  An alternative inductive definition of non-empty lists using a single
+  constructor.
+*)
+Inductive Nel (A : Type) : Type :=
+| nel_cons : A -> option (Nel A) -> Nel A.
+
+Arguments nel_cons {_} _ _ : assert.
+
+Definition nel_hd `(l : Nel A) : A :=
+  match l with (nel_cons a _) => a end.
+
+Definition nel_tl `(l : Nel A) : option (Nel A) :=
+  match l with (nel_cons _ l') => l' end.
+
+Definition nel_one `(a : A) : Nel A := nel_cons a None.
+
+Fixpoint Nel_ind'
+  (A : Type) (P : Nel A -> Prop)
+  (hd' : forall h : A, P (nel_cons h None))
+  (tl' : forall (h : A) (t : Nel A), P t -> P (nel_cons h (Some t)))
+  (l : Nel A) {struct l} : P l :=
+match l with
+| nel_cons h None => hd' h
+| nel_cons h (Some t) => tl' h t (Nel_ind' A P hd' tl' t)
+end.
+
+Fixpoint Nel_to_ne_list `(l : Nel A) : ne_list A :=
+  match l with
+  | nel_cons a None => ne_one a
+  | nel_cons a (Some l') => ne_cons a (Nel_to_ne_list l')
+  end.
+
+Fixpoint ne_list_to_Nel `(l : ne_list A) : Nel A :=
+  match l with
+  | ne_one a => nel_one a
+  | ne_cons a l' => nel_cons a (Some (ne_list_to_Nel l'))
+  end.
+
+Lemma Nel_to_ne_list_to_Nel `(l : Nel A) :
+  ne_list_to_Nel (Nel_to_ne_list l) = l.
+Proof. by induction l using Nel_ind'; cbn; [| rewrite IHl]. Qed.
+
+Lemma ne_list_to_Nel_to_ne_list `(l : ne_list A) :
+  Nel_to_ne_list (ne_list_to_Nel l) = l.
+Proof. by induction l; cbn; [| rewrite IHl]. Qed.

@@ -194,17 +194,6 @@ Proof.
   by inversion Hlength; subst.
 Qed.
 
-Definition filtering_subsequence_stream_filter_concat
-  {A B : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (f : dsig P -> ne_list B)
-  (s : Stream A)
-  (ss : Stream nat)
-  (Hfs : filtering_subsequence P s ss)
-  : Stream B
-  := stream_concat (fun n => f (dexist _ (filtering_subsequence_witness P s ss Hfs n))).
-
 (**
   Given a [filtering_subsequence] for property <<P>> over a stream <<s>> and
   a function <<f>> transforming elements with property <<P>>, we can define the
@@ -600,6 +589,55 @@ Definition bounded_stream_map_option
   map_option f (stream_prefix s (` Hfin)).
 
 End sec_stream_map_option.
+
+Section sec_stream_concat_map.
+
+(** ** Mapping a function expanding elements to lists of elements on a stream
+
+  Given a function <<f>> which [InfinitelyOften] produces non-empty lists from
+  the elements of a stream <<s>>, we can define the stream obtained by
+  concatenating the values of <<s>> through <<f>>.
+*)
+
+Context
+  [A B : Type]
+  (f : A -> list B)
+  (P : A -> Prop := fun a => f a <> [])
+  (s : Stream A)
+  .
+
+Definition stream_concat_map
+  (Hinf : InfinitelyOften P s)
+  : Stream B :=
+  stream_concat (stream_filter_map P (list_function_restriction f) s Hinf).
+
+Lemma stream_concat_map_prefix
+  (Hinf : InfinitelyOften P s)
+  (n : nat)
+  (map_opt_pre := mbind f (stream_prefix s n))
+  (m := length map_opt_pre)
+  : stream_prefix (stream_concat_map Hinf) m = map_opt_pre.
+Proof.
+  subst map_opt_pre m; unfold stream_concat_map.
+  cut (mjoin
+    (List.map ne_list_to_list
+      (list_filter_map (λ a : A, f a ≠ []) (list_function_restriction f)
+          (stream_prefix s n))) = stream_prefix s n ≫= f).
+  {
+    intros <-.
+    by erewrite stream_concat_prefix;
+      unfold stream_filter_map;
+      rewrite fitering_subsequence_stream_filter_map_prefix.
+  }
+  apply list_filter_map_mbind.
+Qed.
+
+Definition bounded_stream_concat_map
+  (Hfin : FinitelyManyBound P s)
+  : list B :=
+  mbind f (stream_prefix s (` Hfin)).
+
+End sec_stream_concat_map.
 
 (**
   For a totally defined function, [stream_map_option] corresponds to the
