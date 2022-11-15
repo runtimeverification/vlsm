@@ -1,6 +1,7 @@
 -Q theories/VLSM VLSM
 
 -arg -w -arg -future-coercion-class-field
+-arg -w -arg -deprecated-tacopt-without-locality
 
 theories/VLSM/Lib/SsrExport.v
 theories/VLSM/Lib/Preamble.v
