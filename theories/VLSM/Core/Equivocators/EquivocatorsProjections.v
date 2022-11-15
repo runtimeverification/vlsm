@@ -566,7 +566,7 @@ Proof.
   - rewrite <- app_comm_cons in Hproject.
     apply equivocator_vlsm_trace_project_cons in Hproject.
     destruct Hproject as [da [prefixa [tr' [Ha [Hproject Heq]]]]].
-    spec IHbprefix tr' da Hproject.
+    specialize (IHbprefix tr' da Hproject).
     destruct IHbprefix as [dmiddle [prefix' [suffix [Hprefix [Hsuffix Htr']]]]].
     exists dmiddle.
     exists (prefixa ++ prefix'). exists suffix.
@@ -696,7 +696,7 @@ Proof.
     specialize (equivocator_state_last_n X s) as Hs_lst.
     apply equivocator_state_project_Some_rev in Heqsi.
     spec Hn; [lia|].
-    spec Hn n.
+    specialize (Hn n).
     destruct_equivocator_state_project s' i s'i Hi; [|lia].
     by simpl in Hn; subst.
   - eexists; split; [done |].

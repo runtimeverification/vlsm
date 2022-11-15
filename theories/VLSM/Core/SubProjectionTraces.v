@@ -552,7 +552,7 @@ Proof.
     rewrite! app_assoc in Hmsg.
     by destruct (Hmsg eq_refl Hin_m Hitem); [left | right].
   }
-  spec IHtr Htr.
+  specialize (IHtr Htr).
   rewrite finite_trace_sub_projection_app.
   apply finite_valid_trace_from_app_iff.
   split; [done |].

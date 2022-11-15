@@ -151,7 +151,7 @@ Proof.
   - by intros Hv; eapply equivocating_validators_is_equivocating_tracewise_iff with (Cm := Cm).
   - intros (msg & Hsender & Heqv).
     apply Hincl.
-    spec Hwitness v;
+    specialize (Hwitness v);
     rewrite finite_trace_last_is_last in Hwitness;
     apply Hwitness.
     exists msg. split; [done |].
@@ -194,7 +194,7 @@ Proof.
     simpl in Heqv. destruct Heqv as [Heq_m Heqv].
     by inversion Heq_m.
   - elim Hnv.
-    spec Hwitness v.
+    specialize (Hwitness v).
     apply finite_valid_trace_from_to_last in Htr as Hs.
     simpl in Hs, Hwitness. rewrite Hs in Hwitness.
     apply Hwitness. exists m'. split; [done |].
@@ -390,9 +390,9 @@ Proof.
               _ Htr'_lst m
             ) as [Hconsistency _].
           spec Hconsistency; [by exists is, tr', Htr' |].
-          by spec Hconsistency is' tr'' Htr''.
+          by specialize (Hconsistency is' tr'' Htr'').
         }
-        spec Hwitness v.
+        specialize (Hwitness v).
         rewrite finite_trace_last_is_last in Hwitness.
         simpl in Hwitness.
         apply Hwitness.
@@ -517,10 +517,10 @@ Proof.
     destruct
       (equivocating_validators_witness_last_char _ _ _ _ _ _ Htr'_item Hwitness)
       as [[Heq Hwitness'] | [msg [Heq_om [v [Hsender [Hnv Hneq]]]]]].
-    + spec IHn (length tr').
+    + specialize (IHn (length tr')).
       rewrite app_length in Hn. simpl in Hn.
       spec IHn; [lia|].
-      spec IHn is tr'.
+      specialize (IHn is tr').
       spec IHn; [by subst m; setoid_rewrite Heq |].
       specialize (IHn eq_refl).
       destruct Htr'_item as [Htr'_item Hinit].
@@ -531,7 +531,7 @@ Proof.
         split; [| done].
         by apply finite_valid_trace_from_to_forget_last in Htr'.
       }
-      spec IHn Hwitness'.
+      specialize (IHn Hwitness').
       destruct IHn as [is' [tr'' [[Htr'' Hinit'] Hprefix]]].
       specialize
         (finite_valid_trace_from_to_app PreFree _ _ _ _ _ Htr'' Hitem)
@@ -553,20 +553,20 @@ Proof.
         by subst.
       }
       destruct Hwitness' as [is' [tr''[Htr'' Hwitness']]].
-      spec IHm (set_size (equivocating_validators s)) (length tr'').
+      specialize (IHm (set_size (equivocating_validators s)) (length tr'')).
       spec IHm.
       {
         rewrite Hneq.
         setoid_rewrite size_union; [by rewrite size_singleton; unfold size; lia |].
         by intro v'; rewrite elem_of_singleton; intros ->.
       }
-      spec IHm is' tr''.
+      specialize (IHm is' tr'').
       apply finite_valid_trace_init_to_last in Htr'' as Htr''_lst.
       simpl in *.
       rewrite Htr''_lst in IHm.
       specialize (IHm eq_refl eq_refl).
       spec IHm; [by apply finite_valid_trace_init_to_forget_last in Htr'' |].
-      spec IHm Hwitness'.
+      specialize (IHm Hwitness').
       destruct IHm as [is'' [tr''' [[Htr''' Hinit'] Hprefix]]].
       apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr'_item as Hitem.
       simpl in *.
@@ -702,7 +702,7 @@ Proof.
     by exists i.
   }
   apply elem_of_elements in Hequivocating_v.
-  spec Hproj (@dexist _ _ (fun v => sub_index_prop_dec (elements(equivocating_validators sf)) v) v Hequivocating_v).
+  specialize (Hproj (@dexist _ _ (fun v => sub_index_prop_dec (elements(equivocating_validators sf)) v) v Hequivocating_v)).
   by apply (VLSM_embedding_can_emit Hproj).
 Qed.
 
@@ -762,7 +762,7 @@ Proof.
     apply Free_has_sender in Hiom as _Hsender.
     destruct (sender im) as [v|] eqn:Hsender; [| by congruence].
     clear _Hsender.
-    spec Heqv v.
+    specialize (Heqv v).
     rewrite finite_trace_last_is_last in Heqv.
     simpl in Heqv.
     assert (Hpre_s : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) s).

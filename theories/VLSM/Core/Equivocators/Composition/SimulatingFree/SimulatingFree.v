@@ -177,7 +177,7 @@ Proof.
     | ?H -> _ => cut H
     end.
     { intro Hivt.
-      spec Happ_extend Hivt.
+      specialize (Happ_extend Hivt).
       match goal with
       |- ?H /\ _ => assert (Hproject : H)
       end.

@@ -391,7 +391,7 @@ Proof.
   destruct (decide (m = n)); [done |].
   elim (HI (Str_nth n l)).
   by destruct (decide (m < n))
-  ; [spec Hl m n|spec Hl n m]; (spec Hl; [lia|])
+  ; [specialize (Hl m n)|specialize (Hl n m)]; (spec Hl; [lia|])
   ; rewrite Hmn in Hl.
 Qed.
 

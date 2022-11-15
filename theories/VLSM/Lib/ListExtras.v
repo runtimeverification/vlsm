@@ -950,7 +950,7 @@ Lemma map_option_length
 Proof.
   induction l; [done |].
   inversion Hfl; subst.
-  spec IHl H2; cbn.
+  specialize (IHl H2); cbn.
   by destruct (f a); cbn; congruence.
 Qed.
 

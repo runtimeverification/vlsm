@@ -457,7 +457,7 @@ Proof.
       as Hzero.
     unfold final_state in Hproper.
     rewrite Htr_lst, finite_trace_last_is_last in Hproper.
-    spec Hproperx (proj1 Hproper).
+    specialize (Hproperx (proj1 Hproper)).
     destruct Hproperx as [oitem [final_descriptors' [Hprojectx [Hitemx Hproperx]]]].
     specialize (Hproperx (finite_trace_last is tr')).
     unfold equivocators_trace_project.
@@ -1123,7 +1123,7 @@ Proof.
       (equivocators_fixed_equivocations_constraint IM equivocating)
       (composite_has_been_directly_observed IM sX)
     ) as Hproject.
-  spec Hproject is tr.
+  specialize (Hproject is tr).
   spec Hproject.
   { subst sX.
     rewrite <- (valid_trace_get_last Htr) in Hdescriptors |- *.
@@ -1132,7 +1132,7 @@ Proof.
         _ _ (valid_trace_forget_last Htr) descriptors Hdescriptors
       ).
   }
-  spec Hproject (valid_trace_forget_last Htr).
+  specialize (Hproject (valid_trace_forget_last Htr)).
 
   rewrite HeqsX in n.
   clear HeqsX.
@@ -1176,8 +1176,7 @@ Proof.
     ) as Hitem_equivocating.
   clear Hdescriptors n.
   spec Hitem_equivocating; [by rewrite Heqtr, !elem_of_app, elem_of_cons; auto |].
-  spec Hitem_equivocating Houtput_select.
-
+  specialize (Hitem_equivocating Houtput_select).
   (*
     Phase III (b):
     Consider a projection trX' obtained using the final_descriptor_m as above,

@@ -114,7 +114,7 @@ Lemma preloaded_equivocator_vlsm_trace_project_valid_item
 Proof.
   specialize (preloaded_equivocator_vlsm_valid_trace_project_inv2 X bs bf btr) as Hinv2.
   spec Hinv2; [by intro contra; subst; inversion Hitem |].
-  spec Hinv2 Hbtr.
+  specialize (Hinv2 Hbtr).
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
@@ -141,7 +141,7 @@ Proof.
     as Hsuffix'.
   spec Hsuffix'; [by cbn; rewrite Hitemx |].
   subst dsuffix.
-  spec Hsuffix' Hsuffix.
+  specialize (Hsuffix' Hsuffix).
   subst bitem.
   destruct
     (equivocator_valid_transition_project_inv2 _ l lst s iom oom Hv Ht _ _ _ Hitemx)
@@ -169,7 +169,7 @@ Proof.
     + remember (bprefix ++ _) as btr.
       specialize (equivocator_vlsm_trace_project_inv X btr) as Hinv.
       spec Hinv; [by destruct bprefix; subst |].
-      spec Hinv i.
+      specialize (Hinv i).
       spec Hinv; [by subst; eexists |].
       specialize (Hinv bs) as [lst_i Hlst_i].
       by eexists.
@@ -321,7 +321,7 @@ Proof.
         as [Hom Hsame].
       subst om'.
       specialize (existing_false_label_equivocator_transition_size X Ht _ Hidesc) as Ht_size.
-      spec oracle_step_update msg.
+      specialize (oracle_step_update msg).
       split.
       * intros [i [s'i [Hs'i Hbri]]].
         apply equivocator_state_project_Some_rev in Hs'i as Hlti.
@@ -332,8 +332,8 @@ Proof.
            destruct Hbri as [H | Hbri]; [| by right; eexists _,_].
            by left; revert H; apply Hselector_io.
         -- right. exists i, s'i. split; [| done].
-           spec Hnot_same i.
-           spec Hnot_same; [lia|]. spec Hnot_same n.
+           specialize (Hnot_same i).
+           spec Hnot_same; [lia|]. specialize (Hnot_same n).
            simpl in Hnot_same. rewrite Hs'i in Hnot_same.
            destruct_equivocator_state_project s i si Hlti'; [|lia].
            by cbn in Hnot_same; congruence.
@@ -357,7 +357,8 @@ Proof.
               simpl in Hsame.
               by destruct_equivocator_state_project s' ins _sidesc' Hins; [subst |lia].
            ++ exists ins, sins. split; [| done].
-              spec Hnot_same ins. spec Hnot_same; [lia|]. spec Hnot_same n.
+              specialize (Hnot_same ins). spec Hnot_same; [lia|].
+              specialize (Hnot_same n).
               simpl in Hnot_same. rewrite Hsins in Hnot_same.
               destruct_equivocator_state_project s' ins _sins Hins; [|lia].
               cbn in Hnot_same; congruence.
@@ -378,7 +379,7 @@ Proof.
         as [Hom Hlast].
       subst om'.
       specialize (existing_true_label_equivocator_transition_size X Ht _ Hidesc) as Ht_size.
-      spec oracle_step_update msg.
+      specialize (oracle_step_update msg).
       split.
       * intros [i [s'i [Hs'i Hbri]]].
         apply equivocator_state_project_Some_rev in Hs'i as Hlti.
@@ -389,7 +390,7 @@ Proof.
            destruct Hbri as [H | Hbri]; [| by right; eexists _,_].
            by left; revert H; apply Hselector_io.
         -- right. exists i, s'i. split; [| done].
-           spec Hnot_last i.
+           specialize (Hnot_last i).
            spec Hnot_last; [lia|].
            simpl in Hnot_last. rewrite Hs'i in Hnot_last.
            destruct_equivocator_state_project s i si Hlti'; [|lia].
@@ -404,7 +405,7 @@ Proof.
            destruct_equivocator_state_project  s' (equivocator_state_n s) _sidesc' Hlst; [|lia].
            by subst.
         -- apply equivocator_state_project_Some_rev in Hsins as Hltins.
-           spec Hnot_last ins. spec Hnot_last; [lia|].
+           specialize (Hnot_last ins). spec Hnot_last; [lia|].
            simpl in Hnot_last. rewrite Hsins in Hnot_last.
            exists ins, sins. split; [| done].
            destruct_equivocator_state_project s' ins _sins Hltins'; [|lia].

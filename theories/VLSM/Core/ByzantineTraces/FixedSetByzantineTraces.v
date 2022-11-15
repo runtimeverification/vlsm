@@ -429,7 +429,7 @@ Proof.
     rewrite set_diff_iff in Hi.
     apply not_and_r in Hi as [Hi | Hi]; [elim Hi; apply elem_of_enum|].
     apply dec_stable in Hi.
-    spec Hgen (message_as_byzantine_label m i Hi).
+    specialize (Hgen (message_as_byzantine_label m i Hi)).
     spec Hgen.
     { split; [| done].
       cbn. unfold fixed_byzantine_IM, update_IM. simpl.

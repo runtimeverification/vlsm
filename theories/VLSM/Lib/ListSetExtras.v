@@ -67,7 +67,7 @@ Proof.
   split; intros; [|subst; apply set_eq_refl].
   destruct l as [| hd tl]; [done |].
   destruct H.
-  spec H hd (elem_of_list_here hd tl).
+  specialize (H hd (elem_of_list_here hd tl)).
   by inversion H.
 Qed.
 
@@ -199,7 +199,7 @@ Proof.
   intro f; induction s; intros; simpl.
   - by apply list_subseteq_nil.
   - assert (Hs : s ⊆ s') by (intros b Hs; apply H; right; done).
-    spec IHs s' Hs.
+    specialize (IHs s' Hs).
     intros b Hs'.
     apply elem_of_cons in Hs' as [-> |]; [| by apply IHs].
     by apply elem_of_list_fmap_1, H; left.
