@@ -430,6 +430,13 @@ Proof.
   by revert n; induction l; intros [| n]; cbn; [.. | rewrite IHl].
 Qed.
 
+Lemma list_prefix_of
+  {A : Type}
+  (l : list A)
+  (n : nat)
+  : list_prefix l n `prefix_of` l.
+Proof. by eexists; symmetry; apply list_prefix_suffix. Qed.
+
 Definition list_segment
   {A : Type}
   (l : list A)

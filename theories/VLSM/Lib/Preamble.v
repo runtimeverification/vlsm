@@ -194,6 +194,59 @@ Proof.
   by split; [| lia].
 Qed.
 
+Definition compute_minimal_among_le
+  (P : nat -> Prop)
+  `{forall n, Decision (P n)}
+  (bound : nat)
+  (Hbound : P bound)
+  : nat :=
+  (fix helper (dif : nat) :=
+        match dif with
+        | 0 => bound
+        | S dif' =>
+          if decide (P (bound - dif)) then bound - dif else helper dif'
+        end)
+      bound.
+
+Lemma compute_minimal_among_le_is_minimal
+  (P : nat -> Prop)
+  `{forall n, Decision (P n)}
+  (bound : nat)
+  (Hbound : P bound)
+  : minimal_among le P (compute_minimal_among_le P bound Hbound).
+Proof.
+  unfold compute_minimal_among_le.
+  remember (fix helper (dif : nat) : nat := _) as helper.
+  pose (P' (n m : nat) := bound - n <= m <= bound /\ P m).
+  cut (forall n, minimal_among le (P' n) (helper n)).
+  {
+    subst P'; intros Hmin; destruct (Hmin bound) as [[[_ ?] ?] Hmin'].
+    clear Hmin; cbn in *.
+    split; [done |].
+    intros; apply Hmin'; [| done].
+    split; [| done].
+    split; [lia |].
+    by etransitivity.
+  }
+  assert (Hbounds : forall n, bound - n <= helper n <= bound)
+    by (induction n; subst helper; cbn; [| case_decide]; lia).
+  assert (Hp : forall n, P (helper n))
+    by (induction n; subst helper; cbn; [| case_decide]; done).
+  assert (Hnp : forall n m, bound - n <= m <= bound -> m < helper n -> ~ P m).
+  {
+    induction n; subst helper; cbn; [by lia |].
+    case_decide; [by lia |].
+    intros.
+    destruct (decide (m = bound - S n)); [by subst |].
+    by apply IHn; lia.
+  }
+  subst P'; split.
+  - by split; [| apply Hp].
+  - intros ? [Hm' Hpm'] Hle.
+    destruct (decide (helper n = m')); [by lia |].
+    by exfalso; eapply Hnp; [done | lia |].
+Qed.
+
 (** A more concise definition of minimality for strict orders. *)
 Definition strict_minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
   P m /\ (forall m', P m' -> ~ R m' m).

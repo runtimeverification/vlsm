@@ -446,6 +446,17 @@ Proof.
   by rewrite IHn1; [| lia].
 Qed.
 
+Lemma stream_prefix_of
+  {A : Type}
+  (l : Stream A)
+  (n1 n2 : nat)
+  (Hn: n1 <= n2)
+  : stream_prefix l n1 `prefix_of` stream_prefix l n2.
+Proof.
+  rewrite <- (stream_prefix_prefix l n1 n2 Hn).
+  by apply list_prefix_of.
+Qed.
+
 Definition stream_segment
   {A : Type}
   (l : Stream A)

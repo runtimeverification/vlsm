@@ -74,6 +74,9 @@ Definition ne_list_to_list {A} (nel : ne_list A) : list A :=
 
 Definition ne_list_length {A} (nel : ne_list A) := length (ne_list_to_list nel).
 
+Lemma ne_list_min_length {A} (nel : ne_list A) : ne_list_length nel >= 1.
+Proof. by destruct nel; cbn; lia. Qed.
+
 Lemma ne_list_to_list_unroll {A} (a : A) (nel : ne_list A) :
   ne_list_to_list (a ::: nel) = a :: ne_list_to_list nel.
 Proof. done. Qed.
@@ -200,6 +203,18 @@ Proof.
     unfold proj1_sig, dexist.
     destruct (f x); [done |].
     by rewrite NeList_to_ne_list_to_list, app_nil_r.
+Qed.
+
+Lemma ne_list_concat_min_length
+  {A : Type}
+  (l : list (ne_list A))
+  : length (mjoin (map ne_list_to_list l)) >= length l.
+Proof.
+  induction l; cbn; [by lia |].
+  rewrite app_length.
+  (* for some strange reason lia doesn't work directly, so... this hack: *)
+  assert (Hle : forall a b c, a >= 1 -> b >= c -> a + b >= S c) by lia.
+  by apply Hle; [apply ne_list_min_length |].
 Qed.
 
 (**

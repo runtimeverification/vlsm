@@ -632,6 +632,47 @@ Proof.
   apply list_filter_map_mbind.
 Qed.
 
+Program Definition stream_concat_map_ex_prefix
+  (Hinf : InfinitelyOften P s)
+  (Hfs := stream_filter_positions_filtering_subsequence _ _ Hinf)
+  (k : nat)
+  : {n : nat |
+      stream_prefix (stream_concat_map Hinf) k
+        `prefix_of`
+      mbind f (stream_prefix s n)}
+  :=
+  let (n, Heq) :=
+    (fitering_subsequence_stream_filter_map_prefix_ex P (list_function_restriction f) _ _ Hfs k)
+  in exist _ n _.
+Next Obligation.
+  cbn; intros Hinf k n Heq.
+  rewrite <- (stream_concat_map_prefix Hinf).
+  apply stream_prefix_of.
+  rewrite <- list_filter_map_mbind.
+  replace k with (length (list_filter_map P (list_function_restriction f) (stream_prefix s n)))
+    by (rewrite <- Heq; apply stream_prefix_length).
+  by apply ne_list_concat_min_length.
+Qed.
+
+Program Definition stream_concat_map_ex_min_prefix
+  `{EqDecision B}
+  (Hinf : InfinitelyOften P s)
+  (k : nat)
+  (Ppre := fun m =>
+    stream_prefix (stream_concat_map Hinf) k
+      `prefix_of`
+    mbind f (stream_prefix s m))
+  : {n : nat | minimal_among le Ppre n}
+  :=
+  let (n, Hpre) :=  stream_concat_map_ex_prefix Hinf k in
+  exist _ (@compute_minimal_among_le Ppre _ n _) _.
+Next Obligation.
+  by intros; subst Ppre; cbn.
+Qed.
+Next Obligation.
+  by intros; apply compute_minimal_among_le_is_minimal.
+Qed.
+
 Definition bounded_stream_concat_map
   (Hfin : FinitelyManyBound P s)
   : list B :=
