@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListFinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
@@ -18,11 +18,11 @@ From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProje
   we denote by [msg_dep_happens_before].
 *)
 Definition msg_dep_rel
-  `(message_dependencies : message -> set message) : relation message :=
+  `{FinSet message Cm} `(message_dependencies : message -> Cm) : relation message :=
   fun m1 m2 => m1 ∈ message_dependencies m2.
 
 Definition msg_dep_happens_before
-  `(message_dependencies : message -> set message) : relation message :=
+  `{FinSet message Cm} `(message_dependencies : message -> Cm) : relation message :=
   tc (msg_dep_rel message_dependencies).
 
 (**
@@ -32,7 +32,8 @@ Definition msg_dep_happens_before
 *)
 Definition message_dependencies_full_node_condition
   `(X : VLSM message)
-  (message_dependencies : message -> set message)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
   (s : vstate X)
@@ -58,7 +59,8 @@ Definition message_dependencies_full_node_condition
 *)
 Class MessageDependencies
   `(X : VLSM message)
-  (message_dependencies : message -> set message)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
   `{!HasBeenSentCapability X}
   `{!HasBeenReceivedCapability X}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
@@ -77,13 +79,14 @@ Class MessageDependencies
   message_dependencies function, [HasBeenSentCapability] and
   [HasBeenReceivedCapability]) can be inferred from that.
 *)
-#[global] Hint Mode MessageDependencies - ! - - - - : typeclass_instances.
+#[global] Hint Mode MessageDependencies - ! - - - - - - - - - - - - - - : typeclass_instances.
 
 Section sec_message_dependencies.
 
 Context
   `(X : VLSM message)
-  (message_dependencies : message -> set message)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
   `{!HasBeenSentCapability X}
   `{!HasBeenReceivedCapability X}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
@@ -267,7 +270,8 @@ Section sec_message_dependencies_equivocation.
 Context
   {message : Type}
   (X : VLSM message)
-  (message_dependencies : message -> set message)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
   `(sender : message -> option validator)
   `{!HasBeenSentCapability X}
   `{!HasBeenReceivedCapability X}
@@ -495,7 +499,8 @@ Section sec_composite_message_dependencies.
 Context
   {message : Type}
   `(IM : index -> VLSM message)
-  (message_dependencies : message -> set message)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
   `{finite.Finite index}
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -594,7 +599,8 @@ Section sec_composite_message_dependencies_equivocation.
 Context
   {message : Type}
   `(IM : index -> VLSM message)
-  (message_dependencies : message -> set message)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
   `(sender : message -> option validator)
   `{finite.Finite index}
   `{forall i, HasBeenSentCapability (IM i)}
@@ -899,9 +905,10 @@ Section sec_sub_composite_message_dependencies.
 Context
   {message : Type}
   `(IM : index -> VLSM message)
-  (message_dependencies : message -> set message)
-  (indices : set index)
-  `{EqDecision index}
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
+  `{FinSet index Ci}
+  (indices : Ci)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
@@ -912,7 +919,7 @@ Lemma msg_dep_reflects_sub_free_validity
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel message_dependencies dm m -> P m -> P dm)
-  (X := free_composite_vlsm (sub_IM IM indices))
+  (X := free_composite_vlsm (sub_IM IM (elements indices)))
   : forall dm m, msg_dep_rel message_dependencies dm m ->
     valid_message_prop (pre_loaded_vlsm X P) m ->
     valid_message_prop (pre_loaded_vlsm X P) dm.
@@ -930,11 +937,12 @@ Section sec_FullMessageDependencies.
 
 Context
   {message : Type}
+  `{FinSet message Cm}
   .
 
 Class FullMessageDependencies
-  (message_dependencies : message -> set message)
-  (full_message_dependencies : message -> set message)
+  (message_dependencies : message -> Cm)
+  (full_message_dependencies : message -> Cm)
   : Prop :=
 {
   full_message_dependencies_happens_before :
@@ -943,22 +951,20 @@ Class FullMessageDependencies
       msg_dep_happens_before message_dependencies dm m;
   full_message_dependencies_irreflexive :
     forall m, m ∉ full_message_dependencies m;
-  full_message_dependencies_nodups :
-    forall m, NoDup (full_message_dependencies m);
 }.
 
 End sec_FullMessageDependencies.
 
 (* given the message type, we can usually look up the functions for message dependencies *)
-#[global] Hint Mode FullMessageDependencies ! - - : typeclass_instances.
+#[global] Hint Mode FullMessageDependencies ! - - - - - - - - - - - - : typeclass_instances.
 
 Section sec_FullMessageDependencies_happens_before.
 
 Context
-  `{EqDecision message}
-  (message_dependencies : message -> set message)
-  (full_message_dependencies : message -> set message)
-  `{FullMessageDependencies _ message_dependencies full_message_dependencies}
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
+  (full_message_dependencies : message -> Cm)
+  (HFullMsgDep : FullMessageDependencies message_dependencies full_message_dependencies)
   .
 
 #[export] Instance msg_dep_happens_before_dec :
@@ -969,8 +975,9 @@ Proof.
       match decide (m1 ∈ full_message_dependencies m2) with
       | left Hdec => left _
       | right Hdec => right _
-      end);
-  by rewrite <- full_message_dependencies_happens_before.
+      end).
+  - by rewrite <- full_message_dependencies_happens_before.
+  - by rewrite <- full_message_dependencies_happens_before.
 Qed.
 
 #[export] Instance msg_dep_happens_before_irrefl :
@@ -997,17 +1004,17 @@ Qed.
 
 Lemma msg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies).
 Proof.
-  apply tc_wf_projected with (<) (fun m => length (full_message_dependencies m));
+  apply tc_wf_projected with (<) (fun m => length (elements (full_message_dependencies m)));
     [by typeclasses eauto | | by apply Wf_nat.lt_wf ].
   intros; unfold lt.
-  change (S _) with (length (x :: full_message_dependencies x)).
+  change (S _) with (length (x :: elements (full_message_dependencies x))).
   apply NoDup_subseteq_length.
   - constructor.
-    + by apply full_message_dependencies_irreflexive.
-    + by apply full_message_dependencies_nodups.
-  - intros z Hz; inversion Hz; subst;
-      [| by eapply msg_dep_rel_full_message_dependecies_subset].
-    by apply full_message_dependencies_happens_before; constructor.
+    + by rewrite elem_of_elements; apply full_message_dependencies_irreflexive.
+    + by apply NoDup_elements.
+  - intros z Hz; inversion Hz; subst; rewrite elem_of_elements in *.
+    + by apply full_message_dependencies_happens_before; constructor.
+    + by eapply msg_dep_rel_full_message_dependecies_subset.
 Qed.
 
 Lemma FullMessageDependencies_ind
@@ -1045,7 +1052,7 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   {validator : Type}
   (A : validator -> index)
   (sender : message -> option validator)
@@ -1082,7 +1089,7 @@ Qed.
   emittable from their dependencies.
 *)
 Definition all_dependencies_emittable_from_dependencies_prop (m : message) : Prop :=
-  forall dm, dm ∈ m :: full_message_dependencies m -> Emittable_from_dependencies_prop dm.
+  forall dm, dm ∈ m :: elements (full_message_dependencies m) -> Emittable_from_dependencies_prop dm.
 
 (**
   The property of requiring that the validity predicate subsumes the
@@ -1126,7 +1133,7 @@ Proof.
   clear v Hemit'.
   eapply FullMessageDependencies_ind; [done |].
   intros dm Hdm Hdeps.
-  specialize (Hm dm); spec Hm; [by right |].
+  specialize (Hm dm); spec Hm; [by right; apply elem_of_elements |].
   inversion Hm as [v _ ?]; clear Hm.
   by apply free_valid_from_valid_dependencies with (A v).
 Qed.
@@ -1167,7 +1174,7 @@ Proof.
         as (v & Hsender & Hemit); [| done | done].
     exists v; [done |].
     by eapply message_dependencies_are_sufficient.
-  - apply full_message_dependencies_happens_before in Hin.
+  - apply elem_of_elements, full_message_dependencies_happens_before in Hin.
     eapply @msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender in Hin
         as (v & Hsender & Hemit); [| done ..].
     exists v; [done |].
@@ -1179,31 +1186,32 @@ End sec_free_composition_validators.
 Section sec_CompositeHasBeenObserved_dec.
 
 Context
-  `{EqDecision message}
+  `{FinSet message Cm}
   `{finite.Finite index}
+  (message_dependencies : message -> Cm)
   (IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
   .
 
 #[export] Instance CompositeHasBeenObserved_dec
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   : RelDecision (CompositeHasBeenObserved IM message_dependencies).
 Proof.
   intros s m.
   destruct (decide (composite_has_been_directly_observed IM s m));
     [by left; constructor |].
-  destruct (decide (Exists (fun m' => m ∈ full_message_dependencies m')
+  destruct (decide (Exists (fun m' => m ∈ elements (full_message_dependencies m'))
                       (composite_observed_messages_set IM s))).
   - left.
     apply Exists_exists in e as (m' & Hobsm' & Hmm').
     constructor 2 with m'.
     + by apply elem_of_composite_observed_messages_set.
-    + by apply full_message_dependencies_happens_before.
+    + by apply full_message_dependencies_happens_before; apply elem_of_elements in Hmm'.
   - right; inversion 1; [by contradict n |].
     contradict n0; apply Exists_exists; exists m'; split.
     + by apply elem_of_composite_observed_messages_set.
-    + by apply full_message_dependencies_happens_before.
+    + by apply elem_of_elements; apply full_message_dependencies_happens_before.
 Qed.
 
 End sec_CompositeHasBeenObserved_dec.
@@ -1216,7 +1224,8 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (message_dependencies : message -> list message)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
   `(sender : message -> option validator)
   (A : validator -> index)
   (Hauth : channel_authentication_prop IM A sender)

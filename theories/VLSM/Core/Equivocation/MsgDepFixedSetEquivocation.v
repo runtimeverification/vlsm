@@ -8,9 +8,11 @@ Section sec_msg_dep_fixed_set_equivocation.
 
 Context
   `(IM : index -> VLSM message)
-  (message_dependencies : message -> set message)
-  (equivocators : set index)
-  `{finite.Finite index}
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
+  `{FinSet index Ci}
+  (equivocators : Ci)
+  `{@finite.Finite index _ }
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
@@ -18,7 +20,7 @@ Context
   .
 
 Definition equivocator_can_emit (m : message) : Prop :=
-  exists i, i ∈ equivocators /\ can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m.
+  exists i, i ∈ (elements equivocators) /\ can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m.
 
 Definition dependencies_with_non_equivocating_senders_were_sent s m : Prop :=
   forall dm, msg_dep_happens_before message_dependencies dm m ->
@@ -47,8 +49,10 @@ Lemma messages_with_valid_dependences_can_be_emitted s dm
   (Hemitted: can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
   : can_emit (equivocators_composition_for_sent IM equivocators s) dm.
 Proof.
-  by eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient
-  ; itauto eauto.
+  eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient.
+  - by apply elem_of_elements, Hdm_i.
+  - by apply Hdepm.
+  - by apply Hemitted.
 Qed.
 
 Lemma msg_dep_rel_reflects_dependencies_with_non_equivocating_senders_were_sent s
@@ -75,10 +79,9 @@ Proof.
   apply emitted_messages_are_valid_iff.
   assert (Hdm_hb : msg_dep_happens_before message_dependencies dm m)
     by (apply msg_dep_happens_before_iff_one; itauto).
-  destruct (Heqv _ Hdm_hb) as [Hsent | (dm_i & Hdm_i & Hemitted)]
-  ; [by left; right | right].
+  destruct (Heqv _ Hdm_hb) as [Hsent | (dm_i & Hdm_i & Hemitted)]; [by left; right | right].
   apply messages_with_valid_dependences_can_be_emitted with dm_i
-  ; [| done | done].
+  ; [| apply elem_of_elements in Hdm_i; done | done].
   intros dm0 Hdm0.
   apply Hind with dm; [done | | done].
   clear -Heqv Hdm; revert dm m Hdm Heqv.
@@ -95,7 +98,8 @@ Proof.
     valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm)
   ; [| by apply dependencies_are_valid].
   intro Hdeps; right.
-  by apply messages_with_valid_dependences_can_be_emitted with i; itauto.
+  by apply messages_with_valid_dependences_can_be_emitted with i;
+   [itauto | apply elem_of_elements in Hi |].
 Qed.
 
 Lemma msg_dep_strong_fixed_equivocation_constraint_subsumption
@@ -109,7 +113,7 @@ Proof.
 Qed.
 
 Lemma single_equivocator_projection s j
-  (Hj : j ∈ equivocators)
+  (Hj : j ∈ (elements equivocators))
   : VLSM_projection
       (equivocators_composition_for_sent IM equivocators s)
       (pre_loaded_with_all_messages_vlsm (IM j))
@@ -152,7 +156,7 @@ Proof.
   intros [(sX, iom) [(sub_i, li) [sX' HtX]]].
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   exists i; split; [done |].
-  apply can_emit_iff.
+  - apply can_emit_iff.
   apply (VLSM_projection_input_valid_transition
           (single_equivocator_projection s i Hi)) with (lY := li) in HtX
   ; [by eexists _,_,_ |].
@@ -289,11 +293,13 @@ Section sec_full_node_fixed_set_equivocation.
 
 Context
   {message : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
-  (message_dependencies : message -> set message)
-  (equivocators : set index)
+  `{FinSet message Cm}
+  (message_dependencies : message -> Cm)
+  (equivocators : Ci)
   {validator : Type}
   (A : validator -> index)
   (sender : message -> option validator)
@@ -322,8 +328,8 @@ Proof.
   apply Hchannel in Hemit; cbv in Hemit |- *.
   destruct (sender m) as [v |]; [| congruence].
   eexists; split; [done |].
-  replace (A v) with i; [done |].
-  by congruence.
+  replace (A v) with i; [by apply elem_of_elements in Hi |].
+  congruence.
 Qed.
 
 Context
@@ -362,6 +368,7 @@ Proof.
   - by revert Hsent; apply sent_by_non_equivocating_are_directly_observed.
   - destruct l as [i li], Heqv as (j & Hsender & HAj).
     apply Hfull in Hv.
+    apply elem_of_elements in HAj.
     eapply VLSM_incl_can_emit.
     {
       apply pre_loaded_vlsm_incl_relaxed
@@ -376,7 +383,7 @@ Proof.
       by apply @preloaded_sub_element_embedding
         with (Hj := HAj) (P := fun dm => dm ∈ message_dependencies m); itauto.
     }
-    eapply message_dependencies_are_sufficient.
+    apply message_dependencies_are_sufficient.
     cut (exists k, can_emit (pre_loaded_with_all_messages_vlsm (IM k)) m).
     {
       intros [k Hk].

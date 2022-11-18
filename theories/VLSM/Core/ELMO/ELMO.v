@@ -4,7 +4,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble Measurable FinSetExtras RealsExtras ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
 From VLSM.Core Require Import Validator ProjectionTraces MessageDependencies.
-From VLSM.Core Require Import TraceableVLSM MinimalEquivocationTrace FinSetMessageDependencies.
+From VLSM.Core Require Import TraceableVLSM MinimalEquivocationTrace.
 From VLSM.Core Require Import BaseELMO UMO MO.
 
 Create HintDb ELMO_hints.
@@ -22,13 +22,14 @@ Section sec_ELMO.
 
 Context
   {Address : Type}
-  `{FinSet Address Ca}
   (State := @State Address)
   (Observation := @Observation Address)
   (Message := @Message Address).
 
 Context
-  `{@ReachableThreshold Address Hmeasurable}
+  {measurable_Address : Measurable Address}
+  `{FinSet Address Ca}
+  `{!ReachableThreshold Address Ca}
   `{finite.Finite index}
   (idx : index -> Address)
   `{!Inj (=) (=) idx}.
@@ -38,11 +39,11 @@ Definition immediate_dependency (m1 m2 : Message) : Prop :=
 
 Lemma immediate_dependency_msg_dep_rel :
   forall dm m : Message,
-    immediate_dependency dm m <-> msg_dep_rel (elements ∘ Message_dependencies) dm m.
+    immediate_dependency dm m <-> msg_dep_rel Message_dependencies dm m.
 Proof.
   unfold immediate_dependency, messages, messages',
     msg_dep_rel, Message_dependencies; cbn.
-  by setoid_rewrite elem_of_elements; setoid_rewrite elem_of_list_to_set.
+  by setoid_rewrite elem_of_list_to_set.
 Qed.
 
 #[local] Notation happensBefore := (tc immediate_dependency).
@@ -51,7 +52,7 @@ Qed.
 
 Lemma happensBefore_msg_dep :
   forall dm m : Message,
-    dm <hb m <-> msg_dep_happens_before (elements ∘ Message_dependencies) dm m.
+    dm <hb m <-> msg_dep_happens_before Message_dependencies dm m.
 Proof.
   by split;
     (induction 1; [by constructor 1; apply immediate_dependency_msg_dep_rel |]);
@@ -99,10 +100,14 @@ Lemma messages_hb_transitive :
     m' <hb m ->
     m' ∈ messages s.
 Proof.
-  by refine (UMO_reachable_elem_of_messages_ind _ _ _ _ _);
+  refine (UMO_reachable_elem_of_messages_ind _ _ _ _ _);
     [intros | intros s Hs IH m' Hm'%tc_r_iff
     | intros s Hs mr Hmr%submseteq_list_subseteq IH m' Hm'%tc_r_iff];
-    apply elem_of_messages_addObservation; right; firstorder.
+    apply elem_of_messages_addObservation; right.
+  - by intuition.
+  - by destruct Hm' as [| (m & ? & ?)]; [| eapply IH].
+  - destruct Hm' as [| (m & ? & ?)]; [by apply Hmr |].
+    by eapply IH; [apply Hmr |].
 Qed.
 
 (**
@@ -375,11 +380,11 @@ Qed.
 Lemma ELMOComponent_message_dependencies_full_node_condition :
   forall i : index,
     message_dependencies_full_node_condition_prop
-      (ELMOComponent i) (elements ∘ Message_dependencies).
+      (ELMOComponent i) Message_dependencies.
 Proof.
   intros i [] s m Hv; inversion Hv as [? ? [Hfull] |]; subst.
   intros dm Hdm; cbn in Hdm.
-  apply elem_of_elements, elem_of_list_to_set in Hdm.
+  apply elem_of_list_to_set in Hdm.
   eapply elem_of_submseteq, elem_of_messages in Hdm; [| done].
   by destruct Hdm as []; [left | right].
 Qed.
@@ -1257,11 +1262,11 @@ Proof.
 Qed.
 
 #[export] Instance MessageDependencies_ELMOComponent :
-  MessageDependencies Ei (elements ∘ Message_dependencies).
+  MessageDependencies Ei Message_dependencies.
 Proof.
   constructor.
   - intros m s' ((s, iom) & l & [(_ & _ & Hv) Ht]) dm Hdm; cbn in *.
-    apply elem_of_elements, elem_of_list_to_set, elem_of_list_fmap in Hdm
+    apply elem_of_list_to_set, elem_of_list_fmap in Hdm
       as (o & -> & Hy).
     inversion Hv; subst; inversion Ht; subst; cbn in *; clear Ht.
     red; unfold Message; simpl.
@@ -1271,14 +1276,14 @@ Proof.
   - intros m Hm.
     apply can_emit_has_trace in Hm as (is & tr & item & Htr & Houtput).
     apply (can_emit_from_valid_trace
-            (pre_loaded_vlsm Ei (λ msg : Message, msg ∈ (elements ∘ Message_dependencies) m)))
+            (pre_loaded_vlsm Ei (λ msg : Message, msg ∈ Message_dependencies m)))
       with is (tr ++ [item]); cycle 1.
     + apply Exists_exists; eexists.
       by split; [apply elem_of_app; right; left |].
     + eapply lift_preloaded_trace_to_seeded;
         [by apply cannot_resend_message_stepwise_ELMOComponent | | done].
       intros dm [Hrcv Hnsnd].
-      apply elem_of_elements, elem_of_list_to_set, elem_of_list_fmap.
+      apply elem_of_list_to_set, elem_of_list_fmap.
       exists (MkObservation Receive dm); split; [done |].
       apply elem_of_receivedMessages.
       destruct Htr as [Htr His].
@@ -1331,11 +1336,12 @@ Proof.
   - change (MkState _ _) with (MkState ol a <+> ob);
       remember (MkState ol a) as s; clear Heqs ol a.
     destruct (P_dec ob) as [ | Hnot_new];
-      [by left; firstorder using rec_obs |].
-    destruct IHol as [ | Hnot_prev];
-      [by left; firstorder using rec_obs |].
+      [by left; eexists; split; [constructor |] |].
+    destruct IHol as [| Hnot_prev];
+      [by left; destruct e as (o & Ho & HPo); exists o; split; [constructor 2 |] |].
     destruct ob as [[] [os]]; cbn in IHob.
-    + destruct IHob as [| Hnot_recv]; [by left; firstorder using rec_obs |].
+    + destruct IHob as [| Hnot_recv];
+      [by left; destruct e as (o & Ho & HPo); exists o; split; [constructor 3 |]  |].
       by right; intros (? & Hrec & ?); inversion Hrec; subst;
         replace s0 with s in * by (apply eq_State; done); eauto.
     + by right; intros (? & Hrec & ?); inversion Hrec; subst;
@@ -1431,8 +1437,7 @@ Proof.
   intros s Hs.
   unfold ELMO_not_heavy, not_heavy.
   replace (equivocation_fault s) with 0%R; [by destruct threshold; apply Rge_le |].
-  unfold equivocation_fault; replace (elements _) with (@nil Address); [done |].
-  by symmetry; apply elements_empty_iff, ELMO_initial_state_equivocating_validators.
+  by symmetry; apply sum_weights_empty, ELMO_initial_state_equivocating_validators.
 Qed.
 
 Lemma ELMO_not_heavy_send_message :
@@ -1444,7 +1449,7 @@ Lemma ELMO_not_heavy_send_message :
 Proof.
   unfold ELMO_not_heavy, not_heavy; etransitivity; [| done].
   apply sum_weights_subseteq; [by apply NoDup_elements.. |].
-  intro a; rewrite !elem_of_elements.
+  intro a.
   unfold equivocating_validators; rewrite !elem_of_filter; cbn.
   intros [(msg & ? & (k & l & Hmsh) & Hnsent) Hx].
   split; [| done]; clear Hx.
@@ -1467,7 +1472,7 @@ Proof.
   intros * Hfull Hobs.
   unfold ELMO_not_heavy, not_heavy; etransitivity; [| done].
   apply sum_weights_subseteq; [by apply NoDup_elements.. |].
-  intro a; rewrite !elem_of_elements.
+  intro a.
   unfold equivocating_validators; rewrite !elem_of_filter; cbn.
   intros [(msg & ? & (k & l & Hmsh) & Hnsent) Hx].
   split; [| done]; clear Hx.
@@ -1482,7 +1487,7 @@ Proof.
     apply full_node_messages_iff_rec_obs; [done |].
     destruct Hmsh as [[= _ ->] | [_ Hmsh]]; [done |].
     apply messages_hb_transitive with m; [done.. |].
-    apply happensBefore_msg_dep, fin_set_full_message_dependencies_happens_before.
+    apply happensBefore_msg_dep, full_message_dependencies_happens_before.
     apply elem_of_rec_obs_fn_1 in Hmsh.
     by apply elem_of_map; eexists; split; cycle 1.
 Qed.
@@ -1528,7 +1533,7 @@ Qed.
 
 Lemma ELMO_composite_observed_before_send_sizeState_Proper :
   Proper
-    (composite_observed_before_send ELMOComponent (elements ∘ Message_dependencies) ==> lt)
+    (composite_observed_before_send ELMOComponent Message_dependencies ==> lt)
     (sizeState ∘ state).
 Proof.
   intros x y Hxy; cbn.
@@ -1540,11 +1545,11 @@ Proof.
   inversion Hobsx; [by eapply ELMO_has_been_directly_observed_sizeState |].
   etransitivity; [| by eapply ELMO_has_been_directly_observed_sizeState].
   by apply Message_full_dependencies_sizeState,
-    fin_set_full_message_dependencies_happens_before.
+    full_message_dependencies_happens_before.
 Qed.
 
 #[local] Instance ELMOComponent_tc_composite_observed_before_send_irreflexive :
-  Irreflexive (tc_composite_observed_before_send ELMOComponent (elements ∘ Message_dependencies)).
+  Irreflexive (tc_composite_observed_before_send ELMOComponent Message_dependencies).
 Proof.
   apply (Proper_reflects_Irreflexive _ (<) (sizeState ∘ state));
     [| typeclasses eauto].
@@ -1569,9 +1574,9 @@ Lemma ELMO_state_to_minimal_equivocation_trace_equivocation_monotonic :
     (item : composite_transition_item ELMOComponent),
     tr = pre ++ [item] ++ suf ->
     forall v : Address,
-      msg_dep_is_globally_equivocating ELMOComponent (elements ∘ Message_dependencies) Message_sender
+      msg_dep_is_globally_equivocating ELMOComponent Message_dependencies Message_sender
         (finite_trace_last is pre) v ->
-      msg_dep_is_globally_equivocating ELMOComponent (elements ∘ Message_dependencies) Message_sender
+      msg_dep_is_globally_equivocating ELMOComponent Message_dependencies Message_sender
         (destination item) v.
 Proof.
   eapply state_to_minimal_equivocation_trace_equivocation_monotonic.
@@ -1648,7 +1653,7 @@ Lemma ELMO_CHBO_in_messages :
   forall s,
     (forall k, UMO_reachable full_node (s k)) ->
   forall m,
-    CompositeHasBeenObserved ELMOComponent (elements ∘ Message_dependencies) s m
+    CompositeHasBeenObserved ELMOComponent Message_dependencies s m
       <->
     ∃ (k : index), m ∈ messages (s k).
 Proof.
@@ -1660,7 +1665,7 @@ Proof.
       enough (m <hb m') by (eapply messages_hb_transitive;done).
       revert Hdepth; apply (tc_congruence (fun m=>m)).
       unfold msg_dep_rel, compose, immediate_dependency.
-      by intros x y Hdep; apply elem_of_elements, elem_of_list_to_set in Hdep.
+      by intros x y Hdep; apply elem_of_list_to_set in Hdep.
   - by intros [k Hm%elem_of_messages]; constructor; exists k.
 Qed.
 
@@ -1670,7 +1675,7 @@ Lemma ELMO_global_equivocators_iff_msg_dep_equivocation :
   ELMO_global_equivocators s a
     <->
   msg_dep_is_globally_equivocating ELMOComponent
-    (elements ∘ Message_dependencies) Message_sender s a.
+    Message_dependencies Message_sender s a.
 Proof.
   intros s a Hs.
   apply Morphisms_Prop.ex_iff_morphism; intro m.
@@ -1747,7 +1752,7 @@ Proof.
     intros item Hitem; unfold ELMO_not_heavy, not_heavy.
     etransitivity; [| done].
     apply sum_weights_subseteq; [by apply NoDup_elements.. |].
-    by intro a; rewrite !elem_of_elements; apply Hitem.
+    by intro a; apply Hitem.
   }
   apply ELMO_state_to_minimal_equivocation_trace_reachable in Heqtr_min as Htr_min; clear Heqtr_min.
   assert (Hall_input_valid :
@@ -1998,7 +2003,7 @@ Lemma ELMO_update_state_with_initial
   (s : composite_state ELMOComponent)
   (Hs : valid_state_prop ELMOProtocol s)
   (i : index)
-  (Heqv : (sum_weights (elements (ELMO_equivocating_validators s ∪ {[idx i]})) <= `threshold)%R)
+  (Heqv : (sum_weights (ELMO_equivocating_validators s ∪ {[idx i]}) <= `threshold)%R)
   (si : State)
   (Hsi : vinitial_state_prop (ELMOComponent i) si) :
     valid_state_prop ELMOProtocol (state_update ELMOComponent s i si) /\
@@ -2058,7 +2063,7 @@ Proof.
     replace (composite_transition _ _ _) with (state_update ELMOComponent sf i si, oom).
     unfold ELMO_not_heavy, not_heavy; etransitivity; [| done].
     apply sum_weights_subseteq; [by apply NoDup_elements.. |].
-    by intro; rewrite !elem_of_elements; apply Hsfisi_eqvs.
+    by intro; apply Hsfisi_eqvs.
   }
   apply (VLSM_incl_finite_valid_trace_init_to Hincl) in Htr_min as Htr_min_pre.
   apply (VLSM_incl_valid_state Hincl) in Hsisi as Hsisi_pre.
@@ -2153,11 +2158,11 @@ Proof.
   apply ELMO_msg_valid_full_has_sender in ELMO_mv_msg_valid_full0 as Hsender.
   destruct Hsender as [i_m Hsender].
   assert (Heqv :
-    (sum_weights (elements (ELMO_equivocating_validators s ∪ {[idx i_m]})) <= `threshold)%R).
+    (sum_weights (ELMO_equivocating_validators s ∪ {[idx i_m]}) <= `threshold)%R).
   {
     etransitivity; [| apply Hc].
     apply sum_weights_subseteq; [by apply NoDup_elements.. |].
-    intro a; rewrite !elem_of_elements, elem_of_union, elem_of_singleton.
+    intro a; rewrite elem_of_union, elem_of_singleton.
     unfold ELMO_equivocating_validators, equivocating_validators.
     rewrite !elem_of_filter.
     destruct (decide (a = adr (state m))).
@@ -2338,7 +2343,7 @@ Proof.
       unfold ELMO_not_heavy, not_heavy.
       etransitivity; [| done].
       apply sum_weights_subseteq; [by apply NoDup_elements.. |].
-      by intro; rewrite !elem_of_elements; apply Hsf_bounded_eqv.
+      by intro; apply Hsf_bounded_eqv.
     - cbn; state_update_simpl.
       replace (UMOComponent_transition _ _ _) with (sf, oom).
       by rewrite state_update_twice.
@@ -2825,7 +2830,10 @@ Proof.
     exists (` (composite_s0 ELMOComponent)).
     unfold composite_s0; cbn; split_and!; [done |..].
     + by apply initial_state_is_valid.
-    + by repeat split; [firstorder.. | inversion 1].
+    + repeat split; [..| by inversion 1].
+      * by intros [j Hj]; inversion Hj.
+      * by inversion 1.
+      * by intros []; intuition.
     + by firstorder.
     + by inversion 1.
   - pose (sigma' := state_update ELMOComponent sigma i s').
@@ -2892,7 +2900,7 @@ Proof.
         unfold ELMO_not_heavy, not_heavy.
         etransitivity; [| done].
         apply sum_weights_subseteq; [by apply NoDup_elements.. |].
-        intros x; rewrite !elem_of_elements.
+        intros x.
         unfold equivocating_validators, is_equivocating; cbn.
         apply filter_subprop; intros; rewrite <- Heq_i in *.
         unfold component_reflects_composite_equivocators in Hsigma'_eqvs.
