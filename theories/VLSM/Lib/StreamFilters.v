@@ -16,6 +16,21 @@ Definition filtering_subsequence
   := (forall i, i < hd ns -> ~P (Str_nth i s)) /\
      ForAll2 (fun m n => P (Str_nth m s) /\ m < n /\ forall i, m < i < n -> ~ P (Str_nth i s)) ns.
 
+(**
+  A more intuitive statement of the [filtering_subsequence] property.
+  See [FilteringSubsequence_iff] for the equivalence result.
+*)
+Record FilteringSubsequence
+  {A : Type}
+  (P : A -> Prop)
+  (s : Stream A)
+  (ns : Stream nat)
+  : Prop :=
+{
+  fs_monotone : monotone_nat_stream_prop ns;
+  fs_is_filter : forall n, P (Str_nth n s) <-> exists k, n = Str_nth k ns;
+}.
+
 Lemma filtering_subsequence_sorted
   {A : Type}
   (P : A -> Prop)
@@ -96,6 +111,32 @@ Proof.
     rewrite ForAll2_forall in Hfs.
     specialize (Hfs k) as [_ [_ Hfs]].
     by elim (Hfs n).
+Qed.
+
+Lemma FilteringSubsequence_iff
+  {A : Type}
+  (P : A -> Prop)
+  (s : Stream A)
+  (ss : Stream nat)
+  : FilteringSubsequence P s ss <-> filtering_subsequence P s ss.
+Proof.
+  split.
+  - intros []; split.
+    + intros i Hi; rewrite fs_is_filter0.
+      intros [? ->].
+      apply (fs_monotone0 x 0) in Hi.
+      by lia.
+    + apply ForAll2_forall; intro; split_and!.
+      * by apply fs_is_filter0; eexists.
+      * by apply (fs_monotone0 n (S n)); lia.
+      * intros i [Hni Hni']; rewrite fs_is_filter0.
+        intros [? ->].
+        by apply fs_monotone0 in Hni, Hni'; lia.
+  - constructor.
+    + by eapply monotone_nat_stream_prop_from_successor,
+        filtering_subsequence_sorted.
+    + split; [by apply filtering_subsequence_witness_rev |].
+      by intros [? ->]; apply filtering_subsequence_witness.
 Qed.
 
 (** Prefixes of the filtering subsequence expressed as filters. *)

@@ -384,6 +384,18 @@ Proof.
     by transitivity (Str_nth m l).
 Qed.
 
+Lemma ForAll2_strict_lookup [A : Type] (R : A -> A -> Prop) {HR : StrictOrder R}
+  : forall l, ForAll2 R l <-> forall m n, m < n <-> R (Str_nth m l) (Str_nth n l).
+Proof.
+  split.
+  - intro Hall; split.
+    + by apply ForAll2_transitive_lookup; [typeclasses eauto |].
+    + by apply ForAll2_strict_lookup_rev.
+  - intro Hall.
+    apply ForAll2_transitive_lookup; [typeclasses eauto |].
+    by intros; apply Hall.
+Qed.
+
 Lemma ForAll2_strict_lookup_inj
  [A : Type] (R : A -> A -> Prop) {HR : StrictOrder R}
   (l : Stream A) (Hl : ForAll2 R l)
@@ -569,14 +581,11 @@ Qed.
 
 Definition monotone_nat_stream_prop
   (s : Stream nat)
-  := forall n1 n2 : nat, n1 < n2 -> Str_nth n1 s < Str_nth n2 s.
+  := forall n1 n2 : nat, n1 < n2 <-> Str_nth n1 s < Str_nth n2 s.
 
 Lemma monotone_nat_stream_prop_from_successor s
   : ForAll2 lt s <-> monotone_nat_stream_prop s.
-Proof.
-  apply ForAll2_transitive_lookup.
-  by typeclasses eauto.
-Qed.
+Proof. by apply ForAll2_strict_lookup; typeclasses eauto. Qed.
 
 Lemma monotone_nat_stream_rev
   (s : Stream nat)
@@ -584,8 +593,8 @@ Lemma monotone_nat_stream_rev
   : forall n1 n2, Str_nth n1  s <= Str_nth n2 s -> n1 <= n2.
 Proof.
   intros n1 n2 Hle.
-  destruct (decide (n1 <= n2)); [lia|].
-  by specialize (Hs n2 n1); spec Hs; lia.
+  destruct (decide (n2 < n1)) as [Hlt |]; [| by lia].
+  by apply Hs in Hlt; lia.
 Qed.
 
 Lemma monotone_nat_stream_find s (Hs : monotone_nat_stream_prop s) (n : nat)
@@ -601,8 +610,9 @@ Proof.
     ; [exists 0; left; cbv in *; lia|].
     destruct (decide (Str_nth (S k) s = S n))
     ; [by exists (S k); left|].
-    exists k; right.
-    by specialize (Hs k (S k)); spec Hs; lia.
+    exists k. right.
+    cut (Str_nth k s < Str_nth (S k) s); [by lia |].
+    by apply (Hs k (S k)); lia.
 Qed.
 
 Definition monotone_nat_stream :=
@@ -613,7 +623,7 @@ Lemma monotone_nat_stream_tl
   (Hs : monotone_nat_stream_prop s)
   : monotone_nat_stream_prop (tl s).
 Proof.
-  by intros n1 n2 Hlt; apply (Hs (S n1) (S n2)); lia.
+  by intros n1 n2; etransitivity; [| apply (Hs (S n1) (S n2))]; lia.
 Qed.
 
 CoFixpoint nat_sequence_from (n : nat) : Stream nat
