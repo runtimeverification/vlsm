@@ -226,6 +226,9 @@ Inductive NonEmptyList (A : Type) : Type :=
 
 Arguments nel_cons {_} _ _ : assert.
 
+#[export] Instance NonEmptyList_inhabited `{Inhabited A} : Inhabited (NonEmptyList A) :=
+  populate (nel_cons inhabitant None).
+
 Definition nel_hd `(l : NonEmptyList A) : A :=
   match l with (nel_cons a _) => a end.
 
