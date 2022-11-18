@@ -194,6 +194,10 @@ Proof.
   by split; [| lia].
 Qed.
 
+(**
+  Given a decidable property on naturals and a natural number on which the
+  property holds, we can compute the least natural number on which it holds.
+*)
 Definition compute_minimal_among_le
   (P : nat -> Prop)
   `{forall n, Decision (P n)}

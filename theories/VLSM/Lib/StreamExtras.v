@@ -4,6 +4,10 @@ From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists NeList.
 
 (** * Stream utility definitions and lemmas *)
 
+Lemma stream_eq_hd_tl {A} (s s' : Stream A) :
+  hd s = hd s' -> tl s = tl s' -> s = s'.
+Proof. by destruct s, s'; cbn; intros -> ->. Qed.
+
 Lemma fHere [A:Type] (P: Stream A -> Prop) : forall s, ForAll P s -> P s.
 Proof. by intros s []. Qed.
 
@@ -770,10 +774,6 @@ Proof.
   - intros [| a l] Hge s; cbn in *; [by replace (n - 0) with n by lia |].
     by rewrite <- IHn; [| cbv in *; lia].
 Qed.
-
-Lemma stream_eq_hd_tl {A} (s s' : Stream A) :
-  hd s = hd s' -> tl s = tl s' -> s = s'.
-Proof. by destruct s, s'; cbn; intros -> ->. Qed.
 
 Lemma stream_concat_unroll {A} (a : ne_list A) (s : Stream (ne_list A)) :
   stream_concat (Cons a s) = stream_prepend a (stream_concat s).

@@ -602,23 +602,23 @@ Section sec_stream_concat_map.
 Context
   [A B : Type]
   (f : A -> list B)
-  (P : A -> Prop := fun a => f a <> [])
+  (FNonEmpty : A -> Prop := fun a => f a <> [])
   (s : Stream A)
   .
 
 Definition stream_concat_map
-  (Hinf : InfinitelyOften P s)
+  (Hinf : InfinitelyOften FNonEmpty s)
   : Stream B :=
-  stream_concat (stream_filter_map P (list_function_restriction f) s Hinf).
+  stream_concat (stream_filter_map FNonEmpty (list_function_restriction f) s Hinf).
 
 Lemma stream_concat_map_prefix
-  (Hinf : InfinitelyOften P s)
+  (Hinf : InfinitelyOften FNonEmpty s)
   (n : nat)
-  (map_opt_pre := mbind f (stream_prefix s n))
-  (m := length map_opt_pre)
-  : stream_prefix (stream_concat_map Hinf) m = map_opt_pre.
+  (mbind_prefix := mbind f (stream_prefix s n))
+  (m := length mbind_prefix)
+  : stream_prefix (stream_concat_map Hinf) m = mbind_prefix.
 Proof.
-  subst map_opt_pre m; unfold stream_concat_map.
+  subst mbind_prefix m; unfold stream_concat_map.
   cut (mjoin
     (List.map ne_list_to_list
       (list_filter_map (λ a : A, f a ≠ []) (list_function_restriction f)
@@ -633,7 +633,7 @@ Proof.
 Qed.
 
 Program Definition stream_concat_map_ex_prefix
-  (Hinf : InfinitelyOften P s)
+  (Hinf : InfinitelyOften FNonEmpty s)
   (Hfs := stream_filter_positions_filtering_subsequence _ _ Hinf)
   (k : nat)
   : {n : nat |
@@ -642,21 +642,21 @@ Program Definition stream_concat_map_ex_prefix
       mbind f (stream_prefix s n)}
   :=
   let (n, Heq) :=
-    (fitering_subsequence_stream_filter_map_prefix_ex P (list_function_restriction f) _ _ Hfs k)
+    (fitering_subsequence_stream_filter_map_prefix_ex FNonEmpty (list_function_restriction f) _ _ Hfs k)
   in exist _ n _.
 Next Obligation.
   cbn; intros Hinf k n Heq.
   rewrite <- (stream_concat_map_prefix Hinf).
   apply stream_prefix_of.
   rewrite <- list_filter_map_mbind.
-  replace k with (length (list_filter_map P (list_function_restriction f) (stream_prefix s n)))
+  replace k with (length (list_filter_map FNonEmpty (list_function_restriction f) (stream_prefix s n)))
     by (rewrite <- Heq; apply stream_prefix_length).
   by apply ne_list_concat_min_length.
 Qed.
 
 Program Definition stream_concat_map_ex_min_prefix
   `{EqDecision B}
-  (Hinf : InfinitelyOften P s)
+  (Hinf : InfinitelyOften FNonEmpty s)
   (k : nat)
   (Ppre := fun m =>
     stream_prefix (stream_concat_map Hinf) k
@@ -674,7 +674,7 @@ Next Obligation.
 Qed.
 
 Definition bounded_stream_concat_map
-  (Hfin : FinitelyManyBound P s)
+  (Hfin : FinitelyManyBound FNonEmpty s)
   : list B :=
   mbind f (stream_prefix s (` Hfin)).
 

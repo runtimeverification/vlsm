@@ -3,6 +3,27 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters StdppExtras.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
 
+(** * VLSM Stuttering Embeddings
+
+  A VLSM projection guaranteeing the existence of translations for all states and
+  traces, where a transition in the source VLSM translates to a (possibly empty)
+  sequence of transitions in the target VLSM.
+  
+  We say that a stuttering embedding is established from VLSM <<X>> to VLSM <<Y>>
+  (sharing the same messages) if there exists maps <<state_project>>
+  taking <<X>>-states to <<Y>>-states, and <<transition_item_project>>, taking
+  a transition from <<X>> to a list of transitions in <<Y>>, such that:
+
+  - [transition_item_project_consistency]: the state-translation of the destination
+    of a transition is the final state of the translation of the transition.
+
+  - [stuttering_embedding_preserves_valid_trace]s: traces obtained by
+    concatenating the translations of transition of a valid trace are valid.
+
+  An example of proper stuttering embedding is given by a VLSM summarizing the
+  transitions of another VLSM.
+*)
+
 Section sec_pre_definitions.
 
 Context
@@ -61,7 +82,7 @@ Record VLSM_stuttering_embedding_type
         state_project (destination itemX);
 }.
 
-(** ** Projection definitions and properties *)
+(** ** Stuttering embedding definitions and properties *)
 
 Section sec_stuttering_embedding_type_properties.
 
@@ -288,8 +309,9 @@ Proof.
 Qed.
 
 (**
-  Any [VLSM_projection] determines a [VLSM_partial_projection], allowing us
-  to lift to VLSM projection the generic results proved about VLSM partial projections.
+  Any [VLSM_weak_stuttering_embedding] determines a [VLSM_weak_partial_projection],
+  allowing us to lift to weak stuttering embeddings the generic results proved
+  about weak partial projections.
 *)
 Lemma VLSM_weak_partial_projection_from_stuttering_embedding :
   VLSM_weak_partial_projection X Y
@@ -409,7 +431,7 @@ Definition VLSM_stuttering_embedding_finite_valid_trace
 
 (**
   Any [VLSM_stuttering_embedding] determines a [VLSM_partial_projection], allowing us
-  to lift to VLSM stuttering_embeddings the generic results proved about VLSM partial projections.
+  to lift to stuttering embeddings the generic results proved about partial projections.
 *)
 Lemma VLSM_partial_projection_from_stuttering_embedding :
   VLSM_partial_projection X Y
@@ -519,7 +541,7 @@ Qed.
 (** ** Stuttering embedding friendliness
 
   A stuttering embedding is friendly if all the valid traces of the destination VLSM
-  are projections of the valid traces of the source VLSM.
+  are prefixes of translations of the valid traces of the source VLSM.
 *)
 
 Section sec_stuttering_embedding_friendliness.
@@ -561,7 +583,7 @@ Qed.
 
 (**
   A consequence of the [stuttering_embedding_friendly_prop]erty is that the valid
-  traces of the target VLSM are precisely prefixed of translations of all
+  traces of the target VLSM are precisely prefixes of translations of all
   the valid traces of the source VLSM.
 *)
 Lemma stuttering_embedding_friendly_trace_char
@@ -588,9 +610,9 @@ End sec_stuttering_embedding_properties.
   To establish a stuttering embedding from VLSM <<X>> to VLSM <<Y>>,
   the following set of conditions is sufficient:
   - <<X>>'s [initial_state]s project to <<Y>>'s [initial state]s
-  - All input-valid transition translates to a trace ending in the
-    translation of the destination of the transition
-  - Every input-valid transition translates to a valid trace
+  - Every input-valid transition translates to a valid trace from the translation
+    of the source of the transition to the translation of the destination
+    of the transition
 *)
 
 Section sec_basic_VLSM_stuttering_embedding.
