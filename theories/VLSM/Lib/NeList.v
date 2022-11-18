@@ -9,7 +9,7 @@ Inductive ne_list (A : Type) : Type :=
 Arguments ne_one {_} _ : assert.
 Arguments ne_cons {_} _ _ : assert.
 
-Global Infix ":::" := ne_cons (at level 60, right associativity).
+Infix ":::" := ne_cons (at level 60, right associativity).
 
 Definition ne_list_hd {A} (l : ne_list A) : A :=
   match l with
@@ -221,45 +221,45 @@ Qed.
   An alternative inductive definition of non-empty lists using a single
   constructor.
 *)
-Inductive Nel (A : Type) : Type :=
-| nel_cons : A -> option (Nel A) -> Nel A.
+Inductive NonEmptyList (A : Type) : Type :=
+| nel_cons : A -> option (NonEmptyList A) -> NonEmptyList A.
 
 Arguments nel_cons {_} _ _ : assert.
 
-Definition nel_hd `(l : Nel A) : A :=
+Definition nel_hd `(l : NonEmptyList A) : A :=
   match l with (nel_cons a _) => a end.
 
-Definition nel_tl `(l : Nel A) : option (Nel A) :=
+Definition nel_tl `(l : NonEmptyList A) : option (NonEmptyList A) :=
   match l with (nel_cons _ l') => l' end.
 
-Definition nel_one `(a : A) : Nel A := nel_cons a None.
+Definition nel_one `(a : A) : NonEmptyList A := nel_cons a None.
 
-Fixpoint Nel_ind'
-  (A : Type) (P : Nel A -> Prop)
+Fixpoint NonEmptyList_ind'
+  (A : Type) (P : NonEmptyList A -> Prop)
   (hd' : forall h : A, P (nel_cons h None))
-  (tl' : forall (h : A) (t : Nel A), P t -> P (nel_cons h (Some t)))
-  (l : Nel A) {struct l} : P l :=
+  (tl' : forall (h : A) (t : NonEmptyList A), P t -> P (nel_cons h (Some t)))
+  (l : NonEmptyList A) {struct l} : P l :=
 match l with
 | nel_cons h None => hd' h
-| nel_cons h (Some t) => tl' h t (Nel_ind' A P hd' tl' t)
+| nel_cons h (Some t) => tl' h t (NonEmptyList_ind' A P hd' tl' t)
 end.
 
-Fixpoint Nel_to_ne_list `(l : Nel A) : ne_list A :=
+Fixpoint NonEmptyList_to_ne_list `(l : NonEmptyList A) : ne_list A :=
   match l with
   | nel_cons a None => ne_one a
-  | nel_cons a (Some l') => ne_cons a (Nel_to_ne_list l')
+  | nel_cons a (Some l') => ne_cons a (NonEmptyList_to_ne_list l')
   end.
 
-Fixpoint ne_list_to_Nel `(l : ne_list A) : Nel A :=
+Fixpoint ne_list_to_NonEmptyList `(l : ne_list A) : NonEmptyList A :=
   match l with
   | ne_one a => nel_one a
-  | ne_cons a l' => nel_cons a (Some (ne_list_to_Nel l'))
+  | ne_cons a l' => nel_cons a (Some (ne_list_to_NonEmptyList l'))
   end.
 
-Lemma Nel_to_ne_list_to_Nel `(l : Nel A) :
-  ne_list_to_Nel (Nel_to_ne_list l) = l.
-Proof. by induction l using Nel_ind'; cbn; [| rewrite IHl]. Qed.
+Lemma NonEmptyList_to_ne_list_to_NonEmptyList `(l : NonEmptyList A) :
+  ne_list_to_NonEmptyList (NonEmptyList_to_ne_list l) = l.
+Proof. by induction l using NonEmptyList_ind'; cbn; [| rewrite IHl]. Qed.
 
-Lemma ne_list_to_Nel_to_ne_list `(l : ne_list A) :
-  Nel_to_ne_list (ne_list_to_Nel l) = l.
+Lemma ne_list_to_NonEmptyList_to_ne_list `(l : ne_list A) :
+  NonEmptyList_to_ne_list (ne_list_to_NonEmptyList l) = l.
 Proof. by induction l; cbn; [| rewrite IHl]. Qed.

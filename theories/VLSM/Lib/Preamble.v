@@ -204,13 +204,13 @@ Definition compute_minimal_among_le
   (bound : nat)
   (Hbound : P bound)
   : nat :=
-  (fix helper (dif : nat) :=
+  let fix helper (dif : nat) :=
         match dif with
         | 0 => bound
         | S dif' =>
           if decide (P (bound - dif)) then bound - dif else helper dif'
-        end)
-      bound.
+        end
+  in helper bound.
 
 Lemma compute_minimal_among_le_is_minimal
   (P : nat -> Prop)

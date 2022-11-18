@@ -16,7 +16,6 @@ From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
 
   - [transition_item_project_consistency]: the state-translation of the destination
     of a transition is the final state of the translation of the transition.
-
   - [stuttering_embedding_preserves_valid_trace]s: traces obtained by
     concatenating the translations of transition of a valid trace are valid.
 
@@ -61,7 +60,7 @@ Lemma elem_of_pre_VLSM_stuttering_embedding_finite_trace_project :
   forall (trX : list (@transition_item _ TX)) (itemY : @transition_item _ TY),
   itemY ∈ pre_VLSM_stuttering_embedding_finite_trace_project trX
     <->
-  ∃ (itemX : @transition_item _ TX), itemY ∈ transition_item_project itemX ∧ itemX ∈ trX.
+ exists (itemX : @transition_item _ TX), itemY ∈ transition_item_project itemX ∧ itemX ∈ trX.
 Proof. by intros; apply elem_of_list_bind. Qed.
 
 End sec_pre_definitions.
