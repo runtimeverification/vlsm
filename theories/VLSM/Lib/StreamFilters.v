@@ -122,19 +122,18 @@ Lemma FilteringSubsequence_iff
 Proof.
   split.
   - intros []; split.
-    + intros i Hi; rewrite fs_is_filter0.
-      intros [? ->].
+    + setoid_rewrite fs_is_filter0.
+      intros i Hi [? ->].
       apply (fs_monotone0 x 0) in Hi.
       by lia.
-    + apply ForAll2_forall; intro; split_and!.
+    + apply ForAll2_forall; intros n; split_and!.
       * by apply fs_is_filter0; eexists.
       * by apply (fs_monotone0 n (S n)); lia.
-      * intros i [Hni Hni']; rewrite fs_is_filter0.
-        intros [? ->].
+      * setoid_rewrite fs_is_filter0.
+        intros i [Hni Hni'] [? ->].
         by apply fs_monotone0 in Hni, Hni'; lia.
   - constructor.
-    + by eapply monotone_nat_stream_prop_from_successor,
-        filtering_subsequence_sorted.
+    + by eapply monotone_nat_stream_prop_from_successor, filtering_subsequence_sorted.
     + split; [by apply filtering_subsequence_witness_rev |].
       by intros [? ->]; apply filtering_subsequence_witness.
 Qed.
@@ -662,15 +661,15 @@ Proof.
   subst mbind_prefix m; unfold stream_concat_map.
   cut (mjoin
     (List.map ne_list_to_list
-      (list_filter_map (λ a : A, f a ≠ []) (list_function_restriction f)
-          (stream_prefix s n))) = stream_prefix s n ≫= f).
+      (list_filter_map (fun a : A => f a <> []) (list_function_restriction f)
+          (stream_prefix s n))) = mbind f (stream_prefix s n)).
   {
     intros <-.
     by erewrite stream_concat_prefix;
       unfold stream_filter_map;
       rewrite fitering_subsequence_stream_filter_map_prefix.
   }
-  apply list_filter_map_mbind.
+  by apply list_filter_map_mbind.
 Qed.
 
 Program Definition stream_concat_map_ex_prefix
@@ -683,14 +682,16 @@ Program Definition stream_concat_map_ex_prefix
       mbind f (stream_prefix s n)}
   :=
   let (n, Heq) :=
-    (fitering_subsequence_stream_filter_map_prefix_ex FNonEmpty (list_function_restriction f) _ _ Hfs k)
+    (fitering_subsequence_stream_filter_map_prefix_ex
+      FNonEmpty (list_function_restriction f) _ _ Hfs k)
   in exist _ n _.
 Next Obligation.
   cbn; intros Hinf k n Heq.
   rewrite <- (stream_concat_map_prefix Hinf).
   apply stream_prefix_of.
   rewrite <- list_filter_map_mbind.
-  replace k with (length (list_filter_map FNonEmpty (list_function_restriction f) (stream_prefix s n)))
+  replace k
+    with (length (list_filter_map FNonEmpty (list_function_restriction f) (stream_prefix s n)))
     by (rewrite <- Heq; apply stream_prefix_length).
   by apply ne_list_concat_min_length.
 Qed.
