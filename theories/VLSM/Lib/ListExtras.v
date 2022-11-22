@@ -430,7 +430,7 @@ Proof.
   by revert n; induction l; intros [| n]; cbn; [.. | rewrite IHl].
 Qed.
 
-Lemma list_prefix_of
+Lemma prefix_of_list_prefix
   {A : Type}
   (l : list A)
   (n : nat)

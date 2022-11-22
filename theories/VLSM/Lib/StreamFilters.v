@@ -707,12 +707,9 @@ Program Definition stream_concat_map_ex_min_prefix
   : {n : nat | minimal_among le Ppre n}
   :=
   let (n, Hpre) :=  stream_concat_map_ex_prefix Hinf k in
-  exist _ (@compute_minimal_among_le Ppre _ n _) _.
+  exist _ (find_least_among Ppre n) _.
 Next Obligation.
-  by intros; subst Ppre; cbn.
-Qed.
-Next Obligation.
-  by intros; apply compute_minimal_among_le_is_minimal.
+  by intros; apply find_least_among_is_minimal.
 Qed.
 
 Definition bounded_stream_concat_map

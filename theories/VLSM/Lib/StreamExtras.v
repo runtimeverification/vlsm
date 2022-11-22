@@ -385,7 +385,7 @@ Proof.
 Qed.
 
 Lemma ForAll2_strict_lookup [A : Type] (R : A -> A -> Prop) {HR : StrictOrder R}
-  : forall l, ForAll2 R l <-> forall m n, m < n <-> R (Str_nth m l) (Str_nth n l).
+  : forall l, ForAll2 R l <-> (forall m n, m < n <-> R (Str_nth m l) (Str_nth n l)).
 Proof.
   split.
   - intro Hall; split.
@@ -470,7 +470,7 @@ Lemma stream_prefix_of
   : stream_prefix l n1 `prefix_of` stream_prefix l n2.
 Proof.
   rewrite <- (stream_prefix_prefix l n1 n2 Hn).
-  by apply list_prefix_of.
+  by apply prefix_of_list_prefix.
 Qed.
 
 Definition stream_segment
@@ -749,7 +749,7 @@ Definition stream_prepend {A} (nel : ne_list A) (s : Stream A) : Stream A :=
     Cons (ne_list_hd l) (from_option prepend s (ne_list_tl l))) nel.
 
 CoFixpoint stream_concat {A} (s : Stream (ne_list A)) : Stream A :=
-  match s with Cons a s' => stream_prepend a (stream_concat s') end.
+  stream_prepend (hd s) (stream_concat (tl s)).
 
 Lemma stream_prepend_prefix {A} (nel : ne_list A) (s : Stream A) :
   stream_prefix (stream_prepend nel s) (ne_list_length nel) = ne_list_to_list nel.
@@ -761,24 +761,23 @@ Lemma stream_prepend_prefix_l
   {A : Type}
   (l : ne_list A)
   (s : Stream A)
-  (n : nat)
-  (Hle : n <= ne_list_length l)
-  : stream_prefix (stream_prepend l s) n = list_prefix (ne_list_to_list l) n.
+  : forall n : nat, n <= ne_list_length l ->
+    stream_prefix (stream_prepend l s) n = list_prefix (ne_list_to_list l) n.
 Proof.
-  revert n Hle; induction l; intros [| n] Hle; cbn; [done | | done |].
+  induction l; intros [| n] Hle; cbn; [done | | done |].
   - by cbn in Hle; replace n with 0 by lia.
   - by cbn in *; rewrite IHl; [| cbv in *; lia].
 Qed.
 
 Lemma stream_prepend_prefix_r
   {A : Type}
-  (l : ne_list A)
-  (s : Stream A)
   (n : nat)
-  (Hge : n >= ne_list_length l)
-  : stream_prefix (stream_prepend l s) n = ne_list_to_list l ++ stream_prefix s (n - ne_list_length l).
+  : forall l : ne_list A, n >= ne_list_length l ->
+    forall (s : Stream A),
+      stream_prefix (stream_prepend l s) n
+        =
+      ne_list_to_list l ++ stream_prefix s (n - ne_list_length l).
 Proof.
-  revert l Hge s.
   induction n; intros [| a l] Hge s; cbn in *; [by lia.. | |].
   - by rewrite Nat.sub_0_r.
   - by rewrite <- IHn; [| cbv in *; lia].
