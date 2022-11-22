@@ -797,7 +797,7 @@ Proof.
   induction n; [done |].
   intros [n0 s]; cbn.
   rewrite app_length.
-  assert (H :
+  assert (Hge :
     length (ne_list_to_list n0) + length (mjoin (List.map ne_list_to_list (stream_prefix s n)))
     ≥ length (ne_list_to_list n0)) by lia.
   rewrite stream_concat_unroll, stream_prepend_prefix_r by done.
