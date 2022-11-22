@@ -36,12 +36,11 @@ Context
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   `{finite.Finite validator}
-  `{FinSet validator Cm}
   (A : validator -> index)
   (sender : message -> option validator)
   (Free := free_composite_vlsm IM)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
-  `{ReachableThreshold validator}
+  `{ReachableThreshold validator Cm}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cm
     := equivocation_dec_tracewise IM A sender)
@@ -625,19 +624,17 @@ End sec_witnessed_equivocation.
 Section sec_witnessed_equivocation_fixed_set.
 
 Context
-  `{EqDecision message}
-  `{FinSet index Ci}
+  `{FinSet message Cm}
+  `{ReachableThreshold index Ci}
   `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (Free := free_composite_vlsm IM)
-  (sender : message -> option index)
-  `{ReachableThreshold index}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM id sender)}
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM id sender)
-  (message_dependencies : message -> set message)
+  (message_dependencies : message -> Cm)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
@@ -664,7 +661,7 @@ Existing Instance Htracewise_BasicEquivocation.
 Definition equivocating_validators_fixed_equivocation_constraint
   (s : composite_state IM)
   :=
-  fixed_equivocation_constraint IM (elements(equivocating_validators s)).
+  fixed_equivocation_constraint IM (equivocating_validators s).
 
 Lemma equivocators_can_emit_free m
   (Hmsg : valid_message_prop Free m)
@@ -675,7 +672,7 @@ Lemma equivocators_can_emit_free m
   l s
   (Hv : composite_valid IM l (s, Some m))
   : can_emit
-    (equivocators_composition_for_directly_observed IM (elements(equivocating_validators sf)) s)
+    (equivocators_composition_for_directly_observed IM (equivocating_validators sf) s)
     m.
 Proof.
   apply emitted_messages_are_valid_iff in Hmsg
@@ -723,12 +720,12 @@ Lemma strong_witness_has_fixed_equivocation is s tr
   (Htr : finite_valid_trace_init_to (free_composite_vlsm IM) is s tr)
   (Heqv: strong_trace_witnessing_equivocation_prop (Cm := Ci) IM id sender is tr)
   : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM
-      (elements(equivocating_validators s))) is s tr.
+      (equivocating_validators s)) is s tr.
 Proof.
   split; [| by apply Htr].
   induction Htr using finite_valid_trace_init_to_rev_ind.
   - eapply (finite_valid_trace_from_to_empty (fixed_equivocation_vlsm_composition IM
-      (elements(equivocating_validators si)))).
+      (equivocating_validators si))).
     by apply initial_state_is_valid.
   - spec IHHtr.
     { intros prefix. intros.
@@ -739,7 +736,7 @@ Proof.
       in Htr as Hpre_tr.
     assert
       (Htr_sf : finite_valid_trace_from_to
-        (fixed_equivocation_vlsm_composition IM (elements (equivocating_validators sf))) si s tr).
+        (fixed_equivocation_vlsm_composition IM (equivocating_validators sf)) si s tr).
     { revert IHHtr.
       apply VLSM_incl_finite_valid_trace_from_to,
                fixed_equivocation_vlsm_composition_index_incl.
@@ -788,8 +785,7 @@ Proof.
       by exists si, tr, Hpre_tr.
     }
     specialize (equivocators_can_emit_free _ Hiom _ Hsender _ Hequivocating_v  _ _ Hv) as Hemit_im.
-    repeat split
-    ; [done |  | done | by right | done].
+    repeat split; [done | | done | by right | done].
     apply emitted_messages_are_valid.
     specialize
       (EquivPreloadedBase_Fixed_weak_embedding IM _ _ Hs') as Hproj.
