@@ -79,9 +79,10 @@ Proof.
   apply emitted_messages_are_valid_iff.
   assert (Hdm_hb : msg_dep_happens_before message_dependencies dm m)
     by (apply msg_dep_happens_before_iff_one; itauto).
-  destruct (Heqv _ Hdm_hb) as [Hsent | (dm_i & Hdm_i & Hemitted)]; [by left; right | right].
+  destruct (Heqv _ Hdm_hb) as [Hsent | (dm_i & Hdm_i & Hemitted)]; [by left; right |].
+  right.
   apply messages_with_valid_dependences_can_be_emitted with dm_i
-  ; [| apply elem_of_elements in Hdm_i; done | done].
+  ; [| by apply elem_of_elements in Hdm_i | done].
   intros dm0 Hdm0.
   apply Hind with dm; [done | | done].
   clear -Heqv Hdm; revert dm m Hdm Heqv.
@@ -113,7 +114,7 @@ Proof.
 Qed.
 
 Lemma single_equivocator_projection s j
-  (Hj : j ∈ (elements equivocators))
+  (Hj : j ∈ elements equivocators)
   : VLSM_projection
       (equivocators_composition_for_sent IM equivocators s)
       (pre_loaded_with_all_messages_vlsm (IM j))
@@ -156,9 +157,9 @@ Proof.
   intros [(sX, iom) [(sub_i, li) [sX' HtX]]].
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   exists i; split; [done |].
-  - apply can_emit_iff.
+  apply can_emit_iff.
   apply (VLSM_projection_input_valid_transition
-          (single_equivocator_projection s i Hi)) with (lY := li) in HtX
+    (single_equivocator_projection s i Hi)) with (lY := li) in HtX
   ; [by eexists _,_,_ |].
   unfold sub_label_element_project; cbn.
   by rewrite decide_True_pi with eq_refl.
@@ -329,7 +330,7 @@ Proof.
   destruct (sender m) as [v |]; [| congruence].
   eexists; split; [done |].
   replace (A v) with i; [by apply elem_of_elements in Hi |].
-  congruence.
+  by congruence.
 Qed.
 
 Context

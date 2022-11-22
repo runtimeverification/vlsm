@@ -133,12 +133,12 @@ Proof.
   destruct Hs as [[(is, His) Heq_s] | [l [(s0, oim) [oom' [[_ [_ [_ [_ Hlimited]]]] Ht]]]]].
   - subst s.
     unfold not_heavy, Equivocation.not_heavy,
-      equivocation_fault, Equivocation.equivocation_fault. simpl.
+      equivocation_fault, Equivocation.equivocation_fault; simpl.
     destruct threshold as [t Ht]; simpl; apply Rge_le.
-    specialize (equivocating_indices_equivocating_validators IM is).
-    rewrite equivocating_indices_initially_empty; intros Heqv_is.
-     simpl in Heqv_is; apply sum_weights_empty in Heqv_is;
-      [by rewrite <- Heqv_is in Ht |..]. done.
+    pose proof (Heqv_is := equivocating_indices_equivocating_validators IM is).
+    rewrite equivocating_indices_initially_empty in Heqv_is by done.
+    simpl in Heqv_is; apply sum_weights_empty in Heqv_is.
+    by rewrite <- Heqv_is in Ht.
   - by replace s with (fst (composite_transition equivocator_IM l (s0, oim))); [done |]
     ; cbn in *; rewrite Ht.
 Qed.
@@ -184,7 +184,7 @@ Proof.
       apply (finite_valid_trace_singleton (equivocators_fixed_equivocations_vlsm IM equivocating)).
       apply valid_trace_last_pstate in IHHtr.
       destruct Ht as [[_ [_ [Hv [[Hno_equiv _] Hno_heavy]]]] Ht].
-      repeat split; [done | | done | done | |].
+      repeat split; [done | | done | done | | done].
       + destruct iom as [m |]; [| by apply option_valid_message_None].
         destruct Hno_equiv as [Hsent | Hfalse]; [| done].
         simpl in Hsent.
@@ -192,8 +192,8 @@ Proof.
       + replace (composite_transition _ _ _) with (sf, oom).
         unfold state_has_fixed_equivocation.
         transitivity (elements (equivocating_validators sf)); [| done].
-        by intros x Hx; apply elem_of_elements, equivocating_indices_equivocating_validators, elem_of_list_to_set.
-      + done.
+        by intros x Hx; apply elem_of_elements, equivocating_indices_equivocating_validators,
+          elem_of_list_to_set.
 Qed.
 
 (**
@@ -234,8 +234,7 @@ Proof.
     apply valid_trace_add_default_last, valid_trace_last_pstate,
       valid_state_limited_equivocation in Htr.
     transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
-    specialize (equivocating_indices_equivocating_validators IM
-                  (finite_trace_last is tr)) as Heq.
+    pose proof (Heq := equivocating_indices_equivocating_validators IM (finite_trace_last is tr)).
     by unfold equivocation_fault; apply sum_weights_subseteq.
 Qed.
 
@@ -280,7 +279,7 @@ Proof.
   ; [| done].
   exists trX, initial_descriptors.
   cbn; split_and?; try itauto.
-  by eapply msg_dep_limited_fixed_equivocation; [| | |].
+  by eapply msg_dep_limited_fixed_equivocation.
 Qed.
 
 End sec_equivocators_projection_annotated_limited.

@@ -314,8 +314,8 @@ Proof.
   apply not_equivocating_equivocator_descriptors_proper in Heqv_descriptors as Hproper.
   split; [done |].
   intros i Hi; rewrite <- elem_of_elements in Hi.
-  specialize (not_equivocating_index_has_singleton_state IM (elements equivocating) _ Hs _ Hi)
-    as Hzero; unfold is_singleton_state in Hzero.
+  pose proof (Hzero := not_equivocating_index_has_singleton_state
+    IM (elements equivocating) _ Hs _ Hi); unfold is_singleton_state in Hzero.
   specialize (Heqv_descriptors i); destruct (eqv_descriptors i); [done |].
   destruct Heqv_descriptors as [s_i_n Heqv_descriptors].
   apply equivocator_state_project_Some_rev in Heqv_descriptors.
@@ -858,8 +858,8 @@ Proof.
   apply composite_has_been_directly_observed_free_iff.
   eapply in_futures_preserving_oracle_from_stepwise; cycle 2
   ; [| by apply has_been_directly_observed_stepwise_props |].
-  - by eapply not_equivocating_sent_message_has_been_directly_observed_in_projection; cycle 1;
-      [| rewrite <- elem_of_elements |..].
+  - by eapply not_equivocating_sent_message_has_been_directly_observed_in_projection;
+      only 3: rewrite <- elem_of_elements.
   - subst lst_trX. subst s. simpl. simpl in Hfinal_state.
     rewrite Hfinal_state. subst trX.
     rewrite finite_trace_last_app.
@@ -934,8 +934,8 @@ Proof.
   spec Hex.
   {
     apply (not_equivocating_index_has_singleton_state _ (elements equivocating));
-     [| by rewrite elem_of_elements].
-     by apply finite_valid_trace_last_pstate in Hitem.
+      [| by rewrite elem_of_elements].
+    by apply finite_valid_trace_last_pstate in Hitem.
   }
   destruct item as (l, iom, s, oom). apply first_transition_valid in Hitem. simpl in Hitem.
   destruct Hitem as [[Hs [Hiom [Hv Hc]]] Ht].
@@ -969,7 +969,7 @@ Proof.
     as [trX [initial_descriptors [_ [Htr_project [Hlast_state HtrX]]]]].
   intros item Hitem Houtput.
   destruct (decide ((projT1 (l item)) ∈ (elements equivocating)));
-   [apply elem_of_elements; done |].
+    [by apply elem_of_elements |].
   elim Hno. clear Hno.
   apply composite_has_been_directly_observed_sent_received_iff.
   left.
@@ -989,7 +989,7 @@ Proof.
     (valid_trace_add_default_last HtrX_free).
   clear HtrX HtrX_free Hfree_lst.
   by eapply equivocator_vlsm_trace_project_reflect_non_equivocating;
-    [| | | | | contradict n; apply elem_of_elements].
+    [.. | contradict n; apply elem_of_elements].
 Qed.
 
 (**

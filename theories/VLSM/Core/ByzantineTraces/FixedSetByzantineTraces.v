@@ -187,7 +187,7 @@ Lemma fixed_non_byzantine_projection_incl_preloaded :
       (free_composite_vlsm (sub_IM fixed_byzantine_IM (elements non_byzantine)))).
 Proof.
   apply basic_VLSM_strong_incl.
-  - by intros s H1incl; apply fixed_non_byzantine_projection_initial_state_preservation.
+  - by intros s Hincl; apply fixed_non_byzantine_projection_initial_state_preservation.
   - by intros.
   - by split; [eapply induced_sub_projection_valid_preservation |].
   - intros l s om s' om'; cbn.
@@ -339,13 +339,13 @@ Proof.
       fixed_byzantine_IM_no_initial_messages fixed_byzantine_IM_preserves_channel_authentication)
     in Hv as Hnoequiv.
   destruct om as [m|]; [| done].
-  destruct Hnoequiv as [Hsent|Hseeded]; [by left |].
+  destruct Hnoequiv as [Hsent | Hseeded]; [by left |].
   right.
   split; [done |].
   apply induced_sub_projection_valid_projection in Hv
     as [i [Hi [li [si Hv]]]].
   exists i.
-  split; [apply elem_of_elements in Hi; done |].
+  split; [by apply elem_of_elements in Hi |].
   revert li si Hv.
   unfold fixed_byzantine_IM, update_IM. simpl.
   apply elem_of_elements, set_diff_elim2 in Hi.
@@ -424,10 +424,10 @@ Proof.
     }
     specialize (valid_generated_state_message X _ _ Hs0 _ _ Hs0) as Hgen.
     unfold non_byzantine in Hi.
-    pose proof elem_of_dec_slow as Hdec.
+    pose proof (Hdec := elem_of_dec_slow).
     rewrite elem_of_elements in Hi; setoid_rewrite set_diff_iff in Hi.
     apply not_and_r in Hi as [Hi | Hi];
-      [by elim Hi; apply elem_of_list_to_set; apply elem_of_enum |].
+      [by elim Hi; apply elem_of_list_to_set, elem_of_enum |].
     apply dec_stable in Hi.
     specialize (Hgen (message_as_byzantine_label m i Hi)).
     spec Hgen.
@@ -590,7 +590,8 @@ Proof.
     apply sub_IM_no_equivocation_preservation in Hv as Hnoeqv; [| done..].
     destruct Hnoeqv as [Hsent | Hseeded].
     + by eapply preloaded_composite_sent_valid.
-    + apply initial_message_is_valid. unfold initial_message_prop.
+    + apply initial_message_is_valid.
+      unfold initial_message_prop.
       right; split; [done |].
       destruct (induced_sub_projection_valid_projection IM
         (elements selection_complement) _ _ _ _ Hv) as (i & Hi & Hiv).
@@ -605,8 +606,8 @@ Proof.
       destruct om as [m |]; [| done].
       destruct Hnoequiv as [Hsent|Hseeded]; [by left | right].
       split; [done |].
-      destruct (induced_sub_projection_valid_projection IM (elements selection_complement) _ _ _ _ Hv)
-        as (i & Hi & Hiv).
+      destruct (induced_sub_projection_valid_projection IM
+        (elements selection_complement) _ _ _ _ Hv) as (i & Hi & Hiv).
       by apply elem_of_elements in Hi; eexists; split.
   - intros l s om s' om' [_ Ht].
     revert Ht.
@@ -679,7 +680,7 @@ Proof.
       eapply message_dependencies_are_sufficient in Hiom.
       revert Hiom.
       rewrite elem_of_elements in Hi; setoid_rewrite set_diff_iff in Hi.
-      pose proof (elem_of_dec_slow (C := Ci)) as Hdec.
+      pose proof (Hdec := elem_of_dec_slow (C := Ci)).
       apply not_and_r in Hi as [Hi | Hi];
         [by elim Hi; apply elem_of_list_to_set; apply elem_of_enum |].
       apply dec_stable in Hi.

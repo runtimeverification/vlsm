@@ -1889,7 +1889,8 @@ Proof.
   case_decide as Hi; [|typeclasses eauto].
   contradict Hi.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i; simpl.
-  by apply elem_of_elements, set_diff_elim2 in Hi; rewrite elem_of_elements.
+  apply elem_of_elements, set_diff_elim2 in Hi.
+  by rewrite elem_of_elements.
 Qed.
 
 End sec_update_IM.

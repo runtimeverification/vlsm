@@ -105,25 +105,26 @@ Lemma eq_equivocating_indices_equivocation_fault :
     list_to_set (equivocating_indices (enum index) s2) ->
       equivocation_fault s1 = equivocation_fault s2.
 Proof.
-  intros s1 s2 Heq. rewrite <- !equivocating_indices_equivocating_validators in Heq. unfold equivocation_fault.
-  apply set_eq_fin_set in Heq. unfold set_eq in Heq. destruct Heq.
-  apply sum_weights_subseteq_list in H11. apply sum_weights_subseteq_list in H12.
-  apply Rle_antisym; [apply H11 | apply H12 | ..].
-  - by apply NoDup_elements. 
-  - by apply NoDup_elements.
-  - by apply NoDup_elements.
-  - by apply NoDup_elements.
+  intros s1 s2 Heq.
+  rewrite <- !equivocating_indices_equivocating_validators in Heq.
+  unfold equivocation_fault.
+  apply set_eq_fin_set in Heq as [Heq1 Heq2].
+  apply sum_weights_subseteq_list in Heq1, Heq2;
+    [| by apply NoDup_elements..].
+  by apply Rle_antisym.
 Qed.
 
-Lemma eq_equivocating_indices_equivocation_fault'
-: forall s1 s2,
-  list_to_set (equivocating_indices (enum index) s1) ≡@{Ci} list_to_set (equivocating_indices (enum index) s2) ->
-  equivocation_fault s1 = equivocation_fault s2.
+Lemma eq_equivocating_indices_equivocation_fault' :
+  forall s1 s2,
+    list_to_set (equivocating_indices (enum index) s1)
+      ≡@{Ci}
+    list_to_set (equivocating_indices (enum index) s2) ->
+      equivocation_fault s1 = equivocation_fault s2.
 Proof.
   intros s1 s2 Heq.
-  apply Rle_antisym.
-  - by apply sum_weights_subseteq; intro i; rewrite <- !equivocating_indices_equivocating_validators in Heq; apply Heq.
-  - by apply sum_weights_subseteq; intro i; rewrite <- !equivocating_indices_equivocating_validators in Heq; apply Heq.
+  rewrite <- !equivocating_indices_equivocating_validators in Heq.
+  apply set_equiv_subseteq in Heq as [Heq1 Heq2].
+  by apply Rle_antisym; apply sum_weights_subseteq.
 Qed.
 
 End sec_equivocating_indices_BasicEquivocation.

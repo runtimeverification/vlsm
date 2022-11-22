@@ -1087,10 +1087,13 @@ Proof.
   intros m [i [Hi Hsent]].
   exists i. split; [done |].
   replace (s2 i) with (s1 i); [done |].
-  assert (Hi' : i ∈ (elements non_equivocators)).
+  assert (Hi' : i ∈ elements non_equivocators).
   {
-    apply elem_of_elements, elem_of_difference. rewrite elem_of_list_to_set.
-    by split; [apply elem_of_enum | rewrite <- elem_of_elements].
+    apply elem_of_elements, elem_of_difference.
+    rewrite elem_of_list_to_set.
+    split.
+    - by apply elem_of_enum.
+    - by rewrite <- elem_of_elements.
   }
   by eapply f_equal_dep with (x := dexist i Hi') in Heq.
 Qed.

@@ -104,7 +104,7 @@ Proof.
     [intros | intros s Hs IH m' Hm'%tc_r_iff
     | intros s Hs mr Hmr%submseteq_list_subseteq IH m' Hm'%tc_r_iff];
     apply elem_of_messages_addObservation; right.
-  - by intuition.
+  - by itauto.
   - by destruct Hm' as [| (m & ? & ?)]; [| eapply IH].
   - destruct Hm' as [| (m & ? & ?)]; [by apply Hmr |].
     by eapply IH; [apply Hmr |].
@@ -1335,13 +1335,13 @@ Proof.
   - by right; intros (? & Hrec & ?); inversion Hrec.
   - change (MkState _ _) with (MkState ol a <+> ob);
       remember (MkState ol a) as s; clear Heqs ol a.
-    destruct (P_dec ob) as [ | Hnot_new];
+    destruct (P_dec ob) as [| Hnot_new];
       [by left; eexists; split; [constructor |] |].
     destruct IHol as [| Hnot_prev];
       [by left; destruct e as (o & Ho & HPo); exists o; split; [constructor 2 |] |].
     destruct ob as [[] [os]]; cbn in IHob.
     + destruct IHob as [| Hnot_recv];
-      [by left; destruct e as (o & Ho & HPo); exists o; split; [constructor 3 |]  |].
+        [by left; destruct e as (o & Ho & HPo); exists o; split; [constructor 3 |] |].
       by right; intros (? & Hrec & ?); inversion Hrec; subst;
         replace s0 with s in * by (apply eq_State; done); eauto.
     + by right; intros (? & Hrec & ?); inversion Hrec; subst;
@@ -2830,11 +2830,11 @@ Proof.
     exists (` (composite_s0 ELMOComponent)).
     unfold composite_s0; cbn; split_and!; [done |..].
     + by apply initial_state_is_valid.
-    + repeat split; [..| by inversion 1].
-      * by intros [j Hj]; inversion Hj.
+    + repeat split; cbn; [..| by inversion 1].
+      * by intros [j Hj].
       * by inversion 1.
-      * by intros []; intuition.
-    + by firstorder.
+      * by intros []; itauto.
+    + by left; cbn.
     + by inversion 1.
   - pose (sigma' := state_update ELMOComponent sigma i s').
     exists sigma'; split; [by subst sigma'; state_update_simpl |].

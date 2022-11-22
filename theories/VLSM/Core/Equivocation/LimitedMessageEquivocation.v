@@ -64,8 +64,7 @@ Lemma limited_equivocation_valid_state s
     LimitedEquivocationProp s.
 Proof.
   intros Hs; apply valid_state_prop_iff in Hs
-    as [[[is His] ->] | (l & [s' om'] & om & [(_ & _ & _ & Hv) Ht])].
-  simpl.
+    as [[[is His] ->] | (l & [s' om'] & om & [(_ & _ & _ & Hv) Ht])]; simpl.
   - exists ∅.
     + by intros v Hv; contradict Hv; apply Hno_initial_equivocation.
     + by destruct threshold; simpl; apply Rge_le; rewrite sum_weights_empty.
@@ -96,7 +95,8 @@ Proof.
   intros s [].
   apply Rle_trans with (sum_weights vs); [| done].
   apply sum_weights_subseteq; intros v Hv.
-  apply Heqv_vs; apply elem_of_filter in Hv. by destruct Hv as [Hvsl Hvsr]; apply Hvsl.
+  apply elem_of_filter in Hv as [Hvsl Hvsr].
+  by apply Heqv_vs, Hvsl.
 Qed.
 
 Definition basic_equivocation_state_validators_comprehensive_prop : Prop :=
@@ -106,8 +106,11 @@ Lemma not_heavy_impl_LimitedEquivocationProp
   (Hcomprehensive : basic_equivocation_state_validators_comprehensive_prop)
   : forall s, not_heavy s -> LimitedEquivocationProp IM is_equivocating s.
 Proof.
-  intros s Hs. exists (equivocating_validators s); [| done].
-  by intros v Hv; apply elem_of_filter; split; [done |]; apply Hcomprehensive.
+  intros s Hs.
+  exists (equivocating_validators s); [| done].
+  intros v Hv; apply elem_of_filter.
+  split; [done |].
+  by apply Hcomprehensive.
 Qed.
 
 End sec_basic_limited_message_equivocation.
@@ -197,7 +200,8 @@ Lemma StrongFixed_valid_state_not_heavy s
   : tracewise_not_heavy s.
 Proof.
   cut (tracewise_equivocating_validators s ⊆ equivocators).
-  { intro Hincl; unfold tracewise_not_heavy, not_heavy.
+  {
+    intro Hincl; unfold tracewise_not_heavy, not_heavy.
     by etransitivity; [apply sum_weights_subseteq |].
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).

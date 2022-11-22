@@ -109,7 +109,8 @@ Proof.
     apply sum_weights_subseteq_list.
     - by apply NoDup_elements.
     - by apply NoDup_elements.
-    - intros i Hi. apply elem_of_elements, Hincl, elem_of_elements, Hi.
+    - intros i Hi.
+      by apply elem_of_elements, Hincl, elem_of_elements, Hi.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
   specialize (preloaded_non_byzantine_vlsm_lift IM byzantine (fun i => i) sender)
@@ -150,8 +151,10 @@ Proof.
     + unfold channel_authenticated_message in Hsigned.
       rewrite Hsender0 in Hsigned.
       by apply Some_inj in Hsigned; subst.
-    + by rewrite elem_of_elements in Hi; contradict Hi; apply elem_of_difference; split;
-      [apply elem_of_list_to_set, elem_of_enum |].
+    + rewrite elem_of_elements in Hi.
+      contradict Hi.
+      apply elem_of_difference; split; [| done].
+      by apply elem_of_list_to_set, elem_of_enum.
 Qed.
 
 Existing Instance Htracewise_BasicEquivocation.
@@ -200,7 +203,6 @@ Proof.
       apply initial_message_is_valid.
       by exists i, (exist _ m Him).
     + destruct Hseeded as (Hsigned & i & Hi & li & si & Hpre_valid).
-      apply elem_of_difference in Hi.
       by eapply Hvalidator.
 Qed.
 
@@ -337,7 +339,8 @@ Proof.
     unfold lift_sub_state.
     destruct (decide (i = j)); subst; state_update_simpl.
     + by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi), !state_update_eq.
-    + by unfold lift_sub_state_to; case_decide as Hj; [rewrite sub_IM_state_update_neq |].
+    + unfold lift_sub_state_to.
+      by case_decide; [rewrite sub_IM_state_update_neq |].
 Qed.
 
 Existing Instance elem_of_dec_slow.
@@ -409,7 +412,7 @@ Proof.
     unfold coeqv_message_equivocators
     ; case_decide as Hnobs; [by apply empty_subseteq |].
     rewrite (full_node_msg_dep_coequivocating_senders _ _ _ _ Hfull _ _ i li);
-      [| cbn; rewrite Hlsti; eapply @pre_loaded_sub_composite_input_valid_projection, Hx].
+      [| by cbn; rewrite Hlsti; eapply @pre_loaded_sub_composite_input_valid_projection, Hx].
     rewrite elements_empty, app_nil_r; cbn.
     intro _i_im; rewrite elem_of_list_to_set.
     destruct (sender im) as [i_im |] eqn: Hsender; [| by inversion 1].
@@ -427,8 +430,9 @@ Proof.
       ; rewrite Hsender in Hauth.
       apply Some_inj in Hauth; subst _i_im.
       destruct (decide (i_im ∈ byzantine)) as [Hi_im | Hni_im]; [done |].
-      contradict H_i_im; apply elem_of_elements, elem_of_difference.
-      by split; [apply elem_of_list_to_set, elem_of_enum|].
+      contradict H_i_im.
+      apply elem_of_elements, elem_of_difference; cbn.
+      by split; [apply elem_of_list_to_set, elem_of_enum |].
 Qed.
 
 (**

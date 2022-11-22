@@ -2,7 +2,7 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppExtras StdppListFinSet.
 
-Section defs.
+Section sec_defs.
 
 Context `{FinSet A C}.
 
@@ -19,19 +19,16 @@ Definition set_union (x y : set) : set := x ∪ y.
 Definition set_diff (x y : set) : set := x ∖ y.
 
 Lemma set_union_subseteq_left :
-    forall (s1 s2 : set), s1 ⊆ (set_union s1 s2).
+  forall (s1 s2 : set), s1 ⊆ (set_union s1 s2).
 Proof. by intros s1 s2 x Hincl; apply set_union_intro; left. Qed.
 
 Lemma set_union_subseteq_iff :
-    forall (s1 s2 s : set), set_union s1 s2 ⊆ s <-> s1 ⊆ s /\ s2 ⊆ s.
+  forall (s1 s2 s : set), set_union s1 s2 ⊆ s <-> s1 ⊆ s /\ s2 ⊆ s.
 Proof.
-  intros s1 s2 s; split.
-  - intros Hincl. unfold subseteq in Hincl; unfold set_subseteq_instance in Hincl;
-    unfold subseteq; unfold set_subseteq_instance.
-    by setoid_rewrite set_union_iff in Hincl; split; itauto.
-  - intros Hincl. unfold subseteq in Hincl; unfold set_subseteq_instance in Hincl;
-    unfold subseteq; unfold set_subseteq_instance.
-    by setoid_rewrite set_union_iff; itauto.
+  intros s1 s2 s.
+  unfold subseteq, set_subseteq_instance, set_subseteq_instance.
+  setoid_rewrite set_union_iff.
+  by split; itauto.
 Qed.
 
 Lemma elem_of_submseteq' :
@@ -44,4 +41,4 @@ Proof. by intros s x Hin; contradict Hin; apply not_elem_of_empty. Qed.
 
 #[export] Instance elem_of_dec : RelDecision (@elem_of A C _) := elem_of_dec_slow.
 
-End defs.
+End sec_defs.

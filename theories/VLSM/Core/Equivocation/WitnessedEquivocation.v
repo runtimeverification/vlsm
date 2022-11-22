@@ -785,8 +785,7 @@ Proof.
       by exists si, tr, Hpre_tr.
     }
     specialize (equivocators_can_emit_free _ Hiom _ Hsender _ Hequivocating_v  _ _ Hv) as Hemit_im.
-    repeat split
-    ; [done | | done | by right | done].
+    repeat split; [done | | done | by right | done].
     apply emitted_messages_are_valid.
     specialize
       (EquivPreloadedBase_Fixed_weak_embedding IM _ _ Hs') as Hproj.

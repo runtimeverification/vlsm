@@ -120,7 +120,7 @@ Context
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (sender : message -> option index)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
-  . 
+  .
 
 Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation_rev
   isX sX trX

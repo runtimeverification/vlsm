@@ -65,16 +65,13 @@ Lemma fixed_equivocating_messages_sent_by_non_equivocating_are_valid
   (Hm : sent_by_non_equivocating IM equivocating s m)
   : valid_message_prop XE m.
 Proof.
-  specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM (elements equivocating))
-    as HinclE.
+  pose proof (HinclE :=
+    equivocators_fixed_equivocations_vlsm_incl_PreFree IM (elements equivocating)).
   apply sent_by_non_equivocating_are_sent in Hm.
-  specialize (StrongFixed_incl_Preloaded IM equivocating)
-    as Hincl.
+  pose proof (Hincl := StrongFixed_incl_Preloaded IM equivocating).
   apply (VLSM_incl_valid_state Hincl) in Hs.
-  apply
-    (composite_sent_valid (equivocator_IM IM) _ _ Heqv_state_s).
-  revert Hm.
-  apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
+  apply (composite_sent_valid (equivocator_IM IM) _ _ Heqv_state_s).
+  revert Hm; apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
   by specialize
     (VLSM_projection_has_been_sent_reflect
       (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM)
@@ -243,13 +240,12 @@ Proof.
       and [fixed_equivocating_non_equivocating_constraint_lifting] to satisfy
       the hypotheses of the replay lemma.
     *)
-    specialize
+    pose proof (Hreplay :=
       (sub_preloaded_replayed_trace_from_valid_equivocating
         IM (sent_by_non_equivocating IM equivocating s)
         (elements equivocating)
         (equivocators_fixed_equivocations_constraint IM (elements equivocating))
-        (fun m => False))
-      as Hreplay.
+        (fun m => False))).
     spec Hreplay.
     { clear -HeqXE. intros i ns s Hi Hs.
       split; [by split |].
@@ -261,7 +257,8 @@ Proof.
           IM (elements equivocating) _ _ _ _ _ Ht Hs).
     }
     spec Hreplay.
-    { subst s.
+    {
+      subst s.
       apply valid_trace_last_pstate in HtrX.
       apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
       apply (VLSM_eq_valid_state HeqX) in HtrX.
