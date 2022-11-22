@@ -601,16 +601,16 @@ Lemma monotone_nat_stream_find s (Hs : monotone_nat_stream_prop s) (n : nat)
   : n < hd s \/ exists k, Str_nth k s = n \/ Str_nth k s < n < Str_nth (S k) s.
 Proof.
   induction n.
-  - destruct (hd s) eqn:Hhd .
+  - destruct (hd s) eqn: Hhd.
     + by right; exists 0; left.
     + by left; lia.
   - destruct (decide (hd s <= S n)); [| by left; lia].
     right.
     destruct IHn as [Hlt | [k Hk]]
-    ; [exists 0; left; cbv in *; lia|].
+    ; [by exists 0; left; cbv in *; lia |].
     destruct (decide (Str_nth (S k) s = S n))
     ; [by exists (S k); left|].
-    exists k. right.
+    exists k; right.
     cut (Str_nth k s < Str_nth (S k) s); [by lia |].
     by apply (Hs k (S k)); lia.
 Qed.
@@ -623,7 +623,7 @@ Lemma monotone_nat_stream_tl
   (Hs : monotone_nat_stream_prop s)
   : monotone_nat_stream_prop (tl s).
 Proof.
-  by intros n1 n2; etransitivity; [| apply (Hs (S n1) (S n2))]; lia.
+  by intros n1 n2; etransitivity; [| by apply (Hs (S n1) (S n2))]; lia.
 Qed.
 
 CoFixpoint nat_sequence_from (n : nat) : Stream nat
@@ -779,10 +779,9 @@ Lemma stream_prepend_prefix_r
   : stream_prefix (stream_prepend l s) n = ne_list_to_list l ++ stream_prefix s (n - ne_list_length l).
 Proof.
   revert l Hge s.
-  induction n.
-  - intros [| a l] Hge s; cbn in *; lia.
-  - intros [| a l] Hge s; cbn in *; [by replace (n - 0) with n by lia |].
-    by rewrite <- IHn; [| cbv in *; lia].
+  induction n; intros [| a l] Hge s; cbn in *; [by lia.. | |].
+  - by rewrite Nat.sub_0_r.
+  - by rewrite <- IHn; [| cbv in *; lia].
 Qed.
 
 Lemma stream_concat_unroll {A} (a : ne_list A) (s : Stream (ne_list A)) :
@@ -794,13 +793,15 @@ Lemma stream_concat_prefix {A} (s : Stream (ne_list A)) n len
   : len = length prefix ->
     stream_prefix (stream_concat s) len = prefix.
 Proof.
-  intros ->; revert s prefix; induction n; [done |]; intros []; cbn.
+  intros ->; revert s prefix.
+  induction n; [done |].
+  intros [n0 s]; cbn.
   rewrite app_length.
-  assert (length (ne_list_to_list n0) +
-  length (mjoin (List.map ne_list_to_list (stream_prefix s n)))
-  ≥ length (ne_list_to_list n0)) by lia.
+  assert (Hge :
+    length (ne_list_to_list n0) + length (mjoin (List.map ne_list_to_list (stream_prefix s n)))
+    ≥ length (ne_list_to_list n0)) by lia.
   rewrite stream_concat_unroll, stream_prepend_prefix_r by done.
   rewrite <- IHn at 2.
   do 2 f_equal.
-  apply minus_plus.
+  by apply minus_plus.
 Qed.
