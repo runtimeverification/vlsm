@@ -111,7 +111,7 @@ Lemma NeList_to_ne_list_to_list {A} :
     ne_list_to_list (NeList_to_ne_list l) = nl_hd l :: nl_tl l.
 Proof.
   intros [h t]; revert h; induction t; intros; [done |].
-  by rewrite NeList_to_ne_list_unroll,ne_list_to_list_unroll, IHt.
+  by rewrite NeList_to_ne_list_unroll, ne_list_to_list_unroll, IHt.
 Qed.
 
 Lemma NeList_to_ne_list_to_NeList {A} :

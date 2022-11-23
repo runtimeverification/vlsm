@@ -254,11 +254,10 @@ Lemma find_least_among_is_minimal
   : minimal_among le P find_least_among.
 Proof.
   destruct (find_least_among_helper_is_minimal bound) as [[[_ ?] ?] Hmin'].
-  cbn in *.
   split; [done |].
   intros; apply Hmin'; [| done].
   split; [| done].
-  split; [lia |].
+  split; [by lia |].
   by etransitivity.
 Qed.
 
