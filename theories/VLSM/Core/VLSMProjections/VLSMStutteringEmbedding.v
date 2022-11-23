@@ -695,9 +695,9 @@ Proof.
   - eapply valid_trace_forget_last, finite_valid_trace_from_to_app_split.
     rewrite <- pre_VLSM_stuttering_embedding_finite_trace_project_app.
     by apply basic_VLSM_stuttering_embedding_finite_valid_trace_init_to.
-  - subst s; apply pre_VLSM_stuttering_embedding_finite_trace_last;
-      [by apply basic_VLSM_stuttering_embedding_type |].
-    by eapply valid_trace_forget_last, finite_valid_trace_from_to_app_split, Htr.
+  - subst s; apply pre_VLSM_stuttering_embedding_finite_trace_last.
+    + by apply basic_VLSM_stuttering_embedding_type.
+    + by eapply valid_trace_forget_last, finite_valid_trace_from_to_app_split, Htr.
 Qed.
 
 (* end hide *)
