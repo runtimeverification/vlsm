@@ -33,8 +33,8 @@ Context
   .
 
 Definition pre_VLSM_stuttering_embedding_finite_trace_project :
-    list (@transition_item _ TX) -> list (@transition_item _ TY) :=
-  mbind transition_item_project.
+  list (@transition_item _ TX) -> list (@transition_item _ TY) :=
+    mbind transition_item_project.
 
 Definition pre_VLSM_stuttering_embedding_infinite_trace_project
   (s : Streams.Stream (@transition_item _ TX))
@@ -50,10 +50,10 @@ Definition pre_VLSM_stuttering_embedding_infinite_finite_trace_project
 
 Definition pre_VLSM_stuttering_embedding_finite_trace_project_app :
   forall (l1 l2 : list (@transition_item _ TX)),
-  pre_VLSM_stuttering_embedding_finite_trace_project (l1 ++ l2)
-    =
-  pre_VLSM_stuttering_embedding_finite_trace_project l1
-    ++ pre_VLSM_stuttering_embedding_finite_trace_project l2
+    pre_VLSM_stuttering_embedding_finite_trace_project (l1 ++ l2)
+      =
+    pre_VLSM_stuttering_embedding_finite_trace_project l1
+      ++ pre_VLSM_stuttering_embedding_finite_trace_project l2
   := mbind_app _.
 
 Lemma elem_of_pre_VLSM_stuttering_embedding_finite_trace_project :
@@ -113,11 +113,11 @@ Context
 
 Definition pre_VLSM_stuttering_embedding_finite_trace_last :
   forall (s : vstate X) (tr : list (vtransition_item X)),
-  finite_valid_trace_from X s tr ->
-  finite_trace_last (state_project s)
-    (pre_VLSM_stuttering_embedding_finite_trace_project transition_item_project tr)
-    =
-  state_project (finite_trace_last s tr).
+    finite_valid_trace_from X s tr ->
+    finite_trace_last (state_project s)
+      (pre_VLSM_stuttering_embedding_finite_trace_project transition_item_project tr)
+      =
+    state_project (finite_trace_last s tr).
 Proof.
   induction 1 using finite_valid_trace_from_rev_ind; [done |].
   erewrite finite_trace_last_is_last,
@@ -216,8 +216,8 @@ Definition strong_stuttering_embedding_initial_state_preservation : Prop :=
   forall s : state,
     vinitial_state_prop X s -> vinitial_state_prop Y (state_project s).
 
-Lemma strong_stuttering_embedding_initial_state_preservation_weaken
-  : strong_stuttering_embedding_initial_state_preservation ->
+Lemma strong_stuttering_embedding_initial_state_preservation_weaken :
+  strong_stuttering_embedding_initial_state_preservation ->
     weak_stuttering_embedding_initial_state_preservation.
 Proof.
   intros Hstrong s Hs.
@@ -262,16 +262,16 @@ Definition VLSM_weak_stuttering_embedding_infinite_finite_trace_project
 Context
   (Hsimul : VLSM_weak_stuttering_embedding X Y state_project transition_item_project).
 
-Definition VLSM_weak_stuttering_embedding_finite_trace_project_app
-  : forall l1 l2,
+Definition VLSM_weak_stuttering_embedding_finite_trace_project_app :
+  forall l1 l2,
     VLSM_weak_stuttering_embedding_finite_trace_project Hsimul (l1 ++ l2)
       =
     VLSM_weak_stuttering_embedding_finite_trace_project Hsimul l1
       ++ VLSM_weak_stuttering_embedding_finite_trace_project Hsimul l2
   := pre_VLSM_stuttering_embedding_finite_trace_project_app transition_item_project.
 
-Definition VLSM_weak_stuttering_embedding_finite_trace_last
-  : forall sX trX,
+Definition VLSM_weak_stuttering_embedding_finite_trace_last :
+  forall sX trX,
     finite_valid_trace_from X sX trX ->
     finite_trace_last (state_project sX)
       (VLSM_weak_stuttering_embedding_finite_trace_project Hsimul trX)
@@ -279,15 +279,15 @@ Definition VLSM_weak_stuttering_embedding_finite_trace_last
     state_project (finite_trace_last sX trX)
   := pre_VLSM_stuttering_embedding_finite_trace_last _ _ _ _ Hsimul.
 
-Definition VLSM_weak_stuttering_embedding_finite_valid_trace_from
-  : forall sX trX,
+Definition VLSM_weak_stuttering_embedding_finite_valid_trace_from :
+  forall sX trX,
     finite_valid_trace_from X sX trX ->
     finite_valid_trace_from Y (state_project sX)
       (VLSM_weak_stuttering_embedding_finite_trace_project Hsimul trX)
   := weak_stuttering_embedding_preserves_valid_trace _ _ _ _ Hsimul.
 
-Lemma VLSM_weak_stuttering_embedding_infinite_valid_trace_from
-  : forall sX trX (Hinf : InfinitelyOften (fun item => transition_item_project item <> []) trX),
+Lemma VLSM_weak_stuttering_embedding_infinite_valid_trace_from :
+  forall sX trX (Hinf : InfinitelyOften (fun item => transition_item_project item <> []) trX),
     infinite_valid_trace_from X sX trX ->
     infinite_valid_trace_from Y (state_project sX)
       (VLSM_weak_stuttering_embedding_infinite_trace_project Hsimul trX Hinf).
@@ -303,8 +303,8 @@ Proof.
     infinite_valid_trace_from_prefix.
 Qed.
 
-Lemma VLSM_weak_stuttering_embedding_infinite_finite_valid_trace_from
-  : forall sX trX (Hfin : FinitelyManyBound (fun item => transition_item_project item <> []) trX),
+Lemma VLSM_weak_stuttering_embedding_infinite_finite_valid_trace_from :
+  forall sX trX (Hfin : FinitelyManyBound (fun item => transition_item_project item <> []) trX),
     infinite_valid_trace_from X sX trX ->
     finite_valid_trace_from Y (state_project sX)
       (VLSM_weak_stuttering_embedding_infinite_finite_trace_project Hsimul trX Hfin).
@@ -329,8 +329,8 @@ Proof.
     by apply VLSM_weak_stuttering_embedding_finite_valid_trace_from.
 Qed.
 
-Lemma VLSM_weak_stuttering_embedding_valid_state
-  : forall sX,
+Lemma VLSM_weak_stuttering_embedding_valid_state :
+  forall sX,
     valid_state_prop X sX -> valid_state_prop Y (state_project sX).
 Proof.
   by intro sX; eapply VLSM_weak_partial_projection_valid_state;
@@ -354,8 +354,8 @@ Proof.
     by erewrite finite_valid_trace_from_to_last.
 Qed.
 
-Lemma VLSM_weak_stuttering_embedding_in_futures
-  : forall s1 s2,
+Lemma VLSM_weak_stuttering_embedding_in_futures :
+  forall s1 s2,
     in_futures X s1 s2 -> in_futures Y (state_project s1) (state_project s2).
 Proof.
   intros s1 s2 [tr Htr].
@@ -363,8 +363,8 @@ Proof.
   by revert Htr; apply VLSM_weak_stuttering_embedding_finite_valid_trace_from_to.
 Qed.
 
-Lemma VLSM_weak_stuttering_embedding_input_valid_transition_item
-  : forall s item,
+Lemma VLSM_weak_stuttering_embedding_input_valid_transition_item :
+  forall s item,
     input_valid_transition_item X s item ->
     finite_valid_trace_from_to Y (state_project s)
       (state_project (destination item)) (transition_item_project item).
@@ -414,26 +414,26 @@ Definition VLSM_stuttering_embedding_infinite_finite_trace_project
 Context
   (Hsimul : VLSM_stuttering_embedding X Y state_project transition_item_project).
 
-Definition VLSM_stuttering_embedding_finite_trace_project_app
-  : forall l1 l2,
+Definition VLSM_stuttering_embedding_finite_trace_project_app :
+  forall l1 l2,
     VLSM_stuttering_embedding_finite_trace_project Hsimul (l1 ++ l2)
       =
     VLSM_stuttering_embedding_finite_trace_project Hsimul l1
       ++ VLSM_stuttering_embedding_finite_trace_project Hsimul l2
   := pre_VLSM_stuttering_embedding_finite_trace_project_app transition_item_project.
 
-Definition VLSM_stuttering_embedding_finite_trace_last
-  : forall sX trX,
+Definition VLSM_stuttering_embedding_finite_trace_last :
+  forall sX trX,
     finite_valid_trace_from X sX trX ->
     finite_trace_last (state_project sX) (VLSM_stuttering_embedding_finite_trace_project Hsimul trX)
       =
     state_project (finite_trace_last sX trX)
   := pre_VLSM_stuttering_embedding_finite_trace_last _ _ _ _ Hsimul.
 
-Definition VLSM_stuttering_embedding_finite_valid_trace
-  : forall sX trX,
-      finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX)
-        (VLSM_stuttering_embedding_finite_trace_project Hsimul trX)
+Definition VLSM_stuttering_embedding_finite_valid_trace :
+  forall sX trX,
+    finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX)
+      (VLSM_stuttering_embedding_finite_trace_project Hsimul trX)
   := stuttering_embedding_preserves_valid_trace _ _ _ _ Hsimul.
 
 (**
@@ -450,10 +450,11 @@ Proof.
     by apply VLSM_stuttering_embedding_finite_valid_trace.
 Qed.
 
-Lemma VLSM_stuttering_embedding_finite_valid_trace_from
-  : forall sX trX,
-      finite_valid_trace_from X sX trX ->
-      finite_valid_trace_from Y (state_project sX) (VLSM_stuttering_embedding_finite_trace_project Hsimul trX).
+Lemma VLSM_stuttering_embedding_finite_valid_trace_from :
+  forall sX trX,
+    finite_valid_trace_from X sX trX ->
+    finite_valid_trace_from Y (state_project sX)
+      (VLSM_stuttering_embedding_finite_trace_project Hsimul trX).
 Proof.
   by intros; eapply VLSM_partial_projection_finite_valid_trace_from;
     [apply VLSM_partial_projection_from_stuttering_embedding |..].
@@ -472,59 +473,59 @@ Definition VLSM_stuttering_embedding_valid_state :
     valid_state_prop X sX -> valid_state_prop Y (state_project sX)
   := VLSM_weak_stuttering_embedding_valid_state VLSM_stuttering_embedding_weaken.
 
-Definition VLSM_stuttering_embedding_input_valid_transition_item
-  : forall s item,
+Definition VLSM_stuttering_embedding_input_valid_transition_item :
+  forall s item,
     input_valid_transition_item X s item ->
     finite_valid_trace_from_to Y (state_project s) (state_project (destination item))
       (transition_item_project item)
   := VLSM_weak_stuttering_embedding_input_valid_transition_item VLSM_stuttering_embedding_weaken.
 
-Definition VLSM_stuttering_embedding_finite_valid_trace_from_to
-  : forall sX s'X trX,
-      finite_valid_trace_from_to X sX s'X trX ->
-      finite_valid_trace_from_to Y (state_project sX) (state_project s'X)
-        (VLSM_stuttering_embedding_finite_trace_project Hsimul trX)
+Definition VLSM_stuttering_embedding_finite_valid_trace_from_to :
+  forall sX s'X trX,
+    finite_valid_trace_from_to X sX s'X trX ->
+    finite_valid_trace_from_to Y (state_project sX) (state_project s'X)
+      (VLSM_stuttering_embedding_finite_trace_project Hsimul trX)
   := VLSM_weak_stuttering_embedding_finite_valid_trace_from_to VLSM_stuttering_embedding_weaken.
 
-Definition VLSM_stuttering_embedding_in_futures
-  : forall s1 s2,
+Definition VLSM_stuttering_embedding_in_futures :
+  forall s1 s2,
     in_futures X s1 s2 -> in_futures Y (state_project s1) (state_project s2)
   := VLSM_weak_stuttering_embedding_in_futures VLSM_stuttering_embedding_weaken.
 
-Definition VLSM_stuttering_embedding_infinite_valid_trace_from
-  : forall sX trX (Hinf : InfinitelyOften _ trX),
+Definition VLSM_stuttering_embedding_infinite_valid_trace_from :
+  forall sX trX (Hinf : InfinitelyOften _ trX),
     infinite_valid_trace_from X sX trX ->
     infinite_valid_trace_from Y (state_project sX)
       (VLSM_stuttering_embedding_infinite_trace_project Hsimul trX Hinf)
   := VLSM_weak_stuttering_embedding_infinite_valid_trace_from VLSM_stuttering_embedding_weaken.
 
-Definition VLSM_stuttering_embedding_infinite_finite_valid_trace_from
-  : forall sX trX (Hfin : FinitelyManyBound _ trX),
+Definition VLSM_stuttering_embedding_infinite_finite_valid_trace_from :
+  forall sX trX (Hfin : FinitelyManyBound _ trX),
     infinite_valid_trace_from X sX trX ->
     finite_valid_trace_from Y (state_project sX)
       (VLSM_stuttering_embedding_infinite_finite_trace_project Hsimul trX Hfin)
   := VLSM_weak_stuttering_embedding_infinite_finite_valid_trace_from VLSM_stuttering_embedding_weaken.
 
-Lemma VLSM_stuttering_embedding_initial_state
-  : forall sX, vinitial_state_prop X sX -> vinitial_state_prop Y (state_project sX).
+Lemma VLSM_stuttering_embedding_initial_state :
+  forall sX, vinitial_state_prop X sX -> vinitial_state_prop Y (state_project sX).
 Proof.
   by intros; eapply VLSM_partial_projection_initial_state;
     [apply VLSM_partial_projection_from_stuttering_embedding |..].
 Qed.
 
-Lemma VLSM_stuttering_embedding_finite_valid_trace_init_to
-  : forall sX s'X trX,
-      finite_valid_trace_init_to X sX s'X trX ->
-      finite_valid_trace_init_to Y (state_project sX) (state_project s'X)
-        (VLSM_stuttering_embedding_finite_trace_project Hsimul trX).
+Lemma VLSM_stuttering_embedding_finite_valid_trace_init_to :
+  forall sX s'X trX,
+    finite_valid_trace_init_to X sX s'X trX ->
+    finite_valid_trace_init_to Y (state_project sX) (state_project s'X)
+      (VLSM_stuttering_embedding_finite_trace_project Hsimul trX).
 Proof.
   intros * []; split.
   - by apply VLSM_stuttering_embedding_finite_valid_trace_from_to.
   - by apply VLSM_stuttering_embedding_initial_state.
 Qed.
 
-Lemma VLSM_stuttering_embedding_infinite_valid_trace
-  : forall sX trX (Hinf : InfinitelyOften _ trX),
+Lemma VLSM_stuttering_embedding_infinite_valid_trace :
+  forall sX trX (Hinf : InfinitelyOften _ trX),
     infinite_valid_trace X sX trX ->
     infinite_valid_trace Y (state_project sX)
       (VLSM_stuttering_embedding_infinite_trace_project Hsimul trX Hinf).
@@ -535,8 +536,8 @@ Proof.
   - by apply VLSM_stuttering_embedding_initial_state.
 Qed.
 
-Lemma VLSM_stuttering_embedding_infinite_finite_valid_trace
-  : forall sX trX (Hfin : FinitelyManyBound _ trX),
+Lemma VLSM_stuttering_embedding_infinite_finite_valid_trace :
+  forall sX trX (Hfin : FinitelyManyBound _ trX),
     infinite_valid_trace X sX trX ->
     finite_valid_trace Y (state_project sX)
       (VLSM_stuttering_embedding_infinite_finite_trace_project Hsimul trX Hfin).
@@ -652,8 +653,8 @@ Context
     X Y state_project transition_item_project)
   .
 
-Lemma basic_VLSM_stuttering_embedding_type
-  : VLSM_stuttering_embedding_type X (type Y) state_project transition_item_project.
+Lemma basic_VLSM_stuttering_embedding_type :
+  VLSM_stuttering_embedding_type X (type Y) state_project transition_item_project.
 Proof.
   constructor; intros.
   by eapply finite_valid_trace_from_to_last, Htransition.
@@ -702,8 +703,8 @@ Qed.
 
 (* end hide *)
 
-Lemma basic_VLSM_weak_stuttering_embedding
-  : VLSM_weak_stuttering_embedding X Y state_project transition_item_project.
+Lemma basic_VLSM_weak_stuttering_embedding :
+  VLSM_weak_stuttering_embedding X Y state_project transition_item_project.
 Proof.
   constructor.
   - by apply basic_VLSM_stuttering_embedding_type.
