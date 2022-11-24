@@ -4,6 +4,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
 From VLSM.Lib Require Import ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
+From VLSM.Core Require Export ReachableThreshold.
 
 (** * VLSM Equivocation Definitions
 
@@ -22,15 +23,8 @@ Proof.
   - by intro Ha; exists (exist _ a Ha).
 Qed.
 
-(** ** Basic equivocation *)
+(** ** Basic equivocation
 
-Class ReachableThreshold V Cv `{Hm : Measurable V} `{FinSet V Cv} : Set :=
-{
-  threshold : {r | (r >= 0)%R};
-  reachable_threshold : exists (vs : Cv), (sum_weights vs > proj1_sig threshold)%R;
-}.
-
-(**
   Assuming a set of <<state>>s, and a set of <<validator>>s,
   which is [Measurable] and has a [ReachableThreshold], we can define
   [BasicEquivocation] starting from an [is_equivocating] relation
