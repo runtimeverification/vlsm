@@ -194,6 +194,75 @@ Proof.
   by split; [| lia].
 Qed.
 
+Section sec_find_least_among.
+(**
+  Given a decidable property on naturals and a natural number on which the
+  property holds, we can compute the least natural number on which it holds.
+*)
+
+Context
+  (P : nat -> Prop)
+  `{forall n, Decision (P n)}
+  (bound : nat)
+  (Hbound : P bound).
+
+#[local] Fixpoint find_least_among_helper (dif : nat) : nat :=
+  match dif with
+  | 0 => bound
+  | S dif' =>
+    if decide (P (bound - dif))
+      then bound - dif
+      else find_least_among_helper dif'
+  end.
+
+Definition find_least_among : nat := find_least_among_helper bound.
+
+#[local] Lemma find_least_among_helper_bounded :
+  forall n, bound - n <= find_least_among_helper n <= bound.
+Proof. by induction n; cbn; [| case_decide]; lia. Qed.
+
+#[local] Lemma find_least_among_helper_has_property :
+  forall n, P (find_least_among_helper n).
+Proof. by induction n; cbn; [| case_decide]. Qed.
+
+#[local] Lemma find_least_among_helper_minimal :
+  forall n m,
+    bound - n <= m <= bound -> m < find_least_among_helper n -> ~ P m.
+Proof.
+  induction n; cbn; [by lia |].
+  case_decide; [by lia |].
+  intros.
+  destruct (decide (m = bound - S n)); [by subst |].
+  by apply IHn; lia.
+Qed.
+
+#[local] Lemma find_least_among_helper_is_minimal :
+  forall n,
+    minimal_among le
+      (fun m => bound - n <= m <= bound /\ P m)
+      (find_least_among_helper n).
+Proof.
+  split; [split |].
+  - by apply find_least_among_helper_bounded.
+  - by apply find_least_among_helper_has_property.
+  - intros ? [Hm' Hpm'] Hle.
+    destruct (decide (find_least_among_helper  n = m')); [by lia |].
+    by exfalso; eapply find_least_among_helper_minimal with n m'; [| lia |].
+Qed.
+
+Lemma find_least_among_is_minimal
+  : minimal_among le P find_least_among.
+Proof.
+  destruct (find_least_among_helper_is_minimal bound) as [[[_ ?] ?] Hmin'].
+  split; [done |].
+  intros; apply Hmin'; [| done].
+  split; [| done].
+  split; [by lia |].
+  by etransitivity.
+Qed.
+
+End sec_find_least_among.
+
 (** A more concise definition of minimality for strict orders. *)
 Definition strict_minimal_among `(R : relation A) (P : A -> Prop) (m : A) : Prop :=
   P m /\ (forall m', P m' -> ~ R m' m).

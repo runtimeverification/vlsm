@@ -19,6 +19,7 @@ theories/VLSM/Lib/FinExtras.v
 theories/VLSM/Lib/FinFunExtras.v
 theories/VLSM/Lib/RealsExtras.v
 theories/VLSM/Lib/TopSort.v
+theories/VLSM/Lib/NeList.v
 theories/VLSM/Lib/StreamExtras.v
 theories/VLSM/Lib/StreamFilters.v
 theories/VLSM/Lib/Temporal.v
@@ -30,6 +31,7 @@ theories/VLSM/Lib/Measurable.v
 theories/VLSM/Core/VLSM.v
 theories/VLSM/Core/Plans.v
 theories/VLSM/Core/VLSMProjections/VLSMPartialProjection.v
+theories/VLSM/Core/VLSMProjections/VLSMStutteringEmbedding.v
 theories/VLSM/Core/VLSMProjections/VLSMTotalProjection.v
 theories/VLSM/Core/VLSMProjections/VLSMEmbedding.v
 theories/VLSM/Core/VLSMProjections/VLSMInclusion.v

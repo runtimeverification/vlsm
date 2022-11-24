@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
-From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras.
+From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras NeList.
 
 (**
   Given a predicate <<P>> and a stream <<s>>, a stream of naturals <<ns>>
@@ -15,6 +15,21 @@ Definition filtering_subsequence
   : Prop
   := (forall i, i < hd ns -> ~P (Str_nth i s)) /\
      ForAll2 (fun m n => P (Str_nth m s) /\ m < n /\ forall i, m < i < n -> ~ P (Str_nth i s)) ns.
+
+(**
+  A more intuitive statement of the [filtering_subsequence] property.
+  See [FilteringSubsequence_iff] for the equivalence result.
+*)
+Record FilteringSubsequence
+  {A : Type}
+  (P : A -> Prop)
+  (s : Stream A)
+  (ns : Stream nat)
+  : Prop :=
+{
+  fs_monotone : monotone_nat_stream_prop ns;
+  fs_is_filter : forall n, P (Str_nth n s) <-> exists k, n = Str_nth k ns;
+}.
 
 Lemma filtering_subsequence_sorted
   {A : Type}
@@ -96,6 +111,31 @@ Proof.
     rewrite ForAll2_forall in Hfs.
     specialize (Hfs k) as [_ [_ Hfs]].
     by elim (Hfs n).
+Qed.
+
+Lemma FilteringSubsequence_iff
+  {A : Type}
+  (P : A -> Prop)
+  (s : Stream A)
+  (ss : Stream nat)
+  : FilteringSubsequence P s ss <-> filtering_subsequence P s ss.
+Proof.
+  split.
+  - intros []; split.
+    + setoid_rewrite fs_is_filter0.
+      intros i Hi [? ->].
+      apply (fs_monotone0 x 0) in Hi.
+      by lia.
+    + apply ForAll2_forall; intros n; split_and!.
+      * by apply fs_is_filter0; eexists.
+      * by apply (fs_monotone0 n (S n)); lia.
+      * setoid_rewrite fs_is_filter0.
+        intros i [Hni Hni'] [? ->].
+        by apply fs_monotone0 in Hni, Hni'; lia.
+  - constructor.
+    + by eapply monotone_nat_stream_prop_from_successor, filtering_subsequence_sorted.
+    + split; [by apply filtering_subsequence_witness_rev |].
+      by intros [? ->]; apply filtering_subsequence_witness.
 Qed.
 
 (** Prefixes of the filtering subsequence expressed as filters. *)
@@ -589,6 +629,95 @@ Definition bounded_stream_map_option
   map_option f (stream_prefix s (` Hfin)).
 
 End sec_stream_map_option.
+
+Section sec_stream_concat_map.
+
+(** ** Mapping a function expanding elements to lists of elements on a stream
+
+  Given a function <<f>> which [InfinitelyOften] produces non-empty lists from
+  the elements of a stream <<s>>, we can define the stream obtained by
+  concatenating the values of <<s>> through <<f>>.
+*)
+
+Context
+  [A B : Type]
+  (f : A -> list B)
+  (FNonEmpty : A -> Prop := fun a => f a <> [])
+  (s : Stream A)
+  .
+
+Definition stream_concat_map
+  (Hinf : InfinitelyOften FNonEmpty s)
+  : Stream B :=
+  stream_concat (stream_filter_map FNonEmpty (list_function_restriction f) s Hinf).
+
+Lemma stream_concat_map_prefix
+  (Hinf : InfinitelyOften FNonEmpty s)
+  (n : nat)
+  (mbind_prefix := mbind f (stream_prefix s n))
+  (m := length mbind_prefix)
+  : stream_prefix (stream_concat_map Hinf) m = mbind_prefix.
+Proof.
+  subst mbind_prefix m; unfold stream_concat_map.
+  cut (mjoin
+    (List.map ne_list_to_list
+      (list_filter_map (fun a : A => f a <> []) (list_function_restriction f)
+          (stream_prefix s n))) = mbind f (stream_prefix s n)).
+  {
+    intros <-.
+    by erewrite stream_concat_prefix;
+      unfold stream_filter_map;
+      rewrite fitering_subsequence_stream_filter_map_prefix.
+  }
+  by apply list_filter_map_mbind.
+Qed.
+
+Program Definition stream_concat_map_ex_prefix
+  (Hinf : InfinitelyOften FNonEmpty s)
+  (Hfs := stream_filter_positions_filtering_subsequence _ _ Hinf)
+  (k : nat)
+  : {n : nat |
+      stream_prefix (stream_concat_map Hinf) k
+        `prefix_of`
+      mbind f (stream_prefix s n)}
+  :=
+  let (n, Heq) :=
+    (fitering_subsequence_stream_filter_map_prefix_ex
+      FNonEmpty (list_function_restriction f) _ _ Hfs k)
+  in exist _ n _.
+Next Obligation.
+  cbn; intros Hinf k n Heq.
+  rewrite <- (stream_concat_map_prefix Hinf).
+  apply stream_prefix_of.
+  rewrite <- list_filter_map_mbind.
+  replace k
+    with (length (list_filter_map FNonEmpty (list_function_restriction f) (stream_prefix s n)))
+    by (rewrite <- Heq; apply stream_prefix_length).
+  by apply ne_list_concat_min_length.
+Qed.
+
+Program Definition stream_concat_map_ex_min_prefix
+  `{EqDecision B}
+  (Hinf : InfinitelyOften FNonEmpty s)
+  (k : nat)
+  (Ppre := fun m =>
+    stream_prefix (stream_concat_map Hinf) k
+      `prefix_of`
+    mbind f (stream_prefix s m))
+  : {n : nat | minimal_among le Ppre n}
+  :=
+  let (n, Hpre) :=  stream_concat_map_ex_prefix Hinf k in
+  exist _ (find_least_among Ppre n) _.
+Next Obligation.
+  by intros; apply find_least_among_is_minimal.
+Qed.
+
+Definition bounded_stream_concat_map
+  (Hfin : FinitelyManyBound FNonEmpty s)
+  : list B :=
+  mbind f (stream_prefix s (` Hfin)).
+
+End sec_stream_concat_map.
 
 (**
   For a totally defined function, [stream_map_option] corresponds to the

@@ -15,7 +15,7 @@ Proof.
 Qed.
 
 (** It is decidable whether a list is null or not. *)
-Lemma null_dec {S} (l : list S) : Decision (l = []).
+#[export] Instance null_dec {S} (l : list S) : Decision (l = []).
 Proof.
   by destruct l; [left | right].
 Qed.
@@ -429,6 +429,13 @@ Lemma list_prefix_suffix
 Proof.
   by revert n; induction l; intros [| n]; cbn; [.. | rewrite IHl].
 Qed.
+
+Lemma prefix_of_list_prefix
+  {A : Type}
+  (l : list A)
+  (n : nat)
+  : list_prefix l n `prefix_of` l.
+Proof. by eexists; symmetry; apply list_prefix_suffix. Qed.
 
 Definition list_segment
   {A : Type}

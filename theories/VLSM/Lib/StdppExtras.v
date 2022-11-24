@@ -723,3 +723,15 @@ Proof.
   - apply elem_of_list_split in Hy as (l21 & l22 & ->).
     by right; exists l1, l21, l22; left; cbn.
 Qed.
+
+Lemma mjoin_app {A} (l1 l2 : list (list A)) :
+  mjoin (l1 ++ l2) = mjoin l1 ++ mjoin l2.
+Proof.
+  induction l1; cbn; [done |].
+  replace (mjoin (l1 ++ l2)) with (mjoin l1 ++ mjoin l2).
+  by rewrite app_assoc.
+Qed.
+
+Lemma mbind_app `(f : A -> list B) (l1 l2 : list A) :
+  mbind f (l1 ++ l2) = mbind f l1 ++ mbind f l2.
+Proof. by induction l1; [| cbn; rewrite IHl1, app_assoc]. Qed.
