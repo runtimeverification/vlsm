@@ -24,10 +24,10 @@ Qed.
 
 (** ** Basic equivocation *)
 
-Class ReachableThreshold V `{Hm : Measurable V} : Set :=
+Class ReachableThreshold V Cv `{Hm : Measurable V} `{FinSet V Cv} : Set :=
 {
   threshold : {r | (r >= 0)%R};
-  reachable_threshold : exists (vs :list V), NoDup vs /\ (sum_weights vs > proj1_sig threshold)%R;
+  reachable_threshold : exists (vs : Cv), (sum_weights vs > proj1_sig threshold)%R;
 }.
 
 (**
@@ -56,8 +56,7 @@ Class ReachableThreshold V `{Hm : Measurable V} : Set :=
 Class BasicEquivocation
   (state validator Cm : Type)
   {measurable_V : Measurable validator}
-  {reachable_threshold : ReachableThreshold validator}
-  `{FinSet validator Cm}
+  `{ReachableThreshold validator Cm}
   : Type :=
 {
   is_equivocating (s : state) (v : validator) : Prop;
@@ -69,7 +68,7 @@ Class BasicEquivocation
     filter (fun v => is_equivocating s v) (state_validators s);
   (** equivocation fault sum: the sum of the weights of equivocating validators *)
   equivocation_fault (s : state) : R :=
-    sum_weights (elements (equivocating_validators s));
+    sum_weights (equivocating_validators s);
   not_heavy (s : state) : Prop := (equivocation_fault s <= proj1_sig threshold)%R
 }.
 
@@ -79,11 +78,7 @@ Lemma eq_equivocating_validators_equivocation_fault
     equivocating_validators s1 ≡@{Cm} equivocating_validators s2 ->
     equivocation_fault s1 = equivocation_fault s2.
 Proof.
-  intros.
-  apply set_eq_nodup_sum_weight_eq.
-  - by apply NoDup_elements.
-  - by apply NoDup_elements.
-  - by apply set_eq_fin_set, H8.
+  by intros; apply sum_weights_proper.
 Qed.
 
 Lemma incl_equivocating_validators_equivocation_fault
@@ -94,10 +89,7 @@ Lemma incl_equivocating_validators_equivocation_fault
     (equivocation_fault s1 <= equivocation_fault s2)%R.
 Proof.
   intros s1 s2 H_incl.
-  apply sum_weights_subseteq.
-  - by apply NoDup_elements.
-  - by apply NoDup_elements.
-  - by intro; setoid_rewrite elem_of_elements; apply H_incl. 
+  by apply sum_weights_subseteq.
 Qed.
 
 (** *** State-message oracles and endowing states with history
@@ -1962,7 +1954,7 @@ Definition sender_safety_prop : Prop :=
 (**
   An alternative, possibly friendlier, formulation. Note that it is
   slightly weaker, in that it does not require that the sender
-  is able to send the message. 
+  is able to send the message.
 *)
 
 Definition sender_safety_alt_prop : Prop :=
@@ -2152,8 +2144,7 @@ Qed.
 Context
     `{finite.Finite validator}
     {measurable_V : Measurable validator}
-    {threshold_V : ReachableThreshold validator}
-    `{FinSet validator Cm}
+    `{ReachableThreshold validator Cm}
     .
 
 (**

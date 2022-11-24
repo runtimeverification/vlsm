@@ -11,6 +11,7 @@ theories/VLSM/Lib/ListExtras.v
 theories/VLSM/Lib/StdppExtras.v
 theories/VLSM/Lib/StdppListSet.v
 theories/VLSM/Lib/ListSetExtras.v
+theories/VLSM/Lib/ListFinSetExtras.v
 theories/VLSM/Lib/SortedLists.v
 theories/VLSM/Lib/FinSetExtras.v
 theories/VLSM/Lib/StdppListFinSet.v
@@ -47,7 +48,6 @@ theories/VLSM/Core/MessageDependencies.v
 theories/VLSM/Core/AnnotatedVLSM.v
 theories/VLSM/Core/ByzantineTraces.v
 theories/VLSM/Core/TraceableVLSM.v
-theories/VLSM/Core/FinSetMessageDependencies.v
 
 theories/VLSM/Core/Equivocation/FixedSetEquivocation.v
 theories/VLSM/Core/Equivocation/MsgDepFixedSetEquivocation.v
