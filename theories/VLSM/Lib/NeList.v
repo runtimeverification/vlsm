@@ -169,7 +169,7 @@ Definition list_function_restriction {A B} (f : A -> list B)
 Lemma list_filter_map_mbind
   {A B : Type}
   (f : A -> list B)
-  
+
   (l : list A)
   : mjoin (map ne_list_to_list
       (list_filter_map (fun a => f a <> []) (list_function_restriction f) l))
@@ -231,7 +231,7 @@ match l with
 end.
 
 Fixpoint NonEmptyList_to_ne_list `(l : NonEmptyList A) : ne_list A :=
-  match (nel_tl l) with
+  match nel_tl l with
   | None => nel_singl (nel_hd l)
   | Some l' => nel_cons (nel_hd l) (NonEmptyList_to_ne_list l')
   end.
