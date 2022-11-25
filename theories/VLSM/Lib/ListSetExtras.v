@@ -458,13 +458,12 @@ Qed.
 Lemma diff_app_nodup `{EqDecision A} : forall (s1 s2 : list A),
   NoDup s1 ->
   NoDup s2 ->
-  NoDup ((set_diff s1 s2) ++ s2).
+  NoDup (set_diff s1 s2 ++ s2).
 Proof.
   intros.
-  apply nodup_append; [| done | |].
+  apply nodup_append; [| done |].
   - by apply set_diff_nodup.
   - by intros; apply (set_diff_elim2 a s1).
-  - by setoid_rewrite set_diff_iff; itauto.
 Qed.
 
 Lemma add_remove_inverse `{EqDecision X}:
@@ -522,14 +521,11 @@ Lemma set_prod_nodup `(s1: set A) `(s2: set B):
   NoDup (set_prod s1 s2).
 Proof.
   intros Hs1 H22; induction Hs1; cbn; [by constructor |].
-  apply nodup_append; [| done | |].
+  apply nodup_append; [| done |].
   - by apply NoDup_fmap; [congruence |].
   - intros [a b].
     rewrite elem_of_list_fmap, elem_of_list_prod.
-    by intros [_ [[= <- _] _]] [].
-  - intros [a b].
-    rewrite elem_of_list_prod, elem_of_list_fmap.
-    by intros [Ha _] [_ [[= -> _] _]].
+    by intros [_ [[= -> _] _]] [].
 Qed.
 
 (**
