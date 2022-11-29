@@ -2,6 +2,15 @@ From stdpp Require Import prelude.
 From Coq Require Import Reals Lra.
 From VLSM.Lib Require Import RealsExtras Measurable ListExtras StdppListSet.
 
+(**
+  Given a set of validators and a [threshold] (a positive real number), we say
+  that the threshold is reachable ([reachable_threshold]) when there exists a
+  set of validators whose combined weight passes the threshold.
+
+  In this module we prove that there exist a [potentially_pivotal] validator,
+  i.e., a validator which added to a set of validators tips over the threshold.
+*)
+
 Class ReachableThreshold V Cv `{Hm : Measurable V} `{FinSet V Cv} : Set :=
 {
   threshold : {r | (r >= 0)%R};
@@ -16,10 +25,14 @@ Context
   `{EqDecision V}
   `{Hrt : ReachableThreshold V Cv}.
 
+(**
+  Given a list with no duplicates and whose added weight does not pass the
+  threshold, we can iteratively add elements into it until it passes the
+  threshold.  Hence, the last element added will tip over the threshold.
+*)
 Lemma pivotal_validator_extension_list
   : forall vsfix vss,
   NoDup vsfix ->
-  (* and whose added weight does not pass the threshold *)
   (sum_weights_list vsfix <= proj1_sig threshold)%R ->
   NoDup (vss ++ vsfix) ->
   (sum_weights_list (vss ++ vsfix) > proj1_sig threshold)%R ->
@@ -46,9 +59,11 @@ Proof.
       by right; apply Hincl.
 Qed.
 
+(**
+  The [FinSet] version of the [pivotal_validator_extension_list] result.
+*)
 Lemma pivotal_validator_extension
   : forall (vsfix vss : Cv),
-  (* and whose added weight does not pass the threshold *)
   (sum_weights vsfix <= proj1_sig threshold)%R ->
   vss ## vsfix ->
   (sum_weights (vss ∪ vsfix) > proj1_sig threshold)%R ->
@@ -89,6 +104,11 @@ Proof.
       by intros [] ?; eapply Hdisj; [apply elem_of_elements, Hincl |].
 Qed.
 
+(**
+  Given a set of validators whose combined weight passes the threshold, we can
+  iteratively remove elements until the combined weight decreases below the
+  threshold. The last element removed tips over the threshold.
+*)
 Lemma validators_pivotal_ind
   : forall (vss : Cv),
   (sum_weights vss > proj1_sig threshold)%R ->
@@ -109,6 +129,11 @@ Proof.
     by repeat esplit.
 Qed.
 
+(**
+  There exists a set whose combined weight passes the threshold and containing
+  an element such that, if the element id removed, the combined weight decreases
+  below the threshold.
+*)
 Lemma sufficient_validators_pivotal
   : exists (vs : Cv),
     (sum_weights vs > proj1_sig threshold)%R /\
@@ -121,6 +146,11 @@ Proof.
   by exists vs'.
 Qed.
 
+(**
+  A validator <<v>> is called potentially pivotal if there exists a set of
+  validators whose combined weight is below the threshold such that, if
+  adding <<v>> to the set, the combine weight would pass over the threshold.
+*)
 Definition potentially_pivotal
   (v : V) : Prop
   :=
@@ -129,6 +159,10 @@ Definition potentially_pivotal
       (sum_weights vs <= proj1_sig threshold)%R /\
       (sum_weights vs > proj1_sig threshold - (proj1_sig (weight v)))%R.
 
+(**
+  The main result of this section proves the existence of a [potentially_pivotal]
+  validator.
+*)
 Lemma exists_pivotal_validator
   : exists v, potentially_pivotal v.
 Proof.
