@@ -45,18 +45,19 @@ Lemma pivotal_validator_extension_list
     (sum_weights_list ((StdppListSet.set_remove v vs) ++ vsfix) <= proj1_sig threshold)%R.
 Proof.
   destruct threshold as [t about_t]; simpl in *.
-  intro.  induction vss; intros Hnd_vsfix Hvsfix Hnd_all Hall.
-  - simpl in Hall. exfalso.
-    by apply (Rge_gt_trans t) in Hall; [eapply Rgt_not_eq | apply Rle_ge].
-  - simpl in Hall. destruct (Rtotal_le_gt (sum_weights_list (vss ++ vsfix)) t) as [| Hgt].
-    + exists (a :: vss). repeat split; [| done | done |].
-      * by apply nodup_append_left in Hnd_all.
-      * exists a. split; [left |]. cbn. by rewrite decide_True.
-    + simpl in Hnd_all.
-      apply NoDup_cons in Hnd_all as [Hnin Hvss].
-      apply IHvss in Hgt as [vs [Hvs [Hincl Hex]]]; [| done..].
-      exists vs. repeat (split; try done).
-      by right; apply Hincl.
+  induction vss; intros Hnd_vsfix Hvsfix Hnd_all Hall; simpl in Hall; [by lra |].
+  destruct (Rtotal_le_gt (sum_weights_list (vss ++ vsfix)) t) as [| Hgt].
+  - exists (a :: vss).
+    repeat split; [| done | done |].
+    + by apply nodup_append_left in Hnd_all.
+    + exists a.
+      split; [by left |].
+      by cbn; rewrite decide_True.
+  - apply NoDup_cons in Hnd_all as [Hnin Hvss].
+    apply IHvss in Hgt as (vs & Hvs & Hincl & Hex); [| done..].
+    exists vs.
+    repeat (split; try done).
+    by right; apply Hincl.
 Qed.
 
 (**
@@ -77,31 +78,33 @@ Proof.
   intros vsfix vss Hvsfix Hdisj Hall.
   destruct (pivotal_validator_extension_list (elements vsfix) (elements vss))
     as (vs & Hnd_vs & Hincl & Hvs & v & Hv & Hvs_v);
-      [by apply NoDup_elements | done | .. | exists (list_to_set vs); split_and!].
-  - apply NoDup_app; split_and!; [apply NoDup_elements | | apply NoDup_elements].
+      [by apply NoDup_elements | done | ..].
+  - apply NoDup_app; split_and!; [by apply NoDup_elements | | by apply NoDup_elements].
     by intro; rewrite !elem_of_elements; intros ? ?; eapply Hdisj.
   - rewrite sum_weights_app_list.
     by rewrite sum_weights_disj_union in Hall.
-  - by intros a Ha; apply elem_of_list_to_set, Hincl, elem_of_elements in Ha.
-  - rewrite sum_weights_app_list in Hvs.
-    rewrite sum_weights_disj_union.
-    + replace (sum_weights (list_to_set vs)) with (sum_weights_list vs); [done |].
+  - exists (list_to_set vs); split_and!.
+    + by intros a Ha; apply elem_of_list_to_set, Hincl, elem_of_elements in Ha.
+    + rewrite sum_weights_app_list in Hvs.
+      rewrite sum_weights_disj_union.
+      * replace (sum_weights (list_to_set vs)) with (sum_weights_list vs); [done |].
+        apply sum_weights_list_permutation_proper.
+        by rewrite elements_list_to_set.
+      * intros x; rewrite elem_of_list_to_set.
+        intros Hx_vs Hx_vsfix; eapply Hdisj; [| done].
+        by eapply elem_of_elements, Hincl.
+    + exists v; split; [by apply elem_of_list_to_set |].
+      replace (sum_weights _)
+        with (sum_weights_list (StdppListSet.set_remove v vs ++ elements vsfix)); [done |].
       apply sum_weights_list_permutation_proper.
-      by rewrite elements_list_to_set.
-    + intros x; rewrite elem_of_list_to_set.
-      intros Hx_vs Hx_vsfix; eapply Hdisj; [| done].
-      by eapply elem_of_elements, Hincl.
-  - exists v; split; [by apply elem_of_list_to_set |].
-    replace (sum_weights _)
-      with (sum_weights_list (StdppListSet.set_remove v vs ++ elements vsfix)); [done |].
-    apply sum_weights_list_permutation_proper.
-    rewrite elements_disj_union.
-    + apply Permutation_app_tail.
-      etransitivity; [by symmetry; apply elements_list_to_set, set_remove_nodup |].
-      apply elements_proper.
-      by intro x; rewrite elem_of_difference, !elem_of_list_to_set, set_remove_iff, elem_of_singleton.
-    + intros x; rewrite elem_of_difference, elem_of_list_to_set, elem_of_singleton.
-      by intros [] ?; eapply Hdisj; [apply elem_of_elements, Hincl |].
+      rewrite elements_disj_union.
+      * apply Permutation_app_tail.
+        etransitivity; [by symmetry; apply elements_list_to_set, set_remove_nodup |].
+        apply elements_proper.
+        intro x.
+        by rewrite elem_of_difference, !elem_of_list_to_set, set_remove_iff, elem_of_singleton.
+      * intros x; rewrite elem_of_difference, elem_of_list_to_set, elem_of_singleton.
+        by intros [] ?; eapply Hdisj; [apply elem_of_elements, Hincl |].
 Qed.
 
 (**
@@ -131,7 +134,7 @@ Qed.
 
 (**
   There exists a set whose combined weight passes the threshold and containing
-  an element such that, if the element id removed, the combined weight decreases
+  an element such that, if the element is removed, the combined weight decreases
   below the threshold.
 *)
 Lemma sufficient_validators_pivotal
@@ -151,9 +154,7 @@ Qed.
   validators whose combined weight is below the threshold such that, if
   adding <<v>> to the set, the combine weight would pass over the threshold.
 *)
-Definition potentially_pivotal
-  (v : V) : Prop
-  :=
+Definition potentially_pivotal (v : V) : Prop :=
   exists (vs : Cv),
       v ∉ vs /\
       (sum_weights vs <= proj1_sig threshold)%R /\
@@ -163,10 +164,10 @@ Definition potentially_pivotal
   The main result of this section proves the existence of a [potentially_pivotal]
   validator.
 *)
-Lemma exists_pivotal_validator
-  : exists v, potentially_pivotal v.
+Lemma exists_pivotal_validator :
+  exists v, potentially_pivotal v.
 Proof.
-  destruct sufficient_validators_pivotal as [vs [Hgt [v [Hin Hlte]]]].
+  destruct sufficient_validators_pivotal as (vs & Hgt & v & Hin & Hlte).
   exists v, (vs ∖ {[v]}); split_and!.
   - by rewrite elem_of_difference, elem_of_singleton; intros [].
   - done.

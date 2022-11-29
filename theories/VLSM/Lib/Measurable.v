@@ -152,9 +152,10 @@ Proof. by induction vs; intros; simpl; [| rewrite IHvs]; lra. Qed.
   Proper ((≡ₚ) ==> (=)) sum_weights_list.
 Proof.
   intros l1 l2 Hl.
-  apply foldr_permutation_proper with (=) (λ (v : V) (r : R), (`(weight v) + r)%R) 0%R in Hl;
-    [done | typeclasses eauto | by intros v x y -> |].
-  by intros; lra.
+  unfold sum_weights_list; apply foldr_permutation_proper; [.. | done].
+  - by typeclasses eauto.
+  - by congruence.
+  - by intros; lra.
 Qed.
 
 Lemma sum_weights_disj_union :
@@ -165,7 +166,7 @@ Proof.
   intros vs vs' Hdisj.
   apply elements_disj_union, sum_weights_list_permutation_proper in Hdisj.
   setoid_rewrite Hdisj.
-  by apply sum_weights_app_list.
+  apply sum_weights_app_list.
 Qed.
 
 Lemma sum_weights_union_empty (vs : Cv) :
