@@ -481,23 +481,6 @@ Proof.
     by eapply filter_nil_not_elem_of in Px.
 Qed.
 
-Lemma nodup_append {A} : forall (l1 l2 : list A),
-  NoDup l1 ->
-  NoDup l2 ->
-  (forall a, a ∈ l1 -> ~ a ∈ l2) ->
-  NoDup (l1 ++ l2).
-Proof.
-  induction l1 as [| h t]; cbn; intros l2 Hn1 Hn2 Hdisj; [done |].
-  inversion Hn1; subst; clear Hn1.
-  constructor.
-  - intros Hin.
-    apply elem_of_app in Hin as []; [done |].
-    by apply Hdisj with h; [left |].
-  - apply IHt; [done.. |].
-    intros a Hin.
-    by apply Hdisj; right.
-Qed.
-
 Lemma elem_of_list_annotate_forget
   {A : Type}
   (P : A -> Prop)
