@@ -448,11 +448,7 @@ Qed.
 Lemma set_diff_nodup' `{EqDecision A} (l l' : list A)
   : NoDup l -> NoDup (set_diff l l').
 Proof.
-  induction 1 as [|x l H H' IH]; simpl.
-  - by constructor.
-  - case_decide.
-    + by apply IH.
-    + by apply set_add_nodup, IH.
+  by apply set_diff_nodup.
 Qed.
 
 Lemma diff_app_nodup `{EqDecision A} : forall (s1 s2 : list A),
