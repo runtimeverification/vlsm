@@ -688,7 +688,7 @@ Proof.
   specialize
     (@lift_to_composite_generalized_preloaded_VLSM_embedding
       message (sub_index (elements(equivocating_validators sf))) _ (sub_IM IM (elements(equivocating_validators sf)))
-      (λ msg : message, msg ∈ message_dependencies m)
+      (fun msg : message => msg ∈ message_dependencies m)
       (composite_has_been_directly_observed IM s))
     as Hproj.
   spec Hproj.

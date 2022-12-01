@@ -722,7 +722,7 @@ Proof. by intros sj; apply state_update_eq. Qed.
 
 Lemma component_transition_projection_None
   : weak_projection_transition_consistency_None X (type (IM i))
-    composite_project_label (λ s : vstate X, s i).
+    composite_project_label (fun s : vstate X => s i).
 Proof.
   intros [j lj] HlX sX iom s'X oom [_ Ht]; cbn in Ht.
   destruct (vtransition _ _ _) as (si', om'); inversion Ht; subst.
@@ -733,7 +733,7 @@ Qed.
 
 Lemma component_transition_projection_Some
   : induced_validator_transition_consistency_Some X (type (IM i))
-    composite_project_label (λ s : vstate X, s i).
+    composite_project_label (fun s : vstate X => s i).
 Proof.
   intros [j1 lj1] [j2 lj2] lj; unfold composite_project_label; cbn.
   case_decide as Hj1; [| done]; subst j1.

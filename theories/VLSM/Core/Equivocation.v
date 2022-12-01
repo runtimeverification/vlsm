@@ -1427,7 +1427,7 @@ Qed.
 
 Definition ComputableSentMessages_has_been_sent
   `{!ComputableSentMessages vlsm}
-  : vstate vlsm → message → Prop :=
+  : vstate vlsm -> message -> Prop :=
   computable_messages_oracle_rel csm_computable_oracle.
 
 #[export] Instance computable_sent_message_has_been_sent_dec
@@ -1466,7 +1466,7 @@ Qed.
 
 Definition ComputableReceivedMessages_has_been_sent
   `{!ComputableReceivedMessages vlsm}
-  : vstate vlsm → message → Prop
+  : vstate vlsm -> message -> Prop
   := computable_messages_oracle_rel crm_computable_oracle.
 
 #[export] Instance computable_received_message_has_been_sent_dec

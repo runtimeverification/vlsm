@@ -1534,7 +1534,7 @@ Definition sub_element_state (s : vstate (IM j)) sub_i
   : vstate (sub_IM IM (elements indices) sub_i) :=
   match (decide (` sub_i = j)) with
   | left e =>
-    eq_rect_r (λ j : index, vstate (IM j)) s e
+    eq_rect_r (fun j : index => vstate (IM j)) s e
   | right _ => ` (vs0 (IM (` sub_i)))
   end.
 

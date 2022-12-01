@@ -300,7 +300,7 @@ Qed.
 *)
 Definition find_decomposition
   (P : set (composite_transition_item IM * composite_state IM) -> nat -> Prop)
-  `{forall s, RelDecision (λ i, P (composite_state_destructor IM state_destructor s i))}
+  `{forall s, RelDecision (fun i => P (composite_state_destructor IM state_destructor s i))}
   (s : composite_state IM)
   (indices : list index)
   : option (index * nat) :=
@@ -601,7 +601,7 @@ Proof.
   assert (destination item = s') as <-
     by (eapply composite_tv_state_destructor_destination, elem_of_list_lookup_2; eauto).
   exists m; constructor; [done.. |].
-  cut (output item ≠ Some m).
+  cut (output item <> Some m).
   {
     intro.
     destruct (composite_has_been_sent_stepwise_props IM (free_constraint IM)) as [_ ].

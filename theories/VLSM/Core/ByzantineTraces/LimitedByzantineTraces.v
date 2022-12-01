@@ -85,7 +85,7 @@ Context
   (byzantine: Ci)
   (non_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
   (Hlimit: (sum_weights (byzantine) <= `threshold)%R)
-  (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine (λ i : index, i) sender)
+  (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine (fun i : index => i) sender)
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
     := equivocation_dec_tracewise IM (fun i => i) sender)
   (tracewise_not_heavy := not_heavy (1 := Htracewise_BasicEquivocation))

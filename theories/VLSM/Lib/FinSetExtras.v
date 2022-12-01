@@ -147,9 +147,9 @@ End sec_general.
 Section sec_filter.
 
 Context
-  (P P2 : A → Prop)
-  `{!∀ x, Decision (P x)}
-  `{!∀ x, Decision (P2 x)}
+  (P P2 : A -> Prop)
+  `{!forall x, Decision (P x)}
+  `{!forall x, Decision (P2 x)}
   (X Y : C).
 
 Lemma filter_subset

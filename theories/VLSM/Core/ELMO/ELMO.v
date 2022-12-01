@@ -761,7 +761,7 @@ Proof.
     + intros Ha.
       apply local_equivocators_simple_add_Receive in Ha; [| done..].
       destruct Ha as [| (<- & Hnot_s & m & Hm & Hincomp)]; [by apply lefo_prev, IHHs |].
-      assert (adr (state m) ≠ adr s) by (destruct Hincomp; congruence).
+      assert (adr (state m) <> adr s) by (destruct Hincomp; congruence).
       by revert Hincomp; apply lefo_last, not_adr_received.
   - destruct s as [s_obs s_a].
     unfold local_equivocators_full; cbn.
@@ -863,7 +863,7 @@ Lemma equivocators_of_msg_subset_of_recv (s : State) (m : Message) :
   full_node s m ->
   forall a,
     local_equivocators_simple (state m) a
-    → local_equivocators_simple (s <+> MkObservation Receive m) a.
+    -> local_equivocators_simple (s <+> MkObservation Receive m) a.
 Proof.
   intros Hfull a []; destruct m as [ms]; cbn in *.
   assert (forall x, x ∈ messages ms -> x ∈ messages (s <+> MkObservation Receive (MkMessage ms)))
@@ -924,7 +924,7 @@ Lemma incomparable_iff (m1 m2 : Message) :
   incomparable m1 m2
     <->
   adr (state m1) = adr (state m2)
-  /\ m1 ≠ m2
+  /\ m1 <> m2
   /\ m1 ∉ sentMessages (state m2)
   /\ m2 ∉ sentMessages (state m1).
 Proof.
@@ -1276,7 +1276,7 @@ Proof.
   - intros m Hm.
     apply can_emit_has_trace in Hm as (is & tr & item & Htr & Houtput).
     apply (can_emit_from_valid_trace
-            (pre_loaded_vlsm Ei (λ msg : Message, msg ∈ Message_dependencies m)))
+            (pre_loaded_vlsm Ei (fun msg : Message => msg ∈ Message_dependencies m)))
       with is (tr ++ [item]); cycle 1.
     + apply Exists_exists; eexists.
       by split; [apply elem_of_app; right; left |].
@@ -1643,7 +1643,7 @@ Qed.
   It might be possible to use something weaker than [UMO_reachable full_node]
   to prove
   [CompositeHasBeenObserved ELMOComponent (elements ∘ Message_dependencies) s m
-  <-> ∃ (k : index) (l : label), rec_obs (s k) (MkObservation l m)]
+  <-> exists (k : index) (l : label), rec_obs (s k) (MkObservation l m)]
   but [CompositeHasBeenObserved] can recurse into sent or received messages
   and [rec_obs] only into received messages so we need some deep structural
   assumption about what [Send] observations are allowed, even recursively
@@ -1655,7 +1655,7 @@ Lemma ELMO_CHBO_in_messages :
   forall m,
     CompositeHasBeenObserved ELMOComponent Message_dependencies s m
       <->
-    ∃ (k : index), m ∈ messages (s k).
+    exists (k : index), m ∈ messages (s k).
 Proof.
   intros s Hs m; split.
   - intros [Hobs|m' Hobs Hdepth];
@@ -2364,7 +2364,7 @@ Qed.
   Let si be a reachable state in (ELMOComponent i) and
   m a message such that
   ELMOComponentValid Receive si (Some m) in (ELMOComponent i),
-  adr m ≠ i and adr m ∉ local_equivocators_full si, and
+  adr m <> i and adr m ∉ local_equivocators_full si, and
   also there is no message m' ∈ received_messages(si) with m' ⊥ m.
 
   Suppose σ is a valid state in ELMOProtocol such that σ i = si,
@@ -2505,7 +2505,7 @@ Lemma all_intermediary_transitions_are_receive
   (Htr_m: finite_valid_trace_from_to
           (pre_loaded_with_all_messages_vlsm (ELMOComponent i_m))
           (sigma i_m) (state m) tr_m)
-  : Forall (λ item : transition_item, l item = Receive) tr_m.
+  : Forall (fun item : transition_item => l item = Receive) tr_m.
 Proof.
   apply Forall_forall; intros item Hitem.
   eapply ELMOComponent_elem_of_ram_trace in Hitem as H_item;
@@ -2555,7 +2555,7 @@ Lemma lift_receive_trace
   (Htr_m:
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (ELMOComponent i_m))
       (sigma i_m) (state m) tr_m)
-  (Htr_m_receive: Forall (λ item : transition_item, l item = Receive) tr_m)
+  (Htr_m_receive: Forall (fun item : transition_item => l item = Receive) tr_m)
   (Htr_m_inputs_in_sigma:
     forall (item : transition_item) (msg : Message),
       item ∈ tr_m -> input item = Some msg ->
@@ -2884,7 +2884,7 @@ Proof.
   - pose (Hti := Ht); destruct Hti as [(_ & _ & Hv) Hti];
       inversion Hv as [? ? [? ? ? Hlocal_ok] |]; subst; inversion Hti; subst om'.
     apply ELMO_msg_valid_full_has_sender in ELMO_mv_msg_valid_full0 as Hsender.
-    cut (∃ gamma,
+    cut (exists gamma,
           in_futures ELMOProtocol sigma gamma /\
           gamma i = sigma i /\
           component_reflects_composite (state_update ELMOComponent gamma i s') i /\
@@ -2973,7 +2973,7 @@ Proof.
       - by constructor.
       - by subst sigma'; cbn; rewrite Heqi_m; destruct m.
     }
-    assert (i ≠ i_m) by (contradict Hm_not_by_i; subst; done).
+    assert (i <> i_m) by (contradict Hm_not_by_i; subst; done).
     assert (ELMOComponentRAMTransition i Receive (sigma' i) (sigma i <+> MkObservation Receive m) m).
     {
       subst sigma'; state_update_simpl; rewrite Heqi.
