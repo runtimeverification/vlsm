@@ -1620,10 +1620,7 @@ Qed.
 Lemma nodup_append_left {A}:
   forall (l1 l2 : list A), NoDup (l1 ++ l2) -> NoDup l1.
 Proof.
-  induction l1; intros.
-  - by constructor.
-  - inversion H. apply IHl1 in H3. constructor; [| done]. intro. apply H2.
-    by apply elem_of_app; left.
+  by intros l1 l2 [? _]%NoDup_app.
 Qed.
 
 Lemma subseteq_empty {A} : forall (l : list A),

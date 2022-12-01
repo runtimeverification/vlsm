@@ -470,7 +470,7 @@ Proof.
 Qed.
 
 Lemma Forall_filter_nil {A} P `{∀ (x:A), Decision (P x)} l :
- Forall (fun a : A => ~ P a) l <-> filter P l = [].
+  Forall (fun a : A => ~ P a) l <-> filter P l = [].
 Proof.
   rewrite Forall_forall.
   split; intro Hnone.
@@ -479,23 +479,6 @@ Proof.
     by rewrite decide_False; auto.
   - intros x Hel Px.
     by eapply filter_nil_not_elem_of in Px.
-Qed.
-
-Lemma nodup_append {A} : forall (l1 l2 : list A),
-  NoDup l1 ->
-  NoDup l2 ->
-  (forall a, a ∈ l1 -> ~ a ∈ l2) ->
-  (forall a, a ∈ l2 -> ~ a ∈ l1) ->
-  NoDup (l1 ++ l2).
-Proof.
-  induction l1; simpl; intros; [done |].
-  inversion H; subst; clear H. constructor.
-  - intro. apply elem_of_app in H. destruct H as [Inl1 | InL2].
-    + by apply H5.
-    + by apply (H1 a); [left |].
-  - apply IHl1; [done | done | |]; intros.
-    + by apply H1; right.
-    + by apply H2 in H; rewrite elem_of_cons in H; itauto.
 Qed.
 
 Lemma elem_of_list_annotate_forget
