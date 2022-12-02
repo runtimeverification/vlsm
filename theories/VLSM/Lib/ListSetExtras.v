@@ -441,14 +441,18 @@ Proof.
 Qed.
 
 (**
-  An improved version of the [set_diff_nodup] Lemma not requiring [NoDup]
+  An improved version of the [set_diff_nodup] lemma not requiring [NoDup]
   for the second argument.
 *)
-(* TODO(palmskog): consider submitting a PR to Coq's stdlib. *)
+(* TODO: submit PR to Coq's stdlib ListSet with this improved version *)
 Lemma set_diff_nodup' `{EqDecision A} (l l' : list A)
   : NoDup l -> NoDup (set_diff l l').
 Proof.
-  by apply set_diff_nodup.
+ induction 1 as [|x l H H' IH]; simpl.
+ - by constructor.
+ - case_decide.
+   + by apply IH.
+   + by apply set_add_nodup, IH.
 Qed.
 
 Lemma diff_app_nodup `{EqDecision A} : forall (s1 s2 : list A),
