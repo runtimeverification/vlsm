@@ -112,13 +112,13 @@ Qed.
 Section sec_strong_fixed_equivocation.
 
 Definition sent_by_non_equivocating s m
-  := exists i, i ∉ (elements equivocating) /\ has_been_sent (IM i) (s i) m.
+  := exists i, i ∉ elements equivocating /\ has_been_sent (IM i) (s i) m.
 
 #[export] Instance sent_by_non_equivocating_dec : RelDecision sent_by_non_equivocating.
 Proof.
   intros s m.
   apply @Decision_iff with (P := Exists (fun i => has_been_sent (IM i) (s i) m)
-    (filter (fun i => i ∉ (elements equivocating)) (enum index))).
+    (filter (fun i => i ∉ elements equivocating) (enum index))).
   - rewrite Exists_exists. apply exist_proper. intro i.
     rewrite elem_of_list_filter. apply and_iff_compat_r.
     split; [intros [Hi Hl]; done | split; [done |]].
@@ -224,7 +224,7 @@ Context
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   (indices1 indices2 : Ci)
-  (Hincl : (elements indices1) ⊆ (elements indices2))
+  (Hincl : elements indices1 ⊆ elements indices2)
   .
 
 Lemma equivocators_composition_for_directly_observed_index_incl_embedding
@@ -454,7 +454,7 @@ Qed.
   (Ht : input_valid_transition Fixed l (s, iom) (sf, Some om))
   : strong_fixed_equivocation IM equivocators base_s om.
 Proof.
-  destruct (decide (projT1 l ∈ (elements equivocators))).
+  destruct (decide (projT1 l ∈ elements equivocators)).
   - apply
       (fixed_input_valid_transition_sub_projection_helper Hs_pr _ e) in Ht.
     by right; eexists _,_,_.

@@ -314,7 +314,7 @@ Context
   }.
 
 Lemma equivocating_validators_is_equivocating_tracewise_iff s v
-  : v ∈ (equivocating_validators s) <-> is_equivocating_tracewise_no_has_been_sent s v.
+  : v ∈ equivocating_validators s <-> is_equivocating_tracewise_no_has_been_sent s v.
 Proof.
   unfold equivocating_validators.
   simpl.

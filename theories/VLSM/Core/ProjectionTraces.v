@@ -267,7 +267,7 @@ Lemma finite_trace_projection_list_in_rev
   (tr : list (composite_transition_item IM))
   (j : index)
   (itemj : vtransition_item (IM j))
-  (Hitemj : itemj ∈ (VLSM_projection_finite_trace_project (preloaded_component_projection IM j) tr))
+  (Hitemj : itemj ∈ VLSM_projection_finite_trace_project (preloaded_component_projection IM j) tr)
   : exists (itemX : composite_transition_item IM), itemX ∈ tr /\
     output itemX = output itemj /\
     input itemX = input itemj /\

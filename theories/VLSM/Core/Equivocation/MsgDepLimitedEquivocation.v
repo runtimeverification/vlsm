@@ -375,7 +375,7 @@ Lemma equivocating_messages_are_equivocator_emitted
   (Him : can_emit (free_composite_vlsm IM) im)
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im) :
     exists j : index,
-      j ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci))
+      j ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci)
         /\
       can_emit (pre_loaded_vlsm (IM j) (fun dm => msg_dep_rel message_dependencies dm im)) im.
 Proof.
@@ -401,7 +401,7 @@ Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_em
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im)
   : forall dm, msg_dep_happens_before message_dependencies dm im ->
     composite_has_been_directly_observed IM s dm \/
-    exists dm_i, dm_i ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci)) /\
+    exists dm_i, dm_i ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci) /\
       can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm.
 Proof.
   intros dm Hdm.

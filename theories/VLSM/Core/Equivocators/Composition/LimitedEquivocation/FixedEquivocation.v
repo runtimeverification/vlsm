@@ -28,7 +28,7 @@ Definition state_has_fixed_equivocation
   (s : composite_state equivocator_IM)
   : Prop
   :=
-  (equivocating_indices IM (enum index) s) ⊆ equivocating.
+  equivocating_indices IM (enum index) s ⊆ equivocating.
 
 Definition equivocators_fixed_equivocations_constraint
   (l : composite_label equivocator_IM)
@@ -613,7 +613,7 @@ Lemma not_equivocating_sent_message_has_been_directly_observed_in_projection
   (lst := finite_trace_last is tr)
   (item: transition_item)
   (Hitem: item ∈ tr)
-  (Hitem_not_equiv: (projT1 (l item)) ∉ equivocating)
+  (Hitem_not_equiv: projT1 (l item) ∉ equivocating)
   (m: message)
   (Hm: field_selector output m item)
   (descriptors: equivocator_descriptors IM)
@@ -890,7 +890,7 @@ Lemma equivocator_vlsm_trace_project_reflect_non_equivocating
   (item: composite_transition_item (equivocator_IM IM))
   (Hitem: item ∈ tr)
   (Houtput: output item = Some m)
-  (Hno_equiv_item: (projT1 (l item)) ∉ equivocating)
+  (Hno_equiv_item: projT1 (l item) ∉ equivocating)
   : trace_has_message (field_selector output) m trX.
 Proof.
   apply elem_of_list_split in Hitem.
@@ -963,12 +963,12 @@ Lemma projection_has_not_been_directly_observed_is_equivocating
   (m: message)
   (Hno: ~ composite_has_been_directly_observed IM sX m)
   : forall item : composite_transition_item (equivocator_IM IM),
-      item ∈ tr -> output item = Some m -> (projT1 (l item)) ∈ equivocating.
+      item ∈ tr -> output item = Some m -> projT1 (l item) ∈ equivocating.
 Proof.
   destruct (free_equivocators_valid_trace_project descriptors is tr Hproper Htr)
     as [trX [initial_descriptors [_ [Htr_project [Hlast_state HtrX]]]]].
   intros item Hitem Houtput.
-  destruct (decide ((projT1 (l item)) ∈ (elements equivocating)));
+  destruct (decide (projT1 (l item) ∈ elements equivocating));
     [by apply elem_of_elements |].
   elim Hno. clear Hno.
   apply composite_has_been_directly_observed_sent_received_iff.

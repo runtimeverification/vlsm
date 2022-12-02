@@ -19,7 +19,7 @@ Definition set_union (x y : set) : set := x ∪ y.
 Definition set_diff (x y : set) : set := x ∖ y.
 
 Lemma set_union_subseteq_left :
-  forall (s1 s2 : set), s1 ⊆ (set_union s1 s2).
+  forall (s1 s2 : set), s1 ⊆ set_union s1 s2.
 Proof. by intros s1 s2 x Hincl; apply set_union_intro; left. Qed.
 
 Lemma set_union_subseteq_iff :

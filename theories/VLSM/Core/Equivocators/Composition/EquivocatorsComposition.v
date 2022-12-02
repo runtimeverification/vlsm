@@ -79,7 +79,7 @@ Context
 Program Instance equivocating_indices_BasicEquivocation :
   BasicEquivocation (composite_state equivocator_IM) index Ci threshold
   := {
-    is_equivocating := fun s v => v ∈ (equivocating_indices (enum index) s) ;
+    is_equivocating := fun s v => v ∈ equivocating_indices (enum index) s ;
     state_validators := fun s => list_to_set(enum index)
   }.
 Next Obligation.
@@ -141,7 +141,7 @@ Lemma equivocators_transition_preserves_equivocating_indices
   (l: composite_label equivocator_IM)
   (s0: composite_state equivocator_IM)
   (Ht: composite_transition equivocator_IM l (s0, iom) = (s, oom))
-  : (equivocating_indices index_listing s0) ⊆ (equivocating_indices index_listing s).
+  : equivocating_indices index_listing s0 ⊆ equivocating_indices index_listing s.
 Proof.
   intros i Hi.
   apply elem_of_list_filter.
