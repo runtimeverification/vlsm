@@ -159,7 +159,7 @@ Qed.
 
 Lemma in_not_in : forall A (x y : A) (l:list A),
   x ∈ l ->
-  ~ y ∈ l ->
+  y ∉ l ->
   x <> y.
 Proof. by itauto congruence. Qed.
 

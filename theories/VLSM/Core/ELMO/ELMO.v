@@ -2291,7 +2291,7 @@ Proof.
         intros [Heqv].
         eapply global_equivocators_simple_step_update_receive in Heqv;
           [| by constructor; state_update_simpl].
-        assert (Hm0_not_sent : ~ m0 ∈ sentMessages (s i)).
+        assert (Hm0_not_sent : m0 ∉ sentMessages (s i)).
         {
           intro Hm0; eapply adr_of_sentMessages in Hm0;
             [| by eapply ELMO_full_node_reachable, valid_state_project_preloaded].

@@ -163,7 +163,7 @@ Qed.
 
 Lemma set_diff_intro :
   forall (a : A) (x y : set),
-    a ∈ x -> ~ a ∈ y -> a ∈ set_diff x y.
+    a ∈ x -> a ∉ y -> a ∈ set_diff x y.
 Proof.
   induction x; cbn; [by inversion 1 |].
   by intros y; destruct (decide (a0 ∈ y));
@@ -179,14 +179,14 @@ Proof.
 Qed.
 
 Lemma set_diff_elim2 :
-  forall (a : A) (x y : set), a ∈ set_diff x y -> ~ a ∈ y.
+  forall (a : A) (x y : set), a ∈ set_diff x y -> a ∉ y.
 Proof.
   induction x; cbn; [by inversion 1 |].
   by intros y; destruct (decide (a0 ∈ y)); rewrite ?set_add_iff; firstorder congruence.
 Qed.
 
 Lemma set_diff_iff a l l' :
-  a ∈ set_diff l l' <-> a ∈ l /\ ~ a ∈ l'.
+  a ∈ set_diff l l' <-> a ∈ l /\ a ∉ l'.
 Proof.
   split.
   - by eauto using set_diff_elim1, set_diff_elim2.
