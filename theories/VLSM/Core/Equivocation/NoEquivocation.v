@@ -58,7 +58,8 @@ Context
   (X: VLSM message)
   `{HasBeenSentCapability message X}
   `{HasBeenDirectlyObservedCapability message X}
-  (Henforced: forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s,om) -> no_equivocations X l (s,om))
+  (Henforced : forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
+    no_equivocations X l (s,om))
   .
 
 (**
@@ -87,8 +88,8 @@ Proof.
   intros Hptrans Hprev msg Hobs.
   specialize (Hprev msg).
   apply preloaded_weaken_input_valid_transition in Hptrans.
-  eapply (oracle_step_update (has_been_directly_observed_stepwise_props X) _ _ _ _ _ Hptrans) in Hobs.
-  simpl in Hobs.
+  eapply (oracle_step_update (has_been_directly_observed_stepwise_props X) _ _ _ _ _ Hptrans)
+    in Hobs; simpl in Hobs.
   specialize (Henforced l s (Some msg)).
   rewrite (has_been_sent_step_update Hptrans).
   destruct Hptrans as [Hv _].
@@ -131,8 +132,8 @@ Proof.
     split; [| done].
     rapply extend_right_finite_trace_from; [done |].
     apply finite_valid_trace_last_pstate in IHtr as Hs.
-    cut (option_valid_message_prop X iom);[firstorder|].
-    destruct iom as [m|];[|apply option_valid_message_None].
+    cut (option_valid_message_prop X iom); [by firstorder |].
+    destruct iom as [m |]; [| by apply option_valid_message_None].
     destruct Hx as [Hv _].
     apply Henforced in Hv.
     destruct Hv as [Hbsm | []].
@@ -144,7 +145,7 @@ Lemma preloaded_incl_no_equivocations
 Proof.
   specialize no_equivocations_preloaded_traces.
   clear -X. destruct X as [T [S M]].
-  apply VLSM_incl_finite_traces_characterization.
+  by apply VLSM_incl_finite_traces_characterization.
 Qed.
 
 Lemma preloaded_eq_no_equivocations
@@ -259,8 +260,9 @@ Definition composite_no_equivocation_vlsm_with_pre_loaded
   :=
   pre_loaded_vlsm (composite_vlsm IM no_equivocations_additional_constraint_with_pre_loaded) seed.
 
-Lemma seeded_no_equivocation_incl_preloaded
-  : VLSM_incl composite_no_equivocation_vlsm_with_pre_loaded (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)).
+Lemma seeded_no_equivocation_incl_preloaded :
+  VLSM_incl composite_no_equivocation_vlsm_with_pre_loaded
+    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)).
 Proof.
   unfold composite_no_equivocation_vlsm_with_pre_loaded.
   match goal with
@@ -313,7 +315,7 @@ Proof.
   apply VLSM_eq_incl_iff.
   specialize (constraint_subsumption_incl IM) as Hincl.
   unfold no_equivocations_additional_constraint_with_pre_loaded.
-  split;apply Hincl;intros l [s [m|]] Hpv; apply Hpv.
+  by split; apply Hincl; intros l [s [m |]] Hpv; apply Hpv.
 Qed.
 
 End sec_seeded_composite_vlsm_no_equivocation.

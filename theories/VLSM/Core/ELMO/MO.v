@@ -84,9 +84,9 @@ Definition MO_msg_valid_alt_recvs' (valid : Message -> Prop) (m : Message) : Pro
 *)
 Inductive MO_msg_valid_alt (P : Address -> Prop) (m : Message) : Prop :=
 {
-    P_adr_state : P (adr (state m));
-    MO_msg_valid_alt_sends' : MO_msg_valid_alt_sends m;
-    MO_msg_valid_alt_recvs'' : MO_msg_valid_alt_recvs' (MO_msg_valid_alt P) m;
+  P_adr_state : P (adr (state m));
+  MO_msg_valid_alt_sends' : MO_msg_valid_alt_sends m;
+  MO_msg_valid_alt_recvs'' : MO_msg_valid_alt_recvs' (MO_msg_valid_alt P) m;
 }.
 
 (**
@@ -126,13 +126,13 @@ Lemma MO_msg_valid_alt_sends_shorten :
 Proof.
   split.
   - unfold MO_msg_valid_alt_sends, MO_msg_valid_alt_sends_bounded.
-    intros Hs k suffix m' _ Hlast. by eapply Hs.
+    by intros Hs k suffix m' _ Hlast; eapply Hs.
   - unfold MO_msg_valid_alt_sends, MO_msg_valid_alt_sends_bounded.
     intros Hs k suffix m' Hlast.
     destruct (decide (k <= length (obs (state m)))).
     + by eapply Hs.
     + apply (Hs (length (obs (state m)))); [lia |].
-      rewrite lastn_ge in *; [done | lia | lia].
+      by rewrite lastn_ge in *; [| lia | lia].
 Qed.
 
 Lemma MO_msg_valid_alt_recvs_shorten :
@@ -141,13 +141,13 @@ Lemma MO_msg_valid_alt_recvs_shorten :
 Proof.
   split.
   - unfold MO_msg_valid_alt_recvs, MO_msg_valid_alt_recvs', MO_msg_valid_alt_recvs_bounded.
-    intros Hr k suffix m' _ Hlast. by eapply Hr.
+    by intros Hr k suffix m' _ Hlast; eapply Hr.
   - unfold MO_msg_valid_alt_recvs, MO_msg_valid_alt_recvs', MO_msg_valid_alt_recvs_bounded.
     intros Hr k suffix m' Hlast.
     destruct (decide (k <= length (obs (state m)))).
     + by eapply Hr.
     + apply (Hr (length (obs (state m))) suffix); [lia |].
-      rewrite lastn_ge in *; [done | lia | lia].
+      by rewrite lastn_ge in *; [| lia | lia].
 Qed.
 
 (**
@@ -216,7 +216,8 @@ Proof.
   unfold MO_msg_valid_alt_recvs, MO_msg_valid_alt_recvs'; cbn; unfold addObservation'.
   intros Hv k suffix m' Hlen Hlast.
   destruct (decide (1 + length (obs (state m)) <= k)); [lia |].
-  apply (Hv k suffix). rewrite lastn_cons. by case_decide; [lia |].
+  apply (Hv k suffix). rewrite lastn_cons.
+  by case_decide; [lia |].
 Qed.
 
 Lemma MO_msg_valid_alt_Send_conv :
@@ -279,7 +280,8 @@ Proof.
   unfold MO_msg_valid_alt_sends; cbn; unfold addObservation'.
   intros Hv k suffix m' Hlen Hlast.
   destruct (decide (1 + length (obs (state m)) <= k)); [lia |].
-  apply Hv with k. rewrite lastn_cons. by case_decide; [lia |].
+  apply Hv with k.
+  by rewrite lastn_cons; case_decide; [lia |].
 Qed.
 
 Lemma MO_msg_valid_alt_recvs_Receive_conv :
@@ -293,7 +295,8 @@ Proof.
   intros Hv; split.
   - intros k suffix m' Hlen Hlast.
     destruct (decide (1 + length (obs (state m)) <= k)); [lia |].
-    apply (Hv k suffix). rewrite lastn_cons. by case_decide; [lia |].
+    apply (Hv k suffix). rewrite lastn_cons.
+    by case_decide; [lia |].
   - apply (Hv (1 + length (obs (state m))) (obs (state m))).
     by rewrite lastn_ge; cbn; [| lia ].
 Qed.
@@ -323,7 +326,7 @@ Proof.
   specialize (Hvs (1 + length (obs (state m1))) (obs (state m1)) m2).
   rewrite lastn_cons in Hvs; case_decide; [| lia].
   destruct (Hvs eq_refl) as [].
-  destruct m1 as [[]], m2 as [[]]; cbn in *; congruence.
+  by destruct m1 as [[]], m2 as [[]]; cbn in *; congruence.
 Qed.
 
 (**
@@ -341,7 +344,7 @@ Lemma MO_msg_valid__MO_msg_valid_alt :
 Proof.
   split; [| revert m].
   - induction 1 as [m Hobs | m Hm IH | m mr Hm IHm Hmr IHmr].
-    + constructor; [done | |]
+    + by constructor; [done | |]
       ; intros k suffix m' Hlast
       ; rewrite Hobs, lastn_nil in Hlast; inversion Hlast.
     + by apply MO_msg_valid_alt_Send.
@@ -415,7 +418,7 @@ Context
 Lemma VLSM_incl_Mi_RMi :
   VLSM_incl_part (vmachine Mi) (vmachine RMi).
 Proof.
-  apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** The initial state of [RMi] is unique. *)
@@ -424,7 +427,7 @@ Lemma vs0_uniqueness :
     UMOComponent_initial_state_prop i is ->
       is = ``(vs0 RMi).
 Proof.
-  intros []; inversion 1; cbv in *; by subst.
+  by intros []; inversion 1; cbv in *; subst.
 Qed.
 
 (** *** Properties of transitions and traces *)
@@ -440,7 +443,7 @@ Proof.
   intros s Hvsp.
   red; cbn; split_and!; [done | | | done].
   - by exists (MkState [] i); constructor.
-  - do 2 constructor.
+  - by do 2 constructor.
 Qed.
 
 (** In a valid state <<s>>, we can receive any valid message. *)
@@ -470,7 +473,7 @@ Proof.
     by apply input_valid_transition_Send_RMi, IH.
   - apply (@input_valid_transition_destination _ RMi Receive (state m) _ (Some mr) None).
     destruct m as [s]; cbn in *.
-    apply input_valid_transition_Receive_RMi; itauto.
+    by apply input_valid_transition_Receive_RMi; itauto.
 Qed.
 
 (** Valid transitions and valid traces lead to bigger states. *)
@@ -503,7 +506,7 @@ Proof.
   induction 1; [by left |].
   assert (sizeState s' < sizeState s)
       by (eapply input_valid_transition_size_RMi; done).
-  destruct IHfinite_valid_trace_from_to; [itauto congruence | itauto lia].
+  by destruct IHfinite_valid_trace_from_to; [itauto congruence | itauto lia].
 Qed.
 
 (**
@@ -523,7 +526,7 @@ Proof.
   ; inversion Ht1; subst; clear Ht1
   ; inversion Ht2; subst; clear Ht2
   ; inversion Hvalid1; inversion Hvalid2; invert_MOComponentValid; auto.
-  destruct s1, s2; cbn in *; subst; itauto.
+  by destruct s1, s2; cbn in *; subst; itauto.
 Qed.
 
 (** Trace segments between any two states are unique. *)
@@ -535,11 +538,11 @@ Lemma finite_valid_trace_from_to_unique_RMi :
 Proof.
   intros s1 s2 tr1 tr2 Hfvt1 Hfvt2; revert tr2 Hfvt2.
   induction Hfvt1 using finite_valid_trace_from_to_rev_ind; intros.
-  - apply finite_valid_trace_from_to_size_RMi in Hfvt2; itauto (congruence + lia).
+  - by apply finite_valid_trace_from_to_size_RMi in Hfvt2; itauto (congruence + lia).
   - destruct Hfvt2 using finite_valid_trace_from_to_rev_ind; [| clear IHHfvt2].
     + apply finite_valid_trace_from_to_size_RMi in Hfvt1.
       apply input_valid_transition_size_RMi in Ht.
-      decompose [and or] Hfvt1; subst; clear Hfvt1; lia.
+      by decompose [and or] Hfvt1; subst; clear Hfvt1; lia.
     + assert (l = l0 /\ s = s0 /\ iom = iom0 /\ oom = oom0)
           by (eapply input_valid_transition_deterministic_conv_RMi; done).
       decompose [and] H; subst; clear H.
@@ -570,7 +573,7 @@ Proof.
   intros s Hvsp.
   red; cbn; split_and!; [done | | | done].
   - by exists (MkState [] i); constructor.
-  - do 2 constructor.
+  - by do 2 constructor.
 Qed.
 
 Lemma input_valid_transition_size_Mi :
@@ -580,7 +583,7 @@ Lemma input_valid_transition_size_Mi :
 Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_valid_transition_size_RMi.
-  apply (@VLSM_incl_input_valid_transition _ (vtype Mi) (vmachine Mi) (vmachine RMi))
+  by apply (@VLSM_incl_input_valid_transition _ (vtype Mi) (vmachine Mi) (vmachine RMi))
   ; eauto using VLSM_incl_Mi_RMi.
 Qed.
 
@@ -593,7 +596,7 @@ Lemma finite_valid_trace_from_to_size_Mi :
 Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_valid_trace_from_to_size_RMi.
-  apply (@VLSM_incl_finite_valid_trace_from_to _ (vtype Mi) (vmachine Mi) (vmachine RMi))
+  by apply (@VLSM_incl_finite_valid_trace_from_to _ (vtype Mi) (vmachine Mi) (vmachine RMi))
   ; eauto using VLSM_incl_Mi_RMi.
 Qed.
 
@@ -604,7 +607,7 @@ Lemma input_valid_transition_deterministic_conv_Mi :
       lbl1 = lbl2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
-  eapply input_valid_transition_deterministic_conv_RMi
+  by eapply input_valid_transition_deterministic_conv_RMi
   ; apply (@VLSM_incl_input_valid_transition _ (vtype Mi) (vmachine Mi) (vmachine RMi))
   ; eauto using VLSM_incl_Mi_RMi.
 Qed.
@@ -615,7 +618,7 @@ Lemma finite_valid_trace_from_to_unique_Mi :
     finite_valid_trace_from_to Mi s1 s2 l2 ->
       l1 = l2.
 Proof.
-  intros s1 s2 l1 l2 Hfvt1 Hfvt2
+  by intros s1 s2 l1 l2 Hfvt1 Hfvt2
   ; eapply finite_valid_trace_from_to_unique_RMi
   ; apply VLSM_incl_finite_valid_trace_from_to
   ; eauto using VLSM_incl_Mi_RMi.
@@ -627,7 +630,7 @@ Lemma finite_valid_trace_init_to_unique_Mi :
     finite_valid_trace_init_to Mi s f l2 ->
       l1 = l2.
 Proof.
-  intros s f l1 l2 Hfvit1 Hfvit2
+  by intros s f l1 l2 Hfvit1 Hfvit2
   ; eapply finite_valid_trace_init_to_unique_RMi
   ; apply VLSM_incl_finite_valid_trace_init_to
   ; eauto using VLSM_incl_Mi_RMi.
@@ -646,18 +649,17 @@ Proof.
   induction Hfv using finite_valid_trace_from_to_rev_ind; intros.
   - inversion Hinit; clear Hinit.
     destruct si; cbn in *; subst; cbn.
-    repeat constructor. exists None. repeat constructor.
+    repeat constructor. exists None.
+    by repeat constructor.
   - specialize (IHHfv Hinit).
     destruct Ht as [Hvalid Ht]; cbn in Ht.
     destruct s as [obs adr], l, iom as [im |]
     ; inversion Ht; subst; clear Ht; cbn in *
     ; cycle 1; [done | done | |].
     + constructor; [| done].
-      eapply extend_right_finite_trace_from_to
-      ; [apply IHHfv | split]; auto.
+      by eapply extend_right_finite_trace_from_to; [apply IHHfv |]; auto.
     + constructor; [| done].
-      eapply extend_right_finite_trace_from_to
-      ; [apply IHHfv | split]; auto.
+      by eapply extend_right_finite_trace_from_to; [apply IHHfv |]; auto.
 Qed.
 
 (** The trace extracted from the final state of another trace is equal to that trace. *)
@@ -684,7 +686,7 @@ Proof.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
   apply finite_valid_trace_init_to_state2trace_RMi_inv in Htr as Heqtr; subst.
   replace (``(vs0 RMi)) with is; [done |].
-  apply vs0_uniqueness, Htr.
+  by apply vs0_uniqueness, Htr.
 Qed.
 
 Lemma valid_state_contains_unique_valid_trace_RMi :
@@ -741,7 +743,7 @@ Proof.
   }
   destruct H1 as [H11 H12], H2 as [H21 H22].
   split.
-  - constructor; [congruence |].
+  - constructor; [by congruence |].
     rewrite H11, H21; cbn.
     split.
     + by apply suffix_app_r, suffix_cons_r.
@@ -833,7 +835,7 @@ Definition lift_to_MO_state
 Definition lift_to_MO_trace
   (us : MO_state) (i : index) (tr : list (vtransition_item (M i)))
   : list MO_transition_item :=
-    pre_VLSM_full_projection_finite_trace_project
+    pre_VLSM_embedding_finite_trace_project
       _ _ (lift_to_MO_label i) (lift_to_MO_state us i) tr.
 
 #[local] Hint Rewrite @state_update_twice : state_update.
@@ -850,8 +852,8 @@ Definition lift_to_MO_trace
 
 Lemma lift_to_MO :
   forall (us : MO_state) (Hus : valid_state_prop MO us) (i : index),
-    VLSM_weak_full_projection (M i) MO (lift_to_MO_label i) (lift_to_MO_state us i).
-Proof. by intros; apply lift_to_free_weak_full_projection. Qed.
+    VLSM_weak_embedding (M i) MO (lift_to_MO_label i) (lift_to_MO_state us i).
+Proof. by intros; apply lift_to_free_weak_embedding. Qed.
 
 Lemma lift_to_MO_valid_state_prop :
   forall (i : index) (s : State) (us : MO_state),
@@ -859,7 +861,7 @@ Lemma lift_to_MO_valid_state_prop :
       valid_state_prop MO (lift_to_MO_state us i s).
 Proof.
   intros is s us Hvsp.
-  by eapply VLSM_weak_full_projection_valid_state, lift_to_MO.
+  by eapply VLSM_weak_embedding_valid_state, lift_to_MO.
 Qed.
 
 Lemma lift_to_MO_valid_message_prop :
@@ -869,7 +871,7 @@ Lemma lift_to_MO_valid_message_prop :
 Proof.
   intros i [] Hovmp; cycle 1.
   - by exists (``(vs0 MO)); constructor.
-  - eapply VLSM_weak_full_projection_valid_message.
+  - eapply VLSM_weak_embedding_valid_message.
     + by apply (lift_to_MO (``(vs0 MO))); exists None; constructor.
     + by inversion 1.
     + by apply Hovmp.
@@ -885,7 +887,7 @@ Lemma lift_to_MO_input_valid_transition :
         (lift_to_MO_state us i s2, oom).
 Proof.
   intros i lbl s1 s2 iom oom us Hivt.
-  by apply @VLSM_weak_full_projection_input_valid_transition, lift_to_MO.
+  by apply @VLSM_weak_embedding_input_valid_transition, lift_to_MO.
 Qed.
 
 Lemma lift_to_MO_finite_valid_trace_from_to :
@@ -896,15 +898,15 @@ Lemma lift_to_MO_finite_valid_trace_from_to :
         MO (lift_to_MO_state us i s1) (lift_to_MO_state us i s2) (lift_to_MO_trace us i tr).
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
-  by eapply (VLSM_weak_full_projection_finite_valid_trace_from_to (lift_to_MO _ Hvsp i)).
+  by eapply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_MO _ Hvsp i)).
 Qed.
 
 (** We could prove the same lifting lemmas for [RMO], but we won't need them. *)
 
 Lemma lift_to_RMO
   (us : MO_state) (Hus : valid_state_prop RMO us) (i : index) :
-  VLSM_weak_full_projection (RM i) RMO (lift_to_MO_label i) (lift_to_MO_state us i).
-Proof. by apply lift_to_preloaded_free_weak_full_projection. Qed.
+  VLSM_weak_embedding (RM i) RMO (lift_to_MO_label i) (lift_to_MO_state us i).
+Proof. by apply lift_to_preloaded_free_weak_embedding. Qed.
 
 Lemma lift_to_RMO_valid_state_prop :
   forall (i : index) (s : State) (us : MO_state),
@@ -912,7 +914,7 @@ Lemma lift_to_RMO_valid_state_prop :
       valid_state_prop RMO (lift_to_MO_state us i s).
 Proof.
   intros is s us Hvsp.
-  by eapply VLSM_weak_full_projection_valid_state, lift_to_RMO.
+  by eapply VLSM_weak_embedding_valid_state, lift_to_RMO.
 Qed.
 
 Lemma lift_to_RMO_valid_message_prop :
@@ -922,7 +924,7 @@ Lemma lift_to_RMO_valid_message_prop :
 Proof.
   intros i [] Hovmp; cycle 1.
   - by exists (``(vs0 MO)); constructor.
-  - eapply VLSM_weak_full_projection_valid_message.
+  - eapply VLSM_weak_embedding_valid_message.
     + by apply (lift_to_RMO (``(vs0 MO))); exists None; constructor.
     + by inversion 1.
     + by apply Hovmp.
@@ -938,7 +940,7 @@ Lemma lift_to_RMO_input_valid_transition :
         (lift_to_MO_state us i s2, oom).
 Proof.
   intros i lbl s1 s2 iom oom us Hivt.
-  by apply @VLSM_weak_full_projection_input_valid_transition, lift_to_RMO.
+  by apply @VLSM_weak_embedding_input_valid_transition, lift_to_RMO.
 Qed.
 
 Lemma lift_to_RMO_finite_valid_trace_from_to :
@@ -949,7 +951,7 @@ Lemma lift_to_RMO_finite_valid_trace_from_to :
         RMO (lift_to_MO_state us i s1) (lift_to_MO_state us i s2) (lift_to_MO_trace us i tr).
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
-  by apply (VLSM_weak_full_projection_finite_valid_trace_from_to (lift_to_RMO _ Hvsp i)).
+  by apply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_RMO _ Hvsp i)).
 Qed.
 
 (** *** Lifting lemmas for validating theorem *)
@@ -1053,7 +1055,7 @@ Proof.
   induction Hfvt using finite_valid_trace_from_to_rev_ind; cbn;
     [by apply finite_valid_trace_lift_RM_to_MO |].
   constructor; [| by apply initial_state_prop_lift_RM_to_MO].
-  unfold lift_to_MO_trace, pre_VLSM_full_projection_finite_trace_project.
+  unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project.
   rewrite map_app.
   eapply finite_valid_trace_from_to_app; cbn; [by apply IHHfvt |].
   apply valid_trace_add_last; [| done].
@@ -1075,7 +1077,7 @@ Qed.
 
 Lemma lift_RM_to_MO :
   forall i : index,
-    VLSM_full_projection (RM i) MO (lift_to_MO_label i) (lift_to_MO_state (``(vs0 MO)) i).
+    VLSM_embedding (RM i) MO (lift_to_MO_label i) (lift_to_MO_state (``(vs0 MO)) i).
 Proof.
   constructor; intros.
   by eapply valid_trace_forget_last, lift_to_MO_finite_valid_trace_init_to,
@@ -1121,11 +1123,12 @@ Proof.
   induction is as [| i is']; cbn; intros us Hall Hvsp.
   - replace us with (λ n : index, MkState [] (idx n)).
     + by constructor; apply initial_state_is_valid; compute.
-    + extensionality i. rewrite Hall; [done |]. apply not_elem_of_nil.
+    + extensionality i; rewrite Hall; [done |].
+      by apply not_elem_of_nil.
   - eapply finite_valid_trace_from_to_app.
     + apply IHis'.
       * intros j Hj. destruct (decide (i = j)); subst; state_update_simpl; [done |].
-        apply Hall. rewrite elem_of_cons. by intros [].
+        by apply Hall; rewrite elem_of_cons; intros [].
       * apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True MO)).
         apply pre_composite_free_update_state_with_initial; [| by compute].
         by apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True MO)).
@@ -1134,7 +1137,7 @@ Proof.
       apply (valid_state_project_preloaded_to_preloaded _ _ _ us i) in Hvsp as Hvsp'.
       apply valid_state_has_trace in Hvsp' as (s & tr & [Hfvt Hinit]).
       replace s with (MkState [] (idx i)) in *; cycle 1.
-      * inversion Hinit. by destruct s; cbn in *; subst.
+      * by inversion Hinit; destruct s; cbn in *; subst.
       * by eapply finite_valid_trace_init_to_state2trace_RMi.
 Qed.
 
@@ -1148,7 +1151,7 @@ Proof.
   apply input_valid_transition_iff in Hiv as [[s m] Ht].
   apply exists_right_finite_trace_from in Ht as (s' & tr & Hfvt & Hlast).
   apply lift_to_MO_finite_valid_trace_init_to in Hfvt as [Hfvt _].
-  unfold lift_to_MO_trace, pre_VLSM_full_projection_finite_trace_project in Hfvt;
+  unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project in Hfvt;
     rewrite map_app in Hfvt.
   apply finite_valid_trace_from_to_app_split in Hfvt as [_ Hfvt].
   remember (finite_trace_last _ _) as ftl.
@@ -1159,7 +1162,7 @@ Proof.
   apply valid_trace_forget_last, first_transition_valid in Hfvt; cbn in *.
   destruct Hfvt as [[Hvps [Hovmp [Hv1 Hv2]]] Ht]; cbn in Hv1, Hv2.
   unfold lift_to_MO_trace in Heqftl; cbn in Heqftl.
-  rewrite <- pre_VLSM_full_projection_finite_trace_last, Hlast in Heqftl.
+  rewrite <- pre_VLSM_embedding_finite_trace_last, Hlast in Heqftl.
   exists ftl; split; [| done].
   by rewrite Heqftl; state_update_simpl.
 Qed.
@@ -1247,8 +1250,7 @@ Record local_equivocators (s : State) (i : Address) : Prop :=
   lceqv_adr2 : adr (state (message lceqv_ob2)) = i;
   lceqv_rec_obs1 : rec_obs s lceqv_ob1;
   lceqv_rec_obs2 : rec_obs s lceqv_ob2;
-  lceqv_incomparable :
-    incomparable (message lceqv_ob1) (message lceqv_ob2);
+  lceqv_incomparable : incomparable (message lceqv_ob1) (message lceqv_ob2);
 }.
 Set Warnings "cannot-define-projection".
 

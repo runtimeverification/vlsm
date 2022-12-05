@@ -2,8 +2,10 @@ From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto aut
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces SubProjectionTraces.
-From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.FixedSetEquivocation Equivocation.NoEquivocation.
-From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections Equivocators.MessageProperties.
+From VLSM.Core Require Import Equivocation EquivocationProjections.
+From VLSM.Core Require Import Equivocation.FixedSetEquivocation Equivocation.NoEquivocation.
+From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
+From VLSM.Core Require Import Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
 From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplayTraces.
@@ -28,21 +30,22 @@ Section sec_fixed_equivocating.
 
 Context {message : Type}
   {index : Type}
-  `{finite.Finite index}
+  `{FinSet index Ci}
+  `{@finite.Finite index _}
   (IM : index -> VLSM message)
   (Free := free_composite_vlsm IM)
   `{forall i : index, HasBeenSentCapability (IM i)}
-  (equivocating : list index)
+  (equivocating : Ci)
   (X : VLSM message := strong_fixed_equivocation_vlsm_composition IM equivocating)
-  (XE : VLSM message := equivocators_fixed_equivocations_vlsm IM equivocating)
+  (XE : VLSM message := equivocators_fixed_equivocations_vlsm IM (elements equivocating))
   (FreeE := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
-  (SubFreeE := free_composite_vlsm (sub_IM (equivocator_IM IM) equivocating))
+  (SubFreeE := free_composite_vlsm (sub_IM (equivocator_IM IM) (elements equivocating)))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   .
 
 Lemma no_initial_messages_in_sub_IM
-  : forall i m, ~vinitial_message_prop (sub_IM IM equivocating i) m.
+  : forall i m, ~vinitial_message_prop (sub_IM IM (elements equivocating) i) m.
 Proof.
   intros [i Hi] m Hinit.
   by apply (no_initial_messages_in_IM i m).
@@ -62,16 +65,13 @@ Lemma fixed_equivocating_messages_sent_by_non_equivocating_are_valid
   (Hm : sent_by_non_equivocating IM equivocating s m)
   : valid_message_prop XE m.
 Proof.
-  specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM equivocating)
-    as HinclE.
+  pose proof (HinclE :=
+    equivocators_fixed_equivocations_vlsm_incl_PreFree IM (elements equivocating)).
   apply sent_by_non_equivocating_are_sent in Hm.
-  specialize (StrongFixed_incl_Preloaded IM equivocating)
-    as Hincl.
+  pose proof (Hincl := StrongFixed_incl_Preloaded IM equivocating).
   apply (VLSM_incl_valid_state Hincl) in Hs.
-  apply
-    (composite_sent_valid (equivocator_IM IM) _ _ Heqv_state_s).
-  revert Hm.
-  apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
+  apply (composite_sent_valid (equivocator_IM IM) _ _ Heqv_state_s).
+  revert Hm; apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
   by specialize
     (VLSM_projection_has_been_sent_reflect
       (preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection IM)
@@ -79,7 +79,7 @@ Proof.
 Qed.
 
 (**
-  This is the constraint counterpart of the [weak_full_projection_valid_preservation]
+  This is the constraint counterpart of the [weak_embedding_valid_preservation]
   property (for the [equivocators_fixed_equivocations_constraint]).
 *)
 Lemma fixed_equivocating_non_equivocating_constraint_lifting
@@ -88,15 +88,15 @@ Lemma fixed_equivocating_non_equivocating_constraint_lifting
   l s om
   (Hv :
     input_valid
-      (seeded_equivocators_no_equivocation_vlsm IM equivocating
+      (seeded_equivocators_no_equivocation_vlsm IM (elements equivocating)
         (sent_by_non_equivocating IM equivocating (equivocators_total_state_project IM eqv_state_s)))
         l (s, om))
-  (Hlift_s : valid_state_prop XE (lift_equivocators_sub_state_to IM equivocating eqv_state_s s))
-  : equivocators_fixed_equivocations_constraint IM equivocating
-        (lift_equivocators_sub_label_to IM equivocating eqv_state_s l)
-        (lift_equivocators_sub_state_to IM equivocating eqv_state_s s, om).
+  (Hlift_s : valid_state_prop XE (lift_equivocators_sub_state_to IM (elements equivocating) eqv_state_s s))
+  : equivocators_fixed_equivocations_constraint IM (elements equivocating)
+        (lift_equivocators_sub_label_to IM (elements equivocating) eqv_state_s l)
+        (lift_equivocators_sub_state_to IM (elements equivocating) eqv_state_s s, om).
 Proof.
-  specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM equivocating)
+  specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM (elements equivocating))
     as HinclE.
   destruct Hv as [Hs [Hom [_ Hc]]].
   apply valid_state_has_fixed_equivocation in Hlift_s.
@@ -107,10 +107,10 @@ Proof.
     apply proj1 in Hc as [Hsent | Hseed].
     + revert Hsent. simpl.
       apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
-      apply (VLSM_incl_valid_state (seeded_no_equivocation_incl_preloaded IM equivocating _)) in Hs.
+      apply (VLSM_incl_valid_state (seeded_no_equivocation_incl_preloaded IM (elements equivocating) _)) in Hs.
       by specialize
-        (VLSM_weak_full_projection_has_been_sent
-          (PreFreeSubE_PreFreeE_weak_full_projection IM _ _ Heqv_state_s)
+        (VLSM_weak_embedding_has_been_sent
+          (PreFreeSubE_PreFreeE_weak_embedding IM _ _ Heqv_state_s)
           _ Hs m
           ).
     + destruct Hseed as [i [Hi Hsent]].
@@ -119,18 +119,19 @@ Proof.
       unfold lift_equivocators_sub_state_to.
       case_decide; [done |].
       unfold equivocator_IM.
-      change (equivocators_total_state_project _ _ _) with (equivocator_state_zero (eqv_state_s i)) in Hsent.
+      change (equivocators_total_state_project _ _ _)
+        with (equivocator_state_zero (eqv_state_s i)) in Hsent.
       revert Hsent.
       apply
         (VLSM_projection_has_been_sent_reflect
           (preloaded_equivocator_zero_projection (IM i))).
       apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
       revert Heqv_state_s.
-      apply (VLSM_projection_valid_state (preloaded_component_projection (equivocator_IM IM) i)).
+      by apply (VLSM_projection_valid_state (preloaded_component_projection (equivocator_IM IM) i)).
   - destruct (composite_transition _ _ _) as (s', om') eqn:Ht'.
     apply
       (equivocating_transition_preserves_fixed_equivocation
-        IM equivocating _ _ _ _ _ Ht' Hlift_s).
+        IM (elements equivocating) _ _ _ _ _ Ht' Hlift_s).
     destruct l as (sub_i, li).
     destruct_dec_sig sub_i i Hi Hsub_i.
     by subst.
@@ -152,20 +153,20 @@ Lemma fixed_equivocation_replay_has_message
   (Him :
     can_produce
     (pre_loaded_with_all_messages_vlsm
-      (free_composite_vlsm (equivocator_IM (sub_IM IM equivocating))))
+      (free_composite_vlsm (equivocator_IM (sub_IM IM (elements equivocating)))))
     s im)
   : composite_has_been_sent (equivocator_IM IM)
-      (lift_equivocators_sub_state_to IM equivocating eqv_state_s s) im.
+      (lift_equivocators_sub_state_to IM (elements equivocating) eqv_state_s s) im.
 Proof.
   apply non_empty_valid_trace_from_can_produce in Him
      as (im_eis & im_etr & item & Him_etr & Hlast & Heqs & Him).
   specialize
-    (PreFreeSubE_PreFreeE_weak_full_projection IM equivocating _ Heqv_state_s)
+    (PreFreeSubE_PreFreeE_weak_embedding IM (elements equivocating) _ Heqv_state_s)
     as Hproj.
   apply valid_trace_add_default_last in Him_etr.
   apply valid_trace_last_pstate in Him_etr as Him_etr_lst.
   specialize
-    (VLSM_weak_full_projection_has_been_sent Hproj _ Him_etr_lst im) as Hsent.
+    (VLSM_weak_embedding_has_been_sent Hproj _ Him_etr_lst im) as Hsent.
   unfold has_been_sent in Hsent. simpl in Hsent.
   replace s with (finite_trace_last im_eis im_etr).
   - apply Hsent.
@@ -190,15 +191,15 @@ Qed.
 Lemma fixed_equivocation_has_replayable_message_prop
   : replayable_message_prop IM (λ _ : message, False)
     (strong_fixed_equivocation_constraint IM equivocating)
-    (equivocators_fixed_equivocations_constraint IM equivocating).
+    (equivocators_fixed_equivocations_constraint IM (elements equivocating)).
 Proof.
   specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
-  specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM equivocating) as HinclE.
+  specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM (elements equivocating)) as HinclE.
   intro; intros.
   destruct iom as [im|]; swap 1 2; [|destruct HcX as [Hsent | Hemitted]].
-  - exists []. exists eqv_state_s.
-    split; [constructor|]; eauto.
+  - exists [], eqv_state_s.
+    by split; [constructor | eauto].
   - exists []. exists eqv_state_s.
     split; [by constructor |].
     split; [done |].
@@ -225,7 +226,7 @@ Proof.
     rewrite finite_trace_last_is_last in Him_tr.
     apply
       (seeded_equivocators_finite_valid_trace_init_to_rev
-        (sub_IM IM equivocating) _ no_initial_messages_in_sub_IM)
+        (sub_IM IM (elements equivocating)) _ no_initial_messages_in_sub_IM)
       in Him_tr
       as (im_eis & Him_eis & im_es & Him_es & im_etr & Him_etr_pr & Him_etr & Him_output).
     rewrite finite_trace_last_output_is_last in Him_output.
@@ -239,13 +240,12 @@ Proof.
       and [fixed_equivocating_non_equivocating_constraint_lifting] to satisfy
       the hypotheses of the replay lemma.
     *)
-    specialize
+    pose proof (Hreplay :=
       (sub_preloaded_replayed_trace_from_valid_equivocating
         IM (sent_by_non_equivocating IM equivocating s)
-        equivocating
-        (equivocators_fixed_equivocations_constraint IM equivocating)
-        (fun m => False))
-      as Hreplay.
+        (elements equivocating)
+        (equivocators_fixed_equivocations_constraint IM (elements equivocating))
+        (fun m => False))).
     spec Hreplay.
     { clear -HeqXE. intros i ns s Hi Hs.
       split; [by split |].
@@ -254,10 +254,11 @@ Proof.
       destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
       by apply
         (equivocating_transition_preserves_fixed_equivocation
-          IM equivocating _ _ _ _ _ Ht Hs).
+          IM (elements equivocating) _ _ _ _ _ Ht Hs).
     }
     spec Hreplay.
-    { subst s.
+    {
+      subst s.
       apply valid_trace_last_pstate in HtrX.
       apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
       apply (VLSM_eq_valid_state HeqX) in HtrX.
@@ -265,7 +266,7 @@ Proof.
       apply (VLSM_incl_valid_message (VLSM_eq_proj1 HeqXE)); [by left|].
       by apply (fixed_equivocating_messages_sent_by_non_equivocating_are_valid eqv_state_s).
     }
-    spec Hreplay eqv_state_s.
+    specialize (Hreplay eqv_state_s).
     spec Hreplay.
     { by apply (VLSM_eq_valid_state HeqXE), (VLSM_eq_valid_state HeqXE). }
     spec Hreplay.
@@ -287,36 +288,34 @@ Proof.
       constraint for which we employ Lemma [fixed_equivocation_replay_has_message].
     *)
     repeat split.
-    + apply
+    + by apply
       (equivocators_total_trace_project_replayed_trace_from
-        IM equivocating eqv_state_s im_eis im_etr).
+        IM (elements equivocating) eqv_state_s im_eis im_etr).
     + subst s.
-      apply
-      (equivocators_total_state_project_replayed_trace_from
-        IM equivocating eqv_state_s im_eis im_etr).
+      by apply
+        (equivocators_total_state_project_replayed_trace_from
+          IM (elements equivocating) eqv_state_s im_eis im_etr).
     + apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
       apply (VLSM_incl_valid_state HinclE) in Hstate_valid as Hstate_pre.
-      specialize
-        (NoEquivocation.seeded_no_equivocation_incl_preloaded (equivocator_IM (sub_IM IM equivocating))
-          (free_constraint _)
-          (sent_by_non_equivocating IM equivocating
-                    s)
-        ) as Hsub_incl.
+      specialize (NoEquivocation.seeded_no_equivocation_incl_preloaded
+        (equivocator_IM (sub_IM IM (elements equivocating)))
+        (free_constraint _)
+          (sent_by_non_equivocating IM equivocating s))
+        as Hsub_incl.
       apply (VLSM_incl_finite_valid_trace Hsub_incl) in Him_etr.
       left.
-      specialize
-        (replayed_trace_from_finite_trace_last IM equivocating eqv_state_s im_eis im_etr (proj2 Him_etr)).
+      specialize (replayed_trace_from_finite_trace_last IM (elements equivocating) eqv_state_s
+        im_eis im_etr (proj2 Him_etr)).
       simpl. intro Hrew. rewrite Hrew. clear Hrew.
       apply fixed_equivocation_replay_has_message; [done |].
       clear -Him_etr Him_output.
-      destruct_list_last im_etr im_ert' item Heqim_etr; [inversion Him_output|].
+      destruct_list_last im_etr im_ert' item Heqim_etr; [by inversion Him_output |].
       apply proj1 in Him_etr.
       replace (im_ert' ++ [item]) with (im_ert' ++ [item] ++ []) in Him_etr
         by (rewrite app_assoc; apply app_nil_r).
-      specialize
-        (input_valid_transition_to
-          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (equivocator_IM (sub_IM IM equivocating))))
-          _ _ _ _ _ Him_etr eq_refl)
+      specialize (input_valid_transition_to (pre_loaded_with_all_messages_vlsm
+        (free_composite_vlsm (equivocator_IM (sub_IM IM (elements equivocating)))))
+        _ _ _ _ _ Him_etr eq_refl)
         as Ht.
       rewrite finite_trace_last_is_last.
       rewrite finite_trace_last_output_is_last in Him_output.
@@ -346,7 +345,8 @@ Proof.
     Since the base result works with pre-loaded vlsms, some massaging of the
     hypothesis and conclusion is done to fit the applied lemma.
   *)
-  assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
+  assert (no_initial_messages_in_XE :
+    forall m, ~ vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   { intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).
   }
@@ -355,7 +355,7 @@ Proof.
   apply (VLSM_eq_finite_valid_trace_init_to HeqX) in HtrX.
   apply
     (generalized_equivocators_finite_valid_trace_init_to_rev
-      IM _ _ (equivocators_fixed_equivocations_constraint IM equivocating))
+      IM _ _ (equivocators_fixed_equivocations_constraint IM (elements equivocating)))
     in HtrX
     as (is & His & s & Hs & tr & Htr & Hptr & Houtput).
   - exists is, s, tr; split_and!; try itauto.
@@ -371,9 +371,9 @@ Proof.
       simpl.
       by apply
         (zero_descriptor_transition_preserves_fixed_equivocation
-          IM equivocating _ _ _ _ _ Het Hes li
+          IM (elements equivocating) _ _ _ _ _ Het Hes li
         ).
-  - apply fixed_equivocation_has_replayable_message_prop.
+  - by apply fixed_equivocation_has_replayable_message_prop.
 Qed.
 
 End sec_fixed_equivocating.
@@ -408,7 +408,8 @@ Lemma no_equivocating_equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  assert (no_initial_messages_in_XE : forall m, ~vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
+  assert (no_initial_messages_in_XE :
+    forall m, ~ vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   {
     intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).
@@ -441,11 +442,7 @@ Proof.
         ).
   - clear isX sX trX HtrX. intro; intros.
     specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM []) as HinclE.
-    destruct iom as [im|].
-    2: {
-      exists []. exists eqv_state_s.
-      split; [constructor |]; eauto.
-    }
+    destruct iom as [im |]; [| by exists [], eqv_state_s; split; constructor].
     destruct HcX as [Hsent | Hemitted]; [| done].
     exists []. exists eqv_state_s.
     split; [by constructor |].

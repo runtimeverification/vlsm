@@ -9,16 +9,12 @@ Lemma elem_of_take {A : Type} (l : list A) (n : nat) (x : A) :
 Proof.
   generalize dependent n.
   induction l; intros n H.
-  - simpl in H. destruct n; simpl in H; inversion H.
-  - simpl in H.
-    destruct n.
-    { simpl in H. inversion H. }
+  - by simpl in H; destruct n; simpl in H; inversion H.
+  - destruct n; [by inversion H |].
     simpl in H.
-    apply elem_of_cons in H.
-    destruct H as [H|H].
-    { subst. simpl. left. }
-    simpl. right.
-    eauto.
+    apply elem_of_cons in H as [-> | H].
+    + by left.
+    + by right; eapply IHl.
 Qed.
 
 Lemma map_skipn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
@@ -81,10 +77,8 @@ Lemma existsb_Exists {A} (f : A -> bool):
   forall l, existsb f l = true <-> Exists (fun x => f x = true) l.
 Proof.
   intro l.
-  rewrite Exists_exists.
-  rewrite existsb_exists.
-  setoid_rewrite elem_of_list_In.
-  auto.
+  rewrite Exists_exists, existsb_exists.
+  by setoid_rewrite elem_of_list_In.
 Qed.
 
 Lemma Exists_last
@@ -101,20 +95,19 @@ Lemma Exists_last
          ~Exists P suffix.
 
 Proof.
-  induction l using rev_ind;[solve[inversion Hsomething]|].
+  induction l using rev_ind; [by inversion Hsomething |].
   destruct (decide (P x)).
   - exists l, nil, x.
     rewrite Exists_nil.
-    itauto.
+    by itauto.
   - apply Exists_app in Hsomething.
-    destruct Hsomething.
-    2:{ inversion H; [done |]. inversion H1. }
+    destruct Hsomething; [| by inversion H; [| inversion H1]].
     specialize (IHl H);clear H.
     destruct IHl as [prefix [suffix [last [Hf [-> Hnone_after]]]]].
     exists prefix, (suffix ++ [x]), last.
     simpl. rewrite app_assoc_reverse. simpl.
     rewrite Exists_app. rewrite Exists_cons. rewrite Exists_nil.
-    itauto.
+    by itauto.
 Qed.
 
 Lemma existsb_last
@@ -160,7 +153,7 @@ Proof.
   setoid_rewrite <-not_true_iff_false.
   setoid_rewrite existsb_Exists.
   apply Exists_first.
-  - typeclasses eauto.
+  - by typeclasses eauto.
   - by apply existsb_Exists.
 Qed.
 
@@ -175,10 +168,10 @@ Definition maximal_elements_list
   filter (fun a => Forall (fun b => (~ precedes a b)) l) l.
 
 Example maximal_elements_list1: maximal_elements_list Nat.lt [1; 4; 2; 4] = [4;4].
-Proof. itauto. Qed.
+Proof. by itauto. Qed.
 
 Example maximal_elements_list2 : maximal_elements_list Nat.le [1; 4; 2; 4] = [].
-Proof. itauto. Qed.
+Proof. by itauto. Qed.
 
 (**
   Returns all elements <<x>> of a set <<S>> such that <<x>> does not compare less
@@ -199,8 +192,7 @@ Proof.
   - by rewrite 2 filter_nil.
   - rewrite 2 filter_cons.
     setoid_rewrite elem_of_cons in H1.
-    destruct (decide (P a)); destruct (decide (Q a)); [|firstorder ..].
-    rewrite IHl; [done |]. firstorder.
+    by destruct (decide (P a)), (decide (Q a)); [rewrite IHl | ..]; firstorder.
 Qed.
 
 Lemma ext_elem_of_filter {A} P Q
@@ -225,10 +217,10 @@ Proof.
     apply filter_ext_elem_of.
     intros.
     specialize (Hext a H2).
-    rewrite Hext. itauto.
+    by rewrite Hext; itauto.
   - apply filter_ext_elem_of. intros.
     specialize (ext_elem_of_filter _ _ l H1 a H2) as Hext; cbn in Hext.
-    destruct (decide (P a)); destruct (decide (Q a)); itauto.
+    by destruct (decide (P a)), (decide (Q a)); itauto.
 Qed.
 
 Lemma NoDup_elem_of_remove A (l l' : list A) a :
@@ -260,7 +252,7 @@ Lemma list_suffix_lookup
   (Hi : n <= i)
   : list_suffix s n !! (i - n) = s !! i.
 Proof.
-  revert s n Hi; induction i; intros [| a s] [| n] Hi; cbn; try done; [| apply IHi]; lia.
+  by revert s n Hi; induction i; intros [| a s] [| n] Hi; cbn; try done; [| apply IHi]; lia.
 Qed.
 
 Lemma list_difference_singleton_not_in `{EqDecision A} :
@@ -290,7 +282,7 @@ Lemma longer_subseteq_has_dups `{EqDecision A} :
   forall l1 l2 : list A, l1 ⊆ l2 -> length l1 > length l2 ->
   exists (i1 i2 : nat) (a : A), i1 ≠ i2 ∧ l1 !! i1 = Some a /\ l1 !! i2 = Some a.
 Proof.
-  induction l1; [inversion 2 |].
+  induction l1; [by inversion 2 |].
   intros l2 Hl12 Hlen12.
   destruct (decide (a ∈ l1)).
   - exists 0.
@@ -298,20 +290,20 @@ Proof.
     by exists (S i2), a.
   - edestruct (IHl1 (list_difference l2 [a]))
            as (i1 & i2 & a' & Hi12 & Hli1 & Hli2); cycle 2.
-    + exists (S i1), (S i2), a'; cbn; itauto.
+    + by exists (S i1), (S i2), a'; cbn; itauto.
     + intros x Hx.
       rewrite elem_of_list_difference, elem_of_list_singleton.
       by split; [apply Hl12; right | by contradict n; subst].
     + cbn in Hlen12.
       assert (Ha : a ∈ l2) by (apply Hl12; left).
-      specialize (list_difference_singleton_length_in _ _ Ha) as Hlen'; lia.
+      by specialize (list_difference_singleton_length_in _ _ Ha) as Hlen'; lia.
 Qed.
 
 Lemma ForAllSuffix2_lookup [A : Type] (R : A -> A -> Prop) l
   : ForAllSuffix2 R l <-> forall n a b, l !! n = Some a -> l !! (S n) = Some b -> R a b.
 Proof.
   split.
-  - induction 1; cbn; [inversion 2 |].
+  - induction 1; cbn; [by inversion 2 |].
     destruct n as [| n']; cbn.
     + by destruct l; do 2 inversion 1; subst.
     + by intros; eapply IHForAllSuffix.
@@ -324,7 +316,11 @@ Proof.
 Qed.
 
 Lemma stdpp_nat_le_sum (x y : nat) : x <= y <-> exists z, y = x + z.
-Proof. split; [exists (y - x); lia | intros [z ->]; lia]. Qed.
+Proof.
+  split.
+  - by exists (y - x); lia.
+  - by intros [z ->]; lia.
+Qed.
 
 Lemma ForAllSuffix2_transitive_lookup
   [A : Type] (R : A -> A -> Prop) {HT : Transitive R} (l : list A)
@@ -334,7 +330,7 @@ Proof.
   split; intro Hall; [| by intros n a b; apply Hall; lia].
   intros m n a b Hlt.
   apply stdpp_nat_le_sum in Hlt as [k ->]; rewrite Nat.add_comm.
-  revert a b; induction k; cbn; [apply Hall |].
+  revert a b; induction k; cbn; [by apply Hall |].
   intros a b Ha Hb.
   assert (Hlt : k + S m < length l) by (apply lookup_lt_Some in Hb; lia).
   apply lookup_lt_is_Some in Hlt as [c Hc].
@@ -363,7 +359,7 @@ Proof.
   intros.
   apply elem_of_list_In.
   apply elem_of_list_In in H0.
-  apply elem_of_list_filter; auto.
+  by apply elem_of_list_filter.
 Qed.
 
 Lemma filter_incl_fn {A} P Q
@@ -394,12 +390,11 @@ Lemma filter_eq_fn {A} P Q
   filter P s = filter Q s.
 Proof.
   induction s; intros; [done |].
-  assert (IHs' : forall a : A, In a s -> P a <-> Q a).
-  { by intros; apply H1; right. }
-  apply IHs in IHs'. clear IHs.
-  erewrite !filter_cons, decide_ext; cycle 1.
-  - by apply H1; left.
+  assert (IHs' : forall a : A, In a s -> P a <-> Q a) by (intros; apply H1; right; done).
+  apply IHs in IHs'.
+  erewrite !filter_cons, decide_ext.
   - by rewrite IHs'.
+  - by apply H1; left.
 Qed.
 
 Lemma nth_error_filter
@@ -414,10 +409,10 @@ Lemma nth_error_filter
 Proof.
   generalize dependent a. generalize dependent n.
   induction l.
-  - intros; simpl in Hnth. destruct n; inversion Hnth.
+  - by intros []; cbn; inversion 1.
   - intros. rewrite filter_cons in Hnth. simpl. destruct (decide (P a)).
     + destruct n.
-      * inversion Hnth; subst. by exists 0.
+      * by inversion Hnth; subst; exists 0.
       * simpl in Hnth.
         specialize (IHl n a0 Hnth).
         destruct IHl as [nth [Hnth' Ha0]].
@@ -434,17 +429,17 @@ Lemma filter_subseteq {A} P `{∀ (x:A), Decision (P x)} (s1 s2 : list A) :
   (filter P s1) ⊆ (filter P s2).
 Proof.
   induction s1; intros; intro x; intros.
-  - contradict H1.
-    rewrite filter_nil; intro Hx. inversion Hx.
+  - by apply not_elem_of_nil in H1.
   - rewrite filter_cons in H1.
     destruct (decide (P a)).
     + rewrite elem_of_cons in H1.
       destruct H1.
       * subst; apply elem_of_list_filter.
-        split; [done |].
-        apply H0; left.
-      * apply IHs1; [| done]. by intros y Hel; apply H0; right.
-    + apply IHs1; [| done]. by intros y Hel; apply H0; right.
+        by split; [| apply H0; left].
+      * apply IHs1; [| done].
+        by intros y Hel; apply H0; right.
+    + apply IHs1; [| done].
+      by intros y Hel; apply H0; right.
 Qed.
 
 Lemma filter_subseteq_fn {A} P Q
@@ -452,35 +447,26 @@ Lemma filter_subseteq_fn {A} P Q
   (forall a, P a -> Q a) ->
   forall (s : list A), filter P s ⊆ filter Q s.
 Proof.
-  induction s; simpl.
-  - rewrite filter_nil; intros x Hx; inversion Hx.
-  - intro x; intros.
-    rewrite filter_cons in H2.
-    destruct (decide (P a)).
-    + rewrite elem_of_cons in H2.
-      rewrite filter_cons.
-      destruct (decide (Q a)); [| itauto].
-      destruct H2.
-      * by subst; left.
-      * by right; apply IHs.
-    + rewrite filter_cons.
-      destruct (decide (Q a)).
-      * by right; apply IHs.
-      * by apply IHs.
+  induction s; cbn; intros x H2; [by inversion H2 |].
+  destruct (decide (P a)), (decide (Q a)); rewrite ?elem_of_cons in H2.
+  - by destruct H2 as [-> |]; [left | right; apply IHs].
+  - by itauto.
+  - by right; apply IHs.
+  - by itauto.
 Qed.
 
 Lemma filter_incl {A} P `{∀ (x:A), Decision (P x)} s1 s2 :
   incl s1 s2 ->
   incl (filter P s1) (filter P s2).
 Proof.
-  induction s1; intros; intro x; intros.
-  - contradict H1; auto.
-  - rewrite filter_cons in H1.
-    destruct (decide (P a)).
-    + destruct H1.
-      * subst. apply filter_in; [| done]. by apply H0; left.
-      * apply IHs1; [| done]. by intros y HIn; apply H0; right.
-    + apply IHs1; [| done]. by intros y HIn; apply H0; right.
+  induction s1; cbn; intros H0 x H1; [done |].
+  destruct (decide (P a)).
+  - destruct H1 as [-> |].
+    + by apply filter_in; [apply H0; left |].
+    + apply IHs1; [| done].
+      by intros y HIn; apply H0; right.
+  - apply IHs1; [| done].
+    by intros y HIn; apply H0; right.
 Qed.
 
 Lemma Forall_filter_nil {A} P `{∀ (x:A), Decision (P x)} l :
@@ -488,10 +474,11 @@ Lemma Forall_filter_nil {A} P `{∀ (x:A), Decision (P x)} l :
 Proof.
   rewrite Forall_forall.
   split; intro Hnone.
-  - induction l; [done |].
+  - induction l; cbn; [done |].
     setoid_rewrite elem_of_cons in Hnone.
-    cbn. rewrite decide_False; auto.
-  - intros x Hel Px. contradict Hel. eapply filter_nil_not_elem_of; eauto.
+    by rewrite decide_False; auto.
+  - intros x Hel Px.
+    by eapply filter_nil_not_elem_of in Px.
 Qed.
 
 Lemma nodup_append {A} : forall (l1 l2 : list A),
@@ -508,7 +495,7 @@ Proof.
     + by apply (H1 a); [left |].
   - apply IHl1; [done | done | |]; intros.
     + by apply H1; right.
-    + apply H2 in H. rewrite elem_of_cons in H. itauto.
+    + by apply H2 in H; rewrite elem_of_cons in H; itauto.
 Qed.
 
 Lemma elem_of_list_annotate_forget
@@ -522,10 +509,10 @@ Lemma elem_of_list_annotate_forget
   : (proj1_sig xP) ∈ l.
 Proof.
   induction l.
-  - inversion Hin.
+  - by inversion Hin.
   - rewrite list_annotate_unroll,elem_of_cons in Hin.
-    destruct Hin as [Heq | Hin].
-    + subst xP. left.
+    destruct Hin as [-> | Hin].
+    + by left.
     + by right; apply (IHl (Forall_tl Hs)).
 Qed.
 
@@ -538,9 +525,9 @@ Lemma elem_of_list_annotate
   (xP : dsig P)
   : xP ∈ (list_annotate P l Hs) <-> (` xP) ∈ l.
 Proof.
-  split; [apply elem_of_list_annotate_forget |].
+  split; [by apply elem_of_list_annotate_forget |].
   destruct xP as [x Hpx]; cbn.
-  induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
+  by induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
 Qed.
 
 Lemma elem_of_map_option
@@ -551,8 +538,8 @@ Lemma elem_of_map_option
   : b ∈ map_option f l <-> exists a : A, a ∈ l /\ f a = Some b.
 Proof.
   induction l as [| h t]; cbn.
-  - setoid_rewrite elem_of_nil. firstorder.
-  - destruct (f h) eqn: Heq; setoid_rewrite elem_of_cons
+  - by setoid_rewrite elem_of_nil; firstorder.
+  - by destruct (f h) eqn: Heq; setoid_rewrite elem_of_cons
     ; firstorder; subst; itauto (eauto || congruence).
 Qed.
 
@@ -569,9 +556,9 @@ Proof.
   generalize dependent a.
   induction la1; intros; destruct lb1 as [|b0 lb1]; simpl in *
   ; inversion Heq; subst.
-  - contradict Ha. left.
+  - by contradict Ha; left.
   - by exists lb1.
-  - contradict Ha. rewrite elem_of_cons, elem_of_app, elem_of_cons; auto.
+  - by contradict Ha; rewrite elem_of_cons, elem_of_app, elem_of_cons; auto.
   - specialize (IHla1 a0 lb1 b la2 lb2 H1 Ha).
     destruct IHla1 as [la0b Hla0b].
     by exists la0b; subst.
@@ -584,7 +571,7 @@ Lemma list_max_elem_of_exists
 Proof.
   induction l; simpl in *; [lia |].
   rewrite elem_of_cons.
-  destruct (Nat.max_spec_le a (list_max l)) as [[H ->] | [H ->]]; itauto lia.
+  by destruct (Nat.max_spec_le a (list_max l)) as [[H ->] | [H ->]]; itauto lia.
 Qed.
 
 Lemma in_map_option
@@ -594,7 +581,7 @@ Lemma in_map_option
   (b : B)
   : In b (map_option f l) <-> exists a : A, In a l /\ f a = Some b.
 Proof.
-  setoid_rewrite <- elem_of_list_In; apply elem_of_map_option.
+  by setoid_rewrite <- elem_of_list_In; apply elem_of_map_option.
 Qed.
 
 Lemma elem_of_map_option_rev
@@ -606,7 +593,7 @@ Lemma elem_of_map_option_rev
   (l : list A)
   : a ∈ l -> b ∈ map_option f l.
 Proof.
-  intro Ha; apply elem_of_map_option; exists a; itauto.
+  by intro Ha; apply elem_of_map_option; exists a; itauto.
 Qed.
 
 Lemma in_map_option_rev
@@ -628,7 +615,7 @@ Lemma map_option_subseteq
   (Hincl : l1 ⊆ l2)
   : (map_option f l1) ⊆ (map_option f l2).
 Proof.
-  intros b. rewrite !elem_of_map_option. firstorder.
+  by intros b; rewrite !elem_of_map_option; firstorder.
 Qed.
 
 Lemma elem_of_cat_option
@@ -637,7 +624,7 @@ Lemma elem_of_cat_option
   (a : A)
   : a ∈ (cat_option l) <-> exists b : (option A), b ∈ l /\ b = Some a.
 Proof.
-  apply elem_of_map_option.
+  by apply elem_of_map_option.
 Qed.
 
 Lemma in_cat_option
@@ -646,7 +633,7 @@ Lemma in_cat_option
   (a : A)
   : In a (cat_option l) <-> exists b : (option A), In b l /\ b = Some a.
 Proof.
-  apply in_map_option.
+  by apply in_map_option.
 Qed.
 
 Lemma map_option_incl
@@ -656,8 +643,7 @@ Lemma map_option_incl
   (Hincl : incl l1 l2)
   : incl (map_option f l1) (map_option f l2).
 Proof.
-  intro b. repeat rewrite in_map_option.
-  firstorder.
+  by intros b; rewrite !in_map_option; firstorder.
 Qed.
 
 Lemma list_max_elem_of_exists2
@@ -666,16 +652,16 @@ Lemma list_max_elem_of_exists2
    (list_max l) ∈ l.
 Proof.
   destruct (list_max l) eqn : eq_max.
-  - destruct l;[itauto congruence|].
+  - destruct l; [by itauto congruence |].
     specialize (list_max_le (n :: l) 0) as Hle.
     destruct Hle as [Hle _].
     rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
     rewrite Forall_forall in Hle.
     specialize (Hle n). spec Hle. left.
     assert (Hn0: n = 0) by lia.
-    rewrite Hn0; left.
+    by rewrite Hn0; left.
   - specialize (list_max_elem_of_exists l) as Hmax.
-    rewrite <- eq_max; itauto lia.
+    by rewrite <- eq_max; itauto lia.
 Qed.
 
 Lemma mode_not_empty
@@ -690,14 +676,14 @@ Proof.
 
   assert (Hmaxp: list_max occurrences > 0). {
     rewrite Heqoccurrences, Heql'; cbn.
-    rewrite decide_True; [lia | done].
+    by rewrite decide_True; [lia |].
   }
 
   assert (exists a, (count_occ decide_eq l' a) = list_max occurrences). {
     assert (In (list_max occurrences) occurrences) by (apply list_max_exists; done).
     rewrite Heqoccurrences, in_map_iff in H.
     destruct H as (x & Heq & Hin).
-    rewrite Heqoccurrences. eauto.
+    by rewrite Heqoccurrences; eauto.
   }
 
   assert (exists a, In a (mode l')). {
@@ -712,10 +698,8 @@ Proof.
     apply filter_in; [done |].
     by rewrite H, Heqoccurrences.
   }
-  destruct H.
-  intros contra.
-  rewrite contra in H0.
-  destruct H0; inversion H0.
+  intros contra; rewrite contra in H0.
+  by destruct H0 as [? []].
 Qed.
 
 (**
@@ -739,3 +723,15 @@ Proof.
   - apply elem_of_list_split in Hy as (l21 & l22 & ->).
     by right; exists l1, l21, l22; left; cbn.
 Qed.
+
+Lemma mjoin_app {A} (l1 l2 : list (list A)) :
+  mjoin (l1 ++ l2) = mjoin l1 ++ mjoin l2.
+Proof.
+  induction l1; cbn; [done |].
+  replace (mjoin (l1 ++ l2)) with (mjoin l1 ++ mjoin l2).
+  by rewrite app_assoc.
+Qed.
+
+Lemma mbind_app `(f : A -> list B) (l1 l2 : list A) :
+  mbind f (l1 ++ l2) = mbind f l1 ++ mbind f l2.
+Proof. by induction l1; [| cbn; rewrite IHl1, app_assoc]. Qed.

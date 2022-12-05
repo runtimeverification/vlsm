@@ -1,6 +1,7 @@
 -Q theories/VLSM VLSM
 
 -arg -w -arg -future-coercion-class-field
+-arg -w -arg -deprecated-tacopt-without-locality
 
 theories/VLSM/Lib/SsrExport.v
 theories/VLSM/Lib/Preamble.v
@@ -10,6 +11,7 @@ theories/VLSM/Lib/ListExtras.v
 theories/VLSM/Lib/StdppExtras.v
 theories/VLSM/Lib/StdppListSet.v
 theories/VLSM/Lib/ListSetExtras.v
+theories/VLSM/Lib/ListFinSetExtras.v
 theories/VLSM/Lib/SortedLists.v
 theories/VLSM/Lib/FinSetExtras.v
 theories/VLSM/Lib/StdppListFinSet.v
@@ -17,6 +19,7 @@ theories/VLSM/Lib/FinExtras.v
 theories/VLSM/Lib/FinFunExtras.v
 theories/VLSM/Lib/RealsExtras.v
 theories/VLSM/Lib/TopSort.v
+theories/VLSM/Lib/NeList.v
 theories/VLSM/Lib/StreamExtras.v
 theories/VLSM/Lib/StreamFilters.v
 theories/VLSM/Lib/Temporal.v
@@ -28,6 +31,7 @@ theories/VLSM/Lib/Measurable.v
 theories/VLSM/Core/VLSM.v
 theories/VLSM/Core/Plans.v
 theories/VLSM/Core/VLSMProjections/VLSMPartialProjection.v
+theories/VLSM/Core/VLSMProjections/VLSMStutteringEmbedding.v
 theories/VLSM/Core/VLSMProjections/VLSMTotalProjection.v
 theories/VLSM/Core/VLSMProjections/VLSMEmbedding.v
 theories/VLSM/Core/VLSMProjections/VLSMInclusion.v
@@ -44,7 +48,6 @@ theories/VLSM/Core/MessageDependencies.v
 theories/VLSM/Core/AnnotatedVLSM.v
 theories/VLSM/Core/ByzantineTraces.v
 theories/VLSM/Core/TraceableVLSM.v
-theories/VLSM/Core/FinSetMessageDependencies.v
 
 theories/VLSM/Core/Equivocation/FixedSetEquivocation.v
 theories/VLSM/Core/Equivocation/MsgDepFixedSetEquivocation.v

@@ -27,7 +27,7 @@ Context
   (IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (state_destructor : forall i, vstate (IM i) -> set (vtransition_item (IM i) * vstate (IM i)))
   (state_size : forall i, vstate (IM i) -> nat)
@@ -140,12 +140,12 @@ Record CompositeLatestSentObservedIn
   (s' : composite_state IM)  (i : index)  (j : index)
   (s : composite_state IM) (item : composite_transition_item IM) (m : message)
   : Prop :=
-  {
-    clsoi_destructor :
-      head (composite_state_destructor IM state_destructor s' i) = Some (item, s);
-    clsoi_output : output item = Some m;
-    clsoi_observed : HasBeenObserved (IM j) message_dependencies (s j) m;
-  }.
+{
+  clsoi_destructor :
+    head (composite_state_destructor IM state_destructor s' i) = Some (item, s);
+  clsoi_output : output item = Some m;
+  clsoi_observed : HasBeenObserved (IM j) message_dependencies (s j) m;
+}.
 
 (**
   Characterizes the fact that:
@@ -182,8 +182,10 @@ Definition latest_composite_observed_before_send
   Transitive (latest_composite_observed_before_send s').
 Proof.
   intros i j k
-    (s_i & item_i & m_i & s_j & item_j & m_j & [Hdestruct_i Houtput_i Hdestruct_j Houtput_j Hij])
-    (_s_j & _item_j & _m_j & s_k & item_k & m_k & [H_destruct_j H_output_j Hdestruct_k Houtput_k Hjk]).
+    (s_i & item_i & m_i & s_j & item_j & m_j
+      & [Hdestruct_i Houtput_i Hdestruct_j Houtput_j Hij])
+    (_s_j & _item_j & _m_j & s_k & item_k & m_k
+      & [H_destruct_j H_output_j Hdestruct_k Houtput_k Hjk]).
   eexists _, _, _, _, _, _; constructor; [done.. |].
   etransitivity; [done |].
   rewrite Hdestruct_j in H_destruct_j; inversion H_destruct_j;
@@ -246,7 +248,7 @@ Proof.
       spec Hchannel_i; [by eexists _, _, _ |].
       specialize (Hchannel j m_j) as Hchannel_j.
       spec Hchannel_j; [by eexists _, _, _ |].
-      congruence.
+      by congruence.
     + apply Some_inj in H_output as <-.
       apply tc_r_iff in Hbefore as [Hdm | (m' & Hbefore & Hdm)].
       * by eapply composite_observed_before_send_subsumes_msg_dep_rel;
@@ -257,7 +259,7 @@ Proof.
         eexists s_j, _; constructor; [done.. |]; cbn.
         destruct Hobs as [[| Houtput] |]; subst; [by constructor | | by do 2 econstructor].
         apply Some_inj in Houtput; subst m_j.
-        contradict Hdm; apply tc_reflect_irreflexive; typeclasses eauto.
+        by contradict Hdm; apply tc_reflect_irreflexive; typeclasses eauto.
 Qed.
 
 (**
@@ -540,7 +542,7 @@ Proof.
       [| done..].
     rewrite find_largest_nat_with_property_bounded_None in Hsent_not_obs, Hnot_send.
     rewrite composite_tv_state_destructor_initial in Hinitial;
-      [| typeclasses eauto | done].
+      [| by typeclasses eauto | done].
     destruct composite_state_destructor as [| [item s]] eqn: Hdestruct;
       [done | clear Hinitial]; cbn in *.
     specialize (Hnot_send 0); spec Hnot_send; [lia |].
@@ -647,7 +649,7 @@ Context
   (IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
-  `{FullMessageDependencies message message_dependencies full_message_dependencies}
+  `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   `{forall i s, Decision (vinitial_state_prop (IM i) s)}
   (state_destructor : forall i, vstate (IM i) -> set (vtransition_item (IM i) * vstate (IM i)))

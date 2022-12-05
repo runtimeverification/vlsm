@@ -7,11 +7,11 @@ From Coq Require Import Streams Classical.
 Set Implicit Arguments.
 
 Inductive Eventually [A:Type] (P: Stream A -> Prop) : Stream A -> Prop :=
-  | ehere : forall s, P s -> Eventually P s
-  | elater : forall s, Eventually P s -> forall a, Eventually P (Cons a s).
+| ehere : forall s, P s -> Eventually P s
+| elater : forall s, Eventually P s -> forall a, Eventually P (Cons a s).
 
 CoInductive Forever [A:Type] (P: Stream A -> Prop) : Stream A -> Prop :=
-  fcons : forall s, P s -> Forever P (tl s) -> Forever P s.
+| fcons : forall s, P s -> Forever P (tl s) -> Forever P s.
 
 Lemma fhere [A:Type] (P: Stream A -> Prop) : forall s, Forever P s -> P s.
 Proof.
@@ -36,7 +36,7 @@ Proof.
       by apply (f_equal (@Streams.tl _)) in Heqfs.
   - induction 1.
     + by constructor.
-    + rewrite unfold_Stream. by constructor.
+    + by rewrite unfold_Stream; constructor.
 Qed.
 
 Lemma Forever_map [A B:Type] (f: A -> B) (P: Stream B -> Prop): forall s,
@@ -50,7 +50,7 @@ Proof.
     + by rewrite (unfold_Stream (map f (Cons a s))).
     + by apply lem.
   - cofix lem. destruct s.
-    inversion 1; subst; constructor; [done |]. by apply lem.
+    by inversion 1; subst; constructor; [| apply lem].
 Qed.
 
 Definition progress [A:Type] (R: A -> A -> Prop) : Stream A -> Prop :=
@@ -62,9 +62,8 @@ Proof.
   cofix not_eventually.
   destruct s.
   constructor.
-  by contradict H; constructor.
-  apply not_eventually.
-  by contradict H; constructor.
+  - by contradict H; constructor.
+  - by apply not_eventually; contradict H; constructor.
 Qed.
 
 Lemma forever_impl [A:Type] (P Q : Stream A -> Prop):
@@ -72,23 +71,23 @@ Lemma forever_impl [A:Type] (P Q : Stream A -> Prop):
 Proof.
   cofix forever_impl.
   destruct s, 1.
-  inversion 1. subst.
-  constructor;auto.
+  inversion 1; subst.
+  by constructor; auto.
 Qed.
 
 Lemma eventually_impl [A:Type] (P Q : Stream A -> Prop):
   forall s, Forever (fun s => P s -> Q s) s -> Eventually P s -> Eventually Q s.
 Proof.
   induction 2.
-  - apply ehere. apply fhere in H. auto.
-  - apply elater. apply flater in H. auto.
+  - by apply fhere in H; apply ehere, H.
+  - by apply flater in H; apply elater, IHEventually.
 Qed.
 
 Lemma forever_tauto [A:Type] (P: Stream A -> Prop):
   (forall s, P s) -> forall s, Forever P s.
 Proof.
   cofix forever_tauto.
-  destruct s;constructor;auto.
+  by destruct s; constructor; auto.
 Qed.
 
 Lemma use_eventually [A:Type] (P Q : Stream A -> Prop):
@@ -96,9 +95,8 @@ Lemma use_eventually [A:Type] (P Q : Stream A -> Prop):
             exists s', P s' /\ Forever Q s'.
 Proof.
   induction 1.
-  exists s;itauto.
-  inversion 1. subst.
-  itauto.
+  - by exists s; itauto.
+  - by inversion 1; subst; itauto.
 Qed.
 
 Lemma refutation [A:Type] [R:A -> A-> Prop] (HR: well_founded R)
@@ -124,9 +122,9 @@ Proof.
   destruct s.
   intro H.
   constructor.
-  - intro a. by destruct (H a).
+  - by intro a; destruct (H a).
   - apply forall_forever.
-    intro a. by destruct (H a).
+    by intro a; destruct (H a).
 Qed.
 
 Lemma not_forever [A:Type] (P: Stream A -> Prop):
@@ -135,7 +133,8 @@ Proof.
   intros s H. apply Classical_Prop.NNPP.
   contradict H.
   apply not_eventually in H.
-  revert H. apply forever_impl,forever_tauto. intro. apply Classical_Prop.NNPP.
+  revert H; apply forever_impl, forever_tauto.
+  by intro; apply Classical_Prop.NNPP.
 Qed.
 
 Lemma stabilization [A:Type] [R:A -> A-> Prop] (HR: well_founded R)
@@ -167,7 +166,7 @@ Proof.
     destruct H as [x H _]. revert Hprogress.
     clear s.
     induction H;intro Hprogress.
-    + destruct s. simpl in H. simpl in H |- *. congruence.
+    + by destruct s; cbn in *; congruence.
     + simpl. intro. subst a0.
       apply elater.
       inversion Hprogress; subst s0.
@@ -178,5 +177,5 @@ Proof.
       * by constructor.
   - apply the_lemma.
     + by destruct Hprogress.
-    + intro x. by destruct (H x).
+    + by intro x; destruct (H x).
 Qed.

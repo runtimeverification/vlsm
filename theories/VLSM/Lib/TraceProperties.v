@@ -9,7 +9,9 @@ Import Prenex Implicits.
 
 (**
   The property encodings and many specific properties are adapted from the paper
-  #<a href="https://arxiv.org/abs/1412.6579">A Hoare logic for the coinductive trace-based big-step semantics of While</a>#.
+  #<a href="https://arxiv.org/abs/1412.6579">
+  A Hoare logic for the coinductive trace-based big-step semantics of While
+  </a>#.
 *)
 
 Section sec_trace_properties.
@@ -419,10 +421,11 @@ move => p [a|a b tr0] tr1 h.
   + by right; exists tr0, tr1, a, b; inversion h.
 Defined.
 
-Lemma followsT_setoidT : forall (p : trace -> Prop) (hp: forall tr0, p tr0 -> forall tr1, bisim tr0 tr1 -> p tr1),
- forall tr0 tr1, followsT p tr0 tr1 ->
- forall tr2, bisim tr0 tr2 -> forall tr3, bisim tr1 tr3 ->
- followsT p tr2 tr3.
+Lemma followsT_setoidT :
+  forall (p : trace -> Prop) (hp: forall tr0, p tr0 -> forall tr1, bisim tr0 tr1 -> p tr1),
+  forall tr0 tr1, followsT p tr0 tr1 ->
+  forall tr2, bisim tr0 tr2 -> forall tr3, bisim tr1 tr3 ->
+    followsT p tr2 tr3.
 Proof.
 move => p hp.
 cofix CIH.
@@ -1132,7 +1135,9 @@ Qed.
   and is the stepping stone to showing the right associativity of the append property.
 *)
 
-CoInductive midpointT (p0 p1: trace -> Prop) (tr0 tr1: trace) (h: followsT (appendT p0 p1) tr0 tr1) : trace -> Prop :=
+CoInductive midpointT
+  (p0 p1 : trace -> Prop) (tr0 tr1 : trace) (h : followsT (appendT p0 p1) tr0 tr1)
+  : trace -> Prop :=
 | midpointT_nil : forall tr,
    tr0 = Tnil (hd tr1) ->
    p0 tr ->

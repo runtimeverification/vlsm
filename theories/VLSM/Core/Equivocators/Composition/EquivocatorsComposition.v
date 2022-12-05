@@ -1,9 +1,11 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import FinFun FunctionalExtensionality.
+From Coq Require Import FinFun FunctionalExtensionality Reals.
 From VLSM.Lib Require Import Preamble ListSetExtras StdppExtras.
 From VLSM.Lib Require Import FinExtras Measurable.
-From VLSM.Core Require Import VLSM VLSMProjections Plans Composition Equivocation SubProjectionTraces Equivocation.NoEquivocation.
+From VLSM.Core Require Import VLSM VLSMProjections Plans Composition Equivocation.
+From VLSM.Core Require Import SubProjectionTraces.
+From VLSM.Core Require Import Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators.
 From VLSM.Core Require Import Equivocators.MessageProperties.
 
@@ -62,26 +64,26 @@ Proof.
   apply Forall_filter_nil.
   apply Forall_forall.
   intros i _.
-  spec Hs i.
+  specialize (Hs i).
   destruct Hs as [Hs _].
-  congruence.
+  by congruence.
 Qed.
 
 Section sec_equivocating_indices_BasicEquivocation.
 
 Context
-  `{FinSet index Ci}
-  `{ReachableThreshold index}
+  `{ReachableThreshold index Ci}
   .
 
-Program Instance equivocating_indices_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci
+Program Instance equivocating_indices_BasicEquivocation :
+  BasicEquivocation (composite_state equivocator_IM) index Ci
   := {
     is_equivocating := fun s v => v ∈ (equivocating_indices (enum index) s) ;
     state_validators := fun s => list_to_set(enum index)
   }.
 Next Obligation.
   intro. intros.
-  typeclasses eauto.
+  by typeclasses eauto.
 Qed.
 
 Lemma equivocating_indices_equivocating_validators
@@ -97,16 +99,32 @@ Proof.
   - by split; auto using elem_of_enum.
 Qed.
 
-Lemma eq_equivocating_indices_equivocation_fault
-: forall s1 s2,
-  list_to_set (equivocating_indices (enum index) s1) ≡@{Ci} list_to_set (equivocating_indices (enum index) s2) ->
-  equivocation_fault s1 = equivocation_fault s2.
+Lemma eq_equivocating_indices_equivocation_fault :
+  forall s1 s2,
+    list_to_set (equivocating_indices (enum index) s1) ≡@{Ci}
+    list_to_set (equivocating_indices (enum index) s2) ->
+      equivocation_fault s1 = equivocation_fault s2.
 Proof.
   intros s1 s2 Heq.
-  apply set_eq_nodup_sum_weight_eq.
-  - by apply NoDup_elements.
-  - by apply NoDup_elements.
-  - by apply set_eq_fin_set; rewrite !equivocating_indices_equivocating_validators.
+  rewrite <- !equivocating_indices_equivocating_validators in Heq.
+  unfold equivocation_fault.
+  apply set_eq_fin_set in Heq as [Heq1 Heq2].
+  apply sum_weights_subseteq_list in Heq1, Heq2;
+    [| by apply NoDup_elements..].
+  by apply Rle_antisym.
+Qed.
+
+Lemma eq_equivocating_indices_equivocation_fault' :
+  forall s1 s2,
+    list_to_set (equivocating_indices (enum index) s1)
+      ≡@{Ci}
+    list_to_set (equivocating_indices (enum index) s2) ->
+      equivocation_fault s1 = equivocation_fault s2.
+Proof.
+  intros s1 s2 Heq.
+  rewrite <- !equivocating_indices_equivocating_validators in Heq.
+  apply set_equiv_subseteq in Heq as [Heq1 Heq2].
+  by apply Rle_antisym; apply sum_weights_subseteq.
 Qed.
 
 End sec_equivocating_indices_BasicEquivocation.
@@ -127,7 +145,7 @@ Proof.
   intros i Hi.
   apply elem_of_list_filter.
   apply elem_of_list_filter in Hi.
-  split; [|apply Hi].
+  split; [| by apply Hi].
   destruct Hi as [Hi _].
   intro Hsi. elim Hi. clear Hi. unfold is_singleton_state in *.
   simpl in *.
@@ -159,7 +177,7 @@ Lemma equivocators_plan_cannot_decrease_state_size
 Proof.
   intro eqv. subst s'.
   induction plan using rev_ind.
-  - simpl. lia.
+  - by cbn; lia.
   - rewrite (composite_apply_plan_app equivocator_IM s plan).
     destruct (composite_apply_plan equivocator_IM s plan) as [junk s1].
     destruct x as [l im].
@@ -171,8 +189,7 @@ Proof.
       destruct (composite_transition equivocator_IM l som) eqn:Htrans
     end.
     apply equivocators_transition_cannot_decrease_state_size with (eqv:=eqv) in Htrans.
-    clear -IHplan Htrans.
-    simpl in * |- *. lia.
+    by cbn in *; lia.
 Qed.
 
 Lemma equivocators_pre_trace_cannot_decrease_state_size
@@ -195,7 +212,7 @@ Proof.
   unfold is_equivocating_state, is_singleton_state.
   intros eqv Hseqv.
   apply equivocators_pre_trace_cannot_decrease_state_size  with (eqv := eqv) in Htr.
-  cbv in *; lia.
+  by cbv in *; lia.
 Qed.
 
 Context
@@ -215,26 +232,28 @@ Lemma equivocators_no_equivocations_vlsm_incl_equivocators_free
   : VLSM_incl equivocators_no_equivocations_vlsm equivocators_free_vlsm.
 Proof.
   apply basic_VLSM_incl.
-  - cbv; intros s Hn n; specialize (Hn n); split_and!; itauto.
+  - by cbv; intros s Hn n; specialize (Hn n); split_and!; itauto.
   - by intro; intros; apply initial_message_is_valid.
-  - split; [| done]. apply Hv.
+  - by split; [apply Hv |].
   - by destruct 1.
 Qed.
 
-Lemma equivocators_no_equivocations_vlsm_incl_PreFree
-  : VLSM_incl equivocators_no_equivocations_vlsm (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
+Lemma equivocators_no_equivocations_vlsm_incl_PreFree :
+  VLSM_incl
+    equivocators_no_equivocations_vlsm
+    (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
 Proof.
   apply VLSM_incl_trans with (machine equivocators_free_vlsm).
   apply equivocators_no_equivocations_vlsm_incl_equivocators_free.
-  apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
-Lemma preloaded_equivocators_no_equivocations_vlsm_incl_PreFree
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm) (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
+Lemma preloaded_equivocators_no_equivocations_vlsm_incl_PreFree :
+  VLSM_incl
+    (pre_loaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm)
+    (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
 Proof.
-  apply basic_VLSM_incl_preloaded.
-  1,3: by intro.
-  by intros l s om [Hv _].
+  by apply basic_VLSM_incl_preloaded; [intro | inversion 1 | intro].
 Qed.
 
 Lemma equivocators_initial_state_size
@@ -283,12 +302,13 @@ Definition not_equivocating_equivocator_descriptors
   : RelDecision not_equivocating_equivocator_descriptors.
 Proof.
   intros eqv_descriptors s.
-  apply @Decision_iff with (P := (Forall (fun eqv => existing_descriptor (IM eqv) (eqv_descriptors eqv) (s eqv)) (enum index))).
+  apply @Decision_iff with (P :=
+    Forall (fun eqv => existing_descriptor (IM eqv) (eqv_descriptors eqv) (s eqv)) (enum index)).
   - rewrite Forall_forall. apply forall_proper. intros.
     split; [| done].
-    intro Henum. apply Henum, elem_of_enum.
+    by intro Henum; apply Henum, elem_of_enum.
   - apply Forall_dec. intro eqv.
-    apply existing_descriptor_dec.
+    by apply existing_descriptor_dec.
 Qed.
 
 Lemma not_equivocating_equivocator_descriptors_proper
@@ -297,7 +317,7 @@ Lemma not_equivocating_equivocator_descriptors_proper
   (Hne : not_equivocating_equivocator_descriptors eqv_descriptors s)
   : proper_equivocator_descriptors eqv_descriptors s.
 Proof.
-  intro eqv. apply existing_descriptor_proper. apply Hne.
+  by intro eqv; apply existing_descriptor_proper, Hne.
 Qed.
 
 Definition zero_descriptor
@@ -316,7 +336,8 @@ Lemma zero_descriptor_proper
   (s : vstate equivocators_free_vlsm)
   : proper_equivocator_descriptors zero_descriptor s.
 Proof.
-  apply not_equivocating_equivocator_descriptors_proper. apply zero_descriptor_not_equivocating.
+  apply not_equivocating_equivocator_descriptors_proper.
+  by apply zero_descriptor_not_equivocating.
 Qed.
 
 Lemma proper_equivocator_descriptors_state_update_eqv
@@ -355,7 +376,7 @@ Lemma lift_initial_to_equivocators_state
 Proof.
   unfold vinitial_state_prop in *. simpl in *.
   unfold composite_initial_state_prop in *.
-  by intro i; spec Hs i.
+  by intro i; specialize (Hs i).
 Qed.
 
 Definition newmachine_descriptors_list
@@ -394,7 +415,7 @@ Lemma equivocator_descriptors_update_neq
   (Hneq : j <> i)
   : equivocator_descriptors_update s i si j = s j.
 Proof.
-  unfold equivocator_descriptors_update. by case_decide.
+  by unfold equivocator_descriptors_update; case_decide.
 Qed.
 
 (**
@@ -432,8 +453,8 @@ Lemma equivocator_descriptors_update_id
 Proof.
   apply functional_extensionality_dep_good.
   intro j.
-  destruct (decide (j = i)).
-  - subst. apply equivocator_descriptors_update_eq.
+  destruct (decide (j = i)); subst.
+  - by apply equivocator_descriptors_update_eq.
   - by apply equivocator_descriptors_update_neq.
 Qed.
 
@@ -446,8 +467,8 @@ Lemma equivocator_descriptors_update_twice
 Proof.
   apply functional_extensionality_dep_good.
   intro j.
-  destruct (decide (j = i)).
-  - subst. rewrite equivocator_descriptors_update_eq. symmetry. apply equivocator_descriptors_update_eq.
+  destruct (decide (j = i)); subst.
+  - by rewrite equivocator_descriptors_update_eq, equivocator_descriptors_update_eq.
   - by rewrite !equivocator_descriptors_update_neq.
 Qed.
 
@@ -486,8 +507,7 @@ Proof.
   destruct (eqv_descriptors eqv) as [sn | i]; [done |].
   destruct Heqv as [es_eqv_i Hes_eqv_i].
   simpl. rewrite Hes_eqv_i. simpl.
-  revert Hes_eqv_i Hes.
-  apply equivocator_vlsm_initial_state_preservation_rev.
+  by eapply equivocator_vlsm_initial_state_preservation_rev.
 Qed.
 
 Lemma equivocators_initial_message
@@ -520,12 +540,13 @@ Context {message : Type}
 
 Definition seeded_equivocators_no_equivocation_vlsm
   (seed : message -> Prop)
-  : VLSM message
-  :=
-  composite_no_equivocation_vlsm_with_pre_loaded sub_equivocator_IM (free_constraint sub_equivocator_IM) seed.
+  : VLSM message :=
+  composite_no_equivocation_vlsm_with_pre_loaded
+    sub_equivocator_IM (free_constraint sub_equivocator_IM) seed.
 
-Lemma sub_equivocator_IM_initial_state_commute is
-  : composite_initial_state_prop sub_equivocator_IM is <-> composite_initial_state_prop sub_IM_equivocator is.
+Lemma sub_equivocator_IM_initial_state_commute is :
+  composite_initial_state_prop sub_equivocator_IM is <->
+  composite_initial_state_prop sub_IM_equivocator is.
 Proof. done. Qed.
 
 End sec_equivocators_sub_projections.

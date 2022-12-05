@@ -68,13 +68,16 @@ Section sec_ELMOComponent_lemmas.
 ### Type classes
 
 - CamelCase name
-- field declaration with C-style naming on separate line
+- field declaration with C-style naming on separate line, with 2 spaces of indentation
+- the `;` in the last field should not be omitted
+- it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
-Class TotalOrder {A} (R : relation A) : Prop := {
+Class TotalOrder {A} (R : relation A) : Prop :=
+{
   total_order_partial :> PartialOrder R;
-  total_order_trichotomy :> Trichotomy (strict R)
+  total_order_trichotomy :> Trichotomy (strict R);
 }.
 ```
 
@@ -96,18 +99,21 @@ Program Instance base_params (p : param) : BaseParams := {
 }.
 ```
 
-### Inductive types
+### Inductive and coinductive types
 
 - C-style type name
 - CamelCase constructors
-- one space indentation for each constructor declaration
+- to avoid name clashes, constructor names can be prefixed with an abbreviation of the type name followed by `_`
+- no indentation in constructor declarations
+- the first `|` in constructor declarations should not be omitted
+- it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
 Inductive lv_event_type : Type :=
- | State
- | Sent
- | Received.
+| State
+| Sent
+| Received.
 ```
 
 ### Definitions
@@ -138,11 +144,14 @@ Lemma sync_some (s : vstate X) (from to : index) :
 
 - C-style name
 - CamelCase for constructor name
-- field declaration with C-style naming on separate line
+- field declaration with C-style naming on separate line, with 2 spaces of indentation
+- the `;` in the last field should not be omitted
+- it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
-Record simp_lv_event : Type := SimpObs {
+Record simp_lv_event : Type := SimpObs
+{
   get_simp_event_type : simp_lv_event_type;
   get_simp_event_subject : index;
   get_simp_event_state : (@state index index_listing);

@@ -1,8 +1,12 @@
 From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
-From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists.
+From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists NeList.
 
 (** * Stream utility definitions and lemmas *)
+
+Lemma stream_eq_hd_tl {A} (s s' : Stream A) :
+  hd s = hd s' -> tl s = tl s' -> s = s'.
+Proof. by destruct s, s'; cbn; intros -> ->. Qed.
 
 Lemma fHere [A:Type] (P: Stream A -> Prop) : forall s, ForAll P s -> P s.
 Proof. by intros s []. Qed.
@@ -15,8 +19,8 @@ Lemma ForAll_subsumption [A:Type] (P Q: Stream A -> Prop)
   : forall s, ForAll P s -> ForAll Q s.
 Proof.
   apply ForAll_coind.
-  - intros s Hp. apply HPQ. revert Hp. apply fHere.
-  - apply fFurther.
+  - by intros s Hp; apply fHere in Hp; apply HPQ.
+  - by apply fFurther.
 Qed.
 
 Lemma Exists_Str_nth_tl [A : Type] (P : Stream A -> Prop)
@@ -53,20 +57,19 @@ Lemma ForAll1_subsumption [A:Type] (P Q: A -> Prop)
   (HPQ : forall a, P a -> Q a)
   : forall s, ForAll1 P s -> ForAll1 Q s.
 Proof.
-  apply ForAll_subsumption.
-  intro s. apply HPQ.
+  by apply ForAll_subsumption; intro s; apply HPQ.
 Qed.
 
 Lemma ForAll1_forall [A : Type] (P : A -> Prop) s
   : ForAll1 P s <-> forall n, P (Str_nth n s).
 Proof.
   split; intros.
-  - apply ForAll_Str_nth_tl with (m := n) in H. apply H.
+  - by apply ForAll_Str_nth_tl with (m := n) in H; apply H.
   - apply ForAll_coind with (fun s : Stream A => forall n : nat, P (Str_nth n s))
     ; intros.
     + by specialize (H0 0).
     + by specialize (H0 (S n)).
-    + apply H.
+    + by apply H.
 Qed.
 
 Definition ForAll2 [A : Type] (R : A -> A -> Prop) := ForAll (fun s => R (hd s) (hd (tl s))).
@@ -75,21 +78,20 @@ Lemma ForAll2_subsumption [A:Type] (R1 R2 : A -> A -> Prop)
   (HR : forall a b, R1 a b -> R2 a b)
   : forall s, ForAll2 R1 s -> ForAll2 R2 s.
 Proof.
-  apply ForAll_subsumption.
-  intro s. apply HR.
+  by apply ForAll_subsumption; intro s; apply HR.
 Qed.
 
 Lemma ForAll2_forall [A : Type] (R : A -> A -> Prop) s
   : ForAll2 R s <-> forall n, R (Str_nth n s) (Str_nth (S n) s).
 Proof.
   split; intros.
-  - apply ForAll_Str_nth_tl with (m := n) in H.
-    apply fHere in H. by rewrite tl_nth_tl in H.
+  - apply ForAll_Str_nth_tl with (m := n), fHere in H.
+    by rewrite tl_nth_tl in H.
   - apply ForAll_coind with (fun s : Stream A => forall n : nat, R (Str_nth n s) (Str_nth (S n) s))
     ; intros.
-    + by specialize (H0 0).
-    + by specialize (H0 (S n)).
-    + apply H.
+    + by apply (H0 0).
+    + by apply (H0 (S n)).
+    + by apply H.
 Qed.
 
 Lemma recons
@@ -131,7 +133,7 @@ Lemma stream_app_f_equal
   (Hs : EqSt s1 s2)
   : EqSt (stream_app l1 s1) (stream_app l2 s2).
 Proof.
-  by subst; induction l2; [ | constructor].
+  by subst; induction l2; [| constructor].
 Qed.
 
 Lemma stream_app_inj_l
@@ -232,19 +234,20 @@ Lemma elem_of_stream_prefix
 Proof.
   revert l a.
   induction n; simpl; split; intros.
-  - inversion H.
-  - destruct H as [k [Hk _]]. lia.
+  - by inversion H.
+  - by destruct H as [k [Hk _]]; lia.
   - destruct l as (b, l).
     inversion H; subst.
-    + exists 0. split; [lia | done].
+    + by exists 0; split; [lia |].
     + apply IHn in H2 as [k [Hlt Heq]].
-      exists (S k). split; [lia | done].
+      by exists (S k); split; [lia |].
   - destruct l as (b, l).
     destruct H as [k [Hlt Heq]].
     destruct k.
-    + unfold Str_nth in Heq. simpl in Heq. subst. left.
-    + unfold Str_nth in *. simpl in Heq.
-      right. apply IHn. exists k. split; [lia | done].
+    + by unfold Str_nth in Heq; simpl in Heq; subst; left.
+    + unfold Str_nth in *; simpl in Heq.
+      right; apply IHn.
+      by exists k; split; [lia |].
 Qed.
 
 Lemma stream_prefix_app_l
@@ -255,8 +258,7 @@ Lemma stream_prefix_app_l
   (Hle : n <= length l)
   : stream_prefix (stream_app l s) n = list_prefix l n.
 Proof.
-  revert n Hle; induction l; intros [| n] Hle.
-  1-3: by inversion Hle.
+  revert n Hle; induction l; intros [| n] Hle; [by inversion Hle.. |].
   by cbn in *; rewrite IHl; [| lia].
 Qed.
 
@@ -271,9 +273,9 @@ Proof.
   generalize dependent l.
   generalize dependent s.
   induction n.
-  - intros s [| a l] Hge; cbn in *; [done | lia].
+  - by intros s [| a l] Hge; cbn in *; [| lia].
   - intros s [| a l] Hge; cbn in *; [done |].
-    rewrite <- IHn; [done | lia].
+    by rewrite <- IHn; [| lia].
 Qed.
 
 Lemma stream_prefix_map
@@ -314,8 +316,7 @@ Proof.
   split.
   - intros Hp n i Hlt.
     specialize (Hi _ _ Hlt).
-    apply nth_error_nth with (d := hd s) in Hi.
-    rewrite Hi. apply Hp.
+    by apply nth_error_nth with (d := hd s) in Hi; rewrite Hi.
   - intros Hp n.
     assert (Hn : n < S n) by lia.
     specialize (Hp _ _ Hn).
@@ -339,10 +340,8 @@ Proof.
     + intros. rewrite lookup_ge_None_2 in H0; [done |].
       by rewrite stream_prefix_length.
     + pose proof (stream_prefix_length s n) as Hlen.
-      rewrite (Hi n i) by lia.
-      rewrite (Hi n (S i)) by lia.
-      intros a b Ha Hb.
-      inversion Ha; subst. inversion Hb; subst. apply Hp.
+      rewrite (Hi n i), (Hi n (S i)) by lia.
+      by do 2 inversion 1; subst.
   - intros Hp n.
     specialize (Hp (S (S n)) n).
     rewrite !Hi in Hp by lia.
@@ -385,6 +384,18 @@ Proof.
     by transitivity (Str_nth m l).
 Qed.
 
+Lemma ForAll2_strict_lookup [A : Type] (R : A -> A -> Prop) {HR : StrictOrder R}
+  : forall l, ForAll2 R l <-> (forall m n, m < n <-> R (Str_nth m l) (Str_nth n l)).
+Proof.
+  split.
+  - intro Hall; split.
+    + by apply ForAll2_transitive_lookup; [typeclasses eauto |].
+    + by apply ForAll2_strict_lookup_rev.
+  - intro Hall.
+    apply ForAll2_transitive_lookup; [typeclasses eauto |].
+    by intros; apply Hall.
+Qed.
+
 Lemma ForAll2_strict_lookup_inj
  [A : Type] (R : A -> A -> Prop) {HR : StrictOrder R}
   (l : Stream A) (Hl : ForAll2 R l)
@@ -396,7 +407,7 @@ Proof.
   destruct (decide (m = n)); [done |].
   elim (HI (Str_nth n l)).
   by destruct (decide (m < n))
-  ; [spec Hl m n|spec Hl n m]; (spec Hl; [lia|])
+  ; [specialize (Hl m n)|specialize (Hl n m)]; (spec Hl; [lia|])
   ; rewrite Hmn in Hl.
 Qed.
 
@@ -425,7 +436,7 @@ Lemma stream_suffix_nth
   (i : nat)
   : Str_nth i (stream_suffix s n) = Str_nth (i + n) s.
 Proof.
-  apply Str_nth_plus.
+  by apply Str_nth_plus.
 Qed.
 
 Lemma stream_prefix_suffix
@@ -436,7 +447,7 @@ Lemma stream_prefix_suffix
 Proof.
   generalize dependent l. unfold stream_suffix.
   induction n; [done |]; intros [a l]; cbn.
-  f_equal. apply IHn.
+  by f_equal; apply IHn.
 Qed.
 
 Lemma stream_prefix_prefix
@@ -447,9 +458,19 @@ Lemma stream_prefix_prefix
   : list_prefix (stream_prefix l n2) n1 = stream_prefix l n1.
 Proof.
   revert l n2 Hn.
-  induction n1; intros [a l]; intros [| n2] Hn; cbn.
-  1-3: by inversion Hn.
-  rewrite IHn1; [done | lia].
+  induction n1; intros [a l]; intros [| n2] Hn; cbn; [by inversion Hn.. |].
+  by rewrite IHn1; [| lia].
+Qed.
+
+Lemma stream_prefix_of
+  {A : Type}
+  (l : Stream A)
+  (n1 n2 : nat)
+  (Hn: n1 <= n2)
+  : stream_prefix l n1 `prefix_of` stream_prefix l n2.
+Proof.
+  rewrite <- (stream_prefix_prefix l n1 n2 Hn).
+  by apply prefix_of_list_prefix.
 Qed.
 
 Definition stream_segment
@@ -503,7 +524,7 @@ Proof.
     clear Hle.
     assert (Hs: n1 + k - n1 = k) by lia.
     rewrite Hs in Heq.
-    rewrite Heq, stream_prefix_nth; [do 2 f_equal |]; lia.
+    by rewrite Heq, stream_prefix_nth; [do 2 f_equal |]; lia.
 Qed.
 
 Lemma stream_prefix_segment
@@ -555,20 +576,16 @@ Proof.
     by apply app_inv_head in Hl1.
   - repeat rewrite app_length.
     unfold stream_segment.
-    repeat rewrite list_suffix_length.
-    repeat rewrite stream_prefix_length.
-    lia.
+    by rewrite !list_suffix_length, !stream_prefix_length; lia.
 Qed.
 
 Definition monotone_nat_stream_prop
   (s : Stream nat)
-  := forall n1 n2 : nat, n1 < n2 -> Str_nth n1 s < Str_nth n2 s.
+  := forall n1 n2 : nat, n1 < n2 <-> Str_nth n1 s < Str_nth n2 s.
 
 Lemma monotone_nat_stream_prop_from_successor s
   : ForAll2 lt s <-> monotone_nat_stream_prop s.
-Proof.
-  apply ForAll2_transitive_lookup. unfold Transitive. lia.
-Qed.
+Proof. by apply ForAll2_strict_lookup; typeclasses eauto. Qed.
 
 Lemma monotone_nat_stream_rev
   (s : Stream nat)
@@ -576,27 +593,26 @@ Lemma monotone_nat_stream_rev
   : forall n1 n2, Str_nth n1  s <= Str_nth n2 s -> n1 <= n2.
 Proof.
   intros n1 n2 Hle.
-  destruct (decide (n1 <= n2)); [lia|].
-  specialize (Hs n2 n1).
-  spec Hs; lia.
+  destruct (decide (n2 < n1)) as [Hlt |]; [| by lia].
+  by apply Hs in Hlt; lia.
 Qed.
 
 Lemma monotone_nat_stream_find s (Hs : monotone_nat_stream_prop s) (n : nat)
   : n < hd s \/ exists k, Str_nth k s = n \/ Str_nth k s < n < Str_nth (S k) s.
 Proof.
   induction n.
-  - destruct (hd s) eqn:Hhd .
+  - destruct (hd s) eqn: Hhd.
     + by right; exists 0; left.
-    + left. lia.
-  - destruct (decide (hd s <= S n)); [|left; lia].
+    + by left; lia.
+  - destruct (decide (hd s <= S n)); [| by left; lia].
     right.
     destruct IHn as [Hlt | [k Hk]]
-    ; [exists 0; left; cbv in *; lia|].
+    ; [by exists 0; left; cbv in *; lia |].
     destruct (decide (Str_nth (S k) s = S n))
     ; [by exists (S k); left|].
-    exists k. right.
-    specialize (Hs k (S k)).
-    spec Hs; lia.
+    exists k; right.
+    cut (Str_nth k s < Str_nth (S k) s); [by lia |].
+    by apply (Hs k (S k)); lia.
 Qed.
 
 Definition monotone_nat_stream :=
@@ -607,10 +623,7 @@ Lemma monotone_nat_stream_tl
   (Hs : monotone_nat_stream_prop s)
   : monotone_nat_stream_prop (tl s).
 Proof.
-  intros n1 n2 Hlt.
-  specialize (Hs (S n1) (S n2)).
-  apply Hs.
-  lia.
+  by intros n1 n2; etransitivity; [| by apply (Hs (S n1) (S n2))]; lia.
 Qed.
 
 CoFixpoint nat_sequence_from (n : nat) : Stream nat
@@ -620,22 +633,20 @@ Definition nat_sequence : Stream nat := nat_sequence_from 0.
 
 Lemma nat_sequence_from_nth : forall m n, Str_nth n (nat_sequence_from m) = n + m.
 Proof.
-  intros m n. revert m.
-  induction n; [done |].
-  intros. simpl.
-  unfold Str_nth. simpl.
-  unfold Str_nth in IHn. rewrite IHn. lia.
+  intros m n; revert m.
+  induction n; cbn; intros; [done |].
+  by unfold Str_nth in IHn |- *; cbn; rewrite IHn; lia.
 Qed.
 
 Lemma nat_sequence_nth : forall n, Str_nth n nat_sequence = n.
 Proof.
-  intros. unfold nat_sequence. rewrite nat_sequence_from_nth. lia.
+  by intros; unfold nat_sequence; rewrite nat_sequence_from_nth; lia.
 Qed.
 
 Lemma nat_sequence_from_sorted : forall n, ForAll2 lt (nat_sequence_from n).
 Proof.
-  intro n.
-  apply ForAll2_forall. intro m. rewrite !nat_sequence_from_nth. lia.
+  intro n; apply ForAll2_forall; intro m.
+  by rewrite !nat_sequence_from_nth; lia.
 Qed.
 
 Definition nat_sequence_sorted : ForAll2 lt nat_sequence :=
@@ -644,8 +655,7 @@ Definition nat_sequence_sorted : ForAll2 lt nat_sequence :=
 Lemma nat_sequence_from_prefix_sorted
   : forall m n, LocallySorted lt (stream_prefix (nat_sequence_from m) n).
 Proof.
-  intros. apply LocallySorted_ForAll2. apply stream_prefix_ForAll2.
-  apply nat_sequence_from_sorted.
+  by intros; apply LocallySorted_ForAll2, stream_prefix_ForAll2, nat_sequence_from_sorted.
 Qed.
 
 Definition nat_sequence_prefix_sorted
@@ -720,7 +730,7 @@ Proof.
   intros [a s] H.
   inversion H. simpl in H1. apply IH in H1.
   constructor; [| done].
-  rewrite Exists1_exists in *. firstorder.
+  by rewrite Exists1_exists in *; firstorder.
 Qed.
 
 Lemma FinitelyManyBound_impl_rev
@@ -731,8 +741,66 @@ Proof.
   exists n.
   apply ForAll1_forall.
   rewrite ForAll1_forall in Hn.
-  intros n' Hn'.
-  elim (Hn n').
-  revert Hn'.
-  apply HPQ.
+  by firstorder.
+Qed.
+
+Definition stream_prepend {A} (nel : ne_list A) (s : Stream A) : Stream A :=
+  (cofix prepend (l : ne_list A) :=
+    Cons (ne_list_hd l) (from_option prepend s (ne_list_tl l))) nel.
+
+CoFixpoint stream_concat {A} (s : Stream (ne_list A)) : Stream A :=
+  stream_prepend (hd s) (stream_concat (tl s)).
+
+Lemma stream_prepend_prefix {A} (nel : ne_list A) (s : Stream A) :
+  stream_prefix (stream_prepend nel s) (ne_list_length nel) = ne_list_to_list nel.
+Proof.
+  by induction nel; [| cbn; f_equal].
+Qed.
+
+Lemma stream_prepend_prefix_l
+  {A : Type}
+  (l : ne_list A)
+  (s : Stream A)
+  : forall n : nat, n <= ne_list_length l ->
+    stream_prefix (stream_prepend l s) n = list_prefix (ne_list_to_list l) n.
+Proof.
+  induction l; intros [| n] Hle; cbn; [done | | done |].
+  - by cbn in Hle; replace n with 0 by lia.
+  - by cbn in *; rewrite IHl; [| cbv in *; lia].
+Qed.
+
+Lemma stream_prepend_prefix_r
+  {A : Type}
+  (n : nat)
+  : forall l : ne_list A, n >= ne_list_length l ->
+    forall (s : Stream A),
+      stream_prefix (stream_prepend l s) n
+        =
+      ne_list_to_list l ++ stream_prefix s (n - ne_list_length l).
+Proof.
+  induction n; intros [| a l] Hge s; cbn in *; [by lia.. | |].
+  - by rewrite Nat.sub_0_r.
+  - by rewrite <- IHn; [| cbv in *; lia].
+Qed.
+
+Lemma stream_concat_unroll {A} (a : ne_list A) (s : Stream (ne_list A)) :
+  stream_concat (Cons a s) = stream_prepend a (stream_concat s).
+Proof. by apply stream_eq_hd_tl. Qed.
+
+Lemma stream_concat_prefix {A} (s : Stream (ne_list A)) n len
+  (prefix := mjoin (List.map ne_list_to_list (stream_prefix s n)))
+  : len = length prefix ->
+    stream_prefix (stream_concat s) len = prefix.
+Proof.
+  intros ->; revert s prefix.
+  induction n; [done |].
+  intros [n0 s]; cbn.
+  rewrite app_length.
+  assert (Hge :
+    length (ne_list_to_list n0) + length (mjoin (List.map ne_list_to_list (stream_prefix s n)))
+    ≥ length (ne_list_to_list n0)) by lia.
+  rewrite stream_concat_unroll, stream_prepend_prefix_r by done.
+  rewrite <- IHn at 2.
+  do 2 f_equal.
+  by apply minus_plus.
 Qed.

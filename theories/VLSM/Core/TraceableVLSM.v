@@ -20,7 +20,7 @@ From VLSM.Core Require Import VLSM Composition VLSMEmbedding.
 (**
   A class with a measure of size for states which is monotonic for valid transitions.
 *)
-Class TransitionMonotoneVLSM `(X : VLSM message) (state_size : vstate X -> nat) :=
+Class TransitionMonotoneVLSM `(X : VLSM message) (state_size : vstate X -> nat) : Prop :=
 {
   transition_monotonicity :
     forall s1 s2 : vstate X, ValidTransitionNext X s1 s2 -> state_size s1 < state_size s2
@@ -44,9 +44,8 @@ Lemma transition_monotone_in_futures
 Proof.
   destruct Hfutures as [tr Htr].
   induction Htr; [done |].
-  apply input_valid_transition_forget_input,
-    valid_transition_next, transition_monotonicity in Ht.
-  by lia.
+  by apply input_valid_transition_forget_input,
+    valid_transition_next, transition_monotonicity in Ht; lia.
 Qed.
 
 Lemma transition_monotone_empty_trace
@@ -58,9 +57,8 @@ Proof.
   induction Htr using finite_valid_trace_from_to_ind; [done | subst].
   assert (state_size s <= state_size s')
     by (apply transition_monotone_in_futures; [| eexists]; done).
-  apply input_valid_transition_forget_input,
-    valid_transition_next, transition_monotonicity in Ht.
-  by lia.
+  by apply input_valid_transition_forget_input,
+    valid_transition_next, transition_monotonicity in Ht; lia.
 Qed.
 
 (**
@@ -74,7 +72,8 @@ Qed.
 Class TraceableVLSM
   `(X : VLSM message)
   (state_destructor : vstate X -> list (vtransition_item X * vstate X))
-  (state_size : vstate X -> nat) :=
+  (state_size : vstate X -> nat)
+  : Prop :=
 {
   tv_monotone :> TransitionMonotoneVLSM X state_size;
   tv_state_destructor_destination :
@@ -88,7 +87,7 @@ Class TraceableVLSM
         input_valid_transition_item (pre_loaded_with_all_messages_vlsm X) s item;
   tv_state_destructor_initial :
     forall (s : vstate X) (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s),
-      vinitial_state_prop X s <-> state_destructor s = []
+      vinitial_state_prop X s <-> state_destructor s = [];
 }.
 
 #[global] Hint Mode TraceableVLSM - ! - - : typeclass_instances.
@@ -208,7 +207,8 @@ Proof.
   - inversion 1 as [| ? ? Hna _]; subst; cbn.
     rewrite state_update_eq.
     replace (foldr Nat.add 0 (map (λ i : index, state_size i (s i)) l))
-       with (foldr Nat.add 0 (map (λ i : index, state_size i (lift_to_composite_state IM s a si i)) l))
+       with (foldr Nat.add 0 (map (λ i : index,
+               state_size i (lift_to_composite_state IM s a si i)) l))
     ; [lia |].
     revert Hna; clear; induction l; [done |].
     intros []%not_elem_of_cons.
@@ -237,8 +237,8 @@ Proof.
   intros s' Hs' s item i.
   unfold composite_state_destructor; rewrite elem_of_list_fmap.
   intros ([itemi si] & [=-> ->] & Hin).
-  eapply (VLSM_weak_full_projection_input_valid_transition
-           (lift_to_preloaded_free_weak_full_projection IM i s' Hs')).
+  eapply (VLSM_weak_embedding_input_valid_transition
+           (lift_to_preloaded_free_weak_embedding IM i s' Hs')).
   eapply @tv_state_destructor_transition; [done | | done].
   by eapply valid_state_project_preloaded_to_preloaded.
 Qed.
@@ -294,7 +294,7 @@ Proof.
   apply composite_tv_state_destructor_state_update in Hdestruct as Heqs'; [| done].
   intros j Hinit; destruct (decide (i = j)); subst; [| by state_update_simpl].
   apply composite_tv_state_destructor_initial in Hinit; [| done].
-  rewrite Hinit in Hdestruct; inversion Hdestruct.
+  by rewrite Hinit in Hdestruct; inversion Hdestruct.
 Qed.
 
 Lemma composite_tv_state_destructor_size :
@@ -373,7 +373,7 @@ Record ChoosingWell
     forall (i : index) (n : nat),
       choose s' Hs' indices = (i, n) ->
       ~ vinitial_state_prop (IM i) (s' i) ->
-      is_Some (composite_state_destructor s' i !! n)
+      is_Some (composite_state_destructor s' i !! n);
 }.
 
 Lemma choosing_well_position_exists :
@@ -418,7 +418,7 @@ Lemma composite_tv_state_destructor_preserves_not_in_indices_initial  :
 Proof.
   intros s' Hs' * Heq indices Hinits' j Hj.
   by erewrite composite_tv_state_destructor_reflects_initiality;
-    [apply Hinits' | done | eapply elem_of_list_lookup_2 | apply Hinits'].
+    [apply Hinits' | | eapply elem_of_list_lookup_2 | apply Hinits'].
 Qed.
 
 (**
@@ -470,7 +470,8 @@ Equations indexed_composite_state_to_trace
       | (right _) eq: Hni => (s', [])
       |  (left _) eq: Hi with inspect (decide (composite_state_destructor s' i_n.1 = [])) =>
         | (right _) eq: Hn  => (s', [])
-        |  (left _) eq: Hnn => indexed_composite_state_to_trace choose s' Hs' (StdppListSet.set_remove i_n.1 indices).
+        |  (left _) eq: Hnn => indexed_composite_state_to_trace choose s' Hs'
+                                 (StdppListSet.set_remove i_n.1 indices).
 Next Obligation.
   by cbn; intros; eapply input_valid_transition_origin, composite_state_destructor_lookup_reachable.
 Qed.
@@ -481,7 +482,8 @@ Next Obligation.
 Qed.
 Next Obligation.
   intros.
-  cut (S (length (StdppListSet.set_remove i_n.1 indices)) <= length indices); [unfold indices; lia |].
+  cut (S (length (StdppListSet.set_remove i_n.1 indices)) <= length indices);
+    [unfold indices; lia |].
   by rewrite <- set_remove_length; [lia |].
 Qed.
 
@@ -541,8 +543,8 @@ Proof.
     + subst; eapply Hind; [done | | | done | done].
       * by apply StdppListSet.set_remove_nodup.
       * by apply set_remove_preserves_not_in_indices_initial.
-    + replace i with j in *
-        by (destruct (decide (i = j)); [| contradict n; subst; apply StdppListSet.set_remove_3]; done).
+    + replace i with j in * by (destruct (decide (i = j));
+        [| contradict n; subst; apply StdppListSet.set_remove_3]; done).
       by erewrite indexed_composite_state_to_trace_reflects_initiality_1;
         [..| done]; apply composite_tv_state_destructor_initial.
   - by intros; subst; clear Heq1; contradict Hdestruct;

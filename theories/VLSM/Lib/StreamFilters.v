@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
-From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras.
+From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras NeList.
 
 (**
   Given a predicate <<P>> and a stream <<s>>, a stream of naturals <<ns>>
@@ -16,6 +16,21 @@ Definition filtering_subsequence
   := (forall i, i < hd ns -> ~P (Str_nth i s)) /\
      ForAll2 (fun m n => P (Str_nth m s) /\ m < n /\ forall i, m < i < n -> ~ P (Str_nth i s)) ns.
 
+(**
+  A more intuitive statement of the [filtering_subsequence] property.
+  See [FilteringSubsequence_iff] for the equivalence result.
+*)
+Record FilteringSubsequence
+  {A : Type}
+  (P : A -> Prop)
+  (s : Stream A)
+  (ns : Stream nat)
+  : Prop :=
+{
+  fs_monotone : monotone_nat_stream_prop ns;
+  fs_is_filter : forall n, P (Str_nth n s) <-> exists k, n = Str_nth k ns;
+}.
+
 Lemma filtering_subsequence_sorted
   {A : Type}
   (P : A -> Prop)
@@ -24,8 +39,9 @@ Lemma filtering_subsequence_sorted
   (Hfs : filtering_subsequence P s ns)
   : ForAll2 lt ns.
 Proof.
-  apply proj2 in Hfs. revert Hfs. apply ForAll2_subsumption.
-  intros. apply H.
+  destruct Hfs as [_ Hfs].
+  revert Hfs; apply ForAll2_subsumption.
+  by intros a b H; apply H.
 Qed.
 
 Lemma filtering_subsequence_prefix_sorted
@@ -67,8 +83,8 @@ Lemma filtering_subsequence_witness
   (k : nat)
   : P (Str_nth (Str_nth k ss) s).
 Proof.
-  apply proj2 in Hfs. rewrite ForAll2_forall in Hfs.
-  apply Hfs.
+  destruct Hfs as [_ Hfs].
+  by rewrite ForAll2_forall in Hfs; apply Hfs.
 Qed.
 
 (**
@@ -89,12 +105,37 @@ Proof.
   apply monotone_nat_stream_prop_from_successor in Hss_sorted.
   apply monotone_nat_stream_find with (n := n) in Hss_sorted.
   destruct Hss_sorted  as [Hlt | [k Hk]].
-  - destruct Hfs as [Hfs _]. by elim (Hfs n).
+  - by destruct Hfs as [Hfs _]; elim (Hfs n).
   - destruct Hk as [Heq | Hk]; subst; [by exists k |].
     exfalso. apply proj2 in Hfs.
     rewrite ForAll2_forall in Hfs.
     specialize (Hfs k) as [_ [_ Hfs]].
     by elim (Hfs n).
+Qed.
+
+Lemma FilteringSubsequence_iff
+  {A : Type}
+  (P : A -> Prop)
+  (s : Stream A)
+  (ss : Stream nat)
+  : FilteringSubsequence P s ss <-> filtering_subsequence P s ss.
+Proof.
+  split.
+  - intros []; split.
+    + setoid_rewrite fs_is_filter0.
+      intros i Hi [? ->].
+      apply (fs_monotone0 x 0) in Hi.
+      by lia.
+    + apply ForAll2_forall; intros n; split_and!.
+      * by apply fs_is_filter0; eexists.
+      * by apply (fs_monotone0 n (S n)); lia.
+      * setoid_rewrite fs_is_filter0.
+        intros i [Hni Hni'] [? ->].
+        by apply fs_monotone0 in Hni, Hni'; lia.
+  - constructor.
+    + by eapply monotone_nat_stream_prop_from_successor, filtering_subsequence_sorted.
+    + split; [by apply filtering_subsequence_witness_rev |].
+      by intros [? ->]; apply filtering_subsequence_witness.
 Qed.
 
 (** Prefixes of the filtering subsequence expressed as filters. *)
@@ -113,8 +154,8 @@ Proof.
   apply (@set_equality_predicate _ lt _).
   - by apply filtering_subsequence_prefix_sorted with P s.
   - apply LocallySorted_filter.
-    + unfold Transitive. lia.
-    + apply nat_sequence_prefix_sorted.
+    + by typeclasses eauto.
+    + by apply nat_sequence_prefix_sorted.
   - unfold ListSetExtras.set_eq, subseteq, list_subseteq.
     setoid_rewrite elem_of_list_filter.
     setoid_rewrite elem_of_stream_prefix.
@@ -126,19 +167,17 @@ Proof.
       eexists; split; [| done].
       destruct (decide (i = k)); [subst; lia|].
       cut (Str_nth i ss < Str_nth k ss); [lia|].
-      apply ForAll2_transitive_lookup; [unfold Transitive; lia| | lia].
+      apply ForAll2_transitive_lookup; [by typeclasses eauto | | lia].
       by apply filtering_subsequence_sorted in Hfs.
     + destruct H as [Hpa [_a [Hlt H_a]]].
       subst _a.
-      specialize (filtering_subsequence_witness_rev _ _ _ Hfs _ Hpa)
-        as [k' Hk'].
-      subst.
+      destruct (filtering_subsequence_witness_rev _ _ _ Hfs _ Hpa) as [k' ->].
       exists k'.
       split; [| done].
       apply filtering_subsequence_sorted in Hfs.
       apply monotone_nat_stream_prop_from_successor in Hfs.
       specialize (monotone_nat_stream_rev _ Hfs k' k) as Hle.
-      feed specialize Hle; lia.
+      by feed specialize Hle; lia.
 Qed.
 
 Lemma filtering_subsequence_prefix_length
@@ -260,7 +299,10 @@ Program Definition fitering_subsequence_stream_filter_map_prefix_ex
   (ss : Stream nat)
   (Hfs : filtering_subsequence P s ss)
   (m : nat)
-  : { n : nat | stream_prefix (filtering_subsequence_stream_filter_map P f s ss Hfs) m = list_filter_map P f (stream_prefix s n) } :=
+  : {n : nat |
+      stream_prefix (filtering_subsequence_stream_filter_map P f s ss Hfs) m =
+      list_filter_map P f (stream_prefix s n)}
+  :=
   match m with
   | 0 => exist _ 0 _
   | S m => exist _ (S (Str_nth m ss)) _
@@ -306,8 +348,8 @@ Qed.
   except that instead of obtaining the filtered sequence itself we obtain the
   stream of all positions corresponding to the filtered sequence.
 
-  Yves Bertot. Filters on Co-Inductive streams: an application to Eratosthenes’ sieve. RR-5343, INRIA.
-  2004, pp.21. ffinria-00070658 https://hal.inria.fr/inria-00070658/document
+  Yves Bertot. Filters on Co-Inductive streams: an application to Eratosthenes’ sieve.
+  RR-5343, INRIA. 2004, pp.21. ffinria-00070658 https://hal.inria.fr/inria-00070658/document
 *)
 
 Section sec_stream_filter_positions.
@@ -356,15 +398,15 @@ Proof.
   intros.
   destruct Hev; simpl.
   - destruct (decide _); [| done].
-    exists 0. split_and!; f_equal; [lia | done | lia].
+    by exists 0; split_and!; f_equal; [lia | | lia].
   - destruct (decide _); simpl.
-    + exists 0. split_and!; f_equal; [lia | done | lia].
+    + by exists 0; split_and!; f_equal; [lia | | lia].
     + specialize (H (tl s) Hev (S n)) as (k & Heq & Hp & Hnp).
       exists (S k). rewrite Heq.
       split; [f_equal; lia|].
       split; [done |].
       intros. destruct i; [done |].
-      apply Hnp. lia.
+      by apply Hnp; lia.
 Qed.
 
 Lemma stream_filter_fst_pos_infinitely_often
@@ -373,8 +415,8 @@ Lemma stream_filter_fst_pos_infinitely_often
   (n : nat)
   : InfinitelyOften P s -> InfinitelyOften P (stream_filter_fst_pos s Hev n).2.
 Proof.
-  destruct (stream_filter_fst_pos_characterization s Hev n) as [k [Heq _]].
-  rewrite Heq. apply InfinitelyOften_nth_tl.
+  destruct (stream_filter_fst_pos_characterization s Hev n) as (k & -> & _).
+  by apply InfinitelyOften_nth_tl.
 Qed.
 
 Lemma stream_filter_fst_pos_le
@@ -383,8 +425,8 @@ Lemma stream_filter_fst_pos_le
   (n : nat)
   : n <= (stream_filter_fst_pos s Hev n).1.
 Proof.
-  destruct (stream_filter_fst_pos_characterization s Hev n) as [k [Heq _]].
-  rewrite Heq. simpl. lia.
+  destruct (stream_filter_fst_pos_characterization s Hev n) as (k & -> & _).
+  by cbn; lia.
 Qed.
 
 Lemma stream_filter_fst_pos_nth_tl_has_property
@@ -405,7 +447,7 @@ Proof.
   intros i [Hlt_i Hilt].
   apply stdpp_nat_le_sum in Hlt_i as [i' ->].
   rewrite Nat.add_comm, <- Str_nth_plus.
-  apply Hnp. simpl in *. lia.
+  by apply Hnp; cbn in *; lia.
 Qed.
 
 (**
@@ -413,14 +455,17 @@ Qed.
   produces the streams of all its position at which <<P>> holds in a strictly
   increasing order (shifted by the given argument <<n>>).
 *)
-CoFixpoint stream_filter_positions (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat) : Stream nat :=
+CoFixpoint stream_filter_positions
+  (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat) : Stream nat :=
   let fpair := stream_filter_fst_pos _ (fHere _ _ Hinf) n in
-  Cons fpair.1 (stream_filter_positions fpair.2 (stream_filter_fst_pos_infinitely_often _ (fHere _ _ Hinf) n Hinf)  (S fpair.1)).
+  Cons fpair.1 (stream_filter_positions fpair.2
+    (stream_filter_fst_pos_infinitely_often _ (fHere _ _ Hinf) n Hinf)  (S fpair.1)).
 
 Lemma stream_filter_positions_unroll (s : Stream A) (Hinf : InfinitelyOften P s) (n : nat)
   (fpair := stream_filter_fst_pos _ (fHere _ _ Hinf) n)
   : stream_filter_positions s Hinf n =
-    Cons fpair.1 (stream_filter_positions fpair.2 (stream_filter_fst_pos_infinitely_often _ (fHere _ _ Hinf) n Hinf)  (S fpair.1)).
+    Cons fpair.1 (stream_filter_positions fpair.2
+      (stream_filter_fst_pos_infinitely_often _ (fHere _ _ Hinf) n Hinf)  (S fpair.1)).
 Proof.
   by rewrite <- recons at 1.
 Qed.
@@ -428,8 +473,9 @@ Qed.
 Lemma stream_filter_positions_Str_nth_tl
   (s : Stream A) (Hinf : InfinitelyOften P s) (n0 : nat) (n : nat)
   : exists kn (Hinf' : InfinitelyOften P (Str_nth_tl (S kn) s)),
-    Str_nth_tl n (stream_filter_positions s Hinf n0) = Cons (n0 + kn) (stream_filter_positions (Str_nth_tl (S kn) s) Hinf' (S (n0 + kn)))
-    /\ P (Str_nth kn s).
+    Str_nth_tl n (stream_filter_positions s Hinf n0) =
+    Cons (n0 + kn) (stream_filter_positions (Str_nth_tl (S kn) s) Hinf' (S (n0 + kn))) /\
+    P (Str_nth kn s).
 Proof.
   induction n.
   - simpl. rewrite (stream_filter_positions_unroll s Hinf n0).
@@ -441,7 +487,7 @@ Proof.
     assert (Htl : (stream_filter_fst_pos s (fHere (Exists1 P) s Hinf) n0).2 = Str_nth_tl (S k) s).
     { by rewrite Heq. }
     exists k.
-    rewrite Hk. simpl. simpl in Htl. rewrite <- Htl. eauto.
+    by rewrite Hk; cbn in *; rewrite <- Htl; eauto.
   - replace
       (Str_nth_tl (S n) (stream_filter_positions s Hinf n0))
       with (tl (Str_nth_tl n (stream_filter_positions s Hinf n0)))
@@ -464,7 +510,7 @@ Proof.
     rewrite tl_nth_tl, Str_nth_tl_plus in Htl.
     rewrite Str_nth_plus in Hp.
     rewrite <- Htl.
-    replace (n0 + S (k + kn)) with (S (n0 + kn + k)) by lia. eauto.
+    by replace (n0 + S (k + kn)) with (S (n0 + kn + k)) by lia; eauto.
 Qed.
 
 Lemma stream_filter_positions_monotone
@@ -475,8 +521,8 @@ Proof.
   revert s Hinf n.
   cofix H.
   intros.
-  constructor; simpl; [|apply H].
-  apply stream_filter_fst_pos_le.
+  constructor; simpl; [| by apply H].
+  by apply stream_filter_fst_pos_le.
 Qed.
 
 (** [stream_filter_positions] produces a [filtering_sequence]. *)
@@ -497,7 +543,8 @@ Proof.
     destruct Hnth_tl as [kn [Hnth_inf [Hnth Hnth_p]]].
     unfold Str_nth. simpl. rewrite <- tl_nth_tl.
     rewrite stream_filter_positions_unroll in Hnth.
-    specialize (stream_filter_fst_pos_characterization (Str_nth_tl kn (tl s)) (fHere _ _ Hnth_inf) (S kn))
+    specialize (stream_filter_fst_pos_characterization
+      (Str_nth_tl kn (tl s)) (fHere _ _ Hnth_inf) (S kn))
       as [k [Heq [Hpk Hnp]]].
     rewrite Hnth; simpl.
     split; [done |].
@@ -506,7 +553,7 @@ Proof.
     intros i [Hle Hlt].
     apply stdpp_nat_le_sum in Hle as [k' ->].
     rewrite Nat.add_comm, <- Str_nth_tl_plus. simpl.
-    apply Hnp. lia.
+    by apply Hnp; lia.
 Qed.
 
 (**
@@ -519,7 +566,8 @@ Definition stream_filter_map
   (s : Stream A)
   (Hinf : InfinitelyOften P s)
   : Stream B :=
-  filtering_subsequence_stream_filter_map P f _ _ (stream_filter_positions_filtering_subsequence s Hinf).
+  filtering_subsequence_stream_filter_map P f _ _
+    (stream_filter_positions_filtering_subsequence s Hinf).
 
 (** Stream filtering is obtained as a specialization of [stream_filter_map]. *)
 Definition stream_filter
@@ -560,7 +608,7 @@ Lemma stream_map_option_prefix
 Proof.
   subst map_opt_pre m.
   rewrite !(map_option_as_filter f (stream_prefix s n)).
-  apply fitering_subsequence_stream_filter_map_prefix.
+  by apply fitering_subsequence_stream_filter_map_prefix.
 Qed.
 
 Program Definition stream_map_option_prefix_ex
@@ -568,8 +616,9 @@ Program Definition stream_map_option_prefix_ex
   (Hfs := stream_filter_positions_filtering_subsequence _ _ Hinf)
   (k : nat)
   : { n | stream_prefix (stream_map_option Hinf) k = map_option f (stream_prefix s n)} :=
-  let (n, Heq) := (fitering_subsequence_stream_filter_map_prefix_ex P (fun k => is_Some_proj (proj2_dsig k)) _ _ Hfs k) in
-  exist _ n _.
+  let (n, Heq) := (fitering_subsequence_stream_filter_map_prefix_ex P
+                    (fun k => is_Some_proj (proj2_dsig k)) _ _ Hfs k)
+  in exist _ n _.
 Next Obligation.
   by intros; cbn; rewrite !map_option_as_filter.
 Qed.
@@ -580,6 +629,95 @@ Definition bounded_stream_map_option
   map_option f (stream_prefix s (` Hfin)).
 
 End sec_stream_map_option.
+
+Section sec_stream_concat_map.
+
+(** ** Mapping a function expanding elements to lists of elements on a stream
+
+  Given a function <<f>> which [InfinitelyOften] produces non-empty lists from
+  the elements of a stream <<s>>, we can define the stream obtained by
+  concatenating the values of <<s>> through <<f>>.
+*)
+
+Context
+  [A B : Type]
+  (f : A -> list B)
+  (FNonEmpty : A -> Prop := fun a => f a <> [])
+  (s : Stream A)
+  .
+
+Definition stream_concat_map
+  (Hinf : InfinitelyOften FNonEmpty s)
+  : Stream B :=
+  stream_concat (stream_filter_map FNonEmpty (list_function_restriction f) s Hinf).
+
+Lemma stream_concat_map_prefix
+  (Hinf : InfinitelyOften FNonEmpty s)
+  (n : nat)
+  (mbind_prefix := mbind f (stream_prefix s n))
+  (m := length mbind_prefix)
+  : stream_prefix (stream_concat_map Hinf) m = mbind_prefix.
+Proof.
+  subst mbind_prefix m; unfold stream_concat_map.
+  cut (mjoin
+    (List.map ne_list_to_list
+      (list_filter_map (fun a : A => f a <> []) (list_function_restriction f)
+          (stream_prefix s n))) = mbind f (stream_prefix s n)).
+  {
+    intros <-.
+    by erewrite stream_concat_prefix;
+      unfold stream_filter_map;
+      rewrite fitering_subsequence_stream_filter_map_prefix.
+  }
+  by apply list_filter_map_mbind.
+Qed.
+
+Program Definition stream_concat_map_ex_prefix
+  (Hinf : InfinitelyOften FNonEmpty s)
+  (Hfs := stream_filter_positions_filtering_subsequence _ _ Hinf)
+  (k : nat)
+  : {n : nat |
+      stream_prefix (stream_concat_map Hinf) k
+        `prefix_of`
+      mbind f (stream_prefix s n)}
+  :=
+  let (n, Heq) :=
+    (fitering_subsequence_stream_filter_map_prefix_ex
+      FNonEmpty (list_function_restriction f) _ _ Hfs k)
+  in exist _ n _.
+Next Obligation.
+  cbn; intros Hinf k n Heq.
+  rewrite <- (stream_concat_map_prefix Hinf).
+  apply stream_prefix_of.
+  rewrite <- list_filter_map_mbind.
+  replace k
+    with (length (list_filter_map FNonEmpty (list_function_restriction f) (stream_prefix s n)))
+    by (rewrite <- Heq; apply stream_prefix_length).
+  by apply ne_list_concat_min_length.
+Qed.
+
+Program Definition stream_concat_map_ex_min_prefix
+  `{EqDecision B}
+  (Hinf : InfinitelyOften FNonEmpty s)
+  (k : nat)
+  (Ppre := fun m =>
+    stream_prefix (stream_concat_map Hinf) k
+      `prefix_of`
+    mbind f (stream_prefix s m))
+  : {n : nat | minimal_among le Ppre n}
+  :=
+  let (n, Hpre) :=  stream_concat_map_ex_prefix Hinf k in
+  exist _ (find_least_among Ppre n) _.
+Next Obligation.
+  by intros; apply find_least_among_is_minimal.
+Qed.
+
+Definition bounded_stream_concat_map
+  (Hfin : FinitelyManyBound FNonEmpty s)
+  : list B :=
+  mbind f (stream_prefix s (` Hfin)).
+
+End sec_stream_concat_map.
 
 (**
   For a totally defined function, [stream_map_option] corresponds to the
@@ -613,14 +751,10 @@ Proof.
     rewrite Heq1.
     simpl.
     destruct _k; [lia|].
-    exfalso. apply (H_k 0); [lia | by eexists].
+    by exfalso; apply (H_k 0); [lia | eexists].
   }
   induction n; intros; rewrite stream_filter_positions_unroll; unfold Streams.Str_nth; simpl.
-  - replace (k + 0) with k by lia.
-    apply Hfirst.
+  - by rewrite Hfirst; lia.
   - unfold Streams.Str_nth in IHn.
-    rewrite IHn.
-    simpl. replace (k + S n) with (S (k + n)) by lia.
-    f_equal. f_equal.
-    apply Hfirst.
+    by rewrite IHn, Hfirst; lia.
 Qed.

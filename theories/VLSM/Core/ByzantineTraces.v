@@ -211,7 +211,7 @@ Qed.
 Lemma alt_proj_option_valid_message
     (m : option message)
     : option_valid_message_prop Alt1 m.
-Proof. apply any_message_is_valid_in_preloaded. Qed.
+Proof. by apply any_message_is_valid_in_preloaded. Qed.
 
 (**
   Next we define the "lifting" of a [state] <<s>> from <<M>> to <<Alt>>,
@@ -242,10 +242,9 @@ Proof.
     assert (option_valid_message_prop Alt om0) as Hom0
       by apply alt_option_valid_message.
     cut (input_valid_transition Alt (existT first l) (lifted_alt_state s,om0) (lifted_alt_state s', om'))
-      ;[apply input_valid_transition_outputs_valid_state_message|].
+      ; [by apply input_valid_transition_outputs_valid_state_message |].
     split.
-    + split_and!; [done ..|].
-      by split; [cbn; apply Ht|].
+    + by repeat split; [.. | apply Ht].
     + simpl.
       replace (lifted_alt_state s first) with s
         by (unfold lifted_alt_state,lift_to_composite_state'; state_update_simpl; done).
@@ -253,7 +252,7 @@ Proof.
       change (vtransition M l (s: vstate M,om0) = (s',om')) in Ht.
       rewrite Ht.
       f_equal.
-      apply state_update_twice.
+      by apply state_update_twice.
 Qed.
 
 (**
@@ -265,13 +264,13 @@ Lemma pre_loaded_with_all_messages_alt_incl
 Proof.
   apply (basic_VLSM_incl (machine PreLoaded) (machine Alt1))
   ; intro; intros; [done | | | apply H].
-  - apply alt_proj_option_valid_message.
+  - by apply alt_proj_option_valid_message.
   - exists (lifted_alt_state s).
     split; [done |].
     destruct Hv as [[_om Hps] [Hpm Hv]].
     repeat split; [| | done].
     + by apply preloaded_alt_valid_state with _om.
-    + apply alt_option_valid_message.
+    + by apply alt_option_valid_message.
 Qed.
 
 (** Hence, <<Preloaded>> and <<Alt1>> are actually trace-equal. *)
@@ -280,8 +279,8 @@ Lemma pre_loaded_with_all_messages_alt_eq
     .
 Proof.
   split.
-  - apply pre_loaded_with_all_messages_alt_incl.
-  - apply alt_pre_loaded_with_all_messages_incl.
+  - by apply pre_loaded_with_all_messages_alt_incl.
+  - by apply alt_pre_loaded_with_all_messages_incl.
 Qed.
 
 End sec_pre_loaded_with_all_messages_byzantine_alt.
@@ -322,7 +321,7 @@ Proof.
       (VLSM_incl_valid_trace
           (pre_loaded_with_all_messages_validator_component_proj_incl _ _ _ Hvalidator)).
   revert Htr.
-  simpl. apply byzantine_pre_loaded_with_all_messages.
+  by simpl; apply byzantine_pre_loaded_with_all_messages.
 Qed.
 
 (** ** Byzantine fault tolerance for a composition of validators
@@ -359,7 +358,7 @@ Lemma validator_pre_loaded_with_all_messages_incl
 Proof.
   apply VLSM_incl_finite_traces_characterization.
   intros.
-  split; [|apply H].
+  split; [| by apply H].
   destruct H as [Htr Hs].
   induction Htr using finite_valid_trace_from_rev_ind.
   - by apply (finite_valid_trace_from_empty X), initial_state_is_valid.
@@ -373,7 +372,7 @@ Proof.
     | valid_state_prop _ ?s => remember s as lst
     end.
     split; [done |].
-    repeat split; [|apply Hvx|apply Hvx].
+    repeat split; [| by apply Hvx | by apply Hvx].
     destruct Hvx as [Hlst [_ [Hv _]]].
     destruct l as (i, li). simpl in *.
     specialize (valid_state_project_preloaded_to_preloaded _ IM constraint lst i Hlst)
@@ -381,7 +380,7 @@ Proof.
     destruct iom as [im |]; [| apply option_valid_message_None].
     eapply Hvalidator; split; [done |]; split; [| done].
     eexists _.
-    apply (pre_loaded_with_all_messages_message_valid_initial_state_message (IM i)).
+    by apply (pre_loaded_with_all_messages_message_valid_initial_state_message (IM i)).
 Qed.
 
 (**

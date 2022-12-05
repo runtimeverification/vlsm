@@ -19,10 +19,11 @@ Context
   which would allow to transition from any given state
   (note that we don't address validity for now).
 *)
-Record plan_item :=
-  { label_a : label;
-    input_a : option message
-  }.
+Record plan_item : Type :=
+{
+  label_a : label;
+  input_a : option message;
+}.
 
 End sec_plans.
 
@@ -136,8 +137,8 @@ Lemma _apply_plan_cons
      (aitems ++ a'items, a'final).
 Proof.
   replace (ai :: a') with ([ai] ++ a').
-  apply _apply_plan_app.
-  itauto.
+  - by apply _apply_plan_app.
+  - by itauto.
 Qed.
 
 (** We can forget information from a trace to obtain a plan. *)
@@ -214,7 +215,7 @@ Proof.
   simpl in *.
   destruct (apply_plan afinal b) as (bitems, bfinal).
   rewrite Happ. simpl. clear Happ. subst afinal.
-  apply finite_valid_trace_from_app_iff.
+  by apply finite_valid_trace_from_app_iff.
 Qed.
 
 Lemma finite_valid_plan_empty
@@ -300,9 +301,9 @@ Proof.
     ( apply finite_valid_plan_from_app_iff in H
     ; destruct H as [Ha Hx]; apply IHa in Ha as Ha').
   - by inversion H.
-  - constructor.
+  - by constructor.
   - by destruct prefa; simpl in Heqa.
-  - destruct H as [Hs _]. by constructor.
+  - by destruct H as [Hs _]; constructor.
   - by destruct Ha' as [Hs _].
   - destruct Ha' as [_ [Hmsgs _]].
     apply Forall_app. split; [done |].
@@ -312,7 +313,7 @@ Proof.
     destruct x.
     destruct ( vtransition X label_a0 (lst, input_a0)) as (dest, out).
     simpl. simpl in Hx. inversion Hx. subst.
-    apply Ht.
+    by apply Ht.
   - assert (Hsuffa : suffa = [] \/ suffa <> []) by
       (destruct suffa; try (left; congruence); right; congruence).
     destruct Hsuffa.
@@ -325,7 +326,7 @@ Proof.
       destruct ai.
       destruct ( vtransition X label_a0 (lst, input_a0)) as (dest, out).
       simpl. simpl in Hx. inversion Hx. subst.
-      apply Ht.
+      by apply Ht.
     + apply exists_last in H. destruct H as [suffa' [x' Heq]]. subst.
       repeat rewrite app_assoc in Heqa.
       apply app_inj_tail in Heqa. rewrite <- app_assoc in Heqa. destruct Heqa; subst.
@@ -381,7 +382,8 @@ Proof.
     | context[let (_, _) := let (_, _) := ?t in _ in _] =>
       destruct t as [dest output] eqn : eq_trans
     end.
-    inversion H; subst. by setoid_rewrite eq_trans.
+    inversion H; subst.
+    by setoid_rewrite eq_trans.
   - match type of H with
     | input_valid_transition _ _ _ ?t =>
       destruct t as [dest output] eqn : eq_trans
