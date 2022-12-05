@@ -24,3 +24,4 @@ html
 .coq-native/
 .vscode
 resources/index.html
+.nra.cache

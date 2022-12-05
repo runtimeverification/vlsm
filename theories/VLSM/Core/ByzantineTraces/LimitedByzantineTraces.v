@@ -25,12 +25,13 @@ From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 Section sec_limited_byzantine_traces.
 
 Context
-  {message : Type}
-  `{ReachableThreshold index Ci}
-  `{!finite.Finite index}
+  {message index : Type}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
+  (threshold : R)
+  `{ReachableThreshold index Ci threshold}
+  `{!finite.Finite index}
   (sender : message -> option index)
   .
 
@@ -44,7 +45,7 @@ Definition fixed_limited_byzantine_trace_prop
   (tr : list (composite_transition_item IM))
   (byzantine : Ci)
   : Prop
-  := (sum_weights (byzantine) <= `threshold)%R /\
+  := (sum_weights (byzantine) <= threshold)%R /\
      fixed_byzantine_trace_alt_prop IM byzantine (fun i => i) sender s tr.
 
 (**
@@ -61,7 +62,7 @@ Context
   `{FinSet message Cm}
   {is_equivocating_tracewise_no_has_been_sent_dec :
     RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (limited_constraint := tracewise_limited_equivocation_constraint IM (Ci := Ci) sender)
+  (limited_constraint := tracewise_limited_equivocation_constraint IM threshold sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
   (Hvalidator: forall i : index, component_message_validator_prop IM limited_constraint i)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -84,10 +85,10 @@ Section sec_fixed_limited_selection.
 Context
   (byzantine: Ci)
   (non_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
-  (Hlimit: (sum_weights (byzantine) <= `threshold)%R)
+  (Hlimit: (sum_weights (byzantine) <= threshold)%R)
   (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine (λ i : index, i) sender)
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
-    := equivocation_dec_tracewise IM (fun i => i) sender)
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci threshold
+    := equivocation_dec_tracewise IM threshold (fun i => i) sender)
   (tracewise_not_heavy := not_heavy (1 := Htracewise_BasicEquivocation))
   (tracewise_equivocating_validators := equivocating_validators (1 := Htracewise_BasicEquivocation))
   .
@@ -246,7 +247,7 @@ Lemma validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
     exists bs btr,
       finite_valid_trace Limited bs btr /\
       exists (selection : Ci) (selection_complement := difference (list_to_set (enum index)) selection),
-        (sum_weights selection <= `threshold)%R /\
+        (sum_weights selection <= threshold)%R /\
         composite_state_sub_projection IM (elements selection_complement) s =
         composite_state_sub_projection IM (elements selection_complement) bs /\
         finite_trace_sub_projection IM (elements selection_complement) tr =
@@ -265,27 +266,29 @@ End sec_limited_byzantine_traces.
 Section sec_msg_dep_limited_byzantine_traces.
 
 Context
-  {message : Type}
-  `{FinSet message Cm}
-  `{ReachableThreshold index Ci}
-  `{@finite.Finite index _}
+  {message index : Type}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
+  (threshold : R)
+  `{ReachableThreshold index Ci threshold}
+  `{!finite.Finite index}
+  `{FinSet message Cm}
   (message_dependencies : message -> Cm)
   (full_message_dependencies : message -> Cm)
   `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (sender : message -> option index)
-  (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
+  (Limited := msg_dep_limited_equivocation_vlsm (Cv := Ci)
+    IM threshold full_message_dependencies sender)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
   (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender :=
     channel_authentication_sender_safety _ _ _ Hchannel)
   (Hvalidator:
     forall i : index,
-      msg_dep_limited_equivocation_message_validator_prop IM
-        full_message_dependencies sender i)
+      msg_dep_limited_equivocation_message_validator_prop (Cv := Ci)
+        IM threshold full_message_dependencies sender i)
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
 
@@ -298,7 +301,7 @@ Context
 Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
   (byzantine: Ci)
   (non_byzantine := difference (list_to_set (enum index)) byzantine)
-  (Hlimited: (sum_weights byzantine <= `threshold)%R)
+  (Hlimited: (sum_weights byzantine <= threshold)%R)
   sub_l sub_s iom sub_sf oom
   (Ht_sub : input_valid_transition
       (pre_loaded_fixed_non_byzantine_vlsm IM byzantine Datatypes.id sender)
@@ -356,7 +359,7 @@ Lemma lift_fixed_byzantine_traces_to_limited
   (tr: list (composite_transition_item IM))
   (byzantine: Ci)
   (non_byzantine := difference (list_to_set (enum index)) byzantine)
-  (Hlimited: (sum_weights byzantine <= `threshold)%R)
+  (Hlimited: (sum_weights byzantine <= threshold)%R)
   (Hbyzantine:
     fixed_byzantine_trace_alt_prop IM byzantine Datatypes.id sender s tr)
   (s_reset_byzantine :=
@@ -442,11 +445,11 @@ Qed.
   the traces exposed to limited equivocation.
 *)
 Lemma msg_dep_validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
-  : limited_byzantine_trace_prop IM sender s tr <->
+  : limited_byzantine_trace_prop (Ci := Ci) IM threshold sender s tr <->
     exists bs btr selection (selection_complement := difference (list_to_set (enum index)) selection),
       finite_valid_trace Limited bs btr /\
       state_annotation (finite_trace_last bs btr) ⊆ selection /\
-      (sum_weights selection <= `threshold)%R /\
+      (sum_weights selection <= threshold)%R /\
       composite_state_sub_projection IM (elements selection_complement) s =
         composite_state_sub_projection IM (elements selection_complement) (original_state bs) /\
       finite_trace_sub_projection IM (elements selection_complement) tr =

@@ -25,6 +25,11 @@ Context
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   `{EqDecision validator}
+  (threshold : R)
+  `{Hmeasurable_V : Measurable validator}
+  `{FinSet validator Cv}
+  `{!ReachableThreshold validator Cv threshold}
+  `{finite.Finite validator}
   (A : validator -> index)
   (sender : message -> option validator)
   (PreFree := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
@@ -298,13 +303,11 @@ Proof.
 Qed.
 
 Context
-  `{ReachableThreshold validator Cm}
   `{RelDecision _ _ is_equivocating_tracewise_no_has_been_sent}
-  `{finite.Finite validator}
   .
 
 #[local] Program Instance equivocation_dec_tracewise
-  : BasicEquivocation (composite_state IM) validator Cm:=
+  : BasicEquivocation (composite_state IM) validator Cv threshold :=
   {
     state_validators := fun _ => list_to_set (enum validator);
     is_equivocating := is_equivocating_tracewise_no_has_been_sent;
@@ -322,7 +325,7 @@ Qed.
 Lemma equivocating_validators_empty_in_initial_state
   (s : composite_state IM)
   (His : composite_initial_state_prop IM s)
-  : equivocating_validators s ≡@{Cm} ∅.
+  : equivocating_validators s ≡@{Cv} ∅.
 Proof.
   intro v. split.
   - rewrite equivocating_validators_is_equivocating_tracewise_iff.
