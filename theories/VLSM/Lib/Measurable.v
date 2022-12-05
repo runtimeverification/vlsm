@@ -1,5 +1,5 @@
 From stdpp Require Import prelude.
-From Coq Require Import Reals.
+From Coq Require Import Reals Lra.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras StdppListFinSet.
 
 (** * Measure-related definitions and lemmas *)
@@ -146,10 +146,34 @@ Qed.
 Lemma sum_weights_app_list
   : forall (vs vs' : list V),
   sum_weights_list (vs ++ vs') = (sum_weights_list vs + sum_weights_list vs')%R.
+Proof. by induction vs; intros; simpl; [| rewrite IHvs]; lra. Qed.
+
+#[export] Instance sum_weights_list_permutation_proper :
+  Proper ((≡ₚ) ==> (=)) sum_weights_list.
 Proof.
-  induction vs; intros; simpl.
-  - by rewrite Rplus_0_l.
-  - by rewrite IHvs, Rplus_assoc.
+  intros l1 l2 Hl.
+  unfold sum_weights_list; apply foldr_permutation_proper; [.. | done].
+  - by typeclasses eauto.
+  - by congruence.
+  - by intros; lra.
+Qed.
+
+Lemma sum_weights_disj_union :
+  forall (vs vs' : Cv),
+    vs ## vs' ->
+    sum_weights (vs ∪ vs') = (sum_weights vs + sum_weights vs')%R.
+Proof.
+  intros vs vs' Hdisj.
+  apply elements_disj_union, sum_weights_list_permutation_proper in Hdisj.
+  setoid_rewrite Hdisj.
+  apply sum_weights_app_list.
+Qed.
+
+Lemma sum_weights_union_empty (vs : Cv) :
+  sum_weights (vs ∪ ∅) = sum_weights vs.
+Proof.
+  rewrite sum_weights_disj_union by apply disjoint_empty_r.
+  by rewrite (sum_weights_empty ∅); [lra |].
 Qed.
 
 End sec_measurable_props.
