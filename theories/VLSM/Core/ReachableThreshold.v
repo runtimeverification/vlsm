@@ -42,7 +42,7 @@ Lemma pivotal_validator_extension_list
   (sum_weights_list (vs ++ vsfix) > proj1_sig threshold)%R /\
   exists v,
     v ∈ vs /\
-    (sum_weights_list ((StdppListSet.set_remove v vs) ++ vsfix) <= proj1_sig threshold)%R.
+    (sum_weights_list (set_remove v vs ++ vsfix) <= proj1_sig threshold)%R.
 Proof.
   destruct threshold as [t about_t]; simpl in *.
   induction vss; intros Hnd_vsfix Hvsfix Hnd_all Hall; simpl in Hall; [by lra |].
