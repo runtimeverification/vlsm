@@ -1437,7 +1437,7 @@ Lemma ELMO_initial_state_not_heavy :
 Proof.
   intros s Hs.
   unfold ELMO_not_heavy, not_heavy.
-  replace (equivocation_fault s) with 0%R; [by apply Rge_le, rt_positive |].
+  replace (equivocation_fault s) with 0%R; [by apply rt_positive |].
   by symmetry; apply sum_weights_empty, ELMO_initial_state_equivocating_validators.
 Qed.
 

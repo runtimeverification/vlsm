@@ -13,7 +13,7 @@ From VLSM.Lib Require Import RealsExtras Measurable ListExtras StdppListSet.
 
 Class ReachableThreshold V Cv (threshold : R) `{Hm : Measurable V} `{FinSet V Cv} : Prop :=
 {
-  rt_positive : (threshold >= 0)%R;
+  rt_positive : (0 <= threshold)%R;
   rt_reachable : exists (vs : Cv), (sum_weights vs > threshold)%R;
 }.
 
@@ -124,7 +124,7 @@ Proof.
   intros vss Hvss.
   destruct (pivotal_validator_extension ∅ vss)
     as (vs & Hincl & Hvs & v & Hv & Hvs').
-  - by rewrite sum_weights_empty; [destruct Hrt; lra |].
+  - by rewrite sum_weights_empty; [apply rt_positive |].
   - by apply disjoint_empty_r.
   - by rewrite sum_weights_union_empty.
   - rewrite sum_weights_union_empty in Hvs, Hvs'.

@@ -135,7 +135,7 @@ Proof.
   - subst s.
     unfold not_heavy, Equivocation.not_heavy,
       equivocation_fault, Equivocation.equivocation_fault; simpl.
-    etransitivity; [| by apply Rge_le, rt_positive].
+    etransitivity; [| by apply rt_positive].
     pose proof (Heqv_is := equivocating_indices_equivocating_validators IM threshold is).
     rewrite equivocating_indices_initially_empty in Heqv_is by done.
     simpl in Heqv_is; apply sum_weights_empty in Heqv_is.

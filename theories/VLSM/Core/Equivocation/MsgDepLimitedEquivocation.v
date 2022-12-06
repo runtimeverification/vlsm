@@ -92,7 +92,7 @@ Lemma coeqv_limited_equivocation_state_not_heavy s
 Proof.
   induction 1 using valid_state_prop_ind.
   - destruct s, Hs as [_ ->]; cbn in *.
-    by rewrite sum_weights_empty; [apply Rge_le, rt_positive |].
+    by rewrite sum_weights_empty; [apply rt_positive |].
   - destruct Ht as [(_ & _ & _ & Hc) Ht]
     ; cbn in Ht; unfold annotated_transition in Ht; destruct (vtransition _ _ _)
     ; inversion_clear Ht.
