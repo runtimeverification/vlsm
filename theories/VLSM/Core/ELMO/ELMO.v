@@ -29,7 +29,8 @@ Context
 Context
   {measurable_Address : Measurable Address}
   `{FinSet Address Ca}
-  `{!ReachableThreshold Address Ca}
+  (threshold : R)
+  `{!ReachableThreshold Address Ca threshold}
   `{finite.Finite index}
   (idx : index -> Address)
   `{!Inj (=) (=) idx}.
@@ -268,7 +269,7 @@ Proof.
   by induction 1; [done |..]; destruct IHELMO_msg_valid_full; econstructor.
 Qed.
 
-#[local] Instance ELMO_local_equivocation : BasicEquivocation State Address Ca :=
+#[local] Instance ELMO_local_equivocation : BasicEquivocation State Address Ca threshold :=
 {
   is_equivocating := local_equivocators_full;
   is_equivocating_dec := local_equivocators_full_dec;
@@ -1376,7 +1377,7 @@ Record global_equivocators_simple (s : composite_state ELMOComponent) (a : Addre
 }.
 Set Warnings "cannot-define-projection".
 
-Definition ELMO_global_equivocation : BasicEquivocation (composite_state ELMOComponent) Address Ca :=
+Definition ELMO_global_equivocation : BasicEquivocation (composite_state ELMOComponent) Address Ca threshold :=
 {|
   is_equivocating := ELMO_global_equivocators;
   is_equivocating_dec := ELMO_global_equivocators_dec;
@@ -1436,7 +1437,7 @@ Lemma ELMO_initial_state_not_heavy :
 Proof.
   intros s Hs.
   unfold ELMO_not_heavy, not_heavy.
-  replace (equivocation_fault s) with 0%R; [by destruct threshold; apply Rge_le |].
+  replace (equivocation_fault s) with 0%R; [by apply rt_positive |].
   by symmetry; apply sum_weights_empty, ELMO_initial_state_equivocating_validators.
 Qed.
 
@@ -2003,7 +2004,7 @@ Lemma ELMO_update_state_with_initial
   (s : composite_state ELMOComponent)
   (Hs : valid_state_prop ELMOProtocol s)
   (i : index)
-  (Heqv : (sum_weights (ELMO_equivocating_validators s ∪ {[idx i]}) <= `threshold)%R)
+  (Heqv : (sum_weights (ELMO_equivocating_validators s ∪ {[idx i]}) <= threshold)%R)
   (si : State)
   (Hsi : vinitial_state_prop (ELMOComponent i) si) :
     valid_state_prop ELMOProtocol (state_update ELMOComponent s i si) /\
@@ -2158,7 +2159,7 @@ Proof.
   apply ELMO_msg_valid_full_has_sender in ELMO_mv_msg_valid_full0 as Hsender.
   destruct Hsender as [i_m Hsender].
   assert (Heqv :
-    (sum_weights (ELMO_equivocating_validators s ∪ {[idx i_m]}) <= `threshold)%R).
+    (sum_weights (ELMO_equivocating_validators s ∪ {[idx i_m]}) <= threshold)%R).
   {
     etransitivity; [| apply Hc].
     apply sum_weights_subseteq; [by apply NoDup_elements.. |].

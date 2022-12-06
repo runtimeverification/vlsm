@@ -6,10 +6,7 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras Stdp
 
 Definition pos_R := {r : R | (r > 0)%R}.
 
-Class Measurable (V : Type) : Type :=
-{
-  weight : V -> pos_R;
-}.
+Class Measurable (V : Type) : Type := weight : V -> pos_R.
 
 #[global] Hint Mode Measurable ! : typeclass_instances.
 

@@ -4,26 +4,26 @@ From VLSM.Lib Require Import RealsExtras Measurable ListExtras StdppListSet.
 
 (**
   Given a set of validators and a [threshold] (a positive real number), we say
-  that the threshold is reachable ([reachable_threshold]) when there exists a
+  that the threshold is reachable ([rt_reachable]) when there exists a
   set of validators whose combined weight passes the threshold.
 
   In this module we prove that there exist a [potentially_pivotal] validator,
   i.e., a validator which added to a set of validators tips over the threshold.
 *)
 
-Class ReachableThreshold V Cv `{Hm : Measurable V} `{FinSet V Cv} : Set :=
+Class ReachableThreshold V Cv (threshold : R) `{Hm : Measurable V} `{FinSet V Cv} : Prop :=
 {
-  threshold : {r | (r >= 0)%R};
-  reachable_threshold : exists (vs : Cv), (sum_weights vs > proj1_sig threshold)%R;
+  rt_positive : (0 <= threshold)%R;
+  rt_reachable : exists (vs : Cv), (sum_weights vs > threshold)%R;
 }.
 
-#[global] Hint Mode ReachableThreshold - - ! ! ! ! ! ! ! ! ! ! : typeclass_instances.
+#[global] Hint Mode ReachableThreshold - - - ! ! ! ! ! ! ! ! ! ! : typeclass_instances.
 
 Section sec_reachable_threshold_props.
 
 Context
-  `{EqDecision V}
-  `{Hrt : ReachableThreshold V Cv}.
+  (threshold : R)
+  `{Hrt : ReachableThreshold V Cv threshold}.
 
 (**
   Given a list with no duplicates and whose added weight does not pass the
@@ -33,20 +33,19 @@ Context
 Lemma pivotal_validator_extension_list
   : forall vsfix vss,
   NoDup vsfix ->
-  (sum_weights_list vsfix <= proj1_sig threshold)%R ->
+  (sum_weights_list vsfix <= threshold)%R ->
   NoDup (vss ++ vsfix) ->
-  (sum_weights_list (vss ++ vsfix) > proj1_sig threshold)%R ->
+  (sum_weights_list (vss ++ vsfix) > threshold)%R ->
   exists (vs : list V),
   NoDup vs /\
   vs ⊆ vss /\
-  (sum_weights_list (vs ++ vsfix) > proj1_sig threshold)%R /\
+  (sum_weights_list (vs ++ vsfix) > threshold)%R /\
   exists v,
     v ∈ vs /\
-    (sum_weights_list (set_remove v vs ++ vsfix) <= proj1_sig threshold)%R.
+    (sum_weights_list (set_remove v vs ++ vsfix) <= threshold)%R.
 Proof.
-  destruct threshold as [t about_t]; simpl in *.
   induction vss; intros Hnd_vsfix Hvsfix Hnd_all Hall; simpl in Hall; [by lra |].
-  destruct (Rtotal_le_gt (sum_weights_list (vss ++ vsfix)) t) as [| Hgt].
+  destruct (Rtotal_le_gt (sum_weights_list (vss ++ vsfix)) threshold) as [| Hgt].
   - exists (a :: vss).
     repeat split; [| done | done |].
     + by apply nodup_append_left in Hnd_all.
@@ -65,15 +64,15 @@ Qed.
 *)
 Lemma pivotal_validator_extension
   : forall (vsfix vss : Cv),
-  (sum_weights vsfix <= proj1_sig threshold)%R ->
+  (sum_weights vsfix <= threshold)%R ->
   vss ## vsfix ->
-  (sum_weights (vss ∪ vsfix) > proj1_sig threshold)%R ->
+  (sum_weights (vss ∪ vsfix) > threshold)%R ->
   exists (vs : Cv),
   vs ⊆ vss /\
-  (sum_weights (vs ∪ vsfix) > proj1_sig threshold)%R /\
+  (sum_weights (vs ∪ vsfix) > threshold)%R /\
   exists v,
     v ∈ vs /\
-    (sum_weights (vs ∖ {[v]} ∪ vsfix) <= proj1_sig threshold)%R.
+    (sum_weights (vs ∖ {[v]} ∪ vsfix) <= threshold)%R.
 Proof.
   intros vsfix vss Hvsfix Hdisj Hall.
   destruct (pivotal_validator_extension_list (elements vsfix) (elements vss))
@@ -114,18 +113,18 @@ Qed.
 *)
 Lemma validators_pivotal_ind
   : forall (vss : Cv),
-  (sum_weights vss > proj1_sig threshold)%R ->
+  (sum_weights vss > threshold)%R ->
   exists vs,
   vs ⊆ vss /\
-  (sum_weights vs > proj1_sig threshold)%R /\
+  (sum_weights vs > threshold)%R /\
   exists v,
     v ∈ vs /\
-    (sum_weights (vs ∖ {[v]}) <= proj1_sig threshold)%R.
+    (sum_weights (vs ∖ {[v]}) <= threshold)%R.
 Proof.
   intros vss Hvss.
   destruct (pivotal_validator_extension ∅ vss)
     as (vs & Hincl & Hvs & v & Hv & Hvs').
-  - by rewrite sum_weights_empty; [destruct threshold; apply Rge_le |].
+  - by rewrite sum_weights_empty; [apply rt_positive |].
   - by apply disjoint_empty_r.
   - by rewrite sum_weights_union_empty.
   - rewrite sum_weights_union_empty in Hvs, Hvs'.
@@ -139,12 +138,12 @@ Qed.
 *)
 Lemma sufficient_validators_pivotal
   : exists (vs : Cv),
-    (sum_weights vs > proj1_sig threshold)%R /\
+    (sum_weights vs > threshold)%R /\
     exists v,
       v ∈ vs /\
-      (sum_weights (vs ∖ {[v]}) <= proj1_sig threshold)%R.
+      (sum_weights (vs ∖ {[v]}) <= threshold)%R.
 Proof.
-  destruct reachable_threshold as [vs Hweight].
+  destruct (rt_reachable (1 := Hrt)) as [vs Hweight].
   apply (validators_pivotal_ind vs) in Hweight as (vs' & Hincl & Hvs').
   by exists vs'.
 Qed.
@@ -157,8 +156,8 @@ Qed.
 Definition potentially_pivotal (v : V) : Prop :=
   exists (vs : Cv),
       v ∉ vs /\
-      (sum_weights vs <= proj1_sig threshold)%R /\
-      (sum_weights vs > proj1_sig threshold - (proj1_sig (weight v)))%R.
+      (sum_weights vs <= threshold)%R /\
+      (sum_weights vs > threshold - weight v)%R.
 
 (**
   The main result of this section proves the existence of a [potentially_pivotal]
