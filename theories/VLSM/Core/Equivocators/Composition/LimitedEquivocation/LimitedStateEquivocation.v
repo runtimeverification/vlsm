@@ -139,7 +139,7 @@ Proof.
     pose proof (Heqv_is := equivocating_indices_equivocating_validators IM threshold is).
     rewrite equivocating_indices_initially_empty in Heqv_is by done.
     simpl in Heqv_is; apply sum_weights_empty in Heqv_is.
-    by cbv in *; lra.
+    by cbv in Heqv_is |- *; lra.
   - by replace s with (fst (composite_transition equivocator_IM l (s0, oim))); [done |]
     ; cbn in *; rewrite Ht.
 Qed.
