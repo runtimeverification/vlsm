@@ -336,8 +336,8 @@ Proof.
 Qed.
 
 (**
-  The oracle should check if all valid traces leading to the state a certain message.
-  The [message_selector] argument checks whether a single transition constains the
+  The oracle should check if all valid traces leading to the state contains certain message.
+  The [message_selector] argument checks whether a single transition contains the
   message, and can be used to check for received messages or sent messages.
 
   Notably, the traces we are considering are any valid in the preloaded
@@ -444,6 +444,11 @@ Proof.
     by itauto.
 Qed.
 
+(*
+  It would seem more flexible to take [m] after the other parameters,
+  but [Htr] is placed last so that <<apply in>> an existing
+  [finite_valid_trace_init_to] hypothesis works.
+ *)
 Lemma oracle_initial_trace_update
       [selector]
       [oracle : state_message_oracle]
@@ -501,8 +506,6 @@ Proof.
       intro H; specialize (H start tr Htr); contradict H.
       by eapply (oracle_initial_trace_update Horacle).
 Qed.
-
-(** TODO move stepwise properties from tracewise properties up here *)
 
 (**
   The most basic [state_message_oracle]s just check whether the message
