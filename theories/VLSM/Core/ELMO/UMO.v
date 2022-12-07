@@ -109,7 +109,8 @@ Instance HasBeenSentCapability_UMOComponent
   (i : Address) : HasBeenSentCapability (UMOComponent i).
 Proof.
   apply Build_HasBeenSentCapability with (fun s m => m ∈ sentMessages s)
-  ; [intros s m; typeclasses eauto | split].
+  ; [by intros s m; typeclasses eauto |].
+  split.
   - by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil.
   - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
     destruct l, im; cbn in *; invert_UMOComponentValid
