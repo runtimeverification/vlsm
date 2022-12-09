@@ -22,12 +22,13 @@ Context
   {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
-  `{forall i, HasBeenSentCapability (IM i)}
-  `{forall i, HasBeenReceivedCapability (IM i)}
-  `{ReachableThreshold validator Cv}
+  (threshold : R)
+  `{ReachableThreshold validator Cv threshold}
   (A : validator -> index)
   (sender : message -> option validator)
   (coequivocating_senders : composite_state IM -> message -> Cv)
+  `{forall i, HasBeenSentCapability (IM i)}
+  `{forall i, HasBeenReceivedCapability (IM i)}
   .
 
 Definition coeqv_message_equivocators (s : composite_state IM) (m : message)
@@ -52,7 +53,7 @@ Definition coeqv_limited_equivocation_constraint
   (l : composite_label IM)
   (som : annotated_state (free_composite_vlsm IM) Cv * option message)
   : Prop :=
-  (sum_weights (coeqv_composite_transition_message_equivocators l som) <= proj1_sig threshold)%R.
+  (sum_weights (coeqv_composite_transition_message_equivocators l som) <= threshold)%R.
 
 #[export] Instance empty_validators_inhabited : Inhabited {s : Cv | s = ∅}
   := populate (exist _ _ eq_refl).
@@ -87,11 +88,11 @@ Qed.
 
 Lemma coeqv_limited_equivocation_state_not_heavy s
   : valid_state_prop coeqv_limited_equivocation_vlsm s ->
-    (sum_weights (state_annotation s) <= proj1_sig threshold)%R.
+    (sum_weights (state_annotation s) <= threshold)%R.
 Proof.
   induction 1 using valid_state_prop_ind.
-  - destruct s, Hs as [_ ->], threshold; cbn in *.
-    by rewrite sum_weights_empty; [apply Rge_le |].
+  - destruct s, Hs as [_ ->]; cbn in *.
+    by rewrite sum_weights_empty; [apply rt_positive |].
   - destruct Ht as [(_ & _ & _ & Hc) Ht]
     ; cbn in Ht; unfold annotated_transition in Ht; destruct (vtransition _ _ _)
     ; inversion_clear Ht.
@@ -120,9 +121,10 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
+  (threshold : R)
+  `{ReachableThreshold validator Cv threshold}
   `{FinSet message Cm}
   (full_message_dependencies : message -> Cm)
-  `{ReachableThreshold validator Cv}
   (A : validator -> index)
   (sender : message -> option validator)
   .
@@ -136,7 +138,7 @@ Definition msg_dep_coequivocating_senders (s : composite_state IM) (m : message)
   list_to_set (map_option sender (elements (not_directly_observed_happens_before_dependencies s m))).
 
 Definition msg_dep_limited_equivocation_vlsm : VLSM message :=
-  coeqv_limited_equivocation_vlsm IM sender msg_dep_coequivocating_senders.
+  coeqv_limited_equivocation_vlsm IM threshold sender msg_dep_coequivocating_senders.
 
 Definition msg_dep_message_equivocators :=
   coeqv_message_equivocators IM sender msg_dep_coequivocating_senders.
@@ -165,13 +167,13 @@ Definition msg_dep_composite_transition_message_equivocators :=
   coeqv_composite_transition_message_equivocators IM sender msg_dep_coequivocating_senders.
 
 Definition msg_dep_limited_equivocation_projection_validator_prop :=
-  coeqv_limited_equivocation_projection_validator_prop IM sender msg_dep_coequivocating_senders.
+  coeqv_limited_equivocation_projection_validator_prop IM threshold sender msg_dep_coequivocating_senders.
 
 Definition msg_dep_limited_equivocation_message_validator_prop :=
-  coeqv_limited_equivocation_message_validator_prop IM sender msg_dep_coequivocating_senders.
+  coeqv_limited_equivocation_message_validator_prop IM threshold sender msg_dep_coequivocating_senders.
 
 Definition msg_dep_limited_equivocation_projection_validator_prop_alt :=
-  coeqv_limited_equivocation_projection_validator_prop_alt IM sender msg_dep_coequivocating_senders.
+  coeqv_limited_equivocation_projection_validator_prop_alt IM threshold sender msg_dep_coequivocating_senders.
 
 Lemma msg_dep_annotate_trace_with_equivocators_project s tr
   : pre_VLSM_embedding_finite_trace_project (type msg_dep_limited_equivocation_vlsm)
@@ -189,7 +191,8 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{ReachableThreshold validator Cv}
+  (threshold : R)
+  `{ReachableThreshold validator Cv threshold}
   (A : validator -> index)
   (sender : message -> option validator)
   .
@@ -198,7 +201,7 @@ Definition full_node_coequivocating_senders (s : composite_state IM) (m : messag
   : Cv := ∅.
 
 Definition full_node_limited_equivocation_vlsm : VLSM message :=
-  coeqv_limited_equivocation_vlsm IM sender full_node_coequivocating_senders.
+  coeqv_limited_equivocation_vlsm IM threshold sender full_node_coequivocating_senders.
 
 End sec_full_node_limited_equivocation.
 
@@ -212,7 +215,8 @@ Context
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (full_message_dependencies : message -> Cm)
-  `{ReachableThreshold validator Cv}
+  (threshold : R)
+  `{ReachableThreshold validator Cv threshold}
   `{!LeibnizEquiv Cv}
   (A : validator -> index)
   (sender : message -> option validator)
@@ -220,8 +224,8 @@ Context
   `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
-  (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
-  (FullNodeLimited := full_node_limited_equivocation_vlsm IM sender)
+  (Limited := msg_dep_limited_equivocation_vlsm IM threshold full_message_dependencies sender (Cv := Cv))
+  (FullNodeLimited := full_node_limited_equivocation_vlsm IM threshold sender (Cv := Cv))
   .
 
 Lemma full_node_msg_dep_coequivocating_senders s m i li
@@ -285,7 +289,7 @@ Proof.
   replace (sum_weights _) with
     (sum_weights
       (coeqv_composite_transition_message_equivocators IM sender
-        (full_node_coequivocating_senders IM) (existT i li) 
+        (full_node_coequivocating_senders IM) (existT i li)
         (s, om)));
     [done |].
   by apply sum_weights_proper, full_node_msg_dep_composite_transition_message_equivocators.
@@ -346,10 +350,8 @@ End sec_full_node_msg_dep_limited_equivocation_equivalence.
 Section sec_msg_dep_fixed_limited_equivocation.
 
 Context
-  {message : Type}
+  {message index : Type}
   `{FinSet message Cm}
-  `{ReachableThreshold index Ci}
-  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -357,8 +359,11 @@ Context
   (full_message_dependencies : message -> Cm)
   `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
+  (threshold : R)
+  `{ReachableThreshold index Ci threshold}
+  `{!finite.Finite index}
   (sender : message -> option index)
-  (Limited := msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
+  (Limited := msg_dep_limited_equivocation_vlsm IM threshold full_message_dependencies sender (Cv := Ci))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
   (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender :=
@@ -370,7 +375,7 @@ Lemma equivocating_messages_are_equivocator_emitted
   (Him : can_emit (free_composite_vlsm IM) im)
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im) :
     exists j : index,
-      j ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci))
+      j ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci)
         /\
       can_emit (pre_loaded_vlsm (IM j) (fun dm => msg_dep_rel message_dependencies dm im)) im.
 Proof.
@@ -396,7 +401,7 @@ Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_em
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im)
   : forall dm, msg_dep_happens_before message_dependencies dm im ->
     composite_has_been_directly_observed IM s dm \/
-    exists dm_i, dm_i ∈ (msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci)) /\
+    exists dm_i, dm_i ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci) /\
       can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm.
 Proof.
   intros dm Hdm.
@@ -464,7 +469,7 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
   (Htr : finite_valid_trace Limited is tr)
   (equivocators := state_annotation (finite_trace_last is tr))
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
-  : (sum_weights equivocators <= `threshold)%R
+  : (sum_weights equivocators <= threshold)%R
       /\
     finite_valid_trace Fixed
       (original_state is)
@@ -473,7 +478,7 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
         tr).
 Proof.
   repeat split; [..| by apply Htr].
-  - by apply coeqv_limited_equivocation_state_not_heavy,
+  - by eapply coeqv_limited_equivocation_state_not_heavy,
             finite_valid_trace_last_pstate, Htr.
   - apply valid_trace_add_default_last in Htr.
     induction Htr using finite_valid_trace_init_to_rev_ind
@@ -555,11 +560,11 @@ Qed.
 
 Corollary msg_dep_fixed_limited_equivocation is tr
   : finite_valid_trace Limited is tr ->
-    fixed_limited_equivocation_prop IM
+    fixed_limited_equivocation_prop IM threshold
       (original_state is)
       (pre_VLSM_embedding_finite_trace_project
         (type Limited) (composite_type IM) Datatypes.id original_state
-        tr).
+        tr) (Ci := Ci).
 Proof.
   intro Htr.
   exists (state_annotation (finite_trace_last is tr)).
@@ -643,7 +648,7 @@ Qed.
 
 Lemma msg_dep_limited_fixed_equivocation
   (is : vstate (free_composite_vlsm IM)) (tr : list (composite_transition_item IM))
-  : fixed_limited_equivocation_prop IM is tr ->
+  : fixed_limited_equivocation_prop (Ci := Ci) IM threshold is tr ->
     finite_valid_trace Limited
       {| original_state := is; state_annotation := ` inhabitant |}
       (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender is tr).
@@ -705,7 +710,7 @@ Lemma annotated_limited_incl_constrained_limited
     RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   : VLSM_embedding
       Limited
-      (tracewise_limited_equivocation_vlsm_composition IM sender (Ci := Ci))
+      (tracewise_limited_equivocation_vlsm_composition IM threshold sender (Ci := Ci))
       Datatypes.id original_state.
 Proof.
   constructor; intros sX trX HtrX.

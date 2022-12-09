@@ -72,7 +72,7 @@ Qed.
 Lemma add_in_sorted_list_in
   {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
   forall msg msg' sigma,
-    msg' ∈ (add_in_sorted_list_fn compare msg sigma) ->
+    msg' ∈ add_in_sorted_list_fn compare msg sigma ->
     msg = msg' \/ msg' ∈ sigma.
 Proof.
   intros. induction sigma; simpl in H0.
@@ -93,7 +93,7 @@ Lemma add_in_sorted_list_in_rev
   {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
   forall msg msg' sigma,
     msg = msg' \/ msg' ∈ sigma ->
-    msg' ∈ (add_in_sorted_list_fn compare msg sigma).
+    msg' ∈ add_in_sorted_list_fn compare msg sigma.
 Proof.
   intros. induction sigma; simpl in H0.
   - by destruct H0 as [H0 | H0]; subst; [left | inversion H0].
@@ -105,7 +105,7 @@ Qed.
 Lemma add_in_sorted_list_iff
   {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
   forall msg msg' sigma,
-    msg' ∈ (add_in_sorted_list_fn compare msg sigma) <->
+    msg' ∈ add_in_sorted_list_fn compare msg sigma <->
     msg = msg' \/ msg' ∈ sigma.
 Proof.
   intros; split.
@@ -116,7 +116,7 @@ Qed.
 Lemma add_in_sorted_list_head
   {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
   forall msg sigma,
-    msg ∈ (add_in_sorted_list_fn compare msg sigma).
+    msg ∈ add_in_sorted_list_fn compare msg sigma.
 Proof.
   by intros; apply add_in_sorted_list_iff; left.
 Qed.
@@ -124,7 +124,7 @@ Qed.
 Lemma add_in_sorted_list_tail
   {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
   forall msg sigma,
-    sigma ⊆ (add_in_sorted_list_fn compare msg sigma).
+    sigma ⊆ add_in_sorted_list_fn compare msg sigma.
 Proof.
   intros msg sigma x Hin.
   by apply add_in_sorted_list_iff; right.
@@ -357,7 +357,7 @@ Proof.
   rewrite Hconcat1 in Hin_y.
   apply elem_of_app in Hin_y.
   rewrite elem_of_cons in Hin_y.
-  assert (y =x \/ y ∈ (pref1 ++ suf1)). {
+  assert (y =x \/ y ∈ pref1 ++ suf1). {
     destruct Hin_y as [Hin_y|Hin_y]; [|destruct Hin_y].
     - by right; apply elem_of_app; left.
     - by left.

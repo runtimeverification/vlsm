@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
-From Coq Require Import FinFun Reals.
+From Coq Require Import FinFun Reals Lra.
 From VLSM.Lib Require Import Preamble StdppListSet ListSetExtras Measurable RealsExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition AnnotatedVLSM.
 From VLSM.Core Require Import Equivocation Equivocation.TraceWiseEquivocation MessageDependencies.
@@ -50,12 +50,13 @@ Qed.
 
 Section sec_limited_state_equivocation.
 
-Context {message : Type}
-  `{ReachableThreshold index Ci}
-  `{!finite.Finite index}
+Context {message index : Type}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
+  (threshold : R)
+  `{ReachableThreshold index Ci threshold}
+  `{!finite.Finite index}
   (Free := free_composite_vlsm IM)
   (equivocator_descriptors := equivocator_descriptors IM)
   (equivocators_state_project := equivocators_state_project IM)
@@ -63,8 +64,8 @@ Context {message : Type}
   (equivocator_descriptors_update := equivocator_descriptors_update IM)
   (proper_equivocator_descriptors := proper_equivocator_descriptors IM)
   (sender : message -> option index)
-  (Heqv_idx_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci
-    := equivocating_indices_BasicEquivocation IM)
+  (Heqv_idx_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci threshold
+    := equivocating_indices_BasicEquivocation IM threshold)
   (FreeE : VLSM message := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (not_heavy := not_heavy (1 := Heqv_idx_BasicEquivocation))
@@ -134,11 +135,11 @@ Proof.
   - subst s.
     unfold not_heavy, Equivocation.not_heavy,
       equivocation_fault, Equivocation.equivocation_fault; simpl.
-    destruct threshold as [t Ht]; simpl; apply Rge_le.
-    pose proof (Heqv_is := equivocating_indices_equivocating_validators IM is).
+    etransitivity; [| by apply rt_positive].
+    pose proof (Heqv_is := equivocating_indices_equivocating_validators IM threshold is).
     rewrite equivocating_indices_initially_empty in Heqv_is by done.
     simpl in Heqv_is; apply sum_weights_empty in Heqv_is.
-    by rewrite <- Heqv_is in Ht.
+    by cbv in Heqv_is |- *; lra.
   - by replace s with (fst (composite_transition equivocator_IM l (s0, oim))); [done |]
     ; cbn in *; rewrite Ht.
 Qed.
@@ -216,7 +217,7 @@ Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
     proper_equivocator_descriptors initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project final_descriptors final_state = final_stateX /\
-    fixed_limited_equivocation_prop IM isX trX.
+    fixed_limited_equivocation_prop (Ci := Ci) IM threshold isX trX.
 Proof.
   apply valid_trace_add_default_last in Htr as Hfixed_tr.
   apply equivocators_limited_valid_trace_is_fixed in Hfixed_tr.
@@ -234,7 +235,7 @@ Proof.
     apply valid_trace_add_default_last, valid_trace_last_pstate,
       valid_state_limited_equivocation in Htr.
     transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
-    pose proof (Heq := equivocating_indices_equivocating_validators IM (finite_trace_last is tr)).
+    pose proof (Heq := equivocating_indices_equivocating_validators IM threshold (finite_trace_last is tr)).
     by unfold equivocation_fault; apply sum_weights_subseteq.
 Qed.
 
@@ -270,7 +271,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
     proper_equivocator_descriptors initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project final_descriptors final_state = final_stateX /\
-    finite_valid_trace (msg_dep_limited_equivocation_vlsm IM full_message_dependencies sender)
+    finite_valid_trace (msg_dep_limited_equivocation_vlsm IM threshold full_message_dependencies sender (Cv := Ci))
       {| original_state := isX; state_annotation := ` inhabitant |}
       (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender isX trX).
 Proof.
@@ -289,7 +290,7 @@ Section sec_equivocators_projection_constrained_limited.
 Context
   `{FinSet message Cm}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) threshold sender)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   (message_dependencies : message -> Cm)
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)

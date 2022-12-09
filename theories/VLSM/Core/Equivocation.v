@@ -4,6 +4,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
 From VLSM.Lib Require Import ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
+From VLSM.Core Require Export ReachableThreshold.
 
 (** * VLSM Equivocation Definitions
 
@@ -22,15 +23,8 @@ Proof.
   - by intro Ha; exists (exist _ a Ha).
 Qed.
 
-(** ** Basic equivocation *)
+(** ** Basic equivocation
 
-Class ReachableThreshold V Cv `{Hm : Measurable V} `{FinSet V Cv} : Set :=
-{
-  threshold : {r | (r >= 0)%R};
-  reachable_threshold : exists (vs : Cv), (sum_weights vs > proj1_sig threshold)%R;
-}.
-
-(**
   Assuming a set of <<state>>s, and a set of <<validator>>s,
   which is [Measurable] and has a [ReachableThreshold], we can define
   [BasicEquivocation] starting from an [is_equivocating] relation
@@ -54,28 +48,29 @@ Class ReachableThreshold V Cv `{Hm : Measurable V} `{FinSet V Cv} : Set :=
 *)
 
 Class BasicEquivocation
-  (state validator Cm : Type)
+  (state validator Cv : Type)
+  (threshold : R)
   {measurable_V : Measurable validator}
-  `{ReachableThreshold validator Cm}
+  `{ReachableThreshold validator Cv threshold}
   : Type :=
 {
   is_equivocating (s : state) (v : validator) : Prop;
   is_equivocating_dec : RelDecision is_equivocating;
   (** retrieves a set containing all possible validators for a state *)
-  state_validators (s : state) : Cm;
+  state_validators (s : state) : Cv;
   (** all validators which are equivocating in a given composite state *)
-  equivocating_validators (s : state) : Cm :=
+  equivocating_validators (s : state) : Cv :=
     filter (fun v => is_equivocating s v) (state_validators s);
   (** equivocation fault sum: the sum of the weights of equivocating validators *)
   equivocation_fault (s : state) : R :=
     sum_weights (equivocating_validators s);
-  not_heavy (s : state) : Prop := (equivocation_fault s <= proj1_sig threshold)%R
+  not_heavy (s : state) : Prop := (equivocation_fault s <= threshold)%R
 }.
 
 Lemma eq_equivocating_validators_equivocation_fault
-   `{BasicEquivocation st validator Cm}
+   `{BasicEquivocation st validator Cv}
    : forall s1 s2,
-    equivocating_validators s1 ≡@{Cm} equivocating_validators s2 ->
+    equivocating_validators s1 ≡@{Cv} equivocating_validators s2 ->
     equivocation_fault s1 = equivocation_fault s2.
 Proof.
   by intros; apply sum_weights_proper.
@@ -85,7 +80,7 @@ Lemma incl_equivocating_validators_equivocation_fault
   `{Heqv: BasicEquivocation st validator }
   `{EqDecision validator}
   : forall s1 s2,
-    (equivocating_validators s1) ⊆ (equivocating_validators s2) ->
+    equivocating_validators s1 ⊆ equivocating_validators s2 ->
     (equivocation_fault s1 <= equivocation_fault s2)%R.
 Proof.
   intros s1 s2 H_incl.
@@ -1925,6 +1920,11 @@ Defined.
 
 Context
       {validator : Type}
+      `{finite.Finite validator}
+      {measurable_V : Measurable validator}
+      (threshold : R)
+      `{FinSet validator Cv}
+      `{!ReachableThreshold validator Cv threshold}
       (A : validator -> index)
       (sender : message -> option validator)
       .
@@ -2141,12 +2141,6 @@ Proof.
   by apply Hs.
 Qed.
 
-Context
-    `{finite.Finite validator}
-    {measurable_V : Measurable validator}
-    `{ReachableThreshold validator Cm}
-    .
-
 (**
   For the equivocation sum fault to be computable, we require that
   our is_equivocating property is decidable. The current implementation
@@ -2156,7 +2150,7 @@ Context
 
 Definition equivocation_dec_statewise
    (Hdec : RelDecision is_equivocating_statewise)
-    : BasicEquivocation (composite_state IM) validator Cm
+    : BasicEquivocation (composite_state IM) validator Cv threshold
   :=
   {|
     state_validators := fun _ => list_to_set (enum validator);
@@ -2165,7 +2159,7 @@ Definition equivocation_dec_statewise
   |}.
 
 Definition equivocation_fault_constraint
-  (Dec : BasicEquivocation (composite_state IM) validator Cm)
+  (Dec : BasicEquivocation (composite_state IM) validator Cv threshold)
   (l : composite_label IM)
   (som : composite_state IM * option message)
   : Prop
