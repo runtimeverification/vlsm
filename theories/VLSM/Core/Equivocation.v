@@ -80,7 +80,7 @@ Lemma incl_equivocating_validators_equivocation_fault
   `{Heqv: BasicEquivocation st validator }
   `{EqDecision validator}
   : forall s1 s2,
-    (equivocating_validators s1) ⊆ (equivocating_validators s2) ->
+    equivocating_validators s1 ⊆ equivocating_validators s2 ->
     (equivocation_fault s1 <= equivocation_fault s2)%R.
 Proof.
   intros s1 s2 H_incl.

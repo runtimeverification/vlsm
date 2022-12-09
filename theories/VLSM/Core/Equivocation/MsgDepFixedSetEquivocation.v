@@ -20,7 +20,7 @@ Context
   .
 
 Definition equivocator_can_emit (m : message) : Prop :=
-  exists i, i ∈ (elements equivocators) /\ can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m.
+  exists i, i ∈ elements equivocators /\ can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m.
 
 Definition dependencies_with_non_equivocating_senders_were_sent s m : Prop :=
   forall dm, msg_dep_happens_before message_dependencies dm m ->

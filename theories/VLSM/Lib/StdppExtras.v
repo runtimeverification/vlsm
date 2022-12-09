@@ -224,7 +224,7 @@ Proof.
 Qed.
 
 Lemma NoDup_elem_of_remove A (l l' : list A) a :
-  NoDup (l ++ a :: l') -> NoDup (l ++ l') /\ a ∉ (l ++ l').
+  NoDup (l ++ a :: l') -> NoDup (l ++ l') /\ a ∉ l ++ l'.
 Proof.
   intros Hnda.
   apply NoDup_app in Hnda.
@@ -426,7 +426,7 @@ Qed.
 
 Lemma filter_subseteq {A} P `{∀ (x:A), Decision (P x)} (s1 s2 : list A) :
   s1 ⊆ s2 ->
-  (filter P s1) ⊆ (filter P s2).
+  filter P s1 ⊆ filter P s2.
 Proof.
   induction s1; intros; intro x; intros.
   - by apply not_elem_of_nil in H1.
@@ -488,8 +488,8 @@ Lemma elem_of_list_annotate_forget
   (l : list A)
   (Hs : Forall P l)
   (xP : dsig P)
-  (Hin : xP ∈ (list_annotate P l Hs))
-  : (proj1_sig xP) ∈ l.
+  (Hin : xP ∈ list_annotate P l Hs)
+  : proj1_sig xP ∈ l.
 Proof.
   induction l.
   - by inversion Hin.
@@ -506,7 +506,7 @@ Lemma elem_of_list_annotate
   (l : list A)
   (Hs : Forall P l)
   (xP : dsig P)
-  : xP ∈ (list_annotate P l Hs) <-> (` xP) ∈ l.
+  : xP ∈ list_annotate P l Hs <-> (` xP) ∈ l.
 Proof.
   split; [by apply elem_of_list_annotate_forget |].
   destruct xP as [x Hpx]; cbn.
@@ -531,7 +531,7 @@ Lemma occurrences_ordering
   (a b : A)
   (la1 la2 lb1 lb2 : list A)
   (Heq : la1 ++ a :: la2 = lb1 ++ b :: lb2)
-  (Ha : ~a ∈ (b :: lb2))
+  (Ha : ~a ∈ b :: lb2)
   : exists lab : list A, lb1 = la1 ++ a :: lab.
 Proof.
   generalize dependent lb2. generalize dependent la2.
@@ -550,7 +550,7 @@ Qed.
 Lemma list_max_elem_of_exists
    (l : list nat)
    (nz : list_max l > 0) :
-   (list_max l) ∈ l.
+   list_max l ∈ l.
 Proof.
   induction l; simpl in *; [lia |].
   rewrite elem_of_cons.
@@ -596,7 +596,7 @@ Lemma map_option_subseteq
   (f : A -> option B)
   (l1 l2 : list A)
   (Hincl : l1 ⊆ l2)
-  : (map_option f l1) ⊆ (map_option f l2).
+  : map_option f l1 ⊆ map_option f l2.
 Proof.
   by intros b; rewrite !elem_of_map_option; firstorder.
 Qed.
@@ -605,7 +605,7 @@ Lemma elem_of_cat_option
   {A : Type}
   (l : list (option A))
   (a : A)
-  : a ∈ (cat_option l) <-> exists b : (option A), b ∈ l /\ b = Some a.
+  : a ∈ cat_option l <-> exists b : option A, b ∈ l /\ b = Some a.
 Proof.
   by apply elem_of_map_option.
 Qed.
@@ -632,7 +632,7 @@ Qed.
 Lemma list_max_elem_of_exists2
    (l : list nat)
    (Hne : l <> []) :
-   (list_max l) ∈ l.
+   list_max l ∈ l.
 Proof.
   destruct (list_max l) eqn : eq_max.
   - destruct l; [by itauto congruence |].
