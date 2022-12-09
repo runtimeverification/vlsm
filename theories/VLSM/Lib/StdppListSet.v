@@ -193,12 +193,17 @@ Proof.
   - by destruct 1; apply set_diff_intro.
 Qed.
 
+(*
+ TODO: change statement when Coq's stdlib drops
+ the unnecessary second premise in ListSet
+*)
 Lemma set_diff_nodup l l' :
-  NoDup l -> NoDup (set_diff l l').
+  NoDup l -> NoDup l' -> NoDup (set_diff l l').
 Proof.
   induction 1 as [| x l H H' IH]; cbn.
   - by constructor.
-  - by case_decide; [| apply set_add_nodup].
+  - intro Hl'; specialize (IH Hl').
+    by case_decide; [| apply set_add_nodup].
 Qed.
 
 End sec_fst_defs.

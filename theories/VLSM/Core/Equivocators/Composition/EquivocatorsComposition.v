@@ -72,13 +72,14 @@ Qed.
 Section sec_equivocating_indices_BasicEquivocation.
 
 Context
-  `{ReachableThreshold index Ci}
+  (threshold : R)
+  `{ReachableThreshold index Ci threshold}
   .
 
 Program Instance equivocating_indices_BasicEquivocation :
-  BasicEquivocation (composite_state equivocator_IM) index Ci
+  BasicEquivocation (composite_state equivocator_IM) index Ci threshold
   := {
-    is_equivocating := fun s v => v ∈ (equivocating_indices (enum index) s) ;
+    is_equivocating := fun s v => v ∈ equivocating_indices (enum index) s ;
     state_validators := fun s => list_to_set(enum index)
   }.
 Next Obligation.
@@ -90,7 +91,7 @@ Lemma equivocating_indices_equivocating_validators
   : forall s, equivocating_validators s ≡@{Ci} list_to_set(equivocating_indices (enum index) s).
 Proof.
   intros s.
-  apply set_eq_fin_set. 
+  apply set_eq_fin_set.
   unfold equivocating_validators, is_equivocating.
   simpl.
   split; intro Hin
@@ -140,7 +141,7 @@ Lemma equivocators_transition_preserves_equivocating_indices
   (l: composite_label equivocator_IM)
   (s0: composite_state equivocator_IM)
   (Ht: composite_transition equivocator_IM l (s0, iom) = (s, oom))
-  : (equivocating_indices index_listing s0) ⊆ (equivocating_indices index_listing s).
+  : equivocating_indices index_listing s0 ⊆ equivocating_indices index_listing s.
 Proof.
   intros i Hi.
   apply elem_of_list_filter.

@@ -230,7 +230,7 @@ Lemma elem_of_stream_prefix
   (l : Stream A)
   (n : nat)
   (a : A)
-  : a ∈ (stream_prefix l n) <-> exists k : nat, k < n /\ Str_nth k l = a.
+  : a ∈ stream_prefix l n <-> exists k : nat, k < n /\ Str_nth k l = a.
 Proof.
   revert l a.
   induction n; simpl; split; intros.
