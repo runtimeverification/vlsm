@@ -165,7 +165,7 @@ Qed.
 Definition maximal_elements_list
   {A} (precedes: relation A) `{!RelDecision precedes} (l : list A)
   : list A :=
-  filter (fun a => Forall (fun b => (~ precedes a b)) l) l.
+  filter (fun a => Forall (fun b => ~ precedes a b) l) l.
 
 Example maximal_elements_list1: maximal_elements_list Nat.lt [1; 4; 2; 4] = [4;4].
 Proof. by itauto. Qed.
@@ -531,7 +531,7 @@ Lemma occurrences_ordering
   (a b : A)
   (la1 la2 lb1 lb2 : list A)
   (Heq : la1 ++ a :: la2 = lb1 ++ b :: lb2)
-  (Ha : ~a ∈ b :: lb2)
+  (Ha : a ∉ b :: lb2)
   : exists lab : list A, lb1 = la1 ++ a :: lab.
 Proof.
   generalize dependent lb2. generalize dependent la2.

@@ -268,7 +268,7 @@ Definition topologically_sorted
     (Hab : precedes a b)
     (l1 l2 : list A)
     (Heq : l = l1 ++ [b] ++ l2)
-    , ~a ∈ l2.
+    , a ∉ l2.
 
 (**
   The following properties assume that <<precedes>> determines a [StrictOrder]
