@@ -158,7 +158,7 @@ Proof.
       composite_apply_plan equivocator_IM full_replay_state
         (map (initial_new_machine_transition_item is)
           l) in
-    (∀ i : index,
+    (forall i : index,
       tr_full_replay_is.2 i =
       match @decide  (sub_index_prop equivocating i) (sub_index_prop_dec equivocating i) with
       | left e =>

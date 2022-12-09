@@ -700,7 +700,7 @@ Proof.
   generalize (enum index), (NoDup_enum index) as Hnodup, (elem_of_enum i) as Hi.
   induction l; intros; [by inversion Hi |].
   inversion Hnodup; subst.
-  assert (Hnil : forall i, i ∉ l -> filter (λ i0 : index, idx i0 = idx i) l = []).
+  assert (Hnil : forall i, i ∉ l -> filter (fun i0 : index => idx i0 = idx i) l = []).
   {
     intros; apply Forall_filter_nil, Forall_forall.
     intros j Hj; contradict Hj.

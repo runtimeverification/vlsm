@@ -49,7 +49,7 @@ Definition ne_list_app {A} (l1 l2 : ne_list A) := ne_list_foldr nel_cons l2 l1.
 
 Inductive ne_list_equiv `{Equiv A} : Equiv (ne_list A) :=
 | ne_one_equiv x y : x ≡ y -> nel_singl x ≡ nel_singl y
-| ne_cons_equiv x y l k : x ≡ y → l ≡ k → x ::: l ≡ y ::: k.
+| ne_cons_equiv x y l k : x ≡ y -> l ≡ k -> x ::: l ≡ y ::: k.
 
 #[export] Existing Instance ne_list_equiv.
 
@@ -146,7 +146,7 @@ Qed.
   fun a nel => a ∈ ne_list_to_list nel.
 
 #[export] Instance ne_list_subseteq {A} : SubsetEq (ne_list A) :=
-  fun l1 l2 => forall x, x ∈ l1 → x ∈ l2.
+  fun l1 l2 => forall x, x ∈ l1 -> x ∈ l2.
 
 #[export] Instance elem_of_ne_list_dec `{dec : EqDecision A} :
   RelDecision (∈@{ne_list A}).

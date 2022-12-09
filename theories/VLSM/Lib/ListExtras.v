@@ -585,7 +585,7 @@ Proof.
 Qed.
 
 Fixpoint nth_error_filter_index
-  {A} P `{∀ (x:A), Decision (P x)}
+  {A} P `{forall (x:A), Decision (P x)}
   (l : list A)
   (n : nat)
   :=
@@ -602,7 +602,7 @@ Fixpoint nth_error_filter_index
   end.
 
 Lemma nth_error_filter_index_le
-  {A} P `{∀ (x:A), Decision (P x)}
+  {A} P `{forall (x:A), Decision (P x)}
   (l : list A)
   (n1 n2 : nat)
   (Hle : n1 <= n2)
@@ -1424,8 +1424,8 @@ Proof.
   by eapply Listing_finite_transparent.
 Qed.
 
-Lemma sumbool_forall [A : Type] [P Q : A → Prop]:
-  (∀ x : A, {P x} + {Q x}) → ∀ l : list A, {Forall P l} + {Exists Q l}.
+Lemma sumbool_forall [A : Type] [P Q : A -> Prop]:
+  (forall x : A, {P x} + {Q x}) -> forall l : list A, {Forall P l} + {Exists Q l}.
 Proof.
   induction l.
   - by left; constructor.
@@ -1592,7 +1592,7 @@ Proof.
 Qed.
 
 Lemma list_subseteq_tran : forall (A : Type) (l m n : list A),
- l ⊆ m → m ⊆ n → l ⊆ n.
+ l ⊆ m -> m ⊆ n -> l ⊆ n.
 Proof.
   intros A l m n Hlm Hmn x y.
   by apply Hmn, Hlm.
@@ -1784,6 +1784,6 @@ Next Obligation.
 Qed.
 
 Definition element_of_filter
-  `{EqDecision A} [P : A -> Prop] `{∀ x, Decision (P x)} [l : list A]
+  `{EqDecision A} [P : A -> Prop] `{forall x, Decision (P x)} [l : list A]
   : dsig (fun i => i ∈ filter P l) -> dsig (fun i => i ∈ l) :=
   element_of_subseteq (list_filter_subseteq P l).

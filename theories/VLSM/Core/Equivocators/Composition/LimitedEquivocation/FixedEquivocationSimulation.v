@@ -189,7 +189,7 @@ Qed.
   [replayable_message_prop]erty for the [equivocators_fixed_equivocations_constraint].
 *)
 Lemma fixed_equivocation_has_replayable_message_prop
-  : replayable_message_prop IM (λ _ : message, False)
+  : replayable_message_prop IM (fun _ : message => False)
     (strong_fixed_equivocation_constraint IM equivocating)
     (equivocators_fixed_equivocations_constraint IM (elements equivocating)).
 Proof.

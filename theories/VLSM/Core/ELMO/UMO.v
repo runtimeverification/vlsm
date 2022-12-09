@@ -1577,7 +1577,7 @@ Proof.
   revert us Hall Hvsp.
   generalize (enum index) as is.
   induction is as [| i is']; cbn; intros us Hall Hvsp.
-  - replace us with (λ n : index, MkState [] (idx n)).
+  - replace us with (fun n : index => MkState [] (idx n)).
     + by constructor; apply initial_state_is_valid; compute.
     + extensionality i; rewrite Hall; [done |].
       by apply not_elem_of_nil.

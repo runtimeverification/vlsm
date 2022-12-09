@@ -274,7 +274,7 @@ Proof.
 Qed.
 
 Lemma filter_set_add `{StrictlyComparable X} P
-  `{∀ (x:X), Decision (P x)} :
+  `{forall (x:X), Decision (P x)} :
   forall (l:list X) x, ~ P x ->
   filter P l = filter P (set_add x l).
 Proof.
@@ -665,7 +665,7 @@ Proof.
 Qed.
 
 Lemma filter_set_eq {X} P Q
- `{∀ (x:X), Decision (P x)} `{∀ (x:X), Decision (Q x)}
+ `{forall (x:X), Decision (P x)} `{forall (x:X), Decision (Q x)}
    (l : list X)
    (resf := filter P l)
    (resg := filter Q l) :
