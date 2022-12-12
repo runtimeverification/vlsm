@@ -1,7 +1,8 @@
-name: Docker CI
+name: "Test PR"
 
 on:
   push:
+  workflow_dispatch:
     branches:
       - '**'
 
