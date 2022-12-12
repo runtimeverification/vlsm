@@ -7,31 +7,12 @@ pipeline {
   }
   options { ansiColor('xterm') }
   environment {
-    COQ_PACKAGE = 'coq-vlsm.dev'
     LONG_REV    = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
   }
   stages {
     stage('Init title') {
       when { changeRequest() }
       steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
-    }
-    stage('Prepare and Check') {
-      stages {
-        stage('Prepare') {
-          steps {
-            sh '''
-	      eval $(opam env)
-              opam update -y
-              opam pin add ${COQ_PACKAGE} . --yes --no-action --kind path
-              opam config list
-              opam repo list
-              opam list
-              opam install ${COQ_PACKAGE} --yes -j 8 --deps-only
-            '''
-          }
-        }
-        stage('Check') { steps { sh 'eval $(opam env) && opam install ${COQ_PACKAGE} --yes -j 8 --verbose' } }
-      }
     }
     stage('Deploy') {
       when {
