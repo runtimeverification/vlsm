@@ -4,7 +4,8 @@ shortname: vlsm
 organization: runtimeverification
 community: false
 dune: false
-coqdoc: false
+action: true
+coqdoc: true
 
 synopsis: >-
   Coq formalization of validating labelled state transition
