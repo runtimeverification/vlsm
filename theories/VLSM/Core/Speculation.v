@@ -41,8 +41,6 @@ Proof.
   by constructor; split with (Underlying s).
 Defined.
 
-Definition speculative_initial_message_prop (m : message) : Prop := vinitial_message_prop X m.
-
 Definition speculative_transition
   (sl : SpeculativeLabel) (ssim : SpeculativeState * option message)
   : SpeculativeState * option message :=
