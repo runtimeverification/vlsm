@@ -46,7 +46,7 @@ Definition speculative_transition
 match sl, ssim with
 | Speculate plan, (Certain s, None) =>
     (Speculative s s plan [], None)
-| Simulate, (Speculative start current (PlanItem lbl msg :: plan) outputs, None) =>
+| Simulate, (Speculative start current (Build_plan_item lbl msg :: plan) outputs, None) =>
     let (current', om) := vtransition X lbl (current, msg) in
       (Speculative start current' plan (outputs ++ [om]), None)
 | Rollback, (Speculative start _ (_ :: _) _, None) =>
@@ -63,9 +63,9 @@ Definition speculative_valid
 match sl, ssim with
 | Speculate plan, (Certain _, None) =>
     plan <> []
-| Simulate, (Speculative _ current (PlanItem lbl msg :: _) _, None) =>
+| Simulate, (Speculative _ current (Build_plan_item lbl msg :: _) _, None) =>
     vvalid X lbl (current, msg)
-| Rollback, (Speculative _ current (PlanItem lbl msg :: _) _, None) =>
+| Rollback, (Speculative _ current (Build_plan_item lbl msg :: _) _, None) =>
     ~ vvalid X lbl (current, msg)
 | Commit, (Speculative _ _ plan _, None) =>
     plan = []
