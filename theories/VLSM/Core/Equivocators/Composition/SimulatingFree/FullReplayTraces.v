@@ -131,7 +131,7 @@ Definition initial_new_machine_transition_item
   let new_l :=
     (existT i (Spawn (equivocator_state_zero seqv)))
     in
-  @Build_plan_item message (composite_type equivocator_IM) new_l None.
+  @PlanItem message (composite_type equivocator_IM) new_l None.
 
 (** Command for equivocating all states of an initial composite state. *)
 Definition spawn_initial_state

@@ -19,7 +19,7 @@ Context
   which would allow to transition from any given state
   (note that we don't address validity for now).
 *)
-Record plan_item : Type :=
+Record plan_item : Type := PlanItem
 {
   label_a : label;
   input_a : option message;
