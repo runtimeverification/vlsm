@@ -18,41 +18,41 @@ Context
   (X : VLSM message).
 
 Inductive SpeculativeLabel : Type :=
-| Simulate
+| Execute
 | Rollback
 | Commit
 | Speculate (plan : list (vplan_item X)).
 
 Inductive SpeculativeState : Type :=
-| Certain (s : vstate X)
+| Actual (s : vstate X)
 | Speculative
     (start current : vstate X) (plan : list (vplan_item X)) (outputs : list (option message)).
 
 Definition speculative_initial_state_prop (s : SpeculativeState) : Prop :=
 match s with
-| Certain s' => vinitial_state_prop X s'
-| _          => False
+| Actual s' => vinitial_state_prop X s'
+| _         => False
 end.
 
 Definition speculative_s0 : Inhabited {s : SpeculativeState | speculative_initial_state_prop s}.
 Proof.
   destruct (vs0 X) as [s Hinit].
-  by constructor; split with (Certain s).
+  by constructor; split with (Actual s).
 Defined.
 
 Definition speculative_transition
   (sl : SpeculativeLabel) (ssim : SpeculativeState * option message)
   : SpeculativeState * option message :=
 match sl, ssim with
-| Speculate plan, (Certain s, None) =>
+| Speculate plan, (Actual s, None) =>
     (Speculative s s plan [], None)
-| Simulate, (Speculative start current (Build_plan_item lbl msg :: plan) outputs, None) =>
+| Execute, (Speculative start current (Build_plan_item lbl msg :: plan) outputs, None) =>
     let (current', om) := vtransition X lbl (current, msg) in
       (Speculative start current' plan (outputs ++ [om]), None)
 | Rollback, (Speculative start _ (_ :: _) _, None) =>
-    (Certain start, None)
+    (Actual start, None)
 | Commit, (Speculative _ current [] [], None) =>
-    (Certain current, None)
+    (Actual current, None)
 | Commit, (Speculative start current [] (om :: outputs), None) =>
     (Speculative start current [] outputs, om)
 | _, (s, _) => (s, None)
@@ -61,9 +61,9 @@ end.
 Definition speculative_valid
   (sl : SpeculativeLabel) (ssim : SpeculativeState * option message) : Prop :=
 match sl, ssim with
-| Speculate plan, (Certain _, None) =>
+| Speculate plan, (Actual _, None) =>
     plan <> []
-| Simulate, (Speculative _ current (Build_plan_item lbl msg :: _) _, None) =>
+| Execute, (Speculative _ current (Build_plan_item lbl msg :: _) _, None) =>
     vvalid X lbl (current, msg)
 | Rollback, (Speculative _ current (Build_plan_item lbl msg :: _) _, None) =>
     ~ vvalid X lbl (current, msg)
