@@ -34,10 +34,11 @@ match s with
 | _         => False
 end.
 
-Definition speculative_s0 : Inhabited {s : SpeculativeState | speculative_initial_state_prop s}.
+#[export] Instance speculative_s0 :
+  Inhabited {s : SpeculativeState | speculative_initial_state_prop s}.
 Proof.
-  destruct (vs0 X) as [s Hinit].
-  by constructor; split with (Actual s).
+  constructor; split with (Actual (` (vs0 X))).
+  by destruct (vs0 X).
 Defined.
 
 Definition speculative_transition
