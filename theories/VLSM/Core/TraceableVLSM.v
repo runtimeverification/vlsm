@@ -126,11 +126,13 @@ state_to_trace s' Hs' with inspect (state_destructor s') :=
 | ((item, s) :: _) eq: Hdestruct =>
   let (is, tr) := state_to_trace s _ in (is, tr ++ [item]).
 Next Obligation.
+Proof.
   cbn; intros.
   eapply tv_state_destructor_transition; [done |].
   by rewrite Hdestruct; left.
 Qed.
 Next Obligation.
+Proof.
   cbn; intros.
   eapply tv_state_destructor_size; [done |].
   by rewrite Hdestruct; left.
@@ -473,14 +475,17 @@ Equations indexed_composite_state_to_trace
         |  (left _) eq: Hnn => indexed_composite_state_to_trace choose s' Hs'
                                  (StdppListSet.set_remove i_n.1 indices).
 Next Obligation.
+Proof.
   by cbn; intros; eapply input_valid_transition_origin, composite_state_destructor_lookup_reachable.
 Qed.
 Next Obligation.
+Proof.
   cbn; intros.
   cut (composite_state_size s < composite_state_size s'); [lia |].
   by eapply composite_tv_state_destructor_size, elem_of_list_lookup_2.
 Qed.
 Next Obligation.
+Proof.
   intros.
   cut (S (length (StdppListSet.set_remove i_n.1 indices)) <= length indices);
     [unfold indices; lia |].

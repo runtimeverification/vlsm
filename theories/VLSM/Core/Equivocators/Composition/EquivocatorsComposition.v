@@ -83,6 +83,7 @@ Program Instance equivocating_indices_BasicEquivocation :
     state_validators := fun s => list_to_set(enum index)
   }.
 Next Obligation.
+Proof.
   intro. intros.
   by typeclasses eauto.
 Qed.

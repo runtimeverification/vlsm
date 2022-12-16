@@ -289,6 +289,7 @@ Program Definition initial_indices
   : list index :=
   @filter _ _ _ (fun i => vinitial_state_prop (IM i) (s i)) _ is.
 Next Obligation.
+Proof.
   by intros; eapply traceable_vlsm_initial_state_dec, valid_state_project_preloaded_to_preloaded.
 Qed.
 

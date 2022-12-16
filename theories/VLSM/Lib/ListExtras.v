@@ -1772,6 +1772,7 @@ Program Definition not_null_element
   `{EqDecision A} [l : list A] (Hl : l <> []) : dsig (fun i => i ∈ l) :=
     dexist (is_Some_proj (proj2 (head_is_Some l) Hl)) _.
 Next Obligation.
+Proof.
   by intros A ? [| h t] ?; [| left].
 Qed.
 
@@ -1780,6 +1781,7 @@ Program Definition element_of_subseteq
   (di : dsig (fun i => i ∈ l1)) : dsig (fun i => i ∈ l2) :=
     dexist (` di) _.
 Next Obligation.
+Proof.
   by intros; cbn; destruct_dec_sig di i Hi Heq; subst; apply Hsub.
 Qed.
 

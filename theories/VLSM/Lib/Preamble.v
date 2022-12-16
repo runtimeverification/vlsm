@@ -667,5 +667,4 @@ Definition sum_project_right {A B : Type} (x : A + B) : option B :=
 Program Definition not_lt_plus_dec {m n} (Hnlt : ~n < m) : {k | k + m = n} :=
   exist _ (n - m) _.
 Next Obligation.
-  by cbn; lia.
-Qed.
+Proof. by cbn; lia. Qed.

@@ -22,6 +22,7 @@ Definition sub_index_prop (i : index) : Prop := i ∈ sub_index_list.
   (i : index)
   : Decision (sub_index_prop i).
 Next Obligation.
+Proof.
   intros; apply decide_rel; typeclasses eauto.
 Qed.
 
@@ -380,6 +381,7 @@ Context
 Program Definition sub_index_list_annotate : list sub_index :=
   list_annotate _ sub_index_list _.
 Next Obligation.
+Proof.
   by apply Forall_forall.
 Qed.
 
@@ -1425,6 +1427,7 @@ Context
 Program Definition free_sub_free_index (i : index) : sub_index (enum index) :=
   dexist i _.
 Next Obligation.
+Proof.
   by intros; apply elem_of_enum.
 Qed.
 

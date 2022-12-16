@@ -211,6 +211,7 @@ fun tr => let: exist f0 h0 := p in f0 tr.
 Program Definition ExT {T: Type} (p: T -> propT) : propT :=
 exist _ (fun tr => exists x, satisfyT (p x) tr) _.
 Next Obligation.
+Proof.
 move => tr0 [x h0] tr1 h1. exists x.
 case: (p x) h0 => [f0 h2] /= h0.
 exact: h2 _ h0 _ h1.
