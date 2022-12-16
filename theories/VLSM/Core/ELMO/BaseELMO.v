@@ -572,8 +572,10 @@ Equations rec_obs_fn (s : State) : listset Observation by wf (sizeState s) lt :=
 | {| obs := [] |} => ∅
 | {| obs := o :: os; adr := a |} =>
   {[o]} ∪ rec_obs_fn (state (message o)) ∪ rec_obs_fn {| obs := os; adr := a |}.
-Next Obligation. by intros [? []] os a _; unfold sizeState; cbn; lia. Qed.
-Next Obligation. by intros [? []] os a _; unfold sizeState; cbn; lia. Qed.
+Next Obligation.
+Proof. by intros [? []] os a _; unfold sizeState; cbn; lia. Qed.
+Next Obligation.
+Proof. by intros [? []] os a _; unfold sizeState; cbn; lia. Qed.
 
 Lemma elem_of_rec_obs_fn_1 :
   forall (s : State) (o : Observation),

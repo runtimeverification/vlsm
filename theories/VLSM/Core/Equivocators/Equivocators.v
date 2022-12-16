@@ -296,6 +296,7 @@ Program Definition equivocator_state_extend
     (fun j => if decide (S (equivocator_state_last bs) = j)
               then s else equivocator_state_s bs (@of_nat_lt j (S (equivocator_state_last bs)) _)).
 Next Obligation.
+Proof.
   by intros; specialize (fin_to_nat_lt j);  lia.
 Qed.
 
@@ -377,6 +378,7 @@ Program Definition equivocator_state_append
         equivocator_state_s es2 (@of_nat_lt k (equivocator_state_n es2) _)
       end).
 Next Obligation.
+Proof.
   by intros; specialize (equivocator_state_last_n es2) as Hlst_es2; lia.
 Qed.
 
