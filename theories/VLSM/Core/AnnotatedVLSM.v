@@ -35,13 +35,14 @@ Context
   `{Inhabited (sig initial_annotation_prop)}
   .
 
-Definition annotated_initial_state_prop (sa : annotated_state) :=
+Definition annotated_initial_state_prop (sa : annotated_state) : Prop :=
   vinitial_state_prop X (original_state sa) /\ initial_annotation_prop (state_annotation sa).
 
-#[export] Program Instance annotated_initial_state_prop_inhabited
-  : Inhabited (sig annotated_initial_state_prop) :=
-  populate (exist _ {| original_state := ` (vs0 X); state_annotation := ` inhabitant  |} _).
+#[export] Program Instance annotated_initial_state_prop_inhabited :
+  Inhabited {sa : annotated_state | annotated_initial_state_prop sa} :=
+    populate (exist _ {| original_state := `(vs0 X); state_annotation := `inhabitant; |} _).
 Next Obligation.
+Proof.
   split; cbn.
   - by destruct (vs0 X).
   - by destruct inhabitant.

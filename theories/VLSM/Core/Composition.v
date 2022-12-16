@@ -167,17 +167,16 @@ Definition composite_initial_state_prop
   :=
     forall n : index, vinitial_state_prop (IM n) (s n).
 
-Definition composite_initial_state
-  := sig composite_initial_state_prop.
+Definition composite_initial_state : Type :=
+  {s : composite_state | composite_initial_state_prop s}.
 
-Definition composite_s0 : composite_initial_state.
-Proof.
-  exists (fun (n : index) => proj1_sig (vs0 (IM n))).
-  by intro i; destruct (vs0 (IM i)) as [s Hs].
-Defined.
+Program Definition composite_s0 : composite_initial_state :=
+  exist _ (fun (n : index) => `(vs0 (IM n))) _.
+Next Obligation.
+Proof. by intros i; destruct (vs0 (IM i)). Defined.
 
 #[export] Instance composite_initial_state_inh : Inhabited composite_initial_state :=
-  {| inhabitant := composite_s0 |}.
+  populate composite_s0.
 
 (**
   A message has the [initial_message_prop]erty in the composite
