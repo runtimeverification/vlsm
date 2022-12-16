@@ -8,7 +8,6 @@ From VLSM.Core Require Import VLSM Plans.
   This module introduces the speculative VLSM construction. It models the
   speculative execution of transitions from the underlying VLSM which can then
   be committed or rolled back.
-
 *)
 
 Section sec_speculative.
@@ -34,12 +33,11 @@ match s with
 | _         => False
 end.
 
-#[export] Instance speculative_s0 :
-  Inhabited {s : SpeculativeState | speculative_initial_state_prop s}.
-Proof.
-  constructor; split with (Actual (` (vs0 X))).
-  by destruct (vs0 X).
-Defined.
+#[export] Program Instance speculative_sig :
+  Inhabited {s : SpeculativeState | speculative_initial_state_prop s} :=
+populate (exist _ (Actual (`(vs0 X))) _).
+Next Obligation.
+Proof. by destruct (vs0 X). Qed.
 
 Definition speculative_transition
   (sl : SpeculativeLabel) (ssim : SpeculativeState * option message)
