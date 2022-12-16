@@ -188,8 +188,15 @@ Context
 Definition projection_induced_initial_state_prop (sY : stateTY) : Prop :=
   exists sX, state_project sX = sY /\ vinitial_state_prop X sX.
 
-Instance projection_induced_initial_state_inh : Inhabited (sig projection_induced_initial_state_prop)
-  := populate (exist _ (state_project (` (vs0 X))) (ex_intro _ _ (conj (eq_refl _) (proj2_sig _)))).
+#[export] Program Instance projection_induced_initial_state_inh :
+  Inhabited {sY : stateTY | projection_induced_initial_state_prop sY} :=
+    populate (exist _ (state_project (` (vs0 X))) _).
+Next Obligation.
+Proof.
+  exists (` (vs0 X)).
+  split; [done |].
+  by destruct (`(vs0 X)); cbn.
+Defined.
 
 Definition projection_induced_initial_message_prop : message -> Prop := const False.
 
