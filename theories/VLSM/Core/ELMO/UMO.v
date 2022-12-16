@@ -35,14 +35,13 @@ Definition UMOComponent_initial_state_type (i : Address) : Type :=
 Program Definition UMOComponent_initial_state
   (i : Address) : UMOComponent_initial_state_type i := MkState [] i.
 Next Obligation.
+Proof.
   by compute.
 Defined.
 
-#[export]
-Instance Inhabited_UMOComponent_initial_state_type
-  (i : Address)
-  : Inhabited (UMOComponent_initial_state_type i)
-  := {| inhabitant := UMOComponent_initial_state i |}.
+#[export] Instance Inhabited_UMOComponent_initial_state_type (i : Address) :
+  Inhabited (UMOComponent_initial_state_type i) :=
+    populate (UMOComponent_initial_state i).
 
 Definition UMOComponent_transition
   (l : Label) (s : State) (om : option Message)

@@ -55,8 +55,10 @@ Definition coeqv_limited_equivocation_constraint
   : Prop :=
   (sum_weights (coeqv_composite_transition_message_equivocators l som) <= threshold)%R.
 
-#[export] Instance empty_validators_inhabited : Inhabited {s : Cv | s = ∅}
-  := populate (exist _ _ eq_refl).
+#[export] Program Instance empty_validators_inhabited : Inhabited {s : Cv | s = ∅} :=
+  populate (exist _ ∅ _).
+Next Obligation.
+Proof. done. Defined.
 
 Definition coeqv_limited_equivocation_vlsm : VLSM message :=
   annotated_vlsm (free_composite_vlsm IM) Cv (fun s => s = ∅)

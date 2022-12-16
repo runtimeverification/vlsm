@@ -23,10 +23,11 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces 
 (** ** Definition and basic properties *)
 
 Section sec_byzantine_traces.
+
 Context
-    {message : Type}
-    (M : VLSM message)
-    .
+  {message : Type}
+  (M : VLSM message)
+  .
 
 (**
   The first definition says that a trace has the [byzantine_trace_prop]erty
@@ -81,10 +82,13 @@ Definition all_messages_type : VLSMType message :=
   ensure that the sets of labels and messages are both non-empty.
 *)
 
-Definition all_messages_s0 := exist (fun s: @state _ all_messages_type => True) tt I.
+Program Definition all_messages_s0 : {_ : @state _ all_messages_type | True} :=
+  exist _ tt _.
+Next Obligation.
+Proof. done. Defined.
 
-Instance all_messages_state_inh : Inhabited (sig  (fun s: @state _ all_messages_type => True)) :=
-  {| inhabitant := all_messages_s0 |}.
+#[export] Instance all_messages_state_inh : Inhabited {_ : @state _ all_messages_type | True} :=
+  populate all_messages_s0.
 
 (**
   The [transition] function of the [emit_any_message_vlsm] generates the

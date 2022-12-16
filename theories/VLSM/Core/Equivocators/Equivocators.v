@@ -533,19 +533,19 @@ Definition equivocator_initial_state_prop
   : Prop
   := is_singleton_state bs /\ vinitial_state_prop X (equivocator_state_zero bs).
 
-Definition equivocator_initial_state
-  := sig equivocator_initial_state_prop.
+Definition equivocator_initial_state : Type :=
+  {bs : equivocator_state | equivocator_initial_state_prop bs}.
 
-Definition equivocator_s0 : equivocator_initial_state.
+Program Definition equivocator_s0 : equivocator_initial_state :=
+  exist _ (mk_singleton_state (proj1_sig (vs0 X))) _.
+Next Obligation.
 Proof.
-  exists (mk_singleton_state (proj1_sig (vs0 X))).
-  unfold mk_singleton_state.
-  unfold equivocator_initial_state_prop.
-  by split; [|destruct (vs0 X)].
+  unfold mk_singleton_state, equivocator_initial_state_prop; cbn.
+  by split; [| destruct (vs0 X)].
 Defined.
 
-Instance equivocator_initial_state_inh : Inhabited equivocator_initial_state :=
-  {| inhabitant := equivocator_s0 |}.
+#[export] Instance equivocator_initial_state_inh : Inhabited equivocator_initial_state :=
+  populate equivocator_s0.
 
 Definition equivocator_transition
   (bl : equivocator_label)

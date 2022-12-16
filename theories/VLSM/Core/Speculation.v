@@ -33,9 +33,9 @@ match s with
 | _         => False
 end.
 
-#[export] Program Instance speculative_sig :
+#[export] Program Instance speculative_s0 :
   Inhabited {s : SpeculativeState | speculative_initial_state_prop s} :=
-populate (exist _ (Actual (`(vs0 X))) _).
+    populate (exist _ (Actual (`(vs0 X))) _).
 Next Obligation.
 Proof. by destruct (vs0 X). Qed.
 
