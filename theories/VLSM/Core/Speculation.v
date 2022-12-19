@@ -45,7 +45,7 @@ Definition speculative_transition
 match sl, ssim with
 | Speculate plan, (Actual s, None) =>
     (Speculative s s plan [], None)
-| Execute, (Speculative start current (Build_plan_item lbl msg :: plan) outputs, None) =>
+| Execute, (Speculative start current (Build_plan_item lbl msg :: plan) outputs, _) =>
     let (current', om) := vtransition X lbl (current, msg) in
       (Speculative start current' plan (outputs ++ [om]), None)
 | Rollback, (Speculative start _ (_ :: _) _, None) =>
@@ -62,8 +62,8 @@ Definition speculative_valid
 match sl, ssim with
 | Speculate plan, (Actual _, None) =>
     plan <> []
-| Execute, (Speculative _ current (Build_plan_item lbl msg :: _) _, None) =>
-    vvalid X lbl (current, msg)
+| Execute, (Speculative _ current (Build_plan_item lbl msg :: _) _, msg') =>
+    vvalid X lbl (current, msg) /\ msg = msg'
 | Rollback, (Speculative _ current (Build_plan_item lbl msg :: _) _, None) =>
     ~ vvalid X lbl (current, msg)
 | Commit, (Speculative _ _ plan _, None) =>
@@ -133,26 +133,33 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_Execute :
-  forall (lbl : label) (start current current' : vstate X) (msg om : option message)
+  forall (lbl : label) (start current current' : vstate X) (msg msg' om : option message)
     (plan : list (vplan_item X)) (outputs : list (option message)),
+    valid_state_message_prop speculative_vlsm
+      (Speculative start current (Build_plan_item lbl msg :: plan) outputs) msg' ->
     input_valid_transition X lbl (current, msg) (current', om) ->
       input_valid_transition speculative_vlsm Execute
-        (Speculative start current (Build_plan_item lbl msg :: plan) outputs, None)
+        (Speculative start current (Build_plan_item lbl msg :: plan) outputs, msg')
         (Speculative start current' plan (outputs ++ [om]), None).
 Proof.
-  intros lbl start current current' msg om plan outputs Hivt.
-  inversion Hivt as [Hiv Ht].
+  intros lbl start current current' msg msg' om plan outputs Hvsmp [Hiv Ht].
   constructor; cbn; cycle 1.
   - unfold vtransition.
     change (@vtype message X) with (@type message X).
     by rewrite Ht.
   - destruct Hiv as (Hvsp & Hovmp & Hv).
+    replace msg with msg' in *; cycle 1.
+    {
+      inversion Hvsmp; subst; [done |].
+      admit.
+    }
     split_and!; cycle 1.
-    + by apply speculative_option_valid_message_prop_None.
+    + admit.
+    + done.
     + unfold vvalid.
       by change (@vtype message X) with (@type message X).
-    + by apply valid_state_prop_Speculative.
-Qed.
+    + by exists msg'.
+Admitted.
 
 Lemma input_valid_transition_Commit_cons :
   forall (start current : vstate X) (om : option message) (outputs : list (option message)),
@@ -238,7 +245,8 @@ Proof.
   constructor; [| by eapply input_valid_transition_Speculate].
   constructor; cycle 1.
   + unfold plan; change [oom] with ([] ++ [oom]).
-    by eapply input_valid_transition_Execute.
+    eapply input_valid_transition_Execute; [| done].
+    admit.
   + constructor; cycle 1.
     * apply input_valid_transition_Commit_cons. admit.
     * constructor.
