@@ -135,10 +135,11 @@ Proof.
   - subst s.
     unfold not_heavy, Equivocation.not_heavy,
       equivocation_fault, Equivocation.equivocation_fault; simpl.
-    etransitivity; [| by apply rt_positive].
-    pose proof (Heqv_is := equivocating_indices_equivocating_validators IM threshold is).
+    pose proof (Heqv_is := @equivocating_indices_equivocating_validators _ _ _ _
+        IM _ _ _ H1 _ _ _ _ _ _ _ _ H9 is).
     rewrite equivocating_indices_initially_empty in Heqv_is by done.
     simpl in Heqv_is; apply sum_weights_empty in Heqv_is.
+    pose proof (rt_positive (H6 := H8)).
     by cbv in Heqv_is |- *; lra.
   - by replace s with (fst (composite_transition equivocator_IM l (s0, oim))); [done |]
     ; cbn in *; rewrite Ht.
@@ -235,7 +236,8 @@ Proof.
     apply valid_trace_add_default_last, valid_trace_last_pstate,
       valid_state_limited_equivocation in Htr.
     transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
-    pose proof (Heq := equivocating_indices_equivocating_validators IM threshold (finite_trace_last is tr)).
+    pose proof (@equivocating_indices_equivocating_validators _ _ _ _ IM
+     threshold _ _ _ _ _ _ _ _ _ _ _ H9).
     by unfold equivocation_fault; apply sum_weights_subseteq.
 Qed.
 

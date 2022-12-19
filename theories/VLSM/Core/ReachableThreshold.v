@@ -98,10 +98,13 @@ Proof.
       apply sum_weights_list_permutation_proper.
       rewrite elements_disj_union.
       * apply Permutation_app_tail.
-        etransitivity; [by symmetry; apply elements_list_to_set, set_remove_nodup |].
-        apply elements_proper.
-        intro x.
-        by rewrite elem_of_difference, !elem_of_list_to_set, set_remove_iff, elem_of_singleton.
+        etransitivity.
+        -- symmetry.
+           by apply (elements_list_to_set (H6 := H6)), set_remove_nodup.
+        -- apply elements_proper.
+           intro x.
+           rewrite elem_of_difference, !elem_of_list_to_set.
+           by rewrite set_remove_iff, elem_of_singleton.
       * intros x; rewrite elem_of_difference, elem_of_list_to_set, elem_of_singleton.
         by intros [] ?; eapply Hdisj; [apply elem_of_elements, Hincl |].
 Qed.
@@ -124,7 +127,8 @@ Proof.
   intros vss Hvss.
   destruct (pivotal_validator_extension ∅ vss)
     as (vs & Hincl & Hvs & v & Hv & Hvs').
-  - by rewrite sum_weights_empty; [apply rt_positive |].
+  - rewrite sum_weights_empty; [| done].
+    by apply (rt_positive (H6 := H6)).
   - by apply disjoint_empty_r.
   - by rewrite sum_weights_union_empty.
   - rewrite sum_weights_union_empty in Hvs, Hvs'.

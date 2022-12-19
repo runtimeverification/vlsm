@@ -16,9 +16,9 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
 ## Meta
 
 - License: [BSD 3-Clause "New" or "Revised" License](LICENSE.md)
-- Compatible Coq versions: 8.15
+- Compatible Coq versions: 8.15 or later
 - Additional dependencies:
-  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0
+  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0 or later
   - [Itauto](https://gitlab.inria.fr/fbesson/itauto)
   - [Coq-Equations](https://github.com/mattam82/Coq-Equations)
 - Coq namespace: `VLSM`

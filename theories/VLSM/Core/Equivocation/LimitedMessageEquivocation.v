@@ -68,7 +68,8 @@ Proof.
     as [[[is His] ->] | (l & [s' om'] & om & [(_ & _ & _ & Hv) Ht])]; simpl.
   - exists ∅.
     + by intros v Hv; contradict Hv; apply Hno_initial_equivocation.
-    + by rewrite sum_weights_empty; [apply rt_positive |].
+    + rewrite sum_weights_empty; [|done].
+      by apply (rt_positive (H6 := H6)).
   - by cbv in Hv, Ht; rewrite Ht in Hv.
 Qed.
 

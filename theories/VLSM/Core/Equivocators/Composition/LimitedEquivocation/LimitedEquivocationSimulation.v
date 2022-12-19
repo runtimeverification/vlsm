@@ -38,7 +38,7 @@ Context
   (threshold : R)
   `{ReachableThreshold index Ci threshold}
   `{!finite.Finite index}
-  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM threshold)
+  (Limited : VLSM message := equivocators_limited_equivocations_vlsm (Ci := Ci) IM threshold)
   (equivocating : Ci)
   (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM (elements equivocating))
   .
@@ -82,7 +82,7 @@ Context
   (threshold : R)
   `{ReachableThreshold index Ci threshold}
   `{!finite.Finite index}
-  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM threshold)
+  (XE : VLSM message := equivocators_limited_equivocations_vlsm (Ci := Ci) IM threshold)
   .
 
 (**
