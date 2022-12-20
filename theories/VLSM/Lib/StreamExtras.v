@@ -373,15 +373,12 @@ Lemma ForAll2_strict_lookup_rev [A : Type] (R : A -> A -> Prop) {HR : StrictOrde
   : forall m n, R (Str_nth m l) (Str_nth n l) -> m < n.
 Proof.
   intros m n Hr.
-  destruct (decide (n <= m)); [|lia].
-  exfalso.
-  destruct HR as [HI HT].
-  rewrite ForAll2_transitive_lookup in Hl by done.
-  destruct (decide (m = n)); subst.
-  - by elim (HI (Str_nth n l)).
-  - specialize (Hl n m). spec Hl; [lia|].
-    elim (HI (Str_nth n l)).
-    by transitivity (Str_nth m l).
+  rewrite ForAll2_transitive_lookup in Hl by typeclasses eauto.
+  destruct (Nat.lt_total m n) as [Hlt | [-> | Hgt]]; [done | |].
+  - by eapply StrictOrder_Irreflexive in Hr.
+  - elim (StrictOrder_Irreflexive (Str_nth n l)).
+    transitivity (Str_nth m l); [| done].
+    by apply Hl.
 Qed.
 
 Lemma ForAll2_strict_lookup [A : Type] (R : A -> A -> Prop) {HR : StrictOrder R}
