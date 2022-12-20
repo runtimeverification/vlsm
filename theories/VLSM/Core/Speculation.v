@@ -92,14 +92,6 @@ Definition speculative_vlsm : VLSM message :=
   vmachine := speculative_vlsm_machine;
 |}.
 
-Lemma speculative_option_valid_message_prop_None :
-  option_valid_message_prop speculative_vlsm None.
-Proof.
-  destruct speculative_s0 as [[s Hinit]].
-  red; exists s.
-  by constructor.
-Qed.
-
 Lemma input_valid_transition_Speculate :
   forall (s : vstate X) (plan : list (vplan_item X)),
     valid_state_prop speculative_vlsm (Actual s) -> plan <> [] ->
@@ -109,7 +101,7 @@ Proof.
   intros s plan Hvsp Hplan.
   constructor; cbn; [| done].
   split_and!; [done | | done].
-  by apply speculative_option_valid_message_prop_None.
+  by apply option_valid_message_None.
 Qed.
 
 Lemma input_valid_transition_Execute :
@@ -125,12 +117,10 @@ Lemma input_valid_transition_Execute :
         (Speculative start current' plan (outputs ++ [om]), None).
 Proof.
   intros lbl start current current' msg msg' om plan outputs Hvsp Hovmp -> [Hiv Ht].
-  constructor; cbn; cycle 1.
-  - unfold vtransition.
-    change (@vtype message X) with (@type message X).
-    by rewrite Ht.
+  constructor; cbn.
   - destruct Hiv as (Hvsp' & Hovmp' & Hv).
     by split_and!.
+  - by replace (vtransition _ _ _) with (current', om).
 Qed.
 
 Lemma input_valid_transition_Commit_cons :
@@ -142,7 +132,7 @@ Lemma input_valid_transition_Commit_cons :
 Proof.
   constructor; cbn; [| done].
   split_and!; [done | | done].
-  by apply speculative_option_valid_message_prop_None.
+  by apply option_valid_message_None.
 Qed.
 
 Lemma input_valid_transition_Commit_nil :
@@ -153,7 +143,7 @@ Lemma input_valid_transition_Commit_nil :
 Proof.
   constructor; cbn; [| done].
   split_and!; [done | | done].
-  by apply speculative_option_valid_message_prop_None.
+  by apply option_valid_message_None.
 Qed.
 
 Lemma input_valid_transition_Rollback :
@@ -168,7 +158,7 @@ Lemma input_valid_transition_Rollback :
 Proof.
   constructor; cbn; [| done].
   split_and!; [done | | done].
-  by apply speculative_option_valid_message_prop_None.
+  by apply option_valid_message_None.
 Qed.
 
 Definition speculative_lift_transition_item
@@ -176,21 +166,16 @@ Definition speculative_lift_transition_item
   : list (vtransition_item speculative_vlsm) :=
 match ti with
 | Build_transition_item lbl iom current oom =>
-    let plan := [Build_plan_item lbl iom]
-    in
-    let spec := @Build_transition_item _ speculative_vlsm_type
-          (Speculate plan) None (Speculative start start plan []) None
-    in
-    let exec := @Build_transition_item _ speculative_vlsm_type
-          Execute iom (Speculative start current [] [oom]) None
-    in
-    let out := @Build_transition_item _ speculative_vlsm_type
-          Commit None (Speculative start current [] []) oom
-    in
+    let plan   := [Build_plan_item lbl iom] in
+    let spec   := @Build_transition_item _ speculative_vlsm_type
+                    (Speculate plan) None (Speculative start start plan []) None in
+    let exec   := @Build_transition_item _ speculative_vlsm_type
+                    Execute iom (Speculative start current [] [oom]) None in
+    let output := @Build_transition_item _ speculative_vlsm_type
+                    Commit None (Speculative start current [] []) oom in
     let commit := @Build_transition_item _ speculative_vlsm_type
-          Commit None (Actual current) None
-    in
-      [spec; exec; out; commit]
+                    Commit None (Actual current) None in
+      [spec; exec; output; commit]
 end.
 
 Fixpoint speculative_lift_trace
@@ -221,42 +206,47 @@ Lemma speculative_lift_input_valid_transition :
         (speculative_lift_transition_item s1 (Build_transition_item lbl iom s2 oom)).
 Proof.
   intros lbl s1 s2 iom oom Hvsp Hovmp Hivt.
-  assert (H1 : input_valid_transition speculative_vlsm
-    (Speculate [{| label_a := lbl; input_a := iom |}]) 
-    (Actual s1, None)
-    (Speculative s1 s1 [{| label_a := lbl; input_a := iom |}] [], None)).
+  assert (Hivt1 :
+    input_valid_transition speculative_vlsm (Speculate [{| label_a := lbl; input_a := iom |}])
+      (Actual s1, None)
+      (Speculative s1 s1 [{| label_a := lbl; input_a := iom |}] [], None)).
   {
     by apply input_valid_transition_Speculate.
   }
-  constructor; [| done].
-  assert (H2 : input_valid_transition speculative_vlsm Execute
-    (Speculative s1 s1 [{| label_a := lbl; input_a := iom |}] [], iom)
-    (Speculative s1 s2 [] [oom], None)).
+  assert (Hivt2 :
+    input_valid_transition speculative_vlsm Execute
+      (Speculative s1 s1 [{| label_a := lbl; input_a := iom |}] [], iom)
+      (Speculative s1 s2 [] [oom], None)).
   {
     unfold plan; change [oom] with ([] ++ [oom]).
     eapply input_valid_transition_Execute; [| done..].
     by eapply input_valid_transition_destination.
   }
-  constructor; [| done].
-  assert (H3 : input_valid_transition speculative_vlsm Commit
-    (Speculative s1 s2 [] [oom], None) (Speculative s1 s2 [] [], oom)).
+  assert (Hivt3 :
+    input_valid_transition speculative_vlsm Commit
+    (Speculative s1 s2 [] [oom], None)
+    (Speculative s1 s2 [] [], oom)).
   {
     apply input_valid_transition_Commit_cons.
     by eapply input_valid_transition_destination.
   }
-  constructor; [| done].
-  assert (H4 : input_valid_transition speculative_vlsm Commit
-    (Speculative s1 s2 [] [], None) (Actual s2, None)).
+  assert (Hivt4 :
+    input_valid_transition speculative_vlsm Commit
+      (Speculative s1 s2 [] [], None)
+      (Actual s2, None)).
   {
     apply input_valid_transition_Commit_nil.
     by eapply input_valid_transition_destination.
   }
   constructor; [| done].
+  constructor; [| done].
+  constructor; [| done].
+  constructor; [| done].
   constructor.
   by eapply input_valid_transition_destination.
 Qed.
 
-Lemma finite_valid_trace_init_to_speculative :
+Lemma finite_valid_trace_init_to_speculative_lift_trace :
   forall (s1 s2 : vstate X) (tr : list (vtransition_item X)),
     finite_valid_trace_init_to X s1 s2 tr ->
       finite_valid_trace_init_to speculative_vlsm (Actual s1) (Actual s2)
@@ -264,7 +254,7 @@ Lemma finite_valid_trace_init_to_speculative :
 Proof.
   intros s1 s2 tr Htr.
   induction Htr using finite_valid_trace_init_to_rev_strong_ind; cbn.
-  - constructor; [| done].
+  - split; [| done].
     constructor.
     by apply initial_state_is_valid.
   - split; [| by apply IHHtr1].
@@ -274,35 +264,13 @@ Proof.
     apply speculative_lift_input_valid_transition; [.. | done].
     + by apply valid_trace_last_pstate in IHHtr1.
     + unfold empty_initial_message_or_final_output in Heqiom.
-      destruct_list_last iom_tr iom_tr' item Heqtr; subst.
-      * by apply option_initial_message_is_valid.
-      * destruct item as [? ? ? []]; cbn; [| by apply speculative_option_valid_message_prop_None].
-        eapply valid_trace_output_is_valid.
-        -- by eapply valid_trace_forget_last, IHHtr2.
-        -- red. rewrite speculative_lift_trace_app, Exists_app.
-           by right; cbn; do 2 right; left; cbn.
+      destruct_list_last iom_tr iom_tr' item Heqtr; subst;
+        [by apply option_initial_message_is_valid |].
+      destruct item as [? ? ? []]; cbn; [| by apply option_valid_message_None].
+      eapply valid_trace_output_is_valid.
+      * by eapply valid_trace_forget_last, IHHtr2.
+      * red; rewrite speculative_lift_trace_app, Exists_app.
+        by do 3 right; left; cbn.
 Qed.
-
-Lemma in_futures_speculative :
-  forall (s1 s2 : vstate X),
-    in_futures X s1 s2 -> in_futures speculative_vlsm (Actual s1) (Actual s2).
-Proof.
-  intros s1 s2 [tr Htr].
-  unfold in_futures.
-  exists (speculative_lift_trace s1 tr).
-  apply finite_valid_trace_init_to_speculative.
-Admitted.
-
-Lemma valid_state_prop_Actual :
-  forall (s : vstate X),
-    valid_state_prop X s -> valid_state_prop speculative_vlsm (Actual s).
-Proof.
-Admitted.
-
-Lemma valid_state_prop_Speculative :
-  forall (start current : vstate X) (plan : list (vplan_item X)) (outputs : list (option message)),
-    valid_state_prop speculative_vlsm (Speculative start current plan outputs).
-Proof.
-Admitted.
 
 End sec_speculative.
