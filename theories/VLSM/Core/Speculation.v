@@ -92,6 +92,54 @@ Definition speculative_vlsm : VLSM message :=
   vmachine := speculative_vlsm_machine;
 |}.
 
+(**
+  We can lift a [transition_item] from the underlying VLSM [X] to a list
+  of four [transition_item]s in the [speculative_vlsm]. This corresponds
+  to the fact that a single transition in the underlying VLSM can be lifted
+  to a trace of length four in the [speculative_vlsm].
+
+  The four steps are:
+  - Speculate a plan
+  - Execute the only item from this plan
+  - Output the message from this execution
+  - Commit the result
+*)
+Definition speculative_lift_transition_item
+  (start : vstate X) (ti : vtransition_item X)
+  : list (vtransition_item speculative_vlsm) :=
+match ti with
+| Build_transition_item lbl iom current oom =>
+    let plan   := [Build_plan_item lbl iom] in
+    let spec   := @Build_transition_item _ speculative_vlsm_type
+                    (Speculate plan) None (Speculative start start plan []) None in
+    let exec   := @Build_transition_item _ speculative_vlsm_type
+                    Execute iom (Speculative start current [] [oom]) None in
+    let output := @Build_transition_item _ speculative_vlsm_type
+                    Commit None (Speculative start current [] []) oom in
+    let commit := @Build_transition_item _ speculative_vlsm_type
+                    Commit None (Actual current) None in
+      [spec; exec; output; commit]
+end.
+
+Fixpoint speculative_lift_trace
+  (start : vstate X) (tr : list (vtransition_item X))
+  : list (vtransition_item speculative_vlsm) :=
+match tr with
+| [] => []
+| ti :: tr' =>
+    speculative_lift_transition_item start ti ++ speculative_lift_trace (destination ti) tr'
+end.
+
+Lemma speculative_lift_trace_app :
+  forall (start : vstate X) (tr1 tr2 : list (vtransition_item X)),
+    speculative_lift_trace start (tr1 ++ tr2) =
+    speculative_lift_trace start tr1 ++ speculative_lift_trace (finite_trace_last start tr1) tr2.
+Proof.
+  intros start tr1; revert start.
+  induction tr1 as [| ti tr1']; simpl; intros; [done |].
+  by rewrite <- app_assoc, IHtr1', finite_trace_last_cons.
+Qed.
+
 Lemma input_valid_transition_Speculate :
   forall (s : vstate X) (plan : list (vplan_item X)),
     valid_state_prop speculative_vlsm (Actual s) -> plan <> [] ->
@@ -161,42 +209,6 @@ Proof.
   by apply option_valid_message_None.
 Qed.
 
-Definition speculative_lift_transition_item
-  (start : vstate X) (ti : vtransition_item X)
-  : list (vtransition_item speculative_vlsm) :=
-match ti with
-| Build_transition_item lbl iom current oom =>
-    let plan   := [Build_plan_item lbl iom] in
-    let spec   := @Build_transition_item _ speculative_vlsm_type
-                    (Speculate plan) None (Speculative start start plan []) None in
-    let exec   := @Build_transition_item _ speculative_vlsm_type
-                    Execute iom (Speculative start current [] [oom]) None in
-    let output := @Build_transition_item _ speculative_vlsm_type
-                    Commit None (Speculative start current [] []) oom in
-    let commit := @Build_transition_item _ speculative_vlsm_type
-                    Commit None (Actual current) None in
-      [spec; exec; output; commit]
-end.
-
-Fixpoint speculative_lift_trace
-  (start : vstate X) (tr : list (vtransition_item X))
-  : list (vtransition_item speculative_vlsm) :=
-match tr with
-| [] => []
-| ti :: tr' =>
-    speculative_lift_transition_item start ti ++ speculative_lift_trace (destination ti) tr'
-end.
-
-Lemma speculative_lift_trace_app :
-  forall (start : vstate X) (tr1 tr2 : list (vtransition_item X)),
-    speculative_lift_trace start (tr1 ++ tr2) =
-    speculative_lift_trace start tr1 ++ speculative_lift_trace (finite_trace_last start tr1) tr2.
-Proof.
-  intros start tr1; revert start.
-  induction tr1 as [| ti tr1']; simpl; intros; [done |].
-  by rewrite <- app_assoc, IHtr1', finite_trace_last_cons.
-Qed.
-
 Lemma speculative_lift_input_valid_transition :
   forall (lbl : label) (s1 s2 : vstate X) (iom oom : option message),
     valid_state_prop speculative_vlsm (Actual s1) ->
@@ -238,11 +250,7 @@ Proof.
     apply input_valid_transition_Commit_nil.
     by eapply input_valid_transition_destination.
   }
-  constructor; [| done].
-  constructor; [| done].
-  constructor; [| done].
-  constructor; [| done].
-  constructor.
+  repeat (constructor; try done).
   by eapply input_valid_transition_destination.
 Qed.
 
