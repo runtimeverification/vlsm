@@ -149,7 +149,9 @@ Lemma input_valid_transition_reflects_trace_witnessing_equivocation_prop
 Proof.
   apply finite_valid_trace_init_to_last in Htr as Hlst.
   intros v; split; simpl in *; rewrite Hlst in *.
-  - by intros Hv; eapply equivocating_validators_is_equivocating_tracewise_iff.
+  - intros Hv.
+    by eapply equivocating_validators_is_equivocating_tracewise_iff
+      with (ReachableThreshold0 := H11).
   - intros (msg & Hsender & Heqv).
     apply Hincl.
     specialize (Hwitness v);
