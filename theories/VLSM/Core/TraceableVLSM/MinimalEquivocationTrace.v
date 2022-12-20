@@ -27,7 +27,7 @@ Context
   (IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
-  `{!FullMessageDependencies message_dependencies full_message_dependencies}
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (state_destructor : forall i, vstate (IM i) -> set (vtransition_item (IM i) * vstate (IM i)))
   (state_size : forall i, vstate (IM i) -> nat)
@@ -650,7 +650,7 @@ Context
   (IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
-  `{!FullMessageDependencies message_dependencies full_message_dependencies}
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   `{forall i s, Decision (vinitial_state_prop (IM i) s)}
   (state_destructor : forall i, vstate (IM i) -> set (vtransition_item (IM i) * vstate (IM i)))

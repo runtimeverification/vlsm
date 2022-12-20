@@ -802,5 +802,6 @@ Proof.
   rewrite stream_concat_unroll, stream_prepend_prefix_r by done.
   rewrite <- IHn at 2.
   do 2 f_equal.
-  by apply minus_plus.
+  rewrite Nat.add_comm.
+  by apply Nat.add_sub.
 Qed.
