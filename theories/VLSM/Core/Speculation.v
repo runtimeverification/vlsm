@@ -100,66 +100,38 @@ Proof.
   by constructor.
 Qed.
 
-Lemma valid_state_prop_Actual :
-  forall (s : vstate X),
-    valid_state_prop X s -> valid_state_prop speculative_vlsm (Actual s).
-Proof.
-  intros s [om Hvsmp]; red.
-  induction Hvsmp.
-  - by exists None; constructor; cbn.
-  - destruct IHHvsmp1 as [om1 Hom1], IHHvsmp2 as [om2 Hom2].
-    exists om1.
-Admitted.
-
-Lemma valid_state_prop_Speculative :
-  forall (start current : vstate X) (plan : list (vplan_item X)) (outputs : list (option message)),
-    valid_state_prop speculative_vlsm (Speculative start current plan outputs).
-Proof.
-  intros.
-  red. exists None.
-Admitted.
-
 Lemma input_valid_transition_Speculate :
   forall (s : vstate X) (plan : list (vplan_item X)),
-    valid_state_prop X s -> plan <> [] ->
+    valid_state_prop speculative_vlsm (Actual s) -> plan <> [] ->
       input_valid_transition speculative_vlsm
         (Speculate plan) (Actual s, None) (Speculative s s plan [], None).
 Proof.
   intros s plan Hvsp Hplan.
   constructor; cbn; [| done].
-  split_and!; [.. | done].
-  - by apply valid_state_prop_Actual.
-  - by apply speculative_option_valid_message_prop_None.
+  split_and!; [done | | done].
+  by apply speculative_option_valid_message_prop_None.
 Qed.
 
 Lemma input_valid_transition_Execute :
   forall (lbl : label) (start current current' : vstate X) (msg msg' om : option message)
     (plan : list (vplan_item X)) (outputs : list (option message)),
-    valid_state_message_prop speculative_vlsm
-      (Speculative start current (Build_plan_item lbl msg :: plan) outputs) msg' ->
+    valid_state_prop speculative_vlsm
+      (Speculative start current ({| label_a := lbl; input_a := msg' |} :: plan) outputs) ->
+    option_valid_message_prop speculative_vlsm msg' ->
+    msg = msg' ->
     input_valid_transition X lbl (current, msg) (current', om) ->
       input_valid_transition speculative_vlsm Execute
         (Speculative start current (Build_plan_item lbl msg :: plan) outputs, msg')
         (Speculative start current' plan (outputs ++ [om]), None).
 Proof.
-  intros lbl start current current' msg msg' om plan outputs Hvsmp [Hiv Ht].
+  intros lbl start current current' msg msg' om plan outputs Hvsp Hovmp -> [Hiv Ht].
   constructor; cbn; cycle 1.
   - unfold vtransition.
     change (@vtype message X) with (@type message X).
     by rewrite Ht.
-  - destruct Hiv as (Hvsp & Hovmp & Hv).
-    replace msg with msg' in *; cycle 1.
-    {
-      inversion Hvsmp; subst; [done |].
-      admit.
-    }
-    split_and!; cycle 1.
-    + admit.
-    + done.
-    + unfold vvalid.
-      by change (@vtype message X) with (@type message X).
-    + by exists msg'.
-Admitted.
+  - destruct Hiv as (Hvsp' & Hovmp' & Hv).
+    by split_and!.
+Qed.
 
 Lemma input_valid_transition_Commit_cons :
   forall (start current : vstate X) (om : option message) (outputs : list (option message)),
@@ -187,22 +159,17 @@ Qed.
 Lemma input_valid_transition_Rollback :
   forall (start current : vstate X) (lbl : label) (msg : option message)
     (plan : list (vplan_item X)) (outputs : list (option message)),
+      valid_state_prop speculative_vlsm
+        (Speculative start current ({| label_a := lbl; input_a := msg |} :: plan) outputs) ->
       ~ vvalid X lbl (current, msg) ->
       input_valid_transition speculative_vlsm Rollback
         (Speculative start current (Build_plan_item lbl msg :: plan) outputs, None)
         (Actual start, None).
 Proof.
   constructor; cbn; [| done].
-  split_and!; [.. | done]; cycle 1.
-  - by apply speculative_option_valid_message_prop_None.
-  - by apply valid_state_prop_Speculative.
+  split_and!; [done | | done].
+  by apply speculative_option_valid_message_prop_None.
 Qed.
-
-Print Assumptions input_valid_transition_Speculate.
-Print Assumptions input_valid_transition_Execute.
-Print Assumptions input_valid_transition_Commit_cons.
-Print Assumptions input_valid_transition_Commit_nil.
-Print Assumptions input_valid_transition_Rollback.
 
 Definition speculative_lift_transition_item
   (start : vstate X) (ti : vtransition_item X)
@@ -235,6 +202,16 @@ match tr with
     speculative_lift_transition_item start ti ++ speculative_lift_trace (destination ti) tr'
 end.
 
+Lemma speculative_lift_trace_app :
+  forall (start : vstate X) (tr1 tr2 : list (vtransition_item X)),
+    speculative_lift_trace start (tr1 ++ tr2) =
+    speculative_lift_trace start tr1 ++ speculative_lift_trace (finite_trace_last start tr1) tr2.
+Proof.
+  intros start tr1; revert start.
+  induction tr1 as [| ti tr1']; simpl; intros; [done |].
+  by rewrite <- app_assoc, IHtr1', finite_trace_last_cons.
+Qed.
+
 Lemma speculative_lift_input_valid_transition :
   forall (lbl : label) (s1 s2 : vstate X) (iom oom : option message),
     input_valid_transition X lbl (s1, iom) (s2, oom) ->
@@ -242,11 +219,10 @@ Lemma speculative_lift_input_valid_transition :
         (speculative_lift_transition_item s1 (Build_transition_item lbl iom s2 oom)).
 Proof.
   intros lbl s1 s2 iom oom [[Hvsp [Hovmp Hv]] Ht].
-  constructor; [| by eapply input_valid_transition_Speculate].
+  constructor; [| admit].
   constructor; cycle 1.
   + unfold plan; change [oom] with ([] ++ [oom]).
-    eapply input_valid_transition_Execute; [| done].
-    admit.
+    eapply input_valid_transition_Execute; admit.
   + constructor; cycle 1.
     * apply input_valid_transition_Commit_cons. admit.
     * constructor.
@@ -255,6 +231,52 @@ Proof.
          split_and!; [admit | | done..].
          by apply speculative_option_valid_message_prop_None.
 Admitted.
+
+Lemma finite_valid_trace_init_to_speculative :
+  forall (s1 s2 : vstate X) (tr : list (vtransition_item X)),
+    finite_valid_trace_init_to X s1 s2 tr ->
+      finite_valid_trace_init_to speculative_vlsm (Actual s1) (Actual s2)
+        (speculative_lift_trace s1 tr).
+Proof.
+  Check finite_valid_trace_init_to.
+  Check finite_valid_trace_init_to_rev_strong_ind.
+  intros s1 s2 tr Htr.
+  induction Htr using finite_valid_trace_init_to_rev_strong_ind; cbn.
+  - constructor; [| done].
+    constructor.
+    by apply initial_state_is_valid.
+  - split; [| by apply IHHtr1].
+    rewrite speculative_lift_trace_app.
+    apply finite_valid_trace_from_to_app with (Actual s); [by apply IHHtr1 |].
+    constructor; cycle 1.
+    {
+      replace s with (finite_trace_last is tr) in * by admit.
+      apply input_valid_transition_Speculate; [| done].
+      by apply valid_trace_last_pstate in IHHtr1.
+    }
+    constructor; cycle 1.
+    {
+      replace sf with (finite_trace_last is tr) in * by admit.
+      change [oom] with ([] ++ [oom]).
+      apply input_valid_transition_Execute; cycle 3.
+      + replace s with (finite_trace_last is tr) in * by admit.
+        done.
+      + cbn.
+
+
+
+
+
+
+
+unfold empty_initial_message_or_final_output in Heqiom.
+        From VLSM.Lib Require Import ListExtras.
+        destruct_list_last iom_tr iom_tr' item Heqtr; subst.
+        * apply option_initial_message_is_valid in Heqiom.
+          exists iom.
+      
+    }
+Qed.
 
 Lemma in_futures_speculative :
   forall (s1 s2 : vstate X),
@@ -284,5 +306,24 @@ Proof.
   - apply (finite_valid_trace_from_to_app speculative_vlsm (Actual s)); [| done].
     by apply speculative_lift_input_valid_transition.
 Qed.
+
+Lemma valid_state_prop_Actual :
+  forall (s : vstate X),
+    valid_state_prop X s -> valid_state_prop speculative_vlsm (Actual s).
+Proof.
+  intros s [om Hvsmp]; red.
+  induction Hvsmp.
+  - by exists None; constructor; cbn.
+  - destruct IHHvsmp1 as [om1 Hom1], IHHvsmp2 as [om2 Hom2].
+    exists om1.
+Admitted.
+
+Lemma valid_state_prop_Speculative :
+  forall (start current : vstate X) (plan : list (vplan_item X)) (outputs : list (option message)),
+    valid_state_prop speculative_vlsm (Speculative start current plan outputs).
+Proof.
+  intros.
+  red. exists None.
+Admitted.
 
 End sec_speculative.
