@@ -10,11 +10,6 @@ Tactic Notation "spec" hyp(H) :=
   let H1 := fresh in (assert (H1: a);
   [|generalize (H H1); clear H H1; intro H]) end.
 
-(** ** Tactics for unfolding terms *)
-Tactic Notation "hnf_in" uconstr(T) :=
-  let t := fresh in
-  set (t := T); hnf in (value of t); subst t.
-
 (** ** Basic logic *)
 
 Lemma Is_true_iff_eq_true: forall x: bool, x = true <-> x.
