@@ -120,7 +120,7 @@ Qed.
 
 Lemma set_diff_intro :
   forall (a : A) (x y : set),
-    a ∈ x -> ~ a ∈ y -> a ∈ set_diff x y.
+    a ∈ x -> a ∉ y -> a ∈ set_diff x y.
 Proof.
   by intros; apply elem_of_difference.
 Qed.
@@ -134,14 +134,14 @@ Proof.
 Qed.
 
 Lemma set_diff_elim2 :
-  forall (a : A) (x y : set), a ∈ set_diff x y -> ~ a ∈ y.
+  forall (a : A) (x y : set), a ∈ set_diff x y -> a ∉ y.
 Proof.
   unfold set_diff; intros a x y Hxy.
   by apply elem_of_difference in Hxy as [_ Hny].
 Qed.
 
 Lemma set_diff_iff a l l' :
-  a ∈ set_diff l l' <-> a ∈ l /\ ~ a ∈ l'.
+  a ∈ set_diff l l' <-> a ∈ l /\ a ∉ l'.
 Proof.
   split.
   - by eauto using set_diff_elim1, set_diff_elim2.

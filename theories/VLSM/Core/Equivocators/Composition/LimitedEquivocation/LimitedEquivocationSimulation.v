@@ -31,13 +31,14 @@ From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.Fixed
 Section sec_fixed_limited_state_equivocation.
 
 Context
-  {message : Type}
-  `{ReachableThreshold index Ci}
-  `{!finite.Finite index}
+  {message index : Type}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (Limited : VLSM message := equivocators_limited_equivocations_vlsm IM (Ci := Ci))
+  (threshold : R)
+  `{ReachableThreshold index Ci threshold}
+  `{!finite.Finite index}
+  (Limited : VLSM message := equivocators_limited_equivocations_vlsm (Ci := Ci) IM threshold)
   (equivocating : Ci)
   (Fixed : VLSM message := equivocators_fixed_equivocations_vlsm IM (elements equivocating))
   .
@@ -49,7 +50,7 @@ Context
   limited state-equivocation constraint.
 *)
 Lemma equivocators_Fixed_incl_Limited
-  (Hlimited : (sum_weights (equivocating) <= `threshold)%R)
+  (Hlimited : (sum_weights (equivocating) <= threshold)%R)
   : VLSM_incl Fixed Limited.
 Proof.
   apply constraint_subsumption_incl.
@@ -74,13 +75,14 @@ End sec_fixed_limited_state_equivocation.
 Section sec_limited_equivocation_simulation.
 
 Context
-  {message : Type}
-  `{ReachableThreshold index Ci}
-  `{!finite.Finite index}
+  {message index : Type}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (XE : VLSM message := equivocators_limited_equivocations_vlsm IM (Ci := Ci))
+  (threshold : R)
+  `{ReachableThreshold index Ci threshold}
+  `{!finite.Finite index}
+  (XE : VLSM message := equivocators_limited_equivocations_vlsm (Ci := Ci) IM threshold)
   .
 
 (**
@@ -91,7 +93,7 @@ Context
 Lemma limited_equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   isX trX
-  (HtrX : fixed_limited_equivocation_prop IM isX trX)
+  (HtrX : fixed_limited_equivocation_prop (Ci := Ci) IM threshold isX trX)
   : exists is s tr,
       equivocators_total_state_project IM is = isX /\
       equivocators_total_state_project IM s = finite_trace_last isX trX /\
@@ -124,7 +126,7 @@ Context
 
 Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation_rev
   isX sX trX
-  (HtrX : finite_valid_trace_init_to (msg_dep_limited_equivocation_vlsm IM
+  (HtrX : finite_valid_trace_init_to (msg_dep_limited_equivocation_vlsm (Cv := Ci) IM threshold
             full_message_dependencies sender) isX sX trX)
   : exists is s tr,
       equivocators_total_state_project IM is = original_state isX /\
@@ -151,7 +153,7 @@ Context
   `{FinSet message Cm}
   (sender : message -> option index)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) threshold sender)
   (message_dependencies : message -> Cm)
   .
 
@@ -162,7 +164,7 @@ Context
   state-equivocation constraint.
 *)
 Lemma limited_equivocators_valid_state_rev
-  (Hwitnessed_equivocation : WitnessedEquivocationCapability IM Datatypes.id sender (Cm := Ci))
+  (Hwitnessed_equivocation : WitnessedEquivocationCapability IM threshold Datatypes.id sender (Cv := Ci))
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
@@ -174,7 +176,7 @@ Lemma limited_equivocators_valid_state_rev
 Proof.
   intros sX HsX.
   apply
-    (limited_valid_state_has_trace_exhibiting_limited_equivocation IM
+    (limited_valid_state_has_trace_exhibiting_limited_equivocation IM threshold
       sender message_dependencies Hwitnessed_equivocation Hfull
       no_initial_messages_in_IM can_emit_signed)
     in HsX as (isX & trX & HsX & HtrX).

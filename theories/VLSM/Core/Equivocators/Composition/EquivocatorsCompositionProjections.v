@@ -2072,7 +2072,7 @@ Proof.
       (free_sub_free_constraint IM (free_constraint IM)))
       (EquivocatorsComposition.equivocators_state_project
         (SubProjectionTraces.sub_IM IM (finite.enum index))
-        (λ i : sub_index (finite.enum index), initial_descriptors (` i))
+        (fun i : sub_index (finite.enum index) => initial_descriptors (` i))
         (composite_state_sub_projection equivocator_IM (finite.enum index) s))
       (finite_trace_sub_projection IM (finite.enum index) trX)).
     { revert HtrX.

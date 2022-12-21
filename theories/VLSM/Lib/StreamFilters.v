@@ -307,8 +307,10 @@ Program Definition fitering_subsequence_stream_filter_map_prefix_ex
   | 0 => exist _ 0 _
   | S m => exist _ (S (Str_nth m ss)) _
   end.
-Next Obligation. done. Qed.
 Next Obligation.
+Proof. done. Qed.
+Next Obligation.
+Proof.
   intros. subst.
   specialize (fitering_subsequence_stream_filter_map_prefix P f _ _ Hfs (S (Str_nth m ss))) as Heq.
   remember (S m) as Sm.
@@ -620,6 +622,7 @@ Program Definition stream_map_option_prefix_ex
                     (fun k => is_Some_proj (proj2_dsig k)) _ _ Hfs k)
   in exist _ n _.
 Next Obligation.
+Proof.
   by intros; cbn; rewrite !map_option_as_filter.
 Qed.
 
@@ -686,6 +689,7 @@ Program Definition stream_concat_map_ex_prefix
       FNonEmpty (list_function_restriction f) _ _ Hfs k)
   in exist _ n _.
 Next Obligation.
+Proof.
   cbn; intros Hinf k n Heq.
   rewrite <- (stream_concat_map_prefix Hinf).
   apply stream_prefix_of.
@@ -709,6 +713,7 @@ Program Definition stream_concat_map_ex_min_prefix
   let (n, Hpre) :=  stream_concat_map_ex_prefix Hinf k in
   exist _ (find_least_among Ppre n) _.
 Next Obligation.
+Proof.
   by intros; apply find_least_among_is_minimal.
 Qed.
 

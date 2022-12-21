@@ -1,5 +1,14 @@
 # VLSM
 
+[![Docker CI][docker-action-shield]][docker-action-link]
+[![coqdoc][coqdoc-shield]][coqdoc-link]
+
+[docker-action-shield]: https://github.com/runtimeverification/vlsm/workflows/Test%20PR/badge.svg?branch=master
+[docker-action-link]: https://github.com/runtimeverification/vlsm/actions?query=workflow:"Test%20PR"
+
+[coqdoc-shield]: https://img.shields.io/badge/docs-coqdoc-blue.svg
+[coqdoc-link]: https://runtimeverification.github.io/vlsm-docs/latest/coqdoc/toc.html
+
 A validating labelled state transition and message production system
 (VLSM) abstractly models a distributed system with faults. This project
 contains a formalization of VLSMs and their theory in the Coq proof assistant.
@@ -9,7 +18,7 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
 - License: [BSD 3-Clause "New" or "Revised" License](LICENSE.md)
 - Compatible Coq versions: 8.15 or later
 - Additional dependencies:
-  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0
+  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0 or later
   - [Itauto](https://gitlab.inria.fr/fbesson/itauto)
   - [Coq-Equations](https://github.com/mattam82/Coq-Equations)
 - Coq namespace: `VLSM`

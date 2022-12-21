@@ -165,7 +165,7 @@ Qed.
 Definition maximal_elements_list
   {A} (precedes: relation A) `{!RelDecision precedes} (l : list A)
   : list A :=
-  filter (fun a => Forall (fun b => (~ precedes a b)) l) l.
+  filter (fun a => Forall (fun b => ~ precedes a b) l) l.
 
 Example maximal_elements_list1: maximal_elements_list Nat.lt [1; 4; 2; 4] = [4;4].
 Proof. by itauto. Qed.
@@ -184,7 +184,7 @@ Definition maximal_elements_set
     filter (fun a => set_Forall (fun b => ~ precedes a b) s) s.
 
 Lemma filter_ext_elem_of {A} P Q
- `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} (l:list A) :
+ `{forall (x:A), Decision (P x)} `{forall (x:A), Decision (Q x)} (l:list A) :
  (forall a, a ∈ l -> (P a <-> Q a)) ->
  filter P l = filter Q l.
 Proof.
@@ -196,7 +196,7 @@ Proof.
 Qed.
 
 Lemma ext_elem_of_filter {A} P Q
- `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)}
+ `{forall (x:A), Decision (P x)} `{forall (x:A), Decision (Q x)}
  (l : list A) :
  filter P l = filter Q l -> forall a, a ∈ l -> (P a <-> Q a).
 Proof.
@@ -207,7 +207,7 @@ Proof.
 Qed.
 
 Lemma filter_complement {X} P Q
- `{∀ (x:X), Decision (P x)} `{∀ (x:X), Decision (Q x)}
+ `{forall (x:X), Decision (P x)} `{forall (x:X), Decision (Q x)}
  (l : list X) :
  filter P l = filter Q l <->
  filter (fun x => ~ P x) l = filter (fun x => ~ Q x) l.
@@ -224,7 +224,7 @@ Proof.
 Qed.
 
 Lemma NoDup_elem_of_remove A (l l' : list A) a :
-  NoDup (l ++ a :: l') -> NoDup (l ++ l') /\ a ∉ (l ++ l').
+  NoDup (l ++ a :: l') -> NoDup (l ++ l') /\ a ∉ l ++ l'.
 Proof.
   intros Hnda.
   apply NoDup_app in Hnda.
@@ -280,7 +280,7 @@ Qed.
 
 Lemma longer_subseteq_has_dups `{EqDecision A} :
   forall l1 l2 : list A, l1 ⊆ l2 -> length l1 > length l2 ->
-  exists (i1 i2 : nat) (a : A), i1 ≠ i2 ∧ l1 !! i1 = Some a /\ l1 !! i2 = Some a.
+  exists (i1 i2 : nat) (a : A), i1 <> i2 /\ l1 !! i1 = Some a /\ l1 !! i2 = Some a.
 Proof.
   induction l1; [by inversion 2 |].
   intros l2 Hl12 Hlen12.
@@ -351,7 +351,7 @@ Proof.
   by apply drop_S.
 Qed.
 
-Lemma filter_in {A} P `{∀ (x:A), Decision (P x)} x s :
+Lemma filter_in {A} P `{forall (x:A), Decision (P x)} x s :
   In x s ->
   P x ->
   In x (filter P s).
@@ -363,7 +363,7 @@ Proof.
 Qed.
 
 Lemma filter_incl_fn {A} P Q
-  `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} :
+  `{forall (x:A), Decision (P x)} `{forall (x:A), Decision (Q x)} :
   (forall a, P a -> Q a) ->
   forall s, incl (filter P s) (filter Q s).
 Proof.
@@ -374,7 +374,7 @@ Proof.
 Qed.
 
 Lemma filter_length_fn {A} P Q
-  `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)}
+  `{forall (x:A), Decision (P x)} `{forall (x:A), Decision (Q x)}
   s (Hfg : Forall (fun a => P a -> Q a) s) :
   length (filter P s) <= length (filter Q s).
 Proof.
@@ -385,7 +385,7 @@ Proof.
 Qed.
 
 Lemma filter_eq_fn {A} P Q
- `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} s :
+ `{forall (x:A), Decision (P x)} `{forall (x:A), Decision (Q x)} s :
   (forall a, In a s -> P a <-> Q a) ->
   filter P s = filter Q s.
 Proof.
@@ -398,7 +398,7 @@ Proof.
 Qed.
 
 Lemma nth_error_filter
-  {A} P `{∀ (x:A), Decision (P x)}
+  {A} P `{forall (x:A), Decision (P x)}
   (l : list A)
   (n : nat)
   (a : A)
@@ -424,9 +424,9 @@ Proof.
       by rewrite Hnth'.
 Qed.
 
-Lemma filter_subseteq {A} P `{∀ (x:A), Decision (P x)} (s1 s2 : list A) :
+Lemma filter_subseteq {A} P `{forall (x:A), Decision (P x)} (s1 s2 : list A) :
   s1 ⊆ s2 ->
-  (filter P s1) ⊆ (filter P s2).
+  filter P s1 ⊆ filter P s2.
 Proof.
   induction s1; intros; intro x; intros.
   - by apply not_elem_of_nil in H1.
@@ -443,7 +443,7 @@ Proof.
 Qed.
 
 Lemma filter_subseteq_fn {A} P Q
-  `{∀ (x:A), Decision (P x)} `{∀ (x:A), Decision (Q x)} :
+  `{forall (x:A), Decision (P x)} `{forall (x:A), Decision (Q x)} :
   (forall a, P a -> Q a) ->
   forall (s : list A), filter P s ⊆ filter Q s.
 Proof.
@@ -455,7 +455,7 @@ Proof.
   - by itauto.
 Qed.
 
-Lemma filter_incl {A} P `{∀ (x:A), Decision (P x)} s1 s2 :
+Lemma filter_incl {A} P `{forall (x:A), Decision (P x)} s1 s2 :
   incl s1 s2 ->
   incl (filter P s1) (filter P s2).
 Proof.
@@ -469,8 +469,8 @@ Proof.
     by intros y HIn; apply H0; right.
 Qed.
 
-Lemma Forall_filter_nil {A} P `{∀ (x:A), Decision (P x)} l :
- Forall (fun a : A => ~ P a) l <-> filter P l = [].
+Lemma Forall_filter_nil {A} P `{forall (x:A), Decision (P x)} l :
+  Forall (fun a : A => ~ P a) l <-> filter P l = [].
 Proof.
   rewrite Forall_forall.
   split; intro Hnone.
@@ -481,23 +481,6 @@ Proof.
     by eapply filter_nil_not_elem_of in Px.
 Qed.
 
-Lemma nodup_append {A} : forall (l1 l2 : list A),
-  NoDup l1 ->
-  NoDup l2 ->
-  (forall a, a ∈ l1 -> ~ a ∈ l2) ->
-  (forall a, a ∈ l2 -> ~ a ∈ l1) ->
-  NoDup (l1 ++ l2).
-Proof.
-  induction l1; simpl; intros; [done |].
-  inversion H; subst; clear H. constructor.
-  - intro. apply elem_of_app in H. destruct H as [Inl1 | InL2].
-    + by apply H5.
-    + by apply (H1 a); [left |].
-  - apply IHl1; [done | done | |]; intros.
-    + by apply H1; right.
-    + by apply H2 in H; rewrite elem_of_cons in H; itauto.
-Qed.
-
 Lemma elem_of_list_annotate_forget
   {A : Type}
   (P : A -> Prop)
@@ -505,8 +488,8 @@ Lemma elem_of_list_annotate_forget
   (l : list A)
   (Hs : Forall P l)
   (xP : dsig P)
-  (Hin : xP ∈ (list_annotate P l Hs))
-  : (proj1_sig xP) ∈ l.
+  (Hin : xP ∈ list_annotate P l Hs)
+  : proj1_sig xP ∈ l.
 Proof.
   induction l.
   - by inversion Hin.
@@ -523,7 +506,7 @@ Lemma elem_of_list_annotate
   (l : list A)
   (Hs : Forall P l)
   (xP : dsig P)
-  : xP ∈ (list_annotate P l Hs) <-> (` xP) ∈ l.
+  : xP ∈ list_annotate P l Hs <-> (` xP) ∈ l.
 Proof.
   split; [by apply elem_of_list_annotate_forget |].
   destruct xP as [x Hpx]; cbn.
@@ -548,7 +531,7 @@ Lemma occurrences_ordering
   (a b : A)
   (la1 la2 lb1 lb2 : list A)
   (Heq : la1 ++ a :: la2 = lb1 ++ b :: lb2)
-  (Ha : ~a ∈ (b :: lb2))
+  (Ha : a ∉ b :: lb2)
   : exists lab : list A, lb1 = la1 ++ a :: lab.
 Proof.
   generalize dependent lb2. generalize dependent la2.
@@ -567,7 +550,7 @@ Qed.
 Lemma list_max_elem_of_exists
    (l : list nat)
    (nz : list_max l > 0) :
-   (list_max l) ∈ l.
+   list_max l ∈ l.
 Proof.
   induction l; simpl in *; [lia |].
   rewrite elem_of_cons.
@@ -613,7 +596,7 @@ Lemma map_option_subseteq
   (f : A -> option B)
   (l1 l2 : list A)
   (Hincl : l1 ⊆ l2)
-  : (map_option f l1) ⊆ (map_option f l2).
+  : map_option f l1 ⊆ map_option f l2.
 Proof.
   by intros b; rewrite !elem_of_map_option; firstorder.
 Qed.
@@ -622,7 +605,7 @@ Lemma elem_of_cat_option
   {A : Type}
   (l : list (option A))
   (a : A)
-  : a ∈ (cat_option l) <-> exists b : (option A), b ∈ l /\ b = Some a.
+  : a ∈ cat_option l <-> exists b : option A, b ∈ l /\ b = Some a.
 Proof.
   by apply elem_of_map_option.
 Qed.
@@ -649,7 +632,7 @@ Qed.
 Lemma list_max_elem_of_exists2
    (l : list nat)
    (Hne : l <> []) :
-   (list_max l) ∈ l.
+   list_max l ∈ l.
 Proof.
   destruct (list_max l) eqn : eq_max.
   - destruct l; [by itauto congruence |].

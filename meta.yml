@@ -4,7 +4,8 @@ shortname: vlsm
 organization: runtimeverification
 community: false
 dune: false
-coqdoc: false
+action: true
+coqdoc: true
 
 synopsis: >-
   Coq formalization of validating labelled state transition
@@ -44,7 +45,7 @@ license:
   file: LICENSE.md
 
 supported_coq_versions:
-  text: 8.15 or later
+  text: 8.15 and later
   opam: '{>= "8.15"}'
 
 dependencies:
@@ -52,7 +53,7 @@ dependencies:
     name: coq-stdpp
     version: '{>= "1.7.0"}'
   description: |-
-    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0
+    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0 or later
 - opam:
     name: coq-itauto
   description: |-
@@ -61,6 +62,10 @@ dependencies:
     name: coq-equations
   description: |-
     [Coq-Equations](https://github.com/mattam82/Coq-Equations)
+
+tested_coq_opam_versions:
+- version: '8.16-ocaml-4.14-flambda'
+- version: '8.15-ocaml-4.14-flambda'
 
 namespace: VLSM
 

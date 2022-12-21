@@ -1,4 +1,5 @@
 From stdpp Require Import prelude.
+From Coq Require Import Reals.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import SubProjectionTraces MessageDependencies Equivocation.
@@ -36,14 +37,15 @@ Context
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   `{finite.Finite validator}
-  (A : validator -> index)
-  (sender : message -> option validator)
   (Free := free_composite_vlsm IM)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
-  `{ReachableThreshold validator Cm}
+  (threshold : R)
+  `{ReachableThreshold validator Cv threshold}
+  (A : validator -> index)
+  (sender : message -> option validator)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cm
-    := equivocation_dec_tracewise IM A sender)
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cv threshold
+    := equivocation_dec_tracewise IM threshold A sender)
   (equivocating_validators :=
     equivocating_validators (BasicEquivocation := Htracewise_BasicEquivocation))
   .
@@ -147,7 +149,9 @@ Lemma input_valid_transition_reflects_trace_witnessing_equivocation_prop
 Proof.
   apply finite_valid_trace_init_to_last in Htr as Hlst.
   intros v; split; simpl in *; rewrite Hlst in *.
-  - by intros Hv; eapply equivocating_validators_is_equivocating_tracewise_iff with (Cm := Cm).
+  - intros Hv.
+    by eapply equivocating_validators_is_equivocating_tracewise_iff
+      with (ReachableThreshold0 := H11).
   - intros (msg & Hsender & Heqv).
     apply Hincl.
     specialize (Hwitness v);
@@ -228,13 +232,13 @@ Lemma equivocating_validators_witness_last_char
   (Htr_item : finite_valid_trace_init_to PreFree is s' (tr ++ [item]))
   (Hwitness : trace_witnessing_equivocation_prop is (tr ++ [item]))
   (s := finite_trace_last is tr)
-  : equivocating_validators s ≡@{Cm} equivocating_validators s'
+  : equivocating_validators s ≡@{Cv} equivocating_validators s'
     /\ trace_witnessing_equivocation_prop is tr
     \/
     (exists m, om = Some m /\
      exists v, sender m = Some v /\
      v ∉ equivocating_validators s /\
-     equivocating_validators s' ≡@{Cm} {[ v ]} ∪ (equivocating_validators s) /\
+     equivocating_validators s' ≡@{Cv} {[ v ]} ∪ (equivocating_validators s) /\
      forall (is : composite_state IM) (tr : list transition_item),
         finite_valid_trace_init_to PreFree is s tr ->
         trace_witnessing_equivocation_prop is tr ->
@@ -356,7 +360,7 @@ Lemma strong_trace_witnessing_equivocation_prop_extend_eq
   (Hprefix : strong_trace_witnessing_equivocation_prop is' tr'')
   item
   (Hwitness : trace_witnessing_equivocation_prop is (tr' ++ [item]))
-  (Heq: equivocating_validators s ≡@{Cm} equivocating_validators (destination item))
+  (Heq: equivocating_validators s ≡@{Cv} equivocating_validators (destination item))
   : strong_trace_witnessing_equivocation_prop is' (tr'' ++ [item]).
 Proof.
   intros prefix suffix Heq_tr''_item.
@@ -413,7 +417,7 @@ Lemma strong_trace_witnessing_equivocation_prop_extend_neq
   (Hwneq: ¬ trace_has_message (field_selector output) msg tr)
   v
   (Hsender: sender msg = Some v)
-  (Hneq: equivocating_validators (destination item) ≡@{Cm} {[ v ]} ∪ (equivocating_validators s))
+  (Hneq: equivocating_validators (destination item) ≡@{Cv} {[ v ]} ∪ (equivocating_validators s))
   : strong_trace_witnessing_equivocation_prop is (tr ++ [item]).
 Proof.
   intros prefix suffix Heq_tr''_item.
@@ -624,26 +628,28 @@ End sec_witnessed_equivocation.
 Section sec_witnessed_equivocation_fixed_set.
 
 Context
-  `{FinSet message Cm}
-  `{ReachableThreshold index Ci}
-  `{!finite.Finite index}
+  {message index : Type}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
+  (threshold : R)
+  `{ReachableThreshold index Ci threshold}
+  `{!finite.Finite index}
   (Free := free_composite_vlsm IM)
-  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM id sender)}
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci
-    := equivocation_dec_tracewise IM id sender)
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM Datatypes.id sender)}
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci threshold
+    := equivocation_dec_tracewise IM threshold Datatypes.id sender)
+  `{FinSet message Cm}
   (message_dependencies : message -> Cm)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  (can_emit_signed : channel_authentication_prop IM id sender)
-  (Hsender_safety : sender_safety_alt_prop IM id sender :=
-    channel_authentication_sender_safety IM id sender can_emit_signed)
+  (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
+  (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender :=
+    channel_authentication_sender_safety IM Datatypes.id sender can_emit_signed)
   (Free_has_sender :=
-    composite_no_initial_valid_messages_have_sender IM id sender
+    composite_no_initial_valid_messages_have_sender IM Datatypes.id sender
       can_emit_signed no_initial_messages_in_IM (free_constraint IM))
   (equivocating_validators :=
     equivocating_validators (BasicEquivocation := Htracewise_BasicEquivocation))
@@ -688,7 +694,7 @@ Proof.
   specialize
     (@lift_to_composite_generalized_preloaded_VLSM_embedding
       message (sub_index (elements(equivocating_validators sf))) _ (sub_IM IM (elements(equivocating_validators sf)))
-      (λ msg : message, msg ∈ message_dependencies m)
+      (fun msg : message => msg ∈ message_dependencies m)
       (composite_has_been_directly_observed IM s))
     as Hproj.
   spec Hproj.
@@ -718,7 +724,7 @@ Qed.
 
 Lemma strong_witness_has_fixed_equivocation is s tr
   (Htr : finite_valid_trace_init_to (free_composite_vlsm IM) is s tr)
-  (Heqv: strong_trace_witnessing_equivocation_prop (Cm := Ci) IM id sender is tr)
+  (Heqv: strong_trace_witnessing_equivocation_prop (Cv := Ci) IM threshold Datatypes.id sender is tr)
   : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM
       (equivocating_validators s)) is s tr.
 Proof.
@@ -800,7 +806,7 @@ Qed.
   [equivocating_validators_fixed_equivocation_constraint] induced by it.
 *)
 Lemma equivocating_validators_fixed_equivocation_characterization
-  (Hke : WitnessedEquivocationCapability IM id sender (Cm := Ci))
+  (Hke : WitnessedEquivocationCapability IM threshold Datatypes.id sender (Cv := Ci))
   : forall s,
     valid_state_prop Free s ->
     valid_state_prop
@@ -808,7 +814,7 @@ Lemma equivocating_validators_fixed_equivocation_characterization
 Proof.
   intros s Hs.
   destruct
-    (free_has_strong_trace_witnessing_equivocation_prop IM id sender _ s Hs)
+    (free_has_strong_trace_witnessing_equivocation_prop IM threshold Datatypes.id sender _ s Hs)
     as [is [tr [Htr Heqv]]].
   cut (finite_valid_trace_from_to (composite_vlsm IM
     (equivocating_validators_fixed_equivocation_constraint s)) is s tr).

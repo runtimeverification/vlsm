@@ -296,6 +296,7 @@ Program Definition equivocator_state_extend
     (fun j => if decide (S (equivocator_state_last bs) = j)
               then s else equivocator_state_s bs (@of_nat_lt j (S (equivocator_state_last bs)) _)).
 Next Obligation.
+Proof.
   by intros; specialize (fin_to_nat_lt j);  lia.
 Qed.
 
@@ -377,6 +378,7 @@ Program Definition equivocator_state_append
         equivocator_state_s es2 (@of_nat_lt k (equivocator_state_n es2) _)
       end).
 Next Obligation.
+Proof.
   by intros; specialize (equivocator_state_last_n es2) as Hlst_es2; lia.
 Qed.
 
@@ -533,19 +535,19 @@ Definition equivocator_initial_state_prop
   : Prop
   := is_singleton_state bs /\ vinitial_state_prop X (equivocator_state_zero bs).
 
-Definition equivocator_initial_state
-  := sig equivocator_initial_state_prop.
+Definition equivocator_initial_state : Type :=
+  {bs : equivocator_state | equivocator_initial_state_prop bs}.
 
-Definition equivocator_s0 : equivocator_initial_state.
+Program Definition equivocator_s0 : equivocator_initial_state :=
+  exist _ (mk_singleton_state (proj1_sig (vs0 X))) _.
+Next Obligation.
 Proof.
-  exists (mk_singleton_state (proj1_sig (vs0 X))).
-  unfold mk_singleton_state.
-  unfold equivocator_initial_state_prop.
-  by split; [|destruct (vs0 X)].
+  unfold mk_singleton_state, equivocator_initial_state_prop; cbn.
+  by split; [| destruct (vs0 X)].
 Defined.
 
-Instance equivocator_initial_state_inh : Inhabited equivocator_initial_state :=
-  {| inhabitant := equivocator_s0 |}.
+#[export] Instance equivocator_initial_state_inh : Inhabited equivocator_initial_state :=
+  populate equivocator_s0.
 
 Definition equivocator_transition
   (bl : equivocator_label)

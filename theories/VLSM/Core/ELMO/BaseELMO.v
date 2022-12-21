@@ -572,8 +572,10 @@ Equations rec_obs_fn (s : State) : listset Observation by wf (sizeState s) lt :=
 | {| obs := [] |} => ∅
 | {| obs := o :: os; adr := a |} =>
   {[o]} ∪ rec_obs_fn (state (message o)) ∪ rec_obs_fn {| obs := os; adr := a |}.
-Next Obligation. by intros [? []] os a _; unfold sizeState; cbn; lia. Qed.
-Next Obligation. by intros [? []] os a _; unfold sizeState; cbn; lia. Qed.
+Next Obligation.
+Proof. by intros [? []] os a _; unfold sizeState; cbn; lia. Qed.
+Next Obligation.
+Proof. by intros [? []] os a _; unfold sizeState; cbn; lia. Qed.
 
 Lemma elem_of_rec_obs_fn_1 :
   forall (s : State) (o : Observation),
@@ -700,7 +702,7 @@ Proof.
   generalize (enum index), (NoDup_enum index) as Hnodup, (elem_of_enum i) as Hi.
   induction l; intros; [by inversion Hi |].
   inversion Hnodup; subst.
-  assert (Hnil : forall i, i ∉ l -> filter (λ i0 : index, idx i0 = idx i) l = []).
+  assert (Hnil : forall i, i ∉ l -> filter (fun i0 : index => idx i0 = idx i) l = []).
   {
     intros; apply Forall_filter_nil, Forall_forall.
     intros j Hj; contradict Hj.

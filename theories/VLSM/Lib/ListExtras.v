@@ -159,7 +159,7 @@ Qed.
 
 Lemma in_not_in : forall A (x y : A) (l:list A),
   x ∈ l ->
-  ~ y ∈ l ->
+  y ∉ l ->
   x <> y.
 Proof. by itauto congruence. Qed.
 
@@ -585,7 +585,7 @@ Proof.
 Qed.
 
 Fixpoint nth_error_filter_index
-  {A} P `{∀ (x:A), Decision (P x)}
+  {A} P `{forall (x:A), Decision (P x)}
   (l : list A)
   (n : nat)
   :=
@@ -602,7 +602,7 @@ Fixpoint nth_error_filter_index
   end.
 
 Lemma nth_error_filter_index_le
-  {A} P `{∀ (x:A), Decision (P x)}
+  {A} P `{forall (x:A), Decision (P x)}
   (l : list A)
   (n1 n2 : nat)
   (Hle : n1 <= n2)
@@ -1424,8 +1424,8 @@ Proof.
   by eapply Listing_finite_transparent.
 Qed.
 
-Lemma sumbool_forall [A : Type] [P Q : A → Prop]:
-  (∀ x : A, {P x} + {Q x}) → ∀ l : list A, {Forall P l} + {Exists Q l}.
+Lemma sumbool_forall [A : Type] [P Q : A -> Prop]:
+  (forall x : A, {P x} + {Q x}) -> forall l : list A, {Forall P l} + {Exists Q l}.
 Proof.
   induction l.
   - by left; constructor.
@@ -1592,7 +1592,7 @@ Proof.
 Qed.
 
 Lemma list_subseteq_tran : forall (A : Type) (l m n : list A),
- l ⊆ m → m ⊆ n → l ⊆ n.
+ l ⊆ m -> m ⊆ n -> l ⊆ n.
 Proof.
   intros A l m n Hlm Hmn x y.
   by apply Hmn, Hlm.
@@ -1620,10 +1620,7 @@ Qed.
 Lemma nodup_append_left {A}:
   forall (l1 l2 : list A), NoDup (l1 ++ l2) -> NoDup l1.
 Proof.
-  induction l1; intros.
-  - by constructor.
-  - inversion H. apply IHl1 in H3. constructor; [| done]. intro. apply H2.
-    by apply elem_of_app; left.
+  by intros l1 l2 [? _]%NoDup_app.
 Qed.
 
 Lemma subseteq_empty {A} : forall (l : list A),
@@ -1775,6 +1772,7 @@ Program Definition not_null_element
   `{EqDecision A} [l : list A] (Hl : l <> []) : dsig (fun i => i ∈ l) :=
     dexist (is_Some_proj (proj2 (head_is_Some l) Hl)) _.
 Next Obligation.
+Proof.
   by intros A ? [| h t] ?; [| left].
 Qed.
 
@@ -1783,10 +1781,11 @@ Program Definition element_of_subseteq
   (di : dsig (fun i => i ∈ l1)) : dsig (fun i => i ∈ l2) :=
     dexist (` di) _.
 Next Obligation.
+Proof.
   by intros; cbn; destruct_dec_sig di i Hi Heq; subst; apply Hsub.
 Qed.
 
 Definition element_of_filter
-  `{EqDecision A} [P : A -> Prop] `{∀ x, Decision (P x)} [l : list A]
+  `{EqDecision A} [P : A -> Prop] `{forall x, Decision (P x)} [l : list A]
   : dsig (fun i => i ∈ filter P l) -> dsig (fun i => i ∈ l) :=
   element_of_subseteq (list_filter_subseteq P l).

@@ -60,7 +60,7 @@ Lemma elem_of_pre_VLSM_stuttering_embedding_finite_trace_project :
   forall (trX : list (@transition_item _ TX)) (itemY : @transition_item _ TY),
     itemY ∈ pre_VLSM_stuttering_embedding_finite_trace_project trX
       <->
-    exists (itemX : @transition_item _ TX), itemY ∈ transition_item_project itemX ∧ itemX ∈ trX.
+    exists (itemX : @transition_item _ TX), itemY ∈ transition_item_project itemX /\ itemX ∈ trX.
 Proof. by intros; apply elem_of_list_bind. Qed.
 
 End sec_pre_definitions.

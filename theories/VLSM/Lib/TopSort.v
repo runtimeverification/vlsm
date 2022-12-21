@@ -268,7 +268,7 @@ Definition topologically_sorted
     (Hab : precedes a b)
     (l1 l2 : list A)
     (Heq : l = l1 ++ [b] ++ l2)
-    , ~a ∈ l2.
+    , a ∉ l2.
 
 (**
   The following properties assume that <<precedes>> determines a [StrictOrder]
@@ -307,7 +307,7 @@ Proof.
   { rewrite Forall_forall in Hl. apply Hl. rewrite Heqa, !elem_of_app, elem_of_list_singleton. auto. }
   specialize (Hts a b Hab lb1 lb2 Heqb).
   rewrite Heqa in Heqb.
-  assert (Ha : a ∉ (b :: lb2)).
+  assert (Ha : a ∉ b :: lb2).
   { intro Ha. apply Hts.
     rewrite elem_of_cons in Ha.
     destruct Ha; subst; [| done].
@@ -416,7 +416,7 @@ Proof.
   rewrite Forall_forall in Hpc. rewrite Forall_forall.
   subst l.
   intros b Hb a Hab.
-  assert (Hb' : b ∈ (init ++ [final])) by (apply elem_of_app; left; done).
+  assert (Hb' : b ∈ init ++ [final]) by (apply elem_of_app; left; done).
   specialize (Hpc b Hb' a Hab).
   apply elem_of_app in Hpc.
   destruct Hpc as [Ha | Ha]; [done |].
@@ -668,7 +668,7 @@ Proof.
     specialize (last_error_is_last l' a') as Hlast.
     by itauto congruence.
   }
-  assert (a ∈ (top_sort l)).
+  assert (a ∈ top_sort l).
   {
     destruct H as [l' <-].
     by apply elem_of_app; right; left.
@@ -690,7 +690,7 @@ Proof.
   specialize (Htop max a contra).
 
   assert (Hinmax: max ∈ l) by (apply maximal_element_in; itauto).
-  assert (Hinatop : a ∈ (top_sort l)) by (apply Hseteq; itauto).
+  assert (Hinatop : a ∈ top_sort l) by (apply Hseteq; itauto).
   apply elem_of_list_split in Hinatop.
   destruct Hinatop as [prefA [sufA HeqA]].
   unfold get_maximal_element in Hmax.

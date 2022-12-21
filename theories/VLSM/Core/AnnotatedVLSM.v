@@ -35,13 +35,14 @@ Context
   `{Inhabited (sig initial_annotation_prop)}
   .
 
-Definition annotated_initial_state_prop (sa : annotated_state) :=
+Definition annotated_initial_state_prop (sa : annotated_state) : Prop :=
   vinitial_state_prop X (original_state sa) /\ initial_annotation_prop (state_annotation sa).
 
-#[export] Program Instance annotated_initial_state_prop_inhabited
-  : Inhabited (sig annotated_initial_state_prop) :=
-  populate (exist _ {| original_state := ` (vs0 X); state_annotation := ` inhabitant  |} _).
+#[export] Program Instance annotated_initial_state_prop_inhabited :
+  Inhabited {sa : annotated_state | annotated_initial_state_prop sa} :=
+    populate (exist _ {| original_state := `(vs0 X); state_annotation := `inhabitant; |} _).
 Next Obligation.
+Proof.
   split; cbn.
   - by destruct (vs0 X).
   - by destruct inhabitant.
@@ -70,7 +71,7 @@ Definition annotated_transition
 
 Definition annotated_vlsm_machine : VLSMMachine annotated_type :=
   {| initial_state_prop := fun s : @state _ annotated_type => annotated_initial_state_prop s
-  ; initial_message_prop := λ m : message, vinitial_message_prop X m
+  ; initial_message_prop := fun m : message => vinitial_message_prop X m
   ; valid := annotated_valid
   ; transition := annotated_transition
   |}.

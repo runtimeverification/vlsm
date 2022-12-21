@@ -85,9 +85,9 @@ Proof.
 Qed.
 
 Lemma tc_wf_projected
-  `{R1 : relation A} `(R2 : relation B) `{!Transitive R2} (f : A → B) :
-  (∀ x y, R1 x y → R2 (f x) (f y)) →
-  wf R2 → wf (tc R1).
+  `{R1 : relation A} `(R2 : relation B) `{!Transitive R2} (f : A -> B) :
+  (forall x y, R1 x y -> R2 (f x) (f y)) ->
+  wf R2 -> wf (tc R1).
 Proof.
   intros Hpreserve.
   apply wf_projected with f.
@@ -667,5 +667,4 @@ Definition sum_project_right {A B : Type} (x : A + B) : option B :=
 Program Definition not_lt_plus_dec {m n} (Hnlt : ~n < m) : {k | k + m = n} :=
   exist _ (n - m) _.
 Next Obligation.
-  by cbn; lia.
-Qed.
+Proof. by cbn; lia. Qed.

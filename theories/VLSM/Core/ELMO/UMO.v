@@ -35,14 +35,13 @@ Definition UMOComponent_initial_state_type (i : Address) : Type :=
 Program Definition UMOComponent_initial_state
   (i : Address) : UMOComponent_initial_state_type i := MkState [] i.
 Next Obligation.
+Proof.
   by compute.
 Defined.
 
-#[export]
-Instance Inhabited_UMOComponent_initial_state_type
-  (i : Address)
-  : Inhabited (UMOComponent_initial_state_type i)
-  := {| inhabitant := UMOComponent_initial_state i |}.
+#[export] Instance Inhabited_UMOComponent_initial_state_type (i : Address) :
+  Inhabited (UMOComponent_initial_state_type i) :=
+    populate (UMOComponent_initial_state i).
 
 Definition UMOComponent_transition
   (l : Label) (s : State) (om : option Message)
@@ -1578,7 +1577,7 @@ Proof.
   revert us Hall Hvsp.
   generalize (enum index) as is.
   induction is as [| i is']; cbn; intros us Hall Hvsp.
-  - replace us with (λ n : index, MkState [] (idx n)).
+  - replace us with (fun n : index => MkState [] (idx n)).
     + by constructor; apply initial_state_is_valid; compute.
     + extensionality i; rewrite Hall; [done |].
       by apply not_elem_of_nil.

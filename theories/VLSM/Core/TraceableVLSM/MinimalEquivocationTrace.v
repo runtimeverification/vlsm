@@ -27,7 +27,7 @@ Context
   (IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
-  `{!FullMessageDependencies message_dependencies full_message_dependencies}
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (state_destructor : forall i, vstate (IM i) -> set (vtransition_item (IM i) * vstate (IM i)))
   (state_size : forall i, vstate (IM i) -> nat)
@@ -289,6 +289,7 @@ Program Definition initial_indices
   : list index :=
   @filter _ _ _ (fun i => vinitial_state_prop (IM i) (s i)) _ is.
 Next Obligation.
+Proof.
   by intros; eapply traceable_vlsm_initial_state_dec, valid_state_project_preloaded_to_preloaded.
 Qed.
 
@@ -300,7 +301,7 @@ Qed.
 *)
 Definition find_decomposition
   (P : set (composite_transition_item IM * composite_state IM) -> nat -> Prop)
-  `{forall s, RelDecision (λ i, P (composite_state_destructor IM state_destructor s i))}
+  `{forall s, RelDecision (fun i => P (composite_state_destructor IM state_destructor s i))}
   (s : composite_state IM)
   (indices : list index)
   : option (index * nat) :=
@@ -601,7 +602,7 @@ Proof.
   assert (destination item = s') as <-
     by (eapply composite_tv_state_destructor_destination, elem_of_list_lookup_2; eauto).
   exists m; constructor; [done.. |].
-  cut (output item ≠ Some m).
+  cut (output item <> Some m).
   {
     intro.
     destruct (composite_has_been_sent_stepwise_props IM (free_constraint IM)) as [_ ].
@@ -649,7 +650,7 @@ Context
   (IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
-  `{!FullMessageDependencies message_dependencies full_message_dependencies}
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   `{forall i s, Decision (vinitial_state_prop (IM i) s)}
   (state_destructor : forall i, vstate (IM i) -> set (vtransition_item (IM i) * vstate (IM i)))

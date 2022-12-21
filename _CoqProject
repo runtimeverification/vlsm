@@ -40,6 +40,7 @@ theories/VLSM/Core/VLSMProjections.v
 theories/VLSM/Core/Composition.v
 theories/VLSM/Core/Validator.v
 theories/VLSM/Core/ProjectionTraces.v
+theories/VLSM/Core/ReachableThreshold.v
 theories/VLSM/Core/Equivocation.v
 theories/VLSM/Core/EquivocationProjections.v
 theories/VLSM/Core/Equivocation/NoEquivocation.v
@@ -48,6 +49,7 @@ theories/VLSM/Core/MessageDependencies.v
 theories/VLSM/Core/AnnotatedVLSM.v
 theories/VLSM/Core/ByzantineTraces.v
 theories/VLSM/Core/TraceableVLSM.v
+theories/VLSM/Core/Speculation.v
 
 theories/VLSM/Core/Equivocation/FixedSetEquivocation.v
 theories/VLSM/Core/Equivocation/MsgDepFixedSetEquivocation.v

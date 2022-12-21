@@ -126,11 +126,13 @@ state_to_trace s' Hs' with inspect (state_destructor s') :=
 | ((item, s) :: _) eq: Hdestruct =>
   let (is, tr) := state_to_trace s _ in (is, tr ++ [item]).
 Next Obligation.
+Proof.
   cbn; intros.
   eapply tv_state_destructor_transition; [done |].
   by rewrite Hdestruct; left.
 Qed.
 Next Obligation.
+Proof.
   cbn; intros.
   eapply tv_state_destructor_size; [done |].
   by rewrite Hdestruct; left.
@@ -206,8 +208,8 @@ Proof.
   induction l; inversion 1 as []; subst.
   - inversion 1 as [| ? ? Hna _]; subst; cbn.
     rewrite state_update_eq.
-    replace (foldr Nat.add 0 (map (λ i : index, state_size i (s i)) l))
-       with (foldr Nat.add 0 (map (λ i : index,
+    replace (foldr Nat.add 0 (map (fun i : index => state_size i (s i)) l))
+       with (foldr Nat.add 0 (map (fun i : index =>
                state_size i (lift_to_composite_state IM s a si i)) l))
     ; [lia |].
     revert Hna; clear; induction l; [done |].
@@ -368,7 +370,7 @@ Record ChoosingWell
     forall Hs'' : valid_state_prop RFree s',
       choose s' Hs' indices = choose s' Hs'' indices;
   cw_chosen_index_in_indices :
-    indices ≠ [] -> (choose s' Hs' indices).1 ∈ indices;
+    indices <> [] -> (choose s' Hs' indices).1 ∈ indices;
   cw_chosen_position_exists :
     forall (i : index) (n : nat),
       choose s' Hs' indices = (i, n) ->
@@ -382,8 +384,8 @@ Lemma choosing_well_position_exists :
     (s' : composite_state IM) (Hs' : valid_state_prop RFree s')
     (indices : list index) (Hwell : ChoosingWell choose s' Hs' indices)
     (i_n :=  choose s' Hs' indices),
-      composite_state_destructor s' i_n.1 ≠ [] ->
-      composite_state_destructor s' i_n.1 !! i_n.2 ≠ None.
+      composite_state_destructor s' i_n.1 <> [] ->
+      composite_state_destructor s' i_n.1 !! i_n.2 <> None.
 Proof.
   intros choose s' Hs' indices Hchoose i_n Hdestruct.
   eapply not_eq_None_Some, cw_chosen_position_exists; [done | |].
@@ -473,14 +475,17 @@ Equations indexed_composite_state_to_trace
         |  (left _) eq: Hnn => indexed_composite_state_to_trace choose s' Hs'
                                  (StdppListSet.set_remove i_n.1 indices).
 Next Obligation.
+Proof.
   by cbn; intros; eapply input_valid_transition_origin, composite_state_destructor_lookup_reachable.
 Qed.
 Next Obligation.
+Proof.
   cbn; intros.
   cut (composite_state_size s < composite_state_size s'); [lia |].
   by eapply composite_tv_state_destructor_size, elem_of_list_lookup_2.
 Qed.
 Next Obligation.
+Proof.
   intros.
   cut (S (length (StdppListSet.set_remove i_n.1 indices)) <= length indices);
     [unfold indices; lia |].
