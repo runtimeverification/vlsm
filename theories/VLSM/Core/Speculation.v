@@ -10,11 +10,55 @@ From VLSM.Core Require Import VLSM Plans.
   be committed or rolled back.
 *)
 
+(** ** Definitions *)
+
 Section sec_speculative.
+
+(**
+  The speculative VLSM construction takes a VLSM <<X>>, called the underlying
+  VLSM, and produces a new VLSM, called [speculative_vlsm].
+*)
 
 Context
   {message : Type}
   (X : VLSM message).
+
+(**
+  [speculative_vlsm] has two kinds of states:
+  - [Actual] states correspond to states of the underlying VLSM. These are the
+    states that are "certain", i.e. once an [Actual] states is reached, previous
+    speculative execution cannot be rolled back anymore.
+  - [Speculative] states are the states in which speculative execution occurs.
+    They are not "certain" in the sense that there is still a possibility of
+    rollback to the previous [Actual] state.
+
+  [Speculative] states contain the following information:
+  - [start] is a state of the underlying VLSM from which speculative execution
+    was started
+  - [current] is a state of the underlying VLSM reached by the speculative
+    execution so far
+  - [plan] is a list of remaining transitions from the underlying VLSM to be
+    performed
+  - [outputs] is a list of messages that were output during the speculative
+    execution so far
+*)
+
+Inductive SpeculativeState : Type :=
+| Actual (s : vstate X)
+| Speculative
+    (start current : vstate X) (plan : list (vplan_item X)) (outputs : list (option message)).
+
+(**
+  [speculative_vlsm] has four kinds of labels:
+  - [Speculate] starts speculative execution. It contains a <<plan>> of what is
+    to be speculatively executed
+  - [Execute] performs a transition from the underlying VLSM
+  - [Commit] outputs messages that were produced during speculative execution
+    (if there are any) and finishes speculative execution (if there are no more
+    messages to be output)
+  - [Rollback] cancels ongoing speculative execution, discarding any messages
+    that were produced, and returns to the previous [Actual] state
+*)
 
 Inductive SpeculativeLabel : Type :=
 | Execute
@@ -22,10 +66,10 @@ Inductive SpeculativeLabel : Type :=
 | Commit
 | Speculate (plan : list (vplan_item X)).
 
-Inductive SpeculativeState : Type :=
-| Actual (s : vstate X)
-| Speculative
-    (start current : vstate X) (plan : list (vplan_item X)) (outputs : list (option message)).
+(**
+  The initial states of [speculative_vlsm] are [Actual states that correspond
+  to the initial states of the underlying VLSM.
+*)
 
 Definition speculative_initial_state_prop (s : SpeculativeState) : Prop :=
 match s with
@@ -38,6 +82,8 @@ end.
     populate (exist _ (Actual (`(vs0 X))) _).
 Next Obligation.
 Proof. by destruct (vs0 X). Qed.
+
+
 
 Definition speculative_transition
   (sl : SpeculativeLabel) (ssim : SpeculativeState * option message)
@@ -91,6 +137,8 @@ Definition speculative_vlsm : VLSM message :=
   vtype := speculative_vlsm_type;
   vmachine := speculative_vlsm_machine;
 |}.
+
+(** ** Lemmas *)
 
 (**
   We can lift a [transition_item] from the underlying VLSM [X] to a list
