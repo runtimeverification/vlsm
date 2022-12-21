@@ -433,20 +433,22 @@ Definition equivocator_has_been_received  := equivocator_oracle (has_been_receiv
   := equivocator_oracle_dec (has_been_received X) _.
 
 Lemma equivocator_has_been_received_stepwise_props
-  : has_been_received_stepwise_props (vlsm := equivocator_vlsm) equivocator_has_been_received.
+  : has_been_received_stepwise_prop (vlsm := equivocator_vlsm) equivocator_has_been_received.
 Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
-    ; [| by apply has_been_received_stepwise_from_trace].
+    ; [| by apply has_been_received_stepwise_props].
     by cbv; itauto.
   - intros s item; destruct item, l; cbn; [| by itauto..].
-    by intros [(_ & _ & _ & Him) _]; simpl in Him; subst; itauto congruence.
+    intros [(_ & _ & _ & Him) _]; simpl in Him; subst.
+    by itauto congruence.
 Qed.
 
 (** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm]. *)
 #[export] Instance equivocator_HasBeenReceivedCapability
   : HasBeenReceivedCapability equivocator_vlsm
-  := HasBeenReceivedCapability_from_stepwise (vlsm := equivocator_vlsm)
+  := Build_HasBeenReceivedCapability equivocator_vlsm
+    equivocator_has_been_received
     equivocator_has_been_received_dec
     equivocator_has_been_received_stepwise_props.
 
@@ -471,20 +473,23 @@ Definition equivocator_has_been_sent  := equivocator_oracle (has_been_sent X).
   := equivocator_oracle_dec (has_been_sent X) _.
 
 Lemma equivocator_has_been_sent_stepwise_props
-  : has_been_sent_stepwise_props (vlsm := equivocator_vlsm) equivocator_has_been_sent.
+  : has_been_sent_stepwise_prop (vlsm := equivocator_vlsm) equivocator_has_been_sent.
 Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
-    ; [| by apply has_been_sent_stepwise_from_trace].
+    ; [| by apply has_been_sent_stepwise_props].
     by cbv; itauto.
   - intros s item; destruct item, l; cbn; [| by itauto..].
-    by intros [_ Ht]; inversion_clear Ht; itauto congruence.
+    intros [_ Ht]; inversion_clear Ht.
+    by itauto congruence.
 Qed.
 
 (** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm]. *)
 #[export] Instance equivocator_HasBeenSentCapability
   : HasBeenSentCapability equivocator_vlsm
-  := HasBeenSentCapability_from_stepwise (vlsm := equivocator_vlsm)
+  := Build_HasBeenSentCapability
+    equivocator_vlsm
+    equivocator_has_been_sent
     equivocator_has_been_sent_dec
     equivocator_has_been_sent_stepwise_props.
 

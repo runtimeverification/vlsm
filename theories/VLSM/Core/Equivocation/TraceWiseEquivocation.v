@@ -285,8 +285,9 @@ Proof.
   rewrite Htr in Htrv.
   intro Hbs_m. elim Hnbs_m. clear Hnbs_m.
   revert Hbs_m.
-  apply in_futures_preserving_oracle_from_stepwise with (field_selector output); [| by eexists].
-  by apply has_been_sent_stepwise_from_trace.
+  apply in_futures_preserving_oracle_from_stepwise with (field_selector output).
+  - by apply has_been_sent_stepwise_props.
+  - by eexists.
 Qed.
 
 Lemma initial_state_not_is_equivocating_tracewise

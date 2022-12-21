@@ -167,8 +167,8 @@ Lemma msg_dep_has_been_sent
   : forall dm, msg_dep_rel dm m -> has_been_directly_observed X s dm.
 Proof.
   revert m Hsent; induction Hs using valid_state_prop_ind; intro m.
-  - intro Hbs; contradict Hbs; eapply oracle_no_inits; [| done].
-    by apply has_been_sent_stepwise_from_trace.
+  - intro Hbs; contradict Hbs.
+    by apply has_been_sent_no_inits.
   - rewrite has_been_sent_step_update by done; intros [-> | Hrcv] dm Hdm.
     + by eapply message_dependencies_are_necessary; [eexists _, _ |].
     + by eapply has_been_directly_observed_step_update; [done |]; right; eapply IHHs.
@@ -198,8 +198,8 @@ Lemma full_node_has_been_received
   : forall dm, msg_dep_rel dm m -> has_been_directly_observed X s dm.
 Proof.
   revert m Hreceived; induction Hs using valid_state_prop_ind; intro m.
-  - intro Hbr; contradict Hbr; eapply oracle_no_inits; [| done].
-    by apply has_been_received_stepwise_from_trace.
+  - intro Hbr; contradict Hbr.
+    by apply has_been_received_no_inits.
   - rewrite has_been_received_step_update by done; intros [-> | Hrcv] dm Hdm
     ; rewrite has_been_directly_observed_step_update by done; right.
     + by eapply Hfull; [apply Ht|].

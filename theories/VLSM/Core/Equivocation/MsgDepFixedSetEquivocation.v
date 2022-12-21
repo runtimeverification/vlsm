@@ -184,7 +184,7 @@ Proof.
     in Hobs as [Hreceived | Hsent]; [.. | done]; cycle 1.
   - left; exists i; split; [done |].
     by eapply in_futures_preserving_oracle_from_stepwise
-    ; [apply has_been_sent_stepwise_from_trace | |].
+    ; [apply has_been_sent_stepwise_props | |].
   - by eapply in_futures_valid_fst.
   - apply in_futures_valid_fst in Hfutures as Hdestination.
     specialize (received_component_received_previously IM Hdestination Hreceived)

@@ -203,6 +203,9 @@ Qed.
 Definition state_message_oracle
   := vstate vlsm -> message -> Prop.
 
+Definition negate_oracle (o : state_message_oracle) : state_message_oracle :=
+  fun s m => ~ o s m.
+
 Definition specialized_selected_message_exists_in_all_traces
   (X : VLSM message)
   (message_selector : message -> transition_item -> Prop)
@@ -328,15 +331,19 @@ Proof.
 Qed.
 
 (**
-  Checks if all [valid_trace]s leading to a certain state contain a certain message.
-  The [message_selector] argument specifies whether we're looking for received or sent
-  messages.
+  The oracle should check if all valid traces leading to the state contain the given message.
+  The [message_selector] argument checks whether a single transition contains the
+  message, and can be used to check for received messages or sent messages.
 
-  Notably, the [valid_trace]s over which we are iterating belong to the preloaded
+  Notably, the traces we are considering are any traces valid in the preloaded
   version of the target VLSM. This is because we want VLSMs to have oracles which
   are valid irrespective of the composition they take part in. As we know,
-  the behavior preloaded VLSMs includes behaviors of its projections in any
-  composition.
+  the behaviors of the projection of a VLSM from a composition are all included
+  in the behaviors of the preloaded version of the VLSM.
+
+  It is impossible to define a correct oracle for a [message_selector]
+  if there is some valid state that has multiple histories, and some message
+  that is in some of those histories but not in others (according to the selector).
 *)
 
 Definition all_traces_have_message_prop
@@ -357,17 +364,159 @@ Definition no_traces_have_message_prop
   :=
   oracle s m <-> selected_message_exists_in_no_preloaded_trace message_selector s m.
 
-Definition has_been_sent_prop : state_message_oracle -> state -> message -> Prop
-  := (all_traces_have_message_prop (field_selector output)).
+Record oracle_tracewise_props
+  (message_selector : message -> transition_item -> Prop)
+  (oracle : state_message_oracle) : Prop :=
+{
+  proper_oracle_holds :
+    forall (s : state) (Hs : valid_state_prop pre_vlsm s) (m : message),
+      all_traces_have_message_prop message_selector oracle s m;
+  proper_not_oracle_holds :
+    forall (s : state) (Hs : valid_state_prop pre_vlsm s) (m : message),
+      no_traces_have_message_prop message_selector (negate_oracle oracle) s m;
+}.
 
-Definition has_not_been_sent_prop : state_message_oracle -> state -> message -> Prop
-  := (no_traces_have_message_prop (field_selector output)).
+(** *** Stepwise consistency properties for [state_message_oracle]
 
-Definition has_been_received_prop : state_message_oracle -> state -> message -> Prop
-  := (all_traces_have_message_prop (field_selector input)).
+  The above definitions like [all_traces_have_message_prop]
+  connect a [state_message_oracle] to a message selector predicate on
+  [transition_item] by requiring the oracle to hold (or not hold)
+  for a state and message iff all traces (resp. no trace) reaching the
+  state have a transition satisfying the message selector with the given message.
 
-Definition has_not_been_received_prop : state_message_oracle -> state -> message -> Prop
-  := (no_traces_have_message_prop (field_selector input)).
+  We will prove that this is equivalent to two more local properties:
+  - [oracle_no_inits] is that the oracle cannot hold for any message in any initial state.
+  - [oracle_step_update] is that the oracle is coherent around a single
+    [input_valid_transition]:
+    - If the oracle holds for a message in the starting state, it must
+      also hold for that message in the destination state.
+    - If the [message_selector] finds a message in the transition, the
+      oracle must hold for that message in the destination state.
+    - If the oracle holds for a message in the destination, at least
+      one of the above cases hold.
+
+  These conditions are defined in the record [oracle_stepwise_props].
+  We prove these conditions hold iff [oracle_tracewise_props] holds.
+*)
+
+Record oracle_stepwise_props
+  (message_selector : message -> transition_item -> Prop)
+  (oracle : state_message_oracle)
+  : Prop :=
+{
+  oracle_no_inits :
+    forall (s : vstate vlsm),
+      initial_state_prop (VLSMMachine := vmachine vlsm) s ->
+      forall (m : message), ~ oracle s m;
+  oracle_step_update :
+    forall (l : label) (s : state) (im : option message) (s' : state) (om : option message),
+      input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
+      forall (msg : message),
+      oracle s' msg
+        <->
+      message_selector msg
+        {| l := l; input := im; destination := s'; output := om |} \/ oracle s msg;
+}.
+
+Lemma oracle_partial_trace_update
+  [selector : message -> transition_item -> Prop]
+  [oracle : state_message_oracle]
+  (Horacle : oracle_stepwise_props selector oracle)
+  s0 s tr
+  (Htr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm vlsm) s0 s tr) :
+    forall (m : message),
+      oracle s m <-> (trace_has_message selector m tr \/ oracle s0 m).
+Proof.
+  induction Htr; intros m; unfold trace_has_message.
+  - rewrite Exists_nil.
+    by itauto.
+  - rewrite Exists_cons, IHHtr.
+    apply (Horacle.(oracle_step_update _ _)) with (msg:=m) in Ht.
+    by itauto.
+Qed.
+
+(*
+  It would seem more flexible to take [m] after the other parameters,
+  but [Htr] is placed last so that <<apply in>> an existing
+  [finite_valid_trace_init_to] hypothesis works.
+*)
+Lemma oracle_initial_trace_update
+  [selector]
+  [oracle : state_message_oracle]
+  (Horacle : oracle_stepwise_props selector oracle)
+  s m
+  [s0 tr]
+  (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) s0 s tr) :
+    oracle s m <-> trace_has_message selector m tr.
+Proof.
+  rewrite (oracle_partial_trace_update Horacle) by apply Htr.
+  assert (~oracle s0 m) by (eapply oracle_no_inits, Htr; done).
+  by itauto.
+Qed.
+
+(* TODO(wkolowski): make notation uniform accross the file. *)
+Lemma oracle_stepwise_props_change_selector
+  [selector : message -> transition_item -> Prop]
+  [oracle : state_message_oracle]
+  (Horacle : oracle_stepwise_props selector oracle)
+  (selector' : message -> transition_item -> Prop)
+  (Heqv :
+    forall s item,
+      input_valid_transition_item (pre_loaded_with_all_messages_vlsm vlsm) s item ->
+      forall m, selector m item <-> selector' m item)
+  : oracle_stepwise_props selector' oracle.
+Proof.
+  destruct Horacle as [Hinits Hupdate].
+  constructor; [done |].
+  by intros; rewrite Hupdate, Heqv.
+Qed.
+
+Lemma oracle_trace_props_from_stepwise
+  [selector : message -> transition_item -> Prop]
+  [oracle : state_message_oracle]
+  (Horacle : oracle_stepwise_props selector oracle) :
+  oracle_tracewise_props selector oracle.
+Proof.
+  constructor; intros s Hs m.
+  - red; unfold selected_message_exists_in_all_preloaded_traces,
+      specialized_selected_message_exists_in_all_traces.
+    split.
+    + intros Hholds s0 tr Htr.
+      by eapply (oracle_initial_trace_update Horacle).
+    + apply pre_loaded_with_all_messages_valid_state_prop,
+        valid_state_has_trace in Hs as (start & tr & Htr).
+      intro H; specialize (H start tr Htr).
+      by eapply oracle_initial_trace_update.
+  - red; unfold negate_oracle, selected_message_exists_in_no_preloaded_trace,
+      specialized_selected_message_exists_in_no_trace.
+    split.
+    + intros Hclaim start tr Htr.
+      contradict Hclaim.
+      by eapply oracle_initial_trace_update.
+    + apply pre_loaded_with_all_messages_valid_state_prop,
+        valid_state_has_trace in Hs as (start & tr & Htr).
+      intro H; specialize (H start tr Htr); contradict H.
+      by eapply (oracle_initial_trace_update Horacle).
+Qed.
+
+(**
+  The most basic [state_message_oracle]s just check whether the message is
+  - *sent* - is the output of the transition
+  - *received* - is the output of the transition
+  - *observed* - is either sent or received in the transition.
+ *)
+
+Definition has_been_sent_prop : state_message_oracle -> state -> message -> Prop :=
+  all_traces_have_message_prop (field_selector output).
+
+Definition has_not_been_sent_prop : state_message_oracle -> state -> message -> Prop :=
+  no_traces_have_message_prop (field_selector output).
+
+Definition has_been_received_prop : state_message_oracle -> state -> message -> Prop :=
+  all_traces_have_message_prop (field_selector input).
+
+Definition has_not_been_received_prop : state_message_oracle -> state -> message -> Prop :=
+  no_traces_have_message_prop (field_selector input).
 
 (**
   Per the vocabulary of the official VLSM document, we say that VLSMs endowed
@@ -383,30 +532,57 @@ Definition has_not_been_received_prop : state_message_oracle -> state -> message
   [has_been_sent] and [has_not_been_sent].
 *)
 
+Definition has_been_sent_stepwise_prop
+    (has_been_sent_pred : state_message_oracle) : Prop :=
+  oracle_stepwise_props (field_selector output) has_been_sent_pred.
+
 Class HasBeenSentCapability : Type :=
 {
   has_been_sent : state_message_oracle;
   has_been_sent_dec :> RelDecision has_been_sent;
-
-  proper_sent :
-    forall (s : state)
-           (Hs : valid_state_prop pre_vlsm s)
-           (m : message),
-           (has_been_sent_prop has_been_sent s m);
-  has_not_been_sent: state_message_oracle :=
-    fun (s : state) (m : message) => ~ has_been_sent s m;
-
-  proper_not_sent :
-    forall (s : state)
-           (Hs : valid_state_prop pre_vlsm s)
-           (m : message),
-           has_not_been_sent_prop has_not_been_sent s m;
+  has_been_sent_stepwise_props : has_been_sent_stepwise_prop has_been_sent;
 }.
 
-(**
-  Reverse implication for 'selected_messages_consistency_prop'
-  always holds.
-*)
+Definition has_not_been_sent `{HasBeenSentCapability} : state_message_oracle :=
+  negate_oracle has_been_sent.
+
+Definition has_been_sent_no_inits `{HasBeenSentCapability} :
+  forall s : vstate vlsm,
+    vinitial_state_prop vlsm s → ∀ m : message, ~ has_been_sent s m
+  := oracle_no_inits _ _ (has_been_sent_stepwise_props).
+
+Definition has_been_sent_step_update `{HasBeenSentCapability} :
+  forall (l : label) (s : state) (im : option message) (s' : state) (om : option message),
+    input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
+  forall msg,
+    has_been_sent s' msg <-> (om = Some msg \/ has_been_sent s msg)
+  := oracle_step_update _ _ has_been_sent_stepwise_props.
+
+Definition has_been_sent_tracewise_prop
+    (has_been_sent_pred : state_message_oracle) : Prop :=
+  oracle_tracewise_props (field_selector output) has_been_sent_pred.
+
+Lemma has_been_sent_tracewise_props `{HasBeenSentCapability} :
+  has_been_sent_tracewise_prop has_been_sent.
+Proof.
+  by exact (oracle_trace_props_from_stepwise has_been_sent_stepwise_props).
+Qed.
+
+Lemma proper_sent `{HasBeenSentCapability} :
+  forall (s : state) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    has_been_sent_prop has_been_sent s m.
+Proof.
+  by intros; apply has_been_sent_tracewise_props.
+Qed.
+
+Lemma proper_not_sent `{HasBeenSentCapability} :
+  forall (s : state) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    has_not_been_sent_prop has_not_been_sent s m.
+Proof.
+  by intros; apply has_been_sent_tracewise_props.
+Qed.
+
+(** Reverse implication for 'selected_messages_consistency_prop' always holds. *)
 Lemma consistency_from_valid_state_proj2
   (s : state)
   (Hs: valid_state_prop pre_vlsm s)
@@ -528,26 +704,56 @@ Proof.
   by apply not_iff_compat, (iff_trans proper_sent).
 Qed.
 
+Definition has_been_received_stepwise_prop
+  (has_been_received_pred : state_message_oracle) : Prop :=
+    oracle_stepwise_props (field_selector input) has_been_received_pred.
+
 Class HasBeenReceivedCapability : Type :=
 {
   has_been_received: state_message_oracle;
   has_been_received_dec :> RelDecision has_been_received;
-
-  proper_received :
-    forall (s : state)
-           (Hs : valid_state_prop pre_vlsm s)
-           (m : message),
-           (has_been_received_prop has_been_received s m);
-
-  has_not_been_received : state_message_oracle :=
-    fun (s : state) (m : message) => ~ has_been_received s m;
-
-  proper_not_received :
-    forall (s : state)
-           (Hs : valid_state_prop pre_vlsm s)
-           (m : message),
-           has_not_been_received_prop has_not_been_received s m;
+  has_been_received_stepwise_props :
+    has_been_received_stepwise_prop has_been_received;
 }.
+
+Definition has_not_been_received `{HasBeenReceivedCapability} : state_message_oracle :=
+  negate_oracle has_been_received.
+
+Definition has_been_received_no_inits `{HasBeenReceivedCapability} :
+  forall s : vstate vlsm,
+    vinitial_state_prop vlsm s → ∀ m : message, ~ has_been_received s m
+  := oracle_no_inits _ _ has_been_received_stepwise_props.
+
+Definition has_been_received_step_update `{HasBeenReceivedCapability} :
+  forall [l : label] [s : state] [im : option message] [s' : state] [om : option message],
+    input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
+  forall msg,
+    has_been_received s' msg <-> (im = Some msg \/ has_been_received s msg)
+  := oracle_step_update _ _ has_been_received_stepwise_props.
+
+Definition has_been_received_tracewise_prop
+  (has_been_received_pred : state_message_oracle) : Prop :=
+    oracle_tracewise_props (field_selector input) has_been_received_pred.
+
+Lemma has_been_received_tracewise_props `{HasBeenReceivedCapability} :
+  has_been_received_tracewise_prop has_been_received.
+Proof.
+  by apply oracle_trace_props_from_stepwise, has_been_received_stepwise_props.
+Qed.
+
+Lemma proper_received `{HasBeenReceivedCapability} :
+  forall (s : state) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    has_been_received_prop has_been_received s m.
+Proof.
+  by apply proper_oracle_holds, has_been_received_tracewise_props.
+Qed.
+
+Lemma proper_not_received `{HasBeenReceivedCapability} :
+  forall (s : state) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    has_not_been_received_prop has_not_been_received s m.
+Proof.
+  by apply proper_not_oracle_holds, has_been_received_tracewise_props.
+Qed.
 
 Lemma has_been_received_consistency
   `{HasBeenReceivedCapability}
@@ -635,118 +841,29 @@ Qed.
 
 End sec_simple.
 
+Arguments oracle_stepwise_props {message} {vlsm} message_selector oracle.
+Arguments oracle_no_inits       {message} {vlsm} {message_selector} {oracle}.
+Arguments oracle_step_update    {message} {vlsm} {message_selector} {oracle}.
+
+Arguments has_been_sent_stepwise_prop     {message} {vlsm} _.
+Arguments has_been_received_stepwise_prop {message} {vlsm} _.
+
 #[global] Hint Mode HasBeenSentCapability - ! : typeclass_instances.
 #[global] Hint Mode HasBeenReceivedCapability - ! : typeclass_instances.
 
-(** *** Stepwise consistency properties for [state_message_oracle]
+Arguments has_been_sent_stepwise_props     {message} vlsm {_}.
+Arguments has_been_received_stepwise_props {message} vlsm {_}.
 
-  The above definitions like [all_traces_have_message_prop]
-  connect a [state_message_oracle] to a predicate on
-  [transition_item] by relating the oracle holding on a state
-  to a satisfying transition existing in all traces.
-
-  This is equivalent to two local properties,
-  one is that the oracle cannot only for any initial state,
-  the other is that the oracle judgement is appropriately
-  related for the starting and [destination] states of
-  any [input_valid_transition].
-
-  These conditions are defined in the record [oracle_stepwise_props].
-*)
-
-Record oracle_stepwise_props
-  [message] [vlsm : VLSM message]
-  (message_selector : message -> transition_item -> Prop)
-  (oracle : state_message_oracle vlsm)
-  : Prop :=
-{
-  oracle_no_inits :
-    forall (s : vstate vlsm),
-      initial_state_prop (VLSMMachine := vmachine vlsm) s ->
-      forall m, ~ oracle s m;
-  oracle_step_update:
-    forall l s im s' om,
-      input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
-      forall msg,
-      oracle s' msg
-        <->
-      message_selector msg
-        {| l := l; input := im; destination := s'; output := om |} \/ oracle s msg;
-}.
-
-Arguments oracle_no_inits {message} {vlsm} {message_selector} {oracle} _.
-Arguments oracle_step_update {message} {vlsm} {message_selector} {oracle} _.
-
-Lemma oracle_partial_trace_update
-      [message] [vlsm: VLSM message]
-      [selector: message -> transition_item -> Prop]
-      [oracle: state_message_oracle vlsm]
-      (Horacle: oracle_stepwise_props selector oracle)
-      s0 s tr
-         (Htr: finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm vlsm) s0 s tr):
-    forall m,
-      oracle s m
-      <-> (trace_has_message selector m tr \/ oracle s0 m).
-Proof.
-  induction Htr.
-  - intro m.
-    unfold trace_has_message.
-    rewrite Exists_nil.
-    by itauto.
-  - intro m. specialize (IHHtr m).
-    unfold trace_has_message.
-    rewrite Exists_cons.
-    apply (Horacle.(oracle_step_update)) with (msg:=m) in Ht.
-    by itauto.
-Qed.
-
-Lemma oracle_initial_trace_update
-      [message] [vlsm: VLSM message]
-      [selector]
-      [oracle : state_message_oracle vlsm]
-      (Horacle: oracle_stepwise_props selector oracle)
-      s0 s tr
-      (Htr: finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) s0 s tr):
-  forall m,
-    oracle s m <-> trace_has_message selector m tr.
-Proof.
-  intros m.
-  pose proof (oracle_partial_trace_update Horacle _ _ _ (proj1 Htr) m).
-  pose proof (oracle_no_inits Horacle s0 (proj2 Htr) m).
-  by clear -H H0; itauto.
-Qed.
-
-(* TODO(wkolowski): make notation uniform accross the file. *)
-Lemma oracle_stepwise_props_change_selector
-      [message] [vlsm: VLSM message]
-      [selector]
-      [oracle : state_message_oracle vlsm]
-      (Horacle: oracle_stepwise_props selector oracle)
-      selector'
-      (Heqv :
-        forall s item,
-          input_valid_transition_item (pre_loaded_with_all_messages_vlsm vlsm) s item ->
-          forall m, selector m item <-> selector' m item)
-      : oracle_stepwise_props selector' oracle.
-Proof.
-  destruct Horacle as [Hinits Hupdate].
-  constructor; [done |].
-  intros l s om s' om' Ht msg.
-  by simpl; rewrite Hupdate, Heqv.
-Qed.
+Arguments has_been_sent_step_update     {message} {vlsm H} [l s im s' om] _ msg.
+Arguments has_been_received_step_update {message} {vlsm H} [l s im s' om] _ msg.
 
 (**
   Proving the trace properties from the stepwise properties
-  begins with a lemma using induction along a trace to
-  prove that given a [finite_valid_trace] to a state,
-  the oracle holds at that state for some message iff
-  a satisfying transition item exists in the trace.
-
+  is based on [oracle_initial_trace_update].
   The theorems for [all_traces_have_message_prop]
   and [no_traces_have_message_prop] are mostly rearranging
-  quantifiers to use this lemma, also using [valid_state_prop]
-  to choose a trace to the state for the directions where
-  one is not given.
+  quantifiers to use this lemma, also using [valid_state_has_trace]
+  to choose a trace reaching the state when one is not given.
 *)
 
 Section sec_trace_from_stepwise.
@@ -759,54 +876,38 @@ Context
   (oracle_props : oracle_stepwise_props selector oracle)
   .
 
-#[local] Lemma H_valid_trace_prop
-      [s0 s tr]
-      (Htr: finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) s0 s tr):
-  forall m,
-    oracle s m <-> trace_has_message selector m tr.
-Proof.
-  intro m.
-  destruct Htr as [Htr Hinit].
-  rewrite (oracle_partial_trace_update oracle_props _ _ _ Htr).
-  by firstorder.
-Qed.
-
-Lemma prove_all_have_message_from_stepwise:
+Lemma prove_all_have_message_from_stepwise :
   forall (s : state)
          (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
          (m : message),
-    (all_traces_have_message_prop vlsm selector oracle s m).
+    all_traces_have_message_prop vlsm selector oracle s m.
 Proof.
   intros s Hproto m.
   unfold all_traces_have_message_prop.
   split.
-  - intros Hsent s0 tr Htr.
-    by eapply H_valid_trace_prop.
+  - intros Hholds s0 tr Htr; revert Htr Hholds.
+    by apply oracle_initial_trace_update.
   - intro H_all_traces.
-    apply valid_state_has_trace in Hproto.
-    destruct Hproto as [s0 [tr Htr]].
-    apply (H_valid_trace_prop Htr).
-    by specialize (H_all_traces s0 tr Htr).
+    apply valid_state_has_trace in Hproto as (s0 & tr & Htr).
+    rewrite oracle_initial_trace_update; [| done..].
+    by apply H_all_traces in Htr.
 Qed.
 
-Lemma prove_none_have_message_from_stepwise:
+Lemma prove_none_have_message_from_stepwise :
   forall (s : state)
          (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
          (m : message),
     no_traces_have_message_prop vlsm selector (fun s m => ~oracle s m) s m.
 Proof.
   intros s Hproto m.
-  pose proof (H_valid_trace_prop).
   split.
-  - intros H_not_sent start tr Htr.
-    contradict H_not_sent.
-    by apply (H_valid_trace_prop Htr).
-  - intros H_no_traces.
-    apply valid_state_has_trace in Hproto.
-    destruct Hproto as [s0 [tr Htr]].
-    specialize (H_no_traces s0 tr Htr).
-    contradict H_no_traces.
-    by apply (H_valid_trace_prop Htr).
+  - intros H_not_holds start tr Htr.
+    contradict H_not_holds.
+    by eapply oracle_initial_trace_update.
+  - intros H_no_traces H_oracle.
+    apply valid_state_has_trace in Hproto as (s0 & tr & Htr).
+    destruct (H_no_traces s0 tr Htr).
+    by rewrite <- oracle_initial_trace_update.
 Qed.
 
 Lemma selected_messages_consistency_prop_from_stepwise
@@ -940,34 +1041,7 @@ End sec_stepwise_from_trace.
   these are more convenient.
 *)
 
-Definition has_been_sent_stepwise_props
-       [message] [vlsm: VLSM message] (has_been_sent_pred: state_message_oracle vlsm) : Prop :=
-  (oracle_stepwise_props (field_selector output) has_been_sent_pred).
-
-Lemma HasBeenSentCapability_from_stepwise
-      [message : Type]
-      [vlsm: VLSM message]
-      [has_been_sent_pred: state_message_oracle vlsm]
-      (has_been_sent_pred_dec: RelDecision has_been_sent_pred)
-      (has_been_sent_alt_props: has_been_sent_stepwise_props has_been_sent_pred):
-  HasBeenSentCapability vlsm.
-Proof.
-  refine ({|has_been_sent:=has_been_sent_pred|}).
-  - by apply prove_all_have_message_from_stepwise.
-  - by apply prove_none_have_message_from_stepwise.
-Defined.
-
-Lemma has_been_sent_stepwise_from_trace
-      [message : Type]
-      (vlsm: VLSM message)
-      `{HasBeenSentCapability message vlsm}:
-  oracle_stepwise_props (field_selector output) (has_been_sent vlsm).
-Proof.
-  apply stepwise_props_from_trace.
-  apply has_been_sent_dec.
-  apply proper_sent.
-  by apply proper_not_sent.
-Defined.
+(* TODO - move up with HasBeenSent *)
 
 Lemma preloaded_has_been_sent_stepwise_props
       [message : Type]
@@ -975,9 +1049,9 @@ Lemma preloaded_has_been_sent_stepwise_props
       `{HasBeenSentCapability message vlsm}
       (seed : message -> Prop)
       (X := pre_loaded_vlsm vlsm seed):
-  has_been_sent_stepwise_props (vlsm := X) (has_been_sent vlsm).
+  has_been_sent_stepwise_prop (vlsm:=X) (has_been_sent vlsm).
 Proof.
-  by destruct (has_been_sent_stepwise_from_trace vlsm).
+  by destruct (has_been_sent_stepwise_props vlsm).
 Qed.
 
 #[export] Instance preloaded_HasBeenSentCapability
@@ -987,20 +1061,10 @@ Qed.
       (seed : message -> Prop):
   HasBeenSentCapability (pre_loaded_vlsm vlsm seed).
 Proof.
-  eapply HasBeenSentCapability_from_stepwise.
+  econstructor.
   - by apply (has_been_sent_dec vlsm).
   - by apply preloaded_has_been_sent_stepwise_props.
 Defined.
-
-Lemma has_been_sent_step_update
-      `{HasBeenSentCapability message vlsm}:
-  forall [l s im s' om],
-    input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s,im) (s',om) ->
-    forall m,
-      has_been_sent vlsm s' m <-> (om = Some m \/ has_been_sent vlsm s m).
-Proof.
-  exact (oracle_step_update (has_been_sent_stepwise_from_trace vlsm)).
-Qed.
 
 Lemma has_been_sent_examine_one_trace
   `{HasBeenSentCapability message vlsm}:
@@ -1016,46 +1080,15 @@ Proof.
   - by apply proper_not_sent.
 Qed.
 
-(** ** Stepwise view of [HasBeenReceivedCapability] *)
-
-Definition has_been_received_stepwise_props
-       [message] [vlsm: VLSM message] (has_been_received_pred: state_message_oracle vlsm) : Prop :=
-  (oracle_stepwise_props (field_selector input) has_been_received_pred).
-
-Lemma HasBeenReceivedCapability_from_stepwise
-      [message : Type]
-      [vlsm: VLSM message]
-      [has_been_received_pred: state_message_oracle vlsm]
-      (has_been_received_pred_dec: RelDecision has_been_received_pred)
-      (has_been_sent_alt_props: has_been_received_stepwise_props has_been_received_pred):
-  HasBeenReceivedCapability vlsm.
-Proof.
-  refine ({|has_been_received:=has_been_received_pred|}).
-  - by apply prove_all_have_message_from_stepwise.
-  - by apply prove_none_have_message_from_stepwise.
-Defined.
-
-Lemma has_been_received_stepwise_from_trace
-      [message : Type]
-      (vlsm: VLSM message)
-      `{HasBeenReceivedCapability message vlsm}:
-  oracle_stepwise_props (field_selector input) (has_been_received vlsm).
-Proof.
-  apply stepwise_props_from_trace.
-  - by apply has_been_received_dec.
-  - by apply proper_received.
-  - by apply proper_not_received.
-Defined.
-
 Lemma preloaded_has_been_received_stepwise_props
       {message : Type}
       (vlsm: VLSM message)
       `{HasBeenReceivedCapability message vlsm}
       (seed : message -> Prop)
       (X := pre_loaded_vlsm vlsm seed):
-  has_been_received_stepwise_props (vlsm := X) (has_been_received vlsm).
+  has_been_received_stepwise_prop (vlsm:=X) (has_been_received vlsm).
 Proof.
-  by destruct (has_been_received_stepwise_from_trace vlsm).
+  by destruct (has_been_received_stepwise_props vlsm).
 Qed.
 
 #[export] Instance preloaded_HasBeenReceivedCapability
@@ -1065,20 +1098,10 @@ Qed.
       (seed : message -> Prop):
   HasBeenReceivedCapability (pre_loaded_vlsm vlsm seed).
 Proof.
-  eapply HasBeenReceivedCapability_from_stepwise.
+  econstructor.
   - by apply (has_been_received_dec vlsm).
   - by apply preloaded_has_been_received_stepwise_props.
 Defined.
-
-Lemma has_been_received_step_update
-      `{HasBeenReceivedCapability message vlsm}:
-  forall [l s im s' om],
-    input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s,im) (s',om) ->
-    forall m,
-      has_been_received vlsm s' m <-> (im = Some m \/ has_been_received vlsm s m).
-Proof.
-  exact (oracle_step_update (has_been_received_stepwise_from_trace vlsm)).
-Qed.
 
 Lemma has_been_received_examine_one_trace
   `{HasBeenReceivedCapability message vlsm}:
@@ -1153,9 +1176,8 @@ Lemma proper_directly_observed
     forall m,
       all_traces_have_message_prop vlsm item_sends_or_receives (has_been_directly_observed vlsm) s m.
 Proof.
-  intros.
-  apply prove_all_have_message_from_stepwise; [| done].
-  by apply has_been_directly_observed_stepwise_props.
+  by apply proper_oracle_holds, oracle_trace_props_from_stepwise,
+    has_been_directly_observed_stepwise_props.
 Qed.
 
 Lemma proper_not_directly_observed
@@ -1166,9 +1188,8 @@ Lemma proper_not_directly_observed
       no_traces_have_message_prop vlsm item_sends_or_receives
                                   (fun s m => ~has_been_directly_observed vlsm s m) s m.
 Proof.
-  intros.
-  apply prove_none_have_message_from_stepwise; [| done].
-  by apply has_been_directly_observed_stepwise_props.
+  by apply proper_not_oracle_holds, oracle_trace_props_from_stepwise,
+    has_been_directly_observed_stepwise_props.
 Qed.
 
 Lemma has_been_directly_observed_examine_one_trace
@@ -1237,30 +1258,14 @@ Lemma has_been_directly_observed_sent_received_iff
   (m : message)
   : has_been_directly_observed vlsm s m <-> has_been_received vlsm s m \/ has_been_sent vlsm s m.
 Proof.
-  specialize
-    (prove_all_have_message_from_stepwise message vlsm  item_sends_or_receives
-    (has_been_directly_observed vlsm) (has_been_directly_observed_stepwise_props _) _ Hs m) as Hall.
-  split.
-  - intro Hobs. destruct Hall as [Hall _]. specialize (Hall Hobs).
-    apply consistency_from_valid_state_proj2 in Hall; [| done].
-    destruct Hall as [is [tr [Htr Hexists]]].
-    apply Exists_or_inv in Hexists.
-    destruct Hexists as [Hsent | Hreceived].
-    + left. specialize (has_been_received_consistency vlsm _ Hs m) as Hcons.
-      apply proper_received; [done |].
-      apply Hcons.
-      by exists is, tr, Htr.
-    + right. specialize (has_been_sent_consistency vlsm _ Hs m) as Hcons.
-      apply proper_sent; [done |].
-      apply Hcons.
-      by exists is, tr, Htr.
-  - intros [Hreceived | Hsent]; apply Hall; intros is tr Htr.
-    + apply proper_received in Hreceived; [| done].
-      apply Exists_or. left.
-      by eapply Hreceived.
-    + apply proper_sent in Hsent; [| done].
-      apply Exists_or. right.
-      by eapply Hsent.
+  induction Hs using valid_state_prop_ind.
+  - split.
+    + by intros ?%has_been_directly_observed_no_inits.
+    + by intros [?%has_been_received_no_inits | ?%has_been_sent_no_inits].
+  - rewrite has_been_directly_observed_step_update by done.
+    rewrite has_been_received_step_update by done.
+    rewrite has_been_sent_step_update by done.
+    by itauto.
 Qed.
 
 Definition has_been_directly_observed_from_sent_received
@@ -1281,47 +1286,15 @@ Qed.
 Lemma has_been_directly_observed_from_sent_received_stepwise_props
   : oracle_stepwise_props item_sends_or_receives has_been_directly_observed_from_sent_received.
 Proof.
-  apply stepwise_props_from_trace
-  ; [by apply has_been_directly_observed_from_sent_received_dec | ..]
-  ; intros; split.
-  - intros [Hsent | Hreceived] start tr Htr.
-    + apply proper_sent in Hsent; [| done].
-      apply Exists_or; right.
-      by eapply Hsent.
-    + apply proper_received in Hreceived; [| done].
-      apply Exists_or; left.
-      by eapply Hreceived.
-  - intros Hobs.
-    apply consistency_from_valid_state_proj2 in Hobs; [| done].
-    destruct Hobs as (is & tr & Htr & Hexists).
-    apply Exists_or_inv in Hexists as [Hsent | Hreceived].
-    + right. apply proper_received; [done |].
-      apply has_been_received_consistency; [done | done |].
-      by exists is, tr, Htr.
-    + left. apply proper_sent; [done |].
-      apply has_been_sent_consistency; [done | done |].
-      by exists is, tr, Htr.
-  - intros Hnobs start tr Htr Hexists.
-    contradict Hnobs.
-    apply Exists_or_inv in Hexists.
-    destruct Hexists as [Hexists| Hexists].
-    + right. apply proper_received; [done |].
-      apply has_been_received_consistency; [done | done |].
-      by exists start, tr, Htr.
-    + left. apply proper_sent; [done |].
-      apply has_been_sent_consistency; [done | done |].
-      by exists start, tr, Htr.
-  - intros Hnobs  [Hobs | Hobs].
-    + apply proper_sent in Hobs; [| done].
-      apply has_been_sent_consistency in Hobs; [| done | done].
-      destruct Hobs as [is [tr [Htr Hexists]]].
-      eapply Hnobs; [done |].
-      by apply Exists_or; right.
-    + apply proper_received in Hobs; [| done].
-      apply has_been_received_consistency in Hobs; [| done | done].
-      destruct Hobs as [is [tr [Htr Hexists]]].
-      eapply Hnobs; [done |].
-      by apply Exists_or; left.
+  unfold has_been_directly_observed_from_sent_received.
+  split.
+  - intros s Hs m [Hsent | Hrecv].
+    + by apply has_been_sent_no_inits in Hsent.
+    + by apply has_been_received_no_inits in Hrecv.
+  - intros l s im s' om Ht m. cbn.
+    rewrite has_been_sent_step_update by done.
+    rewrite has_been_received_step_update by done.
+    by itauto.
 Qed.
 
 #[export] Program Instance HasBeenDirectlyObservedCapability_from_sent_received
@@ -1436,7 +1409,7 @@ Definition ComputableSentMessages_has_been_sent
   `{EqDecision message}
   : HasBeenSentCapability vlsm.
 Proof.
-  eapply HasBeenSentCapability_from_stepwise; cycle 1.
+  econstructor; cycle 1.
   - by apply csm_computable_oracle.
   - by typeclasses eauto.
 Defined.
@@ -1475,7 +1448,7 @@ Definition ComputableReceivedMessages_has_been_sent
   `{EqDecision message}
   : HasBeenReceivedCapability vlsm.
 Proof.
-  eapply HasBeenReceivedCapability_from_stepwise; cycle 1.
+  econstructor; cycle 1.
   - by apply crm_computable_oracle.
   - by typeclasses eauto.
 Defined.
@@ -1552,6 +1525,7 @@ Proof.
       eapply VLSM_incl_finite_valid_trace_init_to;
       [apply vlsm_incl_pre_loaded_with_all_messages_vlsm |].
   }
+  unfold can_emit.
   eapply has_been_sent_examine_one_trace, Exists_exists in Hsent
     as (item_z & Hitem_z & Hz); [| done].
   apply elem_of_list_split in Hitem_z as (pre_z & suf_z & ->).
@@ -1571,9 +1545,10 @@ Lemma preloaded_sent_can_emit
   (Hsent : has_been_sent X s m) :
   can_emit (pre_loaded_with_all_messages_vlsm X) m.
 Proof.
-  pose (Heq := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X).
-  rewrite (VLSM_eq_can_emit Heq).
-  by cbn; eapply sent_can_emit; [apply (VLSM_eq_valid_state Heq) |].
+  pose proof (Heq := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X).
+  rewrite (VLSM_eq_can_emit Heq); cbn.
+  eapply sent_can_emit; [| done].
+  by apply (VLSM_eq_valid_state Heq).
 Qed.
 
 Lemma sent_valid
@@ -1600,13 +1575,10 @@ Lemma received_valid
     valid_message_prop X m.
 Proof.
   induction Hs using valid_state_prop_ind.
-  - contradict Hreceived.
-    eapply oracle_no_inits; [| done].
-    by apply has_been_received_stepwise_from_trace.
+  - by apply has_been_received_no_inits in Hreceived.
   - apply input_valid_transition_in in Ht as Hom'.
     apply preloaded_weaken_input_valid_transition in Ht.
-    erewrite oracle_step_update in Hreceived
-    ; [| apply has_been_received_stepwise_from_trace | done].
+    erewrite has_been_received_step_update in Hreceived by done.
     by destruct Hreceived as [[= ->] |]; auto.
 Qed.
 
@@ -1673,7 +1645,7 @@ Definition composite_oracle : composite_state IM -> message -> Prop :=
 Lemma composite_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  : oracle_stepwise_props (vlsm := X) composite_message_selector composite_oracle.
+  : oracle_stepwise_props (vlsm:=X) composite_message_selector composite_oracle.
 Proof.
   split.
   - (* initial states not claim *)
@@ -1773,13 +1745,11 @@ Qed.
 Lemma composite_has_been_sent_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  : has_been_sent_stepwise_props (vlsm := X) composite_has_been_sent.
+  : has_been_sent_stepwise_prop (vlsm:=X) composite_has_been_sent.
 Proof.
   unfold has_been_sent_stepwise_props.
-  pose proof (composite_stepwise_props
-                (fun i => has_been_sent_stepwise_from_trace
-                            (IM i)))
-       as [Hinits Hstep].
+  pose proof (composite_stepwise_props (fun i => has_been_sent_stepwise_props (IM i)))
+    as [Hinits Hstep].
   split; [done |].
   by intros l; specialize (Hstep l); destruct l.
 Qed.
@@ -1788,7 +1758,8 @@ Qed.
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   : HasBeenSentCapability X :=
-  HasBeenSentCapability_from_stepwise (vlsm := X)
+  Build_HasBeenSentCapability X
+    composite_has_been_sent
     composite_has_been_sent_dec
     (composite_has_been_sent_stepwise_props constraint).
 
@@ -1826,13 +1797,11 @@ Qed.
 Lemma composite_has_been_received_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  : has_been_received_stepwise_props (vlsm := X) composite_has_been_received.
+  : has_been_received_stepwise_prop (vlsm:=X) composite_has_been_received.
 Proof.
   unfold has_been_received_stepwise_props.
-  pose proof (composite_stepwise_props
-                (fun i => has_been_received_stepwise_from_trace
-                            (IM i)))
-       as [Hinits Hstep].
+  pose proof (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)))
+    as [Hinits Hstep].
   split; [done |].
   by intros l; specialize (Hstep l); destruct l.
 Qed.
@@ -1841,7 +1810,8 @@ Qed.
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   : HasBeenReceivedCapability X :=
-  HasBeenReceivedCapability_from_stepwise (vlsm := X)
+  Build_HasBeenReceivedCapability X
+    composite_has_been_received
     composite_has_been_received_dec
     (composite_has_been_received_stepwise_props constraint).
 
@@ -1855,12 +1825,11 @@ Lemma preloaded_composite_has_been_received_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (seed : message -> Prop)
   (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  : has_been_received_stepwise_props (vlsm := X) composite_has_been_received.
+  : has_been_received_stepwise_prop (vlsm:=X) composite_has_been_received.
 Proof.
   unfold has_been_received_stepwise_props.
-  specialize (composite_stepwise_props
-                (fun i => has_been_received_stepwise_from_trace (IM i)))
-       as [Hinits Hstep].
+  specialize (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)))
+    as [Hinits Hstep].
   split; [done |].
   by intros l; specialize (Hstep l); destruct l.
 Qed.
@@ -1870,7 +1839,8 @@ Definition preloaded_composite_HasBeenReceivedCapability
   (seed : message -> Prop)
   (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
   : HasBeenReceivedCapability X :=
-  HasBeenReceivedCapability_from_stepwise (vlsm := X)
+  Build_HasBeenReceivedCapability X
+    composite_has_been_received
     composite_has_been_received_dec
     (preloaded_composite_has_been_received_stepwise_props constraint seed).
 
@@ -1899,7 +1869,7 @@ Qed.
 Lemma composite_has_been_directly_observed_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  : oracle_stepwise_props (vlsm := X) item_sends_or_receives composite_has_been_directly_observed.
+  : oracle_stepwise_props (vlsm:=X) item_sends_or_receives composite_has_been_directly_observed.
 Proof.
   pose proof (composite_stepwise_props
                 (fun i => (has_been_directly_observed_stepwise_props (IM i))))
@@ -2135,10 +2105,8 @@ Lemma initial_state_is_not_equivocating_statewise
   : ~ is_equivocating_statewise s v.
 Proof.
   unfold is_equivocating_statewise, equivocating_wrt.
-  intros [j [m [Hsender [Hnbs Hrcv]]]].
-  revert Hrcv.
-  apply has_been_received_stepwise_from_trace.
-  by apply Hs.
+  intros (j & m & Hsender & Hnbs & Hrcv).
+  by revert Hrcv; apply has_been_received_stepwise_props, Hs.
 Qed.
 
 (**
@@ -2184,7 +2152,7 @@ Proof.
   clear -Hs Horacle.
   specialize
     (oracle_component_selected_previously
-      (fun i => has_been_sent_stepwise_from_trace (IM i))
+      (fun i => has_been_sent_stepwise_props (IM i))
       Hs Horacle)
     as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
   by eexists _, _.
@@ -2207,7 +2175,7 @@ Proof.
   clear -Hs Horacle.
   specialize
     (oracle_component_selected_previously
-      (fun i => has_been_received_stepwise_from_trace (IM i))
+      (fun i => has_been_received_stepwise_props (IM i))
       Hs Horacle)
     as (s_item & [[] ?] & Ht & Hfutures & Hi & Hselected).
   by eexists _, _.
@@ -2649,14 +2617,13 @@ Proof.
   intros m Hm.
   destruct Hfuture as [tr2 Htr2].
   induction Htr2; [done |].
-  apply IHHtr2;clear IHHtr2.
-  specialize (has_been_received_step_update Ht m) as Hrupd.
-  specialize (has_been_sent_step_update Ht m) as Hmupd.
+  apply IHHtr2; clear IHHtr2.
+  pose proof (Hrupd := has_been_received_step_update Ht m).
+  pose proof (Hmupd := has_been_sent_step_update Ht m).
   destruct Hm as [Hr Hs].
-  eapply or_intror in Hr; apply Hrupd in Hr.
-  split; [done |].
+  split; [by itauto |].
   intros [-> |]%Hmupd; [| by apply Hs].
-  by apply Hno_resend in Ht as [_ []].
+  by apply Hno_resend in Ht; itauto.
 Qed.
 
 Context
@@ -2705,7 +2672,7 @@ Proof.
       apply (has_been_received_step_update Hx);right.
       erewrite oracle_partial_trace_update.
       - by left.
-      - by apply has_been_received_stepwise_from_trace.
+      - by apply has_been_received_stepwise_props.
       - by apply valid_trace_add_default_last; apply Htr.
     }
     specialize (IHHtr Htrm').
