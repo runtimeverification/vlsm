@@ -79,4 +79,5 @@ theories/VLSM/Core/ELMO/BaseELMO.v
 theories/VLSM/Core/ELMO/UMO.v
 theories/VLSM/Core/ELMO/MO.v
 theories/VLSM/Core/ELMO/ELMO.v
+theories/VLSM/Core/ELMO/ELMOByzantine.v
 theories/VLSM/Core/ELMO/AllELMO.v

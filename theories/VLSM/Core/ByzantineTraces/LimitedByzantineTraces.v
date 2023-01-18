@@ -444,7 +444,7 @@ Qed.
   composition, then the traces exposed limited Byzantine behavior coincide with
   the traces exposed to limited equivocation.
 *)
-Lemma msg_dep_validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
+Lemma msg_dep_validator_limited_non_equivocating_byzantine_traces_are_limited_non_equivocating s tr
   : limited_byzantine_trace_prop (Ci := Ci) IM threshold sender s tr <->
     exists bs btr selection (selection_complement := difference (list_to_set (enum index)) selection),
       finite_valid_trace Limited bs btr /\

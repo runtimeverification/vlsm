@@ -488,6 +488,13 @@ Qed.
 Definition component_message_validator_prop : Prop :=
   @message_validator_prop _ X (IM j).
 
+Lemma component_projection_validator_is_message_validator
+  : component_projection_validator_prop -> component_message_validator_prop.
+Proof.
+  by intro Hproj; eapply projection_validator_is_message_validator,
+    component_projection_validator_prop_is_induced.
+Qed.
+
 (**
   Assuming the [component_projection_validator_prop]erty, the component
   [pre_loaded_with_all_messages_vlsm] is [VLSM_eq]ual (trace-equivalent) with
