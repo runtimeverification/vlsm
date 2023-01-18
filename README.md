@@ -41,7 +41,7 @@ To install the project dependencies via opam, do:
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto coq-equations
+opam install coq.8.16.1 coq-stdpp.1.8.0 coq-itauto coq-equations
 ```
 
 To build the project when you have all dependencies installed, do:
