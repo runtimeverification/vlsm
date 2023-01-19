@@ -496,10 +496,10 @@ Qed.
 Definition set_remove_list `{EqDecision A} (l1 l2 : list A) : list A :=
   fold_right set_remove l2 l1.
 
-Example set_remove_list1 : set_remove_list [3;1;3] [1;1;2;3;3;3;3] = [1;2;3;3].
+Example set_remove_list1 : set_remove_list [3; 1; 3] [1; 1; 2; 3; 3; 3; 3] = [1; 2; 3; 3].
 Proof. done. Qed.
 
-Example set_remove_list2 : set_remove_list [4] [1;2;3] = [1;2;3].
+Example set_remove_list2 : set_remove_list [4] [1; 2; 3] = [1; 2; 3].
 Proof. done. Qed.
 
 Lemma set_remove_list_1
@@ -548,7 +548,7 @@ Definition set_diff_filter `{EqDecision A} (l r : list A) :=
 Lemma set_diff_filter_iff `{EqDecision A} (a:A) l r:
   a ∈ set_diff_filter l r <-> a ∈ l /\ a ∉ r.
 Proof.
-  induction l;simpl.
+  induction l; simpl.
   - by cbn; split; intros; [inversion H | itauto].
   - unfold set_diff_filter in *.
     rewrite filter_cons.
@@ -604,7 +604,7 @@ Proof.
     destruct (decide (new ∉ b)); [| by contradict n0; itauto].
     simpl.
     by apply le_n_S, len_set_diff_incl_le.
-  - specialize (IHl H);clear H.
+  - specialize (IHl H); clear H.
     unfold set_diff_filter.
     rewrite 2 filter_cons.
     destruct (decide (a0 ∉ a)); destruct (decide (a0 ∉ b)).

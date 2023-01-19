@@ -150,7 +150,7 @@ Proof.
     by itauto.
   - apply Exists_cons in Hsomething.
     destruct Hsomething; [by itauto |].
-    specialize (IHl H);clear H.
+    specialize (IHl H); clear H.
     destruct IHl as [prefix [suffix [first [Hf [-> Hnone_before]]]]].
     exists (a :: prefix), suffix, first.
     rewrite Exists_cons.
@@ -1282,9 +1282,9 @@ Fixpoint complete_prefix
                                end
   end.
 
-Example complete_prefix_some : complete_prefix [1;2;3;4] [1;2] = Some [3;4].
+Example complete_prefix_some : complete_prefix [1; 2; 3; 4] [1; 2] = Some [3; 4].
 Proof. by itauto. Qed.
-Example complete_prefix_none : complete_prefix [1;2;3;4] [1;3] = None.
+Example complete_prefix_none : complete_prefix [1; 2; 3; 4] [1; 3] = None.
 Proof. by itauto. Qed.
 
 Lemma complete_prefix_empty
@@ -1347,7 +1347,7 @@ Definition complete_suffix
   | Some ls => Some (rev ls)
   end.
 
-Example complete_suffix_some : complete_suffix [1;2;3;4] [3;4] = Some [1;2].
+Example complete_suffix_some : complete_suffix [1; 2; 3; 4] [3; 4] = Some [1; 2].
 Proof. by itauto. Qed.
 
 Lemma complete_suffix_correct

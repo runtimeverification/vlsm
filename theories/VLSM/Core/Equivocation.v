@@ -656,7 +656,7 @@ Proof.
   exists is, tr.
   split; [| done].
   revert Htr.
-  unfold pre_vlsm;clear.
+  unfold pre_vlsm; clear.
   destruct vlsm as (T, M).
   by apply VLSM_incl_finite_valid_trace_init_to, vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -681,7 +681,7 @@ Proof.
   specialize (Hsm is tr).
   spec Hsm; [| done].
   revert Htr.
-  unfold pre_vlsm;clear.
+  unfold pre_vlsm; clear.
   destruct vlsm as (T, M).
   by apply VLSM_incl_finite_valid_trace_init_to, vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -967,9 +967,9 @@ Proof.
   intros s Hinit m Horacle.
   assert (Hproto : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
     by (apply initial_state_is_valid; done).
-  apply Horacle_all_have in Horacle;[| done].
+  apply Horacle_all_have in Horacle; [| done].
   specialize (Horacle s nil).
-  eapply Exists_nil;apply Horacle;clear Horacle.
+  eapply Exists_nil; apply Horacle; clear Horacle.
   by split; [constructor |].
 Qed.
 
@@ -1636,7 +1636,7 @@ Definition composite_message_selector : message -> composite_transition_item IM 
 Proof.
   intros msg [[i li] input s output].
   apply (message_selectors i msg).
-  exact {|l:=li;input:=input;destination:=s i;output:=output|}.
+  exact {|l:=li; input:=input; destination:=s i; output:=output|}.
 Defined.
 
 Definition composite_oracle : composite_state IM -> message -> Prop :=
@@ -1663,7 +1663,7 @@ Proof.
       apply (input_valid_transition_preloaded_project_any j) in Hproto.
       by destruct Hproto as [|(lj & Hlj & _)]; [left | right; congruence].
     }
-    apply input_valid_transition_preloaded_project_active in Hproto;simpl in Hproto.
+    apply input_valid_transition_preloaded_project_active in Hproto; simpl in Hproto.
     apply (oracle_step_update (stepwise_props i)) with (msg:=msg) in Hproto.
     split.
     + intros [j Hj].
@@ -2660,7 +2660,7 @@ Proof.
   - rapply @finite_valid_trace_from_empty.
     by apply initial_state_is_valid.
   - assert (trace_received_not_sent_before_or_after_invariant tr P) as Htrm'.
-    { intros m [Hrecv Hsend]. apply (Htrm m);clear Htrm.
+    { intros m [Hrecv Hsend]. apply (Htrm m); clear Htrm.
       split; [by apply Exists_app; left |].
       contradict Hsend.
       unfold trace_has_message in Hsend.
@@ -2669,7 +2669,7 @@ Proof.
       cut (oom <> Some m); [by itauto |].
       intros ->.
       cut (has_been_received X sf m); [by apply (Hno_resend _ _ _ _ _ Hx) |].
-      apply (has_been_received_step_update Hx);right.
+      apply (has_been_received_step_update Hx); right.
       erewrite oracle_partial_trace_update.
       - by left.
       - by apply has_been_received_stepwise_props.
@@ -2677,7 +2677,7 @@ Proof.
     }
     specialize (IHHtr Htrm').
     apply (extend_right_finite_trace_from _ IHHtr).
-    repeat split;try apply Hx;
+    repeat split; try apply Hx;
     [by apply finite_valid_trace_last_pstate |].
     destruct iom as [m |]; [| by apply option_valid_message_None].
     (*
@@ -2692,12 +2692,12 @@ Proof.
       right. apply Htrm.
       split.
       * by apply Exists_app; right; apply Exists_cons; left.
-      * intro Hsent;destruct Hnot_sent.
+      * intro Hsent; destruct Hnot_sent.
         unfold trace_has_message in Hsent.
         rewrite Exists_app, Exists_cons, Exists_nil in Hsent.
         destruct Hsent as [Hsent | [[= ->] | []]]; [done | exfalso].
         apply Hno_resend in Hx as Hx'.
-        apply (proj2 Hx');clear Hx'.
+        apply (proj2 Hx'); clear Hx'.
         by rewrite (has_been_received_step_update Hx); left.
 Qed.
 

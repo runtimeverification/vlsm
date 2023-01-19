@@ -386,7 +386,7 @@ exist _ (dupT u b) (@dupT_setoidT u b).
 
 #[local] Notation "<< p ; b >>" := (DupT p b) (at level 80).
 
-Lemma DupT_cont: forall u v b, u ->> v -> <<u;b>> =>> <<v;b>>.
+Lemma DupT_cont: forall u v b, u ->> v -> <<u; b>> =>> <<v; b>>.
 Proof.
 move => u v b h0 tr0 /=.
 exact: dupT_cont.
@@ -651,14 +651,14 @@ case => [a|a b tr0].
 - exact/followsT_delay/CIH.
 Qed.
 
-Lemma SingletonT_DupT_AppendT_andA_DupT : forall u v b, ([|u|] *** <<v;b>>) =>> <<u andA v;b>>.
+Lemma SingletonT_DupT_AppendT_andA_DupT : forall u v b, ([|u|] *** <<v; b>>) =>> <<u andA v; b>>.
 Proof.
 move => u v b tr0 [tr1 [[a [h0 h2]] h1]] /=; invs h2; invs h1.
 move: H1 => [a [h1 h2]]; invs h2; invs H1.
 exact: dupT_Tcons.
 Qed.
 
-Lemma DupT_andA_AppendT_SingletonT_DupT : forall u v b, <<u andA v;b>> =>> ([|u|] *** <<v;b>>).
+Lemma DupT_andA_AppendT_SingletonT_DupT : forall u v b, <<u andA v; b>> =>> ([|u|] *** <<v; b>>).
 Proof.
 move => u v b tr0 [a [[hu hv] h1]]; invs h1; invs H1.
 exists (Tnil a); split; first by apply: nil_singletonT.
@@ -666,7 +666,7 @@ apply: followsT_nil => //.
 exact: dupT_Tcons.
 Qed.
 
-Lemma DupT_andA_AppendT_SingletonT : forall u v b, <<u andA v;b>> =>> <<u;b>> *** [|v|].
+Lemma DupT_andA_AppendT_SingletonT : forall u v b, <<u andA v; b>> =>> <<u; b>> *** [|v|].
 Proof.
 move => u v b tr0 [a [[hu hv] h0]]; invs h0; invs H1.
 exists (Tcons a b (Tnil a)); split.
@@ -675,7 +675,7 @@ exists (Tcons a b (Tnil a)); split.
   exact: nil_singletonT.
 Qed.
 
-Lemma DupT_AppendT_SingletonT_andA_DupT : forall u v b, (<<u;b>> *** [|v|]) =>> <<u andA v;b>>.
+Lemma DupT_AppendT_SingletonT_andA_DupT : forall u v b, (<<u; b>> *** [|v|]) =>> <<u andA v; b>>.
 Proof.
 move => u v b tr0 [tr1 [[a [hu h0]] h1]].
 invs h0; invs H1; invs h1; invs H3; move: H1 => [a [hv h0]]; invs h0 => /=.
@@ -950,7 +950,7 @@ Lemma IterT_IterT : forall p, (IterT p *** IterT p) =>> IterT p.
 Proof. move => [p hp] tr /=. exact: iterT_iterT. Qed.
 
 Lemma IterT_DupT : forall v b,
- ([|v|] *** (IterT (TtT *** <<v;b>>))) =>> (TtT *** [|v|]).
+ ([|v|] *** (IterT (TtT *** <<v; b>>))) =>> (TtT *** [|v|]).
 Proof.
 move => v b tr0 [tr1 [[a [h0 h2]] h1]]; invs h2; invs h1 => /=.
 exists tr0. split => //.
@@ -1028,7 +1028,7 @@ move: {h2} tr0 a h3 h1. cofix CIH. move => tr0 a h0; invs h0 => h0.
 Qed.
 
 Lemma LastA_IterA : forall v b p,
- LastA ([|v|] *** (IterT (p *** <<v;b>>))) ->> v.
+ LastA ([|v|] *** (IterT (p *** <<v; b>>))) ->> v.
 Proof.
 move => v b p a h0.
 have h1: p =>> TtT by [].
@@ -1038,7 +1038,7 @@ exact: LastA_AppendA.
 Qed.
 
 Lemma IterT_LastA_DupT : forall v b,
- (<<v;b>> *** (IterT (TtT *** <<v;b>>))) =>> (TtT *** [|v|]).
+ (<<v; b>> *** (IterT (TtT *** <<v; b>>))) =>> (TtT *** [|v|]).
 Proof.
 move => v b tr0 [tr1 [[a [h0 h2]] h1]].
 invs h2; invs H1; invs h1; invs H3 => /=.
@@ -1118,7 +1118,7 @@ move => tr a b1; elim => {tr a} [a|a1 b2 a2 tr Hfinal IH].
 Qed.
 
 Lemma LastA_DupT : forall p u b,
- LastA (p *** [|u|]) ->> LastA (p *** <<u;b>>).
+ LastA (p *** [|u|]) ->> LastA (p *** <<u; b>>).
 Proof.
 move => [p hp] u b a [tr0 [[tr1 [h0 h2]] h1]].
 exists (lastdup tr0 b); split; last by apply: finalTA_lastdup.

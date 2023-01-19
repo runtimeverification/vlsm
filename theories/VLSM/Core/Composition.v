@@ -947,7 +947,7 @@ Lemma composite_transition_project_active
       vtransition (IM (projT1 l)) (projT2 l) (s (projT1 l), im) = (s' (projT1 l), om).
 Proof.
   intros.
-  destruct l;simpl.
+  destruct l; simpl.
   simpl in H.
   destruct (vtransition (IM x) v (s x, im)).
   inversion H.

@@ -1073,7 +1073,7 @@ Proof.
   spec Hj; [done |].
   specialize (Hj is) as [fsj Hfsj].
   replace (finite_trace_last _ _) with fs in Hfsj
-    by (symmetry;apply (valid_trace_get_last Htr)).
+    by (symmetry; apply (valid_trace_get_last Htr)).
   exists fsj. split; [done |].
   specialize
     (preloaded_equivocator_vlsm_trace_project_valid _ _ _ Htr _ _ Hfsj)

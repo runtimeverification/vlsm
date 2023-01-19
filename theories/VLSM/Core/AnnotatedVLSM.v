@@ -337,7 +337,7 @@ Proof.
   intros [s1 ann1] [s2 ann2]
   ; unfold annotated_transition; cbn
   ; intros <- iom sX1' oom1
-  ;destruct (vtransition _ _ _) as (si', om').
+  ; destruct (vtransition _ _ _) as (si', om').
   inversion_clear 1; intros sX2' oom2; inversion_clear 1.
   by cbn; state_update_simpl.
 Qed.

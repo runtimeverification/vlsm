@@ -183,7 +183,7 @@ Proof.
   apply Exists_cons.
   rewrite filter_cons.
   destruct (decide (precedes a a)); [by contradict p; apply precedes_irreflexive |].
-  assert ({ l0=[] }+{l0 <> [] }) by (destruct l0;clear;[left|right];congruence).
+  assert ({ l0=[] }+{l0 <> [] }) by (destruct l0; clear; [left|right]; congruence).
   destruct H as [? | Hl0]; [subst l0 |]; [by left |].
   specialize (IHl0 Hl0).
   apply Exists_exists in IHl0.
@@ -194,7 +194,7 @@ Proof.
     specialize (Hall HPl0 x Hin).
     match goal with |- ?X = 0  => cut (X <= 0) end.
     lia.
-    rewrite <- Hlen;clear Hlen.
+    rewrite <- Hlen; clear Hlen.
     apply filter_length_fn.
     revert HPl0.
     intro.

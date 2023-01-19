@@ -102,7 +102,7 @@ Proof.
     by itauto.
   - apply Exists_app in Hsomething.
     destruct Hsomething; [| by inversion H; [| inversion H1]].
-    specialize (IHl H);clear H.
+    specialize (IHl H); clear H.
     destruct IHl as [prefix [suffix [last [Hf [-> Hnone_after]]]]].
     exists prefix, (suffix ++ [x]), last.
     simpl. rewrite app_assoc_reverse. simpl.
@@ -167,7 +167,7 @@ Definition maximal_elements_list
   : list A :=
   filter (fun a => Forall (fun b => ~ precedes a b) l) l.
 
-Example maximal_elements_list1: maximal_elements_list Nat.lt [1; 4; 2; 4] = [4;4].
+Example maximal_elements_list1: maximal_elements_list Nat.lt [1; 4; 2; 4] = [4; 4].
 Proof. by itauto. Qed.
 
 Example maximal_elements_list2 : maximal_elements_list Nat.le [1; 4; 2; 4] = [].

@@ -42,7 +42,7 @@ Qed.
 Lemma Forever_map [A B:Type] (f: A -> B) (P: Stream B -> Prop): forall s,
   Forever P (Streams.map f s) <-> Forever (fun s => P (Streams.map f s)) s.
 Proof.
-  split;revert s.
+  split; revert s.
   - cofix lem. destruct s.
     rewrite (unfold_Stream (map f (Cons a s))).
     simpl.
@@ -165,7 +165,7 @@ Proof.
     specialize (H a).
     destruct H as [x H _]. revert Hprogress.
     clear s.
-    induction H;intro Hprogress.
+    induction H; intro Hprogress.
     + by destruct s; cbn in *; congruence.
     + simpl. intro. subst a0.
       apply elater.

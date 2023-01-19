@@ -97,7 +97,7 @@ Proof.
     as (si', om') eqn:Htei.
   inversion Ht. subst. clear Ht.
   replace idescriptors with (equivocator_descriptors_update descriptors i deqv')
-    by (destruct oitemx;congruence);clear oitem Hpr.
+    by (destruct oitemx; congruence); clear oitem Hpr.
   intros eqv Heqv. apply set_union_iff in Heqv. apply set_union_iff.
   destruct (decide (eqv = i)).
   - subst i.

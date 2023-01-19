@@ -1609,8 +1609,8 @@ Proof.
         [contradict Hnot_sent |]; exists k.
   - destruct Hequiv as [m Hadr [i_rec Hrecv] Hnot_sent].
     unfold ELMO_global_equivocators.
-    exists m;split;[done|].
-    split;[|done].
+    exists m; split; [done|].
+    split; [|done].
     exists i_rec.
     by apply full_node_messages_iff_rec_obs, received_in_messages.
 Qed.
@@ -1664,7 +1664,7 @@ Proof.
       destruct Hobs as [k Hobs]; exists k.
     + by apply elem_of_messages.
     + assert (m' ∈ messages (s k)) by (eapply elem_of_messages; done).
-      enough (m <hb m') by (eapply messages_hb_transitive;done).
+      enough (m <hb m') by (eapply messages_hb_transitive; done).
       revert Hdepth; apply (tc_congruence (fun m=>m)).
       unfold msg_dep_rel, compose, immediate_dependency.
       by intros x y Hdep; apply elem_of_list_to_set in Hdep.
@@ -1683,8 +1683,8 @@ Proof.
   apply Morphisms_Prop.ex_iff_morphism; intro m.
   assert (forall k : index, UMO_reachable full_node (s k))
     by (intro; eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded; done).
-  setoid_rewrite <- full_node_messages_iff_rec_obs;[| done].
-  setoid_rewrite <- ELMO_CHBO_in_messages;[| done].
+  setoid_rewrite <- full_node_messages_iff_rec_obs; [| done].
+  setoid_rewrite <- ELMO_CHBO_in_messages; [| done].
   (* firstorder works here but is slow *)
   by split; intros []; constructor; [cbv; f_equal | .. | apply Some_inj |]; itauto.
 Qed.
