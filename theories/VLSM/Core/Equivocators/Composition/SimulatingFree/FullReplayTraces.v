@@ -234,7 +234,7 @@ Proof.
   inversion_clear Hplana.
   split.
   - apply equivocators_trace_project_app_iff.
-    exists [],[],eqv_descriptors.
+    exists [], [], eqv_descriptors.
     repeat split; [| by apply IHl].
     specialize (Heqv_descriptors (` x)).
     unfold existing_descriptor in Heqv_descriptors.
@@ -376,17 +376,17 @@ Lemma equivocators_trace_project_replayed_trace_from_left full_replay_state is t
     Some ([], eqv_descriptors).
 Proof.
   apply equivocators_trace_project_app_iff.
-  exists [],[],eqv_descriptors.
+  exists [], [], eqv_descriptors.
   repeat split; [| by apply equivocators_trace_project_replayed_initial_state_from].
   induction tr using rev_ind; [done |].
   unfold pre_VLSM_embedding_finite_trace_project.
   rewrite map_app.
   apply equivocators_trace_project_app_iff.
-  exists [],[], eqv_descriptors.
+  exists [], [], eqv_descriptors.
   repeat split; [| done].
   clear IHtr.
   destruct x. simpl.
-  destruct l as (sub_i,li).
+  destruct l as (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i.
   subst sub_i.
   specialize (Heqv_descriptors i).

@@ -245,15 +245,15 @@ Proof.
   - exists om'.
     assert (option_valid_message_prop Alt om0) as Hom0
       by apply alt_option_valid_message.
-    cut (input_valid_transition Alt (existT first l) (lifted_alt_state s,om0) (lifted_alt_state s', om'))
+    cut (input_valid_transition Alt (existT first l) (lifted_alt_state s, om0) (lifted_alt_state s', om'))
       ; [by apply input_valid_transition_outputs_valid_state_message |].
     split.
     + by repeat split; [.. | apply Ht].
     + simpl.
       replace (lifted_alt_state s first) with s
-        by (unfold lifted_alt_state,lift_to_composite_state'; state_update_simpl; done).
+        by (unfold lifted_alt_state, lift_to_composite_state'; state_update_simpl; done).
       apply proj2 in Ht.
-      change (vtransition M l (s: vstate M,om0) = (s',om')) in Ht.
+      change (vtransition M l (s: vstate M, om0) = (s', om')) in Ht.
       rewrite Ht.
       f_equal.
       by apply state_update_twice.

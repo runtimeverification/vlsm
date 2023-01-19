@@ -428,7 +428,7 @@ Proof.
   destruct (sender m) as [v|] eqn:Hsender; simpl in Hj; [| by congruence].
   apply Some_inj in Hj.
   specialize (Hsender_safety _ _ Hsender).
-  intros [(s0,om0) [(i, li) [s1 Hemitted]]].
+  intros [(s0, om0) [(i, li) [s1 Hemitted]]].
   specialize (preloaded_component_projection IM i) as Hproj.
   specialize (VLSM_projection_input_valid_transition Hproj (existT i li) li)
     as Htransition.
@@ -437,9 +437,9 @@ Proof.
   remember (s0 i) as s0i. clear s0 Heqs0i.
   remember (s1 i) as s1i. clear s1 Heqs1i.
   specialize (Hsender_safety i).
-  spec Hsender_safety; [by eexists _,_, _ |].
+  spec Hsender_safety; [by eexists _, _, _ |].
   rewrite Hsender_safety in Hj; subst.
-  by eexists _,_, _.
+  by eexists _, _, _.
 Qed.
 
 End sec_sender_safety_can_emit_projection.

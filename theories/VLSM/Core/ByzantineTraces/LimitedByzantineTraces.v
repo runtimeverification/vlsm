@@ -461,7 +461,7 @@ Proof.
   - intros (byzantine & Hlimited & Hbyzantine).
     apply lift_fixed_byzantine_traces_to_limited in Hbyzantine
        as [Hbtr Heqv_byzantine] ; [| done].
-    eexists _,_, byzantine; do 3 (split; [done |]); split.
+    eexists _, _, byzantine; do 3 (split; [done |]); split.
     + extensionality sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; cbn.
       unfold lift_sub_state.
       by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
@@ -474,7 +474,7 @@ Proof.
     ; [by apply fixed_non_equivocating_incl_fixed_non_byzantine |].
     apply fixed_non_equivocating_traces_char.
     symmetry in His_pr, Htr_pr.
-    eexists _,_; split; [| done].
+    eexists _, _; split; [| done].
     eapply msg_dep_fixed_limited_equivocation_witnessed in Hbtr as [_ Hbtr]; [| done..].
     revert Hbtr; apply VLSM_incl_finite_valid_trace.
     apply fixed_equivocation_vlsm_composition_index_incl.

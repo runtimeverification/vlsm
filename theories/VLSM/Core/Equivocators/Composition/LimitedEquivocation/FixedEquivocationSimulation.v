@@ -281,7 +281,7 @@ Proof.
     apply valid_trace_forget_last in Him_etr.
     specialize (Hreplay _ _ Him_etr).
     apply valid_trace_add_default_last in Hreplay.
-    eexists _,_; split; [done |].
+    eexists _, _; split; [done |].
     (*
       Having verified the validity part of the conclusion, now we only
       need to show two projection properties, and the no message-equivocation
@@ -320,7 +320,7 @@ Proof.
       rewrite finite_trace_last_is_last.
       rewrite finite_trace_last_output_is_last in Him_output.
       replace (output _) with (Some im) in Ht.
-      by eexists _,_.
+      by eexists _, _.
 Qed.
 
 (** ** The main result

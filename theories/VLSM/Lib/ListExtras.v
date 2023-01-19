@@ -319,9 +319,9 @@ Fixpoint list_suffix
   (n : nat)
   {struct n}
   : list A
-  := match n,l with
-    | 0,_ => l
-    | _,[] => []
+  := match n, l with
+    | 0, _ => l
+    | _, [] => []
     | S n, a :: l => list_suffix l n
     end.
 
@@ -340,9 +340,9 @@ Fixpoint list_prefix
   (l : list A)
   (n : nat)
   : list A
-  := match n,l with
-    | 0,_ => []
-    | _,[] => []
+  := match n, l with
+    | 0, _ => []
+    | _, [] => []
     | S n, a :: l => a :: list_prefix l n
     end.
 
@@ -1129,7 +1129,7 @@ Proof.
   - by destruct pre; inversion H.
   - inversion H; subst; [done |].
     apply elem_of_list_fmap in H2 as [x0 [Heq Hin]].
-    destruct x0 as ((prex0,x0),sufx0).
+    destruct x0 as ((prex0, x0), sufx0).
     specialize (IHl prex0 x0 sufx0).
     apply IHl in Hin.
     by inversion Heq; subst.
@@ -1164,7 +1164,7 @@ Definition two_element_decompositions
       match t with
         (l1, e1, l2) =>
         map
-          (fun t => match t with (l2',e2, l3) => (l1, e1, l2', e2, l3) end)
+          (fun t => match t with (l2', e2, l3) => (l1, e1, l2', e2, l3) end)
           (one_element_decompositions l2)
       end
     )

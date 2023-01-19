@@ -571,7 +571,7 @@ Definition input_valid
   let (s, om) := som in
      valid_state_prop s
   /\ option_valid_message_prop om
-  /\ valid l (s,om).
+  /\ valid l (s, om).
 
 (** Input valid transitions are transitions with [input_valid] inputs. *)
 Definition input_valid_transition
@@ -640,7 +640,7 @@ Lemma input_valid_transition_origin
       {l : label}
       {s s' : state}
       {om om' : option message}
-      (Ht : input_valid_transition l (s, om) (s',om'))
+      (Ht : input_valid_transition l (s, om) (s', om'))
   : valid_state_prop s.
 Proof.
   by destruct Ht as [[[_om Hp] _] _]; exists _om.
@@ -762,7 +762,7 @@ Definition can_produce
   (m : message)
   := option_can_produce s (Some m).
 
-(** Of course, if a VLSM [can_emit] <<(s,m)>>, then <<(s,m)>> is valid. *)
+(** Of course, if a VLSM [can_emit] <<(s, m)>>, then <<(s, m)>> is valid. *)
 
 Lemma option_can_produce_valid
   (s : state)
@@ -937,7 +937,7 @@ Qed.
   - <<(s, [])>> is a [finite_valid_trace_from] <<s>> if <<s>> is valid
   - if there is an [input_valid_transition] <<l (s', iom) (s, oom)>>
 
-    and if <<(s,steps)>> is a [valid_trace_from] <<s>>
+    and if <<(s, steps)>> is a [valid_trace_from] <<s>>
 
     then <<(s', ({| l := l; input := iom; destination := s; output := oom |} :: steps)>>
     is a [finite_valid_trace_from] <<s'>>.
@@ -1193,7 +1193,7 @@ Lemma finite_valid_trace_from_rev_ind
     finite_valid_trace_from s tr ->
     P s tr ->
     forall sf iom oom l
-    (Hx: input_valid_transition l (finite_trace_last s tr,iom) (sf,oom)),
+    (Hx: input_valid_transition l (finite_trace_last s tr, iom) (sf, oom)),
     let x:= {|l:=l; input:=iom; destination:=sf; output:=oom|} in
     P s (tr++[x])):
   forall s tr,
@@ -1216,7 +1216,7 @@ Lemma finite_valid_trace_rev_ind
     finite_valid_trace si tr ->
     P si tr ->
     forall sf iom oom l
-    (Hx: input_valid_transition l (finite_trace_last si tr,iom) (sf,oom)),
+    (Hx: input_valid_transition l (finite_trace_last si tr, iom) (sf, oom)),
     let x:= {|l:=l; input:=iom; destination:=sf; output:=oom|} in
     P si (tr++[x])):
   forall si tr,
@@ -1294,7 +1294,7 @@ Lemma can_produce_from_valid_trace si tr
 Proof.
   intros item Hitem.
   apply elem_of_list_split in Hitem as (l1 & l2 & Heq).
-  eexists _,_.
+  eexists _, _.
   by eapply input_valid_transition_to; cbn.
 Qed.
 
@@ -1480,7 +1480,7 @@ Lemma finite_valid_trace_from_to_rev_ind
     (IHtr : P si s tr)
     (Htr : finite_valid_trace_from_to si s tr)
     sf iom oom l
-    (Ht : input_valid_transition l (s,iom) (sf,oom)),
+    (Ht : input_valid_transition l (s, iom) (sf, oom)),
     P si sf (tr++[{|l:=l; input:=iom; destination:=sf; output:=oom|}])):
   forall si sf tr,
     finite_valid_trace_from_to si sf tr ->
@@ -1509,7 +1509,7 @@ Lemma finite_valid_trace_init_to_rev_ind
     (IHtr : P si s tr)
     (Htr : finite_valid_trace_init_to si s tr)
     sf iom oom l
-    (Ht : input_valid_transition l (s,iom) (sf,oom)),
+    (Ht : input_valid_transition l (s, iom) (sf, oom)),
     P si sf (tr++[{|l:=l; input:=iom; destination:=sf; output:=oom|}])):
   forall si sf tr,
     finite_valid_trace_init_to si sf tr ->
@@ -1529,7 +1529,7 @@ Qed.
   [finite_valid_trace_init_to_emit_valid_state_message_rev] lemmas below, this definition
   is the trace-equivalent of the [valid_state_message_prop]erty.
 
-  This inductive property is reflecting that fact that a that <<valid_state_message_prop (s,om)>>
+  This inductive property is reflecting that fact that a that <<valid_state_message_prop (s, om)>>
   holds only if <<s>> and <<om>> are the final state and output of an initial valid
   trace, or a pair of an initial state and option-initial message.
   It follows the inductive structure of <<valid_state_message_prop>>, but augments every node of
@@ -1670,7 +1670,7 @@ Lemma finite_valid_trace_init_to_rev_strong_ind
     (IHiom : P iom_si iom_s iom_tr)
     (Hiom : finite_valid_trace_init_to iom_si iom_s iom_tr)
     sf oom l
-    (Ht : input_valid_transition l (s,iom) (sf,oom)),
+    (Ht : input_valid_transition l (s, iom) (sf, oom)),
     P is sf (tr++[{|l:=l; input:=iom; destination:=sf; output:=oom|}]))
   : forall si sf tr,
     finite_valid_trace_init_to si sf tr ->
@@ -1888,7 +1888,7 @@ Proof.
     inversion Htr; [done |].
     by destruct tl; simpl in *; congruence.
   - apply finite_valid_trace_init_to_emit_forget_emit in Htr.
-    by right; eexists _,_; rewrite finite_trace_last_output_is_last.
+    by right; eexists _, _; rewrite finite_trace_last_output_is_last.
 Qed.
 
 (**
@@ -2640,8 +2640,8 @@ Qed.
 
 Lemma preloaded_weaken_input_valid_transition
       l s om s' om':
-  input_valid_transition X l (s,om) (s',om') ->
-  input_valid_transition pre_loaded_with_all_messages_vlsm l (s,om) (s',om').
+  input_valid_transition X l (s, om) (s', om') ->
+  input_valid_transition pre_loaded_with_all_messages_vlsm l (s, om) (s', om').
 Proof.
   unfold input_valid_transition.
   intros [[[_om valid_s] [_ Hvalid]] Htrans].

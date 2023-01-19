@@ -7,7 +7,7 @@ From VLSM.Lib Require Import Preamble ListExtras ListSetExtras.
 
 Fixpoint list_compare {A} (compare : A -> A -> comparison)
     (l1 l2 : list A) : comparison :=
-  match l1,l2 with
+  match l1, l2 with
   | [], [] => Eq
   | [], _ => Lt
   | _, [] => Gt

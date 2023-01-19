@@ -657,7 +657,7 @@ Proof.
   split; [| done].
   revert Htr.
   unfold pre_vlsm;clear.
-  destruct vlsm as (T,M).
+  destruct vlsm as (T, M).
   by apply VLSM_incl_finite_valid_trace_init_to, vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
@@ -682,7 +682,7 @@ Proof.
   spec Hsm; [| done].
   revert Htr.
   unfold pre_vlsm;clear.
-  destruct vlsm as (T,M).
+  destruct vlsm as (T, M).
   by apply VLSM_incl_finite_valid_trace_init_to, vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
@@ -812,7 +812,7 @@ Lemma sent_messages_proper
 Proof.
   unfold sent_messages. rewrite exists_proj1_sig.
   specialize (proper_sent s Hs m) as Hbs.
-  unfold has_been_sent_prop,all_traces_have_message_prop in Hbs.
+  unfold has_been_sent_prop, all_traces_have_message_prop in Hbs.
   rewrite Hbs.
   symmetry.
   by apply has_been_sent_consistency.
@@ -833,7 +833,7 @@ Lemma received_messages_proper
 Proof.
   unfold received_messages. rewrite exists_proj1_sig.
   specialize (proper_received s Hs m) as Hbs.
-  unfold has_been_received_prop,all_traces_have_message_prop in Hbs.
+  unfold has_been_received_prop, all_traces_have_message_prop in Hbs.
   rewrite Hbs.
   symmetry.
   by apply has_been_received_consistency.
@@ -998,7 +998,7 @@ Qed.
 
 Lemma oracle_step_property_from_trace:
      forall l s im s' om,
-       input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s,im) (s',om) ->
+       input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
        forall msg, oracle s' msg
                    <-> (selector msg {| l:=l; input:=im; destination:=s'; output:=om |}
                         \/ oracle s msg).
@@ -1129,7 +1129,7 @@ Proof.
   destruct (input item) as [m|] eqn:Heqm; [| done].
   elim (selected_message_exists_in_all_traces_initial_state _ _ Hs (field_selector input) m).
   apply has_been_received_consistency; [done | by apply initial_state_is_valid|].
-  eexists _,_, Htr.
+  eexists _, _, Htr.
   apply Exists_exists. exists item. split; [| done].
   by apply elem_of_list_In.
 Qed.
@@ -1532,7 +1532,7 @@ Proof.
   destruct Htr as [Htr _].
   eapply valid_trace_forget_last, input_valid_transition_to in Htr; [| done].
   cbn in Hz; rewrite Hz in Htr.
-  by eexists _,_,_.
+  by eexists _, _, _.
 Qed.
 
 Lemma preloaded_sent_can_emit
@@ -1998,7 +1998,7 @@ Proof.
   apply pre_loaded_with_all_messages_projection_input_valid_transition_eq
     with (j := i) in Ht; [| done]; cbn in Ht.
   specialize (can_emit_signed i m).
-  spec can_emit_signed; [by eexists _,_,_ |].
+  spec can_emit_signed; [by eexists _, _, _ |].
   unfold channel_authenticated_message in can_emit_signed.
   destruct (sender m) as [v|] eqn: Hsender; [| by inversion can_emit_signed].
   apply Some_inj in can_emit_signed.
@@ -2200,7 +2200,7 @@ Proof.
   eapply VLSM_incl_input_valid_transition in Ht; cbn in Ht;
     [| by apply constraint_preloaded_free_incl].
   eapply (VLSM_projection_input_valid_transition (preloaded_component_projection IM i))
-    in Ht; [by eexists _,_ |].
+    in Ht; [by eexists _, _ |].
   by apply (composite_project_label_eq IM).
 Qed.
 
@@ -2604,7 +2604,7 @@ Qed.
 (** A sent message cannot have been previously sent or received. *)
 Definition cannot_resend_message_stepwise_prop : Prop :=
   forall l s oim s' m,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s,oim) (s',Some m) ->
+    input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, oim) (s', Some m) ->
     ~has_been_sent X s m /\ ~has_been_received X s' m.
 
 Lemma cannot_resend_received_message_in_future
@@ -2630,7 +2630,7 @@ Context
   (Hno_resend : cannot_resend_message_stepwise_prop).
 
 Lemma input_valid_transition_received_not_resent l s m s' om'
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s,Some m) (s', om'))
+  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, Some m) (s', om'))
   : om' <> Some m.
 Proof.
   destruct om' as [m'|]; [| by congruence].
@@ -2642,7 +2642,7 @@ Proof.
   apply proj1 in Htr as Hlst. apply finite_valid_trace_from_to_last_pstate in Hlst.
   apply proper_received; [done |].
   apply has_been_received_consistency; [done | done |].
-  exists _,_,Htr.
+  exists _, _, Htr.
   by apply Exists_app; right; apply Exists_cons; left.
 Qed.
 

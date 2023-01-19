@@ -959,7 +959,7 @@ Lemma input_valid_transition_preloaded_project_active
       {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
       l s im s' om:
-  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s,im) (s',om) ->
+  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
   input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l)
                          (s (projT1 l), im) (s' (projT1 l), om).
 Proof.
@@ -976,7 +976,7 @@ Lemma input_valid_transition_project_active
       {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
       l s im s' om:
-  input_valid_transition X l (s,im) (s',om) ->
+  input_valid_transition X l (s, im) (s', om) ->
   input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l)
                          (s (projT1 l), im) (s' (projT1 l), om).
 Proof.
@@ -990,12 +990,12 @@ Lemma input_valid_transition_preloaded_project_any {V} (i:V)
       {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
       (l:vlabel X) s im s' om:
-  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s,im) (s',om) ->
+  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
    input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i))
                           li
-                          (s i,im) (s' i,om)).
+                          (s i, im) (s' i, om)).
 Proof.
   intro Hptrans.
   destruct l as [j lj].
@@ -1018,12 +1018,12 @@ Lemma input_valid_transition_project_any {V} (i:V)
       {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
       (l:vlabel X) s im s' om:
-  input_valid_transition X l (s,im) (s',om) ->
+  input_valid_transition X l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
    input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i))
                           li
-                          (s i,im) (s' i,om)).
+                          (s i, im) (s' i, om)).
 Proof.
   intro Hproto.
   apply preloaded_weaken_input_valid_transition in Hproto.
@@ -1502,7 +1502,7 @@ Context
   (constraint2 : composite_label IM2 -> composite_state IM2 * option message -> Prop)
   (constraint_projection
     : forall s1, valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1 ->
-      forall l1 om, constraint1 l1 (s1,om) ->
+      forall l1 om, constraint1 l1 (s1, om) ->
     constraint2 (same_IM_label_rew l1) (same_IM_state_rew s1, om))
   (seed : message -> Prop)
   .

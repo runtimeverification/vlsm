@@ -445,7 +445,7 @@ Fixpoint top_sort_n
   (l : list A)
   : list A
   :=
-  match n,l with
+  match n, l with
   | 0, _ => []
   | _, [] => []
   | S n', a :: l' =>

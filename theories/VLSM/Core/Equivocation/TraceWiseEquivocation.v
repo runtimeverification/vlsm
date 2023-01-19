@@ -235,7 +235,7 @@ Proof.
   destruct Heqv as [m [Hv [prefix [item [suffix [Heq Heqv]]]]]].
   exists m. split; [done |]. exists prefix.
   destruct_list_last suffix suffix' item' Heqsuffix.
-  { exfalso. subst. apply app_inj_tail,proj2 in Heq. subst item. apply proj1 in Heqv. simpl in Heqv.
+  { exfalso. subst. apply app_inj_tail, proj2 in Heq. subst item. apply proj1 in Heqv. simpl in Heqv.
     subst om. simpl in n. congruence. }
   exists item, suffix'. split; [| done].
   replace (prefix ++ item :: suffix' ++ [item']) with ((prefix ++ item :: suffix') ++ [item']) in Heq.
@@ -275,7 +275,7 @@ Proof.
   subst.
   clear -Hnbs_m Htr.
   apply preloaded_finite_valid_trace_init_to_projection with (j := A v) in Htr as Htrv.
-  apply proj1, finite_valid_trace_from_to_app_split,proj1
+  apply proj1, finite_valid_trace_from_to_app_split, proj1
     , preloaded_finite_valid_trace_from_to_projection with (j := A v)
     , finite_valid_trace_from_to_last in Htr.
   rewrite (VLSMTotalProjection.VLSM_projection_finite_trace_project_app

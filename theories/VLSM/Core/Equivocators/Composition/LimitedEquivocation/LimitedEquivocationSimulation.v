@@ -103,7 +103,7 @@ Lemma limited_equivocators_finite_valid_trace_init_to_rev
 Proof.
   destruct HtrX as (equivocating & Hlimited & HtrX).
   eapply VLSM_incl_finite_valid_trace, valid_trace_add_default_last in HtrX
-  ; [| by eapply VLSM_eq_proj1,Fixed_eq_StrongFixed].
+  ; [| by eapply VLSM_eq_proj1, Fixed_eq_StrongFixed].
   eapply fixed_equivocators_finite_valid_trace_init_to_rev in HtrX
     as (is & s & tr & His & Hs & Htr & Hptr & Houtput); [| done].
   exists is, s, tr; split_and?; try itauto.

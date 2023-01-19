@@ -100,7 +100,7 @@ Proof.
   simpl in IHa.
   simpl.
   destruct x.
-  destruct (transition label_a0 (final, input_a0)) as (dest,out) eqn:Ht.
+  destruct (transition label_a0 (final, input_a0)) as (dest, out) eqn:Ht.
   by simpl; rewrite finite_trace_last_is_last.
 Qed.
 
@@ -322,7 +322,7 @@ Proof.
       unfold lst. clear lst.
       remember (snd (apply_plan s prefa)) as lst.
       unfold finite_valid_plan_from in Hx.
-      unfold apply_plan,_apply_plan in Hx. simpl in Hx.
+      unfold apply_plan, _apply_plan in Hx. simpl in Hx.
       destruct ai.
       destruct ( vtransition X label_a0 (lst, input_a0)) as (dest, out).
       simpl. simpl in Hx. inversion Hx. subst.
@@ -375,7 +375,7 @@ Proof.
   split;
   intros;
   destruct a;
-  unfold apply_plan,_apply_plan in *; simpl in *;
+  unfold apply_plan, _apply_plan in *; simpl in *;
   unfold finite_valid_plan_from in *;
   unfold apply_plan, _apply_plan in *; simpl in *.
   - match type of H with

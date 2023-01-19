@@ -863,7 +863,7 @@ Proof.
     rewrite Hitem_pr.
     subst item.
     specialize (Hchar2 _ Hv Ht) as [Hproper' [Hprevious Hchar2]].
-    destruct oitem as [itemX|]; eexists _,_; split; [done | | done |].
+    destruct oitem as [itemX|]; eexists _, _; split; [done | | done |].
     2: { simpl in *. rewrite Heqsi in Hchar2.
          destruct descriptor' as [sn | i']; simpl in Hchar2.
          - by subst si.
@@ -918,7 +918,7 @@ Proof.
     (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hbtr.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
     as [tr [di [Hbtr_pr Hdi]]].
-  eexists _,_; split; [done |].
+  eexists _, _; split; [done |].
   destruct di as [sn|i].
   - destruct Hdi as [Hsn Htr].
     split; [done |].
@@ -961,7 +961,7 @@ Proof.
     (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm))) in Hbtr.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
     as [tr [di [Hbtr_pr Hdi]]].
-  eexists _,_; split; [done |].
+  eexists _, _; split; [done |].
   destruct di as [sn|i].
   - destruct Hdi as [Hsn Htr].
     split; [done |].

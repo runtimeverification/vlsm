@@ -336,7 +336,7 @@ Proof.
       as Hmsg_trace_full_replay.
     remember (all_equivocating_replayed_trace_from _ _ _ ) as emsg_tr.
     apply valid_trace_add_default_last in Hmsg_trace_full_replay.
-    eexists _,_; split; [done |].
+    eexists _, _; split; [done |].
     subst.
     unfold all_equivocating_replayed_trace_from.
     rewrite

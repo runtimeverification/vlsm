@@ -329,7 +329,7 @@ Proof.
         -- subst i. simpl in Hsame. rewrite Hs'i in Hsame.
            simpl in Hsame. subst s'i.
            apply oracle_step_update in Hbri.
-           destruct Hbri as [H | Hbri]; [| by right; eexists _,_].
+           destruct Hbri as [H | Hbri]; [| by right; eexists _, _].
            by left; revert H; apply Hselector_io.
         -- right. exists i, s'i. split; [| done].
            specialize (Hnot_same i).
@@ -387,7 +387,7 @@ Proof.
         -- subst i. simpl in Hlast. rewrite Hs'i in Hlast.
            simpl in Hlast. subst s'i.
            apply oracle_step_update in Hbri.
-           destruct Hbri as [H | Hbri]; [| by right; eexists _,_].
+           destruct Hbri as [H | Hbri]; [| by right; eexists _, _].
            by left; revert H; apply Hselector_io.
         -- right. exists i, s'i. split; [| done].
            specialize (Hnot_last i).

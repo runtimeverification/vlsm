@@ -1630,7 +1630,7 @@ Lemma sub_transition_element_project_None
     forall s om s' om', composite_transition (sub_IM IM (elements indices)) lX (s, om) = (s', om') ->
     sub_state_element_project s' = sub_state_element_project s.
 Proof.
-  intros (sub_i,li) HlX s om s' om' HtX.
+  intros (sub_i, li) HlX s om s' om' HtX.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   unfold sub_label_element_project in HlX; cbn in HlX, HtX.
   case_decide as Hij; [by congruence |].

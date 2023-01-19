@@ -59,7 +59,7 @@ Context
   `{HasBeenSentCapability message X}
   `{HasBeenDirectlyObservedCapability message X}
   (Henforced : forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
-    no_equivocations X l (s,om))
+    no_equivocations X l (s, om))
   .
 
 (**
@@ -81,7 +81,7 @@ Proof.
 Qed.
 
 Lemma directly_observed_were_sent_preserved l s im s' om:
-  input_valid_transition X l (s,im) (s',om) ->
+  input_valid_transition X l (s, im) (s', om) ->
   directly_observed_were_sent s ->
   directly_observed_were_sent s'.
 Proof.

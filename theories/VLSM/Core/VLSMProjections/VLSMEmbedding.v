@@ -344,8 +344,8 @@ Definition VLSM_weak_embedding_in_futures
 
 Lemma VLSM_weak_embedding_input_valid_transition
   : forall l s im s' om,
-  input_valid_transition X l (s,im) (s',om) ->
-  input_valid_transition Y (label_project l) (state_project s,im) (state_project s',om).
+  input_valid_transition X l (s, im) (s', om) ->
+  input_valid_transition Y (label_project l) (state_project s, im) (state_project s', om).
 Proof.
   intros.
   by apply (VLSM_weak_projection_input_valid_transition VLSM_weak_embedding_is_projection)
@@ -353,7 +353,7 @@ Proof.
 Qed.
 
 Lemma VLSM_weak_embedding_input_valid l s im
-  : input_valid X l (s,im) -> input_valid Y (label_project l) (state_project s,im).
+  : input_valid X l (s, im) -> input_valid Y (label_project l) (state_project s, im).
 Proof.
   by intros; eapply (VLSM_weak_projection_input_valid VLSM_weak_embedding_is_projection).
 Qed.
@@ -490,14 +490,14 @@ Definition VLSM_embedding_in_futures
 
 Definition VLSM_embedding_input_valid_transition
   : forall l s im s' om,
-  input_valid_transition X l (s,im) (s',om) ->
-  input_valid_transition Y (label_project l) (state_project s,im) (state_project s',om)
+  input_valid_transition X l (s, im) (s', om) ->
+  input_valid_transition Y (label_project l) (state_project s, im) (state_project s', om)
   := VLSM_weak_embedding_input_valid_transition VLSM_embedding_weaken.
 
 Definition VLSM_embedding_input_valid
   : forall l s im,
-  input_valid X l (s,im) ->
-  input_valid Y (label_project l) (state_project s,im)
+  input_valid X l (s, im) ->
+  input_valid Y (label_project l) (state_project s, im)
   := VLSM_weak_embedding_input_valid VLSM_embedding_weaken.
 
 Definition VLSM_embedding_can_produce

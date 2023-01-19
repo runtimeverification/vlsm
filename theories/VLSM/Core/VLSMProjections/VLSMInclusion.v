@@ -233,16 +233,16 @@ Qed.
 
 Lemma VLSM_incl_input_valid_transition
   : forall l s im s' om,
-  input_valid_transition X l (s,im) (s',om) ->
-  input_valid_transition Y l (s,im) (s',om).
+  input_valid_transition X l (s, im) (s', om) ->
+  input_valid_transition Y l (s, im) (s', om).
 Proof.
   by apply (VLSM_embedding_input_valid_transition (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 Lemma VLSM_incl_input_valid
   : forall l s im,
-  input_valid X l (s,im) ->
-  input_valid Y l (s,im).
+  input_valid X l (s, im) ->
+  input_valid Y l (s, im).
 Proof.
   by apply (VLSM_embedding_input_valid (VLSM_incl_is_embedding Hincl)).
 Qed.

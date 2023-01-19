@@ -74,7 +74,7 @@ Context
 *)
 Definition projection_validator_prop :=
   forall li si omi,
-    input_valid PreY li (si,omi) ->
+    input_valid PreY li (si, omi) ->
     exists lX sX, InputValidation label_project state_project li si omi lX sX.
 
 (**
@@ -239,7 +239,7 @@ Lemma induced_validator_valid_is_input_valid
   (Hproj : VLSM_projection X pre_projection_induced_validator label_project state_project)
   l s om
   : vvalid projection_induced_validator l (s, om) ->
-      input_valid pre_projection_induced_validator l (s,om).
+      input_valid pre_projection_induced_validator l (s, om).
 Proof.
   intro Hv.
   destruct (id Hv) as (lX & sX & [HlX  HsX (Hps & Hopm & _)]); cbn in HsX; subst.

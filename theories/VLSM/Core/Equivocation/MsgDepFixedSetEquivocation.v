@@ -160,7 +160,7 @@ Proof.
   apply can_emit_iff.
   apply (VLSM_projection_input_valid_transition
     (single_equivocator_projection s i Hi)) with (lY := li) in HtX
-  ; [by eexists _,_,_ |].
+  ; [by eexists _, _, _ |].
   unfold sub_label_element_project; cbn.
   by rewrite decide_True_pi with eq_refl.
 Qed.

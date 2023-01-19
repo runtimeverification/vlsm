@@ -656,7 +656,7 @@ Proof.
 Qed.
 
 Lemma CompositeHasBeenObserved_step_update :
-  forall l s im s' om, input_valid_transition RFree l (s,im) (s',om) ->
+  forall l s im s' om, input_valid_transition RFree l (s, im) (s', om) ->
   forall msg,
     CompositeHasBeenObserved s' msg
       <->
@@ -869,7 +869,7 @@ Proof.
   destruct Htr as (? & ? & ?).
   destruct (decide (has_been_sent (IM (A v)) (s (A v)) m1));
     [destruct (decide (has_been_sent (IM (A v)) (s (A v)) m2)) |]; cycle 1.
-  1,2: eexists; split;
+  1, 2: eexists; split;
       [..| by contradict n; eapply has_been_sent_iff_by_sender];
       [done | by eapply composite_HasBeenObserved_lift].
   contradict Hncomp; eapply tc_comparable, Hsent_comparable; [| done..].
@@ -891,7 +891,7 @@ Proof.
   destruct Htr as (? & ? & ?).
   destruct (decide (has_been_sent (IM (A v)) (s (A v)) m1));
     [destruct (decide (has_been_sent (IM (A v)) (s (A v)) m2)) |]; cycle 1.
-  1,2: eexists; split; cycle 2;
+  1, 2: eexists; split; cycle 2;
       [by contradict n; eapply has_been_sent_iff_by_sender | done |];
       by constructor 1; eexists.
   contradict Hncomp; eapply Hsent_comparable; [| done..].

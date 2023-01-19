@@ -528,7 +528,7 @@ Proof.
       simpl in Hl. subst.
       simpl in Hc.
       destruct Hc as [[Hno_equiv _] _].
-      simpl in Htx,Hvx,Hstate_project.
+      simpl in Htx, Hvx, Hstate_project.
       rewrite Hstate_project in Hvx, Htx.
       destruct input as [input |]; [| by repeat split;
         [| apply option_valid_message_None | | apply HconstraintNone |]].
@@ -911,7 +911,7 @@ Proof.
   destruct Htr as [Hpre Hsuf].
   apply finite_valid_trace_from_app_iff in Hpre.
   destruct Hpre as [_ Hitem].
-  rewrite app_assoc,finite_trace_last_app in Hproper.
+  rewrite app_assoc, finite_trace_last_app in Hproper.
   rewrite finite_trace_last_is_last in Hsuf, Hproper.
   assert (Hsufpre :
     finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) (destination item) suf).

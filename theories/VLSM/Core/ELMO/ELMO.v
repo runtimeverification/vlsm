@@ -652,7 +652,7 @@ Proof.
 Qed.
 
 Lemma local_equivocators_full_nondecreasing (s : State) l om s' om' :
-  vtransition Ri l (s,om) = (s',om') ->
+  vtransition Ri l (s, om) = (s', om') ->
   (forall a, local_equivocators_full s a ->
              local_equivocators_full s' a).
 Proof.
@@ -2987,7 +2987,7 @@ Proof.
     + intros k Hk.
       subst sigma'.
       destruct (decide (k = i_m)); subst; state_update_simpl; [| by apply Hchi_send; itauto].
-      by constructor 2; eexists _,_.
+      by constructor 2; eexists _, _.
     + by etransitivity; [| eapply input_valid_transition_in_futures].
     + by subst sigma'; rewrite <- Heqi; state_update_simpl.
     + split; [| by eexists]; intros [j Hj].

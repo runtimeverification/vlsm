@@ -155,8 +155,8 @@ Fixpoint stream_prefix
   (l : Stream A)
   (n : nat)
   : list A
-  := match n,l with
-  | 0,_ => []
+  := match n, l with
+  | 0, _ => []
   | S n, Cons a l => a :: stream_prefix l n
   end.
 

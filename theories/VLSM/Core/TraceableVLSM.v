@@ -747,7 +747,7 @@ Proof.
   apply_funelim (indexed_composite_state_to_trace choose s' Hs' indices);
     clear choose s' Hs' indices;
     [by intros; inversion Heqis_tr; subst; destruct pre |..];
-    intros choose s' Hs' idx indices (j,nj); cbn.
+    intros choose s' Hs' idx indices (j, nj); cbn.
   - intros item s Hdestruct Hchoice is tr Heq ? _ _ ? ? ? ? ? ? [= <- <-] **;
       rewrite Heq in Hind.
     eapply composite_tv_state_destructor_preserves_not_in_indices_initial in Hinitial as Hinitials;

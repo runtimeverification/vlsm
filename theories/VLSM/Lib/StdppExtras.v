@@ -493,7 +493,7 @@ Lemma elem_of_list_annotate_forget
 Proof.
   induction l.
   - by inversion Hin.
-  - rewrite list_annotate_unroll,elem_of_cons in Hin.
+  - rewrite list_annotate_unroll, elem_of_cons in Hin.
     destruct Hin as [-> | Hin].
     + by left.
     + by right; apply (IHl (Forall_tl Hs)).

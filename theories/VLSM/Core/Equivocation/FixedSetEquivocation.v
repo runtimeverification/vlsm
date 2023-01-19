@@ -457,7 +457,7 @@ Proof.
   destruct (decide (projT1 l ∈ elements equivocators)).
   - apply
       (fixed_input_valid_transition_sub_projection_helper Hs_pr _ e) in Ht.
-    by right; eexists _,_,_.
+    by right; eexists _, _, _.
   - left.
     exists (projT1 l). split; [done |].
     apply (VLSM_projection_in_futures
@@ -515,7 +515,7 @@ Proof.
     split; cycle 1.
     + intros m Hobs.
       eapply @has_been_directly_observed_step_update with (msg := m) (vlsm := Free) in Hpre_t.
-      apply composite_has_been_directly_observed_free_iff,Hpre_t in Hobs.
+      apply composite_has_been_directly_observed_free_iff, Hpre_t in Hobs.
       destruct Hobs as [Hitem | Hobs]
       ; [| by apply composite_has_been_directly_observed_free_iff, Htr_obs in Hobs].
       apply valid_trace_last_pstate in Htr.
@@ -595,9 +595,9 @@ Proof.
   destruct Hsf as [tr Htr].
   apply finite_valid_trace_from_to_complete_left in Htr as [is [trs [Htr Hs]]].
   apply fixed_finite_valid_trace_sub_projection in Htr as Hpr_tr.
-  apply proj1, finite_valid_trace_from_to_app_split,proj1, valid_trace_forget_last in Htr.
+  apply proj1, finite_valid_trace_from_to_app_split, proj1, valid_trace_forget_last in Htr.
   rewrite (finite_trace_sub_projection_app IM (elements equivocators)) in Hpr_tr.
-  apply proj1, finite_valid_trace_from_to_app_split,proj1, valid_trace_last_pstate in Hpr_tr.
+  apply proj1, finite_valid_trace_from_to_app_split, proj1, valid_trace_last_pstate in Hpr_tr.
   subst s. simpl.
   by rewrite <- (finite_trace_sub_projection_last_state IM _ _ _ _ Htr).
 Qed.

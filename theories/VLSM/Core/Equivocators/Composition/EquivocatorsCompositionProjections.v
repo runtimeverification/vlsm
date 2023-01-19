@@ -509,7 +509,7 @@ Proof.
       as pr_tr.
     split.
     + intro Htr.
-      destruct pr_itrX_tr as [(tr1,e1)|] ; [| by inversion Htr].
+      destruct pr_itrX_tr as [(tr1, e1)|] ; [| by inversion Htr].
       specialize (IHtr tr1 e1). apply proj1 in IHtr. specialize (IHtr eq_refl).
       destruct IHtr as [trX [Hpr_tr Htr1]].
       rewrite Hpr_tr in *. rewrite Htr1 in *.
@@ -854,7 +854,7 @@ Proof.
   - unfold equivocators_trace_project in Hproject_tr.
     rewrite fold_right_app in Hproject_tr.
     match type of Hproject_tr with
-    | fold_right _ ?i _ = _ => destruct i as [(projectx,final_descriptors')|] eqn:Hproject_x
+    | fold_right _ ?i _ = _ => destruct i as [(projectx, final_descriptors')|] eqn:Hproject_x
     end
     ; [| by rewrite equivocators_trace_project_fold_None in Hproject_tr; inversion Hproject_tr].
     apply equivocators_trace_project_folder_additive_iff in Hproject_tr.
@@ -1085,7 +1085,7 @@ Proof.
       simpl in Ht. unfold vtransition in Ht. simpl in Ht.
       destruct l as (i, li).
       match type of Ht with
-      | (let (_,_) := ?t in _) = _ => destruct t as (si', om')
+      | (let (_, _) := ?t in _) = _ => destruct t as (si', om')
       end.
       inversion Ht. subst. simpl in n.
       by state_update_simpl.
@@ -1159,7 +1159,7 @@ Proof.
   destruct Hex as [eqv_final [eqv_init [Heqv_init [Heqv_final [trXi [Hprojecti Hex]]]]]].
   specialize (VLSM_projection_finite_trace_last
     (preloaded_component_projection equivocator_IM i) _ _ Htr) as Hlst.
-  simpl in Hlst,Heqv_final. rewrite <- Hlst in Heqv_final. clear Hlst.
+  simpl in Hlst, Heqv_final. rewrite <- Hlst in Heqv_final. clear Hlst.
   match type of Heqv_final with
   | existing_descriptor _ _ (?l i) => remember l as final
   end.
@@ -1339,7 +1339,7 @@ Lemma equivocators_partial_trace_project_characterization
       equivocators_trace_project final_descriptors trX = Some (trY, initial_descriptors) /\
       equivocators_state_project initial_descriptors sX = sY.
 Proof.
-  unfold partial_trace_project,equivocators_partial_trace_project.
+  unfold partial_trace_project, equivocators_partial_trace_project.
   split.
   - intros Hpr_tr.
     case_decide; [| by congruence].
@@ -1695,7 +1695,7 @@ Proof.
   - unfold equivocators_trace_project in Hproject_tr.
     rewrite fold_right_app in Hproject_tr.
     match type of Hproject_tr with
-    | fold_right _ ?i _ = _ => destruct i as [(projectx,final_descriptors')|] eqn:Hproject_x
+    | fold_right _ ?i _ = _ => destruct i as [(projectx, final_descriptors')|] eqn:Hproject_x
     end
     ; [| by rewrite equivocators_trace_project_fold_None in Hproject_tr; inversion Hproject_tr].
     apply equivocators_trace_project_folder_additive_iff in Hproject_tr.
