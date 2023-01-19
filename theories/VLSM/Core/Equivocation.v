@@ -126,7 +126,7 @@ Definition equivocation_in_trace
     (suffix : list transition_item),
     tr = prefix ++ item :: suffix
     /\ input item = Some msg
-    /\ ~trace_has_message (field_selector output) msg prefix.
+    /\ ~ trace_has_message (field_selector output) msg prefix.
 
 Instance equivocation_in_trace_dec
   `{EqDecision message}
@@ -135,7 +135,7 @@ Proof.
   intros msg tr.
   apply @Decision_iff with
     (List.Exists (fun d => match d with (prefix, item, _) =>
-      input item = Some msg /\ ~trace_has_message (field_selector output) msg prefix
+      input item = Some msg /\ ~ trace_has_message (field_selector output) msg prefix
     end) (one_element_decompositions tr)).
   - rewrite Exists_exists.  split.
     + intros [((prefix, item), suffix) [Hitem Heqv]].
@@ -175,7 +175,7 @@ Lemma equivocation_in_trace_last_char
   (item : vtransition_item vlsm)
   : equivocation_in_trace msg (tr ++ [item]) <->
     equivocation_in_trace msg tr \/
-    input item = Some msg /\ ~trace_has_message (field_selector output) msg tr.
+    input item = Some msg /\ ~ trace_has_message (field_selector output) msg tr.
 Proof.
   split.
   - intros [prefix [item' [suffix [Heq_tr_item' [Hinput Hnoutput]]]]].
@@ -253,7 +253,7 @@ Definition specialized_selected_message_exists_in_no_trace
   (start : state)
   (tr : list transition_item)
   (Htr : finite_valid_trace_init_to X start s tr),
-  ~trace_has_message message_selector m tr.
+  ~ trace_has_message message_selector m tr.
 
 Definition selected_message_exists_in_no_preloaded_trace :=
   specialized_selected_message_exists_in_no_trace pre_vlsm.
@@ -450,7 +450,7 @@ Lemma oracle_initial_trace_update
     oracle s m <-> trace_has_message selector m tr.
 Proof.
   rewrite (oracle_partial_trace_update Horacle) by apply Htr.
-  assert (~oracle s0 m) by (eapply oracle_no_inits, Htr; done).
+  assert (~ oracle s0 m) by (eapply oracle_no_inits, Htr; done).
   by itauto.
 Qed.
 
@@ -897,7 +897,7 @@ Lemma prove_none_have_message_from_stepwise :
   forall (s : state)
          (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
          (m : message),
-    no_traces_have_message_prop vlsm selector (fun s m => ~oracle s m) s m.
+    no_traces_have_message_prop vlsm selector (fun s m => ~ oracle s m) s m.
 Proof.
   intros s Hproto m.
   split.
@@ -958,11 +958,11 @@ Context
       all_traces_have_message_prop vlsm selector oracle s m)
   (Hnot_oracle_none_have:
      forall s (Hs: valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s) m,
-       no_traces_have_message_prop vlsm selector (fun m s => ~oracle m s) s m).
+       no_traces_have_message_prop vlsm selector (fun m s => ~ oracle m s) s m).
 
 Lemma oracle_no_inits_from_trace:
   forall (s: vstate vlsm), initial_state_prop (VLSMMachine:=vmachine vlsm) s ->
-                           forall m, ~oracle s m.
+                           forall m, ~ oracle s m.
 Proof.
   intros s Hinit m Horacle.
   assert (Hproto : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
@@ -1186,7 +1186,7 @@ Lemma proper_not_directly_observed
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
       no_traces_have_message_prop vlsm item_sends_or_receives
-                                  (fun s m => ~has_been_directly_observed vlsm s m) s m.
+                                  (fun s m => ~ has_been_directly_observed vlsm s m) s m.
 Proof.
   by apply proper_not_oracle_holds, oracle_trace_props_from_stepwise,
     has_been_directly_observed_stepwise_props.
@@ -1919,7 +1919,7 @@ Definition sender_safety_prop : Prop :=
   (Hsender : sender m = Some v),
   forall (j : index)
          (Hdif : j <> A v),
-         ~can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+         ~ can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 
 (**
   An alternative, possibly friendlier, formulation. Note that it is
@@ -1979,7 +1979,7 @@ Definition sender_nontriviality_prop : Prop :=
   sender m = Some v.
 
 Definition no_initial_messages_in_IM_prop : Prop :=
-  forall i m, ~vinitial_message_prop (IM i) m.
+  forall i m, ~ vinitial_message_prop (IM i) m.
 
 Lemma composite_no_initial_valid_messages_emitted_by_sender
     (can_emit_signed : channel_authentication_prop)
@@ -2605,7 +2605,7 @@ Qed.
 Definition cannot_resend_message_stepwise_prop : Prop :=
   forall l s oim s' m,
     input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, oim) (s', Some m) ->
-    ~has_been_sent X s m /\ ~has_been_received X s' m.
+    ~ has_been_sent X s m /\ ~ has_been_received X s' m.
 
 Lemma cannot_resend_received_message_in_future
   (Hno_resend : cannot_resend_message_stepwise_prop)

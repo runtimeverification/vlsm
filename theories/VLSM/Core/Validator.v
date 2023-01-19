@@ -898,7 +898,7 @@ Proof.
 Qed.
 
 Lemma composite_vlsm_induced_projection_validator_iff
-  (Hno_inits : forall m, ~vinitial_message_prop (IM i) m)
+  (Hno_inits : forall m, ~ vinitial_message_prop (IM i) m)
   : VLSM_eq
       composite_vlsm_induced_projection_validator
       (composite_vlsm_induced_validator IM constraint i).

@@ -43,7 +43,7 @@ Definition item_equivocating_in_trace
   (item : composite_transition_item IM)
   (tr : list (composite_transition_item IM))
   : Prop
-  := from_option (fun m => ~trace_has_message (field_selector output) m tr) False (input item).
+  := from_option (fun m => ~ trace_has_message (field_selector output) m tr) False (input item).
 
 #[local] Instance item_equivocating_in_trace_dec : RelDecision item_equivocating_in_trace.
 Proof.
@@ -154,7 +154,7 @@ Definition is_equivocating_tracewise
   exists prefix elem suffix (lprefix := finite_trace_last is prefix),
   tr = prefix ++ elem :: suffix
   /\ input elem = Some m
-  /\ ~has_been_sent (IM j) (lprefix j) m.
+  /\ ~ has_been_sent (IM j) (lprefix j) m.
 
 (**
   A possibly friendlier version using a previously defined primitive.

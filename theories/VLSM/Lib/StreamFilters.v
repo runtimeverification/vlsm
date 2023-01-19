@@ -13,7 +13,7 @@ Definition filtering_subsequence
   (s : Stream A)
   (ns : Stream nat)
   : Prop
-  := (forall i, i < hd ns -> ~P (Str_nth i s)) /\
+  := (forall i, i < hd ns -> ~ P (Str_nth i s)) /\
      ForAll2 (fun m n => P (Str_nth m s) /\ m < n /\ forall i, m < i < n -> ~ P (Str_nth i s)) ns.
 
 (**

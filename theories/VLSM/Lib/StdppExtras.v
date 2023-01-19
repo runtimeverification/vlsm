@@ -92,7 +92,7 @@ Lemma Exists_last
          (last : A),
          P last /\
          l = prefix ++ [last] ++ suffix /\
-         ~Exists P suffix.
+         ~ Exists P suffix.
 
 Proof.
   induction l using rev_ind; [by inversion Hsomething |].

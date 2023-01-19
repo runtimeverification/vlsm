@@ -137,7 +137,7 @@ Proof.
   by rewrite !fin_to_nat_to_fin.
 Qed.
 
-#[local] Lemma equivocator_state_project_None s i (Hi : ~i < equivocator_state_n s)
+#[local] Lemma equivocator_state_project_None s i (Hi : ~ i < equivocator_state_n s)
   : equivocator_state_project s i = None.
 Proof.
   unfold equivocator_state_project.
@@ -151,7 +151,7 @@ Proof.
 Qed.
 
 Lemma equivocator_state_project_None_rev s i
-  : equivocator_state_project s i = None -> ~i < equivocator_state_n s.
+  : equivocator_state_project s i = None -> ~ i < equivocator_state_n s.
 Proof.
   unfold equivocator_state_project.
   by case_decide; [congruence | intro; lia].

@@ -57,7 +57,7 @@ Definition progress [A:Type] (R: A -> A -> Prop) : Stream A -> Prop :=
   Forever (fun s => let x := hd s in let a := hd (tl s) in a = x \/ R a x).
 
 Lemma not_eventually [A:Type] (P: Stream A -> Prop):
-  forall s, ~Eventually P s -> Forever (fun s => ~ P s) s.
+  forall s, ~ Eventually P s -> Forever (fun s => ~ P s) s.
 Proof.
   cofix not_eventually.
   destruct s.
@@ -128,7 +128,7 @@ Proof.
 Qed.
 
 Lemma not_forever [A:Type] (P: Stream A -> Prop):
-  forall s, ~Forever P s -> Eventually (fun s => ~ P s) s.
+  forall s, ~ Forever P s -> Eventually (fun s => ~ P s) s.
 Proof.
   intros s H. apply Classical_Prop.NNPP.
   contradict H.

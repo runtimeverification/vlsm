@@ -174,7 +174,7 @@ Definition trace_received_not_sent_before_or_after
   (m : message)
   : Prop
   := trace_has_message (field_selector input) m tr /\
-     ~trace_has_message (field_selector output) m tr.
+     ~ trace_has_message (field_selector output) m tr.
 
 (** States that a property holds for all messages received but not sent by a trace. *)
 Definition trace_received_not_sent_before_or_after_invariant
@@ -2416,7 +2416,7 @@ Definition composition_constraint : Type :=
 
 Class VLSM_vdecidable : Type :=
 {
-  valid_decidable : forall l som, {valid l som} + {~valid l som}
+  valid_decidable : forall l som, {valid l som} + {~ valid l som}
 }.
 
 (* end hide *)

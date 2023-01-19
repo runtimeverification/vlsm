@@ -7,7 +7,7 @@ From VLSM.Lib Require Import Preamble.
 
 (** A list is empty if it has no members. *)
 Lemma empty_nil [X:Type] (l:list X) :
-  (forall v, ~In v l) -> l = [].
+  (forall v, ~ In v l) -> l = [].
 Proof.
   clear.
   destruct l as [| a]; cbn; [done |].
@@ -140,7 +140,7 @@ Lemma Exists_first
          (first : A),
          P first /\
          l = prefix ++ [first] ++ suffix /\
-         ~Exists P prefix.
+         ~ Exists P prefix.
 
 Proof.
   induction l; [by inversion Hsomething |].
@@ -1069,14 +1069,14 @@ Lemma exists_first
   {A : Type}
   (l : list A)
   (P : A -> Prop)
-  (Pdec : forall a : A, {P a } + {~P a})
+  (Pdec : forall a : A, {P a } + {~ P a})
   (Hsomething : Exists P l) :
   exists (prefix : list A)
          (suffix : list A)
          (first : A),
          (P first) /\
          l = prefix ++ [first] ++ suffix /\
-         ~Exists P prefix.
+         ~ Exists P prefix.
 Proof.
   induction l.
   - by inversion Hsomething.

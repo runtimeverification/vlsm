@@ -134,7 +134,7 @@ Lemma lift_sub_state_to_neq
   (s0 : composite_state IM)
   (s : composite_state sub_IM)
   i
-  (Hni : ~sub_index_prop i)
+  (Hni : ~ sub_index_prop i)
   : lift_sub_state_to s0 s i = s0 i.
 Proof.
   by unfold lift_sub_state_to; case_decide.
@@ -157,7 +157,7 @@ Lemma lift_sub_state_to_neq_state_update
   (s0 : composite_state IM)
   (s : composite_state sub_IM)
   i
-  (Hni : ~sub_index_prop i)
+  (Hni : ~ sub_index_prop i)
   si'
   : state_update IM (lift_sub_state_to s0 s) i si' =
     lift_sub_state_to (state_update IM s0 i si') s.

@@ -134,7 +134,7 @@ Context
 
 Definition not_directly_observed_happens_before_dependencies (s : composite_state IM) (m : message)
   : Cm :=
-  filter (fun dm => ~composite_has_been_directly_observed IM s dm) (full_message_dependencies m).
+  filter (fun dm => ~ composite_has_been_directly_observed IM s dm) (full_message_dependencies m).
 
 Definition msg_dep_coequivocating_senders (s : composite_state IM) (m : message)
   : Cv :=

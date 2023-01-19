@@ -93,7 +93,7 @@ Definition fixed_byzantine_IM : index -> VLSM message :=
   update_IM IM byzantine (fun i => emit_any_signed_message_vlsm A sender (` i)).
 
 Lemma fixed_byzantine_IM_no_initial_messages
-  : forall i m, ~vinitial_message_prop (fixed_byzantine_IM i) m.
+  : forall i m, ~ vinitial_message_prop (fixed_byzantine_IM i) m.
 Proof.
   unfold fixed_byzantine_IM, update_IM. simpl.
   intros i m Hm.

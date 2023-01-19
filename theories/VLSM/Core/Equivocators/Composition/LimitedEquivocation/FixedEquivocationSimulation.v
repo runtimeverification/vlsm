@@ -45,7 +45,7 @@ Context {message : Type}
   .
 
 Lemma no_initial_messages_in_sub_IM
-  : forall i m, ~vinitial_message_prop (sub_IM IM (elements equivocating) i) m.
+  : forall i m, ~ vinitial_message_prop (sub_IM IM (elements equivocating) i) m.
 Proof.
   intros [i Hi] m Hinit.
   by apply (no_initial_messages_in_IM i m).
