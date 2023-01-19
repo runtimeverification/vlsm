@@ -1194,7 +1194,7 @@ Lemma finite_valid_trace_from_rev_ind
     P s tr ->
     forall sf iom oom l
     (Hx: input_valid_transition l (finite_trace_last s tr, iom) (sf, oom)),
-    let x:= {|l:=l; input:=iom; destination:=sf; output:=oom|} in
+    let x := {|l := l; input := iom; destination := sf; output := oom|} in
     P s (tr++[x])):
   forall s tr,
     finite_valid_trace_from s tr ->
@@ -1217,7 +1217,7 @@ Lemma finite_valid_trace_rev_ind
     P si tr ->
     forall sf iom oom l
     (Hx: input_valid_transition l (finite_trace_last si tr, iom) (sf, oom)),
-    let x:= {|l:=l; input:=iom; destination:=sf; output:=oom|} in
+    let x := {|l := l; input := iom; destination := sf; output := oom|} in
     P si (tr++[x])):
   forall si tr,
     finite_valid_trace si tr ->
@@ -1481,7 +1481,7 @@ Lemma finite_valid_trace_from_to_rev_ind
     (Htr : finite_valid_trace_from_to si s tr)
     sf iom oom l
     (Ht : input_valid_transition l (s, iom) (sf, oom)),
-    P si sf (tr++[{|l:=l; input:=iom; destination:=sf; output:=oom|}])):
+    P si sf (tr++[{|l := l; input := iom; destination := sf; output := oom|}])):
   forall si sf tr,
     finite_valid_trace_from_to si sf tr ->
     P si sf tr.
@@ -1510,7 +1510,7 @@ Lemma finite_valid_trace_init_to_rev_ind
     (Htr : finite_valid_trace_init_to si s tr)
     sf iom oom l
     (Ht : input_valid_transition l (s, iom) (sf, oom)),
-    P si sf (tr++[{|l:=l; input:=iom; destination:=sf; output:=oom|}])):
+    P si sf (tr++[{|l := l; input := iom; destination := sf; output := oom|}])):
   forall si sf tr,
     finite_valid_trace_init_to si sf tr ->
     P si sf tr.
@@ -1671,7 +1671,7 @@ Lemma finite_valid_trace_init_to_rev_strong_ind
     (Hiom : finite_valid_trace_init_to iom_si iom_s iom_tr)
     sf oom l
     (Ht : input_valid_transition l (s, iom) (sf, oom)),
-    P is sf (tr++[{|l:=l; input:=iom; destination:=sf; output:=oom|}]))
+    P is sf (tr++[{|l := l; input := iom; destination := sf; output := oom|}]))
   : forall si sf tr,
     finite_valid_trace_init_to si sf tr ->
     P si sf tr.
@@ -2600,16 +2600,16 @@ Qed.
 Inductive preloaded_valid_state_prop : state -> Prop :=
 | preloaded_valid_initial_state
     (s:state)
-    (Hs: initial_state_prop (VLSMMachine:=pre_loaded_with_all_messages_vlsm_machine) s):
+    (Hs: initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) s):
        preloaded_valid_state_prop s
 | preloaded_protocol_generated
     (l : label)
     (s : state)
     (Hps : preloaded_valid_state_prop s)
     (om : option message)
-    (Hv : valid (VLSMMachine:=pre_loaded_with_all_messages_vlsm_machine) l (s, om))
+    (Hv : valid (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om))
     s' om'
-    (Ht : transition (VLSMMachine:=pre_loaded_with_all_messages_vlsm_machine) l (s, om) = (s', om'))
+    (Ht : transition (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om) = (s', om'))
   : preloaded_valid_state_prop s'.
 
 Lemma preloaded_valid_state_prop_iff s:

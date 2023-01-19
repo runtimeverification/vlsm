@@ -908,7 +908,7 @@ Ltac state_update_simpl :=
 
 Lemma valid_state_project_preloaded_to_preloaded
       message `{EqDecision index} (IM : index -> VLSM message) constraint
-      (X:=composite_vlsm IM constraint)
+      (X := composite_vlsm IM constraint)
       (s: vstate (pre_loaded_with_all_messages_vlsm X)) i:
   valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
@@ -927,7 +927,7 @@ Qed.
 
 Lemma valid_state_project_preloaded
       message `{EqDecision index} (IM : index -> VLSM message) constraint
-      (X:=composite_vlsm IM constraint)
+      (X := composite_vlsm IM constraint)
       (s: vstate X) i:
   valid_state_prop X s ->
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).

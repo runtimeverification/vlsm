@@ -190,7 +190,7 @@ Proof.
       |- context [composite_transition equivocator_IM l ?som] =>
       destruct (composite_transition equivocator_IM l som) eqn:Htrans
     end.
-    apply equivocators_transition_cannot_decrease_state_size with (eqv:=eqv) in Htrans.
+    apply equivocators_transition_cannot_decrease_state_size with (eqv := eqv) in Htrans.
     by cbn in *; lia.
 Qed.
 

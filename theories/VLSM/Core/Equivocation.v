@@ -431,7 +431,7 @@ Proof.
   - rewrite Exists_nil.
     by itauto.
   - rewrite Exists_cons, IHHtr.
-    apply (Horacle.(oracle_step_update _ _)) with (msg:=m) in Ht.
+    apply (Horacle.(oracle_step_update _ _)) with (msg := m) in Ht.
     by itauto.
 Qed.
 
@@ -961,7 +961,7 @@ Context
        no_traces_have_message_prop vlsm selector (fun m s => ~ oracle m s) s m).
 
 Lemma oracle_no_inits_from_trace:
-  forall (s: vstate vlsm), initial_state_prop (VLSMMachine:=vmachine vlsm) s ->
+  forall (s: vstate vlsm), initial_state_prop (VLSMMachine := vmachine vlsm) s ->
                            forall m, ~ oracle s m.
 Proof.
   intros s Hinit m Horacle.
@@ -1000,13 +1000,13 @@ Lemma oracle_step_property_from_trace:
      forall l s im s' om,
        input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
        forall msg, oracle s' msg
-                   <-> (selector msg {| l:=l; input:=im; destination:=s'; output:=om |}
+                   <-> (selector msg {| l := l; input := im; destination := s'; output := om |}
                         \/ oracle s msg).
 Proof.
   intros l s im s' om Htrans msg.
   rename Htrans into Htrans'.
   pose proof Htrans' as [[Hproto_s [Hproto_m Hvalid]] Htrans].
-  set (preloaded:= pre_loaded_with_all_messages_vlsm vlsm) in * |- *.
+  set (preloaded := pre_loaded_with_all_messages_vlsm vlsm) in * |- *.
   pose proof (valid_state_has_trace _ _ Hproto_s)
     as [is [tr [Htr Hinit]]].
   pose proof (Htr' := extend_right_finite_trace_from_to _ Htr Htrans').
@@ -1049,7 +1049,7 @@ Lemma preloaded_has_been_sent_stepwise_props
       `{HasBeenSentCapability message vlsm}
       (seed : message -> Prop)
       (X := pre_loaded_vlsm vlsm seed):
-  has_been_sent_stepwise_prop (vlsm:=X) (has_been_sent vlsm).
+  has_been_sent_stepwise_prop (vlsm := X) (has_been_sent vlsm).
 Proof.
   by destruct (has_been_sent_stepwise_props vlsm).
 Qed.
@@ -1086,7 +1086,7 @@ Lemma preloaded_has_been_received_stepwise_props
       `{HasBeenReceivedCapability message vlsm}
       (seed : message -> Prop)
       (X := pre_loaded_vlsm vlsm seed):
-  has_been_received_stepwise_prop (vlsm:=X) (has_been_received vlsm).
+  has_been_received_stepwise_prop (vlsm := X) (has_been_received vlsm).
 Proof.
   by destruct (has_been_received_stepwise_props vlsm).
 Qed.
@@ -1636,7 +1636,7 @@ Definition composite_message_selector : message -> composite_transition_item IM 
 Proof.
   intros msg [[i li] input s output].
   apply (message_selectors i msg).
-  exact {|l:=li; input:=input; destination:=s i; output:=output|}.
+  exact {|l := li; input := input; destination := s i; output := output|}.
 Defined.
 
 Definition composite_oracle : composite_state IM -> message -> Prop :=
@@ -1645,7 +1645,7 @@ Definition composite_oracle : composite_state IM -> message -> Prop :=
 Lemma composite_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  : oracle_stepwise_props (vlsm:=X) composite_message_selector composite_oracle.
+  : oracle_stepwise_props (vlsm := X) composite_message_selector composite_oracle.
 Proof.
   split.
   - (* initial states not claim *)
@@ -1664,7 +1664,7 @@ Proof.
       by destruct Hproto as [|(lj & Hlj & _)]; [left | right; congruence].
     }
     apply input_valid_transition_preloaded_project_active in Hproto; simpl in Hproto.
-    apply (oracle_step_update (stepwise_props i)) with (msg:=msg) in Hproto.
+    apply (oracle_step_update (stepwise_props i)) with (msg := msg) in Hproto.
     split.
     + intros [j Hj].
       destruct (Hsj j) as [Hunchanged|Hji].
@@ -1737,7 +1737,7 @@ Definition composite_has_been_sent
 Lemma composite_has_been_sent_dec : RelDecision composite_has_been_sent.
 Proof.
   intros s m.
-  apply (Decision_iff (P:=List.Exists (fun i => has_been_sent (IM i) (s i) m) (enum index))).
+  apply (Decision_iff (P := List.Exists (fun i => has_been_sent (IM i) (s i) m) (enum index))).
   - by rewrite Exists_finite.
   - by typeclasses eauto.
 Qed.
@@ -1745,7 +1745,7 @@ Qed.
 Lemma composite_has_been_sent_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  : has_been_sent_stepwise_prop (vlsm:=X) composite_has_been_sent.
+  : has_been_sent_stepwise_prop (vlsm := X) composite_has_been_sent.
 Proof.
   unfold has_been_sent_stepwise_props.
   pose proof (composite_stepwise_props (fun i => has_been_sent_stepwise_props (IM i)))
@@ -1789,7 +1789,7 @@ Definition composite_has_been_received
 Lemma composite_has_been_received_dec : RelDecision composite_has_been_received.
 Proof.
   intros s m.
-  apply (Decision_iff (P:=List.Exists (fun i => has_been_received (IM i) (s i) m) (enum index))).
+  apply (Decision_iff (P := List.Exists (fun i => has_been_received (IM i) (s i) m) (enum index))).
   - by rewrite Exists_finite.
   - by typeclasses eauto.
 Qed.
@@ -1797,7 +1797,7 @@ Qed.
 Lemma composite_has_been_received_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  : has_been_received_stepwise_prop (vlsm:=X) composite_has_been_received.
+  : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
 Proof.
   unfold has_been_received_stepwise_props.
   pose proof (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)))
@@ -1825,7 +1825,7 @@ Lemma preloaded_composite_has_been_received_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (seed : message -> Prop)
   (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  : has_been_received_stepwise_prop (vlsm:=X) composite_has_been_received.
+  : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
 Proof.
   unfold has_been_received_stepwise_props.
   specialize (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)))
@@ -1869,7 +1869,7 @@ Qed.
 Lemma composite_has_been_directly_observed_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  : oracle_stepwise_props (vlsm:=X) item_sends_or_receives composite_has_been_directly_observed.
+  : oracle_stepwise_props (vlsm := X) item_sends_or_receives composite_has_been_directly_observed.
 Proof.
   pose proof (composite_stepwise_props
                 (fun i => (has_been_directly_observed_stepwise_props (IM i))))

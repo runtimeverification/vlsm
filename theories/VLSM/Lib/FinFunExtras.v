@@ -63,7 +63,7 @@ Lemma left_finite
   : Listing (left_listing sum_finite).
 Proof.
   revert sum_finite.
-  apply map_option_listing with (g:=inl); [| done].
+  apply map_option_listing with (g := inl); [| done].
   by destruct a; simpl; congruence.
 Qed.
 
@@ -72,7 +72,7 @@ Lemma right_finite
   : Listing (right_listing sum_finite).
 Proof.
   revert sum_finite.
-  apply map_option_listing with (g:=inr); [| done].
+  apply map_option_listing with (g := inr); [| done].
   by destruct a; simpl; congruence.
 Qed.
 

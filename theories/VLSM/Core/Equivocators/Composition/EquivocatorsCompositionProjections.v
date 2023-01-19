@@ -708,7 +708,7 @@ Lemma equivocators_trace_project_preserves_equivocating_indices
 Proof.
   generalize dependent trX. generalize dependent descriptors.
   induction Htr using finite_valid_trace_from_to_rev_ind; [by inversion 2 |].
-  set (x:={|l:=l|}).
+  set (x := {|l := l|}).
   intros.
   apply equivocators_trace_project_app_iff in Hproject_tr.
   destruct Hproject_tr as [preX [sufX [descriptors' [Hproject_x [Hproject_tr _]]]]].

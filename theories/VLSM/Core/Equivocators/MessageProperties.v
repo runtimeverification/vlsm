@@ -223,8 +223,8 @@ Context
   selector
   (Hselector_io :
     forall l1 l2 s1 s2 im om m,
-      selector m  {| l:= l1; input := im; destination := s1; output := om |} <->
-      selector m  {| l:= l2; input := im; destination := s2; output := om |})
+      selector m  {| l := l1; input := im; destination := s1; output := om |} <->
+      selector m  {| l := l2; input := im; destination := s2; output := om |})
   oracle
   (Hdec : RelDecision oracle)
   (Hstepwise : oracle_stepwise_props (vlsm := X) selector oracle).
