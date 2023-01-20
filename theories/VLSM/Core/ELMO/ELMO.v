@@ -83,7 +83,7 @@ Lemma full_node_reachable_messages_ind
                  (Hfull : full_node s msg)
                  (IH : forall m, m ∈ messages s -> P s m),
     P (s <+> MkObservation l msg) msg)
-  (Hprev : forall s ob m (IH: P s m), P (s <+> ob) m)
+  (Hprev : forall s ob m (IH : P s m), P (s <+> ob) m)
   :
   forall s, UMO_reachable full_node s ->
   forall m, m ∈ messages s -> P s m.
@@ -243,11 +243,11 @@ Inductive ELMO_msg_valid_full : Message -> Prop :=
 | MVF_nil :
     forall m : Message,
       obs (state m) = [] -> MessageHasSender m -> ELMO_msg_valid_full m
-| MVF_send:
+| MVF_send :
     forall m,
       ELMO_msg_valid_full m ->
       ELMO_msg_valid_full (m <*> MkObservation Send m)
-| MVF_recv:
+| MVF_recv :
     forall m mo,
       full_node (state m) mo ->
       no_self_equiv (state m) mo ->
@@ -430,7 +430,7 @@ Proof.
   by inversion Hv; subst; inversion Ht.
 Qed.
 
-Lemma ELMO_transition_inj:
+Lemma ELMO_transition_inj :
   forall l (s : State) (om : option Message) (s' : State) (om' : option Message),
     input_valid_transition Ri l (s, om) (s', om') ->
   forall l0 s0 om0 om'0,
@@ -558,7 +558,7 @@ Proof.
     by exists l0; apply (unfold_robs _ _ Hs); right; exists m.
 Qed.
 
-Lemma full_node_messages_iff_rec_obs:
+Lemma full_node_messages_iff_rec_obs :
   forall (s : State), UMO_reachable full_node s ->
   forall (m : Message),
     m ∈ messages s <-> (exists l, rec_obs s (MkObservation l m)).
@@ -2503,8 +2503,8 @@ Lemma all_intermediary_transitions_are_receive
   (Hsigma : composite_ram_state_prop ELMOComponent sigma)
   (Hcomponent : sigma i = si)
   (Hspecial : component_reflects_composite sigma i)
-  (tr_m: list transition_item)
-  (Htr_m: finite_valid_trace_from_to
+  (tr_m : list transition_item)
+  (Htr_m : finite_valid_trace_from_to
           (pre_loaded_with_all_messages_vlsm (ELMOComponent i_m))
           (sigma i_m) (state m) tr_m)
   : Forall (fun item : transition_item => l item = Receive) tr_m.
@@ -2549,16 +2549,16 @@ Proof.
 Qed.
 
 Lemma lift_receive_trace
-  (sigma: composite_state ELMOComponent)
-  (Hsigma: valid_state_prop ELMOProtocol sigma)
-  (m: Message)
-  (i_m: index)
-  (tr_m: list transition_item)
-  (Htr_m:
+  (sigma : composite_state ELMOComponent)
+  (Hsigma : valid_state_prop ELMOProtocol sigma)
+  (m : Message)
+  (i_m : index)
+  (tr_m : list transition_item)
+  (Htr_m :
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (ELMOComponent i_m))
       (sigma i_m) (state m) tr_m)
-  (Htr_m_receive: Forall (fun item : transition_item => l item = Receive) tr_m)
-  (Htr_m_inputs_in_sigma:
+  (Htr_m_receive : Forall (fun item : transition_item => l item = Receive) tr_m)
+  (Htr_m_inputs_in_sigma :
     forall (item : transition_item) (msg : Message),
       item ∈ tr_m -> input item = Some msg ->
       composite_has_been_directly_observed ELMOComponent sigma msg) :
@@ -2813,7 +2813,7 @@ Qed.
 *)
 Lemma reflecting_composite_for_reachable_component
   (i : index) (si : vstate (ELMOComponent i))
-  (Hreachable : ram_state_prop (ELMOComponent i) si):
+  (Hreachable : ram_state_prop (ELMOComponent i) si) :
   exists s : vstate ELMOProtocol,
     s i = si
     /\ valid_state_prop ELMOProtocol s

@@ -73,7 +73,7 @@ Proof.
   by destruct l.
 Qed.
 
-Lemma existsb_Exists {A} (f : A -> bool):
+Lemma existsb_Exists {A} (f : A -> bool) :
   forall l, existsb f l = true <-> Exists (fun x => f x = true) l.
 Proof.
   intro l.
@@ -129,7 +129,7 @@ Proof.
   - by apply existsb_Exists.
 Qed.
 
-Lemma existsb_forall {A} (f : A -> bool):
+Lemma existsb_forall {A} (f : A -> bool) :
   forall l, existsb f l = false <-> forall x, In x l -> f x = false.
 Proof.
   intro l.
@@ -163,11 +163,11 @@ Qed.
 *)
 
 Definition maximal_elements_list
-  {A} (precedes: relation A) `{!RelDecision precedes} (l : list A)
+  {A} (precedes : relation A) `{!RelDecision precedes} (l : list A)
   : list A :=
   filter (fun a => Forall (fun b => ~ precedes a b) l) l.
 
-Example maximal_elements_list1: maximal_elements_list Nat.lt [1; 4; 2; 4] = [4; 4].
+Example maximal_elements_list1 : maximal_elements_list Nat.lt [1; 4; 2; 4] = [4; 4].
 Proof. by itauto. Qed.
 
 Example maximal_elements_list2 : maximal_elements_list Nat.le [1; 4; 2; 4] = [].
@@ -179,12 +179,12 @@ Proof. by itauto. Qed.
 *)
 Definition maximal_elements_set
   `{HfinSetMessage : FinSet A SetA}
-   (precedes: relation A) `{!RelDecision precedes} (s : SetA)
+   (precedes : relation A) `{!RelDecision precedes} (s : SetA)
    : SetA :=
     filter (fun a => set_Forall (fun b => ~ precedes a b) s) s.
 
 Lemma filter_ext_elem_of {A} P Q
- `{forall (x: A), Decision (P x)} `{forall (x: A), Decision (Q x)} (l: list A) :
+ `{forall (x : A), Decision (P x)} `{forall (x : A), Decision (Q x)} (l : list A) :
  (forall a, a ∈ l -> (P a <-> Q a)) ->
  filter P l = filter Q l.
 Proof.
@@ -196,7 +196,7 @@ Proof.
 Qed.
 
 Lemma ext_elem_of_filter {A} P Q
- `{forall (x: A), Decision (P x)} `{forall (x: A), Decision (Q x)}
+ `{forall (x : A), Decision (P x)} `{forall (x : A), Decision (Q x)}
  (l : list A) :
  filter P l = filter Q l -> forall a, a ∈ l -> (P a <-> Q a).
 Proof.
@@ -207,7 +207,7 @@ Proof.
 Qed.
 
 Lemma filter_complement {X} P Q
- `{forall (x: X), Decision (P x)} `{forall (x: X), Decision (Q x)}
+ `{forall (x : X), Decision (P x)} `{forall (x : X), Decision (Q x)}
  (l : list X) :
  filter P l = filter Q l <->
  filter (fun x => ~ P x) l = filter (fun x => ~ Q x) l.
@@ -351,7 +351,7 @@ Proof.
   by apply drop_S.
 Qed.
 
-Lemma filter_in {A} P `{forall (x: A), Decision (P x)} x s :
+Lemma filter_in {A} P `{forall (x : A), Decision (P x)} x s :
   In x s ->
   P x ->
   In x (filter P s).
@@ -363,7 +363,7 @@ Proof.
 Qed.
 
 Lemma filter_incl_fn {A} P Q
-  `{forall (x: A), Decision (P x)} `{forall (x: A), Decision (Q x)} :
+  `{forall (x : A), Decision (P x)} `{forall (x : A), Decision (Q x)} :
   (forall a, P a -> Q a) ->
   forall s, incl (filter P s) (filter Q s).
 Proof.
@@ -374,7 +374,7 @@ Proof.
 Qed.
 
 Lemma filter_length_fn {A} P Q
-  `{forall (x: A), Decision (P x)} `{forall (x: A), Decision (Q x)}
+  `{forall (x : A), Decision (P x)} `{forall (x : A), Decision (Q x)}
   s (Hfg : Forall (fun a => P a -> Q a) s) :
   length (filter P s) <= length (filter Q s).
 Proof.
@@ -385,7 +385,7 @@ Proof.
 Qed.
 
 Lemma filter_eq_fn {A} P Q
- `{forall (x: A), Decision (P x)} `{forall (x: A), Decision (Q x)} s :
+ `{forall (x : A), Decision (P x)} `{forall (x : A), Decision (Q x)} s :
   (forall a, In a s -> P a <-> Q a) ->
   filter P s = filter Q s.
 Proof.
@@ -398,7 +398,7 @@ Proof.
 Qed.
 
 Lemma nth_error_filter
-  {A} P `{forall (x: A), Decision (P x)}
+  {A} P `{forall (x : A), Decision (P x)}
   (l : list A)
   (n : nat)
   (a : A)
@@ -424,7 +424,7 @@ Proof.
       by rewrite Hnth'.
 Qed.
 
-Lemma filter_subseteq {A} P `{forall (x: A), Decision (P x)} (s1 s2 : list A) :
+Lemma filter_subseteq {A} P `{forall (x : A), Decision (P x)} (s1 s2 : list A) :
   s1 ⊆ s2 ->
   filter P s1 ⊆ filter P s2.
 Proof.
@@ -443,7 +443,7 @@ Proof.
 Qed.
 
 Lemma filter_subseteq_fn {A} P Q
-  `{forall (x: A), Decision (P x)} `{forall (x: A), Decision (Q x)} :
+  `{forall (x : A), Decision (P x)} `{forall (x : A), Decision (Q x)} :
   (forall a, P a -> Q a) ->
   forall (s : list A), filter P s ⊆ filter Q s.
 Proof.
@@ -455,7 +455,7 @@ Proof.
   - by itauto.
 Qed.
 
-Lemma filter_incl {A} P `{forall (x: A), Decision (P x)} s1 s2 :
+Lemma filter_incl {A} P `{forall (x : A), Decision (P x)} s1 s2 :
   incl s1 s2 ->
   incl (filter P s1) (filter P s2).
 Proof.
@@ -469,7 +469,7 @@ Proof.
     by intros y HIn; apply H0; right.
 Qed.
 
-Lemma Forall_filter_nil {A} P `{forall (x: A), Decision (P x)} l :
+Lemma Forall_filter_nil {A} P `{forall (x : A), Decision (P x)} l :
   Forall (fun a : A => ~ P a) l <-> filter P l = [].
 Proof.
   rewrite Forall_forall.
@@ -634,14 +634,14 @@ Lemma list_max_elem_of_exists2
    (Hne : l <> []) :
    list_max l ∈ l.
 Proof.
-  destruct (list_max l) eqn : eq_max.
+  destruct (list_max l) eqn: eq_max.
   - destruct l; [by itauto congruence |].
     specialize (list_max_le (n :: l) 0) as Hle.
     destruct Hle as [Hle _].
     rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
     rewrite Forall_forall in Hle.
     specialize (Hle n). spec Hle. left.
-    assert (Hn0: n = 0) by lia.
+    assert (Hn0 : n = 0) by lia.
     by rewrite Hn0; left.
   - specialize (list_max_elem_of_exists l) as Hmax.
     by rewrite <- eq_max; itauto lia.
@@ -657,7 +657,7 @@ Proof.
   remember (a :: l) as l'.
   remember (List.map (count_occ decide_eq l') l') as occurrences.
 
-  assert (Hmaxp: list_max occurrences > 0). {
+  assert (Hmaxp : list_max occurrences > 0). {
     rewrite Heqoccurrences, Heql'; cbn.
     by rewrite decide_True; [lia |].
   }

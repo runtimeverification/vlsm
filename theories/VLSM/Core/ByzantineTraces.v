@@ -253,7 +253,7 @@ Proof.
       replace (lifted_alt_state s first) with s
         by (unfold lifted_alt_state, lift_to_composite_state'; state_update_simpl; done).
       apply proj2 in Ht.
-      change (vtransition M l (s: vstate M, om0) = (s', om')) in Ht.
+      change (vtransition M l (s : vstate M, om0) = (s', om')) in Ht.
       rewrite Ht.
       f_equal.
       by apply state_update_twice.
@@ -316,7 +316,7 @@ Lemma validator_component_byzantine_fault_tolerance
     (IM : index -> VLSM message)
     (constraint : composite_label IM -> composite_state IM  * option message -> Prop)
     (i : index)
-    (Hvalidator: component_projection_validator_prop IM constraint i)
+    (Hvalidator : component_projection_validator_prop IM constraint i)
     : forall tr, byzantine_trace_prop (IM i) tr ->
         valid_trace_prop (pre_composite_vlsm_induced_projection_validator IM constraint i) tr.
 Proof.
@@ -345,7 +345,7 @@ Context
   (X := composite_vlsm IM constraint)
   (PreLoadedX := pre_loaded_with_all_messages_vlsm X)
   (FreeX := free_composite_vlsm IM)
-  (Hvalidator: forall i : index, component_message_validator_prop IM constraint i)
+  (Hvalidator : forall i : index, component_message_validator_prop IM constraint i)
   .
 
 (**

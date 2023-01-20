@@ -6,7 +6,7 @@ From VLSM.Lib Require Import Preamble.
 (** * Utility lemmas about lists *)
 
 (** A list is empty if it has no members. *)
-Lemma empty_nil [X: Type] (l: list X) :
+Lemma empty_nil [X : Type] (l : list X) :
   (forall v, ~ In v l) -> l = [].
 Proof.
   clear.
@@ -25,7 +25,7 @@ Qed.
   and a last element.
 *)
 Lemma has_last_or_null {S} (l : list S)
-  : {l' : list S & {a : S | l = l' ++ (a:: nil)}} + {l = nil} .
+  : {l' : list S & {a : S | l = l' ++ (a :: nil)}} + {l = nil} .
 Proof.
   destruct (null_dec l).
   - by right.
@@ -157,13 +157,13 @@ Proof.
     by itauto.
 Qed.
 
-Lemma in_not_in : forall A (x y : A) (l: list A),
+Lemma in_not_in : forall A (x y : A) (l : list A),
   x ∈ l ->
   y ∉ l ->
   x <> y.
 Proof. by itauto congruence. Qed.
 
-Definition inb {A} (Aeq_dec : forall x y: A, {x = y} + {x <> y}) (x : A) (xs : list A) :=
+Definition inb {A} (Aeq_dec : forall x y : A, {x = y} + {x <> y}) (x : A) (xs : list A) :=
   if in_dec Aeq_dec x xs then true else false.
 
 Lemma in_correct `{EqDecision X} :
@@ -221,7 +221,7 @@ Definition app_cons {A}
   : [a] ++ l = a :: l
   := eq_refl.
 
-Lemma append_nodup_left {A}:
+Lemma append_nodup_left {A} :
   forall (l1 l2 : list A), List.NoDup (l1 ++ l2) -> List.NoDup l1.
 Proof.
   induction l1; intros.
@@ -230,13 +230,13 @@ Proof.
     by rewrite in_app_iff in H2; itauto.
 Qed.
 
-Lemma append_nodup_right {A}:
+Lemma append_nodup_right {A} :
   forall (l1 l2 : list A), List.NoDup (l1 ++ l2) -> List.NoDup l2.
 Proof.
   by induction l1; cbn; intros; [| inversion H; auto].
 Qed.
 
-Lemma last_is_last {A} : forall (l : list A) (x dummy: A),
+Lemma last_is_last {A} : forall (l : list A) (x dummy : A),
   List.last (l ++ [x]) dummy = x.
 Proof.
   induction l; intros; [done |].
@@ -297,7 +297,7 @@ Lemma nth_error_last
   {A : Type}
   (l : list A)
   (n : nat)
-  (Hlast: S n = length l)
+  (Hlast : S n = length l)
   (_last : A)
   : nth_error l n = Some (List.last l _last).
 Proof.
@@ -348,7 +348,7 @@ Fixpoint list_prefix
 
 Lemma list_prefix_split
   {A : Type}
-  (l left right: list A)
+  (l left right : list A)
   (left_len : nat)
   (Hlen : left_len = length left)
   (Hsplit : l = left ++ right) :
@@ -413,7 +413,7 @@ Lemma list_prefix_prefix
   {A : Type}
   (l : list A)
   (n1 n2 : nat)
-  (Hn: n1 <= n2)
+  (Hn : n1 <= n2)
   : list_prefix (list_prefix l n2) n1 = list_prefix l n1.
 Proof.
   generalize dependent n1. generalize dependent n2.
@@ -585,7 +585,7 @@ Proof.
 Qed.
 
 Fixpoint nth_error_filter_index
-  {A} P `{forall (x: A), Decision (P x)}
+  {A} P `{forall (x : A), Decision (P x)}
   (l : list A)
   (n : nat)
   :=
@@ -602,7 +602,7 @@ Fixpoint nth_error_filter_index
   end.
 
 Lemma nth_error_filter_index_le
-  {A} P `{forall (x: A), Decision (P x)}
+  {A} P `{forall (x : A), Decision (P x)}
   (l : list A)
   (n1 n2 : nat)
   (Hle : n1 <= n2)
@@ -791,7 +791,7 @@ Lemma list_suffix_last
 Proof.
   revert l Hlt; induction i; intros [| a l] Hlt; [done.. |].
   simpl in Hlt.
-  assert (Hlt': i < length l) by lia.
+  assert (Hlt' : i < length l) by lia.
   specialize (IHi l Hlt').
   rewrite unroll_last. simpl.
   rewrite IHi.
@@ -868,7 +868,7 @@ Proof.
   specialize (list_suffix_length (list_prefix l (S n)) n).
   rewrite list_prefix_length; [| done].
   intro Hlength.
-  assert (Hs: S n - n = 1) by lia.
+  assert (Hs : S n - n = 1) by lia.
   rewrite Hs in Hlength.
   remember (list_suffix (list_prefix l (S n)) n) as x.
   clear -Hlength Hlast1.
@@ -1049,7 +1049,7 @@ Qed.
 Lemma nth_error_eq
   {A : Type}
   (l1 l2 : list A)
-  (Hnth: forall n : nat, nth_error l1 n = nth_error l2 n)
+  (Hnth : forall n : nat, nth_error l1 n = nth_error l2 n)
   : l1 = l2.
 Proof.
   generalize dependent l2.
@@ -1222,7 +1222,7 @@ Proof.
   induction l.
   - by simpl in nz; lia.
   - simpl in *.
-    destruct (a <=? (list_max l)) eqn : eq_leb.
+    destruct (a <=? (list_max l)) eqn: eq_leb.
     + assert (Nat.max a (list_max l) = list_max l) by lia.
       by itauto congruence.
     + assert (Nat.max a (list_max l) = a) by lia.
@@ -1234,7 +1234,7 @@ Lemma list_max_exists2
    (Hne : l <> []) :
    In (list_max l) l.
 Proof.
-  destruct (list_max l) eqn : eq_max.
+  destruct (list_max l) eqn: eq_max.
   - destruct l; [by itauto congruence |].
     specialize (list_max_le (n :: l) 0) as Hle.
     destruct Hle as [Hle _].
@@ -1317,14 +1317,14 @@ Proof.
     induction l; intros.
     + by destruct pref; destruct suff;
         simpl in H; itauto (auto || congruence).
-    + destruct pref eqn : eq_pref.
+    + destruct pref eqn: eq_pref.
       rewrite complete_prefix_empty in H.
       inversion H.
       itauto.
       simpl.
       simpl in H.
       destruct (decide (a = a0)); [| done].
-      destruct (complete_prefix l l0) eqn : eq_cp; [| done].
+      destruct (complete_prefix l l0) eqn: eq_cp; [| done].
       inversion H; subst.
       f_equal.
       specialize (IHl l0 suff).
@@ -1357,7 +1357,7 @@ Proof.
   unfold complete_suffix.
   split.
   - intros.
-    destruct (complete_prefix (rev l) (rev suff)) eqn : eq_c.
+    destruct (complete_prefix (rev l) (rev suff)) eqn: eq_c.
     apply complete_prefix_correct in eq_c.
     rewrite H in eq_c.
     rewrite rev_app_distr in eq_c.
@@ -1402,7 +1402,7 @@ Definition list_sum_project_right
   :=
   map_option sum_project_right x.
 
-Lemma fold_right_andb_false l:
+Lemma fold_right_andb_false l :
   fold_right andb false l = false.
 Proof.
   induction l; cbn; [done |].
@@ -1422,7 +1422,7 @@ Proof.
   by eapply Listing_finite_transparent.
 Qed.
 
-Lemma sumbool_forall [A : Type] [P Q : A -> Prop]:
+Lemma sumbool_forall [A : Type] [P Q : A -> Prop] :
   (forall x : A, {P x} + {Q x}) -> forall l : list A, {Forall P l} + {Exists Q l}.
 Proof.
   induction l.
@@ -1430,7 +1430,7 @@ Proof.
   - by refine (if X a then if IHl then left _ else right _ else right _); constructor.
 Qed.
 
-Lemma list_sum_decrease [A: Type] (f g: A -> nat) (l: list A):
+Lemma list_sum_decrease [A : Type] (f g : A -> nat) (l : list A) :
   (forall a, In a l -> f a <= g a) -> Exists (fun a => f a < g a) l ->
   list_sum (map f l) < list_sum (map g l).
 Proof.
@@ -1451,11 +1451,11 @@ Qed.
   natural examples.
 *)
 Lemma fold_left_ind
-      [A B: Type] (f: B -> A -> B) (P : list A -> B -> B -> Prop)
+      [A B : Type] (f : B -> A -> B) (P : list A -> B -> B -> Prop)
       (Hstart : forall x, P nil x x)
       (Hstep : forall x a l r,
           P l (f x a) r ->
-          P (a :: l) x r):
+          P (a :: l) x r) :
   forall l x, P l x (fold_left f l x).
 Proof.
   induction l.
@@ -1469,10 +1469,10 @@ Qed.
   decomposes the list from the right.
 *)
 Lemma fold_left_ind_rev
-      [A B: Type] (f: B -> A -> B) (x0: B)
+      [A B : Type] (f : B -> A -> B) (x0 : B)
       (P : list A -> B -> Prop)
       (Hstart : P nil x0)
-      (Hstep: forall l a x, P l x -> P (l++a:: nil) (f x a)):
+      (Hstep : forall l a x, P l x -> P (l++a :: nil) (f x a)) :
   forall l, P l (fold_left f l x0).
 Proof.
   induction l using rev_ind.
@@ -1564,7 +1564,7 @@ Definition ForAllSuffix2 [A : Type] (R : A -> A -> Prop) : list A -> Prop :=
   ForAllSuffix (fun l => match l with | a :: b :: _ => R a b | _ => True end).
 
 Lemma fsFurther2_transitive [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
-  : forall a b l, ForAllSuffix2 R (a:: b:: l) -> ForAllSuffix2 R (a:: l).
+  : forall a b l, ForAllSuffix2 R (a :: b :: l) -> ForAllSuffix2 R (a :: l).
 Proof.
   inversion 1. subst. destruct l.
   - by repeat constructor.
@@ -1608,14 +1608,14 @@ Proof.
       by intros b Hb; apply Hsub; right.
 Qed.
 
-Lemma elem_of_empty_nil [X: Type] (l: list X) :
+Lemma elem_of_empty_nil [X : Type] (l : list X) :
   (forall v, v ∉ l) -> l = [].
 Proof.
   destruct l as [| a]; [done |].
   by intro H; elim (H a); left.
 Qed.
 
-Lemma nodup_append_left {A}:
+Lemma nodup_append_left {A} :
   forall (l1 l2 : list A), NoDup (l1 ++ l2) -> NoDup l1.
 Proof.
   by intros l1 l2 [? _]%NoDup_app.
@@ -1645,13 +1645,13 @@ Proof.
   by apply submseteq_length, NoDup_submseteq.
 Qed.
 
-Lemma submseteq_tail_l [A] (x: A) l1 l2 :
+Lemma submseteq_tail_l [A] (x : A) l1 l2 :
   x :: l1 ⊆+ l2 -> l1 ⊆+ l2.
 Proof.
   by apply submseteq_trans, submseteq_cons.
 Qed.
 
-Lemma submseteq_list_subseteq [A] (l1 l2 : list A):
+Lemma submseteq_list_subseteq [A] (l1 l2 : list A) :
   l1 ⊆+ l2 -> l1 ⊆ l2.
 Proof.
   by intros H ? Hx; eapply elem_of_submseteq.

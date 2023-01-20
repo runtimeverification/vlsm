@@ -21,9 +21,9 @@ Lemma equivocator_initial_state_project
   {message}
   (X : VLSM message)
   (es : vstate (equivocator_vlsm X))
-  (eqv_descriptor: MachineDescriptor X)
-  (Heqv: proper_descriptor X eqv_descriptor es)
-  (Hes: vinitial_state_prop (equivocator_vlsm X) es):
+  (eqv_descriptor : MachineDescriptor X)
+  (Heqv : proper_descriptor X eqv_descriptor es)
+  (Hes : vinitial_state_prop (equivocator_vlsm X) es) :
   vinitial_state_prop X (equivocator_state_descriptor_project es eqv_descriptor).
 Proof.
   destruct eqv_descriptor; [done |].
@@ -38,8 +38,8 @@ Lemma composite_equivocators_initial_state_project
   (IM : index -> VLSM message)
   (es : composite_state (equivocator_IM IM))
   (eqv_descriptors : equivocator_descriptors IM)
-  {eqv_constraint: composite_constraint (equivocator_IM IM)}
-  {constraint: composite_constraint IM}
+  {eqv_constraint : composite_constraint (equivocator_IM IM)}
+  {constraint : composite_constraint IM}
   (Heqv : proper_equivocator_descriptors IM eqv_descriptors es)
   (Hes : vinitial_state_prop (composite_vlsm (equivocator_IM IM) eqv_constraint) es)
   : vinitial_state_prop (composite_vlsm IM constraint)
@@ -208,7 +208,7 @@ Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
   (is : composite_state equivocator_IM)
   (tr : list (composite_transition_item equivocator_IM))
   (final_state := finite_trace_last is tr)
-  (Hproper: not_equivocating_equivocator_descriptors IM final_descriptors final_state)
+  (Hproper : not_equivocating_equivocator_descriptors IM final_descriptors final_state)
   (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
@@ -263,7 +263,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
   (is : composite_state equivocator_IM)
   (tr : list (composite_transition_item equivocator_IM))
   (final_state := finite_trace_last is tr)
-  (Hproper: not_equivocating_equivocator_descriptors IM final_descriptors final_state)
+  (Hproper : not_equivocating_equivocator_descriptors IM final_descriptors final_state)
   (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
@@ -310,7 +310,7 @@ Lemma limited_equivocators_valid_trace_project
   (is : composite_state equivocator_IM)
   (tr : list (composite_transition_item equivocator_IM))
   (final_state := finite_trace_last is tr)
-  (Hproper: not_equivocating_equivocator_descriptors IM final_descriptors final_state)
+  (Hproper : not_equivocating_equivocator_descriptors IM final_descriptors final_state)
   (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))

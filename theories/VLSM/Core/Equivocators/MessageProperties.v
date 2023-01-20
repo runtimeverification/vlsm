@@ -30,12 +30,12 @@ Context
   the original trace must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting
-  (tr: list (vtransition_item equivocator_vlsm))
-  (trX: list (vtransition_item X))
+  (tr : list (vtransition_item equivocator_vlsm))
+  (trX : list (vtransition_item X))
   (j i : MachineDescriptor)
-  (HtrX: equivocator_vlsm_trace_project _ tr j = Some (trX, i))
+  (HtrX : equivocator_vlsm_trace_project _ tr j = Some (trX, i))
   (m : message)
-  (Hjbs: Exists (field_selector output m) trX)
+  (Hjbs : Exists (field_selector output m) trX)
   : Exists (field_selector output m) tr.
 Proof.
   revert trX i HtrX Hjbs.
@@ -180,17 +180,17 @@ Qed.
   one of its projections must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting_inv
-  (is: vstate equivocator_vlsm)
-  (tr: list (vtransition_item equivocator_vlsm))
-  (Htr: finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is tr)
+  (is : vstate equivocator_vlsm)
+  (tr : list (vtransition_item equivocator_vlsm))
+  (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is tr)
   (m : message)
   (Hbbs : Exists (field_selector output m) tr)
   : exists
     (j i : MachineDescriptor)
     (Hi : proper_descriptor X i is)
     (Hj : existing_descriptor X j (finite_trace_last is tr))
-    (trX: list (vtransition_item X))
-    (HtrX: equivocator_vlsm_trace_project _ tr j = Some (trX, i))
+    (trX : list (vtransition_item X))
+    (HtrX : equivocator_vlsm_trace_project _ tr j = Some (trX, i))
     ,
     Exists (field_selector output m) trX.
 Proof.

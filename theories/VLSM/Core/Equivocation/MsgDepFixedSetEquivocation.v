@@ -41,12 +41,12 @@ Definition msg_dep_fixed_set_equivocation_vlsm : VLSM message :=
   composite_vlsm IM msg_dep_fixed_set_equivocation_constraint.
 
 Lemma messages_with_valid_dependences_can_be_emitted s dm
-  (Hdepm:
+  (Hdepm :
     forall dm0, msg_dep_rel message_dependencies dm0 dm ->
     valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm0)
-  (dm_i: index)
-  (Hdm_i: dm_i ∈ equivocators)
-  (Hemitted: can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
+  (dm_i : index)
+  (Hdm_i : dm_i ∈ equivocators)
+  (Hemitted : can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
   : can_emit (equivocators_composition_for_sent IM equivocators s) dm.
 Proof.
   eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient.

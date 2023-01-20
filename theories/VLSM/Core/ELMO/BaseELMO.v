@@ -117,7 +117,7 @@ Definition addObservation' (ob : Observation) (obs : list Observation) : list Ob
 
 Lemma addObservation'_ind (P : list Observation -> Prop)
   (Hempty : P [])
-  (Hadd : forall ob obs, P obs -> P (addObservation' ob obs)):
+  (Hadd : forall ob obs, P obs -> P (addObservation' ob obs)) :
   forall obs, P obs.
 Proof.
   exact (list_ind P Hempty Hadd).
@@ -125,7 +125,7 @@ Qed.
 
 Lemma addObservation'_rec (P : list Observation -> Set)
   (Hempty : P [])
-  (Hadd : forall ob obs, P obs -> P (addObservation' ob obs)):
+  (Hadd : forall ob obs, P obs -> P (addObservation' ob obs)) :
   forall obs, P obs.
 Proof.
   exact (list_rec P Hempty Hadd).
@@ -133,7 +133,7 @@ Defined.
 
 Lemma addObservation'_rect (P : list Observation -> Type)
   (Hempty : P [])
-  (Hadd : forall ob obs, P obs -> P (addObservation' ob obs)):
+  (Hadd : forall ob obs, P obs -> P (addObservation' ob obs)) :
   forall obs, P obs.
 Proof.
   exact (list_rect P Hempty Hadd).
@@ -150,7 +150,7 @@ Notation "s <+> ob" := (addObservation ob s) (left associativity, at level 50).
 *)
 Lemma addObservation_ind (P : State -> Prop)
   (Hempty : forall a, P (MkState [] a))
-  (Hadd : forall ob s, P s -> P (addObservation ob s)):
+  (Hadd : forall ob s, P s -> P (addObservation ob s)) :
   forall obs, P obs.
 Proof.
   intros [obs a].
@@ -160,7 +160,7 @@ Qed.
 
 Lemma addObservation_rec (P : State -> Set)
   (Hempty : forall a, P (MkState [] a))
-  (Hadd : forall ob s, P s -> P (s <+> ob)):
+  (Hadd : forall ob s, P s -> P (s <+> ob)) :
   forall obs, P obs.
 Proof.
   intros [obs a].
@@ -170,7 +170,7 @@ Defined.
 
 Lemma addObservation_rect (P : State -> Type)
   (Hempty : forall a, P (MkState [] a))
-  (Hadd : forall ob s, P s -> P (addObservation ob s)):
+  (Hadd : forall ob s, P s -> P (addObservation ob s)) :
   forall obs, P obs.
 Proof.
   intros [obs a].

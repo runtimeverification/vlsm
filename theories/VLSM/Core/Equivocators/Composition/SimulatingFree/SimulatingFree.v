@@ -76,14 +76,14 @@ Definition replayable_message_prop : Prop :=
   forall si s tr
     (HtrX : finite_valid_trace_init_to CX si s tr)
     eqv_state_s
-    (Hstate_valid: valid_state_prop CE eqv_state_s)
+    (Hstate_valid : valid_state_prop CE eqv_state_s)
     (Hstate_final_project : equivocators_total_state_project IM eqv_state_s = s)
     eqv_msg_is eqv_msg_s eqv_msg_tr
     (Hmsg_trace : finite_valid_trace_init_to CE eqv_msg_is eqv_msg_s eqv_msg_tr)
     iom
     (Hfinal_msg : last_in_trace_except_from (vinitial_message_prop CE) eqv_msg_tr iom)
     l
-    (HcX: constraintX l (s, iom)),
+    (HcX : constraintX l (s, iom)),
     exists eqv_msg_tr lst_msg_tr,
       finite_valid_trace_from_to CE eqv_state_s lst_msg_tr eqv_msg_tr /\
       equivocators_total_trace_project IM eqv_msg_tr = [] /\

@@ -137,11 +137,11 @@ End sec_equivocating_indices_BasicEquivocation.
 *)
 Lemma equivocators_transition_preserves_equivocating_indices
   (index_listing : list index)
-  (s: composite_state equivocator_IM)
-  (iom oom: option message)
-  (l: composite_label equivocator_IM)
-  (s0: composite_state equivocator_IM)
-  (Ht: composite_transition equivocator_IM l (s0, iom) = (s, oom))
+  (s : composite_state equivocator_IM)
+  (iom oom : option message)
+  (l : composite_label equivocator_IM)
+  (s0 : composite_state equivocator_IM)
+  (Ht : composite_transition equivocator_IM l (s0, iom) = (s, oom))
   : equivocating_indices index_listing s0 ⊆ equivocating_indices index_listing s.
 Proof.
   intros i Hi.
@@ -160,7 +160,7 @@ Qed.
 
 Lemma equivocators_transition_cannot_decrease_state_size
   l s iom s' oom
-  (Ht: composite_transition equivocator_IM l (s, iom) = (s', oom))
+  (Ht : composite_transition equivocator_IM l (s, iom) = (s', oom))
   : forall eqv, equivocator_state_n (s eqv) <= equivocator_state_n (s' eqv).
 Proof.
   intro eqv.
@@ -463,7 +463,7 @@ Qed.
 Lemma equivocator_descriptors_update_twice
   (s : equivocator_descriptors)
   (i : index)
-  (si si': MachineDescriptor (IM i))
+  (si si' : MachineDescriptor (IM i))
   : equivocator_descriptors_update (equivocator_descriptors_update s i si) i si'
   = equivocator_descriptors_update s i si'.
 Proof.

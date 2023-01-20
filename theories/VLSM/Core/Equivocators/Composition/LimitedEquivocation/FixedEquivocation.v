@@ -386,7 +386,7 @@ Definition constraint_has_been_sent_prop
     (descriptors : equivocator_descriptors IM)
     (Hdescriptors : proper_fixed_equivocator_descriptors descriptors s)
     (sX := equivocators_state_project IM descriptors s)
-    (m: message)
+    (m : message)
     (Hm : has_been_sent FreeE s m)
     l,
   constraint l (sX, Some m).
@@ -606,17 +606,17 @@ Qed.
   in any projection of the final state.
 *)
 Lemma not_equivocating_sent_message_has_been_directly_observed_in_projection
-  (is: vstate XE)
-  (tr: list (composite_transition_item (equivocator_IM IM)))
-  (Htr: finite_valid_trace XE is tr)
+  (is : vstate XE)
+  (tr : list (composite_transition_item (equivocator_IM IM)))
+  (Htr : finite_valid_trace XE is tr)
   (lst := finite_trace_last is tr)
-  (item: transition_item)
-  (Hitem: item ∈ tr)
-  (Hitem_not_equiv: projT1 (l item) ∉ equivocating)
-  (m: message)
-  (Hm: field_selector output m item)
-  (descriptors: equivocator_descriptors IM)
-  (Hdescriptors: proper_fixed_equivocator_descriptors descriptors lst)
+  (item : transition_item)
+  (Hitem : item ∈ tr)
+  (Hitem_not_equiv : projT1 (l item) ∉ equivocating)
+  (m : message)
+  (Hm : field_selector output m item)
+  (descriptors : equivocator_descriptors IM)
+  (Hdescriptors : proper_fixed_equivocator_descriptors descriptors lst)
   : has_been_directly_observed Free (equivocators_state_project IM descriptors lst) m.
 Proof.
   destruct (free_equivocators_valid_trace_project descriptors is tr Hdescriptors Htr)
@@ -740,8 +740,8 @@ Lemma equivocators_trace_sub_item_input_is_seeded_or_sub_previously_sent
   (tr : list (vtransition_item XE))
   (s := finite_trace_last is tr)
   (Htr : finite_valid_trace XE is tr)
-  (descriptors: equivocator_descriptors IM)
-  (Hproper: proper_fixed_equivocator_descriptors descriptors s)
+  (descriptors : equivocator_descriptors IM)
+  (Hproper : proper_fixed_equivocator_descriptors descriptors s)
   (lst_trX := equivocators_state_project IM descriptors s)
   : trace_sub_item_input_is_seeded_or_sub_previously_sent
     (equivocator_IM IM) (elements equivocating)
@@ -877,19 +877,19 @@ Qed.
   in any projection.
 *)
 Lemma equivocator_vlsm_trace_project_reflect_non_equivocating
-  (is: composite_state (equivocator_IM IM))
-  (tr: list (composite_transition_item (equivocator_IM IM)))
-  (Htr: finite_valid_trace XE is tr)
-  (m: message)
-  (final_descriptors: equivocator_descriptors IM)
-  (Hproper: proper_fixed_equivocator_descriptors final_descriptors (finite_trace_last is tr))
-  (trX: list (composite_transition_item IM))
-  (initial_descriptors: equivocator_descriptors IM)
-  (Htr_project: equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors))
-  (item: composite_transition_item (equivocator_IM IM))
-  (Hitem: item ∈ tr)
-  (Houtput: output item = Some m)
-  (Hno_equiv_item: projT1 (l item) ∉ equivocating)
+  (is : composite_state (equivocator_IM IM))
+  (tr : list (composite_transition_item (equivocator_IM IM)))
+  (Htr : finite_valid_trace XE is tr)
+  (m : message)
+  (final_descriptors : equivocator_descriptors IM)
+  (Hproper : proper_fixed_equivocator_descriptors final_descriptors (finite_trace_last is tr))
+  (trX : list (composite_transition_item IM))
+  (initial_descriptors : equivocator_descriptors IM)
+  (Htr_project : equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors))
+  (item : composite_transition_item (equivocator_IM IM))
+  (Hitem : item ∈ tr)
+  (Houtput : output item = Some m)
+  (Hno_equiv_item : projT1 (l item) ∉ equivocating)
   : trace_has_message (field_selector output) m trX.
 Proof.
   apply elem_of_list_split in Hitem.
@@ -952,15 +952,15 @@ Qed.
   one of the nodes allowed to equivocate.
 *)
 Lemma projection_has_not_been_directly_observed_is_equivocating
-  (is: composite_state (equivocator_IM IM))
-  (tr: list (composite_transition_item (equivocator_IM IM)))
-  (Htr: finite_valid_trace XE is tr)
+  (is : composite_state (equivocator_IM IM))
+  (tr : list (composite_transition_item (equivocator_IM IM)))
+  (Htr : finite_valid_trace XE is tr)
   (s := @finite_trace_last _ (composite_type (equivocator_IM IM)) is tr)
-  (descriptors: equivocator_descriptors IM)
-  (Hproper: proper_fixed_equivocator_descriptors descriptors s)
+  (descriptors : equivocator_descriptors IM)
+  (Hproper : proper_fixed_equivocator_descriptors descriptors s)
   (sX := equivocators_state_project IM descriptors s)
-  (m: message)
-  (Hno: ~ composite_has_been_directly_observed IM sX m)
+  (m : message)
+  (Hno : ~ composite_has_been_directly_observed IM sX m)
   : forall item : composite_transition_item (equivocator_IM IM),
       item ∈ tr -> output item = Some m -> projT1 (l item) ∈ equivocating.
 Proof.
@@ -1264,7 +1264,7 @@ Theorem fixed_equivocators_valid_trace_project
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
   (final_state := finite_trace_last is tr)
-  (Hproper: proper_fixed_equivocator_descriptors final_descriptors final_state)
+  (Hproper : proper_fixed_equivocator_descriptors final_descriptors final_state)
   (Htr : finite_valid_trace XE is tr)
   : exists
     (trX : list (composite_transition_item IM))

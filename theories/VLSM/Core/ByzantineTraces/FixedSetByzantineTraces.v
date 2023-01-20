@@ -769,7 +769,7 @@ Qed.
 End sec_assuming_initial_messages_lift.
 
 Context
-  (Hvalidator:
+  (Hvalidator :
     forall i : index, i ∉ selection ->
     component_message_validator_prop IM (fixed_equivocation_constraint IM selection) i)
   .

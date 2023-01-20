@@ -1188,8 +1188,8 @@ Record incomparable_state (s1 s2 : State) : Prop :=
 
 Lemma rec_obs_send_inv
   (Q : State -> Observation -> Prop) s ob
-  (Hnew: Q s (MkObservation Send (MkMessage s)))
-  (Hprev: rec_obs s ob -> Q s ob) :
+  (Hnew : Q s (MkObservation Send (MkMessage s)))
+  (Hprev : rec_obs s ob -> Q s ob) :
   rec_obs (s <+> MkObservation Send (MkMessage s)) ob -> Q s ob.
 Proof.
   by inversion 1; (replace s with s0 in *; [auto | apply eq_State]).
@@ -1197,9 +1197,9 @@ Qed.
 
 Lemma rec_obs_recv_inv
   (Q : State -> Message -> Observation -> Prop) s m ob
-  (Hnew: Q s m (MkObservation Receive m))
-  (Hprev: rec_obs s ob -> Q s m ob)
-  (Hrecv: rec_obs (state m) ob -> Q s m ob) :
+  (Hnew : Q s m (MkObservation Receive m))
+  (Hprev : rec_obs s ob -> Q s m ob)
+  (Hrecv : rec_obs (state m) ob -> Q s m ob) :
   rec_obs (s <+> MkObservation Receive m) ob -> Q s m ob.
 Proof.
   by inversion 1; (replace s with s0 in *; [auto | apply eq_State]).

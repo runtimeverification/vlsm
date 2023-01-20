@@ -380,13 +380,13 @@ Proof.
   unfold apply_plan, _apply_plan in *; simpl in *.
   - match type of H with
     | context[let (_, _) := let (_, _) := ?t in _ in _] =>
-      destruct t as [dest output] eqn : eq_trans
+      destruct t as [dest output] eqn: eq_trans
     end.
     inversion H; subst.
     by setoid_rewrite eq_trans.
   - match type of H with
     | input_valid_transition _ _ _ ?t =>
-      destruct t as [dest output] eqn : eq_trans
+      destruct t as [dest output] eqn: eq_trans
     end.
     setoid_rewrite eq_trans.
     apply finite_valid_trace_from_extend; [| done].

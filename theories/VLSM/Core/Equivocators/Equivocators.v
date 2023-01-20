@@ -654,15 +654,15 @@ Ltac equivocator_state_update_simpl :=
   autounfold with state_update in *;
   autorewrite with equivocator_state_update state_update in *.
 
-Arguments Spawn {_ _} _: assert.
-Arguments ContinueWith {_ _} _ _: assert.
-Arguments ForkWith {_ _} _ _: assert.
-Arguments equivocator_state_n {_ _} _: assert.
-Arguments equivocator_state_last {_ _} _: assert.
-Arguments equivocator_state_zero {_ _} _: assert.
-Arguments equivocator_state_s {_ _} _ _: assert.
-Arguments equivocator_state_project {_ _} _ _: assert.
-Arguments equivocator_state_update {_ _} _ _ _: assert.
+Arguments Spawn {_ _} _ : assert.
+Arguments ContinueWith {_ _} _ _ : assert.
+Arguments ForkWith {_ _} _ _ : assert.
+Arguments equivocator_state_n {_ _} _ : assert.
+Arguments equivocator_state_last {_ _} _ : assert.
+Arguments equivocator_state_zero {_ _} _ : assert.
+Arguments equivocator_state_s {_ _} _ _ : assert.
+Arguments equivocator_state_project {_ _} _ _ : assert.
+Arguments equivocator_state_update {_ _} _ _ _ : assert.
 Arguments equivocator_state_extend {_ _} _ _ : assert.
 Arguments equivocator_state_append {_ _} _ _ : assert.
 
@@ -854,11 +854,11 @@ Proof. by destruct d. Qed.
   the descriptor of the label of the transition must be Existing 0 false
 *)
 Lemma equivocator_transition_no_equivocation_zero_descriptor
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Hv: vvalid equivocator_vlsm l (s, iom))
-  (Ht: vtransition equivocator_vlsm l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Hv : vvalid equivocator_vlsm l (s, iom))
+  (Ht : vtransition equivocator_vlsm l (s, iom) = (s', oom))
   (Hs' : is_singleton_state X s')
   : exists li, l = ContinueWith 0 li.
 Proof.
@@ -877,10 +877,10 @@ Qed.
   the state prior to the transition has no equivocation as well.
 *)
 Lemma equivocator_transition_reflects_singleton_state
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Ht: equivocator_transition X l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : is_singleton_state X s' -> is_singleton_state X s.
 Proof.
   unfold is_singleton_state.
@@ -893,10 +893,10 @@ Proof.
 Qed.
 
 Lemma equivocator_transition_cannot_decrease_state_size
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Ht: equivocator_transition X l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : equivocator_state_n s <= equivocator_state_n s'.
 Proof.
   specialize (equivocator_state_extend_size X s) as Hex_size.
@@ -912,10 +912,10 @@ Proof.
 Qed.
 
 Lemma equivocator_transition_preserves_equivocating_state
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Ht: equivocator_transition X l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : is_equivocating_state X s -> is_equivocating_state X s'.
 Proof.
   intros Hs Hs'. elim Hs. clear Hs. revert Ht Hs' .
@@ -923,10 +923,10 @@ Proof.
 Qed.
 
 Lemma zero_descriptor_transition_reflects_equivocating_state
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Ht: equivocator_transition X l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Ht : equivocator_transition X l (s, iom) = (s', oom))
   li
   (Hzero : l = ContinueWith 0 li)
   : is_equivocating_state X s' -> is_equivocating_state X s.
@@ -1219,7 +1219,7 @@ Qed.
 
 End sec_equivocator_vlsm_valid_state_projections.
 
-Arguments NewMachine {_ _} _: assert.
+Arguments NewMachine {_ _} _ : assert.
 Arguments Existing {_ _} _ : assert.
 Arguments equivocator_label_descriptor {_ _} _ : assert.
-Arguments equivocator_state_descriptor_project {_ _} _ _: assert.
+Arguments equivocator_state_descriptor_project {_ _} _ _ : assert.

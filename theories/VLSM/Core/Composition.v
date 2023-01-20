@@ -119,7 +119,7 @@ Qed.
 Lemma state_update_twice
            (s : composite_state)
            (i : index)
-           (si si': vstate (IM i))
+           (si si' : vstate (IM i))
   : state_update (state_update s i si) i si' = state_update s i si'.
 Proof.
   apply functional_extensionality_dep_good.
@@ -909,7 +909,7 @@ Ltac state_update_simpl :=
 Lemma valid_state_project_preloaded_to_preloaded
       message `{EqDecision index} (IM : index -> VLSM message) constraint
       (X := composite_vlsm IM constraint)
-      (s: vstate (pre_loaded_with_all_messages_vlsm X)) i:
+      (s : vstate (pre_loaded_with_all_messages_vlsm X)) i :
   valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
 Proof.
@@ -928,7 +928,7 @@ Qed.
 Lemma valid_state_project_preloaded
       message `{EqDecision index} (IM : index -> VLSM message) constraint
       (X := composite_vlsm IM constraint)
-      (s: vstate X) i:
+      (s : vstate X) i :
   valid_state_prop X s ->
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
 Proof.
@@ -956,9 +956,9 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_preloaded_project_active
-      {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
+      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
-      l s im s' om:
+      l s im s' om :
   input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
   input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l)
                          (s (projT1 l), im) (s' (projT1 l), om).
@@ -973,9 +973,9 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_project_active
-      {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
+      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
-      l s im s' om:
+      l s im s' om :
   input_valid_transition X l (s, im) (s', om) ->
   input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l)
                          (s (projT1 l), im) (s' (projT1 l), om).
@@ -986,10 +986,10 @@ Proof.
   by apply input_valid_transition_preloaded_project_active.
 Qed.
 
-Lemma input_valid_transition_preloaded_project_any {V} (i: V)
-      {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
+Lemma input_valid_transition_preloaded_project_any {V} (i : V)
+      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
-      (l: vlabel X) s im s' om:
+      (l : vlabel X) s im s' om :
   input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
@@ -1014,10 +1014,10 @@ Proof.
     by state_update_simpl.
 Qed.
 
-Lemma input_valid_transition_project_any {V} (i: V)
-      {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
+Lemma input_valid_transition_project_any {V} (i : V)
+      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
-      (l: vlabel X) s im s' om:
+      (l : vlabel X) s im s' om :
   input_valid_transition X l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
@@ -1036,10 +1036,10 @@ Qed.
   components.
 *)
 Lemma can_emit_composite_project
-  {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
+  {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
   (X := composite_vlsm IM constraint)
   (m : message)
-  (Hemit: can_emit (pre_loaded_with_all_messages_vlsm X) m)
+  (Hemit : can_emit (pre_loaded_with_all_messages_vlsm X) m)
   : exists (j : V), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 Proof.
   apply can_emit_iff in Hemit.
@@ -1208,11 +1208,11 @@ Proof.
   destruct ai; simpl in *.
   match goal with
   |- context [let (_, _) := let (_, _) := ?t in _ in _] =>
-    destruct t eqn : eq_trans'
+    destruct t eqn: eq_trans'
   end.
   match goal with
   |- context [let (_, _) := let (_, _) := ?t in _ in _] =>
-    destruct t eqn : eq_trans
+    destruct t eqn: eq_trans
   end.
   inversion Hpr; subst.
   split.
@@ -1255,7 +1255,7 @@ Proof.
   destruct ai.
   match goal with
   |- context [let (_, _) := let (_, _) := ?t in _ in _] =>
-    destruct t eqn : eq_trans
+    destruct t eqn: eq_trans
   end.
   simpl in *.
   unfold vtransition in eq_trans.
@@ -1284,8 +1284,8 @@ Proof.
   - by simpl; itauto.
   - simpl in *.
     rewrite (composite_apply_plan_app IM).
-    destruct (composite_apply_plan IM s a) as (tra, sa) eqn : eq_a; simpl in *.
-    destruct (composite_apply_plan IM sa [x]) as (trx, sx) eqn : eq_x; simpl in *.
+    destruct (composite_apply_plan IM s a) as (tra, sa) eqn: eq_a; simpl in *.
+    destruct (composite_apply_plan IM sa [x]) as (trx, sx) eqn: eq_x; simpl in *.
 
     unfold a_indices in Hdif.
     rewrite map_app in Hdif.
@@ -1372,14 +1372,14 @@ Proof.
       rewrite !apply_plan_app.
       simpl in *.
       destruct (apply_plan Free s' a)
-        as (tra', sa') eqn : eq_as'.
+        as (tra', sa') eqn: eq_as'.
       destruct (apply_plan Free s a)
-        as (tra, sa) eqn : eq_as.
+        as (tra, sa) eqn: eq_as.
       simpl in *.
       destruct (apply_plan Free sa [x])
-        as (trx, sx) eqn : eq_xsa.
+        as (trx, sx) eqn: eq_xsa.
       destruct (apply_plan Free sa' [x])
-        as (trx', sx') eqn : eq_xsa'.
+        as (trx', sx') eqn: eq_xsa'.
       simpl in *.
       destruct (decide (i = (projT1 (label_a x)))).
       * by rewrite e.

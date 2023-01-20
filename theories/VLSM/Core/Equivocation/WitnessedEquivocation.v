@@ -138,9 +138,9 @@ Qed.
   [trace_witnessing_equivocation_prop]erty.
 *)
 Lemma input_valid_transition_reflects_trace_witnessing_equivocation_prop
-  (is s: composite_state IM)
-  (tr: list (composite_transition_item IM))
-  (Htr: finite_valid_trace_init_to PreFree is s tr)
+  (is s : composite_state IM)
+  (tr : list (composite_transition_item IM))
+  (Htr : finite_valid_trace_init_to PreFree is s tr)
   (item : composite_transition_item IM)
   (Hwitness : trace_witnessing_equivocation_prop is (tr ++ [item]))
   (s' := destination item)
@@ -353,13 +353,13 @@ Qed.
 Lemma strong_trace_witnessing_equivocation_prop_extend_eq
   s
   is tr'
-  (Htr': finite_valid_trace_init_to PreFree is s tr')
+  (Htr' : finite_valid_trace_init_to PreFree is s tr')
   is' tr''
-  (Htr'': finite_valid_trace_init_to PreFree is' s tr'')
+  (Htr'' : finite_valid_trace_init_to PreFree is' s tr'')
   (Hprefix : strong_trace_witnessing_equivocation_prop is' tr'')
   item
   (Hwitness : trace_witnessing_equivocation_prop is (tr' ++ [item]))
-  (Heq: equivocating_validators s ≡@{Cv} equivocating_validators (destination item))
+  (Heq : equivocating_validators s ≡@{Cv} equivocating_validators (destination item))
   : strong_trace_witnessing_equivocation_prop is' (tr'' ++ [item]).
 Proof.
   intros prefix suffix Heq_tr''_item.
@@ -408,15 +408,15 @@ Qed.
 Lemma strong_trace_witnessing_equivocation_prop_extend_neq
   s
   is tr
-  (Htr: finite_valid_trace_init_to PreFree is s tr)
+  (Htr : finite_valid_trace_init_to PreFree is s tr)
   (Hprefix : strong_trace_witnessing_equivocation_prop is tr)
   item
   msg
   (Hmsg : input item = Some msg)
-  (Hwneq: ¬ trace_has_message (field_selector output) msg tr)
+  (Hwneq : ¬ trace_has_message (field_selector output) msg tr)
   v
-  (Hsender: sender msg = Some v)
-  (Hneq: equivocating_validators (destination item) ≡@{Cv} {[v]} ∪ (equivocating_validators s))
+  (Hsender : sender msg = Some v)
+  (Hneq : equivocating_validators (destination item) ≡@{Cv} {[v]} ∪ (equivocating_validators s))
   : strong_trace_witnessing_equivocation_prop is (tr ++ [item]).
 Proof.
   intros prefix suffix Heq_tr''_item.
@@ -671,9 +671,9 @@ Definition equivocating_validators_fixed_equivocation_constraint
 Lemma equivocators_can_emit_free m
   (Hmsg : valid_message_prop Free m)
   v
-  (Hsender: sender m = Some v)
+  (Hsender : sender m = Some v)
   sf
-  (Hequivocating_v: v ∈ equivocating_validators sf)
+  (Hequivocating_v : v ∈ equivocating_validators sf)
   l s
   (Hv : composite_valid IM l (s, Some m))
   : can_emit
@@ -723,7 +723,7 @@ Qed.
 
 Lemma strong_witness_has_fixed_equivocation is s tr
   (Htr : finite_valid_trace_init_to (free_composite_vlsm IM) is s tr)
-  (Heqv: strong_trace_witnessing_equivocation_prop (Cv := Ci) IM threshold Datatypes.id sender is tr)
+  (Heqv : strong_trace_witnessing_equivocation_prop (Cv := Ci) IM threshold Datatypes.id sender is tr)
   : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM
       (equivocating_validators s)) is s tr.
 Proof.

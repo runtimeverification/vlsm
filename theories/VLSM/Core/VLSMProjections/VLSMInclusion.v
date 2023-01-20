@@ -54,7 +54,7 @@ Proof.
     destruct tr as [is tr | is tr]; simpl in *.
     + by apply Hincl.
     + destruct Htr as [HtrX HisX].
-      assert (His_tr: finite_valid_trace X is []).
+      assert (His_tr : finite_valid_trace X is []).
       {
         split; [| done].
         by constructor; apply initial_state_is_valid.

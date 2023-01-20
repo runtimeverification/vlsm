@@ -442,7 +442,7 @@ Definition full_node_is_sent_locally_equivocating
   (s : vstate X) (v : validator) : Prop :=
   exists m1 m2, FullNodeSentLocalEquivocationEvidence s v m1 m2.
 
-Lemma full_node_is_sent_locally_equivocating_weaker s v:
+Lemma full_node_is_sent_locally_equivocating_weaker s v :
   full_node_is_locally_equivocating s v ->
   full_node_is_sent_locally_equivocating s v.
 Proof.
@@ -451,7 +451,7 @@ Proof.
   by contradict Hncomp; apply tc_comparable.
 Qed.
 
-Lemma full_node_is_locally_equivocating_stronger s v:
+Lemma full_node_is_locally_equivocating_stronger s v :
   full_node_is_locally_equivocating s v ->
   msg_dep_is_locally_equivocating s v.
 Proof.
@@ -826,7 +826,7 @@ Definition full_node_is_globally_equivocating
   (s : composite_state IM) (v : validator) : Prop :=
   exists m : message, FullNodeGlobalEquivocationEvidence s v m.
 
-Lemma full_node_is_globally_equivocating_stronger s v:
+Lemma full_node_is_globally_equivocating_stronger s v :
   full_node_is_globally_equivocating s v ->
   msg_dep_is_globally_equivocating s v.
 Proof.

@@ -630,7 +630,7 @@ Proof.
       by apply valid_trace_add_last; auto.
     + apply Exists_exists.
       assert
-        (Hsome: is_Some
+        (Hsome : is_Some
           (pre_VLSM_projection_transition_item_project
             (composite_type IM) (composite_type sub_IM)
             composite_label_sub_projection_option composite_state_sub_projection
@@ -731,7 +731,7 @@ Proof.
 Qed.
 
 Lemma lift_sub_valid l s om
-  (Hv: composite_valid sub_IM l (s, om))
+  (Hv : composite_valid sub_IM l (s, om))
   : composite_valid IM (lift_sub_label l) (lift_sub_state s, om).
 Proof.
   revert Hv.
@@ -747,7 +747,7 @@ Proof.
 Qed.
 
 Lemma lift_sub_transition l s om s' om'
-  (Ht: composite_transition sub_IM l (s, om) = (s', om'))
+  (Ht : composite_transition sub_IM l (s, om) = (s', om'))
   : composite_transition IM
     (lift_sub_label l) (lift_sub_state s, om) = (lift_sub_state s', om').
 Proof.
@@ -935,7 +935,7 @@ Proof.
 Qed.
 
 Lemma lift_sub_to_transition l s om s' om'
-  (Ht: composite_transition (sub_IM IM equivocators) l (s, om) = (s', om'))
+  (Ht : composite_transition (sub_IM IM equivocators) l (s, om) = (s', om'))
   : composite_transition IM
     (lift_sub_label IM equivocators l) (lift_sub_state_to IM equivocators base_s s, om) =
     (lift_sub_state_to IM equivocators base_s s', om').
@@ -1106,7 +1106,7 @@ Definition lift_sub_incl_label
   existT (dexist i H2i) (projT2 l).
 
 Lemma lift_sub_incl_valid l s om
-  (Hv: composite_valid (sub_IM IM indices1) l (s, om))
+  (Hv : composite_valid (sub_IM IM indices1) l (s, om))
   : composite_valid (sub_IM IM indices2) (lift_sub_incl_label l) (lift_sub_incl_state s, om).
 Proof.
   revert Hv.
@@ -1119,7 +1119,7 @@ Proof.
 Qed.
 
 Lemma lift_sub_incl_transition l s om s' om'
-  (Ht: composite_transition (sub_IM IM indices1) l (s, om) = (s', om'))
+  (Ht : composite_transition (sub_IM IM indices1) l (s, om) = (s', om'))
   : composite_transition (sub_IM IM indices2)
     (lift_sub_incl_label l) (lift_sub_incl_state s, om) = (lift_sub_incl_state s', om').
 Proof.

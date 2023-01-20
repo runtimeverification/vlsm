@@ -12,10 +12,10 @@ Proof.
 Qed.
 
 Lemma map_option_listing
-      {A B : Type} (f: A -> option B) (g: B -> A)
-      (f_proj_inj: forall a b, f a = Some b -> a = g b)
-      (f_surj: forall b, f (g b) = Some b)
-      (A_listing: list A) (A_finite : Listing A_listing) : Listing (map_option f A_listing).
+      {A B : Type} (f : A -> option B) (g : B -> A)
+      (f_proj_inj : forall a b, f a = Some b -> a = g b)
+      (f_surj : forall b, f (g b) = Some b)
+      (A_listing : list A) (A_finite : Listing A_listing) : Listing (map_option f A_listing).
 Proof.
   destruct A_finite as [Hnodup Hfull].
   split.

@@ -52,7 +52,7 @@ Fixpoint min_predecessors
   :=
   match remainder with
   | [] => min
-  | h:: t =>
+  | h :: t =>
     if decide (count_predecessors h < count_predecessors min)
     then min_predecessors t h
     else min_predecessors t min
@@ -687,7 +687,7 @@ Proof.
   intros contra.
   specialize (Htop max a contra).
 
-  assert (Hinmax: max ∈ l) by (apply maximal_element_in; itauto).
+  assert (Hinmax : max ∈ l) by (apply maximal_element_in; itauto).
   assert (Hinatop : a ∈ top_sort l) by (apply Hseteq; itauto).
   apply elem_of_list_split in Hinatop.
   destruct Hinatop as [prefA [sufA HeqA]].

@@ -168,7 +168,7 @@ Proof.
       | _ =>  full_replay_state i
       end)).
   {
-    intros Hcut; specialize (Hcut _ (incl_refl _) ltac: (apply NoDup_enum)).
+    intros Hcut; specialize (Hcut _ (incl_refl _) ltac : (apply NoDup_enum)).
     unfold replayed_initial_state_from, composite_apply_plan.
     rewrite _apply_plan_last; extensionality i.
     specialize (Hcut i); unfold composite_apply_plan in Hcut; unfold spawn_initial_state
@@ -212,8 +212,8 @@ Qed.
   the projection of the replaying of an initial state is empty.
 *)
 Lemma equivocators_trace_project_replayed_initial_state_from full_replay_state is
-  (eqv_descriptors: equivocator_descriptors)
-  (Heqv_descriptors: not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
+  (eqv_descriptors : equivocator_descriptors)
+  (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   : equivocators_trace_project eqv_descriptors
       (replayed_initial_state_from full_replay_state is) =
     Some ([], eqv_descriptors).
@@ -281,8 +281,8 @@ Proof.
 Qed.
 
 Lemma equivocator_state_descriptor_project_replayed_initial_state_from_left full_replay_state is
-  (eqv_descriptors: equivocator_descriptors)
-  (Heqv_descriptors: not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
+  (eqv_descriptors : equivocator_descriptors)
+  (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   (lst := finite_trace_last full_replay_state (replayed_initial_state_from full_replay_state is))
   : forall i,
     equivocator_state_descriptor_project (lst i) (eqv_descriptors i) =
@@ -340,8 +340,8 @@ Proof.
 Qed.
 
 Lemma equivocator_state_descriptor_project_replayed_trace_from_left full_replay_state is tr
-  (eqv_descriptors: equivocator_descriptors)
-  (Heqv_descriptors: not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
+  (eqv_descriptors : equivocator_descriptors)
+  (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   (lst := finite_trace_last full_replay_state (replayed_trace_from full_replay_state is tr))
   : forall i,
     equivocator_state_descriptor_project (lst i) (eqv_descriptors i) =
@@ -368,8 +368,8 @@ Proof.
 Qed.
 
 Lemma equivocators_trace_project_replayed_trace_from_left full_replay_state is tr
-  (eqv_descriptors: equivocator_descriptors)
-  (Heqv_descriptors: not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
+  (eqv_descriptors : equivocator_descriptors)
+  (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   : equivocators_trace_project eqv_descriptors
       (replayed_trace_from full_replay_state is tr) =
     Some ([], eqv_descriptors).
@@ -439,7 +439,7 @@ Lemma lift_equivocators_sub_transition
   (full_replay_state : composite_state equivocator_IM)
   l s om s' om'
   (Hv : composite_valid sub_equivocator_IM l (s, om))
-  (Ht: composite_transition sub_equivocator_IM l (s, om) = (s', om'))
+  (Ht : composite_transition sub_equivocator_IM l (s, om) = (s', om'))
   : composite_transition equivocator_IM (lift_equivocators_sub_label_to full_replay_state  l)
       (lift_equivocators_sub_state_to full_replay_state s, om) =
       (lift_equivocators_sub_state_to full_replay_state s', om').

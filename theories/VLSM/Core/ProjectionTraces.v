@@ -139,7 +139,7 @@ Qed.
 
 Lemma composite_transition_item_projection_neq
   (item : composite_transition_item IM)
-  (Hneq: j <> projT1 (l item))
+  (Hneq : j <> projT1 (l item))
   : @pre_VLSM_projection_transition_item_project _ (composite_type IM) _
       (composite_project_label IM j) (fun s => s j)
       item
