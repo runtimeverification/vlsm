@@ -168,7 +168,7 @@ Proof.
       | _ =>  full_replay_state i
       end)).
   {
-    intros Hcut; specialize (Hcut _ (incl_refl _) ltac:(apply NoDup_enum)).
+    intros Hcut; specialize (Hcut _ (incl_refl _) ltac: (apply NoDup_enum)).
     unfold replayed_initial_state_from, composite_apply_plan.
     rewrite _apply_plan_last; extensionality i.
     specialize (Hcut i); unfold composite_apply_plan in Hcut; unfold spawn_initial_state
@@ -227,8 +227,8 @@ Proof.
   subst plan.
   induction l using rev_ind; [split; simpl; [done | lia] |].
   rewrite map_app, (composite_apply_plan_app equivocator_IM).
-  destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn:Hplanl.
-  destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn:Hplana.
+  destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn: Hplanl.
+  destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn: Hplana.
   simpl in *.
   inversion_clear Hplana.
   split.
@@ -237,7 +237,7 @@ Proof.
     repeat split; [| by apply IHl].
     specialize (Heqv_descriptors (` x)).
     unfold existing_descriptor in Heqv_descriptors.
-    destruct (eqv_descriptors (` x)) eqn:Heqv_x; [done |].
+    destruct (eqv_descriptors (` x)) eqn: Heqv_x; [done |].
     destruct Heqv_descriptors as [s_x_n Heqv_descriptors].
     apply equivocator_state_project_Some_rev in Heqv_descriptors as Hltn.
     apply proj2 in IHl.
@@ -267,8 +267,8 @@ Proof.
   rewrite map_app, (composite_apply_plan_app equivocator_IM).
   specialize (composite_apply_plan_last equivocator_IM full_replay_state
     (map (initial_new_machine_transition_item is) l)) as Hlst.
-  destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn:Hplanl.
-  destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn:Hplana.
+  destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn: Hplanl.
+  destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn: Hplana.
   inversion_clear Hplana.
   simpl in *.
   rewrite finite_trace_last_is_last. simpl.
@@ -390,7 +390,7 @@ Proof.
   subst sub_i.
   specialize (Heqv_descriptors i).
   unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors _) eqn:Heqv_l; [done |].
+  destruct (eqv_descriptors _) eqn: Heqv_l; [done |].
   destruct Heqv_descriptors as [s_l_n Hs_l_n].
   apply equivocator_state_project_Some_rev in Hs_l_n as Hltn.
   specialize (lift_equivocators_sub_state_to_size full_replay_state destination i)

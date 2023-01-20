@@ -158,7 +158,7 @@ Proof.
 Qed.
 
 #[local] Ltac destruct_equivocator_state_project' es i si Hi Hpr :=
-  destruct (equivocator_state_project es i) as [si |] eqn:Hpr
+  destruct (equivocator_state_project es i) as [si |] eqn: Hpr
   ; [specialize (equivocator_state_project_Some_rev _ _ _ Hpr) as Hi
     | specialize (equivocator_state_project_None_rev _ _ Hpr) as Hi].
 
@@ -667,7 +667,7 @@ Arguments equivocator_state_extend {_ _} _ _ : assert.
 Arguments equivocator_state_append {_ _} _ _ : assert.
 
 Ltac destruct_equivocator_state_project' es i si Hi Hpr :=
-  destruct (equivocator_state_project es i) as [si |] eqn:Hpr
+  destruct (equivocator_state_project es i) as [si |] eqn: Hpr
   ; [specialize (equivocator_state_project_Some_rev _ _ _ _ Hpr) as Hi
     | specialize (equivocator_state_project_None_rev _ _ _ Hpr) as Hi].
 
@@ -981,7 +981,7 @@ Proof.
       | ..]
     ; cbn in Hv, Ht
     ; destruct_equivocator_state_project' s i si Hi Hpr; [| done | | done]
-    ; destruct (vtransition _ _ _) as (si', _om') eqn:Hti
+    ; destruct (vtransition _ _ _) as (si', _om') eqn: Hti
     ; inversion Ht; subst s' _om'; clear Ht
 
     (* I wish I could solve this goal, then apply the composed tactic for the remaining two goals. *)
@@ -1156,7 +1156,7 @@ Lemma existing_true_label_equivocator_state_project_not_last
 Proof.
   cbn in Ht.
   rewrite Hsi in Ht.
-  destruct (vtransition _ _ _) as (si', _om') eqn:Hti.
+  destruct (vtransition _ _ _) as (si', _om') eqn: Hti.
   inversion Ht; subst s' _om'. clear Ht.
   simpl.
   by destruct_equivocator_state_extend_project s si' ni Hni'; [| lia..].
@@ -1191,7 +1191,7 @@ Lemma existing_false_label_equivocator_state_project_not_same
   = equivocator_state_descriptor_project s (Existing ni).
 Proof.
   cbn in Ht. rewrite Hsi in Ht.
-  destruct (vtransition _ _ _) as (si', _om') eqn:Hti.
+  destruct (vtransition _ _ _) as (si', _om') eqn: Hti.
   inversion Ht; subst s' _om'. clear Ht.
   simpl.
   destruct_equivocator_state_update_project s ieqvi si' ni Hni' Hini; [lia.. |].

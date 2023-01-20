@@ -125,7 +125,7 @@ Proof.
   apply map_eq_cons in Hitem_suf_pr as [item [suf [Heqitem_suf [Hitem_pr Hsuf_pr]]]].
   subst tr item_suf. clear Hsuf_pr.
   subst itemX. cbn in Hm0.
-  change (pre ++ item::suf) with (pre ++ [item] ++ suf) in Htr.
+  change (pre ++ item:: suf) with (pre ++ [item] ++ suf) in Htr.
   destruct Htr as [Htr Hinit].
   apply (finite_valid_trace_from_to_app_split PreNonByzantine) in Htr.
   destruct Htr as [Hpre Hitem].

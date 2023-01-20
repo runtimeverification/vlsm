@@ -425,7 +425,7 @@ Context
 Lemma can_emit_projection
   : can_emit PreFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 Proof.
-  destruct (sender m) as [v |] eqn:Hsender; simpl in Hj; [| by congruence].
+  destruct (sender m) as [v |] eqn: Hsender; simpl in Hj; [| by congruence].
   apply Some_inj in Hj.
   specialize (Hsender_safety _ _ Hsender).
   intros [(s0, om0) [(i, li) [s1 Hemitted]]].

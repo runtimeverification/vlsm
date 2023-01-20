@@ -626,7 +626,7 @@ Definition liveness (P : nat -> Prop)
   := forall (n1 : nat), { n2 : nat | n1 <= n2 /\ P n2}.
 
 Definition liveness_dec (P : nat -> Prop)
-  := forall (n1 : nat), { n2 : nat | n1 <= n2 /\ P n2} + {~ exists n2:nat, n1 <= n2 /\ P n2}.
+  := forall (n1 : nat), { n2 : nat | n1 <= n2 /\ P n2} + {~ exists n2: nat, n1 <= n2 /\ P n2}.
 
 Definition min_liveness (P : nat -> Prop)
   := forall (n1 : nat), { n2 : nat | n1 <= n2 /\ P n2
@@ -635,7 +635,7 @@ Definition min_liveness (P : nat -> Prop)
 Lemma not_bounding_impl_liveness
   (P : nat -> Prop)
   (Hdec : liveness_dec P)
-  (Hnbound : ~ exists n1:nat, forall (n2:nat), n1 <= n2 -> ~ P n2)
+  (Hnbound : ~ exists n1: nat, forall (n2: nat), n1 <= n2 -> ~ P n2)
   : liveness P.
 Proof.
   intros n1.

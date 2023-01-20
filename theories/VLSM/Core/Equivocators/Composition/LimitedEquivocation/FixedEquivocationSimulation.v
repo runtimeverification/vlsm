@@ -127,7 +127,7 @@ Proof.
       apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
       revert Heqv_state_s.
       by apply (VLSM_projection_valid_state (preloaded_component_projection (equivocator_IM IM) i)).
-  - destruct (composite_transition _ _ _) as (s', om') eqn:Ht'.
+  - destruct (composite_transition _ _ _) as (s', om') eqn: Ht'.
     apply
       (equivocating_transition_preserves_fixed_equivocation
         IM (elements equivocating) _ _ _ _ _ Ht' Hlift_s).
@@ -250,7 +250,7 @@ Proof.
       split; [by split |].
       apply (VLSM_eq_valid_state HeqXE) in Hs.
       apply valid_state_has_fixed_equivocation in Hs.
-      destruct (composite_transition _ _ _) as (s', om') eqn:Ht.
+      destruct (composite_transition _ _ _) as (s', om') eqn: Ht.
       by apply
         (equivocating_transition_preserves_fixed_equivocation
           IM (elements equivocating) _ _ _ _ _ Ht Hs).
@@ -366,7 +366,7 @@ Proof.
       destruct Hom as [Hom | Hinitial]; [by left | exfalso].
       by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
-      destruct (composite_transition _ _ _) as (es', om') eqn:Het.
+      destruct (composite_transition _ _ _) as (es', om') eqn: Het.
       simpl.
       by apply
         (zero_descriptor_transition_preserves_fixed_equivocation
@@ -432,7 +432,7 @@ Proof.
       destruct Hom as [Hom | Hinitial]; [by left | exfalso].
       by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
-      destruct (composite_transition _ _ _) as (es', om') eqn:Het.
+      destruct (composite_transition _ _ _) as (es', om') eqn: Het.
       simpl.
       by apply
         (zero_descriptor_transition_preserves_fixed_equivocation

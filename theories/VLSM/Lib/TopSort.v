@@ -52,7 +52,7 @@ Fixpoint min_predecessors
   :=
   match remainder with
   | [] => min
-  | h::t =>
+  | h:: t =>
     if decide (count_predecessors h < count_predecessors min)
     then min_predecessors t h
     else min_predecessors t min

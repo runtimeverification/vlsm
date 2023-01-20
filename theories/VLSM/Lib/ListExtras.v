@@ -6,7 +6,7 @@ From VLSM.Lib Require Import Preamble.
 (** * Utility lemmas about lists *)
 
 (** A list is empty if it has no members. *)
-Lemma empty_nil [X:Type] (l:list X) :
+Lemma empty_nil [X: Type] (l: list X) :
   (forall v, ~ In v l) -> l = [].
 Proof.
   clear.
@@ -25,7 +25,7 @@ Qed.
   and a last element.
 *)
 Lemma has_last_or_null {S} (l : list S)
-  : {l' : list S & {a : S | l = l' ++ (a::nil)}} + {l = nil} .
+  : {l' : list S & {a : S | l = l' ++ (a:: nil)}} + {l = nil} .
 Proof.
   destruct (null_dec l).
   - by right.
@@ -157,13 +157,13 @@ Proof.
     by itauto.
 Qed.
 
-Lemma in_not_in : forall A (x y : A) (l:list A),
+Lemma in_not_in : forall A (x y : A) (l: list A),
   x ∈ l ->
   y ∉ l ->
   x <> y.
 Proof. by itauto congruence. Qed.
 
-Definition inb {A} (Aeq_dec : forall x y:A, {x = y} + {x <> y}) (x : A) (xs : list A) :=
+Definition inb {A} (Aeq_dec : forall x y: A, {x = y} + {x <> y}) (x : A) (xs : list A) :=
   if in_dec Aeq_dec x xs then true else false.
 
 Lemma in_correct `{EqDecision X} :
@@ -585,7 +585,7 @@ Proof.
 Qed.
 
 Fixpoint nth_error_filter_index
-  {A} P `{forall (x:A), Decision (P x)}
+  {A} P `{forall (x: A), Decision (P x)}
   (l : list A)
   (n : nat)
   :=
@@ -602,7 +602,7 @@ Fixpoint nth_error_filter_index
   end.
 
 Lemma nth_error_filter_index_le
-  {A} P `{forall (x:A), Decision (P x)}
+  {A} P `{forall (x: A), Decision (P x)}
   (l : list A)
   (n1 n2 : nat)
   (Hle : n1 <= n2)
@@ -627,15 +627,15 @@ Proof.
       * by destruct (nth_error_filter_index P l n2); inversion Hin2.
       * assert (Hle' : n1 <= n2) by lia.
         specialize (IHl n1 n2 Hle').
-        destruct (nth_error_filter_index P l n1) eqn:Hin1'; inversion Hin1;
+        destruct (nth_error_filter_index P l n1) eqn: Hin1'; inversion Hin1;
         subst; clear Hin1.
-        destruct (nth_error_filter_index P l n2) eqn:Hin2'; inversion Hin2
+        destruct (nth_error_filter_index P l n2) eqn: Hin2'; inversion Hin2
         ; subst; clear Hin2.
         by specialize (IHl in1 eq_refl in2 eq_refl); lia.
   - specialize (IHl n1 n2 Hle).
-    destruct (nth_error_filter_index P l n1) eqn:Hin1'; inversion Hin1
+    destruct (nth_error_filter_index P l n1) eqn: Hin1'; inversion Hin1
     ; subst; clear Hin1.
-    destruct (nth_error_filter_index P l n2) eqn:Hin2'; inversion Hin2
+    destruct (nth_error_filter_index P l n2) eqn: Hin2'; inversion Hin2
     ; subst; clear Hin2.
     by specialize (IHl n0 eq_refl n3 eq_refl); lia.
 Qed.
@@ -934,7 +934,7 @@ Proof.
     apply app_eq_nil in Happ_rev as [Hl1' Hl2']; subst.
     by exists [], [].
   - simpl in Happ_rev.
-    destruct (f a) eqn:Hfa; swap 1 2.
+    destruct (f a) eqn: Hfa; swap 1 2.
     + destruct (IHl _ _ Happ_rev) as [_l1 [l2 [-> [<- <-]]]].
       by exists (a :: _l1), l2; cbn; rewrite Hfa.
     + destruct l1' as [| _b l1']; swap 1 2.
@@ -1430,7 +1430,7 @@ Proof.
   - by refine (if X a then if IHl then left _ else right _ else right _); constructor.
 Qed.
 
-Lemma list_sum_decrease [A:Type] (f g: A -> nat) (l: list A):
+Lemma list_sum_decrease [A: Type] (f g: A -> nat) (l: list A):
   (forall a, In a l -> f a <= g a) -> Exists (fun a => f a < g a) l ->
   list_sum (map f l) < list_sum (map g l).
 Proof.
@@ -1451,7 +1451,7 @@ Qed.
   natural examples.
 *)
 Lemma fold_left_ind
-      [A B:Type] (f: B -> A -> B) (P : list A -> B -> B -> Prop)
+      [A B: Type] (f: B -> A -> B) (P : list A -> B -> B -> Prop)
       (Hstart : forall x, P nil x x)
       (Hstep : forall x a l r,
           P l (f x a) r ->
@@ -1469,10 +1469,10 @@ Qed.
   decomposes the list from the right.
 *)
 Lemma fold_left_ind_rev
-      [A B:Type] (f: B -> A -> B) (x0: B)
+      [A B: Type] (f: B -> A -> B) (x0: B)
       (P : list A -> B -> Prop)
       (Hstart : P nil x0)
-      (Hstep: forall l a x, P l x -> P (l++a::nil) (f x a)):
+      (Hstep: forall l a x, P l x -> P (l++a:: nil) (f x a)):
   forall l, P l (fold_left f l x0).
 Proof.
   induction l using rev_ind.
@@ -1564,7 +1564,7 @@ Definition ForAllSuffix2 [A : Type] (R : A -> A -> Prop) : list A -> Prop :=
   ForAllSuffix (fun l => match l with | a :: b :: _ => R a b | _ => True end).
 
 Lemma fsFurther2_transitive [A : Type] (R : A -> A -> Prop) {HT : Transitive R}
-  : forall a b l, ForAllSuffix2 R (a::b::l) -> ForAllSuffix2 R (a::l).
+  : forall a b l, ForAllSuffix2 R (a:: b:: l) -> ForAllSuffix2 R (a:: l).
 Proof.
   inversion 1. subst. destruct l.
   - by repeat constructor.
@@ -1608,7 +1608,7 @@ Proof.
       by intros b Hb; apply Hsub; right.
 Qed.
 
-Lemma elem_of_empty_nil [X:Type] (l:list X) :
+Lemma elem_of_empty_nil [X: Type] (l: list X) :
   (forall v, v ∉ l) -> l = [].
 Proof.
   destruct l as [| a]; [done |].
@@ -1645,7 +1645,7 @@ Proof.
   by apply submseteq_length, NoDup_submseteq.
 Qed.
 
-Lemma submseteq_tail_l [A] (x:A) l1 l2 :
+Lemma submseteq_tail_l [A] (x: A) l1 l2 :
   x :: l1 ⊆+ l2 -> l1 ⊆+ l2.
 Proof.
   by apply submseteq_trans, submseteq_cons.

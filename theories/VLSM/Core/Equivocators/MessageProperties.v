@@ -46,7 +46,7 @@ Proof.
       eqn: Htr; [| by congruence].
     specialize (IHtr trX').
     destruct (equivocator_vlsm_transition_item_project _ a i') as [[[item' |] i''] |]
-      eqn:Hitem'
+      eqn: Hitem'
     ; inversion HtrX; subst; clear HtrX.
     + apply equivocator_transition_item_project_inv_messages in Hitem'.
       destruct Hitem' as [_ [_ [_ [_ Ha]]]].
@@ -196,7 +196,7 @@ Lemma equivocator_vlsm_trace_project_output_reflecting_inv
 Proof.
   apply Exists_exists in Hbbs.
   destruct Hbbs as [item [Hin Houtput]].
-  destruct (equivocator_label_descriptor (l item)) as [sn | i] eqn:Hsndl.
+  destruct (equivocator_label_descriptor (l item)) as [sn | i] eqn: Hsndl.
   - destruct item. destruct l; inversion Hsndl.
     subst. simpl in *.
     by destruct (preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
@@ -305,8 +305,8 @@ Proof.
         rewrite equivocator_state_extend_project_1; [done |].
         by apply equivocator_state_project_Some_rev in Hsins.
     + cbn in Hv.
-      destruct (equivocator_state_project s idesc) as [sidesc |] eqn:Hidesc; [| done].
-      destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn:Htx.
+      destruct (equivocator_state_project s idesc) as [sidesc |] eqn: Hidesc; [| done].
+      destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
@@ -363,8 +363,8 @@ Proof.
               destruct_equivocator_state_project s' ins _sins Hins; [| lia].
               cbn in Hnot_same; congruence.
     + cbn in Hv.
-      destruct (equivocator_state_project s idesc) as [sidesc |] eqn:Hidesc; [| done].
-      destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn:Htx.
+      destruct (equivocator_state_project s idesc) as [sidesc |] eqn: Hidesc; [| done].
+      destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.

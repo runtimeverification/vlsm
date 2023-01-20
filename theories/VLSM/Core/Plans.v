@@ -96,11 +96,11 @@ Proof.
   rewrite rev_unit. unfold _apply_plan in IHa.
   simpl in *.
   destruct (fold_right _apply_plan_folder (start, []) (rev a)) as (final, items)
-    eqn:Happly.
+    eqn: Happly.
   simpl in IHa.
   simpl.
   destruct x.
-  destruct (transition label_a0 (final, input_a0)) as (dest, out) eqn:Ht.
+  destruct (transition label_a0 (final, input_a0)) as (dest, out) eqn: Ht.
   by simpl; rewrite finite_trace_last_is_last.
 Qed.
 
@@ -117,10 +117,10 @@ Proof.
   rewrite fold_right_app. simpl.
   destruct
     (fold_right _apply_plan_folder (@pair state _ start []) (rev  a))
-    as (afinal, aitems) eqn:Ha.
+    as (afinal, aitems) eqn: Ha.
   destruct
     (fold_right _apply_plan_folder (@pair state _ afinal []) (rev a'))
-    as (final, items) eqn:Ha'.
+    as (final, items) eqn: Ha'.
   clear - Ha'.
   specialize (_apply_plan_folder_additive afinal (rev a') aitems) as Hadd.
   rewrite Ha' in Hadd.
@@ -210,7 +210,7 @@ Proof.
   unfold finite_valid_plan_from.
   specialize (apply_plan_app s a b) as Happ.
   specialize (apply_plan_last s a) as Hlst.
-  destruct (apply_plan s a) as (aitems, afinal) eqn:Ha.
+  destruct (apply_plan s a) as (aitems, afinal) eqn: Ha.
   subst s_a.
   simpl in *.
   destruct (apply_plan afinal b) as (bitems, bfinal).
@@ -348,7 +348,7 @@ Proof.
       remember (snd (apply_plan s a)) as sa.
       unfold apply_plan, _apply_plan. simpl.
       destruct x.
-      destruct (vtransition X label_a0 (sa, input_a0)) as (dest, out) eqn:Ht.
+      destruct (vtransition X label_a0 (sa, input_a0)) as (dest, out) eqn: Ht.
       simpl.
       apply Forall_inv in Hinput_ai. simpl in Hinput_ai.
       unfold finite_valid_plan_from in Ha.

@@ -252,7 +252,7 @@ Proof.
     in Hwitness as Hincl
   ; [| by split].
   remember (finite_trace_last is tr) as s.
-  destruct (option_bind _ _ sender om) as [v |] eqn:Heq_v.
+  destruct (option_bind _ _ sender om) as [v |] eqn: Heq_v.
   - destruct om as [m |]; [| by inversion Heq_v]. simpl in Heq_v.
     destruct (decide (set_eq (elements (equivocating_validators s)) (elements (equivocating_validators s')))).
     + apply set_eq_fin_set in s0; left; split; [done |].
@@ -762,7 +762,7 @@ Proof.
     spec Heqv; [by apply app_nil_r |].
     destruct iom as [im |]; [| by repeat split; auto using option_valid_message_None].
     apply Free_has_sender in Hiom as _Hsender.
-    destruct (sender im) as [v |] eqn:Hsender; [| by congruence].
+    destruct (sender im) as [v |] eqn: Hsender; [| by congruence].
     clear _Hsender.
     specialize (Heqv v).
     rewrite finite_trace_last_is_last in Heqv.

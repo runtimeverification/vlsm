@@ -258,7 +258,7 @@ Qed.
 
 Lemma finite_trace_last_cons
   s x tl:
-  finite_trace_last s (x::tl) = finite_trace_last (destination x) tl.
+  finite_trace_last s (x:: tl) = finite_trace_last (destination x) tl.
 Proof.
   by unfold finite_trace_last; rewrite map_cons, unroll_last.
 Qed.
@@ -479,7 +479,7 @@ Inductive valid_state_message_prop : state -> option message -> Prop :=
   : valid_state_message_prop s' om'.
 
 Definition valid_initial_state
-  [s:state] (Hs: initial_state_prop s)
+  [s: state] (Hs: initial_state_prop s)
   : valid_state_message_prop s None
   := valid_initial_state_message s Hs None I.
 
@@ -2272,7 +2272,7 @@ Proof.
       ; (split; [| done])
       ; constructor
       ; apply initial_state_is_valid.
-    + assert (Hnnil : item ::l <> [])
+    + assert (Hnnil : item :: l <> [])
         by (intro Hnil; inversion Hnil).
       specialize (exists_last Hnnil); intros [prefix [last Heq]].
       rewrite Heq in *; clear Hnnil Heq l item.
@@ -2460,7 +2460,7 @@ Class TraceWithLast
 
 Definition valid_trace_add_default_last
   `{TraceWithLast base_prop trace_prop}
-  [msg] [X:VLSM msg] [s tr] (Htr: base_prop msg X s tr):
+  [msg] [X: VLSM msg] [s tr] (Htr: base_prop msg X s tr):
     trace_prop msg X s (finite_trace_last s tr) tr.
 Proof.
   by apply valid_trace_add_last.
@@ -2597,7 +2597,7 @@ Qed.
 
 Inductive preloaded_valid_state_prop : state -> Prop :=
 | preloaded_valid_initial_state
-    (s:state)
+    (s: state)
     (Hs: initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) s):
        preloaded_valid_state_prop s
 | preloaded_protocol_generated

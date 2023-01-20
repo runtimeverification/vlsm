@@ -152,7 +152,7 @@ Proof.
   intro Hsi. elim Hi. clear Hi. unfold is_singleton_state in *.
   simpl in *.
   destruct l as (j, lj).
-  destruct (vtransition (equivocator_IM j) lj (s0 j, iom)) as (sj', om') eqn:Htj.
+  destruct (vtransition (equivocator_IM j) lj (s0 j, iom)) as (sj', om') eqn: Htj.
   inversion Ht. subst. clear Ht.
   destruct (decide (i = j)); subst; state_update_simpl; [| done].
   by revert Hsi; apply equivocator_transition_reflects_singleton_state with iom oom lj.
@@ -188,7 +188,7 @@ Proof.
     cbn -[composite_transition].
     match goal with
       |- context [composite_transition equivocator_IM l ?som] =>
-      destruct (composite_transition equivocator_IM l som) eqn:Htrans
+      destruct (composite_transition equivocator_IM l som) eqn: Htrans
     end.
     apply equivocators_transition_cannot_decrease_state_size with (eqv := eqv) in Htrans.
     by cbn in *; lia.

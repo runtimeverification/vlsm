@@ -439,7 +439,7 @@ Proof.
   destruct l as (i, li).
   unfold vtransition. simpl.
   unfold composite_state_sub_projection at 1. simpl.
-  destruct (vtransition (IM i) li (s i, om)) as (si', omi') eqn:Hti.
+  destruct (vtransition (IM i) li (s i, om)) as (si', omi') eqn: Hti.
   inversion Ht. subst omi' s'. clear Ht.
   match goal with
   |- (let (_, _) := ?t in _) = _ =>
@@ -637,7 +637,7 @@ Proof.
             item))
         by (apply pre_VLSM_projection_transition_item_project_is_Some; done).
       exists (is_Some_proj Hsome).
-      destruct (pre_VLSM_projection_transition_item_project _ _ _ _ _) eqn:Hproj;
+      destruct (pre_VLSM_projection_transition_item_project _ _ _ _ _) eqn: Hproj;
       [| contradict Hsome; apply is_Some_None].
       cbn.
       split.

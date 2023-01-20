@@ -109,7 +109,7 @@ Lemma projection_validator_messages_transitions
 Proof.
   intros Hvalidator li si omi Hpvi.
   apply Hvalidator in Hpvi as (l & s & Hiv).
-  destruct (vtransition X l (s, omi)) as (s', omo) eqn:Ht.
+  destruct (vtransition X l (s, omi)) as (s', omo) eqn: Ht.
   eexists l, s, s', omo; split with (tv_tiv := Hiv) (tv_transition := Ht).
 Qed.
 

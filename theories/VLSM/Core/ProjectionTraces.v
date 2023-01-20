@@ -228,7 +228,7 @@ Proof.
   destruct Ht as [[Hs1 [Hom1 [Hv _]]] Ht].
   simpl in Hv. simpl in Ht. cbn in Ht.
   destruct l as [il l].
-  destruct (vtransition _ _ _) as (si', om') eqn:Htj.
+  destruct (vtransition _ _ _) as (si', om') eqn: Htj.
   inversion Ht; subst; clear Ht.
   by state_update_simpl.
 Qed.

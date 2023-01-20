@@ -919,7 +919,7 @@ Proof.
   - by apply preloaded_valid_initial_state, (Hs i).
   - destruct l as [j lj].
     simpl in Ht. unfold vtransition in Ht. simpl in Ht.
-    destruct (vtransition (IM j) _ _) as (si', _om') eqn:Hti.
+    destruct (vtransition (IM j) _ _) as (si', _om') eqn: Hti.
     inversion_clear Ht.
     destruct (decide (i = j)); subst; state_update_simpl; [| done].
     by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
@@ -986,10 +986,10 @@ Proof.
   by apply input_valid_transition_preloaded_project_active.
 Qed.
 
-Lemma input_valid_transition_preloaded_project_any {V} (i:V)
+Lemma input_valid_transition_preloaded_project_any {V} (i: V)
       {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
-      (l:vlabel X) s im s' om:
+      (l: vlabel X) s im s' om:
   input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
@@ -1014,10 +1014,10 @@ Proof.
     by state_update_simpl.
 Qed.
 
-Lemma input_valid_transition_project_any {V} (i:V)
+Lemma input_valid_transition_project_any {V} (i: V)
       {message} `{EqDecision V} {IM: V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
-      (l:vlabel X) s im s' om:
+      (l: vlabel X) s im s' om:
   input_valid_transition X l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
@@ -1127,7 +1127,7 @@ Context
   {message : Type}
   {index : Type}
   `{EqDecision index}
-  (IM :index -> VLSM message)
+  (IM : index -> VLSM message)
   (Free := free_composite_vlsm IM)
   .
 

@@ -94,7 +94,7 @@ Proof.
   simpl in Ht.
   destruct item. simpl in *. destruct l as (i, li). simpl in *.
   destruct (vtransition (equivocator_IM i) li (s i, input))
-    as (si', om') eqn:Htei.
+    as (si', om') eqn: Htei.
   inversion Ht. subst. clear Ht.
   replace idescriptors with (equivocator_descriptors_update descriptors i deqv')
     by (destruct oitemx; congruence); clear oitem Hpr.
@@ -156,7 +156,7 @@ Proof.
       destruct l as (i, li).
       unfold projT1 .
       match type of Ht with
-      | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn:Hti
+      | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn: Hti
       end.
       inversion Ht; subst; cbn.
       by state_update_simpl.
@@ -238,7 +238,7 @@ Proof.
   specialize (Heqv_pr Hv).
   spec Heqv_pr.
   { simpl. unfold eq_rect_r. simpl.
-    destruct (vtransition (equivocator_IM x) v (s x, input)) eqn:Hti.
+    destruct (vtransition (equivocator_IM x) v (s x, input)) eqn: Hti.
     clear -Ht Hti; inversion Ht; subst.
     by state_update_simpl.
   }
@@ -354,7 +354,7 @@ Proof.
   ; intros
   ; match type of Ht with
     | (let (_, _) := ?t in _) = _ =>
-      destruct t as (si', om') eqn:Ht'
+      destruct t as (si', om') eqn: Ht'
     end
   ; inversion Ht; subst; clear Ht
   ; rewrite state_update_eq in Hchar
@@ -453,7 +453,7 @@ Proof.
       (IM (projT1 (l item)))
       (composite_transition_item_projection equivocator_IM item)
       (eqv_descriptors (projT1 (l item))))
-    as [([itemi |], descriptori) |] eqn:Hpr_itemi
+    as [([itemi |], descriptori) |] eqn: Hpr_itemi
   ; [| by congruence..].
   inversion Hpr_item. subst. clear Hpr_item. simpl.
   repeat split.
@@ -524,7 +524,7 @@ Proof.
       rewrite IHtr by (eexists _; done).
       simpl in *.
       destruct (equivocators_transition_item_project e1 a)
-        as [(oitem, odescriptor) |] eqn:Ha
+        as [(oitem, odescriptor) |] eqn: Ha
       ; [| done].
       by destruct oitem as [item' |]; inversion Htr.
 Qed.
@@ -618,7 +618,7 @@ Proof.
       as (trX' & xX & eqv_descriptors' & Hpr_x & Hpr_tr & Heq).
     simpl in Hpr_x.
     destruct (equivocators_transition_item_project eqv_descriptors x)
-      as [(ox, descriptorx) |] eqn:Hpr_x_item
+      as [(ox, descriptorx) |] eqn: Hpr_x_item
     ; [| by congruence].
     destruct xX as [| xX _empty].
     + destruct ox; [by congruence |].
@@ -783,9 +783,9 @@ Proof.
     destruct l as (i, li). simpl in *.
     destruct (decide (i = eqv)).
     + subst. specialize (His_tr eqv). specialize (Htr_x eqv).
-      destruct (descriptors eqv) eqn:Hvin_desc_eqv;
+      destruct (descriptors eqv) eqn: Hvin_desc_eqv;
         [by simpl in Hex_new; rewrite Hex_new in Hex_new' |].
-      destruct (final_descriptors' eqv) eqn:Hfin_desc_eqv'.
+      destruct (final_descriptors' eqv) eqn: Hfin_desc_eqv'.
       * by simpl in Hex_new, Hex_new'; rewrite Hex_new'; simpl;  lia.
       * by destruct (idescriptors eqv); simpl in *; lia.
     + by rewrite Heq_final_descriptors' in Hex_new'; state_update_simpl.
@@ -852,7 +852,7 @@ Proof.
   - unfold equivocators_trace_project in Hproject_tr.
     rewrite fold_right_app in Hproject_tr.
     match type of Hproject_tr with
-    | fold_right _ ?i _ = _ => destruct i as [(projectx, final_descriptors') |] eqn:Hproject_x
+    | fold_right _ ?i _ = _ => destruct i as [(projectx, final_descriptors') |] eqn: Hproject_x
     end
     ; [| by rewrite equivocators_trace_project_fold_None in Hproject_tr; inversion Hproject_tr].
     apply equivocators_trace_project_folder_additive_iff in Hproject_tr.
@@ -867,7 +867,7 @@ Proof.
     { clear - Hproject_x Hproject_xi.
       simpl in *.
       destruct (equivocators_transition_item_project final_descriptors x)
-        as [(ox, final') |] eqn:Hpr_item_x
+        as [(ox, final') |] eqn: Hpr_item_x
       ; [| by congruence].
       unfold equivocators_transition_item_project in Hpr_item_x.
       destruct (decide (i = projT1 (l x))).
@@ -877,7 +877,7 @@ Proof.
         simpl in Hproject_xi.
         subst eqv_final.
         destruct (equivocator_vlsm_transition_item_project _ _ _)
-          as [(oitem', descriptor') |] eqn:Heqpr_item_x
+          as [(oitem', descriptor') |] eqn: Heqpr_item_x
         ; [| done].
         destruct oitem' as [item' |]
         ; inversion Hproject_xi; subst descriptor' project_xi; clear Hproject_xi
@@ -902,7 +902,7 @@ Proof.
         inversion Hproject_xi. subst. clear Hproject_xi.
         destruct
           (equivocator_vlsm_transition_item_project _ _ _)
-          as [(oitem', descriptor') |] eqn:Heqpr_item_x
+          as [(oitem', descriptor') |] eqn: Heqpr_item_x
         ; [| done].
         destruct oitem' as [item' |]
         ; inversion Hpr_item_x; subst; clear Hpr_item_x
@@ -1048,7 +1048,7 @@ Proof.
   destruct project_x as [(x', x_descriptors) |]
   ; [| by rewrite equivocators_trace_project_fold_None in Hproject; congruence].
   destruct (equivocators_transition_item_project final_descriptors x) as [(oitem', ditem') |]
-    eqn:Hproject_x
+    eqn: Hproject_x
   ; [| by congruence].
   apply (equivocators_trace_project_folder_additive_iff tr x' x_descriptors initial_descriptors trX)
   in Hproject.
@@ -1068,7 +1068,7 @@ Proof.
   unfold equivocator_vlsm_transition_item_project in Heqprojecti.
   unfold final_state in *. clear final_state.
   rewrite finite_trace_last_is_last. simpl.
-  destruct (final_descriptors (projT1 l)) as [sn | j] eqn:Hfinali.
+  destruct (final_descriptors (projT1 l)) as [sn | j] eqn: Hfinali.
   - inversion Heqprojecti. subst. clear Heqprojecti.
     inversion Hproject_x. subst; clear Hproject_x.
     inversion Heqproject_x. subst. clear Heqproject_x.
@@ -1091,10 +1091,10 @@ Proof.
     unfold projT1, projT2 in Heqprojecti.
     destruct Ht as [Hv Ht].
     cbn in Ht.
-    destruct (equivocator_transition _ _ _) as (si', om') eqn:Ht'.
+    destruct (equivocator_transition _ _ _) as (si', om') eqn: Ht'.
     inversion Ht. subst om'. clear Ht.
     replace (s i) with si' in * by (subst; state_update_simpl; done).
-    destruct (equivocator_state_project si' j) as [si'j |] eqn:Hj; [| done].
+    destruct (equivocator_state_project si' j) as [si'j |] eqn: Hj; [| done].
     by destruct li as [ndi | idi li | idi li]
     ; destruct (decide _)
     ; inversion Heqprojecti; subst; clear Heqprojecti
@@ -1341,7 +1341,7 @@ Proof.
   - intros Hpr_tr.
     case_decide; [| by congruence].
     destruct (equivocators_trace_project final_descriptors trX)
-      as [(_trY, initial_descriptors) |] eqn:Htr_project
+      as [(_trY, initial_descriptors) |] eqn: Htr_project
     ; [| by congruence].
     by inversion Hpr_tr; subst _trY; clear Hpr_tr; eauto.
   - intros [Hnot_equiv [initial_descriptors [Hpr_tr Hpr_s]]].
@@ -1575,7 +1575,7 @@ Proof.
   unfold equivocators_trace_project in Hpr_item. unfold sub_IM in *.
   simpl in *.
   destruct (equivocators_transition_item_project IM final_descriptors item)
-    as [(ox, final') |] eqn:Hpr_item_x
+    as [(ox, final') |] eqn: Hpr_item_x
   ; [| by congruence].
   unfold equivocators_transition_item_project in Hpr_item_x.
   unfold composite_transition_item_projection in Hpr_item_x.
@@ -1691,7 +1691,7 @@ Proof.
   - unfold equivocators_trace_project in Hproject_tr.
     rewrite fold_right_app in Hproject_tr.
     match type of Hproject_tr with
-    | fold_right _ ?i _ = _ => destruct i as [(projectx, final_descriptors') |] eqn:Hproject_x
+    | fold_right _ ?i _ = _ => destruct i as [(projectx, final_descriptors') |] eqn: Hproject_x
     end
     ; [| by rewrite equivocators_trace_project_fold_None in Hproject_tr; inversion Hproject_tr].
     apply equivocators_trace_project_folder_additive_iff in Hproject_tr.

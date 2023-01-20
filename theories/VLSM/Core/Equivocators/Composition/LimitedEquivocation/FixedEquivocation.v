@@ -75,7 +75,7 @@ Proof.
   split; [| by apply elem_of_enum].
   cbn in Ht.
   destruct l as (eqv, leqv).
-  destruct (equivocator_transition _ _ _) as (si', _om') eqn:Hti.
+  destruct (equivocator_transition _ _ _) as (si', _om') eqn: Hti.
   inversion Ht. subst. clear Ht.
   destruct (decide (i = eqv)); subst; state_update_simpl; [| done].
   by apply (zero_descriptor_transition_reflects_equivocating_state (IM eqv) _ _ _ _ _ Hti _ Hzero Hi).
@@ -690,14 +690,14 @@ Proof.
   specialize (Heqv_descriptors'' _ Hitem_not_equiv).
   simpl in *.
   destruct (equivocators_transition_item_project IM eqv_descriptors'' item)
-    as [(o, odescriptor) |] eqn:Hpr
+    as [(o, odescriptor) |] eqn: Hpr
   ; [| by congruence].
   destruct item. simpl in *.
   apply first_transition_valid in Hpre_item_free. simpl in Hpre_item_free.
   destruct Hpre_item_free as [[_ [_ [Hv _]]] Ht].
   destruct l. simpl in *. unfold vtransition in Ht. simpl in Ht.
   match type of Ht with
-  | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn:Hti
+  | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn: Hti
   end.
   inversion Ht; subst; clear Ht.
   state_update_simpl.

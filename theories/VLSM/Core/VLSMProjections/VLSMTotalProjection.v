@@ -493,7 +493,7 @@ Lemma VLSM_weak_projection_input_valid
     forall s im, input_valid X lX (s, im) -> input_valid Y lY (state_project s, im).
 Proof.
   intros lX lY Hpr sX im HvX.
-  destruct (vtransition X lX (sX, im)) eqn:HtX.
+  destruct (vtransition X lX (sX, im)) eqn: HtX.
   by eapply VLSM_weak_projection_input_valid_transition, input_valid_can_transition.
 Qed.
 
@@ -981,7 +981,7 @@ Proof.
   clear IHHtr.
   simpl.
   unfold pre_VLSM_projection_transition_item_project.
-  destruct (label_project _) as [lY |] eqn:Hl; [done |].
+  destruct (label_project _) as [lY |] eqn: Hl; [done |].
   apply proj2, (Htransition_None _ Hl) in Hx.
   by rewrite Hx.
 Qed.
@@ -1015,7 +1015,7 @@ Proof.
     apply finite_valid_trace_last_pstate in IHHtrX.
     destruct Hx as [[_ [_ Hv]] Ht].
     rewrite <- (final_state_project _ _ _ _ Htype) in IHHtrX |- * by apply HtrX.
-    destruct (label_project l) as [lY |] eqn:Hl.
+    destruct (label_project l) as [lY |] eqn: Hl.
     + apply (finite_valid_trace_singleton (pre_loaded_with_all_messages_vlsm Y)).
       assert (Hiom : option_valid_message_prop (pre_loaded_with_all_messages_vlsm Y) iom).
       {
@@ -1047,7 +1047,7 @@ Proof.
   clear IHHtr.
   simpl.
   unfold pre_VLSM_projection_transition_item_project.
-  destruct (label_project _) as [lY |] eqn:Hl; [done |].
+  destruct (label_project _) as [lY |] eqn: Hl; [done |].
   apply proj2, (Htransition_None _ Hl) in Hx.
   by rewrite Hx.
 Qed.
@@ -1083,7 +1083,7 @@ Proof.
     apply proj1 in Hx as Hpv.
     destruct Hx as [[_ [_ Hv]] Ht].
     rewrite <- (final_state_project _ _ _ _ Htype) in IHHtrX |- * by apply HtrX.
-    destruct (label_project l) as [lY |] eqn:Hl.
+    destruct (label_project l) as [lY |] eqn: Hl.
     + apply (finite_valid_trace_singleton (pre_loaded_vlsm Y Q)).
       assert (Hiom : option_valid_message_prop (pre_loaded_vlsm Y Q) iom).
       { destruct iom as [im |]; [| by apply option_valid_message_None].

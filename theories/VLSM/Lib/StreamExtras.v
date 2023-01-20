@@ -8,13 +8,13 @@ Lemma stream_eq_hd_tl {A} (s s' : Stream A) :
   hd s = hd s' -> tl s = tl s' -> s = s'.
 Proof. by destruct s, s'; cbn; intros -> ->. Qed.
 
-Lemma fHere [A:Type] (P: Stream A -> Prop) : forall s, ForAll P s -> P s.
+Lemma fHere [A: Type] (P: Stream A -> Prop) : forall s, ForAll P s -> P s.
 Proof. by intros s []. Qed.
 
-Lemma fFurther [A:Type] (P: Stream A -> Prop) : forall s, ForAll P s -> ForAll P (tl s).
+Lemma fFurther [A: Type] (P: Stream A -> Prop) : forall s, ForAll P s -> ForAll P (tl s).
 Proof. by intros s []. Qed.
 
-Lemma ForAll_subsumption [A:Type] (P Q: Stream A -> Prop)
+Lemma ForAll_subsumption [A: Type] (P Q: Stream A -> Prop)
   (HPQ : forall s, P s -> Q s)
   : forall s, ForAll P s -> ForAll Q s.
 Proof.
@@ -53,7 +53,7 @@ Qed.
 
 Definition ForAll1 [A : Type] (P : A -> Prop) := ForAll (fun s => P (hd s)).
 
-Lemma ForAll1_subsumption [A:Type] (P Q: A -> Prop)
+Lemma ForAll1_subsumption [A: Type] (P Q: A -> Prop)
   (HPQ : forall a, P a -> Q a)
   : forall s, ForAll1 P s -> ForAll1 Q s.
 Proof.
@@ -74,7 +74,7 @@ Qed.
 
 Definition ForAll2 [A : Type] (R : A -> A -> Prop) := ForAll (fun s => R (hd s) (hd (tl s))).
 
-Lemma ForAll2_subsumption [A:Type] (R1 R2 : A -> A -> Prop)
+Lemma ForAll2_subsumption [A: Type] (R1 R2 : A -> A -> Prop)
   (HR : forall a b, R1 a b -> R2 a b)
   : forall s, ForAll2 R1 s -> ForAll2 R2 s.
 Proof.

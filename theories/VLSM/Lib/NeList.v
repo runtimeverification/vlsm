@@ -9,7 +9,7 @@ Inductive ne_list (A : Type) : Type :=
 Arguments nel_singl  {_} _ : assert.
 Arguments nel_cons {_} _ _ : assert.
 
-Infix ":::" := nel_cons (at level 60, right associativity).
+Infix "::: " := nel_cons (at level 60, right associativity).
 
 Definition ne_list_hd {A} (l : ne_list A) : A :=
   match l with

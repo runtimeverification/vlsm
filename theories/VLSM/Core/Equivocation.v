@@ -15,8 +15,8 @@ From VLSM.Core Require Export ReachableThreshold.
   and limit equivocation by means of a composition constraint.
 *)
 
-Lemma exists_proj1_sig {A:Type} (P:A -> Prop) (a:A):
-  (exists xP:{x | P x}, proj1_sig xP = a) <-> P a.
+Lemma exists_proj1_sig {A: Type} (P: A -> Prop) (a: A):
+  (exists xP: {x | P x}, proj1_sig xP = a) <-> P a.
 Proof.
   split.
   - by intros [[x Hx] [= ->]].
@@ -1126,7 +1126,7 @@ Lemma trace_to_initial_state_has_no_inputs
   : forall item, In item tr -> input item = None.
 Proof.
   intros item Hitem.
-  destruct (input item) as [m |] eqn:Heqm; [| done].
+  destruct (input item) as [m |] eqn: Heqm; [| done].
   elim (selected_message_exists_in_all_traces_initial_state _ _ Hs (field_selector input) m).
   apply has_been_received_consistency; [done | by apply initial_state_is_valid |].
   eexists _, _, Htr.
@@ -1171,7 +1171,7 @@ Definition has_been_directly_observed_step_update `{HasBeenDirectlyObservedCapab
 
 Lemma proper_directly_observed
   {message} (vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :
-  forall (s:state),
+  forall (s: state),
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
       all_traces_have_message_prop vlsm item_sends_or_receives (has_been_directly_observed vlsm) s m.
@@ -1182,7 +1182,7 @@ Qed.
 
 Lemma proper_not_directly_observed
   `(vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :
-  forall (s:state),
+  forall (s: state),
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
       no_traces_have_message_prop vlsm item_sends_or_receives
@@ -2847,7 +2847,7 @@ Proof.
   rewrite Heqtr in Hfptf.
   apply (finite_valid_trace_from_to_app_split X) in Hfptf.
   destruct Hfptf as [Htr1 Htr2].
-  destruct tritem eqn:Heqtritem.
+  destruct tritem eqn: Heqtritem.
   simpl in Hintritem. subst input.
   eexists. eexists. eexists.
   by split; [| apply  Htr2].
@@ -2879,7 +2879,7 @@ Proof.
   rewrite Heqtr in Hfptf.
   apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm X)) in Hfptf.
   destruct Hfptf as [Htr1 Htr2].
-  destruct tritem eqn:Heqtritem.
+  destruct tritem eqn: Heqtritem.
   simpl in Hintritem. subst input.
   eexists. eexists. eexists.
   by split; [| apply  Htr2].

@@ -33,8 +33,8 @@ Proof.
   - intros x y. generalize dependent x.
     by induction y; intros; destruct x; destruct z; try done
     ; destruct c; try done
-    ; inversion H; clear H; destruct (compare a0 a) eqn:Ha0; try done
-    ; inversion H0; clear H0; destruct (compare a a1) eqn:Ha1; try done
+    ; inversion H; clear H; destruct (compare a0 a) eqn: Ha0; try done
+    ; inversion H0; clear H0; destruct (compare a a1) eqn: Ha1; try done
     ; try apply (IHy _ _ _ H2) in H1; try apply (T _ _ _ _ Ha0) in Ha1
     ; try apply R in Ha0; subst
     ; try (by simpl; rewrite Ha1; try rewrite H1, H2)
@@ -78,7 +78,7 @@ Proof.
   intros. induction sigma; simpl in H0.
   - rewrite elem_of_cons in H0.
     by destruct H0 as [H0 | H0]; subst; try inversion H0; left.
-  - destruct (compare msg a) eqn:Hcmp.
+  - destruct (compare msg a) eqn: Hcmp.
     + by rewrite compare_eq in Hcmp; subst; right.
     + rewrite elem_of_cons in H0.
       by destruct H0 as [Heq | Hin]; subst; [left | right].
@@ -210,7 +210,7 @@ Proof.
   - by subst; simpl; rewrite compare_eq_refl.
   - apply LocallySorted_tl in H0 as LS.
     specialize (IHsigma LS Hin). simpl.
-    destruct (compare msg a) eqn:Hcmp; try rewrite IHsigma; [done | | done].
+    destruct (compare msg a) eqn: Hcmp; try rewrite IHsigma; [done | | done].
     apply (@LocallySorted_elem_of_lt _ _ compare_lt_strict_order msg a sigma H0) in Hin.
     unfold compare_lt in Hin.
     by rewrite compare_asymmetric, Hcmp in Hin; inversion Hin.

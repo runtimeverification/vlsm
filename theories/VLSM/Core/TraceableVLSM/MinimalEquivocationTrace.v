@@ -203,7 +203,7 @@ Proof.
 Qed.
 
 Lemma composite_latest_sent_observed_in_before_send
-  (s' : composite_state IM) (i :index) (j : index)
+  (s' : composite_state IM) (i : index) (j : index)
   (s : composite_state IM) (item : composite_transition_item IM) (m : message)
   (Hij : CompositeLatestSentObservedIn s' i j s item m)
   (s_j : composite_state IM) (item_j : composite_transition_item IM) (m_j : message)

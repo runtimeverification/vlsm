@@ -222,7 +222,7 @@ Proof.
   destruct Hvs' as [m0 [Hsender0 [pre [item [suf [Heqtr [Hm0 Heqv]]]]]]].
   rewrite Heqtr in Htr.
   destruct Htr as [Htr Hinit].
-  change (pre ++ item::suf) with (pre ++ [item] ++ suf) in Htr.
+  change (pre ++ item:: suf) with (pre ++ [item] ++ suf) in Htr.
   apply (finite_valid_trace_from_to_app_split StrongFixed) in Htr.
   destruct Htr as [Hpre Hitem].
   apply (VLSM_incl_finite_valid_trace_from_to StrongFixedinclPreFree) in Hpre as Hpre_pre.

@@ -1570,7 +1570,7 @@ Qed.
 
 Lemma ELMO_state_to_minimal_equivocation_trace_equivocation_monotonic :
   forall (s : composite_state ELMOComponent) (Hs : composite_ram_state_prop ELMOComponent s),
-  forall (is : composite_state ELMOComponent) (tr :list (composite_transition_item ELMOComponent)),
+  forall (is : composite_state ELMOComponent) (tr : list (composite_transition_item ELMOComponent)),
   ELMO_state_to_minimal_equivocation_trace s Hs = (is, tr) ->
   forall (pre suf : list (composite_transition_item ELMOComponent))
     (item : composite_transition_item ELMOComponent),
