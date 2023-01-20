@@ -526,6 +526,28 @@ Definition pre_loaded_with_all_messages_validator_component_proj_incl
 
 End sec_fixed_projection.
 
+Section projection_validation_constraint_subsumption.
+
+Context
+  {message : Type}
+  `{EqDecision index}
+  (IM : index -> VLSM message)
+  (constraint1 constraint2 : composite_label IM -> composite_state IM * option message -> Prop)
+  (j : index).
+
+Lemma component_projection_validator_constraint_subsumption :
+  weak_input_valid_constraint_subsumption IM constraint1 constraint2 ->
+  component_projection_validator_prop IM constraint1 j ->
+  component_projection_validator_prop IM constraint2 j.
+Proof.
+  intros Hsubsumption Hvalidator lj sj omi Hivj.
+  apply Hvalidator in Hivj as (s & Heqsj & Hivj).
+  
+  unfold input_valid_constraint_subsumption in Hsubsumption.
+
+
+End projection_validation_constraint_subsumption.
+
 Section sec_projection_friendliness_sufficient_condition.
 
 Context {message : Type}

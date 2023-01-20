@@ -2,6 +2,7 @@ From stdpp Require Import prelude.
 From Coq Require Import Reals.
 From VLSM.Lib Require Import Measurable.
 From VLSM.Core Require Import VLSM Composition ProjectionTraces.
+From VLSM.Core Require Import Equivocation MessageDependencies FixedSetEquivocation.
 From VLSM.Core Require Import ReachableThreshold Validator.
 From VLSM.Core Require Import ByzantineTraces FixedSetByzantineTraces.
 From VLSM.Core Require Import BaseELMO ELMO.
@@ -41,11 +42,20 @@ Proof.
   by intro; eapply component_projection_validator_is_message_validator, ELMOComponents_validating.
 Qed.
 
-(*
-Corollary ELMO_fixed_byzantine_traces_equivocation_char (byzantine_nodes : Ci) :
+Corollary ELMO_fixed_byzantine_traces_equivocation_char :
+  forall (byzantine_nodes : Ci), (sum_weights (set_map (D := Ca) idx byzantine_nodes) <= threshold)%R ->
   forall (bis : composite_state ELMOComponent) (btr : list (composite_transition_item ELMOComponent)),
-  fixed_byzantine_trace_alt_prop ELMOComponent byzantine_nodes (ELMO_A idx) Message_sender bis btr.
+  fixed_byzantine_trace_alt_prop ELMOComponent byzantine_nodes (ELMO_A idx) Message_sender bis btr
+    ->
   True.
-*)
+Proof.
+  intros ? Hlimited ? ? Hfixed.
+  eapply validator_fixed_byzantine_traces_equivocation_char in Hfixed.
+  - done.
+  - by intros ? **; inversion 1.
+  - by apply ELMO_channel_authentication_prop.
+  - typeclasses eauto.
+  - by apply ELMOComponent_message_dependencies_full_node_condition.
+  -
 
 End sec_elmo_byzantine.
