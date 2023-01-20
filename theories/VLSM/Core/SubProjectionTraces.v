@@ -466,7 +466,7 @@ Proof. by destruct l. Qed.
 Context
   (seed : message -> Prop)
   (sub_constraint : composite_label sub_IM -> composite_state sub_IM * option message -> Prop)
-  (Xj := composite_no_equivocation_vlsm_with_pre_loaded sub_IM (free_constraint sub_IM) seed )
+  (Xj := composite_no_equivocation_vlsm_with_pre_loaded sub_IM (free_constraint sub_IM) seed)
   .
 
 Lemma Xj_incl_Pre_Sub_Free
@@ -812,7 +812,7 @@ Context
   (equivocators : list index)
   (Free := free_composite_vlsm IM)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
-  (equivocating_IM := sub_IM IM equivocators )
+  (equivocating_IM := sub_IM IM equivocators)
   (SubFree : VLSM message :=  free_composite_vlsm equivocating_IM)
   (PreSubFree := pre_loaded_with_all_messages_vlsm SubFree)
   (base_s : composite_state IM)

@@ -353,7 +353,7 @@ Proof.
   ; [by exists Hex | apply equivocator_descriptors_update_eq | ..]
   ; intros
   ; match type of Ht with
-    | (let (_, _) := ?t in _ ) = _ =>
+    | (let (_, _) := ?t in _) = _ =>
       destruct t as (si', om') eqn:Ht'
     end
   ; inversion Ht; subst; clear Ht
@@ -692,7 +692,7 @@ Lemma equivocators_trace_project_preserves_equivocating_indices
   (trX : list (composite_transition_item IM))
   (is s : composite_state equivocator_IM)
   (Htr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm
-          (free_composite_vlsm equivocator_IM)) is s tr )
+          (free_composite_vlsm equivocator_IM)) is s tr)
   (Hdescriptors : proper_equivocator_descriptors descriptors s)
   (Hproject_tr : equivocators_trace_project descriptors tr = Some (trX, idescriptors))
   :
@@ -741,7 +741,7 @@ Lemma equivocators_trace_project_from_state_descriptors
   (trX : list (composite_transition_item IM))
   (is s : composite_state equivocator_IM)
   (Htr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm
-          (free_composite_vlsm equivocator_IM)) is s tr )
+          (free_composite_vlsm equivocator_IM)) is s tr)
   (Hdescriptors : proper_equivocator_descriptors descriptors s)
   (Hproject_tr : equivocators_trace_project descriptors tr = Some (trX, idescriptors))
   : forall eqv, previous_state_descriptor_prop (IM eqv) (descriptors eqv) (is eqv) (idescriptors eqv).
@@ -797,7 +797,7 @@ Lemma equivocators_trace_project_preserves_equivocating_indices_final
   (trX : list (composite_transition_item IM))
   (is s : composite_state equivocator_IM)
   (Htr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm
-          (free_composite_vlsm equivocator_IM)) is s tr )
+          (free_composite_vlsm equivocator_IM)) is s tr)
   (Hdescriptors : not_equivocating_equivocator_descriptors IM descriptors s)
   (Hproject_tr : equivocators_trace_project descriptors tr = Some (trX, idescriptors))
   :

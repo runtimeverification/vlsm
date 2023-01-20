@@ -87,7 +87,7 @@ Qed.
 Lemma pre_VLSM_projection_transition_item_project_finitely_many
   (s : Streams.Stream (@transition_item _ TX))
   : FinitelyManyBound pre_VLSM_projection_in_projection s ->
-    FinitelyManyBound (is_Some ∘ pre_VLSM_projection_transition_item_project ) s.
+    FinitelyManyBound (is_Some ∘ pre_VLSM_projection_transition_item_project) s.
 Proof.
   apply FinitelyManyBound_impl_rev.
   intro item.
@@ -475,7 +475,7 @@ Qed.
 Lemma VLSM_weak_projection_input_valid_transition
   : forall lX lY, label_project lX = Some lY ->
     forall s im s' om,
-    input_valid_transition X lX (s, im) (s', om ) ->
+    input_valid_transition X lX (s, im) (s', om) ->
     input_valid_transition Y lY (state_project s, im) (state_project s', om).
 Proof.
   specialize VLSM_weak_partial_projection_from_projection as Hpart_simul.
@@ -643,7 +643,7 @@ Definition VLSM_projection_valid_state
 Definition VLSM_projection_input_valid_transition
   : forall lX lY, label_project lX = Some lY ->
     forall s im s' om,
-    input_valid_transition X lX (s, im) (s', om ) ->
+    input_valid_transition X lX (s, im) (s', om) ->
     input_valid_transition Y lY (state_project s, im) (state_project s', om)
   := VLSM_weak_projection_input_valid_transition VLSM_projection_weaken.
 

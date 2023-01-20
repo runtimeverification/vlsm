@@ -332,7 +332,7 @@ Proof.
       (replayed_trace_from_valid_equivocating
        _ Hstate_valid _ _ Hmsg_trace)
       as Hmsg_trace_full_replay.
-    remember (all_equivocating_replayed_trace_from _ _ _ ) as emsg_tr.
+    remember (all_equivocating_replayed_trace_from _ _ _) as emsg_tr.
     apply valid_trace_add_default_last in Hmsg_trace_full_replay.
     eexists _, _; split; [done |].
     subst.

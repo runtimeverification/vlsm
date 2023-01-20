@@ -188,7 +188,7 @@ Context
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
-  (Hlimited : (sum_weights equivocators <= threshold)%R )
+  (Hlimited : (sum_weights equivocators <= threshold)%R)
   (sender : message -> option index)
   (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}

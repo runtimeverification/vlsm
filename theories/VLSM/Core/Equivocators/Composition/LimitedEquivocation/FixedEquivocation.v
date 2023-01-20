@@ -632,7 +632,7 @@ Proof.
   }
 
   assert (HtrX_Pre : finite_valid_trace (pre_loaded_with_all_messages_vlsm Free)
-                      (equivocators_state_project IM initial_descriptors is) trX ).
+                      (equivocators_state_project IM initial_descriptors is) trX).
   {
     revert HtrX_Free; apply VLSM_incl_finite_valid_trace.
     by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.

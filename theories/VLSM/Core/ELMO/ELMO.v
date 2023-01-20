@@ -2709,7 +2709,7 @@ Proof.
 Qed.
 
 Lemma component_reflects_composite_messages_step_update
-  (i : index) (l : Label) (sigma : composite_state ELMOComponent) (s' : State) (m : Message ) :
+  (i : index) (l : Label) (sigma : composite_state ELMOComponent) (s' : State) (m : Message) :
   ELMOComponentRAMTransition i l (sigma i) s' m ->
   component_reflects_composite_messages sigma i ->
   component_reflects_composite_messages (state_update ELMOComponent sigma i s') i.
