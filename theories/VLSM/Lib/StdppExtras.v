@@ -537,7 +537,7 @@ Proof.
   generalize dependent lb2. generalize dependent la2.
   generalize dependent b. generalize dependent lb1.
   generalize dependent a.
-  induction la1; intros; destruct lb1 as [|b0 lb1]; simpl in *
+  induction la1; intros; destruct lb1 as [| b0 lb1]; simpl in *
   ; inversion Heq; subst.
   - by contradict Ha; left.
   - by exists lb1.

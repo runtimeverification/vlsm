@@ -184,7 +184,7 @@ Qed.
 Lemma strong_fixed_equivocation_subsumption s m
   : strong_fixed_equivocation s m -> fixed_equivocation s m.
 Proof.
-  intros [Hobs | Hemit]; [left|right].
+  intros [Hobs | Hemit]; [left | right].
   - by apply sent_by_non_equivocating_are_directly_observed.
   - revert Hemit. apply VLSM_incl_can_emit.
     by apply Equivocators_Strong_Fixed_incl.
@@ -582,7 +582,7 @@ Proof.
   apply (VLSM_incl_valid_state Fixed_incl_Preloaded) in Hf as Hfuture.
   apply in_futures_refl in Hfuture.
   apply valid_state_has_trace in Hf as [is [tr Htr]].
-  eapply fixed_finite_valid_trace_sub_projection_helper in Htr as Htr_pr; [|done].
+  eapply fixed_finite_valid_trace_sub_projection_helper in Htr as Htr_pr; [| done].
   by apply Htr_pr.
 Qed.
 
@@ -833,7 +833,7 @@ Proof.
     intros s om [Hv Hc].
     split.
     + by cbn; rewrite lift_sub_state_to_neq.
-    + destruct om as [m|]; [| done].
+    + destruct om as [m |]; [| done].
       by apply lift_sub_state_to_strong_fixed_equivocation.
   - intros [i liX] lY.
     unfold remove_equivocating_state_project;
@@ -931,7 +931,7 @@ Proof.
     + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
       destruct_dec_sig i j Hj Heq; subst i; cbn; unfold sub_IM; cbn.
       by rewrite lift_sub_state_to_eq with (Hi := Hj).
-    + destruct om as [m|]; [| done]; cbn.
+    + destruct om as [m |]; [| done]; cbn.
       destruct Hv as (_ & Hm & _).
       apply emitted_messages_are_valid_iff in Hm.
       destruct Hm as [[Hinit | Hobs] | Hemit].

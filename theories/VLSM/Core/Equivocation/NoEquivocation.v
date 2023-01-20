@@ -93,7 +93,7 @@ Proof.
   specialize (Henforced l s (Some msg)).
   rewrite (has_been_sent_step_update Hptrans).
   destruct Hptrans as [Hv _].
-  destruct Hobs as [[Hin|Hout]|Hobs]; subst.
+  destruct Hobs as [[Hin | Hout] | Hobs]; subst.
   - (* by [no_equivocations], the incoming message [im] was previously sent *)
     specialize (Henforced Hv).
     by destruct Henforced; [right |].
@@ -220,7 +220,7 @@ Proof.
   rewrite composite_has_been_directly_observed_sent_received_iff.
   intros Hobs.
   cut (has_been_sent X s m); [done |].
-  apply (directly_observed_were_sent_invariant message X); [|done ..].
+  apply (directly_observed_were_sent_invariant message X); [| done ..].
   by intros l s0 om; apply Hsubsumed.
 Qed.
 

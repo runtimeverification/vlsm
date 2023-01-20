@@ -202,7 +202,7 @@ Proof.
   unfold set_map.
   remember (f <$> elements X) as fX.
   set (x := size (list_to_set _)).
-  cut (x <= length fX); [|by apply list_to_set_size].
+  cut (x <= length fX); [| by apply list_to_set_size].
   enough (length fX = size X) by lia.
   unfold size, set_size.
   simpl; subst fX.

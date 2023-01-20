@@ -169,7 +169,7 @@ Lemma stream_prefix_nth
   : nth_error (stream_prefix s n) i = Some (Str_nth i s).
 Proof.
   revert s n Hi.
-  induction i; intros [a s] [| n] Hi; [by inversion Hi ..|].
+  induction i; intros [a s] [| n] Hi; [by inversion Hi .. |].
   by apply IHi; lia.
 Qed.
 
@@ -182,7 +182,7 @@ Lemma stream_prefix_lookup
   : stream_prefix s n !! i = Some (Str_nth i s).
 Proof.
   revert s n Hi.
-  induction i; intros [a s] [| n] Hi; [by inversion Hi ..|].
+  induction i; intros [a s] [| n] Hi; [by inversion Hi .. |].
   by apply IHi; lia.
 Qed.
 
@@ -404,7 +404,7 @@ Proof.
   destruct (decide (m = n)); [done |].
   elim (HI (Str_nth n l)).
   by destruct (decide (m < n))
-  ; [specialize (Hl m n)|specialize (Hl n m)]; (spec Hl; [lia|])
+  ; [specialize (Hl m n) | specialize (Hl n m)]; (spec Hl; [lia |])
   ; rewrite Hmn in Hl.
 Qed.
 
@@ -606,7 +606,7 @@ Proof.
     destruct IHn as [Hlt | [k Hk]]
     ; [by exists 0; left; cbv in *; lia |].
     destruct (decide (Str_nth (S k) s = S n))
-    ; [by exists (S k); left|].
+    ; [by exists (S k); left |].
     exists k; right.
     cut (Str_nth k s < Str_nth (S k) s); [by lia |].
     by apply (Hs k (S k)); lia.

@@ -178,12 +178,12 @@ Lemma count_predecessors_zero
 Proof.
   unfold count_predecessors.
   induction l; [done |].
-  inversion_clear HPl as [|? ? HPa HPl0].
+  inversion_clear HPl as [| ? ? HPa HPl0].
   specialize (IHl0 HPl0).
   apply Exists_cons.
   rewrite filter_cons.
   destruct (decide (precedes a a)); [by contradict p; apply precedes_irreflexive |].
-  assert ({ l0=[] }+{l0 <> [] }) by (destruct l0; clear; [left|right]; congruence).
+  assert ({ l0=[] }+{l0 <> [] }) by (destruct l0; clear; [left | right]; congruence).
   destruct H as [? | Hl0]; [subst l0 |]; [by left |].
   specialize (IHl0 Hl0).
   apply Exists_exists in IHl0.
@@ -481,7 +481,7 @@ Proof.
     rewrite <- Heql'. rewrite <- H0. intro Hlen.
     specialize (IHn Hlen).
     split; intros x Hx; rewrite elem_of_cons in Hx;
-      destruct Hx as [Heq|Hinx]; try (subst x).
+      destruct Hx as [Heq | Hinx]; try (subst x).
     + by right; apply IHn; left.
     + destruct (decide (x = min)); try subst x.
       * by left.
@@ -612,7 +612,7 @@ Proof.
     }
     destruct l1 as [| _min l1]; inversion Heq; [by subst |].
     subst _min.
-    destruct (decide (a ∈ l')) as [i|i].
+    destruct (decide (a ∈ l')) as [i | i].
     - apply (IHn i l1 l2 Ha2 H4).
     - assert (Hmina : min = a).
       destruct (decide (min = a0)).

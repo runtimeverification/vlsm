@@ -480,7 +480,7 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
         (type Limited) (composite_type IM) Datatypes.id original_state
         tr).
 Proof.
-  repeat split; [..| by apply Htr].
+  repeat split; [.. | by apply Htr].
   - by eapply coeqv_limited_equivocation_state_not_heavy,
             finite_valid_trace_last_pstate, Htr.
   - apply valid_trace_add_default_last in Htr.
@@ -520,7 +520,7 @@ Proof.
         intro; rewrite !elem_of_elements.
         by destruct iom as [im |]; [apply union_subseteq_l |].
       * destruct iom as [im |]
-        ; [apply option_valid_message_Some|apply option_valid_message_None].
+        ; [apply option_valid_message_Some | apply option_valid_message_None].
         destruct (decide (composite_has_been_directly_observed IM (original_state s) im))
               as [Hobs | Hnobs].
         -- eapply composite_directly_observed_valid; [| done].

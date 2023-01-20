@@ -606,7 +606,7 @@ Proof.
       destruct (composite_label_sub_projection_option _); [| by congruence].
       by inversion HitemX.
   - clear -Hmsg Sub_Free Hlst His IHtr.
-    destruct iom as [m|]; [| done].
+    destruct iom as [m |]; [| done].
     simpl in *.
     remember {| input := Some m |} as x.
     assert (Hx : from_sub_projection x).
@@ -640,7 +640,7 @@ Proof.
         by (apply pre_VLSM_projection_transition_item_project_is_Some; done).
       exists (is_Some_proj Hsome).
       destruct (pre_VLSM_projection_transition_item_project _ _ _ _ _) eqn:Hproj;
-      [|contradict Hsome; apply is_Some_None].
+      [| contradict Hsome; apply is_Some_None].
       cbn.
       split.
       * by apply elem_of_map_option; exists item.
@@ -1115,7 +1115,7 @@ Proof.
   destruct l as (sub1_i, li); destruct_dec_sig sub1_i i Hi Heqsub1_i; subst; cbn.
   unfold vvalid, lift_sub_incl_state; cbn.
   unfold sub_IM in li; simpl in li.
-  destruct (decide (sub_index_prop indices1 i)) as [H_i|]
+  destruct (decide (sub_index_prop indices1 i)) as [H_i |]
   ; [| done].
   by rewrite (sub_IM_state_pi s H_i Hi).
 Qed.
@@ -1129,7 +1129,7 @@ Proof.
   destruct l as (sub1_i, li); destruct_dec_sig sub1_i i Hi Heqsub1_i; subst
   ; cbn; unfold vtransition, lift_sub_incl_state at 1
   ; cbn; unfold sub_IM in li; simpl in li.
-  destruct (decide (sub_index_prop indices1 i)) as [H_i|]
+  destruct (decide (sub_index_prop indices1 i)) as [H_i |]
   ; [| done].
   rewrite (sub_IM_state_pi s H_i Hi).
   destruct (transition _ _) as (si', _om'); inversion_clear 1; f_equal.
@@ -1158,7 +1158,7 @@ Lemma lift_sub_incl_preloaded_embedding
       (pre_loaded_vlsm (free_composite_vlsm sub_IM2) Q)
       lift_sub_incl_label lift_sub_incl_state.
 Proof.
-  apply basic_VLSM_embedding_preloaded_with; [done |..]; intro; intros.
+  apply basic_VLSM_embedding_preloaded_with; [done | ..]; intro; intros.
   - by split; [apply lift_sub_incl_valid, H |].
   - by apply lift_sub_incl_transition.
   - by apply lift_sub_incl_state_initial.
@@ -1566,7 +1566,7 @@ Lemma preloaded_sub_element_embedding
   (PreQSubFree := pre_loaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q)
   : VLSM_embedding PrePXj PreQSubFree sub_element_label sub_element_state.
 Proof.
-  apply basic_VLSM_embedding_preloaded_with; [done |..].
+  apply basic_VLSM_embedding_preloaded_with; [done | ..].
   - intros l s om Hv.
     split; [cbn | done].
     by rewrite sub_element_state_eq with (H_j := Hj).
@@ -1796,7 +1796,7 @@ Lemma can_emit_sub_projection
   : can_emit PreSubFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 Proof.
   intro Hemit.
-  apply can_emit_projection with validator A sender; [done | done|].
+  apply can_emit_projection with validator A sender; [done | done |].
   by apply (VLSM_embedding_can_emit lift_sub_preloaded_free_embedding).
 Qed.
 
@@ -1889,7 +1889,7 @@ Context
 Proof.
   intros sub_i.
   unfold sub_IM, updated_IM, update_IM.
-  case_decide as Hi; [|typeclasses eauto].
+  case_decide as Hi; [| typeclasses eauto].
   contradict Hi.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i; simpl.
   apply elem_of_elements, set_diff_elim2 in Hi.

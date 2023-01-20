@@ -21,7 +21,7 @@ Proof.
   split.
   - clear Hfull.
     induction A_listing as [| a l IHl]; [by constructor |].
-    inversion_clear Hnodup as [|? ? H1 H2].
+    inversion_clear Hnodup as [| ? ? H1 H2].
     specialize (IHl H2); clear H2.
     simpl.
     destruct (f a) eqn: Hfa; [| done].

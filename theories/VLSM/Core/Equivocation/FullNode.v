@@ -113,7 +113,7 @@ Lemma full_node_condition_for_admissible_equivocators_subsumption
       full_node_condition_for_admissible_equivocators
       full_node_condition_for_admissible_equivocators_alt.
 Proof.
-  intros l (s, [m|]) [Hs [_ [_ Hc]]]; [| done].
+  intros l (s, [m |]) [Hs [_ [_ Hc]]]; [| done].
   destruct Hc as [Hno_equiv | Hfull]; [by left |].
   right.
   destruct Hfull as [i [Hi Hfull]].

@@ -606,7 +606,7 @@ Lemma has_been_sent_consistency
 Proof.
   split; [| by apply consistency_from_valid_state_proj2].
   intro Hsome.
-  destruct (decide (has_been_sent s m)) as [Hsm|Hsm].
+  destruct (decide (has_been_sent s m)) as [Hsm | Hsm].
   - by apply proper_sent in Hsm.
   - apply proper_not_sent in Hsm; [| done].
     destruct Hsome as [is [tr [Htr Hmsg]]].
@@ -764,7 +764,7 @@ Lemma has_been_received_consistency
 Proof.
   split; [| by apply consistency_from_valid_state_proj2].
   intro Hsome.
-  destruct (decide (has_been_received s m)) as [Hsm|Hsm];
+  destruct (decide (has_been_received s m)) as [Hsm | Hsm];
     [by apply proper_received in Hsm |].
   apply proper_not_received in Hsm; [| done].
   destruct Hsome as [is [tr [Htr Hsome]]].
@@ -919,7 +919,7 @@ Lemma selected_messages_consistency_prop_from_stepwise
 Proof.
   split; [| by apply consistency_from_valid_state_proj2].
   intro Hsome.
-  destruct (decide (oracle s m)) as [Hsm|Hsm].
+  destruct (decide (oracle s m)) as [Hsm | Hsm].
   - by apply prove_all_have_message_from_stepwise in Hsm.
   - apply prove_none_have_message_from_stepwise in Hsm; [| done].
     destruct Hsome as [is [tr [Htr Hmsg]]].
@@ -1126,9 +1126,9 @@ Lemma trace_to_initial_state_has_no_inputs
   : forall item, In item tr -> input item = None.
 Proof.
   intros item Hitem.
-  destruct (input item) as [m|] eqn:Heqm; [| done].
+  destruct (input item) as [m |] eqn:Heqm; [| done].
   elim (selected_message_exists_in_all_traces_initial_state _ _ Hs (field_selector input) m).
-  apply has_been_received_consistency; [done | by apply initial_state_is_valid|].
+  apply has_been_received_consistency; [done | by apply initial_state_is_valid |].
   eexists _, _, Htr.
   apply Exists_exists. exists item. split; [| done].
   by apply elem_of_list_In.
@@ -1315,7 +1315,7 @@ Lemma has_been_directly_observed_consistency
 Proof.
   split; [| by apply consistency_from_valid_state_proj2].
   intro Hsome.
-  destruct (decide (has_been_directly_observed vlsm s m)) as [Hsm|Hsm].
+  destruct (decide (has_been_directly_observed vlsm s m)) as [Hsm | Hsm].
   - by apply proper_directly_observed in Hsm.
   - apply proper_not_directly_observed in Hsm; [| done].
     destruct Hsome as [is [tr [Htr Hmsg]]].
@@ -1636,7 +1636,7 @@ Definition composite_message_selector : message -> composite_transition_item IM 
 Proof.
   intros msg [[i li] input s output].
   apply (message_selectors i msg).
-  exact {|l := li; input := input; destination := s i; output := output|}.
+  exact {| l := li; input := input; destination := s i; output := output |}.
 Defined.
 
 Definition composite_oracle : composite_state IM -> message -> Prop :=
@@ -1661,13 +1661,13 @@ Proof.
     {
       intro j.
       apply (input_valid_transition_preloaded_project_any j) in Hproto.
-      by destruct Hproto as [|(lj & Hlj & _)]; [left | right; congruence].
+      by destruct Hproto as [| (lj & Hlj & _)]; [left | right; congruence].
     }
     apply input_valid_transition_preloaded_project_active in Hproto; simpl in Hproto.
     apply (oracle_step_update (stepwise_props i)) with (msg := msg) in Hproto.
     split.
     + intros [j Hj].
-      destruct (Hsj j) as [Hunchanged|Hji].
+      destruct (Hsj j) as [Hunchanged | Hji].
       * by right; exists j; rewrite Hunchanged.
       * subst j.
         apply Hproto in Hj.
@@ -1675,7 +1675,7 @@ Proof.
     + intros [Hnow | [j Hbefore]].
       * by exists i; apply Hproto; left.
       * exists j.
-        destruct (Hsj j) as [Hunchanged| ->].
+        destruct (Hsj j) as [Hunchanged | ->].
         -- by rewrite <- Hunchanged.
         -- by apply Hproto; right.
 Qed.
@@ -1718,7 +1718,7 @@ Proof.
   apply proj1, finite_valid_trace_from_to_app_split, proj2 in Htr.
   rewrite finite_trace_last_is_last in Htr.
   destruct itemX, l; cbn in *.
-  by split_and!; [| exists suf |..].
+  by split_and!; [| exists suf | ..].
 Qed.
 
 End sec_stepwise_props.
@@ -2000,7 +2000,7 @@ Proof.
   specialize (can_emit_signed i m).
   spec can_emit_signed; [by eexists _, _, _ |].
   unfold channel_authenticated_message in can_emit_signed.
-  destruct (sender m) as [v|] eqn: Hsender; [| by inversion can_emit_signed].
+  destruct (sender m) as [v |] eqn: Hsender; [| by inversion can_emit_signed].
   apply Some_inj in can_emit_signed.
   by exists v; subst; unfold can_emit; eauto.
 Qed.
@@ -2363,7 +2363,7 @@ Lemma composite_has_been_directly_observed_sent_received_iff
     composite_has_been_sent IM s m \/ composite_has_been_received IM s m.
 Proof.
   split.
-  - by intros [i [Hs|Hr]]; [left | right]; exists i.
+  - by intros [i [Hs | Hr]]; [left | right]; exists i.
   - by intros [[i Hs] | [i Hr]]; exists i; [left | right].
 Qed.
 
@@ -2573,12 +2573,12 @@ Proof.
     split; [done |].
     intro Hbsm. elim Hnbsm.
     apply proper_sent; [done |].
-    by apply has_been_sent_consistency; [..|exists is, tr, Htr].
+    by apply has_been_sent_consistency; [.. | exists is, tr, Htr].
   - split.
     + apply proper_received; [done |].
-      by apply has_been_received_consistency; [..|exists is, tr, Htr].
+      by apply has_been_received_consistency; [.. | exists is, tr, Htr].
     + intro Hbsm. elim Hnbsm.
-      by apply proper_sent in Hbsm; [eapply Hbsm|].
+      by apply proper_sent in Hbsm; [eapply Hbsm |].
 Qed.
 
 Definition state_received_not_sent_invariant
@@ -2633,7 +2633,7 @@ Lemma input_valid_transition_received_not_resent l s m s' om'
   (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, Some m) (s', om'))
   : om' <> Some m.
 Proof.
-  destruct om' as [m'|]; [| by congruence].
+  destruct om' as [m' |]; [| by congruence].
   intro Heq. inversion Heq. subst m'. clear Heq.
   destruct (Hno_resend _ _ _ _ _ Ht) as [_ Hnbr_m].
   elim Hnbr_m. clear Hnbr_m.
@@ -2685,7 +2685,7 @@ Proof.
       produced in a valid (by IHHtr) trace.
       If m was not sent during tr,
     *)
-    assert (Decision (trace_has_message (field_selector output) m tr)) as [Hsent|Hnot_sent].
+    assert (Decision (trace_has_message (field_selector output) m tr)) as [Hsent | Hnot_sent].
     apply (@Exists_dec _). intros. apply decide_eq.
     + by eapply valid_trace_output_is_valid.
     + apply initial_message_is_valid.

@@ -108,7 +108,7 @@ Lemma last_error_some {S}
   (Herr : last_error l = Some s) :
   List.last l random = s.
 Proof.
-  by destruct l; [|inversion Herr; apply unroll_last].
+  by destruct l; [| inversion Herr; apply unroll_last].
 Qed.
 
 Lemma incl_empty : forall A (l : list A),
@@ -396,7 +396,7 @@ Lemma list_prefix_length
   (Hlen : n <= length l)
   : length (list_prefix l n) = n.
 Proof.
-  by revert l Hlen; induction n; intros [|a l] Hlen; cbn in *;
+  by revert l Hlen; induction n; intros [| a l] Hlen; cbn in *;
     [| | inversion Hlen | rewrite IHn; lia].
 Qed.
 
@@ -406,7 +406,7 @@ Lemma list_suffix_length
   (n : nat)
   : length (list_suffix l n) = length l - n.
 Proof.
-  by revert l; induction n; intros [|a l]; [.. | apply IHn].
+  by revert l; induction n; intros [| a l]; [.. | apply IHn].
 Qed.
 
 Lemma list_prefix_prefix
@@ -531,7 +531,7 @@ Lemma list_annotate_eq
   (Hl2 : Forall P l2)
   : list_annotate P l1 Hl1 = list_annotate P l2 Hl2 <-> l1 = l2.
 Proof.
-  split; [|intro; subst; apply list_annotate_pi].
+  split; [| intro; subst; apply list_annotate_pi].
   revert Hl1 l2 Hl2.
   induction l1; destruct l2; simpl; intros; [done.. |].
   inversion H.
@@ -808,7 +808,7 @@ Lemma list_suffix_last_default
   (_default : A)
   : List.last (list_suffix l i) _default  = _default.
 Proof.
-  revert l Hlast; induction i; intros [|a l] Hlast; [done.. |].
+  revert l Hlast; induction i; intros [| a l] Hlast; [done.. |].
   by apply IHi; inversion Hlast.
 Qed.
 
@@ -938,7 +938,7 @@ Proof.
     destruct (f a) eqn:Hfa; swap 1 2.
     + destruct (IHl _ _ Happ_rev) as [_l1 [l2 [-> [<- <-]]]].
       by exists (a :: _l1), l2; cbn; rewrite Hfa.
-    + destruct l1' as [|_b l1']; swap 1 2.
+    + destruct l1' as [| _b l1']; swap 1 2.
       * change (_b :: l1') with ([_b] ++ l1') in Happ_rev.
         rewrite <- app_assoc in Happ_rev. inversion Happ_rev.
         subst _b.
@@ -1054,7 +1054,7 @@ Lemma nth_error_eq
   : l1 = l2.
 Proof.
   generalize dependent l2.
-  induction l1; intros [| a2 l2] Hnth; [done |..].
+  induction l1; intros [| a2 l2] Hnth; [done | ..].
   - by specialize (Hnth 0); simpl in Hnth; inversion Hnth.
   - by specialize (Hnth 0); simpl in Hnth; inversion Hnth.
   - assert (H0 := Hnth 0); cbn in H0; inversion H0; subst.
@@ -1209,7 +1209,7 @@ Proof.
   induction l; intros.
   - left. symmetry in Heql, Heq.
     by apply app_nil in Heql as [-> ->], Heq as [-> ->].
-  - destruct pre1 as [| a1 pre1]; destruct pre2 as [|a2 pre2]. 1-3: eauto.
+  - destruct pre1 as [| a1 pre1]; destruct pre2 as [| a2 pre2]. 1-3: eauto.
     inversion Heql; subst a1; clear Heql.
     inversion Heq; subst a2; clear Heq.
     by destruct (IHl pre1 suf1 pre2 suf2 H1 H2)

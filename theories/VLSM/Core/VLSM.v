@@ -325,12 +325,12 @@ Lemma finite_trace_nth_app2
 Proof.
   intro H.
   apply Compare_dec.le_lt_eq_dec in H.
-  destruct H as [H |<-].
+  destruct H as [H | <-].
   - unfold finite_trace_nth.
     rewrite map_app, app_comm_cons.
     rewrite nth_error_app2; simpl length; rewrite map_length; [| by auto with arith].
     destruct n; [by exfalso; lia |].
-    by rewrite (Nat.sub_succ_l (length t1) n); [|lia].
+    by rewrite (Nat.sub_succ_l (length t1) n); [| lia].
   - by rewrite finite_trace_nth_app1, finite_trace_nth_last,
       Nat.sub_diag, finite_trace_nth_first.
 Qed.
@@ -1085,7 +1085,7 @@ Lemma valid_trace_output_is_valid
   : valid_message_prop m.
 Proof.
   revert is Htr.
-  induction Houtput as [item tr' Hm| item tr']; intros; inversion Htr; subst.
+  induction Houtput as [item tr' Hm | item tr']; intros; inversion Htr; subst.
   - simpl in Hm.
     subst.
     by apply input_valid_transition_out in Ht.
@@ -1101,8 +1101,8 @@ Lemma valid_trace_input_is_valid
   : valid_message_prop m.
 Proof.
   revert is Htr.
-  induction Hinput as [item tr' Hm| item tr']; intros
-  ; inversion Htr as [|s _tr'  Htr' _is iom oom l Ht ]; subst.
+  induction Hinput as [item tr' Hm | item tr']; intros
+  ; inversion Htr as [| s _tr'  Htr' _is iom oom l Ht ]; subst.
   - simpl in Hm.
     subst.
     by apply input_valid_transition_in in Ht.
@@ -1117,7 +1117,7 @@ Lemma valid_trace_observed_is_valid
   (Hobserved : trace_has_message item_sends_or_receives m tr)
   : valid_message_prop m.
 Proof.
-  by apply trace_has_message_observed_iff in Hobserved as [Hm |Hm]
+  by apply trace_has_message_observed_iff in Hobserved as [Hm | Hm]
   ; revert Htr m Hm; [apply valid_trace_input_is_valid | apply valid_trace_output_is_valid].
 Qed.
 
@@ -1179,10 +1179,10 @@ Proof.
     split.
     + intros [Hal Hl'].
       inversion Hal; subst; simpl in *.
-      by constructor; [apply IHls|].
+      by constructor; [apply IHls |].
     + inversion 1; subst; simpl in *.
       apply IHls in Htl as [Hl Hl'].
-      by split; [constructor|].
+      by split; [constructor |].
 Qed.
 
 Lemma finite_valid_trace_from_rev_ind
@@ -1194,7 +1194,7 @@ Lemma finite_valid_trace_from_rev_ind
     P s tr ->
     forall sf iom oom l
     (Hx: input_valid_transition l (finite_trace_last s tr, iom) (sf, oom)),
-    let x := {|l := l; input := iom; destination := sf; output := oom|} in
+    let x := {| l := l; input := iom; destination := sf; output := oom |} in
     P s (tr++[x])):
   forall s tr,
     finite_valid_trace_from s tr ->
@@ -1217,7 +1217,7 @@ Lemma finite_valid_trace_rev_ind
     P si tr ->
     forall sf iom oom l
     (Hx: input_valid_transition l (finite_trace_last si tr, iom) (sf, oom)),
-    let x := {|l := l; input := iom; destination := sf; output := oom|} in
+    let x := {| l := l; input := iom; destination := sf; output := oom |} in
     P si (tr++[x])):
   forall si tr,
     finite_valid_trace si tr ->
@@ -1403,7 +1403,7 @@ Lemma finite_valid_trace_from_to_app
     -> finite_valid_trace_from_to m f ls'
     -> finite_valid_trace_from_to s f (ls ++ ls').
 Proof.
-  by intros Hl Hl'; induction Hl; [|constructor; auto].
+  by intros Hl Hl'; induction Hl; [| constructor; auto].
 Qed.
 
 Lemma finite_valid_trace_from_to_app_split
@@ -1481,7 +1481,7 @@ Lemma finite_valid_trace_from_to_rev_ind
     (Htr : finite_valid_trace_from_to si s tr)
     sf iom oom l
     (Ht : input_valid_transition l (s, iom) (sf, oom)),
-    P si sf (tr++[{|l := l; input := iom; destination := sf; output := oom|}])):
+    P si sf (tr++[{| l := l; input := iom; destination := sf; output := oom |}])):
   forall si sf tr,
     finite_valid_trace_from_to si sf tr ->
     P si sf tr.
@@ -1510,7 +1510,7 @@ Lemma finite_valid_trace_init_to_rev_ind
     (Htr : finite_valid_trace_init_to si s tr)
     sf iom oom l
     (Ht : input_valid_transition l (s, iom) (sf, oom)),
-    P si sf (tr++[{|l := l; input := iom; destination := sf; output := oom|}])):
+    P si sf (tr++[{| l := l; input := iom; destination := sf; output := oom |}])):
   forall si sf tr,
     finite_valid_trace_init_to si sf tr ->
     P si sf tr.
@@ -1671,7 +1671,7 @@ Lemma finite_valid_trace_init_to_rev_strong_ind
     (Hiom : finite_valid_trace_init_to iom_si iom_s iom_tr)
     sf oom l
     (Ht : input_valid_transition l (s, iom) (sf, oom)),
-    P is sf (tr++[{|l := l; input := iom; destination := sf; output := oom|}]))
+    P is sf (tr++[{| l := l; input := iom; destination := sf; output := oom |}]))
   : forall si sf tr,
     finite_valid_trace_init_to si sf tr ->
     P si sf tr.
@@ -1905,7 +1905,7 @@ Lemma valid_state_has_trace
 Proof using.
   destruct Hp as [_om Hp].
   apply valid_state_message_has_trace in Hp.
-  destruct Hp as [[Hinit _]|Htrace].
+  destruct Hp as [[Hinit _] | Htrace].
   - exists s, [].
     split; [| done].
     constructor.
@@ -2115,13 +2115,13 @@ Proof.
   exists (exist _ _ Htr).
   simpl.
   exists (length prefix_tr), (length prefix_tr + length suffix_tr).
-  split; [lia|].
+  split; [lia |].
   apply finite_valid_trace_from_to_last in Hprefix_tr.
   apply finite_valid_trace_from_to_last in Hsuffix_tr.
   split.
-  - rewrite finite_trace_nth_app1; [|lia].
+  - rewrite finite_trace_nth_app1; [| lia].
     by rewrite finite_trace_nth_last; congruence.
-  - rewrite finite_trace_nth_app2; [|lia].
+  - rewrite finite_trace_nth_app2; [| lia].
     by rewrite Nat.add_comm, Nat.add_sub, finite_trace_nth_last; congruence.
 Qed.
 

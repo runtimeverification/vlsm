@@ -499,7 +499,7 @@ Proof.
     specialize (equivocators_trace_project_preserves_proper_fixed_equivocator_descriptors
       _ _ (proj1 Htr'pre) _ _ _ Htr_project Hproper')
       as Hproper_initial.
-    destruct oitem as [item|].
+    destruct oitem as [item |].
     +  simpl in Hitemx. destruct Hitemx as [Hl [Hinput [Houtput [Hdestination _]]]].
       specialize (Hx _ eq_refl).
       destruct Hx as [Hvx Htx].
@@ -691,7 +691,7 @@ Proof.
   specialize (Heqv_descriptors'' _ Hitem_not_equiv).
   simpl in *.
   destruct (equivocators_transition_item_project IM eqv_descriptors'' item)
-    as [(o, odescriptor)|] eqn:Hpr
+    as [(o, odescriptor) |] eqn:Hpr
   ; [| by congruence].
   destruct item. simpl in *.
   apply first_transition_valid in Hpre_item_free. simpl in Hpre_item_free.
@@ -775,7 +775,7 @@ Proof.
   apply finite_valid_trace_from_app_iff in Htr as Hpre. destruct Hpre as [Hpre _].
   apply finite_valid_trace_from_app_iff in Hpre. destruct Hpre as [Hpre Hivt].
   apply first_transition_valid in Hivt.
-  destruct (composite_has_been_directly_observed_dec IM lst_trX m) as [|Heqv]
+  destruct (composite_has_been_directly_observed_dec IM lst_trX m) as [| Heqv]
   ; [by left | right].
   assert (Hsuf_free : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE)
     (finite_trace_last is pre) ([item] ++ suf)).
@@ -794,7 +794,7 @@ Proof.
   destruct Hivt as [[_ [_ [_ [[Hc _] Hfixed]]]] Ht].
   simpl in Ht, Hfixed. rewrite Ht in Hfixed. simpl in Hfixed.
   clear Ht.
-  destruct Hc as [Hc | Hinit]; [|done ].
+  destruct Hc as [Hc | Hinit]; [| done ].
   assert (Hpre_free : finite_valid_trace FreeE is pre).
   {
     split; [| done].
@@ -1166,9 +1166,9 @@ Proof.
     (equivocator_vlsm_transition_item_project (IM (projT1 (l item)))
       (composite_transition_item_projection (equivocator_IM IM) item)
       (item_descriptors (projT1 (l item)))
-    ) as [(o, deqv')|]
+    ) as [(o, deqv') |]
     ; [| by congruence].
-  destruct o as [item'|]; [| by congruence].
+  destruct o as [item' |]; [| by congruence].
   inversion Hpr_item. subst output_itemX pre_descriptors. clear Hpr_item deqv'.
   simpl in Houtput_select.
 
@@ -1287,7 +1287,7 @@ Lemma fixed_equivocators_vlsm_partial_projection
   (final_descriptors : equivocator_descriptors IM)
   : VLSM_partial_projection XE X (equivocators_partial_trace_project IM final_descriptors).
 Proof.
-  split; [split|].
+  split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert (HPreFree_pre_tr :
       finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) s_pre (pre ++ tr)).
@@ -1313,7 +1313,7 @@ Qed.
 Lemma fixed_equivocators_vlsm_projection
   : VLSM_projection XE X (equivocators_total_label_project IM) (equivocators_total_state_project IM).
 Proof.
-  constructor; [constructor|]; intros sX trX HtrX.
+  constructor; [constructor |]; intros sX trX HtrX.
   - apply PreFreeE_Free_vlsm_projection_type.
     apply VLSM_incl_finite_valid_trace_from; [| done].
     by apply equivocators_fixed_equivocations_vlsm_incl_PreFree.
@@ -1363,7 +1363,7 @@ Lemma strong_constraint_subsumption_fixed_all
     (equivocators_no_equivocations_constraint IM)
     (equivocators_fixed_equivocations_constraint IM (enum index)).
 Proof.
-  by split; [|intro; intros; apply elem_of_enum].
+  by split; [| intro; intros; apply elem_of_enum].
 Qed.
 
 Lemma strong_constraint_subsumption_all_fixed

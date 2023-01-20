@@ -137,7 +137,7 @@ Proof.
       as Hreplay.
     spec Hreplay.
     { clear -Heqiom Hfinal_msg.
-      destruct iom as [im|]; [| done].
+      destruct iom as [im |]; [| done].
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' item Heqiom_tr.
       - by right.
@@ -211,7 +211,7 @@ Proof.
     }
     clear Happ_extend.
     apply valid_trace_last_pstate in Happ.
-    repeat split; [done |..| done].
+    repeat split; [done | .. | done].
     + destruct iom as [im |]; [| by apply option_valid_message_None].
       destruct Hbs_iom as [Hbs_iom | Hseeded].
       * by apply (preloaded_composite_sent_valid (equivocator_IM IM) _ _ _ Happ _ Hbs_iom).
@@ -316,12 +316,12 @@ Lemma seeded_equivocators_finite_valid_trace_init_to_rev
 Proof.
   apply
     (generalized_equivocators_finite_valid_trace_init_to_rev IM)
-  ; [..| done].
+  ; [.. | done].
   - intro; intros. split; [| done].
     destruct om; [| done].
-    destruct Hom as [Hsent|Hinitial]; [by left |].
+    destruct Hom as [Hsent | Hinitial]; [by left |].
     right.
-    destruct Hinitial as [[i [[mi Hmi] Him]]|Hseeded]; [exfalso | done].
+    destruct Hinitial as [[i [[mi Hmi] Him]] | Hseeded]; [exfalso | done].
     by elim (no_initial_messages_in_IM i mi).
   - clear isX sX trX HtrX.
     intro; intros.
@@ -421,7 +421,7 @@ Proof.
   clear.
   intros l (s, om) Hc.
   split; [| done].
-  destruct om as [m|]; [| done].
+  destruct om as [m |]; [| done].
   by apply proj1 in Hc.
 Qed.
 

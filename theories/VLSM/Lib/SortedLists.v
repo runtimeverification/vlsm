@@ -358,7 +358,7 @@ Proof.
   apply elem_of_app in Hin_y.
   rewrite elem_of_cons in Hin_y.
   assert (y =x \/ y ∈ pref1 ++ suf1). {
-    destruct Hin_y as [Hin_y|Hin_y]; [|destruct Hin_y].
+    destruct Hin_y as [Hin_y | Hin_y]; [| destruct Hin_y].
     - by right; apply elem_of_app; left.
     - by left.
     - by right; apply elem_of_app; right.

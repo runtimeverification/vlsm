@@ -42,10 +42,10 @@ Proof.
   induction tr; intros.
   - by inversion HtrX; subst; inversion Hjbs.
   - simpl in HtrX.
-    destruct (equivocator_vlsm_trace_project _ tr j) as [(trX', i')|]
+    destruct (equivocator_vlsm_trace_project _ tr j) as [(trX', i') |]
       eqn: Htr; [| by congruence].
     specialize (IHtr trX').
-    destruct (equivocator_vlsm_transition_item_project _ a i') as [[[item'|] i'']|]
+    destruct (equivocator_vlsm_transition_item_project _ a i') as [[[item' |] i''] |]
       eqn:Hitem'
     ; inversion HtrX; subst; clear HtrX.
     + apply equivocator_transition_item_project_inv_messages in Hitem'.
@@ -133,7 +133,7 @@ Proof.
   destruct
     (preloaded_equivocator_vlsm_trace_project_valid_inv _ _ _ Htl _ _ Hi)
     as [suffix Hsuffix].
-  exists itemx. split; [eexists; apply Hitemx|].
+  exists itemx. split; [eexists; apply Hitemx |].
   remember (Existing i) as dsuffix.
   remember {| input := iom |} as bitem.
   specialize (equivocator_vlsm_trace_project_app_inv
@@ -305,7 +305,7 @@ Proof.
         rewrite equivocator_state_extend_project_1; [done |].
         by apply equivocator_state_project_Some_rev in Hsins.
     + cbn in Hv.
-      destruct (equivocator_state_project s idesc) as [sidesc|] eqn:Hidesc; [| done].
+      destruct (equivocator_state_project s idesc) as [sidesc |] eqn:Hidesc; [| done].
       destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn:Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
@@ -333,9 +333,9 @@ Proof.
            by left; revert H; apply Hselector_io.
         -- right. exists i, s'i. split; [| done].
            specialize (Hnot_same i).
-           spec Hnot_same; [lia|]. specialize (Hnot_same n).
+           spec Hnot_same; [lia |]. specialize (Hnot_same n).
            simpl in Hnot_same. rewrite Hs'i in Hnot_same.
-           destruct_equivocator_state_project s i si Hlti'; [|lia].
+           destruct_equivocator_state_project s i si Hlti'; [| lia].
            by cbn in Hnot_same; congruence.
       * apply proj2 in oracle_step_update.
         apply equivocator_state_project_Some_rev in Hidesc as Hltidesc.
@@ -345,7 +345,7 @@ Proof.
            specialize (oracle_step_update (or_introl Heq_im)).
            exists idesc, sidesc'.
            simpl in Hsame.
-           destruct_equivocator_state_project  s' idesc _sidesc' Hlst; [|lia].
+           destruct_equivocator_state_project  s' idesc _sidesc' Hlst; [| lia].
            simpl in Hsame.
            by subst.
         -- apply equivocator_state_project_Some_rev in Hsins as Hltins.
@@ -355,15 +355,15 @@ Proof.
               specialize (oracle_step_update (or_intror Hbri)).
               exists ins, sidesc'. split; [| done].
               simpl in Hsame.
-              by destruct_equivocator_state_project s' ins _sidesc' Hins; [subst |lia].
+              by destruct_equivocator_state_project s' ins _sidesc' Hins; [subst | lia].
            ++ exists ins, sins. split; [| done].
-              specialize (Hnot_same ins). spec Hnot_same; [lia|].
+              specialize (Hnot_same ins). spec Hnot_same; [lia |].
               specialize (Hnot_same n).
               simpl in Hnot_same. rewrite Hsins in Hnot_same.
-              destruct_equivocator_state_project s' ins _sins Hins; [|lia].
+              destruct_equivocator_state_project s' ins _sins Hins; [| lia].
               cbn in Hnot_same; congruence.
     + cbn in Hv.
-      destruct (equivocator_state_project s idesc) as [sidesc|] eqn:Hidesc; [| done].
+      destruct (equivocator_state_project s idesc) as [sidesc |] eqn:Hidesc; [| done].
       destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn:Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
@@ -391,9 +391,9 @@ Proof.
            by left; revert H; apply Hselector_io.
         -- right. exists i, s'i. split; [| done].
            specialize (Hnot_last i).
-           spec Hnot_last; [lia|].
+           spec Hnot_last; [lia |].
            simpl in Hnot_last. rewrite Hs'i in Hnot_last.
-           destruct_equivocator_state_project s i si Hlti'; [|lia].
+           destruct_equivocator_state_project s i si Hlti'; [| lia].
            by cbn in Hnot_last; congruence.
       * apply proj2 in oracle_step_update.
         intros [Heq_im | [ins [sins [Hsins Hbri]]]].
@@ -402,13 +402,13 @@ Proof.
            specialize (oracle_step_update (or_introl Heq_im)).
            exists (equivocator_state_n s), sidesc'.
            simpl in Hlast.
-           destruct_equivocator_state_project  s' (equivocator_state_n s) _sidesc' Hlst; [|lia].
+           destruct_equivocator_state_project  s' (equivocator_state_n s) _sidesc' Hlst; [| lia].
            by subst.
         -- apply equivocator_state_project_Some_rev in Hsins as Hltins.
-           specialize (Hnot_last ins). spec Hnot_last; [lia|].
+           specialize (Hnot_last ins). spec Hnot_last; [lia |].
            simpl in Hnot_last. rewrite Hsins in Hnot_last.
            exists ins, sins. split; [| done].
-           destruct_equivocator_state_project s' ins _sins Hltins'; [|lia].
+           destruct_equivocator_state_project s' ins _sins Hltins'; [| lia].
            by cbn in Hnot_last; congruence.
 Qed.
 

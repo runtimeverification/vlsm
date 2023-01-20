@@ -197,7 +197,7 @@ Proof.
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
   specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM (elements equivocating)) as HinclE.
   intro; intros.
-  destruct iom as [im|]; swap 1 2; [|destruct HcX as [Hsent | Hemitted]].
+  destruct iom as [im |]; swap 1 2; [| destruct HcX as [Hsent | Hemitted]].
   - exists [], eqv_state_s.
     by split; [constructor | eauto].
   - exists []. exists eqv_state_s.
@@ -263,7 +263,7 @@ Proof.
       apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
       apply (VLSM_eq_valid_state HeqX) in HtrX.
       intros m Hsent.
-      apply (VLSM_incl_valid_message (VLSM_eq_proj1 HeqXE)); [by left|].
+      apply (VLSM_incl_valid_message (VLSM_eq_proj1 HeqXE)); [by left |].
       by apply (fixed_equivocating_messages_sent_by_non_equivocating_are_valid eqv_state_s).
     }
     specialize (Hreplay eqv_state_s).
@@ -347,7 +347,7 @@ Proof.
   *)
   assert (no_initial_messages_in_XE :
     forall m, ~ vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
-  { intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
+  { intros m [[i [[mi Hmi] Him]] | Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).
   }
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
@@ -364,7 +364,7 @@ Proof.
     apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
     + split; [| done].  destruct om as [im |]; [| done].
-      destruct Hom as [Hom|Hinitial]; [by left | exfalso].
+      destruct Hom as [Hom | Hinitial]; [by left | exfalso].
       by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.
@@ -411,7 +411,7 @@ Proof.
   assert (no_initial_messages_in_XE :
     forall m, ~ vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   {
-    intros m [[i [[mi Hmi] Him]]|Hseeded]; [| done].
+    intros m [[i [[mi Hmi] Him]] | Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).
   }
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
@@ -431,7 +431,7 @@ Proof.
     apply (VLSM_eq_valid_state HeqXE) in Hes.
     split.
     + split; [| done]. destruct om as [im |]; [| done].
-      destruct Hom as [Hom|Hinitial]; [by left | exfalso].
+      destruct Hom as [Hom | Hinitial]; [by left | exfalso].
       by apply no_initial_messages_in_XE in Hinitial.
     + apply valid_state_has_fixed_equivocation in Hes.
       destruct (composite_transition _ _ _) as (es', om') eqn:Het.

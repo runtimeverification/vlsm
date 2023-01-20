@@ -672,8 +672,8 @@ Qed.
 Lemma basic_VLSM_weak_embedding : VLSM_weak_embedding X Y label_project state_project.
 Proof.
   specialize (basic_VLSM_weak_projection X Y (Some ∘ label_project) state_project) as Hproj.
-  spec Hproj; [by apply weak_projection_valid_preservation_from_full|].
-  spec Hproj; [by apply weak_projection_transition_preservation_Some_from_full|].
+  spec Hproj; [by apply weak_projection_valid_preservation_from_full |].
+  spec Hproj; [by apply weak_projection_transition_preservation_Some_from_full |].
   spec Hproj; [by apply weak_projection_transition_consistency_None_from_full |].
   spec Hproj; [done |].
   spec Hproj; [by apply weak_projection_valid_message_preservation_from_full |].
@@ -785,7 +785,7 @@ Proof.
     + destruct iom as [m |]; [| by apply option_valid_message_None].
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' iom_lst Heqiom_tr
-      ; [apply option_initial_message_is_valid; destruct Heqiom as [Him | Hp]|].
+      ; [apply option_initial_message_is_valid; destruct Heqiom as [Him | Hp] |].
       * by left; revert Him; apply Hmessage.
       * by right; auto.
       * apply

@@ -342,7 +342,7 @@ Lemma limited_equivocators_vlsm_partial_projection
   : VLSM_partial_projection equivocators_limited_equivocations_vlsm Limited
       (equivocators_partial_trace_project IM final_descriptors).
 Proof.
-  split; [split|].
+  split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert (HPreFree_pre_tr :
       finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) s_pre (pre ++ tr)).
@@ -371,7 +371,7 @@ Lemma limited_equivocators_vlsm_projection
   : VLSM_projection equivocators_limited_equivocations_vlsm Limited
     (equivocators_total_label_project IM) (equivocators_total_state_project IM).
 Proof.
-  constructor; [constructor|]; intros ? *.
+  constructor; [constructor |]; intros ? *.
   - intros HtrX. apply PreFreeE_Free_vlsm_projection_type.
     revert HtrX. apply VLSM_incl_finite_valid_trace_from.
     by apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.

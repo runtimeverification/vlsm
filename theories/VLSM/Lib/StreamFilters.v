@@ -165,8 +165,8 @@ Proof.
       subst.
       split; [by apply filtering_subsequence_witness |].
       eexists; split; [| done].
-      destruct (decide (i = k)); [subst; lia|].
-      cut (Str_nth i ss < Str_nth k ss); [lia|].
+      destruct (decide (i = k)); [subst; lia |].
+      cut (Str_nth i ss < Str_nth k ss); [lia |].
       apply ForAll2_transitive_lookup; [by typeclasses eauto | | lia].
       by apply filtering_subsequence_sorted in Hfs.
     + destruct H as [Hpa [_a [Hlt H_a]]].
@@ -405,7 +405,7 @@ Proof.
     + by exists 0; split_and!; f_equal; [lia | | lia].
     + specialize (H (tl s) Hev (S n)) as (k & Heq & Hp & Hnp).
       exists (S k). rewrite Heq.
-      split; [f_equal; lia|].
+      split; [f_equal; lia |].
       split; [done |].
       intros. destruct i; [done |].
       by apply Hnp; lia.
@@ -551,7 +551,7 @@ Proof.
     rewrite Hnth; simpl.
     split; [done |].
     rewrite Heq. simpl.
-    split; [lia|].
+    split; [lia |].
     intros i [Hle Hlt].
     apply stdpp_nat_le_sum in Hle as [k' ->].
     rewrite Nat.add_comm, <- Str_nth_tl_plus. simpl.
@@ -755,7 +755,7 @@ Proof.
     end.
     rewrite Heq1.
     simpl.
-    destruct _k; [lia|].
+    destruct _k; [lia |].
     by exfalso; apply (H_k 0); [lia | eexists].
   }
   induction n; intros; rewrite stream_filter_positions_unroll; unfold Streams.Str_nth; simpl.

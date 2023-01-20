@@ -481,8 +481,8 @@ Lemma projection_induced_validator_eq
   : VLSM_eq X1 X2 -> VLSM_eq XY1 XY2.
 Proof.
   intro Heq; apply VLSM_eq_incl_iff; split.
-  - by apply (projection_induced_validator_incl MX1 MX2); [..| apply VLSM_eq_proj1].
-  - by apply (projection_induced_validator_incl MX2 MX1); [..| apply VLSM_eq_proj2].
+  - by apply (projection_induced_validator_incl MX1 MX2); [.. | apply VLSM_eq_proj1].
+  - by apply (projection_induced_validator_incl MX2 MX1); [.. | apply VLSM_eq_proj2].
 Qed.
 
 End sec_projection_induced_validator_incl.
@@ -854,7 +854,7 @@ Proof.
   - by intros m [Him | Hpm]; right; [by apply Hinits |].
   - intros l s iom [sX [<- Hv]].
     exists (existT i l), sX.
-    by split; [apply composite_project_label_eq |..].
+    by split; [apply composite_project_label_eq | ..].
   - intros l s iom s' oom.
     cbn; unfold lift_to_composite_state' at 1.
     state_update_simpl.

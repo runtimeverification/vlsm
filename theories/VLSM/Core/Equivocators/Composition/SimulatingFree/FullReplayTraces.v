@@ -60,7 +60,7 @@ Proof.
     by apply lift_sub_valid, Hv.
   - by intros [_ Ht]; revert Ht; apply lift_sub_transition.
   - by intros; apply (lift_sub_state_initial equivocator_IM).
-  - intros; destruct HmX as [Hinit|Hseeded]; [| by apply Hseed].
+  - intros; destruct HmX as [Hinit | Hseeded]; [| by apply Hseed].
     apply initial_message_is_valid.
     destruct Hinit as [i Him].
     by exists (proj1_sig i).
@@ -116,7 +116,7 @@ Lemma lift_equivocators_sub_state_to_size
 Proof.
   intro i.
   unfold lift_equivocators_sub_state_to.
-  destruct (decide _); [|lia].
+  destruct (decide _); [| lia].
   by rewrite equivocator_state_append_size; lia.
 Qed.
 
@@ -247,7 +247,7 @@ Proof.
     unfold equivocator_vlsm_transition_item_project. rewrite Heqv_x.
     simpl; equivocator_state_update_simpl.
     rewrite decide_False by lia.
-    destruct_equivocator_state_project (lfinal (` x)) n lfinal_x_n Hltn'; [|lia].
+    destruct_equivocator_state_project (lfinal (` x)) n lfinal_x_n Hltn'; [| lia].
     by equivocator_state_update_simpl.
   - intro i. apply proj2 in IHl. specialize (IHl i).
     by destruct (decide (i = `x)); subst; equivocator_state_update_simpl; [lia |].
@@ -276,7 +276,7 @@ Proof.
   intros i j Hj.
   destruct (decide (`x = i)); subst; equivocator_state_update_simpl; [| by auto].
   specialize (IHl (` x) j Hj).
-  destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [|lia].
+  destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [| lia].
   rewrite equivocator_state_extend_project_1; [done |].
   by apply equivocator_state_project_Some_rev in IHl as Hltj'.
 Qed.
@@ -292,7 +292,7 @@ Proof.
   intro i. specialize (Heqv_descriptors i).
   unfold equivocator_state_descriptor_project.
   unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors i) as [sn|ji]; [done |].
+  destruct (eqv_descriptors i) as [sn | ji]; [done |].
   destruct Heqv_descriptors as [full_i_ji Hpr_ji].
   apply equivocator_state_project_Some_rev in Hpr_ji as Hltji.
   subst lst.
@@ -351,7 +351,7 @@ Proof.
   intro i. specialize (Heqv_descriptors i).
   unfold equivocator_state_descriptor_project.
   unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors i) as [sn|ji]; [done |].
+  destruct (eqv_descriptors i) as [sn | ji]; [done |].
   destruct Heqv_descriptors as [full_i_ji Hpr_ji].
   apply equivocator_state_project_Some_rev in Hpr_ji as Hltji.
   subst lst.
@@ -401,10 +401,10 @@ Proof.
   simpl.
   destruct_equivocator_state_project
     (lift_equivocators_sub_state_to full_replay_state destination i) n
-    lift_n Hlt_n; [|lia].
+    lift_n Hlt_n; [| lia].
   rewrite (lift_equivocators_sub_state_to_sub) with (Hi := Hi).
   rewrite equivocator_state_append_lst.
-  by destruct li as [sn_d| id li| id li]; simpl
+  by destruct li as [sn_d | id li | id li]; simpl
   ; rewrite !decide_False by lia
   ; equivocator_state_update_simpl.
 Qed.
@@ -648,7 +648,7 @@ Proof.
   left. exists i.
   simpl. rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
   subst. unfold SubProjectionTraces.sub_IM in Hsent. cbn in Hsent |-*.
-  apply equivocator_state_append_sent_right; [..|done].
+  apply equivocator_state_append_sent_right; [.. | done].
   - by apply Hfull_replay_state_pr.
   - by apply (Hs_pr (dexist i Hi) Hs).
 Qed.

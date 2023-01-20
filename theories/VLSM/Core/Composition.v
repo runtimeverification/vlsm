@@ -537,7 +537,7 @@ Proof.
   - by apply valid_initial_state_message.
   - apply (valid_generated_state_message X2) with s _om _s om l. 1-2, 4: done.
     apply constraint_subsumption_input_valid; [done |].
-    by split_and!; [exists _om | exists _s|].
+    by split_and!; [exists _om | exists _s |].
 Qed.
 
 Lemma constraint_subsumption_incl
@@ -780,8 +780,8 @@ Proof.
     + by subst; rewrite state_update_twice.
     + rewrite state_update_twice_neq by done.
       apply input_valid_transition_destination with (existT j lj) (state_update s i si) om omj'.
-      by repeat split; [done | done |..]; cbn; rewrite state_update_neq;
-        [..| rewrite Htj |].
+      by repeat split; [done | done | ..]; cbn; rewrite state_update_neq;
+        [.. | rewrite Htj |].
 Qed.
 
 Lemma lift_to_composite_valid_preservation :
@@ -1186,7 +1186,7 @@ Proof.
   unfold i in Heq.
   rewrite Heq.
   destruct (vtransition (IM x) v (s' x, input)).
-  split; [done|].
+  split; [done |].
   unfold i.
   by state_update_simpl.
 Qed.
@@ -1328,7 +1328,7 @@ Lemma relevant_components
   (forall (i : index), i ∈ li -> (res' i) = res i).
 Proof.
   induction a using rev_ind.
-  - by split; [apply finite_valid_plan_empty|].
+  - by split; [apply finite_valid_plan_empty |].
   - simpl in *.
     apply finite_valid_plan_from_app_iff in Hpr.
     destruct Hpr as [Hrem Hsingle].
@@ -1730,7 +1730,7 @@ Proof.
       assert (Hss1 : input_valid_transition RFree (existT i li)
                   (state_update IM s j (s1 j), om) (s1, om')).
       {
-        repeat split; [by apply IHHs2 | by apply any_message_is_valid_in_preloaded |..]
+        repeat split; [by apply IHHs2 | by apply any_message_is_valid_in_preloaded | ..]
         ; cbn; state_update_simpl; [done |].
         replace (vtransition _ _ _) with (s' i, om').
         f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.

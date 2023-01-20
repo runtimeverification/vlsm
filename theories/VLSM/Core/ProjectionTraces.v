@@ -478,7 +478,7 @@ Lemma component_projection_validator_prop_is_induced
 Proof.
   split; intros Hvalidator li si omi Hvi.
   - apply Hvalidator in Hvi as (sX & <- & Hv).
-    by eexists (existT j li), sX; split; [apply composite_project_label_eq |..].
+    by eexists (existT j li), sX; split; [apply composite_project_label_eq | ..].
   - apply Hvalidator in Hvi as ([i _li] & sX & []).
     unfold composite_project_label in tiv_label_project; case_decide; [subst; cbn in * | done].
     apply Some_inj in tiv_label_project; subst _li.

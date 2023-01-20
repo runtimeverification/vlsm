@@ -147,7 +147,7 @@ Proof.
     by apply reach_init.
   - destruct Ht as [(_ & _ & Hvalid) Ht]; cbn in Ht, Hvalid.
     rewrite VM_transition_is_UMO in Ht.
-    destruct l, om; injection Ht as [= <- <-]; [| done..|].
+    destruct l, om; injection Ht as [= <- <-]; [| done.. |].
     + apply VM_enforces_full_node in Hvalid.
       by apply reach_recv.
     + by apply reach_send.
@@ -259,14 +259,14 @@ Lemma ELMO_msg_valid_full_to_reach (m : Message) :
   UMO_reachable (fun s m => full_node s m /\ no_self_equiv s m) (state m).
 Proof.
   by induction 1; destruct m as [ms]; cbn in *;
-    [replace ms with (MkState [] (adr ms)) by (apply eq_State; done) |..];
+    [replace ms with (MkState [] (adr ms)) by (apply eq_State; done) | ..];
     constructor.
 Qed.
 
 Lemma ELMO_msg_valid_full_has_sender (m : Message) :
   ELMO_msg_valid_full m -> MessageHasSender m.
 Proof.
-  by induction 1; [done |..]; destruct IHELMO_msg_valid_full; econstructor.
+  by induction 1; [done | ..]; destruct IHELMO_msg_valid_full; econstructor.
 Qed.
 
 #[local] Instance ELMO_local_equivocation : BasicEquivocation State Address Ca threshold :=
@@ -336,7 +336,7 @@ Proof.
   constructor 1 with sentMessages; constructor.
   - by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil.
   - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
-    destruct l, im; cbn in *; [| by exfalso; inversion Hv..|];
+    destruct l, im; cbn in *; [| by exfalso; inversion Hv.. |];
     inversion_clear Ht; destruct s; cbn.
     + by rewrite decide_False; cbn; firstorder congruence.
     + rewrite decide_True by done; cbn.
@@ -619,7 +619,7 @@ Proof.
   apply local_equivocators_simple_addObservation
     in Ha as [| (<- & _ & m & Hm & Hincomp)]; [done |]; cbn in *.
   destruct Hincomp as [Hadr []].
-  by apply self_messages_sent in Hm; [constructor |..].
+  by apply self_messages_sent in Hm; [constructor | ..].
 Qed.
 
 (**
@@ -820,7 +820,7 @@ Proof.
   intros [Hs _]%ELMO_reachable_view.
   induction Hs as [| | ? ? Hvalid].
   - by inversion 1.
-  - by intros m [->|Hm%IHHs]%elem_of_messages_addObservation; apply submseteq_cons.
+  - by intros m [-> | Hm%IHHs]%elem_of_messages_addObservation; apply submseteq_cons.
   - intros m Hm.
     apply submseteq_cons; change (full_node s m).
     apply elem_of_messages_addObservation in Hm as [-> | Hm].
@@ -1223,7 +1223,7 @@ Qed.
 Proof.
   constructor.
   - by typeclasses eauto.
-  - by intros [[| [[] ?] ?] ?] *; [inversion 1 |..];
+  - by intros [[| [[] ?] ?] ?] *; [inversion 1 | ..];
       intro Hitem; apply elem_of_list_singleton in Hitem;
       inversion_clear Hitem.
   - by apply ELMOComponent_state_destructor_input_valid_transition.
@@ -1609,8 +1609,8 @@ Proof.
         [contradict Hnot_sent |]; exists k.
   - destruct Hequiv as [m Hadr [i_rec Hrecv] Hnot_sent].
     unfold ELMO_global_equivocators.
-    exists m; split; [done|].
-    split; [|done].
+    exists m; split; [done |].
+    split; [| done].
     exists i_rec.
     by apply full_node_messages_iff_rec_obs, received_in_messages.
 Qed.
@@ -1660,7 +1660,7 @@ Lemma ELMO_CHBO_in_messages :
     exists (k : index), m ∈ messages (s k).
 Proof.
   intros s Hs m; split.
-  - intros [Hobs|m' Hobs Hdepth];
+  - intros [Hobs | m' Hobs Hdepth];
       destruct Hobs as [k Hobs]; exists k.
     + by apply elem_of_messages.
     + assert (m' ∈ messages (s k)) by (eapply elem_of_messages; done).
@@ -1698,7 +1698,7 @@ Proof.
   rewrite ELMO_global_equivocators_iff_msg_dep_equivocation by done.
   rewrite <- global_equivocators_simple_iff_full_node_equivocation by done.
   pose proof @ELMOComponent_message_dependencies_full_node_condition.
-  by rewrite full_node_is_globally_equivocating_iff; [| typeclasses eauto |..].
+  by rewrite full_node_is_globally_equivocating_iff; [| typeclasses eauto | ..].
 Qed.
 
 (**
@@ -1850,7 +1850,7 @@ Proof.
   inversion Ht as [| ? ? ? [(Hsi & _ & Hvi) Hti]]; inversion Hvi; inversion Hti; subst.
   destruct (decide (a = idx i)); subst; [done |].
   intros [ges_m ges_adr ges_recv ges_not_sent].
-  econstructor; [done |..].
+  econstructor; [done | ..].
   - destruct ges_recv as [j Hrcv]; exists j.
     destruct (decide (j = i)); subst; state_update_simpl; [| done].
     by cbn; rewrite decide_False by auto.
@@ -1891,13 +1891,13 @@ Proof.
         destruct (decide (j = i)); subst; state_update_simpl; [| done].
         by cbn; rewrite decide_False by auto.
   - intros [[ges_m ges_adr ges_recv ges_not_sent] | [-> Hnsnd]].
-    + econstructor; [done |..].
+    + econstructor; [done | ..].
       * destruct ges_recv as [j Hrcv]; exists j.
         destruct (decide (j = i)); subst; state_update_simpl; [| done].
         by cbn; rewrite decide_True, map_cons by done; right.
       * intros [j Hsnd]; apply ges_not_sent; exists j.
         by destruct (decide (j = i)); subst; state_update_simpl.
-    + econstructor; [done |..].
+    + econstructor; [done | ..].
       * by exists i; state_update_simpl; left.
       * intros [j Hsnd]; apply Hnsnd; exists j.
         destruct (decide (j = i)); subst; state_update_simpl; [| done].
@@ -2082,7 +2082,7 @@ Proof.
   assert (Hpre_tisi : input_valid_transition ReachELMO (existT j lj)
     (state_update ELMOComponent s i si, iom) (state_update ELMOComponent sf i si, oom)).
   {
-    repeat split; [done |..| done].
+    repeat split; [done | .. | done].
     - by apply any_message_is_valid_in_preloaded.
     - by cbn; state_update_simpl.
   }
@@ -2154,7 +2154,7 @@ Proof.
   {
     apply valid_state_prop_iff; right.
     by exists (existT i Receive), (s, Some m), None; repeat split;
-      [| apply any_message_is_valid_in_preloaded |..].
+      [| apply any_message_is_valid_in_preloaded | ..].
   }
   pose (H_rcv := Hrcv); destruct H_rcv.
   apply ELMO_msg_valid_full_has_sender in ELMO_mv_msg_valid_full0 as Hsender.
@@ -2331,7 +2331,7 @@ Proof.
     rewrite Forall_singleton in H_lst_msg_valid.
     rewrite Forall_singleton in Hsf_bounded_eqv.
     setoid_rewrite map_app; cbn.
-    eapply extend_right_finite_trace_from_to; [by apply IHHtr_m| cbn].
+    eapply extend_right_finite_trace_from_to; [by apply IHHtr_m | cbn].
     destruct Ht0 as [(Hs0 &  _ & Hv0) Ht0].
     repeat split.
     - by eapply finite_valid_trace_from_to_last_pstate, IHHtr_m.
@@ -2456,10 +2456,10 @@ Proof.
   assert (i <> i_m) by (contradict Hadr_neq; congruence).
   apply valid_state_project_preloaded with (i := i_m) in Hsigma as Hsi_m.
   assert (adr (sigma i_m) = idx i_m) by (apply ELMO_reachable_adr; done).
-  destruct (ELMO_unique_trace_segments i_m (sigma i_m) (state m)) as [tr []]; [..| by eexists].
+  destruct (ELMO_unique_trace_segments i_m (sigma i_m) (state m)) as [tr []]; [.. | by eexists].
   - destruct Ht as [(Hsi & _ & Hv) _]; inversion Hv; subst.
     by clear Hsi_m; destruct m; eapply receivable_messages_reachable.
-  - destruct (H_not_i_paused i_m) as [Hinit | (sim & lst_im & Hsnd)]; [done |..].
+  - destruct (H_not_i_paused i_m) as [Hinit | (sim & lst_im & Hsnd)]; [done | ..].
     + replace (sigma i_m) with (MkState [] (adr (state m)));
         [by specialize (state_suffix_empty_minimum (state m)); itauto |].
       by apply eq_State; [| cbn; congruence].
@@ -2487,7 +2487,7 @@ Proof.
       * eapply was_sent_before_characterization_1 in Hbefore; [by rewrite Hsnd; itauto |].
         eapply ELMO_reachable_view with (i := i_m).
         destruct Ht as [(Hsi & _ & Hv) _]; inversion Hv; subst.
-        by clear Hsi_m; destruct m; eapply receivable_messages_reachable; [congruence |..].
+        by clear Hsi_m; destruct m; eapply receivable_messages_reachable; [congruence | ..].
 Qed.
 
 Lemma all_intermediary_transitions_are_receive
@@ -2521,7 +2521,7 @@ Proof.
   eapply ELMOComponent_sentMessages_of_ram_trace in Hitem as Hm0; [| done..].
   eapply reachable_sent_messages_adr in Hm0 as Hm0_adr;
     [| by eapply finite_valid_trace_from_to_last_pstate].
-  exists (MkMessage s_m0); [by congruence |..].
+  exists (MkMessage s_m0); [by congruence | ..].
   - exists i.
     assert (Hm : MkMessage s_m0 ∈ messages (sigma i)).
     {
@@ -2590,7 +2590,7 @@ Proof.
     by (eapply Htr_m_inputs_in_sigma;
       [apply elem_of_app; right; apply elem_of_list_singleton |]; done).
   edestruct IHHtr_m as [Htr Hall];
-    [..| split; [eapply finite_valid_trace_from_to_app; [by apply Htr |] |]].
+    [.. | split; [eapply finite_valid_trace_from_to_app; [by apply Htr |] |]].
   - done.
   - intros item msg Hitem Hmsg.
     by eapply Htr_m_inputs_in_sigma; [apply elem_of_app; left |].
@@ -2599,7 +2599,7 @@ Proof.
   - apply finite_valid_trace_from_add_last; [| done].
     apply first_transition_valid; cbn.
     apply finite_valid_trace_from_to_last_pstate in Htr as Hsigma'.
-    repeat split; cbn; [done |..].
+    repeat split; cbn; [done | ..].
     + by eapply composite_directly_observed_valid; cycle 1.
     + by constructor; state_update_simpl.
     + eapply
@@ -2675,7 +2675,7 @@ Proof.
     composite_has_been_directly_observed ELMOComponent sigma msg).
   {
     intros item msg Hitem Hinput.
-    destruct Ht as [(Hsi & _ & Hv) _]; inversion Hv as [? ? []|]; subst.
+    destruct Ht as [(Hsi & _ & Hv) _]; inversion Hv as [? ? [] |]; subst.
     cut (has_been_received (ELMOComponent i_m) (state m) msg).
     {
       cbn; intro Hmsg.
@@ -2697,7 +2697,7 @@ Proof.
     + intros m0; split; [| by eexists].
       intros [j Hm0]; destruct (decide (i_m = j)); subst; state_update_simpl;
         [| by apply Hspecial; eexists].
-      destruct Ht as [(_ & _ & Hv) _]; inversion Hv as [? ? []|]; subst.
+      destruct Ht as [(_ & _ & Hv) _]; inversion Hv as [? ? [] |]; subst.
       by eapply elem_of_submseteq; [| done].
     + intros a; state_update_simpl.
       by transitivity (global_equivocators_simple sigma a); [apply Heqv | apply Hspecial].
@@ -2830,9 +2830,9 @@ Proof.
   - unfold initial_state_prop in Hs; cbn in Hs.
     apply UMOComponent_initial_state_spec in Hs as ->.
     exists (` (composite_s0 ELMOComponent)).
-    unfold composite_s0; cbn; split_and!; [done |..].
+    unfold composite_s0; cbn; split_and!; [done | ..].
     + by apply initial_state_is_valid.
-    + repeat split; cbn; [..| by inversion 1].
+    + repeat split; cbn; [.. | by inversion 1].
       * by intros [j Hj].
       * by inversion 1.
       * by intros []; itauto.
@@ -2862,14 +2862,14 @@ Proof.
         subst sigma'; state_update_simpl.
         unfold local_equivocators_full; cbn; rewrite lefo_alt; cbn.
         by split; [right | intros [|]; [destruct_and! |]].
-      * intros [? <- ]; esplit; [done |..].
+      * intros [? <- ]; esplit; [done | ..].
         -- destruct ges_recv as [j Hrecv].
            destruct (decide (i = j)); subst; subst sigma'; state_update_simpl; [| by eexists].
            by cbn in Hrecv; rewrite decide_False in Hrecv by itauto; exists j.
         -- intros [j Hsent]; apply ges_not_sent; exists j.
            destruct (decide (i = j)); subst; subst sigma'; state_update_simpl; [| done].
            by eapply has_been_sent_step_update; [| right].
-      * intros []; esplit; [done |..].
+      * intros []; esplit; [done | ..].
         -- destruct ges_recv as [j Hrecv]; exists j.
            destruct (decide (i = j)); subst; subst sigma'; state_update_simpl; [| done].
            by eapply has_been_received_step_update; [| right].
@@ -2979,7 +2979,7 @@ Proof.
     assert (ELMOComponentRAMTransition i Receive (sigma' i) (sigma i <+> MkObservation Receive m) m).
     {
       subst sigma'; state_update_simpl; rewrite Heqi.
-      constructor; repeat split; [..| done].
+      constructor; repeat split; [.. | done].
       - by eapply valid_state_project_preloaded.
       - by apply any_message_is_valid_in_preloaded.
     }

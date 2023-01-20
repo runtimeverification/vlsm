@@ -54,7 +54,7 @@ Qed.
 Lemma set_add_intro :
   forall (a b : A) (x : set), a = b \/ a ∈ x -> a ∈ set_add b x.
 Proof.
-  by intros a b x [H1| H2]; auto.
+  by intros a b x [H1 | H2]; auto.
 Qed.
 
 Lemma set_add_elim :
@@ -83,7 +83,7 @@ Lemma set_add_nodup a l :
   NoDup l -> NoDup (set_add a l).
 Proof.
   induction 1 as [| x l H H' IH]; cbn.
-  - by constructor; [inversion 1| apply NoDup_nil].
+  - by constructor; [inversion 1 | apply NoDup_nil].
   - by destruct (decide (a = x)) as [<- | Hax]; constructor
     ; rewrite ?set_add_iff; itauto.
 Qed.

@@ -237,10 +237,10 @@ Proof.
       by inversion Hti; rewrite state_update_neq.
     }
     eapply HasBeenObserved_step_update in Hobs as [Hobs | Hnow];
-      [by eexists s_j, _; constructor; [..| constructor 1] | | done].
+      [by eexists s_j, _; constructor; [.. | constructor 1] | | done].
     destruct Hnow as (_mj & [H_input | H_output] & [Hnow | Hbefore]); subst.
-    + by eexists s_j, _; constructor; [done..| constructor 2].
-    + by eexists s_j, _; constructor; [done..| constructor 3].
+    + by eexists s_j, _; constructor; [done.. | constructor 2].
+    + by eexists s_j, _; constructor; [done.. | constructor 3].
     + apply Some_inj in H_output as <-.
       contradict n.
       apply input_valid_transition_preloaded_project_active in Hti as Hti'; cbn in Hti'.
@@ -434,7 +434,7 @@ Proof.
     destruct is' as [| i is']; [by cbn in Hlen |].
     destruct (Hall_sent_observed i) as (i' & Hi' & Hcomposite); [by apply Hsub; left |].
     exists (i' :: i :: is').
-    split_and!; [by rewrite <- Hlen |..].
+    split_and!; [by rewrite <- Hlen | ..].
     + by inversion 1; subst; [| apply Hsub].
     + by constructor.
 Qed.
@@ -561,7 +561,7 @@ Proof.
         with (n := 0) in Hinitial_outside;
         [| typeclasses eauto | done | by rewrite Hdestruct].
       by apply Hinitial_outside.
-    - by exists s, item, m; constructor; [rewrite Hdestruct| ..].
+    - by exists s, item, m; constructor; [rewrite Hdestruct | ..].
   }
   destruct (composite_latest_sent_observed_in_chain _ His _ Hs' Hall_sent_observed)
     as (is' & Hsub & Hlen & Hall).

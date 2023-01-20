@@ -356,7 +356,7 @@ Proof.
       specialize (apply_plan_last s a) as Hlst.
       simpl in Hlst, Ha.
       setoid_rewrite Hlst in Ha. setoid_rewrite <- Heqsa in Ha.
-      repeat constructor; [|done ..].
+      repeat constructor; [| done ..].
       exists out.
       replace (@pair (@state message (@type message X)) (option message) dest out)
         with (vtransition X label_a0 (sa, input_a0)).

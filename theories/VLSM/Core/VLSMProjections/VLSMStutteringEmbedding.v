@@ -96,7 +96,7 @@ Definition strong_transition_item_project_consistency
     vtransition X lX (sX, inputX) = (destinationX, outputX) ->
     finite_trace_last (state_project sX)
       (transition_item_project
-        {| l := lX; input := inputX; destination := destinationX; output := outputX|})
+        {| l := lX; input := inputX; destination := destinationX; output := outputX |})
       =
     state_project destinationX.
 
@@ -486,7 +486,7 @@ Lemma VLSM_stuttering_embedding_finite_valid_trace_from :
       (VLSM_stuttering_embedding_finite_trace_project Hsimul trX).
 Proof.
   by intros; eapply VLSM_partial_projection_finite_valid_trace_from;
-    [apply VLSM_partial_projection_from_stuttering_embedding |..].
+    [apply VLSM_partial_projection_from_stuttering_embedding | ..].
 Qed.
 
 Definition VLSM_stuttering_embedding_weaken :
@@ -539,7 +539,7 @@ Lemma VLSM_stuttering_embedding_initial_state :
   forall sX, vinitial_state_prop X sX -> vinitial_state_prop Y (state_project sX).
 Proof.
   by intros; eapply VLSM_partial_projection_initial_state;
-    [apply VLSM_partial_projection_from_stuttering_embedding |..].
+    [apply VLSM_partial_projection_from_stuttering_embedding | ..].
 Qed.
 
 Lemma VLSM_stuttering_embedding_finite_valid_trace_init_to :
@@ -705,7 +705,7 @@ Proof.
   rewrite pre_VLSM_stuttering_embedding_finite_trace_project_app.
   apply finite_valid_trace_from_to_app with (state_project s); [done |].
   cbn; rewrite app_nil_r.
-  remember {| l := _|} as itemX; replace sf with (destination itemX) by (subst; done).
+  remember {| l := _ |} as itemX; replace sf with (destination itemX) by (subst; done).
   by apply Htransition; subst.
 Qed.
 

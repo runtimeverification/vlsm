@@ -64,7 +64,7 @@ Lemma set_eq_empty_iff
   : forall (l : list A),
     set_eq l [] <-> l = [].
 Proof.
-  split; intros; [|subst; apply set_eq_refl].
+  split; intros; [| subst; apply set_eq_refl].
   destruct l as [| hd tl]; [done |].
   destruct H.
   specialize (H hd (elem_of_list_here hd tl)).
@@ -278,7 +278,7 @@ Lemma filter_set_add `{StrictlyComparable X} P
   forall (l:list X) x, ~ P x ->
   filter P l = filter P (set_add x l).
 Proof.
-  induction l as [|hd tl IHl]; intros x H_false; cbn.
+  induction l as [| hd tl IHl]; intros x H_false; cbn.
   - by rewrite decide_False.
   - destruct (decide (x = hd)); cbn; [done |].
     by destruct (decide (P hd)); rewrite <- IHl.
@@ -289,7 +289,7 @@ Lemma set_add_ignore `{StrictlyComparable X} :
     x ∈ l ->
     set_add x l = l.
 Proof.
-  induction l as [|hd tl IHl]; inversion 1; subst; cbn.
+  induction l as [| hd tl IHl]; inversion 1; subst; cbn.
   - by rewrite decide_True.
   - by case_decide; [| rewrite IHl].
 Qed.
@@ -448,7 +448,7 @@ Qed.
 Lemma set_diff_nodup' `{EqDecision A} (l l' : list A)
   : NoDup l -> NoDup (set_diff l l').
 Proof.
- induction 1 as [|x l H H' IH]; simpl.
+ induction 1 as [| x l H H' IH]; simpl.
  - by constructor.
  - case_decide.
    + by apply IH.

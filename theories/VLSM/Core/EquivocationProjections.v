@@ -143,7 +143,7 @@ Proof.
   apply valid_state_has_trace in Hpr_is as [is' [tr_is Hpr_is]].
   exists is', (tr_is ++ (VLSM_weak_embedding_finite_trace_project Hsimul tr)).
   destruct Hpr_is as [Hpr_is His'].
-  repeat split; [| done|].
+  repeat split; [| done |].
   - by eapply (finite_valid_trace_from_to_app (pre_loaded_with_all_messages_vlsm Y)).
   - apply Exists_app. right.
     apply Exists_exists in Hm as [item [Hitem Hm]].
@@ -425,7 +425,7 @@ Context
 Lemma can_emit_projection
   : can_emit PreFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 Proof.
-  destruct (sender m) as [v|] eqn:Hsender; simpl in Hj; [| by congruence].
+  destruct (sender m) as [v |] eqn:Hsender; simpl in Hj; [| by congruence].
   apply Some_inj in Hj.
   specialize (Hsender_safety _ _ Hsender).
   intros [(s0, om0) [(i, li) [s1 Hemitted]]].
