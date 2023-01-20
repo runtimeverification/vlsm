@@ -238,7 +238,7 @@ Lemma equivocating_validators_witness_last_char
     (exists m, om = Some m /\
      exists v, sender m = Some v /\
      v ∉ equivocating_validators s /\
-     equivocating_validators s' ≡@{Cv} {[ v ]} ∪ (equivocating_validators s) /\
+     equivocating_validators s' ≡@{Cv} {[v]} ∪ (equivocating_validators s) /\
      forall (is : composite_state IM) (tr : list transition_item),
         finite_valid_trace_init_to PreFree is s tr ->
         trace_witnessing_equivocation_prop is tr ->
@@ -417,7 +417,7 @@ Lemma strong_trace_witnessing_equivocation_prop_extend_neq
   (Hwneq: ¬ trace_has_message (field_selector output) msg tr)
   v
   (Hsender: sender msg = Some v)
-  (Hneq: equivocating_validators (destination item) ≡@{Cv} {[ v ]} ∪ (equivocating_validators s))
+  (Hneq: equivocating_validators (destination item) ≡@{Cv} {[v]} ∪ (equivocating_validators s))
   : strong_trace_witnessing_equivocation_prop is (tr ++ [item]).
 Proof.
   intros prefix suffix Heq_tr''_item.

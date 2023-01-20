@@ -432,7 +432,7 @@ Proof.
     (equivocator_transition_item_project_proper_characterization item _ Hproper)
     as Hchar.
   destruct item. simpl in *.
-  destruct Hchar as [_oitemx [_deqv' [_Hpr [Hchar1 Hchar2]]] ].
+  destruct Hchar as [_oitemx [_deqv' [_Hpr [Hchar1 Hchar2]]]].
   rewrite Hproject in _Hpr. inversion _Hpr. subst _oitemx _deqv'. clear _Hpr.
   specialize (Hchar2 _ Hv Ht).
   destruct Hchar2 as [Hdeqv' Hchar2].

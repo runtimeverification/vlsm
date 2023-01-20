@@ -570,7 +570,7 @@ Proof.
       setoid_rewrite rec_obs_addObservation_iff; cbn.
     split.
     + by intros [<- | [l0]]; eauto.
-    + by intros [l0 [ | [[= _] | [->]]]]; eauto using full_node_rebase_rec_obs.
+    + by intros [l0 [| [[= _] | [->]]]]; eauto using full_node_rebase_rec_obs.
 Qed.
 
 (**
@@ -1202,7 +1202,7 @@ Proof.
   intros s' Hs'; split; intro Hs''.
   - by cbn in Hs''; apply UMOComponent_initial_state_spec in Hs'' as ->.
   - apply ELMO_reachable_adr in Hs'.
-    by destruct s' as [[| [[] ]] adr]; cbn in *; [| done..].
+    by destruct s' as [[| [[]]] adr]; cbn in *; [| done..].
 Qed.
 
 Lemma ELMOComponent_state_destructor_input_valid_transition :
@@ -1627,7 +1627,7 @@ Lemma global_equivocators_simple_iff_full_node_equivocation :
 Proof.
   split.
   - by intros [? [?%Some_inj]]; econstructor.
-  - by intros [? <- ]; econstructor.
+  - by intros [? <-]; econstructor.
 Qed.
 
 (**
@@ -1779,7 +1779,7 @@ Proof.
     split; [| by apply Htr_min]; clear Htr_min.
     apply (extend_right_finite_trace_from_to _ IHHtr).
     destruct Ht as [(Hs_pre & _ & [Hv _]) Ht].
-    repeat split; [| | done | | done ].
+    repeat split; [| | done | | done].
     + by apply valid_trace_last_pstate in IHHtr.
     + by destruct iom; [apply Hmsg_valid | apply option_valid_message_None].
     + destruct l as [i []]; [| done].
@@ -2862,7 +2862,7 @@ Proof.
         subst sigma'; state_update_simpl.
         unfold local_equivocators_full; cbn; rewrite lefo_alt; cbn.
         by split; [right | intros [|]; [destruct_and! |]].
-      * intros [? <- ]; esplit; [done | ..].
+      * intros [? <-]; esplit; [done | ..].
         -- destruct ges_recv as [j Hrecv].
            destruct (decide (i = j)); subst; subst sigma'; state_update_simpl; [| by eexists].
            by cbn in Hrecv; rewrite decide_False in Hrecv by itauto; exists j.
@@ -3013,7 +3013,7 @@ Proof.
         -- intros Heqv.
            destruct (decide (a = adr (state m))); [by subst |].
            eapply local_equivocators_full_step_update in Heqv; [| by constructor].
-           by destruct Heqv as [| [-> ]].
+           by destruct Heqv as [| [->]].
 Qed.
 
 (** Every [ELMOComponent] is a validator for [ELMOProtocol]. *)

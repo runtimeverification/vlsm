@@ -212,7 +212,7 @@ Proof.
   - cut (valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm).
     {
       intro Hsent_comp; apply emitted_messages_are_valid_iff in Hsent_comp
-        as [[[sub_j [[_im Him] Heqim]] | ] | ]
+        as [[[sub_j [[_im Him] Heqim]] |] |]
       ; [| by left | by right].
       destruct_dec_sig sub_j j Hj Heqsub_j; subst.
       clear -Him no_initial_messages_in_IM; contradict Him.

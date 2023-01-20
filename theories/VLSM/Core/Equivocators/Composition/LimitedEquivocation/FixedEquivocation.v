@@ -571,7 +571,7 @@ Proof.
           valid_state_prop (pre_loaded_with_all_messages_vlsm FreeE) (finite_trace_last is tr'))
             by (apply finite_valid_trace_last_pstate, Htr'pre).
         apply proper_sent; [done |].
-        apply has_been_sent_consistency; [typeclasses eauto | done | ].
+        apply has_been_sent_consistency; [typeclasses eauto | done |].
         by exists is, tr', (valid_trace_add_default_last Htr'pre).
     + exists trX'. exists initial_descriptors. subst foldx. split; [done |].
       split; [by apply Htr_project |].
@@ -794,7 +794,7 @@ Proof.
   destruct Hivt as [[_ [_ [_ [[Hc _] Hfixed]]]] Ht].
   simpl in Ht, Hfixed. rewrite Ht in Hfixed. simpl in Hfixed.
   clear Ht.
-  destruct Hc as [Hc | Hinit]; [| done ].
+  destruct Hc as [Hc | Hinit]; [| done].
   assert (Hpre_free : finite_valid_trace FreeE is pre).
   {
     split; [| done].
@@ -1025,7 +1025,7 @@ Proof.
     split; [| done].
     destruct om; [| done].
     simpl in Hc. simpl.
-    destruct Hc as [Hc | Hc ]
+    destruct Hc as [Hc | Hc]
     ; [| by right; apply Hseed12].
     left.
     destruct Hc as [subi Hibs].

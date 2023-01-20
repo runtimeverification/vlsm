@@ -605,7 +605,7 @@ Proof.
   cut (output item <> Some m).
   {
     intro.
-    destruct (composite_has_been_sent_stepwise_props IM (free_constraint IM)) as [_ ].
+    destruct (composite_has_been_sent_stepwise_props IM (free_constraint IM)) as [_].
     rewrite oracle_step_update by done; cbn.
     by intros [].
   }

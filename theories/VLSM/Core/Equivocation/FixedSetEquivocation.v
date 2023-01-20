@@ -768,7 +768,7 @@ Lemma lift_sub_state_to_sent_by_non_equivocating_iff s eqv_is m
   : sent_by_non_equivocating IM equivocators s m <->
     sent_by_non_equivocating IM equivocators (lift_sub_state_to IM (elements equivocators) s eqv_is) m.
 Proof.
-  by split; intros [i [Hi Hsent]]; exists i; split; [done | | done | ]
+  by split; intros [i [Hi Hsent]]; exists i; split; [done | | done |]
   ; revert Hsent; rewrite lift_sub_state_to_neq.
 Qed.
 

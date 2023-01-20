@@ -1005,7 +1005,7 @@ Qed.
 Lemma msg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies).
 Proof.
   apply tc_wf_projected with (<) (fun m => length (elements (full_message_dependencies m)));
-    [by typeclasses eauto | | by apply Wf_nat.lt_wf ].
+    [by typeclasses eauto | | by apply Wf_nat.lt_wf].
   intros; unfold lt.
   change (S _) with (length (x :: elements (full_message_dependencies x))).
   apply NoDup_subseteq_length.

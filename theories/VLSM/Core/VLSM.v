@@ -1102,7 +1102,7 @@ Lemma valid_trace_input_is_valid
 Proof.
   revert is Htr.
   induction Hinput as [item tr' Hm | item tr']; intros
-  ; inversion Htr as [| s _tr'  Htr' _is iom oom l Ht ]; subst.
+  ; inversion Htr as [| s _tr'  Htr' _is iom oom l Ht]; subst.
   - simpl in Hm.
     subst.
     by apply input_valid_transition_in in Ht.
@@ -2202,7 +2202,7 @@ Proof.
     ; apply finite_valid_trace_singleton.
   - intros last_p p Hind last tr Htr Hprefix.
     specialize (Hind last_p tr Htr).
-    destruct tr as [ | ]; unfold trace_prefix in Hprefix;   simpl in Hprefix
+    destruct tr as [|]; unfold trace_prefix in Hprefix;   simpl in Hprefix
     ; destruct Hprefix as [suffix Heq]; subst; destruct Htr as [Htr Hinit]; simpl; simpl in Hind
     ; split; try done.
     + assert

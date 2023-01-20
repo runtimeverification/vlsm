@@ -298,7 +298,7 @@ Proof.
     apply (Hv k suffix). rewrite lastn_cons.
     by case_decide; [lia |].
   - apply (Hv (1 + length (obs (state m))) (obs (state m))).
-    by rewrite lastn_ge; cbn; [| lia ].
+    by rewrite lastn_ge; cbn; [| lia].
 Qed.
 
 Lemma MO_msg_valid_alt_Receive_conv :

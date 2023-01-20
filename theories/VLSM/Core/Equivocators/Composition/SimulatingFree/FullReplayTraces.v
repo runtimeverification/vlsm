@@ -204,7 +204,7 @@ Proof.
     + case_decide.
       * rewrite decide_True; rewrite ?elem_of_app; itauto.
       * rewrite decide_False; [done |].
-        intros [Hin | Hx]%elem_of_app; [ done |].
+        intros [Hin | Hx]%elem_of_app; [done |].
         by rewrite elem_of_list_singleton, dsig_eq in Hx.
 Qed.
 

@@ -347,8 +347,8 @@ Proof.
   destruct item. simpl in *. destruct l as (i, li). simpl in *.
   destruct oitemi as [itemi' |]; eexists _; eexists _; (split; [done |])
   ; [| split; [done |]]
-  ; [ destruct Hitemx as [[Hex Hli] [Hinputi [Houtputi [Hdestinationi Hdescriptori]]]]
-  ; rewrite Hli; subst; split; [ repeat split |]
+  ; [destruct Hitemx as [[Hex Hli] [Hinputi [Houtputi [Hdestinationi Hdescriptori]]]]
+  ; rewrite Hli; subst; split; [repeat split |]
     |]
   ; [by exists Hex | apply equivocator_descriptors_update_eq | ..]
   ; intros
@@ -2003,7 +2003,7 @@ Proof.
       unfold free_sub_free_constraint, lift_sub_label, free_sub_free_state, free_sub_free_index.
       unfold equivocators_no_equivocations_constraint.
       intros [Hno_equiv _].
-      split; [| done ].
+      split; [| done].
       destruct om as [m |]; [| done].
       left. destruct Hno_equiv as [Hno_equiv | Hfalse]; [| done].
       destruct Hno_equiv as [eqv Hno_equiv].
