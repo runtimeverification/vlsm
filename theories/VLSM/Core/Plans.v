@@ -298,7 +298,7 @@ Lemma finite_valid_plan_iff
 Proof.
   induction a using rev_ind; repeat split; intros
   ; try
-    ( apply finite_valid_plan_from_app_iff in H
+    (apply finite_valid_plan_from_app_iff in H
     ; destruct H as [Ha Hx]; apply IHa in Ha as Ha').
   - by inversion H.
   - by constructor.
@@ -311,7 +311,7 @@ Proof.
     remember (snd (apply_plan s a)) as lst.
     unfold apply_plan, _apply_plan in Hx. simpl in Hx.
     destruct x.
-    destruct ( vtransition X label_a0 (lst, input_a0)) as (dest, out).
+    destruct (vtransition X label_a0 (lst, input_a0)) as (dest, out).
     simpl. simpl in Hx. inversion Hx. subst.
     by apply Ht.
   - assert (Hsuffa : suffa = [] \/ suffa <> []) by
@@ -324,7 +324,7 @@ Proof.
       unfold finite_valid_plan_from in Hx.
       unfold apply_plan, _apply_plan in Hx. simpl in Hx.
       destruct ai.
-      destruct ( vtransition X label_a0 (lst, input_a0)) as (dest, out).
+      destruct (vtransition X label_a0 (lst, input_a0)) as (dest, out).
       simpl. simpl in Hx. inversion Hx. subst.
       by apply Ht.
     + apply exists_last in H. destruct H as [suffa' [x' Heq]]. subst.

@@ -129,7 +129,7 @@ Qed.
 Lemma annotate_trace_from_app sa tr1 tr2
   : annotate_trace_from sa (tr1 ++ tr2) =
     annotate_trace_from sa tr1 ++
-      annotate_trace_from (finite_trace_last sa ( annotate_trace_from sa tr1)) tr2.
+      annotate_trace_from (finite_trace_last sa (annotate_trace_from sa tr1)) tr2.
 Proof.
   revert sa.
   induction tr1 as [| item tr1]; [done |].

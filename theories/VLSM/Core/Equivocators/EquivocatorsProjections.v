@@ -55,7 +55,7 @@ Definition equivocator_vlsm_transition_item_project
             else Some (None, Existing j)
         | ContinueWith i lx =>
           if decide (i = j) then
-              Some ( Some {| l := lx; input := im; output := om; destination := sj |}, Existing i)
+              Some (Some {| l := lx; input := im; output := om; destination := sj |}, Existing i)
             else Some (None, Existing j)
         end
       end
