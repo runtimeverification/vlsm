@@ -275,8 +275,7 @@ Qed.
   ; destruct (decide (j < equivocator_state_n es)) as [Hj | Hj]
   ; [ destruct (decide (i = j)) as [Hij | Hij]
     ; [ specialize (equivocator_state_update_project_eq es i s j Hj Hij) as Hpr
-      | specialize (equivocator_state_update_project_neq es i s j Hij) as Hpr
-      ]
+      | specialize (equivocator_state_update_project_neq es i s j Hij) as Hpr]
     | specialize (equivocator_state_project_None (equivocator_state_update es i s) j Hj) as Hpr]
   ; rewrite Hpr in *
   ; clear Hsize.
@@ -450,10 +449,8 @@ Qed.
     swap 1 2;
     [ specialize (equivocator_state_append_project_3 es es' i Hi) as Hpr
     | apply not_lt_plus_dec in Hi' as [k Hk];
-      specialize (equivocator_state_append_project_2 es es' i k (eq_sym Hk)) as Hpr
-    ]
-  | specialize (equivocator_state_append_project_1 es es' i Hi) as Hpr
-  ]
+      specialize (equivocator_state_append_project_2 es es' i k (eq_sym Hk)) as Hpr]
+  | specialize (equivocator_state_append_project_1 es es' i Hi) as Hpr]
   ; rewrite Hpr in *
   .
 
@@ -686,8 +683,7 @@ Ltac destruct_equivocator_state_update_project' es i s j Hj Hij Hpr :=
   ; [ specialize (equivocator_state_project_None _ (equivocator_state_update es i s) j Hj) as Hpr
     | destruct (decide (i = j)) as [Hij | Hij]
     ; [ specialize (equivocator_state_update_project_eq _ es i s j Hj Hij) as Hpr
-      | specialize (equivocator_state_update_project_neq _ es i s j Hij) as Hpr
-      ]]
+      | specialize (equivocator_state_update_project_neq _ es i s j Hij) as Hpr]]
   ; rewrite Hpr in *
   ; clear Hsize.
 

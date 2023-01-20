@@ -578,10 +578,8 @@ Proof.
   |- fold_right _ ?r _ = _ <-> _ => remember r as r_sufX
   end.
   destruct r_sufX as [(sufX, eqv_descriptors') |]
-  ; [
-    | by rewrite equivocators_trace_project_fold_None; split;
-      [intro contra; congruence | intros [preX [sufX [eqv_descriptors' [contra _]]]]; congruence]
-    ].
+  ; [| by rewrite equivocators_trace_project_fold_None; split;
+      [intro contra; congruence | intros [preX [sufX [eqv_descriptors' [contra _]]]]; congruence]].
   rewrite (equivocators_trace_project_folder_additive_iff
     pre sufX eqv_descriptors' ieqv_descriptors trX).
   split.
