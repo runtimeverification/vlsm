@@ -280,8 +280,7 @@ Lemma replayed_trace_from_valid_equivocating
 Proof.
   apply
     (sub_replayed_trace_from_valid_equivocating IM seed
-      (enum index) _ Hfull_replay_state
-    ).
+      (enum index) _ Hfull_replay_state).
   pose (Hproj := preloaded_sub_composition_all_embedding (equivocator_IM IM)
     (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM)
     (free_constraint _) seed) seed).
@@ -331,8 +330,7 @@ Proof.
     apply valid_trace_forget_last in Hmsg_trace.
     specialize
       (replayed_trace_from_valid_equivocating
-       _ Hstate_valid _ _ Hmsg_trace
-      )
+       _ Hstate_valid _ _ Hmsg_trace)
       as Hmsg_trace_full_replay.
     remember (all_equivocating_replayed_trace_from _ _ _ ) as emsg_tr.
     apply valid_trace_add_default_last in Hmsg_trace_full_replay.

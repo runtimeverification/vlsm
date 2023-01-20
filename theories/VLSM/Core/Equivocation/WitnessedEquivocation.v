@@ -242,8 +242,7 @@ Lemma equivocating_validators_witness_last_char
      forall (is : composite_state IM) (tr : list transition_item),
         finite_valid_trace_init_to PreFree is s tr ->
         trace_witnessing_equivocation_prop is tr ->
-        ~ trace_has_message (field_selector output) m tr
-    ).
+        ~ trace_has_message (field_selector output) m tr).
 Proof.
   destruct Htr_item as [Htr Hinit].
   apply finite_valid_trace_from_to_app_split in Htr.
@@ -390,8 +389,8 @@ Proof.
           apply valid_trace_last_pstate in Htr' as Htr'_lst.
           destruct
             (has_been_sent_consistency Free
-              _ Htr'_lst m
-            ) as [Hconsistency _].
+              _ Htr'_lst m)
+            as [Hconsistency _].
           spec Hconsistency; [by exists is, tr', Htr' |].
           by specialize (Hconsistency is' tr'' Htr'').
         }

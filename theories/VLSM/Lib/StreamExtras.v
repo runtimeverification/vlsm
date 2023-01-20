@@ -542,10 +542,7 @@ Lemma stream_prefix_segment_suffix
   (n1 n2 : nat)
   (Hn : n1 <= n2)
   : stream_app
-      ((stream_prefix l n1)
-        ++
-       (stream_segment l n1 n2)
-      )
+      (stream_prefix l n1 ++ stream_segment l n1 n2)
       (stream_suffix l n2)
   = l.
 Proof.

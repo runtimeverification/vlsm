@@ -1111,8 +1111,7 @@ Proof.
   intro m. simpl. unfold composite_initial_message_prop.
   apply
     (Decision_iff
-      (P := List.Exists (fun i => vinitial_message_prop (IM i) m) (enum index))
-    ).
+      (P := List.Exists (fun i => vinitial_message_prop (IM i) m) (enum index))).
   - rewrite <- exists_finite.
     split; intros [i Hm]; exists i.
     + by exists (exist _ _ Hm).

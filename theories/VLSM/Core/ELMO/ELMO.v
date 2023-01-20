@@ -2206,8 +2206,8 @@ Proof.
     Forall (fun item =>
       ELMO_equivocating_validators (lift_to_composite_state ELMOComponent s i_m (destination item))
         ⊆
-      ELMO_equivocating_validators s ∪ {[idx i_m]}
-      ) tr_m).
+      ELMO_equivocating_validators s ∪ {[idx i_m]})
+        tr_m).
   {
     assert (Hall_reachable :
       Forall (fun item =>
@@ -2353,8 +2353,8 @@ Proof.
   cut
     (input_valid_transition ELMOProtocol (existT i_m Send)
       (lift_to_composite_state ELMOComponent s i_m (state m), None)
-      (lift_to_composite_state ELMOComponent s i_m (state m <+> MkObservation Send m), Some m)
-    ); [by apply input_valid_transition_out |].
+      (lift_to_composite_state ELMOComponent s i_m (state m <+> MkObservation Send m), Some m))
+    ; [by apply input_valid_transition_out |].
   repeat split.
   - by apply finite_valid_trace_from_to_last_pstate in Htr_m_lift.
   - by apply option_valid_message_None.

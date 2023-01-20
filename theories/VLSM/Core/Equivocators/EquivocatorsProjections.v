@@ -501,8 +501,7 @@ Definition equivocator_vlsm_trace_project
         | Some (None, odescriptor) => Some (r, odescriptor)
         | Some (Some item', odescriptor) => Some (item' :: r, odescriptor)
         end
-      end
-    )
+      end)
     (Some ([], descriptor))
     tr.
 

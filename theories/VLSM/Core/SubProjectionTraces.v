@@ -431,8 +431,7 @@ Lemma transition_sub_projection
   : composite_transition sub_IM
     (existT
       (dexist (projT1 l) Hsub)
-      (projT2 l)
-    )
+      (projT2 l))
     (composite_state_sub_projection s, om)
     = (composite_state_sub_projection s', om').
 Proof.
@@ -460,8 +459,7 @@ Lemma valid_sub_projection
   : composite_valid sub_IM
     (existT
       (dexist (projT1 l) Hsub)
-      (projT2 l)
-    )
+      (projT2 l))
     (composite_state_sub_projection s, om).
 Proof. by destruct l. Qed.
 
@@ -481,8 +479,8 @@ Proof.
       (no_equivocations_additional_constraint_with_pre_loaded sub_IM
         (free_constraint sub_IM)
         seed)
-      (free_constraint sub_IM)
-    ) as Hincl.
+      (free_constraint sub_IM))
+    as Hincl.
   spec Hincl; [done |].
   match goal with
   |- context [pre_loaded_vlsm ?v _] =>

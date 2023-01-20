@@ -148,8 +148,7 @@ Proof.
   exact
     (StrictOrder_Asymmetric Hso
       (exist P a Ha) (exist P b Hb)
-      Hab Hba
-    ).
+      Hab Hba).
 Qed.
 
 Lemma precedes_transitive
@@ -164,8 +163,7 @@ Proof.
   exact
     (RelationClasses.StrictOrder_Transitive
       (exist P a Ha) (exist P b Hb) (exist P c Hc)
-      Hab Hbc
-    ).
+      Hab Hbc).
 Qed.
 
 (**

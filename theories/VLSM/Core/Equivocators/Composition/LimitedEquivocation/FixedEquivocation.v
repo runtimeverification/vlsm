@@ -341,8 +341,7 @@ Proof.
   intros [Hproper Hfixed].
   specialize
     (preloaded_equivocators_valid_trace_project_proper_initial IM
-      _ _ Htr _ _ _ HtrX Hproper
-    )
+      _ _ Htr _ _ _ HtrX Hproper)
     as Hiproper.
   split; [done |].
   intros i Hi. specialize (Hfixed i Hi).
@@ -923,14 +922,14 @@ Proof.
   }
   specialize
     (equivocators_trace_project_preserves_proper_fixed_equivocator_descriptors _ _ Hsufpre
-      final_descriptors eqv_item _ Hpr_suf Hproper
-    ) as Hproper_item.
+      final_descriptors eqv_item _ Hpr_suf Hproper)
+    as Hproper_item.
   destruct Hproper_item as [Hproper_item Hproper_fixed_item].
   specialize (Hproper_fixed_item _ Hno_equiv_item).
   specialize
     (no_equivocating_equivocators_transition_item_project IM eqv_item item
-      Hproper_fixed_item
-    ) as Hex.
+      Hproper_fixed_item)
+    as Hex.
   spec Hex.
   {
     apply (not_equivocating_index_has_singleton_state _ (elements equivocating));
@@ -1127,16 +1126,15 @@ Proof.
   specialize
     (finite_valid_trace_sub_projection (equivocator_IM IM) (elements equivocating)
       (equivocators_fixed_equivocations_constraint IM (elements equivocating))
-      (composite_has_been_directly_observed IM sX)
-    ) as Hproject.
+      (composite_has_been_directly_observed IM sX))
+    as Hproject.
   specialize (Hproject is tr).
   spec Hproject.
   { subst sX.
     rewrite <- (valid_trace_get_last Htr) in Hdescriptors |- *.
     apply
       (equivocators_trace_sub_item_input_is_seeded_or_sub_previously_sent
-        _ _ (valid_trace_forget_last Htr) descriptors Hdescriptors
-      ).
+        _ _ (valid_trace_forget_last Htr) descriptors Hdescriptors).
   }
   specialize (Hproject (valid_trace_forget_last Htr)).
 
@@ -1165,8 +1163,8 @@ Proof.
   destruct
     (equivocator_vlsm_transition_item_project (IM (projT1 (l item)))
       (composite_transition_item_projection (equivocator_IM IM) item)
-      (item_descriptors (projT1 (l item)))
-    ) as [(o, deqv') |]
+      (item_descriptors (projT1 (l item))))
+    as [(o, deqv') |]
     ; [| by congruence].
   destruct o as [item' |]; [| by congruence].
   inversion Hpr_item. subst output_itemX pre_descriptors. clear Hpr_item deqv'.
@@ -1178,8 +1176,8 @@ Proof.
   specialize
     (projection_has_not_been_directly_observed_is_equivocating _ _ (valid_trace_forget_last Htr)
       _ Hdescriptors
-      _ n item
-    ) as Hitem_equivocating.
+      _ n item)
+    as Hitem_equivocating.
   clear Hdescriptors n.
   spec Hitem_equivocating; [by rewrite Heqtr, !elem_of_app, elem_of_cons; auto |].
   specialize (Hitem_equivocating Houtput_select).
@@ -1199,8 +1197,8 @@ Proof.
       (composite_state_sub_projection (equivocator_IM IM) (elements equivocating) is)
       (finite_trace_sub_projection (equivocator_IM IM) (elements equivocating) tr)
       Hproject
-      (fun i => final_descriptors_m (proj1_sig i))
-    ) as Hsub_project.
+      (fun i => final_descriptors_m (proj1_sig i)))
+    as Hsub_project.
   simpl in Hsub_project.
   spec Hsub_project.
   {
@@ -1233,8 +1231,7 @@ Proof.
   destruct
     (equivocators_trace_project_finite_trace_sub_projection_commute IM (elements equivocating)
       final_descriptors_m initial_descriptors_m initial_descriptors' tr trXm trX'
-      Hproject_trXm Hpr_tr'
-    )
+      Hproject_trXm Hpr_tr')
     as [_ HeqtrX].
   clear Hproject_trXm Hpr_tr'.
 
@@ -1242,8 +1239,8 @@ Proof.
 
   remember
     (equivocators_state_project (sub_IM IM (elements equivocating)) initial_descriptors'
-      (composite_state_sub_projection (equivocator_IM IM) (elements equivocating) is)
-    ) as isX. clear HeqisX.
+      (composite_state_sub_projection (equivocator_IM IM) (elements equivocating) is))
+    as isX. clear HeqisX.
   eapply can_emit_from_valid_trace; [done |].
 
   subst.

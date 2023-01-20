@@ -907,8 +907,7 @@ Definition map_option
       match f x with
       | None => lb
       | Some b => b :: lb
-      end
-    )
+      end)
     [].
 
 Lemma map_option_app
@@ -1166,8 +1165,7 @@ Definition two_element_decompositions
         map
           (fun t => match t with (l2', e2, l3) => (l1, e1, l2', e2, l3) end)
           (one_element_decompositions l2)
-      end
-    )
+      end)
     (one_element_decompositions l).
 
 Lemma in_two_element_decompositions_iff

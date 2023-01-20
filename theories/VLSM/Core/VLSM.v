@@ -891,8 +891,7 @@ Lemma valid_state_prop_ind
   (IHgen :
     forall (s' : state) (l: label) (om om' : option message) (s : state)
       (Ht : input_valid_transition l (s, om) (s', om')) (Hs : P s),
-      P s'
-  )
+      P s')
   : forall (s : state) (Hs : valid_state_prop s), P s.
 Proof.
   intros.
@@ -2207,8 +2206,8 @@ Proof.
     ; split; try done.
     + assert
         (Hex : exists suffix0 : list transition_item,
-            (p ++ [last_p]) ++ last :: suffix = p ++ last_p :: suffix0
-        ) by (exists (last :: suffix); rewrite <- app_assoc; done)
+            (p ++ [last_p]) ++ last :: suffix = p ++ last_p :: suffix0)
+          by (exists (last :: suffix); rewrite <- app_assoc; done)
       ; specialize (Hind Hex); clear Hex
       ; destruct Hind as [Hptr _]
       ; destruct last
@@ -2222,8 +2221,8 @@ Proof.
       by rewrite finite_trace_last_is_last.
     + assert
         (Hex : exists suffix0 : Stream transition_item,
-            stream_app (p ++ [last_p])  (Cons last suffix) = stream_app p (Cons last_p suffix0)
-        ) by (exists (Cons last suffix); rewrite <- stream_app_assoc; done)
+            stream_app (p ++ [last_p])  (Cons last suffix) = stream_app p (Cons last_p suffix0))
+          by (exists (Cons last suffix); rewrite <- stream_app_assoc; done)
       ; specialize (Hind Hex); clear Hex
       ; destruct Hind as [Hptr _]
       ; destruct last
@@ -2242,8 +2241,7 @@ Proof.
            last_p
            {| l := l0; input := input0; destination := destination0; output := output0 |}
            Htr
-           eq_refl
-        ).
+           eq_refl).
       simpl.
       by rewrite finite_trace_last_is_last.
 Qed.
@@ -2668,8 +2666,7 @@ Lemma pre_traces_with_valid_inputs_are_valid is s tr
   (Htr : finite_valid_trace_init_to pre_loaded_with_all_messages_vlsm is s tr)
   (Hobs : forall m,
     trace_has_message (field_selector input) m tr ->
-    valid_message_prop X m
-  )
+    valid_message_prop X m)
   : finite_valid_trace_init_to X is s tr.
 Proof.
   revert s Htr Hobs.

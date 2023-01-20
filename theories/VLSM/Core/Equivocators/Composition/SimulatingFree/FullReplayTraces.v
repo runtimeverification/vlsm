@@ -166,8 +166,7 @@ Proof.
         if (decide (eqv ∈ l)) then equivocator_state_append (full_replay_state i) (is eqv)
         else full_replay_state i
       | _ =>  full_replay_state i
-      end
-    )).
+      end)).
   {
     intros Hcut; specialize (Hcut _ (incl_refl _) ltac:(apply NoDup_enum)).
     unfold replayed_initial_state_from, composite_apply_plan.
@@ -430,8 +429,8 @@ Proof.
   specialize
     (equivocator_state_append_valid (IM i) li
       (s (dexist i Hi)) om
-      (full_replay_state i) Hv
-    ) as Hlift.
+      (full_replay_state i) Hv)
+    as Hlift.
   cbn.
   by rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
 Qed.
@@ -451,8 +450,8 @@ Proof.
     (equivocator_state_append_transition (IM i) li
       (s (dexist i Hi)) om
       (s' (dexist i Hi)) om'
-      (full_replay_state i) Hv
-    ) as Hlift.
+      (full_replay_state i) Hv)
+    as Hlift.
   cbn in Ht.
   destruct (equivocator_transition _ _ _) as (_si', _om').
   inversion Ht; subst s' om'; clear Ht.

@@ -111,8 +111,7 @@ Proof.
       by specialize
         (VLSM_weak_embedding_has_been_sent
           (PreFreeSubE_PreFreeE_weak_embedding IM _ _ Heqv_state_s)
-          _ Hs m
-          ).
+          _ Hs m).
     + destruct Hseed as [i [Hi Hsent]].
       simpl.
       exists i.
@@ -371,8 +370,7 @@ Proof.
       simpl.
       by apply
         (zero_descriptor_transition_preserves_fixed_equivocation
-          IM (elements equivocating) _ _ _ _ _ Het Hes li
-        ).
+          IM (elements equivocating) _ _ _ _ _ Het Hes li).
   - by apply fixed_equivocation_has_replayable_message_prop.
 Qed.
 
@@ -438,8 +436,7 @@ Proof.
       simpl.
       by apply
         (zero_descriptor_transition_preserves_fixed_equivocation
-          IM [] _ _ _ _ _ Het Hes li
-        ).
+          IM [] _ _ _ _ _ Het Hes li).
   - clear isX sX trX HtrX. intro; intros.
     specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM []) as HinclE.
     destruct iom as [im |]; [| by exists [], eqv_state_s; split; constructor].
