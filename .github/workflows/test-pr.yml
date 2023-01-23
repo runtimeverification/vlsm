@@ -14,7 +14,6 @@ jobs:
       matrix:
         image:
           - 'coqorg/coq:8.16-ocaml-4.14-flambda'
-          - 'coqorg/coq:8.15-ocaml-4.14-flambda'
       fail-fast: false
     steps:
       - uses: actions/checkout@v3

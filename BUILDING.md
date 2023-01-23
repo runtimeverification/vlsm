@@ -46,7 +46,7 @@ Choose "y", in order to allow opam to modify `~/.profile`.
 ### Install a switch for opam
 
 ```shell
-opam switch create coq-8.15 --packages=ocaml-variants.4.13.1+options,ocaml-option-flambda
+opam switch create coq-8.16 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
 ```
 
 ### Update the current shell environment
@@ -59,7 +59,7 @@ eval $(opam env)
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq.8.15.2 coq-stdpp.1.7.0 coq-itauto
+opam install coq.8.16.1 coq-stdpp.1.8.0 coq-itauto
 ```
 
 ### Clone the project repository
@@ -81,17 +81,17 @@ make -j $(nproc)
 
 The latest Coq Platform release is always available using [this link](https://github.com/coq/platform/releases/latest). 
 
-However, for the purposes of demonstration, we will assume the archive is called `2022.04.1.zip`.
+However, for the purposes of demonstration, we will assume the archive is called `2022.09.1.zip`.
 
 ```shell
-wget https://github.com/coq/platform/archive/refs/tags/2022.04.1.zip
-unzip 2022.04.1.zip
+wget https://github.com/coq/platform/archive/refs/tags/2022.09.1.zip
+unzip 2022.09.1.zip
 ```
 
 ### Run the Platform scripts
 
 ```shell
-cd platform-2022.04.1
+cd platform-2022.09.1
 ./coq_platform_make.sh
 ```
 
@@ -99,17 +99,11 @@ cd platform-2022.04.1
 
 The Platform scripts will create a new opam switch, whose
 name can be viewed by running `opam switch`. Here, we assume
-the switch is called `__coq-platform.2022.04.1~8.15~2022.04`.
+the switch is called `__coq-platform.2022.09.1~8.16~2022.09`.
 
 ```shell
-opam switch __coq-platform.2022.04.1~8.15~2022.04
+opam switch __coq-platform.2022.09.1~8.16~2022.09
 eval $(opam env)
-```
-
-### Install the itauto library
-
-```shell
-opam install coq-itauto
 ```
 
 ### Clone the project repository
@@ -127,11 +121,11 @@ make -j $(nproc)
 
 ## Editor instructions
 
-We recommend using the Visual Studio Code editor, which you can download and install from [here](https://code.visualstudio.com/).
+We recommend using the Visual Studio Code (VS Code) editor, which you can download and install from [here](https://code.visualstudio.com/).
 
-After installing Visual Studio Code, you need to install the **Remote - WSL** extension. Click the *Connect to WSL* button, to open a new editor window in the WSL environment and open the project folder from inside this window.
+After installing VS Code, you need to install the **Remote - WSL** extension. Click the *Connect to WSL* button, to open a new editor window in the WSL environment and open the project folder from inside this window.
 
-Then install following extensions in the Remote WSL environment:
+Then, install the following extensions in the Remote WSL environment:
 
 - [the **VsCoq** extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq)
 - [the **Fast Unicode Math Characters** extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode)
