@@ -43,7 +43,7 @@ DUPLICATES.md: $(DOCVFILES)
 alectryon: $(ALECTRYONHTMLFILES)
 .PHONY: alectryon
 
-# requires https://github.com/palmskog/rvdpdgraph/tree/v8.15
+# requires https://github.com/palmskog/rvdpdgraph/tree/v8.16
 rvdpd: $(SVGFILES)
 .PHONY: rvdpd
 

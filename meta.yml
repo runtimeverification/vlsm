@@ -45,15 +45,15 @@ license:
   file: LICENSE.md
 
 supported_coq_versions:
-  text: 8.15 and later
-  opam: '{>= "8.15"}'
+  text: 8.16 and later
+  opam: '{>= "8.16"}'
 
 dependencies:
 - opam:
     name: coq-stdpp
-    version: '{>= "1.7.0"}'
+    version: '{>= "1.8.0"}'
   description: |-
-    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.7.0 or later
+    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.8.0 or later
 - opam:
     name: coq-itauto
   description: |-
@@ -65,7 +65,6 @@ dependencies:
 
 tested_coq_opam_versions:
 - version: '8.16-ocaml-4.14-flambda'
-- version: '8.15-ocaml-4.14-flambda'
 
 namespace: VLSM
 
