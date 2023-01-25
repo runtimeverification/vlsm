@@ -138,7 +138,7 @@ Lemma list_to_set_size
 Proof.
   induction l; cbn.
   - by rewrite size_empty; lia.
-  - specialize (union_size_le_sum ({[a]}) (list_to_set l)) as Hun_size.
+  - specialize (union_size_le_sum ({[ a ]}) (list_to_set l)) as Hun_size.
     by rewrite size_singleton in Hun_size; lia.
 Qed.
 

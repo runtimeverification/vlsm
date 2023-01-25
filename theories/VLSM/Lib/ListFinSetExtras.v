@@ -10,9 +10,9 @@ Definition set := C.
 
 Definition empty_set : set := ∅.
 
-Definition set_add (a : A) (x : set) : set := {[a]} ∪ x.
+Definition set_add (a : A) (x : set) : set := {[ a ]} ∪ x.
 
-Definition set_remove (a : A) (x : set) : set := x ∖ {[a]}.
+Definition set_remove (a : A) (x : set) : set := x ∖ {[ a ]}.
 
 Definition set_union (x y : set) : set := x ∪ y.
 

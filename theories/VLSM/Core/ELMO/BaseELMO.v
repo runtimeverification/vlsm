@@ -571,7 +571,7 @@ Inductive rec_obs : State -> Observation -> Prop :=
 Equations rec_obs_fn (s : State) : listset Observation by wf (sizeState s) lt :=
 | {| obs := [] |} => ∅
 | {| obs := o :: os; adr := a |} =>
-  {[o]} ∪ rec_obs_fn (state (message o)) ∪ rec_obs_fn {| obs := os; adr := a |}.
+  {[ o ]} ∪ rec_obs_fn (state (message o)) ∪ rec_obs_fn {| obs := os; adr := a |}.
 Next Obligation.
 Proof. by intros [? []] os a _; unfold sizeState; cbn; lia. Qed.
 Next Obligation.

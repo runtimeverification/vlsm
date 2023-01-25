@@ -1952,7 +1952,7 @@ Lemma ELMO_equivocating_validators_step_update_Receive
   ELMOComponentRAMTransition i Receive (sigma i) s' m ->
     ELMO_equivocating_validators (state_update ELMOComponent sigma i s')
       ⊆
-    ELMO_equivocating_validators sigma ∪ {[adr (state m)]}.
+    ELMO_equivocating_validators sigma ∪ {[ adr (state m) ]}.
 Proof.
   intros Hsigma Ht.
   assert (Hte : input_valid_transition ReachELMO
@@ -2005,13 +2005,13 @@ Lemma ELMO_update_state_with_initial
   (s : composite_state ELMOComponent)
   (Hs : valid_state_prop ELMOProtocol s)
   (i : index)
-  (Heqv : (sum_weights (ELMO_equivocating_validators s ∪ {[idx i]}) <= threshold)%R)
+  (Heqv : (sum_weights (ELMO_equivocating_validators s ∪ {[ idx i ]}) <= threshold)%R)
   (si : State)
   (Hsi : vinitial_state_prop (ELMOComponent i) si) :
     valid_state_prop ELMOProtocol (state_update ELMOComponent s i si) /\
     ELMO_equivocating_validators (state_update ELMOComponent s i si)
       ⊆
-    ELMO_equivocating_validators s ∪ {[idx i]}.
+    ELMO_equivocating_validators s ∪ {[ idx i ]}.
 Proof.
   assert (Hincl : VLSM_incl ELMOProtocol ReachELMO) by apply constraint_preloaded_free_incl.
   assert (Htr_min := ELMO_state_to_minimal_equivocation_trace_valid _ Hs).
@@ -2046,11 +2046,11 @@ Proof.
     by rewrite state_update_twice_neq.
   }
   cut (ELMO_equivocating_validators (state_update ELMOComponent sf i si) ⊆
-        ELMO_equivocating_validators sf ∪ {[idx i]}).
+        ELMO_equivocating_validators sf ∪ {[ idx i ]}).
   {
     intro Hsfisi_eqvs'.
     assert (Hsfisi_eqvs :
-      ELMO_equivocating_validators (state_update ELMOComponent sf i si) ⊆ s_eqvs ∪ {[idx i]}).
+      ELMO_equivocating_validators (state_update ELMOComponent sf i si) ⊆ s_eqvs ∪ {[ idx i ]}).
     {
       etransitivity; [done |].
       by apply union_subseteq; split; [apply union_subseteq_l' | apply union_subseteq_r'].
@@ -2160,7 +2160,7 @@ Proof.
   apply ELMO_msg_valid_full_has_sender in ELMO_mv_msg_valid_full0 as Hsender.
   destruct Hsender as [i_m Hsender].
   assert (Heqv :
-    (sum_weights (ELMO_equivocating_validators s ∪ {[idx i_m]}) <= threshold)%R).
+    (sum_weights (ELMO_equivocating_validators s ∪ {[ idx i_m ]}) <= threshold)%R).
   {
     etransitivity; [| apply Hc].
     apply sum_weights_subseteq; [by apply NoDup_elements.. |].
@@ -2206,7 +2206,7 @@ Proof.
     Forall (fun item =>
       ELMO_equivocating_validators (lift_to_composite_state ELMOComponent s i_m (destination item))
         ⊆
-      ELMO_equivocating_validators s ∪ {[idx i_m]})
+      ELMO_equivocating_validators s ∪ {[ idx i_m ]})
         tr_m).
   {
     assert (Hall_reachable :
@@ -2251,7 +2251,7 @@ Proof.
     constructor; [| by constructor].
     assert (Hsis0_eqvs :
       ELMO_equivocating_validators (state_update ELMOComponent s i_m s0)
-        ⊆ ELMO_equivocating_validators s ∪ {[adr (state m)]}).
+        ⊆ ELMO_equivocating_validators s ∪ {[ adr (state m) ]}).
     {
       apply valid_trace_get_last in Htr_m as <-.
       destruct_list_last tr tr' lst Heq; [done |].
@@ -2265,14 +2265,14 @@ Proof.
     destruct (Ht) as [(_ & _ & H_v) H_t];
       inversion H_v as [? ? [] |]; subst; inversion H_t; subst; cycle 1.
     - transitivity (ELMO_equivocating_validators (state_update ELMOComponent s i_m s0)
-        ∪ {[adr (state m)]}).
+        ∪ {[ adr (state m) ]}).
       + by eapply union_subseteq_l', ELMO_equivocating_validators_step_update_Send;
           [| by constructor; state_update_simpl].
       + by apply union_subseteq; split; [| apply union_subseteq_r'].
     - destruct (decide (adr (state m) = adr (state m0))) as [Hmm0 | Hnmm0].
       {
         transitivity (ELMO_equivocating_validators (state_update ELMOComponent s i_m s0)
-          ∪ {[adr (state m)]}).
+          ∪ {[ adr (state m) ]}).
         - rewrite Hmm0.
           by eapply ELMO_equivocating_validators_step_update_Receive;
             [| constructor; state_update_simpl].
@@ -2281,7 +2281,7 @@ Proof.
       assert (Hm0_obs : m0 ∈ messages (s i)) by (apply Hlast_obs; left; done).
       destruct (decide (i_m = i)); cycle 1.
       + transitivity (ELMO_equivocating_validators (state_update ELMOComponent s i_m s0)
-          ∪ {[adr (state m)]});
+          ∪ {[ adr (state m) ]});
           [| by apply union_subseteq; split; [| by apply union_subseteq_r']].
         eapply union_subseteq_l', ELMO_equivocating_validators_step_update_Receive_already_Observed;
           [done | | by constructor; state_update_simpl].

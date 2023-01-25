@@ -22,8 +22,8 @@ sed -i 's/ )/)/g' $(find -name "*.v")
 # Remove superfluous space after a '[' and before a ']'.
 # Note: this might require manual tinkering to ensure no
 # weird corner cases are present.
-sed -i 's/\[ /[/g' $(find -name "*.v")
-sed -i 's/ ]/]/g' $(find -name "*.v")
+sed -i 's/\([^\{]\)\[ /\1[/g' $(find -name "*.v")
+sed -i 's/ ]\([^}]\)/]\1/g' $(find -name "*.v")
 
 # Add missing space around a |
 sed -i 's/|\([^]}| -]\)/| \1/g' $(find -name "*.v")

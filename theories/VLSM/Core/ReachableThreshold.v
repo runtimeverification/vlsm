@@ -72,7 +72,7 @@ Lemma pivotal_validator_extension
   (sum_weights (vs ∪ vsfix) > threshold)%R /\
   exists v,
     v ∈ vs /\
-    (sum_weights (vs ∖ {[v]} ∪ vsfix) <= threshold)%R.
+    (sum_weights (vs ∖ {[ v ]} ∪ vsfix) <= threshold)%R.
 Proof.
   intros vsfix vss Hvsfix Hdisj Hall.
   destruct (pivotal_validator_extension_list (elements vsfix) (elements vss))
@@ -122,7 +122,7 @@ Lemma validators_pivotal_ind
   (sum_weights vs > threshold)%R /\
   exists v,
     v ∈ vs /\
-    (sum_weights (vs ∖ {[v]}) <= threshold)%R.
+    (sum_weights (vs ∖ {[ v ]}) <= threshold)%R.
 Proof.
   intros vss Hvss.
   destruct (pivotal_validator_extension ∅ vss)
@@ -145,7 +145,7 @@ Lemma sufficient_validators_pivotal
     (sum_weights vs > threshold)%R /\
     exists v,
       v ∈ vs /\
-      (sum_weights (vs ∖ {[v]}) <= threshold)%R.
+      (sum_weights (vs ∖ {[ v ]}) <= threshold)%R.
 Proof.
   destruct (rt_reachable (1 := Hrt)) as [vs Hweight].
   apply (validators_pivotal_ind vs) in Hweight as (vs' & Hincl & Hvs').
@@ -171,7 +171,7 @@ Lemma exists_pivotal_validator :
   exists v, potentially_pivotal v.
 Proof.
   destruct sufficient_validators_pivotal as (vs & Hgt & v & Hin & Hlte).
-  exists v, (vs ∖ {[v]}); split_and!.
+  exists v, (vs ∖ {[ v ]}); split_and!.
   - by rewrite elem_of_difference, elem_of_singleton; intros [].
   - done.
   - rewrite (sum_weights_in v) in Hgt by done.
