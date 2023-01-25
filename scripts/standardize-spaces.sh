@@ -4,6 +4,8 @@
 sed -i 's/,\([^ ]\)/, \1/g' $(find -name "*.v")
 
 # Add missing space after a semicolon.
+# Note: this clashes with the notation << ; >>
+# which needs to be fixed manually.
 sed -i 's/;\([^ ]\)/; \1/g' $(find -name "*.v")
 
 # Add missing space after a tilde.
@@ -26,6 +28,8 @@ sed -i 's/\([^\{]\)\[ /\1[/g' $(find -name "*.v")
 sed -i 's/ ]\([^}]\)/]\1/g' $(find -name "*.v")
 
 # Add missing space around a |
+# Note: this affects the notation [| |] which
+# needs to be fixed manually.
 sed -i 's/|\([^]}| -]\)/| \1/g' $(find -name "*.v")
 sed -i 's/\([^[{| ]\)|/\1 |/g' $(find -name "*.v")
 
