@@ -52,7 +52,7 @@ Fixpoint min_predecessors
   :=
   match remainder with
   | [] => min
-  | h::t =>
+  | h :: t =>
     if decide (count_predecessors h < count_predecessors min)
     then min_predecessors t h
     else min_predecessors t min
@@ -148,8 +148,7 @@ Proof.
   exact
     (StrictOrder_Asymmetric Hso
       (exist P a Ha) (exist P b Hb)
-      Hab Hba
-    ).
+      Hab Hba).
 Qed.
 
 Lemma precedes_transitive
@@ -164,8 +163,7 @@ Proof.
   exact
     (RelationClasses.StrictOrder_Transitive
       (exist P a Ha) (exist P b Hb) (exist P c Hc)
-      Hab Hbc
-    ).
+      Hab Hbc).
 Qed.
 
 (**
@@ -178,12 +176,12 @@ Lemma count_predecessors_zero
 Proof.
   unfold count_predecessors.
   induction l; [done |].
-  inversion_clear HPl as [|? ? HPa HPl0].
+  inversion_clear HPl as [| ? ? HPa HPl0].
   specialize (IHl0 HPl0).
   apply Exists_cons.
   rewrite filter_cons.
   destruct (decide (precedes a a)); [by contradict p; apply precedes_irreflexive |].
-  assert ({ l0=[] }+{l0 <> [] }) by (destruct l0;clear;[left|right];congruence).
+  assert ({ l0=[] }+{l0 <> [] }) by (destruct l0; clear; [left | right]; congruence).
   destruct H as [? | Hl0]; [subst l0 |]; [by left |].
   specialize (IHl0 Hl0).
   apply Exists_exists in IHl0.
@@ -194,7 +192,7 @@ Proof.
     specialize (Hall HPl0 x Hin).
     match goal with |- ?X = 0  => cut (X <= 0) end.
     lia.
-    rewrite <- Hlen;clear Hlen.
+    rewrite <- Hlen; clear Hlen.
     apply filter_length_fn.
     revert HPl0.
     intro.
@@ -445,7 +443,7 @@ Fixpoint top_sort_n
   (l : list A)
   : list A
   :=
-  match n,l with
+  match n, l with
   | 0, _ => []
   | _, [] => []
   | S n', a :: l' =>
@@ -481,7 +479,7 @@ Proof.
     rewrite <- Heql'. rewrite <- H0. intro Hlen.
     specialize (IHn Hlen).
     split; intros x Hx; rewrite elem_of_cons in Hx;
-      destruct Hx as [Heq|Hinx]; try (subst x).
+      destruct Hx as [Heq | Hinx]; try (subst x).
     + by right; apply IHn; left.
     + destruct (decide (x = min)); try subst x.
       * by left.
@@ -612,7 +610,7 @@ Proof.
     }
     destruct l1 as [| _min l1]; inversion Heq; [by subst |].
     subst _min.
-    destruct (decide (a ∈ l')) as [i|i].
+    destruct (decide (a ∈ l')) as [i | i].
     - apply (IHn i l1 l2 Ha2 H4).
     - assert (Hmina : min = a).
       destruct (decide (min = a0)).
@@ -689,7 +687,7 @@ Proof.
   intros contra.
   specialize (Htop max a contra).
 
-  assert (Hinmax: max ∈ l) by (apply maximal_element_in; itauto).
+  assert (Hinmax : max ∈ l) by (apply maximal_element_in; itauto).
   assert (Hinatop : a ∈ top_sort l) by (apply Hseteq; itauto).
   apply elem_of_list_split in Hinatop.
   destruct Hinatop as [prefA [sufA HeqA]].

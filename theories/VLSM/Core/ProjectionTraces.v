@@ -139,7 +139,7 @@ Qed.
 
 Lemma composite_transition_item_projection_neq
   (item : composite_transition_item IM)
-  (Hneq: j <> projT1 (l item))
+  (Hneq : j <> projT1 (l item))
   : @pre_VLSM_projection_transition_item_project _ (composite_type IM) _
       (composite_project_label IM j) (fun s => s j)
       item
@@ -228,7 +228,7 @@ Proof.
   destruct Ht as [[Hs1 [Hom1 [Hv _]]] Ht].
   simpl in Hv. simpl in Ht. cbn in Ht.
   destruct l as [il l].
-  destruct (vtransition _ _ _) as (si', om') eqn:Htj.
+  destruct (vtransition _ _ _) as (si', om') eqn: Htj.
   inversion Ht; subst; clear Ht.
   by state_update_simpl.
 Qed.
@@ -478,7 +478,7 @@ Lemma component_projection_validator_prop_is_induced
 Proof.
   split; intros Hvalidator li si omi Hvi.
   - apply Hvalidator in Hvi as (sX & <- & Hv).
-    by eexists (existT j li), sX; split; [apply composite_project_label_eq |..].
+    by eexists (existT j li), sX; split; [apply composite_project_label_eq | ..].
   - apply Hvalidator in Hvi as ([i _li] & sX & []).
     unfold composite_project_label in tiv_label_project; case_decide; [subst; cbn in * | done].
     apply Some_inj in tiv_label_project; subst _li.

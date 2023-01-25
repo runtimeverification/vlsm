@@ -184,7 +184,7 @@ Qed.
 Lemma strong_fixed_equivocation_subsumption s m
   : strong_fixed_equivocation s m -> fixed_equivocation s m.
 Proof.
-  intros [Hobs | Hemit]; [left|right].
+  intros [Hobs | Hemit]; [left | right].
   - by apply sent_by_non_equivocating_are_directly_observed.
   - revert Hemit. apply VLSM_incl_can_emit.
     by apply Equivocators_Strong_Fixed_incl.
@@ -228,7 +228,7 @@ Context
   .
 
 Lemma equivocators_composition_for_directly_observed_index_incl_embedding
-  (s: state)
+  (s : state)
   : VLSM_embedding
     (equivocators_composition_for_directly_observed IM indices1 s)
     (equivocators_composition_for_directly_observed IM indices2 s)
@@ -414,7 +414,7 @@ Proof.
 Qed.
 
 #[local] Lemma fixed_input_valid_transition_sub_projection_helper
-  (Hs_pr: valid_state_prop (equivocators_composition_for_sent IM equivocators base_s)
+  (Hs_pr : valid_state_prop (equivocators_composition_for_sent IM equivocators base_s)
     (composite_state_sub_projection IM (elements equivocators) s))
   l
   (e : sub_index_prop (elements equivocators) (projT1 l))
@@ -446,7 +446,7 @@ Qed.
 
 (** See the lemma [fixed_output_has_strong_fixed_equivocation] below. *)
 #[local] Lemma fixed_output_has_strong_fixed_equivocation_helper
-  (Hs_pr: valid_state_prop (equivocators_composition_for_sent IM equivocators base_s)
+  (Hs_pr : valid_state_prop (equivocators_composition_for_sent IM equivocators base_s)
     (composite_state_sub_projection IM (elements equivocators) s))
   sf
   (Hfuture : in_futures PreFree sf base_s)
@@ -457,7 +457,7 @@ Proof.
   destruct (decide (projT1 l ∈ elements equivocators)).
   - apply
       (fixed_input_valid_transition_sub_projection_helper Hs_pr _ e) in Ht.
-    by right; eexists _,_,_.
+    by right; eexists _, _, _.
   - left.
     exists (projT1 l). split; [done |].
     apply (VLSM_projection_in_futures
@@ -486,9 +486,9 @@ End sec_fixed_finite_valid_trace_sub_projection_helper_lemmas.
 *)
 Lemma fixed_finite_valid_trace_sub_projection_helper
   si s tr
-  (Htr: finite_valid_trace_init_to Fixed si s tr)
+  (Htr : finite_valid_trace_init_to Fixed si s tr)
   base_s
-  (Hfuture: in_futures PreFree s base_s)
+  (Hfuture : in_futures PreFree s base_s)
   : finite_valid_trace_from_to (equivocators_composition_for_sent IM equivocators base_s)
     (composite_state_sub_projection IM (elements equivocators) si)
     (composite_state_sub_projection IM (elements equivocators) s)
@@ -515,7 +515,7 @@ Proof.
     split; cycle 1.
     + intros m Hobs.
       eapply @has_been_directly_observed_step_update with (msg := m) (vlsm := Free) in Hpre_t.
-      apply composite_has_been_directly_observed_free_iff,Hpre_t in Hobs.
+      apply composite_has_been_directly_observed_free_iff, Hpre_t in Hobs.
       destruct Hobs as [Hitem | Hobs]
       ; [| by apply composite_has_been_directly_observed_free_iff, Htr_obs in Hobs].
       apply valid_trace_last_pstate in Htr.
@@ -576,13 +576,13 @@ Qed.
 Lemma fixed_directly_observed_has_strong_fixed_equivocation f
   (Hf : valid_state_prop Fixed f)
   m
-  (Hobs: composite_has_been_directly_observed IM f m)
+  (Hobs : composite_has_been_directly_observed IM f m)
   : strong_fixed_equivocation IM equivocators f m.
 Proof.
   apply (VLSM_incl_valid_state Fixed_incl_Preloaded) in Hf as Hfuture.
   apply in_futures_refl in Hfuture.
   apply valid_state_has_trace in Hf as [is [tr Htr]].
-  eapply fixed_finite_valid_trace_sub_projection_helper in Htr as Htr_pr; [|done].
+  eapply fixed_finite_valid_trace_sub_projection_helper in Htr as Htr_pr; [| done].
   by apply Htr_pr.
 Qed.
 
@@ -595,9 +595,9 @@ Proof.
   destruct Hsf as [tr Htr].
   apply finite_valid_trace_from_to_complete_left in Htr as [is [trs [Htr Hs]]].
   apply fixed_finite_valid_trace_sub_projection in Htr as Hpr_tr.
-  apply proj1, finite_valid_trace_from_to_app_split,proj1, valid_trace_forget_last in Htr.
+  apply proj1, finite_valid_trace_from_to_app_split, proj1, valid_trace_forget_last in Htr.
   rewrite (finite_trace_sub_projection_app IM (elements equivocators)) in Hpr_tr.
-  apply proj1, finite_valid_trace_from_to_app_split,proj1, valid_trace_last_pstate in Hpr_tr.
+  apply proj1, finite_valid_trace_from_to_app_split, proj1, valid_trace_last_pstate in Hpr_tr.
   subst s. simpl.
   by rewrite <- (finite_trace_sub_projection_last_state IM _ _ _ _ Htr).
 Qed.
@@ -768,7 +768,7 @@ Lemma lift_sub_state_to_sent_by_non_equivocating_iff s eqv_is m
   : sent_by_non_equivocating IM equivocators s m <->
     sent_by_non_equivocating IM equivocators (lift_sub_state_to IM (elements equivocators) s eqv_is) m.
 Proof.
-  by split; intros [i [Hi Hsent]]; exists i; split; [done | | done | ]
+  by split; intros [i [Hi Hsent]]; exists i; split; [done | | done |]
   ; revert Hsent; rewrite lift_sub_state_to_neq.
 Qed.
 
@@ -833,7 +833,7 @@ Proof.
     intros s om [Hv Hc].
     split.
     + by cbn; rewrite lift_sub_state_to_neq.
-    + destruct om as [m|]; [| done].
+    + destruct om as [m |]; [| done].
       by apply lift_sub_state_to_strong_fixed_equivocation.
   - intros [i liX] lY.
     unfold remove_equivocating_state_project;
@@ -931,7 +931,7 @@ Proof.
     + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
       destruct_dec_sig i j Hj Heq; subst i; cbn; unfold sub_IM; cbn.
       by rewrite lift_sub_state_to_eq with (Hi := Hj).
-    + destruct om as [m|]; [| done]; cbn.
+    + destruct om as [m |]; [| done]; cbn.
       destruct Hv as (_ & Hm & _).
       apply emitted_messages_are_valid_iff in Hm.
       destruct Hm as [[Hinit | Hobs] | Hemit].
@@ -1053,10 +1053,10 @@ Context
   (non_equivocators := list_to_set (enum index) ∖ equivocators)
   (Free := free_composite_vlsm IM)
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
-  (FixedNonEquivocating:= pre_induced_sub_projection IM (elements non_equivocators)
+  (FixedNonEquivocating := pre_induced_sub_projection IM (elements non_equivocators)
                                 (fixed_equivocation_constraint IM equivocators))
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
-  (StrongFixedNonEquivocating:= pre_induced_sub_projection IM (elements non_equivocators)
+  (StrongFixedNonEquivocating := pre_induced_sub_projection IM (elements non_equivocators)
                                 (strong_fixed_equivocation_constraint IM equivocators))
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .

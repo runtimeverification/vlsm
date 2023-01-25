@@ -74,7 +74,7 @@ Context
 *)
 Definition projection_validator_prop :=
   forall li si omi,
-    input_valid PreY li (si,omi) ->
+    input_valid PreY li (si, omi) ->
     exists lX sX, InputValidation label_project state_project li si omi lX sX.
 
 (**
@@ -109,7 +109,7 @@ Lemma projection_validator_messages_transitions
 Proof.
   intros Hvalidator li si omi Hpvi.
   apply Hvalidator in Hpvi as (l & s & Hiv).
-  destruct (vtransition X l (s, omi)) as (s', omo) eqn:Ht.
+  destruct (vtransition X l (s, omi)) as (s', omo) eqn: Ht.
   eexists l, s, s', omo; split with (tv_tiv := Hiv) (tv_transition := Ht).
 Qed.
 
@@ -239,7 +239,7 @@ Lemma induced_validator_valid_is_input_valid
   (Hproj : VLSM_projection X pre_projection_induced_validator label_project state_project)
   l s om
   : vvalid projection_induced_validator l (s, om) ->
-      input_valid pre_projection_induced_validator l (s,om).
+      input_valid pre_projection_induced_validator l (s, om).
 Proof.
   intro Hv.
   destruct (id Hv) as (lX & sX & [HlX  HsX (Hps & Hopm & _)]); cbn in HsX; subst.
@@ -481,8 +481,8 @@ Lemma projection_induced_validator_eq
   : VLSM_eq X1 X2 -> VLSM_eq XY1 XY2.
 Proof.
   intro Heq; apply VLSM_eq_incl_iff; split.
-  - by apply (projection_induced_validator_incl MX1 MX2); [..| apply VLSM_eq_proj1].
-  - by apply (projection_induced_validator_incl MX2 MX1); [..| apply VLSM_eq_proj2].
+  - by apply (projection_induced_validator_incl MX1 MX2); [.. | apply VLSM_eq_proj1].
+  - by apply (projection_induced_validator_incl MX2 MX1); [.. | apply VLSM_eq_proj2].
 Qed.
 
 End sec_projection_induced_validator_incl.
@@ -854,7 +854,7 @@ Proof.
   - by intros m [Him | Hpm]; right; [by apply Hinits |].
   - intros l s iom [sX [<- Hv]].
     exists (existT i l), sX.
-    by split; [apply composite_project_label_eq |..].
+    by split; [apply composite_project_label_eq | ..].
   - intros l s iom s' oom.
     cbn; unfold lift_to_composite_state' at 1.
     state_update_simpl.
@@ -898,7 +898,7 @@ Proof.
 Qed.
 
 Lemma composite_vlsm_induced_projection_validator_iff
-  (Hno_inits : forall m, ~vinitial_message_prop (IM i) m)
+  (Hno_inits : forall m, ~ vinitial_message_prop (IM i) m)
   : VLSM_eq
       composite_vlsm_induced_projection_validator
       (composite_vlsm_induced_validator IM constraint i).

@@ -64,7 +64,7 @@ Context
     RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
   (limited_constraint := tracewise_limited_equivocation_constraint (Ci := Ci) IM threshold sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
-  (Hvalidator: forall i : index, component_message_validator_prop IM limited_constraint i)
+  (Hvalidator : forall i : index, component_message_validator_prop IM limited_constraint i)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
   (message_dependencies : message -> Cm)
@@ -83,9 +83,9 @@ Context
 Section sec_fixed_limited_selection.
 
 Context
-  (byzantine: Ci)
+  (byzantine : Ci)
   (non_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
-  (Hlimit: (sum_weights byzantine <= threshold)%R)
+  (Hlimit : (sum_weights byzantine <= threshold)%R)
   (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine (fun i : index => i) sender)
   (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci threshold
     := equivocation_dec_tracewise IM threshold (fun i => i) sender)
@@ -125,7 +125,7 @@ Proof.
   apply map_eq_cons in Hitem_suf_pr as [item [suf [Heqitem_suf [Hitem_pr Hsuf_pr]]]].
   subst tr item_suf. clear Hsuf_pr.
   subst itemX. cbn in Hm0.
-  change (pre ++ item::suf) with (pre ++ [item] ++ suf) in Htr.
+  change (pre ++ item :: suf) with (pre ++ [item] ++ suf) in Htr.
   destruct Htr as [Htr Hinit].
   apply (finite_valid_trace_from_to_app_split PreNonByzantine) in Htr.
   destruct Htr as [Hpre Hitem].
@@ -285,7 +285,7 @@ Context
   (Hchannel : channel_authentication_prop IM Datatypes.id sender)
   (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender :=
     channel_authentication_sender_safety _ _ _ Hchannel)
-  (Hvalidator:
+  (Hvalidator :
     forall i : index,
       msg_dep_limited_equivocation_message_validator_prop (Cv := Ci)
         IM threshold full_message_dependencies sender i)
@@ -299,9 +299,9 @@ Context
   for weight-limited equivocation.
 *)
 Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
-  (byzantine: Ci)
+  (byzantine : Ci)
   (non_byzantine := difference (list_to_set (enum index)) byzantine)
-  (Hlimited: (sum_weights byzantine <= threshold)%R)
+  (Hlimited : (sum_weights byzantine <= threshold)%R)
   sub_l sub_s iom sub_sf oom
   (Ht_sub : input_valid_transition
       (pre_loaded_fixed_non_byzantine_vlsm IM byzantine Datatypes.id sender)
@@ -355,12 +355,12 @@ Existing Instance elem_of_dec_slow.
   is included in <<byzantine>>.
 *)
 Lemma lift_fixed_byzantine_traces_to_limited
-  (s: composite_state IM)
-  (tr: list (composite_transition_item IM))
-  (byzantine: Ci)
+  (s : composite_state IM)
+  (tr : list (composite_transition_item IM))
+  (byzantine : Ci)
   (non_byzantine := difference (list_to_set (enum index)) byzantine)
-  (Hlimited: (sum_weights byzantine <= threshold)%R)
-  (Hbyzantine:
+  (Hlimited : (sum_weights byzantine <= threshold)%R)
+  (Hbyzantine :
     fixed_byzantine_trace_alt_prop IM byzantine Datatypes.id sender s tr)
   (s_reset_byzantine :=
     lift_sub_state IM (elements non_byzantine)
@@ -461,7 +461,7 @@ Proof.
   - intros (byzantine & Hlimited & Hbyzantine).
     apply lift_fixed_byzantine_traces_to_limited in Hbyzantine
        as [Hbtr Heqv_byzantine] ; [| done].
-    eexists _,_, byzantine; do 3 (split; [done |]); split.
+    eexists _, _, byzantine; do 3 (split; [done |]); split.
     + extensionality sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; cbn.
       unfold lift_sub_state.
       by rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
@@ -474,7 +474,7 @@ Proof.
     ; [by apply fixed_non_equivocating_incl_fixed_non_byzantine |].
     apply fixed_non_equivocating_traces_char.
     symmetry in His_pr, Htr_pr.
-    eexists _,_; split; [| done].
+    eexists _, _; split; [| done].
     eapply msg_dep_fixed_limited_equivocation_witnessed in Hbtr as [_ Hbtr]; [| done..].
     revert Hbtr; apply VLSM_incl_finite_valid_trace.
     apply fixed_equivocation_vlsm_composition_index_incl.

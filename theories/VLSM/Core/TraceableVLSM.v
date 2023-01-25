@@ -551,7 +551,7 @@ Proof.
     + replace i with j in * by (destruct (decide (i = j));
         [| contradict n; subst; apply StdppListSet.set_remove_3]; done).
       by erewrite indexed_composite_state_to_trace_reflects_initiality_1;
-        [..| done]; apply composite_tv_state_destructor_initial.
+        [.. | done]; apply composite_tv_state_destructor_initial.
   - by intros; subst; clear Heq1; contradict Hdestruct;
       eapply choosing_well_position_exists; [apply Hchoose |].
 Qed.
@@ -593,7 +593,7 @@ Proof.
   intros ? ? ? ?.
   apply_funelim (indexed_composite_state_to_trace choose s Hs indices);
     clear choose s Hs indices;
-    [by inversion 4; inversion 1 |..];
+    [by inversion 4; inversion 1 | ..];
     intros ? ? ? idx indices [j nj].
   - intros * -> Hind _ _ i Hi is' tr' [=] _item H_item; subst is' tr'.
     apply elem_of_app in H_item as [H_item | H_item].
@@ -626,7 +626,7 @@ Proof.
   intros choose Hwell s' Hs' indices; revert Hwell.
   apply_funelim (indexed_composite_state_to_trace choose s' Hs' indices);
     clear choose s' Hs' indices;
-    [by inversion 5 |..];
+    [by inversion 5 | ..];
     intros ? ? ? idx indices [j jn].
   - intros * -> Hind _ _ _ _ _ ? ? [= -> <-].
     rewrite finite_trace_last_is_last.
@@ -653,7 +653,7 @@ Proof.
   intros choose Hchoose s Hs indices; revert Hchoose.
   apply_funelim (indexed_composite_state_to_trace choose s Hs indices);
     clear choose s Hs indices; intros choose s' Hs';
-    [by inversion 4; subst; constructor |..];
+    [by inversion 4; subst; constructor | ..];
     intros idx indices.
   - intros ? ? ? ? _ ? ? -> Hind _ _ Hchoose Hnodup Hinitial is' tr' [= -> <-].
     eapply composite_tv_state_destructor_preserves_not_in_indices_initial  in Hinitial; [| done..].
@@ -746,8 +746,8 @@ Proof.
   revert Hinitial; generalize (enum index); intro indices; revert Hwell HchooseP.
   apply_funelim (indexed_composite_state_to_trace choose s' Hs' indices);
     clear choose s' Hs' indices;
-    [by intros; inversion Heqis_tr; subst; destruct pre |..];
-    intros choose s' Hs' idx indices (j,nj); cbn.
+    [by intros; inversion Heqis_tr; subst; destruct pre | ..];
+    intros choose s' Hs' idx indices (j, nj); cbn.
   - intros item s Hdestruct Hchoice is tr Heq ? _ _ ? ? ? ? ? ? [= <- <-] **;
       rewrite Heq in Hind.
     eapply composite_tv_state_destructor_preserves_not_in_indices_initial in Hinitial as Hinitials;

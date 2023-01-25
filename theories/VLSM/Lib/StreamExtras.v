@@ -8,13 +8,13 @@ Lemma stream_eq_hd_tl {A} (s s' : Stream A) :
   hd s = hd s' -> tl s = tl s' -> s = s'.
 Proof. by destruct s, s'; cbn; intros -> ->. Qed.
 
-Lemma fHere [A:Type] (P: Stream A -> Prop) : forall s, ForAll P s -> P s.
+Lemma fHere [A : Type] (P : Stream A -> Prop) : forall s, ForAll P s -> P s.
 Proof. by intros s []. Qed.
 
-Lemma fFurther [A:Type] (P: Stream A -> Prop) : forall s, ForAll P s -> ForAll P (tl s).
+Lemma fFurther [A : Type] (P : Stream A -> Prop) : forall s, ForAll P s -> ForAll P (tl s).
 Proof. by intros s []. Qed.
 
-Lemma ForAll_subsumption [A:Type] (P Q: Stream A -> Prop)
+Lemma ForAll_subsumption [A : Type] (P Q : Stream A -> Prop)
   (HPQ : forall s, P s -> Q s)
   : forall s, ForAll P s -> ForAll Q s.
 Proof.
@@ -53,7 +53,7 @@ Qed.
 
 Definition ForAll1 [A : Type] (P : A -> Prop) := ForAll (fun s => P (hd s)).
 
-Lemma ForAll1_subsumption [A:Type] (P Q: A -> Prop)
+Lemma ForAll1_subsumption [A : Type] (P Q : A -> Prop)
   (HPQ : forall a, P a -> Q a)
   : forall s, ForAll1 P s -> ForAll1 Q s.
 Proof.
@@ -74,7 +74,7 @@ Qed.
 
 Definition ForAll2 [A : Type] (R : A -> A -> Prop) := ForAll (fun s => R (hd s) (hd (tl s))).
 
-Lemma ForAll2_subsumption [A:Type] (R1 R2 : A -> A -> Prop)
+Lemma ForAll2_subsumption [A : Type] (R1 R2 : A -> A -> Prop)
   (HR : forall a b, R1 a b -> R2 a b)
   : forall s, ForAll2 R1 s -> ForAll2 R2 s.
 Proof.
@@ -155,8 +155,8 @@ Fixpoint stream_prefix
   (l : Stream A)
   (n : nat)
   : list A
-  := match n,l with
-  | 0,_ => []
+  := match n, l with
+  | 0, _ => []
   | S n, Cons a l => a :: stream_prefix l n
   end.
 
@@ -169,7 +169,7 @@ Lemma stream_prefix_nth
   : nth_error (stream_prefix s n) i = Some (Str_nth i s).
 Proof.
   revert s n Hi.
-  induction i; intros [a s] [| n] Hi; [by inversion Hi ..|].
+  induction i; intros [a s] [| n] Hi; [by inversion Hi .. |].
   by apply IHi; lia.
 Qed.
 
@@ -182,7 +182,7 @@ Lemma stream_prefix_lookup
   : stream_prefix s n !! i = Some (Str_nth i s).
 Proof.
   revert s n Hi.
-  induction i; intros [a s] [| n] Hi; [by inversion Hi ..|].
+  induction i; intros [a s] [| n] Hi; [by inversion Hi .. |].
   by apply IHi; lia.
 Qed.
 
@@ -404,7 +404,7 @@ Proof.
   destruct (decide (m = n)); [done |].
   elim (HI (Str_nth n l)).
   by destruct (decide (m < n))
-  ; [specialize (Hl m n)|specialize (Hl n m)]; (spec Hl; [lia|])
+  ; [specialize (Hl m n) | specialize (Hl n m)]; (spec Hl; [lia |])
   ; rewrite Hmn in Hl.
 Qed.
 
@@ -451,7 +451,7 @@ Lemma stream_prefix_prefix
   {A : Type}
   (l : Stream A)
   (n1 n2 : nat)
-  (Hn: n1 <= n2)
+  (Hn : n1 <= n2)
   : list_prefix (stream_prefix l n2) n1 = stream_prefix l n1.
 Proof.
   revert l n2 Hn.
@@ -463,7 +463,7 @@ Lemma stream_prefix_of
   {A : Type}
   (l : Stream A)
   (n1 n2 : nat)
-  (Hn: n1 <= n2)
+  (Hn : n1 <= n2)
   : stream_prefix l n1 `prefix_of` stream_prefix l n2.
 Proof.
   rewrite <- (stream_prefix_prefix l n1 n2 Hn).
@@ -519,7 +519,7 @@ Proof.
     specialize (list_suffix_nth (stream_prefix l n2) n1 (n1 + k) Hle)
     ; intro Heq.
     clear Hle.
-    assert (Hs: n1 + k - n1 = k) by lia.
+    assert (Hs : n1 + k - n1 = k) by lia.
     rewrite Hs in Heq.
     by rewrite Heq, stream_prefix_nth; [do 2 f_equal |]; lia.
 Qed.
@@ -542,10 +542,7 @@ Lemma stream_prefix_segment_suffix
   (n1 n2 : nat)
   (Hn : n1 <= n2)
   : stream_app
-      ((stream_prefix l n1)
-        ++
-       (stream_segment l n1 n2)
-      )
+      (stream_prefix l n1 ++ stream_segment l n1 n2)
       (stream_suffix l n2)
   = l.
 Proof.
@@ -606,7 +603,7 @@ Proof.
     destruct IHn as [Hlt | [k Hk]]
     ; [by exists 0; left; cbv in *; lia |].
     destruct (decide (Str_nth (S k) s = S n))
-    ; [by exists (S k); left|].
+    ; [by exists (S k); left |].
     exists k; right.
     cut (Str_nth k s < Str_nth (S k) s); [by lia |].
     by apply (Hs k (S k)); lia.

@@ -176,8 +176,8 @@ Qed.
 
 Lemma VLSM_eq_input_valid_transition
   : forall l s im s' om,
-  input_valid_transition X l (s,im) (s',om) <->
-  input_valid_transition Y l (s,im) (s',om).
+  input_valid_transition X l (s, im) (s', om) <->
+  input_valid_transition Y l (s, im) (s', om).
 Proof.
   split.
   - by apply (VLSM_incl_input_valid_transition VLSM_eq_proj1).
@@ -186,7 +186,7 @@ Qed.
 
 Lemma VLSM_eq_input_valid
   : forall l s im,
-  input_valid X l (s,im) <-> input_valid Y l (s,im).
+  input_valid X l (s, im) <-> input_valid Y l (s, im).
 Proof.
   split.
   - by apply (VLSM_incl_input_valid VLSM_eq_proj1).

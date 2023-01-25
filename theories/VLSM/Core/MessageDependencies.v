@@ -202,7 +202,7 @@ Proof.
     by apply has_been_received_no_inits.
   - rewrite has_been_received_step_update by done; intros [-> | Hrcv] dm Hdm
     ; rewrite has_been_directly_observed_step_update by done; right.
-    + by eapply Hfull; [apply Ht|].
+    + by eapply Hfull; [apply Ht |].
     + by eapply IHHs.
 Qed.
 
@@ -217,7 +217,7 @@ Lemma msg_dep_full_node_reflects_has_been_directly_observed
   : forall dm m, msg_dep_rel dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.
-  intros dm m Hdm [Hsent|Hreceived].
+  intros dm m Hdm [Hsent | Hreceived].
   - by eapply msg_dep_has_been_sent.
   - by eapply full_node_has_been_received.
 Qed.
@@ -234,7 +234,7 @@ Lemma msg_dep_full_node_happens_before_reflects_has_been_directly_observed
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.
   intros dm m Hdm Hobs.
-  eapply msg_dep_happens_before_reflect; [|done ..].
+  eapply msg_dep_happens_before_reflect; [| done ..].
   by apply msg_dep_full_node_reflects_has_been_directly_observed.
 Qed.
 
@@ -368,7 +368,7 @@ Proof.
   exists s, {| l := l; input := im; destination := s'; output := Some m |}.
   constructor; [done.. |].
   eapply @message_dependencies_are_necessary in Hdm as Hobs; [| done | by eexists _, _].
-  eapply has_been_directly_observed_step_update in Hobs as [[| Hout] |]; [..| done]; cycle 2.
+  eapply has_been_directly_observed_step_update in Hobs as [[| Hout] |]; [.. | done]; cycle 2.
   - by do 2 constructor.
   - by subst; cbn; constructor.
   - by contradict Hdm; inversion Hout; apply tc_reflect_irreflexive.
@@ -442,7 +442,7 @@ Definition full_node_is_sent_locally_equivocating
   (s : vstate X) (v : validator) : Prop :=
   exists m1 m2, FullNodeSentLocalEquivocationEvidence s v m1 m2.
 
-Lemma full_node_is_sent_locally_equivocating_weaker s v:
+Lemma full_node_is_sent_locally_equivocating_weaker s v :
   full_node_is_locally_equivocating s v ->
   full_node_is_sent_locally_equivocating s v.
 Proof.
@@ -451,7 +451,7 @@ Proof.
   by contradict Hncomp; apply tc_comparable.
 Qed.
 
-Lemma full_node_is_locally_equivocating_stronger s v:
+Lemma full_node_is_locally_equivocating_stronger s v :
   full_node_is_locally_equivocating s v ->
   msg_dep_is_locally_equivocating s v.
 Proof.
@@ -656,7 +656,7 @@ Proof.
 Qed.
 
 Lemma CompositeHasBeenObserved_step_update :
-  forall l s im s' om, input_valid_transition RFree l (s,im) (s',om) ->
+  forall l s im s' om, input_valid_transition RFree l (s, im) (s', om) ->
   forall msg,
     CompositeHasBeenObserved s' msg
       <->
@@ -727,7 +727,7 @@ Lemma composite_ObservedBeforeSendTransition_project :
     (s i) (composite_transition_item_projection IM item) m1 m2.
 Proof.
   by intros * []; constructor;
-    [eapply input_valid_transition_preloaded_project_active |..].
+    [eapply input_valid_transition_preloaded_project_active | ..].
 Qed.
 
 Lemma composite_observed_before_send_iff m1 m2 :
@@ -786,7 +786,7 @@ Proof.
   by eapply emitted_messages_are_valid,
     msg_dep_reflects_happens_before_free_validity,
     emitted_messages_are_valid_iff
-    in Hm as [(i & [] & <-)|]; [exfalso; eapply no_initial_messages_in_IM | ..].
+    in Hm as [(i & [] & <-) |]; [exfalso; eapply no_initial_messages_in_IM | ..].
 Qed.
 
 (**
@@ -826,7 +826,7 @@ Definition full_node_is_globally_equivocating
   (s : composite_state IM) (v : validator) : Prop :=
   exists m : message, FullNodeGlobalEquivocationEvidence s v m.
 
-Lemma full_node_is_globally_equivocating_stronger s v:
+Lemma full_node_is_globally_equivocating_stronger s v :
   full_node_is_globally_equivocating s v ->
   msg_dep_is_globally_equivocating s v.
 Proof.
@@ -869,8 +869,8 @@ Proof.
   destruct Htr as (? & ? & ?).
   destruct (decide (has_been_sent (IM (A v)) (s (A v)) m1));
     [destruct (decide (has_been_sent (IM (A v)) (s (A v)) m2)) |]; cycle 1.
-  1,2: eexists; split;
-      [..| by contradict n; eapply has_been_sent_iff_by_sender];
+  1, 2: eexists; split;
+      [.. | by contradict n; eapply has_been_sent_iff_by_sender];
       [done | by eapply composite_HasBeenObserved_lift].
   contradict Hncomp; eapply tc_comparable, Hsent_comparable; [| done..].
   by eapply valid_state_project_preloaded_to_preloaded.
@@ -891,7 +891,7 @@ Proof.
   destruct Htr as (? & ? & ?).
   destruct (decide (has_been_sent (IM (A v)) (s (A v)) m1));
     [destruct (decide (has_been_sent (IM (A v)) (s (A v)) m2)) |]; cycle 1.
-  1,2: eexists; split; cycle 2;
+  1, 2: eexists; split; cycle 2;
       [by contradict n; eapply has_been_sent_iff_by_sender | done |];
       by constructor 1; eexists.
   contradict Hncomp; eapply Hsent_comparable; [| done..].
@@ -1005,7 +1005,7 @@ Qed.
 Lemma msg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies).
 Proof.
   apply tc_wf_projected with (<) (fun m => length (elements (full_message_dependencies m)));
-    [by typeclasses eauto | | by apply Wf_nat.lt_wf ].
+    [by typeclasses eauto | | by apply Wf_nat.lt_wf].
   intros; unfold lt.
   change (S _) with (length (x :: elements (full_message_dependencies x))).
   apply NoDup_subseteq_length.
@@ -1247,7 +1247,7 @@ Lemma input_valid_transition_preserves_msg_dep_is_globally_equivocating :
       msg_dep_is_globally_equivocating IM message_dependencies sender (destination item) v.
 Proof.
   intros s item Ht j Hsj v Hv [m []].
-  exists m; constructor; [done |..].
+  exists m; constructor; [done | ..].
   - by eapply transition_preserves_CompositeHasBeenObserved.
   - contradict mdgee_not_sent0.
     apply exists_right_finite_trace_from in Ht as (is & tr & Htr & _).

@@ -55,11 +55,11 @@ Section sec_no_equivocation_invariants.
 
 Context
   message
-  (X: VLSM message)
+  (X : VLSM message)
   `{HasBeenSentCapability message X}
   `{HasBeenDirectlyObservedCapability message X}
   (Henforced : forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
-    no_equivocations X l (s,om))
+    no_equivocations X l (s, om))
   .
 
 (**
@@ -69,10 +69,10 @@ Context
   the same state, too.
 *)
 
-Definition directly_observed_were_sent (s: state) : Prop :=
+Definition directly_observed_were_sent (s : state) : Prop :=
   forall msg, has_been_directly_observed X s msg -> has_been_sent X s msg.
 
-Lemma directly_observed_were_sent_initial s:
+Lemma directly_observed_were_sent_initial s :
   vinitial_state_prop X s ->
   directly_observed_were_sent s.
 Proof.
@@ -80,8 +80,8 @@ Proof.
   by apply has_been_directly_observed_no_inits in Hsend.
 Qed.
 
-Lemma directly_observed_were_sent_preserved l s im s' om:
-  input_valid_transition X l (s,im) (s',om) ->
+Lemma directly_observed_were_sent_preserved l s im s' om :
+  input_valid_transition X l (s, im) (s', om) ->
   directly_observed_were_sent s ->
   directly_observed_were_sent s'.
 Proof.
@@ -93,7 +93,7 @@ Proof.
   specialize (Henforced l s (Some msg)).
   rewrite (has_been_sent_step_update Hptrans).
   destruct Hptrans as [Hv _].
-  destruct Hobs as [[Hin|Hout]|Hobs]; subst.
+  destruct Hobs as [[Hin | Hout] | Hobs]; subst.
   - (* by [no_equivocations], the incoming message [im] was previously sent *)
     specialize (Henforced Hv).
     by destruct Henforced; [right |].
@@ -206,13 +206,13 @@ Section sec_composite_no_equivocation_invariants.
 Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   (X := composite_vlsm IM constraint)
-  (Hsubsumed: preloaded_constraint_subsumption IM constraint composite_no_equivocations)
+  (Hsubsumed : preloaded_constraint_subsumption IM constraint composite_no_equivocations)
   .
 
-Definition composite_directly_observed_were_sent (s: state) : Prop :=
+Definition composite_directly_observed_were_sent (s : state) : Prop :=
   forall msg, composite_has_been_directly_observed IM s msg -> composite_has_been_sent IM s msg.
 
-Lemma composite_directly_observed_were_sent_invariant s:
+Lemma composite_directly_observed_were_sent_invariant s :
   valid_state_prop X s ->
   composite_directly_observed_were_sent s.
 Proof.
@@ -220,7 +220,7 @@ Proof.
   rewrite composite_has_been_directly_observed_sent_received_iff.
   intros Hobs.
   cut (has_been_sent X s m); [done |].
-  apply (directly_observed_were_sent_invariant message X); [|done ..].
+  apply (directly_observed_were_sent_invariant message X); [| done ..].
   by intros l s0 om; apply Hsubsumed.
 Qed.
 

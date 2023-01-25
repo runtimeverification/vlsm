@@ -89,8 +89,8 @@ Definition full_node_condition_for_admissible_equivocators_alt
 Lemma node_generated_without_further_equivocation_weaken
   (i : index)
   (Hno_resend : cannot_resend_message_stepwise_prop (IM i))
-  (s: composite_state IM)
-  (Hs: valid_state_prop
+  (s : composite_state IM)
+  (Hs : valid_state_prop
      (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
   (m : message)
   (Hsmi : node_generated_without_further_equivocation s m i)
@@ -113,7 +113,7 @@ Lemma full_node_condition_for_admissible_equivocators_subsumption
       full_node_condition_for_admissible_equivocators
       full_node_condition_for_admissible_equivocators_alt.
 Proof.
-  intros l (s, [m|]) [Hs [_ [_ Hc]]]; [| done].
+  intros l (s, [m |]) [Hs [_ [_ Hc]]]; [| done].
   destruct Hc as [Hno_equiv | Hfull]; [by left |].
   right.
   destruct Hfull as [i [Hi Hfull]].

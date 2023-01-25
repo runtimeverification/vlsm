@@ -93,11 +93,11 @@ Definition fixed_byzantine_IM : index -> VLSM message :=
   update_IM IM byzantine (fun i => emit_any_signed_message_vlsm A sender (` i)).
 
 Lemma fixed_byzantine_IM_no_initial_messages
-  : forall i m, ~vinitial_message_prop (fixed_byzantine_IM i) m.
+  : forall i m, ~ vinitial_message_prop (fixed_byzantine_IM i) m.
 Proof.
   unfold fixed_byzantine_IM, update_IM. simpl.
   intros i m Hm.
-  by case_decide; [|destruct (no_initial_messages_in_IM i m)].
+  by case_decide; [| destruct (no_initial_messages_in_IM i m)].
 Qed.
 
 Lemma fixed_byzantine_IM_preserves_channel_authentication
@@ -338,7 +338,7 @@ Proof.
       A sender fixed_byzantine_IM_sender_safety
       fixed_byzantine_IM_no_initial_messages fixed_byzantine_IM_preserves_channel_authentication)
     in Hv as Hnoequiv.
-  destruct om as [m|]; [| done].
+  destruct om as [m |]; [| done].
   destruct Hnoequiv as [Hsent | Hseeded]; [by left |].
   right.
   split; [done |].
@@ -414,7 +414,7 @@ Proof.
     subst.
     unfold sub_IM, fixed_byzantine_IM, update_IM in Him.
     simpl in Him.
-    by case_decide; [|destruct (no_initial_messages_in_IM i im)].
+    by case_decide; [| destruct (no_initial_messages_in_IM i im)].
   - destruct Hseeded as [[i [Hi Hsender]] Hvalid].
     pose (X := (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint)).
     pose (s0 := proj1_sig (composite_s0 fixed_byzantine_IM)).
@@ -436,7 +436,7 @@ Proof.
       by rewrite @decide_True.
     }
     cbn in Hgen.
-    destruct (vtransition _ _ _) as (si', _om) eqn:Ht.
+    destruct (vtransition _ _ _) as (si', _om) eqn: Ht.
     specialize (Hgen _ _ eq_refl).
     replace _om with (Some m) in Hgen; [by eexists |].
     clear -Ht.
@@ -604,7 +604,7 @@ Proof.
     + split; [| done].
       apply sub_IM_no_equivocation_preservation in Hv as Hnoequiv; [| done..].
       destruct om as [m |]; [| done].
-      destruct Hnoequiv as [Hsent|Hseeded]; [by left | right].
+      destruct Hnoequiv as [Hsent | Hseeded]; [by left | right].
       split; [done |].
       destruct (induced_sub_projection_valid_projection IM
         (elements selection_complement) _ _ _ _ Hv) as (i & Hi & Hiv).
@@ -650,7 +650,7 @@ Proof.
   intros l s om Hv HsY HomY.
   split.
   - by apply lift_sub_valid, Hv.
-  - destruct om as [m|]; [| done].
+  - destruct om as [m |]; [| done].
     apply proj2 in Hv as Hc.
     destruct Hc as [_ [_ [Hc _]]].
     destruct Hc as [Hsent | Hseeded].
@@ -769,7 +769,7 @@ Qed.
 End sec_assuming_initial_messages_lift.
 
 Context
-  (Hvalidator:
+  (Hvalidator :
     forall i : index, i ∉ selection ->
     component_message_validator_prop IM (fixed_equivocation_constraint IM selection) i)
   .

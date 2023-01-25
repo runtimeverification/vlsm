@@ -60,7 +60,7 @@ Proof.
     by apply lift_sub_valid, Hv.
   - by intros [_ Ht]; revert Ht; apply lift_sub_transition.
   - by intros; apply (lift_sub_state_initial equivocator_IM).
-  - intros; destruct HmX as [Hinit|Hseeded]; [| by apply Hseed].
+  - intros; destruct HmX as [Hinit | Hseeded]; [| by apply Hseed].
     apply initial_message_is_valid.
     destruct Hinit as [i Him].
     by exists (proj1_sig i).
@@ -116,7 +116,7 @@ Lemma lift_equivocators_sub_state_to_size
 Proof.
   intro i.
   unfold lift_equivocators_sub_state_to.
-  destruct (decide _); [|lia].
+  destruct (decide _); [| lia].
   by rewrite equivocator_state_append_size; lia.
 Qed.
 
@@ -166,8 +166,7 @@ Proof.
         if (decide (eqv ∈ l)) then equivocator_state_append (full_replay_state i) (is eqv)
         else full_replay_state i
       | _ =>  full_replay_state i
-      end
-    )).
+      end)).
   {
     intros Hcut; specialize (Hcut _ (incl_refl _) ltac:(apply NoDup_enum)).
     unfold replayed_initial_state_from, composite_apply_plan.
@@ -204,7 +203,7 @@ Proof.
     + case_decide.
       * rewrite decide_True; rewrite ?elem_of_app; itauto.
       * rewrite decide_False; [done |].
-        intros [Hin | Hx]%elem_of_app; [ done |].
+        intros [Hin | Hx]%elem_of_app; [done |].
         by rewrite elem_of_list_singleton, dsig_eq in Hx.
 Qed.
 
@@ -213,8 +212,8 @@ Qed.
   the projection of the replaying of an initial state is empty.
 *)
 Lemma equivocators_trace_project_replayed_initial_state_from full_replay_state is
-  (eqv_descriptors: equivocator_descriptors)
-  (Heqv_descriptors: not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
+  (eqv_descriptors : equivocator_descriptors)
+  (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   : equivocators_trace_project eqv_descriptors
       (replayed_initial_state_from full_replay_state is) =
     Some ([], eqv_descriptors).
@@ -228,17 +227,17 @@ Proof.
   subst plan.
   induction l using rev_ind; [split; simpl; [done | lia] |].
   rewrite map_app, (composite_apply_plan_app equivocator_IM).
-  destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn:Hplanl.
-  destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn:Hplana.
+  destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn: Hplanl.
+  destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn: Hplana.
   simpl in *.
   inversion_clear Hplana.
   split.
   - apply equivocators_trace_project_app_iff.
-    exists [],[],eqv_descriptors.
+    exists [], [], eqv_descriptors.
     repeat split; [| by apply IHl].
     specialize (Heqv_descriptors (` x)).
     unfold existing_descriptor in Heqv_descriptors.
-    destruct (eqv_descriptors (` x)) eqn:Heqv_x; [done |].
+    destruct (eqv_descriptors (` x)) eqn: Heqv_x; [done |].
     destruct Heqv_descriptors as [s_x_n Heqv_descriptors].
     apply equivocator_state_project_Some_rev in Heqv_descriptors as Hltn.
     apply proj2 in IHl.
@@ -247,7 +246,7 @@ Proof.
     unfold equivocator_vlsm_transition_item_project. rewrite Heqv_x.
     simpl; equivocator_state_update_simpl.
     rewrite decide_False by lia.
-    destruct_equivocator_state_project (lfinal (` x)) n lfinal_x_n Hltn'; [|lia].
+    destruct_equivocator_state_project (lfinal (` x)) n lfinal_x_n Hltn'; [| lia].
     by equivocator_state_update_simpl.
   - intro i. apply proj2 in IHl. specialize (IHl i).
     by destruct (decide (i = `x)); subst; equivocator_state_update_simpl; [lia |].
@@ -268,22 +267,22 @@ Proof.
   rewrite map_app, (composite_apply_plan_app equivocator_IM).
   specialize (composite_apply_plan_last equivocator_IM full_replay_state
     (map (initial_new_machine_transition_item is) l)) as Hlst.
-  destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn:Hplanl.
-  destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn:Hplana.
+  destruct (composite_apply_plan _ _ _) as (litems, lfinal) eqn: Hplanl.
+  destruct (composite_apply_plan _ lfinal _) as (aitems, afinal) eqn: Hplana.
   inversion_clear Hplana.
   simpl in *.
   rewrite finite_trace_last_is_last. simpl.
   intros i j Hj.
   destruct (decide (`x = i)); subst; equivocator_state_update_simpl; [| by auto].
   specialize (IHl (` x) j Hj).
-  destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [|lia].
+  destruct_equivocator_state_project (full_replay_state (` x)) j s_x_j Hltj; [| lia].
   rewrite equivocator_state_extend_project_1; [done |].
   by apply equivocator_state_project_Some_rev in IHl as Hltj'.
 Qed.
 
 Lemma equivocator_state_descriptor_project_replayed_initial_state_from_left full_replay_state is
-  (eqv_descriptors: equivocator_descriptors)
-  (Heqv_descriptors: not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
+  (eqv_descriptors : equivocator_descriptors)
+  (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   (lst := finite_trace_last full_replay_state (replayed_initial_state_from full_replay_state is))
   : forall i,
     equivocator_state_descriptor_project (lst i) (eqv_descriptors i) =
@@ -292,7 +291,7 @@ Proof.
   intro i. specialize (Heqv_descriptors i).
   unfold equivocator_state_descriptor_project.
   unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors i) as [sn|ji]; [done |].
+  destruct (eqv_descriptors i) as [sn | ji]; [done |].
   destruct Heqv_descriptors as [full_i_ji Hpr_ji].
   apply equivocator_state_project_Some_rev in Hpr_ji as Hltji.
   subst lst.
@@ -341,8 +340,8 @@ Proof.
 Qed.
 
 Lemma equivocator_state_descriptor_project_replayed_trace_from_left full_replay_state is tr
-  (eqv_descriptors: equivocator_descriptors)
-  (Heqv_descriptors: not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
+  (eqv_descriptors : equivocator_descriptors)
+  (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   (lst := finite_trace_last full_replay_state (replayed_trace_from full_replay_state is tr))
   : forall i,
     equivocator_state_descriptor_project (lst i) (eqv_descriptors i) =
@@ -351,7 +350,7 @@ Proof.
   intro i. specialize (Heqv_descriptors i).
   unfold equivocator_state_descriptor_project.
   unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors i) as [sn|ji]; [done |].
+  destruct (eqv_descriptors i) as [sn | ji]; [done |].
   destruct Heqv_descriptors as [full_i_ji Hpr_ji].
   apply equivocator_state_project_Some_rev in Hpr_ji as Hltji.
   subst lst.
@@ -369,29 +368,29 @@ Proof.
 Qed.
 
 Lemma equivocators_trace_project_replayed_trace_from_left full_replay_state is tr
-  (eqv_descriptors: equivocator_descriptors)
-  (Heqv_descriptors: not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
+  (eqv_descriptors : equivocator_descriptors)
+  (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   : equivocators_trace_project eqv_descriptors
       (replayed_trace_from full_replay_state is tr) =
     Some ([], eqv_descriptors).
 Proof.
   apply equivocators_trace_project_app_iff.
-  exists [],[],eqv_descriptors.
+  exists [], [], eqv_descriptors.
   repeat split; [| by apply equivocators_trace_project_replayed_initial_state_from].
   induction tr using rev_ind; [done |].
   unfold pre_VLSM_embedding_finite_trace_project.
   rewrite map_app.
   apply equivocators_trace_project_app_iff.
-  exists [],[], eqv_descriptors.
+  exists [], [], eqv_descriptors.
   repeat split; [| done].
   clear IHtr.
   destruct x. simpl.
-  destruct l as (sub_i,li).
+  destruct l as (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i.
   subst sub_i.
   specialize (Heqv_descriptors i).
   unfold existing_descriptor in Heqv_descriptors.
-  destruct (eqv_descriptors _) eqn:Heqv_l; [done |].
+  destruct (eqv_descriptors _) eqn: Heqv_l; [done |].
   destruct Heqv_descriptors as [s_l_n Hs_l_n].
   apply equivocator_state_project_Some_rev in Hs_l_n as Hltn.
   specialize (lift_equivocators_sub_state_to_size full_replay_state destination i)
@@ -401,10 +400,10 @@ Proof.
   simpl.
   destruct_equivocator_state_project
     (lift_equivocators_sub_state_to full_replay_state destination i) n
-    lift_n Hlt_n; [|lia].
+    lift_n Hlt_n; [| lia].
   rewrite (lift_equivocators_sub_state_to_sub) with (Hi := Hi).
   rewrite equivocator_state_append_lst.
-  by destruct li as [sn_d| id li| id li]; simpl
+  by destruct li as [sn_d | id li | id li]; simpl
   ; rewrite !decide_False by lia
   ; equivocator_state_update_simpl.
 Qed.
@@ -430,8 +429,8 @@ Proof.
   specialize
     (equivocator_state_append_valid (IM i) li
       (s (dexist i Hi)) om
-      (full_replay_state i) Hv
-    ) as Hlift.
+      (full_replay_state i) Hv)
+    as Hlift.
   cbn.
   by rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
 Qed.
@@ -440,7 +439,7 @@ Lemma lift_equivocators_sub_transition
   (full_replay_state : composite_state equivocator_IM)
   l s om s' om'
   (Hv : composite_valid sub_equivocator_IM l (s, om))
-  (Ht: composite_transition sub_equivocator_IM l (s, om) = (s', om'))
+  (Ht : composite_transition sub_equivocator_IM l (s, om) = (s', om'))
   : composite_transition equivocator_IM (lift_equivocators_sub_label_to full_replay_state  l)
       (lift_equivocators_sub_state_to full_replay_state s, om) =
       (lift_equivocators_sub_state_to full_replay_state s', om').
@@ -451,8 +450,8 @@ Proof.
     (equivocator_state_append_transition (IM i) li
       (s (dexist i Hi)) om
       (s' (dexist i Hi)) om'
-      (full_replay_state i) Hv
-    ) as Hlift.
+      (full_replay_state i) Hv)
+    as Hlift.
   cbn in Ht.
   destruct (equivocator_transition _ _ _) as (_si', _om').
   inversion Ht; subst s' om'; clear Ht.
@@ -648,7 +647,7 @@ Proof.
   left. exists i.
   simpl. rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
   subst. unfold SubProjectionTraces.sub_IM in Hsent. cbn in Hsent |-*.
-  apply equivocator_state_append_sent_right; [..|done].
+  apply equivocator_state_append_sent_right; [.. | done].
   - by apply Hfull_replay_state_pr.
   - by apply (Hs_pr (dexist i Hi) Hs).
 Qed.

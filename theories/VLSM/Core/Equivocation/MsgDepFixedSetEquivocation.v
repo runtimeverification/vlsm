@@ -41,12 +41,12 @@ Definition msg_dep_fixed_set_equivocation_vlsm : VLSM message :=
   composite_vlsm IM msg_dep_fixed_set_equivocation_constraint.
 
 Lemma messages_with_valid_dependences_can_be_emitted s dm
-  (Hdepm:
+  (Hdepm :
     forall dm0, msg_dep_rel message_dependencies dm0 dm ->
     valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm0)
-  (dm_i: index)
-  (Hdm_i: dm_i ∈ equivocators)
-  (Hemitted: can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
+  (dm_i : index)
+  (Hdm_i : dm_i ∈ equivocators)
+  (Hemitted : can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
   : can_emit (equivocators_composition_for_sent IM equivocators s) dm.
 Proof.
   eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient.
@@ -160,7 +160,7 @@ Proof.
   apply can_emit_iff.
   apply (VLSM_projection_input_valid_transition
     (single_equivocator_projection s i Hi)) with (lY := li) in HtX
-  ; [by eexists _,_,_ |].
+  ; [by eexists _, _, _ |].
   unfold sub_label_element_project; cbn.
   by rewrite decide_True_pi with eq_refl.
 Qed.
@@ -212,7 +212,7 @@ Proof.
   - cut (valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm).
     {
       intro Hsent_comp; apply emitted_messages_are_valid_iff in Hsent_comp
-        as [[[sub_j [[_im Him] Heqim]] | ] | ]
+        as [[[sub_j [[_im Him] Heqim]] |] |]
       ; [| by left | by right].
       destruct_dec_sig sub_j j Hj Heqsub_j; subst.
       clear -Him no_initial_messages_in_IM; contradict Him.

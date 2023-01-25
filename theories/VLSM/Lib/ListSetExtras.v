@@ -64,7 +64,7 @@ Lemma set_eq_empty_iff
   : forall (l : list A),
     set_eq l [] <-> l = [].
 Proof.
-  split; intros; [|subst; apply set_eq_refl].
+  split; intros; [| subst; apply set_eq_refl].
   destruct l as [| hd tl]; [done |].
   destruct H.
   specialize (H hd (elem_of_list_here hd tl)).
@@ -170,7 +170,7 @@ Qed.
 
 Lemma set_union_iterated_subseteq
   `{EqDecision A}
-  (ss ss': list (set A))
+  (ss ss' : list (set A))
   (Hincl : ss ⊆ ss') :
   fold_right set_union [] ss ⊆
   fold_right set_union [] ss'.
@@ -274,11 +274,11 @@ Proof.
 Qed.
 
 Lemma filter_set_add `{StrictlyComparable X} P
-  `{forall (x:X), Decision (P x)} :
-  forall (l:list X) x, ~ P x ->
+  `{forall (x : X), Decision (P x)} :
+  forall (l : list X) x, ~ P x ->
   filter P l = filter P (set_add x l).
 Proof.
-  induction l as [|hd tl IHl]; intros x H_false; cbn.
+  induction l as [| hd tl IHl]; intros x H_false; cbn.
   - by rewrite decide_False.
   - destruct (decide (x = hd)); cbn; [done |].
     by destruct (decide (P hd)); rewrite <- IHl.
@@ -289,13 +289,13 @@ Lemma set_add_ignore `{StrictlyComparable X} :
     x ∈ l ->
     set_add x l = l.
 Proof.
-  induction l as [|hd tl IHl]; inversion 1; subst; cbn.
+  induction l as [| hd tl IHl]; inversion 1; subst; cbn.
   - by rewrite decide_True.
   - by case_decide; [| rewrite IHl].
 Qed.
 
-Lemma set_add_new `{EqDecision A}:
-  forall (x:A) l, x ∉ l -> set_add x l = l++[x].
+Lemma set_add_new `{EqDecision A} :
+  forall (x : A) l, x ∉ l -> set_add x l = l++[x].
 Proof.
   induction l; cbn; [done |]; intros H_not_in.
   rewrite decide_False; cycle 1.
@@ -321,7 +321,7 @@ Proof.
 Qed.
 
 Lemma set_remove_first `{EqDecision A} : forall x y (s : list A),
-  x = y -> set_remove x (y::s) = s.
+  x = y -> set_remove x (y :: s) = s.
 Proof.
   by intros x y s ->; cbn; rewrite decide_True.
 Qed.
@@ -448,7 +448,7 @@ Qed.
 Lemma set_diff_nodup' `{EqDecision A} (l l' : list A)
   : NoDup l -> NoDup (set_diff l l').
 Proof.
- induction 1 as [|x l H H' IH]; simpl.
+ induction 1 as [| x l H H' IH]; simpl.
  - by constructor.
  - case_decide.
    + by apply IH.
@@ -466,7 +466,7 @@ Proof.
   - by intros a; apply (set_diff_elim2 a s1).
 Qed.
 
-Lemma add_remove_inverse `{EqDecision X}:
+Lemma add_remove_inverse `{EqDecision X} :
   forall (lv : list X) (v : X),
     v ∉ lv ->
     set_remove v (set_add v lv) = lv.
@@ -496,10 +496,10 @@ Qed.
 Definition set_remove_list `{EqDecision A} (l1 l2 : list A) : list A :=
   fold_right set_remove l2 l1.
 
-Example set_remove_list1 : set_remove_list [3;1;3] [1;1;2;3;3;3;3] = [1;2;3;3].
+Example set_remove_list1 : set_remove_list [3; 1; 3] [1; 1; 2; 3; 3; 3; 3] = [1; 2; 3; 3].
 Proof. done. Qed.
 
-Example set_remove_list2 : set_remove_list [4] [1;2;3] = [1;2;3].
+Example set_remove_list2 : set_remove_list [4] [1; 2; 3] = [1; 2; 3].
 Proof. done. Qed.
 
 Lemma set_remove_list_1
@@ -515,7 +515,7 @@ Proof.
   - by simpl in Hin; apply set_remove_1, IHl1 in Hin.
 Qed.
 
-Lemma set_prod_nodup `(s1: set A) `(s2: set B):
+Lemma set_prod_nodup `(s1 : set A) `(s2 : set B) :
   NoDup s1 ->
   NoDup s2 ->
   NoDup (set_prod s1 s2).
@@ -545,10 +545,10 @@ Definition set_diff_filter `{EqDecision A} (l r : list A) :=
   The characteristic membership property, parallel to
   [set_diff_iff].
 *)
-Lemma set_diff_filter_iff `{EqDecision A} (a:A) l r:
+Lemma set_diff_filter_iff `{EqDecision A} (a : A) l r :
   a ∈ set_diff_filter l r <-> a ∈ l /\ a ∉ r.
 Proof.
-  induction l;simpl.
+  induction l; simpl.
   - by cbn; split; intros; [inversion H | itauto].
   - unfold set_diff_filter in *.
     rewrite filter_cons.
@@ -559,7 +559,7 @@ Proof.
       by split; itauto congruence.
 Qed.
 
-Lemma set_diff_filter_nodup `{EqDecision A} (l r:list A):
+Lemma set_diff_filter_nodup `{EqDecision A} (l r : list A) :
   NoDup l -> NoDup (set_diff_filter l r).
 Proof.
   by intros H; apply NoDup_filter.
@@ -570,8 +570,8 @@ Qed.
   a smaller result.
   This lemma is used to prove [len_set_diff_decrease].
 *)
-Lemma len_set_diff_incl_le `{EqDecision A} (l a b: list A)
-      (H_subseteq: forall x, x ∈ b -> x ∈ a):
+Lemma len_set_diff_incl_le `{EqDecision A} (l a b : list A)
+      (H_subseteq : forall x, x ∈ b -> x ∈ a) :
   length (set_diff_filter l a) <= length (set_diff_filter l b).
 Proof.
   induction l; [done |].
@@ -589,10 +589,10 @@ Qed.
   by adding an element actually found in <<l>> will decrease
   the size of the result.
 *)
-Lemma len_set_diff_decrease `{EqDecision A} (new:A) (l a b: list A)
-      (H_subseteq: forall x, x ∈ b -> x ∈ a)
-      (H_new_is_new: new ∈ a /\ new ∉ b)
-      (H_new_is_relevant: new ∈ l):
+Lemma len_set_diff_decrease `{EqDecision A} (new : A) (l a b : list A)
+      (H_subseteq : forall x, x ∈ b -> x ∈ a)
+      (H_new_is_new : new ∈ a /\ new ∉ b)
+      (H_new_is_relevant : new ∈ l) :
   length (set_diff_filter l a) < length (set_diff_filter l b).
 Proof.
   induction l; [by inversion H_new_is_relevant |];
@@ -604,7 +604,7 @@ Proof.
     destruct (decide (new ∉ b)); [| by contradict n0; itauto].
     simpl.
     by apply le_n_S, len_set_diff_incl_le.
-  - specialize (IHl H);clear H.
+  - specialize (IHl H); clear H.
     unfold set_diff_filter.
     rewrite 2 filter_cons.
     destruct (decide (a0 ∉ a)); destruct (decide (a0 ∉ b)).
@@ -620,10 +620,10 @@ Proof.
     + by apply IHl.
 Qed.
 
-Lemma len_set_diff_map_set_add `{EqDecision B} (new:B) `{EqDecision A} (f: B -> A)
-      (a: list B) (l: list A)
-      (H_new_is_new: f new ∉ map f a)
-      (H_new_is_relevant: f new ∈ l):
+Lemma len_set_diff_map_set_add `{EqDecision B} (new : B) `{EqDecision A} (f : B -> A)
+      (a : list B) (l : list A)
+      (H_new_is_new : f new ∉ map f a)
+      (H_new_is_relevant : f new ∈ l) :
   length (set_diff_filter l (map f (set_add new a))) <
     length (set_diff_filter l (map f a)).
 Proof.
@@ -665,7 +665,7 @@ Proof.
 Qed.
 
 Lemma filter_set_eq {X} P Q
- `{forall (x:X), Decision (P x)} `{forall (x:X), Decision (Q x)}
+ `{forall (x : X), Decision (P x)} `{forall (x : X), Decision (Q x)}
    (l : list X)
    (resf := filter P l)
    (resg := filter Q l) :
@@ -722,7 +722,7 @@ Proof.
          by exists needle.
 Qed.
 
-Lemma subseteq_Forall (A:Type) (P : A -> Prop) (l1 l2 : list A) :
+Lemma subseteq_Forall (A : Type) (P : A -> Prop) (l1 l2 : list A) :
  l2 ⊆ l1 -> Forall P l1 -> Forall P l2.
 Proof.
   intros Hsub Hfor.

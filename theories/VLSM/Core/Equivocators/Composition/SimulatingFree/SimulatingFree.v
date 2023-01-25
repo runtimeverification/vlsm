@@ -76,14 +76,14 @@ Definition replayable_message_prop : Prop :=
   forall si s tr
     (HtrX : finite_valid_trace_init_to CX si s tr)
     eqv_state_s
-    (Hstate_valid: valid_state_prop CE eqv_state_s)
+    (Hstate_valid : valid_state_prop CE eqv_state_s)
     (Hstate_final_project : equivocators_total_state_project IM eqv_state_s = s)
     eqv_msg_is eqv_msg_s eqv_msg_tr
     (Hmsg_trace : finite_valid_trace_init_to CE eqv_msg_is eqv_msg_s eqv_msg_tr)
     iom
     (Hfinal_msg : last_in_trace_except_from (vinitial_message_prop CE) eqv_msg_tr iom)
     l
-    (HcX: constraintX l (s, iom)),
+    (HcX : constraintX l (s, iom)),
     exists eqv_msg_tr lst_msg_tr,
       finite_valid_trace_from_to CE eqv_state_s lst_msg_tr eqv_msg_tr /\
       equivocators_total_trace_project IM eqv_msg_tr = [] /\
@@ -126,9 +126,9 @@ Proof.
     }
     by apply functional_extensionality_dep_good; subst.
   - destruct IHHtrX1 as [eqv_state_is [Hstate_start_project [eqv_state_s
-      [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _ ]]]]]]].
+      [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _]]]]]]].
     destruct IHHtrX2 as [eqv_msg_is [Hmsg_start_project [eqv_msg_s [_
-      [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg ]]]]]]].
+      [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg]]]]]]].
     exists eqv_state_is. split; [done |].
     apply valid_trace_last_pstate in Hstate_trace as Hstate_valid.
     destruct Ht as [[Hs [Hiom [Hv Hc]]] Ht].
@@ -137,7 +137,7 @@ Proof.
       as Hreplay.
     spec Hreplay.
     { clear -Heqiom Hfinal_msg.
-      destruct iom as [im|]; [| done].
+      destruct iom as [im |]; [| done].
       unfold empty_initial_message_or_final_output in Heqiom.
       destruct_list_last iom_tr iom_tr' item Heqiom_tr.
       - by right.
@@ -157,7 +157,7 @@ Proof.
       (@existT _ (fun i : index => vlabel (equivocator_IM IM i)) eqv (ContinueWith 0 li))
       as el.
     destruct (vtransition CE el (es, iom))
-      as (es', om') eqn:Hesom'.
+      as (es', om') eqn: Hesom'.
     specialize (Happ_extend  el iom es' om').
     apply valid_trace_get_last in Happ as Heqes.
     assert (Hes_pr_i : forall i, equivocators_total_state_project IM es i = s i)
@@ -170,7 +170,7 @@ Proof.
     cbn in Hesom', Hes_pr_eqv.
     rewrite Hes_pr_eqv in Hesom'.
     cbn in Ht.
-    destruct (vtransition _ _ _) as (si', _om) eqn:Hteqv.
+    destruct (vtransition _ _ _) as (si', _om) eqn: Hteqv.
     inversion Ht. subst sf _om. clear Ht.
     inversion Hesom'. subst es' om'. clear Hesom'.
     match type of Happ_extend with
@@ -211,7 +211,7 @@ Proof.
     }
     clear Happ_extend.
     apply valid_trace_last_pstate in Happ.
-    repeat split; [done |..| done].
+    repeat split; [done | .. | done].
     + destruct iom as [im |]; [| by apply option_valid_message_None].
       destruct Hbs_iom as [Hbs_iom | Hseeded].
       * by apply (preloaded_composite_sent_valid (equivocator_IM IM) _ _ _ Happ _ Hbs_iom).
@@ -280,8 +280,7 @@ Lemma replayed_trace_from_valid_equivocating
 Proof.
   apply
     (sub_replayed_trace_from_valid_equivocating IM seed
-      (enum index) _ Hfull_replay_state
-    ).
+      (enum index) _ Hfull_replay_state).
   pose (Hproj := preloaded_sub_composition_all_embedding (equivocator_IM IM)
     (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM)
     (free_constraint _) seed) seed).
@@ -316,12 +315,12 @@ Lemma seeded_equivocators_finite_valid_trace_init_to_rev
 Proof.
   apply
     (generalized_equivocators_finite_valid_trace_init_to_rev IM)
-  ; [..| done].
+  ; [.. | done].
   - intro; intros. split; [| done].
     destruct om; [| done].
-    destruct Hom as [Hsent|Hinitial]; [by left |].
+    destruct Hom as [Hsent | Hinitial]; [by left |].
     right.
-    destruct Hinitial as [[i [[mi Hmi] Him]]|Hseeded]; [exfalso | done].
+    destruct Hinitial as [[i [[mi Hmi] Him]] | Hseeded]; [exfalso | done].
     by elim (no_initial_messages_in_IM i mi).
   - clear isX sX trX HtrX.
     intro; intros.
@@ -331,12 +330,11 @@ Proof.
     apply valid_trace_forget_last in Hmsg_trace.
     specialize
       (replayed_trace_from_valid_equivocating
-       _ Hstate_valid _ _ Hmsg_trace
-      )
+       _ Hstate_valid _ _ Hmsg_trace)
       as Hmsg_trace_full_replay.
-    remember (all_equivocating_replayed_trace_from _ _ _ ) as emsg_tr.
+    remember (all_equivocating_replayed_trace_from _ _ _) as emsg_tr.
     apply valid_trace_add_default_last in Hmsg_trace_full_replay.
-    eexists _,_; split; [done |].
+    eexists _, _; split; [done |].
     subst.
     unfold all_equivocating_replayed_trace_from.
     rewrite
@@ -421,7 +419,7 @@ Proof.
   clear.
   intros l (s, om) Hc.
   split; [| done].
-  destruct om as [m|]; [| done].
+  destruct om as [m |]; [| done].
   by apply proj1 in Hc.
 Qed.
 

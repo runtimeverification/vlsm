@@ -132,12 +132,12 @@ Definition equivocator_state_project
   : equivocator_state_project s i = Some (equivocator_state_s s (nat_to_fin Hi)).
 Proof.
   unfold equivocator_state_project.
-  case_decide; [|lia].
+  case_decide; [| lia].
   f_equal. apply equivocator_state_eq.
   by rewrite !fin_to_nat_to_fin.
 Qed.
 
-#[local] Lemma equivocator_state_project_None s i (Hi : ~i < equivocator_state_n s)
+#[local] Lemma equivocator_state_project_None s i (Hi : ~ i < equivocator_state_n s)
   : equivocator_state_project s i = None.
 Proof.
   unfold equivocator_state_project.
@@ -151,16 +151,16 @@ Proof.
 Qed.
 
 Lemma equivocator_state_project_None_rev s i
-  : equivocator_state_project s i = None -> ~i < equivocator_state_n s.
+  : equivocator_state_project s i = None -> ~ i < equivocator_state_n s.
 Proof.
   unfold equivocator_state_project.
   by case_decide; [congruence | intro; lia].
 Qed.
 
 #[local] Ltac destruct_equivocator_state_project' es i si Hi Hpr :=
-  destruct (equivocator_state_project es i) as [si|] eqn:Hpr
-  ; [ specialize (equivocator_state_project_Some_rev _ _ _ Hpr) as Hi
-    | specialize (equivocator_state_project_None_rev _ _ Hpr) as Hi ].
+  destruct (equivocator_state_project es i) as [si |] eqn: Hpr
+  ; [specialize (equivocator_state_project_Some_rev _ _ _ Hpr) as Hi
+    | specialize (equivocator_state_project_None_rev _ _ Hpr) as Hi].
 
 #[local] Ltac destruct_equivocator_state_project es i si Hi :=
   let Hpr := fresh "Hpr" in
@@ -182,8 +182,8 @@ Proof.
     specialize (Hext (equivocator_state_last es2)) as Hlst_es2.
     clear Hext.
     symmetry in Hlst_es1.
-    destruct_equivocator_state_project es1 (equivocator_state_last es1) lst1 Hi1; [|lia].
-    destruct_equivocator_state_project es2 (equivocator_state_last es2) lst2 Hi2; [|lia].
+    destruct_equivocator_state_project es1 (equivocator_state_last es1) lst1 Hi1; [| lia].
+    destruct_equivocator_state_project es2 (equivocator_state_last es2) lst2 Hi2; [| lia].
     apply equivocator_state_project_Some_rev in Hlst_es1.
     apply equivocator_state_project_Some_rev in Hlst_es2.
     lia.
@@ -240,7 +240,7 @@ Lemma equivocator_state_update_project_eq bs i si j
   : equivocator_state_project (equivocator_state_update bs i si) j = Some si.
 Proof.
   pose proof (equivocator_state_update_size bs i si) as Heq.
-  destruct_equivocator_state_project' (equivocator_state_update bs i si) j sj Hi' Hpr ; [|lia].
+  destruct_equivocator_state_project' (equivocator_state_update bs i si) j sj Hi' Hpr ; [| lia].
   rewrite <- Hpr.
   rewrite (equivocator_state_project_Some _ _ Hi').
   f_equal; subst; clear; simpl.
@@ -273,10 +273,9 @@ Qed.
   let Hsize := fresh "Hsize" in
   pose proof (equivocator_state_update_size es i s) as Hsize
   ; destruct (decide (j < equivocator_state_n es)) as [Hj | Hj]
-  ; [ destruct (decide (i = j)) as [Hij | Hij]
-    ; [ specialize (equivocator_state_update_project_eq es i s j Hj Hij) as Hpr
-      | specialize (equivocator_state_update_project_neq es i s j Hij) as Hpr
-      ]
+  ; [destruct (decide (i = j)) as [Hij | Hij]
+    ; [specialize (equivocator_state_update_project_eq es i s j Hj Hij) as Hpr
+      | specialize (equivocator_state_update_project_neq es i s j Hij) as Hpr]
     | specialize (equivocator_state_project_None (equivocator_state_update es i s) j Hj) as Hpr]
   ; rewrite Hpr in *
   ; clear Hsize.
@@ -352,9 +351,9 @@ Qed.
   let Hni := fresh "Hni" in
   let Hni' := fresh "Hni" in
   destruct (decide (i < equivocator_state_n es)) as [Hi | Hni]
-  ; [|destruct (decide (i = equivocator_state_n es)) as [Hi | Hni']]
+  ; [| destruct (decide (i = equivocator_state_n es)) as [Hi | Hni']]
   ; [| | assert (Hi : equivocator_state_n es < i) by lia]
-  ; [ specialize (equivocator_state_extend_project_1 es s i Hi) as Hpr
+  ; [specialize (equivocator_state_extend_project_1 es s i Hi) as Hpr
     | specialize (equivocator_state_extend_project_2 es s i Hi) as Hpr
     | specialize (equivocator_state_extend_project_3 es s i Hi) as Hpr]
   ; rewrite Hpr in *.
@@ -445,15 +444,13 @@ Qed.
 
 #[local] Ltac destruct_equivocator_state_append_project' es es' i Hi k Hk Hpr :=
   let Hi' := fresh "Hi" in
-  destruct (decide (i < equivocator_state_n es)) as [Hi| Hi']; swap 1 2;
-  [ destruct (decide (i < equivocator_state_n es + equivocator_state_n es')) as [Hi|Hi];
+  destruct (decide (i < equivocator_state_n es)) as [Hi | Hi']; swap 1 2;
+  [destruct (decide (i < equivocator_state_n es + equivocator_state_n es')) as [Hi | Hi];
     swap 1 2;
-    [ specialize (equivocator_state_append_project_3 es es' i Hi) as Hpr
+    [specialize (equivocator_state_append_project_3 es es' i Hi) as Hpr
     | apply not_lt_plus_dec in Hi' as [k Hk];
-      specialize (equivocator_state_append_project_2 es es' i k (eq_sym Hk)) as Hpr
-    ]
-  | specialize (equivocator_state_append_project_1 es es' i Hi) as Hpr
-  ]
+      specialize (equivocator_state_append_project_2 es es' i k (eq_sym Hk)) as Hpr]
+  | specialize (equivocator_state_append_project_1 es es' i Hi) as Hpr]
   ; rewrite Hpr in *
   .
 
@@ -498,7 +495,7 @@ Proof.
       ; [done | done |].
       by rewrite equivocator_state_append_size; lia.
     + rewrite !equivocator_state_extend_project_1
-      ; [rewrite equivocator_state_append_project_2 with (k := k)|lia|]
+      ; [rewrite equivocator_state_append_project_2 with (k := k) | lia |]
       ; [done | done |].
       by rewrite equivocator_state_append_size; lia.
   - rewrite equivocator_state_extend_project_1.
@@ -657,22 +654,22 @@ Ltac equivocator_state_update_simpl :=
   autounfold with state_update in *;
   autorewrite with equivocator_state_update state_update in *.
 
-Arguments Spawn {_ _} _: assert.
-Arguments ContinueWith {_ _} _ _: assert.
-Arguments ForkWith {_ _} _ _: assert.
-Arguments equivocator_state_n {_ _} _: assert.
-Arguments equivocator_state_last {_ _} _: assert.
-Arguments equivocator_state_zero {_ _} _: assert.
-Arguments equivocator_state_s {_ _} _ _: assert.
-Arguments equivocator_state_project {_ _} _ _: assert.
-Arguments equivocator_state_update {_ _} _ _ _: assert.
+Arguments Spawn {_ _} _ : assert.
+Arguments ContinueWith {_ _} _ _ : assert.
+Arguments ForkWith {_ _} _ _ : assert.
+Arguments equivocator_state_n {_ _} _ : assert.
+Arguments equivocator_state_last {_ _} _ : assert.
+Arguments equivocator_state_zero {_ _} _ : assert.
+Arguments equivocator_state_s {_ _} _ _ : assert.
+Arguments equivocator_state_project {_ _} _ _ : assert.
+Arguments equivocator_state_update {_ _} _ _ _ : assert.
 Arguments equivocator_state_extend {_ _} _ _ : assert.
 Arguments equivocator_state_append {_ _} _ _ : assert.
 
 Ltac destruct_equivocator_state_project' es i si Hi Hpr :=
-  destruct (equivocator_state_project es i) as [si|] eqn:Hpr
-  ; [ specialize (equivocator_state_project_Some_rev _ _ _ _ Hpr) as Hi
-    | specialize (equivocator_state_project_None_rev _ _ _ Hpr) as Hi ].
+  destruct (equivocator_state_project es i) as [si |] eqn: Hpr
+  ; [specialize (equivocator_state_project_Some_rev _ _ _ _ Hpr) as Hi
+    | specialize (equivocator_state_project_None_rev _ _ _ Hpr) as Hi].
 
 Ltac destruct_equivocator_state_project es i si Hi :=
   let Hpr := fresh "Hpr" in
@@ -683,11 +680,10 @@ Ltac destruct_equivocator_state_update_project' es i s j Hj Hij Hpr :=
   let Hsize := fresh "Hsize" in
   pose proof (equivocator_state_update_size _ es i s) as Hsize
   ; destruct (decide (j < equivocator_state_n es)) as [Hj | Hj]; swap 1 2
-  ; [ specialize (equivocator_state_project_None _ (equivocator_state_update es i s) j Hj) as Hpr
+  ; [specialize (equivocator_state_project_None _ (equivocator_state_update es i s) j Hj) as Hpr
     | destruct (decide (i = j)) as [Hij | Hij]
-    ; [ specialize (equivocator_state_update_project_eq _ es i s j Hj Hij) as Hpr
-      | specialize (equivocator_state_update_project_neq _ es i s j Hij) as Hpr
-      ]]
+    ; [specialize (equivocator_state_update_project_eq _ es i s j Hj Hij) as Hpr
+      | specialize (equivocator_state_update_project_neq _ es i s j Hij) as Hpr]]
   ; rewrite Hpr in *
   ; clear Hsize.
 
@@ -700,9 +696,9 @@ Ltac destruct_equivocator_state_extend_project' es s i Hi Hpr :=
   let Hni := fresh "Hni" in
   let Hni' := fresh "Hni" in
   destruct (decide (i < equivocator_state_n es)) as [Hi | Hni]
-  ; [|destruct (decide (i = equivocator_state_n es)) as [Hi | Hni']]
+  ; [| destruct (decide (i = equivocator_state_n es)) as [Hi | Hni']]
   ; [| | assert (Hi : equivocator_state_n es < i) by lia]
-  ; [ specialize (equivocator_state_extend_project_1 _ es s i Hi) as Hpr
+  ; [specialize (equivocator_state_extend_project_1 _ es s i Hi) as Hpr
     | specialize (equivocator_state_extend_project_2 _ es s i Hi) as Hpr
     | specialize (equivocator_state_extend_project_3 _ es s i Hi) as Hpr]
   ; rewrite Hpr in *.
@@ -858,17 +854,17 @@ Proof. by destruct d. Qed.
   the descriptor of the label of the transition must be Existing 0 false
 *)
 Lemma equivocator_transition_no_equivocation_zero_descriptor
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Hv: vvalid equivocator_vlsm l (s, iom))
-  (Ht: vtransition equivocator_vlsm l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Hv : vvalid equivocator_vlsm l (s, iom))
+  (Ht : vtransition equivocator_vlsm l (s, iom) = (s', oom))
   (Hs' : is_singleton_state X s')
   : exists li, l = ContinueWith 0 li.
 Proof.
   unfold is_singleton_state in Hs'.
   destruct l as [sn | ei l | ei l]
-  ; [ inversion Ht; subst; rewrite equivocator_state_extend_size in Hs'; cbv in Hs'; lia|..]
+  ; [inversion Ht; subst; rewrite equivocator_state_extend_size in Hs'; cbv in Hs'; lia | ..]
   ; cbn in Hv, Ht;  destruct_equivocator_state_project s ei sei Hei; [| done | | done]
   ; destruct (vtransition _ _ _) as (si', om')
   ; inversion Ht; subst; equivocator_state_update_simpl.
@@ -881,15 +877,15 @@ Qed.
   the state prior to the transition has no equivocation as well.
 *)
 Lemma equivocator_transition_reflects_singleton_state
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Ht: equivocator_transition X l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : is_singleton_state X s' -> is_singleton_state X s.
 Proof.
   unfold is_singleton_state.
-  by destruct l as [sn| ei l| ei l]; cbn in Ht
-  ; [inversion Ht; rewrite equivocator_state_extend_size; cbv; lia| ..]
+  by destruct l as [sn | ei l | ei l]; cbn in Ht
+  ; [inversion Ht; rewrite equivocator_state_extend_size; cbv; lia | ..]
   ; destruct (equivocator_state_project _ _)
   ; [| by inversion Ht | | by inversion Ht]
   ; destruct (vtransition _ _ _) as (si', om')
@@ -897,15 +893,15 @@ Proof.
 Qed.
 
 Lemma equivocator_transition_cannot_decrease_state_size
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Ht: equivocator_transition X l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : equivocator_state_n s <= equivocator_state_n s'.
 Proof.
   specialize (equivocator_state_extend_size X s) as Hex_size.
-  destruct l as [sn| ei l| ei l]
-  ; [inversion Ht; rewrite Hex_size; lia|..]
+  destruct l as [sn | ei l | ei l]
+  ; [inversion Ht; rewrite Hex_size; lia | ..]
   ; cbn in Ht
   ; destruct (equivocator_state_project _ _)
   ; [| by inversion Ht; lia | | by inversion Ht; lia]
@@ -916,10 +912,10 @@ Proof.
 Qed.
 
 Lemma equivocator_transition_preserves_equivocating_state
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Ht: equivocator_transition X l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : is_equivocating_state X s -> is_equivocating_state X s'.
 Proof.
   intros Hs Hs'. elim Hs. clear Hs. revert Ht Hs' .
@@ -927,10 +923,10 @@ Proof.
 Qed.
 
 Lemma zero_descriptor_transition_reflects_equivocating_state
-  (iom oom: option message)
-  (l: vlabel equivocator_vlsm)
-  (s s': vstate equivocator_vlsm)
-  (Ht: equivocator_transition X l (s, iom) = (s', oom))
+  (iom oom : option message)
+  (l : vlabel equivocator_vlsm)
+  (s s' : vstate equivocator_vlsm)
+  (Ht : equivocator_transition X l (s, iom) = (s', oom))
   li
   (Hzero : l = ContinueWith 0 li)
   : is_equivocating_state X s' -> is_equivocating_state X s.
@@ -975,17 +971,17 @@ Proof.
       destruction tactic for a valid equivocator transition
       vtransition equivocator_vlsm l (s, om) = (s', om')
     *)
-    destruct l as [sn|i l|i l]
-    ; [ inversion_clear Ht; split; [by apply option_valid_message_None |]
+    destruct l as [sn | i l | i l]
+    ; [inversion_clear Ht; split; [by apply option_valid_message_None |]
       ; intros
       ; destruct_equivocator_state_extend_project s sn i Hi
-      ; [ by apply IHHbs1 in H
+      ; [by apply IHHbs1 in H
       | inversion H; subst; apply initial_state_is_valid; apply Hv
       | done]
-      |..]
+      | ..]
     ; cbn in Hv, Ht
     ; destruct_equivocator_state_project' s i si Hi Hpr; [| done | | done]
-    ; destruct (vtransition _ _ _) as (si', _om') eqn:Hti
+    ; destruct (vtransition _ _ _) as (si', _om') eqn: Hti
     ; inversion Ht; subst s' _om'; clear Ht
 
     (* I wish I could solve this goal, then apply the composed tactic for the remaining two goals. *)
@@ -1160,7 +1156,7 @@ Lemma existing_true_label_equivocator_state_project_not_last
 Proof.
   cbn in Ht.
   rewrite Hsi in Ht.
-  destruct (vtransition _ _ _) as (si', _om') eqn:Hti.
+  destruct (vtransition _ _ _) as (si', _om') eqn: Hti.
   inversion Ht; subst s' _om'. clear Ht.
   simpl.
   by destruct_equivocator_state_extend_project s si' ni Hni'; [| lia..].
@@ -1195,11 +1191,11 @@ Lemma existing_false_label_equivocator_state_project_not_same
   = equivocator_state_descriptor_project s (Existing ni).
 Proof.
   cbn in Ht. rewrite Hsi in Ht.
-  destruct (vtransition _ _ _) as (si', _om') eqn:Hti.
+  destruct (vtransition _ _ _) as (si', _om') eqn: Hti.
   inversion Ht; subst s' _om'. clear Ht.
   simpl.
-  destruct_equivocator_state_update_project s ieqvi si' ni Hni' Hini; [lia..|].
-  by destruct_equivocator_state_project s ni sni Hni''; [|lia].
+  destruct_equivocator_state_update_project s ieqvi si' ni Hni' Hini; [lia.. |].
+  by destruct_equivocator_state_project s ni sni Hni''; [| lia].
 Qed.
 
 Lemma existing_false_label_equivocator_state_project_same
@@ -1223,7 +1219,7 @@ Qed.
 
 End sec_equivocator_vlsm_valid_state_projections.
 
-Arguments NewMachine {_ _} _: assert.
+Arguments NewMachine {_ _} _ : assert.
 Arguments Existing {_ _} _ : assert.
 Arguments equivocator_label_descriptor {_ _} _ : assert.
-Arguments equivocator_state_descriptor_project {_ _} _ _: assert.
+Arguments equivocator_state_descriptor_project {_ _} _ _ : assert.

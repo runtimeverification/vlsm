@@ -12,16 +12,16 @@ Proof.
 Qed.
 
 Lemma map_option_listing
-      {A B : Type} (f: A -> option B) (g: B -> A)
-      (f_proj_inj: forall a b, f a = Some b -> a = g b)
-      (f_surj: forall b, f (g b) = Some b)
-      (A_listing: list A) (A_finite : Listing A_listing) : Listing (map_option f A_listing).
+      {A B : Type} (f : A -> option B) (g : B -> A)
+      (f_proj_inj : forall a b, f a = Some b -> a = g b)
+      (f_surj : forall b, f (g b) = Some b)
+      (A_listing : list A) (A_finite : Listing A_listing) : Listing (map_option f A_listing).
 Proof.
   destruct A_finite as [Hnodup Hfull].
   split.
   - clear Hfull.
     induction A_listing as [| a l IHl]; [by constructor |].
-    inversion_clear Hnodup as [|? ? H1 H2].
+    inversion_clear Hnodup as [| ? ? H1 H2].
     specialize (IHl H2); clear H2.
     simpl.
     destruct (f a) eqn: Hfa; [| done].
@@ -63,8 +63,8 @@ Lemma left_finite
   : Listing (left_listing sum_finite).
 Proof.
   revert sum_finite.
-  apply map_option_listing with (g:=inl); [| done].
-  by destruct a;simpl;congruence.
+  apply map_option_listing with (g := inl); [| done].
+  by destruct a; simpl; congruence.
 Qed.
 
 Lemma right_finite
@@ -72,8 +72,8 @@ Lemma right_finite
   : Listing (right_listing sum_finite).
 Proof.
   revert sum_finite.
-  apply map_option_listing with (g:=inr); [| done].
-  by destruct a;simpl;congruence.
+  apply map_option_listing with (g := inr); [| done].
+  by destruct a; simpl; congruence.
 Qed.
 
 End sec_sum_listing.

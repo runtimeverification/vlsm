@@ -75,7 +75,7 @@ Proof.
   split; [| by apply elem_of_enum].
   cbn in Ht.
   destruct l as (eqv, leqv).
-  destruct (equivocator_transition _ _ _) as (si', _om') eqn:Hti.
+  destruct (equivocator_transition _ _ _) as (si', _om') eqn: Hti.
   inversion Ht. subst. clear Ht.
   destruct (decide (i = eqv)); subst; state_update_simpl; [| done].
   by apply (zero_descriptor_transition_reflects_equivocating_state (IM eqv) _ _ _ _ _ Hti _ Hzero Hi).
@@ -341,8 +341,7 @@ Proof.
   intros [Hproper Hfixed].
   specialize
     (preloaded_equivocators_valid_trace_project_proper_initial IM
-      _ _ Htr _ _ _ HtrX Hproper
-    )
+      _ _ Htr _ _ _ HtrX Hproper)
     as Hiproper.
   split; [done |].
   intros i Hi. specialize (Hfixed i Hi).
@@ -387,7 +386,7 @@ Definition constraint_has_been_sent_prop
     (descriptors : equivocator_descriptors IM)
     (Hdescriptors : proper_fixed_equivocator_descriptors descriptors s)
     (sX := equivocators_state_project IM descriptors s)
-    (m: message)
+    (m : message)
     (Hm : has_been_sent FreeE s m)
     l,
   constraint l (sX, Some m).
@@ -499,7 +498,7 @@ Proof.
     specialize (equivocators_trace_project_preserves_proper_fixed_equivocator_descriptors
       _ _ (proj1 Htr'pre) _ _ _ Htr_project Hproper')
       as Hproper_initial.
-    destruct oitem as [item|].
+    destruct oitem as [item |].
     +  simpl in Hitemx. destruct Hitemx as [Hl [Hinput [Houtput [Hdestination _]]]].
       specialize (Hx _ eq_refl).
       destruct Hx as [Hvx Htx].
@@ -528,7 +527,7 @@ Proof.
       simpl in Hl. subst.
       simpl in Hc.
       destruct Hc as [[Hno_equiv _] _].
-      simpl in Htx,Hvx,Hstate_project.
+      simpl in Htx, Hvx, Hstate_project.
       rewrite Hstate_project in Hvx, Htx.
       destruct input as [input |]; [| by repeat split;
         [| apply option_valid_message_None | | apply HconstraintNone |]].
@@ -571,7 +570,7 @@ Proof.
           valid_state_prop (pre_loaded_with_all_messages_vlsm FreeE) (finite_trace_last is tr'))
             by (apply finite_valid_trace_last_pstate, Htr'pre).
         apply proper_sent; [done |].
-        apply has_been_sent_consistency; [typeclasses eauto | done | ].
+        apply has_been_sent_consistency; [typeclasses eauto | done |].
         by exists is, tr', (valid_trace_add_default_last Htr'pre).
     + exists trX'. exists initial_descriptors. subst foldx. split; [done |].
       split; [by apply Htr_project |].
@@ -607,17 +606,17 @@ Qed.
   in any projection of the final state.
 *)
 Lemma not_equivocating_sent_message_has_been_directly_observed_in_projection
-  (is: vstate XE)
-  (tr: list (composite_transition_item (equivocator_IM IM)))
-  (Htr: finite_valid_trace XE is tr)
+  (is : vstate XE)
+  (tr : list (composite_transition_item (equivocator_IM IM)))
+  (Htr : finite_valid_trace XE is tr)
   (lst := finite_trace_last is tr)
-  (item: transition_item)
-  (Hitem: item ∈ tr)
-  (Hitem_not_equiv: projT1 (l item) ∉ equivocating)
-  (m: message)
-  (Hm: field_selector output m item)
-  (descriptors: equivocator_descriptors IM)
-  (Hdescriptors: proper_fixed_equivocator_descriptors descriptors lst)
+  (item : transition_item)
+  (Hitem : item ∈ tr)
+  (Hitem_not_equiv : projT1 (l item) ∉ equivocating)
+  (m : message)
+  (Hm : field_selector output m item)
+  (descriptors : equivocator_descriptors IM)
+  (Hdescriptors : proper_fixed_equivocator_descriptors descriptors lst)
   : has_been_directly_observed Free (equivocators_state_project IM descriptors lst) m.
 Proof.
   destruct (free_equivocators_valid_trace_project descriptors is tr Hdescriptors Htr)
@@ -633,7 +632,7 @@ Proof.
   }
 
   assert (HtrX_Pre : finite_valid_trace (pre_loaded_with_all_messages_vlsm Free)
-                      (equivocators_state_project IM initial_descriptors is) trX ).
+                      (equivocators_state_project IM initial_descriptors is) trX).
   {
     revert HtrX_Free; apply VLSM_incl_finite_valid_trace.
     by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
@@ -691,14 +690,14 @@ Proof.
   specialize (Heqv_descriptors'' _ Hitem_not_equiv).
   simpl in *.
   destruct (equivocators_transition_item_project IM eqv_descriptors'' item)
-    as [(o, odescriptor)|] eqn:Hpr
+    as [(o, odescriptor) |] eqn: Hpr
   ; [| by congruence].
   destruct item. simpl in *.
   apply first_transition_valid in Hpre_item_free. simpl in Hpre_item_free.
   destruct Hpre_item_free as [[_ [_ [Hv _]]] Ht].
   destruct l. simpl in *. unfold vtransition in Ht. simpl in Ht.
   match type of Ht with
-  | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn:Hti
+  | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn: Hti
   end.
   inversion Ht; subst; clear Ht.
   state_update_simpl.
@@ -741,8 +740,8 @@ Lemma equivocators_trace_sub_item_input_is_seeded_or_sub_previously_sent
   (tr : list (vtransition_item XE))
   (s := finite_trace_last is tr)
   (Htr : finite_valid_trace XE is tr)
-  (descriptors: equivocator_descriptors IM)
-  (Hproper: proper_fixed_equivocator_descriptors descriptors s)
+  (descriptors : equivocator_descriptors IM)
+  (Hproper : proper_fixed_equivocator_descriptors descriptors s)
   (lst_trX := equivocators_state_project IM descriptors s)
   : trace_sub_item_input_is_seeded_or_sub_previously_sent
     (equivocator_IM IM) (elements equivocating)
@@ -775,7 +774,7 @@ Proof.
   apply finite_valid_trace_from_app_iff in Htr as Hpre. destruct Hpre as [Hpre _].
   apply finite_valid_trace_from_app_iff in Hpre. destruct Hpre as [Hpre Hivt].
   apply first_transition_valid in Hivt.
-  destruct (composite_has_been_directly_observed_dec IM lst_trX m) as [|Heqv]
+  destruct (composite_has_been_directly_observed_dec IM lst_trX m) as [| Heqv]
   ; [by left | right].
   assert (Hsuf_free : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE)
     (finite_trace_last is pre) ([item] ++ suf)).
@@ -794,7 +793,7 @@ Proof.
   destruct Hivt as [[_ [_ [_ [[Hc _] Hfixed]]]] Ht].
   simpl in Ht, Hfixed. rewrite Ht in Hfixed. simpl in Hfixed.
   clear Ht.
-  destruct Hc as [Hc | Hinit]; [|done ].
+  destruct Hc as [Hc | Hinit]; [| done].
   assert (Hpre_free : finite_valid_trace FreeE is pre).
   {
     split; [| done].
@@ -878,19 +877,19 @@ Qed.
   in any projection.
 *)
 Lemma equivocator_vlsm_trace_project_reflect_non_equivocating
-  (is: composite_state (equivocator_IM IM))
-  (tr: list (composite_transition_item (equivocator_IM IM)))
-  (Htr: finite_valid_trace XE is tr)
-  (m: message)
-  (final_descriptors: equivocator_descriptors IM)
-  (Hproper: proper_fixed_equivocator_descriptors final_descriptors (finite_trace_last is tr))
-  (trX: list (composite_transition_item IM))
-  (initial_descriptors: equivocator_descriptors IM)
-  (Htr_project: equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors))
-  (item: composite_transition_item (equivocator_IM IM))
-  (Hitem: item ∈ tr)
-  (Houtput: output item = Some m)
-  (Hno_equiv_item: projT1 (l item) ∉ equivocating)
+  (is : composite_state (equivocator_IM IM))
+  (tr : list (composite_transition_item (equivocator_IM IM)))
+  (Htr : finite_valid_trace XE is tr)
+  (m : message)
+  (final_descriptors : equivocator_descriptors IM)
+  (Hproper : proper_fixed_equivocator_descriptors final_descriptors (finite_trace_last is tr))
+  (trX : list (composite_transition_item IM))
+  (initial_descriptors : equivocator_descriptors IM)
+  (Htr_project : equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors))
+  (item : composite_transition_item (equivocator_IM IM))
+  (Hitem : item ∈ tr)
+  (Houtput : output item = Some m)
+  (Hno_equiv_item : projT1 (l item) ∉ equivocating)
   : trace_has_message (field_selector output) m trX.
 Proof.
   apply elem_of_list_split in Hitem.
@@ -911,7 +910,7 @@ Proof.
   destruct Htr as [Hpre Hsuf].
   apply finite_valid_trace_from_app_iff in Hpre.
   destruct Hpre as [_ Hitem].
-  rewrite app_assoc,finite_trace_last_app in Hproper.
+  rewrite app_assoc, finite_trace_last_app in Hproper.
   rewrite finite_trace_last_is_last in Hsuf, Hproper.
   assert (Hsufpre :
     finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) (destination item) suf).
@@ -923,14 +922,14 @@ Proof.
   }
   specialize
     (equivocators_trace_project_preserves_proper_fixed_equivocator_descriptors _ _ Hsufpre
-      final_descriptors eqv_item _ Hpr_suf Hproper
-    ) as Hproper_item.
+      final_descriptors eqv_item _ Hpr_suf Hproper)
+    as Hproper_item.
   destruct Hproper_item as [Hproper_item Hproper_fixed_item].
   specialize (Hproper_fixed_item _ Hno_equiv_item).
   specialize
     (no_equivocating_equivocators_transition_item_project IM eqv_item item
-      Hproper_fixed_item
-    ) as Hex.
+      Hproper_fixed_item)
+    as Hex.
   spec Hex.
   {
     apply (not_equivocating_index_has_singleton_state _ (elements equivocating));
@@ -953,15 +952,15 @@ Qed.
   one of the nodes allowed to equivocate.
 *)
 Lemma projection_has_not_been_directly_observed_is_equivocating
-  (is: composite_state (equivocator_IM IM))
-  (tr: list (composite_transition_item (equivocator_IM IM)))
-  (Htr: finite_valid_trace XE is tr)
+  (is : composite_state (equivocator_IM IM))
+  (tr : list (composite_transition_item (equivocator_IM IM)))
+  (Htr : finite_valid_trace XE is tr)
   (s := @finite_trace_last _ (composite_type (equivocator_IM IM)) is tr)
-  (descriptors: equivocator_descriptors IM)
-  (Hproper: proper_fixed_equivocator_descriptors descriptors s)
+  (descriptors : equivocator_descriptors IM)
+  (Hproper : proper_fixed_equivocator_descriptors descriptors s)
   (sX := equivocators_state_project IM descriptors s)
-  (m: message)
-  (Hno: ~ composite_has_been_directly_observed IM sX m)
+  (m : message)
+  (Hno : ~ composite_has_been_directly_observed IM sX m)
   : forall item : composite_transition_item (equivocator_IM IM),
       item ∈ tr -> output item = Some m -> projT1 (l item) ∈ equivocating.
 Proof.
@@ -1025,7 +1024,7 @@ Proof.
     split; [| done].
     destruct om; [| done].
     simpl in Hc. simpl.
-    destruct Hc as [Hc | Hc ]
+    destruct Hc as [Hc | Hc]
     ; [| by right; apply Hseed12].
     left.
     destruct Hc as [subi Hibs].
@@ -1127,16 +1126,15 @@ Proof.
   specialize
     (finite_valid_trace_sub_projection (equivocator_IM IM) (elements equivocating)
       (equivocators_fixed_equivocations_constraint IM (elements equivocating))
-      (composite_has_been_directly_observed IM sX)
-    ) as Hproject.
+      (composite_has_been_directly_observed IM sX))
+    as Hproject.
   specialize (Hproject is tr).
   spec Hproject.
   { subst sX.
     rewrite <- (valid_trace_get_last Htr) in Hdescriptors |- *.
     apply
       (equivocators_trace_sub_item_input_is_seeded_or_sub_previously_sent
-        _ _ (valid_trace_forget_last Htr) descriptors Hdescriptors
-      ).
+        _ _ (valid_trace_forget_last Htr) descriptors Hdescriptors).
   }
   specialize (Hproject (valid_trace_forget_last Htr)).
 
@@ -1165,10 +1163,10 @@ Proof.
   destruct
     (equivocator_vlsm_transition_item_project (IM (projT1 (l item)))
       (composite_transition_item_projection (equivocator_IM IM) item)
-      (item_descriptors (projT1 (l item)))
-    ) as [(o, deqv')|]
+      (item_descriptors (projT1 (l item))))
+    as [(o, deqv') |]
     ; [| by congruence].
-  destruct o as [item'|]; [| by congruence].
+  destruct o as [item' |]; [| by congruence].
   inversion Hpr_item. subst output_itemX pre_descriptors. clear Hpr_item deqv'.
   simpl in Houtput_select.
 
@@ -1178,8 +1176,8 @@ Proof.
   specialize
     (projection_has_not_been_directly_observed_is_equivocating _ _ (valid_trace_forget_last Htr)
       _ Hdescriptors
-      _ n item
-    ) as Hitem_equivocating.
+      _ n item)
+    as Hitem_equivocating.
   clear Hdescriptors n.
   spec Hitem_equivocating; [by rewrite Heqtr, !elem_of_app, elem_of_cons; auto |].
   specialize (Hitem_equivocating Houtput_select).
@@ -1199,8 +1197,8 @@ Proof.
       (composite_state_sub_projection (equivocator_IM IM) (elements equivocating) is)
       (finite_trace_sub_projection (equivocator_IM IM) (elements equivocating) tr)
       Hproject
-      (fun i => final_descriptors_m (proj1_sig i))
-    ) as Hsub_project.
+      (fun i => final_descriptors_m (proj1_sig i)))
+    as Hsub_project.
   simpl in Hsub_project.
   spec Hsub_project.
   {
@@ -1233,8 +1231,7 @@ Proof.
   destruct
     (equivocators_trace_project_finite_trace_sub_projection_commute IM (elements equivocating)
       final_descriptors_m initial_descriptors_m initial_descriptors' tr trXm trX'
-      Hproject_trXm Hpr_tr'
-    )
+      Hproject_trXm Hpr_tr')
     as [_ HeqtrX].
   clear Hproject_trXm Hpr_tr'.
 
@@ -1242,8 +1239,8 @@ Proof.
 
   remember
     (equivocators_state_project (sub_IM IM (elements equivocating)) initial_descriptors'
-      (composite_state_sub_projection (equivocator_IM IM) (elements equivocating) is)
-    ) as isX. clear HeqisX.
+      (composite_state_sub_projection (equivocator_IM IM) (elements equivocating) is))
+    as isX. clear HeqisX.
   eapply can_emit_from_valid_trace; [done |].
 
   subst.
@@ -1267,7 +1264,7 @@ Theorem fixed_equivocators_valid_trace_project
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
   (final_state := finite_trace_last is tr)
-  (Hproper: proper_fixed_equivocator_descriptors final_descriptors final_state)
+  (Hproper : proper_fixed_equivocator_descriptors final_descriptors final_state)
   (Htr : finite_valid_trace XE is tr)
   : exists
     (trX : list (composite_transition_item IM))
@@ -1287,7 +1284,7 @@ Lemma fixed_equivocators_vlsm_partial_projection
   (final_descriptors : equivocator_descriptors IM)
   : VLSM_partial_projection XE X (equivocators_partial_trace_project IM final_descriptors).
 Proof.
-  split; [split|].
+  split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert (HPreFree_pre_tr :
       finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) s_pre (pre ++ tr)).
@@ -1313,7 +1310,7 @@ Qed.
 Lemma fixed_equivocators_vlsm_projection
   : VLSM_projection XE X (equivocators_total_label_project IM) (equivocators_total_state_project IM).
 Proof.
-  constructor; [constructor|]; intros sX trX HtrX.
+  constructor; [constructor |]; intros sX trX HtrX.
   - apply PreFreeE_Free_vlsm_projection_type.
     apply VLSM_incl_finite_valid_trace_from; [| done].
     by apply equivocators_fixed_equivocations_vlsm_incl_PreFree.
@@ -1363,7 +1360,7 @@ Lemma strong_constraint_subsumption_fixed_all
     (equivocators_no_equivocations_constraint IM)
     (equivocators_fixed_equivocations_constraint IM (enum index)).
 Proof.
-  by split; [|intro; intros; apply elem_of_enum].
+  by split; [| intro; intros; apply elem_of_enum].
 Qed.
 
 Lemma strong_constraint_subsumption_all_fixed

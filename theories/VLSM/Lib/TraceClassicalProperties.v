@@ -41,7 +41,7 @@ end.
 
 (** ** Using midpoints to show the right associativity of the append property *)
 
-CoFixpoint midp (p0 p1: trace -> Prop) tr0 tr1 (h: followsT (appendT p0 p1) tr0 tr1) : trace :=
+CoFixpoint midp (p0 p1 : trace -> Prop) tr0 tr1 (h : followsT (appendT p0 p1) tr0 tr1) : trace :=
 match followsT_dec h with
 | inl (existT tr (exist a (conj _ (conj _ H)))) =>
   let: exist x _ := constructive_indefinite_description _ H in x
@@ -50,7 +50,7 @@ match followsT_dec h with
 end.
 
 Lemma midpointT_midp :
-  forall (p0 p1: trace -> Prop) tr0 tr1 (h : followsT (appendT p0 p1) tr0 tr1),
+  forall (p0 p1 : trace -> Prop) tr0 tr1 (h : followsT (appendT p0 p1) tr0 tr1),
     midpointT h (midp h).
 Proof.
 cofix CIH.
@@ -63,7 +63,7 @@ dependent inversion h; subst.
     (followsT_delay a b f) tr tr' f a b (midp f)).
 Qed.
 
-Lemma appendT_assoc_R: forall p1 p2 p3,
+Lemma appendT_assoc_R : forall p1 p2 p3,
  forall tr : trace, (appendT p1 (appendT p2 p3)) tr -> (appendT (appendT p1 p2)  p3) tr.
 Proof.
 move => p1 p2 p3 tr0 [tr1 [h1 h2]].
@@ -73,7 +73,7 @@ exists (midp h2); split.
 - exact: (midpointT_after (midpointT_midp h2)).
 Qed.
 
-Lemma AppendT_assoc_R: forall (p1 p2 p3 : propT), (p1 *** p2 *** p3) =>> (p1 *** p2) *** p3.
+Lemma AppendT_assoc_R : forall (p1 p2 p3 : propT), (p1 *** p2 *** p3) =>> (p1 *** p2) *** p3.
 Proof.
 move => [f1 hf1] [f2 hf2] [f3 hf3] tr0 /= h1.
 exact: appendT_assoc_R.

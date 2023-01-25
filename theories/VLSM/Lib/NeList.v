@@ -103,7 +103,7 @@ Definition NeList_to_ne_list {A} (l : NeList A) : ne_list A :=
 Lemma NeList_to_ne_list_unroll {A} (a b : A) (l : list A) :
   NeList_to_ne_list {| nl_hd := a; nl_tl := b :: l |}
     =
-  nel_cons a (NeList_to_ne_list {| nl_hd := b; nl_tl := l|}).
+  nel_cons a (NeList_to_ne_list {| nl_hd := b; nl_tl := l |}).
 Proof. done. Qed.
 
 Lemma NeList_to_ne_list_to_list {A} :

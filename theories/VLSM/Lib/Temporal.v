@@ -6,24 +6,24 @@ From Coq Require Import Streams Classical.
 
 Set Implicit Arguments.
 
-Inductive Eventually [A:Type] (P: Stream A -> Prop) : Stream A -> Prop :=
+Inductive Eventually [A : Type] (P : Stream A -> Prop) : Stream A -> Prop :=
 | ehere : forall s, P s -> Eventually P s
 | elater : forall s, Eventually P s -> forall a, Eventually P (Cons a s).
 
-CoInductive Forever [A:Type] (P: Stream A -> Prop) : Stream A -> Prop :=
+CoInductive Forever [A : Type] (P : Stream A -> Prop) : Stream A -> Prop :=
 | fcons : forall s, P s -> Forever P (tl s) -> Forever P s.
 
-Lemma fhere [A:Type] (P: Stream A -> Prop) : forall s, Forever P s -> P s.
+Lemma fhere [A : Type] (P : Stream A -> Prop) : forall s, Forever P s -> P s.
 Proof.
   by destruct 1.
 Qed.
 
-Lemma flater [A:Type] (P: Stream A -> Prop) : forall a s, Forever P (Cons a s) -> Forever P s.
+Lemma flater [A : Type] (P : Stream A -> Prop) : forall a s, Forever P (Cons a s) -> Forever P s.
 Proof.
   by inversion 1.
 Qed.
 
-Lemma Eventually_map [A B:Type] (f: A -> B) (P: Stream B -> Prop): forall s,
+Lemma Eventually_map [A B : Type] (f : A -> B) (P : Stream B -> Prop) : forall s,
   Eventually P (Streams.map f s) <-> Eventually (fun s => P (Streams.map f s)) s.
 Proof.
   split.
@@ -39,10 +39,10 @@ Proof.
     + by rewrite unfold_Stream; constructor.
 Qed.
 
-Lemma Forever_map [A B:Type] (f: A -> B) (P: Stream B -> Prop): forall s,
+Lemma Forever_map [A B : Type] (f : A -> B) (P : Stream B -> Prop) : forall s,
   Forever P (Streams.map f s) <-> Forever (fun s => P (Streams.map f s)) s.
 Proof.
-  split;revert s.
+  split; revert s.
   - cofix lem. destruct s.
     rewrite (unfold_Stream (map f (Cons a s))).
     simpl.
@@ -53,11 +53,11 @@ Proof.
     by inversion 1; subst; constructor; [| apply lem].
 Qed.
 
-Definition progress [A:Type] (R: A -> A -> Prop) : Stream A -> Prop :=
+Definition progress [A : Type] (R : A -> A -> Prop) : Stream A -> Prop :=
   Forever (fun s => let x := hd s in let a := hd (tl s) in a = x \/ R a x).
 
-Lemma not_eventually [A:Type] (P: Stream A -> Prop):
-  forall s, ~Eventually P s -> Forever (fun s => ~ P s) s.
+Lemma not_eventually [A : Type] (P : Stream A -> Prop) :
+  forall s, ~ Eventually P s -> Forever (fun s => ~ P s) s.
 Proof.
   cofix not_eventually.
   destruct s.
@@ -66,7 +66,7 @@ Proof.
   - by apply not_eventually; contradict H; constructor.
 Qed.
 
-Lemma forever_impl [A:Type] (P Q : Stream A -> Prop):
+Lemma forever_impl [A : Type] (P Q : Stream A -> Prop) :
   forall s, Forever (fun s => P s -> Q s) s -> Forever P s -> Forever Q s.
 Proof.
   cofix forever_impl.
@@ -75,7 +75,7 @@ Proof.
   by constructor; auto.
 Qed.
 
-Lemma eventually_impl [A:Type] (P Q : Stream A -> Prop):
+Lemma eventually_impl [A : Type] (P Q : Stream A -> Prop) :
   forall s, Forever (fun s => P s -> Q s) s -> Eventually P s -> Eventually Q s.
 Proof.
   induction 2.
@@ -83,14 +83,14 @@ Proof.
   - by apply flater in H; apply elater, IHEventually.
 Qed.
 
-Lemma forever_tauto [A:Type] (P: Stream A -> Prop):
+Lemma forever_tauto [A : Type] (P : Stream A -> Prop) :
   (forall s, P s) -> forall s, Forever P s.
 Proof.
   cofix forever_tauto.
   by destruct s; constructor; auto.
 Qed.
 
-Lemma use_eventually [A:Type] (P Q : Stream A -> Prop):
+Lemma use_eventually [A : Type] (P Q : Stream A -> Prop) :
   forall s, Eventually P s -> Forever Q s ->
             exists s', P s' /\ Forever Q s'.
 Proof.
@@ -99,8 +99,8 @@ Proof.
   - by inversion 1; subst; itauto.
 Qed.
 
-Lemma refutation [A:Type] [R:A -> A-> Prop] (HR: well_founded R)
-      [s]: ~ Forever (fun s => Eventually (fun x => R (hd x) (hd s)) s) s.
+Lemma refutation [A : Type] [R : A -> A-> Prop] (HR : well_founded R)
+      [s] : ~ Forever (fun s => Eventually (fun x => R (hd x) (hd s)) s) s.
 Proof.
   remember (hd s) as x.
   revert s Heqx.
@@ -114,8 +114,8 @@ Proof.
   by eapply H0; eauto.
 Qed.
 
-Lemma forall_forever: forall [A B:Type] (P: A -> Stream B -> Prop) [s: Stream B],
-    (forall (a:A), Forever (P a) s) -> Forever (fun s => forall a, P a s) s.
+Lemma forall_forever : forall [A B : Type] (P : A -> Stream B -> Prop) [s : Stream B],
+    (forall (a : A), Forever (P a) s) -> Forever (fun s => forall a, P a s) s.
 Proof.
   intros A B P.
   cofix forall_forever.
@@ -127,8 +127,8 @@ Proof.
     by intro a; destruct (H a).
 Qed.
 
-Lemma not_forever [A:Type] (P: Stream A -> Prop):
-  forall s, ~Forever P s -> Eventually (fun s => ~ P s) s.
+Lemma not_forever [A : Type] (P : Stream A -> Prop) :
+  forall s, ~ Forever P s -> Eventually (fun s => ~ P s) s.
 Proof.
   intros s H. apply Classical_Prop.NNPP.
   contradict H.
@@ -137,8 +137,8 @@ Proof.
   by intro; apply Classical_Prop.NNPP.
 Qed.
 
-Lemma stabilization [A:Type] [R:A -> A-> Prop] (HR: well_founded R)
-      [s]: progress R s -> exists x, Eventually (Forever (fun s => hd s = x)) s.
+Lemma stabilization [A : Type] [R : A -> A-> Prop] (HR : well_founded R)
+      [s] : progress R s -> exists x, Eventually (Forever (fun s => hd s = x)) s.
 Proof.
   intro Hprogress.
   apply Classical_Prop.NNPP.
@@ -165,7 +165,7 @@ Proof.
     specialize (H a).
     destruct H as [x H _]. revert Hprogress.
     clear s.
-    induction H;intro Hprogress.
+    induction H; intro Hprogress.
     + by destruct s; cbn in *; congruence.
     + simpl. intro. subst a0.
       apply elater.

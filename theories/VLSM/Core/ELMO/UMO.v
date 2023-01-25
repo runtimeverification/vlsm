@@ -709,7 +709,7 @@ Proof.
   intros s Hs.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
   apply finite_valid_trace_init_to_state2trace_Ui_inv in Htr as Heqtr; subst.
-  replace (``(vs0 Ri)) with is; [done|].
+  replace (``(vs0 Ri)) with is; [done |].
   by apply vs0_uniqueness, Htr.
 Qed.
 
@@ -1039,7 +1039,7 @@ Lemma state_suffix_totally_orders_sent_messages_Ui' :
 Proof.
   intros s m1 m2 Hvsp Hin1 Hin2.
   by eapply state_suffix_totally_orders_sent_messages_Ri';
-    [apply UMO_reachable_Ui |..].
+    [apply UMO_reachable_Ui | ..].
 Qed.
 
 (** ** Observability
@@ -1686,7 +1686,7 @@ Proof.
     rewrite (IHis' (state_update U us i' (MkState [] (idx i'))) m i).
     + by state_update_simpl.
     + by apply valid_state_prop_state_update_init.
-    + erewrite adr_of_sentMessages, adr_of_valid_state_Ri; [done | ..| done].
+    + erewrite adr_of_sentMessages, adr_of_valid_state_Ri; [done | .. | done].
       * by rewrite <- Hidx; apply Hvsp'.
       * by eapply UMO_reachable_Ri, Hvsp'.
     + intros j Hnin. destruct (decide (i' = j)); subst.

@@ -7,12 +7,12 @@ From Coq Require Import Eqdep_dec.
 
 Tactic Notation "spec" hyp(H) :=
   match type of H with ?a -> _ =>
-  let H1 := fresh in (assert (H1: a);
-  [|generalize (H H1); clear H H1; intro H]) end.
+  let H1 := fresh in (assert (H1 : a);
+  [| generalize (H H1); clear H H1; intro H]) end.
 
 (** ** Basic logic *)
 
-Lemma Is_true_iff_eq_true: forall x: bool, x = true <-> x.
+Lemma Is_true_iff_eq_true : forall x : bool, x = true <-> x.
 Proof.
   split.
   - by apply Is_true_eq_left.
@@ -33,7 +33,7 @@ Lemma Decision_and : forall {P Q}, Decision P -> Decision Q -> Decision (P /\ Q)
 Proof. by firstorder. Qed.
 Lemma Decision_or : forall {P Q}, Decision P -> Decision Q -> Decision (P \/ Q).
 Proof. by firstorder. Qed.
-Lemma Decision_not : forall {P}, Decision P -> Decision (~P).
+Lemma Decision_not : forall {P}, Decision P -> Decision (~ P).
 Proof. by firstorder. Qed.
 
 #[export] Instance bool_decision {b : bool} : Decision b :=
@@ -620,13 +620,13 @@ Qed.
 (** ** Liveness *)
 
 Definition bounding (P : nat -> Prop)
-  :=  {n1 : nat | forall (n2 : nat), n1 <= n2 -> ~P n2}.
+  :=  {n1 : nat | forall (n2 : nat), n1 <= n2 -> ~ P n2}.
 
 Definition liveness (P : nat -> Prop)
   := forall (n1 : nat), { n2 : nat | n1 <= n2 /\ P n2}.
 
 Definition liveness_dec (P : nat -> Prop)
-  := forall (n1 : nat), { n2 : nat | n1 <= n2 /\ P n2} + {~exists n2:nat, n1 <= n2 /\ P n2}.
+  := forall (n1 : nat), { n2 : nat | n1 <= n2 /\ P n2} + {~ exists n2 : nat, n1 <= n2 /\ P n2}.
 
 Definition min_liveness (P : nat -> Prop)
   := forall (n1 : nat), { n2 : nat | n1 <= n2 /\ P n2
@@ -635,7 +635,7 @@ Definition min_liveness (P : nat -> Prop)
 Lemma not_bounding_impl_liveness
   (P : nat -> Prop)
   (Hdec : liveness_dec P)
-  (Hnbound : ~exists n1:nat, forall (n2:nat), n1 <= n2 -> ~P n2)
+  (Hnbound : ~ exists n1 : nat, forall (n2 : nat), n1 <= n2 -> ~ P n2)
   : liveness P.
 Proof.
   intros n1.
@@ -664,7 +664,7 @@ Definition sum_project_right {A B : Type} (x : A + B) : option B :=
   | inr b => Some b
   end.
 
-Program Definition not_lt_plus_dec {m n} (Hnlt : ~n < m) : {k | k + m = n} :=
+Program Definition not_lt_plus_dec {m n} (Hnlt : ~ n < m) : {k | k + m = n} :=
   exist _ (n - m) _.
 Next Obligation.
 Proof. by cbn; lia. Qed.

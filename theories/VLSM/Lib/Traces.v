@@ -31,13 +31,13 @@ match tr with
 | Tcons a b tr0 => a
 end.
 
-Definition trace_decompose (tr: trace): trace :=
+Definition trace_decompose (tr : trace) : trace :=
 match tr with
 | Tnil a => Tnil a
 | Tcons a b tr' => Tcons a b tr'
 end.
 
-Lemma trace_destr: forall tr, tr = trace_decompose tr.
+Lemma trace_destr : forall tr, tr = trace_decompose tr.
 Proof. by case. Qed.
 
 (** ** Bisimulations between traces *)
@@ -52,14 +52,14 @@ CoInductive bisim : trace -> trace -> Prop :=
 Lemma bisim_refl : forall tr, bisim tr tr.
 Proof.
 cofix CIH.
-case => [a|a b tr]; first exact: bisim_nil.
+case => [a | a b tr]; first exact: bisim_nil.
 exact/bisim_cons/CIH.
 Qed.
 
 Lemma bisim_sym : forall tr1 tr2, bisim tr1 tr2 -> bisim tr2 tr1.
 Proof.
 cofix CIH.
-case => [a|a b tr1] tr2 Hbs; invs Hbs; first exact: bisim_nil.
+case => [a | a b tr1] tr2 Hbs; invs Hbs; first exact: bisim_nil.
 exact/bisim_cons/CIH.
 Qed.
 
@@ -67,16 +67,16 @@ Lemma bisim_trans : forall tr1 tr2 tr3,
  bisim tr1 tr2 -> bisim tr2 tr3 -> bisim tr1 tr3.
 Proof.
 cofix CIH.
-case => [a|a b tr1] tr2 tr0 Hbs Hbs'; invs Hbs; invs Hbs'; first exact: bisim_nil.
+case => [a | a b tr1] tr2 tr0 Hbs Hbs'; invs Hbs; invs Hbs'; first exact: bisim_nil.
 exact: (bisim_cons _ _ (CIH _ _ _ H3 H4)).
 Qed.
 
-Lemma bisim_hd: forall tr0 tr1, bisim tr0 tr1 -> hd tr0 = hd tr1.
+Lemma bisim_hd : forall tr0 tr1, bisim tr0 tr1 -> hd tr0 = hd tr1.
 Proof. by move => tr0 tr1 []. Qed.
 
 (** ** Appending traces to one another *)
 
-CoFixpoint trace_append (tr tr': trace): trace :=
+CoFixpoint trace_append (tr tr' : trace) : trace :=
 match tr with
 | Tnil a => tr'
 | Tcons a b tr0 => Tcons a b (trace_append tr0 tr')
