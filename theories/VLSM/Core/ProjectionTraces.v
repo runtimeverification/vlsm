@@ -542,9 +542,9 @@ Lemma component_projection_validator_constraint_subsumption :
 Proof.
   intros Hsubsumption Hvalidator lj sj omi Hivj.
   apply Hvalidator in Hivj as (s & Heqsj & Hivj).
-  
-  unfold input_valid_constraint_subsumption in Hsubsumption.
-
+  exists s; split; [done |].
+  by revert Hivj; apply VLSM_incl_input_valid, weak_constraint_subsumption_incl.
+Qed.
 
 End projection_validation_constraint_subsumption.
 
