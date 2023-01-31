@@ -353,7 +353,9 @@ End sec_full_node_msg_dep_limited_equivocation_equivalence.
 Section sec_msg_dep_fixed_limited_equivocation.
 
 Context
-  {message index : Type}
+  {message : Type}
+  `{FinSet index Ci}
+  `{!finite.Finite index}
   `{FinSet message Cm}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
@@ -363,13 +365,14 @@ Context
   `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (threshold : R)
-  `{ReachableThreshold index Ci threshold}
-  `{!finite.Finite index}
-  (sender : message -> option index)
-  (Limited := msg_dep_limited_equivocation_vlsm IM threshold full_message_dependencies sender (Cv := Ci))
+  `{ReachableThreshold validator Cv threshold}
+  (sender : message -> option validator)
+  (A : validator -> index)
+  `{!Inj (=) (=) A}
+  (Limited := msg_dep_limited_equivocation_vlsm IM threshold full_message_dependencies sender (Cv := Cv))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  (Hchannel : channel_authentication_prop IM Datatypes.id sender)
-  (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender :=
+  (Hchannel : channel_authentication_prop IM A sender)
+  (Hsender_safety : sender_safety_alt_prop IM A sender :=
     channel_authentication_sender_safety _ _ _ Hchannel)
   .
 
@@ -377,24 +380,24 @@ Lemma equivocating_messages_are_equivocator_emitted
   s im
   (Him : can_emit (free_composite_vlsm IM) im)
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im) :
-    exists j : index,
-      j ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci)
+    exists v : validator,
+      v ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Cv)
         /\
-      can_emit (pre_loaded_vlsm (IM j) (fun dm => msg_dep_rel message_dependencies dm im)) im.
+      can_emit (pre_loaded_vlsm (IM (A v)) (fun dm => msg_dep_rel message_dependencies dm im)) im.
 Proof.
   eapply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
       in Him.
   apply can_emit_composite_project in Him as [j Him].
   apply Hchannel in Him as Hsender.
-  exists j; subst; cbn.
+  unfold channel_authenticated_message in Hsender.
+  destruct (sender im) as [v |] eqn:Heq_sender; [| by inversion Hsender].
+  apply Some_inj in Hsender; cbn in Hsender; subst.
+  exists v; subst; cbn.
   unfold msg_dep_message_equivocators, coeqv_message_equivocators,
-         msg_dep_coequivocating_senders, not_directly_observed_happens_before_dependencies
-  ; rewrite decide_False by done; cbn.
-  unfold channel_authenticated_message in Hsender
-  ; destruct (sender im) as [_j |]; [| inversion Hsender]
-  ; apply Some_inj in Hsender; cbn in Hsender; subst.
+         msg_dep_coequivocating_senders, not_directly_observed_happens_before_dependencies.
+  rewrite decide_False by done; cbn.
   split.
-  - by rewrite elem_of_list_to_set, elem_of_app; left; left.
+  - by rewrite Heq_sender, elem_of_list_to_set, elem_of_app; left; left.
   - by eapply message_dependencies_are_sufficient.
 Qed.
 
@@ -404,17 +407,17 @@ Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_em
   (Hnobserved : ¬ composite_has_been_directly_observed IM s im)
   : forall dm, msg_dep_happens_before message_dependencies dm im ->
     composite_has_been_directly_observed IM s dm \/
-    exists dm_i, dm_i ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Ci) /\
-      can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm.
+    exists v_i, v_i ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Cv) /\
+      can_emit (pre_loaded_with_all_messages_vlsm (IM (A v_i))) dm.
 Proof.
   intros dm Hdm.
   destruct (decide (composite_has_been_directly_observed IM s dm)) as [Hobs | Hnobs]
   ; [by left | right].
-  cut (exists i, sender dm = Some i /\
-                 can_emit (pre_loaded_with_all_messages_vlsm (IM i)) dm).
+  cut (exists v, sender dm = Some v /\
+                 can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) dm).
   {
-    intros (i & Hsender & Hemit).
-    exists i; split; [| done].
+    intros (v & Hsender & Hemit).
+    exists v; split; [| done].
     unfold msg_dep_message_equivocators, coeqv_message_equivocators,
       msg_dep_coequivocating_senders, not_directly_observed_happens_before_dependencies.
     rewrite decide_False, elem_of_list_to_set, elem_of_app, elem_of_elements,
@@ -429,24 +432,28 @@ Qed.
 
 Lemma message_equivocators_can_emit (s : vstate Limited) im
   (Hs : valid_state_prop
-          (fixed_equivocation_vlsm_composition IM (state_annotation s))
+          (fixed_equivocation_vlsm_composition IM (Ci := Ci) (fin_sets.set_map A (state_annotation s)))
           (original_state s))
   (Hnobserved : ¬ composite_has_been_directly_observed IM (original_state s) im)
   (HLemit : can_emit (free_composite_vlsm IM) im)
   : can_emit
-      (equivocators_composition_for_directly_observed IM
-        (state_annotation s
+      (equivocators_composition_for_directly_observed IM (Ci := Ci)
+        (fin_sets.set_map A (state_annotation s
             ∪ msg_dep_message_equivocators IM full_message_dependencies sender
-                (original_state s) im)
+                (original_state s) im))
         (original_state s))
       im.
 Proof.
   eapply VLSM_embedding_can_emit.
-  - unshelve apply equivocators_composition_for_directly_observed_index_incl_embedding;
-      [| by intros x Hx; apply elem_of_elements, union_subseteq_r, elem_of_elements].
+  - unshelve apply equivocators_composition_for_directly_observed_index_incl_embedding with
+      (indices1 := fin_sets.set_map A (msg_dep_message_equivocators IM (Cv := Cv) full_message_dependencies sender
+        (original_state s) im)).
+    intros x; rewrite !elem_of_elements.
+    by apply set_map_mono, union_subseteq_r.
   - destruct (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
-      as (j & Heqv_j%elem_of_elements & Hemitj).
-    eapply sub_valid_preloaded_lifts_can_be_emitted; [done | | done].
+      as (j & Heqv_j & Hemitj).
+    eapply sub_valid_preloaded_lifts_can_be_emitted;
+      [by apply elem_of_elements, elem_of_map_2 | | done].
     cbn; intros dm H_dm.
     assert (Hdm : msg_dep_happens_before message_dependencies dm im)
         by (apply msg_dep_happens_before_iff_one; left; done).
@@ -457,10 +464,10 @@ Proof.
     apply emitted_messages_are_valid_iff.
     destruct (equivocating_messages_dependencies_are_directly_observed_or_equivocator_emitted
       _ _ HLemit Hnobserved _ Hdm)
-      as [Hobs_dm | (dm_i & Hdm_i%elem_of_elements & Hemit_dm)]
+      as [Hobs_dm | (dm_i & Hdm_i & Hemit_dm)]
     ; [by left; right | right].
     eapply sub_valid_preloaded_lifts_can_be_emitted;
-      [done | | by eapply message_dependencies_are_sufficient].
+      [by apply elem_of_elements, elem_of_map_2 | | by eapply message_dependencies_are_sufficient].
     intros dm' Hdm'; apply Hind.
     + by apply msg_dep_happens_before_iff_one; left.
     + transitivity dm; [| done].
@@ -471,7 +478,7 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
   is tr
   (Htr : finite_valid_trace Limited is tr)
   (equivocators := state_annotation (finite_trace_last is tr))
-  (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
+  (Fixed := fixed_equivocation_vlsm_composition IM (Ci := Ci) (fin_sets.set_map A equivocators))
   : (sum_weights equivocators <= threshold)%R
       /\
     finite_valid_trace Fixed
@@ -492,6 +499,7 @@ Proof.
       apply VLSM_incl_finite_valid_trace_from,
         fixed_equivocation_vlsm_composition_index_incl.
       intro; rewrite !elem_of_elements.
+      apply set_map_mono; [done |].
       by eapply coeqv_limited_equivocation_transition_state_annotation_incl, Ht.
     + apply finite_valid_trace_singleton.
       unfold input_valid_transition, input_valid.
@@ -499,7 +507,7 @@ Proof.
                               (composite_type IM) Datatypes.id original_state tr).
       rewrite <- pre_VLSM_embedding_finite_trace_last.
       assert (Hs : valid_state_prop
-                    (fixed_equivocation_vlsm_composition IM (state_annotation s))
+                    (fixed_equivocation_vlsm_composition IM (Ci := Ci) (fin_sets.set_map A (state_annotation s)))
                     (original_state s)).
       {
         replace s with (finite_trace_last si tr) at 2
@@ -518,6 +526,7 @@ Proof.
       * revert Hs; apply VLSM_incl_valid_state.
         apply fixed_equivocation_vlsm_composition_index_incl.
         intro; rewrite !elem_of_elements.
+        apply set_map_mono; [done |].
         by destruct iom as [im |]; [apply union_subseteq_l |].
       * destruct iom as [im |]
         ; [apply option_valid_message_Some | apply option_valid_message_None].
@@ -525,8 +534,9 @@ Proof.
               as [Hobs | Hnobs].
         -- eapply composite_directly_observed_valid; [| done].
            revert Hs; apply VLSM_incl_valid_state.
-           by apply fixed_equivocation_vlsm_composition_index_incl;
-             intro; rewrite !elem_of_elements; apply union_subseteq_l.
+           apply fixed_equivocation_vlsm_composition_index_incl.
+           intro; rewrite !elem_of_elements.
+           by apply set_map_mono, union_subseteq_l.
         -- revert HLim.
            setoid_rewrite emitted_messages_are_valid_iff.
            intros [Hinit | Hemit]; [by left | right].
@@ -535,16 +545,18 @@ Proof.
              eapply EquivPreloadedBase_Fixed_weak_embedding
                with (base_s := original_state s).
              - revert Hs; apply VLSM_incl_valid_state.
-               by apply fixed_equivocation_vlsm_composition_index_incl;
-                 intro; rewrite !elem_of_elements; apply union_subseteq_l.
+               apply fixed_equivocation_vlsm_composition_index_incl.
+               intro; rewrite !elem_of_elements.
+               by apply set_map_mono, union_subseteq_l.
              - by intros; apply no_initial_messages_in_IM.
            }
            eapply VLSM_incl_can_emit.
            {
              apply Equivocators_Fixed_Strong_incl.
              revert Hs; apply VLSM_incl_valid_state.
-             by apply fixed_equivocation_vlsm_composition_index_incl;
-               intro; rewrite !elem_of_elements; apply union_subseteq_l.
+             apply fixed_equivocation_vlsm_composition_index_incl.
+             intro; rewrite !elem_of_elements.
+             by apply set_map_mono, union_subseteq_l.
            }
            apply message_equivocators_can_emit; [done | done |].
            eapply VLSM_embedding_can_emit; [| done].
@@ -563,11 +575,11 @@ Qed.
 
 Corollary msg_dep_fixed_limited_equivocation is tr
   : finite_valid_trace Limited is tr ->
-    fixed_limited_equivocation_prop IM threshold
+    fixed_limited_equivocation_prop IM threshold A
       (original_state is)
       (pre_VLSM_embedding_finite_trace_project
         (type Limited) (composite_type IM) Datatypes.id original_state
-        tr) (Ci := Ci).
+        tr) (Ci := Ci) (Cv := Cv).
 Proof.
   intro Htr.
   exists (state_annotation (finite_trace_last is tr)).
@@ -575,7 +587,8 @@ Proof.
 Qed.
 
 Lemma fixed_transition_preserves_annotation_equivocators
-  equivocators
+  (eqv_validators : Cv)
+  (equivocators := fin_sets.set_map A eqv_validators : Ci)
   (is : vstate (free_composite_vlsm IM)) s tr
   (Htr1 :
     finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM equivocators)
@@ -590,16 +603,16 @@ Lemma fixed_transition_preserves_annotation_equivocators
       (@finite_trace_last _ (type Limited)
         {| original_state := is; state_annotation := `inhabitant |}
         (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender is tr))
-    ⊆ equivocators)
+    ⊆ eqv_validators)
   : msg_dep_composite_transition_message_equivocators IM
       full_message_dependencies sender l
       (@finite_trace_last _ (type Limited)
         {| original_state := is; state_annotation := empty_set |}
         (annotate_trace_from (free_composite_vlsm IM)
-          Ci
+          Cv
           (msg_dep_composite_transition_message_equivocators IM full_message_dependencies sender)
           {| original_state := is; state_annotation := empty_set |} tr), iom)
-    ⊆ equivocators.
+    ⊆ eqv_validators.
 Proof.
   destruct iom as [im |]; [| done].
   apply ListFinSetExtras.set_union_subseteq_iff; split; [done | cbn].
@@ -625,7 +638,9 @@ Proof.
     destruct_dec_sig sub_eqv _eqv H_eqv Heqsub_eqv; subst.
     unfold sub_IM in Hemitted; cbn in Hemitted.
     eapply Hsender_safety in Hemitted; [| done].
-    by subst; apply elem_of_elements.
+    apply elem_of_elements, elem_of_map in H_eqv as (eqv' & -> & Heqv').
+    eapply inj in Hemitted; [| done].
+    by subst.
   - cut (strong_fixed_equivocation IM equivocators s msg).
     {
       intros [Hobserved | Hemitted_msg].
@@ -636,7 +651,10 @@ Proof.
         apply can_emit_composite_project in Hemitted_msg as [sub_i Hemitted_msg].
         destruct_dec_sig sub_i i Hi Heqsub_i; subst.
         eapply Hsender_safety in Hemitted_msg; [| done].
-        by cbn in Hemitted_msg; subst; apply elem_of_elements.
+        cbn in Hemitted_msg; subst.
+        apply elem_of_elements, elem_of_map in Hi as (_eqv & HeqA & H_eqv).
+        eapply inj in HeqA; [| done].
+        by subst.
     }
     eapply msg_dep_happens_before_reflect
     ; [| by apply full_message_dependencies_happens_before | right]
@@ -651,7 +669,7 @@ Qed.
 
 Lemma msg_dep_limited_fixed_equivocation
   (is : vstate (free_composite_vlsm IM)) (tr : list (composite_transition_item IM))
-  : fixed_limited_equivocation_prop (Ci := Ci) IM threshold is tr ->
+  : fixed_limited_equivocation_prop (Ci := Ci) (Cv := Cv) IM threshold A is tr ->
     finite_valid_trace Limited
       {| original_state := is; state_annotation := ` inhabitant |}
       (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender is tr).
@@ -709,15 +727,16 @@ Proof.
 Qed.
 
 Lemma annotated_limited_incl_constrained_limited
+  `{!finite.Finite validator}
   {is_equivocating_tracewise_no_has_been_sent_dec :
-    RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
+    RelDecision (is_equivocating_tracewise_no_has_been_sent IM A sender)}
   : VLSM_embedding
       Limited
-      (tracewise_limited_equivocation_vlsm_composition IM threshold sender (Ci := Ci))
+      (tracewise_limited_equivocation_vlsm_composition IM threshold A sender (Cv := Cv))
       Datatypes.id original_state.
 Proof.
   constructor; intros sX trX HtrX.
-  eapply traces_exhibiting_limited_equivocation_are_valid.
+  eapply @traces_exhibiting_limited_equivocation_are_valid; [done.. | |].
   - by apply Hsender_safety.
   - by apply msg_dep_fixed_limited_equivocation.
 Qed.

@@ -25,14 +25,18 @@ From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 Section sec_limited_byzantine_traces.
 
 Context
-  {message index : Type}
+  {message : Type}
+  `{FinSet index Ci}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   (threshold : R)
-  `{ReachableThreshold index Ci threshold}
-  `{!finite.Finite index}
-  (sender : message -> option index)
+  `{ReachableThreshold validator Cv threshold}
+  `{!finite.Finite validator}
+  (A : validator -> index)
+  `{!Inj (=) (=) A}
+  (sender : message -> option validator)
   .
 
 (**
@@ -43,10 +47,11 @@ Context
 Definition fixed_limited_byzantine_trace_prop
   (s : composite_state IM)
   (tr : list (composite_transition_item IM))
-  (byzantine : Ci)
+  (byzantine_vs : Cv)
+  (byzantine := fin_sets.set_map A byzantine_vs : Ci)
   : Prop
-  := (sum_weights (byzantine) <= threshold)%R /\
-     fixed_byzantine_trace_alt_prop IM byzantine (fun i => i) sender s tr.
+  := (sum_weights byzantine_vs <= threshold)%R /\
+     fixed_byzantine_trace_alt_prop (Ci := Ci) IM byzantine A sender s tr.
 
 (**
   The union of traces with the [fixed_limited_byzantine_trace_prop]erty over
@@ -61,12 +66,12 @@ Definition limited_byzantine_trace_prop
 Context
   `{FinSet message Cm}
   {is_equivocating_tracewise_no_has_been_sent_dec :
-    RelDecision (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (limited_constraint := tracewise_limited_equivocation_constraint (Ci := Ci) IM threshold sender)
+    RelDecision (is_equivocating_tracewise_no_has_been_sent IM A sender)}
+  (limited_constraint := tracewise_limited_equivocation_constraint (Cv := Cv) IM threshold A sender)
   (Limited : VLSM message := composite_vlsm IM limited_constraint)
   (Hvalidator : forall i : index, component_message_validator_prop IM limited_constraint i)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  (can_emit_signed : channel_authentication_prop IM Datatypes.id sender)
+  (can_emit_signed : channel_authentication_prop IM A sender)
   (message_dependencies : message -> Cm)
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
@@ -83,12 +88,13 @@ Context
 Section sec_fixed_limited_selection.
 
 Context
-  (byzantine : Ci)
+  (byzantine_vs : Cv)
+  (byzantine : Ci := fin_sets.set_map A byzantine_vs )
   (non_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
-  (Hlimit : (sum_weights byzantine <= threshold)%R)
-  (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine (fun i : index => i) sender)
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci threshold
-    := equivocation_dec_tracewise IM threshold (fun i => i) sender)
+  (Hlimit : (sum_weights byzantine_vs <= threshold)%R)
+  (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine A sender)
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cv threshold
+    := equivocation_dec_tracewise IM threshold A sender)
   (tracewise_not_heavy := not_heavy (1 := Htracewise_BasicEquivocation))
   (tracewise_equivocating_validators := equivocating_validators (1 := Htracewise_BasicEquivocation))
   .
@@ -102,11 +108,11 @@ Lemma limited_PreNonByzantine_valid_state_lift_not_heavy s
   (sX := lift_sub_state IM (elements non_byzantine) s)
   : tracewise_not_heavy sX.
 Proof.
-  cut (tracewise_equivocating_validators sX ⊆ byzantine).
+  cut (tracewise_equivocating_validators sX ⊆ byzantine_vs).
   {
     intro Hincl.
     unfold tracewise_not_heavy, not_heavy.
-    transitivity (sum_weights byzantine); [| done].
+    transitivity (sum_weights byzantine_vs); [| done].
     apply sum_weights_subseteq_list.
     - by apply NoDup_elements.
     - by apply NoDup_elements.
@@ -114,7 +120,7 @@ Proof.
       by apply elem_of_elements, Hincl, elem_of_elements, Hi.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
-  specialize (preloaded_non_byzantine_vlsm_lift IM byzantine (fun i => i) sender)
+  specialize (preloaded_non_byzantine_vlsm_lift IM byzantine A sender)
     as Hproj.
   apply (VLSM_embedding_finite_valid_trace_init_to Hproj) in Htr as Hpre_tr.
   intros v Hv.
@@ -151,7 +157,9 @@ Proof.
     destruct (decide (i ∈ byzantine)).
     + unfold channel_authenticated_message in Hsigned.
       rewrite Hsender0 in Hsigned.
-      by apply Some_inj in Hsigned; subst.
+      apply Some_inj in Hsigned; subst.
+      apply elem_of_map in e as (_v & HeqAv & H_v).
+      by eapply inj in HeqAv; [| done]; subst.
     + rewrite elem_of_elements in Hi.
       contradict Hi.
       apply elem_of_difference; split; [| done].
@@ -215,9 +223,10 @@ End sec_fixed_limited_selection.
   equivocation composition such that the projection of the two traces to
   the <<non-byzantine>> nodes coincide.
 *)
-Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating s tr byzantine
+Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating s tr byzantine_vs
+  (byzantine : Ci := fin_sets.set_map A byzantine_vs)
   (not_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
-  : fixed_limited_byzantine_trace_prop s tr byzantine ->
+  : fixed_limited_byzantine_trace_prop s tr byzantine_vs ->
     exists bs btr,
       finite_valid_trace Limited bs btr /\
       composite_state_sub_projection IM (elements not_byzantine) s =
@@ -228,7 +237,7 @@ Proof.
   intros [Hlimit Hfixed].
   eexists _, _; split.
   - by apply (VLSM_embedding_finite_valid_trace
-            (limited_PreNonByzantine_vlsm_lift byzantine Hlimit)).
+            (limited_PreNonByzantine_vlsm_lift byzantine_vs Hlimit)).
   - unfold lift_sub_state.
     rewrite composite_state_sub_projection_lift_to.
     split; [done |].
@@ -246,8 +255,10 @@ Lemma validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
   : limited_byzantine_trace_prop s tr ->
     exists bs btr,
       finite_valid_trace Limited bs btr /\
-      exists (selection : Ci) (selection_complement := difference (list_to_set (enum index)) selection),
-        (sum_weights selection <= threshold)%R /\
+      exists (selection_vs : Cv)
+        (selection : Ci := fin_sets.set_map A selection_vs)
+        (selection_complement := difference (list_to_set (enum index)) selection),
+        (sum_weights selection_vs <= threshold)%R /\
         composite_state_sub_projection IM (elements selection_complement) s =
         composite_state_sub_projection IM (elements selection_complement) bs /\
         finite_trace_sub_projection IM (elements selection_complement) tr =
@@ -266,28 +277,32 @@ End sec_limited_byzantine_traces.
 Section sec_msg_dep_limited_byzantine_traces.
 
 Context
-  {message index : Type}
+  {message : Type}
+  `{FinSet index Ci}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (threshold : R)
-  `{ReachableThreshold index Ci threshold}
-  `{!finite.Finite index}
+  `{ReachableThreshold validator Cv threshold}
+  `{!finite.Finite validator}
   `{FinSet message Cm}
   (message_dependencies : message -> Cm)
   (full_message_dependencies : message -> Cm)
   `{!FullMessageDependencies message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
-  (sender : message -> option index)
-  (Limited := msg_dep_limited_equivocation_vlsm (Cv := Ci)
+  (sender : message -> option validator)
+  (A : validator -> index)
+  `{!Inj (=) (=) A}
+  (Limited := msg_dep_limited_equivocation_vlsm (Cv := Cv)
     IM threshold full_message_dependencies sender)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  (Hchannel : channel_authentication_prop IM Datatypes.id sender)
-  (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender :=
+  (Hchannel : channel_authentication_prop IM A sender)
+  (Hsender_safety : sender_safety_alt_prop IM A sender :=
     channel_authentication_sender_safety _ _ _ Hchannel)
   (Hvalidator :
     forall i : index,
-      msg_dep_limited_equivocation_message_validator_prop (Cv := Ci)
+      msg_dep_limited_equivocation_message_validator_prop (Cv := Cv)
         IM threshold full_message_dependencies sender i)
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
@@ -299,22 +314,23 @@ Context
   for weight-limited equivocation.
 *)
 Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
-  (byzantine : Ci)
+  (byzantine_vs : Cv)
+  (byzantine : Ci := fin_sets.set_map A byzantine_vs)
   (non_byzantine := difference (list_to_set (enum index)) byzantine)
-  (Hlimited : (sum_weights byzantine <= threshold)%R)
+  (Hlimited : (sum_weights byzantine_vs <= threshold)%R)
   sub_l sub_s iom sub_sf oom
   (Ht_sub : input_valid_transition
-      (pre_loaded_fixed_non_byzantine_vlsm IM byzantine Datatypes.id sender)
+      (pre_loaded_fixed_non_byzantine_vlsm IM byzantine A sender)
       sub_l (sub_s, iom) (sub_sf, oom))
   ann_s
   (Hann_s : valid_state_prop Limited ann_s)
   (Hann_s_pr : original_state ann_s = lift_sub_state IM (elements non_byzantine) sub_s)
   (ann' := msg_dep_composite_transition_message_equivocators IM full_message_dependencies sender
       (lift_sub_label IM (elements non_byzantine) sub_l) (ann_s, iom))
-  (Heqv_byzantine : ann' ⊆ byzantine)
+  (Heqv_byzantine : ann' ⊆ byzantine_vs)
   : input_valid_transition Limited
       (lift_sub_label IM (elements non_byzantine) sub_l) (ann_s, iom)
-      (Build_annotated_state (free_composite_vlsm IM) Ci
+      (Build_annotated_state (free_composite_vlsm IM) Cv
         (lift_sub_state IM (elements non_byzantine) sub_sf) ann',
       oom).
 Proof.
@@ -326,7 +342,7 @@ Proof.
   - unfold lift_sub_state in Hann_s_pr.
     rewrite Hann_s_pr, (lift_sub_state_to_eq _ _ _ _ _ Hi).
     by apply Ht_sub.
-  - apply Rle_trans with (sum_weights byzantine)
+  - apply Rle_trans with (sum_weights byzantine_vs)
     ; [| done].
     apply sum_weights_subseteq.
     by intro; apply Heqv_byzantine.
@@ -357,23 +373,24 @@ Existing Instance elem_of_dec_slow.
 Lemma lift_fixed_byzantine_traces_to_limited
   (s : composite_state IM)
   (tr : list (composite_transition_item IM))
-  (byzantine : Ci)
+  (byzantine_vs : Cv)
+  (byzantine : Ci := fin_sets.set_map A byzantine_vs)
   (non_byzantine := difference (list_to_set (enum index)) byzantine)
-  (Hlimited : (sum_weights byzantine <= threshold)%R)
+  (Hlimited : (sum_weights byzantine_vs <= threshold)%R)
   (Hbyzantine :
-    fixed_byzantine_trace_alt_prop IM byzantine Datatypes.id sender s tr)
+    fixed_byzantine_trace_alt_prop IM byzantine A sender s tr)
   (s_reset_byzantine :=
     lift_sub_state IM (elements non_byzantine)
       (composite_state_sub_projection IM (elements non_byzantine) s))
-  (bs := Build_annotated_state (free_composite_vlsm IM) Ci s_reset_byzantine (` inhabitant))
+  (bs := Build_annotated_state (free_composite_vlsm IM) Cv s_reset_byzantine (` inhabitant))
   (btr :=
-    msg_dep_annotate_trace_with_equivocators (Cv := Ci) IM full_message_dependencies sender
+    msg_dep_annotate_trace_with_equivocators (Cv := Cv) IM full_message_dependencies sender
       s_reset_byzantine
       (pre_VLSM_embedding_finite_trace_project _ _
         (lift_sub_label IM (elements non_byzantine)) (lift_sub_state IM (elements non_byzantine))
         (finite_trace_sub_projection IM (elements non_byzantine) tr)))
   : finite_valid_trace Limited bs btr /\
-    state_annotation (@finite_trace_last _ (type Limited) bs btr) ⊆ byzantine.
+    state_annotation (@finite_trace_last _ (type Limited) bs btr) ⊆ byzantine_vs.
 Proof.
   subst non_byzantine.
   induction Hbyzantine using finite_valid_trace_rev_ind; [repeat split |].
@@ -432,10 +449,14 @@ Proof.
       unfold channel_authenticated_message in Hauth
       ; rewrite Hsender in Hauth.
       apply Some_inj in Hauth; subst _i_im.
-      destruct (decide (i_im ∈ byzantine)) as [Hi_im | Hni_im]; [done |].
+      destruct (decide (i_im ∈ byzantine_vs)) as [Hi_im | Hni_im]; [done |].
       contradict H_i_im.
       apply elem_of_elements, elem_of_difference; cbn.
-      by split; [apply elem_of_list_to_set, elem_of_enum |].
+      split; [by apply elem_of_list_to_set, elem_of_enum |].
+      unfold byzantine; rewrite elem_of_map.
+      intros (v & HeqAv & Hv).
+      eapply inj in HeqAv; [| done].
+      by subst.
 Qed.
 
 (**
@@ -444,12 +465,14 @@ Qed.
   composition, then the traces exposed limited Byzantine behavior coincide with
   the traces exposed to limited equivocation.
 *)
-Lemma msg_dep_validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
-  : limited_byzantine_trace_prop (Ci := Ci) IM threshold sender s tr <->
-    exists bs btr selection (selection_complement := difference (list_to_set (enum index)) selection),
+Lemma msg_dep_validator_limited_non_equivocating_byzantine_traces_are_limited_non_equivocating s tr
+  : limited_byzantine_trace_prop (Ci := Ci) (Cv := Cv) IM threshold A sender s tr <->
+    exists bs btr selection_vs
+      (selection : Ci := fin_sets.set_map A selection_vs)
+      (selection_complement := difference (list_to_set (enum index)) selection),
       finite_valid_trace Limited bs btr /\
-      state_annotation (finite_trace_last bs btr) ⊆ selection /\
-      (sum_weights selection <= threshold)%R /\
+      state_annotation (finite_trace_last bs btr) ⊆ selection_vs /\
+      (sum_weights selection_vs <= threshold)%R /\
       composite_state_sub_projection IM (elements selection_complement) s =
         composite_state_sub_projection IM (elements selection_complement) (original_state bs) /\
       finite_trace_sub_projection IM (elements selection_complement) tr =
@@ -475,10 +498,11 @@ Proof.
     apply fixed_non_equivocating_traces_char.
     symmetry in His_pr, Htr_pr.
     eexists _, _; split; [| done].
-    eapply msg_dep_fixed_limited_equivocation_witnessed in Hbtr as [_ Hbtr]; [| done..].
+    eapply @msg_dep_fixed_limited_equivocation_witnessed in Hbtr as [_ Hbtr]; [| done..].
     revert Hbtr; apply VLSM_incl_finite_valid_trace.
     apply fixed_equivocation_vlsm_composition_index_incl.
-    by intro; rewrite !elem_of_elements; apply Heqv_byzantine.
+    intro; rewrite !elem_of_elements.
+    by apply set_map_mono.
 Qed.
 
 End sec_msg_dep_limited_byzantine_traces.
