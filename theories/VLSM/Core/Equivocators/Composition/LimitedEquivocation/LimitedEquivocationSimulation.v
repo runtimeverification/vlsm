@@ -93,7 +93,7 @@ Context
 Lemma limited_equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   isX trX
-  (HtrX : fixed_limited_equivocation_prop (Ci := Ci) IM threshold isX trX)
+  (HtrX : fixed_limited_equivocation_prop (Ci := Ci) (Cv := Ci) IM threshold Datatypes.id isX trX)
   : exists is s tr,
       equivocators_total_state_project IM is = isX /\
       equivocators_total_state_project IM s = finite_trace_last isX trX /\
@@ -108,7 +108,17 @@ Proof.
     as (is & s & tr & His & Hs & Htr & Hptr & Houtput); [| done].
   exists is, s, tr; split_and?; try itauto.
   revert Hptr; apply VLSM_incl_finite_valid_trace_init_to.
-  by apply equivocators_Fixed_incl_Limited.
+  eapply VLSM_incl_trans; [| by apply equivocators_Fixed_incl_Limited].
+  apply constraint_subsumption_incl.
+  apply preloaded_constraint_subsumption_stronger,
+    strong_constraint_subsumption_strongest.
+  intros l (_s, om) [Hmsg Hfixed].
+  split; [done |].
+  unfold state_has_fixed_equivocation.
+  etransitivity; [done |].
+  intro v; rewrite !elem_of_elements.
+  intro Hv; apply elem_of_map in Hv as (? & ? & ?).
+  by subst.
 Qed.
 
 Section sec_equivocators_simulating_annotated_limited.
@@ -139,7 +149,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
       finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   apply valid_trace_get_last in HtrX as HeqsX.
-  eapply valid_trace_forget_last, msg_dep_fixed_limited_equivocation in HtrX; [| done ..].
+  eapply valid_trace_forget_last, @msg_dep_fixed_limited_equivocation in HtrX; [| done..].
   apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
      as (is & s & tr & His_pr & Hpr_s & Htr_pr & Htr & Houtput); [| done].
   exists is, s, tr; subst; split_and!; [done | | done | done |].
@@ -153,7 +163,7 @@ Context
   `{FinSet message Cm}
   (sender : message -> option index)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) threshold sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Cv := Ci) threshold Datatypes.id sender)
   (message_dependencies : message -> Cm)
   .
 
@@ -176,8 +186,8 @@ Lemma limited_equivocators_valid_state_rev
 Proof.
   intros sX HsX.
   apply
-    (limited_valid_state_has_trace_exhibiting_limited_equivocation IM threshold
-      sender message_dependencies Hwitnessed_equivocation Hfull
+    (limited_valid_state_has_trace_exhibiting_limited_equivocation (Ci := Ci) IM threshold
+      Datatypes.id sender message_dependencies Hwitnessed_equivocation Hfull
       no_initial_messages_in_IM can_emit_signed)
     in HsX as (isX & trX & HsX & HtrX).
   apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX
