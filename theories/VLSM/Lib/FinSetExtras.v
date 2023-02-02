@@ -11,6 +11,10 @@ Context
 
 Section sec_general.
 
+Lemma elements_subseteq (X Y : C) :
+  X ⊆ Y -> elements X ⊆ elements Y.
+Proof. by set_solver. Qed.
+
 Lemma union_size_ge_size1
   (X Y : C) :
   size (X ∪ Y) >= size X.
@@ -208,5 +212,18 @@ Proof.
   simpl; subst fX.
   by apply fmap_length.
 Qed.
+
+Lemma elem_of_set_map_inj (f : A -> B) `{!Inj (=) (=) f} (a : A) (X : C) :
+  f a ∈@{D} fin_sets.set_map f X <-> a ∈ X.
+Proof.
+  intros; rewrite elem_of_map.
+  split; [| by eexists].
+  intros (_v & HeqAv & H_v).
+  eapply inj in HeqAv; [| done].
+  by subst.
+Qed.
+
+Lemma set_map_id (X : C) : X ≡ set_map id X.
+Proof. by set_solver. Qed.
 
 End sec_map.

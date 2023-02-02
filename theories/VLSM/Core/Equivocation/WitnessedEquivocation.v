@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Reals.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import SubProjectionTraces MessageDependencies Equivocation.
 From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquivocation.
@@ -627,7 +627,7 @@ End sec_witnessed_equivocation.
 Section sec_witnessed_equivocation_fixed_set.
 
 Context
-  {message}
+  {message : Type}
   `{FinSet index Ci}
   `{!finite.Finite index}
   (IM : index -> VLSM message)
@@ -709,7 +709,7 @@ Proof.
   }
   eapply VLSM_embedding_can_emit; [| done].
   unshelve eapply (Hproj (dexist (A v) _)).
-  by apply elem_of_elements, elem_of_map; eexists.
+  by apply elem_of_elements, elem_of_map_2.
 Qed.
 
 (** *** Main result of the section
@@ -749,9 +749,7 @@ Proof.
     { revert IHHtr.
       apply VLSM_incl_finite_valid_trace_from_to,
                fixed_equivocation_vlsm_composition_index_incl.
-      intro; rewrite !elem_of_elements, !elem_of_map.
-      intros (v & -> & Hv); eexists; split; [done |].
-      revert Hv.
+      apply elements_subseteq, set_map_subset.
       remember {| destination := sf |} as item.
       replace sf with (destination item) by (subst; done).
       eapply equivocating_validators_witness_monotonicity; [done |].

@@ -185,6 +185,27 @@ Qed.
 
 End sec_equivocators_fixed_equivocations_vlsm.
 
+Lemma equivocators_fixed_equivocations_vlsm_subset_incl
+  {message : Type}
+  `{finite.Finite index}
+  (IM : index -> VLSM message)
+  `{forall i : index, HasBeenSentCapability (IM i)}
+  (equivocator_IM := equivocator_IM IM)
+  (equivocating1 equivocating2 : set index)
+  (Hincl : equivocating1 ⊆ equivocating2) :
+  VLSM_incl
+    (equivocators_fixed_equivocations_vlsm IM equivocating1)
+    (equivocators_fixed_equivocations_vlsm IM equivocating2).
+Proof.
+  apply constraint_subsumption_incl.
+  apply preloaded_constraint_subsumption_stronger,
+    strong_constraint_subsumption_strongest.
+  intros l (_s, om) [Hmsg Hfixed].
+  split; [done |].
+  unfold state_has_fixed_equivocation.
+  by set_solver.
+Qed.
+
 Section sec_fixed_equivocation_with_fullnode.
 
 (**

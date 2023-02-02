@@ -1,7 +1,8 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun RIneq.
-From VLSM.Lib Require Import Preamble Measurable StdppListSet RealsExtras ListSetExtras.
+From VLSM.Lib Require Import Preamble StdppListSet ListSetExtras FinSetExtras.
+From VLSM.Lib Require Import RealsExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections MessageDependencies Composition Equivocation.
 From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
@@ -244,9 +245,7 @@ Proof.
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
   + apply (SubProjectionTraces.sub_can_emit_sender IM (elements equivocators)
       A sender Hsender_safety _ _ v), elem_of_elements in Hemit; [| done].
-    apply elem_of_map in Hemit as (_v & HeqAv & H_v).
-    eapply inj in HeqAv; [| done].
-    by subst.
+    by revert Hemit; apply elem_of_set_map_inj.
 Qed.
 
 Lemma StrongFixed_incl_Limited : VLSM_incl StrongFixed Limited.

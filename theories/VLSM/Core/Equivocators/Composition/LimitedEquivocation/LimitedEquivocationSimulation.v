@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import FinFun Reals.
-From VLSM.Lib Require Import StdppListSet RealsExtras Measurable.
+From VLSM.Lib Require Import StdppListSet RealsExtras Measurable FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition AnnotatedVLSM.
 From VLSM.Core Require Import Equivocation MessageDependencies.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
@@ -109,16 +109,8 @@ Proof.
   exists is, s, tr; split_and?; try itauto.
   revert Hptr; apply VLSM_incl_finite_valid_trace_init_to.
   eapply VLSM_incl_trans; [| by apply equivocators_Fixed_incl_Limited].
-  apply constraint_subsumption_incl.
-  apply preloaded_constraint_subsumption_stronger,
-    strong_constraint_subsumption_strongest.
-  intros l (_s, om) [Hmsg Hfixed].
-  split; [done |].
-  unfold state_has_fixed_equivocation.
-  etransitivity; [done |].
-  intro v; rewrite !elem_of_elements.
-  intro Hv; apply elem_of_map in Hv as (? & ? & ?).
-  by subst.
+  apply equivocators_fixed_equivocations_vlsm_subset_incl.
+  by set_solver.
 Qed.
 
 Section sec_equivocators_simulating_annotated_limited.

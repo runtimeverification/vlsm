@@ -1,7 +1,8 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From Coq Require Import Reals.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble ListExtras StdppListFinSet ListSetExtras Measurable StdppExtras.
+From VLSM.Lib Require Import Preamble StdppExtras StdppListFinSet FinSetExtras.
+From VLSM.Lib Require Import ListExtras ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition.
 From VLSM.Core Require Import Validator ProjectionTraces SubProjectionTraces Equivocation.
 From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
@@ -637,10 +638,9 @@ Proof.
     apply can_emit_composite_project in Hemitted as [sub_eqv Hemitted].
     destruct_dec_sig sub_eqv _eqv H_eqv Heqsub_eqv; subst.
     unfold sub_IM in Hemitted; cbn in Hemitted.
-    eapply Hsender_safety in Hemitted; [| done].
-    apply elem_of_elements, elem_of_map in H_eqv as (eqv' & -> & Heqv').
-    eapply inj in Hemitted; [| done].
-    by subst.
+    eapply Hsender_safety in Hemitted; [| done]; subst.
+    apply elem_of_elements in H_eqv.
+    by revert H_eqv; apply elem_of_set_map_inj.
   - cut (strong_fixed_equivocation IM equivocators s msg).
     {
       intros [Hobserved | Hemitted_msg].
@@ -652,9 +652,8 @@ Proof.
         destruct_dec_sig sub_i i Hi Heqsub_i; subst.
         eapply Hsender_safety in Hemitted_msg; [| done].
         cbn in Hemitted_msg; subst.
-        apply elem_of_elements, elem_of_map in Hi as (_eqv & HeqA & H_eqv).
-        eapply inj in HeqA; [| done].
-        by subst.
+        apply elem_of_elements in Hi.
+        by revert Hi; apply elem_of_set_map_inj.
     }
     eapply msg_dep_happens_before_reflect
     ; [| by apply full_message_dependencies_happens_before | right]

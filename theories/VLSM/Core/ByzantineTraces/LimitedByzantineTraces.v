@@ -1,6 +1,7 @@
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
-From VLSM.Lib Require Import Preamble StdppListSet Measurable ListSetExtras RealsExtras ListFinSetExtras.
+From VLSM.Lib Require Import Preamble StdppListSet FinSetExtras ListSetExtras ListFinSetExtras.
+From VLSM.Lib Require Import Measurable RealsExtras.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM Validator Equivocation.
 From VLSM.Core Require Import ByzantineTraces.FixedSetByzantineTraces.
@@ -158,8 +159,7 @@ Proof.
     + unfold channel_authenticated_message in Hsigned.
       rewrite Hsender0 in Hsigned.
       apply Some_inj in Hsigned; subst.
-      apply elem_of_map in e as (_v & HeqAv & H_v).
-      by eapply inj in HeqAv; [| done]; subst.
+      by revert e; apply elem_of_set_map_inj.
     + rewrite elem_of_elements in Hi.
       contradict Hi.
       apply elem_of_difference; split; [| done].
@@ -453,10 +453,7 @@ Proof.
       contradict H_i_im.
       apply elem_of_elements, elem_of_difference; cbn.
       split; [by apply elem_of_list_to_set, elem_of_enum |].
-      unfold byzantine; rewrite elem_of_map.
-      intros (v & HeqAv & Hv).
-      eapply inj in HeqAv; [| done].
-      by subst.
+      by contradict Hni_im; revert Hni_im; apply elem_of_set_map_inj.
 Qed.
 
 (**

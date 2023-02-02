@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Reals Lra.
-From VLSM.Lib Require Import Preamble StdppListSet ListSetExtras Measurable RealsExtras.
+From VLSM.Lib Require Import Preamble StdppListSet ListSetExtras Measurable RealsExtras FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition AnnotatedVLSM.
 From VLSM.Core Require Import Equivocation Equivocation.TraceWiseEquivocation MessageDependencies.
 From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.LimitedMessageEquivocation.
@@ -244,9 +244,8 @@ Proof.
       intros [| Hemit]; [by left |].
       right; revert Hemit.
       unshelve eapply VLSM_embedding_can_emit, equivocators_composition_for_directly_observed_index_incl_embedding.
-      intro v; rewrite !elem_of_elements.
-      intro Hv; apply elem_of_map.
-      by exists v.
+      apply elements_subseteq.
+      by intros v Hv; apply elem_of_map; eexists.
 Qed.
 
 Section sec_equivocators_projection_annotated_limited.
@@ -289,9 +288,8 @@ Proof.
       in Htr as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_limited)
   ; [| done].
   exists trX, initial_descriptors.
-  cbn; split_and?; try itauto.
-  eapply @msg_dep_limited_fixed_equivocation; [done | done | done | | done..].
-  typeclasses eauto.
+  cbn; split_and!; [itauto.. |].
+  by eapply @msg_dep_limited_fixed_equivocation; [| | | typeclasses eauto |..].
 Qed.
 
 End sec_equivocators_projection_annotated_limited.
