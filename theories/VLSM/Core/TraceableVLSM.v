@@ -493,6 +493,27 @@ Proof.
 Qed.
 
 (**
+  Given any ram-state we can extract all traces leading to it by recursively
+  following the transitions leading to it.
+*)
+Equations state_to_traces (s' : vstate X) (Hs' : valid_state_prop R s') :
+  list (vstate X * list (vtransition_item X)) by wf (state_size s') lt :=
+state_to_traces s' Hs' with inspect (state_destructor s') :=
+| trs eq: Hdestruct => if (decide (trs = [])) then [(s', [])] else (trs ≫= (fun items => [(state_to_traces items.2 _) ≫= (fun istr => [(istr.1, istr.2 ++ [items.1])])])) ≫= id.
+Next Obligation.
+Proof.
+  cbn; intros.
+  eapply tv_state_destructor_transition; [done |].
+  rewrite Hdestruct.
+Qed.
+Next Obligation.
+Proof.
+  cbn; intros.
+  eapply tv_state_destructor_size; [done |].
+  by rewrite Hdestruct; left.
+Qed.
+
+(**
   For any composite ram-state <<s>> and for any index <<i>> for which the
   component state <<s i>> has the [initial_state_prop]erty, the component state of
   index <<i>> of the origin state of the trace extracted from <<s>> is equal

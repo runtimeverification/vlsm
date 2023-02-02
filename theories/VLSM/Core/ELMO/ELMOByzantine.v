@@ -1,10 +1,10 @@
-From stdpp Require Import prelude.
+From stdpp Require Import prelude finite.
 From Coq Require Import Reals.
-From VLSM.Lib Require Import Measurable.
+From VLSM.Lib Require Import Preamble Measurable.
 From VLSM.Core Require Import VLSM Composition ProjectionTraces VLSMProjections.
-From VLSM.Core Require Import Equivocation MessageDependencies FixedSetEquivocation.
+From VLSM.Core Require Import Equivocation MessageDependencies FixedSetEquivocation TraceWiseEquivocation.
 From VLSM.Core Require Import ReachableThreshold Validator.
-From VLSM.Core Require Import ByzantineTraces FixedSetByzantineTraces.
+From VLSM.Core Require Import ByzantineTraces FixedSetByzantineTraces LimitedByzantineTraces.
 From VLSM.Core Require Import BaseELMO ELMO.
 
 Section sec_elmo_byzantine.
@@ -131,5 +131,29 @@ Proof.
   - revert Hetr.
     by apply VLSM_eq_finite_valid_trace, ELMO_fixed_equivocation_VLSM_eq.
 Qed.
+
+#[export] Instance ELMO_is_equivocating_tracewise_no_has_been_sent_dec :
+  RelDecision (is_equivocating_tracewise_no_has_been_sent ELMOComponent (ELMO_A idx) Message_sender).
+Proof.
+  intros s a.
+  apply (Decision_iff (P := ELMO_global_equivocators threshold _ s a));
+    [| typeclasses eauto].
+
+Lemma ELMO_msg_dep_validator_limited_non_equivocating_byzantine_traces_are_limited_non_equivocating :
+  forall s tr,
+    limited_byzantine_trace_prop (Ci := Ci) (Cv := Ca) ELMOComponent threshold (ELMO_A idx) Message_sender s tr ->
+    exists bs btr (selection_vs : Ca)
+      (selection : Ci := fin_sets.set_map (ELMO_A idx) selection_vs)
+      (selection_complement := difference (list_to_set (enum index)) selection), True.
+      finite_valid_trace Limited bs btr /\
+      state_annotation (finite_trace_last bs btr) ⊆ selection_vs /\
+      (sum_weights selection_vs <= threshold)%R /\
+      composite_state_sub_projection IM (elements selection_complement) s =
+        composite_state_sub_projection IM (elements selection_complement) (original_state bs) /\
+      finite_trace_sub_projection IM (elements selection_complement) tr =
+        finite_trace_sub_projection IM (elements selection_complement)
+          (pre_VLSM_embedding_finite_trace_project
+            (type Limited) (composite_type IM) Datatypes.id original_state btr).
+
 
 End sec_elmo_byzantine.
