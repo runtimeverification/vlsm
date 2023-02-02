@@ -1,11 +1,11 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Reals Lra.
-From VLSM.Lib Require Import Preamble StdppListSet ListSetExtras Measurable RealsExtras.
+From VLSM.Lib Require Import Preamble StdppListSet ListSetExtras Measurable RealsExtras FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition AnnotatedVLSM.
 From VLSM.Core Require Import Equivocation Equivocation.TraceWiseEquivocation MessageDependencies.
 From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.LimitedMessageEquivocation.
-From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation.
+From VLSM.Core Require Import FixedSetEquivocation MsgDepLimitedEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators.
 From VLSM.Core Require Import Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
@@ -218,7 +218,7 @@ Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
     proper_equivocator_descriptors initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project final_descriptors final_state = final_stateX /\
-    fixed_limited_equivocation_prop (Ci := Ci) IM threshold isX trX.
+    fixed_limited_equivocation_prop (Cv := Ci) (Ci := Ci) IM threshold Datatypes.id isX trX.
 Proof.
   apply valid_trace_add_default_last in Htr as Hfixed_tr.
   apply equivocators_limited_valid_trace_is_fixed in Hfixed_tr.
@@ -228,17 +228,24 @@ Proof.
     (equivocating_validators (finite_trace_last is tr)) final_descriptors is tr) as Hpr.
   feed specialize Hpr; [| done |].
   - by eapply not_equivocating_equivocator_descriptors_proper_fixed.
-  - destruct Hpr as [trX [initial_descriptors [Hinitial_descriptors [Hpr [Hlst_pr Hpr_fixed]]]]].
+  - destruct Hpr as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_fixed).
     exists trX, initial_descriptors.
-    repeat split; [by apply Hinitial_descriptors | done | done |].
+    split_and!; [by apply Hinitial_descriptors | done | done |].
     exists (equivocating_validators (finite_trace_last is tr)).
-    split; [| done].
-    apply valid_trace_add_default_last, valid_trace_last_pstate,
-      valid_state_limited_equivocation in Htr.
-    transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
-    pose proof (@equivocating_indices_equivocating_validators _ _ _ _ IM
-     threshold _ _ _ _ _ _ _ _ _ _ _ H9).
-    by unfold equivocation_fault; apply sum_weights_subseteq.
+    split.
+    + apply valid_trace_add_default_last, valid_trace_last_pstate,
+        valid_state_limited_equivocation in Htr.
+      transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
+      by unfold equivocation_fault; apply sum_weights_subseteq.
+    + revert Hpr_fixed.
+      apply VLSM_incl_finite_valid_trace, constraint_subsumption_incl.
+      apply preloaded_constraint_subsumption_stronger, strong_constraint_subsumption_strongest.
+      intros l (s, [m |]); [| done]; cbn.
+      intros [| Hemit]; [by left |].
+      right; revert Hemit.
+      unshelve eapply VLSM_embedding_can_emit, equivocators_composition_for_directly_observed_index_incl_embedding.
+      apply elements_subseteq.
+      by intros v Hv; apply elem_of_map; eexists.
 Qed.
 
 Section sec_equivocators_projection_annotated_limited.
@@ -281,8 +288,8 @@ Proof.
       in Htr as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_limited)
   ; [| done].
   exists trX, initial_descriptors.
-  cbn; split_and?; try itauto.
-  by eapply msg_dep_limited_fixed_equivocation.
+  cbn; split_and!; [itauto.. |].
+  by eapply @msg_dep_limited_fixed_equivocation; [| | | typeclasses eauto |..].
 Qed.
 
 End sec_equivocators_projection_annotated_limited.
@@ -291,9 +298,9 @@ Section sec_equivocators_projection_constrained_limited.
 
 Context
   `{FinSet message Cm}
-  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Ci := Ci) threshold sender)
-  (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM Datatypes.id sender)}
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Cv := Ci) threshold Datatypes.id sender)
+  (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender)
   (message_dependencies : message -> Cm)
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
@@ -328,7 +335,7 @@ Proof.
       as [trX [initial_descriptors [Hinitial_descriptors [Hpr [Hlst_pr Hpr_limited]]]]].
   exists trX, initial_descriptors.
   repeat split; [done.. | |].
-  - by eapply traces_exhibiting_limited_equivocation_are_valid.
+  - by eapply @traces_exhibiting_limited_equivocation_are_valid; [| | typeclasses eauto | |].
   - by destruct Hpr_limited as [equivs Hpr_limited]; apply Hpr_limited.
 Qed.
 

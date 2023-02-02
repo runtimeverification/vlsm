@@ -1,7 +1,8 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun RIneq.
-From VLSM.Lib Require Import Preamble Measurable StdppListSet RealsExtras ListSetExtras.
+From VLSM.Lib Require Import Preamble StdppListSet ListSetExtras FinSetExtras.
+From VLSM.Lib Require Import RealsExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections MessageDependencies Composition Equivocation.
 From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
@@ -123,15 +124,17 @@ Context
   {message index : Type}
   (IM : index -> VLSM message)
   (threshold : R)
-  `{ReachableThreshold index Ci threshold}
-  `{!finite.Finite index}
+  `{EqDecision index}
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (Free := free_composite_vlsm IM)
-  (sender : message -> option index)
-  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM id sender)}
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci threshold
-    := equivocation_dec_tracewise IM threshold Datatypes.id sender)
+  `{finite.Finite validator}
+  `{ReachableThreshold validator Cv threshold}
+  (A : validator -> index)
+  (sender : message -> option validator)
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cv threshold
+    := equivocation_dec_tracewise IM threshold A sender)
   .
 
 Existing Instance Htracewise_BasicEquivocation.
@@ -148,14 +151,14 @@ Definition tracewise_limited_equivocation_vlsm_composition : VLSM message :=
 
 Lemma full_node_limited_equivocation_valid_state_weight s
   : valid_state_prop tracewise_limited_equivocation_vlsm_composition s ->
-    LimitedEquivocationProp (Cv := Ci) IM threshold is_equivocating s.
+    LimitedEquivocationProp (Cv := Cv) IM threshold is_equivocating s.
 Proof.
   eapply limited_equivocation_valid_state; [done |].
   by intros; apply initial_state_not_is_equivocating_tracewise.
 Qed.
 
 Lemma tracewise_not_heavy_LimitedEquivocationProp_iff :
-  forall s, not_heavy s <-> LimitedEquivocationProp (Cv := Ci) IM threshold is_equivocating s.
+  forall s, not_heavy s <-> LimitedEquivocationProp (Cv := Cv) IM threshold is_equivocating s.
 Proof.
   intros; split.
   - by apply not_heavy_impl_LimitedEquivocationProp,
@@ -179,22 +182,27 @@ Context
   {message index : Type}
   (IM : index -> VLSM message)
   (threshold : R)
-  `{ReachableThreshold index Ci threshold}
+  `{FinSet index Ci}
   `{!finite.Finite index}
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  (equivocators : Ci)
   (Free := free_composite_vlsm IM)
+  `{finite.Finite validator}
+  `{ReachableThreshold validator Cv threshold}
+  (A : validator -> index)
+  `{! Inj (=) (=) A}
+  (sender : message -> option validator)
+  (eqv_validators : Cv)
+  (equivocators := fin_sets.set_map A eqv_validators : Ci)
+  (Hlimited : (sum_weights eqv_validators <= threshold)%R )
+  (Hsender_safety : sender_safety_alt_prop IM A sender)
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
-  (Hlimited : (sum_weights equivocators <= threshold)%R)
-  (sender : message -> option index)
-  (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
-  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Ci := Ci) IM threshold sender)
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) index Ci threshold
-    := equivocation_dec_tracewise IM threshold (fun i => i) sender)
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Cv := Cv) IM threshold A sender)
+  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cv threshold
+    := equivocation_dec_tracewise IM threshold A sender)
   (tracewise_not_heavy := not_heavy (1 := Htracewise_BasicEquivocation))
   (tracewise_equivocating_validators := equivocating_validators (1 := Htracewise_BasicEquivocation))
   .
@@ -203,7 +211,7 @@ Lemma StrongFixed_valid_state_not_heavy s
   (Hs : valid_state_prop StrongFixed s)
   : tracewise_not_heavy s.
 Proof.
-  cut (tracewise_equivocating_validators s ⊆ equivocators).
+  cut (tracewise_equivocating_validators s ⊆ eqv_validators).
   {
     intro Hincl; unfold tracewise_not_heavy, not_heavy.
     by etransitivity; [apply sum_weights_subseteq |].
@@ -235,8 +243,9 @@ Proof.
       by (exists i; done).
     apply (composite_proper_sent IM) in Hsent; [| done].
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
-  + by apply (SubProjectionTraces.sub_can_emit_sender IM (elements equivocators)
-      (fun i => i) sender Hsender_safety _ _ v), elem_of_elements in Hemit.
+  + apply (SubProjectionTraces.sub_can_emit_sender IM (elements equivocators)
+      A sender Hsender_safety _ _ v), elem_of_elements in Hemit; [| done].
+    by revert Hemit; apply elem_of_set_map_inj.
 Qed.
 
 Lemma StrongFixed_incl_Limited : VLSM_incl StrongFixed Limited.
@@ -272,11 +281,16 @@ Section sec_has_limited_equivocation.
 *)
 
 Context
-  {message index : Type}
+  {message}
+  `{FinSet index Ci}
+  `{!finite.Finite index}
   (IM : index -> VLSM message)
   (threshold : R)
-  `{ReachableThreshold index Ci threshold}
-  `{!finite.Finite index}
+  `{finite.Finite validator}
+  `{ReachableThreshold validator Cv threshold}
+  (A : validator -> index)
+  `{!Inj (=) (=) A}
+  (sender : message -> option validator)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   .
@@ -286,16 +300,15 @@ Definition fixed_limited_equivocation_prop
   (tr : list (composite_transition_item IM))
   : Prop
   :=
-    exists equivocators : Ci,
+    exists equivocators : Cv,
       (sum_weights equivocators <= threshold)%R /\
-      finite_valid_trace (fixed_equivocation_vlsm_composition IM equivocators) s tr.
+      finite_valid_trace (fixed_equivocation_vlsm_composition (Ci := Ci) IM (fin_sets.set_map A equivocators)) s tr.
 
 Context
-  (sender : message -> option index)
   `{FinSet message Cm}
   (message_dependencies : message -> Cm)
-  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM (fun i => i) sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Ci := Ci) IM threshold sender)
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
+  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Cv := Cv) IM threshold A sender)
   .
 
 (**
@@ -303,12 +316,12 @@ Context
   composition using a [limited_equivocation_constraint].
 *)
 Lemma traces_exhibiting_limited_equivocation_are_valid
-  (Hsender_safety : sender_safety_alt_prop IM (fun i => i) sender)
+  (Hsender_safety : sender_safety_alt_prop IM A sender)
   : forall s tr, fixed_limited_equivocation_prop s tr -> finite_valid_trace Limited s tr.
 Proof.
   intros s tr [equivocators [Hlimited Htr]].
   eapply VLSM_incl_finite_valid_trace; [| done].
-  by apply Fixed_incl_Limited.
+  by eapply Fixed_incl_Limited.
 Qed.
 
 (**
@@ -317,16 +330,16 @@ Qed.
   the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma traces_exhibiting_limited_equivocation_are_valid_rev
-  (Hke : WitnessedEquivocationCapability IM threshold id sender (Cv := Ci))
+  (Hke : WitnessedEquivocationCapability IM threshold A sender (Cv := Cv))
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  (can_emit_signed : channel_authentication_prop IM id sender)
-  (Htracewise_basic_equivocation : BasicEquivocation (composite_state IM) index Ci threshold
-    := equivocation_dec_tracewise IM threshold (fun i => i) sender)
-  (tracewise_not_heavy := not_heavy (1 := Htracewise_basic_equivocation) (Cv := Ci))
-  : forall is s tr, strong_trace_witnessing_equivocation_prop IM threshold id sender is tr (Cv := Ci) ->
+  (can_emit_signed : channel_authentication_prop IM A sender)
+  (Htracewise_basic_equivocation : BasicEquivocation (composite_state IM) validator Cv threshold
+    := equivocation_dec_tracewise IM threshold A sender)
+  (tracewise_not_heavy := not_heavy (1 := Htracewise_basic_equivocation) (Cv := Cv))
+  : forall is s tr, strong_trace_witnessing_equivocation_prop IM threshold A sender is tr (Cv := Cv) ->
     finite_valid_trace_init_to (free_composite_vlsm IM) is s tr ->
     tracewise_not_heavy s ->
     fixed_limited_equivocation_prop is tr.
@@ -344,13 +357,13 @@ Qed.
   have the [fixed_limited_equivocation_prop]erty.
 *)
 Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
-  (Hke : WitnessedEquivocationCapability IM threshold id sender (Cv := Ci))
+  (Hke : WitnessedEquivocationCapability IM threshold A sender (Cv := Cv))
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  (can_emit_signed : channel_authentication_prop IM id sender)
-  : forall s tr, strong_trace_witnessing_equivocation_prop IM threshold id sender s tr (Cv := Ci) ->
+  (can_emit_signed : channel_authentication_prop IM A sender)
+  : forall s tr, strong_trace_witnessing_equivocation_prop IM threshold A sender s tr (Cv := Cv) ->
     finite_valid_trace Limited s tr -> fixed_limited_equivocation_prop s tr.
 Proof.
   intros s tr Hstrong Htr.
@@ -369,12 +382,12 @@ Qed.
 *)
 
 Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
-  (Hke : WitnessedEquivocationCapability IM threshold id sender (Cv := Ci))
+  (Hke : WitnessedEquivocationCapability IM threshold A sender (Cv := Cv))
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  (can_emit_signed : channel_authentication_prop IM id sender)
+  (can_emit_signed : channel_authentication_prop IM A sender)
   : forall s, valid_state_prop Limited s ->
     exists is tr, finite_trace_last is tr = s /\ fixed_limited_equivocation_prop is tr.
 Proof.
@@ -382,7 +395,7 @@ Proof.
   assert (Hfree_s : valid_state_prop (free_composite_vlsm IM) s)
     by (revert Hs; apply VLSM_incl_valid_state, constraint_free_incl).
   destruct
-    (free_has_strong_trace_witnessing_equivocation_prop IM threshold id sender _ s Hfree_s)
+    (free_has_strong_trace_witnessing_equivocation_prop IM threshold A sender _ s Hfree_s)
     as (is & tr & Htr & Heqv).
   exists is, tr.
   apply valid_trace_get_last in Htr as Hlst.
