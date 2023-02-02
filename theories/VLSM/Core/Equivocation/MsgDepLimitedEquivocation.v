@@ -391,7 +391,7 @@ Proof.
   apply can_emit_composite_project in Him as [j Him].
   apply Hchannel in Him as Hsender.
   unfold channel_authenticated_message in Hsender.
-  destruct (sender im) as [v |] eqn:Heq_sender; [| by inversion Hsender].
+  destruct (sender im) as [v |] eqn: Heq_sender; [| by inversion Hsender].
   apply Some_inj in Hsender; cbn in Hsender; subst.
   exists v; subst; cbn.
   unfold msg_dep_message_equivocators, coeqv_message_equivocators,
@@ -447,8 +447,8 @@ Lemma message_equivocators_can_emit (s : vstate Limited) im
 Proof.
   eapply VLSM_embedding_can_emit.
   - unshelve apply equivocators_composition_for_directly_observed_index_incl_embedding with
-      (indices1 := fin_sets.set_map A (msg_dep_message_equivocators IM (Cv := Cv) full_message_dependencies sender
-        (original_state s) im)).
+      (indices1 := fin_sets.set_map A (msg_dep_message_equivocators IM (Cv := Cv)
+        full_message_dependencies sender (original_state s) im)).
     intros x; rewrite !elem_of_elements.
     by apply set_map_mono, union_subseteq_r.
   - destruct (equivocating_messages_are_equivocator_emitted _ _ HLemit Hnobserved)
