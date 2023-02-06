@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import EquationsExtras.
-From VLSM.Lib Require Import Preamble ListSetExtras ListExtras.
+From VLSM.Lib Require Import Preamble ListSetExtras.
 From VLSM.Core Require Import VLSM Composition VLSMEmbedding.
 
 (** * Traceable VLSMs
@@ -752,7 +752,7 @@ Proof.
       rewrite Heq in Hind.
     eapply composite_tv_state_destructor_preserves_not_in_indices_initial in Hinitial as Hinitials;
       [| done..].
-    destruct_list_last suf suf' last_suf Heqsuf; subst suf; simplify_list_eq;
+    ListExtras.destruct_list_last suf suf' last_suf Heqsuf; subst suf; simplify_list_eq;
       [| by eapply Hind].
     assert (destination item0 = s') as ->
       by (eapply composite_tv_state_destructor_destination, elem_of_list_lookup_2; done).

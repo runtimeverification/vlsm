@@ -1,7 +1,7 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Reals Lra.
-From VLSM.Lib Require Import Preamble StdppListSet ListSetExtras Measurable RealsExtras FinSetExtras.
+From VLSM.Lib Require Import Preamble Measurable RealsExtras FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition AnnotatedVLSM.
 From VLSM.Core Require Import Equivocation Equivocation.TraceWiseEquivocation MessageDependencies.
 From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.LimitedMessageEquivocation.

@@ -1,7 +1,6 @@
 From stdpp Require Import prelude finite.
-From VLSM.Lib Require Import EquationsExtras.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras ListSetExtras NatExtras.
-From VLSM.Core Require Import VLSM Composition VLSMEmbedding.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras NatExtras.
+From VLSM.Core Require Import VLSM Composition.
 From VLSM.Core Require Import Equivocation MessageDependencies TraceableVLSM.
 
 (** * Minimally-equivocating traces
