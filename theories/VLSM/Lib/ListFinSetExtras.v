@@ -1,6 +1,6 @@
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble StdppExtras StdppListFinSet.
+From VLSM.Lib Require Import Preamble StdppListFinSet.
 
 Section sec_defs.
 

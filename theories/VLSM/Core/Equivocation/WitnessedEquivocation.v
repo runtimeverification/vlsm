@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Reals.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras FinSetExtras.
+From VLSM.Lib Require Import Preamble ListExtras ListSetExtras FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import SubProjectionTraces MessageDependencies Equivocation.
 From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquivocation.

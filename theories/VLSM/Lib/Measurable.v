@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Reals Lra.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet ListSetExtras StdppListFinSet.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppListFinSet.
 
 (** * Measure-related definitions and lemmas *)
 
