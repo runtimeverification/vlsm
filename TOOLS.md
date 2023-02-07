@@ -30,13 +30,27 @@ git clone https://github.com/JasonGross/coq-tools.git
 
 ### Minimizing requires
 
+The minimization script included in the Coq repository will operate on absolutized imports.
+To absolutize the imports of a given file run:
+
+```shell
+./../coq-tools/absolutize-imports.py file.v --in-place .bak
+```
+
+In this single file case, all the project's `-Q`/`-R` options must be manually passed to the script. To instead absolutize the import sentences in the entire project without the need to manually pass any paths, run the script from the directory where the `_CoqProject` file lives:
+
+```shell
+./../coq-tools/absolutize-imports.py -f _CoqProject --update-all 
+```
+
+
 To minimize a single file's list of Coq require sentences, run the script `minimize-requires.py` from the Coq repository:
 
 ```shell
 ./../coq-tools/minimize-requires.py file.v --in-place .bak
 ```
 
-In this single file case, all the project's `-Q`/`-R` options must be manually passed to the script. To instead minimize the require sentences in the entire project without the need to manually pass any paths, run the script from the directory where the `_CoqProject` file lives:
+To minimize the require sentences for the whole project:
 
 ```shell
 ./../coq-tools/minimize-requires.py --all -f _CoqProject
