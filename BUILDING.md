@@ -25,36 +25,46 @@ sudo apt-get update
 
 ### Install opam (unless already installed)
 
+We recommend installing opam via the official install script, which will always
+install the latest released version:
+
 ```shell
 bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"
 opam init
 ```
 
-On Fedora, the opam package is included in the standard repositories.
-It can be installed by running:
+As an alternative, the opam package is included in the
+standard repositories in some Linux distributions. In Fedora,
+it can be installed by running:
 
 ```shell
 sudo dnf install opam
 ```
 
-Install the unzip and bubblewrap tools (on Debian based distributions):
+### Install opam runtime requirements
+
+The unzip and bubblewrap tools are needed by opam.
+
+To install on Debian-based distributions:
 
 ```shell
-sudo apt-get install unzip
-sudo apt-get install -y bubblewrap
+sudo apt-get install -y unzip bubblewrap
 ```
 
-And on Fedora you can run:
+To install on Fedora:
 
 ```shell
 sudo dnf install unzip bubblewrap
 ```
 
-If you encounter the error "Sandboxing is not working on your platform ubuntu", then disable the sandboxing by choosing "Y".
+### Initialize opam
 
-Run again: `opam init`
+Run `opam init`.
 
-Choose "y", in order to allow opam to modify `~/.profile`.
+If you encounter the error "Sandboxing is not working on your platform", then
+disable the sandboxing by choosing "Y".
+
+Choose "y" in order to allow opam to modify `~/.profile`.
 
 ### Install a switch for opam
 
