@@ -30,11 +30,24 @@ bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/she
 opam init
 ```
 
-Install the unzip and bubblewrap tools:
+On Fedora, the opam package is included in the standard repositories.
+It can be installed by running:
+
+```shell
+sudo dnf install opam
+```
+
+Install the unzip and bubblewrap tools (on Debian based distributions):
 
 ```shell
 sudo apt-get install unzip
 sudo apt-get install -y bubblewrap
+```
+
+And on Fedora you can run:
+
+```shell
+sudo dnf install unzip bubblewrap
 ```
 
 If you encounter the error "Sandboxing is not working on your platform ubuntu", then disable the sandboxing by choosing "Y".
