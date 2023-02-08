@@ -82,7 +82,7 @@ eval $(opam env)
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq.8.16.1 coq-stdpp.1.8.0 coq-itauto
+opam install coq.8.16.1 coq-stdpp.1.8.0 coq-itauto coq-equations
 ```
 
 ### Clone the project repository
