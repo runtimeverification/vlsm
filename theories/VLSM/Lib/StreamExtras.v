@@ -1,5 +1,4 @@
 From Hammer Require Import Tactics.
-From Hammer Require Import Tactics.
 From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists NeList.

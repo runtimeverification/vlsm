@@ -1,5 +1,4 @@
 From Hammer Require Import Tactics.
-From Hammer Require Import Tactics.
 From Coq Require Export Program.Tactics.
 Obligation Tactic := idtac.
 From stdpp Require Import prelude.

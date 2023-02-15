@@ -1,5 +1,4 @@
 From Hammer Require Import Tactics.
-From Hammer Require Import Tactics.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
