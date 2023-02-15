@@ -1,3 +1,5 @@
+From Hammer Require Import Tactics.
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Sorting.
@@ -194,7 +196,7 @@ Proof.
   intros x y s LS IN. revert y x LS IN.
   induction s.
   - by inversion 2.
-  - by do 2 inversion 1; subst; firstorder.
+  - by do 2 inversion 1; subst; sauto.
 Qed.
 
 Lemma add_in_sorted_list_existing

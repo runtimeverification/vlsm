@@ -1,3 +1,5 @@
+From Hammer Require Import Tactics.
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
@@ -195,7 +197,7 @@ Proof.
   intros a Ha.
   apply elem_of_map in Ha.
   apply elem_of_map.
-  by firstorder.
+  by sauto.
 Qed.
 
 Lemma set_map_size_upper_bound

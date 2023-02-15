@@ -1,3 +1,5 @@
+From Hammer Require Import Tactics.
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Streams Classical.

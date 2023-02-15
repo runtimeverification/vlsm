@@ -1,3 +1,5 @@
+From Hammer Require Import Tactics.
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
@@ -17,7 +19,7 @@ Lemma set_eq_extract_forall
   (l1 l2 : set A)
   : set_eq l1 l2 <-> forall a, (a ∈ l1 <-> a ∈ l2).
 Proof.
-  by unfold set_eq; firstorder.
+  by unfold set_eq; sauto.
 Qed.
 
 Lemma set_eq_fin_set `{FinSet A Cm} (s1 s2 : Cm) :
@@ -48,7 +50,7 @@ Qed.
 Lemma set_eq_comm {A} : forall s1 s2 : set A,
   set_eq s1 s2 <-> set_eq s2 s1.
 Proof.
-  by firstorder.
+  by sauto.
 Qed.
 
 Lemma set_eq_tran {A} : forall s1 s2 s3 : set A,
@@ -56,7 +58,7 @@ Lemma set_eq_tran {A} : forall s1 s2 s3 : set A,
   set_eq s2 s3 ->
   set_eq s1 s3.
 Proof.
-  by intros; split; apply PreOrder_Transitive with s2; firstorder.
+  by intros; split; apply PreOrder_Transitive with s2; sauto.
 Qed.
 
 Lemma set_eq_empty_iff
@@ -78,7 +80,7 @@ Proof.
   intros a s1 s2 Heq.
   rewrite !set_eq_extract_forall in *.
   setoid_rewrite elem_of_cons.
-  by firstorder.
+  by sauto.
 Qed.
 
 Lemma set_eq_Forall
@@ -132,7 +134,7 @@ Proof.
   intros.
   unfold subseteq, list_subseteq.
   setoid_rewrite set_union_iff.
-  by firstorder.
+  by sauto.
 Qed.
 
 Lemma set_union_iterated_nodup `{EqDecision A}
@@ -336,7 +338,7 @@ Proof.
   - by cbn in H; rewrite decide_True in H; constructor.
   - rewrite elem_of_cons in H0.
     simpl in H; rewrite decide_False in H by done; inversion H; subst; clear H.
-    constructor; [| by firstorder].
+    constructor; [| by sauto].
     by intro Ha; apply (set_remove_3 _ x) in Ha; auto.
 Qed.
 
