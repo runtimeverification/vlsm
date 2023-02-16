@@ -1297,7 +1297,7 @@ Proof.
         destruct Hchar1 as [[Hex Heq_l] [Heq_input [Heq_output [Hpr_s Heq_descli]]]].
         simplify_eq.
         destruct Hchar2 as [Hvx_pr Htx_pr].
-        apply finite_valid_trace_from_to_singleton.
+        apply finite_valid_trace_from_to_singleton; [done |].
         repeat split
         ; [| apply any_message_is_valid_in_preloaded | done | done].
         by apply finite_valid_trace_from_to_last_pstate in HtrX.

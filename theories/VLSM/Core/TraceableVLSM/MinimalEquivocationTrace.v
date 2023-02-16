@@ -2,7 +2,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras ListSetExtras NatExtras.
 From VLSM.Core Require Import VLSM Composition VLSMEmbedding.
-From VLSM.Core Require Import Equivocation MessageDependencies TraceableVLSM.
+From VLSM.Core Require Import Equivocation MessageDependencies TraceableVLSM TraceWiseEquivocation.
 
 (** * Minimally-equivocating traces
 
@@ -699,6 +699,92 @@ Proof.
     (P := fun s => msg_dep_is_globally_equivocating IM message_dependencies sender s v);
     [by eapply minimal_equivocation_choice_is_choosing_well | | done..].
   by intros ? **; eapply minimal_equivocation_choice_monotone.
+Qed.
+
+(**
+  The equivocators of any state in the minimal equivocation trace are included
+  into the equivocators of its final trace.
+*)
+Lemma state_to_minimal_equivocation_trace_equivocation_last :
+  forall (s : composite_state IM) (Hs : valid_state_prop RFree s),
+  forall is tr, state_to_minimal_equivocation_trace s Hs = (is, tr) ->
+  forall (item : composite_transition_item IM), item ∈ tr ->
+    forall v : validator,
+      msg_dep_is_globally_equivocating IM message_dependencies sender
+        (destination item ) v ->
+      msg_dep_is_globally_equivocating IM message_dependencies sender
+        s v.
+Proof.
+  intros.
+  eapply composite_state_to_trace_P_monotonic_last with
+  (P := fun s => msg_dep_is_globally_equivocating IM message_dependencies sender s v);
+    [by eapply minimal_equivocation_choice_is_choosing_well | | done..].
+  by intros ? **; eapply minimal_equivocation_choice_monotone.
+Qed.
+
+Lemma minimal_equivocation_trace_tracewise_equivocation_is_global
+  (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i)) :
+  forall (s : composite_state IM) (Hs : valid_state_prop RFree s),
+  forall (v : validator),
+    is_equivocating_tracewise_no_has_been_sent IM A sender s v
+      ->
+    msg_dep_is_globally_equivocating IM message_dependencies sender s v.
+Proof.
+  intros s Hs v Heqv.
+  destruct (state_to_minimal_equivocation_trace s Hs) as (is, tr) eqn: Hmin.
+  apply reachable_composite_state_to_trace in Hmin as Htr;
+    [| by eapply minimal_equivocation_choice_is_choosing_well].
+  destruct (Heqv _ _ Htr) as (m & Hsender & pre & item & suf & Heqtr & Hinput & Hnoutput).
+  cut (msg_dep_is_globally_equivocating IM message_dependencies sender (destination item) v).
+  {
+    eapply state_to_minimal_equivocation_trace_equivocation_last; [done |].
+    by subst; apply elem_of_app; right; left.
+  }
+  subst tr; destruct Htr as [Htr Hinit].
+  replace (pre ++ item :: suf) with ((pre ++ [item]) ++ suf) in Htr
+    by (simplify_list_eq; done).
+  apply finite_valid_trace_from_to_app_split in Htr as [Htr _].
+  rewrite finite_trace_last_is_last in Htr.
+  exists m; constructor; [done |..].
+  - apply chbo_directly, composite_has_been_directly_observed_sent_received_iff.
+    right.
+    cut (trace_has_message (field_selector input) m (pre ++ [item])).
+    {
+      intro Hhas.
+      by eapply (has_been_received_examine_one_trace _ _ _ (conj Htr Hinit) m) in Hhas.
+    }
+    subst; apply Exists_app; right.
+    by apply Exists_cons; left.
+  - contradict Hnoutput.
+    apply finite_valid_trace_from_to_app_split in Htr as [Htr Hitem].
+    apply finite_valid_trace_from_to_singleton in Hitem; [| done].
+    destruct item; cbn in *; subst.
+    specialize (proj1 (has_been_sent_step_update Hitem m) Hnoutput) as Hsent.
+    destruct Hsent as [Houtput | Hsent].
+    + contradict Houtput.
+      by eapply input_valid_transition_preloaded_project_active,
+        input_valid_transition_received_not_resent
+         in Hitem; [| apply Hno_resend].
+    + by eapply (has_been_sent_examine_one_trace _ _ _ (conj Htr Hinit) m) in Hsent.
+Qed.
+
+Lemma minimal_equivocation_trace_tracewise_equivocation_equiv_global
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
+  (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i)) :
+  forall (s : composite_state IM) (Hs : valid_state_prop RFree s),
+  forall (v : validator),
+    is_equivocating_tracewise_no_has_been_sent IM A sender s v
+      <->
+    msg_dep_is_globally_equivocating IM message_dependencies sender s v.
+Proof.
+  split; [by apply minimal_equivocation_trace_tracewise_equivocation_is_global |].
+  intro Hglobally.
+  eapply is_equivocating_tracewise_no_has_been_sent_iff;
+    [by apply channel_authentication_sender_safety |].
+  eapply is_equivocating_statewise_implies_is_equivocating_tracewise,
+    full_node_is_globally_equivocating_iff_statewise;
+    [by apply channel_authentication_sender_safety | done |].
+  by eapply full_node_is_globally_equivocating_iff.
 Qed.
 
 End sec_minimal_equivocation_trace.

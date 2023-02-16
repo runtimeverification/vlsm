@@ -729,7 +729,7 @@ Qed.
   are determined by the label, initial state and input message of the
   transition. This is because [transition] is a function.
 
-  Because of the above, [input_valid_transition]s are also deterministic. 
+  Because of the above, [input_valid_transition]s are also deterministic.
 *)
 
 Lemma input_valid_transition_deterministic :
@@ -965,6 +965,14 @@ Definition finite_valid_trace_singleton :
        finite_valid_trace_from_extend s' []
            (finite_valid_trace_from_empty s' (input_valid_transition_destination Hptrans))
            _ _ _ _ Hptrans.
+
+Lemma finite_valid_trace_from_singleton s item :
+  input_valid_transition_item s item
+    <->
+  finite_valid_trace_from s [item].
+Proof.
+  by split; [destruct item; apply finite_valid_trace_singleton | inversion 1].
+Qed.
 
 (**
   To complete our definition of a finite valid trace, we must also guarantee
@@ -1343,11 +1351,14 @@ Inductive finite_valid_trace_from_to : state -> state -> list transition_item ->
     finite_valid_trace_from_to s' f
       ({| l := l; input := iom; destination := s; output := oom |} :: tl).
 
-Lemma finite_valid_trace_from_to_singleton s s' iom oom l
-    : input_valid_transition l (s, iom) (s', oom) ->
-      finite_valid_trace_from_to s s' [{| l := l; input := iom; destination := s'; output := oom |}].
+Lemma finite_valid_trace_from_to_singleton s s' item :
+  s' = destination item ->
+    input_valid_transition_item s item
+      <->
+    finite_valid_trace_from_to s s' [item].
 Proof.
-  intro Ht.
+  split; [| by inversion 1].
+  subst; destruct item; intro Ht.
   constructor; [| done].
   constructor.
   by apply input_valid_transition_destination in Ht.
@@ -1631,7 +1642,7 @@ Proof.
   induction Htl.
   - by constructor; apply initial_state_is_valid.
   - apply finite_valid_trace_from_to_app with s; [done |].
-    apply finite_valid_trace_from_to_singleton.
+    apply finite_valid_trace_from_to_singleton; [done |].
     apply finite_valid_trace_init_to_emit_valid_state_message in Htl1.
     apply finite_valid_trace_init_to_emit_valid_state_message in Htl2.
     by firstorder.

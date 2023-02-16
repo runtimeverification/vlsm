@@ -154,10 +154,7 @@ Proof.
     replace s' with (destination item)
       by (eapply tv_state_destructor_destination; rewrite Hdestruct; left).
     eapply (finite_valid_trace_from_to_app R); [by apply Hind |].
-    cut (input_valid_transition_item R s item).
-    {
-      by destruct item; cbn; apply (finite_valid_trace_from_to_singleton R).
-    }
+    apply (finite_valid_trace_from_to_singleton R); [done |].
     eapply tv_state_destructor_transition; [done |].
     by rewrite Hdestruct; left.
 Qed.
@@ -493,27 +490,6 @@ Proof.
 Qed.
 
 (**
-  Given any ram-state we can extract all traces leading to it by recursively
-  following the transitions leading to it.
-*)
-Equations state_to_traces (s' : vstate X) (Hs' : valid_state_prop R s') :
-  list (vstate X * list (vtransition_item X)) by wf (state_size s') lt :=
-state_to_traces s' Hs' with inspect (state_destructor s') :=
-| trs eq: Hdestruct => if (decide (trs = [])) then [(s', [])] else (trs ≫= (fun items => [(state_to_traces items.2 _) ≫= (fun istr => [(istr.1, istr.2 ++ [items.1])])])) ≫= id.
-Next Obligation.
-Proof.
-  cbn; intros.
-  eapply tv_state_destructor_transition; [done |].
-  rewrite Hdestruct.
-Qed.
-Next Obligation.
-Proof.
-  cbn; intros.
-  eapply tv_state_destructor_size; [done |].
-  by rewrite Hdestruct; left.
-Qed.
-
-(**
   For any composite ram-state <<s>> and for any index <<i>> for which the
   component state <<s i>> has the [initial_state_prop]erty, the component state of
   index <<i>> of the origin state of the trace extracted from <<s>> is equal
@@ -788,6 +764,37 @@ Proof.
     eapply StdppListSet.set_remove_nodup with (a := j) in Hnodup.
     by eapply Hind.
   - by intros; inversion Heqis_tr; subst; destruct pre.
+Qed.
+
+Lemma composite_state_to_trace_P_monotonic_last :
+  forall (P : composite_state IM -> Prop),
+  forall (choose : choice_function), choosing_well choose ->
+    chosen_transition_preserves_P P choose ->
+  forall (s : composite_state IM) (Hs : valid_state_prop RFree s),
+  forall is tr, composite_state_to_trace choose s Hs = (is, tr) ->
+  forall (item : composite_transition_item IM), item ∈ tr ->
+    P (destination item) -> P s.
+Proof.
+  intros P choose Hwell HchooseP s' Hs' is tr Heqis_tr.
+  specialize (composite_state_to_trace_P_monotonic P choose Hwell HchooseP s' Hs' is tr Heqis_tr).
+  apply reachable_composite_state_to_trace, valid_trace_get_last in Heqis_tr; [| done].
+  clear -Heqis_tr.
+  revert s' Heqis_tr; induction tr using rev_ind; [by inversion 3 |].
+  intros s' Hlst Hall item Hitem.
+  rewrite finite_trace_last_is_last in Hlst; subst.
+  apply elem_of_app in Hitem as [Hitem | Hitem];
+    [| by apply elem_of_list_singleton in Hitem; subst].
+  intro HPitem.
+  destruct_list_last tr tr' lst Heqtr; [by inversion Hitem |]; subst tr.
+  cut (P (destination lst)).
+  {
+    intro HPlst; eapply Hall with (pre := (tr' ++ [lst])) (suf := []); [done |].
+    by rewrite finite_trace_last_is_last.
+  }
+  eapply IHtr; [by apply finite_trace_last_is_last | |done..].
+  intros pre suf item' Heq.
+  eapply Hall with (pre := pre) (suf := suf ++ [x]).
+  by rewrite Heq; simplify_list_eq.
 Qed.
 
 End sec_traceable_vlsm_composition.

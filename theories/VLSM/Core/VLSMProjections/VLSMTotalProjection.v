@@ -876,7 +876,7 @@ Proof.
   apply valid_trace_last_pstate in IHHtr1.
   destruct (label_project l) as [lY |] eqn: Hl; cycle 1.
   - by apply (Htransition_None _ Hl) in Ht; rewrite Ht; constructor.
-  - apply finite_valid_trace_from_to_singleton.
+  - apply finite_valid_trace_from_to_singleton; [done |].
     assert (Hiom : option_valid_message_prop Y iom).
     {
       destruct iom as [im |]; [| by apply option_valid_message_None].

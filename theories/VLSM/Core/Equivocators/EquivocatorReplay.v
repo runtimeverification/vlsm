@@ -73,7 +73,8 @@ Proof.
       None
       (equivocator_state_append base_s s)
       None)].
-  apply (finite_valid_trace_from_to_singleton (pre_loaded_vlsm (equivocator_vlsm X) seed)).
+  apply (finite_valid_trace_from_to_singleton (pre_loaded_vlsm (equivocator_vlsm X) seed));
+    [done |].
   repeat split.
   - done.
   - by apply option_valid_message_None.

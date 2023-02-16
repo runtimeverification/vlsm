@@ -1135,7 +1135,7 @@ Context
 
   The following results concern facts about applying a [plan Free] <<P>>
   to a [vstate Free] <<s'>>, knowing its effects on a different [vstate Free] <<s>>
-  which shares some relevant features with <<s'>>. 
+  which shares some relevant features with <<s'>>.
 *)
 
 (* A transition on component <<i>> is [input_valid] from <<s'>> if it is
@@ -1767,7 +1767,7 @@ Proof.
   eapply finite_valid_trace_from_to_app.
   - apply IHCompositeValidTransitionsFromTo.
     by eapply input_valid_transition_origin.
-  - by destruct item; apply finite_valid_trace_from_to_singleton.
+  - by apply finite_valid_trace_from_to_singleton.
 Qed.
 
 End sec_composite_history_vlsm.

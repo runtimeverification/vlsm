@@ -528,7 +528,7 @@ Proof.
       cbn; unfold composite_label_sub_projection_option.
       case_decide as Hl.
       * eapply finite_valid_trace_from_to_app; [by apply Htr_pr |].
-        apply finite_valid_trace_from_to_singleton.
+        apply finite_valid_trace_from_to_singleton; [done |].
         apply valid_trace_last_pstate in Htr_pr.
         by apply fixed_input_valid_transition_sub_projection_helper.
       * rewrite app_nil_r;

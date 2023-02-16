@@ -389,7 +389,7 @@ Proof.
     with (VLSM_weak_stuttering_embedding_finite_trace_project Hsimul [item])
     by apply app_nil_r.
   apply VLSM_weak_stuttering_embedding_finite_valid_trace_from_to.
-  by destruct item; apply finite_valid_trace_from_to_singleton.
+  by apply finite_valid_trace_from_to_singleton.
 Qed.
 
 End sec_weak_stuttering_embedding_properties.

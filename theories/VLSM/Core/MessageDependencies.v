@@ -826,6 +826,29 @@ Definition full_node_is_globally_equivocating
   (s : composite_state IM) (v : validator) : Prop :=
   exists m : message, FullNodeGlobalEquivocationEvidence s v m.
 
+Lemma full_node_is_globally_equivocating_iff_statewise
+  (A : validator -> index)
+  (Hsender_safety : sender_safety_alt_prop IM A sender)
+  (s : composite_state IM)
+  (Hs : valid_state_prop RFree s)
+  (v : validator) :
+  full_node_is_globally_equivocating s v
+    <->
+  is_equivocating_statewise IM A sender s v.
+Proof.
+  split.
+  - intros (m & [Hsender [i Hreceived] Hnsent]).
+    exists i, m; split_and!; [done | | done].
+    unfold has_not_been_sent, negate_oracle.
+    by contradict Hnsent; eexists.
+  - intros (i & m & Hsender & Hnsent & Hreceived).
+    exists m; constructor; [done | by eexists |].
+    unfold has_not_been_sent, negate_oracle in Hnsent.
+    contradict Hnsent.
+    apply valid_state_has_trace in Hs as (? & ? & ?).
+    by eapply has_been_sent_iff_by_sender.
+Qed.
+
 Lemma full_node_is_globally_equivocating_stronger s v :
   full_node_is_globally_equivocating s v ->
   msg_dep_is_globally_equivocating s v.

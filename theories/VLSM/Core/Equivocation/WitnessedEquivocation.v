@@ -43,11 +43,7 @@ Context
   `{ReachableThreshold validator Cv threshold}
   (A : validator -> index)
   (sender : message -> option validator)
-  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cv threshold
-    := equivocation_dec_tracewise IM threshold A sender)
-  (equivocating_validators :=
-    equivocating_validators (BasicEquivocation := Htracewise_BasicEquivocation))
+  (equivocating := is_equivocating_tracewise_no_has_been_sent IM A sender)
   .
 
 (**
@@ -58,18 +54,18 @@ Definition trace_witnessing_equivocation_prop
   is tr
   (s := finite_trace_last is tr)
   : Prop :=
-  forall v, v ∈ equivocating_validators s <->
+  forall v, equivocating s v <->
     exists (m : message), (sender m = Some v) /\ equivocation_in_trace PreFree m tr.
 
 Lemma equivocating_senders_in_trace_witnessing_equivocation_prop
   is tr
   (Htr : trace_witnessing_equivocation_prop is tr)
   (s := finite_trace_last is tr)
-  : set_eq (elements (equivocating_validators s)) (equivocating_senders_in_trace IM sender tr).
+  : forall v, equivocating s v <-> v ∈ equivocating_senders_in_trace IM sender tr.
 Proof.
-  split; intros v Hv.
-  - by apply elem_of_elements, Htr in Hv; apply elem_of_equivocating_senders_in_trace.
-  - by eapply elem_of_elements, Htr, elem_of_equivocating_senders_in_trace.
+  split; intros Hv.
+  - by apply Htr in Hv; apply elem_of_equivocating_senders_in_trace.
+  - by eapply Htr, elem_of_equivocating_senders_in_trace.
 Qed.
 
 (**
@@ -96,15 +92,10 @@ Lemma initial_state_witnessing_equivocation_prop
   (Hs : composite_initial_state_prop IM s)
   : trace_witnessing_equivocation_prop s [].
 Proof.
-  intros v.
-  unfold finite_trace_last. simpl.
-  rewrite <- elem_of_elements.
-  replace (elements (equivocating_validators s)) with (@nil validator).
-  simpl.
-  split; [by inversion 1 |].
-  intros [m [_ Hmsg]].
-  - by elim (no_equivocation_in_empty_trace PreFree m).
-  - by symmetry; apply elements_empty_iff, equivocating_validators_empty_in_initial_state.
+  intros v; split.
+  - by intro Heqv; contradict Heqv; apply initial_state_not_is_equivocating_tracewise.
+  - intros (m & _ & Hmsg).
+    by elim (no_equivocation_in_empty_trace PreFree m).
 Qed.
 
 (**
@@ -118,13 +109,12 @@ Lemma equivocating_validators_witness_monotonicity
   (item : composite_transition_item IM)
   (Hwitness : trace_witnessing_equivocation_prop is (tr ++ [item]))
   (s' := destination item)
-  : equivocating_validators s ⊆ equivocating_validators s'.
+  : forall v, equivocating s v -> equivocating s' v.
 Proof.
   intros v Hv.
   specialize (Hwitness v).
   rewrite finite_trace_last_is_last in Hwitness.
   apply Hwitness.
-  apply equivocating_validators_is_equivocating_tracewise_iff in Hv.
   specialize (Hv _ _ Htr) as [m [Hmsg Heqv]].
   exists m. split; [done |].
   by apply equivocation_in_trace_prefix.
@@ -144,14 +134,14 @@ Lemma input_valid_transition_reflects_trace_witnessing_equivocation_prop
   (item : composite_transition_item IM)
   (Hwitness : trace_witnessing_equivocation_prop is (tr ++ [item]))
   (s' := destination item)
-  (Hincl : equivocating_validators s' ⊆ equivocating_validators s)
+  (Hincl : forall v, equivocating s' v -> equivocating s v)
   : trace_witnessing_equivocation_prop is tr.
 Proof.
   apply finite_valid_trace_init_to_last in Htr as Hlst.
   intros v; split; simpl in *; rewrite Hlst in *.
   - intros Hv.
-    by eapply equivocating_validators_is_equivocating_tracewise_iff
-      with (ReachableThreshold0 := H11).
+    specialize (Hv _ _ Htr) as [m [Hmsg Heqv]].
+    by exists m.
   - intros (msg & Hsender & Heqv).
     apply Hincl.
     specialize (Hwitness v);
@@ -170,8 +160,8 @@ Lemma equivocating_validators_step_update
     l s om s' om'
     (Ht : input_valid_transition PreFree l (s, om) (s', om'))
     v
-    : v ∈ equivocating_validators s' ->
-      v ∈ equivocating_validators s \/
+    : equivocating s' v ->
+      equivocating s v \/
       (exists m, om = Some m /\
       sender m = Some v /\
       forall is tr
@@ -180,6 +170,8 @@ Lemma equivocating_validators_step_update
       ~ trace_has_message (field_selector output) m tr).
 Proof.
   intro Hv.
+  destruct (transition_is_equivocating_tracewise_char IM A sender  _ _ _ _ _ Ht _ Hv).
+
   destruct (decide (v ∈ elements (equivocating_validators s))) as [Hnv | Hnv]
   ; rewrite elem_of_elements in Hnv; [by left | right].
   apply equivocating_validators_is_equivocating_tracewise_iff in Hv.

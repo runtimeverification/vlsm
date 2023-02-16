@@ -138,7 +138,9 @@ Proof.
   intros s a.
   apply (Decision_iff (P := ELMO_global_equivocators threshold _ s a));
     [| typeclasses eauto].
+Admitted.
 
+(*
 Lemma ELMO_msg_dep_validator_limited_non_equivocating_byzantine_traces_are_limited_non_equivocating :
   forall s tr,
     limited_byzantine_trace_prop (Ci := Ci) (Cv := Ca) ELMOComponent threshold (ELMO_A idx) Message_sender s tr ->
@@ -154,6 +156,6 @@ Lemma ELMO_msg_dep_validator_limited_non_equivocating_byzantine_traces_are_limit
         finite_trace_sub_projection IM (elements selection_complement)
           (pre_VLSM_embedding_finite_trace_project
             (type Limited) (composite_type IM) Datatypes.id original_state btr).
-
+*)
 
 End sec_elmo_byzantine.

@@ -303,6 +303,7 @@ Proof.
   by destruct prefix; inversion Heq.
 Qed.
 
+(*
 Context
   `{RelDecision _ _ is_equivocating_tracewise_no_has_been_sent}
   .
@@ -365,5 +366,6 @@ Proof.
     _ _ _ _ _ Ht Hno_sender) as Heqv.
   by apply incl_equivocating_validators_equivocation_fault.
 Qed.
+*)
 
 End sec_tracewise_equivocation.

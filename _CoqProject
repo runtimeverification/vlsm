@@ -55,6 +55,7 @@ theories/VLSM/Core/Equivocation/MsgDepFixedSetEquivocation.v
 theories/VLSM/Core/Equivocation/TraceWiseEquivocation.v
 theories/VLSM/Core/Equivocation/WitnessedEquivocation.v
 theories/VLSM/Core/Equivocation/FullNode.v
+theories/VLSM/Core/Equivocation/LimitedEquivocation.v
 theories/VLSM/Core/Equivocation/LimitedMessageEquivocation.v
 theories/VLSM/Core/Equivocation/MsgDepLimitedEquivocation.v
 
