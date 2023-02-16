@@ -718,3 +718,12 @@ Qed.
 Lemma mbind_app `(f : A -> list B) (l1 l2 : list A) :
   mbind f (l1 ++ l2) = mbind f l1 ++ mbind f l2.
 Proof. by induction l1; [| cbn; rewrite IHl1, app_assoc]. Qed.
+
+Lemma mbind_nils :
+  forall {A B : Type} (f : A -> list B) (l : list A),
+    Forall (fun x : A => f x = []) l ->
+      mbind f l = [].
+Proof.
+  induction 1; cbn; [done |].
+  by rewrite H, IHForall; cbn.
+Qed.

@@ -994,6 +994,15 @@ Proof.
   - by destruct (f x); [elim n |].
 Qed.
 
+Lemma map_option_Forall :
+  forall {A B : Type} (f : A -> option B) (l : list A),
+    Forall (fun x => ~ is_Some (f x)) l ->
+      map_option f l = [].
+Proof.
+  induction 1; cbn; [done |].
+  by destruct (f x); [contradict H |].
+Qed.
+
 (** Unpack list of [option A] into list of [A]. *)
 Definition cat_option {A : Type} : list (option A) -> list A :=
   @map_option (option A) A id.
