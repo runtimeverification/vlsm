@@ -21,21 +21,21 @@ Proof.
 Qed.
 
 Lemma and_proper_l (A B C : Prop) : (A -> (B <-> C)) -> (A /\ B) <-> (A /\ C).
-Proof. by sauto. Qed.
+Proof. by strivial. Qed.
 
 Lemma impl_proper (A B C : Prop) : (A -> (B <-> C)) -> (A -> B) <-> (A -> C).
-Proof. by sauto. Qed.
+Proof. by strivial. Qed.
 
 (** ** Decidable propositions *)
 
 Lemma Decision_iff : forall {P Q}, (P <-> Q) -> Decision P -> Decision Q.
-Proof. by sauto. Qed.
+Proof. by qauto. Qed.
 Lemma Decision_and : forall {P Q}, Decision P -> Decision Q -> Decision (P /\ Q).
-Proof. by sauto. Qed.
+Proof. by qauto. Qed.
 Lemma Decision_or : forall {P Q}, Decision P -> Decision Q -> Decision (P \/ Q).
-Proof. by sauto. Qed.
+Proof. by qauto. Qed.
 Lemma Decision_not : forall {P}, Decision P -> Decision (~ P).
-Proof. by sauto. Qed.
+Proof. by qauto. Qed.
 
 #[export] Instance bool_decision {b : bool} : Decision b :=
 match b with
@@ -64,7 +64,7 @@ Lemma tc_reflect
   (P : A -> Prop)
   (Hreflects : forall dm m, R dm m -> P m -> P dm)
   : forall dm m, tc R dm m -> P m -> P dm.
-Proof. by induction 1; sauto. Qed.
+Proof. by induction 1; strivial. Qed.
 
 (** Characterization of [tc] in terms of the last transitivity step. *)
 Lemma tc_r_iff `(R : relation A) :
@@ -279,7 +279,7 @@ Lemma asymmetric_minimal_among_iff
   : forall m, minimal_among R P m <-> strict_minimal_among R P m.
 Proof.
   unfold minimal_among, strict_minimal_among; specialize asymmetry.
-  by sauto.
+  by hauto.
 Qed.
 
 (** The minimality definitions are equivalent for [StrictOrder]s. *)
@@ -346,7 +346,7 @@ Lemma compare_asymmetric' {A} `{CompareAsymmetric A} :
 Proof.
   intros x y.
   rewrite compare_asymmetric.
-  by destruct (compare y x); cbn; sauto db: congruence.
+  by destruct (compare y x); cbn; strivial; congruence.
 Qed.
 
 (** Strictly-ordered comparisons are asymmetric. *)
@@ -512,7 +512,7 @@ Lemma option_compare_reflexive
   (X : Type) `{StrictlyComparable X}
   : CompareReflexive (option_compare X).
 Proof.
-  by intros [x |] [y |]; cbn; rewrite ?compare_eq; sauto db: congruence.
+  by intros [x |] [y |]; cbn; rewrite ?compare_eq; strivial; congruence.
 Qed.
 
 Lemma option_compare_transitive

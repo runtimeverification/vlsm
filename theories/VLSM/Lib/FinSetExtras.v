@@ -196,7 +196,7 @@ Proof.
   intros a Ha.
   apply elem_of_map in Ha.
   apply elem_of_map.
-  by sauto.
+  by strivial.
 Qed.
 
 Lemma set_map_size_upper_bound

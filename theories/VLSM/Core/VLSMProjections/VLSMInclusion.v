@@ -25,6 +25,7 @@ Definition VLSM_incl_part
     valid_trace_prop X t -> valid_trace_prop Y t.
 #[local] Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma VLSM_incl_refl
   (MX : VLSMMachine vtype)
   (X := mk_vlsm MX)
@@ -33,6 +34,7 @@ Proof.
   by firstorder.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma VLSM_incl_trans
   (MX MY MZ : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)

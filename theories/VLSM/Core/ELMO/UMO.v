@@ -115,10 +115,10 @@ Proof.
   - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
     destruct l, im; cbn in *; invert_UMOComponentValid
     ; inversion Ht; subst; clear Ht; cbn.
-    + by rewrite decide_False; cbn; sauto db: congruence.
+    + by rewrite decide_False; cbn; qauto; congruence.
     + rewrite decide_True by done; cbn.
       unfold Message; rewrite elem_of_cons.
-      by sauto db: congruence.
+      by qauto; congruence.
 Defined.
 
 #[export]
@@ -133,8 +133,8 @@ Proof.
     ; inversion Ht; subst; clear Ht; cbn.
     + rewrite decide_True by done; cbn.
       unfold Message; rewrite elem_of_cons.
-      by sauto db: congruence.
-    + by rewrite decide_False; cbn; sauto db: congruence.
+      by qauto; congruence.
+    + by rewrite decide_False; cbn; qauto; congruence.
 Defined.
 
 #[export]
@@ -1409,14 +1409,14 @@ Instance sent_comparable_dec : RelDecision sent_comparable.
 Proof.
   intros m1 m2.
   destruct (decide (adr (state m1) = adr (state m2)));
-    [| by right; destruct 1; apply n; sauto db: congruence].
+    [| by right; destruct 1; apply n; qauto; congruence].
   destruct (decide (obs (state m1) = obs (state m2)));
     [by left; replace m2 with m1 by (apply eq_Message; done); constructor |].
   destruct (decide (m1 ∈ sentMessages (state m2)));
     [by left; constructor; constructor |].
   destruct (decide (m2 ∈ sentMessages (state m1)));
     [by left; constructor; constructor |].
-  by right; destruct 1; sauto.
+  by right; destruct 1; qauto.
 Defined.
 
 #[export]

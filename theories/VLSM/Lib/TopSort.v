@@ -385,6 +385,7 @@ Definition precedes_closed
   :=
   Forall (fun (b : A) => forall (a : A) (Hmj : precedes a b), a ∈ s) s.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma precedes_closed_set_eq
   {A : Type}
   (precedes : relation A)

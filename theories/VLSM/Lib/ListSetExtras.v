@@ -18,7 +18,7 @@ Lemma set_eq_extract_forall
   (l1 l2 : set A)
   : set_eq l1 l2 <-> forall a, (a ∈ l1 <-> a ∈ l2).
 Proof.
-  by unfold set_eq; sauto.
+  by unfold set_eq; strivial.
 Qed.
 
 Lemma set_eq_fin_set `{FinSet A Cm} (s1 s2 : Cm) :
@@ -49,7 +49,7 @@ Qed.
 Lemma set_eq_comm {A} : forall s1 s2 : set A,
   set_eq s1 s2 <-> set_eq s2 s1.
 Proof.
-  by sauto.
+  by qauto.
 Qed.
 
 Lemma set_eq_tran {A} : forall s1 s2 s3 : set A,
@@ -57,7 +57,7 @@ Lemma set_eq_tran {A} : forall s1 s2 s3 : set A,
   set_eq s2 s3 ->
   set_eq s1 s3.
 Proof.
-  by intros; split; apply PreOrder_Transitive with s2; sauto.
+  by intros; split; apply PreOrder_Transitive with s2; qauto.
 Qed.
 
 Lemma set_eq_empty_iff
@@ -79,9 +79,10 @@ Proof.
   intros a s1 s2 Heq.
   rewrite !set_eq_extract_forall in *.
   setoid_rewrite elem_of_cons.
-  by sauto.
+  by qauto.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma set_eq_Forall
   {A : Type}
   (s1 s2 : set A)
@@ -133,7 +134,7 @@ Proof.
   intros.
   unfold subseteq, list_subseteq.
   setoid_rewrite set_union_iff.
-  by sauto.
+  by qauto.
 Qed.
 
 Lemma set_union_iterated_nodup `{EqDecision A}
@@ -337,7 +338,7 @@ Proof.
   - by cbn in H; rewrite decide_True in H; constructor.
   - rewrite elem_of_cons in H0.
     simpl in H; rewrite decide_False in H by done; inversion H; subst; clear H.
-    constructor; [| by sauto].
+    constructor; [| by strivial].
     by intro Ha; apply (set_remove_3 _ x) in Ha; auto.
 Qed.
 
@@ -647,6 +648,7 @@ Proof.
   by intros a l1 l2 H; split; apply H.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Add Parametric Morphism A : (@elem_of_list A)
   with signature @eq A ==> @list_subseteq A ==> Basics.impl as set_elem_of_subseteq.
 Proof. by firstorder. Qed.

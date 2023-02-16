@@ -725,7 +725,7 @@ Proof.
   intros [a s] H.
   inversion H. simpl in H1. apply IH in H1.
   constructor; [| done].
-  by rewrite Exists1_exists in *; sauto.
+  by rewrite Exists1_exists in *; strivial.
 Qed.
 
 Lemma FinitelyManyBound_impl_rev
@@ -736,7 +736,7 @@ Proof.
   exists n.
   apply ForAll1_forall.
   rewrite ForAll1_forall in Hn.
-  by sauto.
+  by qauto.
 Qed.
 
 Definition stream_prepend {A} (nel : ne_list A) (s : Stream A) : Stream A :=

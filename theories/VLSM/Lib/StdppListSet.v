@@ -103,7 +103,7 @@ Proof.
   inversion_clear Hnd.
   destruct (decide (b = x)) as [<- | Hbx].
   - by intros Ha ->.
-  - by rewrite elem_of_cons; sauto db: subst.
+  - by rewrite elem_of_cons; qauto; subst.
 Qed.
 
 Lemma set_remove_3 (a b : A) (l : set) :
@@ -168,7 +168,7 @@ Lemma set_diff_intro :
 Proof.
   induction x; cbn; [by inversion 1 |].
   by intros y; destruct (decide (a0 ∈ y));
-    rewrite elem_of_cons, ?set_add_iff; sauto db: congruence.
+    rewrite elem_of_cons, ?set_add_iff; qauto; congruence.
 Qed.
 
 Lemma set_diff_elim1 :
@@ -176,14 +176,14 @@ Lemma set_diff_elim1 :
     a ∈ set_diff x y -> a ∈ x.
 Proof.
   induction x; cbn; [done |]; intros y.
-  by destruct (decide (a0 ∈ y)); rewrite elem_of_cons, ?set_add_iff; sauto.
+  by destruct (decide (a0 ∈ y)); rewrite elem_of_cons, ?set_add_iff; qauto.
 Qed.
 
 Lemma set_diff_elim2 :
   forall (a : A) (x y : set), a ∈ set_diff x y -> a ∉ y.
 Proof.
   induction x; cbn; [by inversion 1 |].
-  by intros y; destruct (decide (a0 ∈ y)); rewrite ?set_add_iff; sauto db: congruence.
+  by intros y; destruct (decide (a0 ∈ y)); rewrite ?set_add_iff; qauto; congruence.
 Qed.
 
 Lemma set_diff_iff a l l' :

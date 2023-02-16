@@ -588,7 +588,7 @@ Proof.
         (VLSM_projection_input_valid_transition Hproji); [done |].
       by split; [| apply injective_projections].
     + assert (HivtX : input_valid_transition X lX (sX, om) (vtransition X lX (sX, om)))
-        by sauto.
+        by strivial.
       destruct (vtransition _ _ _) as (sX', _om').
       eapply (VLSM_projection_input_valid_transition Hproj) in HivtX as [_ Hs']; [| done].
       rewrite HsX in Hs'.

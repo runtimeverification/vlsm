@@ -42,6 +42,7 @@ Proof.
   by intros Heq t Hyt; apply Heq.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma VLSM_eq_incl_iff
   (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
@@ -52,6 +53,7 @@ End sec_VLSM_equality.
 
 Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma VLSM_eq_refl
   {message : Type}
   {vtype : VLSMType message}
@@ -62,6 +64,7 @@ Proof.
   by firstorder.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma VLSM_eq_sym
   {message : Type}
   {vtype : VLSMType message}
@@ -72,6 +75,7 @@ Proof.
   by firstorder.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma VLSM_eq_trans
   {message : Type}
   {vtype : VLSMType message}
