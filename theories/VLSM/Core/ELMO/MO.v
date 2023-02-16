@@ -1224,6 +1224,7 @@ Proof.
       by apply rec_recv.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma unfold_rec_obs :
   forall (s : State) (ob : Observation),
     rec_obs s ob
@@ -1233,7 +1234,7 @@ Proof using. clear. (* avoid unneccessary dependence on section variables *)
   intros s ob; split.
   - induction 1.
     + by left; constructor.
-    + by setoid_rewrite elem_of_addObservation; firstorder.
+    + by setoid_rewrite elem_of_addObservation; sauto.
     + by setoid_rewrite elem_of_addObservation; firstorder.
   - induction s using addObservation_ind.
     + by firstorder using elem_of_nil.

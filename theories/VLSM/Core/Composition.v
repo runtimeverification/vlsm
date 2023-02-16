@@ -399,6 +399,7 @@ Definition lift_to_composite_finite_trace j
 Definition lift_to_composite_finite_trace_last j
   := VLSM_embedding_finite_trace_last (lift_to_composite_VLSM_embedding j).
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma constraint_free_incl
   (constraint : composite_label -> composite_state  * option message -> Prop)
   : VLSM_incl (composite_vlsm constraint) free_composite_vlsm.
@@ -1591,6 +1592,7 @@ Definition composite_valid_transition_item
   (s : composite_state IM) (item : composite_transition_item IM) : Prop :=
   CompositeValidTransition (l item) s (input item) (destination item) (output item).
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma composite_valid_transition_reachable_iff l s1 iom s2 oom :
   CompositeValidTransition l s1 iom s2 oom <-> ValidTransition RFree l s1 iom s2 oom.
 Proof. by firstorder. Qed.

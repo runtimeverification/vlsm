@@ -82,6 +82,7 @@ Proof.
   by sauto.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma set_eq_Forall
   {A : Type}
   (s1 s2 : set A)
@@ -647,6 +648,7 @@ Proof.
   by intros a l1 l2 H; split; apply H.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Add Parametric Morphism A : (@elem_of_list A)
   with signature @eq A ==> @list_subseteq A ==> Basics.impl as set_elem_of_subseteq.
 Proof. by firstorder. Qed.

@@ -514,6 +514,7 @@ Proof.
   by induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma elem_of_map_option
   {A B : Type}
   (f : A -> option B)

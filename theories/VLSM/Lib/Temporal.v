@@ -138,6 +138,7 @@ Proof.
   by intro; apply Classical_Prop.NNPP.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma stabilization [A : Type] [R : A -> A-> Prop] (HR : well_founded R)
       [s] : progress R s -> exists x, Eventually (Forever (fun s => hd s = x)) s.
 Proof.

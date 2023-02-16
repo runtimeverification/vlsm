@@ -961,6 +961,7 @@ Proof.
   by destruct (f a); cbn; congruence.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma map_option_nth
   {A B : Type}
   (f : A -> option B)
