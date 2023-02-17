@@ -133,6 +133,7 @@ Proof.
     split; [| done].
     rapply extend_right_finite_trace_from; [done |].
     apply finite_valid_trace_last_pstate in IHtr as Hs.
+    (* this sauto call takes over 1 second*)
     cut (option_valid_message_prop X iom); [by sauto |].
     destruct iom as [m |]; [| by apply option_valid_message_None].
     destruct Hx as [Hv _].

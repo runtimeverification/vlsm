@@ -1234,6 +1234,7 @@ Proof using. clear. (* avoid unneccessary dependence on section variables *)
   intros s ob; split.
   - induction 1.
     + by left; constructor.
+      (* this sauto call takes more than one second *)
     + by setoid_rewrite elem_of_addObservation; sauto.
     + by setoid_rewrite elem_of_addObservation; firstorder.
   - induction s using addObservation_ind.

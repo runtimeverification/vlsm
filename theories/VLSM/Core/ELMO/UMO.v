@@ -115,9 +115,11 @@ Proof.
   - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
     destruct l, im; cbn in *; invert_UMOComponentValid
     ; inversion Ht; subst; clear Ht; cbn.
+    (* this sauto call takes over 5 seconds *)
     + by rewrite decide_False; cbn; sauto db: congruence.
     + rewrite decide_True by done; cbn.
       unfold Message; rewrite elem_of_cons.
+      (* this sauto call takes over 16 seconds*)
       by sauto db: congruence.
 Defined.
 
@@ -133,6 +135,7 @@ Proof.
     ; inversion Ht; subst; clear Ht; cbn.
     + rewrite decide_True by done; cbn.
       unfold Message; rewrite elem_of_cons.
+      (* this sauto call takes more than 15 seconds *)
       by sauto db: congruence.
     + by rewrite decide_False; cbn; sauto db: congruence.
 Defined.
