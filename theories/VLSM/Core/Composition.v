@@ -503,7 +503,6 @@ Context
   the lemma [basic_VLSM_incl].
 *)
 
-(* begin hide *)
 Lemma weak_constraint_subsumption_incl
   (Hsubsumption : weak_input_valid_constraint_subsumption constraint1 constraint2)
   : VLSM_incl X1 X2.
@@ -605,7 +604,6 @@ Proof.
   by apply (VLSM_incl_can_emit (preloaded_constraint_subsumption_incl Hpre_subsumption)).
 Qed.
 
-(* end hide *)
 End sec_constraint_subsumption.
 
 Lemma preloaded_constraint_free_incl
