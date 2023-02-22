@@ -908,8 +908,6 @@ Proof.
   by apply valid_trace_forget_last in Happ_pr; subst.
 Qed.
 
-(* end hide *)
-
 Lemma basic_VLSM_weak_projection
   : VLSM_weak_projection X Y label_project state_project.
 Proof.

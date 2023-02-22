@@ -1284,8 +1284,6 @@ Proof.
     by rewrite list_prefix_map, list_prefix_nth.
 Qed.
 
-(* begin hide *)
-
 Lemma can_produce_from_valid_trace si tr
   (Htr : finite_valid_trace_from si tr)
   : forall item, item ∈ tr ->
@@ -1312,8 +1310,6 @@ Proof.
   unfold can_produce; rewrite <- Houtput.
   by eapply can_produce_from_valid_trace; [apply Htr |].
 Qed.
-
-(* end hide *)
 
 (** ** Finite [valid_trace]s with a final state
 
@@ -2048,8 +2044,6 @@ Proof.
      finite_valid_trace_first_pstate in Htr.
 Qed.
 
-(* begin hide *)
-
 Lemma in_futures_refl
   (first : state)
   (Hps : valid_state_prop first)
@@ -2360,7 +2354,6 @@ Proof.
       * specialize (stream_prefix_length (Streams.map destination tr) (S m)); intro Hpref_len.
         by rewrite Hpref_len; lia.
 Qed.
-(* end hide *)
 
 (**
   Stating liveness properties will require quantifying over complete
@@ -2391,8 +2384,6 @@ Definition complete_trace_prop (tr : Trace) : Prop
       | Infinite _ _ => True
       end.
 
-(* begin hide *)
-
 (*
   Implicitly, the state itself must be in the trace, and minimally the last
   element of the trace. Also implicitly, the trace leading up to the state
@@ -2417,7 +2408,6 @@ Class VLSM_vdecidable : Type :=
   valid_decidable : forall l som, {valid l som} + {~ valid l som}
 }.
 
-(* end hide *)
 End sec_VLSM.
 
 (**
@@ -2556,7 +2546,6 @@ Definition byzantine_message_prop
 Definition byzantine_message : Type
   := sig byzantine_message_prop.
 
-(* begin hide *)
 Lemma pre_loaded_with_all_messages_message_valid_initial_state_message
   (om : option message)
   : valid_state_message_prop pre_loaded_with_all_messages_vlsm (proj1_sig (vs0 X)) om.
@@ -2586,7 +2575,6 @@ Proof.
   apply pre_loaded_with_all_messages_valid_state_message_preservation.
   by itauto.
 Qed.
-(* end hide *)
 
 Lemma any_message_is_valid_in_preloaded (om : option message) :
   option_valid_message_prop pre_loaded_with_all_messages_vlsm om.
