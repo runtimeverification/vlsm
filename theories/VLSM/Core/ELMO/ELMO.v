@@ -1,3 +1,4 @@
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From Coq Require Import FunctionalExtensionality Reals.
 From stdpp Require Import prelude finite.
@@ -329,6 +330,7 @@ Definition ELMOComponent (i : index) : VLSM Message :=
   vmachine := ELMOComponentMachine i;
 |}.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 #[export]
 Instance ComputableSentMessages_ELMOComponent
   (i : index) : ComputableSentMessages (ELMOComponent i).
@@ -344,6 +346,7 @@ Proof.
       by firstorder congruence.
 Defined.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 #[export]
 Instance ComputableReceivedMessages_ELMOComponent
   (i : index) : ComputableReceivedMessages (ELMOComponent i).
@@ -364,6 +367,7 @@ Instance HasBeenDirectlyObservedCapability_ELMOComponent
   (i : index) : HasBeenDirectlyObservedCapability (ELMOComponent i) :=
     HasBeenDirectlyObservedCapability_from_sent_received (ELMOComponent i).
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma ELMO_reachable_view (s : State) i :
   ram_state_prop (ELMOComponent i) s
     <->
@@ -588,6 +592,7 @@ Proof.
     intros; apply elem_of_sentMessages_addObservation; constructor; auto.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma local_equivocators_simple_addObservation :
   forall (s : State) (ob : Observation) (a : Address),
     local_equivocators_simple (s <+> ob) a ->
@@ -1262,6 +1267,7 @@ Proof.
     by apply elem_of_receivedMessages, obs_sizeState in Hobs; cbn in Hobs; lia.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 #[export] Instance MessageDependencies_ELMOComponent :
   MessageDependencies Ei Message_dependencies.
 Proof.

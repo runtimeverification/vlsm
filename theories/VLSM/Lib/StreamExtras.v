@@ -1,3 +1,4 @@
+From Hammer Require Import Tactics.
 From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists NeList.
@@ -724,7 +725,7 @@ Proof.
   intros [a s] H.
   inversion H. simpl in H1. apply IH in H1.
   constructor; [| done].
-  by rewrite Exists1_exists in *; firstorder.
+  by rewrite Exists1_exists in *; strivial.
 Qed.
 
 Lemma FinitelyManyBound_impl_rev
@@ -735,7 +736,7 @@ Proof.
   exists n.
   apply ForAll1_forall.
   rewrite ForAll1_forall in Hn.
-  by firstorder.
+  by qauto.
 Qed.
 
 Definition stream_prepend {A} (nel : ne_list A) (s : Stream A) : Stream A :=

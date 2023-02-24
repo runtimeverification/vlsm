@@ -1,3 +1,4 @@
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From Coq Require Import Streams.
@@ -165,7 +166,7 @@ Lemma trace_has_message_observed_iff m tr
   (Hobserved : trace_has_message item_sends_or_receives m tr)
   : trace_has_message (field_selector input) m tr \/ trace_has_message (field_selector output) m tr.
 Proof.
-  by unfold trace_has_message in *; rewrite !Exists_exists in *; firstorder.
+  by unfold trace_has_message in *; rewrite !Exists_exists in *; qauto.
 Qed.
 
 (** Defines a message received but not sent by within the trace. *)
@@ -790,7 +791,7 @@ Proof.
   split.
   - intros Hm; inversion Hm; subst.
     + by right.
-    + by left; exists (s1, om0), l0; firstorder.
+    + by left; exists (s1, om0), l0; strivial.
   - intros [Hem | Him].
     + by apply option_can_produce_valid.
     + by constructor; apply Him.
@@ -870,7 +871,7 @@ Proof.
   - intro Hps'. destruct Hps' as [om' Hs].
     inversion Hs; subst.
     + by left; exists (exist _ _ Hs0).
-    + by right; exists l0, (s, om), om'; firstorder.
+    + by right; exists l0, (s, om), om'; strivial.
   - intros [[[s His] Heq] | [l [[s om] [om' [[[_om Hps] [[_s Hpm] Hv]] Ht]]]]]; subst.
     + by exists None; apply valid_initial_state_message.
     + by exists om'; apply valid_generated_state_message with s _om _s om l.
@@ -898,7 +899,7 @@ Proof.
   destruct Hs as [om Hs].
   induction Hs.
   - by apply IHinit.
-  - by apply (IHgen s' l0 om om' s); firstorder.
+  - by apply (IHgen s' l0 om om' s); strivial.
 Qed.
 
 (** Valid message characterization. *)
@@ -913,7 +914,7 @@ Proof.
   - intros [s' Hpm'].
     inversion Hpm'; subst.
     + by left; exists (exist _ m' Hom).
-    + by right; exists l0, (s, om), s'; firstorder.
+    + by right; exists l0, (s, om), s'; strivial.
   - intros [[[s His] Heq] | [l [[s om] [s' [[[_om Hps] [[_s Hpm] Hv]] Ht]]]]]; subst.
     + by apply initial_message_is_valid.
     + by exists s'; apply valid_generated_state_message with s _om _s om l.
@@ -1630,7 +1631,7 @@ Proof.
     apply finite_valid_trace_from_to_singleton.
     apply finite_valid_trace_init_to_emit_valid_state_message in Htl1.
     apply finite_valid_trace_init_to_emit_valid_state_message in Htl2.
-    by firstorder.
+    by strivial.
 Qed.
 
 Lemma finite_valid_trace_init_to_add_emit
@@ -1680,7 +1681,7 @@ Proof.
     {
       apply finite_valid_trace_init_to_emit_valid_state_message in Htr1.
       apply finite_valid_trace_init_to_emit_valid_state_message in Htr2.
-      by firstorder.
+      by strivial.
     }
     apply finite_valid_trace_init_to_emit_output in Htr2 as Houtput.
     apply finite_valid_trace_init_to_emit_forget_emit in Htr1.
@@ -1957,7 +1958,7 @@ Proof.
   apply finite_valid_trace_from_to_last in Htrs as Hlast.
   rewrite <- Hlast in Htr.
   apply finite_valid_trace_from_to_forget_last in Htrs.
-  by firstorder using finite_valid_trace_from_app_iff.
+  by strivial using finite_valid_trace_from_app_iff.
 Qed.
 
 (**
@@ -2795,7 +2796,7 @@ Context
 Lemma ValidTransition_preloaded_iff :
   forall l s1 iom s2 oom,
     ValidTransition X l s1 iom s2 oom <-> ValidTransition R l s1 iom s2 oom.
-Proof. by firstorder. Qed.
+Proof. by sauto. Qed.
 
 Lemma ValidTransitionNext_preloaded_iff :
   forall s1 s2, ValidTransitionNext X s1 s2 <-> ValidTransitionNext R s1 s2.
@@ -2812,7 +2813,7 @@ Lemma input_valid_transition_forget_input :
   forall l s1 iom s2 oom,
     input_valid_transition X l (s1, iom) (s2, oom) ->
     ValidTransition X l s1 iom s2 oom.
-Proof. by firstorder. Qed.
+Proof. by hauto. Qed.
 
 End sec_valid_transition_props.
 

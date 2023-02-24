@@ -1,3 +1,4 @@
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import EquationsExtras.
@@ -353,6 +354,7 @@ Proof.
   by split; intros H; decompose [and or ex] H; subst; eauto.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 (**
   When a message belongs to the [sentMessages] of some state, then the state
   contains a corresponding observation which was sent. The converse also holds.
@@ -392,6 +394,7 @@ Proof.
   by destruct (decide (isSend ob)).
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 (**
   When a message belongs to the [receivedMessages] of some state, then the state
   contains a corresponding observation which was received. The converse also holds.
@@ -615,6 +618,7 @@ Proof.
   by apply rec_obs_fn_sizeState.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 #[export] Instance Message_FullMessageDependencies :
   FullMessageDependencies Message_dependencies Message_full_dependencies.
 Proof.

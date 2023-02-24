@@ -1,3 +1,4 @@
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import finite.
 From Coq Require Import FinFun.
@@ -884,7 +885,7 @@ Lemma nth_error_map
   (n : nat)
   : nth_error (List.map f l) n = option_map f (nth_error l n).
 Proof.
-  by revert n; induction l; intros [| n]; firstorder.
+  by revert n; induction l; intros [| n]; strivial.
 Qed.
 
 Lemma exists_finite
@@ -960,6 +961,7 @@ Proof.
   by destruct (f a); cbn; congruence.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma map_option_nth
   {A B : Type}
   (f : A -> option B)
@@ -1446,8 +1448,8 @@ Proof.
   induction 2; cbn.
   - apply PeanoNat.Nat.add_lt_le_mono; [done |].
     induction l; cbn; [done |].
-    by apply PeanoNat.Nat.add_le_mono; firstorder.
-  - by apply PeanoNat.Nat.add_le_lt_mono; firstorder.
+    by apply PeanoNat.Nat.add_le_mono; qauto.
+  - by apply PeanoNat.Nat.add_le_lt_mono; strivial.
 Qed.
 
 (**

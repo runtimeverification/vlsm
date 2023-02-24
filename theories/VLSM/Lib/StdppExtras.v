@@ -1,3 +1,4 @@
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
@@ -192,7 +193,7 @@ Proof.
   - by rewrite 2 filter_nil.
   - rewrite 2 filter_cons.
     setoid_rewrite elem_of_cons in H1.
-    by destruct (decide (P a)), (decide (Q a)); [rewrite IHl | ..]; firstorder.
+    by destruct (decide (P a)), (decide (Q a)); [rewrite IHl | ..]; qauto.
 Qed.
 
 Lemma ext_elem_of_filter {A} P Q
@@ -232,8 +233,8 @@ Proof.
   apply NoDup_cons in Hnda.
   setoid_rewrite elem_of_cons in Ha.
   destruct Hnda as [Ha' Hnd']; split.
-  - by apply NoDup_app; firstorder.
-  - by rewrite elem_of_app; firstorder.
+  - by apply NoDup_app; qauto.
+  - by rewrite elem_of_app; qauto.
 Qed.
 
 Lemma list_lookup_lt [A] (is : list A) :
@@ -513,6 +514,7 @@ Proof.
   by induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
 Qed.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma elem_of_map_option
   {A B : Type}
   (f : A -> option B)
@@ -598,7 +600,7 @@ Lemma map_option_subseteq
   (Hincl : l1 ⊆ l2)
   : map_option f l1 ⊆ map_option f l2.
 Proof.
-  by intros b; rewrite !elem_of_map_option; firstorder.
+  by intros b; rewrite !elem_of_map_option; strivial.
 Qed.
 
 Lemma elem_of_cat_option
@@ -626,7 +628,7 @@ Lemma map_option_incl
   (Hincl : incl l1 l2)
   : incl (map_option f l1) (map_option f l2).
 Proof.
-  by intros b; rewrite !in_map_option; firstorder.
+  by intros b; rewrite !in_map_option; strivial.
 Qed.
 
 Lemma list_max_elem_of_exists2

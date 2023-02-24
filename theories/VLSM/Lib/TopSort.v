@@ -1,3 +1,4 @@
+From Hammer Require Import Tactics.
 From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet StdppExtras.
@@ -384,6 +385,7 @@ Definition precedes_closed
   :=
   Forall (fun (b : A) => forall (a : A) (Hmj : precedes a b), a ∈ s) s.
 
+(* Replacing firstorder with sauto might cause it to get stuck *)
 Lemma precedes_closed_set_eq
   {A : Type}
   (precedes : relation A)

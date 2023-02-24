@@ -1,3 +1,4 @@
+From Hammer Require Import Tactics.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
@@ -132,7 +133,7 @@ Proof.
     split; [| done].
     rapply extend_right_finite_trace_from; [done |].
     apply finite_valid_trace_last_pstate in IHtr as Hs.
-    cut (option_valid_message_prop X iom); [by firstorder |].
+    cut (option_valid_message_prop X iom); [by hauto|].
     destruct iom as [m |]; [| by apply option_valid_message_None].
     destruct Hx as [Hv _].
     apply Henforced in Hv.
