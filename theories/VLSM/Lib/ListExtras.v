@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto. #[local] Tactic Notation "itauto" := itauto auto.
+From Cdcl Require Import Itauto.
 From stdpp Require Import finite.
 From Coq Require Import FinFun.
 From VLSM.Lib Require Import Preamble.
