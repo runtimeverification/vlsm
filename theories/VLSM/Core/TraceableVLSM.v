@@ -354,7 +354,7 @@ Definition choice_function : Type :=
 
   - if the set of indices is non-empty, then the returned index must belong to it
 
-  - if the component state coresponding to the returned index in not initial, then
+  - if the component state corresponding to the returned index in not initial, then
     the returned position must identify a transition leading to the given state
 
   - the choice does not depend on the particular proof for the composite ram-state
@@ -701,7 +701,7 @@ Qed.
 (**
   The property of a [choice_function] with respect to a predicate on composite
   states which states that for any chosen transition, if the predicate holds for
-  the source of the transition then it must also hold for its taget.
+  the source of the transition then it must also hold for its target.
 
   See [MinimalEquivocationTrace.minimal_equivocation_choice_monotone] for an
   example of such a function.

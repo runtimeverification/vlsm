@@ -146,7 +146,7 @@ Notation "s <+> ob" := (addObservation ob s) (left associativity, at level 50).
 
 (**
   The induction principle [addObservation_ind] considers a [State]
-  as built up using [addObservation] from an inital state.
+  as built up using [addObservation] from an initial state.
 *)
 Lemma addObservation_ind (P : State -> Prop)
   (Hempty : forall a, P (MkState [] a))
