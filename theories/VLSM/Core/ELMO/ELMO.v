@@ -1407,7 +1407,7 @@ Definition FreeELMO : VLSM Message :=
   free_composite_vlsm ELMOComponent.
 
 (**
-  To talk about reachabile composite states for the ELMOProtocol we also name
+  To talk about reachable composite states for the ELMOProtocol we also name
   the [pre_loaded_with_all_messages_vlsm] version of the [free_composition].
 *)
 

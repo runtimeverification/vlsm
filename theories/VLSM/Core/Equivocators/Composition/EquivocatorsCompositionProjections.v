@@ -37,7 +37,7 @@ Context {message : Type}
   are all valid in the destination of the transition this returns a
   set of updated descriptors for corresponding positions in the origin state
   of the transition, and if the transition was an in-place change to an
-  exisitng alternative it also returns a projected transition item in
+  existing alternative it also returns a projected transition item in
   the plain composition of [IM].
 *)
 Definition equivocators_transition_item_project
@@ -655,7 +655,7 @@ Proof.
         by simpl; rewrite Hpr_x_item.
 Qed.
 
-(** A corrollary of the above, reflecting a split in the projection to the original trace. *)
+(** A corollary of the above, reflecting a split in the projection to the original trace. *)
 Lemma equivocators_trace_project_app_inv
   (tr : list (composite_transition_item equivocator_IM))
   (ieqv_descriptors eqv_descriptors : equivocator_descriptors)
@@ -1106,7 +1106,7 @@ Proof.
 Qed.
 
 (**
-  A corrollary of [preloaded_equivocators_valid_trace_from_project] selecting
+  A corollary of [preloaded_equivocators_valid_trace_from_project] selecting
   only the [proper_equivocator_descriptors] property.
 *)
 Lemma preloaded_equivocators_valid_trace_project_proper_initial

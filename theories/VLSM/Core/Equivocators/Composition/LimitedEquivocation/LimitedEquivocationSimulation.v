@@ -160,7 +160,7 @@ Context
   .
 
 (**
-  Any valid state for the composition of reqular nodes under a limited
+  Any valid state for the composition of regular nodes under a limited
   message-equivocation constraint is the projection of a valid state of
   the composition of equivocators under a no message-equivocation and limited
   state-equivocation constraint.

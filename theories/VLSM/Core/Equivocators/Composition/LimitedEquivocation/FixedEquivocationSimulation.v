@@ -326,7 +326,7 @@ Qed.
 
   The main result, showing that fixed-set message-equivocation traces can be
   simulated by fixed-set state-equivocation traces is obtained by instantiating
-  Lemma [generalized_equivocators_finite_valid_trace_init_to_rev], discharing
+  Lemma [generalized_equivocators_finite_valid_trace_init_to_rev], discharging
   the most complex assumption of the lemma (about [replayable_message_prop])
   with Lemma [fixed_equivocation_has_replayable_message_prop].
 *)

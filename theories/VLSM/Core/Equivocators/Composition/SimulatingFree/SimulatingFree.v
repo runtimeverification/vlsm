@@ -251,7 +251,7 @@ Context {message : Type}
   Since [replayed_trace_from] was defined for a subset of the equivocators, we
   here define a specialized version of it when the set of all equivocators is used.
 
-  We then restate some of the lemmas concering [replayed_trace_from] for the new
+  We then restate some of the lemmas concerning [replayed_trace_from] for the new
   definition.
 *)
 Definition all_equivocating_replayed_trace_from

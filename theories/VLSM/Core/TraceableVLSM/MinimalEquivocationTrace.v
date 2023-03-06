@@ -578,7 +578,7 @@ Proof.
 Qed.
 
 (**
-  The main result of this section: the transition choosen by the
+  The main result of this section: the transition chosen by the
   [minimal_equivocation_choice] function does not hide existing equivocation.
 *)
 Lemma minimal_equivocation_choice_monotone :
