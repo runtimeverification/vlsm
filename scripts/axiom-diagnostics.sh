@@ -73,10 +73,10 @@ coqc $COQLIBS "$tmp/tmp.v" \
 `# We will do some post-processing.` \
 | \
 sed -r \
-`# Remove axiom types written inline.` \
--e 's/(.*) : .*/\1/' \
 `# Remove axiom types written multiline.` \
 -e '/^  .*/d' \
+`# Remove axiom types written inline.` \
+-e 's/([^:]*) : .*/\1/' \
 `# Remove compilation details.` \
 | \
 grep -vE '(^COQ)|(^make\[))' \
