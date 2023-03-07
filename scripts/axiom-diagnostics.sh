@@ -74,15 +74,20 @@ coqc $COQLIBS "$tmp/tmp.v" \
 | \
 sed -r \
 `# Remove axiom types written inline.` \
--e '/ : .*/d' \
+-e 's/(.*) : .*/\1/' \
 `# Remove axiom types written multiline.` \
 -e '/^  .*/d' \
 `# Remove compilation details.` \
 | \
- grep -vE '(^COQ)|(^make\[))' \
-`# Remove redundant lines and indent axioms listings ` \
+grep -vE '(^COQ)|(^make\[))' \
+`# Remove redundant lines and indent axioms listings.` \
 | \
-awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) {lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}'
+awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) {lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}' \
+`# Filter out axioms related to primitive integers.` \
+| \
+sed -r \
+-e '/PrimInt63/d' \
+-e '/Uint63/d'
 
 # Delete the temporary directory (unless user wants to keep it).
 if [ $keep_tmp == false ]
