@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto.
+From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble ListSetExtras.

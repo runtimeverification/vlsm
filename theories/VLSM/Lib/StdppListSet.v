@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto.
+From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 
 Section sec_fst_defs.

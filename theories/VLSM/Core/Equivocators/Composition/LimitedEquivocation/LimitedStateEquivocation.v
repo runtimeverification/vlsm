@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto.
+From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Reals Lra.
 From VLSM.Lib Require Import Preamble Measurable RealsExtras FinSetExtras.

@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto.
+From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet StdppExtras.
 

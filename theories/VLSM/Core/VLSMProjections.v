@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto.
+From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From Coq Require Import FunctionalExtensionality.
 From VLSM.Core Require Import VLSM.
