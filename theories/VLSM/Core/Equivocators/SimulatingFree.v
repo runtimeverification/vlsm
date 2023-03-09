@@ -4,9 +4,9 @@ From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition SubProjectionTraces.
 From VLSM.Core Require Import Equivocation Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.MessageProperties.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
-From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplayTraces.
+From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
+From VLSM.Core Require Import Equivocators.SimulatingFree.FullReplayTraces.
 
 (** * Equivocators simulating regular nodes
 

@@ -8,9 +8,9 @@ From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.LimitedMe
 From VLSM.Core Require Import FixedSetEquivocation MsgDepLimitedEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators.
 From VLSM.Core Require Import Equivocators.MessageProperties.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
-From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
+From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
+From VLSM.Core Require Import Equivocators.LimitedEquivocation.FixedEquivocation.
 
 (** * VLSM Limited Equivocation *)
 Definition composite_constraint
