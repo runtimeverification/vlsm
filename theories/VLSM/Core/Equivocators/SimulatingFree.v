@@ -6,7 +6,7 @@ From VLSM.Core Require Import Equivocation Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
-From VLSM.Core Require Import Equivocators.SimulatingFree.FullReplayTraces.
+From VLSM.Core Require Import Equivocators.FullReplayTraces.
 
 (** * Equivocators simulating regular nodes
 

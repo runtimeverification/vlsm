@@ -10,7 +10,7 @@ From VLSM.Core Require Import Equivocators.Equivocators.
 From VLSM.Core Require Import Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
-From VLSM.Core Require Import Equivocators.LimitedEquivocation.FixedEquivocation.
+From VLSM.Core Require Import Equivocators.FixedEquivocation.
 
 (** * VLSM Limited Equivocation *)
 Definition composite_constraint

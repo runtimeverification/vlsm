@@ -8,9 +8,9 @@ From VLSM.Core Require Import Equivocators.Equivocators Equivocators.Equivocator
 From VLSM.Core Require Import Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
-From VLSM.Core Require Import Equivocators.SimulatingFree.FullReplayTraces.
-From VLSM.Core Require Import Equivocators.LimitedEquivocation.FixedEquivocation.
-From VLSM.Core Require Import Equivocators.SimulatingFree.SimulatingFree.
+From VLSM.Core Require Import Equivocators.FullReplayTraces.
+From VLSM.Core Require Import Equivocators.FixedEquivocation.
+From VLSM.Core Require Import Equivocators.SimulatingFree.
 
 (** * VLSM Equivocators Simulating fixed-set equivocation composition
 
