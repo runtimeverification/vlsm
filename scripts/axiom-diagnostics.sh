@@ -77,9 +77,6 @@ sed -r \
 -e '/^  .*/d' \
 `# Remove axiom types written inline.` \
 -e 's/([^:]*) : .*/\1/' \
-`# Remove compilation details.` \
-| \
-grep -vE '(^COQ)|(^make\[))' \
 `# Remove redundant lines and indent axioms listings.` \
 | \
 awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) {lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}' \
