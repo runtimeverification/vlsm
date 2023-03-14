@@ -49,10 +49,12 @@ do
   # Replace definitions, lemmas etc. with Print Assumptions statements.
   # We also open a phony goal, so that we can use the idtac tactic
   # to print the name of the definition/lemma we are processing.
-  lemma_name='"\5"'
+  lemma_name='\5'
   module_name=$(basename $filepath .v)
+  full_name=$module_name.$lemma_name
+  full_name_in_quotes='"'$full_name'"'
   sed -r \
-  -e "s/\s*(Program)?\s*(Local|Global|#\[local\]|#\[global\])?\s*(Program)?\s*(Lemma|Theorem|Remark|Proposition|Corollary|Definition|Fixpoint|CoFixpoint|Inductive|Variant|CoInductive|Record|Class|Instance)\s+([_a-zA-Z0-9']+).*/Goal False. idtac $lemma_name. Abort. Print Assumptions $module_name.\5./" \
+  -e "s/\s*(Program)?\s*(Local|Global|#\[local\]|#\[global\])?\s*(Program)?\s*(Lemma|Theorem|Remark|Proposition|Corollary|Definition|Fixpoint|CoFixpoint|Inductive|Variant|CoInductive|Record|Class|Instance)\s+([_a-zA-Z0-9']+).*/Goal False. idtac $full_name_in_quotes. Abort. Print Assumptions $full_name./" \
   `# Filter out all attributes, including a trailing space.` \
   -e 's/\#\[[^]]*\] //' \
   `# Filter out all lines that are not about printing assumptions.` \
@@ -73,16 +75,18 @@ coqc $COQLIBS "$tmp/tmp.v" \
 `# We will do some post-processing.` \
 | \
 sed -r \
-`# Remove axiom types written inline.` \
--e '/ : .*/d' \
 `# Remove axiom types written multiline.` \
 -e '/^  .*/d' \
-`# Remove compilation details.` \
+`# Remove axiom types written inline.` \
+-e 's/([^:]*) : .*/\1/' \
+`# Remove redundant lines and indent axioms listings.` \
 | \
- grep -vE '(^COQ)|(^make\[))' \
-`# Remove redundant lines and indent axioms listings ` \
+awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) {lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}' \
+`# Filter out axioms related to primitive integers.` \
 | \
-awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) {lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}'
+sed -r \
+-e '/PrimInt63/d' \
+-e '/Uint63/d'
 
 # Delete the temporary directory (unless user wants to keep it).
 if [ $keep_tmp == false ]
