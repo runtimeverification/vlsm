@@ -1,4 +1,4 @@
-From Cdcl Require Import Itauto.
+From VLSM.Lib Require Import Itauto.
 From Coq Require Import Reals.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppExtras StdppListFinSet FinSetExtras.
