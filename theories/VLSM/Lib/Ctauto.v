@@ -1,9 +1,10 @@
 From Cdcl Require Export Itauto.
 
-(** * Constructive Itauto tactic *)
+(** * Classical Itauto tactic *)
 
 Ltac gen_conflicts tac :=
   intros; unfold not in *; unfold iff in *;
+  cdcl_nnpp; unfold not;
   (cdcl_conflicts tac).
 
 Tactic Notation "itauto" tactic(tac) :=

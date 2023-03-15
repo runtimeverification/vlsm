@@ -4,6 +4,7 @@
 -arg -w -arg -deprecated-tacopt-without-locality
 
 theories/VLSM/Lib/Itauto.v
+theories/VLSM/Lib/Ctauto.v
 theories/VLSM/Lib/SsrExport.v
 theories/VLSM/Lib/Preamble.v
 theories/VLSM/Lib/EquationsExtras.v
