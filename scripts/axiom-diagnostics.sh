@@ -53,6 +53,10 @@ do
   module_name=$(basename $filepath .v)
   full_name=$module_name.$lemma_name
   full_name_in_quotes='"'$full_name'"'
+  cat $filepath \
+  | \
+  awk 'BEGIN{ comment=0 } { if ($0 ~ /^ *\(\*.*\*\)$/) { next; } if ($0 ~ /^ *\(\*/) { comment = 1; next; } if ($0 ~ /\*\)$/) { comment = 0; next; } if (comment == 0) { print $0; } }' \
+  | \
   sed -r \
   -e "s/\s*(Program)?\s*(Local|Global|#\[local\]|#\[global\])?\s*(Program)?\s*(Lemma|Theorem|Remark|Proposition|Corollary|Definition|Fixpoint|CoFixpoint|Inductive|Variant|CoInductive|Record|Class|Instance)\s+([_a-zA-Z0-9']+).*/Goal False. idtac $full_name_in_quotes. Abort. Print Assumptions $full_name./" \
   `# Filter out all attributes, including a trailing space.` \
@@ -62,7 +66,6 @@ do
   `# Filter out some other problematic lines.` \
   -e '/andA/d' \
   -e '/\[/d' \
-  $filepath \
   `# And append the results to the temporary file.` \
   >> "$tmp/tmp"
 done
