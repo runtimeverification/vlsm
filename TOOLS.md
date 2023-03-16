@@ -98,3 +98,9 @@ To analyze comment and specification usage throughout the project (for all `*.v`
 
 This will output a table whose columns correspond (in this order) to: comment size, specification size, ratio between comments and specifications, ratio between specifications and comments, filename.
 
+The default separator is the tab character (`\t`). To change it use the `--separator` or `-s` flag followed by `tab` or `pipe`.
+For example, in order to separate columns by pipes:
+
+```shell
+./all-comment-ratio.v -s pipe
+```
