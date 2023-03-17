@@ -55,6 +55,7 @@ do
   full_name_in_quotes='"'$full_name'"'
   cat $filepath \
   | \
+  `# Filter out comments.` \
   awk 'BEGIN{ comment=0 } { if ($0 ~ /^ *\(\*.*\*\)$/) { next; } if ($0 ~ /^ *\(\*/) { comment = 1; next; } if ($0 ~ /\*\)$/) { comment = 0; next; } if (comment == 0) { print $0; } }' \
   | \
   sed -r \
