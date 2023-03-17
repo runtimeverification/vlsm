@@ -204,8 +204,6 @@ Proof.
     by intros [(-> & -> & m2 & Hrecv & Hadr & Hincomp) |]; econstructor.
 Qed.
 
-#[local] Existing Instance list_exist_dec.
-
 #[export]
 Instance local_equivocators_full_obs_dec : RelDecision local_equivocators_full_obs.
 Proof.
@@ -213,7 +211,11 @@ Proof.
   induction ol using addObservation'_rec.
   - by right; inversion 1.
   - apply (Decision_iff (iff_Symmetric _ _ (lefo_alt _ _ _))).
-    by typeclasses eauto.
+    apply Decision_or; [| done].
+    apply Decision_and; [done |].
+    apply Decision_and; [by typeclasses eauto |].
+    apply list_exist_dec.
+    by intro; typeclasses eauto.
 Defined.
 
 Definition local_equivocators_full (s : State) : Address -> Prop :=

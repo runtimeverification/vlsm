@@ -415,8 +415,6 @@ Class StrictlyComparable (X : Type) : Type :=
 }.
 #[global] Hint Mode StrictlyComparable ! : typeclass_instances.
 
-#[export] Existing Instance compare_strictorder.
-
 Definition comparable `(R : relation A) : relation A :=
   fun x y => exists c, CompSpec (=) R x y c.
 
