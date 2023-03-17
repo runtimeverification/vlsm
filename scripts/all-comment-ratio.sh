@@ -16,9 +16,21 @@ eval set -- "$VALID_ARGS"
 while [ : ]; do
   case "$1" in
     -s | --separator)
-        echo "Processing 'gamma' option. Input argument is '$2'"
-        echo $2
         if [[ "$2" == "tab" ]]; then SEP="\t"; else SEP="|"; fi
+        case "$2" in
+           tab)
+              SEP="\t"
+              ;;
+           pipe)
+              SEP="|"
+              ;;
+           csv)
+              SEP=","
+              ;;
+           *)
+              SEP="|"
+              ;;
+        esac
         shift 2
         ;;
     --) shift; 
@@ -27,9 +39,21 @@ while [ : ]; do
   esac
 done
 
+END=""
+HEADERSEP="$SEP"
+SEDSTRING=""
+
+if [[ $SEP == "\t" || $SEP == "|" ]]; then
+   END="|"
+   SEDSTRING='s/\t/\t | /g; s/^/| /g; s/$/ |/g'
+   HEADERSEP="|"
+fi
+echo "sep=$SEP"
+
+
 BASE=$(dirname $0)
-echo "| Comments size | Spec size | Comments-Spec Ratio | Spec-Comments Ratio | Filename |"
-echo "|:--------------|:----------|:--------------------|:--------------------|:---------|"
-find . -iname "*.v" -exec $BASE/comment-ratio.sh $SEP "{}" \; | sort -n -k3 | sed 's/\t/\t | /g; s/^/| /g; s/$/ |/g'
+echo "$END Comments size $HEADERSEP Spec size $HEADERSEP Comments-Spec Ratio $HEADERSEP Spec-Comments Ratio $HEADERSEP Filename $END"
+[[ $SEP == "\t" || $SEP == "|" ]] && echo "|:--------------|:----------|:--------------------|:--------------------|:---------|"
+find . -iname "*.v" -exec $BASE/comment-ratio.sh $SEP "{}" \; | sort -n -k3 | sed "$SEDSTRING"
 
 
