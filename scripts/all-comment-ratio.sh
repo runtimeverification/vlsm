@@ -16,7 +16,6 @@ eval set -- "$VALID_ARGS"
 while [ : ]; do
   case "$1" in
     -s | --separator)
-        if [[ "$2" == "tab" ]]; then SEP="\t"; else SEP="|"; fi
         case "$2" in
            tab)
               SEP="\t"
@@ -49,7 +48,6 @@ if [[ $SEP == "\t" || $SEP == "|" ]]; then
    HEADERSEP="|"
 fi
 echo "sep=$SEP"
-
 
 BASE=$(dirname $0)
 echo "$END Comments size $HEADERSEP Spec size $HEADERSEP Comments-Spec Ratio $HEADERSEP Spec-Comments Ratio $HEADERSEP Filename $END"
