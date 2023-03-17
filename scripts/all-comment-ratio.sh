@@ -47,7 +47,6 @@ if [[ $SEP == "\t" || $SEP == "|" ]]; then
    SEDSTRING='s/\t/\t | /g; s/^/| /g; s/$/ |/g'
    HEADERSEP="|"
 fi
-echo "sep=$SEP"
 
 BASE=$(dirname $0)
 echo "$END Comments size $HEADERSEP Spec size $HEADERSEP Comments-Spec Ratio $HEADERSEP Spec-Comments Ratio $HEADERSEP Filename $END"
