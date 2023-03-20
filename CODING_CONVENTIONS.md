@@ -162,15 +162,29 @@ Record simp_lv_event : Type := SimpObs
 
 Locality annotations should be put on the same line as the command they annotate. This makes it easier to process them with line-based tools, like `grep` or `sed`.
 
-Good:
+Recommended:
 ```coq
 #[export] Instance compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
 ```
 
-Bad:
+Not recommended:
 ```coq
 #[export]
 Instance compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
+```
+
+In case you need to split the line because it's too long, keep the annotation on the same line as the command and the name. When splitting the above example:
+
+Recommended:
+```coq
+#[export] Instance compare_eq_dec
+  {A} `{CompareStrictOrder A} : EqDecision A.
+```
+
+Not recommended:
+```coq
+#[export] Instance
+  compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
 ```
 
 ## Coqdoc
