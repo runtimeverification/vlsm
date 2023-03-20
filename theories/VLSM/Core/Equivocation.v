@@ -145,9 +145,9 @@ Proof.
       exists ((prefix, item), suffix).
       by rewrite elem_of_list_In, in_one_element_decompositions_iff.
   - apply Exists_dec. intros ((prefix, item), suffix).
-    apply Decision_and.
+    apply and_dec.
     + by apply option_eq_dec.
-    + apply Decision_not. apply Exists_dec. intros pitem.
+    + apply not_dec. apply Exists_dec. intros pitem.
       by apply option_eq_dec.
 Qed.
 
@@ -1278,7 +1278,7 @@ Lemma has_been_directly_observed_from_sent_received_dec
   : RelDecision has_been_directly_observed_from_sent_received.
 Proof.
   intros s m.
-  apply Decision_or.
+  apply or_dec.
   - by apply has_been_sent_dec.
   - by apply has_been_received_dec.
 Qed.
