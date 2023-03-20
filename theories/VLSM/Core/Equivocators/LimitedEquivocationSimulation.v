@@ -9,12 +9,12 @@ From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation.
 From VLSM.Core Require Import Equivocation.WitnessedEquivocation.
 From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation.
 From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
-From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.LimitedStateEquivocation.
+From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
+From VLSM.Core Require Import Equivocators.LimitedStateEquivocation.
 From VLSM.Core Require Import
-  Equivocators.Composition.LimitedEquivocation.FixedEquivocationSimulation.
-From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
+  Equivocators.FixedEquivocationSimulation.
+From VLSM.Core Require Import Equivocators.FixedEquivocation.
 
 (** * VLSM Equivocators Simulating limited message equivocation traces
 
