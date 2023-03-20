@@ -211,11 +211,7 @@ Proof.
   induction ol using addObservation'_rec.
   - by right; inversion 1.
   - apply (Decision_iff (iff_Symmetric _ _ (lefo_alt _ _ _))).
-    apply Decision_or; [| done].
-    apply Decision_and; [done |].
-    apply Decision_and; [by typeclasses eauto |].
-    apply list_exist_dec.
-    by intro; typeclasses eauto.
+    by pose proof @list_exist_dec; typeclasses eauto.
 Defined.
 
 Definition local_equivocators_full (s : State) : Address -> Prop :=
