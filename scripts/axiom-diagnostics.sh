@@ -1,7 +1,14 @@
 #!/bin/sh
 
-# If argument $1 is not present, print usage info and exit.
-if test -z "$1"
+GROUPBYFLAG=0
+
+if test -n "$1"
+then
+   GROUPBYFLAG=$1
+fi
+
+# If argument $2 is not present, print usage info and exit.
+if test -z "$2"
 then
   echo "Usage:"
   echo "make axioms"
@@ -10,19 +17,19 @@ then
   exit
 fi
 
-# Nice name for argument $1.
-COQLIBS=$1
+# Nice name for argument $2.
+COQLIBS=$2
 
-# If argument $2 is not present, set it to current directory.
-if test -z $2
+# If argument $3 is not present, set it to current directory.
+if test -z $3
 then
   dir=.
 else
-  dir=$2
+  dir=$3
 fi
 
-# If argument $3 is set to true, then keep it. Otherwise set it to false.
-if [[ $3 ]] && [ $3 == true ]
+# If argument $4 is set to true, then keep it. Otherwise set it to false.
+if [[ $4 ]] && [ $4 == true ]
 then
   keep_tmp=true
 else
@@ -74,23 +81,44 @@ done
 # Add the .v extension to the temporary file so that coqc can process it.
 mv "$tmp/tmp" "$tmp/tmp.v"
 
-# Execute the temporary file - this prints assumption info about all definitions and lemmas to stdin.
-coqc $COQLIBS "$tmp/tmp.v" \
-`# We will do some post-processing.` \
-| \
-sed -r \
-`# Remove axiom types written multiline.` \
--e '/^  .*/d' \
-`# Remove axiom types written inline.` \
--e 's/([^:]*) : .*/\1/' \
-`# Remove redundant lines and indent axioms listings.` \
-| \
-awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) {lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}' \
-`# Filter out axioms related to primitive integers.` \
-| \
-sed -r \
--e '/PrimInt63/d' \
--e '/Uint63/d'
+if [[ $GROUPBYFLAG == "true" ]]; then
+   # Execute the temporary file - this prints assumption info about all definitions and lemmas to stdin.
+   coqc $COQLIBS "$tmp/tmp.v" \
+   `# We will do some post-processing.` \
+   | \
+   sed -r \
+   `# Remove axiom types written multiline.` \
+   -e '/^  .*/d' \
+   `# Remove axiom types written inline.` \
+   -e 's/([^:]*) : .*/\1/' \
+   `# Remove redundant lines and indent axioms listings.` \
+   | \
+   awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) {lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}' \
+   `# Filter out axioms related to primitive integers.` \
+   | \
+   sed -r \
+   -e '/PrimInt63/d' \
+   -e '/Uint63/d' \
+   `# If the user passed GROUPBYMOD=true then group the listings by module name.` \
+   | \
+   sed 's/\t/|/' | sed -E '/^\|/!s/()\..*$//' \
+   | \
+   awk 'BEGIN {lastModule=""} {if ($0 ~ /^\|/) { data[lastModule][$0] = 1 } else { lastModule=$0 }} END {for (key in data) { print key; for (axiom in data[key]){ print "\t"axiom; } print "\n"; }}' | sed -E 's/\|//'
+
+else
+   coqc $COQLIBS "$tmp/tmp.v" \
+   | \
+   sed -r \
+   -e '/^  .*/d' \
+   -e 's/([^:]*) : .*/\1/' \
+   | \
+   awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) {lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}' \
+   | \
+   sed -r \
+   -e '/PrimInt63/d' \
+   -e '/Uint63/d'
+fi
+
 
 # Delete the temporary directory (unless user wants to keep it).
 if [ $keep_tmp == false ]

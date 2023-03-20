@@ -30,7 +30,7 @@ coqdoc: $(DOCVOFILES) $(DOCVFILES) $(CSSFILES) $(JSFILES) $(HTMLFILES)
 .PHONY: coqdoc
 
 axioms: $(DOCVOFILES)
-	@scripts/axiom-diagnostics.sh "${COQLIBS}" "${path}" "${keep_tmp}"
+	@scripts/axiom-diagnostics.sh "${GROUPBYMOD}" "${COQLIBS}" "${path}" "${keep_tmp}"
 .PHONY: axioms
 
 RATIOS.md: $(DOCVFILES)
