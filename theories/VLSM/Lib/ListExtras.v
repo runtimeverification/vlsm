@@ -133,7 +133,7 @@ Lemma Exists_first
   {A : Type}
   (l : list A)
   (P : A -> Prop)
-  (Pdec : forall a, Decision (P a))
+  (Pdec : forall a : A, Decision (P a))
   (Hsomething : Exists P l)
   : exists (prefix : list A)
          (suffix : list A)
@@ -141,18 +141,15 @@ Lemma Exists_first
          P first /\
          l = prefix ++ [first] ++ suffix /\
          ~ Exists P prefix.
-
 Proof.
-  induction l; [by inversion Hsomething |].
-  destruct (decide (P a)).
-  - exists nil, l, a.
+  induction l as [| h t]; [by inversion Hsomething |].
+  destruct (decide (P h)).
+  - exists [], t, h.
     rewrite Exists_nil.
     by itauto.
-  - apply Exists_cons in Hsomething.
-    destruct Hsomething; [by itauto |].
-    specialize (IHl H); clear H.
-    destruct IHl as [prefix [suffix [first [Hf [-> Hnone_before]]]]].
-    exists (a :: prefix), suffix, first.
+  - apply Exists_cons in Hsomething as []; [done |].
+    destruct (IHt H) as (prefix & suffix & first & p & -> & Hnex).
+    exists (h :: prefix), suffix, first.
     rewrite Exists_cons.
     by itauto.
 Qed.
@@ -1070,31 +1067,6 @@ Proof.
     apply IHl1.
     intro n.
     by apply (Hnth (S n)).
-Qed.
-
-(* TODO remove (we have Exists_first) *)
-Lemma exists_first
-  {A : Type}
-  (l : list A)
-  (P : A -> Prop)
-  (Pdec : forall a : A, {P a } + {~ P a})
-  (Hsomething : Exists P l) :
-  exists (prefix : list A)
-         (suffix : list A)
-         (first : A),
-         (P first) /\
-         l = prefix ++ [first] ++ suffix /\
-         ~ Exists P prefix.
-Proof.
-  induction l.
-  - by inversion Hsomething.
-  - destruct (Pdec a).
-    + by exists [], l, a; rewrite Exists_nil; itauto.
-    + assert (Hl : Exists P l) by (inversion Hsomething; subst; done).
-      specialize (IHl Hl).
-      destruct IHl as [prefix [suffix [first [Hfirst [Heq Hprefix]]]]].
-      exists (a :: prefix), suffix, first. split_and!; subst; [done | done |].
-      by inversion 1; subst.
 Qed.
 
 Lemma in_fast
