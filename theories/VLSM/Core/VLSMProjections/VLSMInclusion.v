@@ -22,6 +22,7 @@ Definition VLSM_incl_part
   :=
   forall t : Trace,
     valid_trace_prop X t -> valid_trace_prop Y t.
+
 #[local] Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
 
 Lemma VLSM_incl_refl
