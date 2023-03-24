@@ -1,6 +1,5 @@
 #!/bin/sh
-#| Paper           | Coq                              |
-#|:----------------|:---------------------------------|
+
 BASE=$(dirname $0)
 echo "| Comments size | Spec size | Comments-Spec Ratio | Spec-Comments Ratio | Filename |"
 echo "|:--------------|:----------|:--------------------|:--------------------|:---------|"
