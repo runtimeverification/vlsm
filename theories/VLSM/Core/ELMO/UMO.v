@@ -103,8 +103,7 @@ Proof.
   by inversion 1; destruct s; cbn in *; subst.
 Qed.
 
-#[export]
-Instance HasBeenSentCapability_UMOComponent
+#[export] Instance HasBeenSentCapability_UMOComponent
   (i : Address) : HasBeenSentCapability (UMOComponent i).
 Proof.
   apply Build_HasBeenSentCapability with (fun s m => m ∈ sentMessages s)
@@ -120,8 +119,7 @@ Proof.
       by firstorder congruence.
 Defined.
 
-#[export]
-Instance HasBeenReceivedCapability_UMOComponent
+#[export] Instance HasBeenReceivedCapability_UMOComponent
   (i : Address) : HasBeenReceivedCapability (UMOComponent i).
 Proof.
   eapply Build_HasBeenReceivedCapability with (fun s m => m ∈ receivedMessages s)
@@ -136,8 +134,7 @@ Proof.
     + by rewrite decide_False; cbn; firstorder congruence.
 Defined.
 
-#[export]
-Instance HasBeenDirectlyObservedCapability_UMOComponent
+#[export] Instance HasBeenDirectlyObservedCapability_UMOComponent
   (i : Address) : HasBeenDirectlyObservedCapability (UMOComponent i) :=
     HasBeenDirectlyObservedCapability_from_sent_received (UMOComponent i).
 
@@ -741,8 +738,7 @@ Record state_suffix (s1 s2 : State) : Prop :=
   obs_prefix : strict suffix (obs s1) (obs s2);
 }.
 
-#[export]
-Instance state_suffix_dec : RelDecision state_suffix :=
+#[export] Instance state_suffix_dec : RelDecision state_suffix :=
   fun s1 s2 =>
     match decide (adr s1 = adr s2) with
     | left addr_eq =>
@@ -1399,12 +1395,10 @@ Definition incomparable (m1 m2 : Message) : Prop :=
 
 End sec_UMOComponent_lemmas.
 
-#[export]
-Instance sent_comparable_sym : Symmetric sent_comparable.
+#[export] Instance sent_comparable_sym : Symmetric sent_comparable.
 Proof. by intros x y []; constructor. Defined.
 
-#[export]
-Instance sent_comparable_dec : RelDecision sent_comparable.
+#[export] Instance sent_comparable_dec : RelDecision sent_comparable.
 Proof.
   intros m1 m2.
   destruct (decide (adr (state m1) = adr (state m2)));
@@ -1418,8 +1412,7 @@ Proof.
   by right; destruct 1; firstorder.
 Defined.
 
-#[export]
-Instance incomparable_sym : Symmetric incomparable.
+#[export] Instance incomparable_sym : Symmetric incomparable.
 Proof. by intros x y []; constructor. Defined.
 
 Section sec_UMOProtocol.

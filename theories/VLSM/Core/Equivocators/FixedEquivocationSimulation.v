@@ -6,11 +6,11 @@ From VLSM.Core Require Import Equivocation EquivocationProjections.
 From VLSM.Core Require Import Equivocation.FixedSetEquivocation Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
 From VLSM.Core Require Import Equivocators.MessageProperties.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsCompositionProjections.
-From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.FullReplayTraces.
-From VLSM.Core Require Import Equivocators.Composition.LimitedEquivocation.FixedEquivocation.
-From VLSM.Core Require Import Equivocators.Composition.SimulatingFree.SimulatingFree.
+From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
+From VLSM.Core Require Import Equivocators.FullReplayTraces.
+From VLSM.Core Require Import Equivocators.FixedEquivocation.
+From VLSM.Core Require Import Equivocators.SimulatingFree.
 
 (** * VLSM Equivocators Simulating fixed-set equivocation composition
 
@@ -176,9 +176,8 @@ Proof.
     apply elem_of_list_lookup.
     rewrite StdppExtras.last_last_error in Hlast.
     replace (Some _) with (last im_etr).
-    clear. (* TODO: replace with stdpp list.last_lookup once it becomes available *)
     exists (pred (length im_etr)).
-    by induction im_etr as [| ?[]].
+    by rewrite list.last_lookup.
   - apply last_error_destination_last.
     by rewrite Hlast; simpl; f_equal.
 Qed.

@@ -23,6 +23,7 @@ Definition VLSM_eq_part
   :=
   forall t : Trace,
     valid_trace_prop X t <-> valid_trace_prop Y t .
+
 #[local] Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
 
 Lemma VLSM_eq_incl_l

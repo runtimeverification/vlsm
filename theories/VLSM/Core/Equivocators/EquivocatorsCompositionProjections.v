@@ -6,7 +6,7 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces 
 From VLSM.Core Require Import SubProjectionTraces Equivocation.
 From VLSM.Core Require Import Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
-From VLSM.Core Require Import Equivocators.Composition.EquivocatorsComposition.
+From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.MessageProperties.
 
 (** * VLSM Equivocator Composition Projections *)

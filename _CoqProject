@@ -59,23 +59,23 @@ theories/VLSM/Core/Equivocation/WitnessedEquivocation.v
 theories/VLSM/Core/Equivocation/FullNode.v
 theories/VLSM/Core/Equivocation/LimitedMessageEquivocation.v
 theories/VLSM/Core/Equivocation/MsgDepLimitedEquivocation.v
+theories/VLSM/Core/Equivocation/MinimalEquivocationTrace.v
 
 theories/VLSM/Core/Equivocators/Equivocators.v
 theories/VLSM/Core/Equivocators/EquivocatorsProjections.v
 theories/VLSM/Core/Equivocators/MessageProperties.v
 theories/VLSM/Core/Equivocators/EquivocatorReplay.v
-theories/VLSM/Core/Equivocators/Composition/EquivocatorsComposition.v
-theories/VLSM/Core/Equivocators/Composition/EquivocatorsCompositionProjections.v
-theories/VLSM/Core/Equivocators/Composition/SimulatingFree/FullReplayTraces.v
-theories/VLSM/Core/Equivocators/Composition/SimulatingFree/SimulatingFree.v
-theories/VLSM/Core/Equivocators/Composition/LimitedEquivocation/FixedEquivocation.v
-theories/VLSM/Core/Equivocators/Composition/LimitedEquivocation/FixedEquivocationSimulation.v
-theories/VLSM/Core/Equivocators/Composition/LimitedEquivocation/LimitedStateEquivocation.v
-theories/VLSM/Core/Equivocators/Composition/LimitedEquivocation/LimitedEquivocationSimulation.v
+theories/VLSM/Core/Equivocators/EquivocatorsComposition.v
+theories/VLSM/Core/Equivocators/EquivocatorsCompositionProjections.v
+theories/VLSM/Core/Equivocators/FullReplayTraces.v
+theories/VLSM/Core/Equivocators/SimulatingFree.v
+theories/VLSM/Core/Equivocators/FixedEquivocation.v
+theories/VLSM/Core/Equivocators/FixedEquivocationSimulation.v
+theories/VLSM/Core/Equivocators/LimitedStateEquivocation.v
+theories/VLSM/Core/Equivocators/LimitedEquivocationSimulation.v
 
 theories/VLSM/Core/ByzantineTraces/FixedSetByzantineTraces.v
 theories/VLSM/Core/ByzantineTraces/LimitedByzantineTraces.v
-theories/VLSM/Core/TraceableVLSM/MinimalEquivocationTrace.v
 
 theories/VLSM/Core/ELMO/BaseELMO.v
 theories/VLSM/Core/ELMO/UMO.v
