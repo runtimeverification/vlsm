@@ -307,7 +307,7 @@ Context
   `{RelDecision _ _ is_equivocating_tracewise_no_has_been_sent}
   .
 
-#[local] Program Instance equivocation_dec_tracewise
+#[export] Program Instance equivocation_dec_tracewise
   : BasicEquivocation (composite_state IM) validator Cv threshold :=
   {
     state_validators := fun _ => list_to_set (enum validator);
