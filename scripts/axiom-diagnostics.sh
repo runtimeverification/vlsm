@@ -85,7 +85,7 @@ sed -r \
 -e 's/([^:]*) : .*/\1/' \
 `# Remove redundant lines and indent axioms listings.` \
 | \
-awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) {lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}' \
+awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global context/) { print "\n"lastLine; lastLine=""; next; } if ($0 ~ /Axioms:/) { print "\n"lastLine; lastLine="" } else { print "\t"lastLine; lastLine=$0}}' \
 `# Filter out axioms related to primitive integers.` \
 | \
 sed -r \
