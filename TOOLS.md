@@ -87,3 +87,21 @@ For example, if you want to limit the number of consecutive newlines to 1, run:
 ```shell
 python scripts/strip-newlines.py 2
 ```
+
+## Analyzing commments and specifications
+
+To analyze comment and specification usage throughout the project (for all `*.v` files), run:
+
+```shell
+./all-comment-ratio.sh
+```
+
+This will output a table whose columns correspond (in this order) to: comment size, specification size, ratio between comments and specifications, ratio between specifications and comments, filename.
+
+The default separator is the tab character (`\t`). To change it use the `--separator` or `-s` flag followed by `tab`, `pipe` (will use the `|` character) or `csv` (will use commas).
+For example, in order to separate columns by commas:
+
+```shell
+./all-comment-ratio.sh -s csv
+```
+
