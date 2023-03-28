@@ -51,8 +51,6 @@ Inductive ne_list_equiv `{Equiv A} : Equiv (ne_list A) :=
 | ne_one_equiv x y : x ≡ y -> nel_singl x ≡ nel_singl y
 | ne_cons_equiv x y l k : x ≡ y -> l ≡ k -> x ::: l ≡ y ::: k.
 
-#[export] Existing Instance ne_list_equiv.
-
 Definition ne_list_to_list {A} (nel : ne_list A) : list A :=
   ne_list_foldr cons [] nel.
 
