@@ -19,10 +19,8 @@ Context
 
 Definition VLSM_eq_part
   (MX MY : VLSMMachine vtype)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
-  :=
-  forall t : Trace,
-    valid_trace_prop X t <-> valid_trace_prop Y t .
+  (X := mk_vlsm MX) (Y := mk_vlsm MY) : Prop :=
+    VLSM_incl X Y /\ VLSM_incl Y X.
 
 #[local] Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
 
@@ -298,8 +296,6 @@ Qed.
 Lemma vlsm_is_pre_loaded_with_False
   : VLSM_eq X (pre_loaded_vlsm X (fun m => False)).
 Proof.
-  destruct X as (T, M). intro Hpp.
-  apply VLSM_eq_incl_iff.
   by cbn; split; apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
