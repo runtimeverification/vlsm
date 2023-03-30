@@ -706,11 +706,11 @@ Lemma free_valid_preloaded_lifts_can_be_emitted
 Proof.
   intros.
   eapply VLSM_incl_can_emit.
-  - by eapply VLSM_eq_proj2, (vlsm_is_pre_loaded_with_False free_composite_vlsm).
+  - by eapply (vlsm_is_pre_loaded_with_False free_composite_vlsm).
   - eapply valid_preloaded_lifts_can_be_emitted; [| done].
     intros dm Hdm.
     eapply VLSM_incl_valid_message.
-    + by apply VLSM_eq_proj1, (vlsm_is_pre_loaded_with_False free_composite_vlsm).
+    + by apply (vlsm_is_pre_loaded_with_False free_composite_vlsm).
     + by cbv; itauto.
     + by apply Hdeps.
 Qed.

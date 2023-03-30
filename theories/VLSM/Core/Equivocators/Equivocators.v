@@ -1044,11 +1044,11 @@ Lemma equivocator_state_project_valid_message
 Proof.
   destruct om as [m |]; [| by apply option_valid_message_None].
   specialize (vlsm_is_pre_loaded_with_False_initial_message equivocator_vlsm) as Hinit.
-  apply (VLSM_incl_valid_message (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm)))
+  apply (VLSM_incl_valid_message (proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm)))
     in Hom; [| done].
   apply preloaded_with_equivocator_state_project_valid_message in Hom.
   specialize (vlsm_is_pre_loaded_with_False_initial_message_rev X) as Hinit_rev.
-  by apply (VLSM_incl_valid_message (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
+  by apply (VLSM_incl_valid_message (proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
   ; destruct X.
 Qed.
 
