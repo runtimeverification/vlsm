@@ -374,7 +374,6 @@ Qed.
 Lemma unlock_finite_trace_last s tr :
   finite_trace_last s tr = List.last (List.map destination tr) s.
 Proof. done. Qed.
-Opaque finite_trace_last.
 
 End sec_trace_lemmas.
 
@@ -972,8 +971,6 @@ Definition finite_valid_trace_singleton :
 *)
 Definition finite_valid_trace (s : state) (ls : list transition_item) : Prop :=
   finite_valid_trace_from s ls /\ initial_state_prop s.
-
-Opaque finite_valid_trace.
 
 (**
   In the remainder of the section we provide various results allowing us to
