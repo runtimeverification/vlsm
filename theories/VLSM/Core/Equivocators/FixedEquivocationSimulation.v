@@ -261,7 +261,7 @@ Proof.
       apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
       apply (VLSM_eq_valid_state HeqX) in HtrX.
       intros m Hsent.
-      apply (VLSM_incl_valid_message (VLSM_eq_proj1 HeqXE)); [by left |].
+      apply (VLSM_incl_valid_message (proj1 HeqXE)); [by left |].
       by apply (fixed_equivocating_messages_sent_by_non_equivocating_are_valid eqv_state_s).
     }
     specialize (Hreplay eqv_state_s).

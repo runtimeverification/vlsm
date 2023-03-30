@@ -515,7 +515,7 @@ Qed.
 Definition pre_loaded_with_all_messages_validator_component_proj_incl
   (Hvalidator : component_projection_validator_prop)
   : VLSM_incl (pre_loaded_with_all_messages_vlsm (IM j)) Xj :=
-  VLSM_eq_proj1 (pre_loaded_with_all_messages_validator_component_proj_eq Hvalidator).
+  proj1 (pre_loaded_with_all_messages_validator_component_proj_eq Hvalidator).
 
 End sec_fixed_projection.
 

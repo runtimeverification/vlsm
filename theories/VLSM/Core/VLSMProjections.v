@@ -241,7 +241,7 @@ Lemma VLSM_projection_eq_trans
   (ProjXY : VLSM_projection X Y project_labelXY project_stateXY)
   (ProjYZ : VLSM_eq Y Z)
   : VLSM_projection X Z project_labelXY project_stateXY.
-Proof. by apply VLSM_projection_incl_trans; [| apply VLSM_eq_proj1]. Qed.
+Proof. by apply VLSM_projection_incl_trans; [| apply ProjYZ]. Qed.
 
 Lemma VLSM_embedding_eq_trans
   {message}
@@ -255,7 +255,7 @@ Lemma VLSM_embedding_eq_trans
   (ProjXY : VLSM_embedding X Y project_labelXY project_stateXY)
   (ProjYZ : VLSM_eq Y Z)
   : VLSM_embedding X Z project_labelXY project_stateXY.
-Proof. by apply VLSM_embedding_incl_trans; [| apply VLSM_eq_proj1]. Qed.
+Proof. by apply VLSM_embedding_incl_trans; [| apply ProjYZ]. Qed.
 
 Lemma VLSM_eq_projection_trans
   {message}
@@ -269,7 +269,7 @@ Lemma VLSM_eq_projection_trans
   (project_stateYZ : vstate Y -> vstate Z)
   (ProjYZ : VLSM_projection Y Z project_labelYZ project_stateYZ)
   : VLSM_projection X Z project_labelYZ project_stateYZ.
-Proof. by apply VLSM_incl_projection_trans; [apply VLSM_eq_proj1 |]. Qed.
+Proof. by apply VLSM_incl_projection_trans; [apply ProjXY |]. Qed.
 
 Lemma VLSM_eq_embedding_trans
   {message}
@@ -283,6 +283,6 @@ Lemma VLSM_eq_embedding_trans
   (project_stateYZ : vstate Y -> vstate Z)
   (ProjYZ : VLSM_embedding Y Z project_labelYZ project_stateYZ)
   : VLSM_embedding X Z project_labelYZ project_stateYZ.
-Proof. by apply VLSM_incl_embedding_trans; [apply VLSM_eq_proj1 |]. Qed.
+Proof. by apply VLSM_incl_embedding_trans; [apply ProjXY |]. Qed.
 
 End sec_transitivity_props.

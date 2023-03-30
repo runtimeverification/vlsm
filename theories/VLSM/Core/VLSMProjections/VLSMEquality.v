@@ -72,24 +72,12 @@ Context
 
 (** VLSM equality specialized to finite trace. *)
 
-Lemma VLSM_eq_proj1 : VLSM_incl X Y.
-Proof.
-  by apply Hincl.
-Qed.
-
-Lemma VLSM_eq_proj2 : VLSM_incl Y X.
-Proof.
-  by apply Hincl.
-Qed.
-
 Lemma VLSM_eq_finite_valid_trace
   (s : vstate X)
   (tr : list (vtransition_item X))
   : finite_valid_trace X s tr <-> finite_valid_trace Y s tr.
 Proof.
-  split.
-  - by apply (VLSM_incl_finite_valid_trace VLSM_eq_proj1).
-  - by apply (VLSM_incl_finite_valid_trace VLSM_eq_proj2).
+  by split; apply VLSM_incl_finite_valid_trace, Hincl.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace_init_to
@@ -98,27 +86,21 @@ Lemma VLSM_eq_finite_valid_trace_init_to
   : finite_valid_trace_init_to X s f tr <->
     finite_valid_trace_init_to Y s f tr.
 Proof.
-  split.
-  - by apply (VLSM_incl_finite_valid_trace_init_to VLSM_eq_proj1).
-  - by apply (VLSM_incl_finite_valid_trace_init_to VLSM_eq_proj2).
+  by split; apply VLSM_incl_finite_valid_trace_init_to, Hincl.
 Qed.
 
 Lemma VLSM_eq_valid_state
   (s : vstate X)
   : valid_state_prop X s <-> valid_state_prop Y s.
 Proof.
-  split.
-  - by apply (VLSM_incl_valid_state VLSM_eq_proj1).
-  - by apply (VLSM_incl_valid_state VLSM_eq_proj2).
+  by split; apply VLSM_incl_valid_state, Hincl.
 Qed.
 
 Lemma VLSM_eq_initial_state
   (is : vstate X)
   : vinitial_state_prop X is <-> vinitial_state_prop Y is.
 Proof.
-  split.
-  - by apply (VLSM_incl_initial_state VLSM_eq_proj1).
-  - by apply (VLSM_incl_initial_state VLSM_eq_proj2).
+  by split; apply VLSM_incl_initial_state, Hincl.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace_from
@@ -127,9 +109,7 @@ Lemma VLSM_eq_finite_valid_trace_from
   : finite_valid_trace_from X s tr <->
     finite_valid_trace_from Y s tr.
 Proof.
-  split.
-  - by apply (VLSM_incl_finite_valid_trace_from VLSM_eq_proj1).
-  - by apply (VLSM_incl_finite_valid_trace_from VLSM_eq_proj2).
+  by split; apply VLSM_incl_finite_valid_trace_from, Hincl.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace_from_to
@@ -137,18 +117,14 @@ Lemma VLSM_eq_finite_valid_trace_from_to
   (tr : list (vtransition_item X))
   : finite_valid_trace_from_to X s f tr <-> finite_valid_trace_from_to Y s f tr.
 Proof.
-  split.
-  - by apply (VLSM_incl_finite_valid_trace_from_to VLSM_eq_proj1).
-  - by apply (VLSM_incl_finite_valid_trace_from_to VLSM_eq_proj2).
+  by split; apply VLSM_incl_finite_valid_trace_from_to, Hincl.
 Qed.
 
 Lemma VLSM_eq_in_futures
   (s1 s2 : vstate X)
   : in_futures X s1 s2 <-> in_futures Y s1 s2.
 Proof.
-  split.
-  - by apply (VLSM_incl_in_futures VLSM_eq_proj1).
-  - by apply (VLSM_incl_in_futures VLSM_eq_proj2).
+  by split; apply VLSM_incl_in_futures, Hincl.
 Qed.
 
 Lemma VLSM_eq_input_valid_transition
@@ -156,18 +132,14 @@ Lemma VLSM_eq_input_valid_transition
   input_valid_transition X l (s, im) (s', om) <->
   input_valid_transition Y l (s, im) (s', om).
 Proof.
-  split.
-  - by apply (VLSM_incl_input_valid_transition VLSM_eq_proj1).
-  - by apply (VLSM_incl_input_valid_transition VLSM_eq_proj2).
+  by split; apply @VLSM_incl_input_valid_transition, Hincl.
 Qed.
 
 Lemma VLSM_eq_input_valid
   : forall l s im,
   input_valid X l (s, im) <-> input_valid Y l (s, im).
 Proof.
-  split.
-  - by apply (VLSM_incl_input_valid VLSM_eq_proj1).
-  - by apply (VLSM_incl_input_valid VLSM_eq_proj2).
+  by split; apply @VLSM_incl_input_valid, Hincl.
 Qed.
 
 Lemma VLSM_eq_can_produce
@@ -175,18 +147,14 @@ Lemma VLSM_eq_can_produce
   (om : option message)
   : option_can_produce X s om <-> option_can_produce Y s om.
 Proof.
-  split.
-  - by apply (VLSM_incl_can_produce VLSM_eq_proj1).
-  - by apply (VLSM_incl_can_produce VLSM_eq_proj2).
+  by split; apply VLSM_incl_can_produce, Hincl.
 Qed.
 
 Lemma VLSM_eq_can_emit
   (m : message)
   : can_emit X m <-> can_emit Y m.
 Proof.
-  split.
-  - by apply (VLSM_incl_can_emit VLSM_eq_proj1).
-  - by apply (VLSM_incl_can_emit VLSM_eq_proj2).
+  by split; apply VLSM_incl_can_emit, Hincl.
 Qed.
 
 Lemma VLSM_eq_infinite_valid_trace_from
@@ -194,26 +162,20 @@ Lemma VLSM_eq_infinite_valid_trace_from
   : infinite_valid_trace_from X s ls <->
     infinite_valid_trace_from Y s ls.
 Proof.
-  split.
-  - by apply (VLSM_incl_infinite_valid_trace_from VLSM_eq_proj1).
-  - by apply (VLSM_incl_infinite_valid_trace_from VLSM_eq_proj2).
+  by split; apply VLSM_incl_infinite_valid_trace_from, Hincl.
 Qed.
 
 Lemma VLSM_eq_infinite_valid_trace
   s ls
   : infinite_valid_trace X s ls <-> infinite_valid_trace Y s ls.
 Proof.
-  split.
-  - by apply (VLSM_incl_infinite_valid_trace VLSM_eq_proj1).
-  - by apply (VLSM_incl_infinite_valid_trace VLSM_eq_proj2).
+  by split; apply VLSM_incl_infinite_valid_trace, Hincl.
 Qed.
 
 Lemma VLSM_eq_valid_trace
   : forall t, valid_trace_prop X t <-> valid_trace_prop Y t.
 Proof.
-  split.
-  - by apply (VLSM_incl_valid_trace VLSM_eq_proj1).
-  - by apply (VLSM_incl_valid_trace VLSM_eq_proj2).
+  by split; apply VLSM_incl_valid_trace, Hincl.
 Qed.
 
 End sec_VLSM_eq_properties.
@@ -263,7 +225,7 @@ Lemma pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm
   : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X P).
 Proof.
   split; cbn;
-    [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
+    [| by apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
   apply basic_VLSM_incl.
   - by intro; intros **.
   - by intros l s m Hv _ _; eapply Hvalidating.

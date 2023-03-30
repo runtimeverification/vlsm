@@ -481,8 +481,8 @@ Lemma projection_induced_validator_eq
   : VLSM_eq X1 X2 -> VLSM_eq XY1 XY2.
 Proof.
   intro Heq; split.
-  - by apply (projection_induced_validator_incl MX1 MX2); [.. | apply VLSM_eq_proj1].
-  - by apply (projection_induced_validator_incl MX2 MX1); [.. | apply VLSM_eq_proj2].
+  - by apply (projection_induced_validator_incl MX1 MX2); [.. | apply Heq].
+  - by apply (projection_induced_validator_incl MX2 MX1); [.. | apply Heq].
 Qed.
 
 End sec_projection_induced_validator_incl.
