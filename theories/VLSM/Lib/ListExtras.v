@@ -595,14 +595,14 @@ Proof.
     by specialize (IHl n0 eq_refl n3 eq_refl); lia.
 Qed.
 
-Fixpoint Forall_filter
+Lemma Forall_filter
   {A : Type}
   (P : A -> Prop)
   {Pdec : forall a : A, Decision (P a)}
   (l : list A) : Forall P (filter P l).
 Proof.
-  destruct l; cbn; [done |].
-  by destruct (decide (P a)); eauto.
+  induction l as [| h t]; cbn; [done |].
+  by destruct (decide (P h)); [constructor |].
 Defined.
 
 (**
