@@ -362,8 +362,6 @@ Proof.
       by case_decide; [rewrite sub_IM_state_update_neq |].
 Qed.
 
-Existing Instance elem_of_dec_slow.
-
 (**
   Considering a trace with the [fixed_byzantine_trace_alt_prop]erty for a
   set <<byzantine>> of indices of bounded weight, its subtrace corresponding to

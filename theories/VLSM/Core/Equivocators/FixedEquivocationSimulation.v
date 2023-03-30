@@ -176,9 +176,8 @@ Proof.
     apply elem_of_list_lookup.
     rewrite StdppExtras.last_last_error in Hlast.
     replace (Some _) with (last im_etr).
-    clear. (* TODO: replace with stdpp list.last_lookup once it becomes available *)
     exists (pred (length im_etr)).
-    by induction im_etr as [| ?[]].
+    by rewrite list.last_lookup.
   - apply last_error_destination_last.
     by rewrite Hlast; simpl; f_equal.
 Qed.

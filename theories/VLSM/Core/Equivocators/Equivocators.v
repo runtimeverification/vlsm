@@ -109,7 +109,7 @@ Definition is_equivocating_state
   (s : equivocator_state)
   : Decision (is_equivocating_state s).
 Proof.
-  apply Decision_not.
+  apply not_dec.
   by apply is_singleton_state_dec.
 Qed.
 

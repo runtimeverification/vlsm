@@ -9,8 +9,7 @@ From VLSM.Core Require Import BaseELMO UMO MO.
 
 Create HintDb ELMO_hints.
 
-#[local]
-Hint Resolve submseteq_tail_l : ELMO_hints.
+#[local] Hint Resolve submseteq_tail_l : ELMO_hints.
 
 (** * ELMO Protocol Definitions and Properties
 
@@ -204,23 +203,19 @@ Proof.
     by intros [(-> & -> & m2 & Hrecv & Hadr & Hincomp) |]; econstructor.
 Qed.
 
-#[local] Existing Instance list_exist_dec.
-
-#[export]
-Instance local_equivocators_full_obs_dec : RelDecision local_equivocators_full_obs.
+#[export] Instance local_equivocators_full_obs_dec : RelDecision local_equivocators_full_obs.
 Proof.
   intros ol a.
   induction ol using addObservation'_rec.
   - by right; inversion 1.
   - apply (Decision_iff (iff_Symmetric _ _ (lefo_alt _ _ _))).
-    by typeclasses eauto.
+    by pose proof @list_exist_dec; typeclasses eauto.
 Defined.
 
 Definition local_equivocators_full (s : State) : Address -> Prop :=
   local_equivocators_full_obs (obs s).
 
-#[export]
-Instance local_equivocators_full_dec : RelDecision local_equivocators_full :=
+#[export] Instance local_equivocators_full_dec : RelDecision local_equivocators_full :=
   fun s a => local_equivocators_full_obs_dec (obs s) a.
 
 (**
@@ -329,8 +324,7 @@ Definition ELMOComponent (i : index) : VLSM Message :=
   vmachine := ELMOComponentMachine i;
 |}.
 
-#[export]
-Instance ComputableSentMessages_ELMOComponent
+#[export] Instance ComputableSentMessages_ELMOComponent
   (i : index) : ComputableSentMessages (ELMOComponent i).
 Proof.
   constructor 1 with sentMessages; constructor.
@@ -344,8 +338,7 @@ Proof.
       by firstorder congruence.
 Defined.
 
-#[export]
-Instance ComputableReceivedMessages_ELMOComponent
+#[export] Instance ComputableReceivedMessages_ELMOComponent
   (i : index) : ComputableReceivedMessages (ELMOComponent i).
 Proof.
   constructor 1 with receivedMessages; constructor.
@@ -359,8 +352,7 @@ Proof.
     + by rewrite decide_False; cbn; firstorder congruence.
 Defined.
 
-#[export]
-Instance HasBeenDirectlyObservedCapability_ELMOComponent
+#[export] Instance HasBeenDirectlyObservedCapability_ELMOComponent
   (i : index) : HasBeenDirectlyObservedCapability (ELMOComponent i) :=
     HasBeenDirectlyObservedCapability_from_sent_received (ELMOComponent i).
 
@@ -1349,8 +1341,7 @@ Proof.
         replace s0 with s in * by (apply eq_State; done); eauto.
 Defined.
 
-#[export]
-Instance ELMO_global_equivocators_dec : RelDecision ELMO_global_equivocators.
+#[export] Instance ELMO_global_equivocators_dec : RelDecision ELMO_global_equivocators.
 Proof.
   intros s a.
   apply (@Decision_iff

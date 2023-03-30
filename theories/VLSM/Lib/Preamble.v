@@ -29,12 +29,6 @@ Proof. by firstorder. Qed.
 
 Lemma Decision_iff : forall {P Q}, (P <-> Q) -> Decision P -> Decision Q.
 Proof. by firstorder. Qed.
-Lemma Decision_and : forall {P Q}, Decision P -> Decision Q -> Decision (P /\ Q).
-Proof. by firstorder. Qed.
-Lemma Decision_or : forall {P Q}, Decision P -> Decision Q -> Decision (P \/ Q).
-Proof. by firstorder. Qed.
-Lemma Decision_not : forall {P}, Decision P -> Decision (~ P).
-Proof. by firstorder. Qed.
 
 #[export] Instance bool_decision {b : bool} : Decision b :=
 match b with
@@ -414,8 +408,6 @@ Class StrictlyComparable (X : Type) : Type :=
   compare_strictorder :> CompareStrictOrder compare;
 }.
 #[global] Hint Mode StrictlyComparable ! : typeclass_instances.
-
-#[export] Existing Instance compare_strictorder.
 
 Definition comparable `(R : relation A) : relation A :=
   fun x y => exists c, CompSpec (=) R x y c.
