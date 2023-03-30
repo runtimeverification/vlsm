@@ -24,12 +24,6 @@ Definition VLSM_eq_part
 
 #[local] Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
 
-Lemma VLSM_eq_incl_iff
-  (MX MY : VLSMMachine vtype)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
-  : VLSM_eq X Y <-> VLSM_incl X Y /\ VLSM_incl Y X.
-Proof. by firstorder. Qed.
-
 End sec_VLSM_equality.
 
 Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
@@ -80,12 +74,12 @@ Context
 
 Lemma VLSM_eq_proj1 : VLSM_incl X Y.
 Proof.
-  by apply VLSM_eq_incl_iff in Hincl; apply Hincl.
+  by apply Hincl.
 Qed.
 
 Lemma VLSM_eq_proj2 : VLSM_incl Y X.
 Proof.
-  by apply VLSM_eq_incl_iff in Hincl; apply Hincl.
+  by apply Hincl.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace
@@ -238,7 +232,7 @@ Lemma pre_loaded_vlsm_with_valid_eq
   (QimpliesValid : forall m, Q m -> valid_message_prop (pre_loaded_vlsm X P) m)
   : VLSM_eq (pre_loaded_vlsm X (fun m => P m \/ Q m)) (pre_loaded_vlsm X P).
 Proof.
-  apply VLSM_eq_incl_iff; split; cbn.
+  split; cbn.
   - by apply pre_loaded_vlsm_incl_relaxed; itauto.
   - by apply pre_loaded_vlsm_incl; itauto.
 Qed.
@@ -247,7 +241,7 @@ Lemma pre_loaded_vlsm_idem
   (P : message -> Prop)
   : VLSM_eq (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
 Proof.
-  apply VLSM_eq_incl_iff; split; cbn.
+  split; cbn.
   - by apply pre_loaded_vlsm_idem_l.
   - by apply pre_loaded_vlsm_idem_r.
 Qed.
@@ -255,7 +249,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True
   : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun m => True)).
 Proof.
-  apply VLSM_eq_incl_iff; split; cbn.
+  split; cbn.
   - by apply pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l.
   - by apply pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_r.
 Qed.
@@ -268,7 +262,7 @@ Lemma pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm
       valid_message_prop (pre_loaded_vlsm X P) m)
   : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X P).
 Proof.
-  apply VLSM_eq_incl_iff; split; cbn;
+  split; cbn;
     [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
   apply basic_VLSM_incl.
   - by intro; intros **.
@@ -300,7 +294,7 @@ Lemma pre_loaded_with_all_messages_vlsm_idem :
     (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X))
     (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  apply VLSM_eq_incl_iff; split; cbn.
+  split; cbn.
   - by apply pre_loaded_with_all_messages_vlsm_idem_l.
   - by apply pre_loaded_with_all_messages_vlsm_idem_r.
 Qed.
@@ -310,7 +304,6 @@ Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om :
   valid_state_message_prop (pre_loaded_vlsm X (fun m => False)) s om.
 Proof.
   pose proof vlsm_is_pre_loaded_with_False as Heq.
-  apply VLSM_eq_incl_iff in Heq.
   destruct X as (T, M); simpl in *.
   by split; (apply VLSM_incl_valid_state_message; [| cbv; tauto]); apply Heq.
 Qed.

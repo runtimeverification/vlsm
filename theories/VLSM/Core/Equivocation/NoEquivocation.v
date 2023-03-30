@@ -151,11 +151,9 @@ Qed.
 Lemma preloaded_eq_no_equivocations
   : VLSM_eq (pre_loaded_with_all_messages_vlsm X) X.
 Proof.
-  specialize preloaded_incl_no_equivocations.
-  specialize (vlsm_incl_pre_loaded_with_all_messages_vlsm X).
-  clear -X. destruct X as [T [S M]].
-  intros Hincl Hincl'.
-  by apply VLSM_eq_incl_iff.
+  split.
+  - by apply preloaded_incl_no_equivocations.
+  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm X).
 Qed.
 
 End sec_no_equivocation_invariants.
@@ -314,7 +312,6 @@ Proof.
   | VLSM_eq _ ?v => apply VLSM_eq_trans with (machine v)
   end
   ; [done |].
-  apply VLSM_eq_incl_iff.
   specialize (constraint_subsumption_incl IM) as Hincl.
   unfold no_equivocations_additional_constraint_with_pre_loaded.
   by split; apply Hincl; intros l [s [m |]] Hpv; apply Hpv.

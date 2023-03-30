@@ -53,7 +53,7 @@ Qed.
 Lemma composite_vlsm_induced_projection_composition_iff :
   VLSM_eq X (composite_vlsm composite_vlsm_induced_projection constraint).
 Proof.
-  apply VLSM_eq_incl_iff; split.
+  split.
   - apply basic_VLSM_strong_incl; [| | by intro..].
     + by intros s Hs i; specialize (Hs i).
     + intros ? (i & [im Him] & <-).

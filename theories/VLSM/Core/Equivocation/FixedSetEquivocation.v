@@ -696,7 +696,7 @@ Lemma Equivocators_Fixed_Strong_eq base_s
       (equivocators_composition_for_directly_observed IM equivocators base_s)
       (equivocators_composition_for_sent IM equivocators base_s).
 Proof.
-  apply VLSM_eq_incl_iff. split.
+  split.
   - by apply Equivocators_Fixed_Strong_incl.
   - by apply Equivocators_Strong_Fixed_incl.
 Qed.
@@ -723,7 +723,7 @@ Qed.
 
 Lemma Fixed_eq_StrongFixed : VLSM_eq Fixed StrongFixed.
 Proof.
-  apply VLSM_eq_incl_iff. split.
+  split.
   - by apply Fixed_incl_StrongFixed.
   - by apply StrongFixed_incl_Fixed.
 Qed.
@@ -1015,7 +1015,6 @@ Lemma strong_fixed_equivocation_vlsm_composition_no_equivocators
   : VLSM_eq (strong_fixed_equivocation_vlsm_composition IM (@empty Ci _))
       (composite_vlsm IM (composite_no_equivocations IM)).
 Proof.
-  apply VLSM_eq_incl_iff.
   split.
   - apply constraint_subsumption_incl.
     apply preloaded_constraint_subsumption_stronger.
