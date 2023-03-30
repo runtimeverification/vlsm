@@ -14,12 +14,6 @@ Proof.
   by intro H; elim (H a); left.
 Qed.
 
-(** It is decidable whether a list is null or not. *)
-#[export] Instance null_dec {S} (l : list S) : Decision (l = []).
-Proof.
-  by destruct l; [left | right].
-Qed.
-
 (**
   A list is either null or it can be decomposed into an initial prefix
   and a last element.
@@ -27,7 +21,7 @@ Qed.
 Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a :: nil)}} + {l = nil} .
 Proof.
-  destruct (null_dec l).
+  destruct (decide (l = [])).
   - by right.
   - by left; apply exists_last in n.
 Qed.
