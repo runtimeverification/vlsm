@@ -248,41 +248,11 @@ Proof.
   by intros; rewrite last_is_last.
 Qed.
 
-(** Polymorphic list library *)
-
-Fixpoint is_member {W} `{StrictlyComparable W} (w : W) (l : list W) : bool :=
-  match l with
-  | [] => false
-  | hd :: tl => match compare w hd with
-              | Eq => true
-              | _ => is_member w tl
-              end
-  end.
-
 Definition compareb {A} `{StrictlyComparable A} (a1 a2 : A) : bool :=
   match compare a1 a2 with
   | Eq => true
   | _ => false
   end.
-
-Lemma is_member_correct {W} `{StrictlyComparable W}
-  : forall l (w : W), is_member w l = true <-> In w l.
-Proof.
-  intros l w.
-  induction l as [| hd tl IHl]; cbn.
-  - by itauto congruence.
-  - rewrite compare_asymmetric, <- compare_eq.
-    by destruct (compare hd w) eqn: Hcmp; cbn; itauto congruence.
-Qed.
-
-Lemma is_member_correct' {W} `{StrictlyComparable W}
-  : forall l (w : W), is_member w l = false <-> ~ In w l.
-Proof.
-  intros.
-  rewrite <- is_member_correct.
-  split; [by congruence |].
-  by apply not_true_is_false.
-Qed.
 
 Lemma In_app_comm {X} : forall l1 l2 (x : X), In x (l1 ++ l2) <-> In x (l2 ++ l1).
 Proof.
