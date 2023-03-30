@@ -242,12 +242,6 @@ Proof.
   by intros; rewrite last_is_last.
 Qed.
 
-Definition compareb {A} `{StrictlyComparable A} (a1 a2 : A) : bool :=
-  match compare a1 a2 with
-  | Eq => true
-  | _ => false
-  end.
-
 Lemma In_app_comm {X} : forall l1 l2 (x : X), In x (l1 ++ l2) <-> In x (l2 ++ l1).
 Proof.
   by intros l1 l2 x; split; intro H_in;
