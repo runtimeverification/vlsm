@@ -1208,19 +1208,13 @@ Fixpoint complete_prefix
   (l pref : list A) : option (list A) :=
   match l, pref with
   | l , [] => Some l
-  | [], (b :: pref') => None
-  | (a :: l'), (b :: pref') => match (decide_eq a b) with
-                               | right _ => None
-                               | _ => let res' := complete_prefix l' pref' in
-                                      match res' with
-                                      | None => None
-                                      | Some s => Some s
-                                      end
-                               end
+  | [], b :: pref' => None
+  | a :: l', b :: pref' => if decide_eq a b then complete_prefix l' pref' else None
   end.
 
 Example complete_prefix_some : complete_prefix [1; 2; 3; 4] [1; 2] = Some [3; 4].
 Proof. by itauto. Qed.
+
 Example complete_prefix_none : complete_prefix [1; 2; 3; 4] [1; 3] = None.
 Proof. by itauto. Qed.
 
