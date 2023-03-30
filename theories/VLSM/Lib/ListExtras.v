@@ -1447,28 +1447,6 @@ Proof.
   by induction 1; constructor; auto.
 Qed.
 
-Definition ForAllSuffix1 [A : Type] (P : A -> Prop) : list A -> Prop :=
-  ForAllSuffix (fun l => match l with | [] => True | a :: _ => P a end).
-
-Lemma ForAllSuffix1_Forall [A : Type] (P : A -> Prop)
-  : forall l, ForAllSuffix1 P l <-> Forall P l.
-Proof.
-  by split; induction 1; constructor; auto.
-Qed.
-
-Definition ExistsSuffix1 [A : Type] (P : A -> Prop) : list A -> Prop :=
-  ExistsSuffix (fun l => match l with | [] => False | a :: _ => P a end).
-
-Lemma ExistsSuffix1_Exists [A : Type] (P : A -> Prop)
-  : forall l, ExistsSuffix1 P l <-> Exists P l.
-Proof.
-  split; induction 1.
-  - by destruct l; [| left].
-  - by right.
-  - by left.
-  - by right.
-Qed.
-
 Definition ForAllSuffix2 [A : Type] (R : A -> A -> Prop) : list A -> Prop :=
   ForAllSuffix (fun l => match l with | a :: b :: _ => R a b | _ => True end).
 
