@@ -24,22 +24,6 @@ Definition VLSM_eq_part
 
 #[local] Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
 
-Lemma VLSM_eq_incl_l
-  (MX MY : VLSMMachine vtype)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
-  : VLSM_eq X Y -> VLSM_incl X Y.
-Proof.
-  by intros Heq t Hxt; apply Heq.
-Qed.
-
-Lemma VLSM_eq_incl_r
-  (MX MY : VLSMMachine vtype)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
-  : VLSM_eq X Y -> VLSM_incl Y X.
-Proof.
-  by intros Heq t Hyt; apply Heq.
-Qed.
-
 Lemma VLSM_eq_incl_iff
   (MX MY : VLSMMachine vtype)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
