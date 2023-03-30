@@ -1068,18 +1068,6 @@ Proof.
       by rewrite IHl.
 Qed.
 
-Lemma in_one_element_decompositions_iff
-  {A : Type}
-  (l : list A)
-  (pre suf : list A)
-  (x : A)
-  : In (pre, x, suf) (one_element_decompositions l)
-  <-> pre ++ [x] ++ suf = l.
-Proof.
-  rewrite <- elem_of_list_In.
-  by apply elem_of_one_element_decompositions.
-Qed.
-
 Definition two_element_decompositions
   {A : Type}
   (l : list A)
@@ -1110,15 +1098,15 @@ Proof.
     apply in_map_iff in Hin.
     destruct Hin as [((mid', y'), suf') [Hdec Hin]].
     inversion Hdec. subst. clear Hdec.
-    apply in_one_element_decompositions_iff in Hdecx.
-    apply in_one_element_decompositions_iff in Hin.
+    apply elem_of_list_In, elem_of_one_element_decompositions in Hdecx, Hin.
     by subst.
   - remember (mid ++ [y] ++ suf) as sufx.
     intro H.
-    exists (pre, x, sufx). apply in_one_element_decompositions_iff in H.
+    exists (pre, x, sufx).
+    apply elem_of_one_element_decompositions, elem_of_list_In in H.
     split; [done |].
     apply in_map_iff. exists (mid, y, suf).
-    by rewrite in_one_element_decompositions_iff.
+    by rewrite <- elem_of_list_In, elem_of_one_element_decompositions.
 Qed.
 
 Lemma order_decompositions
