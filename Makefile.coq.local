@@ -14,7 +14,7 @@ COQDOCHTMLFLAGS = --toc --toc-depth 3 --index indexpage --html -s \
   --interpolate --no-lib-name --parse-comments \
   --with-header resources/header.html --with-footer resources/footer.html
 
-GROUPBYMOD = "false"
+group_by_mod = "false"
 
 ALECTRYON = alectryon
 ALECTRYONDIR = docs/alectryon
@@ -32,7 +32,7 @@ coqdoc: $(DOCVOFILES) $(DOCVFILES) $(CSSFILES) $(JSFILES) $(HTMLFILES)
 .PHONY: coqdoc
 
 axioms: $(DOCVOFILES)
-	@scripts/axiom-diagnostics.sh "${COQLIBS}" "${path}" "${keep_tmp}" "${GROUPBYMOD}" 
+	@scripts/axiom-diagnostics.sh "${COQLIBS}" "${path}" "${keep_tmp}" "${group_by_mod}" 
 .PHONY: axioms
 
 RATIOS.md: $(DOCVFILES)
