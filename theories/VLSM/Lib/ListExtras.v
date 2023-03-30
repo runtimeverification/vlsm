@@ -1027,18 +1027,6 @@ Proof.
     by apply (Hnth (S n)).
 Qed.
 
-Lemma in_fast
-  {A : Type}
-  (l : list A)
-  (a : A)
-  (b : A)
-  (Hin : In a (b :: l))
-  (Hneq : b <> a) :
-  In a l.
-Proof.
-  by destruct Hin.
-Qed.
-
 Fixpoint one_element_decompositions
   {A : Type}
   (l : list A)
