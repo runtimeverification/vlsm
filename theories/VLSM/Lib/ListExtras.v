@@ -5,15 +5,6 @@ From VLSM.Lib Require Import Preamble.
 
 (** * Utility lemmas about lists *)
 
-(** A list is empty if it has no members. *)
-Lemma empty_nil [X : Type] (l : list X) :
-  (forall v, ~ In v l) -> l = [].
-Proof.
-  clear.
-  destruct l as [| a]; cbn; [done |].
-  by intro H; elim (H a); left.
-Qed.
-
 (**
   A list is either null or it can be decomposed into an initial prefix
   and a last element.
@@ -1493,13 +1484,6 @@ Proof.
       * by right; intro Hsub'; elim n; apply Hsub'; left.
     + right; intro Hsub; elim Hnsub.
       by intros b Hb; apply Hsub; right.
-Qed.
-
-Lemma elem_of_empty_nil [X : Type] (l : list X) :
-  (forall v, v ∉ l) -> l = [].
-Proof.
-  destruct l as [| a]; [done |].
-  by intro H; elim (H a); left.
 Qed.
 
 Lemma nodup_append_left {A} :

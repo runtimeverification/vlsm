@@ -1844,7 +1844,7 @@ Context
 Lemma sub_no_indices_no_can_emit (P : message -> Prop)
   : forall m, ~ can_emit (pre_loaded_vlsm (free_composite_vlsm sub_IM) P) m.
 Proof.
-  apply pre_loaded_empty_composition_no_emit, elem_of_empty_nil.
+  apply pre_loaded_empty_composition_no_emit, elem_of_nil_inv.
   by intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; inversion Hi.
 Qed.
 
