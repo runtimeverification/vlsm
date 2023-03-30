@@ -22,8 +22,6 @@ Definition VLSM_eq_part
   (X := mk_vlsm MX) (Y := mk_vlsm MY) : Prop :=
     VLSM_incl X Y /\ VLSM_incl Y X.
 
-#[local] Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
-
 End sec_VLSM_equality.
 
 Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
@@ -209,7 +207,7 @@ Proof.
 Qed.
 
 Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True
-  : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun m => True)).
+  : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun _ => True)).
 Proof.
   split; cbn.
   - by apply pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l.
@@ -234,19 +232,19 @@ Proof.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False
-  : VLSM_eq X (pre_loaded_vlsm X (fun m => False)).
+  : VLSM_eq X (pre_loaded_vlsm X (fun _ => False)).
 Proof.
   by cbn; split; apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_initial_message
-  : strong_embedding_initial_message_preservation X (pre_loaded_vlsm X (fun m => False)).
+  : strong_embedding_initial_message_preservation X (pre_loaded_vlsm X (fun _ => False)).
 Proof.
   by intros m Hm; left.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_initial_message_rev
-  : strong_embedding_initial_message_preservation (pre_loaded_vlsm X (fun m => False)) X.
+  : strong_embedding_initial_message_preservation (pre_loaded_vlsm X (fun _ => False)) X.
 Proof.
   by intros m [Hm | Hfalse].
 Qed.
@@ -263,7 +261,7 @@ Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om :
   valid_state_message_prop X s om <->
-  valid_state_message_prop (pre_loaded_vlsm X (fun m => False)) s om.
+  valid_state_message_prop (pre_loaded_vlsm X (fun _ => False)) s om.
 Proof.
   pose proof vlsm_is_pre_loaded_with_False as Heq.
   destruct X as (T, M); simpl in *.
