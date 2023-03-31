@@ -609,6 +609,68 @@ Qed.
   compare_strictorder := CompareStrictOrder_pair_compare;
 }.
 
+(** *** Comparison for lists *)
+
+Fixpoint list_compare
+  (A : Type) `{StrictlyComparable A}
+  (l1 l2 : list A) : comparison :=
+match l1, l2 with
+| [], [] => Eq
+| [], _ => Lt
+| _, [] => Gt
+| h1 :: t1, h2 :: t2 =>
+  match compare h1 h2 with
+  | Eq => list_compare A t1 t2
+  | cmp => cmp
+  end
+end.
+
+Lemma list_compare_reflexive
+  {A : Type} `{StrictlyComparable A}
+  : CompareReflexive (list_compare A).
+Proof.
+  intros l1; induction l1 as [| h1 t1]; intros [| h2 t2]; [done.. |].
+  split; cbn.
+  - intros Heq.
+    destruct (compare h1 h2) eqn: Hcmp; [| done..].
+    apply compare_eq in Hcmp as ->.
+    by apply IHt1 in Heq as ->.
+  - inversion 1; subst.
+    by rewrite compare_eq_refl, IHt1.
+Qed.
+
+Lemma list_compare_transitive
+  {A : Type} `{StrictlyComparable A}
+  : CompareTransitive (list_compare A).
+Proof.
+  intros l1 l2 l3; revert l1 l3.
+  induction l2 as [| h2 t2]; cbn; [by destruct l1, l3; cbn; congruence |].
+  destruct l1 as [| h1 t1], l3 as [| h3 t3]; cbn; [by congruence.. |].
+  intros c.
+  destruct (compare h1 h2) eqn: H12, (compare h2 h3) eqn: H23;
+    rewrite ?compare_eq in H12; rewrite ?compare_eq in H23; subst;
+    rewrite ?compare_eq_refl, ?H12, ?H23; only 2-4, 6-8: congruence.
+  - by apply IHt2.
+  - by rewrite (StrictOrder_Transitive _ _ _ _ H12 H23).
+  - by rewrite (StrictOrder_Transitive _ _ _ _ H12 H23).
+Qed.
+
+#[export] Instance CompareStrictOrder_list_compare
+  {A : Type} `{StrictlyComparable A}
+  : CompareStrictOrder (list_compare A).
+Proof.
+  split.
+  - by apply list_compare_reflexive.
+  - by apply list_compare_transitive.
+Defined.
+
+#[export] Instance StrictlyComparable_list
+  {A : Type} `{StrictlyComparable A} : StrictlyComparable (list A) :=
+{
+  compare := list_compare A;
+  compare_strictorder := CompareStrictOrder_list_compare;
+}.
+
 (** ** Liveness *)
 
 Definition bounding (P : nat -> Prop)
