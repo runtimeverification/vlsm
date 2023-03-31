@@ -662,7 +662,7 @@ Proof.
   split.
   - by apply list_compare_reflexive.
   - by apply list_compare_transitive.
-Defined.
+Qed.
 
 #[export] Instance StrictlyComparable_list
   {A : Type} `{StrictlyComparable A} : StrictlyComparable (list A) :=
