@@ -1123,15 +1123,15 @@ Lemma trace_to_initial_state_has_no_inputs
   is s tr
   (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr)
   (Hs : vinitial_state_prop vlsm s)
-  : forall item, In item tr -> input item = None.
+  : forall item, item ∈ tr -> input item = None.
 Proof.
   intros item Hitem.
   destruct (input item) as [m |] eqn: Heqm; [| done].
   elim (selected_message_exists_in_all_traces_initial_state _ _ Hs (field_selector input) m).
   apply has_been_received_consistency; [done | by apply initial_state_is_valid |].
   eexists _, _, Htr.
-  apply Exists_exists. exists item. split; [| done].
-  by apply elem_of_list_In.
+  apply Exists_exists.
+  by exists item.
 Qed.
 
 (** ** A state message oracle for messages sent or received

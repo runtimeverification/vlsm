@@ -130,11 +130,10 @@ Proof.
 Qed.
 
 Lemma existsb_forall {A} (f : A -> bool) :
-  forall l, existsb f l = false <-> forall x, In x l -> f x = false.
+  forall l, existsb f l = false <-> forall x, x ∈ l -> f x = false.
 Proof.
   intro l.
   setoid_rewrite <- not_true_iff_false.
-  setoid_rewrite <- elem_of_list_In.
   by rewrite existsb_Exists, <- Forall_Exists_neg, Forall_forall.
 Qed.
 
@@ -351,17 +350,6 @@ Proof.
   by apply drop_S.
 Qed.
 
-Lemma filter_in {A} P `{forall (x : A), Decision (P x)} x s :
-  In x s ->
-  P x ->
-  In x (filter P s).
-Proof.
-  intros.
-  apply elem_of_list_In.
-  apply elem_of_list_In in H0.
-  by apply elem_of_list_filter.
-Qed.
-
 Lemma list_subseteq_filter {A} P Q
   `{forall (x : A), Decision (P x)} `{forall (x : A), Decision (Q x)} :
   (forall a, P a -> Q a) ->
@@ -380,19 +368,6 @@ Proof.
   inversion Hfg; subst. specialize (IHs H4).
   rewrite 2 filter_cons.
   by destruct (decide (P a)), (decide (Q a)); cbn; itauto lia.
-Qed.
-
-Lemma filter_eq_fn {A} P Q
- `{forall (x : A), Decision (P x)} `{forall (x : A), Decision (Q x)} s :
-  (forall a, In a s -> P a <-> Q a) ->
-  filter P s = filter Q s.
-Proof.
-  induction s; intros; [done |].
-  assert (IHs' : forall a : A, In a s -> P a <-> Q a) by (intros; apply H1; right; done).
-  apply IHs in IHs'.
-  erewrite !filter_cons, decide_ext.
-  - by rewrite IHs'.
-  - by apply H1; left.
 Qed.
 
 Lemma nth_error_filter
@@ -581,13 +556,13 @@ Proof.
   }
 
   assert (exists a, (count_occ decide_eq l' a) = list_max occurrences). {
-    assert (In (list_max occurrences) occurrences) by (apply list_max_exists; done).
-    rewrite Heqoccurrences, in_map_iff in H.
+    assert (list_max occurrences ∈ occurrences) by (apply list_max_exists; done).
+    rewrite Heqoccurrences, elem_of_list_In, in_map_iff in H.
     destruct H as (x & Heq & Hin).
     by rewrite Heqoccurrences; eauto.
   }
 
-  assert (exists a, In a (mode l')). {
+  assert (exists a, a ∈ mode l'). {
     destruct H.
     exists x.
     specialize (count_occ_In decide_eq l' x).
@@ -596,11 +571,12 @@ Proof.
     rewrite H in H1.
     specialize (H1 Hmaxp).
     unfold mode.
-    apply filter_in; [done |].
-    by rewrite H, Heqoccurrences.
+    apply elem_of_list_filter.
+    by rewrite H, Heqoccurrences, elem_of_list_In.
   }
   intros contra; rewrite contra in H0.
-  by destruct H0 as [? []].
+  destruct H0 as [? H0].
+  by apply elem_of_nil in H0.
 Qed.
 
 (**

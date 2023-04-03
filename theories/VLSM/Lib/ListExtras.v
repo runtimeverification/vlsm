@@ -140,29 +140,29 @@ Lemma in_not_in : forall A (x y : A) (l : list A),
   x <> y.
 Proof. by itauto congruence. Qed.
 
-Definition inb {A} (Aeq_dec : forall x y : A, {x = y} + {x <> y}) (x : A) (xs : list A) :=
-  if in_dec Aeq_dec x xs then true else false.
+Definition inb `{EqDecision A} (x : A) (xs : list A) :=
+  if decide (x ∈ xs) then true else false.
 
-Lemma in_correct `{EqDecision X} :
-  forall (l : list X) (x : X),
-    In x l <-> inb decide_eq x l = true.
+Lemma in_correct `{EqDecision A} :
+  forall (l : list A) (x : A),
+    x ∈ l <-> inb x l = true.
 Proof.
   intros s msg.
   unfold inb.
-  by destruct (in_dec _ _ _); itauto congruence.
+  by destruct (decide (msg ∈ s)); itauto congruence.
 Qed.
 
-Lemma in_correct_refl `{EqDecision X} :
-  forall (l : list X) (x : X),
-    In x l <-> inb decide_eq x l.
+Lemma in_correct_refl `{EqDecision A} :
+  forall (l : list A) (x : A),
+    x ∈ l <-> inb x l.
 Proof.
   intros s msg.
   by rewrite in_correct, Is_true_iff_eq_true.
 Qed.
 
-Lemma in_correct' `{EqDecision X} :
-  forall (l : list X) (x : X),
-    ~ In x l <-> inb decide_eq x l = false.
+Lemma in_correct' `{EqDecision A} :
+  forall (l : list A) (x : A),
+    x ∉ l <-> inb x l = false.
 Proof.
   intros s msg.
   by rewrite in_correct, not_true_iff_false.
@@ -215,12 +215,6 @@ Lemma last_error_is_last {A} : forall (l : list A) (x : A),
 Proof.
   destruct l; cbn; [done |].
   by intros; rewrite last_is_last.
-Qed.
-
-Lemma In_app_comm {X} : forall l1 l2 (x : X), In x (l1 ++ l2) <-> In x (l2 ++ l1).
-Proof.
-  by intros l1 l2 x; split; intro H_in;
-    apply in_or_app; apply in_app_or in H_in as [cat | dog]; itauto.
 Qed.
 
 Lemma nth_error_last
@@ -1083,11 +1077,11 @@ Lemma in_two_element_decompositions_iff
   (l : list A)
   (pre mid suf : list A)
   (x y : A)
-  : In (pre, x, mid, y, suf) (two_element_decompositions l)
+  : (pre, x, mid, y, suf) ∈ two_element_decompositions l
   <-> pre ++ [x] ++ mid ++ [y] ++ suf = l.
 Proof.
   unfold two_element_decompositions.
-  rewrite in_flat_map.
+  rewrite elem_of_list_In, in_flat_map.
   split.
   - intros [((pre', x'), sufx) [Hdecx Hin]].
     apply in_map_iff in Hin.
@@ -1124,26 +1118,26 @@ Proof.
       as [Heq | [[suf1' Hgt] | [suf2' Hlt]]]; subst; eauto.
 Qed.
 
-Lemma list_max_exists
-   (l : list nat)
-   (nz : list_max l > 0) :
-   In (list_max l) l.
+Lemma list_max_exists :
+  forall (l : list nat),
+   list_max l > 0 -> list_max l ∈ l.
 Proof.
-  induction l.
+  intros l nz; induction l.
   - by simpl in nz; lia.
   - simpl in *.
     destruct (a <=? (list_max l)) eqn: eq_leb.
-    + assert (Nat.max a (list_max l) = list_max l) by lia.
-      by itauto congruence.
+    + replace (Nat.max a (list_max l)) with (list_max l) by lia.
+      rewrite elem_of_cons; right.
+      by apply IHl; lia.
     + assert (Nat.max a (list_max l) = a) by lia.
       by rewrite H; left.
 Qed.
 
-Lemma list_max_exists2
-   (l : list nat)
-   (Hne : l <> []) :
-   In (list_max l) l.
+Lemma list_max_exists2 :
+  forall (l : list nat),
+    l <> [] -> list_max l ∈ l.
 Proof.
+  intros l.
   destruct (list_max l) eqn: eq_max.
   - destruct l; [by itauto congruence |].
     specialize (list_max_le (n :: l) 0) as Hle.
@@ -1151,6 +1145,7 @@ Proof.
     rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
     rewrite Forall_forall in Hle.
     specialize (Hle n). spec Hle; [left |].
+    rewrite elem_of_cons.
     by simpl; lia.
   - specialize (list_max_exists l) as Hmax.
     spec Hmax; [lia |].
@@ -1322,13 +1317,14 @@ Proof.
 Qed.
 
 Lemma list_sum_decrease [A : Type] (f g : A -> nat) (l : list A) :
-  (forall a, In a l -> f a <= g a) -> Exists (fun a => f a < g a) l ->
+  (forall a, a ∈ l -> f a <= g a) -> Exists (fun a => f a < g a) l ->
   list_sum (map f l) < list_sum (map g l).
 Proof.
+  setoid_rewrite elem_of_list_In.
   induction 2; cbn.
   - apply PeanoNat.Nat.add_lt_le_mono; [done |].
     induction l; cbn; [done |].
-    by apply PeanoNat.Nat.add_le_mono; firstorder.
+    apply PeanoNat.Nat.add_le_mono; firstorder.
   - by apply PeanoNat.Nat.add_le_lt_mono; firstorder.
 Qed.
 
