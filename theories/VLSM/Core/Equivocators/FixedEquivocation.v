@@ -1394,7 +1394,6 @@ Qed.
 
 Lemma equivocators_fixed_equivocations_all_eq : VLSM_eq XE NE.
 Proof.
-  apply VLSM_eq_incl_iff.
   split.
   - apply constraint_subsumption_incl.
     apply preloaded_constraint_subsumption_stronger.

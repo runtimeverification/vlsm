@@ -260,9 +260,7 @@ Qed.
 
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
 Proof.
-  specialize (Fixed_eq_StrongFixed IM equivocators)
-    as Heq.
-  apply VLSM_eq_proj1 in Heq.
+  destruct (Fixed_eq_StrongFixed IM equivocators) as [Heq _].
   apply VLSM_incl_trans with (machine StrongFixed).
   - by apply Heq.
   - by apply StrongFixed_incl_Limited.
