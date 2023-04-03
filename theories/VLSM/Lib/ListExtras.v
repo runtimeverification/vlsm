@@ -1004,20 +1004,7 @@ Lemma elem_of_map_option :
   forall {A B : Type} (f : A -> option B) (l : list A) (y : B),
     y ∈ map_option f l <-> exists x : A, x ∈ l /\ f x = Some y.
 Proof.
-  induction l as [| h t]; cbn; intros y;
-    [by setoid_rewrite elem_of_nil; firstorder |].
-  destruct (f h) eqn: Heq.
-  - setoid_rewrite elem_of_cons.
-    split.
-    + intros [-> | Hin]; [by exists h; itauto |].
-      apply IHt in Hin as (x & Hinx & Hfx).
-      by exists x; itauto.
-    + intros (x & [-> | Hin] & Hfx); rewrite IHt.
-      * by left; congruence.
-      * by right; exists x.
-  - setoid_rewrite elem_of_cons.
-    rewrite IHt.
-    by firstorder congruence.
+  apply @elem_of_list_omap.
 Qed.
 
 Lemma NoDup_map_option :
@@ -1025,10 +1012,10 @@ Lemma NoDup_map_option :
     (forall a1 a2 : A, is_Some (f a1) -> is_Some (f a2) -> f a1 = f a2 -> a1 = a2) ->
       NoDup l -> NoDup (map_option f l).
 Proof.
-  induction l as [| h t]; cbn; [by constructor |].
-  intros Hinj Hnd; inversion Hnd; subst; clear Hnd.
-  destruct (f h) eqn: Heq; [| by apply IHt].
-  constructor; [| by apply IHt].
+  intros A B f l Hinj Hnd.
+  induction Hnd as [| h t Hnin Hnd IH]; cbn; [by constructor |].
+  destruct (f h) eqn: Heq; [| by apply IH].
+  constructor; [| by apply IH].
   intros Hin; apply elem_of_map_option in Hin as (x & Hinx & Hfx).
   assert (x = h) by (apply Hinj; [done.. | congruence]).
   by congruence.
