@@ -1000,6 +1000,27 @@ Proof.
   by destruct (f x); [contradict H |].
 Qed.
 
+Lemma elem_of_map_option :
+  forall {A B : Type} (f : A -> option B) (l : list A) (y : B),
+    y ∈ map_option f l <-> exists x : A, x ∈ l /\ f x = Some y.
+Proof.
+  apply @elem_of_list_omap.
+Qed.
+
+Lemma NoDup_map_option :
+  forall {A B : Type} (f : A -> option B) (l : list A),
+    (forall a1 a2 : A, is_Some (f a1) -> is_Some (f a2) -> f a1 = f a2 -> a1 = a2) ->
+      NoDup l -> NoDup (map_option f l).
+Proof.
+  intros A B f l Hinj Hnd.
+  induction Hnd as [| h t Hnin Hnd IH]; cbn; [by constructor |].
+  destruct (f h) eqn: Heq; [| by apply IH].
+  constructor; [| by apply IH].
+  intros Hin; apply elem_of_map_option in Hin as (x & Hinx & Hfx).
+  assert (x = h) by (apply Hinj; [done.. | congruence]).
+  by congruence.
+Qed.
+
 (** Unpack list of [option A] into list of [A]. *)
 Definition cat_option {A : Type} : list (option A) -> list A :=
   @map_option (option A) A id.
@@ -1390,19 +1411,6 @@ Proof.
   by rewrite IHl, andb_false_r.
 Qed.
 
-Definition Listing_finite_transparent
-  `{EqDecision A} {l : list A} (finite_l : Listing l) : finite.Finite A.
-Proof.
-  exists l.
-  - by apply NoDup_ListNoDup, finite_l.
-  - by intro; apply elem_of_list_In, finite_l.
-Defined.
-
-Lemma Listing_finite `{EqDecision A} {l : list A} (finite_l : Listing l) : finite.Finite A.
-Proof.
-  by eapply Listing_finite_transparent.
-Qed.
-
 Lemma sumbool_forall [A : Type] [P Q : A -> Prop] :
   (forall x : A, {P x} + {Q x}) -> forall l : list A, {Forall P l} + {Exists Q l}.
 Proof.
@@ -1609,12 +1617,6 @@ Proof.
   exfalso.
   specialize (H a (elem_of_list_here _ _)).
   by inversion H.
-Qed.
-
-Lemma Listing_NoDup {A} {l : list A} : Listing l -> NoDup l.
-Proof.
-  intros [Hnd Hfull].
-  by apply NoDup_ListNoDup.
 Qed.
 
 Lemma NoDup_subseteq_length [A : Type]
