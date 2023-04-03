@@ -344,7 +344,7 @@ Qed.
 Lemma full_node_msg_dep_limited_equivocation_vlsm_eq :
   VLSM_eq FullNodeLimited Limited.
 Proof.
-  apply VLSM_eq_incl_iff; split.
+  split.
   - by apply full_node_msg_dep_limited_equivocation_vlsm_incl.
   - by apply msg_dep_full_node_limited_equivocation_vlsm_incl.
 Qed.

@@ -914,19 +914,19 @@ Lemma equivocator_vlsm_trace_project_valid
     end.
 Proof.
   apply (VLSM_incl_finite_valid_trace_from_to
-    (VLSM_eq_proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hbtr.
+    (proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm))) in Hbtr.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
     as [tr [di [Hbtr_pr Hdi]]].
   eexists _, _; split; [done |].
   destruct di as [sn | i].
   - destruct Hdi as [Hsn Htr].
     split; [done |].
-    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2
+    apply (VLSM_incl_finite_valid_trace_from_to (proj2
       (vlsm_is_pre_loaded_with_False X))) in Htr.
     by clear -Htr; destruct X.
   - destruct Hdi as [s [Hpr_bs_i Htr]].
     eexists; split; [done |].
-    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2 (vlsm_is_pre_loaded_with_False X)))
+    apply (VLSM_incl_finite_valid_trace_from_to (proj2 (vlsm_is_pre_loaded_with_False X)))
       in Htr.
     by clear -Htr; destruct X.
 Qed.
@@ -956,7 +956,7 @@ Lemma preloaded_equivocator_vlsm_trace_project_valid
       finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) s ej tr
     end.
 Proof.
-  apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj1
+  apply (VLSM_incl_finite_valid_trace_from_to (proj1
     (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm))) in Hbtr.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
     as [tr [di [Hbtr_pr Hdi]]].
@@ -964,12 +964,12 @@ Proof.
   destruct di as [sn | i].
   - destruct Hdi as [Hsn Htr].
     split; [done |].
-    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2
+    apply (VLSM_incl_finite_valid_trace_from_to (proj2
       (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
     by clear -Htr; destruct X.
   - destruct Hdi as [s [Hpr_bs_i Htr]].
     eexists; split; [done |].
-    apply (VLSM_incl_finite_valid_trace_from_to (VLSM_eq_proj2
+    apply (VLSM_incl_finite_valid_trace_from_to (proj2
       (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X))) in Htr.
     by clear -Htr; destruct X.
 Qed.

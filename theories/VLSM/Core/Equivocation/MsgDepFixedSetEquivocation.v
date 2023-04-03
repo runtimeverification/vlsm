@@ -283,7 +283,7 @@ Lemma msg_dep_strong_fixed_equivocation_eq
       (composite_vlsm IM msg_dep_fixed_set_equivocation_constraint)
       (composite_vlsm IM (strong_fixed_equivocation_constraint IM equivocators)).
 Proof.
-  apply VLSM_eq_incl_iff; split.
+  split.
   - by apply msg_dep_strong_fixed_equivocation_incl.
   - by apply strong_msg_dep_fixed_equivocation_incl.
 Qed.
@@ -418,7 +418,7 @@ Lemma full_node_fixed_equivocation_eq
       (composite_vlsm IM full_node_fixed_set_equivocation_constraint)
       (composite_vlsm IM (fixed_equivocation_constraint IM equivocators)).
 Proof.
-  apply VLSM_eq_incl_iff; split.
+  split.
   - apply full_node_fixed_equivocation_incl; [done |].
     by apply channel_authentication_sender_safety.
   - by apply fixed_full_node_equivocation_incl.

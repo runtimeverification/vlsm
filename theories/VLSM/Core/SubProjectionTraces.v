@@ -500,7 +500,7 @@ Proof.
     |- context [pre_loaded_with_all_messages_vlsm ?v] =>
       specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True v) as Hincl
     end.
-    by apply VLSM_eq_incl_iff, proj2 in Hincl.
+    by destruct Hincl.
 Qed.
 
 (**

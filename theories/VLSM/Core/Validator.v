@@ -480,9 +480,9 @@ Lemma projection_induced_validator_eq
     induced_validator_transition_consistency_Some X2 TY label_project state_project)
   : VLSM_eq X1 X2 -> VLSM_eq XY1 XY2.
 Proof.
-  intro Heq; apply VLSM_eq_incl_iff; split.
-  - by apply (projection_induced_validator_incl MX1 MX2); [.. | apply VLSM_eq_proj1].
-  - by apply (projection_induced_validator_incl MX2 MX1); [.. | apply VLSM_eq_proj2].
+  intro Heq; split.
+  - by apply (projection_induced_validator_incl MX1 MX2); [.. | apply Heq].
+  - by apply (projection_induced_validator_incl MX2 MX1); [.. | apply Heq].
 Qed.
 
 End sec_projection_induced_validator_incl.
@@ -662,7 +662,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_validator_proj_eq
   : VLSM_eq PreY Xi.
 Proof.
-  apply VLSM_eq_incl_iff; split.
+  split.
   - by apply pre_loaded_with_all_messages_validator_proj_incl.
   - by apply induced_validator_incl_preloaded_with_all_messages.
 Qed.
@@ -846,7 +846,7 @@ Lemma preloaded_composite_vlsm_induced_projection_validator_iff
       (pre_loaded_vlsm composite_vlsm_induced_projection_validator P)
       (pre_loaded_vlsm (composite_vlsm_induced_validator IM constraint i) P).
 Proof.
-  apply VLSM_eq_incl_iff; split; cbn; apply basic_VLSM_strong_incl.
+  split; cbn; apply basic_VLSM_strong_incl.
   - intros s Hs; cbn in *; red.
     exists (lift_to_composite_state' IM i s).
     split; [by state_update_simpl |].

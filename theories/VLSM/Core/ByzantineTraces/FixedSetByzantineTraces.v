@@ -488,7 +488,7 @@ Qed.
 Lemma fixed_non_byzantine_pre_loaded_eq
   : VLSM_eq fixed_non_byzantine_projection pre_loaded_fixed_non_byzantine_vlsm'.
 Proof.
-  apply VLSM_eq_incl_iff. split.
+  split.
   - by apply fixed_non_byzantine_pre_loaded_incl.
   - by apply pre_loaded_fixed_non_byzantine_incl.
 Qed.
@@ -760,7 +760,6 @@ Qed.
 Lemma fixed_non_byzantine_eq_fixed_non_equivocating_from_initial
   : VLSM_eq PreNonByzantine FixedNonEquivocating.
 Proof.
-  apply VLSM_eq_incl_iff.
   split.
   - by apply fixed_non_byzantine_incl_fixed_non_equivocating_from_initial.
   - by apply fixed_non_equivocating_incl_fixed_non_byzantine.
