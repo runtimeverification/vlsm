@@ -54,11 +54,9 @@ Proof.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseY _ HsY m) in Hm.
   specialize (Hm _ _ HtrX).
   apply Exists_exists in Hm as [itemY [HitemY Hm]].
-  apply elem_of_list_In in HitemY.
-  apply pre_VLSM_projection_finite_trace_project_in_iff in HitemY
+  apply pre_VLSM_projection_finite_trace_project_elem_of_iff in HitemY
     as [itemX [HitemX Hpr]].
   apply Exists_exists.
-  apply elem_of_list_In in HitemX.
   exists itemX. split; [done |].
   revert Hm.
   unfold pre_VLSM_projection_transition_item_project in Hpr.

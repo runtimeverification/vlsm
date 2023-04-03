@@ -96,22 +96,17 @@ Proof.
   by destruct l; [| inversion Herr; apply unroll_last].
 Qed.
 
-Lemma incl_empty : forall A (l : list A),
-  incl l nil -> l = nil.
+Lemma incl_singleton {A} :
+  forall (l : list A) (a : A),
+    l ⊆ [a] -> forall b : A, b ∈ l -> b = a.
 Proof.
-  intros A [] H; [done |].
-  by destruct (H a); left.
-Qed.
-
-Lemma incl_singleton {A} : forall (l : list A) (a : A),
-  incl l [a] ->
-  forall b, In b l -> b = a.
-Proof.
-  intros. induction l; inversion H0; subst.
-  - by destruct (H b); [left | done | inversion H1].
-  - apply IHl; [| done].
-    apply incl_tran with (a0 :: l); [| done].
-    by apply incl_tl, incl_refl.
+  intros l a Hsub b Hin.
+  induction l as [| h t]; inversion Hin; subst.
+  - specialize (Hsub _ Hin).
+    by apply elem_of_list_singleton in Hsub.
+  - apply IHt; [| done].
+    rewrite <- Hsub.
+    by apply list_subseteq_cons.
 Qed.
 
 Lemma Exists_first
@@ -173,28 +168,17 @@ Proof.
   by rewrite in_correct, not_true_iff_false.
 Qed.
 
-Definition inclb
-  `{EqDecision A}
-  (l1 l2 : list A)
-  : bool
-  := forallb (fun x : A => inb decide_eq x l2) l1.
-
-Lemma incl_correct `{EqDecision A}
-  (l1 l2 : list A)
-  : incl l1 l2 <-> inclb l1 l2 = true.
+Lemma map_list_subseteq {A B} (f : A -> B) :
+  forall l1 l2 : list A,
+    l1 ⊆ l2 -> map f l1 ⊆ map f l2.
 Proof.
-  unfold inclb.
-  rewrite forallb_forall.
-  by split; intros Hincl x Hx; apply in_correct; apply Hincl.
-Qed.
-
-Lemma map_incl {A B} (f : B -> A) : forall s s',
-  incl s s' ->
-  incl (map f s) (map f s').
-Proof.
-  intros s s' Hincl fx Hin.
-  apply in_map_iff .
-  by apply in_map_iff in Hin as (x & Heq & Hin); eauto.
+  unfold subseteq, list_subseteq.
+  intros l1 l2 Hsub b Hin.
+  rewrite elem_of_list_In, in_map_iff in Hin |- *.
+  destruct Hin as (x & <- & Hin').
+  exists x.
+  rewrite <- elem_of_list_In in *.
+  by split; [| apply Hsub].
 Qed.
 
 Definition app_cons {A}
@@ -863,9 +847,7 @@ Lemma map_option_app
   l1 l2
   : map_option f (l1 ++ l2) = map_option f l1 ++ map_option f l2.
 Proof.
-  induction l1; [done |].
-  cbn; rewrite IHl1.
-  by destruct (f a).
+  by apply omap_app.
 Qed.
 
 Lemma map_option_app_rev
@@ -873,7 +855,7 @@ Lemma map_option_app_rev
   (f : A -> option B)
   l l1' l2'
   (Happ_rev : map_option f l = l1' ++ l2')
-  : exists l1 l2, l = l1 ++ l2 /\ map_option f l1 = l1' /\ map_option f l2 = l2'.
+  : exists l1 l2 : list A, l = l1 ++ l2 /\ map_option f l1 = l1' /\ map_option f l2 = l2'.
 Proof.
   revert l1' l2' Happ_rev.
   induction l; intros.
@@ -954,7 +936,7 @@ Lemma elem_of_map_option :
   forall {A B : Type} (f : A -> option B) (l : list A) (y : B),
     y ∈ map_option f l <-> exists x : A, x ∈ l /\ f x = Some y.
 Proof.
-  apply @elem_of_list_omap.
+  by apply @elem_of_list_omap.
 Qed.
 
 Lemma NoDup_map_option :

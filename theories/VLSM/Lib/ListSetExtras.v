@@ -181,7 +181,6 @@ Proof.
   rewrite Exists_exists in *.
   destruct H as [x [Hx Ha]].
   exists x.
-  unfold incl in Hincl.
   by split; [apply Hincl |].
 Qed.
 
@@ -676,7 +675,6 @@ Proof.
   apply filter_ext_elem_of. intros.
   unfold set_eq in H1.
   destruct H1 as [H1 H1'].
-  unfold incl in *.
   specialize (H1 a). specialize (H1' a).
   split; intros.
   - by eapply elem_of_list_filter, H1, elem_of_list_filter.

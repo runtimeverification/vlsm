@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Program.
-From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM.Lib Require Import Preamble ListExtras StdppExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition SubProjectionTraces.
 From VLSM.Core Require Import Equivocation Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
@@ -153,7 +153,7 @@ Lemma replayed_initial_state_from_lift
   : finite_trace_last full_replay_state (replayed_initial_state_from full_replay_state is)
     = lift_equivocators_sub_state_to full_replay_state is.
 Proof.
-  cut (forall l (Hincl : incl l (enum (sub_index equivocating))) (Hnodup : NoDup l),
+  cut (forall l (Hincl : l ⊆ enum (sub_index equivocating)) (Hnodup : NoDup l),
     let tr_full_replay_is :=
       composite_apply_plan equivocator_IM full_replay_state
         (map (initial_new_machine_transition_item is)
@@ -168,7 +168,7 @@ Proof.
       | _ =>  full_replay_state i
       end)).
   {
-    intros Hcut; specialize (Hcut _ (incl_refl _) ltac:(apply NoDup_enum)).
+    intros Hcut; specialize (Hcut _ ltac:(done) ltac:(apply NoDup_enum)).
     unfold replayed_initial_state_from, composite_apply_plan.
     rewrite _apply_plan_last; extensionality i.
     specialize (Hcut i); unfold composite_apply_plan in Hcut; unfold spawn_initial_state
@@ -181,7 +181,7 @@ Proof.
   induction l using rev_ind; intros.
   - case_decide; [| done].
     by rewrite decide_False; [| inversion 1].
-  - spec IHl; [by apply incl_app_inv in Hincl; apply Hincl |].
+  - spec IHl; [by apply list_subseteq_inv_app in Hincl; apply Hincl |].
     spec IHl; [by apply NoDup_app in Hnodup; apply Hnodup |].
     subst tr_full_replay_is.
     rewrite map_app, (composite_apply_plan_app equivocator_IM); simpl in *

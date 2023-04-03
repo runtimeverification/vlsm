@@ -362,15 +362,13 @@ Proof.
   by apply elem_of_list_filter.
 Qed.
 
-Lemma filter_incl_fn {A} P Q
+Lemma list_subseteq_filter {A} P Q
   `{forall (x : A), Decision (P x)} `{forall (x : A), Decision (Q x)} :
   (forall a, P a -> Q a) ->
-  forall s, incl (filter P s) (filter Q s).
+  forall s : list A, filter P s ⊆ filter Q s.
 Proof.
-  induction s; simpl.
-  - by apply incl_refl.
-  - intros x HIn. rewrite filter_cons in *.
-    by destruct (decide (P a)), (decide (Q a)); cbn in *; itauto.
+  induction s; cbn; intros x Hin; [done |].
+  by destruct (decide (P a)), (decide (Q a)); cbn in *; rewrite ?elem_of_cons in *; itauto.
 Qed.
 
 Lemma filter_length_fn {A} P Q
@@ -455,20 +453,6 @@ Proof.
   - by itauto.
 Qed.
 
-Lemma filter_incl {A} P `{forall (x : A), Decision (P x)} s1 s2 :
-  incl s1 s2 ->
-  incl (filter P s1) (filter P s2).
-Proof.
-  induction s1; cbn; intros H0 x H1; [done |].
-  destruct (decide (P a)).
-  - destruct H1 as [-> |].
-    + by apply filter_in; [apply H0; left |].
-    + apply IHs1; [| done].
-      by intros y HIn; apply H0; right.
-  - apply IHs1; [| done].
-    by intros y HIn; apply H0; right.
-Qed.
-
 Lemma Forall_filter_nil {A} P `{forall (x : A), Decision (P x)} l :
   Forall (fun a : A => ~ P a) l <-> filter P l = [].
 Proof.
@@ -513,19 +497,6 @@ Proof.
   by induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
 Qed.
 
-Lemma elem_of_map_option
-  {A B : Type}
-  (f : A -> option B)
-  (l : list A)
-  (b : B)
-  : b ∈ map_option f l <-> exists a : A, a ∈ l /\ f a = Some b.
-Proof.
-  induction l as [| h t]; cbn.
-  - by setoid_rewrite elem_of_nil; firstorder.
-  - by destruct (f h) eqn: Heq; setoid_rewrite elem_of_cons
-    ; firstorder; subst; itauto (eauto || congruence).
-Qed.
-
 Lemma occurrences_ordering
   {A : Type}
   (a b : A)
@@ -557,40 +528,6 @@ Proof.
   by destruct (Nat.max_spec_le a (list_max l)) as [[H ->] | [H ->]]; itauto lia.
 Qed.
 
-Lemma in_map_option
-  {A B : Type}
-  (f : A -> option B)
-  (l : list A)
-  (b : B)
-  : In b (map_option f l) <-> exists a : A, In a l /\ f a = Some b.
-Proof.
-  by setoid_rewrite <- elem_of_list_In; apply elem_of_map_option.
-Qed.
-
-Lemma elem_of_map_option_rev
-  {A B : Type}
-  (f : A -> option B)
-  (a : A)
-  (b : B)
-  (Hab : f a = Some b)
-  (l : list A)
-  : a ∈ l -> b ∈ map_option f l.
-Proof.
-  by intro Ha; apply elem_of_map_option; exists a; itauto.
-Qed.
-
-Lemma in_map_option_rev
-  {A B : Type}
-  (f : A -> option B)
-  (a : A)
-  (b : B)
-  (Hab : f a = Some b)
-  (l : list A)
-  : In a l -> In b (map_option f l).
-Proof.
-  by setoid_rewrite <- elem_of_list_In; apply elem_of_map_option_rev.
-Qed.
-
 Lemma map_option_subseteq
   {A B : Type}
   (f : A -> option B)
@@ -608,25 +545,6 @@ Lemma elem_of_cat_option
   : a ∈ cat_option l <-> exists b : option A, b ∈ l /\ b = Some a.
 Proof.
   by apply elem_of_map_option.
-Qed.
-
-Lemma in_cat_option
-  {A : Type}
-  (l : list (option A))
-  (a : A)
-  : In a (cat_option l) <-> exists b : (option A), In b l /\ b = Some a.
-Proof.
-  by apply in_map_option.
-Qed.
-
-Lemma map_option_incl
-  {A B : Type}
-  (f : A -> option B)
-  (l1 l2 : list A)
-  (Hincl : incl l1 l2)
-  : incl (map_option f l1) (map_option f l2).
-Proof.
-  by intros b; rewrite !in_map_option; firstorder.
 Qed.
 
 Lemma list_max_elem_of_exists2
@@ -726,4 +644,15 @@ Lemma mbind_nils :
 Proof.
   induction 1; cbn; [done |].
   by rewrite H, IHForall; cbn.
+Qed.
+
+Lemma list_subseteq_inv_app :
+  forall {A : Type} (l1 l2 l3 : list A),
+    l1 ++ l2 ⊆ l3 -> l1 ⊆ l3 /\ l2 ⊆ l3.
+Proof.
+  unfold subseteq, list_subseteq.
+  intros A l1 l2 l3 Hsub.
+  split; intros x Hin.
+  - by apply Hsub, elem_of_app; left.
+  - by apply Hsub, elem_of_app; right.
 Qed.
