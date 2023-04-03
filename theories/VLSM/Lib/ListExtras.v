@@ -12,9 +12,9 @@ From VLSM.Lib Require Import Preamble.
 Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a :: nil)}} + {l = nil} .
 Proof.
-  destruct (decide (l = [])).
+  destruct l as [| h t].
   - by right.
-  - by left; apply exists_last in n.
+  - by left; apply exists_last.
 Qed.
 
 (**
@@ -586,14 +586,15 @@ Proof.
     by specialize (IHl n0 eq_refl n3 eq_refl); lia.
 Qed.
 
-Lemma Forall_filter
+(* TODO(wkolowski): Forall_filter, Forall_hd and Forall_tl should end with Qed! *)
+Fixpoint Forall_filter
   {A : Type}
   (P : A -> Prop)
   {Pdec : forall a : A, Decision (P a)}
   (l : list A) : Forall P (filter P l).
 Proof.
-  induction l as [| h t]; cbn; [done |].
-  by destruct (decide (P h)); [constructor |].
+  destruct l; cbn; [done |].
+  by destruct (decide (P a)); eauto.
 Defined.
 
 (**
