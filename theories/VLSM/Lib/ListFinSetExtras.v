@@ -2,6 +2,8 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppListFinSet.
 
+Set Default Proof Using "Type".
+
 Section sec_defs.
 
 Context `{FinSet A C}.
@@ -20,11 +22,11 @@ Definition set_diff (x y : set) : set := x ∖ y.
 
 Lemma set_union_subseteq_left :
   forall (s1 s2 : set), s1 ⊆ set_union s1 s2.
-Proof. by intros s1 s2 x Hincl; apply set_union_intro; left. Qed.
+Proof using H6 H5 H4 H3 H1 H0 EqDecision0. by intros s1 s2 x Hincl; apply set_union_intro; left. Qed.
 
 Lemma set_union_subseteq_iff :
   forall (s1 s2 s : set), set_union s1 s2 ⊆ s <-> s1 ⊆ s /\ s2 ⊆ s.
-Proof.
+Proof using H6 H5 H4 H3 H1 H0 EqDecision0.
   intros s1 s2 s.
   unfold subseteq, set_subseteq_instance, set_subseteq_instance.
   setoid_rewrite set_union_iff.
@@ -37,7 +39,7 @@ Proof. by intros a s1 s2 Ha Hincl; apply Hincl. Qed.
 
 Lemma empty_subseteq :
   forall (s : set), ∅ ⊆ s.
-Proof. by intros s x Hin; contradict Hin; apply not_elem_of_empty. Qed.
+Proof using H6 H5 H4 H3 H2 H1 EqDecision0. by intros s x Hin; contradict Hin; apply not_elem_of_empty. Qed.
 
 #[export] Instance elem_of_dec : RelDecision (@elem_of A C _) := elem_of_dec_slow.
 

@@ -4,6 +4,8 @@ From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble StdppExtras.
 From VLSM.Core Require Import VLSM MessageDependencies.
 
+Set Default Proof Using "Type".
+
 (** * Basic Definitions and Lemmas for UMO, MO and ELMO
 
   This module contains basic definitions and lemmas needed for the UMO, MO and
@@ -77,7 +79,7 @@ Proof. by intros x y; unfold Decision; decide equality. Defined.
 #[local] Lemma State_eq_dec : forall x y : State, {x = y} + {x <> y}
 with Observation_eq_dec : forall x y : Observation, {x = y} + {x <> y}
 with Message_eq_dec : forall x y : Message, {x = y} + {x <> y}.
-Proof.
+Proof using EqDecision0.
   - intros x y; decide equality.
     + by apply EqDecision0.
     + by decide equality.
@@ -696,7 +698,7 @@ Definition ELMO_A (a : Address) : index :=
   hd inhabitant (filter (fun i => idx i = a) (enum index)).
 
 Lemma ELMO_A_inv : forall i, ELMO_A (idx i) = i.
-Proof.
+Proof using Inj0.
   intro i; unfold ELMO_A; cbn.
   replace (filter _ _) with [i]; [done |].
   generalize (enum index), (NoDup_enum index) as Hnodup, (elem_of_enum i) as Hi.

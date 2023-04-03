@@ -1,6 +1,8 @@
 From Coq Require Import Reals.
 From stdpp Require Import prelude.
 
+Set Default Proof Using "Type".
+
 (** * Real number utility definitions and lemmas *)
 
 (** Sum a list of real numbers. *)

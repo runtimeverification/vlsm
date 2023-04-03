@@ -4,6 +4,8 @@ From VLSM.Lib Require Import Preamble ListExtras ListFinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Message Dependencies
 
   An abstract framework for the full-node condition.
@@ -133,7 +135,7 @@ Lemma msg_dep_reflects_validity
   : forall dm m, msg_dep_rel dm m ->
     valid_message_prop (pre_loaded_vlsm X P) m ->
     valid_message_prop (pre_loaded_vlsm X P) dm.
-Proof.
+Proof using MessageDependencies0 Irreflexive0 HasBeenSentCapability0 HasBeenReceivedCapability0.
   intros dm m Hdm.
   rewrite emitted_messages_are_valid_iff, can_emit_iff.
   intros [Hinit | [s Hproduce]].
@@ -165,7 +167,7 @@ Lemma msg_dep_has_been_sent
   m
   (Hsent : has_been_sent X s m)
   : forall dm, msg_dep_rel dm m -> has_been_directly_observed X s dm.
-Proof.
+Proof using MessageDependencies0 Irreflexive0.
   revert m Hsent; induction Hs using valid_state_prop_ind; intro m.
   - intro Hbs; contradict Hbs.
     by apply has_been_sent_no_inits.
@@ -216,7 +218,7 @@ Lemma msg_dep_full_node_reflects_has_been_directly_observed
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
   : forall dm m, msg_dep_rel dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
-Proof.
+Proof using MessageDependencies0 Irreflexive0.
   intros dm m Hdm [Hsent | Hreceived].
   - by eapply msg_dep_has_been_sent.
   - by eapply full_node_has_been_received.
@@ -232,7 +234,7 @@ Lemma msg_dep_full_node_happens_before_reflects_has_been_directly_observed
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
   : forall dm m, msg_dep_happens_before dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
-Proof.
+Proof using MessageDependencies0 Irreflexive0.
   intros dm m Hdm Hobs.
   eapply msg_dep_happens_before_reflect; [| done ..].
   by apply msg_dep_full_node_reflects_has_been_directly_observed.
@@ -248,7 +250,7 @@ Lemma msg_dep_full_node_input_valid_happens_before_has_been_directly_observed
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m))
   : forall dm, msg_dep_happens_before dm m ->
     has_been_directly_observed X s dm.
-Proof.
+Proof using MessageDependencies0 Irreflexive0.
   intro dm; rewrite msg_dep_happens_before_iff_one; intros [Hdm | (dm' & Hdm' & Hdm)].
   - by eapply Hfull; [apply Hvalid |].
   - eapply msg_dep_happens_before_reflect; [| done |].
@@ -514,7 +516,7 @@ Context
 *)
 #[export] Instance composite_message_dependencies
   : MessageDependencies (free_composite_vlsm IM) message_dependencies.
-Proof.
+Proof using H10.
   split.
   - intros m s' ((s, iom) & [i li] & Ht) dm Hdm.
     apply composite_has_been_directly_observed_free_iff.
@@ -533,7 +535,7 @@ Lemma msg_dep_reflects_free_validity
   (X := free_composite_vlsm IM)
   : forall dm m, msg_dep_rel message_dependencies dm m ->
     valid_message_prop X m -> valid_message_prop X dm.
-Proof.
+Proof using Irreflexive0 H9 H8 H7 H10.
   intros dm m Hdm.
   rewrite !emitted_messages_are_valid_iff.
   intros [[i [[im Him] _]] | Hemit]
@@ -563,7 +565,7 @@ Lemma msg_dep_reflects_happens_before_free_validity
   (X := free_composite_vlsm IM)
   : forall dm m, msg_dep_happens_before message_dependencies dm m ->
     valid_message_prop X m -> valid_message_prop X dm.
-Proof.
+Proof using Irreflexive0 H9 H8 H7 H10.
   by apply msg_dep_happens_before_reflect, msg_dep_reflects_free_validity.
 Qed.
 
@@ -578,7 +580,7 @@ Lemma msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_send
     forall dm, msg_dep_happens_before message_dependencies dm m ->
     exists v, sender dm = Some v /\
       can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) dm.
-Proof.
+Proof using Irreflexive0 H9 H8 H7 H10.
   intros m Hm dm Hdm.
   cut (valid_message_prop X dm).
   - by apply composite_no_initial_valid_messages_emitted_by_sender.
@@ -778,7 +780,7 @@ Lemma tc_composite_observed_before_send_subsumes_happens_before
   forall m, can_emit Free m ->
   forall dm, msg_dep_happens_before message_dependencies dm m ->
     tc_composite_observed_before_send dm m.
-Proof.
+Proof using H7.
   intros m Hm dm Hdm.
   induction Hdm; [by eapply tc_composite_observed_before_send_subsumes_msg_dep_rel |].
   transitivity y; [| by apply IHHdm].
@@ -829,7 +831,7 @@ Definition full_node_is_globally_equivocating
 Lemma full_node_is_globally_equivocating_stronger s v :
   full_node_is_globally_equivocating s v ->
   msg_dep_is_globally_equivocating s v.
-Proof.
+Proof using EqDecision1.
   intros [m []]; exists m; constructor; [done | | done].
   by constructor 1; apply composite_has_been_directly_observed_sent_received_iff; right.
 Qed.
@@ -923,7 +925,7 @@ Lemma msg_dep_reflects_sub_free_validity
   : forall dm m, msg_dep_rel message_dependencies dm m ->
     valid_message_prop (pre_loaded_vlsm X P) m ->
     valid_message_prop (pre_loaded_vlsm X P) dm.
-Proof.
+Proof using Irreflexive0 H17 H16 H15.
   eapply msg_dep_reflects_validity; [| | done].
   - by typeclasses eauto.
   - intros m [sub_i [[im Him] Heqm]].
@@ -969,7 +971,7 @@ Context
 
 #[export] Instance msg_dep_happens_before_dec :
  RelDecision (msg_dep_happens_before message_dependencies).
-Proof.
+Proof using full_message_dependencies HFullMsgDep.
  refine
    (fun m1 m2 =>
       match decide (m1 ∈ full_message_dependencies m2) with
@@ -982,7 +984,7 @@ Qed.
 
 #[export] Instance msg_dep_happens_before_irrefl :
   Irreflexive (msg_dep_happens_before message_dependencies).
-Proof.
+Proof using full_message_dependencies HFullMsgDep.
   intros m Hm.
   contradict Hm.
   rewrite <- full_message_dependencies_happens_before.
@@ -995,7 +997,7 @@ Qed.
 Lemma msg_dep_rel_full_message_dependecies_subset :
   forall x y : message, msg_dep_rel message_dependencies x y ->
     full_message_dependencies x ⊆ full_message_dependencies y.
-Proof.
+Proof using HFullMsgDep.
   intros; intros z Hz.
   apply full_message_dependencies_happens_before.
   transitivity x; [by apply full_message_dependencies_happens_before |].
@@ -1003,7 +1005,7 @@ Proof.
 Qed.
 
 Lemma msg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies).
-Proof.
+Proof using full_message_dependencies HFullMsgDep.
   apply tc_wf_projected with (<) (fun m => length (elements (full_message_dependencies m)));
     [by typeclasses eauto | | by apply Wf_nat.lt_wf].
   intros; unfold lt.
@@ -1023,7 +1025,7 @@ Lemma FullMessageDependencies_ind
   (IHm : forall dm, dm ∈ full_message_dependencies m ->
     (forall dm0, dm0 ∈ full_message_dependencies dm -> P dm0) -> P dm)
   : forall dm, dm ∈ full_message_dependencies m -> P dm.
-Proof.
+Proof using message_dependencies HFullMsgDep H6 H5 H4 H3 H2 H1 H0 EqDecision0.
   induction m  as (m & Hm) using (well_founded_ind msg_dep_happens_before_wf).
   intros dm Hdm.
   apply IHm; [done |].
@@ -1111,7 +1113,7 @@ Lemma free_valid_from_valid_dependencies
     forall dm, dm ∈ full_message_dependencies m ->
       valid_message_prop (free_composite_vlsm IM) dm)
   : valid_message_prop (free_composite_vlsm IM) m.
-Proof.
+Proof using H9 H8 H7 H6 H5 H4 H3 H10 EqDecision1.
   eapply emitted_messages_are_valid, free_valid_preloaded_lifts_can_be_emitted; [| done].
   by intros; apply Hdeps, full_message_dependencies_happens_before, msg_dep_happens_before_iff_one;
     left.
@@ -1125,7 +1127,7 @@ Lemma free_valid_from_all_dependencies_emitable_from_dependencies :
   forall m,
     all_dependencies_emittable_from_dependencies_prop m ->
       valid_message_prop (free_composite_vlsm IM) m.
-Proof.
+Proof using H9 H7 H6 H5 H4 H3 H10 EqDecision1.
   intros m Hm.
   specialize (Hm m) as Hemit; spec Hemit; [left |].
   inversion Hemit as [v _ Hemit']; clear Hemit.
@@ -1147,7 +1149,7 @@ Qed.
 Lemma valid_free_validating_is_message_validating
   : forall i, valid_all_dependencies_emittable_from_dependencies_prop i ->
     component_message_validator_prop IM (free_constraint IM) i.
-Proof.
+Proof using H9 H7 H6 H5 H4 H3 H10 EqDecision1.
   by intros i Hvalidating l s im Hv
   ; eapply free_valid_from_all_dependencies_emitable_from_dependencies, Hvalidating.
 Qed.
@@ -1165,7 +1167,7 @@ Lemma valid_free_validating_equiv_message_validating
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   : forall i, component_message_validator_prop IM (free_constraint IM) i <->
   valid_all_dependencies_emittable_from_dependencies_prop i.
-Proof.
+Proof using H.
   intros i; split; [| apply valid_free_validating_is_message_validating].
   intros Hvalidator l s m Hv dm Hdm.
   specialize (Hvalidator l s m Hv).
@@ -1197,7 +1199,7 @@ Context
 #[export] Instance CompositeHasBeenObserved_dec
   `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   : RelDecision (CompositeHasBeenObserved IM message_dependencies).
-Proof.
+Proof using H7 EqDecision1.
   intros s m.
   destruct (decide (composite_has_been_directly_observed IM s m));
     [by left; constructor |].
@@ -1245,7 +1247,7 @@ Lemma input_valid_transition_preserves_msg_dep_is_globally_equivocating :
     forall v, A v = j ->
       msg_dep_is_globally_equivocating IM message_dependencies sender s v ->
       msg_dep_is_globally_equivocating IM message_dependencies sender (destination item) v.
-Proof.
+Proof using Hsender_safety Hauth.
   intros s item Ht j Hsj v Hv [m []].
   exists m; constructor; [done | ..].
   - by eapply transition_preserves_CompositeHasBeenObserved.

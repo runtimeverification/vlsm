@@ -5,6 +5,8 @@ From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation Equivocation.NoEquivocation.
 
+Set Default Proof Using "Type".
+
 (** * Fixed Set Equivocation
 
   In this section we define fixed equivocation for the regular composition.
@@ -115,7 +117,7 @@ Definition sent_by_non_equivocating s m
   := exists i, i ∉ elements equivocating /\ has_been_sent (IM i) (s i) m.
 
 #[export] Instance sent_by_non_equivocating_dec : RelDecision sent_by_non_equivocating.
-Proof.
+Proof using H7 EqDecision0.
   intros s m.
   apply @Decision_iff with (P := Exists (fun i => has_been_sent (IM i) (s i) m)
     (filter (fun i => i ∉ elements equivocating) (enum index))).
@@ -136,7 +138,7 @@ Qed.
 Lemma sent_by_non_equivocating_are_directly_observed s m
   (Hsent : sent_by_non_equivocating s m)
   : composite_has_been_directly_observed IM s m.
-Proof.
+Proof using EqDecision0.
   apply composite_has_been_directly_observed_sent_received_iff; left.
   by apply sent_by_non_equivocating_are_sent.
 Qed.
@@ -241,7 +243,7 @@ Lemma fixed_equivocation_index_incl_subsumption
   : forall s m,
     fixed_equivocation IM indices1 s m ->
     fixed_equivocation IM indices2 s m.
-Proof.
+Proof using Hincl.
   intros s m [Hobs | Hemit]; [by left |].
   right.
   specialize
@@ -254,7 +256,7 @@ Lemma fixed_equivocation_constraint_index_incl_subsumption
   : strong_constraint_subsumption IM
     (fixed_equivocation_constraint IM indices1)
     (fixed_equivocation_constraint IM indices2).
-Proof.
+Proof using Hincl.
   intros l (s, [m |]); [| done].
   by apply fixed_equivocation_index_incl_subsumption.
 Qed.
@@ -263,7 +265,7 @@ Lemma fixed_equivocation_vlsm_composition_index_incl
   : VLSM_incl
     (fixed_equivocation_vlsm_composition IM indices1)
     (fixed_equivocation_vlsm_composition IM indices2).
-Proof.
+Proof using Hincl.
   apply constraint_subsumption_incl.
   apply preloaded_constraint_subsumption_stronger.
   apply strong_constraint_subsumption_strongest.
@@ -399,7 +401,7 @@ Context
   l m
   (Hv : input_valid Fixed l (s, Some m))
   : strong_fixed_equivocation IM equivocators base_s m.
-Proof.
+Proof using Hobs_s_protocol.
   destruct Hv as [_ [_ [_ [Hobs | Hemit]]]].
   - by apply Hobs_s_protocol.
   - right.
@@ -424,7 +426,7 @@ Qed.
       (composite_label_sub_projection IM (elements equivocators) l e)
       (composite_state_sub_projection IM (elements equivocators) s, iom)
       (composite_state_sub_projection IM (elements equivocators) sf, oom).
-Proof.
+Proof using Hobs_s_protocol.
   destruct l as (i, li). simpl in *.
   repeat split.
   - done.
@@ -453,7 +455,7 @@ Qed.
   l iom om
   (Ht : input_valid_transition Fixed l (s, iom) (sf, Some om))
   : strong_fixed_equivocation IM equivocators base_s om.
-Proof.
+Proof using Hobs_s_protocol.
   destruct (decide (projT1 l ∈ elements equivocators)).
   - apply
       (fixed_input_valid_transition_sub_projection_helper Hs_pr _ e) in Ht.
@@ -495,7 +497,7 @@ Lemma fixed_finite_valid_trace_sub_projection_helper
     (finite_trace_sub_projection IM (elements equivocators) tr) /\
     forall m, composite_has_been_directly_observed IM s m ->
       strong_fixed_equivocation IM equivocators base_s m.
-Proof.
+Proof using H7.
   induction Htr using finite_valid_trace_init_to_rev_ind.
   - split.
     + apply finite_valid_trace_from_to_empty.
@@ -559,7 +561,7 @@ Lemma fixed_finite_valid_trace_sub_projection is f tr
               (composite_state_sub_projection IM (elements equivocators) is)
               (composite_state_sub_projection IM (elements equivocators) f)
               (finite_trace_sub_projection IM (elements equivocators) tr).
-Proof.
+Proof using H7.
   apply fixed_finite_valid_trace_sub_projection_helper with (base_s := f) in Htr as Htr_pr.
   - split; [by apply Htr_pr |].
     apply proj2 in Htr.
@@ -578,7 +580,7 @@ Lemma fixed_directly_observed_has_strong_fixed_equivocation f
   m
   (Hobs : composite_has_been_directly_observed IM f m)
   : strong_fixed_equivocation IM equivocators f m.
-Proof.
+Proof using H7.
   apply (VLSM_incl_valid_state Fixed_incl_Preloaded) in Hf as Hfuture.
   apply in_futures_refl in Hfuture.
   apply valid_state_has_trace in Hf as [is [tr Htr]].
@@ -591,7 +593,7 @@ Lemma fixed_valid_state_sub_projection s f
   : valid_state_prop
     (equivocators_composition_for_sent IM equivocators f)
     (composite_state_sub_projection IM (elements equivocators) s).
-Proof.
+Proof using H7.
   destruct Hsf as [tr Htr].
   apply finite_valid_trace_from_to_complete_left in Htr as [is [trs [Htr Hs]]].
   apply fixed_finite_valid_trace_sub_projection in Htr as Hpr_tr.
@@ -610,7 +612,7 @@ Lemma fixed_input_has_strong_fixed_equivocation
   l s m
   (Ht : input_valid Fixed l (s, Some m))
   : strong_fixed_equivocation IM equivocators s m.
-Proof.
+Proof using H7.
   apply fixed_input_has_strong_fixed_equivocation_helper with (base_s := s) in Ht
   ; [done |].
   by apply fixed_directly_observed_has_strong_fixed_equivocation, Ht.
@@ -624,7 +626,7 @@ Lemma fixed_output_has_strong_fixed_equivocation
   l s iom sf om
   (Ht : input_valid_transition Fixed l (s, iom) (sf, Some om))
   : strong_fixed_equivocation IM equivocators sf om.
-Proof.
+Proof using H7.
   apply input_valid_transition_origin in Ht as Hs.
   apply fixed_output_has_strong_fixed_equivocation_helper with s sf l iom.
   - intros m Hobs. apply in_futures_preserves_strong_fixed_equivocation with s.
@@ -679,7 +681,7 @@ Lemma Equivocators_Fixed_Strong_incl base_s
   : VLSM_incl
       (equivocators_composition_for_directly_observed IM equivocators base_s)
       (equivocators_composition_for_sent IM equivocators base_s).
-Proof.
+Proof using H7.
   apply basic_VLSM_incl.
   - by intros s Hincl.
   - intros l s m Hv HsY [Hinit | Hobs]
@@ -695,7 +697,7 @@ Lemma Equivocators_Fixed_Strong_eq base_s
   : VLSM_eq
       (equivocators_composition_for_directly_observed IM equivocators base_s)
       (equivocators_composition_for_sent IM equivocators base_s).
-Proof.
+Proof using H7.
   apply VLSM_eq_incl_iff. split.
   - by apply Equivocators_Fixed_Strong_incl.
   - by apply Equivocators_Strong_Fixed_incl.
@@ -709,7 +711,7 @@ Lemma fixed_strong_equivocation_subsumption
   : input_valid_constraint_subsumption IM
     (fixed_equivocation_constraint IM equivocators)
     (strong_fixed_equivocation_constraint IM equivocators).
-Proof.
+Proof using H7.
   intros l (s, om) Hv.
   destruct om as [m |]; [| done].
   apply proj1 in Hv as Hs.
@@ -717,12 +719,12 @@ Proof.
 Qed.
 
 Lemma Fixed_incl_StrongFixed : VLSM_incl Fixed StrongFixed.
-Proof.
+Proof using H7.
   apply constraint_subsumption_incl. apply fixed_strong_equivocation_subsumption.
 Qed.
 
 Lemma Fixed_eq_StrongFixed : VLSM_eq Fixed StrongFixed.
-Proof.
+Proof using H7.
   apply VLSM_eq_incl_iff. split.
   - by apply Fixed_incl_StrongFixed.
   - by apply StrongFixed_incl_Fixed.
@@ -878,7 +880,7 @@ Context
 Lemma fixed_equivocator_lifting_initial_state :
   weak_projection_initial_state_preservation EquivPreloadedBase Fixed
     (lift_sub_state_to IM (elements equivocators) base_s).
-Proof.
+Proof using Hbase_s H7.
   intros eqv_is Heqv_is.
   apply (VLSM_incl_valid_state (StrongFixed_incl_Fixed IM equivocators)).
   apply (VLSM_projection_valid_state (remove_equivocating_transitions_fixed_projection _ Heqv_is)).
@@ -925,7 +927,7 @@ Lemma EquivPreloadedBase_Fixed_weak_embedding
     forall i m, i ∈ equivocators -> ~ vinitial_message_prop (IM i) m)
   : VLSM_weak_embedding EquivPreloadedBase Fixed
       (lift_sub_label IM (elements equivocators)) (lift_sub_state_to IM (elements equivocators) base_s).
-Proof.
+Proof using Hbase_s H7 H6 H4 H3 H2 H1 H0.
   apply basic_VLSM_weak_embedding.
   - intros l s om Hv HsY HomY. split.
     + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
@@ -985,7 +987,7 @@ Context
 Lemma strong_fixed_equivocation_no_equivocators
   : forall s m,
   strong_fixed_equivocation IM (@empty Ci _) s m <-> composite_has_been_sent IM s m.
-Proof.
+Proof using H6 H4 H3 H2 H1 H.
   intros s m.
   split.
   - intros [Hsent | Hemit].
@@ -1002,7 +1004,7 @@ Lemma strong_fixed_equivocation_constraint_no_equivocators
   : forall l som,
     strong_fixed_equivocation_constraint IM (@empty Ci _) l som <->
     composite_no_equivocations IM l som.
-Proof.
+Proof using H6 H4 H3 H2 H1 H.
   intros.
   destruct som as (s, [m |]); [| done].
   simpl.
@@ -1014,7 +1016,7 @@ Qed.
 Lemma strong_fixed_equivocation_vlsm_composition_no_equivocators
   : VLSM_eq (strong_fixed_equivocation_vlsm_composition IM (@empty Ci _))
       (composite_vlsm IM (composite_no_equivocations IM)).
-Proof.
+Proof using H6 H4 H3 H2 H1 H.
   apply VLSM_eq_incl_iff.
   split.
   - apply constraint_subsumption_incl.
@@ -1032,7 +1034,7 @@ Qed.
 Lemma fixed_equivocation_vlsm_composition_no_equivocators
   : VLSM_eq (fixed_equivocation_vlsm_composition IM (@empty Ci _))
       (composite_vlsm IM (composite_no_equivocations IM)).
-Proof.
+Proof using H7 H6 H4 H3 H2 H1 H.
   eapply VLSM_eq_trans.
   - by apply Fixed_eq_StrongFixed.
   - by apply strong_fixed_equivocation_vlsm_composition_no_equivocators.
@@ -1070,7 +1072,7 @@ Lemma lift_strong_fixed_non_equivocating
   : VLSM_embedding StrongFixedNonEquivocating StrongFixed
     (lift_sub_label IM (elements non_equivocators))
     (lift_sub_state IM (elements non_equivocators)).
-Proof.
+Proof using H6 H3 H EqDecision0.
   apply induced_sub_projection_lift.
   intros s1 s2 Heq l om.
   destruct om as [m |]; [| by itauto].
@@ -1107,7 +1109,7 @@ Lemma lift_fixed_non_equivocating
   : VLSM_embedding FixedNonEquivocating Fixed
     (lift_sub_label IM (elements non_equivocators))
     (lift_sub_state IM (elements non_equivocators)).
-Proof.
+Proof using H6 H3 H EqDecision0.
   constructor.
   intros sX trX Htr.
   apply
@@ -1124,7 +1126,7 @@ Lemma fixed_non_equivocating_projection_friendliness
   : projection_friendly_prop
       (induced_sub_projection_is_projection IM (elements non_equivocators)
         (fixed_equivocation_constraint IM equivocators)).
-Proof.
+Proof using H6 H3 H EqDecision0.
   apply induced_sub_projection_friendliness.
   by apply lift_fixed_non_equivocating.
 Qed.
@@ -1140,7 +1142,7 @@ Lemma fixed_non_equivocating_traces_char is tr
     finite_valid_trace Fixed eis etr /\
     composite_state_sub_projection IM (elements non_equivocators) eis = is /\
     finite_trace_sub_projection IM (elements non_equivocators) etr = tr.
-Proof.
+Proof using H6 H3 H EqDecision0.
   apply (projection_friendly_trace_char (induced_sub_projection_is_projection _ _ _)).
   by apply fixed_non_equivocating_projection_friendliness.
 Qed.

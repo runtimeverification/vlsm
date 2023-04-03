@@ -3,6 +3,8 @@ From stdpp Require Import prelude.
 From Coq Require Import Streams.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Basics
 
   This module provides basic VLSM infrastructure.
@@ -2767,7 +2769,7 @@ Proof. by subst. Qed.
 
 Lemma same_VLSM_initial_message_preservation m
   : vinitial_message_prop X1 m -> vinitial_message_prop X2 m.
-Proof. by subst. Qed.
+Proof using Heq. by subst. Qed.
 
 End sec_same_VLSM.
 
@@ -2848,7 +2850,7 @@ Lemma history_unique_trace_to_reachable :
   forall is s tr, finite_valid_trace_init_to R is s tr ->
   forall is' tr', finite_valid_trace_init_to R is' s tr' ->
     is' = is /\ tr' = tr.
-Proof.
+Proof using H.
   intros is s tr Htr; induction Htr using finite_valid_trace_init_to_rev_ind;
     intros is' tr' [Htr' His'].
   - destruct_list_last tr' tr'' item Heqtr'; [by inversion Htr' | subst].

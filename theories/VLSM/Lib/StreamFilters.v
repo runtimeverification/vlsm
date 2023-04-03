@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
 From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras NeList.
 
+Set Default Proof Using "Type".
+
 (**
   Given a predicate <<P>> and a stream <<s>>, a stream of naturals <<ns>>
   determines a [filtering_subsequence] for <<P>> on <<s>> if it corresponds to
@@ -377,7 +379,7 @@ Fixpoint stream_filter_fst_pos
   (n : nat)
   {struct Hev}
   : nat * Stream A.
-Proof.
+Proof using Pdec.
   refine
     (match decide (P (hd s)) with
       | left p => (n, tl s)

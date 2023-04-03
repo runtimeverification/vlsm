@@ -6,6 +6,8 @@ From VLSM.Lib Require Import ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 From VLSM.Core Require Export ReachableThreshold.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Equivocation Definitions
 
   This module is dedicated to building the vocabulary for discussing equivocation.
@@ -881,7 +883,7 @@ Lemma prove_all_have_message_from_stepwise :
          (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
          (m : message),
     all_traces_have_message_prop vlsm selector oracle s m.
-Proof.
+Proof using oracle_props.
   intros s Hproto m.
   unfold all_traces_have_message_prop.
   split.
@@ -898,7 +900,7 @@ Lemma prove_none_have_message_from_stepwise :
          (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
          (m : message),
     no_traces_have_message_prop vlsm selector (fun s m => ~ oracle s m) s m.
-Proof.
+Proof using oracle_props.
   intros s Hproto m.
   split.
   - intros H_not_holds start tr Htr.
@@ -916,7 +918,7 @@ Lemma selected_messages_consistency_prop_from_stepwise
     (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
     (m : message)
     : selected_messages_consistency_prop vlsm selector s m.
-Proof.
+Proof using oracle_props.
   split; [| by apply consistency_from_valid_state_proj2].
   intro Hsome.
   destruct (decide (oracle s m)) as [Hsm | Hsm].
@@ -931,7 +933,7 @@ Lemma in_futures_preserving_oracle_from_stepwise :
     (Hfutures : in_futures (pre_loaded_with_all_messages_vlsm vlsm) s1 s2)
     (m : message),
     oracle s1 m -> oracle  s2 m.
-Proof.
+Proof using selector oracle_props.
   intros s1 s2 [tr Htr] m Hs1m.
   by eapply oracle_partial_trace_update; [| | right].
 Qed.
@@ -963,7 +965,7 @@ Context
 Lemma oracle_no_inits_from_trace :
   forall (s : vstate vlsm), initial_state_prop (VLSMMachine := vmachine vlsm) s ->
                            forall m, ~ oracle s m.
-Proof.
+Proof using selector Horacle_all_have.
   intros s Hinit m Horacle.
   assert (Hproto : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
     by (apply initial_state_is_valid; done).
@@ -979,7 +981,7 @@ Lemma examine_one_trace :
   forall m,
     oracle s m <->
     trace_has_message selector m tr.
-Proof.
+Proof using oracle_dec Horacle_all_have Hnot_oracle_none_have.
   intros is s tr Htr m.
   assert (valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
     by (apply valid_trace_last_pstate in Htr; done).
@@ -1002,7 +1004,7 @@ Lemma oracle_step_property_from_trace :
        forall msg, oracle s' msg
                    <-> (selector msg {| l := l; input := im; destination := s'; output := om |}
                         \/ oracle s msg).
-Proof.
+Proof using oracle_dec Horacle_all_have Hnot_oracle_none_have.
   intros l s im s' om Htrans msg.
   rename Htrans into Htrans'.
   pose proof Htrans' as [[Hproto_s [Hproto_m Hvalid]] Htrans].
@@ -1019,7 +1021,7 @@ Proof.
 Qed.
 
 Lemma stepwise_props_from_trace : oracle_stepwise_props selector oracle.
-Proof.
+Proof using oracle_dec Horacle_all_have Hnot_oracle_none_have.
   constructor.
   - by apply oracle_no_inits_from_trace.
   - by apply oracle_step_property_from_trace.
@@ -1493,7 +1495,7 @@ Qed.
 
 Lemma com_computable_oracle :
   computable_messages_oracle vlsm directly_observed_messages_set item_sends_or_receives.
-Proof.
+Proof using EqDecision0.
   constructor; intros.
   - setoid_rewrite directly_observed_messages_set_iff.
     + by apply has_been_directly_observed_stepwise_props.
@@ -1633,7 +1635,7 @@ Context
   .
 
 Definition composite_message_selector : message -> composite_transition_item IM -> Prop.
-Proof.
+Proof using message_selectors.
   intros msg [[i li] input s output].
   apply (message_selectors i msg).
   exact {| l := li; input := input; destination := s i; output := output |}.
@@ -1646,7 +1648,7 @@ Lemma composite_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   : oracle_stepwise_props (vlsm := X) composite_message_selector composite_oracle.
-Proof.
+Proof using stepwise_props.
   split.
   - (* initial states not claim *)
     intros s Hs m [i Horacle].
@@ -1693,7 +1695,7 @@ Lemma oracle_component_selected_previously
     in_futures X (destination item) s /\
     projT1 (l item) = i /\
     composite_message_selector m item.
-Proof.
+Proof using stepwise_props.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
   eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr
   ; [| by apply constraint_preloaded_free_incl].
@@ -1735,7 +1737,7 @@ Definition composite_has_been_sent
 
 (** [composite_has_been_sent] is decidable. *)
 Lemma composite_has_been_sent_dec : RelDecision composite_has_been_sent.
-Proof.
+Proof using H EqDecision0.
   intros s m.
   apply (Decision_iff (P := List.Exists (fun i => has_been_sent (IM i) (s i) m) (enum index))).
   - by rewrite Exists_finite.
@@ -1768,7 +1770,7 @@ Lemma composite_proper_sent
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
   (m : message)
   : has_been_sent_prop (free_composite_vlsm IM) composite_has_been_sent s m.
-Proof.
+Proof using H.
   specialize (proper_sent (free_composite_vlsm IM)) as Hproper_sent.
   by apply Hproper_sent.
 Qed.
@@ -1787,7 +1789,7 @@ Definition composite_has_been_received
 
 (** [composite_has_been_received] is decidable. *)
 Lemma composite_has_been_received_dec : RelDecision composite_has_been_received.
-Proof.
+Proof using H EqDecision0.
   intros s m.
   apply (Decision_iff (P := List.Exists (fun i => has_been_received (IM i) (s i) m) (enum index))).
   - by rewrite Exists_finite.
@@ -1858,7 +1860,7 @@ Definition composite_has_been_directly_observed
 
 (** [composite_has_been_directly_observed] is decidable. *)
 Lemma composite_has_been_directly_observed_dec : RelDecision composite_has_been_directly_observed.
-Proof.
+Proof using H EqDecision0.
   intros s m.
   apply (Decision_iff
     (P := List.Exists (fun i => has_been_directly_observed (IM i) (s i) m) (enum index))).
@@ -1882,7 +1884,7 @@ Definition composite_HasBeenDirectlyObservedCapability_from_stepwise
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   : HasBeenDirectlyObservedCapability X.
-Proof.
+Proof using H1 H0 H.
   exists composite_has_been_directly_observed.
   - by apply composite_has_been_directly_observed_dec.
   - by apply (composite_has_been_directly_observed_stepwise_props constraint).
@@ -1938,7 +1940,7 @@ Definition sender_safety_alt_prop : Prop :=
 
 Lemma sender_safety_alt_iff
   : sender_safety_prop <-> sender_safety_alt_prop.
-Proof.
+Proof using EqDecision0.
   split; intros Hsender_safety m; intros.
   - specialize (Hsender_safety m v Hsender).
     destruct (decide (i = A v)); [done |].
@@ -2149,7 +2151,6 @@ Lemma sent_component_sent_previously
     projT1 (l item) = i /\
     output item = Some m.
 Proof.
-  clear -Hs Horacle.
   specialize
     (oracle_component_selected_previously
       (fun i => has_been_sent_stepwise_props (IM i))
@@ -2172,7 +2173,6 @@ Lemma received_component_received_previously
     projT1 (l item) = i /\
     input item = Some m.
 Proof.
-  clear -Hs Horacle.
   specialize
     (oracle_component_selected_previously
       (fun i => has_been_received_stepwise_props (IM i))
@@ -2213,7 +2213,7 @@ Lemma messages_sent_from_component_of_valid_state_are_valid
   (m : message)
   (Hsent : has_been_sent (IM i) (s i) m) :
   valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H0 IM index message.
   by apply (sent_valid X s); [| exists i].
 Qed.
 
@@ -2227,7 +2227,7 @@ Lemma preloaded_messages_sent_from_component_of_valid_state_are_valid
   (m : message)
   (Hsent : has_been_sent (IM i) (s i) m) :
   valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H0 IM index message.
   by eapply sent_valid; [| exists i].
 Qed.
 
@@ -2240,7 +2240,7 @@ Lemma messages_received_from_component_of_valid_state_are_valid
   (m : message)
   (Hreceived : has_been_received (IM i) (s i) m)
   : valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H1 IM index message.
   by eapply received_valid; [| exists i].
 Qed.
 
@@ -2254,7 +2254,7 @@ Lemma preloaded_messages_received_from_component_of_valid_state_are_valid
   (m : message)
   (Hreceived : has_been_received (IM i) (s i) m)
   : valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H1 IM index message.
   by eapply received_valid; [| exists i].
 Qed.
 
@@ -2266,7 +2266,7 @@ Lemma composite_sent_valid
   (m : message)
   (Hsent : composite_has_been_sent s m)
   : valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H0 IM index message.
   destruct Hsent as [i Hsent].
   by apply messages_sent_from_component_of_valid_state_are_valid with s i.
 Qed.
@@ -2280,7 +2280,7 @@ Lemma preloaded_composite_sent_valid
   (m : message)
   (Hsent : composite_has_been_sent s m)
   : valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H0 IM index message.
   destruct Hsent as [i Hsent].
   by apply preloaded_messages_sent_from_component_of_valid_state_are_valid with s i.
 Qed.
@@ -2293,7 +2293,7 @@ Lemma composite_received_valid
   (m : message)
   (Hreceived : composite_has_been_received s m)
   : valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H1 IM index message.
   destruct Hreceived as [i Hreceived].
   by apply messages_received_from_component_of_valid_state_are_valid with s i.
 Qed.
@@ -2307,7 +2307,7 @@ Lemma preloaded_composite_received_valid
   (m : message)
   (Hreceived : composite_has_been_received s m)
   : valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H1 IM index message.
   destruct Hreceived as [i Hreceived].
   by apply preloaded_messages_received_from_component_of_valid_state_are_valid with s i.
 Qed.
@@ -2320,7 +2320,7 @@ Lemma composite_directly_observed_valid
   (m : message)
   (Hobserved : composite_has_been_directly_observed s m)
   : valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H0 H1 IM index message.
   destruct Hobserved as [i Hobserved].
   apply (has_been_directly_observed_sent_received_iff (IM i)) in Hobserved.
   - destruct Hobserved as [Hreceived | Hsent].
@@ -2338,7 +2338,7 @@ Lemma preloaded_composite_directly_observed_valid
   (m : message)
   (Hobserved : composite_has_been_directly_observed s m)
   : valid_message_prop X m.
-Proof.
+Proof using EqDecision0 Free H H0 H1 IM index message.
   destruct Hobserved as [i Hobserved].
   apply (has_been_directly_observed_sent_received_iff (IM i)) in Hobserved.
   - destruct Hobserved as [Hreceived | Hsent].
@@ -2632,7 +2632,7 @@ Context
 Lemma input_valid_transition_received_not_resent l s m s' om'
   (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, Some m) (s', om'))
   : om' <> Some m.
-Proof.
+Proof using H H0 Hno_resend X message.
   destruct om' as [m' |]; [| by congruence].
   intro Heq. inversion Heq. subst m'. clear Heq.
   destruct (Hno_resend _ _ _ _ _ Ht) as [_ Hnbr_m].
@@ -2653,7 +2653,7 @@ Lemma lift_preloaded_trace_to_seeded
   (is : state)
   (Htr : finite_valid_trace PreX is tr)
   : finite_valid_trace (pre_loaded_vlsm X P) is tr.
-Proof.
+Proof using EqDecision0 H H0 Hno_resend PreX X message.
   unfold trace_received_not_sent_before_or_after_invariant in Htrm.
   split; [| by apply Htr].
   induction Htr using finite_valid_trace_rev_ind; intros.
@@ -2707,7 +2707,7 @@ Lemma lift_preloaded_state_to_seeded
   (Hequiv_s : state_received_not_sent_invariant s P)
   (Hs : valid_state_prop PreX s)
   : valid_state_prop (pre_loaded_vlsm X P) s.
-Proof.
+Proof using EqDecision0 H H0 Hno_resend PreX X message.
   apply valid_state_has_trace in Hs as Htr.
   destruct Htr as [is [tr Htr]].
   specialize (lift_preloaded_trace_to_seeded P tr) as Hlift.
@@ -2725,7 +2725,7 @@ Lemma lift_generated_to_seeded
   (m : message)
   (Hgen : can_produce PreX s m)
   : can_produce (pre_loaded_vlsm X P) s m.
-Proof.
+Proof using EqDecision0 H H0 Hno_resend PreX X message.
   apply non_empty_valid_trace_from_can_produce.
   apply non_empty_valid_trace_from_can_produce in Hgen.
   destruct Hgen as [is [tr [item [Htr Hgen]]]].
@@ -2798,7 +2798,7 @@ Lemma all_pre_traces_to_valid_state_are_valid
   is tr
   (Htr : finite_valid_trace_init_to PreX is s tr)
   : finite_valid_trace_init_to X is s tr.
-Proof.
+Proof using EqDecision0 H H0 IM PreX X constraint index message.
   apply pre_traces_with_valid_inputs_are_valid in Htr; [done |].
   apply valid_trace_last_pstate in Htr as Hspre.
   intros.

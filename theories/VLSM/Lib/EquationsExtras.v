@@ -1,5 +1,7 @@
 From Equations Require Export Equations.
 
+Set Default Proof Using "Type".
+
 (** * Equations utility definitions
 
   The definition of [inspect] is available in Equations as of version 1.3+8.16.

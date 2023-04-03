@@ -3,6 +3,8 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppExtras.
 From VLSM.Core Require Import VLSM Composition VLSMProjections Validator.
 
+Set Default Proof Using "Type".
+
 Section sec_projections.
 
 (** * Composite VLSM induced projections

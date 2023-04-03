@@ -2,6 +2,8 @@ From stdpp Require Import prelude finite.
 From Coq Require Import FinFun.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras.
 
+Set Default Proof Using "Type".
+
 (** * Finite function utility definitions and lemmas *)
 
 Lemma listing_from_finite (A : Type) `{finite.Finite A} : Listing (enum A).

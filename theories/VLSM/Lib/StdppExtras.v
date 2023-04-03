@@ -2,6 +2,8 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 
+Set Default Proof Using "Type".
+
 (** * Std++ Related Results *)
 
 Lemma elem_of_take {A : Type} (l : list A) (n : nat) (x : A) :

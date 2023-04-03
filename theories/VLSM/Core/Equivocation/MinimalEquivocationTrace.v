@@ -3,6 +3,8 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras NatExt
 From VLSM.Core Require Import VLSM Composition.
 From VLSM.Core Require Import Equivocation MessageDependencies TraceableVLSM.
 
+Set Default Proof Using "Type".
+
 (** * Minimally-equivocating traces
 
   In this module we define a [choice_function], [minimal_equivocation_choice],
@@ -99,7 +101,7 @@ Lemma not_CompositeNthSentNotObserved_is_observed :
       ts !! n = Some (item, s) ->
       forall m, output item = Some m ->
       CompositeHasBeenObserved IM message_dependencies s m.
-Proof.
+Proof using full_message_dependencies H11 H EqDecision1.
   intros * Hnobs **.
   destruct (decide (CompositeHasBeenObserved IM message_dependencies s m)); [done |].
   by contradict Hnobs; econstructor.
@@ -115,7 +117,7 @@ Definition composite_latest_sent_not_observed_prop
 
 #[local] Instance composite_latest_sent_not_observed_dec s' :
   RelDecision (composite_latest_sent_not_observed_prop s').
-Proof.
+Proof using full_message_dependencies H11 H.
   intros i n.
   destruct (composite_state_destructor IM state_destructor s' i !! n)
     as [[item s] |] eqn: Hdestruct;
@@ -194,7 +196,7 @@ Qed.
 
 #[local] Instance latest_composite_observed_before_send_irreflexive s' :
   Irreflexive (latest_composite_observed_before_send s').
-Proof.
+Proof using Irreflexive0.
   intros a (s_i & item_i & m_i & s_j & item_j & m_j & [Hdestruct Houtput H_destruct H_output Hrel]).
   rewrite Hdestruct in H_destruct; inversion H_destruct; subst; clear H_destruct.
   rewrite Houtput in H_output; inversion H_output; subst.
@@ -210,7 +212,7 @@ Lemma composite_latest_sent_observed_in_before_send
     head (composite_state_destructor IM state_destructor s' j) = Some (item_j, s_j) ->
     output item_j = Some m_j ->
     latest_composite_observed_before_send s' i j.
-Proof.
+Proof using validator state_size sender full_message_dependencies Hchannel H13 H12 H11 A.
   intros Hs' Hdestruct_j Houtput_j.
   eapply composite_state_destructor_head_reachable in Hdestruct_j as Htj; [| done..].
   destruct Hij as [Hdestruct_i Houtput_i Hobs].
@@ -273,7 +275,7 @@ Lemma traceable_vlsm_initial_state_dec :
   forall (i : index) (si : vstate (IM i)),
     valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) si ->
     Decision (vinitial_state_prop (IM i) si).
-Proof.
+Proof using state_size state_destructor H13.
   intros; destruct (decide (state_destructor i si = nil)).
   - by left; apply tv_state_destructor_initial.
   - by right; contradict n; apply tv_state_destructor_initial.
@@ -456,7 +458,7 @@ Lemma all_latest_composite_observed_before_send_one_step
     forall isj, is' !! j = Some isj ->
     forall isi, is' !! (S j) = Some isi ->
     latest_composite_observed_before_send s isi isj.
-Proof.
+Proof using validator state_size sender full_message_dependencies Hchannel H13 H12 H11 A.
   intros Hall j isj Hisj isi Hisi.
   eapply ForAllSuffix2_lookup in Hisj as Hobs_j; [| done..].
   destruct Hobs_j as (s_isi & item_isi & m_isi & Hobs_j).
@@ -483,7 +485,7 @@ Lemma all_latest_composite_observed_before_send
     forall isi, is' !! i = Some isi ->
     forall isj, is' !! j = Some isj ->
     latest_composite_observed_before_send s isi isj.
-Proof.
+Proof using validator state_size sender full_message_dependencies Hchannel H13 H12 H11 A.
   intros Hall i j Hij; unfold gt, lt in Hij; remember (S j) as k.
   revert j Heqk; induction Hij; intros j -> isi Hisi isj Hisj.
   - by eapply all_latest_composite_observed_before_send_one_step.
@@ -530,7 +532,7 @@ Lemma at_least_one_send_not_previously_observed
     find_not_send_decomposition s' is = None ->
     find_sent_not_observed_decomposition s' is = None ->
       False.
-Proof.
+Proof using validator sender Irreflexive0 Hchannel H12 A.
   intros Hinitial Hnot_send Hsent_not_obs.
   assert (Hall_sent_observed :
     forall x : index, x ∈ is ->
@@ -592,7 +594,7 @@ Lemma minimal_equivocation_choice_monotone :
         forall v : validator,
           msg_dep_is_globally_equivocating IM message_dependencies sender s v ->
           msg_dep_is_globally_equivocating IM message_dependencies sender s' v.
-Proof.
+Proof using Irreflexive0 Hchannel H12 A.
   intros is Hnodup s' Hs' Hnis i Hi n Hchoice s item Hdestruct v [m []].
   eapply composite_state_destructor_lookup_reachable in Hdestruct as Ht;
     [| typeclasses eauto | done].
@@ -692,7 +694,7 @@ Lemma state_to_minimal_equivocation_trace_equivocation_monotonic :
         (finite_trace_last is pre) v ->
       msg_dep_is_globally_equivocating IM message_dependencies sender
         (destination item) v.
-Proof.
+Proof using Irreflexive0 Hchannel H12 A.
   intros.
   eapply composite_state_to_trace_P_monotonic with
     (P := fun s => msg_dep_is_globally_equivocating IM message_dependencies sender s v);

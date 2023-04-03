@@ -4,6 +4,8 @@ From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble ListSetExtras.
 From VLSM.Core Require Import VLSM Composition VLSMEmbedding.
 
+Set Default Proof Using "Type".
+
 (** * Traceable VLSMs
 
   This section introduces [TraceableVLSM]s, characterized by the fact that from
@@ -106,7 +108,7 @@ Lemma tv_state_destructor_size :
   forall s' : vstate X, valid_state_prop R s' ->
   forall (s : vstate X) (item : vtransition_item X),
     (item, s) ∈ state_destructor s' -> state_size s < state_size s'.
-Proof.
+Proof using TraceableVLSM0.
   intros.
   apply transition_monotonicity.
   erewrite <- tv_state_destructor_destination by done.
@@ -223,7 +225,7 @@ Qed.
 Lemma composite_tv_state_destructor_destination :
   forall (s' s : composite_state IM) (item : composite_transition_item IM) i,
      (item, s) ∈ composite_state_destructor s' i -> destination item = s'.
-Proof.
+Proof using state_size H0.
   intros *; unfold composite_state_destructor; rewrite elem_of_list_fmap.
   intros ([itemi si] & [= -> ->] & Hin).
   cbn; unfold lift_to_composite_state.
@@ -235,7 +237,7 @@ Lemma composite_tv_state_destructor_transition :
   forall (s : composite_state IM) (item : composite_transition_item IM) (i : index),
   (item, s) ∈ composite_state_destructor s' i ->
   input_valid_transition_item RFree s item.
-Proof.
+Proof using state_size H0.
   intros s' Hs' s item i.
   unfold composite_state_destructor; rewrite elem_of_list_fmap.
   intros ([itemi si] & [=-> ->] & Hin).
@@ -259,7 +261,7 @@ Lemma composite_tv_state_destructor_state_update :
   forall (s : composite_state IM) (item : composite_transition_item IM) (i : index),
   (item, s) ∈ composite_state_destructor s' i ->
   s' = state_update IM s i (destination item i).
-Proof.
+Proof using state_size H0.
   intros s' Hs' s item i Hin.
   replace s' with (destination item) in *
     by (eapply composite_tv_state_destructor_destination; done).
@@ -275,7 +277,7 @@ Lemma composite_tv_state_destructor_initial :
     vinitial_state_prop (IM i) (s i)
       <->
     composite_state_destructor s i = [].
-Proof.
+Proof using state_size H0.
   unfold composite_state_destructor; split; intros Hinit.
   - replace (state_destructor i (s i))
       with (@nil (vtransition_item (IM i) * vstate (IM i))); [done |].
@@ -291,7 +293,7 @@ Lemma composite_tv_state_destructor_reflects_initiality :
   forall (i : index) (s : composite_state IM) (item : composite_transition_item IM),
     (item, s) ∈ composite_state_destructor s' i ->
     forall j, vinitial_state_prop (IM j) (s' j) -> s j = s' j.
-Proof.
+Proof using state_size H0.
   intros s' Hs' i s item Hdestruct.
   apply composite_tv_state_destructor_state_update in Hdestruct as Heqs'; [| done].
   intros j Hinit; destruct (decide (i = j)); subst; [| by state_update_simpl].
@@ -304,7 +306,7 @@ Lemma composite_tv_state_destructor_size :
   forall (s : composite_state IM) (item : composite_transition_item IM) (i : index),
     (item, s) ∈ composite_state_destructor s' i ->
     composite_state_size s < composite_state_size s'.
-Proof.
+Proof using H0.
   intros s' Hs' s item i.
   unfold composite_state_destructor; rewrite elem_of_list_fmap.
   intros ([itemi si] & [= -> ->] & Hin).
@@ -320,7 +322,7 @@ Lemma composite_state_destructor_lookup_reachable :
   forall s' : composite_state IM, valid_state_prop RFree s' ->
   forall i n item s, composite_state_destructor s' i !! n = Some (item, s) ->
     input_valid_transition_item RFree s item.
-Proof.
+Proof using state_size H0.
   intros s' Hs' i n item s Hdestruct.
   by eapply composite_tv_state_destructor_transition, elem_of_list_lookup_2.
 Qed.
@@ -329,7 +331,7 @@ Lemma composite_state_destructor_head_reachable :
   forall s' : composite_state IM, valid_state_prop RFree s' ->
   forall i item s, head (composite_state_destructor s' i) = Some (item, s) ->
   input_valid_transition_item RFree s item.
-Proof.
+Proof using state_size H0.
   intros s' Hs' i item s Hdestruct.
   by eapply composite_tv_state_destructor_transition, head_Some_elem_of.
 Qed.
@@ -386,7 +388,7 @@ Lemma choosing_well_position_exists :
     (i_n :=  choose s' Hs' indices),
       composite_state_destructor s' i_n.1 <> [] ->
       composite_state_destructor s' i_n.1 !! i_n.2 <> None.
-Proof.
+Proof using state_size H0.
   intros choose s' Hs' indices Hchoose i_n Hdestruct.
   eapply not_eq_None_Some, cw_chosen_position_exists; [done | |].
   - by destruct (choose _ _ _).
@@ -417,7 +419,7 @@ Lemma composite_tv_state_destructor_preserves_not_in_indices_initial  :
     forall (indices : list index),
       not_in_indices_initial_prop s' indices ->
       not_in_indices_initial_prop s indices.
-Proof.
+Proof using state_size H0.
   intros s' Hs' * Heq indices Hinits' j Hj.
   by erewrite composite_tv_state_destructor_reflects_initiality;
     [apply Hinits' | | eapply elem_of_list_lookup_2 | apply Hinits'].
@@ -434,7 +436,7 @@ Lemma set_remove_preserves_not_in_indices_initial :
   forall (indices : list index),
   not_in_indices_initial_prop s' indices ->
   not_in_indices_initial_prop s' (StdppListSet.set_remove i indices).
-Proof.
+Proof using state_size H0.
   intros s' Hs' i Hdestruct indices Hinit j Hj.
   destruct (decide (j ∈ indices)); [| by apply Hinit].
   destruct (decide (j = i)); [by subst; apply composite_tv_state_destructor_initial |].

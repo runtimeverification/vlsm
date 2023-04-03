@@ -1,5 +1,7 @@
 From Cdcl Require Export Itauto.
 
+Set Default Proof Using "Type".
+
 (** * Constructive Itauto tactic *)
 
 Ltac gen_conflicts tac :=

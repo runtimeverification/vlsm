@@ -2,6 +2,8 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Plans *)
 
 Section sec_plans.

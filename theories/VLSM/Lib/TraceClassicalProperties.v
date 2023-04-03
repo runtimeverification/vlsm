@@ -1,6 +1,7 @@
 From Coq Require Import Classical ClassicalEpsilon.
 From VLSM.Lib Require Import SsrExport Traces TraceProperties.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.

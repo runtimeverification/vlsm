@@ -3,6 +3,8 @@ From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM Equivocation.
 From VLSM.Core Require Import Composition VLSMProjections Validator ProjectionTraces.
 
+Set Default Proof Using "Type".
+
 (** * VLSM projections and messages properties
 
   In this section we show that messages properties (oracles like [has_been_sent],
@@ -45,7 +47,7 @@ Lemma VLSM_projection_oracle_reflect
   (HstepwiseY : oracle_stepwise_props (vlsm := Y) selectorY oracleY)
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
   forall m, oracleY (state_project s) m -> oracleX s m.
-Proof.
+Proof using label_project Hsimul Hselector.
   intros s Hs m Hm.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseX _ Hs m).
   intros isX trX HtrX.
@@ -74,7 +76,7 @@ Lemma VLSM_projection_has_been_sent_reflect
   `{HasBeenSentCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m.
-Proof.
+Proof using label_project Hsimul.
   apply VLSM_projection_oracle_reflect with (field_selector output) (field_selector output).
   - by intros [] [] **; cbn in *; subst.
   - by apply (has_been_sent_stepwise_props X).
@@ -86,7 +88,7 @@ Lemma VLSM_projection_has_been_received_reflect
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m.
-Proof.
+Proof using label_project Hsimul.
   apply VLSM_projection_oracle_reflect with (field_selector input) (field_selector input).
   - by intros [] [] **; cbn in *; subst.
   - by apply (has_been_received_stepwise_props X).
@@ -100,7 +102,7 @@ Lemma VLSM_projection_has_been_directly_observed_reflect
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_directly_observed Y (state_project s) m -> has_been_directly_observed X s m.
-Proof.
+Proof using label_project Hsimul.
   apply VLSM_projection_oracle_reflect with item_sends_or_receives item_sends_or_receives.
   - by intros [] [] **; cbn in *; subst.
   - by apply has_been_directly_observed_stepwise_props.
@@ -135,7 +137,7 @@ Lemma VLSM_weak_embedding_selected_message_exists_in_some_preloaded_traces
   s m
   : selected_message_exists_in_some_preloaded_traces X selectorX s m ->
   selected_message_exists_in_some_preloaded_traces Y selectorY (state_project s) m.
-Proof.
+Proof using label_project Hsimul Hselector.
   intros [is [tr [Htr Hm]]].
   destruct Htr as [Htr His].
   apply (VLSM_weak_embedding_finite_valid_trace_from_to Hsimul) in Htr.
@@ -163,7 +165,7 @@ Lemma VLSM_weak_embedding_oracle
   (HoracleY_dec : RelDecision oracleY)
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, oracleX s m -> oracleY (state_project s) m.
-Proof.
+Proof using label_project Hsimul Hselector.
   intros s Hs m Hm.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseX _ Hs m) in Hm.
   apply (selected_messages_consistency_prop_from_stepwise _ _ _ _ HstepwiseX HoracleX_dec _ Hs) in Hm.
@@ -180,7 +182,7 @@ Lemma VLSM_weak_embedding_has_been_sent
   `{HasBeenSentCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m.
-Proof.
+Proof using label_project Hsimul.
   apply VLSM_weak_embedding_oracle with (field_selector output) (field_selector output).
   - by intros [] [] Hin Hout; cbn in *; subst.
   - by apply (has_been_sent_stepwise_props X).
@@ -194,7 +196,7 @@ Lemma VLSM_weak_embedding_has_been_received
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m.
-Proof.
+Proof using label_project Hsimul.
   apply VLSM_weak_embedding_oracle with (field_selector input) (field_selector input).
   - by intros [] [] Hin Hout; cbn in *; subst.
   - by apply (has_been_received_stepwise_props X).
@@ -210,7 +212,7 @@ Lemma VLSM_weak_embedding_has_been_directly_observed
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_directly_observed X s m -> has_been_directly_observed Y (state_project s) m.
-Proof.
+Proof using label_project Hsimul.
   apply VLSM_weak_embedding_oracle with item_sends_or_receives item_sends_or_receives.
   - by intros [] [] **; cbn in *; subst.
   - by apply has_been_directly_observed_stepwise_props.
@@ -301,7 +303,7 @@ Lemma VLSM_incl_has_been_sent
   `{HasBeenSentCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent X s m -> has_been_sent Y s m.
-Proof.
+Proof using Hincl.
   intros s Hs m Hm.
   by eapply
     (@VLSM_embedding_has_been_sent _ X Y _ _
@@ -313,7 +315,7 @@ Lemma VLSM_incl_has_been_received
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received X s m -> has_been_received Y s m.
-Proof.
+Proof using Hincl.
   intros s Hs m Hm.
   by eapply
     (@VLSM_embedding_has_been_received _ X Y _ _
@@ -327,7 +329,7 @@ Lemma VLSM_incl_has_been_directly_observed
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_directly_observed X s m -> has_been_directly_observed Y s m.
-Proof.
+Proof using Hincl.
   intros s Hs m Hm.
   by eapply
     (@VLSM_embedding_has_been_directly_observed _ X Y _ _
@@ -339,7 +341,7 @@ Lemma VLSM_incl_has_been_sent_reflect
   `{HasBeenSentCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_sent Y s m -> has_been_sent X s m.
-Proof.
+Proof using Hincl.
   intros s Hs m Hm.
   by eapply
     (@VLSM_embedding_has_been_sent_reflect _ X Y _ _
@@ -351,7 +353,7 @@ Lemma VLSM_incl_has_been_received_reflect
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_received Y s m -> has_been_received X s m.
-Proof.
+Proof using Hincl.
   intros s Hs m Hm.
   by eapply
     (@VLSM_embedding_has_been_received_reflect _ X Y _ _
@@ -365,7 +367,7 @@ Lemma VLSM_incl_has_been_directly_observed_reflect
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
     forall m, has_been_directly_observed Y s m -> has_been_directly_observed X s m.
-Proof.
+Proof using Hincl.
   intros s Hs m Hm.
   by eapply
     (@VLSM_embedding_has_been_directly_observed_reflect _ X Y _ _
@@ -393,7 +395,7 @@ Lemma same_IM_composite_has_been_sent_preservation s1 m
   (Hs1 : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1)
   : composite_has_been_sent IM1 s1 m ->
     composite_has_been_sent IM2 (same_IM_state_rew Heq s1) m.
-Proof.
+Proof using H.
   specialize (same_IM_preloaded_free_embedding IM1 IM2 Heq) as Hproj.
   intros Hbs1_m.
   by specialize (VLSM_embedding_has_been_sent Hproj _ Hs1 m Hbs1_m).
@@ -424,7 +426,7 @@ Context
 *)
 Lemma can_emit_projection
   : can_emit PreFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
-Proof.
+Proof using validator sender Hsender_safety Hj A.
   destruct (sender m) as [v |] eqn: Hsender; simpl in Hj; [| by congruence].
   apply Some_inj in Hj.
   specialize (Hsender_safety _ _ Hsender).

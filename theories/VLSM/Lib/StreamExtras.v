@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists NeList.
 
+Set Default Proof Using "Type".
+
 (** * Stream utility definitions and lemmas *)
 
 Lemma stream_eq_hd_tl {A} (s s' : Stream A) :

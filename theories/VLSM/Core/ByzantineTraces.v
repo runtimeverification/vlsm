@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Byzantine Traces
 
   In this section, we introduce two definitions of Byzantine traces,
@@ -359,7 +361,7 @@ Context
 *)
 Lemma validator_pre_loaded_with_all_messages_incl
     : VLSM_incl PreLoadedX X.
-Proof.
+Proof using Hvalidator.
   apply VLSM_incl_finite_traces_characterization.
   intros.
   split; [| by apply H].
@@ -395,7 +397,7 @@ Lemma composite_validator_byzantine_traces_are_not_byzantine
     (tr : vTrace X)
     (Hbyz : byzantine_trace_prop X tr)
     : valid_trace_prop X tr.
-Proof.
+Proof using Hvalidator.
   apply validator_pre_loaded_with_all_messages_incl.
   apply alt_pre_loaded_with_all_messages_incl.
   by apply byzantine_alt_byzantine_iff in Hbyz.

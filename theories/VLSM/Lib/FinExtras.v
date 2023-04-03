@@ -1,5 +1,7 @@
 From stdpp Require Import prelude.
 
+Set Default Proof Using "Type".
+
 (** * Finite type utility definitions and lemmas *)
 
 Fixpoint up_to_n_listing

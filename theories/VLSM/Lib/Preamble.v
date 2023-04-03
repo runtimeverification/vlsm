@@ -3,6 +3,8 @@ Obligation Tactic := idtac.
 From stdpp Require Import prelude.
 From Coq Require Import Eqdep_dec.
 
+Set Default Proof Using "Type".
+
 (** * General utility definitions, lemmas, and tactics *)
 
 Tactic Notation "spec" hyp(H) :=
@@ -217,7 +219,7 @@ Proof. by induction n; cbn; [| case_decide]; lia. Qed.
 
 #[local] Lemma find_least_among_helper_has_property :
   forall n, P (find_least_among_helper n).
-Proof. by induction n; cbn; [| case_decide]. Qed.
+Proof using Hbound. by induction n; cbn; [| case_decide]. Qed.
 
 #[local] Lemma find_least_among_helper_minimal :
   forall n m,
@@ -235,7 +237,7 @@ Qed.
     minimal_among le
       (fun m => bound - n <= m <= bound /\ P m)
       (find_least_among_helper n).
-Proof.
+Proof using Hbound.
   split; [split |].
   - by apply find_least_among_helper_bounded.
   - by apply find_least_among_helper_has_property.
@@ -246,7 +248,7 @@ Qed.
 
 Lemma find_least_among_is_minimal
   : minimal_among le P find_least_among.
-Proof.
+Proof using Hbound.
   destruct (find_least_among_helper_is_minimal bound) as [[[_ ?] ?] Hmin'].
   split; [done |].
   intros; apply Hmin'; [| done].

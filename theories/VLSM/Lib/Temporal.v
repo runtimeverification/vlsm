@@ -2,6 +2,8 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From Coq Require Import Streams Classical.
 
+Set Default Proof Using "Type".
+
 (** * Temporal Logic Predicates and Results *)
 
 Set Implicit Arguments.

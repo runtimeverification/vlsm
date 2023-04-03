@@ -5,6 +5,8 @@ From VLSM.Lib Require Import Preamble StdppExtras StdppListSet.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation ProjectionTraces.
 From VLSM.Core Require Import BaseELMO.
 
+Set Default Proof Using "Type".
+
 (** * UMO Protocol Definitions and Properties
 
   This module contains definitions and properties of UMO components and
@@ -105,7 +107,7 @@ Qed.
 
 #[export] Instance HasBeenSentCapability_UMOComponent
   (i : Address) : HasBeenSentCapability (UMOComponent i).
-Proof.
+Proof using EqDecision0.
   apply Build_HasBeenSentCapability with (fun s m => m ∈ sentMessages s)
   ; [by intros s m; typeclasses eauto |].
   split.
@@ -121,7 +123,7 @@ Defined.
 
 #[export] Instance HasBeenReceivedCapability_UMOComponent
   (i : Address) : HasBeenReceivedCapability (UMOComponent i).
-Proof.
+Proof using EqDecision0.
   eapply Build_HasBeenReceivedCapability with (fun s m => m ∈ receivedMessages s)
   ; [intros s m; typeclasses eauto | split].
   - by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil.
@@ -1399,7 +1401,7 @@ End sec_UMOComponent_lemmas.
 Proof. by intros x y []; constructor. Defined.
 
 #[export] Instance sent_comparable_dec : RelDecision sent_comparable.
-Proof.
+Proof using EqDecision0.
   intros m1 m2.
   destruct (decide (adr (state m1) = adr (state m2)));
     [| by right; destruct 1; apply n; firstorder congruence].
@@ -1599,7 +1601,7 @@ Lemma finite_valid_trace_from_to_UMO_state2trace_UMO :
   forall us : UMO_state,
     valid_state_prop UMO us ->
       finite_valid_trace_init_to UMO (``(vs0 UMO)) us (UMO_state2trace us).
-Proof.
+Proof using EqDecision0.
   intros us Hvsp.
   apply all_pre_traces_to_valid_state_are_valid; [typeclasses eauto | done |].
   apply finite_valid_trace_from_to_UMO_state2trace_RUMO.
@@ -1661,7 +1663,7 @@ Lemma elem_of_UMO_sentMessages :
   forall (us : UMO_state) (m : Message) (i : index),
     valid_state_prop RUMO us -> idx i = adr (state m) ->
       m ∈ UMO_sentMessages us <-> m ∈ sentMessages (us i).
-Proof.
+Proof using Inj0.
   intros us m i Hvsp Hidx.
   assert (Hall : forall i, i ∉ enum index -> us i = MkState [] (idx i))
     by (intros j Hin; contradict Hin; apply elem_of_enum).
@@ -1704,7 +1706,7 @@ Lemma UMO_sentMessages_characterization :
         <->
       let s' := state m <+> MkObservation Send m in
         state_suffix s' (us i) \/ s' = us i.
-Proof.
+Proof using Inj0.
   intros us m i Hvsp Hidx.
   rewrite elem_of_UMO_sentMessages by done.
   rewrite <- sentMessages_characterization; [done |].

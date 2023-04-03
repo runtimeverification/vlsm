@@ -3,6 +3,8 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Validator Composition.
 
+Set Default Proof Using "Type".
+
 (** * State-annotated VLSMs
 
   This module describes the VLSM obtained by augmenting the states of an existing

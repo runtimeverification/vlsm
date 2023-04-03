@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From Coq Require Import Reals Lra.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppListFinSet.
 
+Set Default Proof Using "Type".
+
 (** * Measure-related definitions and lemmas *)
 
 Definition pos_R := {r : R | (r > 0)%R}.
@@ -29,7 +31,7 @@ Proof. done. Qed.
 
 Lemma sum_weights_empty :
   forall (l : Cv), l ≡ ∅ -> sum_weights l = 0%R.
-Proof.
+Proof using H7 H5 H4 H3 H2 EqDecision0.
   intros l Hl.
   unfold sum_weights, set_fold; cbn.
   by apply elements_empty_iff in Hl as ->.
@@ -80,7 +82,7 @@ Lemma sum_weights_subseteq_list
   NoDup vs' ->
   vs ⊆ vs' ->
   (sum_weights_list vs <= sum_weights_list vs')%R.
-Proof.
+Proof using EqDecision0.
   induction vs; intros vs' Hnodup_vs Hnodup_vs' Hincl;
     [by apply sum_weights_positive_list |].
   pose proof (Hvs' := sum_weights_in_list a vs' Hnodup_vs').
@@ -100,7 +102,7 @@ Lemma sum_weights_subseteq
   : forall (vs vs' : Cv),
   vs ⊆ vs' ->
   (sum_weights vs <= sum_weights vs')%R.
-Proof.
+Proof using H7 H5 H4 H3 H2 H1 EqDecision0.
   intros vs vs' Hincl.
   rewrite !sum_weights_list_rew.
   apply sum_weights_subseteq_list.
@@ -110,7 +112,7 @@ Proof.
 Qed.
 
 Lemma sum_weights_proper : Proper (equiv ==> eq) sum_weights.
-Proof.
+Proof using H7 H5 H4 H3 H2 H1 EqDecision0.
   intros x y Hequiv.
   by apply Rle_antisym; apply sum_weights_subseteq; intro a; apply Hequiv.
 Qed.
@@ -118,7 +120,7 @@ Qed.
 Lemma sum_weights_in :
   forall v (vs : Cv),
     v ∈ vs -> sum_weights vs = (proj1_sig (weight v) + sum_weights (set_remove v vs))%R.
-Proof.
+Proof using H7 H4 H3 H1 EqDecision0.
   intros v vs Hv.
   rewrite sum_weights_list_rew, sum_weights_in_list with (v := v); cycle 1.
   - by apply NoDup_elements.
@@ -159,7 +161,7 @@ Lemma sum_weights_disj_union :
   forall (vs vs' : Cv),
     vs ## vs' ->
     sum_weights (vs ∪ vs') = (sum_weights vs + sum_weights vs')%R.
-Proof.
+Proof using H7 H5 H4 H2 H1 EqDecision0.
   intros vs vs' Hdisj.
   apply elements_disj_union, sum_weights_list_permutation_proper in Hdisj.
   setoid_rewrite Hdisj.
@@ -168,7 +170,7 @@ Qed.
 
 Lemma sum_weights_union_empty (vs : Cv) :
   sum_weights (vs ∪ ∅) = sum_weights vs.
-Proof.
+Proof using H7 H5 H4 H2 H0 EqDecision0.
   rewrite sum_weights_disj_union by apply disjoint_empty_r.
   by rewrite (sum_weights_empty ∅); [lra |].
 Qed.

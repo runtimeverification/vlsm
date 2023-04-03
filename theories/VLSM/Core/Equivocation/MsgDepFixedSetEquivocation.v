@@ -4,6 +4,8 @@ From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition Equivocation.
 From VLSM.Core Require Import Equivocation.FixedSetEquivocation ProjectionTraces SubProjectionTraces.
 
+Set Default Proof Using "Type".
+
 Section sec_msg_dep_fixed_set_equivocation.
 
 Context
@@ -48,7 +50,7 @@ Lemma messages_with_valid_dependences_can_be_emitted s dm
   (Hdm_i : dm_i ∈ equivocators)
   (Hemitted : can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
   : can_emit (equivocators_composition_for_sent IM equivocators s) dm.
-Proof.
+Proof using Irreflexive0 H9 H8 H18 H17 H14 H12 H11 H10.
   eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient.
   - by apply elem_of_elements, Hdm_i.
   - by apply Hdepm.
@@ -73,7 +75,7 @@ Lemma dependencies_are_valid s m
     forall dm, msg_dep_rel message_dependencies dm m ->
       valid_message_prop
         (equivocators_composition_for_sent IM equivocators s) dm.
-Proof.
+Proof using Irreflexive0 H9 H8 H7 H18 H17 H14 H12 H11 H10.
   induction m as [m Hind] using (well_founded_ind Hmsg_dep_happens_before_wf).
   intros Heqv dm Hdm.
   apply emitted_messages_are_valid_iff.
@@ -93,7 +95,7 @@ Lemma msg_dep_strong_fixed_equivocation_subsumption s m
   (Hmsg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies))
   : msg_dep_fixed_set_equivocation s m ->
     strong_fixed_equivocation IM equivocators s m.
-Proof.
+Proof using Irreflexive0 H9 H8 H7 H18 H17 H14 H12 H11 H10.
   intros  [Hsent | [[i [Hi Hemit]] Heqv]]; [by left |].
   cut (forall dm, msg_dep_rel message_dependencies dm m ->
     valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm)
@@ -108,7 +110,7 @@ Lemma msg_dep_strong_fixed_equivocation_constraint_subsumption
   : strong_constraint_subsumption IM
       msg_dep_fixed_set_equivocation_constraint
       (strong_fixed_equivocation_constraint IM equivocators).
-Proof.
+Proof using Irreflexive0 H9 H8 H7 H18 H17 H14 H12 H11 H10.
   intros l [s [m |]] Hc; [| done].
   by apply msg_dep_strong_fixed_equivocation_subsumption.
 Qed.
@@ -172,7 +174,7 @@ Lemma sent_by_non_equivocating_msg_dep_rel_strong_fixed_equivocation
     forall dm m, msg_dep_rel message_dependencies dm m ->
     sent_by_non_equivocating  IM equivocators s m ->
     strong_fixed_equivocation IM equivocators s dm.
-Proof.
+Proof using Irreflexive0 H18 H17.
   intros s Hs dm m Hdm (i & Hni & Hsent).
   apply (messages_sent_from_component_produced_previously IM Hs) in Hsent
     as (destination & Hfutures & Hproduce).
@@ -206,7 +208,7 @@ Lemma msg_dep_rel_reflects_strong_fixed_equivocation
     forall dm m, msg_dep_rel message_dependencies dm m ->
     strong_fixed_equivocation IM equivocators s m ->
     strong_fixed_equivocation IM equivocators s dm.
-Proof.
+Proof using Irreflexive0 H18 H17.
   intros s Hs dm m Hdm [Hsent | Hemit].
   - by eapply sent_by_non_equivocating_msg_dep_rel_strong_fixed_equivocation.
   - cut (valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm).
@@ -235,7 +237,7 @@ Lemma strong_fixed_equivocation_msg_dep_constraint_subsumption
   : input_valid_constraint_subsumption IM
       (strong_fixed_equivocation_constraint IM equivocators)
       msg_dep_fixed_set_equivocation_constraint.
-Proof.
+Proof using Irreflexive0 H18 H17.
   intros l [s [m |]] (Hs & _ & _ & Hc); [| done].
   cut (dependencies_with_non_equivocating_senders_were_sent s m).
   {
@@ -259,7 +261,7 @@ Lemma msg_dep_strong_fixed_equivocation_incl
   : VLSM_incl
       (composite_vlsm IM msg_dep_fixed_set_equivocation_constraint)
       (composite_vlsm IM (strong_fixed_equivocation_constraint IM equivocators)).
-Proof.
+Proof using Irreflexive0 H9 H8 H7 H18 H17 H14 H12 H11 H10.
   apply constraint_subsumption_incl.
   apply preloaded_constraint_subsumption_stronger.
   apply strong_constraint_subsumption_strongest.
@@ -271,7 +273,7 @@ Lemma strong_msg_dep_fixed_equivocation_incl
   : VLSM_incl
       (composite_vlsm IM (strong_fixed_equivocation_constraint IM equivocators))
       (composite_vlsm IM msg_dep_fixed_set_equivocation_constraint).
-Proof.
+Proof using Irreflexive0 H18 H17.
   apply constraint_subsumption_incl.
   by apply strong_fixed_equivocation_msg_dep_constraint_subsumption.
 Qed.
@@ -282,7 +284,7 @@ Lemma msg_dep_strong_fixed_equivocation_eq
   : VLSM_eq
       (composite_vlsm IM msg_dep_fixed_set_equivocation_constraint)
       (composite_vlsm IM (strong_fixed_equivocation_constraint IM equivocators)).
-Proof.
+Proof using Irreflexive0 H9 H8 H7 H18 H17 H14 H12 H11 H10.
   apply VLSM_eq_incl_iff; split.
   - by apply msg_dep_strong_fixed_equivocation_incl.
   - by apply strong_msg_dep_fixed_equivocation_incl.
@@ -323,7 +325,7 @@ Lemma msg_dep_full_node_fixed_set_equivocation_constraint_subsumption
   : strong_constraint_subsumption IM
       (msg_dep_fixed_set_equivocation_constraint IM message_dependencies equivocators)
       full_node_fixed_set_equivocation_constraint.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0 EqDecision0.
   intros l [s [m |]]; [| done]
   ; intros [Hsent | [[i [Hi Hemit]] Hdeps]]; [by left | right].
   apply Hchannel in Hemit; cbv in Hemit |- *.
@@ -345,7 +347,7 @@ Lemma fixed_full_node_equivocation_incl
   : VLSM_incl
       (composite_vlsm IM (fixed_equivocation_constraint IM equivocators))
       (composite_vlsm IM full_node_fixed_set_equivocation_constraint).
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Irreflexive0 H9 H7 H6 H4 H3 H2 H18 H16 H15 H14 H13 H12 H11 H10 H1 H0 EqDecision1 Cm.
   eapply VLSM_incl_trans.
   - by apply Fixed_incl_StrongFixed.
   - eapply VLSM_incl_trans.
@@ -363,7 +365,7 @@ Lemma full_node_fixed_equivocation_constraint_subsumption
   : input_valid_constraint_subsumption IM
       full_node_fixed_set_equivocation_constraint
       (fixed_equivocation_constraint IM equivocators).
-Proof.
+Proof using no_initial_messages_in_IM Irreflexive0 H6 H4 H3 H2 H18 H1 H0.
   intros l [s [m |]] (_ & Hm & Hv & Hc); [| itauto]
   ; destruct Hc as [Hsent | Heqv]; [left | right].
   - by revert Hsent; apply sent_by_non_equivocating_are_directly_observed.
@@ -406,7 +408,7 @@ Lemma full_node_fixed_equivocation_incl
   : VLSM_incl
       (composite_vlsm IM full_node_fixed_set_equivocation_constraint)
       (composite_vlsm IM (fixed_equivocation_constraint IM equivocators)).
-Proof.
+Proof using no_initial_messages_in_IM Irreflexive0 H6 H4 H3 H2 H18 H1 H0.
   apply constraint_subsumption_incl.
   by apply full_node_fixed_equivocation_constraint_subsumption.
 Qed.
@@ -417,7 +419,7 @@ Lemma full_node_fixed_equivocation_eq
   : VLSM_eq
       (composite_vlsm IM full_node_fixed_set_equivocation_constraint)
       (composite_vlsm IM (fixed_equivocation_constraint IM equivocators)).
-Proof.
+Proof using no_initial_messages_in_IM Irreflexive0 H7 H6 H4 H3 H2 H18 H1 H0.
   apply VLSM_eq_incl_iff; split.
   - apply full_node_fixed_equivocation_incl; [done |].
     by apply channel_authentication_sender_safety.

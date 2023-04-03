@@ -6,6 +6,8 @@ From VLSM.Core Require Import VLSM Composition ProjectionTraces.
 From VLSM.Core Require Import Equivocation.
 From VLSM.Lib Require Import Preamble StdppExtras.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Trace-wise Equivocation
 
   In this section we define a more precise notion of message equivocation,
@@ -46,7 +48,7 @@ Definition item_equivocating_in_trace
   := from_option (fun m => ~ trace_has_message (field_selector output) m tr) False (input item).
 
 #[local] Instance item_equivocating_in_trace_dec : RelDecision item_equivocating_in_trace.
-Proof.
+Proof using EqDecision0.
   intros item tr.
   destruct item. destruct input as [m |]; [| by right; itauto].
   unfold item_equivocating_in_trace, trace_has_message, field_selector; cbn.
@@ -126,7 +128,7 @@ Qed.
 
 Lemma equivocating_senders_in_trace_prefix prefix suffix
   : equivocating_senders_in_trace prefix ⊆ equivocating_senders_in_trace (prefix ++ suffix).
-Proof.
+Proof using PreFree EqDecision1.
   intros v. rewrite !elem_of_equivocating_senders_in_trace.
   intros [m [Hm Heqv]].
   exists m. split; [done |].
@@ -226,7 +228,7 @@ Lemma transition_is_equivocating_tracewise_char
   : is_equivocating_tracewise_no_has_been_sent s' v ->
     is_equivocating_tracewise_no_has_been_sent s v \/
     option_bind _ _ sender om = Some v.
-Proof.
+Proof using EqDecision4.
   destruct (decide (option_bind _ _ sender om = Some v))
   ; [by intro; right |].
   intros Heqv. left. intros is tr [Htr Hinit].
@@ -249,7 +251,7 @@ Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
   (Hno_sender : option_bind _ _ sender om = None)
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v -> is_equivocating_tracewise_no_has_been_sent s v.
-Proof.
+Proof using EqDecision4.
   intro Hs'.
   by destruct (transition_is_equivocating_tracewise_char _ _ _ _ _ Ht v Hs'); [| congruence].
 Qed.

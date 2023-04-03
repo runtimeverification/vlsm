@@ -1,6 +1,7 @@
 From Coq Require Import Program.Equality.
 From VLSM.Lib Require Import SsrExport Traces.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.

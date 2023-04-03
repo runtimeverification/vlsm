@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM VLSMProjections Equivocators.Equivocators.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Projecting Equivocator Traces *)
 
 Section sec_equivocator_vlsm_projections.

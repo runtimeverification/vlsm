@@ -10,6 +10,8 @@ From VLSM.Core Require Import Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Equivocators Fixed Equivocation *)
 
 Section sec_equivocators_fixed_equivocations_vlsm.
@@ -252,7 +254,7 @@ Context
 (** The [full_node_constraint_alt] is stronger than the [fixed_equivocation_constraint]. *)
 Lemma fixed_equivocation_constraint_subsumption_alt
   : strong_constraint_subsumption IM full_node_constraint_alt fixed_equivocation_constraint.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0.
   intros l (s, [m |]) Hc ; [| done].
   destruct Hc as [Hno_equiv | [i [Hi Hm]]]; [by left |].
   unfold node_generated_without_further_equivocation_alt in Hm.
@@ -270,7 +272,7 @@ Qed.
 Lemma fixed_equivocation_constraint_subsumption
   (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i))
   : preloaded_constraint_subsumption IM full_node_constraint fixed_equivocation_constraint.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0 EqDecision0.
   intros l (s, om) Hv.
   apply fixed_equivocation_constraint_subsumption_alt.
   by eapply full_node_condition_for_admissible_equivocators_subsumption.
@@ -331,7 +333,7 @@ Lemma not_equivocating_equivocator_descriptors_proper_fixed
   (eqv_descriptors : equivocator_descriptors IM)
   (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors s)
   : proper_fixed_equivocator_descriptors eqv_descriptors s.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0.
   apply not_equivocating_equivocator_descriptors_proper in Heqv_descriptors as Hproper.
   split; [done |].
   intros i Hi; rewrite <- elem_of_elements in Hi.
@@ -450,7 +452,7 @@ Lemma _equivocators_valid_trace_project
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project IM final_descriptors final_state = final_stateX /\
     finite_valid_trace X' isX trX.
-Proof.
+Proof using X H9 H6 H4 H3 H2 H1 H0.
   remember (length tr) as len_tr.
   revert tr Htr Heqlen_tr final_state final_descriptors Hproper.
   induction len_tr as [len_tr IHlen] using (well_founded_induction Wf_nat.lt_wf); intros.
@@ -618,7 +620,7 @@ Lemma free_equivocators_valid_trace_project
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project IM final_descriptors final_state = final_stateX /\
     finite_valid_trace (free_composite_vlsm IM) isX trX.
-Proof.
+Proof using X H9 H6 H4 H3 H2 H1 H0.
   by apply _equivocators_valid_trace_project.
 Qed.
 
@@ -639,7 +641,7 @@ Lemma not_equivocating_sent_message_has_been_directly_observed_in_projection
   (descriptors : equivocator_descriptors IM)
   (Hdescriptors : proper_fixed_equivocator_descriptors descriptors lst)
   : has_been_directly_observed Free (equivocators_state_project IM descriptors lst) m.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0.
   destruct (free_equivocators_valid_trace_project descriptors is tr Hdescriptors Htr)
     as [trX [initial_descriptors [_ [Htr_project [Hfinal_state HtrX_Free]]]]].
   subst lst.
@@ -767,7 +769,7 @@ Lemma equivocators_trace_sub_item_input_is_seeded_or_sub_previously_sent
   : trace_sub_item_input_is_seeded_or_sub_previously_sent
     (equivocator_IM IM) (elements equivocating)
     (composite_has_been_directly_observed IM lst_trX) tr.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0.
   intros pre item suf m Heq Hm Hitem.
   destruct (free_equivocators_valid_trace_project descriptors is tr Hproper Htr)
     as [trX [initial_descriptors [Hinitial_descriptors [Htr_project [Hfinal_state HtrXFree]]]]].
@@ -912,7 +914,7 @@ Lemma equivocator_vlsm_trace_project_reflect_non_equivocating
   (Houtput : output item = Some m)
   (Hno_equiv_item : projT1 (l item) ∉ equivocating)
   : trace_has_message (field_selector output) m trX.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [pre [suf Heq_tr]].
   change (item :: suf) with ([item] ++ suf) in Heq_tr.
@@ -984,7 +986,7 @@ Lemma projection_has_not_been_directly_observed_is_equivocating
   (Hno : ~ composite_has_been_directly_observed IM sX m)
   : forall item : composite_transition_item (equivocator_IM IM),
       item ∈ tr -> output item = Some m -> projT1 (l item) ∈ equivocating.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0.
   destruct (free_equivocators_valid_trace_project descriptors is tr Hproper Htr)
     as [trX [initial_descriptors [_ [Htr_project [Hlast_state HtrX]]]]].
   intros item Hitem Houtput.
@@ -1117,7 +1119,7 @@ Qed.
 Lemma fixed_equivocation_constraint_has_constraint_has_been_sent_prop
   : constraint_has_been_sent_prop
     (fixed_equivocation_constraint IM equivocating).
-Proof.
+Proof using H6 H4 H3 H2 H1 H0.
   unfold constraint_has_been_sent_prop. intros.
   remember (equivocators_state_project _ _ _) as sX.
   destruct (composite_has_been_directly_observed_dec IM sX m)
@@ -1296,7 +1298,7 @@ Theorem fixed_equivocators_valid_trace_project
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project IM final_descriptors final_state = final_stateX /\
     finite_valid_trace X isX trX.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0.
   apply _equivocators_valid_trace_project; [done | done | done |]; intros.
   by apply fixed_equivocation_constraint_has_constraint_has_been_sent_prop.
 Qed.
@@ -1304,7 +1306,7 @@ Qed.
 Lemma fixed_equivocators_vlsm_partial_projection
   (final_descriptors : equivocator_descriptors IM)
   : VLSM_partial_projection XE X (equivocators_partial_trace_project IM final_descriptors).
-Proof.
+Proof using H6 H4 H3 H2 H1 H0 H.
   split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert (HPreFree_pre_tr :
@@ -1330,7 +1332,7 @@ Qed.
 
 Lemma fixed_equivocators_vlsm_projection
   : VLSM_projection XE X (equivocators_total_label_project IM) (equivocators_total_state_project IM).
-Proof.
+Proof using H6 H4 H3 H2 H1 H0 H.
   constructor; [constructor |]; intros sX trX HtrX.
   - apply PreFreeE_Free_vlsm_projection_type.
     apply VLSM_incl_finite_valid_trace_from; [| done].

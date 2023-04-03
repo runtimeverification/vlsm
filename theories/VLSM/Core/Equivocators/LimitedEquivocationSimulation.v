@@ -16,6 +16,8 @@ From VLSM.Core Require Import
   Equivocators.FixedEquivocationSimulation.
 From VLSM.Core Require Import Equivocators.FixedEquivocation.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Equivocators Simulating limited message equivocation traces
 
   In this module we show that the composition of equivocators with no-message
@@ -139,7 +141,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
             Datatypes.id original_state trX /\
       finite_valid_trace_init_to XE is s tr /\
       finite_trace_last_output trX = finite_trace_last_output tr.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Hchannel H19 H18 H16 H15 H11 FullMessageDependencies0 EqDecision1.
   apply valid_trace_get_last in HtrX as HeqsX.
   eapply valid_trace_forget_last, @msg_dep_fixed_limited_equivocation in HtrX; [| done..].
   apply limited_equivocators_finite_valid_trace_init_to_rev in HtrX

@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From Coq Require Import Reals Lra.
 From VLSM.Lib Require Import RealsExtras Measurable ListExtras StdppListSet.
 
+Set Default Proof Using "Type".
+
 (**
   Given a set of validators and a [threshold] (a positive real number), we say
   that the threshold is reachable ([rt_reachable]) when there exists a
@@ -73,7 +75,7 @@ Lemma pivotal_validator_extension
   exists v,
     v ∈ vs /\
     (sum_weights (vs ∖ {[ v ]} ∪ vsfix) <= threshold)%R.
-Proof.
+Proof using H6 H3 H0 EqDecision0.
   intros vsfix vss Hvsfix Hdisj Hall.
   destruct (pivotal_validator_extension_list (elements vsfix) (elements vss))
     as (vs & Hnd_vs & Hincl & Hvs & v & Hv & Hvs_v);
@@ -123,7 +125,7 @@ Lemma validators_pivotal_ind
   exists v,
     v ∈ vs /\
     (sum_weights (vs ∖ {[ v ]}) <= threshold)%R.
-Proof.
+Proof using Hrt H6 H3 H2 H0 EqDecision0.
   intros vss Hvss.
   destruct (pivotal_validator_extension ∅ vss)
     as (vs & Hincl & Hvs & v & Hv & Hvs').
@@ -146,7 +148,7 @@ Lemma sufficient_validators_pivotal
     exists v,
       v ∈ vs /\
       (sum_weights (vs ∖ {[ v ]}) <= threshold)%R.
-Proof.
+Proof using Hrt H6 H3 H2 H0 EqDecision0.
   destruct (rt_reachable (1 := Hrt)) as [vs Hweight].
   apply (validators_pivotal_ind vs) in Hweight as (vs' & Hincl & Hvs').
   by exists vs'.
@@ -169,7 +171,7 @@ Definition potentially_pivotal (v : V) : Prop :=
 *)
 Lemma exists_pivotal_validator :
   exists v, potentially_pivotal v.
-Proof.
+Proof using Hrt H6 H4 H3 H2 H1 H0 EqDecision0.
   destruct sufficient_validators_pivotal as (vs & Hgt & v & Hin & Hlte).
   exists v, (vs ∖ {[ v ]}); split_and!.
   - by rewrite elem_of_difference, elem_of_singleton; intros [].

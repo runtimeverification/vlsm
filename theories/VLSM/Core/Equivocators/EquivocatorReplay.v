@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections Equivocators.Equivocators.
 From VLSM.Core Require Import Equivocation EquivocationProjections Equivocators.MessageProperties.
 
+Set Default Proof Using "Type".
+
 (** * Equivocator State Append Determines a Projection
 
   In this module, we show that we can "append" two equivocator traces by

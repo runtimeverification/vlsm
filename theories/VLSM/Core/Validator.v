@@ -2,6 +2,8 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Projection Validators
 
   In the sequel we fix VLSMs <<X>> and <<Y>> and some <<label_project>>
@@ -300,7 +302,7 @@ Context
 Lemma projection_induced_valid_message_char
   : forall om, option_valid_message_prop projection_induced_validator om ->
     option_valid_message_prop X om.
-Proof.
+Proof using Htransition_consistency Htransition_Some Hstate_lift Hlabel_lift.
   intros om [s Hsom].
   induction Hsom.
   - by destruct om as [m |]; [done |]; apply option_valid_message_None.
@@ -322,7 +324,7 @@ Context
 
 Lemma projection_induced_validator_is_projection
   : VLSM_projection X pre_projection_induced_validator label_project state_project.
-Proof.
+Proof using Htransition_consistency Htransition_Some Htransition_None Hstate_lift Hlabel_lift.
   apply basic_VLSM_projection; intro; intros.
   - by exists lX, s.
   - specialize (Htransition_Some _ _ H _ _ _ _ H0); cbn.
@@ -344,7 +346,7 @@ Lemma induced_validator_transition_item_lift
   : pre_VLSM_projection_transition_item_project _ _ label_project state_project
     (pre_VLSM_embedding_transition_item_project _ _ label_lift state_lift item)
     = Some item.
-Proof.
+Proof using Hstate_lift Hlabel_lift.
   destruct item.
   unfold pre_VLSM_embedding_transition_item_project,
          pre_VLSM_projection_transition_item_project.
@@ -356,7 +358,7 @@ Lemma induced_validator_trace_lift
   : pre_VLSM_projection_finite_trace_project _ _ label_project state_project
     (pre_VLSM_embedding_finite_trace_project _ _ label_lift state_lift tr)
     = tr.
-Proof.
+Proof using Hstate_lift Hlabel_lift.
   induction tr; cbn; [done |].
   by rewrite induced_validator_transition_item_lift; f_equal.
 Qed.
@@ -423,7 +425,7 @@ Lemma projection_induced_validator_incl
   (Htransition_consistency2 :
     induced_validator_transition_consistency_Some X2 TY label_project state_project)
   : VLSM_incl X1 X2 -> VLSM_incl XY1 XY2.
-Proof.
+Proof using Hstate_lift Hlabel_lift.
   pose (Htransition_Some1 :=
     basic_weak_projection_transition_consistency_Some
       X1 TY _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency1).
@@ -479,7 +481,7 @@ Lemma projection_induced_validator_eq
   (Htransition_consistency2 :
     induced_validator_transition_consistency_Some X2 TY label_project state_project)
   : VLSM_eq X1 X2 -> VLSM_eq XY1 XY2.
-Proof.
+Proof using Hstate_lift Hlabel_lift.
   intro Heq; apply VLSM_eq_incl_iff; split.
   - by apply (projection_induced_validator_incl MX1 MX2); [.. | apply VLSM_eq_proj1].
   - by apply (projection_induced_validator_incl MX2 MX1); [.. | apply VLSM_eq_proj2].
@@ -530,7 +532,7 @@ Context
 Lemma projection_induced_valid_transition_eq
   : forall l s om, vvalid Xi l (s, om) ->
     vtransition Xi l (s, om) = vtransition Y l (s, om).
-Proof.
+Proof using Htransition_consistency Htransition_None Hstate_lift Hproji Hproj Hlabel_lift.
   intros l s im (lX & sX & [Hlx HsX Hv]); cbn in HsX; subst s.
   replace (vtransition Y _ _) with
     (state_project (vtransition X lX (sX, im)).1, (vtransition X lX (sX, im)).2).
@@ -543,7 +545,7 @@ Qed.
 
 Lemma induced_validator_incl_preloaded_with_all_messages
   : VLSM_incl Xi PreY.
-Proof.
+Proof using Htransition_consistency Htransition_Some Htransition_None Hstate_lift Hproji Hproj Hlabel_lift.
   apply basic_VLSM_incl.
   - by intros is (s & <- & Hs); apply (VLSM_projection_initial_state Hproj).
   - by intros l s m Hv HsY HmX; apply initial_message_is_valid.
@@ -574,7 +576,7 @@ Definition projection_validator_prop_alt :=
 Lemma validator_alt_free_states_are_projection_states
   : projection_validator_prop_alt ->
     forall s, valid_state_prop PreY s -> valid_state_prop Xi s.
-Proof.
+Proof using Htransition_consistency Htransition_Some Htransition_None Hstate_lift Hproji Hproj Hlabel_lift Hinitial_lift.
   intros Hvalidator sY Hs.
   induction Hs using valid_state_prop_ind.
   - apply initial_state_is_valid.
@@ -598,7 +600,7 @@ Qed.
 (** Below we show that the two definitions above are actually equivalent. *)
 Lemma projection_validator_prop_alt_iff
   : projection_validator_prop_alt <-> projection_validator_prop Y label_project state_project.
-Proof.
+Proof using Htransition_consistency Htransition_Some Htransition_None Hstate_lift Hproji Hproj Hlabel_lift Hinitial_lift.
   split; intros Hvalidator l si om Hvalid.
   - apply Hvalidator; [by apply Hvalid |].
     by apply validator_alt_free_states_are_projection_states; [.. | apply Hvalid].
@@ -612,7 +614,7 @@ Qed.
 Lemma validator_free_states_are_projection_states
   : projection_validator_prop Y label_project state_project ->
     forall s, valid_state_prop PreY s -> valid_state_prop Xi s.
-Proof.
+Proof using Htransition_consistency Htransition_Some Htransition_None Hstate_lift Hproji Hproj Hlabel_lift Hinitial_lift.
   rewrite <- projection_validator_prop_alt_iff by done.
   by apply validator_alt_free_states_are_projection_states.
 Qed.
@@ -631,7 +633,7 @@ Context
 *)
 Lemma pre_loaded_with_all_messages_validator_proj_incl
   : VLSM_incl PreY Xi.
-Proof.
+Proof using Hvalidator Htransition_consistency Htransition_Some Htransition_None Hstate_lift Hproji Hproj Hlabel_lift Hinitial_lift.
   (* reduce inclusion to inclusion of finite traces. *)
   apply VLSM_incl_finite_traces_characterization.
   intros sY trY HtrY.
@@ -661,7 +663,7 @@ Qed.
 *)
 Lemma pre_loaded_with_all_messages_validator_proj_eq
   : VLSM_eq PreY Xi.
-Proof.
+Proof using Hvalidator Htransition_consistency Htransition_Some Htransition_None Hstate_lift Hproji Hproj Hlabel_lift Hinitial_lift.
   apply VLSM_eq_incl_iff; split.
   - by apply pre_loaded_with_all_messages_validator_proj_incl.
   - by apply induced_validator_incl_preloaded_with_all_messages.
@@ -973,7 +975,7 @@ Context
 
 Lemma pre_loaded_with_all_messages_self_validator_vlsm_incl
   : VLSM_incl PreX X.
-Proof.
+Proof using Hvalidator.
   unfold self_validator_vlsm_prop  in Hvalidator.
   destruct X as (T & M). simpl in *.
   (* redcuction to inclusion of finite traces. *)
@@ -997,7 +999,7 @@ Qed.
 
 Lemma pre_loaded_with_all_messages_self_validator_vlsm_eq
   : VLSM_eq PreX X.
-Proof.
+Proof using Hvalidator.
   split.
   - by apply pre_loaded_with_all_messages_self_validator_vlsm_incl.
   - pose (vlsm_incl_pre_loaded_with_all_messages_vlsm X) as Hincl.

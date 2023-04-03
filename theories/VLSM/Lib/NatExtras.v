@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble.
 
+Set Default Proof Using "Type".
+
 (** * Natural number utility definitions and lemmas
 
   Given a decidable property on naturals and a bound, finds the

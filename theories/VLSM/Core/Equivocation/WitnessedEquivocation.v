@@ -5,6 +5,8 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import SubProjectionTraces MessageDependencies Equivocation.
 From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquivocation.
 
+Set Default Proof Using "Type".
+
 (** * Witnessed equivocation
 
   Although [is_equivocating_tracewise] provides a very precise notion of
@@ -361,7 +363,7 @@ Lemma strong_trace_witnessing_equivocation_prop_extend_eq
   (Hwitness : trace_witnessing_equivocation_prop is (tr' ++ [item]))
   (Heq : equivocating_validators s ≡@{Cv} equivocating_validators (destination item))
   : strong_trace_witnessing_equivocation_prop is' (tr'' ++ [item]).
-Proof.
+Proof using H0 H.
   intros prefix suffix Heq_tr''_item.
   destruct_list_last suffix suffix' sitem Hsuffix_eq.
   - rewrite app_nil_r in Heq_tr''_item.
@@ -475,7 +477,7 @@ Lemma preloaded_has_strong_trace_witnessing_equivocation_prop s
   : exists is' tr',
     finite_valid_trace_init_to PreFree is' s tr' /\
     strong_trace_witnessing_equivocation_prop is' tr'.
-Proof.
+Proof using Hke H0 H.
   apply is_equivocating_tracewise_witness in Hs.
   destruct Hs as [is [tr [Htr Hwitness]]].
   apply finite_valid_trace_init_to_last in Htr as Hlst.
@@ -600,7 +602,7 @@ Lemma free_has_strong_trace_witnessing_equivocation_prop s
   : exists is' tr',
     finite_valid_trace_init_to Free is' s tr' /\
     strong_trace_witnessing_equivocation_prop is' tr'.
-Proof.
+Proof using Hke H1 H0 H.
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm Free))
     in Hs as Hpre_s.
   apply preloaded_has_strong_trace_witnessing_equivocation_prop in Hpre_s.
@@ -683,7 +685,7 @@ Lemma equivocators_can_emit_free m
   : can_emit
     (equivocators_composition_for_directly_observed IM (Ci := Ci) (fin_sets.set_map A (equivocating_validators sf)) s)
     m.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies can_emit_signed Irreflexive0 Hsender_safety Hfull H6 H4 H3 H29 H28 H27 H26 H25 H24 H23 H22 H21 H EqDecision3 Cm.
   apply emitted_messages_are_valid_iff in Hmsg
     as [(_v & [_im Him] & Heqim) | Hiom]
   ; [by elim (no_initial_messages_in_IM _v _im) |].
@@ -730,7 +732,7 @@ Lemma strong_witness_has_fixed_equivocation is s tr
   (Heqv : strong_trace_witnessing_equivocation_prop (Cv := Cv) IM threshold A sender is tr)
   : finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM (Ci := Ci)
       (fin_sets.set_map A (equivocating_validators s))) is s tr.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies can_emit_signed Irreflexive0 Hsender_safety Hfull H7 H6 H4 H3 H29 H28 H27 H26 H25 H24 H23 H22 H21 H Free_has_sender EqDecision3 Cm.
   split; [| by apply Htr].
   induction Htr using finite_valid_trace_init_to_rev_ind.
   - eapply (finite_valid_trace_from_to_empty (fixed_equivocation_vlsm_composition IM
@@ -814,7 +816,7 @@ Lemma equivocating_validators_fixed_equivocation_characterization
     valid_state_prop Free s ->
     valid_state_prop
       (composite_vlsm IM (equivocating_validators_fixed_equivocation_constraint s)) s.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies can_emit_signed Irreflexive0 Hsender_safety Hfull H7 H6 H4 H3 H29 H28 H27 H26 H25 H24 H23 H22 H21 H Free_has_sender EqDecision3 Cm.
   intros s Hs.
   destruct
     (free_has_strong_trace_witnessing_equivocation_prop IM threshold A sender _ s Hs)

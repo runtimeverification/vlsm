@@ -1,6 +1,8 @@
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras StdppExtras.
 
+Set Default Proof Using "Type".
+
 (** A straight-forward inductive definition of non-empty lists. *)
 Inductive ne_list (A : Type) : Type :=
 | nel_singl : A -> ne_list A

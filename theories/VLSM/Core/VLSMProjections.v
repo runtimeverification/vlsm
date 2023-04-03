@@ -6,6 +6,8 @@ From VLSM.Core Require Export VLSMPartialProjection VLSMStutteringEmbedding.
 From VLSM.Core Require Export VLSMTotalProjection VLSMEmbedding.
 From VLSM.Core Require Export VLSMInclusion VLSMEquality.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Projection Properties *)
 
 Section sec_same_VLSM_embedding.

@@ -5,6 +5,8 @@ From VLSM.Lib Require Import ListSetExtras FinExtras.
 From VLSM.Core Require Import VLSM Equivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Message Properties *)
 
 Section sec_equivocator_vlsm_message_properties.
@@ -259,7 +261,7 @@ Definition equivocator_oracle
 
 Lemma equivocator_oracle_dec
   : RelDecision equivocator_oracle.
-Proof.
+Proof using Hdec.
   intros s m.
   eapply
     (Decision_iff
@@ -279,7 +281,7 @@ Qed.
 
 Lemma equivocator_oracle_stepwise_props
   : oracle_stepwise_props (vlsm := equivocator_vlsm) equivocator_selector equivocator_oracle.
-Proof.
+Proof using Hstepwise Hselector_io.
   destruct Hstepwise.
   split; intros.
   - destruct H as [Hn His]. unfold is_singleton_state in Hn.
@@ -543,7 +545,7 @@ Qed.
 
 Lemma equivocator_ComputableSentMessages :
   ComputableSentMessages equivocator_vlsm.
-Proof.
+Proof using EqDecision0 ComputableSentMessages0.
   constructor 1 with equivocator_sent_messages_set; constructor; intros.
   - rewrite <- equivocator_elem_of_sent_messages_set.
     by eapply equivocator_has_been_sent_stepwise_props.

@@ -3,6 +3,8 @@ From stdpp Require Import prelude.
 From Coq Require Import Sorting.
 From VLSM.Lib Require Import Preamble ListExtras ListSetExtras.
 
+Set Default Proof Using "Type".
+
 (** * Sorted list utility functions and lemmas *)
 
 Fixpoint list_compare {A} (compare : A -> A -> comparison)

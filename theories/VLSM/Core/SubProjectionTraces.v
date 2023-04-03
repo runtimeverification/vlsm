@@ -5,6 +5,8 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras StdppL
 From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.
 From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.NoEquivocation.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Subcomposition *)
 
 Section sec_sub_composition.
@@ -603,11 +605,10 @@ Proof.
     + unfold pre_VLSM_projection_transition_item_project in HitemX.
       destruct (composite_label_sub_projection_option _); [| by congruence].
       by inversion HitemX.
-  - clear -Hmsg Sub_Free Hlst His IHtr.
-    destruct iom as [m |]; [| done].
+  - destruct iom as [m |]; [| done].
     simpl in *.
     remember {| input := Some m |} as x.
-    assert (Hx : from_sub_projection x).
+    assert (Hx' : from_sub_projection x).
     {
       unfold from_sub_projection at 1, pre_VLSM_projection_in_projection,
         composite_label_sub_projection_option.
@@ -914,7 +915,7 @@ Qed.
 Lemma preloaded_lift_sub_state_to_initial_state :
   weak_projection_initial_state_preservation PreSubFree PreFree
     (lift_sub_state_to IM equivocators base_s).
-Proof.
+Proof using EqDecision0 Free Hbase_s IM PreFree PreSubFree SubFree base_s equivocating_IM equivocators index message.
   apply valid_state_has_trace in Hbase_s as Htr.
   destruct Htr as [is [tr Htr]].
   intros eqv_is Heqv_is.
@@ -963,7 +964,7 @@ Qed.
 Lemma PreSubFree_PreFree_weak_embedding :
   VLSM_weak_embedding PreSubFree PreFree
     (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
-Proof.
+Proof using EqDecision0 Free Hbase_s IM PreFree PreSubFree SubFree base_s equivocating_IM equivocators index message.
   apply basic_VLSM_weak_embedding.
   - split; [| done].
     by apply lift_sub_to_valid, Hv.
@@ -1088,7 +1089,7 @@ Lemma lift_sub_incl_message_initial
   (m : message)
   (Hm : composite_initial_message_prop sub_IM1 m)
   : composite_initial_message_prop sub_IM2 m.
-Proof.
+Proof using EqDecision0 Hincl IM index indices1 indices2 message sub_IM1 sub_IM2.
   destruct Hm as [[i Hi] Hm].
   unfold sub_IM1, sub_IM in Hm. simpl in Hm.
   apply bool_decide_spec, Hincl in Hi.
@@ -1189,7 +1190,7 @@ Lemma sub_can_emit_sender (P : message -> Prop)
     sender m = Some v ->
     can_emit (pre_loaded_vlsm (free_composite_vlsm sub_IM) P)  m ->
     A v ∈ indices.
-Proof.
+Proof using A EqDecision0 Hsender_safety IM index indices message sender sub_IM validator.
   intros m v Hsender Hemit.
   specialize (Hsender_safety m v Hsender).
   destruct Hemit as [[s om] [[sub_i li] [s' Ht]]].
@@ -1265,7 +1266,7 @@ Qed.
 
 Lemma sub_IM_sender_safety
   : sender_safety_alt_prop sub_IM sub_IM_A sub_IM_sender.
-Proof.
+Proof using A EqDecision0 Hsender_safety IM index indices message sender sub_IM validator.
   intros m sub_v Hsender sub_i Hm.
   destruct_dec_sig sub_v v HAv Heqsub_v.
   destruct_dec_sig sub_i i Hi Heqsub_i.
@@ -1291,7 +1292,7 @@ Lemma sub_IM_has_been_sent_iff_by_sender s
   (Hv : A v ∈ indices)
   : composite_has_been_sent sub_IM s m ->
     has_been_sent (sub_IM (dexist (A v) Hv)) (s (dexist (A v) Hv)) m.
-Proof.
+Proof using A EqDecision0 H Hsender_safety IM index indices message sender sub_IM sub_index_prop_dec validator.
   apply valid_state_has_trace in Hs as Htr.
   destruct Htr as [is [tr Htr]].
   assert (Hsub_sender : sub_IM_sender m = Some (dexist v Hv)).
@@ -1380,7 +1381,7 @@ Lemma sub_IM_no_equivocation_preservation
     l (s, om))
   : composite_no_equivocations_except_from sub_IM
       non_sub_index_authenticated_message l (s, om).
-Proof.
+Proof using A EqDecision0 H Hsender_safety IM can_emit_signed index indices message no_initial_messages_in_IM sender sub_IM validator.
   destruct om as [m |]; [| done].
   destruct Hv as (lX & sX & [_ [=] (_ & Hm & _ & Hc)]).
   specialize (composite_no_initial_valid_messages_have_sender IM A sender
@@ -1589,7 +1590,7 @@ Lemma sub_valid_preloaded_lifts_can_be_emitted
     valid_message_prop (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q) dm)
   : forall m, can_emit (pre_loaded_vlsm (IM j) P) m ->
     can_emit (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q) m.
-Proof.
+Proof using Ci EqDecision0 H5 Hj IM index indices j message.
   intros m Hm.
   eapply VLSM_incl_can_emit.
   - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
@@ -1843,7 +1844,7 @@ Context
 *)
 Lemma sub_no_indices_no_can_emit (P : message -> Prop)
   : forall m, ~ can_emit (pre_loaded_vlsm (free_composite_vlsm sub_IM) P) m.
-Proof.
+Proof using EqDecision0 Hno_indices IM index indices message sub_IM.
   apply pre_loaded_empty_composition_no_emit, elem_of_empty_nil.
   by intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; inversion Hi.
 Qed.
@@ -1884,7 +1885,7 @@ Context
   `{forall i : index, HasBeenSentCapability (IM i)}
   : forall sub_i : sub_index (elements selection_complement),
     HasBeenSentCapability (sub_IM updated_IM (elements selection_complement) sub_i).
-Proof.
+Proof using Ci EqDecision0 H H0 H1 H2 H3 H4 H5 H6 H7 IM index message replacement_IM selection selection_complement updated_IM.
   intros sub_i.
   unfold sub_IM, updated_IM, update_IM.
   case_decide as Hi; [| typeclasses eauto].

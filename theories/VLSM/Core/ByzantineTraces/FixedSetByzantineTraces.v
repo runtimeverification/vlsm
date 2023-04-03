@@ -1,3 +1,4 @@
+Set Default Proof Using "Type".
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality.
@@ -94,7 +95,7 @@ Definition fixed_byzantine_IM : index -> VLSM message :=
 
 Lemma fixed_byzantine_IM_no_initial_messages
   : forall i m, ~ vinitial_message_prop (fixed_byzantine_IM i) m.
-Proof.
+Proof using no_initial_messages_in_IM.
   unfold fixed_byzantine_IM, update_IM. simpl.
   intros i m Hm.
   by case_decide; [| destruct (no_initial_messages_in_IM i m)].
@@ -102,7 +103,7 @@ Qed.
 
 Lemma fixed_byzantine_IM_preserves_channel_authentication
 : channel_authentication_prop fixed_byzantine_IM A sender.
-Proof.
+Proof using can_emit_signed.
   unfold fixed_byzantine_IM, update_IM. simpl.
   intros i m Hm.
   case_decide; [| by apply can_emit_signed].
@@ -122,7 +123,7 @@ Definition message_as_byzantine_label
   (i : index)
   (Hi : i ∈ byzantine)
   : composite_label fixed_byzantine_IM.
-Proof.
+Proof using H6 H4 H3 H2 H1 H0.
   exists i.
   unfold fixed_byzantine_IM, update_IM.
   simpl.
@@ -272,7 +273,7 @@ Definition pre_loaded_fixed_non_byzantine_vlsm : VLSM message :=
 
 Lemma non_byzantine_nodes_same
   : forall sub_i, sub_IM fixed_byzantine_IM (elements non_byzantine) sub_i = sub_IM IM (elements non_byzantine) sub_i.
-Proof.
+Proof using H6 H3 H.
   intro sub_i.
   destruct_dec_sig sub_i i Hi Heqsub_i.
   subst.
@@ -284,7 +285,7 @@ Qed.
 
 Lemma non_byzantine_nodes_same_sym
   : forall sub_i, sub_IM IM (elements non_byzantine) sub_i = sub_IM fixed_byzantine_IM (elements non_byzantine) sub_i.
-Proof.
+Proof using H6 H3 H.
   by intro; symmetry; apply non_byzantine_nodes_same.
 Qed.
 
@@ -331,7 +332,7 @@ Lemma fixed_non_byzantine_projection_valid_no_equivocations
       (sub_IM fixed_byzantine_IM (elements non_byzantine))
       fixed_set_signed_message
       l (s, om).
-Proof.
+Proof using no_initial_messages_in_IM can_emit_signed Hsender_safety.
   intros l s om Hv.
   apply
     (sub_IM_no_equivocation_preservation fixed_byzantine_IM (elements non_byzantine)
@@ -354,7 +355,7 @@ Qed.
 
 Lemma fixed_non_byzantine_pre_loaded_incl
   : VLSM_incl fixed_non_byzantine_projection pre_loaded_fixed_non_byzantine_vlsm'.
-Proof.
+Proof using no_initial_messages_in_IM can_emit_signed Hsender_safety.
   apply basic_VLSM_incl.
   - by intro; intros; apply fixed_non_byzantine_projection_initial_state_preservation.
   - intros l s m (Hs & _ & Hv) HsY _.
@@ -377,7 +378,7 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_valid
        non_byzantine_not_equivocating_constraint)
     (lift_sub_label fixed_byzantine_IM (elements non_byzantine))
     (lift_sub_state fixed_byzantine_IM (elements non_byzantine)).
-Proof.
+Proof using can_emit_signed Hsender_safety.
   intros (sub_i, li) s om (HsX & HomX & Hv & Hc & _) HsY HomY.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   split; [by apply lift_sub_valid |].
@@ -406,7 +407,7 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_initial_message
     (composite_vlsm fixed_byzantine_IM
        non_byzantine_not_equivocating_constraint)
     (lift_sub_state fixed_byzantine_IM (elements non_byzantine)).
-Proof.
+Proof using no_initial_messages_in_IM.
   intros l s m Hv HsY HmX.
   destruct HmX as [[sub_i [[im Him] Heqm]] | Hseeded].
   - exfalso. clear -no_initial_messages_in_IM Him.
@@ -461,7 +462,7 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_lift :
     (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint)
     (lift_sub_label fixed_byzantine_IM (elements non_byzantine))
     (lift_sub_state fixed_byzantine_IM (elements non_byzantine)).
-Proof.
+Proof using no_initial_messages_in_IM can_emit_signed Hsender_safety.
   apply basic_VLSM_embedding.
   - by intro; intros; apply pre_loaded_fixed_non_byzantine_vlsm_lift_valid.
   - by intro; intros * []; rapply lift_sub_transition.
@@ -471,7 +472,7 @@ Qed.
 
 Lemma pre_loaded_fixed_non_byzantine_incl
   : VLSM_incl pre_loaded_fixed_non_byzantine_vlsm' fixed_non_byzantine_projection.
-Proof.
+Proof using no_initial_messages_in_IM can_emit_signed Hsender_safety.
   apply basic_VLSM_incl; cbn.
   - by intro; intros; apply fixed_non_byzantine_projection_initial_state_preservation.
   - by intros l s m Hv _ Him; apply initial_message_is_valid.
@@ -487,7 +488,7 @@ Qed.
 
 Lemma fixed_non_byzantine_pre_loaded_eq
   : VLSM_eq fixed_non_byzantine_projection pre_loaded_fixed_non_byzantine_vlsm'.
-Proof.
+Proof using no_initial_messages_in_IM can_emit_signed Hsender_safety.
   apply VLSM_eq_incl_iff. split.
   - by apply fixed_non_byzantine_pre_loaded_incl.
   - by apply pre_loaded_fixed_non_byzantine_incl.
@@ -551,7 +552,7 @@ Lemma fixed_non_equivocating_incl_sub_non_equivocating
       (pre_induced_sub_projection IM (elements selection_complement)
         (sub_IM_not_equivocating_constraint IM
           (elements selection_complement) A sender)).
-Proof.
+Proof using can_emit_signed Hsender_safety H6 H3 H.
   apply induced_sub_projection_constraint_subsumption_incl.
   intros l (s, om) Hv.
   apply (fixed_strong_equivocation_subsumption IM selection)
@@ -580,7 +581,7 @@ Qed.
 
 Lemma fixed_non_equivocating_incl_fixed_non_byzantine
   : VLSM_incl FixedNonEquivocating PreNonByzantine.
-Proof.
+Proof using no_initial_messages_in_IM can_emit_signed Hsender_safety H6 H3.
   apply basic_VLSM_incl.
   - intros s (sX & <- & Hinitial) sub_i.
     by apply Hinitial.
@@ -622,7 +623,7 @@ Qed.
 Corollary fixed_equivocating_traces_are_byzantine is tr
   : finite_valid_trace Fixed is tr ->
     fixed_byzantine_trace_alt_prop IM selection A sender is tr.
-Proof.
+Proof using no_initial_messages_in_IM can_emit_signed Hsender_safety H6 H3.
   intro Htr.
   apply (VLSM_incl_finite_valid_trace fixed_non_equivocating_incl_fixed_non_byzantine).
   specialize
@@ -646,7 +647,7 @@ Lemma fixed_non_byzantine_vlsm_lift_valid
   : weak_embedding_valid_preservation PreNonByzantine Fixed
     (lift_sub_label IM (elements selection_complement))
     (lift_sub_state IM (elements selection_complement)).
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies can_emit_signed Irreflexive0 Hsender_safety Hfull H6 H3 H18 H17 H16 H15 H14 H13 H12 H11 H10 EqDecision1 Cm.
   intros l s om Hv HsY HomY.
   split.
   - by apply lift_sub_valid, Hv.
@@ -727,7 +728,7 @@ Lemma fixed_non_byzantine_vlsm_lift_from_initial
   : VLSM_embedding PreNonByzantine Fixed
       (lift_sub_label IM (elements selection_complement))
       (lift_sub_state IM (elements selection_complement)).
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies can_emit_signed Irreflexive0 Hsender_safety Hfull Hfixed_non_byzantine_vlsm_lift_initial_message H6 H3 H18 H17 H16 H15 H14 H13 H12 H11 H10 EqDecision1 Cm.
   apply basic_VLSM_embedding.
   - by intro; intros; apply fixed_non_byzantine_vlsm_lift_valid.
   - by intro; intros * []; rapply lift_sub_transition.
@@ -737,7 +738,7 @@ Qed.
 
 Lemma fixed_non_byzantine_incl_fixed_non_equivocating_from_initial
   : VLSM_incl PreNonByzantine FixedNonEquivocating.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies can_emit_signed Irreflexive0 Hsender_safety Hfull Hfixed_non_byzantine_vlsm_lift_initial_message H6 H3 H18 H17 H16 H15 H14 H13 H12 H11 H10 EqDecision1 Cm.
   apply basic_VLSM_incl.
   - intro; intros.
     exists (lift_sub_state IM (elements selection_complement) s).
@@ -759,7 +760,7 @@ Qed.
 
 Lemma fixed_non_byzantine_eq_fixed_non_equivocating_from_initial
   : VLSM_eq PreNonByzantine FixedNonEquivocating.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies can_emit_signed Irreflexive0 Hsender_safety Hfull Hfixed_non_byzantine_vlsm_lift_initial_message H6 H3 H18 H17 H16 H15 H14 H13 H12 H11 H10 EqDecision1 Cm.
   apply VLSM_eq_incl_iff.
   split.
   - by apply fixed_non_byzantine_incl_fixed_non_equivocating_from_initial.
@@ -777,7 +778,7 @@ Context
 Lemma validator_fixed_non_byzantine_vlsm_lift_initial_message
   : weak_embedding_initial_message_preservation PreNonByzantine Fixed
     (lift_sub_state IM (elements selection_complement)).
-Proof.
+Proof using Hvalidator H6 H3.
   intros l s m Hv HsY HmX.
   destruct HmX as [[sub_i [[im Him] Heqm]] | Hseeded].
   - simpl in Heqm. subst.
@@ -800,7 +801,7 @@ Qed.
 *)
 Lemma validator_fixed_non_byzantine_eq_fixed_non_equivocating
   : VLSM_eq PreNonByzantine FixedNonEquivocating.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies can_emit_signed Irreflexive0 Hvalidator Hsender_safety Hfull H6 H3 H18 H17 H16 H15 H14 H13 H12 H11 H10 EqDecision1 Cm.
   apply fixed_non_byzantine_eq_fixed_non_equivocating_from_initial.
   by apply validator_fixed_non_byzantine_vlsm_lift_initial_message.
 Qed.
@@ -824,7 +825,7 @@ Lemma validator_fixed_byzantine_traces_equivocation_char bis btr
       composite_state_sub_projection IM (elements selection_complement) bis /\
       finite_trace_sub_projection IM (elements selection_complement) etr =
       finite_trace_sub_projection IM (elements selection_complement) btr.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies can_emit_signed Irreflexive0 Hvalidator Hsender_safety Hfull H6 H3 H18 H17 H16 H15 H14 H13 H12 H11 H10 EqDecision1 Cm.
   unfold fixed_byzantine_trace_alt_prop.
   split; intros Htr.
   - apply fixed_non_equivocating_traces_char.

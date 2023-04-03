@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
 
+Set Default Proof Using "Type".
+
 (** * VLSM No Equivocation Composition Constraints *)
 
 Section sec_no_equivocations.
@@ -84,7 +86,7 @@ Lemma directly_observed_were_sent_preserved l s im s' om :
   input_valid_transition X l (s, im) (s', om) ->
   directly_observed_were_sent s ->
   directly_observed_were_sent s'.
-Proof.
+Proof using Henforced.
   intros Hptrans Hprev msg Hobs.
   specialize (Hprev msg).
   apply preloaded_weaken_input_valid_transition in Hptrans.
@@ -105,7 +107,7 @@ Qed.
 Lemma directly_observed_were_sent_invariant s:
   valid_state_prop X s ->
   directly_observed_were_sent s.
-Proof.
+Proof using Henforced.
   intro Hproto.
   induction Hproto using valid_state_prop_ind.
   - by apply directly_observed_were_sent_initial.
@@ -122,7 +124,7 @@ Lemma no_equivocations_preloaded_traces
   (is : state)
   (tr : list transition_item)
   : finite_valid_trace (pre_loaded_with_all_messages_vlsm X) is tr -> finite_valid_trace X is tr.
-Proof.
+Proof using Henforced H0 H.
   intro Htr.
   induction Htr using finite_valid_trace_rev_ind.
   - split; [| done].
@@ -142,7 +144,7 @@ Qed.
 
 Lemma preloaded_incl_no_equivocations
   : VLSM_incl (pre_loaded_with_all_messages_vlsm X) X.
-Proof.
+Proof using Henforced H0 H.
   specialize no_equivocations_preloaded_traces.
   clear -X. destruct X as [T [S M]].
   by apply VLSM_incl_finite_traces_characterization.
@@ -150,7 +152,7 @@ Qed.
 
 Lemma preloaded_eq_no_equivocations
   : VLSM_eq (pre_loaded_with_all_messages_vlsm X) X.
-Proof.
+Proof using Henforced H0 H.
   specialize preloaded_incl_no_equivocations.
   specialize (vlsm_incl_pre_loaded_with_all_messages_vlsm X).
   clear -X. destruct X as [T [S M]].
@@ -215,7 +217,7 @@ Definition composite_directly_observed_were_sent (s : state) : Prop :=
 Lemma composite_directly_observed_were_sent_invariant s :
   valid_state_prop X s ->
   composite_directly_observed_were_sent s.
-Proof.
+Proof using Hsubsumed H.
   intros Hs m.
   rewrite composite_has_been_directly_observed_sent_received_iff.
   intros Hobs.

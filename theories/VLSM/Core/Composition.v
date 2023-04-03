@@ -4,6 +4,8 @@ From Coq Require Import Streams FunctionalExtensionality Eqdep_dec.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Composition
 
   This module provides Coq definitions for composite VLSMs and their projections
@@ -1105,7 +1107,7 @@ Context
 Lemma composite_decidable_initial_message
   (Hdec_init : forall i, vdecidable_initial_messages_prop (IM i))
   : decidable_initial_messages_prop (composite_vlsm_machine IM constraint).
-Proof.
+Proof using H.
   intro m. simpl. unfold composite_initial_message_prop.
   apply
     (Decision_iff
@@ -1411,39 +1413,39 @@ Context {message : Type}
 Lemma empty_composition_no_index
   (i : index)
   : False.
-Proof.
+Proof using Hempty_index H EqDecision0.
   by specialize (elem_of_enum i); rewrite Hempty_index; apply not_elem_of_nil.
 Qed.
 
 Lemma empty_composition_single_state
   (s : composite_state IM)
   : s = (proj1_sig (composite_s0 IM)).
-Proof.
+Proof using Hempty_index H EqDecision0.
   by extensionality i; elim (empty_composition_no_index i).
 Qed.
 
 Lemma empty_composition_no_label
   (l : composite_label IM)
   : False.
-Proof.
+Proof using Hempty_index H EqDecision0.
   by destruct l as [i _]; elim (empty_composition_no_index i).
 Qed.
 
 Lemma empty_composition_no_initial_message
   : forall m, ~ composite_initial_message_prop IM m.
-Proof.
+Proof using Hempty_index H EqDecision0.
   by intros m [i _]; elim (empty_composition_no_index i).
 Qed.
 
 Lemma empty_composition_no_emit
   : forall m, ~ can_emit X m.
-Proof.
+Proof using Hempty_index H.
   by intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
 Lemma empty_composition_no_valid_message
   : forall m, ~ valid_message_prop X m.
-Proof.
+Proof using Hempty_index H.
   intros m Hm.
   apply emitted_messages_are_valid_iff in Hm as [Hinit | Hemit].
   - by elim (empty_composition_no_initial_message _ Hinit).
@@ -1454,13 +1456,13 @@ Lemma pre_loaded_empty_composition_no_emit
   (seed : message -> Prop)
   (PreX := pre_loaded_vlsm X seed)
   : forall m, ~ can_emit PreX m.
-Proof.
+Proof using Hempty_index H.
   by intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
 Lemma pre_loaded_with_all_empty_composition_no_emit
   : forall m, ~ can_emit (pre_loaded_with_all_messages_vlsm X) m.
-Proof.
+Proof using Hempty_index H.
   by intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
@@ -1510,7 +1512,7 @@ Lemma same_IM_embedding
     (pre_loaded_vlsm (composite_vlsm IM2 constraint2) seed)
     same_IM_label_rew
     same_IM_state_rew.
-Proof.
+Proof using constraint_projection.
   apply basic_VLSM_embedding; intros l **.
   - destruct Hv as [Hs [Hom [Hv Hc]]].
     apply constraint_projection in Hc; cycle 1.
@@ -1666,7 +1668,7 @@ Context
 Lemma not_CompositeValidTransitionNext_initial :
   forall s2, composite_initial_state_prop IM s2 ->
   forall s1, ~ CompositeValidTransitionNext IM s1 s2.
-Proof.
+Proof using H.
   intros s2 Hs2 s1 [* Hs1].
   apply composite_valid_transition_projection, proj1, valid_transition_next in Hs1; cbn in Hs1.
   by contradict Hs1; apply not_ValidTransitionNext_initial, Hs2.
@@ -1678,7 +1680,7 @@ Lemma composite_quasi_unique_transition_to_state :
   forall [l2 s2 iom2 oom2], CompositeValidTransition IM l2 s2 iom2 s oom2 ->
   projT1 l1 = projT1 l2 ->
   l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
-Proof.
+Proof using H.
   intros ? [i li1] * Ht1 [_i li2] * Ht2 [=]; subst _i.
   apply composite_valid_transition_projection in Ht1, Ht2; cbn in Ht1, Ht2.
   destruct Ht1 as [Ht1 Heq_s], Ht2 as [Ht2 Heqs].
@@ -1696,7 +1698,7 @@ Lemma CompositeValidTransition_reflects_rechability :
   CompositeValidTransition IM l s1 iom s2 oom ->
   valid_state_prop RFree s2 ->
   input_valid_transition RFree l (s1, iom) (s2, oom).
-Proof.
+Proof using H.
   intros * Hnext Hs2; revert l s1 iom oom Hnext.
   induction Hs2 using valid_state_prop_ind; intros * Hnext.
   - apply composite_valid_transition_next in Hnext.
@@ -1744,20 +1746,20 @@ Qed.
 Lemma CompositeValidTransitionNext_reflects_rechability :
   forall s1 s2, CompositeValidTransitionNext IM s1 s2 ->
     valid_state_prop RFree s2 -> valid_state_prop RFree s1.
-Proof.
+Proof using H.
   by intros s1 s2 []; eapply CompositeValidTransition_reflects_rechability.
 Qed.
 
 Lemma composite_valid_transition_future_reflects_rechability :
   forall s1 s2, composite_valid_transition_future IM s1 s2 ->
     valid_state_prop RFree s2 -> valid_state_prop RFree s1.
-Proof. by apply tc_reflect, CompositeValidTransitionNext_reflects_rechability. Qed.
+Proof using H. by apply tc_reflect, CompositeValidTransitionNext_reflects_rechability. Qed.
 
 Lemma composite_valid_transitions_from_to_reflects_reachability :
   forall s s' tr,
   CompositeValidTransitionsFromTo IM s s' tr ->
   valid_state_prop RFree s' -> finite_valid_trace_from_to RFree s s' tr.
-Proof.
+Proof using H.
   induction 1; intros; [by constructor |].
   assert (Hitem : input_valid_transition RFree (l item) (s', input item)
                           (destination item, output item))

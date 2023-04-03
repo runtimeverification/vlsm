@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import Equivocation.
 
+Set Default Proof Using "Type".
+
 Section sec_full_node_constraint.
 
 Context
@@ -95,7 +97,7 @@ Lemma node_generated_without_further_equivocation_weaken
   (m : message)
   (Hsmi : node_generated_without_further_equivocation s m i)
   : node_generated_without_further_equivocation_alt s m i.
-Proof.
+Proof using EqDecision0.
   destruct Hsmi as [si [Hsim Hsi]].
   apply can_emit_iff. exists si.
   revert Hsim.
@@ -112,7 +114,7 @@ Lemma full_node_condition_for_admissible_equivocators_subsumption
   : preloaded_constraint_subsumption IM
       full_node_condition_for_admissible_equivocators
       full_node_condition_for_admissible_equivocators_alt.
-Proof.
+Proof using EqDecision0.
   intros l (s, [m |]) [Hs [_ [_ Hc]]]; [| done].
   destruct Hc as [Hno_equiv | Hfull]; [by left |].
   right.

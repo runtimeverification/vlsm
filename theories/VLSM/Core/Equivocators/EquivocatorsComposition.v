@@ -9,6 +9,8 @@ From VLSM.Core Require Import Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators.
 From VLSM.Core Require Import Equivocators.MessageProperties.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Equivocator Composition
 
   Given a composition <<X>> of VLSMs, we can model equivocator behavior by
@@ -302,7 +304,7 @@ Definition not_equivocating_equivocator_descriptors
 
 #[export] Instance not_equivocating_equivocator_descriptors_dec
   : RelDecision not_equivocating_equivocator_descriptors.
-Proof.
+Proof using H.
   intros eqv_descriptors s.
   apply @Decision_iff with (P :=
     Forall (fun eqv => existing_descriptor (IM eqv) (eqv_descriptors eqv) (s eqv)) (enum index)).

@@ -1,3 +1,4 @@
+Set Default Proof Using "Type".
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
 From VLSM.Lib Require Import Preamble FinSetExtras ListFinSetExtras.
@@ -108,7 +109,7 @@ Lemma limited_PreNonByzantine_valid_state_lift_not_heavy s
   (Hs : valid_state_prop PreNonByzantine s)
   (sX := lift_sub_state IM (elements non_byzantine) s)
   : tracewise_not_heavy sX.
-Proof.
+Proof using Inj0 Hlimit H6 H3.
   cut (tracewise_equivocating_validators sX ⊆ byzantine_vs).
   {
     intro Hincl.
@@ -177,7 +178,7 @@ Lemma limited_PreNonByzantine_lift_valid
   : weak_embedding_valid_preservation PreNonByzantine Limited
     (lift_sub_label IM (elements non_byzantine))
     (lift_sub_state IM (elements non_byzantine)).
-Proof.
+Proof using Inj0 Hlimit H6 H3.
   intros l s om Hv HsY HomY.
   repeat split; [by apply lift_sub_valid, Hv |].
   hnf.
@@ -200,7 +201,7 @@ Lemma limited_PreNonByzantine_vlsm_lift
   : VLSM_embedding PreNonByzantine Limited
       (lift_sub_label IM (elements non_byzantine))
       (lift_sub_state IM (elements non_byzantine)).
-Proof.
+Proof using Inj0 Hvalidator Hlimit H6 H3.
   apply basic_VLSM_embedding; intros ? *.
   - by intros; apply limited_PreNonByzantine_lift_valid.
   - by intros * []; rapply lift_sub_transition.
@@ -233,7 +234,7 @@ Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating 
       composite_state_sub_projection IM (elements not_byzantine) bs /\
       finite_trace_sub_projection IM (elements not_byzantine) tr =
       finite_trace_sub_projection IM (elements not_byzantine) btr.
-Proof.
+Proof using Inj0 Hvalidator H6 H3.
   intros [Hlimit Hfixed].
   eexists _, _; split.
   - by apply (VLSM_embedding_finite_valid_trace
@@ -263,7 +264,7 @@ Lemma validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
         composite_state_sub_projection IM (elements selection_complement) bs /\
         finite_trace_sub_projection IM (elements selection_complement) tr =
         finite_trace_sub_projection IM (elements selection_complement) btr.
-Proof.
+Proof using Inj0 Hvalidator H6 H3.
   intros [byzantine Hlimited].
   apply proj1 in Hlimited as Hlimit.
   apply validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating
@@ -333,7 +334,7 @@ Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
       (Build_annotated_state (free_composite_vlsm IM) Cv
         (lift_sub_state IM (elements non_byzantine) sub_sf) ann',
       oom).
-Proof.
+Proof using Hvalidator H17 H15 H14 EqDecision1.
   destruct sub_l as [sub_i li]; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   repeat split; cbn.
   - done.
@@ -389,7 +390,7 @@ Lemma lift_fixed_byzantine_traces_to_limited
         (finite_trace_sub_projection IM (elements non_byzantine) tr)))
   : finite_valid_trace Limited bs btr /\
     state_annotation (@finite_trace_last _ (type Limited) bs btr) ⊆ byzantine_vs.
-Proof.
+Proof using message_dependencies Inj0 Hvalidator Hfull H6 H3 H28 H27 H25 H24 H20 H17 H15 H14 FullMessageDependencies0 EqDecision2 EqDecision1.
   subst non_byzantine.
   induction Hbyzantine using finite_valid_trace_rev_ind; [repeat split |].
   - constructor; apply initial_state_is_valid.
@@ -474,7 +475,7 @@ Lemma msg_dep_validator_limited_non_equivocating_byzantine_traces_are_limited_no
         finite_trace_sub_projection IM (elements selection_complement)
           (pre_VLSM_embedding_finite_trace_project
             (type Limited) (composite_type IM) Datatypes.id original_state btr).
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Inj0 Hvalidator Hfull Hchannel H6 H3 H28 H27 H25 H24 H20 H18 H17 H15 H14 FullMessageDependencies0 EqDecision2 EqDecision1.
   split.
   - intros (byzantine & Hlimited & Hbyzantine).
     apply lift_fixed_byzantine_traces_to_limited in Hbyzantine

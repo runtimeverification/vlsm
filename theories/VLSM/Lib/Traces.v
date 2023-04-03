@@ -1,5 +1,6 @@
 From VLSM.Lib Require Import SsrExport.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.

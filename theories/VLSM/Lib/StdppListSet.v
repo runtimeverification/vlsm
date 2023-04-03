@@ -1,6 +1,8 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 
+Set Default Proof Using "Type".
+
 Section sec_fst_defs.
 
 Context `{EqDecision A}.

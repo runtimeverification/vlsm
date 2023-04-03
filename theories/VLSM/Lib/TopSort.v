@@ -2,6 +2,8 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet StdppExtras.
 
+Set Default Proof Using "Type".
+
 (** * Topological sorting implementation
 
   This module implements an algorithm producing a linear extension for a
@@ -131,7 +133,7 @@ Lemma precedes_irreflexive
   (a : A)
   (Ha : P a)
   : ~ precedes a a.
-Proof.
+Proof using RelDecision0 Hso.
   specialize (StrictOrder_Irreflexive (exist P a Ha)).
   unfold complement; unfold precedes_P; simpl; intro Hirr.
   by destruct (decide (precedes a a)).
@@ -143,7 +145,7 @@ Lemma precedes_asymmetric
   (Hb : P b)
   (Hab : precedes a b)
   : ~ precedes b a.
-Proof.
+Proof using Hso.
   intro Hba.
   exact
     (StrictOrder_Asymmetric Hso
@@ -159,7 +161,7 @@ Lemma precedes_transitive
   (Hab : precedes a b)
   (Hbc : precedes b c)
   : precedes a c.
-Proof.
+Proof using Hso.
   exact
     (RelationClasses.StrictOrder_Transitive
       (exist P a Ha) (exist P b Hb) (exist P c Hc)
@@ -173,7 +175,7 @@ Qed.
 Lemma count_predecessors_zero
   (Hl : l <> [])
   : Exists (fun a => count_predecessors a = 0) l.
-Proof.
+Proof using P Hso HPl.
   unfold count_predecessors.
   induction l; [done |].
   inversion_clear HPl as [| ? ? HPa HPl0].
@@ -214,7 +216,7 @@ Lemma min_predecessors_zero
   (Hl : l = a :: l')
   (min := min_predecessors l' a)
   : count_predecessors min = 0.
-Proof.
+Proof using P Hso HPl.
   assert (Hl' : l <> []) by (intro H; rewrite Hl in H; inversion H).
   specialize (count_predecessors_zero Hl'); intro Hx.
   apply Exists_exists in Hx. destruct Hx as [x [Hinx Hcountx]].
@@ -300,7 +302,7 @@ Lemma topologically_sorted_occurrences_ordering
   (lb1 lb2 : list A)
   (Heqb : l = lb1 ++ [b] ++ lb2)
   : exists (lab : list A), lb1 = la1 ++ a :: lab.
-Proof.
+Proof using RelDecision0 P Hts Hso Hl.
   assert (Hpa : P a).
   { rewrite Forall_forall in Hl. apply Hl. rewrite Heqa, !elem_of_app, elem_of_list_singleton. auto. }
   specialize (Hts a b Hab lb1 lb2 Heqb).
@@ -325,7 +327,7 @@ Corollary top_sort_before
   (l1 l2 : list A)
   (Heq : l = l1 ++ [b] ++ l2)
   : a ∈ l1.
-Proof.
+Proof using RelDecision0 P Hts Hso Hl.
   apply elem_of_list_split in Ha.
   destruct Ha as [la1 [la2 Ha]].
   specialize (topologically_sorted_occurrences_ordering a b Hab la1 la2 Ha l1 l2 Heq).
@@ -343,7 +345,7 @@ Corollary top_sort_precedes
   (Ha : a ∈ l)
   (Hb : b ∈ l)
   : exists l1 l2 l3, l = l1 ++ [a] ++ l2 ++ [b] ++ l3.
-Proof.
+Proof using RelDecision0 P Hts Hso Hl.
   apply elem_of_list_split in Hb.
   destruct Hb as [l12 [l3 Hb']].
   specialize (top_sort_before a b Hab Ha l12 l3 Hb').
@@ -550,7 +552,7 @@ Context
   <<l>>, [top_sort] <<l>> is [topologically_sorted].
 *)
 Lemma top_sort_sorted : topologically_sorted precedes (top_sort l).
-Proof.
+Proof using P Hso Hl.
   intro a; intros.
   intro Ha2.
   assert (Ha : a ∈ l).
@@ -638,7 +640,7 @@ Definition topological_sorting
   set_eq l lts /\ topologically_sorted precedes lts.
 
 Corollary top_sort_correct : topological_sorting l (top_sort l).
-Proof.
+Proof using P Hso Hl.
   split.
   - by apply top_sort_set_eq.
   - by apply top_sort_sorted.
@@ -652,7 +654,7 @@ Lemma maximal_element_in
   (a : A)
   (Hmax : get_maximal_element = Some a) :
   a ∈ l.
-Proof.
+Proof using P Hso Hl.
   unfold get_maximal_element in Hmax.
   assert (exists l', l' ++ [a] = top_sort l).
   {
@@ -681,7 +683,7 @@ Lemma get_maximal_element_correct
   (Hina : a ∈ l)
   (Hmax : get_maximal_element = Some max) :
   ~ precedes max a.
-Proof.
+Proof using P Hso Hl.
   specialize top_sort_correct as [Hseteq Htop].
   unfold topologically_sorted in Htop.
   intros contra.
@@ -721,7 +723,7 @@ Qed.
 Lemma get_maximal_element_some
   (Hne : l <> []) :
   exists a, get_maximal_element = Some a.
-Proof.
+Proof using P Hl.
   unfold get_maximal_element.
   destruct l; cbn; [by congruence |].
   exists (List.last
@@ -762,14 +764,14 @@ Corollary simple_topologically_sorted_precedes_closed_remove_last
   (Hinit : l = init ++ [final])
   (Hpc : precedes_closed precedes l)
   : precedes_closed precedes init.
-Proof.
+Proof using StrictOrder0.
   by eapply topologically_sorted_precedes_closed_remove_last;
     [typeclasses eauto | apply Forall_True | ..].
 Qed.
 
 Corollary simple_top_sort_correct : forall l,
   topological_sorting precedes l (top_sort precedes l).
-Proof.
+Proof using StrictOrder0.
   by intro; eapply top_sort_correct; [typeclasses eauto | apply Forall_True].
 Qed.
 
@@ -777,7 +779,7 @@ Corollary simple_maximal_element_in l
   (a : A)
   (Hmax : get_maximal_element precedes l = Some a) :
   a ∈ l.
-Proof.
+Proof using StrictOrder0.
   by eapply maximal_element_in; [typeclasses eauto | apply Forall_True |].
 Qed.
 
@@ -786,7 +788,7 @@ Corollary simple_get_maximal_element_correct l
   (Hina : a ∈ l)
   (Hmax : get_maximal_element precedes l = Some max) :
   ~ precedes max a.
-Proof.
+Proof using StrictOrder0.
   by eapply get_maximal_element_correct; [typeclasses eauto | apply Forall_True | ..].
 Qed.
 

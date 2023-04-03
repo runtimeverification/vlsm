@@ -3,6 +3,8 @@ From stdpp Require Import finite.
 From Coq Require Import FinFun.
 From VLSM.Lib Require Import Preamble.
 
+Set Default Proof Using "Type".
+
 (** * Utility lemmas about lists *)
 
 (** A list is empty if it has no members. *)

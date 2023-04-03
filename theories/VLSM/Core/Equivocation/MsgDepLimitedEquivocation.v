@@ -10,6 +10,8 @@ From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation.
 From VLSM.Core Require Import Equivocation.MsgDepFixedSetEquivocation.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 
+Set Default Proof Using "Type".
+
 (**
   To allow capturing the two models of limited equivocation described in the
   sections below, we first define a notion of limited equivocation parameterized
@@ -72,7 +74,7 @@ Definition coeqv_annotate_trace_with_equivocators :=
 Lemma coeqv_limited_equivocation_transition_state_annotation_incl [l s iom s' oom]
   : vtransition coeqv_limited_equivocation_vlsm l (s, iom) = (s', oom) ->
     state_annotation s ⊆ state_annotation s'.
-Proof.
+Proof using H7 H5 H4 EqDecision1.
   cbn; unfold annotated_transition; destruct (vtransition _ _ _) as (_s', _om').
   inversion 1; cbn.
   by destruct iom as [m |]; [apply union_subseteq_l |].
@@ -81,7 +83,7 @@ Qed.
 Lemma coeqv_limited_equivocation_state_annotation_nodup s
   : valid_state_prop coeqv_limited_equivocation_vlsm s ->
     NoDup (elements (state_annotation s)).
-Proof.
+Proof using H7 H5 H4 H0 EqDecision1.
   induction 1 using valid_state_prop_ind.
   - by destruct s, Hs as [_ ->]; cbn in *; apply NoDup_elements.
   - destruct Ht as [_ Ht]; cbn in Ht.
@@ -92,7 +94,7 @@ Qed.
 Lemma coeqv_limited_equivocation_state_not_heavy s
   : valid_state_prop coeqv_limited_equivocation_vlsm s ->
     (sum_weights (state_annotation s) <= threshold)%R.
-Proof.
+Proof using H8 H7 H5 H4 H0 EqDecision1.
   induction 1 using valid_state_prop_ind.
   - destruct s, Hs as [_ ->]; cbn in *.
     rewrite sum_weights_empty; [| done].
@@ -235,7 +237,7 @@ Context
 Lemma full_node_msg_dep_coequivocating_senders s m i li
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, Some m))
   : msg_dep_coequivocating_senders IM full_message_dependencies sender s m ≡@{Cv} ∅.
-Proof.
+Proof using message_dependencies Hfull H6 H4 H3 H19 H17 H16 H15 H14 H FullMessageDependencies0 EqDecision2 EqDecision0.
   intro; split; intro Hx; [| by contradict Hx; apply not_elem_of_empty].
   exfalso; contradict Hx.
   unfold msg_dep_coequivocating_senders.
@@ -273,7 +275,7 @@ Lemma full_node_msg_dep_composite_transition_message_equivocators
     msg_dep_composite_transition_message_equivocators
       IM full_message_dependencies sender
       (existT i li) (s, om).
-Proof.
+Proof using message_dependencies Hfull H6 H4 H3 H19 H17 H15 H14 H FullMessageDependencies0 EqDecision2 EqDecision0.
   destruct om as [m |]; cbn; [| done].
   apply sets.union_proper; [done |].
   unfold coeqv_message_equivocators, msg_dep_coequivocating_senders.
@@ -288,7 +290,7 @@ Lemma msg_dep_full_node_valid_iff
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
            (projT2 l) (original_state s (projT1 l), om))
   : vvalid Limited l (s, om) <-> vvalid FullNodeLimited l (s, om).
-Proof.
+Proof using message_dependencies Hfull H6 H4 H3 H19 H17 H15 H14 H10 H FullMessageDependencies0 EqDecision2 EqDecision0.
   cbn; unfold annotated_valid, coeqv_limited_equivocation_constraint; destruct l as [i li].
   replace (sum_weights _) with
     (sum_weights
@@ -304,7 +306,7 @@ Lemma msg_dep_full_node_transition_iff
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
            (projT2 l) (original_state s (projT1 l), om))
   : vtransition Limited l (s, om) = vtransition FullNodeLimited l (s, om).
-Proof.
+Proof using message_dependencies LeibnizEquiv0 Hfull H6 H4 H3 H19 H17 H15 H14 H10 H FullMessageDependencies0 EqDecision2 EqDecision0.
   cbn; unfold annotated_transition;
     destruct (vtransition _ _ _) as (s', om'), l as (i, li).
   do 2 f_equal.
@@ -315,7 +317,7 @@ Qed.
 
 Lemma msg_dep_full_node_limited_equivocation_vlsm_incl :
   VLSM_incl Limited FullNodeLimited.
-Proof.
+Proof using message_dependencies LeibnizEquiv0 Hfull H6 H4 H3 H19 H17 H15 H14 H10 H FullMessageDependencies0 EqDecision2 EqDecision0.
   apply basic_VLSM_incl.
   - by intros s Hs.
   - by intros _ _ m _ _ Hinit; apply initial_message_is_valid.
@@ -329,7 +331,7 @@ Qed.
 
 Lemma full_node_msg_dep_limited_equivocation_vlsm_incl :
   VLSM_incl FullNodeLimited Limited.
-Proof.
+Proof using message_dependencies LeibnizEquiv0 Hfull H6 H4 H3 H19 H17 H15 H14 H10 H FullMessageDependencies0 EqDecision2 EqDecision0.
   apply basic_VLSM_incl.
   - by intros s Hs.
   - by intros _ _ m _ _ Hinit; apply initial_message_is_valid.
@@ -343,7 +345,7 @@ Qed.
 
 Lemma full_node_msg_dep_limited_equivocation_vlsm_eq :
   VLSM_eq FullNodeLimited Limited.
-Proof.
+Proof using message_dependencies LeibnizEquiv0 Hfull H6 H4 H3 H19 H17 H15 H14 H10 H FullMessageDependencies0 EqDecision2 EqDecision0.
   apply VLSM_eq_incl_iff; split.
   - by apply full_node_msg_dep_limited_equivocation_vlsm_incl.
   - by apply msg_dep_full_node_limited_equivocation_vlsm_incl.
@@ -385,7 +387,7 @@ Lemma equivocating_messages_are_equivocator_emitted
       v ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Cv)
         /\
       can_emit (pre_loaded_vlsm (IM (A v)) (fun dm => msg_dep_rel message_dependencies dm im)) im.
-Proof.
+Proof using Hchannel H26 H24 H23 H18 FullMessageDependencies0 EqDecision2.
   eapply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
       in Him.
   apply can_emit_composite_project in Him as [j Him].
@@ -410,7 +412,7 @@ Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_em
     composite_has_been_directly_observed IM s dm \/
     exists v_i, v_i ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Cv) /\
       can_emit (pre_loaded_with_all_messages_vlsm (IM (A v_i))) dm.
-Proof.
+Proof using no_initial_messages_in_IM Hchannel H26 H24 H23 H18 FullMessageDependencies0 EqDecision2.
   intros dm Hdm.
   destruct (decide (composite_has_been_directly_observed IM s dm)) as [Hobs | Hnobs]
   ; [by left | right].
@@ -444,7 +446,7 @@ Lemma message_equivocators_can_emit (s : vstate Limited) im
                 (original_state s) im))
         (original_state s))
       im.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Hsender_safety Hchannel H8 H6 H4 H3 H26 H24 H23 H19 H18 H15 H13 H12 H FullMessageDependencies0 EqDecision2 EqDecision1.
   eapply VLSM_embedding_can_emit.
   - unshelve apply equivocators_composition_for_directly_observed_index_incl_embedding with
       (indices1 := fin_sets.set_map A (msg_dep_message_equivocators IM (Cv := Cv)
@@ -487,7 +489,7 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
       (pre_VLSM_embedding_finite_trace_project
         (type Limited) (composite_type IM) Datatypes.id original_state
         tr).
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Hsender_safety Hchannel H8 H6 H4 H3 H27 H26 H24 H23 H19 H18 H15 H13 H12 H FullMessageDependencies0 EqDecision2 EqDecision1.
   repeat split; [.. | by apply Htr].
   - by eapply coeqv_limited_equivocation_state_not_heavy,
             finite_valid_trace_last_pstate, Htr.
@@ -581,7 +583,7 @@ Corollary msg_dep_fixed_limited_equivocation is tr
       (pre_VLSM_embedding_finite_trace_project
         (type Limited) (composite_type IM) Datatypes.id original_state
         tr) (Ci := Ci) (Cv := Cv).
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Hsender_safety Hchannel H8 H6 H4 H3 H27 H26 H24 H23 H19 H18 H15 H13 H12 H FullMessageDependencies0 EqDecision2 EqDecision1.
   intro Htr.
   exists (state_annotation (finite_trace_last is tr)).
   by apply msg_dep_fixed_limited_equivocation_witnessed.
@@ -614,7 +616,7 @@ Lemma fixed_transition_preserves_annotation_equivocators
           (msg_dep_composite_transition_message_equivocators IM full_message_dependencies sender)
           {| original_state := is; state_annotation := empty_set |} tr), iom)
     ⊆ eqv_validators.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Inj0 Hsender_safety Hchannel H8 H6 H4 H3 H26 H24 H23 H18 H15 H13 H12 H FullMessageDependencies0 EqDecision2 EqDecision1.
   destruct iom as [im |]; [| done].
   apply ListFinSetExtras.set_union_subseteq_iff; split; [done | cbn].
   rewrite annotate_trace_from_last_original_state; cbn.
@@ -672,7 +674,7 @@ Lemma msg_dep_limited_fixed_equivocation
     finite_valid_trace Limited
       {| original_state := is; state_annotation := ` inhabitant |}
       (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender is tr).
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Inj0 Hsender_safety Hchannel H8 H6 H4 H3 H26 H24 H23 H19 H18 H15 H13 H12 H FullMessageDependencies0 EqDecision2 EqDecision1.
   intros (equivocators & Hlimited & Htr).
   split; [| by split; [apply Htr |]].
   apply valid_trace_add_default_last in Htr.
@@ -733,7 +735,7 @@ Lemma annotated_limited_incl_constrained_limited
       Limited
       (tracewise_limited_equivocation_vlsm_composition IM threshold A sender (Cv := Cv))
       Datatypes.id original_state.
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Inj0 Hsender_safety Hchannel H8 H6 H5 H4 H3 H2 H18 H15 H13 H12 H1 H0 H FullMessageDependencies0 EqDecision1 Ci.
   constructor; intros sX trX HtrX.
   eapply @traces_exhibiting_limited_equivocation_are_valid; [done.. | |].
   - by apply Hsender_safety.

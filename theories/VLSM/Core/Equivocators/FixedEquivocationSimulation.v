@@ -12,6 +12,8 @@ From VLSM.Core Require Import Equivocators.FullReplayTraces.
 From VLSM.Core Require Import Equivocators.FixedEquivocation.
 From VLSM.Core Require Import Equivocators.SimulatingFree.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Equivocators Simulating fixed-set equivocation composition
 
   In this module we show that the composition of equivocators with no
@@ -46,7 +48,7 @@ Context {message : Type}
 
 Lemma no_initial_messages_in_sub_IM
   : forall i m, ~ vinitial_message_prop (sub_IM IM (elements equivocating) i) m.
-Proof.
+Proof using no_initial_messages_in_IM.
   intros [i Hi] m Hinit.
   by apply (no_initial_messages_in_IM i m).
 Qed.
@@ -156,7 +158,7 @@ Lemma fixed_equivocation_replay_has_message
     s im)
   : composite_has_been_sent (equivocator_IM IM)
       (lift_equivocators_sub_state_to IM (elements equivocating) eqv_state_s s) im.
-Proof.
+Proof using H7.
   apply non_empty_valid_trace_from_can_produce in Him
      as (im_eis & im_etr & item & Him_etr & Hlast & Heqs & Him).
   specialize
@@ -190,7 +192,8 @@ Lemma fixed_equivocation_has_replayable_message_prop
   : replayable_message_prop IM (fun _ : message => False)
     (strong_fixed_equivocation_constraint IM equivocating)
     (equivocators_fixed_equivocations_constraint IM (elements equivocating)).
-Proof.
+Proof using Ci EqDecision0 Free FreeE H5 H7 H8 IM PreFreeE SubFreeE X XE
+equivocating index message no_initial_messages_in_IM.
   specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
   specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
   specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM (elements equivocating)) as HinclE.
@@ -269,8 +272,7 @@ Proof.
     { by apply (VLSM_eq_valid_state HeqXE), (VLSM_eq_valid_state HeqXE). }
     spec Hreplay.
     { subst s.
-      clear -HeqXE Hstate_valid.
-      intros l s om Hv Hlift_s.
+      intros l' s om Hv Hlift_s.
       apply (VLSM_eq_valid_state HeqXE) in Hstate_valid.
       apply (VLSM_eq_valid_state HeqXE) in Hlift_s.
       by apply fixed_equivocating_non_equivocating_constraint_lifting.
@@ -338,7 +340,7 @@ Lemma fixed_equivocators_finite_valid_trace_init_to_rev
       equivocators_total_trace_project IM tr = trX /\
       finite_valid_trace_init_to XE is s tr /\
       finite_trace_last_output trX = finite_trace_last_output tr.
-Proof.
+Proof using Ci EqDecision0 Free FreeE H5 H7 H8 IM PreFreeE SubFreeE X XE equivocating index message no_initial_messages_in_IM.
   (*
     Since the base result works with pre-loaded vlsms, some massaging of the
     hypothesis and conclusion is done to fit the applied lemma.

@@ -8,6 +8,8 @@ From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
 From VLSM.Core Require Import Equivocators.FullReplayTraces.
 
+Set Default Proof Using "Type".
+
 (** * Equivocators simulating regular nodes
 
   In this module we prove a general simulation result parameterized by
@@ -110,7 +112,7 @@ Lemma generalized_equivocators_finite_valid_trace_init_to_rev
     exists tr, equivocators_total_trace_project IM tr = trX /\
     finite_valid_trace_init_to CE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
-Proof.
+Proof using H.
   assert (HinclE : VLSM_incl CE PreFreeE)
     by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
@@ -312,7 +314,7 @@ Lemma seeded_equivocators_finite_valid_trace_init_to_rev
     exists tr, equivocators_total_trace_project IM tr = trX /\
     finite_valid_trace_init_to SeededXE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
-Proof.
+Proof using H.
   apply
     (generalized_equivocators_finite_valid_trace_init_to_rev IM)
   ; [.. | done].
@@ -391,7 +393,7 @@ Lemma equivocators_finite_valid_trace_init_to_rev
     exists tr, equivocators_total_trace_project IM tr = trX /\
     finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
-Proof.
+Proof using H.
   specialize (vlsm_is_pre_loaded_with_False Free) as Heq.
   apply (VLSM_eq_finite_valid_trace_init_to Heq) in HtrX.
   specialize

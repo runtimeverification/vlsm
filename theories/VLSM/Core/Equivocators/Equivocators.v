@@ -4,6 +4,8 @@ From Coq Require Import Eqdep Fin FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Equivocation
 
   An [equivocator_vlsm] for a given [VLSM] <<X>> is a VLSM which starts as a

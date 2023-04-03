@@ -9,6 +9,8 @@ From VLSM.Core Require Import Equivocators.Equivocators Equivocators.Equivocator
 From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.MessageProperties.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Equivocator Composition Projections *)
 
 Section sec_equivocators_composition_projections.
@@ -1516,7 +1518,7 @@ Qed.
 Lemma PreFreeE_PreFree_vlsm_partial_projection
   (final_descriptors : equivocator_descriptors)
   : VLSM_partial_projection PreFreeE PreFree (equivocators_partial_trace_project final_descriptors).
-Proof.
+Proof using equivocators_no_equivocations_vlsm H0.
   split; [by split; apply equivocators_partial_trace_project_extends_left |].
   intros s tr sX trX Hpr_tr Htr.
   destruct (destruct_equivocators_partial_trace_project Hpr_tr)
@@ -2105,7 +2107,7 @@ Lemma equivocators_valid_trace_from_project
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project final_descriptors final_state = final_stateX /\
     finite_valid_trace_from_to Free isX final_stateX trX.
-Proof.
+Proof using sub_IM H.
   apply valid_trace_get_last in Htr as Hfinal_state. apply valid_trace_forget_last in Htr.
   subst final_state.
   specialize (VLSM_partial_projection_finite_valid_trace_from
@@ -2152,7 +2154,7 @@ Qed.
 Lemma equivocators_no_equivocations_vlsm_X_vlsm_projection
   : VLSM_projection equivocators_no_equivocations_vlsm Free
       (equivocators_total_label_project IM) (equivocators_total_state_project IM).
-Proof.
+Proof using sub_IM H.
   constructor; [constructor |].
   - intros * Htr. apply PreFreeE_Free_vlsm_projection_type.
     apply VLSM_incl_finite_valid_trace_from; [| done].
@@ -2182,7 +2184,7 @@ Qed.
 Lemma preloaded_equivocators_no_equivocations_vlsm_X_vlsm_projection
   : VLSM_projection PreFreeE PreFree
       (equivocators_total_label_project IM) (equivocators_total_state_project IM).
-Proof.
+Proof using H0 H.
   constructor; [constructor; intros |].
   - by apply PreFreeE_Free_vlsm_projection_type.
   - intros * Htr.

@@ -12,6 +12,8 @@ From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
 From VLSM.Core Require Import Equivocators.FixedEquivocation.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Limited Equivocation *)
 Definition composite_constraint
   {index message} (IM : index -> VLSM message) : Type :=
@@ -283,7 +285,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
     finite_valid_trace (msg_dep_limited_equivocation_vlsm IM threshold full_message_dependencies sender (Cv := Ci))
       {| original_state := isX; state_annotation := ` inhabitant |}
       (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender isX trX).
-Proof.
+Proof using no_initial_messages_in_IM message_dependencies Hchannel HMsgDep HFullMsgDep H18 H16 H15 H11 EqDecision1.
   eapply equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
       in Htr as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_limited)
   ; [| done].
@@ -328,7 +330,7 @@ Lemma limited_equivocators_valid_trace_project
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project final_descriptors final_state = final_stateX /\
     finite_valid_trace Limited isX trX.
-Proof.
+Proof using Hsender_safety H0.
   specialize
     (equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
       final_descriptors is tr Hproper Htr)
@@ -348,7 +350,7 @@ Lemma limited_equivocators_vlsm_partial_projection
   (final_descriptors : equivocator_descriptors)
   : VLSM_partial_projection equivocators_limited_equivocations_vlsm Limited
       (equivocators_partial_trace_project IM final_descriptors).
-Proof.
+Proof using Hsender_safety H0.
   split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert (HPreFree_pre_tr :
@@ -377,7 +379,7 @@ Qed.
 Lemma limited_equivocators_vlsm_projection
   : VLSM_projection equivocators_limited_equivocations_vlsm Limited
     (equivocators_total_label_project IM) (equivocators_total_state_project IM).
-Proof.
+Proof using Hsender_safety H0.
   constructor; [constructor |]; intros ? *.
   - intros HtrX. apply PreFreeE_Free_vlsm_projection_type.
     revert HtrX. apply VLSM_incl_finite_valid_trace_from.

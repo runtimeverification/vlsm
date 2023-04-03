@@ -7,6 +7,8 @@ From VLSM.Core Require Import Validator ProjectionTraces MessageDependencies.
 From VLSM.Core Require Import TraceableVLSM MinimalEquivocationTrace.
 From VLSM.Core Require Import BaseELMO UMO MO.
 
+Set Default Proof Using "Type".
+
 Create HintDb ELMO_hints.
 
 #[local] Hint Resolve submseteq_tail_l : ELMO_hints.
@@ -204,7 +206,7 @@ Proof.
 Qed.
 
 #[export] Instance local_equivocators_full_obs_dec : RelDecision local_equivocators_full_obs.
-Proof.
+Proof using EqDecision0.
   intros ol a.
   induction ol using addObservation'_rec.
   - by right; inversion 1.
@@ -326,7 +328,7 @@ Definition ELMOComponent (i : index) : VLSM Message :=
 
 #[export] Instance ComputableSentMessages_ELMOComponent
   (i : index) : ComputableSentMessages (ELMOComponent i).
-Proof.
+Proof using Inj0.
   constructor 1 with sentMessages; constructor.
   - by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil.
   - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
@@ -340,7 +342,7 @@ Defined.
 
 #[export] Instance ComputableReceivedMessages_ELMOComponent
   (i : index) : ComputableReceivedMessages (ELMOComponent i).
-Proof.
+Proof using Inj0.
   constructor 1 with receivedMessages; constructor.
   - by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil.
   - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
@@ -588,7 +590,7 @@ Lemma local_equivocators_simple_addObservation :
       adr (state (message ob)) = a /\
       message ob ∉ messages s /\
       exists m, m ∈ messages s /\ incomparable (message ob) m.
-Proof.
+Proof using threshold measurable_Address index idx i Ri ReachableThreshold0 H7 H6 H5 H4 H3 H2 H1 H0 H EqDecision1 EqDecision0 Ei Ca.
   intros s ob a [].
   apply elem_of_messages_addObservation in les_obs_m1 as [-> | Hm1], les_obs_m2 as [-> | Hm2].
   - by destruct les_incomparable as [? []]; constructor.
@@ -606,7 +608,7 @@ Lemma local_equivocators_simple_add_Send (s : State) :
   UMO_reachable no_self_equiv s ->
   forall a, local_equivocators_simple (s <+> MkObservation Send (MkMessage s)) a ->
             local_equivocators_simple s a.
-Proof.
+Proof using threshold measurable_Address index idx i Ri ReachableThreshold0 H7 H6 H5 H4 H3 H2 H1 H0 H EqDecision1 EqDecision0 Ei Ca.
   intros Hs a Ha.
   apply local_equivocators_simple_addObservation
     in Ha as [| (<- & _ & m & Hm & Hincomp)]; [done |]; cbn in *.
@@ -621,7 +623,7 @@ Qed.
 Lemma local_equivocators_simple_no_self (s : State) :
   UMO_reachable no_self_equiv s ->
     ~ local_equivocators_simple s (adr s).
-Proof.
+Proof using threshold measurable_Address index idx i Ri ReachableThreshold0 H7 H6 H5 H4 H3 H2 H1 H0 H EqDecision1 EqDecision0 Ei Ca.
   intros Hs; induction Hs as [| | ? ? Hno_self_eqv].
   - by destruct 1; inversion les_obs_m1.
   - by contradict IHHs; apply local_equivocators_simple_add_Send in IHHs.
@@ -665,7 +667,7 @@ Lemma local_equivocators_simple_add_Receive (s : State) (msg : Message) :
             local_equivocators_simple s i
      \/ adr (state msg) = i /\ i <> adr s /\
           exists m, m ∈ messages s /\ incomparable msg m.
-Proof.
+Proof using threshold measurable_Address index idx i Ri ReachableThreshold0 H7 H6 H5 H4 H3 H2 H1 H0 H EqDecision1 EqDecision0 Ei Ca.
   intros Hs Hno_equiv a Ha.
   assert (a <> adr (s <+> MkObservation Receive msg))
     by (contradict Ha; subst; apply local_equivocators_simple_no_self; constructor; done).
@@ -743,7 +745,7 @@ Qed.
 Lemma local_equivocators_simple_iff_full (s : State) :
   UMO_reachable no_self_equiv s ->
   forall a, local_equivocators_simple s a <-> local_equivocators_full s a.
-Proof.
+Proof using threshold measurable_Address index idx i Ri ReachableThreshold0 H7 H6 H5 H4 H3 H2 H1 H0 H EqDecision1 EqDecision0 Ei Ca.
   intros Hs a; split.
   - induction Hs.
     + by destruct 1; inversion les_obs_m1.
@@ -782,7 +784,7 @@ Qed.
 Lemma local_equivocators_iff_full (s : State) :
   UMO_reachable (fun s m => full_node s m /\ no_self_equiv s m) s ->
   forall a, local_equivocators s a <-> local_equivocators_full s a.
-Proof.
+Proof using threshold measurable_Address index idx i Ri ReachableThreshold0 H7 H6 H5 H4 H3 H2 H1 H0 H EqDecision1 EqDecision0 Ei Ca.
   intros Hs a.
   by rewrite local_equivocators_iff_simple;
     [apply local_equivocators_simple_iff_full |];
@@ -871,7 +873,7 @@ Lemma equivocation_limit_recv_ok_msg_ok (s : State) (m : Message) :
   UMO_reachable no_self_equiv (state m) ->
   local_equivocation_limit_ok (s <+> MkObservation Receive m) ->
   local_equivocation_limit_ok (state m).
-Proof.
+Proof using i Ri Ei.
   intros Hfull Hno_self Hs Hms Hs'.
   eapply Rle_trans; [| done].
   apply incl_equivocating_validators_equivocation_fault, filter_subprop; cbn; intros a Ha.
@@ -998,7 +1000,7 @@ Lemma reachable_received_messages_reachable (s : State) :
   forall i',
     adr (state m) = idx i' ->
     ram_state_prop (ELMOComponent i') (state m).
-Proof.
+Proof using Inj0.
   intros Hs m Hm.
   destruct (decide (adr (state m) = adr s)).
   {
@@ -1067,7 +1069,7 @@ Lemma receivable_messages_reachable (ms s : State) i' :
   ram_state_prop Ei s ->
   ELMO_recv_valid s (MkMessage ms) ->
   ram_state_prop (ELMOComponent i') ms.
-Proof.
+Proof using Inj0.
   intros Heq Hram Hrv.
   change ms with (state (MkMessage ms)).
   apply reachable_received_messages_reachable
@@ -1119,7 +1121,7 @@ Lemma ELMOComponent_receivedMessages_of_ram_trace
   [s s' tr] (Htr : finite_valid_trace_from_to Ri s s' tr) :
   forall item, item ∈ tr ->
   forall m, (field_selector input) m item -> m ∈ receivedMessages s'.
-Proof.
+Proof using Inj0.
   induction Htr using finite_valid_trace_from_to_rev_ind; [by inversion 1 |].
   intros item Hitem m Hm.
   change (has_been_received Ei sf m).
@@ -1132,7 +1134,7 @@ Lemma ELMOComponent_sentMessages_of_ram_trace
   [s s' tr] (Htr : finite_valid_trace_from_to Ri s s' tr) :
   forall item, item ∈ tr ->
   forall m, (field_selector output) m item -> m ∈ sentMessages s'.
-Proof.
+Proof using Inj0.
   induction Htr using finite_valid_trace_from_to_rev_ind; [by inversion 1 |].
   intros item Hitem m Hm.
   change (has_been_sent Ei sf m).
@@ -1158,7 +1160,7 @@ Lemma ELMOComponent_messages_of_ram_trace
   [s s' tr] (Htr : finite_valid_trace_from_to Ri s s' tr) :
   forall item, item ∈ tr ->
   forall m, item_sends_or_receives m item -> m ∈ messages s'.
-Proof.
+Proof using Inj0.
   intros ? ? ? [|]; apply elem_of_messages.
   - by right; eapply ELMOComponent_receivedMessages_of_ram_trace.
   - by left; eapply ELMOComponent_sentMessages_of_ram_trace.
@@ -1552,7 +1554,7 @@ Qed.
 
 Lemma ELMO_channel_authentication_prop :
   channel_authentication_prop ELMOComponent (ELMO_A idx) Message_sender.
-Proof.
+Proof using Inj0.
   intros i m ((s, []) & [] & s' & [(Hs & _ & Hv) Ht]);
     inversion Hv; subst; inversion Ht; subst.
   unfold channel_authenticated_message; cbn; f_equal.
@@ -2003,7 +2005,7 @@ Lemma ELMO_update_state_with_initial
     ELMO_equivocating_validators (state_update ELMOComponent s i si)
       ⊆
     ELMO_equivocating_validators s ∪ {[ idx i ]}.
-Proof.
+Proof using H8.
   assert (Hincl : VLSM_incl ELMOProtocol ReachELMO) by apply constraint_preloaded_free_incl.
   assert (Htr_min := ELMO_state_to_minimal_equivocation_trace_valid _ Hs).
   cbn in Htr_min; destruct (ELMO_state_to_minimal_equivocation_trace _ _)
@@ -2110,7 +2112,7 @@ Lemma ELMO_valid_states_only_receive_valid_messages :
   forall (i : index) (l : Label) (s' : vstate ELMOProtocol) (m : Message),
     ELMOProtocolValidTransition i l s s' m ->
     valid_message_prop ELMOProtocol m.
-Proof.
+Proof using H8.
   intros s Hs i l s' m Hvalid.
   inversion Hvalid as [? ? ? ? Hreceive | ? ? ? ? Hsend]; subst; cycle 1.
   {
@@ -2815,7 +2817,7 @@ Lemma reflecting_composite_for_reachable_component
       let s' := state_update ELMOComponent s i s_prev in
       valid_state_prop ELMOProtocol s' /\
       ELMOProtocolValidTransition i l s' s m.
-Proof.
+Proof using H8.
   induction Hreachable using valid_state_prop_ind;
     [| destruct IHHreachable as (sigma & <- & Hsigma & Hreflects & Hsend & Hall), l; cycle 1].
   - unfold initial_state_prop in Hs; cbn in Hs.
@@ -3011,7 +3013,7 @@ Qed.
 Theorem ELMOComponents_validating :
   forall i : index,
     component_projection_validator_prop ELMOComponent ELMO_global_constraint i.
-Proof.
+Proof using H8.
   intros i li si om Hvti.
   apply input_valid_transition_iff in Hvti as [[si' om'] Hvti].
   pose (Hvti' := Hvti); destruct Hvti' as [(_ & _ & Hvi) Hti].

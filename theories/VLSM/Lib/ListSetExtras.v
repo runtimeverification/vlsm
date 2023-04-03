@@ -2,6 +2,8 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
 
+Set Default Proof Using "Type".
+
 (** * List set utility definitions and lemmas *)
 
 Definition set_eq {A} (s1 s2 : set A) : Prop :=

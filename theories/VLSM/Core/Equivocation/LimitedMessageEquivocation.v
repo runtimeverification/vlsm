@@ -8,6 +8,8 @@ From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 From VLSM.Core Require Import Equivocation.WitnessedEquivocation.
 
+Set Default Proof Using "Type".
+
 (** * VLSM Limited Message Equivocation
 
   In this section we define the notion of limited (message-based) equivocation.
@@ -64,7 +66,7 @@ Definition limited_equivocation_composite_vlsm : VLSM message :=
 Lemma limited_equivocation_valid_state s
   : valid_state_prop limited_equivocation_composite_vlsm s ->
     LimitedEquivocationProp s.
-Proof.
+Proof using Hno_initial_equivocation H7 H6 H4 H3 H2 H1 H0 EqDecision1.
   intros Hs; apply valid_state_prop_iff in Hs
     as [[[is His] ->] | (l & [s' om'] & om & [(_ & _ & _ & Hv) Ht])]; simpl.
   - exists ∅.
@@ -210,7 +212,7 @@ Context
 Lemma StrongFixed_valid_state_not_heavy s
   (Hs : valid_state_prop StrongFixed s)
   : tracewise_not_heavy s.
-Proof.
+Proof using Inj0 Hsender_safety Hlimited H7 H6 H4 H3 H.
   cut (tracewise_equivocating_validators s ⊆ eqv_validators).
   {
     intro Hincl; unfold tracewise_not_heavy, not_heavy.
@@ -249,7 +251,7 @@ Proof.
 Qed.
 
 Lemma StrongFixed_incl_Limited : VLSM_incl StrongFixed Limited.
-Proof.
+Proof using Inj0 Hsender_safety Hlimited H7 H6 H4 H3 H.
   apply constraint_subsumption_incl.
   intros [i li] [s om] Hpv.
   unfold limited_equivocation_constraint.
@@ -259,7 +261,7 @@ Proof.
 Qed.
 
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
-Proof.
+Proof using Inj0 Hsender_safety Hlimited H7 H6 H4 H3 H.
   specialize (Fixed_eq_StrongFixed IM equivocators)
     as Heq.
   apply VLSM_eq_proj1 in Heq.
@@ -318,7 +320,7 @@ Context
 Lemma traces_exhibiting_limited_equivocation_are_valid
   (Hsender_safety : sender_safety_alt_prop IM A sender)
   : forall s tr, fixed_limited_equivocation_prop s tr -> finite_valid_trace Limited s tr.
-Proof.
+Proof using Inj0 H7 H6 H4 H3 H.
   intros s tr [equivocators [Hlimited Htr]].
   eapply VLSM_incl_finite_valid_trace; [| done].
   by eapply Fixed_incl_Limited.
@@ -343,7 +345,7 @@ Lemma traces_exhibiting_limited_equivocation_are_valid_rev
     finite_valid_trace_init_to (free_composite_vlsm IM) is s tr ->
     tracewise_not_heavy s ->
     fixed_limited_equivocation_prop is tr.
-Proof.
+Proof using H7 H6 H4 H3 H.
   intros is s tr Hstrong Htr Hnot_heavy.
   exists (equivocating_validators s).
   split; cycle 1.
@@ -365,7 +367,7 @@ Lemma limited_traces_exhibiting_limited_equivocation_are_valid_rev
   (can_emit_signed : channel_authentication_prop IM A sender)
   : forall s tr, strong_trace_witnessing_equivocation_prop IM threshold A sender s tr (Cv := Cv) ->
     finite_valid_trace Limited s tr -> fixed_limited_equivocation_prop s tr.
-Proof.
+Proof using H7 H6 H4 H3 H.
   intros s tr Hstrong Htr.
   eapply traces_exhibiting_limited_equivocation_are_valid_rev; [done.. | |].
   - apply valid_trace_add_default_last.
@@ -390,7 +392,7 @@ Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
   (can_emit_signed : channel_authentication_prop IM A sender)
   : forall s, valid_state_prop Limited s ->
     exists is tr, finite_trace_last is tr = s /\ fixed_limited_equivocation_prop is tr.
-Proof.
+Proof using H7 H6 H4 H3 H.
   intros s Hs.
   assert (Hfree_s : valid_state_prop (free_composite_vlsm IM) s)
     by (revert Hs; apply VLSM_incl_valid_state, constraint_free_incl).
