@@ -1,4 +1,4 @@
-for file in `find theories/VLSM/Core/ELMO/ -maxdepth 1 -name 'UMO.v'`; do 
+for file in `find theories/VLSM/Core/ELMO/ -maxdepth 1 -name '*.v'`; do
    fline=`cat $file | head -n1`
    if [[ $fline == 'Set Default Proof Using "Type".' ]]; then
       echo $file

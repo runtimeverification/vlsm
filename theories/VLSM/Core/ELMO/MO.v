@@ -1,3 +1,4 @@
+Set Default Proof Using "Type".
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality.
 From stdpp Require Import prelude finite.
@@ -713,7 +714,7 @@ Lemma state_suffix_totally_orders_valid_sent_messages :
       obs1 <*> MkObservation Send m1 <**> obs2 <*> MkObservation Send m2 <**> obs3 ->
     MO_msg_valid_alt_sends m ->
       state_suffix (state m1) (state m2) /\ state_suffix (state m2) (state m).
-Proof.
+Proof using P.
   intros m m1 m2 obs1 obs2 obs3 Heq Hvalid.
   red in Hvalid.
   assert (H2 :
@@ -1228,7 +1229,7 @@ Lemma unfold_rec_obs :
     rec_obs s ob
       <->
     ob ∈ obs s \/ exists m, MkObservation Receive m ∈ obs s /\ rec_obs (state m) ob.
-Proof using. clear. (* avoid unneccessary dependence on section variables *)
+Proof. clear -Message. (* avoid unneccessary dependence on section variables *)
   intros s ob; split.
   - induction 1.
     + by left; constructor.

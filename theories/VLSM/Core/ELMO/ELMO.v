@@ -1,3 +1,4 @@
+Set Default Proof Using "Type".
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality Reals.
 From stdpp Require Import prelude finite.

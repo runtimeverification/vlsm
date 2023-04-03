@@ -1,3 +1,4 @@
+Set Default Proof Using "Type".
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import EquationsExtras.
