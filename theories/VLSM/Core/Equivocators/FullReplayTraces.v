@@ -504,16 +504,16 @@ Lemma replayed_initial_state_from_valid
   : finite_valid_trace_from SeededCE full_replay_state
       (replayed_initial_state_from full_replay_state is).
 Proof.
-  cut (forall l, incl l (enum (sub_index equivocating)) ->
+  cut (forall l, l ⊆ enum (sub_index equivocating) ->
     finite_valid_plan_from SeededCE
       full_replay_state (map (initial_new_machine_transition_item is) l)).
-  { intros Hplan. specialize (Hplan _ (incl_refl _)).
-    by unfold finite_valid_plan_from in Hplan.
+  {
+    by intros Hplan; apply Hplan.
   }
   intro l.
   induction l using rev_ind; intros Hincl.
   - by constructor.
-  - spec IHl; [by intros i Hi; apply Hincl, in_app_iff; left |].
+  - spec IHl; [by intros i Hi; apply Hincl; apply elem_of_app; left |].
     rewrite map_app.
     apply finite_valid_plan_from_app_iff.
     split; [done |].
