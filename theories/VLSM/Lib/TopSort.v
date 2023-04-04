@@ -465,8 +465,7 @@ Lemma top_sort_set_eq
 Proof.
   unfold top_sort.
   remember (length l) as n. generalize dependent l.
-  induction n; intros; destruct l; try apply set_eq_refl
-  ; inversion Heqn.
+  induction n; intros; destruct l; [done.. |]; inversion Heqn.
   simpl.
   remember (min_predecessors precedes (a :: l) l a) as min.
   remember (set_remove min l) as l'.
