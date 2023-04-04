@@ -12,7 +12,7 @@ From VLSM.Lib Require Import Preamble.
 Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a :: nil)}} + {l = nil} .
 Proof.
-  destruct l as [| h t].
+  destruct l.
   - by right.
   - by left; apply exists_last.
 Qed.
@@ -954,7 +954,7 @@ Lemma elem_of_map_option :
   forall {A B : Type} (f : A -> option B) (l : list A) (y : B),
     y ∈ map_option f l <-> exists x : A, x ∈ l /\ f x = Some y.
 Proof.
-  apply @elem_of_list_omap.
+  by apply @elem_of_list_omap.
 Qed.
 
 Lemma NoDup_map_option :
