@@ -5,21 +5,6 @@ From VLSM.Lib Require Import Preamble.
 
 (** * Utility lemmas about lists *)
 
-(** A list is empty if it has no members. *)
-Lemma empty_nil [X : Type] (l : list X) :
-  (forall v, ~ In v l) -> l = [].
-Proof.
-  clear.
-  destruct l as [| a]; cbn; [done |].
-  by intro H; elim (H a); left.
-Qed.
-
-(** It is decidable whether a list is null or not. *)
-#[export] Instance null_dec {S} (l : list S) : Decision (l = []).
-Proof.
-  by destruct l; [left | right].
-Qed.
-
 (**
   A list is either null or it can be decomposed into an initial prefix
   and a last element.
@@ -27,9 +12,9 @@ Qed.
 Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a :: nil)}} + {l = nil} .
 Proof.
-  destruct (null_dec l).
+  destruct l.
   - by right.
-  - by left; apply exists_last in n.
+  - by left; apply exists_last.
 Qed.
 
 (**
@@ -246,42 +231,6 @@ Lemma last_error_is_last {A} : forall (l : list A) (x : A),
 Proof.
   destruct l; cbn; [done |].
   by intros; rewrite last_is_last.
-Qed.
-
-(** Polymorphic list library *)
-
-Fixpoint is_member {W} `{StrictlyComparable W} (w : W) (l : list W) : bool :=
-  match l with
-  | [] => false
-  | hd :: tl => match compare w hd with
-              | Eq => true
-              | _ => is_member w tl
-              end
-  end.
-
-Definition compareb {A} `{StrictlyComparable A} (a1 a2 : A) : bool :=
-  match compare a1 a2 with
-  | Eq => true
-  | _ => false
-  end.
-
-Lemma is_member_correct {W} `{StrictlyComparable W}
-  : forall l (w : W), is_member w l = true <-> In w l.
-Proof.
-  intros l w.
-  induction l as [| hd tl IHl]; cbn.
-  - by itauto congruence.
-  - rewrite compare_asymmetric, <- compare_eq.
-    by destruct (compare hd w) eqn: Hcmp; cbn; itauto congruence.
-Qed.
-
-Lemma is_member_correct' {W} `{StrictlyComparable W}
-  : forall l (w : W), is_member w l = false <-> ~ In w l.
-Proof.
-  intros.
-  rewrite <- is_member_correct.
-  split; [by congruence |].
-  by apply not_true_is_false.
 Qed.
 
 Lemma In_app_comm {X} : forall l1 l2 (x : X), In x (l1 ++ l2) <-> In x (l2 ++ l1).
@@ -637,6 +586,7 @@ Proof.
     by specialize (IHl n0 eq_refl n3 eq_refl); lia.
 Qed.
 
+(* TODO(wkolowski): Forall_filter, Forall_hd and Forall_tl should end with Qed! *)
 Fixpoint Forall_filter
   {A : Type}
   (P : A -> Prop)
@@ -1004,7 +954,7 @@ Lemma elem_of_map_option :
   forall {A B : Type} (f : A -> option B) (l : list A) (y : B),
     y ∈ map_option f l <-> exists x : A, x ∈ l /\ f x = Some y.
 Proof.
-  apply @elem_of_list_omap.
+  by apply @elem_of_list_omap.
 Qed.
 
 Lemma NoDup_map_option :
@@ -1090,18 +1040,6 @@ Proof.
     by apply (Hnth (S n)).
 Qed.
 
-Lemma in_fast
-  {A : Type}
-  (l : list A)
-  (a : A)
-  (b : A)
-  (Hin : In a (b :: l))
-  (Hneq : b <> a) :
-  In a l.
-Proof.
-  by destruct Hin.
-Qed.
-
 Fixpoint one_element_decompositions
   {A : Type}
   (l : list A)
@@ -1143,18 +1081,6 @@ Proof.
       by rewrite IHl.
 Qed.
 
-Lemma in_one_element_decompositions_iff
-  {A : Type}
-  (l : list A)
-  (pre suf : list A)
-  (x : A)
-  : In (pre, x, suf) (one_element_decompositions l)
-  <-> pre ++ [x] ++ suf = l.
-Proof.
-  rewrite <- elem_of_list_In.
-  by apply elem_of_one_element_decompositions.
-Qed.
-
 Definition two_element_decompositions
   {A : Type}
   (l : list A)
@@ -1185,15 +1111,15 @@ Proof.
     apply in_map_iff in Hin.
     destruct Hin as [((mid', y'), suf') [Hdec Hin]].
     inversion Hdec. subst. clear Hdec.
-    apply in_one_element_decompositions_iff in Hdecx.
-    apply in_one_element_decompositions_iff in Hin.
+    apply elem_of_list_In, elem_of_one_element_decompositions in Hdecx, Hin.
     by subst.
   - remember (mid ++ [y] ++ suf) as sufx.
     intro H.
-    exists (pre, x, sufx). apply in_one_element_decompositions_iff in H.
+    exists (pre, x, sufx).
+    apply elem_of_one_element_decompositions, elem_of_list_In in H.
     split; [done |].
     apply in_map_iff. exists (mid, y, suf).
-    by rewrite in_one_element_decompositions_iff.
+    by rewrite <- elem_of_list_In, elem_of_one_element_decompositions.
 Qed.
 
 Lemma order_decompositions
@@ -1271,19 +1197,13 @@ Fixpoint complete_prefix
   (l pref : list A) : option (list A) :=
   match l, pref with
   | l , [] => Some l
-  | [], (b :: pref') => None
-  | (a :: l'), (b :: pref') => match (decide_eq a b) with
-                               | right _ => None
-                               | _ => let res' := complete_prefix l' pref' in
-                                      match res' with
-                                      | None => None
-                                      | Some s => Some s
-                                      end
-                               end
+  | [], b :: pref' => None
+  | a :: l', b :: pref' => if decide_eq a b then complete_prefix l' pref' else None
   end.
 
 Example complete_prefix_some : complete_prefix [1; 2; 3; 4] [1; 2] = Some [3; 4].
 Proof. by itauto. Qed.
+
 Example complete_prefix_none : complete_prefix [1; 2; 3; 4] [1; 3] = None.
 Proof. by itauto. Qed.
 
@@ -1527,28 +1447,6 @@ Proof.
   by induction 1; constructor; auto.
 Qed.
 
-Definition ForAllSuffix1 [A : Type] (P : A -> Prop) : list A -> Prop :=
-  ForAllSuffix (fun l => match l with | [] => True | a :: _ => P a end).
-
-Lemma ForAllSuffix1_Forall [A : Type] (P : A -> Prop)
-  : forall l, ForAllSuffix1 P l <-> Forall P l.
-Proof.
-  by split; induction 1; constructor; auto.
-Qed.
-
-Definition ExistsSuffix1 [A : Type] (P : A -> Prop) : list A -> Prop :=
-  ExistsSuffix (fun l => match l with | [] => False | a :: _ => P a end).
-
-Lemma ExistsSuffix1_Exists [A : Type] (P : A -> Prop)
-  : forall l, ExistsSuffix1 P l <-> Exists P l.
-Proof.
-  split; induction 1.
-  - by destruct l; [| left].
-  - by right.
-  - by left.
-  - by right.
-Qed.
-
 Definition ForAllSuffix2 [A : Type] (R : A -> A -> Prop) : list A -> Prop :=
   ForAllSuffix (fun l => match l with | a :: b :: _ => R a b | _ => True end).
 
@@ -1595,13 +1493,6 @@ Proof.
       * by right; intro Hsub'; elim n; apply Hsub'; left.
     + right; intro Hsub; elim Hnsub.
       by intros b Hb; apply Hsub; right.
-Qed.
-
-Lemma elem_of_empty_nil [X : Type] (l : list X) :
-  (forall v, v ∉ l) -> l = [].
-Proof.
-  destruct l as [| a]; [done |].
-  by intro H; elim (H a); left.
 Qed.
 
 Lemma nodup_append_left {A} :
