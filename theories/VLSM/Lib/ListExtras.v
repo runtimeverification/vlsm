@@ -12,7 +12,7 @@ From VLSM.Lib Require Import Preamble.
 Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a :: nil)}} + {l = nil} .
 Proof.
-  destruct l as [| h t].
+  destruct l.
   - by right.
   - by left; apply exists_last.
 Qed.

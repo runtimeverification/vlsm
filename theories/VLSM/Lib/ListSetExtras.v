@@ -7,6 +7,15 @@ From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
 Definition set_eq {A} (s1 s2 : set A) : Prop :=
   s1 ⊆ s2 /\ s2 ⊆ s1.
 
+(**
+  By declaring [set_eq] and [Equivalence] relation, we able rewriting with
+  it using the rewrite tactic. See the Coq reference manual for details:
+  https://coq.inria.fr/refman/addendum/generalized-rewriting.html
+  (section "Declaring rewrite relations", subsection "First class setoids and morphisms").
+*)
+#[export] Instance Equivalence_set_eq {A : Type} : Equivalence (@set_eq A).
+Proof. by firstorder. Qed.
+
 #[export] Instance set_eq_dec `{EqDecision A} : RelDecision (@set_eq A).
 Proof.
   by intros s1 s2; typeclasses eauto.
@@ -40,31 +49,12 @@ Proof.
   by intros s1 s2 [].
 Qed.
 
-Lemma set_eq_refl {A} : forall (s : list A), set_eq s s.
-Proof.
-  by induction s.
-Qed.
-
-Lemma set_eq_comm {A} : forall s1 s2 : set A,
-  set_eq s1 s2 <-> set_eq s2 s1.
-Proof.
-  by firstorder.
-Qed.
-
-Lemma set_eq_tran {A} : forall s1 s2 s3 : set A,
-  set_eq s1 s2 ->
-  set_eq s2 s3 ->
-  set_eq s1 s3.
-Proof.
-  by intros; split; apply PreOrder_Transitive with s2; firstorder.
-Qed.
-
 Lemma set_eq_empty_iff
   {A}
   : forall (l : list A),
     set_eq l [] <-> l = [].
 Proof.
-  split; intros; [| subst; apply set_eq_refl].
+  split; intros; [| by subst].
   destruct l as [| hd tl]; [done |].
   destruct H.
   specialize (H hd (elem_of_list_here hd tl)).
@@ -635,19 +625,15 @@ Proof.
     by apply set_add_iff; left.
 Qed.
 
-Add Parametric Relation A : (set A) (@set_eq A)
- reflexivity proved by (@set_eq_refl A)
- transitivity proved by (@set_eq_tran A) as set_eq_rel.
-
-Add Parametric Morphism A : (@elem_of_list A)
-  with signature @eq A ==> @set_eq A ==> iff as set_eq_elem_of.
+#[export] Instance set_eq_elem_of (A : Type) :
+  Proper (@eq A ==> @set_eq A ==> iff) elem_of_list.
 Proof.
-  by intros a l1 l2 H; split; apply H.
+  by intros x y -> l1 l2 H; split; apply H.
 Qed.
 
-Add Parametric Morphism A : (@elem_of_list A)
-  with signature @eq A ==> @list_subseteq A ==> Basics.impl as set_elem_of_subseteq.
-Proof. by firstorder. Qed.
+#[export] Instance set_elem_of_subseteq (A : Type) :
+  Proper (@eq A ==> @list_subseteq A ==> impl) elem_of_list.
+Proof. by intros x y -> l1 l2 H; firstorder. Qed.
 
 Lemma set_union_iterated_preserves_prop
   `{EqDecision A}
