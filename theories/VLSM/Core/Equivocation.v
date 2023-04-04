@@ -140,10 +140,10 @@ Proof.
   - rewrite Exists_exists.  split.
     + intros [((prefix, item), suffix) [Hitem Heqv]].
       exists prefix, item, suffix.
-      by apply elem_of_list_In, in_one_element_decompositions_iff in Hitem.
+      by apply elem_of_one_element_decompositions in Hitem.
     + intros [prefix [item [suffix [Hitem Heqv]]]].
       exists ((prefix, item), suffix).
-      by rewrite elem_of_list_In, in_one_element_decompositions_iff.
+      by rewrite elem_of_one_element_decompositions.
   - apply Exists_dec. intros ((prefix, item), suffix).
     apply and_dec.
     + by apply option_eq_dec.

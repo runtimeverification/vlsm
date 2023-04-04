@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # If argument $1 is not present, print usage info and exit.
 if test -z "$1"
 then
@@ -7,6 +8,7 @@ then
   echo "make axioms"
   echo "make axioms path=path_to_source_directory"
   echo "make axioms path=path_to_source_directory keep_tmp=true"
+  echo "make axioms path=path_to_source_directory keep_tmp=true group_by_mod=true"
   exit
 fi
 
@@ -27,6 +29,12 @@ then
   keep_tmp=true
 else
   keep_tmp=false
+fi
+
+# If argument $4 is present then store it
+if test -n "$4"
+then
+   group_by_mod=$4
 fi
 
 # Create a temporary directory to hold intermediate results.
@@ -90,7 +98,10 @@ awk '{if (lastLine=="") {lastLine=$0;next} if ($0 ~ /Closed under the global con
 | \
 sed -r \
 -e '/PrimInt63/d' \
--e '/Uint63/d'
+-e '/Uint63/d' \
+`# If the user passed group_by_mod=true then group the listings by module name.` \
+| \
+if [ "$group_by_mod" = "true" ]; then sed -E -e 's/\t/|/' -e '/^\|/!s/()\..*$//' | awk 'BEGIN {lastModule=""} {if ($0 ~ /^\|/) { data[lastModule][$0] = 1 } else { lastModule=$0 }} END {for (key in data) { print key; for (axiom in data[key]){ print "\t"axiom; } print "\n"; }}' | sed -E 's/\|//'; else tail -n +1; fi
 
 # Delete the temporary directory (unless user wants to keep it).
 if [ $keep_tmp == false ]
