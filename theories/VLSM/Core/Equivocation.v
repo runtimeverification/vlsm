@@ -2442,10 +2442,8 @@ Proof.
     destruct Hobs as [item [Hitem Hx]].
     exists (lift_to_composite_transition_item' IM i item).
     split; [| by destruct item].
-    apply elem_of_list_In.
-    apply in_map_iff. exists item.
-    apply elem_of_list_In in Hitem.
-    by destruct item.
+    apply elem_of_list_fmap.
+    by exists item.
 Qed.
 
 Section sec_CompositeComputableMessages.

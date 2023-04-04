@@ -78,7 +78,8 @@ Lemma existsb_Exists {A} (f : A -> bool) :
 Proof.
   intro l.
   rewrite Exists_exists, existsb_exists.
-  by setoid_rewrite elem_of_list_In.
+  apply exist_proper; intros x.
+  by rewrite elem_of_list_In.
 Qed.
 
 Lemma Exists_last
@@ -557,7 +558,7 @@ Proof.
 
   assert (exists a, (count_occ decide_eq l' a) = list_max occurrences). {
     assert (list_max occurrences ∈ occurrences) by (apply list_max_exists; done).
-    rewrite Heqoccurrences, elem_of_list_In, in_map_iff in H.
+    rewrite Heqoccurrences, elem_of_list_fmap in H.
     destruct H as (x & Heq & Hin).
     by rewrite Heqoccurrences; eauto.
   }
@@ -565,14 +566,10 @@ Proof.
   assert (exists a, a ∈ mode l'). {
     destruct H.
     exists x.
-    specialize (count_occ_In decide_eq l' x).
-    intros.
-    destruct H0 as [_ H1].
-    rewrite H in H1.
-    specialize (H1 Hmaxp).
     unfold mode.
     apply elem_of_list_filter.
-    by rewrite H, Heqoccurrences, elem_of_list_In.
+    specialize (count_occ_In decide_eq l' x); rewrite <- elem_of_list_In.
+    by itauto congruence.
   }
   intros contra; rewrite contra in H0.
   destruct H0 as [? H0].

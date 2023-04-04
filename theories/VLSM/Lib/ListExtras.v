@@ -174,10 +174,9 @@ Lemma map_list_subseteq {A B} (f : A -> B) :
 Proof.
   unfold subseteq, list_subseteq.
   intros l1 l2 Hsub b Hin.
-  rewrite elem_of_list_In, in_map_iff in Hin |- *.
-  destruct Hin as (x & <- & Hin').
+  rewrite elem_of_list_fmap in Hin |- *.
+  destruct Hin as (x & -> & Hin').
   exists x.
-  rewrite <- elem_of_list_In in *.
   by split; [| apply Hsub].
 Qed.
 
@@ -1072,7 +1071,7 @@ Definition two_element_decompositions
       end)
     (one_element_decompositions l).
 
-Lemma in_two_element_decompositions_iff
+Lemma elem_of_two_element_decompositions
   {A : Type}
   (l : list A)
   (pre mid suf : list A)
@@ -1081,21 +1080,19 @@ Lemma in_two_element_decompositions_iff
   <-> pre ++ [x] ++ mid ++ [y] ++ suf = l.
 Proof.
   unfold two_element_decompositions.
-  rewrite elem_of_list_In, in_flat_map.
+  rewrite elem_of_list_In, in_flat_map; setoid_rewrite <- elem_of_list_In.
   split.
   - intros [((pre', x'), sufx) [Hdecx Hin]].
-    apply in_map_iff in Hin.
-    destruct Hin as [((mid', y'), suf') [Hdec Hin]].
-    inversion Hdec. subst. clear Hdec.
-    apply elem_of_list_In, elem_of_one_element_decompositions in Hdecx, Hin.
-    by subst.
+    apply elem_of_list_fmap in Hin as [[[mid' y'] suf'] [[= -> -> -> -> ->] Hin]].
+    by apply elem_of_one_element_decompositions in Hdecx as <-, Hin as <-.
   - remember (mid ++ [y] ++ suf) as sufx.
     intro H.
     exists (pre, x, sufx).
-    apply elem_of_one_element_decompositions, elem_of_list_In in H.
+    apply elem_of_one_element_decompositions in H.
     split; [done |].
-    apply in_map_iff. exists (mid, y, suf).
-    by rewrite <- elem_of_list_In, elem_of_one_element_decompositions.
+    apply elem_of_list_fmap.
+    exists (mid, y, suf).
+    by rewrite elem_of_one_element_decompositions.
 Qed.
 
 Lemma order_decompositions
@@ -1316,16 +1313,32 @@ Proof.
   - by refine (if X a then if IHl then left _ else right _ else right _); constructor.
 Qed.
 
+Lemma list_sum_map :
+  forall {A : Type} (f g : A -> nat) (l : list A),
+    (forall x : A, x ∈ l -> f x <= g x) ->
+      list_sum (map f l) <= list_sum (map g l).
+Proof.
+  induction l as [| h t]; cbn; intros Hle; [done |].
+  apply PeanoNat.Nat.add_le_mono.
+  - by apply Hle; left.
+  - apply IHt; intros x Hin.
+    by apply Hle; right.
+Qed.
+
 Lemma list_sum_decrease [A : Type] (f g : A -> nat) (l : list A) :
   (forall a, a ∈ l -> f a <= g a) -> Exists (fun a => f a < g a) l ->
   list_sum (map f l) < list_sum (map g l).
 Proof.
-  setoid_rewrite elem_of_list_In.
   induction 2; cbn.
   - apply PeanoNat.Nat.add_lt_le_mono; [done |].
-    induction l; cbn; [done |].
-    apply PeanoNat.Nat.add_le_mono; firstorder.
-  - by apply PeanoNat.Nat.add_le_lt_mono; firstorder.
+    apply list_sum_map.
+    intros a' Hin.
+    by apply H; right.
+  - apply PeanoNat.Nat.add_le_lt_mono.
+    + by apply H; left.
+    + apply IHExists.
+      intros a Hin.
+      by apply H; right.
 Qed.
 
 (**
