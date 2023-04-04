@@ -1117,36 +1117,14 @@ Qed.
 
 Lemma list_max_exists :
   forall (l : list nat),
-   list_max l > 0 -> list_max l ∈ l.
-Proof.
-  intros l nz; induction l.
-  - by simpl in nz; lia.
-  - simpl in *.
-    destruct (a <=? (list_max l)) eqn: eq_leb.
-    + replace (Nat.max a (list_max l)) with (list_max l) by lia.
-      rewrite elem_of_cons; right.
-      by apply IHl; lia.
-    + assert (Nat.max a (list_max l) = a) by lia.
-      by rewrite H; left.
-Qed.
-
-Lemma list_max_exists2 :
-  forall (l : list nat),
     l <> [] -> list_max l ∈ l.
 Proof.
-  intros l.
-  destruct (list_max l) eqn: eq_max.
-  - destruct l; [by itauto congruence |].
-    specialize (list_max_le (n :: l) 0) as Hle.
-    destruct Hle as [Hle _].
-    rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
-    rewrite Forall_forall in Hle.
-    specialize (Hle n). spec Hle; [left |].
-    rewrite elem_of_cons.
-    by simpl; lia.
-  - specialize (list_max_exists l) as Hmax.
-    spec Hmax; [lia |].
-    by rewrite <- eq_max.
+  induction l as [| h t]; cbn; [done |].
+  intros _.
+  destruct (PeanoNat.Nat.max_spec h (foldr Init.Nat.max 0 t))
+    as [[Hlt ->] | [Hle ->]]; [| by left].
+  right; apply IHt.
+  by destruct t; [cbn in Hlt; lia |].
 Qed.
 
 (**

@@ -557,7 +557,11 @@ Proof.
   }
 
   assert (exists a, (count_occ decide_eq l' a) = list_max occurrences). {
-    assert (list_max occurrences ∈ occurrences) by (apply list_max_exists; done).
+    assert (list_max occurrences ∈ occurrences).
+    {
+      apply list_max_exists.
+      by destruct occurrences; [cbn in Hmaxp; lia |].
+    }
     rewrite Heqoccurrences, elem_of_list_fmap in H.
     destruct H as (x & Heq & Hin).
     by rewrite Heqoccurrences; eauto.
