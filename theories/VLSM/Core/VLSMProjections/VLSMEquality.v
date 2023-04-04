@@ -269,3 +269,113 @@ Proof.
 Qed.
 
 End sec_VLSM_incl_preloaded_properties.
+
+Section sec_VLSM_equality_from_eq.
+
+Section sec_VLSMType_eq_uses.
+Context
+  [message : Type]
+  [X Y : VLSM message]
+  (H_vtypes : vtype X = vtype Y).
+
+Definition retype_label : vlabel X -> vlabel Y :=
+  fun l => eq_rect _ id l _ (f_equal _ H_vtypes).
+
+Definition retype_state : vstate X -> vstate Y :=
+  fun l => eq_rect _ id l _ (f_equal _ H_vtypes).
+
+End sec_VLSMType_eq_uses.
+
+Definition VLSM_incl_alt [message] (X Y : VLSM message) (H : vtype X = vtype Y) : Prop :=
+  VLSM_embedding X Y (retype_label H) (retype_state H).
+
+Definition VLSM_eq_alt [message] (X Y : VLSM message) (H : vtype X = vtype Y) : Prop :=
+  VLSM_embedding X Y (retype_label H) (retype_state H) /\
+  VLSM_embedding Y X (retype_label (eq_sym H)) (retype_state (eq_sym H)).
+
+(* Construct a VLSM with [VLSMMachine] components as [Y] but the
+   same [VLSMType] as [X] *)
+Definition rebase_VLSM [message] (X Y : VLSM message) (H : vtype X = vtype Y) : VLSM message :=
+  mk_vlsm (eq_rect_r VLSMMachine (vmachine Y) H).
+
+Lemma VLSM_embedding_rebase_1 [message] (X Y : VLSM message) (H : vtype X = vtype Y) :
+  VLSM_embedding (rebase_VLSM X Y H) Y (retype_label H) (retype_state H).
+Proof.
+  destruct X as [XT XM], Y as [YT YM].
+  simpl in H; subst YT.
+  set (X := mk_vlsm XM).
+  set (Y := mk_vlsm YM).
+  change (rebase_VLSM _ Y eq_refl) with Y.
+  constructor.
+  intros s t [Ht Hs].
+  split; [| done].
+  clear Hs.
+  change (retype_state _ s) with s.
+  revert s Ht; induction t; [done |].
+  intros s Hs.
+  by inversion Hs; subst; constructor; simpl; auto.
+Qed.
+
+Lemma VLSM_embedding_rebase_2 [message] (X Y : VLSM message) (H : vtype X = vtype Y) :
+  VLSM_embedding Y (rebase_VLSM X Y H) (retype_label (eq_sym H)) (retype_state (eq_sym H)).
+Proof.
+  destruct X as [XT XM], Y as [YT YM].
+  simpl in H; subst YT.
+  set (X := mk_vlsm XM).
+  set (Y := mk_vlsm YM).
+  change (rebase_VLSM _ Y eq_refl) with Y.
+  constructor.
+  intros s t [Ht Hs].
+  split; [| done].
+  clear Hs.
+  change (retype_state _ s) with s.
+  revert s Ht; induction t; [done |].
+  intros s Hs.
+  by inversion Hs; subst; constructor; simpl; auto.
+Qed.
+
+Lemma VLSM_incl_embedding_iff [message] (X Y : VLSM message) (H : vtype X = vtype Y) :
+  VLSM_incl_alt X Y H <-> VLSM_incl X (rebase_VLSM X Y H).
+Proof.
+  destruct X as [XT XM]; simpl in *; set (X := {| vmachine := XM |}) in *.
+  destruct Y as [YT YM]; simpl in *; set (Y := {| vmachine := YM |}) in *.
+  subst YT.
+  change (VLSM_incl_part _ _) with (VLSM_incl X Y).
+  split.
+  - intros H_XY t.
+    simpl; fold X Y.
+    intros Ht.
+    apply (VLSM_embedding_valid_trace H_XY) in Ht.
+    destruct t as [s t| s t].
+    + destruct Ht as [Ht Hs].
+      split; [clear Hs | by apply Hs].
+      change (retype_state eq_refl s) with s in Ht.
+      revert t s Ht; induction t; [done |].
+      intros s0.
+      intros Hal. inversion Hal; subst.
+      change (retype_state eq_refl ?x) with x in *.
+      change (retype_label eq_refl ?x) with x in *.
+      by destruct a; simpl in *; constructor; eauto.
+    + destruct Ht as [Ht Hs].
+      split; [clear Hs | by apply Hs].
+      change (retype_state eq_refl ?x) with x in *.
+      revert s t Ht; cofix rec; intros s t Ht.
+      destruct t as [a t].
+      set (a':=a) in *.
+      destruct a.
+      simpl in *.
+      rewrite Streams.unfold_Stream in Ht.
+      simpl in Ht.
+      change (infinite_valid_trace_from Y s (Streams.Cons a' (VLSM_embedding_infinite_trace_project H_XY t))) in Ht.
+      inversion Ht; subst.
+      by constructor; [apply rec|].
+  - intros Hincl.
+    constructor.
+    intros s tr Htr.
+    apply (VLSM_incl_finite_valid_trace Hincl) in Htr.
+    replace _ with (finite_valid_trace Y s tr); [done | f_equal].
+    symmetry; etransitivity; [apply map_ext | by apply map_id].
+    by intros []; reflexivity.
+Qed.
+
+End sec_VLSM_equality_from_eq.

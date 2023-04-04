@@ -181,11 +181,13 @@ Proof.
 Qed.
 
 Lemma fixed_non_byzantine_projection_incl_preloaded :
-  VLSM_incl
+  VLSM_incl_alt
     fixed_non_byzantine_projection
     (pre_loaded_with_all_messages_vlsm
-      (free_composite_vlsm (sub_IM fixed_byzantine_IM (elements non_byzantine)))).
+       (free_composite_vlsm (sub_IM fixed_byzantine_IM (elements non_byzantine))))
+    eq_refl.
 Proof.
+  apply VLSM_incl_embedding_iff.
   apply basic_VLSM_strong_incl.
   - by intros s Hincl; apply fixed_non_byzantine_projection_initial_state_preservation.
   - by intros.
