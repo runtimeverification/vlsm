@@ -168,11 +168,11 @@ Proof.
       | _ =>  full_replay_state i
       end)).
   {
-    intros Hcut; specialize (Hcut _ ltac:(done) ltac:(apply NoDup_enum)).
+    intros Hcut.
     unfold replayed_initial_state_from, composite_apply_plan.
     rewrite _apply_plan_last; extensionality i.
-    specialize (Hcut i); unfold composite_apply_plan in Hcut; unfold spawn_initial_state
-    ; simpl in *; rewrite Hcut.
+    unfold composite_apply_plan in Hcut; unfold spawn_initial_state; cbn in *.
+    rewrite Hcut; [| done | by apply NoDup_enum].
     unfold lift_equivocators_sub_state_to.
     case_decide; [| done].
     rewrite decide_True; [done |].
