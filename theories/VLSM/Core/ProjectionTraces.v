@@ -1,6 +1,6 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble StdppExtras.
+From VLSM.Lib Require Import Preamble ListExtras StdppExtras.
 From VLSM.Core Require Import VLSM Composition VLSMProjections Validator.
 
 Section sec_projections.

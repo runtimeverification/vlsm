@@ -124,20 +124,22 @@ Definition pre_VLSM_projection_finite_trace_project_app_rev
       pre_VLSM_projection_finite_trace_project l2 = l2'
   := map_option_app_rev _.
 
-Definition pre_VLSM_projection_finite_trace_project_in_iff
-  : forall trX itemY, In itemY (pre_VLSM_projection_finite_trace_project trX) <->
-    exists itemX, In itemX trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY
-  := in_map_option _.
+Definition pre_VLSM_projection_finite_trace_project_elem_of_iff
+  : forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
+    exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY
+  := elem_of_map_option _.
 
 Definition elem_of_pre_VLSM_projection_finite_trace_project
   : forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
     exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY
   := elem_of_map_option _.
 
-Definition pre_VLSM_projection_finite_trace_project_in
+Definition pre_VLSM_projection_finite_trace_project_elem_of
   : forall itemX itemY, pre_VLSM_projection_transition_item_project itemX = Some itemY ->
-    forall trX, In itemX trX -> In itemY (pre_VLSM_projection_finite_trace_project trX)
-  := in_map_option_rev _.
+    forall trX, itemX ∈ trX -> itemY ∈ pre_VLSM_projection_finite_trace_project trX.
+Proof.
+  by intros; apply elem_of_map_option; exists itemX.
+Qed.
 
 End sec_pre_definitions.
 
@@ -590,8 +592,8 @@ Definition VLSM_projection_finite_trace_project_in
       pre_VLSM_projection_transition_item_project
         _ _ label_project state_project itemX = Some itemY ->
     forall trX,
-      In itemX trX -> In itemY (VLSM_projection_finite_trace_project Hsimul trX)
-  := pre_VLSM_projection_finite_trace_project_in _ _ label_project state_project.
+      itemX ∈ trX -> itemY ∈ VLSM_projection_finite_trace_project Hsimul trX
+  := pre_VLSM_projection_finite_trace_project_elem_of _ _ label_project state_project.
 
 Definition VLSM_projection_finite_trace_last
   : forall sX trX,
