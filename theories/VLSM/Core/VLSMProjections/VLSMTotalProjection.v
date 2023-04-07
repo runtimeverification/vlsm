@@ -269,11 +269,11 @@ Record VLSM_projection : Prop :=
 }.
 
 Definition weak_projection_initial_state_preservation : Prop :=
-  forall s : state,
+  forall s : vstate X,
     vinitial_state_prop X s -> valid_state_prop Y (state_project s).
 
 Definition strong_projection_initial_state_preservation : Prop :=
-  forall s : state,
+  forall s : vstate X,
     vinitial_state_prop X s -> vinitial_state_prop Y (state_project s).
 
 Lemma strong_projection_initial_state_preservation_weaken
@@ -887,8 +887,8 @@ Proof.
 Qed.
 
 #[local] Lemma basic_VLSM_projection_finite_valid_trace_from
-  (s : state)
-  (ls : list transition_item)
+  (s : vstate X)
+  (ls : list (vtransition_item X))
   (Hpxt : finite_valid_trace_from X s ls)
   : finite_valid_trace_from Y (state_project s)
       (pre_VLSM_projection_finite_trace_project _ _ label_project state_project ls).

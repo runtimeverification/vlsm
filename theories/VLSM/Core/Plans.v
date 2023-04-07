@@ -20,7 +20,7 @@ Context
 *)
 Record plan_item : Type :=
 {
-  label_a : label;
+  label_a : label T;
   input_a : option message;
 }.
 
@@ -31,7 +31,7 @@ Section sec_apply_plans.
 Context
   {message : Type}
   {T : VLSMType message}
-  {transition : label -> state * option message -> state * option message}
+  {transition : label T -> state T * option message -> state T * option message}
   .
 
 (**
@@ -47,8 +47,8 @@ Context
 *)
 Definition _apply_plan_folder
   (a : plan_item)
-  (sl : state * list transition_item)
-  : state * list transition_item
+  (sl : state T * list (transition_item T))
+  : state T * list (transition_item T)
   :=
   let (s, items) := sl in
   match a with {| label_a := l'; input_a := input' |} =>
@@ -62,9 +62,9 @@ Definition _apply_plan_folder
   end.
 
 Lemma _apply_plan_folder_additive
-  (start : state)
-  (aitems : list plan_item)
-  (seed_items : list transition_item)
+  (start : state T)
+  (aitems : list (plan_item))
+  (seed_items : list (transition_item T))
   : let (final, items) := fold_right _apply_plan_folder (start, []) aitems in
     fold_right _apply_plan_folder (start, seed_items) aitems = (final, items ++ seed_items).
 Proof.
@@ -76,16 +76,16 @@ Proof.
 Qed.
 
 Definition _apply_plan
-  (start : state)
+  (start : state T)
   (a : list plan_item)
-  : list transition_item * state
+  : list (transition_item T) * state T
   :=
   let (final, items) :=
-    fold_right _apply_plan_folder (@pair state _ start []) (rev a) in
+    fold_right _apply_plan_folder (@pair (state T) _ start []) (rev a) in
   (rev items, final).
 
 Lemma _apply_plan_last
-  (start : state)
+  (start : state T)
   (a : list plan_item)
   (after_a := _apply_plan start a)
   : finite_trace_last start (fst after_a) = snd after_a.
@@ -104,7 +104,7 @@ Proof.
 Qed.
 
 Lemma _apply_plan_app
-  (start : state)
+  (start : state T)
   (a a' : list plan_item)
   : _apply_plan start (a ++ a') =
     let (aitems, afinal) := _apply_plan start a in
@@ -115,10 +115,10 @@ Proof.
   rewrite rev_app_distr.
   rewrite fold_right_app. simpl.
   destruct
-    (fold_right _apply_plan_folder (@pair state _ start []) (rev  a))
+    (fold_right _apply_plan_folder (@pair (state T) _ start []) (rev  a))
     as (afinal, aitems) eqn: Ha.
   destruct
-    (fold_right _apply_plan_folder (@pair state _ afinal []) (rev a'))
+    (fold_right _apply_plan_folder (@pair (state T) _ afinal []) (rev a'))
     as (final, items) eqn: Ha'.
   clear - Ha'.
   specialize (_apply_plan_folder_additive afinal (rev a') aitems) as Hadd.
@@ -127,7 +127,7 @@ Proof.
 Qed.
 
 Lemma _apply_plan_cons
-  (start : state)
+  (start : state T)
   (ai : plan_item)
   (a' : list plan_item)
   : _apply_plan start (ai :: a') =
@@ -142,19 +142,19 @@ Qed.
 
 (** We can forget information from a trace to obtain a plan. *)
 Definition _transition_item_to_plan_item
-  (item : transition_item)
+  (item : transition_item T)
   : plan_item
   := {| label_a := l item; input_a := input item |}.
 
 Definition _trace_to_plan
-  (items : list transition_item)
+  (items : list (transition_item T))
   : list plan_item
   := map _transition_item_to_plan_item items.
 
 Definition _messages_a
   (a : list plan_item) :
   list message :=
-  ListExtras.cat_option (List.map input_a a).
+  ListExtras.cat_option (List.map (input_a (T := T)) a).
 
 End sec_apply_plans.
 
@@ -417,7 +417,7 @@ Definition ensures
 Lemma plan_independence
   (a b : plan)
   (Pb : vstate X -> Prop)
-  (s : state)
+  (s : vstate X)
   (Hpr : valid_state_prop X s)
   (Ha : finite_valid_plan_from s a)
   (Hhave : Pb s)

@@ -121,9 +121,9 @@ Definition equivocation_in_trace
   : Prop
   :=
   exists
-    (prefix : list transition_item)
-    (item : transition_item)
-    (suffix : list transition_item),
+    (prefix : list (vtransition_item vlsm))
+    (item : (vtransition_item vlsm))
+    (suffix : list (vtransition_item vlsm)),
     tr = prefix ++ item :: suffix
     /\ input item = Some msg
     /\ ~ trace_has_message (field_selector output) msg prefix.
@@ -208,14 +208,14 @@ Definition negate_oracle (o : state_message_oracle) : state_message_oracle :=
 
 Definition specialized_selected_message_exists_in_all_traces
   (X : VLSM message)
-  (message_selector : message -> transition_item -> Prop)
-  (s : state)
+  (message_selector : message -> vtransition_item X -> Prop)
+  (s : vstate X)
   (m : message)
   : Prop
   :=
   forall
-  (start : state)
-  (tr : list transition_item)
+  (start : vstate X)
+  (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_init_to X start s tr),
   trace_has_message message_selector m tr.
 
@@ -224,34 +224,34 @@ Definition selected_message_exists_in_all_preloaded_traces
 
 Definition specialized_selected_message_exists_in_some_traces
   (X : VLSM message)
-  (message_selector : message -> transition_item -> Prop)
-  (s : state)
+  (message_selector : message -> vtransition_item X -> Prop)
+  (s : vstate X)
   (m : message)
   : Prop
   :=
   exists
-  (start : state)
-  (tr : list transition_item)
+  (start : vstate X)
+  (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_init_to X start s tr),
   trace_has_message message_selector m tr.
 
 Definition selected_message_exists_in_some_preloaded_traces : forall
-  (message_selector : message -> transition_item -> Prop)
-  (s : state)
+  (message_selector : message -> vtransition_item vlsm -> Prop)
+  (s : vstate vlsm)
   (m : message),
     Prop
   := specialized_selected_message_exists_in_some_traces pre_vlsm.
 
 Definition specialized_selected_message_exists_in_no_trace
   (X : VLSM message)
-  (message_selector : message -> transition_item -> Prop)
-  (s : state)
+  (message_selector : message -> vtransition_item X -> Prop)
+  (s : vstate X)
   (m : message)
   : Prop
   :=
   forall
-  (start : state)
-  (tr : list transition_item)
+  (start : vstate X)
+  (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_init_to X start s tr),
   ~ trace_has_message message_selector m tr.
 
@@ -260,8 +260,8 @@ Definition selected_message_exists_in_no_preloaded_trace :=
 
 Lemma selected_message_exists_not_some_iff_no
   (X : VLSM message)
-  (message_selector : message -> transition_item -> Prop)
-  (s : state)
+  (message_selector : message -> vtransition_item X -> Prop)
+  (s : vstate X)
   (m : message)
   : ~ specialized_selected_message_exists_in_some_traces X message_selector s m
     <-> specialized_selected_message_exists_in_no_trace X message_selector s m.
@@ -272,8 +272,8 @@ Proof.
 Qed.
 
 Lemma selected_message_exists_preloaded_not_some_iff_no
-  (message_selector : message -> transition_item -> Prop)
-  (s : state)
+  (message_selector : message -> vtransition_item vlsm -> Prop)
+  (s : vstate vlsm)
   (m : message)
   : ~ selected_message_exists_in_some_preloaded_traces message_selector s m
     <-> selected_message_exists_in_no_preloaded_trace message_selector s m.
@@ -284,11 +284,11 @@ Qed.
 (** Sufficient condition for [specialized_selected_message_exists_in_some_traces]. *)
 Lemma specialized_selected_message_exists_in_some_traces_from
   (X : VLSM message)
-  (message_selector : message -> transition_item -> Prop)
-  (s : state)
+  (message_selector : message -> vtransition_item X -> Prop)
+  (s : vstate X)
   (m : message)
-  (start : state)
-  (tr : list transition_item)
+  (start : vstate X)
+  (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_from_to X start s tr)
   (Hsome : trace_has_message message_selector m tr)
   : specialized_selected_message_exists_in_some_traces X message_selector s m.
@@ -307,7 +307,7 @@ Proof.
 Qed.
 
 Definition selected_messages_consistency_prop
-  (message_selector : message -> transition_item -> Prop)
+  (message_selector : message -> vtransition_item vlsm -> Prop)
   (s : vstate vlsm)
   (m : message)
   : Prop
@@ -318,7 +318,7 @@ Definition selected_messages_consistency_prop
 Lemma selected_message_exists_in_all_traces_initial_state
   (s : vstate vlsm)
   (Hs : vinitial_state_prop vlsm s)
-  (message_selector : message -> transition_item -> Prop)
+  (message_selector : message -> vtransition_item vlsm -> Prop)
   (m : message)
   : ~ selected_message_exists_in_all_preloaded_traces message_selector s m.
 Proof.
@@ -347,32 +347,32 @@ Qed.
 *)
 
 Definition all_traces_have_message_prop
-  (message_selector : message -> transition_item -> Prop)
+  (message_selector : message -> vtransition_item vlsm -> Prop)
   (oracle : state_message_oracle)
-  (s : state)
+  (s : vstate vlsm)
   (m : message)
   : Prop
   :=
   oracle s m <-> selected_message_exists_in_all_preloaded_traces message_selector s m.
 
 Definition no_traces_have_message_prop
-  (message_selector : message -> transition_item -> Prop)
+  (message_selector : message -> vtransition_item vlsm -> Prop)
   (oracle : state_message_oracle)
-  (s : state)
+  (s : vstate vlsm)
   (m : message)
   : Prop
   :=
   oracle s m <-> selected_message_exists_in_no_preloaded_trace message_selector s m.
 
 Record oracle_tracewise_props
-  (message_selector : message -> transition_item -> Prop)
+  (message_selector : message -> vtransition_item vlsm -> Prop)
   (oracle : state_message_oracle) : Prop :=
 {
   proper_oracle_holds :
-    forall (s : state) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    forall (s : vstate vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
       all_traces_have_message_prop message_selector oracle s m;
   proper_not_oracle_holds :
-    forall (s : state) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    forall (s : vstate vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
       no_traces_have_message_prop message_selector (negate_oracle oracle) s m;
 }.
 
@@ -400,7 +400,7 @@ Record oracle_tracewise_props
 *)
 
 Record oracle_stepwise_props
-  (message_selector : message -> transition_item -> Prop)
+  (message_selector : message -> vtransition_item vlsm -> Prop)
   (oracle : state_message_oracle)
   : Prop :=
 {

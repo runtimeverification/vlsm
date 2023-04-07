@@ -458,8 +458,8 @@ Proof.
   - by exists lX, sX; split; [| | apply HivtX1]; itauto.
   - cbn in *; rewrite <- HsX_pr.
     destruct (vtransition X2 _ _) as [_s'X2 _oom] eqn: H_tX2.
-    apply (Htransition_Some2 _ _ HlX_pr _ _ _ _ HivtX1) in H_tX2 as [? ->].
-    by congruence.
+    apply (Htransition_Some2 _ _ HlX_pr _ _ _ _ HivtX1) in H_tX2 as [<- ->].
+    by rewrite <- Heq_s'X_pr.
 Qed.
 
 (**
@@ -588,7 +588,8 @@ Proof.
       by split; [| apply injective_projections].
     + assert (HivtX : input_valid_transition X lX (sX, om) (vtransition X lX (sX, om)))
         by firstorder.
-      destruct (vtransition _ _ _) as (sX', _om').
+      destruct (vtransition X _ _) as (sX', _om').
+      Check VLSM_projection_input_valid_transition.
       eapply (VLSM_projection_input_valid_transition Hproj) in HivtX as [_ Hs']; [| done].
       rewrite HsX in Hs'.
       destruct Y as (TY & MY); cbv in Htrans, Hs'.
@@ -944,7 +945,7 @@ Context
   a [valid_state] and [valid_message] for the original VLSM.
 *)
 Definition self_validator_vlsm_prop :=
-  forall (l : label) (s : state) (om : option message),
+  forall (l : vlabel X) (s : vstate X) (om : option message),
     input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
     input_valid X l (s, om).
 
@@ -982,7 +983,7 @@ Proof.
   split; [| done].
   (* reverse induction on the length of a trace. *)
   induction tr using rev_ind.
-  - by constructor; apply initial_state_is_valid.
+  - by constructor 1 with (X :=  {| vmachine := M |}); apply initial_state_is_valid.
   - apply finite_valid_trace_from_app_iff in Htr as [Htr Hx].
     apply (finite_valid_trace_from_app_iff (mk_vlsm M)).
     split; [by apply IHtr |].

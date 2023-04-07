@@ -20,11 +20,14 @@ From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
   easily shared by multiple VLSMs during composition.
 *)
 
-Class VLSMType (message : Type) : Type :=
+Record VLSMType (message : Type) : Type :=
 {
   state : Type;
   label : Type;
 }.
+
+Arguments state {_} _.
+Arguments label {_} _.
 
 (** *** VLSM class definition
 
@@ -39,15 +42,15 @@ Class VLSMType (message : Type) : Type :=
   and the [transition] function and [valid] predicate.
 *)
 
-Class VLSMMachine {message : Type} (vtype : VLSMType message) : Type :=
+Record VLSMMachine {message : Type} (vtype : VLSMType message) : Type :=
 {
-  initial_state_prop : state -> Prop;
-  initial_state : Type := {s : state | initial_state_prop s};
+  initial_state_prop : state vtype -> Prop;
+  initial_state : Type := {s : state vtype | initial_state_prop s};
   s0 : Inhabited initial_state;
   initial_message_prop : message -> Prop;
   initial_message : Type := {m : message | initial_message_prop m};
-  transition : label -> state * option message -> state * option message;
-  valid : label -> state * option message -> Prop;
+  transition : label vtype -> state vtype * option message -> state vtype * option message;
+  valid : label vtype -> state vtype * option message -> Prop;
 }.
 
 (* The & is a "bidirectionality hint", so that typechecking
@@ -58,10 +61,16 @@ Class VLSMMachine {message : Type} (vtype : VLSMType message) : Type :=
    in ways that can be matched with [@state _ ?vtype] and [@label _ ?vtype].
 *)
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
+Arguments initial_state_prop {message vtype} v s.
+Arguments initial_state {message vtype} v. 
+Arguments initial_message_prop {message vtype} v m.
+Arguments initial_message {message vtype} v.  
+Arguments transition {message vtype} v l s.
+Arguments valid {message vtype} v l s.
 
 Definition option_initial_message_prop
   {message : Type} {vtype : VLSMType message} {vmachine : VLSMMachine vtype}
-  : option message -> Prop := from_option initial_message_prop True.
+  : option message -> Prop := from_option (initial_message_prop vmachine) True.
 
 Definition VLSMMachine_pre_loaded_with_messages
   {message : Type} {vtype : VLSMType message} (vmachine : VLSMMachine vtype)
@@ -77,7 +86,7 @@ Definition VLSMMachine_pre_loaded_with_messages
 
 Definition decidable_initial_messages_prop
   {message : Type} {vtype : VLSMType message} (vmachine : VLSMMachine vtype)
-  := forall m, Decision (initial_message_prop m).
+  := forall m, Decision (initial_message_prop vmachine m).
 
 (** *** VLSM type definition
 
@@ -129,9 +138,9 @@ Context
 
 Record transition_item : Type :=
 {
-  l : label;
+  l : label T;
   input : option message;
-  destination : state;
+  destination : state T;
   output : option message;
 }.
 
@@ -184,17 +193,17 @@ Definition trace_received_not_sent_before_or_after_invariant
   := forall m, trace_received_not_sent_before_or_after tr m -> P m.
 
 Inductive Trace : Type :=
-| Finite : state -> list transition_item -> Trace
-| Infinite : state -> Stream transition_item -> Trace.
+| Finite : state T -> list transition_item -> Trace
+| Infinite : state T -> Stream transition_item -> Trace.
 
-Definition trace_first (tr : Trace) : state :=
+Definition trace_first (tr : Trace) : state T :=
   match tr with
   | Finite s _ => s
   | Infinite s _ => s
   end.
 
 Definition finite_trace_last
-  (si : state) (tr : list transition_item) : state :=
+  (si : state T) (tr : list transition_item) : state T :=
   List.last (List.map destination tr) si.
 
 Definition finite_trace_last_output
@@ -202,11 +211,11 @@ Definition finite_trace_last_output
   List.last (List.map output tr) None.
 
 Definition finite_trace_nth
-  (si : state) (tr : list transition_item)
-  : nat -> option state :=
+  (si : state T) (tr : list transition_item)
+  : nat -> option (state T) :=
 nth_error (si :: List.map destination tr).
 
-Definition trace_last (tr : Trace) : option state
+Definition trace_last (tr : Trace) : option (state T)
   :=
     match tr with
     | Finite s ls => Some (finite_trace_last s ls)
@@ -219,7 +228,7 @@ Definition trace_last (tr : Trace) : option state
   states in the transition list/stream to the initial state of the trace.
 *)
 Definition trace_nth (tr : Trace)
-  : nat -> option state :=
+  : nat -> option (state T) :=
   fun (n : nat) =>
     match tr with
     | Finite s ls => finite_trace_nth s ls n
@@ -228,7 +237,7 @@ Definition trace_nth (tr : Trace)
 
 End sec_traces.
 
-Arguments transition_item {message} {T} , {message} T.
+Arguments transition_item {message} T.
 Arguments field_selector {_} {T} _ msg item / .
 Arguments item_sends_or_receives {_} {_} msg item /.
 
@@ -240,10 +249,10 @@ Context
   .
 
 Lemma last_error_destination_last
-  (tr : list transition_item)
-  (s : state)
+  (tr : list (transition_item T))
+  (s : state T)
   (Hlast : option_map destination (last_error tr) = Some s)
-  (default : state)
+  (default : state T)
   : finite_trace_last default tr  = s.
 Proof.
   unfold option_map in Hlast.
@@ -256,46 +265,45 @@ Proof.
   by rewrite last_map.
 Qed.
 
-Lemma finite_trace_last_cons
-  s x tl :
+Lemma finite_trace_last_cons (s : state T) x tl :
   finite_trace_last s (x :: tl) = finite_trace_last (destination x) tl.
 Proof.
   by unfold finite_trace_last; rewrite map_cons, unroll_last.
 Qed.
 
 Lemma finite_trace_last_nil
-  s :
+  (s : state T):
   finite_trace_last s [] = s.
 Proof. done. Qed.
 
 Lemma finite_trace_last_app
-  s t1 t2 :
+  (s : state T) t1 t2 :
   finite_trace_last s (t1 ++ t2) = finite_trace_last (finite_trace_last s t1) t2.
 Proof.
   by unfold finite_trace_last; rewrite map_app, last_app.
 Qed.
 
 Lemma finite_trace_last_is_last
-  s x tl :
+  (s : state T) x tl :
   finite_trace_last s (tl++[x]) = destination x.
 Proof.
   by unfold finite_trace_last; rewrite map_app; cbn; rewrite last_is_last.
 Qed.
 
 Lemma finite_trace_last_output_is_last
-  x tl :
+  (x : @transition_item _ T) tl :
   finite_trace_last_output (tl++[x]) = output x.
 Proof.
   by unfold finite_trace_last_output; rewrite map_app; cbn; rewrite last_is_last.
 Qed.
 
 Lemma finite_trace_nth_first
-  (si : state) (tr : list transition_item) :
+  (si : state T) (tr : list (transition_item T)) :
   finite_trace_nth si tr 0 = Some si.
 Proof. done. Qed.
 
 Lemma finite_trace_nth_last
-  (si : state) (tr : list transition_item) :
+  (si : state T) (tr : list (transition_item T)) :
   finite_trace_nth si tr (length tr) = Some (finite_trace_last si tr).
 Proof.
   unfold finite_trace_nth, finite_trace_last.
@@ -306,7 +314,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_nth_app1
-  (si : state) (t1 t2 : list transition_item) n :
+  (si : state T) (t1 t2 : list (transition_item T)) n :
   n <= length t1 ->
   finite_trace_nth si (t1++t2) n = finite_trace_nth si t1 n.
 Proof.
@@ -319,7 +327,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_nth_app2
-  (si : state) (t1 t2 : list transition_item) n :
+  (si : state T) (t1 t2 : list (transition_item T)) n :
   length t1 <= n ->
   finite_trace_nth si (t1++t2) n = finite_trace_nth (finite_trace_last si t1) t2 (n - length t1).
 Proof.
@@ -336,7 +344,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_nth_length
-  (si : state) (tr : list transition_item) n s :
+  (si : state T) (tr : list (transition_item T)) n s :
   finite_trace_nth si tr n = Some s ->
   n <= length tr.
 Proof.
@@ -347,7 +355,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_last_prefix
-  (s : state) (tr : list transition_item) n nth :
+  (s : state T) (tr : list (transition_item T)) n nth :
   finite_trace_nth s tr n = Some nth ->
   finite_trace_last s (list_prefix tr n) = nth.
 Proof.
@@ -360,7 +368,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_last_suffix
-  (s : state) (tr : list transition_item) n :
+  (s : state T) (tr : list (transition_item T)) n :
   n < length tr ->
   finite_trace_last s (list_suffix tr n) = finite_trace_last s tr.
 Proof.
@@ -372,7 +380,7 @@ Proof.
 Qed.
 
 Lemma unlock_finite_trace_last s tr :
-  finite_trace_last s tr = List.last (List.map destination tr) s.
+  finite_trace_last (s : state T) tr = List.last (List.map destination tr) s.
 Proof. done. Qed.
 
 End sec_trace_lemmas.
@@ -391,8 +399,8 @@ Context
 
 Definition type := vtype vlsm.
 Definition machine := vmachine vlsm.
-Definition vstate := @state _ type.
-Definition vlabel := @label _ type.
+Definition vstate := state type.
+Definition vlabel := label type.
 Definition vinitial_state_prop := @initial_state_prop _ _ machine.
 Definition vinitial_state := @initial_state _ _ machine.
 Definition vinitial_message_prop := @initial_message_prop _ _ machine.
@@ -426,10 +434,19 @@ Context
   (X : VLSM message)
   (TypeX := type X)
   (MachineX := machine X)
+  (state := vstate X)
+  (label := vlabel X)
+  (initial_state_prop := vinitial_state_prop X)
+  (option_initial_message_prop := voption_initial_message_prop X)
+  (valid := vvalid X)
+  (transition := vtransition X)
+  (initial_message_prop := vinitial_message_prop X)
+  (transition_item := vtransition_item X)
+  (initial_state := vinitial_state X)
+  (initial_message := vinitial_message X)
   .
 
-Existing Instance TypeX.
-Existing Instance MachineX.
+
 
 (** *** Valid states and messages
 
@@ -1201,7 +1218,7 @@ Proof.
   - apply finite_valid_trace_from_app_iff in Htr.
     destruct Htr as [Htr Hx].
     destruct x; apply (Hextend _ _ Htr (IHtr Htr)).
-    by inversion Hx; congruence.
+    by inversion Hx.
 Qed.
 
 Lemma finite_valid_trace_rev_ind
@@ -1880,7 +1897,10 @@ Proof.
     inversion Htr; [done |].
     by destruct tl; simpl in *; congruence.
   - apply finite_valid_trace_init_to_emit_forget_emit in Htr.
-    by right; eexists _, _; rewrite finite_trace_last_output_is_last.
+    right.
+    eexists _,_.
+    split; [done |].
+    by rewrite finite_trace_last_output_is_last.
 Qed.
 
 (**
@@ -2109,10 +2129,13 @@ Proof.
   apply finite_valid_trace_from_to_last in Hprefix_tr.
   apply finite_valid_trace_from_to_last in Hsuffix_tr.
   split.
-  - rewrite finite_trace_nth_app1; [| lia].
-    by rewrite finite_trace_nth_last; congruence.
-  - rewrite finite_trace_nth_app2; [| lia].
-    by rewrite Nat.add_comm, Nat.add_sub, finite_trace_nth_last; congruence.
+  - rewrite finite_trace_nth_app1 by done.
+    by rewrite finite_trace_nth_last, Hprefix_tr.
+  - rewrite finite_trace_nth_app2.
+    + replace (length _ + length _ - length _) with (length suffix_tr).
+      * by rewrite finite_trace_nth_last, Hprefix_tr, Hsuffix_tr.
+      * unfold transition_item, vtransition_item. lia.
+    + unfold transition_item, vtransition_item. lia.
 Qed.
 
 Definition trace_segment
@@ -2164,13 +2187,13 @@ Definition trace_prefix
     end.
 
 Definition trace_prefix_fn
-  (tr : Trace)
+  (tr : vTrace X)
   (n : nat)
   : Trace
   :=
   match tr with
   | Finite s ls => Finite s (list_prefix ls n)
-  | Infinite s st => Finite s (stream_prefix st n)
+  | Infinite s  st => Finite s (stream_prefix st n)
   end.
 
 Lemma trace_prefix_valid
@@ -2204,12 +2227,8 @@ Proof.
       ; destruct last
       ; apply extend_right_finite_trace_from
       ; try done.
-      rewrite <- (app_cons {| l := l0; input := input0; destination := destination0;
-        output := output0 |} suffix), app_assoc, <- !(app_assoc p _ _) in Htr; cbn in Htr.
-      specialize
-        (finite_valid_trace_consecutive_valid_transition _ _ _ _ _ _ Htr eq_refl).
-      simpl.
-      by rewrite finite_trace_last_is_last.
+      apply finite_valid_trace_from_app_iff in Htr as [_ Htr].
+      by inversion Htr.
     + assert
         (Hex : exists suffix0 : Stream transition_item,
             stream_app (p ++ [last_p])  (Cons last suffix) = stream_app p (Cons last_p suffix0))
@@ -2427,9 +2446,9 @@ Arguments extend_right_finite_trace_from_to [message] (X) [s1 s2 ts] (Ht12) [l3 
 
 Class TraceWithLast
   (base_prop : forall {message} (X : VLSM message),
-    @state _ (@type _ X) -> list transition_item -> Prop)
+    @state _ (@type _ X) -> list (vtransition_item X) -> Prop)
   (trace_prop : forall {message} (X : VLSM message),
-    state -> state -> list transition_item -> Prop)
+    vstate X -> vstate X -> list (vtransition_item X) -> Prop)
   : Prop :=
 {
   valid_trace_add_last : forall [msg] [X : VLSM msg] [s f tr],
@@ -2551,7 +2570,7 @@ Proof.
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_message_preservation
-  (s : state)
+  (s : vstate X)
   (om : option message)
   (Hps : valid_state_message_prop X s om)
   : valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
@@ -2562,7 +2581,7 @@ Proof.
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_prop
-  (s : state)
+  (s : vstate X)
   (Hps : valid_state_prop X s)
   : valid_state_prop pre_loaded_with_all_messages_vlsm s.
 Proof.
@@ -2580,19 +2599,19 @@ Proof.
   by apply pre_loaded_with_all_messages_message_valid_initial_state_message.
 Qed.
 
-Inductive preloaded_valid_state_prop : state -> Prop :=
+Inductive preloaded_valid_state_prop : vstate X -> Prop :=
 | preloaded_valid_initial_state
-    (s : state)
-    (Hs : initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) s) :
+    (s : vstate X)
+    (Hs : vinitial_state_prop pre_loaded_with_all_messages_vlsm s) :
        preloaded_valid_state_prop s
 | preloaded_protocol_generated
-    (l : label)
-    (s : state)
+    (l : vlabel X)
+    (s : vstate X)
     (Hps : preloaded_valid_state_prop s)
     (om : option message)
-    (Hv : valid (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om))
+    (Hv : vvalid pre_loaded_with_all_messages_vlsm l (s, om))
     s' om'
-    (Ht : transition (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om) = (s', om'))
+    (Ht : vtransition pre_loaded_with_all_messages_vlsm l (s, om) = (s', om'))
   : preloaded_valid_state_prop s'.
 
 Lemma preloaded_valid_state_prop_iff s :
@@ -2683,10 +2702,10 @@ End sec_pre_loaded_with_all_messages_vlsm.
 
 Lemma non_empty_valid_trace_from_can_produce
   `(X : VLSM message)
-  (s : state)
+  (s : vstate X)
   (m : message)
   : can_produce X s m
-  <-> exists (is : state) (tr : list transition_item) (item : transition_item),
+  <-> exists (is : vstate X) (tr : list (vtransition_item X)) (item : (vtransition_item X)),
     finite_valid_trace X is tr /\
     last_error tr = Some item /\
     destination item = s /\ output item = Some m.
@@ -2777,7 +2796,7 @@ Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
   vt_transition : vtransition X l (s1, iom) = (s2, oom);
 }.
 
-Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : state) : Prop :=
+Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : vstate X) : Prop :=
 | transition_next :
     forall l iom oom (Ht : ValidTransition X l s1 iom s2 oom),
       ValidTransitionNext X s1 s2.

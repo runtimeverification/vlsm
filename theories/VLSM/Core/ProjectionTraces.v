@@ -157,7 +157,7 @@ Definition finite_trace_projection_list (tr : list (composite_transition_item IM
     (composite_project_label IM j) (fun s => s j) tr.
 
 Lemma preloaded_valid_state_projection
-  (s : state)
+  (s : composite_state IM)
   (Hps : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
   : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM j)) (s j).
 Proof.
@@ -199,7 +199,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_projection_input_valid_transition_eq
   (s1 s2 : composite_state IM)
   (om1 om2 : option message)
-  (l : label)
+  (l : composite_label IM)
   (Ht : input_valid_transition
           (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
   (Hl : projT1 l = j)
@@ -218,7 +218,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_projection_input_valid_transition_neq
   [s1 s2 : composite_state IM]
   [om1 om2 : option message]
-  [l : label]
+  [l : composite_label IM]
   (Ht : input_valid_transition
           (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
   [i : index]
@@ -351,8 +351,8 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_composition_valid_message
-  (l : label)
-  (s : state)
+  (l : vlabel Xj)
+  (s : vstate Xj)
   (om : option message)
   (Hv : vvalid Xj l (s, om))
   : option_valid_message_prop X om.
@@ -361,8 +361,8 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_projection_valid_state
-  (lj : label)
-  (sj : state)
+  (lj : vlabel Xj)
+  (sj : vstate Xj)
   (om : option message)
   (Hv : vvalid Xj lj (sj, om))
   : valid_state_prop Xj sj.
@@ -372,8 +372,8 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_projection_valid_state_message_outputs
-    (l : label)
-    (s : state)
+    (l : vlabel Xj)
+    (s : vstate Xj)
     (om : option message)
     (Hv : vvalid Xj l (s, om))
     s' om'
@@ -388,8 +388,8 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_destination_projection_valid_state
-    (l : label)
-    (s : state)
+    (l : vlabel Xj)
+    (s : vstate Xj)
     (om : option message)
     (Hv : vvalid Xj l (s, om))
     s' om'
@@ -400,8 +400,8 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_destination_projection_valid_message
-    (l : label)
-    (s : state)
+    (l : vlabel Xj)
+    (s : vstate Xj)
     (om : option message)
     (Hv : vvalid Xj l (s, om))
     s' om'
@@ -420,7 +420,7 @@ Lemma valid_message_projection_rev :
 Proof.
   intros m ((sj, om) & lj & sj' & (_ & _ & s & <- & Hv) & Ht).
   eexists _, _, (state_update IM s j sj'); split; [done |].
-  by cbn in *; replace (vtransition _ _ _) with (sj', Some m).
+  by cbn; replace (vtransition (IM j) lj _) with (sj', Some m).
 Qed.
 
 (**
@@ -430,7 +430,7 @@ Qed.
 *)
 Lemma proj_pre_loaded_with_all_messages_valid_state_message_preservation
   (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
-  (s : state)
+  (s : vstate Xj)
   (om : option message)
   (Hps : valid_state_message_prop Xj s om)
   : valid_state_message_prop PreLoaded s om.
@@ -554,7 +554,7 @@ Definition projection_friendliness_sufficient_condition
 
 Lemma projection_friendliness_sufficient_condition_valid_state
   (Hfr : projection_friendliness_sufficient_condition)
-  (s : state)
+  (s : vstate Xj)
   (Hp : valid_state_prop Xj s)
   : valid_state_prop X (lift_to_composite_state' IM j s).
 Proof.
@@ -570,10 +570,10 @@ Proof.
     destruct Hom as [_s Hom].
     specialize (valid_generated_state_message X _ _ HsX _ _ Hom _ Hfr) as Hgen.
     apply Hgen.
-    simpl.
+    cbn.
     unfold lift_to_composite_state' at 1.
     state_update_simpl.
-    replace (vtransition (IM j) _ _) with (s', om').
+    replace (vtransition (IM j) l _) with (s', om').
     f_equal.
     by apply state_update_twice.
 Qed.

@@ -120,10 +120,12 @@ Definition pre_VLSM_stuttering_embedding_finite_trace_last :
     state_project (finite_trace_last s tr).
 Proof.
   induction 1 using finite_valid_trace_from_rev_ind; [done |].
-  erewrite finite_trace_last_is_last,
-    pre_VLSM_stuttering_embedding_finite_trace_project_app,
-    finite_trace_last_app, IHfinite_valid_trace_from,
-    <- transition_item_project_consistency; [| done..].
+  erewrite finite_trace_last_is_last.
+  setoid_rewrite
+    pre_VLSM_stuttering_embedding_finite_trace_project_app.
+  setoid_rewrite finite_trace_last_app. 
+  setoid_rewrite IHfinite_valid_trace_from.
+  setoid_rewrite <- transition_item_project_consistency; [| done..].
   by cbn; rewrite app_nil_r.
 Qed.
 
@@ -210,11 +212,11 @@ Record VLSM_stuttering_embedding : Prop :=
 }.
 
 Definition weak_stuttering_embedding_initial_state_preservation : Prop :=
-  forall s : state,
+  forall s : vstate X,
     vinitial_state_prop X s -> valid_state_prop Y (state_project s).
 
 Definition strong_stuttering_embedding_initial_state_preservation : Prop :=
-  forall s : state,
+  forall s : vstate X,
     vinitial_state_prop X s -> vinitial_state_prop Y (state_project s).
 
 Lemma strong_stuttering_embedding_initial_state_preservation_weaken :
@@ -702,7 +704,7 @@ Context
       (pre_VLSM_stuttering_embedding_finite_trace_project transition_item_project tr).
 Proof.
   induction Htr using finite_valid_trace_init_to_rev_ind; [by constructor; apply Hstate |].
-  rewrite pre_VLSM_stuttering_embedding_finite_trace_project_app.
+  setoid_rewrite pre_VLSM_stuttering_embedding_finite_trace_project_app.
   apply finite_valid_trace_from_to_app with (state_project s); [done |].
   cbn; rewrite app_nil_r.
   remember {| l := _ |} as itemX; replace sf with (destination itemX) by (subst; done).
@@ -710,8 +712,8 @@ Proof.
 Qed.
 
 #[local] Lemma basic_VLSM_stuttering_embedding_finite_valid_trace_from
-  (s : state)
-  (ls : list transition_item)
+  (s : vstate X)
+  (ls : list (vtransition_item X))
   (Hpxt : finite_valid_trace_from X s ls)
   : finite_valid_trace_from Y (state_project s)
       (pre_VLSM_stuttering_embedding_finite_trace_project transition_item_project ls).
@@ -723,7 +725,7 @@ Proof.
     (finite_trace_last (state_project is_s)
       (pre_VLSM_stuttering_embedding_finite_trace_project transition_item_project tr_s)).
   - eapply valid_trace_forget_last, finite_valid_trace_from_to_app_split.
-    rewrite <- pre_VLSM_stuttering_embedding_finite_trace_project_app.
+    setoid_rewrite <- pre_VLSM_stuttering_embedding_finite_trace_project_app.
     by apply basic_VLSM_stuttering_embedding_finite_valid_trace_init_to.
   - subst s; apply pre_VLSM_stuttering_embedding_finite_trace_last.
     + by apply basic_VLSM_stuttering_embedding_type.

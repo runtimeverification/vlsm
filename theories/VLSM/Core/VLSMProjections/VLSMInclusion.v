@@ -78,7 +78,7 @@ Lemma VLSM_incl_embedding_iff
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <-> VLSM_embedding X Y id id.
 Proof.
-  assert (Hid : forall tr, tr = pre_VLSM_embedding_finite_trace_project _ _ id id tr).
+  assert (Hid : forall tr, tr = pre_VLSM_embedding_finite_trace_project (type X) _ id id tr).
   {
     induction tr; [done |].
     by destruct a; cbn; f_equal.
@@ -264,7 +264,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_can_produce
-  (s : state)
+  (s : vstate X)
   (om : option message)
   : option_can_produce X s om -> option_can_produce Y s om.
 Proof.
@@ -479,7 +479,7 @@ Proof.
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from
-  (from : state) (tr : list transition_item)
+  (from : vstate X) (tr : list (vtransition_item X))
   : finite_valid_trace_from X from tr ->
     finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) from tr.
 Proof.
@@ -488,7 +488,7 @@ Proof.
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from_to
-  (from to : state) (tr : list transition_item)
+  (from to : vstate X) (tr : list (vtransition_item X))
   : finite_valid_trace_from_to X from to tr ->
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) from to tr.
 Proof.
