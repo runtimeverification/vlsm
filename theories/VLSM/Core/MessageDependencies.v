@@ -1,6 +1,6 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble ListExtras ListFinSetExtras.
+From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
@@ -976,6 +976,7 @@ Proof.
       | left Hdec => left _
       | right Hdec => right _
       end).
+  - by apply elem_of_dec_slow.
   - by rewrite <- full_message_dependencies_happens_before.
   - by rewrite <- full_message_dependencies_happens_before.
 Qed.

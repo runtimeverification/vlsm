@@ -1,6 +1,6 @@
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
-From VLSM.Lib Require Import Preamble FinSetExtras ListFinSetExtras.
+From VLSM.Lib Require Import Preamble FinSetExtras.
 From VLSM.Lib Require Import Measurable RealsExtras.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM Equivocation.
@@ -155,6 +155,7 @@ Proof.
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
   - specialize (proj1 Hemit) as [i [Hi Hsigned]].
     subst.
+    pose @elem_of_dec_slow.
     destruct (decide (i ∈ byzantine)).
     + unfold channel_authenticated_message in Hsigned.
       rewrite Hsender0 in Hsigned.
@@ -426,7 +427,7 @@ Proof.
         [| | subst lst; apply finite_valid_trace_last_pstate | |].
     }
     destruct iom as [im |]; [| done].
-    apply set_union_subseteq_iff; split; [done |].
+    apply union_subseteq; split; [done |].
     unfold coeqv_message_equivocators
     ; case_decide as Hnobs; [by apply empty_subseteq |].
     rewrite (full_node_msg_dep_coequivocating_senders _ _ _ _ Hfull _ _ i li);
@@ -447,6 +448,7 @@ Proof.
       unfold channel_authenticated_message in Hauth
       ; rewrite Hsender in Hauth.
       apply Some_inj in Hauth; subst _i_im.
+      pose @elem_of_dec_slow.
       destruct (decide (i_im ∈ byzantine_vs)) as [Hi_im | Hni_im]; [done |].
       contradict H_i_im.
       apply elem_of_elements, elem_of_difference; cbn.
