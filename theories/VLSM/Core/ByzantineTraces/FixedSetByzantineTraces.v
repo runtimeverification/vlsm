@@ -424,7 +424,6 @@ Proof.
     }
     specialize (valid_generated_state_message X _ _ Hs0 _ _ Hs0) as Hgen.
     unfold non_byzantine in Hi.
-    pose proof (Hdec := elem_of_dec_slow (H6 := H6)).
     rewrite elem_of_elements, elem_of_difference in Hi.
     apply not_and_r in Hi as [Hi | Hi];
       [by elim Hi; apply elem_of_list_to_set, elem_of_enum |].
@@ -680,7 +679,6 @@ Proof.
       eapply message_dependencies_are_sufficient in Hiom.
       revert Hiom.
       rewrite elem_of_elements, elem_of_difference in Hi.
-      pose proof (Hdec := elem_of_dec_slow (C := Ci)).
       apply not_and_r in Hi as [Hi | Hi];
         [by elim Hi; apply elem_of_list_to_set; apply elem_of_enum |].
       apply dec_stable in Hi.

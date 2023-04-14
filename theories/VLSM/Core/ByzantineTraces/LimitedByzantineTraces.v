@@ -155,7 +155,6 @@ Proof.
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
   - specialize (proj1 Hemit) as [i [Hi Hsigned]].
     subst.
-    pose @elem_of_dec_slow.
     destruct (decide (i ∈ byzantine)).
     + unfold channel_authenticated_message in Hsigned.
       rewrite Hsender0 in Hsigned.
@@ -448,7 +447,6 @@ Proof.
       unfold channel_authenticated_message in Hauth
       ; rewrite Hsender in Hauth.
       apply Some_inj in Hauth; subst _i_im.
-      pose @elem_of_dec_slow.
       destruct (decide (i_im ∈ byzantine_vs)) as [Hi_im | Hni_im]; [done |].
       contradict H_i_im.
       apply elem_of_elements, elem_of_difference; cbn.

@@ -38,6 +38,9 @@ end.
 
 Notation decide_eq := (fun x y => decide (x = y)).
 
+(** For some reason, this instance is not exported by stdpp. *)
+#[export] Existing Instance elem_of_dec_slow.
+
 (** ** Lemmas about transitive closure *)
 
 Lemma transitive_tc_idempotent `(Transitive A R) :
