@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import Reals.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble StdppExtras StdppListFinSet FinSetExtras.
+From VLSM.Lib Require Import Preamble StdppExtras FinSetExtras.
 From VLSM.Lib Require Import ListExtras ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition.
 From VLSM.Core Require Import Validator ProjectionTraces SubProjectionTraces Equivocation.
@@ -608,11 +608,11 @@ Lemma fixed_transition_preserves_annotation_equivocators
   : msg_dep_composite_transition_message_equivocators IM
       full_message_dependencies sender l
       (@finite_trace_last _ (type Limited)
-        {| original_state := is; state_annotation := empty_set |}
+        {| original_state := is; state_annotation := ∅ |}
         (annotate_trace_from (free_composite_vlsm IM)
           Cv
           (msg_dep_composite_transition_message_equivocators IM full_message_dependencies sender)
-          {| original_state := is; state_annotation := empty_set |} tr), iom)
+          {| original_state := is; state_annotation := ∅ |} tr), iom)
     ⊆ eqv_validators.
 Proof.
   destruct iom as [im |]; [| done].

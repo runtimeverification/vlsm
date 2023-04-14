@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality Lia.
 From stdpp Require Import prelude finite.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras StdppListFinSet.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras. (*  StdppListFinSet. *)
 From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.
 From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.NoEquivocation.
 
@@ -1877,7 +1877,7 @@ Definition update_IM
 Context
   (replacement_IM : sub_index (elements selection) -> VLSM message)
   (updated_IM := update_IM replacement_IM)
-  (selection_complement : Ci := set_diff (list_to_set (enum index)) selection)
+  (selection_complement : Ci := list_to_set (enum index) ∖ selection)
   .
 
 #[export] Instance update_IM_complement_Hbs
@@ -1890,7 +1890,7 @@ Proof.
   case_decide as Hi; [| typeclasses eauto].
   contradict Hi.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i; simpl.
-  apply elem_of_elements, set_diff_elim2 in Hi.
+  apply elem_of_elements, elem_of_difference in Hi as [_ Hi].
   by rewrite elem_of_elements.
 Qed.
 
