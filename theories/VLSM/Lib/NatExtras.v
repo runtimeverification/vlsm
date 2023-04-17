@@ -4,25 +4,22 @@ From VLSM.Lib Require Import Preamble.
 
 (** * Natural number utility definitions and lemmas *)
 
-Fixpoint up_to_n_listing
-  (n : nat)
-  : list nat
-  :=
-  match n with
-  | 0 => []
-  | S n' => n' :: up_to_n_listing n'
-  end.
+Fixpoint up_to_n_listing (n : nat) : list nat :=
+match n with
+| 0 => []
+| S n' => n' :: up_to_n_listing n'
+end.
 
-Lemma up_to_n_listing_length
-  (n : nat)
-  : length (up_to_n_listing n) = n.
+Lemma up_to_n_listing_length :
+  forall (n : nat),
+    length (up_to_n_listing n) = n.
 Proof.
   by induction n; simpl; congruence.
 Qed.
 
-Lemma up_to_n_full
-  (n : nat)
-  : forall i, i < n <-> i ∈ up_to_n_listing n.
+Lemma up_to_n_full :
+  forall (n i : nat),
+    i < n <-> i ∈ up_to_n_listing n.
 Proof.
   induction n; split; inversion 1; subst; cbn; [left | | lia |].
   - by right; apply IHn.
