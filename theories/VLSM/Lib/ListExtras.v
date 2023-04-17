@@ -1470,15 +1470,6 @@ Proof.
   by intros l1 l2 [? _]%NoDup_app.
 Qed.
 
-Lemma subseteq_empty {A} : forall (l : list A),
-  l ⊆ nil -> l = nil.
-Proof.
-  intros. destruct l; [done |].
-  exfalso.
-  specialize (H a (elem_of_list_here _ _)).
-  by inversion H.
-Qed.
-
 Lemma NoDup_subseteq_length [A : Type]
   [l1 l2 : list A]
   (Hnodup : NoDup l1)
