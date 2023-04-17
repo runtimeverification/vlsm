@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun FunctionalExtensionality Reals.
 From VLSM.Lib Require Import Preamble ListSetExtras StdppExtras.
-From VLSM.Lib Require Import FinExtras Measurable.
+From VLSM.Lib Require Import NatExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Plans Composition Equivocation.
 From VLSM.Core Require Import SubProjectionTraces.
 From VLSM.Core Require Import Equivocation.NoEquivocation.
@@ -84,7 +84,6 @@ Program Instance equivocating_indices_BasicEquivocation :
   }.
 Next Obligation.
 Proof.
-  intro. intros.
   by typeclasses eauto.
 Qed.
 
