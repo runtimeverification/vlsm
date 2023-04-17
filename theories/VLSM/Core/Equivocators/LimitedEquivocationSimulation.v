@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From Coq Require Import FinFun Reals.
-From VLSM.Lib Require Import StdppListSet RealsExtras Measurable FinSetExtras.
+From VLSM.Lib Require Import StdppListSet Measurable FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition AnnotatedVLSM.
 From VLSM.Core Require Import Equivocation MessageDependencies.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
@@ -59,7 +59,7 @@ Proof.
   intros l (s, om) [Hno_equiv Hfixed].
   split; [done |].
   unfold not_heavy.
-  transitivity (sum_weights (equivocating)); [| done].
+  eapply (Rle_trans _ (sum_weights (equivocating))); [| done].
   remember (composite_transition _ _ _).1. clear Heqc.
   unfold state_has_fixed_equivocation in Hfixed.
   unfold equivocation_fault.

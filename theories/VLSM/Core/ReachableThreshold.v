@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Reals Lra.
-From VLSM.Lib Require Import RealsExtras Measurable ListExtras StdppListSet.
+From VLSM.Lib Require Import Measurable ListExtras StdppListSet.
 
 (**
   Given a set of validators and a [threshold] (a positive real number), we say

@@ -1,7 +1,7 @@
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
 From VLSM.Lib Require Import Preamble FinSetExtras ListFinSetExtras.
-From VLSM.Lib Require Import Measurable RealsExtras.
+From VLSM.Lib Require Import Measurable.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM Equivocation.
 From VLSM.Core Require Import ByzantineTraces.FixedSetByzantineTraces.
@@ -113,7 +113,7 @@ Proof.
   {
     intro Hincl.
     unfold tracewise_not_heavy, not_heavy.
-    transitivity (sum_weights byzantine_vs); [| done].
+    eapply (Rle_trans _ (sum_weights byzantine_vs)); [| done].
     apply sum_weights_subseteq_list.
     - by apply NoDup_elements.
     - by apply NoDup_elements.

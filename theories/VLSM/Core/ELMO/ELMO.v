@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality Reals.
 From stdpp Require Import prelude finite.
-From VLSM.Lib Require Import Preamble Measurable FinSetExtras RealsExtras ListExtras.
+From VLSM.Lib Require Import Preamble Measurable FinSetExtras ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
 From VLSM.Core Require Import Validator ProjectionTraces MessageDependencies.
 From VLSM.Core Require Import TraceableVLSM MinimalEquivocationTrace.
@@ -1440,7 +1440,7 @@ Lemma ELMO_not_heavy_send_message :
       (state_update ELMOComponent sigma i
         (sigma i <+> MkObservation Send (MkMessage (sigma i)))).
 Proof.
-  unfold ELMO_not_heavy, not_heavy; etransitivity; [| done].
+  unfold ELMO_not_heavy, not_heavy; intros; eapply Rle_trans; [| done].
   apply sum_weights_subseteq; [by apply NoDup_elements.. |].
   intro a.
   unfold equivocating_validators; rewrite !elem_of_filter; cbn.
@@ -1463,7 +1463,7 @@ Lemma ELMO_not_heavy_receive_observed_message :
       ELMO_not_heavy (state_update ELMOComponent sigma i (sigma i <+> MkObservation Receive m)).
 Proof.
   intros * Hfull Hobs.
-  unfold ELMO_not_heavy, not_heavy; etransitivity; [| done].
+  unfold ELMO_not_heavy, not_heavy; intros; eapply Rle_trans; [| done].
   apply sum_weights_subseteq; [by apply NoDup_elements.. |].
   intro a.
   unfold equivocating_validators; rewrite !elem_of_filter; cbn.
@@ -1743,7 +1743,7 @@ Proof.
     eapply Forall_impl; cbn; [done |].
     apply ELMO_valid_state_not_heavy in Hs as Hheavy.
     intros item Hitem; unfold ELMO_not_heavy, not_heavy.
-    etransitivity; [| done].
+    eapply Rle_trans; [| done].
     apply sum_weights_subseteq; [by apply NoDup_elements.. |].
     by intro a; apply Hitem.
   }
@@ -2054,7 +2054,7 @@ Proof.
     destruct lj; [| done].
     unfold ELMO_global_constraint.
     replace (composite_transition _ _ _) with (state_update ELMOComponent sf i si, oom).
-    unfold ELMO_not_heavy, not_heavy; etransitivity; [| done].
+    unfold ELMO_not_heavy, not_heavy; eapply Rle_trans; [| done].
     apply sum_weights_subseteq; [by apply NoDup_elements.. |].
     by intro; apply Hsfisi_eqvs.
   }
@@ -2153,7 +2153,7 @@ Proof.
   assert (Heqv :
     (sum_weights (ELMO_equivocating_validators s ∪ {[ idx i_m ]}) <= threshold)%R).
   {
-    etransitivity; [| apply Hc].
+    eapply Rle_trans; [| apply Hc].
     apply sum_weights_subseteq; [by apply NoDup_elements.. |].
     intro a; rewrite elem_of_union, elem_of_singleton.
     unfold ELMO_equivocating_validators, equivocating_validators.
@@ -2334,7 +2334,7 @@ Proof.
       rewrite state_update_eq.
       cbn in Ht0 |- *; rewrite Ht0, state_update_twice.
       unfold ELMO_not_heavy, not_heavy.
-      etransitivity; [| done].
+      eapply Rle_trans; [| done].
       apply sum_weights_subseteq; [by apply NoDup_elements.. |].
       by intro; apply Hsf_bounded_eqv.
     - cbn; state_update_simpl.
@@ -2891,7 +2891,7 @@ Proof.
         repeat split; cbn; [by rewrite Heq_i | | by rewrite Heq_i].
         unfold local_equivocation_limit_ok, not_heavy in Hlocal_ok.
         unfold ELMO_not_heavy, not_heavy.
-        etransitivity; [| done].
+        eapply Rle_trans; [| done].
         apply sum_weights_subseteq; [by apply NoDup_elements.. |].
         intros x.
         unfold equivocating_validators, is_equivocating; cbn.

@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Reals Lra.
-From VLSM.Lib Require Import Preamble Measurable RealsExtras FinSetExtras.
+From VLSM.Lib Require Import Preamble Measurable FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition AnnotatedVLSM.
 From VLSM.Core Require Import Equivocation Equivocation.TraceWiseEquivocation MessageDependencies.
 From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.LimitedMessageEquivocation.
@@ -235,7 +235,7 @@ Proof.
     split.
     + apply valid_trace_add_default_last, valid_trace_last_pstate,
         valid_state_limited_equivocation in Htr.
-      transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
+      eapply (Rle_trans _ (equivocation_fault (finite_trace_last is tr))); [| done].
       by unfold equivocation_fault; apply sum_weights_subseteq.
     + revert Hpr_fixed.
       apply VLSM_incl_finite_valid_trace, constraint_subsumption_incl.

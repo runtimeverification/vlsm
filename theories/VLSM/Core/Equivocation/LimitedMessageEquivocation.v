@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun RIneq.
 From VLSM.Lib Require Import Preamble FinSetExtras.
-From VLSM.Lib Require Import RealsExtras Measurable.
+From VLSM.Lib Require Import Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections MessageDependencies Composition Equivocation.
 From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
@@ -214,7 +214,7 @@ Proof.
   cut (tracewise_equivocating_validators s ⊆ eqv_validators).
   {
     intro Hincl; unfold tracewise_not_heavy, not_heavy.
-    by etransitivity; [apply sum_weights_subseteq |].
+    by eapply Rle_trans; [apply sum_weights_subseteq |].
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
   {
