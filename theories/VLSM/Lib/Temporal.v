@@ -4,103 +4,65 @@ From Coq Require Import Streams Classical.
 
 (** * Temporal Logic Predicates and Results *)
 
-Set Implicit Arguments.
-
-Inductive Eventually [A : Type] (P : Stream A -> Prop) : Stream A -> Prop :=
-| ehere : forall s, P s -> Eventually P s
-| elater : forall s, Eventually P s -> forall a, Eventually P (Cons a s).
-
-CoInductive Forever [A : Type] (P : Stream A -> Prop) : Stream A -> Prop :=
-| fcons : forall s, P s -> Forever P (tl s) -> Forever P s.
-
-Lemma fhere [A : Type] (P : Stream A -> Prop) : forall s, Forever P s -> P s.
+Lemma Exists_map_conv [A B : Type] (f : A -> B) (P : Stream B -> Prop) : forall s,
+  Exists P (Streams.map f s) -> Exists (fun s => P (Streams.map f s)) s.
 Proof.
-  by destruct 1.
-Qed.
-
-Lemma flater [A : Type] (P : Stream A -> Prop) : forall a s, Forever P (Cons a s) -> Forever P s.
-Proof.
-  by inversion 1.
-Qed.
-
-Lemma Eventually_map [A B : Type] (f : A -> B) (P : Stream B -> Prop) : forall s,
-  Eventually P (Streams.map f s) <-> Eventually (fun s => P (Streams.map f s)) s.
-Proof.
-  split.
-  - remember (map f s) as fs.
-    intro H. revert s Heqfs.
-    induction H.
-    + by intros s0 ->; constructor.
-    + intros [a' s'].
-      intros. apply elater. apply IHEventually.
-      by apply (f_equal (@Streams.tl _)) in Heqfs.
-  - induction 1.
-    + by constructor.
-    + by rewrite unfold_Stream; constructor.
-Qed.
-
-Lemma Forever_map [A B : Type] (f : A -> B) (P : Stream B -> Prop) : forall s,
-  Forever P (Streams.map f s) <-> Forever (fun s => P (Streams.map f s)) s.
-Proof.
-  split; revert s.
-  - cofix lem. destruct s.
-    rewrite (unfold_Stream (map f (Cons a s))).
-    simpl.
-    inversion 1; subst; constructor.
-    + by rewrite (unfold_Stream (map f (Cons a s))).
-    + by apply lem.
-  - cofix lem. destruct s.
-    by inversion 1; subst; constructor; [| apply lem].
+  intros; remember (map f s) as fs; revert s Heqfs.
+  induction H; [by intros s0 ->; constructor |].
+  intros [a' s'] Heqfs.
+  constructor 2.
+  apply IHExists.
+  by rewrite Heqfs.
 Qed.
 
 Definition progress [A : Type] (R : A -> A -> Prop) : Stream A -> Prop :=
-  Forever (fun s => let x := hd s in let a := hd (tl s) in a = x \/ R a x).
+  ForAll (fun s => let x := hd s in let a := hd (tl s) in a = x \/ R a x).
 
-Lemma not_eventually [A : Type] (P : Stream A -> Prop) :
-  forall s, ~ Eventually P s -> Forever (fun s => ~ P s) s.
+Lemma not_Exists [A : Type] (P : Stream A -> Prop) :
+  forall s, ~ Exists P s -> ForAll (fun s => ~ P s) s.
 Proof.
-  cofix not_eventually.
+  cofix not_Exists.
   destruct s.
   constructor.
   - by contradict H; constructor.
-  - by apply not_eventually; contradict H; constructor.
+  - by apply not_Exists; contradict H; constructor.
 Qed.
 
-Lemma forever_impl [A : Type] (P Q : Stream A -> Prop) :
-  forall s, Forever (fun s => P s -> Q s) s -> Forever P s -> Forever Q s.
+Lemma ForAll_impl [A : Type] (P Q : Stream A -> Prop) :
+  forall s, ForAll (fun s => P s -> Q s) s -> ForAll P s -> ForAll Q s.
 Proof.
-  cofix forever_impl.
+  cofix ForAll_impl.
   destruct s, 1.
   inversion 1; subst.
   by constructor; auto.
 Qed.
 
-Lemma eventually_impl [A : Type] (P Q : Stream A -> Prop) :
-  forall s, Forever (fun s => P s -> Q s) s -> Eventually P s -> Eventually Q s.
+Lemma Exists_impl [A : Type] (P Q : Stream A -> Prop) :
+  forall s, ForAll (fun s => P s -> Q s) s -> Exists P s -> Exists Q s.
 Proof.
   induction 2.
-  - by apply fhere in H; apply ehere, H.
-  - by apply flater in H; apply elater, IHEventually.
+  - by apply Here, H.
+  - by apply Further, IHExists; inversion H.
 Qed.
 
-Lemma forever_tauto [A : Type] (P : Stream A -> Prop) :
-  (forall s, P s) -> forall s, Forever P s.
+Lemma ForAll_tauto [A : Type] (P : Stream A -> Prop) :
+  (forall s, P s) -> forall s, ForAll P s.
 Proof.
-  cofix forever_tauto.
+  cofix ForAll_tauto.
   by destruct s; constructor; auto.
 Qed.
 
-Lemma use_eventually [A : Type] (P Q : Stream A -> Prop) :
-  forall s, Eventually P s -> Forever Q s ->
-            exists s', P s' /\ Forever Q s'.
+Lemma use_Exists [A : Type] (P Q : Stream A -> Prop) :
+  forall s, Exists P s -> ForAll Q s ->
+            exists s', P s' /\ ForAll Q s'.
 Proof.
   induction 1.
-  - by exists s; itauto.
+  - by exists x; itauto.
   - by inversion 1; subst; itauto.
 Qed.
 
 Lemma refutation [A : Type] [R : A -> A-> Prop] (HR : well_founded R)
-      [s] : ~ Forever (fun s => Eventually (fun x => R (hd x) (hd s)) s) s.
+      [s] : ~ ForAll (fun s => Exists (fun x => R (hd x) (hd s)) s) s.
 Proof.
   remember (hd s) as x.
   revert s Heqx.
@@ -108,51 +70,50 @@ Proof.
   induction HR. clear H.
   intros s -> HF.
   destruct (id HF).
-  pose proof (use_eventually H HF).
-  destruct H1 as [[a' s'] [Ha' H1']].
+  destruct (use_Exists _ _ _ H HF) as [[a' s'] [Ha' H1']].
   simpl in Ha'.
   by eapply H0; eauto.
 Qed.
 
-Lemma forall_forever : forall [A B : Type] (P : A -> Stream B -> Prop) [s : Stream B],
-    (forall (a : A), Forever (P a) s) -> Forever (fun s => forall a, P a s) s.
+Lemma forall_ForAll : forall [A B : Type] (P : A -> Stream B -> Prop) [s : Stream B],
+    (forall (a : A), ForAll (P a) s) -> ForAll (fun s => forall a, P a s) s.
 Proof.
   intros A B P.
-  cofix forall_forever.
+  cofix forall_ForAll.
   destruct s.
   intro H.
   constructor.
   - by intro a; destruct (H a).
-  - apply forall_forever.
+  - apply forall_ForAll.
     by intro a; destruct (H a).
 Qed.
 
-Lemma not_forever [A : Type] (P : Stream A -> Prop) :
-  forall s, ~ Forever P s -> Eventually (fun s => ~ P s) s.
+Lemma not_ForAll [A : Type] (P : Stream A -> Prop) :
+  forall s, ~ ForAll P s -> Exists (fun s => ~ P s) s.
 Proof.
   intros s H. apply Classical_Prop.NNPP.
   contradict H.
-  apply not_eventually in H.
-  revert H; apply forever_impl, forever_tauto.
+  apply not_Exists in H.
+  revert H; apply ForAll_impl, ForAll_tauto.
   by intro; apply Classical_Prop.NNPP.
 Qed.
 
 Lemma stabilization [A : Type] [R : A -> A-> Prop] (HR : well_founded R)
-      [s] : progress R s -> exists x, Eventually (Forever (fun s => hd s = x)) s.
+      [s] : progress R s -> exists x, Exists (ForAll (fun s => hd s = x)) s.
 Proof.
   intro Hprogress.
   apply Classical_Prop.NNPP.
   intro H.
-  assert (forall x, Forever (Eventually (fun s => hd s <> x)) s).
+  assert (forall x, ForAll (Exists (fun s => hd s <> x)) s).
   {
     intro x.
-    assert (forall n : A, ¬ Eventually (Forever (fun s : Stream A => hd s = n)) s) by firstorder.
+    assert (forall n : A, ~ Exists (ForAll (fun s : Stream A => hd s = n)) s) by firstorder.
     specialize (H0 x).
-    apply not_eventually in H0.
+    apply not_Exists in H0.
     revert H0.
-    apply forever_impl, forever_tauto.
+    apply ForAll_impl, ForAll_tauto.
     clear. intros s H.
-    by apply not_forever in H.
+    by apply not_ForAll in H.
   }
   clear H; rename H0 into H.
   refine (@refutation _ _ HR s _).
@@ -163,19 +124,18 @@ Proof.
     simpl.
     generalize (eq_refl : hd (Cons a s) = a).
     specialize (H a).
-    destruct H as [x H _]. revert Hprogress.
-    clear s.
+    destruct H as [H _]. revert Hprogress.
     induction H; intro Hprogress.
     + by destruct s; cbn in *; congruence.
-    + simpl. intro. subst a0.
-      apply elater.
-      inversion Hprogress; subst s0.
+    + simpl. intro. subst a.
+      apply Further.
+      inversion Hprogress.
       simpl in H0, H1.
-      specialize (IHEventually H1).
+      specialize (IHExists H1).
       destruct H0.
-      * by apply IHEventually.
+      * by apply IHExists.
       * by constructor.
   - apply the_lemma.
-    + by destruct Hprogress.
-    + by intro x; destruct (H x).
+    + by apply Hprogress.
+    + by apply H.
 Qed.
