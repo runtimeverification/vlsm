@@ -23,7 +23,6 @@ theories/VLSM/Lib/TopSort.v
 theories/VLSM/Lib/NeList.v
 theories/VLSM/Lib/StreamExtras.v
 theories/VLSM/Lib/StreamFilters.v
-theories/VLSM/Lib/Temporal.v
 theories/VLSM/Lib/Traces.v
 theories/VLSM/Lib/TraceProperties.v
 theories/VLSM/Lib/TraceClassicalProperties.v
