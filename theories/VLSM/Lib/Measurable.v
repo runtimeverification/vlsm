@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From Coq Require Import Reals Lra.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppListFinSet.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
 
 (** * Measure-related definitions and lemmas *)
 
@@ -117,7 +117,7 @@ Qed.
 
 Lemma sum_weights_in :
   forall v (vs : Cv),
-    v ∈ vs -> sum_weights vs = (proj1_sig (weight v) + sum_weights (set_remove v vs))%R.
+    v ∈ vs -> sum_weights vs = (proj1_sig (weight v) + sum_weights (vs ∖ {[ v ]}))%R.
 Proof.
   intros v vs Hv.
   rewrite sum_weights_list_rew, sum_weights_in_list with (v := v); cycle 1.
@@ -128,15 +128,14 @@ Proof.
     + by apply NoDup_elements.
     + intros x Hx.
       rewrite elem_of_elements.
-      apply set_remove_iff.
       apply StdppListSet.set_remove_iff in Hx; [| by apply NoDup_elements].
-      by rewrite elem_of_elements in Hx.
+      rewrite elem_of_elements in Hx.
+      by rewrite elem_of_difference, elem_of_singleton.
     + by apply NoDup_elements.
     + by apply set_remove_nodup, NoDup_elements.
     + intros x Hx.
-      rewrite elem_of_elements in Hx.
+      rewrite elem_of_elements, elem_of_difference, elem_of_singleton in Hx.
       apply StdppListSet.set_remove_iff; [by apply NoDup_elements |].
-      apply set_remove_iff in Hx.
       by rewrite elem_of_elements.
 Qed.
 
