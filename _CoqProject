@@ -15,7 +15,6 @@ theories/VLSM/Lib/StdppListSet.v
 theories/VLSM/Lib/ListSetExtras.v
 theories/VLSM/Lib/SortedLists.v
 theories/VLSM/Lib/FinSetExtras.v
-theories/VLSM/Lib/FinExtras.v
 theories/VLSM/Lib/RealsExtras.v
 theories/VLSM/Lib/TopSort.v
 theories/VLSM/Lib/NeList.v
