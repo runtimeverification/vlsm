@@ -383,40 +383,13 @@ Proof.
   by apply list_prefix_prefix.
 Qed.
 
-Definition Forall_hd
-  {A : Type}
-  {P : A -> Prop}
-  {a : A}
-  {l : list A}
-  (Hs : Forall P (a :: l))
-  : P a.
-Proof.
-  by inversion Hs.
-Defined.
-
-Definition Forall_tl
-  {A : Type}
-  {P : A -> Prop}
-  {a : A}
-  {l : list A}
-  (Hs : Forall P (a :: l))
-  : Forall P l.
-Proof.
-  by inversion Hs.
-Defined.
-
 Fixpoint list_annotate
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  : list (dsig P).
-Proof.
-  destruct l as [| a l].
-  - by exact [].
-  - by exact ((dexist a (Forall_hd Hs)) :: list_annotate A P Pdec l (Forall_tl Hs)).
-Defined.
+  {A : Type} (P : A -> Prop) {Pdec : forall a, Decision (P a)}
+  (l : list A) : Forall P l -> list (dsig P) :=
+match l with
+| [] => fun _ => []
+| h :: t => fun Hs => dexist h (Forall_inv Hs) :: list_annotate P t (Forall_inv_tail Hs)
+end.
 
 Lemma list_annotate_length
   {A : Type}
@@ -462,16 +435,6 @@ Proof.
   by subst.
 Qed.
 
-Lemma list_annotate_unroll
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (a : A)
-  (l : list A)
-  (Hs : Forall P (a :: l))
-  : list_annotate P (a :: l) Hs = dexist a (Forall_hd Hs) ::  list_annotate P l (Forall_tl Hs).
-Proof. done. Qed.
-
 Lemma list_annotate_app
   {A : Type}
   (P : A -> Prop)
@@ -501,10 +464,10 @@ Proof.
   generalize dependent l.
   induction n; intros [| a l] Hs.
   - by exists None.
-  - inversion Hs; subst. exists (Some (dexist a (Forall_hd Hs))).
-    by rewrite list_annotate_unroll.
+  - inversion Hs; subst.
+    by exists (Some (dexist a (Forall_inv Hs))).
   - by exists None.
-  - by rewrite list_annotate_unroll; eauto.
+  - by cbn; eauto.
 Qed.
 
 Fixpoint nth_error_filter_index
@@ -563,16 +526,13 @@ Proof.
     by specialize (IHl n0 eq_refl n3 eq_refl); lia.
 Qed.
 
-(* TODO(wkolowski): Forall_filter, Forall_hd and Forall_tl should end with Qed! *)
-Fixpoint Forall_filter
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a : A, Decision (P a)}
-  (l : list A) : Forall P (filter P l).
+Lemma Forall_filter :
+  forall {A : Type} (P : A -> Prop) {Pdec : forall a : A, Decision (P a)} (l : list A),
+    Forall P (filter P l).
 Proof.
-  destruct l; cbn; [done |].
-  by destruct (decide (P a)); eauto.
-Defined.
+  induction l as [| h t]; cbn; [by constructor |].
+  by destruct (decide (P h)); [constructor |].
+Qed.
 
 (**
   Produces the sublist of elements of a list filtered by a decidable predicate
