@@ -13,10 +13,8 @@ theories/VLSM/Lib/ListExtras.v
 theories/VLSM/Lib/StdppExtras.v
 theories/VLSM/Lib/StdppListSet.v
 theories/VLSM/Lib/ListSetExtras.v
-theories/VLSM/Lib/ListFinSetExtras.v
 theories/VLSM/Lib/SortedLists.v
 theories/VLSM/Lib/FinSetExtras.v
-theories/VLSM/Lib/StdppListFinSet.v
 theories/VLSM/Lib/RealsExtras.v
 theories/VLSM/Lib/TopSort.v
 theories/VLSM/Lib/NeList.v
