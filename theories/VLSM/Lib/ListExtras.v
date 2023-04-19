@@ -550,7 +550,7 @@ match l with
   end
 end.
 
-Definition filter_annotate_length
+Lemma filter_annotate_length
   {A : Type}
   (P : A -> Prop)
   {Pdec : forall a : A, Decision (P a)}
