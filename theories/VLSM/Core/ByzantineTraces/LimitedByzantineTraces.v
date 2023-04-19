@@ -1,6 +1,6 @@
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
-From VLSM.Lib Require Import Preamble FinSetExtras ListFinSetExtras.
+From VLSM.Lib Require Import Preamble FinSetExtras.
 From VLSM.Lib Require Import Measurable RealsExtras.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM Equivocation.
@@ -426,7 +426,7 @@ Proof.
         [| | subst lst; apply finite_valid_trace_last_pstate | |].
     }
     destruct iom as [im |]; [| done].
-    apply set_union_subseteq_iff; split; [done |].
+    apply union_subseteq; split; [done |].
     unfold coeqv_message_equivocators
     ; case_decide as Hnobs; [by apply empty_subseteq |].
     rewrite (full_node_msg_dep_coequivocating_senders _ _ _ _ Hfull _ _ i li);

@@ -8,7 +8,7 @@ Definition set_eq {A} (s1 s2 : set A) : Prop :=
   s1 ⊆ s2 /\ s2 ⊆ s1.
 
 (**
-  By declaring [set_eq] and [Equivalence] relation, we able rewriting with
+  By declaring [set_eq] and [Equivalence] relation, we enable rewriting with
   it using the rewrite tactic. See the Coq reference manual for details:
   https://coq.inria.fr/refman/addendum/generalized-rewriting.html
   (section "Declaring rewrite relations", subsection "First class setoids and morphisms").

@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppListSet.
-From VLSM.Lib Require Import ListSetExtras FinExtras.
+From VLSM.Lib Require Import ListSetExtras NatExtras.
 From VLSM.Core Require Import VLSM Equivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
 
