@@ -578,20 +578,29 @@ Defined.
   Produces the sublist of elements of a list filtered by a decidable predicate
   each of them paired with the proof that it satisfies the predicate.
 *)
-Definition filter_annotate
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a : A, Decision (P a)}
+Fixpoint filter_annotate
+  {A : Type} (P : A -> Prop) {Pdec : forall a : A, Decision (P a)}
   (l : list A) : list (dsig P) :=
-  list_annotate _ _ (Forall_filter P l).
+match l with
+| [] => []
+| h :: t =>
+  match decide (P h) with
+  | left p => dexist h p :: filter_annotate P t
+  | right _ => filter_annotate P t
+  end
+end.
 
 Definition filter_annotate_length
   {A : Type}
   (P : A -> Prop)
   {Pdec : forall a : A, Decision (P a)}
   (l : list A)
-  : length (filter_annotate P l) = length (filter P l) :=
-  list_annotate_length _ _ (Forall_filter P l).
+  : length (filter_annotate P l) = length (filter P l).
+Proof.
+  induction l as [| h t]; cbn; [done |].
+  destruct (decide (P h)); cbn; [| done].
+  by rewrite IHt.
+Qed.
 
 Lemma filter_annotate_unroll
   {A : Type}
@@ -616,8 +625,9 @@ Lemma filter_annotate_app
   (l1 l2 : list A)
   : filter_annotate P (l1 ++ l2) = filter_annotate P l1 ++ filter_annotate P l2.
 Proof.
-  induction l1; [done |].
-  by simpl; rewrite! filter_annotate_unroll, IHl1; case_decide.
+  induction l1; cbn; [done |].
+  destruct (decide (P a)); cbn; [| done].
+  by rewrite IHl1.
 Qed.
 
 (**
