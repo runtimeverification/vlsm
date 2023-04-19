@@ -616,7 +616,7 @@ Lemma fixed_transition_preserves_annotation_equivocators
     ⊆ eqv_validators.
 Proof.
   destruct iom as [im |]; [| done].
-  apply ListFinSetExtras.set_union_subseteq_iff; split; [done | cbn].
+  apply union_subseteq; split; [done | cbn].
   rewrite annotate_trace_from_last_original_state; cbn.
   replace (finite_trace_last _ _) with s
        by (apply valid_trace_get_last in Htr1; congruence).
