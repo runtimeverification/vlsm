@@ -81,7 +81,7 @@ Definition _apply_plan
   : list transition_item * state _
   :=
   let (final, items) :=
-    fold_right _apply_plan_folder (@pair state _ start []) (rev a) in
+    fold_right _apply_plan_folder (@pair (state _) _ start []) (rev a) in
   (rev items, final).
 
 Lemma _apply_plan_last
@@ -115,10 +115,10 @@ Proof.
   rewrite rev_app_distr.
   rewrite fold_right_app. simpl.
   destruct
-    (fold_right _apply_plan_folder (@pair state _ start []) (rev  a))
+    (fold_right _apply_plan_folder (@pair (state _) _ start []) (rev  a))
     as (afinal, aitems) eqn: Ha.
   destruct
-    (fold_right _apply_plan_folder (@pair state _ afinal []) (rev a'))
+    (fold_right _apply_plan_folder (@pair (state _) _ afinal []) (rev a'))
     as (final, items) eqn: Ha'.
   clear - Ha'.
   specialize (_apply_plan_folder_additive afinal (rev a') aitems) as Hadd.
