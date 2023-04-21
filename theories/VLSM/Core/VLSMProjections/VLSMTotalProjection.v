@@ -32,8 +32,8 @@ Section sec_pre_definitions.
 Context
   {message : Type}
   (TX TY : VLSMType message)
-  (label_project : @label _ TX -> option (@label _ TY))
-  (state_project : @state _ TX -> @state _ TY)
+  (label_project : label TX -> option (label TY))
+  (state_project : state TX -> state TY)
   .
 
 Definition pre_VLSM_projection_in_projection
@@ -147,8 +147,8 @@ Record VLSM_projection_type
   {message : Type}
   (X : VLSM message)
   (TY : VLSMType message)
-  (label_project : vlabel X -> option (@label _ TY))
-  (state_project : vstate X -> @state _ TY)
+  (label_project : vlabel X -> option (label TY))
+  (state_project : vstate X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project (type X) TY label_project state_project)
   : Prop :=
 {
@@ -167,8 +167,8 @@ Definition VLSM_partial_trace_project_from_projection
   {message : Type}
   {X : VLSM message}
   {TY : VLSMType message}
-  (label_project : vlabel X -> option (@label _ TY))
-  (state_project : vstate X -> @state _ TY)
+  (label_project : vlabel X -> option (label TY))
+  (state_project : vstate X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   := fun str : vstate X * list (vtransition_item X) =>
       let (s, tr) := str in Some (state_project s, trace_project tr).
@@ -205,8 +205,8 @@ Context
   {message : Type}
   (X : VLSM message)
   (TY : VLSMType message)
-  (label_project : vlabel X -> option (@label _ TY))
-  (state_project : vstate X -> @state _ TY)
+  (label_project : vlabel X -> option (label TY))
+  (state_project : vstate X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   .
 
@@ -271,11 +271,11 @@ Record VLSM_projection : Prop :=
 }.
 
 Definition weak_projection_initial_state_preservation : Prop :=
-  forall s : state,
+  forall s : state _,
     vinitial_state_prop X s -> valid_state_prop Y (state_project s).
 
 Definition strong_projection_initial_state_preservation : Prop :=
-  forall s : state,
+  forall s : state _,
     vinitial_state_prop X s -> vinitial_state_prop Y (state_project s).
 
 Lemma strong_projection_initial_state_preservation_weaken
@@ -815,8 +815,8 @@ Context
   {message : Type}
   (X : VLSM message)
   (TY : VLSMType message)
-  (label_project : vlabel X -> option (@label _ TY))
-  (state_project : vstate X -> @state _ TY)
+  (label_project : vlabel X -> option (label TY))
+  (state_project : vstate X -> state TY)
   (Htransition_None : weak_projection_transition_consistency_None X TY label_project state_project)
   .
 
@@ -889,7 +889,7 @@ Proof.
 Qed.
 
 #[local] Lemma basic_VLSM_projection_finite_valid_trace_from
-  (s : state)
+  (s : state _)
   (ls : list transition_item)
   (Hpxt : finite_valid_trace_from X s ls)
   : finite_valid_trace_from Y (state_project s)

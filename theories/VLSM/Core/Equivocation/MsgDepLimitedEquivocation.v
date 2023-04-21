@@ -264,7 +264,7 @@ Proof.
 Qed.
 
 Lemma full_node_msg_dep_composite_transition_message_equivocators
-  i li (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
+  i li (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om))
   : coeqv_composite_transition_message_equivocators
       IM sender (full_node_coequivocating_senders IM)
@@ -284,7 +284,7 @@ Proof.
 Qed.
 
 Lemma msg_dep_full_node_valid_iff
-  l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
+  l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
            (projT2 l) (original_state s (projT1 l), om))
   : vvalid Limited l (s, om) <-> vvalid FullNodeLimited l (s, om).
@@ -300,7 +300,7 @@ Proof.
 Qed.
 
 Lemma msg_dep_full_node_transition_iff
-  l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
+  l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
            (projT2 l) (original_state s (projT1 l), om))
   : vtransition Limited l (s, om) = vtransition FullNodeLimited l (s, om).

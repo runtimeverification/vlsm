@@ -29,8 +29,8 @@ Section sec_pre_definitions.
 Context
   {message : Type}
   (TX TY : VLSMType message)
-  (label_project : @label _ TX -> @label _ TY)
-  (state_project : @state _ TX -> @state _ TY)
+  (label_project : label TX -> label TY)
+  (state_project : state TX -> state TY)
   .
 
 Definition pre_VLSM_embedding_transition_item_project
@@ -132,7 +132,7 @@ Record VLSM_embedding : Prop :=
 }.
 
 Definition weak_embedding_valid_preservation : Prop :=
-  forall (l : label) (s : state) (om : option message)
+  forall (l : label _) (s : state _) (om : option message)
     (Hv : input_valid X l (s, om))
     (HsY : valid_state_prop Y (state_project s))
     (HomY : option_valid_message_prop Y om),
@@ -147,7 +147,7 @@ Proof.
 Qed.
 
 Definition strong_embedding_valid_preservation : Prop :=
-  forall (l : label) (s : state) (om : option message),
+  forall (l : label _) (s : state _) (om : option message),
     vvalid X l (s, om) -> vvalid Y (label_project l) ((state_project s), om).
 
 Lemma strong_projection_valid_preservation_from_full
@@ -211,7 +211,7 @@ Proof.
 Qed.
 
 Definition weak_embedding_initial_message_preservation : Prop :=
-  forall (l : label) (s : state) (m : message)
+  forall (l : label _) (s : state _) (m : message)
     (Hv : input_valid X l (s, Some m))
     (HsY : valid_state_prop Y (state_project s))
     (HmX : vinitial_message_prop X m),
@@ -374,7 +374,7 @@ Proof.
 Qed.
 
 Lemma VLSM_weak_embedding_can_produce
-  (s : state)
+  (s : state _)
   (om : option message)
   : option_can_produce X s om -> option_can_produce Y (state_project s) om.
 Proof.
@@ -502,7 +502,7 @@ Definition VLSM_embedding_input_valid
 
 Definition VLSM_embedding_can_produce
   : forall
-    (s : state)
+    (s : state _)
     (om : option message),
     option_can_produce X s om -> option_can_produce Y (state_project s) om
   := VLSM_weak_embedding_can_produce VLSM_embedding_weaken.
@@ -580,7 +580,7 @@ End sec_VLSM_embedding.
   which are easy to verify in a practical setting. One such result is the following.
 
   For VLSM <<X>> to fully-project to a VLSM <<Y>>, the following set of conditions is sufficient:
-  - <<X>>'s [initial_state]s project to <<Y>>'s [initial state]s
+  - <<X>>'s [initial_state]s project to <<Y>>'s [initial_state]s
   - Every message <<m>> (including the empty one) which can be input to
     an [input_valid] transition in <<X>>, is a [valid_message] in <<Y>>
   - <<X>>'s [input_valid] is included in <<Y>>'s [valid].

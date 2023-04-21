@@ -1527,7 +1527,7 @@ Qed.
 Lemma ELMO_composite_observed_before_send_sizeState_Proper :
   Proper
     (composite_observed_before_send ELMOComponent Message_dependencies ==> lt)
-    (sizeState ∘ state).
+    (sizeState ∘ state _).
 Proof.
   intros x y Hxy; cbn.
   apply composite_observed_before_send_iff in Hxy
@@ -1544,7 +1544,7 @@ Qed.
 #[local] Instance ELMOComponent_tc_composite_observed_before_send_irreflexive :
   Irreflexive (tc_composite_observed_before_send ELMOComponent Message_dependencies).
 Proof.
-  apply (Proper_reflects_Irreflexive _ (<) (sizeState ∘ state));
+  apply (Proper_reflects_Irreflexive _ (<) (sizeState ∘ state _));
     [| typeclasses eauto].
   apply Proper_tc; [typeclasses eauto |].
   by apply ELMO_composite_observed_before_send_sizeState_Proper.
@@ -1636,7 +1636,7 @@ Qed.
   It might be possible to use something weaker than [UMO_reachable full_node]
   to prove
   [CompositeHasBeenObserved ELMOComponent (elements ∘ Message_dependencies) s m
-  <-> exists (k : index) (l : label), rec_obs (s k) (MkObservation l m)]
+  <-> exists (k : index) (l : label _), rec_obs (s k) (MkObservation l m)]
   but [CompositeHasBeenObserved] can recurse into sent or received messages
   and [rec_obs] only into received messages so we need some deep structural
   assumption about what [Send] observations are allowed, even recursively

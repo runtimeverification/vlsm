@@ -141,7 +141,7 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_can_produce
-  (s : state)
+  (s : state _)
   (om : option message)
   : option_can_produce X s om <-> option_can_produce Y s om.
 Proof.
@@ -217,7 +217,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm
   (P : message -> Prop)
   (Hvalidating :
-    forall (l : label) (s : state) (m : message)
+    forall (l : label _) (s : state _) (m : message)
       (Hv : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m)),
       valid_message_prop (pre_loaded_vlsm X P) m)
   : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X P).

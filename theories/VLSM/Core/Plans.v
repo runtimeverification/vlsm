@@ -20,7 +20,7 @@ Context
 *)
 Record plan_item : Type :=
 {
-  label_a : label;
+  label_a : label _;
   input_a : option message;
 }.
 
@@ -31,7 +31,7 @@ Section sec_apply_plans.
 Context
   {message : Type}
   {T : VLSMType message}
-  {transition : label -> state * option message -> state * option message}
+  {transition : label _ -> state _ * option message -> state _ * option message}
   .
 
 (**
@@ -47,8 +47,8 @@ Context
 *)
 Definition _apply_plan_folder
   (a : plan_item)
-  (sl : state * list transition_item)
-  : state * list transition_item
+  (sl : state _ * list transition_item)
+  : state _ * list transition_item
   :=
   let (s, items) := sl in
   match a with {| label_a := l'; input_a := input' |} =>
@@ -62,7 +62,7 @@ Definition _apply_plan_folder
   end.
 
 Lemma _apply_plan_folder_additive
-  (start : state)
+  (start : state _)
   (aitems : list plan_item)
   (seed_items : list transition_item)
   : let (final, items) := fold_right _apply_plan_folder (start, []) aitems in
@@ -76,16 +76,16 @@ Proof.
 Qed.
 
 Definition _apply_plan
-  (start : state)
+  (start : state _)
   (a : list plan_item)
-  : list transition_item * state
+  : list transition_item * state _
   :=
   let (final, items) :=
     fold_right _apply_plan_folder (@pair state _ start []) (rev a) in
   (rev items, final).
 
 Lemma _apply_plan_last
-  (start : state)
+  (start : state _)
   (a : list plan_item)
   (after_a := _apply_plan start a)
   : finite_trace_last start (fst after_a) = snd after_a.
@@ -104,7 +104,7 @@ Proof.
 Qed.
 
 Lemma _apply_plan_app
-  (start : state)
+  (start : state _)
   (a a' : list plan_item)
   : _apply_plan start (a ++ a') =
     let (aitems, afinal) := _apply_plan start a in
@@ -127,7 +127,7 @@ Proof.
 Qed.
 
 Lemma _apply_plan_cons
-  (start : state)
+  (start : state _)
   (ai : plan_item)
   (a' : list plan_item)
   : _apply_plan start (ai :: a') =
@@ -417,7 +417,7 @@ Definition ensures
 Lemma plan_independence
   (a b : plan)
   (Pb : vstate X -> Prop)
-  (s : state)
+  (s : state _)
   (Hpr : valid_state_prop X s)
   (Ha : finite_valid_plan_from s a)
   (Hhave : Pb s)

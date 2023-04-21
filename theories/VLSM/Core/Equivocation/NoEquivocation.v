@@ -24,7 +24,7 @@ Definition no_equivocations_except_from
   `{HasBeenSentCapability message vlsm}
   (exception : message -> Prop)
   (l : vlabel vlsm)
-  (som : state * option message)
+  (som : state _ * option message)
   :=
   let (s, om) := som in
   from_option (fun m => has_been_sent vlsm s m \/ exception m) True om.
@@ -36,7 +36,7 @@ Definition no_equivocations_except_from
 Definition no_equivocations
   `{HasBeenSentCapability message vlsm}
   (l : vlabel vlsm)
-  (som : state * option message)
+  (som : state _ * option message)
   : Prop
   :=
   no_equivocations_except_from (fun m => False) l som.
@@ -69,7 +69,7 @@ Context
   the same state, too.
 *)
 
-Definition directly_observed_were_sent (s : state) : Prop :=
+Definition directly_observed_were_sent (s : state _) : Prop :=
   forall msg, has_been_directly_observed X s msg -> has_been_sent X s msg.
 
 Lemma directly_observed_were_sent_initial s :
@@ -119,7 +119,7 @@ Qed.
   one cannot use the new messages to create additional traces.
 *)
 Lemma no_equivocations_preloaded_traces
-  (is : state)
+  (is : state _)
   (tr : list transition_item)
   : finite_valid_trace (pre_loaded_with_all_messages_vlsm X) is tr -> finite_valid_trace X is tr.
 Proof.
@@ -207,7 +207,7 @@ Context
   (Hsubsumed : preloaded_constraint_subsumption IM constraint composite_no_equivocations)
   .
 
-Definition composite_directly_observed_were_sent (s : state) : Prop :=
+Definition composite_directly_observed_were_sent (s : state _) : Prop :=
   forall msg, composite_has_been_directly_observed IM s msg -> composite_has_been_sent IM s msg.
 
 Lemma composite_directly_observed_were_sent_invariant s :

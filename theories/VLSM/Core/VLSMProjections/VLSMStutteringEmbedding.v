@@ -28,7 +28,7 @@ Section sec_pre_definitions.
 Context
   {message : Type}
   {TX TY : VLSMType message}
-  (state_project : @state _ TX -> @state _ TY)
+  (state_project : state TX -> state TY)
   (transition_item_project : @transition_item _ TX -> list (@transition_item _ TY))
   .
 
@@ -69,7 +69,7 @@ Record VLSM_stuttering_embedding_type
   {message : Type}
   (X : VLSM message)
   (TY : VLSMType message)
-  (state_project : vstate X -> @state _ TY)
+  (state_project : vstate X -> state TY)
   (transition_item_project : vtransition_item X -> list (@transition_item _ TY))
   : Prop :=
 {
@@ -89,7 +89,7 @@ Definition strong_transition_item_project_consistency
   {message : Type}
   [X : VLSM message]
   [TY : VLSMType message]
-  (state_project : vstate X -> @state _ TY)
+  (state_project : vstate X -> state TY)
   (transition_item_project : vtransition_item X -> list (@transition_item _ TY))
   : Prop :=
   forall sX lX inputX destinationX outputX,
@@ -106,7 +106,7 @@ Context
   {message : Type}
   (X : VLSM message)
   (TY : VLSMType message)
-  (state_project : vstate X -> @state _ TY)
+  (state_project : vstate X -> state TY)
   (transition_item_project : vtransition_item X -> list (@transition_item _ TY))
   (Hsimul : VLSM_stuttering_embedding_type X TY state_project transition_item_project)
   .
@@ -133,11 +133,11 @@ Definition VLSM_partial_trace_project_from_stuttering_embedding
   {message : Type}
   {X : VLSM message}
   {TY : VLSMType message}
-  (state_project : vstate X -> @state _ TY)
+  (state_project : vstate X -> state TY)
   (transition_item_project : vtransition_item X -> list (@transition_item _ TY))
   (trace_project := pre_VLSM_stuttering_embedding_finite_trace_project transition_item_project)
   (str : vstate X * list (vtransition_item X))
-  : option (@state _ TY * list (@transition_item _ TY)) :=
+  : option (state TY * list (@transition_item _ TY)) :=
     let (s, tr) := str in Some (state_project s, trace_project tr).
 
 Context
@@ -210,11 +210,11 @@ Record VLSM_stuttering_embedding : Prop :=
 }.
 
 Definition weak_stuttering_embedding_initial_state_preservation : Prop :=
-  forall s : state,
+  forall s : state _,
     vinitial_state_prop X s -> valid_state_prop Y (state_project s).
 
 Definition strong_stuttering_embedding_initial_state_preservation : Prop :=
-  forall s : state,
+  forall s : state _,
     vinitial_state_prop X s -> vinitial_state_prop Y (state_project s).
 
 Lemma strong_stuttering_embedding_initial_state_preservation_weaken :
@@ -662,7 +662,7 @@ Context
   {message : Type}
   (X : VLSM message)
   (TY : VLSMType message)
-  (state_project : vstate X -> @state _ TY)
+  (state_project : vstate X -> state TY)
   (transition_item_project : vtransition_item X -> list (@transition_item _ TY))
   .
 
@@ -710,7 +710,7 @@ Proof.
 Qed.
 
 #[local] Lemma basic_VLSM_stuttering_embedding_finite_valid_trace_from
-  (s : state)
+  (s : state _)
   (ls : list transition_item)
   (Hpxt : finite_valid_trace_from X s ls)
   : finite_valid_trace_from Y (state_project s)

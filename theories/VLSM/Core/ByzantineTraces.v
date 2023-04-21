@@ -82,12 +82,12 @@ Definition all_messages_type : VLSMType message :=
   ensure that the sets of labels and messages are both non-empty.
 *)
 
-Program Definition all_messages_s0 : {_ : @state _ all_messages_type | True} :=
+Program Definition all_messages_s0 : {_ : state all_messages_type | True} :=
   exist _ tt _.
 Next Obligation.
 Proof. done. Defined.
 
-#[export] Instance all_messages_state_inh : Inhabited {_ : @state _ all_messages_type | True} :=
+#[export] Instance all_messages_state_inh : Inhabited {_ : state all_messages_type | True} :=
   populate all_messages_s0.
 
 (**
@@ -95,15 +95,15 @@ Proof. done. Defined.
   message given as a label.
 *)
 Definition all_messages_transition
-    (l : @label _ all_messages_type)
-    (som : @state _ all_messages_type * option message)
-    : @state _ all_messages_type * option message
+    (l : label all_messages_type)
+    (som : state all_messages_type * option message)
+    : state all_messages_type * option message
     := (tt, Some l).
 
 (** The [valid]ity predicate specifies that all transitions are valid. *)
 Definition all_messages_valid
-    (l : @label _ all_messages_type)
-    (som : @state _ all_messages_type * option message)
+    (l : label all_messages_type)
+    (som : state all_messages_type * option message)
     : Prop
     := True.
 
@@ -203,7 +203,7 @@ Lemma alt_option_valid_message
     : option_valid_message_prop Alt om.
 Proof.
   destruct om as [m |]; [| apply option_valid_message_None].
-  pose (s := ``(vs0 Alt) : state).
+  pose (s := ``(vs0 Alt) : state _).
   exists s.
   assert (valid_state_message_prop Alt s None) as Hs
       by (apply valid_initial_state, proj2_sig).
@@ -233,7 +233,7 @@ Definition lifted_alt_state
   a [valid_state] of <<Alt>>.
 *)
 Lemma preloaded_alt_valid_state
-    (sj : state)
+    (sj : state _)
     (om : option message)
     (Hp : valid_state_message_prop PreLoaded sj om)
     : valid_state_prop Alt (lifted_alt_state sj).

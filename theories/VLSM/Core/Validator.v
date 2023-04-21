@@ -18,8 +18,8 @@ Context
   {TY : VLSMType message}
   .
 
-#[local] Notation labelTY := (@label _ TY).
-#[local] Notation stateTY := (@state _ TY).
+#[local] Notation labelTY := (label TY).
+#[local] Notation stateTY := (state TY).
 
 Context
   (label_project : vlabel X -> option labelTY)
@@ -145,10 +145,10 @@ Context
   {TX TY : VLSMType message}
   .
 
-#[local] Notation labelTX := (@label _ TX).
-#[local] Notation stateTX := (@state _ TX).
-#[local] Notation labelTY := (@label _ TY).
-#[local] Notation stateTY := (@state _ TY).
+#[local] Notation labelTX := (label TX).
+#[local] Notation stateTX := (state TX).
+#[local] Notation labelTY := (label TY).
+#[local] Notation stateTY := (state TY).
 
 Context
   (label_project : labelTX -> option labelTY)
@@ -173,8 +173,8 @@ Context
   (TY : VLSMType message)
   .
 
-#[local] Notation labelTY := (@label _ TY).
-#[local] Notation stateTY := (@state _ TY).
+#[local] Notation labelTY := (label TY).
+#[local] Notation stateTY := (state TY).
 #[local] Notation transition_itemTY := (@transition_item _ TY).
 
 Context
@@ -391,10 +391,10 @@ Context
   (TY : VLSMType message)
   .
 
-#[local] Notation labelTX := (@label _ TX).
-#[local] Notation stateTX := (@state _ TX).
-#[local] Notation labelTY := (@label _ TY).
-#[local] Notation stateTY := (@state _ TY).
+#[local] Notation labelTX := (label TX).
+#[local] Notation stateTX := (state TX).
+#[local] Notation labelTY := (label TY).
+#[local] Notation stateTY := (state TY).
 
 Context
   (label_project : labelTX -> option labelTY)
@@ -944,7 +944,7 @@ Context
   a [valid_state] and [valid_message] for the original VLSM.
 *)
 Definition self_validator_vlsm_prop :=
-  forall (l : label) (s : state) (om : option message),
+  forall (l : label _) (s : state _) (om : option message),
     input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
     input_valid X l (s, om).
 

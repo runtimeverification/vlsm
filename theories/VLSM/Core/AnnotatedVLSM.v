@@ -50,27 +50,27 @@ Qed.
 
 Context
   (annotated_constraint :
-    @label _ annotated_type -> annotated_state * option message -> Prop)
+    label annotated_type -> annotated_state * option message -> Prop)
   (annotated_transition_state :
-    @label _ annotated_type -> annotated_state * option message -> annotation)
+    label annotated_type -> annotated_state * option message -> annotation)
   .
 
 Definition annotated_valid
-  (l : @label _ annotated_type)
+  (l : label annotated_type)
   (som : annotated_state * option message)
   : Prop :=
   vvalid X l (original_state som.1, som.2) /\
   annotated_constraint l som.
 
 Definition annotated_transition
-  (l : @label _ annotated_type)
+  (l : label annotated_type)
   (som : annotated_state * option message)
   : annotated_state * option message :=
   let (s', om') := vtransition X l (original_state som.1, som.2) in
   ({| original_state := s'; state_annotation := annotated_transition_state l som |}, om').
 
 Definition annotated_vlsm_machine : VLSMMachine annotated_type :=
-  {| initial_state_prop := fun s : @state _ annotated_type => annotated_initial_state_prop s
+  {| initial_state_prop := fun s : state annotated_type => annotated_initial_state_prop s
   ; initial_message_prop := fun m : message => vinitial_message_prop X m
   ; valid := annotated_valid
   ; transition := annotated_transition
@@ -107,7 +107,7 @@ Proof.
   by destruct item.
 Qed.
 
-Definition annotate_trace_from (sa : @state _ annotated_type) (tr : list (vtransition_item X))
+Definition annotate_trace_from (sa : state annotated_type) (tr : list (vtransition_item X))
   : list (@transition_item _ annotated_type) :=
   fold_right annotate_trace_item (fun sa => []) tr sa.
 
@@ -183,10 +183,10 @@ Context
   (initial_annotation_prop : annotation -> Prop)
   `{Inhabited (sig initial_annotation_prop)}
   (annotated_constraint :
-    @label _ (annotated_type X annotation) ->
+    label (annotated_type X annotation) ->
       annotated_state X annotation  * option message -> Prop)
   (annotated_transition_state :
-    @label _ (annotated_type X annotation) ->
+    label (annotated_type X annotation) ->
       annotated_state X annotation * option message -> annotation)
   (AnnotatedX : VLSM message :=
     annotated_vlsm X annotation initial_annotation_prop annotated_constraint
@@ -218,10 +218,10 @@ Context
   (initial_annotation_prop : annotation -> Prop)
   `{Inhabited (sig initial_annotation_prop)}
   (annotated_constraint :
-    @label _ (annotated_type Free annotation) ->
+    label (annotated_type Free annotation) ->
       annotated_state Free annotation  * option message -> Prop)
   (annotated_transition_state :
-    @label _ (annotated_type Free annotation) ->
+    label (annotated_type Free annotation) ->
       annotated_state Free annotation * option message -> annotation)
   (AnnotatedFree : VLSM message :=
     annotated_vlsm Free annotation initial_annotation_prop annotated_constraint

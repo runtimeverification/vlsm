@@ -316,7 +316,7 @@ Context
 *)
 Definition proper_fixed_equivocator_descriptors
   (eqv_descriptors : equivocator_descriptors IM)
-  (s : state)
+  (s : state _)
   : Prop
   := proper_equivocator_descriptors IM eqv_descriptors s /\
     forall i, i ∉ equivocating -> eqv_descriptors i = Existing 0.
