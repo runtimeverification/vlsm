@@ -26,6 +26,9 @@ Class VLSMType (message : Type) : Type :=
   label : Type;
 }.
 
+Arguments state {_} _.
+Arguments label {_} _.
+
 (** *** VLSM class definition
 
   The [VLSMMachine] class is parameterized by a [VLSMType], and contains the
@@ -42,7 +45,7 @@ Class VLSMType (message : Type) : Type :=
 Class VLSMMachine {message : Type} (vtype : VLSMType message) : Type :=
 {
   initial_state_prop : state -> Prop;
-  initial_state : Type := {s : state | initial_state_prop s};
+  initial_state : Type := {s : state _ | initial_state_prop s};
   s0 : Inhabited initial_state;
   initial_message_prop : message -> Prop;
   initial_message : Type := {m : message | initial_message_prop m};
@@ -203,10 +206,10 @@ Definition finite_trace_last_output
 
 Definition finite_trace_nth
   (si : state) (tr : list transition_item)
-  : nat -> option state :=
+  : nat -> option (state _) :=
 nth_error (si :: List.map destination tr).
 
-Definition trace_last (tr : Trace) : option state
+Definition trace_last (tr : Trace) : option (state _)
   :=
     match tr with
     | Finite s ls => Some (finite_trace_last s ls)
@@ -219,7 +222,7 @@ Definition trace_last (tr : Trace) : option state
   states in the transition list/stream to the initial state of the trace.
 *)
 Definition trace_nth (tr : Trace)
-  : nat -> option state :=
+  : nat -> option (state _) :=
   fun (n : nat) =>
     match tr with
     | Finite s ls => finite_trace_nth s ls n
@@ -391,8 +394,8 @@ Context
 
 Definition type := vtype vlsm.
 Definition machine := vmachine vlsm.
-Definition vstate := @state _ type.
-Definition vlabel := @label _ type.
+Definition vstate := state type.
+Definition vlabel := label type.
 Definition vinitial_state_prop := @initial_state_prop _ _ machine.
 Definition vinitial_state := @initial_state _ _ machine.
 Definition vinitial_message_prop := @initial_message_prop _ _ machine.
@@ -497,10 +500,10 @@ Definition valid_message_prop (m : message) :=
   exists s : state, valid_state_message_prop s (Some m).
 
 Definition valid_state : Type :=
-  { s : state | valid_state_prop s }.
+  {s : state _ | valid_state_prop s}.
 
 Definition valid_message : Type :=
-  { m : message | valid_message_prop m }.
+  {m : message | valid_message_prop m}.
 
 Lemma initial_state_is_valid
   (s : state)
@@ -2012,7 +2015,7 @@ Proof.
   by apply Ht in Ht0; transitivity s.
 Qed.
 
-Instance eq_equiv : @Equivalence state eq := _.
+Instance eq_equiv : @Equivalence (state _) eq := _.
 
 Lemma in_futures_strict_preserving
   (R : state -> state -> Prop)
