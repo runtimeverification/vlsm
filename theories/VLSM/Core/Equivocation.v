@@ -54,7 +54,7 @@ Class BasicEquivocation
   `{ReachableThreshold validator Cv threshold}
   : Type :=
 {
-  is_equivocating (s : state _) (v : validator) : Prop;
+  is_equivocating (s : state) (v : validator) : Prop;
   is_equivocating_dec : RelDecision is_equivocating;
   (** retrieves a set containing all possible validators for a state *)
   state_validators (s : state) : Cv;
@@ -62,9 +62,9 @@ Class BasicEquivocation
   equivocating_validators (s : state) : Cv :=
     filter (fun v => is_equivocating s v) (state_validators s);
   (** equivocation fault sum: the sum of the weights of equivocating validators *)
-  equivocation_fault (s : state _) : R :=
+  equivocation_fault (s : state) : R :=
     sum_weights (equivocating_validators s);
-  not_heavy (s : state _) : Prop := (equivocation_fault s <= threshold)%R
+  not_heavy (s : state) : Prop := (equivocation_fault s <= threshold)%R
 }.
 
 Lemma eq_equivocating_validators_equivocation_fault
