@@ -230,8 +230,8 @@ Proof.
   split; [| by intros ->].
   generalize dependent s2.
   induction s1; destruct s2; intros; [done | | |].
-  - by destruct H as [_ H]; apply subseteq_empty in H; inversion H.
-  - by destruct H as [H _]; apply subseteq_empty in H; inversion H.
+  - by destruct H as [_ H]; apply list_nil_subseteq in H.
+  - by destruct H as [H _]; apply list_nil_subseteq in H.
   - apply (set_eq_first_equal a a0 s1 s2 LS1 LS2) in H. destruct H; subst.
     apply Sorted_LocallySorted_iff, Sorted_inv in LS1 as [LS1 _].
     apply Sorted_LocallySorted_iff in LS1.

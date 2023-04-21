@@ -140,34 +140,6 @@ Lemma in_not_in : forall A (x y : A) (l : list A),
   x <> y.
 Proof. by itauto congruence. Qed.
 
-Definition inb `{EqDecision A} (x : A) (xs : list A) :=
-  if decide (x ∈ xs) then true else false.
-
-Lemma in_correct `{EqDecision A} :
-  forall (l : list A) (x : A),
-    x ∈ l <-> inb x l = true.
-Proof.
-  intros s msg.
-  unfold inb.
-  by destruct (decide (msg ∈ s)); itauto congruence.
-Qed.
-
-Lemma in_correct_refl `{EqDecision A} :
-  forall (l : list A) (x : A),
-    x ∈ l <-> inb x l.
-Proof.
-  intros s msg.
-  by rewrite in_correct, Is_true_iff_eq_true.
-Qed.
-
-Lemma in_correct' `{EqDecision A} :
-  forall (l : list A) (x : A),
-    x ∉ l <-> inb x l = false.
-Proof.
-  intros s msg.
-  by rewrite in_correct, not_true_iff_false.
-Qed.
-
 Lemma map_list_subseteq {A B} (f : A -> B) :
   forall l1 l2 : list A,
     l1 ⊆ l2 -> map f l1 ⊆ map f l2.
@@ -1438,15 +1410,6 @@ Lemma nodup_append_left {A} :
   forall (l1 l2 : list A), NoDup (l1 ++ l2) -> NoDup l1.
 Proof.
   by intros l1 l2 [? _]%NoDup_app.
-Qed.
-
-Lemma subseteq_empty {A} : forall (l : list A),
-  l ⊆ nil -> l = nil.
-Proof.
-  intros. destruct l; [done |].
-  exfalso.
-  specialize (H a (elem_of_list_here _ _)).
-  by inversion H.
 Qed.
 
 Lemma NoDup_subseteq_length [A : Type]
