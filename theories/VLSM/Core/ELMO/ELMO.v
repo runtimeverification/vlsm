@@ -1527,7 +1527,7 @@ Qed.
 Lemma ELMO_composite_observed_before_send_sizeState_Proper :
   Proper
     (composite_observed_before_send ELMOComponent Message_dependencies ==> lt)
-    (sizeState ∘ state _).
+    (sizeState ∘ state).
 Proof.
   intros x y Hxy; cbn.
   apply composite_observed_before_send_iff in Hxy
@@ -1544,7 +1544,7 @@ Qed.
 #[local] Instance ELMOComponent_tc_composite_observed_before_send_irreflexive :
   Irreflexive (tc_composite_observed_before_send ELMOComponent Message_dependencies).
 Proof.
-  apply (Proper_reflects_Irreflexive _ (<) (sizeState ∘ state _));
+  apply (Proper_reflects_Irreflexive _ (<) (sizeState ∘ state));
     [| typeclasses eauto].
   apply Proper_tc; [typeclasses eauto |].
   by apply ELMO_composite_observed_before_send_sizeState_Proper.
