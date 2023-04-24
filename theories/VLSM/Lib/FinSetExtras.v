@@ -90,8 +90,7 @@ Proof.
     intros a.
     split; intros Ha.
     - by set_solver.
-    - destruct (@decide (a ∈ Y)).
-      apply elem_of_dec_slow.
+    - destruct (decide (a ∈ Y)).
       + by apply elem_of_union; left; itauto.
       + by apply elem_of_union; right; set_solver.
   }
