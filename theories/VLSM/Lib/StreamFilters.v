@@ -177,7 +177,7 @@ Proof.
       apply filtering_subsequence_sorted in Hfs.
       apply monotone_nat_stream_prop_from_successor in Hfs.
       specialize (monotone_nat_stream_rev _ Hfs k' k) as Hle.
-      by feed specialize Hle; lia.
+      by lia.
 Qed.
 
 Lemma filtering_subsequence_prefix_length

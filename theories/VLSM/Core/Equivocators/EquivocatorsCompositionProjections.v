@@ -1620,14 +1620,14 @@ Proof.
         assert (e1 : i = (dexist (projT1 (l item)) Hl)) by (apply dsig_eq; done).
         subst i.
         rewrite equivocator_descriptors_update_eq_rew with (Heq := eq_refl).
-        simpl in e. replace e with (eq_refl (projT1 (l item))); [done |].
+        simpl in e. replace e with (@eq_refl _ (projT1 (l item))); [done |].
         by apply Eqdep_dec.UIP_dec.
       * by rewrite! equivocator_descriptors_update_neq; [| | intros ->].
       * rewrite equivocator_descriptors_update_eq_rew with (Heq := e).
         assert (e1 : i = (dexist (projT1 (l item)) Hl)) by (apply dsig_eq; done).
         subst i.
         rewrite equivocator_descriptors_update_eq_rew with (Heq := eq_refl).
-        simpl in e. replace e with (eq_refl (projT1 (l item))); [done |].
+        simpl in e. replace e with (@eq_refl _ (projT1 (l item))); [done |].
         by apply Eqdep_dec.UIP_dec.
       * by rewrite! equivocator_descriptors_update_neq; [| | intros ->].
     + destruct oitem' as [item' |]

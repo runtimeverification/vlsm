@@ -140,34 +140,6 @@ Lemma in_not_in : forall A (x y : A) (l : list A),
   x <> y.
 Proof. by itauto congruence. Qed.
 
-Definition inb `{EqDecision A} (x : A) (xs : list A) :=
-  if decide (x ∈ xs) then true else false.
-
-Lemma in_correct `{EqDecision A} :
-  forall (l : list A) (x : A),
-    x ∈ l <-> inb x l = true.
-Proof.
-  intros s msg.
-  unfold inb.
-  by destruct (decide (msg ∈ s)); itauto congruence.
-Qed.
-
-Lemma in_correct_refl `{EqDecision A} :
-  forall (l : list A) (x : A),
-    x ∈ l <-> inb x l.
-Proof.
-  intros s msg.
-  by rewrite in_correct, Is_true_iff_eq_true.
-Qed.
-
-Lemma in_correct' `{EqDecision A} :
-  forall (l : list A) (x : A),
-    x ∉ l <-> inb x l = false.
-Proof.
-  intros s msg.
-  by rewrite in_correct, not_true_iff_false.
-Qed.
-
 Lemma map_list_subseteq {A B} (f : A -> B) :
   forall l1 l2 : list A,
     l1 ⊆ l2 -> map f l1 ⊆ map f l2.
@@ -383,40 +355,13 @@ Proof.
   by apply list_prefix_prefix.
 Qed.
 
-Definition Forall_hd
-  {A : Type}
-  {P : A -> Prop}
-  {a : A}
-  {l : list A}
-  (Hs : Forall P (a :: l))
-  : P a.
-Proof.
-  by inversion Hs.
-Defined.
-
-Definition Forall_tl
-  {A : Type}
-  {P : A -> Prop}
-  {a : A}
-  {l : list A}
-  (Hs : Forall P (a :: l))
-  : Forall P l.
-Proof.
-  by inversion Hs.
-Defined.
-
 Fixpoint list_annotate
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  : list (dsig P).
-Proof.
-  destruct l as [| a l].
-  - by exact [].
-  - by exact ((dexist a (Forall_hd Hs)) :: list_annotate A P Pdec l (Forall_tl Hs)).
-Defined.
+  {A : Type} (P : A -> Prop) {Pdec : forall a, Decision (P a)}
+  (l : list A) : Forall P l -> list (dsig P) :=
+match l with
+| [] => fun _ => []
+| h :: t => fun Hs => dexist h (Forall_inv Hs) :: list_annotate P t (Forall_inv_tail Hs)
+end.
 
 Lemma list_annotate_length
   {A : Type}
@@ -462,16 +407,6 @@ Proof.
   by subst.
 Qed.
 
-Lemma list_annotate_unroll
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (a : A)
-  (l : list A)
-  (Hs : Forall P (a :: l))
-  : list_annotate P (a :: l) Hs = dexist a (Forall_hd Hs) ::  list_annotate P l (Forall_tl Hs).
-Proof. done. Qed.
-
 Lemma list_annotate_app
   {A : Type}
   (P : A -> Prop)
@@ -501,10 +436,10 @@ Proof.
   generalize dependent l.
   induction n; intros [| a l] Hs.
   - by exists None.
-  - inversion Hs; subst. exists (Some (dexist a (Forall_hd Hs))).
-    by rewrite list_annotate_unroll.
+  - inversion Hs; subst.
+    by exists (Some (dexist a (Forall_inv Hs))).
   - by exists None.
-  - by rewrite list_annotate_unroll; eauto.
+  - by cbn; eauto.
 Qed.
 
 Fixpoint nth_error_filter_index
@@ -563,35 +498,41 @@ Proof.
     by specialize (IHl n0 eq_refl n3 eq_refl); lia.
 Qed.
 
-(* TODO(wkolowski): Forall_filter, Forall_hd and Forall_tl should end with Qed! *)
-Fixpoint Forall_filter
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a : A, Decision (P a)}
-  (l : list A) : Forall P (filter P l).
+Lemma Forall_filter :
+  forall {A : Type} (P : A -> Prop) {Pdec : forall a : A, Decision (P a)} (l : list A),
+    Forall P (filter P l).
 Proof.
-  destruct l; cbn; [done |].
-  by destruct (decide (P a)); eauto.
-Defined.
+  induction l as [| h t]; cbn; [by constructor |].
+  by destruct (decide (P h)); [constructor |].
+Qed.
 
 (**
   Produces the sublist of elements of a list filtered by a decidable predicate
   each of them paired with the proof that it satisfies the predicate.
 *)
-Definition filter_annotate
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a : A, Decision (P a)}
+Fixpoint filter_annotate
+  {A : Type} (P : A -> Prop) {Pdec : forall a : A, Decision (P a)}
   (l : list A) : list (dsig P) :=
-  list_annotate _ _ (Forall_filter P l).
+match l with
+| [] => []
+| h :: t =>
+  match decide (P h) with
+  | left p => dexist h p :: filter_annotate P t
+  | right _ => filter_annotate P t
+  end
+end.
 
-Definition filter_annotate_length
+Lemma filter_annotate_length
   {A : Type}
   (P : A -> Prop)
   {Pdec : forall a : A, Decision (P a)}
   (l : list A)
-  : length (filter_annotate P l) = length (filter P l) :=
-  list_annotate_length _ _ (Forall_filter P l).
+  : length (filter_annotate P l) = length (filter P l).
+Proof.
+  induction l as [| h t]; cbn; [done |].
+  destruct (decide (P h)); cbn; [| done].
+  by rewrite IHt.
+Qed.
 
 Lemma filter_annotate_unroll
   {A : Type}
@@ -616,8 +557,9 @@ Lemma filter_annotate_app
   (l1 l2 : list A)
   : filter_annotate P (l1 ++ l2) = filter_annotate P l1 ++ filter_annotate P l2.
 Proof.
-  induction l1; [done |].
-  by simpl; rewrite! filter_annotate_unroll, IHl1; case_decide.
+  induction l1; cbn; [done |].
+  destruct (decide (P a)); cbn; [| done].
+  by rewrite IHl1.
 Qed.
 
 (**
@@ -1468,15 +1410,6 @@ Lemma nodup_append_left {A} :
   forall (l1 l2 : list A), NoDup (l1 ++ l2) -> NoDup l1.
 Proof.
   by intros l1 l2 [? _]%NoDup_app.
-Qed.
-
-Lemma subseteq_empty {A} : forall (l : list A),
-  l ⊆ nil -> l = nil.
-Proof.
-  intros. destruct l; [done |].
-  exfalso.
-  specialize (H a (elem_of_list_here _ _)).
-  by inversion H.
 Qed.
 
 Lemma NoDup_subseteq_length [A : Type]
