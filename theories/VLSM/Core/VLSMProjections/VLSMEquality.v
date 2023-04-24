@@ -141,7 +141,7 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_can_produce
-  (s : state _)
+  (s : state vtype)
   (om : option message)
   : option_can_produce X s om <-> option_can_produce Y s om.
 Proof.

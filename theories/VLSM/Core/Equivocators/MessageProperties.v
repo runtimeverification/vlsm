@@ -62,7 +62,7 @@ Lemma preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
   (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs btr)
   (bitem : vtransition_item equivocator_vlsm)
   (Hitem : bitem ∈ btr)
-  (sn : state _)
+  (sn : state (type X))
   (Hnew : l bitem = Spawn sn)
   : input bitem = None /\ output bitem = None /\
     exists

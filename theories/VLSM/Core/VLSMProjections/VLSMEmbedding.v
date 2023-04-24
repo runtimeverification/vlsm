@@ -132,7 +132,7 @@ Record VLSM_embedding : Prop :=
 }.
 
 Definition weak_embedding_valid_preservation : Prop :=
-  forall (l : label _) (s : state _) (om : option message)
+  forall (l : label (vtype X)) (s : state (vtype X)) (om : option message)
     (Hv : input_valid X l (s, om))
     (HsY : valid_state_prop Y (state_project s))
     (HomY : option_valid_message_prop Y om),
@@ -147,7 +147,7 @@ Proof.
 Qed.
 
 Definition strong_embedding_valid_preservation : Prop :=
-  forall (l : label _) (s : state _) (om : option message),
+  forall (l : label (vtype X)) (s : state (vtype X)) (om : option message),
     vvalid X l (s, om) -> vvalid Y (label_project l) ((state_project s), om).
 
 Lemma strong_projection_valid_preservation_from_full
@@ -211,7 +211,7 @@ Proof.
 Qed.
 
 Definition weak_embedding_initial_message_preservation : Prop :=
-  forall (l : label _) (s : state _) (m : message)
+  forall (l : label (vtype X)) (s : state (vtype X)) (m : message)
     (Hv : input_valid X l (s, Some m))
     (HsY : valid_state_prop Y (state_project s))
     (HmX : vinitial_message_prop X m),
@@ -374,7 +374,7 @@ Proof.
 Qed.
 
 Lemma VLSM_weak_embedding_can_produce
-  (s : state _)
+  (s : state (vtype X))
   (om : option message)
   : option_can_produce X s om -> option_can_produce Y (state_project s) om.
 Proof.
@@ -502,7 +502,7 @@ Definition VLSM_embedding_input_valid
 
 Definition VLSM_embedding_can_produce
   : forall
-    (s : state _)
+    (s : state (vtype X))
     (om : option message),
     option_can_produce X s om -> option_can_produce Y (state_project s) om
   := VLSM_weak_embedding_can_produce VLSM_embedding_weaken.

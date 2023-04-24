@@ -516,8 +516,8 @@ Qed.
 
 Lemma constraint_subsumption_input_valid
   (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
-  (l : label _)
-  (s : state _)
+  (l : label (type X1))
+  (s : state (type X1))
   (om : option message)
   (Hv : input_valid X1 l (s, om))
   : vvalid X2 l (s, om).
@@ -527,7 +527,7 @@ Qed.
 
 Lemma constraint_subsumption_valid_state_message_preservation
   (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
-  (s : state _)
+  (s : state (type X1))
   (om : option message)
   (Hps : valid_state_message_prop X1 s om)
   : valid_state_message_prop X2 s om.
@@ -552,8 +552,8 @@ Qed.
 
 Lemma preloaded_constraint_subsumption_input_valid
   (Hpre_subsumption : preloaded_constraint_subsumption constraint1 constraint2)
-  (l : label _)
-  (s : state _)
+  (l : label (type X1))
+  (s : state (type X1))
   (om : option message)
   (Hv : input_valid (pre_loaded_with_all_messages_vlsm X1) l (s, om))
   : vvalid X2 l (s, om).
@@ -1241,7 +1241,7 @@ Qed.
   component <<i>>.
 *)
 Lemma irrelevant_components_one
-  (s : state _)
+  (s : state (composite_type IM))
   (ai : composite_plan_item IM)
   (i : index)
   (Hdif : i <> projT1 (label_a ai)) :
@@ -1270,7 +1270,7 @@ Qed.
   multiple transitions.
 *)
 Lemma irrelevant_components
-  (s : state _)
+  (s : state (composite_type IM))
   (a : composite_plan IM)
   (a_indices := List.map (@projT1 _ _) (List.map (@label_a _ _) a))
   (i : index)
