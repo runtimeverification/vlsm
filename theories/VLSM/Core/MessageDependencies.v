@@ -1,6 +1,6 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble ListExtras ListFinSetExtras.
+From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 

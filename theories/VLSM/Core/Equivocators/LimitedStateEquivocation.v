@@ -224,12 +224,12 @@ Proof.
   apply equivocators_limited_valid_trace_is_fixed in Hfixed_tr.
   apply valid_trace_last_pstate in Hfixed_tr as Hfixed_last.
   apply valid_trace_forget_last in Hfixed_tr.
-  specialize (fixed_equivocators_valid_trace_project IM
-    (equivocating_validators (finite_trace_last is tr)) final_descriptors is tr) as Hpr.
-  feed specialize Hpr; [| done |].
+  destruct (fixed_equivocators_valid_trace_project IM
+    (equivocating_validators (finite_trace_last is tr)) final_descriptors is tr)
+    as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_fixed).
   - by eapply not_equivocating_equivocator_descriptors_proper_fixed.
-  - destruct Hpr as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_fixed).
-    exists trX, initial_descriptors.
+  - done.
+  - exists trX, initial_descriptors.
     split_and!; [by apply Hinitial_descriptors | done | done |].
     exists (equivocating_validators (finite_trace_last is tr)).
     split.

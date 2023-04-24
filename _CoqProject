@@ -13,16 +13,12 @@ theories/VLSM/Lib/ListExtras.v
 theories/VLSM/Lib/StdppExtras.v
 theories/VLSM/Lib/StdppListSet.v
 theories/VLSM/Lib/ListSetExtras.v
-theories/VLSM/Lib/ListFinSetExtras.v
 theories/VLSM/Lib/SortedLists.v
 theories/VLSM/Lib/FinSetExtras.v
-theories/VLSM/Lib/StdppListFinSet.v
-theories/VLSM/Lib/FinExtras.v
 theories/VLSM/Lib/TopSort.v
 theories/VLSM/Lib/NeList.v
 theories/VLSM/Lib/StreamExtras.v
 theories/VLSM/Lib/StreamFilters.v
-theories/VLSM/Lib/Temporal.v
 theories/VLSM/Lib/Traces.v
 theories/VLSM/Lib/TraceProperties.v
 theories/VLSM/Lib/TraceClassicalProperties.v
