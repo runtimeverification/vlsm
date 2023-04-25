@@ -392,10 +392,9 @@ Context
   or [VLSMType]. Functions [machine] and [type] below achieve this precise purpose.
 *)
 
-Definition type := vtype vlsm.
 Definition machine := vmachine vlsm.
-Definition vstate := state type.
-Definition vlabel := label type.
+Definition vstate := state (vtype vlsm).
+Definition vlabel := label (vtype vlsm).
 Definition vinitial_state_prop := @initial_state_prop _ _ machine.
 Definition vinitial_state := @initial_state _ _ machine.
 Definition vinitial_message_prop := @initial_message_prop _ _ machine.
@@ -405,8 +404,8 @@ Definition vs0 := @inhabitant _ (@s0 _ _ machine).
 Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ machine.
 Definition vtransition := @transition _ _ machine.
 Definition vvalid := @valid _ _ machine.
-Definition vtransition_item := @transition_item _ type.
-Definition vTrace := @Trace _ type.
+Definition vtransition_item := @transition_item _ (vtype vlsm).
+Definition vTrace := @Trace _ (vtype vlsm).
 
 End sec_vlsm_projections.
 
@@ -427,7 +426,7 @@ Section sec_VLSM.
 Context
   {message : Type}
   (X : VLSM message)
-  (TypeX := type X)
+  (TypeX := vtype X)
   (MachineX := machine X)
   .
 
@@ -2474,8 +2473,8 @@ Defined.
 
 Class TraceWithStart
   {message} {X : VLSM message}
-  (start : @state message (type X))
-  (trace_prop : list (transition_item (type X)) -> Prop)
+  (start : @state message (vtype X))
+  (trace_prop : list (transition_item (vtype X)) -> Prop)
   : Prop :=
 {
   valid_trace_first_pstate :
@@ -2516,7 +2515,7 @@ Context
   .
 
 Definition pre_loaded_with_all_messages_vlsm_machine
-  : VLSMMachine (type X)
+  : VLSMMachine (vtype X)
   :=
   {| initial_state_prop := vinitial_state_prop X
    ; initial_message_prop := fun message => True

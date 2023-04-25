@@ -300,7 +300,7 @@ Qed.
 
 Definition replayed_trace_from full_replay_state is tr :=
   replayed_initial_state_from full_replay_state is ++
-  pre_VLSM_embedding_finite_trace_project (type FreeSubE) (type FreeE)
+  pre_VLSM_embedding_finite_trace_project (vtype FreeSubE) (vtype FreeE)
     (lift_equivocators_sub_label_to full_replay_state)
     (lift_equivocators_sub_state_to full_replay_state) tr.
 
