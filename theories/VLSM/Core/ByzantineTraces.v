@@ -203,7 +203,7 @@ Lemma alt_option_valid_message
     : option_valid_message_prop Alt om.
 Proof.
   destruct om as [m |]; [| apply option_valid_message_None].
-  pose (s := ``(vs0 Alt) : state (vtype Alt)).
+  pose (s := ``(vs0 Alt) : vstate Alt).
   exists s.
   assert (valid_state_message_prop Alt s None) as Hs
       by (apply valid_initial_state, proj2_sig).
@@ -233,7 +233,7 @@ Definition lifted_alt_state
   a [valid_state] of <<Alt>>.
 *)
 Lemma preloaded_alt_valid_state
-    (sj : state (type PreLoaded))
+    (sj : vstate PreLoaded)
     (om : option message)
     (Hp : valid_state_message_prop PreLoaded sj om)
     : valid_state_prop Alt (lifted_alt_state sj).

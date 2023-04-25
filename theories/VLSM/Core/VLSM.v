@@ -2430,9 +2430,9 @@ Arguments extend_right_finite_trace_from_to [message] (X) [s1 s2 ts] (Ht12) [l3 
 
 Class TraceWithLast
   (base_prop : forall {message} (X : VLSM message),
-    state (type X) -> list transition_item -> Prop)
+    vstate X -> list transition_item -> Prop)
   (trace_prop : forall {message} (X : VLSM message),
-    state (type X) -> state (type X) -> list transition_item -> Prop)
+    vstate X -> vstate X -> list transition_item -> Prop)
   : Prop :=
 {
   valid_trace_add_last : forall [msg] [X : VLSM msg] [s f tr],
@@ -2554,7 +2554,7 @@ Proof.
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_message_preservation
-  (s : state (type X))
+  (s : vstate X)
   (om : option message)
   (Hps : valid_state_message_prop X s om)
   : valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
@@ -2565,7 +2565,7 @@ Proof.
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_prop
-  (s : state (type X))
+  (s : vstate X)
   (Hps : valid_state_prop X s)
   : valid_state_prop pre_loaded_with_all_messages_vlsm s.
 Proof.
@@ -2583,14 +2583,14 @@ Proof.
   by apply pre_loaded_with_all_messages_message_valid_initial_state_message.
 Qed.
 
-Inductive preloaded_valid_state_prop : state (type X) -> Prop :=
+Inductive preloaded_valid_state_prop : vstate X -> Prop :=
 | preloaded_valid_initial_state
-    (s : state (type X))
+    (s : vstate X)
     (Hs : initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) s) :
        preloaded_valid_state_prop s
 | preloaded_protocol_generated
-    (l : label (type X))
-    (s : state (type X))
+    (l : vlabel X)
+    (s : vstate X)
     (Hps : preloaded_valid_state_prop s)
     (om : option message)
     (Hv : valid (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om))
@@ -2686,10 +2686,10 @@ End sec_pre_loaded_with_all_messages_vlsm.
 
 Lemma non_empty_valid_trace_from_can_produce
   `(X : VLSM message)
-  (s : state (type X))
+  (s : vstate X)
   (m : message)
   : can_produce X s m
-  <-> exists (is : state (type X)) (tr : list transition_item) (item : transition_item),
+  <-> exists (is : vstate X) (tr : list transition_item) (item : transition_item),
     finite_valid_trace X is tr /\
     last_error tr = Some item /\
     destination item = s /\ output item = Some m.
@@ -2780,7 +2780,7 @@ Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
   vt_transition : vtransition X l (s1, iom) = (s2, oom);
 }.
 
-Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : state (type X)) : Prop :=
+Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : vstate X) : Prop :=
 | transition_next :
     forall l iom oom (Ht : ValidTransition X l s1 iom s2 oom),
       ValidTransitionNext X s1 s2.

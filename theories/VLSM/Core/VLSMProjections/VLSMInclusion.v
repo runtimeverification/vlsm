@@ -479,7 +479,7 @@ Proof.
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from
-  (from : state (type X)) (tr : list transition_item)
+  (from : vstate X) (tr : list transition_item)
   : finite_valid_trace_from X from tr ->
     finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) from tr.
 Proof.
@@ -488,7 +488,7 @@ Proof.
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from_to
-  (from to : state (type X)) (tr : list transition_item)
+  (from to : vstate X) (tr : list transition_item)
   : finite_valid_trace_from_to X from to tr ->
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) from to tr.
 Proof.

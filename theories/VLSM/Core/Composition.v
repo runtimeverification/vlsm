@@ -516,8 +516,8 @@ Qed.
 
 Lemma constraint_subsumption_input_valid
   (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
-  (l : label (type X1))
-  (s : state (type X1))
+  (l : vlabel X1)
+  (s : vstate X1)
   (om : option message)
   (Hv : input_valid X1 l (s, om))
   : vvalid X2 l (s, om).
@@ -527,7 +527,7 @@ Qed.
 
 Lemma constraint_subsumption_valid_state_message_preservation
   (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
-  (s : state (type X1))
+  (s : vstate X1)
   (om : option message)
   (Hps : valid_state_message_prop X1 s om)
   : valid_state_message_prop X2 s om.
@@ -552,8 +552,8 @@ Qed.
 
 Lemma preloaded_constraint_subsumption_input_valid
   (Hpre_subsumption : preloaded_constraint_subsumption constraint1 constraint2)
-  (l : label (type X1))
-  (s : state (type X1))
+  (l : vlabel X1)
+  (s : vstate X1)
   (om : option message)
   (Hv : input_valid (pre_loaded_with_all_messages_vlsm X1) l (s, om))
   : vvalid X2 l (s, om).

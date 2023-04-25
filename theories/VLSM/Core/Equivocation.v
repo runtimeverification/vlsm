@@ -209,12 +209,12 @@ Definition negate_oracle (o : state_message_oracle) : state_message_oracle :=
 Definition specialized_selected_message_exists_in_all_traces
   (X : VLSM message)
   (message_selector : message -> transition_item -> Prop)
-  (s : state (type X))
+  (s : vstate X)
   (m : message)
   : Prop
   :=
   forall
-  (start : state (type X))
+  (start : vstate X)
   (tr : list transition_item)
   (Htr : finite_valid_trace_init_to X start s tr),
   trace_has_message message_selector m tr.
@@ -225,19 +225,19 @@ Definition selected_message_exists_in_all_preloaded_traces
 Definition specialized_selected_message_exists_in_some_traces
   (X : VLSM message)
   (message_selector : message -> transition_item -> Prop)
-  (s : state (type X))
+  (s : vstate X)
   (m : message)
   : Prop
   :=
   exists
-  (start : state (type X))
+  (start : vstate X)
   (tr : list transition_item)
   (Htr : finite_valid_trace_init_to X start s tr),
   trace_has_message message_selector m tr.
 
 Definition selected_message_exists_in_some_preloaded_traces : forall
   (message_selector : message -> transition_item -> Prop)
-  (s : state (type pre_vlsm))
+  (s : vstate pre_vlsm)
   (m : message),
     Prop
   := specialized_selected_message_exists_in_some_traces pre_vlsm.
@@ -245,12 +245,12 @@ Definition selected_message_exists_in_some_preloaded_traces : forall
 Definition specialized_selected_message_exists_in_no_trace
   (X : VLSM message)
   (message_selector : message -> transition_item -> Prop)
-  (s : state (type X))
+  (s : vstate X)
   (m : message)
   : Prop
   :=
   forall
-  (start : state (type X))
+  (start : vstate X)
   (tr : list transition_item)
   (Htr : finite_valid_trace_init_to X start s tr),
   ~ trace_has_message message_selector m tr.
@@ -261,7 +261,7 @@ Definition selected_message_exists_in_no_preloaded_trace :=
 Lemma selected_message_exists_not_some_iff_no
   (X : VLSM message)
   (message_selector : message -> transition_item -> Prop)
-  (s : state (type X))
+  (s : vstate X)
   (m : message)
   : ~ specialized_selected_message_exists_in_some_traces X message_selector s m
     <-> specialized_selected_message_exists_in_no_trace X message_selector s m.
@@ -273,7 +273,7 @@ Qed.
 
 Lemma selected_message_exists_preloaded_not_some_iff_no
   (message_selector : message -> transition_item -> Prop)
-  (s : state (type pre_vlsm))
+  (s : vstate pre_vlsm)
   (m : message)
   : ~ selected_message_exists_in_some_preloaded_traces message_selector s m
     <-> selected_message_exists_in_no_preloaded_trace message_selector s m.
@@ -285,9 +285,9 @@ Qed.
 Lemma specialized_selected_message_exists_in_some_traces_from
   (X : VLSM message)
   (message_selector : message -> transition_item -> Prop)
-  (s : state (type X))
+  (s : vstate X)
   (m : message)
-  (start : state (type X))
+  (start : vstate X)
   (tr : list transition_item)
   (Htr : finite_valid_trace_from_to X start s tr)
   (Hsome : trace_has_message message_selector m tr)
@@ -349,7 +349,7 @@ Qed.
 Definition all_traces_have_message_prop
   (message_selector : message -> transition_item -> Prop)
   (oracle : state_message_oracle)
-  (s : state (type vlsm))
+  (s : vstate vlsm)
   (m : message)
   : Prop
   :=
@@ -358,7 +358,7 @@ Definition all_traces_have_message_prop
 Definition no_traces_have_message_prop
   (message_selector : message -> transition_item -> Prop)
   (oracle : state_message_oracle)
-  (s : state (type vlsm))
+  (s : vstate vlsm)
   (m : message)
   : Prop
   :=
@@ -369,10 +369,10 @@ Record oracle_tracewise_props
   (oracle : state_message_oracle) : Prop :=
 {
   proper_oracle_holds :
-    forall (s : state (type pre_vlsm)) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    forall (s : vstate pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
       all_traces_have_message_prop message_selector oracle s m;
   proper_not_oracle_holds :
-    forall (s : state (type pre_vlsm)) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    forall (s : vstate pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
       no_traces_have_message_prop message_selector (negate_oracle oracle) s m;
 }.
 
@@ -506,17 +506,17 @@ Qed.
   - *observed* - is either sent or received in the transition.
  *)
 
-Definition has_been_sent_prop : state_message_oracle -> state (type vlsm) -> message -> Prop :=
+Definition has_been_sent_prop : state_message_oracle -> vstate vlsm -> message -> Prop :=
   all_traces_have_message_prop (field_selector output).
 
-Definition has_not_been_sent_prop : state_message_oracle -> state (type vlsm) -> message -> Prop :=
+Definition has_not_been_sent_prop : state_message_oracle -> vstate vlsm -> message -> Prop :=
   no_traces_have_message_prop (field_selector output).
 
-Definition has_been_received_prop : state_message_oracle -> state (type vlsm) -> message -> Prop :=
+Definition has_been_received_prop : state_message_oracle -> vstate vlsm -> message -> Prop :=
   all_traces_have_message_prop (field_selector input).
 
 Definition has_not_been_received_prop
-  : state_message_oracle -> state (type vlsm) -> message -> Prop :=
+  : state_message_oracle -> vstate vlsm -> message -> Prop :=
   no_traces_have_message_prop (field_selector input).
 
 (**
@@ -570,14 +570,14 @@ Proof.
 Qed.
 
 Lemma proper_sent `{HasBeenSentCapability} :
-  forall (s : state (type pre_vlsm)) (Hs : valid_state_prop pre_vlsm s) (m : message),
+  forall (s : vstate pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
     has_been_sent_prop has_been_sent s m.
 Proof.
   by intros; apply has_been_sent_tracewise_props.
 Qed.
 
 Lemma proper_not_sent `{HasBeenSentCapability} :
-  forall (s : state (type pre_vlsm)) (Hs : valid_state_prop pre_vlsm s) (m : message),
+  forall (s : vstate pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
     has_not_been_sent_prop has_not_been_sent s m.
 Proof.
   by intros; apply has_been_sent_tracewise_props.
@@ -585,7 +585,7 @@ Qed.
 
 (** Reverse implication for 'selected_messages_consistency_prop' always holds. *)
 Lemma consistency_from_valid_state_proj2
-  (s : state (type pre_vlsm))
+  (s : vstate pre_vlsm)
   (Hs : valid_state_prop pre_vlsm s)
   (m : message)
   (selector : message -> transition_item -> Prop)
@@ -600,7 +600,7 @@ Qed.
 
 Lemma has_been_sent_consistency
   `{HasBeenSentCapability}
-  (s : state (type pre_vlsm))
+  (s : vstate pre_vlsm)
   (Hs : valid_state_prop pre_vlsm s)
   (m : message)
   : selected_messages_consistency_prop (field_selector output) s m.
@@ -616,7 +616,7 @@ Qed.
 
 Lemma can_produce_has_been_sent
   `{HasBeenSentCapability}
-  (s : state (type pre_vlsm))
+  (s : vstate pre_vlsm)
   (m : message)
   (Hsm : can_produce pre_vlsm s m)
   : has_been_sent s m.
@@ -641,7 +641,7 @@ Qed.
 *)
 Lemma specialized_proper_sent
   `{HasBeenSentCapability}
-  (s : state (type vlsm))
+  (s : vstate vlsm)
   (Hs : valid_state_prop vlsm s)
   (m : message)
   (Hsome : specialized_selected_message_exists_in_some_traces vlsm (field_selector output) s m)
@@ -668,7 +668,7 @@ Qed.
 *)
 Lemma specialized_proper_sent_rev
   `{HasBeenSentCapability}
-  (s : state (type vlsm))
+  (s : vstate vlsm)
   (Hs : valid_state_prop vlsm s)
   (m : message)
   (Hsm : has_been_sent s m)
@@ -690,11 +690,11 @@ Qed.
 Lemma has_been_sent_consistency_proper_not_sent
   (has_been_sent : state_message_oracle)
   (has_been_sent_dec : RelDecision has_been_sent)
-  (s : state (type vlsm))
+  (s : vstate vlsm)
   (m : message)
   (proper_sent : has_been_sent_prop has_been_sent s m)
   (has_not_been_sent
-    := fun (s : state (type vlsm)) (m : message) => ~ has_been_sent s m)
+    := fun (s : vstate vlsm) (m : message) => ~ has_been_sent s m)
   (Hconsistency : selected_messages_consistency_prop (field_selector output) s m)
   : has_not_been_sent_prop has_not_been_sent s m.
 Proof.
@@ -743,14 +743,14 @@ Proof.
 Qed.
 
 Lemma proper_received `{HasBeenReceivedCapability} :
-  forall (s : state (type pre_vlsm)) (Hs : valid_state_prop pre_vlsm s) (m : message),
+  forall (s : vstate pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
     has_been_received_prop has_been_received s m.
 Proof.
   by apply proper_oracle_holds, has_been_received_tracewise_props.
 Qed.
 
 Lemma proper_not_received `{HasBeenReceivedCapability} :
-  forall (s : state (type pre_vlsm)) (Hs : valid_state_prop pre_vlsm s) (m : message),
+  forall (s : vstate pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
     has_not_been_received_prop has_not_been_received s m.
 Proof.
   by apply proper_not_oracle_holds, has_been_received_tracewise_props.
@@ -758,7 +758,7 @@ Qed.
 
 Lemma has_been_received_consistency
   `{HasBeenReceivedCapability}
-  (s : state (type pre_vlsm))
+  (s : vstate pre_vlsm)
   (Hs : valid_state_prop pre_vlsm s)
   (m : message)
   : selected_messages_consistency_prop (field_selector input) s m.
@@ -775,11 +775,11 @@ Qed.
 Lemma has_been_received_consistency_proper_not_received
   (has_been_received : state_message_oracle)
   (has_been_received_dec : RelDecision has_been_received)
-  (s : state (type vlsm))
+  (s : vstate vlsm)
   (m : message)
   (proper_received : has_been_received_prop has_been_received s m)
   (has_not_been_received
-    := fun (s : state (type vlsm)) (m : message) => ~ has_been_received s m)
+    := fun (s : vstate vlsm) (m : message) => ~ has_been_received s m)
   (Hconsistency : selected_messages_consistency_prop (field_selector input) s m)
   : has_not_been_received_prop has_not_been_received s m.
 Proof.
@@ -895,7 +895,7 @@ Proof.
 Qed.
 
 Lemma prove_none_have_message_from_stepwise :
-  forall (s : state (type (pre_loaded_with_all_messages_vlsm vlsm)))
+  forall (s : vstate (pre_loaded_with_all_messages_vlsm vlsm))
          (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
          (m : message),
     no_traces_have_message_prop vlsm selector (fun s m => ~ oracle s m) s m.
@@ -913,7 +913,7 @@ Qed.
 
 Lemma selected_messages_consistency_prop_from_stepwise
     (oracle_dec : RelDecision oracle)
-    (s : state (type (pre_loaded_with_all_messages_vlsm vlsm)))
+    (s : vstate (pre_loaded_with_all_messages_vlsm vlsm))
     (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
     (m : message)
     : selected_messages_consistency_prop vlsm selector s m.
@@ -928,7 +928,7 @@ Proof.
 Qed.
 
 Lemma in_futures_preserving_oracle_from_stepwise :
-  forall (s1 s2 : state (type (pre_loaded_with_all_messages_vlsm vlsm)))
+  forall (s1 s2 : vstate (pre_loaded_with_all_messages_vlsm vlsm))
     (Hfutures : in_futures (pre_loaded_with_all_messages_vlsm vlsm) s1 s2)
     (m : message),
     oracle s1 m -> oracle  s2 m.
@@ -1172,7 +1172,7 @@ Definition has_been_directly_observed_step_update `{HasBeenDirectlyObservedCapab
 
 Lemma proper_directly_observed
   {message} (vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :
-  forall (s : state (type (pre_loaded_with_all_messages_vlsm vlsm))),
+  forall (s : vstate (pre_loaded_with_all_messages_vlsm vlsm)),
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
       all_traces_have_message_prop vlsm item_sends_or_receives (has_been_directly_observed vlsm) s m.
@@ -1183,7 +1183,7 @@ Qed.
 
 Lemma proper_not_directly_observed
   `(vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :
-  forall (s : state (type (pre_loaded_with_all_messages_vlsm vlsm))),
+  forall (s : vstate (pre_loaded_with_all_messages_vlsm vlsm)),
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
     forall m,
       no_traces_have_message_prop vlsm item_sends_or_receives
@@ -1215,7 +1215,7 @@ Definition no_additional_equivocations
   {message : Type}
   (vlsm : VLSM message)
   `{HasBeenDirectlyObservedCapability message vlsm}
-  (s : state (type vlsm))
+  (s : vstate vlsm)
   (m : message)
   : Prop
   :=
@@ -1237,7 +1237,7 @@ Definition no_additional_equivocations_constraint
   (vlsm : VLSM message)
   `{HasBeenDirectlyObservedCapability message vlsm}
   (l : vlabel vlsm)
-  (som : state (type vlsm) * option message)
+  (som : vstate vlsm * option message)
   : Prop
   :=
   let (s, om) := som in
@@ -1254,7 +1254,7 @@ Context
 
 Lemma has_been_directly_observed_sent_received_iff
   `{HasBeenDirectlyObservedCapability message vlsm}
-  (s : state (type (pre_loaded_with_all_messages_vlsm vlsm)))
+  (s : vstate (pre_loaded_with_all_messages_vlsm vlsm))
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
   (m : message)
   : has_been_directly_observed vlsm s m <-> has_been_received vlsm s m \/ has_been_sent vlsm s m.
@@ -1309,7 +1309,7 @@ Qed.
 
 Lemma has_been_directly_observed_consistency
   `{HasBeenDirectlyObservedCapability message vlsm}
-  (s : state (type (pre_loaded_with_all_messages_vlsm vlsm)))
+  (s : vstate (pre_loaded_with_all_messages_vlsm vlsm))
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
   (m : message)
   : selected_messages_consistency_prop vlsm item_sends_or_receives s m.
@@ -1513,7 +1513,7 @@ Lemma sent_can_emit
   [message]
   (X : VLSM message)
   `{HasBeenSentCapability message X}
-  (s : state (type X))
+  (s : vstate X)
   (Hs : valid_state_prop X s)
   (m : message)
   (Hsent : has_been_sent X s m) :
@@ -1540,7 +1540,7 @@ Lemma preloaded_sent_can_emit
   [message]
   (X : VLSM message)
   `{HasBeenSentCapability message X}
-  (s : state (type (pre_loaded_with_all_messages_vlsm X)))
+  (s : vstate (pre_loaded_with_all_messages_vlsm X))
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
   (m : message)
   (Hsent : has_been_sent X s m) :
@@ -1556,7 +1556,7 @@ Lemma sent_valid
     [message]
     (X : VLSM message)
     `{HasBeenSentCapability message X}
-    (s : state (type X))
+    (s : vstate X)
     (Hs : valid_state_prop X s)
     (m : message)
     (Hsent : has_been_sent X s m) :
@@ -1569,7 +1569,7 @@ Lemma received_valid
     [message]
     (X : VLSM message)
     `{HasBeenReceivedCapability message X}
-    (s : state (type X))
+    (s : vstate X)
     (Hs : valid_state_prop X s)
     (m : message)
     (Hreceived : has_been_received X s m) :
@@ -1588,7 +1588,7 @@ Lemma directly_observed_valid
     (X : VLSM message)
     `{HasBeenSentCapability message X}
     `{HasBeenReceivedCapability message X}
-    (s : state (type X))
+    (s : vstate X)
     (Hs : valid_state_prop X s)
     (m : message)
     (Hobserved : has_been_directly_observed X s m) :
@@ -1765,7 +1765,7 @@ Qed.
     (composite_has_been_sent_stepwise_props constraint).
 
 Lemma composite_proper_sent
-  (s : state (type (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))))
+  (s : vstate (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
   (m : message)
   : has_been_sent_prop (free_composite_vlsm IM) composite_has_been_sent s m.
@@ -2080,8 +2080,8 @@ Qed.
 Definition equivocating_wrt
   (v : validator)
   (j : index)
-  (sv : state (type (IM (A v))))
-  (sj : state (type (IM j)))
+  (sv : vstate (IM (A v)))
+  (sj : vstate (IM j))
   (i := A v)
   : Prop
   :=
@@ -2554,12 +2554,12 @@ Context
   `{HasBeenReceivedCapability message X}
   .
 
-Definition state_received_not_sent (s : state (type X)) (m : message) : Prop :=
+Definition state_received_not_sent (s : vstate X) (m : message) : Prop :=
   has_been_received X s m /\ ~ has_been_sent X s m.
 
 Lemma state_received_not_sent_trace_iff
   (m : message)
-  (s is : state (type PreX))
+  (s is : vstate (PreX))
   (tr : list transition_item)
   (Htr : finite_valid_trace_init_to PreX is s tr)
   : state_received_not_sent s m <-> trace_received_not_sent_before_or_after tr m.
@@ -2581,14 +2581,14 @@ Proof.
 Qed.
 
 Definition state_received_not_sent_invariant
-  (s : state (type X))
+  (s : vstate X)
   (P : message -> Prop)
   : Prop
   := forall m, state_received_not_sent s m -> P m.
 
 Lemma state_received_not_sent_invariant_trace_iff
   (P : message -> Prop)
-  (s is : state (type PreX))
+  (s is : vstate (PreX))
   (tr : list transition_item)
   (Htr : finite_valid_trace_init_to PreX is s tr)
   : state_received_not_sent_invariant s P <->
@@ -2607,7 +2607,7 @@ Definition cannot_resend_message_stepwise_prop : Prop :=
 
 Lemma cannot_resend_received_message_in_future
   (Hno_resend : cannot_resend_message_stepwise_prop)
-  (s1 s2 : state (type PreX))
+  (s1 s2 : vstate (PreX))
   (Hfuture : in_futures PreX s1 s2)
   : forall m : message,
     state_received_not_sent s1 m -> state_received_not_sent s2 m.
@@ -2648,7 +2648,7 @@ Lemma lift_preloaded_trace_to_seeded
   (P : message -> Prop)
   (tr : list transition_item)
   (Htrm : trace_received_not_sent_before_or_after_invariant tr P)
-  (is : state (type PreX))
+  (is : vstate (PreX))
   (Htr : finite_valid_trace PreX is tr)
   : finite_valid_trace (pre_loaded_vlsm X P) is tr.
 Proof.
@@ -2701,7 +2701,7 @@ Qed.
 
 Lemma lift_preloaded_state_to_seeded
   (P : message -> Prop)
-  (s : state (type X))
+  (s : vstate X)
   (Hequiv_s : state_received_not_sent_invariant s P)
   (Hs : valid_state_prop PreX s)
   : valid_state_prop (pre_loaded_vlsm X P) s.
@@ -2718,7 +2718,7 @@ Qed.
 
 Lemma lift_generated_to_seeded
   (P : message -> Prop)
-  (s : state (type X))
+  (s : vstate X)
   (Hequiv_s : state_received_not_sent_invariant s P)
   (m : message)
   (Hgen : can_produce PreX s m)
@@ -2756,7 +2756,7 @@ Context
   .
 
 Lemma has_been_sent_irrelevance
-  (s : state (type (pre_loaded_with_all_messages_vlsm X)))
+  (s : vstate (pre_loaded_with_all_messages_vlsm X))
   (m : message)
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
   : has_been_sent1 s m -> has_been_sent2 s m.
@@ -2820,7 +2820,7 @@ Context
 Lemma has_been_received_in_state s1 m :
   valid_state_prop X s1 ->
   has_been_received X s1 m ->
-  exists (s0 : state (type X)) (item : transition_item) (tr : list transition_item),
+  exists (s0 : vstate X) (item : transition_item) (tr : list transition_item),
     input item = Some m /\
     finite_valid_trace_from_to X s0 s1 (item :: tr).
 Proof.
@@ -2854,7 +2854,7 @@ Qed.
 Lemma has_been_received_in_state_preloaded s1 m :
   valid_state_prop (pre_loaded_with_all_messages_vlsm X) s1 ->
   has_been_received X s1 m ->
-  exists (s0 : state (type (pre_loaded_with_all_messages_vlsm X)))
+  exists (s0 : vstate (pre_loaded_with_all_messages_vlsm X))
     (item : transition_item) (tr : list transition_item),
     input item = Some m /\
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) s0 s1 (item :: tr).

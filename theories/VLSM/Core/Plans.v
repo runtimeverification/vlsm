@@ -417,7 +417,7 @@ Definition ensures
 Lemma plan_independence
   (a b : plan)
   (Pb : vstate X -> Prop)
-  (s : state (type X))
+  (s : vstate X)
   (Hpr : valid_state_prop X s)
   (Ha : finite_valid_plan_from s a)
   (Hhave : Pb s)
