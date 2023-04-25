@@ -37,10 +37,10 @@ Section sec_transitivity_props.
 Lemma pre_VLSM_projection_finite_trace_project_trans
   {message : Type}
   (TX TY TZ : VLSMType message)
-  (project_labelXY : @label _ TX -> option (@label _ TY))
-  (project_stateXY : @state _ TX -> @state _ TY)
-  (project_labelYZ : @label _ TY -> option (@label _ TZ))
-  (project_stateYZ : @state _ TY -> @state _ TZ)
+  (project_labelXY : label TX -> option (label TY))
+  (project_stateXY : state TX -> state TY)
+  (project_labelYZ : label TY -> option (label TZ))
+  (project_stateYZ : state TY -> state TZ)
   : forall trX,
     pre_VLSM_projection_finite_trace_project TX TZ
       (mbind project_labelYZ ∘ project_labelXY)
@@ -124,10 +124,10 @@ Qed.
 Lemma pre_VLSM_embedding_finite_trace_project_trans
   {message}
   (TX TY TZ : VLSMType message)
-  (project_labelXY : @label _ TX -> @label _ TY)
-  (project_stateXY : @state _ TX -> @state _ TY)
-  (project_labelYZ : @label _ TY -> @label _ TZ)
-  (project_stateYZ : @state _ TY -> @state _ TZ)
+  (project_labelXY : label TX -> label TY)
+  (project_stateXY : state TX -> state TY)
+  (project_labelYZ : label TY -> label TZ)
+  (project_stateYZ : state TY -> state TZ)
   : forall trX,
     pre_VLSM_embedding_finite_trace_project TX TZ
       (project_labelYZ ∘ project_labelXY)

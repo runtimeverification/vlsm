@@ -647,7 +647,7 @@ Proof.
 Qed.
 
 Lemma valid_state_sub_projection
-  (s : state)
+  (s : state (composite_type IM))
   (Hs : state_sub_item_input_is_seeded_or_sub_previously_sent s)
   (Hps : valid_state_prop X s)
   : valid_state_prop Xj (composite_state_sub_projection s).

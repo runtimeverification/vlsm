@@ -204,7 +204,7 @@ Qed.
 Lemma Hzero (s : equivocator_state) : 0 < equivocator_state_n s.
 Proof. by pose proof (equivocator_state_last_n s); lia. Qed.
 
-Definition equivocator_state_zero (es : equivocator_state) : state :=
+Definition equivocator_state_zero (es : equivocator_state) : vstate X :=
   equivocator_state_s es (nat_to_fin (Hzero es)).
 
 Lemma equivocator_state_project_zero (es : equivocator_state)
@@ -220,7 +220,7 @@ Definition equivocator_state_update
   (si : vstate X)
   : equivocator_state
   :=
-  @existT nat (fun n => Fin.t (S n) -> state)
+  @existT nat (fun n => Fin.t (S n) -> vstate X)
     (equivocator_state_last bs)
 	  (fun j => if  decide (i = j) then si else equivocator_state_s bs j).
 

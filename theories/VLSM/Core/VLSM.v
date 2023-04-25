@@ -26,6 +26,9 @@ Class VLSMType (message : Type) : Type :=
   label : Type;
 }.
 
+Arguments state {_} _.
+Arguments label {_} _.
+
 (** *** VLSM class definition
 
   The [VLSMMachine] class is parameterized by a [VLSMType], and contains the
@@ -41,13 +44,13 @@ Class VLSMType (message : Type) : Type :=
 
 Class VLSMMachine {message : Type} (vtype : VLSMType message) : Type :=
 {
-  initial_state_prop : state -> Prop;
-  initial_state : Type := {s : state | initial_state_prop s};
+  initial_state_prop : state vtype -> Prop;
+  initial_state : Type := {s : state vtype | initial_state_prop s};
   s0 : Inhabited initial_state;
   initial_message_prop : message -> Prop;
   initial_message : Type := {m : message | initial_message_prop m};
-  transition : label -> state * option message -> state * option message;
-  valid : label -> state * option message -> Prop;
+  transition : label vtype -> state vtype * option message -> state vtype * option message;
+  valid : label vtype -> state vtype * option message -> Prop;
 }.
 
 (* The & is a "bidirectionality hint", so that typechecking
@@ -55,7 +58,7 @@ Class VLSMMachine {message : Type} (vtype : VLSMType message) : Type :=
    result type to determine [vtype] before typechecking the fields.
    Without this, the types of the values given for the fields would
    have to be written so they only mention the state and label type
-   in ways that can be matched with [@state _ ?vtype] and [@label _ ?vtype].
+   in ways that can be matched with [state ?vtype] and [label ?vtype].
 *)
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
@@ -129,9 +132,9 @@ Context
 
 Record transition_item : Type :=
 {
-  l : label;
+  l : label T;
   input : option message;
-  destination : state;
+  destination : state T;
   output : option message;
 }.
 
@@ -184,17 +187,17 @@ Definition trace_received_not_sent_before_or_after_invariant
   := forall m, trace_received_not_sent_before_or_after tr m -> P m.
 
 Inductive Trace : Type :=
-| Finite : state -> list transition_item -> Trace
-| Infinite : state -> Stream transition_item -> Trace.
+| Finite : state T -> list transition_item -> Trace
+| Infinite : state T -> Stream transition_item -> Trace.
 
-Definition trace_first (tr : Trace) : state :=
+Definition trace_first (tr : Trace) : state T :=
   match tr with
   | Finite s _ => s
   | Infinite s _ => s
   end.
 
 Definition finite_trace_last
-  (si : state) (tr : list transition_item) : state :=
+  (si : state T) (tr : list transition_item) : state T :=
   List.last (List.map destination tr) si.
 
 Definition finite_trace_last_output
@@ -202,11 +205,11 @@ Definition finite_trace_last_output
   List.last (List.map output tr) None.
 
 Definition finite_trace_nth
-  (si : state) (tr : list transition_item)
-  : nat -> option state :=
-nth_error (si :: List.map destination tr).
+  (si : state T) (tr : list transition_item)
+  : nat -> option (state T) :=
+  nth_error (si :: List.map destination tr).
 
-Definition trace_last (tr : Trace) : option state
+Definition trace_last (tr : Trace) : option (state T)
   :=
     match tr with
     | Finite s ls => Some (finite_trace_last s ls)
@@ -219,7 +222,7 @@ Definition trace_last (tr : Trace) : option state
   states in the transition list/stream to the initial state of the trace.
 *)
 Definition trace_nth (tr : Trace)
-  : nat -> option state :=
+  : nat -> option (state T) :=
   fun (n : nat) =>
     match tr with
     | Finite s ls => finite_trace_nth s ls n
@@ -241,9 +244,9 @@ Context
 
 Lemma last_error_destination_last
   (tr : list transition_item)
-  (s : state)
+  (s : state T)
   (Hlast : option_map destination (last_error tr) = Some s)
-  (default : state)
+  (default : state T)
   : finite_trace_last default tr  = s.
 Proof.
   unfold option_map in Hlast.
@@ -290,12 +293,12 @@ Proof.
 Qed.
 
 Lemma finite_trace_nth_first
-  (si : state) (tr : list transition_item) :
+  (si : state T) (tr : list transition_item) :
   finite_trace_nth si tr 0 = Some si.
 Proof. done. Qed.
 
 Lemma finite_trace_nth_last
-  (si : state) (tr : list transition_item) :
+  (si : state T) (tr : list transition_item) :
   finite_trace_nth si tr (length tr) = Some (finite_trace_last si tr).
 Proof.
   unfold finite_trace_nth, finite_trace_last.
@@ -306,7 +309,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_nth_app1
-  (si : state) (t1 t2 : list transition_item) n :
+  (si : state T) (t1 t2 : list transition_item) n :
   n <= length t1 ->
   finite_trace_nth si (t1++t2) n = finite_trace_nth si t1 n.
 Proof.
@@ -319,7 +322,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_nth_app2
-  (si : state) (t1 t2 : list transition_item) n :
+  (si : state T) (t1 t2 : list transition_item) n :
   length t1 <= n ->
   finite_trace_nth si (t1++t2) n = finite_trace_nth (finite_trace_last si t1) t2 (n - length t1).
 Proof.
@@ -336,7 +339,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_nth_length
-  (si : state) (tr : list transition_item) n s :
+  (si : state T) (tr : list transition_item) n s :
   finite_trace_nth si tr n = Some s ->
   n <= length tr.
 Proof.
@@ -347,7 +350,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_last_prefix
-  (s : state) (tr : list transition_item) n nth :
+  (s : state T) (tr : list transition_item) n nth :
   finite_trace_nth s tr n = Some nth ->
   finite_trace_last s (list_prefix tr n) = nth.
 Proof.
@@ -360,7 +363,7 @@ Proof.
 Qed.
 
 Lemma finite_trace_last_suffix
-  (s : state) (tr : list transition_item) n :
+  (s : state T) (tr : list transition_item) n :
   n < length tr ->
   finite_trace_last s (list_suffix tr n) = finite_trace_last s tr.
 Proof.
@@ -391,8 +394,8 @@ Context
 
 Definition type := vtype vlsm.
 Definition machine := vmachine vlsm.
-Definition vstate := @state _ type.
-Definition vlabel := @label _ type.
+Definition vstate := state type.
+Definition vlabel := label type.
 Definition vinitial_state_prop := @initial_state_prop _ _ machine.
 Definition vinitial_state := @initial_state _ _ machine.
 Definition vinitial_message_prop := @initial_message_prop _ _ machine.
@@ -457,28 +460,28 @@ Existing Instance MachineX.
     - then [transition] <<l (s, om)>> has the [valid_state_message_prop]erty.
 *)
 
-Inductive valid_state_message_prop : state -> option message -> Prop :=
+Inductive valid_state_message_prop : state TypeX -> option message -> Prop :=
 | valid_initial_state_message
-    (s : state)
+    (s : state TypeX)
     (Hs : initial_state_prop s)
     (om : option message)
     (Hom : option_initial_message_prop om)
   : valid_state_message_prop s om
 | valid_generated_state_message
-    (s : state)
+    (s : state TypeX)
     (_om : option message)
     (Hps : valid_state_message_prop s _om)
-    (_s : state)
+    (_s : state TypeX)
     (om : option message)
     (Hpm : valid_state_message_prop _s om)
-    (l : label)
+    (l : label TypeX)
     (Hv : valid l (s, om))
     s' om'
     (Ht : transition l (s, om) = (s', om'))
   : valid_state_message_prop s' om'.
 
 Definition valid_initial_state
-  [s : state] (Hs : initial_state_prop s)
+  [s : state TypeX] (Hs : initial_state_prop s)
   : valid_state_message_prop s None
   := valid_initial_state_message s Hs None I.
 
@@ -490,20 +493,20 @@ Definition valid_initial_state
   dependent types [valid_state] and [valid_message].
 *)
 
-Definition valid_state_prop (s : state) :=
+Definition valid_state_prop (s : state TypeX) :=
   exists om : option message, valid_state_message_prop s om.
 
 Definition valid_message_prop (m : message) :=
-  exists s : state, valid_state_message_prop s (Some m).
+  exists s : state TypeX, valid_state_message_prop s (Some m).
 
 Definition valid_state : Type :=
-  { s : state | valid_state_prop s }.
+  {s : state TypeX | valid_state_prop s}.
 
 Definition valid_message : Type :=
-  { m : message | valid_message_prop m }.
+  {m : message | valid_message_prop m}.
 
 Lemma initial_state_is_valid
-  (s : state)
+  (s : state TypeX)
   (Hinitial : initial_state_prop s) :
   valid_state_prop s.
 Proof.
@@ -526,7 +529,7 @@ Qed.
 *)
 
 Definition option_valid_message_prop (om : option message) :=
-  exists s : state, valid_state_message_prop s om.
+  exists s : state TypeX, valid_state_message_prop s om.
 
 Lemma option_valid_message_None
   : option_valid_message_prop None.
@@ -563,8 +566,8 @@ Qed.
   given inputs and that they have a [valid_state] and a [valid_message].
 *)
 Definition input_valid
-           (l : label)
-           (som : state * option message)
+           (l : label TypeX)
+           (som : state TypeX * option message)
   : Prop
   :=
   let (s, om) := som in
@@ -574,26 +577,26 @@ Definition input_valid
 
 (** Input valid transitions are transitions with [input_valid] inputs. *)
 Definition input_valid_transition
-  (l : label)
-  (som : state * option message)
-  (som' : state * option message)
+  (l : label TypeX)
+  (som : state TypeX * option message)
+  (som' : state TypeX * option message)
   :=
   input_valid l som
   /\  transition l som = som'.
 
 Definition input_valid_transition_item
-  (s : state)
+  (s : state TypeX)
   (item : transition_item)
   :=
   input_valid_transition (l item) (s, input item) (destination item, output item).
 
 Definition input_valid_transition_preserving
-  (R : state -> state -> Prop)
+  (R : state TypeX -> state TypeX -> Prop)
   : Prop
   :=
   forall
-    (s1 s2 : state)
-    (l : label)
+    (s1 s2 : state TypeX)
+    (l : label TypeX)
     (om1 om2 : option message)
     (Hvalid_transition : input_valid_transition l (s1, om1) (s2, om2)),
     R s1 s2.
@@ -601,9 +604,9 @@ Definition input_valid_transition_preserving
 (** Next three lemmas show the two definitions above are strongly related. *)
 
 Lemma input_valid_transition_valid
-  (l : label)
-  (som : state * option message)
-  (som' : state * option message)
+  (l : label TypeX)
+  (som : state TypeX * option message)
+  (som' : state TypeX * option message)
   (Ht : input_valid_transition l som som')
   : input_valid l som.
 Proof.
@@ -611,18 +614,18 @@ Proof.
 Qed.
 
 Lemma input_valid_can_transition
-  (l : label)
-  (som : state * option message)
+  (l : label TypeX)
+  (som : state TypeX * option message)
   (Hv : input_valid l som)
   : forall som', transition l som = som' ->
     input_valid_transition l som som'.
 Proof. done. Qed.
 
 Lemma input_valid_transition_iff
-  (l : label)
-  (som : state * option message)
+  (l : label TypeX)
+  (som : state TypeX * option message)
   : input_valid l som
-  <-> exists (som' : state * option message),
+  <-> exists (som' : state TypeX * option message),
         input_valid_transition l som som'.
 Proof.
   split.
@@ -636,8 +639,8 @@ Qed.
   pre-existing concepts.
 *)
 Lemma input_valid_transition_origin
-      {l : label}
-      {s s' : state}
+      {l : label TypeX}
+      {s s' : state TypeX}
       {om om' : option message}
       (Ht : input_valid_transition l (s, om) (s', om'))
   : valid_state_prop s.
@@ -646,8 +649,8 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_destination
-      {l : label}
-      {s s' : state}
+      {l : label TypeX}
+      {s s' : state TypeX}
       {om om' : option message}
       (Ht : input_valid_transition l (s, om) (s', om'))
   : valid_state_prop s'.
@@ -658,8 +661,8 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_in
-      {l : label}
-      {s s' : state}
+      {l : label TypeX}
+      {s s' : state TypeX}
       {om om' : option message}
       (Ht : input_valid_transition l (s, om) (s', om'))
   : option_valid_message_prop om.
@@ -669,8 +672,8 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_outputs_valid_state_message
-      {l : label}
-      {s s' : state}
+      {l : label TypeX}
+      {s s' : state TypeX}
       {om om' : option message}
       (Ht : input_valid_transition l (s, om) (s', om'))
     : valid_state_message_prop s' om'.
@@ -680,8 +683,8 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_out
-      {l : label}
-      {s s' : state}
+      {l : label TypeX}
+      {s s' : state TypeX}
       {om om' : option message}
       (Ht : input_valid_transition l (s, om) (s', om'))
   : option_valid_message_prop om'.
@@ -691,8 +694,8 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_is_valid
-      {l : label}
-      {s s' : state}
+      {l : label TypeX}
+      {s s' : state TypeX}
       {om om' : option message}
       (Ht : input_valid_transition l (s, om) (s', om'))
   : valid l (s, om).
@@ -701,8 +704,8 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_transition
-      {l : label}
-      {s s' : state}
+      {l : label TypeX}
+      {s s' : state TypeX}
       {om om' : option message}
       (Ht : input_valid_transition l (s, om) (s', om'))
     :  transition l (s, om) = (s', om').
@@ -711,8 +714,8 @@ Proof.
 Qed.
 
 Lemma input_valid_state_message_outputs
-  (l : label)
-  (s : state)
+  (l : label TypeX)
+  (s : state TypeX)
   (om : option message)
   (Hv : input_valid l (s, om))
   s' om'
@@ -732,7 +735,7 @@ Qed.
 *)
 
 Lemma input_valid_transition_deterministic :
-  forall {lbl : label} {s s1 s2 : state} {iom oom1 oom2 : option message},
+  forall {lbl : label TypeX} {s s1 s2 : state TypeX} {iom oom1 oom2 : option message},
     input_valid_transition lbl (s, iom) (s1, oom1) ->
     input_valid_transition lbl (s, iom) (s2, oom2) ->
       s1 = s2 /\ oom1 = oom2.
@@ -748,23 +751,23 @@ Qed.
 *)
 
 Definition option_can_produce
-  (s : state)
+  (s : state TypeX)
   (om : option message)
   :=
   exists
-  (som : state * option message)
-  (l : label),
+  (som : state TypeX * option message)
+  (l : label TypeX),
   input_valid_transition l som (s, om).
 
 Definition can_produce
-  (s : state)
+  (s : state TypeX)
   (m : message)
   := option_can_produce s (Some m).
 
 (** Of course, if a VLSM [can_emit] <<(s, m)>>, then <<(s, m)>> is valid. *)
 
 Lemma option_can_produce_valid
-  (s : state)
+  (s : state TypeX)
   (om : option message)
   (Hm : option_can_produce s om)
   : valid_state_message_prop s om .
@@ -774,14 +777,14 @@ Proof.
 Qed.
 
 Definition can_produce_valid
-  (s : state)
+  (s : state TypeX)
   (m : message)
   (Hm : can_produce s m)
   : valid_state_message_prop s (Some m)
   := option_can_produce_valid s (Some m) Hm.
 
 Lemma option_can_produce_valid_iff
-  (s : state)
+  (s : state TypeX)
   (om : option message)
   : valid_state_message_prop s om <->
     option_can_produce s om \/ initial_state_prop s /\ option_initial_message_prop om.
@@ -796,7 +799,7 @@ Proof.
 Qed.
 
 Definition can_produce_valid_iff
-  (s : state)
+  (s : state TypeX)
   (m : message)
   : valid_state_message_prop s (Some m) <->
     can_produce s m \/ initial_state_prop s /\ initial_message_prop m
@@ -806,9 +809,9 @@ Definition can_emit
   (m : message)
   :=
   exists
-  (som : state * option message)
-  (l : label)
-  (s : state),
+  (som : state TypeX * option message)
+  (l : label TypeX)
+  (s : state TypeX),
   input_valid_transition l som (s, Some m).
 
 Lemma can_emit_iff
@@ -859,10 +862,10 @@ Qed.
 *)
 
 Lemma valid_state_prop_iff :
-  forall s' : state,
+  forall s' : state TypeX,
     valid_state_prop s'
     <-> (exists is : initial_state, s' = proj1_sig is)
-      \/ exists (l : label) (som : state * option message) (om' : option message),
+      \/ exists (l : label TypeX) (som : state TypeX * option message) (om' : option message),
         input_valid_transition l som (s', om').
 Proof.
   intros; split.
@@ -885,13 +888,13 @@ Qed.
   and <<_om>>, and a spurious inductive assumption <<P _s>>.
 *)
 Lemma valid_state_prop_ind
-  (P : state -> Prop)
-  (IHinit : forall (s : state) (Hs : initial_state_prop s), P s)
+  (P : state TypeX -> Prop)
+  (IHinit : forall (s : state TypeX) (Hs : initial_state_prop s), P s)
   (IHgen :
-    forall (s' : state) (l : label) (om om' : option message) (s : state)
+    forall (s' : state TypeX) (l : label TypeX) (om om' : option message) (s : state TypeX)
       (Ht : input_valid_transition l (s, om) (s', om')) (Hs : P s),
       P s')
-  : forall (s : state) (Hs : valid_state_prop s), P s.
+  : forall (s : state TypeX) (Hs : valid_state_prop s), P s.
 Proof.
   intros.
   destruct Hs as [om Hs].
@@ -905,7 +908,7 @@ Lemma valid_message_prop_iff :
   forall m' : message,
     valid_message_prop m'
     <-> (exists im : initial_message, m' = proj1_sig im)
-      \/ exists (l : label) (som : state * option message) (s' : state),
+      \/ exists (l : label TypeX) (som : state TypeX * option message) (s' : state TypeX),
         input_valid_transition l som (s', Some m').
 Proof.
   intros; split.
@@ -946,18 +949,18 @@ Qed.
   for infinite traces, which can only be extended at the front.
 *)
 
-Inductive finite_valid_trace_from : state -> list transition_item -> Prop :=
-| finite_valid_trace_from_empty : forall (s : state)
+Inductive finite_valid_trace_from : state TypeX -> list transition_item -> Prop :=
+| finite_valid_trace_from_empty : forall (s : state TypeX)
     (Hs : valid_state_prop s),
     finite_valid_trace_from s []
-| finite_valid_trace_from_extend : forall  (s : state) (tl : list transition_item)
+| finite_valid_trace_from_extend : forall  (s : state TypeX) (tl : list transition_item)
     (Htl : finite_valid_trace_from s tl)
-    (s' : state) (iom oom : option message) (l : label)
+    (s' : state TypeX) (iom oom : option message) (l : label TypeX)
     (Ht : input_valid_transition l (s', iom) (s, oom)),
     finite_valid_trace_from  s' ({| l := l; input := iom; destination := s; output := oom |} :: tl).
 
 Definition finite_valid_trace_singleton :
-  forall {l : label} {s s' : state} {iom oom : option message},
+  forall {l : label TypeX} {s s' : state TypeX} {iom oom : option message},
     input_valid_transition l (s, iom) (s', oom) ->
     finite_valid_trace_from  s ({| l := l; input := iom; destination := s'; output := oom |} :: [])
   := fun l s s' iom oom Hptrans =>
@@ -969,7 +972,7 @@ Definition finite_valid_trace_singleton :
   To complete our definition of a finite valid trace, we must also guarantee
   that <<start>> is an initial state according to the protocol.
 *)
-Definition finite_valid_trace (s : state) (ls : list transition_item) : Prop :=
+Definition finite_valid_trace (s : state TypeX) (ls : list transition_item) : Prop :=
   finite_valid_trace_from s ls /\ initial_state_prop s.
 
 (**
@@ -986,7 +989,7 @@ Definition finite_valid_trace (s : state) (ls : list transition_item) : Prop :=
   require an <<assert>> and writing out the full VLSM and state expressions
   as part of the proof script.
 *)
-Lemma finite_valid_trace_empty (s : state) :
+Lemma finite_valid_trace_empty (s : state TypeX) :
   vinitial_state_prop X s ->
   finite_valid_trace s [].
 Proof.
@@ -994,7 +997,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_first_valid_transition
-      (s : state)
+      (s : state TypeX)
       (tr : list transition_item)
       (te : transition_item)
       (Htr : finite_valid_trace_from s (te :: tr))
@@ -1002,7 +1005,7 @@ Lemma finite_valid_trace_first_valid_transition
 Proof. by inversion Htr. Qed.
 
 Lemma finite_valid_trace_first_pstate
-  (s : state)
+  (s : state TypeX)
   (tr : list transition_item)
   (Htr : finite_valid_trace_from s tr)
   : valid_state_prop s.
@@ -1011,7 +1014,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_tail
-      (s : state)
+      (s : state TypeX)
       (tr : list transition_item)
       (te : transition_item)
       (Htr : finite_valid_trace_from s (te :: tr))
@@ -1019,7 +1022,7 @@ Lemma finite_valid_trace_tail
 Proof. by inversion Htr. Qed.
 
 Lemma finite_valid_trace_last_pstate
-  (s : state)
+  (s : state TypeX)
   (tr : list transition_item)
   (Htr : finite_valid_trace_from s tr)
   : valid_state_prop (finite_trace_last s tr).
@@ -1038,7 +1041,7 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_to
-      (s : state)
+      (s : state TypeX)
       (tr : list transition_item)
       (tr1 tr2 : list transition_item)
       (te : transition_item)
@@ -1057,7 +1060,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_consecutive_valid_transition
-      (s : state)
+      (s : state TypeX)
       (tr : list transition_item)
       (tr1 tr2 : list transition_item)
       (te1 te2 : transition_item)
@@ -1073,7 +1076,7 @@ Proof.
 Qed.
 
 Lemma valid_trace_output_is_valid
-  (is : state)
+  (is : state TypeX)
   (tr : list transition_item)
   (Htr : finite_valid_trace_from is tr)
   (m : message)
@@ -1089,7 +1092,7 @@ Proof.
 Qed.
 
 Lemma valid_trace_input_is_valid
-  (is : state)
+  (is : state TypeX)
   (tr : list transition_item)
   (Htr : finite_valid_trace_from is tr)
   (m : message)
@@ -1106,7 +1109,7 @@ Proof.
 Qed.
 
 Lemma valid_trace_observed_is_valid
-  (is : state)
+  (is : state TypeX)
   (tr : list transition_item)
   (Htr : finite_valid_trace_from is tr)
   (m : message)
@@ -1118,7 +1121,7 @@ Proof.
 Qed.
 
 Lemma first_transition_valid
-  (s : state)
+  (s : state TypeX)
   (te : transition_item)
   : finite_valid_trace_from s [te] <->
     input_valid_transition (l te) (s, input te) (destination te, output te).
@@ -1131,13 +1134,13 @@ Proof.
 Qed.
 
 Lemma extend_right_finite_trace_from
-  (s1 : state)
+  (s1 : state TypeX)
   (ts : list transition_item)
   (Ht12 : finite_valid_trace_from s1 ts)
-  (l3 : label)
+  (l3 : label TypeX)
   (s2 := finite_trace_last s1 ts)
   (iom3 : option message)
-  (s3 : state)
+  (s3 : state TypeX)
   (oom3 : option message)
   (Hv23 : input_valid_transition l3 (s2, iom3) (s3, oom3))
   : finite_valid_trace_from s1
@@ -1160,7 +1163,7 @@ Qed.
 *)
 
 Lemma finite_valid_trace_from_app_iff
-  (s : state) (ls ls' : list transition_item) (s' := finite_trace_last s ls)
+  (s : state TypeX) (ls ls' : list transition_item) (s' := finite_trace_last s ls)
   : finite_valid_trace_from s ls /\ finite_valid_trace_from s' ls'
     <->
     finite_valid_trace_from s (ls ++ ls').
@@ -1182,7 +1185,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_from_rev_ind
-  (P : state -> list transition_item -> Prop)
+  (P : state TypeX -> list transition_item -> Prop)
   (Hempty : forall s,
     valid_state_prop s -> P s nil)
   (Hextend : forall s tr,
@@ -1205,7 +1208,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_rev_ind
-  (P : state -> list transition_item -> Prop)
+  (P : state TypeX -> list transition_item -> Prop)
   (Hempty : forall si,
     initial_state_prop si -> P si nil)
   (Hextend : forall si tr,
@@ -1231,7 +1234,7 @@ Qed.
 *)
 
 Lemma finite_valid_trace_from_prefix
-  (s : state)
+  (s : state TypeX)
   (ls : list transition_item)
   (Htr : finite_valid_trace_from s ls)
   (n : nat)
@@ -1243,11 +1246,11 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_from_suffix
-  (s : state)
+  (s : state TypeX)
   (ls : list transition_item)
   (Htr : finite_valid_trace_from s ls)
   (n : nat)
-  (nth : state)
+  (nth : state TypeX)
   (Hnth : finite_trace_nth s ls n = Some nth)
   : finite_valid_trace_from nth (list_suffix ls n).
 Proof.
@@ -1264,12 +1267,12 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_from_segment
-  (s : state)
+  (s : state TypeX)
   (ls : list transition_item)
   (Htr : finite_valid_trace_from s ls)
   (n1 n2 : nat)
   (Hle : n1 <= n2)
-  (n1th : state)
+  (n1th : state TypeX)
   (Hnth : finite_trace_nth s ls n1 = Some n1th)
   : finite_valid_trace_from n1th (list_segment ls n1 n2).
 Proof.
@@ -1293,7 +1296,7 @@ Proof.
 Qed.
 
 Lemma can_emit_from_valid_trace
-  (si : state)
+  (si : state TypeX)
   (m : message)
   (tr : list transition_item)
   (Htr : finite_valid_trace si tr)
@@ -1325,13 +1328,13 @@ Qed.
   parameter.
 *)
 
-Inductive finite_valid_trace_from_to : state -> state -> list transition_item -> Prop :=
-| finite_valid_trace_from_to_empty : forall (s : state)
+Inductive finite_valid_trace_from_to : state TypeX -> state TypeX -> list transition_item -> Prop :=
+| finite_valid_trace_from_to_empty : forall (s : state TypeX)
     (Hs : valid_state_prop s),
     finite_valid_trace_from_to s s []
-| finite_valid_trace_from_to_extend : forall  (s f : state) (tl : list transition_item)
+| finite_valid_trace_from_to_extend : forall  (s f : state TypeX) (tl : list transition_item)
     (Htl : finite_valid_trace_from_to s f tl)
-    (s' : state) (iom oom : option message) (l : label)
+    (s' : state TypeX) (iom oom : option message) (l : label TypeX)
     (Ht : input_valid_transition l (s', iom) (s, oom)),
     finite_valid_trace_from_to s' f
       ({| l := l; input := iom; destination := s; output := oom |} :: tl).
@@ -1390,7 +1393,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_from_to_app
-  (m s f : state) (ls ls' : list transition_item)
+  (m s f : state TypeX) (ls ls' : list transition_item)
   : finite_valid_trace_from_to s m ls
     -> finite_valid_trace_from_to m f ls'
     -> finite_valid_trace_from_to s f (ls ++ ls').
@@ -1399,7 +1402,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_from_to_app_split
-  (s f : state) (ls ls' : list transition_item)
+  (s f : state TypeX) (ls ls' : list transition_item)
   : finite_valid_trace_from_to s f (ls ++ ls') ->
     let m := finite_trace_last s ls in
     finite_valid_trace_from_to s m ls
@@ -1446,12 +1449,12 @@ Proof.
 Qed.
 
 Lemma extend_right_finite_trace_from_to
-  (s1 s2 : state)
+  (s1 s2 : state TypeX)
   (ts : list transition_item)
   (Ht12 : finite_valid_trace_from_to s1 s2 ts)
-  (l3 : label)
+  (l3 : label TypeX)
   (iom3 : option message)
-  (s3 : state)
+  (s3 : state TypeX)
   (oom3 : option message)
   (Hv23 : input_valid_transition l3 (s2, iom3) (s3, oom3))
   : finite_valid_trace_from_to s1 s3
@@ -1464,7 +1467,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_from_to_rev_ind
-  (P : state -> state -> list transition_item -> Prop)
+  (P : state TypeX -> state TypeX -> list transition_item -> Prop)
   (Hempty : forall si
     (Hsi : valid_state_prop si),
     P si si nil)
@@ -1493,7 +1496,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_init_to_rev_ind
-  (P : state -> state -> list transition_item -> Prop)
+  (P : state TypeX -> state TypeX -> list transition_item -> Prop)
   (Hempty : forall si
     (Hsi : initial_state_prop si),
     P si si nil)
@@ -1535,26 +1538,26 @@ Qed.
   over [finite_valid_trace_init_to] traces.
 *)
 Inductive finite_valid_trace_init_to_emit
-  : state -> state -> option message -> list transition_item -> Prop :=
-| finite_valid_trace_init_to_emit_empty : forall (is : state) (om : option message)
+  : state TypeX -> state TypeX -> option message -> list transition_item -> Prop :=
+| finite_valid_trace_init_to_emit_empty : forall (is : state TypeX) (om : option message)
     (His : initial_state_prop is)
     (Him : option_initial_message_prop om),
     finite_valid_trace_init_to_emit is is om []
 | finite_valid_trace_init_to_emit_extend
     : forall
-      (is s : state) (_om : option message) (tl : list transition_item)
+      (is s : state TypeX) (_om : option message) (tl : list transition_item)
       (Hs : finite_valid_trace_init_to_emit is s _om tl)
-      (iom_is iom_s : state) (iom : option message) (iom_tl : list transition_item)
+      (iom_is iom_s : state TypeX) (iom : option message) (iom_tl : list transition_item)
       (Hiom : finite_valid_trace_init_to_emit iom_is iom_s iom iom_tl)
-      (l : label)
+      (l : label TypeX)
       (Hv : valid l (s, iom))
-      (s' : state) (oom : option message)
+      (s' : state TypeX) (oom : option message)
       (Ht : transition l (s, iom) = (s', oom)),
       finite_valid_trace_init_to_emit is s' oom
         (tl ++ [{| l := l; input := iom; destination := s'; output := oom |}]).
 
 Lemma finite_valid_trace_init_to_emit_initial_state
-  (is f : state) (om : option message) (tl : list transition_item)
+  (is f : state TypeX) (om : option message) (tl : list transition_item)
   (Htl : finite_valid_trace_init_to_emit is f om tl)
   : initial_state_prop is.
 Proof. by induction Htl. Qed.
@@ -1575,7 +1578,7 @@ Proof.
 Defined.
 
 Lemma finite_valid_trace_init_to_emit_output
-  (s f : state) (om : option message) (tl : list transition_item)
+  (s f : state TypeX) (om : option message) (tl : list transition_item)
   (Htl : finite_valid_trace_init_to_emit s f om tl)
   : empty_initial_message_or_final_output tl om.
 Proof.
@@ -1590,7 +1593,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_init_to_emit_valid_state_message
-  (s f : state) (om : option message) (tl : list transition_item)
+  (s f : state TypeX) (om : option message) (tl : list transition_item)
   (Htl : finite_valid_trace_init_to_emit s f om tl)
   : valid_state_message_prop f om.
 Proof.
@@ -1602,7 +1605,7 @@ Qed.
 Lemma finite_valid_trace_init_to_emit_valid_state_message_rev
   f om
   (Hp : valid_state_message_prop f om)
-  : exists (s : state) (tl : list transition_item),
+  : exists (s : state TypeX) (tl : list transition_item),
     finite_valid_trace_init_to_emit s f om tl.
 Proof.
   induction Hp.
@@ -1614,7 +1617,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_init_to_emit_forget_emit
-  (s f : state) (_om : option message) (tl : list transition_item)
+  (s f : state TypeX) (_om : option message) (tl : list transition_item)
   (Htl : finite_valid_trace_init_to_emit s f _om tl)
   : finite_valid_trace_init_to s f tl.
 Proof.
@@ -1631,7 +1634,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_trace_init_to_add_emit
-  (s f : state) (tl : list transition_item)
+  (s f : state TypeX) (tl : list transition_item)
   (Htl : finite_valid_trace_init_to s f tl)
   : finite_valid_trace_init_to_emit s f (finite_trace_last_output tl) tl.
 Proof.
@@ -1650,7 +1653,7 @@ Qed.
   to be used for the trace generating the message received in the last transition.
 *)
 Lemma finite_valid_trace_init_to_rev_strong_ind
-  (P : state -> state -> list transition_item -> Prop)
+  (P : state TypeX -> state TypeX -> list transition_item -> Prop)
   (Hempty : forall is
     (His : initial_state_prop is),
     P is is nil)
@@ -1694,15 +1697,15 @@ Qed.
 *)
 
 CoInductive infinite_valid_trace_from :
-  state -> Stream transition_item -> Prop :=
-| infinite_valid_trace_from_extend : forall  (s : state) (tl : Stream transition_item)
+  state TypeX -> Stream transition_item -> Prop :=
+| infinite_valid_trace_from_extend : forall  (s : state TypeX) (tl : Stream transition_item)
     (Htl : infinite_valid_trace_from s tl)
-    (s' : state) (iom oom : option message) (l : label)
+    (s' : state TypeX) (iom oom : option message) (l : label TypeX)
     (Ht : input_valid_transition l (s', iom) (s, oom)),
     infinite_valid_trace_from  s'
       (Cons {| l := l; input := iom; destination := s; output := oom |}  tl).
 
-Definition infinite_valid_trace (s : state) (st : Stream transition_item)
+Definition infinite_valid_trace (s : state TypeX) (st : Stream transition_item)
   := infinite_valid_trace_from s st /\ initial_state_prop s.
 
 (**
@@ -1710,7 +1713,7 @@ Definition infinite_valid_trace (s : state) (st : Stream transition_item)
   definitions, mostly reducing them to properties about their finite segments.
 *)
 Lemma infinite_valid_trace_consecutive_valid_transition
-      (is : state)
+      (is : state TypeX)
       (tr tr2 : Stream transition_item)
       (tr1 : list transition_item)
       (te1 te2 : transition_item)
@@ -1727,7 +1730,7 @@ Proof.
 Qed.
 
 Lemma infinite_valid_trace_from_app_iff
-  (s : state)
+  (s : state TypeX)
   (ls : list transition_item)
   (ls' : Stream transition_item)
   (s' := finite_trace_last s ls)
@@ -1754,7 +1757,7 @@ Proof.
 Qed.
 
 Lemma infinite_valid_trace_from_prefix
-  (s : state)
+  (s : state TypeX)
   (ls : Stream transition_item)
   (Htr : infinite_valid_trace_from s ls)
   (n : nat)
@@ -1766,7 +1769,7 @@ Proof.
 Qed.
 
 Lemma infinite_valid_trace_from_prefix_rev
-  (s : state)
+  (s : state TypeX)
   (ls : Stream transition_item)
   (Hpref : forall n : nat, finite_valid_trace_from s (stream_prefix ls n))
   : infinite_valid_trace_from s ls.
@@ -1795,7 +1798,7 @@ Proof.
 Qed.
 
 Lemma infinite_valid_trace_from_segment
-  (s : state)
+  (s : state TypeX)
   (ls : Stream transition_item)
   (Htr : infinite_valid_trace_from s ls)
   (n1 n2 : nat)
@@ -1864,11 +1867,11 @@ Qed.
 *)
 
 Lemma valid_state_message_has_trace
-      (s : state)
+      (s : state TypeX)
       (om : option message)
       (Hp : valid_state_message_prop s om)
   : initial_state_prop s /\ option_initial_message_prop om
-  \/ exists (is : state) (tr : list transition_item),
+  \/ exists (is : state TypeX) (tr : list transition_item),
         finite_valid_trace_init_to is s tr
         /\ finite_trace_last_output tr = om.
 Proof.
@@ -1890,9 +1893,9 @@ Qed.
   messages.
 *)
 Lemma valid_state_has_trace
-      (s : state)
+      (s : state TypeX)
       (Hp : valid_state_prop s) :
-  exists (is : state) (tr : list transition_item),
+  exists (is : state TypeX) (tr : list transition_item),
     finite_valid_trace_init_to is s tr.
 Proof using.
   destruct Hp as [_om Hp].
@@ -1940,10 +1943,10 @@ Qed.
   (to the left) to start in an initial state.
 *)
 Lemma finite_valid_trace_from_complete_left
-  (s : state)
+  (s : state TypeX)
   (tr : list transition_item)
   (Htr : finite_valid_trace_from s tr)
-  : exists (is : state) (trs : list transition_item),
+  : exists (is : state TypeX) (trs : list transition_item),
     finite_valid_trace is (trs ++ tr) /\
     finite_trace_last is trs = s.
 Proof.
@@ -1962,10 +1965,10 @@ Qed.
   (to the left) to start in an initial state.
 *)
 Lemma finite_valid_trace_from_to_complete_left
-  (s f : state)
+  (s f : state TypeX)
   (tr : list transition_item)
   (Htr : finite_valid_trace_from_to s f tr)
-  : exists (is : state) (trs : list transition_item),
+  : exists (is : state TypeX) (trs : list transition_item),
     finite_valid_trace_init_to is f (trs ++ tr) /\
     finite_trace_last is trs = s.
 Proof.
@@ -1993,16 +1996,16 @@ Qed.
 *)
 
 Definition in_futures
-  (first second : state)
+  (first second : state TypeX)
   : Prop :=
   exists (tr : list transition_item),
     finite_valid_trace_from_to first second tr.
 
 Lemma in_futures_preserving
-  (R : state -> state -> Prop)
+  (R : state TypeX -> state TypeX -> Prop)
   (Hpre : PreOrder R)
   (Ht : input_valid_transition_preserving R)
-  (s1 s2 : state)
+  (s1 s2 : state TypeX)
   (Hin : in_futures s1 s2)
   : R s1 s2.
 Proof.
@@ -2012,13 +2015,13 @@ Proof.
   by apply Ht in Ht0; transitivity s.
 Qed.
 
-Instance eq_equiv : @Equivalence state eq := _.
+Instance eq_equiv : @Equivalence (state TypeX) eq := _.
 
 Lemma in_futures_strict_preserving
-  (R : state -> state -> Prop)
+  (R : state TypeX -> state TypeX -> Prop)
   (Hpre : StrictOrder R)
   (Ht : input_valid_transition_preserving R)
-  (s1 s2 : state)
+  (s1 s2 : state TypeX)
   (Hin : in_futures s1 s2)
   (Hneq : s1 <> s2)
   : R s1 s2.
@@ -2032,7 +2035,7 @@ Proof.
 Qed.
 
 Lemma in_futures_valid_fst
-  (first second : state)
+  (first second : state TypeX)
   (Hfuture : in_futures first second)
   : valid_state_prop first.
 Proof.
@@ -2042,7 +2045,7 @@ Proof.
 Qed.
 
 Lemma in_futures_refl
-  (first : state)
+  (first : state TypeX)
   (Hps : valid_state_prop first)
   : in_futures first first.
 Proof.
@@ -2088,7 +2091,7 @@ Proof.
 Qed.
 
 Lemma in_futures_witness
-  (first second : state)
+  (first second : state TypeX)
   (Hfutures : in_futures first second)
   : exists (tr : valid_trace) (n1 n2 : nat),
     n1 <= n2
@@ -2129,7 +2132,7 @@ Lemma valid_trace_segment
   (Htr : valid_trace_prop tr)
   (n1 n2 : nat)
   (Hle : n1 <= n2)
-  (first : state)
+  (first : state TypeX)
   (Hfirst : trace_nth tr n1 = Some first)
   : finite_valid_trace_from first (trace_segment tr n1 n2).
 Proof.
@@ -2291,7 +2294,7 @@ Lemma valid_trace_nth
   (tr : Trace)
   (Htr : valid_trace_prop tr)
   (n : nat)
-  (s : state)
+  (s : state TypeX)
   (Hnth : trace_nth tr n = Some s)
   : valid_state_prop s.
 Proof.
@@ -2307,7 +2310,7 @@ Proof.
 Qed.
 
 Lemma in_futures_valid_snd
-  (first second : state)
+  (first second : state TypeX)
   (Hfutures : in_futures first second)
   : valid_state_prop second.
 Proof.
@@ -2318,7 +2321,7 @@ Proof.
 Qed.
 
 Lemma in_futures_witness_reverse
-  (first second : state)
+  (first second : state TypeX)
   (tr : valid_trace)
   (n1 n2 : nat)
   (Hle : n1 <= n2)
@@ -2396,7 +2399,7 @@ Definition complete_trace_prop (tr : Trace) : Prop
 
 (* 6.2.2 Equivocation-free as a composition constraint *)
 Definition composition_constraint : Type :=
-  label -> state * option message -> Prop.
+  label TypeX -> state TypeX * option message -> Prop.
 
 (* Decidable VLSMs *)
 
@@ -2427,9 +2430,9 @@ Arguments extend_right_finite_trace_from_to [message] (X) [s1 s2 ts] (Ht12) [l3 
 
 Class TraceWithLast
   (base_prop : forall {message} (X : VLSM message),
-    @state _ (@type _ X) -> list transition_item -> Prop)
+    vstate X -> list transition_item -> Prop)
   (trace_prop : forall {message} (X : VLSM message),
-    state -> state -> list transition_item -> Prop)
+    vstate X -> vstate X -> list transition_item -> Prop)
   : Prop :=
 {
   valid_trace_add_last : forall [msg] [X : VLSM msg] [s f tr],
@@ -2551,7 +2554,7 @@ Proof.
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_message_preservation
-  (s : state)
+  (s : vstate X)
   (om : option message)
   (Hps : valid_state_message_prop X s om)
   : valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
@@ -2562,7 +2565,7 @@ Proof.
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_prop
-  (s : state)
+  (s : vstate X)
   (Hps : valid_state_prop X s)
   : valid_state_prop pre_loaded_with_all_messages_vlsm s.
 Proof.
@@ -2580,14 +2583,14 @@ Proof.
   by apply pre_loaded_with_all_messages_message_valid_initial_state_message.
 Qed.
 
-Inductive preloaded_valid_state_prop : state -> Prop :=
+Inductive preloaded_valid_state_prop : vstate X -> Prop :=
 | preloaded_valid_initial_state
-    (s : state)
+    (s : vstate X)
     (Hs : initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) s) :
        preloaded_valid_state_prop s
 | preloaded_protocol_generated
-    (l : label)
-    (s : state)
+    (l : vlabel X)
+    (s : vstate X)
     (Hps : preloaded_valid_state_prop s)
     (om : option message)
     (Hv : valid (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om))
@@ -2683,10 +2686,10 @@ End sec_pre_loaded_with_all_messages_vlsm.
 
 Lemma non_empty_valid_trace_from_can_produce
   `(X : VLSM message)
-  (s : state)
+  (s : vstate X)
   (m : message)
   : can_produce X s m
-  <-> exists (is : state) (tr : list transition_item) (item : transition_item),
+  <-> exists (is : vstate X) (tr : list transition_item) (item : transition_item),
     finite_valid_trace X is tr /\
     last_error tr = Some item /\
     destination item = s /\ output item = Some m.
@@ -2777,7 +2780,7 @@ Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
   vt_transition : vtransition X l (s1, iom) = (s2, oom);
 }.
 
-Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : state) : Prop :=
+Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : vstate X) : Prop :=
 | transition_next :
     forall l iom oom (Ht : ValidTransition X l s1 iom s2 oom),
       ValidTransitionNext X s1 s2.

@@ -228,7 +228,7 @@ Context
   .
 
 Lemma equivocators_composition_for_directly_observed_index_incl_embedding
-  (s : state)
+  (s : state (composite_type IM))
   : VLSM_embedding
     (equivocators_composition_for_directly_observed IM indices1 s)
     (equivocators_composition_for_directly_observed IM indices2 s)
