@@ -13,11 +13,11 @@ Section sec_VLSM_inclusion.
 
 Context
   {message : Type}
-  {vtype : VLSMType message}
+  {T : VLSMType message}
   .
 
 Definition VLSM_incl_part
-  (MX MY : VLSMMachine vtype)
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   :=
   forall t : Trace,
@@ -26,7 +26,7 @@ Definition VLSM_incl_part
 #[local] Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
 
 Lemma VLSM_incl_refl
-  (MX : VLSMMachine vtype)
+  (MX : VLSMMachine T)
   (X := mk_vlsm MX)
   : VLSM_incl X X.
 Proof.
@@ -34,7 +34,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_trans
-  (MX MY MZ : VLSMMachine vtype)
+  (MX MY MZ : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
   : VLSM_incl X Y -> VLSM_incl Y Z -> VLSM_incl X Z.
 Proof.
@@ -42,7 +42,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_finite_traces_characterization
-  (MX MY : VLSMMachine vtype)
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <->
     forall (s : vstate X)
@@ -74,7 +74,7 @@ Qed.
   label and state projection functions are identities.
 *)
 Lemma VLSM_incl_embedding_iff
-  (MX MY : VLSMMachine vtype)
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <-> VLSM_embedding X Y id id.
 Proof.
@@ -95,14 +95,14 @@ Proof.
 Qed.
 
 Definition VLSM_incl_is_embedding
-  {MX MY : VLSMMachine vtype}
+  {MX MY : VLSMMachine T}
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   (Hincl : VLSM_incl X Y)
   : VLSM_embedding X Y id id
   := proj1 (VLSM_incl_embedding_iff MX MY) Hincl.
 
 Lemma VLSM_incl_is_embedding_finite_trace_project
-  {MX MY : VLSMMachine vtype}
+  {MX MY : VLSMMachine T}
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   (Hincl : VLSM_incl X Y)
   : forall tr,
@@ -157,8 +157,8 @@ Section sec_VLSM_incl_properties.
 (** ** VLSM inclusion properties *)
 
 Context
-  {message : Type} [vtype : VLSMType message]
-  [MX MY : VLSMMachine vtype]
+  {message : Type} [T : VLSMType message]
+  [MX MY : VLSMMachine T]
   (Hincl : VLSM_incl_part MX MY)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
@@ -264,7 +264,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_can_produce
-  (s : state vtype)
+  (s : state T)
   (om : option message)
   : option_can_produce X s om -> option_can_produce Y s om.
 Proof.

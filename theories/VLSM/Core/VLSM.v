@@ -42,34 +42,34 @@ Arguments label {_} _.
   and the [transition] function and [valid] predicate.
 *)
 
-Class VLSMMachine {message : Type} (vtype : VLSMType message) : Type :=
+Class VLSMMachine {message : Type} (T : VLSMType message) : Type :=
 {
-  initial_state_prop : state vtype -> Prop;
-  initial_state : Type := {s : state vtype | initial_state_prop s};
+  initial_state_prop : state T -> Prop;
+  initial_state : Type := {s : state T | initial_state_prop s};
   s0 : Inhabited initial_state;
   initial_message_prop : message -> Prop;
   initial_message : Type := {m : message | initial_message_prop m};
-  transition : label vtype -> state vtype * option message -> state vtype * option message;
-  valid : label vtype -> state vtype * option message -> Prop;
+  transition : label T -> state T * option message -> state T * option message;
+  valid : label T -> state T * option message -> Prop;
 }.
 
 (* The & is a "bidirectionality hint", so that typechecking
    a VLSMMachine record definition will try to use the expected
-   result type to determine [vtype] before typechecking the fields.
+   result type to determine <<T>> before typechecking the fields.
    Without this, the types of the values given for the fields would
    have to be written so they only mention the state and label type
-   in ways that can be matched with [state ?vtype] and [label ?vtype].
+   in ways that can be matched with [state ?T] and [label ?T].
 *)
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
 Definition option_initial_message_prop
-  {message : Type} {vtype : VLSMType message} {vmachine : VLSMMachine vtype}
+  {message : Type} {T : VLSMType message} {vmachine : VLSMMachine T}
   : option message -> Prop := from_option initial_message_prop True.
 
 Definition VLSMMachine_pre_loaded_with_messages
-  {message : Type} {vtype : VLSMType message} (vmachine : VLSMMachine vtype)
+  {message : Type} {T : VLSMType message} (vmachine : VLSMMachine T)
   (initial : message -> Prop)
-  : VLSMMachine vtype
+  : VLSMMachine T
   :=
   {| initial_state_prop := @initial_state_prop _ _ vmachine
   ; initial_message_prop := fun m => @initial_message_prop _ _ vmachine  m \/ initial m
@@ -79,7 +79,7 @@ Definition VLSMMachine_pre_loaded_with_messages
   |}.
 
 Definition decidable_initial_messages_prop
-  {message : Type} {vtype : VLSMType message} (vmachine : VLSMMachine vtype)
+  {message : Type} {T : VLSMType message} (vmachine : VLSMMachine T)
   := forall m, Decision (initial_message_prop m).
 
 (** *** VLSM type definition
