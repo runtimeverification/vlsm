@@ -93,7 +93,7 @@ Definition decidable_initial_messages_prop
 
 Record VLSM (message : Type) : Type := mk_vlsm
 {
-  vtype : VLSMType message;
+  vtype :> VLSMType message;
   vmachine : VLSMMachine vtype;
 }.
 
@@ -2473,8 +2473,8 @@ Defined.
 
 Class TraceWithStart
   {message} {X : VLSM message}
-  (start : @state message (vtype X))
-  (trace_prop : list (transition_item (vtype X)) -> Prop)
+  (start : state X)
+  (trace_prop : list (transition_item X) -> Prop)
   : Prop :=
 {
   valid_trace_first_pstate :
@@ -2515,7 +2515,7 @@ Context
   .
 
 Definition pre_loaded_with_all_messages_vlsm_machine
-  : VLSMMachine (vtype X)
+  : VLSMMachine X
   :=
   {| initial_state_prop := vinitial_state_prop X
    ; initial_message_prop := fun message => True
