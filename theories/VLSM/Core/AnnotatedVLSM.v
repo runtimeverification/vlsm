@@ -96,11 +96,11 @@ Lemma annotate_trace_item_project
   (k : annotated_state -> list (@transition_item _ annotated_type))
   (sa : annotated_state)
   : pre_VLSM_embedding_finite_trace_project
-      annotated_type (vtype X) id original_state
+      annotated_type X id original_state
       (annotate_trace_item item k sa)
       = item ::
         pre_VLSM_embedding_finite_trace_project
-            annotated_type (vtype X) id original_state
+            annotated_type X id original_state
             (k {| original_state := destination item;
                   state_annotation := annotated_transition_state (l item) (sa, input item) |}).
 Proof.
@@ -158,7 +158,7 @@ Proof. by apply annotate_trace_from_last_original_state. Qed.
 
 Lemma annotate_trace_project is tr
   : pre_VLSM_embedding_finite_trace_project
-      annotated_type (vtype X) id original_state
+      annotated_type X id original_state
       (annotate_trace is tr)
       = tr.
 Proof.
@@ -289,7 +289,7 @@ Proof.
 Qed.
 
 Definition annotated_composite_induced_validator : VLSM message
-  := projection_induced_validator AnnotatedFree (vtype (IM i))
+  := projection_induced_validator AnnotatedFree (IM i)
     annotated_composite_label_project annotated_composite_state_project
     annotated_composite_label_lift annotated_composite_state_lift.
 

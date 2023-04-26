@@ -393,8 +393,8 @@ Context
 *)
 
 Definition machine := vmachine vlsm.
-Definition vstate := state (vtype vlsm).
-Definition vlabel := label (vtype vlsm).
+Definition vstate := state vlsm.
+Definition vlabel := label vlsm.
 Definition vinitial_state_prop := @initial_state_prop _ _ machine.
 Definition vinitial_state := @initial_state _ _ machine.
 Definition vinitial_message_prop := @initial_message_prop _ _ machine.
@@ -404,8 +404,8 @@ Definition vs0 := @inhabitant _ (@s0 _ _ machine).
 Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ machine.
 Definition vtransition := @transition _ _ machine.
 Definition vvalid := @valid _ _ machine.
-Definition vtransition_item := @transition_item _ (vtype vlsm).
-Definition vTrace := @Trace _ (vtype vlsm).
+Definition vtransition_item := @transition_item _ vlsm.
+Definition vTrace := @Trace _ vlsm.
 
 End sec_vlsm_projections.
 

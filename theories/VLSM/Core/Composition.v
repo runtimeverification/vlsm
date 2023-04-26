@@ -210,7 +210,7 @@ Definition lift_to_composite_transition_item
   (s : composite_state)
   (j : index)
   : vtransition_item (IM j) -> composite_transition_item :=
-  pre_VLSM_embedding_transition_item_project (vtype (IM j)) composite_type
+  pre_VLSM_embedding_transition_item_project (IM j) composite_type
     (lift_to_composite_label j) (lift_to_composite_state s j).
 
 (**

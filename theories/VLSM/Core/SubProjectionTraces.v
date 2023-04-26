@@ -1682,7 +1682,7 @@ Qed.
 
 Definition induced_sub_element_projection constraint : VLSM message :=
   projection_induced_validator
-    (pre_induced_sub_projection IM (elements indices) constraint) (vtype (IM j))
+    (pre_induced_sub_projection IM (elements indices) constraint) (IM j)
     sub_label_element_project sub_state_element_project
     sub_element_label sub_element_state.
 

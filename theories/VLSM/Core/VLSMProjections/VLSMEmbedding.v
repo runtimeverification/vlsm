@@ -278,7 +278,7 @@ Lemma VLSM_embedding_projection_type
   (X Y : VLSM message)
   (label_project : vlabel X -> vlabel Y)
   (state_project : vstate X -> vstate Y)
-  : VLSM_projection_type X (vtype Y) (Some ∘ label_project) state_project.
+  : VLSM_projection_type X Y (Some ∘ label_project) state_project.
 Proof.
   split; intros.
   destruct_list_last trX trX' lstX Heq; [done |].

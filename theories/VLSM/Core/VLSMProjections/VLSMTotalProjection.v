@@ -149,7 +149,7 @@ Record VLSM_projection_type
   (TY : VLSMType message)
   (label_project : vlabel X -> option (label TY))
   (state_project : vstate X -> state TY)
-  (trace_project := pre_VLSM_projection_finite_trace_project (vtype X) TY label_project state_project)
+  (trace_project := pre_VLSM_projection_finite_trace_project X TY label_project state_project)
   : Prop :=
 {
   final_state_project :
@@ -179,7 +179,7 @@ Context
   {label_project : vlabel X -> option (vlabel Y)}
   {state_project : vstate X -> vstate Y}
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
-  (Hsimul : VLSM_projection_type X (vtype Y) label_project state_project)
+  (Hsimul : VLSM_projection_type X Y label_project state_project)
   .
 
 (**
@@ -255,7 +255,7 @@ Context
 *)
 Record VLSM_weak_projection : Prop :=
 {
-  weak_projection_type :> VLSM_projection_type X (vtype Y) label_project state_project;
+  weak_projection_type :> VLSM_projection_type X Y label_project state_project;
   weak_trace_project_preserves_valid_trace :
     forall sX trX,
       finite_valid_trace_from X sX trX ->
@@ -264,7 +264,7 @@ Record VLSM_weak_projection : Prop :=
 
 Record VLSM_projection : Prop :=
 {
-  projection_type :> VLSM_projection_type X (vtype Y) label_project state_project;
+  projection_type :> VLSM_projection_type X Y label_project state_project;
   trace_project_preserves_valid_trace :
     forall sX trX,
       finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX) (trace_project trX);
@@ -851,8 +851,8 @@ Context
   (Hvalid : weak_projection_valid_preservation X Y label_project state_project)
   (Htransition_Some : weak_projection_transition_preservation_Some X Y label_project state_project)
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)
-  (Htype : VLSM_projection_type X (vtype Y) label_project state_project :=
-    basic_VLSM_projection_type X (vtype Y) label_project state_project Htransition_None)
+  (Htype : VLSM_projection_type X Y label_project state_project :=
+    basic_VLSM_projection_type X Y label_project state_project Htransition_None)
   .
 
 Section sec_weak_projection.
@@ -905,7 +905,7 @@ Proof.
   apply finite_valid_trace_from_to_app_split, proj2 in Happ_pr.
   apply valid_trace_get_last in Hs as Heqs.
   apply valid_trace_forget_last, proj1 in Hs.
-  rewrite <- (final_state_project X (vtype Y) label_project state_project Htype)
+  rewrite <- (final_state_project X Y label_project state_project Htype)
     in Happ_pr by done.
   by apply valid_trace_forget_last in Happ_pr; subst.
 Qed.
@@ -968,14 +968,14 @@ Lemma basic_VLSM_projection_type_preloaded
   (label_project : vlabel X -> option (vlabel Y))
   (state_project : vstate X -> vstate Y)
   (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
-  : VLSM_projection_type (pre_loaded_with_all_messages_vlsm X) (vtype Y) label_project state_project.
+  : VLSM_projection_type (pre_loaded_with_all_messages_vlsm X) Y label_project state_project.
 Proof.
   constructor.
   intros is tr Htr.
   induction Htr using finite_valid_trace_from_rev_ind
   ; [done |].
   rewrite (@pre_VLSM_projection_finite_trace_project_app _
-    (vtype (pre_loaded_with_all_messages_vlsm X)) (vtype Y) label_project state_project).
+    (pre_loaded_with_all_messages_vlsm X) Y label_project state_project).
   rewrite finite_trace_last_is_last.
   rewrite finite_trace_last_app, <- IHHtr.
   clear IHHtr.
@@ -1007,7 +1007,7 @@ Proof.
   induction HtrX using finite_valid_trace_rev_ind.
   - by constructor; apply initial_state_is_valid, Hstate.
   - rewrite (@pre_VLSM_projection_finite_trace_project_app _
-      (vtype (pre_loaded_with_all_messages_vlsm X)) (vtype Y) label_project state_project).
+      (pre_loaded_with_all_messages_vlsm X) Y label_project state_project).
     apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm Y)).
     split; [done |].
     simpl. unfold pre_VLSM_projection_transition_item_project.
@@ -1034,14 +1034,14 @@ Lemma basic_VLSM_projection_type_preloaded_with
   (label_project : vlabel X -> option (vlabel Y))
   (state_project : vstate X -> vstate Y)
   (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
-  : VLSM_projection_type (pre_loaded_vlsm X P) (vtype Y) label_project state_project.
+  : VLSM_projection_type (pre_loaded_vlsm X P) Y label_project state_project.
 Proof.
   constructor.
   intros is tr Htr.
   induction Htr using finite_valid_trace_from_rev_ind
   ; [done |].
   rewrite (@pre_VLSM_projection_finite_trace_project_app
-    _ (vtype (pre_loaded_vlsm X P)) (vtype Y) label_project state_project).
+    _ (pre_loaded_vlsm X P) Y label_project state_project).
   rewrite finite_trace_last_is_last.
   rewrite finite_trace_last_app, <- IHHtr.
   clear IHHtr.
@@ -1074,7 +1074,7 @@ Proof.
   induction HtrX using finite_valid_trace_rev_ind.
   - by constructor; apply initial_state_is_valid, Hstate.
   - rewrite (@pre_VLSM_projection_finite_trace_project_app _
-      (vtype (pre_loaded_vlsm X P)) (vtype Y) label_project state_project).
+      (pre_loaded_vlsm X P) Y label_project state_project).
     apply (finite_valid_trace_from_app_iff (pre_loaded_vlsm Y Q)).
     split; [done |].
     simpl. unfold pre_VLSM_projection_transition_item_project.
