@@ -357,7 +357,7 @@ Proof.
       setoid_rewrite Hlst in Ha. setoid_rewrite <- Heqsa in Ha.
       repeat constructor; [| done ..].
       exists out.
-      replace (@pair (@state message X) (option message) dest out)
+      replace (@pair (state X) (option message) dest out)
         with (vtransition X label_a0 (sa, input_a0)).
       destruct Ha as [_oma Hsa].
       destruct Hinput_ai as [_s Hinput_a0].
