@@ -56,7 +56,7 @@ Definition equivocators_transition_item_project
       with
   | Some (Some item', deqv') =>
     Some
-      (Some (@Build_transition_item message (@type message Free)
+      (Some (@Build_transition_item message (vtype Free)
         (existT eqv (l item'))
         (input item) sx (output item))
       , equivocator_descriptors_update eqv_descriptors eqv deqv')
@@ -1462,7 +1462,7 @@ Qed.
 Lemma equivocators_total_VLSM_projection_finite_trace_project
   {s tr}
   (Hpre_tr : finite_valid_trace_from PreFreeE s tr)
-  : @pre_VLSM_projection_finite_trace_project _ (type PreFreeE) _ equivocators_total_label_project
+  : @pre_VLSM_projection_finite_trace_project _ (vtype PreFreeE) _ equivocators_total_label_project
       equivocators_total_state_project tr = equivocators_total_trace_project tr.
 Proof.
   induction tr using rev_ind; [done |].

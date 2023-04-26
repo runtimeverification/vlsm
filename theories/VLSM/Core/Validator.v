@@ -503,7 +503,7 @@ Context
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)
   (label_lift : vlabel Y -> vlabel X)
   (state_lift : vstate Y -> vstate X)
-  (Xi := pre_projection_induced_validator X (type Y)
+  (Xi := pre_projection_induced_validator X (vtype Y)
           label_project state_project label_lift state_lift)
   (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
   (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
@@ -701,12 +701,12 @@ Definition composite_project_label (l : composite_label IM)
   projection from a composition to a component.
 *)
 Definition composite_vlsm_induced_validator : VLSM message :=
-  projection_induced_validator X (type (IM i))
+  projection_induced_validator X (vtype (IM i))
     composite_project_label (fun s => s i)
     (lift_to_composite_label IM i) (lift_to_composite_state' IM i).
 
 Definition pre_composite_vlsm_induced_validator : VLSM message :=
-  pre_projection_induced_validator X (type (IM i))
+  pre_projection_induced_validator X (vtype (IM i))
     composite_project_label (fun s => s i)
     (lift_to_composite_label IM i) (lift_to_composite_state' IM i).
 
@@ -728,7 +728,7 @@ Lemma component_state_projection_lift
 Proof. by intros sj; apply state_update_eq. Qed.
 
 Lemma component_transition_projection_None
-  : weak_projection_transition_consistency_None X (type (IM i))
+  : weak_projection_transition_consistency_None X (vtype (IM i))
     composite_project_label (fun s : vstate X => s i).
 Proof.
   intros [j lj] HlX sX iom s'X oom [_ Ht]; cbn in Ht.
@@ -739,7 +739,7 @@ Proof.
 Qed.
 
 Lemma component_transition_projection_Some
-  : induced_validator_transition_consistency_Some X (type (IM i))
+  : induced_validator_transition_consistency_Some X (vtype (IM i))
     composite_project_label (fun s : vstate X => s i).
 Proof.
   intros [j1 lj1] [j2 lj2] lj; unfold composite_project_label; cbn.
@@ -824,7 +824,7 @@ Proof. by destruct siomi, Hcomposite as (s & <- & _ & _ & []). Qed.
   [composite_vlsm_induced_projection_valid].
 *)
 Definition composite_vlsm_induced_projection_validator_machine
-  : VLSMMachine (type (IM i)) :=
+  : VLSMMachine (vtype (IM i)) :=
 {|
   initial_state_prop := vinitial_state_prop (IM i);
   initial_message_prop := vinitial_message_prop (IM i);

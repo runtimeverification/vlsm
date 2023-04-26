@@ -606,7 +606,7 @@ Lemma free_equivocators_valid_trace_project
   (final_descriptors : equivocator_descriptors IM)
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
-  (final_state := @finite_trace_last _ (@type _ XE) is tr)
+  (final_state := @finite_trace_last _ (vtype XE) is tr)
   (Hproper : proper_fixed_equivocator_descriptors final_descriptors final_state)
   (Htr : finite_valid_trace XE is tr)
   : exists

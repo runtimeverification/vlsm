@@ -145,7 +145,7 @@ Context
   {X Y : VLSM message}
   (state_project : vstate X -> vstate Y)
   (transition_item_project : vtransition_item X -> list (vtransition_item Y))
-  (Hsimul : VLSM_stuttering_embedding_type X (type Y) state_project transition_item_project)
+  (Hsimul : VLSM_stuttering_embedding_type X (vtype Y) state_project transition_item_project)
   .
 
 (**
@@ -193,7 +193,7 @@ Definition stuttering_embedding_input_valid_transition_item_validity : Prop :=
 Record VLSM_weak_stuttering_embedding : Prop :=
 {
   weak_stuttering_embedding_type :>
-    VLSM_stuttering_embedding_type X (type Y) state_project transition_item_project;
+    VLSM_stuttering_embedding_type X (vtype Y) state_project transition_item_project;
   weak_stuttering_embedding_preserves_valid_trace :
     forall sX trX,
       finite_valid_trace_from X sX trX ->
@@ -203,7 +203,7 @@ Record VLSM_weak_stuttering_embedding : Prop :=
 Record VLSM_stuttering_embedding : Prop :=
 {
   stuttering_embedding_type :>
-    VLSM_stuttering_embedding_type X (type Y) state_project transition_item_project;
+    VLSM_stuttering_embedding_type X (vtype Y) state_project transition_item_project;
   stuttering_embedding_preserves_valid_trace :
     forall sX trX,
       finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX) (trace_project trX);
@@ -683,7 +683,7 @@ Context
   .
 
 Lemma basic_VLSM_stuttering_embedding_type :
-  VLSM_stuttering_embedding_type X (type Y) state_project transition_item_project.
+  VLSM_stuttering_embedding_type X (vtype Y) state_project transition_item_project.
 Proof.
   constructor; intros.
   by eapply finite_valid_trace_from_to_last, Htransition.

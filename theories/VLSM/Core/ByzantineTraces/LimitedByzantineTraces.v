@@ -388,7 +388,7 @@ Lemma lift_fixed_byzantine_traces_to_limited
         (lift_sub_label IM (elements non_byzantine)) (lift_sub_state IM (elements non_byzantine))
         (finite_trace_sub_projection IM (elements non_byzantine) tr)))
   : finite_valid_trace Limited bs btr /\
-    state_annotation (@finite_trace_last _ (type Limited) bs btr) ⊆ byzantine_vs.
+    state_annotation (@finite_trace_last _ (vtype Limited) bs btr) ⊆ byzantine_vs.
 Proof.
   subst non_byzantine.
   induction Hbyzantine using finite_valid_trace_rev_ind; [repeat split |].
@@ -473,7 +473,7 @@ Lemma msg_dep_validator_limited_non_equivocating_byzantine_traces_are_limited_no
       finite_trace_sub_projection IM (elements selection_complement) tr =
         finite_trace_sub_projection IM (elements selection_complement)
           (pre_VLSM_embedding_finite_trace_project
-            (type Limited) (composite_type IM) Datatypes.id original_state btr).
+            (vtype Limited) (composite_type IM) Datatypes.id original_state btr).
 Proof.
   split.
   - intros (byzantine & Hlimited & Hbyzantine).
