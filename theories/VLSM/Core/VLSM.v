@@ -63,23 +63,23 @@ Class VLSMMachine {message : Type} (T : VLSMType message) : Type :=
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
 Definition option_initial_message_prop
-  {message : Type} {T : VLSMType message} {vmachine : VLSMMachine T}
+  {message : Type} {T : VLSMType message} {M : VLSMMachine T}
   : option message -> Prop := from_option initial_message_prop True.
 
 Definition VLSMMachine_pre_loaded_with_messages
-  {message : Type} {T : VLSMType message} (vmachine : VLSMMachine T)
+  {message : Type} {T : VLSMType message} (M : VLSMMachine T)
   (initial : message -> Prop)
   : VLSMMachine T
   :=
-  {| initial_state_prop := @initial_state_prop _ _ vmachine
-  ; initial_message_prop := fun m => @initial_message_prop _ _ vmachine  m \/ initial m
-  ; s0 := @s0 _ _ vmachine
-  ; transition := @transition _ _ vmachine
-  ; valid := @valid _ _ vmachine
+  {| initial_state_prop := @initial_state_prop _ _ M
+  ; initial_message_prop := fun m => @initial_message_prop _ _ M  m \/ initial m
+  ; s0 := @s0 _ _ M
+  ; transition := @transition _ _ M
+  ; valid := @valid _ _ M
   |}.
 
 Definition decidable_initial_messages_prop
-  {message : Type} {T : VLSMType message} (vmachine : VLSMMachine T)
+  {message : Type} {T : VLSMType message} (M : VLSMMachine T)
   := forall m, Decision (initial_message_prop m).
 
 (** *** VLSM type definition
@@ -387,23 +387,17 @@ Context
   (vlsm : VLSM message)
   .
 
-(**
-  Given a [VLSM], it is convenient to be able to retrieve its [VLSMMachine]
-  or [VLSMType]. Functions [machine] and [type] below achieve this precise purpose.
-*)
-
-Definition machine := vmachine vlsm.
 Definition vstate := state vlsm.
 Definition vlabel := label vlsm.
-Definition vinitial_state_prop := @initial_state_prop _ _ machine.
-Definition vinitial_state := @initial_state _ _ machine.
-Definition vinitial_message_prop := @initial_message_prop _ _ machine.
-Definition voption_initial_message_prop := @option_initial_message_prop _ _ machine.
-Definition vinitial_message := @initial_message _ _ machine.
-Definition vs0 := @inhabitant _ (@s0 _ _ machine).
-Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ machine.
-Definition vtransition := @transition _ _ machine.
-Definition vvalid := @valid _ _ machine.
+Definition vinitial_state_prop := @initial_state_prop _ _ (vmachine vlsm).
+Definition vinitial_state := @initial_state _ _ (vmachine vlsm).
+Definition vinitial_message_prop := @initial_message_prop _ _ (vmachine vlsm).
+Definition voption_initial_message_prop := @option_initial_message_prop _ _ (vmachine vlsm).
+Definition vinitial_message := @initial_message _ _ (vmachine vlsm).
+Definition vs0 := @inhabitant _ (@s0 _ _ (vmachine vlsm)).
+Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ (vmachine vlsm).
+Definition vtransition := @transition _ _ (vmachine vlsm).
+Definition vvalid := @valid _ _ (vmachine vlsm).
 Definition vtransition_item := @transition_item _ vlsm.
 Definition vTrace := @Trace _ vlsm.
 
@@ -414,7 +408,7 @@ Ltac unfold_vtransition H := (unfold vtransition in H; simpl in H).
 Lemma mk_vlsm_machine
   {message : Type}
   (X : VLSM message)
-  : mk_vlsm (machine X) = X.
+  : mk_vlsm (vmachine X) = X.
 Proof.
   by destruct X.
 Qed.
@@ -427,7 +421,7 @@ Context
   {message : Type}
   (X : VLSM message)
   (TypeX := vtype X)
-  (MachineX := machine X)
+  (MachineX := vmachine X)
   .
 
 Existing Instance TypeX.
@@ -2519,7 +2513,7 @@ Definition pre_loaded_with_all_messages_vlsm_machine
   :=
   {| initial_state_prop := vinitial_state_prop X
    ; initial_message_prop := fun message => True
-   ; s0 := @s0 _ _ (machine X)
+   ; s0 := @s0 _ _ (vmachine X)
    ; transition := vtransition X
    ; valid := vvalid X
   |}.

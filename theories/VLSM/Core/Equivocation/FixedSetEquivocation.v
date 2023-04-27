@@ -92,7 +92,7 @@ Qed.
 Lemma fixed_equivocation_vlsm_composition_incl_preloaded_free
   : VLSM_incl fixed_equivocation_vlsm_composition (pre_loaded_with_all_messages_vlsm Free).
 Proof.
-  apply VLSM_incl_trans with (machine Free).
+  apply VLSM_incl_trans with (vmachine Free).
   - by apply fixed_equivocation_vlsm_composition_incl_free.
   - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
