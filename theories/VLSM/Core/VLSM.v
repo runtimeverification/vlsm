@@ -63,23 +63,23 @@ Class VLSMMachine {message : Type} (T : VLSMType message) : Type :=
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
 Definition option_initial_message_prop
-  {message : Type} {T : VLSMType message} {vmachine : VLSMMachine T}
+  {message : Type} {T : VLSMType message} {M : VLSMMachine T}
   : option message -> Prop := from_option initial_message_prop True.
 
 Definition VLSMMachine_pre_loaded_with_messages
-  {message : Type} {T : VLSMType message} (vmachine : VLSMMachine T)
+  {message : Type} {T : VLSMType message} (M : VLSMMachine T)
   (initial : message -> Prop)
   : VLSMMachine T
   :=
-  {| initial_state_prop := @initial_state_prop _ _ vmachine
-  ; initial_message_prop := fun m => @initial_message_prop _ _ vmachine  m \/ initial m
-  ; s0 := @s0 _ _ vmachine
-  ; transition := @transition _ _ vmachine
-  ; valid := @valid _ _ vmachine
+  {| initial_state_prop := @initial_state_prop _ _ M
+  ; initial_message_prop := fun m => @initial_message_prop _ _ M  m \/ initial m
+  ; s0 := @s0 _ _ M
+  ; transition := @transition _ _ M
+  ; valid := @valid _ _ M
   |}.
 
 Definition decidable_initial_messages_prop
-  {message : Type} {T : VLSMType message} (vmachine : VLSMMachine T)
+  {message : Type} {T : VLSMType message} (M : VLSMMachine T)
   := forall m, Decision (initial_message_prop m).
 
 (** *** VLSM type definition
