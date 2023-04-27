@@ -255,7 +255,7 @@ Proof.
       cbn in *; replace ol with (@nil Observation) in * by (specialize (Hinit_empty _ Hs); done).
       by split; [apply reach_init |].
     + destruct Ht as [(_ & _ & Hvalid) Ht].
-      change transition with (vtransition V) in Ht; rewrite Htransition in Ht.
+      cbn in Ht; rewrite Htransition in Ht.
       destruct IHHs as [IH Hadr].
       by destruct l, om; inversion Ht; subst; auto using @UMO_reachable.
   - intros [Hs Hadr].
@@ -267,13 +267,13 @@ Proof.
       * by apply IHHs.
       * by apply option_valid_message_None.
       * by change (vvalid V Send (s, None)); apply Hsend_spec; [apply IHHs |].
-      * by change transition with (vtransition V); rewrite Htransition.
+      * by cbn; rewrite Htransition.
     + apply input_valid_transition_destination
         with (l := Receive) (s := s) (om := Some msg) (om' := None).
       repeat split; [| | done |].
       * by apply IHHs.
       * by apply any_message_is_valid_in_preloaded.
-      * by change transition with (vtransition V); rewrite Htransition.
+      * by cbn; rewrite Htransition.
 Qed.
 
 (** ** Every valid state contains a unique valid trace leading to it

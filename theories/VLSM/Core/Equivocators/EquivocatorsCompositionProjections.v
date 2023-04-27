@@ -1079,8 +1079,7 @@ Proof.
         rewrite equivocator_descriptors_update_eq in IHtr.
       by rewrite Hfinali.
     + state_update_simpl.
-      destruct Ht as [Hv Ht].
-      simpl in Ht. unfold vtransition in Ht. simpl in Ht.
+      destruct Ht as [Hv Ht]; cbn in Ht.
       destruct l as (i, li).
       match type of Ht with
       | (let (_, _) := ?t in _) = _ => destruct t as (si', om')

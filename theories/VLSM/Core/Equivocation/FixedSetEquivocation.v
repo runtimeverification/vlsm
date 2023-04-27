@@ -433,9 +433,9 @@ Proof.
     apply strong_fixed_equivocation_eqv_valid_message.
     by apply (fixed_input_has_strong_fixed_equivocation_helper _ _ Ht).
   - by apply Ht.
-  - apply proj2 in Ht. simpl in Ht.
-    simpl. unfold sub_IM at 2. simpl. unfold composite_state_sub_projection at 1. simpl.
-    destruct (vtransition _ _ _) as (si', om').
+  - destruct Ht as [_ Ht]; cbn in Ht.
+    cbn; unfold sub_IM at 2; cbn; unfold composite_state_sub_projection at 1; cbn.
+    destruct (vtransition (IM i) _ _) as (si', om').
     inversion_clear Ht. f_equal.
     clear.
     apply functional_extensionality_dep. intro sub_j.
