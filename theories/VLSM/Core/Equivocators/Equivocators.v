@@ -52,8 +52,8 @@ Definition equivocator_type : VLSMType message :=
      label := EquivocatorLabel
   |}.
 
-Definition equivocator_state : Type := @state message equivocator_type.
-Definition equivocator_label : Type := @label message equivocator_type.
+Definition equivocator_state : Type := state equivocator_type.
+Definition equivocator_label : Type := label equivocator_type.
 
 (** The number of machine copies in the given state. *)
 Definition equivocator_state_n (es : equivocator_state) := S (projT1 es).

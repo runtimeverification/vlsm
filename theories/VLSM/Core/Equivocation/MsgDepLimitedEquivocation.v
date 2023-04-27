@@ -180,7 +180,7 @@ Definition msg_dep_limited_equivocation_projection_validator_prop_alt :=
   coeqv_limited_equivocation_projection_validator_prop_alt IM threshold sender msg_dep_coequivocating_senders.
 
 Lemma msg_dep_annotate_trace_with_equivocators_project s tr
-  : pre_VLSM_embedding_finite_trace_project (vtype msg_dep_limited_equivocation_vlsm)
+  : pre_VLSM_embedding_finite_trace_project msg_dep_limited_equivocation_vlsm
     (composite_type IM) Datatypes.id original_state
     (msg_dep_annotate_trace_with_equivocators s tr) = tr.
 Proof. by apply (annotate_trace_project (free_composite_vlsm IM) Cv). Qed.
@@ -485,7 +485,7 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
     finite_valid_trace Fixed
       (original_state is)
       (pre_VLSM_embedding_finite_trace_project
-        (vtype Limited) (composite_type IM) Datatypes.id original_state
+        Limited (composite_type IM) Datatypes.id original_state
         tr).
 Proof.
   repeat split; [.. | by apply Htr].
@@ -504,7 +504,7 @@ Proof.
       by eapply coeqv_limited_equivocation_transition_state_annotation_incl, Ht.
     + apply finite_valid_trace_singleton.
       unfold input_valid_transition, input_valid.
-      change (map _ _) with (pre_VLSM_embedding_finite_trace_project (vtype Limited)
+      change (map _ _) with (pre_VLSM_embedding_finite_trace_project Limited
                               (composite_type IM) Datatypes.id original_state tr).
       rewrite <- pre_VLSM_embedding_finite_trace_last.
       assert (Hs : valid_state_prop
@@ -514,7 +514,7 @@ Proof.
         replace s with (finite_trace_last si tr) at 2
              by (apply valid_trace_get_last in Htr; done).
         rewrite (pre_VLSM_embedding_finite_trace_last
-                  (vtype Limited) (composite_type IM) Datatypes.id original_state si tr).
+                  Limited (composite_type IM) Datatypes.id original_state si tr).
         by apply finite_valid_trace_last_pstate.
       }
       destruct Ht as [[HLs [HLim HLv]] HLt].
@@ -579,7 +579,7 @@ Corollary msg_dep_fixed_limited_equivocation is tr
     fixed_limited_equivocation_prop IM threshold A
       (original_state is)
       (pre_VLSM_embedding_finite_trace_project
-        (vtype Limited) (composite_type IM) Datatypes.id original_state
+        Limited (composite_type IM) Datatypes.id original_state
         tr) (Ci := Ci) (Cv := Cv).
 Proof.
   intro Htr.
@@ -601,13 +601,13 @@ Lemma fixed_transition_preserves_annotation_equivocators
       (s, iom) (sf, oom))
   (Hsub_equivocators :
     state_annotation
-      (@finite_trace_last _ (vtype Limited)
+      (@finite_trace_last _ Limited
         {| original_state := is; state_annotation := `inhabitant |}
         (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender is tr))
     ⊆ eqv_validators)
   : msg_dep_composite_transition_message_equivocators IM
       full_message_dependencies sender l
-      (@finite_trace_last _ (vtype Limited)
+      (@finite_trace_last _ Limited
         {| original_state := is; state_annotation := ∅ |}
         (annotate_trace_from (free_composite_vlsm IM)
           Cv
@@ -680,7 +680,7 @@ Proof.
   |- finite_valid_trace_from Limited ?is ?tr =>
     cut
       (finite_valid_trace_from Limited is tr /\
-        (state_annotation (@finite_trace_last _ (vtype Limited) is tr) ⊆ equivocators))
+        (state_annotation (@finite_trace_last _ Limited is tr) ⊆ equivocators))
   end
   ; [itauto |].
   induction Htr using finite_valid_trace_init_to_rev_strong_ind.

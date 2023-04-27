@@ -171,10 +171,10 @@ Context
   corresponding [type] and [transition].
 *)
 
-Definition vplan_item := (@plan_item _ (vtype X)).
+Definition vplan_item := (@plan_item _ X).
 Definition plan : Type := list vplan_item.
-Definition apply_plan := (@_apply_plan _ (vtype X) (vtransition X)).
-Definition trace_to_plan := (@_trace_to_plan _ (vtype X)).
+Definition apply_plan := (@_apply_plan _ X (vtransition X)).
+Definition trace_to_plan := (@_trace_to_plan _ X).
 Definition apply_plan_app
   (start : vstate X)
   (a a' : plan)
@@ -182,13 +182,13 @@ Definition apply_plan_app
     let (aitems, afinal) := apply_plan start a in
     let (a'items, a'final) := apply_plan afinal a' in
      (aitems ++ a'items, a'final)
-  := (@_apply_plan_app _ (vtype X) (vtransition X) start a a').
+  := (@_apply_plan_app _ X (vtransition X) start a a').
 Definition apply_plan_last
   (start : vstate X)
   (a : plan)
   (after_a := apply_plan start a)
   : finite_trace_last start (fst after_a) = snd after_a
-  := (@_apply_plan_last _ (vtype X) (vtransition X) start a).
+  := (@_apply_plan_last _ X (vtransition X) start a).
 
 (**
   A plan is valid w.r.t. a state if by applying it to that state we
@@ -357,7 +357,7 @@ Proof.
       setoid_rewrite Hlst in Ha. setoid_rewrite <- Heqsa in Ha.
       repeat constructor; [| done ..].
       exists out.
-      replace (@pair (@state message (vtype X)) (option message) dest out)
+      replace (@pair (state X) (option message) dest out)
         with (vtransition X label_a0 (sa, input_a0)).
       destruct Ha as [_oma Hsa].
       destruct Hinput_ai as [_s Hinput_a0].

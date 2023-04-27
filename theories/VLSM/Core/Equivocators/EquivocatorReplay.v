@@ -68,7 +68,7 @@ Lemma equivocator_state_append_initial_state_in_futures
         (equivocator_state_append base_s s).
 Proof.
   exists
-    [(@Build_transition_item _ (vtype (equivocator_vlsm X))
+    [(@Build_transition_item _ (equivocator_vlsm X)
       (Spawn (equivocator_state_zero s))
       None
       (equivocator_state_append base_s s)
