@@ -143,15 +143,15 @@ Proof.
     by contradict Hinit; apply no_initial_messages_in_X.
   - apply (directly_observed_valid (pre_loaded_vlsm X P) s).
     + by exists (Some m); apply can_produce_valid.
-    + destruct X.
+    + destruct X as [T M].
       eapply VLSM_incl_has_been_directly_observed
         with HasBeenSentCapability0 HasBeenReceivedCapability0; cycle 2.
       * eapply @message_dependencies_are_necessary; [done | | done].
         by apply (VLSM_incl_can_produce
-          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P)).
       * by apply basic_VLSM_incl_preloaded; cbv.
       * apply (VLSM_incl_valid_state
-          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P)).
         by eexists; eapply can_produce_valid.
 Qed.
 
