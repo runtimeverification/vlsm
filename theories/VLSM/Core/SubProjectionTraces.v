@@ -405,7 +405,7 @@ Definition finite_trace_sub_projection_app
 
 Lemma X_incl_Pre : VLSM_incl X Pre.
 Proof.
-  apply VLSM_incl_trans with (machine (free_composite_vlsm IM)).
+  apply VLSM_incl_trans with (vmachine (free_composite_vlsm IM)).
   - by apply (constraint_free_incl IM constraint).
   - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -484,12 +484,12 @@ Proof.
   spec Hincl; [done |].
   match goal with
   |- context [pre_loaded_vlsm ?v _] =>
-    apply VLSM_incl_trans with (machine (pre_loaded_with_all_messages_vlsm v))
+    apply VLSM_incl_trans with (vmachine (pre_loaded_with_all_messages_vlsm v))
   end; [| apply Hincl].
   clear Hincl.
   match goal with
   |- context [pre_loaded_with_all_messages_vlsm ?v] =>
-    apply VLSM_incl_trans with (machine (pre_loaded_vlsm v (fun m => True)))
+    apply VLSM_incl_trans with (vmachine (pre_loaded_vlsm v (fun m => True)))
   end.
   - match goal with
     |- context [pre_loaded_vlsm ?v _] =>

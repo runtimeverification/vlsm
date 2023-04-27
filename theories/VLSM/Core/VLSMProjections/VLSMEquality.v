@@ -24,7 +24,7 @@ Definition VLSM_eq_part
 
 End sec_VLSM_equality.
 
-Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
+Notation VLSM_eq X Y := (VLSM_eq_part (vmachine X) (vmachine Y)).
 
 Lemma VLSM_eq_refl
   {message : Type}

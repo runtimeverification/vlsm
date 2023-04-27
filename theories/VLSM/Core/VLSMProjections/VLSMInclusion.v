@@ -23,7 +23,7 @@ Definition VLSM_incl_part
   forall t : Trace,
     valid_trace_prop X t -> valid_trace_prop Y t.
 
-#[local] Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
+#[local] Notation VLSM_incl X Y := (VLSM_incl_part (vmachine X) (vmachine Y)).
 
 Lemma VLSM_incl_refl
   (MX : VLSMMachine T)
@@ -85,7 +85,7 @@ Proof.
   }
   split.
   - constructor; intros.
-    apply (proj1 (VLSM_incl_finite_traces_characterization (machine X) (machine Y)) H) in H0.
+    apply (proj1 (VLSM_incl_finite_traces_characterization (vmachine X) (vmachine Y)) H) in H0.
     replace (pre_VLSM_embedding_finite_trace_project _ _ _ _ trX) with trX; [done |].
     by apply Hid.
   - intro Hproject. apply VLSM_incl_finite_traces_characterization.
@@ -115,7 +115,7 @@ Qed.
 
 End sec_VLSM_inclusion.
 
-Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
+Notation VLSM_incl X Y := (VLSM_incl_part (vmachine X) (vmachine Y)).
 
 Section sec_VLSM_incl_preservation.
 

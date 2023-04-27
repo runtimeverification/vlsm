@@ -266,7 +266,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_alt_incl
     : VLSM_incl PreLoaded Alt1.
 Proof.
-  apply (basic_VLSM_incl (machine PreLoaded) (machine Alt1))
+  apply (basic_VLSM_incl (vmachine PreLoaded) (vmachine Alt1))
   ; intro; intros; [done | | | apply H].
   - by apply alt_proj_option_valid_message.
   - exists (lifted_alt_state s).
