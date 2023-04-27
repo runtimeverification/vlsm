@@ -309,7 +309,7 @@ Proof.
   end.
   apply VLSM_eq_sym in Heq.
   match type of Heq with
-  | VLSM_eq _ ?v => apply VLSM_eq_trans with (vmachine v)
+  | VLSM_eq _ ?v => apply VLSM_eq_trans with v
   end
   ; [done |].
   specialize (constraint_subsumption_incl IM) as Hincl.

@@ -85,7 +85,7 @@ Proof.
   }
   split.
   - constructor; intros.
-    apply (proj1 (VLSM_incl_finite_traces_characterization (vmachine X) (vmachine Y)) H) in H0.
+    apply (proj1 (VLSM_incl_finite_traces_characterization X Y) H) in H0.
     replace (pre_VLSM_embedding_finite_trace_project _ _ _ _ trX) with trX; [done |].
     by apply Hid.
   - intro Hproject. apply VLSM_incl_finite_traces_characterization.

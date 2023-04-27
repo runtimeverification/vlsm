@@ -446,7 +446,7 @@ Lemma proj_pre_loaded_with_all_messages_incl
   (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
   : VLSM_incl Xj PreLoaded.
 Proof.
-  apply (basic_VLSM_incl (vmachine Xj) (vmachine PreLoaded)); intro; intros.
+  apply (basic_VLSM_incl Xj PreLoaded); intro; intros.
   - done.
   - by apply initial_message_is_valid.
   - by unfold vvalid; cbn; eapply (projection_valid_implies_valid IM), Hv.
