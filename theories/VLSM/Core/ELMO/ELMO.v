@@ -367,7 +367,7 @@ Proof.
     + by cbn; split; inversion 1; [| constructor].
   - apply Morphisms_Prop.and_iff_morphism.
     + by split; apply UMO_reachable_impl; inversion 1; subst; [| constructor].
-    + by firstorder.
+    + by cbn; firstorder.
 Qed.
 
 Lemma ELMOComponent_message_dependencies_full_node_condition :

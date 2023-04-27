@@ -402,7 +402,7 @@ Lemma constraint_free_incl
   (constraint : composite_label -> composite_state  * option message -> Prop)
   : VLSM_incl (composite_vlsm constraint) free_composite_vlsm.
 Proof.
-  by apply basic_VLSM_strong_incl; firstorder.
+  by apply basic_VLSM_strong_incl; do 2 (red; cbn); firstorder.
 Qed.
 
 Lemma composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages
@@ -1590,7 +1590,12 @@ Definition composite_valid_transition_item
 
 Lemma composite_valid_transition_reachable_iff l s1 iom s2 oom :
   CompositeValidTransition l s1 iom s2 oom <-> ValidTransition RFree l s1 iom s2 oom.
-Proof. by firstorder. Qed.
+Proof.
+  split; [by intros []; constructor |].
+  intros []; constructor.
+  - by apply vt_valid.
+  - by apply vt_transition.
+Qed.
 
 Inductive CompositeValidTransitionNext (s1 s2 : composite_state IM) : Prop :=
 | composite_transition_next : forall l iom oom,
