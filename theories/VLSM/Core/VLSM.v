@@ -2008,7 +2008,7 @@ Proof.
   by apply Ht in Ht0; transitivity s.
 Qed.
 
-Instance eq_equiv : @Equivalence (state TypeX) eq := _.
+#[export] Instance eq_equiv : @Equivalence (state TypeX) eq := _.
 
 Lemma in_futures_strict_preserving
   (R : state TypeX -> state TypeX -> Prop)
