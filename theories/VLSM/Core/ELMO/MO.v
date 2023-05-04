@@ -416,7 +416,7 @@ Context
 
 (** The VLSM [Mi] embeds into [RMi]. *)
 Lemma VLSM_incl_Mi_RMi :
-  VLSM_incl_part (vmachine Mi) (vmachine RMi).
+  VLSM_incl_part Mi RMi.
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -583,7 +583,7 @@ Lemma input_valid_transition_size_Mi :
 Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_valid_transition_size_RMi.
-  by apply (@VLSM_incl_input_valid_transition _ Mi (vmachine Mi) (vmachine RMi))
+  by apply (@VLSM_incl_input_valid_transition _ Mi Mi RMi)
   ; eauto using VLSM_incl_Mi_RMi.
 Qed.
 
@@ -596,7 +596,7 @@ Lemma finite_valid_trace_from_to_size_Mi :
 Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_valid_trace_from_to_size_RMi.
-  by apply (@VLSM_incl_finite_valid_trace_from_to _ Mi (vmachine Mi) (vmachine RMi))
+  by apply (@VLSM_incl_finite_valid_trace_from_to _ Mi Mi RMi)
   ; eauto using VLSM_incl_Mi_RMi.
 Qed.
 
@@ -608,7 +608,7 @@ Lemma input_valid_transition_deterministic_conv_Mi :
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
   by eapply input_valid_transition_deterministic_conv_RMi
-  ; apply (@VLSM_incl_input_valid_transition _ Mi (vmachine Mi) (vmachine RMi))
+  ; apply (@VLSM_incl_input_valid_transition _ Mi Mi RMi)
   ; eauto using VLSM_incl_Mi_RMi.
 Qed.
 

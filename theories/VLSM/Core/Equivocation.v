@@ -406,7 +406,7 @@ Record oracle_stepwise_props
 {
   oracle_no_inits :
     forall (s : vstate vlsm),
-      initial_state_prop (VLSMMachine := vmachine vlsm) s ->
+      @initial_state_prop _ _ vlsm s ->
       forall (m : message), ~ oracle s m;
   oracle_step_update :
     forall (l : label _) (s : state _) (im : option message) (s' : state _) (om : option message),
@@ -962,7 +962,7 @@ Context
        no_traces_have_message_prop vlsm selector (fun m s => ~ oracle m s) s m).
 
 Lemma oracle_no_inits_from_trace :
-  forall (s : vstate vlsm), initial_state_prop (VLSMMachine := vmachine vlsm) s ->
+  forall (s : vstate vlsm), @initial_state_prop _ _ vlsm s ->
                            forall m, ~ oracle s m.
 Proof.
   intros s Hinit m Horacle.

@@ -94,7 +94,7 @@ Definition decidable_initial_messages_prop
 Record VLSM (message : Type) : Type := mk_vlsm
 {
   vtype :> VLSMType message;
-  vmachine : VLSMMachine vtype;
+  vmachine :> VLSMMachine vtype;
 }.
 
 Arguments vtype [message] v.
@@ -107,7 +107,7 @@ Definition pre_loaded_vlsm
   (initial : message -> Prop)
   : VLSM message
   :=
-  {| vmachine := VLSMMachine_pre_loaded_with_messages (vmachine X) initial |}.
+  {| vmachine := VLSMMachine_pre_loaded_with_messages X initial |}.
 
 Section sec_traces.
 
@@ -389,15 +389,15 @@ Context
 
 Definition vstate := state vlsm.
 Definition vlabel := label vlsm.
-Definition vinitial_state_prop := @initial_state_prop _ _ (vmachine vlsm).
-Definition vinitial_state := @initial_state _ _ (vmachine vlsm).
-Definition vinitial_message_prop := @initial_message_prop _ _ (vmachine vlsm).
-Definition voption_initial_message_prop := @option_initial_message_prop _ _ (vmachine vlsm).
-Definition vinitial_message := @initial_message _ _ (vmachine vlsm).
-Definition vs0 := @inhabitant _ (@s0 _ _ (vmachine vlsm)).
-Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ (vmachine vlsm).
-Definition vtransition := @transition _ _ (vmachine vlsm).
-Definition vvalid := @valid _ _ (vmachine vlsm).
+Definition vinitial_state_prop := @initial_state_prop _ _ vlsm.
+Definition vinitial_state := @initial_state _ _ vlsm.
+Definition vinitial_message_prop := @initial_message_prop _ _ vlsm.
+Definition voption_initial_message_prop := @option_initial_message_prop _ _ vlsm.
+Definition vinitial_message := @initial_message _ _ vlsm.
+Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
+Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ vlsm.
+Definition vtransition := @transition _ _ vlsm.
+Definition vvalid := @valid _ _ vlsm.
 Definition vtransition_item := @transition_item _ vlsm.
 Definition vTrace := @Trace _ vlsm.
 
@@ -2513,7 +2513,7 @@ Definition pre_loaded_with_all_messages_vlsm_machine
   :=
   {| initial_state_prop := vinitial_state_prop X
    ; initial_message_prop := fun message => True
-   ; s0 := @s0 _ _ (vmachine X)
+   ; s0 := @s0 _ _ X
    ; transition := vtransition X
    ; valid := vvalid X
   |}.

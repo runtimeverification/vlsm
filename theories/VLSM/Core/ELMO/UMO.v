@@ -305,7 +305,7 @@ Context
   transport them to [Ui].
 *)
 Lemma VLSM_incl_Ui_Ri :
-  VLSM_incl_part (vmachine Ui) (vmachine Ri).
+  VLSM_incl_part Ui Ri.
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -474,7 +474,7 @@ Lemma input_valid_transition_size_Ui :
 Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_valid_transition_size_Ri.
-  by apply (@VLSM_incl_input_valid_transition _ Ui (vmachine Ui) (vmachine Ri))
+  by apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
@@ -487,7 +487,7 @@ Lemma finite_valid_trace_from_to_size_Ui :
 Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_valid_trace_from_to_size_Ri.
-  by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui (vmachine Ui) (vmachine Ri))
+  by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
@@ -497,7 +497,7 @@ Lemma finite_valid_trace_from_to_inv_Ui :
 Proof.
   intros s tr Hfvt.
   eapply finite_valid_trace_from_to_inv_Ri.
-  by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui (vmachine Ui) (vmachine Ri))
+  by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
@@ -535,7 +535,7 @@ Lemma input_valid_transition_deterministic_conv_Ui :
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
   by eapply input_valid_transition_deterministic_conv_Ri
-  ; apply (@VLSM_incl_input_valid_transition _ Ui (vmachine Ui) (vmachine Ri))
+  ; apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
@@ -1603,7 +1603,7 @@ Proof.
   intros us Hvsp.
   apply all_pre_traces_to_valid_state_are_valid; [typeclasses eauto | done |].
   apply finite_valid_trace_from_to_UMO_state2trace_RUMO.
-  eapply (@VLSM_incl_valid_state _ UMO (vmachine UMO) (vmachine RUMO)); [| done].
+  eapply (@VLSM_incl_valid_state _ UMO UMO RUMO); [| done].
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
