@@ -128,7 +128,7 @@ Definition equivocation_in_trace
     /\ input item = Some msg
     /\ ~ trace_has_message (field_selector output) msg prefix.
 
-Instance equivocation_in_trace_dec
+#[export] Instance equivocation_in_trace_dec
   `{EqDecision message}
   : RelDecision equivocation_in_trace.
 Proof.
