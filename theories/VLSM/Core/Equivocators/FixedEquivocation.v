@@ -716,7 +716,8 @@ Proof.
   destruct item. simpl in *.
   apply first_transition_valid in Hpre_item_free. simpl in Hpre_item_free.
   destruct Hpre_item_free as [[_ [_ [Hv _]]] Ht].
-  destruct l. simpl in *. unfold vtransition in Ht. simpl in Ht.
+  destruct l.
+  cbn in *; unfold vtransition in Ht.
   match type of Ht with
   | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn: Hti
   end.
@@ -812,7 +813,7 @@ Proof.
   destruct item as (l, iom, s0, oom).
   simpl in Hm. subst iom.
   destruct Hivt as [[_ [_ [_ [[Hc _] Hfixed]]]] Ht].
-  simpl in Ht, Hfixed. rewrite Ht in Hfixed. simpl in Hfixed.
+  cbn in Ht, Hfixed; rewrite Ht in Hfixed.
   clear Ht.
   destruct Hc as [Hc | Hinit]; [| done].
   assert (Hpre_free : finite_valid_trace FreeE is pre).

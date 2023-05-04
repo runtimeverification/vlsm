@@ -570,8 +570,7 @@ Proof.
     destruct Hom as [_s Hom].
     specialize (valid_generated_state_message X _ _ HsX _ _ Hom _ Hfr) as Hgen.
     apply Hgen.
-    simpl.
-    unfold lift_to_composite_state' at 1.
+    cbn; unfold lift_to_composite_state' at 1.
     state_update_simpl.
     replace (vtransition (IM j) _ _) with (s', om').
     f_equal.

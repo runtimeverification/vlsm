@@ -249,7 +249,7 @@ Proof.
       ; [by apply input_valid_transition_outputs_valid_state_message |].
     split.
     + by repeat split; [.. | apply Ht].
-    + simpl.
+    + cbn.
       replace (lifted_alt_state s first) with s
         by (unfold lifted_alt_state, lift_to_composite_state'; state_update_simpl; done).
       apply proj2 in Ht.

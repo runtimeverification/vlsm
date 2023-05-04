@@ -916,8 +916,8 @@ Proof.
   induction Hproto.
   - by apply preloaded_valid_initial_state, (Hs i).
   - destruct l as [j lj].
-    simpl in Ht. unfold vtransition in Ht. simpl in Ht.
-    destruct (vtransition (IM j) _ _) as (si', _om') eqn: Hti.
+    cbn in Ht; unfold vtransition in Ht.
+    destruct (transition lj _) as (si', _om') eqn: Hti.
     inversion_clear Ht.
     destruct (decide (i = j)); subst; state_update_simpl; [| done].
     by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
@@ -1149,13 +1149,9 @@ Lemma relevant_component_transition
   (Hiv : input_valid Free l (s, input)) :
   input_valid Free l (s', input).
 Proof.
-  unfold input_valid in *.
-  split_and!; try itauto.
-  unfold valid in *; simpl in *.
-  unfold constrained_composite_valid in *.
-  unfold composite_valid in *.
-  unfold free_constraint in *; simpl.
-  unfold vvalid in *.
+  split_and!; [done | by apply Hiv |].
+  cbn in Hiv |- *.
+  unfold constrained_composite_valid, composite_valid, free_constraint, vvalid in Hiv |- *.
   destruct l.
   simpl in i.
   unfold i in Heq.
