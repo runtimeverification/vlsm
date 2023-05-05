@@ -184,7 +184,7 @@ Proof. by intros i; destruct (vs0 (IM i)). Defined.
 *)
 Definition composite_initial_message_prop (m : message) : Prop
   :=
-    exists (n : index) (mi : vinitial_message (IM n)), proj1_sig mi = m.
+    exists (n : index) (mi : initial_message (IM n)), proj1_sig mi = m.
 
 Definition option_composite_initial_message_prop : option message -> Prop
   := from_option composite_initial_message_prop True.
@@ -1103,7 +1103,7 @@ Context
   .
 
 Lemma composite_decidable_initial_message
-  (Hdec_init : forall i, vdecidable_initial_messages_prop (IM i))
+  (Hdec_init : forall i, decidable_initial_messages_prop (IM i))
   : decidable_initial_messages_prop (composite_vlsm_machine IM constraint).
 Proof.
   intro m. simpl. unfold composite_initial_message_prop.
