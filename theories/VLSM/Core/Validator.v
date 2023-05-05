@@ -16,19 +16,13 @@ Section sec_input_validation_definitions.
 Context
   `{X : VLSM message}
   {TY : VLSMType message}
-  .
-
-#[local] Notation labelTY := (label TY).
-#[local] Notation stateTY := (state TY).
-
-Context
-  (label_project : vlabel X -> option labelTY)
-  (state_project : vstate X -> stateTY)
+  (label_project : vlabel X -> option (label TY))
+  (state_project : vstate X -> state TY)
   .
 
 Record InputValidation
-  (lY : labelTY)
-  (sY : stateTY)
+  (lY : label TY)
+  (sY : state TY)
   (om : option message)
   (lX : vlabel X)
   (sX : vstate X)
@@ -40,8 +34,8 @@ Record InputValidation
 }.
 
 Record TransitionValidation
-  (lY : labelTY)
-  (sY : stateTY)
+  (lY : label TY)
+  (sY : state TY)
   (om : option message)
   (lX : vlabel X)
   (sX : vstate X)
@@ -143,18 +137,10 @@ Section sec_projection_induced_validator_pre_definitions.
 Context
   {message : Type}
   {TX TY : VLSMType message}
-  .
-
-#[local] Notation labelTX := (label TX).
-#[local] Notation stateTX := (state TX).
-#[local] Notation labelTY := (label TY).
-#[local] Notation stateTY := (state TY).
-
-Context
-  (label_project : labelTX -> option labelTY)
-  (state_project : stateTX -> stateTY)
-  (label_lift : labelTY -> labelTX)
-  (state_lift : stateTY -> stateTX)
+  (label_project : label TX -> option (label TY))
+  (state_project : state TX -> state TY)
+  (label_lift : label TY -> label TX)
+  (state_lift : state TY -> state TX)
   .
 
 (** <<label_project>> is a left-inverse of <<label_lift>> *)
@@ -173,23 +159,19 @@ Context
   (TY : VLSMType message)
   .
 
-#[local] Notation labelTY := (label TY).
-#[local] Notation stateTY := (state TY).
-#[local] Notation transition_itemTY := (@transition_item _ TY).
-
 Context
-  (label_project : vlabel X -> option labelTY)
-  (state_project : vstate X -> stateTY)
+  (label_project : vlabel X -> option (label TY))
+  (state_project : vstate X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
-  (label_lift : labelTY -> vlabel X)
-  (state_lift : stateTY -> vstate X)
+  (label_lift : label TY -> vlabel X)
+  (state_lift : state TY -> vstate X)
   .
 
-Definition projection_induced_initial_state_prop (sY : stateTY) : Prop :=
+Definition projection_induced_initial_state_prop (sY : state TY) : Prop :=
   exists sX, state_project sX = sY /\ vinitial_state_prop X sX.
 
 #[export] Program Instance projection_induced_initial_state_inh :
-  Inhabited {sY : stateTY | projection_induced_initial_state_prop sY} :=
+  Inhabited {sY : state TY | projection_induced_initial_state_prop sY} :=
     populate (exist _ (state_project (` (vs0 X))) _).
 Next Obligation.
 Proof.
@@ -201,16 +183,16 @@ Defined.
 Definition projection_induced_initial_message_prop : message -> Prop := const False.
 
 Definition projection_induced_transition
-  (lY : labelTY)
-  (somY : stateTY * option message)
-  : stateTY * option message :=
+  (lY : label TY)
+  (somY : state TY * option message)
+  : state TY * option message :=
   let (sY, om) := somY in
   let (s'X, om') := vtransition X (label_lift lY) (state_lift sY, om) in
   (state_project s'X, om').
 
 Definition projection_induced_valid
-  (lY : labelTY)
-  (somY : stateTY * option message)
+  (lY : label TY)
+  (somY : state TY * option message)
   : Prop :=
   exists lX sX, InputValidation label_project state_project lY somY.1 somY.2 lX sX.
 
@@ -340,7 +322,7 @@ Context
   .
 
 Lemma induced_validator_transition_item_lift
-  (item : transition_itemTY)
+  (item : transition_item TY)
   : pre_VLSM_projection_transition_item_project _ _ label_project state_project
     (pre_VLSM_embedding_transition_item_project _ _ label_lift state_lift item)
     = Some item.
@@ -352,7 +334,7 @@ Proof.
 Qed.
 
 Lemma induced_validator_trace_lift
-  (tr : list transition_itemTY)
+  (tr : list (transition_item TY))
   : pre_VLSM_projection_finite_trace_project _ _ label_project state_project
     (pre_VLSM_embedding_finite_trace_project _ _ label_lift state_lift tr)
     = tr.
@@ -389,19 +371,11 @@ Context
   {message : Type}
   {TX : VLSMType message}
   (TY : VLSMType message)
-  .
-
-#[local] Notation labelTX := (label TX).
-#[local] Notation stateTX := (state TX).
-#[local] Notation labelTY := (label TY).
-#[local] Notation stateTY := (state TY).
-
-Context
-  (label_project : labelTX -> option labelTY)
-  (state_project : stateTX -> stateTY)
+  (label_project : label TX -> option (label TY))
+  (state_project : state TX -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
-  (label_lift : labelTY -> labelTX)
-  (state_lift : stateTY -> stateTX)
+  (label_lift : label TY -> label TX)
+  (state_lift : state TY -> state TX)
   (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
   (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
   .
