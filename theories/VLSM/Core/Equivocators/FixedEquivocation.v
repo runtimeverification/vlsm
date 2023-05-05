@@ -300,7 +300,7 @@ Context
   (XE : VLSM message := equivocators_fixed_equivocations_vlsm IM (elements equivocating))
   (X : VLSM message := fixed_equivocation_vlsm_composition IM equivocating)
   (FreeE : VLSM message := free_composite_vlsm (equivocator_IM IM))
-  (Hdec_init : forall i, vdecidable_initial_messages_prop (IM i))
+  (Hdec_init : forall i, decidable_initial_messages_prop (IM i))
   (Free := free_composite_vlsm IM)
   (index_equivocating_prop : index -> Prop := sub_index_prop (elements equivocating))
   (equivocating_index : Type := sub_index (elements equivocating))

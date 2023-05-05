@@ -394,7 +394,6 @@ Definition vinitial_state := @initial_state _ _ vlsm.
 Definition vinitial_message_prop := @initial_message_prop _ _ vlsm.
 Definition vinitial_message := @initial_message _ _ vlsm.
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
-Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ vlsm.
 Definition vtransition := @transition _ _ vlsm.
 Definition vvalid := @valid _ _ vlsm.
 Definition vtransition_item := @transition_item _ vlsm.

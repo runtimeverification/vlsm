@@ -1103,7 +1103,7 @@ Context
   .
 
 Lemma composite_decidable_initial_message
-  (Hdec_init : forall i, vdecidable_initial_messages_prop (IM i))
+  (Hdec_init : forall i, decidable_initial_messages_prop (IM i))
   : decidable_initial_messages_prop (composite_vlsm_machine IM constraint).
 Proof.
   intro m. simpl. unfold composite_initial_message_prop.
