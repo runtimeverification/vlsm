@@ -62,6 +62,8 @@ Class VLSMMachine {message : Type} (T : VLSMType message) : Type :=
 *)
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
+Arguments initial_message {message T} _, {message} _ _.
+
 Definition option_initial_message_prop
   {message : Type} {T : VLSMType message} {M : VLSMMachine T}
   : option message -> Prop := from_option initial_message_prop True.
@@ -392,7 +394,6 @@ Definition vlabel := label vlsm.
 Definition vinitial_state_prop := @initial_state_prop _ _ vlsm.
 Definition vinitial_state := @initial_state _ _ vlsm.
 Definition vinitial_message_prop := @initial_message_prop _ _ vlsm.
-Definition vinitial_message := @initial_message _ _ vlsm.
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
 Definition vtransition := @transition _ _ vlsm.
 Definition vvalid := @valid _ _ vlsm.
@@ -893,7 +894,7 @@ Qed.
 Lemma valid_message_prop_iff :
   forall m' : message,
     valid_message_prop m'
-    <-> (exists im : vinitial_message X, m' = proj1_sig im)
+    <-> (exists im : initial_message X, m' = proj1_sig im)
       \/ exists (l : label X) (som : state X * option message) (s' : state X),
         input_valid_transition l som (s', Some m').
 Proof.

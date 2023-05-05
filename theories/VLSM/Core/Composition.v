@@ -184,7 +184,7 @@ Proof. by intros i; destruct (vs0 (IM i)). Defined.
 *)
 Definition composite_initial_message_prop (m : message) : Prop
   :=
-    exists (n : index) (mi : vinitial_message (IM n)), proj1_sig mi = m.
+    exists (n : index) (mi : initial_message (IM n)), proj1_sig mi = m.
 
 Definition option_composite_initial_message_prop : option message -> Prop
   := from_option composite_initial_message_prop True.
