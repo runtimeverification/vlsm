@@ -1387,7 +1387,7 @@ Definition computable_messages_oracle_rel_dec
 
 Lemma ComputableSentMessages_initial_state_empty
   `{!ComputableSentMessages vlsm}
-  (s : vinitial_state vlsm)
+  (s : initial_state vlsm)
   : sent_messages_set (proj1_sig s) = [].
 Proof.
   by eapply computable_messages_oracle_initial_state_empty;
@@ -1426,7 +1426,7 @@ Proof. done. Qed.
 
 Lemma ComputableReceivedMessages_initial_state_empty
   `{!ComputableReceivedMessages vlsm}
-  (s : vinitial_state vlsm)
+  (s : initial_state vlsm)
   : received_messages_set (proj1_sig s) = [].
 Proof.
   by eapply computable_messages_oracle_initial_state_empty;
