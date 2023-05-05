@@ -62,7 +62,7 @@ Class VLSMMachine {message : Type} (T : VLSMType message) : Type :=
 *)
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
-Arguments initial_message {message T} _, {message} _ _.
+Arguments initial_message {message T} _.
 
 Definition option_initial_message_prop
   {message : Type} {T : VLSMType message} {M : VLSMMachine T}
