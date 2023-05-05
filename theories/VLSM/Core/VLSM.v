@@ -392,7 +392,6 @@ Definition vlabel := label vlsm.
 Definition vinitial_state_prop := @initial_state_prop _ _ vlsm.
 Definition vinitial_state := @initial_state _ _ vlsm.
 Definition vinitial_message_prop := @initial_message_prop _ _ vlsm.
-Definition voption_initial_message_prop := @option_initial_message_prop _ _ vlsm.
 Definition vinitial_message := @initial_message _ _ vlsm.
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
 Definition vdecidable_initial_messages_prop := @decidable_initial_messages_prop _ _ vlsm.
