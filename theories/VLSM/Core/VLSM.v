@@ -234,8 +234,9 @@ Definition trace_nth (tr : Trace)
 
 End sec_traces.
 
+Arguments Trace {message T}, {message} T.
 Arguments transition_item {message} {T} , {message} T.
-Arguments field_selector {_} {T} _ msg item / .
+Arguments field_selector {_} {T} _ msg item /.
 Arguments item_sends_or_receives {_} {_} msg item /.
 
 Section sec_trace_lemmas.
@@ -398,7 +399,6 @@ Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
 Definition vtransition := @transition _ _ vlsm.
 Definition vvalid := @valid _ _ vlsm.
 Definition vtransition_item := @transition_item _ vlsm.
-Definition vTrace := @Trace _ vlsm.
 
 End sec_vlsm_projections.
 
@@ -2156,7 +2156,7 @@ Definition trace_prefix
 Definition trace_prefix_fn
   (tr : Trace)
   (n : nat)
-  : vTrace X
+  : Trace X
   :=
   match tr with
   | Finite s ls => Finite s (list_prefix ls n)

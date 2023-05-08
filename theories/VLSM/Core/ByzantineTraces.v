@@ -40,7 +40,7 @@ Context
   to <<M>>.
 *)
 Definition byzantine_trace_prop
-    (tr : vTrace M) :=
+    (tr : Trace M) :=
     exists (M' : VLSM message)
         (Proj := binary_free_composition_fst M M'),
         valid_trace_prop Proj tr.
@@ -51,7 +51,7 @@ Definition byzantine_trace_prop
 *)
 Lemma byzantine_pre_loaded_with_all_messages
     (PreLoaded := pre_loaded_with_all_messages_vlsm M)
-    (tr : vTrace M)
+    (tr : Trace M)
     (Hbyz : byzantine_trace_prop tr)
     : valid_trace_prop PreLoaded tr.
 Proof.
@@ -126,7 +126,7 @@ Definition emit_any_message_vlsm
   to the component corresponding to <<M>>.
 *)
 Definition alternate_byzantine_trace_prop
-    (tr : vTrace M)
+    (tr : Trace M)
     (Proj := binary_free_composition_fst M emit_any_message_vlsm)
     :=
     valid_trace_prop Proj tr.
@@ -138,7 +138,7 @@ Definition alternate_byzantine_trace_prop
   [alternate_byzantine_trace_prop]erty also has the [byzantine_trace_prop]erty.
 *)
 Lemma byzantine_alt_byzantine
-    (tr : vTrace M)
+    (tr : Trace M)
     (Halt : alternate_byzantine_trace_prop tr)
     : byzantine_trace_prop tr.
 Proof.
@@ -294,7 +294,7 @@ End sec_pre_loaded_with_all_messages_byzantine_alt.
   equivalent.
 *)
 Lemma byzantine_alt_byzantine_iff
-    (tr : vTrace M)
+    (tr : Trace M)
     : alternate_byzantine_trace_prop tr <-> byzantine_trace_prop tr.
 Proof.
   split; intros.
@@ -392,7 +392,7 @@ Qed.
   resist any kind of external influence.
 *)
 Lemma composite_validator_byzantine_traces_are_not_byzantine
-    (tr : vTrace X)
+    (tr : Trace X)
     (Hbyz : byzantine_trace_prop X tr)
     : valid_trace_prop X tr.
 Proof.
