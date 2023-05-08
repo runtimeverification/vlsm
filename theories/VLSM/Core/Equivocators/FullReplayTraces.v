@@ -531,7 +531,7 @@ Proof.
 Qed.
 
 Lemma lift_initial_message
-  : forall m, vinitial_message_prop SeededXE m -> valid_message_prop SeededCE m.
+  : forall m, initial_message_prop SeededXE m -> valid_message_prop SeededCE m.
 Proof.
   intros m [Hinit | Hseeded].
   - apply initial_message_is_valid. destruct Hinit as [[i Hi] Hinit].

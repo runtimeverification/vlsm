@@ -127,7 +127,7 @@ Proof. by apply tc_reflect. Qed.
   [valid_message_prop]erty.
 *)
 Lemma msg_dep_reflects_validity
-  (no_initial_messages_in_X : forall m, ~ vinitial_message_prop X m)
+  (no_initial_messages_in_X : forall m, ~ initial_message_prop X m)
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
   : forall dm m, msg_dep_rel dm m ->

@@ -214,12 +214,12 @@ Definition weak_embedding_initial_message_preservation : Prop :=
   forall (l : vlabel X) (s : vstate X) (m : message)
     (Hv : input_valid X l (s, Some m))
     (HsY : valid_state_prop Y (state_project s))
-    (HmX : vinitial_message_prop X m),
+    (HmX : initial_message_prop X m),
     valid_message_prop Y m.
 
 Definition strong_embedding_initial_message_preservation : Prop :=
   forall m : message,
-    vinitial_message_prop X m -> vinitial_message_prop Y m.
+    initial_message_prop X m -> initial_message_prop Y m.
 
 Lemma strong_embedding_initial_message_preservation_weaken
   : strong_embedding_initial_message_preservation ->

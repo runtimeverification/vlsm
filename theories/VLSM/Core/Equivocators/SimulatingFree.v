@@ -58,7 +58,7 @@ Definition last_in_trace_except_from
 Definition zero_descriptor_constraint_lifting_prop : Prop :=
   forall
     es (Hes : valid_state_prop CE es)
-    om (Hom : sent_except_from (equivocator_IM IM) (vinitial_message_prop CE) es om)
+    om (Hom : sent_except_from (equivocator_IM IM) (@initial_message_prop _ _ CE) es om)
     eqv li,
     constraintE (existT eqv (ContinueWith 0 li)) (es, om).
 
@@ -81,14 +81,14 @@ Definition replayable_message_prop : Prop :=
     eqv_msg_is eqv_msg_s eqv_msg_tr
     (Hmsg_trace : finite_valid_trace_init_to CE eqv_msg_is eqv_msg_s eqv_msg_tr)
     iom
-    (Hfinal_msg : last_in_trace_except_from (vinitial_message_prop CE) eqv_msg_tr iom)
+    (Hfinal_msg : last_in_trace_except_from (@initial_message_prop _ _ CE) eqv_msg_tr iom)
     l
     (HcX : constraintX l (s, iom)),
     exists eqv_msg_tr lst_msg_tr,
       finite_valid_trace_from_to CE eqv_state_s lst_msg_tr eqv_msg_tr /\
       equivocators_total_trace_project IM eqv_msg_tr = [] /\
       equivocators_total_state_project IM lst_msg_tr = s /\
-      sent_except_from (equivocator_IM IM) (vinitial_message_prop CE) lst_msg_tr iom.
+      sent_except_from (equivocator_IM IM) (@initial_message_prop _ _ CE) lst_msg_tr iom.
 
 (**
   The main result of this section, showing that every trace of the

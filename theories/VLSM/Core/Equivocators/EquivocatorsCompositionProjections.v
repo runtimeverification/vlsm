@@ -1729,8 +1729,8 @@ Context
 
 Lemma seeded_equivocators_initial_message
   (m : message)
-  (Hem : vinitial_message_prop SeededXE m)
-  : vinitial_message_prop SeededX m.
+  (Hem : initial_message_prop SeededXE m)
+  : initial_message_prop SeededX m.
 Proof.
   destruct Hem as [[eqv [emi Hem]] | Hseed].
   - by left; exists eqv, emi.

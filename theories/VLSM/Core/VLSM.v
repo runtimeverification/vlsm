@@ -63,6 +63,7 @@ Class VLSMMachine {message : Type} (T : VLSMType message) : Type :=
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
 Arguments initial_state {message T} _.
+Arguments initial_message_prop {message T} _ _, {message T _} _.
 Arguments initial_message {message T} _.
 
 Definition option_initial_message_prop
@@ -393,7 +394,6 @@ Context
 Definition vstate := state vlsm.
 Definition vlabel := label vlsm.
 Definition vinitial_state_prop := @initial_state_prop _ _ vlsm.
-Definition vinitial_message_prop := @initial_message_prop _ _ vlsm.
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
 Definition vtransition := @transition _ _ vlsm.
 Definition vvalid := @valid _ _ vlsm.
@@ -503,7 +503,7 @@ Qed.
 
 Lemma initial_message_is_valid
   (m : message)
-  (Hinitial : vinitial_message_prop X m) :
+  (Hinitial : initial_message_prop X m) :
   valid_message_prop m.
 Proof.
   exists (proj1_sig (vs0 X)).
@@ -826,7 +826,7 @@ Qed.
 
 Lemma emitted_messages_are_valid_iff
   (m : message)
-  : valid_message_prop m <-> vinitial_message_prop X m \/ can_emit m.
+  : valid_message_prop m <-> initial_message_prop X m \/ can_emit m.
 Proof.
   split.
   - intros [s Hm].
@@ -2758,7 +2758,7 @@ Lemma same_VLSM_initial_state_preservation s1
 Proof. by subst. Qed.
 
 Lemma same_VLSM_initial_message_preservation m
-  : vinitial_message_prop X1 m -> vinitial_message_prop X2 m.
+  : initial_message_prop X1 m -> initial_message_prop X2 m.
 Proof. by subst. Qed.
 
 End sec_same_VLSM.
