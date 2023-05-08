@@ -372,11 +372,10 @@ Definition lift_to_equivocators_state
 
 Lemma lift_initial_to_equivocators_state
   (s : vstate Free)
-  (Hs : vinitial_state_prop Free s)
-  : vinitial_state_prop equivocators_no_equivocations_vlsm (lift_to_equivocators_state s).
+  (Hs : initial_state_prop Free s)
+  : initial_state_prop equivocators_no_equivocations_vlsm (lift_to_equivocators_state s).
 Proof.
-  unfold vinitial_state_prop in *. simpl in *.
-  unfold composite_initial_state_prop in *.
+  cbn in Hs |- *; unfold composite_initial_state_prop in Hs |- *.
   by intro i; specialize (Hs i).
 Qed.
 
@@ -496,10 +495,10 @@ Qed.
 
 Lemma equivocators_initial_state_project
   (es : vstate equivocators_free_vlsm)
-  (Hes : vinitial_state_prop equivocators_free_vlsm es)
+  (Hes : initial_state_prop equivocators_free_vlsm es)
   (eqv_descriptors : equivocator_descriptors)
   (Heqv : proper_equivocator_descriptors eqv_descriptors es)
-  : vinitial_state_prop Free (equivocators_state_project eqv_descriptors es).
+  : initial_state_prop Free (equivocators_state_project eqv_descriptors es).
 Proof.
   intro eqv. specialize (Hes eqv).
   unfold equivocator_IM in Hes.

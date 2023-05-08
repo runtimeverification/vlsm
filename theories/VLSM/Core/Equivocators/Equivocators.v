@@ -530,7 +530,7 @@ Qed.
 Definition equivocator_initial_state_prop
   (bs : equivocator_state)
   : Prop
-  := is_singleton_state bs /\ vinitial_state_prop X (equivocator_state_zero bs).
+  := is_singleton_state bs /\ initial_state_prop X (equivocator_state_zero bs).
 
 Definition equivocator_initial_state : Type :=
   {bs : equivocator_state | equivocator_initial_state_prop bs}.
@@ -577,7 +577,7 @@ Definition equivocator_valid
   :=
   match bl with
   | Spawn sn  => (* state is initial *)
-    vinitial_state_prop X sn /\ bsom.2 = None
+    initial_state_prop X sn /\ bsom.2 = None
   | ContinueWith i l | ForkWith i l =>
     match equivocator_state_project bsom.1 i with
     | Some si => vvalid X l (si, bsom.2)
@@ -609,7 +609,7 @@ Proof. by intro. Qed.
 
 Lemma equivocator_vlsm_initial_state_preservation_rev is i s
   (Hs : equivocator_state_project is i = Some s)
-  : vinitial_state_prop equivocator_vlsm is -> vinitial_state_prop X s.
+  : initial_state_prop equivocator_vlsm is -> initial_state_prop X s.
 Proof.
   intros [Hzero Hinit].
   apply equivocator_state_project_Some_rev in Hs as Hlt_i.
@@ -619,8 +619,8 @@ Qed.
 
 Lemma mk_singleton_initial_state
   (s : vstate X)
-  : vinitial_state_prop X s ->
-    vinitial_state_prop equivocator_vlsm (mk_singleton_state s).
+  : initial_state_prop X s ->
+    initial_state_prop equivocator_vlsm (mk_singleton_state s).
 Proof. done. Qed.
 
 End sec_equivocator_vlsm.
@@ -781,7 +781,7 @@ Definition proper_descriptor
   (s : vstate equivocator_vlsm)
   :=
   match d with
-  | NewMachine sn => vinitial_state_prop X sn
+  | NewMachine sn => initial_state_prop X sn
   | Existing i => is_Some (equivocator_state_project s i)
   end.
 

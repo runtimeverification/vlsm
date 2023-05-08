@@ -272,11 +272,11 @@ Record VLSM_projection : Prop :=
 
 Definition weak_projection_initial_state_preservation : Prop :=
   forall s : vstate X,
-    vinitial_state_prop X s -> valid_state_prop Y (state_project s).
+    initial_state_prop X s -> valid_state_prop Y (state_project s).
 
 Definition strong_projection_initial_state_preservation : Prop :=
   forall s : vstate X,
-    vinitial_state_prop X s -> vinitial_state_prop Y (state_project s).
+    initial_state_prop X s -> initial_state_prop Y (state_project s).
 
 Lemma strong_projection_initial_state_preservation_weaken
   : strong_projection_initial_state_preservation ->
@@ -679,7 +679,7 @@ Definition VLSM_projection_infinite_finite_valid_trace_from
     := VLSM_weak_projection_infinite_finite_valid_trace_from VLSM_projection_weaken.
 
 Lemma VLSM_projection_initial_state
-  : forall sX, vinitial_state_prop X sX -> vinitial_state_prop Y (state_project sX).
+  : forall sX, initial_state_prop X sX -> initial_state_prop Y (state_project sX).
 Proof.
   specialize VLSM_partial_projection_from_projection as Hpart_simul.
   specialize (VLSM_partial_projection_initial_state Hpart_simul) as His.

@@ -317,7 +317,7 @@ Definition selected_messages_consistency_prop
 
 Lemma selected_message_exists_in_all_traces_initial_state
   (s : vstate vlsm)
-  (Hs : vinitial_state_prop vlsm s)
+  (Hs : initial_state_prop vlsm s)
   (message_selector : message -> transition_item -> Prop)
   (m : message)
   : ~ selected_message_exists_in_all_preloaded_traces message_selector s m.
@@ -549,7 +549,7 @@ Definition has_not_been_sent `{HasBeenSentCapability} : state_message_oracle :=
 
 Definition has_been_sent_no_inits `{HasBeenSentCapability} :
   forall s : vstate vlsm,
-    vinitial_state_prop vlsm s → ∀ m : message, ~ has_been_sent s m
+    initial_state_prop vlsm s -> ∀ m : message, ~ has_been_sent s m
   := oracle_no_inits _ _ (has_been_sent_stepwise_props).
 
 Definition has_been_sent_step_update `{HasBeenSentCapability} :
@@ -722,7 +722,7 @@ Definition has_not_been_received `{HasBeenReceivedCapability} : state_message_or
 
 Definition has_been_received_no_inits `{HasBeenReceivedCapability} :
   forall s : vstate vlsm,
-    vinitial_state_prop vlsm s → ∀ m : message, ~ has_been_received s m
+    initial_state_prop vlsm s -> ∀ m : message, ~ has_been_received s m
   := oracle_no_inits _ _ has_been_received_stepwise_props.
 
 Definition has_been_received_step_update `{HasBeenReceivedCapability} :
@@ -1123,7 +1123,7 @@ Lemma trace_to_initial_state_has_no_inputs
   `{HasBeenReceivedCapability message vlsm}
   is s tr
   (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr)
-  (Hs : vinitial_state_prop vlsm s)
+  (Hs : initial_state_prop vlsm s)
   : forall item, item ∈ tr -> input item = None.
 Proof.
   intros item Hitem.
@@ -1365,7 +1365,7 @@ Context
 Lemma computable_messages_oracle_initial_state_empty
   `(Hrm : computable_messages_oracle vlsm oracle_set message_selector)
   (s : vstate vlsm)
-  (Hs : vinitial_state_prop vlsm s)
+  (Hs : initial_state_prop vlsm s)
   : oracle_set s = [].
 Proof.
   apply elem_of_nil_inv; intro.

@@ -63,7 +63,7 @@ Lemma equivocator_state_append_initial_state_in_futures
     (base_s : equivocator_state X)
     (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
     s
-    : vinitial_state_prop (equivocator_vlsm X) s ->
+    : initial_state_prop (equivocator_vlsm X) s ->
       in_futures (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s
         (equivocator_state_append base_s s).
 Proof.
@@ -87,7 +87,7 @@ Lemma equivocator_state_append_transition_initial_state
     (base_s : equivocator_state X)
     (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
     s
-    : vinitial_state_prop (equivocator_vlsm X) s ->
+    : initial_state_prop (equivocator_vlsm X) s ->
       valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed)
         (equivocator_state_append base_s s).
 Proof.

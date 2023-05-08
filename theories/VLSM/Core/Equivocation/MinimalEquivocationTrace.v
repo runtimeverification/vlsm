@@ -272,7 +272,7 @@ Definition composite_latest_sent_observed_in
 Lemma traceable_vlsm_initial_state_dec :
   forall (i : index) (si : vstate (IM i)),
     valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) si ->
-    Decision (vinitial_state_prop (IM i) si).
+    Decision (initial_state_prop (IM i) si).
 Proof.
   intros; destruct (decide (state_destructor i si = nil)).
   - by left; apply tv_state_destructor_initial.
@@ -286,7 +286,7 @@ Qed.
 Program Definition initial_indices
   (s : composite_state IM) (Hs : valid_state_prop RFree s) (is : list index)
   : list index :=
-  @filter _ _ _ (fun i => vinitial_state_prop (IM i) (s i)) _ is.
+  @filter _ _ _ (fun i => initial_state_prop (IM i) (s i)) _ is.
 Next Obligation.
 Proof.
   by intros; eapply traceable_vlsm_initial_state_dec, valid_state_project_preloaded_to_preloaded.
@@ -552,7 +552,7 @@ Proof.
     apply composite_HasBeenObserved_iff in Hsent_not_obs as [y Hobs].
     exists y; split.
     - destruct (decide (elem_of y is)); [done | exfalso].
-      cut (vinitial_state_prop (IM y) (s y)).
+      cut (initial_state_prop (IM y) (s y)).
       {
         by intro; inversion Hobs; eapply has_been_directly_observed_no_inits.
       }
@@ -651,7 +651,7 @@ Context
   `{forall i, ComputableReceivedMessages (IM i)}
   `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
-  `{forall i s, Decision (vinitial_state_prop (IM i) s)}
+  `{forall i s, Decision (initial_state_prop (IM i) s)}
   (state_destructor : forall i, vstate (IM i) -> set (vtransition_item (IM i) * vstate (IM i)))
   (state_size : forall i, vstate (IM i) -> nat)
   `{forall i, TraceableVLSM (IM i) (state_destructor i) (state_size i)}

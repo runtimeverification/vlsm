@@ -240,14 +240,14 @@ Qed.
 Lemma UMO_based_valid_reachable
   (VM : VLSMMachine (Build_VLSMType Message State Label))
   (V := mk_vlsm VM)
-  (Hinit_empty : forall si, vinitial_state_prop V si -> obs si = [])
+  (Hinit_empty : forall si, initial_state_prop V si -> obs si = [])
   (Hsend_spec : forall s om, ram_state_prop V s -> vvalid V Send (s, om) <-> om = None)
   (Htransition : forall l s om, vtransition V l (s, om) = UMOComponent_transition l s om) :
   forall (s : State),
     ram_state_prop V s
       <->
     UMO_reachable (fun s m => VM.(valid) Receive (s, Some m)) s
-      /\ vinitial_state_prop V (MkState [] (adr s)).
+      /\ initial_state_prop V (MkState [] (adr s)).
 Proof.
   split.
   - intros Hs; induction Hs using valid_state_prop_ind.

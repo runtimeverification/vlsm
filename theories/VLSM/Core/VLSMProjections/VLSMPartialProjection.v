@@ -181,7 +181,7 @@ Qed.
 Lemma VLSM_partial_projection_initial_state
   : forall sX sY trY,
     trace_project (sX, []) = Some (sY, trY) ->
-    vinitial_state_prop X sX -> vinitial_state_prop Y sY.
+    initial_state_prop X sX -> initial_state_prop Y sY.
 Proof.
   intros sX sY trY Hpr HsX.
   eapply VLSM_partial_projection_finite_valid_trace; [done |].

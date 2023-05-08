@@ -211,11 +211,11 @@ Record VLSM_stuttering_embedding : Prop :=
 
 Definition weak_stuttering_embedding_initial_state_preservation : Prop :=
   forall s : vstate X,
-    vinitial_state_prop X s -> valid_state_prop Y (state_project s).
+    initial_state_prop X s -> valid_state_prop Y (state_project s).
 
 Definition strong_stuttering_embedding_initial_state_preservation : Prop :=
   forall s : vstate X,
-    vinitial_state_prop X s -> vinitial_state_prop Y (state_project s).
+    initial_state_prop X s -> initial_state_prop Y (state_project s).
 
 Lemma strong_stuttering_embedding_initial_state_preservation_weaken :
   strong_stuttering_embedding_initial_state_preservation ->
@@ -536,7 +536,7 @@ Definition VLSM_stuttering_embedding_infinite_finite_valid_trace_from :
   := VLSM_weak_stuttering_embedding_infinite_finite_valid_trace_from VLSM_stuttering_embedding_weaken.
 
 Lemma VLSM_stuttering_embedding_initial_state :
-  forall sX, vinitial_state_prop X sX -> vinitial_state_prop Y (state_project sX).
+  forall sX, initial_state_prop X sX -> initial_state_prop Y (state_project sX).
 Proof.
   by intros; eapply VLSM_partial_projection_initial_state;
     [apply VLSM_partial_projection_from_stuttering_embedding | ..].

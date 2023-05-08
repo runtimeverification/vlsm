@@ -165,7 +165,7 @@ Definition composite_initial_state_prop
            (s : composite_state)
   : Prop
   :=
-    forall n : index, vinitial_state_prop (IM n) (s n).
+    forall n : index, initial_state_prop (IM n) (s n).
 
 Definition composite_initial_state : Type :=
   {s : composite_state | composite_initial_state_prop s}.
@@ -347,7 +347,7 @@ Definition composite_trace_to_plan := (@_trace_to_plan _ composite_type).
 Lemma composite_initial_state_prop_lift
   (j : index)
   (sj : vstate (IM j))
-  (Hinitj : vinitial_state_prop (IM j) sj)
+  (Hinitj : initial_state_prop (IM j) sj)
   : composite_initial_state_prop (lift_to_composite_state' j sj).
 Proof.
   intro i.
@@ -747,7 +747,7 @@ Lemma composite_update_initial_state_with_initial
   (Hs : composite_initial_state_prop s)
   (i : index)
   (si : vstate (IM i))
-  (Hsi : vinitial_state_prop (IM i) si)
+  (Hsi : initial_state_prop (IM i) si)
   : composite_initial_state_prop (state_update s i si).
 Proof.
   intro j. destruct (decide (j = i)); subst.
@@ -765,7 +765,7 @@ Lemma pre_composite_free_update_state_with_initial
   (Hs : valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) s)
   (i : index)
   (si : vstate (IM i))
-  (Hsi : vinitial_state_prop (IM i) si)
+  (Hsi : initial_state_prop (IM i) si)
   : valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) (state_update s i si).
 Proof.
   induction Hs using valid_state_prop_ind.

@@ -666,7 +666,7 @@ Lemma equivocator_valid_transition_project_inv3
           equivocator_state_project s' i' = Some si
       | NewMachine sn' =>
           l = Spawn sn' /\ i = equivocator_state_last s /\ iom = None /\ oom = None /\
-          equivocator_state_project s i = Some sn' /\ vinitial_state_prop X sn'
+          equivocator_state_project s i = Some sn' /\ initial_state_prop X sn'
       end
     end.
 Proof.
@@ -833,7 +833,7 @@ Lemma preloaded_with_equivocator_vlsm_trace_project_valid
     equivocator_vlsm_trace_project btr (Existing j) = Some (tr, di) /\
     match di with
     | NewMachine sn =>
-      vinitial_state_prop X sn
+      initial_state_prop X sn
       /\ finite_valid_trace_from_to (pre_loaded_vlsm X seed) sn ej tr
     | Existing i =>
       exists s, equivocator_state_project bs i = Some s /\
@@ -906,7 +906,7 @@ Lemma equivocator_vlsm_trace_project_valid
     equivocator_vlsm_trace_project btr (Existing j) = Some (tr, di) /\
     match di with
     | NewMachine sn =>
-      vinitial_state_prop X sn
+      initial_state_prop X sn
       /\ finite_valid_trace_from_to X sn ej tr
     | Existing i =>
       exists s, equivocator_state_project bs i = Some s /\
@@ -949,7 +949,7 @@ Lemma preloaded_equivocator_vlsm_trace_project_valid
     equivocator_vlsm_trace_project btr (Existing j) = Some (tr, di) /\
     match di with
     | NewMachine sn =>
-      vinitial_state_prop X sn
+      initial_state_prop X sn
       /\ finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) sn ej tr
     | Existing i =>
       exists s, equivocator_state_project bs i = Some s /\
@@ -1064,8 +1064,8 @@ Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
     | Existing i =>
       exists isi, equivocator_state_project is i = Some isi /\
       finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) isi fsj trX /\
-      (vinitial_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is ->
-        vinitial_state_prop (pre_loaded_with_all_messages_vlsm X) isi)
+      (initial_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is ->
+        initial_state_prop (pre_loaded_with_all_messages_vlsm X) isi)
     end.
 Proof.
   specialize (equivocator_vlsm_trace_project_inv _ Hntr j) as Hj.

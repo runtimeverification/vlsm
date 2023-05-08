@@ -73,7 +73,7 @@ Definition directly_observed_were_sent (s : vstate X) : Prop :=
   forall msg, has_been_directly_observed X s msg -> has_been_sent X s msg.
 
 Lemma directly_observed_were_sent_initial s :
-  vinitial_state_prop X s ->
+  initial_state_prop X s ->
   directly_observed_were_sent s.
 Proof.
   intros Hinitial msg Hsend.

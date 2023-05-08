@@ -23,8 +23,8 @@ Lemma equivocator_initial_state_project
   (es : vstate (equivocator_vlsm X))
   (eqv_descriptor : MachineDescriptor X)
   (Heqv : proper_descriptor X eqv_descriptor es)
-  (Hes : vinitial_state_prop (equivocator_vlsm X) es) :
-  vinitial_state_prop X (equivocator_state_descriptor_project es eqv_descriptor).
+  (Hes : initial_state_prop (equivocator_vlsm X) es) :
+  initial_state_prop X (equivocator_state_descriptor_project es eqv_descriptor).
 Proof.
   destruct eqv_descriptor; [done |].
   destruct Heqv as [esn Hesn].
@@ -41,8 +41,8 @@ Lemma composite_equivocators_initial_state_project
   {eqv_constraint : composite_constraint (equivocator_IM IM)}
   {constraint : composite_constraint IM}
   (Heqv : proper_equivocator_descriptors IM eqv_descriptors es)
-  (Hes : vinitial_state_prop (composite_vlsm (equivocator_IM IM) eqv_constraint) es)
-  : vinitial_state_prop (composite_vlsm IM constraint)
+  (Hes : initial_state_prop (composite_vlsm (equivocator_IM IM) eqv_constraint) es)
+  : initial_state_prop (composite_vlsm IM constraint)
       (equivocators_state_project IM eqv_descriptors es).
 Proof.
   refine (fun i => equivocator_initial_state_project _ _ _ (Heqv i) (Hes i)).

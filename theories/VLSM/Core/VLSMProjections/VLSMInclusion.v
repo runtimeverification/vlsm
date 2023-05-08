@@ -198,7 +198,7 @@ Qed.
 
 Lemma VLSM_incl_initial_state
   (is : vstate X)
-  : vinitial_state_prop X is -> vinitial_state_prop Y is.
+  : initial_state_prop X is -> initial_state_prop Y is.
 Proof.
   by apply (VLSM_embedding_initial_state (VLSM_incl_is_embedding Hincl)).
 Qed.

@@ -461,7 +461,7 @@ Definition VLSM_embedding_finite_valid_trace_init_to
 
 Definition VLSM_embedding_initial_state
   : forall (is : vstate X),
-    vinitial_state_prop X is -> vinitial_state_prop Y (state_project is)
+    initial_state_prop X is -> initial_state_prop Y (state_project is)
   := VLSM_projection_initial_state VLSM_embedding_is_projection.
 
 Lemma VLSM_embedding_weaken

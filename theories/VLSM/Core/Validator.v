@@ -168,7 +168,7 @@ Context
   .
 
 Definition projection_induced_initial_state_prop (sY : state TY) : Prop :=
-  exists sX, state_project sX = sY /\ vinitial_state_prop X sX.
+  exists sX, state_project sX = sY /\ initial_state_prop X sX.
 
 #[export] Program Instance projection_induced_initial_state_inh :
   Inhabited {sY : state TY | projection_induced_initial_state_prop sY} :=
@@ -406,7 +406,7 @@ Proof.
       X2 TY _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency2).
   intros Hincl.
   apply VLSM_incl_finite_traces_characterization.
-  assert (His : forall s, vinitial_state_prop XY1 s -> vinitial_state_prop XY2 s).
+  assert (His : forall s, initial_state_prop XY1 s -> initial_state_prop XY2 s).
   {
     intros is (s1 & Hs1_pr & Hs1).
     by exists s1; split; [| apply VLSM_incl_initial_state].
@@ -800,7 +800,7 @@ Proof. by destruct siomi, Hcomposite as (s & <- & _ & _ & []). Qed.
 Definition composite_vlsm_induced_projection_validator_machine
   : VLSMMachine (IM i) :=
 {|
-  initial_state_prop := vinitial_state_prop (IM i);
+  initial_state_prop := @initial_state_prop _ _ (IM i);
   initial_message_prop := @initial_message_prop _ _ (IM i);
   s0 := populate (vs0 (IM i));
   transition :=  vtransition (IM i);
