@@ -804,7 +804,7 @@ Qed.
 
 Lemma lift_to_composite_initial_message_preservation :
   forall (i : index),
-      forall m, vinitial_message_prop (IM i) m ->
+      forall m, initial_message_prop (IM i) m ->
       composite_initial_message_prop m.
 Proof. by intros i m Hm; exists i, (exist _ _ Hm). Qed.
 
@@ -1109,7 +1109,7 @@ Proof.
   intro m. simpl. unfold composite_initial_message_prop.
   apply
     (Decision_iff
-      (P := List.Exists (fun i => vinitial_message_prop (IM i) m) (enum index))).
+      (P := List.Exists (fun i => initial_message_prop (IM i) m) (enum index))).
   - rewrite <- exists_finite.
     split; intros [i Hm]; exists i.
     + by exists (exist _ _ Hm).
@@ -1529,7 +1529,7 @@ Proof.
     simpl in Hi. subst im.
     cbn. unfold composite_initial_message_prop.
     left. exists i.
-    assert (Hm : vinitial_message_prop (IM2 i) m).
+    assert (Hm : initial_message_prop (IM2 i) m).
     + by eapply same_VLSM_initial_message_preservation; eauto.
     + by exists (exist _ m Hm).
 Qed.

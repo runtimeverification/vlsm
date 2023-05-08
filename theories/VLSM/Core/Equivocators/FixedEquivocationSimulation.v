@@ -45,7 +45,7 @@ Context {message : Type}
   .
 
 Lemma no_initial_messages_in_sub_IM
-  : forall i m, ~ vinitial_message_prop (sub_IM IM (elements equivocating) i) m.
+  : forall i m, ~ initial_message_prop (sub_IM IM (elements equivocating) i) m.
 Proof.
   intros [i Hi] m Hinit.
   by apply (no_initial_messages_in_IM i m).
@@ -344,7 +344,7 @@ Proof.
     hypothesis and conclusion is done to fit the applied lemma.
   *)
   assert (no_initial_messages_in_XE :
-    forall m, ~ vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
+    forall m, ~ initial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   { intros m [[i [[mi Hmi] Him]] | Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).
   }
@@ -406,7 +406,7 @@ Lemma no_equivocating_equivocators_finite_valid_trace_init_to_rev
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   assert (no_initial_messages_in_XE :
-    forall m, ~ vinitial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
+    forall m, ~ initial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
   {
     intros m [[i [[mi Hmi] Him]] | Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).

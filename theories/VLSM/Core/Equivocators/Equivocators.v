@@ -589,7 +589,7 @@ Definition equivocator_vlsm_machine
   : VLSMMachine equivocator_type
   :=
   {|  initial_state_prop := equivocator_initial_state_prop
-   ;  initial_message_prop := vinitial_message_prop X
+   ;  initial_message_prop := @initial_message_prop _ _ X
    ;  transition := equivocator_transition
    ;  valid := equivocator_valid
   |}.
