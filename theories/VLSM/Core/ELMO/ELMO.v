@@ -134,7 +134,7 @@ Lemma full_node_VLSM_reachable
     forall s : State, initial_state_prop V s -> obs s = [])
   (VM_enforces_full_node :
     forall (l : Label) (s : State) (m : Message),
-      vvalid V l (s, Some m) -> full_node s m) :
+      valid V l (s, Some m) -> full_node s m) :
   forall (s : State),
     ram_state_prop V s ->
     UMO_reachable full_node s.

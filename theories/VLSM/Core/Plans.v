@@ -293,7 +293,7 @@ Lemma finite_valid_plan_iff
       (ai : plan_item)
       (Heqa : a = prefa ++ [ai] ++ suffa)
       (lst := snd (apply_plan s prefa)),
-      vvalid X (label_a ai) (lst, input_a ai).
+      valid X (label_a ai) (lst, input_a ai).
 Proof.
   induction a using rev_ind; repeat split; intros
   ; try

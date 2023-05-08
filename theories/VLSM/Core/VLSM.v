@@ -66,6 +66,7 @@ Arguments initial_state_prop {message T} _ _, {message T _} _.
 Arguments initial_state {message T} _.
 Arguments initial_message_prop {message T} _ _, {message T _} _.
 Arguments initial_message {message T} _.
+Arguments valid {message T} _ _ _, {message T _} _ _.
 
 Definition option_initial_message_prop
   {message : Type} {T : VLSMType message} {M : VLSMMachine T}
@@ -396,7 +397,6 @@ Definition vstate := state vlsm.
 Definition vlabel := label vlsm.
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
 Definition vtransition := @transition _ _ vlsm.
-Definition vvalid := @valid _ _ vlsm.
 Definition vtransition_item := @transition_item _ vlsm.
 Definition vTrace := @Trace _ vlsm.
 
@@ -462,7 +462,7 @@ Inductive valid_state_message_prop : state X -> option message -> Prop :=
     (om : option message)
     (Hpm : valid_state_message_prop _s om)
     (l : label X)
-    (Hv : vvalid X l (s, om))
+    (Hv : valid X l (s, om))
     s' om'
     (Ht : vtransition X l (s, om) = (s', om'))
   : valid_state_message_prop s' om'.
@@ -560,7 +560,7 @@ Definition input_valid
   let (s, om) := som in
      valid_state_prop s
   /\ option_valid_message_prop om
-  /\ vvalid X l (s, om).
+  /\ valid X l (s, om).
 
 (** Input valid transitions are transitions with [input_valid] inputs. *)
 Definition input_valid_transition
@@ -685,7 +685,7 @@ Lemma input_valid_transition_is_valid
       {s s' : state X}
       {om om' : option message}
       (Ht : input_valid_transition l (s, om) (s', om'))
-  : vvalid X l (s, om).
+  : valid X l (s, om).
 Proof.
   by destruct Ht as [[_ [_ Hv]] _].
 Qed.
@@ -1537,7 +1537,7 @@ Inductive finite_valid_trace_init_to_emit
       (iom_is iom_s : state X) (iom : option message) (iom_tl : list (transition_item X))
       (Hiom : finite_valid_trace_init_to_emit iom_is iom_s iom iom_tl)
       (l : label X)
-      (Hv : vvalid X l (s, iom))
+      (Hv : valid X l (s, iom))
       (s' : state X) (oom : option message)
       (Ht : vtransition X l (s, iom) = (s', oom)),
       finite_valid_trace_init_to_emit is s' oom
@@ -2394,7 +2394,7 @@ Class VLSM_vdecidable : Type :=
 {
   valid_decidable :
     forall (l : label X) (som : state X * option message),
-      {vvalid X l som} + {~ vvalid X l som}
+      {valid X l som} + {~ valid X l som}
 }.
 
 End sec_VLSM.
@@ -2511,7 +2511,7 @@ Definition pre_loaded_with_all_messages_vlsm_machine
    ; initial_message_prop := fun message => True
    ; s0 := @s0 _ _ X
    ; transition := vtransition X
-   ; valid := vvalid X
+   ; valid := @valid _ _ X
   |}.
 
 Definition pre_loaded_with_all_messages_vlsm
@@ -2743,8 +2743,8 @@ Context
   .
 
 Lemma same_VLSM_valid_preservation l1 s1 om
-  : vvalid X1 l1 (s1, om) ->
-    vvalid X2 (same_VLSM_label_rew Heq l1) (same_VLSM_state_rew Heq s1, om).
+  : valid X1 l1 (s1, om) ->
+    valid X2 (same_VLSM_label_rew Heq l1) (same_VLSM_state_rew Heq s1, om).
 Proof. by subst. Qed.
 
 Lemma same_VLSM_transition_preservation l1 s1 om s1' om'
@@ -2765,7 +2765,7 @@ End sec_same_VLSM.
 
 Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
 {
-  vt_valid : vvalid X l (s1, iom);
+  vt_valid : valid X l (s1, iom);
   vt_transition : vtransition X l (s1, iom) = (s2, oom);
 }.
 

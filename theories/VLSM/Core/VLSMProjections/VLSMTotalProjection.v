@@ -292,12 +292,12 @@ Definition weak_projection_valid_preservation : Prop :=
     (Hv : input_valid X lX (s, om))
     (HsY : valid_state_prop Y (state_project s))
     (HomY : option_valid_message_prop Y om),
-    vvalid Y lY ((state_project s), om).
+    valid Y lY ((state_project s), om).
 
 Definition strong_projection_valid_preservation : Prop :=
   forall lX lY, label_project lX = Some lY ->
   forall s om,
-  vvalid X lX (s, om) -> vvalid Y lY ((state_project s), om).
+  valid X lX (s, om) -> valid Y lY ((state_project s), om).
 
 Lemma strong_projection_valid_preservation_weaken
   : strong_projection_valid_preservation ->

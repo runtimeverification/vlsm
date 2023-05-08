@@ -102,7 +102,7 @@ Context
 *)
 Definition message_dependencies_full_node_condition_prop : Prop :=
   forall l s m,
-  vvalid X l (s, Some m) ->
+  valid X l (s, Some m) ->
   message_dependencies_full_node_condition X message_dependencies s m.
 
 (** Unrolling one the [msg_dep_happens_before] relation one step. *)

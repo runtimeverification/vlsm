@@ -580,7 +580,7 @@ Definition equivocator_valid
     initial_state_prop X sn /\ bsom.2 = None
   | ContinueWith i l | ForkWith i l =>
     match equivocator_state_project bsom.1 i with
-    | Some si => vvalid X l (si, bsom.2)
+    | Some si => valid X l (si, bsom.2)
     | None => False
     end
   end.
@@ -857,7 +857,7 @@ Lemma equivocator_transition_no_equivocation_zero_descriptor
   (iom oom : option message)
   (l : vlabel equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
-  (Hv : vvalid equivocator_vlsm l (s, iom))
+  (Hv : valid equivocator_vlsm l (s, iom))
   (Ht : vtransition equivocator_vlsm l (s, iom) = (s', oom))
   (Hs' : is_singleton_state X s')
   : exists li, l = ContinueWith 0 li.

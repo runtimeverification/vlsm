@@ -59,7 +59,7 @@ Definition annotated_valid
   (l : label annotated_type)
   (som : annotated_state * option message)
   : Prop :=
-  vvalid X l (original_state som.1, som.2) /\
+  valid X l (original_state som.1, som.2) /\
   annotated_constraint l som.
 
 Definition annotated_transition

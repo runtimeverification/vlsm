@@ -241,7 +241,7 @@ Lemma UMO_based_valid_reachable
   (VM : VLSMMachine (Build_VLSMType Message State Label))
   (V := mk_vlsm VM)
   (Hinit_empty : forall si, initial_state_prop V si -> obs si = [])
-  (Hsend_spec : forall s om, ram_state_prop V s -> vvalid V Send (s, om) <-> om = None)
+  (Hsend_spec : forall s om, ram_state_prop V s -> valid V Send (s, om) <-> om = None)
   (Htransition : forall l s om, vtransition V l (s, om) = UMOComponent_transition l s om) :
   forall (s : State),
     ram_state_prop V s
@@ -266,7 +266,7 @@ Proof.
       repeat split.
       * by apply IHHs.
       * by apply option_valid_message_None.
-      * by change (vvalid V Send (s, None)); apply Hsend_spec; [apply IHHs |].
+      * by apply Hsend_spec; [apply IHHs |].
       * by cbn; rewrite Htransition.
     + apply input_valid_transition_destination
         with (l := Receive) (s := s) (om := Some msg) (om' := None).

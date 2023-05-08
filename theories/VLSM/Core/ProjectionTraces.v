@@ -340,7 +340,7 @@ Context
 Lemma projection_valid_input_valid
   (l : vlabel Xj)
   (som : vstate Xj * option message)
-  (Hv : vvalid Xj l som)
+  (Hv : valid Xj l som)
   : input_valid Xj l som.
 Proof.
   destruct som as (s, om).
@@ -354,7 +354,7 @@ Lemma projection_valid_implies_composition_valid_message
   (l : vlabel Xj)
   (s : vstate Xj)
   (om : option message)
-  (Hv : vvalid Xj l (s, om))
+  (Hv : valid Xj l (s, om))
   : option_valid_message_prop X om.
 Proof.
   by destruct Hv as (sx & Hs & HpsX & HpmX & Hv).
@@ -364,7 +364,7 @@ Lemma projection_valid_implies_projection_valid_state
   (lj : vlabel Xj)
   (sj : vstate Xj)
   (om : option message)
-  (Hv : vvalid Xj lj (sj, om))
+  (Hv : valid Xj lj (sj, om))
   : valid_state_prop Xj sj.
 Proof.
   by destruct Hv as (s & <- & Hs & _)
@@ -375,7 +375,7 @@ Lemma projection_valid_implies_projection_valid_state_message_outputs
     (l : vlabel Xj)
     (s : vstate Xj)
     (om : option message)
-    (Hv : vvalid Xj l (s, om))
+    (Hv : valid Xj l (s, om))
     s' om'
     (Ht : vtransition (IM j) l (s, om) = (s', om'))
     : valid_state_message_prop Xj s' om'.
@@ -391,7 +391,7 @@ Lemma projection_valid_implies_destination_projection_valid_state
     (l : vlabel Xj)
     (s : vstate Xj)
     (om : option message)
-    (Hv : vvalid Xj l (s, om))
+    (Hv : valid Xj l (s, om))
     s' om'
     (Ht : vtransition (IM j) l (s, om) = (s', om'))
     : valid_state_prop Xj s'.
@@ -403,7 +403,7 @@ Lemma projection_valid_implies_destination_projection_valid_message
     (l : vlabel Xj)
     (s : vstate Xj)
     (om : option message)
-    (Hv : vvalid Xj l (s, om))
+    (Hv : valid Xj l (s, om))
     s' om'
     (Ht : vtransition (IM j) l (s, om) = (s', om'))
     : option_valid_message_prop Xj om'.
@@ -449,7 +449,7 @@ Proof.
   apply (basic_VLSM_incl Xj PreLoaded); intro; intros.
   - done.
   - by apply initial_message_is_valid.
-  - by unfold vvalid; cbn; eapply (projection_valid_implies_valid IM), Hv.
+  - by cbn; eapply (projection_valid_implies_valid IM), Hv.
   - by apply H.
 Qed.
 
@@ -470,7 +470,7 @@ Qed.
 Definition component_projection_validator_prop :=
   forall (lj : vlabel (IM j)) (sj : vstate (IM j)) (omi : option message),
     input_valid (pre_loaded_with_all_messages_vlsm (IM j)) lj (sj, omi) ->
-    vvalid Xj lj (sj, omi).
+    valid Xj lj (sj, omi).
 
 Lemma component_projection_validator_prop_is_induced
   : component_projection_validator_prop <->
@@ -550,7 +550,7 @@ Definition projection_friendliness_sufficient_condition
     (s : vstate X)
     (Hs : valid_state_prop X s)
     (Hsi : s j = sj)
-    , vvalid X (existT j lj) (s, om).
+    , valid X (existT j lj) (s, om).
 
 Lemma projection_friendliness_sufficient_condition_valid_state
   (Hfr : projection_friendliness_sufficient_condition)

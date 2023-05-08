@@ -287,7 +287,7 @@ Lemma msg_dep_full_node_valid_iff
   l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
            (projT2 l) (original_state s (projT1 l), om))
-  : vvalid Limited l (s, om) <-> vvalid FullNodeLimited l (s, om).
+  : valid Limited l (s, om) <-> valid FullNodeLimited l (s, om).
 Proof.
   cbn; unfold annotated_valid, coeqv_limited_equivocation_constraint; destruct l as [i li].
   replace (sum_weights _) with
