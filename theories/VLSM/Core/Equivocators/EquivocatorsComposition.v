@@ -513,8 +513,8 @@ Qed.
 
 Lemma equivocators_initial_message
   (m : message)
-  (Hem : vinitial_message_prop equivocators_free_vlsm m)
-  : vinitial_message_prop Free m.
+  (Hem : initial_message_prop equivocators_free_vlsm m)
+  : initial_message_prop Free m.
 Proof.
   destruct Hem as [eqv [emi Hem]].
   by exists eqv, emi.

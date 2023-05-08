@@ -57,7 +57,7 @@ Proof.
   - apply basic_VLSM_strong_incl; [| | by intro..].
     + by intros s Hs i; specialize (Hs i).
     + intros ? (i & [im Him] & <-).
-      assert (Him' : vinitial_message_prop (composite_vlsm_induced_projection i) im) by (left; done).
+      assert (Him' : initial_message_prop (composite_vlsm_induced_projection i) im) by (left; done).
       by exists i, (exist _ _ Him').
   - apply basic_VLSM_incl.
     + by intros s Hs i; specialize (Hs i).

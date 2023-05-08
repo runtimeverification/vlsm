@@ -801,7 +801,7 @@ Definition composite_vlsm_induced_projection_validator_machine
   : VLSMMachine (IM i) :=
 {|
   initial_state_prop := vinitial_state_prop (IM i);
-  initial_message_prop := vinitial_message_prop (IM i);
+  initial_message_prop := @initial_message_prop _ _ (IM i);
   s0 := populate (vs0 (IM i));
   transition :=  vtransition (IM i);
   valid := composite_vlsm_induced_projection_valid;
@@ -815,7 +815,7 @@ Definition pre_composite_vlsm_induced_projection_validator : VLSM message :=
 
 Lemma preloaded_composite_vlsm_induced_projection_validator_iff
   (P : message -> Prop)
-  (Hinits : forall m,  vinitial_message_prop (IM i) m -> P m)
+  (Hinits : forall m,  initial_message_prop (IM i) m -> P m)
   : VLSM_eq
       (pre_loaded_vlsm composite_vlsm_induced_projection_validator P)
       (pre_loaded_vlsm (composite_vlsm_induced_validator IM constraint i) P).
@@ -872,7 +872,7 @@ Proof.
 Qed.
 
 Lemma composite_vlsm_induced_projection_validator_iff
-  (Hno_inits : forall m, ~ vinitial_message_prop (IM i) m)
+  (Hno_inits : forall m, ~ initial_message_prop (IM i) m)
   : VLSM_eq
       composite_vlsm_induced_projection_validator
       (composite_vlsm_induced_validator IM constraint i).

@@ -922,7 +922,7 @@ Qed.
 *)
 Lemma EquivPreloadedBase_Fixed_weak_embedding
   (no_initial_messages_for_equivocators :
-    forall i m, i ∈ equivocators -> ~ vinitial_message_prop (IM i) m)
+    forall i m, i ∈ equivocators -> ~ initial_message_prop (IM i) m)
   : VLSM_weak_embedding EquivPreloadedBase Fixed
       (lift_sub_label IM (elements equivocators)) (lift_sub_state_to IM (elements equivocators) base_s).
 Proof.

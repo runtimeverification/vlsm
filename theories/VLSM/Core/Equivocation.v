@@ -1980,7 +1980,7 @@ Definition sender_nontriviality_prop : Prop :=
   sender m = Some v.
 
 Definition no_initial_messages_in_IM_prop : Prop :=
-  forall i m, ~ vinitial_message_prop (IM i) m.
+  forall i m, ~ initial_message_prop (IM i) m.
 
 Lemma composite_no_initial_valid_messages_emitted_by_sender
     (can_emit_signed : channel_authentication_prop)

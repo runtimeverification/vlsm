@@ -71,7 +71,7 @@ Definition annotated_transition
 
 Definition annotated_vlsm_machine : VLSMMachine annotated_type :=
   {| initial_state_prop := fun s : state annotated_type => annotated_initial_state_prop s
-  ; initial_message_prop := fun m : message => vinitial_message_prop X m
+  ; initial_message_prop := fun m : message => initial_message_prop X m
   ; valid := annotated_valid
   ; transition := annotated_transition
   |}.
