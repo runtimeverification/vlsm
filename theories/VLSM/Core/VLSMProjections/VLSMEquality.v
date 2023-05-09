@@ -96,7 +96,7 @@ Qed.
 
 Lemma VLSM_eq_initial_state
   (is : vstate X)
-  : vinitial_state_prop X is <-> vinitial_state_prop Y is.
+  : initial_state_prop X is <-> initial_state_prop Y is.
 Proof.
   by split; apply VLSM_incl_initial_state, Hincl.
 Qed.

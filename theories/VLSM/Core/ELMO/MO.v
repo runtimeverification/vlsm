@@ -958,8 +958,8 @@ Qed.
 
 Lemma initial_state_prop_lift_RM_to_MO :
   forall (i : index) (s : State),
-    vinitial_state_prop (RM i) s ->
-      vinitial_state_prop MO (lift_to_MO_state (``(vs0 MO)) i s).
+    initial_state_prop (RM i) s ->
+      initial_state_prop MO (lift_to_MO_state (``(vs0 MO)) i s).
 Proof.
   intros i s Hisp j; cbn.
   by destruct (decide (i = j)); subst; state_update_simpl.
@@ -967,7 +967,7 @@ Qed.
 
 Lemma finite_valid_trace_lift_RM_to_MO :
   forall (i : index) (s : State),
-    vinitial_state_prop (RM i) s ->
+    initial_state_prop (RM i) s ->
       finite_valid_trace_init_to MO
         (lift_to_MO_state (``(vs0 MO)) i s) (lift_to_MO_state (``(vs0 MO)) i s) [].
 Proof.

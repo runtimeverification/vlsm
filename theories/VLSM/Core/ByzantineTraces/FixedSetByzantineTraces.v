@@ -165,7 +165,7 @@ Definition fixed_non_byzantine_projection : VLSM message :=
     non_byzantine_not_equivocating_constraint.
 
 Lemma fixed_non_byzantine_projection_initial_state_preservation
-  : forall s, vinitial_state_prop fixed_non_byzantine_projection s <->
+  : forall s, initial_state_prop fixed_non_byzantine_projection s <->
     composite_initial_state_prop (sub_IM fixed_byzantine_IM (elements non_byzantine)) s.
 Proof.
   split.

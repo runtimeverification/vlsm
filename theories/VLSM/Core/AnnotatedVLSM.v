@@ -36,7 +36,7 @@ Context
   .
 
 Definition annotated_initial_state_prop (sa : annotated_state) : Prop :=
-  vinitial_state_prop X (original_state sa) /\ initial_annotation_prop (state_annotation sa).
+  initial_state_prop X (original_state sa) /\ initial_annotation_prop (state_annotation sa).
 
 #[export] Program Instance annotated_initial_state_prop_inhabited :
   Inhabited {sa : annotated_state | annotated_initial_state_prop sa} :=

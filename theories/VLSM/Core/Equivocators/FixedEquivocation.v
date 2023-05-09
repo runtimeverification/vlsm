@@ -372,10 +372,10 @@ Qed.
 
 Lemma fixed_equivocators_initial_state_project
   (es : vstate XE)
-  (Hes : vinitial_state_prop XE es)
+  (Hes : initial_state_prop XE es)
   (eqv_descriptors : equivocator_descriptors IM)
   (Heqv : proper_equivocator_descriptors IM eqv_descriptors es)
-  : vinitial_state_prop X (equivocators_state_project IM eqv_descriptors es).
+  : initial_state_prop X (equivocators_state_project IM eqv_descriptors es).
 Proof.
   intro eqv. specialize (Hes eqv).
   unfold equivocator_IM in Hes.
@@ -459,7 +459,7 @@ Proof.
   - clear IHlen. subst. exists [], final_descriptors.
     split; [done |]. split; [done |]. split; [done |].
     remember (equivocators_state_project IM final_descriptors is) as isx.
-    cut (vinitial_state_prop X' isx).
+    cut (initial_state_prop X' isx).
     { intro His. split; [| done]. constructor.
       apply valid_state_prop_iff. left.
       by exists (exist _ _ His).

@@ -131,7 +131,7 @@ Lemma full_node_VLSM_reachable
     forall (l : Label) (s : State) (om : option Message),
       vtransition V l (s, om) = UMOComponent_transition l s om)
   (VM_init_empty :
-    forall s : State, vinitial_state_prop V s -> obs s = [])
+    forall s : State, initial_state_prop V s -> obs s = [])
   (VM_enforces_full_node :
     forall (l : Label) (s : State) (m : Message),
       vvalid V l (s, Some m) -> full_node s m) :
@@ -416,7 +416,7 @@ Qed.
 Lemma ELMO_transition_output_not_initial :
   forall l (s : State) (om : option Message) (s' : State) (om' : option Message),
     input_valid_transition Ri l (s, om) (s', om') ->
-    ~ vinitial_state_prop Ri s'.
+    ~ initial_state_prop Ri s'.
 Proof.
   intros l s om [ol a] om' [(_ & _ & Hv) Ht]; compute; intros [-> _].
   by inversion Hv; subst; inversion Ht.
@@ -1189,7 +1189,7 @@ end.
 
 Lemma ELMOComponent_state_destructor_initial :
   forall (s' : vstate Ei), ram_state_prop Ei s' ->
-    vinitial_state_prop Ei s' <-> ELMOComponent_state_destructor s' = [].
+    initial_state_prop Ei s' <-> ELMOComponent_state_destructor s' = [].
 Proof.
   intros s' Hs'; split; intro Hs''.
   - by cbn in Hs''; apply UMOComponent_initial_state_spec in Hs'' as ->.
@@ -1998,7 +1998,7 @@ Lemma ELMO_update_state_with_initial
   (i : index)
   (Heqv : (sum_weights (ELMO_equivocating_validators s ∪ {[ idx i ]}) <= threshold)%R)
   (si : State)
-  (Hsi : vinitial_state_prop (ELMOComponent i) si) :
+  (Hsi : initial_state_prop (ELMOComponent i) si) :
     valid_state_prop ELMOProtocol (state_update ELMOComponent s i si) /\
     ELMO_equivocating_validators (state_update ELMOComponent s i si)
       ⊆
@@ -2166,7 +2166,7 @@ Proof.
       subst; apply ELMO_global_equivocators_iff_simple, Hs'_eqv; [done |].
       by right; apply ELMO_global_equivocators_iff_simple.
   }
-  assert (His : vinitial_state_prop (ELMOComponent i_m) (MkState [] (idx i_m))) by done.
+  assert (His : initial_state_prop (ELMOComponent i_m) (MkState [] (idx i_m))) by done.
   destruct (ELMO_update_state_with_initial _ Hs _ Heqv _ His) as [Hsimis Hsimis_eqvs].
   eapply valid_state_project_preloaded with (i := i) in Hs as Hsi_pre.
   replace m with (MkMessage (state m)) in Hrcv by (destruct m; done).

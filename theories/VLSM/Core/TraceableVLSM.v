@@ -87,7 +87,7 @@ Class TraceableVLSM
         input_valid_transition_item (pre_loaded_with_all_messages_vlsm X) s item;
   tv_state_destructor_initial :
     forall (s : vstate X) (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s),
-      vinitial_state_prop X s <-> state_destructor s = [];
+      initial_state_prop X s <-> state_destructor s = [];
 }.
 
 #[global] Hint Mode TraceableVLSM - ! - - : typeclass_instances.
@@ -272,7 +272,7 @@ Qed.
 Lemma composite_tv_state_destructor_initial :
   forall (s : composite_state IM), valid_state_prop RFree s ->
   forall i,
-    vinitial_state_prop (IM i) (s i)
+    initial_state_prop (IM i) (s i)
       <->
     composite_state_destructor s i = [].
 Proof.
@@ -290,7 +290,7 @@ Lemma composite_tv_state_destructor_reflects_initiality :
   forall (s' : composite_state IM), valid_state_prop RFree s' ->
   forall (i : index) (s : composite_state IM) (item : composite_transition_item IM),
     (item, s) ∈ composite_state_destructor s' i ->
-    forall j, vinitial_state_prop (IM j) (s' j) -> s j = s' j.
+    forall j, initial_state_prop (IM j) (s' j) -> s j = s' j.
 Proof.
   intros s' Hs' i s item Hdestruct.
   apply composite_tv_state_destructor_state_update in Hdestruct as Heqs'; [| done].
@@ -374,7 +374,7 @@ Record ChoosingWell
   cw_chosen_position_exists :
     forall (i : index) (n : nat),
       choose s' Hs' indices = (i, n) ->
-      ~ vinitial_state_prop (IM i) (s' i) ->
+      ~ initial_state_prop (IM i) (s' i) ->
       is_Some (composite_state_destructor s' i !! n);
 }.
 
@@ -401,7 +401,7 @@ Definition not_in_indices_initial_prop
   (s' : composite_state IM)
   (indices : list index)
   : Prop :=
-  forall i, i ∉ indices -> vinitial_state_prop (IM i) (s' i).
+  forall i, i ∉ indices -> initial_state_prop (IM i) (s' i).
 
 (**
   The ram-transitions leading to a composite ram-state reflect the
@@ -502,7 +502,7 @@ Lemma indexed_composite_state_to_trace_reflects_initiality_1 :
   forall (choose : choice_function)
     (s : composite_state IM) (Hs : valid_state_prop RFree s)
     (indices : list index),
-  forall (i : index), vinitial_state_prop (IM i) (s i) ->
+  forall (i : index), initial_state_prop (IM i) (s i) ->
     forall is tr, indexed_composite_state_to_trace choose s Hs indices = (is, tr) ->
     is i = s i.
 Proof.
@@ -530,7 +530,7 @@ Lemma indexed_composite_state_to_trace_result_state :
   forall (indices : list index), NoDup indices ->
     not_in_indices_initial_prop s indices ->
     forall is tr, indexed_composite_state_to_trace choose s Hs indices = (is, tr) ->
-    forall i, i ∈ indices -> vinitial_state_prop (IM i) (is i).
+    forall i, i ∈ indices -> initial_state_prop (IM i) (is i).
 Proof.
   intros ? Hchoose *; revert Hchoose.
   apply_funelim (indexed_composite_state_to_trace choose s Hs indices);
@@ -571,7 +571,7 @@ Proof.
   intros * ? ? ? ? ? Hinitial ** i.
   destruct (decide (i ∈ indices)).
   - by eapply indexed_composite_state_to_trace_result_state.
-  - assert (vinitial_state_prop (IM i) (s i)) by (apply Hinitial; done).
+  - assert (initial_state_prop (IM i) (s i)) by (apply Hinitial; done).
     by erewrite indexed_composite_state_to_trace_reflects_initiality_1.
 Qed.
 
@@ -584,7 +584,7 @@ Lemma indexed_composite_state_to_trace_reflects_initiality_2 :
   forall (choose : choice_function)
     (s : composite_state IM) (Hs : valid_state_prop RFree s)
     (indices : list index),
-  forall (i : index), vinitial_state_prop (IM i) (s i) ->
+  forall (i : index), initial_state_prop (IM i) (s i) ->
     forall is tr,
       indexed_composite_state_to_trace choose s Hs indices = (is, tr) ->
       forall item, item ∈ tr ->

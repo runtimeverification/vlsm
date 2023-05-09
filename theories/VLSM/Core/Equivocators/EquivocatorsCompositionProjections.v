@@ -1249,7 +1249,7 @@ Proof.
     exists final_descriptors. split; [done |].
     exists [].
     repeat (split; [done |]).
-    cut (vinitial_state_prop (free_composite_vlsm IM)
+    cut (initial_state_prop (free_composite_vlsm IM)
       (equivocators_state_project final_descriptors is)).
     {
       intro Hinit; split; [| done].
@@ -1786,7 +1786,7 @@ Proof.
   subst len_tr.
   destruct_list_last tr tr' lst Htr_lst.
   - clear H. subst. subst final_state. simpl in *. inversion Hpr_trX. subst.
-    cut (vinitial_state_prop SubFree (equivocators_state_project sub_IM initial_descriptors is)).
+    cut (initial_state_prop SubFree (equivocators_state_project sub_IM initial_descriptors is)).
     { intro. split; [| done]. constructor.
       apply valid_state_prop_iff. left.
       by exists (exist _ _ H).

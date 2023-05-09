@@ -62,6 +62,7 @@ Class VLSMMachine {message : Type} (T : VLSMType message) : Type :=
 *)
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
+Arguments initial_state_prop {message T} _ _, {message T _} _.
 Arguments initial_state {message T} _.
 Arguments initial_message_prop {message T} _ _, {message T _} _.
 Arguments initial_message {message T} _.
@@ -394,7 +395,6 @@ Context
 
 Definition vstate := state vlsm.
 Definition vlabel := label vlsm.
-Definition vinitial_state_prop := @initial_state_prop _ _ vlsm.
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
 Definition vtransition := @transition _ _ vlsm.
 Definition vvalid := @valid _ _ vlsm.
@@ -450,7 +450,7 @@ Context
 Inductive valid_state_message_prop : state X -> option message -> Prop :=
 | valid_initial_state_message
     (s : state X)
-    (Hs : vinitial_state_prop X s)
+    (Hs : initial_state_prop X s)
     (om : option message)
     (Hom : @option_initial_message_prop _ _ X om)
   : valid_state_message_prop s om
@@ -494,7 +494,7 @@ Definition valid_message : Type :=
 
 Lemma initial_state_is_valid
   (s : state X)
-  (Hinitial : vinitial_state_prop X s) :
+  (Hinitial : initial_state_prop X s) :
   valid_state_prop s.
 Proof.
   exists None.
@@ -774,7 +774,7 @@ Lemma option_can_produce_valid_iff
   (s : state X)
   (om : option message)
   : valid_state_message_prop s om <->
-    option_can_produce s om \/ vinitial_state_prop X s /\ @option_initial_message_prop _ X X om.
+    option_can_produce s om \/ initial_state_prop X s /\ @option_initial_message_prop _ X X om.
 Proof.
   split.
   - intros Hm; inversion Hm; subst.
@@ -876,7 +876,7 @@ Qed.
 *)
 Lemma valid_state_prop_ind
   (P : state X -> Prop)
-  (IHinit : forall (s : state X) (Hs : vinitial_state_prop X s), P s)
+  (IHinit : forall (s : state X) (Hs : initial_state_prop X s), P s)
   (IHgen :
     forall (s' : state X) (l : label X) (om om' : option message) (s : state X)
       (Ht : input_valid_transition l (s, om) (s', om')) (Hs : P s),
@@ -960,7 +960,7 @@ Definition finite_valid_trace_singleton :
   that <<start>> is an initial state according to the protocol.
 *)
 Definition finite_valid_trace (s : state X) (ls : list (transition_item X)) : Prop :=
-  finite_valid_trace_from s ls /\ vinitial_state_prop X s.
+  finite_valid_trace_from s ls /\ initial_state_prop X s.
 
 (**
   In the remainder of the section we provide various results allowing us to
@@ -977,7 +977,7 @@ Definition finite_valid_trace (s : state X) (ls : list (transition_item X)) : Pr
   as part of the proof script.
 *)
 Lemma finite_valid_trace_empty (s : state X) :
-  vinitial_state_prop X s ->
+  initial_state_prop X s ->
   finite_valid_trace s [].
 Proof.
   by split; [constructor; apply initial_state_is_valid |].
@@ -1197,7 +1197,7 @@ Qed.
 Lemma finite_valid_trace_rev_ind
   (P : state X -> list (transition_item X) -> Prop)
   (Hempty : forall si,
-    vinitial_state_prop X si -> P si nil)
+    initial_state_prop X si -> P si nil)
   (Hextend : forall si tr,
     finite_valid_trace si tr ->
     P si tr ->
@@ -1408,7 +1408,7 @@ Qed.
 
 Definition finite_valid_trace_init_to si sf tr : Prop
   := finite_valid_trace_from_to si sf tr
-      /\ vinitial_state_prop X si.
+      /\ initial_state_prop X si.
 
 Lemma finite_valid_trace_init_add_last si sf tr :
   finite_valid_trace si tr ->
@@ -1485,7 +1485,7 @@ Qed.
 Lemma finite_valid_trace_init_to_rev_ind
   (P : state X -> state X -> list (transition_item X) -> Prop)
   (Hempty : forall si
-    (Hsi : vinitial_state_prop X si),
+    (Hsi : initial_state_prop X si),
     P si si nil)
   (Hextend : forall si s tr
     (IHtr : P si s tr)
@@ -1527,7 +1527,7 @@ Qed.
 Inductive finite_valid_trace_init_to_emit
   : state X -> state X -> option message -> list (transition_item X) -> Prop :=
 | finite_valid_trace_init_to_emit_empty : forall (is : state X) (om : option message)
-    (His : vinitial_state_prop X is)
+    (His : initial_state_prop X is)
     (Him : @option_initial_message_prop _ X X om),
     finite_valid_trace_init_to_emit is is om []
 | finite_valid_trace_init_to_emit_extend
@@ -1546,7 +1546,7 @@ Inductive finite_valid_trace_init_to_emit
 Lemma finite_valid_trace_init_to_emit_initial_state
   (is f : state X) (om : option message) (tl : list (transition_item X))
   (Htl : finite_valid_trace_init_to_emit is f om tl)
-  : vinitial_state_prop X is.
+  : initial_state_prop X is.
 Proof. by induction Htl. Qed.
 
 (**
@@ -1642,7 +1642,7 @@ Qed.
 Lemma finite_valid_trace_init_to_rev_strong_ind
   (P : state X -> state X -> list (transition_item X) -> Prop)
   (Hempty : forall is
-    (His : vinitial_state_prop X is),
+    (His : initial_state_prop X is),
     P is is nil)
   (Hextend : forall is s tr
     (IHs : P is s tr)
@@ -1693,7 +1693,7 @@ CoInductive infinite_valid_trace_from :
       (Cons {| l := l; input := iom; destination := s; output := oom |}  tl).
 
 Definition infinite_valid_trace (s : state X) (st : Stream (transition_item X))
-  := infinite_valid_trace_from s st /\ vinitial_state_prop X s.
+  := infinite_valid_trace_from s st /\ initial_state_prop X s.
 
 (**
   As for the finite case, the following lemmas help decompose teh above
@@ -1831,13 +1831,13 @@ Proof. by destruct tr, Htr. Qed.
 Lemma valid_trace_initial
   (tr : Trace)
   (Htr : valid_trace_prop tr)
-  : vinitial_state_prop X (trace_first tr).
+  : initial_state_prop X (trace_first tr).
 Proof. by destruct tr, Htr. Qed.
 
 Lemma valid_trace_from_iff
   (tr : Trace)
   : valid_trace_prop tr
-  <-> valid_trace_from_prop tr /\ vinitial_state_prop X (trace_first tr).
+  <-> valid_trace_from_prop tr /\ initial_state_prop X (trace_first tr).
 Proof.
   split.
   - intro Htr; split.
@@ -1857,7 +1857,7 @@ Lemma valid_state_message_has_trace
       (s : state X)
       (om : option message)
       (Hp : valid_state_message_prop s om)
-  : vinitial_state_prop X s /\ @option_initial_message_prop _ X X om
+  : initial_state_prop X s /\ @option_initial_message_prop _ X X om
   \/ exists (is : state X) (tr : list transition_item),
         finite_valid_trace_init_to is s tr
         /\ finite_trace_last_output tr = om.
@@ -2507,7 +2507,7 @@ Context
 Definition pre_loaded_with_all_messages_vlsm_machine
   : VLSMMachine X
   :=
-  {| initial_state_prop := vinitial_state_prop X
+  {| initial_state_prop := @initial_state_prop _ _ X
    ; initial_message_prop := fun message => True
    ; s0 := @s0 _ _ X
    ; transition := vtransition X
@@ -2754,7 +2754,7 @@ Lemma same_VLSM_transition_preservation l1 s1 om s1' om'
 Proof. by subst. Qed.
 
 Lemma same_VLSM_initial_state_preservation s1
-  : vinitial_state_prop X1 s1 -> vinitial_state_prop X2 (same_VLSM_state_rew Heq s1).
+  : initial_state_prop X1 s1 -> initial_state_prop X2 (same_VLSM_state_rew Heq s1).
 Proof. by subst. Qed.
 
 Lemma same_VLSM_initial_message_preservation m
@@ -2808,7 +2808,7 @@ End sec_valid_transition_props.
 Class HistoryVLSM `(X : VLSM message) : Prop :=
 {
   not_ValidTransitionNext_initial :
-    forall s2, vinitial_state_prop X s2 ->
+    forall s2, initial_state_prop X s2 ->
     forall s1, ~ ValidTransitionNext X s1 s2;
   unique_transition_to_state :
     forall [s : vstate X],
