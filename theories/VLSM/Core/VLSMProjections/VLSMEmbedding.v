@@ -517,7 +517,7 @@ Definition VLSM_embedding_valid_message
     valid_message_prop X m -> valid_message_prop Y m
   := VLSM_weak_embedding_valid_message VLSM_embedding_weaken Hinitial_valid_message.
 
-Definition VLSM_embedding_trace_project (t : vTrace X) : vTrace Y :=
+Definition VLSM_embedding_trace_project (t : Trace X) : Trace Y :=
   match t with
   | Finite s tr => Finite (state_project s) (VLSM_embedding_finite_trace_project Hsimul tr)
   | Infinite s tr =>
