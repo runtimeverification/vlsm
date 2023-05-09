@@ -38,12 +38,12 @@ Proof.
   - intros [i li] lY HlX s om s' om' [_ Ht].
     unfold composite_project_label in HlX; cbn in HlX;
       case_decide; inversion HlX; subst; clear HlX; cbn in *.
-    unfold vtransition in Ht; destruct (transition _ _) as (si', _om').
+    destruct (transition _ _) as (si', _om').
     by inversion Ht; state_update_simpl.
   - intros [i li] HlX s om s' om' [_ Ht].
       unfold composite_project_label in HlX; cbn in HlX;
       case_decide; inversion HlX; cbn in *.
-    destruct (vtransition _ _ _); inversion Ht.
+    destruct (transition _ _ _); inversion Ht.
     by state_update_simpl.
   - by intros sX HsX; specialize (HsX j).
   - intros [i li] lY HlX s m (_ & Hm & _ & _) _.
@@ -93,10 +93,10 @@ Proof.
   ; unfold composite_project_label in H; cbn in H
   ; case_decide; inversion H; subst; clear H; cbn in *.
   - apply H0.
-  - destruct (vtransition _ _ _) as [si' _om']
+  - destruct (transition _ _ _) as [si' _om']
     ; inversion H0; subst; clear H0.
     by state_update_simpl.
-  - destruct (vtransition _ _ _) as [si' _om']
+  - destruct (transition _ _ _) as [si' _om']
     ; inversion H0; subst; clear H0.
     by state_update_simpl.
 Qed.
@@ -228,7 +228,7 @@ Proof.
   destruct Ht as [[Hs1 [Hom1 [Hv _]]] Ht].
   simpl in Hv. simpl in Ht. cbn in Ht.
   destruct l as [il l].
-  destruct (vtransition _ _ _) as (si', om') eqn: Htj.
+  destruct (transition _ _ _) as (si', om') eqn: Htj.
   inversion Ht; subst; clear Ht.
   by state_update_simpl.
 Qed.
@@ -377,7 +377,7 @@ Lemma projection_valid_implies_projection_valid_state_message_outputs
     (om : option message)
     (Hv : valid Xj l (s, om))
     s' om'
-    (Ht : vtransition (IM j) l (s, om) = (s', om'))
+    (Ht : transition (IM j) l (s, om) = (s', om'))
     : valid_state_message_prop Xj s' om'.
 Proof.
   apply projection_valid_implies_projection_valid_state in Hv as Hs.
@@ -393,7 +393,7 @@ Lemma projection_valid_implies_destination_projection_valid_state
     (om : option message)
     (Hv : valid Xj l (s, om))
     s' om'
-    (Ht : vtransition (IM j) l (s, om) = (s', om'))
+    (Ht : transition (IM j) l (s, om) = (s', om'))
     : valid_state_prop Xj s'.
 Proof.
   by eexists; eapply projection_valid_implies_projection_valid_state_message_outputs.
@@ -405,7 +405,7 @@ Lemma projection_valid_implies_destination_projection_valid_message
     (om : option message)
     (Hv : valid Xj l (s, om))
     s' om'
-    (Ht : vtransition (IM j) l (s, om) = (s', om'))
+    (Ht : transition (IM j) l (s, om) = (s', om'))
     : option_valid_message_prop Xj om'.
 Proof.
   by eexists; eapply projection_valid_implies_projection_valid_state_message_outputs.
@@ -420,7 +420,7 @@ Lemma valid_message_projection_rev :
 Proof.
   intros m ((sj, om) & lj & sj' & (_ & _ & s & <- & Hv) & Ht).
   eexists _, _, (state_update IM s j sj'); split; [done |].
-  by cbn in *; replace (vtransition _ _ _) with (sj', Some m).
+  by cbn in *; replace (transition _ _ _) with (sj', Some m).
 Qed.
 
 (**
@@ -572,7 +572,7 @@ Proof.
     apply Hgen.
     cbn; unfold lift_to_composite_state' at 1.
     state_update_simpl.
-    replace (vtransition (IM j) _ _) with (s', om').
+    replace (transition (IM j) _ _) with (s', om').
     f_equal.
     by apply state_update_twice.
 Qed.
@@ -590,10 +590,9 @@ Proof.
   apply basic_VLSM_embedding; intro; intros.
   - apply (Hfr _ _ _ Hv); [| apply state_update_eq].
     by apply (projection_friendliness_sufficient_condition_valid_state Hfr), Hv.
-  - unfold lift_to_composite_label, vtransition. simpl.
-    unfold lift_to_composite_state' at 1.
+  - cbn; unfold lift_to_composite_state' at 1.
     state_update_simpl.
-    replace (vtransition (IM j) _ _) with (s', om')
+    replace (transition (IM j) _ _) with (s', om')
       by (symmetry; apply H).
     by rewrite state_update_twice.
   - by apply (composite_initial_state_prop_lift IM j).

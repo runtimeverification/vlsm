@@ -93,7 +93,7 @@ Definition strong_transition_item_project_consistency
   (transition_item_project : vtransition_item X -> list (@transition_item _ TY))
   : Prop :=
   forall sX lX inputX destinationX outputX,
-    vtransition X lX (sX, inputX) = (destinationX, outputX) ->
+    transition X lX (sX, inputX) = (destinationX, outputX) ->
     finite_trace_last (state_project sX)
       (transition_item_project
         {| l := lX; input := inputX; destination := destinationX; output := outputX |})

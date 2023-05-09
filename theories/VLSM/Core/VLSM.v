@@ -66,6 +66,7 @@ Arguments initial_state_prop {message T} _ _, {message T _} _.
 Arguments initial_state {message T} _.
 Arguments initial_message_prop {message T} _ _, {message T _} _.
 Arguments initial_message {message T} _.
+Arguments transition {message T} _ _ _, {message T _} _ _.
 Arguments valid {message T} _ _ _, {message T _} _ _.
 
 Definition option_initial_message_prop
@@ -397,12 +398,9 @@ Context
 Definition vstate := state vlsm.
 Definition vlabel := label vlsm.
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
-Definition vtransition := @transition _ _ vlsm.
 Definition vtransition_item := @transition_item _ vlsm.
 
 End sec_vlsm_projections.
-
-Ltac unfold_vtransition H := (unfold vtransition in H; simpl in H).
 
 Lemma mk_vlsm_machine
   {message : Type}
@@ -464,7 +462,7 @@ Inductive valid_state_message_prop : state X -> option message -> Prop :=
     (l : label X)
     (Hv : valid X l (s, om))
     s' om'
-    (Ht : vtransition X l (s, om) = (s', om'))
+    (Ht : transition X l (s, om) = (s', om'))
   : valid_state_message_prop s' om'.
 
 Definition valid_initial_state
@@ -569,7 +567,7 @@ Definition input_valid_transition
   (som' : state X * option message)
   :=
   input_valid l som
-  /\ vtransition X l som = som'.
+  /\ transition X l som = som'.
 
 Definition input_valid_transition_item
   (s : state X)
@@ -604,7 +602,7 @@ Lemma input_valid_can_transition
   (l : label X)
   (som : state X * option message)
   (Hv : input_valid l som)
-  : forall som', vtransition X l som = som' ->
+  : forall som', transition X l som = som' ->
     input_valid_transition l som som'.
 Proof. done. Qed.
 
@@ -695,7 +693,7 @@ Lemma input_valid_transition_transition
       {s s' : state X}
       {om om' : option message}
       (Ht : input_valid_transition l (s, om) (s', om'))
-    : vtransition X l (s, om) = (s', om').
+    : transition X l (s, om) = (s', om').
 Proof.
   by destruct Ht as [_ Ht].
 Qed.
@@ -706,7 +704,7 @@ Lemma input_valid_state_message_outputs
   (om : option message)
   (Hv : input_valid l (s, om))
   s' om'
-  (Ht : vtransition X l (s, om) = (s', om'))
+  (Ht : transition X l (s, om) = (s', om'))
   : valid_state_message_prop s' om'.
 Proof.
   destruct Hv as [[_om Hs] [[_s Hom] Hv]].
@@ -1539,7 +1537,7 @@ Inductive finite_valid_trace_init_to_emit
       (l : label X)
       (Hv : valid X l (s, iom))
       (s' : state X) (oom : option message)
-      (Ht : vtransition X l (s, iom) = (s', oom)),
+      (Ht : transition X l (s, iom) = (s', oom)),
       finite_valid_trace_init_to_emit is s' oom
         (tl ++ [{| l := l; input := iom; destination := s'; output := oom |}]).
 
@@ -2510,7 +2508,7 @@ Definition pre_loaded_with_all_messages_vlsm_machine
   {| initial_state_prop := @initial_state_prop _ _ X
    ; initial_message_prop := fun message => True
    ; s0 := @s0 _ _ X
-   ; transition := vtransition X
+   ; transition := @transition _ _ X
    ; valid := @valid _ _ X
   |}.
 
@@ -2748,8 +2746,8 @@ Lemma same_VLSM_valid_preservation l1 s1 om
 Proof. by subst. Qed.
 
 Lemma same_VLSM_transition_preservation l1 s1 om s1' om'
-  : vtransition X1 l1 (s1, om) = (s1', om') ->
-    vtransition X2 (same_VLSM_label_rew Heq l1) (same_VLSM_state_rew Heq s1, om) =
+  : transition X1 l1 (s1, om) = (s1', om') ->
+    transition X2 (same_VLSM_label_rew Heq l1) (same_VLSM_state_rew Heq s1, om) =
       (same_VLSM_state_rew Heq s1', om').
 Proof. by subst. Qed.
 
@@ -2766,7 +2764,7 @@ End sec_same_VLSM.
 Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
 {
   vt_valid : valid X l (s1, iom);
-  vt_transition : vtransition X l (s1, iom) = (s2, oom);
+  vt_transition : transition X l (s1, iom) = (s2, oom);
 }.
 
 Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : vstate X) : Prop :=

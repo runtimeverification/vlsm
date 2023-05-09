@@ -222,7 +222,7 @@ Definition weak_projection_transition_consistency_None : Prop :=
 
 Definition strong_projection_transition_consistency_None : Prop :=
   forall lX, label_project lX = None ->
-  forall s om s' om', vtransition X lX (s, om) = (s', om') ->
+  forall s om s' om', transition X lX (s, om) = (s', om') ->
     state_project s' = state_project s.
 
 Lemma strong_projection_transition_consistency_None_weaken
@@ -310,12 +310,12 @@ Qed.
 Definition weak_projection_transition_preservation_Some : Prop :=
   forall lX lY, label_project lX = Some lY ->
   forall s om s' om', input_valid_transition X lX (s, om) (s', om') ->
-    vtransition Y lY (state_project s, om) = (state_project s', om').
+    transition Y lY (state_project s, om) = (state_project s', om').
 
 Definition strong_projection_transition_preservation_Some : Prop :=
   forall lX lY, label_project lX = Some lY ->
-  forall s om s' om', vtransition X lX (s, om) = (s', om') ->
-    vtransition Y lY (state_project s, om) = (state_project s', om').
+  forall s om s' om', transition X lX (s, om) = (s', om') ->
+    transition Y lY (state_project s, om) = (state_project s', om').
 
 Lemma strong_projection_transition_preservation_Some_weaken
   : strong_projection_transition_preservation_Some ->
@@ -495,7 +495,7 @@ Lemma VLSM_weak_projection_input_valid
     forall s im, input_valid X lX (s, im) -> input_valid Y lY (state_project s, im).
 Proof.
   intros lX lY Hpr sX im HvX.
-  destruct (vtransition X lX (sX, im)) eqn: HtX.
+  destruct (transition X lX (sX, im)) eqn: HtX.
   by eapply VLSM_weak_projection_input_valid_transition, input_valid_can_transition.
 Qed.
 

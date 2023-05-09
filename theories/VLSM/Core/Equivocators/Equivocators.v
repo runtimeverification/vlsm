@@ -558,14 +558,14 @@ Definition equivocator_transition
     match equivocator_state_project bsom.1 i with
     | None => bsom
     | Some si =>
-      let (si', om') := vtransition X l (si, bsom.2) in
+      let (si', om') := transition X l (si, bsom.2) in
       (equivocator_state_update bsom.1 i si', om')
     end
   | ForkWith i l =>
     match equivocator_state_project bsom.1 i with
     | None => bsom
     | Some si =>
-      let (si', om') := vtransition X l (si, bsom.2) in
+      let (si', om') := transition X l (si, bsom.2) in
       (equivocator_state_extend bsom.1 si', om')
     end
   end.
@@ -858,7 +858,7 @@ Lemma equivocator_transition_no_equivocation_zero_descriptor
   (l : vlabel equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (Hv : valid equivocator_vlsm l (s, iom))
-  (Ht : vtransition equivocator_vlsm l (s, iom) = (s', oom))
+  (Ht : transition equivocator_vlsm l (s, iom) = (s', oom))
   (Hs' : is_singleton_state X s')
   : exists li, l = ContinueWith 0 li.
 Proof.
@@ -866,7 +866,7 @@ Proof.
   destruct l as [sn | ei l | ei l]
   ; [inversion Ht; subst; rewrite equivocator_state_extend_size in Hs'; cbv in Hs'; lia | ..]
   ; cbn in Hv, Ht;  destruct_equivocator_state_project s ei sei Hei; [| done | | done]
-  ; destruct (vtransition _ _ _) as (si', om')
+  ; destruct (transition _ _ _) as (si', om')
   ; inversion Ht; subst; equivocator_state_update_simpl.
   - by exists l; f_equal; lia.
   - by lia.
@@ -888,7 +888,7 @@ Proof.
   ; [inversion Ht; rewrite equivocator_state_extend_size; cbv; lia | ..]
   ; destruct (equivocator_state_project _ _)
   ; [| by inversion Ht | | by inversion Ht]
-  ; destruct (vtransition _ _ _) as (si', om')
+  ; destruct (transition _ _ _) as (si', om')
   ; inversion Ht; subst; clear Ht; equivocator_state_update_simpl.
 Qed.
 
@@ -905,7 +905,7 @@ Proof.
   ; cbn in Ht
   ; destruct (equivocator_state_project _ _)
   ; [| by inversion Ht; lia | | by inversion Ht; lia]
-  ; destruct (vtransition _ _ _) as (si', om')
+  ; destruct (transition _ _ _) as (si', om')
   ; inversion Ht; subst; clear Ht.
   - by equivocator_state_update_simpl.
   - by rewrite Hex_size; lia.
@@ -934,7 +934,7 @@ Proof.
   subst.
   cbn in Ht.
   rewrite equivocator_state_project_zero in Ht.
-  destruct (vtransition _ _ _).
+  destruct (transition _ _ _).
   inversion Ht. subst.
   unfold is_equivocating_state, is_singleton_state.
   by equivocator_state_update_simpl.
@@ -969,7 +969,7 @@ Proof.
 
     (*
       destruction tactic for a valid equivocator transition
-      vtransition equivocator_vlsm l (s, om) = (s', om')
+      transition equivocator_vlsm l (s, om) = (s', om')
     *)
     destruct l as [sn | i l | i l]
     ; [inversion_clear Ht; split; [by apply option_valid_message_None |]
@@ -981,7 +981,7 @@ Proof.
       | ..]
     ; cbn in Hv, Ht
     ; destruct_equivocator_state_project' s i si Hi Hpr; [| done | | done]
-    ; destruct (vtransition _ _ _) as (si', _om') eqn: Hti
+    ; destruct (transition _ _ _) as (si', _om') eqn: Hti
     ; inversion Ht; subst s' _om'; clear Ht
 
     (* I wish I could solve this goal, then apply the composed tactic for the remaining two goals. *)
@@ -1086,7 +1086,7 @@ Qed.
 
 Lemma new_machine_label_equivocator_transition_size
   {sn s oin s' oout}
-  (Ht : vtransition equivocator_vlsm (Spawn sn) (s, oin) = (s', oout))
+  (Ht : transition equivocator_vlsm (Spawn sn) (s, oin) = (s', oout))
   : equivocator_state_n s' = S (equivocator_state_n s).
 Proof.
   inversion_clear Ht.
@@ -1095,35 +1095,35 @@ Qed.
 
 Lemma existing_true_label_equivocator_transition_size
   {ieqvi li s oin s' oout}
-  (Ht : vtransition equivocator_vlsm (ForkWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition equivocator_vlsm (ForkWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hv : equivocator_state_project s ieqvi = Some si)
   : equivocator_state_n s' = S (equivocator_state_n s).
 Proof.
   cbn in Ht.
   rewrite Hv in Ht.
-  destruct (vtransition _ _ _).
+  destruct (transition _ _ _).
   inversion Ht. subst.
   by apply equivocator_state_extend_size.
 Qed.
 
 Lemma existing_false_label_equivocator_transition_size
   {ieqvi li s oin s' oout}
-  (Ht : vtransition equivocator_vlsm (ContinueWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition equivocator_vlsm (ContinueWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hv : equivocator_state_project s ieqvi = Some si)
   : equivocator_state_n s' = equivocator_state_n s.
 Proof.
   cbn in Ht.
   rewrite Hv in Ht.
-  destruct (vtransition _ _ _).
+  destruct (transition _ _ _).
   inversion Ht. subst.
   by equivocator_state_update_simpl.
 Qed.
 
 Lemma new_machine_label_equivocator_state_project_last
   {sn s oin s' oout}
-  (Ht : vtransition equivocator_vlsm (Spawn sn) (s, oin) = (s', oout))
+  (Ht : transition equivocator_vlsm (Spawn sn) (s, oin) = (s', oout))
   : equivocator_state_descriptor_project s' (Existing (equivocator_state_n s)) =
     equivocator_state_descriptor_project s (NewMachine sn).
 Proof.
@@ -1134,7 +1134,7 @@ Qed.
 
 Lemma new_machine_label_equivocator_state_project_not_last
   {sn s oin s' oout}
-  (Ht : vtransition equivocator_vlsm (Spawn sn) (s, oin) = (s', oout))
+  (Ht : transition equivocator_vlsm (Spawn sn) (s, oin) = (s', oout))
   ni
   (Hni : ni < equivocator_state_n s)
   : equivocator_state_descriptor_project s' (Existing ni) =
@@ -1146,7 +1146,7 @@ Qed.
 
 Lemma existing_true_label_equivocator_state_project_not_last
   {ieqvi li s oin s' oout}
-  (Ht : vtransition equivocator_vlsm (ForkWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition equivocator_vlsm (ForkWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hsi : equivocator_state_project s ieqvi = Some si)
   ni
@@ -1156,7 +1156,7 @@ Lemma existing_true_label_equivocator_state_project_not_last
 Proof.
   cbn in Ht.
   rewrite Hsi in Ht.
-  destruct (vtransition _ _ _) as (si', _om') eqn: Hti.
+  destruct (transition _ _ _) as (si', _om') eqn: Hti.
   inversion Ht; subst s' _om'. clear Ht.
   simpl.
   by destruct_equivocator_state_extend_project s si' ni Hni'; [| lia..].
@@ -1164,11 +1164,11 @@ Qed.
 
 Lemma existing_true_label_equivocator_state_project_last
   {ieqvi li s oin s' oout}
-  (Ht : vtransition equivocator_vlsm (ForkWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition equivocator_vlsm (ForkWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hsi : equivocator_state_project s ieqvi = Some si)
   si' _oout
-  (Hti : vtransition X li (si, oin) = (si', _oout))
+  (Hti : transition X li (si, oin) = (si', _oout))
   : _oout = oout /\
     equivocator_state_descriptor_project s' (Existing (equivocator_state_n s)) = si'.
 Proof.
@@ -1181,7 +1181,7 @@ Qed.
 
 Lemma existing_false_label_equivocator_state_project_not_same
   {ieqvi li s oin s' oout}
-  (Ht : vtransition equivocator_vlsm (ContinueWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition equivocator_vlsm (ContinueWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hsi : equivocator_state_project s ieqvi = Some si)
   ni
@@ -1191,7 +1191,7 @@ Lemma existing_false_label_equivocator_state_project_not_same
   = equivocator_state_descriptor_project s (Existing ni).
 Proof.
   cbn in Ht. rewrite Hsi in Ht.
-  destruct (vtransition _ _ _) as (si', _om') eqn: Hti.
+  destruct (transition _ _ _) as (si', _om') eqn: Hti.
   inversion Ht; subst s' _om'. clear Ht.
   simpl.
   destruct_equivocator_state_update_project s ieqvi si' ni Hni' Hini; [lia.. |].
@@ -1200,11 +1200,11 @@ Qed.
 
 Lemma existing_false_label_equivocator_state_project_same
   {ieqvi li s oin s' oout}
-  (Ht : vtransition equivocator_vlsm (ContinueWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition equivocator_vlsm (ContinueWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hsi : equivocator_state_project s ieqvi = Some si)
   si' _oout
-  (Hti : vtransition X li (si, oin) = (si', _oout))
+  (Hti : transition X li (si, oin) = (si', _oout))
   : _oout = oout /\
     equivocator_state_descriptor_project s' (Existing ieqvi) = si'.
 Proof.

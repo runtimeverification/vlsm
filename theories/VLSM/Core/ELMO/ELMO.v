@@ -129,7 +129,7 @@ Lemma full_node_VLSM_reachable
   (V := mk_vlsm VM)
   (VM_transition_is_UMO :
     forall (l : Label) (s : State) (om : option Message),
-      vtransition V l (s, om) = UMOComponent_transition l s om)
+      transition V l (s, om) = UMOComponent_transition l s om)
   (VM_init_empty :
     forall s : State, initial_state_prop V s -> obs s = [])
   (VM_enforces_full_node :
@@ -644,7 +644,7 @@ Proof.
 Qed.
 
 Lemma local_equivocators_full_nondecreasing (s : State) l om s' om' :
-  vtransition Ri l (s, om) = (s', om') ->
+  transition Ri l (s, om) = (s', om') ->
   (forall a, local_equivocators_full s a ->
              local_equivocators_full s' a).
 Proof.
@@ -652,7 +652,7 @@ Proof.
 Qed.
 
 Lemma local_equivocators_full_increase_only_received_adr (s : State) m s' om' :
-  vtransition Ri Receive (s, Some m) = (s', om') ->
+  transition Ri Receive (s, Some m) = (s', om') ->
   forall a, local_equivocators_full s' a ->
             local_equivocators_full s a \/ a = adr (state m).
 Proof.

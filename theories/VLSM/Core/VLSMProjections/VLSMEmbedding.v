@@ -170,7 +170,7 @@ Qed.
 Definition weak_embedding_transition_preservation : Prop :=
   forall l s om s' om',
     input_valid_transition X l (s, om) (s', om') ->
-    vtransition Y (label_project l) (state_project s, om) = (state_project s', om').
+    transition Y (label_project l) (state_project s, om) = (state_project s', om').
 
 Lemma weak_projection_transition_preservation_Some_from_full
   : weak_embedding_transition_preservation ->
@@ -186,8 +186,8 @@ Proof. by inversion 1. Qed.
 
 Definition strong_embedding_transition_preservation : Prop :=
   forall l s om s' om',
-      vtransition X l (s, om) = (s', om') ->
-      vtransition Y (label_project l) (state_project s, om) = (state_project s', om').
+      transition X l (s, om) = (s', om') ->
+      transition Y (label_project l) (state_project s, om) = (state_project s', om').
 
 Lemma strong_projection_transition_preservation_Some_from_full
   : strong_embedding_transition_preservation ->

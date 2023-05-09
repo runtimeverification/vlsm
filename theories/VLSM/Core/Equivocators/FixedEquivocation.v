@@ -717,10 +717,8 @@ Proof.
   apply first_transition_valid in Hpre_item_free. simpl in Hpre_item_free.
   destruct Hpre_item_free as [[_ [_ [Hv _]]] Ht].
   destruct l.
-  cbn in *; unfold vtransition in Ht.
-  match type of Ht with
-  | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn: Hti
-  end.
+  cbn in *.
+  destruct (equivocator_transition (IM x) v _) as [si' om'] eqn: Hti.
   inversion Ht; subst; clear Ht.
   state_update_simpl.
   destruct (equivocator_transition_no_equivocation_zero_descriptor

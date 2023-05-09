@@ -435,7 +435,7 @@ Proof.
   - by apply Ht.
   - destruct Ht as [_ Ht]; cbn in Ht.
     cbn; unfold sub_IM at 2; cbn; unfold composite_state_sub_projection at 1; cbn.
-    destruct (vtransition (IM i) _ _) as (si', om').
+    destruct (transition li _) as (si', om').
     inversion_clear Ht. f_equal.
     clear.
     apply functional_extensionality_dep. intro sub_j.
@@ -536,7 +536,7 @@ Proof.
            with (composite_state_sub_projection IM (elements equivocators) s)
         ; [done |].
         destruct Ht as [_ Ht]; cbn in Ht;
-        destruct l as (i, li), (vtransition _ _ _) as (si', om');
+        destruct l as (i, li), (transition _ _ _) as (si', om');
         inversion_clear Ht; clear -Hl.
         extensionality sub_j; destruct_dec_sig sub_j j Hj Heqsub_j;
         subst; unfold composite_state_sub_projection.
@@ -841,7 +841,7 @@ Proof.
     case_decide as Hi; inversion_clear 1.
     intros s om s' om';
     rewrite lift_sub_state_to_neq by done;
-    destruct (vtransition _ _ _) as (si', _om');
+    destruct (transition _ _ _) as (si', _om');
     inversion_clear 1.
     f_equal; extensionality j.
     by destruct (decide (i = j)); subst; state_update_simpl.
@@ -850,7 +850,7 @@ Proof.
     unfold remove_equivocating_label_project; cbn.
     case_decide as Hi; [| by congruence].
     intros _ s om s' om';
-    destruct (vtransition _ _ _) as (si', _om') eqn: Hti;
+    destruct (transition _ _ _) as (si', _om') eqn: Hti;
     inversion_clear 1.
     extensionality j.
     unfold lift_sub_state_to.
@@ -946,7 +946,7 @@ Proof.
     destruct_dec_sig sub_i j Hj Heq; subst;
     unfold input_valid_transition; cbn; unfold sub_IM; cbn;
     rewrite lift_sub_state_to_eq with (Hi := Hj);
-    destruct (vtransition _ _ _) as (si', _om');
+    destruct (transition _ _ _) as (si', _om');
     intros [_ Ht]; inversion_clear Ht.
     f_equal; extensionality i.
     destruct (decide (i = j)); subst; state_update_simpl.

@@ -306,7 +306,7 @@ Proof.
         by apply equivocator_state_project_Some_rev in Hsins.
     + cbn in Hv.
       destruct (equivocator_state_project s idesc) as [sidesc |] eqn: Hidesc; [| done].
-      destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
+      destruct (transition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
@@ -364,7 +364,7 @@ Proof.
               cbn in Hnot_same; congruence.
     + cbn in Hv.
       destruct (equivocator_state_project s idesc) as [sidesc |] eqn: Hidesc; [| done].
-      destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
+      destruct (transition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.

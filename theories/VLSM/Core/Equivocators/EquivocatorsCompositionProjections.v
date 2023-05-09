@@ -93,7 +93,7 @@ Proof.
   end.
   simpl in Ht.
   destruct item. simpl in *. destruct l as (i, li). simpl in *.
-  destruct (vtransition (equivocator_IM i) li (s i, input))
+  destruct (equivocator_transition (IM i) li (s i, input))
     as (si', om') eqn: Htei.
   inversion Ht. subst. clear Ht.
   replace idescriptors with (equivocator_descriptors_update descriptors i deqv')
@@ -238,7 +238,7 @@ Proof.
   specialize (Heqv_pr Hv).
   spec Heqv_pr.
   { simpl. unfold eq_rect_r. simpl.
-    destruct (vtransition (equivocator_IM x) v (s x, input)) eqn: Hti.
+    destruct (equivocator_transition (IM x) v (s x, input)) eqn: Hti.
     clear -Ht Hti; inversion Ht; subst.
     by state_update_simpl.
   }
@@ -1480,13 +1480,13 @@ Proof.
     rewrite decide_False; [done |].
     by state_update_simpl; cbn.
   - destruct (equivocator_state_project _ _) as [s_i |]; [| done].
-    destruct (vtransition _ _ _) as (si', _om').
+    destruct (transition _ _ _) as (si', _om').
     inversion_clear Ht. state_update_simpl.
     destruct ji as [| ji].
     + by rewrite decide_True.
     + by rewrite decide_False.
   - destruct (equivocator_state_project _ _) as [s_i |]; [| done].
-    destruct (vtransition _ _ _) as (si', _om').
+    destruct (transition _ _ _) as (si', _om').
     inversion_clear Ht.
     by state_update_simpl; cbn; rewrite decide_False.
 Qed.
@@ -2139,11 +2139,11 @@ Proof.
     by state_update_simpl.
   - simpl in Hl. destruct ji as [| ji]; [by inversion Hl |]. clear Hl.
     destruct (equivocator_state_project _ _) as [si |]; [| done].
-    destruct (vtransition _ _ _) as (si', _om').
+    destruct (transition _ _ _) as (si', _om').
     inversion_clear Ht.  unfold equivocators_total_state_project.
     by state_update_simpl.
   - destruct (equivocator_state_project _ _) as [si |]; [| done].
-    destruct (vtransition _ _ _) as (si', _om').
+    destruct (transition _ _ _) as (si', _om').
     inversion_clear Ht.  unfold equivocators_total_state_project.
     by state_update_simpl.
 Qed.
