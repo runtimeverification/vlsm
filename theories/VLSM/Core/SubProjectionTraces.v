@@ -297,7 +297,7 @@ Proof.
 Qed.
 
 Lemma induced_sub_projection_valid_projection l s om
-  (Hv : vvalid pre_induced_sub_projection l (s, om))
+  (Hv : valid pre_induced_sub_projection l (s, om))
   : exists i, i ∈ sub_index_list /\
     exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, om).
 Proof.
@@ -737,11 +737,8 @@ Proof.
   revert Hv.
   destruct l as (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i.
-  simpl.
-  unfold vvalid. unfold lift_sub_state, lift_sub_state_to.
-  simpl.
-  subst. simpl.
-  unfold sub_IM in li. simpl in li.
+  cbn; unfold lift_sub_state, lift_sub_state_to; subst; cbn.
+  unfold sub_IM in li; cbn in li.
   case_decide as _Hi; [| done].
   by rewrite (sub_IM_state_pi s _Hi Hi); auto.
 Qed.
@@ -1111,7 +1108,7 @@ Lemma lift_sub_incl_valid l s om
 Proof.
   revert Hv.
   destruct l as (sub1_i, li); destruct_dec_sig sub1_i i Hi Heqsub1_i; subst; cbn.
-  unfold vvalid, lift_sub_incl_state; cbn.
+  unfold lift_sub_incl_state; cbn.
   unfold sub_IM in li; simpl in li.
   destruct (decide (sub_index_prop indices1 i)) as [H_i |]
   ; [| done].
@@ -1342,7 +1339,7 @@ Context
   .
 
 Lemma induced_sub_projection_valid_preservation constraint l s om
-  (Hv : vvalid (pre_induced_sub_projection IM indices constraint) l (s, om))
+  (Hv : valid (pre_induced_sub_projection IM indices constraint) l (s, om))
   : composite_valid sub_IM l (s, om).
 Proof.
   destruct Hv as ([i lXi] & sX & [Heql [=] (HsX & Hom & Hv & Hc)]).
@@ -1376,7 +1373,7 @@ Qed.
 
 Lemma sub_IM_no_equivocation_preservation
   l s om
-  (Hv : vvalid (pre_induced_sub_projection IM indices sub_IM_not_equivocating_constraint)
+  (Hv : valid (pre_induced_sub_projection IM indices sub_IM_not_equivocating_constraint)
     l (s, om))
   : composite_no_equivocations_except_from sub_IM
       non_sub_index_authenticated_message l (s, om).

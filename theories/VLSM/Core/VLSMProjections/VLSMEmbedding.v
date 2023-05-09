@@ -136,7 +136,7 @@ Definition weak_embedding_valid_preservation : Prop :=
     (Hv : input_valid X l (s, om))
     (HsY : valid_state_prop Y (state_project s))
     (HomY : option_valid_message_prop Y om),
-    vvalid Y (label_project l) ((state_project s), om).
+    valid Y (label_project l) ((state_project s), om).
 
 Lemma weak_projection_valid_preservation_from_full
   : weak_embedding_valid_preservation ->
@@ -148,7 +148,7 @@ Qed.
 
 Definition strong_embedding_valid_preservation : Prop :=
   forall (l : vlabel X) (s : vstate X) (om : option message),
-    vvalid X l (s, om) -> vvalid Y (label_project l) ((state_project s), om).
+    valid X l (s, om) -> valid Y (label_project l) ((state_project s), om).
 
 Lemma strong_projection_valid_preservation_from_full
   : strong_embedding_valid_preservation ->

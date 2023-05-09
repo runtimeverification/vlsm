@@ -220,7 +220,7 @@ Proof. by intros li si omi (_ & _ & Hv). Qed.
 Lemma induced_validator_valid_is_input_valid
   (Hproj : VLSM_projection X pre_projection_induced_validator label_project state_project)
   l s om
-  : vvalid projection_induced_validator l (s, om) ->
+  : valid projection_induced_validator l (s, om) ->
       input_valid pre_projection_induced_validator l (s, om).
 Proof.
   intro Hv.
@@ -502,7 +502,7 @@ Context
   [projection_induced_validator] has the same output as the transition on <<Y>>.
 *)
 Lemma projection_induced_valid_transition_eq
-  : forall l s om, vvalid Xi l (s, om) ->
+  : forall l s om, valid Xi l (s, om) ->
     vtransition Xi l (s, om) = vtransition Y l (s, om).
 Proof.
   intros l s im (lX & sX & [Hlx HsX Hv]); cbn in HsX; subst s.
@@ -521,8 +521,9 @@ Proof.
   apply basic_VLSM_incl.
   - by intros is (s & <- & Hs); apply (VLSM_projection_initial_state Hproj).
   - by intros l s m Hv HsY HmX; apply initial_message_is_valid.
-  - by intros l s om (_ & _ & lX & sX & [Hlx Heq Hv]) _ _; cbn in Heq; subst;
-      simpl; eapply VLSM_projection_input_valid.
+  - intros l s om (_ & _ & lX & sX & [Hlx Heq Hv]) _ _.
+    cbn in Heq; subst; simpl.
+    by eapply VLSM_projection_input_valid in Hproj as (_ & _ & ?).
   - intros l s im s' om [(_ & _ & HvXi) HtXi]; cbn.
     by setoid_rewrite <- HtXi; rewrite <- projection_induced_valid_transition_eq.
 Qed.
@@ -537,9 +538,9 @@ Qed.
 *)
 Definition projection_validator_prop_alt :=
   forall li si iom,
-    vvalid Y li (si, iom) ->
+    valid Y li (si, iom) ->
     valid_state_prop Xi si ->
-    vvalid Xi li (si, iom).
+    valid Xi li (si, iom).
 
 (**
   Under validator assumptions, all reachable states for component <<Y>> are
@@ -789,7 +790,7 @@ Lemma projection_valid_implies_valid
   (li : vlabel (IM i))
   (siomi : vstate (IM i) * option message)
   (Hcomposite : composite_vlsm_induced_projection_valid li siomi)
-  : vvalid (IM i) li siomi.
+  : valid (IM i) li siomi.
 Proof. by destruct siomi, Hcomposite as (s & <- & _ & _ & []). Qed.
 
 (**

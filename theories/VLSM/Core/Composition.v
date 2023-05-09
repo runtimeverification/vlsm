@@ -290,7 +290,7 @@ Definition composite_valid
   :=
   let (s, om) := som in
   let (i, li) := l in
-  vvalid (IM i) li (s i, om).
+  valid (IM i) li (s i, om).
 
 (**
   A <<constraint>> for a composite VLSM is a [valid]ity condition defined
@@ -520,7 +520,7 @@ Lemma constraint_subsumption_input_valid
   (s : vstate X1)
   (om : option message)
   (Hv : input_valid X1 l (s, om))
-  : vvalid X2 l (s, om).
+  : valid X2 l (s, om).
 Proof.
   by split; [apply Hv | apply Hsubsumption].
 Qed.
@@ -556,7 +556,7 @@ Lemma preloaded_constraint_subsumption_input_valid
   (s : vstate X1)
   (om : option message)
   (Hv : input_valid (pre_loaded_with_all_messages_vlsm X1) l (s, om))
-  : vvalid X2 l (s, om).
+  : valid X2 l (s, om).
 Proof.
   by split; [apply Hv | apply Hpre_subsumption].
 Qed.
@@ -784,7 +784,7 @@ Qed.
 
 Lemma lift_to_composite_valid_preservation :
   forall (i : index) (cs : composite_state),
-  forall l s om, vvalid (IM i) l (s, om) ->
+  forall l s om, valid (IM i) l (s, om) ->
     composite_valid (lift_to_composite_label i l)
       (lift_to_composite_state cs i s, om).
 Proof. by intros; cbn; rewrite state_update_eq. Qed.
@@ -1151,7 +1151,7 @@ Lemma relevant_component_transition
 Proof.
   split_and!; [done | by apply Hiv |].
   cbn in Hiv |- *.
-  unfold constrained_composite_valid, composite_valid, free_constraint, vvalid in Hiv |- *.
+  unfold constrained_composite_valid, composite_valid, free_constraint in Hiv |- *.
   destruct l.
   simpl in i.
   unfold i in Heq.

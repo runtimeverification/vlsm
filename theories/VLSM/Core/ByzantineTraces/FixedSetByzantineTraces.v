@@ -326,7 +326,7 @@ Qed.
   the constraint of [pre_loaded_fixed_non_byzantine_vlsm'].
 *)
 Lemma fixed_non_byzantine_projection_valid_no_equivocations
-  : forall l s om, vvalid fixed_non_byzantine_projection l (s, om) ->
+  : forall l s om, valid fixed_non_byzantine_projection l (s, om) ->
     composite_no_equivocations_except_from
       (sub_IM fixed_byzantine_IM (elements non_byzantine))
       fixed_set_signed_message
