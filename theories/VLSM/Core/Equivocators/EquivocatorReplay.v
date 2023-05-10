@@ -52,7 +52,7 @@ Proof.
   ; (destruct (equivocator_state_project s n) as [sn |] eqn: Hn; [| done])
   ;  rewrite (equivocator_state_append_project_2 _ base_s s _ n eq_refl)
   ;  rewrite Hn
-  ;  destruct (vtransition _ _ _) as (sn', _om') eqn: Hti
+  ;  destruct (transition _ _ _) as (sn', _om') eqn: Hti
   ;  inversion_clear Ht; f_equal.
   - by apply equivocator_state_append_update_commute.
   - by apply equivocator_state_append_extend_commute.

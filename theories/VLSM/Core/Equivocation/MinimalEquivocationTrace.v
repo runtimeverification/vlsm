@@ -232,7 +232,7 @@ Proof.
     replace (s j) with (s' j) in Hobs; cycle 1.
     {
       destruct Hti as [_ Hti]; cbn in Hti.
-      destruct (vtransition _ _ _) as [si' om'].
+      destruct (transition _ _ _) as [si' om'].
       by inversion Hti; rewrite state_update_neq.
     }
     eapply HasBeenObserved_step_update in Hobs as [Hobs | Hnow];

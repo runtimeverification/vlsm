@@ -251,7 +251,7 @@ Definition composite_transition
   :=
   let (s, om) := som in
   let (i, li) := l in
-  let (si', om') := vtransition (IM i) li (s i, om) in
+  let (si', om') := transition (IM i) li (s i, om) in
   (state_update s i si',  om').
 
 Lemma composite_transition_state_neq
@@ -263,7 +263,7 @@ Lemma composite_transition_state_neq
   (Hi : i <> projT1 l)
   : s' i = s i.
 Proof.
-  destruct l; cbn in Ht; destruct (vtransition _ _ _).
+  destruct l; cbn in Ht; destruct (transition _ _ _).
   by inversion Ht; apply state_update_neq.
 Qed.
 
@@ -273,9 +273,9 @@ Lemma composite_transition_state_eq
   (s s' : composite_state)
   (om om' : option message)
   (Ht : composite_transition (existT i li) (s, om) = (s', om'))
-  : s' i = fst (vtransition (IM i) li (s i, om)).
+  : s' i = fst (transition (IM i) li (s i, om)).
 Proof.
-  by cbn in Ht; destruct (vtransition _ _ _); inversion Ht; apply state_update_eq.
+  by cbn in Ht; destruct (transition _ _ _); inversion Ht; apply state_update_eq.
 Qed.
 
 (**
@@ -382,9 +382,9 @@ Proof.
   - split; [| done].
     cbn; unfold lift_to_composite_state'.
     by rewrite state_update_eq.
-  - unfold vtransition; cbn; unfold lift_to_composite_state' at 1.
+  - cbn; unfold lift_to_composite_state' at 1.
     rewrite state_update_eq.
-    replace (vtransition _ _ _) with (s', om').
+    replace (transition _ _ _) with (s', om').
     unfold lift_to_composite_state'.
     by rewrite state_update_twice.
   - by apply composite_initial_state_prop_lift.
@@ -642,9 +642,9 @@ Proof.
   - by apply PimpliesQ.
   - split; cbn; [| done].
     by unfold lift_to_composite_state'; rewrite state_update_eq.
-  - unfold vtransition; cbn; unfold lift_to_composite_state' at 1.
+  - cbn; unfold lift_to_composite_state' at 1.
     rewrite state_update_eq.
-    replace (vtransition (IM j) l _) with (s', om').
+    replace (transition (IM j) l _) with (s', om').
     unfold lift_to_composite_state'.
     by rewrite state_update_twice.
   - by apply composite_initial_state_prop_lift.
@@ -663,7 +663,7 @@ Proof.
     unfold lift_to_composite_state'; cbn.
     by rewrite state_update_eq.
   - intro; intros; cbn.
-    unfold vtransition; cbn; unfold vtransition; cbn; unfold lift_to_composite_state' at 1.
+    cbn; unfold lift_to_composite_state' at 1.
     rewrite state_update_eq.
     replace (transition l _) with (s', om').
     unfold lift_to_composite_state'.
@@ -772,7 +772,7 @@ Proof.
   - by apply initial_state_is_valid, composite_update_initial_state_with_initial.
   - destruct Ht as [[Hps [Hom [Hv _]]] Ht]; cbn in Ht, Hv.
     destruct l as [j lj].
-    destruct (vtransition _ _ _) as [sj' omj'] eqn: Htj.
+    destruct (transition _ _ _) as [sj' omj'] eqn: Htj.
     inversion_clear Ht.
     destruct (decide (i = j)).
     + by subst; rewrite state_update_twice.
@@ -791,7 +791,7 @@ Proof. by intros; cbn; rewrite state_update_eq. Qed.
 
 Lemma lift_to_composite_transition_preservation :
   forall (i : index) (cs : composite_state),
-  forall l s om s' om', vtransition (IM i) l (s, om) = (s', om') ->
+  forall l s om s' om', transition (IM i) l (s, om) = (s', om') ->
     composite_transition (lift_to_composite_label i l)
       (lift_to_composite_state cs i s, om)
         =
@@ -799,7 +799,7 @@ Lemma lift_to_composite_transition_preservation :
 Proof.
   intros; cbn.
   unfold lift_to_composite_state; rewrite state_update_eq.
-  by replace (vtransition _ _ _) with (s', om'); rewrite state_update_twice.
+  by replace (transition _ _ _) with (s', om'); rewrite state_update_twice.
 Qed.
 
 Lemma lift_to_composite_initial_message_preservation :
@@ -916,7 +916,7 @@ Proof.
   induction Hproto.
   - by apply preloaded_valid_initial_state, (Hs i).
   - destruct l as [j lj].
-    cbn in Ht; unfold vtransition in Ht.
+    cbn in Ht.
     destruct (transition lj _) as (si', _om') eqn: Hti.
     inversion_clear Ht.
     destruct (decide (i = j)); subst; state_update_simpl; [| done].
@@ -942,12 +942,12 @@ Lemma composite_transition_project_active
   forall (l : composite_label IM) (s : composite_state IM) (im : option message)
     (s' : composite_state IM) (om : option message),
       composite_transition IM l (s, im) = (s', om) ->
-      vtransition (IM (projT1 l)) (projT2 l) (s (projT1 l), im) = (s' (projT1 l), om).
+      transition (IM (projT1 l)) (projT2 l) (s (projT1 l), im) = (s' (projT1 l), om).
 Proof.
   intros.
   destruct l; simpl.
   simpl in H.
-  destruct (vtransition (IM x) v (s x, im)).
+  destruct (transition (IM x) v (s x, im)).
   inversion H.
   f_equal.
   by state_update_simpl.
@@ -1007,7 +1007,7 @@ Proof.
   - left.
     destruct Hptrans as [Hpvalid Htrans].
     cbn in Htrans.
-    destruct (vtransition (IM j) lj (s j, im)).
+    destruct (transition (IM j) lj (s j, im)).
     inversion_clear Htrans.
     by state_update_simpl.
 Qed.
@@ -1168,17 +1168,15 @@ Lemma relevant_component_transition2
   (i := projT1 l)
   (Heq : (s i) = (s' i))
   (Hprs : valid_state_prop Free s') :
-  let (dest, output) := vtransition Free l (s, input) in
-  let (dest', output') := vtransition Free l (s', input) in
+  let (dest, output) := transition Free l (s, input) in
+  let (dest', output') := transition Free l (s', input) in
   output = output' /\ (dest i) = (dest' i).
 Proof.
-  unfold vtransition.
-  unfold transition.
   destruct l; simpl.
   simpl in i.
   unfold i in Heq.
   rewrite Heq.
-  destruct (vtransition (IM x) v (s' x, input)).
+  destruct (transition (IM x) v (s' x, input)).
   split; [done |].
   unfold i.
   by state_update_simpl.
@@ -1210,7 +1208,7 @@ Proof.
   end.
   inversion Hpr; subst.
   split.
-  - assert (Ht' : input_valid_transition Free label_a (s', input_a) (s0, o)). {
+  - assert (Ht' : input_valid_transition Free label_a (s', input_a) (c, o)). {
       unfold input_valid_transition in *.
       destruct Ht as [Hpr_valid Htrans].
       by apply relevant_component_transition with (s' := s') in Hpr_valid; itauto.
@@ -1223,10 +1221,10 @@ Proof.
     specialize (relevant_component_transition2 s s' label_a input_a) as Hrel.
     simpl in Hrel. unfold i in Heq. specialize (Hrel Heq Hprs').
     match type of Hrel with
-    | let (_, _) := ?t in _ => replace t with (s1, o0) in Hrel
+    | let (_, _) := ?t in _ => replace t with (c0, o0) in Hrel
     end.
     match type of Hrel with
-    | let (_, _) := ?t in _ => replace t with (s0, o) in Hrel
+    | let (_, _) := ?t in _ => replace t with (c, o) in Hrel
     end.
     unfold i.
     by itauto.
@@ -1252,7 +1250,6 @@ Proof.
     destruct t eqn: eq_trans
   end.
   simpl in *.
-  unfold vtransition in eq_trans.
   simpl in eq_trans.
   destruct label_a; simpl in *.
   match type of eq_trans with
@@ -1516,7 +1513,7 @@ Proof.
       clear Hc. revert Hv. destruct l as (i, li). cbn.
       by apply same_VLSM_valid_preservation.
   - apply proj2 in H. revert H. destruct l as (i, li). cbn.
-    destruct (vtransition (IM1 i) _ _) as (si'1, _om') eqn: Ht1.
+    destruct (transition (IM1 i) _ _) as (si'1, _om') eqn: Ht1.
     unfold same_IM_state_rew at 1.
     erewrite same_VLSM_transition_preservation; [| done].
     inversion 1; subst; clear H.
@@ -1618,7 +1615,7 @@ Lemma composite_valid_transition_projection :
     ValidTransition (IM (projT1 l)) (projT2 l) (s1 (projT1 l)) iom (s2 (projT1 l)) oom /\
     s2 = state_update IM s1 (projT1 l) (s2 (projT1 l)).
 Proof.
-  intros [i li] * [Hv Ht]; cbn in Ht; destruct (vtransition _ _ _) eqn: Hti.
+  intros [i li] * [Hv Ht]; cbn in Ht; destruct (transition _ _ _) eqn: Hti.
   by inversion Ht; subst; cbn; state_update_simpl.
 Qed.
 
@@ -1629,7 +1626,7 @@ Lemma composite_valid_transition_projection_inv :
     CompositeValidTransition (existT i li) s1 iom s2 oom.
 Proof.
   intros * [Hv Ht] s1 <- s2 ->; split; [done |].
-  by cbn; replace (vtransition _ _ _) with (si2, oom).
+  by cbn; replace (transition _ _ _) with (si2, oom).
 Qed.
 
 Inductive CompositeValidTransitionsFromTo
@@ -1730,7 +1727,7 @@ Proof.
       {
         repeat split; [by apply IHHs2 | by apply any_message_is_valid_in_preloaded | ..]
         ; cbn; state_update_simpl; [done |].
-        replace (vtransition _ _ _) with (s' i, om').
+        replace (transition _ _ _) with (s' i, om').
         f_equal; extensionality k; apply f_equal with (f := fun s => s k) in Heqs'.
         rewrite Heq_s'.
         by destruct (decide (i = k)), (decide (j = k)); subst; state_update_simpl.
@@ -1739,7 +1736,7 @@ Proof.
       * by eapply input_valid_transition_destination.
       * by apply any_message_is_valid_in_preloaded.
       * done.
-      * by replace (vtransition _ _ _) with (s' j, oom); f_equal.
+      * by replace (transition _ _ _) with (s' j, oom); f_equal.
 Qed.
 
 Lemma CompositeValidTransitionNext_reflects_rechability :

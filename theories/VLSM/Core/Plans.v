@@ -173,7 +173,7 @@ Context
 
 Definition vplan_item := (@plan_item _ X).
 Definition plan : Type := list vplan_item.
-Definition apply_plan := (@_apply_plan _ X (vtransition X)).
+Definition apply_plan := (@_apply_plan _ X (@transition _ _ X)).
 Definition trace_to_plan := (@_trace_to_plan _ X).
 Definition apply_plan_app
   (start : vstate X)
@@ -182,13 +182,13 @@ Definition apply_plan_app
     let (aitems, afinal) := apply_plan start a in
     let (a'items, a'final) := apply_plan afinal a' in
      (aitems ++ a'items, a'final)
-  := (@_apply_plan_app _ X (vtransition X) start a a').
+  := (@_apply_plan_app _ X (@transition _ _ X) start a a').
 Definition apply_plan_last
   (start : vstate X)
   (a : plan)
   (after_a := apply_plan start a)
   : finite_trace_last start (fst after_a) = snd after_a
-  := (@_apply_plan_last _ X (vtransition X) start a).
+  := (@_apply_plan_last _ X (@transition _ _ X) start a).
 
 (**
   A plan is valid w.r.t. a state if by applying it to that state we
@@ -255,7 +255,7 @@ Proof.
   unfold _transition_item_to_plan_item, apply_plan, _apply_plan.
   simpl.
   destruct Ht as [Hvx Hx].
-  by replace (vtransition X l _) with (sf, oom).
+  by rewrite Hx.
 Qed.
 
 Lemma trace_to_plan_to_trace
@@ -310,7 +310,7 @@ Proof.
     remember (snd (apply_plan s a)) as lst.
     unfold apply_plan, _apply_plan in Hx. simpl in Hx.
     destruct x.
-    destruct (vtransition X label_a0 (lst, input_a0)) as (dest, out).
+    destruct (transition X label_a0 (lst, input_a0)) as (dest, out).
     simpl. simpl in Hx. inversion Hx. subst.
     by apply Ht.
   - assert (Hsuffa : suffa = [] \/ suffa <> []) by
@@ -323,7 +323,7 @@ Proof.
       unfold finite_valid_plan_from in Hx.
       unfold apply_plan, _apply_plan in Hx. simpl in Hx.
       destruct ai.
-      destruct (vtransition X label_a0 (lst, input_a0)) as (dest, out).
+      destruct (transition X label_a0 (lst, input_a0)) as (dest, out).
       simpl. simpl in Hx. inversion Hx. subst.
       by apply Ht.
     + apply exists_last in H. destruct H as [suffa' [x' Heq]]. subst.
@@ -347,7 +347,7 @@ Proof.
       remember (snd (apply_plan s a)) as sa.
       unfold apply_plan, _apply_plan. simpl.
       destruct x.
-      destruct (vtransition X label_a0 (sa, input_a0)) as (dest, out) eqn: Ht.
+      destruct (transition X label_a0 (sa, input_a0)) as (dest, out) eqn: Ht.
       simpl.
       apply Forall_inv in Hinput_ai. simpl in Hinput_ai.
       unfold finite_valid_plan_from in Ha.
@@ -357,8 +357,6 @@ Proof.
       setoid_rewrite Hlst in Ha. setoid_rewrite <- Heqsa in Ha.
       repeat constructor; [| done ..].
       exists out.
-      replace (@pair (state X) (option message) dest out)
-        with (vtransition X label_a0 (sa, input_a0)).
       destruct Ha as [_oma Hsa].
       destruct Hinput_ai as [_s Hinput_a0].
       by apply valid_generated_state_message with sa _oma _s input_a0 label_a0.
@@ -368,7 +366,7 @@ Qed.
 Lemma finite_valid_plan_from_one
   (s : vstate X)
   (a : plan_item) :
-  let res := vtransition X (label_a a) (s, input_a a) in
+  let res := transition X (label_a a) (s, input_a a) in
   finite_valid_plan_from s [a] <-> input_valid_transition X (label_a a) (s, input_a a) res.
 Proof.
   split;

@@ -66,7 +66,7 @@ Definition annotated_transition
   (l : label annotated_type)
   (som : annotated_state * option message)
   : annotated_state * option message :=
-  let (s', om') := vtransition X l (original_state som.1, som.2) in
+  let (s', om') := transition X l (original_state som.1, som.2) in
   ({| original_state := s'; state_annotation := annotated_transition_state l som |}, om').
 
 Definition annotated_vlsm_machine : VLSMMachine annotated_type :=
@@ -199,7 +199,7 @@ Proof.
   apply basic_VLSM_strong_embedding; cycle 1; [| by cbv; itauto..].
   intros l [s a] om [s' a'] om'.
   cbn; unfold annotated_transition; cbn
-  ; destruct (vtransition _ _ _) as (_s', _om').
+  ; destruct (transition _ _ _) as (_s', _om').
   by inversion 1.
 Qed.
 
@@ -272,7 +272,7 @@ Proof.
     intros [s ann] iom [s' ann'] oom.
     unfold input_valid_transition; cbn
     ; unfold annotated_transition; cbn
-    ; destruct (vtransition _ _ _) as (si', om').
+    ; destruct (transition _ _ _) as (si', om').
     intros [_ Ht]; inversion Ht.
     by state_update_simpl.
   - intros [j lj].
@@ -281,7 +281,7 @@ Proof.
     intros _ [s ann] iom [s' ann'] oom.
     unfold input_valid_transition; cbn
     ; unfold annotated_transition; cbn
-    ; destruct (vtransition _ _ _) as (si', om').
+    ; destruct (transition _ _ _) as (si', om').
     intros [_ Ht]; inversion Ht.
     by state_update_simpl.
   - by intros [s ann] [Hs _]; cbn; apply Hs.
@@ -302,7 +302,7 @@ Proof.
   case_decide as Hij; [by congruence |].
   intros _ sX omX s'X om'X [_ Ht]; revert Ht; cbn.
   unfold annotated_transition; cbn
-  ; destruct (vtransition _ _ _) as (si', om')
+  ; destruct (transition _ _ _) as (si', om')
   ; inversion 1; clear Ht; subst om' s'X; cbn.
   by state_update_simpl.
 Qed.
@@ -337,7 +337,7 @@ Proof.
   intros [s1 ann1] [s2 ann2]
   ; unfold annotated_transition; cbn
   ; intros <- iom sX1' oom1
-  ; destruct (vtransition _ _ _) as (si', om').
+  ; destruct (transition _ _ _) as (si', om').
   inversion_clear 1; intros sX2' oom2; inversion_clear 1.
   by cbn; state_update_simpl.
 Qed.

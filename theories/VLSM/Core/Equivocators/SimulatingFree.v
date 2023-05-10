@@ -156,7 +156,7 @@ Proof.
     pose
       (@existT _ (fun i : index => vlabel (equivocator_IM IM i)) eqv (ContinueWith 0 li))
       as el.
-    destruct (vtransition CE el (es, iom))
+    destruct (transition CE el (es, iom))
       as (es', om') eqn: Hesom'.
     specialize (Happ_extend  el iom es' om').
     apply valid_trace_get_last in Happ as Heqes.
@@ -170,7 +170,7 @@ Proof.
     cbn in Hesom', Hes_pr_eqv.
     rewrite Hes_pr_eqv in Hesom'.
     cbn in Ht.
-    destruct (vtransition _ _ _) as (si', _om) eqn: Hteqv.
+    destruct (transition _ _ _) as (si', _om) eqn: Hteqv.
     inversion Ht. subst sf _om. clear Ht.
     inversion Hesom'. subst es' om'. clear Hesom'.
     match type of Happ_extend with

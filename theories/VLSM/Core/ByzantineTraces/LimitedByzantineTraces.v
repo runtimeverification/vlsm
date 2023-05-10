@@ -352,7 +352,7 @@ Proof.
     ; rewrite Hann_s_pr; unfold lift_sub_state at 1
     ; rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi)
     ; unfold sub_IM at 2; cbn
-    ; destruct (vtransition _ _ _) as (si', om')
+    ; destruct (transition _ _ _) as (si', om')
     ; inversion_clear 1.
     do 2 f_equal; extensionality j.
     unfold lift_sub_state.

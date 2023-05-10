@@ -151,7 +151,7 @@ Proof.
   intro Hsi. elim Hi. clear Hi. unfold is_singleton_state in *.
   simpl in *.
   destruct l as (j, lj).
-  destruct (vtransition (equivocator_IM j) lj (s0 j, iom)) as (sj', om') eqn: Htj.
+  destruct (equivocator_transition (IM j) lj (s0 j, iom)) as (sj', om') eqn: Htj.
   inversion Ht. subst. clear Ht.
   destruct (decide (i = j)); subst; state_update_simpl; [| done].
   by revert Hsi; apply equivocator_transition_reflects_singleton_state with iom oom lj.

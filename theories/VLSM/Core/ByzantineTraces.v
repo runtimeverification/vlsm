@@ -253,8 +253,7 @@ Proof.
       replace (lifted_alt_state s first) with s
         by (unfold lifted_alt_state, lift_to_composite_state'; state_update_simpl; done).
       apply proj2 in Ht.
-      change (vtransition M l (s : vstate M, om0) = (s', om')) in Ht.
-      rewrite Ht.
+      replace (transition l _) with (s', om').
       f_equal.
       by apply state_update_twice.
 Qed.

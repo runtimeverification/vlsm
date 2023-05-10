@@ -435,7 +435,7 @@ Proof.
       by rewrite @decide_True.
     }
     cbn in Hgen.
-    destruct (vtransition _ _ _) as (si', _om) eqn: Ht.
+    destruct (transition _ _ _) as (si', _om) eqn: Ht.
     specialize (Hgen _ _ eq_refl).
     replace _om with (Some m) in Hgen; [by eexists |].
     clear -Ht.

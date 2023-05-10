@@ -70,10 +70,10 @@ Definition coeqv_annotate_trace_with_equivocators :=
     coeqv_composite_transition_message_equivocators.
 
 Lemma coeqv_limited_equivocation_transition_state_annotation_incl [l s iom s' oom]
-  : vtransition coeqv_limited_equivocation_vlsm l (s, iom) = (s', oom) ->
+  : transition coeqv_limited_equivocation_vlsm l (s, iom) = (s', oom) ->
     state_annotation s ⊆ state_annotation s'.
 Proof.
-  cbn; unfold annotated_transition; destruct (vtransition _ _ _) as (_s', _om').
+  cbn; unfold annotated_transition; destruct (transition _ _ _) as (_s', _om').
   inversion 1; cbn.
   by destruct iom as [m |]; [apply union_subseteq_l |].
 Qed.
@@ -86,7 +86,7 @@ Proof.
   - by destruct s, Hs as [_ ->]; cbn in *; apply NoDup_elements.
   - destruct Ht as [_ Ht]; cbn in Ht.
     unfold annotated_transition in Ht
-    ; destruct (vtransition _ _ _); inversion Ht; apply NoDup_elements.
+    ; destruct (transition _ _ _); inversion Ht; apply NoDup_elements.
 Qed.
 
 Lemma coeqv_limited_equivocation_state_not_heavy s
@@ -98,7 +98,7 @@ Proof.
     rewrite sum_weights_empty; [| done].
     by apply (rt_positive (H6 := H7)).
   - destruct Ht as [(_ & _ & _ & Hc) Ht]
-    ; cbn in Ht; unfold annotated_transition in Ht; destruct (vtransition _ _ _)
+    ; cbn in Ht; unfold annotated_transition in Ht; destruct (transition _ _ _)
     ; inversion_clear Ht.
     by destruct om as [m |].
 Qed.
@@ -303,10 +303,10 @@ Lemma msg_dep_full_node_transition_iff
   l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
            (projT2 l) (original_state s (projT1 l), om))
-  : vtransition Limited l (s, om) = vtransition FullNodeLimited l (s, om).
+  : transition Limited l (s, om) = transition FullNodeLimited l (s, om).
 Proof.
   cbn; unfold annotated_transition;
-    destruct (vtransition _ _ _) as (s', om'), l as (i, li).
+    destruct (transition _ _ _) as (s', om'), l as (i, li).
   do 2 f_equal.
   destruct om as [m |]; [| done].
   symmetry.
@@ -521,7 +521,7 @@ Proof.
       cbn in HLt |- *; unfold annotated_transition in HLt; cbn in HLt.
       replace (finite_trace_last si _) with s
            by (apply valid_trace_get_last in Htr; congruence).
-      destruct l as [i li], (vtransition _ _ _) as (si', om').
+      destruct l as [i li], (transition _ _ _) as (si', om').
       inversion HLt; subst; clear HLt; cbn.
       repeat split.
       * revert Hs; apply VLSM_incl_valid_state.
@@ -721,7 +721,7 @@ Proof.
         replace (finite_trace_last _ _) with s
              by (apply valid_trace_get_last in Htr1; congruence).
         by destruct Ht as [_ Ht]; cbn in Ht
-        ; destruct (vtransition _ _ _) as (si', om')
+        ; destruct (transition _ _ _) as (si', om')
         ; inversion Ht.
 Qed.
 

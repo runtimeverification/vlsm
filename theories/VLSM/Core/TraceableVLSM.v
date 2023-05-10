@@ -265,7 +265,7 @@ Proof.
     by (eapply composite_tv_state_destructor_destination; done).
   eapply composite_tv_state_destructor_index  in Hin as Hl.
   eapply composite_tv_state_destructor_transition in Hin as [_ Ht]; [| done].
-  destruct item, l; cbn in *; destruct (vtransition _ _ _); inversion Ht; subst.
+  destruct item, l; cbn in *; destruct (transition _ _ _); inversion Ht; subst.
   by state_update_simpl.
 Qed.
 
