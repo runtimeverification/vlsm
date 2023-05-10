@@ -599,7 +599,7 @@ Proof.
     apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating)
        in Hv as (_ & _ & Hv).
     split.
-    + by eapply induced_sub_projection_valid_preservation.
+    + by eapply induced_sub_projection_valid_preservation in Hv.
     + split; [| done].
       apply sub_IM_no_equivocation_preservation in Hv as Hnoequiv; [| done..].
       destruct om as [m |]; [| done].

@@ -16,7 +16,7 @@ Section sec_input_validation_definitions.
 Context
   `{X : VLSM message}
   {TY : VLSMType message}
-  (label_project : vlabel X -> option (label TY))
+  (label_project : label X -> option (label TY))
   (state_project : vstate X -> state TY)
   .
 
@@ -24,7 +24,7 @@ Record InputValidation
   (lY : label TY)
   (sY : state TY)
   (om : option message)
-  (lX : vlabel X)
+  (lX : label X)
   (sX : vstate X)
   : Prop :=
 {
@@ -37,7 +37,7 @@ Record TransitionValidation
   (lY : label TY)
   (sY : state TY)
   (om : option message)
-  (lX : vlabel X)
+  (lX : label X)
   (sX : vstate X)
   (sX' : vstate X)
   (om' : option message)
@@ -56,7 +56,7 @@ Section sec_projection_validator.
 Context
   `{X : VLSM message}
   (Y : VLSM message)
-  (label_project : vlabel X -> option (vlabel Y))
+  (label_project : label X -> option (label Y))
   (state_project : vstate X -> vstate Y)
   (PreY := pre_loaded_with_all_messages_vlsm Y)
   .
@@ -160,10 +160,10 @@ Context
   .
 
 Context
-  (label_project : vlabel X -> option (label TY))
+  (label_project : label X -> option (label TY))
   (state_project : vstate X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
-  (label_lift : label TY -> vlabel X)
+  (label_lift : label TY -> label X)
   (state_lift : state TY -> vstate X)
   .
 
@@ -472,10 +472,10 @@ Section sec_induced_validator_validators.
 Context
   `{X : VLSM message}
   (Y : VLSM message)
-  (label_project : vlabel X -> option (vlabel Y))
+  (label_project : label X -> option (label Y))
   (state_project : vstate X -> vstate Y)
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)
-  (label_lift : vlabel Y -> vlabel X)
+  (label_lift : label Y -> label X)
   (state_lift : vstate Y -> vstate X)
   (Xi := pre_projection_induced_validator X Y
           label_project state_project label_lift state_lift)
@@ -665,7 +665,7 @@ Context
   .
 
 Definition composite_project_label (l : composite_label IM)
-  : option (vlabel (IM i)) :=
+  : option (label (IM i)) :=
   match decide (i = (projT1 l)) with
   | left e => Some (eq_rect_r _ (projT2 l) e)
   | _ => None
@@ -774,7 +774,7 @@ Context
   the [input_valid]ity of <<X>>.
 *)
 Definition composite_vlsm_induced_projection_valid
-  (li : vlabel (IM i))
+  (li : label (IM i))
   (siomi : vstate (IM i) * option message)
   :=
   let (si, omi) := siomi in
@@ -787,7 +787,7 @@ Definition composite_vlsm_induced_projection_valid
   easy to see that it implies [valid]ity in the component.
 *)
 Lemma projection_valid_implies_valid
-  (li : vlabel (IM i))
+  (li : label (IM i))
   (siomi : vstate (IM i) * option message)
   (Hcomposite : composite_vlsm_induced_projection_valid li siomi)
   : valid (IM i) li siomi.

@@ -716,16 +716,16 @@ Proof.
   destruct item. simpl in *.
   apply first_transition_valid in Hpre_item_free. simpl in Hpre_item_free.
   destruct Hpre_item_free as [[_ [_ [Hv _]]] Ht].
-  destruct l.
+  destruct l as [x l].
   cbn in *.
-  destruct (equivocator_transition (IM x) v _) as [si' om'] eqn: Hti.
+  destruct (equivocator_transition (IM x) l _) as [si' om'] eqn: Hti.
   inversion Ht; subst; clear Ht.
   state_update_simpl.
   destruct (equivocator_transition_no_equivocation_zero_descriptor
     (IM x) _ _ _ _ _ Hv Hti Hsingleton_d_item) as [li Hsndv].
   unfold equivocators_transition_item_project in Hpr.
   simpl in Hpr.
-  subst v.
+  subst l.
   unfold ProjectionTraces.composite_transition_item_projection in Hpr.
   unfold ProjectionTraces.composite_transition_item_projection_from_eq in Hpr.
   simpl in Hpr.

@@ -396,7 +396,6 @@ Context
   .
 
 Definition vstate := state vlsm.
-Definition vlabel := label vlsm.
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
 Definition vtransition_item := @transition_item _ vlsm.
 
@@ -2576,7 +2575,7 @@ Inductive preloaded_valid_state_prop : vstate X -> Prop :=
     (Hs : initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) s) :
        preloaded_valid_state_prop s
 | preloaded_protocol_generated
-    (l : vlabel X)
+    (l : label X)
     (s : vstate X)
     (Hps : preloaded_valid_state_prop s)
     (om : option message)
@@ -2727,8 +2726,8 @@ Context
   (Heq : X1 = X2)
   .
 
-Definition same_VLSM_label_rew (l1 : vlabel X1) : vlabel X2 :=
-  eq_rect X1 _ l1 _ Heq.
+Definition same_VLSM_label_rew (l1 : label X1) : label X2 :=
+  eq_rect X1 label l1 _ Heq.
 
 Definition same_VLSM_state_rew (s1 : vstate X1) : vstate X2 :=
   eq_rect X1 _ s1 _ Heq.

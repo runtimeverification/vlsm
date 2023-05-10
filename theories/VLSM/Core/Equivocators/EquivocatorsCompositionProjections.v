@@ -108,12 +108,9 @@ Proof.
     state_update_simpl.
     cut (is_equivocating_state (IM eqv) si' \/  is_newmachine_descriptor (IM eqv) (descriptors eqv));
       [by itauto |].
-    by apply
-      (equivocator_transition_item_project_preserves_equivocating_indices (IM eqv) {|
-      l := li;
-      input := input;
-      destination := si';
-      output := output |} _ Hdescriptors _ _ Hitem_pr _ Hv Htei); itauto.
+    eapply (equivocator_transition_item_project_preserves_equivocating_indices)
+      in Hitem_pr; [done.. |].
+    by itauto.
   - destruct Heqv as [Heqv | Heqv]
     ; apply elem_of_list_filter in Heqv as [Heqv Hin].
     + left.
@@ -234,18 +231,20 @@ Proof.
       Hdest_i
       (s i))
     as Heqv_pr.
-  destruct item, l. simpl in Ht, Hv. simpl in i. subst i.
+  destruct item, l as [x l]. simpl in Ht, Hv. simpl in i. subst i.
   specialize (Heqv_pr Hv).
   spec Heqv_pr.
   { simpl. unfold eq_rect_r. simpl.
-    destruct (equivocator_transition (IM x) v (s x, input)) eqn: Hti.
+    destruct (equivocator_transition (IM x) l (s x, input)) eqn: Hti.
     clear -Ht Hti; inversion Ht; subst.
     by state_update_simpl.
   }
   destruct Heqv_pr as [Hex Heqv_pr].
   exists Hex.
   unfold equivocators_transition_item_project.
-  unfold l. unfold projT1.
+  cbn in *.
+  unfold equivocator_vlsm_transition_item_project,
+    composite_transition_item_projection; cbn.
   rewrite Hzero, Heqv_pr; cbn; repeat f_equal.
   by state_update_simpl.
 Qed.
@@ -459,8 +458,8 @@ Proof.
   repeat split.
   apply equivocator_transition_item_project_inv_characterization in Hpr_itemi
     as [[Hex Hl]].
-  rewrite Hl.
-  by exists Hex.
+  exists Hex.
+  by f_equal.
 Qed.
 
 Definition equivocators_trace_project_folder
@@ -1055,20 +1054,21 @@ Proof.
   destruct Hproject as [trX' [Hproject_x' HeqtrX]].
   specialize (IHtr trX' (conj Htr Hinit) _ Hproject_x').
   inversion Hx. subst. clear Hx.
-  unfold equivocators_transition_item_project in Hproject_x.
-  simpl in Hproject_x.
-  unfold composite_transition_item_projection in Hproject_x. simpl in Hproject_x.
-  unfold composite_transition_item_projection_from_eq in Hproject_x. simpl in Hproject_x.
-  unfold eq_rect_r in Hproject_x. simpl in Hproject_x.
+  unfold equivocators_transition_item_project in Hproject_x; simpl in Hproject_x.
+  unfold composite_transition_item_projection in Hproject_x; simpl in Hproject_x.
+  unfold composite_transition_item_projection_from_eq in Hproject_x; simpl in Hproject_x.
+  unfold eq_rect_r in Hproject_x; simpl in Hproject_x.
   match type of Hproject_x with
   | context [equivocator_vlsm_transition_item_project ?X ?i ?c] =>
-      remember (equivocator_vlsm_transition_item_project X i c)  as projecti
+      destruct (equivocator_vlsm_transition_item_project X i c) as [(oitem'', ditem'') |]
+        eqn: Heqprojecti; [| by congruence]
   end.
-  destruct projecti as [(oitem'', ditem'') |]; [| by congruence].
   unfold equivocator_vlsm_transition_item_project in Heqprojecti.
   unfold final_state in *. clear final_state.
   rewrite finite_trace_last_is_last. simpl.
-  destruct (final_descriptors (projT1 l)) as [sn | j] eqn: Hfinali.
+  match type of Heqprojecti with
+  | match ?fd with _ => _ end = _ => destruct fd as [sn | j] eqn: Hfinali
+  end.
   - inversion Heqprojecti. subst. clear Heqprojecti.
     inversion Hproject_x. subst; clear Hproject_x.
     inversion Heqproject_x. subst. clear Heqproject_x.
@@ -1077,7 +1077,7 @@ Proof.
     + subst.
       unfold equivocator_descriptors_update in IHtr;
         rewrite equivocator_descriptors_update_eq in IHtr.
-      by rewrite Hfinali.
+      by cbn; rewrite Hfinali.
     + state_update_simpl.
       destruct Ht as [Hv Ht]; cbn in Ht.
       destruct l as (i, li).
@@ -1644,7 +1644,7 @@ Proof.
         (@dec_sig_sigT_eq _
           (sub_index_prop selection)
           (sub_index_prop_dec selection)
-          (fun n => vlabel (IM n))
+          (fun n => label (IM n))
           (projT1 (l item)) (l item') (l item') _Hl Hl).
   - simpl in Hpr_sub_item. unfold final_sub_descriptors in *.
     inversion Hpr_sub_item. subst. clear Hpr_sub_item.
@@ -2046,7 +2046,7 @@ Proof.
       by apply
         (@dec_sig_sigT_eq _ _
           (sub_index_prop_dec (enum index))
-          (fun n => vlabel (EquivocatorsComposition.equivocator_IM IM n))
+          (fun n => label (EquivocatorsComposition.equivocator_IM IM n))
           i li li).
     }
     destruct Hcommute as [Heq_initial Heq_trX].

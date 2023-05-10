@@ -1236,7 +1236,7 @@ Definition no_additional_equivocations_constraint
   {message : Type}
   (vlsm : VLSM message)
   `{HasBeenDirectlyObservedCapability message vlsm}
-  (l : vlabel vlsm)
+  (l : label vlsm)
   (som : vstate vlsm * option message)
   : Prop
   :=

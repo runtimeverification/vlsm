@@ -44,8 +44,8 @@ Context
 *)
 Inductive EquivocatorLabel : Type :=
 | Spawn : vstate X -> EquivocatorLabel
-| ContinueWith : nat -> vlabel X -> EquivocatorLabel
-| ForkWith : nat -> vlabel X -> EquivocatorLabel.
+| ContinueWith : nat -> label X -> EquivocatorLabel
+| ForkWith : nat -> label X -> EquivocatorLabel.
 
 Definition equivocator_type : VLSMType message :=
   {| state := bounded_state_copies ;
@@ -816,7 +816,7 @@ Definition existing_equivocator_label
 Definition existing_equivocator_label_extract
   (l : equivocator_label X)
   (Hs : existing_equivocator_label l)
-  : vlabel X.
+  : label X.
 Proof.
   by destruct l.
 Defined.
@@ -855,7 +855,7 @@ Proof. by destruct d. Qed.
 *)
 Lemma equivocator_transition_no_equivocation_zero_descriptor
   (iom oom : option message)
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (Hv : valid equivocator_vlsm l (s, iom))
   (Ht : transition equivocator_vlsm l (s, iom) = (s', oom))
@@ -878,7 +878,7 @@ Qed.
 *)
 Lemma equivocator_transition_reflects_singleton_state
   (iom oom : option message)
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : is_singleton_state X s' -> is_singleton_state X s.
@@ -894,7 +894,7 @@ Qed.
 
 Lemma equivocator_transition_cannot_decrease_state_size
   (iom oom : option message)
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : equivocator_state_n s <= equivocator_state_n s'.
@@ -913,7 +913,7 @@ Qed.
 
 Lemma equivocator_transition_preserves_equivocating_state
   (iom oom : option message)
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : is_equivocating_state X s -> is_equivocating_state X s'.
@@ -924,7 +924,7 @@ Qed.
 
 Lemma zero_descriptor_transition_reflects_equivocating_state
   (iom oom : option message)
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (Ht : equivocator_transition X l (s, iom) = (s', oom))
   li

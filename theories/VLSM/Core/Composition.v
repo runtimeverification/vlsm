@@ -48,7 +48,7 @@ Definition composite_state : Type :=
 *)
 Definition composite_label
   : Type
-  := sigT (fun n => vlabel (IM n)).
+  := sigT (fun n => label (IM n)).
 
 (*
   Declaring this a "canonical structure" will make type checking
@@ -191,7 +191,7 @@ Definition option_composite_initial_message_prop : option message -> Prop
 
 Definition lift_to_composite_label
   (j : index)
-  (lj : vlabel (IM j))
+  (lj : label (IM j))
   : composite_label
   := existT j lj.
 
@@ -269,7 +269,7 @@ Qed.
 
 Lemma composite_transition_state_eq
   (i : index)
-  (li : vlabel (IM i))
+  (li : label (IM i))
   (s s' : composite_state)
   (om om' : option message)
   (Ht : composite_transition (existT i li) (s, om) = (s', om'))
@@ -516,7 +516,7 @@ Qed.
 
 Lemma constraint_subsumption_input_valid
   (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
-  (l : vlabel X1)
+  (l : label X1)
   (s : vstate X1)
   (om : option message)
   (Hv : input_valid X1 l (s, om))
@@ -552,7 +552,7 @@ Qed.
 
 Lemma preloaded_constraint_subsumption_input_valid
   (Hpre_subsumption : preloaded_constraint_subsumption constraint1 constraint2)
-  (l : vlabel X1)
+  (l : label X1)
   (s : vstate X1)
   (om : option message)
   (Hv : input_valid (pre_loaded_with_all_messages_vlsm X1) l (s, om))
@@ -944,10 +944,8 @@ Lemma composite_transition_project_active
       composite_transition IM l (s, im) = (s', om) ->
       transition (IM (projT1 l)) (projT2 l) (s (projT1 l), im) = (s' (projT1 l), om).
 Proof.
-  intros.
-  destruct l; simpl.
-  simpl in H.
-  destruct (transition (IM x) v (s x, im)).
+  intros [x l]; cbn; intros.
+  destruct (transition (IM x) l (s x, im)).
   inversion H.
   f_equal.
   by state_update_simpl.
@@ -987,7 +985,7 @@ Qed.
 Lemma input_valid_transition_preloaded_project_any {V} (i : V)
       {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
-      (l : vlabel X) s im s' om :
+      (l : label X) s im s' om :
   input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
@@ -1015,7 +1013,7 @@ Qed.
 Lemma input_valid_transition_project_any {V} (i : V)
       {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
       (X := composite_vlsm IM constraint)
-      (l : vlabel X) s im s' om :
+      (l : label X) s im s' om :
   input_valid_transition X l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
@@ -1141,7 +1139,7 @@ Context
 
 Lemma relevant_component_transition
   (s s' : vstate Free)
-  (l : vlabel Free)
+  (l : label Free)
   (input : option message)
   (i := projT1 l)
   (Heq : (s i) = (s' i))
@@ -1163,7 +1161,7 @@ Qed.
 
 Lemma relevant_component_transition2
   (s s' : vstate Free)
-  (l : vlabel Free)
+  (l : label Free)
   (input : option message)
   (i := projT1 l)
   (Heq : (s i) = (s' i))
@@ -1172,11 +1170,11 @@ Lemma relevant_component_transition2
   let (dest', output') := transition Free l (s', input) in
   output = output' /\ (dest i) = (dest' i).
 Proof.
-  destruct l; simpl.
+  destruct l as [x l]; simpl.
   simpl in i.
   unfold i in Heq.
   rewrite Heq.
-  destruct (transition (IM x) v (s' x, input)).
+  destruct (transition (IM x) l (s' x, input)).
   split; [done |].
   unfold i.
   by state_update_simpl.
@@ -1324,7 +1322,7 @@ Proof.
     destruct Hpr as [Hrem Hsingle].
 
     spec IHa. {
-      remember (List.map (@projT1 _ (fun n : index => vlabel (IM n))) (List.map label_a a)) as small.
+      remember (List.map (@projT1 _ (fun n : index => label (IM n))) (List.map label_a a)) as small.
       transitivity a_indices; [| done].
       unfold a_indices.
       intros e H; simpl.

@@ -17,7 +17,7 @@ Section sec_projection_oracle.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> option (vlabel Y)}
+  {label_project : label X -> option (label Y)}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
@@ -114,7 +114,7 @@ Section sec_weak_embedding_oracle.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
+  {label_project : label X -> label Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_weak_embedding (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
@@ -226,7 +226,7 @@ Section sec_embedding_oracle.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
+  {label_project : label X -> label Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul :
     VLSM_embedding (pre_loaded_with_all_messages_vlsm X)

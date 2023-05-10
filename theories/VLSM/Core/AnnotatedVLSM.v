@@ -26,7 +26,7 @@ Record annotated_state : Type :=
 }.
 
 Definition annotated_type : VLSMType message :=
-  {| label := vlabel X;
+  {| label := label X;
      state := annotated_state
   |}.
 
@@ -229,7 +229,7 @@ Context
   (i : index)
   .
 
-Definition annotated_composite_label_project : vlabel AnnotatedFree -> option (vlabel (IM i))
+Definition annotated_composite_label_project : label AnnotatedFree -> option (label (IM i))
   := composite_project_label IM i.
 
 Definition annotated_composite_state_project : vstate AnnotatedFree -> vstate (IM i)
@@ -242,7 +242,7 @@ Definition annotated_projection_validator_prop : Prop :=
 Definition annotated_message_validator_prop : Prop :=
   @message_validator_prop _ AnnotatedFree (IM i).
 
-Definition annotated_composite_label_lift : vlabel (IM i) -> vlabel AnnotatedFree
+Definition annotated_composite_label_lift : label (IM i) -> label AnnotatedFree
   := lift_to_composite_label IM i.
 
 Definition annotated_composite_state_lift : vstate (IM i) -> vstate AnnotatedFree
