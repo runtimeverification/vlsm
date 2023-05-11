@@ -348,7 +348,7 @@ Inductive ObservedBeforeStateOrMessage
     ObservedBeforeStateOrMessage m _s (Some im).
 
 Record ObservedBeforeSendTransition
-  (s : state X) (item : vtransition_item X) (m1 m2 : message) : Prop :=
+  (s : state X) (item : transition_item X) (m1 m2 : message) : Prop :=
 {
   dobst_transition : input_valid_transition_item R s item;
   dobst_output_m2 : output item = Some m2;
@@ -697,7 +697,7 @@ Definition composite_observed_before_send (m1 m2 : message) : Prop :=
   exists s item, CompositeObservedBeforeSendTransition s item m1 m2.
 
 Lemma composite_ObservedBeforeSendTransition_lift :
-  forall (i : index) (s : state (IM i)) (item : vtransition_item (IM i))
+  forall (i : index) (s : state (IM i)) (item : transition_item (IM i))
     (m1 m2 : message),
   ObservedBeforeSendTransition (IM i) message_dependencies s item m1 m2 ->
   CompositeObservedBeforeSendTransition

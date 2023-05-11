@@ -757,7 +757,7 @@ Qed.
 *)
 Lemma equivocators_trace_sub_item_input_is_seeded_or_sub_previously_sent
   (is : state XE)
-  (tr : list (vtransition_item XE))
+  (tr : list (transition_item XE))
   (s := finite_trace_last is tr)
   (Htr : finite_valid_trace XE is tr)
   (descriptors : equivocator_descriptors IM)

@@ -396,7 +396,6 @@ Context
   .
 
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
-Definition vtransition_item := @transition_item _ vlsm.
 
 End sec_vlsm_projections.
 

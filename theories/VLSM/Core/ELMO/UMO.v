@@ -1452,7 +1452,7 @@ Definition lift_to_UMO_state
     lift_to_composite_state U us i si.
 
 Definition lift_to_UMO_trace
-  (us : UMO_state) (i : index) (tr : list (vtransition_item (U i)))
+  (us : UMO_state) (i : index) (tr : list (transition_item (U i)))
   : list UMO_transition_item :=
     pre_VLSM_embedding_finite_trace_project
       _ _ (lift_to_UMO_label i) (lift_to_UMO_state us i) tr.
@@ -1504,7 +1504,7 @@ Proof.
 Qed.
 
 Lemma lift_to_UMO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (U i))) (us : UMO_state),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (U i))) (us : UMO_state),
     valid_state_prop UMO us ->
     finite_valid_trace_from_to (U i) s1 s2 tr ->
       finite_valid_trace_from_to
@@ -1522,7 +1522,7 @@ Lemma lift_to_RUMO
 Proof. by apply lift_to_preloaded_free_weak_embedding. Qed.
 
 Lemma lift_to_RUMO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (R i))) (us : UMO_state),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (R i))) (us : UMO_state),
     valid_state_prop RUMO us ->
     finite_valid_trace_from_to (R i) s1 s2 tr ->
       finite_valid_trace_from_to

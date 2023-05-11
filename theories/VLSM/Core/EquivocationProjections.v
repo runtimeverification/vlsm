@@ -25,8 +25,8 @@ Context
 Section sec_selectors.
 
 Context
-  (selectorX : message -> vtransition_item X -> Prop)
-  (selectorY : message -> vtransition_item Y -> Prop)
+  (selectorX : message -> transition_item X -> Prop)
+  (selectorY : message -> transition_item Y -> Prop)
   (Hselector : forall itemX itemY,
     input itemX = input itemY -> output itemX = output itemY ->
     forall m, selectorX m itemX <-> selectorY m itemY)
@@ -122,8 +122,8 @@ Context
 Section sec_selectors.
 
 Context
-  (selectorX : message -> vtransition_item X -> Prop)
-  (selectorY : message -> vtransition_item Y -> Prop)
+  (selectorX : message -> transition_item X -> Prop)
+  (selectorY : message -> transition_item Y -> Prop)
   (Hselector : forall itemX itemY,
     input itemX = input itemY -> output itemX = output itemY ->
     forall m, selectorX m itemX <-> selectorY m itemY)
