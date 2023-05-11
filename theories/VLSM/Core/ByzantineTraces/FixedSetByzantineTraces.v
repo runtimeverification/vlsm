@@ -45,8 +45,8 @@ Context
 
 (** The [valid]ity predicate allows sending only signed messages *)
 Definition signed_messages_valid
-  (l : @label message all_messages_type)
-  (som : @state message all_messages_type * option message)
+  (l : label all_messages_type)
+  (som : state all_messages_type * option message)
   : Prop :=
   channel_authenticated_message A sender node_idx l.
 
