@@ -42,7 +42,7 @@ Arguments label {_} _.
   and the [transition] function and [valid] predicate.
 *)
 
-Class VLSMMachine {message : Type} (T : VLSMType message) : Type :=
+Record VLSMMachine {message : Type} (T : VLSMType message) : Type :=
 {
   initial_state_prop : state T -> Prop;
   initial_state : Type := {s : state T | initial_state_prop s};
@@ -62,16 +62,16 @@ Class VLSMMachine {message : Type} (T : VLSMType message) : Type :=
 *)
 Arguments Build_VLSMMachine _ _ & _ _ _ _ _.
 
-Arguments initial_state_prop {message T} _ _, {message T _} _.
-Arguments initial_state {message T} _.
-Arguments initial_message_prop {message T} _ _, {message T _} _.
-Arguments initial_message {message T} _.
-Arguments transition {message T} _ _ _, {message T _} _ _.
-Arguments valid {message T} _ _ _, {message T _} _ _.
+Arguments initial_state_prop {message T} VLSMMachine _, {message T VLSMMachine} _ : rename.
+Arguments initial_state {message T} VLSMMachine : rename.
+Arguments initial_message_prop {message T} VLSMMachine _, {message T VLSMMachine} _ : rename.
+Arguments initial_message {message T} VLSMMachine : rename.
+Arguments transition {message T} VLSMMachine _ _, {message T VLSMMachine} _ _ : rename.
+Arguments valid {message T} VLSMMachine _ _, {message T VLSMMachine} _ _ : rename.
 
 Definition option_initial_message_prop
   {message : Type} {T : VLSMType message} {M : VLSMMachine T}
-  : option message -> Prop := from_option initial_message_prop True.
+  : option message -> Prop := from_option (@initial_message_prop _ _ M) True.
 
 Definition VLSMMachine_pre_loaded_with_messages
   {message : Type} {T : VLSMType message} (M : VLSMMachine T)
@@ -87,7 +87,7 @@ Definition VLSMMachine_pre_loaded_with_messages
 
 Definition decidable_initial_messages_prop
   {message : Type} {T : VLSMType message} (M : VLSMMachine T)
-  := forall m, Decision (initial_message_prop m).
+  := forall m, Decision (@initial_message_prop _ _ M m).
 
 (** *** VLSM type definition
 
@@ -2582,7 +2582,7 @@ Inductive preloaded_valid_state_prop : state X -> Prop :=
     (Ht : transition (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om) = (s', om'))
   : preloaded_valid_state_prop s'.
 
-Lemma preloaded_valid_state_prop_iff s :
+Lemma preloaded_valid_state_prop_iff (s : state X) :
   valid_state_prop pre_loaded_with_all_messages_vlsm s
   <-> preloaded_valid_state_prop s.
 Proof.
