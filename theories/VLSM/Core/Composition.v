@@ -38,7 +38,7 @@ Section sec_composite_type.
   family of [state] types corresponding to each index.
 *)
 Definition composite_state : Type :=
-  forall n : index, vstate (IM n).
+  forall n : index, state (IM n).
 
 (**
   A [composite_label] is a pair between an index <<N>> and a [label] of <<IT n>>.
@@ -54,7 +54,7 @@ Definition composite_label
   Declaring this a "canonical structure" will make type checking
   guess that a VLSMType should be composite_type instead of just
   failing, if it has to compare composite_state with state or
-  vstate of an unsolved VLSMType or VLSM.
+  state of an unsolved VLSMType or VLSM.
 *)
 Canonical Structure composite_type : VLSMType message :=
   {| state := composite_state
@@ -70,12 +70,12 @@ Definition composite_transition_item : Type := @transition_item message composit
 Definition state_update
            (s : composite_state)
            (i : index)
-           (si : vstate (IM i))
+           (si : state (IM i))
            (j : index)
-  : vstate (IM j)
+  : state (IM j)
   :=
   match decide (j = i) with
-  | left e => eq_rect_r (fun i => vstate (IM i)) si e
+  | left e => eq_rect_r (fun i => state (IM i)) si e
   | _ => s j
   end.
 
@@ -83,7 +83,7 @@ Definition state_update
 Lemma state_update_neq
            (s : composite_state)
            (i : index)
-           (si : vstate (IM i))
+           (si : state (IM i))
            (j : index)
            (Hneq : j <> i)
   : state_update s i si j = s j.
@@ -94,7 +94,7 @@ Qed.
 Lemma state_update_eq
            (s : composite_state)
            (i : index)
-           (si : vstate (IM i))
+           (si : state (IM i))
   : state_update s i si i = si.
 Proof.
   unfold state_update.
@@ -105,7 +105,7 @@ Qed.
 Lemma state_update_id
            (s : composite_state)
            (i : index)
-           (si : vstate (IM i))
+           (si : state (IM i))
            (Heq : s i = si)
   : state_update s i si = s.
 Proof.
@@ -119,7 +119,7 @@ Qed.
 Lemma state_update_twice
            (s : composite_state)
            (i : index)
-           (si si' : vstate (IM i))
+           (si si' : state (IM i))
   : state_update (state_update s i si) i si' = state_update s i si'.
 Proof.
   apply functional_extensionality_dep_good.
@@ -132,8 +132,8 @@ Qed.
 Lemma state_update_twice_neq
            (s : composite_state)
            (i j : index)
-           (si : vstate (IM i))
-           (sj : vstate (IM j))
+           (si : state (IM i))
+           (sj : state (IM j))
            (Hij : j <> i)
   : state_update (state_update s i si) j sj
   = state_update (state_update s j sj) i si.
@@ -202,7 +202,7 @@ Definition lift_to_composite_label
 Definition lift_to_composite_state
   (s : composite_state)
   (j : index)
-  (sj : vstate (IM j))
+  (sj : state (IM j))
   : composite_state
   := state_update s j sj.
 
@@ -346,7 +346,7 @@ Definition composite_trace_to_plan := (@_trace_to_plan _ composite_type).
 
 Lemma composite_initial_state_prop_lift
   (j : index)
-  (sj : vstate (IM j))
+  (sj : state (IM j))
   (Hinitj : initial_state_prop (IM j) sj)
   : composite_initial_state_prop (lift_to_composite_state' j sj).
 Proof.
@@ -517,7 +517,7 @@ Qed.
 Lemma constraint_subsumption_input_valid
   (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
   (l : label X1)
-  (s : vstate X1)
+  (s : state X1)
   (om : option message)
   (Hv : input_valid X1 l (s, om))
   : valid X2 l (s, om).
@@ -527,7 +527,7 @@ Qed.
 
 Lemma constraint_subsumption_valid_state_message_preservation
   (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
-  (s : vstate X1)
+  (s : state X1)
   (om : option message)
   (Hps : valid_state_message_prop X1 s om)
   : valid_state_message_prop X2 s om.
@@ -553,7 +553,7 @@ Qed.
 Lemma preloaded_constraint_subsumption_input_valid
   (Hpre_subsumption : preloaded_constraint_subsumption constraint1 constraint2)
   (l : label X1)
-  (s : vstate X1)
+  (s : state X1)
   (om : option message)
   (Hv : input_valid (pre_loaded_with_all_messages_vlsm X1) l (s, om))
   : valid X2 l (s, om).
@@ -717,7 +717,7 @@ Qed.
 
 Lemma valid_state_preloaded_composite_free_lift
   (j : index)
-  (sj : vstate (IM j))
+  (sj : state (IM j))
   (Hp : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM j)) sj)
   : valid_state_prop
       (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
@@ -746,7 +746,7 @@ Lemma composite_update_initial_state_with_initial
   (s : composite_state)
   (Hs : composite_initial_state_prop s)
   (i : index)
-  (si : vstate (IM i))
+  (si : state (IM i))
   (Hsi : initial_state_prop (IM i) si)
   : composite_initial_state_prop (state_update s i si).
 Proof.
@@ -764,7 +764,7 @@ Lemma pre_composite_free_update_state_with_initial
   (s : composite_state)
   (Hs : valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) s)
   (i : index)
-  (si : vstate (IM i))
+  (si : state (IM i))
   (Hsi : initial_state_prop (IM i) si)
   : valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) (state_update s i si).
 Proof.
@@ -907,7 +907,7 @@ Ltac state_update_simpl :=
 Lemma valid_state_project_preloaded_to_preloaded
       message `{EqDecision index} (IM : index -> VLSM message) constraint
       (X := composite_vlsm IM constraint)
-      (s : vstate (pre_loaded_with_all_messages_vlsm X)) i :
+      (s : state (pre_loaded_with_all_messages_vlsm X)) i :
   valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
 Proof.
@@ -926,11 +926,11 @@ Qed.
 Lemma valid_state_project_preloaded
       message `{EqDecision index} (IM : index -> VLSM message) constraint
       (X := composite_vlsm IM constraint)
-      (s : vstate X) i :
+      (s : state X) i :
   valid_state_prop X s ->
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
 Proof.
-  change (vstate X) with (vstate (pre_loaded_with_all_messages_vlsm X)) in s.
+  change (state X) with (state (pre_loaded_with_all_messages_vlsm X)) in s.
   intros [om Hproto].
   apply valid_state_project_preloaded_to_preloaded.
   exists om.
@@ -1130,7 +1130,7 @@ Context
 (** ** Composite Plan Properties
 
   The following results concern facts about applying a [plan Free] <<P>>
-  to a [vstate Free] <<s'>>, knowing its effects on a different [vstate Free] <<s>>
+  to a [state Free] <<s'>>, knowing its effects on a different [state Free] <<s>>
   which shares some relevant features with <<s'>>. 
 *)
 
@@ -1138,7 +1138,7 @@ Context
    [input_valid] from <<s>> and their <<i>>'th components are equal. *)
 
 Lemma relevant_component_transition
-  (s s' : vstate Free)
+  (s s' : state Free)
   (l : label Free)
   (input : option message)
   (i := projT1 l)
@@ -1160,7 +1160,7 @@ Qed.
 (* The effect of the transition is also the same. *)
 
 Lemma relevant_component_transition2
-  (s s' : vstate Free)
+  (s s' : state Free)
   (l : label Free)
   (input : option message)
   (i := projT1 l)
@@ -1181,7 +1181,7 @@ Proof.
 Qed.
 
 Lemma relevant_components_one
-  (s s' : vstate Free)
+  (s s' : state Free)
   (Hprs' : valid_state_prop Free s')
   (ai : vplan_item Free)
   (i := projT1 (label_a ai))
@@ -1302,7 +1302,7 @@ Qed.
 (* Same as relevant_components_one but for multiple transitions. *)
 
 Lemma relevant_components
-  (s s' : vstate Free)
+  (s s' : state Free)
   (Hprs' : valid_state_prop Free s')
   (a : plan Free)
   (a_indices := List.map (@projT1 _ _) (List.map (@label_a _ _) a))

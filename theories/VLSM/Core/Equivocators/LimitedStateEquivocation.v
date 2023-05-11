@@ -20,7 +20,7 @@ Definition composite_constraint
 Lemma equivocator_initial_state_project
   {message}
   (X : VLSM message)
-  (es : vstate (equivocator_vlsm X))
+  (es : state (equivocator_vlsm X))
   (eqv_descriptor : MachineDescriptor X)
   (Heqv : proper_descriptor X eqv_descriptor es)
   (Hes : initial_state_prop (equivocator_vlsm X) es) :

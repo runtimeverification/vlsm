@@ -148,7 +148,7 @@ Record VLSM_projection_type
   (X : VLSM message)
   (TY : VLSMType message)
   (label_project : label X -> option (label TY))
-  (state_project : vstate X -> state TY)
+  (state_project : state X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project X TY label_project state_project)
   : Prop :=
 {
@@ -168,16 +168,16 @@ Definition VLSM_partial_trace_project_from_projection
   {X : VLSM message}
   {TY : VLSMType message}
   (label_project : label X -> option (label TY))
-  (state_project : vstate X -> state TY)
+  (state_project : state X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
-  := fun str : vstate X * list (vtransition_item X) =>
+  := fun str : state X * list (vtransition_item X) =>
       let (s, tr) := str in Some (state_project s, trace_project tr).
 
 Context
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   (Hsimul : VLSM_projection_type X Y label_project state_project)
   .
@@ -206,7 +206,7 @@ Context
   (X : VLSM message)
   (TY : VLSMType message)
   (label_project : label X -> option (label TY))
-  (state_project : vstate X -> state TY)
+  (state_project : state X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   .
 
@@ -241,7 +241,7 @@ Context
   {message : Type}
   (X Y : VLSM message)
   (label_project : label X -> option (label Y))
-  (state_project : vstate X -> vstate Y)
+  (state_project : state X -> state Y)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   .
 
@@ -271,11 +271,11 @@ Record VLSM_projection : Prop :=
 }.
 
 Definition weak_projection_initial_state_preservation : Prop :=
-  forall s : vstate X,
+  forall s : state X,
     initial_state_prop X s -> valid_state_prop Y (state_project s).
 
 Definition strong_projection_initial_state_preservation : Prop :=
-  forall s : vstate X,
+  forall s : state X,
     initial_state_prop X s -> initial_state_prop Y (state_project s).
 
 Lemma strong_projection_initial_state_preservation_weaken
@@ -351,7 +351,7 @@ Definition VLSM_weak_projection_trace_project
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
   : list (vtransition_item X) -> list (vtransition_item Y)
   := pre_VLSM_projection_finite_trace_project _ _ label_project state_project.
@@ -360,7 +360,7 @@ Definition VLSM_weak_projection_in
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
   := pre_VLSM_projection_in_projection _ _ label_project.
 
@@ -368,7 +368,7 @@ Definition VLSM_weak_projection_infinite_trace_project
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
   (s : Streams.Stream (vtransition_item X))
   (Hinf : InfinitelyOften (VLSM_weak_projection_in Hsimul) s)
@@ -379,7 +379,7 @@ Definition VLSM_weak_projection_infinite_finite_trace_project
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
   (s : Streams.Stream (vtransition_item X))
   (Hfin : FinitelyManyBound (VLSM_weak_projection_in Hsimul) s)
@@ -390,7 +390,7 @@ Context
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
   .
 
@@ -531,7 +531,7 @@ Definition VLSM_projection_finite_trace_project
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_projection X Y label_project state_project)
   : list (vtransition_item X) -> list (vtransition_item Y)
   := pre_VLSM_projection_finite_trace_project _ _ label_project state_project.
@@ -540,7 +540,7 @@ Definition VLSM_projection_in
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_projection X Y label_project state_project)
   := pre_VLSM_projection_in_projection _ _ label_project.
 
@@ -548,7 +548,7 @@ Definition VLSM_projection_infinite_trace_project
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_projection X Y label_project state_project)
   (s : Streams.Stream (vtransition_item X))
   (Hinf : InfinitelyOften (VLSM_projection_in Hsimul) s)
@@ -559,7 +559,7 @@ Definition VLSM_projection_infinite_finite_trace_project
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_projection X Y label_project state_project)
   (s : Streams.Stream (vtransition_item X))
   (Hfin : FinitelyManyBound (VLSM_projection_in Hsimul) s)
@@ -570,7 +570,7 @@ Context
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_projection X Y label_project state_project)
   .
 
@@ -735,19 +735,19 @@ Section sec_projection_friendliness.
 *)
 Definition projection_friendly_prop
   := forall
-    (sY : vstate Y)
+    (sY : state Y)
     (trY : list (vtransition_item Y))
     (HtrY : finite_valid_trace Y sY trY),
-    exists (sX : vstate X) (trX : list (vtransition_item X)),
+    exists (sX : state X) (trX : list (vtransition_item X)),
       finite_valid_trace X sX trX
       /\ state_project sX = sY
       /\ VLSM_projection_finite_trace_project Hsimul trX = trY.
 
 Lemma projection_friendly_in_futures
   (Hfr : projection_friendly_prop)
-  (s1 s2 : vstate Y)
+  (s1 s2 : state Y)
   (Hfuture : in_futures Y s1 s2)
-  : exists (sX1 sX2 : vstate X),
+  : exists (sX1 sX2 : state X),
     state_project sX1 = s1 /\ state_project sX2 = s2 /\ in_futures X sX1 sX2.
 Proof.
   destruct Hfuture as [tr_s2 Hfuture].
@@ -779,7 +779,7 @@ Qed.
 Lemma projection_friendly_trace_char
   (Hfriendly : projection_friendly_prop)
   : forall sY trY, finite_valid_trace Y sY trY <->
-    exists (sX : vstate X) (trX : list (vtransition_item X)),
+    exists (sX : state X) (trX : list (vtransition_item X)),
       finite_valid_trace X sX trX
       /\ state_project sX = sY
       /\ VLSM_projection_finite_trace_project Hsimul trX = trY.
@@ -816,7 +816,7 @@ Context
   (X : VLSM message)
   (TY : VLSMType message)
   (label_project : label X -> option (label TY))
-  (state_project : vstate X -> state TY)
+  (state_project : state X -> state TY)
   (Htransition_None : weak_projection_transition_consistency_None X TY label_project state_project)
   .
 
@@ -844,7 +844,7 @@ Context
   {message : Type}
   (X Y : VLSM message)
   (label_project : label X -> option (label Y))
-  (state_project : vstate X -> vstate Y)
+  (state_project : state X -> state Y)
   .
 
 Context
@@ -889,7 +889,7 @@ Proof.
 Qed.
 
 #[local] Lemma basic_VLSM_projection_finite_valid_trace_from
-  (s : vstate X)
+  (s : state X)
   (ls : list transition_item)
   (Hpxt : finite_valid_trace_from X s ls)
   : finite_valid_trace_from Y (state_project s)
@@ -946,7 +946,7 @@ Lemma basic_VLSM_strong_projection
   {message : Type}
   (X Y : VLSM message)
   (label_project : label X -> option (label Y))
-  (state_project : vstate X -> vstate Y)
+  (state_project : state X -> state Y)
   (Hvalid : strong_projection_valid_preservation X Y label_project state_project)
   (Htransition_Some : strong_projection_transition_preservation_Some X Y label_project state_project)
   (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
@@ -966,7 +966,7 @@ Lemma basic_VLSM_projection_type_preloaded
   {message : Type}
   (X Y : VLSM message)
   (label_project : label X -> option (label Y))
-  (state_project : vstate X -> vstate Y)
+  (state_project : state X -> state Y)
   (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
   : VLSM_projection_type (pre_loaded_with_all_messages_vlsm X) Y label_project state_project.
 Proof.
@@ -990,7 +990,7 @@ Lemma basic_VLSM_projection_preloaded
   {message : Type}
   (X Y : VLSM message)
   (label_project : label X -> option (label Y))
-  (state_project : vstate X -> vstate Y)
+  (state_project : state X -> state Y)
   (Hvalid : strong_projection_valid_preservation X Y label_project state_project)
   (Htransition_Some : strong_projection_transition_preservation_Some X Y label_project state_project)
   (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
@@ -1032,7 +1032,7 @@ Lemma basic_VLSM_projection_type_preloaded_with
   (X Y : VLSM message)
   (P Q : message -> Prop)
   (label_project : label X -> option (label Y))
-  (state_project : vstate X -> vstate Y)
+  (state_project : state X -> state Y)
   (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
   : VLSM_projection_type (pre_loaded_vlsm X P) Y label_project state_project.
 Proof.
@@ -1057,7 +1057,7 @@ Lemma basic_VLSM_projection_preloaded_with
   (X Y : VLSM message)
   (P Q : message -> Prop)
   (label_project : label X -> option (label Y))
-  (state_project : vstate X -> vstate Y)
+  (state_project : state X -> state Y)
   (Hvalid : strong_projection_valid_preservation X Y label_project state_project)
   (Htransition_Some : strong_projection_transition_preservation_Some X Y label_project state_project)
   (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)

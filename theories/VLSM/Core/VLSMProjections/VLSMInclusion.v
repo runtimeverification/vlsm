@@ -45,7 +45,7 @@ Lemma VLSM_incl_finite_traces_characterization
   (MX MY : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <->
-    forall (s : vstate X)
+    forall (s : state X)
     (tr : list (vtransition_item X)),
     finite_valid_trace X s tr -> finite_valid_trace Y s tr.
 Proof.
@@ -167,7 +167,7 @@ Context
 (** VLSM inclusion specialized to finite trace. *)
 
 Lemma VLSM_incl_finite_valid_trace
-  (s : vstate X)
+  (s : state X)
   (tr : list (vtransition_item X))
   (Htr : finite_valid_trace X s tr)
   : finite_valid_trace Y s tr.
@@ -178,7 +178,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_finite_valid_trace_init_to
-  (s f : vstate X)
+  (s f : state X)
   (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_init_to X s f tr)
   : finite_valid_trace_init_to Y s f tr.
@@ -189,7 +189,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_valid_state
-  (s : vstate X)
+  (s : state X)
   (Hs : valid_state_prop X s)
   : valid_state_prop Y s.
 Proof.
@@ -197,14 +197,14 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_initial_state
-  (is : vstate X)
+  (is : state X)
   : initial_state_prop X is -> initial_state_prop Y is.
 Proof.
   by apply (VLSM_embedding_initial_state (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 Lemma VLSM_incl_finite_valid_trace_from
-  (s : vstate X)
+  (s : state X)
   (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_from X s tr)
   : finite_valid_trace_from Y s tr.
@@ -215,7 +215,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_finite_valid_trace_from_to
-  (s f : vstate X)
+  (s f : state X)
   (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_from_to X s f tr)
   : finite_valid_trace_from_to Y s f tr.
@@ -226,7 +226,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_in_futures
-  (s1 s2 : vstate X)
+  (s1 s2 : state X)
   : in_futures X s1 s2 -> in_futures Y s1 s2.
 Proof.
   by apply (VLSM_embedding_in_futures (VLSM_incl_is_embedding Hincl)).
@@ -479,7 +479,7 @@ Proof.
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from
-  (from : vstate X) (tr : list transition_item)
+  (from : state X) (tr : list transition_item)
   : finite_valid_trace_from X from tr ->
     finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) from tr.
 Proof.
@@ -488,7 +488,7 @@ Proof.
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from_to
-  (from to : vstate X) (tr : list transition_item)
+  (from to : state X) (tr : list transition_item)
   : finite_valid_trace_from_to X from to tr ->
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) from to tr.
 Proof.

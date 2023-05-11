@@ -71,7 +71,7 @@ Context
 (** VLSM equality specialized to finite trace. *)
 
 Lemma VLSM_eq_finite_valid_trace
-  (s : vstate X)
+  (s : state X)
   (tr : list (vtransition_item X))
   : finite_valid_trace X s tr <-> finite_valid_trace Y s tr.
 Proof.
@@ -79,7 +79,7 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace_init_to
-  (s f : vstate X)
+  (s f : state X)
   (tr : list (vtransition_item X))
   : finite_valid_trace_init_to X s f tr <->
     finite_valid_trace_init_to Y s f tr.
@@ -88,21 +88,21 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_valid_state
-  (s : vstate X)
+  (s : state X)
   : valid_state_prop X s <-> valid_state_prop Y s.
 Proof.
   by split; apply VLSM_incl_valid_state, Hincl.
 Qed.
 
 Lemma VLSM_eq_initial_state
-  (is : vstate X)
+  (is : state X)
   : initial_state_prop X is <-> initial_state_prop Y is.
 Proof.
   by split; apply VLSM_incl_initial_state, Hincl.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace_from
-  (s : vstate X)
+  (s : state X)
   (tr : list (vtransition_item X))
   : finite_valid_trace_from X s tr <->
     finite_valid_trace_from Y s tr.
@@ -111,7 +111,7 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace_from_to
-  (s f : vstate X)
+  (s f : state X)
   (tr : list (vtransition_item X))
   : finite_valid_trace_from_to X s f tr <-> finite_valid_trace_from_to Y s f tr.
 Proof.
@@ -119,7 +119,7 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_in_futures
-  (s1 s2 : vstate X)
+  (s1 s2 : state X)
   : in_futures X s1 s2 <-> in_futures Y s1 s2.
 Proof.
   by split; apply VLSM_incl_in_futures, Hincl.

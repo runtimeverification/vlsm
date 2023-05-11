@@ -339,7 +339,7 @@ Context
 
 Lemma projection_valid_input_valid
   (l : label Xj)
-  (som : vstate Xj * option message)
+  (som : state Xj * option message)
   (Hv : valid Xj l som)
   : input_valid Xj l som.
 Proof.
@@ -352,7 +352,7 @@ Qed.
 
 Lemma projection_valid_implies_composition_valid_message
   (l : label Xj)
-  (s : vstate Xj)
+  (s : state Xj)
   (om : option message)
   (Hv : valid Xj l (s, om))
   : option_valid_message_prop X om.
@@ -362,7 +362,7 @@ Qed.
 
 Lemma projection_valid_implies_projection_valid_state
   (lj : label Xj)
-  (sj : vstate Xj)
+  (sj : state Xj)
   (om : option message)
   (Hv : valid Xj lj (sj, om))
   : valid_state_prop Xj sj.
@@ -373,7 +373,7 @@ Qed.
 
 Lemma projection_valid_implies_projection_valid_state_message_outputs
     (l : label Xj)
-    (s : vstate Xj)
+    (s : state Xj)
     (om : option message)
     (Hv : valid Xj l (s, om))
     s' om'
@@ -389,7 +389,7 @@ Qed.
 
 Lemma projection_valid_implies_destination_projection_valid_state
     (l : label Xj)
-    (s : vstate Xj)
+    (s : state Xj)
     (om : option message)
     (Hv : valid Xj l (s, om))
     s' om'
@@ -401,7 +401,7 @@ Qed.
 
 Lemma projection_valid_implies_destination_projection_valid_message
     (l : label Xj)
-    (s : vstate Xj)
+    (s : state Xj)
     (om : option message)
     (Hv : valid Xj l (s, om))
     s' om'
@@ -430,7 +430,7 @@ Qed.
 *)
 Lemma proj_pre_loaded_with_all_messages_valid_state_message_preservation
   (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
-  (s : vstate Xj)
+  (s : state Xj)
   (om : option message)
   (Hps : valid_state_message_prop Xj s om)
   : valid_state_message_prop PreLoaded s om.
@@ -468,7 +468,7 @@ Qed.
   [composite_vlsm_induced_projection_validator].
 *)
 Definition component_projection_validator_prop :=
-  forall (lj : label (IM j)) (sj : vstate (IM j)) (omi : option message),
+  forall (lj : label (IM j)) (sj : state (IM j)) (omi : option message),
     input_valid (pre_loaded_with_all_messages_vlsm (IM j)) lj (sj, omi) ->
     valid Xj lj (sj, omi).
 
@@ -544,17 +544,17 @@ Context
 Definition projection_friendliness_sufficient_condition
   := forall
     (lj : label (IM j))
-    (sj : vstate (IM j))
+    (sj : state (IM j))
     (om : option message)
     (Hiv : input_valid Xj lj (sj, om))
-    (s : vstate X)
+    (s : state X)
     (Hs : valid_state_prop X s)
     (Hsi : s j = sj)
     , valid X (existT j lj) (s, om).
 
 Lemma projection_friendliness_sufficient_condition_valid_state
   (Hfr : projection_friendliness_sufficient_condition)
-  (s : vstate Xj)
+  (s : state Xj)
   (Hp : valid_state_prop Xj s)
   : valid_state_prop X (lift_to_composite_state' IM j s).
 Proof.

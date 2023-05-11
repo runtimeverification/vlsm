@@ -829,7 +829,7 @@ Definition lift_to_MO_label
     lift_to_composite_label M i li.
 
 Definition lift_to_MO_state
-  (us : MO_state) (i : index) (si : vstate (M i)) : MO_state :=
+  (us : MO_state) (i : index) (si : VLSM.state (M i)) : MO_state :=
     lift_to_composite_state M us i si.
 
 Definition lift_to_MO_trace
@@ -1149,7 +1149,7 @@ Proof.
   unfold component_projection_validator_prop.
   intros i lj sj omi * Hiv.
   apply input_valid_transition_iff in Hiv as [[s m] Ht].
-  apply exists_right_finite_trace_from in Ht as (s' & tr & Hfvt & Hlast).
+  destruct (exists_right_finite_trace_from _ _ _ _ _ _ Ht) as (s' & tr & Hfvt & Hlast).
   apply lift_to_MO_finite_valid_trace_init_to in Hfvt as [Hfvt _].
   unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project in Hfvt;
     rewrite map_app in Hfvt.
@@ -1160,7 +1160,7 @@ Proof.
             (lift_to_MO_state (fun j : index => MkState [] (idx j)) i s')
             (lift_to_MO_trace (fun j : index => MkState [] (idx j)) i tr)) in Heqftl.
   apply valid_trace_forget_last, first_transition_valid in Hfvt; cbn in *.
-  destruct Hfvt as [[Hvps [Hovmp [Hv1 Hv2]]] Ht]; cbn in Hv1, Hv2.
+  destruct Hfvt as [[Hvps [Hovmp [Hv1 Hv2]]] Ht']; cbn in Hv1, Hv2.
   unfold lift_to_MO_trace in Heqftl; cbn in Heqftl.
   rewrite <- pre_VLSM_embedding_finite_trace_last, Hlast in Heqftl.
   exists ftl; split; [| done].
@@ -1255,7 +1255,7 @@ Record local_equivocators (s : State) (i : Address) : Prop :=
 Set Warnings "cannot-define-projection".
 
 Definition composite_rec_observation
-  (s : vstate MO) (ob : Observation) : Prop :=
+  (s : VLSM.state MO) (ob : Observation) : Prop :=
     exists i : index, rec_obs (s i) ob.
 
 Definition state_after_sending (m : Message) : State :=
@@ -1263,7 +1263,7 @@ Definition state_after_sending (m : Message) : State :=
 
 Set Warnings "-cannot-define-projection".
 Record global_equivocators
-  (sigma : vstate MO) (i : index) : Prop :=
+  (sigma : VLSM.state MO) (i : index) : Prop :=
 {
   globeqv_ob : Observation;
   globeqv_adr : adr (state (message globeqv_ob)) = idx i;
@@ -1287,7 +1287,7 @@ Proof.
 Qed.
 
 Lemma messages_rec_obs :
-  forall i (s : vstate (RM i)),
+  forall i (s : VLSM.state (RM i)),
     valid_state_prop (RM i) s ->
     forall (m' : Message) (ob : Observation),
       m' ∈ messages s ->

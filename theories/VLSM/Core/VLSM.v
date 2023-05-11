@@ -395,7 +395,6 @@ Context
   (vlsm : VLSM message)
   .
 
-Definition vstate := state vlsm.
 Definition vs0 := @inhabitant _ (@s0 _ _ vlsm).
 Definition vtransition_item := @transition_item _ vlsm.
 
@@ -2416,9 +2415,9 @@ Arguments extend_right_finite_trace_from_to [message] (X) [s1 s2 ts] (Ht12) [l3 
 
 Class TraceWithLast
   (base_prop : forall {message} (X : VLSM message),
-    vstate X -> list transition_item -> Prop)
+    state X -> list transition_item -> Prop)
   (trace_prop : forall {message} (X : VLSM message),
-    vstate X -> vstate X -> list transition_item -> Prop)
+    state X -> state X -> list transition_item -> Prop)
   : Prop :=
 {
   valid_trace_add_last : forall [msg] [X : VLSM msg] [s f tr],
@@ -2540,7 +2539,7 @@ Proof.
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_message_preservation
-  (s : vstate X)
+  (s : state X)
   (om : option message)
   (Hps : valid_state_message_prop X s om)
   : valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
@@ -2551,7 +2550,7 @@ Proof.
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_prop
-  (s : vstate X)
+  (s : state X)
   (Hps : valid_state_prop X s)
   : valid_state_prop pre_loaded_with_all_messages_vlsm s.
 Proof.
@@ -2569,14 +2568,14 @@ Proof.
   by apply pre_loaded_with_all_messages_message_valid_initial_state_message.
 Qed.
 
-Inductive preloaded_valid_state_prop : vstate X -> Prop :=
+Inductive preloaded_valid_state_prop : state X -> Prop :=
 | preloaded_valid_initial_state
-    (s : vstate X)
+    (s : state X)
     (Hs : initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) s) :
        preloaded_valid_state_prop s
 | preloaded_protocol_generated
     (l : label X)
-    (s : vstate X)
+    (s : state X)
     (Hps : preloaded_valid_state_prop s)
     (om : option message)
     (Hv : valid (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om))
@@ -2672,10 +2671,10 @@ End sec_pre_loaded_with_all_messages_vlsm.
 
 Lemma non_empty_valid_trace_from_can_produce
   `(X : VLSM message)
-  (s : vstate X)
+  (s : state X)
   (m : message)
   : can_produce X s m
-  <-> exists (is : vstate X) (tr : list transition_item) (item : transition_item),
+  <-> exists (is : state X) (tr : list transition_item) (item : transition_item),
     finite_valid_trace X is tr /\
     last_error tr = Some item /\
     destination item = s /\ output item = Some m.
@@ -2729,8 +2728,8 @@ Context
 Definition same_VLSM_label_rew (l1 : label X1) : label X2 :=
   eq_rect X1 label l1 _ Heq.
 
-Definition same_VLSM_state_rew (s1 : vstate X1) : vstate X2 :=
-  eq_rect X1 _ s1 _ Heq.
+Definition same_VLSM_state_rew (s1 : state X1) : state X2 :=
+  eq_rect X1 state s1 _ Heq.
 
 End sec_definitions.
 
@@ -2766,7 +2765,7 @@ Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
   vt_transition : transition X l (s1, iom) = (s2, oom);
 }.
 
-Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : vstate X) : Prop :=
+Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : state X) : Prop :=
 | transition_next :
     forall l iom oom (Ht : ValidTransition X l s1 iom s2 oom),
       ValidTransitionNext X s1 s2.
@@ -2808,7 +2807,7 @@ Class HistoryVLSM `(X : VLSM message) : Prop :=
     forall s2, initial_state_prop X s2 ->
     forall s1, ~ ValidTransitionNext X s1 s2;
   unique_transition_to_state :
-    forall [s : vstate X],
+    forall [s : state X],
     forall [l1 s1 iom1 oom1], ValidTransition X l1 s1 iom1 s oom1 ->
     forall [l2 s2 iom2 oom2], ValidTransition X l2 s2 iom2 s oom2 ->
     l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2;

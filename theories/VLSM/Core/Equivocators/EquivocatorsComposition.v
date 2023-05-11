@@ -151,8 +151,7 @@ Proof.
   intro Hsi. elim Hi. clear Hi. unfold is_singleton_state in *.
   simpl in *.
   destruct l as (j, lj).
-  destruct (equivocator_transition (IM j) lj (s0 j, iom)) as (sj', om') eqn: Htj.
-  inversion Ht. subst. clear Ht.
+  case_match; inversion Ht; subst; clear Ht.
   destruct (decide (i = j)); subst; state_update_simpl; [| done].
   by revert Hsi; apply equivocator_transition_reflects_singleton_state with iom oom lj.
 Qed.
@@ -284,7 +283,7 @@ Definition equivocator_descriptors : Type := forall (eqv : index), MachineDescri
 *)
 Definition proper_equivocator_descriptors
   (eqv_descriptors : equivocator_descriptors)
-  (s : vstate equivocators_free_vlsm)
+  (s : state equivocators_free_vlsm)
   : Prop
   := forall
     (eqv : index),
@@ -293,7 +292,7 @@ Definition proper_equivocator_descriptors
 (** Same as above, but disallowing equivocation. *)
 Definition not_equivocating_equivocator_descriptors
   (eqv_descriptors : equivocator_descriptors)
-  (s : vstate equivocators_free_vlsm)
+  (s : state equivocators_free_vlsm)
   : Prop
   := forall
     (eqv : index),
@@ -314,7 +313,7 @@ Qed.
 
 Lemma not_equivocating_equivocator_descriptors_proper
   (eqv_descriptors : equivocator_descriptors)
-  (s : vstate equivocators_free_vlsm)
+  (s : state equivocators_free_vlsm)
   (Hne : not_equivocating_equivocator_descriptors eqv_descriptors s)
   : proper_equivocator_descriptors eqv_descriptors s.
 Proof.
@@ -327,14 +326,14 @@ Definition zero_descriptor
   := Existing 0.
 
 Lemma zero_descriptor_not_equivocating
-  (s : vstate equivocators_free_vlsm)
+  (s : state equivocators_free_vlsm)
   : not_equivocating_equivocator_descriptors zero_descriptor s.
 Proof.
   by intro eqv; eexists.
 Qed.
 
 Lemma zero_descriptor_proper
-  (s : vstate equivocators_free_vlsm)
+  (s : state equivocators_free_vlsm)
   : proper_equivocator_descriptors zero_descriptor s.
 Proof.
   apply not_equivocating_equivocator_descriptors_proper.
@@ -343,9 +342,9 @@ Qed.
 
 Lemma proper_equivocator_descriptors_state_update_eqv
   (eqv_descriptors : equivocator_descriptors)
-  (s : vstate equivocators_free_vlsm)
+  (s : state equivocators_free_vlsm)
   (eqv : index)
-  (si : vstate (equivocator_IM eqv))
+  (si : state (equivocator_IM eqv))
   (Hsi_proper : proper_descriptor (IM eqv) (eqv_descriptors eqv) (s eqv))
   (Hproper : proper_equivocator_descriptors eqv_descriptors (state_update equivocator_IM s eqv si))
   : proper_equivocator_descriptors eqv_descriptors s.
@@ -357,21 +356,21 @@ Qed.
 
 Definition equivocators_state_project
   (eqv_descriptors : equivocator_descriptors)
-  (s : vstate equivocators_free_vlsm)
-  : vstate Free
+  (s : state equivocators_free_vlsm)
+  : state Free
   :=
   fun (eqv : index) =>
   equivocator_state_descriptor_project (s eqv) (eqv_descriptors eqv).
 
 Definition lift_to_equivocators_state
-  (s : vstate Free)
+  (s : state Free)
   (eqv : index)
-  : vstate (equivocator_IM eqv)
+  : state (equivocator_IM eqv)
   :=
   mk_singleton_state _ (s eqv).
 
 Lemma lift_initial_to_equivocators_state
-  (s : vstate Free)
+  (s : state Free)
   (Hs : initial_state_prop Free s)
   : initial_state_prop equivocators_no_equivocations_vlsm (lift_to_equivocators_state s).
 Proof.
@@ -474,9 +473,9 @@ Qed.
 
 Lemma equivocators_state_project_state_update_eqv
   (eqv_descriptors : equivocator_descriptors)
-  (s : vstate equivocators_free_vlsm)
+  (s : state equivocators_free_vlsm)
   (eqv : index)
-  (seqv : vstate (equivocator_IM eqv))
+  (seqv : state (equivocator_IM eqv))
   : let si :=  match eqv_descriptors eqv with
     | NewMachine sn => sn
     | Existing i =>
@@ -494,7 +493,7 @@ Proof.
 Qed.
 
 Lemma equivocators_initial_state_project
-  (es : vstate equivocators_free_vlsm)
+  (es : state equivocators_free_vlsm)
   (Hes : initial_state_prop equivocators_free_vlsm es)
   (eqv_descriptors : equivocator_descriptors)
   (Heqv : proper_equivocator_descriptors eqv_descriptors es)

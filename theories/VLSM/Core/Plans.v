@@ -176,7 +176,7 @@ Definition plan : Type := list vplan_item.
 Definition apply_plan := (@_apply_plan _ X (@transition _ _ X)).
 Definition trace_to_plan := (@_trace_to_plan _ X).
 Definition apply_plan_app
-  (start : vstate X)
+  (start : state X)
   (a a' : plan)
   : apply_plan start (a ++ a') =
     let (aitems, afinal) := apply_plan start a in
@@ -184,7 +184,7 @@ Definition apply_plan_app
      (aitems ++ a'items, a'final)
   := (@_apply_plan_app _ X (@transition _ _ X) start a a').
 Definition apply_plan_last
-  (start : vstate X)
+  (start : state X)
   (a : plan)
   (after_a := apply_plan start a)
   : finite_trace_last start (fst after_a) = snd after_a
@@ -195,13 +195,13 @@ Definition apply_plan_last
   obtain a valid trace sequence.
 *)
 Definition finite_valid_plan_from
-  (s : vstate X)
+  (s : state X)
   (a : plan)
   : Prop :=
   finite_valid_trace_from _ s (fst (apply_plan s a)).
 
 Lemma finite_valid_plan_from_app_iff
-  (s : vstate X)
+  (s : state X)
   (a b : plan)
   (s_a := snd (apply_plan s a))
   : finite_valid_plan_from s a /\ finite_valid_plan_from s_a b <-> finite_valid_plan_from s (a ++ b).
@@ -218,7 +218,7 @@ Proof.
 Qed.
 
 Lemma finite_valid_plan_empty
-  (s : vstate X)
+  (s : state X)
   (Hpr : valid_state_prop X s)  :
   finite_valid_plan_from s [].
 Proof.
@@ -226,7 +226,7 @@ Proof.
 Qed.
 
 Lemma apply_plan_last_valid
-  (s : vstate X)
+  (s : state X)
   (a : plan)
   (Hpra : finite_valid_plan_from s a)
   (after_a := apply_plan s a) :
@@ -242,7 +242,7 @@ Qed.
   and reapplying the plan to the same state <<s>> we obtain the original trace.
 *)
 Lemma trace_to_plan_to_trace_from_to
-  (s s' : vstate X)
+  (s s' : state X)
   (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_from_to X s s' tr)
   : apply_plan s (trace_to_plan tr) = (tr, s').
@@ -259,7 +259,7 @@ Proof.
 Qed.
 
 Lemma trace_to_plan_to_trace
-  (s : vstate X)
+  (s : state X)
   (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_from X s tr)
   : fst (apply_plan s (trace_to_plan tr)) = tr.
@@ -273,7 +273,7 @@ Qed.
   state of the trace.
 *)
 Lemma finite_valid_trace_from_to_plan
-  (s : vstate X)
+  (s : state X)
   (tr : list (vtransition_item X))
   (Htr : finite_valid_trace_from X s tr)
   : finite_valid_plan_from s (trace_to_plan tr).
@@ -283,7 +283,7 @@ Qed.
 
 (** Characterization of valid plans. *)
 Lemma finite_valid_plan_iff
-  (s : vstate X)
+  (s : state X)
   (a : plan)
   : finite_valid_plan_from s a
   <-> valid_state_prop X s
@@ -364,7 +364,7 @@ Qed.
 
 (** Characterizing a singleton valid plan as a input valid transition. *)
 Lemma finite_valid_plan_from_one
-  (s : vstate X)
+  (s : state X)
   (a : plan_item) :
   let res := transition X (label_a a) (s, input_a a) in
   finite_valid_plan_from s [a] <-> input_valid_transition X (label_a a) (s, input_a a) res.
@@ -375,17 +375,9 @@ Proof.
   unfold apply_plan, _apply_plan in *; simpl in *;
   unfold finite_valid_plan_from in *;
   unfold apply_plan, _apply_plan in *; simpl in *.
-  - match type of H with
-    | context[let (_, _) := let (_, _) := ?t in _ in _] =>
-      destruct t as [dest output] eqn: eq_trans
-    end.
-    inversion H; subst.
-    by setoid_rewrite eq_trans.
-  - match type of H with
-    | input_valid_transition _ _ _ ?t =>
-      destruct t as [dest output] eqn: eq_trans
-    end.
-    setoid_rewrite eq_trans.
+  - destruct (transition label_a0 (s, input_a0)); cbn in H.
+    by inversion H; subst.
+  - destruct (transition label_a0 (s, input_a0)); cbn in H |- *.
     apply finite_valid_trace_from_extend; [| done].
     apply finite_valid_trace_from_empty.
     by apply input_valid_transition_destination in H.
@@ -393,16 +385,16 @@ Qed.
 
 Definition preserves
   (a : plan)
-  (P : vstate X -> Prop) :
+  (P : state X -> Prop) :
   Prop :=
-  forall (s : vstate X),
+  forall (s : state X),
   (P s -> valid_state_prop X s -> finite_valid_plan_from s a -> P (snd (apply_plan s a))).
 
 Definition ensures
   (a : plan)
-  (P : vstate X -> Prop) :
+  (P : state X -> Prop) :
   Prop :=
-  forall (s : vstate X),
+  forall (s : state X),
   (valid_state_prop X s -> P s -> finite_valid_plan_from s a).
 
 (*
@@ -414,8 +406,8 @@ Definition ensures
 
 Lemma plan_independence
   (a b : plan)
-  (Pb : vstate X -> Prop)
-  (s : vstate X)
+  (Pb : state X -> Prop)
+  (s : state X)
   (Hpr : valid_state_prop X s)
   (Ha : finite_valid_plan_from s a)
   (Hhave : Pb s)
