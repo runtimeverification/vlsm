@@ -154,7 +154,7 @@ Proof.
       (extend_right_finite_trace_from_to CE Happ) as Happ_extend.
     destruct l as (eqv, li).
     pose
-      (@existT _ (fun i : index => vlabel (equivocator_IM IM i)) eqv (ContinueWith 0 li))
+      (@existT _ (fun i : index => label (equivocator_IM IM i)) eqv (ContinueWith 0 li))
       as el.
     destruct (transition CE el (es, iom))
       as (es', om') eqn: Hesom'.

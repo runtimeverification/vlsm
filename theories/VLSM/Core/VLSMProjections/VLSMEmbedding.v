@@ -96,7 +96,7 @@ Section sec_basic_definitions.
 Context
   {message : Type}
   (X Y : VLSM message)
-  (label_project : vlabel X -> vlabel Y)
+  (label_project : label X -> label Y)
   (state_project : vstate X -> vstate Y)
   .
 
@@ -132,7 +132,7 @@ Record VLSM_embedding : Prop :=
 }.
 
 Definition weak_embedding_valid_preservation : Prop :=
-  forall (l : vlabel X) (s : vstate X) (om : option message)
+  forall (l : label X) (s : vstate X) (om : option message)
     (Hv : input_valid X l (s, om))
     (HsY : valid_state_prop Y (state_project s))
     (HomY : option_valid_message_prop Y om),
@@ -147,7 +147,7 @@ Proof.
 Qed.
 
 Definition strong_embedding_valid_preservation : Prop :=
-  forall (l : vlabel X) (s : vstate X) (om : option message),
+  forall (l : label X) (s : vstate X) (om : option message),
     valid X l (s, om) -> valid Y (label_project l) ((state_project s), om).
 
 Lemma strong_projection_valid_preservation_from_full
@@ -211,7 +211,7 @@ Proof.
 Qed.
 
 Definition weak_embedding_initial_message_preservation : Prop :=
-  forall (l : vlabel X) (s : vstate X) (m : message)
+  forall (l : label X) (s : vstate X) (m : message)
     (Hv : input_valid X l (s, Some m))
     (HsY : valid_state_prop Y (state_project s))
     (HmX : initial_message_prop X m),
@@ -235,7 +235,7 @@ End sec_basic_definitions.
 Definition VLSM_embedding_transition_item_project
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
+  {label_project : label X -> label Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_embedding X Y label_project state_project)
   := pre_VLSM_embedding_transition_item_project _ _  label_project state_project
@@ -244,7 +244,7 @@ Definition VLSM_embedding_transition_item_project
 Definition VLSM_embedding_finite_trace_project
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
+  {label_project : label X -> label Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_embedding X Y label_project state_project)
   := pre_VLSM_embedding_finite_trace_project _ _  label_project state_project.
@@ -252,7 +252,7 @@ Definition VLSM_embedding_finite_trace_project
 Definition VLSM_embedding_infinite_trace_project
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
+  {label_project : label X -> label Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_embedding X Y label_project state_project)
   := pre_VLSM_embedding_infinite_trace_project _ _  label_project state_project.
@@ -260,7 +260,7 @@ Definition VLSM_embedding_infinite_trace_project
 Definition VLSM_weak_embedding_finite_trace_project
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
+  {label_project : label X -> label Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_weak_embedding X Y label_project state_project)
   := pre_VLSM_embedding_finite_trace_project _ _ label_project state_project.
@@ -268,7 +268,7 @@ Definition VLSM_weak_embedding_finite_trace_project
 Definition VLSM_weak_embedding_infinite_trace_project
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
+  {label_project : label X -> label Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_weak_embedding X Y label_project state_project)
   := pre_VLSM_embedding_infinite_trace_project _ _  label_project state_project.
@@ -276,7 +276,7 @@ Definition VLSM_weak_embedding_infinite_trace_project
 Lemma VLSM_embedding_projection_type
   {message : Type}
   (X Y : VLSM message)
-  (label_project : vlabel X -> vlabel Y)
+  (label_project : label X -> label Y)
   (state_project : vstate X -> vstate Y)
   : VLSM_projection_type X Y (Some ∘ label_project) state_project.
 Proof.
@@ -292,7 +292,7 @@ Section sec_weak_projection_properties.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
+  {label_project : label X -> label Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_weak_embedding X Y label_project state_project)
   .
@@ -413,7 +413,7 @@ Section sec_embedding_properties.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
+  {label_project : label X -> label Y}
   {state_project : vstate X -> vstate Y}
   (Hsimul : VLSM_embedding X Y label_project state_project)
   .
@@ -595,7 +595,7 @@ Section sec_basic_VLSM_embedding.
 Context
   {message : Type}
   (X Y : VLSM message)
-  (label_project : vlabel X -> vlabel Y)
+  (label_project : label X -> label Y)
   (state_project : vstate X -> vstate Y)
   .
 
@@ -709,7 +709,7 @@ End sec_basic_VLSM_embedding.
 Lemma basic_VLSM_strong_embedding
   {message : Type}
   (X Y : VLSM message)
-  (label_project : vlabel X -> vlabel Y)
+  (label_project : label X -> label Y)
   (state_project : vstate X -> vstate Y)
   (Hvalid : strong_embedding_valid_preservation X Y label_project state_project)
   (Htransition : strong_embedding_transition_preservation X Y label_project state_project)
@@ -727,7 +727,7 @@ Qed.
 Lemma basic_VLSM_embedding_preloaded
   {message : Type}
   (X Y : VLSM message)
-  (label_project : vlabel X -> vlabel Y)
+  (label_project : label X -> label Y)
   (state_project : vstate X -> vstate Y)
   (Hvalid : strong_embedding_valid_preservation X Y label_project state_project)
   (Htransition : strong_embedding_transition_preservation  X Y label_project state_project)
@@ -757,7 +757,7 @@ Lemma basic_VLSM_embedding_preloaded_with
   (X Y : VLSM message)
   (P Q : message -> Prop)
   (PimpliesQ : forall m : message, P m -> Q m)
-  (label_project : vlabel X -> vlabel Y)
+  (label_project : label X -> label Y)
   (state_project : vstate X -> vstate Y)
   (Hvalid : strong_embedding_valid_preservation X Y label_project state_project)
   (Htransition : strong_embedding_transition_preservation  X Y label_project state_project)

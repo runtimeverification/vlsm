@@ -224,7 +224,7 @@ Proof.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   unfold lift_sub_label, composite_label_sub_projection_option, composite_label_sub_projection; cbn.
   case_decide; [f_equal | done].
-  by apply (@dec_sig_sigT_eq _ _ sub_index_prop_dec (fun i => vlabel (IM i))).
+  by apply (@dec_sig_sigT_eq _ _ sub_index_prop_dec (fun i => label (IM i))).
 Qed.
 
 Lemma composite_state_sub_projection_lift
@@ -261,7 +261,7 @@ Proof.
   inversion HlX2_pr.
   subst _i.
   apply
-    (@dec_sig_sigT_eq_rev _ _ _ sub_index_prop_dec (fun i => vlabel (IM i)))
+    (@dec_sig_sigT_eq_rev _ _ _ sub_index_prop_dec (fun i => label (IM i)))
     in HlX2_pr as ->.
   apply f_equal_dep with (x := dexist i Hi) in HsXeq_pr as HsXeq_pri.
   cbv in HsXeq_pri.
@@ -1519,7 +1519,7 @@ Context
   (Hj : j ∈ elements indices)
   .
 
-Definition sub_element_label (l : vlabel (IM j))
+Definition sub_element_label (l : label (IM j))
   : composite_label (sub_IM IM (elements indices)) :=
   existT (dexist j Hj) l.
 
@@ -1605,9 +1605,9 @@ Qed.
 
 Definition sub_label_element_project
   (l : composite_label (sub_IM IM (elements indices)))
-  : option (vlabel (IM j)) :=
+  : option (label (IM j)) :=
   match decide (j = ` (projT1 l)) with
-  | left e => Some (eq_rect_r (fun j => vlabel (IM j)) (projT2 l) e)
+  | left e => Some (eq_rect_r (fun j => label (IM j)) (projT2 l) e)
   | right _ => None
   end.
 

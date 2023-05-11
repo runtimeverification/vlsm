@@ -199,7 +199,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_projection_input_valid_transition_eq
   (s1 s2 : composite_state IM)
   (om1 om2 : option message)
-  (l : vlabel (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
+  (l : label (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
   (Ht : input_valid_transition
           (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
   (Hl : projT1 l = j)
@@ -218,7 +218,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_projection_input_valid_transition_neq
   [s1 s2 : composite_state IM]
   [om1 om2 : option message]
-  [l : vlabel (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))]
+  [l : label (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))]
   (Ht : input_valid_transition
           (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
   [i : index]
@@ -338,7 +338,7 @@ Context
   .
 
 Lemma projection_valid_input_valid
-  (l : vlabel Xj)
+  (l : label Xj)
   (som : vstate Xj * option message)
   (Hv : valid Xj l som)
   : input_valid Xj l som.
@@ -351,7 +351,7 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_composition_valid_message
-  (l : vlabel Xj)
+  (l : label Xj)
   (s : vstate Xj)
   (om : option message)
   (Hv : valid Xj l (s, om))
@@ -361,7 +361,7 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_projection_valid_state
-  (lj : vlabel Xj)
+  (lj : label Xj)
   (sj : vstate Xj)
   (om : option message)
   (Hv : valid Xj lj (sj, om))
@@ -372,7 +372,7 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_projection_valid_state_message_outputs
-    (l : vlabel Xj)
+    (l : label Xj)
     (s : vstate Xj)
     (om : option message)
     (Hv : valid Xj l (s, om))
@@ -388,7 +388,7 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_destination_projection_valid_state
-    (l : vlabel Xj)
+    (l : label Xj)
     (s : vstate Xj)
     (om : option message)
     (Hv : valid Xj l (s, om))
@@ -400,7 +400,7 @@ Proof.
 Qed.
 
 Lemma projection_valid_implies_destination_projection_valid_message
-    (l : vlabel Xj)
+    (l : label Xj)
     (s : vstate Xj)
     (om : option message)
     (Hv : valid Xj l (s, om))
@@ -468,7 +468,7 @@ Qed.
   [composite_vlsm_induced_projection_validator].
 *)
 Definition component_projection_validator_prop :=
-  forall (lj : vlabel (IM j)) (sj : vstate (IM j)) (omi : option message),
+  forall (lj : label (IM j)) (sj : vstate (IM j)) (omi : option message),
     input_valid (pre_loaded_with_all_messages_vlsm (IM j)) lj (sj, omi) ->
     valid Xj lj (sj, omi).
 
@@ -543,7 +543,7 @@ Context
 
 Definition projection_friendliness_sufficient_condition
   := forall
-    (lj : vlabel (IM j))
+    (lj : label (IM j))
     (sj : vstate (IM j))
     (om : option message)
     (Hiv : input_valid Xj lj (sj, om))

@@ -23,7 +23,7 @@ Context
 Definition no_equivocations_except_from
   `{HasBeenSentCapability message vlsm}
   (exception : message -> Prop)
-  (l : vlabel vlsm)
+  (l : label vlsm)
   (som : vstate vlsm * option message)
   :=
   let (s, om) := som in
@@ -35,7 +35,7 @@ Definition no_equivocations_except_from
 *)
 Definition no_equivocations
   `{HasBeenSentCapability message vlsm}
-  (l : vlabel vlsm)
+  (l : label vlsm)
   (som : vstate vlsm * option message)
   : Prop
   :=

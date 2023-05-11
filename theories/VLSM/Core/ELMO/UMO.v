@@ -1444,7 +1444,7 @@ Definition UMO_transition_item : Type := composite_transition_item U.
 (** We can lift labels, states and traces from an UMO component to the UMO protocol. *)
 
 Definition lift_to_UMO_label
-  (i : index) (li : vlabel (U i)) : UMO_label :=
+  (i : index) (li : VLSM.label (U i)) : UMO_label :=
     lift_to_composite_label U i li.
 
 Definition lift_to_UMO_state

@@ -825,7 +825,7 @@ Definition MO_transition_item : Type := composite_transition_item M.
 (** We can lift labels, states and traces from an MO component to the MO protocol. *)
 
 Definition lift_to_MO_label
-  (i : index) (li : vlabel (M i)) : MO_label :=
+  (i : index) (li : VLSM.label (M i)) : MO_label :=
     lift_to_composite_label M i li.
 
 Definition lift_to_MO_state

@@ -606,7 +606,7 @@ Qed.
 
 (** Next we prove some inversion properties for [equivocator_vlsm_transition_item_project]. *)
 Lemma equivocator_valid_transition_project_inv2
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s' s : vstate equivocator_vlsm)
   (iom oom : option message)
   (Hv : valid equivocator_vlsm l (s', iom))
@@ -648,7 +648,7 @@ Proof.
 Qed.
 
 Lemma equivocator_valid_transition_project_inv3
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (iom oom : option message)
   (Hv : valid equivocator_vlsm l (s', iom))
@@ -712,7 +712,7 @@ Proof.
 Qed.
 
 Lemma equivocator_valid_transition_project_inv4
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (iom oom : option message)
   (Hv : valid equivocator_vlsm l (s', iom))
@@ -754,7 +754,7 @@ Proof.
 Qed.
 
 Lemma equivocator_valid_transition_project_inv5_new_machine
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (iom oom : option message)
   (Ht : transition equivocator_vlsm l (s', iom) = (s, oom))
@@ -774,7 +774,7 @@ Proof.
 Qed.
 
 Lemma equivocator_valid_transition_project_inv5
-  (l : vlabel equivocator_vlsm)
+  (l : label equivocator_vlsm)
   (s s' : vstate equivocator_vlsm)
   (iom oom : option message)
   (Hv : valid equivocator_vlsm l (s', iom))
@@ -1085,7 +1085,7 @@ Proof.
   by apply (equivocator_vlsm_initial_state_preservation_rev X _ _ _ Hisi).
 Qed.
 
-Definition equivocator_label_zero_project (l : equivocator_label X) : option (vlabel X) :=
+Definition equivocator_label_zero_project (l : equivocator_label X) : option (label X) :=
   match l with
   | ContinueWith 0 li => Some li
   | _ => None
