@@ -37,13 +37,13 @@ Context
   .
 
 Definition pre_VLSM_projection_in_projection
-  (item : @transition_item _ TX)
+  (item : transition_item TX)
   : Prop :=
   is_Some (label_project (l item)).
 
 Definition pre_VLSM_projection_transition_item_project
-  (item : @transition_item _ TX)
-  : option (@transition_item _ TY)
+  (item : transition_item TX)
+  : option (transition_item TY)
   :=
   match label_project (l item) with
   | None => None
@@ -53,7 +53,7 @@ Definition pre_VLSM_projection_transition_item_project
   end.
 
 Lemma pre_VLSM_projection_transition_item_project_is_Some
-  (item : @transition_item _ TX)
+  (item : transition_item TX)
   : pre_VLSM_projection_in_projection item ->
     is_Some (pre_VLSM_projection_transition_item_project item).
 Proof.
@@ -64,7 +64,7 @@ Proof.
 Qed.
 
 Lemma pre_VLSM_projection_transition_item_project_is_Some_rev
-  (item : @transition_item _ TX)
+  (item : transition_item TX)
   : is_Some (pre_VLSM_projection_transition_item_project item) ->
     pre_VLSM_projection_in_projection item.
 Proof.
@@ -75,7 +75,7 @@ Proof.
 Qed.
 
 Lemma pre_VLSM_projection_transition_item_project_infinitely_often
-  (s : Streams.Stream (@transition_item _ TX))
+  (s : Streams.Stream (transition_item TX))
   : InfinitelyOften pre_VLSM_projection_in_projection s ->
     InfinitelyOften (is_Some ∘ pre_VLSM_projection_transition_item_project) s.
 Proof.
@@ -85,7 +85,7 @@ Proof.
 Qed.
 
 Lemma pre_VLSM_projection_transition_item_project_finitely_many
-  (s : Streams.Stream (@transition_item _ TX))
+  (s : Streams.Stream (transition_item TX))
   : FinitelyManyBound pre_VLSM_projection_in_projection s ->
     FinitelyManyBound (is_Some ∘ pre_VLSM_projection_transition_item_project) s.
 Proof.
@@ -95,21 +95,21 @@ Proof.
 Qed.
 
 Definition pre_VLSM_projection_finite_trace_project
-  : list (@transition_item _ TX) -> list (@transition_item _ TY)
+  : list (transition_item TX) -> list (transition_item TY)
   :=
   map_option pre_VLSM_projection_transition_item_project.
 
 Definition pre_VLSM_projection_infinite_trace_project
-  (s : Streams.Stream (@transition_item _ TX))
+  (s : Streams.Stream (transition_item TX))
   (Hs : InfinitelyOften  pre_VLSM_projection_in_projection s)
-  : Streams.Stream (@transition_item _ TY) :=
+  : Streams.Stream (transition_item TY) :=
   stream_map_option pre_VLSM_projection_transition_item_project s
     (pre_VLSM_projection_transition_item_project_infinitely_often _ Hs).
 
 Definition pre_VLSM_projection_infinite_finite_trace_project
-  (s : Streams.Stream (@transition_item _ TX))
+  (s : Streams.Stream (transition_item TX))
   (Hs : FinitelyManyBound pre_VLSM_projection_in_projection s)
-  : list (@transition_item _ TY) :=
+  : list (transition_item TY) :=
   pre_VLSM_projection_finite_trace_project (stream_prefix s (proj1_sig Hs)).
 
 Definition pre_VLSM_projection_finite_trace_project_app

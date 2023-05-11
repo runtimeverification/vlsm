@@ -42,7 +42,7 @@ Context
   .
 
 Definition last_in_trace_except_from
-  {T} exception (tr : list (@transition_item message T)) iom : Prop :=
+  {T : VLSMType message} exception (tr : list (transition_item T)) iom : Prop :=
     match iom with
     | None => True
     | Some im =>
