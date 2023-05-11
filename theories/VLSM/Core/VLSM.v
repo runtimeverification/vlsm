@@ -20,7 +20,7 @@ From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
   easily shared by multiple VLSMs during composition.
 *)
 
-Class VLSMType (message : Type) : Type :=
+Record VLSMType (message : Type) : Type :=
 {
   state : Type;
   label : Type;
@@ -268,33 +268,33 @@ Proof.
 Qed.
 
 Lemma finite_trace_last_cons
-  s x tl :
+  (s : state T) (x : transition_item T) (tl : list (transition_item T)) :
   finite_trace_last s (x :: tl) = finite_trace_last (destination x) tl.
 Proof.
   by unfold finite_trace_last; rewrite map_cons, unroll_last.
 Qed.
 
 Lemma finite_trace_last_nil
-  s :
+  (s : state T) :
   finite_trace_last s [] = s.
 Proof. done. Qed.
 
 Lemma finite_trace_last_app
-  s t1 t2 :
+  (s : state T) (t1 t2 : list (transition_item T)) :
   finite_trace_last s (t1 ++ t2) = finite_trace_last (finite_trace_last s t1) t2.
 Proof.
   by unfold finite_trace_last; rewrite map_app, last_app.
 Qed.
 
 Lemma finite_trace_last_is_last
-  s x tl :
+  (s : state T) (x : transition_item T) (tl : list (transition_item T)) :
   finite_trace_last s (tl++[x]) = destination x.
 Proof.
   by unfold finite_trace_last; rewrite map_app; cbn; rewrite last_is_last.
 Qed.
 
 Lemma finite_trace_last_output_is_last
-  x tl :
+  (x : transition_item T) (tl : list (transition_item T)) :
   finite_trace_last_output (tl++[x]) = output x.
 Proof.
   by unfold finite_trace_last_output; rewrite map_app; cbn; rewrite last_is_last.
@@ -382,7 +382,7 @@ Proof.
   by rewrite map_length.
 Qed.
 
-Lemma unlock_finite_trace_last s tr :
+Lemma unlock_finite_trace_last (s : state T) (tr : list (transition_item T)) :
   finite_trace_last s tr = List.last (List.map destination tr) s.
 Proof. done. Qed.
 
