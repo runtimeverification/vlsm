@@ -1199,7 +1199,7 @@ Qed.
 
 Lemma ELMOComponent_state_destructor_input_valid_transition :
   forall (s' : VLSM.state Ei), ram_state_prop Ei s' ->
-  forall (s : VLSM.state Ei) (item : vtransition_item Ei),
+  forall (s : VLSM.state Ei) (item : transition_item Ei),
     (item, s) ∈ ELMOComponent_state_destructor s' ->
     input_valid_transition_item Ri s item.
 Proof.

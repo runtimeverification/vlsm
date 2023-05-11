@@ -209,7 +209,7 @@ Definition lift_to_composite_state
 Definition lift_to_composite_transition_item
   (s : composite_state)
   (j : index)
-  : vtransition_item (IM j) -> composite_transition_item :=
+  : transition_item (IM j) -> composite_transition_item :=
   pre_VLSM_embedding_transition_item_project (IM j) composite_type
     (lift_to_composite_label j) (lift_to_composite_state s j).
 
@@ -392,7 +392,7 @@ Proof.
 Qed.
 
 Definition lift_to_composite_finite_trace j
-  : list (vtransition_item (IM j)) -> list composite_transition_item
+  : list (transition_item (IM j)) -> list composite_transition_item
   := VLSM_embedding_finite_trace_project (lift_to_composite_VLSM_embedding j).
 
 Definition lift_to_composite_finite_trace_last j

@@ -331,7 +331,7 @@ Definition VLSM_weak_embedding_valid_state
 Definition VLSM_weak_embedding_finite_valid_trace_from_to
   : forall
     (s f : state X)
-    (tr : list (vtransition_item X))
+    (tr : list (transition_item X))
     (Htr : finite_valid_trace_from_to X s f tr),
     finite_valid_trace_from_to Y (state_project s) (state_project f)
       (VLSM_weak_embedding_finite_trace_project Hsimul tr)
@@ -445,7 +445,7 @@ Qed.
 Definition VLSM_embedding_finite_valid_trace_from
   : forall
     (s : state X)
-    (tr : list (vtransition_item X))
+    (tr : list (transition_item X))
     (Htr : finite_valid_trace_from X s tr),
     finite_valid_trace_from Y (state_project s) (VLSM_embedding_finite_trace_project Hsimul tr)
   := VLSM_projection_finite_valid_trace_from VLSM_embedding_is_projection.
@@ -453,7 +453,7 @@ Definition VLSM_embedding_finite_valid_trace_from
 Definition VLSM_embedding_finite_valid_trace_init_to
   : forall
     (s f : state X)
-    (tr : list (vtransition_item X))
+    (tr : list (transition_item X))
     (Htr : finite_valid_trace_init_to X s f tr),
     finite_valid_trace_init_to Y (state_project s) (state_project f)
       (VLSM_embedding_finite_trace_project Hsimul tr)
@@ -477,7 +477,7 @@ Definition VLSM_embedding_valid_state
 Definition VLSM_embedding_finite_valid_trace_from_to
   : forall
     (s f : state X)
-    (tr : list (vtransition_item X))
+    (tr : list (transition_item X))
     (Htr : finite_valid_trace_from_to X s f tr),
     finite_valid_trace_from_to Y (state_project s) (state_project f)
       (VLSM_embedding_finite_trace_project Hsimul tr)

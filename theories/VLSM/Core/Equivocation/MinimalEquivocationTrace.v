@@ -28,7 +28,7 @@ Context
   `{forall i, ComputableReceivedMessages (IM i)}
   `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
-  (state_destructor : forall i, state (IM i) -> set (vtransition_item (IM i) * state (IM i)))
+  (state_destructor : forall i, state (IM i) -> set (transition_item (IM i) * state (IM i)))
   (state_size : forall i, state (IM i) -> nat)
   `{forall i, TraceableVLSM (IM i) (state_destructor i) (state_size i)}
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -652,7 +652,7 @@ Context
   `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   `{forall i s, Decision (initial_state_prop (IM i) s)}
-  (state_destructor : forall i, state (IM i) -> set (vtransition_item (IM i) * state (IM i)))
+  (state_destructor : forall i, state (IM i) -> set (transition_item (IM i) * state (IM i)))
   (state_size : forall i, state (IM i) -> nat)
   `{forall i, TraceableVLSM (IM i) (state_destructor i) (state_size i)}
   `(sender : message -> option validator)

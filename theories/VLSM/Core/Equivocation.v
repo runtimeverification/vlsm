@@ -117,7 +117,7 @@ Context
 *)
 Definition equivocation_in_trace
   (msg : message)
-  (tr : list (vtransition_item vlsm))
+  (tr : list (transition_item vlsm))
   : Prop
   :=
   exists
@@ -160,8 +160,8 @@ Qed.
 
 Lemma equivocation_in_trace_prefix
   (msg : message)
-  (prefix : list (vtransition_item vlsm))
-  (suffix : list (vtransition_item vlsm))
+  (prefix : list (transition_item vlsm))
+  (suffix : list (transition_item vlsm))
   : equivocation_in_trace msg prefix -> equivocation_in_trace msg (prefix ++ suffix).
 Proof.
   intros (pre & item & suf & -> & Hinput & Hnoutput).
@@ -171,8 +171,8 @@ Qed.
 
 Lemma equivocation_in_trace_last_char
   (msg : message)
-  (tr : list (vtransition_item vlsm))
-  (item : vtransition_item vlsm)
+  (tr : list (transition_item vlsm))
+  (item : transition_item vlsm)
   : equivocation_in_trace msg (tr ++ [item]) <->
     equivocation_in_trace msg tr \/
     input item = Some msg /\ ~ trace_has_message (field_selector output) msg tr.
@@ -1628,7 +1628,7 @@ Context
 Section sec_stepwise_props.
 
 Context
-  [message_selectors : forall i : index, message -> vtransition_item (IM i) -> Prop]
+  [message_selectors : forall i : index, message -> transition_item (IM i) -> Prop]
   [oracles : forall i, state_message_oracle (IM i)]
   (stepwise_props : forall i, oracle_stepwise_props (message_selectors i) (oracles i))
   .
@@ -2455,7 +2455,7 @@ Context
   `{finite.Finite index}
   (IM : index -> VLSM message)
   (indexed_oracle_set : forall i, state (IM i) -> set message)
-  (indexed_message_selector : forall i, message -> vtransition_item (IM i) -> Prop)
+  (indexed_message_selector : forall i, message -> transition_item (IM i) -> Prop)
   (Free := free_composite_vlsm IM)
   .
 

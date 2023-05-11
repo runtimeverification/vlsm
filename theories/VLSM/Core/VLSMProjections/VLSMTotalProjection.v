@@ -170,7 +170,7 @@ Definition VLSM_partial_trace_project_from_projection
   (label_project : label X -> option (label TY))
   (state_project : state X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
-  := fun str : state X * list (vtransition_item X) =>
+  := fun str : state X * list (transition_item X) =>
       let (s, tr) := str in Some (state_project s, trace_project tr).
 
 Context
@@ -353,7 +353,7 @@ Definition VLSM_weak_projection_trace_project
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
-  : list (vtransition_item X) -> list (vtransition_item Y)
+  : list (transition_item X) -> list (transition_item Y)
   := pre_VLSM_projection_finite_trace_project _ _ label_project state_project.
 
 Definition VLSM_weak_projection_in
@@ -370,9 +370,9 @@ Definition VLSM_weak_projection_infinite_trace_project
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
-  (s : Streams.Stream (vtransition_item X))
+  (s : Streams.Stream (transition_item X))
   (Hinf : InfinitelyOften (VLSM_weak_projection_in Hsimul) s)
-  : Streams.Stream (vtransition_item Y)
+  : Streams.Stream (transition_item Y)
   := pre_VLSM_projection_infinite_trace_project _ _ label_project state_project s Hinf.
 
 Definition VLSM_weak_projection_infinite_finite_trace_project
@@ -381,9 +381,9 @@ Definition VLSM_weak_projection_infinite_finite_trace_project
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
-  (s : Streams.Stream (vtransition_item X))
+  (s : Streams.Stream (transition_item X))
   (Hfin : FinitelyManyBound (VLSM_weak_projection_in Hsimul) s)
-  : list (vtransition_item Y)
+  : list (transition_item Y)
   := pre_VLSM_projection_infinite_finite_trace_project _ _ label_project state_project s Hfin.
 
 Context
@@ -533,7 +533,7 @@ Definition VLSM_projection_finite_trace_project
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_projection X Y label_project state_project)
-  : list (vtransition_item X) -> list (vtransition_item Y)
+  : list (transition_item X) -> list (transition_item Y)
   := pre_VLSM_projection_finite_trace_project _ _ label_project state_project.
 
 Definition VLSM_projection_in
@@ -550,9 +550,9 @@ Definition VLSM_projection_infinite_trace_project
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_projection X Y label_project state_project)
-  (s : Streams.Stream (vtransition_item X))
+  (s : Streams.Stream (transition_item X))
   (Hinf : InfinitelyOften (VLSM_projection_in Hsimul) s)
-  : Streams.Stream (vtransition_item Y)
+  : Streams.Stream (transition_item Y)
   := pre_VLSM_projection_infinite_trace_project _ _ label_project state_project s Hinf.
 
 Definition VLSM_projection_infinite_finite_trace_project
@@ -561,9 +561,9 @@ Definition VLSM_projection_infinite_finite_trace_project
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_projection X Y label_project state_project)
-  (s : Streams.Stream (vtransition_item X))
+  (s : Streams.Stream (transition_item X))
   (Hfin : FinitelyManyBound (VLSM_projection_in Hsimul) s)
-  : list (vtransition_item Y)
+  : list (transition_item Y)
   := pre_VLSM_projection_infinite_finite_trace_project _ _ label_project state_project s Hfin.
 
 Context
@@ -736,9 +736,9 @@ Section sec_projection_friendliness.
 Definition projection_friendly_prop
   := forall
     (sY : state Y)
-    (trY : list (vtransition_item Y))
+    (trY : list (transition_item Y))
     (HtrY : finite_valid_trace Y sY trY),
-    exists (sX : state X) (trX : list (vtransition_item X)),
+    exists (sX : state X) (trX : list (transition_item X)),
       finite_valid_trace X sX trX
       /\ state_project sX = sY
       /\ VLSM_projection_finite_trace_project Hsimul trX = trY.
@@ -779,7 +779,7 @@ Qed.
 Lemma projection_friendly_trace_char
   (Hfriendly : projection_friendly_prop)
   : forall sY trY, finite_valid_trace Y sY trY <->
-    exists (sX : state X) (trX : list (vtransition_item X)),
+    exists (sX : state X) (trX : list (transition_item X)),
       finite_valid_trace X sX trX
       /\ state_project sX = sY
       /\ VLSM_projection_finite_trace_project Hsimul trX = trY.

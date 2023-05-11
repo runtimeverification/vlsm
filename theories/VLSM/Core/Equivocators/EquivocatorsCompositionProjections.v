@@ -834,7 +834,7 @@ Lemma equivocators_trace_project_finite_trace_projection_list_commute
   (eqv_initial : MachineDescriptor (IM i))
   (tr : list (composite_transition_item equivocator_IM))
   (trX : list (composite_transition_item IM))
-  (trXi : list (vtransition_item (IM i)))
+  (trXi : list (transition_item (IM i)))
   (eqv_final := final_descriptors i)
   (Hproject_tr : equivocators_trace_project final_descriptors tr = Some (trX, initial_descriptors))
   (Hproject_tri :

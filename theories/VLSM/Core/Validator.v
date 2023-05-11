@@ -957,7 +957,7 @@ Proof.
   split; [| done].
   (* reverse induction on the length of a trace. *)
   induction tr using rev_ind.
-  - by constructor; apply initial_state_is_valid.
+  - by cbn in s |- *; constructor; apply initial_state_is_valid.
   - apply finite_valid_trace_from_app_iff in Htr as [Htr Hx].
     apply (finite_valid_trace_from_app_iff (mk_vlsm M)).
     split; [by apply IHtr |].

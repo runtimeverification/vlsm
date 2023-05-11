@@ -243,7 +243,7 @@ Qed.
 *)
 Lemma trace_to_plan_to_trace_from_to
   (s s' : state X)
-  (tr : list (vtransition_item X))
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace_from_to X s s' tr)
   : apply_plan s (trace_to_plan tr) = (tr, s').
 Proof.
@@ -260,7 +260,7 @@ Qed.
 
 Lemma trace_to_plan_to_trace
   (s : state X)
-  (tr : list (vtransition_item X))
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace_from X s tr)
   : fst (apply_plan s (trace_to_plan tr)) = tr.
 Proof.
@@ -274,7 +274,7 @@ Qed.
 *)
 Lemma finite_valid_trace_from_to_plan
   (s : state X)
-  (tr : list (vtransition_item X))
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace_from X s tr)
   : finite_valid_plan_from s (trace_to_plan tr).
 Proof.

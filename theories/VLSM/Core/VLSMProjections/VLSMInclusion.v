@@ -46,7 +46,7 @@ Lemma VLSM_incl_finite_traces_characterization
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <->
     forall (s : state X)
-    (tr : list (vtransition_item X)),
+    (tr : list (transition_item X)),
     finite_valid_trace X s tr -> finite_valid_trace Y s tr.
 Proof.
   split; intros Hincl.
@@ -168,7 +168,7 @@ Context
 
 Lemma VLSM_incl_finite_valid_trace
   (s : state X)
-  (tr : list (vtransition_item X))
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace X s tr)
   : finite_valid_trace Y s tr.
 Proof.
@@ -179,7 +179,7 @@ Qed.
 
 Lemma VLSM_incl_finite_valid_trace_init_to
   (s f : state X)
-  (tr : list (vtransition_item X))
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace_init_to X s f tr)
   : finite_valid_trace_init_to Y s f tr.
 Proof.
@@ -205,7 +205,7 @@ Qed.
 
 Lemma VLSM_incl_finite_valid_trace_from
   (s : state X)
-  (tr : list (vtransition_item X))
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace_from X s tr)
   : finite_valid_trace_from Y s tr.
 Proof.
@@ -216,7 +216,7 @@ Qed.
 
 Lemma VLSM_incl_finite_valid_trace_from_to
   (s f : state X)
-  (tr : list (vtransition_item X))
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace_from_to X s f tr)
   : finite_valid_trace_from_to Y s f tr.
 Proof.
