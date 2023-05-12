@@ -18,7 +18,7 @@ Context
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
@@ -39,8 +39,8 @@ Context
   selector is reflected to X.
 *)
 Lemma VLSM_projection_oracle_reflect
-  (oracleX : vstate X -> message -> Prop)
-  (oracleY : vstate Y -> message -> Prop)
+  (oracleX : state X -> message -> Prop)
+  (oracleY : state Y -> message -> Prop)
   (HstepwiseX : oracle_stepwise_props (vlsm := X) selectorX oracleX)
   (HstepwiseY : oracle_stepwise_props (vlsm := Y) selectorY oracleY)
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
@@ -115,7 +115,7 @@ Context
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> label Y}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_embedding (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
@@ -227,7 +227,7 @@ Context
   {message : Type}
   {X Y : VLSM message}
   {label_project : label X -> label Y}
-  {state_project : vstate X -> vstate Y}
+  {state_project : state X -> state Y}
   (Hsimul :
     VLSM_embedding (pre_loaded_with_all_messages_vlsm X)
       (pre_loaded_with_all_messages_vlsm Y) label_project state_project)

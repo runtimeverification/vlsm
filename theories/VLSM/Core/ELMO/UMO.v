@@ -1448,7 +1448,7 @@ Definition lift_to_UMO_label
     lift_to_composite_label U i li.
 
 Definition lift_to_UMO_state
-  (us : UMO_state) (i : index) (si : vstate (U i)) : UMO_state :=
+  (us : UMO_state) (i : index) (si : VLSM.state (U i)) : UMO_state :=
     lift_to_composite_state U us i si.
 
 Definition lift_to_UMO_trace

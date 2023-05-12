@@ -496,7 +496,7 @@ Notation "m <*> ob" := (addObservationToMessage ob m) (left associativity, at le
 Notation "m <**> obs" := (addObservationsToMessage obs m) (left associativity, at level 50).
 
 (** [ram_state_prop] defines the "reachable by any means" or ram states of a VLSM. *)
-Definition ram_state_prop {message} (V : VLSM message) (s : vstate V) : Prop :=
+Definition ram_state_prop {message} (V : VLSM message) (s : VLSM.state V) : Prop :=
   valid_state_prop (pre_loaded_with_all_messages_vlsm V) s.
 
 Section sec_BaseELMO_Observations.

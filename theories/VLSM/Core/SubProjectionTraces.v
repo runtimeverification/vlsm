@@ -47,7 +47,7 @@ Qed.
 Lemma sub_IM_state_update_eq
   (i : index)
   (s : composite_state sub_IM)
-  (si : vstate (IM i))
+  (si : state (IM i))
   (e1 e2 : sub_index_prop i)
   : state_update sub_IM s (dexist i e1) si (dexist i e2) = si.
 Proof.
@@ -61,7 +61,7 @@ Lemma sub_IM_state_update_neq
   (s : composite_state sub_IM)
   (i : index)
   (ei : sub_index_prop i)
-  (si : vstate (IM i))
+  (si : state (IM i))
   (j : index)
   (ej : sub_index_prop j)
   : i <> j ->
@@ -83,7 +83,7 @@ Definition seeded_free_sub_composition
 Definition composite_state_sub_projection
   (s : composite_state IM)
   : composite_state sub_IM
-  := fun (subi : sub_index) => s (proj1_sig subi) : vstate (sub_IM subi).
+  := fun (subi : sub_index) => s (proj1_sig subi) : state (sub_IM subi).
 
 Lemma composite_initial_state_sub_projection
   (s : composite_state IM)
@@ -1523,11 +1523,11 @@ Definition sub_element_label (l : label (IM j))
   : composite_label (sub_IM IM (elements indices)) :=
   existT (dexist j Hj) l.
 
-Definition sub_element_state (s : vstate (IM j)) sub_i
-  : vstate (sub_IM IM (elements indices) sub_i) :=
+Definition sub_element_state (s : state (IM j)) sub_i
+  : state (sub_IM IM (elements indices) sub_i) :=
   match (decide (` sub_i = j)) with
   | left e =>
-    eq_rect_r (fun j : index => vstate (IM j)) s e
+    eq_rect_r (fun j : index => state (IM j)) s e
   | right _ => ` (vs0 (IM (` sub_i)))
   end.
 
@@ -1613,7 +1613,7 @@ Definition sub_label_element_project
 
 Definition sub_state_element_project
   (s : composite_state (sub_IM IM (elements indices)))
-  : vstate (IM j) := s (dexist j Hj).
+  : state (IM j) := s (dexist j Hj).
 
 Lemma sub_transition_element_project_None
   : forall lX, sub_label_element_project lX = None ->

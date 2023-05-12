@@ -93,9 +93,10 @@ Proof.
   end.
   simpl in Ht.
   destruct item. simpl in *. destruct l as (i, li). simpl in *.
-  destruct (equivocator_transition (IM i) li (s i, input))
-    as (si', om') eqn: Htei.
-  inversion Ht. subst. clear Ht.
+  match type of Ht with
+  | (let '(si', om') := ?t in _) = _ => destruct t as [si' om] eqn: Htei
+  end.
+  inversion Ht; subst; clear Ht.
   replace idescriptors with (equivocator_descriptors_update descriptors i deqv')
     by (destruct oitemx; congruence); clear oitem Hpr.
   intros eqv Heqv. apply set_union_iff in Heqv. apply set_union_iff.
@@ -235,8 +236,7 @@ Proof.
   specialize (Heqv_pr Hv).
   spec Heqv_pr.
   { simpl. unfold eq_rect_r. simpl.
-    destruct (equivocator_transition (IM x) l (s x, input)) eqn: Hti.
-    clear -Ht Hti; inversion Ht; subst.
+    case_match; clear -Ht; inversion Ht; subst.
     by state_update_simpl.
   }
   destruct Heqv_pr as [Hex Heqv_pr].
@@ -1226,7 +1226,7 @@ Qed.
   of the free composition of nodes.
 *)
 Lemma pre_equivocators_valid_trace_project
-  (is final_state : vstate equivocators_no_equivocations_vlsm)
+  (is final_state : state equivocators_no_equivocations_vlsm)
   (tr : list (composite_transition_item equivocator_IM))
   (Htr : finite_valid_trace_init_to PreFreeE is final_state tr)
   (final_descriptors : equivocator_descriptors)
@@ -2091,7 +2091,7 @@ Qed.
 
 Lemma equivocators_valid_trace_from_project
   (final_descriptors : equivocator_descriptors IM)
-  (is final_state : vstate equivocators_no_equivocations_vlsm)
+  (is final_state : state equivocators_no_equivocations_vlsm)
   (tr : list (composite_transition_item equivocator_IM))
   (Hproper : not_equivocating_equivocator_descriptors IM final_descriptors final_state)
   (Htr : finite_valid_trace_from_to equivocators_no_equivocations_vlsm is final_state tr)

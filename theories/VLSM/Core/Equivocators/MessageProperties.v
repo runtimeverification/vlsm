@@ -57,12 +57,12 @@ Proof.
 Qed.
 
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
-  (bs : vstate equivocator_vlsm)
+  (bs : state equivocator_vlsm)
   (btr : list (vtransition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs btr)
   (bitem : vtransition_item equivocator_vlsm)
   (Hitem : bitem ∈ btr)
-  (sn : vstate X)
+  (sn : state X)
   (Hnew : l bitem = Spawn sn)
   : input bitem = None /\ output bitem = None /\
     exists
@@ -95,7 +95,7 @@ Qed.
   the projection of the item.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item
-  (bs bf : vstate equivocator_vlsm)
+  (bs bf : state equivocator_vlsm)
   (btr : list (vtransition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs bf btr)
   (bitem : vtransition_item equivocator_vlsm)
@@ -180,7 +180,7 @@ Qed.
   one of its projections must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting_inv
-  (is : vstate equivocator_vlsm)
+  (is : state equivocator_vlsm)
   (tr : list (vtransition_item equivocator_vlsm))
   (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is tr)
   (m : message)
@@ -250,7 +250,7 @@ Definition equivocator_selector
   of the internal machines.
 *)
 Definition equivocator_oracle
-  (s : vstate equivocator_vlsm)
+  (s : state equivocator_vlsm)
   (m : message)
   : Prop
   :=
@@ -509,7 +509,7 @@ Context
   union of all [sent_messages_set] for its internal machines.
 *)
 Definition equivocator_sent_messages_set
-  (s : vstate equivocator_vlsm)
+  (s : state equivocator_vlsm)
   : set message
   :=
   fold_right set_union []
@@ -522,7 +522,7 @@ Definition equivocator_sent_messages_set
       (up_to_n_listing (equivocator_state_n s))).
 
 Lemma equivocator_elem_of_sent_messages_set :
-  forall (s : vstate equivocator_vlsm) (m : message),
+  forall (s : state equivocator_vlsm) (m : message),
     equivocator_has_been_sent s m
       <->
     m ∈ equivocator_sent_messages_set s.

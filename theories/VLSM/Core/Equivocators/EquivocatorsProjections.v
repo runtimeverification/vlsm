@@ -173,7 +173,7 @@ Proof.
   simpl in Hitem |- *.
   destruct (equivocator_state_project _ _); [| done].
   split; [by eexists |].
-  by destruct l as [s | i' | i']; case_decide; inversion Hitem.
+  by destruct l; case_decide; inversion Hitem.
 Qed.
 
 (**
@@ -184,7 +184,7 @@ Qed.
 Lemma no_equivocating_equivocator_transition_item_project
   (item : vtransition_item equivocator_vlsm)
   (Hno_equiv_item : is_singleton_state X (destination item))
-  (s : vstate equivocator_vlsm)
+  (s : state equivocator_vlsm)
   (Hv : valid equivocator_vlsm (l item) (s, input item))
   (Ht : transition equivocator_vlsm (l item) (s, input item) = (destination item, output item))
   : exists (Hex : existing_equivocator_label _ (l item)),
@@ -211,7 +211,7 @@ Qed.
 *)
 Lemma exists_equivocator_transition_item_project
   (item : vtransition_item equivocator_vlsm)
-  (s : vstate equivocator_vlsm)
+  (s : state equivocator_vlsm)
   (Hs : proper_existing_equivocator_label X (l item) s)
   (Hv : valid equivocator_vlsm (l item) (s, input item))
   (Ht : transition equivocator_vlsm (l item) (s, input item) = (destination item, output item))
@@ -268,7 +268,7 @@ Qed.
 *)
 Definition previous_state_descriptor_prop
   (original_descriptor : MachineDescriptor)
-  (s : vstate equivocator_vlsm)
+  (s : state equivocator_vlsm)
   (s_descriptor : MachineDescriptor)
   : Prop :=
     match original_descriptor with
@@ -296,14 +296,14 @@ Lemma equivocator_transition_item_project_proper_characterization
       | None => True
       end
     /\ forall
-      (s : vstate equivocator_vlsm)
+      (s : state equivocator_vlsm)
       (Hv : valid equivocator_vlsm (l item) (s, input item))
       (Ht : transition equivocator_vlsm (l item) (s, input item) = (destination item, output item)),
       proper_descriptor X descriptor' s /\
       previous_state_descriptor_prop descriptor s descriptor' /\
       match oitem with
       | Some itemx =>
-        forall (sx : vstate X)
+        forall (sx : state X)
           (Hsx : sx = equivocator_state_descriptor_project s descriptor'),
           valid X (l itemx) (sx, input itemx) /\
           transition X (l itemx) (sx, input itemx) = (destination itemx, output itemx)
@@ -422,7 +422,7 @@ Lemma equivocator_transition_item_project_preserves_equivocating_indices
   (Hproper : proper_descriptor X descriptor (destination item))
   oitem idescriptor
   (Hproject : equivocator_vlsm_transition_item_project item descriptor = Some (oitem, idescriptor))
-  (s : vstate equivocator_vlsm)
+  (s : state equivocator_vlsm)
   (Hv : valid equivocator_vlsm (l item) (s, input item))
   (Ht : transition equivocator_vlsm (l item) (s, input item) = (destination item, output item))
   : is_equivocating_state X s \/ is_newmachine_descriptor X idescriptor ->
@@ -511,7 +511,7 @@ Definition equivocator_vlsm_trace_project
 *)
 Lemma equivocator_vlsm_trace_project_on_new_machine
   (tr : list (vtransition_item equivocator_vlsm))
-  (s : vstate X)
+  (s : state X)
   : equivocator_vlsm_trace_project tr (NewMachine s) = Some ([], NewMachine s).
 Proof.
   by induction tr; simpl; rewrite ?IHtr.
@@ -607,7 +607,7 @@ Qed.
 (** Next we prove some inversion properties for [equivocator_vlsm_transition_item_project]. *)
 Lemma equivocator_valid_transition_project_inv2
   (l : label equivocator_vlsm)
-  (s' s : vstate equivocator_vlsm)
+  (s' s : state equivocator_vlsm)
   (iom oom : option message)
   (Hv : valid equivocator_vlsm l (s', iom))
   (Ht : transition equivocator_vlsm l (s', iom) = (s, oom))
@@ -649,7 +649,7 @@ Qed.
 
 Lemma equivocator_valid_transition_project_inv3
   (l : label equivocator_vlsm)
-  (s s' : vstate equivocator_vlsm)
+  (s s' : state equivocator_vlsm)
   (iom oom : option message)
   (Hv : valid equivocator_vlsm l (s', iom))
   (Ht : transition equivocator_vlsm l (s', iom) = (s, oom))
@@ -713,7 +713,7 @@ Qed.
 
 Lemma equivocator_valid_transition_project_inv4
   (l : label equivocator_vlsm)
-  (s s' : vstate equivocator_vlsm)
+  (s s' : state equivocator_vlsm)
   (iom oom : option message)
   (Hv : valid equivocator_vlsm l (s', iom))
   (Ht : transition equivocator_vlsm l (s', iom) = (s, oom))
@@ -755,11 +755,11 @@ Qed.
 
 Lemma equivocator_valid_transition_project_inv5_new_machine
   (l : label equivocator_vlsm)
-  (s s' : vstate equivocator_vlsm)
+  (s s' : state equivocator_vlsm)
   (iom oom : option message)
   (Ht : transition equivocator_vlsm l (s', iom) = (s, oom))
   (item := {| l := l; input := iom; destination := s; output := oom |})
-  (sn : vstate X)
+  (sn : state X)
   (Hnew : l = Spawn sn)
   : exists (i : nat) si,
     equivocator_state_project s i = si /\
@@ -775,7 +775,7 @@ Qed.
 
 Lemma equivocator_valid_transition_project_inv5
   (l : label equivocator_vlsm)
-  (s s' : vstate equivocator_vlsm)
+  (s s' : state equivocator_vlsm)
   (iom oom : option message)
   (Hv : valid equivocator_vlsm l (s', iom))
   (Ht : transition equivocator_vlsm l (s', iom) = (s, oom))
@@ -821,7 +821,7 @@ Qed.
 *)
 Lemma preloaded_with_equivocator_vlsm_trace_project_valid
   (seed : message -> Prop)
-  (bs be : vstate equivocator_vlsm)
+  (bs be : state equivocator_vlsm)
   (btr : list (vtransition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from_to (pre_loaded_vlsm equivocator_vlsm seed) bs be btr)
   (j : nat)
@@ -894,7 +894,7 @@ Proof.
 Qed.
 
 Lemma equivocator_vlsm_trace_project_valid
-  (bs be : vstate equivocator_vlsm)
+  (bs be : state equivocator_vlsm)
   (btr : list (vtransition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from_to equivocator_vlsm bs be btr)
   (j : nat)
@@ -937,7 +937,7 @@ Qed.
   trace segment in the [pre_loaded_with_all_messages_vlsm] corresponding to the original vlsm.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid
-  (bs be : vstate equivocator_vlsm)
+  (bs be : state equivocator_vlsm)
   (btr : list (vtransition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs be btr)
   (j : nat)
@@ -983,7 +983,7 @@ Lemma equivocator_vlsm_trace_project_inv
   (Hntr : tr <> [])
   (j : nat)
   (HtrX : is_Some (equivocator_vlsm_trace_project tr (Existing j)))
-  (is : vstate equivocator_vlsm)
+  (is : state equivocator_vlsm)
   : exists sj, equivocator_state_project (finite_trace_last is tr) j = Some sj.
 Proof.
   apply exists_last in Hntr.
@@ -1014,7 +1014,7 @@ Qed.
   first state of the trace does not fail and yields the same index.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid_inv
-  (bs : vstate equivocator_vlsm)
+  (bs : state equivocator_vlsm)
   (btr : list (vtransition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs btr)
   (i : nat)
@@ -1048,7 +1048,7 @@ Qed.
 
 (** An inversion lemma about projections of a valid trace. *)
 Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
-  (is fs : vstate (pre_loaded_with_all_messages_vlsm equivocator_vlsm))
+  (is fs : state (pre_loaded_with_all_messages_vlsm equivocator_vlsm))
   (tr : list transition_item)
   (Hntr : tr <> [])
   (Htr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is fs tr)

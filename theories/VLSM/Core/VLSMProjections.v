@@ -64,10 +64,10 @@ Lemma VLSM_projection_trans
   {message}
   (X Y Z : VLSM message)
   (project_labelXY : label X -> option (label Y))
-  (project_stateXY : vstate X -> vstate Y)
+  (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_projection X Y project_labelXY project_stateXY)
   (project_labelYZ : label Y -> option (label Z))
-  (project_stateYZ : vstate Y -> vstate Z)
+  (project_stateYZ : state Y -> state Z)
   (ProjYZ : VLSM_projection Y Z project_labelYZ project_stateYZ)
   : VLSM_projection X Z
     (mbind project_labelYZ ∘ project_labelXY)
@@ -85,10 +85,10 @@ Lemma VLSM_projection_embedding_trans
   {message}
   (X Y Z : VLSM message)
   (project_labelXY : label X -> option (label Y))
-  (project_stateXY : vstate X -> vstate Y)
+  (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_projection X Y project_labelXY project_stateXY)
   (project_labelYZ : label Y -> label Z)
-  (project_stateYZ : vstate Y -> vstate Z)
+  (project_stateYZ : state Y -> state Z)
   (ProjYZ : VLSM_embedding Y Z project_labelYZ project_stateYZ)
   : VLSM_projection X Z
     (fmap project_labelYZ ∘ project_labelXY)
@@ -105,10 +105,10 @@ Lemma VLSM_embedding_projection_trans
   {message}
   (X Y Z : VLSM message)
   (project_labelXY : label X -> label Y)
-  (project_stateXY : vstate X -> vstate Y)
+  (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_embedding X Y project_labelXY project_stateXY)
   (project_labelYZ : label Y -> option (label Z))
-  (project_stateYZ : vstate Y -> vstate Z)
+  (project_stateYZ : state Y -> state Z)
   (ProjYZ : VLSM_projection Y Z project_labelYZ project_stateYZ)
   : VLSM_projection X Z
     (project_labelYZ ∘ project_labelXY)
@@ -143,10 +143,10 @@ Lemma VLSM_embedding_trans
   {message}
   (X Y Z : VLSM message)
   (project_labelXY : label X -> label Y)
-  (project_stateXY : vstate X -> vstate Y)
+  (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_embedding X Y project_labelXY project_stateXY)
   (project_labelYZ : label Y -> label Z)
-  (project_stateYZ : vstate Y -> vstate Z)
+  (project_stateYZ : state Y -> state Z)
   (ProjYZ : VLSM_embedding Y Z project_labelYZ project_stateYZ)
   : VLSM_embedding X Z
     (project_labelYZ ∘ project_labelXY)
@@ -166,7 +166,7 @@ Lemma VLSM_projection_incl_trans
   (Y := mk_vlsm MY)
   (Z := mk_vlsm MZ)
   (project_labelXY : label X -> option (label Y))
-  (project_stateXY : vstate X -> vstate Y)
+  (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_projection X Y project_labelXY project_stateXY)
   (ProjYZ : VLSM_incl Y Z)
   : VLSM_projection X Z project_labelXY project_stateXY.
@@ -185,7 +185,7 @@ Lemma VLSM_embedding_incl_trans
   (Y := mk_vlsm MY)
   (Z := mk_vlsm MZ)
   (project_labelXY : label X -> label Y)
-  (project_stateXY : vstate X -> vstate Y)
+  (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_embedding X Y project_labelXY project_stateXY)
   (ProjYZ : VLSM_incl Y Z)
   : VLSM_embedding X Z project_labelXY project_stateXY.
@@ -204,7 +204,7 @@ Lemma VLSM_incl_projection_trans
   (Z : VLSM message)
   (ProjXY : VLSM_incl X Y)
   (project_labelYZ : label Y -> option (label Z))
-  (project_stateYZ : vstate Y -> vstate Z)
+  (project_stateYZ : state Y -> state Z)
   (ProjYZ : VLSM_projection Y Z project_labelYZ project_stateYZ)
   : VLSM_projection X Z project_labelYZ project_stateYZ.
 Proof.
@@ -221,7 +221,7 @@ Lemma VLSM_incl_embedding_trans
   (Z : VLSM message)
   (ProjXY : VLSM_incl X Y)
   (project_labelYZ : label Y -> label Z)
-  (project_stateYZ : vstate Y -> vstate Z)
+  (project_stateYZ : state Y -> state Z)
   (ProjYZ : VLSM_embedding Y Z project_labelYZ project_stateYZ)
   : VLSM_embedding X Z project_labelYZ project_stateYZ.
 Proof.
@@ -237,7 +237,7 @@ Lemma VLSM_projection_eq_trans
   (Y := mk_vlsm MY)
   (Z := mk_vlsm MZ)
   (project_labelXY : label X -> option (label Y))
-  (project_stateXY : vstate X -> vstate Y)
+  (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_projection X Y project_labelXY project_stateXY)
   (ProjYZ : VLSM_eq Y Z)
   : VLSM_projection X Z project_labelXY project_stateXY.
@@ -251,7 +251,7 @@ Lemma VLSM_embedding_eq_trans
   (Y := mk_vlsm MY)
   (Z := mk_vlsm MZ)
   (project_labelXY : label X -> label Y)
-  (project_stateXY : vstate X -> vstate Y)
+  (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_embedding X Y project_labelXY project_stateXY)
   (ProjYZ : VLSM_eq Y Z)
   : VLSM_embedding X Z project_labelXY project_stateXY.
@@ -266,7 +266,7 @@ Lemma VLSM_eq_projection_trans
   (Z : VLSM message)
   (ProjXY : VLSM_eq X Y)
   (project_labelYZ : label Y -> option (label Z))
-  (project_stateYZ : vstate Y -> vstate Z)
+  (project_stateYZ : state Y -> state Z)
   (ProjYZ : VLSM_projection Y Z project_labelYZ project_stateYZ)
   : VLSM_projection X Z project_labelYZ project_stateYZ.
 Proof. by apply VLSM_incl_projection_trans; [apply ProjXY |]. Qed.
@@ -280,7 +280,7 @@ Lemma VLSM_eq_embedding_trans
   (Z : VLSM message)
   (ProjXY : VLSM_eq X Y)
   (project_labelYZ : label Y -> label Z)
-  (project_stateYZ : vstate Y -> vstate Z)
+  (project_stateYZ : state Y -> state Z)
   (ProjYZ : VLSM_embedding Y Z project_labelYZ project_stateYZ)
   : VLSM_embedding X Z project_labelYZ project_stateYZ.
 Proof. by apply VLSM_incl_embedding_trans; [apply ProjXY |]. Qed.

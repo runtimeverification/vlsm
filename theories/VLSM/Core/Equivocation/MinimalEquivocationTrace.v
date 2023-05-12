@@ -28,8 +28,8 @@ Context
   `{forall i, ComputableReceivedMessages (IM i)}
   `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
-  (state_destructor : forall i, vstate (IM i) -> set (vtransition_item (IM i) * vstate (IM i)))
-  (state_size : forall i, vstate (IM i) -> nat)
+  (state_destructor : forall i, state (IM i) -> set (vtransition_item (IM i) * state (IM i)))
+  (state_size : forall i, state (IM i) -> nat)
   `{forall i, TraceableVLSM (IM i) (state_destructor i) (state_size i)}
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   `(sender : message -> option validator)
@@ -270,7 +270,7 @@ Definition composite_latest_sent_observed_in
   exists item s m, CompositeLatestSentObservedIn s' i j item s m.
 
 Lemma traceable_vlsm_initial_state_dec :
-  forall (i : index) (si : vstate (IM i)),
+  forall (i : index) (si : state (IM i)),
     valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) si ->
     Decision (initial_state_prop (IM i) si).
 Proof.
@@ -652,8 +652,8 @@ Context
   `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   `{forall i, MessageDependencies (IM i) message_dependencies}
   `{forall i s, Decision (initial_state_prop (IM i) s)}
-  (state_destructor : forall i, vstate (IM i) -> set (vtransition_item (IM i) * vstate (IM i)))
-  (state_size : forall i, vstate (IM i) -> nat)
+  (state_destructor : forall i, state (IM i) -> set (vtransition_item (IM i) * state (IM i)))
+  (state_size : forall i, state (IM i) -> nat)
   `{forall i, TraceableVLSM (IM i) (state_destructor i) (state_size i)}
   `(sender : message -> option validator)
   `{!Irreflexive (tc_composite_observed_before_send IM message_dependencies)}

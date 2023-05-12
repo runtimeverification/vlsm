@@ -21,7 +21,7 @@ Context
 
 Record annotated_state : Type :=
 {
-  original_state : vstate X;
+  original_state : state X;
   state_annotation : annotation;
 }.
 
@@ -147,7 +147,7 @@ Proof.
   by rewrite! finite_trace_last_is_last.
 Qed.
 
-Definition annotate_trace (s : vstate X) (tr : list (vtransition_item X))
+Definition annotate_trace (s : state X) (tr : list (vtransition_item X))
   : list (@transition_item _ annotated_type) :=
   annotate_trace_from {| original_state := s; state_annotation := ` inhabitant |} tr.
 
@@ -232,7 +232,7 @@ Context
 Definition annotated_composite_label_project : label AnnotatedFree -> option (label (IM i))
   := composite_project_label IM i.
 
-Definition annotated_composite_state_project : vstate AnnotatedFree -> vstate (IM i)
+Definition annotated_composite_state_project : state AnnotatedFree -> state (IM i)
   := fun s => original_state s i.
 
 Definition annotated_projection_validator_prop : Prop :=
@@ -245,7 +245,7 @@ Definition annotated_message_validator_prop : Prop :=
 Definition annotated_composite_label_lift : label (IM i) -> label AnnotatedFree
   := lift_to_composite_label IM i.
 
-Definition annotated_composite_state_lift : vstate (IM i) -> vstate AnnotatedFree
+Definition annotated_composite_state_lift : state (IM i) -> state AnnotatedFree
   := fun si =>
      @Build_annotated_state _ (free_composite_vlsm IM) _
       (lift_to_composite_state' IM i si) (` inhabitant).

@@ -17,7 +17,7 @@ Context
   `{X : VLSM message}
   {TY : VLSMType message}
   (label_project : label X -> option (label TY))
-  (state_project : vstate X -> state TY)
+  (state_project : state X -> state TY)
   .
 
 Record InputValidation
@@ -25,7 +25,7 @@ Record InputValidation
   (sY : state TY)
   (om : option message)
   (lX : label X)
-  (sX : vstate X)
+  (sX : state X)
   : Prop :=
 {
   tiv_label_project : label_project lX = Some lY;
@@ -38,8 +38,8 @@ Record TransitionValidation
   (sY : state TY)
   (om : option message)
   (lX : label X)
-  (sX : vstate X)
-  (sX' : vstate X)
+  (sX : state X)
+  (sX' : state X)
   (om' : option message)
   : Prop :=
 {
@@ -57,7 +57,7 @@ Context
   `{X : VLSM message}
   (Y : VLSM message)
   (label_project : label X -> option (label Y))
-  (state_project : vstate X -> vstate Y)
+  (state_project : state X -> state Y)
   (PreY := pre_loaded_with_all_messages_vlsm Y)
   .
 
@@ -161,10 +161,10 @@ Context
 
 Context
   (label_project : label X -> option (label TY))
-  (state_project : vstate X -> state TY)
+  (state_project : state X -> state TY)
   (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   (label_lift : label TY -> label X)
-  (state_lift : state TY -> vstate X)
+  (state_lift : state TY -> state X)
   .
 
 Definition projection_induced_initial_state_prop (sY : state TY) : Prop :=
@@ -473,10 +473,10 @@ Context
   `{X : VLSM message}
   (Y : VLSM message)
   (label_project : label X -> option (label Y))
-  (state_project : vstate X -> vstate Y)
+  (state_project : state X -> state Y)
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)
   (label_lift : label Y -> label X)
-  (state_lift : vstate Y -> vstate X)
+  (state_lift : state Y -> state X)
   (Xi := pre_projection_induced_validator X Y
           label_project state_project label_lift state_lift)
   (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
@@ -704,7 +704,7 @@ Proof. by intros sj; apply state_update_eq. Qed.
 
 Lemma component_transition_projection_None
   : weak_projection_transition_consistency_None X (IM i)
-    composite_project_label (fun s : vstate X => s i).
+    composite_project_label (fun s : state X => s i).
 Proof.
   intros [j lj] HlX sX iom s'X oom [_ Ht]; cbn in Ht.
   destruct (transition _ _ _) as (si', om'); inversion Ht; subst.
@@ -715,7 +715,7 @@ Qed.
 
 Lemma component_transition_projection_Some
   : induced_validator_transition_consistency_Some X (IM i)
-    composite_project_label (fun s : vstate X => s i).
+    composite_project_label (fun s : state X => s i).
 Proof.
   intros [j1 lj1] [j2 lj2] lj; unfold composite_project_label; cbn.
   case_decide as Hj1; [| done]; subst j1.
@@ -775,10 +775,10 @@ Context
 *)
 Definition composite_vlsm_induced_projection_valid
   (li : label (IM i))
-  (siomi : vstate (IM i) * option message)
+  (siomi : state (IM i) * option message)
   :=
   let (si, omi) := siomi in
-  exists s : vstate X,
+  exists s : state X,
     s i = si /\ input_valid X (existT i li) (s, omi).
 
 (**
@@ -788,10 +788,10 @@ Definition composite_vlsm_induced_projection_valid
 *)
 Lemma projection_valid_implies_valid
   (li : label (IM i))
-  (siomi : vstate (IM i) * option message)
+  (siomi : state (IM i) * option message)
   (Hcomposite : composite_vlsm_induced_projection_valid li siomi)
   : valid (IM i) li siomi.
-Proof. by destruct siomi, Hcomposite as (s & <- & _ & _ & []). Qed.
+Proof. by destruct siomi, Hcomposite as (? & <- & _ & _ & []). Qed.
 
 (**
   We define the induced projection validator of <<X>> to index <<i>> as the [VLSM]

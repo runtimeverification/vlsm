@@ -316,7 +316,7 @@ Context
 *)
 Definition proper_fixed_equivocator_descriptors
   (eqv_descriptors : equivocator_descriptors IM)
-  (s : vstate (free_composite_vlsm (equivocator_IM IM)))
+  (s : state (free_composite_vlsm (equivocator_IM IM)))
   : Prop
   := proper_equivocator_descriptors IM eqv_descriptors s /\
     forall i, i ∉ equivocating -> eqv_descriptors i = Existing 0.
@@ -371,7 +371,7 @@ Proof.
 Qed.
 
 Lemma fixed_equivocators_initial_state_project
-  (es : vstate XE)
+  (es : state XE)
   (Hes : initial_state_prop XE es)
   (eqv_descriptors : equivocator_descriptors IM)
   (Heqv : proper_equivocator_descriptors IM eqv_descriptors es)
@@ -627,7 +627,7 @@ Qed.
   in any projection of the final state.
 *)
 Lemma not_equivocating_sent_message_has_been_directly_observed_in_projection
-  (is : vstate XE)
+  (is : state XE)
   (tr : list (composite_transition_item (equivocator_IM IM)))
   (Htr : finite_valid_trace XE is tr)
   (lst := finite_trace_last is tr)
@@ -756,7 +756,7 @@ Qed.
   valid ([finite_valid_trace_sub_projection]).
 *)
 Lemma equivocators_trace_sub_item_input_is_seeded_or_sub_previously_sent
-  (is : vstate XE)
+  (is : state XE)
   (tr : list (vtransition_item XE))
   (s := finite_trace_last is tr)
   (Htr : finite_valid_trace XE is tr)

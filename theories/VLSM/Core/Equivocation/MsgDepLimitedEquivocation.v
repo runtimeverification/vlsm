@@ -431,7 +431,7 @@ Proof.
   by eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender.
 Qed.
 
-Lemma message_equivocators_can_emit (s : vstate Limited) im
+Lemma message_equivocators_can_emit (s : state Limited) im
   (Hs : valid_state_prop
           (fixed_equivocation_vlsm_composition IM (Ci := Ci) (fin_sets.set_map A (state_annotation s)))
           (original_state s))
@@ -590,7 +590,7 @@ Qed.
 Lemma fixed_transition_preserves_annotation_equivocators
   (eqv_validators : Cv)
   (equivocators := fin_sets.set_map A eqv_validators : Ci)
-  (is : vstate (free_composite_vlsm IM)) s tr
+  (is : state (free_composite_vlsm IM)) s tr
   (Htr1 :
     finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM equivocators)
     is s tr)
@@ -667,7 +667,7 @@ Proof.
 Qed.
 
 Lemma msg_dep_limited_fixed_equivocation
-  (is : vstate (free_composite_vlsm IM)) (tr : list (composite_transition_item IM))
+  (is : state (free_composite_vlsm IM)) (tr : list (composite_transition_item IM))
   : fixed_limited_equivocation_prop (Ci := Ci) (Cv := Cv) IM threshold A is tr ->
     finite_valid_trace Limited
       {| original_state := is; state_annotation := ` inhabitant |}
