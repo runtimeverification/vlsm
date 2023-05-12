@@ -61,7 +61,7 @@ Canonical Structure composite_type : VLSMType message :=
    ; label := composite_label
   |}.
 
-Definition composite_transition_item : Type := @transition_item message composite_type.
+Definition composite_transition_item : Type := transition_item composite_type.
 
 (**
   A very useful operation on [composite_state]s is updating the state corresponding

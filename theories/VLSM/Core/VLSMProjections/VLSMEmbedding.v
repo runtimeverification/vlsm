@@ -34,7 +34,7 @@ Context
   .
 
 Definition pre_VLSM_embedding_transition_item_project
-  : @transition_item _ TX -> @transition_item _ TY
+  : transition_item TX -> transition_item TY
   :=
   fun item =>
   {| l := label_project (l item)
@@ -44,11 +44,11 @@ Definition pre_VLSM_embedding_transition_item_project
   |}.
 
 Definition pre_VLSM_embedding_finite_trace_project
-  : list (@transition_item _ TX) -> list (@transition_item _ TY)
+  : list (transition_item TX) -> list (transition_item TY)
   := map pre_VLSM_embedding_transition_item_project.
 
 Definition pre_VLSM_embedding_infinite_trace_project
-  : Streams.Stream (@transition_item _ TX) -> Streams.Stream (@transition_item _ TY)
+  : Streams.Stream (transition_item TX) -> Streams.Stream (transition_item TY)
   := Streams.map pre_VLSM_embedding_transition_item_project.
 
 Lemma pre_VLSM_embedding_infinite_trace_project_infinitely_often

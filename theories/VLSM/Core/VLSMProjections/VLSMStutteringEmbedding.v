@@ -29,27 +29,27 @@ Context
   {message : Type}
   {TX TY : VLSMType message}
   (state_project : state TX -> state TY)
-  (transition_item_project : @transition_item _ TX -> list (@transition_item _ TY))
+  (transition_item_project : transition_item TX -> list (transition_item TY))
   .
 
 Definition pre_VLSM_stuttering_embedding_finite_trace_project :
-  list (@transition_item _ TX) -> list (@transition_item _ TY) :=
+  list (transition_item TX) -> list (transition_item TY) :=
     mbind transition_item_project.
 
 Definition pre_VLSM_stuttering_embedding_infinite_trace_project
-  (s : Streams.Stream (@transition_item _ TX))
+  (s : Streams.Stream (transition_item TX))
   (Hs : InfinitelyOften (fun item => transition_item_project item <> []) s)
-  : Streams.Stream (@transition_item _ TY) :=
+  : Streams.Stream (transition_item TY) :=
   stream_concat_map transition_item_project s Hs.
 
 Definition pre_VLSM_stuttering_embedding_infinite_finite_trace_project
-  (s : Streams.Stream (@transition_item _ TX))
+  (s : Streams.Stream (transition_item TX))
   (Hs : FinitelyManyBound (fun item => transition_item_project item <> []) s)
-  : list (@transition_item _ TY) :=
+  : list (transition_item TY) :=
   bounded_stream_concat_map transition_item_project s Hs.
 
 Definition pre_VLSM_stuttering_embedding_finite_trace_project_app :
-  forall (l1 l2 : list (@transition_item _ TX)),
+  forall (l1 l2 : list (transition_item TX)),
     pre_VLSM_stuttering_embedding_finite_trace_project (l1 ++ l2)
       =
     pre_VLSM_stuttering_embedding_finite_trace_project l1
@@ -57,10 +57,10 @@ Definition pre_VLSM_stuttering_embedding_finite_trace_project_app :
   := mbind_app _.
 
 Lemma elem_of_pre_VLSM_stuttering_embedding_finite_trace_project :
-  forall (trX : list (@transition_item _ TX)) (itemY : @transition_item _ TY),
+  forall (trX : list (transition_item TX)) (itemY : transition_item TY),
     itemY ∈ pre_VLSM_stuttering_embedding_finite_trace_project trX
       <->
-    exists (itemX : @transition_item _ TX), itemY ∈ transition_item_project itemX /\ itemX ∈ trX.
+    exists (itemX : transition_item TX), itemY ∈ transition_item_project itemX /\ itemX ∈ trX.
 Proof. by intros; apply elem_of_list_bind. Qed.
 
 End sec_pre_definitions.
@@ -70,7 +70,7 @@ Record VLSM_stuttering_embedding_type
   (X : VLSM message)
   (TY : VLSMType message)
   (state_project : state X -> state TY)
-  (transition_item_project : transition_item X -> list (@transition_item _ TY))
+  (transition_item_project : transition_item X -> list (transition_item TY))
   : Prop :=
 {
   transition_item_project_consistency :
@@ -90,7 +90,7 @@ Definition strong_transition_item_project_consistency
   [X : VLSM message]
   [TY : VLSMType message]
   (state_project : state X -> state TY)
-  (transition_item_project : transition_item X -> list (@transition_item _ TY))
+  (transition_item_project : transition_item X -> list (transition_item TY))
   : Prop :=
   forall sX lX inputX destinationX outputX,
     transition X lX (sX, inputX) = (destinationX, outputX) ->
@@ -107,7 +107,7 @@ Context
   (X : VLSM message)
   (TY : VLSMType message)
   (state_project : state X -> state TY)
-  (transition_item_project : transition_item X -> list (@transition_item _ TY))
+  (transition_item_project : transition_item X -> list (transition_item TY))
   (Hsimul : VLSM_stuttering_embedding_type X TY state_project transition_item_project)
   .
 
@@ -134,10 +134,10 @@ Definition VLSM_partial_trace_project_from_stuttering_embedding
   {X : VLSM message}
   {TY : VLSMType message}
   (state_project : state X -> state TY)
-  (transition_item_project : transition_item X -> list (@transition_item _ TY))
+  (transition_item_project : transition_item X -> list (transition_item TY))
   (trace_project := pre_VLSM_stuttering_embedding_finite_trace_project transition_item_project)
   (str : state X * list (transition_item X))
-  : option (state TY * list (@transition_item _ TY)) :=
+  : option (state TY * list (transition_item TY)) :=
     let (s, tr) := str in Some (state_project s, trace_project tr).
 
 Context
@@ -663,7 +663,7 @@ Context
   (X : VLSM message)
   (TY : VLSMType message)
   (state_project : state X -> state TY)
-  (transition_item_project : transition_item X -> list (@transition_item _ TY))
+  (transition_item_project : transition_item X -> list (transition_item TY))
   .
 
 Lemma strong_VLSM_stuttering_embedding_type
