@@ -164,7 +164,8 @@ Section sec_valid_plans.
 
 Context
   {message : Type}
-  (X : VLSM message)
+  {T : VLSMType message}
+  (X : VLSM T)
   .
 
 (**
