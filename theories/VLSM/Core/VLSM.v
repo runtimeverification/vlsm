@@ -31,15 +31,15 @@ Arguments label {_} _.
 
 (** *** VLSM class definition
 
-  The [VLSMMachine] class is parameterized by a [VLSMType], and contains the
+  [VLSMMachine] is parameterized by a [VLSMType], and contains the
   remaining parameters to define a VLSM over the given types.
   These are the properties for initial states ([initial_state_prop])
-  and initial messages ([initial_message_prop]),
-  from which we can immediately define the dependent
-  types [initial_state] (as [state]s having the [initial_state_prop]erty) and
-  [initial_message] (as <<message>>s having the [initial_message_prop]erty),
-  a witness [s0] to nonemptiness of the [initial_state] set,
-  and the [transition] function and [valid] predicate.
+  and initial messages ([initial_message_prop]), from which we can
+  immediately define the types [initial_state] (as [state]s having
+  the [initial_state_prop]erty) and [initial_message] (as <<message>>s
+  having the [initial_message_prop]erty), a witness [s0] that the
+  [initial_state] is inhabited, and the [transition] function and
+  [valid]ity predicate.
 *)
 
 Record VLSMMachine {message : Type} (T : VLSMType message) : Type :=
