@@ -416,7 +416,7 @@ Context
 
 (** The VLSM [Mi] embeds into [RMi]. *)
 Lemma VLSM_incl_Mi_RMi :
-  VLSM_incl_part Mi RMi.
+  VLSM_incl Mi RMi.
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.

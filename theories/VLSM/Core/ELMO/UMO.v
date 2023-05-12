@@ -305,7 +305,7 @@ Context
   transport them to [Ui].
 *)
 Lemma VLSM_incl_Ui_Ri :
-  VLSM_incl_part Ui Ri.
+  VLSM_incl Ui Ri.
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.

@@ -16,37 +16,26 @@ Context
   {T : VLSMType message}
   .
 
-Definition VLSM_incl_part
-  (MX MY : VLSM T)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
-  :=
+Definition VLSM_incl (X Y : VLSM T) : Prop :=
   forall t : Trace,
     valid_trace_prop X t -> valid_trace_prop Y t.
 
-#[local] Notation VLSM_incl X Y := (VLSM_incl_part (vmachine X) (vmachine Y)).
-
-Lemma VLSM_incl_refl
-  (MX : VLSM T)
-  (X := mk_vlsm MX)
-  : VLSM_incl X X.
+Lemma VLSM_incl_refl (X : VLSM T) :
+  VLSM_incl X X.
 Proof.
   by firstorder.
 Qed.
 
-Lemma VLSM_incl_trans
-  (MX MY MZ : VLSM T)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
-  : VLSM_incl X Y -> VLSM_incl Y Z -> VLSM_incl X Z.
+Lemma VLSM_incl_trans (X Y Z : VLSM T) :
+  VLSM_incl X Y -> VLSM_incl Y Z -> VLSM_incl X Z.
 Proof.
   by firstorder.
 Qed.
 
-Lemma VLSM_incl_finite_traces_characterization
-  (MX MY : VLSM T)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
-  : VLSM_incl X Y <->
-    forall (s : state X)
-    (tr : list (transition_item X)),
+Lemma VLSM_incl_finite_traces_characterization (X Y : VLSM T) :
+  VLSM_incl X Y
+    <->
+  forall (s : state X) (tr : list (transition_item X)),
     finite_valid_trace X s tr -> finite_valid_trace Y s tr.
 Proof.
   split; intros Hincl.
@@ -73,10 +62,8 @@ Qed.
   A [VLSM_incl]usion is equivalent to a [VLSM_embedding] in which both the
   label and state projection functions are identities.
 *)
-Lemma VLSM_incl_embedding_iff
-  (MX MY : VLSM T)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
-  : VLSM_incl X Y <-> VLSM_embedding X Y id id.
+Lemma VLSM_incl_embedding_iff (X Y : VLSM T) :
+  VLSM_incl X Y <-> VLSM_embedding X Y id id.
 Proof.
   assert (Hid : forall tr : list (transition_item T),
     tr = pre_VLSM_embedding_finite_trace_project _ _ id id tr).
@@ -96,15 +83,13 @@ Proof.
 Qed.
 
 Definition VLSM_incl_is_embedding
-  {MX MY : VLSM T}
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
+  {X Y : VLSM T}
   (Hincl : VLSM_incl X Y)
   : VLSM_embedding X Y id id
-  := proj1 (VLSM_incl_embedding_iff MX MY) Hincl.
+  := proj1 (VLSM_incl_embedding_iff X Y) Hincl.
 
 Lemma VLSM_incl_is_embedding_finite_trace_project
-  {MX MY : VLSM T}
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
+  {X Y : VLSM T}
   (Hincl : VLSM_incl X Y)
   : forall tr,
     VLSM_embedding_finite_trace_project (VLSM_incl_is_embedding Hincl) tr = tr.
@@ -116,8 +101,6 @@ Qed.
 
 End sec_VLSM_inclusion.
 
-Notation VLSM_incl X Y := (VLSM_incl_part (vmachine X) (vmachine Y)).
-
 Section sec_VLSM_incl_preservation.
 
 (** ** VLSM inclusion preservation *)
@@ -125,9 +108,7 @@ Section sec_VLSM_incl_preservation.
 Context
   {message : Type}
   {T : VLSMType message}
-  (MX MY : VLSM T)
-  (X := mk_vlsm MX)
-  (Y := mk_vlsm MY)
+  (X Y : VLSM T)
   .
 
 Definition weak_incl_valid_preservation : Prop :=
@@ -159,10 +140,8 @@ Section sec_VLSM_incl_properties.
 
 Context
   {message : Type} [T : VLSMType message]
-  [MX MY : VLSM T]
-  (Hincl : VLSM_incl_part MX MY)
-  (X := mk_vlsm MX)
-  (Y := mk_vlsm MY)
+  [X Y : VLSM T]
+  (Hincl : VLSM_incl X Y)
   .
 
 (** VLSM inclusion specialized to finite trace. *)
@@ -257,7 +236,7 @@ Qed.
   transition.
 *)
 Lemma VLSM_incl_valid_state_message
-  (Hmessage : strong_incl_initial_message_preservation MX MY)
+  (Hmessage : strong_incl_initial_message_preservation X Y)
   : forall s om, valid_state_message_prop X s om -> valid_state_message_prop Y s om.
 Proof.
   intros s om.
@@ -280,7 +259,7 @@ Proof.
 Qed.
 
 Definition VLSM_incl_valid_message
-  (Hinitial_valid_message : strong_incl_initial_message_preservation MX MY)
+  (Hinitial_valid_message : strong_incl_initial_message_preservation X Y)
   : forall (m : message),
     valid_message_prop X m -> valid_message_prop Y m.
 Proof.
@@ -328,35 +307,33 @@ Section sec_basic_VLSM_incl.
 Context
   {message : Type}
   {T : VLSMType message}
-  (MX MY : VLSM T)
-  (X := mk_vlsm MX)
-  (Y := mk_vlsm MY)
+  (X Y : VLSM T)
   .
 
 Lemma basic_VLSM_incl
-  (Hinitial_state : strong_incl_initial_state_preservation MX MY)
-  (Hinitial_valid_message : weak_incl_initial_message_preservation MX MY)
-  (Hvalid : weak_incl_valid_preservation MX MY)
-  (Htransition : weak_incl_transition_preservation MX MY)
+  (Hinitial_state : strong_incl_initial_state_preservation X Y)
+  (Hinitial_valid_message : weak_incl_initial_message_preservation X Y)
+  (Hvalid : weak_incl_valid_preservation X Y)
+  (Htransition : weak_incl_transition_preservation X Y)
   : VLSM_incl X Y.
 Proof.
   by apply VLSM_incl_embedding_iff, basic_VLSM_embedding.
 Qed.
 
 Lemma basic_VLSM_strong_incl
-  (Hinitial_state : strong_incl_initial_state_preservation MX MY)
-  (Hinitial_valid_message : strong_incl_initial_message_preservation MX MY)
-  (Hvalid : strong_incl_valid_preservation MX MY)
-  (Htransition : strong_incl_transition_preservation MX MY)
+  (Hinitial_state : strong_incl_initial_state_preservation X Y)
+  (Hinitial_valid_message : strong_incl_initial_message_preservation X Y)
+  (Hvalid : strong_incl_valid_preservation X Y)
+  (Htransition : strong_incl_transition_preservation X Y)
   : VLSM_incl X Y.
 Proof.
   by apply VLSM_incl_embedding_iff, basic_VLSM_strong_embedding.
 Qed.
 
 Lemma basic_VLSM_incl_preloaded
-  (Hinitial_state : strong_incl_initial_state_preservation MX MY)
-  (Hvalid : strong_incl_valid_preservation MX MY)
-  (Htransition : strong_incl_transition_preservation MX MY)
+  (Hinitial_state : strong_incl_initial_state_preservation X Y)
+  (Hvalid : strong_incl_valid_preservation X Y)
+  (Htransition : strong_incl_transition_preservation X Y)
   : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y).
 Proof.
   by apply VLSM_incl_embedding_iff, (basic_VLSM_embedding_preloaded X Y id id).
@@ -365,10 +342,10 @@ Qed.
 Lemma basic_VLSM_incl_preloaded_with
   (P Q : message -> Prop)
   (PimpliesQ : forall m : message, P m -> Q m)
-  (Hvalid : strong_incl_valid_preservation MX MY)
-  (Htransition : strong_incl_transition_preservation  MX MY)
-  (Hstate : strong_incl_initial_state_preservation MX MY)
-  (Hmessage : strong_incl_initial_message_preservation MX MY)
+  (Hvalid : strong_incl_valid_preservation X Y)
+  (Htransition : strong_incl_transition_preservation  X Y)
+  (Hstate : strong_incl_initial_state_preservation X Y)
+  (Hmessage : strong_incl_initial_message_preservation X Y)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q).
 Proof.
   by apply VLSM_incl_embedding_iff,
@@ -381,7 +358,8 @@ Section sec_VLSM_incl_preloaded_properties.
 
 Context
   {message : Type}
-  (X : VLSM message)
+  {T : VLSMType message}
+  (X : VLSM T)
   .
 
 Lemma vlsm_incl_pre_loaded_with_all_messages_vlsm
@@ -475,8 +453,7 @@ Lemma pre_loaded_with_all_messages_can_emit
   (Hm : can_emit X m)
   : can_emit (pre_loaded_with_all_messages_vlsm X) m.
 Proof.
-  apply (VLSM_incl_can_emit vlsm_incl_pre_loaded_with_all_messages_vlsm).
-  by rewrite mk_vlsm_machine.
+  by apply (VLSM_incl_can_emit vlsm_incl_pre_loaded_with_all_messages_vlsm).
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from
