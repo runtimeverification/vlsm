@@ -29,7 +29,8 @@ Section sec_VLSM_partial_projection.
 
 Record VLSM_partial_projection_type
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (partial_trace_project :
     state X * list (transition_item X) -> option (state Y * list (transition_item Y)))
   : Prop :=
@@ -55,7 +56,8 @@ Record VLSM_partial_projection_type
 *)
 Record VLSM_weak_partial_projection
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (partial_trace_project :
     state X * list (transition_item X) -> option (state Y * list (transition_item Y)))
   : Prop :=
@@ -69,7 +71,8 @@ Record VLSM_weak_partial_projection
 
 Record VLSM_partial_projection
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (partial_trace_project :
     state X * list (transition_item X) -> option (state Y * list (transition_item Y)))
   : Prop :=
@@ -87,7 +90,8 @@ Section sec_weak_partial_projection_properties.
 
 Context
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {trace_project :
     state X * list (transition_item X) -> option (state Y * list (transition_item Y))}
   (Hsimul : VLSM_weak_partial_projection X Y trace_project)
@@ -149,7 +153,8 @@ Section sec_partial_projection_properties.
 
 Context
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {trace_project :
     state X * list (transition_item X) -> option (state Y * list (transition_item Y))}
   (Hsimul : VLSM_partial_projection X Y trace_project)
