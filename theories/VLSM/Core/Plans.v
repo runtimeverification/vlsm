@@ -26,6 +26,8 @@ Record plan_item : Type :=
 
 End sec_plans.
 
+Arguments plan_item {message T}, {message} T.
+
 Section sec_apply_plans.
 
 Context
@@ -142,7 +144,7 @@ Qed.
 
 (** We can forget information from a trace to obtain a plan. *)
 Definition _transition_item_to_plan_item
-  (item : transition_item)
+  (item : transition_item T)
   : plan_item
   := {| label_a := l item; input_a := input item |}.
 
@@ -152,7 +154,7 @@ Definition _trace_to_plan
   := map _transition_item_to_plan_item items.
 
 Definition _messages_a
-  (a : list plan_item) :
+  (a : list (plan_item T)) :
   list message :=
   ListExtras.cat_option (List.map input_a a).
 

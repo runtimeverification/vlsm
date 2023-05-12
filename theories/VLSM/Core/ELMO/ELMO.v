@@ -1175,16 +1175,16 @@ Context
   .
 
 Definition ELMOComponent_state_destructor (s : State)
-  : list (@transition_item Message ELMOComponentType * State) :=
+  : list (transition_item ELMOComponentType * State) :=
   let adr := adr s in
 match obs s with
 | [] => []
 | MkObservation Send msg as ob :: obs =>
     let source := MkState obs adr in
-      [(Build_transition_item Send None s (Some msg), source)]
+      [(@Build_transition_item _ ELMOComponentType Send None s (Some msg), source)]
 | MkObservation Receive msg as ob :: obs =>
     let source := MkState obs adr in
-      [(Build_transition_item Receive (Some msg) s None, source)]
+      [(@Build_transition_item _ ELMOComponentType Receive (Some msg) s None, source)]
 end.
 
 Lemma ELMOComponent_state_destructor_initial :
@@ -2500,7 +2500,7 @@ Lemma all_intermediary_transitions_are_receive
   (Htr_m : finite_valid_trace_from_to
           (pre_loaded_with_all_messages_vlsm (ELMOComponent i_m))
           (sigma i_m) (state m) tr_m)
-  : Forall (fun item : transition_item => l item = Receive) tr_m.
+  : Forall (fun item : transition_item ELMOComponentType => l item = Receive) tr_m.
 Proof.
   apply Forall_forall; intros item Hitem.
   eapply ELMOComponent_elem_of_ram_trace in Hitem as H_item;
@@ -2550,7 +2550,7 @@ Lemma lift_receive_trace
   (Htr_m :
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (ELMOComponent i_m))
       (sigma i_m) (state m) tr_m)
-  (Htr_m_receive : Forall (fun item : transition_item => l item = Receive) tr_m)
+  (Htr_m_receive : Forall (fun item : transition_item ELMOComponentType => l item = Receive) tr_m)
   (Htr_m_inputs_in_sigma :
     forall (item : transition_item) (msg : Message),
       item ∈ tr_m -> input item = Some msg ->
@@ -2656,7 +2656,8 @@ Proof.
   assert (Hai_m : adr (sigma i_m) = idx i_m)
     by (apply ELMO_reachable_adr; eapply valid_state_project_preloaded; done).
   edestruct non_equivocating_received_message_continues_trace as [tr_m Htr_m]; [done.. |].
-  assert (Htr_m_receive : Forall (fun item => l item = Receive) tr_m).
+  assert (Htr_m_receive :
+    Forall (fun item : transition_item ELMOComponentType => l item = Receive) tr_m).
   {
     eapply all_intermediary_transitions_are_receive.
     1-4, 6-8: done.

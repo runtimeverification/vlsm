@@ -78,7 +78,8 @@ Lemma VLSM_incl_embedding_iff
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <-> VLSM_embedding X Y id id.
 Proof.
-  assert (Hid : forall tr, tr = pre_VLSM_embedding_finite_trace_project _ _ id id tr).
+  assert (Hid : forall tr : list (transition_item T),
+    tr = pre_VLSM_embedding_finite_trace_project _ _ id id tr).
   {
     induction tr; [done |].
     by destruct a; cbn; f_equal.
