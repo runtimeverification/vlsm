@@ -20,7 +20,8 @@ Section sec_VLSM_composition.
 Context
   {message : Type}
   `{EqDecision index}
-  (IM : index -> VLSM message)
+  {IT : index -> VLSMType message}
+  (IM : forall i : index, VLSM (IT i))
   .
 
 Section sec_composite_type.
@@ -68,10 +69,10 @@ Definition composite_transition_item : Type := transition_item composite_type.
   to a component.
 *)
 Definition state_update
-           (s : composite_state)
-           (i : index)
-           (si : state (IM i))
-           (j : index)
+  (s : composite_state)
+  (i : index)
+  (si : state (IM i))
+  (j : index)
   : state (IM j)
   :=
   match decide (j = i) with
@@ -81,20 +82,20 @@ Definition state_update
 
 (** The next few results describe several properties of the [state_update] operation. *)
 Lemma state_update_neq
-           (s : composite_state)
-           (i : index)
-           (si : state (IM i))
-           (j : index)
-           (Hneq : j <> i)
+  (s : composite_state)
+  (i : index)
+  (si : state (IM i))
+  (j : index)
+  (Hneq : j <> i)
   : state_update s i si j = s j.
 Proof.
   by unfold state_update; case_decide.
 Qed.
 
 Lemma state_update_eq
-           (s : composite_state)
-           (i : index)
-           (si : state (IM i))
+  (s : composite_state)
+  (i : index)
+  (si : state (IM i))
   : state_update s i si i = si.
 Proof.
   unfold state_update.
@@ -103,10 +104,10 @@ Proof.
 Qed.
 
 Lemma state_update_id
-           (s : composite_state)
-           (i : index)
-           (si : state (IM i))
-           (Heq : s i = si)
+  (s : composite_state)
+  (i : index)
+  (si : state (IM i))
+  (Heq : s i = si)
   : state_update s i si = s.
 Proof.
   apply functional_extensionality_dep_good.
@@ -117,9 +118,9 @@ Proof.
 Qed.
 
 Lemma state_update_twice
-           (s : composite_state)
-           (i : index)
-           (si si' : state (IM i))
+  (s : composite_state)
+  (i : index)
+  (si si' : state (IM i))
   : state_update (state_update s i si) i si' = state_update s i si'.
 Proof.
   apply functional_extensionality_dep_good.
@@ -130,11 +131,11 @@ Proof.
 Qed.
 
 Lemma state_update_twice_neq
-           (s : composite_state)
-           (i j : index)
-           (si : state (IM i))
-           (sj : state (IM j))
-           (Hij : j <> i)
+  (s : composite_state)
+  (i j : index)
+  (si : state (IM i))
+  (sj : state (IM j))
+  (Hij : j <> i)
   : state_update (state_update s i si) j sj
   = state_update (state_update s j sj) i si.
 Proof.
@@ -161,11 +162,8 @@ Section sec_composite_vlsm.
   A [composite_state] has the [initial_state_prop]erty if all of its component
   states have the [initial_state_prop]erty in the corresponding component signature.
 *)
-Definition composite_initial_state_prop
-           (s : composite_state)
-  : Prop
-  :=
-    forall n : index, initial_state_prop (IM n) (s n).
+Definition composite_initial_state_prop (s : composite_state) : Prop :=
+  forall n : index, initial_state_prop (IM n) (s n).
 
 Definition composite_initial_state : Type :=
   {s : composite_state | composite_initial_state_prop s}.
@@ -182,18 +180,14 @@ Proof. by intros i; destruct (vs0 (IM i)). Defined.
   A message has the [initial_message_prop]erty in the composite
   iff it has the [initial_message_prop]erty in any of the components.
 *)
-Definition composite_initial_message_prop (m : message) : Prop
-  :=
-    exists (n : index) (mi : initial_message (IM n)), proj1_sig mi = m.
+Definition composite_initial_message_prop (m : message) : Prop :=
+  exists (n : index) (mi : initial_message (IM n)), proj1_sig mi = m.
 
-Definition option_composite_initial_message_prop : option message -> Prop
-  := from_option composite_initial_message_prop True.
+Definition option_composite_initial_message_prop : option message -> Prop :=
+  from_option composite_initial_message_prop True.
 
-Definition lift_to_composite_label
-  (j : index)
-  (lj : label (IM j))
-  : composite_label
-  := existT j lj.
+Definition lift_to_composite_label (j : index) (lj : label (IM j)) : composite_label :=
+  existT j lj.
 
 (**
   We can always "lift" state <<sj>> from component <<j>> to a composite state by
@@ -308,7 +302,7 @@ Definition constrained_composite_valid
   :=
   composite_valid l som /\ constraint l som.
 
-Definition composite_vlsm_machine
+Definition composite_vlsm
   (constraint : composite_label -> composite_state * option message -> Prop)
   : VLSM composite_type
   :=
@@ -317,11 +311,6 @@ Definition composite_vlsm_machine
    ; transition := composite_transition
    ; valid := constrained_composite_valid constraint
   |}.
-
-Definition composite_vlsm
-  (constraint : composite_label -> composite_state * option message -> Prop)
-  : VLSM message
-  := mk_vlsm (composite_vlsm_machine constraint).
 
 (**
   Composite versions for the generic [_apply_plan]-related definitions and
@@ -371,7 +360,7 @@ Definition free_constraint
   : Prop
   := True.
 
-Definition free_composite_vlsm : VLSM message
+Definition free_composite_vlsm : VLSM composite_type
   := composite_vlsm free_constraint.
 
 Lemma lift_to_composite_VLSM_embedding j
@@ -905,9 +894,12 @@ Ltac state_update_simpl :=
 *)
 
 Lemma valid_state_project_preloaded_to_preloaded
-      message `{EqDecision index} (IM : index -> VLSM message) constraint
-      (X := composite_vlsm IM constraint)
-      (s : state (pre_loaded_with_all_messages_vlsm X)) i :
+  `{EqDecision index}
+  {message : Type}
+  {IT : index -> VLSMType message} (IM : forall i : index, VLSM (IT i))
+  constraint
+  (X := composite_vlsm IM constraint)
+  (s : state (pre_loaded_with_all_messages_vlsm X)) i :
   valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
 Proof.
@@ -917,16 +909,18 @@ Proof.
   - by apply preloaded_valid_initial_state, (Hs i).
   - destruct l as [j lj].
     cbn in Ht.
-    destruct (transition lj _) as (si', _om') eqn: Hti.
+    destruct (@transition _ _ (IM j) lj _) as (si', _om') eqn: Hti.
     inversion_clear Ht.
     destruct (decide (i = j)); subst; state_update_simpl; [| done].
     by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
 Qed.
 
 Lemma valid_state_project_preloaded
-      message `{EqDecision index} (IM : index -> VLSM message) constraint
-      (X := composite_vlsm IM constraint)
-      (s : state X) i :
+  `{EqDecision index}
+  {message : Type} {IT : index -> VLSMType message} (IM : forall i : index, VLSM (IT i))
+  constraint
+  (X := composite_vlsm IM constraint)
+  (s : state X) i :
   valid_state_prop X s ->
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
 Proof.
@@ -938,7 +932,8 @@ Proof.
 Qed.
 
 Lemma composite_transition_project_active
-  message `{EqDecision index} (IM : index -> VLSM message) :
+  `{EqDecision index}
+  {message : Type} {IT : index -> VLSMType message} (IM : forall i : index, VLSM (IT i)) :
   forall (l : composite_label IM) (s : composite_state IM) (im : option message)
     (s' : composite_state IM) (om : option message),
       composite_transition IM l (s, im) = (s', om) ->
@@ -952,26 +947,30 @@ Proof.
 Qed.
 
 Lemma input_valid_transition_preloaded_project_active
-      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
-      (X := composite_vlsm IM constraint)
-      l s im s' om :
+  `{EqDecision index}
+  {message : Type} {IT : index -> VLSMType message} (IM : forall i : index, VLSM (IT i))
+  {constraint}
+  (X := composite_vlsm IM constraint)
+  l s im s' om :
   input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
   input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l)
                          (s (projT1 l), im) (s' (projT1 l), om).
 Proof.
   intro Hptrans.
   destruct Hptrans as [[Hproto_s [_ Hcvalid]] Htrans].
-  split; [| by eapply composite_transition_project_active].
-  split; [| split].
+  split; [| by apply (composite_transition_project_active IM)].
+  split_and!.
   - by eapply valid_state_project_preloaded_to_preloaded.
   - by apply any_message_is_valid_in_preloaded.
   - by destruct l; apply Hcvalid.
 Qed.
 
 Lemma input_valid_transition_project_active
-      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
-      (X := composite_vlsm IM constraint)
-      l s im s' om :
+  `{EqDecision index}
+  {message : Type} {IT : index -> VLSMType message} (IM : forall i : index, VLSM (IT i))
+  {constraint}
+  (X := composite_vlsm IM constraint)
+  l s im s' om :
   input_valid_transition X l (s, im) (s', om) ->
   input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l)
                          (s (projT1 l), im) (s' (projT1 l), om).
@@ -982,10 +981,12 @@ Proof.
   by apply input_valid_transition_preloaded_project_active.
 Qed.
 
-Lemma input_valid_transition_preloaded_project_any {V} (i : V)
-      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
-      (X := composite_vlsm IM constraint)
-      (l : label X) s im s' om :
+Lemma input_valid_transition_preloaded_project_any {index} (i : index)
+  `{EqDecision index}
+  {message : Type} {IT : index -> VLSMType message} (IM : forall i : index, VLSM (IT i))
+  {constraint}
+  (X := composite_vlsm IM constraint)
+  (l : label X) s im s' om :
   input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
@@ -1010,10 +1011,12 @@ Proof.
     by state_update_simpl.
 Qed.
 
-Lemma input_valid_transition_project_any {V} (i : V)
-      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
-      (X := composite_vlsm IM constraint)
-      (l : label X) s im s' om :
+Lemma input_valid_transition_project_any {index} (i : index)
+  `{EqDecision index}
+  {message : Type} {IT : index -> VLSMType message} (IM : forall i : index, VLSM (IT i))
+  {constraint}
+  (X := composite_vlsm IM constraint)
+  (l : label X) s im s' om :
   input_valid_transition X l (s, im) (s', om) ->
   (s i = s' i \/
    exists li, (l = existT i li) /\
@@ -1032,11 +1035,13 @@ Qed.
   components.
 *)
 Lemma can_emit_composite_project
-  {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
+  `{EqDecision index}
+  {message : Type} {IT : index -> VLSMType message} (IM : forall i : index, VLSM (IT i))
+  {constraint}
   (X := composite_vlsm IM constraint)
   (m : message)
   (Hemit : can_emit (pre_loaded_with_all_messages_vlsm X) m)
-  : exists (j : V), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+  : exists (j : index), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 Proof.
   apply can_emit_iff in Hemit.
   destruct Hemit as [s2 [(s1, oim) [l Ht]]].
@@ -1059,7 +1064,8 @@ Section sec_binary_free_composition.
 
 Context
   {message : Type}
-  (M1 M2 : VLSM message)
+  {T1 T2 : VLSMType message}
+  (M1 : VLSM T1) (M2 : VLSM T2)
   .
 
 Definition binary_index : Set := bool.
@@ -1067,21 +1073,41 @@ Definition binary_index : Set := bool.
 Definition first : binary_index := true.
 Definition second : binary_index := false.
 
-#[export] Instance binary_index_dec :  EqDecision binary_index := _.
+#[export] Instance binary_index_dec : EqDecision binary_index := _.
 #[export] Instance binary_index_inhabited : Inhabited binary_index := populate first.
 
-Definition binary_IM
+Definition binary_type : VLSMType message :=
+{|
+  state := state T1 + state T2;
+  label := label T1 + label T2;
+|}.
+
+(*
+Program Definition binary_IM
   (i : binary_index)
-  : VLSM message
+  : VLSM binary_type
   :=
   match i with
-  | true => M1
-  | false => M2
+  | true => _
+  | false => _
   end.
+Next Obligation.
+Proof.
+  unshelve esplit.
+  - intros [s1 | s2].
+    + exact (initial_state_prop M1 s1).
+    + exact (initial_state_prop M2 s2).
+  - split.
+    exists (inl (` (vs0 M1))).
+    by destruct (vs0 M1).
+  - exact (@initial_message_prop _ _ M1).
+  - cbn.
+Abort.
 
 Definition binary_free_composition
   : VLSM message
   := free_composite_vlsm binary_IM.
+*)
 
 End sec_binary_free_composition.
 
@@ -1096,13 +1122,14 @@ Section sec_composite_decidable_initial_message.
 Context
   {message : Type}
   `{finite.Finite index}
-  (IM : index -> VLSM message)
+  {IT : index -> VLSMType message}
+  (IM : forall i : index, VLSM (IT i))
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   .
 
 Lemma composite_decidable_initial_message
   (Hdec_init : forall i, decidable_initial_messages_prop (IM i))
-  : decidable_initial_messages_prop (composite_vlsm_machine IM constraint).
+  : decidable_initial_messages_prop (composite_vlsm IM constraint).
 Proof.
   intro m. simpl. unfold composite_initial_message_prop.
   apply
@@ -1123,7 +1150,8 @@ Context
   {message : Type}
   {index : Type}
   `{EqDecision index}
-  (IM : index -> VLSM message)
+  {IT : index -> VLSMType message}
+  (IM : forall i : index, VLSM (IT i))
   (Free := free_composite_vlsm IM)
   .
 
@@ -1391,9 +1419,11 @@ End sec_composite_plan_properties.
 
 Section sec_empty_composition_properties.
 
-Context {message : Type}
+Context
+  {message : Type}
   `{finite.Finite index}
-  (IM : index -> VLSM message)
+  {IT : index -> VLSMType message}
+  (IM : forall i : index, VLSM (IT i))
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   (Hempty_index : enum index = [])
@@ -1464,12 +1494,15 @@ End sec_empty_composition_properties.
   (and pre-loaded with the same set of messages).
 *)
 
+(*
 Section sec_same_IM_embedding.
 
 Context
   {message : Type}
   `{EqDecision index}
-  (IM1 IM2 : index -> VLSM message)
+  {IT1 IT2 : index -> VLSMType message}
+  (IM1 : forall i : index, VLSM (IT1 i))
+  (IM2 : forall i : index, VLSM (IT2 i))
   (Heq : forall i, IM1 i = IM2 i)
   .
 
@@ -1558,13 +1591,15 @@ End sec_same_IM_embedding.
 
 Arguments same_IM_label_rew {_ _ _ _} _ _ : assert.
 Arguments same_IM_state_rew {_ _ _ _} _ _ _ : assert.
+*)
 
 Section sec_composite_valid_transition.
 
 Context
   {message : Type}
   `{EqDecision index}
-  (IM : index -> VLSM message)
+  {IT : index -> VLSMType message}
+  (IM : forall i : index, VLSM (IT i))
   (Free := free_composite_vlsm IM)
   (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
@@ -1653,7 +1688,8 @@ Section sec_composite_history_vlsm.
 Context
   {message : Type}
   `{EqDecision index}
-  (IM : index -> VLSM message)
+  {IT : index -> VLSMType message}
+  (IM : forall i : index, VLSM (IT i))
   `{forall i, HistoryVLSM (IM i)}
   (Free := free_composite_vlsm IM)
   (RFree := pre_loaded_with_all_messages_vlsm Free)
@@ -1713,7 +1749,7 @@ Proof.
       specialize (IHHs2 (existT j lj) (state_update IM s j (s1 j)) iom oom).
       spec IHHs2.
       {
-        apply composite_valid_transition_projection_inv with (s1 j) (s' j); [done | |].
+        eapply composite_valid_transition_projection_inv; [done | |].
         - by state_update_simpl.
         - rewrite state_update_twice.
           symmetry; apply state_update_id.
