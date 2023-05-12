@@ -67,7 +67,8 @@ End sec_pre_definitions.
 
 Record VLSM_stuttering_embedding_type
   {message : Type}
-  (X : VLSM message)
+  {TX : VLSMType message}
+  (X : VLSM TX)
   (TY : VLSMType message)
   (state_project : state X -> state TY)
   (transition_item_project : transition_item X -> list (transition_item TY))
@@ -87,7 +88,8 @@ Section sec_stuttering_embedding_type_properties.
 
 Definition strong_transition_item_project_consistency
   {message : Type}
-  [X : VLSM message]
+  {TX : VLSMType message}
+  [X : VLSM TX]
   [TY : VLSMType message]
   (state_project : state X -> state TY)
   (transition_item_project : transition_item X -> list (transition_item TY))
@@ -104,7 +106,8 @@ Section sec_pre_properties.
 
 Context
   {message : Type}
-  (X : VLSM message)
+  {TX : VLSMType message}
+  (X : VLSM TX)
   (TY : VLSMType message)
   (state_project : state X -> state TY)
   (transition_item_project : transition_item X -> list (transition_item TY))
@@ -131,7 +134,8 @@ End sec_pre_properties.
 
 Definition VLSM_partial_trace_project_from_stuttering_embedding
   {message : Type}
-  {X : VLSM message}
+  {TX : VLSMType message}
+  {X : VLSM TX}
   {TY : VLSMType message}
   (state_project : state X -> state TY)
   (transition_item_project : transition_item X -> list (transition_item TY))
@@ -142,7 +146,8 @@ Definition VLSM_partial_trace_project_from_stuttering_embedding
 
 Context
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   (state_project : state X -> state Y)
   (transition_item_project : transition_item X -> list (transition_item Y))
   (Hsimul : VLSM_stuttering_embedding_type X Y state_project transition_item_project)
@@ -172,7 +177,8 @@ Section sec_VLSM_stuttering_embedding_definitions.
 
 Context
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (state_project : state X -> state Y)
   (transition_item_project : transition_item X -> list (transition_item Y))
   (trace_project := pre_VLSM_stuttering_embedding_finite_trace_project transition_item_project)
@@ -232,7 +238,8 @@ Section sec_weak_stuttering_embedding_properties.
 
 Context
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {state_project : state X -> state Y}
   {transition_item_project : transition_item X -> list (transition_item Y)}
   .
@@ -398,7 +405,8 @@ Section sec_stuttering_embedding_properties.
 
 Context
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {state_project : state X -> state Y}
   {transition_item_project : transition_item X -> list (transition_item Y)}
   .
@@ -660,7 +668,8 @@ Section sec_strong_VLSM_stuttering_embedding_type.
 
 Context
   {message : Type}
-  (X : VLSM message)
+  {TX : VLSMType message}
+  (X : VLSM TX)
   (TY : VLSMType message)
   (state_project : state X -> state TY)
   (transition_item_project : transition_item X -> list (transition_item TY))
@@ -675,7 +684,8 @@ End sec_strong_VLSM_stuttering_embedding_type.
 
 Context
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (state_project : state X -> state Y)
   (transition_item_project : transition_item X -> list (transition_item Y))
   (Htransition : stuttering_embedding_input_valid_transition_item_validity
