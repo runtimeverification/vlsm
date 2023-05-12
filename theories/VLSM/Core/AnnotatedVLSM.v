@@ -69,7 +69,7 @@ Definition annotated_transition
   let (s', om') := transition X l (original_state som.1, som.2) in
   ({| original_state := s'; state_annotation := annotated_transition_state l som |}, om').
 
-Definition annotated_vlsm_machine : VLSMMachine annotated_type :=
+Definition annotated_vlsm_machine : VLSM annotated_type :=
   {| initial_state_prop := fun s : state annotated_type => annotated_initial_state_prop s
   ; initial_message_prop := fun m : message => initial_message_prop X m
   ; valid := annotated_valid

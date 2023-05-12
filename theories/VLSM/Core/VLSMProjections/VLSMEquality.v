@@ -18,7 +18,7 @@ Context
   .
 
 Definition VLSM_eq_part
-  (MX MY : VLSMMachine T)
+  (MX MY : VLSM T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) : Prop :=
     VLSM_incl X Y /\ VLSM_incl Y X.
 
@@ -29,7 +29,7 @@ Notation VLSM_eq X Y := (VLSM_eq_part (vmachine X) (vmachine Y)).
 Lemma VLSM_eq_refl
   {message : Type}
   {T : VLSMType message}
-  (MX : VLSMMachine T)
+  (MX : VLSM T)
   (X := mk_vlsm MX)
   : VLSM_eq X X.
 Proof.
@@ -39,7 +39,7 @@ Qed.
 Lemma VLSM_eq_sym
   {message : Type}
   {T : VLSMType message}
-  (MX MY : VLSMMachine T)
+  (MX MY : VLSM T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_eq X Y -> VLSM_eq Y X.
 Proof.
@@ -49,7 +49,7 @@ Qed.
 Lemma VLSM_eq_trans
   {message : Type}
   {T : VLSMType message}
-  (MX MY MZ : VLSMMachine T)
+  (MX MY MZ : VLSM T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
   : VLSM_eq X Y -> VLSM_eq Y Z -> VLSM_eq X Z.
 Proof.
@@ -62,7 +62,7 @@ Section sec_VLSM_eq_properties.
 
 Context
   {message : Type} [T : VLSMType message]
-  [MX MY : VLSMMachine T]
+  [MX MY : VLSM T]
   (Hincl : VLSM_eq_part MX MY)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)

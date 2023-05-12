@@ -154,7 +154,7 @@ Section sec_composite_vlsm.
 
   Assume an non-empty <<index>> type and let <<IT>> be
   an <<index>>ed family of [VLSMType]s, and for each index <<i>>, let <<IM i>> be
-  a [VLSMMachine] of type <<IT i>>.
+  a [VLSM] of type <<IT i>>.
 *)
 
 (**
@@ -310,7 +310,7 @@ Definition constrained_composite_valid
 
 Definition composite_vlsm_machine
   (constraint : composite_label -> composite_state * option message -> Prop)
-  : VLSMMachine composite_type
+  : VLSM composite_type
   :=
   {| initial_state_prop := composite_initial_state_prop
    ; initial_message_prop := composite_initial_message_prop

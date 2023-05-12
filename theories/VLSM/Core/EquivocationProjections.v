@@ -288,7 +288,7 @@ Section sec_incl_oracle.
 Context
   {message : Type}
   {T : VLSMType message}
-  {MX MY : VLSMMachine T}
+  {MX MY : VLSM T}
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   (Hincl : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y))

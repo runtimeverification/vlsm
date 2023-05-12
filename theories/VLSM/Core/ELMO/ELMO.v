@@ -125,7 +125,7 @@ Qed.
   returns the state unchanged on invalid input.)
 *)
 Lemma full_node_VLSM_reachable
-  (VM : VLSMMachine ELMOComponentType)
+  (VM : VLSM ELMOComponentType)
   (V := mk_vlsm VM)
   (VM_transition_is_UMO :
     forall (l : Label) (s : State) (om : option Message),
@@ -309,7 +309,7 @@ Proof.
   - by intros [[] Hfo]; constructor; apply Hfo.
 Qed.
 
-Definition ELMOComponentMachine (i : index) : VLSMMachine ELMOComponentType :=
+Definition ELMOComponentMachine (i : index) : VLSM ELMOComponentType :=
 {|
   initial_state_prop := UMOComponent_initial_state_prop (idx i);
   initial_message_prop := const False;

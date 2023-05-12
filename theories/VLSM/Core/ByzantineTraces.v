@@ -108,7 +108,7 @@ Definition all_messages_valid
     := True.
 
 Definition emit_any_message_vlsm_machine
-    : VLSMMachine all_messages_type
+    : VLSM all_messages_type
     :=
     {| initial_state_prop := fun s => True
      ; initial_message_prop := fun m => False

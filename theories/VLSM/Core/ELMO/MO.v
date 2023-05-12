@@ -381,7 +381,7 @@ repeat match goal with
 | H : MOComponentValid _ Send _ (Some _) |- _ => inversion H; subst; clear H
 end.
 
-Definition MOComponentMachine (P : Address -> Prop) (i : Address) : VLSMMachine ELMOComponentType :=
+Definition MOComponentMachine (P : Address -> Prop) (i : Address) : VLSM ELMOComponentType :=
 {|
   initial_state_prop := UMOComponent_initial_state_prop i;
   initial_message_prop := const False;

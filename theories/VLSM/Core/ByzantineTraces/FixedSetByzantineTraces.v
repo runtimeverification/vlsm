@@ -51,7 +51,7 @@ Definition signed_messages_valid
   channel_authenticated_message A sender node_idx l.
 
 Definition emit_any_signed_message_vlsm_machine
-  : VLSMMachine all_messages_type
+  : VLSM all_messages_type
   :=
   {| initial_state_prop := fun s => True
    ; initial_message_prop := fun m => False

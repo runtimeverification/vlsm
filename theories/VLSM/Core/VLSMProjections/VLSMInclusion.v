@@ -17,7 +17,7 @@ Context
   .
 
 Definition VLSM_incl_part
-  (MX MY : VLSMMachine T)
+  (MX MY : VLSM T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   :=
   forall t : Trace,
@@ -26,7 +26,7 @@ Definition VLSM_incl_part
 #[local] Notation VLSM_incl X Y := (VLSM_incl_part (vmachine X) (vmachine Y)).
 
 Lemma VLSM_incl_refl
-  (MX : VLSMMachine T)
+  (MX : VLSM T)
   (X := mk_vlsm MX)
   : VLSM_incl X X.
 Proof.
@@ -34,7 +34,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_trans
-  (MX MY MZ : VLSMMachine T)
+  (MX MY MZ : VLSM T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
   : VLSM_incl X Y -> VLSM_incl Y Z -> VLSM_incl X Z.
 Proof.
@@ -42,7 +42,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_finite_traces_characterization
-  (MX MY : VLSMMachine T)
+  (MX MY : VLSM T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <->
     forall (s : state X)
@@ -74,7 +74,7 @@ Qed.
   label and state projection functions are identities.
 *)
 Lemma VLSM_incl_embedding_iff
-  (MX MY : VLSMMachine T)
+  (MX MY : VLSM T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <-> VLSM_embedding X Y id id.
 Proof.
@@ -96,14 +96,14 @@ Proof.
 Qed.
 
 Definition VLSM_incl_is_embedding
-  {MX MY : VLSMMachine T}
+  {MX MY : VLSM T}
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   (Hincl : VLSM_incl X Y)
   : VLSM_embedding X Y id id
   := proj1 (VLSM_incl_embedding_iff MX MY) Hincl.
 
 Lemma VLSM_incl_is_embedding_finite_trace_project
-  {MX MY : VLSMMachine T}
+  {MX MY : VLSM T}
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   (Hincl : VLSM_incl X Y)
   : forall tr,
@@ -125,7 +125,7 @@ Section sec_VLSM_incl_preservation.
 Context
   {message : Type}
   {T : VLSMType message}
-  (MX MY : VLSMMachine T)
+  (MX MY : VLSM T)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   .
@@ -159,7 +159,7 @@ Section sec_VLSM_incl_properties.
 
 Context
   {message : Type} [T : VLSMType message]
-  [MX MY : VLSMMachine T]
+  [MX MY : VLSM T]
   (Hincl : VLSM_incl_part MX MY)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
@@ -328,7 +328,7 @@ Section sec_basic_VLSM_incl.
 Context
   {message : Type}
   {T : VLSMType message}
-  (MX MY : VLSMMachine T)
+  (MX MY : VLSM T)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   .

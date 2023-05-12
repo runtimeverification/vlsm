@@ -586,7 +586,7 @@ Definition equivocator_valid
   end.
 
 Definition equivocator_vlsm_machine
-  : VLSMMachine equivocator_type
+  : VLSM equivocator_type
   :=
   {|  initial_state_prop := equivocator_initial_state_prop
    ;  initial_message_prop := @initial_message_prop _ _ X

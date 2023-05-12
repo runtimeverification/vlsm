@@ -71,7 +71,7 @@ repeat match goal with
 | H : UMOComponentValid Send _ (Some _) |- _ => inversion H; subst; clear H
 end.
 
-Definition UMOComponentMachine (i : Address) : VLSMMachine ELMOComponentType :=
+Definition UMOComponentMachine (i : Address) : VLSM ELMOComponentType :=
 {|
   initial_state_prop := UMOComponent_initial_state_prop i;
   initial_message_prop := const False;
@@ -238,7 +238,7 @@ Qed.
   in the [VLSM.ELMO.ELMO] module.
 *)
 Lemma UMO_based_valid_reachable
-  (VM : VLSMMachine (Build_VLSMType Message State Label))
+  (VM : VLSM (Build_VLSMType Message State Label))
   (V := mk_vlsm VM)
   (Hinit_empty : forall si, initial_state_prop V si -> obs si = [])
   (Hsend_spec : forall s om, ram_state_prop V s -> valid V Send (s, om) <-> om = None)

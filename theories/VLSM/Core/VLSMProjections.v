@@ -162,7 +162,7 @@ Lemma VLSM_projection_incl_trans
   {message}
   (X : VLSM message)
   {T : VLSMType message}
-  {MY MZ : VLSMMachine T}
+  {MY MZ : VLSM T}
   (Y := mk_vlsm MY)
   (Z := mk_vlsm MZ)
   (project_labelXY : label X -> option (label Y))
@@ -181,7 +181,7 @@ Lemma VLSM_embedding_incl_trans
   {message}
   (X : VLSM message)
   {T : VLSMType message}
-  {MY MZ : VLSMMachine T}
+  {MY MZ : VLSM T}
   (Y := mk_vlsm MY)
   (Z := mk_vlsm MZ)
   (project_labelXY : label X -> label Y)
@@ -198,7 +198,7 @@ Qed.
 Lemma VLSM_incl_projection_trans
   {message}
   {T : VLSMType message}
-  {MX MY : VLSMMachine T}
+  {MX MY : VLSM T}
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   (Z : VLSM message)
@@ -215,7 +215,7 @@ Qed.
 Lemma VLSM_incl_embedding_trans
   {message}
   {T : VLSMType message}
-  {MX MY : VLSMMachine T}
+  {MX MY : VLSM T}
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   (Z : VLSM message)
@@ -233,7 +233,7 @@ Lemma VLSM_projection_eq_trans
   {message}
   (X : VLSM message)
   {T : VLSMType message}
-  {MY MZ : VLSMMachine T}
+  {MY MZ : VLSM T}
   (Y := mk_vlsm MY)
   (Z := mk_vlsm MZ)
   (project_labelXY : label X -> option (label Y))
@@ -247,7 +247,7 @@ Lemma VLSM_embedding_eq_trans
   {message}
   (X : VLSM message)
   {T : VLSMType message}
-  {MY MZ : VLSMMachine T}
+  {MY MZ : VLSM T}
   (Y := mk_vlsm MY)
   (Z := mk_vlsm MZ)
   (project_labelXY : label X -> label Y)
@@ -260,7 +260,7 @@ Proof. by apply VLSM_embedding_incl_trans; [| apply ProjYZ]. Qed.
 Lemma VLSM_eq_projection_trans
   {message}
   {T : VLSMType message}
-  {MX MY : VLSMMachine T}
+  {MX MY : VLSM T}
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   (Z : VLSM message)
@@ -274,7 +274,7 @@ Proof. by apply VLSM_incl_projection_trans; [apply ProjXY |]. Qed.
 Lemma VLSM_eq_embedding_trans
   {message}
   {T : VLSMType message}
-  {MX MY : VLSMMachine T}
+  {MX MY : VLSM T}
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
   (Z : VLSM message)

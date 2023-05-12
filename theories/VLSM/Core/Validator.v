@@ -196,7 +196,7 @@ Definition projection_induced_valid
   : Prop :=
   exists lX sX, InputValidation label_project state_project lY somY.1 somY.2 lX sX.
 
-Definition projection_induced_validator_machine : VLSMMachine TY :=
+Definition projection_induced_validator_machine : VLSM TY :=
   {| initial_message_prop := projection_induced_initial_message_prop
    ; initial_state_prop := projection_induced_initial_state_prop
    ; transition := projection_induced_transition
@@ -386,7 +386,7 @@ Context
   their projections induced by the same maps.
 *)
 Lemma projection_induced_validator_incl
-  (MX1 MX2 : VLSMMachine TX)
+  (MX1 MX2 : VLSM TX)
   (X1 := mk_vlsm MX1) (X2 := mk_vlsm MX2)
   (XY1 : VLSM message :=
     pre_projection_induced_validator X1 TY label_project state_project label_lift state_lift)
@@ -442,7 +442,7 @@ Qed.
   their projections induced by the same maps.
 *)
 Lemma projection_induced_validator_eq
-  (MX1 MX2 : VLSMMachine TX)
+  (MX1 MX2 : VLSM TX)
   (X1 := mk_vlsm MX1) (X2 := mk_vlsm MX2)
   (XY1 : VLSM message :=
     pre_projection_induced_validator X1 TY label_project state_project label_lift state_lift)
@@ -799,7 +799,7 @@ Proof. by destruct siomi, Hcomposite as (? & <- & _ & _ & []). Qed.
   [composite_vlsm_induced_projection_valid].
 *)
 Definition composite_vlsm_induced_projection_validator_machine
-  : VLSMMachine (IM i) :=
+  : VLSM (IM i) :=
 {|
   initial_state_prop := @initial_state_prop _ _ (IM i);
   initial_message_prop := @initial_message_prop _ _ (IM i);
