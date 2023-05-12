@@ -17,20 +17,15 @@ Context
   {T : VLSMType message}
   .
 
-Definition VLSM_eq_part
-  (MX MY : VLSM T)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY) : Prop :=
-    VLSM_incl X Y /\ VLSM_incl Y X.
+Definition VLSM_eq (X Y : VLSM T) : Prop :=
+  VLSM_incl X Y /\ VLSM_incl Y X.
 
 End sec_VLSM_equality.
-
-Notation VLSM_eq X Y := (VLSM_eq_part (vmachine X) (vmachine Y)).
 
 Lemma VLSM_eq_refl
   {message : Type}
   {T : VLSMType message}
-  (MX : VLSM T)
-  (X := mk_vlsm MX)
+  (X : VLSM T)
   : VLSM_eq X X.
 Proof.
   by firstorder.
@@ -39,8 +34,7 @@ Qed.
 Lemma VLSM_eq_sym
   {message : Type}
   {T : VLSMType message}
-  (MX MY : VLSM T)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY)
+  (X Y : VLSM T)
   : VLSM_eq X Y -> VLSM_eq Y X.
 Proof.
   by firstorder.
@@ -49,8 +43,7 @@ Qed.
 Lemma VLSM_eq_trans
   {message : Type}
   {T : VLSMType message}
-  (MX MY MZ : VLSM T)
-  (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
+  (X Y Z : VLSM T)
   : VLSM_eq X Y -> VLSM_eq Y Z -> VLSM_eq X Z.
 Proof.
   by firstorder.
@@ -62,10 +55,8 @@ Section sec_VLSM_eq_properties.
 
 Context
   {message : Type} [T : VLSMType message]
-  [MX MY : VLSM T]
-  (Hincl : VLSM_eq_part MX MY)
-  (X := mk_vlsm MX)
-  (Y := mk_vlsm MY)
+  [X Y : VLSM T]
+  (Hincl : VLSM_eq X Y)
   .
 
 (** VLSM equality specialized to finite trace. *)
@@ -130,14 +121,18 @@ Lemma VLSM_eq_input_valid_transition
   input_valid_transition X l (s, im) (s', om) <->
   input_valid_transition Y l (s, im) (s', om).
 Proof.
-  by split; apply @VLSM_incl_input_valid_transition, Hincl.
+  split.
+  - by apply @VLSM_incl_input_valid_transition, Hincl.
+  - by apply (@VLSM_incl_input_valid_transition _ T Y X), Hincl.
 Qed.
 
 Lemma VLSM_eq_input_valid
   : forall l s im,
   input_valid X l (s, im) <-> input_valid Y l (s, im).
 Proof.
-  by split; apply @VLSM_incl_input_valid, Hincl.
+  split.
+  - by apply @VLSM_incl_input_valid, Hincl.
+  - by apply (@VLSM_incl_input_valid _ T Y X), Hincl.
 Qed.
 
 Lemma VLSM_eq_can_produce
@@ -184,7 +179,8 @@ Section sec_VLSM_incl_preloaded_properties.
 
 Context
   {message : Type}
-  (X : VLSM message)
+  {T : VLSMType message}
+  (X : VLSM T)
   .
 
 Lemma pre_loaded_vlsm_with_valid_eq
@@ -264,7 +260,6 @@ Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om :
   valid_state_message_prop (pre_loaded_vlsm X (fun _ => False)) s om.
 Proof.
   pose proof vlsm_is_pre_loaded_with_False as Heq.
-  destruct X as (T, M); simpl in *.
   by split; (apply VLSM_incl_valid_state_message; [| cbv; tauto]); apply Heq.
 Qed.
 
