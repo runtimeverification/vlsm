@@ -95,7 +95,8 @@ Section sec_basic_definitions.
 
 Context
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (label_project : label X -> label Y)
   (state_project : state X -> state Y)
   .
@@ -234,7 +235,8 @@ End sec_basic_definitions.
 
 Definition VLSM_embedding_transition_item_project
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_embedding X Y label_project state_project)
@@ -243,7 +245,8 @@ Definition VLSM_embedding_transition_item_project
 
 Definition VLSM_embedding_finite_trace_project
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_embedding X Y label_project state_project)
@@ -251,7 +254,8 @@ Definition VLSM_embedding_finite_trace_project
 
 Definition VLSM_embedding_infinite_trace_project
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_embedding X Y label_project state_project)
@@ -259,7 +263,8 @@ Definition VLSM_embedding_infinite_trace_project
 
 Definition VLSM_weak_embedding_finite_trace_project
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_embedding X Y label_project state_project)
@@ -267,7 +272,8 @@ Definition VLSM_weak_embedding_finite_trace_project
 
 Definition VLSM_weak_embedding_infinite_trace_project
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_embedding X Y label_project state_project)
@@ -275,7 +281,8 @@ Definition VLSM_weak_embedding_infinite_trace_project
 
 Lemma VLSM_embedding_projection_type
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (label_project : label X -> label Y)
   (state_project : state X -> state Y)
   : VLSM_projection_type X Y (Some ∘ label_project) state_project.
@@ -291,7 +298,8 @@ Section sec_weak_projection_properties.
 
 Context
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_embedding X Y label_project state_project)
@@ -412,7 +420,8 @@ Section sec_embedding_properties.
 
 Context
   {message : Type}
-  {X Y : VLSM message}
+  {TX TY : VLSMType message}
+  {X : VLSM TX} {Y : VLSM TY}
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_embedding X Y label_project state_project)
@@ -594,7 +603,8 @@ Section sec_basic_VLSM_embedding.
 
 Context
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (label_project : label X -> label Y)
   (state_project : state X -> state Y)
   .
@@ -708,7 +718,8 @@ End sec_basic_VLSM_embedding.
 
 Lemma basic_VLSM_strong_embedding
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (label_project : label X -> label Y)
   (state_project : state X -> state Y)
   (Hvalid : strong_embedding_valid_preservation X Y label_project state_project)
@@ -726,7 +737,8 @@ Qed.
 
 Lemma basic_VLSM_embedding_preloaded
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (label_project : label X -> label Y)
   (state_project : state X -> state Y)
   (Hvalid : strong_embedding_valid_preservation X Y label_project state_project)
@@ -754,7 +766,8 @@ Qed.
 
 Lemma basic_VLSM_embedding_preloaded_with
   {message : Type}
-  (X Y : VLSM message)
+  {TX TY : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY)
   (P Q : message -> Prop)
   (PimpliesQ : forall m : message, P m -> Q m)
   (label_project : label X -> label Y)
