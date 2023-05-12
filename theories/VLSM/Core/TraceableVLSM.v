@@ -50,7 +50,7 @@ Qed.
 
 Lemma transition_monotone_empty_trace
   `(X : VLSM message) `{TransitionMonotoneVLSM _ X} :
-  forall [s : state X] [tr : list (vtransition_item X)],
+  forall [s : state X] [tr : list (transition_item X)],
     finite_valid_trace_from_to X s s tr -> tr = [].
 Proof.
   intros s tr Htr; remember s as f; rewrite Heqf in Htr at 1.
@@ -71,18 +71,18 @@ Qed.
 *)
 Class TraceableVLSM
   `(X : VLSM message)
-  (state_destructor : state X -> list (vtransition_item X * state X))
+  (state_destructor : state X -> list (transition_item X * state X))
   (state_size : state X -> nat)
   : Prop :=
 {
   tv_monotone :> TransitionMonotoneVLSM X state_size;
   tv_state_destructor_destination :
-    forall (s' s : state X) (item : vtransition_item X),
+    forall (s' s : state X) (item : transition_item X),
       (item, s) ∈ state_destructor s' -> destination item = s';
   tv_state_destructor_transition :
     forall s' : state X,
       valid_state_prop (pre_loaded_with_all_messages_vlsm X) s' ->
-      forall (s : state X) (item : vtransition_item X),
+      forall (s : state X) (item : transition_item X),
         (item, s) ∈ state_destructor s' ->
         input_valid_transition_item (pre_loaded_with_all_messages_vlsm X) s item;
   tv_state_destructor_initial :
@@ -97,14 +97,14 @@ Section sec_traceable_vlsm_props.
 Context
   `(X : VLSM message)
   (state_size : state X -> nat)
-  (state_destructor : state X -> list (vtransition_item X * state X))
+  (state_destructor : state X -> list (transition_item X * state X))
   `{!TraceableVLSM X state_destructor state_size}
   (R := pre_loaded_with_all_messages_vlsm X)
   .
 
 Lemma tv_state_destructor_size :
   forall s' : state X, valid_state_prop R s' ->
-  forall (s : state X) (item : vtransition_item X),
+  forall (s : state X) (item : transition_item X),
     (item, s) ∈ state_destructor s' -> state_size s < state_size s'.
 Proof.
   intros.
@@ -120,7 +120,7 @@ Qed.
   following the transitions leading to it.
 *)
 Equations state_to_trace (s' : state X) (Hs' : valid_state_prop R s') :
-  state X * list (vtransition_item X) by wf (state_size s') lt :=
+  state X * list (transition_item X) by wf (state_size s') lt :=
 state_to_trace s' Hs' with inspect (state_destructor s') :=
 |               [] eq: _         => (s', [])
 | ((item, s) :: _) eq: Hdestruct =>
@@ -146,8 +146,9 @@ Proof.
   intros s Hs.
   apply_funelim (state_to_trace s Hs); clear s Hs.
   - intros s' Hdestruct ? ? ? ? Heqis_tr.
-    inversion Heqis_tr; subst.
-    by split; [constructor | eapply @tv_state_destructor_initial with (X := X)].
+    inversion Heqis_tr; subst; split.
+    + by apply finite_valid_trace_from_to_empty with (X := R).
+    + by eapply @tv_state_destructor_initial with (X := X).
   - intros ? ? ? ? ? ? Hind ? ? ? Heqis_tr.
     destruct (state_to_trace s _) as [_is _tr]; inversion Heqis_tr; subst; clear Heqis_tr.
     split; [| by eapply Hind].
@@ -172,7 +173,7 @@ Context
   {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
-  (state_destructor : forall i, state (IM i) -> list (vtransition_item (IM i) * state (IM i)))
+  (state_destructor : forall i, state (IM i) -> list (transition_item (IM i) * state (IM i)))
   (state_size : forall i, state (IM i) -> nat)
   `{forall i, TraceableVLSM (IM i) (state_destructor i) (state_size i)}
   (Free := free_composite_vlsm IM)
@@ -185,7 +186,7 @@ Context
 *)
 
 Definition lift_to_composite_transition_item_state
-  (s : composite_state IM) (i : index) (item_s : vtransition_item (IM i) * state (IM i))
+  (s : composite_state IM) (i : index) (item_s : transition_item (IM i) * state (IM i))
   : composite_transition_item IM * composite_state IM :=
   (lift_to_composite_transition_item IM s i item_s.1,
     lift_to_composite_state IM s i item_s.2).
@@ -278,7 +279,7 @@ Lemma composite_tv_state_destructor_initial :
 Proof.
   unfold composite_state_destructor; split; intros Hinit.
   - replace (state_destructor i (s i))
-      with (@nil (vtransition_item (IM i) * state (IM i))); [done |].
+      with (@nil (transition_item (IM i) * state (IM i))); [done |].
     symmetry; apply tv_state_destructor_initial; [| done].
     by eapply valid_state_project_preloaded_to_preloaded.
   - apply tv_state_destructor_initial.

@@ -79,7 +79,7 @@ Definition annotated_vlsm_machine : VLSMMachine annotated_type :=
 Definition annotated_vlsm : VLSM message := mk_vlsm annotated_vlsm_machine.
 
 Definition annotate_trace_item
-  (item : vtransition_item X)
+  (item : transition_item X)
   (k : annotated_state -> list (@transition_item _ annotated_type))
   (sa : annotated_state)
   : list (@transition_item _ annotated_type) :=
@@ -92,7 +92,7 @@ Definition annotate_trace_item
       @Build_transition_item _ annotated_type (l item) (input item) sa' (output item) :: k sa'.
 
 Lemma annotate_trace_item_project
-  (item : vtransition_item X)
+  (item : transition_item X)
   (k : annotated_state -> list (@transition_item _ annotated_type))
   (sa : annotated_state)
   : pre_VLSM_embedding_finite_trace_project
@@ -107,7 +107,7 @@ Proof.
   by destruct item.
 Qed.
 
-Definition annotate_trace_from (sa : state annotated_type) (tr : list (vtransition_item X))
+Definition annotate_trace_from (sa : state annotated_type) (tr : list (transition_item X))
   : list (@transition_item _ annotated_type) :=
   fold_right annotate_trace_item (fun sa => []) tr sa.
 
@@ -147,7 +147,7 @@ Proof.
   by rewrite! finite_trace_last_is_last.
 Qed.
 
-Definition annotate_trace (s : state X) (tr : list (vtransition_item X))
+Definition annotate_trace (s : state X) (tr : list (transition_item X))
   : list (@transition_item _ annotated_type) :=
   annotate_trace_from {| original_state := s; state_annotation := ` inhabitant |} tr.
 

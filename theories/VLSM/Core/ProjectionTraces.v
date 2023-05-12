@@ -106,7 +106,7 @@ Definition composite_transition_item_projection_from_eq
   (i := projT1 (l item))
   j
   (e : j = i)
-  : vtransition_item (IM j)
+  : transition_item (IM j)
   :=
   let lj := eq_rect_r _ (projT2 (l item)) e in
   @Build_transition_item _ (IM j) lj (input item) (destination item j) (output item).
@@ -114,7 +114,7 @@ Definition composite_transition_item_projection_from_eq
 Definition composite_transition_item_projection
   (item : composite_transition_item IM)
   (i := projT1 (l item))
-  : vtransition_item (IM i)
+  : transition_item (IM i)
   :=
   composite_transition_item_projection_from_eq item i eq_refl.
 
@@ -152,7 +152,7 @@ Proof.
 Qed.
 
 Definition finite_trace_projection_list (tr : list (composite_transition_item IM))
-  : list (vtransition_item (IM j)) :=
+  : list (transition_item (IM j)) :=
   @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _
     (composite_project_label IM j) (fun s => s j) tr.
 
@@ -266,7 +266,7 @@ Qed.
 Lemma finite_trace_projection_list_in_rev
   (tr : list (composite_transition_item IM))
   (j : index)
-  (itemj : vtransition_item (IM j))
+  (itemj : transition_item (IM j))
   (Hitemj : itemj ∈ VLSM_projection_finite_trace_project (preloaded_component_projection IM j) tr)
   : exists (itemX : composite_transition_item IM), itemX ∈ tr /\
     output itemX = output itemj /\

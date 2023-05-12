@@ -30,8 +30,8 @@ Context
   the original trace must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting
-  (tr : list (vtransition_item equivocator_vlsm))
-  (trX : list (vtransition_item X))
+  (tr : list (transition_item equivocator_vlsm))
+  (trX : list (transition_item X))
   (j i : MachineDescriptor)
   (HtrX : equivocator_vlsm_trace_project _ tr j = Some (trX, i))
   (m : message)
@@ -58,9 +58,9 @@ Qed.
 
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
   (bs : state equivocator_vlsm)
-  (btr : list (vtransition_item equivocator_vlsm))
+  (btr : list (transition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs btr)
-  (bitem : vtransition_item equivocator_vlsm)
+  (bitem : transition_item equivocator_vlsm)
   (Hitem : bitem ∈ btr)
   (sn : state X)
   (Hnew : l bitem = Spawn sn)
@@ -96,16 +96,16 @@ Qed.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item
   (bs bf : state equivocator_vlsm)
-  (btr : list (vtransition_item equivocator_vlsm))
+  (btr : list (transition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs bf btr)
-  (bitem : vtransition_item equivocator_vlsm)
+  (bitem : transition_item equivocator_vlsm)
   (Hitem : bitem ∈ btr)
   (idl : nat)
   (Hlbitem : equivocator_label_descriptor (l bitem) = Existing idl)
-  : exists (item : vtransition_item X),
+  : exists (item : transition_item X),
       (exists (d : MachineDescriptor),
         equivocator_vlsm_transition_item_project _ bitem d = Some (Some item, Existing idl))
-      /\ exists (tr : list (vtransition_item X)),
+      /\ exists (tr : list (transition_item X)),
         item ∈ tr /\
         exists (dfinal dfirst : MachineDescriptor),
           proper_descriptor X dfirst bs /\
@@ -181,7 +181,7 @@ Qed.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting_inv
   (is : state equivocator_vlsm)
-  (tr : list (vtransition_item equivocator_vlsm))
+  (tr : list (transition_item equivocator_vlsm))
   (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is tr)
   (m : message)
   (Hbbs : Exists (field_selector output m) tr)
@@ -189,7 +189,7 @@ Lemma equivocator_vlsm_trace_project_output_reflecting_inv
     (j i : MachineDescriptor)
     (Hi : proper_descriptor X i is)
     (Hj : existing_descriptor X j (finite_trace_last is tr))
-    (trX : list (vtransition_item X))
+    (trX : list (transition_item X))
     (HtrX : equivocator_vlsm_trace_project _ tr j = Some (trX, i))
     ,
     Exists (field_selector output m) trX.
@@ -231,7 +231,7 @@ Context
 
 Definition equivocator_selector
   (m : message)
-  (item : vtransition_item equivocator_vlsm)
+  (item : transition_item equivocator_vlsm)
   : Prop
   :=
   match (l item) with

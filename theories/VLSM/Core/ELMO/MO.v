@@ -833,7 +833,7 @@ Definition lift_to_MO_state
     lift_to_composite_state M us i si.
 
 Definition lift_to_MO_trace
-  (us : MO_state) (i : index) (tr : list (vtransition_item (M i)))
+  (us : MO_state) (i : index) (tr : list (transition_item (M i)))
   : list MO_transition_item :=
     pre_VLSM_embedding_finite_trace_project
       _ _ (lift_to_MO_label i) (lift_to_MO_state us i) tr.
@@ -891,7 +891,7 @@ Proof.
 Qed.
 
 Lemma lift_to_MO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (M i))) (us : MO_state),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (M i))) (us : MO_state),
     valid_state_prop MO us ->
     finite_valid_trace_from_to (M i) s1 s2 tr ->
       finite_valid_trace_from_to
@@ -944,7 +944,7 @@ Proof.
 Qed.
 
 Lemma lift_to_RMO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (RM i))) (us : MO_state),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (RM i))) (us : MO_state),
     valid_state_prop RMO us ->
     finite_valid_trace_from_to (RM i) s1 s2 tr ->
       finite_valid_trace_from_to
@@ -1046,7 +1046,7 @@ Proof.
 Qed.
 
 Lemma lift_to_MO_finite_valid_trace_init_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (M i))),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (M i))),
     finite_valid_trace_init_to (RM i) s1 s2 tr ->
       finite_valid_trace_init_to MO (lift_to_MO_state (``(vs0 MO)) i s1)
         (lift_to_MO_state (``(vs0 MO)) i s2) (lift_to_MO_trace (``(vs0 MO)) i tr).
