@@ -14,7 +14,8 @@ Section sec_same_VLSM_embedding.
 
 Context
   {message : Type}
-  (X1 X2 : VLSM message)
+  {T1 T2 : VLSMType message}
+  (X1 : VLSM T1) (X2 : VLSM T1)
   (Heq : X1 = X2)
   .
 
@@ -61,8 +62,9 @@ Proof.
 Qed.
 
 Lemma VLSM_projection_trans
-  {message}
-  (X Y Z : VLSM message)
+  {message : Type}
+  {TX TY TZ : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY) (Z : VLSM TZ)
   (project_labelXY : label X -> option (label Y))
   (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_projection X Y project_labelXY project_stateXY)
@@ -82,8 +84,9 @@ Proof.
 Qed.
 
 Lemma VLSM_projection_embedding_trans
-  {message}
-  (X Y Z : VLSM message)
+  {message : Type}
+  {TX TY TZ : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY) (Z : VLSM TZ)
   (project_labelXY : label X -> option (label Y))
   (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_projection X Y project_labelXY project_stateXY)
@@ -102,8 +105,9 @@ Proof.
 Qed.
 
 Lemma VLSM_embedding_projection_trans
-  {message}
-  (X Y Z : VLSM message)
+  {message : Type}
+  {TX TY TZ : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY) (Z : VLSM TZ)
   (project_labelXY : label X -> label Y)
   (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_embedding X Y project_labelXY project_stateXY)
@@ -140,8 +144,9 @@ Lemma pre_VLSM_embedding_finite_trace_project_trans
 Proof. by induction trX; [| destruct a; cbn; f_equal]. Qed.
 
 Lemma VLSM_embedding_trans
-  {message}
-  (X Y Z : VLSM message)
+  {message : Type}
+  {TX TY TZ : VLSMType message}
+  (X : VLSM TX) (Y : VLSM TY) (Z : VLSM TZ)
   (project_labelXY : label X -> label Y)
   (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_embedding X Y project_labelXY project_stateXY)
@@ -159,12 +164,11 @@ Proof.
 Qed.
 
 Lemma VLSM_projection_incl_trans
-  {message}
-  (X : VLSM message)
+  {message : Type}
+  {TX : VLSMType message}
+  (X : VLSM TX)
   {T : VLSMType message}
-  {MY MZ : VLSM T}
-  (Y := mk_vlsm MY)
-  (Z := mk_vlsm MZ)
+  {Y Z : VLSM T}
   (project_labelXY : label X -> option (label Y))
   (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_projection X Y project_labelXY project_stateXY)
@@ -178,12 +182,11 @@ Proof.
 Qed.
 
 Lemma VLSM_embedding_incl_trans
-  {message}
-  (X : VLSM message)
+  {message : Type}
+  {TX : VLSMType message}
+  (X : VLSM TX)
   {T : VLSMType message}
-  {MY MZ : VLSM T}
-  (Y := mk_vlsm MY)
-  (Z := mk_vlsm MZ)
+  {Y Z : VLSM T}
   (project_labelXY : label X -> label Y)
   (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_embedding X Y project_labelXY project_stateXY)
@@ -196,12 +199,11 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_projection_trans
-  {message}
+  {message : Type}
   {T : VLSMType message}
-  {MX MY : VLSM T}
-  (X := mk_vlsm MX)
-  (Y := mk_vlsm MY)
-  (Z : VLSM message)
+  {X Y : VLSM T}
+  {TZ : VLSMType message}
+  (Z : VLSM TZ)
   (ProjXY : VLSM_incl X Y)
   (project_labelYZ : label Y -> option (label Z))
   (project_stateYZ : state Y -> state Z)
@@ -213,12 +215,11 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_embedding_trans
-  {message}
+  {message : Type}
   {T : VLSMType message}
-  {MX MY : VLSM T}
-  (X := mk_vlsm MX)
-  (Y := mk_vlsm MY)
-  (Z : VLSM message)
+  {X Y : VLSM T}
+  {TZ : VLSMType message}
+  (Z : VLSM TZ)
   (ProjXY : VLSM_incl X Y)
   (project_labelYZ : label Y -> label Z)
   (project_stateYZ : state Y -> state Z)
@@ -230,12 +231,11 @@ Proof.
 Qed.
 
 Lemma VLSM_projection_eq_trans
-  {message}
-  (X : VLSM message)
+  {message : Type}
+  {TX : VLSMType message}
+  (X : VLSM TX)
   {T : VLSMType message}
-  {MY MZ : VLSM T}
-  (Y := mk_vlsm MY)
-  (Z := mk_vlsm MZ)
+  {Y Z : VLSM T}
   (project_labelXY : label X -> option (label Y))
   (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_projection X Y project_labelXY project_stateXY)
@@ -244,12 +244,11 @@ Lemma VLSM_projection_eq_trans
 Proof. by apply VLSM_projection_incl_trans; [| apply ProjYZ]. Qed.
 
 Lemma VLSM_embedding_eq_trans
-  {message}
-  (X : VLSM message)
+  {message : Type}
+  {TX : VLSMType message}
+  (X : VLSM TX)
   {T : VLSMType message}
-  {MY MZ : VLSM T}
-  (Y := mk_vlsm MY)
-  (Z := mk_vlsm MZ)
+  {Y Z : VLSM T}
   (project_labelXY : label X -> label Y)
   (project_stateXY : state X -> state Y)
   (ProjXY : VLSM_embedding X Y project_labelXY project_stateXY)
@@ -258,12 +257,11 @@ Lemma VLSM_embedding_eq_trans
 Proof. by apply VLSM_embedding_incl_trans; [| apply ProjYZ]. Qed.
 
 Lemma VLSM_eq_projection_trans
-  {message}
+  {message : Type}
   {T : VLSMType message}
-  {MX MY : VLSM T}
-  (X := mk_vlsm MX)
-  (Y := mk_vlsm MY)
-  (Z : VLSM message)
+  {X Y : VLSM T}
+  {TZ : VLSMType message}
+  (Z : VLSM TZ)
   (ProjXY : VLSM_eq X Y)
   (project_labelYZ : label Y -> option (label Z))
   (project_stateYZ : state Y -> state Z)
@@ -272,12 +270,11 @@ Lemma VLSM_eq_projection_trans
 Proof. by apply VLSM_incl_projection_trans; [apply ProjXY |]. Qed.
 
 Lemma VLSM_eq_embedding_trans
-  {message}
+  {message : Type}
   {T : VLSMType message}
-  {MX MY : VLSM T}
-  (X := mk_vlsm MX)
-  (Y := mk_vlsm MY)
-  (Z : VLSM message)
+  {X Y : VLSM T}
+  {TZ : VLSMType message}
+  (Z : VLSM TZ)
   (ProjXY : VLSM_eq X Y)
   (project_labelYZ : label Y -> label Z)
   (project_stateYZ : state Y -> state Z)
