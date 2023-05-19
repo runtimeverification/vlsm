@@ -273,15 +273,16 @@ End sec_VLSM_incl_preloaded_properties.
 Section sec_VLSM_equality_from_eq.
 
 Section sec_VLSMType_eq_uses.
+
 Context
   [message : Type]
   [X Y : VLSM message]
   (H_vtypes : vtype X = vtype Y).
 
-Definition retype_label : vlabel X -> vlabel Y :=
+Definition retype_label : label X -> label Y :=
   fun l => eq_rect _ id l _ (f_equal _ H_vtypes).
 
-Definition retype_state : vstate X -> vstate Y :=
+Definition retype_state : state X -> state Y :=
   fun l => eq_rect _ id l _ (f_equal _ H_vtypes).
 
 End sec_VLSMType_eq_uses.
