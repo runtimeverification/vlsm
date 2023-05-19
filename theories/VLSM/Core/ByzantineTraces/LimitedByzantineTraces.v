@@ -1,6 +1,6 @@
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality Reals.
-From VLSM.Lib Require Import Preamble FinSetExtras ListFinSetExtras.
+From VLSM.Lib Require Import Preamble FinSetExtras.
 From VLSM.Lib Require Import Measurable RealsExtras.
 From VLSM.Core Require Import VLSM MessageDependencies VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces AnnotatedVLSM Equivocation.
@@ -352,7 +352,7 @@ Proof.
     ; rewrite Hann_s_pr; unfold lift_sub_state at 1
     ; rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi)
     ; unfold sub_IM at 2; cbn
-    ; destruct (vtransition _ _ _) as (si', om')
+    ; destruct (transition _ _ _) as (si', om')
     ; inversion_clear 1.
     do 2 f_equal; extensionality j.
     unfold lift_sub_state.
@@ -388,7 +388,7 @@ Lemma lift_fixed_byzantine_traces_to_limited
         (lift_sub_label IM (elements non_byzantine)) (lift_sub_state IM (elements non_byzantine))
         (finite_trace_sub_projection IM (elements non_byzantine) tr)))
   : finite_valid_trace Limited bs btr /\
-    state_annotation (@finite_trace_last _ (type Limited) bs btr) ⊆ byzantine_vs.
+    state_annotation (@finite_trace_last _ Limited bs btr) ⊆ byzantine_vs.
 Proof.
   subst non_byzantine.
   induction Hbyzantine using finite_valid_trace_rev_ind; [repeat split |].
@@ -426,7 +426,7 @@ Proof.
         [| | subst lst; apply finite_valid_trace_last_pstate | |].
     }
     destruct iom as [im |]; [| done].
-    apply set_union_subseteq_iff; split; [done |].
+    apply union_subseteq; split; [done |].
     unfold coeqv_message_equivocators
     ; case_decide as Hnobs; [by apply empty_subseteq |].
     rewrite (full_node_msg_dep_coequivocating_senders _ _ _ _ Hfull _ _ i li);
@@ -473,7 +473,7 @@ Lemma msg_dep_validator_limited_non_equivocating_byzantine_traces_are_limited_no
       finite_trace_sub_projection IM (elements selection_complement) tr =
         finite_trace_sub_projection IM (elements selection_complement)
           (pre_VLSM_embedding_finite_trace_project
-            (type Limited) (composite_type IM) Datatypes.id original_state btr).
+            Limited (composite_type IM) Datatypes.id original_state btr).
 Proof.
   split.
   - intros (byzantine & Hlimited & Hbyzantine).

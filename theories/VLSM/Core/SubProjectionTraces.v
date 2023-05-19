@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality Lia.
 From stdpp Require Import prelude finite.
-From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras StdppListFinSet.
+From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
 From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.
 From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.NoEquivocation.
 
@@ -47,7 +47,7 @@ Qed.
 Lemma sub_IM_state_update_eq
   (i : index)
   (s : composite_state sub_IM)
-  (si : vstate (IM i))
+  (si : state (IM i))
   (e1 e2 : sub_index_prop i)
   : state_update sub_IM s (dexist i e1) si (dexist i e2) = si.
 Proof.
@@ -61,7 +61,7 @@ Lemma sub_IM_state_update_neq
   (s : composite_state sub_IM)
   (i : index)
   (ei : sub_index_prop i)
-  (si : vstate (IM i))
+  (si : state (IM i))
   (j : index)
   (ej : sub_index_prop j)
   : i <> j ->
@@ -83,7 +83,7 @@ Definition seeded_free_sub_composition
 Definition composite_state_sub_projection
   (s : composite_state IM)
   : composite_state sub_IM
-  := fun (subi : sub_index) => s (proj1_sig subi) : vstate (sub_IM subi).
+  := fun (subi : sub_index) => s (proj1_sig subi) : state (sub_IM subi).
 
 Lemma composite_initial_state_sub_projection
   (s : composite_state IM)
@@ -210,7 +210,7 @@ Proof.
   unfold composite_state_sub_projection. simpl.
   destruct lX as [x v].
   apply proj2 in HtX. cbn in HtX.
-  destruct (vtransition _ _ _) as (si', _om').
+  destruct (transition _ _ _) as (si', _om').
   inversion_clear HtX.
   rewrite state_update_neq; [done | intros ->].
   unfold composite_label_sub_projection_option in HlX; simpl in HlX.
@@ -224,7 +224,7 @@ Proof.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   unfold lift_sub_label, composite_label_sub_projection_option, composite_label_sub_projection; cbn.
   case_decide; [f_equal | done].
-  by apply (@dec_sig_sigT_eq _ _ sub_index_prop_dec (fun i => vlabel (IM i))).
+  by apply (@dec_sig_sigT_eq _ _ sub_index_prop_dec (fun i => label (IM i))).
 Qed.
 
 Lemma composite_state_sub_projection_lift
@@ -261,13 +261,13 @@ Proof.
   inversion HlX2_pr.
   subst _i.
   apply
-    (@dec_sig_sigT_eq_rev _ _ _ sub_index_prop_dec (fun i => vlabel (IM i)))
+    (@dec_sig_sigT_eq_rev _ _ _ sub_index_prop_dec (fun i => label (IM i)))
     in HlX2_pr as ->.
   apply f_equal_dep with (x := dexist i Hi) in HsXeq_pr as HsXeq_pri.
   cbv in HsXeq_pri.
   cbn in Ht1, Ht2.
   rewrite <- HsXeq_pri in Ht2.
-  destruct (vtransition _ _ _) as (si', om').
+  destruct (transition _ _ _) as (si', om').
   inversion Ht1. subst. clear Ht1.
   inversion Ht2. subst. clear Ht2.
   split; [| done].
@@ -297,7 +297,7 @@ Proof.
 Qed.
 
 Lemma induced_sub_projection_valid_projection l s om
-  (Hv : vvalid pre_induced_sub_projection l (s, om))
+  (Hv : valid pre_induced_sub_projection l (s, om))
   : exists i, i ∈ sub_index_list /\
     exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, om).
 Proof.
@@ -322,13 +322,13 @@ Proof.
 Qed.
 
 Lemma induced_sub_projection_transition_is_composite l s om
-  : vtransition pre_induced_sub_projection l (s, om) = composite_transition sub_IM l (s, om).
+  : transition pre_induced_sub_projection l (s, om) = composite_transition sub_IM l (s, om).
 Proof.
   destruct l as (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   cbn; unfold sub_IM, lift_sub_state;
   rewrite lift_sub_state_to_eq with (Hi := Hi); cbn;
-  destruct (vtransition _ _ _) as (si', om').
+  destruct (transition _ _ _) as (si', om').
   f_equal; extensionality sub_k.
   destruct_dec_sig sub_k k Hk Heqsub_k; subst.
   unfold composite_state_sub_projection; cbn.
@@ -405,7 +405,7 @@ Definition finite_trace_sub_projection_app
 
 Lemma X_incl_Pre : VLSM_incl X Pre.
 Proof.
-  apply VLSM_incl_trans with (machine (free_composite_vlsm IM)).
+  apply VLSM_incl_trans with (free_composite_vlsm IM).
   - by apply (constraint_free_incl IM constraint).
   - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -437,9 +437,8 @@ Lemma transition_sub_projection
 Proof.
   simpl. simpl in Ht.
   destruct l as (i, li).
-  unfold vtransition. simpl.
-  unfold composite_state_sub_projection at 1. simpl.
-  destruct (vtransition (IM i) li (s i, om)) as (si', omi') eqn: Hti.
+  cbn; unfold composite_state_sub_projection at 1; cbn.
+  destruct (transition (IM i) li (s i, om)) as (si', omi') eqn: Hti.
   inversion Ht. subst omi' s'. clear Ht.
   match goal with
   |- (let (_, _) := ?t in _) = _ =>
@@ -484,12 +483,12 @@ Proof.
   spec Hincl; [done |].
   match goal with
   |- context [pre_loaded_vlsm ?v _] =>
-    apply VLSM_incl_trans with (machine (pre_loaded_with_all_messages_vlsm v))
+    apply VLSM_incl_trans with (pre_loaded_with_all_messages_vlsm v)
   end; [| apply Hincl].
   clear Hincl.
   match goal with
   |- context [pre_loaded_with_all_messages_vlsm ?v] =>
-    apply VLSM_incl_trans with (machine (pre_loaded_vlsm v (fun m => True)))
+    apply VLSM_incl_trans with (pre_loaded_vlsm v (fun m => True))
   end.
   - match goal with
     |- context [pre_loaded_vlsm ?v _] =>
@@ -647,7 +646,7 @@ Proof.
 Qed.
 
 Lemma valid_state_sub_projection
-  (s : state)
+  (s : state (composite_type IM))
   (Hs : state_sub_item_input_is_seeded_or_sub_previously_sent s)
   (Hps : valid_state_prop X s)
   : valid_state_prop Xj (composite_state_sub_projection s).
@@ -737,11 +736,8 @@ Proof.
   revert Hv.
   destruct l as (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i.
-  simpl.
-  unfold vvalid. unfold lift_sub_state, lift_sub_state_to.
-  simpl.
-  subst. simpl.
-  unfold sub_IM in li. simpl in li.
+  cbn; unfold lift_sub_state, lift_sub_state_to; subst; cbn.
+  unfold sub_IM in li; cbn in li.
   case_decide as _Hi; [| done].
   by rewrite (sub_IM_state_pi s _Hi Hi); auto.
 Qed.
@@ -754,11 +750,8 @@ Proof.
   revert Ht.
   destruct l as (sub_i, li).
   destruct_dec_sig sub_i i Hi Heqsub_i.
-  simpl.
-  unfold vtransition. unfold lift_sub_state at 1. unfold lift_sub_state_to.
-  simpl.
-  subst. simpl.
-  unfold sub_IM in li. simpl in li.
+  cbn; unfold lift_sub_state at 1; unfold lift_sub_state_to; subst; cbn.
+  unfold sub_IM in li; simpl in li.
   case_decide as _Hi; [| done].
   rewrite (sub_IM_state_pi s _Hi Hi).
   clear _Hi; destruct (transition _ _) as (si', _om'); inversion_clear 1.
@@ -857,7 +850,7 @@ Proof.
   cbn in Ht |- *.
   unfold remove_equivocating_state_project.
   rewrite lift_sub_state_to_neq by done.
-  destruct (vtransition _ _ _) as (si', _om').
+  destruct (transition _ _ _) as (si', _om').
   inversion_clear Ht.
   f_equal; extensionality j.
   by destruct (decide (i = j)); subst; state_update_simpl.
@@ -873,7 +866,7 @@ Proof.
   simpl in Hl.
   case_decide; [| by congruence]. clear Hl.
   cbn in Ht.
-  destruct (vtransition _ _ _) as (si', _om').
+  destruct (transition _ _ _) as (si', _om').
   inversion_clear Ht.
   extensionality j.
   unfold remove_equivocating_state_project, lift_sub_state_to.
@@ -942,7 +935,7 @@ Lemma lift_sub_to_transition l s om s' om'
 Proof.
   destruct l as (i, li).
   destruct_dec_sig i j Hj Heq. subst i.
-  revert Ht. unfold vtransition. simpl. unfold vtransition. simpl.
+  revert Ht; cbn.
   rewrite lift_sub_state_to_eq with (Hi := Hj).
   destruct (transition _ _) as (si', _om').
   inversion_clear 1.
@@ -1003,7 +996,7 @@ Proof.
     eapply Hconstraint_consistency; [| done].
     by symmetry; apply composite_state_sub_projection_lift_to.
   - intros l s om s' om' [_ Ht]; revert Ht; cbn
-    ; destruct (vtransition _ _ _) as [si' _om']
+    ; destruct (transition _ _ _) as [si' _om']
     ; inversion_clear 1.
     f_equal; extensionality i.
     destruct l as [sub_j lj]
@@ -1111,7 +1104,7 @@ Lemma lift_sub_incl_valid l s om
 Proof.
   revert Hv.
   destruct l as (sub1_i, li); destruct_dec_sig sub1_i i Hi Heqsub1_i; subst; cbn.
-  unfold vvalid, lift_sub_incl_state; cbn.
+  unfold lift_sub_incl_state; cbn.
   unfold sub_IM in li; simpl in li.
   destruct (decide (sub_index_prop indices1 i)) as [H_i |]
   ; [| done].
@@ -1125,7 +1118,7 @@ Lemma lift_sub_incl_transition l s om s' om'
 Proof.
   revert Ht.
   destruct l as (sub1_i, li); destruct_dec_sig sub1_i i Hi Heqsub1_i; subst
-  ; cbn; unfold vtransition, lift_sub_incl_state at 1
+  ; cbn; unfold lift_sub_incl_state at 1
   ; cbn; unfold sub_IM in li; simpl in li.
   destruct (decide (sub_index_prop indices1 i)) as [H_i |]
   ; [| done].
@@ -1342,7 +1335,7 @@ Context
   .
 
 Lemma induced_sub_projection_valid_preservation constraint l s om
-  (Hv : vvalid (pre_induced_sub_projection IM indices constraint) l (s, om))
+  (Hv : valid (pre_induced_sub_projection IM indices constraint) l (s, om))
   : composite_valid sub_IM l (s, om).
 Proof.
   destruct Hv as ([i lXi] & sX & [Heql [=] (HsX & Hom & Hv & Hc)]).
@@ -1352,7 +1345,7 @@ Qed.
 
 Lemma induced_sub_projection_transition_preservation [constraint]
   : forall l s om s' om',
-  vtransition (pre_induced_sub_projection IM indices constraint) l (s, om) = (s', om') <->
+  transition (pre_induced_sub_projection IM indices constraint) l (s, om) = (s', om') <->
   composite_transition sub_IM l (s, om) = (s', om').
 Proof.
   intros.
@@ -1361,7 +1354,7 @@ Proof.
   subst.
   cbn. unfold sub_IM at 6. simpl.
   unfold lift_sub_state at 1. rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi).
-  destruct (vtransition _ _ _) as (si', _om').
+  destruct (transition _ _ _) as (si', _om').
   by split; inversion 1; subst; clear H; f_equal; extensionality sub_j
   ; destruct_dec_sig sub_j j Hj Heqsub_j
   ; subst sub_j
@@ -1376,7 +1369,7 @@ Qed.
 
 Lemma sub_IM_no_equivocation_preservation
   l s om
-  (Hv : vvalid (pre_induced_sub_projection IM indices sub_IM_not_equivocating_constraint)
+  (Hv : valid (pre_induced_sub_projection IM indices sub_IM_not_equivocating_constraint)
     l (s, om))
   : composite_no_equivocations_except_from sub_IM
       non_sub_index_authenticated_message l (s, om).
@@ -1457,7 +1450,7 @@ Proof.
   - intros [i li] *; cbn.
     unfold sub_IM, SubProjectionTraces.sub_IM at 2; cbn
     ; unfold composite_state_sub_projection at 1; cbn
-    ; destruct (vtransition _ _ _) as (si', _om')
+    ; destruct (transition _ _ _) as (si', _om')
     ; inversion_clear 1; f_equal.
     extensionality sub_j; destruct_dec_sig sub_j j Hj Heqj; subst sub_j
     ; unfold composite_state_sub_projection at 2; cbn.
@@ -1475,7 +1468,6 @@ Proof.
   apply basic_VLSM_strong_embedding.
   - by intros [i li] *; auto.
   - intros [i li] *
-    ; cbn; unfold vtransition
     ; cbn; unfold sub_IM, SubProjectionTraces.sub_IM at 2
     ; cbn; unfold composite_state_sub_projection at 1
     ; cbn; destruct (transition _ _) as (si', _om'); inversion_clear 1.
@@ -1497,11 +1489,11 @@ Proof.
     ; unfold free_sub_free_state, free_sub_free_index.
     by rewrite (sub_IM_state_pi s (free_sub_free_index_obligation_1 i) Hi).
   - intros [sub_i li] *; destruct_dec_sig sub_i i Hi Heqi; subst sub_i.
-    unfold vtransition; cbn
+    cbn
     ; unfold sub_IM at 2, SubProjectionTraces.sub_IM, free_sub_free_state at 1,
              free_sub_free_index; cbn
     ; rewrite (sub_IM_state_pi s (free_sub_free_index_obligation_1 i) Hi)
-    ; destruct (vtransition _ _ _) as (si', _om'); inversion_clear 1.
+    ; destruct (transition _ _ _) as (si', _om'); inversion_clear 1.
     f_equal; extensionality j; unfold free_sub_free_state at 2.
     unfold free_sub_free_index, sub_IM.
     by destruct (decide (i = j)); subst; state_update_simpl.
@@ -1527,15 +1519,15 @@ Context
   (Hj : j ∈ elements indices)
   .
 
-Definition sub_element_label (l : vlabel (IM j))
+Definition sub_element_label (l : label (IM j))
   : composite_label (sub_IM IM (elements indices)) :=
   existT (dexist j Hj) l.
 
-Definition sub_element_state (s : vstate (IM j)) sub_i
-  : vstate (sub_IM IM (elements indices) sub_i) :=
+Definition sub_element_state (s : state (IM j)) sub_i
+  : state (sub_IM IM (elements indices) sub_i) :=
   match (decide (` sub_i = j)) with
   | left e =>
-    eq_rect_r (fun j : index => vstate (IM j)) s e
+    eq_rect_r (fun j : index => state (IM j)) s e
   | right _ => ` (vs0 (IM (` sub_i)))
   end.
 
@@ -1570,7 +1562,7 @@ Proof.
     by rewrite sub_element_state_eq with (H_j := Hj).
   - intros l s om s' om'; cbn.
     rewrite sub_element_state_eq with (H_j := Hj).
-    intro Ht; replace (vtransition _ _ _) with (s', om'); f_equal.
+    intro Ht; replace (transition _ _ _) with (s', om'); f_equal.
     extensionality sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     by destruct (decide (i = j)); subst; state_update_simpl.
@@ -1613,15 +1605,15 @@ Qed.
 
 Definition sub_label_element_project
   (l : composite_label (sub_IM IM (elements indices)))
-  : option (vlabel (IM j)) :=
+  : option (label (IM j)) :=
   match decide (j = ` (projT1 l)) with
-  | left e => Some (eq_rect_r (fun j => vlabel (IM j)) (projT2 l) e)
+  | left e => Some (eq_rect_r (fun j => label (IM j)) (projT2 l) e)
   | right _ => None
   end.
 
 Definition sub_state_element_project
   (s : composite_state (sub_IM IM (elements indices)))
-  : vstate (IM j) := s (dexist j Hj).
+  : state (IM j) := s (dexist j Hj).
 
 Lemma sub_transition_element_project_None
   : forall lX, sub_label_element_project lX = None ->
@@ -1632,7 +1624,7 @@ Proof.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
   unfold sub_label_element_project in HlX; cbn in HlX, HtX.
   case_decide as Hij; [by congruence |].
-  destruct (vtransition _ _ _) as (si', _om').
+  destruct (transition _ _ _) as (si', _om').
   inversion_clear HtX.
   unfold sub_state_element_project.
   by state_update_simpl.
@@ -1675,14 +1667,14 @@ Proof.
   intros sX1 sX2 Hsjeq iom.
   rewrite (sub_IM_state_pi sX1 Hj1 Hj), (sub_IM_state_pi sX2 Hj2 Hj), <- Hsjeq
   ; unfold sub_IM at 3 13; cbn
-  ; destruct (vtransition _ _ _) as (si', om').
+  ; destruct (transition _ _ _) as (si', om').
   do 2 inversion_clear 1.
   by state_update_simpl.
 Qed.
 
 Definition induced_sub_element_projection constraint : VLSM message :=
   projection_induced_validator
-    (pre_induced_sub_projection IM (elements indices) constraint) (type (IM j))
+    (pre_induced_sub_projection IM (elements indices) constraint) (IM j)
     sub_label_element_project sub_state_element_project
     sub_element_label sub_element_state.
 
@@ -1844,7 +1836,7 @@ Context
 Lemma sub_no_indices_no_can_emit (P : message -> Prop)
   : forall m, ~ can_emit (pre_loaded_vlsm (free_composite_vlsm sub_IM) P) m.
 Proof.
-  apply pre_loaded_empty_composition_no_emit, elem_of_empty_nil.
+  apply pre_loaded_empty_composition_no_emit, elem_of_nil_inv.
   by intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; inversion Hi.
 Qed.
 
@@ -1877,7 +1869,7 @@ Definition update_IM
 Context
   (replacement_IM : sub_index (elements selection) -> VLSM message)
   (updated_IM := update_IM replacement_IM)
-  (selection_complement : Ci := set_diff (list_to_set (enum index)) selection)
+  (selection_complement : Ci := list_to_set (enum index) ∖ selection)
   .
 
 #[export] Instance update_IM_complement_Hbs
@@ -1890,7 +1882,7 @@ Proof.
   case_decide as Hi; [| typeclasses eauto].
   contradict Hi.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst sub_i; simpl.
-  apply elem_of_elements, set_diff_elim2 in Hi.
+  apply elem_of_elements, elem_of_difference in Hi as [_ Hi].
   by rewrite elem_of_elements.
 Qed.
 

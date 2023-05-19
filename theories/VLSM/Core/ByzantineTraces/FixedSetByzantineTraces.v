@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality.
-From VLSM.Lib Require Import Preamble StdppListFinSet.
+From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM MessageDependencies ProjectionTraces VLSMProjections.
 From VLSM.Core Require Import Composition SubProjectionTraces ByzantineTraces.
 From VLSM.Core Require Import Validator Equivocation EquivocationProjections.
@@ -45,8 +45,8 @@ Context
 
 (** The [valid]ity predicate allows sending only signed messages *)
 Definition signed_messages_valid
-  (l : @label message all_messages_type)
-  (som : @state message all_messages_type * option message)
+  (l : label (@all_messages_type message))
+  (som : state (@all_messages_type message) * option message)
   : Prop :=
   channel_authenticated_message A sender node_idx l.
 
@@ -93,7 +93,7 @@ Definition fixed_byzantine_IM : index -> VLSM message :=
   update_IM IM byzantine (fun i => emit_any_signed_message_vlsm A sender (` i)).
 
 Lemma fixed_byzantine_IM_no_initial_messages
-  : forall i m, ~ vinitial_message_prop (fixed_byzantine_IM i) m.
+  : forall i m, ~ initial_message_prop (fixed_byzantine_IM i) m.
 Proof.
   unfold fixed_byzantine_IM, update_IM. simpl.
   intros i m Hm.
@@ -165,7 +165,7 @@ Definition fixed_non_byzantine_projection : VLSM message :=
     non_byzantine_not_equivocating_constraint.
 
 Lemma fixed_non_byzantine_projection_initial_state_preservation
-  : forall s, vinitial_state_prop fixed_non_byzantine_projection s <->
+  : forall s, initial_state_prop fixed_non_byzantine_projection s <->
     composite_initial_state_prop (sub_IM fixed_byzantine_IM (elements non_byzantine)) s.
 Proof.
   split.
@@ -280,7 +280,7 @@ Proof.
   subst.
   unfold sub_IM, fixed_byzantine_IM, update_IM.
   simpl.
-  apply elem_of_elements, set_diff_elim2 in Hi.
+  apply elem_of_elements, elem_of_difference in Hi as [_ Hi].
   by rewrite decide_False; [| rewrite elem_of_elements].
 Qed.
 
@@ -328,7 +328,7 @@ Qed.
   the constraint of [pre_loaded_fixed_non_byzantine_vlsm'].
 *)
 Lemma fixed_non_byzantine_projection_valid_no_equivocations
-  : forall l s om, vvalid fixed_non_byzantine_projection l (s, om) ->
+  : forall l s om, valid fixed_non_byzantine_projection l (s, om) ->
     composite_no_equivocations_except_from
       (sub_IM fixed_byzantine_IM (elements non_byzantine))
       fixed_set_signed_message
@@ -350,7 +350,7 @@ Proof.
   split; [by apply elem_of_elements in Hi |].
   revert li si Hv.
   unfold fixed_byzantine_IM, update_IM. simpl.
-  apply elem_of_elements, set_diff_elim2 in Hi.
+  apply elem_of_elements, elem_of_difference in Hi as [_ Hi].
   by rewrite decide_False; [intros; exists li, si | rewrite elem_of_elements].
 Qed.
 
@@ -426,8 +426,7 @@ Proof.
     }
     specialize (valid_generated_state_message X _ _ Hs0 _ _ Hs0) as Hgen.
     unfold non_byzantine in Hi.
-    pose proof (Hdec := elem_of_dec_slow (H6 := H6)).
-    rewrite elem_of_elements in Hi; setoid_rewrite set_diff_iff in Hi.
+    rewrite elem_of_elements, elem_of_difference in Hi.
     apply not_and_r in Hi as [Hi | Hi];
       [by elim Hi; apply elem_of_list_to_set, elem_of_enum |].
     apply dec_stable in Hi.
@@ -438,7 +437,7 @@ Proof.
       by rewrite @decide_True.
     }
     cbn in Hgen.
-    destruct (vtransition _ _ _) as (si', _om) eqn: Ht.
+    destruct (transition _ _ _) as (si', _om) eqn: Ht.
     specialize (Hgen _ _ eq_refl).
     replace _om with (Some m) in Hgen; [by eexists |].
     clear -Ht.
@@ -573,7 +572,7 @@ Proof.
     revert Hs.
     apply valid_state_project_preloaded_to_preloaded.
   }
-  apply elem_of_elements, set_diff_elim2 in HAv.
+  apply elem_of_elements, elem_of_difference in HAv as [_ HAv].
   destruct Hstrong_v as [(i & Hi & Hsent) | Hemitted].
   - apply valid_state_has_trace in Hs as (is & tr & Htr).
     by eapply has_been_sent_iff_by_sender; [| | | exists i].
@@ -602,7 +601,7 @@ Proof.
     apply (VLSM_incl_input_valid fixed_non_equivocating_incl_sub_non_equivocating)
        in Hv as (_ & _ & Hv).
     split.
-    + by eapply induced_sub_projection_valid_preservation.
+    + by eapply induced_sub_projection_valid_preservation in Hv.
     + split; [| done].
       apply sub_IM_no_equivocation_preservation in Hv as Hnoequiv; [| done..].
       destruct om as [m |]; [| done].
@@ -681,8 +680,7 @@ Proof.
       rewrite Hsigned in Heq_v. subst _v.
       eapply message_dependencies_are_sufficient in Hiom.
       revert Hiom.
-      rewrite elem_of_elements in Hi; setoid_rewrite set_diff_iff in Hi.
-      pose proof (Hdec := elem_of_dec_slow (C := Ci)).
+      rewrite elem_of_elements, elem_of_difference in Hi.
       apply not_and_r in Hi as [Hi | Hi];
         [by elim Hi; apply elem_of_list_to_set; apply elem_of_enum |].
       apply dec_stable in Hi.
@@ -789,7 +787,7 @@ Proof.
     apply initial_message_is_valid.
     by exists i, (exist _ m Him).
   - destruct Hseeded as [Hsigned [i [Hi [li [si Hpre_valid]]]]].
-    apply set_diff_elim2 in Hi.
+    apply elem_of_difference in Hi as [_ Hi].
     by eapply Hvalidator.
 Qed.
 

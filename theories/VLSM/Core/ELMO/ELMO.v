@@ -129,12 +129,12 @@ Lemma full_node_VLSM_reachable
   (V := mk_vlsm VM)
   (VM_transition_is_UMO :
     forall (l : Label) (s : State) (om : option Message),
-      vtransition V l (s, om) = UMOComponent_transition l s om)
+      transition V l (s, om) = UMOComponent_transition l s om)
   (VM_init_empty :
-    forall s : State, vinitial_state_prop V s -> obs s = [])
+    forall s : State, initial_state_prop V s -> obs s = [])
   (VM_enforces_full_node :
     forall (l : Label) (s : State) (m : Message),
-      vvalid V l (s, Some m) -> full_node s m) :
+      valid V l (s, Some m) -> full_node s m) :
   forall (s : State),
     ram_state_prop V s ->
     UMO_reachable full_node s.
@@ -367,7 +367,7 @@ Proof.
     + by cbn; split; inversion 1; [| constructor].
   - apply Morphisms_Prop.and_iff_morphism.
     + by split; apply UMO_reachable_impl; inversion 1; subst; [| constructor].
-    + by firstorder.
+    + by cbn; firstorder.
 Qed.
 
 Lemma ELMOComponent_message_dependencies_full_node_condition :
@@ -416,7 +416,7 @@ Qed.
 Lemma ELMO_transition_output_not_initial :
   forall l (s : State) (om : option Message) (s' : State) (om' : option Message),
     input_valid_transition Ri l (s, om) (s', om') ->
-    ~ vinitial_state_prop Ri s'.
+    ~ initial_state_prop Ri s'.
 Proof.
   intros l s om [ol a] om' [(_ & _ & Hv) Ht]; compute; intros [-> _].
   by inversion Hv; subst; inversion Ht.
@@ -644,7 +644,7 @@ Proof.
 Qed.
 
 Lemma local_equivocators_full_nondecreasing (s : State) l om s' om' :
-  vtransition Ri l (s, om) = (s', om') ->
+  transition Ri l (s, om) = (s', om') ->
   (forall a, local_equivocators_full s a ->
              local_equivocators_full s' a).
 Proof.
@@ -652,7 +652,7 @@ Proof.
 Qed.
 
 Lemma local_equivocators_full_increase_only_received_adr (s : State) m s' om' :
-  vtransition Ri Receive (s, Some m) = (s', om') ->
+  transition Ri Receive (s, Some m) = (s', om') ->
   forall a, local_equivocators_full s' a ->
             local_equivocators_full s a \/ a = adr (state m).
 Proof.
@@ -1175,21 +1175,21 @@ Context
   .
 
 Definition ELMOComponent_state_destructor (s : State)
-  : list (@transition_item Message ELMOComponentType * State) :=
+  : list (transition_item ELMOComponentType * State) :=
   let adr := adr s in
 match obs s with
 | [] => []
 | MkObservation Send msg as ob :: obs =>
     let source := MkState obs adr in
-      [(Build_transition_item Send None s (Some msg), source)]
+      [(@Build_transition_item _ ELMOComponentType Send None s (Some msg), source)]
 | MkObservation Receive msg as ob :: obs =>
     let source := MkState obs adr in
-      [(Build_transition_item Receive (Some msg) s None, source)]
+      [(@Build_transition_item _ ELMOComponentType Receive (Some msg) s None, source)]
 end.
 
 Lemma ELMOComponent_state_destructor_initial :
-  forall (s' : vstate Ei), ram_state_prop Ei s' ->
-    vinitial_state_prop Ei s' <-> ELMOComponent_state_destructor s' = [].
+  forall (s' : VLSM.state Ei), ram_state_prop Ei s' ->
+    initial_state_prop Ei s' <-> ELMOComponent_state_destructor s' = [].
 Proof.
   intros s' Hs'; split; intro Hs''.
   - by cbn in Hs''; apply UMOComponent_initial_state_spec in Hs'' as ->.
@@ -1198,8 +1198,8 @@ Proof.
 Qed.
 
 Lemma ELMOComponent_state_destructor_input_valid_transition :
-  forall (s' : vstate Ei), ram_state_prop Ei s' ->
-  forall (s : vstate Ei) (item : vtransition_item Ei),
+  forall (s' : VLSM.state Ei), ram_state_prop Ei s' ->
+  forall (s : VLSM.state Ei) (item : transition_item Ei),
     (item, s) ∈ ELMOComponent_state_destructor s' ->
     input_valid_transition_item Ri s item.
 Proof.
@@ -1584,7 +1584,7 @@ Qed.
 *)
 
 Lemma ELMO_global_equivocators_iff_simple :
-  forall (s : vstate ELMOProtocol) (a : Address),
+  forall (s : VLSM.state ELMOProtocol) (a : Address),
     composite_ram_state_prop ELMOComponent s ->
       ELMO_global_equivocators s a <-> global_equivocators_simple s a.
 Proof.
@@ -1611,7 +1611,7 @@ Qed.
    of the generic definition [full_node_is_globally_equivocating].
 *)
 Lemma global_equivocators_simple_iff_full_node_equivocation :
-  forall (s : vstate ELMOProtocol) (a : Address),
+  forall (s : VLSM.state ELMOProtocol) (a : Address),
     full_node_is_globally_equivocating ELMOComponent Message_sender s a
     <->
     global_equivocators_simple s a.
@@ -1636,7 +1636,7 @@ Qed.
   It might be possible to use something weaker than [UMO_reachable full_node]
   to prove
   [CompositeHasBeenObserved ELMOComponent (elements ∘ Message_dependencies) s m
-  <-> exists (k : index) (l : label), rec_obs (s k) (MkObservation l m)]
+  <-> exists (k : index) (l : label _), rec_obs (s k) (MkObservation l m)]
   but [CompositeHasBeenObserved] can recurse into sent or received messages
   and [rec_obs] only into received messages so we need some deep structural
   assumption about what [Send] observations are allowed, even recursively
@@ -1663,14 +1663,14 @@ Proof.
 Qed.
 
 Lemma ELMO_global_equivocators_iff_msg_dep_equivocation :
-  forall (s : vstate ELMOProtocol) (a : Address),
+  forall (s : VLSM.state ELMOProtocol) (a : Address),
     composite_ram_state_prop ELMOComponent s ->
   ELMO_global_equivocators s a
     <->
   msg_dep_is_globally_equivocating ELMOComponent
     Message_dependencies Message_sender s a.
 Proof.
-  intros s a Hs.
+  cbn; intros s a Hs.
   apply Morphisms_Prop.ex_iff_morphism; intro m.
   assert (forall k : index, UMO_reachable full_node (s k))
     by (intro; eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded; done).
@@ -1681,7 +1681,7 @@ Proof.
 Qed.
 
 Lemma ELMO_global_equivocators_iff_simple_by_generic :
-  forall (s : vstate ELMOProtocol) (a : Address),
+  forall (s : VLSM.state ELMOProtocol) (a : Address),
     composite_ram_state_prop ELMOComponent s ->
       ELMO_global_equivocators s a <-> global_equivocators_simple s a.
 Proof.
@@ -1753,8 +1753,8 @@ Proof.
   {
     apply Forall_forall; intros item Hitem m Hobs.
     eapply directly_observed_valid; [done |].
-    unshelve eapply EquivocationProjections.VLSM_incl_has_been_directly_observed_reflect; cycle 3;
-      [by apply preloaded_constraint_free_incl | .. | by typeclasses eauto | by typeclasses eauto].
+    eapply EquivocationProjections.VLSM_incl_has_been_directly_observed_reflect;
+      [by apply preloaded_constraint_free_incl | |].
     - by generalize Hs; apply VLSM_incl_valid_state, vlsm_incl_pre_loaded_with_all_messages_vlsm.
     - eapply has_been_directly_observed_examine_one_trace; [done |].
       by apply Exists_exists; eexists; cbn; eauto.
@@ -1783,11 +1783,11 @@ Qed.
   input or a non-empty output, the distinction being made by the label.
 *)
 Inductive ELMOProtocolValidTransition
-  : index -> Label -> vstate ELMOProtocol -> vstate ELMOProtocol -> Message -> Prop :=
-| ep_valid_receive : forall (i : index) (s1 s2 : vstate ELMOProtocol) (m : Message),
+  : index -> Label -> VLSM.state ELMOProtocol -> VLSM.state ELMOProtocol -> Message -> Prop :=
+| ep_valid_receive : forall (i : index) (s1 s2 : VLSM.state ELMOProtocol) (m : Message),
     ValidTransition ELMOProtocol (existT i Receive) s1 (Some m) s2 None ->
     ELMOProtocolValidTransition i Receive s1 s2 m
-| ep_valid_send : forall (i : index) (s1 s2 : vstate ELMOProtocol) (m : Message),
+| ep_valid_send : forall (i : index) (s1 s2 : VLSM.state ELMOProtocol) (m : Message),
     ValidTransition ELMOProtocol (existT i Send) s1 None s2 (Some m) ->
     ELMOProtocolValidTransition i Send s1 s2 m.
 
@@ -1998,7 +1998,7 @@ Lemma ELMO_update_state_with_initial
   (i : index)
   (Heqv : (sum_weights (ELMO_equivocating_validators s ∪ {[ idx i ]}) <= threshold)%R)
   (si : State)
-  (Hsi : vinitial_state_prop (ELMOComponent i) si) :
+  (Hsi : initial_state_prop (ELMOComponent i) si) :
     valid_state_prop ELMOProtocol (state_update ELMOComponent s i si) /\
     ELMO_equivocating_validators (state_update ELMOComponent s i si)
       ⊆
@@ -2105,9 +2105,9 @@ Proof.
 Qed.
 
 Lemma ELMO_valid_states_only_receive_valid_messages :
-  forall s : vstate ELMOProtocol,
+  forall s : VLSM.state ELMOProtocol,
     valid_state_prop ELMOProtocol s ->
-  forall (i : index) (l : Label) (s' : vstate ELMOProtocol) (m : Message),
+  forall (i : index) (l : Label) (s' : VLSM.state ELMOProtocol) (m : Message),
     ELMOProtocolValidTransition i l s s' m ->
     valid_message_prop ELMOProtocol m.
 Proof.
@@ -2166,7 +2166,7 @@ Proof.
       subst; apply ELMO_global_equivocators_iff_simple, Hs'_eqv; [done |].
       by right; apply ELMO_global_equivocators_iff_simple.
   }
-  assert (His : vinitial_state_prop (ELMOComponent i_m) (MkState [] (idx i_m))) by done.
+  assert (His : initial_state_prop (ELMOComponent i_m) (MkState [] (idx i_m))) by done.
   destruct (ELMO_update_state_with_initial _ Hs _ Heqv _ His) as [Hsimis Hsimis_eqvs].
   eapply valid_state_project_preloaded with (i := i) in Hs as Hsi_pre.
   replace m with (MkMessage (state m)) in Hrcv by (destruct m; done).
@@ -2393,24 +2393,26 @@ Definition latest_observation_Send (s : State) : Prop :=
   exists (s' : State) (m : Message),
     s = s' <+> MkObservation Send m.
 
-Definition component_reflects_composite_messages (s : vstate ELMOProtocol) (i : index) : Prop :=
-  forall m : Message, (exists j, m ∈ messages (s j)) <-> m ∈ messages (s i).
+Definition component_reflects_composite_messages
+  (s : VLSM.state ELMOProtocol) (i : index) : Prop :=
+    forall m : Message, (exists j, m ∈ messages (s j)) <-> m ∈ messages (s i).
 
-Definition component_reflects_composite_equivocators (s : vstate ELMOProtocol) (i : index) : Prop :=
-  forall a : Address, global_equivocators_simple s a <-> local_equivocators_full (s i) a.
+Definition component_reflects_composite_equivocators
+  (s : VLSM.state ELMOProtocol) (i : index) : Prop :=
+    forall a : Address, global_equivocators_simple s a <-> local_equivocators_full (s i) a.
 
-Record component_reflects_composite (s : vstate ELMOProtocol) (i : index) : Prop :=
+Record component_reflects_composite (s : VLSM.state ELMOProtocol) (i : index) : Prop :=
 {
   component_sees_messages : component_reflects_composite_messages s i;
   component_sees_equivocators : component_reflects_composite_equivocators s i;
 }.
 
 Definition other_components_after_send
-  (P_allowed : index -> Prop) (s : vstate ELMOProtocol) : Prop :=
+  (P_allowed : index -> Prop) (s : VLSM.state ELMOProtocol) : Prop :=
     forall i : index, ~ P_allowed i -> latest_observation_Send (s i).
 
 Lemma non_equivocating_received_message_continues_trace
-  (i : index) (si si' : vstate (ELMOComponent i))
+  (i : index) (si si' : VLSM.state (ELMOComponent i))
   (m : Message)
   (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (ELMOComponent i))
     Receive (si, Some m) (si', None))
@@ -2482,7 +2484,7 @@ Proof.
 Qed.
 
 Lemma all_intermediary_transitions_are_receive
-  (i : index) (si si' : vstate (ELMOComponent i))
+  (i : index) (si si' : VLSM.state (ELMOComponent i))
   (m : Message)
   (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (ELMOComponent i))
     Receive (si, Some m) (si', None))
@@ -2498,7 +2500,7 @@ Lemma all_intermediary_transitions_are_receive
   (Htr_m : finite_valid_trace_from_to
           (pre_loaded_with_all_messages_vlsm (ELMOComponent i_m))
           (sigma i_m) (state m) tr_m)
-  : Forall (fun item : transition_item => l item = Receive) tr_m.
+  : Forall (fun item : transition_item ELMOComponentType => l item = Receive) tr_m.
 Proof.
   apply Forall_forall; intros item Hitem.
   eapply ELMOComponent_elem_of_ram_trace in Hitem as H_item;
@@ -2548,7 +2550,7 @@ Lemma lift_receive_trace
   (Htr_m :
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (ELMOComponent i_m))
       (sigma i_m) (state m) tr_m)
-  (Htr_m_receive : Forall (fun item : transition_item => l item = Receive) tr_m)
+  (Htr_m_receive : Forall (fun item : transition_item ELMOComponentType => l item = Receive) tr_m)
   (Htr_m_inputs_in_sigma :
     forall (item : transition_item) (msg : Message),
       item ∈ tr_m -> input item = Some msg ->
@@ -2628,7 +2630,7 @@ Proof.
 Qed.
 
 Lemma special_receivable_messages_emittable_in_future
-  (i : index) (si si' : vstate (ELMOComponent i))
+  (i : index) (si si' : VLSM.state (ELMOComponent i))
   (m : Message)
   (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (ELMOComponent i))
     Receive (si, Some m) (si', None))
@@ -2643,7 +2645,7 @@ Lemma special_receivable_messages_emittable_in_future
   (Hspecial : component_reflects_composite sigma i)
   (H_not_i_paused : other_components_after_send (fun j : index => j = i) sigma)
   (Hm_not_sent_yet : ~ composite_has_been_sent ELMOComponent sigma m) :
-    exists sigma' : vstate ELMOProtocol,
+    exists sigma' : VLSM.state ELMOProtocol,
       in_futures ELMOProtocol sigma sigma' /\
       sigma' i = si /\
       component_reflects_composite sigma' i /\
@@ -2654,7 +2656,8 @@ Proof.
   assert (Hai_m : adr (sigma i_m) = idx i_m)
     by (apply ELMO_reachable_adr; eapply valid_state_project_preloaded; done).
   edestruct non_equivocating_received_message_continues_trace as [tr_m Htr_m]; [done.. |].
-  assert (Htr_m_receive : Forall (fun item => l item = Receive) tr_m).
+  assert (Htr_m_receive :
+    Forall (fun item : transition_item ELMOComponentType => l item = Receive) tr_m).
   {
     eapply all_intermediary_transitions_are_receive.
     1-4, 6-8: done.
@@ -2803,9 +2806,9 @@ Qed.
   conditions of the previous lemma.
 *)
 Lemma reflecting_composite_for_reachable_component
-  (i : index) (si : vstate (ELMOComponent i))
+  (i : index) (si : VLSM.state (ELMOComponent i))
   (Hreachable : ram_state_prop (ELMOComponent i) si) :
-  exists s : vstate ELMOProtocol,
+  exists s : VLSM.state ELMOProtocol,
     s i = si
     /\ valid_state_prop ELMOProtocol s
     /\ component_reflects_composite s i
@@ -3015,7 +3018,8 @@ Proof.
   intros i li si om Hvti.
   apply input_valid_transition_iff in Hvti as [[si' om'] Hvti].
   pose (Hvti' := Hvti); destruct Hvti' as [(_ & _ & Hvi) Hti].
-  apply input_valid_transition_destination in Hvti as Hsi'.
+  assert (Hsi' : valid_state_prop (pre_loaded_with_all_messages_vlsm (ELMOComponent i)) si')
+    by (eapply input_valid_transition_destination; done).
   apply reflecting_composite_for_reachable_component in Hsi'
     as (s' & <- & Hs' & _ & _ & Htransitions).
   specialize (Htransitions si li).

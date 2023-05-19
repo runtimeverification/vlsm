@@ -52,7 +52,7 @@ Proof.
   ; (destruct (equivocator_state_project s n) as [sn |] eqn: Hn; [| done])
   ;  rewrite (equivocator_state_append_project_2 _ base_s s _ n eq_refl)
   ;  rewrite Hn
-  ;  destruct (vtransition _ _ _) as (sn', _om') eqn: Hti
+  ;  destruct (transition _ _ _) as (sn', _om') eqn: Hti
   ;  inversion_clear Ht; f_equal.
   - by apply equivocator_state_append_update_commute.
   - by apply equivocator_state_append_extend_commute.
@@ -63,12 +63,12 @@ Lemma equivocator_state_append_initial_state_in_futures
     (base_s : equivocator_state X)
     (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
     s
-    : vinitial_state_prop (equivocator_vlsm X) s ->
+    : initial_state_prop (equivocator_vlsm X) s ->
       in_futures (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s
         (equivocator_state_append base_s s).
 Proof.
   exists
-    [(@Build_transition_item _ (type (equivocator_vlsm X))
+    [(@Build_transition_item _ (equivocator_vlsm X)
       (Spawn (equivocator_state_zero s))
       None
       (equivocator_state_append base_s s)
@@ -87,7 +87,7 @@ Lemma equivocator_state_append_transition_initial_state
     (base_s : equivocator_state X)
     (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
     s
-    : vinitial_state_prop (equivocator_vlsm X) s ->
+    : initial_state_prop (equivocator_vlsm X) s ->
       valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed)
         (equivocator_state_append base_s s).
 Proof.

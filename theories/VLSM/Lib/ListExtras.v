@@ -5,21 +5,6 @@ From VLSM.Lib Require Import Preamble.
 
 (** * Utility lemmas about lists *)
 
-(** A list is empty if it has no members. *)
-Lemma empty_nil [X : Type] (l : list X) :
-  (forall v, ~ In v l) -> l = [].
-Proof.
-  clear.
-  destruct l as [| a]; cbn; [done |].
-  by intro H; elim (H a); left.
-Qed.
-
-(** It is decidable whether a list is null or not. *)
-#[export] Instance null_dec {S} (l : list S) : Decision (l = []).
-Proof.
-  by destruct l; [left | right].
-Qed.
-
 (**
   A list is either null or it can be decomposed into an initial prefix
   and a last element.
@@ -27,9 +12,9 @@ Qed.
 Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a :: nil)}} + {l = nil} .
 Proof.
-  destruct (null_dec l).
+  destruct l.
   - by right.
-  - by left; apply exists_last in n.
+  - by left; apply exists_last.
 Qed.
 
 (**
@@ -111,22 +96,17 @@ Proof.
   by destruct l; [| inversion Herr; apply unroll_last].
 Qed.
 
-Lemma incl_empty : forall A (l : list A),
-  incl l nil -> l = nil.
+Lemma incl_singleton {A} :
+  forall (l : list A) (a : A),
+    l ⊆ [a] -> forall b : A, b ∈ l -> b = a.
 Proof.
-  intros A [] H; [done |].
-  by destruct (H a); left.
-Qed.
-
-Lemma incl_singleton {A} : forall (l : list A) (a : A),
-  incl l [a] ->
-  forall b, In b l -> b = a.
-Proof.
-  intros. induction l; inversion H0; subst.
-  - by destruct (H b); [left | done | inversion H1].
-  - apply IHl; [| done].
-    apply incl_tran with (a0 :: l); [| done].
-    by apply incl_tl, incl_refl.
+  intros l a Hsub b Hin.
+  induction l as [| h t]; inversion Hin; subst.
+  - specialize (Hsub _ Hin).
+    by apply elem_of_list_singleton in Hsub.
+  - apply IHt; [| done].
+    rewrite <- Hsub.
+    by apply list_subseteq_cons.
 Qed.
 
 Lemma Exists_first
@@ -160,56 +140,16 @@ Lemma in_not_in : forall A (x y : A) (l : list A),
   x <> y.
 Proof. by itauto congruence. Qed.
 
-Definition inb {A} (Aeq_dec : forall x y : A, {x = y} + {x <> y}) (x : A) (xs : list A) :=
-  if in_dec Aeq_dec x xs then true else false.
-
-Lemma in_correct `{EqDecision X} :
-  forall (l : list X) (x : X),
-    In x l <-> inb decide_eq x l = true.
+Lemma map_list_subseteq {A B} (f : A -> B) :
+  forall l1 l2 : list A,
+    l1 ⊆ l2 -> map f l1 ⊆ map f l2.
 Proof.
-  intros s msg.
-  unfold inb.
-  by destruct (in_dec _ _ _); itauto congruence.
-Qed.
-
-Lemma in_correct_refl `{EqDecision X} :
-  forall (l : list X) (x : X),
-    In x l <-> inb decide_eq x l.
-Proof.
-  intros s msg.
-  by rewrite in_correct, Is_true_iff_eq_true.
-Qed.
-
-Lemma in_correct' `{EqDecision X} :
-  forall (l : list X) (x : X),
-    ~ In x l <-> inb decide_eq x l = false.
-Proof.
-  intros s msg.
-  by rewrite in_correct, not_true_iff_false.
-Qed.
-
-Definition inclb
-  `{EqDecision A}
-  (l1 l2 : list A)
-  : bool
-  := forallb (fun x : A => inb decide_eq x l2) l1.
-
-Lemma incl_correct `{EqDecision A}
-  (l1 l2 : list A)
-  : incl l1 l2 <-> inclb l1 l2 = true.
-Proof.
-  unfold inclb.
-  rewrite forallb_forall.
-  by split; intros Hincl x Hx; apply in_correct; apply Hincl.
-Qed.
-
-Lemma map_incl {A B} (f : B -> A) : forall s s',
-  incl s s' ->
-  incl (map f s) (map f s').
-Proof.
-  intros s s' Hincl fx Hin.
-  apply in_map_iff .
-  by apply in_map_iff in Hin as (x & Heq & Hin); eauto.
+  unfold subseteq, list_subseteq.
+  intros l1 l2 Hsub b Hin.
+  rewrite elem_of_list_fmap in Hin |- *.
+  destruct Hin as (x & -> & Hin').
+  exists x.
+  by split; [| apply Hsub].
 Qed.
 
 Definition app_cons {A}
@@ -246,48 +186,6 @@ Lemma last_error_is_last {A} : forall (l : list A) (x : A),
 Proof.
   destruct l; cbn; [done |].
   by intros; rewrite last_is_last.
-Qed.
-
-(** Polymorphic list library *)
-
-Fixpoint is_member {W} `{StrictlyComparable W} (w : W) (l : list W) : bool :=
-  match l with
-  | [] => false
-  | hd :: tl => match compare w hd with
-              | Eq => true
-              | _ => is_member w tl
-              end
-  end.
-
-Definition compareb {A} `{StrictlyComparable A} (a1 a2 : A) : bool :=
-  match compare a1 a2 with
-  | Eq => true
-  | _ => false
-  end.
-
-Lemma is_member_correct {W} `{StrictlyComparable W}
-  : forall l (w : W), is_member w l = true <-> In w l.
-Proof.
-  intros l w.
-  induction l as [| hd tl IHl]; cbn.
-  - by itauto congruence.
-  - rewrite compare_asymmetric, <- compare_eq.
-    by destruct (compare hd w) eqn: Hcmp; cbn; itauto congruence.
-Qed.
-
-Lemma is_member_correct' {W} `{StrictlyComparable W}
-  : forall l (w : W), is_member w l = false <-> ~ In w l.
-Proof.
-  intros.
-  rewrite <- is_member_correct.
-  split; [by congruence |].
-  by apply not_true_is_false.
-Qed.
-
-Lemma In_app_comm {X} : forall l1 l2 (x : X), In x (l1 ++ l2) <-> In x (l2 ++ l1).
-Proof.
-  by intros l1 l2 x; split; intro H_in;
-    apply in_or_app; apply in_app_or in H_in as [cat | dog]; itauto.
 Qed.
 
 Lemma nth_error_last
@@ -457,40 +355,13 @@ Proof.
   by apply list_prefix_prefix.
 Qed.
 
-Definition Forall_hd
-  {A : Type}
-  {P : A -> Prop}
-  {a : A}
-  {l : list A}
-  (Hs : Forall P (a :: l))
-  : P a.
-Proof.
-  by inversion Hs.
-Defined.
-
-Definition Forall_tl
-  {A : Type}
-  {P : A -> Prop}
-  {a : A}
-  {l : list A}
-  (Hs : Forall P (a :: l))
-  : Forall P l.
-Proof.
-  by inversion Hs.
-Defined.
-
 Fixpoint list_annotate
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  : list (dsig P).
-Proof.
-  destruct l as [| a l].
-  - by exact [].
-  - by exact ((dexist a (Forall_hd Hs)) :: list_annotate A P Pdec l (Forall_tl Hs)).
-Defined.
+  {A : Type} (P : A -> Prop) {Pdec : forall a, Decision (P a)}
+  (l : list A) : Forall P l -> list (dsig P) :=
+match l with
+| [] => fun _ => []
+| h :: t => fun Hs => dexist h (Forall_inv Hs) :: list_annotate P t (Forall_inv_tail Hs)
+end.
 
 Lemma list_annotate_length
   {A : Type}
@@ -536,16 +407,6 @@ Proof.
   by subst.
 Qed.
 
-Lemma list_annotate_unroll
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (a : A)
-  (l : list A)
-  (Hs : Forall P (a :: l))
-  : list_annotate P (a :: l) Hs = dexist a (Forall_hd Hs) ::  list_annotate P l (Forall_tl Hs).
-Proof. done. Qed.
-
 Lemma list_annotate_app
   {A : Type}
   (P : A -> Prop)
@@ -575,10 +436,10 @@ Proof.
   generalize dependent l.
   induction n; intros [| a l] Hs.
   - by exists None.
-  - inversion Hs; subst. exists (Some (dexist a (Forall_hd Hs))).
-    by rewrite list_annotate_unroll.
+  - inversion Hs; subst.
+    by exists (Some (dexist a (Forall_inv Hs))).
   - by exists None.
-  - by rewrite list_annotate_unroll; eauto.
+  - by cbn; eauto.
 Qed.
 
 Fixpoint nth_error_filter_index
@@ -637,34 +498,41 @@ Proof.
     by specialize (IHl n0 eq_refl n3 eq_refl); lia.
 Qed.
 
-Fixpoint Forall_filter
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a : A, Decision (P a)}
-  (l : list A) : Forall P (filter P l).
+Lemma Forall_filter :
+  forall {A : Type} (P : A -> Prop) {Pdec : forall a : A, Decision (P a)} (l : list A),
+    Forall P (filter P l).
 Proof.
-  destruct l; cbn; [done |].
-  by destruct (decide (P a)); eauto.
-Defined.
+  induction l as [| h t]; cbn; [by constructor |].
+  by destruct (decide (P h)); [constructor |].
+Qed.
 
 (**
   Produces the sublist of elements of a list filtered by a decidable predicate
   each of them paired with the proof that it satisfies the predicate.
 *)
-Definition filter_annotate
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a : A, Decision (P a)}
+Fixpoint filter_annotate
+  {A : Type} (P : A -> Prop) {Pdec : forall a : A, Decision (P a)}
   (l : list A) : list (dsig P) :=
-  list_annotate _ _ (Forall_filter P l).
+match l with
+| [] => []
+| h :: t =>
+  match decide (P h) with
+  | left p => dexist h p :: filter_annotate P t
+  | right _ => filter_annotate P t
+  end
+end.
 
-Definition filter_annotate_length
+Lemma filter_annotate_length
   {A : Type}
   (P : A -> Prop)
   {Pdec : forall a : A, Decision (P a)}
   (l : list A)
-  : length (filter_annotate P l) = length (filter P l) :=
-  list_annotate_length _ _ (Forall_filter P l).
+  : length (filter_annotate P l) = length (filter P l).
+Proof.
+  induction l as [| h t]; cbn; [done |].
+  destruct (decide (P h)); cbn; [| done].
+  by rewrite IHt.
+Qed.
 
 Lemma filter_annotate_unroll
   {A : Type}
@@ -689,8 +557,9 @@ Lemma filter_annotate_app
   (l1 l2 : list A)
   : filter_annotate P (l1 ++ l2) = filter_annotate P l1 ++ filter_annotate P l2.
 Proof.
-  induction l1; [done |].
-  by simpl; rewrite! filter_annotate_unroll, IHl1; case_decide.
+  induction l1; cbn; [done |].
+  destruct (decide (P a)); cbn; [| done].
+  by rewrite IHl1.
 Qed.
 
 (**
@@ -913,9 +782,7 @@ Lemma map_option_app
   l1 l2
   : map_option f (l1 ++ l2) = map_option f l1 ++ map_option f l2.
 Proof.
-  induction l1; [done |].
-  cbn; rewrite IHl1.
-  by destruct (f a).
+  by apply omap_app.
 Qed.
 
 Lemma map_option_app_rev
@@ -923,7 +790,7 @@ Lemma map_option_app_rev
   (f : A -> option B)
   l l1' l2'
   (Happ_rev : map_option f l = l1' ++ l2')
-  : exists l1 l2, l = l1 ++ l2 /\ map_option f l1 = l1' /\ map_option f l2 = l2'.
+  : exists l1 l2 : list A, l = l1 ++ l2 /\ map_option f l1 = l1' /\ map_option f l2 = l2'.
 Proof.
   revert l1' l2' Happ_rev.
   induction l; intros.
@@ -1004,7 +871,7 @@ Lemma elem_of_map_option :
   forall {A B : Type} (f : A -> option B) (l : list A) (y : B),
     y ∈ map_option f l <-> exists x : A, x ∈ l /\ f x = Some y.
 Proof.
-  apply @elem_of_list_omap.
+  by apply @elem_of_list_omap.
 Qed.
 
 Lemma NoDup_map_option :
@@ -1090,18 +957,6 @@ Proof.
     by apply (Hnth (S n)).
 Qed.
 
-Lemma in_fast
-  {A : Type}
-  (l : list A)
-  (a : A)
-  (b : A)
-  (Hin : In a (b :: l))
-  (Hneq : b <> a) :
-  In a l.
-Proof.
-  by destruct Hin.
-Qed.
-
 Fixpoint one_element_decompositions
   {A : Type}
   (l : list A)
@@ -1143,18 +998,6 @@ Proof.
       by rewrite IHl.
 Qed.
 
-Lemma in_one_element_decompositions_iff
-  {A : Type}
-  (l : list A)
-  (pre suf : list A)
-  (x : A)
-  : In (pre, x, suf) (one_element_decompositions l)
-  <-> pre ++ [x] ++ suf = l.
-Proof.
-  rewrite <- elem_of_list_In.
-  by apply elem_of_one_element_decompositions.
-Qed.
-
 Definition two_element_decompositions
   {A : Type}
   (l : list A)
@@ -1170,30 +1013,28 @@ Definition two_element_decompositions
       end)
     (one_element_decompositions l).
 
-Lemma in_two_element_decompositions_iff
+Lemma elem_of_two_element_decompositions
   {A : Type}
   (l : list A)
   (pre mid suf : list A)
   (x y : A)
-  : In (pre, x, mid, y, suf) (two_element_decompositions l)
+  : (pre, x, mid, y, suf) ∈ two_element_decompositions l
   <-> pre ++ [x] ++ mid ++ [y] ++ suf = l.
 Proof.
   unfold two_element_decompositions.
-  rewrite in_flat_map.
+  rewrite elem_of_list_In, in_flat_map; setoid_rewrite <- elem_of_list_In.
   split.
   - intros [((pre', x'), sufx) [Hdecx Hin]].
-    apply in_map_iff in Hin.
-    destruct Hin as [((mid', y'), suf') [Hdec Hin]].
-    inversion Hdec. subst. clear Hdec.
-    apply in_one_element_decompositions_iff in Hdecx.
-    apply in_one_element_decompositions_iff in Hin.
-    by subst.
+    apply elem_of_list_fmap in Hin as [[[mid' y'] suf'] [[= -> -> -> -> ->] Hin]].
+    by apply elem_of_one_element_decompositions in Hdecx as <-, Hin as <-.
   - remember (mid ++ [y] ++ suf) as sufx.
     intro H.
-    exists (pre, x, sufx). apply in_one_element_decompositions_iff in H.
+    exists (pre, x, sufx).
+    apply elem_of_one_element_decompositions in H.
     split; [done |].
-    apply in_map_iff. exists (mid, y, suf).
-    by rewrite in_one_element_decompositions_iff.
+    apply elem_of_list_fmap.
+    exists (mid, y, suf).
+    by rewrite elem_of_one_element_decompositions.
 Qed.
 
 Lemma order_decompositions
@@ -1216,37 +1057,16 @@ Proof.
       as [Heq | [[suf1' Hgt] | [suf2' Hlt]]]; subst; eauto.
 Qed.
 
-Lemma list_max_exists
-   (l : list nat)
-   (nz : list_max l > 0) :
-   In (list_max l) l.
+Lemma list_max_exists :
+  forall (l : list nat),
+    l <> [] -> list_max l ∈ l.
 Proof.
-  induction l.
-  - by simpl in nz; lia.
-  - simpl in *.
-    destruct (a <=? (list_max l)) eqn: eq_leb.
-    + assert (Nat.max a (list_max l) = list_max l) by lia.
-      by itauto congruence.
-    + assert (Nat.max a (list_max l) = a) by lia.
-      by rewrite H; left.
-Qed.
-
-Lemma list_max_exists2
-   (l : list nat)
-   (Hne : l <> []) :
-   In (list_max l) l.
-Proof.
-  destruct (list_max l) eqn: eq_max.
-  - destruct l; [by itauto congruence |].
-    specialize (list_max_le (n :: l) 0) as Hle.
-    destruct Hle as [Hle _].
-    rewrite eq_max in Hle. spec Hle. apply Nat.le_refl.
-    rewrite Forall_forall in Hle.
-    specialize (Hle n). spec Hle; [left |].
-    by simpl; lia.
-  - specialize (list_max_exists l) as Hmax.
-    spec Hmax; [lia |].
-    by rewrite <- eq_max.
+  induction l as [| h t]; cbn; [done |].
+  intros _.
+  destruct (PeanoNat.Nat.max_spec h (foldr Init.Nat.max 0 t))
+    as [[Hlt ->] | [Hle ->]]; [| by left].
+  right; apply IHt.
+  by destruct t; [cbn in Hlt; lia |].
 Qed.
 
 (**
@@ -1271,19 +1091,13 @@ Fixpoint complete_prefix
   (l pref : list A) : option (list A) :=
   match l, pref with
   | l , [] => Some l
-  | [], (b :: pref') => None
-  | (a :: l'), (b :: pref') => match (decide_eq a b) with
-                               | right _ => None
-                               | _ => let res' := complete_prefix l' pref' in
-                                      match res' with
-                                      | None => None
-                                      | Some s => Some s
-                                      end
-                               end
+  | [], b :: pref' => None
+  | a :: l', b :: pref' => if decide_eq a b then complete_prefix l' pref' else None
   end.
 
 Example complete_prefix_some : complete_prefix [1; 2; 3; 4] [1; 2] = Some [3; 4].
 Proof. by itauto. Qed.
+
 Example complete_prefix_none : complete_prefix [1; 2; 3; 4] [1; 3] = None.
 Proof. by itauto. Qed.
 
@@ -1419,15 +1233,32 @@ Proof.
   - by refine (if X a then if IHl then left _ else right _ else right _); constructor.
 Qed.
 
+Lemma list_sum_map :
+  forall {A : Type} (f g : A -> nat) (l : list A),
+    (forall x : A, x ∈ l -> f x <= g x) ->
+      list_sum (map f l) <= list_sum (map g l).
+Proof.
+  induction l as [| h t]; cbn; intros Hle; [done |].
+  apply PeanoNat.Nat.add_le_mono.
+  - by apply Hle; left.
+  - apply IHt; intros x Hin.
+    by apply Hle; right.
+Qed.
+
 Lemma list_sum_decrease [A : Type] (f g : A -> nat) (l : list A) :
-  (forall a, In a l -> f a <= g a) -> Exists (fun a => f a < g a) l ->
+  (forall a, a ∈ l -> f a <= g a) -> Exists (fun a => f a < g a) l ->
   list_sum (map f l) < list_sum (map g l).
 Proof.
   induction 2; cbn.
   - apply PeanoNat.Nat.add_lt_le_mono; [done |].
-    induction l; cbn; [done |].
-    by apply PeanoNat.Nat.add_le_mono; firstorder.
-  - by apply PeanoNat.Nat.add_le_lt_mono; firstorder.
+    apply list_sum_map.
+    intros a' Hin.
+    by apply H; right.
+  - apply PeanoNat.Nat.add_le_lt_mono.
+    + by apply H; left.
+    + apply IHExists.
+      intros a Hin.
+      by apply H; right.
 Qed.
 
 (**
@@ -1527,28 +1358,6 @@ Proof.
   by induction 1; constructor; auto.
 Qed.
 
-Definition ForAllSuffix1 [A : Type] (P : A -> Prop) : list A -> Prop :=
-  ForAllSuffix (fun l => match l with | [] => True | a :: _ => P a end).
-
-Lemma ForAllSuffix1_Forall [A : Type] (P : A -> Prop)
-  : forall l, ForAllSuffix1 P l <-> Forall P l.
-Proof.
-  by split; induction 1; constructor; auto.
-Qed.
-
-Definition ExistsSuffix1 [A : Type] (P : A -> Prop) : list A -> Prop :=
-  ExistsSuffix (fun l => match l with | [] => False | a :: _ => P a end).
-
-Lemma ExistsSuffix1_Exists [A : Type] (P : A -> Prop)
-  : forall l, ExistsSuffix1 P l <-> Exists P l.
-Proof.
-  split; induction 1.
-  - by destruct l; [| left].
-  - by right.
-  - by left.
-  - by right.
-Qed.
-
 Definition ForAllSuffix2 [A : Type] (R : A -> A -> Prop) : list A -> Prop :=
   ForAllSuffix (fun l => match l with | a :: b :: _ => R a b | _ => True end).
 
@@ -1597,26 +1406,10 @@ Proof.
       by intros b Hb; apply Hsub; right.
 Qed.
 
-Lemma elem_of_empty_nil [X : Type] (l : list X) :
-  (forall v, v ∉ l) -> l = [].
-Proof.
-  destruct l as [| a]; [done |].
-  by intro H; elim (H a); left.
-Qed.
-
 Lemma nodup_append_left {A} :
   forall (l1 l2 : list A), NoDup (l1 ++ l2) -> NoDup l1.
 Proof.
   by intros l1 l2 [? _]%NoDup_app.
-Qed.
-
-Lemma subseteq_empty {A} : forall (l : list A),
-  l ⊆ nil -> l = nil.
-Proof.
-  intros. destruct l; [done |].
-  exfalso.
-  specialize (H a (elem_of_list_here _ _)).
-  by inversion H.
 Qed.
 
 Lemma NoDup_subseteq_length [A : Type]

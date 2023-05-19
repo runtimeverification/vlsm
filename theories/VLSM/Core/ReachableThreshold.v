@@ -45,7 +45,7 @@ Lemma pivotal_validator_extension_list
     (sum_weights_list (set_remove v vs ++ vsfix) <= threshold)%R.
 Proof.
   induction vss; intros Hnd_vsfix Hvsfix Hnd_all Hall; simpl in Hall; [by lra |].
-  destruct (Rtotal_le_gt (sum_weights_list (vss ++ vsfix)) threshold) as [| Hgt].
+  destruct (Rle_or_lt (sum_weights_list (vss ++ vsfix)) threshold) as [| Hgt].
   - exists (a :: vss).
     repeat split; [| done | done |].
     + by apply nodup_append_left in Hnd_all.

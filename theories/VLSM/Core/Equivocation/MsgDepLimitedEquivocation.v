@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import Reals.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble StdppExtras StdppListFinSet FinSetExtras.
+From VLSM.Lib Require Import Preamble StdppExtras FinSetExtras.
 From VLSM.Lib Require Import ListExtras ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM AnnotatedVLSM MessageDependencies VLSMProjections Composition.
 From VLSM.Core Require Import Validator ProjectionTraces SubProjectionTraces Equivocation.
@@ -70,10 +70,10 @@ Definition coeqv_annotate_trace_with_equivocators :=
     coeqv_composite_transition_message_equivocators.
 
 Lemma coeqv_limited_equivocation_transition_state_annotation_incl [l s iom s' oom]
-  : vtransition coeqv_limited_equivocation_vlsm l (s, iom) = (s', oom) ->
+  : transition coeqv_limited_equivocation_vlsm l (s, iom) = (s', oom) ->
     state_annotation s ⊆ state_annotation s'.
 Proof.
-  cbn; unfold annotated_transition; destruct (vtransition _ _ _) as (_s', _om').
+  cbn; unfold annotated_transition; destruct (transition _ _ _) as (_s', _om').
   inversion 1; cbn.
   by destruct iom as [m |]; [apply union_subseteq_l |].
 Qed.
@@ -86,7 +86,7 @@ Proof.
   - by destruct s, Hs as [_ ->]; cbn in *; apply NoDup_elements.
   - destruct Ht as [_ Ht]; cbn in Ht.
     unfold annotated_transition in Ht
-    ; destruct (vtransition _ _ _); inversion Ht; apply NoDup_elements.
+    ; destruct (transition _ _ _); inversion Ht; apply NoDup_elements.
 Qed.
 
 Lemma coeqv_limited_equivocation_state_not_heavy s
@@ -98,7 +98,7 @@ Proof.
     rewrite sum_weights_empty; [| done].
     by apply (rt_positive (H6 := H7)).
   - destruct Ht as [(_ & _ & _ & Hc) Ht]
-    ; cbn in Ht; unfold annotated_transition in Ht; destruct (vtransition _ _ _)
+    ; cbn in Ht; unfold annotated_transition in Ht; destruct (transition _ _ _)
     ; inversion_clear Ht.
     by destruct om as [m |].
 Qed.
@@ -180,7 +180,7 @@ Definition msg_dep_limited_equivocation_projection_validator_prop_alt :=
   coeqv_limited_equivocation_projection_validator_prop_alt IM threshold sender msg_dep_coequivocating_senders.
 
 Lemma msg_dep_annotate_trace_with_equivocators_project s tr
-  : pre_VLSM_embedding_finite_trace_project (type msg_dep_limited_equivocation_vlsm)
+  : pre_VLSM_embedding_finite_trace_project msg_dep_limited_equivocation_vlsm
     (composite_type IM) Datatypes.id original_state
     (msg_dep_annotate_trace_with_equivocators s tr) = tr.
 Proof. by apply (annotate_trace_project (free_composite_vlsm IM) Cv). Qed.
@@ -264,7 +264,7 @@ Proof.
 Qed.
 
 Lemma full_node_msg_dep_composite_transition_message_equivocators
-  i li (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
+  i li (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om))
   : coeqv_composite_transition_message_equivocators
       IM sender (full_node_coequivocating_senders IM)
@@ -284,10 +284,10 @@ Proof.
 Qed.
 
 Lemma msg_dep_full_node_valid_iff
-  l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
+  l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
            (projT2 l) (original_state s (projT1 l), om))
-  : vvalid Limited l (s, om) <-> vvalid FullNodeLimited l (s, om).
+  : valid Limited l (s, om) <-> valid FullNodeLimited l (s, om).
 Proof.
   cbn; unfold annotated_valid, coeqv_limited_equivocation_constraint; destruct l as [i li].
   replace (sum_weights _) with
@@ -300,13 +300,13 @@ Proof.
 Qed.
 
 Lemma msg_dep_full_node_transition_iff
-  l (s : @state _ (annotated_type (free_composite_vlsm IM) Cv)) om
+  l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
   (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
            (projT2 l) (original_state s (projT1 l), om))
-  : vtransition Limited l (s, om) = vtransition FullNodeLimited l (s, om).
+  : transition Limited l (s, om) = transition FullNodeLimited l (s, om).
 Proof.
   cbn; unfold annotated_transition;
-    destruct (vtransition _ _ _) as (s', om'), l as (i, li).
+    destruct (transition _ _ _) as (s', om'), l as (i, li).
   do 2 f_equal.
   destruct om as [m |]; [| done].
   symmetry.
@@ -431,7 +431,7 @@ Proof.
   by eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender.
 Qed.
 
-Lemma message_equivocators_can_emit (s : vstate Limited) im
+Lemma message_equivocators_can_emit (s : state Limited) im
   (Hs : valid_state_prop
           (fixed_equivocation_vlsm_composition IM (Ci := Ci) (fin_sets.set_map A (state_annotation s)))
           (original_state s))
@@ -485,7 +485,7 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
     finite_valid_trace Fixed
       (original_state is)
       (pre_VLSM_embedding_finite_trace_project
-        (type Limited) (composite_type IM) Datatypes.id original_state
+        Limited (composite_type IM) Datatypes.id original_state
         tr).
 Proof.
   repeat split; [.. | by apply Htr].
@@ -504,7 +504,7 @@ Proof.
       by eapply coeqv_limited_equivocation_transition_state_annotation_incl, Ht.
     + apply finite_valid_trace_singleton.
       unfold input_valid_transition, input_valid.
-      change (map _ _) with (pre_VLSM_embedding_finite_trace_project (type Limited)
+      change (map _ _) with (pre_VLSM_embedding_finite_trace_project Limited
                               (composite_type IM) Datatypes.id original_state tr).
       rewrite <- pre_VLSM_embedding_finite_trace_last.
       assert (Hs : valid_state_prop
@@ -514,14 +514,14 @@ Proof.
         replace s with (finite_trace_last si tr) at 2
              by (apply valid_trace_get_last in Htr; done).
         rewrite (pre_VLSM_embedding_finite_trace_last
-                  (type Limited) (composite_type IM) Datatypes.id original_state si tr).
+                  Limited (composite_type IM) Datatypes.id original_state si tr).
         by apply finite_valid_trace_last_pstate.
       }
       destruct Ht as [[HLs [HLim HLv]] HLt].
       cbn in HLt |- *; unfold annotated_transition in HLt; cbn in HLt.
       replace (finite_trace_last si _) with s
            by (apply valid_trace_get_last in Htr; congruence).
-      destruct l as [i li], (vtransition _ _ _) as (si', om').
+      destruct l as [i li], (transition _ _ _) as (si', om').
       inversion HLt; subst; clear HLt; cbn.
       repeat split.
       * revert Hs; apply VLSM_incl_valid_state.
@@ -579,7 +579,7 @@ Corollary msg_dep_fixed_limited_equivocation is tr
     fixed_limited_equivocation_prop IM threshold A
       (original_state is)
       (pre_VLSM_embedding_finite_trace_project
-        (type Limited) (composite_type IM) Datatypes.id original_state
+        Limited (composite_type IM) Datatypes.id original_state
         tr) (Ci := Ci) (Cv := Cv).
 Proof.
   intro Htr.
@@ -590,7 +590,7 @@ Qed.
 Lemma fixed_transition_preserves_annotation_equivocators
   (eqv_validators : Cv)
   (equivocators := fin_sets.set_map A eqv_validators : Ci)
-  (is : vstate (free_composite_vlsm IM)) s tr
+  (is : state (free_composite_vlsm IM)) s tr
   (Htr1 :
     finite_valid_trace_init_to (fixed_equivocation_vlsm_composition IM equivocators)
     is s tr)
@@ -601,22 +601,22 @@ Lemma fixed_transition_preserves_annotation_equivocators
       (s, iom) (sf, oom))
   (Hsub_equivocators :
     state_annotation
-      (@finite_trace_last _ (type Limited)
+      (@finite_trace_last _ Limited
         {| original_state := is; state_annotation := `inhabitant |}
         (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender is tr))
     ⊆ eqv_validators)
   : msg_dep_composite_transition_message_equivocators IM
       full_message_dependencies sender l
-      (@finite_trace_last _ (type Limited)
-        {| original_state := is; state_annotation := empty_set |}
+      (@finite_trace_last _ Limited
+        {| original_state := is; state_annotation := ∅ |}
         (annotate_trace_from (free_composite_vlsm IM)
           Cv
           (msg_dep_composite_transition_message_equivocators IM full_message_dependencies sender)
-          {| original_state := is; state_annotation := empty_set |} tr), iom)
+          {| original_state := is; state_annotation := ∅ |} tr), iom)
     ⊆ eqv_validators.
 Proof.
   destruct iom as [im |]; [| done].
-  apply ListFinSetExtras.set_union_subseteq_iff; split; [done | cbn].
+  apply union_subseteq; split; [done | cbn].
   rewrite annotate_trace_from_last_original_state; cbn.
   replace (finite_trace_last _ _) with s
        by (apply valid_trace_get_last in Htr1; congruence).
@@ -667,7 +667,7 @@ Proof.
 Qed.
 
 Lemma msg_dep_limited_fixed_equivocation
-  (is : vstate (free_composite_vlsm IM)) (tr : list (composite_transition_item IM))
+  (is : state (free_composite_vlsm IM)) (tr : list (composite_transition_item IM))
   : fixed_limited_equivocation_prop (Ci := Ci) (Cv := Cv) IM threshold A is tr ->
     finite_valid_trace Limited
       {| original_state := is; state_annotation := ` inhabitant |}
@@ -680,7 +680,7 @@ Proof.
   |- finite_valid_trace_from Limited ?is ?tr =>
     cut
       (finite_valid_trace_from Limited is tr /\
-        (state_annotation (@finite_trace_last _ (type Limited) is tr) ⊆ equivocators))
+        (state_annotation (@finite_trace_last _ Limited is tr) ⊆ equivocators))
   end
   ; [itauto |].
   induction Htr using finite_valid_trace_init_to_rev_strong_ind.
@@ -721,7 +721,7 @@ Proof.
         replace (finite_trace_last _ _) with s
              by (apply valid_trace_get_last in Htr1; congruence).
         by destruct Ht as [_ Ht]; cbn in Ht
-        ; destruct (vtransition _ _ _) as (si', om')
+        ; destruct (transition _ _ _) as (si', om')
         ; inversion Ht.
 Qed.
 

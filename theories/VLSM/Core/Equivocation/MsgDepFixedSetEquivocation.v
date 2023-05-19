@@ -136,13 +136,13 @@ Proof.
     subst i; cbv in HlX_pr; apply Some_inj in HlX_pr; subst li.
     cbn; unfold sub_IM, sub_state_element_project; cbn.
     rewrite (sub_IM_state_pi sX Hj Hi).
-    destruct (vtransition _ _ _) as (sj', _om'); inversion_clear 1.
+    destruct (transition _ _ _) as (sj', _om'); inversion_clear 1.
     by f_equal; symmetry; apply sub_IM_state_update_eq.
   - intros [sub_i li] HlX_pr sX om sX' om' [_ HtX].
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     unfold sub_label_element_project in HlX_pr; cbn in HlX_pr.
     case_decide as Heqij; [by congruence |].
-    cbn in HtX; destruct (vtransition _ _ _) as (si', _om').
+    cbn in HtX; destruct (transition _ _ _) as (si', _om').
     inversion_clear HtX.
     unfold sub_state_element_project.
     by state_update_simpl.

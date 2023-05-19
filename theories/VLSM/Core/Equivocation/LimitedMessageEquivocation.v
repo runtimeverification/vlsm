@@ -218,7 +218,7 @@ Proof.
   }
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
   {
-    apply VLSM_incl_trans with (machine Free).
+    apply VLSM_incl_trans with Free.
     - by apply (constraint_free_incl IM (strong_fixed_equivocation_constraint IM equivocators)).
     - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
@@ -261,7 +261,7 @@ Qed.
 Lemma Fixed_incl_Limited : VLSM_incl Fixed Limited.
 Proof.
   destruct (Fixed_eq_StrongFixed IM equivocators) as [Heq _].
-  apply VLSM_incl_trans with (machine StrongFixed).
+  apply VLSM_incl_trans with StrongFixed.
   - by apply Heq.
   - by apply StrongFixed_incl_Limited.
 Qed.

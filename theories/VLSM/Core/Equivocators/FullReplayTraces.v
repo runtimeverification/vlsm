@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FinFun Program.
-From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM.Lib Require Import Preamble ListExtras StdppExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition SubProjectionTraces.
 From VLSM.Core Require Import Equivocation Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
@@ -153,7 +153,7 @@ Lemma replayed_initial_state_from_lift
   : finite_trace_last full_replay_state (replayed_initial_state_from full_replay_state is)
     = lift_equivocators_sub_state_to full_replay_state is.
 Proof.
-  cut (forall l (Hincl : incl l (enum (sub_index equivocating))) (Hnodup : NoDup l),
+  cut (forall l (Hincl : l ⊆ enum (sub_index equivocating)) (Hnodup : NoDup l),
     let tr_full_replay_is :=
       composite_apply_plan equivocator_IM full_replay_state
         (map (initial_new_machine_transition_item is)
@@ -168,11 +168,11 @@ Proof.
       | _ =>  full_replay_state i
       end)).
   {
-    intros Hcut; specialize (Hcut _ (incl_refl _) ltac:(apply NoDup_enum)).
+    intros Hcut.
     unfold replayed_initial_state_from, composite_apply_plan.
     rewrite _apply_plan_last; extensionality i.
-    specialize (Hcut i); unfold composite_apply_plan in Hcut; unfold spawn_initial_state
-    ; simpl in *; rewrite Hcut.
+    unfold composite_apply_plan in Hcut; unfold spawn_initial_state; cbn in *.
+    rewrite Hcut; [| done | by apply NoDup_enum].
     unfold lift_equivocators_sub_state_to.
     case_decide; [| done].
     rewrite decide_True; [done |].
@@ -181,7 +181,7 @@ Proof.
   induction l using rev_ind; intros.
   - case_decide; [| done].
     by rewrite decide_False; [| inversion 1].
-  - spec IHl; [by apply incl_app_inv in Hincl; apply Hincl |].
+  - spec IHl; [by apply list_subseteq_inv_app in Hincl; apply Hincl |].
     spec IHl; [by apply NoDup_app in Hnodup; apply Hnodup |].
     subst tr_full_replay_is.
     rewrite map_app, (composite_apply_plan_app equivocator_IM); simpl in *
@@ -300,7 +300,7 @@ Qed.
 
 Definition replayed_trace_from full_replay_state is tr :=
   replayed_initial_state_from full_replay_state is ++
-  pre_VLSM_embedding_finite_trace_project (type FreeSubE) (type FreeE)
+  pre_VLSM_embedding_finite_trace_project FreeSubE FreeE
     (lift_equivocators_sub_label_to full_replay_state)
     (lift_equivocators_sub_state_to full_replay_state) tr.
 
@@ -504,16 +504,16 @@ Lemma replayed_initial_state_from_valid
   : finite_valid_trace_from SeededCE full_replay_state
       (replayed_initial_state_from full_replay_state is).
 Proof.
-  cut (forall l, incl l (enum (sub_index equivocating)) ->
+  cut (forall l, l ⊆ enum (sub_index equivocating) ->
     finite_valid_plan_from SeededCE
       full_replay_state (map (initial_new_machine_transition_item is) l)).
-  { intros Hplan. specialize (Hplan _ (incl_refl _)).
-    by unfold finite_valid_plan_from in Hplan.
+  {
+    by intros Hplan; apply Hplan.
   }
   intro l.
   induction l using rev_ind; intros Hincl.
   - by constructor.
-  - spec IHl; [by intros i Hi; apply Hincl, in_app_iff; left |].
+  - spec IHl; [by intros i Hi; apply Hincl; apply elem_of_app; left |].
     rewrite map_app.
     apply finite_valid_plan_from_app_iff.
     split; [done |].
@@ -531,7 +531,7 @@ Proof.
 Qed.
 
 Lemma lift_initial_message
-  : forall m, vinitial_message_prop SeededXE m -> valid_message_prop SeededCE m.
+  : forall m, initial_message_prop SeededXE m -> valid_message_prop SeededCE m.
 Proof.
   intros m [Hinit | Hseeded].
   - apply initial_message_is_valid. destruct Hinit as [[i Hi] Hinit].

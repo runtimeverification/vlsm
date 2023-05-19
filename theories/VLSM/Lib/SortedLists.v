@@ -5,50 +5,6 @@ From VLSM.Lib Require Import Preamble ListExtras ListSetExtras.
 
 (** * Sorted list utility functions and lemmas *)
 
-Fixpoint list_compare {A} (compare : A -> A -> comparison)
-    (l1 l2 : list A) : comparison :=
-  match l1, l2 with
-  | [], [] => Eq
-  | [], _ => Lt
-  | _, [] => Gt
-  | (h1 :: t1), (h2 :: t2) =>
-    match compare h1 h2 with
-    | Eq => @list_compare A compare t1 t2
-    | cmp => cmp
-    end
-  end.
-
-#[export] Instance list_compare_strict_order
-  {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
-    CompareStrictOrder (@list_compare A compare).
-Proof.
-  intros. destruct H as [R T].
-  split.
-  - intro x. induction x; intros; destruct y; split; intros; try done.
-    + simpl in H. destruct (compare a a0) eqn: Hcmp; try done.
-      apply compare_eq in Hcmp as ->.
-      by apply IHx in H as ->.
-    + inversion H; subst; cbn.
-      by rewrite compare_eq_refl, IHx.
-  - intros x y. generalize dependent x.
-    by induction y; intros; destruct x; destruct z; try done
-    ; destruct c; try done
-    ; inversion H; clear H; destruct (compare a0 a) eqn: Ha0; try done
-    ; inversion H0; clear H0; destruct (compare a a1) eqn: Ha1; try done
-    ; try apply (IHy _ _ _ H2) in H1; try apply (T _ _ _ _ Ha0) in Ha1
-    ; try apply R in Ha0; subst
-    ; try (by simpl; rewrite Ha1; try rewrite H1, H2)
-    ; try (by simpl; rewrite Ha1; rewrite H2)
-    ; try (by apply R in Ha1; subst; simpl;  rewrite Ha0; rewrite H1)
-    .
-Defined.
-
-Lemma list_compare_eq_dec {A} {compare : A -> A -> comparison} `{CompareStrictOrder A compare} :
-  (forall x y : list A, {x = y} + {x <> y}).
-Proof.
-  by intros; apply compare_eq_dec.
-Qed.
-
 Fixpoint add_in_sorted_list_fn
   {A} (compare : A -> A -> comparison) (x : A) (l : list A) : list A :=
   match l with
@@ -274,8 +230,8 @@ Proof.
   split; [| by intros ->].
   generalize dependent s2.
   induction s1; destruct s2; intros; [done | | |].
-  - by destruct H as [_ H]; apply subseteq_empty in H; inversion H.
-  - by destruct H as [H _]; apply subseteq_empty in H; inversion H.
+  - by destruct H as [_ H]; apply list_nil_subseteq in H.
+  - by destruct H as [H _]; apply list_nil_subseteq in H.
   - apply (set_eq_first_equal a a0 s1 s2 LS1 LS2) in H. destruct H; subst.
     apply Sorted_LocallySorted_iff, Sorted_inv in LS1 as [LS1 _].
     apply Sorted_LocallySorted_iff in LS1.

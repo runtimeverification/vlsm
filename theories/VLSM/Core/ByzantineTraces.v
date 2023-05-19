@@ -40,7 +40,7 @@ Context
   to <<M>>.
 *)
 Definition byzantine_trace_prop
-    (tr : vTrace M) :=
+    (tr : Trace M) :=
     exists (M' : VLSM message)
         (Proj := binary_free_composition_fst M M'),
         valid_trace_prop Proj tr.
@@ -51,7 +51,7 @@ Definition byzantine_trace_prop
 *)
 Lemma byzantine_pre_loaded_with_all_messages
     (PreLoaded := pre_loaded_with_all_messages_vlsm M)
-    (tr : vTrace M)
+    (tr : Trace M)
     (Hbyz : byzantine_trace_prop tr)
     : valid_trace_prop PreLoaded tr.
 Proof.
@@ -82,12 +82,12 @@ Definition all_messages_type : VLSMType message :=
   ensure that the sets of labels and messages are both non-empty.
 *)
 
-Program Definition all_messages_s0 : {_ : @state _ all_messages_type | True} :=
+Program Definition all_messages_s0 : {_ : state all_messages_type | True} :=
   exist _ tt _.
 Next Obligation.
 Proof. done. Defined.
 
-#[export] Instance all_messages_state_inh : Inhabited {_ : @state _ all_messages_type | True} :=
+#[export] Instance all_messages_state_inh : Inhabited {_ : state all_messages_type | True} :=
   populate all_messages_s0.
 
 (**
@@ -95,15 +95,15 @@ Proof. done. Defined.
   message given as a label.
 *)
 Definition all_messages_transition
-    (l : @label _ all_messages_type)
-    (som : @state _ all_messages_type * option message)
-    : @state _ all_messages_type * option message
+    (l : label all_messages_type)
+    (som : state all_messages_type * option message)
+    : state all_messages_type * option message
     := (tt, Some l).
 
 (** The [valid]ity predicate specifies that all transitions are valid. *)
 Definition all_messages_valid
-    (l : @label _ all_messages_type)
-    (som : @state _ all_messages_type * option message)
+    (l : label all_messages_type)
+    (som : state all_messages_type * option message)
     : Prop
     := True.
 
@@ -126,7 +126,7 @@ Definition emit_any_message_vlsm
   to the component corresponding to <<M>>.
 *)
 Definition alternate_byzantine_trace_prop
-    (tr : vTrace M)
+    (tr : Trace M)
     (Proj := binary_free_composition_fst M emit_any_message_vlsm)
     :=
     valid_trace_prop Proj tr.
@@ -138,7 +138,7 @@ Definition alternate_byzantine_trace_prop
   [alternate_byzantine_trace_prop]erty also has the [byzantine_trace_prop]erty.
 *)
 Lemma byzantine_alt_byzantine
-    (tr : vTrace M)
+    (tr : Trace M)
     (Halt : alternate_byzantine_trace_prop tr)
     : byzantine_trace_prop tr.
 Proof.
@@ -203,7 +203,7 @@ Lemma alt_option_valid_message
     : option_valid_message_prop Alt om.
 Proof.
   destruct om as [m |]; [| apply option_valid_message_None].
-  pose (s := ``(vs0 Alt) : state).
+  pose (s := ``(vs0 Alt) : state Alt).
   exists s.
   assert (valid_state_message_prop Alt s None) as Hs
       by (apply valid_initial_state, proj2_sig).
@@ -223,8 +223,8 @@ Proof. by apply any_message_is_valid_in_preloaded. Qed.
   (composed) state [s0] of <<Alt>>.
 *)
 Definition lifted_alt_state
-    (s : vstate M)
-    : vstate Alt
+    (s : state M)
+    : state Alt
     := lift_to_composite_state'
          (binary_IM M emit_any_message_vlsm) first s.
 
@@ -233,7 +233,7 @@ Definition lifted_alt_state
   a [valid_state] of <<Alt>>.
 *)
 Lemma preloaded_alt_valid_state
-    (sj : state)
+    (sj : state PreLoaded)
     (om : option message)
     (Hp : valid_state_message_prop PreLoaded sj om)
     : valid_state_prop Alt (lifted_alt_state sj).
@@ -249,12 +249,11 @@ Proof.
       ; [by apply input_valid_transition_outputs_valid_state_message |].
     split.
     + by repeat split; [.. | apply Ht].
-    + simpl.
+    + cbn.
       replace (lifted_alt_state s first) with s
         by (unfold lifted_alt_state, lift_to_composite_state'; state_update_simpl; done).
       apply proj2 in Ht.
-      change (vtransition M l (s : vstate M, om0) = (s', om')) in Ht.
-      rewrite Ht.
+      replace (transition l _) with (s', om').
       f_equal.
       by apply state_update_twice.
 Qed.
@@ -266,7 +265,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_alt_incl
     : VLSM_incl PreLoaded Alt1.
 Proof.
-  apply (basic_VLSM_incl (machine PreLoaded) (machine Alt1))
+  apply (basic_VLSM_incl PreLoaded Alt1)
   ; intro; intros; [done | | | apply H].
   - by apply alt_proj_option_valid_message.
   - exists (lifted_alt_state s).
@@ -294,7 +293,7 @@ End sec_pre_loaded_with_all_messages_byzantine_alt.
   equivalent.
 *)
 Lemma byzantine_alt_byzantine_iff
-    (tr : vTrace M)
+    (tr : Trace M)
     : alternate_byzantine_trace_prop tr <-> byzantine_trace_prop tr.
 Proof.
   split; intros.
@@ -392,7 +391,7 @@ Qed.
   resist any kind of external influence.
 *)
 Lemma composite_validator_byzantine_traces_are_not_byzantine
-    (tr : vTrace X)
+    (tr : Trace X)
     (Hbyz : byzantine_trace_prop X tr)
     : valid_trace_prop X tr.
 Proof.

@@ -13,20 +13,20 @@ Section sec_VLSM_inclusion.
 
 Context
   {message : Type}
-  {vtype : VLSMType message}
+  {T : VLSMType message}
   .
 
 Definition VLSM_incl_part
-  (MX MY : VLSMMachine vtype)
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   :=
   forall t : Trace,
     valid_trace_prop X t -> valid_trace_prop Y t.
 
-#[local] Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
+#[local] Notation VLSM_incl X Y := (VLSM_incl_part (vmachine X) (vmachine Y)).
 
 Lemma VLSM_incl_refl
-  (MX : VLSMMachine vtype)
+  (MX : VLSMMachine T)
   (X := mk_vlsm MX)
   : VLSM_incl X X.
 Proof.
@@ -34,7 +34,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_trans
-  (MX MY MZ : VLSMMachine vtype)
+  (MX MY MZ : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
   : VLSM_incl X Y -> VLSM_incl Y Z -> VLSM_incl X Z.
 Proof.
@@ -42,11 +42,11 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_finite_traces_characterization
-  (MX MY : VLSMMachine vtype)
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <->
-    forall (s : vstate X)
-    (tr : list (vtransition_item X)),
+    forall (s : state X)
+    (tr : list (transition_item X)),
     finite_valid_trace X s tr -> finite_valid_trace Y s tr.
 Proof.
   split; intros Hincl.
@@ -74,18 +74,19 @@ Qed.
   label and state projection functions are identities.
 *)
 Lemma VLSM_incl_embedding_iff
-  (MX MY : VLSMMachine vtype)
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_incl X Y <-> VLSM_embedding X Y id id.
 Proof.
-  assert (Hid : forall tr, tr = pre_VLSM_embedding_finite_trace_project _ _ id id tr).
+  assert (Hid : forall tr : list (transition_item T),
+    tr = pre_VLSM_embedding_finite_trace_project _ _ id id tr).
   {
     induction tr; [done |].
     by destruct a; cbn; f_equal.
   }
   split.
   - constructor; intros.
-    apply (proj1 (VLSM_incl_finite_traces_characterization (machine X) (machine Y)) H) in H0.
+    apply (proj1 (VLSM_incl_finite_traces_characterization X Y) H) in H0.
     replace (pre_VLSM_embedding_finite_trace_project _ _ _ _ trX) with trX; [done |].
     by apply Hid.
   - intro Hproject. apply VLSM_incl_finite_traces_characterization.
@@ -95,14 +96,14 @@ Proof.
 Qed.
 
 Definition VLSM_incl_is_embedding
-  {MX MY : VLSMMachine vtype}
+  {MX MY : VLSMMachine T}
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   (Hincl : VLSM_incl X Y)
   : VLSM_embedding X Y id id
   := proj1 (VLSM_incl_embedding_iff MX MY) Hincl.
 
 Lemma VLSM_incl_is_embedding_finite_trace_project
-  {MX MY : VLSMMachine vtype}
+  {MX MY : VLSMMachine T}
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   (Hincl : VLSM_incl X Y)
   : forall tr,
@@ -115,7 +116,7 @@ Qed.
 
 End sec_VLSM_inclusion.
 
-Notation VLSM_incl X Y := (VLSM_incl_part (machine X) (machine Y)).
+Notation VLSM_incl X Y := (VLSM_incl_part (vmachine X) (vmachine Y)).
 
 Section sec_VLSM_incl_preservation.
 
@@ -157,8 +158,8 @@ Section sec_VLSM_incl_properties.
 (** ** VLSM inclusion properties *)
 
 Context
-  {message : Type} [vtype : VLSMType message]
-  [MX MY : VLSMMachine vtype]
+  {message : Type} [T : VLSMType message]
+  [MX MY : VLSMMachine T]
   (Hincl : VLSM_incl_part MX MY)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
@@ -167,8 +168,8 @@ Context
 (** VLSM inclusion specialized to finite trace. *)
 
 Lemma VLSM_incl_finite_valid_trace
-  (s : vstate X)
-  (tr : list (vtransition_item X))
+  (s : state X)
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace X s tr)
   : finite_valid_trace Y s tr.
 Proof.
@@ -178,8 +179,8 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_finite_valid_trace_init_to
-  (s f : vstate X)
-  (tr : list (vtransition_item X))
+  (s f : state X)
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace_init_to X s f tr)
   : finite_valid_trace_init_to Y s f tr.
 Proof.
@@ -189,7 +190,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_valid_state
-  (s : vstate X)
+  (s : state X)
   (Hs : valid_state_prop X s)
   : valid_state_prop Y s.
 Proof.
@@ -197,15 +198,15 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_initial_state
-  (is : vstate X)
-  : vinitial_state_prop X is -> vinitial_state_prop Y is.
+  (is : state X)
+  : initial_state_prop X is -> initial_state_prop Y is.
 Proof.
   by apply (VLSM_embedding_initial_state (VLSM_incl_is_embedding Hincl)).
 Qed.
 
 Lemma VLSM_incl_finite_valid_trace_from
-  (s : vstate X)
-  (tr : list (vtransition_item X))
+  (s : state X)
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace_from X s tr)
   : finite_valid_trace_from Y s tr.
 Proof.
@@ -215,8 +216,8 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_finite_valid_trace_from_to
-  (s f : vstate X)
-  (tr : list (vtransition_item X))
+  (s f : state X)
+  (tr : list (transition_item X))
   (Htr : finite_valid_trace_from_to X s f tr)
   : finite_valid_trace_from_to Y s f tr.
 Proof.
@@ -226,7 +227,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_in_futures
-  (s1 s2 : vstate X)
+  (s1 s2 : state X)
   : in_futures X s1 s2 -> in_futures Y s1 s2.
 Proof.
   by apply (VLSM_embedding_in_futures (VLSM_incl_is_embedding Hincl)).
@@ -264,7 +265,7 @@ Proof.
 Qed.
 
 Lemma VLSM_incl_can_produce
-  (s : state)
+  (s : state T)
   (om : option message)
   : option_can_produce X s om -> option_can_produce Y s om.
 Proof.
@@ -479,7 +480,7 @@ Proof.
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from
-  (from : state) (tr : list transition_item)
+  (from : state X) (tr : list transition_item)
   : finite_valid_trace_from X from tr ->
     finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) from tr.
 Proof.
@@ -488,7 +489,7 @@ Proof.
 Qed.
 
 Lemma preloaded_weaken_finite_valid_trace_from_to
-  (from to : state) (tr : list transition_item)
+  (from to : state X) (tr : list transition_item)
   : finite_valid_trace_from_to X from to tr ->
     finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) from to tr.
 Proof.

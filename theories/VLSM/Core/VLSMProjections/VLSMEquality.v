@@ -14,22 +14,22 @@ Section sec_VLSM_equality.
 
 Context
   {message : Type}
-  {vtype : VLSMType message}
+  {T : VLSMType message}
   .
 
 Definition VLSM_eq_part
-  (MX MY : VLSMMachine vtype)
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) : Prop :=
     VLSM_incl X Y /\ VLSM_incl Y X.
 
 End sec_VLSM_equality.
 
-Notation VLSM_eq X Y := (VLSM_eq_part (machine X) (machine Y)).
+Notation VLSM_eq X Y := (VLSM_eq_part (vmachine X) (vmachine Y)).
 
 Lemma VLSM_eq_refl
   {message : Type}
-  {vtype : VLSMType message}
-  (MX : VLSMMachine vtype)
+  {T : VLSMType message}
+  (MX : VLSMMachine T)
   (X := mk_vlsm MX)
   : VLSM_eq X X.
 Proof.
@@ -38,8 +38,8 @@ Qed.
 
 Lemma VLSM_eq_sym
   {message : Type}
-  {vtype : VLSMType message}
-  (MX MY : VLSMMachine vtype)
+  {T : VLSMType message}
+  (MX MY : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY)
   : VLSM_eq X Y -> VLSM_eq Y X.
 Proof.
@@ -48,8 +48,8 @@ Qed.
 
 Lemma VLSM_eq_trans
   {message : Type}
-  {vtype : VLSMType message}
-  (MX MY MZ : VLSMMachine vtype)
+  {T : VLSMType message}
+  (MX MY MZ : VLSMMachine T)
   (X := mk_vlsm MX) (Y := mk_vlsm MY) (Z := mk_vlsm MZ)
   : VLSM_eq X Y -> VLSM_eq Y Z -> VLSM_eq X Z.
 Proof.
@@ -61,8 +61,8 @@ Section sec_VLSM_eq_properties.
 (** ** VLSM equality properties *)
 
 Context
-  {message : Type} [vtype : VLSMType message]
-  [MX MY : VLSMMachine vtype]
+  {message : Type} [T : VLSMType message]
+  [MX MY : VLSMMachine T]
   (Hincl : VLSM_eq_part MX MY)
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
@@ -71,16 +71,16 @@ Context
 (** VLSM equality specialized to finite trace. *)
 
 Lemma VLSM_eq_finite_valid_trace
-  (s : vstate X)
-  (tr : list (vtransition_item X))
+  (s : state X)
+  (tr : list (transition_item X))
   : finite_valid_trace X s tr <-> finite_valid_trace Y s tr.
 Proof.
   by split; apply VLSM_incl_finite_valid_trace, Hincl.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace_init_to
-  (s f : vstate X)
-  (tr : list (vtransition_item X))
+  (s f : state X)
+  (tr : list (transition_item X))
   : finite_valid_trace_init_to X s f tr <->
     finite_valid_trace_init_to Y s f tr.
 Proof.
@@ -88,22 +88,22 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_valid_state
-  (s : vstate X)
+  (s : state X)
   : valid_state_prop X s <-> valid_state_prop Y s.
 Proof.
   by split; apply VLSM_incl_valid_state, Hincl.
 Qed.
 
 Lemma VLSM_eq_initial_state
-  (is : vstate X)
-  : vinitial_state_prop X is <-> vinitial_state_prop Y is.
+  (is : state X)
+  : initial_state_prop X is <-> initial_state_prop Y is.
 Proof.
   by split; apply VLSM_incl_initial_state, Hincl.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace_from
-  (s : vstate X)
-  (tr : list (vtransition_item X))
+  (s : state X)
+  (tr : list (transition_item X))
   : finite_valid_trace_from X s tr <->
     finite_valid_trace_from Y s tr.
 Proof.
@@ -111,15 +111,15 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_finite_valid_trace_from_to
-  (s f : vstate X)
-  (tr : list (vtransition_item X))
+  (s f : state X)
+  (tr : list (transition_item X))
   : finite_valid_trace_from_to X s f tr <-> finite_valid_trace_from_to Y s f tr.
 Proof.
   by split; apply VLSM_incl_finite_valid_trace_from_to, Hincl.
 Qed.
 
 Lemma VLSM_eq_in_futures
-  (s1 s2 : vstate X)
+  (s1 s2 : state X)
   : in_futures X s1 s2 <-> in_futures Y s1 s2.
 Proof.
   by split; apply VLSM_incl_in_futures, Hincl.
@@ -141,7 +141,7 @@ Proof.
 Qed.
 
 Lemma VLSM_eq_can_produce
-  (s : state)
+  (s : state T)
   (om : option message)
   : option_can_produce X s om <-> option_can_produce Y s om.
 Proof.
@@ -217,7 +217,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm
   (P : message -> Prop)
   (Hvalidating :
-    forall (l : label) (s : state) (m : message)
+    forall (l : label _) (s : state _) (m : message)
       (Hv : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m)),
       valid_message_prop (pre_loaded_vlsm X P) m)
   : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X P).

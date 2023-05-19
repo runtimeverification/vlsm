@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppListSet.
-From VLSM.Lib Require Import ListSetExtras FinExtras.
+From VLSM.Lib Require Import ListSetExtras NatExtras.
 From VLSM.Core Require Import VLSM Equivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
 
@@ -30,8 +30,8 @@ Context
   the original trace must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting
-  (tr : list (vtransition_item equivocator_vlsm))
-  (trX : list (vtransition_item X))
+  (tr : list (transition_item equivocator_vlsm))
+  (trX : list (transition_item X))
   (j i : MachineDescriptor)
   (HtrX : equivocator_vlsm_trace_project _ tr j = Some (trX, i))
   (m : message)
@@ -57,12 +57,12 @@ Proof.
 Qed.
 
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
-  (bs : vstate equivocator_vlsm)
-  (btr : list (vtransition_item equivocator_vlsm))
+  (bs : state equivocator_vlsm)
+  (btr : list (transition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs btr)
-  (bitem : vtransition_item equivocator_vlsm)
+  (bitem : transition_item equivocator_vlsm)
   (Hitem : bitem ∈ btr)
-  (sn : state)
+  (sn : state X)
   (Hnew : l bitem = Spawn sn)
   : input bitem = None /\ output bitem = None /\
     exists
@@ -95,17 +95,17 @@ Qed.
   the projection of the item.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item
-  (bs bf : vstate equivocator_vlsm)
-  (btr : list (vtransition_item equivocator_vlsm))
+  (bs bf : state equivocator_vlsm)
+  (btr : list (transition_item equivocator_vlsm))
   (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs bf btr)
-  (bitem : vtransition_item equivocator_vlsm)
+  (bitem : transition_item equivocator_vlsm)
   (Hitem : bitem ∈ btr)
   (idl : nat)
   (Hlbitem : equivocator_label_descriptor (l bitem) = Existing idl)
-  : exists (item : vtransition_item X),
+  : exists (item : transition_item X),
       (exists (d : MachineDescriptor),
         equivocator_vlsm_transition_item_project _ bitem d = Some (Some item, Existing idl))
-      /\ exists (tr : list (vtransition_item X)),
+      /\ exists (tr : list (transition_item X)),
         item ∈ tr /\
         exists (dfinal dfirst : MachineDescriptor),
           proper_descriptor X dfirst bs /\
@@ -180,8 +180,8 @@ Qed.
   one of its projections must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting_inv
-  (is : vstate equivocator_vlsm)
-  (tr : list (vtransition_item equivocator_vlsm))
+  (is : state equivocator_vlsm)
+  (tr : list (transition_item equivocator_vlsm))
   (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is tr)
   (m : message)
   (Hbbs : Exists (field_selector output m) tr)
@@ -189,7 +189,7 @@ Lemma equivocator_vlsm_trace_project_output_reflecting_inv
     (j i : MachineDescriptor)
     (Hi : proper_descriptor X i is)
     (Hj : existing_descriptor X j (finite_trace_last is tr))
-    (trX : list (vtransition_item X))
+    (trX : list (transition_item X))
     (HtrX : equivocator_vlsm_trace_project _ tr j = Some (trX, i))
     ,
     Exists (field_selector output m) trX.
@@ -231,7 +231,7 @@ Context
 
 Definition equivocator_selector
   (m : message)
-  (item : vtransition_item equivocator_vlsm)
+  (item : transition_item equivocator_vlsm)
   : Prop
   :=
   match (l item) with
@@ -250,7 +250,7 @@ Definition equivocator_selector
   of the internal machines.
 *)
 Definition equivocator_oracle
-  (s : vstate equivocator_vlsm)
+  (s : state equivocator_vlsm)
   (m : message)
   : Prop
   :=
@@ -306,7 +306,7 @@ Proof.
         by apply equivocator_state_project_Some_rev in Hsins.
     + cbn in Hv.
       destruct (equivocator_state_project s idesc) as [sidesc |] eqn: Hidesc; [| done].
-      destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
+      destruct (transition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
@@ -364,7 +364,7 @@ Proof.
               cbn in Hnot_same; congruence.
     + cbn in Hv.
       destruct (equivocator_state_project s idesc) as [sidesc |] eqn: Hidesc; [| done].
-      destruct (vtransition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
+      destruct (transition X l (sidesc, im)) as (sidesc', om') eqn: Htx.
       specialize
         (oracle_step_update l sidesc im sidesc' om').
       spec oracle_step_update.
@@ -509,7 +509,7 @@ Context
   union of all [sent_messages_set] for its internal machines.
 *)
 Definition equivocator_sent_messages_set
-  (s : vstate equivocator_vlsm)
+  (s : state equivocator_vlsm)
   : set message
   :=
   fold_right set_union []
@@ -522,7 +522,7 @@ Definition equivocator_sent_messages_set
       (up_to_n_listing (equivocator_state_n s))).
 
 Lemma equivocator_elem_of_sent_messages_set :
-  forall (s : vstate equivocator_vlsm) (m : message),
+  forall (s : state equivocator_vlsm) (m : message),
     equivocator_has_been_sent s m
       <->
     m ∈ equivocator_sent_messages_set s.

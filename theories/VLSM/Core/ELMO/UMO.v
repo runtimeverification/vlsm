@@ -240,14 +240,14 @@ Qed.
 Lemma UMO_based_valid_reachable
   (VM : VLSMMachine (Build_VLSMType Message State Label))
   (V := mk_vlsm VM)
-  (Hinit_empty : forall si, vinitial_state_prop V si -> obs si = [])
-  (Hsend_spec : forall s om, ram_state_prop V s -> vvalid V Send (s, om) <-> om = None)
-  (Htransition : forall l s om, vtransition V l (s, om) = UMOComponent_transition l s om) :
+  (Hinit_empty : forall si, initial_state_prop V si -> obs si = [])
+  (Hsend_spec : forall s om, ram_state_prop V s -> valid V Send (s, om) <-> om = None)
+  (Htransition : forall l s om, transition V l (s, om) = UMOComponent_transition l s om) :
   forall (s : State),
     ram_state_prop V s
       <->
     UMO_reachable (fun s m => VM.(valid) Receive (s, Some m)) s
-      /\ vinitial_state_prop V (MkState [] (adr s)).
+      /\ initial_state_prop V (MkState [] (adr s)).
 Proof.
   split.
   - intros Hs; induction Hs using valid_state_prop_ind.
@@ -255,7 +255,7 @@ Proof.
       cbn in *; replace ol with (@nil Observation) in * by (specialize (Hinit_empty _ Hs); done).
       by split; [apply reach_init |].
     + destruct Ht as [(_ & _ & Hvalid) Ht].
-      change transition with (vtransition V) in Ht; rewrite Htransition in Ht.
+      cbn in Ht; rewrite Htransition in Ht.
       destruct IHHs as [IH Hadr].
       by destruct l, om; inversion Ht; subst; auto using @UMO_reachable.
   - intros [Hs Hadr].
@@ -266,14 +266,14 @@ Proof.
       repeat split.
       * by apply IHHs.
       * by apply option_valid_message_None.
-      * by change (vvalid V Send (s, None)); apply Hsend_spec; [apply IHHs |].
-      * by change transition with (vtransition V); rewrite Htransition.
+      * by apply Hsend_spec; [apply IHHs |].
+      * by cbn; rewrite Htransition.
     + apply input_valid_transition_destination
         with (l := Receive) (s := s) (om := Some msg) (om' := None).
       repeat split; [| | done |].
       * by apply IHHs.
       * by apply any_message_is_valid_in_preloaded.
-      * by change transition with (vtransition V); rewrite Htransition.
+      * by cbn; rewrite Htransition.
 Qed.
 
 (** ** Every valid state contains a unique valid trace leading to it
@@ -305,7 +305,7 @@ Context
   transport them to [Ui].
 *)
 Lemma VLSM_incl_Ui_Ri :
-  VLSM_incl_part (vmachine Ui) (vmachine Ri).
+  VLSM_incl_part Ui Ri.
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -474,7 +474,7 @@ Lemma input_valid_transition_size_Ui :
 Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_valid_transition_size_Ri.
-  by apply (@VLSM_incl_input_valid_transition _ (vtype Ui) (vmachine Ui) (vmachine Ri))
+  by apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
@@ -487,7 +487,7 @@ Lemma finite_valid_trace_from_to_size_Ui :
 Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_valid_trace_from_to_size_Ri.
-  by apply (@VLSM_incl_finite_valid_trace_from_to _ (vtype Ui) (vmachine Ui) (vmachine Ri))
+  by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
@@ -497,7 +497,7 @@ Lemma finite_valid_trace_from_to_inv_Ui :
 Proof.
   intros s tr Hfvt.
   eapply finite_valid_trace_from_to_inv_Ri.
-  by apply (@VLSM_incl_finite_valid_trace_from_to _ (vtype Ui) (vmachine Ui) (vmachine Ri))
+  by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
@@ -535,7 +535,7 @@ Lemma input_valid_transition_deterministic_conv_Ui :
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
   by eapply input_valid_transition_deterministic_conv_Ri
-  ; apply (@VLSM_incl_input_valid_transition _ (vtype Ui) (vmachine Ui) (vmachine Ri))
+  ; apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
@@ -1444,15 +1444,15 @@ Definition UMO_transition_item : Type := composite_transition_item U.
 (** We can lift labels, states and traces from an UMO component to the UMO protocol. *)
 
 Definition lift_to_UMO_label
-  (i : index) (li : vlabel (U i)) : UMO_label :=
+  (i : index) (li : VLSM.label (U i)) : UMO_label :=
     lift_to_composite_label U i li.
 
 Definition lift_to_UMO_state
-  (us : UMO_state) (i : index) (si : vstate (U i)) : UMO_state :=
+  (us : UMO_state) (i : index) (si : VLSM.state (U i)) : UMO_state :=
     lift_to_composite_state U us i si.
 
 Definition lift_to_UMO_trace
-  (us : UMO_state) (i : index) (tr : list (vtransition_item (U i)))
+  (us : UMO_state) (i : index) (tr : list (transition_item (U i)))
   : list UMO_transition_item :=
     pre_VLSM_embedding_finite_trace_project
       _ _ (lift_to_UMO_label i) (lift_to_UMO_state us i) tr.
@@ -1504,7 +1504,7 @@ Proof.
 Qed.
 
 Lemma lift_to_UMO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (U i))) (us : UMO_state),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (U i))) (us : UMO_state),
     valid_state_prop UMO us ->
     finite_valid_trace_from_to (U i) s1 s2 tr ->
       finite_valid_trace_from_to
@@ -1522,7 +1522,7 @@ Lemma lift_to_RUMO
 Proof. by apply lift_to_preloaded_free_weak_embedding. Qed.
 
 Lemma lift_to_RUMO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (R i))) (us : UMO_state),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (R i))) (us : UMO_state),
     valid_state_prop RUMO us ->
     finite_valid_trace_from_to (R i) s1 s2 tr ->
       finite_valid_trace_from_to
@@ -1603,7 +1603,7 @@ Proof.
   intros us Hvsp.
   apply all_pre_traces_to_valid_state_are_valid; [typeclasses eauto | done |].
   apply finite_valid_trace_from_to_UMO_state2trace_RUMO.
-  eapply (@VLSM_incl_valid_state _ (vtype UMO) (vmachine UMO) (vmachine RUMO)); [| done].
+  eapply (@VLSM_incl_valid_state _ UMO UMO RUMO); [| done].
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 

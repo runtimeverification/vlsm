@@ -92,7 +92,7 @@ Qed.
 Lemma fixed_equivocation_vlsm_composition_incl_preloaded_free
   : VLSM_incl fixed_equivocation_vlsm_composition (pre_loaded_with_all_messages_vlsm Free).
 Proof.
-  apply VLSM_incl_trans with (machine Free).
+  apply VLSM_incl_trans with Free.
   - by apply fixed_equivocation_vlsm_composition_incl_free.
   - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -228,7 +228,7 @@ Context
   .
 
 Lemma equivocators_composition_for_directly_observed_index_incl_embedding
-  (s : state)
+  (s : state (composite_type IM))
   : VLSM_embedding
     (equivocators_composition_for_directly_observed IM indices1 s)
     (equivocators_composition_for_directly_observed IM indices2 s)
@@ -433,9 +433,9 @@ Proof.
     apply strong_fixed_equivocation_eqv_valid_message.
     by apply (fixed_input_has_strong_fixed_equivocation_helper _ _ Ht).
   - by apply Ht.
-  - apply proj2 in Ht. simpl in Ht.
-    simpl. unfold sub_IM at 2. simpl. unfold composite_state_sub_projection at 1. simpl.
-    destruct (vtransition _ _ _) as (si', om').
+  - destruct Ht as [_ Ht]; cbn in Ht.
+    cbn; unfold sub_IM at 2; cbn; unfold composite_state_sub_projection at 1; cbn.
+    destruct (transition li _) as (si', om').
     inversion_clear Ht. f_equal.
     clear.
     apply functional_extensionality_dep. intro sub_j.
@@ -536,7 +536,7 @@ Proof.
            with (composite_state_sub_projection IM (elements equivocators) s)
         ; [done |].
         destruct Ht as [_ Ht]; cbn in Ht;
-        destruct l as (i, li), (vtransition _ _ _) as (si', om');
+        destruct l as (i, li), (transition _ _ _) as (si', om');
         inversion_clear Ht; clear -Hl.
         extensionality sub_j; destruct_dec_sig sub_j j Hj Heqsub_j;
         subst; unfold composite_state_sub_projection.
@@ -841,7 +841,7 @@ Proof.
     case_decide as Hi; inversion_clear 1.
     intros s om s' om';
     rewrite lift_sub_state_to_neq by done;
-    destruct (vtransition _ _ _) as (si', _om');
+    destruct (transition _ _ _) as (si', _om');
     inversion_clear 1.
     f_equal; extensionality j.
     by destruct (decide (i = j)); subst; state_update_simpl.
@@ -850,7 +850,7 @@ Proof.
     unfold remove_equivocating_label_project; cbn.
     case_decide as Hi; [| by congruence].
     intros _ s om s' om';
-    destruct (vtransition _ _ _) as (si', _om') eqn: Hti;
+    destruct (transition _ _ _) as (si', _om') eqn: Hti;
     inversion_clear 1.
     extensionality j.
     unfold lift_sub_state_to.
@@ -922,7 +922,7 @@ Qed.
 *)
 Lemma EquivPreloadedBase_Fixed_weak_embedding
   (no_initial_messages_for_equivocators :
-    forall i m, i ∈ equivocators -> ~ vinitial_message_prop (IM i) m)
+    forall i m, i ∈ equivocators -> ~ initial_message_prop (IM i) m)
   : VLSM_weak_embedding EquivPreloadedBase Fixed
       (lift_sub_label IM (elements equivocators)) (lift_sub_state_to IM (elements equivocators) base_s).
 Proof.
@@ -946,7 +946,7 @@ Proof.
     destruct_dec_sig sub_i j Hj Heq; subst;
     unfold input_valid_transition; cbn; unfold sub_IM; cbn;
     rewrite lift_sub_state_to_eq with (Hi := Hj);
-    destruct (vtransition _ _ _) as (si', _om');
+    destruct (transition _ _ _) as (si', _om');
     intros [_ Ht]; inversion_clear Ht.
     f_equal; extensionality i.
     destruct (decide (i = j)); subst; state_update_simpl.

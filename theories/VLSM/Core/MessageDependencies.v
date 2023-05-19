@@ -1,6 +1,6 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble ListExtras ListFinSetExtras.
+From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
@@ -36,7 +36,7 @@ Definition message_dependencies_full_node_condition
   (message_dependencies : message -> Cm)
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
-  (s : vstate X)
+  (s : state X)
   (m : message)
   : Prop :=
   forall dm, dm ∈ message_dependencies m -> has_been_directly_observed X s dm.
@@ -102,7 +102,7 @@ Context
 *)
 Definition message_dependencies_full_node_condition_prop : Prop :=
   forall l s m,
-  vvalid X l (s, Some m) ->
+  valid X l (s, Some m) ->
   message_dependencies_full_node_condition X message_dependencies s m.
 
 (** Unrolling one the [msg_dep_happens_before] relation one step. *)
@@ -127,7 +127,7 @@ Proof. by apply tc_reflect. Qed.
   [valid_message_prop]erty.
 *)
 Lemma msg_dep_reflects_validity
-  (no_initial_messages_in_X : forall m, ~ vinitial_message_prop X m)
+  (no_initial_messages_in_X : forall m, ~ initial_message_prop X m)
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
   : forall dm m, msg_dep_rel dm m ->
@@ -143,15 +143,15 @@ Proof.
     by contradict Hinit; apply no_initial_messages_in_X.
   - apply (directly_observed_valid (pre_loaded_vlsm X P) s).
     + by exists (Some m); apply can_produce_valid.
-    + destruct X.
+    + destruct X as [T M].
       eapply VLSM_incl_has_been_directly_observed
         with HasBeenSentCapability0 HasBeenReceivedCapability0; cycle 2.
       * eapply @message_dependencies_are_necessary; [done | | done].
         by apply (VLSM_incl_can_produce
-          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P)).
       * by apply basic_VLSM_incl_preloaded; cbv.
       * apply (VLSM_incl_valid_state
-          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm vmachine) P)).
+          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P)).
         by eexists; eapply can_produce_valid.
 Qed.
 
@@ -284,7 +284,7 @@ Context
   observed in the state (as sent or received), or it happens before (in the sense
   of the [msg_dep_happens_before] relation) a directly observed message.
 *)
-Inductive HasBeenObserved (s : vstate X) (m : message) : Prop :=
+Inductive HasBeenObserved (s : state X) (m : message) : Prop :=
 | hbo_directly :
     has_been_directly_observed X s m ->
     HasBeenObserved s m
@@ -337,18 +337,18 @@ Qed.
   message depending on a directly observed one).
 *)
 Inductive ObservedBeforeStateOrMessage
-  : message -> vstate X -> option message -> Prop :=
-| observed_before_state (m : message) (s : vstate X) (_oim : option message) :
+  : message -> state X -> option message -> Prop :=
+| observed_before_state (m : message) (s : state X) (_oim : option message) :
     HasBeenObserved s m ->
     ObservedBeforeStateOrMessage m s _oim
-| observed_is_message (m : message) (_s : vstate X) :
+| observed_is_message (m : message) (_s : state X) :
     ObservedBeforeStateOrMessage m _s (Some m)
-| observed_before_message (m : message) (_s : vstate X) (im : message) :
+| observed_before_message (m : message) (_s : state X) (im : message) :
     msg_dep_happens_before message_dependencies m im ->
     ObservedBeforeStateOrMessage m _s (Some im).
 
 Record ObservedBeforeSendTransition
-  (s : vstate X) (item : vtransition_item X) (m1 m2 : message) : Prop :=
+  (s : state X) (item : transition_item X) (m1 m2 : message) : Prop :=
 {
   dobst_transition : input_valid_transition_item R s item;
   dobst_output_m2 : output item = Some m2;
@@ -381,7 +381,7 @@ Qed.
   not comparable according to the [msg_dep_happens_before] relation.
 *)
 Record MsgDepLocalEquivocationEvidence
-  (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
+  (s : state X) (v : validator) (m1 m2 : message) : Prop :=
 {
   mdlee_sender1 : sender m1 = Some v;
   mdlee_sender2 : sender m2 = Some v;
@@ -390,7 +390,7 @@ Record MsgDepLocalEquivocationEvidence
   mdlee_incomparable : ~ comparable (msg_dep_happens_before message_dependencies) m1 m2;
 }.
 
-Definition msg_dep_is_locally_equivocating (s : vstate X) (v : validator) : Prop :=
+Definition msg_dep_is_locally_equivocating (s : state X) (v : validator) : Prop :=
   exists m1 m2, MsgDepLocalEquivocationEvidence s v m1 m2.
 
 (**
@@ -400,7 +400,7 @@ Definition msg_dep_is_locally_equivocating (s : vstate X) (v : validator) : Prop
   [msg_dep_full_node_happens_before_reflects_has_been_directly_observed].
 *)
 Record FullNodeLocalEquivocationEvidence
-  (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
+  (s : state X) (v : validator) (m1 m2 : message) : Prop :=
 {
   fnlee_sender1 : sender m1 = Some v;
   fnlee_sender2 : sender m2 = Some v;
@@ -409,7 +409,7 @@ Record FullNodeLocalEquivocationEvidence
   fnlee_incomparable : ~ comparable (msg_dep_happens_before message_dependencies) m1 m2;
 }.
 
-Definition full_node_is_locally_equivocating (s : vstate X) (v : validator) : Prop :=
+Definition full_node_is_locally_equivocating (s : state X) (v : validator) : Prop :=
   exists m1 m2, FullNodeLocalEquivocationEvidence s v m1 m2.
 
 (**
@@ -418,7 +418,7 @@ Definition full_node_is_locally_equivocating (s : vstate X) (v : validator) : Pr
   a state would be totally ordered by [msg_dep_rel].
 *)
 Definition has_been_sent_msg_dep_comparable_prop : Prop :=
-  forall (s : vstate X), valid_state_prop R s ->
+  forall (s : state X), valid_state_prop R s ->
   forall (m1 m2 : message),
     has_been_sent X s m1 ->
     has_been_sent X s m2 ->
@@ -429,7 +429,7 @@ Definition has_been_sent_msg_dep_comparable_prop : Prop :=
   both full-node and [has_been_sent_msg_dep_comparable_prop].
 *)
 Record FullNodeSentLocalEquivocationEvidence
-  (s : vstate X) (v : validator) (m1 m2 : message) : Prop :=
+  (s : state X) (v : validator) (m1 m2 : message) : Prop :=
 {
   fnslee_sender1 : sender m1 = Some v;
   fnslee_sender2 : sender m2 = Some v;
@@ -439,7 +439,7 @@ Record FullNodeSentLocalEquivocationEvidence
 }.
 
 Definition full_node_is_sent_locally_equivocating
-  (s : vstate X) (v : validator) : Prop :=
+  (s : state X) (v : validator) : Prop :=
   exists m1 m2, FullNodeSentLocalEquivocationEvidence s v m1 m2.
 
 Lemma full_node_is_sent_locally_equivocating_weaker s v :
@@ -697,7 +697,7 @@ Definition composite_observed_before_send (m1 m2 : message) : Prop :=
   exists s item, CompositeObservedBeforeSendTransition s item m1 m2.
 
 Lemma composite_ObservedBeforeSendTransition_lift :
-  forall (i : index) (s : vstate (IM i)) (item : vtransition_item (IM i))
+  forall (i : index) (s : state (IM i)) (item : transition_item (IM i))
     (m1 m2 : message),
   ObservedBeforeSendTransition (IM i) message_dependencies s item m1 m2 ->
   CompositeObservedBeforeSendTransition

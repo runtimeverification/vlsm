@@ -21,12 +21,12 @@ Context
 
 Record annotated_state : Type :=
 {
-  original_state : vstate X;
+  original_state : state X;
   state_annotation : annotation;
 }.
 
 Definition annotated_type : VLSMType message :=
-  {| label := vlabel X;
+  {| label := label X;
      state := annotated_state
   |}.
 
@@ -36,7 +36,7 @@ Context
   .
 
 Definition annotated_initial_state_prop (sa : annotated_state) : Prop :=
-  vinitial_state_prop X (original_state sa) /\ initial_annotation_prop (state_annotation sa).
+  initial_state_prop X (original_state sa) /\ initial_annotation_prop (state_annotation sa).
 
 #[export] Program Instance annotated_initial_state_prop_inhabited :
   Inhabited {sa : annotated_state | annotated_initial_state_prop sa} :=
@@ -50,28 +50,28 @@ Qed.
 
 Context
   (annotated_constraint :
-    @label _ annotated_type -> annotated_state * option message -> Prop)
+    label annotated_type -> annotated_state * option message -> Prop)
   (annotated_transition_state :
-    @label _ annotated_type -> annotated_state * option message -> annotation)
+    label annotated_type -> annotated_state * option message -> annotation)
   .
 
 Definition annotated_valid
-  (l : @label _ annotated_type)
+  (l : label annotated_type)
   (som : annotated_state * option message)
   : Prop :=
-  vvalid X l (original_state som.1, som.2) /\
+  valid X l (original_state som.1, som.2) /\
   annotated_constraint l som.
 
 Definition annotated_transition
-  (l : @label _ annotated_type)
+  (l : label annotated_type)
   (som : annotated_state * option message)
   : annotated_state * option message :=
-  let (s', om') := vtransition X l (original_state som.1, som.2) in
+  let (s', om') := transition X l (original_state som.1, som.2) in
   ({| original_state := s'; state_annotation := annotated_transition_state l som |}, om').
 
 Definition annotated_vlsm_machine : VLSMMachine annotated_type :=
-  {| initial_state_prop := fun s : @state _ annotated_type => annotated_initial_state_prop s
-  ; initial_message_prop := fun m : message => vinitial_message_prop X m
+  {| initial_state_prop := fun s : state annotated_type => annotated_initial_state_prop s
+  ; initial_message_prop := fun m : message => initial_message_prop X m
   ; valid := annotated_valid
   ; transition := annotated_transition
   |}.
@@ -79,10 +79,10 @@ Definition annotated_vlsm_machine : VLSMMachine annotated_type :=
 Definition annotated_vlsm : VLSM message := mk_vlsm annotated_vlsm_machine.
 
 Definition annotate_trace_item
-  (item : vtransition_item X)
-  (k : annotated_state -> list (@transition_item _ annotated_type))
+  (item : transition_item X)
+  (k : annotated_state -> list (transition_item annotated_type))
   (sa : annotated_state)
-  : list (@transition_item _ annotated_type) :=
+  : list (transition_item annotated_type) :=
     let sa' :=
       {|
         original_state := destination item;
@@ -92,23 +92,23 @@ Definition annotate_trace_item
       @Build_transition_item _ annotated_type (l item) (input item) sa' (output item) :: k sa'.
 
 Lemma annotate_trace_item_project
-  (item : vtransition_item X)
-  (k : annotated_state -> list (@transition_item _ annotated_type))
+  (item : transition_item X)
+  (k : annotated_state -> list (transition_item annotated_type))
   (sa : annotated_state)
   : pre_VLSM_embedding_finite_trace_project
-      annotated_type (type X) id original_state
+      annotated_type X id original_state
       (annotate_trace_item item k sa)
       = item ::
         pre_VLSM_embedding_finite_trace_project
-            annotated_type (type X) id original_state
+            annotated_type X id original_state
             (k {| original_state := destination item;
                   state_annotation := annotated_transition_state (l item) (sa, input item) |}).
 Proof.
   by destruct item.
 Qed.
 
-Definition annotate_trace_from (sa : @state _ annotated_type) (tr : list (vtransition_item X))
-  : list (@transition_item _ annotated_type) :=
+Definition annotate_trace_from (sa : state annotated_type) (tr : list (transition_item X))
+  : list (transition_item annotated_type) :=
   fold_right annotate_trace_item (fun sa => []) tr sa.
 
 Lemma annotate_trace_from_unroll sa item tr
@@ -147,8 +147,8 @@ Proof.
   by rewrite! finite_trace_last_is_last.
 Qed.
 
-Definition annotate_trace (s : vstate X) (tr : list (vtransition_item X))
-  : list (@transition_item _ annotated_type) :=
+Definition annotate_trace (s : state X) (tr : list (transition_item X))
+  : list (transition_item annotated_type) :=
   annotate_trace_from {| original_state := s; state_annotation := ` inhabitant |} tr.
 
 Lemma annotate_trace_last_original_state s s' tr
@@ -158,7 +158,7 @@ Proof. by apply annotate_trace_from_last_original_state. Qed.
 
 Lemma annotate_trace_project is tr
   : pre_VLSM_embedding_finite_trace_project
-      annotated_type (type X) id original_state
+      annotated_type X id original_state
       (annotate_trace is tr)
       = tr.
 Proof.
@@ -183,10 +183,10 @@ Context
   (initial_annotation_prop : annotation -> Prop)
   `{Inhabited (sig initial_annotation_prop)}
   (annotated_constraint :
-    @label _ (annotated_type X annotation) ->
+    label (annotated_type X annotation) ->
       annotated_state X annotation  * option message -> Prop)
   (annotated_transition_state :
-    @label _ (annotated_type X annotation) ->
+    label (annotated_type X annotation) ->
       annotated_state X annotation * option message -> annotation)
   (AnnotatedX : VLSM message :=
     annotated_vlsm X annotation initial_annotation_prop annotated_constraint
@@ -199,7 +199,7 @@ Proof.
   apply basic_VLSM_strong_embedding; cycle 1; [| by cbv; itauto..].
   intros l [s a] om [s' a'] om'.
   cbn; unfold annotated_transition; cbn
-  ; destruct (vtransition _ _ _) as (_s', _om').
+  ; destruct (transition _ _ _) as (_s', _om').
   by inversion 1.
 Qed.
 
@@ -218,10 +218,10 @@ Context
   (initial_annotation_prop : annotation -> Prop)
   `{Inhabited (sig initial_annotation_prop)}
   (annotated_constraint :
-    @label _ (annotated_type Free annotation) ->
+    label (annotated_type Free annotation) ->
       annotated_state Free annotation  * option message -> Prop)
   (annotated_transition_state :
-    @label _ (annotated_type Free annotation) ->
+    label (annotated_type Free annotation) ->
       annotated_state Free annotation * option message -> annotation)
   (AnnotatedFree : VLSM message :=
     annotated_vlsm Free annotation initial_annotation_prop annotated_constraint
@@ -229,10 +229,10 @@ Context
   (i : index)
   .
 
-Definition annotated_composite_label_project : vlabel AnnotatedFree -> option (vlabel (IM i))
+Definition annotated_composite_label_project : label AnnotatedFree -> option (label (IM i))
   := composite_project_label IM i.
 
-Definition annotated_composite_state_project : vstate AnnotatedFree -> vstate (IM i)
+Definition annotated_composite_state_project : state AnnotatedFree -> state (IM i)
   := fun s => original_state s i.
 
 Definition annotated_projection_validator_prop : Prop :=
@@ -242,10 +242,10 @@ Definition annotated_projection_validator_prop : Prop :=
 Definition annotated_message_validator_prop : Prop :=
   @message_validator_prop _ AnnotatedFree (IM i).
 
-Definition annotated_composite_label_lift : vlabel (IM i) -> vlabel AnnotatedFree
+Definition annotated_composite_label_lift : label (IM i) -> label AnnotatedFree
   := lift_to_composite_label IM i.
 
-Definition annotated_composite_state_lift : vstate (IM i) -> vstate AnnotatedFree
+Definition annotated_composite_state_lift : state (IM i) -> state AnnotatedFree
   := fun si =>
      @Build_annotated_state _ (free_composite_vlsm IM) _
       (lift_to_composite_state' IM i si) (` inhabitant).
@@ -272,7 +272,7 @@ Proof.
     intros [s ann] iom [s' ann'] oom.
     unfold input_valid_transition; cbn
     ; unfold annotated_transition; cbn
-    ; destruct (vtransition _ _ _) as (si', om').
+    ; destruct (transition _ _ _) as (si', om').
     intros [_ Ht]; inversion Ht.
     by state_update_simpl.
   - intros [j lj].
@@ -281,7 +281,7 @@ Proof.
     intros _ [s ann] iom [s' ann'] oom.
     unfold input_valid_transition; cbn
     ; unfold annotated_transition; cbn
-    ; destruct (vtransition _ _ _) as (si', om').
+    ; destruct (transition _ _ _) as (si', om').
     intros [_ Ht]; inversion Ht.
     by state_update_simpl.
   - by intros [s ann] [Hs _]; cbn; apply Hs.
@@ -289,7 +289,7 @@ Proof.
 Qed.
 
 Definition annotated_composite_induced_validator : VLSM message
-  := projection_induced_validator AnnotatedFree (type (IM i))
+  := projection_induced_validator AnnotatedFree (IM i)
     annotated_composite_label_project annotated_composite_state_project
     annotated_composite_label_lift annotated_composite_state_lift.
 
@@ -302,7 +302,7 @@ Proof.
   case_decide as Hij; [by congruence |].
   intros _ sX omX s'X om'X [_ Ht]; revert Ht; cbn.
   unfold annotated_transition; cbn
-  ; destruct (vtransition _ _ _) as (si', om')
+  ; destruct (transition _ _ _) as (si', om')
   ; inversion 1; clear Ht; subst om' s'X; cbn.
   by state_update_simpl.
 Qed.
@@ -337,7 +337,7 @@ Proof.
   intros [s1 ann1] [s2 ann2]
   ; unfold annotated_transition; cbn
   ; intros <- iom sX1' oom1
-  ; destruct (vtransition _ _ _) as (si', om').
+  ; destruct (transition _ _ _) as (si', om').
   inversion_clear 1; intros sX2' oom2; inversion_clear 1.
   by cbn; state_update_simpl.
 Qed.

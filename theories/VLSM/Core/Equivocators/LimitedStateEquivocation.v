@@ -20,11 +20,11 @@ Definition composite_constraint
 Lemma equivocator_initial_state_project
   {message}
   (X : VLSM message)
-  (es : vstate (equivocator_vlsm X))
+  (es : state (equivocator_vlsm X))
   (eqv_descriptor : MachineDescriptor X)
   (Heqv : proper_descriptor X eqv_descriptor es)
-  (Hes : vinitial_state_prop (equivocator_vlsm X) es) :
-  vinitial_state_prop X (equivocator_state_descriptor_project es eqv_descriptor).
+  (Hes : initial_state_prop (equivocator_vlsm X) es) :
+  initial_state_prop X (equivocator_state_descriptor_project es eqv_descriptor).
 Proof.
   destruct eqv_descriptor; [done |].
   destruct Heqv as [esn Hesn].
@@ -41,8 +41,8 @@ Lemma composite_equivocators_initial_state_project
   {eqv_constraint : composite_constraint (equivocator_IM IM)}
   {constraint : composite_constraint IM}
   (Heqv : proper_equivocator_descriptors IM eqv_descriptors es)
-  (Hes : vinitial_state_prop (composite_vlsm (equivocator_IM IM) eqv_constraint) es)
-  : vinitial_state_prop (composite_vlsm IM constraint)
+  (Hes : initial_state_prop (composite_vlsm (equivocator_IM IM) eqv_constraint) es)
+  : initial_state_prop (composite_vlsm IM constraint)
       (equivocators_state_project IM eqv_descriptors es).
 Proof.
   refine (fun i => equivocator_initial_state_project _ _ _ (Heqv i) (Hes i)).
@@ -224,12 +224,12 @@ Proof.
   apply equivocators_limited_valid_trace_is_fixed in Hfixed_tr.
   apply valid_trace_last_pstate in Hfixed_tr as Hfixed_last.
   apply valid_trace_forget_last in Hfixed_tr.
-  specialize (fixed_equivocators_valid_trace_project IM
-    (equivocating_validators (finite_trace_last is tr)) final_descriptors is tr) as Hpr.
-  feed specialize Hpr; [| done |].
+  destruct (fixed_equivocators_valid_trace_project IM
+    (equivocating_validators (finite_trace_last is tr)) final_descriptors is tr)
+    as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_fixed).
   - by eapply not_equivocating_equivocator_descriptors_proper_fixed.
-  - destruct Hpr as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_fixed).
-    exists trX, initial_descriptors.
+  - done.
+  - exists trX, initial_descriptors.
     split_and!; [by apply Hinitial_descriptors | done | done |].
     exists (equivocating_validators (finite_trace_last is tr)).
     split.

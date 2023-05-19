@@ -416,7 +416,7 @@ Context
 
 (** The VLSM [Mi] embeds into [RMi]. *)
 Lemma VLSM_incl_Mi_RMi :
-  VLSM_incl_part (vmachine Mi) (vmachine RMi).
+  VLSM_incl_part Mi RMi.
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -583,7 +583,7 @@ Lemma input_valid_transition_size_Mi :
 Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_valid_transition_size_RMi.
-  by apply (@VLSM_incl_input_valid_transition _ (vtype Mi) (vmachine Mi) (vmachine RMi))
+  by apply (@VLSM_incl_input_valid_transition _ Mi Mi RMi)
   ; eauto using VLSM_incl_Mi_RMi.
 Qed.
 
@@ -596,7 +596,7 @@ Lemma finite_valid_trace_from_to_size_Mi :
 Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_valid_trace_from_to_size_RMi.
-  by apply (@VLSM_incl_finite_valid_trace_from_to _ (vtype Mi) (vmachine Mi) (vmachine RMi))
+  by apply (@VLSM_incl_finite_valid_trace_from_to _ Mi Mi RMi)
   ; eauto using VLSM_incl_Mi_RMi.
 Qed.
 
@@ -608,7 +608,7 @@ Lemma input_valid_transition_deterministic_conv_Mi :
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
   by eapply input_valid_transition_deterministic_conv_RMi
-  ; apply (@VLSM_incl_input_valid_transition _ (vtype Mi) (vmachine Mi) (vmachine RMi))
+  ; apply (@VLSM_incl_input_valid_transition _ Mi Mi RMi)
   ; eauto using VLSM_incl_Mi_RMi.
 Qed.
 
@@ -825,15 +825,15 @@ Definition MO_transition_item : Type := composite_transition_item M.
 (** We can lift labels, states and traces from an MO component to the MO protocol. *)
 
 Definition lift_to_MO_label
-  (i : index) (li : vlabel (M i)) : MO_label :=
+  (i : index) (li : VLSM.label (M i)) : MO_label :=
     lift_to_composite_label M i li.
 
 Definition lift_to_MO_state
-  (us : MO_state) (i : index) (si : vstate (M i)) : MO_state :=
+  (us : MO_state) (i : index) (si : VLSM.state (M i)) : MO_state :=
     lift_to_composite_state M us i si.
 
 Definition lift_to_MO_trace
-  (us : MO_state) (i : index) (tr : list (vtransition_item (M i)))
+  (us : MO_state) (i : index) (tr : list (transition_item (M i)))
   : list MO_transition_item :=
     pre_VLSM_embedding_finite_trace_project
       _ _ (lift_to_MO_label i) (lift_to_MO_state us i) tr.
@@ -891,7 +891,7 @@ Proof.
 Qed.
 
 Lemma lift_to_MO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (M i))) (us : MO_state),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (M i))) (us : MO_state),
     valid_state_prop MO us ->
     finite_valid_trace_from_to (M i) s1 s2 tr ->
       finite_valid_trace_from_to
@@ -944,7 +944,7 @@ Proof.
 Qed.
 
 Lemma lift_to_RMO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (RM i))) (us : MO_state),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (RM i))) (us : MO_state),
     valid_state_prop RMO us ->
     finite_valid_trace_from_to (RM i) s1 s2 tr ->
       finite_valid_trace_from_to
@@ -958,8 +958,8 @@ Qed.
 
 Lemma initial_state_prop_lift_RM_to_MO :
   forall (i : index) (s : State),
-    vinitial_state_prop (RM i) s ->
-      vinitial_state_prop MO (lift_to_MO_state (``(vs0 MO)) i s).
+    initial_state_prop (RM i) s ->
+      initial_state_prop MO (lift_to_MO_state (``(vs0 MO)) i s).
 Proof.
   intros i s Hisp j; cbn.
   by destruct (decide (i = j)); subst; state_update_simpl.
@@ -967,7 +967,7 @@ Qed.
 
 Lemma finite_valid_trace_lift_RM_to_MO :
   forall (i : index) (s : State),
-    vinitial_state_prop (RM i) s ->
+    initial_state_prop (RM i) s ->
       finite_valid_trace_init_to MO
         (lift_to_MO_state (``(vs0 MO)) i s) (lift_to_MO_state (``(vs0 MO)) i s) [].
 Proof.
@@ -1046,7 +1046,7 @@ Proof.
 Qed.
 
 Lemma lift_to_MO_finite_valid_trace_init_to :
-  forall (i : index) (s1 s2 : State) (tr : list (vtransition_item (M i))),
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (M i))),
     finite_valid_trace_init_to (RM i) s1 s2 tr ->
       finite_valid_trace_init_to MO (lift_to_MO_state (``(vs0 MO)) i s1)
         (lift_to_MO_state (``(vs0 MO)) i s2) (lift_to_MO_trace (``(vs0 MO)) i tr).
@@ -1149,7 +1149,7 @@ Proof.
   unfold component_projection_validator_prop.
   intros i lj sj omi * Hiv.
   apply input_valid_transition_iff in Hiv as [[s m] Ht].
-  apply exists_right_finite_trace_from in Ht as (s' & tr & Hfvt & Hlast).
+  destruct (exists_right_finite_trace_from _ _ _ _ _ _ Ht) as (s' & tr & Hfvt & Hlast).
   apply lift_to_MO_finite_valid_trace_init_to in Hfvt as [Hfvt _].
   unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project in Hfvt;
     rewrite map_app in Hfvt.
@@ -1160,7 +1160,7 @@ Proof.
             (lift_to_MO_state (fun j : index => MkState [] (idx j)) i s')
             (lift_to_MO_trace (fun j : index => MkState [] (idx j)) i tr)) in Heqftl.
   apply valid_trace_forget_last, first_transition_valid in Hfvt; cbn in *.
-  destruct Hfvt as [[Hvps [Hovmp [Hv1 Hv2]]] Ht]; cbn in Hv1, Hv2.
+  destruct Hfvt as [[Hvps [Hovmp [Hv1 Hv2]]] Ht']; cbn in Hv1, Hv2.
   unfold lift_to_MO_trace in Heqftl; cbn in Heqftl.
   rewrite <- pre_VLSM_embedding_finite_trace_last, Hlast in Heqftl.
   exists ftl; split; [| done].
@@ -1255,7 +1255,7 @@ Record local_equivocators (s : State) (i : Address) : Prop :=
 Set Warnings "cannot-define-projection".
 
 Definition composite_rec_observation
-  (s : vstate MO) (ob : Observation) : Prop :=
+  (s : VLSM.state MO) (ob : Observation) : Prop :=
     exists i : index, rec_obs (s i) ob.
 
 Definition state_after_sending (m : Message) : State :=
@@ -1263,7 +1263,7 @@ Definition state_after_sending (m : Message) : State :=
 
 Set Warnings "-cannot-define-projection".
 Record global_equivocators
-  (sigma : vstate MO) (i : index) : Prop :=
+  (sigma : VLSM.state MO) (i : index) : Prop :=
 {
   globeqv_ob : Observation;
   globeqv_adr : adr (state (message globeqv_ob)) = idx i;
@@ -1287,7 +1287,7 @@ Proof.
 Qed.
 
 Lemma messages_rec_obs :
-  forall i (s : vstate (RM i)),
+  forall i (s : VLSM.state (RM i)),
     valid_state_prop (RM i) s ->
     forall (m' : Message) (ob : Observation),
       m' ∈ messages s ->

@@ -158,7 +158,7 @@ Lemma equivocators_fixed_equivocations_vlsm_incl_PreFree :
   VLSM_incl equivocators_fixed_equivocations_vlsm
     (pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM)).
 Proof.
-  apply VLSM_incl_trans with (machine (free_composite_vlsm equivocator_IM)).
+  apply VLSM_incl_trans with (free_composite_vlsm equivocator_IM).
   - by apply equivocators_fixed_equivocations_vlsm_incl_free.
   - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
@@ -300,7 +300,7 @@ Context
   (XE : VLSM message := equivocators_fixed_equivocations_vlsm IM (elements equivocating))
   (X : VLSM message := fixed_equivocation_vlsm_composition IM equivocating)
   (FreeE : VLSM message := free_composite_vlsm (equivocator_IM IM))
-  (Hdec_init : forall i, vdecidable_initial_messages_prop (IM i))
+  (Hdec_init : forall i, decidable_initial_messages_prop (IM i))
   (Free := free_composite_vlsm IM)
   (index_equivocating_prop : index -> Prop := sub_index_prop (elements equivocating))
   (equivocating_index : Type := sub_index (elements equivocating))
@@ -316,7 +316,7 @@ Context
 *)
 Definition proper_fixed_equivocator_descriptors
   (eqv_descriptors : equivocator_descriptors IM)
-  (s : state)
+  (s : state (free_composite_vlsm (equivocator_IM IM)))
   : Prop
   := proper_equivocator_descriptors IM eqv_descriptors s /\
     forall i, i ∉ equivocating -> eqv_descriptors i = Existing 0.
@@ -371,11 +371,11 @@ Proof.
 Qed.
 
 Lemma fixed_equivocators_initial_state_project
-  (es : vstate XE)
-  (Hes : vinitial_state_prop XE es)
+  (es : state XE)
+  (Hes : initial_state_prop XE es)
   (eqv_descriptors : equivocator_descriptors IM)
   (Heqv : proper_equivocator_descriptors IM eqv_descriptors es)
-  : vinitial_state_prop X (equivocators_state_project IM eqv_descriptors es).
+  : initial_state_prop X (equivocators_state_project IM eqv_descriptors es).
 Proof.
   intro eqv. specialize (Hes eqv).
   unfold equivocator_IM in Hes.
@@ -459,7 +459,7 @@ Proof.
   - clear IHlen. subst. exists [], final_descriptors.
     split; [done |]. split; [done |]. split; [done |].
     remember (equivocators_state_project IM final_descriptors is) as isx.
-    cut (vinitial_state_prop X' isx).
+    cut (initial_state_prop X' isx).
     { intro His. split; [| done]. constructor.
       apply valid_state_prop_iff. left.
       by exists (exist _ _ His).
@@ -606,7 +606,7 @@ Lemma free_equivocators_valid_trace_project
   (final_descriptors : equivocator_descriptors IM)
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
-  (final_state := @finite_trace_last _ (@type _ XE) is tr)
+  (final_state := @finite_trace_last _ XE is tr)
   (Hproper : proper_fixed_equivocator_descriptors final_descriptors final_state)
   (Htr : finite_valid_trace XE is tr)
   : exists
@@ -627,7 +627,7 @@ Qed.
   in any projection of the final state.
 *)
 Lemma not_equivocating_sent_message_has_been_directly_observed_in_projection
-  (is : vstate XE)
+  (is : state XE)
   (tr : list (composite_transition_item (equivocator_IM IM)))
   (Htr : finite_valid_trace XE is tr)
   (lst := finite_trace_last is tr)
@@ -647,7 +647,7 @@ Proof.
 
   assert (Htr_Pre : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) is tr).
   { revert Htr. apply VLSM_incl_finite_valid_trace.
-    apply VLSM_incl_trans with (machine FreeE);
+    apply VLSM_incl_trans with FreeE;
     [| by apply vlsm_incl_pre_loaded_with_all_messages_vlsm].
     apply equivocators_fixed_equivocations_vlsm_incl_free.
   }
@@ -716,17 +716,16 @@ Proof.
   destruct item. simpl in *.
   apply first_transition_valid in Hpre_item_free. simpl in Hpre_item_free.
   destruct Hpre_item_free as [[_ [_ [Hv _]]] Ht].
-  destruct l. simpl in *. unfold vtransition in Ht. simpl in Ht.
-  match type of Ht with
-  | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn: Hti
-  end.
+  destruct l as [x l].
+  cbn in *.
+  destruct (equivocator_transition (IM x) l _) as [si' om'] eqn: Hti.
   inversion Ht; subst; clear Ht.
   state_update_simpl.
   destruct (equivocator_transition_no_equivocation_zero_descriptor
     (IM x) _ _ _ _ _ Hv Hti Hsingleton_d_item) as [li Hsndv].
   unfold equivocators_transition_item_project in Hpr.
   simpl in Hpr.
-  subst v.
+  subst l.
   unfold ProjectionTraces.composite_transition_item_projection in Hpr.
   unfold ProjectionTraces.composite_transition_item_projection_from_eq in Hpr.
   simpl in Hpr.
@@ -757,8 +756,8 @@ Qed.
   valid ([finite_valid_trace_sub_projection]).
 *)
 Lemma equivocators_trace_sub_item_input_is_seeded_or_sub_previously_sent
-  (is : vstate XE)
-  (tr : list (vtransition_item XE))
+  (is : state XE)
+  (tr : list (transition_item XE))
   (s := finite_trace_last is tr)
   (Htr : finite_valid_trace XE is tr)
   (descriptors : equivocator_descriptors IM)
@@ -784,7 +783,7 @@ Proof.
   }
   assert (Htr_free : finite_valid_trace  (pre_loaded_with_all_messages_vlsm FreeE) is tr).
   { revert Htr.  apply VLSM_incl_finite_valid_trace.
-    apply VLSM_incl_trans with (machine FreeE)
+    apply VLSM_incl_trans with FreeE
     ; [by apply equivocators_fixed_equivocations_vlsm_incl_free |].
     by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
@@ -801,7 +800,7 @@ Proof.
     (finite_trace_last is pre) ([item] ++ suf)).
   {
     revert Hsuf; apply VLSM_incl_finite_valid_trace_from.
-    apply VLSM_incl_trans with (machine FreeE)
+    apply VLSM_incl_trans with FreeE
     ; [by apply equivocators_fixed_equivocations_vlsm_incl_free |].
     by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
@@ -812,7 +811,7 @@ Proof.
   destruct item as (l, iom, s0, oom).
   simpl in Hm. subst iom.
   destruct Hivt as [[_ [_ [_ [[Hc _] Hfixed]]]] Ht].
-  simpl in Ht, Hfixed. rewrite Ht in Hfixed. simpl in Hfixed.
+  cbn in Ht, Hfixed; rewrite Ht in Hfixed.
   clear Ht.
   destruct Hc as [Hc | Hinit]; [| done].
   assert (Hpre_free : finite_valid_trace FreeE is pre).
@@ -937,7 +936,7 @@ Proof.
     finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) (destination item) suf).
   {
     revert Hsuf. apply VLSM_incl_finite_valid_trace_from.
-    apply VLSM_incl_trans with (machine FreeE).
+    apply VLSM_incl_trans with FreeE.
     - by apply equivocators_fixed_equivocations_vlsm_incl_free.
     - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
@@ -1130,7 +1129,7 @@ Proof.
   assert (Htr'pre : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm FreeE) is s tr).
   {
     revert Htr; apply VLSM_incl_finite_valid_trace_init_to.
-    apply VLSM_incl_trans with (machine FreeE).
+    apply VLSM_incl_trans with FreeE.
     - by apply (constraint_free_incl (equivocator_IM IM)
         (equivocators_fixed_equivocations_constraint IM (elements equivocating))).
     - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.

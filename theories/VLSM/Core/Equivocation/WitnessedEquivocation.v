@@ -492,7 +492,7 @@ Proof.
     finite_valid_trace PreFree is tr ->
     trace_witnessing_equivocation_prop is tr ->
     let s := finite_trace_last is tr in
-    exists (is' : state) (tr' : list transition_item),
+    exists (is' : state PreFree) (tr' : list transition_item),
       finite_valid_trace_init_to PreFree is' s tr' /\
       (forall prefix suffix : list transition_item,
        prefix ++ suffix = tr' ->

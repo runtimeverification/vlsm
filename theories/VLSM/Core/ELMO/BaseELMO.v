@@ -496,7 +496,7 @@ Notation "m <*> ob" := (addObservationToMessage ob m) (left associativity, at le
 Notation "m <**> obs" := (addObservationsToMessage obs m) (left associativity, at level 50).
 
 (** [ram_state_prop] defines the "reachable by any means" or ram states of a VLSM. *)
-Definition ram_state_prop {message} (V : VLSM message) (s : vstate V) : Prop :=
+Definition ram_state_prop {message} (V : VLSM message) (s : VLSM.state V) : Prop :=
   valid_state_prop (pre_loaded_with_all_messages_vlsm V) s.
 
 Section sec_BaseELMO_Observations.
@@ -509,15 +509,15 @@ Context
   (Message := @Message Address)
   .
 
-#[export] Instance ELMOComponentType : VLSMType Message :=
-{
-  state := State;
-  label := Label;
-}.
+Definition ELMOComponentType : VLSMType Message :=
+{|
+  VLSM.state := State;
+  VLSM.label := Label;
+|}.
 
 (** We can extract a trace from a [list] of [Observation]s. *)
 Fixpoint observations2trace (obs : list Observation) (adr : Address)
-  : list transition_item :=
+  : list (transition_item ELMOComponentType) :=
 match obs with
 | [] => []
 | MkObservation Send msg as ob :: obs =>
@@ -526,10 +526,12 @@ match obs with
     let ob'  := MkObservation Send msg' in
     let obs' := addObservation' ob' obs in
     let dest := MkState obs' adr in
-      observations2trace obs adr ++ [Build_transition_item Send None dest (Some msg')]
+      observations2trace obs adr ++
+        [@Build_transition_item _ ELMOComponentType Send None dest (Some msg')]
 | MkObservation Receive msg as ob :: obs =>
     let dest := MkState (ob :: obs) adr in
-      observations2trace obs adr ++ [Build_transition_item Receive (Some msg) dest None]
+      observations2trace obs adr ++
+        [@Build_transition_item _ ELMOComponentType Receive (Some msg) dest None]
 end.
 
 (** A state contains a list of observations, so we can extract a trace from a state. *)

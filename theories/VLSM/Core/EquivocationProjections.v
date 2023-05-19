@@ -17,16 +17,16 @@ Section sec_projection_oracle.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> option (vlabel Y)}
-  {state_project : vstate X -> vstate Y}
+  {label_project : label X -> option (label Y)}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
 Section sec_selectors.
 
 Context
-  (selectorX : message -> vtransition_item X -> Prop)
-  (selectorY : message -> vtransition_item Y -> Prop)
+  (selectorX : message -> transition_item X -> Prop)
+  (selectorY : message -> transition_item Y -> Prop)
   (Hselector : forall itemX itemY,
     input itemX = input itemY -> output itemX = output itemY ->
     forall m, selectorX m itemX <-> selectorY m itemY)
@@ -39,8 +39,8 @@ Context
   selector is reflected to X.
 *)
 Lemma VLSM_projection_oracle_reflect
-  (oracleX : vstate X -> message -> Prop)
-  (oracleY : vstate Y -> message -> Prop)
+  (oracleX : state X -> message -> Prop)
+  (oracleY : state Y -> message -> Prop)
   (HstepwiseX : oracle_stepwise_props (vlsm := X) selectorX oracleX)
   (HstepwiseY : oracle_stepwise_props (vlsm := Y) selectorY oracleY)
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
@@ -54,11 +54,9 @@ Proof.
   apply (prove_all_have_message_from_stepwise _ _ _ _ HstepwiseY _ HsY m) in Hm.
   specialize (Hm _ _ HtrX).
   apply Exists_exists in Hm as [itemY [HitemY Hm]].
-  apply elem_of_list_In in HitemY.
-  apply pre_VLSM_projection_finite_trace_project_in_iff in HitemY
+  apply pre_VLSM_projection_finite_trace_project_elem_of_iff in HitemY
     as [itemX [HitemX Hpr]].
   apply Exists_exists.
-  apply elem_of_list_In in HitemX.
   exists itemX. split; [done |].
   revert Hm.
   unfold pre_VLSM_projection_transition_item_project in Hpr.
@@ -116,16 +114,16 @@ Section sec_weak_embedding_oracle.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
-  {state_project : vstate X -> vstate Y}
+  {label_project : label X -> label Y}
+  {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_embedding (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
 Section sec_selectors.
 
 Context
-  (selectorX : message -> vtransition_item X -> Prop)
-  (selectorY : message -> vtransition_item Y -> Prop)
+  (selectorX : message -> transition_item X -> Prop)
+  (selectorY : message -> transition_item Y -> Prop)
   (Hselector : forall itemX itemY,
     input itemX = input itemY -> output itemX = output itemY ->
     forall m, selectorX m itemX <-> selectorY m itemY)
@@ -228,8 +226,8 @@ Section sec_embedding_oracle.
 Context
   {message : Type}
   {X Y : VLSM message}
-  {label_project : vlabel X -> vlabel Y}
-  {state_project : vstate X -> vstate Y}
+  {label_project : label X -> label Y}
+  {state_project : state X -> state Y}
   (Hsimul :
     VLSM_embedding (pre_loaded_with_all_messages_vlsm X)
       (pre_loaded_with_all_messages_vlsm Y) label_project state_project)

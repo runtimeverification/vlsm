@@ -1,5 +1,5 @@
 From stdpp Require Import prelude.
-From Coq Require Import Streams Sorted.
+From Coq Require Import Streams Classical Sorted.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists NeList.
 
 (** * Stream utility definitions and lemmas *)
@@ -21,6 +21,103 @@ Proof.
   apply ForAll_coind.
   - by intros s Hp; apply fHere in Hp; apply HPQ.
   - by apply fFurther.
+Qed.
+
+Lemma Exists_map_conv :
+  forall [A B : Type] (f : A -> B) (P : Stream B -> Prop) (s : Stream A),
+    Exists P (Streams.map f s) -> Exists (fun s => P (Streams.map f s)) s.
+Proof.
+  intros A B f P s HEx.
+  remember (map f s) as fs; revert s Heqfs.
+  induction HEx; [by intros s ->; constructor |].
+  intros [a' s'] ->.
+  constructor 2; cbn.
+  by apply IHHEx.
+Qed.
+
+Lemma ForAll_tauto :
+  forall [A : Type] (P : Stream A -> Prop),
+    (forall s : Stream A, P s) -> forall s : Stream A, ForAll P s.
+Proof.
+  cofix CH.
+  by constructor; [| apply CH].
+Qed.
+
+Lemma forall_ForAll :
+  forall [A B : Type] (P : A -> Stream B -> Prop) [s : Stream B],
+    (forall (a : A), ForAll (P a) s) -> ForAll (fun s' => forall a, P a s') s.
+Proof.
+  cofix CH.
+  intros A B P [b s] H.
+  constructor.
+  - by intro a; destruct (H a).
+  - apply CH.
+    by intro a; destruct (H a).
+Qed.
+
+Lemma ForAll_impl :
+  forall [A : Type] (P Q : Stream A -> Prop) (s : Stream A),
+    ForAll (fun s => P s -> Q s) s -> ForAll P s -> ForAll Q s.
+Proof.
+  cofix CH.
+  intros A P Q [a s] []; inversion 1; subst.
+  constructor; cbn; [by apply H |].
+  by apply (CH A P Q).
+Qed.
+
+Lemma Exists_impl :
+  forall [A : Type] (P Q : Stream A -> Prop) (s : Stream A),
+    ForAll (fun s => P s -> Q s) s -> Exists P s -> Exists Q s.
+Proof.
+  intros A P Q s Hall HEx.
+  induction HEx.
+  - by apply Here, Hall.
+  - by apply Further, IHHEx; inversion Hall.
+Qed.
+
+Lemma not_Exists :
+  forall [A : Type] (P : Stream A -> Prop) (s : Stream A),
+    ~ Exists P s -> ForAll (fun s => ~ P s) s.
+Proof.
+  cofix CH.
+  intros A P [a s] H.
+  constructor.
+  - by contradict H; constructor.
+  - by apply CH; contradict H; constructor.
+Qed.
+
+Lemma not_ForAll :
+  forall [A : Type] (P : Stream A -> Prop) (s : Stream A),
+    ~ ForAll P s -> Exists (fun s => ~ P s) s.
+Proof.
+  intros A P s H.
+  apply Classical_Prop.NNPP.
+  contradict H.
+  apply not_Exists in H.
+  revert H; apply ForAll_impl, ForAll_tauto.
+  by intro; apply Classical_Prop.NNPP.
+Qed.
+
+Lemma not_Exists_ForAll :
+  forall [A : Type] (s : Stream A),
+    ~ (exists x : A, Exists (ForAll (λ s : Stream A, hd s = x)) s) ->
+    forall x : A, ForAll (Exists (fun s => hd s <> x)) s.
+Proof.
+  intros A s Hnex x.
+  assert (Hnex' : ~ Exists (ForAll (fun s : Stream A => hd s = x)) s) by firstorder.
+  apply not_Exists in Hnex'.
+  revert Hnex'; apply ForAll_impl, ForAll_tauto.
+  clear; intros s Hnall.
+  by apply not_ForAll in Hnall.
+Qed.
+
+Lemma use_Exists :
+  forall [A : Type] (P Q : Stream A -> Prop) (s : Stream A),
+    Exists P s -> ForAll Q s -> exists s', P s' /\ ForAll Q s'.
+Proof.
+  induction 1.
+  - by exists x.
+  - by inversion 1; subst; apply IHExists.
 Qed.
 
 Lemma Exists_Str_nth_tl [A : Type] (P : Stream A -> Prop)
@@ -799,3 +896,56 @@ Proof.
   rewrite Nat.add_comm.
   by apply Nat.add_sub.
 Qed.
+
+Section sec_temporal.
+
+Definition progress [A : Type] (R : A -> A -> Prop) : Stream A -> Prop :=
+  ForAll (fun s => let x := hd s in let a := hd (tl s) in a = x \/ R a x).
+
+Lemma refutation :
+  forall [A : Type] [R : A -> A-> Prop] (HR : well_founded R) [s : Stream A],
+    ~ ForAll (fun s => Exists (fun x => R (hd x) (hd s)) s) s.
+Proof.
+  intros A R HR [h t]; revert t.
+  specialize (HR h).
+  induction HR as [h' _ IH].
+  intros t HF.
+  destruct (id HF).
+  destruct (use_Exists _ _ _ H HF) as [[a' s'] [Ha' H1']].
+  by eapply IH; eauto.
+Qed.
+
+Lemma progress_Exists_neq :
+  forall [A : Type] [R : A -> A -> Prop] (s : Stream A),
+    progress R s -> ForAll (Exists (fun s' => hd s' <> hd s)) s ->
+      Exists (fun s' => R (hd s') (hd s)) s.
+Proof.
+  intros A R [a s] Hprogress Hex; cbn.
+  generalize (eq_refl : hd (Cons a s) = a).
+  destruct Hex as [Hex _].
+  revert Hprogress; induction Hex; intros Hprogress <-; [by cbn in H; congruence |].
+  constructor 2.
+  inversion Hprogress as [[] ?]; cbn in *.
+  - by apply IHHex.
+  - by constructor.
+Qed.
+
+Lemma stabilization :
+  forall [A : Type] [R : A -> A-> Prop] (HR : well_founded R) [s : Stream A],
+    progress R s -> exists x : A, Exists (ForAll (fun s => hd s = x)) s.
+Proof.
+  intros A R HR s Hprogress.
+  apply Classical_Prop.NNPP; intros Hnex.
+  assert (H : forall x : A, ForAll (Exists (fun s => hd s <> x)) s)
+    by (apply not_Exists_ForAll; done).
+  apply (@refutation _ _ HR s).
+  clear Hnex; revert s Hprogress H.
+  cofix CH.
+  constructor.
+  - by apply progress_Exists_neq.
+  - apply CH.
+    + by apply Hprogress.
+    + by apply H.
+Qed.
+
+End sec_temporal.

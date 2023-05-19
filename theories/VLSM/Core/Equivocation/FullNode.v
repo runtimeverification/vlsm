@@ -28,7 +28,7 @@ Definition node_generated_without_further_equivocation
   (m : message)
   (i : index)
   : Prop
-  := exists (si : vstate (IM i)),
+  := exists (si : state (IM i)),
     can_produce (pre_loaded_with_all_messages_vlsm (IM i)) si m /\
     state_received_not_sent_invariant (IM i) si (composite_has_been_directly_observed IM s).
 

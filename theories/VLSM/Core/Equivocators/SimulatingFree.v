@@ -42,7 +42,7 @@ Context
   .
 
 Definition last_in_trace_except_from
-  {T} exception (tr : list (@transition_item message T)) iom : Prop :=
+  {T : VLSMType message} exception (tr : list (transition_item T)) iom : Prop :=
     match iom with
     | None => True
     | Some im =>
@@ -58,7 +58,7 @@ Definition last_in_trace_except_from
 Definition zero_descriptor_constraint_lifting_prop : Prop :=
   forall
     es (Hes : valid_state_prop CE es)
-    om (Hom : sent_except_from (equivocator_IM IM) (vinitial_message_prop CE) es om)
+    om (Hom : sent_except_from (equivocator_IM IM) (@initial_message_prop _ _ CE) es om)
     eqv li,
     constraintE (existT eqv (ContinueWith 0 li)) (es, om).
 
@@ -81,14 +81,14 @@ Definition replayable_message_prop : Prop :=
     eqv_msg_is eqv_msg_s eqv_msg_tr
     (Hmsg_trace : finite_valid_trace_init_to CE eqv_msg_is eqv_msg_s eqv_msg_tr)
     iom
-    (Hfinal_msg : last_in_trace_except_from (vinitial_message_prop CE) eqv_msg_tr iom)
+    (Hfinal_msg : last_in_trace_except_from (@initial_message_prop _ _ CE) eqv_msg_tr iom)
     l
     (HcX : constraintX l (s, iom)),
     exists eqv_msg_tr lst_msg_tr,
       finite_valid_trace_from_to CE eqv_state_s lst_msg_tr eqv_msg_tr /\
       equivocators_total_trace_project IM eqv_msg_tr = [] /\
       equivocators_total_state_project IM lst_msg_tr = s /\
-      sent_except_from (equivocator_IM IM) (vinitial_message_prop CE) lst_msg_tr iom.
+      sent_except_from (equivocator_IM IM) (@initial_message_prop _ _ CE) lst_msg_tr iom.
 
 (**
   The main result of this section, showing that every trace of the
@@ -154,9 +154,9 @@ Proof.
       (extend_right_finite_trace_from_to CE Happ) as Happ_extend.
     destruct l as (eqv, li).
     pose
-      (@existT _ (fun i : index => vlabel (equivocator_IM IM i)) eqv (ContinueWith 0 li))
+      (@existT _ (fun i : index => label (equivocator_IM IM i)) eqv (ContinueWith 0 li))
       as el.
-    destruct (vtransition CE el (es, iom))
+    destruct (transition CE el (es, iom))
       as (es', om') eqn: Hesom'.
     specialize (Happ_extend  el iom es' om').
     apply valid_trace_get_last in Happ as Heqes.
@@ -170,7 +170,7 @@ Proof.
     cbn in Hesom', Hes_pr_eqv.
     rewrite Hes_pr_eqv in Hesom'.
     cbn in Ht.
-    destruct (vtransition _ _ _) as (si', _om) eqn: Hteqv.
+    destruct (transition _ _ _) as (si', _om) eqn: Hteqv.
     inversion Ht. subst sf _om. clear Ht.
     inversion Hesom'. subst es' om'. clear Hesom'.
     match type of Happ_extend with

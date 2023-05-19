@@ -20,16 +20,16 @@ From VLSM.Core Require Import VLSM Composition VLSMEmbedding.
 (**
   A class with a measure of size for states which is monotonic for valid transitions.
 *)
-Class TransitionMonotoneVLSM `(X : VLSM message) (state_size : vstate X -> nat) : Prop :=
+Class TransitionMonotoneVLSM `(X : VLSM message) (state_size : state X -> nat) : Prop :=
 {
   transition_monotonicity :
-    forall s1 s2 : vstate X, ValidTransitionNext X s1 s2 -> state_size s1 < state_size s2
+    forall s1 s2 : state X, ValidTransitionNext X s1 s2 -> state_size s1 < state_size s2
 }.
 
 #[global] Hint Mode TransitionMonotoneVLSM - ! - : typeclass_instances.
 
 #[export] Instance pre_loaded_TransitionMonotoneVLSM
-  `(X : VLSM message) (state_size : vstate X -> nat)
+  `(X : VLSM message) (state_size : state X -> nat)
   `{!TransitionMonotoneVLSM X state_size}
   : TransitionMonotoneVLSM (pre_loaded_with_all_messages_vlsm X) state_size.
 Proof.
@@ -39,7 +39,7 @@ Qed.
 
 Lemma transition_monotone_in_futures
   `(X : VLSM message) `{TransitionMonotoneVLSM _ X}
-  [s sf : vstate X] (Hfutures : in_futures X s sf) :
+  [s sf : state X] (Hfutures : in_futures X s sf) :
   state_size s <= state_size sf.
 Proof.
   destruct Hfutures as [tr Htr].
@@ -50,7 +50,7 @@ Qed.
 
 Lemma transition_monotone_empty_trace
   `(X : VLSM message) `{TransitionMonotoneVLSM _ X} :
-  forall [s : vstate X] [tr : list (vtransition_item X)],
+  forall [s : state X] [tr : list (transition_item X)],
     finite_valid_trace_from_to X s s tr -> tr = [].
 Proof.
   intros s tr Htr; remember s as f; rewrite Heqf in Htr at 1.
@@ -71,23 +71,23 @@ Qed.
 *)
 Class TraceableVLSM
   `(X : VLSM message)
-  (state_destructor : vstate X -> list (vtransition_item X * vstate X))
-  (state_size : vstate X -> nat)
+  (state_destructor : state X -> list (transition_item X * state X))
+  (state_size : state X -> nat)
   : Prop :=
 {
   tv_monotone :> TransitionMonotoneVLSM X state_size;
   tv_state_destructor_destination :
-    forall (s' s : vstate X) (item : vtransition_item X),
+    forall (s' s : state X) (item : transition_item X),
       (item, s) ∈ state_destructor s' -> destination item = s';
   tv_state_destructor_transition :
-    forall s' : vstate X,
+    forall s' : state X,
       valid_state_prop (pre_loaded_with_all_messages_vlsm X) s' ->
-      forall (s : vstate X) (item : vtransition_item X),
+      forall (s : state X) (item : transition_item X),
         (item, s) ∈ state_destructor s' ->
         input_valid_transition_item (pre_loaded_with_all_messages_vlsm X) s item;
   tv_state_destructor_initial :
-    forall (s : vstate X) (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s),
-      vinitial_state_prop X s <-> state_destructor s = [];
+    forall (s : state X) (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s),
+      initial_state_prop X s <-> state_destructor s = [];
 }.
 
 #[global] Hint Mode TraceableVLSM - ! - - : typeclass_instances.
@@ -96,15 +96,15 @@ Section sec_traceable_vlsm_props.
 
 Context
   `(X : VLSM message)
-  (state_size : vstate X -> nat)
-  (state_destructor : vstate X -> list (vtransition_item X * vstate X))
+  (state_size : state X -> nat)
+  (state_destructor : state X -> list (transition_item X * state X))
   `{!TraceableVLSM X state_destructor state_size}
   (R := pre_loaded_with_all_messages_vlsm X)
   .
 
 Lemma tv_state_destructor_size :
-  forall s' : vstate X, valid_state_prop R s' ->
-  forall (s : vstate X) (item : vtransition_item X),
+  forall s' : state X, valid_state_prop R s' ->
+  forall (s : state X) (item : transition_item X),
     (item, s) ∈ state_destructor s' -> state_size s < state_size s'.
 Proof.
   intros.
@@ -119,8 +119,8 @@ Qed.
   Given any ram-state we can extract a trace leading to it by recursively
   following the transitions leading to it.
 *)
-Equations state_to_trace (s' : vstate X) (Hs' : valid_state_prop R s') :
-  vstate X * list (vtransition_item X) by wf (state_size s') lt :=
+Equations state_to_trace (s' : state X) (Hs' : valid_state_prop R s') :
+  state X * list (transition_item X) by wf (state_size s') lt :=
 state_to_trace s' Hs' with inspect (state_destructor s') :=
 |               [] eq: _         => (s', [])
 | ((item, s) :: _) eq: Hdestruct =>
@@ -140,14 +140,15 @@ Qed.
 
 (** Traces extracted using [state_to_trace] are ram-traces. *)
 Lemma reachable_state_to_trace :
-  forall (s : vstate X) (Hs : valid_state_prop R s) is tr,
+  forall (s : state X) (Hs : valid_state_prop R s) is tr,
     state_to_trace s Hs = (is, tr) -> finite_valid_trace_init_to R is s tr.
 Proof.
   intros s Hs.
   apply_funelim (state_to_trace s Hs); clear s Hs.
   - intros s' Hdestruct ? ? ? ? Heqis_tr.
-    inversion Heqis_tr; subst.
-    by split; [constructor | eapply @tv_state_destructor_initial with (X := X)].
+    inversion Heqis_tr; subst; split.
+    + by apply finite_valid_trace_from_to_empty with (X := R).
+    + by eapply @tv_state_destructor_initial with (X := X).
   - intros ? ? ? ? ? ? Hind ? ? ? Heqis_tr.
     destruct (state_to_trace s _) as [_is _tr]; inversion Heqis_tr; subst; clear Heqis_tr.
     split; [| by eapply Hind].
@@ -172,8 +173,8 @@ Context
   {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
-  (state_destructor : forall i, vstate (IM i) -> list (vtransition_item (IM i) * vstate (IM i)))
-  (state_size : forall i, vstate (IM i) -> nat)
+  (state_destructor : forall i, state (IM i) -> list (transition_item (IM i) * state (IM i)))
+  (state_size : forall i, state (IM i) -> nat)
   `{forall i, TraceableVLSM (IM i) (state_destructor i) (state_size i)}
   (Free := free_composite_vlsm IM)
   (RFree := pre_loaded_with_all_messages_vlsm Free)
@@ -185,7 +186,7 @@ Context
 *)
 
 Definition lift_to_composite_transition_item_state
-  (s : composite_state IM) (i : index) (item_s : vtransition_item (IM i) * vstate (IM i))
+  (s : composite_state IM) (i : index) (item_s : transition_item (IM i) * state (IM i))
   : composite_transition_item IM * composite_state IM :=
   (lift_to_composite_transition_item IM s i item_s.1,
     lift_to_composite_state IM s i item_s.2).
@@ -198,7 +199,7 @@ Definition composite_state_size (s : composite_state IM) :=
   foldr Nat.add 0 (map (fun i => state_size i (s i)) (enum index)).
 
 Lemma composite_state_update_size_monotone :
-  forall (s : composite_state IM) (i : index) (si : vstate (IM i)),
+  forall (s : composite_state IM) (i : index) (si : state (IM i)),
   state_size i (s i) < state_size i si ->
   composite_state_size s < composite_state_size (lift_to_composite_state  IM s i si).
 Proof.
@@ -265,20 +266,20 @@ Proof.
     by (eapply composite_tv_state_destructor_destination; done).
   eapply composite_tv_state_destructor_index  in Hin as Hl.
   eapply composite_tv_state_destructor_transition in Hin as [_ Ht]; [| done].
-  destruct item, l; cbn in *; destruct (vtransition _ _ _); inversion Ht; subst.
+  destruct item, l; cbn in *; destruct (transition _ _ _); inversion Ht; subst.
   by state_update_simpl.
 Qed.
 
 Lemma composite_tv_state_destructor_initial :
   forall (s : composite_state IM), valid_state_prop RFree s ->
   forall i,
-    vinitial_state_prop (IM i) (s i)
+    initial_state_prop (IM i) (s i)
       <->
     composite_state_destructor s i = [].
 Proof.
   unfold composite_state_destructor; split; intros Hinit.
   - replace (state_destructor i (s i))
-      with (@nil (vtransition_item (IM i) * vstate (IM i))); [done |].
+      with (@nil (transition_item (IM i) * state (IM i))); [done |].
     symmetry; apply tv_state_destructor_initial; [| done].
     by eapply valid_state_project_preloaded_to_preloaded.
   - apply tv_state_destructor_initial.
@@ -290,7 +291,7 @@ Lemma composite_tv_state_destructor_reflects_initiality :
   forall (s' : composite_state IM), valid_state_prop RFree s' ->
   forall (i : index) (s : composite_state IM) (item : composite_transition_item IM),
     (item, s) ∈ composite_state_destructor s' i ->
-    forall j, vinitial_state_prop (IM j) (s' j) -> s j = s' j.
+    forall j, initial_state_prop (IM j) (s' j) -> s j = s' j.
 Proof.
   intros s' Hs' i s item Hdestruct.
   apply composite_tv_state_destructor_state_update in Hdestruct as Heqs'; [| done].
@@ -374,7 +375,7 @@ Record ChoosingWell
   cw_chosen_position_exists :
     forall (i : index) (n : nat),
       choose s' Hs' indices = (i, n) ->
-      ~ vinitial_state_prop (IM i) (s' i) ->
+      ~ initial_state_prop (IM i) (s' i) ->
       is_Some (composite_state_destructor s' i !! n);
 }.
 
@@ -401,7 +402,7 @@ Definition not_in_indices_initial_prop
   (s' : composite_state IM)
   (indices : list index)
   : Prop :=
-  forall i, i ∉ indices -> vinitial_state_prop (IM i) (s' i).
+  forall i, i ∉ indices -> initial_state_prop (IM i) (s' i).
 
 (**
   The ram-transitions leading to a composite ram-state reflect the
@@ -502,7 +503,7 @@ Lemma indexed_composite_state_to_trace_reflects_initiality_1 :
   forall (choose : choice_function)
     (s : composite_state IM) (Hs : valid_state_prop RFree s)
     (indices : list index),
-  forall (i : index), vinitial_state_prop (IM i) (s i) ->
+  forall (i : index), initial_state_prop (IM i) (s i) ->
     forall is tr, indexed_composite_state_to_trace choose s Hs indices = (is, tr) ->
     is i = s i.
 Proof.
@@ -530,7 +531,7 @@ Lemma indexed_composite_state_to_trace_result_state :
   forall (indices : list index), NoDup indices ->
     not_in_indices_initial_prop s indices ->
     forall is tr, indexed_composite_state_to_trace choose s Hs indices = (is, tr) ->
-    forall i, i ∈ indices -> vinitial_state_prop (IM i) (is i).
+    forall i, i ∈ indices -> initial_state_prop (IM i) (is i).
 Proof.
   intros ? Hchoose *; revert Hchoose.
   apply_funelim (indexed_composite_state_to_trace choose s Hs indices);
@@ -571,7 +572,7 @@ Proof.
   intros * ? ? ? ? ? Hinitial ** i.
   destruct (decide (i ∈ indices)).
   - by eapply indexed_composite_state_to_trace_result_state.
-  - assert (vinitial_state_prop (IM i) (s i)) by (apply Hinitial; done).
+  - assert (initial_state_prop (IM i) (s i)) by (apply Hinitial; done).
     by erewrite indexed_composite_state_to_trace_reflects_initiality_1.
 Qed.
 
@@ -584,7 +585,7 @@ Lemma indexed_composite_state_to_trace_reflects_initiality_2 :
   forall (choose : choice_function)
     (s : composite_state IM) (Hs : valid_state_prop RFree s)
     (indices : list index),
-  forall (i : index), vinitial_state_prop (IM i) (s i) ->
+  forall (i : index), initial_state_prop (IM i) (s i) ->
     forall is tr,
       indexed_composite_state_to_trace choose s Hs indices = (is, tr) ->
       forall item, item ∈ tr ->

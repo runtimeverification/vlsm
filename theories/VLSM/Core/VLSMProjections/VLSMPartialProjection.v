@@ -31,7 +31,7 @@ Record VLSM_partial_projection_type
   {message : Type}
   (X Y : VLSM message)
   (partial_trace_project :
-    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y)))
+    state X * list (transition_item X) -> option (state Y * list (transition_item Y)))
   : Prop :=
 {
   partial_trace_project_extends_left :
@@ -57,7 +57,7 @@ Record VLSM_weak_partial_projection
   {message : Type}
   (X Y : VLSM message)
   (partial_trace_project :
-    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y)))
+    state X * list (transition_item X) -> option (state Y * list (transition_item Y)))
   : Prop :=
 {
   weak_partial_projection_type :> VLSM_partial_projection_type X Y partial_trace_project;
@@ -71,7 +71,7 @@ Record VLSM_partial_projection
   {message : Type}
   (X Y : VLSM message)
   (partial_trace_project :
-    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y)))
+    state X * list (transition_item X) -> option (state Y * list (transition_item Y)))
   : Prop :=
 {
   partial_projection_type :> VLSM_partial_projection_type X Y partial_trace_project;
@@ -89,7 +89,7 @@ Context
   {message : Type}
   {X Y : VLSM message}
   {trace_project :
-    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y))}
+    state X * list (transition_item X) -> option (state Y * list (transition_item Y))}
   (Hsimul : VLSM_weak_partial_projection X Y trace_project)
   .
 
@@ -151,7 +151,7 @@ Context
   {message : Type}
   {X Y : VLSM message}
   {trace_project :
-    vstate X * list (vtransition_item X) -> option (vstate Y * list (vtransition_item Y))}
+    state X * list (transition_item X) -> option (state Y * list (transition_item Y))}
   (Hsimul : VLSM_partial_projection X Y trace_project)
   .
 
@@ -181,7 +181,7 @@ Qed.
 Lemma VLSM_partial_projection_initial_state
   : forall sX sY trY,
     trace_project (sX, []) = Some (sY, trY) ->
-    vinitial_state_prop X sX -> vinitial_state_prop Y sY.
+    initial_state_prop X sX -> initial_state_prop Y sY.
 Proof.
   intros sX sY trY Hpr HsX.
   eapply VLSM_partial_projection_finite_valid_trace; [done |].
