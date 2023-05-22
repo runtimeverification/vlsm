@@ -112,7 +112,7 @@ Definition lift_sub_state_to
   (s : composite_state sub_IM)
   : composite_state IM
   := fun i =>
-    match @decide  (sub_index_prop i) (sub_index_prop_dec i) with
+    match decide (sub_index_prop i) with
     | left e =>  s (dexist i e)
     | _ => s0 i
     end.
@@ -1051,8 +1051,6 @@ Context
   (sub_IM2 := sub_IM IM indices2)
   (sub_index1_prop_dec :
     forall i, Decision (sub_index_prop indices1 i) := fun i => sub_index_prop_dec indices1 i)
-  (sub_index2_prop_dec :
-    forall i, Decision (sub_index_prop indices2 i) := fun i => sub_index_prop_dec indices2 i)
   .
 
 Definition lift_sub_incl_state
