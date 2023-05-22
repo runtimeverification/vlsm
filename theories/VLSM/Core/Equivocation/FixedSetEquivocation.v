@@ -38,9 +38,8 @@ Context
   [free_equivocating_vlsm_composition] is the free composition of the subset of
   nodes which are allowed to equivocate.
 *)
-Definition free_equivocating_vlsm_composition
-  : VLSM message
-  := @free_composite_vlsm message equivocating_index _ equivocating_IM.
+Definition free_equivocating_vlsm_composition : VLSM message :=
+  free_composite_vlsm equivocating_IM.
 
 (**
   [pre_loaded_free_equivocating_vlsm_composition] preloads the free composition
