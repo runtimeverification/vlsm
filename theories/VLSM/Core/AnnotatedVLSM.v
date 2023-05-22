@@ -89,7 +89,7 @@ Definition annotate_trace_item
         state_annotation := annotated_transition_state (l item) (sa, input item);
       |}
     in
-      @Build_transition_item _ annotated_type (l item) (input item) sa' (output item) :: k sa'.
+      Build_transition_item annotated_type (l item) (input item) sa' (output item) :: k sa'.
 
 Lemma annotate_trace_item_project
   (item : transition_item X)
@@ -119,7 +119,7 @@ Lemma annotate_trace_from_unroll sa item tr
         state_annotation := annotated_transition_state (l item) (sa, input item)
       |}
     in
-      @Build_transition_item _ annotated_type (l item) (input item) sa' (output item)
+      Build_transition_item annotated_type (l item) (input item) sa' (output item)
         ::
       annotate_trace_from sa' tr.
 Proof.
@@ -247,7 +247,7 @@ Definition annotated_composite_label_lift : label (IM i) -> label AnnotatedFree
 
 Definition annotated_composite_state_lift : state (IM i) -> state AnnotatedFree
   := fun si =>
-     @Build_annotated_state _ (free_composite_vlsm IM) _
+     Build_annotated_state (free_composite_vlsm IM) _
       (lift_to_composite_state' IM i si) (` inhabitant).
 
 Definition annotated_projection_validator_prop_alt : Prop :=

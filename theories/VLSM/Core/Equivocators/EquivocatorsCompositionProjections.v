@@ -56,7 +56,7 @@ Definition equivocators_transition_item_project
       with
   | Some (Some item', deqv') =>
     Some
-      (Some (@Build_transition_item message Free
+      (Some (Build_transition_item Free
         (existT eqv (l item'))
         (input item) sx (output item))
       , equivocator_descriptors_update eqv_descriptors eqv deqv')

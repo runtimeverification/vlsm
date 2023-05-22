@@ -1181,10 +1181,10 @@ match obs s with
 | [] => []
 | MkObservation Send msg as ob :: obs =>
     let source := MkState obs adr in
-      [(@Build_transition_item _ ELMOComponentType Send None s (Some msg), source)]
+      [(Build_transition_item ELMOComponentType Send None s (Some msg), source)]
 | MkObservation Receive msg as ob :: obs =>
     let source := MkState obs adr in
-      [(@Build_transition_item _ ELMOComponentType Receive (Some msg) s None, source)]
+      [(Build_transition_item ELMOComponentType Receive (Some msg) s None, source)]
 end.
 
 Lemma ELMOComponent_state_destructor_initial :
@@ -2061,7 +2061,7 @@ Proof.
   apply (VLSM_incl_finite_valid_trace_init_to Hincl) in Htr_min as Htr_min_pre.
   apply (VLSM_incl_valid_state Hincl) in Hsisi as Hsisi_pre.
   assert (finite_valid_trace_init_to ReachELMO si0 sf
-    (tr ++ [@Build_transition_item _ (composite_type ELMOComponent) (existT j lj) iom sf oom])).
+    (tr ++ [Build_transition_item (composite_type ELMOComponent) (existT j lj) iom sf oom])).
   {
     split; [| by apply Htr_min].
     apply valid_trace_add_last; [| by apply finite_trace_last_is_last].

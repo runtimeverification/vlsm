@@ -240,6 +240,7 @@ End sec_traces.
 
 Arguments Trace {message T}, {message} T.
 Arguments transition_item {message} {T} , {message} T.
+Arguments Build_transition_item {message T}, {message} T.
 Arguments field_selector {_} {T} _ msg item /.
 Arguments item_sends_or_receives {_} {_} msg item /.
 

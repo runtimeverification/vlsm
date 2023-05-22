@@ -224,7 +224,7 @@ Definition lift_to_composite_transition_item'
   := lift_to_composite_transition_item (proj1_sig composite_s0).
 
 (** Composite versions for [plan_item] and [plan]. *)
-Definition composite_plan_item := @plan_item _ composite_type.
+Definition composite_plan_item := plan_item composite_type.
 Definition composite_plan := list composite_plan_item.
 
 Definition lift_to_composite_plan_item
