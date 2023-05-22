@@ -1845,7 +1845,7 @@ Section sec_update_IM.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (selection : Ci)
   .

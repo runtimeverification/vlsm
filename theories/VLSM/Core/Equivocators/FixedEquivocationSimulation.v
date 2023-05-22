@@ -31,7 +31,7 @@ Section sec_fixed_equivocating.
 Context {message : Type}
   {index : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (Free := free_composite_vlsm IM)
   `{forall i : index, HasBeenSentCapability (IM i)}

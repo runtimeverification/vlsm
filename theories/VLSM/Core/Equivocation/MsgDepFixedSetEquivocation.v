@@ -12,7 +12,7 @@ Context
   (message_dependencies : message -> Cm)
   `{FinSet index Ci}
   (equivocators : Ci)
-  `{@finite.Finite index _ }
+  `{finite.Finite index}
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
@@ -295,7 +295,7 @@ Section sec_full_node_fixed_set_equivocation.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{FinSet message Cm}
