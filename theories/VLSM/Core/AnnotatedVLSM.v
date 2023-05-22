@@ -236,7 +236,7 @@ Definition annotated_composite_state_project : state AnnotatedFree -> state (IM 
   := fun s => original_state s i.
 
 Definition annotated_projection_validator_prop : Prop :=
-  @projection_validator_prop _ AnnotatedFree (IM i)
+  projection_validator_prop (IM i)
     annotated_composite_label_project annotated_composite_state_project.
 
 Definition annotated_message_validator_prop : Prop :=
@@ -251,7 +251,7 @@ Definition annotated_composite_state_lift : state (IM i) -> state AnnotatedFree
       (lift_to_composite_state' IM i si) (` inhabitant).
 
 Definition annotated_projection_validator_prop_alt : Prop :=
-  @projection_validator_prop_alt _ AnnotatedFree (IM i)
+  projection_validator_prop_alt (IM i)
     annotated_composite_label_project annotated_composite_state_project
     annotated_composite_label_lift annotated_composite_state_lift.
 
