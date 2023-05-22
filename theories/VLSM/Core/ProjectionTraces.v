@@ -121,7 +121,7 @@ Definition composite_transition_item_projection
 Lemma composite_transition_item_projection_iff
   (item : composite_transition_item IM)
   (i := projT1 (l item))
-  : @pre_VLSM_projection_transition_item_project _ (composite_type IM) _
+  : pre_VLSM_projection_transition_item_project (composite_type IM) _
       (composite_project_label IM i) (fun s => s i)
       item
     = Some (composite_transition_item_projection item).
@@ -140,7 +140,7 @@ Qed.
 Lemma composite_transition_item_projection_neq
   (item : composite_transition_item IM)
   (Hneq : j <> projT1 (l item))
-  : @pre_VLSM_projection_transition_item_project _ (composite_type IM) _
+  : pre_VLSM_projection_transition_item_project (composite_type IM) _
       (composite_project_label IM j) (fun s => s j)
       item
     = None.
@@ -153,7 +153,7 @@ Qed.
 
 Definition finite_trace_projection_list (tr : list (composite_transition_item IM))
   : list (transition_item (IM j)) :=
-  @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _
+  pre_VLSM_projection_finite_trace_project (composite_type IM) _
     (composite_project_label IM j) (fun s => s j) tr.
 
 Lemma preloaded_valid_state_projection
