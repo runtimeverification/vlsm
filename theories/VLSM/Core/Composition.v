@@ -454,7 +454,7 @@ Definition strong_constraint_subsumption
 Definition preloaded_constraint_subsumption
     (constraint1 constraint2 : composite_label -> composite_state * option message -> Prop)
     :=
-    forall (l : composite_label) (som : state _ * option message),
+    forall (l : composite_label) (som : state * option message),
         input_valid (pre_loaded_with_all_messages_vlsm (composite_vlsm constraint1)) l som ->
         constraint2 l som.
 

@@ -26,8 +26,8 @@ Record VLSMType (message : Type) : Type :=
   label : Type;
 }.
 
-Arguments state {_} _.
-Arguments label {_} _.
+Arguments state {_} _, {_ _}.
+Arguments label {_} _, {_ _}.
 
 (** *** VLSM class definition
 
@@ -2725,10 +2725,10 @@ Context
   .
 
 Definition same_VLSM_label_rew (l1 : label X1) : label X2 :=
-  eq_rect X1 label l1 _ Heq.
+  eq_rect X1 (@label _) l1 _ Heq.
 
 Definition same_VLSM_state_rew (s1 : state X1) : state X2 :=
-  eq_rect X1 state s1 _ Heq.
+  eq_rect X1 (@state _) s1 _ Heq.
 
 End sec_definitions.
 

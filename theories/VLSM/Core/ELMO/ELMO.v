@@ -1636,7 +1636,7 @@ Qed.
   It might be possible to use something weaker than [UMO_reachable full_node]
   to prove
   [CompositeHasBeenObserved ELMOComponent (elements ∘ Message_dependencies) s m
-  <-> exists (k : index) (l : label _), rec_obs (s k) (MkObservation l m)]
+  <-> exists (k : index) (l : label), rec_obs (s k) (MkObservation l m)]
   but [CompositeHasBeenObserved] can recurse into sent or received messages
   and [rec_obs] only into received messages so we need some deep structural
   assumption about what [Send] observations are allowed, even recursively
