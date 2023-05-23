@@ -774,7 +774,7 @@ Arguments sub_IM_state_pi {_ _ _ _ _ _} _ _ _.
   Make initial arguments of lift_sub_transition not maximally inserted,
   so tactics like rapply lift_sub_transition
   do not try to guess those arguments before looking at the goal,
-  and we don't have to always write rapply @lift_sub_transition.
+  and we don't have to always write <<rapply @lift_sub_transition>>.
 *)
 Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%function_scope
   sub_index_list%list_scope l s om s' om' Ht.
