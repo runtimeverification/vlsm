@@ -26,8 +26,21 @@ Record VLSMType (message : Type) : Type :=
   label : Type;
 }.
 
-Arguments state {_} _, {_ _}.
-Arguments label {_} _, {_ _}.
+(*
+  We set implicit arguments for [state] in such a way that we can provide the
+  argument either explicitly as <<state X>> or we can leave it out, writing
+  just <<state>>, allowing Coq to infer it. We do the same for [label].
+*)
+Arguments state {message v}, {message} v.
+Arguments label {message v}, {message} v.
+
+(*
+  Unfortunately, with the above implicit argument settings the argument is not
+  displayed (e.g. in the context during a proof it's displayed as <<state>>), so
+  we force Coq to always display this argument using an "only printing" notation.
+*)
+Notation "'state' X" := (@state _ X) (at level 10, only printing).
+Notation "'label' X" := (@label _ X) (at level 10, only printing).
 
 (** *** VLSM class definition
 
