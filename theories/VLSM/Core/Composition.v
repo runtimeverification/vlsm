@@ -1096,9 +1096,8 @@ Definition binary_IM
   | false => M2
   end.
 
-Definition binary_free_composition
-  : VLSM message
-  := free_composite_vlsm binary_IM.
+Definition binary_free_composition : VLSM message :=
+  composite_vlsm binary_IM (fun _ _ => True).
 
 End sec_binary_free_composition.
 
