@@ -375,6 +375,23 @@ Definition free_composite_vlsm_machine : VLSMMachine composite_type :=
 Definition free_composite_vlsm : VLSM message :=
   mk_vlsm free_composite_vlsm_machine.
 
+(**
+  [free_composite_vlsm] is equivalent to a [composite_vlsm] with a trivial
+  constraint.
+*)
+
+Lemma free_composite_vlsm_spec :
+  VLSM_eq free_composite_vlsm (composite_vlsm (fun _ _ => True)).
+Proof.
+  split.
+  - apply (VLSM_incl_embedding_iff); cbn.
+    by apply basic_VLSM_strong_embedding; red; cbn.
+  - apply (VLSM_incl_embedding_iff); cbn.
+    apply basic_VLSM_strong_embedding; red; cbn; [| done..].
+    unfold constrained_composite_valid.
+    by itauto.
+Qed.
+
 Lemma lift_to_composite_VLSM_embedding j
   : VLSM_embedding (IM j) free_composite_vlsm (lift_to_composite_label j)
       (lift_to_composite_state' j).
