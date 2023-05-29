@@ -264,7 +264,7 @@ Proof.
     unfold annotated_composite_label_project, composite_project_label; cbn.
     case_decide; [| congruence].
     subst _i; cbn; inversion_clear 1.
-    by intros (s, ann) om (_ & _ & [Hv _] & _) _ _.
+    by intros (s, ann) om (_ & _ & Hv & _) _ _.
   - intros [_i _li] li.
     unfold annotated_composite_label_project, composite_project_label; cbn.
     case_decide; [| congruence].
