@@ -225,8 +225,7 @@ Lemma pre_loaded_with_all_messages_projection_input_valid_transition_neq
   (Hi : i <> projT1 l)
   : s1 i = s2 i.
 Proof.
-  destruct Ht as [[Hs1 [Hom1 [Hv _]]] Ht].
-  simpl in Hv. simpl in Ht. cbn in Ht.
+  destruct Ht as [[Hs1 [Hom1 Hv]] Ht]; cbn in Hv, Ht.
   destruct l as [il l].
   destruct (transition _ _ _) as (si', om') eqn: Htj.
   inversion Ht; subst; clear Ht.
@@ -301,10 +300,10 @@ Context
   .
 
 Definition binary_free_composition_fst : VLSM message :=
-  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (free_constraint _) first.
+  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (fun _ _ => True) first.
 
 Definition binary_free_composition_snd : VLSM message :=
-  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (free_constraint _) second.
+  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (fun _ _ => True) second.
 
 End sec_binary_free_composition_projections.
 
