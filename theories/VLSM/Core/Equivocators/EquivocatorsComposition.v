@@ -234,7 +234,7 @@ Proof.
   apply basic_VLSM_incl.
   - by cbv; intros s Hn n; specialize (Hn n); split_and!; itauto.
   - by intro; intros; apply initial_message_is_valid.
-  - by split; [apply Hv |].
+  - by intros l s om Hiv _ _; apply Hiv.
   - by destruct 1.
 Qed.
 
