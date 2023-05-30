@@ -300,10 +300,12 @@ Context
   .
 
 Definition binary_free_composition_fst : VLSM message :=
-  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (fun _ _ => True) first.
+  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2)
+    (free_constraint (binary_IM M1 M2)) first.
 
 Definition binary_free_composition_snd : VLSM message :=
-  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2) (fun _ _ => True) second.
+  pre_composite_vlsm_induced_projection_validator (binary_IM M1 M2)
+    (free_constraint (binary_IM M1 M2)) second.
 
 End sec_binary_free_composition_projections.
 

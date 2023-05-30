@@ -380,8 +380,11 @@ Definition free_composite_vlsm : VLSM message :=
   constraint.
 *)
 
+Definition free_constraint : composite_label -> composite_state * option message -> Prop :=
+  fun _ _ => True.
+
 Lemma free_composite_vlsm_spec :
-  VLSM_eq free_composite_vlsm (composite_vlsm (fun _ _ => True)).
+  VLSM_eq free_composite_vlsm (composite_vlsm free_constraint).
 Proof.
   split.
   - apply (VLSM_incl_embedding_iff); cbn.
@@ -1172,7 +1175,7 @@ Definition binary_IM
   end.
 
 Definition binary_free_composition : VLSM message :=
-  composite_vlsm binary_IM (fun _ _ => True).
+  composite_vlsm binary_IM (free_constraint binary_IM).
 
 End sec_binary_free_composition.
 
