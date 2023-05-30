@@ -928,7 +928,7 @@ Lemma EquivPreloadedBase_Fixed_weak_embedding
 Proof.
   apply basic_VLSM_weak_embedding.
   - intros l s om Hv HsY HomY. split.
-    + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
+    + destruct Hv as [_ [_ Hv]]; revert Hv; destruct l as (i, li).
       destruct_dec_sig i j Hj Heq; subst i; cbn; unfold sub_IM; cbn.
       by rewrite lift_sub_state_to_eq with (Hi := Hj).
     + destruct om as [m |]; [| done]; cbn.
