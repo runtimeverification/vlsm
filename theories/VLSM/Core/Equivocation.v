@@ -1960,6 +1960,16 @@ Proof.
   by intros l; specialize (Hstep l); destruct l.
 Qed.
 
+Lemma free_composite_has_been_directly_observed_stepwise_props :
+  oracle_stepwise_props (vlsm := free_composite_vlsm IM) item_sends_or_receives
+    composite_has_been_directly_observed.
+Proof.
+  destruct (free_composite_stepwise_props (fun i =>
+    has_been_directly_observed_stepwise_props (IM i))) as [Hinits Hstep].
+  split; [done |].
+  by intros l; specialize (Hstep l); destruct l.
+Qed.
+
 Definition composite_HasBeenDirectlyObservedCapability_from_stepwise
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
@@ -2077,6 +2087,29 @@ Proof.
   intros [[i [[mi Hmi] _]] | [(s, om) [(i, l) [s' Ht]]]]
   ; [by contradict Hmi; apply no_initial_messages_in_IM |].
   apply (VLSM_incl_input_valid_transition (constraint_preloaded_free_incl IM _)) in Ht.
+  apply pre_loaded_with_all_messages_projection_input_valid_transition_eq
+    with (j := i) in Ht; [| done]; cbn in Ht.
+  specialize (can_emit_signed i m).
+  spec can_emit_signed; [by eexists _, _, _ |].
+  unfold channel_authenticated_message in can_emit_signed.
+  destruct (sender m) as [v |] eqn: Hsender; [| by inversion can_emit_signed].
+  apply Some_inj in can_emit_signed.
+  by exists v; subst; unfold can_emit; eauto.
+Qed.
+
+Lemma free_composite_no_initial_valid_messages_emitted_by_sender
+  (can_emit_signed : channel_authentication_prop)
+  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop)
+  (X := free_composite_vlsm IM)
+  : forall (m : message), valid_message_prop X m ->
+    exists v, sender m = Some v /\
+      can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m.
+Proof.
+  intro m.
+  rewrite emitted_messages_are_valid_iff.
+  intros [[i [[mi Hmi] _]] | [(s, om) [(i, l) [s' Ht]]]]
+  ; [by contradict Hmi; apply no_initial_messages_in_IM |].
+  apply (VLSM_incl_input_valid_transition (preloaded_free_incl IM)) in Ht.
   apply pre_loaded_with_all_messages_projection_input_valid_transition_eq
     with (j := i) in Ht; [| done]; cbn in Ht.
   specialize (can_emit_signed i m).

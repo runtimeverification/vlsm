@@ -660,6 +660,14 @@ Proof.
   - by apply preloaded_constraint_free_incl.
 Qed.
 
+Lemma preloaded_free_incl :
+  VLSM_incl free_composite_vlsm (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
+Proof.
+  eapply VLSM_incl_trans.
+  - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  - by apply VLSM_incl_refl.
+Qed.
+
 Lemma lift_to_composite_generalized_preloaded_VLSM_embedding
   (P Q : message -> Prop)
   (PimpliesQ : forall m, P m -> Q m)
@@ -1140,6 +1148,22 @@ Proof.
   exists (s2 (projT1 l)).
   exists (s1 (projT1 l), oim), (projT2 l).
   by eapply input_valid_transition_preloaded_project_active.
+Qed.
+
+Lemma can_emit_free_composite_project
+  {message} `{EqDecision V} {IM : V -> VLSM message}
+  (X := free_composite_vlsm IM)
+  (m : message)
+  (Hemit : can_emit (pre_loaded_with_all_messages_vlsm X) m)
+  : exists (j : V), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+Proof.
+  apply can_emit_iff in Hemit.
+  destruct Hemit as [s2 [(s1, oim) [l Ht]]].
+  exists (projT1 l).
+  apply can_emit_iff.
+  exists (s2 (projT1 l)).
+  exists (s1 (projT1 l), oim), (projT2 l).
+  by eapply input_valid_transition_preloaded_project_active_free.
 Qed.
 
 Section sec_binary_free_composition.
