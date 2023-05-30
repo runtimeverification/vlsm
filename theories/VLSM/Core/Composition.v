@@ -587,6 +587,16 @@ Proof.
   - by apply preloaded_constraint_subsumption_input_valid.
 Qed.
 
+Lemma preloaded_constraint_subsumption_incl_free :
+  VLSM_incl
+    (pre_loaded_with_all_messages_vlsm X1)
+    (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
+Proof.
+  apply basic_VLSM_incl; intro; intros; [done | | | apply H].
+  - by apply initial_message_is_valid.
+  - by apply Hv.
+Qed.
+
 Lemma weak_constraint_subsumption_weakest
   (Hsubsumption : input_valid_constraint_subsumption constraint1 constraint2)
   : weak_input_valid_constraint_subsumption constraint1 constraint2.

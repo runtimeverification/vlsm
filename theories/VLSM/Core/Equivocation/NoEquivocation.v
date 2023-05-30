@@ -279,7 +279,7 @@ Proof.
     end
     ; [done |].
     unfold free_composite_vlsm; cbn.
-    by apply preloaded_constraint_subsumption_incl.
+    by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
 End sec_seeded_composite_vlsm_no_equivocation_definition.
