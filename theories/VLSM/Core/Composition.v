@@ -1510,6 +1510,14 @@ Proof.
   by intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
+Lemma pre_loaded_empty_free_composition_no_emit
+  (seed : message -> Prop)
+  (PreX := pre_loaded_vlsm (free_composite_vlsm IM) seed)
+  : forall m, ~ can_emit PreX m.
+Proof.
+  by intros m [s' [l _]]; elim (empty_composition_no_label l).
+Qed.
+
 Lemma pre_loaded_with_all_empty_composition_no_emit
   : forall m, ~ can_emit (pre_loaded_with_all_messages_vlsm X) m.
 Proof.
