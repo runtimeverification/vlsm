@@ -1681,6 +1681,42 @@ Proof.
         -- by apply Hproto; right.
 Qed.
 
+Lemma free_composite_stepwise_props :
+  oracle_stepwise_props (vlsm := free_composite_vlsm IM) composite_message_selector composite_oracle.
+Proof.
+  split.
+  - (* initial states not claim *)
+    intros s Hs m [i Horacle].
+    revert Horacle.
+    apply (oracle_no_inits (stepwise_props i)).
+    by apply Hs.
+  - (* step update property *)
+    intros l s im s' om Hproto msg.
+    destruct l as [i li].
+    simpl.
+    assert (Hsj : forall j, s j = s' j \/ j = i).
+    {
+      intro j.
+      apply (input_valid_transition_preloaded_project_any_free j) in Hproto.
+      by destruct Hproto as [| (lj & Hlj & _)]; [left | right; congruence].
+    }
+    apply input_valid_transition_preloaded_project_active_free in Hproto; simpl in Hproto.
+    apply (oracle_step_update (stepwise_props i)) with (msg := msg) in Hproto.
+    split.
+    + intros [j Hj].
+      destruct (Hsj j) as [Hunchanged | Hji].
+      * by right; exists j; rewrite Hunchanged.
+      * subst j.
+        apply Hproto in Hj.
+        by destruct Hj; [left | right; exists i].
+    + intros [Hnow | [j Hbefore]].
+      * by exists i; apply Hproto; left.
+      * exists j.
+        destruct (Hsj j) as [Hunchanged | ->].
+        -- by rewrite <- Hunchanged.
+        -- by apply Hproto; right.
+Qed.
+
 Lemma oracle_component_selected_previously
   [constraint : composite_label IM -> composite_state IM * option message -> Prop]
   (X := composite_vlsm IM constraint)
@@ -1764,6 +1800,27 @@ Qed.
     composite_has_been_sent_dec
     (composite_has_been_sent_stepwise_props constraint).
 
+(** Analogous stuff for [free_composite_vlsm]. *)
+
+Lemma free_composite_has_been_sent_stepwise_props
+  (X := free_composite_vlsm IM)
+  : has_been_sent_stepwise_prop (vlsm := X) composite_has_been_sent.
+Proof.
+  unfold has_been_sent_stepwise_props.
+  pose proof (free_composite_stepwise_props (fun i => has_been_sent_stepwise_props (IM i)))
+    as [Hinits Hstep].
+  split; [done |].
+  by intros l; specialize (Hstep l); destruct l.
+Qed.
+
+#[export] Instance free_composite_HasBeenSentCapability
+  (X := free_composite_vlsm IM)
+  : HasBeenSentCapability X :=
+  Build_HasBeenSentCapability X
+    composite_has_been_sent
+    composite_has_been_sent_dec
+    free_composite_has_been_sent_stepwise_props.
+
 Lemma composite_proper_sent
   (s : state (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
@@ -1819,6 +1876,30 @@ Qed.
 #[export] Instance composite_HasBeenDirectlyObservedCapability
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
+  : HasBeenDirectlyObservedCapability X :=
+  HasBeenDirectlyObservedCapability_from_sent_received X.
+
+Lemma free_composite_has_been_received_stepwise_props
+  (X := free_composite_vlsm IM)
+  : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
+Proof.
+  unfold has_been_received_stepwise_props.
+  pose proof (free_composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)))
+    as [Hinits Hstep].
+  split; [done |].
+  by intros l; specialize (Hstep l); destruct l.
+Qed.
+
+#[export] Instance free_composite_HasBeenReceivedCapability
+  (X := free_composite_vlsm IM)
+  : HasBeenReceivedCapability X :=
+  Build_HasBeenReceivedCapability X
+    composite_has_been_received
+    composite_has_been_received_dec
+    free_composite_has_been_received_stepwise_props.
+
+#[export] Instance free_composite_HasBeenDirectlyObservedCapability
+  (X := free_composite_vlsm IM)
   : HasBeenDirectlyObservedCapability X :=
   HasBeenDirectlyObservedCapability_from_sent_received X.
 
@@ -2036,7 +2117,7 @@ Proof.
     unfold channel_authenticated_message; destruct (sender m) as [v' |]; [| done].
     by cbn; intros Hvv'; apply Some_inj, A_inj in Hvv'; subst.
   }
-  apply input_valid_transition_preloaded_project_active in Ht as Hti.
+  apply input_valid_transition_preloaded_project_active_free in Ht as Hti.
   by rewrite Houtput in Hti; apply can_emit_signed; rewrite HAv; eexists _, _, _.
 Qed.
 
@@ -2481,7 +2562,7 @@ Lemma composite_computable_messages_oracle
 Proof.
   by constructor; intros
   ; setoid_rewrite elem_of_composite_oracle_set
-  ; apply composite_stepwise_props
+  ; apply free_composite_stepwise_props
      with (message_selectors := indexed_message_selector)
           (oracles := fun (i : index) (s : state (IM i)) (m : message) =>
             m ∈ indexed_oracle_set i s)
