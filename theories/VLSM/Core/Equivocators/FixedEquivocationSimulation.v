@@ -70,7 +70,7 @@ Proof.
   apply sent_by_non_equivocating_are_sent in Hm.
   pose proof (Hincl := StrongFixed_incl_Preloaded IM equivocating).
   apply (VLSM_incl_valid_state Hincl) in Hs.
-  apply (composite_sent_valid (equivocator_IM IM) _ _ Heqv_state_s).
+  eapply sent_valid; [done |].
   revert Hm; apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
   by specialize
     (VLSM_projection_has_been_sent_reflect

@@ -2120,7 +2120,7 @@ Proof.
   }
   assert (Hincl : VLSM_incl ELMOProtocol ReachELMO) by apply constraint_preloaded_free_incl.
   destruct (decide (composite_has_been_sent ELMOComponent s m)) as [| Hnsnd];
-    [by eapply composite_sent_valid |].
+    [by eapply sent_valid |].
   destruct Hreceive as [[Hv Hc] Ht]; inversion Hv as [? ? Hrcv |]; subst; inversion Ht.
   assert (Hm_eqv : global_equivocators_simple s' (adr (state m))).
   {
@@ -3029,7 +3029,7 @@ Proof.
     symmetry in Heqs'i; destruct (Htransitions _ Heqs'i) as [Hvs'0 Hvt0];
     inversion Hvt0 as [? ? ? ? Hvt | ? ? ? ? Hvt].
   - repeat split; [done | | by apply Hvt..].
-    eapply composite_received_valid; [by apply Hs' |].
+    eapply received_valid; [by apply Hs' |].
     by eexists; eapply has_been_received_step_update; [| left].
   - by repeat split; [| apply option_valid_message_None | apply Hvt].
 Qed.
