@@ -311,7 +311,7 @@ Qed.
 
 Definition preloaded_Fixed_incl_Preloaded :
   VLSM_incl (pre_loaded_with_all_messages_vlsm Fixed) (pre_loaded_with_all_messages_vlsm Free) :=
-    preloaded_constraint_free_incl _ _.
+    preloaded_constraint_subsumption_incl_free _ _.
 
 Definition StrongFixed_incl_Free : VLSM_incl StrongFixed Free := constraint_free_incl _ _.
 

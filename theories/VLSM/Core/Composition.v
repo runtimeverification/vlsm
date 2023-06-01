@@ -636,15 +636,6 @@ Qed.
 
 End sec_constraint_subsumption.
 
-Lemma preloaded_constraint_free_incl
-  (constraint : composite_label -> composite_state  * option message -> Prop) :
-    VLSM_incl
-      (pre_loaded_with_all_messages_vlsm (composite_vlsm constraint))
-      (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
-Proof.
-  by apply basic_VLSM_strong_incl; do 2 (red; cbn); firstorder.
-Qed.
-
 (*
   TODO(traiansf): There are many places where, because the lemma below
   was missing, it was either reproved locally, or multiple VLSM_incl_
@@ -657,7 +648,7 @@ Lemma constraint_preloaded_free_incl
 Proof.
   eapply VLSM_incl_trans.
   - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-  - by apply preloaded_constraint_free_incl.
+  - by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
 Lemma preloaded_free_incl :
