@@ -2128,10 +2128,23 @@ Lemma composite_no_initial_valid_messages_have_sender
     : forall (m : message) (Hm : valid_message_prop X m), sender m <> None.
 Proof.
   intros m Hm.
-  cut (exists v, sender m = Some v /\
-   can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
+  cut (exists v : validator, sender m = Some v /\
+    can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
   - by intros (v & -> & _); congruence.
   - by eapply composite_no_initial_valid_messages_emitted_by_sender.
+Qed.
+
+Lemma free_composite_no_initial_valid_messages_have_sender
+  (can_emit_signed : channel_authentication_prop)
+  (no_initial_messages_in_IM : no_initial_messages_in_IM_prop) :
+  forall (m : message),
+    valid_message_prop (free_composite_vlsm IM) m -> sender m <> None.
+Proof.
+  intros m Hm.
+  cut (exists v : validator, sender m = Some v /\
+    can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
+  - by intros (v & -> & _); congruence.
+  - by apply free_composite_no_initial_valid_messages_emitted_by_sender.
 Qed.
 
 Lemma composite_emitted_by_validator_have_sender
@@ -2938,7 +2951,8 @@ Context
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   (PreX := pre_loaded_with_all_messages_vlsm X)
-  .
+  (Y := free_composite_vlsm IM)
+  (PreY := pre_loaded_with_all_messages_vlsm Y).
 
 (**
   Under [HasBeenReceivedCapability] assumptions, and given the fact that
@@ -2960,6 +2974,23 @@ Proof.
   apply valid_trace_last_pstate in Htr as Hspre.
   intros.
   eapply composite_received_valid; [done |].
+  specialize (proper_received _ s Hspre m) as Hproper.
+  apply proj2 in Hproper. apply Hproper.
+  apply has_been_received_consistency; [by typeclasses eauto | done |].
+  by exists is, tr, Htr.
+Qed.
+
+Lemma all_pre_traces_to_valid_state_are_valid_free
+  s
+  (Hs : valid_state_prop Y s)
+  is tr
+  (Htr : finite_valid_trace_init_to PreY is s tr)
+  : finite_valid_trace_init_to Y is s tr.
+Proof.
+  apply pre_traces_with_valid_inputs_are_valid in Htr; [done |].
+  apply valid_trace_last_pstate in Htr as Hspre.
+  intros.
+  eapply received_valid; cbn; [done |].
   specialize (proper_received _ s Hspre m) as Hproper.
   apply proj2 in Hproper. apply Hproper.
   apply has_been_received_consistency; [by typeclasses eauto | done |].
