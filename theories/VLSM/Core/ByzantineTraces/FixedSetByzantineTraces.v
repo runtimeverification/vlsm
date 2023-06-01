@@ -189,7 +189,7 @@ Proof.
   apply basic_VLSM_strong_incl.
   - by intros s Hincl; apply fixed_non_byzantine_projection_initial_state_preservation.
   - by intros.
-  - by split; [eapply induced_sub_projection_valid_preservation |].
+  - by intros l **; cbn; eapply induced_sub_projection_valid_preservation.
   - intros l s om s' om'; cbn.
     (* an ugly trick to get the forward direction from an iff (<->) lemma *)
     by eapply proj1; rapply @induced_sub_projection_transition_preservation.
@@ -568,7 +568,7 @@ Proof.
   {
     intro i.
     revert Hs.
-    apply valid_state_project_preloaded_to_preloaded.
+    by apply valid_state_project_preloaded_to_preloaded_free.
   }
   apply elem_of_elements, elem_of_difference in HAv as [_ HAv].
   destruct Hstrong_v as [(i & Hi & Hsent) | Hemitted].
@@ -702,8 +702,8 @@ Lemma preloaded_non_byzantine_vlsm_lift
       (lift_sub_state IM (elements selection_complement)).
 Proof.
   apply basic_VLSM_strong_embedding; [| | | done].
-  - intros l s om [Hv _].
-    by split; [apply lift_sub_valid |].
+  - intros l s om [Hv _]; cbn.
+    by apply lift_sub_valid.
   - by intro; intros; rapply lift_sub_transition.
   - by intro; intros; apply (lift_sub_state_initial IM).
 Qed.
