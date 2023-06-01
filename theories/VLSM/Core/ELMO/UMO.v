@@ -1584,7 +1584,7 @@ Proof.
           (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
     + replace us with (state_update U us i (us i)) at 2 by (state_update_simpl; done).
       apply lift_to_RUMO_finite_valid_trace_from_to; [done |].
-      apply (valid_state_project_preloaded_to_preloaded _ _ _ us i) in Hvsp as Hvsp'.
+      apply (valid_state_project_preloaded_to_preloaded_free _ _ us i) in Hvsp as Hvsp'.
       apply valid_state_has_trace in Hvsp' as (s & tr & [Hfvt Hinit]).
       replace s with (MkState [] (idx i)) in *; cycle 1.
       * by inversion Hinit; destruct s; cbn in *; subst.
@@ -1601,7 +1601,7 @@ Lemma finite_valid_trace_from_to_UMO_state2trace_UMO :
       finite_valid_trace_init_to UMO (``(vs0 UMO)) us (UMO_state2trace us).
 Proof.
   intros us Hvsp.
-  apply all_pre_traces_to_valid_state_are_valid; [typeclasses eauto | done |].
+  apply all_pre_traces_to_valid_state_are_valid_free; [typeclasses eauto | done |].
   apply finite_valid_trace_from_to_UMO_state2trace_RUMO.
   eapply (@VLSM_incl_valid_state _ UMO UMO RUMO); [| done].
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
