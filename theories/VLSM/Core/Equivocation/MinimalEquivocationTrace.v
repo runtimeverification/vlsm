@@ -217,7 +217,7 @@ Proof.
   exists s, item, m, s_j, item_j, m_j; constructor; [done.. |]; constructor.
   apply head_Some_elem_of in Hdestruct_j as H_destruct_j.
   eapply composite_tv_state_destructor_index in H_destruct_j as Hlj.
-  apply input_valid_transition_preloaded_project_active in Htj as Htj'.
+  apply input_valid_transition_preloaded_project_active_free in Htj as Htj'.
   eapply composite_tv_state_destructor_destination in H_destruct_j as Hdestination_j; [| done].
   destruct item_j, l as [_j lj]; cbn in *; subst _j destination.
   destruct (decide (i = j)).
@@ -242,7 +242,7 @@ Proof.
     + by eexists s_j, _; constructor; [done.. | constructor 3].
     + apply Some_inj in H_output as <-.
       contradict n.
-      apply input_valid_transition_preloaded_project_active in Hti as Hti'; cbn in Hti'.
+      apply input_valid_transition_preloaded_project_active_free in Hti as Hti'; cbn in Hti'.
       specialize (Hchannel i m_j) as Hchannel_i.
       spec Hchannel_i; [by eexists _, _, _ |].
       specialize (Hchannel j m_j) as Hchannel_j.
@@ -289,7 +289,8 @@ Program Definition initial_indices
   @filter _ _ _ (fun i => initial_state_prop (IM i) (s i)) _ is.
 Next Obligation.
 Proof.
-  by intros; eapply traceable_vlsm_initial_state_dec, valid_state_project_preloaded_to_preloaded.
+  by intros; eapply traceable_vlsm_initial_state_dec,
+    valid_state_project_preloaded_to_preloaded_free.
 Qed.
 
 (**
@@ -604,7 +605,7 @@ Proof.
   cut (output item <> Some m).
   {
     intro.
-    destruct (composite_has_been_sent_stepwise_props IM (free_constraint IM)) as [_].
+    destruct (free_composite_has_been_sent_stepwise_props IM) as [_].
     rewrite oracle_step_update by done; cbn.
     by intros [].
   }
