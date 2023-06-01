@@ -150,7 +150,7 @@ Qed.
 Lemma equivocators_fixed_equivocations_vlsm_incl_free
   : VLSM_incl equivocators_fixed_equivocations_vlsm (free_composite_vlsm equivocator_IM).
 Proof.
-  by apply constraint_subsumption_incl.
+  by apply constraint_free_incl.
 Qed.
 
 (** Inclusion into the preloaded free composition. *)
@@ -558,12 +558,11 @@ Proof.
       ; [done |].
       assert
         (Hs_free : valid_state_prop FreeE (finite_trace_last is tr')).
-      { destruct Hs as [_om Hs].
-        apply (constraint_subsumption_valid_state_message_preservation (equivocator_IM IM))
-          with (constraint2 := free_constraint (equivocator_IM IM))
-          in Hs as Hs_free
-          ; [| done].
-        by exists _om.
+      {
+        destruct Hs as [_om Hs].
+        exists _om.
+        eapply VLSM_incl_valid_state_message; [by apply free_composite_vlsm_spec | by do 2 red |].
+        by eapply constraint_subsumption_valid_state_message_preservation.
       }
       specialize
         (specialized_proper_sent_rev FreeE _ Hs_free _ Hno_equiv) as Hall.
@@ -619,7 +618,12 @@ Lemma free_equivocators_valid_trace_project
     equivocators_state_project IM final_descriptors final_state = final_stateX /\
     finite_valid_trace (free_composite_vlsm IM) isX trX.
 Proof.
-  by apply _equivocators_valid_trace_project.
+  destruct (_equivocators_valid_trace_project final_descriptors is tr Hproper Htr
+    (free_constraint IM)) as (trX & idesc & Hex); [done.. |].
+  exists trX, idesc.
+  split_and!; [by itauto.. |].
+  apply (@VLSM_incl_finite_valid_trace _ _ (composite_vlsm IM (free_constraint IM))); [| by itauto].
+  by apply free_composite_vlsm_spec.
 Qed.
 
 (**
@@ -715,7 +719,7 @@ Proof.
   ; [| by congruence].
   destruct item. simpl in *.
   apply first_transition_valid in Hpre_item_free. simpl in Hpre_item_free.
-  destruct Hpre_item_free as [[_ [_ [Hv _]]] Ht].
+  destruct Hpre_item_free as [[_ [_ Hv]] Ht].
   destruct l as [x l].
   cbn in *.
   destruct (equivocator_transition (IM x) l _) as [si' om'] eqn: Hti.
