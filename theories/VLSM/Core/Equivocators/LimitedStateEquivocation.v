@@ -90,7 +90,7 @@ Definition equivocators_limited_equivocations_vlsm
 Lemma equivocators_limited_equivocations_vlsm_incl_free
   : VLSM_incl equivocators_limited_equivocations_vlsm FreeE.
 Proof.
-  by apply constraint_subsumption_incl.
+  by apply constraint_free_incl.
 Qed.
 
 (** Inclusion in the preloaded free composition. *)
