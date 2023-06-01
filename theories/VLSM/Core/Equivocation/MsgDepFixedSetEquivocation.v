@@ -122,7 +122,7 @@ Lemma single_equivocator_projection s j
       (sub_state_element_project IM equivocators j Hj).
 Proof.
   apply basic_VLSM_projection.
-  - intros [sub_i li] lY HlX_pr sX om (_ & _ & HvX & _) HsY _; revert HvX.
+  - intros [sub_i li] lY HlX_pr sX om (_ & _ & HvX) HsY _; revert HvX.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
     unfold sub_label_element_project in HlX_pr; cbn in HlX_pr.
     case_decide as Heqij; [| congruence].
@@ -219,7 +219,7 @@ Proof.
       by apply no_initial_messages_in_IM.
     }
     destruct Hemit as ((sX, iom) & (sub_i, li) & sX' & HtX).
-    eapply (preloaded_composite_directly_observed_valid _ _ _ sX').
+    eapply (preloaded_free_composite_directly_observed_valid _ _ sX').
     + by eapply input_valid_transition_destination.
     + exists sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst.
       eapply message_dependencies_are_necessary; [| done].
