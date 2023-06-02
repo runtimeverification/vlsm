@@ -1181,10 +1181,10 @@ match obs s with
 | [] => []
 | MkObservation Send msg as ob :: obs =>
     let source := MkState obs adr in
-      [(@Build_transition_item _ ELMOComponentType Send None s (Some msg), source)]
+      [(Build_transition_item ELMOComponentType Send None s (Some msg), source)]
 | MkObservation Receive msg as ob :: obs =>
     let source := MkState obs adr in
-      [(@Build_transition_item _ ELMOComponentType Receive (Some msg) s None, source)]
+      [(Build_transition_item ELMOComponentType Receive (Some msg) s None, source)]
 end.
 
 Lemma ELMOComponent_state_destructor_initial :
@@ -1636,7 +1636,7 @@ Qed.
   It might be possible to use something weaker than [UMO_reachable full_node]
   to prove
   [CompositeHasBeenObserved ELMOComponent (elements ∘ Message_dependencies) s m
-  <-> exists (k : index) (l : label _), rec_obs (s k) (MkObservation l m)]
+  <-> exists (k : index) (l : label), rec_obs (s k) (MkObservation l m)]
   but [CompositeHasBeenObserved] can recurse into sent or received messages
   and [rec_obs] only into received messages so we need some deep structural
   assumption about what [Send] observations are allowed, even recursively
@@ -2061,7 +2061,7 @@ Proof.
   apply (VLSM_incl_finite_valid_trace_init_to Hincl) in Htr_min as Htr_min_pre.
   apply (VLSM_incl_valid_state Hincl) in Hsisi as Hsisi_pre.
   assert (finite_valid_trace_init_to ReachELMO si0 sf
-    (tr ++ [@Build_transition_item _ (composite_type ELMOComponent) (existT j lj) iom sf oom])).
+    (tr ++ [Build_transition_item (composite_type ELMOComponent) (existT j lj) iom sf oom])).
   {
     split; [| by apply Htr_min].
     apply valid_trace_add_last; [| by apply finite_trace_last_is_last].
