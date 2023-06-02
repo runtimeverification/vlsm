@@ -395,6 +395,35 @@ Proof.
     by itauto.
 Qed.
 
+Lemma preloaded_free_composite_vlsm_spec :
+  forall (initial : message -> Prop),
+    VLSM_eq
+      (pre_loaded_vlsm free_composite_vlsm initial)
+      (pre_loaded_vlsm (composite_vlsm free_constraint) initial).
+Proof.
+  split.
+  - apply (VLSM_incl_embedding_iff); cbn.
+    by apply basic_VLSM_strong_embedding; red; cbn.
+  - apply (VLSM_incl_embedding_iff); cbn.
+    apply basic_VLSM_strong_embedding; red; cbn; [| done..].
+    unfold constrained_composite_valid.
+    by itauto.
+Qed.
+
+Lemma preloaded_with_all_messages_free_composite_vlsm_spec :
+  VLSM_eq
+    (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
+    (pre_loaded_with_all_messages_vlsm (composite_vlsm free_constraint)).
+Proof.
+  split.
+  - apply (VLSM_incl_embedding_iff); cbn.
+    by apply basic_VLSM_strong_embedding; red; cbn.
+  - apply (VLSM_incl_embedding_iff); cbn.
+    apply basic_VLSM_strong_embedding; red; cbn; [| done..].
+    unfold constrained_composite_valid.
+    by itauto.
+Qed.
+
 Lemma lift_to_composite_VLSM_embedding j
   : VLSM_embedding (IM j) free_composite_vlsm (lift_to_composite_label j)
       (lift_to_composite_state' j).
