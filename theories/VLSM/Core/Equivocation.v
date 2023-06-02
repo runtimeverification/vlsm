@@ -409,7 +409,7 @@ Record oracle_stepwise_props
       initial_state_prop vlsm s ->
       forall (m : message), ~ oracle s m;
   oracle_step_update :
-    forall (l : label) (s : state) (im : option message) (s' : state) (om : option message),
+    forall (l : label _) (s : state _) (im : option message) (s' : state _) (om : option message),
       input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
       forall (msg : message),
       oracle s' msg
@@ -553,7 +553,7 @@ Definition has_been_sent_no_inits `{HasBeenSentCapability} :
   := oracle_no_inits _ _ (has_been_sent_stepwise_props).
 
 Definition has_been_sent_step_update `{HasBeenSentCapability} :
-  forall (l : label) (s : state) (im : option message) (s' : state) (om : option message),
+  forall (l : label _) (s : state _) (im : option message) (s' : state _) (om : option message),
     input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
   forall msg,
     has_been_sent s' msg <-> (om = Some msg \/ has_been_sent s msg)
@@ -726,7 +726,7 @@ Definition has_been_received_no_inits `{HasBeenReceivedCapability} :
   := oracle_no_inits _ _ has_been_received_stepwise_props.
 
 Definition has_been_received_step_update `{HasBeenReceivedCapability} :
-  forall [l : label] [s : state] [im : option message] [s' : state] [om : option message],
+  forall [l : label _] [s : state _] [im : option message] [s' : state _] [om : option message],
     input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
   forall msg,
     has_been_received s' msg <-> (im = Some msg \/ has_been_received s msg)
@@ -878,7 +878,7 @@ Context
   .
 
 Lemma prove_all_have_message_from_stepwise :
-  forall (s : state)
+  forall (s : state _)
          (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s)
          (m : message),
     all_traces_have_message_prop vlsm selector oracle s m.

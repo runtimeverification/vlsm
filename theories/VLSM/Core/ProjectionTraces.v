@@ -157,7 +157,7 @@ Definition finite_trace_projection_list (tr : list (composite_transition_item IM
     (composite_project_label IM j) (fun s => s j) tr.
 
 Lemma preloaded_valid_state_projection
-  (s : state)
+  (s : state _)
   (Hps : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
   : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM j)) (s j).
 Proof.

@@ -919,7 +919,7 @@ Context
   a [valid_state] and [valid_message] for the original VLSM.
 *)
 Definition self_validator_vlsm_prop :=
-  forall (l : label) (s : state) (om : option message),
+  forall (l : label _) (s : state _) (om : option message),
     input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
     input_valid X l (s, om).
 
