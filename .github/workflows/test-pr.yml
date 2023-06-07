@@ -15,6 +15,7 @@ jobs:
         image:
           - 'coqorg/coq:8.16-ocaml-4.14-flambda'
           - 'coqorg/coq:8.17-ocaml-4.14-flambda'
+          - 'coqorg/coq:8.18-ocaml-4.14-flambda'
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
