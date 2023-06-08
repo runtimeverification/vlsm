@@ -128,6 +128,27 @@ Definition lv_message_observations (s : state) (target : index) : set lv_event :
   set_union (lv_sent_observations s target) (lv_received_observations s target).
 ```
 
+- do not use definitions to prove propositions; use lemma/theorem and tactics instead
+
+Not recommended:
+```coq
+Definition finite_trace_partial_map_app
+  : forall l1 l2, finite_trace_partial_map (l1 ++ l2) =
+    finite_trace_partial_map l1 ++ finite_trace_partial_map l2
+  := map_option_app _.
+```
+
+Recommended:
+```coq
+Lemma finite_trace_partial_map_app :
+  forall l1 l2 : list (transition_item TX),
+    finite_trace_partial_map (l1 ++ l2) =
+    finite_trace_partial_map l1 ++ finite_trace_partial_map l2.
+Proof.
+  by apply map_option_app.
+Qed.
+```
+
 ### Theorems and lemmas
 
 - C-style name
