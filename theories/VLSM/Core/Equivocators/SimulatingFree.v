@@ -39,6 +39,8 @@ Context
   (CE := pre_loaded_vlsm (composite_vlsm (equivocator_IM IM) constraintE) seed)
   (FreeE := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
+  (CX_free := pre_loaded_vlsm (free_composite_vlsm IM) seed)
+  (CE_free := pre_loaded_vlsm (free_composite_vlsm (equivocator_IM IM)) seed)
   .
 
 Definition last_in_trace_except_from
@@ -243,6 +245,8 @@ Context {message : Type}
   (seed : message -> Prop)
   (SeededXE : VLSM message :=
     composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed)
+  (SeededXE_free : VLSM message :=
+    free_composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) seed)
   (Free := free_composite_vlsm IM)
   (SeededFree := pre_loaded_vlsm Free seed)
   .
@@ -313,9 +317,10 @@ Lemma seeded_equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to SeededXE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  apply
-    (generalized_equivocators_finite_valid_trace_init_to_rev IM)
-  ; [.. | done].
+  apply (generalized_equivocators_finite_valid_trace_init_to_rev IM)
+    with (constraintX := free_constraint _); cycle 2.
+  - apply VLSM_incl_finite_valid_trace_init_to; [| by apply HtrX].
+    by apply preloaded_free_composite_vlsm_spec.
   - intro; intros. split; [| done].
     destruct om; [| done].
     destruct Hom as [Hsent | Hinitial]; [by left |].
@@ -343,7 +348,7 @@ Proof.
     rewrite
       (equivocators_total_trace_project_replayed_trace_from
         IM (enum index) eqv_state_s).
-    repeat split. simpl.
+    repeat split; simpl.
     destruct Hfinal_msg as [Hfinal_msg | Hinitial]; [| by right].
     left.
     apply valid_trace_first_pstate in Hmsg_trace_full_replay as Hfst.
@@ -354,7 +359,6 @@ Proof.
     specialize (@has_been_sent_examine_one_trace _ FreeE _ _ _ _ (conj Happ His_s) im)
       as Hrew.
     unfold has_been_sent in Hrew; cbn in Hrew; apply Hrew.
-
     apply Exists_app. right.
     destruct_list_last eqv_msg_tr eqv_msg_tr' itemX Heqv_msg_tr
     ; [by inversion Hfinal_msg |].
@@ -394,10 +398,8 @@ Lemma equivocators_finite_valid_trace_init_to_rev
 Proof.
   specialize (vlsm_is_pre_loaded_with_False Free) as Heq.
   apply (VLSM_eq_finite_valid_trace_init_to Heq) in HtrX.
-  specialize
-    (seeded_equivocators_finite_valid_trace_init_to_rev
-      IM (fun m => False) no_initial_messages_in_IM
-      _ _ _ HtrX)
+  specialize (seeded_equivocators_finite_valid_trace_init_to_rev
+    IM (fun m => False) no_initial_messages_in_IM _ _ _ HtrX)
     as [is [His [s [Hs [tr [Htr_pr [Htr Houtput]]]]]]].
   exists is; split; [done |].
   exists s; split; [done |].
@@ -417,7 +419,7 @@ Proof.
   apply strong_constraint_subsumption_strongest.
   subst.
   clear.
-  intros l (s, om) Hc.
+  intros l [s om] Hc.
   split; [| done].
   destruct om as [m |]; [| done].
   by apply proj1 in Hc.
