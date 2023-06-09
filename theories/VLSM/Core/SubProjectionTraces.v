@@ -112,7 +112,7 @@ Definition lift_sub_state_to
   (s : composite_state sub_IM)
   : composite_state IM
   := fun i =>
-    match @decide  (sub_index_prop i) (sub_index_prop_dec i) with
+    match decide (sub_index_prop i) with
     | left e =>  s (dexist i e)
     | _ => s0 i
     end.
@@ -233,7 +233,7 @@ Proof. by intro; apply composite_state_sub_projection_lift_to. Qed.
 
 Lemma composite_trace_sub_projection_lift
   (tr : list (composite_transition_item sub_IM))
-  : @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _
+  : pre_VLSM_projection_finite_trace_project (composite_type IM) _
     composite_label_sub_projection_option composite_state_sub_projection
     (pre_VLSM_embedding_finite_trace_project _ _ lift_sub_label lift_sub_state tr)
     = tr.
@@ -360,11 +360,11 @@ Qed.
 End sec_induced_sub_projection_subsumption.
 
 Definition from_sub_projection : composite_transition_item IM -> Prop :=
-  @pre_VLSM_projection_in_projection _ (composite_type IM) _ composite_label_sub_projection_option.
+  pre_VLSM_projection_in_projection (composite_type IM) _ composite_label_sub_projection_option.
 
 Definition finite_trace_sub_projection
   : list (composite_transition_item IM) -> list (composite_transition_item sub_IM) :=
-  @pre_VLSM_projection_finite_trace_project _ (composite_type IM) _
+  pre_VLSM_projection_finite_trace_project (composite_type IM) _
     composite_label_sub_projection_option composite_state_sub_projection.
 
 Section sec_sub_projection_with_no_equivocation_constraints.
@@ -400,7 +400,7 @@ Definition finite_trace_sub_projection_app
   finite_trace_sub_projection (tr1 ++ tr2) =
   finite_trace_sub_projection tr1 ++ finite_trace_sub_projection tr2
   :=
-    @pre_VLSM_projection_finite_trace_project_app _ (composite_type IM) _
+    pre_VLSM_projection_finite_trace_project_app (composite_type IM) _
       composite_label_sub_projection_option composite_state_sub_projection tr1 tr2.
 
 Lemma X_incl_Pre : VLSM_incl X Pre.
@@ -586,7 +586,7 @@ Proof.
     apply (valid_trace_output_is_valid Xj _ _ IHtr).
     apply Exists_exists.
     specialize
-      (@pre_VLSM_projection_transition_item_project_is_Some _ (composite_type IM) _
+      (pre_VLSM_projection_transition_item_project_is_Some (composite_type IM) _
         composite_label_sub_projection_option composite_state_sub_projection
         item Hsub_item)
       as [itemX HitemX].
@@ -768,7 +768,7 @@ Arguments sub_IM_state_pi {_ _ _ _ _ _} _ _ _.
   Make initial arguments of lift_sub_transition not maximally inserted,
   so tactics like rapply lift_sub_transition
   do not try to guess those arguments before looking at the goal,
-  and we don't have to always write rapply @lift_sub_transition.
+  and we don't have to always write <<rapply @lift_sub_transition>>.
 *)
 Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%function_scope
   sub_index_list%list_scope l s om s' om' Ht.
@@ -1043,8 +1043,6 @@ Context
   (sub_IM2 := sub_IM IM indices2)
   (sub_index1_prop_dec :
     forall i, Decision (sub_index_prop indices1 i) := fun i => sub_index_prop_dec indices1 i)
-  (sub_index2_prop_dec :
-    forall i, Decision (sub_index_prop indices2 i) := fun i => sub_index_prop_dec indices2 i)
   .
 
 Definition lift_sub_incl_state
@@ -1836,7 +1834,7 @@ Section sec_update_IM.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   (selection : Ci)
   .

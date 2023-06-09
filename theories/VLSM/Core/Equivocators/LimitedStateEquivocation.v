@@ -190,7 +190,7 @@ Proof.
       + destruct iom as [m |]; [| by apply option_valid_message_None].
         destruct Hno_equiv as [Hsent | Hfalse]; [| done].
         simpl in Hsent.
-        by eapply composite_sent_valid.
+        by eapply sent_valid.
       + replace (composite_transition _ _ _) with (sf, oom).
         unfold state_has_fixed_equivocation.
         transitivity (elements (equivocating_validators sf)); [| done].

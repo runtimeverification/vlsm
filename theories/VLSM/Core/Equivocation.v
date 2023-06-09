@@ -2436,21 +2436,7 @@ Lemma preloaded_composite_sent_valid
   (Hsent : composite_has_been_sent s m)
   : valid_message_prop X m.
 Proof.
-  destruct Hsent as [i Hsent].
-  by apply preloaded_messages_sent_from_component_of_valid_state_are_valid with s i.
-Qed.
-
-Lemma composite_received_valid
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  (s : composite_state IM)
-  (Hs : valid_state_prop X s)
-  (m : message)
-  (Hreceived : composite_has_been_received s m)
-  : valid_message_prop X m.
-Proof.
-  destruct Hreceived as [i Hreceived].
-  by apply messages_received_from_component_of_valid_state_are_valid with s i.
+  by eapply sent_valid.
 Qed.
 
 Lemma preloaded_composite_received_valid
@@ -2463,8 +2449,7 @@ Lemma preloaded_composite_received_valid
   (Hreceived : composite_has_been_received s m)
   : valid_message_prop X m.
 Proof.
-  destruct Hreceived as [i Hreceived].
-  by apply preloaded_messages_received_from_component_of_valid_state_are_valid with s i.
+  by eapply received_valid.
 Qed.
 
 Lemma composite_directly_observed_valid
@@ -2973,7 +2958,7 @@ Proof.
   apply pre_traces_with_valid_inputs_are_valid in Htr; [done |].
   apply valid_trace_last_pstate in Htr as Hspre.
   intros.
-  eapply composite_received_valid; [done |].
+  eapply received_valid; [done |].
   specialize (proper_received _ s Hspre m) as Hproper.
   apply proj2 in Hproper. apply Hproper.
   apply has_been_received_consistency; [by typeclasses eauto | done |].

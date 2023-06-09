@@ -222,7 +222,7 @@ Section sec_fixed_equivocation_with_fullnode.
 Context
   `{EqDecision message}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
@@ -292,7 +292,7 @@ Context
   `{EqDecision message}
   {index : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}

@@ -70,7 +70,7 @@ Arguments transition {message T} VLSMMachine _ _, {message T VLSMMachine} _ _ : 
 Arguments valid {message T} VLSMMachine _ _, {message T VLSMMachine} _ _ : rename.
 
 Definition option_initial_message_prop
-  {message : Type} {T : VLSMType message} {M : VLSMMachine T}
+  {message : Type} {T : VLSMType message} (M : VLSMMachine T)
   : option message -> Prop := from_option (@initial_message_prop _ _ M) True.
 
 Definition VLSMMachine_pre_loaded_with_messages
@@ -240,6 +240,7 @@ End sec_traces.
 
 Arguments Trace {message T}, {message} T.
 Arguments transition_item {message} {T} , {message} T.
+Arguments Build_transition_item {message T}, {message} T.
 Arguments field_selector {_} {T} _ msg item /.
 Arguments item_sends_or_receives {_} {_} msg item /.
 
@@ -447,7 +448,7 @@ Inductive valid_state_message_prop : state X -> option message -> Prop :=
     (s : state X)
     (Hs : initial_state_prop X s)
     (om : option message)
-    (Hom : @option_initial_message_prop _ _ X om)
+    (Hom : option_initial_message_prop X om)
   : valid_state_message_prop s om
 | valid_generated_state_message
     (s : state X)
@@ -530,7 +531,7 @@ Qed.
 
 Lemma option_initial_message_is_valid
   (om : option message)
-  (Hinitial : @option_initial_message_prop _ X X om) :
+  (Hinitial : option_initial_message_prop X om) :
   option_valid_message_prop om.
 Proof.
   destruct om.
@@ -769,7 +770,7 @@ Lemma option_can_produce_valid_iff
   (s : state X)
   (om : option message)
   : valid_state_message_prop s om <->
-    option_can_produce s om \/ initial_state_prop X s /\ @option_initial_message_prop _ X X om.
+    option_can_produce s om \/ initial_state_prop X s /\ option_initial_message_prop X om.
 Proof.
   split.
   - intros Hm; inversion Hm; subst.
@@ -1523,7 +1524,7 @@ Inductive finite_valid_trace_init_to_emit
   : state X -> state X -> option message -> list (transition_item X) -> Prop :=
 | finite_valid_trace_init_to_emit_empty : forall (is : state X) (om : option message)
     (His : initial_state_prop X is)
-    (Him : @option_initial_message_prop _ X X om),
+    (Him : option_initial_message_prop X om),
     finite_valid_trace_init_to_emit is is om []
 | finite_valid_trace_init_to_emit_extend
     : forall
@@ -1556,7 +1557,7 @@ Definition empty_initial_message_or_final_output
 Proof.
   destruct (has_last_or_null tl) as [[_ [item _]] | _].
   - exact (output item  = om).
-  - exact (@option_initial_message_prop _ X X om).
+  - exact (option_initial_message_prop X om).
 Defined.
 
 Lemma finite_valid_trace_init_to_emit_output
@@ -1852,7 +1853,7 @@ Lemma valid_state_message_has_trace
       (s : state X)
       (om : option message)
       (Hp : valid_state_message_prop s om)
-  : initial_state_prop X s /\ @option_initial_message_prop _ X X om
+  : initial_state_prop X s /\ option_initial_message_prop X om
   \/ exists (is : state X) (tr : list transition_item),
         finite_valid_trace_init_to is s tr
         /\ finite_trace_last_output tr = om.
@@ -2725,10 +2726,10 @@ Context
   .
 
 Definition same_VLSM_label_rew (l1 : label X1) : label X2 :=
-  eq_rect X1 label l1 _ Heq.
+  eq_rect X1 (@label _) l1 _ Heq.
 
 Definition same_VLSM_state_rew (s1 : state X1) : state X2 :=
-  eq_rect X1 state s1 _ Heq.
+  eq_rect X1 (@state _) s1 _ Heq.
 
 End sec_definitions.
 

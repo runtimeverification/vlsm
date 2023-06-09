@@ -23,7 +23,7 @@ Section sec_fixed_equivocation_without_fullnode.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
@@ -38,9 +38,8 @@ Context
   [free_equivocating_vlsm_composition] is the free composition of the subset of
   nodes which are allowed to equivocate.
 *)
-Definition free_equivocating_vlsm_composition
-  : VLSM message
-  := @free_composite_vlsm message equivocating_index _ equivocating_IM.
+Definition free_equivocating_vlsm_composition : VLSM message :=
+  free_composite_vlsm equivocating_IM.
 
 (**
   [pre_loaded_free_equivocating_vlsm_composition] preloads the free composition
@@ -219,7 +218,7 @@ Section sec_fixed_equivocation_index_incl.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
@@ -290,7 +289,7 @@ Section sec_fixed_equivocator_sub_projection.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -658,7 +657,7 @@ Section sec_Fixed_eq_StrongFixed.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -749,7 +748,7 @@ Section sec_fixed_equivocator_lifting.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
@@ -976,7 +975,7 @@ Section sec_fixed_equivocation_no_equivocators.
 Context
   {message : Type}
   `{FinSet index Ci}
-  `{@finite.Finite index _}
+  `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}

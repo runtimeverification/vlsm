@@ -27,6 +27,7 @@ Record plan_item : Type :=
 End sec_plans.
 
 Arguments plan_item {message T}, {message} T.
+Arguments Build_plan_item {message T}, {message} T.
 
 Section sec_apply_plans.
 

@@ -1181,10 +1181,10 @@ match obs s with
 | [] => []
 | MkObservation Send msg as ob :: obs =>
     let source := MkState obs adr in
-      [(@Build_transition_item _ ELMOComponentType Send None s (Some msg), source)]
+      [(Build_transition_item ELMOComponentType Send None s (Some msg), source)]
 | MkObservation Receive msg as ob :: obs =>
     let source := MkState obs adr in
-      [(@Build_transition_item _ ELMOComponentType Receive (Some msg) s None, source)]
+      [(Build_transition_item ELMOComponentType Receive (Some msg) s None, source)]
 end.
 
 Lemma ELMOComponent_state_destructor_initial :
@@ -1636,7 +1636,7 @@ Qed.
   It might be possible to use something weaker than [UMO_reachable full_node]
   to prove
   [CompositeHasBeenObserved ELMOComponent (elements ∘ Message_dependencies) s m
-  <-> exists (k : index) (l : label _), rec_obs (s k) (MkObservation l m)]
+  <-> exists (k : index) (l : label), rec_obs (s k) (MkObservation l m)]
   but [CompositeHasBeenObserved] can recurse into sent or received messages
   and [rec_obs] only into received messages so we need some deep structural
   assumption about what [Send] observations are allowed, even recursively
@@ -2062,7 +2062,7 @@ Proof.
   apply (VLSM_incl_finite_valid_trace_init_to Hincl) in Htr_min as Htr_min_pre.
   apply (VLSM_incl_valid_state Hincl) in Hsisi as Hsisi_pre.
   assert (finite_valid_trace_init_to ReachELMO si0 sf
-    (tr ++ [@Build_transition_item _ (composite_type ELMOComponent) (existT j lj) iom sf oom])).
+    (tr ++ [Build_transition_item (composite_type ELMOComponent) (existT j lj) iom sf oom])).
   {
     split; [| by apply Htr_min].
     apply valid_trace_add_last; [| by apply finite_trace_last_is_last].
@@ -2121,7 +2121,7 @@ Proof.
   }
   assert (Hincl : VLSM_incl ELMOProtocol ReachELMO) by apply constraint_preloaded_free_incl.
   destruct (decide (composite_has_been_sent ELMOComponent s m)) as [| Hnsnd];
-    [by eapply composite_sent_valid |].
+    [by eapply sent_valid |].
   destruct Hreceive as [[Hv Hc] Ht]; inversion Hv as [? ? Hrcv |]; subst; inversion Ht.
   assert (Hm_eqv : global_equivocators_simple s' (adr (state m))).
   {
@@ -3030,7 +3030,7 @@ Proof.
     symmetry in Heqs'i; destruct (Htransitions _ Heqs'i) as [Hvs'0 Hvt0];
     inversion Hvt0 as [? ? ? ? Hvt | ? ? ? ? Hvt].
   - repeat split; [done | | by apply Hvt..].
-    eapply composite_received_valid; [by apply Hs' |].
+    eapply received_valid; [by apply Hs' |].
     by eexists; eapply has_been_received_step_update; [| left].
   - by repeat split; [| apply option_valid_message_None | apply Hvt].
 Qed.
