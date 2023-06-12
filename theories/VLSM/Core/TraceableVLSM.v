@@ -195,7 +195,7 @@ Definition composite_state_destructor (s' : composite_state IM) (i : index)
   : list (composite_transition_item IM * composite_state IM) :=
   map (lift_to_composite_transition_item_state s' i) (state_destructor i (s' i)).
 
-Definition composite_state_size (s : composite_state IM) :=
+Definition composite_state_size (s : composite_state IM) : nat :=
   foldr Nat.add 0 (map (fun i => state_size i (s i)) (enum index)).
 
 Lemma composite_state_update_size_monotone :

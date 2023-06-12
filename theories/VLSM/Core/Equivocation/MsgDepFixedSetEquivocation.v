@@ -26,7 +26,7 @@ Definition dependencies_with_non_equivocating_senders_were_sent s m : Prop :=
   forall dm, msg_dep_happens_before message_dependencies dm m ->
     sent_by_non_equivocating IM equivocators s dm \/ equivocator_can_emit dm.
 
-Definition msg_dep_fixed_set_equivocation (s : composite_state IM) (m : message) :=
+Definition msg_dep_fixed_set_equivocation (s : composite_state IM) (m : message) : Prop :=
   sent_by_non_equivocating IM equivocators s m \/
   equivocator_can_emit m /\
   dependencies_with_non_equivocating_senders_were_sent s m.
@@ -306,10 +306,10 @@ Context
   (sender : message -> option validator)
   .
 
-Definition has_equivocating_sender (m : message)
-  := exists v, sender m = Some v /\ A v ∈ equivocators.
+Definition has_equivocating_sender (m : message) : Prop :=
+  exists v, sender m = Some v /\ A v ∈ equivocators.
 
-Definition full_node_fixed_set_equivocation (s : composite_state IM) (m : message) :=
+Definition full_node_fixed_set_equivocation (s : composite_state IM) (m : message) : Prop :=
   sent_by_non_equivocating IM equivocators s m \/ has_equivocating_sender m.
 
 Definition full_node_fixed_set_equivocation_constraint

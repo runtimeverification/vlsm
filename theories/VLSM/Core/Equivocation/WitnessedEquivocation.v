@@ -301,9 +301,9 @@ Qed.
   A stronger [trace_witnessing_equivocation_prop]erty requires that any
   prefix of a trace is witnessing equivocation for its corresponding final state.
 *)
-Definition strong_trace_witnessing_equivocation_prop is tr :=
-    forall prefix suffix, prefix ++ suffix = tr ->
-      trace_witnessing_equivocation_prop is prefix.
+Definition strong_trace_witnessing_equivocation_prop is tr : Prop :=
+  forall prefix suffix, prefix ++ suffix = tr ->
+    trace_witnessing_equivocation_prop is prefix.
 
 (**
   An advantage of the [strong_trace_witnessing_equivocation_prop]erty
