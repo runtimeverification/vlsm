@@ -1276,6 +1276,27 @@ Context
    [input_valid] from <<s>> and their <<i>>'th components are equal. *)
 
 Lemma relevant_component_transition
+  (Free' := composite_vlsm _ (free_constraint IM))
+  (s s' : state Free')
+  (l : label Free')
+  (input : option message)
+  (i := projT1 l)
+  (Heq : (s i) = (s' i))
+  (Hprs : valid_state_prop Free' s')
+  (Hiv : input_valid Free' l (s, input)) :
+  input_valid Free' l (s', input).
+Proof.
+  split_and!; [done | by apply Hiv |].
+  cbn in Hiv |- *.
+  unfold constrained_composite_valid, composite_valid, free_constraint in Hiv |- *.
+  destruct l.
+  simpl in i.
+  unfold i in Heq.
+  rewrite <- Heq.
+  by itauto.
+Qed.
+
+Lemma relevant_component_transition_free
   (s s' : state Free)
   (l : label Free)
   (input : option message)
@@ -1297,6 +1318,24 @@ Qed.
 (* The effect of the transition is also the same. *)
 
 Lemma relevant_component_transition2
+  (Free' := composite_vlsm _ (free_constraint IM))
+  (s s' : state Free')
+  (l : label Free')
+  (input : option message)
+  (i := projT1 l)
+  (Heq : (s i) = (s' i))
+  (Hprs : valid_state_prop Free' s') :
+  let (dest, output) := transition Free' l (s, input) in
+  let (dest', output') := transition Free' l (s', input) in
+  output = output' /\ (dest i) = (dest' i).
+Proof.
+  destruct l as [x l]; simpl in i |- *.
+  unfold i in Heq; rewrite Heq.
+  destruct (transition (IM x) l (s' x, input)).
+  by state_update_simpl.
+Qed.
+
+Lemma relevant_component_transition2_free
   (s s' : state Free)
   (l : label Free)
   (input : option message)
@@ -1314,6 +1353,47 @@ Proof.
 Qed.
 
 Lemma relevant_components_one
+  (s s' : state (composite_vlsm _ (free_constraint IM)))
+  (Hprs' : valid_state_prop (composite_vlsm _ (free_constraint IM)) s')
+  (ai : vplan_item (composite_vlsm _ (free_constraint IM)))
+  (i := projT1 (label_a ai))
+  (Heq : (s i) = (s' i))
+  (Hpr : finite_valid_plan_from (composite_vlsm _ (free_constraint IM)) s [ai]) :
+  let res' := snd (apply_plan (composite_vlsm _ (free_constraint IM)) s' [ai]) in
+  let res := snd (apply_plan (composite_vlsm _ (free_constraint IM)) s [ai]) in
+  finite_valid_plan_from (composite_vlsm _ (free_constraint IM)) s' [ai] /\
+  (res' i) = res i.
+Proof.
+  simpl.
+  unfold finite_valid_plan_from, apply_plan, _apply_plan in *.
+  destruct ai; simpl in *.
+  match goal with
+  |- context [let (_, _) := let (_, _) := ?t in _ in _] =>
+    destruct t eqn: eq_trans'
+  end.
+  match goal with
+  |- context [let (_, _) := let (_, _) := ?t in _ in _] =>
+    destruct t eqn: eq_trans
+  end.
+  inversion Hpr; subst.
+  split.
+  - assert (Ht' : input_valid_transition (composite_vlsm _ (free_constraint IM)) label_a (s', input_a) (c, o)).
+    {
+      unfold input_valid_transition in *.
+      destruct Ht as [Hpr_valid Htrans].
+      by apply relevant_component_transition with (s' := s') in Hpr_valid; itauto.
+    }
+    apply finite_valid_trace_from_extend; [| done].
+    apply finite_valid_trace_from_empty.
+    by apply input_valid_transition_destination in Ht'.
+  - specialize (relevant_component_transition2 s s' label_a input_a Heq Hprs') as Hrel.
+    cbn in *.
+    repeat case_match.
+    unfold i; cbn in *.
+    by itauto congruence.
+Qed.
+
+Lemma relevant_components_one_free
   (s s' : state Free)
   (Hprs' : valid_state_prop Free s')
   (ai : vplan_item Free)
@@ -1342,12 +1422,12 @@ Proof.
     {
       unfold input_valid_transition in *.
       destruct Ht as [Hpr_valid Htrans].
-      by apply relevant_component_transition with (s' := s') in Hpr_valid; itauto.
+      by apply relevant_component_transition_free with (s' := s') in Hpr_valid; itauto.
     }
     apply finite_valid_trace_from_extend; [| done].
     apply finite_valid_trace_from_empty.
     by apply input_valid_transition_destination in Ht'.
-  - specialize (relevant_component_transition2 s s' label_a input_a Heq Hprs') as Hrel.
+  - specialize (relevant_component_transition2_free s s' label_a input_a Heq Hprs') as Hrel.
     cbn in *.
     repeat case_match.
     unfold i; cbn in *.
@@ -1428,6 +1508,72 @@ Qed.
 (* Same as relevant_components_one but for multiple transitions. *)
 
 Lemma relevant_components
+  (s s' : state (composite_vlsm _ (free_constraint IM)))
+  (Hprs' : valid_state_prop (composite_vlsm _ (free_constraint IM)) s')
+  (a : plan (composite_vlsm _ (free_constraint IM)))
+  (a_indices := List.map (@projT1 _ _) (List.map (@label_a _ _) a))
+  (li : list index)
+  (Heq : forall (i : index), i ∈ li -> (s' i) = (s i))
+  (Hincl : a_indices ⊆ li)
+  (Hpr : finite_valid_plan_from (composite_vlsm _ (free_constraint IM)) s a) :
+  let res' := snd (apply_plan (composite_vlsm _ (free_constraint IM)) s' a) in
+  let res := snd (apply_plan (composite_vlsm _ (free_constraint IM)) s a) in
+  finite_valid_plan_from (composite_vlsm _ (free_constraint IM)) s' a /\
+  (forall (i : index), i ∈ li -> (res' i) = res i).
+Proof.
+  induction a using rev_ind; cbn in *; [by auto using finite_valid_plan_empty |].
+  apply finite_valid_plan_from_app_iff in Hpr as [Hrem Hsingle].
+  spec IHa.
+  {
+    remember (List.map (@projT1 _ (fun n : index => label (IM n))) (List.map label_a a)) as small.
+    transitivity a_indices; [| done].
+    unfold a_indices.
+    intros e H; simpl.
+    rewrite 2 map_app, elem_of_app.
+    by itauto.
+  }
+  spec IHa; [done |].
+  destruct IHa as [IHapr IHaind].
+
+  specialize (relevant_components_one
+    (snd (apply_plan (composite_vlsm _ (free_constraint IM)) s a))
+    (snd (apply_plan (composite_vlsm _ (free_constraint IM)) s' a))) as Hrel.
+  spec Hrel; [by apply apply_plan_last_valid; itauto |].
+  specialize (Hrel x); simpl in *.
+  spec Hrel.
+  {
+    specialize (IHaind (projT1 (label_a x))).
+    symmetry.
+    apply IHaind.
+    specialize (Hincl (projT1 (label_a x))).
+    apply Hincl.
+    unfold a_indices.
+    by rewrite 2 map_app, elem_of_app; right; left.
+  }
+  specialize (Hrel Hsingle).
+  destruct Hrel as [Hrelpr Hrelind].
+  split; [by apply finite_valid_plan_from_app_iff; split |].
+  intros i Hi.
+  rewrite !apply_plan_app.
+  destruct (apply_plan (composite_vlsm IM (free_constraint IM)) s' a) as [tra' sa'] eqn: eq_as'.
+  destruct (apply_plan (composite_vlsm IM (free_constraint IM)) s a) as [tra sa] eqn: eq_as.
+  simpl in *.
+  destruct (apply_plan (composite_vlsm IM (free_constraint IM)) sa [x]) as [trx sx] eqn: eq_xsa.
+  destruct (apply_plan (composite_vlsm IM (free_constraint IM)) sa' [x]) as [trx' sx'] eqn: eq_xsa'.
+  simpl in *.
+  destruct (decide (i = (projT1 (label_a x)))); [by rewrite e |].
+
+  apply (f_equal snd) in eq_xsa, eq_xsa'.
+  replace sx' with (snd (composite_apply_plan IM sa' [x])).
+  replace sx with (snd (composite_apply_plan IM sa [x])).
+  specialize (irrelevant_components_one sa x i n) as Hdiff.
+  specialize (irrelevant_components_one sa' x i n) as Hdiff0.
+  setoid_rewrite Hdiff.
+  setoid_rewrite Hdiff0.
+  by apply IHaind.
+Qed.
+
+Lemma relevant_components_free
   (s s' : state Free)
   (Hprs' : valid_state_prop Free s')
   (a : plan Free)
@@ -1455,7 +1601,7 @@ Proof.
   spec IHa; [done |].
   destruct IHa as [IHapr IHaind].
 
-  specialize (relevant_components_one (snd (apply_plan Free s a))
+  specialize (relevant_components_one_free (snd (apply_plan Free s a))
     (snd (apply_plan Free s' a))) as Hrel.
   spec Hrel; [by apply apply_plan_last_valid; itauto |].
   specialize (Hrel x); simpl in *.
