@@ -34,6 +34,7 @@ theories/VLSM/Core/VLSMProjections/VLSMEmbedding.v
 theories/VLSM/Core/VLSMProjections/VLSMInclusion.v
 theories/VLSM/Core/VLSMProjections/VLSMEquality.v
 theories/VLSM/Core/VLSMProjections.v
+theories/VLSM/Core/ConstrainedVLSM.v
 theories/VLSM/Core/Composition.v
 theories/VLSM/Core/Validator.v
 theories/VLSM/Core/ProjectionTraces.v
