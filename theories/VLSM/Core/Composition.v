@@ -3,6 +3,7 @@ From stdpp Require Import prelude finite.
 From Coq Require Import Streams FunctionalExtensionality Eqdep_dec.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections.
+From VLSM.Core Require Import ConstrainedVLSM.
 
 (** * VLSM Composition
 
@@ -292,36 +293,20 @@ Definition composite_valid
   let (i, li) := l in
   valid (IM i) li (s i, om).
 
-(**
-  A <<constraint>> for a composite VLSM is a [valid]ity condition defined
-  directly on [composite_label]s and [composite_state]s, thus being able to
-  impose a global condition.
+Definition free_composite_vlsm_machine : VLSMMachine composite_type :=
+{|
+  initial_state_prop := composite_initial_state_prop;
+  initial_message_prop := composite_initial_message_prop;
+  transition := composite_transition;
+  valid := composite_valid;
+|}.
 
-  [constrained_composite_valid]ity interposes such a <<constraint>> on top of
-  the [composite_valid]ity.
-*)
-
-Definition constrained_composite_valid
-  (constraint : composite_label -> composite_state * option message -> Prop)
-  (l : composite_label)
-  (som : composite_state * option message)
-  :=
-  composite_valid l som /\ constraint l som.
-
-Definition composite_vlsm_machine
-  (constraint : composite_label -> composite_state * option message -> Prop)
-  : VLSMMachine composite_type
-  :=
-  {| initial_state_prop := composite_initial_state_prop
-   ; initial_message_prop := composite_initial_message_prop
-   ; transition := composite_transition
-   ; valid := constrained_composite_valid constraint
-  |}.
+Definition free_composite_vlsm : VLSM message :=
+  mk_vlsm free_composite_vlsm_machine.
 
 Definition composite_vlsm
-  (constraint : composite_label -> composite_state * option message -> Prop)
-  : VLSM message
-  := mk_vlsm (composite_vlsm_machine constraint).
+  (constraint : composite_label -> composite_state * option message -> Prop) : VLSM message :=
+    constrained_vlsm free_composite_vlsm constraint.
 
 (**
   Composite versions for the generic [_apply_plan]-related definitions and
@@ -357,23 +342,6 @@ Proof.
   - rewrite state_update_neq; cbn; [| done].
     by destruct (vs0 _) as [s Hs].
 Qed.
-
-(** ** Free VLSM composition
-
-  The [free_composite_vlsm] is like [composite_vlsm], but without any additional
-  validity constraints.
-*)
-
-Definition free_composite_vlsm_machine : VLSMMachine composite_type :=
-{|
-  initial_state_prop := composite_initial_state_prop;
-  initial_message_prop := composite_initial_message_prop;
-  transition := composite_transition;
-  valid := composite_valid;
-|}.
-
-Definition free_composite_vlsm : VLSM message :=
-  mk_vlsm free_composite_vlsm_machine.
 
 (**
   [free_composite_vlsm] is equivalent to a [composite_vlsm] with a trivial
