@@ -39,8 +39,6 @@ Context
   (CE := pre_loaded_vlsm (composite_vlsm (equivocator_IM IM) constraintE) seed)
   (FreeE := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
-  (CX_free := pre_loaded_vlsm (free_composite_vlsm IM) seed)
-  (CE_free := pre_loaded_vlsm (free_composite_vlsm (equivocator_IM IM)) seed)
   .
 
 Definition last_in_trace_except_from
@@ -245,8 +243,6 @@ Context {message : Type}
   (seed : message -> Prop)
   (SeededXE : VLSM message :=
     composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed)
-  (SeededXE_free : VLSM message :=
-    free_composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) seed)
   (Free := free_composite_vlsm IM)
   (SeededFree := pre_loaded_vlsm Free seed)
   .
