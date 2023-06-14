@@ -1753,9 +1753,10 @@ Proof.
   {
     apply Forall_forall; intros item Hitem m Hobs.
     eapply directly_observed_valid; [done |].
-      
-    eapply EquivocationProjections.VLSM_incl_has_been_directly_observed_reflect;
-      [by apply preloaded_constraint_subsumption_incl_free | |].
+    unshelve eapply EquivocationProjections.VLSM_incl_has_been_directly_observed_reflect.
+    - (* Where does this come from? *)
+      exact (fun _ => True).
+    - by rapply @preloaded_constraint_subsumption_incl_free.
     - by generalize Hs; apply VLSM_incl_valid_state, vlsm_incl_pre_loaded_with_all_messages_vlsm.
     - eapply has_been_directly_observed_examine_one_trace; [done |].
       by apply Exists_exists; eexists; cbn; eauto.

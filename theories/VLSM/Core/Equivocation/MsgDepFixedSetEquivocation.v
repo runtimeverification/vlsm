@@ -368,7 +368,6 @@ Proof.
   ; destruct Hc as [Hsent | Heqv]; [left | right].
   - by revert Hsent; apply sent_by_non_equivocating_are_directly_observed.
   - destruct l as [i li], Heqv as (j & Hsender & HAj).
-    apply Hfull in Hv.
     apply elem_of_elements in HAj.
     eapply VLSM_incl_can_emit.
     {
@@ -377,7 +376,7 @@ Proof.
           dm ∈ message_dependencies m).
       intros m0 [Hsent_m0 | Hdep_m0]; [itauto |].
       left; exists i.
-      by specialize (Hv _ Hdep_m0) as [Hsent | Hreceived]; [left | right].
+      by eapply Hfull; [apply Hv |].
     }
     eapply VLSM_embedding_can_emit.
     {

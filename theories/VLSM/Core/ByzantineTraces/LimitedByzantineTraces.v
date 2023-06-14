@@ -179,7 +179,7 @@ Lemma limited_PreNonByzantine_lift_valid
     (lift_sub_state IM (elements non_byzantine)).
 Proof.
   intros l s om Hv HsY HomY.
-  repeat split; [by apply lift_sub_valid, Hv |].
+  repeat split; [by rapply @lift_sub_valid; apply Hv |].
   hnf.
   destruct (composite_transition (sub_IM IM (elements non_byzantine)) l (s, om))
     as [s' om'] eqn: Ht.

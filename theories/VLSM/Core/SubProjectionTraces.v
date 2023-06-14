@@ -982,7 +982,7 @@ Proof.
     unfold composite_label_sub_projection_option in Heql; cbn in Heql.
     case_decide as Hi; [| by congruence].
     apply Some_inj in Heql; subst l; cbn.
-    unfold constrained_composite_valid, lift_sub_state; cbn;
+    unfold lift_sub_state; cbn;
     rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi); subst.
     split; [done |].
     eapply Hconstraint_consistency; [| done].

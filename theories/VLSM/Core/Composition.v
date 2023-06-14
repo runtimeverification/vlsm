@@ -359,7 +359,6 @@ Proof.
     by apply basic_VLSM_strong_embedding; red; cbn.
   - apply (VLSM_incl_embedding_iff); cbn.
     apply basic_VLSM_strong_embedding; red; cbn; [| done..].
-    unfold constrained_composite_valid.
     by itauto.
 Qed.
 
@@ -374,7 +373,6 @@ Proof.
     by apply basic_VLSM_strong_embedding; red; cbn.
   - apply (VLSM_incl_embedding_iff); cbn.
     apply basic_VLSM_strong_embedding; red; cbn; [| done..].
-    unfold constrained_composite_valid.
     by itauto.
 Qed.
 
@@ -388,7 +386,6 @@ Proof.
     by apply basic_VLSM_strong_embedding; red; cbn.
   - apply (VLSM_incl_embedding_iff); cbn.
     apply basic_VLSM_strong_embedding; red; cbn; [| done..].
-    unfold constrained_composite_valid.
     by itauto.
 Qed.
 
@@ -1208,7 +1205,7 @@ Context
 
 Lemma composite_decidable_initial_message
   (Hdec_init : forall i, decidable_initial_messages_prop (IM i))
-  : decidable_initial_messages_prop (composite_vlsm_machine IM constraint).
+  : decidable_initial_messages_prop (composite_vlsm IM constraint).
 Proof.
   intro m. simpl. unfold composite_initial_message_prop.
   apply
@@ -1256,7 +1253,7 @@ Lemma relevant_component_transition
 Proof.
   split_and!; [done | by apply Hiv |].
   cbn in Hiv |- *.
-  unfold constrained_composite_valid, composite_valid, free_constraint in Hiv |- *.
+  unfold composite_valid, free_constraint in Hiv |- *.
   destruct l.
   simpl in i.
   unfold i in Heq.

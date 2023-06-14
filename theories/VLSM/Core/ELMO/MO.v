@@ -1164,7 +1164,7 @@ Proof.
   unfold lift_to_MO_trace in Heqftl; cbn in Heqftl.
   rewrite <- pre_VLSM_embedding_finite_trace_last, Hlast in Heqftl.
   exists ftl; split; [by rewrite Heqftl; state_update_simpl |].
-  split_and!; [| | done].
+  split_and!; [| | done..].
   - eapply VLSM_incl_valid_state; [| by apply Hvps].
     by apply free_composite_vlsm_spec.
   - destruct Hovmp as [ss Hvsmp].

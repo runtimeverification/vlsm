@@ -396,8 +396,7 @@ Lemma composite_validator_byzantine_traces_are_not_byzantine
     : valid_trace_prop X tr.
 Proof.
   apply validator_pre_loaded_with_all_messages_incl.
-  apply alt_pre_loaded_with_all_messages_incl.
-  by apply byzantine_alt_byzantine_iff in Hbyz.
+  by apply byzantine_alt_byzantine_iff, alt_pre_loaded_with_all_messages_incl in Hbyz.
 Qed.
 
 End sec_composite_validator_byzantine_traces.
