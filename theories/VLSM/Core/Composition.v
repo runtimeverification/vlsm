@@ -1521,56 +1521,72 @@ Lemma relevant_components
   finite_valid_plan_from (composite_vlsm _ (free_constraint IM)) s' a /\
   (forall (i : index), i ∈ li -> (res' i) = res i).
 Proof.
-  induction a using rev_ind; cbn in *; [by auto using finite_valid_plan_empty |].
-  apply finite_valid_plan_from_app_iff in Hpr as [Hrem Hsingle].
-  spec IHa.
-  {
-    remember (List.map (@projT1 _ (fun n : index => label (IM n))) (List.map label_a a)) as small.
-    transitivity a_indices; [| done].
-    unfold a_indices.
-    intros e H; simpl.
-    rewrite 2 map_app, elem_of_app.
-    by itauto.
-  }
-  spec IHa; [done |].
-  destruct IHa as [IHapr IHaind].
+  induction a using rev_ind.
+  - by split; [apply finite_valid_plan_empty |].
+  - simpl in *.
+    apply finite_valid_plan_from_app_iff in Hpr.
+    destruct Hpr as [Hrem Hsingle].
 
-  specialize (relevant_components_one
-    (snd (apply_plan (composite_vlsm _ (free_constraint IM)) s a))
-    (snd (apply_plan (composite_vlsm _ (free_constraint IM)) s' a))) as Hrel.
-  spec Hrel; [by apply apply_plan_last_valid; itauto |].
-  specialize (Hrel x); simpl in *.
-  spec Hrel.
-  {
-    specialize (IHaind (projT1 (label_a x))).
-    symmetry.
-    apply IHaind.
-    specialize (Hincl (projT1 (label_a x))).
-    apply Hincl.
-    unfold a_indices.
-    by rewrite 2 map_app, elem_of_app; right; left.
-  }
-  specialize (Hrel Hsingle).
-  destruct Hrel as [Hrelpr Hrelind].
-  split; [by apply finite_valid_plan_from_app_iff; split |].
-  intros i Hi.
-  rewrite !apply_plan_app.
-  destruct (apply_plan (composite_vlsm IM (free_constraint IM)) s' a) as [tra' sa'] eqn: eq_as'.
-  destruct (apply_plan (composite_vlsm IM (free_constraint IM)) s a) as [tra sa] eqn: eq_as.
-  simpl in *.
-  destruct (apply_plan (composite_vlsm IM (free_constraint IM)) sa [x]) as [trx sx] eqn: eq_xsa.
-  destruct (apply_plan (composite_vlsm IM (free_constraint IM)) sa' [x]) as [trx' sx'] eqn: eq_xsa'.
-  simpl in *.
-  destruct (decide (i = (projT1 (label_a x)))); [by rewrite e |].
+    spec IHa. {
+      remember (List.map (@projT1 _ (fun n : index => label (IM n))) (List.map label_a a)) as small.
+      transitivity a_indices; [| done].
+      unfold a_indices.
+      intros e H; simpl.
+      rewrite 2 map_app, elem_of_app.
+      by itauto.
+    }
 
-  apply (f_equal snd) in eq_xsa, eq_xsa'.
-  replace sx' with (snd (composite_apply_plan IM sa' [x])).
-  replace sx with (snd (composite_apply_plan IM sa [x])).
-  specialize (irrelevant_components_one sa x i n) as Hdiff.
-  specialize (irrelevant_components_one sa' x i n) as Hdiff0.
-  setoid_rewrite Hdiff.
-  setoid_rewrite Hdiff0.
-  by apply IHaind.
+    spec IHa; [done |].
+
+    destruct IHa as [IHapr IHaind].
+
+    specialize (relevant_components_one
+      (snd (apply_plan (composite_vlsm _ (free_constraint IM)) s a))
+      (snd (apply_plan (composite_vlsm _ (free_constraint IM)) s' a))) as Hrel.
+
+    spec Hrel; [by apply apply_plan_last_valid; itauto |].
+
+    specialize (Hrel x); simpl in *.
+
+    spec Hrel. {
+      specialize (IHaind (projT1 (label_a x))).
+      symmetry.
+      apply IHaind.
+      specialize (Hincl (projT1 (label_a x))).
+      apply Hincl.
+      unfold a_indices.
+      by rewrite 2 map_app, elem_of_app; right; left.
+    }
+    specialize (Hrel Hsingle).
+    destruct Hrel as [Hrelpr Hrelind].
+    split.
+    + by apply finite_valid_plan_from_app_iff; split.
+    + intros i Hi.
+      specialize (IHaind i Hi).
+      specialize (Heq i Hi).
+      rewrite !apply_plan_app.
+      simpl in *.
+      destruct (apply_plan (composite_vlsm IM (free_constraint IM)) s' a) as [tra' sa'] eqn: eq_as'.
+      destruct (apply_plan (composite_vlsm IM (free_constraint IM)) s a) as [tra sa] eqn: eq_as.
+      simpl in *.
+      destruct (apply_plan (composite_vlsm IM (free_constraint IM)) sa [x]) as [trx sx] eqn: eq_xsa.
+      destruct (apply_plan (composite_vlsm IM (free_constraint IM)) sa' [x]) as [trx' sx'] eqn: eq_xsa'.
+      simpl in *.
+      destruct (decide (i = (projT1 (label_a x)))).
+      * by rewrite e.
+      * specialize (irrelevant_components_one sa) as Hdiff.
+        specialize (Hdiff x i n).
+
+        specialize (irrelevant_components_one sa') as Hdiff0.
+        specialize (Hdiff0 x i n).
+        simpl in *.
+        apply (f_equal snd) in eq_xsa.
+        apply (f_equal snd) in eq_xsa'.
+
+        replace sx' with (snd (composite_apply_plan IM sa' [x])).
+        replace sx with (snd (composite_apply_plan IM sa [x])).
+        setoid_rewrite Hdiff.
+        by setoid_rewrite Hdiff0.
 Qed.
 
 Lemma relevant_components_free
