@@ -348,7 +348,7 @@ Proof.
     rewrite
       (equivocators_total_trace_project_replayed_trace_from
         IM (enum index) eqv_state_s).
-    repeat split; simpl.
+    repeat split. simpl.
     destruct Hfinal_msg as [Hfinal_msg | Hinitial]; [| by right].
     left.
     apply valid_trace_first_pstate in Hmsg_trace_full_replay as Hfst.
@@ -359,6 +359,7 @@ Proof.
     specialize (@has_been_sent_examine_one_trace _ FreeE _ _ _ _ (conj Happ His_s) im)
       as Hrew.
     unfold has_been_sent in Hrew; cbn in Hrew; apply Hrew.
+
     apply Exists_app. right.
     destruct_list_last eqv_msg_tr eqv_msg_tr' itemX Heqv_msg_tr
     ; [by inversion Hfinal_msg |].
@@ -398,8 +399,10 @@ Lemma equivocators_finite_valid_trace_init_to_rev
 Proof.
   specialize (vlsm_is_pre_loaded_with_False Free) as Heq.
   apply (VLSM_eq_finite_valid_trace_init_to Heq) in HtrX.
-  specialize (seeded_equivocators_finite_valid_trace_init_to_rev
-    IM (fun m => False) no_initial_messages_in_IM _ _ _ HtrX)
+  specialize
+    (seeded_equivocators_finite_valid_trace_init_to_rev
+      IM (fun m => False) no_initial_messages_in_IM
+      _ _ _ HtrX)
     as [is [His [s [Hs [tr [Htr_pr [Htr Houtput]]]]]]].
   exists is; split; [done |].
   exists s; split; [done |].
@@ -419,7 +422,7 @@ Proof.
   apply strong_constraint_subsumption_strongest.
   subst.
   clear.
-  intros l [s om] Hc.
+  intros l (s, om) Hc.
   split; [| done].
   destruct om as [m |]; [| done].
   by apply proj1 in Hc.
