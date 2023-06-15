@@ -1649,8 +1649,7 @@ Lemma composite_stepwise_props
   : oracle_stepwise_props (vlsm := X) composite_message_selector composite_oracle.
 Proof.
   split.
-  - (* initial states not claim *)
-    intros s Hs m [i Horacle].
+  - intros s Hs m [i Horacle].
     revert Horacle.
     apply (oracle_no_inits (stepwise_props i)).
     by apply Hs.
@@ -1685,11 +1684,9 @@ Lemma free_composite_stepwise_props :
   oracle_stepwise_props (vlsm := free_composite_vlsm IM) composite_message_selector composite_oracle.
 Proof.
   split.
-  - (* initial states not claim *)
-    intros s Hs m [i Horacle].
+  - intros s Hs m [i Horacle].
     revert Horacle.
-    apply (oracle_no_inits (stepwise_props i)).
-    by apply Hs.
+    by apply (oracle_no_inits (stepwise_props i)).
   - (* step update property *)
     intros l s im s' om Hproto msg.
     destruct l as [i li].
@@ -1712,9 +1709,8 @@ Proof.
     + intros [Hnow | [j Hbefore]].
       * by exists i; apply Hproto; left.
       * exists j.
-        destruct (Hsj j) as [Hunchanged | ->].
-        -- by rewrite <- Hunchanged.
-        -- by apply Hproto; right.
+        destruct (Hsj j) as [<- | ->]; [done |].
+        by apply Hproto; right.
 Qed.
 
 Lemma oracle_component_selected_previously
@@ -1799,8 +1795,6 @@ Qed.
     composite_has_been_sent
     composite_has_been_sent_dec
     (composite_has_been_sent_stepwise_props constraint).
-
-(** Analogous stuff for [free_composite_vlsm]. *)
 
 Lemma free_composite_has_been_sent_stepwise_props
   (X := free_composite_vlsm IM)
@@ -2949,9 +2943,8 @@ Context
   within it must be valid, thus the trace itself is valid.
 *)
 Lemma all_pre_traces_to_valid_state_are_valid
-  s
+  (s is : state PreX) (tr : list (transition_item PreX))
   (Hs : valid_state_prop X s)
-  is tr
   (Htr : finite_valid_trace_init_to PreX is s tr)
   : finite_valid_trace_init_to X is s tr.
 Proof.
@@ -2966,9 +2959,8 @@ Proof.
 Qed.
 
 Lemma all_pre_traces_to_valid_state_are_valid_free
-  s
+  (s is : state PreY) (tr : list (transition_item PreY))
   (Hs : valid_state_prop Y s)
-  is tr
   (Htr : finite_valid_trace_init_to PreY is s tr)
   : finite_valid_trace_init_to Y is s tr.
 Proof.
