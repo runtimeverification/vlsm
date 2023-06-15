@@ -1065,11 +1065,7 @@ Lemma preloaded_equivocator_state_project_valid_state
       valid_state_prop (pre_loaded_with_all_messages_vlsm X) si.
 Proof.
   intros i si Hpr.
-  apply (VLSM_eq_valid_state
-    (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True equivocator_vlsm)) in Hbs.
-  specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
-  apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X)) in Hsi.
-  by destruct X.
+  by apply (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr).
 Qed.
 
 (**

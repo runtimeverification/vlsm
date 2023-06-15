@@ -449,18 +449,6 @@ Proof.
   by intros; apply basic_VLSM_incl_preloaded_with; cbv; itauto.
 Qed.
 
-Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l :
-  VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun m => True)).
-Proof.
-  by apply VLSM_incl_refl.
-Qed.
-
-Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_r :
-  VLSM_incl (pre_loaded_vlsm X (fun m => True)) (pre_loaded_with_all_messages_vlsm X).
-Proof.
-  by apply VLSM_incl_refl.
-Qed.
-
 Lemma pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
   forall (P : message -> Prop),
     VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_with_all_messages_vlsm X).

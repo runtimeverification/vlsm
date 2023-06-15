@@ -854,13 +854,7 @@ Lemma pre_composite_vlsm_induced_projection_validator_iff
       pre_composite_vlsm_induced_projection_validator
       (pre_composite_vlsm_induced_validator IM constraint i).
 Proof.
-  eapply VLSM_eq_trans;
-    [by apply pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True |].
-  eapply VLSM_eq_trans;
-    [by apply preloaded_composite_vlsm_induced_projection_validator_iff |].
-  by apply VLSM_eq_sym,
-    (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True
-      (composite_vlsm_induced_validator IM constraint i)).
+  by apply preloaded_composite_vlsm_induced_projection_validator_iff.
 Qed.
 
 Lemma component_projection :

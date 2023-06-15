@@ -1554,10 +1554,7 @@ Lemma preloaded_sent_can_emit
   (Hsent : has_been_sent X s m) :
   can_emit (pre_loaded_with_all_messages_vlsm X) m.
 Proof.
-  pose proof (Heq := pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True X).
-  rewrite (VLSM_eq_can_emit Heq); cbn.
-  eapply sent_can_emit; [| done].
-  by apply (VLSM_eq_valid_state Heq).
+  by eapply sent_can_emit.
 Qed.
 
 Lemma sent_valid

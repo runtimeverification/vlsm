@@ -489,11 +489,7 @@ Proof.
       apply (pre_loaded_vlsm_incl v seed (fun m => True))
     end.
     itauto.
-  - match goal with
-    |- context [pre_loaded_with_all_messages_vlsm ?v] =>
-      specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True v) as Hincl
-    end.
-    by destruct Hincl.
+  - by apply VLSM_incl_refl.
 Qed.
 
 (**
@@ -1733,10 +1729,7 @@ Lemma lift_sub_preloaded_free_embedding
 Proof.
   constructor.
   intros sX trX HtrX.
-  by apply (VLSM_eq_finite_valid_trace
-    (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True Free)),
-    (VLSM_embedding_finite_valid_trace (lift_sub_free_preloaded_with_embedding _)),
-    (VLSM_eq_finite_valid_trace (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True SubFree)).
+  by apply (VLSM_embedding_finite_valid_trace (lift_sub_free_preloaded_with_embedding _)).
 Qed.
 
 (**

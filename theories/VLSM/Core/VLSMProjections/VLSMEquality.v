@@ -217,12 +217,6 @@ Proof.
   - by apply pre_loaded_vlsm_idem_r.
 Qed.
 
-Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True :
-  VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun _ => True)).
-Proof.
-  apply VLSM_eq_refl.
-Qed.
-
 Lemma pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm
   (P : message -> Prop)
   (Hvalidating :

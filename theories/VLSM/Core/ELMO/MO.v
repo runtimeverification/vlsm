@@ -1129,9 +1129,7 @@ Proof.
     + apply IHis'.
       * intros j Hj. destruct (decide (i = j)); subst; state_update_simpl; [done |].
         by apply Hall; rewrite elem_of_cons; intros [].
-      * apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True MO)).
-        apply pre_composite_free_update_state_with_initial; [| by compute].
-        by apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True MO)).
+      * by apply pre_composite_free_update_state_with_initial; [| by compute].
     + replace us with (state_update M us i (us i)) at 2 by (state_update_simpl; done).
       apply lift_to_RMO_finite_valid_trace_from_to; [done |].
       apply (valid_state_project_preloaded_to_preloaded_free _ _ us i) in Hvsp as Hvsp'.

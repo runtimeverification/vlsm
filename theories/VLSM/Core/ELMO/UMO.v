@@ -1578,10 +1578,7 @@ Proof.
     + apply IHis'.
       * intros j Hj. destruct (decide (i = j)); subst; state_update_simpl; [done |].
         apply Hall. rewrite elem_of_cons. by intros [].
-      * apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
-        apply pre_composite_free_update_state_with_initial; [| by compute].
-        by apply (VLSM_eq_valid_state
-          (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
+      * by apply pre_composite_free_update_state_with_initial.
     + replace us with (state_update U us i (us i)) at 2 by (state_update_simpl; done).
       apply lift_to_RUMO_finite_valid_trace_from_to; [done |].
       apply (valid_state_project_preloaded_to_preloaded_free _ _ us i) in Hvsp as Hvsp'.
@@ -1652,9 +1649,7 @@ Lemma valid_state_prop_state_update_init :
       valid_state_prop RUMO (state_update U us i (MkState [] (idx i))).
 Proof.
   intros us i Hvsp.
-  apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
-  apply pre_composite_free_update_state_with_initial; [| by compute].
-  by apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True UMO)).
+  by apply pre_composite_free_update_state_with_initial.
 Qed.
 
 Lemma elem_of_UMO_sentMessages :
