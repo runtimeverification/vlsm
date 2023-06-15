@@ -128,7 +128,7 @@ Definition lv_message_observations (s : state) (target : index) : set lv_event :
   set_union (lv_sent_observations s target) (lv_received_observations s target).
 ```
 
-- do not use definitions to prove propositions; use lemma/theorem and tactics instead
+- When giving an explicit proof term for things that live in `Prop`, avoid using `Definition` with `:=`, because it is unclear whether the point is just to give the proof term or whether transparency also matters. Instead use `Lemma` and provide the proof term using the `exact` tactic, while marking transparency with `Qed` or `Defined`.
 
 Not recommended:
 ```coq
@@ -145,7 +145,7 @@ Lemma finite_trace_partial_map_app :
     finite_trace_partial_map (l1 ++ l2) =
     finite_trace_partial_map l1 ++ finite_trace_partial_map l2.
 Proof.
-  by apply map_option_app.
+  exact (map_option_app _).
 Qed.
 ```
 
