@@ -759,14 +759,12 @@ Proof.
   by apply valid_generated_state_message with s0 _om0 _s0 om0 l.
 Qed.
 
-Lemma can_produce_valid
+Definition can_produce_valid
   (s : state X)
   (m : message)
   (Hm : can_produce s m)
-  : valid_state_message_prop s (Some m).
-Proof.
-  exact (option_can_produce_valid s (Some m) Hm).
-Qed.
+  : valid_state_message_prop s (Some m)
+  := option_can_produce_valid s (Some m) Hm.
 
 Lemma option_can_produce_valid_iff
   (s : state X)
@@ -783,14 +781,12 @@ Proof.
     + by constructor; apply Him.
 Qed.
 
-Lemma can_produce_valid_iff
+Definition can_produce_valid_iff
   (s : state X)
   (m : message)
   : valid_state_message_prop s (Some m) <->
-    can_produce s m \/ initial_state_prop X s /\ initial_message_prop X m.
-Proof.
-  exact (option_can_produce_valid_iff s (Some m)).
-Qed.
+    can_produce s m \/ initial_state_prop s /\ initial_message_prop m
+  := option_can_produce_valid_iff s (Some m).
 
 Definition can_emit
   (m : message)
@@ -946,15 +942,14 @@ Inductive finite_valid_trace_from : state X -> list transition_item -> Prop :=
     (Ht : input_valid_transition l (s', iom) (s, oom)),
     finite_valid_trace_from  s' ({| l := l; input := iom; destination := s; output := oom |} :: tl).
 
-Lemma finite_valid_trace_singleton :
+Definition finite_valid_trace_singleton :
   forall {l : label X} {s s' : state X} {iom oom : option message},
     input_valid_transition l (s, iom) (s', oom) ->
-      finite_valid_trace_from  s [{| l := l; input := iom; destination := s'; output := oom |}].
-Proof.
-  intros l s s' iom oom Hptrans.
-  apply finite_valid_trace_from_extend; [| done].
-  by constructor; apply input_valid_transition_destination in Hptrans.
-Qed.
+    finite_valid_trace_from  s ({| l := l; input := iom; destination := s'; output := oom |} :: [])
+  := fun l s s' iom oom Hptrans =>
+       finite_valid_trace_from_extend s' []
+           (finite_valid_trace_from_empty s' (input_valid_transition_destination Hptrans))
+           _ _ _ _ Hptrans.
 
 (**
   To complete our definition of a finite valid trace, we must also guarantee

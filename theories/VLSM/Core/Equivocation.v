@@ -547,23 +547,17 @@ Class HasBeenSentCapability : Type :=
 Definition has_not_been_sent `{HasBeenSentCapability} : state_message_oracle :=
   negate_oracle has_been_sent.
 
-Lemma has_been_sent_no_inits `{HasBeenSentCapability} :
+Definition has_been_sent_no_inits `{HasBeenSentCapability} :
   forall s : state vlsm,
-    initial_state_prop vlsm s ->
-  forall m : message,
-    ~ has_been_sent s m.
-Proof.
-  exact (oracle_no_inits _ _ (has_been_sent_stepwise_props)).
-Qed.
+    initial_state_prop vlsm s -> ∀ m : message, ~ has_been_sent s m
+  := oracle_no_inits _ _ (has_been_sent_stepwise_props).
 
-Lemma has_been_sent_step_update `{HasBeenSentCapability} :
+Definition has_been_sent_step_update `{HasBeenSentCapability} :
   forall (l : label _) (s : state _) (im : option message) (s' : state _) (om : option message),
     input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
-  forall msg : message,
-    has_been_sent s' msg <-> (om = Some msg \/ has_been_sent s msg).
-Proof.
-  exact (oracle_step_update _ _ has_been_sent_stepwise_props).
-Qed.
+  forall msg,
+    has_been_sent s' msg <-> (om = Some msg \/ has_been_sent s msg)
+  := oracle_step_update _ _ has_been_sent_stepwise_props.
 
 Definition has_been_sent_tracewise_prop
     (has_been_sent_pred : state_message_oracle) : Prop :=
@@ -726,22 +720,17 @@ Class HasBeenReceivedCapability : Type :=
 Definition has_not_been_received `{HasBeenReceivedCapability} : state_message_oracle :=
   negate_oracle has_been_received.
 
-Lemma has_been_received_no_inits `{HasBeenReceivedCapability} :
+Definition has_been_received_no_inits `{HasBeenReceivedCapability} :
   forall s : state vlsm,
-    initial_state_prop vlsm s ->
-  forall m : message, ~ has_been_received s m.
-Proof.
-  exact (oracle_no_inits _ _ has_been_received_stepwise_props).
-Qed.
+    initial_state_prop vlsm s -> ∀ m : message, ~ has_been_received s m
+  := oracle_no_inits _ _ has_been_received_stepwise_props.
 
-Lemma has_been_received_step_update `{HasBeenReceivedCapability} :
+Definition has_been_received_step_update `{HasBeenReceivedCapability} :
   forall [l : label _] [s : state _] [im : option message] [s' : state _] [om : option message],
     input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
-  forall msg : message,
-    has_been_received s' msg <-> (im = Some msg \/ has_been_received s msg).
-Proof.
-  exact (oracle_step_update _ _ has_been_received_stepwise_props).
-Qed.
+  forall msg,
+    has_been_received s' msg <-> (im = Some msg \/ has_been_received s msg)
+  := oracle_step_update _ _ has_been_received_stepwise_props.
 
 Definition has_been_received_tracewise_prop
   (has_been_received_pred : state_message_oracle) : Prop :=
@@ -1170,24 +1159,16 @@ Arguments has_been_directly_observed_stepwise_props {message} vlsm {_}.
 
 #[global] Hint Mode HasBeenDirectlyObservedCapability - ! : typeclass_instances.
 
-Lemma has_been_directly_observed_no_inits `[HasBeenDirectlyObservedCapability message vlsm] :
-  forall (s : state vlsm),
-    initial_state_prop vlsm s ->
-  forall m : message,
-    ~ has_been_directly_observed vlsm s m.
-Proof.
-  exact (oracle_no_inits (has_been_directly_observed_stepwise_props vlsm)).
-Qed.
+Definition has_been_directly_observed_no_inits `[HasBeenDirectlyObservedCapability message vlsm]
+  := oracle_no_inits (has_been_directly_observed_stepwise_props vlsm).
 
-Lemma has_been_directly_observed_step_update `{HasBeenDirectlyObservedCapability message vlsm} :
+Definition has_been_directly_observed_step_update `{HasBeenDirectlyObservedCapability message vlsm} :
   forall l s im s' om,
     input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
-  forall msg : message,
-    has_been_directly_observed vlsm s' msg <->
-    (im = Some msg \/ om = Some msg) \/ has_been_directly_observed vlsm s msg.
-Proof.
-  exact (oracle_step_update (has_been_directly_observed_stepwise_props vlsm)).
-Qed.
+    forall msg,
+      has_been_directly_observed vlsm s' msg <->
+      ((im = Some msg \/ om = Some msg) \/ has_been_directly_observed vlsm s msg)
+  := oracle_step_update (has_been_directly_observed_stepwise_props vlsm).
 
 Lemma proper_directly_observed
   {message} (vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :

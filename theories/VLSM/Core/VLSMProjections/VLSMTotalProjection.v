@@ -112,41 +112,31 @@ Definition pre_VLSM_projection_infinite_finite_trace_project
   : list (transition_item TY) :=
   pre_VLSM_projection_finite_trace_project (stream_prefix s (proj1_sig Hs)).
 
-Lemma pre_VLSM_projection_finite_trace_project_app :
-  forall l1 l2, pre_VLSM_projection_finite_trace_project (l1 ++ l2) =
-    pre_VLSM_projection_finite_trace_project l1 ++ pre_VLSM_projection_finite_trace_project l2.
-Proof.
-  exact (map_option_app _).
-Qed.
+Definition pre_VLSM_projection_finite_trace_project_app
+  : forall l1 l2, pre_VLSM_projection_finite_trace_project (l1 ++ l2) =
+    pre_VLSM_projection_finite_trace_project l1 ++ pre_VLSM_projection_finite_trace_project l2
+  := map_option_app _.
 
-Lemma pre_VLSM_projection_finite_trace_project_app_rev :
-  forall l l1' l2', pre_VLSM_projection_finite_trace_project l = l1' ++ l2' ->
+Definition pre_VLSM_projection_finite_trace_project_app_rev
+  : forall l l1' l2', pre_VLSM_projection_finite_trace_project l = l1' ++ l2' ->
     exists l1 l2, l = l1 ++ l2 /\
       pre_VLSM_projection_finite_trace_project l1 = l1' /\
-      pre_VLSM_projection_finite_trace_project l2 = l2'.
-Proof.
-  exact (map_option_app_rev _).
-Qed.
+      pre_VLSM_projection_finite_trace_project l2 = l2'
+  := map_option_app_rev _.
 
-Lemma pre_VLSM_projection_finite_trace_project_elem_of_iff :
-  forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
-    exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY.
-Proof.
-  exact (elem_of_map_option _).
-Qed.
+Definition pre_VLSM_projection_finite_trace_project_elem_of_iff
+  : forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
+    exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY
+  := elem_of_map_option _.
 
-Lemma elem_of_pre_VLSM_projection_finite_trace_project :
-  forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
-    exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY.
-Proof.
-  exact (elem_of_map_option _).
-Qed.
+Definition elem_of_pre_VLSM_projection_finite_trace_project
+  : forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
+    exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY
+  := elem_of_map_option _.
 
-Lemma pre_VLSM_projection_finite_trace_project_elem_of :
-  forall itemX itemY,
-    pre_VLSM_projection_transition_item_project itemX = Some itemY ->
-  forall trX,
-    itemX ∈ trX -> itemY ∈ pre_VLSM_projection_finite_trace_project trX.
+Definition pre_VLSM_projection_finite_trace_project_elem_of
+  : forall itemX itemY, pre_VLSM_projection_transition_item_project itemX = Some itemY ->
+    forall trX, itemX ∈ trX -> itemY ∈ pre_VLSM_projection_finite_trace_project trX.
 Proof.
   by intros; apply elem_of_map_option; exists itemX.
 Qed.
@@ -372,7 +362,6 @@ Definition VLSM_weak_projection_in
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
-  : transition_item X -> Prop
   := pre_VLSM_projection_in_projection _ _ label_project.
 
 Definition VLSM_weak_projection_infinite_trace_project
@@ -405,39 +394,30 @@ Context
   (Hsimul : VLSM_weak_projection X Y label_project state_project)
   .
 
-Lemma VLSM_weak_projection_trace_project_app :
-  forall l1 l2,
-    VLSM_weak_projection_trace_project Hsimul (l1 ++ l2) =
-    VLSM_weak_projection_trace_project Hsimul l1 ++ VLSM_weak_projection_trace_project Hsimul l2.
-Proof.
-  exact (pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project).
-Qed.
+Definition VLSM_weak_projection_trace_project_app
+  : forall l1 l2, VLSM_weak_projection_trace_project Hsimul (l1 ++ l2) =
+    VLSM_weak_projection_trace_project Hsimul l1 ++ VLSM_weak_projection_trace_project Hsimul l2
+  := pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project.
 
-Lemma VLSM_weak_projection_trace_project_app_rev :
-  forall l l1' l2', VLSM_weak_projection_trace_project Hsimul l = l1' ++ l2' ->
+Definition VLSM_weak_projection_trace_project_app_rev
+  : forall l l1' l2', VLSM_weak_projection_trace_project Hsimul l = l1' ++ l2' ->
     exists l1 l2, l = l1 ++ l2 /\
       VLSM_weak_projection_trace_project Hsimul l1 = l1' /\
-      VLSM_weak_projection_trace_project Hsimul l2 = l2'.
-Proof.
-  exact (pre_VLSM_projection_finite_trace_project_app_rev _ _ label_project state_project).
-Qed.
+      VLSM_weak_projection_trace_project Hsimul l2 = l2'
+  := pre_VLSM_projection_finite_trace_project_app_rev _ _ label_project state_project.
 
-Lemma VLSM_weak_projection_finite_trace_last :
-  forall sX trX,
+Definition VLSM_weak_projection_finite_trace_last
+  : forall sX trX,
     finite_valid_trace_from X sX trX ->
-      state_project (finite_trace_last sX trX) =
-      finite_trace_last (state_project sX) (VLSM_weak_projection_trace_project Hsimul trX).
-Proof.
-  exact (final_state_project _ _ _ _ Hsimul).
-Qed.
+    state_project (finite_trace_last sX trX) =
+    finite_trace_last (state_project sX) (VLSM_weak_projection_trace_project Hsimul trX)
+  := final_state_project _ _ _ _ Hsimul.
 
-Lemma VLSM_weak_projection_finite_valid_trace_from :
-  forall sX trX,
+Definition VLSM_weak_projection_finite_valid_trace_from
+  : forall sX trX,
     finite_valid_trace_from X sX trX ->
-      finite_valid_trace_from Y (state_project sX) (VLSM_weak_projection_trace_project Hsimul trX).
-Proof.
-  exact (weak_trace_project_preserves_valid_trace _ _ _ _ Hsimul).
-Qed.
+      finite_valid_trace_from Y (state_project sX) (VLSM_weak_projection_trace_project Hsimul trX)
+  := weak_trace_project_preserves_valid_trace _ _ _ _ Hsimul.
 
 Lemma VLSM_weak_projection_infinite_valid_trace_from
   : forall sX trX (Hinf : InfinitelyOften (VLSM_weak_projection_in Hsimul) trX),
@@ -562,7 +542,6 @@ Definition VLSM_projection_in
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
   (Hsimul : VLSM_projection X Y label_project state_project)
-  : transition_item X -> Prop
   := pre_VLSM_projection_in_projection _ _ label_project.
 
 Definition VLSM_projection_infinite_trace_project
@@ -595,51 +574,39 @@ Context
   (Hsimul : VLSM_projection X Y label_project state_project)
   .
 
-Lemma VLSM_projection_finite_trace_project_app :
-  forall l1 l2,
-    VLSM_projection_finite_trace_project Hsimul (l1 ++ l2) =
-    VLSM_projection_finite_trace_project Hsimul l1 ++ VLSM_projection_finite_trace_project Hsimul l2.
-Proof.
-  exact (pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project).
-Qed.
+Definition VLSM_projection_finite_trace_project_app
+  : forall l1 l2, VLSM_projection_finite_trace_project Hsimul (l1 ++ l2) =
+    VLSM_projection_finite_trace_project Hsimul l1 ++ VLSM_projection_finite_trace_project Hsimul l2
+  := pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project.
 
-Lemma VLSM_projection_finite_trace_project_app_rev :
-  forall l l1' l2',
-    VLSM_projection_finite_trace_project Hsimul l = l1' ++ l2' ->
+Definition VLSM_projection_finite_trace_project_app_rev
+  : forall l l1' l2', VLSM_projection_finite_trace_project Hsimul l = l1' ++ l2' ->
     exists l1 l2,
       l = l1 ++ l2 /\
       VLSM_projection_finite_trace_project Hsimul l1 = l1' /\
-      VLSM_projection_finite_trace_project Hsimul l2 = l2'.
-Proof.
-  exact (pre_VLSM_projection_finite_trace_project_app_rev _ _ label_project state_project).
-Qed.
+      VLSM_projection_finite_trace_project Hsimul l2 = l2'
+  := pre_VLSM_projection_finite_trace_project_app_rev _ _ label_project state_project.
 
-Lemma VLSM_projection_finite_trace_project_in :
-  forall itemX itemY,
-    pre_VLSM_projection_transition_item_project
-      _ _ label_project state_project itemX = Some itemY ->
-  forall trX,
-    itemX ∈ trX -> itemY ∈ VLSM_projection_finite_trace_project Hsimul trX.
-Proof.
-  exact (pre_VLSM_projection_finite_trace_project_elem_of _ _ label_project state_project).
-Qed.
+Definition VLSM_projection_finite_trace_project_in
+  : forall itemX itemY,
+      pre_VLSM_projection_transition_item_project
+        _ _ label_project state_project itemX = Some itemY ->
+    forall trX,
+      itemX ∈ trX -> itemY ∈ VLSM_projection_finite_trace_project Hsimul trX
+  := pre_VLSM_projection_finite_trace_project_elem_of _ _ label_project state_project.
 
-Lemma VLSM_projection_finite_trace_last :
-  forall (sX : state X) (trX : list (transition_item X)),
-    finite_valid_trace_from X sX trX ->
-      state_project (finite_trace_last sX trX) =
-      finite_trace_last (state_project sX) (VLSM_projection_finite_trace_project Hsimul trX).
-Proof.
-  exact (final_state_project _ _ _ _ Hsimul).
-Qed.
+Definition VLSM_projection_finite_trace_last
+  : forall sX trX,
+      finite_valid_trace_from X sX trX ->
+      state_project (finite_trace_last sX trX) = finite_trace_last (state_project sX)
+        (VLSM_projection_finite_trace_project Hsimul trX)
+  := final_state_project _ _ _ _ Hsimul.
 
-Lemma VLSM_projection_finite_valid_trace :
-  forall (sX : state X) (trX : list (transition_item X)),
-    finite_valid_trace X sX trX ->
-      finite_valid_trace Y (state_project sX) (VLSM_projection_finite_trace_project Hsimul trX).
-Proof.
-  exact (trace_project_preserves_valid_trace _ _ _ _ Hsimul).
-Qed.
+Definition VLSM_projection_finite_valid_trace
+  : forall sX trX,
+      finite_valid_trace X sX trX -> finite_valid_trace Y (state_project sX)
+        (VLSM_projection_finite_trace_project Hsimul trX)
+  := trace_project_preserves_valid_trace _ _ _ _ Hsimul.
 
 (**
   Any [VLSM_projection] determines a [VLSM_partial_projection], allowing us
@@ -670,65 +637,46 @@ Definition VLSM_projection_weaken : VLSM_weak_projection X Y label_project state
   ;  weak_trace_project_preserves_valid_trace := VLSM_projection_finite_valid_trace_from
   |}.
 
-Lemma VLSM_projection_valid_state :
-  forall sX : state X,
-    valid_state_prop X sX -> valid_state_prop Y (state_project sX).
-Proof.
-  exact (VLSM_weak_projection_valid_state VLSM_projection_weaken).
-Qed.
+Definition VLSM_projection_valid_state
+  : forall sX,
+    valid_state_prop X sX -> valid_state_prop Y (state_project sX)
+  := VLSM_weak_projection_valid_state VLSM_projection_weaken.
 
-Lemma VLSM_projection_input_valid_transition :
-  forall lX lY,
-    label_project lX = Some lY ->
-  forall s im s' om,
+Definition VLSM_projection_input_valid_transition
+  : forall lX lY, label_project lX = Some lY ->
+    forall s im s' om,
     input_valid_transition X lX (s, im) (s', om) ->
-    input_valid_transition Y lY (state_project s, im) (state_project s', om).
-Proof.
-  exact (VLSM_weak_projection_input_valid_transition VLSM_projection_weaken).
-Qed.
+    input_valid_transition Y lY (state_project s, im) (state_project s', om)
+  := VLSM_weak_projection_input_valid_transition VLSM_projection_weaken.
 
-Lemma VLSM_projection_input_valid :
-  forall (lX : label X) (lY : label Y),
-    label_project lX = Some lY ->
-  forall (s : state X) (im : option message),
-    input_valid X lX (s, im) -> input_valid Y lY (state_project s, im).
-Proof.
-  exact (VLSM_weak_projection_input_valid VLSM_projection_weaken).
-Qed.
+Definition VLSM_projection_input_valid
+  := VLSM_weak_projection_input_valid VLSM_projection_weaken.
 
-Lemma VLSM_projection_finite_valid_trace_from_to :
-  forall sX s'X trX,
-    finite_valid_trace_from_to X sX s'X trX ->
-    finite_valid_trace_from_to Y (state_project sX) (state_project s'X)
-      (VLSM_projection_finite_trace_project Hsimul trX).
-Proof.
-  exact (VLSM_weak_projection_finite_valid_trace_from_to VLSM_projection_weaken).
-Qed.
+Definition VLSM_projection_finite_valid_trace_from_to
+  : forall sX s'X trX,
+      finite_valid_trace_from_to X sX s'X trX ->
+      finite_valid_trace_from_to Y (state_project sX) (state_project s'X)
+        (VLSM_projection_finite_trace_project Hsimul trX)
+  := VLSM_weak_projection_finite_valid_trace_from_to VLSM_projection_weaken.
 
-Lemma VLSM_projection_in_futures :
-  forall s1 s2 : state X,
-    in_futures X s1 s2 -> in_futures Y (state_project s1) (state_project s2).
-Proof.
-  exact (VLSM_weak_projection_in_futures VLSM_projection_weaken).
-Qed.
+Definition VLSM_projection_in_futures
+  : forall s1 s2,
+    in_futures X s1 s2 -> in_futures Y (state_project s1) (state_project s2)
+  := VLSM_weak_projection_in_futures VLSM_projection_weaken.
 
-Lemma VLSM_projection_infinite_valid_trace_from :
-  forall sX trX (Hinf : InfinitelyOften (VLSM_projection_in Hsimul) trX),
+Definition VLSM_projection_infinite_valid_trace_from
+  : forall sX trX (Hinf : InfinitelyOften (VLSM_projection_in Hsimul) trX),
     infinite_valid_trace_from X sX trX ->
     infinite_valid_trace_from Y (state_project sX)
-      (VLSM_projection_infinite_trace_project Hsimul trX Hinf).
-Proof.
-  exact (VLSM_weak_projection_infinite_valid_trace_from VLSM_projection_weaken).
-Qed.
+      (VLSM_projection_infinite_trace_project Hsimul trX Hinf)
+    := VLSM_weak_projection_infinite_valid_trace_from VLSM_projection_weaken.
 
-Lemma VLSM_projection_infinite_finite_valid_trace_from :
-  forall sX trX (Hfin : FinitelyManyBound (VLSM_projection_in Hsimul) trX),
+Definition VLSM_projection_infinite_finite_valid_trace_from
+  : forall sX trX (Hfin : FinitelyManyBound (VLSM_projection_in Hsimul) trX),
     infinite_valid_trace_from X sX trX ->
     finite_valid_trace_from Y (state_project sX)
-      (VLSM_projection_infinite_finite_trace_project Hsimul trX Hfin).
-Proof.
-  exact (VLSM_weak_projection_infinite_finite_valid_trace_from VLSM_projection_weaken).
-Qed.
+      (VLSM_projection_infinite_finite_trace_project Hsimul trX Hfin)
+    := VLSM_weak_projection_infinite_finite_valid_trace_from VLSM_projection_weaken.
 
 Lemma VLSM_projection_initial_state
   : forall sX, initial_state_prop X sX -> initial_state_prop Y (state_project sX).
@@ -785,8 +733,8 @@ Section sec_projection_friendliness.
   We axiomatize projection friendliness as the converse of
   [VLSM_projection_finite_valid_trace]
 *)
-Definition projection_friendly_prop : Prop :=
-  forall
+Definition projection_friendly_prop
+  := forall
     (sY : state Y)
     (trY : list (transition_item Y))
     (HtrY : finite_valid_trace Y sY trY),

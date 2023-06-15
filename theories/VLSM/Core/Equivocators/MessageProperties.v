@@ -426,8 +426,7 @@ Context
   We define [has_been_received] for the [equivocator_vlsm] as being received by any
   of the internal machines.
 *)
-Definition equivocator_has_been_received : state equivocator_vlsm → message → Prop :=
-  equivocator_oracle (has_been_received X).
+Definition equivocator_has_been_received  := equivocator_oracle (has_been_received X).
 
 #[export] Instance equivocator_has_been_received_dec
   : RelDecision equivocator_has_been_received
@@ -467,8 +466,7 @@ Context
   We define [has_been_sent] for the [equivocator_vlsm] as being sent by any
   of the internal machines.
 *)
-Definition equivocator_has_been_sent : state equivocator_vlsm → message → Prop :=
-  equivocator_oracle (has_been_sent X).
+Definition equivocator_has_been_sent  := equivocator_oracle (has_been_sent X).
 
 #[export] Instance equivocator_has_been_sent_dec
   : RelDecision equivocator_has_been_sent

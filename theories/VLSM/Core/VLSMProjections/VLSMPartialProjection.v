@@ -93,13 +93,11 @@ Context
   (Hsimul : VLSM_weak_partial_projection X Y trace_project)
   .
 
-Lemma VLSM_weak_partial_projection_finite_valid_trace_from :
-  forall sX trX sY trY,
+Definition VLSM_weak_partial_projection_finite_valid_trace_from
+  : forall sX trX sY trY,
     trace_project (sX, trX) = Some (sY, trY) ->
-    finite_valid_trace_from X sX trX -> finite_valid_trace_from Y sY trY.
-Proof.
-  exact (weak_partial_trace_project_preserves_valid_trace _ _ _ Hsimul).
-Qed.
+    finite_valid_trace_from X sX trX -> finite_valid_trace_from Y sY trY
+  := weak_partial_trace_project_preserves_valid_trace _ _ _ Hsimul.
 
 Lemma VLSM_weak_partial_projection_valid_state
   : forall sX sY trY,
@@ -157,13 +155,11 @@ Context
   (Hsimul : VLSM_partial_projection X Y trace_project)
   .
 
-Lemma VLSM_partial_projection_finite_valid_trace :
-  forall sX trX sY trY,
+Definition VLSM_partial_projection_finite_valid_trace
+  : forall sX trX sY trY,
     trace_project (sX, trX) = Some (sY, trY) ->
-    finite_valid_trace X sX trX -> finite_valid_trace Y sY trY.
-Proof.
-  exact (partial_trace_project_preserves_valid_trace _ _ _ Hsimul).
-Qed.
+    finite_valid_trace X sX trX -> finite_valid_trace Y sY trY
+  := partial_trace_project_preserves_valid_trace _ _ _ Hsimul.
 
 Lemma VLSM_partial_projection_finite_valid_trace_from
   : forall sX trX sY trY,
@@ -199,32 +195,21 @@ Definition VLSM_partial_projection_weaken : VLSM_weak_partial_projection X Y tra
        VLSM_partial_projection_finite_valid_trace_from
   |}.
 
-Lemma VLSM_partial_projection_valid_state :
-  forall sX sY trY,
+Definition VLSM_partial_projection_valid_state
+  : forall sX sY trY,
     trace_project (sX, []) = Some (sY, trY) ->
-    valid_state_prop X sX -> valid_state_prop Y sY.
-Proof.
-  exact (VLSM_weak_partial_projection_valid_state VLSM_partial_projection_weaken).
-Qed.
+    valid_state_prop X sX -> valid_state_prop Y sY
+  := VLSM_weak_partial_projection_valid_state VLSM_partial_projection_weaken.
 
-Lemma  VLSM_partial_projection_input_valid_transition :
-  forall sX itemX sY itemY,
+Definition VLSM_partial_projection_input_valid_transition
+  : forall sX itemX sY itemY,
     trace_project (sX, [itemX]) = Some (sY, [itemY]) ->
     input_valid_transition X (l itemX) (sX, input itemX) (destination itemX, output itemX) ->
-    input_valid_transition Y (l itemY) (sY, input itemY) (destination itemY, output itemY).
-Proof.
-  exact (VLSM_weak_partial_projection_input_valid_transition VLSM_partial_projection_weaken).
-Qed.
+    input_valid_transition Y (l itemY) (sY, input itemY) (destination itemY, output itemY)
+  := VLSM_weak_partial_projection_input_valid_transition VLSM_partial_projection_weaken.
 
-Lemma VLSM_partial_projection_input_valid :
-  forall (sX : state X) (itemX : transition_item),
-    input_valid_transition_item X sX itemX ->
-  forall (sY : state Y) (itemY : transition_item),
-    trace_project (sX, [itemX]) = Some (sY, [itemY]) ->
-      input_valid Y (l itemY) (sY, input itemY).
-Proof.
-  exact (VLSM_weak_partial_projection_input_valid VLSM_partial_projection_weaken).
-Qed.
+Definition VLSM_partial_projection_input_valid
+  := VLSM_weak_partial_projection_input_valid VLSM_partial_projection_weaken.
 
 End sec_partial_projection_properties.
 

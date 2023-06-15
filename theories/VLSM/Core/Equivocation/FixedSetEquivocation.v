@@ -308,19 +308,13 @@ Proof.
   by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).
 Qed.
 
-Lemma preloaded_Fixed_incl_Preloaded :
-  VLSM_incl (pre_loaded_with_all_messages_vlsm Fixed) (pre_loaded_with_all_messages_vlsm Free).
-Proof.
-  exact (preloaded_constraint_free_incl _ _).
-Qed.
+Definition preloaded_Fixed_incl_Preloaded :
+  VLSM_incl (pre_loaded_with_all_messages_vlsm Fixed) (pre_loaded_with_all_messages_vlsm Free) :=
+    preloaded_constraint_free_incl _ _.
 
-Lemma StrongFixed_incl_Free : VLSM_incl StrongFixed Free.
-Proof.
-  exact (constraint_free_incl _ _).
-Qed.
+Definition StrongFixed_incl_Free : VLSM_incl StrongFixed Free := constraint_free_incl _ _.
 
-Lemma StrongFixed_incl_Preloaded :
-  VLSM_incl StrongFixed (pre_loaded_with_all_messages_vlsm Free).
+Lemma StrongFixed_incl_Preloaded : VLSM_incl StrongFixed (pre_loaded_with_all_messages_vlsm Free).
 Proof.
   eapply VLSM_incl_trans; [by apply StrongFixed_incl_Free |].
   by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).

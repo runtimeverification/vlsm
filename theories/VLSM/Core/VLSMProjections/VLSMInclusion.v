@@ -95,14 +95,12 @@ Proof.
     by apply Hid.
 Qed.
 
-Lemma VLSM_incl_is_embedding :
-  forall
-    {MX MY : VLSMMachine T}
-    (X := mk_vlsm MX) (Y := mk_vlsm MY),
-      VLSM_incl X Y -> VLSM_embedding X Y id id.
-Proof.
-  exact (fun MX MY Hincl => proj1 (VLSM_incl_embedding_iff MX MY) Hincl).
-Qed.
+Definition VLSM_incl_is_embedding
+  {MX MY : VLSMMachine T}
+  (X := mk_vlsm MX) (Y := mk_vlsm MY)
+  (Hincl : VLSM_incl X Y)
+  : VLSM_embedding X Y id id
+  := proj1 (VLSM_incl_embedding_iff MX MY) Hincl.
 
 Lemma VLSM_incl_is_embedding_finite_trace_project
   {MX MY : VLSMMachine T}
@@ -281,12 +279,12 @@ Proof.
   by apply (VLSM_embedding_can_emit (VLSM_incl_is_embedding Hincl)).
 Qed.
 
-Lemma VLSM_incl_valid_message :
-  strong_incl_initial_message_preservation MX MY ->
-  forall (m : message),
+Definition VLSM_incl_valid_message
+  (Hinitial_valid_message : strong_incl_initial_message_preservation MX MY)
+  : forall (m : message),
     valid_message_prop X m -> valid_message_prop Y m.
 Proof.
-  intros Hinitial_valid_message m [s Hm].
+  intros m [s Hm].
   by exists s; revert Hm; apply VLSM_incl_valid_state_message.
 Qed.
 

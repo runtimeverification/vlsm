@@ -112,12 +112,10 @@ Proof.
   by inversion Ht; subst.
 Qed.
 
-Lemma fixed_byzantine_IM_sender_safety :
-  sender_safety_alt_prop fixed_byzantine_IM A sender.
-Proof.
-  exact (channel_authentication_sender_safety fixed_byzantine_IM A sender
-    fixed_byzantine_IM_preserves_channel_authentication).
-Qed.
+Definition fixed_byzantine_IM_sender_safety
+  : sender_safety_alt_prop fixed_byzantine_IM A sender :=
+  channel_authentication_sender_safety fixed_byzantine_IM A sender
+    fixed_byzantine_IM_preserves_channel_authentication.
 
 Definition message_as_byzantine_label
   (m : message)
