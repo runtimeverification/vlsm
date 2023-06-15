@@ -328,27 +328,20 @@ Definition composite_vlsm
   results.
 *)
 Definition composite_apply_plan := (@_apply_plan _ composite_type composite_transition).
-
-Lemma composite_apply_plan_app
+Definition composite_apply_plan_app
   (start : composite_state)
   (a a' : list plan_item)
   : composite_apply_plan start (a ++ a') =
     let (aitems, afinal) := composite_apply_plan start a in
     let (a'items, a'final) := composite_apply_plan afinal a' in
-     (aitems ++ a'items, a'final).
-Proof.
-  exact (@_apply_plan_app _ composite_type composite_transition start a a').
-Qed.
-
-Lemma composite_apply_plan_last
+     (aitems ++ a'items, a'final)
+  := (@_apply_plan_app _ composite_type composite_transition start a a').
+Definition composite_apply_plan_last
   (start : composite_state)
   (a : list plan_item)
   (after_a := composite_apply_plan start a)
-  : finite_trace_last start (fst after_a) = snd after_a.
-Proof.
-  exact (@_apply_plan_last _ composite_type composite_transition start a).
-Qed.
-
+  : finite_trace_last start (fst after_a) = snd after_a
+  := (@_apply_plan_last _ composite_type composite_transition start a).
 Definition composite_trace_to_plan := (@_trace_to_plan _ composite_type).
 
 Lemma composite_initial_state_prop_lift
@@ -402,14 +395,8 @@ Definition lift_to_composite_finite_trace j
   : list (transition_item (IM j)) -> list composite_transition_item
   := VLSM_embedding_finite_trace_project (lift_to_composite_VLSM_embedding j).
 
-Lemma lift_to_composite_finite_trace_last :
-  forall (j : index) (sX : state (IM j)) (trX : list transition_item),
-    lift_to_composite_state' j (finite_trace_last sX trX) =
-    finite_trace_last (lift_to_composite_state' j sX)
-      (VLSM_embedding_finite_trace_project (lift_to_composite_VLSM_embedding j) trX).
-Proof.
-  exact (fun j => VLSM_embedding_finite_trace_last (lift_to_composite_VLSM_embedding j)).
-Qed.
+Definition lift_to_composite_finite_trace_last j
+  := VLSM_embedding_finite_trace_last (lift_to_composite_VLSM_embedding j).
 
 Lemma constraint_free_incl
   (constraint : composite_label -> composite_state  * option message -> Prop)
