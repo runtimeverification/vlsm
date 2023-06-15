@@ -383,9 +383,10 @@ Lemma projection_valid_implies_projection_valid_state_message_outputs
 Proof.
   apply projection_valid_implies_projection_valid_state in Hv as Hs.
   destruct Hs as [? Hs].
-  assert (valid_state_message_prop Xj (` (vs0 (IM j))) om)
-      by (apply valid_initial_state_message; [destruct (vs0 (IM j)) | destruct om]; done).
-  by eapply (valid_generated_state_message Xj); cycle 2.
+  eapply (valid_generated_state_message Xj s x Hs (` (vs0 (IM j)))); [| done..].
+  apply valid_initial_state_message.
+  - by destruct (vs0 (IM j)); cbn.
+  - by destruct om; cbn; [right |].
 Qed.
 
 Lemma projection_valid_implies_destination_projection_valid_state
