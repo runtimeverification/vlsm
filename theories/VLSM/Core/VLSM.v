@@ -73,18 +73,6 @@ Definition option_initial_message_prop
   {message : Type} {T : VLSMType message} (M : VLSMMachine T)
   : option message -> Prop := from_option (@initial_message_prop _ _ M) True.
 
-Definition VLSMMachine_pre_loaded_with_messages
-  {message : Type} {T : VLSMType message} (M : VLSMMachine T)
-  (initial : message -> Prop)
-  : VLSMMachine T
-  :=
-  {| initial_state_prop := @initial_state_prop _ _ M
-  ; initial_message_prop := fun m => @initial_message_prop _ _ M  m \/ initial m
-  ; s0 := @s0 _ _ M
-  ; transition := @transition _ _ M
-  ; valid := @valid _ _ M
-  |}.
-
 Definition decidable_initial_messages_prop
   {message : Type} {T : VLSMType message} (M : VLSMMachine T)
   := forall m, Decision (@initial_message_prop _ _ M m).
@@ -107,14 +95,6 @@ Record VLSM (message : Type) : Type := mk_vlsm
 Arguments vtype [message] v.
 Arguments vmachine [message] v.
 Arguments mk_vlsm [message] [vtype] vmachine.
-
-Definition pre_loaded_vlsm
-  {message : Type}
-  (X : VLSM message)
-  (initial : message -> Prop)
-  : VLSM message
-  :=
-  {| vmachine := VLSMMachine_pre_loaded_with_messages X initial |}.
 
 Section sec_traces.
 
@@ -728,8 +708,8 @@ Qed.
 
 (**
   For VLSMs initialized with many initial messages such as
-  the [composite_vlsm_induced_projection] or the [pre_loaded_with_all_messages_vlsm],
-  the question of whether a [VLSM] [can_emit] a message <<m>> becomes more
+  the [composite_vlsm_induced_projection] the question of
+  whether a [VLSM] [can_emit] a message <<m>> becomes more
   useful than that whether <<m>> is a [valid_message].
 *)
 
@@ -2493,6 +2473,22 @@ Class TraceWithStart
   Byzantine fault tolerance analysis.
 *)
 
+Definition VLSMMachine_pre_loaded_with_messages
+  {message : Type} {T : VLSMType message} (M : VLSMMachine T)
+  (initial : message -> Prop)
+  : VLSMMachine T :=
+{|
+  initial_state_prop := @initial_state_prop _ _ M;
+  initial_message_prop := fun m => @initial_message_prop _ _ M  m \/ initial m;
+  s0 := @s0 _ _ M;
+  transition := @transition _ _ M;
+  valid := @valid _ _ M;
+|}.
+
+Definition pre_loaded_vlsm {message : Type} (X : VLSM message) (initial : message -> Prop)
+  : VLSM message :=
+    mk_vlsm (VLSMMachine_pre_loaded_with_messages X initial).
+
 Section sec_pre_loaded_with_all_messages_vlsm.
 
 Context
@@ -2500,19 +2496,8 @@ Context
   (X : VLSM message)
   .
 
-Definition pre_loaded_with_all_messages_vlsm_machine
-  : VLSMMachine X
-  :=
-  {| initial_state_prop := @initial_state_prop _ _ X
-   ; initial_message_prop := fun message => True
-   ; s0 := @s0 _ _ X
-   ; transition := @transition _ _ X
-   ; valid := @valid _ _ X
-  |}.
-
-Definition pre_loaded_with_all_messages_vlsm
-  : VLSM message
-  := mk_vlsm pre_loaded_with_all_messages_vlsm_machine.
+Definition pre_loaded_with_all_messages_vlsm : VLSM message :=
+  pre_loaded_vlsm X (fun _ => True).
 
 (**
   A message which can be emitted during a protocol run of the
@@ -2535,7 +2520,7 @@ Lemma pre_loaded_with_all_messages_message_valid_initial_state_message
   (om : option message)
   : valid_state_message_prop pre_loaded_with_all_messages_vlsm (proj1_sig (vs0 X)) om.
 Proof.
-  by apply valid_initial_state_message; [apply proj2_sig | destruct om].
+  by apply valid_initial_state_message; [apply proj2_sig | destruct om]; cbn; [right |].
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_message_preservation
@@ -2545,7 +2530,8 @@ Lemma pre_loaded_with_all_messages_valid_state_message_preservation
   : valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
 Proof.
   induction Hps.
-  - by apply (valid_initial_state_message pre_loaded_with_all_messages_vlsm); [| destruct om].
+  - apply (valid_initial_state_message pre_loaded_with_all_messages_vlsm); cbn; [done |].
+    by destruct om; cbn; [right |].
   - by apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l0.
 Qed.
 
@@ -2571,16 +2557,16 @@ Qed.
 Inductive preloaded_valid_state_prop : state X -> Prop :=
 | preloaded_valid_initial_state
     (s : state X)
-    (Hs : initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) s) :
+    (Hs : initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm) s) :
        preloaded_valid_state_prop s
 | preloaded_protocol_generated
     (l : label X)
     (s : state X)
     (Hps : preloaded_valid_state_prop s)
     (om : option message)
-    (Hv : valid (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om))
+    (Hv : valid (VLSMMachine := pre_loaded_with_all_messages_vlsm) l (s, om))
     s' om'
-    (Ht : transition (VLSMMachine := pre_loaded_with_all_messages_vlsm_machine) l (s, om) = (s', om'))
+    (Ht : transition (VLSMMachine := pre_loaded_with_all_messages_vlsm) l (s, om) = (s', om'))
   : preloaded_valid_state_prop s'.
 
 Lemma preloaded_valid_state_prop_iff (s : state X) :
@@ -2605,7 +2591,7 @@ Lemma preloaded_weaken_valid_state_message_prop s om :
 Proof.
   induction 1.
   - refine (valid_initial_state_message pre_loaded_with_all_messages_vlsm s Hs om _).
-    by destruct om.
+    by destruct om; cbn; [right |].
   - by eapply valid_generated_state_message; cycle 2; eauto.
 Qed.
 
