@@ -483,8 +483,7 @@ Proof.
     split.
     + intros Hholds s0 tr Htr.
       by eapply (oracle_initial_trace_update Horacle).
-    + apply pre_loaded_with_all_messages_valid_state_prop,
-        valid_state_has_trace in Hs as (start & tr & Htr).
+    + apply valid_state_has_trace in Hs as (start & tr & Htr).
       intro H; specialize (H start tr Htr).
       by eapply oracle_initial_trace_update.
   - red; unfold negate_oracle, selected_message_exists_in_no_preloaded_trace,
@@ -493,8 +492,7 @@ Proof.
     + intros Hclaim start tr Htr.
       contradict Hclaim.
       by eapply oracle_initial_trace_update.
-    + apply pre_loaded_with_all_messages_valid_state_prop,
-        valid_state_has_trace in Hs as (start & tr & Htr).
+    + apply valid_state_has_trace in Hs as (start & tr & Htr).
       intro H; specialize (H start tr Htr); contradict H.
       by eapply (oracle_initial_trace_update Horacle).
 Qed.
@@ -1052,7 +1050,12 @@ Lemma preloaded_has_been_sent_stepwise_props
       (X := pre_loaded_vlsm vlsm seed) :
   has_been_sent_stepwise_prop (vlsm := X) (has_been_sent vlsm).
 Proof.
-  by destruct (has_been_sent_stepwise_props vlsm).
+  destruct (has_been_sent_stepwise_props vlsm); cbn in *.
+  split; cbn; [done |].
+  intros.
+  eapply oracle_step_update0.
+  eapply VLSM_incl_input_valid_transition; [| done].
+  by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
 Qed.
 
 #[export] Instance preloaded_HasBeenSentCapability
@@ -1089,7 +1092,12 @@ Lemma preloaded_has_been_received_stepwise_props
       (X := pre_loaded_vlsm vlsm seed) :
   has_been_received_stepwise_prop (vlsm := X) (has_been_received vlsm).
 Proof.
-  by destruct (has_been_received_stepwise_props vlsm).
+  destruct (has_been_received_stepwise_props vlsm); cbn in *.
+  split; cbn; [done |].
+  intros.
+  eapply oracle_step_update0.
+  eapply VLSM_incl_input_valid_transition; [| done].
+  by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
 Qed.
 
 #[export] Instance preloaded_HasBeenReceivedCapability
@@ -1903,11 +1911,14 @@ Lemma preloaded_composite_has_been_received_stepwise_props
   (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
   : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
 Proof.
-  unfold has_been_received_stepwise_props.
-  specialize (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)))
+  unfold has_been_received_stepwise_prop.
+  destruct (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)) constraint)
     as [Hinits Hstep].
   split; [done |].
-  by intros l; specialize (Hstep l); destruct l.
+  intros l **; specialize (Hstep l); destruct l; cbn in *.
+  apply Hstep with om.
+  eapply VLSM_incl_input_valid_transition; [| done].
+  by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
 Qed.
 
 Definition preloaded_composite_HasBeenReceivedCapability
