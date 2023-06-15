@@ -456,7 +456,7 @@ Lemma input_valid_transition_Receive_RMi :
 Proof.
   intros s m Hvsp Hvalid.
   red; cbn; split_and!; [done | | | done].
-  - by exists (MkState [] i); constructor.
+  - by exists (MkState [] i); constructor; cbn; [| itauto].
   - by constructor.
 Qed.
 
@@ -926,7 +926,7 @@ Proof.
   - by exists (``(vs0 MO)); constructor.
   - eapply VLSM_weak_embedding_valid_message.
     + by apply (lift_to_RMO (``(vs0 MO))); exists None; constructor.
-    + by inversion 1.
+    + by inversion 1; cbn; [| right].
     + by apply Hovmp.
 Qed.
 
