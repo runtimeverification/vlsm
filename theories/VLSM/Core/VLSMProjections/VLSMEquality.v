@@ -252,16 +252,6 @@ Proof.
   by intros m [Hm | Hfalse].
 Qed.
 
-Lemma pre_loaded_with_all_messages_vlsm_idem :
-  VLSM_eq
-    (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X))
-    (pre_loaded_with_all_messages_vlsm X).
-Proof.
-  split; cbn.
-  - by apply pre_loaded_with_all_messages_vlsm_idem_l.
-  - by apply pre_loaded_with_all_messages_vlsm_idem_r.
-Qed.
-
 Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om :
   valid_state_message_prop X s om <->
   valid_state_message_prop (pre_loaded_vlsm X (fun _ => False)) s om.

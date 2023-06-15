@@ -456,22 +456,6 @@ Proof.
   by intros; apply pre_loaded_vlsm_incl.
 Qed.
 
-Lemma pre_loaded_with_all_messages_vlsm_idem_l :
-  VLSM_incl
-    (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X))
-    (pre_loaded_with_all_messages_vlsm X).
-Proof.
-  by apply pre_loaded_vlsm_idem_l.
-Qed.
-
-Lemma pre_loaded_with_all_messages_vlsm_idem_r :
-  VLSM_incl
-    (pre_loaded_with_all_messages_vlsm X)
-    (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)).
-Proof.
-  by apply pre_loaded_vlsm_idem_r.
-Qed.
-
 Lemma pre_loaded_with_all_messages_can_emit
   (m : message)
   (Hm : can_emit X m)
