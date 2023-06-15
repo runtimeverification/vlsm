@@ -228,7 +228,7 @@ Proof.
   repeat split; [| | done].
   - by eapply VLSM_projection_valid_state.
   - destruct om as [m |]; [| apply option_valid_message_None].
-    by apply option_initial_message_is_valid.
+    by apply option_initial_message_is_valid; cbn; right.
 Qed.
 
 Section sec_projection_induced_validator_as_projection.
@@ -312,7 +312,7 @@ Proof.
     by specialize (Htransition_Some _ _ eq_refl) as [-> ->].
   - by eapply Htransition_None.
   - by exists s.
-  - by destruct Hv as [_ [Hm _]]; apply initial_message_is_valid.
+  - by destruct Hv as [_ [Hm _]]; apply initial_message_is_valid; cbn; right.
 Qed.
 
 Section sec_projection_induced_friendliness.
@@ -520,7 +520,7 @@ Lemma induced_validator_incl_preloaded_with_all_messages
 Proof.
   apply basic_VLSM_incl.
   - by intros is (s & <- & Hs); apply (VLSM_projection_initial_state Hproj).
-  - by intros l s m Hv HsY HmX; apply initial_message_is_valid.
+  - by intros l s m Hv HsY HmX; apply initial_message_is_valid; cbn; right.
   - intros l s om (_ & _ & lX & sX & [Hlx Heq Hv]) _ _.
     cbn in Heq; subst; simpl.
     by eapply VLSM_projection_input_valid in Hproj as (_ & _ & ?).
