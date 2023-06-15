@@ -188,7 +188,7 @@ Lemma fixed_non_byzantine_projection_incl_preloaded :
 Proof.
   apply basic_VLSM_strong_incl.
   - by intros s Hincl; apply fixed_non_byzantine_projection_initial_state_preservation.
-  - by intros.
+  - by do 2 red; cbn; itauto.
   - by intros l **; cbn; eapply induced_sub_projection_valid_preservation.
   - intros l s om s' om'; cbn.
     (* an ugly trick to get the forward direction from an iff (<->) lemma *)
@@ -473,7 +473,7 @@ Lemma pre_loaded_fixed_non_byzantine_incl
 Proof.
   apply basic_VLSM_incl; cbn.
   - by intro; intros; apply fixed_non_byzantine_projection_initial_state_preservation.
-  - by intros l s m Hv _ Him; apply initial_message_is_valid.
+  - by intros l s m Hv _ Him; apply initial_message_is_valid; cbn; itauto.
   - intros l s om Hv.
     exists (lift_sub_label fixed_byzantine_IM (elements non_byzantine) l).
     exists (lift_sub_state fixed_byzantine_IM (elements non_byzantine) s).
@@ -701,11 +701,12 @@ Lemma preloaded_non_byzantine_vlsm_lift
       (lift_sub_label IM (elements selection_complement))
       (lift_sub_state IM (elements selection_complement)).
 Proof.
-  apply basic_VLSM_strong_embedding; [| | | done].
+  apply basic_VLSM_strong_embedding.
   - intros l s om [Hv _]; cbn.
     by apply lift_sub_valid.
   - by intro; intros; rapply lift_sub_transition.
   - by intro; intros; apply (lift_sub_state_initial IM).
+  - by do 2 red; cbn; itauto.
 Qed.
 
 Section sec_assuming_initial_messages_lift.
@@ -742,7 +743,7 @@ Proof.
     split.
     + by apply composite_state_sub_projection_lift_to.
     + by apply (lift_sub_state_initial IM).
-  - by intro; intros; apply initial_message_is_valid.
+  - by intro; intros; apply initial_message_is_valid; cbn; itauto.
   - intros l s om Hv HsY HomY.
     exists (lift_sub_label IM (elements selection_complement) l).
     exists (lift_sub_state IM (elements selection_complement) s).
