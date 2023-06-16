@@ -388,7 +388,7 @@ Lemma equivocating_messages_are_equivocator_emitted
 Proof.
   eapply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
       in Him.
-  apply can_emit_composite_project in Him as [j Him].
+  apply can_emit_free_composite_project in Him as [j Him].
   apply Hchannel in Him as Hsender.
   unfold channel_authenticated_message in Hsender.
   destruct (sender im) as [v |] eqn: Heq_sender; [| by inversion Hsender].
@@ -635,7 +635,7 @@ Proof.
   - subst msg.
     eapply VLSM_incl_can_emit in Hemitted
     ; [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
-    apply can_emit_composite_project in Hemitted as [sub_eqv Hemitted].
+    apply can_emit_free_composite_project in Hemitted as [sub_eqv Hemitted].
     destruct_dec_sig sub_eqv _eqv H_eqv Heqsub_eqv; subst.
     unfold sub_IM in Hemitted; cbn in Hemitted.
     eapply Hsender_safety in Hemitted; [| done]; subst.
@@ -648,7 +648,7 @@ Proof.
         by eapply sent_by_non_equivocating_are_directly_observed.
       - eapply VLSM_incl_can_emit in Hemitted_msg
         ; [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
-        apply can_emit_composite_project in Hemitted_msg as [sub_i Hemitted_msg].
+        apply can_emit_free_composite_project in Hemitted_msg as [sub_i Hemitted_msg].
         destruct_dec_sig sub_i i Hi Heqsub_i; subst.
         eapply Hsender_safety in Hemitted_msg; [| done].
         cbn in Hemitted_msg; subst.
