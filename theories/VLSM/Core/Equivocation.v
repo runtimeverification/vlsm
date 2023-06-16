@@ -2480,7 +2480,7 @@ Proof.
     + by eapply preloaded_messages_sent_from_component_of_valid_state_are_valid.
   - eapply valid_state_project_preloaded_to_preloaded.
     eapply VLSM_incl_valid_state; [| done].
-    by apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by rapply @pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma preloaded_free_composite_directly_observed_valid

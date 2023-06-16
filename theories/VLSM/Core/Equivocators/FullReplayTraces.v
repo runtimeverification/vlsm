@@ -57,7 +57,7 @@ Lemma SeededXE_Free_embedding
 Proof.
   apply basic_VLSM_embedding; intros ? *.
   - split; [| done].
-    by apply lift_sub_valid, Hv.
+    by rapply @lift_sub_valid; apply Hv.
   - by intros [_ Ht]; revert Ht; apply lift_sub_transition.
   - by intros; apply (lift_sub_state_initial equivocator_IM).
   - intros; destruct HmX as [Hinit | Hseeded].
