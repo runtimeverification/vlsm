@@ -1851,22 +1851,13 @@ Proof.
   by apply composite_valid_transition_reachable_iff, input_valid_transition_forget_input.
 Qed.
 
-End sec_composite_valid_transition.
-
-Section sec_composite_history_vlsm.
-
 Context
-  {message : Type}
-  `{EqDecision index}
-  (IM : index -> VLSM message)
-  `{forall i, HistoryVLSM (IM i)}
-  (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
+  `{forall i : index, HistoryVLSM (IM i)}
   .
 
 Lemma not_CompositeValidTransitionNext_initial :
   forall s2, composite_initial_state_prop IM s2 ->
-  forall s1, ~ CompositeValidTransitionNext IM s1 s2.
+  forall s1, ~ CompositeValidTransitionNext s1 s2.
 Proof.
   intros s2 Hs2 s1 [* Hs1].
   apply composite_valid_transition_projection, proj1, valid_transition_next in Hs1; cbn in Hs1.
@@ -1875,8 +1866,8 @@ Qed.
 
 Lemma composite_quasi_unique_transition_to_state :
   forall [s],
-  forall [l1 s1 iom1 oom1], CompositeValidTransition IM l1 s1 iom1 s oom1 ->
-  forall [l2 s2 iom2 oom2], CompositeValidTransition IM l2 s2 iom2 s oom2 ->
+  forall [l1 s1 iom1 oom1], CompositeValidTransition l1 s1 iom1 s oom1 ->
+  forall [l2 s2 iom2 oom2], CompositeValidTransition l2 s2 iom2 s oom2 ->
   projT1 l1 = projT1 l2 ->
   l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
@@ -1894,7 +1885,7 @@ Qed.
 
 Lemma CompositeValidTransition_reflects_rechability :
   forall l s1 iom s2 oom,
-  CompositeValidTransition IM l s1 iom s2 oom ->
+  CompositeValidTransition l s1 iom s2 oom ->
   valid_state_prop RFree s2 ->
   input_valid_transition RFree l (s1, iom) (s2, oom).
 Proof.
@@ -1943,20 +1934,20 @@ Proof.
 Qed.
 
 Lemma CompositeValidTransitionNext_reflects_rechability :
-  forall s1 s2, CompositeValidTransitionNext IM s1 s2 ->
+  forall s1 s2, CompositeValidTransitionNext s1 s2 ->
     valid_state_prop RFree s2 -> valid_state_prop RFree s1.
 Proof.
   by intros s1 s2 []; eapply CompositeValidTransition_reflects_rechability.
 Qed.
 
 Lemma composite_valid_transition_future_reflects_rechability :
-  forall s1 s2, composite_valid_transition_future IM s1 s2 ->
+  forall s1 s2, composite_valid_transition_future s1 s2 ->
     valid_state_prop RFree s2 -> valid_state_prop RFree s1.
 Proof. by apply tc_reflect, CompositeValidTransitionNext_reflects_rechability. Qed.
 
 Lemma composite_valid_transitions_from_to_reflects_reachability :
   forall s s' tr,
-  CompositeValidTransitionsFromTo IM s s' tr ->
+  CompositeValidTransitionsFromTo s s' tr ->
   valid_state_prop RFree s' -> finite_valid_trace_from_to RFree s s' tr.
 Proof.
   induction 1; intros; [by constructor |].
@@ -1969,4 +1960,4 @@ Proof.
   - by destruct item; apply finite_valid_trace_from_to_singleton.
 Qed.
 
-End sec_composite_history_vlsm.
+End sec_composite_valid_transition.
