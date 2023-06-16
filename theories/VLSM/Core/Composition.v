@@ -1253,7 +1253,6 @@ Lemma relevant_component_transition
 Proof.
   split_and!; [done | by apply Hiv |].
   cbn in Hiv |- *.
-  unfold composite_valid, free_constraint in Hiv |- *.
   destruct l.
   simpl in i.
   unfold i in Heq.
@@ -1581,7 +1580,6 @@ Proof.
   }
   spec IHa; [done |].
   destruct IHa as [IHapr IHaind].
-
   specialize (relevant_components_one_free (snd (apply_plan Free s a))
     (snd (apply_plan Free s' a))) as Hrel.
   spec Hrel; [by apply apply_plan_last_valid; itauto |].
@@ -1608,7 +1606,6 @@ Proof.
   destruct (apply_plan Free sa' [x]) as [trx' sx'] eqn: eq_xsa'.
   simpl in *.
   destruct (decide (i = (projT1 (label_a x)))); [by rewrite e |].
-
   apply (f_equal snd) in eq_xsa, eq_xsa'.
   replace sx' with (snd (composite_apply_plan IM sa' [x])).
   replace sx with (snd (composite_apply_plan IM sa [x])).
