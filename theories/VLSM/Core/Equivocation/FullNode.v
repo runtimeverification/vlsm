@@ -122,7 +122,7 @@ Proof.
   apply node_generated_without_further_equivocation_weaken; [done | | done].
   revert Hs.
   apply VLSM_incl_valid_state.
-  by apply preloaded_constraint_free_incl.
+  by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
 End sec_full_node_constraint.

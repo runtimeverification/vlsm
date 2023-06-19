@@ -1673,7 +1673,7 @@ Proof.
   cbn; intros s a Hs.
   apply Morphisms_Prop.ex_iff_morphism; intro m.
   assert (forall k : index, UMO_reachable full_node (s k))
-    by (intro; eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded; done).
+    by (intro; eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded_free; done).
   setoid_rewrite <- full_node_messages_iff_rec_obs; [| done].
   setoid_rewrite <- ELMO_CHBO_in_messages; [| done].
   (* firstorder works here but is slow *)
@@ -1753,8 +1753,8 @@ Proof.
   {
     apply Forall_forall; intros item Hitem m Hobs.
     eapply directly_observed_valid; [done |].
-    eapply EquivocationProjections.VLSM_incl_has_been_directly_observed_reflect;
-      [by apply preloaded_constraint_free_incl | |].
+    eapply (EquivocationProjections.VLSM_incl_has_been_directly_observed_reflect
+      (preloaded_constraint_subsumption_incl_free ELMOComponent ELMO_global_constraint)).
     - by generalize Hs; apply VLSM_incl_valid_state, vlsm_incl_pre_loaded_with_all_messages_vlsm.
     - eapply has_been_directly_observed_examine_one_trace; [done |].
       by apply Exists_exists; eexists; cbn; eauto.
@@ -1769,7 +1769,7 @@ Proof.
       clear Hall_not_heavy Hall_input_valid.
     split; [| by apply Htr_min]; clear Htr_min.
     apply (extend_right_finite_trace_from_to _ IHHtr).
-    destruct Ht as [(Hs_pre & _ & [Hv _]) Ht].
+    destruct Ht as [(Hs_pre & _ & Hy) Ht].
     repeat split; [| | done | | done].
     + by apply valid_trace_last_pstate in IHHtr.
     + by destruct iom; [apply Hmsg_valid | apply option_valid_message_None].
@@ -1912,7 +1912,7 @@ Proof.
   exists m; repeat split; [| done].
   destruct Hobs as [k Hobs]; exists k.
   apply full_node_messages_iff_rec_obs; [| by apply elem_of_messages].
-  by eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded.
+  by eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded_free.
 Qed.
 
 Lemma ELMO_equivocating_validators_step_update_Send
@@ -2524,11 +2524,11 @@ Proof.
     }
     apply elem_of_messages in Hm as [Hsnd |]; [| done].
     cbn in Hsnd; eapply reachable_sent_messages_adr in Hsnd; cycle 1.
-    + by eapply valid_state_project_preloaded_to_preloaded.
+    + by eapply valid_state_project_preloaded_to_preloaded_free.
     + by congruence.
   - intros [j Hsnd].
     cbn in Hsnd; eapply reachable_sent_messages_adr in Hsnd as Hsnd_adr;
-      [| by eapply valid_state_project_preloaded_to_preloaded].
+      [| by eapply valid_state_project_preloaded_to_preloaded_free].
     rewrite Hm0_adr in Hsnd_adr.
     eapply inj in Hsnd_adr; [| done]; subst j.
     eapply ELMOComponent_sizeState_of_ram_trace_output in Hitem;

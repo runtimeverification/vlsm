@@ -997,7 +997,7 @@ Proof.
   intros m [s' IH].
   inversion IH; subst; [by inversion Hom as [j []]; inversion x |].
   destruct l as [k []], om as [m' |];
-    destruct Hv as [Hv _]; inversion Hv; subst; clear Hv;
+    inversion Hv; subst; clear Hv;
     inversion Ht; subst; clear Ht.
   unfold addObservationToMessage; cbn; red.
   remember (s k <+> MkObservation Send (MkMessage (s k))) as sk'.
@@ -1019,7 +1019,7 @@ Proof.
   intros m mr Hvalid [sm IH1] [smr IH2].
   inversion IH1; subst; [by inversion Hom as [j []]; inversion x |].
   destruct l as [k []], om as [m' |];
-    destruct Hv as [Hv _]; inversion Hv; subst; clear Hv;
+    inversion Hv; subst; clear Hv;
     inversion Ht; subst; clear Ht.
   exists (state_update M s k (s k <+> MkObservation Receive mr <+>
     MkObservation Send (MkMessage (s k <+> MkObservation Receive mr)))).
@@ -1134,7 +1134,7 @@ Proof.
         by apply (VLSM_eq_valid_state (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True MO)).
     + replace us with (state_update M us i (us i)) at 2 by (state_update_simpl; done).
       apply lift_to_RMO_finite_valid_trace_from_to; [done |].
-      apply (valid_state_project_preloaded_to_preloaded _ _ _ us i) in Hvsp as Hvsp'.
+      apply (valid_state_project_preloaded_to_preloaded_free _ _ us i) in Hvsp as Hvsp'.
       apply valid_state_has_trace in Hvsp' as (s & tr & [Hfvt Hinit]).
       replace s with (MkState [] (idx i)) in *; cycle 1.
       * by inversion Hinit; destruct s; cbn in *; subst.
@@ -1160,11 +1160,17 @@ Proof.
             (lift_to_MO_state (fun j : index => MkState [] (idx j)) i s')
             (lift_to_MO_trace (fun j : index => MkState [] (idx j)) i tr)) in Heqftl.
   apply valid_trace_forget_last, first_transition_valid in Hfvt; cbn in *.
-  destruct Hfvt as [[Hvps [Hovmp [Hv1 Hv2]]] Ht']; cbn in Hv1, Hv2.
+  destruct Hfvt as [[Hvps [Hovmp Hv]] Ht']; cbn in Hv.
   unfold lift_to_MO_trace in Heqftl; cbn in Heqftl.
   rewrite <- pre_VLSM_embedding_finite_trace_last, Hlast in Heqftl.
-  exists ftl; split; [| done].
-  by rewrite Heqftl; state_update_simpl.
+  exists ftl; split; [by rewrite Heqftl; state_update_simpl |].
+  split_and!; [| | done..].
+  - eapply VLSM_incl_valid_state; [| by apply Hvps].
+    by apply free_composite_vlsm_spec.
+  - destruct Hovmp as [ss Hvsmp].
+    exists ss.
+    apply VLSM_incl_valid_state_message; [| by do 2 red | done].
+    by apply free_composite_vlsm_spec.
 Qed.
 
 (** *** Equivocation *)

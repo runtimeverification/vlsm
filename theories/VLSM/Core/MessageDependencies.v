@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
+From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections. 
 
 (** * VLSM Message Dependencies
 
@@ -518,11 +518,11 @@ Proof.
   split.
   - intros m s' ((s, iom) & [i li] & Ht) dm Hdm.
     apply composite_has_been_directly_observed_free_iff.
-    apply input_valid_transition_preloaded_project_active in Ht; cbn in Ht.
+    apply input_valid_transition_preloaded_project_active_free in Ht; cbn in Ht.
     eapply composite_has_been_directly_observed_from_component.
     by eapply message_dependencies_are_necessary; [eexists _, _; cbn |].
   - intros m Hemit.
-    apply can_emit_composite_project in Hemit as [j Hemitj].
+    apply can_emit_free_composite_project in Hemit as [j Hemitj].
     eapply message_dependencies_are_sufficient in Hemitj.
     eapply VLSM_embedding_can_emit; [| done].
     by apply lift_to_composite_generalized_preloaded_VLSM_embedding.
@@ -581,7 +581,7 @@ Lemma msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_send
 Proof.
   intros m Hm dm Hdm.
   cut (valid_message_prop X dm).
-  - by apply composite_no_initial_valid_messages_emitted_by_sender.
+  - by apply free_composite_no_initial_valid_messages_emitted_by_sender.
   - by eapply msg_dep_reflects_happens_before_free_validity.
 Qed.
 
@@ -649,7 +649,7 @@ Lemma transition_preserves_CompositeHasBeenObserved :
   forall l s im s' om, input_valid_transition RFree l (s, im) (s', om) ->
   forall msg, CompositeHasBeenObserved s msg -> CompositeHasBeenObserved s' msg.
 Proof.
-  destruct (composite_has_been_directly_observed_stepwise_props IM (free_constraint IM)) as [].
+  destruct (free_composite_has_been_directly_observed_stepwise_props IM) as [].
   intros * Ht msg Hbefore; inversion Hbefore as [Hobs | m Hobs Hdep].
   - by constructor; eapply oracle_step_update; [| right].
   - by econstructor 2; [| done]; eapply oracle_step_update; [| right].
@@ -664,7 +664,7 @@ Lemma CompositeHasBeenObserved_step_update :
     (exists m, (im = Some m \/ om = Some m) /\
       (msg = m \/ msg_dep_happens_before message_dependencies msg m)).
 Proof.
-  destruct (composite_has_been_directly_observed_stepwise_props IM (free_constraint IM)) as [].
+  destruct (free_composite_has_been_directly_observed_stepwise_props IM) as [].
   intros * Ht msg; split.
   - inversion 1 as [Hobs' | m' Hobs' Hdep];
       (eapply oracle_step_update in Hobs'; [| done]);
@@ -727,7 +727,7 @@ Lemma composite_ObservedBeforeSendTransition_project :
     (s i) (composite_transition_item_projection IM item) m1 m2.
 Proof.
   by intros * []; constructor;
-    [eapply input_valid_transition_preloaded_project_active | ..].
+    [eapply input_valid_transition_preloaded_project_active_free | ..].
 Qed.
 
 Lemma composite_observed_before_send_iff m1 m2 :
@@ -748,7 +748,7 @@ Lemma composite_observed_before_send_subsumes_msg_dep_rel
     composite_observed_before_send dm m.
 Proof.
   intros m Hm dm Hdm.
-  apply can_emit_composite_project in Hm as [j Hjm].
+  apply can_emit_free_composite_project in Hm as [j Hjm].
   by eapply composite_observed_before_send_lift,
     observed_before_send_subsumes_msg_dep_rel.
 Qed.
@@ -851,7 +851,7 @@ Proof.
   }
   destruct Hobs as [Hobs | m' [i Hobs] Hhb]; [done | exists i].
   by eapply msg_dep_full_node_happens_before_reflects_has_been_directly_observed
-  ; [| | apply valid_state_project_preloaded_to_preloaded | |].
+  ; [| | apply valid_state_project_preloaded_to_preloaded_free | |].
 Qed.
 
 Lemma msg_dep_locally_is_globally_equivocating
@@ -873,7 +873,7 @@ Proof.
       [.. | by contradict n; eapply has_been_sent_iff_by_sender];
       [done | by eapply composite_HasBeenObserved_lift].
   contradict Hncomp; eapply tc_comparable, Hsent_comparable; [| done..].
-  by eapply valid_state_project_preloaded_to_preloaded.
+  by eapply valid_state_project_preloaded_to_preloaded_free.
 Qed.
 
 Lemma full_node_sent_locally_is_globally_equivocating
@@ -895,7 +895,7 @@ Proof.
       [by contradict n; eapply has_been_sent_iff_by_sender | done |];
       by constructor 1; eexists.
   contradict Hncomp; eapply Hsent_comparable; [| done..].
-  by eapply valid_state_project_preloaded_to_preloaded.
+  by eapply valid_state_project_preloaded_to_preloaded_free.
 Qed.
 
 End sec_composite_message_dependencies_equivocation.
@@ -1148,8 +1148,11 @@ Lemma valid_free_validating_is_message_validating
   : forall i, valid_all_dependencies_emittable_from_dependencies_prop i ->
     component_message_validator_prop IM (free_constraint IM) i.
 Proof.
-  by intros i Hvalidating l s im Hv
-  ; eapply free_valid_from_all_dependencies_emitable_from_dependencies, Hvalidating.
+  intros i Hvalidating l s im Hv.
+  eapply VLSM_incl_valid_message.
+  - by apply free_composite_vlsm_spec.
+  - by do 2 red.
+  - by eapply free_valid_from_all_dependencies_emitable_from_dependencies, Hvalidating.
 Qed.
 
 (**
@@ -1161,7 +1164,7 @@ Qed.
 *)
 Lemma valid_free_validating_equiv_message_validating
   `{forall i, MessageDependencies (IM i) message_dependencies}
-  (Hchannel : channel_authentication_prop  IM A sender)
+  (Hchannel : channel_authentication_prop IM A sender)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   : forall i, component_message_validator_prop IM (free_constraint IM) i <->
   valid_all_dependencies_emittable_from_dependencies_prop i.
@@ -1175,10 +1178,13 @@ Proof.
     exists v; [done |].
     by eapply message_dependencies_are_sufficient.
   - apply elem_of_elements, full_message_dependencies_happens_before in Hin.
-    eapply @msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender in Hin
-        as (v & Hsender & Hemit); [| done ..].
-    exists v; [done |].
-    by eapply message_dependencies_are_sufficient.
+    eapply msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_sender in Hin
+        as (v & Hsender & Hemit); [| done.. |].
+    + exists v; [done |].
+      by eapply message_dependencies_are_sufficient.
+    + eapply VLSM_incl_valid_message; [| | done].
+      * by apply free_composite_vlsm_spec.
+      * by do 2 red.
 Qed.
 
 End sec_free_composition_validators.

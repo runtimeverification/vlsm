@@ -211,7 +211,7 @@ Proof.
     intros.
     erewrite <- oracle_initial_trace_update
       with (vlsm := free_composite_vlsm IM); cycle 1.
-    - by apply composite_has_been_sent_stepwise_props.
+    - by apply free_composite_has_been_sent_stepwise_props.
     - done.
     - by eapply has_been_sent_iff_by_sender.
   }

@@ -313,9 +313,10 @@ Lemma seeded_equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to SeededXE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  apply
-    (generalized_equivocators_finite_valid_trace_init_to_rev IM)
-  ; [.. | done].
+  apply (generalized_equivocators_finite_valid_trace_init_to_rev IM)
+    with (constraintX := free_constraint _); cycle 2.
+  - apply VLSM_incl_finite_valid_trace_init_to; [| by apply HtrX].
+    by apply preloaded_free_composite_vlsm_spec.
   - intro; intros. split; [| done].
     destruct om; [| done].
     destruct Hom as [Hsent | Hinitial]; [by left |].

@@ -258,6 +258,9 @@ Definition composite_no_equivocation_vlsm_with_pre_loaded
   :=
   pre_loaded_vlsm (composite_vlsm IM no_equivocations_additional_constraint_with_pre_loaded) seed.
 
+Definition free_composite_no_equivocation_vlsm_with_pre_loaded : VLSM message :=
+  pre_loaded_vlsm (free_composite_vlsm IM) seed.
+
 Lemma seeded_no_equivocation_incl_preloaded :
   VLSM_incl composite_no_equivocation_vlsm_with_pre_loaded
     (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)).
@@ -279,7 +282,7 @@ Proof.
     end
     ; [done |].
     unfold free_composite_vlsm; cbn.
-    by apply preloaded_constraint_subsumption_incl.
+    by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
 End sec_seeded_composite_vlsm_no_equivocation_definition.

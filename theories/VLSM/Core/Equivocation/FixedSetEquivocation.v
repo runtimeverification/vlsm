@@ -310,7 +310,7 @@ Qed.
 
 Definition preloaded_Fixed_incl_Preloaded :
   VLSM_incl (pre_loaded_with_all_messages_vlsm Fixed) (pre_loaded_with_all_messages_vlsm Free) :=
-    preloaded_constraint_free_incl _ _.
+    preloaded_constraint_subsumption_incl_free _ _.
 
 Definition StrongFixed_incl_Free : VLSM_incl StrongFixed Free := constraint_free_incl _ _.
 
@@ -927,7 +927,7 @@ Lemma EquivPreloadedBase_Fixed_weak_embedding
 Proof.
   apply basic_VLSM_weak_embedding.
   - intros l s om Hv HsY HomY. split.
-    + destruct Hv as [_ [_ [Hv _]]]; revert Hv; destruct l as (i, li).
+    + destruct Hv as [_ [_ Hv]]; revert Hv; destruct l as (i, li).
       destruct_dec_sig i j Hj Heq; subst i; cbn; unfold sub_IM; cbn.
       by rewrite lift_sub_state_to_eq with (Hi := Hj).
     + destruct om as [m |]; [| done]; cbn.

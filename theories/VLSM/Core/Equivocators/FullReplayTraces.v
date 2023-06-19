@@ -57,13 +57,14 @@ Lemma SeededXE_Free_embedding
 Proof.
   apply basic_VLSM_embedding; intros ? *.
   - split; [| done].
-    by apply lift_sub_valid, Hv.
+    by rapply @lift_sub_valid; apply Hv.
   - by intros [_ Ht]; revert Ht; apply lift_sub_transition.
   - by intros; apply (lift_sub_state_initial equivocator_IM).
-  - intros; destruct HmX as [Hinit | Hseeded]; [| by apply Hseed].
-    apply initial_message_is_valid.
-    destruct Hinit as [i Him].
-    by exists (proj1_sig i).
+  - intros; destruct HmX as [Hinit | Hseeded].
+    + apply initial_message_is_valid.
+      destruct Hinit as [i Him].
+      by exists (proj1_sig i).
+    + by eapply VLSM_incl_valid_message; [apply free_composite_vlsm_spec | do 2 red | apply Hseed].
 Qed.
 
 (**
@@ -572,7 +573,7 @@ End sec_pre_loaded_constrained_projection.
 
 Lemma SeededXE_PreFreeE_weak_embedding
   (full_replay_state : composite_state equivocator_IM)
-  (Hfull_replay_state : valid_state_prop PreFreeE  full_replay_state)
+  (Hfull_replay_state : valid_state_prop PreFreeE full_replay_state)
   : VLSM_weak_embedding SeededXE PreFreeE
       (lift_equivocators_sub_label_to full_replay_state)
       (lift_equivocators_sub_state_to full_replay_state).
@@ -581,10 +582,17 @@ Proof.
   intros sX trX HtrX.
   specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True FreeE) as Heq.
   apply (VLSM_eq_finite_valid_trace_from Heq).
-  revert sX trX HtrX.
-  apply lift_equivocators_sub_weak_projection; [done | | | done].
+  eapply (lift_equivocators_sub_weak_projection (free_constraint _) (fun _ => True)) in HtrX; cycle 1.
+  - done.
   - by intros; apply initial_message_is_valid; right.
-  - by apply (VLSM_eq_valid_state Heq) in Hfull_replay_state.
+  - apply (VLSM_eq_valid_state Heq) in Hfull_replay_state.
+    apply (VLSM_incl_valid_state (MX := pre_loaded_vlsm FreeE (fun _ => True))); [| done].
+    by apply preloaded_free_composite_vlsm_spec.
+  - done.
+  - apply (@VLSM_incl_finite_valid_trace_from _ _ (pre_loaded_vlsm
+      (composite_vlsm equivocator_IM (free_constraint _)) (fun _ => True))); [| done].
+    eapply VLSM_incl_trans; [| by apply Heq].
+    by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma PreFreeSubE_PreFreeE_weak_embedding
@@ -595,14 +603,16 @@ Lemma PreFreeSubE_PreFreeE_weak_embedding
       (lift_equivocators_sub_state_to full_replay_state).
 Proof.
   apply basic_VLSM_weak_embedding; intros ? *.
-  - by split; [apply lift_equivocators_sub_valid; apply Hv |].
+  - by intros; apply lift_equivocators_sub_valid, Hv.
   - by intro Ht; apply lift_equivocators_sub_transition; apply Ht.
   - intros.
     rewrite <- replayed_initial_state_from_lift; [| done].
     apply finite_valid_trace_last_pstate.
     specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True FreeE) as Heq.
     apply (VLSM_eq_finite_valid_trace_from Heq).
+    eapply VLSM_incl_finite_valid_trace_from; [by apply preloaded_free_composite_vlsm_spec |].
     apply replayed_initial_state_from_valid; [done | | done].
+    eapply VLSM_incl_valid_state; [by apply preloaded_free_composite_vlsm_spec |].
     by apply (VLSM_eq_valid_state Heq).
   - by intros; apply any_message_is_valid_in_preloaded.
 Qed.
@@ -648,7 +658,9 @@ Proof.
   simpl. rewrite (lift_equivocators_sub_state_to_sub _ _ _ Hi).
   subst. unfold SubProjectionTraces.sub_IM in Hsent. cbn in Hsent |-*.
   apply equivocator_state_append_sent_right; [.. | done].
-  - by apply Hfull_replay_state_pr.
+  - apply Hfull_replay_state_pr.
+    eapply VLSM_incl_valid_state; [| done].
+    by apply preloaded_with_all_messages_free_composite_vlsm_spec.
   - by apply (Hs_pr (dexist i Hi) Hs).
 Qed.
 

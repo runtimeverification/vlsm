@@ -473,14 +473,8 @@ Lemma Xj_incl_Pre_Sub_Free
 Proof.
   subst Xj.
   unfold composite_no_equivocation_vlsm_with_pre_loaded.
-  specialize
-    (preloaded_constraint_subsumption_incl sub_IM
-      (no_equivocations_additional_constraint_with_pre_loaded sub_IM
-        (free_constraint sub_IM)
-        seed)
-      (free_constraint sub_IM))
-    as Hincl.
-  spec Hincl; [done |].
+  pose proof (Hincl := preloaded_constraint_subsumption_incl_free sub_IM
+    (no_equivocations_additional_constraint_with_pre_loaded sub_IM (free_constraint sub_IM) seed)).
   match goal with
   |- context [pre_loaded_vlsm ?v _] =>
     apply VLSM_incl_trans with (pre_loaded_with_all_messages_vlsm v)
@@ -831,7 +825,6 @@ Proof.
   simpl in Hl.
   destruct (decide _); [by congruence |].
   inversion Hl. subst lY. clear Hl.
-  split; [| done].
   cbn in Hv |- *.
   unfold remove_equivocating_state_project.
   by rewrite lift_sub_state_to_neq; [apply Hv |].
@@ -958,8 +951,7 @@ Lemma PreSubFree_PreFree_weak_embedding :
     (lift_sub_label IM equivocators) (lift_sub_state_to IM equivocators base_s).
 Proof.
   apply basic_VLSM_weak_embedding.
-  - split; [| done].
-    by apply lift_sub_to_valid, Hv.
+  - by red; intros; by apply lift_sub_to_valid, Hv.
   - intros l s om s' om' Hv.
     by apply lift_sub_to_transition, Hv.
   - by apply preloaded_lift_sub_state_to_initial_state.
@@ -990,7 +982,7 @@ Proof.
     unfold composite_label_sub_projection_option in Heql; cbn in Heql.
     case_decide as Hi; [| by congruence].
     apply Some_inj in Heql; subst l; cbn.
-    unfold constrained_composite_valid, lift_sub_state; cbn;
+    unfold lift_sub_state; cbn;
     rewrite (lift_sub_state_to_eq _ _ _ _ _ Hi); subst.
     split; [done |].
     eapply Hconstraint_consistency; [| done].
@@ -1132,8 +1124,7 @@ Lemma lift_sub_incl_embedding :
     lift_sub_incl_label lift_sub_incl_state.
 Proof.
   apply basic_VLSM_strong_embedding; intro; intros.
-  - by split; [apply lift_sub_incl_valid, H |].
-
+  - by apply lift_sub_incl_valid, H.
   - by apply lift_sub_incl_transition.
   - by apply lift_sub_incl_state_initial.
   - by apply lift_sub_incl_message_initial.
@@ -1148,7 +1139,7 @@ Lemma lift_sub_incl_preloaded_embedding
       lift_sub_incl_label lift_sub_incl_state.
 Proof.
   apply basic_VLSM_embedding_preloaded_with; [done | ..]; intro; intros.
-  - by split; [apply lift_sub_incl_valid, H |].
+  - by apply lift_sub_incl_valid, H.
   - by apply lift_sub_incl_transition.
   - by apply lift_sub_incl_state_initial.
   - by apply lift_sub_incl_message_initial.
@@ -1555,11 +1546,10 @@ Lemma preloaded_sub_element_embedding
   : VLSM_embedding PrePXj PreQSubFree sub_element_label sub_element_state.
 Proof.
   apply basic_VLSM_embedding_preloaded_with; [done | ..].
-  - intros l s om Hv.
-    split; [cbn | done].
-    by rewrite sub_element_state_eq with (H_j := Hj).
+  - intros l s om Hv; cbn.
+    by rewrite sub_element_state_eq.
   - intros l s om s' om'; cbn.
-    rewrite sub_element_state_eq with (H_j := Hj).
+    rewrite sub_element_state_eq.
     intro Ht; replace (transition _ _ _) with (s', om'); f_equal.
     extensionality sub_i.
     destruct_dec_sig sub_i i Hi Heqsub_i; subst.
@@ -1719,9 +1709,8 @@ Lemma lift_sub_free_preloaded_with_embedding
   : VLSM_embedding (pre_loaded_vlsm SubFree seed) (pre_loaded_vlsm Free seed)
     (lift_sub_label IM indices) (lift_sub_state IM indices).
 Proof.
-  apply (basic_VLSM_embedding_preloaded_with SubFree Free seed seed); intro; intros.
-  - done.
-  - by split; [apply lift_sub_valid, H |].
+  apply (basic_VLSM_embedding_preloaded_with SubFree Free seed seed); intro; intros; [done | ..].
+  - by cbn; apply lift_sub_valid, H.
   - by rapply lift_sub_transition.
   - by apply (lift_sub_state_initial IM).
   - by apply (lift_sub_message_initial IM indices).
@@ -1831,10 +1820,10 @@ Context
   If a sub-composition [can_emit] a message then its sender must be one of
   the components of the sub-composition.
 *)
-Lemma sub_no_indices_no_can_emit (P : message -> Prop)
-  : forall m, ~ can_emit (pre_loaded_vlsm (free_composite_vlsm sub_IM) P) m.
+Lemma sub_no_indices_no_can_emit (P : message -> Prop) :
+  forall m, ~ can_emit (pre_loaded_vlsm (free_composite_vlsm sub_IM) P) m.
 Proof.
-  apply pre_loaded_empty_composition_no_emit, elem_of_nil_inv.
+  apply pre_loaded_empty_free_composition_no_emit, elem_of_nil_inv.
   by intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; inversion Hi.
 Qed.
 

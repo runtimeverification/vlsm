@@ -189,7 +189,7 @@ Proof.
   apply basic_VLSM_strong_incl.
   - by intros s Hincl; apply fixed_non_byzantine_projection_initial_state_preservation.
   - by intros.
-  - by split; [eapply induced_sub_projection_valid_preservation |].
+  - by intros l **; cbn; eapply induced_sub_projection_valid_preservation.
   - intros l s om s' om'; cbn.
     (* an ugly trick to get the forward direction from an iff (<->) lemma *)
     by eapply proj1; rapply @induced_sub_projection_transition_preservation.
@@ -364,7 +364,7 @@ Proof.
       by eapply preloaded_composite_sent_valid.
     + by apply initial_message_is_valid; right.
   - intros l s om (_ & _ & Hv) _ _; split.
-    + by eapply induced_sub_projection_valid_preservation.
+    + by rapply @induced_sub_projection_valid_preservation.
     + split; [| done].
       by apply fixed_non_byzantine_projection_valid_no_equivocations.
   - intros l s om s' om' [_ Ht]; cbn.
@@ -380,7 +380,7 @@ Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_valid
 Proof.
   intros (sub_i, li) s om (HsX & HomX & Hv & Hc & _) HsY HomY.
   destruct_dec_sig sub_i i Hi Heqsub_i; subst.
-  split; [by apply lift_sub_valid |].
+  split; [by rapply @lift_sub_valid |].
   clear -Hsender_safety Hc HsX.
   cbn; destruct om as [m |]; [| done].
   destruct (sender m) as [v |] eqn: Hsender; [| done]; cbn.
@@ -568,7 +568,7 @@ Proof.
   {
     intro i.
     revert Hs.
-    apply valid_state_project_preloaded_to_preloaded.
+    by apply valid_state_project_preloaded_to_preloaded_free.
   }
   apply elem_of_elements, elem_of_difference in HAv as [_ HAv].
   destruct Hstrong_v as [(i & Hi & Hsent) | Hemitted].
@@ -648,7 +648,7 @@ Lemma fixed_non_byzantine_vlsm_lift_valid
 Proof.
   intros l s om Hv HsY HomY.
   split.
-  - by apply lift_sub_valid, Hv.
+  - by rapply @lift_sub_valid; apply Hv.
   - destruct om as [m |]; [| done].
     apply proj2 in Hv as Hc.
     destruct Hc as [_ [_ [Hc _]]].
@@ -702,8 +702,8 @@ Lemma preloaded_non_byzantine_vlsm_lift
       (lift_sub_state IM (elements selection_complement)).
 Proof.
   apply basic_VLSM_strong_embedding; [| | | done].
-  - intros l s om [Hv _].
-    by split; [apply lift_sub_valid |].
+  - intros l s om [Hv _]; cbn.
+    by apply lift_sub_valid.
   - by intro; intros; rapply lift_sub_transition.
   - by intro; intros; apply (lift_sub_state_initial IM).
 Qed.
