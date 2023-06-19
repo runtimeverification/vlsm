@@ -128,7 +128,7 @@ Definition lv_message_observations (s : state) (target : index) : set lv_event :
   set_union (lv_sent_observations s target) (lv_received_observations s target).
 ```
 
-- When giving an explicit proof term for things that live in `Prop`, avoid using `Definition` with `:=`, because it is unclear whether the point is just to give the proof term or whether transparency also matters. Instead use `Lemma` and provide the proof term using the `exact` tactic, while marking transparency with `Qed` or `Defined`.
+- When explicitly defining a constant that lives in `Prop`, avoid using `Definition` with `:=`. Instead use `Lemma` (or `Theorem`, `Proposition`, etc.) and provide the constant term body using the `exact` tactic, while indicating the opacity with `Qed` or `Defined`.
 
 Not recommended:
 ```coq
@@ -144,9 +144,7 @@ Lemma finite_trace_partial_map_app :
   forall l1 l2 : list (transition_item TX),
     finite_trace_partial_map (l1 ++ l2) =
     finite_trace_partial_map l1 ++ finite_trace_partial_map l2.
-Proof.
-  exact (map_option_app _).
-Qed.
+Proof. exact (map_option_app _). Qed.
 ```
 
 ### Theorems and lemmas
