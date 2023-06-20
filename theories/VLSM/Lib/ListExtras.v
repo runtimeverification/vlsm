@@ -152,11 +152,10 @@ Proof.
   by split; [| apply Hsub].
 Qed.
 
-Definition app_cons {A}
-  (a : A)
-  (l : list A)
-  : [a] ++ l = a :: l
-  := eq_refl.
+Lemma app_cons :
+  forall {A : Type} (a : A) (l : list A),
+    [a] ++ l = a :: l.
+Proof. done. Defined.
 
 Lemma append_nodup_left {A} :
   forall (l1 l2 : list A), List.NoDup (l1 ++ l2) -> List.NoDup l1.
