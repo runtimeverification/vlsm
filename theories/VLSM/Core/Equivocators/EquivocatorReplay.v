@@ -117,10 +117,7 @@ Lemma equivocator_state_append_preloaded_weak_projection
       (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
       (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
-  constructor.
-  intros sX trX HtrX.
-  revert sX trX HtrX.
-  by apply equivocator_state_append_preloaded_with_weak_projection.
+  by constructor; apply equivocator_state_append_preloaded_with_weak_projection.
 Qed.
 
 Lemma equivocator_state_append_weak_projection

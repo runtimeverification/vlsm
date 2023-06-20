@@ -1750,7 +1750,7 @@ Proof.
     unfold same_IM_state_rew at 2.
     by destruct (decide (i = j)); subst; state_update_simpl.
   - by intros i; apply same_VLSM_initial_state_preservation.
-  - by apply initial_message_is_valid; right.
+  - by apply initial_message_is_valid; cbn; right.
 Qed.
 
 End sec_same_IM_embedding.

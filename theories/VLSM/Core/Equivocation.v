@@ -1051,10 +1051,9 @@ Lemma preloaded_has_been_sent_stepwise_props
   has_been_sent_stepwise_prop (vlsm := X) (has_been_sent vlsm).
 Proof.
   destruct (has_been_sent_stepwise_props vlsm); cbn in *.
-  split; cbn; [done |].
-  intros.
-  eapply oracle_step_update0.
-  eapply VLSM_incl_input_valid_transition; [| done].
+  split; [done |].
+  cbn; intros.
+  eapply oracle_step_update0, VLSM_incl_input_valid_transition; [| done].
   by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
 Qed.
 
@@ -1093,10 +1092,9 @@ Lemma preloaded_has_been_received_stepwise_props
   has_been_received_stepwise_prop (vlsm := X) (has_been_received vlsm).
 Proof.
   destruct (has_been_received_stepwise_props vlsm); cbn in *.
-  split; cbn; [done |].
-  intros.
-  eapply oracle_step_update0.
-  eapply VLSM_incl_input_valid_transition; [| done].
+  split; [done |].
+  cbn; intros.
+  eapply oracle_step_update0, VLSM_incl_input_valid_transition; [| done].
   by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
 Qed.
 
@@ -1913,8 +1911,7 @@ Proof.
     as [Hinits Hstep].
   split; [done |].
   intros l **; specialize (Hstep l); destruct l; cbn in *.
-  apply Hstep with om.
-  eapply VLSM_incl_input_valid_transition; [| done].
+  eapply Hstep with om, VLSM_incl_input_valid_transition; [| done].
   by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
 Qed.
 

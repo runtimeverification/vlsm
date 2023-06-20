@@ -456,7 +456,7 @@ Lemma input_valid_transition_Receive_RMi :
 Proof.
   intros s m Hvsp Hvalid.
   red; cbn; split_and!; [done | | | done].
-  - by exists (MkState [] i); constructor; cbn; [| itauto].
+  - by exists (MkState [] i); constructor; cbn; [| right].
   - by constructor.
 Qed.
 
@@ -1129,7 +1129,7 @@ Proof.
     + apply IHis'.
       * intros j Hj. destruct (decide (i = j)); subst; state_update_simpl; [done |].
         by apply Hall; rewrite elem_of_cons; intros [].
-      * by apply pre_composite_free_update_state_with_initial; [| by compute].
+      * by apply pre_composite_free_update_state_with_initial.
     + replace us with (state_update M us i (us i)) at 2 by (state_update_simpl; done).
       apply lift_to_RMO_finite_valid_trace_from_to; [done |].
       apply (valid_state_project_preloaded_to_preloaded_free _ _ us i) in Hvsp as Hvsp'.
