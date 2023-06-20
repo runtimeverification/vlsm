@@ -417,24 +417,6 @@ Proof.
   by apply pre_loaded_vlsm_incl_relaxed; itauto.
 Qed.
 
-Lemma pre_loaded_vlsm_or_l :
-  forall (P Q : message -> Prop),
-    VLSM_incl
-      (pre_loaded_vlsm (pre_loaded_vlsm X P) Q)
-      (pre_loaded_vlsm X (fun x => P x \/ Q x)).
-Proof.
-  by intros; apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
-Lemma pre_loaded_vlsm_or_r :
-  forall (P Q : message -> Prop),
-    VLSM_incl
-      (pre_loaded_vlsm X (fun x => P x \/ Q x))
-      (pre_loaded_vlsm (pre_loaded_vlsm X P) Q).
-Proof.
-  by intros; apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
 Lemma pre_loaded_vlsm_idem_l :
   forall (P : message -> Prop),
     VLSM_incl (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).

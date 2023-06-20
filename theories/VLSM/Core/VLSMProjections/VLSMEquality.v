@@ -197,17 +197,6 @@ Proof.
   - by apply pre_loaded_vlsm_incl; itauto.
 Qed.
 
-Lemma pre_loaded_vlsm_or :
-  forall (P Q : message -> Prop),
-    VLSM_eq
-      (pre_loaded_vlsm (pre_loaded_vlsm X P) Q)
-      (pre_loaded_vlsm X (fun x => P x \/ Q x)).
-Proof.
-  split; cbn.
-  - by apply pre_loaded_vlsm_or_l.
-  - by apply pre_loaded_vlsm_or_r.
-Qed.
-
 Lemma pre_loaded_vlsm_idem
   (P : message -> Prop)
   : VLSM_eq (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
