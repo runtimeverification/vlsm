@@ -152,8 +152,8 @@ Proof.
   by split; [| apply Hsub].
 Qed.
 
-Lemma app_cons :
-  forall {A : Type} (a : A) (l : list A),
+Lemma app_cons {A} :
+  forall (a : A) (l : list A),
     [a] ++ l = a :: l.
 Proof. done. Defined.
 

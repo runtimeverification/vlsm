@@ -95,13 +95,12 @@ Proof.
     by apply Hid.
 Qed.
 
-Lemma VLSM_incl_is_embedding :
-  forall
-    {MX MY : VLSMMachine T}
-    (X := mk_vlsm MX) (Y := mk_vlsm MY),
-      VLSM_incl X Y -> VLSM_embedding X Y id id.
+Lemma VLSM_incl_is_embedding
+  {MX MY : VLSMMachine T}
+  (X := mk_vlsm MX) (Y := mk_vlsm MY) :
+    VLSM_incl X Y -> VLSM_embedding X Y id id.
 Proof.
-  exact (fun MX MY Hincl => proj1 (VLSM_incl_embedding_iff MX MY) Hincl).
+  exact (proj1 (VLSM_incl_embedding_iff MX MY)).
 Defined.
 
 Lemma VLSM_incl_is_embedding_finite_trace_project

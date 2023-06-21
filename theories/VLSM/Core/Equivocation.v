@@ -549,9 +549,7 @@ Definition has_not_been_sent `{HasBeenSentCapability} : state_message_oracle :=
 
 Lemma has_been_sent_no_inits `{HasBeenSentCapability} :
   forall s : state vlsm,
-    initial_state_prop vlsm s ->
-  forall m : message,
-    ~ has_been_sent s m.
+    initial_state_prop vlsm s -> forall m : message, ~ has_been_sent s m.
 Proof.
   exact (oracle_no_inits _ _ (has_been_sent_stepwise_props)).
 Defined.
@@ -728,8 +726,7 @@ Definition has_not_been_received `{HasBeenReceivedCapability} : state_message_or
 
 Lemma has_been_received_no_inits `{HasBeenReceivedCapability} :
   forall s : state vlsm,
-    initial_state_prop vlsm s ->
-  forall m : message, ~ has_been_received s m.
+    initial_state_prop vlsm s -> forall m : message, ~ has_been_received s m.
 Proof.
   exact (oracle_no_inits _ _ has_been_received_stepwise_props).
 Defined.
