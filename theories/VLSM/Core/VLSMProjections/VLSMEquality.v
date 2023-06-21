@@ -206,14 +206,6 @@ Proof.
   - by apply pre_loaded_vlsm_idem_r.
 Qed.
 
-Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True
-  : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun _ => True)).
-Proof.
-  split; cbn.
-  - by apply pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l.
-  - by apply pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_r.
-Qed.
-
 Lemma pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm
   (P : message -> Prop)
   (Hvalidating :
@@ -231,32 +223,22 @@ Proof.
   - by intros l s om s' om' [_ Ht].
 Qed.
 
-Lemma vlsm_is_pre_loaded_with_False
-  : VLSM_eq X (pre_loaded_vlsm X (fun _ => False)).
+Lemma vlsm_is_pre_loaded_with_False :
+  VLSM_eq X (pre_loaded_vlsm X (fun _ => False)).
 Proof.
   by cbn; split; apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
-Lemma vlsm_is_pre_loaded_with_False_initial_message
-  : strong_embedding_initial_message_preservation X (pre_loaded_vlsm X (fun _ => False)).
+Lemma vlsm_is_pre_loaded_with_False_initial_message :
+  strong_embedding_initial_message_preservation X (pre_loaded_vlsm X (fun _ => False)).
 Proof.
   by intros m Hm; left.
 Qed.
 
-Lemma vlsm_is_pre_loaded_with_False_initial_message_rev
-  : strong_embedding_initial_message_preservation (pre_loaded_vlsm X (fun _ => False)) X.
+Lemma vlsm_is_pre_loaded_with_False_initial_message_rev :
+  strong_embedding_initial_message_preservation (pre_loaded_vlsm X (fun _ => False)) X.
 Proof.
   by intros m [Hm | Hfalse].
-Qed.
-
-Lemma pre_loaded_with_all_messages_vlsm_idem :
-  VLSM_eq
-    (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X))
-    (pre_loaded_with_all_messages_vlsm X).
-Proof.
-  split; cbn.
-  - by apply pre_loaded_with_all_messages_vlsm_idem_l.
-  - by apply pre_loaded_with_all_messages_vlsm_idem_r.
 Qed.
 
 Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om :

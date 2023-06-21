@@ -265,24 +265,9 @@ Lemma seeded_no_equivocation_incl_preloaded :
   VLSM_incl composite_no_equivocation_vlsm_with_pre_loaded
     (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)).
 Proof.
-  unfold composite_no_equivocation_vlsm_with_pre_loaded.
-  match goal with
-  |- VLSM_incl (pre_loaded_vlsm ?v _) _ =>
-    specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True v) as Hprev
-  end.
-  destruct Hprev as [_ Hprev].
-  match type of Hprev with
-  | VLSM_incl (mk_vlsm ?m) _ => apply VLSM_incl_trans with m
-  end.
-  - cbn; clear Hprev.
-    by apply (@pre_loaded_vlsm_incl message
-      (composite_vlsm IM no_equivocations_additional_constraint_with_pre_loaded)).
-  - match type of Hprev with
-    | VLSM_incl _ (mk_vlsm ?m) => apply VLSM_incl_trans with m
-    end
-    ; [done |].
-    unfold free_composite_vlsm; cbn.
-    by apply preloaded_constraint_subsumption_incl_free.
+  apply (VLSM_incl_trans _ (pre_loaded_with_all_messages_vlsm (composite_vlsm IM _))).
+  - by cbn; apply (@pre_loaded_vlsm_incl message (composite_vlsm IM _)).
+  - by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
 End sec_seeded_composite_vlsm_no_equivocation_definition.

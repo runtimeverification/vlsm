@@ -244,7 +244,7 @@ Lemma composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
       (pre_loaded_vlsm (composite_vlsm constraint) P)
       (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
 Proof.
-  by intros; apply basic_VLSM_strong_incl; cbv; [.. | itauto |].
+  by intros; apply basic_VLSM_strong_incl; cbv; [| itauto.. |].
 Qed.
 
 Lemma constraint_free_valid_state_message_preservation :
@@ -835,14 +835,8 @@ Lemma lift_to_preloaded_free_weak_embedding :
       (lift_to_composite_state cs i).
 Proof.
   constructor; intros.
-  apply (VLSM_eq_finite_valid_trace_from
-    (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)).
-  apply pre_lift_to_free_weak_embedding.
-  - by apply (VLSM_eq_valid_state
-      (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True free_composite_vlsm)).
-  - apply (VLSM_eq_finite_valid_trace_from
-      (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True (IM i))).
-    by destruct (IM i).
+  apply pre_lift_to_free_weak_embedding; [done |].
+  by destruct (IM i).
 Qed.
 
 End sec_VLSM_composition.
@@ -1756,7 +1750,7 @@ Proof.
     unfold same_IM_state_rew at 2.
     by destruct (decide (i = j)); subst; state_update_simpl.
   - by intros i; apply same_VLSM_initial_state_preservation.
-  - by apply initial_message_is_valid.
+  - by apply initial_message_is_valid; cbn; right.
 Qed.
 
 End sec_same_IM_embedding.

@@ -471,29 +471,11 @@ Context
 Lemma Xj_incl_Pre_Sub_Free
   : VLSM_incl Xj (pre_loaded_with_all_messages_vlsm Sub_Free).
 Proof.
-  subst Xj.
-  unfold composite_no_equivocation_vlsm_with_pre_loaded.
-  pose proof (Hincl := preloaded_constraint_subsumption_incl_free sub_IM
-    (no_equivocations_additional_constraint_with_pre_loaded sub_IM (free_constraint sub_IM) seed)).
-  match goal with
-  |- context [pre_loaded_vlsm ?v _] =>
-    apply VLSM_incl_trans with (pre_loaded_with_all_messages_vlsm v)
-  end; [| apply Hincl].
-  clear Hincl.
-  match goal with
-  |- context [pre_loaded_with_all_messages_vlsm ?v] =>
-    apply VLSM_incl_trans with (pre_loaded_vlsm v (fun m => True))
-  end.
-  - match goal with
-    |- context [pre_loaded_vlsm ?v _] =>
-      apply (pre_loaded_vlsm_incl v seed (fun m => True))
-    end.
-    itauto.
-  - match goal with
-    |- context [pre_loaded_with_all_messages_vlsm ?v] =>
-      specialize (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True v) as Hincl
-    end.
-    by destruct Hincl.
+  apply (VLSM_incl_trans _ (pre_loaded_with_all_messages_vlsm
+    (composite_vlsm sub_IM (no_equivocations_additional_constraint_with_pre_loaded sub_IM _ seed)))).
+  - by cbn; apply (pre_loaded_vlsm_incl (composite_vlsm sub_IM
+      (no_equivocations_additional_constraint_with_pre_loaded sub_IM (free_constraint sub_IM) seed))).
+  - by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
 (**
@@ -1733,10 +1715,7 @@ Lemma lift_sub_preloaded_free_embedding
 Proof.
   constructor.
   intros sX trX HtrX.
-  by apply (VLSM_eq_finite_valid_trace
-    (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True Free)),
-    (VLSM_embedding_finite_valid_trace (lift_sub_free_preloaded_with_embedding _)),
-    (VLSM_eq_finite_valid_trace (pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True SubFree)).
+  by apply (VLSM_embedding_finite_valid_trace (lift_sub_free_preloaded_with_embedding _)).
 Qed.
 
 (**

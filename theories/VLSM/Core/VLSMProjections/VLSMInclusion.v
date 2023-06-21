@@ -385,13 +385,17 @@ Context
   (X : VLSM message)
   .
 
-Lemma vlsm_incl_pre_loaded_with_all_messages_vlsm
-  : VLSM_incl X (pre_loaded_with_all_messages_vlsm X).
+Lemma vlsm_incl_pre_loaded :
+  forall (P : message -> Prop),
+    VLSM_incl X (pre_loaded_vlsm X P).
 Proof.
-  apply VLSM_incl_finite_traces_characterization.
-  intros. split; [| by apply H].
-  apply preloaded_weaken_valid_trace_from.
-  by destruct X; apply H.
+  by intros; apply basic_VLSM_strong_incl; cbv; itauto.
+Qed.
+
+Lemma vlsm_incl_pre_loaded_with_all_messages_vlsm :
+  VLSM_incl X (pre_loaded_with_all_messages_vlsm X).
+Proof.
+  by apply vlsm_incl_pre_loaded.
 Qed.
 
 Lemma pre_loaded_vlsm_incl_relaxed
@@ -414,61 +418,25 @@ Proof.
   by apply pre_loaded_vlsm_incl_relaxed; itauto.
 Qed.
 
-Lemma pre_loaded_vlsm_idem_l
-  (P : message -> Prop)
-  : VLSM_incl (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
+Lemma pre_loaded_vlsm_idem_l :
+  forall (P : message -> Prop),
+    VLSM_incl (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
 Proof.
-  by apply basic_VLSM_strong_incl; cbv; itauto.
+  by intros; apply basic_VLSM_strong_incl; cbv; itauto.
 Qed.
 
-Lemma pre_loaded_vlsm_idem_r
-  (P : message -> Prop)
-  : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm (pre_loaded_vlsm X P) P).
+Lemma pre_loaded_vlsm_idem_r :
+  forall (P : message -> Prop),
+    VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm (pre_loaded_vlsm X P) P).
 Proof.
-  by apply basic_VLSM_incl_preloaded_with; cbv; itauto.
+  by intros; apply basic_VLSM_incl_preloaded_with; cbv; itauto.
 Qed.
 
-Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_l
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X (fun m => True)).
+Lemma pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
+  forall (P : message -> Prop),
+    VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_with_all_messages_vlsm X).
 Proof.
-  by apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
-Lemma pre_loaded_with_all_messages_vlsm_is_pre_loaded_with_True_r
-  : VLSM_incl (pre_loaded_vlsm X (fun m => True)) (pre_loaded_with_all_messages_vlsm X).
-Proof.
-  by apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
-Lemma pre_loaded_vlsm_incl_pre_loaded_with_all_messages
-  (P : message -> Prop)
-  : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_with_all_messages_vlsm X).
-Proof.
-  by apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
-Lemma vlsm_incl_pre_loaded
-  (P : message -> Prop)
-  : VLSM_incl X (pre_loaded_vlsm X P).
-Proof.
-  eapply VLSM_incl_trans; [| by apply pre_loaded_vlsm_incl].
-  by apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
-Lemma pre_loaded_with_all_messages_vlsm_idem_l :
-  VLSM_incl
-    (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X))
-    (pre_loaded_with_all_messages_vlsm X).
-Proof.
-  by apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
-Lemma pre_loaded_with_all_messages_vlsm_idem_r :
-  VLSM_incl
-    (pre_loaded_with_all_messages_vlsm X)
-    (pre_loaded_with_all_messages_vlsm (pre_loaded_with_all_messages_vlsm X)).
-Proof.
-  by apply basic_VLSM_incl_preloaded; cbv; itauto.
+  by intros; apply pre_loaded_vlsm_incl.
 Qed.
 
 Lemma pre_loaded_with_all_messages_can_emit
