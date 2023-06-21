@@ -1359,7 +1359,7 @@ Lemma destruct_equivocators_partial_trace_project
 Proof.
   exact (proj1 (equivocators_partial_trace_project_characterization
     final_descriptors sX trX sY trY) Hpr_tr).
-Defined.
+Qed.
 
 Lemma construct_equivocators_partial_trace_project
   {final_descriptors : equivocator_descriptors}
@@ -1374,7 +1374,7 @@ Lemma construct_equivocators_partial_trace_project
 Proof.
   exact (proj2 (equivocators_partial_trace_project_characterization
     final_descriptors sX trX sY trY) Hed).
-Defined.
+Qed.
 
 Lemma equivocators_partial_trace_project_extends_left
   (final_descriptors : equivocator_descriptors)

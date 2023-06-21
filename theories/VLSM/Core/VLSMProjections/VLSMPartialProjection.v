@@ -99,7 +99,7 @@ Lemma VLSM_weak_partial_projection_finite_valid_trace_from :
     finite_valid_trace_from X sX trX -> finite_valid_trace_from Y sY trY.
 Proof.
   exact (weak_partial_trace_project_preserves_valid_trace _ _ _ Hsimul).
-Defined.
+Qed.
 
 Lemma VLSM_weak_partial_projection_valid_state
   : forall sX sY trY,
@@ -163,7 +163,7 @@ Lemma VLSM_partial_projection_finite_valid_trace :
     finite_valid_trace X sX trX -> finite_valid_trace Y sY trY.
 Proof.
   exact (partial_trace_project_preserves_valid_trace _ _ _ Hsimul).
-Defined.
+Qed.
 
 Lemma VLSM_partial_projection_finite_valid_trace_from
   : forall sX trX sY trY,
@@ -205,7 +205,7 @@ Lemma VLSM_partial_projection_valid_state :
     valid_state_prop X sX -> valid_state_prop Y sY.
 Proof.
   exact (VLSM_weak_partial_projection_valid_state VLSM_partial_projection_weaken).
-Defined.
+Qed.
 
 Lemma  VLSM_partial_projection_input_valid_transition :
   forall sX itemX sY itemY,
@@ -214,7 +214,7 @@ Lemma  VLSM_partial_projection_input_valid_transition :
     input_valid_transition Y (l itemY) (sY, input itemY) (destination itemY, output itemY).
 Proof.
   exact (VLSM_weak_partial_projection_input_valid_transition VLSM_partial_projection_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_partial_projection_input_valid :
   forall (sX : state X) (itemX : transition_item),
@@ -224,7 +224,7 @@ Lemma VLSM_partial_projection_input_valid :
       input_valid Y (l itemY) (sY, input itemY).
 Proof.
   exact (VLSM_weak_partial_projection_input_valid VLSM_partial_projection_weaken).
-Defined.
+Qed.
 
 End sec_partial_projection_properties.
 

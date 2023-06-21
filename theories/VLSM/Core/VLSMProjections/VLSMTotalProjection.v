@@ -117,7 +117,7 @@ Lemma pre_VLSM_projection_finite_trace_project_app :
     pre_VLSM_projection_finite_trace_project l1 ++ pre_VLSM_projection_finite_trace_project l2.
 Proof.
   exact (map_option_app _).
-Defined.
+Qed.
 
 Lemma pre_VLSM_projection_finite_trace_project_app_rev :
   forall l l1' l2', pre_VLSM_projection_finite_trace_project l = l1' ++ l2' ->
@@ -126,21 +126,21 @@ Lemma pre_VLSM_projection_finite_trace_project_app_rev :
       pre_VLSM_projection_finite_trace_project l2 = l2'.
 Proof.
   exact (map_option_app_rev _).
-Defined.
+Qed.
 
 Lemma pre_VLSM_projection_finite_trace_project_elem_of_iff :
   forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
     exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY.
 Proof.
   exact (elem_of_map_option _).
-Defined.
+Qed.
 
 Lemma elem_of_pre_VLSM_projection_finite_trace_project :
   forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
     exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY.
 Proof.
   exact (elem_of_map_option _).
-Defined.
+Qed.
 
 Lemma pre_VLSM_projection_finite_trace_project_elem_of :
   forall itemX itemY,
@@ -410,7 +410,7 @@ Lemma VLSM_weak_projection_trace_project_app :
     VLSM_weak_projection_trace_project Hsimul l1 ++ VLSM_weak_projection_trace_project Hsimul l2.
 Proof.
   exact (pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project).
-Defined.
+Qed.
 
 Lemma VLSM_weak_projection_trace_project_app_rev :
   forall l l1' l2', VLSM_weak_projection_trace_project Hsimul l = l1' ++ l2' ->
@@ -419,7 +419,7 @@ Lemma VLSM_weak_projection_trace_project_app_rev :
       VLSM_weak_projection_trace_project Hsimul l2 = l2'.
 Proof.
   exact (pre_VLSM_projection_finite_trace_project_app_rev _ _ label_project state_project).
-Defined.
+Qed.
 
 Lemma VLSM_weak_projection_finite_trace_last :
   forall sX trX,
@@ -428,7 +428,7 @@ Lemma VLSM_weak_projection_finite_trace_last :
       finite_trace_last (state_project sX) (VLSM_weak_projection_trace_project Hsimul trX).
 Proof.
   exact (final_state_project _ _ _ _ Hsimul).
-Defined.
+Qed.
 
 Lemma VLSM_weak_projection_finite_valid_trace_from :
   forall sX trX,
@@ -436,7 +436,7 @@ Lemma VLSM_weak_projection_finite_valid_trace_from :
       finite_valid_trace_from Y (state_project sX) (VLSM_weak_projection_trace_project Hsimul trX).
 Proof.
   exact (weak_trace_project_preserves_valid_trace _ _ _ _ Hsimul).
-Defined.
+Qed.
 
 Lemma VLSM_weak_projection_infinite_valid_trace_from
   : forall sX trX (Hinf : InfinitelyOften (VLSM_weak_projection_in Hsimul) trX),
@@ -599,7 +599,7 @@ Lemma VLSM_projection_finite_trace_project_app :
     VLSM_projection_finite_trace_project Hsimul l1 ++ VLSM_projection_finite_trace_project Hsimul l2.
 Proof.
   exact (pre_VLSM_projection_finite_trace_project_app _ _ label_project state_project).
-Defined.
+Qed.
 
 Lemma VLSM_projection_finite_trace_project_app_rev :
   forall l l1' l2',
@@ -610,7 +610,7 @@ Lemma VLSM_projection_finite_trace_project_app_rev :
       VLSM_projection_finite_trace_project Hsimul l2 = l2'.
 Proof.
   exact (pre_VLSM_projection_finite_trace_project_app_rev _ _ label_project state_project).
-Defined.
+Qed.
 
 Lemma VLSM_projection_finite_trace_project_in :
   forall itemX itemY,
@@ -620,7 +620,7 @@ Lemma VLSM_projection_finite_trace_project_in :
     itemX ∈ trX -> itemY ∈ VLSM_projection_finite_trace_project Hsimul trX.
 Proof.
   exact (pre_VLSM_projection_finite_trace_project_elem_of _ _ label_project state_project).
-Defined.
+Qed.
 
 Lemma VLSM_projection_finite_trace_last :
   forall (sX : state X) (trX : list (transition_item X)),
@@ -629,7 +629,7 @@ Lemma VLSM_projection_finite_trace_last :
       finite_trace_last (state_project sX) (VLSM_projection_finite_trace_project Hsimul trX).
 Proof.
   exact (final_state_project _ _ _ _ Hsimul).
-Defined.
+Qed.
 
 Lemma VLSM_projection_finite_valid_trace :
   forall (sX : state X) (trX : list (transition_item X)),
@@ -637,7 +637,7 @@ Lemma VLSM_projection_finite_valid_trace :
       finite_valid_trace Y (state_project sX) (VLSM_projection_finite_trace_project Hsimul trX).
 Proof.
   exact (trace_project_preserves_valid_trace _ _ _ _ Hsimul).
-Defined.
+Qed.
 
 (**
   Any [VLSM_projection] determines a [VLSM_partial_projection], allowing us
@@ -673,7 +673,7 @@ Lemma VLSM_projection_valid_state :
     valid_state_prop X sX -> valid_state_prop Y (state_project sX).
 Proof.
   exact (VLSM_weak_projection_valid_state VLSM_projection_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_projection_input_valid_transition :
   forall lX lY,
@@ -683,7 +683,7 @@ Lemma VLSM_projection_input_valid_transition :
     input_valid_transition Y lY (state_project s, im) (state_project s', om).
 Proof.
   exact (VLSM_weak_projection_input_valid_transition VLSM_projection_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_projection_input_valid :
   forall (lX : label X) (lY : label Y),
@@ -692,7 +692,7 @@ Lemma VLSM_projection_input_valid :
     input_valid X lX (s, im) -> input_valid Y lY (state_project s, im).
 Proof.
   exact (VLSM_weak_projection_input_valid VLSM_projection_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_projection_finite_valid_trace_from_to :
   forall sX s'X trX,
@@ -701,14 +701,14 @@ Lemma VLSM_projection_finite_valid_trace_from_to :
       (VLSM_projection_finite_trace_project Hsimul trX).
 Proof.
   exact (VLSM_weak_projection_finite_valid_trace_from_to VLSM_projection_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_projection_in_futures :
   forall s1 s2 : state X,
     in_futures X s1 s2 -> in_futures Y (state_project s1) (state_project s2).
 Proof.
   exact (VLSM_weak_projection_in_futures VLSM_projection_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_projection_infinite_valid_trace_from :
   forall sX trX (Hinf : InfinitelyOften (VLSM_projection_in Hsimul) trX),
@@ -717,7 +717,7 @@ Lemma VLSM_projection_infinite_valid_trace_from :
       (VLSM_projection_infinite_trace_project Hsimul trX Hinf).
 Proof.
   exact (VLSM_weak_projection_infinite_valid_trace_from VLSM_projection_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_projection_infinite_finite_valid_trace_from :
   forall sX trX (Hfin : FinitelyManyBound (VLSM_projection_in Hsimul) trX),
@@ -726,7 +726,7 @@ Lemma VLSM_projection_infinite_finite_valid_trace_from :
       (VLSM_projection_infinite_finite_trace_project Hsimul trX Hfin).
 Proof.
   exact (VLSM_weak_projection_infinite_finite_valid_trace_from VLSM_projection_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_projection_initial_state
   : forall sX, initial_state_prop X sX -> initial_state_prop Y (state_project sX).

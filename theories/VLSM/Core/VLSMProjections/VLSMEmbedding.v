@@ -304,7 +304,7 @@ Lemma VLSM_weak_embedding_finite_trace_last :
     finite_trace_last (state_project sX) (VLSM_weak_embedding_finite_trace_project Hsimul trX).
 Proof.
   exact (pre_VLSM_embedding_finite_trace_last _ _ label_project state_project).
-Defined.
+Qed.
 
 Lemma VLSM_weak_embedding_finite_valid_trace_from :
   forall (s : state X) (tr : list (transition_item X)),
@@ -313,7 +313,7 @@ Lemma VLSM_weak_embedding_finite_valid_trace_from :
       (VLSM_weak_embedding_finite_trace_project Hsimul tr).
 Proof.
   exact (weak_full_trace_project_preserves_valid_trace _ _ _ _ Hsimul).
-Defined.
+Qed.
 
 (**
   Any [VLSM_embedding] determines a [VLSM_projection], allowing us
@@ -332,7 +332,7 @@ Lemma VLSM_weak_embedding_valid_state :
     valid_state_prop Y (state_project s).
 Proof.
   exact (VLSM_weak_projection_valid_state VLSM_weak_embedding_is_projection).
-Defined.
+Qed.
 
 Lemma VLSM_weak_embedding_finite_valid_trace_from_to :
   forall (s f : state X) (tr : list (transition_item X)),
@@ -341,14 +341,14 @@ Lemma VLSM_weak_embedding_finite_valid_trace_from_to :
       (VLSM_weak_embedding_finite_trace_project Hsimul tr).
 Proof.
   exact (VLSM_weak_projection_finite_valid_trace_from_to VLSM_weak_embedding_is_projection).
-Defined.
+Qed.
 
 Lemma VLSM_weak_embedding_in_futures :
   forall (s1 s2 : state X),
     in_futures X s1 s2 -> in_futures Y (state_project s1) (state_project s2).
 Proof.
   exact (VLSM_weak_projection_in_futures VLSM_weak_embedding_is_projection).
-Defined.
+Qed.
 
 Lemma VLSM_weak_embedding_input_valid_transition
   : forall l s im s' om,
@@ -432,7 +432,7 @@ Lemma VLSM_embedding_finite_trace_last :
     finite_trace_last (state_project sX) (VLSM_embedding_finite_trace_project Hsimul trX).
 Proof.
   exact (pre_VLSM_embedding_finite_trace_last _ _ label_project state_project).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_finite_valid_trace :
   forall (s : state X) (tr : list (transition_item X)),
@@ -440,7 +440,7 @@ Lemma VLSM_embedding_finite_valid_trace :
     finite_valid_trace Y (state_project s) (VLSM_embedding_finite_trace_project Hsimul tr).
 Proof.
   exact (full_trace_project_preserves_valid_trace _ _ _ _ Hsimul).
-Defined.
+Qed.
 
 (**
   Any [VLSM_embedding] determines a [VLSM_projection], allowing us
@@ -460,7 +460,7 @@ Lemma VLSM_embedding_finite_valid_trace_from :
     finite_valid_trace_from Y (state_project s) (VLSM_embedding_finite_trace_project Hsimul tr).
 Proof.
   exact (VLSM_projection_finite_valid_trace_from VLSM_embedding_is_projection).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_finite_valid_trace_init_to :
   forall (s f : state X) (tr : list (transition_item X)),
@@ -469,14 +469,14 @@ Lemma VLSM_embedding_finite_valid_trace_init_to :
       (VLSM_embedding_finite_trace_project Hsimul tr).
 Proof.
   exact (VLSM_projection_finite_valid_trace_init_to VLSM_embedding_is_projection).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_initial_state :
   forall (is : state X),
     initial_state_prop X is -> initial_state_prop Y (state_project is).
 Proof.
   exact (VLSM_projection_initial_state VLSM_embedding_is_projection).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_weaken
   : VLSM_weak_embedding X Y label_project state_project.
@@ -489,7 +489,7 @@ Lemma VLSM_embedding_valid_state :
     valid_state_prop Y (state_project s).
 Proof.
   exact (VLSM_weak_embedding_valid_state VLSM_embedding_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_finite_valid_trace_from_to :
   forall (s f : state X) (tr : list (transition_item X)),
@@ -498,14 +498,14 @@ Lemma VLSM_embedding_finite_valid_trace_from_to :
       (VLSM_embedding_finite_trace_project Hsimul tr).
 Proof.
   exact (VLSM_weak_embedding_finite_valid_trace_from_to VLSM_embedding_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_in_futures :
   forall (s1 s2 : state X),
     in_futures X s1 s2 -> in_futures Y (state_project s1) (state_project s2).
 Proof.
   exact (VLSM_weak_embedding_in_futures VLSM_embedding_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_input_valid_transition :
   forall l s im s' om,
@@ -513,7 +513,7 @@ Lemma VLSM_embedding_input_valid_transition :
     input_valid_transition Y (label_project l) (state_project s, im) (state_project s', om).
 Proof.
   exact (VLSM_weak_embedding_input_valid_transition VLSM_embedding_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_input_valid :
   forall l s im,
@@ -521,21 +521,21 @@ Lemma VLSM_embedding_input_valid :
     input_valid Y (label_project l) (state_project s, im).
 Proof.
   exact (VLSM_weak_embedding_input_valid VLSM_embedding_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_can_produce :
   forall (s : state X) (om : option message),
     option_can_produce X s om -> option_can_produce Y (state_project s) om.
 Proof.
   exact (VLSM_weak_embedding_can_produce VLSM_embedding_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_can_emit :
   forall (m : message),
     can_emit X m -> can_emit Y m.
 Proof.
   exact (VLSM_weak_embedding_can_emit VLSM_embedding_weaken).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_valid_message :
   strong_embedding_initial_message_preservation X Y ->
@@ -544,7 +544,7 @@ Lemma VLSM_embedding_valid_message :
 Proof.
   exact (fun Hinitial_valid_message =>
     VLSM_weak_embedding_valid_message VLSM_embedding_weaken Hinitial_valid_message).
-Defined.
+Qed.
 
 Definition VLSM_embedding_trace_project (t : Trace X) : Trace Y :=
   match t with
@@ -560,7 +560,7 @@ Lemma VLSM_embedding_infinite_valid_trace_from :
       (VLSM_embedding_infinite_trace_project Hsimul ls).
 Proof.
   exact (fun s ls => VLSM_weak_embedding_infinite_valid_trace_from VLSM_embedding_weaken s ls).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_infinite_valid_trace
   s ls
