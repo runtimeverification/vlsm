@@ -552,7 +552,7 @@ Lemma has_been_sent_no_inits `{HasBeenSentCapability} :
     initial_state_prop vlsm s -> forall m : message, ~ has_been_sent s m.
 Proof.
   exact (oracle_no_inits _ _ (has_been_sent_stepwise_props)).
-Defined.
+Qed.
 
 Lemma has_been_sent_step_update `{HasBeenSentCapability} :
   forall (l : label _) (s : state _) (im : option message) (s' : state _) (om : option message),
@@ -561,7 +561,7 @@ Lemma has_been_sent_step_update `{HasBeenSentCapability} :
     has_been_sent s' msg <-> (om = Some msg \/ has_been_sent s msg).
 Proof.
   exact (oracle_step_update _ _ has_been_sent_stepwise_props).
-Defined.
+Qed.
 
 Definition has_been_sent_tracewise_prop
     (has_been_sent_pred : state_message_oracle) : Prop :=
@@ -729,7 +729,7 @@ Lemma has_been_received_no_inits `{HasBeenReceivedCapability} :
     initial_state_prop vlsm s -> forall m : message, ~ has_been_received s m.
 Proof.
   exact (oracle_no_inits _ _ has_been_received_stepwise_props).
-Defined.
+Qed.
 
 Lemma has_been_received_step_update `{HasBeenReceivedCapability} :
   forall [l : label _] [s : state _] [im : option message] [s' : state _] [om : option message],
@@ -738,7 +738,7 @@ Lemma has_been_received_step_update `{HasBeenReceivedCapability} :
     has_been_received s' msg <-> (im = Some msg \/ has_been_received s msg).
 Proof.
   exact (oracle_step_update _ _ has_been_received_stepwise_props).
-Defined.
+Qed.
 
 Definition has_been_received_tracewise_prop
   (has_been_received_pred : state_message_oracle) : Prop :=
@@ -1174,7 +1174,7 @@ Lemma has_been_directly_observed_no_inits `[HasBeenDirectlyObservedCapability me
     ~ has_been_directly_observed vlsm s m.
 Proof.
   exact (oracle_no_inits (has_been_directly_observed_stepwise_props vlsm)).
-Defined.
+Qed.
 
 Lemma has_been_directly_observed_step_update `{HasBeenDirectlyObservedCapability message vlsm} :
   forall l s im s' om,
@@ -1184,7 +1184,7 @@ Lemma has_been_directly_observed_step_update `{HasBeenDirectlyObservedCapability
     (im = Some msg \/ om = Some msg) \/ has_been_directly_observed vlsm s msg.
 Proof.
   exact (oracle_step_update (has_been_directly_observed_stepwise_props vlsm)).
-Defined.
+Qed.
 
 Lemma proper_directly_observed
   {message} (vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :

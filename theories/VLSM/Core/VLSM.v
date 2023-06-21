@@ -766,7 +766,7 @@ Lemma can_produce_valid
   : valid_state_message_prop s (Some m).
 Proof.
   exact (option_can_produce_valid s (Some m) Hm).
-Defined.
+Qed.
 
 Lemma option_can_produce_valid_iff
   (s : state X)
@@ -790,7 +790,7 @@ Lemma can_produce_valid_iff
     can_produce s m \/ initial_state_prop X s /\ initial_message_prop X m.
 Proof.
   exact (option_can_produce_valid_iff s (Some m)).
-Defined.
+Qed.
 
 Definition can_emit
   (m : message)

@@ -155,7 +155,7 @@ Qed.
 Lemma app_cons {A} :
   forall (a : A) (l : list A),
     [a] ++ l = a :: l.
-Proof. done. Defined.
+Proof. done. Qed.
 
 Lemma append_nodup_left {A} :
   forall (l1 l2 : list A), List.NoDup (l1 ++ l2) -> List.NoDup l1.

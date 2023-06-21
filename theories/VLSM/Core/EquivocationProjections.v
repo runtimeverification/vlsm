@@ -240,7 +240,7 @@ Lemma VLSM_embedding_has_been_sent
     forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m.
 Proof.
   exact (VLSM_weak_embedding_has_been_sent (VLSM_embedding_weaken Hsimul)).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_has_been_received
   `{HasBeenReceivedCapability message X}
@@ -249,7 +249,7 @@ Lemma VLSM_embedding_has_been_received
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m.
 Proof.
   exact (VLSM_weak_embedding_has_been_received (VLSM_embedding_weaken Hsimul)).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_has_been_directly_observed
   `{HasBeenSentCapability message X}
@@ -260,7 +260,7 @@ Lemma VLSM_embedding_has_been_directly_observed
     forall m, has_been_directly_observed X s m -> has_been_directly_observed Y (state_project s) m.
 Proof.
   exact (VLSM_weak_embedding_has_been_directly_observed (VLSM_embedding_weaken Hsimul)).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_has_been_sent_reflect
   `{HasBeenSentCapability message X}
@@ -269,7 +269,7 @@ Lemma VLSM_embedding_has_been_sent_reflect
     forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m.
 Proof.
   exact (VLSM_projection_has_been_sent_reflect  (VLSM_embedding_is_projection Hsimul)).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_has_been_received_reflect
   `{HasBeenReceivedCapability message X}
@@ -278,7 +278,7 @@ Lemma VLSM_embedding_has_been_received_reflect
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m.
 Proof.
   exact (VLSM_projection_has_been_received_reflect  (VLSM_embedding_is_projection Hsimul)).
-Defined.
+Qed.
 
 Lemma VLSM_embedding_has_been_directly_observed_reflect
   `{HasBeenSentCapability message X}
@@ -289,7 +289,7 @@ Lemma VLSM_embedding_has_been_directly_observed_reflect
     forall m, has_been_directly_observed Y (state_project s) m -> has_been_directly_observed X s m.
 Proof.
   exact (VLSM_projection_has_been_directly_observed_reflect (VLSM_embedding_is_projection Hsimul)).
-Defined.
+Qed.
 
 End sec_embedding_oracle.
 

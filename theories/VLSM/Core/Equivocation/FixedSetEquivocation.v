@@ -317,7 +317,7 @@ Qed.
 Lemma StrongFixed_incl_Free : VLSM_incl StrongFixed Free.
 Proof.
   exact (constraint_free_incl _ _).
-Defined.
+Qed.
 
 Lemma StrongFixed_incl_Preloaded : VLSM_incl StrongFixed (pre_loaded_with_all_messages_vlsm Free).
 Proof.

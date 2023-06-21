@@ -117,7 +117,7 @@ Lemma fixed_byzantine_IM_sender_safety :
 Proof.
   exact (channel_authentication_sender_safety fixed_byzantine_IM A sender
     fixed_byzantine_IM_preserves_channel_authentication).
-Defined.
+Qed.
 
 Definition message_as_byzantine_label
   (m : message)
