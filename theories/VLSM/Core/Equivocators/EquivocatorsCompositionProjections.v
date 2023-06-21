@@ -1346,30 +1346,35 @@ Proof.
     by rewrite decide_True, Hpr_tr; subst.
 Qed.
 
-Definition destruct_equivocators_partial_trace_project
+Lemma destruct_equivocators_partial_trace_project
   {final_descriptors : equivocator_descriptors}
   (X := free_composite_vlsm equivocator_IM)
   (partial_trace_project := equivocators_partial_trace_project final_descriptors)
   {sX trX sY trY}
-  (Hpr_tr : partial_trace_project (sX, trX) = Some (sY, trY))
-  : not_equivocating_equivocator_descriptors IM final_descriptors (finite_trace_last sX trX) /\
-    exists initial_descriptors,
-      equivocators_trace_project final_descriptors trX = Some (trY, initial_descriptors) /\
-      equivocators_state_project initial_descriptors sX = sY
-  := proj1 (equivocators_partial_trace_project_characterization
-      final_descriptors sX trX sY trY) Hpr_tr.
+  (Hpr_tr : partial_trace_project (sX, trX) = Some (sY, trY)) :
+    not_equivocating_equivocator_descriptors IM final_descriptors (finite_trace_last sX trX) /\
+      exists initial_descriptors,
+        equivocators_trace_project final_descriptors trX = Some (trY, initial_descriptors) /\
+        equivocators_state_project initial_descriptors sX = sY.
+Proof.
+  exact (proj1 (equivocators_partial_trace_project_characterization
+    final_descriptors sX trX sY trY) Hpr_tr).
+Qed.
 
-Definition construct_equivocators_partial_trace_project
+Lemma construct_equivocators_partial_trace_project
   {final_descriptors : equivocator_descriptors}
   (X := free_composite_vlsm equivocator_IM)
   (partial_trace_project := equivocators_partial_trace_project final_descriptors)
   {sX trX sY trY}
-  (H : not_equivocating_equivocator_descriptors IM final_descriptors (finite_trace_last sX trX) /\
+  (Hed : not_equivocating_equivocator_descriptors IM final_descriptors (finite_trace_last sX trX) /\
     exists initial_descriptors,
       equivocators_trace_project final_descriptors trX = Some (trY, initial_descriptors) /\
-      equivocators_state_project initial_descriptors sX = sY)
-  : partial_trace_project (sX, trX) = Some (sY, trY)
-  := proj2 (equivocators_partial_trace_project_characterization final_descriptors sX trX sY trY) H.
+      equivocators_state_project initial_descriptors sX = sY) :
+    partial_trace_project (sX, trX) = Some (sY, trY).
+Proof.
+  exact (proj2 (equivocators_partial_trace_project_characterization
+    final_descriptors sX trX sY trY) Hed).
+Qed.
 
 Lemma equivocators_partial_trace_project_extends_left
   (final_descriptors : equivocator_descriptors)

@@ -233,51 +233,63 @@ Context
       (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
-Definition VLSM_embedding_has_been_sent
+Lemma VLSM_embedding_has_been_sent
   `{HasBeenSentCapability message X}
   `{HasBeenSentCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m
-  := VLSM_weak_embedding_has_been_sent (VLSM_embedding_weaken Hsimul).
+    forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m.
+Proof.
+  exact (VLSM_weak_embedding_has_been_sent (VLSM_embedding_weaken Hsimul)).
+Qed.
 
-Definition VLSM_embedding_has_been_received
+Lemma VLSM_embedding_has_been_received
   `{HasBeenReceivedCapability message X}
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_received X s m -> has_been_received Y (state_project s) m
-  := VLSM_weak_embedding_has_been_received (VLSM_embedding_weaken Hsimul).
+    forall m, has_been_received X s m -> has_been_received Y (state_project s) m.
+Proof.
+  exact (VLSM_weak_embedding_has_been_received (VLSM_embedding_weaken Hsimul)).
+Qed.
 
-Definition VLSM_embedding_has_been_directly_observed
-  `{HasBeenSentCapability message X}
-  `{HasBeenReceivedCapability message X}
-  `{HasBeenSentCapability message Y}
-  `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_directly_observed X s m -> has_been_directly_observed Y (state_project s) m
-  := VLSM_weak_embedding_has_been_directly_observed (VLSM_embedding_weaken Hsimul).
-
-Definition VLSM_embedding_has_been_sent_reflect
-  `{HasBeenSentCapability message X}
-  `{HasBeenSentCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m
-  := VLSM_projection_has_been_sent_reflect  (VLSM_embedding_is_projection Hsimul).
-
-Definition VLSM_embedding_has_been_received_reflect
-  `{HasBeenReceivedCapability message X}
-  `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_received Y (state_project s) m -> has_been_received X s m
-  := VLSM_projection_has_been_received_reflect  (VLSM_embedding_is_projection Hsimul).
-
-Definition VLSM_embedding_has_been_directly_observed_reflect
+Lemma VLSM_embedding_has_been_directly_observed
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
   : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-    forall m, has_been_directly_observed Y (state_project s) m -> has_been_directly_observed X s m
-  := VLSM_projection_has_been_directly_observed_reflect  (VLSM_embedding_is_projection Hsimul).
+    forall m, has_been_directly_observed X s m -> has_been_directly_observed Y (state_project s) m.
+Proof.
+  exact (VLSM_weak_embedding_has_been_directly_observed (VLSM_embedding_weaken Hsimul)).
+Qed.
+
+Lemma VLSM_embedding_has_been_sent_reflect
+  `{HasBeenSentCapability message X}
+  `{HasBeenSentCapability message Y}
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+    forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m.
+Proof.
+  exact (VLSM_projection_has_been_sent_reflect  (VLSM_embedding_is_projection Hsimul)).
+Qed.
+
+Lemma VLSM_embedding_has_been_received_reflect
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenReceivedCapability message Y}
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+    forall m, has_been_received Y (state_project s) m -> has_been_received X s m.
+Proof.
+  exact (VLSM_projection_has_been_received_reflect  (VLSM_embedding_is_projection Hsimul)).
+Qed.
+
+Lemma VLSM_embedding_has_been_directly_observed_reflect
+  `{HasBeenSentCapability message X}
+  `{HasBeenReceivedCapability message X}
+  `{HasBeenSentCapability message Y}
+  `{HasBeenReceivedCapability message Y}
+  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+    forall m, has_been_directly_observed Y (state_project s) m -> has_been_directly_observed X s m.
+Proof.
+  exact (VLSM_projection_has_been_directly_observed_reflect (VLSM_embedding_is_projection Hsimul)).
+Qed.
 
 End sec_embedding_oracle.
 
