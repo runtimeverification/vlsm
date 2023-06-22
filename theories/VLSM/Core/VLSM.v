@@ -519,6 +519,123 @@ Proof.
   - by apply option_valid_message_None.
 Qed.
 
+(** 
+  We also include the more intuitive, mutually recursive definition
+  for valid states and messages.
+  This definition has three cases for [valid_message_mrec]:
+  - messages equal to None are valid
+  - if <<m>> is an [option]al <<message>> with the [initial_message_prop]erty,
+    then it constitutes a valid message ([valid_None_message_mrec]);
+  - for all [state]s <<st>>, [option]al <<message>>s <<om>>, and [label] <<l>>:
+    - if <<om>> is a valid message ([valid_message_mrec]);
+    - and if <<st>> is a valid state ([valid_state_mrec]);
+    - and if <<l>> [valid] <<l (st, om)>>;
+    - [transition] <<l (st, om)>> emmits a message which has the
+      [valid_message_mrec] property.
+  There are also two cases for [valid_state_mrec]:
+  - if <<s>> is a [state] with the [initial_state_prop]erty, then it has the
+    [valid_state_mrec];
+  - for all [state]s <<st>>, [option]al <<message>>s <<om>>, and [label] <<l>>:
+    - if <<st>> is a valid state ([valid_state_mrec]);
+    - and if <<om>> is a valid message ([valid_message_mrec]);
+    - and if <<l>> [valid] <<l (st, om)>>;
+    - then the state resulting from [transition] <<l (st, om)>> has the
+      [valid_state_mrec] property.
+*)
+
+Inductive valid_message_mrec : option message -> Prop :=
+| valid_None_message_mrec : valid_message_mrec None
+| valid_initial_message_mrec : forall m, initial_message_prop X m -> valid_message_mrec (Some m)
+| valid_generated_message_mrec : forall {l : label X} {om om' : option message} {st st' : state X},
+    valid X l (st, om) -> valid_state_mrec st -> valid_message_mrec om ->
+      (st', om') = (transition X l (st, om)) -> valid_message_mrec om'
+with valid_state_mrec : state X -> Prop :=
+| valid_initial_state_mrec : forall s, initial_state_prop X s -> valid_state_mrec s
+| valid_generated_state_mrec : forall {l : label X} {om om' : option message} {st st' : state X},
+    valid X l (st, om) -> valid_state_mrec st -> valid_message_mrec om ->
+      (st', om') = (transition X l (st, om)) -> valid_state_mrec st'.
+
+(**
+  Reasoning about this mutually recursive definition is facilitated
+  by a custom induction scheme.
+*)
+
+Scheme valid_message_ind := Induction for valid_message_mrec Sort Prop
+with valid_state_ind := Induction for valid_state_mrec Sort Prop.
+
+(**
+  To guarantee the equivalence between [valid_message_mrec] coupled with
+  [valid_state_mrec] and [valid_state_message_prop] we prove that the
+  following lemmas hold:
+*)
+
+Lemma valid_state_message_prop_impl_valid :
+  forall (s : state X) (om : option message),
+  valid_state_message_prop s om -> valid_message_mrec om /\ valid_state_mrec s.
+Proof.
+  induction 1; split.
+  - by destruct om; [apply valid_initial_message_mrec | constructor].
+  - by apply valid_initial_state_mrec.
+  - replace om' with ((transition X l0 (s, om)).2)
+      by (cbn in Ht; rewrite Ht; done).
+    eapply valid_generated_message_mrec; [done | ..].
+    + by apply IHvalid_state_message_prop1.
+    + by apply IHvalid_state_message_prop2.
+    + by rewrite Ht.
+  - replace s' with ((transition X l0 (s, om)).1)
+      by (cbn in Ht; rewrite Ht; done).
+    eapply valid_generated_state_mrec; [done | ..].
+    + by apply IHvalid_state_message_prop1.
+    + by apply IHvalid_state_message_prop2.
+    + by rewrite Ht.
+Qed.
+
+Lemma valid_impl_valid_state_prop :
+  forall (s : state X),
+    valid_state_mrec s -> valid_state_prop s.
+Proof.
+  apply valid_state_ind with (P := fun m _ => option_valid_message_prop m).
+  - by apply option_valid_message_None.
+  - by apply initial_message_is_valid.
+  - intros * ? ? [] ? [] Htr.
+    by eexists; eapply valid_generated_state_message; cycle 1.
+  - by intros; apply initial_state_is_valid.
+  - intros * ? ? [] ? [] Htr.
+    by eexists; eapply valid_generated_state_message; cycle 1.
+Qed.
+
+Lemma valid_impl_valid_message_prop :
+  forall (om : option message),
+    valid_message_mrec om -> option_valid_message_prop om.
+Proof.
+  apply valid_message_ind with (P0 := fun s _ => valid_state_prop s).
+  - by apply option_valid_message_None.
+  - by apply initial_message_is_valid.
+  - intros * ? ? [] ? [] Htr.
+    by eexists; eapply valid_generated_state_message; cycle 1.
+  - by intros; apply initial_state_is_valid.
+  - intros * ? ? [] ? [] Htr.
+    by eexists; eapply valid_generated_state_message; cycle 1.
+Qed.
+
+Lemma valid_iff_valid_message_prop :
+  forall (om : option message),
+    valid_message_mrec om <-> option_valid_message_prop om.
+Proof.
+  split.
+  - by apply valid_impl_valid_message_prop.
+  - by intros []; eapply valid_state_message_prop_impl_valid.
+Qed.
+
+Lemma valid_iff_valid_state_prop :
+  forall (s : state X),
+    valid_state_mrec s <-> valid_state_prop s.
+Proof.
+  split.
+  - by apply valid_impl_valid_state_prop.
+  - by intros []; eapply valid_state_message_prop_impl_valid.
+Qed.
+
 (** *** Input validity and input valid transitions
 
   To specify that a particular (input of a) transition can actually be
