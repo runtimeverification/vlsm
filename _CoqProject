@@ -48,6 +48,7 @@ theories/VLSM/Core/MessageDependencies.v
 theories/VLSM/Core/AnnotatedVLSM.v
 theories/VLSM/Core/ByzantineTraces.v
 theories/VLSM/Core/TraceableVLSM.v
+theories/VLSM/Core/HistoryVLSM.v
 
 theories/VLSM/Core/Equivocation/FixedSetEquivocation.v
 theories/VLSM/Core/Equivocation/MsgDepFixedSetEquivocation.v

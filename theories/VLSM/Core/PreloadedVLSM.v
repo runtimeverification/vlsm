@@ -193,7 +193,7 @@ Qed.
 
 End sec_pre_loaded_with_all_messages_vlsm.
 
-Section sec_pre_loaded_history_vlsm.
+Section sec_pre_loaded_valid_transition.
 
 Context
   `(X : VLSM message)
@@ -211,46 +211,7 @@ Proof.
   by intros; split; intros []; econstructor; apply ValidTransition_preloaded_iff.
 Qed.
 
-#[export] Instance preloaded_history_vlsm
-  `{HistoryVLSM message X} : HistoryVLSM R.
-Proof.
-  split; intros.
-  - rewrite <- ValidTransitionNext_preloaded_iff.
-    by apply not_ValidTransitionNext_initial.
-  - by eapply (@unique_transition_to_state _ X);
-      [| apply ValidTransition_preloaded_iff..].
-Qed.
-
-Lemma history_unique_trace_to_reachable
-  `{HistoryVLSM message X} :
-  forall is s tr, finite_valid_trace_init_to R is s tr ->
-  forall is' tr', finite_valid_trace_init_to R is' s tr' ->
-    is' = is /\ tr' = tr.
-Proof.
-  intros is s tr Htr; induction Htr using finite_valid_trace_init_to_rev_ind;
-    intros is' tr' [Htr' His'].
-  - destruct_list_last tr' tr'' item Heqtr'; [by inversion Htr' | subst].
-    apply finite_valid_trace_from_to_app_split in Htr' as [_ Hitem].
-    inversion Hitem; inversion Htl; subst.
-    destruct Ht as [(_ & _ & Hv) Ht].
-    exfalso; clear His'; eapply @not_ValidTransitionNext_initial;
-      [| done | by esplit].
-    by typeclasses eauto.
-  - destruct_list_last tr' tr'' item Heqtr'; subst tr'.
-    + inversion Htr'; subst; clear Htr'.
-      destruct Ht as [(_ & _ & Hv) Ht].
-      exfalso; eapply @not_ValidTransitionNext_initial; [| done | by esplit].
-      by typeclasses eauto.
-    + apply finite_valid_trace_from_to_app_split in Htr' as [Htr' Hitem].
-      inversion Hitem; inversion Htl; subst; clear Hitem Htl.
-      apply input_valid_transition_forget_input in Ht, Ht0.
-      specialize (unique_transition_to_state Ht Ht0) as Heqs.
-      destruct_and! Heqs; subst.
-      specialize (IHHtr _ _  (conj Htr' His')).
-      by destruct_and! IHHtr; subst.
-Qed.
-
-End sec_pre_loaded_history_vlsm.
+End sec_pre_loaded_valid_transition.
 
 Section sec_pre_loaded_vlsm_total_projection.
 

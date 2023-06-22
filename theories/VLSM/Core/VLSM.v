@@ -2586,17 +2586,3 @@ Lemma input_valid_transition_forget_input :
 Proof. by firstorder. Qed.
 
 End sec_valid_transition_props.
-
-Class HistoryVLSM `(X : VLSM message) : Prop :=
-{
-  not_ValidTransitionNext_initial :
-    forall s2, initial_state_prop X s2 ->
-    forall s1, ~ ValidTransitionNext X s1 s2;
-  unique_transition_to_state :
-    forall [s : state X],
-    forall [l1 s1 iom1 oom1], ValidTransition X l1 s1 iom1 s oom1 ->
-    forall [l2 s2 iom2 oom2], ValidTransition X l2 s2 iom2 s oom2 ->
-    l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2;
-}.
-
-#[global] Hint Mode HistoryVLSM - ! : typeclass_instances.
