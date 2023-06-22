@@ -1,0 +1,254 @@
+From VLSM.Lib Require Import Itauto.
+From stdpp Require Import prelude.
+From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM Require Import VLSM.
+
+(** * Pre-loaded VLSMs
+
+  Given a VLSM <<X>>, we introduce the _pre-loaded_ version of it, which is
+  identical to <<X>>, except that all messages are initial. The high degree
+  of freedom allowed to the pre-loaded version lets it experience everything
+  experienced by <<X>> but also other kinds of behavior, including _Byzantine_
+  behavior, which makes it a useful concept in Byzantine fault tolerance analysis.
+*)
+
+Definition VLSMMachine_pre_loaded_with_messages
+  {message : Type} {T : VLSMType message} (M : VLSMMachine T)
+  (initial : message -> Prop)
+  : VLSMMachine T :=
+{|
+  initial_state_prop := @initial_state_prop _ _ M;
+  initial_message_prop := fun m => @initial_message_prop _ _ M  m \/ initial m;
+  s0 := @s0 _ _ M;
+  transition := @transition _ _ M;
+  valid := @valid _ _ M;
+|}.
+
+Definition pre_loaded_vlsm {message : Type} (X : VLSM message) (initial : message -> Prop)
+  : VLSM message :=
+    mk_vlsm (VLSMMachine_pre_loaded_with_messages X initial).
+
+Section sec_pre_loaded_with_all_messages_vlsm.
+
+Context
+  {message : Type}
+  (X : VLSM message)
+  .
+
+Definition pre_loaded_with_all_messages_vlsm : VLSM message :=
+  pre_loaded_vlsm X (fun _ => True).
+
+(**
+  A message which can be emitted during a protocol run of the
+  [pre_loaded_with_all_messages_vlsm] is called a [byzantine_message],
+  because as shown by [byzantine_pre_loaded_with_all_messages] and
+  [pre_loaded_with_all_messages_alt_eq], byzantine traces for a [VLSM]
+  are precisely the valid traces of the [pre_loaded_with_all_messages_vlsm],
+  hence a byzantine message is any message which a byzantine trace [can_emit].
+*)
+
+Definition byzantine_message_prop
+  (m : message)
+  : Prop
+  := can_emit pre_loaded_with_all_messages_vlsm m.
+
+Definition byzantine_message : Type
+  := sig byzantine_message_prop.
+
+Lemma pre_loaded_with_all_messages_message_valid_initial_state_message
+  (om : option message)
+  : valid_state_message_prop pre_loaded_with_all_messages_vlsm (proj1_sig (vs0 X)) om.
+Proof.
+  by apply valid_initial_state_message; [apply proj2_sig | destruct om]; cbn; [right |].
+Qed.
+
+Lemma pre_loaded_with_all_messages_valid_state_message_preservation
+  (s : state X)
+  (om : option message)
+  (Hps : valid_state_message_prop X s om)
+  : valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
+Proof.
+  induction Hps.
+  - apply (valid_initial_state_message pre_loaded_with_all_messages_vlsm); cbn; [done |].
+    by destruct om; cbn; [right |].
+  - by apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l.
+Qed.
+
+Lemma pre_loaded_with_all_messages_valid_state_prop
+  (s : state X)
+  (Hps : valid_state_prop X s)
+  : valid_state_prop pre_loaded_with_all_messages_vlsm s.
+Proof.
+  unfold valid_state_prop in *.
+  destruct Hps as [om Hprs].
+  exists om.
+  apply pre_loaded_with_all_messages_valid_state_message_preservation.
+  by itauto.
+Qed.
+
+Lemma any_message_is_valid_in_preloaded (om : option message) :
+  option_valid_message_prop pre_loaded_with_all_messages_vlsm om.
+Proof.
+  eexists.
+  by apply pre_loaded_with_all_messages_message_valid_initial_state_message.
+Qed.
+
+Inductive preloaded_valid_state_prop : state X -> Prop :=
+| preloaded_valid_initial_state
+    (s : state X)
+    (Hs : initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm) s) :
+       preloaded_valid_state_prop s
+| preloaded_protocol_generated
+    (l : label X)
+    (s : state X)
+    (Hps : preloaded_valid_state_prop s)
+    (om : option message)
+    (Hv : valid (VLSMMachine := pre_loaded_with_all_messages_vlsm) l (s, om))
+    s' om'
+    (Ht : transition (VLSMMachine := pre_loaded_with_all_messages_vlsm) l (s, om) = (s', om'))
+  : preloaded_valid_state_prop s'.
+
+Lemma preloaded_valid_state_prop_iff (s : state X) :
+  valid_state_prop pre_loaded_with_all_messages_vlsm s
+  <-> preloaded_valid_state_prop s.
+Proof.
+  split.
+  - intros [om Hvalid].
+    induction Hvalid.
+    + by apply preloaded_valid_initial_state.
+    + by apply preloaded_protocol_generated with l s om om'.
+  - induction 1.
+    + by exists None; apply valid_initial_state_message.
+    + exists om'. destruct IHpreloaded_valid_state_prop as [_om Hs].
+      specialize (any_message_is_valid_in_preloaded om) as [_s Hom].
+      by apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l.
+Qed.
+
+Lemma preloaded_weaken_valid_state_message_prop s om :
+  valid_state_message_prop X s om ->
+  valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
+Proof.
+  induction 1.
+  - refine (valid_initial_state_message pre_loaded_with_all_messages_vlsm s Hs om _).
+    by destruct om; cbn; [right |].
+  - by eapply valid_generated_state_message; cycle 2; eauto.
+Qed.
+
+Lemma preloaded_weaken_input_valid_transition
+      l s om s' om' :
+  input_valid_transition X l (s, om) (s', om') ->
+  input_valid_transition pre_loaded_with_all_messages_vlsm l (s, om) (s', om').
+Proof.
+  unfold input_valid_transition.
+  intros [[[_om valid_s] [_ Hvalid]] Htrans].
+  repeat split; [| | done..].
+  - by exists _om; apply preloaded_weaken_valid_state_message_prop.
+  - by apply any_message_is_valid_in_preloaded.
+Qed.
+
+Lemma preloaded_weaken_valid_trace_from s tr
+  : finite_valid_trace_from X s tr ->
+    finite_valid_trace_from pre_loaded_with_all_messages_vlsm s tr.
+Proof.
+  intros H. induction H using finite_valid_trace_from_rev_ind.
+  - apply (finite_valid_trace_from_empty pre_loaded_with_all_messages_vlsm).
+    destruct H as [om H]. exists om.
+    by revert H; apply preloaded_weaken_valid_state_message_prop.
+  - apply (finite_valid_trace_from_app_iff pre_loaded_with_all_messages_vlsm).
+    split; [done |].
+    apply (finite_valid_trace_singleton pre_loaded_with_all_messages_vlsm).
+    by revert Hx; apply preloaded_weaken_input_valid_transition.
+Qed.
+
+Lemma pre_traces_with_valid_inputs_are_valid is s tr
+  (Htr : finite_valid_trace_init_to pre_loaded_with_all_messages_vlsm is s tr)
+  (Hobs : forall m,
+    trace_has_message (field_selector input) m tr ->
+    valid_message_prop X m)
+  : finite_valid_trace_init_to X is s tr.
+Proof.
+  revert s Htr Hobs.
+  induction tr using rev_ind; intros; split
+  ; [| by apply Htr | | by apply Htr]
+  ; destruct Htr as [Htr Hinit].
+  - inversion Htr; subst.
+    by apply (finite_valid_trace_from_to_empty X), initial_state_is_valid.
+  - apply finite_valid_trace_from_to_last in Htr as Hlst.
+    apply finite_valid_trace_from_to_app_split in Htr.
+    destruct Htr as [Htr Hx].
+    specialize (IHtr _ (conj Htr Hinit)).
+    spec IHtr; [by intros; apply Hobs, trace_has_message_prefix |].
+    destruct IHtr as [IHtr _];
+    apply finite_valid_trace_from_to_forget_last in IHtr.
+    apply finite_valid_trace_from_add_last; [| done].
+    inversion Hx; subst f tl s'.
+    apply (extend_right_finite_trace_from X); [done |].
+    destruct Ht as [[_ [_ Hv]] Ht].
+    apply finite_valid_trace_last_pstate in IHtr as Hplst.
+    repeat split. 1, 3-4: done.
+    destruct iom as [m |]; [| apply option_valid_message_None].
+    apply option_valid_message_Some, Hobs.
+    red; rewrite Exists_app, Exists_cons.
+    by subst; cbn; itauto.
+Qed.
+
+End sec_pre_loaded_with_all_messages_vlsm.
+
+Section sec_pre_loaded_history_vlsm.
+
+Context
+  `(X : VLSM message)
+  (R := pre_loaded_with_all_messages_vlsm X)
+  .
+
+Lemma ValidTransition_preloaded_iff :
+  forall l s1 iom s2 oom,
+    ValidTransition X l s1 iom s2 oom <-> ValidTransition R l s1 iom s2 oom.
+Proof. by firstorder. Qed.
+
+Lemma ValidTransitionNext_preloaded_iff :
+  forall s1 s2, ValidTransitionNext X s1 s2 <-> ValidTransitionNext R s1 s2.
+Proof.
+  by intros; split; intros []; econstructor; apply ValidTransition_preloaded_iff.
+Qed.
+
+#[export] Instance preloaded_history_vlsm
+  `{HistoryVLSM message X} : HistoryVLSM R.
+Proof.
+  split; intros.
+  - rewrite <- ValidTransitionNext_preloaded_iff.
+    by apply not_ValidTransitionNext_initial.
+  - by eapply (@unique_transition_to_state _ X);
+      [| apply ValidTransition_preloaded_iff..].
+Qed.
+
+Lemma history_unique_trace_to_reachable
+  `{HistoryVLSM message X} :
+  forall is s tr, finite_valid_trace_init_to R is s tr ->
+  forall is' tr', finite_valid_trace_init_to R is' s tr' ->
+    is' = is /\ tr' = tr.
+Proof.
+  intros is s tr Htr; induction Htr using finite_valid_trace_init_to_rev_ind;
+    intros is' tr' [Htr' His'].
+  - destruct_list_last tr' tr'' item Heqtr'; [by inversion Htr' | subst].
+    apply finite_valid_trace_from_to_app_split in Htr' as [_ Hitem].
+    inversion Hitem; inversion Htl; subst.
+    destruct Ht as [(_ & _ & Hv) Ht].
+    exfalso; clear His'; eapply @not_ValidTransitionNext_initial;
+      [| done | by esplit].
+    by typeclasses eauto.
+  - destruct_list_last tr' tr'' item Heqtr'; subst tr'.
+    + inversion Htr'; subst; clear Htr'.
+      destruct Ht as [(_ & _ & Hv) Ht].
+      exfalso; eapply @not_ValidTransitionNext_initial; [| done | by esplit].
+      by typeclasses eauto.
+    + apply finite_valid_trace_from_to_app_split in Htr' as [Htr' Hitem].
+      inversion Hitem; inversion Htl; subst; clear Hitem Htl.
+      apply input_valid_transition_forget_input in Ht, Ht0.
+      specialize (unique_transition_to_state Ht Ht0) as Heqs.
+      destruct_and! Heqs; subst.
+      specialize (IHHtr _ _  (conj Htr' His')).
+      by destruct_and! IHHtr; subst.
+Qed.
+
+End sec_pre_loaded_history_vlsm.

@@ -26,6 +26,7 @@ theories/VLSM/Lib/TraceClassicalProperties.v
 theories/VLSM/Lib/Measurable.v
 
 theories/VLSM/Core/VLSM.v
+theories/VLSM/Core/PreloadedVLSM.v
 theories/VLSM/Core/Plans.v
 theories/VLSM/Core/VLSMProjections/VLSMPartialProjection.v
 theories/VLSM/Core/VLSMProjections/VLSMStutteringEmbedding.v
