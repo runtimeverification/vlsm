@@ -256,13 +256,22 @@ End sec_pre_loaded_history_vlsm.
 
 Section sec_pre_loaded_vlsm_total_projection.
 
-Lemma basic_VLSM_projection_type_preloaded
+Context
   {message : Type}
   (X Y : VLSM message)
+  (P Q : message -> Prop)
   (label_project : label X -> option (label Y))
   (state_project : state X -> state Y)
+  (Hvalid : strong_projection_valid_preservation X Y label_project state_project)
+  (Htransition_Some : strong_projection_transition_preservation_Some X Y label_project state_project)
   (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
-  : VLSM_projection_type (pre_loaded_with_all_messages_vlsm X) Y label_project state_project.
+  (Hstate : strong_projection_initial_state_preservation X Y state_project)
+  (Hmessage : weak_projection_valid_message_preservation
+                (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project)
+  .
+
+Lemma basic_VLSM_projection_type_preloaded :
+  VLSM_projection_type (pre_loaded_with_all_messages_vlsm X) Y label_project state_project.
 Proof.
   constructor.
   intros is tr Htr.
@@ -280,21 +289,12 @@ Proof.
   by rewrite Hx.
 Qed.
 
-Lemma basic_VLSM_projection_preloaded
-  {message : Type}
-  (X Y : VLSM message)
-  (label_project : label X -> option (label Y))
-  (state_project : state X -> state Y)
-  (Hvalid : strong_projection_valid_preservation X Y label_project state_project)
-  (Htransition_Some : strong_projection_transition_preservation_Some X Y label_project state_project)
-  (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
-  (Hstate : strong_projection_initial_state_preservation X Y state_project)
-  : VLSM_projection
-      (pre_loaded_with_all_messages_vlsm X)
-      (pre_loaded_with_all_messages_vlsm Y) label_project state_project.
+Lemma basic_VLSM_projection_preloaded :
+  VLSM_projection
+    (pre_loaded_with_all_messages_vlsm X)
+    (pre_loaded_with_all_messages_vlsm Y) label_project state_project.
 Proof.
-  specialize (basic_VLSM_projection_type_preloaded X Y label_project state_project Htransition_None)
-    as Htype.
+  specialize (basic_VLSM_projection_type_preloaded) as Htype.
   constructor; [done |].
   intros sX trX HtrX.
   split; [| by apply Hstate; apply HtrX].
@@ -321,14 +321,8 @@ Proof.
     + by apply (finite_valid_trace_from_empty (pre_loaded_with_all_messages_vlsm Y)).
 Qed.
 
-Lemma basic_VLSM_projection_type_preloaded_with
-  {message : Type}
-  (X Y : VLSM message)
-  (P Q : message -> Prop)
-  (label_project : label X -> option (label Y))
-  (state_project : state X -> state Y)
-  (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
-  : VLSM_projection_type (pre_loaded_vlsm X P) Y label_project state_project.
+Lemma basic_VLSM_projection_type_preloaded_with :
+  VLSM_projection_type (pre_loaded_vlsm X P) Y label_project state_project.
 Proof.
   constructor.
   intros is tr Htr.
@@ -346,22 +340,10 @@ Proof.
   by rewrite Hx.
 Qed.
 
-Lemma basic_VLSM_projection_preloaded_with
-  {message : Type}
-  (X Y : VLSM message)
-  (P Q : message -> Prop)
-  (label_project : label X -> option (label Y))
-  (state_project : state X -> state Y)
-  (Hvalid : strong_projection_valid_preservation X Y label_project state_project)
-  (Htransition_Some : strong_projection_transition_preservation_Some X Y label_project state_project)
-  (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
-  (Hstate : strong_projection_initial_state_preservation X Y state_project)
-  (Hmessage : weak_projection_valid_message_preservation
-                (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project)
-  : VLSM_projection (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project.
+Lemma basic_VLSM_projection_preloaded_with :
+  VLSM_projection (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project.
 Proof.
-  specialize (basic_VLSM_projection_type_preloaded_with X Y P Q
-    label_project state_project Htransition_None) as Htype.
+  specialize (basic_VLSM_projection_type_preloaded_with) as Htype.
   constructor; [done |].
   intros sX trX HtrX.
   split; [| by apply Hstate; apply HtrX].
@@ -392,16 +374,22 @@ End sec_pre_loaded_vlsm_total_projection.
 
 Section sec_pre_loaded_vlsm_embedding.
 
-Lemma basic_VLSM_embedding_preloaded
+Context
   {message : Type}
   (X Y : VLSM message)
+  (P Q : message -> Prop)
+  (PimpliesQ : forall m : message, P m -> Q m)
   (label_project : label X -> label Y)
   (state_project : state X -> state Y)
   (Hvalid : strong_embedding_valid_preservation X Y label_project state_project)
   (Htransition : strong_embedding_transition_preservation  X Y label_project state_project)
   (Hstate : strong_projection_initial_state_preservation X Y state_project)
-  : VLSM_embedding (pre_loaded_with_all_messages_vlsm X)
-      (pre_loaded_with_all_messages_vlsm Y) label_project state_project.
+  (Hmessage : strong_embedding_initial_message_preservation X Y)
+  .
+
+Lemma basic_VLSM_embedding_preloaded :
+  VLSM_embedding (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y)
+    label_project state_project.
 Proof.
   constructor.
   intros sX trX HtrX.
@@ -420,18 +408,8 @@ Proof.
     + by apply any_message_is_valid_in_preloaded.
 Qed.
 
-Lemma basic_VLSM_embedding_preloaded_with
-  {message : Type}
-  (X Y : VLSM message)
-  (P Q : message -> Prop)
-  (PimpliesQ : forall m : message, P m -> Q m)
-  (label_project : label X -> label Y)
-  (state_project : state X -> state Y)
-  (Hvalid : strong_embedding_valid_preservation X Y label_project state_project)
-  (Htransition : strong_embedding_transition_preservation  X Y label_project state_project)
-  (Hstate : strong_projection_initial_state_preservation X Y state_project)
-  (Hmessage : strong_embedding_initial_message_preservation X Y)
-  : VLSM_embedding (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project.
+Lemma basic_VLSM_embedding_preloaded_with :
+  VLSM_embedding (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project.
 Proof.
   constructor.
   intros sX trX HtrX.
@@ -492,8 +470,7 @@ Lemma basic_VLSM_incl_preloaded_with
   (Hmessage : strong_incl_initial_message_preservation MX MY)
   : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q).
 Proof.
-  by apply VLSM_incl_embedding_iff,
-           (basic_VLSM_embedding_preloaded_with X Y _ _ PimpliesQ id id).
+  by apply VLSM_incl_embedding_iff, (basic_VLSM_embedding_preloaded_with X Y _ _ PimpliesQ id id).
 Qed.
 
 End sec_pre_loaded_vlsm_inclusion.
