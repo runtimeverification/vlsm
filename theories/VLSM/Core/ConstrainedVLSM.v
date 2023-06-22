@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From Coq Require Import Streams.
 From VLSM.Lib Require Import Preamble.
-From VLSM.Core Require Import VLSM VLSMInclusion VLSMEmbedding VLSMEquality.
+From VLSM.Core Require Import VLSM PreloadedVLSM VLSMInclusion VLSMEmbedding VLSMEquality.
 
 (** * Constrained VLSM
 

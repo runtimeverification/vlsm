@@ -1,6 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Core Require Import VLSM VLSMProjections.VLSMEmbedding VLSMProjections.VLSMTotalProjection.
+From VLSM.Core Require Import VLSM.
+From VLSM.Core.VLSMProjections Require Import VLSMEmbedding VLSMTotalProjection.
 
 (** * VLSM Inclusion
 
@@ -354,116 +355,4 @@ Proof.
   by apply VLSM_incl_embedding_iff, basic_VLSM_strong_embedding.
 Qed.
 
-Lemma basic_VLSM_incl_preloaded
-  (Hinitial_state : strong_incl_initial_state_preservation MX MY)
-  (Hvalid : strong_incl_valid_preservation MX MY)
-  (Htransition : strong_incl_transition_preservation MX MY)
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y).
-Proof.
-  by apply VLSM_incl_embedding_iff, (basic_VLSM_embedding_preloaded X Y id id).
-Qed.
-
-Lemma basic_VLSM_incl_preloaded_with
-  (P Q : message -> Prop)
-  (PimpliesQ : forall m : message, P m -> Q m)
-  (Hvalid : strong_incl_valid_preservation MX MY)
-  (Htransition : strong_incl_transition_preservation  MX MY)
-  (Hstate : strong_incl_initial_state_preservation MX MY)
-  (Hmessage : strong_incl_initial_message_preservation MX MY)
-  : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q).
-Proof.
-  by apply VLSM_incl_embedding_iff,
-           (basic_VLSM_embedding_preloaded_with X Y _ _ PimpliesQ id id).
-Qed.
-
 End sec_basic_VLSM_incl.
-
-Section sec_VLSM_incl_preloaded_properties.
-
-Context
-  {message : Type}
-  (X : VLSM message)
-  .
-
-Lemma vlsm_incl_pre_loaded :
-  forall (P : message -> Prop),
-    VLSM_incl X (pre_loaded_vlsm X P).
-Proof.
-  by intros; apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
-Lemma vlsm_incl_pre_loaded_with_all_messages_vlsm :
-  VLSM_incl X (pre_loaded_with_all_messages_vlsm X).
-Proof.
-  by apply vlsm_incl_pre_loaded.
-Qed.
-
-Lemma pre_loaded_vlsm_incl_relaxed
-  (P Q : message -> Prop)
-  (PimpliesQorValid : forall m : message, P m -> Q m \/ valid_message_prop (pre_loaded_vlsm X Q) m)
-  : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
-Proof.
-  apply basic_VLSM_incl; cycle 1; [| by cbv; itauto..].
-  intros _ _ m _ _ [Him | Hp].
-  - by apply initial_message_is_valid; left.
-  - apply PimpliesQorValid in Hp as [Hq | Hvalid]; [| done].
-    by apply initial_message_is_valid; right.
-Qed.
-
-Lemma pre_loaded_vlsm_incl
-  (P Q : message -> Prop)
-  (PimpliesQ : forall m : message, P m -> Q m)
-  : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
-Proof.
-  by apply pre_loaded_vlsm_incl_relaxed; itauto.
-Qed.
-
-Lemma pre_loaded_vlsm_idem_l :
-  forall (P : message -> Prop),
-    VLSM_incl (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
-Proof.
-  by intros; apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
-Lemma pre_loaded_vlsm_idem_r :
-  forall (P : message -> Prop),
-    VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm (pre_loaded_vlsm X P) P).
-Proof.
-  by intros; apply basic_VLSM_incl_preloaded_with; cbv; itauto.
-Qed.
-
-Lemma pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
-  forall (P : message -> Prop),
-    VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_with_all_messages_vlsm X).
-Proof.
-  by intros; apply pre_loaded_vlsm_incl.
-Qed.
-
-Lemma pre_loaded_with_all_messages_can_emit
-  (m : message)
-  (Hm : can_emit X m)
-  : can_emit (pre_loaded_with_all_messages_vlsm X) m.
-Proof.
-  apply (VLSM_incl_can_emit vlsm_incl_pre_loaded_with_all_messages_vlsm).
-  by rewrite mk_vlsm_machine.
-Qed.
-
-Lemma preloaded_weaken_finite_valid_trace_from
-  (from : state X) (tr : list transition_item)
-  : finite_valid_trace_from X from tr ->
-    finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) from tr.
-Proof.
-  by intros; eapply VLSM_incl_finite_valid_trace_from;
-    [apply vlsm_incl_pre_loaded_with_all_messages_vlsm | destruct X].
-Qed.
-
-Lemma preloaded_weaken_finite_valid_trace_from_to
-  (from to : state X) (tr : list transition_item)
-  : finite_valid_trace_from_to X from to tr ->
-    finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) from to tr.
-Proof.
-  by intros; eapply VLSM_incl_finite_valid_trace_from_to;
-    [apply vlsm_incl_pre_loaded_with_all_messages_vlsm | destruct X].
-Qed.
-
-End sec_VLSM_incl_preloaded_properties.

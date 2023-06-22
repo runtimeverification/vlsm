@@ -1,6 +1,6 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Core Require Import VLSM VLSMProjections Composition.
+From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 
 (** * VLSM Projection Validators
 

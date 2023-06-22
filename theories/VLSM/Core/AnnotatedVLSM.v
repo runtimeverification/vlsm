@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras.
-From VLSM.Core Require Import VLSM VLSMProjections Validator Composition.
+From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Validator Composition.
 
 (** * State-annotated VLSMs
 

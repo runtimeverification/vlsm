@@ -3,7 +3,7 @@ From stdpp Require Import prelude finite.
 From Coq Require Import Streams FunctionalExtensionality Eqdep_dec.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections.
-From VLSM.Core Require Import ConstrainedVLSM.
+From VLSM.Core Require Import PreloadedVLSM ConstrainedVLSM.
 
 (** * VLSM Composition
 

@@ -1,6 +1,6 @@
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
-From VLSM.Core Require Import VLSM VLSMProjections Equivocators.Equivocators.
+From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Equivocators.Equivocators.
 
 (** * VLSM Projecting Equivocator Traces *)
 
