@@ -14,9 +14,8 @@ From VLSM.Core.VLSMProjections Require Import VLSMEquality.
   behavior, which makes it a useful concept in Byzantine fault tolerance analysis.
 *)
 
-Definition VLSMMachine_pre_loaded_with_messages
-  {message : Type} {T : VLSMType message} (M : VLSMMachine T)
-  (initial : message -> Prop)
+Definition pre_loaded_vlsm_machine
+  {message : Type} {T : VLSMType message} (M : VLSMMachine T) (initial : message -> Prop)
   : VLSMMachine T :=
 {|
   initial_state_prop := @initial_state_prop _ _ M;
@@ -28,7 +27,7 @@ Definition VLSMMachine_pre_loaded_with_messages
 
 Definition pre_loaded_vlsm {message : Type} (X : VLSM message) (initial : message -> Prop)
   : VLSM message :=
-    mk_vlsm (VLSMMachine_pre_loaded_with_messages X initial).
+    mk_vlsm (pre_loaded_vlsm_machine X initial).
 
 Section sec_pre_loaded_with_all_messages_vlsm.
 
