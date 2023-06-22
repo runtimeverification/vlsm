@@ -2,6 +2,8 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM Require Import VLSM.
+From VLSM.Core.VLSMProjections Require Import VLSMTotalProjection VLSMEmbedding VLSMInclusion.
+From VLSM.Core.VLSMProjections Require Import VLSMEquality.
 
 (** * Pre-loaded VLSMs
 
@@ -252,3 +254,409 @@ Proof.
 Qed.
 
 End sec_pre_loaded_history_vlsm.
+
+Section sec_pre_loaded_vlsm_total_projection.
+
+Lemma basic_VLSM_projection_type_preloaded
+  {message : Type}
+  (X Y : VLSM message)
+  (label_project : label X -> option (label Y))
+  (state_project : state X -> state Y)
+  (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
+  : VLSM_projection_type (pre_loaded_with_all_messages_vlsm X) Y label_project state_project.
+Proof.
+  constructor.
+  intros is tr Htr.
+  induction Htr using finite_valid_trace_from_rev_ind
+  ; [done |].
+  rewrite (pre_VLSM_projection_finite_trace_project_app
+    (pre_loaded_with_all_messages_vlsm X) Y label_project state_project).
+  rewrite finite_trace_last_is_last.
+  rewrite finite_trace_last_app, <- IHHtr.
+  clear IHHtr.
+  simpl.
+  unfold pre_VLSM_projection_transition_item_project.
+  destruct (label_project _) as [lY |] eqn: Hl; [done |].
+  apply proj2, (Htransition_None _ Hl) in Hx.
+  by rewrite Hx.
+Qed.
+
+Lemma basic_VLSM_projection_preloaded
+  {message : Type}
+  (X Y : VLSM message)
+  (label_project : label X -> option (label Y))
+  (state_project : state X -> state Y)
+  (Hvalid : strong_projection_valid_preservation X Y label_project state_project)
+  (Htransition_Some : strong_projection_transition_preservation_Some X Y label_project state_project)
+  (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
+  (Hstate : strong_projection_initial_state_preservation X Y state_project)
+  : VLSM_projection
+      (pre_loaded_with_all_messages_vlsm X)
+      (pre_loaded_with_all_messages_vlsm Y) label_project state_project.
+Proof.
+  specialize (basic_VLSM_projection_type_preloaded X Y label_project state_project Htransition_None)
+    as Htype.
+  constructor; [done |].
+  intros sX trX HtrX.
+  split; [| by apply Hstate; apply HtrX].
+  induction HtrX using finite_valid_trace_rev_ind.
+  - by constructor; apply initial_state_is_valid, Hstate.
+  - rewrite (pre_VLSM_projection_finite_trace_project_app
+      (pre_loaded_with_all_messages_vlsm X) Y label_project state_project).
+    apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm Y)).
+    split; [done |].
+    simpl. unfold pre_VLSM_projection_transition_item_project.
+    simpl.
+    apply finite_valid_trace_last_pstate in IHHtrX.
+    destruct Hx as [[_ [_ Hv]] Ht].
+    rewrite <- (final_state_project _ _ _ _ Htype) in IHHtrX |- * by apply HtrX.
+    destruct (label_project l) as [lY |] eqn: Hl.
+    + apply (finite_valid_trace_singleton (pre_loaded_with_all_messages_vlsm Y)).
+      assert (Hiom : option_valid_message_prop (pre_loaded_with_all_messages_vlsm Y) iom).
+      {
+        destruct iom as [im |]; [| by apply option_valid_message_None].
+        by apply (any_message_is_valid_in_preloaded Y).
+      }
+      apply (Hvalid _ _ Hl) in Hv.
+      by apply (Htransition_Some _ _ Hl) in Ht.
+    + by apply (finite_valid_trace_from_empty (pre_loaded_with_all_messages_vlsm Y)).
+Qed.
+
+Lemma basic_VLSM_projection_type_preloaded_with
+  {message : Type}
+  (X Y : VLSM message)
+  (P Q : message -> Prop)
+  (label_project : label X -> option (label Y))
+  (state_project : state X -> state Y)
+  (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
+  : VLSM_projection_type (pre_loaded_vlsm X P) Y label_project state_project.
+Proof.
+  constructor.
+  intros is tr Htr.
+  induction Htr using finite_valid_trace_from_rev_ind
+  ; [done |].
+  rewrite (pre_VLSM_projection_finite_trace_project_app
+    (pre_loaded_vlsm X P) Y label_project state_project).
+  rewrite finite_trace_last_is_last.
+  rewrite finite_trace_last_app, <- IHHtr.
+  clear IHHtr.
+  simpl.
+  unfold pre_VLSM_projection_transition_item_project.
+  destruct (label_project _) as [lY |] eqn: Hl; [done |].
+  apply proj2, (Htransition_None _ Hl) in Hx.
+  by rewrite Hx.
+Qed.
+
+Lemma basic_VLSM_projection_preloaded_with
+  {message : Type}
+  (X Y : VLSM message)
+  (P Q : message -> Prop)
+  (label_project : label X -> option (label Y))
+  (state_project : state X -> state Y)
+  (Hvalid : strong_projection_valid_preservation X Y label_project state_project)
+  (Htransition_Some : strong_projection_transition_preservation_Some X Y label_project state_project)
+  (Htransition_None : strong_projection_transition_consistency_None _ _ label_project state_project)
+  (Hstate : strong_projection_initial_state_preservation X Y state_project)
+  (Hmessage : weak_projection_valid_message_preservation
+                (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project)
+  : VLSM_projection (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project.
+Proof.
+  specialize (basic_VLSM_projection_type_preloaded_with X Y P Q
+    label_project state_project Htransition_None) as Htype.
+  constructor; [done |].
+  intros sX trX HtrX.
+  split; [| by apply Hstate; apply HtrX].
+  induction HtrX using finite_valid_trace_rev_ind.
+  - by constructor; apply initial_state_is_valid, Hstate.
+  - rewrite (pre_VLSM_projection_finite_trace_project_app
+      (pre_loaded_vlsm X P) Y label_project state_project).
+    apply (finite_valid_trace_from_app_iff (pre_loaded_vlsm Y Q)).
+    split; [done |].
+    simpl. unfold pre_VLSM_projection_transition_item_project.
+    simpl.
+    apply finite_valid_trace_last_pstate in IHHtrX.
+    apply proj1 in Hx as Hpv.
+    destruct Hx as [[_ [_ Hv]] Ht].
+    rewrite <- (final_state_project _ _ _ _ Htype) in IHHtrX |- * by apply HtrX.
+    destruct (label_project l) as [lY |] eqn: Hl.
+    + apply (finite_valid_trace_singleton (pre_loaded_vlsm Y Q)).
+      assert (Hiom : option_valid_message_prop (pre_loaded_vlsm Y Q) iom).
+      { destruct iom as [im |]; [| by apply option_valid_message_None].
+        by apply (Hmessage _ _ Hl) in Hpv.
+      }
+      apply (Hvalid _ _ Hl) in Hv.
+      by apply (Htransition_Some _ _ Hl) in Ht.
+    + by apply (finite_valid_trace_from_empty (pre_loaded_vlsm Y Q)).
+Qed.
+
+End sec_pre_loaded_vlsm_total_projection.
+
+Section sec_pre_loaded_vlsm_embedding.
+
+Lemma basic_VLSM_embedding_preloaded
+  {message : Type}
+  (X Y : VLSM message)
+  (label_project : label X -> label Y)
+  (state_project : state X -> state Y)
+  (Hvalid : strong_embedding_valid_preservation X Y label_project state_project)
+  (Htransition : strong_embedding_transition_preservation  X Y label_project state_project)
+  (Hstate : strong_projection_initial_state_preservation X Y state_project)
+  : VLSM_embedding (pre_loaded_with_all_messages_vlsm X)
+      (pre_loaded_with_all_messages_vlsm Y) label_project state_project.
+Proof.
+  constructor.
+  intros sX trX HtrX.
+  split; [| by apply Hstate; apply HtrX].
+  induction HtrX using finite_valid_trace_rev_ind.
+  - by constructor; apply initial_state_is_valid, Hstate.
+  - setoid_rewrite map_app. apply finite_valid_trace_from_app_iff.
+    split; [done |].
+    simpl. apply (finite_valid_trace_singleton (pre_loaded_with_all_messages_vlsm Y)).
+    destruct Hx as [[_ [_ Hv]] Ht].
+    apply Hvalid in Hv.
+    apply Htransition in Ht.
+    rewrite (pre_VLSM_embedding_finite_trace_last _ _ label_project state_project) in Hv, Ht.
+    repeat split; [.. | done | done].
+    + by apply finite_valid_trace_last_pstate in IHHtrX.
+    + by apply any_message_is_valid_in_preloaded.
+Qed.
+
+Lemma basic_VLSM_embedding_preloaded_with
+  {message : Type}
+  (X Y : VLSM message)
+  (P Q : message -> Prop)
+  (PimpliesQ : forall m : message, P m -> Q m)
+  (label_project : label X -> label Y)
+  (state_project : state X -> state Y)
+  (Hvalid : strong_embedding_valid_preservation X Y label_project state_project)
+  (Htransition : strong_embedding_transition_preservation  X Y label_project state_project)
+  (Hstate : strong_projection_initial_state_preservation X Y state_project)
+  (Hmessage : strong_embedding_initial_message_preservation X Y)
+  : VLSM_embedding (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q) label_project state_project.
+Proof.
+  constructor.
+  intros sX trX HtrX.
+  apply valid_trace_add_default_last in HtrX.
+  split; [| by apply Hstate; apply HtrX].
+  induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
+  - by constructor; apply initial_state_is_valid, Hstate.
+  - setoid_rewrite map_app. apply finite_valid_trace_from_app_iff.
+    split; [done |].
+    simpl. apply (finite_valid_trace_singleton (pre_loaded_vlsm Y Q)).
+    destruct Ht as [[_ [_ Hv]] Ht].
+    apply Hvalid in Hv.
+    apply Htransition in Ht.
+    apply valid_trace_get_last in HtrX1. subst s.
+    rewrite (pre_VLSM_embedding_finite_trace_last _ _ label_project state_project) in Hv, Ht.
+    simpl.
+    repeat split; [.. | done | done].
+    + by apply finite_valid_trace_last_pstate in IHHtrX1.
+    + destruct iom as [m |]; [| by apply option_valid_message_None].
+      unfold empty_initial_message_or_final_output in Heqiom.
+      destruct_list_last iom_tr iom_tr' iom_lst Heqiom_tr
+      ; [apply option_initial_message_is_valid; destruct Heqiom as [Him | Hp] |].
+      * by left; revert Him; apply Hmessage.
+      * by right; auto.
+      * apply
+          (valid_trace_output_is_valid (pre_loaded_vlsm Y Q) _ _ IHHtrX2 m).
+        setoid_rewrite map_app.
+        by apply Exists_app; right; left.
+Qed.
+
+End sec_pre_loaded_vlsm_embedding.
+
+Section sec_pre_loaded_vlsm_inclusion.
+
+Context
+  {message : Type}
+  {T : VLSMType message}
+  (MX MY : VLSMMachine T)
+  (X := mk_vlsm MX)
+  (Y := mk_vlsm MY)
+  .
+
+Lemma basic_VLSM_incl_preloaded
+  (Hinitial_state : strong_incl_initial_state_preservation MX MY)
+  (Hvalid : strong_incl_valid_preservation MX MY)
+  (Htransition : strong_incl_transition_preservation MX MY)
+  : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y).
+Proof.
+  by apply VLSM_incl_embedding_iff, (basic_VLSM_embedding_preloaded X Y id id).
+Qed.
+
+Lemma basic_VLSM_incl_preloaded_with
+  (P Q : message -> Prop)
+  (PimpliesQ : forall m : message, P m -> Q m)
+  (Hvalid : strong_incl_valid_preservation MX MY)
+  (Htransition : strong_incl_transition_preservation  MX MY)
+  (Hstate : strong_incl_initial_state_preservation MX MY)
+  (Hmessage : strong_incl_initial_message_preservation MX MY)
+  : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm Y Q).
+Proof.
+  by apply VLSM_incl_embedding_iff,
+           (basic_VLSM_embedding_preloaded_with X Y _ _ PimpliesQ id id).
+Qed.
+
+End sec_pre_loaded_vlsm_inclusion.
+
+Section sec_VLSM_incl_preloaded_properties.
+
+Context
+  {message : Type}
+  (X : VLSM message)
+  .
+
+Lemma vlsm_incl_pre_loaded :
+  forall (P : message -> Prop),
+    VLSM_incl X (pre_loaded_vlsm X P).
+Proof.
+  by intros; apply basic_VLSM_strong_incl; cbv; itauto.
+Qed.
+
+Lemma vlsm_incl_pre_loaded_with_all_messages_vlsm :
+  VLSM_incl X (pre_loaded_with_all_messages_vlsm X).
+Proof.
+  by apply vlsm_incl_pre_loaded.
+Qed.
+
+Lemma pre_loaded_vlsm_incl_relaxed
+  (P Q : message -> Prop)
+  (PimpliesQorValid : forall m : message, P m -> Q m \/ valid_message_prop (pre_loaded_vlsm X Q) m)
+  : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
+Proof.
+  apply basic_VLSM_incl; cycle 1; [| by cbv; itauto..].
+  intros _ _ m _ _ [Him | Hp].
+  - by apply initial_message_is_valid; left.
+  - apply PimpliesQorValid in Hp as [Hq | Hvalid]; [| done].
+    by apply initial_message_is_valid; right.
+Qed.
+
+Lemma pre_loaded_vlsm_incl
+  (P Q : message -> Prop)
+  (PimpliesQ : forall m : message, P m -> Q m)
+  : VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm X Q).
+Proof.
+  by apply pre_loaded_vlsm_incl_relaxed; itauto.
+Qed.
+
+Lemma pre_loaded_vlsm_idem_l :
+  forall (P : message -> Prop),
+    VLSM_incl (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
+Proof.
+  by intros; apply basic_VLSM_strong_incl; cbv; itauto.
+Qed.
+
+Lemma pre_loaded_vlsm_idem_r :
+  forall (P : message -> Prop),
+    VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_vlsm (pre_loaded_vlsm X P) P).
+Proof.
+  by intros; apply basic_VLSM_incl_preloaded_with; cbv; itauto.
+Qed.
+
+Lemma pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
+  forall (P : message -> Prop),
+    VLSM_incl (pre_loaded_vlsm X P) (pre_loaded_with_all_messages_vlsm X).
+Proof.
+  by intros; apply pre_loaded_vlsm_incl.
+Qed.
+
+Lemma pre_loaded_with_all_messages_can_emit
+  (m : message)
+  (Hm : can_emit X m)
+  : can_emit (pre_loaded_with_all_messages_vlsm X) m.
+Proof.
+  apply (VLSM_incl_can_emit vlsm_incl_pre_loaded_with_all_messages_vlsm).
+  by rewrite mk_vlsm_machine.
+Qed.
+
+Lemma preloaded_weaken_finite_valid_trace_from
+  (from : state X) (tr : list transition_item)
+  : finite_valid_trace_from X from tr ->
+    finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) from tr.
+Proof.
+  by intros; eapply VLSM_incl_finite_valid_trace_from;
+    [apply vlsm_incl_pre_loaded_with_all_messages_vlsm | destruct X].
+Qed.
+
+Lemma preloaded_weaken_finite_valid_trace_from_to
+  (from to : state X) (tr : list transition_item)
+  : finite_valid_trace_from_to X from to tr ->
+    finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) from to tr.
+Proof.
+  by intros; eapply VLSM_incl_finite_valid_trace_from_to;
+    [apply vlsm_incl_pre_loaded_with_all_messages_vlsm | destruct X].
+Qed.
+
+End sec_VLSM_incl_preloaded_properties.
+
+Section sec_VLSM_eq_preloaded_properties.
+
+Context
+  {message : Type}
+  (X : VLSM message)
+  .
+
+Lemma pre_loaded_vlsm_with_valid_eq
+  (P Q : message -> Prop)
+  (QimpliesValid : forall m, Q m -> valid_message_prop (pre_loaded_vlsm X P) m)
+  : VLSM_eq (pre_loaded_vlsm X (fun m => P m \/ Q m)) (pre_loaded_vlsm X P).
+Proof.
+  split; cbn.
+  - by apply pre_loaded_vlsm_incl_relaxed; itauto.
+  - by apply pre_loaded_vlsm_incl; itauto.
+Qed.
+
+Lemma pre_loaded_vlsm_idem
+  (P : message -> Prop)
+  : VLSM_eq (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
+Proof.
+  split; cbn.
+  - by apply pre_loaded_vlsm_idem_l.
+  - by apply pre_loaded_vlsm_idem_r.
+Qed.
+
+Lemma pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm
+  (P : message -> Prop)
+  (Hvalidating :
+    forall (l : label _) (s : state _) (m : message)
+      (Hv : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m)),
+      valid_message_prop (pre_loaded_vlsm X P) m)
+  : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X P).
+Proof.
+  split; cbn;
+    [| by apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
+  apply basic_VLSM_incl.
+  - by intro; intros **.
+  - by intros l s m Hv _ _; eapply Hvalidating.
+  - by intros l s om (_ & _ & ?).
+  - by intros l s om s' om' [_ Ht].
+Qed.
+
+Lemma vlsm_is_pre_loaded_with_False :
+  VLSM_eq X (pre_loaded_vlsm X (fun _ => False)).
+Proof.
+  by cbn; split; apply basic_VLSM_strong_incl; cbv; itauto.
+Qed.
+
+Lemma vlsm_is_pre_loaded_with_False_initial_message :
+  strong_embedding_initial_message_preservation X (pre_loaded_vlsm X (fun _ => False)).
+Proof.
+  by intros m Hm; left.
+Qed.
+
+Lemma vlsm_is_pre_loaded_with_False_initial_message_rev :
+  strong_embedding_initial_message_preservation (pre_loaded_vlsm X (fun _ => False)) X.
+Proof.
+  by intros m [Hm | Hfalse].
+Qed.
+
+Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om :
+  valid_state_message_prop X s om <->
+  valid_state_message_prop (pre_loaded_vlsm X (fun _ => False)) s om.
+Proof.
+  pose proof vlsm_is_pre_loaded_with_False as Heq.
+  destruct X as (T, M); simpl in *.
+  by split; (apply VLSM_incl_valid_state_message; [| cbv; tauto]); apply Heq.
+Qed.
+
+End sec_VLSM_eq_preloaded_properties.

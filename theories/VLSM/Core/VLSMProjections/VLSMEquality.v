@@ -1,6 +1,6 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Core Require Import VLSM PreloadedVLSM.
+From VLSM.Core Require Import VLSM.
 From VLSM.Core.VLSMProjections Require Import VLSMInclusion VLSMEmbedding.
 
 (** * VLSM Trace Equality
@@ -178,77 +178,3 @@ Proof.
 Qed.
 
 End sec_VLSM_eq_properties.
-
-Section sec_VLSM_incl_preloaded_properties.
-
-(** ** Inclusion properties for pre-loaded VLSMs *)
-
-Context
-  {message : Type}
-  (X : VLSM message)
-  .
-
-Lemma pre_loaded_vlsm_with_valid_eq
-  (P Q : message -> Prop)
-  (QimpliesValid : forall m, Q m -> valid_message_prop (pre_loaded_vlsm X P) m)
-  : VLSM_eq (pre_loaded_vlsm X (fun m => P m \/ Q m)) (pre_loaded_vlsm X P).
-Proof.
-  split; cbn.
-  - by apply pre_loaded_vlsm_incl_relaxed; itauto.
-  - by apply pre_loaded_vlsm_incl; itauto.
-Qed.
-
-Lemma pre_loaded_vlsm_idem
-  (P : message -> Prop)
-  : VLSM_eq (pre_loaded_vlsm (pre_loaded_vlsm X P) P) (pre_loaded_vlsm X P).
-Proof.
-  split; cbn.
-  - by apply pre_loaded_vlsm_idem_l.
-  - by apply pre_loaded_vlsm_idem_r.
-Qed.
-
-Lemma pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm
-  (P : message -> Prop)
-  (Hvalidating :
-    forall (l : label _) (s : state _) (m : message)
-      (Hv : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m)),
-      valid_message_prop (pre_loaded_vlsm X P) m)
-  : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X P).
-Proof.
-  split; cbn;
-    [| by apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
-  apply basic_VLSM_incl.
-  - by intro; intros **.
-  - by intros l s m Hv _ _; eapply Hvalidating.
-  - by intros l s om (_ & _ & ?).
-  - by intros l s om s' om' [_ Ht].
-Qed.
-
-Lemma vlsm_is_pre_loaded_with_False :
-  VLSM_eq X (pre_loaded_vlsm X (fun _ => False)).
-Proof.
-  by cbn; split; apply basic_VLSM_strong_incl; cbv; itauto.
-Qed.
-
-Lemma vlsm_is_pre_loaded_with_False_initial_message :
-  strong_embedding_initial_message_preservation X (pre_loaded_vlsm X (fun _ => False)).
-Proof.
-  by intros m Hm; left.
-Qed.
-
-Lemma vlsm_is_pre_loaded_with_False_initial_message_rev :
-  strong_embedding_initial_message_preservation (pre_loaded_vlsm X (fun _ => False)) X.
-Proof.
-  by intros m [Hm | Hfalse].
-Qed.
-
-Lemma vlsm_is_pre_loaded_with_False_valid_state_message s om :
-  valid_state_message_prop X s om <->
-  valid_state_message_prop (pre_loaded_vlsm X (fun _ => False)) s om.
-Proof.
-  pose proof vlsm_is_pre_loaded_with_False as Heq.
-  destruct X as (T, M); simpl in *.
-  by split; (apply VLSM_incl_valid_state_message; [| cbv; tauto]); apply Heq.
-Qed.
-
-End sec_VLSM_incl_preloaded_properties.
