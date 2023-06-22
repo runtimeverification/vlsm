@@ -1,6 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Core Require Import VLSM VLSMProjections.VLSMEmbedding VLSMProjections.VLSMTotalProjection.
+From VLSM.Core Require Import VLSM PreloadedVLSM.
+From VLSM.Core.VLSMProjections Require Import VLSMEmbedding VLSMTotalProjection.
 
 (** * VLSM Inclusion
 

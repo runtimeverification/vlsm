@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From Coq Require Import Eqdep Fin FunctionalExtensionality.
 From VLSM.Lib Require Import Preamble.
-From VLSM.Core Require Import VLSM VLSMProjections Composition.
+From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 
 (** * VLSM Equivocation
 

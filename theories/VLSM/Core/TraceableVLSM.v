@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble ListSetExtras.
-From VLSM.Core Require Import VLSM Composition VLSMEmbedding.
+From VLSM.Core Require Import VLSM PreloadedVLSM Composition VLSMEmbedding.
 
 (** * Traceable VLSMs
 

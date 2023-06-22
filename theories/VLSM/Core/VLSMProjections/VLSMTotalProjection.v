@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters StdppExtras.
-From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
+From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections.VLSMPartialProjection.
 
 Section sec_VLSM_projection.
 

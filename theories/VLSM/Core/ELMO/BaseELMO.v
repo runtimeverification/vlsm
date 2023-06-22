@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble StdppExtras.
-From VLSM.Core Require Import VLSM MessageDependencies.
+From VLSM.Core Require Import VLSM PreloadedVLSM MessageDependencies.
 
 (** * Basic Definitions and Lemmas for UMO, MO and ELMO
 
