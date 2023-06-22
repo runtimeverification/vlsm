@@ -1,9 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
-From VLSM Require Import VLSM.
-From VLSM.Core.VLSMProjections Require Import VLSMTotalProjection VLSMEmbedding VLSMInclusion.
-From VLSM.Core.VLSMProjections Require Import VLSMEquality.
+From VLSM.Core Require Import VLSM VLSMProjections.
 
 (** * Pre-loaded VLSMs
 
