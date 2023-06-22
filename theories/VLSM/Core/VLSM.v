@@ -2628,12 +2628,6 @@ Qed.
 Definition finite_constrained_trace_init_to `(X : VLSM message) :=
   finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X).
 
-Lemma parity_valid_is_constrained :
-  VLSM_incl ParityVLSM (pre_loaded_with_all_messages_vlsm ParityVLSM).
-Proof.
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-Qed.
-
 (** 
   In order to simplify proofs regarding valid/constrained traces we have defined an
   equivalent definition for both [finite_valid_trace_init_to] and [finite_constrained_trace_init_to].
@@ -2669,8 +2663,6 @@ Definition constrained_state_prop `(X : VLSM message) :=
 Definition constrained_message_prop `(X : VLSM message) :=
   can_emit (pre_loaded_with_all_messages_vlsm X).
 
-Definition constrained_transition `(X : VLSM message) := ValidTransition X.
-
 (**
   Equivalence proof between the [finite_constrained_trace_init_to] and
   [finite_constrained_trace_init_to_alt].
@@ -2705,7 +2697,7 @@ Proof.
     + by repeat split; [| apply any_message_is_valid_in_preloaded | done ..].
     + apply IHtr; [| done].
       apply valid_state_prop_iff; right.
-      exists l, (s, om), om'.
+      exists l0, (s, om), om'.
       by repeat split; [| apply any_message_is_valid_in_preloaded | done ..].
 Qed.
 
@@ -2751,7 +2743,7 @@ Proof.
     apply (finite_valid_trace_from_to_extend X); [| done].
     apply IHtr; [| done].
     apply valid_state_prop_iff; right.
-    by exists l, (s, om), om'.
+    by exists l0, (s, om), om'.
 Qed.
 
 Lemma valid_transitions_init_to_equiv `(X : VLSM message)
