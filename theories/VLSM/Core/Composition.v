@@ -1040,36 +1040,31 @@ Qed.
   If a message can be emitted by a composition, then it can be emitted by one of the
   components.
 *)
-Lemma can_emit_composite_project
-  {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
-  (X := composite_vlsm IM constraint)
-  (m : message)
-  (Hemit : can_emit (pre_loaded_with_all_messages_vlsm X) m)
-  : exists (j : V), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
-Proof.
-  apply can_emit_iff in Hemit.
-  destruct Hemit as [s2 [(s1, oim) [l Ht]]].
-  exists (projT1 l).
-  apply can_emit_iff.
-  exists (s2 (projT1 l)).
-  exists (s1 (projT1 l), oim), (projT2 l).
-  by eapply input_valid_transition_preloaded_project_active.
-Qed.
 
 Lemma can_emit_free_composite_project
-  {message} `{EqDecision V} {IM : V -> VLSM message}
+  {message : Type} `{EqDecision V} {IM : V -> VLSM message}
   (X := free_composite_vlsm IM)
   (m : message)
-  (Hemit : can_emit (pre_loaded_with_all_messages_vlsm X) m)
-  : exists (j : V), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+  (Hemit : can_emit (pre_loaded_with_all_messages_vlsm X) m) :
+    exists (j : V), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 Proof.
-  apply can_emit_iff in Hemit.
-  destruct Hemit as [s2 [(s1, oim) [l Ht]]].
+  apply can_emit_iff in Hemit as (s2 & [s1 oim] & l & Ht).
   exists (projT1 l).
   apply can_emit_iff.
-  exists (s2 (projT1 l)).
-  exists (s1 (projT1 l), oim), (projT2 l).
+  exists (s2 (projT1 l)), (s1 (projT1 l), oim), (projT2 l).
   by eapply input_valid_transition_preloaded_project_active_free.
+Qed.
+
+Lemma can_emit_composite_project
+  {message : Type} `{EqDecision V} {IM : V -> VLSM message} {constraint}
+  (X := composite_vlsm IM constraint)
+  (m : message)
+  (Hemit : can_emit (pre_loaded_with_all_messages_vlsm X) m) :
+    exists (j : V), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+Proof.
+  apply can_emit_free_composite_project.
+  eapply VLSM_incl_can_emit; [| done].
+  by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 (** ** Binary free composition
