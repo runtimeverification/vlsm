@@ -2124,7 +2124,8 @@ Proof.
   rewrite emitted_messages_are_valid_iff.
   intros [[i [[mi Hmi] _]] | [(s, om) [(i, l) [s' Ht]]]]
   ; [by contradict Hmi; apply no_initial_messages_in_IM |].
-  apply (VLSM_incl_input_valid_transition (preloaded_free_incl IM)) in Ht.
+  eapply VLSM_incl_input_valid_transition in Ht;
+    [| by eapply (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))].
   apply pre_loaded_with_all_messages_projection_input_valid_transition_eq
     with (j := i) in Ht; [| done]; cbn in Ht.
   specialize (can_emit_signed i m).

@@ -255,12 +255,6 @@ Proof.
   by intros s om; apply (VLSM_incl_valid_state_message constraint_free_incl); intro.
 Qed.
 
-Lemma preloaded_free_incl :
-  VLSM_incl free_composite_vlsm (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
-Proof.
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-Qed.
-
 (*
   TODO(traiansf): There are many places where, because the lemma below
   was missing, it was either reproved locally, or multiple VLSM_incl_
@@ -272,7 +266,7 @@ Lemma constraint_preloaded_free_incl :
 Proof.
   eapply VLSM_incl_trans.
   - by apply constraint_free_incl.
-  - by apply preloaded_free_incl.
+  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm free_composite_vlsm).
 Qed.
 
 Context
