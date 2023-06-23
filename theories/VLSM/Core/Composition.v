@@ -880,25 +880,6 @@ Ltac state_update_simpl :=
   precise.
 *)
 
-Lemma valid_state_project_preloaded_to_preloaded
-      message `{EqDecision index} (IM : index -> VLSM message) constraint
-      (X := composite_vlsm IM constraint)
-      (s : state (pre_loaded_with_all_messages_vlsm X)) i :
-  valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-  valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
-Proof.
-  intros [om Hproto].
-  apply preloaded_valid_state_prop_iff.
-  induction Hproto.
-  - by apply preloaded_valid_initial_state, (Hs i).
-  - destruct l as [j lj].
-    cbn in Ht.
-    destruct (transition lj _) as (si', _om') eqn: Hti.
-    inversion_clear Ht.
-    destruct (decide (i = j)); subst; state_update_simpl; [| done].
-    by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
-Qed.
-
 Lemma valid_state_project_preloaded_to_preloaded_free
   message `{EqDecision index} (IM : index -> VLSM message)
   (X := free_composite_vlsm IM)
@@ -908,14 +889,25 @@ Lemma valid_state_project_preloaded_to_preloaded_free
 Proof.
   intros [om Hproto].
   apply preloaded_valid_state_prop_iff.
-  induction Hproto.
-  - by apply preloaded_valid_initial_state, (Hs i).
-  - destruct l as [j lj].
-    cbn in Ht.
-    destruct (transition lj _) as (si', _om') eqn: Hti.
-    inversion_clear Ht.
-    destruct (decide (i = j)); subst; state_update_simpl; [| done].
-    by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
+  induction Hproto; [by apply preloaded_valid_initial_state, (Hs i) |].
+  destruct l as [j lj]; cbn in Ht.
+  destruct (transition lj _) as (si', _om') eqn: Hti.
+  inversion_clear Ht.
+  destruct (decide (i = j)); subst; state_update_simpl; [| done].
+  by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
+Qed.
+
+Lemma valid_state_project_preloaded_to_preloaded
+  message `{EqDecision index} (IM : index -> VLSM message) constraint
+  (X := composite_vlsm IM constraint)
+  (s : state (pre_loaded_with_all_messages_vlsm X)) i :
+  valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
+Proof.
+  intros.
+  eapply valid_state_project_preloaded_to_preloaded_free.
+  apply VLSM_incl_valid_state; [| done].
+  by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma valid_state_project_preloaded
