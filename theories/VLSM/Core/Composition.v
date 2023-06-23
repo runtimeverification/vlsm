@@ -979,78 +979,61 @@ Proof.
   by revert Hptrans; apply input_valid_transition_preloaded_project_active.
 Qed.
 
-Lemma input_valid_transition_preloaded_project_any {V} (i : V)
-      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
-      (X := composite_vlsm IM constraint)
-      (l : label X) s im s' om :
-  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
-  (s i = s' i \/
-   exists li, (l = existT i li) /\
-   input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i))
-                          li
-                          (s i, im) (s' i, om)).
-Proof.
-  intro Hptrans.
-  destruct l as [j lj].
-  destruct (decide (i = j)).
-  - subst j.
-    right.
-    exists lj.
-    split; [done |].
-    revert Hptrans.
-    by apply input_valid_transition_preloaded_project_active.
-  - left.
-    destruct Hptrans as [Hpvalid Htrans].
-    cbn in Htrans.
-    destruct (transition (IM j) lj (s j, im)).
-    inversion_clear Htrans.
-    by state_update_simpl.
-Qed.
-
 Lemma input_valid_transition_preloaded_project_any_free
-  {V} (i : V)
-  {message} `{EqDecision V} {IM : V -> VLSM message}
+  {V : Type} (i : V)
+  {message : Type} `{EqDecision V} {IM : V -> VLSM message}
   (X := free_composite_vlsm IM)
   (l : label X) s im s' om :
   input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
-  (s i = s' i \/
-   exists li, (l = existT i li) /\
-   input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i))
-                          li
-                          (s i, im) (s' i, om)).
+    s i = s' i \/
+    exists li : label (IM i),
+      l = existT i li /\
+     input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, im) (s' i, om).
 Proof.
   intro Hptrans.
   destruct l as [j lj].
-  destruct (decide (i = j)).
-  - subst j.
-    right.
+  destruct (decide (i = j)); subst.
+  - right.
     exists lj.
     split; [done |].
-    revert Hptrans.
-    by apply input_valid_transition_preloaded_project_active_free.
+    by revert Hptrans; apply input_valid_transition_preloaded_project_active_free.
   - left.
-    destruct Hptrans as [Hpvalid Htrans].
-    cbn in Htrans.
-    destruct (transition (IM j) lj (s j, im)).
-    inversion_clear Htrans.
+    destruct Hptrans as [Hpvalid Htrans]; cbn in Htrans.
+    destruct (transition (IM j) lj (s j, im)); inversion_clear Htrans.
     by state_update_simpl.
 Qed.
 
-Lemma input_valid_transition_project_any {V} (i : V)
-      {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
-      (X := composite_vlsm IM constraint)
-      (l : label X) s im s' om :
+Lemma input_valid_transition_preloaded_project_any
+  {V : Type} (i : V)
+  {message : Type} `{EqDecision V} {IM : V -> VLSM message} {constraint}
+  (X := composite_vlsm IM constraint)
+  (l : label X) s im s' om :
+  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
+    s i = s' i \/
+    exists li : label (IM i),
+      l = existT i li /\
+      input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, im) (s' i, om).
+Proof.
+  intros.
+  apply input_valid_transition_preloaded_project_any_free.
+  apply (@VLSM_incl_input_valid_transition _ _ (pre_loaded_with_all_messages_vlsm X)); [| done].
+  by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+Qed.
+
+Lemma input_valid_transition_project_any
+  {V : Type} (i : V)
+  {message : Type} `{EqDecision V} {IM : V -> VLSM message} {constraint}
+  (X := composite_vlsm IM constraint)
+  (l : label X) s im s' om :
   input_valid_transition X l (s, im) (s', om) ->
-  (s i = s' i \/
-   exists li, (l = existT i li) /\
-   input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i))
-                          li
-                          (s i, im) (s' i, om)).
+    s i = s' i \/
+    exists li : label (IM i),
+      l = existT i li /\
+      input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, im) (s' i, om).
 Proof.
   intro Hproto.
   apply preloaded_weaken_input_valid_transition in Hproto.
-  revert Hproto.
-  by apply input_valid_transition_preloaded_project_any.
+  by revert Hproto; apply input_valid_transition_preloaded_project_any.
 Qed.
 
 (**
