@@ -917,11 +917,8 @@ Lemma valid_state_project_preloaded
   valid_state_prop X s ->
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
 Proof.
-  change (state X) with (state (pre_loaded_with_all_messages_vlsm X)) in s.
-  intros [om Hproto].
-  apply valid_state_project_preloaded_to_preloaded.
-  exists om.
-  by apply preloaded_weaken_valid_state_message_prop.
+  by intros; apply valid_state_project_preloaded_to_preloaded,
+    pre_loaded_with_all_messages_valid_state_prop.
 Qed.
 
 Lemma composite_transition_project_active
