@@ -1686,28 +1686,21 @@ Qed.
 
 End sec_pre_loaded_constrained.
 
-Lemma same_IM_preloaded_free_embedding
-  : VLSM_embedding
+Lemma same_IM_preloaded_free_embedding :
+  VLSM_embedding
     (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1))
     (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM2))
     same_IM_label_rew
     same_IM_state_rew.
 Proof.
-  apply basic_VLSM_embedding; intros l **.
-  - destruct l; cbn.
-    unfold same_VLSM_label_rew, same_IM_state_rew.
-    destruct (Heq x); cbn.
-    by destruct Hv as [Hs [Hom Hv]].
-  - destruct H as [_ H], l as [i li]; revert H; cbn.
-    destruct (transition (IM1 i) _ _) as [si'1 _om'] eqn: Ht1.
-    unfold same_IM_state_rew at 1.
-    erewrite same_VLSM_transition_preservation; [| done].
-    inversion 1; subst; clear H.
-    f_equal; extensionality j.
-    unfold same_IM_state_rew at 2.
-    by destruct (decide (i = j)); subst; state_update_simpl.
-  - by intros i; apply same_VLSM_initial_state_preservation.
-  - by apply initial_message_is_valid; cbn; right.
+  constructor.
+  intros s1 tr1 Htr1.
+  eapply VLSM_incl_finite_valid_trace in Htr1; [| by apply preloaded_free_composite_vlsm_spec].
+  pose proof (Hproj := same_IM_embedding (free_constraint IM1) (free_constraint IM2)
+    ltac:(done) (fun _ => True)).
+  apply (VLSM_embedding_finite_valid_trace Hproj) in Htr1.
+  eapply VLSM_incl_finite_valid_trace in Htr1; [done |].
+  by apply preloaded_free_composite_vlsm_spec.
 Qed.
 
 End sec_same_IM_embedding.
