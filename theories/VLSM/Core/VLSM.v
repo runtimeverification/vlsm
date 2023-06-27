@@ -524,13 +524,13 @@ Qed.
   of valid states and messages.
   This definition has three cases for [valid_message_mrec]:
   - [None] is a valid message ([valid_None_message_mrec]);
-  - if <<m>> is an [option]al <<message>> with the [initial_message_prop]erty,
+  - if <<m>> is an optional <<message>> with the [initial_message_prop]erty,
     then it constitutes a valid message 
   - for all [state]s <<st>>, [option]al <<message>>s <<om>>, and [label] <<l>>:
     - if <<om>> is a valid message ([valid_message_mrec]);
     - and if <<st>> is a valid state ([valid_state_mrec]);
     - and if <<l>> [valid] <<l (st, om)>>;
-    - [transition] <<l (st, om)>> emmits a message which has the
+    - the [transition] <<l (st, om)>> emits a message which has the
       [valid_message_mrec] property.
   There are also two cases for [valid_state_mrec]:
   - if <<s>> is a [state] with the [initial_state_prop]erty, then it has the
@@ -548,12 +548,12 @@ Inductive valid_message_mrec : option message -> Prop :=
 | valid_initial_message_mrec : forall m, initial_message_prop X m -> valid_message_mrec (Some m)
 | valid_generated_message_mrec : forall {l : label X} {om om' : option message} {st st' : state X},
     valid X l (st, om) -> valid_state_mrec st -> valid_message_mrec om ->
-       (transition X l (st, om)) = (st', om') -> valid_message_mrec om'
+       transition X l (st, om) = (st', om') -> valid_message_mrec om'
 with valid_state_mrec : state X -> Prop :=
 | valid_initial_state_mrec : forall s, initial_state_prop X s -> valid_state_mrec s
 | valid_generated_state_mrec : forall {l : label X} {om om' : option message} {st st' : state X},
     valid X l (st, om) -> valid_state_mrec st -> valid_message_mrec om ->
-      (transition X l (st, om)) = (st', om') -> valid_state_mrec st'.
+      transition X l (st, om) = (st', om') -> valid_state_mrec st'.
 
 (**
   Reasoning about this mutually recursive definition is facilitated
@@ -562,6 +562,9 @@ with valid_state_mrec : state X -> Prop :=
 
 Scheme valid_message_ind := Induction for valid_message_mrec Sort Prop
 with valid_state_ind := Induction for valid_state_mrec Sort Prop.
+
+Arguments valid_message_ind Pmsg Pstate : rename.
+Arguments valid_state_ind Pmsg Pstate : rename.
 
 (**
   To guarantee the equivalence between [valid_message_mrec] coupled with
@@ -592,7 +595,7 @@ Lemma valid_impl_valid_state_prop :
   forall (s : state X),
     valid_state_mrec s -> valid_state_prop s.
 Proof.
-  apply valid_state_ind with (P := fun m _ => option_valid_message_prop m).
+  apply valid_state_ind with (Pmsg := fun m _ => option_valid_message_prop m).
   - by apply option_valid_message_None.
   - by apply initial_message_is_valid.
   - intros * ? ? [] ? [] Htr.
@@ -606,7 +609,7 @@ Lemma valid_impl_valid_message_prop :
   forall (om : option message),
     valid_message_mrec om -> option_valid_message_prop om.
 Proof.
-  apply valid_message_ind with (P0 := fun s _ => valid_state_prop s).
+  apply valid_message_ind with (Pstate := fun s _ => valid_state_prop s).
   - by apply option_valid_message_None.
   - by apply initial_message_is_valid.
   - intros * ? ? [] ? [] Htr.
@@ -2687,9 +2690,7 @@ Proof.
   revert s Hs Htr.
   induction tr; intros; inversion Htr; subst.
   - by apply (finite_valid_trace_from_to_empty (pre_loaded_with_all_messages_vlsm X)).
-  - intros.
-    inversion Htr; subst.
-    apply (finite_valid_trace_from_to_extend (pre_loaded_with_all_messages_vlsm X)); cycle 1.
+  - apply (finite_valid_trace_from_to_extend (pre_loaded_with_all_messages_vlsm X)); cycle 1.
     + by repeat split; [| apply any_message_is_valid_in_preloaded | ..].
     + apply IHtr; [| done].
       apply valid_state_prop_iff; right.
@@ -2732,9 +2733,7 @@ Proof.
   revert s Hs Htr.
   induction tr; intros; inversion Htr; subst.
   - by apply (finite_valid_trace_from_to_empty X).
-  - intros.
-    inversion Htr; subst.
-    apply (finite_valid_trace_from_to_extend X); [| done].
+  - apply (finite_valid_trace_from_to_extend X); [| done].
     apply IHtr; [| done].
     apply valid_state_prop_iff; right.
     by exists l0, (s, om), om'.
