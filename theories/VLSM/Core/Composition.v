@@ -1247,19 +1247,9 @@ Lemma irrelevant_components_one
   let res := snd (composite_apply_plan IM s [ai]) in
   (res i) = (s i).
 Proof.
-  unfold composite_apply_plan, apply_plan, _apply_plan.
-  simpl.
-  destruct ai.
-  match goal with
-  |- context [let (_, _) := let (_, _) := ?t in _ in _] =>
-    destruct t eqn: eq_trans
-  end.
-  simpl in *.
-  simpl in eq_trans.
-  destruct label_a; simpl in *.
-  match type of eq_trans with
-  | (let (si', om') := ?t in _) = _ => destruct t end.
-  inversion eq_trans.
+  unfold composite_apply_plan, apply_plan, _apply_plan; cbn.
+  repeat case_match; cbn.
+  inversion H; inversion H1; subst.
   by state_update_simpl.
 Qed.
 
