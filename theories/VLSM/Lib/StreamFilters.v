@@ -747,14 +747,9 @@ Proof.
   revert s Hinf.
   assert (Hfirst : forall s Hinf k,
     (stream_filter_fst_pos (is_Some ∘ (Some ∘ f)) s (fHere _ _ Hinf) k).1 = k).
-  { intros.
-    match goal with
-    |- fst (stream_filter_fst_pos ?P s ?Hex k) = k =>
-      specialize (stream_filter_fst_pos_characterization P s Hex k)
-        as [_k [Heq1 [_ H_k]]]
-    end.
-    rewrite Heq1.
-    simpl.
+  {
+    intros.
+    edestruct stream_filter_fst_pos_characterization as (_k & -> & _ & H_k); cbn.
     destruct _k; [lia |].
     by exfalso; apply (H_k 0); [lia | eexists].
   }

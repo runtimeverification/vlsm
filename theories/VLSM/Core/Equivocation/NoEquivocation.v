@@ -292,17 +292,12 @@ Lemma false_composite_no_equivocation_vlsm_with_pre_loaded
 Proof.
   unfold SeededNoeqvFalse.
   unfold composite_no_equivocation_vlsm_with_pre_loaded.
-  match goal with
-  |- VLSM_eq (pre_loaded_vlsm ?m _) _ => specialize (vlsm_is_pre_loaded_with_False m) as Heq
-  end.
-  apply VLSM_eq_sym in Heq.
-  match type of Heq with
-  | VLSM_eq _ ?v => apply VLSM_eq_trans with v
-  end
-  ; [done |].
-  specialize (constraint_subsumption_incl IM) as Hincl.
-  unfold no_equivocations_additional_constraint_with_pre_loaded.
-  by split; apply Hincl; intros l [s [m |]] Hpv; apply Hpv.
+  apply VLSM_eq_trans with
+    (composite_vlsm IM (no_equivocations_additional_constraint_with_pre_loaded (fun _ =>  False))).
+  - by apply VLSM_eq_sym, vlsm_is_pre_loaded_with_False.
+  - specialize (constraint_subsumption_incl IM) as Hincl.
+    unfold no_equivocations_additional_constraint_with_pre_loaded.
+    by split; apply Hincl; intros l [s [m |]] Hpv; apply Hpv.
 Qed.
 
 End sec_seeded_composite_vlsm_no_equivocation.

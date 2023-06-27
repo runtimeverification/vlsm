@@ -190,8 +190,7 @@ Proof.
   - left.
     specialize (Forall_forall P l0); intros [Hall _].
     specialize (Hall HPl0 x Hin).
-    match goal with |- ?X = 0  => cut (X <= 0) end.
-    lia.
+    match goal with |- ?X = 0  => cut (X <= 0) end; [by lia |].
     rewrite <- Hlen; clear Hlen.
     apply filter_length_fn.
     revert HPl0.
