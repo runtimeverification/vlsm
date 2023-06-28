@@ -440,10 +440,7 @@ Proof.
   cbn; unfold composite_state_sub_projection at 1; cbn.
   destruct (transition (IM i) li (s i, om)) as (si', omi') eqn: Hti.
   inversion Ht. subst omi' s'. clear Ht.
-  match goal with
-  |- (let (_, _) := ?t in _) = _ =>
-    replace t with (si', om')
-  end.
+  setoid_rewrite Hti.
   f_equal.
   extensionality sub_j.
   destruct_dec_sig sub_j j Hj Heqj.

@@ -1231,13 +1231,7 @@ Proof.
         (proj1 (valid_trace_forget_last Htr)))
       as Heq_lst.
     simpl in Heq_lst.
-    match goal with
-    |- proper_equivocator_descriptors _ _ ?l =>
-      match type of Heq_lst with
-      | _ = ?l' =>
-        replace l with l'
-      end
-    end.
+    rewrite Heq_lst.
     intros e.
     destruct e.
     apply not_equivocating_equivocator_descriptors_proper in Hfinal_descriptors_m.
