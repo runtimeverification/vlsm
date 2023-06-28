@@ -4,7 +4,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
 From VLSM.Lib Require Import ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
-From VLSM.Core Require Export PreloadedVLSM ReachableThreshold.
+From VLSM.Core Require Export PreloadedVLSM ConstrainedVLSM ReachableThreshold.
 
 (** * VLSM Equivocation Definitions
 
@@ -1077,6 +1077,29 @@ Proof.
   - by apply preloaded_has_been_sent_stepwise_props.
 Defined.
 
+Lemma constrained_has_been_sent_stepwise_props
+  `(X : VLSM message)
+  `{HasBeenSentCapability message X}
+  (constraint : label X -> state X * option message -> Prop) :
+  has_been_sent_stepwise_prop (vlsm := constrained_vlsm X constraint) (has_been_sent X).
+Proof.
+  destruct (has_been_sent_stepwise_props X); cbn in *.
+  split; [done |].
+  cbn; intros.
+  eapply oracle_step_update0, VLSM_incl_input_valid_transition; [| done].
+  by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
+Qed.
+
+#[export] Instance constrained_vlsm_HasBeenSentCapability
+  `(X : VLSM message) `{HasBeenSentCapability message X}
+  (constraint : label X -> state X * option message -> Prop)
+  : HasBeenSentCapability (constrained_vlsm X constraint).
+Proof.
+  econstructor.
+  - by apply (has_been_sent_dec X).
+  - by apply constrained_has_been_sent_stepwise_props.
+Defined.
+
 Lemma has_been_sent_examine_one_trace
   `{HasBeenSentCapability message vlsm} :
   forall is s tr,
@@ -1116,6 +1139,29 @@ Proof.
   econstructor.
   - by apply (has_been_received_dec vlsm).
   - by apply preloaded_has_been_received_stepwise_props.
+Defined.
+
+Lemma constrained_has_been_received_stepwise_props
+  `(X : VLSM message)
+  `{HasBeenReceivedCapability message X}
+  (constraint : label X -> state X * option message -> Prop) :
+  has_been_received_stepwise_prop (vlsm := constrained_vlsm X constraint) (has_been_received X).
+Proof.
+  destruct (has_been_received_stepwise_props X); cbn in *.
+  split; [done |].
+  cbn; intros.
+  eapply oracle_step_update0, VLSM_incl_input_valid_transition; [| done].
+  by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
+Qed.
+
+#[export] Instance constrained_vlsm_HasBeenReceivedCapability
+  `(X : VLSM message) `{HasBeenReceivedCapability message X}
+  (constraint : label X -> state X * option message -> Prop)
+  : HasBeenReceivedCapability (constrained_vlsm X constraint).
+Proof.
+  econstructor.
+  - by apply (has_been_received_dec X).
+  - by apply constrained_has_been_received_stepwise_props.
 Defined.
 
 Lemma has_been_received_examine_one_trace
@@ -1775,15 +1821,6 @@ Proof.
   by intros l; specialize (Hstep l); destruct l.
 Qed.
 
-#[export] Instance composite_HasBeenSentCapability
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : HasBeenSentCapability X :=
-  Build_HasBeenSentCapability X
-    composite_has_been_sent
-    composite_has_been_sent_dec
-    (composite_has_been_sent_stepwise_props constraint).
-
 Lemma free_composite_has_been_sent_stepwise_props
   (X := free_composite_vlsm IM)
   : has_been_sent_stepwise_prop (vlsm := X) composite_has_been_sent.
@@ -1846,21 +1883,6 @@ Proof.
   by intros l; specialize (Hstep l); destruct l.
 Qed.
 
-#[export] Instance composite_HasBeenReceivedCapability
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : HasBeenReceivedCapability X :=
-  Build_HasBeenReceivedCapability X
-    composite_has_been_received
-    composite_has_been_received_dec
-    (composite_has_been_received_stepwise_props constraint).
-
-#[export] Instance composite_HasBeenDirectlyObservedCapability
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : HasBeenDirectlyObservedCapability X :=
-  HasBeenDirectlyObservedCapability_from_sent_received X.
-
 Lemma free_composite_has_been_received_stepwise_props
   (X := free_composite_vlsm IM)
   : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
@@ -1882,6 +1904,12 @@ Qed.
 
 #[export] Instance free_composite_HasBeenDirectlyObservedCapability
   (X := free_composite_vlsm IM)
+  : HasBeenDirectlyObservedCapability X :=
+  HasBeenDirectlyObservedCapability_from_sent_received X.
+
+#[export] Instance constrained_vlsm_HasBeenDirectlyObservedCapability
+  `(X : VLSM message) `{HasBeenSentCapability message X} `{HasBeenReceivedCapability message X}
+  (constraint : label X -> state X * option message -> Prop)
   : HasBeenDirectlyObservedCapability X :=
   HasBeenDirectlyObservedCapability_from_sent_received X.
 
