@@ -2065,20 +2065,6 @@ Proof.
   by apply constraint_free_incl.
 Qed.
 
-Lemma composite_no_initial_valid_messages_have_sender
-    (can_emit_signed : channel_authentication_prop)
-    (no_initial_messages_in_IM : no_initial_messages_in_IM_prop)
-    (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-    (X := composite_vlsm IM constraint)
-    : forall (m : message) (Hm : valid_message_prop X m), sender m <> None.
-Proof.
-  intros m Hm.
-  cut (exists v : validator, sender m = Some v /\
-    can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
-  - by intros (v & -> & _); congruence.
-  - by eapply composite_no_initial_valid_messages_emitted_by_sender.
-Qed.
-
 Lemma free_composite_no_initial_valid_messages_have_sender
   (can_emit_signed : channel_authentication_prop)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop) :
@@ -2090,6 +2076,19 @@ Proof.
     can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
   - by intros (v & -> & _); congruence.
   - by apply free_composite_no_initial_valid_messages_emitted_by_sender.
+Qed.
+
+Lemma composite_no_initial_valid_messages_have_sender
+    (can_emit_signed : channel_authentication_prop)
+    (no_initial_messages_in_IM : no_initial_messages_in_IM_prop)
+    (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+    (X := composite_vlsm IM constraint)
+    : forall (m : message) (Hm : valid_message_prop X m), sender m <> None.
+Proof.
+  intros m Hm.
+  apply free_composite_no_initial_valid_messages_have_sender; [done.. |].
+  eapply VLSM_incl_valid_message with X; [| by do 2 red | done].
+  by apply constraint_free_incl.
 Qed.
 
 Lemma composite_emitted_by_validator_have_sender
