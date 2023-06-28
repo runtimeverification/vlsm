@@ -1809,18 +1809,6 @@ Proof.
   - by typeclasses eauto.
 Qed.
 
-Lemma composite_has_been_sent_stepwise_props
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : has_been_sent_stepwise_prop (vlsm := X) composite_has_been_sent.
-Proof.
-  unfold has_been_sent_stepwise_props.
-  pose proof (composite_stepwise_props (fun i => has_been_sent_stepwise_props (IM i)))
-    as [Hinits Hstep].
-  split; [done |].
-  by intros l; specialize (Hstep l); destruct l.
-Qed.
-
 Lemma free_composite_has_been_sent_stepwise_props
   (X := free_composite_vlsm IM)
   : has_been_sent_stepwise_prop (vlsm := X) composite_has_been_sent.
@@ -1871,18 +1859,6 @@ Proof.
   - by typeclasses eauto.
 Qed.
 
-Lemma composite_has_been_received_stepwise_props
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
-Proof.
-  unfold has_been_received_stepwise_props.
-  pose proof (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)))
-    as [Hinits Hstep].
-  split; [done |].
-  by intros l; specialize (Hstep l); destruct l.
-Qed.
-
 Lemma free_composite_has_been_received_stepwise_props
   (X := free_composite_vlsm IM)
   : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
@@ -1912,31 +1888,6 @@ Qed.
   (constraint : label X -> state X * option message -> Prop)
   : HasBeenDirectlyObservedCapability X :=
   HasBeenDirectlyObservedCapability_from_sent_received X.
-
-Lemma preloaded_composite_has_been_received_stepwise_props
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
-Proof.
-  unfold has_been_received_stepwise_prop.
-  destruct (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)) constraint)
-    as [Hinits Hstep].
-  split; [done |].
-  intros l **; specialize (Hstep l); destruct l; cbn in *.
-  eapply Hstep with om, VLSM_incl_input_valid_transition; [| done].
-  by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
-Qed.
-
-Definition preloaded_composite_HasBeenReceivedCapability
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  : HasBeenReceivedCapability X :=
-  Build_HasBeenReceivedCapability X
-    composite_has_been_received
-    composite_has_been_received_dec
-    (preloaded_composite_has_been_received_stepwise_props constraint seed).
 
 End sec_composite_has_been_received.
 
@@ -1981,16 +1932,6 @@ Proof.
   split; [done |].
   by intros l; specialize (Hstep l); destruct l.
 Qed.
-
-Definition composite_HasBeenDirectlyObservedCapability_from_stepwise
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : HasBeenDirectlyObservedCapability X.
-Proof.
-  exists composite_has_been_directly_observed.
-  - by apply composite_has_been_directly_observed_dec.
-  - by apply (composite_has_been_directly_observed_stepwise_props constraint).
-Defined.
 
 Context
       {validator : Type}
