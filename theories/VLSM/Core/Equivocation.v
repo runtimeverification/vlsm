@@ -1662,74 +1662,43 @@ Defined.
 Definition composite_oracle : composite_state IM -> message -> Prop :=
   fun s msg => exists i, oracles i (s i) msg.
 
+Lemma free_composite_stepwise_props :
+  oracle_stepwise_props (vlsm := free_composite_vlsm IM) composite_message_selector composite_oracle.
+Proof.
+  split; [by intros s Hs m []; eapply oracle_no_inits |].
+  intros [i li] s im s' om Hproto msg; cbn.
+  assert (Hsj : forall j : index, s j = s' j \/ j = i).
+  {
+    intro j.
+    apply (input_valid_transition_preloaded_project_any_free j) in Hproto.
+    by destruct Hproto as [| (lj & Hlj & _)]; [left | right; congruence].
+  }
+  apply input_valid_transition_preloaded_project_active_free in Hproto; simpl in Hproto.
+  apply (oracle_step_update (stepwise_props i)) with (msg := msg) in Hproto.
+  split.
+  - intros [j Hj].
+    destruct (Hsj j) as [Hunchanged | ->].
+    + by right; exists j; rewrite Hunchanged.
+    + apply Hproto in Hj.
+      by destruct Hj; [left | right; exists i].
+  - intros [Hnow | [j Hbefore]].
+    + by exists i; apply Hproto; left.
+    + exists j.
+      destruct (Hsj j) as [<- | ->]; [done |].
+      by apply Hproto; right.
+Qed.
+
 Lemma composite_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   : oracle_stepwise_props (vlsm := X) composite_message_selector composite_oracle.
 Proof.
+  destruct free_composite_stepwise_props.
   split.
-  - intros s Hs m [i Horacle].
-    revert Horacle.
-    apply (oracle_no_inits (stepwise_props i)).
-    by apply Hs.
-  - (* step update property *)
-    intros l s im s' om Hproto msg.
-    destruct l as [i li].
-    simpl.
-    assert (Hsj : forall j, s j = s' j \/ j = i).
-    {
-      intro j.
-      apply (input_valid_transition_preloaded_project_any j) in Hproto.
-      by destruct Hproto as [| (lj & Hlj & _)]; [left | right; congruence].
-    }
-    apply input_valid_transition_preloaded_project_active in Hproto; simpl in Hproto.
-    apply (oracle_step_update (stepwise_props i)) with (msg := msg) in Hproto.
-    split.
-    + intros [j Hj].
-      destruct (Hsj j) as [Hunchanged | Hji].
-      * by right; exists j; rewrite Hunchanged.
-      * subst j.
-        apply Hproto in Hj.
-        by destruct Hj; [left | right; exists i].
-    + intros [Hnow | [j Hbefore]].
-      * by exists i; apply Hproto; left.
-      * exists j.
-        destruct (Hsj j) as [Hunchanged | ->].
-        -- by rewrite <- Hunchanged.
-        -- by apply Hproto; right.
-Qed.
-
-Lemma free_composite_stepwise_props :
-  oracle_stepwise_props (vlsm := free_composite_vlsm IM) composite_message_selector composite_oracle.
-Proof.
-  split.
-  - intros s Hs m [i Horacle].
-    revert Horacle.
-    by apply (oracle_no_inits (stepwise_props i)).
-  - (* step update property *)
-    intros l s im s' om Hproto msg.
-    destruct l as [i li].
-    simpl.
-    assert (Hsj : forall j, s j = s' j \/ j = i).
-    {
-      intro j.
-      apply (input_valid_transition_preloaded_project_any_free j) in Hproto.
-      by destruct Hproto as [| (lj & Hlj & _)]; [left | right; congruence].
-    }
-    apply input_valid_transition_preloaded_project_active_free in Hproto; simpl in Hproto.
-    apply (oracle_step_update (stepwise_props i)) with (msg := msg) in Hproto.
-    split.
-    + intros [j Hj].
-      destruct (Hsj j) as [Hunchanged | Hji].
-      * by right; exists j; rewrite Hunchanged.
-      * subst j.
-        apply Hproto in Hj.
-        by destruct Hj; [left | right; exists i].
-    + intros [Hnow | [j Hbefore]].
-      * by exists i; apply Hproto; left.
-      * exists j.
-        destruct (Hsj j) as [<- | ->]; [done |].
-        by apply Hproto; right.
+  - by apply oracle_no_inits0.
+  - intros; apply oracle_step_update0.
+    apply (@VLSM_incl_input_valid_transition _ _ (pre_loaded_with_all_messages_vlsm X)); [| done].
+    by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
 Lemma oracle_component_selected_previously
