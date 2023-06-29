@@ -2844,22 +2844,6 @@ Context
   Hence, given any pre_loaded trace leading to <<s>>, all messages received
   within it must be valid, thus the trace itself is valid.
 *)
-Lemma all_pre_traces_to_valid_state_are_valid
-  (s is : state PreX) (tr : list (transition_item PreX))
-  (Hs : valid_state_prop X s)
-  (Htr : finite_valid_trace_init_to PreX is s tr)
-  : finite_valid_trace_init_to X is s tr.
-Proof.
-  apply pre_traces_with_valid_inputs_are_valid in Htr; [done |].
-  apply valid_trace_last_pstate in Htr as Hspre.
-  intros.
-  eapply received_valid; [done |].
-  specialize (proper_received _ s Hspre m) as Hproper.
-  apply proj2 in Hproper. apply Hproper.
-  apply has_been_received_consistency; [by typeclasses eauto | done |].
-  by exists is, tr, Htr.
-Qed.
-
 Lemma all_pre_traces_to_valid_state_are_valid_free
   (s is : state PreY) (tr : list (transition_item PreY))
   (Hs : valid_state_prop Y s)
