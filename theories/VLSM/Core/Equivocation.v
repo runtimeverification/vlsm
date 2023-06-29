@@ -2290,20 +2290,6 @@ Proof.
   by apply (sent_valid X s); [| exists i].
 Qed.
 
-Lemma preloaded_messages_sent_from_component_of_valid_state_are_valid
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  (s : composite_state IM)
-  (Hs : valid_state_prop X s)
-  (i : index)
-  (m : message)
-  (Hsent : has_been_sent (IM i) (s i) m) :
-  valid_message_prop X m.
-Proof.
-  by eapply sent_valid; [| exists i].
-Qed.
-
 Lemma preloaded_messages_sent_from_component_of_valid_state_are_valid_free
   (seed : message -> Prop)
   (X := pre_loaded_vlsm (free_composite_vlsm IM) seed)
@@ -2320,20 +2306,6 @@ Qed.
 Lemma messages_received_from_component_of_valid_state_are_valid
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  (s : composite_state IM)
-  (Hs : valid_state_prop X s)
-  (i : index)
-  (m : message)
-  (Hreceived : has_been_received (IM i) (s i) m)
-  : valid_message_prop X m.
-Proof.
-  by eapply received_valid; [| exists i].
-Qed.
-
-Lemma preloaded_messages_received_from_component_of_valid_state_are_valid
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
   (s : composite_state IM)
   (Hs : valid_state_prop X s)
   (i : index)
@@ -2411,26 +2383,6 @@ Proof.
     + by eapply messages_received_from_component_of_valid_state_are_valid.
     + by eapply messages_sent_from_component_of_valid_state_are_valid.
   - by eapply valid_state_project_preloaded.
-Qed.
-
-Lemma preloaded_composite_directly_observed_valid
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  (s : composite_state IM)
-  (Hs : valid_state_prop X s)
-  (m : message)
-  (Hobserved : composite_has_been_directly_observed s m)
-  : valid_message_prop X m.
-Proof.
-  destruct Hobserved as [i Hobserved].
-  apply (has_been_directly_observed_sent_received_iff (IM i)) in Hobserved.
-  - destruct Hobserved as [Hreceived | Hsent].
-    + by eapply preloaded_messages_received_from_component_of_valid_state_are_valid.
-    + by eapply preloaded_messages_sent_from_component_of_valid_state_are_valid.
-  - eapply valid_state_project_preloaded_to_preloaded.
-    eapply VLSM_incl_valid_state; [| done].
-    by rapply @pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma preloaded_free_composite_directly_observed_valid
