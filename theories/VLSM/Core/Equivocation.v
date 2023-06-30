@@ -4,7 +4,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
 From VLSM.Lib Require Import ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
-From VLSM.Core Require Export PreloadedVLSM ReachableThreshold.
+From VLSM.Core Require Export PreloadedVLSM ConstrainedVLSM ReachableThreshold.
 
 (** * VLSM Equivocation Definitions
 
@@ -1077,6 +1077,29 @@ Proof.
   - by apply preloaded_has_been_sent_stepwise_props.
 Defined.
 
+Lemma constrained_has_been_sent_stepwise_props
+  `(X : VLSM message)
+  `{HasBeenSentCapability message X}
+  (constraint : label X -> state X * option message -> Prop) :
+  has_been_sent_stepwise_prop (vlsm := constrained_vlsm X constraint) (has_been_sent X).
+Proof.
+  destruct (has_been_sent_stepwise_props X); cbn in *.
+  split; [done |].
+  cbn; intros.
+  eapply oracle_step_update0, VLSM_incl_input_valid_transition; [| done].
+  by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
+Qed.
+
+#[export] Instance constrained_vlsm_HasBeenSentCapability
+  `(X : VLSM message) `{HasBeenSentCapability message X}
+  (constraint : label X -> state X * option message -> Prop)
+  : HasBeenSentCapability (constrained_vlsm X constraint).
+Proof.
+  econstructor.
+  - by apply (has_been_sent_dec X).
+  - by apply constrained_has_been_sent_stepwise_props.
+Defined.
+
 Lemma has_been_sent_examine_one_trace
   `{HasBeenSentCapability message vlsm} :
   forall is s tr,
@@ -1116,6 +1139,29 @@ Proof.
   econstructor.
   - by apply (has_been_received_dec vlsm).
   - by apply preloaded_has_been_received_stepwise_props.
+Defined.
+
+Lemma constrained_has_been_received_stepwise_props
+  `(X : VLSM message)
+  `{HasBeenReceivedCapability message X}
+  (constraint : label X -> state X * option message -> Prop) :
+  has_been_received_stepwise_prop (vlsm := constrained_vlsm X constraint) (has_been_received X).
+Proof.
+  destruct (has_been_received_stepwise_props X); cbn in *.
+  split; [done |].
+  cbn; intros.
+  eapply oracle_step_update0, VLSM_incl_input_valid_transition; [| done].
+  by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
+Qed.
+
+#[export] Instance constrained_vlsm_HasBeenReceivedCapability
+  `(X : VLSM message) `{HasBeenReceivedCapability message X}
+  (constraint : label X -> state X * option message -> Prop)
+  : HasBeenReceivedCapability (constrained_vlsm X constraint).
+Proof.
+  econstructor.
+  - by apply (has_been_received_dec X).
+  - by apply constrained_has_been_received_stepwise_props.
 Defined.
 
 Lemma has_been_received_examine_one_trace
@@ -1662,74 +1708,43 @@ Defined.
 Definition composite_oracle : composite_state IM -> message -> Prop :=
   fun s msg => exists i, oracles i (s i) msg.
 
+Lemma free_composite_stepwise_props :
+  oracle_stepwise_props (vlsm := free_composite_vlsm IM) composite_message_selector composite_oracle.
+Proof.
+  split; [by intros s Hs m []; eapply oracle_no_inits |].
+  intros [i li] s im s' om Hproto msg; cbn.
+  assert (Hsj : forall j : index, s j = s' j \/ j = i).
+  {
+    intro j.
+    apply (input_valid_transition_preloaded_project_any_free j) in Hproto.
+    by destruct Hproto as [| (lj & Hlj & _)]; [left | right; congruence].
+  }
+  apply input_valid_transition_preloaded_project_active_free in Hproto; simpl in Hproto.
+  apply (oracle_step_update (stepwise_props i)) with (msg := msg) in Hproto.
+  split.
+  - intros [j Hj].
+    destruct (Hsj j) as [Hunchanged | ->].
+    + by right; exists j; rewrite Hunchanged.
+    + apply Hproto in Hj.
+      by destruct Hj; [left | right; exists i].
+  - intros [Hnow | [j Hbefore]].
+    + by exists i; apply Hproto; left.
+    + exists j.
+      destruct (Hsj j) as [<- | ->]; [done |].
+      by apply Hproto; right.
+Qed.
+
 Lemma composite_stepwise_props
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   : oracle_stepwise_props (vlsm := X) composite_message_selector composite_oracle.
 Proof.
+  destruct free_composite_stepwise_props.
   split.
-  - intros s Hs m [i Horacle].
-    revert Horacle.
-    apply (oracle_no_inits (stepwise_props i)).
-    by apply Hs.
-  - (* step update property *)
-    intros l s im s' om Hproto msg.
-    destruct l as [i li].
-    simpl.
-    assert (Hsj : forall j, s j = s' j \/ j = i).
-    {
-      intro j.
-      apply (input_valid_transition_preloaded_project_any j) in Hproto.
-      by destruct Hproto as [| (lj & Hlj & _)]; [left | right; congruence].
-    }
-    apply input_valid_transition_preloaded_project_active in Hproto; simpl in Hproto.
-    apply (oracle_step_update (stepwise_props i)) with (msg := msg) in Hproto.
-    split.
-    + intros [j Hj].
-      destruct (Hsj j) as [Hunchanged | Hji].
-      * by right; exists j; rewrite Hunchanged.
-      * subst j.
-        apply Hproto in Hj.
-        by destruct Hj; [left | right; exists i].
-    + intros [Hnow | [j Hbefore]].
-      * by exists i; apply Hproto; left.
-      * exists j.
-        destruct (Hsj j) as [Hunchanged | ->].
-        -- by rewrite <- Hunchanged.
-        -- by apply Hproto; right.
-Qed.
-
-Lemma free_composite_stepwise_props :
-  oracle_stepwise_props (vlsm := free_composite_vlsm IM) composite_message_selector composite_oracle.
-Proof.
-  split.
-  - intros s Hs m [i Horacle].
-    revert Horacle.
-    by apply (oracle_no_inits (stepwise_props i)).
-  - (* step update property *)
-    intros l s im s' om Hproto msg.
-    destruct l as [i li].
-    simpl.
-    assert (Hsj : forall j, s j = s' j \/ j = i).
-    {
-      intro j.
-      apply (input_valid_transition_preloaded_project_any_free j) in Hproto.
-      by destruct Hproto as [| (lj & Hlj & _)]; [left | right; congruence].
-    }
-    apply input_valid_transition_preloaded_project_active_free in Hproto; simpl in Hproto.
-    apply (oracle_step_update (stepwise_props i)) with (msg := msg) in Hproto.
-    split.
-    + intros [j Hj].
-      destruct (Hsj j) as [Hunchanged | Hji].
-      * by right; exists j; rewrite Hunchanged.
-      * subst j.
-        apply Hproto in Hj.
-        by destruct Hj; [left | right; exists i].
-    + intros [Hnow | [j Hbefore]].
-      * by exists i; apply Hproto; left.
-      * exists j.
-        destruct (Hsj j) as [<- | ->]; [done |].
-        by apply Hproto; right.
+  - by apply oracle_no_inits0.
+  - intros; apply oracle_step_update0.
+    apply (@VLSM_incl_input_valid_transition _ _ (pre_loaded_with_all_messages_vlsm X)); [| done].
+    by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
 Lemma oracle_component_selected_previously
@@ -1794,27 +1809,6 @@ Proof.
   - by typeclasses eauto.
 Qed.
 
-Lemma composite_has_been_sent_stepwise_props
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : has_been_sent_stepwise_prop (vlsm := X) composite_has_been_sent.
-Proof.
-  unfold has_been_sent_stepwise_props.
-  pose proof (composite_stepwise_props (fun i => has_been_sent_stepwise_props (IM i)))
-    as [Hinits Hstep].
-  split; [done |].
-  by intros l; specialize (Hstep l); destruct l.
-Qed.
-
-#[export] Instance composite_HasBeenSentCapability
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : HasBeenSentCapability X :=
-  Build_HasBeenSentCapability X
-    composite_has_been_sent
-    composite_has_been_sent_dec
-    (composite_has_been_sent_stepwise_props constraint).
-
 Lemma free_composite_has_been_sent_stepwise_props
   (X := free_composite_vlsm IM)
   : has_been_sent_stepwise_prop (vlsm := X) composite_has_been_sent.
@@ -1865,33 +1859,6 @@ Proof.
   - by typeclasses eauto.
 Qed.
 
-Lemma composite_has_been_received_stepwise_props
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
-Proof.
-  unfold has_been_received_stepwise_props.
-  pose proof (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)))
-    as [Hinits Hstep].
-  split; [done |].
-  by intros l; specialize (Hstep l); destruct l.
-Qed.
-
-#[export] Instance composite_HasBeenReceivedCapability
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : HasBeenReceivedCapability X :=
-  Build_HasBeenReceivedCapability X
-    composite_has_been_received
-    composite_has_been_received_dec
-    (composite_has_been_received_stepwise_props constraint).
-
-#[export] Instance composite_HasBeenDirectlyObservedCapability
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : HasBeenDirectlyObservedCapability X :=
-  HasBeenDirectlyObservedCapability_from_sent_received X.
-
 Lemma free_composite_has_been_received_stepwise_props
   (X := free_composite_vlsm IM)
   : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
@@ -1916,30 +1883,11 @@ Qed.
   : HasBeenDirectlyObservedCapability X :=
   HasBeenDirectlyObservedCapability_from_sent_received X.
 
-Lemma preloaded_composite_has_been_received_stepwise_props
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  : has_been_received_stepwise_prop (vlsm := X) composite_has_been_received.
-Proof.
-  unfold has_been_received_stepwise_prop.
-  destruct (composite_stepwise_props (fun i => has_been_received_stepwise_props (IM i)) constraint)
-    as [Hinits Hstep].
-  split; [done |].
-  intros l **; specialize (Hstep l); destruct l; cbn in *.
-  eapply Hstep with om, VLSM_incl_input_valid_transition; [| done].
-  by apply basic_VLSM_strong_incl; do 2 red; cbn; itauto.
-Qed.
-
-Definition preloaded_composite_HasBeenReceivedCapability
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  : HasBeenReceivedCapability X :=
-  Build_HasBeenReceivedCapability X
-    composite_has_been_received
-    composite_has_been_received_dec
-    (preloaded_composite_has_been_received_stepwise_props constraint seed).
+#[export] Instance constrained_vlsm_HasBeenDirectlyObservedCapability
+  `(X : VLSM message) `{HasBeenSentCapability message X} `{HasBeenReceivedCapability message X}
+  (constraint : label X -> state X * option message -> Prop)
+  : HasBeenDirectlyObservedCapability X :=
+  HasBeenDirectlyObservedCapability_from_sent_received X.
 
 End sec_composite_has_been_received.
 
@@ -1984,16 +1932,6 @@ Proof.
   split; [done |].
   by intros l; specialize (Hstep l); destruct l.
 Qed.
-
-Definition composite_HasBeenDirectlyObservedCapability_from_stepwise
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (X := composite_vlsm IM constraint)
-  : HasBeenDirectlyObservedCapability X.
-Proof.
-  exists composite_has_been_directly_observed.
-  - by apply composite_has_been_directly_observed_dec.
-  - by apply (composite_has_been_directly_observed_stepwise_props constraint).
-Defined.
 
 Context
       {validator : Type}
@@ -2088,30 +2026,6 @@ Definition sender_nontriviality_prop : Prop :=
 Definition no_initial_messages_in_IM_prop : Prop :=
   forall i m, ~ initial_message_prop (IM i) m.
 
-Lemma composite_no_initial_valid_messages_emitted_by_sender
-    (can_emit_signed : channel_authentication_prop)
-    (no_initial_messages_in_IM : no_initial_messages_in_IM_prop)
-    (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-    (X := composite_vlsm IM constraint)
-    : forall (m : message), valid_message_prop X m ->
-      exists v, sender m = Some v /\
-        can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m.
-Proof.
-  intro m.
-  rewrite emitted_messages_are_valid_iff.
-  intros [[i [[mi Hmi] _]] | [(s, om) [(i, l) [s' Ht]]]]
-  ; [by contradict Hmi; apply no_initial_messages_in_IM |].
-  apply (VLSM_incl_input_valid_transition (constraint_preloaded_free_incl IM _)) in Ht.
-  apply pre_loaded_with_all_messages_projection_input_valid_transition_eq
-    with (j := i) in Ht; [| done]; cbn in Ht.
-  specialize (can_emit_signed i m).
-  spec can_emit_signed; [by eexists _, _, _ |].
-  unfold channel_authenticated_message in can_emit_signed.
-  destruct (sender m) as [v |] eqn: Hsender; [| by inversion can_emit_signed].
-  apply Some_inj in can_emit_signed.
-  by exists v; subst; unfold can_emit; eauto.
-Qed.
-
 Lemma free_composite_no_initial_valid_messages_emitted_by_sender
   (can_emit_signed : channel_authentication_prop)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop)
@@ -2136,18 +2050,19 @@ Proof.
   by exists v; subst; unfold can_emit; eauto.
 Qed.
 
-Lemma composite_no_initial_valid_messages_have_sender
+Lemma composite_no_initial_valid_messages_emitted_by_sender
     (can_emit_signed : channel_authentication_prop)
     (no_initial_messages_in_IM : no_initial_messages_in_IM_prop)
     (constraint : composite_label IM -> composite_state IM * option message -> Prop)
     (X := composite_vlsm IM constraint)
-    : forall (m : message) (Hm : valid_message_prop X m), sender m <> None.
+    : forall (m : message), valid_message_prop X m ->
+      exists v, sender m = Some v /\
+        can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m.
 Proof.
-  intros m Hm.
-  cut (exists v : validator, sender m = Some v /\
-    can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
-  - by intros (v & -> & _); congruence.
-  - by eapply composite_no_initial_valid_messages_emitted_by_sender.
+  intros.
+  apply free_composite_no_initial_valid_messages_emitted_by_sender; [done.. |].
+  eapply VLSM_incl_valid_message with X; [| by do 2 red | done].
+  by apply constraint_free_incl.
 Qed.
 
 Lemma free_composite_no_initial_valid_messages_have_sender
@@ -2161,6 +2076,19 @@ Proof.
     can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
   - by intros (v & -> & _); congruence.
   - by apply free_composite_no_initial_valid_messages_emitted_by_sender.
+Qed.
+
+Lemma composite_no_initial_valid_messages_have_sender
+    (can_emit_signed : channel_authentication_prop)
+    (no_initial_messages_in_IM : no_initial_messages_in_IM_prop)
+    (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+    (X := composite_vlsm IM constraint)
+    : forall (m : message) (Hm : valid_message_prop X m), sender m <> None.
+Proof.
+  intros m Hm.
+  apply free_composite_no_initial_valid_messages_have_sender; [done.. |].
+  eapply VLSM_incl_valid_message with X; [| by do 2 red | done].
+  by apply constraint_free_incl.
 Qed.
 
 Lemma composite_emitted_by_validator_have_sender
@@ -2362,20 +2290,6 @@ Proof.
   by apply (sent_valid X s); [| exists i].
 Qed.
 
-Lemma preloaded_messages_sent_from_component_of_valid_state_are_valid
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  (s : composite_state IM)
-  (Hs : valid_state_prop X s)
-  (i : index)
-  (m : message)
-  (Hsent : has_been_sent (IM i) (s i) m) :
-  valid_message_prop X m.
-Proof.
-  by eapply sent_valid; [| exists i].
-Qed.
-
 Lemma preloaded_messages_sent_from_component_of_valid_state_are_valid_free
   (seed : message -> Prop)
   (X := pre_loaded_vlsm (free_composite_vlsm IM) seed)
@@ -2392,20 +2306,6 @@ Qed.
 Lemma messages_received_from_component_of_valid_state_are_valid
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  (s : composite_state IM)
-  (Hs : valid_state_prop X s)
-  (i : index)
-  (m : message)
-  (Hreceived : has_been_received (IM i) (s i) m)
-  : valid_message_prop X m.
-Proof.
-  by eapply received_valid; [| exists i].
-Qed.
-
-Lemma preloaded_messages_received_from_component_of_valid_state_are_valid
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
   (s : composite_state IM)
   (Hs : valid_state_prop X s)
   (i : index)
@@ -2483,26 +2383,6 @@ Proof.
     + by eapply messages_received_from_component_of_valid_state_are_valid.
     + by eapply messages_sent_from_component_of_valid_state_are_valid.
   - by eapply valid_state_project_preloaded.
-Qed.
-
-Lemma preloaded_composite_directly_observed_valid
-  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-  (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
-  (s : composite_state IM)
-  (Hs : valid_state_prop X s)
-  (m : message)
-  (Hobserved : composite_has_been_directly_observed s m)
-  : valid_message_prop X m.
-Proof.
-  destruct Hobserved as [i Hobserved].
-  apply (has_been_directly_observed_sent_received_iff (IM i)) in Hobserved.
-  - destruct Hobserved as [Hreceived | Hsent].
-    + by eapply preloaded_messages_received_from_component_of_valid_state_are_valid.
-    + by eapply preloaded_messages_sent_from_component_of_valid_state_are_valid.
-  - eapply valid_state_project_preloaded_to_preloaded.
-    eapply VLSM_incl_valid_state; [| done].
-    by rapply @pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma preloaded_free_composite_directly_observed_valid
@@ -2964,22 +2844,6 @@ Context
   Hence, given any pre_loaded trace leading to <<s>>, all messages received
   within it must be valid, thus the trace itself is valid.
 *)
-Lemma all_pre_traces_to_valid_state_are_valid
-  (s is : state PreX) (tr : list (transition_item PreX))
-  (Hs : valid_state_prop X s)
-  (Htr : finite_valid_trace_init_to PreX is s tr)
-  : finite_valid_trace_init_to X is s tr.
-Proof.
-  apply pre_traces_with_valid_inputs_are_valid in Htr; [done |].
-  apply valid_trace_last_pstate in Htr as Hspre.
-  intros.
-  eapply received_valid; [done |].
-  specialize (proper_received _ s Hspre m) as Hproper.
-  apply proj2 in Hproper. apply Hproper.
-  apply has_been_received_consistency; [by typeclasses eauto | done |].
-  by exists is, tr, Htr.
-Qed.
-
 Lemma all_pre_traces_to_valid_state_are_valid_free
   (s is : state PreY) (tr : list (transition_item PreY))
   (Hs : valid_state_prop Y s)
