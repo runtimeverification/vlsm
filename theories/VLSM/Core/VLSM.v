@@ -523,7 +523,7 @@ Qed.
   We also include the more intuitive, mutually recursive definition
   of valid states and messages.
   This definition has three cases for [valid_message_mrec]:
-  - [None] is a valid message ([valid_None_message_mrec]);
+  - [None] is a valid message ([valid_message_mrec_None]);
   - if <<m>> is an optional <<message>> with the [initial_message_prop]erty,
     then it constitutes a valid message 
   - for all [state]s <<st>>, [option]al <<message>>s <<om>>, and [label] <<l>>:
@@ -544,14 +544,14 @@ Qed.
 *)
 
 Inductive valid_message_mrec : option message -> Prop :=
-| valid_None_message_mrec : valid_message_mrec None
-| valid_initial_message_mrec : forall m, initial_message_prop X m -> valid_message_mrec (Some m)
-| valid_generated_message_mrec : forall {l : label X} {om om' : option message} {st st' : state X},
+| valid_message_mrec_None : valid_message_mrec None
+| valid_message_mrec_initial : forall m, initial_message_prop X m -> valid_message_mrec (Some m)
+| valid_message_mrec_generated : forall {l : label X} {om om' : option message} {st st' : state X},
     valid X l (st, om) -> valid_state_mrec st -> valid_message_mrec om ->
        transition X l (st, om) = (st', om') -> valid_message_mrec om'
 with valid_state_mrec : state X -> Prop :=
-| valid_initial_state_mrec : forall s, initial_state_prop X s -> valid_state_mrec s
-| valid_generated_state_mrec : forall {l : label X} {om om' : option message} {st st' : state X},
+| valid_state_mrec_initial : forall s, initial_state_prop X s -> valid_state_mrec s
+| valid_state_mrec_generated : forall {l : label X} {om om' : option message} {st st' : state X},
     valid X l (st, om) -> valid_state_mrec st -> valid_message_mrec om ->
       transition X l (st, om) = (st', om') -> valid_state_mrec st'.
 
@@ -577,15 +577,15 @@ Lemma valid_state_message_prop_impl_valid :
   valid_state_message_prop s om -> valid_message_mrec om /\ valid_state_mrec s.
 Proof.
   induction 1; split.
-  - by destruct om; [apply valid_initial_message_mrec | constructor].
-  - by apply valid_initial_state_mrec.
+  - by destruct om; [apply valid_message_mrec_initial | constructor].
+  - by apply valid_state_mrec_initial.
   - replace om' with (transition X l0 (s, om)).2
       by (cbn in Ht; rewrite Ht; done).
     rewrite Ht; cbn.
-    by eapply valid_generated_message_mrec; [done | itauto.. |].
+    by eapply valid_message_mrec_generated; [done | itauto.. |].
   - replace s' with (transition X l0 (s, om)).1
       by (cbn in Ht; rewrite Ht; done).
-    eapply valid_generated_state_mrec; [done | ..].
+    eapply valid_state_mrec_generated; [done | ..].
     + by apply IHvalid_state_message_prop1.
     + by apply IHvalid_state_message_prop2.
     + by rewrite Ht.
