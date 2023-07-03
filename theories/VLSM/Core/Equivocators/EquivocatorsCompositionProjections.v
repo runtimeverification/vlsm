@@ -1712,8 +1712,7 @@ Section sec_seeded_equivocators_valid_trace_project.
 Context
   (seed : message -> Prop)
   (SeededXE := seeded_equivocators_no_equivocation_vlsm IM selection seed)
-  (sub_equivocator_IM := sub_IM (equivocator_IM IM) selection)
-  (SubFreeE := free_composite_vlsm sub_equivocator_IM)
+  (SubFreeE := free_composite_vlsm (sub_IM (equivocator_IM IM) selection))
   (SubPreFreeE := pre_loaded_with_all_messages_vlsm SubFreeE)
   (SubFree := free_composite_vlsm (sub_IM IM selection))
   (SeededX := pre_loaded_vlsm SubFree seed)
@@ -1736,8 +1735,8 @@ Proof.
 Qed.
 
 Lemma seeded_equivocators_valid_trace_project
-  (is : composite_state sub_equivocator_IM)
-  (tr : list (composite_transition_item sub_equivocator_IM))
+  (is : composite_state _)
+  (tr : list (composite_transition_item _))
   (Htr : finite_valid_trace SeededXE is tr)
   (final_state := finite_trace_last is tr)
   (final_descriptors : equivocator_descriptors _)
@@ -1850,7 +1849,7 @@ Proof.
     ; [by apply initial_message_is_valid, seeded_equivocators_initial_message; right |].
     assert (Hs_free : valid_state_prop SubPreFreeE (finite_trace_last is tr'))
       by (apply proj1, finite_valid_trace_from_to_last_pstate in Hpre_tr_to; done).
-    apply (composite_proper_sent sub_equivocator_IM _ Hs_free) in Hno_equiv.
+    apply (composite_proper_sent _ _ Hs_free) in Hno_equiv.
     specialize (Hno_equiv is tr' Hpre_tr_to).
     apply finite_valid_trace_init_to_forget_last in Hpre_tr_to as Hpre_tr.
     destruct (equivocators_trace_project_output_reflecting_inv _ _ _ (proj1 Hpre_tr) _ Hno_equiv)
