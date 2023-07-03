@@ -21,14 +21,11 @@ Context {message : Type}
   (equivocators_no_equivocations_vlsm := equivocators_no_equivocations_vlsm IM)
   (equivocators_state_project := equivocators_state_project IM)
   (equivocator_IM := equivocator_IM IM)
-  (equivocator_descriptors_update := equivocator_descriptors_update IM)
   (FreeE := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (Free := free_composite_vlsm IM)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
-
-#[local] Hint Unfold equivocator_descriptors_update : state_update.
 
 (**
   Given a [transition_item] <<item>> in the compositions of equivocators
@@ -58,8 +55,8 @@ Definition equivocators_transition_item_project
       (Some (Build_transition_item Free
         (existT eqv (l item'))
         (input item) sx (output item))
-      , equivocator_descriptors_update eqv_descriptors eqv deqv')
-  | Some (None, deqv') => Some (None, equivocator_descriptors_update eqv_descriptors eqv deqv')
+      , equivocator_descriptors_update IM eqv_descriptors eqv deqv')
+  | Some (None, deqv') => Some (None, equivocator_descriptors_update IM eqv_descriptors eqv deqv')
   | None => None
   end.
 
@@ -96,7 +93,7 @@ Proof.
   | (let '(si', om') := ?t in _) = _ => destruct t as [si' om] eqn: Htei
   end.
   inversion Ht; subst; clear Ht.
-  replace idescriptors with (equivocator_descriptors_update descriptors i deqv')
+  replace idescriptors with (equivocator_descriptors_update IM descriptors i deqv')
     by (destruct oitemx; congruence); clear oitem Hpr.
   intros eqv Heqv. apply set_union_iff in Heqv. apply set_union_iff.
   destruct (decide (eqv = i)).
@@ -277,21 +274,19 @@ Proof.
   spec Hproject; [by rewrite (sigT_eta (l item)) in Hv |].
   spec Hproject; [by apply composite_transition_project_active in Ht |].
   destruct Hproject as [Heqv' [eqv [Heqv Hproject]]].
-  exists (equivocator_descriptors_update (zero_descriptor IM) (projT1 (l item)) eqv).
+  exists (equivocator_descriptors_update IM (zero_descriptor IM) (projT1 (l item)) eqv).
   split.
   {
     intro i. unfold equivocator_descriptors_update. destruct (decide (i = projT1 (l item))).
     - by subst; state_update_simpl.
-    - rewrite equivocator_descriptors_update_neq by done; cbn.
-      by rewrite equivocator_state_project_zero.
+    - by cbn; rewrite equivocator_state_project_zero.
   }
-  exists (equivocator_descriptors_update (zero_descriptor IM) (projT1 (l item))
+  exists (equivocator_descriptors_update IM (zero_descriptor IM) (projT1 (l item))
     (equivocator_label_descriptor (l (composite_transition_item_projection equivocator_IM item)))).
   split.
   { intro i. unfold equivocator_descriptors_update. destruct (decide (i = projT1 (l item))).
     - by subst; state_update_simpl.
-    - rewrite equivocator_descriptors_update_neq by done.
-      simpl. by rewrite equivocator_state_project_zero.
+    - by cbn; rewrite equivocator_state_project_zero.
   }
   unfold equivocators_transition_item_project.
   state_update_simpl.
@@ -320,7 +315,7 @@ Lemma equivocators_transition_item_project_proper_descriptor_characterization
       (Ht : composite_transition equivocator_IM (l item) (s, input item) =
               (destination item, output item)),
       proper_descriptor (IM i) (eqv_descriptors' i) (s i) /\
-      eqv_descriptors' = equivocator_descriptors_update eqv_descriptors i (eqv_descriptors' i) /\
+      eqv_descriptors' = equivocator_descriptors_update IM eqv_descriptors i (eqv_descriptors' i) /\
       s = state_update equivocator_IM (destination item) i (s i) /\
       previous_state_descriptor_prop (IM i) (eqv_descriptors i) (s i) (eqv_descriptors' i) /\
       match oitem with
@@ -404,7 +399,7 @@ Lemma equivocators_transition_item_project_proper_characterization
       (Ht : composite_transition equivocator_IM (l item) (s, input item) =
         (destination item, output item)),
       proper_equivocator_descriptors IM eqv_descriptors' s /\
-      eqv_descriptors' = equivocator_descriptors_update eqv_descriptors
+      eqv_descriptors' = equivocator_descriptors_update IM eqv_descriptors
                           (projT1 (l item)) (eqv_descriptors' (projT1 (l item))) /\
       s = state_update equivocator_IM (destination item) (projT1 (l item)) (s (projT1 (l item))) /\
       previous_state_descriptor_prop (IM (projT1 (l item))) (eqv_descriptors (projT1 (l item)))
@@ -1073,8 +1068,7 @@ Proof.
     intro e. specialize (IHtr e).
     destruct (decide (e = projT1 l)).
     + subst.
-      unfold equivocator_descriptors_update in IHtr;
-        rewrite equivocator_descriptors_update_eq in IHtr.
+      rewrite equivocator_descriptors_update_eq in IHtr.
       by cbn; rewrite Hfinali.
     + state_update_simpl.
       destruct Ht as [Hv Ht]; cbn in Ht.
@@ -1157,7 +1151,7 @@ Proof.
   match type of Heqv_final with
   | existing_descriptor _ _ (?l i) => remember l as final
   end.
-  remember (equivocator_descriptors_update (zero_descriptor IM) i eqv_final) as final_descriptors.
+  remember (equivocator_descriptors_update IM (zero_descriptor IM) i eqv_final) as final_descriptors.
   assert (Hfinal_descriptors : not_equivocating_equivocator_descriptors IM final_descriptors final).
   {
     intro eqv. subst final_descriptors.
@@ -1938,15 +1932,12 @@ Context {message : Type}
   (equivocators_no_equivocations_vlsm := equivocators_no_equivocations_vlsm IM)
   (equivocators_state_project := equivocators_state_project IM)
   (equivocator_IM := equivocator_IM IM)
-  (equivocator_descriptors_update := equivocator_descriptors_update IM)
   (FreeE := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (Free := free_composite_vlsm IM)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   (sub_IM := sub_IM IM (finite.enum index))
   .
-
-#[local] Hint Unfold equivocator_descriptors_update : state_update.
 
 Definition free_sub_free_equivocator_descriptors
   (descriptors : equivocator_descriptors IM)
