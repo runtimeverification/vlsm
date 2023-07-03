@@ -18,7 +18,6 @@ Context {message : Type}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   (equivocator_descriptors := equivocator_descriptors IM)
-  (equivocators_no_equivocations_vlsm := equivocators_no_equivocations_vlsm IM)
   (equivocator_IM := equivocator_IM IM)
   (FreeE := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
@@ -1217,7 +1216,7 @@ Qed.
   of the free composition of nodes.
 *)
 Lemma pre_equivocators_valid_trace_project
-  (is final_state : state equivocators_no_equivocations_vlsm)
+  (is final_state : state (equivocators_no_equivocations_vlsm IM))
   (tr : list (composite_transition_item equivocator_IM))
   (Htr : finite_valid_trace_init_to PreFreeE is final_state tr)
   (final_descriptors : equivocator_descriptors)
@@ -1928,7 +1927,6 @@ Context {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
-  (equivocators_no_equivocations_vlsm := equivocators_no_equivocations_vlsm IM)
   (equivocator_IM := equivocator_IM IM)
   (FreeE := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
@@ -1944,7 +1942,7 @@ Definition free_sub_free_equivocator_descriptors
 
 Lemma equivocators_no_equivocations_vlsm_X_vlsm_partial_projection
   (final_descriptors : equivocator_descriptors IM)
-  : VLSM_partial_projection equivocators_no_equivocations_vlsm Free
+  : VLSM_partial_projection (equivocators_no_equivocations_vlsm IM) Free
       (equivocators_partial_trace_project IM final_descriptors).
 Proof.
   split; [split |].
@@ -2085,10 +2083,10 @@ Qed.
 
 Lemma equivocators_valid_trace_from_project
   (final_descriptors : equivocator_descriptors IM)
-  (is final_state : state equivocators_no_equivocations_vlsm)
+  (is final_state : state (equivocators_no_equivocations_vlsm IM))
   (tr : list (composite_transition_item equivocator_IM))
   (Hproper : not_equivocating_equivocator_descriptors IM final_descriptors final_state)
-  (Htr : finite_valid_trace_from_to equivocators_no_equivocations_vlsm is final_state tr)
+  (Htr : finite_valid_trace_from_to (equivocators_no_equivocations_vlsm IM) is final_state tr)
   : exists
     isX final_stateX
     (trX : list (composite_transition_item IM))
@@ -2143,7 +2141,7 @@ Proof.
 Qed.
 
 Lemma equivocators_no_equivocations_vlsm_X_vlsm_projection
-  : VLSM_projection equivocators_no_equivocations_vlsm Free
+  : VLSM_projection (equivocators_no_equivocations_vlsm IM) Free
       (equivocators_total_label_project IM) (equivocators_total_state_project IM).
 Proof.
   constructor; [constructor |].
