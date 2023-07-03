@@ -1926,12 +1926,11 @@ Context {message : Type}
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (Free := free_composite_vlsm IM)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
-  (sub_IM := sub_IM IM (finite.enum index))
   .
 
 Definition free_sub_free_equivocator_descriptors
   (descriptors : equivocator_descriptors IM)
-  : equivocator_descriptors sub_IM
+  : equivocator_descriptors (sub_IM IM (finite.enum index))
   := fun i => descriptors (proj1_sig i).
 
 Lemma equivocators_no_equivocations_vlsm_X_vlsm_partial_projection
