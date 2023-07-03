@@ -1715,8 +1715,7 @@ Context
   (sub_equivocator_IM := sub_IM (equivocator_IM IM) selection)
   (SubFreeE := free_composite_vlsm sub_equivocator_IM)
   (SubPreFreeE := pre_loaded_with_all_messages_vlsm SubFreeE)
-  (sub_IM := sub_IM IM selection)
-  (SubFree := free_composite_vlsm sub_IM)
+  (SubFree := free_composite_vlsm (sub_IM IM selection))
   (SeededX := pre_loaded_vlsm SubFree seed)
   .
 
@@ -1741,16 +1740,16 @@ Lemma seeded_equivocators_valid_trace_project
   (tr : list (composite_transition_item sub_equivocator_IM))
   (Htr : finite_valid_trace SeededXE is tr)
   (final_state := finite_trace_last is tr)
-  (final_descriptors : (equivocator_descriptors sub_IM))
-  (Hproper : proper_equivocator_descriptors sub_IM final_descriptors final_state)
+  (final_descriptors : equivocator_descriptors _)
+  (Hproper : proper_equivocator_descriptors _ final_descriptors final_state)
   : exists
-    (trX : list (composite_transition_item sub_IM))
-    (initial_descriptors : equivocator_descriptors sub_IM)
-    (isX := equivocators_state_project sub_IM initial_descriptors is)
+    (trX : list (composite_transition_item _))
+    (initial_descriptors : equivocator_descriptors _)
+    (isX := equivocators_state_project _ initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
-    proper_equivocator_descriptors sub_IM initial_descriptors is /\
-    equivocators_trace_project sub_IM final_descriptors tr = Some (trX, initial_descriptors) /\
-    equivocators_state_project sub_IM final_descriptors final_state = final_stateX /\
+    proper_equivocator_descriptors _ initial_descriptors is /\
+    equivocators_trace_project _ final_descriptors tr = Some (trX, initial_descriptors) /\
+    equivocators_state_project _ final_descriptors final_state = final_stateX /\
     finite_valid_trace SeededX isX trX.
 Proof.
   assert (Htr_to : finite_valid_trace_init_to SeededXE is final_state tr).
@@ -1779,7 +1778,7 @@ Proof.
   subst len_tr.
   destruct_list_last tr tr' lst Htr_lst.
   - clear H. subst. subst final_state. simpl in *. inversion Hpr_trX. subst.
-    cut (initial_state_prop SubFree (equivocators_state_project sub_IM initial_descriptors is)).
+    cut (initial_state_prop SubFree (equivocators_state_project _ initial_descriptors is)).
     { intro. split; [| done]. constructor.
       apply valid_state_prop_iff. left.
       by exists (exist _ _ H).
@@ -1792,7 +1791,7 @@ Proof.
     apply finite_valid_trace_from_app_iff in Htr.
     destruct Htr as [Htr Hlst].
     specialize (H' tr' (conj Htr Hinit) eq_refl).
-    specialize (equivocators_transition_item_project_proper_characterization sub_IM
+    specialize (equivocators_transition_item_project_proper_characterization _
       final_descriptors lst) as Hproperx.
     unfold final_state in Hproper. rewrite Htr_lst in Hproper.
     rewrite finite_trace_last_is_last in Hproper.
@@ -1817,7 +1816,7 @@ Proof.
     split; [| done]. apply finite_valid_trace_from_app_iff.
     split; [done |].
     assert (Hlst_trX' : valid_state_prop SeededX (finite_trace_last
-      (equivocators_state_project sub_IM initial_descriptors is) trX')).
+      (equivocators_state_project _ initial_descriptors is) trX')).
     { by apply (finite_valid_trace_last_pstate SeededX) in HtrX'. }
     destruct oitem as [item |]; inversion _Hprojectx; subst lstX; clear _Hprojectx
     ; [| by constructor].
@@ -1833,7 +1832,7 @@ Proof.
       revert Htr_to; apply VLSM_incl_finite_valid_trace_init_to.
       by apply seeded_no_equivocation_incl_preloaded.
     }
-    pose proof (pre_equivocators_valid_trace_project sub_IM _ _ _
+    pose proof (pre_equivocators_valid_trace_project _ _ _ _
      Hpre_tr_to final_descriptors' Hproper') as Hpr_tr'.
     destruct Hpr_tr' as [_initial_descriptors [_ [_trX' [_Hpr_trX' Heq_final_stateX']]]].
     replace (equivocators_trace_project _ _ _) with (Some (trX', initial_descriptors))
@@ -1861,7 +1860,7 @@ Proof.
     spec H; [by rewrite app_length; cbn; lia |].
     specialize (H tr' (conj Htr Hinit) eq_refl).
     assert (Hfinal_descriptors_m_proper :
-      proper_equivocator_descriptors sub_IM final_descriptors_m (finite_trace_last is tr'))
+      proper_equivocator_descriptors _ final_descriptors_m (finite_trace_last is tr'))
       by (apply not_equivocating_equivocator_descriptors_proper; done).
     specialize (H final_descriptors_m Hfinal_descriptors_m_proper).
     pose proof (pre_equivocators_valid_trace_project _ _ _ _
@@ -1891,9 +1890,9 @@ Proof.
 Qed.
 
 Lemma SeededXE_SeededX_vlsm_partial_projection
-  (final_descriptors : equivocator_descriptors sub_IM)
+  (final_descriptors : equivocator_descriptors _)
   : VLSM_partial_projection SeededXE SeededX
-      (equivocators_partial_trace_project sub_IM final_descriptors).
+      (equivocators_partial_trace_project _ final_descriptors).
 Proof.
   split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
@@ -1906,13 +1905,12 @@ Proof.
     clear Hpre_tr. revert s tr sX trX Hpr_tr s_pre pre Hs_lst HPreFree_pre_tr.
     by apply equivocators_partial_trace_project_extends_left.
   - intros s tr sX trX Hpr_tr Htr.
-    destruct (destruct_equivocators_partial_trace_project sub_IM  Hpr_tr)
+    destruct (destruct_equivocators_partial_trace_project _  Hpr_tr)
       as [Hnot_equiv [initial_descriptors [Htr_project Hs_project]]].
     apply not_equivocating_equivocator_descriptors_proper in Hnot_equiv as Hproper.
     destruct (seeded_equivocators_valid_trace_project _ _ Htr _ Hproper)
       as [_trX [_initial_descriptors [_ [_Htr_project [_ HtrX]]]]].
-    rewrite Htr_project in _Htr_project.
-    by inversion _Htr_project; subst.
+    by unfold sub_IM in *; congruence.
 Qed.
 
 End sec_seeded_equivocators_valid_trace_project.
