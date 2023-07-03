@@ -522,7 +522,9 @@ Qed.
 (** 
   We also include the more intuitive, mutually recursive definition
   of valid states and messages.
+
   This definition has three cases for [valid_message_mrec]:
+
   - [None] is a valid message ([valid_message_mrec_None]);
   - if <<m>> is an optional <<message>> with the [initial_message_prop]erty,
     then it constitutes a valid message 
@@ -532,7 +534,9 @@ Qed.
     - and if <<l>> [valid] <<l (st, om)>>;
     - the [transition] <<l (st, om)>> emits a message which has the
       [valid_message_mrec] property.
+
   There are also two cases for [valid_state_mrec]:
+
   - if <<s>> is a [state] with the [initial_state_prop]erty, then it has the
     [valid_state_mrec];
   - for all [state]s <<st>>, [option]al <<message>>s <<om>>, and [label] <<l>>:
@@ -1020,18 +1024,17 @@ Qed.
 
   A [finite_valid_trace_from] a [state] <<start>> is a pair <<(start, steps)>> where <<steps>>
   is a list of [transition_item]s, and is inductively defined by:
+
   - <<(s, [])>> is a [finite_valid_trace_from] <<s>> if <<s>> is valid
-  - if there is an [input_valid_transition] <<l (s', iom) (s, oom)>>
-
-    and if <<(s, steps)>> is a [valid_trace_from] <<s>>
-
+  - if there is an [input_valid_transition] <<l (s', iom) (s, oom)>>,
+    and if <<(s, steps)>> is a [valid_trace_from] <<s>>,
     then <<(s', ({| l := l; input := iom; destination := s; output := oom |} :: steps)>>
     is a [finite_valid_trace_from] <<s'>>.
 
-  Note that the definition is given such that it extends an existing trace by
-  adding a transition to its front.
-  The reason for this choice is to have this definition be similar to the one
-  for infinite traces, which can only be extended at the front.
+  Note that the definition is designed so that it extends an existing trace by
+  adding a transition to its front. The reason for this choice is to have this
+  definition be similar to the one for infinite traces, which can only be extended
+  at the front.
 *)
 
 Inductive finite_valid_trace_from : state X -> list transition_item -> Prop :=
@@ -1397,7 +1400,7 @@ Proof.
   by eapply can_produce_from_valid_trace; [apply Htr |].
 Qed.
 
-(** ** Finite [valid_trace]s with a final state
+(** ** Finite valid traces with a final state
 
   It is often necessary to refer to know ending state of a [finite_valid_trace_from].
   This is either the [destination] of the [last] [transition_item] in the trace, or
