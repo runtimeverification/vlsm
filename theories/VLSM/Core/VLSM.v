@@ -2604,12 +2604,8 @@ Proof.
     pose proof (finite_valid_trace_singleton _ Hsm) as Htr.
     apply finite_valid_trace_from_complete_left in Htr.
     destruct  Htr as [is [trs [Htrs _]]].
-    exists is.
-    match type of Htrs with
-    | context [_ ++ [?item]] => remember item as lstitem
-    end.
-    exists (trs ++ [lstitem]). exists lstitem.
-    by rewrite last_error_is_last; subst.
+    eexists is, (trs ++ _), _.
+    by rewrite last_error_is_last.
   - intros [is [tr [item [Htr [Hitem [Hs Hm]]]]]].
     destruct_list_last tr tr' item' Heq; [by inversion Hitem |].
     clear Heq.
