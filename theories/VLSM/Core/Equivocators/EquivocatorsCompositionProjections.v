@@ -349,10 +349,10 @@ Proof.
     |]
   ; [by exists Hex | apply equivocator_descriptors_update_eq | ..]
   ; intros
-  ; case_match
+  ; case_match eqn: Ht'
   ; inversion Ht; subst; clear Ht
   ; rewrite state_update_eq in Hchar
-  ; specialize (Hchar _ Hv H1)
+  ; specialize (Hchar _ Hv Ht')
   ; simpl in *
   ; destruct Hchar as (Hproper' & Hex_new & Hchar)
   .
