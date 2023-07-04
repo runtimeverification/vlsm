@@ -500,15 +500,11 @@ Proof.
     specialize
       (stream_filter_fst_pos_characterization (Str_nth_tl kn (tl s)) (fHere _ _ Hinfn) (S (n0 + kn)))
         as [k [Heq [Hp _]]].
-    match type of Heq with
-    | ?pair = (?f, ?s) =>
-      assert (Hk : pair.1 = f) by (rewrite Heq; done);
-      assert (Htl : pair.2 = s) by (rewrite Heq; done)
-    end.
-    simpl in Hk.  rewrite Hk.
-    simpl in Htl.
     exists (S (k + kn)).
-    simpl.
+    cbn in Heq.
+    apply (f_equal fst) in Heq as Hk; rewrite Hk.
+    apply (f_equal snd) in Heq as Htl.
+    simpl in Htl |- *.
     rewrite tl_nth_tl, Str_nth_tl_plus in Htl.
     rewrite Str_nth_plus in Hp.
     rewrite <- Htl.
