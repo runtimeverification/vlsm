@@ -574,60 +574,23 @@ Qed.
 
 End sec_VLSM_eq_preloaded_properties.
 
-(** ** Finite constrained traces
+Section sec_constrained_defs_alt.
 
-  The ability to preload VLSM with all possible messages allows us to encode behavior
-  such as finite constrained traces, which are, by definition, finite valid traces
+(** ** Alternate definitions to constrained traces, states and messages
+
+  The ability to preload VLSM with all possible messages allows us to give an
+  alternate definition to finite constrained traces as finite valid traces
   where all messages are valid (initial).
 *)
 
-Definition finite_constrained_trace_init_to `(X : VLSM message) :=
+Context `(X : VLSM message).
+
+Definition finite_constrained_trace_init_to_alt :=
   finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X).
 
-(**
-  In order to simplify proofs regarding valid/constrained traces we have
-  an equivalent definition for both [finite_valid_trace_init_to] and
-  [finite_constrained_trace_init_to].
-*)
-
-Inductive constrained_transitions_from_to `(X : VLSM message) :
-  state X -> state X -> list (transition_item X) -> Prop :=
-| ct_empty : forall s, constrained_transitions_from_to X s s []
-| ct_extend : forall s s' om om' l f tr, transition X l (s, om) = (s', om') ->
-    valid X l (s, om) -> constrained_transitions_from_to X s' f tr ->
-    constrained_transitions_from_to X s f
-      ((Build_transition_item l om s' om') :: tr).
-
-Definition finite_constrained_trace_init_to_alt
-  `(X : VLSM message) (s f : state X) (tr : list (transition_item X)) :=
-  constrained_transitions_from_to X s f tr /\ initial_state_prop X s.
-
-Inductive message_valid_transitions_from_to `(X : VLSM message) :
-  state X -> state X -> list (transition_item X) -> Prop :=
-| mvt_empty : forall s, message_valid_transitions_from_to X s s []
-| mvt_extend : forall s s' om om' l f tr, option_valid_message_prop X om ->
-    transition X l (s, om) = (s', om') -> valid X l (s, om) ->
-      message_valid_transitions_from_to X s' f tr -> message_valid_transitions_from_to X s f
-        ((Build_transition_item l om s' om') :: tr).
-
-Definition finite_valid_trace_init_to_alt
-  `(X : VLSM message) (s f : state X) (tr : list (transition_item X)) :=
-  message_valid_transitions_from_to X s f tr /\ initial_state_prop X s.
-
-Definition constrained_state_prop `(X : VLSM message) :=
-  valid_state_prop (pre_loaded_with_all_messages_vlsm X).
-
-Definition constrained_message_prop `(X : VLSM message) :=
-  can_emit (pre_loaded_with_all_messages_vlsm X).
-
-(**
-  Equivalence proof between [finite_constrained_trace_init_to] and
-  [finite_constrained_trace_init_to_alt].
-*)
-
-Lemma constrained_transitions_init_to_right_impl
-  `(X : VLSM message) (s f : state X) (tr : list (transition_item X)) :
-  finite_constrained_trace_init_to X s f tr -> finite_constrained_trace_init_to_alt X s f tr.
+Lemma finite_constrained_trace_init_to_alt_right_impl
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_constrained_trace_init_to_alt s f tr -> finite_constrained_trace_init_to X s f tr.
 Proof.
   intros [Htr Hinit].
   constructor; [| done]; clear Hinit.
@@ -636,9 +599,9 @@ Proof.
   - by apply (ct_extend X); [apply Ht..|].
 Qed.
 
-Lemma constrained_transitions_init_to_left_impl
-  `(X : VLSM message) (s f : state X) (tr : list (transition_item X)) :
-  finite_constrained_trace_init_to_alt X s f tr -> finite_constrained_trace_init_to X s f tr.
+Lemma finite_constrained_trace_init_to_alt_left_impl
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_constrained_trace_init_to X s f tr -> finite_constrained_trace_init_to_alt s f tr.
 Proof.
   intros [Htr Hs].
   split; [| done].
@@ -654,52 +617,57 @@ Proof.
       by repeat split; [| apply any_message_is_valid_in_preloaded | ..].
 Qed.
 
-Lemma constrained_transitions_init_to_equiv
-  `(X : VLSM message) (s f : state X) (tr : list (transition_item X)) :
-  finite_constrained_trace_init_to X s f tr <-> finite_constrained_trace_init_to_alt X s f tr.
+Lemma finite_constrained_trace_init_to_alt_equiv
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_constrained_trace_init_to X s f tr <-> finite_constrained_trace_init_to_alt s f tr.
 Proof.
   split.
-  - by apply constrained_transitions_init_to_right_impl.
-  - by apply constrained_transitions_init_to_left_impl.
+  - by apply finite_constrained_trace_init_to_alt_left_impl.
+  - by apply finite_constrained_trace_init_to_alt_right_impl.
 Qed.
 
 (**
-  Equivalence proof between [finite_valid_trace_init_to] and
-  [finite_valid_trace_init_to_alt].
+  Similarly, we can alternately define constrained states as valid states for
+  the VLSM in which all messages are valid (initial). 
 *)
 
-Lemma valid_transitions_init_to_right_impl
-  `(X : VLSM message) (s f : state X) (tr : list (transition_item X)) :
-  finite_valid_trace_init_to X s f tr -> finite_valid_trace_init_to_alt X s f tr.
+Definition constrained_state_prop_alt :=
+  valid_state_prop (pre_loaded_with_all_messages_vlsm X).
+
+Lemma constrained_state_prop_alt_equiv (s : state X):
+    constrained_state_prop X s <-> constrained_state_prop_alt s.
 Proof.
-  intros [Htr Hinit].
-  constructor; [| done]; clear Hinit.
-  induction Htr.
-  - by constructor.
-  - by constructor; [apply Ht.. |].
+  unfold constrained_state_prop;
+    setoid_rewrite finite_constrained_trace_init_to_alt_equiv; split.
+  - by intros (? & ? & []); eapply finite_valid_trace_from_to_last_pstate.
+  - by intro Hs; apply valid_state_has_trace in Hs as (? & ? & ?); eexists _, _.
 Qed.
 
-Lemma valid_transitions_init_to_left_impl
-  `(X : VLSM message) (s f : state X) (tr : list (transition_item X)) :
-  finite_valid_trace_init_to_alt X s f tr -> finite_valid_trace_init_to X s f tr.
+(**
+  Similarly, we can alternately define constrained messages as emittable in
+  the VLSM in which all messages are valid (initial). 
+*)
+
+Definition constrained_message_prop_alt :=
+  can_emit (pre_loaded_with_all_messages_vlsm X).
+
+Lemma constrained_message_prop_alt_equiv (m : message):
+  constrained_message_prop X m <-> constrained_message_prop_alt m.
 Proof.
-  intros [Htr Hs].
-  split; [| done].
-  apply (initial_state_is_valid X) in Hs.
-  revert s Hs Htr.
-  induction tr; intros; inversion Htr; subst.
-  - by apply (finite_valid_trace_from_to_empty X).
-  - apply (finite_valid_trace_from_to_extend X); [| done].
-    apply IHtr; [| done].
-    apply valid_state_prop_iff; right.
-    by exists l, (s, om), om'.
+  unfold constrained_message_prop_alt, constrained_message_prop; rewrite can_emit_iff.
+  setoid_rewrite finite_constrained_trace_init_to_alt_equiv.
+  setoid_rewrite non_empty_valid_trace_from_can_produce; split.
+  - intros (is & s & tr & item & Htr & Hm).
+    exists s, is, (tr ++ [item]), item; split_and!; [..| done].
+    + by eapply valid_trace_forget_last.
+    + by apply last_error_is_last.
+    + apply finite_valid_trace_init_to_last in Htr.
+      by erewrite <- finite_trace_last_is_last.
+  - intros (s & is & tr' & item & Htr & Hlast & Hs & Hm).
+    destruct_list_last tr' tr item_ Heqtr; subst; [done |].
+    rewrite last_error_is_last in Hlast; apply Some_inj in Hlast as ->.
+    apply valid_trace_add_default_last in Htr.
+    by eexists _, _, _, _.
 Qed.
 
-Lemma valid_transitions_init_to_equiv
-  `(X : VLSM message) (s f : state X) (tr : list (transition_item X)) :
-  finite_valid_trace_init_to X s f tr <-> finite_valid_trace_init_to_alt X s f tr.
-Proof.
-  split.
-  - by apply valid_transitions_init_to_right_impl.
-  - by apply valid_transitions_init_to_left_impl.
-Qed.
+End sec_constrained_defs_alt.

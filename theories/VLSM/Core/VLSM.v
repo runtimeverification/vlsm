@@ -2703,3 +2703,110 @@ Lemma input_valid_transition_forget_input :
 Proof. by firstorder. Qed.
 
 End sec_valid_transition_props.
+
+Section sec_constrained_defs.
+
+(** ** Constrained traces, states and messages *)
+
+Context `(X : VLSM message).
+
+Inductive constrained_transitions_from_to :
+  state X -> state X -> list (transition_item X) -> Prop :=
+| ct_empty : forall s, constrained_transitions_from_to s s []
+| ct_extend : forall s s' om om' l f tr, transition X l (s, om) = (s', om') ->
+    valid X l (s, om) -> constrained_transitions_from_to s' f tr ->
+    constrained_transitions_from_to s f
+      ((Build_transition_item l om s' om') :: tr).
+
+Definition finite_constrained_trace_init_to
+  (s f : state X) (tr : list (transition_item X)) :=
+  constrained_transitions_from_to s f tr /\ initial_state_prop X s.
+
+Definition constrained_state_prop (f : state X) : Prop :=
+  exists (s : state X) (tr : list (transition_item X)),
+    finite_constrained_trace_init_to s f tr.
+
+Definition constrained_message_prop (m : message) : Prop :=
+  exists (s f : state X) (tr : list (transition_item X)) (item : transition_item X),
+    finite_constrained_trace_init_to s f (tr ++ [item]) /\ output item = Some m.
+
+End sec_constrained_defs.
+
+Section sec_finite_valid_trace_init_to_alt.
+
+(** ** Alternate definitions to valid traces and states
+
+  Inspired from the [constrained_transitions_from_to] definition we can
+  derive an alternate definition for valid traces which is easier to use
+  when checking whether a concrete trace is valid.
+*)
+
+Context `(X : VLSM message).
+
+Inductive message_valid_transitions_from_to :
+  state X -> state X -> list (transition_item X) -> Prop :=
+| mvt_empty : forall s, message_valid_transitions_from_to s s []
+| mvt_extend : forall s s' om om' l f tr, option_valid_message_prop X om ->
+    transition X l (s, om) = (s', om') -> valid X l (s, om) ->
+    message_valid_transitions_from_to s' f tr ->
+    message_valid_transitions_from_to s f ((Build_transition_item l om s' om') :: tr).
+
+Definition finite_valid_trace_init_to_alt
+  (s f : state X) (tr : list (transition_item X)) :=
+  message_valid_transitions_from_to s f tr /\ initial_state_prop X s.
+
+Lemma finite_valid_trace_init_to_alt_left_impl
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_valid_trace_init_to X s f tr -> finite_valid_trace_init_to_alt s f tr.
+Proof.
+  intros [Htr Hinit].
+  constructor; [| done]; clear Hinit.
+  induction Htr.
+  - by constructor.
+  - by constructor; [apply Ht.. |].
+Qed.
+
+Lemma finite_valid_trace_init_to_alt_right_impl
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_valid_trace_init_to_alt s f tr -> finite_valid_trace_init_to X s f tr.
+Proof.
+  intros [Htr Hs].
+  split; [| done].
+  apply (initial_state_is_valid X) in Hs.
+  revert s Hs Htr.
+  induction tr; intros; inversion Htr; subst.
+  - by apply (finite_valid_trace_from_to_empty X).
+  - apply (finite_valid_trace_from_to_extend X); [| done].
+    apply IHtr; [| done].
+    apply valid_state_prop_iff; right.
+    by exists l0, (s, om), om'.
+Qed.
+
+Lemma finite_valid_trace_init_to_alt_equiv
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_valid_trace_init_to X s f tr <-> finite_valid_trace_init_to_alt s f tr.
+Proof.
+  split.
+  - by apply finite_valid_trace_init_to_alt_left_impl.
+  - by apply finite_valid_trace_init_to_alt_right_impl.
+Qed.
+
+(**
+  Similarly, we can alternately define valid states as states at the end of
+  a trace satisfying [finite_valid_trace_init_to_alt].
+*)
+Definition valid_state_prop_alt (s : state X) : Prop :=
+  exists (is : state X) (tr : list (transition_item X)),
+    finite_valid_trace_init_to_alt is s tr.
+
+Lemma valid_state_prop_alt_equiv (s : state X) :
+  valid_state_prop X s <-> valid_state_prop_alt s.
+Proof.
+  unfold valid_state_prop_alt; setoid_rewrite <- finite_valid_trace_init_to_alt_equiv.
+  split.
+  - by intros Hs; apply valid_state_has_trace in Hs.
+  - intros (? & ? & Htr & _).
+    by eapply finite_valid_trace_from_to_last_pstate.
+Qed.
+
+End sec_finite_valid_trace_init_to_alt.
