@@ -145,9 +145,7 @@ Proof.
       destruct item. simpl in *.
       destruct l as (i, li).
       unfold projT1 .
-      match type of Ht with
-      | (let (_, _) := ?t in _) = _ => destruct t as (si', om') eqn: Hti
-      end.
+      case_match.
       inversion Ht; subst; cbn.
       by state_update_simpl.
     }
@@ -341,10 +339,7 @@ Proof.
     |]
   ; [by exists Hex | apply equivocator_descriptors_update_eq | ..]
   ; intros
-  ; match type of Ht with
-    | (let (_, _) := ?t in _) = _ =>
-      destruct t as (si', om') eqn: Ht'
-    end
+  ; case_match eqn: Ht'
   ; inversion Ht; subst; clear Ht
   ; rewrite state_update_eq in Hchar
   ; specialize (Hchar _ Hv Ht')
@@ -1069,9 +1064,7 @@ Proof.
     + state_update_simpl.
       destruct Ht as [Hv Ht]; cbn in Ht.
       destruct l as (i, li).
-      match type of Ht with
-      | (let (_, _) := ?t in _) = _ => destruct t as (si', om')
-      end.
+      case_match.
       inversion Ht. subst. simpl in n.
       by state_update_simpl.
   - destruct l as (i, li).
@@ -1144,10 +1137,8 @@ Proof.
   specialize (VLSM_projection_finite_trace_last
     (preloaded_component_projection (equivocator_IM IM) i) _ _ Htr) as Hlst.
   simpl in Hlst, Heqv_final. rewrite <- Hlst in Heqv_final. clear Hlst.
-  match type of Heqv_final with
-  | existing_descriptor _ _ (?l i) => remember l as final
-  end.
-  remember (equivocator_descriptors_update IM (zero_descriptor IM) i eqv_final) as final_descriptors.
+  remember (finite_trace_last is tr) as final.
+  remember (equivocator_descriptors_update _ (zero_descriptor IM) i eqv_final) as final_descriptors.
   assert (Hfinal_descriptors : not_equivocating_equivocator_descriptors IM final_descriptors final).
   {
     intro eqv. subst final_descriptors.
@@ -1586,20 +1577,14 @@ Proof.
   - simpl in Hpr_sub_item.
     unfold final_sub_descriptors in *.
     unfold equivocators_transition_item_project in Hpr_sub_item.
-    match type of Hpr_sub_item with
-    | context [equivocator_vlsm_transition_item_project ?X ?i ?c]
-      => remember (equivocator_vlsm_transition_item_project X i c) as project
-    end.
-    simpl in Heqproject.
+    cbn in Hpr_sub_item.
     unfold
       composite_transition_item_projection,
       composite_transition_item_projection_from_eq,
       eq_rect_r,
-      composite_state_sub_projection in Heqproject.
-    simpl in Heqproject.
-    rewrite <-  Heqpr_item_x in Heqproject. clear Heqpr_item_x.
-    subst project.
+      composite_state_sub_projection in Hpr_sub_item.
     simpl in Hpr_sub_item.
+    rewrite <-  Heqpr_item_x in Hpr_sub_item. clear Heqpr_item_x.
     split.
     + extensionality i.
       destruct oitem' as [item' |]

@@ -372,14 +372,11 @@ Proof.
     split; [| done].
     apply finite_valid_trace_last_pstate in IHtr.
     simpl in *.
-    match type of IHtr with
-    | valid_state_prop _ ?s => remember s as lst
-    end.
     split; [done |].
     repeat split; [| by apply Hvx | by apply Hvx].
     destruct Hvx as [Hlst [_ [Hv _]]].
     destruct l as (i, li). simpl in *.
-    specialize (valid_state_project_preloaded_to_preloaded _ IM constraint lst i Hlst)
+    specialize (valid_state_project_preloaded_to_preloaded _ IM constraint _ i Hlst)
       as Hlsti.
     destruct iom as [im |]; [| apply option_valid_message_None].
     eapply Hvalidator; split; [done |]; split; [| done].

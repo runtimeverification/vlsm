@@ -543,10 +543,7 @@ Proof.
       by apply (strong_trace_witnessing_equivocation_prop_extend_eq _ is tr' (conj Htr' Hinit))
       ; [by split | done..].
     + subst. destruct Hneq as [Hneq Hwneq].
-      match type of Hnv with
-      | _ ∉ equivocating_validators ?st =>
-        remember st as s
-      end.
+      remember (finite_trace_last is tr') as s.
       specialize (is_equivocating_tracewise_witness s) as Hwitness'.
       spec Hwitness'.
       { apply proj1, finite_valid_trace_from_to_app_split, proj1
