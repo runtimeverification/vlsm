@@ -65,6 +65,7 @@ dependencies:
 
 tested_coq_opam_versions:
 - version: '8.16-ocaml-4.14-flambda'
+- version: '8.17-ocaml-4.14-flambda'
 
 namespace: VLSM
 
