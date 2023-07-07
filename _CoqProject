@@ -80,3 +80,5 @@ theories/VLSM/Core/ELMO/UMO.v
 theories/VLSM/Core/ELMO/MO.v
 theories/VLSM/Core/ELMO/ELMO.v
 theories/VLSM/Core/ELMO/AllELMO.v
+
+theories/VLSM/Core/Examples/Parity.v
