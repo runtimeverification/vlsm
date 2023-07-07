@@ -87,7 +87,7 @@ Qed.
 
 (** ** Definition of Parity VLSM
 
-  The Parity VLSM will only have one label, the 'd' (decrease) label.
+  The Parity VLSM will only have one label, indicating a decrement.
   For this reason, the [unit] type can be used.
 *)
 

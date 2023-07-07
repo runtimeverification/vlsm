@@ -50,6 +50,6 @@ Report [issues on GitHub](https://github.com/runtimeverification/vlsm/issues).
 - Grigore Roșu
 - Traian Șerbănuță
 - Ioan Teodorescu
-- Dafina Trufaš
+- Dafina Trufaș
 - Jan Tušil
 - Vlad Zamfir
