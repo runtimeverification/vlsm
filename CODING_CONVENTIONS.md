@@ -67,7 +67,8 @@ Section sec_ELMOComponent_lemmas.
 
 ### Type classes
 
-- CamelCase name
+- CamelCase for class (type) name
+- CamelCase for constructor name using prefix `mk` (when construction via `Instance` might not be sufficient)
 - field declaration with C-style naming on separate line, with 2 spaces of indentation
 - the `;` in the last field should not be omitted
 - it's recommended to include the sort annotation, especially when it's `Prop`
@@ -161,19 +162,19 @@ Lemma sync_some (s : vstate X) (from to : index) :
 
 ### Records
 
-- C-style name
-- CamelCase for constructor name
+- C-style for record (type) name
+- CamelCase for constructor name using prefix `mk`
 - field declaration with C-style naming on separate line, with 2 spaces of indentation
 - the `;` in the last field should not be omitted
 - it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
-Record simp_lv_event : Type := SimpObs
+Record simp_lv_event : Type := mkSimpObs
 {
-  get_simp_event_type : simp_lv_event_type;
-  get_simp_event_subject : index;
-  get_simp_event_state : (@state index index_listing);
+  simp_lv_event_type : simp_lv_event_type;
+  simp_lv_event_subject : index;
+  simp_lv_event_state : (@state index index_listing);
 }.
 ```
 
