@@ -1875,9 +1875,10 @@ Proof.
 Qed.
 
 Lemma SeededXE_SeededX_vlsm_partial_projection
-  (final_descriptors : equivocator_descriptors _)
+  (IM' := fun i : sub_index selection => IM (`i))
+  (final_descriptors : equivocator_descriptors IM')
   : VLSM_partial_projection SeededXE SeededX
-      (equivocators_partial_trace_project _ final_descriptors).
+      (equivocators_partial_trace_project IM' final_descriptors).
 Proof.
   split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
