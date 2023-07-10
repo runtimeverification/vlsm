@@ -1,8 +1,6 @@
 From stdpp Require Import prelude finite.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections.
 
-#[local] Open Scope Z_scope.
-
 (** * Parity VLSM
 
   This module demonstrates some basic notions of the VLSM framework. The idea
@@ -12,6 +10,8 @@ From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections.
   difference ([parity_valid_states_same_parity]). The definitions and lemmas tap into
   concepts such as valid and constrained traces, transitions, states, and messages.
 *)
+
+#[local] Open Scope Z_scope.
 
 (** ** General arithmetic results
 
@@ -62,9 +62,9 @@ Proof.
     by rewrite <- Zeven_unary_minus.
 Qed.
 
-(** ** General VLSM results and automation *)
+(** ** General automation *)
 
-(** *** Custom tactic used to simplify proofs on valid VLSM transitions *)
+(** Custom tactic used to simplify proofs on valid VLSM transitions *)
 
 Ltac app_valid_tran :=
   repeat split; cbn; try done;
@@ -74,16 +74,6 @@ Ltac app_valid_tran :=
   | |- valid_state_prop _ _ => by apply initial_state_is_valid
   | |- valid_state_prop _ _ => eapply input_valid_transition_destination
   end.
-
-(** *** Last transition of a valid VLSM trace is valid *)
-
-Lemma input_valid_transition_last `(X : VLSM message) :
-  forall (s f : state X) (tr tr' : list (transition_item X)) (li : transition_item X),
-    finite_valid_trace_from_to X s f tr' -> tr' = tr ++ [li] ->
-      input_valid_transition_item X (finite_trace_last s tr) li.
-Proof.
-  by intros * Htr; eapply input_valid_transition_to, valid_trace_forget_last.
-Qed.
 
 (** ** Definition of Parity VLSM
 
@@ -358,7 +348,7 @@ Lemma parity_example_valid_transition :
   input_valid_transition ParityVLSM parity_label
    ((8, 2), Some 2) ((8, 0), Some 4).
 Proof.
-  apply (input_valid_transition_last ParityVLSM
+  apply (finite_valid_trace_from_to_last_transition ParityVLSM
     parity_trace1_first_state parity_trace1_last_state
     parity_trace1_init parity_trace1 parity_trace1_last_item); [| done].
   by apply parity_valid_trace1.
@@ -373,7 +363,8 @@ Example parity_example_constrained_transition :
   input_valid_transition (pre_loaded_with_all_messages_vlsm ParityVLSM) parity_label
    ((5, 1), Some 1) ((5, 0), Some 2).
 Proof.
-  apply (input_valid_transition_last (pre_loaded_with_all_messages_vlsm ParityVLSM)
+  apply (finite_valid_trace_from_to_last_transition
+    (pre_loaded_with_all_messages_vlsm ParityVLSM)
     parity_trace2_init_first_state parity_trace2_last_state parity_trace2_init
     parity_trace2 parity_trace2_last_item); [| done].
   by apply parity_constrained_trace2.
