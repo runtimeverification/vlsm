@@ -168,7 +168,7 @@ Definition parity_label : label ParityVLSM := ().
 (** *** Example of an arbitrary transition *)
 
 Lemma parity_example_transition_1 `(X : VLSM message) :
-  transition ParityVLSM () ((5, 4), Some 10) = ((5, -6), Some 20).
+  transition ParityVLSM parity_label ((5, 4), Some 10) = ((5, -6), Some 20).
 Proof. done. Qed.
 
 (** *** Example of a valid trace *)
@@ -196,7 +196,7 @@ Proof. by apply initial_message_is_valid. Qed.
 Example parity_can_emit_4 : can_emit ParityVLSM 4.
 Proof.
   unfold can_emit.
-  exists ((2, 2), Some 2), (), (2, 0).
+  exists ((2, 2), Some 2), parity_label, (2, 0).
   repeat split; [| | done | done].
   - by apply initial_state_is_valid.
   - by apply parity_valid_message_prop_2.
@@ -398,7 +398,7 @@ Proof.
   intros m [n ->] Hmgt0.
   pose (s := (n, n)).
   unfold constrained_message_prop, can_emit; cbn.
-  exists (s, Some n), (), (n, 0).
+  exists (s, Some n), parity_label, (n, 0).
   repeat split.
   - by apply initial_state_is_valid; constructor; cbn; lia.
   - by apply any_message_is_valid_in_preloaded.
@@ -439,7 +439,7 @@ Proof.
   - by apply initial_state_is_valid; split; lia.
   - pose (s := (st.1, st.1)).
     unfold constrained_state_prop.
-    apply input_valid_transition_destination with (l := ()) (s := s)
+    apply input_valid_transition_destination with (l := parity_label) (s := s)
       (om := Some (st.1 - st.2)) (om' := Some (2 * (st.1 - st.2))).
     repeat split.
     + by apply initial_state_is_valid; constructor; cbn; lia.
@@ -497,7 +497,7 @@ Proof.
     pose (msgin := 2 ^ (x + 1)).
     pose (x' := (msgin, msgin)).
     apply emitted_messages_are_valid.
-    exists (x', Some (2 ^ (x + 1))), (), (x'.1, msgin - msgin); subst x' msgin; cbn.
+    exists (x', Some (2 ^ (x + 1))), parity_label, (x'.1, msgin - msgin); subst x' msgin; cbn.
     repeat split; [| by apply Hindh | by cbn | by lia |].
     + by apply initial_state_is_valid; constructor; cbn; lia.
     + by unfold transition; cbn; rewrite <- Z.pow_succ_r, Z.add_succ_l; [| lia].
@@ -553,7 +553,7 @@ Proof.
   destruct x; [.. | by lia].
   - by apply initial_state_is_valid; constructor; lia.
   - apply input_valid_transition_destination
-      with (l := ()) (s := (s.1, s.2 + 2)) (om := Some 2) (om' := Some 4).
+      with (l := parity_label) (s := (s.1, s.2 + 2)) (om := Some 2) (om' := Some 4).
     repeat split; cbn; [| | by lia | by lia |].
     + by eapply Hind with (y := Z.pos p - 1); cbn; lia.
     + by apply initial_message_is_valid.
