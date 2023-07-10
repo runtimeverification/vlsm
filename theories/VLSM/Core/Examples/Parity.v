@@ -3,12 +3,12 @@ From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections.
 
 #[local] Open Scope Z_scope.
 
-(** * Parity VLSM 
+(** * Parity VLSM
 
   This module demonstrates some basic notions of the VLSM framework. The idea
   of the parity VLSM is to store a tuple and continually decrement one of the
   tuple's elements while a constraint is checked at each step. The name originates
-  from the property of this VLSM to preserve the evenness of the tuple elements 
+  from the property of this VLSM to preserve the evenness of the tuple elements
   difference ([parity_valid_states_same_parity]). The definitions and lemmas tap into
   concepts such as valid and constrained traces, transitions, states, and messages.
 *)
@@ -68,10 +68,10 @@ Qed.
 
 Ltac app_valid_tran :=
   repeat split; cbn; try done;
-  [ try by apply initial_state_is_valid
-  | try by apply initial_message_is_valid ];
   match goal with
+  | |- option_valid_message_prop _ _ => by apply initial_message_is_valid
   | |- option_valid_message_prop _ _ => eapply emitted_messages_are_valid
+  | |- valid_state_prop _ _ => by apply initial_state_is_valid
   | |- valid_state_prop _ _ => eapply input_valid_transition_destination
   end.
 
@@ -133,7 +133,7 @@ Definition ParityComponentValid (l : ParityLabel) (st : ParityState)
   end.
 
 (**
-  One must also provide a proof that the intial state type
+  We must also provide a proof that the intial state type
   is inhabited as the set of initial states is non-empty.
 *)
 
@@ -150,7 +150,7 @@ Proof. done. Defined.
   populate (ParityComponent_initial_state).
 
 (**
-  An intermediate representation for VLSM is required.
+  An intermediate representation for the VLSM is required.
   It uses the previously defined specifications.
 *)
 
@@ -163,7 +163,7 @@ Definition ParityMachine : VLSMMachine ParityType :=
   valid := fun l '(st, om) => ParityComponentValid l st om;
 |}.
 
-(** The definition of the Parity VLSM: *)
+(** The definition of the Parity VLSM. *)
 
 Definition ParityVLSM : VLSM ParityMessage :=
 {|
@@ -281,7 +281,7 @@ Definition parity_trace2_init_last_state : ParityState := (5, 1).
 Definition parity_trace2_last_state : ParityState :=
   destination parity_trace2_last_item.
 
-(** The given trace is valid without the last transition *)
+(** The given trace is valid without the last transition. *)
 
 Proposition parity_valid_transition_1' :
   input_valid_transition ParityVLSM parity_label
@@ -311,7 +311,7 @@ Example parity_valid_trace2_init_alt :
 Proof.
   constructor; [| done].
   by repeat apply mvt_extend; [..| apply mvt_empty]; try done;
-  apply parity_valid_message_prop_2.
+    apply parity_valid_message_prop_2.
 Qed.
 
 (**
@@ -359,8 +359,8 @@ Lemma parity_example_valid_transition :
    ((8, 2), Some 2) ((8, 0), Some 4).
 Proof.
   apply (input_valid_transition_last ParityVLSM
-   parity_trace1_first_state parity_trace1_last_state
-   parity_trace1_init parity_trace1 parity_trace1_last_item); [| done].
+    parity_trace1_first_state parity_trace1_last_state
+    parity_trace1_init parity_trace1 parity_trace1_last_item); [| done].
   by apply parity_valid_trace1.
 Qed.
 
@@ -395,7 +395,7 @@ Lemma parity_constrained_messages_left :
   forall (m : ParityMessage), constrained_message_prop_alt ParityVLSM m ->
    Z.Even m /\ m > 0.
 Proof.
-  intros m ([s []] & [] & s' & [(_ & _ & []) Ht]).
+  intros m ([s []] & [] & s' & (_ & _ & []) & Ht).
   inversion Ht; subst.
   by split; [eexists | lia].
 Qed.
@@ -405,7 +405,7 @@ Lemma parity_constrained_messages_right :
    constrained_message_prop_alt ParityVLSM m.
 Proof.
   intros m [n ->] Hmgt0.
-  pose (s := (n, n)). 
+  pose (s := (n, n)).
   unfold constrained_message_prop, can_emit; cbn.
   exists (s, Some n), (), (n, 0).
   repeat split.
@@ -440,13 +440,13 @@ Qed.
 
 Lemma parity_constrained_states_left :
   forall (st : ParityState), st.1 >= st.2 -> st.2 >= 0 ->
-   constrained_state_prop_alt ParityVLSM st.
+    constrained_state_prop_alt ParityVLSM st.
 Proof.
   intros st Hn Hi.
   (* make two cases *)
   destruct (decide (st.1 = st.2)).
   - by apply initial_state_is_valid; split; lia.
-  - pose (s := (st.1, st.1)). 
+  - pose (s := (st.1, st.1)).
     unfold constrained_state_prop.
     apply input_valid_transition_destination with (l := ()) (s := s)
       (om := Some (st.1 - st.2)) (om' := Some (2 * (st.1 - st.2))).
@@ -525,7 +525,7 @@ Qed.
 
 Lemma parity_valid_states_right :
   forall (s : ParityState),
-  valid_state_prop ParityVLSM s -> (Z.Even s.2 <-> Z.Even s.1) /\ s.1 >= s.2 /\ s.2 >= 0.
+    valid_state_prop ParityVLSM s -> (Z.Even s.2 <-> Z.Even s.1) /\ s.1 >= s.2 /\ s.2 >= 0.
 Proof.
   induction 1 using valid_state_prop_ind.
   - destruct Hs as [Hs <-].
