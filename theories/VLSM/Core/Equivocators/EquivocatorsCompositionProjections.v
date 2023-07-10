@@ -1720,20 +1720,21 @@ Proof.
 Qed.
 
 Lemma seeded_equivocators_valid_trace_project
-  (is : composite_state _)
-  (tr : list (composite_transition_item _))
+  (is : composite_state (sub_IM (equivocator_IM IM) selection))
+  (tr : list (composite_transition_item (sub_IM (equivocator_IM IM) selection)))
   (Htr : finite_valid_trace SeededXE is tr)
   (final_state := finite_trace_last is tr)
-  (final_descriptors : equivocator_descriptors _)
-  (Hproper : proper_equivocator_descriptors _ final_descriptors final_state)
+  (IM' := fun i : sub_index selection => IM (`i))
+  (final_descriptors : equivocator_descriptors IM')
+  (Hproper : proper_equivocator_descriptors IM' final_descriptors final_state)
   : exists
-    (trX : list (composite_transition_item _))
-    (initial_descriptors : equivocator_descriptors _)
-    (isX := equivocators_state_project _ initial_descriptors is)
+    (trX : list (composite_transition_item IM'))
+    (initial_descriptors : equivocator_descriptors IM')
+    (isX := equivocators_state_project IM' initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
-    proper_equivocator_descriptors _ initial_descriptors is /\
-    equivocators_trace_project _ final_descriptors tr = Some (trX, initial_descriptors) /\
-    equivocators_state_project _ final_descriptors final_state = final_stateX /\
+    proper_equivocator_descriptors IM' initial_descriptors is /\
+    equivocators_trace_project IM' final_descriptors tr = Some (trX, initial_descriptors) /\
+    equivocators_state_project IM' final_descriptors final_state = final_stateX /\
     finite_valid_trace SeededX isX trX.
 Proof.
   assert (Htr_to : finite_valid_trace_init_to SeededXE is final_state tr).
@@ -1745,7 +1746,7 @@ Proof.
     revert Htr_to; apply VLSM_incl_finite_valid_trace_init_to.
     by apply seeded_no_equivocation_incl_preloaded.
   }
-  pose proof (pre_equivocators_valid_trace_project _ _ _ _
+  pose proof (pre_equivocators_valid_trace_project IM' _ _ _
     Hpre_tr_to final_descriptors Hproper) as Hex.
   destruct Hex as [initial_descriptors [Hproper_initial [trX [Hpr_trX Hpre_trX]]]].
   exists trX, initial_descriptors.
@@ -1816,7 +1817,7 @@ Proof.
       revert Htr_to; apply VLSM_incl_finite_valid_trace_init_to.
       by apply seeded_no_equivocation_incl_preloaded.
     }
-    pose proof (pre_equivocators_valid_trace_project _ _ _ _
+    pose proof (pre_equivocators_valid_trace_project IM' _ _ _
      Hpre_tr_to final_descriptors' Hproper') as Hpr_tr'.
     destruct Hpr_tr' as [_initial_descriptors [_ [_trX' [_Hpr_trX' Heq_final_stateX']]]].
     replace (equivocators_trace_project _ _ _) with (Some (trX', initial_descriptors))
