@@ -2617,6 +2617,15 @@ Proof.
     by eexists _, l0; apply Ht.
 Qed.
 
+(** The last transition of a valid VLSM trace is valid *)
+Lemma finite_valid_trace_from_to_last_transition `(X : VLSM message) :
+  forall (s f : state X) (tr tr' : list (transition_item X)) (li : transition_item X),
+    finite_valid_trace_from_to X s f tr' -> tr' = tr ++ [li] ->
+      input_valid_transition_item X (finite_trace_last s tr) li.
+Proof.
+  by intros * Htr; eapply input_valid_transition_to, valid_trace_forget_last.
+Qed.
+
 (** *** Properties of provably-equal VLSMs
 
   If we know that two VLSMs are provably equal, we could try rewriting by them.
