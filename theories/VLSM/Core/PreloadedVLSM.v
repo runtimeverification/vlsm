@@ -573,3 +573,101 @@ Proof.
 Qed.
 
 End sec_VLSM_eq_preloaded_properties.
+
+Section sec_constrained_defs_alt.
+
+(** ** Alternate definitions to constrained traces, states and messages
+
+  The ability to preload VLSM with all possible messages allows us to give an
+  alternate definition to finite constrained traces as finite valid traces
+  where all messages are valid (initial).
+*)
+
+Context `(X : VLSM message).
+
+Definition finite_constrained_trace_init_to_alt :=
+  finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X).
+
+Lemma finite_constrained_trace_init_to_alt_right_impl
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_constrained_trace_init_to_alt s f tr -> finite_constrained_trace_init_to X s f tr.
+Proof.
+  intros [Htr Hinit].
+  constructor; [| done]; clear Hinit.
+  induction Htr.
+  - by apply (ct_empty X).
+  - by apply (ct_extend X); [apply Ht..|].
+Qed.
+
+Lemma finite_constrained_trace_init_to_alt_left_impl
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_constrained_trace_init_to X s f tr -> finite_constrained_trace_init_to_alt s f tr.
+Proof.
+  intros [Htr Hs].
+  split; [| done].
+  apply (initial_state_is_valid (pre_loaded_with_all_messages_vlsm X)) in Hs.
+  revert s Hs Htr.
+  induction tr; intros; inversion Htr; subst.
+  - by apply (finite_valid_trace_from_to_empty (pre_loaded_with_all_messages_vlsm X)).
+  - apply (finite_valid_trace_from_to_extend (pre_loaded_with_all_messages_vlsm X)); cycle 1.
+    + by repeat split; [| apply any_message_is_valid_in_preloaded | ..].
+    + apply IHtr; [| done].
+      apply valid_state_prop_iff; right.
+      exists l, (s, om), om'.
+      by repeat split; [| apply any_message_is_valid_in_preloaded | ..].
+Qed.
+
+Lemma finite_constrained_trace_init_to_alt_equiv
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_constrained_trace_init_to X s f tr <-> finite_constrained_trace_init_to_alt s f tr.
+Proof.
+  split.
+  - by apply finite_constrained_trace_init_to_alt_left_impl.
+  - by apply finite_constrained_trace_init_to_alt_right_impl.
+Qed.
+
+(**
+  Similarly, we can alternately define constrained states as valid states for
+  the VLSM in which all messages are valid (initial). 
+*)
+
+Definition constrained_state_prop_alt :=
+  valid_state_prop (pre_loaded_with_all_messages_vlsm X).
+
+Lemma constrained_state_prop_alt_equiv (s : state X):
+    constrained_state_prop X s <-> constrained_state_prop_alt s.
+Proof.
+  unfold constrained_state_prop;
+    setoid_rewrite finite_constrained_trace_init_to_alt_equiv; split.
+  - by intros (? & ? & []); eapply finite_valid_trace_from_to_last_pstate.
+  - by intro Hs; apply valid_state_has_trace in Hs as (? & ? & ?); eexists _, _.
+Qed.
+
+(**
+  Similarly, we can alternately define constrained messages as emittable in
+  the VLSM in which all messages are valid (initial). 
+*)
+
+Definition constrained_message_prop_alt :=
+  can_emit (pre_loaded_with_all_messages_vlsm X).
+
+Lemma constrained_message_prop_alt_equiv (m : message):
+  constrained_message_prop X m <-> constrained_message_prop_alt m.
+Proof.
+  unfold constrained_message_prop_alt, constrained_message_prop; rewrite can_emit_iff.
+  setoid_rewrite finite_constrained_trace_init_to_alt_equiv.
+  setoid_rewrite non_empty_valid_trace_from_can_produce; split.
+  - intros (is & s & tr & item & Htr & Hm).
+    exists s, is, (tr ++ [item]), item; split_and!; [..| done].
+    + by eapply valid_trace_forget_last.
+    + by apply last_error_is_last.
+    + apply finite_valid_trace_init_to_last in Htr.
+      by erewrite <- finite_trace_last_is_last.
+  - intros (s & is & tr' & item & Htr & Hlast & Hs & Hm).
+    destruct_list_last tr' tr item_ Heqtr; subst; [done |].
+    rewrite last_error_is_last in Hlast; apply Some_inj in Hlast as ->.
+    apply valid_trace_add_default_last in Htr.
+    by eexists _, _, _, _.
+Qed.
+
+End sec_constrained_defs_alt.

@@ -145,6 +145,14 @@ Proof.
     by rewrite size_singleton in Hun_size; lia.
 Qed.
 
+#[export] Instance fin_set_subseteq_dec : RelDecision (⊆@{C}).
+Proof.
+  intros X Y.
+  eapply @Decision_iff with (P := set_Forall (fun a => a ∈ Y) X).
+  - by set_solver.
+  - by typeclasses eauto.
+Qed.
+
 End sec_general.
 
 Section sec_filter.
