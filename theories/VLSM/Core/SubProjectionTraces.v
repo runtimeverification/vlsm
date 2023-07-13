@@ -346,7 +346,7 @@ Context
   .
 
 Lemma induced_sub_projection_constraint_subsumption_incl
-  (Hsubsumption : input_valid_constraint_subsumption IM constraint1 constraint2)
+  (Hsubsumption : input_valid_constraint_subsumption (free_composite_vlsm IM) constraint1 constraint2)
   : VLSM_incl (pre_induced_sub_projection constraint1) (pre_induced_sub_projection constraint2).
 Proof.
   apply projection_induced_validator_incl.
@@ -472,7 +472,7 @@ Proof.
     (composite_vlsm sub_IM (no_equivocations_additional_constraint_with_pre_loaded sub_IM _ seed)))).
   - by cbn; apply (pre_loaded_vlsm_incl (composite_vlsm sub_IM
       (no_equivocations_additional_constraint_with_pre_loaded sub_IM (free_constraint sub_IM) seed))).
-  - by apply preloaded_constraint_subsumption_incl_free.
+  - by cbn; apply (preloaded_constraint_subsumption_incl_free (free_composite_vlsm _)).
 Qed.
 
 (**

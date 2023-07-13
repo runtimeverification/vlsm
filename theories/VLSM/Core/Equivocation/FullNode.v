@@ -109,7 +109,7 @@ Qed.
 *)
 Lemma full_node_condition_for_admissible_equivocators_subsumption
   (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i))
-  : preloaded_constraint_subsumption IM
+  : preloaded_constraint_subsumption (free_composite_vlsm IM)
       full_node_condition_for_admissible_equivocators
       full_node_condition_for_admissible_equivocators_alt.
 Proof.

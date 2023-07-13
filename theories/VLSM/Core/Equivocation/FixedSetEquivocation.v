@@ -190,7 +190,7 @@ Proof.
 Qed.
 
 Lemma strong_fixed_equivocation_constraint_subsumption
-  : strong_constraint_subsumption IM
+  : strong_constraint_subsumption (free_composite_vlsm IM)
     strong_fixed_equivocation_constraint
     fixed_equivocation_constraint.
 Proof.
@@ -250,7 +250,7 @@ Proof.
 Qed.
 
 Lemma fixed_equivocation_constraint_index_incl_subsumption
-  : strong_constraint_subsumption IM
+  : strong_constraint_subsumption (free_composite_vlsm IM)
     (fixed_equivocation_constraint IM indices1)
     (fixed_equivocation_constraint IM indices2).
 Proof.
@@ -710,7 +710,7 @@ Qed.
   [strong_fixed_equivocation_constraint] holds under [input_valid] assumptions.
 *)
 Lemma fixed_strong_equivocation_subsumption
-  : input_valid_constraint_subsumption IM
+  : input_valid_constraint_subsumption (free_composite_vlsm IM)
     (fixed_equivocation_constraint IM equivocators)
     (strong_fixed_equivocation_constraint IM equivocators).
 Proof.
@@ -1020,12 +1020,12 @@ Lemma strong_fixed_equivocation_vlsm_composition_no_equivocators
       (composite_vlsm IM (composite_no_equivocations IM)).
 Proof.
   split.
-  - apply constraint_subsumption_incl.
+  - apply (constraint_subsumption_incl (free_composite_vlsm IM)).
     apply preloaded_constraint_subsumption_stronger.
     apply strong_constraint_subsumption_strongest.
     intros l som.
     by rewrite strong_fixed_equivocation_constraint_no_equivocators.
-  - apply constraint_subsumption_incl.
+  - apply (constraint_subsumption_incl (free_composite_vlsm IM)).
     apply preloaded_constraint_subsumption_stronger.
     apply strong_constraint_subsumption_strongest.
     intros l som.

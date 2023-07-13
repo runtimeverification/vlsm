@@ -105,7 +105,7 @@ Qed.
 
 Lemma msg_dep_strong_fixed_equivocation_constraint_subsumption
   (Hmsg_dep_happens_before_wf : well_founded (msg_dep_happens_before message_dependencies))
-  : strong_constraint_subsumption IM
+  : strong_constraint_subsumption (free_composite_vlsm IM)
       msg_dep_fixed_set_equivocation_constraint
       (strong_fixed_equivocation_constraint IM equivocators).
 Proof.
@@ -232,7 +232,7 @@ Qed.
 
 Lemma strong_fixed_equivocation_msg_dep_constraint_subsumption
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
-  : input_valid_constraint_subsumption IM
+  : input_valid_constraint_subsumption (free_composite_vlsm IM)
       (strong_fixed_equivocation_constraint IM equivocators)
       msg_dep_fixed_set_equivocation_constraint.
 Proof.
@@ -320,7 +320,7 @@ Definition full_node_fixed_set_equivocation_constraint
 
 Lemma msg_dep_full_node_fixed_set_equivocation_constraint_subsumption
   (Hchannel : channel_authentication_prop IM A sender)
-  : strong_constraint_subsumption IM
+  : strong_constraint_subsumption (free_composite_vlsm IM)
       (msg_dep_fixed_set_equivocation_constraint IM message_dependencies equivocators)
       full_node_fixed_set_equivocation_constraint.
 Proof.
@@ -350,7 +350,7 @@ Proof.
   - by apply Fixed_incl_StrongFixed.
   - eapply VLSM_incl_trans.
     + by eapply strong_msg_dep_fixed_equivocation_incl.
-    + eapply constraint_subsumption_incl with (constraint1 :=
+    + eapply (constraint_subsumption_incl (free_composite_vlsm _)) with (constraint1 :=
         msg_dep_fixed_set_equivocation_constraint IM message_dependencies equivocators).
       apply preloaded_constraint_subsumption_stronger.
       apply strong_constraint_subsumption_strongest.
@@ -360,7 +360,7 @@ Qed.
 Lemma full_node_fixed_equivocation_constraint_subsumption
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   (Hsender_safety : sender_safety_alt_prop IM A sender)
-  : input_valid_constraint_subsumption IM
+  : input_valid_constraint_subsumption (free_composite_vlsm IM)
       full_node_fixed_set_equivocation_constraint
       (fixed_equivocation_constraint IM equivocators).
 Proof.
