@@ -75,12 +75,11 @@ Qed.
 
 Lemma valid_state_message_prop_constrained_vlsm :
   forall
-    (constraint : label X -> state X * option message -> Prop)
     (s : state _) (om : option message),
       valid_state_message_prop (constrained_vlsm X constraint) s om ->
         valid_state_message_prop X s om.
 Proof.
-  intros cstr s om H.
+  intros s om H.
   destruct X.
   eapply VLSM_incl_valid_state_message; [.. | by do 2 red | done].
   by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
@@ -324,3 +323,220 @@ Proof.
 Qed.
 
 End sec_constrained_vlsm_commutation_lemmas.
+
+Section sec_constraint_subsumption.
+
+Context
+  `(X : VLSM message)
+  (constraint : label X -> state X * option message -> Prop).
+
+Lemma constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
+  forall (P : message -> Prop),
+    VLSM_incl
+      (pre_loaded_vlsm (constrained_vlsm X constraint) P)
+      (pre_loaded_with_all_messages_vlsm X).
+Proof.
+  by intros; apply basic_VLSM_strong_incl; cbv; [| itauto.. |].
+Qed.
+
+Lemma constraint_free_valid_state_message_preservation :
+  forall (s : state _) (om : option message)
+    (Hsom : valid_state_message_prop (constrained_vlsm X constraint) s om),
+      valid_state_message_prop X s om.
+Proof.
+  by apply valid_state_message_prop_constrained_vlsm.
+Qed.
+
+(*
+  TODO(traiansf): There are many places where, because the lemma below
+  was missing, it was either reproved locally, or multiple VLSM_incl_
+  lemmas were used to achieve a similar result. It would be nice to
+  find those usages and use this lemma instad.
+*)
+Lemma constrained_preloaded_incl :
+  VLSM_incl (constrained_vlsm X constraint) (pre_loaded_with_all_messages_vlsm X).
+Proof.
+  apply (@VLSM_incl_trans _ _ _ X).
+  - by cbn; apply VLSM_incl_constrained_vlsm.
+  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm X).
+Qed.
+
+Context
+  (constraint1 constraint2 : label X -> state X * option message -> Prop)
+  (X1 := constrained_vlsm X constraint1)
+  (X2 := constrained_vlsm X constraint2)
+  .
+
+(**
+  A <<constraint1>> is subsumed by <<constraint2>> if <<constraint1>> is stronger
+  than <<constraint2>> for any input.
+*)
+Definition strong_constraint_subsumption : Prop :=
+  forall (l : label X) (som : state X * option message),
+    constraint1 l som -> constraint2 l som.
+
+(**
+  A weaker version of [strong_constraint_subsumption] requiring [input_valid]ity
+  w.r.t. [pre_loaded_with_all_messages_vlsm] as a precondition for the subsumption
+  property.
+
+  This definition is useful in proving [VLSM_incl]usions between [VLSM]s
+  pre-loaded with all messages (Lemma [preloaded_constraint_subsumption_incl]).
+
+  Although there are currently no explicit cases for its usage, it might be more
+  useful than the [strong_constraint_subsumption] property in cases where proving
+  constraint subsumption relies on the state being valid and/or the message
+  being valid.
+*)
+Definition preloaded_constraint_subsumption : Prop :=
+  forall (l : label X) (som : state _ * option message),
+    input_valid (pre_loaded_with_all_messages_vlsm (constrained_vlsm X constraint1)) l som ->
+      constraint2 l som.
+
+(**
+  A weaker version of [preloaded_constraint_subsumption] requiring [input_valid]ity
+  as a precondition for the subsumption property.
+
+  This definition is usually useful in proving [VLSM_incl]usions between regular
+  [VLSM]s (Lemma [constraint_subsumption_incl]).
+
+  It is more useful than the [strong_constraint_subsumption] property in cases
+  where proving constraint subsumption relies on the state/message being valid
+  and/or the message being valid (e.g., Lemma [Fixed_incl_StrongFixed]).
+*)
+Definition input_valid_constraint_subsumption : Prop :=
+  forall (l : label X) (som : state X * option message),
+    input_valid (constrained_vlsm X constraint1) l som -> constraint2 l som.
+
+(**
+  The weakest form [constraint_subsumption] also requires that the input
+  state and message are valid for the composition under the second constraint.
+*)
+Definition weak_input_valid_constraint_subsumption : Prop :=
+  forall (l : label X) (som : state X * option message),
+    input_valid (constrained_vlsm X constraint1) l som ->
+    valid_state_prop (constrained_vlsm X constraint2) som.1 ->
+    option_valid_message_prop (constrained_vlsm X constraint2) som.2 ->
+      constraint2 l som.
+
+(**
+  Let <<X1>>, <<X2>> be two compositions of the same family of VLSMs but with
+  constraints <<constraint1>> and <<constraint2>>, respectively. Further assume
+  that <<constraint1>> is subsumed by <<constraint2>>.
+
+  We will show that <<X1>> is trace-included into <<X2>> by applying
+  the lemma [basic_VLSM_incl].
+*)
+
+Lemma weak_constraint_subsumption_incl
+  (Hsubsumption : weak_input_valid_constraint_subsumption)
+  : VLSM_incl X1 X2.
+Proof.
+  apply basic_VLSM_incl.
+  - by intros s Hs.
+  - by intros _ _ m _ _ Hm; apply initial_message_is_valid.
+  - by split; [apply Hv | auto].
+  - by intros l s om s' om' Ht; apply Ht.
+Qed.
+
+Lemma constraint_subsumption_input_valid
+  (Hsubsumption : input_valid_constraint_subsumption)
+  (l : label X1)
+  (s : state X1)
+  (om : option message)
+  (Hv : input_valid X1 l (s, om))
+  : valid X2 l (s, om).
+Proof.
+  by split; [apply Hv | apply Hsubsumption].
+Qed.
+
+Lemma constraint_subsumption_valid_state_message_preservation
+  (Hsubsumption : input_valid_constraint_subsumption)
+  (s : state X1)
+  (om : option message)
+  (Hps : valid_state_message_prop X1 s om)
+  : valid_state_message_prop X2 s om.
+Proof.
+  induction Hps; [by apply valid_initial_state_message |].
+  apply (valid_generated_state_message X2) with s _om _s om l; only 1-2, 4: done.
+  apply constraint_subsumption_input_valid; [done |].
+  by split_and!; [exists _om | exists _s |].
+Qed.
+
+Lemma constraint_subsumption_incl
+  (Hsubsumption : input_valid_constraint_subsumption)
+  : VLSM_incl X1 X2.
+Proof.
+  apply basic_VLSM_incl; intro; intros.
+  - done.
+  - by apply initial_message_is_valid.
+  - by apply constraint_subsumption_input_valid.
+  - by apply H.
+Qed.
+
+Lemma preloaded_constraint_subsumption_input_valid
+  (Hpre_subsumption : preloaded_constraint_subsumption)
+  (l : label X1)
+  (s : state X1)
+  (om : option message)
+  (Hv : input_valid (pre_loaded_with_all_messages_vlsm X1) l (s, om))
+  : valid X2 l (s, om).
+Proof.
+  by split; [apply Hv | apply Hpre_subsumption].
+Qed.
+
+Lemma preloaded_constraint_subsumption_incl
+  (Hpre_subsumption : preloaded_constraint_subsumption)
+  : VLSM_incl (pre_loaded_with_all_messages_vlsm X1) (pre_loaded_with_all_messages_vlsm X2).
+Proof.
+  apply basic_VLSM_incl; intro; intros; [done | | | apply H].
+  - by apply initial_message_is_valid.
+  - by apply preloaded_constraint_subsumption_input_valid.
+Qed.
+
+Lemma preloaded_constraint_subsumption_incl_free :
+  VLSM_incl
+    (pre_loaded_with_all_messages_vlsm X1)
+    (pre_loaded_with_all_messages_vlsm X).
+Proof.
+  apply basic_VLSM_incl; intro; intros; [done | ..].
+  - by apply initial_message_is_valid.
+  - by apply Hv.
+  - by apply H.
+Qed.
+
+Lemma weak_constraint_subsumption_weakest
+  (Hsubsumption : input_valid_constraint_subsumption)
+  : weak_input_valid_constraint_subsumption.
+Proof.
+  by intros l som Hv _ _; auto.
+Qed.
+
+Lemma preloaded_constraint_subsumption_stronger
+  (Hpre_subsumption : preloaded_constraint_subsumption)
+  : input_valid_constraint_subsumption.
+Proof.
+  intros l som Hv.
+  apply Hpre_subsumption.
+  destruct som.
+  by apply (VLSM_incl_input_valid (vlsm_incl_pre_loaded_with_all_messages_vlsm X1)).
+Qed.
+
+Lemma strong_constraint_subsumption_strongest
+  (Hstrong_subsumption : strong_constraint_subsumption)
+  : preloaded_constraint_subsumption.
+Proof.
+  intros l [s om] (_ & _ & _ & Hc).
+  by apply Hstrong_subsumption.
+Qed.
+
+Lemma constraint_subsumption_byzantine_message_prop
+  (Hpre_subsumption : preloaded_constraint_subsumption)
+  (m : message)
+  (Hm : byzantine_message_prop X1 m)
+  : byzantine_message_prop X2 m.
+Proof.
+  by apply (VLSM_incl_can_emit (preloaded_constraint_subsumption_incl Hpre_subsumption)).
+Qed.
+
+End sec_constraint_subsumption.
