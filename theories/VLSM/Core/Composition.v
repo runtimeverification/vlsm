@@ -235,7 +235,7 @@ Context
 Lemma constraint_free_incl :
   VLSM_incl (composite_vlsm constraint) free_composite_vlsm.
 Proof.
-  by apply basic_VLSM_strong_incl; do 2 (red; cbn); firstorder.
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 Lemma composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
@@ -244,7 +244,7 @@ Lemma composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
       (pre_loaded_vlsm (composite_vlsm constraint) P)
       (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
 Proof.
-  by intros; apply basic_VLSM_strong_incl; cbv; [| itauto.. |].
+  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma constraint_free_valid_state_message_preservation :
@@ -252,7 +252,7 @@ Lemma constraint_free_valid_state_message_preservation :
     (Hsom : valid_state_message_prop (composite_vlsm constraint) s om),
       valid_state_message_prop free_composite_vlsm s om.
 Proof.
-  by intros s om; apply (VLSM_incl_valid_state_message constraint_free_incl); intro.
+  by apply valid_state_message_prop_constrained_vlsm.
 Qed.
 
 (*
@@ -264,9 +264,7 @@ Qed.
 Lemma constraint_preloaded_free_incl :
   VLSM_incl (composite_vlsm constraint) (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
 Proof.
-  eapply VLSM_incl_trans.
-  - by apply constraint_free_incl.
-  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm free_composite_vlsm).
+  by apply constrained_preloaded_incl.
 Qed.
 
 Context
@@ -280,8 +278,7 @@ Context
   than <<constraint2>> for any input.
 *)
 Definition strong_constraint_subsumption : Prop :=
-  forall (l : composite_label) (som : composite_state * option message),
-    constraint1 l som -> constraint2 l som.
+  strong_constraint_subsumption free_composite_vlsm constraint1 constraint2.
 
 (**
   A weaker version of [strong_constraint_subsumption] requiring [input_valid]ity
@@ -297,9 +294,7 @@ Definition strong_constraint_subsumption : Prop :=
   being valid.
 *)
 Definition preloaded_constraint_subsumption : Prop :=
-  forall (l : composite_label) (som : state _ * option message),
-    input_valid (pre_loaded_with_all_messages_vlsm (composite_vlsm constraint1)) l som ->
-    constraint2 l som.
+  preloaded_constraint_subsumption free_composite_vlsm constraint1 constraint2.
 
 (**
   A weaker version of [preloaded_constraint_subsumption] requiring [input_valid]ity
@@ -313,19 +308,13 @@ Definition preloaded_constraint_subsumption : Prop :=
   and/or the message being valid (e.g., Lemma [Fixed_incl_StrongFixed]).
 *)
 Definition input_valid_constraint_subsumption : Prop :=
-  forall (l : composite_label) (som : composite_state * option message),
-    input_valid (composite_vlsm constraint1) l som -> constraint2 l som.
-
+  input_valid_constraint_subsumption free_composite_vlsm constraint1 constraint2.
 (**
   The weakest form [constraint_subsumption] also requires that the input
   state and message are valid for the composition under the second constraint.
 *)
 Definition weak_input_valid_constraint_subsumption : Prop :=
-  forall (l : composite_label) (som : composite_state * option message),
-    input_valid (composite_vlsm constraint1) l som ->
-    valid_state_prop (composite_vlsm constraint2) som.1 ->
-    option_valid_message_prop (composite_vlsm constraint2) som.2 ->
-      constraint2 l som.
+  weak_input_valid_constraint_subsumption free_composite_vlsm constraint1 constraint2.
 
 (**
   Let <<X1>>, <<X2>> be two compositions of the same family of VLSMs but with
@@ -340,11 +329,7 @@ Lemma weak_constraint_subsumption_incl
   (Hsubsumption : weak_input_valid_constraint_subsumption)
   : VLSM_incl X1 X2.
 Proof.
-  apply basic_VLSM_incl.
-  - by intros s Hs.
-  - by intros _ _ m _ _ Hm; apply initial_message_is_valid.
-  - by split; [apply Hv | auto].
-  - by intros l s om s' om' Ht; apply Ht.
+  by apply weak_constraint_subsumption_incl.
 Qed.
 
 Lemma constraint_subsumption_input_valid
@@ -355,7 +340,7 @@ Lemma constraint_subsumption_input_valid
   (Hv : input_valid X1 l (s, om))
   : valid X2 l (s, om).
 Proof.
-  by split; [apply Hv | apply Hsubsumption].
+  by apply constraint_subsumption_input_valid.
 Qed.
 
 Lemma constraint_subsumption_valid_state_message_preservation
@@ -365,22 +350,14 @@ Lemma constraint_subsumption_valid_state_message_preservation
   (Hps : valid_state_message_prop X1 s om)
   : valid_state_message_prop X2 s om.
 Proof.
-  induction Hps.
-  - by apply valid_initial_state_message.
-  - apply (valid_generated_state_message X2) with s _om _s om l. 1-2, 4: done.
-    apply constraint_subsumption_input_valid; [done |].
-    by split_and!; [exists _om | exists _s |].
+  by apply constraint_subsumption_valid_state_message_preservation.
 Qed.
 
 Lemma constraint_subsumption_incl
   (Hsubsumption : input_valid_constraint_subsumption)
   : VLSM_incl X1 X2.
 Proof.
-  apply basic_VLSM_incl; intro; intros.
-  - done.
-  - by apply initial_message_is_valid.
-  - by apply constraint_subsumption_input_valid.
-  - by apply H.
+  by apply constraint_subsumption_incl.
 Qed.
 
 Lemma preloaded_constraint_subsumption_input_valid
@@ -391,16 +368,14 @@ Lemma preloaded_constraint_subsumption_input_valid
   (Hv : input_valid (pre_loaded_with_all_messages_vlsm X1) l (s, om))
   : valid X2 l (s, om).
 Proof.
-  by split; [apply Hv | apply Hpre_subsumption].
+  by apply preloaded_constraint_subsumption_input_valid.
 Qed.
 
 Lemma preloaded_constraint_subsumption_incl
   (Hpre_subsumption : preloaded_constraint_subsumption)
   : VLSM_incl (pre_loaded_with_all_messages_vlsm X1) (pre_loaded_with_all_messages_vlsm X2).
 Proof.
-  apply basic_VLSM_incl; intro; intros; [done | | | apply H].
-  - by apply initial_message_is_valid.
-  - by apply preloaded_constraint_subsumption_input_valid.
+  by apply preloaded_constraint_subsumption_incl.
 Qed.
 
 Lemma preloaded_constraint_subsumption_incl_free :
@@ -408,33 +383,28 @@ Lemma preloaded_constraint_subsumption_incl_free :
     (pre_loaded_with_all_messages_vlsm X1)
     (pre_loaded_with_all_messages_vlsm free_composite_vlsm).
 Proof.
-  apply basic_VLSM_incl; intro; intros; [done | | | apply H].
-  - by apply initial_message_is_valid.
-  - by apply Hv.
+  by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
 Lemma weak_constraint_subsumption_weakest
   (Hsubsumption : input_valid_constraint_subsumption)
   : weak_input_valid_constraint_subsumption.
 Proof.
-  by intros l som Hv _ _; auto.
+  by apply weak_constraint_subsumption_weakest.
 Qed.
 
 Lemma preloaded_constraint_subsumption_stronger
   (Hpre_subsumption : preloaded_constraint_subsumption)
   : input_valid_constraint_subsumption.
 Proof.
-  intros l som Hv; apply (Hpre_subsumption l som); destruct som.
-  by revert Hv; apply (VLSM_incl_input_valid
-    (vlsm_incl_pre_loaded_with_all_messages_vlsm (composite_vlsm constraint1))).
+  by apply preloaded_constraint_subsumption_stronger.
 Qed.
 
 Lemma strong_constraint_subsumption_strongest
   (Hstrong_subsumption : strong_constraint_subsumption)
   : preloaded_constraint_subsumption.
 Proof.
-  intros l (s, om) [_ [_ [_ Hc]]].
-  by revert Hc; apply Hstrong_subsumption.
+  by apply strong_constraint_subsumption_strongest.
 Qed.
 
 Lemma constraint_subsumption_byzantine_message_prop
@@ -443,8 +413,7 @@ Lemma constraint_subsumption_byzantine_message_prop
   (Hm : byzantine_message_prop X1 m)
   : byzantine_message_prop X2 m.
 Proof.
-  revert Hm.
-  by apply (VLSM_incl_can_emit (preloaded_constraint_subsumption_incl Hpre_subsumption)).
+  by eapply constraint_subsumption_byzantine_message_prop.
 Qed.
 
 End sec_constraint_subsumption.
