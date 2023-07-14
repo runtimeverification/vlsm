@@ -394,7 +394,7 @@ Proof.
             A sender fixed_byzantine_IM_sender_safety)
     ; [| done | done].
     eapply (VLSM_incl_valid_state); [| done].
-    by eapply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by eapply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   - contradict HAv; clear -Hseeded Hsender.
     destruct Hseeded as [(i & Hi & Hm) _].
     unfold channel_authenticated_message in Hm.
@@ -562,8 +562,7 @@ Proof.
   cbn; destruct (sender m) as [v |] eqn: Hsender; [| done]; cbn.
   case_decide as HAv; [| done].
   unfold sub_IM; cbn.
-  apply (VLSM_incl_valid_state (constraint_free_incl IM
-    (fixed_equivocation_constraint IM selection))) in Hs.
+  eapply VLSM_incl_valid_state in Hs; [| by apply VLSM_incl_constrained_vlsm].
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm
     (free_composite_vlsm IM))) in Hs.
   assert (Hpre_si : forall i, valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i)).

@@ -318,7 +318,8 @@ Proof.
   apply (VLSM_projection_valid_state (preloaded_component_projection IM i)).
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm
     (free_composite_vlsm IM))).
-  by apply (VLSM_incl_valid_state (constraint_free_incl IM constraint)).
+  apply VLSM_incl_valid_state; [| done].
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 Lemma induced_sub_projection_transition_is_composite l s om
@@ -346,7 +347,7 @@ Context
   .
 
 Lemma induced_sub_projection_constraint_subsumption_incl
-  (Hsubsumption : input_valid_constraint_subsumption IM constraint1 constraint2)
+  (Hsubsumption : input_valid_constraint_subsumption (free_composite_vlsm IM) constraint1 constraint2)
   : VLSM_incl (pre_induced_sub_projection constraint1) (pre_induced_sub_projection constraint2).
 Proof.
   apply projection_induced_validator_incl.
@@ -406,7 +407,7 @@ Definition finite_trace_sub_projection_app
 Lemma X_incl_Pre : VLSM_incl X Pre.
 Proof.
   apply VLSM_incl_trans with (free_composite_vlsm IM).
-  - by apply (constraint_free_incl IM constraint).
+  - by apply VLSM_incl_constrained_vlsm.
   - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
@@ -472,7 +473,7 @@ Proof.
     (composite_vlsm sub_IM (no_equivocations_additional_constraint_with_pre_loaded sub_IM _ seed)))).
   - by cbn; apply (pre_loaded_vlsm_incl (composite_vlsm sub_IM
       (no_equivocations_additional_constraint_with_pre_loaded sub_IM (free_constraint sub_IM) seed))).
-  - by apply preloaded_constraint_subsumption_incl_free.
+  - by cbn; apply (preloaded_constraint_subsumption_incl_free (free_composite_vlsm _)).
 Qed.
 
 (**
@@ -1351,7 +1352,7 @@ Proof.
   apply (emitted_messages_are_valid_iff (composite_vlsm IM sub_IM_not_equivocating_constraint) m)
     in Hm as [[i [[im Him] Heqm]] | Hemitted].
   - by elim (no_initial_messages_in_IM i im).
-  - apply (VLSM_incl_can_emit (constraint_preloaded_free_incl _ _)) in Hemitted.
+  - eapply VLSM_incl_can_emit in Hemitted; [| by apply constrained_preloaded_incl].
     specialize (can_emit_projection IM A sender Hsender_safety (A v) m) as Hemit.
     spec Hemit; [by rewrite Hsender; itauto |].
     apply Hemit in Hemitted; clear Hemit.
@@ -1735,7 +1736,7 @@ Proof.
         (existT (dexist i Hi) li) (sub_s, Some im));
     [by apply (VLSM_embedding_input_valid lift_sub_preloaded_free_embedding) |].
   eapply VLSM_incl_input_valid; [| done].
-  by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma can_emit_sub_projection

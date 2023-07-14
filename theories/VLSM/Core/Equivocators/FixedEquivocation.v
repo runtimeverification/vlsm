@@ -150,7 +150,7 @@ Qed.
 Lemma equivocators_fixed_equivocations_vlsm_incl_free
   : VLSM_incl equivocators_fixed_equivocations_vlsm (free_composite_vlsm equivocator_IM).
 Proof.
-  by apply constraint_free_incl.
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 (** Inclusion into the preloaded free composition. *)
@@ -250,8 +250,9 @@ Context
   .
 
 (** The [full_node_constraint_alt] is stronger than the [fixed_equivocation_constraint]. *)
-Lemma fixed_equivocation_constraint_subsumption_alt
-  : strong_constraint_subsumption IM full_node_constraint_alt fixed_equivocation_constraint.
+Lemma fixed_equivocation_constraint_subsumption_alt :
+  strong_constraint_subsumption (free_composite_vlsm IM) full_node_constraint_alt
+    fixed_equivocation_constraint.
 Proof.
   intros l (s, [m |]) Hc ; [| done].
   destruct Hc as [Hno_equiv | [i [Hi Hm]]]; [by left |].
@@ -269,7 +270,8 @@ Qed.
 *)
 Lemma fixed_equivocation_constraint_subsumption
   (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i))
-  : preloaded_constraint_subsumption IM full_node_constraint fixed_equivocation_constraint.
+  : preloaded_constraint_subsumption (free_composite_vlsm IM) full_node_constraint
+      fixed_equivocation_constraint.
 Proof.
   intros l (s, om) Hv.
   apply fixed_equivocation_constraint_subsumption_alt.
@@ -562,7 +564,7 @@ Proof.
         destruct Hs as [_om Hs].
         exists _om.
         eapply VLSM_incl_valid_state_message; [by apply free_composite_vlsm_spec | by do 2 red |].
-        by eapply constraint_subsumption_valid_state_message_preservation.
+        by eapply (constraint_subsumption_valid_state_message_preservation (free_composite_vlsm _)).
       }
       specialize
         (specialized_proper_sent_rev FreeE _ Hs_free _ Hno_equiv) as Hall.
@@ -1058,7 +1060,7 @@ Proof.
     apply (preloaded_valid_state_projection (equivocator_IM (sub_IM IM (elements equivocating))) subi).
     revert Hs.
     apply VLSM_incl_valid_state.
-    by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   - by destruct 1.
 Qed.
 
@@ -1095,7 +1097,7 @@ Proof.
     apply (preloaded_valid_state_projection (equivocator_IM (sub_IM IM (elements equivocating))) subi).
     revert Hs.
     apply VLSM_incl_valid_state.
-    by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 (**
@@ -1134,8 +1136,7 @@ Proof.
   {
     revert Htr; apply VLSM_incl_finite_valid_trace_init_to.
     apply VLSM_incl_trans with FreeE.
-    - by apply (constraint_free_incl (equivocator_IM IM)
-        (equivocators_fixed_equivocations_constraint IM (elements equivocating))).
+    - by apply VLSM_incl_constrained_vlsm.
     - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
   assert (Hplst : valid_state_prop (pre_loaded_with_all_messages_vlsm FreeE) s)
@@ -1374,7 +1375,7 @@ Context
   .
 
 Lemma strong_constraint_subsumption_fixed_all
-  : strong_constraint_subsumption (equivocator_IM IM)
+  : strong_constraint_subsumption (free_composite_vlsm (equivocator_IM IM))
     (equivocators_no_equivocations_constraint IM)
     (equivocators_fixed_equivocations_constraint IM (enum index)).
 Proof.
@@ -1382,7 +1383,7 @@ Proof.
 Qed.
 
 Lemma strong_constraint_subsumption_all_fixed
-  : strong_constraint_subsumption (equivocator_IM IM)
+  : strong_constraint_subsumption (free_composite_vlsm (equivocator_IM IM))
     (equivocators_fixed_equivocations_constraint IM (enum index))
     (equivocators_no_equivocations_constraint IM).
 Proof.
@@ -1392,12 +1393,12 @@ Qed.
 Lemma equivocators_fixed_equivocations_all_eq : VLSM_eq XE NE.
 Proof.
   split.
-  - apply constraint_subsumption_incl.
+  - apply (constraint_subsumption_incl (free_composite_vlsm _)).
     apply preloaded_constraint_subsumption_stronger.
     apply strong_constraint_subsumption_strongest.
     by apply strong_constraint_subsumption_all_fixed.
   - apply
-      (constraint_subsumption_incl (equivocator_IM IM)
+      (constraint_subsumption_incl (free_composite_vlsm (equivocator_IM IM))
         (equivocators_no_equivocations_constraint IM)
         (equivocators_fixed_equivocations_constraint IM (enum index))).
     apply preloaded_constraint_subsumption_stronger.

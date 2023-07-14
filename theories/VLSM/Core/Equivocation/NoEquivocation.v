@@ -204,7 +204,8 @@ Section sec_composite_no_equivocation_invariants.
 Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   (X := composite_vlsm IM constraint)
-  (Hsubsumed : preloaded_constraint_subsumption IM constraint composite_no_equivocations)
+  (Hsubsumed : preloaded_constraint_subsumption (free_composite_vlsm IM) constraint
+    composite_no_equivocations)
   .
 
 Definition composite_directly_observed_were_sent (s : state (composite_type IM)) : Prop :=
@@ -267,7 +268,7 @@ Lemma seeded_no_equivocation_incl_preloaded :
 Proof.
   apply (VLSM_incl_trans _ (pre_loaded_with_all_messages_vlsm (composite_vlsm IM _))).
   - by cbn; apply (@pre_loaded_vlsm_incl message (composite_vlsm IM _)).
-  - by apply preloaded_constraint_subsumption_incl_free.
+  - by apply (preloaded_constraint_subsumption_incl_free (free_composite_vlsm IM)).
 Qed.
 
 End sec_seeded_composite_vlsm_no_equivocation_definition.
@@ -295,7 +296,7 @@ Proof.
   apply VLSM_eq_trans with
     (composite_vlsm IM (no_equivocations_additional_constraint_with_pre_loaded (fun _ =>  False))).
   - by apply VLSM_eq_sym, vlsm_is_pre_loaded_with_False.
-  - specialize (constraint_subsumption_incl IM) as Hincl.
+  - specialize (constraint_subsumption_incl (free_composite_vlsm IM)) as Hincl.
     unfold no_equivocations_additional_constraint_with_pre_loaded.
     by split; apply Hincl; intros l [s [m |]] Hpv; apply Hpv.
 Qed.

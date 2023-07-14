@@ -1763,7 +1763,7 @@ Lemma oracle_component_selected_previously
 Proof.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
   eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr
-  ; [| by apply constraint_preloaded_free_incl].
+  ; [| by apply constrained_preloaded_incl].
   apply (VLSM_projection_finite_valid_trace_init_to
           (preloaded_component_projection IM i))
      in Hpre_tr.
@@ -2062,7 +2062,7 @@ Proof.
   intros.
   apply free_composite_no_initial_valid_messages_emitted_by_sender; [done.. |].
   eapply VLSM_incl_valid_message with X; [| by do 2 red | done].
-  by apply constraint_free_incl.
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 Lemma free_composite_no_initial_valid_messages_have_sender
@@ -2088,7 +2088,7 @@ Proof.
   intros m Hm.
   apply free_composite_no_initial_valid_messages_have_sender; [done.. |].
   eapply VLSM_incl_valid_message with X; [| by do 2 red | done].
-  by apply constraint_free_incl.
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 Lemma composite_emitted_by_validator_have_sender
@@ -2271,7 +2271,7 @@ Proof.
   ; destruct l as [i li]; cbn in *; subst output.
   exists destination; split; [done |].
   eapply VLSM_incl_input_valid_transition in Ht; cbn in Ht;
-    [| by apply constraint_preloaded_free_incl].
+    [| by apply constrained_preloaded_incl].
   eapply (VLSM_projection_input_valid_transition (preloaded_component_projection IM i))
     in Ht; [by eexists _, _ |].
   by apply (composite_project_label_eq IM).
