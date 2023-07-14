@@ -401,7 +401,7 @@ Definition input_valid_constraint_subsumption : Prop :=
     input_valid (constrained_vlsm X constraint1) l som -> constraint2 l som.
 
 (**
-  The weakest form [constraint_subsumption] also requires that the input
+  The weakest form of constraint subsumption also requires that the input
   state and message are valid for the composition under the second constraint.
 *)
 Definition weak_input_valid_constraint_subsumption : Prop :=
@@ -412,9 +412,9 @@ Definition weak_input_valid_constraint_subsumption : Prop :=
       constraint2 l som.
 
 (**
-  Let <<X1>>, <<X2>> be two compositions of the same family of VLSMs but with
-  constraints <<constraint1>> and <<constraint2>>, respectively. Further assume
-  that <<constraint1>> is subsumed by <<constraint2>>.
+  Let <<X1>>, <<X2>> be two constrained VLSMs constraints <<constraint1>>
+  and <<constraint2>>, respectively. Further assume that <<constraint1>>
+  is subsumed by <<constraint2>>.
 
   We will show that <<X1>> is trace-included into <<X2>> by applying
   the lemma [basic_VLSM_incl].
