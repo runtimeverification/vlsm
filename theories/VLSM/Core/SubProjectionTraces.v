@@ -318,7 +318,8 @@ Proof.
   apply (VLSM_projection_valid_state (preloaded_component_projection IM i)).
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm
     (free_composite_vlsm IM))).
-  by apply (VLSM_incl_valid_state (VLSM_incl_constrained_vlsm IM constraint)).
+  apply VLSM_incl_valid_state; [| done].
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 Lemma induced_sub_projection_transition_is_composite l s om
@@ -406,7 +407,7 @@ Definition finite_trace_sub_projection_app
 Lemma X_incl_Pre : VLSM_incl X Pre.
 Proof.
   apply VLSM_incl_trans with (free_composite_vlsm IM).
-  - by apply (VLSM_incl_constrained_vlsm IM constraint).
+  - by apply VLSM_incl_constrained_vlsm.
   - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
@@ -1351,7 +1352,7 @@ Proof.
   apply (emitted_messages_are_valid_iff (composite_vlsm IM sub_IM_not_equivocating_constraint) m)
     in Hm as [[i [[im Him] Heqm]] | Hemitted].
   - by elim (no_initial_messages_in_IM i im).
-  - apply (VLSM_incl_can_emit (constrained_preloaded_incl _ _)) in Hemitted.
+  - eapply VLSM_incl_can_emit in Hemitted; [| by apply constrained_preloaded_incl].
     specialize (can_emit_projection IM A sender Hsender_safety (A v) m) as Hemit.
     spec Hemit; [by rewrite Hsender; itauto |].
     apply Hemit in Hemitted; clear Hemit.
