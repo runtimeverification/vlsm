@@ -150,7 +150,7 @@ Qed.
 Lemma equivocators_fixed_equivocations_vlsm_incl_free
   : VLSM_incl equivocators_fixed_equivocations_vlsm (free_composite_vlsm equivocator_IM).
 Proof.
-  by apply constraint_free_incl.
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 (** Inclusion into the preloaded free composition. *)
@@ -1136,7 +1136,7 @@ Proof.
   {
     revert Htr; apply VLSM_incl_finite_valid_trace_init_to.
     apply VLSM_incl_trans with FreeE.
-    - by apply (constraint_free_incl (equivocator_IM IM)
+    - by apply (VLSM_incl_constrained_vlsm (equivocator_IM IM)
         (equivocators_fixed_equivocations_constraint IM (elements equivocating))).
     - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }

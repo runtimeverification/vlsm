@@ -318,7 +318,7 @@ Proof.
   apply (VLSM_projection_valid_state (preloaded_component_projection IM i)).
   apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm
     (free_composite_vlsm IM))).
-  by apply (VLSM_incl_valid_state (constraint_free_incl IM constraint)).
+  by apply (VLSM_incl_valid_state (VLSM_incl_constrained_vlsm IM constraint)).
 Qed.
 
 Lemma induced_sub_projection_transition_is_composite l s om
@@ -406,7 +406,7 @@ Definition finite_trace_sub_projection_app
 Lemma X_incl_Pre : VLSM_incl X Pre.
 Proof.
   apply VLSM_incl_trans with (free_composite_vlsm IM).
-  - by apply (constraint_free_incl IM constraint).
+  - by apply (VLSM_incl_constrained_vlsm IM constraint).
   - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 

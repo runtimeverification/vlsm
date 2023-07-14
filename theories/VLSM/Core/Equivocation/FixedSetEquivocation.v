@@ -85,7 +85,7 @@ Definition fixed_equivocation_vlsm_composition : VLSM message
 Lemma fixed_equivocation_vlsm_composition_incl_free
   : VLSM_incl fixed_equivocation_vlsm_composition Free.
 Proof.
-  by apply constraint_free_incl.
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 Lemma fixed_equivocation_vlsm_composition_incl_preloaded_free
@@ -300,7 +300,7 @@ Context
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
-Definition Fixed_incl_Free : VLSM_incl Fixed Free := constraint_free_incl _ _.
+Definition Fixed_incl_Free : VLSM_incl Fixed Free := VLSM_incl_constrained_vlsm _ _.
 
 Lemma Fixed_incl_Preloaded : VLSM_incl Fixed (pre_loaded_with_all_messages_vlsm Free).
 Proof.
@@ -316,7 +316,7 @@ Qed.
 
 Lemma StrongFixed_incl_Free : VLSM_incl StrongFixed Free.
 Proof.
-  exact (constraint_free_incl _ _).
+  exact (VLSM_incl_constrained_vlsm _ _).
 Qed.
 
 Lemma StrongFixed_incl_Preloaded : VLSM_incl StrongFixed (pre_loaded_with_all_messages_vlsm Free).

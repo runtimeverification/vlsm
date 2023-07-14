@@ -219,7 +219,7 @@ Proof.
   assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
   {
     apply VLSM_incl_trans with Free.
-    - by apply (constraint_free_incl IM (strong_fixed_equivocation_constraint IM equivocators)).
+    - by apply (VLSM_incl_constrained_vlsm IM (strong_fixed_equivocation_constraint IM equivocators)).
     - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
@@ -368,7 +368,7 @@ Proof.
   eapply traces_exhibiting_limited_equivocation_are_valid_rev; [done.. | |].
   - apply valid_trace_add_default_last.
     eapply VLSM_incl_finite_valid_trace; [| done].
-    by apply constraint_free_incl.
+    by apply VLSM_incl_constrained_vlsm.
   - by apply tracewise_not_heavy_LimitedEquivocationProp_iff,
       full_node_limited_equivocation_valid_state_weight,
       finite_valid_trace_last_pstate with (X := Limited), Htr.
@@ -391,7 +391,7 @@ Lemma limited_valid_state_has_trace_exhibiting_limited_equivocation
 Proof.
   intros s Hs.
   assert (Hfree_s : valid_state_prop (free_composite_vlsm IM) s)
-    by (revert Hs; apply VLSM_incl_valid_state, constraint_free_incl).
+    by (revert Hs; apply VLSM_incl_valid_state, VLSM_incl_constrained_vlsm).
   destruct
     (free_has_strong_trace_witnessing_equivocation_prop IM threshold A sender _ s Hfree_s)
     as (is & tr & Htr & Heqv).

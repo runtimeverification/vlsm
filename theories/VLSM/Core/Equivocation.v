@@ -2062,7 +2062,7 @@ Proof.
   intros.
   apply free_composite_no_initial_valid_messages_emitted_by_sender; [done.. |].
   eapply VLSM_incl_valid_message with X; [| by do 2 red | done].
-  by apply constraint_free_incl.
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 Lemma free_composite_no_initial_valid_messages_have_sender
@@ -2088,7 +2088,7 @@ Proof.
   intros m Hm.
   apply free_composite_no_initial_valid_messages_have_sender; [done.. |].
   eapply VLSM_incl_valid_message with X; [| by do 2 red | done].
-  by apply constraint_free_incl.
+  by apply VLSM_incl_constrained_vlsm.
 Qed.
 
 Lemma composite_emitted_by_validator_have_sender
