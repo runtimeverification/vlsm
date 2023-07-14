@@ -1729,7 +1729,7 @@ Qed.
 Lemma ELMO_state_to_minimal_equivocation_trace_valid
   (s : composite_state ELMOComponent)
   (Hs : valid_state_prop ELMOProtocol s)
-  (Hs_pre := VLSM_incl_valid_state (constrained_preloaded_incl _ ELMO_global_constraint) _ Hs
+  (Hs_pre := VLSM_incl_valid_state (constrained_preloaded_incl (free_composite_vlsm _) ELMO_global_constraint) _ Hs
     : composite_ram_state_prop ELMOComponent s)
   (is : composite_state ELMOComponent)
   (tr : list (composite_transition_item ELMOComponent)) :
@@ -2907,7 +2907,8 @@ Proof.
           with (l := existT i Receive) (s := gamma) (om := Some m) (om' := None);
           repeat split; [| | done].
         - eapply in_futures_valid_snd.
-          by apply (VLSM_incl_in_futures (constrained_preloaded_incl _ ELMO_global_constraint)).
+          by apply (VLSM_incl_in_futures (constrained_preloaded_incl (free_composite_vlsm _)
+            ELMO_global_constraint)).
         - by apply any_message_is_valid_in_preloaded.
       }
       split_and!.
