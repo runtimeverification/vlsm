@@ -1149,9 +1149,9 @@ Lemma ELMOComponent_sizeState_of_ram_trace_output
 Proof.
   induction Htr; [by inversion 1 |].
   intros item Hitem m Hm.
-  apply elem_of_cons in Hitem as [-> | Hitem]; cbn in Hm;
-    destruct Ht as [(_ & _ & Hv) Ht]; inversion Hv; subst; inversion Ht; subst; [done | ..].
-  all: by etransitivity; [| eapply IHHtr]; [rewrite addObservation_size; lia | ..].
+  by apply elem_of_cons in Hitem as [-> | Hitem]; cbn in Hm;
+    destruct Ht as [(_ & _ & Hv) Ht]; inversion Hv; subst; inversion Ht; subst; [done | ..];
+    only 1-2: (etransitivity; [| eapply IHHtr]; [rewrite addObservation_size; lia | ..]).
 Qed.
 
 Lemma ELMOComponent_messages_of_ram_trace
@@ -2660,8 +2660,7 @@ Proof.
   assert (Htr_m_receive :
     Forall (fun item : transition_item ELMOComponentType => l item = Receive) tr_m).
   {
-    eapply all_intermediary_transitions_are_receive.
-    1-4, 6-8: done.
+    eapply all_intermediary_transitions_are_receive; only 1-4, 6-8: done.
     eapply VLSM_incl_valid_state; [| done].
     by apply constrained_preloaded_incl with (constraint := ELMO_global_constraint).
   }
