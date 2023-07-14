@@ -339,14 +339,6 @@ Proof.
   by intros; apply basic_VLSM_strong_incl; cbv; [| itauto.. |].
 Qed.
 
-Lemma constraint_free_valid_state_message_preservation :
-  forall (s : state _) (om : option message)
-    (Hsom : valid_state_message_prop (constrained_vlsm X constraint) s om),
-      valid_state_message_prop X s om.
-Proof.
-  by apply valid_state_message_prop_constrained_vlsm.
-Qed.
-
 (*
   TODO(traiansf): There are many places where, because the lemma below
   was missing, it was either reproved locally, or multiple VLSM_incl_
