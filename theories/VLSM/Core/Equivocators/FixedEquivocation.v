@@ -1060,7 +1060,7 @@ Proof.
     apply (preloaded_valid_state_projection (equivocator_IM (sub_IM IM (elements equivocating))) subi).
     revert Hs.
     apply VLSM_incl_valid_state.
-    by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   - by destruct 1.
 Qed.
 
@@ -1097,7 +1097,7 @@ Proof.
     apply (preloaded_valid_state_projection (equivocator_IM (sub_IM IM (elements equivocating))) subi).
     revert Hs.
     apply VLSM_incl_valid_state.
-    by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 (**

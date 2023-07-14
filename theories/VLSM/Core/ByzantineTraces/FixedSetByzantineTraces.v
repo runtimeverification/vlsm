@@ -394,7 +394,7 @@ Proof.
             A sender fixed_byzantine_IM_sender_safety)
     ; [| done | done].
     eapply (VLSM_incl_valid_state); [| done].
-    by eapply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by eapply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   - contradict HAv; clear -Hseeded Hsender.
     destruct Hseeded as [(i & Hi & Hm) _].
     unfold channel_authenticated_message in Hm.

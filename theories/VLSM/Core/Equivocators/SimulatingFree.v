@@ -112,7 +112,7 @@ Lemma generalized_equivocators_finite_valid_trace_init_to_rev
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   assert (HinclE : VLSM_incl CE PreFreeE)
-    by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
   - specialize (lift_initial_to_equivocators_state IM _ His) as Hs.
     remember (lift_to_equivocators_state IM is) as s.

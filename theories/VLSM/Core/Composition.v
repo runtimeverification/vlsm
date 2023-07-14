@@ -683,7 +683,7 @@ Proof.
   intros.
   eapply valid_state_project_preloaded_to_preloaded_free.
   apply VLSM_incl_valid_state; [| done].
-  by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma valid_state_project_preloaded
@@ -739,7 +739,7 @@ Proof.
   intros.
   apply input_valid_transition_preloaded_project_active_free.
   apply (@VLSM_incl_input_valid_transition _ _ (pre_loaded_with_all_messages_vlsm X)); [| done].
-  by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma input_valid_transition_project_active
@@ -793,7 +793,7 @@ Proof.
   intros.
   apply input_valid_transition_preloaded_project_any_free.
   apply (@VLSM_incl_input_valid_transition _ _ (pre_loaded_with_all_messages_vlsm X)); [| done].
-  by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma input_valid_transition_project_any
@@ -840,7 +840,7 @@ Lemma can_emit_composite_project
 Proof.
   apply can_emit_free_composite_project.
   eapply VLSM_incl_can_emit; [| done].
-  by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 (** ** Binary free composition
@@ -1266,7 +1266,7 @@ Proof.
   - destruct Hv as [Hs [Hom [Hv Hc]]].
     apply constraint_projection in Hc; cycle 1.
     + apply VLSM_incl_valid_state; [| done].
-      by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+      by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
     + split; [| done].
       clear Hc. revert Hv. destruct l as (i, li). cbn.
       by apply same_VLSM_valid_preservation.

@@ -588,7 +588,7 @@ Proof.
   - done.
   - apply (@VLSM_incl_finite_valid_trace_from _ _ (pre_loaded_vlsm
       (composite_vlsm equivocator_IM (free_constraint _)) (fun _ => True))); [| done].
-    by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma PreFreeSubE_PreFreeE_weak_embedding

@@ -1735,7 +1735,7 @@ Proof.
         (existT (dexist i Hi) li) (sub_s, Some im));
     [by apply (VLSM_embedding_input_valid lift_sub_preloaded_free_embedding) |].
   eapply VLSM_incl_input_valid; [| done].
-  by apply composite_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
 
 Lemma can_emit_sub_projection
