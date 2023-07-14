@@ -1136,8 +1136,7 @@ Proof.
   {
     revert Htr; apply VLSM_incl_finite_valid_trace_init_to.
     apply VLSM_incl_trans with FreeE.
-    - by apply (VLSM_incl_constrained_vlsm (equivocator_IM IM)
-        (equivocators_fixed_equivocations_constraint IM (elements equivocating))).
+    - by apply VLSM_incl_constrained_vlsm.
     - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
   assert (Hplst : valid_state_prop (pre_loaded_with_all_messages_vlsm FreeE) s)
