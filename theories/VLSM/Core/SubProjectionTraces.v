@@ -1351,7 +1351,7 @@ Proof.
   apply (emitted_messages_are_valid_iff (composite_vlsm IM sub_IM_not_equivocating_constraint) m)
     in Hm as [[i [[im Him] Heqm]] | Hemitted].
   - by elim (no_initial_messages_in_IM i im).
-  - apply (VLSM_incl_can_emit (constraint_preloaded_free_incl _ _)) in Hemitted.
+  - apply (VLSM_incl_can_emit (constrained_preloaded_incl _ _)) in Hemitted.
     specialize (can_emit_projection IM A sender Hsender_safety (A v) m) as Hemit.
     spec Hemit; [by rewrite Hsender; itauto |].
     apply Hemit in Hemitted; clear Hemit.

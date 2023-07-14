@@ -177,7 +177,7 @@ Proof.
   apply (messages_sent_from_component_produced_previously IM Hs) in Hsent
     as (destination & Hfutures & Hproduce).
   eapply VLSM_incl_in_futures in Hfutures as Hpre_futures
-  ; [| apply constraint_preloaded_free_incl].
+  ; [| apply constrained_preloaded_incl].
   apply (VLSM_projection_in_futures (preloaded_component_projection IM i)) in Hpre_futures.
   eapply message_dependencies_are_necessary in Hproduce as Hobs.
   eapply has_been_directly_observed_sent_received_iff
@@ -194,7 +194,7 @@ Proof.
       ; destruct Ht as [(_ & _ & _ & Hc) _].
       eapply in_futures_preserves_strong_fixed_equivocation; [| apply Hc].
       eapply VLSM_incl_in_futures.
-      + by apply constraint_preloaded_free_incl
+      + by apply constrained_preloaded_incl
          with (constraint := strong_fixed_equivocation_constraint IM equivocators).
       + by do 2 (eapply in_futures_trans; [done |]).
 Qed.

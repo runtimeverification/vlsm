@@ -1729,7 +1729,7 @@ Qed.
 Lemma ELMO_state_to_minimal_equivocation_trace_valid
   (s : composite_state ELMOComponent)
   (Hs : valid_state_prop ELMOProtocol s)
-  (Hs_pre := VLSM_incl_valid_state (constraint_preloaded_free_incl _ ELMO_global_constraint) _ Hs
+  (Hs_pre := VLSM_incl_valid_state (constrained_preloaded_incl _ ELMO_global_constraint) _ Hs
     : composite_ram_state_prop ELMOComponent s)
   (is : composite_state ELMOComponent)
   (tr : list (composite_transition_item ELMOComponent)) :
@@ -2005,7 +2005,7 @@ Lemma ELMO_update_state_with_initial
       ⊆
     ELMO_equivocating_validators s ∪ {[ idx i ]}.
 Proof.
-  assert (Hincl : VLSM_incl ELMOProtocol ReachELMO) by apply constraint_preloaded_free_incl.
+  assert (Hincl : VLSM_incl ELMOProtocol ReachELMO) by apply constrained_preloaded_incl.
   assert (Htr_min := ELMO_state_to_minimal_equivocation_trace_valid _ Hs).
   cbn in Htr_min; destruct (ELMO_state_to_minimal_equivocation_trace _ _)
     as [is_min tr_min] eqn: Heqtr_min; specialize (Htr_min _ _ eq_refl).
@@ -2119,7 +2119,7 @@ Proof.
     exists (s, None), (existT i Send), s'.
     by repeat split; [| apply option_valid_message_None | apply Hsend..].
   }
-  assert (Hincl : VLSM_incl ELMOProtocol ReachELMO) by apply constraint_preloaded_free_incl.
+  assert (Hincl : VLSM_incl ELMOProtocol ReachELMO) by apply constrained_preloaded_incl.
   destruct (decide (composite_has_been_sent ELMOComponent s m)) as [| Hnsnd];
     [by eapply sent_valid |].
   destruct Hreceive as [[Hv Hc] Ht]; inversion Hv as [? ? Hrcv |]; subst; inversion Ht.
@@ -2663,7 +2663,7 @@ Proof.
     eapply all_intermediary_transitions_are_receive.
     1-4, 6-8: done.
     eapply VLSM_incl_valid_state; [| done].
-    by apply constraint_preloaded_free_incl with (constraint := ELMO_global_constraint).
+    by apply constrained_preloaded_incl with (constraint := ELMO_global_constraint).
   }
   assert (Htr_m_inputs_in_sigma :
     forall item msg, item ∈ tr_m -> input item = Some msg ->
@@ -2907,7 +2907,7 @@ Proof.
           with (l := existT i Receive) (s := gamma) (om := Some m) (om' := None);
           repeat split; [| | done].
         - eapply in_futures_valid_snd.
-          by apply (VLSM_incl_in_futures (constraint_preloaded_free_incl _ ELMO_global_constraint)).
+          by apply (VLSM_incl_in_futures (constrained_preloaded_incl _ ELMO_global_constraint)).
         - by apply any_message_is_valid_in_preloaded.
       }
       split_and!.
