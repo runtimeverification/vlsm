@@ -1149,9 +1149,11 @@ Lemma ELMOComponent_sizeState_of_ram_trace_output
 Proof.
   induction Htr; [by inversion 1 |].
   intros item Hitem m Hm.
-  by apply elem_of_cons in Hitem as [-> | Hitem]; cbn in Hm;
-    destruct Ht as [(_ & _ & Hv) Ht]; inversion Hv; subst; inversion Ht; subst; [done | ..];
-    only 1-2: (etransitivity; [| eapply IHHtr]; [rewrite addObservation_size; lia | ..]).
+  destruct Ht as [(_ & _ & Hv) Ht].
+  apply elem_of_cons in Hitem as [-> | Hitem]; cbn in Hm.
+  - by inversion Hv; subst; inversion Ht.
+  - transitivity (sizeState s); [| by eapply IHHtr].
+    by eapply Nat.lt_le_incl, ELMOComponent_valid_transition_size; cbn in Hv, Ht.
 Qed.
 
 Lemma ELMOComponent_messages_of_ram_trace
