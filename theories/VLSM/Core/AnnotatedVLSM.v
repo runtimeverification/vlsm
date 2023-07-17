@@ -2,6 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Validator Composition.
+From VLSM.Core Require Import ConstrainedVLSM.
 
 (** * State-annotated VLSMs
 
@@ -49,8 +50,6 @@ Proof.
 Qed.
 
 Context
-  (annotated_constraint :
-    label annotated_type -> annotated_state * option message -> Prop)
   (annotated_transition_state :
     label annotated_type -> annotated_state * option message -> annotation)
   .
@@ -59,8 +58,7 @@ Definition annotated_valid
   (l : label annotated_type)
   (som : annotated_state * option message)
   : Prop :=
-  valid X l (original_state som.1, som.2) /\
-  annotated_constraint l som.
+  valid X l (original_state som.1, som.2).
 
 Definition annotated_transition
   (l : label annotated_type)
@@ -189,8 +187,8 @@ Context
     label (annotated_type X annotation) ->
       annotated_state X annotation * option message -> annotation)
   (AnnotatedX : VLSM message :=
-    annotated_vlsm X annotation initial_annotation_prop annotated_constraint
-      annotated_transition_state)
+    constrained_vlsm (annotated_vlsm X annotation initial_annotation_prop annotated_transition_state)
+      annotated_constraint)
   .
 
 Definition forget_annotations_projection
@@ -224,8 +222,9 @@ Context
     label (annotated_type Free annotation) ->
       annotated_state Free annotation * option message -> annotation)
   (AnnotatedFree : VLSM message :=
-    annotated_vlsm Free annotation initial_annotation_prop annotated_constraint
-      annotated_transition_state)
+    constrained_vlsm
+      (annotated_vlsm Free annotation initial_annotation_prop annotated_transition_state)
+      annotated_constraint)
   (i : index)
   .
 
