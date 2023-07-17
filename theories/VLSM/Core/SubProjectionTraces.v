@@ -404,12 +404,6 @@ Definition finite_trace_sub_projection_app
     pre_VLSM_projection_finite_trace_project_app (composite_type IM) _
       composite_label_sub_projection_option composite_state_sub_projection tr1 tr2.
 
-Lemma X_incl_Pre : VLSM_incl X Pre.
-Proof.
-  apply VLSM_incl_trans with (free_composite_vlsm IM).
-  - by apply VLSM_incl_constrained_vlsm.
-  - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-Qed.
 
 Lemma finite_trace_sub_projection_last_state
   (start : composite_state IM)
@@ -627,13 +621,15 @@ Lemma valid_state_sub_projection
 Proof.
   apply valid_state_has_trace in Hps.
   destruct Hps as [is [tr Htr]].
-  specialize (Hs _ _ (VLSM_incl_finite_valid_trace_init_to X_incl_Pre _ _ _ Htr)).
+  specialize (Hs _ _ (VLSM_incl_finite_valid_trace_init_to
+    (constrained_preloaded_incl (free_composite_vlsm IM) constraint) _ _ _ Htr)).
   apply valid_trace_get_last in Htr as Hlst.
   apply valid_trace_forget_last in Htr.
   specialize (finite_trace_sub_projection_last_state _ _ (proj1 Htr)) as Hlst'.
   apply (finite_valid_trace_sub_projection _ _ Hs) in Htr as Hptr.
-  - destruct Hptr as [Hptr _]. apply finite_valid_trace_last_pstate in Hptr.
-    by cbn in *; rewrite Hlst' in Hptr; subst.
+  destruct Hptr as [Hptr _].
+  apply finite_valid_trace_last_pstate in Hptr.
+  by cbn in *; rewrite Hlst' in Hptr; subst.
 Qed.
 
 Lemma finite_valid_trace_from_sub_projection
@@ -659,7 +655,7 @@ Proof.
     by rewrite Hpre_lst in Htr.
   - specialize (Hmsg is (pre ++ tr)).
     apply Hmsg.
-    apply (VLSM_incl_finite_valid_trace_init_to X_incl_Pre).
+    apply VLSM_incl_finite_valid_trace_init_to; [by apply constrained_preloaded_incl |].
     apply valid_trace_add_last; [done |].
     rewrite finite_trace_last_app.
     by unfold lst; subst.
