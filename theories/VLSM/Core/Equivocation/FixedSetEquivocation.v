@@ -88,14 +88,6 @@ Proof.
   by apply VLSM_incl_constrained_vlsm.
 Qed.
 
-Lemma fixed_equivocation_vlsm_composition_incl_preloaded_free
-  : VLSM_incl fixed_equivocation_vlsm_composition (pre_loaded_with_all_messages_vlsm Free).
-Proof.
-  apply VLSM_incl_trans with Free.
-  - by apply fixed_equivocation_vlsm_composition_incl_free.
-  - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-Qed.
-
 (** ** A (seemingly) stronger definition for fixed-set equivocation
 
   A seemingly stronger fixed equivocation constraint requires that a received
@@ -302,12 +294,6 @@ Context
 
 Definition Fixed_incl_Free : VLSM_incl Fixed Free := VLSM_incl_constrained_vlsm _ _.
 
-Lemma Fixed_incl_Preloaded : VLSM_incl Fixed (pre_loaded_with_all_messages_vlsm Free).
-Proof.
-  eapply VLSM_incl_trans; [by apply Fixed_incl_Free |].
-  by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).
-Qed.
-
 Lemma preloaded_Fixed_incl_Preloaded :
   VLSM_incl (pre_loaded_with_all_messages_vlsm Fixed) (pre_loaded_with_all_messages_vlsm Free).
 Proof.
@@ -317,12 +303,6 @@ Qed.
 Lemma StrongFixed_incl_Free : VLSM_incl StrongFixed Free.
 Proof.
   exact (VLSM_incl_constrained_vlsm _ _).
-Qed.
-
-Lemma StrongFixed_incl_Preloaded : VLSM_incl StrongFixed (pre_loaded_with_all_messages_vlsm Free).
-Proof.
-  eapply VLSM_incl_trans; [by apply StrongFixed_incl_Free |].
-  by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm Free).
 Qed.
 
 Lemma in_futures_preserves_sent_by_non_equivocating s base_s
@@ -468,7 +448,8 @@ Proof.
       (preloaded_component_projection IM (projT1 l))) in Hfuture.
     apply in_futures_preserving_oracle_from_stepwise with (field_selector output) (sf (projT1 l))
     ; [by apply has_been_sent_stepwise_props | done |].
-    apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht.
+    apply (VLSM_incl_input_valid_transition
+      (constrained_preloaded_incl (free_composite_vlsm IM) _)) in Ht.
     specialize (VLSM_projection_input_valid_transition
       (preloaded_component_projection IM (projT1 l)) l (projT2 l)) as Hproject.
     spec Hproject.
@@ -508,7 +489,8 @@ Proof.
     + intros m Hobs; exfalso.
       eapply (@has_been_directly_observed_no_inits _ Free); [done |].
       by apply composite_has_been_directly_observed_free_iff.
-  - apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht as Hpre_t.
+  - apply (VLSM_incl_input_valid_transition
+      (constrained_preloaded_incl (free_composite_vlsm IM) _)) in Ht as Hpre_t.
     assert (Hfuture_s : in_futures PreFree s base_s).
     {
       destruct Hfuture as [tr' Htr'].
@@ -569,7 +551,8 @@ Proof.
     apply proj2 in Htr.
     by specialize (composite_initial_state_sub_projection IM (elements equivocators) is Htr).
   - apply in_futures_refl. apply valid_trace_last_pstate in Htr.
-    by apply (VLSM_incl_valid_state Fixed_incl_Preloaded).
+    apply VLSM_incl_valid_state; [| done].
+    by apply constrained_preloaded_incl.
 Qed.
 
 (**
@@ -583,7 +566,8 @@ Lemma fixed_directly_observed_has_strong_fixed_equivocation f
   (Hobs : composite_has_been_directly_observed IM f m)
   : strong_fixed_equivocation IM equivocators f m.
 Proof.
-  apply (VLSM_incl_valid_state Fixed_incl_Preloaded) in Hf as Hfuture.
+  apply (VLSM_incl_valid_state (constrained_preloaded_incl
+    (free_composite_vlsm IM) _)) in Hf as Hfuture.
   apply in_futures_refl in Hfuture.
   apply valid_state_has_trace in Hf as [is [tr Htr]].
   eapply fixed_finite_valid_trace_sub_projection_helper in Htr as Htr_pr; [| done].
@@ -632,13 +616,15 @@ Proof.
   apply input_valid_transition_origin in Ht as Hs.
   apply fixed_output_has_strong_fixed_equivocation_helper with s sf l iom.
   - intros m Hobs. apply in_futures_preserves_strong_fixed_equivocation with s.
-    + apply (VLSM_incl_input_valid_transition Fixed_incl_Preloaded) in Ht.
+    + apply (VLSM_incl_input_valid_transition
+        (constrained_preloaded_incl (free_composite_vlsm IM) _)) in Ht.
       by eapply (input_valid_transition_in_futures PreFree).
     + by apply fixed_directly_observed_has_strong_fixed_equivocation.
   - apply input_valid_transition_in_futures in Ht.
     by apply fixed_valid_state_sub_projection.
   - apply in_futures_refl. apply input_valid_transition_destination in Ht.
-    by apply (VLSM_incl_valid_state Fixed_incl_Preloaded).
+    apply VLSM_incl_valid_state; [| done].
+    by apply constrained_preloaded_incl.
   - done.
 Qed.
 

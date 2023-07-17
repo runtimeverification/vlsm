@@ -68,8 +68,7 @@ Proof.
   pose proof (HinclE :=
     equivocators_fixed_equivocations_vlsm_incl_PreFree IM (elements equivocating)).
   apply sent_by_non_equivocating_are_sent in Hm.
-  pose proof (Hincl := StrongFixed_incl_Preloaded IM equivocating).
-  apply (VLSM_incl_valid_state Hincl) in Hs.
+  apply (VLSM_incl_valid_state (constrained_preloaded_incl (free_composite_vlsm IM) _)) in Hs.
   eapply sent_valid; [done |].
   revert Hm; apply (VLSM_incl_valid_state HinclE) in Heqv_state_s.
   by specialize
