@@ -243,9 +243,7 @@ Lemma equivocators_no_equivocations_vlsm_incl_PreFree :
     equivocators_no_equivocations_vlsm
     (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
 Proof.
-  apply VLSM_incl_trans with equivocators_free_vlsm.
-  apply equivocators_no_equivocations_vlsm_incl_equivocators_free.
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply constrained_preloaded_incl.
 Qed.
 
 Lemma preloaded_equivocators_no_equivocations_vlsm_incl_PreFree :
