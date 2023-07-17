@@ -316,10 +316,8 @@ Proof.
   exists _li, (sX i).
   repeat split; [| by apply any_message_is_valid_in_preloaded | by apply Hv].
   apply (VLSM_projection_valid_state (preloaded_component_projection IM i)).
-  apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm
-    (free_composite_vlsm IM))).
   apply VLSM_incl_valid_state; [| done].
-  by apply VLSM_incl_constrained_vlsm.
+  by apply constrained_preloaded_incl.
 Qed.
 
 Lemma induced_sub_projection_transition_is_composite l s om
