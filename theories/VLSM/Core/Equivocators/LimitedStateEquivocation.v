@@ -97,10 +97,7 @@ Qed.
 Lemma equivocators_limited_equivocations_vlsm_incl_preloaded_free
   : VLSM_incl equivocators_limited_equivocations_vlsm PreFreeE.
 Proof.
-  specialize equivocators_limited_equivocations_vlsm_incl_free as Hincl1.
-  specialize (vlsm_incl_pre_loaded_with_all_messages_vlsm FreeE)
-    as Hincl2.
-  by eapply VLSM_incl_trans.
+  by apply constrained_preloaded_incl.
 Qed.
 
 (** Inclusion of preloaded machine in the preloaded free composition. *)
