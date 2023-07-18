@@ -33,7 +33,6 @@ Context
   (equivocator_IM := equivocator_IM IM)
   (sub_equivocator_IM := sub_IM equivocator_IM equivocating)
   (sub_IM := sub_IM IM equivocating)
-  (equivocator_descriptors_update := equivocator_descriptors_update IM)
   (Free := free_composite_vlsm IM)
   (FreeE := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
@@ -41,8 +40,6 @@ Context
   (PreFreeSubE := pre_loaded_with_all_messages_vlsm FreeSubE)
   (SeededXE : VLSM message := seeded_equivocators_no_equivocation_vlsm IM equivocating seed)
 .
-
-#[local] Hint Unfold equivocator_descriptors_update : state_update.
 
 Lemma SeededXE_Free_embedding
   (Hseed : forall m, seed m -> valid_message_prop FreeE m)
