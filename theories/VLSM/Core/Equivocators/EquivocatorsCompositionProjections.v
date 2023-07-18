@@ -1930,8 +1930,8 @@ Proof.
     assert
       (HPreFree_pre_tr : finite_valid_trace_from PreFreeE s_pre (pre ++ tr)).
     {
-      revert Hpre_tr; apply VLSM_incl_finite_valid_trace_from.
-      by apply equivocators_no_equivocations_vlsm_incl_PreFree.
+      apply VLSM_incl_finite_valid_trace_from; [| done].
+      by apply constrained_preloaded_incl.
     }
     clear Hpre_tr.  revert s tr sX trX Hpr_tr s_pre pre Hs_lst HPreFree_pre_tr.
     by apply equivocators_partial_trace_project_extends_left.
@@ -2085,8 +2085,8 @@ Proof.
   rewrite decide_True in Hsim by done.
   assert (HPreFree_tr : finite_valid_trace_from PreFreeE is tr).
   {
-    revert Htr; apply VLSM_incl_finite_valid_trace_from.
-    by apply equivocators_no_equivocations_vlsm_incl_PreFree.
+    apply VLSM_incl_finite_valid_trace_from; [| done].
+    by apply constrained_preloaded_incl.
   }
   apply not_equivocating_equivocator_descriptors_proper in Hproper.
   destruct
@@ -2127,12 +2127,12 @@ Proof.
   constructor; [constructor |].
   - intros * Htr. apply PreFreeE_Free_vlsm_projection_type.
     apply VLSM_incl_finite_valid_trace_from; [| done].
-    by apply equivocators_no_equivocations_vlsm_incl_PreFree.
+    by apply constrained_preloaded_incl.
   - intros * Htr.
     assert (Hpre_tr : finite_valid_trace PreFreeE sX trX).
     {
       apply VLSM_incl_finite_valid_trace; [| done].
-      by apply equivocators_no_equivocations_vlsm_incl_PreFree.
+      by apply constrained_preloaded_incl.
     }
     specialize
      (VLSM_partial_projection_finite_valid_trace
