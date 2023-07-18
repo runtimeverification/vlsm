@@ -58,7 +58,6 @@ Context {message index : Type}
   `{ReachableThreshold index Ci threshold}
   `{!finite.Finite index}
   (Free := free_composite_vlsm IM)
-  (equivocator_descriptors := equivocator_descriptors IM)
   (equivocator_IM := equivocator_IM IM)
   (sender : message -> option index)
   (Heqv_idx_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci threshold
@@ -191,7 +190,7 @@ Qed.
   [fixed_limited_equivocation_prop]erty.
 *)
 Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
-  (final_descriptors : equivocator_descriptors)
+  (final_descriptors : equivocator_descriptors IM)
   (is : composite_state equivocator_IM)
   (tr : list (composite_transition_item equivocator_IM))
   (final_state := finite_trace_last is tr)
@@ -199,7 +198,7 @@ Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
   (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
-    (initial_descriptors : equivocator_descriptors)
+    (initial_descriptors : equivocator_descriptors IM)
     (isX := equivocators_state_project IM initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
     proper_equivocator_descriptors IM initial_descriptors is /\
@@ -253,7 +252,7 @@ Context
   annotated with equivocators to obtain a limited-message equivocation trace.
 *)
 Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation
-  (final_descriptors : equivocator_descriptors)
+  (final_descriptors : equivocator_descriptors IM)
   (is : composite_state equivocator_IM)
   (tr : list (composite_transition_item equivocator_IM))
   (final_state := finite_trace_last is tr)
@@ -261,7 +260,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
   (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
-    (initial_descriptors : equivocator_descriptors)
+    (initial_descriptors : equivocator_descriptors IM)
     (isX := equivocators_state_project IM initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
     proper_equivocator_descriptors IM initial_descriptors is /\
@@ -300,7 +299,7 @@ Context
   message-equivocation.
 *)
 Lemma limited_equivocators_valid_trace_project
-  (final_descriptors : equivocator_descriptors)
+  (final_descriptors : equivocator_descriptors IM)
   (is : composite_state equivocator_IM)
   (tr : list (composite_transition_item equivocator_IM))
   (final_state := finite_trace_last is tr)
@@ -308,7 +307,7 @@ Lemma limited_equivocators_valid_trace_project
   (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
-    (initial_descriptors : equivocator_descriptors)
+    (initial_descriptors : equivocator_descriptors IM)
     (isX := equivocators_state_project IM initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
     proper_equivocator_descriptors IM initial_descriptors is /\
@@ -332,7 +331,7 @@ Qed.
   [equivocator_descriptors] one might not be able to obtain a trace projection.
 *)
 Lemma limited_equivocators_vlsm_partial_projection
-  (final_descriptors : equivocator_descriptors)
+  (final_descriptors : equivocator_descriptors IM)
   : VLSM_partial_projection equivocators_limited_equivocations_vlsm Limited
       (equivocators_partial_trace_project IM final_descriptors).
 Proof.
