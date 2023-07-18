@@ -38,7 +38,6 @@ Context
   (sub_IM := sub_IM IM equivocating)
   (equivocator_descriptors_update := equivocator_descriptors_update IM)
   (proper_equivocator_descriptors := proper_equivocator_descriptors IM)
-  (equivocators_trace_project := equivocators_trace_project IM)
   (Free := free_composite_vlsm IM)
   (FreeE := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
@@ -215,7 +214,7 @@ Qed.
 Lemma equivocators_trace_project_replayed_initial_state_from full_replay_state is
   (eqv_descriptors : equivocator_descriptors)
   (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
-  : equivocators_trace_project eqv_descriptors
+  : equivocators_trace_project IM eqv_descriptors
       (replayed_initial_state_from full_replay_state is) =
     Some ([], eqv_descriptors).
 Proof.
@@ -371,7 +370,7 @@ Qed.
 Lemma equivocators_trace_project_replayed_trace_from_left full_replay_state is tr
   (eqv_descriptors : equivocator_descriptors)
   (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
-  : equivocators_trace_project eqv_descriptors
+  : equivocators_trace_project IM eqv_descriptors
       (replayed_trace_from full_replay_state is tr) =
     Some ([], eqv_descriptors).
 Proof.
