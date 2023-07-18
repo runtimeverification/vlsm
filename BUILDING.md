@@ -17,10 +17,21 @@ Notes for Windows users:
 
 ## Building VLSM manually
 
-### Ensure packages are up to date (optional)
+### Install opam requirements (unless already installed)
+
+A compiler and the unzip and bubblewrap tools are needed by opam.
+
+To install on Debian-based distributions:
 
 ```shell
 sudo apt-get update
+sudo apt-get install -y build-essential unzip bubblewrap
+```
+
+To install on Fedora:
+
+```shell
+sudo dnf install @development-tools unzip bubblewrap
 ```
 
 ### Install opam (unless already installed)
@@ -39,22 +50,6 @@ it can be installed by running:
 
 ```shell
 sudo dnf install opam
-```
-
-### Install opam runtime requirements
-
-The unzip and bubblewrap tools are needed by opam.
-
-To install on Debian-based distributions:
-
-```shell
-sudo apt-get install -y unzip bubblewrap
-```
-
-To install on Fedora:
-
-```shell
-sudo dnf install unzip bubblewrap
 ```
 
 ### Initialize opam
