@@ -61,7 +61,6 @@ Context {message index : Type}
   (equivocator_descriptors := equivocator_descriptors IM)
   (equivocators_state_project := equivocators_state_project IM)
   (equivocator_IM := equivocator_IM IM)
-  (equivocator_descriptors_update := equivocator_descriptors_update IM)
   (sender : message -> option index)
   (Heqv_idx_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci threshold
     := equivocating_indices_BasicEquivocation IM threshold)
