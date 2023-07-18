@@ -31,11 +31,10 @@ Context
   (seed : message -> Prop)
   (equivocating : list index)
   (equivocator_IM := equivocator_IM IM)
-  (sub_equivocator_IM := sub_IM equivocator_IM equivocating)
   (Free := free_composite_vlsm IM)
   (FreeE := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
-  (FreeSubE := free_composite_vlsm sub_equivocator_IM)
+  (FreeSubE := free_composite_vlsm (sub_IM equivocator_IM equivocating))
   (PreFreeSubE := pre_loaded_with_all_messages_vlsm FreeSubE)
   (SeededXE : VLSM message := seeded_equivocators_no_equivocation_vlsm IM equivocating seed)
 .
@@ -64,7 +63,7 @@ Qed.
 *)
 Definition lift_equivocators_sub_label_to
   (base_s : composite_state equivocator_IM)
-  (l : composite_label sub_equivocator_IM)
+  (l : composite_label (sub_IM equivocator_IM equivocating))
   : composite_label equivocator_IM
   :=
   let (sub_i, li) := l in
@@ -78,7 +77,7 @@ Definition lift_equivocators_sub_label_to
 *)
 Definition lift_equivocators_sub_state_to
   (base_s : composite_state equivocator_IM)
-  (s : composite_state sub_equivocator_IM)
+  (s : composite_state (sub_IM equivocator_IM equivocating))
   : composite_state equivocator_IM
   := fun i =>
     match @decide  (sub_index_prop equivocating i) (sub_index_prop_dec equivocating i) with
@@ -88,7 +87,7 @@ Definition lift_equivocators_sub_state_to
 
 Lemma lift_equivocators_sub_state_to_sub
   (base_s : composite_state equivocator_IM)
-  (s : composite_state sub_equivocator_IM)
+  (s : composite_state (sub_IM equivocator_IM equivocating))
   i
   (Hi : sub_index_prop equivocating i)
   : lift_equivocators_sub_state_to base_s s i
@@ -102,7 +101,7 @@ Qed.
 
 Lemma lift_equivocators_sub_state_to_size
   (base_s : composite_state equivocator_IM)
-  (s : composite_state sub_equivocator_IM)
+  (s : composite_state (sub_IM equivocator_IM equivocating))
   : forall i,
     equivocator_state_n (base_s i) <= equivocator_state_n (lift_equivocators_sub_state_to base_s s i).
 Proof.
@@ -114,7 +113,7 @@ Qed.
 
 (** The plan item corresponding to an initial state equivocation. *)
 Definition initial_new_machine_transition_item
-  (is : composite_state sub_equivocator_IM)
+  (is : composite_state (sub_IM equivocator_IM equivocating))
   (eqv : sub_index equivocating)
   : composite_plan_item equivocator_IM
   :=
@@ -127,7 +126,7 @@ Definition initial_new_machine_transition_item
 
 (** Command for equivocating all states of an initial composite state. *)
 Definition spawn_initial_state
-  (is : composite_state sub_equivocator_IM)
+  (is : composite_state (sub_IM equivocator_IM equivocating))
   : composite_plan equivocator_IM
   := map (initial_new_machine_transition_item is) (enum (sub_index equivocating)).
 
@@ -140,8 +139,8 @@ Definition replayed_initial_state_from full_replay_state is :=
 *)
 Lemma replayed_initial_state_from_lift
   (full_replay_state : composite_state equivocator_IM)
-  (is : composite_state sub_equivocator_IM)
-  (His : composite_initial_state_prop sub_equivocator_IM is)
+  (is : composite_state (sub_IM equivocator_IM equivocating))
+  (His : composite_initial_state_prop (sub_IM equivocator_IM equivocating) is)
   : finite_trace_last full_replay_state (replayed_initial_state_from full_replay_state is)
     = lift_equivocators_sub_state_to full_replay_state is.
 Proof.
@@ -412,7 +411,7 @@ Qed.
 Lemma lift_equivocators_sub_valid
   (full_replay_state : composite_state equivocator_IM)
   l s om
-  (Hv : composite_valid sub_equivocator_IM l (s, om))
+  (Hv : composite_valid (sub_IM equivocator_IM equivocating) l (s, om))
   : composite_valid equivocator_IM (lift_equivocators_sub_label_to full_replay_state  l)
       (lift_equivocators_sub_state_to full_replay_state s, om).
 Proof.
@@ -430,8 +429,8 @@ Qed.
 Lemma lift_equivocators_sub_transition
   (full_replay_state : composite_state equivocator_IM)
   l s om s' om'
-  (Hv : composite_valid sub_equivocator_IM l (s, om))
-  (Ht : composite_transition sub_equivocator_IM l (s, om) = (s', om'))
+  (Hv : composite_valid (sub_IM equivocator_IM equivocating) l (s, om))
+  (Ht : composite_transition (sub_IM equivocator_IM equivocating) l (s, om) = (s', om'))
   : composite_transition equivocator_IM (lift_equivocators_sub_label_to full_replay_state  l)
       (lift_equivocators_sub_state_to full_replay_state s, om) =
       (lift_equivocators_sub_state_to full_replay_state s', om').
@@ -491,8 +490,8 @@ Context
   .
 
 Lemma replayed_initial_state_from_valid
-  (is : composite_state sub_equivocator_IM)
-  (His : composite_initial_state_prop sub_equivocator_IM is)
+  (is : composite_state (sub_IM equivocator_IM equivocating))
+  (His : composite_initial_state_prop (sub_IM equivocator_IM equivocating) is)
   : finite_valid_trace_from SeededCE full_replay_state
       (replayed_initial_state_from full_replay_state is).
 Proof.
@@ -547,8 +546,8 @@ Proof.
 Qed.
 
 Lemma sub_preloaded_replayed_trace_from_valid_equivocating
-  (is : composite_state sub_equivocator_IM)
-  (tr : list (composite_transition_item sub_equivocator_IM))
+  (is : composite_state (sub_IM equivocator_IM equivocating))
+  (tr : list (composite_transition_item (sub_IM equivocator_IM equivocating)))
   (Htr : finite_valid_trace SeededXE is tr)
   : finite_valid_trace_from SeededCE
       full_replay_state (replayed_trace_from full_replay_state is tr).
@@ -625,14 +624,15 @@ Proof.
   specialize (valid_state_project_preloaded_to_preloaded _ equivocator_IM (free_constraint _)
     full_replay_state) as Hfull_replay_state_pr.
   pose (no_equivocations_additional_constraint_with_pre_loaded
-          sub_equivocator_IM (free_constraint sub_equivocator_IM) seed)
+    (sub_IM equivocator_IM equivocating) (free_constraint (sub_IM equivocator_IM equivocating)) seed)
         as constraint.
   specialize
     (pre_loaded_vlsm_incl_pre_loaded_with_all_messages
-      (composite_vlsm sub_equivocator_IM constraint)
+      (composite_vlsm (sub_IM equivocator_IM equivocating) constraint)
       seed) as Hincl.
   apply (VLSM_incl_valid_state Hincl) in Hs.
-  specialize (valid_state_project_preloaded_to_preloaded _ sub_equivocator_IM constraint s)
+  specialize (valid_state_project_preloaded_to_preloaded
+    _ (sub_IM equivocator_IM equivocating) constraint s)
     as Hs_pr.
   simpl in Hc1.
   destruct Hc1 as [Hsub_sent | Hseeded]; [| by right].
@@ -670,8 +670,8 @@ Proof.
 Qed.
 
 Lemma sub_replayed_trace_from_valid_equivocating
-  (is : composite_state sub_equivocator_IM)
-  (tr : list (composite_transition_item sub_equivocator_IM))
+  (is : composite_state (sub_IM equivocator_IM equivocating))
+  (tr : list (composite_transition_item (sub_IM equivocator_IM equivocating)))
   (Htr : finite_valid_trace SeededXE is tr)
   : finite_valid_trace_from SeededAllXE
       full_replay_state (replayed_trace_from full_replay_state is tr).
