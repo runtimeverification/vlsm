@@ -62,7 +62,6 @@ Context {message index : Type}
   (equivocators_state_project := equivocators_state_project IM)
   (equivocator_IM := equivocator_IM IM)
   (equivocator_descriptors_update := equivocator_descriptors_update IM)
-  (proper_equivocator_descriptors := proper_equivocator_descriptors IM)
   (sender : message -> option index)
   (Heqv_idx_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci threshold
     := equivocating_indices_BasicEquivocation IM threshold)
@@ -205,7 +204,7 @@ Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
     (initial_descriptors : equivocator_descriptors)
     (isX := equivocators_state_project initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
-    proper_equivocator_descriptors initial_descriptors is /\
+    proper_equivocator_descriptors IM initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project final_descriptors final_state = final_stateX /\
     fixed_limited_equivocation_prop (Cv := Ci) (Ci := Ci) IM threshold Datatypes.id isX trX.
@@ -267,7 +266,7 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
     (initial_descriptors : equivocator_descriptors)
     (isX := equivocators_state_project initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
-    proper_equivocator_descriptors initial_descriptors is /\
+    proper_equivocator_descriptors IM initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project final_descriptors final_state = final_stateX /\
     finite_valid_trace (msg_dep_limited_equivocation_vlsm IM threshold full_message_dependencies sender (Cv := Ci))
@@ -314,7 +313,7 @@ Lemma limited_equivocators_valid_trace_project
     (initial_descriptors : equivocator_descriptors)
     (isX := equivocators_state_project initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
-    proper_equivocator_descriptors initial_descriptors is /\
+    proper_equivocator_descriptors IM initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
     equivocators_state_project final_descriptors final_state = final_stateX /\
     finite_valid_trace Limited isX trX.
