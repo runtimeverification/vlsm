@@ -1658,9 +1658,10 @@ Proof.
   apply @projection_induced_validator_is_projection.
   - by intro; apply sub_element_label_project.
   - by intro; apply sub_element_state_project.
-  - intros ? **; eapply sub_transition_element_project_Some; cycle 2.
-    2-3: setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
-    all: done.
+  - intros lX1 lX2 lY Hl1 Hl2 sX1 sX2 Hs iom sX1' oom1 Ht1 sX2' oom2 Ht2.
+    eapply sub_transition_element_project_Some; [by apply Hl1 | by apply Hl2 | by apply Hs | ..].
+    + by rewrite induced_sub_projection_transition_is_composite in Ht1.
+    + by rewrite induced_sub_projection_transition_is_composite in Ht2.
   - intros lX HlX s om s' om' [_ Ht].
     apply sub_transition_element_project_None with lX om om'; [done |].
     by setoid_rewrite <- (induced_sub_projection_transition_is_composite _ _ constraint).
