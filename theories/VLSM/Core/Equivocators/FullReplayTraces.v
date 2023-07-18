@@ -32,7 +32,6 @@ Context
   (equivocating : list index)
   (equiv_index : Type := sub_index equivocating)
   (equivocator_descriptors := equivocator_descriptors IM)
-  (equivocators_state_project := equivocators_state_project IM)
   (equivocator_IM := equivocator_IM IM)
   (sub_equivocator_IM := sub_IM equivocator_IM equivocating)
   (sub_IM := sub_IM IM equivocating)
