@@ -238,16 +238,6 @@ Proof.
   - by destruct 1.
 Qed.
 
-Lemma equivocators_no_equivocations_vlsm_incl_PreFree :
-  VLSM_incl
-    equivocators_no_equivocations_vlsm
-    (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
-Proof.
-  apply VLSM_incl_trans with equivocators_free_vlsm.
-  apply equivocators_no_equivocations_vlsm_incl_equivocators_free.
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-Qed.
-
 Lemma preloaded_equivocators_no_equivocations_vlsm_incl_PreFree :
   VLSM_incl
     (pre_loaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm)

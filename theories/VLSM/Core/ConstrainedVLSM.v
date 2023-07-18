@@ -339,12 +339,6 @@ Proof.
   by intros; apply basic_VLSM_strong_incl; cbv; [| itauto.. |].
 Qed.
 
-(*
-  TODO(traiansf): There are many places where, because the lemma below
-  was missing, it was either reproved locally, or multiple VLSM_incl_
-  lemmas were used to achieve a similar result. It would be nice to
-  find those usages and use this lemma instad.
-*)
 Lemma constrained_preloaded_incl :
   VLSM_incl (constrained_vlsm X constraint) (pre_loaded_with_all_messages_vlsm X).
 Proof.
@@ -511,7 +505,8 @@ Proof.
   intros l som Hv.
   apply Hpre_subsumption.
   destruct som.
-  by apply (VLSM_incl_input_valid (vlsm_incl_pre_loaded_with_all_messages_vlsm X1)).
+  eapply VLSM_incl_input_valid; [| done].
+  by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm X1).
 Qed.
 
 Lemma strong_constraint_subsumption_strongest

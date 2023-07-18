@@ -969,9 +969,7 @@ Lemma pre_loaded_with_all_messages_self_validator_vlsm_eq
 Proof.
   split.
   - by apply pre_loaded_with_all_messages_self_validator_vlsm_incl.
-  - pose (vlsm_incl_pre_loaded_with_all_messages_vlsm X) as Hincl.
-    destruct X as (T, M).
-    by apply Hincl.
+  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm X).
 Qed.
 
 End sec_self_validator_vlsm.

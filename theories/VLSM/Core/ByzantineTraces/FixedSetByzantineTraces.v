@@ -562,19 +562,12 @@ Proof.
   cbn; destruct (sender m) as [v |] eqn: Hsender; [| done]; cbn.
   case_decide as HAv; [| done].
   unfold sub_IM; cbn.
-  eapply VLSM_incl_valid_state in Hs; [| by apply VLSM_incl_constrained_vlsm].
-  apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm
-    (free_composite_vlsm IM))) in Hs.
-  assert (Hpre_si : forall i, valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i)).
-  {
-    intro i.
-    revert Hs.
-    by apply valid_state_project_preloaded_to_preloaded_free.
-  }
   apply elem_of_elements, elem_of_difference in HAv as [_ HAv].
   destruct Hstrong_v as [(i & Hi & Hsent) | Hemitted].
   - apply valid_state_has_trace in Hs as (is & tr & Htr).
-    by eapply has_been_sent_iff_by_sender; [| | | exists i].
+    eapply has_been_sent_iff_by_sender; [done | | done | by exists i].
+    eapply VLSM_incl_finite_valid_trace_init_to in Htr; [done |].
+    by apply constrained_preloaded_incl.
   - by contradict HAv; apply elem_of_elements; eapply sub_can_emit_sender.
 Qed.
 

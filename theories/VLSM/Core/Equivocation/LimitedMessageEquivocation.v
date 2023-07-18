@@ -216,14 +216,9 @@ Proof.
     intro Hincl; unfold tracewise_not_heavy, not_heavy.
     by etransitivity; [apply sum_weights_subseteq |].
   }
-  assert (StrongFixedinclPreFree : VLSM_incl StrongFixed PreFree).
-  {
-    apply VLSM_incl_trans with Free.
-    - by apply VLSM_incl_constrained_vlsm.
-    - by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-  }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
-  apply (VLSM_incl_finite_valid_trace_init_to StrongFixedinclPreFree) in Htr as Hpre_tr.
+  eapply VLSM_incl_finite_valid_trace_init_to in Htr as Hpre_tr;
+    [| by apply constrained_preloaded_incl].
   intros v Hv.
   apply equivocating_validators_is_equivocating_tracewise_iff in Hv as Hvs'.
   specialize (Hvs' _ _ Hpre_tr).
@@ -233,17 +228,18 @@ Proof.
   change (pre ++ item :: suf) with (pre ++ [item] ++ suf) in Htr.
   apply (finite_valid_trace_from_to_app_split StrongFixed) in Htr.
   destruct Htr as [Hpre Hitem].
-  apply (VLSM_incl_finite_valid_trace_from_to StrongFixedinclPreFree) in Hpre as Hpre_pre.
+  eapply VLSM_incl_finite_valid_trace_from_to in Hpre as Hpre_pre;
+    [| by apply constrained_preloaded_incl].
   apply valid_trace_last_pstate in Hpre_pre as Hs_pre.
   apply (finite_valid_trace_from_to_app_split StrongFixed), proj1 in Hitem.
   inversion Hitem; subst; clear Htl Hitem. simpl in Hm0. subst.
   destruct Ht as [(_ & _ & _ & Hc) _].
   destruct Hc as [(i & Hi & Hsenti) | Hemit].
-  + assert (Hsent : composite_has_been_sent IM (finite_trace_last is pre) m0)
+  - assert (Hsent : composite_has_been_sent IM (finite_trace_last is pre) m0)
       by (exists i; done).
     apply (composite_proper_sent IM) in Hsent; [| done].
     by specialize (Hsent _ _ (conj Hpre_pre Hinit)).
-  + apply (SubProjectionTraces.sub_can_emit_sender IM (elements equivocators)
+  - apply (SubProjectionTraces.sub_can_emit_sender IM (elements equivocators)
       A sender Hsender_safety _ _ v), elem_of_elements in Hemit; [| done].
     by revert Hemit; apply elem_of_set_map_inj.
 Qed.
