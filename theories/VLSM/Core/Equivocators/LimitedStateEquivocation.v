@@ -93,13 +93,6 @@ Proof.
   by apply VLSM_incl_constrained_vlsm.
 Qed.
 
-(** Inclusion in the preloaded free composition. *)
-Lemma equivocators_limited_equivocations_vlsm_incl_preloaded_free
-  : VLSM_incl equivocators_limited_equivocations_vlsm PreFreeE.
-Proof.
-  by apply constrained_preloaded_incl.
-Qed.
-
 (** Inclusion of preloaded machine in the preloaded free composition. *)
 Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free
   : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm) PreFreeE.
@@ -351,8 +344,8 @@ Proof.
     assert (HPreFree_pre_tr :
       finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) s_pre (pre ++ tr)).
     {
-      revert Hpre_tr; apply VLSM_incl_finite_valid_trace_from.
-      by apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
+      apply VLSM_incl_finite_valid_trace_from; [| done].
+      by apply constrained_preloaded_incl.
     }
     clear Hpre_tr.  revert s tr sX trX Hpr_tr s_pre pre Hs_lst HPreFree_pre_tr.
     by apply equivocators_partial_trace_project_extends_left.
@@ -378,12 +371,12 @@ Proof.
   constructor; [constructor |]; intros ? *.
   - intros HtrX. apply PreFreeE_Free_vlsm_projection_type.
     revert HtrX. apply VLSM_incl_finite_valid_trace_from.
-    by apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
+    by apply constrained_preloaded_incl.
   - intro HtrX.
     assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
     {
-      revert HtrX; apply VLSM_incl_finite_valid_trace.
-      by apply equivocators_limited_equivocations_vlsm_incl_preloaded_free.
+      apply VLSM_incl_finite_valid_trace; [| done].
+      by apply constrained_preloaded_incl.
     }
     specialize (VLSM_partial_projection_finite_valid_trace
       (limited_equivocators_vlsm_partial_projection (zero_descriptor IM))
