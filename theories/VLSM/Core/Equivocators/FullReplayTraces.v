@@ -31,7 +31,6 @@ Context
   (seed : message -> Prop)
   (equivocating : list index)
   (equiv_index : Type := sub_index equivocating)
-  (equivocator_descriptors := equivocator_descriptors IM)
   (equivocator_IM := equivocator_IM IM)
   (sub_equivocator_IM := sub_IM equivocator_IM equivocating)
   (sub_IM := sub_IM IM equivocating)
@@ -210,7 +209,7 @@ Qed.
   the projection of the replaying of an initial state is empty.
 *)
 Lemma equivocators_trace_project_replayed_initial_state_from full_replay_state is
-  (eqv_descriptors : equivocator_descriptors)
+  (eqv_descriptors : equivocator_descriptors IM)
   (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   : equivocators_trace_project IM eqv_descriptors
       (replayed_initial_state_from full_replay_state is) =
@@ -279,7 +278,7 @@ Proof.
 Qed.
 
 Lemma equivocator_state_descriptor_project_replayed_initial_state_from_left full_replay_state is
-  (eqv_descriptors : equivocator_descriptors)
+  (eqv_descriptors : equivocator_descriptors IM)
   (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   (lst := finite_trace_last full_replay_state (replayed_initial_state_from full_replay_state is))
   : forall i,
@@ -338,7 +337,7 @@ Proof.
 Qed.
 
 Lemma equivocator_state_descriptor_project_replayed_trace_from_left full_replay_state is tr
-  (eqv_descriptors : equivocator_descriptors)
+  (eqv_descriptors : equivocator_descriptors IM)
   (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   (lst := finite_trace_last full_replay_state (replayed_trace_from full_replay_state is tr))
   : forall i,
@@ -366,7 +365,7 @@ Proof.
 Qed.
 
 Lemma equivocators_trace_project_replayed_trace_from_left full_replay_state is tr
-  (eqv_descriptors : equivocator_descriptors)
+  (eqv_descriptors : equivocator_descriptors IM)
   (Heqv_descriptors : not_equivocating_equivocator_descriptors IM eqv_descriptors full_replay_state)
   : equivocators_trace_project IM eqv_descriptors
       (replayed_trace_from full_replay_state is tr) =
