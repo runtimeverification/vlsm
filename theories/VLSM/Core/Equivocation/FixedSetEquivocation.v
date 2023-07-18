@@ -489,8 +489,8 @@ Proof.
     + intros m Hobs; exfalso.
       eapply (@has_been_directly_observed_no_inits _ Free); [done |].
       by apply composite_has_been_directly_observed_free_iff.
-  - apply (VLSM_incl_input_valid_transition
-      (constrained_preloaded_incl (free_composite_vlsm IM) _)) in Ht as Hpre_t.
+  - eapply (VLSM_incl_input_valid_transition) in Ht as Hpre_t;
+      [| by apply constrained_preloaded_incl].
     assert (Hfuture_s : in_futures PreFree s base_s).
     {
       destruct Hfuture as [tr' Htr'].
@@ -566,8 +566,7 @@ Lemma fixed_directly_observed_has_strong_fixed_equivocation f
   (Hobs : composite_has_been_directly_observed IM f m)
   : strong_fixed_equivocation IM equivocators f m.
 Proof.
-  apply (VLSM_incl_valid_state (constrained_preloaded_incl
-    (free_composite_vlsm IM) _)) in Hf as Hfuture.
+  eapply VLSM_incl_valid_state in Hf as Hfuture; [| by apply constrained_preloaded_incl].
   apply in_futures_refl in Hfuture.
   apply valid_state_has_trace in Hf as [is [tr Htr]].
   eapply fixed_finite_valid_trace_sub_projection_helper in Htr as Htr_pr; [| done].
@@ -616,8 +615,7 @@ Proof.
   apply input_valid_transition_origin in Ht as Hs.
   apply fixed_output_has_strong_fixed_equivocation_helper with s sf l iom.
   - intros m Hobs. apply in_futures_preserves_strong_fixed_equivocation with s.
-    + apply (VLSM_incl_input_valid_transition
-        (constrained_preloaded_incl (free_composite_vlsm IM) _)) in Ht.
+    + eapply VLSM_incl_input_valid_transition in Ht; [| by apply constrained_preloaded_incl].
       by eapply (input_valid_transition_in_futures PreFree).
     + by apply fixed_directly_observed_has_strong_fixed_equivocation.
   - apply input_valid_transition_in_futures in Ht.
