@@ -22,7 +22,8 @@ From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections Pl
 
 Section sec_all_equivocating.
 
-Context {message : Type}
+Context
+  {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
@@ -44,7 +45,6 @@ Context {message : Type}
   (FreeSubE := free_composite_vlsm sub_equivocator_IM)
   (PreFreeSubE := pre_loaded_with_all_messages_vlsm FreeSubE)
   (SeededXE : VLSM message := seeded_equivocators_no_equivocation_vlsm IM equivocating seed)
-  (equivocators_no_equivocations_vlsm := equivocators_no_equivocations_vlsm IM)
 .
 
 #[local] Hint Unfold equivocator_descriptors_update : state_update.
