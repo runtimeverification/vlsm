@@ -30,7 +30,6 @@ Context
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   (seed : message -> Prop)
   (equivocating : list index)
-  (equiv_index : Type := sub_index equivocating)
   (equivocator_IM := equivocator_IM IM)
   (sub_equivocator_IM := sub_IM equivocator_IM equivocating)
   (sub_IM := sub_IM IM equivocating)
@@ -120,7 +119,7 @@ Qed.
 (** The plan item corresponding to an initial state equivocation. *)
 Definition initial_new_machine_transition_item
   (is : composite_state sub_equivocator_IM)
-  (eqv : equiv_index)
+  (eqv : sub_index equivocating)
   : composite_plan_item equivocator_IM
   :=
   let i := proj1_sig eqv in
