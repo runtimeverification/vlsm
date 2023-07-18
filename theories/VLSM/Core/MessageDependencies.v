@@ -91,8 +91,6 @@ Context
   `{!HasBeenReceivedCapability X}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   `{!MessageDependencies X message_dependencies}
-  (msg_dep_rel := msg_dep_rel message_dependencies)
-  (msg_dep_happens_before := msg_dep_happens_before message_dependencies)
   .
 
 (**
@@ -107,8 +105,9 @@ Definition message_dependencies_full_node_condition_prop : Prop :=
 
 (** Unrolling one the [msg_dep_happens_before] relation one step. *)
 Lemma msg_dep_happens_before_iff_one x z
-  : msg_dep_happens_before x z <->
-    msg_dep_rel x z \/ exists y, msg_dep_happens_before x y /\ msg_dep_rel y z.
+  : msg_dep_happens_before message_dependencies x z <->
+    msg_dep_rel message_dependencies x z \/
+    exists y, msg_dep_happens_before message_dependencies x y /\ msg_dep_rel message_dependencies y z.
 Proof. by apply tc_r_iff. Qed.
 
 (**
@@ -117,8 +116,8 @@ Proof. by apply tc_r_iff. Qed.
 *)
 Lemma msg_dep_happens_before_reflect
   (P : message -> Prop)
-  (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
-  : forall dm m, msg_dep_happens_before dm m -> P m -> P dm.
+  (Hreflects : forall dm m, msg_dep_rel message_dependencies dm m -> P m -> P dm)
+  : forall dm m, msg_dep_happens_before message_dependencies dm m -> P m -> P dm.
 Proof. by apply tc_reflect. Qed.
 
 (**
@@ -129,8 +128,8 @@ Proof. by apply tc_reflect. Qed.
 Lemma msg_dep_reflects_validity
   (no_initial_messages_in_X : forall m, ~ initial_message_prop X m)
   (P : message -> Prop)
-  (Hreflects : forall dm m, msg_dep_rel dm m -> P m -> P dm)
-  : forall dm m, msg_dep_rel dm m ->
+  (Hreflects : forall dm m, msg_dep_rel message_dependencies dm m -> P m -> P dm)
+  : forall dm m, msg_dep_rel message_dependencies dm m ->
     valid_message_prop (pre_loaded_vlsm X P) m ->
     valid_message_prop (pre_loaded_vlsm X P) dm.
 Proof.
@@ -164,7 +163,7 @@ Lemma msg_dep_has_been_sent
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
   m
   (Hsent : has_been_sent X s m)
-  : forall dm, msg_dep_rel dm m -> has_been_directly_observed X s dm.
+  : forall dm, msg_dep_rel message_dependencies dm m -> has_been_directly_observed X s dm.
 Proof.
   revert m Hsent; induction Hs using valid_state_prop_ind; intro m.
   - intro Hbs; contradict Hbs.
@@ -195,7 +194,7 @@ Lemma full_node_has_been_received
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
   m
   (Hreceived : has_been_received X s m)
-  : forall dm, msg_dep_rel dm m -> has_been_directly_observed X s dm.
+  : forall dm, msg_dep_rel message_dependencies dm m -> has_been_directly_observed X s dm.
 Proof.
   revert m Hreceived; induction Hs using valid_state_prop_ind; intro m.
   - intro Hbr; contradict Hbr.
@@ -214,7 +213,7 @@ Lemma msg_dep_full_node_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   s
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
-  : forall dm m, msg_dep_rel dm m ->
+  : forall dm m, msg_dep_rel message_dependencies dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.
   intros dm m Hdm [Hsent | Hreceived].
@@ -230,7 +229,7 @@ Lemma msg_dep_full_node_happens_before_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   s
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
-  : forall dm m, msg_dep_happens_before dm m ->
+  : forall dm m, msg_dep_happens_before message_dependencies dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.
   intros dm m Hdm Hobs.
@@ -246,7 +245,7 @@ Lemma msg_dep_full_node_input_valid_happens_before_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   l s m
   (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m))
-  : forall dm, msg_dep_happens_before dm m ->
+  : forall dm, msg_dep_happens_before message_dependencies dm m ->
     has_been_directly_observed X s dm.
 Proof.
   intro dm; rewrite msg_dep_happens_before_iff_one; intros [Hdm | (dm' & Hdm' & Hdm)].
@@ -1225,7 +1224,7 @@ End sec_CompositeHasBeenObserved_dec.
 Section sec_msg_dep_is_globally_equivocating_props.
 
 Context
-  {message}
+  {message : Type}
   `{EqDecision index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}

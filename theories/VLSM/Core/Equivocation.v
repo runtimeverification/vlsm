@@ -1428,7 +1428,8 @@ Global Hint Mode ComputableReceivedMessages - ! : typeclass_instances.
 Section sec_computable_sent_received_observed.
 
 Context
-  `(vlsm : VLSM message).
+  `(vlsm : VLSM message)
+  .
 
 Lemma computable_messages_oracle_initial_state_empty
   `(Hrm : computable_messages_oracle vlsm oracle_set message_selector)
@@ -1934,15 +1935,15 @@ Proof.
 Qed.
 
 Context
-      {validator : Type}
-      `{finite.Finite validator}
-      {measurable_V : Measurable validator}
-      (threshold : R)
-      `{FinSet validator Cv}
-      `{!ReachableThreshold validator Cv threshold}
-      (A : validator -> index)
-      (sender : message -> option validator)
-      .
+  {validator : Type}
+  `{finite.Finite validator}
+  {measurable_V : Measurable validator}
+  (threshold : R)
+  `{FinSet validator Cv}
+  `{!ReachableThreshold validator Cv threshold}
+  (A : validator -> index)
+  (sender : message -> option validator)
+  .
 
 Definition node_signed_message (node_idx : index) (m : message) : Prop :=
   option_map A (sender m) = Some node_idx.
@@ -2678,7 +2679,8 @@ Proof.
 Qed.
 
 Context
-  (Hno_resend : cannot_resend_message_stepwise_prop).
+  (Hno_resend : cannot_resend_message_stepwise_prop)
+  .
 
 Lemma input_valid_transition_received_not_resent l s m s' om'
   (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, Some m) (s', om'))
@@ -2804,15 +2806,13 @@ Context
   (X : VLSM message)
   (Hbs1 : HasBeenSentCapability X)
   (Hbs2 : HasBeenSentCapability X)
-  (has_been_sent1 := @has_been_sent _ X Hbs1)
-  (has_been_sent2 := @has_been_sent _ X Hbs2)
   .
 
 Lemma has_been_sent_irrelevance
   (s : state (pre_loaded_with_all_messages_vlsm X))
   (m : message)
   (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
-  : has_been_sent1 s m -> has_been_sent2 s m.
+  : @has_been_sent _ X Hbs1 s m -> @has_been_sent _ X Hbs2 s m.
 Proof.
   intro H.
   apply proper_sent in H; [| done].
@@ -2868,7 +2868,7 @@ Context
   {message : Type}
   (X : VLSM message)
   `{HasBeenReceivedCapability message X}
-.
+  .
 
 Lemma has_been_received_in_state s1 m :
   valid_state_prop X s1 ->

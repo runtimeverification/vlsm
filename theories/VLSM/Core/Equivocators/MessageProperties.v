@@ -21,8 +21,6 @@ Section sec_equivocator_vlsm_message_properties.
 Context
   {message : Type}
   (X : VLSM message)
-  (equivocator_vlsm := equivocator_vlsm X)
-  (MachineDescriptor := MachineDescriptor X)
   .
 
 (**
@@ -30,9 +28,9 @@ Context
   the original trace must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting
-  (tr : list (transition_item equivocator_vlsm))
+  (tr : list (transition_item (equivocator_vlsm X)))
   (trX : list (transition_item X))
-  (j i : MachineDescriptor)
+  (j i : MachineDescriptor X)
   (HtrX : equivocator_vlsm_trace_project _ tr j = Some (trX, i))
   (m : message)
   (Hjbs : Exists (field_selector output m) trX)
@@ -57,22 +55,22 @@ Proof.
 Qed.
 
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
-  (bs : state equivocator_vlsm)
-  (btr : list (transition_item equivocator_vlsm))
-  (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs btr)
-  (bitem : transition_item equivocator_vlsm)
+  (bs : state (equivocator_vlsm X))
+  (btr : list (transition_item (equivocator_vlsm X)))
+  (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs btr)
+  (bitem : transition_item (equivocator_vlsm X))
   (Hitem : bitem ∈ btr)
   (sn : state X)
   (Hnew : l bitem = Spawn sn)
   : input bitem = None /\ output bitem = None /\
     exists
-      (d : MachineDescriptor),
+      (d : MachineDescriptor X),
       equivocator_vlsm_transition_item_project _ bitem d = Some (None, NewMachine sn).
 Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm equivocator_vlsm))
+  apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)))
     in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
@@ -95,19 +93,19 @@ Qed.
   the projection of the item.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item
-  (bs bf : state equivocator_vlsm)
-  (btr : list (transition_item equivocator_vlsm))
-  (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs bf btr)
-  (bitem : transition_item equivocator_vlsm)
+  (bs bf : state (equivocator_vlsm X))
+  (btr : list (transition_item (equivocator_vlsm X)))
+  (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs bf btr)
+  (bitem : transition_item (equivocator_vlsm X))
   (Hitem : bitem ∈ btr)
   (idl : nat)
   (Hlbitem : equivocator_label_descriptor (l bitem) = Existing idl)
   : exists (item : transition_item X),
-      (exists (d : MachineDescriptor),
+      (exists (d : MachineDescriptor X),
         equivocator_vlsm_transition_item_project _ bitem d = Some (Some item, Existing idl))
       /\ exists (tr : list (transition_item X)),
         item ∈ tr /\
-        exists (dfinal dfirst : MachineDescriptor),
+        exists (dfinal dfirst : MachineDescriptor X),
           proper_descriptor X dfirst bs /\
           existing_descriptor X dfinal (finite_trace_last bs btr) /\
           equivocator_vlsm_trace_project _ btr dfinal = Some (tr, dfirst).
@@ -118,7 +116,7 @@ Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm equivocator_vlsm))
+  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)))
     in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
@@ -180,13 +178,13 @@ Qed.
   one of its projections must do so too.
 *)
 Lemma equivocator_vlsm_trace_project_output_reflecting_inv
-  (is : state equivocator_vlsm)
-  (tr : list (transition_item equivocator_vlsm))
-  (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm equivocator_vlsm) is tr)
+  (is : state (equivocator_vlsm X))
+  (tr : list (transition_item (equivocator_vlsm X)))
+  (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) is tr)
   (m : message)
   (Hbbs : Exists (field_selector output m) tr)
   : exists
-    (j i : MachineDescriptor)
+    (j i : MachineDescriptor X)
     (Hi : proper_descriptor X i is)
     (Hj : existing_descriptor X j (finite_trace_last is tr))
     (trX : list (transition_item X))
@@ -220,18 +218,18 @@ Qed.
 Section sec_oracle_lifting.
 
 Context
-  selector
+  (selector : message -> transition_item X -> Prop)
   (Hselector_io :
     forall l1 l2 s1 s2 im om m,
       selector m  {| l := l1; input := im; destination := s1; output := om |} <->
       selector m  {| l := l2; input := im; destination := s2; output := om |})
-  oracle
+  (oracle : state X -> message -> Prop)
   (Hdec : RelDecision oracle)
   (Hstepwise : oracle_stepwise_props (vlsm := X) selector oracle).
 
 Definition equivocator_selector
   (m : message)
-  (item : transition_item equivocator_vlsm)
+  (item : transition_item (equivocator_vlsm X))
   : Prop
   :=
   match (l item) with
@@ -250,7 +248,7 @@ Definition equivocator_selector
   of the internal machines.
 *)
 Definition equivocator_oracle
-  (s : state equivocator_vlsm)
+  (s : state (equivocator_vlsm X))
   (m : message)
   : Prop
   :=
@@ -278,7 +276,7 @@ Proof.
 Qed.
 
 Lemma equivocator_oracle_stepwise_props
-  : oracle_stepwise_props (vlsm := equivocator_vlsm) equivocator_selector equivocator_oracle.
+  : oracle_stepwise_props (vlsm := equivocator_vlsm X) equivocator_selector equivocator_oracle.
 Proof.
   destruct Hstepwise.
   split; intros.
@@ -433,7 +431,7 @@ Definition equivocator_has_been_received  := equivocator_oracle (has_been_receiv
   := equivocator_oracle_dec (has_been_received X) _.
 
 Lemma equivocator_has_been_received_stepwise_props
-  : has_been_received_stepwise_prop (vlsm := equivocator_vlsm) equivocator_has_been_received.
+  : has_been_received_stepwise_prop (vlsm := equivocator_vlsm X) equivocator_has_been_received.
 Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
@@ -446,8 +444,8 @@ Qed.
 
 (** Finally we define the [HasBeenReceivedCapability] for the [equivocator_vlsm]. *)
 #[export] Instance equivocator_HasBeenReceivedCapability
-  : HasBeenReceivedCapability equivocator_vlsm
-  := Build_HasBeenReceivedCapability equivocator_vlsm
+  : HasBeenReceivedCapability (equivocator_vlsm X)
+  := Build_HasBeenReceivedCapability (equivocator_vlsm X)
     equivocator_has_been_received
     equivocator_has_been_received_dec
     equivocator_has_been_received_stepwise_props.
@@ -473,7 +471,7 @@ Definition equivocator_has_been_sent  := equivocator_oracle (has_been_sent X).
   := equivocator_oracle_dec (has_been_sent X) _.
 
 Lemma equivocator_has_been_sent_stepwise_props
-  : has_been_sent_stepwise_prop (vlsm := equivocator_vlsm) equivocator_has_been_sent.
+  : has_been_sent_stepwise_prop (vlsm := equivocator_vlsm X) equivocator_has_been_sent.
 Proof.
   eapply oracle_stepwise_props_change_selector.
   - apply equivocator_oracle_stepwise_props
@@ -486,9 +484,9 @@ Qed.
 
 (** Finally we define the [HasBeenSentCapability] for the [equivocator_vlsm]. *)
 #[export] Instance equivocator_HasBeenSentCapability
-  : HasBeenSentCapability equivocator_vlsm
+  : HasBeenSentCapability (equivocator_vlsm X)
   := Build_HasBeenSentCapability
-    equivocator_vlsm
+    (equivocator_vlsm X)
     equivocator_has_been_sent
     equivocator_has_been_sent_dec
     equivocator_has_been_sent_stepwise_props.
@@ -509,7 +507,7 @@ Context
   union of all [sent_messages_set] for its internal machines.
 *)
 Definition equivocator_sent_messages_set
-  (s : state equivocator_vlsm)
+  (s : state (equivocator_vlsm X))
   : set message
   :=
   fold_right set_union []
@@ -522,7 +520,7 @@ Definition equivocator_sent_messages_set
       (up_to_n_listing (equivocator_state_n s))).
 
 Lemma equivocator_elem_of_sent_messages_set :
-  forall (s : state equivocator_vlsm) (m : message),
+  forall (s : state (equivocator_vlsm X)) (m : message),
     equivocator_has_been_sent s m
       <->
     m ∈ equivocator_sent_messages_set s.
@@ -542,7 +540,7 @@ Proof.
 Qed.
 
 Lemma equivocator_ComputableSentMessages :
-  ComputableSentMessages equivocator_vlsm.
+  ComputableSentMessages (equivocator_vlsm X).
 Proof.
   constructor 1 with equivocator_sent_messages_set; constructor; intros.
   - rewrite <- equivocator_elem_of_sent_messages_set.

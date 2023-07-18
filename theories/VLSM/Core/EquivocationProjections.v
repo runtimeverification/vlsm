@@ -19,7 +19,8 @@ Context
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
-  (Hsimul : VLSM_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
+  (Hsimul : VLSM_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y)
+    label_project state_project)
   .
 
 Section sec_selectors.
@@ -116,7 +117,8 @@ Context
   {X Y : VLSM message}
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
-  (Hsimul : VLSM_weak_embedding (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
+  (Hsimul : VLSM_weak_embedding (pre_loaded_with_all_messages_vlsm X)
+    (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
 Section sec_selectors.

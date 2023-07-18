@@ -26,7 +26,12 @@ Section sec_min_predecessors.
   occurring in that list.
 *)
 
-Context {A} (precedes : relation A) `{!RelDecision precedes} (l : list A).
+Context
+  {A : Type}
+  (precedes : relation A)
+  `{!RelDecision precedes}
+  (l : list A)
+  .
 
 Definition count_predecessors
   (a : A)
@@ -252,7 +257,12 @@ Section sec_topologically_sorted.
 
 (** ** Definition and properties of topologically sorted lists *)
 
-Context {A} (precedes : relation A) `{!RelDecision precedes} (l : list A).
+Context
+  {A : Type}
+  (precedes : relation A)
+  `{!RelDecision precedes}
+  (l : list A)
+  .
 
 (**
   We say that a list <<l>> is [topologically_sorted] w.r.t a <<precedes>>
@@ -430,7 +440,11 @@ Section sec_top_sort.
 
 (** ** The topological sorting algorithm *)
 
-Context {A} `{EqDecision A} (precedes : relation A) `{!RelDecision precedes}.
+Context
+  `{EqDecision A}
+  (precedes : relation A)
+  `{!RelDecision precedes}
+  .
 
 (**
   Iteratively extracts <<n>> elements with minimal number of predecessors

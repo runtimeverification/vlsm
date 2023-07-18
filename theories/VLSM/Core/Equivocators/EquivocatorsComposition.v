@@ -34,7 +34,8 @@ From VLSM.Core Require Import Equivocators.MessageProperties.
 
 Section sec_fully_equivocating_composition.
 
-Context {message : Type}
+Context
+  {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
@@ -517,14 +518,14 @@ End sec_fully_equivocating_composition.
 
 Section sec_equivocators_sub_projections.
 
-Context {message : Type}
+Context
+  {message : Type}
   `{EqDecision index}
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   (equivocating : list index)
   (sub_equivocator_IM := sub_IM (equivocator_IM IM) equivocating)
-  (sub_IM := sub_IM IM equivocating)
-  (sub_IM_equivocator := equivocator_IM sub_IM)
+  (sub_IM_equivocator := equivocator_IM (sub_IM IM equivocating))
   .
 
 Definition seeded_equivocators_no_equivocation_vlsm

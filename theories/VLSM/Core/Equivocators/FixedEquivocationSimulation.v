@@ -28,7 +28,8 @@ From VLSM.Core Require Import Equivocators.SimulatingFree.
 
 Section sec_fixed_equivocating.
 
-Context {message : Type}
+Context
+  {message : Type}
   {index : Type}
   `{FinSet index Ci}
   `{finite.Finite index}
@@ -383,7 +384,8 @@ End sec_fixed_equivocating.
 
 Section sec_no_equivocation.
 
-Context {message : Type}
+Context
+  {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
   (Free := free_composite_vlsm IM)

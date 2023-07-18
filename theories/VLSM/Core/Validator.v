@@ -298,8 +298,6 @@ Qed.
 
 Context
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)
-  (Htype : VLSM_projection_type X TY label_project state_project :=
-    basic_VLSM_projection_type X TY label_project state_project Htransition_None)
   .
 
 Lemma projection_induced_validator_is_projection
@@ -316,10 +314,6 @@ Proof.
 Qed.
 
 Section sec_projection_induced_friendliness.
-
-Context
-  (Hproj := projection_induced_validator_is_projection)
-  .
 
 Lemma induced_validator_transition_item_lift
   (item : transition_item TY)
@@ -349,7 +343,7 @@ Qed.
 *)
 Lemma basic_projection_induces_friendliness
   : VLSM_embedding pre_projection_induced_validator X label_lift state_lift ->
-    projection_friendly_prop Hproj.
+    projection_friendly_prop projection_induced_validator_is_projection.
 Proof.
   intros Hfull_proj isY trY HtrY.
   exists (state_lift isY), (VLSM_embedding_finite_trace_project Hfull_proj trY).
@@ -373,7 +367,6 @@ Context
   (TY : VLSMType message)
   (label_project : label TX -> option (label TY))
   (state_project : state TX -> state TY)
-  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   (label_lift : label TY -> label TX)
   (state_lift : state TY -> state TX)
   (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
@@ -477,18 +470,12 @@ Context
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)
   (label_lift : label Y -> label X)
   (state_lift : state Y -> state X)
-  (Xi := pre_projection_induced_validator X Y
-          label_project state_project label_lift state_lift)
+  (Xi := pre_projection_induced_validator X Y label_project state_project label_lift state_lift)
   (Hlabel_lift : induced_validator_label_lift_prop label_project label_lift)
   (Hstate_lift : induced_validator_state_lift_prop state_project state_lift)
   (Hinitial_lift : strong_projection_initial_state_preservation Y X state_lift)
   (Htransition_consistency :
     induced_validator_transition_consistency_Some _ _ label_project state_project)
-  (Htransition_Some
-    : weak_projection_transition_consistency_Some
-        _ _ label_project state_project label_lift state_lift
-    := basic_weak_projection_transition_consistency_Some
-        _ _ _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency)
   (Hproji :=
     projection_induced_validator_is_projection
       _ _ _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency Htransition_None)

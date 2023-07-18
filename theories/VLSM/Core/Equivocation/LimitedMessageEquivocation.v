@@ -133,11 +133,11 @@ Context
   (A : validator -> index)
   (sender : message -> option validator)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cv threshold
+  (HBE : BasicEquivocation (composite_state IM) validator Cv threshold
     := equivocation_dec_tracewise IM threshold A sender)
   .
 
-Existing Instance Htracewise_BasicEquivocation.
+Existing Instance HBE.
 
 Lemma tracewise_basic_equivocation_state_validators_comprehensive_prop :
   basic_equivocation_state_validators_comprehensive_prop IM.
@@ -201,19 +201,17 @@ Context
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
   (PreFree := pre_loaded_with_all_messages_vlsm Free)
   (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Cv := Cv) IM threshold A sender)
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cv threshold
-    := equivocation_dec_tracewise IM threshold A sender)
-  (tracewise_not_heavy := not_heavy (1 := Htracewise_BasicEquivocation))
-  (tracewise_equivocating_validators := equivocating_validators (1 := Htracewise_BasicEquivocation))
+  (HBE : BasicEquivocation (composite_state IM) validator Cv threshold :=
+    equivocation_dec_tracewise IM threshold A sender)
   .
 
 Lemma StrongFixed_valid_state_not_heavy s
   (Hs : valid_state_prop StrongFixed s)
-  : tracewise_not_heavy s.
+  : not_heavy (1 := HBE) s.
 Proof.
-  cut (tracewise_equivocating_validators s ⊆ eqv_validators).
+  cut (equivocating_validators (1 := HBE) s ⊆ eqv_validators).
   {
-    intro Hincl; unfold tracewise_not_heavy, not_heavy.
+    intro Hincl; unfold not_heavy.
     by etransitivity; [apply sum_weights_subseteq |].
   }
   apply valid_state_has_trace in Hs as [is [tr Htr]].
@@ -302,7 +300,8 @@ Context
   `{FinSet message Cm}
   (message_dependencies : message -> Cm)
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Cv := Cv) IM threshold A sender)
+  (Limited : VLSM message :=
+    tracewise_limited_equivocation_vlsm_composition (Cv := Cv) IM threshold A sender)
   .
 
 (**

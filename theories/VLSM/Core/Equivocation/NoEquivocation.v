@@ -54,7 +54,7 @@ End sec_no_equivocations.
 Section sec_no_equivocation_invariants.
 
 Context
-  message
+  (message : Type)
   (X : VLSM message)
   `{HasBeenSentCapability message X}
   `{HasBeenDirectlyObservedCapability message X}
