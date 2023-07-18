@@ -215,7 +215,10 @@ Section sec_fixed_equivocation_with_fullnode.
   Context setting the stage for, and instantiating the
   [full_node_condition_for_admissible_equivocators].
   It requires that the nodes have [has_been_sent] and [has_been_received]
-  capabilities, that the number of nodes is finite
+  capabilities, that the number of nodes is finite.
+
+  Additionally to the above we require that equality on messages is decidable
+  and that the set of VLSMs allowed to equivocate is non-empty.
 *)
 Context
   `{EqDecision message}
@@ -224,39 +227,20 @@ Context
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
-  (equivocator_IM := equivocator_IM IM)
   (equivocating : Ci)
-  (admissible_index := fun s i => i ∈ equivocating)
-  (full_node_constraint
-    := full_node_condition_for_admissible_equivocators IM admissible_index)
-  (full_node_constraint_alt
-    := full_node_condition_for_admissible_equivocators_alt IM admissible_index)
-  .
-
-(**
-  Context for the [fixed_equivocation_constraint]. Additionally to the above it
-  requires that equality on messages is decidable and that the set of VLSMs
-  allowed to equivocate is non-empty.
-*)
-
-Context
-  (equivocating_index : Type := sub_index (elements equivocating))
-  (equivocating_IM := sub_IM IM (elements equivocating))
-  (fixed_equivocation_constraint : composite_label IM  -> composite_state IM * option message -> Prop
-    := fixed_equivocation_constraint IM equivocating)
-  (Free := free_composite_vlsm IM)
   .
 
 (** The [full_node_constraint_alt] is stronger than the [fixed_equivocation_constraint]. *)
 Lemma fixed_equivocation_constraint_subsumption_alt :
-  strong_constraint_subsumption (free_composite_vlsm IM) full_node_constraint_alt
-    fixed_equivocation_constraint.
+  strong_constraint_subsumption (free_composite_vlsm IM)
+    (full_node_condition_for_admissible_equivocators_alt IM (fun _ i => i ∈ equivocating))
+    (fixed_equivocation_constraint IM equivocating).
 Proof.
   intros l (s, [m |]) Hc ; [| done].
   destruct Hc as [Hno_equiv | [i [Hi Hm]]]; [by left |].
   unfold node_generated_without_further_equivocation_alt in Hm.
   right.
-  unfold admissible_index in Hi; apply elem_of_elements in Hi.
+  apply elem_of_elements in Hi.
   eapply can_emit_composite_free_lift with (j := dexist i Hi); [| done].
   by eauto.
 Qed.
@@ -268,8 +252,9 @@ Qed.
 *)
 Lemma fixed_equivocation_constraint_subsumption
   (Hno_resend : forall i : index, cannot_resend_message_stepwise_prop (IM i))
-  : preloaded_constraint_subsumption (free_composite_vlsm IM) full_node_constraint
-      fixed_equivocation_constraint.
+  : preloaded_constraint_subsumption (free_composite_vlsm IM)
+      (full_node_condition_for_admissible_equivocators IM (fun _ i => i ∈ equivocating))
+      (fixed_equivocation_constraint IM equivocating).
 Proof.
   intros l (s, om) Hv.
   apply fixed_equivocation_constraint_subsumption_alt.
@@ -302,11 +287,6 @@ Context
   (FreeE : VLSM message := free_composite_vlsm (equivocator_IM IM))
   (Hdec_init : forall i, decidable_initial_messages_prop (IM i))
   (Free := free_composite_vlsm IM)
-  (index_equivocating_prop : index -> Prop := sub_index_prop (elements equivocating))
-  (equivocating_index : Type := sub_index (elements equivocating))
-  (equivocating_IM := sub_IM IM (elements equivocating))
-  (free_equivocating_vlsm_composition : VLSM message := free_composite_vlsm equivocating_IM)
-  (sub_equivocator_IM := sub_IM (equivocator_IM IM) (elements equivocating))
   .
 
 (**
