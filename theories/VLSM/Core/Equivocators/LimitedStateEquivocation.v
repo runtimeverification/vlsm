@@ -50,7 +50,8 @@ Qed.
 
 Section sec_limited_state_equivocation.
 
-Context {message index : Type}
+Context
+  {message index : Type}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
@@ -58,33 +59,25 @@ Context {message index : Type}
   `{ReachableThreshold index Ci threshold}
   `{!finite.Finite index}
   (Free := free_composite_vlsm IM)
-  (equivocator_descriptors := equivocator_descriptors IM)
-  (equivocators_state_project := equivocators_state_project IM)
-  (equivocator_IM := equivocator_IM IM)
-  (equivocator_descriptors_update := equivocator_descriptors_update IM)
-  (proper_equivocator_descriptors := proper_equivocator_descriptors IM)
   (sender : message -> option index)
-  (Heqv_idx_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci threshold
+  (HBE : BasicEquivocation (composite_state (equivocator_IM IM)) index Ci threshold
     := equivocating_indices_BasicEquivocation IM threshold)
-  (FreeE : VLSM message := free_composite_vlsm equivocator_IM)
+  (FreeE : VLSM message := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
-  (not_heavy := not_heavy (1 := Heqv_idx_BasicEquivocation))
-  (equivocating_validators := equivocating_validators (1 := Heqv_idx_BasicEquivocation))
-  (equivocation_fault := equivocation_fault (1 := Heqv_idx_BasicEquivocation))
   .
 
 Definition equivocators_limited_equivocations_constraint
-  (l : composite_label equivocator_IM)
-  (som : composite_state equivocator_IM * option message)
-  (som' := composite_transition equivocator_IM l som)
+  (l : composite_label (equivocator_IM IM))
+  (som : composite_state (equivocator_IM IM) * option message)
+  (som' := composite_transition (equivocator_IM IM) l som)
   : Prop
   := equivocators_no_equivocations_constraint IM l som
-  /\ not_heavy (fst som').
+  /\ not_heavy (1 := HBE) (fst som').
 
 Definition equivocators_limited_equivocations_vlsm
   : VLSM message
   :=
-  composite_vlsm equivocator_IM equivocators_limited_equivocations_constraint.
+  composite_vlsm (equivocator_IM IM) equivocators_limited_equivocations_constraint.
 
 (** Inclusion in the free composition. *)
 Lemma equivocators_limited_equivocations_vlsm_incl_free
@@ -116,9 +109,9 @@ Qed.
   has limited equivocation.
 *)
 Lemma valid_state_limited_equivocation
-  (s : composite_state equivocator_IM)
+  (s : composite_state (equivocator_IM IM))
   (Hs : valid_state_prop equivocators_limited_equivocations_vlsm s)
-  : not_heavy s.
+  : not_heavy (1 := HBE) s.
 Proof.
   apply valid_state_prop_iff in Hs.
   destruct Hs as [[(is, His) Heq_s] | [l [(s0, oim) [oom' [[_ [_ [_ [_ Hlimited]]]] Ht]]]]].
@@ -131,7 +124,7 @@ Proof.
     simpl in Heqv_is; apply sum_weights_empty in Heqv_is.
     pose proof (rt_positive (H6 := H8)).
     by cbv in Heqv_is |- *; lra.
-  - by replace s with (fst (composite_transition equivocator_IM l (s0, oim))); [done |]
+  - by replace s with (fst (composite_transition (equivocator_IM IM) l (s0, oim))); [done |]
     ; cbn in *; rewrite Ht.
 Qed.
 
@@ -145,13 +138,13 @@ Qed.
 Lemma equivocators_limited_valid_trace_is_fixed is s tr
   : finite_valid_trace_init_to equivocators_limited_equivocations_vlsm is s tr ->
   finite_valid_trace_init_to
-   (equivocators_fixed_equivocations_vlsm IM (elements(equivocating_validators s)))
+   (equivocators_fixed_equivocations_vlsm IM (elements (equivocating_validators (1 := HBE) s)))
    is s tr.
 Proof.
   intro Htr.
   split; [| apply Htr].
-  cut
-    (forall equivocating, elements(equivocating_validators s) ⊆ equivocating ->
+  cut (forall equivocating,
+    elements (equivocating_validators (1 := HBE) s) ⊆ equivocating ->
       finite_valid_trace_from_to (equivocators_fixed_equivocations_vlsm IM equivocating) is s tr);
     [by intros H'; apply H' |].
   induction Htr using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
@@ -163,7 +156,7 @@ Proof.
       specialize (equivocators_transition_preserves_equivocating_indices
         IM (enum index)  _ _ _ _ _ Ht) as Hincl'.
       clear -Hincl Hincl'.
-      transitivity (elements (equivocating_validators sf)); [| done].
+      transitivity (elements (equivocating_validators (1 := HBE) sf)); [| done].
       intro x; rewrite! elem_of_elements; intro Hx.
       apply equivocating_indices_equivocating_validators, elem_of_list_to_set, Hincl'.
       by apply equivocating_indices_equivocating_validators, elem_of_list_to_set in Hx.
@@ -183,7 +176,7 @@ Proof.
         by eapply sent_valid.
       + replace (composite_transition _ _ _) with (sf, oom).
         unfold state_has_fixed_equivocation.
-        transitivity (elements (equivocating_validators sf)); [| done].
+        transitivity (elements (equivocating_validators (1 := HBE) sf)); [| done].
         by intros x Hx; apply elem_of_elements, equivocating_indices_equivocating_validators,
           elem_of_list_to_set.
 Qed.
@@ -194,20 +187,20 @@ Qed.
   [fixed_limited_equivocation_prop]erty.
 *)
 Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
-  (final_descriptors : equivocator_descriptors)
-  (is : composite_state equivocator_IM)
-  (tr : list (composite_transition_item equivocator_IM))
+  (final_descriptors : equivocator_descriptors IM)
+  (is : composite_state (equivocator_IM IM))
+  (tr : list (composite_transition_item (equivocator_IM IM)))
   (final_state := finite_trace_last is tr)
   (Hproper : not_equivocating_equivocator_descriptors IM final_descriptors final_state)
   (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
-    (initial_descriptors : equivocator_descriptors)
-    (isX := equivocators_state_project initial_descriptors is)
+    (initial_descriptors : equivocator_descriptors IM)
+    (isX := equivocators_state_project IM initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
-    proper_equivocator_descriptors initial_descriptors is /\
+    proper_equivocator_descriptors IM initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
-    equivocators_state_project final_descriptors final_state = final_stateX /\
+    equivocators_state_project IM final_descriptors final_state = final_stateX /\
     fixed_limited_equivocation_prop (Cv := Ci) (Ci := Ci) IM threshold Datatypes.id isX trX.
 Proof.
   apply valid_trace_add_default_last in Htr as Hfixed_tr.
@@ -215,17 +208,17 @@ Proof.
   apply valid_trace_last_pstate in Hfixed_tr as Hfixed_last.
   apply valid_trace_forget_last in Hfixed_tr.
   destruct (fixed_equivocators_valid_trace_project IM
-    (equivocating_validators (finite_trace_last is tr)) final_descriptors is tr)
+    (equivocating_validators (1 := HBE) (finite_trace_last is tr)) final_descriptors is tr)
     as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_fixed).
   - by eapply not_equivocating_equivocator_descriptors_proper_fixed.
   - done.
   - exists trX, initial_descriptors.
     split_and!; [by apply Hinitial_descriptors | done | done |].
-    exists (equivocating_validators (finite_trace_last is tr)).
+    exists (equivocating_validators (1 := HBE) (finite_trace_last is tr)).
     split.
     + apply valid_trace_add_default_last, valid_trace_last_pstate,
         valid_state_limited_equivocation in Htr.
-      transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
+      transitivity (equivocation_fault (1 := HBE) (finite_trace_last is tr)); [| done].
       by unfold equivocation_fault; apply sum_weights_subseteq.
     + revert Hpr_fixed.
       apply VLSM_incl_finite_valid_trace, constraint_subsumption_incl.
@@ -256,20 +249,20 @@ Context
   annotated with equivocators to obtain a limited-message equivocation trace.
 *)
 Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocation
-  (final_descriptors : equivocator_descriptors)
-  (is : composite_state equivocator_IM)
-  (tr : list (composite_transition_item equivocator_IM))
+  (final_descriptors : equivocator_descriptors IM)
+  (is : composite_state (equivocator_IM IM))
+  (tr : list (composite_transition_item (equivocator_IM IM)))
   (final_state := finite_trace_last is tr)
   (Hproper : not_equivocating_equivocator_descriptors IM final_descriptors final_state)
   (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
-    (initial_descriptors : equivocator_descriptors)
-    (isX := equivocators_state_project initial_descriptors is)
+    (initial_descriptors : equivocator_descriptors IM)
+    (isX := equivocators_state_project IM initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
-    proper_equivocator_descriptors initial_descriptors is /\
+    proper_equivocator_descriptors IM initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
-    equivocators_state_project final_descriptors final_state = final_stateX /\
+    equivocators_state_project IM final_descriptors final_state = final_stateX /\
     finite_valid_trace (msg_dep_limited_equivocation_vlsm IM threshold full_message_dependencies sender (Cv := Ci))
       {| original_state := isX; state_annotation := ` inhabitant |}
       (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender isX trX).
@@ -289,7 +282,8 @@ Section sec_equivocators_projection_constrained_limited.
 Context
   `{FinSet message Cm}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM Datatypes.id sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Cv := Ci) threshold Datatypes.id sender)
+  (Limited : VLSM message :=
+    tracewise_limited_equivocation_vlsm_composition IM (Cv := Ci) threshold Datatypes.id sender)
   (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender)
   (message_dependencies : message -> Cm)
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
@@ -303,20 +297,20 @@ Context
   message-equivocation.
 *)
 Lemma limited_equivocators_valid_trace_project
-  (final_descriptors : equivocator_descriptors)
-  (is : composite_state equivocator_IM)
-  (tr : list (composite_transition_item equivocator_IM))
+  (final_descriptors : equivocator_descriptors IM)
+  (is : composite_state (equivocator_IM IM))
+  (tr : list (composite_transition_item (equivocator_IM IM)))
   (final_state := finite_trace_last is tr)
   (Hproper : not_equivocating_equivocator_descriptors IM final_descriptors final_state)
   (Htr : finite_valid_trace equivocators_limited_equivocations_vlsm is tr)
   : exists
     (trX : list (composite_transition_item IM))
-    (initial_descriptors : equivocator_descriptors)
-    (isX := equivocators_state_project initial_descriptors is)
+    (initial_descriptors : equivocator_descriptors IM)
+    (isX := equivocators_state_project IM initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
-    proper_equivocator_descriptors initial_descriptors is /\
+    proper_equivocator_descriptors IM initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
-    equivocators_state_project final_descriptors final_state = final_stateX /\
+    equivocators_state_project IM final_descriptors final_state = final_stateX /\
     finite_valid_trace Limited isX trX.
 Proof.
   specialize
@@ -335,7 +329,7 @@ Qed.
   [equivocator_descriptors] one might not be able to obtain a trace projection.
 *)
 Lemma limited_equivocators_vlsm_partial_projection
-  (final_descriptors : equivocator_descriptors)
+  (final_descriptors : equivocator_descriptors IM)
   : VLSM_partial_projection equivocators_limited_equivocations_vlsm Limited
       (equivocators_partial_trace_project IM final_descriptors).
 Proof.
@@ -380,7 +374,7 @@ Proof.
     }
     specialize (VLSM_partial_projection_finite_valid_trace
       (limited_equivocators_vlsm_partial_projection (zero_descriptor IM))
-       sX trX (equivocators_state_project (zero_descriptor IM) sX)
+       sX trX (equivocators_state_project IM (zero_descriptor IM) sX)
        (equivocators_total_trace_project IM trX))
        as Hsim.
     spec Hsim.
