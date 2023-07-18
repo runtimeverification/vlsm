@@ -59,7 +59,6 @@ Context {message index : Type}
   `{!finite.Finite index}
   (Free := free_composite_vlsm IM)
   (equivocator_descriptors := equivocator_descriptors IM)
-  (equivocators_state_project := equivocators_state_project IM)
   (equivocator_IM := equivocator_IM IM)
   (sender : message -> option index)
   (Heqv_idx_BasicEquivocation : BasicEquivocation (composite_state equivocator_IM) index Ci threshold
@@ -201,11 +200,11 @@ Lemma equivocators_limited_valid_trace_projects_to_fixed_limited_equivocation
   : exists
     (trX : list (composite_transition_item IM))
     (initial_descriptors : equivocator_descriptors)
-    (isX := equivocators_state_project initial_descriptors is)
+    (isX := equivocators_state_project IM initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
     proper_equivocator_descriptors IM initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
-    equivocators_state_project final_descriptors final_state = final_stateX /\
+    equivocators_state_project IM final_descriptors final_state = final_stateX /\
     fixed_limited_equivocation_prop (Cv := Ci) (Ci := Ci) IM threshold Datatypes.id isX trX.
 Proof.
   apply valid_trace_add_default_last in Htr as Hfixed_tr.
@@ -263,11 +262,11 @@ Lemma equivocators_limited_valid_trace_projects_to_annotated_limited_equivocatio
   : exists
     (trX : list (composite_transition_item IM))
     (initial_descriptors : equivocator_descriptors)
-    (isX := equivocators_state_project initial_descriptors is)
+    (isX := equivocators_state_project IM initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
     proper_equivocator_descriptors IM initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
-    equivocators_state_project final_descriptors final_state = final_stateX /\
+    equivocators_state_project IM final_descriptors final_state = final_stateX /\
     finite_valid_trace (msg_dep_limited_equivocation_vlsm IM threshold full_message_dependencies sender (Cv := Ci))
       {| original_state := isX; state_annotation := ` inhabitant |}
       (msg_dep_annotate_trace_with_equivocators IM full_message_dependencies sender isX trX).
@@ -310,11 +309,11 @@ Lemma limited_equivocators_valid_trace_project
   : exists
     (trX : list (composite_transition_item IM))
     (initial_descriptors : equivocator_descriptors)
-    (isX := equivocators_state_project initial_descriptors is)
+    (isX := equivocators_state_project IM initial_descriptors is)
     (final_stateX := finite_trace_last isX trX),
     proper_equivocator_descriptors IM initial_descriptors is /\
     equivocators_trace_project IM final_descriptors tr = Some (trX, initial_descriptors) /\
-    equivocators_state_project final_descriptors final_state = final_stateX /\
+    equivocators_state_project IM final_descriptors final_state = final_stateX /\
     finite_valid_trace Limited isX trX.
 Proof.
   specialize
@@ -378,7 +377,7 @@ Proof.
     }
     specialize (VLSM_partial_projection_finite_valid_trace
       (limited_equivocators_vlsm_partial_projection (zero_descriptor IM))
-       sX trX (equivocators_state_project (zero_descriptor IM) sX)
+       sX trX (equivocators_state_project IM (zero_descriptor IM) sX)
        (equivocators_total_trace_project IM trX))
        as Hsim.
     spec Hsim.
