@@ -72,6 +72,13 @@ Choose "y" in order to allow opam to modify `~/.profile`.
 opam switch create coq-8.16 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
 ```
 
+If you get an error regarding the missing C compiler, you can install it, by running:
+
+```shell
+sudo apt-update
+sudo apt install build-essential
+```
+
 ### Update the current shell environment
 
 ```shell
