@@ -63,7 +63,6 @@ Context {message index : Type}
     := equivocating_indices_BasicEquivocation IM threshold)
   (FreeE : VLSM message := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
-  (equivocation_fault := equivocation_fault (1 := Heqv_idx_BasicEquivocation))
   .
 
 Definition equivocators_limited_equivocations_constraint
@@ -220,7 +219,7 @@ Proof.
     split.
     + apply valid_trace_add_default_last, valid_trace_last_pstate,
         valid_state_limited_equivocation in Htr.
-      transitivity (equivocation_fault (finite_trace_last is tr)); [| done].
+      transitivity (equivocation_fault (1 := Heqv_idx_BasicEquivocation) (finite_trace_last is tr)); [| done].
       by unfold equivocation_fault; apply sum_weights_subseteq.
     + revert Hpr_fixed.
       apply VLSM_incl_finite_valid_trace, constraint_subsumption_incl.
