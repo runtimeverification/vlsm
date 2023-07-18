@@ -62,8 +62,10 @@ Next Obligation.
 Proof. done. Defined.
 
 Definition coeqv_limited_equivocation_vlsm : VLSM message :=
-  annotated_vlsm (free_composite_vlsm IM) Cv (fun s => s = ∅)
-    coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
+  constrained_vlsm
+    (annotated_vlsm (free_composite_vlsm IM) Cv (fun s => s = ∅)
+      coeqv_composite_transition_message_equivocators)
+    coeqv_limited_equivocation_constraint.
 
 Definition coeqv_annotate_trace_with_equivocators :=
   annotate_trace (free_composite_vlsm IM) Cv (fun s => s = ∅)
@@ -249,9 +251,9 @@ Proof.
 Qed.
 
 Lemma annotated_free_input_valid_projection
-  iprop `{Inhabited (sig iprop)} constr trans
+  iprop `{Inhabited (sig iprop)} trans constr
   i li s om
-  : input_valid (annotated_vlsm (free_composite_vlsm IM) Cv iprop constr trans)
+  : input_valid (constrained_vlsm (annotated_vlsm (free_composite_vlsm IM) Cv iprop trans) constr)
       (existT i li) (s, om) ->
     input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om).
 Proof.
