@@ -174,7 +174,7 @@ Record simp_lv_event : Type := mkSimpObs
 {
   simp_lv_event_type : simp_lv_event_type;
   simp_lv_event_subject : index;
-  simp_lv_event_state : (@state index index_listing);
+  simp_lv_event_state : @state index index_listing;
 }.
 ```
 
