@@ -63,7 +63,6 @@ Context {message index : Type}
     := equivocating_indices_BasicEquivocation IM threshold)
   (FreeE : VLSM message := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
-  (not_heavy := not_heavy (1 := Heqv_idx_BasicEquivocation))
   (equivocating_validators := equivocating_validators (1 := Heqv_idx_BasicEquivocation))
   (equivocation_fault := equivocation_fault (1 := Heqv_idx_BasicEquivocation))
   .
@@ -74,7 +73,7 @@ Definition equivocators_limited_equivocations_constraint
   (som' := composite_transition (equivocator_IM IM) l som)
   : Prop
   := equivocators_no_equivocations_constraint IM l som
-  /\ not_heavy (fst som').
+  /\ not_heavy (1 := Heqv_idx_BasicEquivocation) (fst som').
 
 Definition equivocators_limited_equivocations_vlsm
   : VLSM message
@@ -113,7 +112,7 @@ Qed.
 Lemma valid_state_limited_equivocation
   (s : composite_state (equivocator_IM IM))
   (Hs : valid_state_prop equivocators_limited_equivocations_vlsm s)
-  : not_heavy s.
+  : not_heavy (1 := Heqv_idx_BasicEquivocation) s.
 Proof.
   apply valid_state_prop_iff in Hs.
   destruct Hs as [[(is, His) Heq_s] | [l [(s0, oim) [oom' [[_ [_ [_ [_ Hlimited]]]] Ht]]]]].
