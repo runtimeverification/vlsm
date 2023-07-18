@@ -59,7 +59,7 @@ Context {message index : Type}
   `{!finite.Finite index}
   (Free := free_composite_vlsm IM)
   (sender : message -> option index)
-  (Heqv_idx_BasicEquivocation : BasicEquivocation (composite_state (equivocator_IM IM)) index Ci threshold
+  (HBE : BasicEquivocation (composite_state (equivocator_IM IM)) index Ci threshold
     := equivocating_indices_BasicEquivocation IM threshold)
   (FreeE : VLSM message := free_composite_vlsm (equivocator_IM IM))
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
@@ -71,7 +71,7 @@ Definition equivocators_limited_equivocations_constraint
   (som' := composite_transition (equivocator_IM IM) l som)
   : Prop
   := equivocators_no_equivocations_constraint IM l som
-  /\ not_heavy (1 := Heqv_idx_BasicEquivocation) (fst som').
+  /\ not_heavy (1 := HBE) (fst som').
 
 Definition equivocators_limited_equivocations_vlsm
   : VLSM message
@@ -110,7 +110,7 @@ Qed.
 Lemma valid_state_limited_equivocation
   (s : composite_state (equivocator_IM IM))
   (Hs : valid_state_prop equivocators_limited_equivocations_vlsm s)
-  : not_heavy (1 := Heqv_idx_BasicEquivocation) s.
+  : not_heavy (1 := HBE) s.
 Proof.
   apply valid_state_prop_iff in Hs.
   destruct Hs as [[(is, His) Heq_s] | [l [(s0, oim) [oom' [[_ [_ [_ [_ Hlimited]]]] Ht]]]]].
@@ -137,14 +137,13 @@ Qed.
 Lemma equivocators_limited_valid_trace_is_fixed is s tr
   : finite_valid_trace_init_to equivocators_limited_equivocations_vlsm is s tr ->
   finite_valid_trace_init_to
-   (equivocators_fixed_equivocations_vlsm IM (elements
-    (equivocating_validators (1 := Heqv_idx_BasicEquivocation) s)))
+   (equivocators_fixed_equivocations_vlsm IM (elements (equivocating_validators (1 := HBE) s)))
    is s tr.
 Proof.
   intro Htr.
   split; [| apply Htr].
   cut (forall equivocating,
-    elements (equivocating_validators (1 := Heqv_idx_BasicEquivocation) s) ⊆ equivocating ->
+    elements (equivocating_validators (1 := HBE) s) ⊆ equivocating ->
       finite_valid_trace_from_to (equivocators_fixed_equivocations_vlsm IM equivocating) is s tr);
     [by intros H'; apply H' |].
   induction Htr using finite_valid_trace_init_to_rev_ind; intros equivocating Hincl.
@@ -156,7 +155,7 @@ Proof.
       specialize (equivocators_transition_preserves_equivocating_indices
         IM (enum index)  _ _ _ _ _ Ht) as Hincl'.
       clear -Hincl Hincl'.
-      transitivity (elements (equivocating_validators (1 := Heqv_idx_BasicEquivocation) sf)); [| done].
+      transitivity (elements (equivocating_validators (1 := HBE) sf)); [| done].
       intro x; rewrite! elem_of_elements; intro Hx.
       apply equivocating_indices_equivocating_validators, elem_of_list_to_set, Hincl'.
       by apply equivocating_indices_equivocating_validators, elem_of_list_to_set in Hx.
@@ -176,7 +175,7 @@ Proof.
         by eapply sent_valid.
       + replace (composite_transition _ _ _) with (sf, oom).
         unfold state_has_fixed_equivocation.
-        transitivity (elements (equivocating_validators (1 := Heqv_idx_BasicEquivocation) sf)); [| done].
+        transitivity (elements (equivocating_validators (1 := HBE) sf)); [| done].
         by intros x Hx; apply elem_of_elements, equivocating_indices_equivocating_validators,
           elem_of_list_to_set.
 Qed.
@@ -208,18 +207,17 @@ Proof.
   apply valid_trace_last_pstate in Hfixed_tr as Hfixed_last.
   apply valid_trace_forget_last in Hfixed_tr.
   destruct (fixed_equivocators_valid_trace_project IM
-    (equivocating_validators (1 := Heqv_idx_BasicEquivocation)
-      (finite_trace_last is tr)) final_descriptors is tr)
+    (equivocating_validators (1 := HBE) (finite_trace_last is tr)) final_descriptors is tr)
     as (trX & initial_descriptors & Hinitial_descriptors & Hpr & Hlst_pr & Hpr_fixed).
   - by eapply not_equivocating_equivocator_descriptors_proper_fixed.
   - done.
   - exists trX, initial_descriptors.
     split_and!; [by apply Hinitial_descriptors | done | done |].
-    exists (equivocating_validators (1 := Heqv_idx_BasicEquivocation) (finite_trace_last is tr)).
+    exists (equivocating_validators (1 := HBE) (finite_trace_last is tr)).
     split.
     + apply valid_trace_add_default_last, valid_trace_last_pstate,
         valid_state_limited_equivocation in Htr.
-      transitivity (equivocation_fault (1 := Heqv_idx_BasicEquivocation) (finite_trace_last is tr)); [| done].
+      transitivity (equivocation_fault (1 := HBE) (finite_trace_last is tr)); [| done].
       by unfold equivocation_fault; apply sum_weights_subseteq.
     + revert Hpr_fixed.
       apply VLSM_incl_finite_valid_trace, constraint_subsumption_incl.
