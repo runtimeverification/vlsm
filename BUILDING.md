@@ -17,10 +17,21 @@ Notes for Windows users:
 
 ## Building VLSM manually
 
-### Ensure packages are up to date (optional)
+### Install opam requirements (unless already installed)
+
+A compiler and the unzip and bubblewrap tools are needed by opam.
+
+To install on Debian-based distributions:
 
 ```shell
 sudo apt-get update
+sudo apt-get install -y build-essential unzip bubblewrap
+```
+
+To install on Fedora:
+
+```shell
+sudo dnf install @development-tools unzip bubblewrap
 ```
 
 ### Install opam (unless already installed)
@@ -41,22 +52,6 @@ it can be installed by running:
 sudo dnf install opam
 ```
 
-### Install opam runtime requirements
-
-The unzip and bubblewrap tools are needed by opam.
-
-To install on Debian-based distributions:
-
-```shell
-sudo apt-get install -y unzip bubblewrap
-```
-
-To install on Fedora:
-
-```shell
-sudo dnf install unzip bubblewrap
-```
-
 ### Initialize opam
 
 Run `opam init`.
@@ -70,13 +65,6 @@ Choose "y" in order to allow opam to modify `~/.profile`.
 
 ```shell
 opam switch create coq-8.16 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
-```
-
-If you get an error regarding the missing C compiler, you can install it, by running:
-
-```shell
-sudo apt-update
-sudo apt install build-essential
 ```
 
 ### Update the current shell environment
