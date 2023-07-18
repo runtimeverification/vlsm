@@ -713,7 +713,6 @@ Section sec_equivocator_vlsm_valid_state_projections.
 Context
   {message : Type}
   (X : VLSM message)
-  (equivocator_vlsm := equivocator_vlsm X)
   .
 
 (**
@@ -778,7 +777,7 @@ Definition equivocator_state_descriptor_project
 *)
 Definition proper_descriptor
   (d : MachineDescriptor)
-  (s : state equivocator_vlsm)
+  (s : state (equivocator_vlsm X))
   :=
   match d with
   | NewMachine sn => initial_state_prop X sn
@@ -793,7 +792,7 @@ Definition proper_equivocator_label
 (** Existing-only descriptor. *)
 Definition existing_descriptor
   (d : MachineDescriptor)
-  (s : state equivocator_vlsm)
+  (s : state (equivocator_vlsm X))
   :=
   match d with
   | Existing i => is_Some (equivocator_state_project s i)
@@ -837,7 +836,7 @@ Qed.
 
 Lemma existing_descriptor_proper
   (d : MachineDescriptor)
-  (s : state equivocator_vlsm)
+  (s : state (equivocator_vlsm X))
   (Hned : existing_descriptor d s)
   : proper_descriptor d s.
 Proof. by destruct d. Qed.
@@ -855,10 +854,10 @@ Proof. by destruct d. Qed.
 *)
 Lemma equivocator_transition_no_equivocation_zero_descriptor
   (iom oom : option message)
-  (l : label equivocator_vlsm)
-  (s s' : state equivocator_vlsm)
-  (Hv : valid equivocator_vlsm l (s, iom))
-  (Ht : transition equivocator_vlsm l (s, iom) = (s', oom))
+  (l : label (equivocator_vlsm X))
+  (s s' : state (equivocator_vlsm X))
+  (Hv : valid (equivocator_vlsm X) l (s, iom))
+  (Ht : transition (equivocator_vlsm X) l (s, iom) = (s', oom))
   (Hs' : is_singleton_state X s')
   : exists li, l = ContinueWith 0 li.
 Proof.
@@ -878,8 +877,8 @@ Qed.
 *)
 Lemma equivocator_transition_reflects_singleton_state
   (iom oom : option message)
-  (l : label equivocator_vlsm)
-  (s s' : state equivocator_vlsm)
+  (l : label (equivocator_vlsm X))
+  (s s' : state (equivocator_vlsm X))
   (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : is_singleton_state X s' -> is_singleton_state X s.
 Proof.
@@ -894,8 +893,8 @@ Qed.
 
 Lemma equivocator_transition_cannot_decrease_state_size
   (iom oom : option message)
-  (l : label equivocator_vlsm)
-  (s s' : state equivocator_vlsm)
+  (l : label (equivocator_vlsm X))
+  (s s' : state (equivocator_vlsm X))
   (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : equivocator_state_n s <= equivocator_state_n s'.
 Proof.
@@ -913,8 +912,8 @@ Qed.
 
 Lemma equivocator_transition_preserves_equivocating_state
   (iom oom : option message)
-  (l : label equivocator_vlsm)
-  (s s' : state equivocator_vlsm)
+  (l : label (equivocator_vlsm X))
+  (s s' : state (equivocator_vlsm X))
   (Ht : equivocator_transition X l (s, iom) = (s', oom))
   : is_equivocating_state X s -> is_equivocating_state X s'.
 Proof.
@@ -924,8 +923,8 @@ Qed.
 
 Lemma zero_descriptor_transition_reflects_equivocating_state
   (iom oom : option message)
-  (l : label equivocator_vlsm)
-  (s s' : state equivocator_vlsm)
+  (l : label (equivocator_vlsm X))
+  (s s' : state (equivocator_vlsm X))
   (Ht : equivocator_transition X l (s, iom) = (s', oom))
   li
   (Hzero : l = ContinueWith 0 li)
@@ -947,9 +946,9 @@ Qed.
 *)
 Lemma preloaded_equivocator_state_projection_preserves_validity
   (seed : message -> Prop)
-  (bs : state equivocator_vlsm)
+  (bs : state (equivocator_vlsm X))
   (om : option message)
-  (Hbs : valid_state_message_prop (pre_loaded_vlsm equivocator_vlsm seed) bs om)
+  (Hbs : valid_state_message_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) bs om)
   : option_valid_message_prop (pre_loaded_vlsm X seed) om /\
     forall i si,
       equivocator_state_project bs i = Some si ->
@@ -969,7 +968,7 @@ Proof.
 
     (*
       destruction tactic for a valid equivocator transition
-      transition equivocator_vlsm l (s, om) = (s', om')
+      transition (equivocator_vlsm X) l (s, om) = (s', om')
     *)
     destruct l as [sn | i l | i l]
     ; [inversion_clear Ht; split; [by apply option_valid_message_None |]
@@ -1002,8 +1001,8 @@ Qed.
 
 Lemma preloaded_with_equivocator_state_project_valid_state
   (seed : message -> Prop)
-  (bs : state equivocator_vlsm)
-  (Hbs : valid_state_prop (pre_loaded_vlsm equivocator_vlsm seed) bs)
+  (bs : state (equivocator_vlsm X))
+  (Hbs : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) bs)
   : forall i si,
     equivocator_state_project bs i = Some si ->
     valid_state_prop (pre_loaded_vlsm X seed) si.
@@ -1015,7 +1014,7 @@ Qed.
 Lemma preloaded_with_equivocator_state_project_valid_message
   (seed : message -> Prop)
   (om : option message)
-  (Hom : option_valid_message_prop (pre_loaded_vlsm equivocator_vlsm seed) om)
+  (Hom : option_valid_message_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) om)
   :
   option_valid_message_prop (pre_loaded_vlsm X seed) om.
 Proof.
@@ -1024,13 +1023,13 @@ Proof.
 Qed.
 
 Lemma equivocator_state_project_valid_state
-  (bs : state equivocator_vlsm)
-  (Hbs : valid_state_prop equivocator_vlsm bs)
+  (bs : state (equivocator_vlsm X))
+  (Hbs : valid_state_prop (equivocator_vlsm X) bs)
   : forall i si,
     equivocator_state_project bs i = Some si -> valid_state_prop X si.
 Proof.
   intros i si Hpr.
-  apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False equivocator_vlsm)) in Hbs.
+  apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False (equivocator_vlsm X))) in Hbs.
   specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
   apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False X)) in Hsi.
   by destruct X.
@@ -1038,13 +1037,13 @@ Qed.
 
 Lemma equivocator_state_project_valid_message
   (om : option message)
-  (Hom : option_valid_message_prop equivocator_vlsm om)
+  (Hom : option_valid_message_prop (equivocator_vlsm X) om)
   :
   option_valid_message_prop X om.
 Proof.
   destruct om as [m |]; [| by apply option_valid_message_None].
-  specialize (vlsm_is_pre_loaded_with_False_initial_message equivocator_vlsm) as Hinit.
-  apply (VLSM_incl_valid_message (proj1 (vlsm_is_pre_loaded_with_False equivocator_vlsm)))
+  specialize (vlsm_is_pre_loaded_with_False_initial_message (equivocator_vlsm X)) as Hinit.
+  apply (VLSM_incl_valid_message (proj1 (vlsm_is_pre_loaded_with_False (equivocator_vlsm X))))
     in Hom; [| done].
   apply preloaded_with_equivocator_state_project_valid_message in Hom.
   specialize (vlsm_is_pre_loaded_with_False_initial_message_rev X) as Hinit_rev.
@@ -1058,8 +1057,8 @@ Qed.
   corresponding to the original machine.
 *)
 Lemma preloaded_equivocator_state_project_valid_state
-  (bs : state equivocator_vlsm)
-  (Hbs : valid_state_prop (pre_loaded_with_all_messages_vlsm equivocator_vlsm) bs)
+  (bs : state (equivocator_vlsm X))
+  (Hbs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs)
   : forall i si,
     equivocator_state_project bs i = Some si ->
       valid_state_prop (pre_loaded_with_all_messages_vlsm X) si.
@@ -1082,7 +1081,7 @@ Qed.
 
 Lemma new_machine_label_equivocator_transition_size
   {sn s oin s' oout}
-  (Ht : transition equivocator_vlsm (Spawn sn) (s, oin) = (s', oout))
+  (Ht : transition (equivocator_vlsm X) (Spawn sn) (s, oin) = (s', oout))
   : equivocator_state_n s' = S (equivocator_state_n s).
 Proof.
   inversion_clear Ht.
@@ -1091,7 +1090,7 @@ Qed.
 
 Lemma existing_true_label_equivocator_transition_size
   {ieqvi li s oin s' oout}
-  (Ht : transition equivocator_vlsm (ForkWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition (equivocator_vlsm X) (ForkWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hv : equivocator_state_project s ieqvi = Some si)
   : equivocator_state_n s' = S (equivocator_state_n s).
@@ -1105,7 +1104,7 @@ Qed.
 
 Lemma existing_false_label_equivocator_transition_size
   {ieqvi li s oin s' oout}
-  (Ht : transition equivocator_vlsm (ContinueWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition (equivocator_vlsm X) (ContinueWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hv : equivocator_state_project s ieqvi = Some si)
   : equivocator_state_n s' = equivocator_state_n s.
@@ -1119,7 +1118,7 @@ Qed.
 
 Lemma new_machine_label_equivocator_state_project_last
   {sn s oin s' oout}
-  (Ht : transition equivocator_vlsm (Spawn sn) (s, oin) = (s', oout))
+  (Ht : transition (equivocator_vlsm X) (Spawn sn) (s, oin) = (s', oout))
   : equivocator_state_descriptor_project s' (Existing (equivocator_state_n s)) =
     equivocator_state_descriptor_project s (NewMachine sn).
 Proof.
@@ -1130,7 +1129,7 @@ Qed.
 
 Lemma new_machine_label_equivocator_state_project_not_last
   {sn s oin s' oout}
-  (Ht : transition equivocator_vlsm (Spawn sn) (s, oin) = (s', oout))
+  (Ht : transition (equivocator_vlsm X) (Spawn sn) (s, oin) = (s', oout))
   ni
   (Hni : ni < equivocator_state_n s)
   : equivocator_state_descriptor_project s' (Existing ni) =
@@ -1142,7 +1141,7 @@ Qed.
 
 Lemma existing_true_label_equivocator_state_project_not_last
   {ieqvi li s oin s' oout}
-  (Ht : transition equivocator_vlsm (ForkWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition (equivocator_vlsm X) (ForkWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hsi : equivocator_state_project s ieqvi = Some si)
   ni
@@ -1160,7 +1159,7 @@ Qed.
 
 Lemma existing_true_label_equivocator_state_project_last
   {ieqvi li s oin s' oout}
-  (Ht : transition equivocator_vlsm (ForkWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition (equivocator_vlsm X) (ForkWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hsi : equivocator_state_project s ieqvi = Some si)
   si' _oout
@@ -1177,7 +1176,7 @@ Qed.
 
 Lemma existing_false_label_equivocator_state_project_not_same
   {ieqvi li s oin s' oout}
-  (Ht : transition equivocator_vlsm (ContinueWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition (equivocator_vlsm X) (ContinueWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hsi : equivocator_state_project s ieqvi = Some si)
   ni
@@ -1196,7 +1195,7 @@ Qed.
 
 Lemma existing_false_label_equivocator_state_project_same
   {ieqvi li s oin s' oout}
-  (Ht : transition equivocator_vlsm (ContinueWith ieqvi li) (s, oin) = (s', oout))
+  (Ht : transition (equivocator_vlsm X) (ContinueWith ieqvi li) (s, oin) = (s', oout))
   si
   (Hsi : equivocator_state_project s ieqvi = Some si)
   si' _oout

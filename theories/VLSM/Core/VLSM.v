@@ -2717,7 +2717,9 @@ Section sec_constrained_defs.
 
 (** ** Constrained traces, states and messages *)
 
-Context `(X : VLSM message).
+Context
+  `(X : VLSM message)
+  .
 
 Inductive constrained_transitions_from_to :
   state X -> state X -> list (transition_item X) -> Prop :=
@@ -2750,7 +2752,9 @@ Section sec_finite_valid_trace_init_to_alt.
   when checking whether a concrete trace is valid.
 *)
 
-Context `(X : VLSM message).
+Context
+  `(X : VLSM message)
+  .
 
 Inductive message_valid_transitions_from_to :
   state X -> state X -> list (transition_item X) -> Prop :=

@@ -23,7 +23,8 @@ Section sec_reachable_threshold_props.
 
 Context
   (threshold : R)
-  `{Hrt : ReachableThreshold V Cv threshold}.
+  `{Hrt : ReachableThreshold V Cv threshold}
+  .
 
 (**
   Given a list with no duplicates and whose added weight does not pass the

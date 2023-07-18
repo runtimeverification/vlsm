@@ -1143,7 +1143,8 @@ End sec_composite_plan_properties.
 
 Section sec_empty_composition_properties.
 
-Context {message : Type}
+Context
+  {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)

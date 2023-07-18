@@ -234,7 +234,8 @@ End sec_generalized_constraints.
 
 Section sec_seeded_all_equivocating.
 
-Context {message : Type}
+Context
+  {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
@@ -370,7 +371,8 @@ End sec_seeded_all_equivocating.
 
 Section sec_all_equivocating.
 
-Context {message : Type}
+Context
+  {message : Type}
   {index : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)

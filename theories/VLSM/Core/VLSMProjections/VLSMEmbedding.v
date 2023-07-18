@@ -628,9 +628,6 @@ Context
   (X Y : VLSM message)
   (label_project : label X -> label Y)
   (state_project : state X -> state Y)
-  .
-
-Context
   (Hvalid : weak_embedding_valid_preservation X Y label_project state_project)
   (Htransition : weak_embedding_transition_preservation X Y label_project state_project)
   .

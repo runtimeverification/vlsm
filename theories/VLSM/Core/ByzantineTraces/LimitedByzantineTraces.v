@@ -94,10 +94,8 @@ Context
   (non_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
   (Hlimit : (sum_weights byzantine_vs <= threshold)%R)
   (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine A sender)
-  (Htracewise_BasicEquivocation : BasicEquivocation (composite_state IM) validator Cv threshold
+  (HBE : BasicEquivocation (composite_state IM) validator Cv threshold
     := equivocation_dec_tracewise IM threshold A sender)
-  (tracewise_not_heavy := not_heavy (1 := Htracewise_BasicEquivocation))
-  (tracewise_equivocating_validators := equivocating_validators (1 := Htracewise_BasicEquivocation))
   .
 
 (**
@@ -107,12 +105,12 @@ Context
 Lemma limited_PreNonByzantine_valid_state_lift_not_heavy s
   (Hs : valid_state_prop PreNonByzantine s)
   (sX := lift_sub_state IM (elements non_byzantine) s)
-  : tracewise_not_heavy sX.
+  : not_heavy (1 := HBE) sX.
 Proof.
-  cut (tracewise_equivocating_validators sX ⊆ byzantine_vs).
+  cut (equivocating_validators (1 := HBE) sX ⊆ byzantine_vs).
   {
     intro Hincl.
-    unfold tracewise_not_heavy, not_heavy.
+    unfold not_heavy.
     transitivity (sum_weights byzantine_vs); [| done].
     apply sum_weights_subseteq_list.
     - by apply NoDup_elements.
@@ -166,7 +164,7 @@ Proof.
       by apply elem_of_list_to_set, elem_of_enum.
 Qed.
 
-Existing Instance Htracewise_BasicEquivocation.
+Existing Instance HBE.
 
 (**
   When replacing the byzantine components of a composite [valid_state] with
@@ -298,8 +296,6 @@ Context
     IM threshold full_message_dependencies sender)
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   (Hchannel : channel_authentication_prop IM A sender)
-  (Hsender_safety : sender_safety_alt_prop IM A sender :=
-    channel_authentication_sender_safety _ _ _ Hchannel)
   (Hvalidator :
     forall i : index,
       msg_dep_limited_equivocation_message_validator_prop (Cv := Cv)

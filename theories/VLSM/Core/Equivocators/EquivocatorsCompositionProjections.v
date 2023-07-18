@@ -1905,7 +1905,8 @@ End sec_equivocators_composition_sub_projections.
 
 Section sec_equivocators_composition_vlsm_projection.
 
-Context {message : Type}
+Context
+  {message : Type}
   `{finite.Finite index}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}

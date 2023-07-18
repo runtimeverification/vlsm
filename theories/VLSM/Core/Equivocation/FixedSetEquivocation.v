@@ -28,10 +28,6 @@ Context
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   (equivocating : Ci)
-  (Free := free_composite_vlsm IM)
-  (index_equivocating_prop : index -> Prop := sub_index_prop (elements equivocating))
-  (equivocating_index : Type := sub_index (elements equivocating))
-  (equivocating_IM := sub_IM IM (elements equivocating))
   .
 
 (**
@@ -39,7 +35,7 @@ Context
   nodes which are allowed to equivocate.
 *)
 Definition free_equivocating_vlsm_composition : VLSM message :=
-  free_composite_vlsm equivocating_IM.
+  free_composite_vlsm (sub_IM IM (elements equivocating)).
 
 (**
   [pre_loaded_free_equivocating_vlsm_composition] preloads the free composition
@@ -83,7 +79,7 @@ Definition fixed_equivocation_vlsm_composition : VLSM message
   := composite_vlsm IM fixed_equivocation_constraint.
 
 Lemma fixed_equivocation_vlsm_composition_incl_free
-  : VLSM_incl fixed_equivocation_vlsm_composition Free.
+  : VLSM_incl fixed_equivocation_vlsm_composition (free_composite_vlsm IM).
 Proof.
   by apply VLSM_incl_constrained_vlsm.
 Qed.

@@ -583,7 +583,9 @@ Section sec_constrained_defs_alt.
   where all messages are valid (initial).
 *)
 
-Context `(X : VLSM message).
+Context
+  `(X : VLSM message)
+  .
 
 Definition finite_constrained_trace_init_to_alt :=
   finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X).

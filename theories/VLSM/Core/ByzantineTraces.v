@@ -163,10 +163,10 @@ Qed.
 Section sec_pre_loaded_with_all_messages_byzantine_alt.
 
 Context
-    (PreLoaded := pre_loaded_with_all_messages_vlsm M)
-    (Alt1 := binary_free_composition_fst M emit_any_message_vlsm)
-    (Alt := binary_free_composition M emit_any_message_vlsm)
-    .
+  (PreLoaded := pre_loaded_with_all_messages_vlsm M)
+  (Alt1 := binary_free_composition_fst M emit_any_message_vlsm)
+  (Alt := binary_free_composition M emit_any_message_vlsm)
+  .
 
 (**
   Let <<PreLoaded>> denote the [pre_loaded_with_all_messages_vlsm] of <<M>>, <<Alt>> denote

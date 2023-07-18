@@ -217,7 +217,6 @@ Context
   (TY : VLSMType message)
   (label_project : label X -> option (label TY))
   (state_project : state X -> state TY)
-  (trace_project := pre_VLSM_projection_finite_trace_project _ _ label_project state_project)
   .
 
 (**
@@ -895,9 +894,6 @@ Context
   (X Y : VLSM message)
   (label_project : label X -> option (label Y))
   (state_project : state X -> state Y)
-  .
-
-Context
   (Hvalid : weak_projection_valid_preservation X Y label_project state_project)
   (Htransition_Some : weak_projection_transition_preservation_Some X Y label_project state_project)
   (Htransition_None : weak_projection_transition_consistency_None _ _ label_project state_project)

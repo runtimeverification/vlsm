@@ -15,7 +15,8 @@ Section sec_constrained_vlsm.
 Context
   {message : Type}
   (X : VLSM message)
-  (constraint : label X -> state X * option message -> Prop).
+  (constraint : label X -> state X * option message -> Prop)
+  .
 
 Definition constrained_vlsm_type : VLSMType message :=
   vtype X.
@@ -62,7 +63,8 @@ Section sec_constrained_vlsm_lemmas.
 Context
   {message : Type}
   (X : VLSM message)
-  (constraint : label X -> state X * option message -> Prop).
+  (constraint : label X -> state X * option message -> Prop)
+  .
 
 Lemma option_initial_message_prop_constrained_vlsm :
   forall om : option message,
@@ -328,7 +330,8 @@ Section sec_constraint_subsumption.
 
 Context
   `(X : VLSM message)
-  (constraint : label X -> state X * option message -> Prop).
+  (constraint : label X -> state X * option message -> Prop)
+  .
 
 Lemma constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
   forall (P : message -> Prop),

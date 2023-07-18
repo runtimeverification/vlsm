@@ -523,12 +523,13 @@ End sec_fixed_projection.
 
 Section sec_projection_friendliness_sufficient_condition.
 
-Context {message : Type}
-        `{EqDecision index}
-        (IM : index -> VLSM message)
-        (constraint : composite_label IM -> composite_state IM * option message -> Prop)
-        (X := composite_vlsm IM constraint)
-.
+Context
+  {message : Type}
+  `{EqDecision index}
+  (IM : index -> VLSM message)
+  (constraint : composite_label IM -> composite_state IM * option message -> Prop)
+  (X := composite_vlsm IM constraint)
+  .
 
 (** ** A sufficient condition for the [projection_friendly_prop]erty *)
 

@@ -23,9 +23,7 @@ Context
   {Address : Type}
   (State := @State Address)
   (Observation := @Observation Address)
-  (Message := @Message Address).
-
-Context
+  (Message := @Message Address)
   {measurable_Address : Measurable Address}
   `{FinSet Address Ca}
   (threshold : R)
@@ -1301,7 +1299,9 @@ End sec_MessageDependencies_ELMOComponent.
 
 Section sec_ELMOProtocol.
 
-Context `{Inhabited index}.
+Context
+  `{Inhabited index}
+  .
 
 (** ** Protocol
 
