@@ -50,7 +50,8 @@ Qed.
 
 Section sec_limited_state_equivocation.
 
-Context {message index : Type}
+Context
+  {message index : Type}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   `{forall i : index, HasBeenReceivedCapability (IM i)}
@@ -281,7 +282,8 @@ Section sec_equivocators_projection_constrained_limited.
 Context
   `{FinSet message Cm}
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM Datatypes.id sender)}
-  (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition IM (Cv := Ci) threshold Datatypes.id sender)
+  (Limited : VLSM message :=
+    tracewise_limited_equivocation_vlsm_composition IM (Cv := Ci) threshold Datatypes.id sender)
   (Hsender_safety : sender_safety_alt_prop IM Datatypes.id sender)
   (message_dependencies : message -> Cm)
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
