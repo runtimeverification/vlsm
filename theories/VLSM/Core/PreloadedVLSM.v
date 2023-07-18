@@ -184,7 +184,7 @@ Proof.
     apply (extend_right_finite_trace_from X); [done |].
     destruct Ht as [[_ [_ Hv]] Ht].
     apply finite_valid_trace_last_pstate in IHtr as Hplst.
-    repeat split. 1, 3-4: done.
+    repeat split; only 1, 3-4: done.
     destruct iom as [m |]; [| apply option_valid_message_None].
     apply option_valid_message_Some, Hobs.
     red; rewrite Exists_app, Exists_cons.
