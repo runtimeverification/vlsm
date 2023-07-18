@@ -32,7 +32,6 @@ Context
   (equivocating : list index)
   (equivocator_IM := equivocator_IM IM)
   (sub_equivocator_IM := sub_IM equivocator_IM equivocating)
-  (sub_IM := sub_IM IM equivocating)
   (Free := free_composite_vlsm IM)
   (FreeE := free_composite_vlsm equivocator_IM)
   (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
