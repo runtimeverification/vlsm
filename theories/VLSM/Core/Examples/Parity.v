@@ -36,7 +36,7 @@ Lemma Zeven_equiv_plus :
 Proof.
   intros n m Hparity.
   destruct (Zeven_odd_dec m).
-  - apply Zeven_equiv, Zeven_plus_Zeven; [done |]. 
+  - apply Zeven_equiv, Zeven_plus_Zeven; [done |].
     by rewrite Zeven_equiv, Hparity, <- Zeven_equiv.
   - apply Zeven_equiv, Zodd_plus_Zodd; [done |].
     destruct (Zeven_odd_dec n); [| done].
