@@ -18,14 +18,20 @@ From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections.
   These lemmas will be helpful in subsequent proofs.
 *)
 
+(** Parity is preserved by taking opposite *)
 Lemma Zeven_unary_minus :
   forall n : Z, Z.Even n <-> Z.Even (-n).
 Proof. by intros n; split; intros [p Hp]; exists (-p); lia. Qed.
 
-Lemma Zeven_preserve_parity :
+(** Even right-hand side and difference implies even left-hand side 
+    This lemma will be useful when proving the final result of this section, because of the way 
+    we defined the transitions in the Parity VLSM
+*)
+Lemma Zeven_sub_preserve_parity :
   forall (n m : Z), Z.Even n -> Z.Even (m - n) -> Z.Even m.
 Proof. by intros m n [m'] [n']; exists (m' + n'); lia. Qed.
 
+(** Parity is preserved by addition *)
 Lemma Zeven_equiv_plus :
   forall (n m : Z), (Z.Even n <-> Z.Even m) -> Z.Even (m + n).
 Proof.
@@ -40,6 +46,7 @@ Proof.
     by rewrite Zeven_equiv, <- Hparity, <- Zeven_equiv.
 Qed.
 
+(** Parity is preserved by subtraction *)
 Lemma Zeven_equiv_minus :
   forall (n m : Z), (Z.Even n <-> Z.Even m) -> Z.Even (m - n).
 Proof.
@@ -55,9 +62,8 @@ Lemma Zeven_plus_equiv :
   forall (n m : Z), Z.Even n -> (Z.Even m <-> Z.Even (m + n)).
 Proof.
   split; intros.
-  - apply Zeven_preserve_parity with m; [done |].
-    by replace (m + n - m) with n by lia.
-  - apply Zeven_preserve_parity with (m + n); [done |].
+  - by apply Zeven_equiv, Zeven_plus_Zeven; rewrite Zeven_equiv.
+  - apply Zeven_sub_preserve_parity with (m + n); [done |].
     replace (m - (m + n)) with (-n) by lia.
     by rewrite <- Zeven_unary_minus.
 Qed.
@@ -101,7 +107,7 @@ Definition ParityType : VLSMType ParityMessage :=
 
 (**
   The specifications for the initial state, transition
-  and validity constraint are as follows:
+  and guard predicate are as follows:
 *)
 
 Definition ParityComponent_initial_state_prop (st : ParityState) : Prop :=
@@ -173,6 +179,13 @@ Proof. done. Qed.
 
 (** *** Example of a valid trace *)
 
+(** The initial state cannot be included to this definition, because, since there is no
+    transition reaching this state, it cannot be expressed in the below manner
+    Regarding the transition which leads to the final state, it technically could be
+    included, but we choose to model this way, in order to be consistent
+    with the subsequent example, where adding the last transition makes a qualitative
+    difference to the trace
+*)
 Definition parity_trace1_init : list (transition_item ParityVLSM) :=
   [ Build_transition_item parity_label (Some 4) (8, 4) (Some 8)
   ; Build_transition_item parity_label (Some 2) (8, 2) (Some 4) ].
@@ -246,6 +259,7 @@ Qed.
 
 (** *** Example of a constrained trace *)
 
+(** Previously defined trace is obviously constrained, since it's valid *)
 Lemma parity_constrained_trace1 :
   finite_constrained_trace_init_to ParityVLSM
    parity_trace1_first_state parity_trace1_last_state parity_trace1.
@@ -380,7 +394,7 @@ Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
-(** *** Constrained messages are even integers *)
+(** *** Constrained messages are positive even integers *)
 
 Lemma parity_constrained_messages_left :
   forall (m : ParityMessage), constrained_message_prop_alt ParityVLSM m ->
@@ -397,12 +411,11 @@ Lemma parity_constrained_messages_right :
 Proof.
   intros m [n ->] Hmgt0.
   pose (s := (n, n)).
-  unfold constrained_message_prop, can_emit; cbn.
   exists (s, Some n), parity_label, (n, 0).
   repeat split.
   - by apply initial_state_is_valid; constructor; cbn; lia.
   - by apply any_message_is_valid_in_preloaded.
-  - by cbn; lia.
+  - by cbn.
   - by lia.
   - by cbn; do 2 f_equal; lia.
 Qed.
@@ -438,7 +451,6 @@ Proof.
   destruct (decide (st.1 = st.2)).
   - by apply initial_state_is_valid; split; lia.
   - pose (s := (st.1, st.1)).
-    unfold constrained_state_prop.
     apply input_valid_transition_destination with (l := parity_label) (s := s)
       (om := Some (st.1 - st.2)) (om' := Some (2 * (st.1 - st.2))).
     repeat split.
@@ -458,7 +470,7 @@ Proof.
   - by intros [? ?]; apply parity_constrained_states_left.
 Qed.
 
-(** *** Powers of 2 are valid messages *)
+(** *** Powers of 2 greater or equal than 2 are valid messages *)
 
 Lemma parity_valid_messages_powers_of_2_right :
   forall (m : option ParityMessage),
@@ -529,12 +541,12 @@ Proof.
     split_and!; [| by lia ..].
     transitivity (Z.Even s.2); [| done].
     split.
-    + apply Zeven_preserve_parity.
+    + apply Zeven_sub_preserve_parity.
       destruct p'; [lia | | lia].
-      exists (2 ^ (Z.pos p - 1)); cbn; rewrite <- Z.pow_succ_r; [| lia].
+      exists (2 ^ (Z.pos p - 1)); rewrite <- Z.pow_succ_r; [| lia].
       by f_equal; lia.
     + intro Heis.
-      apply Zeven_preserve_parity with (n := s.2); [done |].
+      apply Zeven_sub_preserve_parity with (n := s.2); [done |].
       exists (- 2 ^ (p' - 1)).
       by rewrite Z.mul_opp_r, <- Z.pow_succ_r, Z.sub_1_r, Z.succ_pred; lia.
 Qed.
