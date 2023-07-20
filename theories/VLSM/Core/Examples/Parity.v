@@ -27,7 +27,7 @@ Proof. by intros n; split; intros [p Hp]; exists (-p); lia. Qed.
     This lemma will be useful when proving the final result of this section, because of the way 
     we defined the transitions in the Parity VLSM *)
 (** Maybe also renamed to be more suggestive in the sense that is about a difference? *)
-Lemma Zeven_preserve_parity :
+Lemma Zeven_sub_preserve_parity :
   forall (n m : Z), Z.Even n -> Z.Even (m - n) -> Z.Even m.
 Proof. by intros m n [m'] [n']; exists (m' + n'); lia. Qed.
 
@@ -64,7 +64,7 @@ Lemma Zeven_plus_equiv :
 Proof.
   split; intros.
   - by apply Zeven_equiv, Zeven_plus_Zeven; rewrite Zeven_equiv.
-  - apply Zeven_preserve_parity with (m + n); [done |].
+  - apply Zeven_sub_preserve_parity with (m + n); [done |].
     replace (m - (m + n)) with (-n) by lia.
     by rewrite <- Zeven_unary_minus.
 Qed.
@@ -541,12 +541,12 @@ Proof.
     split_and!; [| by lia ..].
     transitivity (Z.Even s.2); [| done].
     split.
-    + apply Zeven_preserve_parity.
+    + apply Zeven_sub_preserve_parity.
       destruct p'; [lia | | lia].
       exists (2 ^ (Z.pos p - 1)); rewrite <- Z.pow_succ_r; [| lia].
       by f_equal; lia.
     + intro Heis.
-      apply Zeven_preserve_parity with (n := s.2); [done |].
+      apply Zeven_sub_preserve_parity with (n := s.2); [done |].
       exists (- 2 ^ (p' - 1)).
       by rewrite Z.mul_opp_r, <- Z.pow_succ_r, Z.sub_1_r, Z.succ_pred; lia.
 Qed.
