@@ -23,7 +23,7 @@ Lemma Zeven_unary_minus :
   forall n : Z, Z.Even n <-> Z.Even (-n).
 Proof. by intros n; split; intros [p Hp]; exists (-p); lia. Qed.
 
-(** Even subtrahend and difference implies even minuend 
+(** Even right-hand side and difference implies even left-hand side 
     This lemma will be useful when proving the final result of this section, because of the way 
     we defined the transitions in the Parity VLSM *)
 (** Maybe also renamed to be more suggestive in the sense that is about a difference? *)
@@ -180,9 +180,12 @@ Proof. done. Qed.
 
 (** *** Example of a valid trace *)
 
-(** The initial state cannot be included to this definition, because, since there is no transition reaching this state, it cannot be expressed in the below manner
-    Regarding the transition which leads to the final state, it technically could be included, but we choose to model this way, in order to be consistent
-    with the subsequent example, where adding the last transition makes a qualitative difference to the trace *)
+(** The initial state cannot be included to this definition, because, since there is no
+    transition reaching this state, it cannot be expressed in the below manner
+    Regarding the transition which leads to the final state, it technically could be
+    included, but we choose to model this way, in order to be consistent
+    with the subsequent example, where adding the last transition makes a qualitative
+    difference to the trace *)
 Definition parity_trace1_init : list (transition_item ParityVLSM) :=
   [ Build_transition_item parity_label (Some 4) (8, 4) (Some 8)
   ; Build_transition_item parity_label (Some 2) (8, 2) (Some 4) ].
@@ -536,7 +539,7 @@ Proof.
     destruct Hv as [Hv1 Hv2], IHvalid_state_prop as (Heven & Hgt1 & Hgt2); cbn.
     apply parity_valid_messages_powers_of_2_right in Hm as [p' (Hpgt0 & [= ->])]; [| auto] .
     split_and!; [| by lia ..].
-    etransitivity; [| done].
+    transitivity (Z.Even s.2); [| done].
     split.
     + apply Zeven_preserve_parity.
       destruct p'; [lia | | lia].
