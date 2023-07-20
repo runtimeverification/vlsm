@@ -25,12 +25,13 @@ Proof. by intros n; split; intros [p Hp]; exists (-p); lia. Qed.
 
 (** Even right-hand side and difference implies even left-hand side 
     This lemma will be useful when proving the final result of this section, because of the way 
-    we defined the transitions in the Parity VLSM *)
+    we defined the transitions in the Parity VLSM
+*)
 Lemma Zeven_sub_preserve_parity :
   forall (n m : Z), Z.Even n -> Z.Even (m - n) -> Z.Even m.
 Proof. by intros m n [m'] [n']; exists (m' + n'); lia. Qed.
 
-(** Parity is preserved by taking sum *)
+(** Parity is preserved by addition *)
 Lemma Zeven_equiv_plus :
   forall (n m : Z), (Z.Even n <-> Z.Even m) -> Z.Even (m + n).
 Proof.
@@ -45,7 +46,7 @@ Proof.
     by rewrite Zeven_equiv, <- Hparity, <- Zeven_equiv.
 Qed.
 
-(** Parity is preserved by taking difference *)
+(** Parity is preserved by subtraction *)
 Lemma Zeven_equiv_minus :
   forall (n m : Z), (Z.Even n <-> Z.Even m) -> Z.Even (m - n).
 Proof.
@@ -57,7 +58,6 @@ Proof.
   by apply Zeven_unary_minus.
 Qed.
 
-(** Even sum term implies parity of the sum depends on the parity of the other sum term *)
 Lemma Zeven_plus_equiv :
   forall (n m : Z), Z.Even n -> (Z.Even m <-> Z.Even (m + n)).
 Proof.
@@ -184,7 +184,8 @@ Proof. done. Qed.
     Regarding the transition which leads to the final state, it technically could be
     included, but we choose to model this way, in order to be consistent
     with the subsequent example, where adding the last transition makes a qualitative
-    difference to the trace *)
+    difference to the trace
+*)
 Definition parity_trace1_init : list (transition_item ParityVLSM) :=
   [ Build_transition_item parity_label (Some 4) (8, 4) (Some 8)
   ; Build_transition_item parity_label (Some 2) (8, 2) (Some 4) ].
@@ -393,7 +394,7 @@ Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
-(** *** Constrained messages are strictly positive even integers *)
+(** *** Constrained messages are positive even integers *)
 
 Lemma parity_constrained_messages_left :
   forall (m : ParityMessage), constrained_message_prop_alt ParityVLSM m ->
