@@ -26,7 +26,6 @@ Proof. by intros n; split; intros [p Hp]; exists (-p); lia. Qed.
 (** Even right-hand side and difference implies even left-hand side 
     This lemma will be useful when proving the final result of this section, because of the way 
     we defined the transitions in the Parity VLSM *)
-(** Maybe also renamed to be more suggestive in the sense that is about a difference? *)
 Lemma Zeven_sub_preserve_parity :
   forall (n m : Z), Z.Even n -> Z.Even (m - n) -> Z.Even m.
 Proof. by intros m n [m'] [n']; exists (m' + n'); lia. Qed.
