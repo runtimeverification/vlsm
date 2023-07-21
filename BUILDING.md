@@ -61,7 +61,7 @@ disable the sandboxing by choosing "Y".
 
 Choose "y" in order to allow opam to modify `~/.profile`.
 
-### <a name="switch-creation"></a>Install a switch for opam
+### Install a switch for opam
 
 ```shell
 opam switch create coq-8.17 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
@@ -73,7 +73,7 @@ opam switch create coq-8.17 --packages=ocaml-variants.4.14.1+options,ocaml-optio
 eval $(opam env)
 ```
 
-### <a name="dependencies-installation"></a>Install the project dependencies via opam
+### Install the project dependencies via opam
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
@@ -143,7 +143,7 @@ We recommend using the Visual Studio Code (VS Code) editor, which you can downlo
 
 After installing VS Code, you need to install the **Remote - WSL** extension. Click the *Connect to WSL* button, to open a new editor window in the WSL environment and open the project folder from inside this window.
 
-Then, install the following extensions in the Remote WSL environment (assuming that [switch-creation](#switch-creation) and [dependencies-installation](#dependencies-installation) have been already done):
+Then, install the following extensions in the Remote WSL environment (assuming that [switch creation](#install-a-switch-for-opam) and [dependencies installation](#install-the-project-dependencies-via-opam) have been already done):
 
 - [**Fast Unicode Math Characters** extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode)
 - [**VsCoq** Extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq):
