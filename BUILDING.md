@@ -148,4 +148,18 @@ Then, install the following extensions in the Remote WSL environment:
 - [the **VsCoq** extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq)
 - [the **Fast Unicode Math Characters** extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode)
 
+As an alternative to **VsCoq**, you can use [the **coq-lsp** extension](https://coq.discourse.group/t/ann-coq-lsp-0-1-7/1996). This extension requires Coq 8.17.1 version, so in order to use it, you will need to create a dedicated opam switch and install the project's dependencies on it:
+
+```shell
+opam switch create coq-8.17.1 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
+eval $(opam env)
+opam repo add coq-released https://coq.inria.fr/opam/released
+opam install coq-stdpp.1.8.0 coq-itauto coq-equations
+```
+Then, run the following command, to install the **coq-lsp** extension:
+
+```shell
+opam install coq-lsp && code --install-extension ejgallego.coq-lsp
+```
+
 After installing the above extensions, we recommend checking their instructions for basic usage.
