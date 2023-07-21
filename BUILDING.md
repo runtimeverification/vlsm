@@ -61,10 +61,10 @@ disable the sandboxing by choosing "Y".
 
 Choose "y" in order to allow opam to modify `~/.profile`.
 
-### Install a switch for opam
+### <a name="switch-creation"></a>Install a switch for opam
 
 ```shell
-opam switch create coq-8.16 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
+opam switch create coq-8.17 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
 ```
 
 ### Update the current shell environment
@@ -73,11 +73,11 @@ opam switch create coq-8.16 --packages=ocaml-variants.4.14.1+options,ocaml-optio
 eval $(opam env)
 ```
 
-### Install the project dependencies via opam
+### <a name="dependencies-installation"></a>Install the project dependencies via opam
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq.8.16.1 coq-stdpp.1.8.0 coq-itauto coq-equations
+opam install coq.8.17.1 coq-stdpp.1.8.0 coq-itauto coq-equations
 ```
 
 ### Clone the project repository
@@ -143,21 +143,15 @@ We recommend using the Visual Studio Code (VS Code) editor, which you can downlo
 
 After installing VS Code, you need to install the **Remote - WSL** extension. Click the *Connect to WSL* button, to open a new editor window in the WSL environment and open the project folder from inside this window.
 
-Then, install the following extensions in the Remote WSL environment:
+Then, install the following extensions in the Remote WSL environment (assuming that [switch-creation](#switch-creation) and [dependencies-installation](#dependencies-installation) have been already done):
 
-- [the **VsCoq** extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq)
-- [the **Fast Unicode Math Characters** extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode)
-
-As an alternative to **VsCoq**, you can use [the **coq-lsp** extension](https://coq.discourse.group/t/ann-coq-lsp-0-1-7/1996). This extension requires Coq 8.17.1 version, so in order to use it, you will need to create a dedicated opam switch and install the project's dependencies on it:
-
+- [**Fast Unicode Math Characters** extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode)
+- [**VsCoq** Extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq):
 ```shell
-opam switch create coq-8.17.1 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
-eval $(opam env)
-opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq-stdpp.1.8.0 coq-itauto coq-equations
+code --install-extension coq-community.vscoq
 ```
-Then, run the following command, to install the **coq-lsp** extension:
-
+OR
+- [**Coq LSP** Extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq):
 ```shell
 opam install coq-lsp && code --install-extension ejgallego.coq-lsp
 ```
