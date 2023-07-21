@@ -148,7 +148,7 @@ Then, install the following extensions in the Remote WSL environment (assuming t
 - [**Fast Unicode Math Characters** extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode)
 - [**VsCoq** Extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq):
 ```shell
-code --install-extension coq-community.vscoq
+code --install-extension maximedenes.vscoq
 ```
 OR
 - [**Coq LSP** Extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq):
