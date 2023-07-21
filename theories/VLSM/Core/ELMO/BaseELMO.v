@@ -620,68 +620,64 @@ Qed.
 #[export] Instance Message_FullMessageDependencies :
   FullMessageDependencies Message_dependencies Message_full_dependencies.
 Proof.
-  constructor; cycle 1.
-  - by intros m Hm; apply Message_full_dependencies_sizeState in Hm; lia.
-  - intros dm [s]; revert dm; unfold Message_full_dependencies; cbn.
-    apply_funelim (rec_obs_fn s);
-      [intros adr dm; split | intros [l m] os a Hindm Hindos dm; split].
-    + by rewrite set_map_empty, elem_of_empty.
-    + rewrite msg_dep_happens_before_iff_one; unfold msg_dep_rel; cbn.
-      rewrite set_map_empty; setoid_rewrite elem_of_empty.
-      by firstorder.
-    + intros Hdm; apply elem_of_map in Hdm as (o & -> & Hdm).
-      unfold Message in Hdm; rewrite !elem_of_union, !elem_of_singleton in Hdm; cbn in Hdm.
-      destruct Hdm as [[-> | Hm] | Hos].
+  constructor; [| by intros m Hm; apply Message_full_dependencies_sizeState in Hm; lia].
+  intros dm [s]; revert dm; unfold Message_full_dependencies; cbn.
+  apply_funelim (rec_obs_fn s);
+    [intros adr dm; split | intros [l m] os a Hindm Hindos dm; split].
+  - by rewrite set_map_empty, elem_of_empty.
+  - rewrite msg_dep_happens_before_iff_one; unfold msg_dep_rel; cbn.
+    rewrite set_map_empty; setoid_rewrite elem_of_empty.
+    by firstorder.
+  - intros Hdm; apply elem_of_map in Hdm as (o & -> & Hdm).
+    unfold Message in Hdm; rewrite !elem_of_union, !elem_of_singleton in Hdm; cbn in Hdm.
+    destruct Hdm as [[-> | Hm] | Hos].
+    + apply msg_dep_happens_before_iff_one; left.
+      unfold msg_dep_rel, compose; cbn; unfold Message.
+      by rewrite elem_of_union, elem_of_singleton; left.
+    + transitivity m; cbn in *.
+      * by destruct m; apply Hindm, elem_of_map; cbn; eexists; split.
       * apply msg_dep_happens_before_iff_one; left.
         unfold msg_dep_rel, compose; cbn; unfold Message.
         by rewrite elem_of_union, elem_of_singleton; left.
-      * transitivity m; cbn in *.
-        -- by destruct m; apply Hindm, elem_of_map; cbn; eexists; split.
-        -- apply msg_dep_happens_before_iff_one; left.
-           unfold msg_dep_rel, compose; cbn; unfold Message.
-           by rewrite elem_of_union, elem_of_singleton; left.
-      * assert (Hmos : message o ∈@{listset Message} set_map message (rec_obs_fn (MkState os a)))
-          by (apply elem_of_map; eexists; split; done).
-        apply Hindos in Hmos.
-        cut (forall dm,
-              msg_dep_rel Message_dependencies
-                dm (MkMessage (MkState os a)) ->
-              msg_dep_rel Message_dependencies
-                dm (MkMessage (MkState (MkObservation l m :: os) a))).
-        {
-          intro Hext; apply msg_dep_happens_before_iff_one.
-          apply msg_dep_happens_before_iff_one in Hmos as [Hdep | (dm & Hhb & Hdep)].
-          - by left; apply Hext.
-          - by right; eexists; split; [| apply Hext].
-        }
-        unfold msg_dep_rel; cbn.
-        by intros dm; rewrite elem_of_union; right.
-    + intros Hb; apply elem_of_map.
-      do 2 setoid_rewrite elem_of_union; setoid_rewrite elem_of_singleton; cbn.
-      apply msg_dep_happens_before_iff_one in Hb.
-      unfold msg_dep_rel, compose in Hb; cbn in Hb; unfold Message in Hb.
-      setoid_rewrite elem_of_union in Hb;
-        setoid_rewrite elem_of_singleton in Hb.
-      destruct Hb as [[-> | Hdm] | Hos].
-      * by eexists; split; [| by left; left].
+    + assert (Hmos : message o ∈@{listset Message} set_map message (rec_obs_fn (MkState os a)))
+        by (apply elem_of_map; eexists; split; done).
+      apply Hindos in Hmos.
+      cut (forall dm,
+        msg_dep_rel Message_dependencies dm (MkMessage (MkState os a)) ->
+        msg_dep_rel Message_dependencies dm (MkMessage (MkState (MkObservation l m :: os) a))).
+      {
+        intro Hext; apply msg_dep_happens_before_iff_one.
+        apply msg_dep_happens_before_iff_one in Hmos as [Hdep | (dm & Hhb & Hdep)].
+        - by left; apply Hext.
+        - by right; eexists; split; [| apply Hext].
+      }
+      unfold msg_dep_rel; cbn.
+      by intros dm; rewrite elem_of_union; right.
+  - intros Hb; apply elem_of_map.
+    do 2 setoid_rewrite elem_of_union; setoid_rewrite elem_of_singleton; cbn.
+    apply msg_dep_happens_before_iff_one in Hb.
+    unfold msg_dep_rel, compose in Hb; cbn in Hb; unfold Message in Hb.
+    setoid_rewrite elem_of_union in Hb;
+      setoid_rewrite elem_of_singleton in Hb.
+    destruct Hb as [[-> | Hdm] | Hos].
+    + by eexists; split; [| by left; left].
+    + cut (msg_dep_happens_before Message_dependencies dm (MkMessage (MkState os a))).
+      {
+        intro Hb; apply Hindos, elem_of_map in Hb as (y & -> & Hy).
+        by eexists; split; [| right].
+      }
+      by apply msg_dep_happens_before_iff_one; left.
+    + destruct Hos as (y & Hb & [-> | Hos]).
+      * destruct m as [state_m].
+        apply Hindm, elem_of_map in Hb as (y & -> & Hy).
+        by eexists; split; [| left; right].
       * cut (msg_dep_happens_before Message_dependencies dm (MkMessage (MkState os a))).
         {
-          intro Hb; apply Hindos, elem_of_map in Hb as (y & -> & Hy).
+          intros (z & -> & Hz)%Hindos%elem_of_map.
           by eexists; split; [| right].
         }
+        transitivity y; [done |].
         by apply msg_dep_happens_before_iff_one; left.
-      * destruct Hos as (y & Hb & [-> | Hos]).
-        -- destruct m as [state_m].
-           apply Hindm, elem_of_map in Hb as (y & -> & Hy).
-           by eexists; split; [| left; right].
-        -- cut (msg_dep_happens_before Message_dependencies dm
-                (MkMessage (MkState os a))).
-           {
-             intros (z & -> & Hz)%Hindos%elem_of_map.
-             by eexists; split; [| right].
-           }
-           transitivity y; [done |].
-           by apply msg_dep_happens_before_iff_one; left.
 Qed.
 
 Definition Message_sender (m : Message) : option Address :=

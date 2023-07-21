@@ -490,90 +490,88 @@ Lemma msg_dep_fixed_limited_equivocation_witnessed
         Limited (composite_type IM) Datatypes.id original_state
         tr).
 Proof.
-  repeat split; [.. | by apply Htr].
-  - by eapply coeqv_limited_equivocation_state_not_heavy,
-            finite_valid_trace_last_pstate, Htr.
-  - apply valid_trace_add_default_last in Htr.
-    induction Htr using finite_valid_trace_init_to_rev_ind
-    ; [constructor; apply initial_state_is_valid; apply Hsi |].
-    setoid_rewrite map_app.
-    apply finite_valid_trace_from_app_iff; split.
-    + revert IHHtr.
-      apply VLSM_incl_finite_valid_trace_from,
-        fixed_equivocation_vlsm_composition_index_incl.
+  repeat split; [by eapply coeqv_limited_equivocation_state_not_heavy,
+    finite_valid_trace_last_pstate, Htr | | by apply Htr].
+  apply valid_trace_add_default_last in Htr.
+  induction Htr using finite_valid_trace_init_to_rev_ind
+  ; [constructor; apply initial_state_is_valid; apply Hsi |].
+  setoid_rewrite map_app.
+  apply finite_valid_trace_from_app_iff; split.
+  - revert IHHtr.
+    apply VLSM_incl_finite_valid_trace_from,
+      fixed_equivocation_vlsm_composition_index_incl.
+    intro; rewrite !elem_of_elements.
+    apply set_map_mono; [done |].
+    by eapply coeqv_limited_equivocation_transition_state_annotation_incl, Ht.
+  - apply finite_valid_trace_singleton.
+    unfold input_valid_transition, input_valid.
+    change (map _ _) with (pre_VLSM_embedding_finite_trace_project Limited
+      (composite_type IM) Datatypes.id original_state tr).
+    rewrite <- pre_VLSM_embedding_finite_trace_last.
+    assert (Hs : valid_state_prop
+      (fixed_equivocation_vlsm_composition IM (Ci := Ci) (fin_sets.set_map A (state_annotation s)))
+        (original_state s)).
+    {
+      replace s with (finite_trace_last si tr) at 2
+        by (apply valid_trace_get_last in Htr; done).
+      rewrite (pre_VLSM_embedding_finite_trace_last
+        Limited (composite_type IM) Datatypes.id original_state si tr).
+      by apply finite_valid_trace_last_pstate.
+    }
+    destruct Ht as [[HLs [HLim HLv]] HLt].
+    cbn in HLt |- *; unfold annotated_transition in HLt; cbn in HLt.
+    replace (finite_trace_last si _) with s
+      by (apply valid_trace_get_last in Htr; congruence).
+    destruct l as [i li], (transition _ _ _) as (si', om').
+    inversion HLt; subst; clear HLt; cbn.
+    repeat split.
+    + revert Hs; apply VLSM_incl_valid_state.
+      apply fixed_equivocation_vlsm_composition_index_incl.
       intro; rewrite !elem_of_elements.
       apply set_map_mono; [done |].
-      by eapply coeqv_limited_equivocation_transition_state_annotation_incl, Ht.
-    + apply finite_valid_trace_singleton.
-      unfold input_valid_transition, input_valid.
-      change (map _ _) with (pre_VLSM_embedding_finite_trace_project Limited
-                              (composite_type IM) Datatypes.id original_state tr).
-      rewrite <- pre_VLSM_embedding_finite_trace_last.
-      assert (Hs : valid_state_prop
-                    (fixed_equivocation_vlsm_composition IM (Ci := Ci) (fin_sets.set_map A (state_annotation s)))
-                    (original_state s)).
-      {
-        replace s with (finite_trace_last si tr) at 2
-             by (apply valid_trace_get_last in Htr; done).
-        rewrite (pre_VLSM_embedding_finite_trace_last
-                  Limited (composite_type IM) Datatypes.id original_state si tr).
-        by apply finite_valid_trace_last_pstate.
-      }
-      destruct Ht as [[HLs [HLim HLv]] HLt].
-      cbn in HLt |- *; unfold annotated_transition in HLt; cbn in HLt.
-      replace (finite_trace_last si _) with s
-           by (apply valid_trace_get_last in Htr; congruence).
-      destruct l as [i li], (transition _ _ _) as (si', om').
-      inversion HLt; subst; clear HLt; cbn.
-      repeat split.
-      * revert Hs; apply VLSM_incl_valid_state.
+      by destruct iom as [im |]; [apply union_subseteq_l |].
+    + destruct iom as [im |]; [| by apply option_valid_message_None].
+      apply option_valid_message_Some.
+      destruct (decide (composite_has_been_directly_observed IM (original_state s) im))
+        as [Hobs | Hnobs].
+      * eapply composite_directly_observed_valid; [| done].
+        revert Hs; apply VLSM_incl_valid_state.
         apply fixed_equivocation_vlsm_composition_index_incl.
         intro; rewrite !elem_of_elements.
-        apply set_map_mono; [done |].
-        by destruct iom as [im |]; [apply union_subseteq_l |].
-      * destruct iom as [im |]
-        ; [apply option_valid_message_Some | apply option_valid_message_None].
-        destruct (decide (composite_has_been_directly_observed IM (original_state s) im))
-              as [Hobs | Hnobs].
-        -- eapply composite_directly_observed_valid; [| done].
-           revert Hs; apply VLSM_incl_valid_state.
-           apply fixed_equivocation_vlsm_composition_index_incl.
-           intro; rewrite !elem_of_elements.
-           by apply set_map_mono, union_subseteq_l.
-        -- revert HLim.
-           setoid_rewrite emitted_messages_are_valid_iff.
-           intros [Hinit | Hemit]; [by left | right].
-           eapply VLSM_weak_embedding_can_emit.
-           {
-             eapply EquivPreloadedBase_Fixed_weak_embedding
-               with (base_s := original_state s).
-             - revert Hs; apply VLSM_incl_valid_state.
-               apply fixed_equivocation_vlsm_composition_index_incl.
-               intro; rewrite !elem_of_elements.
-               by apply set_map_mono, union_subseteq_l.
-             - by intros; apply no_initial_messages_in_IM.
-           }
-           eapply VLSM_incl_can_emit.
-           {
-             apply Equivocators_Fixed_Strong_incl.
-             revert Hs; apply VLSM_incl_valid_state.
-             apply fixed_equivocation_vlsm_composition_index_incl.
-             intro; rewrite !elem_of_elements.
-             by apply set_map_mono, union_subseteq_l.
-           }
-           apply message_equivocators_can_emit; [done | done |].
-           eapply VLSM_embedding_can_emit; [| done].
-           by apply forget_annotations_projection.
-      * by apply HLv.
-      * destruct iom as [im |]; [| done].
-        destruct (decide (composite_has_been_directly_observed IM (original_state s) im))
-              as [Hobs | Hnobs]; [by left | right; cbn].
+        by apply set_map_mono, union_subseteq_l.
+      * revert HLim.
+        setoid_rewrite emitted_messages_are_valid_iff.
+        intros [Hinit | Hemit]; [by left | right].
+        eapply VLSM_weak_embedding_can_emit.
+        {
+          eapply EquivPreloadedBase_Fixed_weak_embedding with (base_s := original_state s);
+            [| by intros; apply no_initial_messages_in_IM].
+          revert Hs; apply VLSM_incl_valid_state.
+          apply fixed_equivocation_vlsm_composition_index_incl.
+          intro; rewrite !elem_of_elements.
+          by apply set_map_mono, union_subseteq_l.
+        }
+        eapply VLSM_incl_can_emit.
+        {
+          apply Equivocators_Fixed_Strong_incl.
+          revert Hs; apply VLSM_incl_valid_state.
+          apply fixed_equivocation_vlsm_composition_index_incl.
+          intro; rewrite !elem_of_elements.
+          by apply set_map_mono, union_subseteq_l.
+        }
         apply message_equivocators_can_emit; [done | done |].
-        apply emitted_messages_are_valid_iff in HLim
-          as [[j [[mj Hmj] Heqim]] | Hemit]
-        ; [clear Heqim; contradict Hmj; apply no_initial_messages_in_IM |].
         eapply VLSM_embedding_can_emit; [| done].
         by apply forget_annotations_projection.
+    + by apply HLv.
+    + destruct iom as [im |]; [| done].
+      destruct (decide (composite_has_been_directly_observed IM (original_state s) im))
+        as [Hobs | Hnobs]; [by left | right; cbn].
+      apply message_equivocators_can_emit; [done | done |].
+      apply emitted_messages_are_valid_iff in HLim
+        as [[j [[mj Hmj] Heqim]] | Hemit]
+      ; [clear Heqim; contradict Hmj; apply no_initial_messages_in_IM |].
+      eapply VLSM_embedding_can_emit; [| done].
+      by apply forget_annotations_projection.
 Qed.
 
 Corollary msg_dep_fixed_limited_equivocation is tr

@@ -1006,11 +1006,10 @@ Proof.
       apply reachable_sent_messages_reachable.
       assert (i = i') as ->; [| done].
       by (apply ELMO_reachable_view in Hs as []; apply (inj idx); congruence).
-    - apply self_messages_sent; [| done |].
-      + apply ELMO_reachable_view in Hs as [Hs ?].
-        revert Hs; apply UMO_reachable_impl.
-        by intros ? ? [].
-      + by apply elem_of_messages; auto.
+    - apply self_messages_sent; [| done | by apply elem_of_messages; auto].
+      apply ELMO_reachable_view in Hs as [Hs ?].
+      revert Hs; apply UMO_reachable_impl.
+      by intros ? ? [].
   }
   revert m Hm n.
   apply ELMO_reachable_view in Hs as [Hs Hadr].
@@ -1020,44 +1019,44 @@ Proof.
   destruct (decide (m ∈ receivedMessages s)); [by eauto |].
   clear IHHs; revert s Hs Hadr Hvalid n.
   destruct m as [ms]; cbn.
-  induction ms using addObservation_ind.
-  - by intros; apply initial_state_is_valid; constructor.
-  - set (m' := ms <+> ob); cbn.
-    intros s Hs Hadr Hrecv_m' Hfresh' Hadr_neq i' Hadr_ms.
-    assert (Hrecv_if_fresh : MkMessage ms ∉ receivedMessages s -> ELMO_recv_valid s (MkMessage ms)).
-    {
-      by intro; apply (ELMO_recv_valid_prefix s (MkMessage ms) ob); [apply ELMO_reachable_view | ..].
-    }
-    assert (Hms : ram_state_prop (ELMOComponent i') ms).
-    {
-      destruct (decide (MkMessage ms ∈ receivedMessages s)); [| by eauto].
-      revert e; clear -Hs IHms Hadr Hadr_ms Hadr_neq.
-      induction Hs; [by inversion 1 | by eapply IHHs |].
-      destruct (decide (MkMessage ms ∈ receivedMessages s)).
-      - by intros; eapply IHHs.
-      - intros [[Hms _] |]%elem_of_receivedMessages_addObservation; cbn in *; subst; eauto.
-    }
-    apply ELMO_reachable_view; split; [| done].
-    apply ELMO_reachable_view in Hms as [Hms _].
-    destruct ob as [[] [os]].
-    + apply reach_recv; [| done].
-      destruct Hrecv_m' as [Hfull_s_m' Hself Hmvf_m' Hlimit].
-      inversion Hmvf_m' as [| | ? ? Hfull_m_os Hself_os Hvalid Heqmo]; [done |].
-      assert (m = MkMessage ms)
-        by (destruct m; f_equal; apply eq_State; done).
-      subst m; clear mo Heqmo; cbn in *.
-      constructor; [done | done | |].
-      * apply reachable_messages_are_msg_valid with (s := s).
-        -- by apply ELMO_reachable_view.
-        -- by revert Hfull_s_m'; apply elem_of_submseteq, elem_of_list_here.
-      * apply equivocation_limit_recv_ok_msg_ok in Hlimit; try done.
-        -- by revert Hs; apply UMO_reachable_impl; intros ? ? [].
-        -- apply reach_recv; [done |].
-           by revert Hms; apply UMO_reachable_impl; intros ? ? [].
-    + destruct Hrecv_m' as [_ _ Hmvf _]; inversion Hmvf; [done |].
-      unfold m'.
-      replace os with ms by (apply eq_State; done).
-      by apply reach_send.
+  induction ms using addObservation_ind;
+    [by intros; apply initial_state_is_valid; constructor |].
+  set (m' := ms <+> ob); cbn.
+  intros s Hs Hadr Hrecv_m' Hfresh' Hadr_neq i' Hadr_ms.
+  assert (Hrecv_if_fresh : MkMessage ms ∉ receivedMessages s -> ELMO_recv_valid s (MkMessage ms)).
+  {
+    by intro; apply (ELMO_recv_valid_prefix s (MkMessage ms) ob); [apply ELMO_reachable_view | ..].
+  }
+  assert (Hms : ram_state_prop (ELMOComponent i') ms).
+  {
+    destruct (decide (MkMessage ms ∈ receivedMessages s)); [| by eauto].
+    revert e; clear -Hs IHms Hadr Hadr_ms Hadr_neq.
+    induction Hs; [by inversion 1 | by eapply IHHs |].
+    destruct (decide (MkMessage ms ∈ receivedMessages s)).
+    - by intros; eapply IHHs.
+    - intros [[Hms _] |]%elem_of_receivedMessages_addObservation; cbn in *; subst; eauto.
+  }
+  apply ELMO_reachable_view; split; [| done].
+  apply ELMO_reachable_view in Hms as [Hms _].
+  destruct ob as [[] [os]].
+  - apply reach_recv; [| done].
+    destruct Hrecv_m' as [Hfull_s_m' Hself Hmvf_m' Hlimit].
+    inversion Hmvf_m' as [| | ? ? Hfull_m_os Hself_os Hvalid Heqmo]; [done |].
+    assert (m = MkMessage ms)
+      by (destruct m; f_equal; apply eq_State; done).
+    subst m; clear mo Heqmo; cbn in *.
+    constructor; [done | done | |].
+    + apply reachable_messages_are_msg_valid with (s := s).
+      * by apply ELMO_reachable_view.
+      * by revert Hfull_s_m'; apply elem_of_submseteq, elem_of_list_here.
+    + apply equivocation_limit_recv_ok_msg_ok in Hlimit; try done.
+      * by revert Hs; apply UMO_reachable_impl; intros ? ? [].
+      * apply reach_recv; [done |].
+        by revert Hms; apply UMO_reachable_impl; intros ? ? [].
+  - destruct Hrecv_m' as [_ _ Hmvf _]; inversion Hmvf; [done |].
+    unfold m'.
+    replace os with ms by (apply eq_State; done).
+    by apply reach_send.
 Qed.
 
 Lemma receivable_messages_reachable (ms s : State) i' :
