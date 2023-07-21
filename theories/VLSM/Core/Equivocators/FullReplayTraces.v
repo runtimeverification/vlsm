@@ -169,33 +169,32 @@ Proof.
     rewrite decide_True; [done |].
     by apply elem_of_enum.
   }
-  induction l using rev_ind; intros.
-  - case_decide; [| done].
-    by rewrite decide_False; [| inversion 1].
-  - spec IHl; [by apply list_subseteq_inv_app in Hincl; apply Hincl |].
-    spec IHl; [by apply NoDup_app in Hnodup; apply Hnodup |].
-    subst tr_full_replay_is.
-    rewrite map_app, (composite_apply_plan_app (equivocator_IM IM)); simpl in *
-    ; destruct (composite_apply_plan _ _ _) as (aitems, afinal); simpl in *.
-    specialize (IHl i); destruct_dec_sig x ix Hix Heqx; subst x; simpl in *.
-    case_decide as _Hix; cycle 1;
-      destruct (decide (ix = i)); subst; equivocator_state_update_simpl; [done | done | |].
-    + rewrite decide_False in IHl.
-      * rewrite IHl, decide_True.
-        -- rewrite (sub_IM_state_pi is _Hix Hix); symmetry.
-           by apply equivocator_state_append_singleton_is_extend, (His (dexist i Hix)).
-        -- rewrite elem_of_app, elem_of_list_singleton; right.
-           by apply dsig_eq.
-      * intro Heqv.
-        apply NoDup_app in Hnodup as (_ & Hnodup & _).
-        eapply Hnodup; [done |].
-        rewrite elem_of_list_singleton.
+  induction l using rev_ind; intros;
+    [by case_decide; [rewrite decide_False by apply not_elem_of_nil |] |].
+  spec IHl; [by apply list_subseteq_inv_app in Hincl; apply Hincl |].
+  spec IHl; [by apply NoDup_app in Hnodup; apply Hnodup |].
+  subst tr_full_replay_is.
+  rewrite map_app, (composite_apply_plan_app (equivocator_IM IM)); simpl in *
+  ; destruct (composite_apply_plan _ _ _) as (aitems, afinal); simpl in *.
+  specialize (IHl i); destruct_dec_sig x ix Hix Heqx; subst x; simpl in *.
+  case_decide as _Hix; cycle 1;
+    destruct (decide (ix = i)); subst; equivocator_state_update_simpl; [done | done | |].
+  - rewrite decide_False in IHl.
+    + rewrite IHl, decide_True.
+      * rewrite (sub_IM_state_pi is _Hix Hix); symmetry.
+        by apply equivocator_state_append_singleton_is_extend, (His (dexist i Hix)).
+      * rewrite elem_of_app, elem_of_list_singleton; right.
         by apply dsig_eq.
-    + case_decide.
-      * rewrite decide_True; rewrite ?elem_of_app; itauto.
-      * rewrite decide_False; [done |].
-        intros [Hin | Hx]%elem_of_app; [done |].
-        by rewrite elem_of_list_singleton, dsig_eq in Hx.
+    + intro Heqv.
+      apply NoDup_app in Hnodup as (_ & Hnodup & _).
+      eapply Hnodup; [done |].
+      rewrite elem_of_list_singleton.
+      by apply dsig_eq.
+  - case_decide.
+    + rewrite decide_True; rewrite ?elem_of_app; itauto.
+    + rewrite decide_False; [done |].
+      intros [Hin | Hx]%elem_of_app; [done |].
+      by rewrite elem_of_list_singleton, dsig_eq in Hx.
 Qed.
 
 (**

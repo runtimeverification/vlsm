@@ -84,23 +84,21 @@ Lemma min_predecessors_correct
   (mins := count_predecessors min)
   : Forall (fun b => mins <= count_predecessors b) (a :: l').
 Proof.
-  unfold mins; clear mins. unfold min; clear min. generalize dependent a.
-  induction l'; intros; rewrite Forall_forall; intros.
-  - by simpl in H; inversion H; subst; cbn; [lia | inversion H2].
-  - rewrite elem_of_cons in H.
-    setoid_rewrite Forall_forall in IHl'.
-    destruct H as [Heq | Hin]; subst.
-    + simpl. destruct (decide (count_predecessors a < count_predecessors a0)).
-      * transitivity (count_predecessors a); [| lia].
-        by apply IHl'; left.
-      * by apply IHl'; left.
-    + simpl. destruct (decide (count_predecessors a < count_predecessors a0)); [by apply IHl' |].
-      apply not_lt in n. unfold ge in n.
-      rewrite elem_of_cons in Hin.
-      destruct Hin as [Heq | Hin]; subst.
-      * transitivity (count_predecessors a0); [| lia].
-        by apply IHl'; left.
-      * by apply IHl'; right.
+  unfold mins, min; clear mins min.
+  rewrite Forall_forall.
+  revert a.
+  induction l'; intros a0 x Hin; [by cbn; apply elem_of_list_singleton in Hin as -> |].
+  apply elem_of_cons in Hin as [-> | Hin]; cbn.
+  - destruct (decide (count_predecessors a < count_predecessors a0)).
+    + transitivity (count_predecessors a); [| lia].
+      by apply IHl'; left.
+    + by apply IHl'; left.
+  - destruct (decide (count_predecessors a < count_predecessors a0)); [by apply IHl' |].
+    apply not_lt in n; unfold ge in n.
+    apply elem_of_cons in Hin as [-> | Hin].
+    + transitivity (count_predecessors a0); [| lia].
+      by apply IHl'; left.
+    + by apply IHl'; right.
 Qed.
 
 (**
@@ -482,27 +480,25 @@ Proof.
   simpl.
   remember (min_predecessors precedes (a :: l) l a) as min.
   remember (set_remove min l) as l'.
-  destruct (decide (min = a)); try rewrite e.
-  - by subst; apply set_eq_cons, IHn.
-  - specialize (min_predecessors_in precedes (a :: l) l a).
-    rewrite <- Heqmin. simpl. intros [Heq | Hin]; [done |].
-    specialize (IHn (a :: l')).
-    specialize (set_remove_length min l Hin).
-    rewrite <- Heql'. rewrite <- H0. intro Hlen.
-    specialize (IHn Hlen).
-    split; intros x Hx; rewrite elem_of_cons in Hx;
-      destruct Hx as [Heq | Hinx]; try (subst x).
-    + by right; apply IHn; left.
-    + destruct (decide (x = min)); try subst x.
-      * by left.
-      * specialize (set_remove_3 _ _ l Hinx n1).
-        rewrite <- Heql'. intro Hinx'.
-        by right; apply IHn; right.
-    + by right.
-    + apply IHn in Hinx.
-      rewrite elem_of_cons in Hinx.
-      destruct Hinx as [-> | Hinx]; [left | right]; subst.
-      by apply set_remove_1 in Hinx.
+  destruct (decide (min = a)); [by subst a; subst; apply set_eq_cons, IHn |].
+  specialize (min_predecessors_in precedes (a :: l) l a).
+  rewrite <- Heqmin. simpl. intros [Heq | Hin]; [done |].
+  specialize (IHn (a :: l')).
+  specialize (set_remove_length min l Hin).
+  rewrite <- Heql'. rewrite <- H0. intro Hlen.
+  specialize (IHn Hlen).
+  split; intros x Hx; rewrite elem_of_cons in Hx;
+    destruct Hx as [Heq | Hinx]; try (subst x).
+  - by right; apply IHn; left.
+  - destruct (decide (x = min)); [by subst; left |].
+    specialize (set_remove_3 _ _ l Hinx n1).
+    rewrite <- Heql'. intro Hinx'.
+    by right; apply IHn; right.
+  - by right.
+  - apply IHn in Hinx.
+    rewrite elem_of_cons in Hinx.
+    destruct Hinx as [-> | Hinx]; [left | right]; subst.
+    by apply set_remove_1 in Hinx.
 Qed.
 
 Lemma top_sort_nodup
@@ -513,41 +509,40 @@ Proof.
   unfold top_sort.
   remember (length l) as len.
   generalize dependent l.
-  induction len; intros.
-  - by cbn; symmetry in Heqlen; apply length_zero_iff_nil in Heqlen; subst.
-  - destruct l as [| a l]; [by constructor |].
-    simpl.
-    assert (Hl' : NoDup l) by (inversion Hl; done).
-    assert (Hlen : len = length l) by (inversion Heqlen; done).
-    assert (Hl'' : NoDup (set_remove (min_predecessors precedes (a :: l) l a) l))
-      by (apply set_remove_nodup; done).
-    destruct (decide (min_predecessors precedes (a :: l) l a = a)); constructor.
-    + specialize (IHlen l Hl'  Hlen).
-      rewrite e in *.
-      inversion Hl; subst. intro Ha; elim H1.
-      by apply top_sort_set_eq in Ha.
-    + by apply IHlen.
-    + intro Hmin.
-      assert (Hlen' : len = length (a :: set_remove (min_predecessors precedes (a :: l) l a) l)).
-      {
-        simpl.
-        rewrite <- set_remove_length; [done |].
-        by destruct (@min_predecessors_in _ precedes _ (a :: l) l a).
-      }
-      rewrite Hlen' in Hmin.
-      apply (proj2 (top_sort_set_eq (a :: set_remove (min_predecessors precedes (a :: l) l a) l)))
-        in Hmin.
-      rewrite elem_of_cons in Hmin.
-      destruct Hmin; [done |].
-      by apply set_remove_2 in H.
-    + apply IHlen.
-      * constructor; [| done].
-        intro Ha. apply set_remove_iff in Ha; [| done].
-        destruct Ha as [Ha _].
-        by inversion Hl.
-      * simpl.
-        rewrite <- set_remove_length; [done |].
-        by destruct (@min_predecessors_in _ precedes _ (a :: l) l a).
+  induction len; intros; [by cbn; constructor |].
+  destruct l as [| a l]; [by constructor |].
+  simpl.
+  assert (Hl' : NoDup l) by (inversion Hl; done).
+  assert (Hlen : len = length l) by (inversion Heqlen; done).
+  assert (Hl'' : NoDup (set_remove (min_predecessors precedes (a :: l) l a) l))
+    by (apply set_remove_nodup; done).
+  destruct (decide (min_predecessors precedes (a :: l) l a = a)); constructor.
+  - specialize (IHlen l Hl'  Hlen).
+    rewrite e in *.
+    inversion Hl; subst. intro Ha; elim H1.
+    by apply top_sort_set_eq in Ha.
+  - by apply IHlen.
+  - intro Hmin.
+    assert (Hlen' : len = length (a :: set_remove (min_predecessors precedes (a :: l) l a) l)).
+    {
+      simpl.
+      rewrite <- set_remove_length; [done |].
+      by destruct (@min_predecessors_in _ precedes _ (a :: l) l a).
+    }
+    rewrite Hlen' in Hmin.
+    apply (proj2 (top_sort_set_eq (a :: set_remove (min_predecessors precedes (a :: l) l a) l)))
+      in Hmin.
+    rewrite elem_of_cons in Hmin.
+    destruct Hmin; [done |].
+    by apply set_remove_2 in H.
+  - apply IHlen.
+    + constructor; [| done].
+      intro Ha. apply set_remove_iff in Ha; [| done].
+      destruct Ha as [Ha _].
+      by inversion Hl.
+    + simpl.
+      rewrite <- set_remove_length; [done |].
+      by destruct (@min_predecessors_in _ precedes _ (a :: l) l a).
 Qed.
 
 Context
@@ -563,8 +558,7 @@ Context
 *)
 Lemma top_sort_sorted : topologically_sorted precedes (top_sort l).
 Proof.
-  intro a; intros.
-  intro Ha2.
+  intros a b Hab l1 l2 Heq Ha2.
   assert (Ha : a ∈ l).
   {
     apply top_sort_set_eq.
@@ -572,72 +566,51 @@ Proof.
   }
   unfold top_sort in Heq.
   remember (length l) as n.
-  generalize dependent Heq.
-  generalize dependent l2.
-  generalize dependent l1.
-  generalize dependent Ha.
-  generalize dependent Hab.
-  generalize dependent b.
-  generalize dependent a.
-  generalize dependent l.
-  clear Hl l.
+  revert l Hl Heqn a b Hab l1 Ha l2 Ha2 Heq.
   induction n; intros
   ; try (symmetry in Heqn;  apply length_zero_iff_nil in Heqn; subst l; inversion Ha).
-  destruct l as [| a0 l0]; inversion Hl; subst; simpl in Heq.
-  + inversion Ha.
-  + remember (min_predecessors precedes (a0 :: l0) l0 a0) as min.
-    remember
-      (match decide (min = a0) return (set A) with
-      | left _ => l0
-      | right _ => @cons A a0 (set_remove min l0)
-      end) as l'.
-    inversion Heqn.
-    assert (Hall' : Forall P l').
-    { rewrite Forall_forall. intros x Hx.
-      rewrite Forall_forall in H2.
-      destruct (decide (min = a0)); subst.
-      - by apply H2.
-      - apply elem_of_cons in Hx.
-        destruct Hx as [-> | Hx]; [done |].
-        apply set_remove_1 in Hx.
-        by apply H2.
-    }
-    assert (Hlenl' : n = length l').
-    {
-      destruct (decide (min = a0)); subst; cbn; [done |].
-      rewrite <- set_remove_length; [done |].
-      specialize (min_predecessors_in precedes (a0 :: l0) l0 a0).
-      by cbn; intros [Heq' | Hin].
-    }
-    specialize (IHn l' Hall' Hlenl' a b Hab).
-    assert (Hminb : b <> min).
-    {
-      destruct (decide (b = min)); subst; [| done].
-      specialize (min_predecessors_zero precedes (a0 :: l0) P Hl l0 a0 eq_refl).
-      simpl. intro Hmin.
-      apply zero_predecessors in Hmin.
-      rewrite Forall_forall in Hmin.
-      apply Hmin in Ha.
-      congruence.
-    }
-    destruct l1 as [| _min l1]; inversion Heq; [by subst |].
-    subst _min.
-    destruct (decide (a ∈ l')) as [i | i].
-    - apply (IHn i l1 l2 Ha2 H4).
-    - assert (Hmina : min = a).
-      destruct (decide (min = a0)).
-      * by subst a0 l'; apply elem_of_cons in Ha as [].
-      * subst l'.
-        rewrite elem_of_cons in Ha.
-        destruct Ha as [Heqa | Ha'].
-        -- subst a0.
-           rewrite elem_of_cons in i.
-           by contradict i; left.
-        -- destruct (decide (a = min)); [done |].
-           apply (set_remove_3 _ _ _ Ha') in n1.
-           by contradict i; right.
-      * subst. apply i, top_sort_set_eq. unfold top_sort.
-        rewrite <- Hlenl', H4, elem_of_app, !elem_of_cons. itauto.
+  destruct l as [| a0 l0]; inversion Hl; subst; simpl in Heq; [by inversion Ha |].
+  remember (min_predecessors precedes (a0 :: l0) l0 a0) as min.
+  remember
+    (match decide (min = a0) return (set A) with
+    | left _ => l0
+    | right _ => @cons A a0 (set_remove min l0)
+    end) as l'.
+  inversion Heqn.
+  assert (Hall' : Forall P l').
+  {
+    rewrite Forall_forall. intros x Hx.
+    rewrite Forall_forall in H2.
+    destruct (decide (min = a0)); subst; [by apply H2 |].
+    apply elem_of_cons in Hx.
+    destruct Hx as [-> | Hx]; [done |].
+    apply set_remove_1 in Hx.
+    by apply H2.
+  }
+  assert (Hlenl' : n = length l').
+  {
+    destruct (decide (min = a0)); subst; cbn; [done |].
+    rewrite <- set_remove_length; [done |].
+    specialize (min_predecessors_in precedes (a0 :: l0) l0 a0).
+    by cbn; intros [Heq' | Hin].
+  }
+  specialize (IHn l' Hall' Hlenl' a b Hab).
+  assert (Hminb : b <> min).
+  {
+    destruct (decide (b = min)); subst; [| done].
+    specialize (min_predecessors_zero precedes (a0 :: l0) P Hl l0 a0 eq_refl).
+    simpl. intro Hmin.
+    apply zero_predecessors in Hmin.
+    rewrite Forall_forall in Hmin.
+    apply Hmin in Ha.
+    by congruence.
+  }
+  destruct l1 as [| _min l1]; inversion Heq; [by subst |].
+  subst _min.
+  destruct (decide (a ∈ l')) as [i | i]; [by apply (IHn l1 i l2 Ha2 H4) |].
+  subst. apply i, top_sort_set_eq. unfold top_sort.
+  rewrite <- Hlenl', H4, elem_of_app, !elem_of_cons.
+  by itauto.
 Qed.
 
 (**
@@ -698,7 +671,6 @@ Proof.
   unfold topologically_sorted in Htop.
   intros contra.
   specialize (Htop max a contra).
-
   assert (Hinmax : max ∈ l) by (apply maximal_element_in; itauto).
   assert (Hinatop : a ∈ top_sort l) by (apply Hseteq; itauto).
   apply elem_of_list_split in Hinatop.
