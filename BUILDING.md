@@ -64,7 +64,7 @@ Choose "y" in order to allow opam to modify `~/.profile`.
 ### Install a switch for opam
 
 ```shell
-opam switch create coq-8.16 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
+opam switch create coq-8.17 --packages=ocaml-variants.4.14.1+options,ocaml-option-flambda
 ```
 
 ### Update the current shell environment
@@ -77,7 +77,7 @@ eval $(opam env)
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq.8.16.1 coq-stdpp.1.8.0 coq-itauto coq-equations
+opam install coq.8.17.1 coq-stdpp.1.8.0 coq-itauto coq-equations
 ```
 
 ### Clone the project repository
@@ -139,13 +139,26 @@ make -j $(nproc)
 
 ## Editor instructions
 
-We recommend using the Visual Studio Code (VS Code) editor, which you can download and install from [here](https://code.visualstudio.com/).
+We recommend using the Visual Studio Code (VS Code) editor, which you can download and install from [here](https://code.visualstudio.com).
 
-After installing VS Code, you need to install the **Remote - WSL** extension. Click the *Connect to WSL* button, to open a new editor window in the WSL environment and open the project folder from inside this window.
+If you are using WSL on Windows, you need to install the VS Code [WSL extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl). When this extension is installed, click the *Connect to WSL* button, to open a new editor window in the WSL environment and open the project folder from inside this window.
 
-Then, install the following extensions in the Remote WSL environment:
+We recommend also installing the [Fast Unicode Math Characters extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode), to enable easier input of mathematical symbols.
 
-- [the **VsCoq** extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq)
-- [the **Fast Unicode Math Characters** extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode)
+To enable Coq support in VS Code, there are two options: the VsCoq extension and the Coq LSP extension.
 
-After installing the above extensions, we recommend checking their instructions for basic usage.
+### VsCoq extension
+
+The [VsCoq extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq) is a stable standalone extension using Coq's legacy XML protocol. It can be installed from the command line:
+
+```shell
+code --install-extension maximedenes.vscoq
+```
+
+## Coq LSP extension
+
+The [Coq LSP extension](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp) is an experimental new extension with advanced features that requires installing an opam package. To install it from the command line, make sure that [switch creation](#install-a-switch-for-opam) and [dependency installation](#install-the-project-dependencies-via-opam) are done and then run:
+
+```shell
+opam install coq-lsp && code --install-extension ejgallego.coq-lsp
+```
