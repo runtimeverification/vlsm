@@ -99,13 +99,11 @@ Proof.
       apply sum_weights_list_permutation_proper.
       rewrite elements_disj_union.
       * apply Permutation_app_tail.
-        etransitivity.
-        -- symmetry.
-           by apply (elements_list_to_set (H6 := H6)), set_remove_nodup.
-        -- apply elements_proper.
-           intro x.
-           rewrite elem_of_difference, !elem_of_list_to_set.
-           by rewrite set_remove_iff, elem_of_singleton.
+        etransitivity; [by symmetry; apply (elements_list_to_set (H6 := H6)), set_remove_nodup |].
+        apply elements_proper.
+        intro x.
+        rewrite elem_of_difference, !elem_of_list_to_set.
+        by rewrite set_remove_iff, elem_of_singleton.
       * intros x; rewrite elem_of_difference, elem_of_list_to_set, elem_of_singleton.
         by intros [] ?; eapply Hdisj; [apply elem_of_elements, Hincl |].
 Qed.
