@@ -139,21 +139,26 @@ make -j $(nproc)
 
 ## Editor instructions
 
-We recommend using the Visual Studio Code (VS Code) editor, which you can download and install from [here](https://code.visualstudio.com/).
+We recommend using the Visual Studio Code (VS Code) editor, which you can download and install from [here](https://code.visualstudio.com).
 
-After installing VS Code, you need to install the **Remote - WSL** extension. Click the *Connect to WSL* button, to open a new editor window in the WSL environment and open the project folder from inside this window.
+If you are using WSL on Windows, you need to install the VS Code [WSL extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl). When this extension is installed, click the *Connect to WSL* button, to open a new editor window in the WSL environment and open the project folder from inside this window.
 
-Then, install the following extensions in the Remote WSL environment (assuming that [switch creation](#install-a-switch-for-opam) and [dependencies installation](#install-the-project-dependencies-via-opam) have been already done):
+We recommend also installing the [Fast Unicode Math Characters extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode), to enable easier input of mathematical symbols.
 
-- [**Fast Unicode Math Characters** extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode)
-- [**VsCoq** Extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq):
+To enable Coq support in VS Code, there are two options: the VsCoq extension and the Coq LSP extension.
+
+### VsCoq extension
+
+The [VsCoq extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq) is a stable standalone extension using Coq's legacy XML protocol. It can be installed from the command line:
+
 ```shell
 code --install-extension maximedenes.vscoq
 ```
-OR
-- [**Coq LSP** Extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq):
+
+## Coq LSP extension
+
+The [Coq LSP extension](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp) is an experimental new extension with advanced features that requires installing an opam package. To install it from the command line, make sure that [switch creation](#install-a-switch-for-opam) and [dependency installation](#install-the-project-dependencies-via-opam) are done and then run:
+
 ```shell
 opam install coq-lsp && code --install-extension ejgallego.coq-lsp
 ```
-
-After installing the above extensions, we recommend checking their instructions for basic usage.
