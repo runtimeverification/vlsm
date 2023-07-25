@@ -9,6 +9,7 @@ Section sec_no_equivocations.
 Context
   {message : Type}
   (vlsm : VLSM message)
+  `{HasBeenSentCapability message vlsm}
   .
 
 (**
@@ -21,25 +22,17 @@ Context
 *)
 
 Definition no_equivocations_except_from
-  `{HasBeenSentCapability message vlsm}
-  (exception : message -> Prop)
-  (l : label vlsm)
-  (som : state vlsm * option message)
-  :=
+  (exception : message -> Prop) (l : label vlsm) (som : state vlsm * option message) : Prop :=
   let (s, om) := som in
-  from_option (fun m => has_been_sent vlsm s m \/ exception m) True om.
+    from_option (fun m => has_been_sent vlsm s m \/ exception m) True om.
 
 (**
   The [no_equivocations] constraint does not allow any exceptions
   (messages being received must have been previously sent).
 *)
 Definition no_equivocations
-  `{HasBeenSentCapability message vlsm}
-  (l : label vlsm)
-  (som : state vlsm * option message)
-  : Prop
-  :=
-  no_equivocations_except_from (fun m => False) l som.
+  (l : label vlsm) (som : state vlsm * option message) : Prop :=
+    no_equivocations_except_from (fun m => False) l som.
 
 End sec_no_equivocations.
 
@@ -70,44 +63,40 @@ Context
 *)
 
 Definition directly_observed_were_sent (s : state X) : Prop :=
-  forall msg, has_been_directly_observed X s msg -> has_been_sent X s msg.
+  forall msg : message,
+    has_been_directly_observed X s msg -> has_been_sent X s msg.
 
-Lemma directly_observed_were_sent_initial s :
-  initial_state_prop X s ->
-  directly_observed_were_sent s.
+Lemma directly_observed_were_sent_initial :
+  forall (s : state X),
+    initial_state_prop X s -> directly_observed_were_sent s.
 Proof.
-  intros Hinitial msg Hsend.
+  intros s Hinitial msg Hsend.
   by apply has_been_directly_observed_no_inits in Hsend.
 Qed.
 
-Lemma directly_observed_were_sent_preserved l s im s' om :
-  input_valid_transition X l (s, im) (s', om) ->
-  directly_observed_were_sent s ->
-  directly_observed_were_sent s'.
+Lemma directly_observed_were_sent_preserved :
+  forall (l : label X) (s : state X) (im : option message) (s' : state X) (om : option message),
+    input_valid_transition X l (s, im) (s', om) -> directly_observed_were_sent s ->
+      directly_observed_were_sent s'.
 Proof.
-  intros Hptrans Hprev msg Hobs.
-  specialize (Hprev msg).
+  intros l s im s' om Hptrans Hprev msg Hobs.
   apply preloaded_weaken_input_valid_transition in Hptrans.
-  eapply (oracle_step_update (has_been_directly_observed_stepwise_props X) _ _ _ _ _ Hptrans)
-    in Hobs; simpl in Hobs.
-  specialize (Henforced l s (Some msg)).
-  rewrite (has_been_sent_step_update Hptrans).
-  destruct Hptrans as [Hv _].
-  destruct Hobs as [[Hin | Hout] | Hobs]; subst.
+  eapply (oracle_step_update (has_been_directly_observed_stepwise_props X)) in Hobs;
+    cbn in Hobs; [| done].
+  rewrite has_been_sent_step_update by done.
+  destruct Hobs as [[-> | ->] |].
   - (* by [no_equivocations], the incoming message [im] was previously sent *)
-    specialize (Henforced Hv).
-    by destruct Henforced; [right |].
+    destruct Hptrans as [Hv _].
+    by destruct (Henforced l s (Some msg) Hv); [right |].
   - by left.
   - by right; apply Hprev.
 Qed.
 
-(* TODO(wkolowski): make notation uniform accross the file. *)
-Lemma directly_observed_were_sent_invariant s:
-  valid_state_prop X s ->
-  directly_observed_were_sent s.
+Lemma directly_observed_were_sent_invariant :
+  forall (s : state X),
+    valid_state_prop X s -> directly_observed_were_sent s.
 Proof.
-  intro Hproto.
-  induction Hproto using valid_state_prop_ind.
+  induction 1 using valid_state_prop_ind.
   - by apply directly_observed_were_sent_initial.
   - by eapply directly_observed_were_sent_preserved.
 Qed.
@@ -118,38 +107,34 @@ Qed.
   since all messages must be sent before being received, which means that
   one cannot use the new messages to create additional traces.
 *)
-Lemma no_equivocations_preloaded_traces
-  (is : state (pre_loaded_with_all_messages_vlsm X))
-  (tr : list transition_item)
-  : finite_valid_trace (pre_loaded_with_all_messages_vlsm X) is tr -> finite_valid_trace X is tr.
+Lemma no_equivocations_preloaded_traces :
+  forall (is : state (pre_loaded_with_all_messages_vlsm X)) (tr : list transition_item),
+    finite_valid_trace (pre_loaded_with_all_messages_vlsm X) is tr -> finite_valid_trace X is tr.
 Proof.
-  intro Htr.
-  induction Htr using finite_valid_trace_rev_ind.
-  - split; [| done].
-    rapply @finite_valid_trace_from_empty.
-    by apply initial_state_is_valid.
-  - destruct IHHtr as [IHtr His].
-    split; [| done].
-    rapply extend_right_finite_trace_from; [done |].
-    apply finite_valid_trace_last_pstate in IHtr as Hs.
-    cut (option_valid_message_prop X iom); [by firstorder |].
-    destruct iom as [m |]; [| by apply option_valid_message_None].
-    destruct Hx as [Hv _].
-    apply Henforced in Hv.
-    destruct Hv as [Hbsm | []].
-    by eapply sent_valid.
+  intros is tr Htr.
+  induction Htr using finite_valid_trace_rev_ind;
+    [by cbn; apply finite_valid_trace_empty |].
+  destruct IHHtr as [IHtr His].
+  split; [| done].
+  rapply extend_right_finite_trace_from; [done |].
+  apply finite_valid_trace_last_pstate in IHtr as Hs.
+  repeat split; [done | | by apply Hx..].
+  destruct iom as [m |]; [| by apply option_valid_message_None].
+  eapply sent_valid; [done |].
+  destruct Hx as [Hv _].
+  by apply Henforced in Hv as [].
 Qed.
 
-Lemma preloaded_incl_no_equivocations
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm X) X.
+Lemma preloaded_incl_no_equivocations :
+  VLSM_incl (pre_loaded_with_all_messages_vlsm X) X.
 Proof.
   specialize no_equivocations_preloaded_traces.
   clear -X. destruct X as [T [S M]].
   by apply VLSM_incl_finite_traces_characterization.
 Qed.
 
-Lemma preloaded_eq_no_equivocations
-  : VLSM_eq (pre_loaded_with_all_messages_vlsm X) X.
+Lemma preloaded_eq_no_equivocations :
+  VLSM_eq (pre_loaded_with_all_messages_vlsm X) X.
 Proof.
   split.
   - by apply preloaded_incl_no_equivocations.
@@ -168,15 +153,14 @@ Context
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   .
 
-Definition sent_except_from exception es iom : Prop :=
-  from_option (fun im => composite_has_been_sent IM es im \/ exception im) True iom.
+Definition sent_except_from
+  (exception : message -> Prop) (es : composite_state IM) (iom : option message) : Prop :=
+    from_option (fun im => composite_has_been_sent IM es im \/ exception im) True iom.
 
 Definition composite_no_equivocations_except_from
-  (exception : message -> Prop)
-  (l : composite_label IM)
-  (som : composite_state IM * option message)
-  :=
-  sent_except_from exception som.1 som.2.
+  (exception : message -> Prop) (l : composite_label IM) (som : composite_state IM * option message)
+  : Prop :=
+    sent_except_from exception som.1 som.2.
 
 (**
   The [composite_no_equivocations] constraint requires that
@@ -184,11 +168,8 @@ Definition composite_no_equivocations_except_from
   machine in the composition.
 *)
 Definition composite_no_equivocations
-  (l : composite_label IM)
-  (som : composite_state IM * option message)
-  : Prop
-  :=
-  composite_no_equivocations_except_from (fun m => False) l som.
+  (l : composite_label IM) (som : composite_state IM * option message) : Prop :=
+    composite_no_equivocations_except_from (fun m => False) l som.
 
 (** ** Composite No-Equivocation Invariants
 
@@ -209,18 +190,18 @@ Context
   .
 
 Definition composite_directly_observed_were_sent (s : state (composite_type IM)) : Prop :=
-  forall msg, composite_has_been_directly_observed IM s msg -> composite_has_been_sent IM s msg.
+  forall msg : message,
+    composite_has_been_directly_observed IM s msg -> composite_has_been_sent IM s msg.
 
-Lemma composite_directly_observed_were_sent_invariant s :
-  valid_state_prop X s ->
-  composite_directly_observed_were_sent s.
+Lemma composite_directly_observed_were_sent_invariant :
+  forall (s : state X),
+    valid_state_prop X s -> composite_directly_observed_were_sent s.
 Proof.
-  intros Hs m.
-  rewrite composite_has_been_directly_observed_sent_received_iff.
-  intros Hobs.
-  cut (has_been_sent X s m); [done |].
-  apply (directly_observed_were_sent_invariant message X); [| done ..].
-  by intros l s0 om; apply Hsubsumed.
+  intros s Hs m Hobs.
+  change (has_been_sent X s m).
+  apply (directly_observed_were_sent_invariant message X); [| done |].
+  - by intros l s0 om; apply Hsubsumed.
+  - by apply composite_has_been_directly_observed_sent_received_iff.
 Qed.
 
 End sec_composite_no_equivocation_invariants.
@@ -235,10 +216,6 @@ Section sec_seeded_composite_vlsm_no_equivocation.
   the newly added initial messages are safe to be received at all times.
 *)
 
-Context
-  (X := free_composite_vlsm IM)
-  .
-
 Section sec_seeded_composite_vlsm_no_equivocation_definition.
 
 Context
@@ -248,15 +225,10 @@ Context
 (** Constraint is updated to also allow seeded messages. *)
 
 Definition no_equivocations_additional_constraint_with_pre_loaded
-  (l : composite_label IM)
-  (som : composite_state IM * option message)
-  :=
-  composite_no_equivocations_except_from seed l som
-  /\ constraint l som.
+  (l : composite_label IM) (som : composite_state IM * option message) : Prop :=
+    composite_no_equivocations_except_from seed l som /\ constraint l som.
 
-Definition composite_no_equivocation_vlsm_with_pre_loaded
-  : VLSM message
-  :=
+Definition composite_no_equivocation_vlsm_with_pre_loaded : VLSM message :=
   pre_loaded_vlsm (composite_vlsm IM no_equivocations_additional_constraint_with_pre_loaded) seed.
 
 Definition free_composite_no_equivocation_vlsm_with_pre_loaded : VLSM message :=
@@ -275,30 +247,20 @@ End sec_seeded_composite_vlsm_no_equivocation_definition.
 
 (** Adds a no-equivocations condition on top of an existing constraint. *)
 Definition no_equivocations_additional_constraint
-  (l : composite_label IM)
-  (som : composite_state IM * option message)
-  :=
-  composite_no_equivocations l som
-  /\ constraint l som.
+  (l : composite_label IM) (som : composite_state IM * option message) : Prop :=
+    composite_no_equivocations l som /\ constraint l som.
 
-Context
-  (SeededNoeqvFalse := composite_no_equivocation_vlsm_with_pre_loaded (fun m => False))
-  (Noeqv := composite_vlsm IM no_equivocations_additional_constraint)
-  (SeededNoeqvTrue := composite_no_equivocation_vlsm_with_pre_loaded (fun m => True))
-  (PreFree := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
-  .
-
-Lemma false_composite_no_equivocation_vlsm_with_pre_loaded
-  : VLSM_eq SeededNoeqvFalse Noeqv.
+Lemma false_composite_no_equivocation_vlsm_with_pre_loaded :
+  VLSM_eq
+    (composite_no_equivocation_vlsm_with_pre_loaded (fun m => False))
+    (composite_vlsm IM no_equivocations_additional_constraint).
 Proof.
-  unfold SeededNoeqvFalse.
   unfold composite_no_equivocation_vlsm_with_pre_loaded.
   apply VLSM_eq_trans with
     (composite_vlsm IM (no_equivocations_additional_constraint_with_pre_loaded (fun _ =>  False))).
   - by apply VLSM_eq_sym, vlsm_is_pre_loaded_with_False.
-  - specialize (constraint_subsumption_incl (free_composite_vlsm IM)) as Hincl.
-    unfold no_equivocations_additional_constraint_with_pre_loaded.
-    by split; apply Hincl; intros l [s [m |]] Hpv; apply Hpv.
+  - by split; apply (constraint_subsumption_incl (free_composite_vlsm IM));
+      intros l [s [m |]] Hpv; apply Hpv.
 Qed.
 
 End sec_seeded_composite_vlsm_no_equivocation.
