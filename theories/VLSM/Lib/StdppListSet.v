@@ -10,28 +10,28 @@ Definition set := list A.
 Definition empty_set : set := [].
 
 Fixpoint set_add (a : A) (x : set) : set :=
-match x with
-| [] => [a]
-| a1 :: x1 => if decide (a = a1) then a1 :: x1 else a1 :: set_add a x1
-end.
+  match x with
+  | [] => [a]
+  | a1 :: x1 => if decide (a = a1) then a1 :: x1 else a1 :: set_add a x1
+  end.
 
 Fixpoint set_remove (a : A) (x : set) : set :=
-match x with
-| [] => empty_set
-| a1 :: x1 => if decide (a = a1) then x1 else a1 :: set_remove a x1
-end.
+  match x with
+  | [] => empty_set
+  | a1 :: x1 => if decide (a = a1) then x1 else a1 :: set_remove a x1
+  end.
 
 Fixpoint set_union (x y : set) : set :=
-match y with
-| [] => x
-| a1 :: y1 => set_add a1 (set_union x y1)
-end.
+  match y with
+  | [] => x
+  | a1 :: y1 => set_add a1 (set_union x y1)
+  end.
 
 Fixpoint set_diff (x y : set) : set :=
-match x with
-| [] => []
-| a1 :: x1 => if decide (a1 ∈ y) then set_diff x1 y else set_add a1 (set_diff x1 y)
-end.
+  match x with
+  | [] => []
+  | a1 :: x1 => if decide (a1 ∈ y) then set_diff x1 y else set_add a1 (set_diff x1 y)
+  end.
 
 Lemma set_add_intro1 :
   forall (a b : A) (x : set), a ∈ x -> a ∈ set_add b x.

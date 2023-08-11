@@ -120,7 +120,7 @@ Inductive lv_event_type : Type :=
 ### Definitions
 
 - C-style name
-- two spaces indentation before definition body
+- if a definition doesn't fit into a single line, indent its body with 2 spaces when starting on the next line.
 - generally avoid unnecessary type declarations for quantified variables
 
 Example:
@@ -146,6 +146,41 @@ Lemma finite_trace_partial_map_app :
     finite_trace_partial_map (l1 ++ l2) =
     finite_trace_partial_map l1 ++ finite_trace_partial_map l2.
 Proof. exact (map_option_app _). Qed.
+```
+
+### Pattern matching
+
+- Indent match expressions by 2 spaces.
+- Do not indent the `|` relative to the match keyword.
+- Avoid wasting space with indentation, i.e. when the match branch is long, put the result on the next line.
+
+Recommended:
+```coq
+Fixpoint add_in_sorted_list_fn
+  {A} (compare : A -> A -> comparison) (x : A) (l : list A) : list A :=
+  match l with
+  | [] => [x]
+  | h :: t =>
+    match compare x h with
+    | Lt => x :: h :: t
+    | Eq => h :: t
+    | Gt => h :: @add_in_sorted_list_fn A compare x t
+    end
+  end.
+```
+
+Not recommended:
+```coq
+Fixpoint add_in_sorted_list_fn
+  {A} (compare : A -> A -> comparison) (x : A) (l : list A) : list A :=
+match l with
+| [] => [x]
+| h :: t => match compare x h with
+            | Lt => x :: h :: t
+            | Eq => h :: t
+            | Gt => h :: @add_in_sorted_list_fn A compare x t
+            end
+end.
 ```
 
 ### Theorems and lemmas

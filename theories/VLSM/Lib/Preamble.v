@@ -31,10 +31,10 @@ Lemma Decision_iff : forall {P Q}, (P <-> Q) -> Decision P -> Decision Q.
 Proof. by firstorder. Qed.
 
 #[export] Instance bool_decision {b : bool} : Decision b :=
-match b with
-| true => left I
-| false => right (fun H => H)
-end.
+  match b with
+  | true => left I
+  | false => right (fun H => H)
+  end.
 
 Notation decide_eq := (fun x y => decide (x = y)).
 
@@ -617,16 +617,16 @@ Qed.
 Fixpoint list_compare
   (A : Type) `{StrictlyComparable A}
   (l1 l2 : list A) : comparison :=
-match l1, l2 with
-| [], [] => Eq
-| [], _ => Lt
-| _, [] => Gt
-| h1 :: t1, h2 :: t2 =>
-  match compare h1 h2 with
-  | Eq => list_compare A t1 t2
-  | cmp => cmp
-  end
-end.
+  match l1, l2 with
+  | [], [] => Eq
+  | [], _ => Lt
+  | _, [] => Gt
+  | h1 :: t1, h2 :: t2 =>
+    match compare h1 h2 with
+    | Eq => list_compare A t1 t2
+    | cmp => cmp
+    end
+  end.
 
 Lemma list_compare_reflexive
   {A : Type} `{StrictlyComparable A}

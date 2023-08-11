@@ -5,10 +5,10 @@ From VLSM.Lib Require Import Preamble.
 (** * Natural number utility definitions and lemmas *)
 
 Fixpoint up_to_n_listing (n : nat) : list nat :=
-match n with
-| 0 => []
-| S n' => n' :: up_to_n_listing n'
-end.
+  match n with
+  | 0 => []
+  | S n' => n' :: up_to_n_listing n'
+  end.
 
 Lemma up_to_n_listing_length :
   forall (n : nat),

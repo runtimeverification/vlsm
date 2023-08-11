@@ -357,10 +357,10 @@ Qed.
 Fixpoint list_annotate
   {A : Type} (P : A -> Prop) {Pdec : forall a, Decision (P a)}
   (l : list A) : Forall P l -> list (dsig P) :=
-match l with
-| [] => fun _ => []
-| h :: t => fun Hs => dexist h (Forall_inv Hs) :: list_annotate P t (Forall_inv_tail Hs)
-end.
+  match l with
+  | [] => fun _ => []
+  | h :: t => fun Hs => dexist h (Forall_inv Hs) :: list_annotate P t (Forall_inv_tail Hs)
+  end.
 
 Lemma list_annotate_length
   {A : Type}
@@ -512,14 +512,14 @@ Qed.
 Fixpoint filter_annotate
   {A : Type} (P : A -> Prop) {Pdec : forall a : A, Decision (P a)}
   (l : list A) : list (dsig P) :=
-match l with
-| [] => []
-| h :: t =>
-  match decide (P h) with
-  | left p => dexist h p :: filter_annotate P t
-  | right _ => filter_annotate P t
-  end
-end.
+  match l with
+  | [] => []
+  | h :: t =>
+    match decide (P h) with
+    | left p => dexist h p :: filter_annotate P t
+    | right _ => filter_annotate P t
+    end
+  end.
 
 Lemma filter_annotate_length
   {A : Type}
