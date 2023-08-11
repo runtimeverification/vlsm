@@ -223,10 +223,10 @@ Fixpoint NonEmptyList_ind'
   (hd' : forall h : A, P (NEL_cons h None))
   (tl' : forall (h : A) (t : NonEmptyList A), P t -> P (NEL_cons h (Some t)))
   (l : NonEmptyList A) {struct l} : P l :=
-match l with
-| NEL_cons h None => hd' h
-| NEL_cons h (Some t) => tl' h t (NonEmptyList_ind' A P hd' tl' t)
-end.
+  match l with
+  | NEL_cons h None => hd' h
+  | NEL_cons h (Some t) => tl' h t (NonEmptyList_ind' A P hd' tl' t)
+  end.
 
 Fixpoint NonEmptyList_to_ne_list `(l : NonEmptyList A) : ne_list A :=
   match nel_tl l with

@@ -295,16 +295,16 @@ Qed.
 (** *** Messages sent and received by a State *)
 
 Definition isSend (ob : Observation) : Prop :=
-match label ob with
-| Send => True
-| Receive => False
-end.
+  match label ob with
+  | Send => True
+  | Receive => False
+  end.
 
 Definition isReceive (ob : Observation) : Prop :=
-match label ob with
-| Send => False
-| Receive => True
-end.
+  match label ob with
+  | Send => False
+  | Receive => True
+  end.
 
 #[export] Instance isSend_dec (ob : Observation) : Decision (isSend ob).
 Proof.
@@ -518,21 +518,21 @@ Definition ELMOComponentType : VLSMType Message :=
 (** We can extract a trace from a [list] of [Observation]s. *)
 Fixpoint observations2trace (obs : list Observation) (adr : Address)
   : list (transition_item ELMOComponentType) :=
-match obs with
-| [] => []
-| MkObservation Send msg as ob :: obs =>
-    let s'   := MkState obs adr in
-    let msg' := MkMessage s' in
-    let ob'  := MkObservation Send msg' in
-    let obs' := addObservation' ob' obs in
-    let dest := MkState obs' adr in
-      observations2trace obs adr ++
-        [Build_transition_item ELMOComponentType Send None dest (Some msg')]
-| MkObservation Receive msg as ob :: obs =>
-    let dest := MkState (ob :: obs) adr in
-      observations2trace obs adr ++
-        [Build_transition_item ELMOComponentType Receive (Some msg) dest None]
-end.
+  match obs with
+  | [] => []
+  | MkObservation Send msg as ob :: obs =>
+      let s'   := MkState obs adr in
+      let msg' := MkMessage s' in
+      let ob'  := MkObservation Send msg' in
+      let obs' := addObservation' ob' obs in
+      let dest := MkState obs' adr in
+        observations2trace obs adr ++
+          [Build_transition_item ELMOComponentType Send None dest (Some msg')]
+  | MkObservation Receive msg as ob :: obs =>
+      let dest := MkState (ob :: obs) adr in
+        observations2trace obs adr ++
+          [Build_transition_item ELMOComponentType Receive (Some msg) dest None]
+  end.
 
 (** A state contains a list of observations, so we can extract a trace from a state. *)
 Definition state2trace (s : State) : list transition_item :=

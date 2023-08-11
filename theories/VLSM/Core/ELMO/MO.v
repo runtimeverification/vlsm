@@ -1099,11 +1099,11 @@ Definition MOComponent_state2trace
 *)
 Fixpoint MO_state2trace_aux
   (us : MO_state) (is : list index) : list MO_transition_item :=
-match is with
-| [] => []
-| i :: is' =>
-  MO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++ MOComponent_state2trace us i
-end.
+  match is with
+  | [] => []
+  | i :: is' =>
+    MO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++ MOComponent_state2trace us i
+  end.
 
 Definition MO_state2trace
   (us : MO_state) : list MO_transition_item :=

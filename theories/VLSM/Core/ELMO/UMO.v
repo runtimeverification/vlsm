@@ -46,20 +46,20 @@ Defined.
 Definition UMOComponent_transition
   (l : Label) (s : State) (om : option Message)
   : State * option Message :=
-match l, om with
-| Send, Some m => (s, om)
-| Send, None   =>
-    let ob := MkObservation Send (MkMessage s) in
-    let st := s <+> ob in
-    let msg := Some (MkMessage s) in
-      (st, msg)
-| Receive, None => (s, None)
-| Receive, Some m =>
-    let ob := MkObservation Receive m in
-    let st := s <+> ob in
-    let msg := None in
-      (st, msg)
-end.
+  match l, om with
+  | Send, Some m => (s, om)
+  | Send, None   =>
+      let ob := MkObservation Send (MkMessage s) in
+      let st := s <+> ob in
+      let msg := Some (MkMessage s) in
+        (st, msg)
+  | Receive, None => (s, None)
+  | Receive, Some m =>
+      let ob := MkObservation Receive m in
+      let st := s <+> ob in
+      let msg := None in
+        (st, msg)
+  end.
 
 Inductive UMOComponentValid : Label -> State -> option Message -> Prop :=
 | OCV_Send    : forall st : State, UMOComponentValid Send st None
@@ -1547,12 +1547,12 @@ Definition UMOComponent_state2trace
 *)
 Fixpoint UMO_state2trace_aux
   (us : UMO_state) (is : list index) : list UMO_transition_item :=
-match is with
-| [] => []
-| i :: is' =>
-  UMO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++
-  UMOComponent_state2trace us i
-end.
+  match is with
+  | [] => []
+  | i :: is' =>
+    UMO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++
+    UMOComponent_state2trace us i
+  end.
 
 Definition UMO_state2trace
   (us : UMO_state) : list UMO_transition_item :=
@@ -1605,40 +1605,40 @@ Proof.
 Qed.
 
 Fixpoint UMO_obs_aux (us : UMO_state) (is : list index) : list Observation :=
-match is with
-| [] => []
-| i :: is' => UMO_obs_aux (state_update _ us i (MkState [] (idx i))) is' ++ obs (us i)
-end.
+  match is with
+  | [] => []
+  | i :: is' => UMO_obs_aux (state_update _ us i (MkState [] (idx i))) is' ++ obs (us i)
+  end.
 
 Definition UMO_obs (us : UMO_state) : list Observation :=
   UMO_obs_aux us (enum index).
 
 Fixpoint UMO_sentMessages_aux (us : UMO_state) (is : list index) : set Message :=
-match is with
-| [] => []
-| i :: is' =>
-  UMO_sentMessages_aux (state_update _ us i (MkState [] (idx i))) is' ++ sentMessages (us i)
-end.
+  match is with
+  | [] => []
+  | i :: is' =>
+    UMO_sentMessages_aux (state_update _ us i (MkState [] (idx i))) is' ++ sentMessages (us i)
+  end.
 
 Definition UMO_sentMessages (us : UMO_state) : set Message :=
   UMO_sentMessages_aux us (enum index).
 
 Fixpoint UMO_receivedMessages_aux (us : UMO_state) (is : list index) : set Message :=
-match is with
-| [] => []
-| i :: is' =>
-  UMO_receivedMessages_aux (state_update _ us i (MkState [] (idx i))) is' ++ receivedMessages (us i)
-end.
+  match is with
+  | [] => []
+  | i :: is' =>
+    UMO_receivedMessages_aux (state_update _ us i (MkState [] (idx i))) is' ++ receivedMessages (us i)
+  end.
 
 Definition UMO_receivedMessages (us : UMO_state) : set Message :=
   UMO_receivedMessages_aux us (enum index).
 
 Fixpoint UMO_messages_aux (us : UMO_state) (is : list index) : set Message :=
-match is with
-| [] => []
-| i :: is' =>
-  UMO_messages_aux (state_update _ us i (MkState [] (idx i))) is' ++ messages (us i)
-end.
+  match is with
+  | [] => []
+  | i :: is' =>
+    UMO_messages_aux (state_update _ us i (MkState [] (idx i))) is' ++ messages (us i)
+  end.
 
 Definition UMO_messages (us : UMO_state) : set Message :=
   UMO_messages_aux us (enum index).

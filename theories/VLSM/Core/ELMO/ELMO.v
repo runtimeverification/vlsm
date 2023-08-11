@@ -1176,15 +1176,15 @@ Context
 Definition ELMOComponent_state_destructor (s : State)
   : list (transition_item ELMOComponentType * State) :=
   let adr := adr s in
-match obs s with
-| [] => []
-| MkObservation Send msg as ob :: obs =>
-    let source := MkState obs adr in
-      [(Build_transition_item ELMOComponentType Send None s (Some msg), source)]
-| MkObservation Receive msg as ob :: obs =>
-    let source := MkState obs adr in
-      [(Build_transition_item ELMOComponentType Receive (Some msg) s None, source)]
-end.
+  match obs s with
+  | [] => []
+  | MkObservation Send msg as ob :: obs =>
+      let source := MkState obs adr in
+        [(Build_transition_item ELMOComponentType Send None s (Some msg), source)]
+  | MkObservation Receive msg as ob :: obs =>
+      let source := MkState obs adr in
+        [(Build_transition_item ELMOComponentType Receive (Some msg) s None, source)]
+  end.
 
 Lemma ELMOComponent_state_destructor_initial :
   forall (s' : VLSM.state Ei), ram_state_prop Ei s' ->
@@ -1385,12 +1385,12 @@ Definition ELMO_equivocating_validators : composite_state ELMOComponent -> Ca :=
 Definition ELMO_global_constraint
   (l : composite_label ELMOComponent)
   (som : composite_state ELMOComponent * option Message) : Prop :=
-match l with
-| existT _ Receive =>
-  let (s', _) := composite_transition ELMOComponent l som in
-    ELMO_not_heavy s'
-| existT _ Send => True
-end.
+  match l with
+  | existT _ Receive =>
+    let (s', _) := composite_transition ELMOComponent l som in
+      ELMO_not_heavy s'
+  | existT _ Send => True
+  end.
 
 Definition ELMOProtocol : VLSM Message :=
   composite_vlsm ELMOComponent ELMO_global_constraint.
