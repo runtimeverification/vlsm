@@ -429,7 +429,7 @@ Proof.
   - by intros [? ?]; apply parity_constrained_messages_right.
 Qed.
 
-(** *** Constrained states property **)
+(** *** Constrained states property *)
 
 Lemma parity_constrained_states_right :
  forall (st : ParityState),
