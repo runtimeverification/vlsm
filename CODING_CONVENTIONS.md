@@ -120,7 +120,7 @@ Inductive lv_event_type : Type :=
 ### Definitions
 
 - C-style name
-- two spaces indentation before definition body
+- If the definition doesn't fit into a single line, indent its body with 2 spaces starting in the next line.
 - generally avoid unnecessary type declarations for quantified variables
 
 Example:
