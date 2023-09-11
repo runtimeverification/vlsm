@@ -238,12 +238,8 @@ Proof.
   - by app_valid_tran; apply parity_can_emit_square_mult.
   - unfold parity_trace1_first_state. 
     assert (Z.of_nat multiplier ^ 3 = Z.of_nat multiplier ^ 2 * Z.of_nat multiplier) by lia.
-    rewrite H.
-    cut (Z.of_nat multiplier >= 1).
-    {
-      intros. admit.
-    } admit.
-Admitted.
+    by rewrite H; nia.
+Qed.
 
 Proposition parity_valid_transition_2 :
   input_valid_transition ParityVLSM parity_label
@@ -253,9 +249,9 @@ Proof.
   repeat split; [| | | lia |].
   - by app_valid_tran; apply parity_valid_transition_1.
   - by app_valid_tran; apply parity_can_emit_square_mult.
-  - admit.
+  - by nia.
   - by cbn; repeat f_equal; lia.
-Admitted.
+Qed.
 
 Proposition parity_valid_transition_3 : 
   input_valid_transition ParityVLSM parity_label
@@ -265,9 +261,9 @@ Proof.
   repeat split; [| | | lia |].
   - by app_valid_tran; apply parity_valid_transition_2.
   - by app_valid_tran; apply parity_can_emit_square_mult.
-  - admit.
+  - by nia.
   - by cbn; repeat f_equal; lia.
-Admitted.
+Qed.
 
 Example parity_valid_trace1 :
   finite_valid_trace_init_to ParityVLSM
@@ -289,14 +285,15 @@ Proof.
   repeat apply mvt_extend; [.. | apply mvt_empty].
   - by apply parity_valid_message_prop_square_mult.
   - by apply parity_valid_transition_1.
-  - cbn. split; [| lia]. admit.
+  - cbn; split; [| lia].
+    by unfold parity_trace1_first_state; nia.
   - by apply parity_valid_message_prop_mult.
   - by apply parity_valid_transition_2.
-  - cbn. split; [| lia]. admit.
+  - by cbn; split; [nia|lia].
   - by apply parity_valid_message_prop_mult.
   - by apply parity_valid_transition_3.
-  - cbn. split; [| lia]. admit.
-Admitted.
+  - by cbn; split; [nia|lia].
+Qed.
 
 (** *** Example of a constrained trace *)
 
@@ -308,12 +305,13 @@ Proof.
   constructor; [| by assert (Z.of_nat multiplier ^ 3 >= 1) by lia].
   repeat apply ct_extend; [..| apply ct_empty].
   - by apply parity_valid_transition_1.
-  - cbn. split; [| lia]. admit.
+  - cbn. split; [| lia]. 
+    by unfold parity_trace1_first_state; nia.
   - by apply parity_valid_transition_2.
-  - cbn. split; [| lia]. admit.
+  - cbn; split; [nia|lia].
   - by apply parity_valid_transition_3.
-  - cbn. split; [| lia]. admit.
-Admitted.
+  - cbn; split; [nia| lia].
+Qed.
 
 Definition parity_trace2_init : list (transition_item ParityVLSM) :=
   [ Build_transition_item parity_label (Some (Z.of_nat multiplier)) (Z.of_nat multiplier + 1)
