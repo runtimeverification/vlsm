@@ -83,7 +83,8 @@ Ltac app_valid_tran :=
 
 Section sec_parity_vlsm.
 
-Context (multiplier : nat).
+Context (multiplier : nat)
+        (multiplier_geq_2 : Z.of_nat multiplier >= 2).
 
 (** ** Definition of Parity VLSM
 
@@ -191,64 +192,90 @@ Proof. done. Qed.
 *)
 
 Definition parity_trace1_init : list (transition_item ParityVLSM) :=
-  [ Build_transition_item parity_label (Some 4) 4 (Some 8)
-  ; Build_transition_item parity_label (Some 2) 2 (Some 4) ].
+  [ Build_transition_item parity_label (Some (Z.of_nat multiplier ^ 2))
+                                       (Z.of_nat multiplier ^ 3 - Z.of_nat multiplier ^ 2)
+                                       (Some (Z.of_nat multiplier ^ 3))
+  ; Build_transition_item parity_label (Some (Z.of_nat multiplier))
+                                       (Z.of_nat multiplier ^ 3 - Z.of_nat multiplier ^ 2 - Z.of_nat multiplier)
+                                       (Some (Z.of_nat multiplier ^ 2)) ].
 
 Definition parity_trace1_last_item : transition_item ParityVLSM :=
-  Build_transition_item parity_label (Some 2) 8 (Some 4).
+  Build_transition_item parity_label (Some (Z.of_nat multiplier))
+  (Z.of_nat multiplier ^ 3 - Z.of_nat multiplier ^ 2 - Z.of_nat multiplier - Z.of_nat multiplier)
+  (Some (Z.of_nat multiplier ^ 2)).
 
 Definition parity_trace1 : list (transition_item ParityVLSM) :=
   parity_trace1_init ++ [parity_trace1_last_item].
 
-Definition parity_trace1_first_state : ParityState := 8.
+Definition parity_trace1_first_state : ParityState := Z.of_nat multiplier ^ 3.
 
-Definition parity_trace1_last_state : ParityState :=
-  destination parity_trace1_last_item.
+Definition parity_trace1_last_state : ParityState := destination parity_trace1_last_item.
 
 (** Defined trace is valid: *)
 
 Example parity_valid_message_prop_mult : valid_message_prop ParityVLSM (Z.of_nat multiplier).
 Proof. by apply initial_message_is_valid. Qed.
 
-Example parity_can_emit_square_mult : can_emit ParityVLSM (Z.of_nat multiplier * Z.of_nat multiplier).
+Example parity_can_emit_square_mult : can_emit ParityVLSM (Z.of_nat multiplier ^ 2).
 Proof.
-  unfold can_emit.
   exists (Z.of_nat multiplier, Some (Z.of_nat multiplier)), parity_label, 0.
-  repeat split; [..| done | |].
-  - app_valid_tran. unfold input_valid_transition, input_valid.
-    repeat split; [| app_valid_tran |..];
-    admit.
-  - by apply parity_valid_message_prop_mult.
-Admitted.
+  by repeat split; [assert (Z.of_nat multiplier >= 1) by lia; app_valid_tran.. | | lia | cbn; repeat f_equal; lia].
+Qed.
 
-Example parity_valid_message_prop_square_mult : valid_message_prop ParityVLSM (Z.of_nat multiplier * Z.of_nat multiplier).
+Example parity_valid_message_prop_square_mult : valid_message_prop ParityVLSM (Z.of_nat multiplier ^ 2).
 Proof.
-  by apply (emitted_messages_are_valid ParityVLSM (Z.of_nat multiplier * Z.of_nat multiplier) parity_can_emit_square_mult).
+  by apply (emitted_messages_are_valid ParityVLSM (Z.of_nat multiplier ^ 2) parity_can_emit_square_mult).
 Qed.
 
 Proposition parity_valid_transition_1 :
   input_valid_transition ParityVLSM parity_label
-   (parity_trace1_first_state, Some 4) ((8, 4), Some 8).
-Proof. by app_valid_tran; apply parity_can_emit_4. Qed.
+   (parity_trace1_first_state, Some (Z.of_nat multiplier ^ 2))
+   (Z.of_nat multiplier ^ 3 - Z.of_nat multiplier ^ 2, Some (Z.of_nat multiplier ^ 3)).
+Proof.
+  repeat split; [| | | lia].
+  - apply initial_state_is_valid.
+    by assert (Z.of_nat multiplier ^ 3 >= 1) by lia.
+  - by app_valid_tran; apply parity_can_emit_square_mult.
+  - unfold parity_trace1_first_state. 
+    assert (Z.of_nat multiplier ^ 3 = Z.of_nat multiplier ^ 2 * Z.of_nat multiplier) by lia.
+    rewrite H.
+    cut (Z.of_nat multiplier >= 1).
+    {
+      intros. admit.
+    } admit.
+Admitted.
 
 Proposition parity_valid_transition_2 :
   input_valid_transition ParityVLSM parity_label
-   ((8, 4), Some 2) ((8, 2), Some 4).
-Proof. by app_valid_tran; apply parity_valid_transition_1. Qed.
+   (Z.of_nat multiplier ^ 3 - Z.of_nat multiplier ^ 2, Some (Z.of_nat multiplier))
+   (Z.of_nat multiplier ^ 3 - Z.of_nat multiplier ^ 2 - Z.of_nat multiplier, Some (Z.of_nat multiplier ^ 2)).
+Proof.
+  repeat split; [| | | lia |].
+  - by app_valid_tran; apply parity_valid_transition_1.
+  - by app_valid_tran; apply parity_can_emit_square_mult.
+  - admit.
+  - by cbn; repeat f_equal; lia.
+Admitted.
 
 Proposition parity_valid_transition_3 : 
   input_valid_transition ParityVLSM parity_label
-   ((8, 2), Some 2) ((8, 0), Some 4).
-Proof. by app_valid_tran; apply parity_valid_transition_2. Qed.
+  (Z.of_nat multiplier ^ 3 - Z.of_nat multiplier ^ 2 - Z.of_nat multiplier, Some (Z.of_nat multiplier))
+  (Z.of_nat multiplier ^ 3 - Z.of_nat multiplier ^ 2 - Z.of_nat multiplier - Z.of_nat multiplier, Some (Z.of_nat multiplier ^ 2)).
+Proof.
+  repeat split; [| | | lia |].
+  - by app_valid_tran; apply parity_valid_transition_2.
+  - by app_valid_tran; apply parity_can_emit_square_mult.
+  - admit.
+  - by cbn; repeat f_equal; lia.
+Admitted.
 
 Example parity_valid_trace1 :
   finite_valid_trace_init_to ParityVLSM
    parity_trace1_first_state parity_trace1_last_state parity_trace1.
 Proof.
-  constructor; [| done].
+  constructor; [| by assert (Z.of_nat multiplier ^ 3 >= 1) by lia].
   repeat apply finite_valid_trace_from_to_extend.
-  - by eapply finite_valid_trace_from_to_empty,
-      input_valid_transition_destination, parity_valid_transition_3.
+  - by eapply finite_valid_trace_from_to_empty, input_valid_transition_destination, parity_valid_transition_3.
   - by apply parity_valid_transition_3.
   - by apply parity_valid_transition_2.
   - by apply parity_valid_transition_1.
@@ -258,10 +285,18 @@ Example parity_valid_trace1_alt :
   finite_valid_trace_init_to_alt ParityVLSM
    parity_trace1_first_state parity_trace1_last_state parity_trace1.
 Proof.
-  constructor; [| done].
-  by repeat apply mvt_extend; [.. | apply mvt_empty]; try done;
-    [apply parity_valid_message_prop_4 | apply parity_valid_message_prop_2 ..].
-Qed.
+  constructor; [| by assert (Z.of_nat multiplier ^ 3 >= 1) by lia].
+  repeat apply mvt_extend; [.. | apply mvt_empty].
+  - by apply parity_valid_message_prop_square_mult.
+  - by apply parity_valid_transition_1.
+  - cbn. split; [| lia]. admit.
+  - by apply parity_valid_message_prop_mult.
+  - by apply parity_valid_transition_2.
+  - cbn. split; [| lia]. admit.
+  - by apply parity_valid_message_prop_mult.
+  - by apply parity_valid_transition_3.
+  - cbn. split; [| lia]. admit.
+Admitted.
 
 (** *** Example of a constrained trace *)
 
@@ -270,47 +305,66 @@ Lemma parity_constrained_trace1 :
   finite_constrained_trace_init_to ParityVLSM
    parity_trace1_first_state parity_trace1_last_state parity_trace1.
 Proof.
-  constructor; [| done].
-  by repeat apply ct_extend; [..| apply ct_empty].
-Qed.
+  constructor; [| by assert (Z.of_nat multiplier ^ 3 >= 1) by lia].
+  repeat apply ct_extend; [..| apply ct_empty].
+  - by apply parity_valid_transition_1.
+  - cbn. split; [| lia]. admit.
+  - by apply parity_valid_transition_2.
+  - cbn. split; [| lia]. admit.
+  - by apply parity_valid_transition_3.
+  - cbn. split; [| lia]. admit.
+Admitted.
 
 Definition parity_trace2_init : list (transition_item ParityVLSM) :=
-  [ Build_transition_item parity_label (Some 2) (5, 3) (Some 4)
-  ; Build_transition_item parity_label (Some 2) (5, 1) (Some 4) ].
+  [ Build_transition_item parity_label (Some (Z.of_nat multiplier)) (Z.of_nat multiplier + 1)
+                                       (Some (Z.of_nat multiplier ^ 2))
+  ; Build_transition_item parity_label (Some (Z.of_nat multiplier)) 1 (Some (Z.of_nat multiplier ^ 2)) ].
 
 Definition parity_trace2_last_item : transition_item ParityVLSM :=
-  Build_transition_item parity_label (Some 1) (5, 0) (Some 2).
+  Build_transition_item parity_label (Some 1) 0 (Some (Z.of_nat multiplier)).
 
 Definition parity_trace2 : list (transition_item ParityVLSM) :=
   parity_trace2_init ++ [parity_trace2_last_item].
 
-Definition parity_trace2_init_first_state : ParityState := (5, 5).
+Definition parity_trace2_init_first_state : ParityState := 2 * Z.of_nat multiplier + 1.
 
-Definition parity_trace2_init_last_state : ParityState := (5, 1).
+Definition parity_trace2_init_last_state : ParityState := 1.
 
-Definition parity_trace2_last_state : ParityState :=
-  destination parity_trace2_last_item.
+Definition parity_trace2_last_state : ParityState := destination parity_trace2_last_item.
 
 (** The given trace is valid without the last transition. *)
 
 Proposition parity_valid_transition_1' :
   input_valid_transition ParityVLSM parity_label
-   (parity_trace2_init_first_state, Some 2) ((5, 3), Some 4).
-Proof. by app_valid_tran. Qed.
+   (parity_trace2_init_first_state, Some (Z.of_nat multiplier)) (Z.of_nat multiplier + 1, Some (Z.of_nat multiplier ^ 2)).
+Proof.
+  repeat split; [| | | lia |].
+  - apply initial_state_is_valid.
+    by assert (2 * Z.of_nat multiplier + 1 >= 1) by lia.
+  - by app_valid_tran; apply parity_can_emit_square_mult.
+  - by unfold parity_trace2_init_first_state; lia.
+  - by cbn; repeat f_equal; unfold parity_trace2_init_first_state; lia.
+Qed.
 
 Proposition parity_valid_transition_2' :
   input_valid_transition ParityVLSM parity_label
-   ((5, 3), Some 2) ((5, 1), Some 4).
-Proof. by app_valid_tran; apply parity_valid_transition_1'. Qed.
+  (Z.of_nat multiplier + 1, Some (Z.of_nat multiplier)) (1, Some (Z.of_nat multiplier ^ 2)).
+Proof. 
+  repeat split; [| | | lia |].
+  - apply initial_state_is_valid.
+    by assert (Z.of_nat multiplier + 1 >= 1) by lia.
+  - by app_valid_tran; apply parity_can_emit_square_mult.
+  - by unfold parity_trace2_init_first_state; lia.
+  - by cbn; repeat f_equal; unfold parity_trace2_init_first_state; lia.
+Qed.
 
 Example parity_valid_trace2_init :
   finite_valid_trace_init_to ParityVLSM
    parity_trace2_init_first_state parity_trace2_init_last_state parity_trace2_init.
 Proof.
-  constructor; [| done].
+  constructor; [| by assert (2 * Z.of_nat multiplier + 1 >= 1) by lia].
   repeat apply finite_valid_trace_from_to_extend.
-  - by eapply finite_valid_trace_from_to_empty,
-      input_valid_transition_destination, parity_valid_transition_2'.
+  - eapply finite_valid_trace_from_to_empty, input_valid_transition_destination, parity_valid_transition_2'.
   - by apply parity_valid_transition_2'.
   - by apply parity_valid_transition_1'.
 Qed.
@@ -319,9 +373,14 @@ Example parity_valid_trace2_init_alt :
   finite_valid_trace_init_to_alt ParityVLSM
    parity_trace2_init_first_state parity_trace2_init_last_state parity_trace2_init.
 Proof.
-  constructor; [| done].
-  by repeat apply mvt_extend; [..| apply mvt_empty]; try done;
-    apply parity_valid_message_prop_2.
+  constructor; [| by assert (2 * Z.of_nat multiplier + 1 >= 1) by lia].
+  repeat apply mvt_extend; [..| apply mvt_empty].
+  - by apply parity_valid_message_prop_mult.
+  - by apply parity_valid_transition_1'.
+  - by cbn; split; unfold parity_trace2_init_first_state; lia.
+  - by apply parity_valid_message_prop_mult.
+  - by apply parity_valid_transition_2'.
+  - by cbn; split; unfold parity_trace2_init_first_state; lia.
 Qed.
 
 (**
@@ -354,9 +413,11 @@ Proof.
   split; [| done].
   eapply (extend_right_finite_trace_from_to (pre_loaded_with_all_messages_vlsm ParityVLSM));
     [done |].
-  repeat split; [| | done..].
+  repeat split; [| | | lia |].
   - by eapply finite_valid_trace_from_to_last_pstate.
   - by apply any_message_is_valid_in_preloaded.
+  - by unfold parity_trace2_init_last_state; lia.
+  - by cbn; repeat f_equal; lia.
 Qed.
 
 (** *** Example of a valid transition
