@@ -556,10 +556,9 @@ Proof.
   induction Hvsm using valid_state_message_prop_ind.
   - unfold option_initial_message_prop, from_option in Hom.
     destruct om; [| done].
-    unfold initial_message_prop in Hom; cbn in Hom.
-    by exists 1; subst; split; [lia | f_equal; lia].
-  - destruct om, IHHvsm2 as [x Hx]; inversion Ht; cycle 1; [| done ..].
-    inversion H as [Hxgt1 Hsmx].
+    cbn in Hom.
+    by exists 1; split; [lia | f_equal; lia].
+  - destruct om, IHHvsm2 as [x Hx]; inversion Ht; cycle 1; [| done..].
     exists (x + 1).
     split; [by lia | f_equal].
     destruct Hx as [Hgeq1 Hsome]; apply Some_inj in Hsome; rewrite Hsome.
@@ -581,12 +580,9 @@ Proof.
   - intros x Hxgt0 Hindh.
     pose (msgin := multiplier ^ (x + 1)).
     apply emitted_messages_are_valid.
-    exists (msgin, Some (multiplier ^ (x + 1))), parity_label, 0. subst msgin; cbn.
-    repeat split.
+    exists (msgin, Some (multiplier ^ (x + 1))), parity_label, 0. cbn.
+    repeat split; [| by apply Hindh | lia.. |].
     + by apply initial_state_is_valid; cbn; unfold ParityComponent_initial_state_prop; lia.
-    + by apply Hindh.
-    + by lia.
-    + by lia.
     + cbn; rewrite <- Z.pow_succ_r, Z.add_succ_l; [do 2 f_equal; lia | lia].
 Qed.
 
@@ -605,19 +601,186 @@ Section sec_composition.
 
 Context {index : Type}
         (multipliers : index -> Z)
+        (Hmultipliers : forall (i : index), multipliers i <> 0)
         `{finite.Finite index}
         `{Inhabited index}.
 
 Definition indexed_parity_vlsms (i : index) : VLSM ParityMessage :=
   ParityVLSM (multipliers i).
 
-Definition parity_constraint
-  (l : composite_label indexed_parity_vlsms) (sm : composite_state indexed_parity_vlsms * option ParityMessage) : Prop :=
-  let i := projT1 l in
-  let (s', _) := composite_transition indexed_parity_vlsms l sm in
-  Z.even (((fst sm) i) + (s' i)).
+Context (parity_constraint : composite_label indexed_parity_vlsms ->
+                             composite_state indexed_parity_vlsms * option ParityMessage -> Prop).
 
 Definition parity_composite_vlsm : VLSM ParityMessage :=
   composite_vlsm indexed_parity_vlsms parity_constraint.
 
+Definition prod_powers_aux (powers : index -> nat) (l : list index) : Z := 
+  foldr Z.mul 1 (zip_with Z.pow (map multipliers l) (map (Z.of_nat ∘ powers) l)).
+
+Lemma prod_powers_aux_cons (powers : index -> nat) (a : index) (l : list index) :
+  prod_powers_aux powers (a :: l) = multipliers a ^ Z.of_nat (powers a) * prod_powers_aux powers l.
+Proof. done. Qed.
+
+Lemma prod_powers_aux_zero (powers : index -> nat) (l : list index) :
+  Forall (fun n => powers n = 0%nat) l -> prod_powers_aux powers l = 1.
+Proof.
+  intros Hforall.
+  induction Hforall; [done |].
+  rewrite prod_powers_aux_cons, IHHforall, H1. lia.
+Qed.
+
+Definition prod_powers (powers : index -> nat) : Z := prod_powers_aux powers (enum index).
+
+Definition update_powers (powers : index -> nat) (n : index) (nr : nat) (x : index): nat :=
+  if decide (n = x) then nr
+  else powers x.
+
+Lemma update_powers_eq (powers : index -> nat) (n : index) (nr : nat) :
+  update_powers powers n nr n = nr.
+Proof.
+  unfold update_powers. by rewrite decide_True.
+Qed.
+
+Lemma update_powers_neq (powers : index -> nat) (n : index) (x : index) (nr : nat) : n <> x ->
+  update_powers powers n nr x = powers x.
+Proof.
+  intros Hn.
+  unfold update_powers. by rewrite decide_False.
+Qed.
+
+Definition increment_powers (powers : index -> nat) (n : index) :=
+  update_powers powers n (S (powers n)).
+
+Lemma increment_powers_eq (powers : index -> nat) (n : index) :
+  increment_powers powers n n = S (powers n).
+Proof.
+  apply update_powers_eq.
+Qed.
+
+Lemma increment_powers_neq (powers : index -> nat) (n : index) (x : index) : n <> x ->
+  increment_powers powers n x = powers x.
+Proof.
+  apply update_powers_neq.
+Qed.
+
+Definition zero_powers (x : index) : nat := 0.
+
+Lemma prod_powers_zero : prod_powers zero_powers = 1.
+Proof.
+  apply prod_powers_aux_zero. by rewrite Forall_forall.
+Qed.
+
+Lemma prod_increment_powers (powers : index -> nat) (n : index) :
+  prod_powers (increment_powers powers n) = multipliers n * prod_powers powers.
+Proof.
+  unfold prod_powers.
+  pose proof (Hnodup := NoDup_enum index).
+  pose proof (Hn := elem_of_enum n).
+  revert Hnodup Hn.
+  generalize (enum index) as l.
+  induction l; [by inversion 2 |].
+  rewrite NoDup_cons, elem_of_cons, !prod_powers_aux_cons.
+  intros [Ha Hnodup] [Hn | Hn].
+  - subst. rewrite increment_powers_eq.
+    rewrite Zmult_assoc, <- Z.pow_succ_r; [| lia].
+    cut (prod_powers_aux (increment_powers powers a) l = prod_powers_aux powers l); [by intros ->; lia |]. 
+    clear IHl Hnodup.
+    induction l; [done |].
+    apply not_elem_of_cons in Ha as [Ha0 Ha].
+    by rewrite !prod_powers_aux_cons, IHl, increment_powers_neq by done.
+  - rewrite IHl by done. rewrite increment_powers_neq by set_solver.
+    by lia.
+Qed.
+
+Definition delta_powers (n : index) :=
+  increment_powers zero_powers n.
+
+Lemma prod_powers_delta (n : index) : prod_powers (delta_powers n) = multipliers n.
+Proof.
+  unfold delta_powers.
+  rewrite prod_increment_powers, prod_powers_zero.
+  by lia.
+Qed.
+
+Lemma composition_valid_messages_powers_of_mults_left (m : ParityMessage) :
+  valid_message_prop parity_composite_vlsm m ->
+  exists (powers : index -> nat) (i : index), Z.of_nat (powers i) >= 1 /\
+  m = prod_powers powers.
+  intros [s Hvsm]. remember (Some m) as om.
+  revert m Heqom.
+  induction Hvsm using valid_state_message_prop_ind; intros; subst.
+  - unfold option_initial_message_prop, from_option in Hom.
+    cbn in Hom.
+    unfold composite_initial_message_prop in Hom.
+    destruct Hom as (n & (mielem & mi) & Hmi).
+    cbn in mi, Hmi.
+    exists (delta_powers n), n.
+    unfold delta_powers at 1.
+    split; [by rewrite increment_powers_eq |].
+    f_equal. rewrite <- Hmi, mi. symmetry. apply prod_powers_delta.
+  - destruct l as (k & lk).
+    destruct om; [| done].
+    destruct (IHHvsm2 p) as [powers (i & Hi)]; [done |]; inversion Ht.
+    exists (increment_powers powers k), k.
+    split; [by rewrite increment_powers_eq; lia |].
+    f_equal.
+    destruct Hi as [Hgeq1 ->].
+    by rewrite prod_increment_powers.
+Qed.
+
+Inductive Powers : (index -> nat) -> Prop :=
+| P_zero : Powers zero_powers
+| P_succ : forall (i : index) (powers : index -> nat), Powers powers -> Powers (increment_powers powers i).
+
+Lemma Powers_powers (powers : index -> nat) : Powers powers.
+Proof.
+  remember (foldr plus 0%nat (map powers (enum index))) as n.
+  revert powers Heqn.
+  induction n using well_founded_ind.
+  destruct (decide (exists (i : index), powers i <> 0%nat)).
+  - destruct e as (x & Hx).
+    destruct (powers x) eqn : Heqx; [done |]. clear Hx.
+    pose (powers' := update_powers powers x n).
+    replace powers with (increment_powers powers' x).
+    apply P_succ.
+Qed.
+
 End sec_composition.
+
+Section sec_parity23.
+
+Inductive index23 := two | three.
+
+Definition multipliers23 (n : index23) : Z :=
+  match n with
+  | two => 2
+  | three => 3
+  end.
+
+#[local] Instance inhabited_index23 : Inhabited index23 := populate two.
+
+Print finite.Finite.
+
+#[local] Instance eq_dec_index23 : EqDecision index23.
+Proof.
+  intros x y.
+  unfold Decision.
+  decide equality.
+Qed.
+
+#[local] Instance finite_index23 : finite.Finite index23.
+Proof.
+  exists [two; three].
+  - repeat constructor; set_solver.
+  - intros []; set_solver.
+Qed.
+
+Definition parity_constraint
+  (l : composite_label (indexed_parity_vlsms multipliers23)) (sm : composite_state (indexed_parity_vlsms multipliers23) * option ParityMessage) : Prop :=
+  let i := projT1 l in
+  let (s', _) := composite_transition (indexed_parity_vlsms multipliers23) l sm in
+  Z.even (((fst sm) i) + (s' i)).
+
+Definition parity_composite_vlsm23 := parity_composite_vlsm multipliers23 parity_constraint.
+
+End sec_parity23.
