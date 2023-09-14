@@ -1,4 +1,5 @@
 From stdpp Require Import prelude finite.
+From Coq Require Import FunctionalExtensionality.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 
 (** * Parity VLSM
@@ -23,8 +24,8 @@ Lemma Zeven_unary_minus :
   forall n : Z, Z.Even n <-> Z.Even (-n).
 Proof. by intros n; split; intros [p Hp]; exists (-p); lia. Qed.
 
-(** Even right-hand side and difference implies even left-hand side 
-    This lemma will be useful when proving the final result of this section, because of the way 
+(** Even right-hand side and difference implies even left-hand side
+    This lemma will be useful when proving the final result of this section, because of the way
     we defined the transitions in the Parity VLSM
 *)
 Lemma Zeven_sub_preserve_parity :
@@ -258,7 +259,7 @@ Proof.
   - by cbn; do 2 f_equal; lia.
 Qed.
 
-Proposition parity_valid_transition_3 : 
+Proposition parity_valid_transition_3 :
   input_valid_transition ParityVLSM parity_label
   (multiplier ^ 3 - multiplier ^ 2 - multiplier, Some multiplier)
   (multiplier ^ 3 - multiplier ^ 2 - multiplier - multiplier, Some (multiplier ^ 2)).
@@ -314,7 +315,7 @@ Proof.
                   unfold ParityComponent_initial_state_prop; lia].
   repeat apply ct_extend; [..| apply ct_empty].
   - by apply parity_valid_transition_1.
-  - cbn. split; [| lia]. 
+  - cbn. split; [| lia].
     by unfold parity_trace1_first_state; nia.
   - by apply parity_valid_transition_2.
   - cbn; split; [nia|lia].
@@ -357,7 +358,7 @@ Qed.
 Proposition parity_valid_transition_2' :
   input_valid_transition ParityVLSM parity_label
   (multiplier + 1, Some multiplier) (1, Some (multiplier ^ 2)).
-Proof. 
+Proof.
   repeat split; [| | | lia |].
   - unfold parity_trace2_init_first_state; apply initial_state_is_valid; cbn;
      unfold ParityComponent_initial_state_prop; lia.
@@ -614,7 +615,7 @@ Context (parity_constraint : composite_label indexed_parity_vlsms ->
 Definition parity_composite_vlsm : VLSM ParityMessage :=
   composite_vlsm indexed_parity_vlsms parity_constraint.
 
-Definition prod_powers_aux (powers : index -> nat) (l : list index) : Z := 
+Definition prod_powers_aux (powers : index -> nat) (l : list index) : Z :=
   foldr Z.mul 1 (zip_with Z.pow (map multipliers l) (map (Z.of_nat ∘ powers) l)).
 
 Lemma prod_powers_aux_cons (powers : index -> nat) (a : index) (l : list index) :
@@ -628,6 +629,29 @@ Proof.
   induction Hforall; [done |].
   rewrite prod_powers_aux_cons, IHHforall, H1. lia.
 Qed.
+
+Definition sum_powers_aux (powers : index -> nat) (l : list index) : nat :=
+  foldr plus 0%nat (map powers l).
+
+Lemma sum_powers_aux_zero (powers : index -> nat) (l : list index) :
+  Forall (fun n => powers n = 0%nat) l -> sum_powers_aux powers l = 0%nat.
+Proof.
+  unfold sum_powers_aux; intros Hforall.
+  induction Hforall; [done |].
+  by cbn; rewrite IHHforall, H1.
+Qed.
+
+Lemma sum_powers_aux_zero_rev (powers : index -> nat) (l : list index) :
+  sum_powers_aux powers l = 0%nat -> Forall (fun n => powers n = 0%nat) l.
+Proof.
+  unfold sum_powers_aux; induction l; [by constructor |].
+  cbn in *.
+  intros Hzero.
+  constructor; [by lia |].
+  by apply IHl; lia.
+Qed.
+
+Definition sum_powers (powers : index -> nat) : nat := sum_powers_aux powers (enum index).
 
 Definition prod_powers (powers : index -> nat) : Z := prod_powers_aux powers (enum index).
 
@@ -670,6 +694,40 @@ Proof.
   apply prod_powers_aux_zero. by rewrite Forall_forall.
 Qed.
 
+Lemma sum_powers_zero_iff (powers : index -> nat) :
+  sum_powers powers = 0%nat <-> powers = zero_powers.
+Proof.
+  split.
+  - intros Hzero.
+    apply sum_powers_aux_zero_rev in Hzero.
+    rewrite Forall_forall in Hzero.
+    by extensionality x; apply Hzero, elem_of_enum.
+  - intros ->.
+    by apply sum_powers_aux_zero, Forall_forall.
+Qed.
+
+Lemma sum_increment_powers (powers : index -> nat) (n : index) :
+  sum_powers (increment_powers powers n) = S (sum_powers powers).
+Proof.
+  unfold sum_powers.
+  pose proof (Hnodup := NoDup_enum index).
+  pose proof (Hn := elem_of_enum n).
+  revert Hnodup Hn.
+  generalize (enum index) as l.
+  induction l; [by inversion 2 |].
+  rewrite NoDup_cons, elem_of_cons; cbn.
+  intros [Ha Hnodup] [Hn | Hn].
+  - subst. rewrite increment_powers_eq; cbn.
+    do 2 f_equal.
+    clear IHl Hnodup.
+    induction l; [done |].
+    apply not_elem_of_cons in Ha as [Ha0 Ha]; cbn.
+    by rewrite IHl, increment_powers_neq.
+  - unfold sum_powers_aux in IHl; rewrite IHl by done.
+    rewrite increment_powers_neq by set_solver.
+    by lia.
+Qed.
+
 Lemma prod_increment_powers (powers : index -> nat) (n : index) :
   prod_powers (increment_powers powers n) = multipliers n * prod_powers powers.
 Proof.
@@ -683,7 +741,7 @@ Proof.
   intros [Ha Hnodup] [Hn | Hn].
   - subst. rewrite increment_powers_eq.
     rewrite Zmult_assoc, <- Z.pow_succ_r; [| lia].
-    cut (prod_powers_aux (increment_powers powers a) l = prod_powers_aux powers l); [by intros ->; lia |]. 
+    cut (prod_powers_aux (increment_powers powers a) l = prod_powers_aux powers l); [by intros ->; lia |].
     clear IHl Hnodup.
     induction l; [done |].
     apply not_elem_of_cons in Ha as [Ha0 Ha].
@@ -734,15 +792,44 @@ Inductive Powers : (index -> nat) -> Prop :=
 
 Lemma Powers_powers (powers : index -> nat) : Powers powers.
 Proof.
-  remember (foldr plus 0%nat (map powers (enum index))) as n.
+  remember (sum_powers powers) as n.
   revert powers Heqn.
-  induction n using well_founded_ind.
-  destruct (decide (exists (i : index), powers i <> 0%nat)).
-  - destruct e as (x & Hx).
-    destruct (powers x) eqn : Heqx; [done |]. clear Hx.
-    pose (powers' := update_powers powers x n).
-    replace powers with (increment_powers powers' x).
-    apply P_succ.
+  induction n; intros.
+  - symmetry in Heqn. apply sum_powers_zero_iff in Heqn as ->.
+    by constructor.
+  - assert (Hnz : exists (i : index), powers i <> 0%nat).
+    {
+      apply Exists_finite, not_Forall_Exists; [by typeclasses eauto |].
+      intros Hall.
+      by unfold sum_powers in Heqn; rewrite sum_powers_aux_zero in Heqn.
+    }
+    destruct Hnz as (x & Hx).
+    destruct (powers x) as [| px] eqn : Heqx; [done |]. clear Hx.
+    pose (powers' := update_powers powers x px).
+    assert (Heq : powers = increment_powers powers' x).
+    {
+      extensionality y; unfold increment_powers, powers'.
+      destruct (decide (x = y)); [by subst; rewrite !update_powers_eq |].
+      by rewrite !update_powers_neq.
+    }
+    rewrite Heq.
+    constructor.
+    apply IHn.
+    rewrite Heq, sum_increment_powers in Heqn.
+    by congruence.
+Qed.
+
+Lemma powers_ind
+  (P : (index -> nat) -> Prop)
+  (Hzero : P zero_powers)
+  (Hsucc : forall (i : index) (powers : index -> nat),
+    P powers -> P (increment_powers powers i)) :
+  forall (powers : index -> nat), P powers.
+Proof.
+  intro powers.
+  pose proof (Hpowers := Powers_powers powers).
+  induction Hpowers; [done |].
+  by apply Hsucc.
 Qed.
 
 End sec_composition.
