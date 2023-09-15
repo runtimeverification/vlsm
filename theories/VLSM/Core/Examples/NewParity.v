@@ -141,11 +141,10 @@ Proof. done. Qed.
 
 Definition parity_trace1_init : list (transition_item ParityVLSM) :=
   [ Build_transition_item parity_label (Some (multiplier ^ 2))
-                                           (multiplier ^ 3 - multiplier ^ 2)
-                                           (Some (multiplier ^ 3))
+      (multiplier ^ 3 - multiplier ^ 2) (Some (multiplier ^ 3))
   ; Build_transition_item parity_label (Some multiplier)
-                                           (multiplier ^ 3 - multiplier ^ 2 - multiplier)
-                                           (Some (multiplier ^ 2)) ].
+      (multiplier ^ 3 - multiplier ^ 2 - multiplier)
+      (Some (multiplier ^ 2)) ].
 
 Definition parity_trace1_last_item : transition_item ParityVLSM :=
   Build_transition_item parity_label (Some multiplier)
@@ -173,7 +172,8 @@ Proof.
   - by app_valid_tran.
 Qed.
 
-Example parity_valid_message_prop_square_mult : multiplier > 0 -> valid_message_prop ParityVLSM (multiplier ^ 2).
+Example parity_valid_message_prop_square_mult :
+ multiplier > 0 -> valid_message_prop ParityVLSM (multiplier ^ 2).
 Proof.
   intros Hgeq0.
   by eapply (emitted_messages_are_valid ParityVLSM (multiplier ^ 2) (parity_can_emit_square_mult Hgeq0)).
@@ -205,8 +205,8 @@ Qed.
 
 Proposition parity_valid_transition_3 : multiplier >= 2 ->
   input_valid_transition ParityVLSM parity_label
-  (multiplier ^ 3 - multiplier ^ 2 - multiplier, Some multiplier)
-  (multiplier ^ 3 - multiplier ^ 2 - multiplier - multiplier, Some (multiplier ^ 2)).
+   (multiplier ^ 3 - multiplier ^ 2 - multiplier, Some multiplier)
+   (multiplier ^ 3 - multiplier ^ 2 - multiplier - multiplier, Some (multiplier ^ 2)).
 Proof.
   repeat split; [| | | lia |].
   - by app_valid_tran; apply parity_valid_transition_2.
@@ -268,8 +268,7 @@ Proof.
 Qed.
 
 Definition parity_trace2_init : list (transition_item ParityVLSM) :=
-  [ Build_transition_item parity_label (Some multiplier) (multiplier + 1)
-                                           (Some (multiplier ^ 2))
+  [ Build_transition_item parity_label (Some multiplier) (multiplier + 1) (Some (multiplier ^ 2))
   ; Build_transition_item parity_label (Some multiplier) 1 (Some (multiplier ^ 2)) ].
 
 Definition parity_trace2_last_item : transition_item ParityVLSM :=
@@ -474,8 +473,7 @@ Proof.
 Qed.
 
 Lemma parity_constrained_states_left :
-  forall (st : ParityState), st >= 0 ->
-    constrained_state_prop_alt ParityVLSM st.
+  forall (st : ParityState), st >= 0 -> constrained_state_prop_alt ParityVLSM st.
 Proof.
   intros st Hst.
   unfold constrained_state_prop_alt.
@@ -487,8 +485,7 @@ Proof.
 Qed.
 
 Lemma parity_constrained_states :
-  forall (st : ParityState),
-    constrained_state_prop_alt ParityVLSM st <-> st >= 0.
+  forall (st : ParityState), constrained_state_prop_alt ParityVLSM st <-> st >= 0.
 Proof.
   split.
   - by apply parity_constrained_states_right.
@@ -610,7 +607,8 @@ Definition zero_powers (x : index) : nat := 0.
 
 Inductive Powers : (index -> nat) -> Prop :=
 | P_zero : Powers zero_powers
-| P_succ : forall (i : index) (powers : index -> nat), Powers powers -> Powers (increment_powers powers i).
+| P_succ : forall (i : index) (powers : index -> nat),
+   Powers powers -> Powers (increment_powers powers i).
 
 Lemma sum_powers_zero_iff (powers : index -> nat) :
   sum_powers powers = 0%nat <-> powers = zero_powers.
@@ -701,14 +699,15 @@ Context {index : Type}
 Definition indexed_parity_vlsms (i : index) : VLSM ParityMessage :=
   ParityVLSM (multipliers i).
 
-Context (parity_constraint : composite_label indexed_parity_vlsms ->
-                             composite_state indexed_parity_vlsms * option ParityMessage -> Prop).
+Context
+ (parity_constraint : composite_label indexed_parity_vlsms ->
+   composite_state indexed_parity_vlsms * option ParityMessage -> Prop).
 
 Definition parity_composite_vlsm : VLSM ParityMessage :=
   composite_vlsm indexed_parity_vlsms parity_constraint.
 
 Lemma composite_state_pos (s : composite_state indexed_parity_vlsms)
-(Hs : valid_state_prop parity_composite_vlsm s) :
+ (Hs : valid_state_prop parity_composite_vlsm s) :
   forall (i : index), s i >= 0.
 Proof.
   intros i.
@@ -735,7 +734,7 @@ Definition prod_powers (powers : index -> nat) : Z := prod_powers_aux powers (en
 
 Lemma prod_powers_zero : prod_powers zero_powers = 1.
 Proof.
-  apply prod_powers_aux_zero. by rewrite Forall_forall.
+  by apply prod_powers_aux_zero; rewrite Forall_forall.
 Qed.
 
 Lemma prod_increment_powers (powers : index -> nat) (n : index) :
@@ -760,8 +759,7 @@ Proof.
     by lia.
 Qed.
 
-Definition delta_powers (n : index) :=
-  increment_powers zero_powers n.
+Definition delta_powers (n : index) := increment_powers zero_powers n.
 
 Lemma prod_powers_delta (n : index) : prod_powers (delta_powers n) = multipliers n.
 Proof.
@@ -771,7 +769,7 @@ Proof.
 Qed.
 
 Lemma prod_powers_pos (Hmpos : forall (i : index), multipliers i > 0) :
-forall (powers : index -> nat), prod_powers powers > 0.
+ forall (powers : index -> nat), prod_powers powers > 0.
 Proof.
   intros powers.
   induction powers using powers_ind; [by rewrite prod_powers_zero |].
@@ -782,6 +780,7 @@ Qed.
 Lemma composition_valid_messages_powers_of_mults_right (m : ParityMessage) :
   valid_message_prop parity_composite_vlsm m ->
   exists (powers : index -> nat) (i : index), Z.of_nat (powers i) >= 1 /\ m = prod_powers powers.
+Proof.
   intros [s Hvsm]. remember (Some m) as om.
   revert m Heqom.
   induction Hvsm using valid_state_message_prop_ind; intros; subst.
@@ -810,16 +809,16 @@ End sec_composition.
 Section sec_free_composition.
 
 Context {index : Type}
-        (multipliers : index -> Z)
-        (Hmultipliers : forall (i : index), multipliers i <> 0)
-        `{finite.Finite index}
-        `{Inhabited index}.
+  (multipliers : index -> Z)
+  (Hmultipliers : forall (i : index), multipliers i <> 0)
+  `{finite.Finite index}
+  `{Inhabited index}.
 
 Definition free_parity_composite_vlsm : VLSM ParityMessage :=
   free_composite_vlsm (indexed_parity_vlsms multipliers).
 
 Lemma composition_valid_messages_powers_of_mults_left
-(Hmpos : forall (i : index), multipliers i > 0) (m : ParityMessage) :
+ (Hmpos : forall (i : index), multipliers i > 0) (m : ParityMessage) :
   forall (powers : index -> nat) (i : index), Z.of_nat (powers i) >= 1 /\ m = prod_powers multipliers powers ->
   valid_message_prop free_parity_composite_vlsm m.
 Proof.
@@ -865,7 +864,7 @@ Proof.
 Qed.
 
 Lemma composition_valid_messages_powers_of_mults
-(Hmpos : forall (i : index), multipliers i > 0) (m : ParityMessage) :
+ (Hmpos : forall (i : index), multipliers i > 0) (m : ParityMessage) :
   (exists (powers : index -> nat) (i : index), Z.of_nat (powers i) >= 1 /\ m = prod_powers multipliers powers) <->
   valid_message_prop free_parity_composite_vlsm m.
 Proof.
@@ -1047,7 +1046,7 @@ Lemma final_state_prop23_right (s : composite_state (indexed_parity_vlsms multip
 Proof.
   intros [Hs Hfinal].
   destruct (decide ((s two = 0 /\ s three = 0) \/ (s two = 0 /\ s three = 1) \/
-                    (s two = 1 /\ s three = 0) \/ (s two = 1 /\ s three = 1))); [done |].
+    (s two = 1 /\ s three = 0) \/ (s two = 1 /\ s three = 1))); [done |].
   assert (exists (i : index23), s i > 1) as [i Hi].
   {
     cut (s two > 1 \/ s three > 1).
@@ -1059,7 +1058,9 @@ Proof.
     lia.
   }
   contradict Hfinal. clear n.
-  exists (existT i parity_label), (Some 2), (state_update (indexed_parity_vlsms multipliers23) s i (s i - 2), Some (multipliers23 i * 2)).
+  exists (existT i parity_label), (Some 2),
+   (state_update (indexed_parity_vlsms multipliers23) s i (s i - 2),
+   Some (multipliers23 i * 2)).
   repeat split; [done |..].
   - apply initial_message_is_valid. exists two.
     assert (initial_message_prop (indexed_parity_vlsms multipliers23 two) 2) by done.
