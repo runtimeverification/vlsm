@@ -6,68 +6,11 @@ From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 
   This module demonstrates some basic notions of the VLSM framework.
   The idea of the parity VLSM is to store an integer and continually decrement it,
-  while a constraint is checked at each step. The name originates from the
-  property of this VLSM to accept as constrained messages even numbers.
-  The definitions and lemmas tap into concepts such as valid and constrained traces,
-  transitions, states, and messages.
+  while a constraint is checked at each step. The definitions and lemmas tap into
+  concepts such as valid and constrained traces, transitions, states, and messages.
 *)
 
 #[local] Open Scope Z_scope.
-
-(** ** General arithmetic results
-
-  These lemmas will be helpful in subsequent proofs.
-*)
-
-(** Parity is preserved by taking opposite *)
-Lemma Zeven_unary_minus :
-  forall n : Z, Z.Even n <-> Z.Even (-n).
-Proof. by intros n; split; intros [p Hp]; exists (-p); lia. Qed.
-
-(** Even right-hand side and difference implies even left-hand side
-    This lemma will be useful when proving the final result of this section, because of the way
-    we defined the transitions in the Parity VLSM
-*)
-Lemma Zeven_sub_preserve_parity :
-  forall (n m : Z), Z.Even n -> Z.Even (m - n) -> Z.Even m.
-Proof. by intros m n [m'] [n']; exists (m' + n'); lia. Qed.
-
-(** Parity is preserved by addition *)
-Lemma Zeven_equiv_plus :
-  forall (n m : Z), (Z.Even n <-> Z.Even m) -> Z.Even (m + n).
-Proof.
-  intros n m Hparity.
-  destruct (Zeven_odd_dec m).
-  - apply Zeven_equiv, Zeven_plus_Zeven; [done |].
-    by rewrite Zeven_equiv, Hparity, <- Zeven_equiv.
-  - apply Zeven_equiv, Zodd_plus_Zodd; [done |].
-    destruct (Zeven_odd_dec n); [| done].
-    exfalso.
-    eapply Zodd_not_Zeven; [done |].
-    by rewrite Zeven_equiv, <- Hparity, <- Zeven_equiv.
-Qed.
-
-(** Parity is preserved by subtraction *)
-Lemma Zeven_equiv_minus :
-  forall (n m : Z), (Z.Even n <-> Z.Even m) -> Z.Even (m - n).
-Proof.
-  intros n m **.
-  replace (m - n) with (m + (-n)) by lia.
-  apply Zeven_equiv_plus.
-  etransitivity; [| done].
-  symmetry.
-  by apply Zeven_unary_minus.
-Qed.
-
-Lemma Zeven_plus_equiv :
-  forall (n m : Z), Z.Even n -> (Z.Even m <-> Z.Even (m + n)).
-Proof.
-  split; intros.
-  - by apply Zeven_equiv, Zeven_plus_Zeven; rewrite Zeven_equiv.
-  - apply Zeven_sub_preserve_parity with (m + n); [done |].
-    replace (m - (m + n)) with (-n) by lia.
-    by rewrite <- Zeven_unary_minus.
-Qed.
 
 (** ** General automation *)
 
@@ -130,7 +73,7 @@ Definition ParityComponent_transition
   | None    => (st, None)
   end.
 
-Definition ParityComponentValid (l : ParityLabel) (st : ParityState)
+Definition ParityComponent_valid (l : ParityLabel) (st : ParityState)
 (om : option ParityMessage) : Prop :=
   match om with
   | Some msg => msg <= st /\ 1 <= msg
@@ -165,7 +108,7 @@ Definition ParityMachine : VLSMMachine ParityType :=
   initial_message_prop := fun (ms : ParityMessage) => ms = multiplier;
   s0 := ParityComponent_Inhabited_initial_state_type;
   transition := fun l '(st, om) => ParityComponent_transition l st om;
-  valid := fun l '(st, om) => ParityComponentValid l st om;
+  valid := fun l '(st, om) => ParityComponent_valid l st om;
 |}.
 
 (** The definition of the Parity VLSM. *)
@@ -764,6 +707,15 @@ Context (parity_constraint : composite_label indexed_parity_vlsms ->
 Definition parity_composite_vlsm : VLSM ParityMessage :=
   composite_vlsm indexed_parity_vlsms parity_constraint.
 
+Lemma composite_state_pos (s : composite_state indexed_parity_vlsms)
+(Hs : valid_state_prop parity_composite_vlsm s) :
+  forall (i : index), s i >= 0.
+Proof.
+  intros i.
+  apply parity_constrained_states_right with (multipliers i).
+  by apply (valid_state_project_preloaded ParityMessage indexed_parity_vlsms parity_constraint).
+Qed.
+
 Definition prod_powers_aux (powers : index -> nat) (l : list index) : Z :=
   foldr Z.mul 1 (zip_with Z.pow (map multipliers l) (map (Z.of_nat ∘ powers) l)).
 
@@ -785,7 +737,6 @@ Lemma prod_powers_zero : prod_powers zero_powers = 1.
 Proof.
   apply prod_powers_aux_zero. by rewrite Forall_forall.
 Qed.
-
 
 Lemma prod_increment_powers (powers : index -> nat) (n : index) :
   prod_powers (increment_powers powers n) = multipliers n * prod_powers powers.
@@ -855,8 +806,6 @@ Lemma composition_valid_messages_powers_of_mults_right (m : ParityMessage) :
 Qed.
 
 End sec_composition.
-
-Print powers_ind.
 
 Section sec_free_composition.
 
@@ -967,8 +916,157 @@ Definition parity_constraint
   (l : composite_label (indexed_parity_vlsms multipliers23)) (sm : composite_state (indexed_parity_vlsms multipliers23) * option ParityMessage) : Prop :=
   let i := projT1 l in
   let (s', _) := composite_transition (indexed_parity_vlsms multipliers23) l sm in
-  Z.even (((fst sm) i) + (s' i)).
+  Z.Even (((fst sm) i) + (s' i)).
 
 Definition parity_composite_vlsm23 := parity_composite_vlsm multipliers23 parity_constraint.
+
+Definition final_state (s : composite_state (indexed_parity_vlsms multipliers23)) :=
+  valid_state_prop parity_composite_vlsm23 s /\
+  ¬ exists (l : composite_label (indexed_parity_vlsms multipliers23))
+           (om : option ParityMessage)
+           (som' : composite_state (indexed_parity_vlsms multipliers23) * option ParityMessage),
+  input_valid_transition parity_composite_vlsm23 l (s, om) som'.
+
+Definition statenm (n m : Z) : composite_state (indexed_parity_vlsms multipliers23) :=
+  fun (i : index23) => match i with two => n | three => m end.
+
+Definition state00 := statenm 0 0.
+
+Definition state01 := statenm 0 1.
+
+Definition state10 := statenm 1 0.
+
+Definition state11 := statenm 1 1.
+
+Definition state12 := statenm 1 2.
+
+Definition state21 := statenm 2 1.
+
+Definition state22 := statenm 2 2.
+
+Definition state02 := statenm 0 2.
+
+Example valid_statenm_geq1 (n m : Z) (Hn : n >= 1) (Hm : m >= 1) :
+  valid_state_prop parity_composite_vlsm23 (statenm n m).
+Proof.
+  by apply initial_state_is_valid; cbn; unfold composite_initial_state_prop; cbn;
+  unfold ParityComponent_initial_state_prop; intros p; unfold statenm; cbn; destruct p; lia.
+Qed.
+
+Example valid_state11 : valid_state_prop parity_composite_vlsm23 state11.
+Proof.
+  by assert (H1 : 1 >= 1) by lia; apply (valid_statenm_geq1 1 1 H1); lia.
+Qed.
+
+Example valid_state00 : valid_state_prop parity_composite_vlsm23 state00.
+Proof.
+  assert (H2 : 2 >= 1) by lia.
+  apply input_valid_transition_destination with (l := existT three parity_label)
+    (s := state02) (om := Some 2) (om' := Some 6).
+  repeat split.
+  - apply input_valid_transition_destination with (l := existT two parity_label)
+      (s := state22) (om := Some 2) (om' := Some 4).
+    repeat split.
+    + by apply (valid_statenm_geq1 2 2 H2 H2).
+    + apply initial_message_is_valid. exists two.
+      assert (initial_message_prop (indexed_parity_vlsms multipliers23 two) 2) by done.
+      by exists (exist _ 2 H).
+    + by cbn; lia.
+    + by lia.
+    + by cbn; state_update_simpl; exists 1; lia.
+    + by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn; lia.
+  - apply initial_message_is_valid. exists two.
+    assert (initial_message_prop (indexed_parity_vlsms multipliers23 two) 2) by done.
+    by exists (exist _ 2 H).
+  - unfold state02. cbn. lia.
+  - by lia.
+  - by cbn; state_update_simpl; exists 1; lia.
+  - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn; lia.
+Qed.
+
+Example valid_state01 : valid_state_prop parity_composite_vlsm23 state01.
+Proof.
+assert (H1 : 1 >= 1) by lia; assert (H2 : 2 >= 1) by lia.
+  apply input_valid_transition_destination with (l := existT two parity_label)
+    (s := state21) (om := Some 2) (om' := Some 4).
+  repeat split.
+  - by apply (valid_statenm_geq1 2 1 H2 H1).
+  - apply initial_message_is_valid. exists two.
+    assert (initial_message_prop (indexed_parity_vlsms multipliers23 two) 2) by done.
+    by exists (exist _ 2 H).
+  - by cbn; lia.
+  - by lia.
+  - by cbn; state_update_simpl; exists 1; lia.
+  - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn; lia.
+Qed.
+
+Example valid_state10 : valid_state_prop parity_composite_vlsm23 state10.
+Proof.
+  assert (H1 : 1 >= 1) by lia; assert (H2 : 2 >= 1) by lia.
+  apply input_valid_transition_destination with (l := existT three parity_label)
+    (s := state12) (om := Some 2) (om' := Some 6).
+  repeat split.
+  - by apply (valid_statenm_geq1 1 2 H1 H2).
+  - apply initial_message_is_valid. exists two.
+    assert (initial_message_prop (indexed_parity_vlsms multipliers23 two) 2) by done.
+    by exists (exist _ 2 H).
+  - by cbn; lia.
+  - by lia.
+  - by cbn; state_update_simpl; exists 1; lia.
+  - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn; lia.
+Qed.
+
+Lemma final_state_prop23_left (s : composite_state (indexed_parity_vlsms multipliers23)) :
+  (s = state00) \/ (s = state01) \/ (s = state10) \/ (s = state11) -> final_state s.
+Proof.
+  intros Hcases.
+  split.
+  - destruct Hcases as [Hst | [Hst | [Hst | Hst]]]; subst.
+    + by apply valid_state00.
+    + by apply valid_state01.
+    + by apply valid_state10.
+    + by apply valid_state11.
+  - intros ([i li] & om & som' & (Hs & Hom & Hv & Hc) & Ht).
+    unfold parity_constraint in Hc.
+    replace (composite_transition _ _ _) with som' in Hc.
+    destruct om; [| done].
+    cbn in *; subst.
+    state_update_simpl.
+    assert (Z.Even p) as [n Hp].
+      {
+        destruct Hc as [n Hc].
+        exists (s i - n).
+        by lia.
+      }
+    by destruct Hcases as [Hst | [Hst | [Hst | Hst]]]; subst; destruct i; cbn in *; lia.
+Qed.
+
+Lemma final_state_prop23_right (s : composite_state (indexed_parity_vlsms multipliers23)) :
+  final_state s -> (s two = 0 /\ s three = 0) \/ (s two = 0 /\ s three = 1) \/
+                   (s two = 1 /\ s three = 0) \/ (s two = 1 /\ s three = 1).
+Proof.
+  intros [Hs Hfinal].
+  destruct (decide ((s two = 0 /\ s three = 0) \/ (s two = 0 /\ s three = 1) \/
+                    (s two = 1 /\ s three = 0) \/ (s two = 1 /\ s three = 1))); [done |].
+  assert (exists (i : index23), s i > 1) as [i Hi].
+  {
+    cut (s two > 1 \/ s three > 1).
+    {
+      by intros []; eexists.
+    }
+    assert (s two >= 0) by (eapply composite_state_pos; done).
+    assert (s three >= 0) by (eapply composite_state_pos; done).
+    lia.
+  }
+  contradict Hfinal. clear n.
+  exists (existT i parity_label), (Some 2), (state_update (indexed_parity_vlsms multipliers23) s i (s i - 2), Some (multipliers23 i * 2)).
+  repeat split; [done |..].
+  - apply initial_message_is_valid. exists two.
+    assert (initial_message_prop (indexed_parity_vlsms multipliers23 two) 2) by done.
+    by exists (exist _ 2 H).
+  - by lia.
+  - by lia.
+  - by cbn; state_update_simpl; exists (s i - 1); lia.
+Qed.
 
 End sec_parity23.
