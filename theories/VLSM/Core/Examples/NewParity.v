@@ -27,12 +27,13 @@ Ltac app_valid_tran :=
 
 Section sec_parity_vlsm.
 
-Context (multiplier : Z)
-        (multiplier_geq_0 : multiplier <> 0)
-        (index : Type)
-        `{finite.Finite index}
-        `{Inhabited index}
-        .
+Context
+ (multiplier : Z)
+ (multiplier_geq_0 : multiplier <> 0)
+ (index : Type)
+ `{finite.Finite index}
+ `{Inhabited index}
+ .
 
 (** ** Definition of Parity VLSM
 
@@ -141,10 +142,9 @@ Proof. done. Qed.
 
 Definition parity_trace1_init : list (transition_item ParityVLSM) :=
   [ Build_transition_item parity_label (Some (multiplier ^ 2))
-      (multiplier ^ 3 - multiplier ^ 2) (Some (multiplier ^ 3))
+     (multiplier ^ 3 - multiplier ^ 2) (Some (multiplier ^ 3))
   ; Build_transition_item parity_label (Some multiplier)
-      (multiplier ^ 3 - multiplier ^ 2 - multiplier)
-      (Some (multiplier ^ 2)) ].
+     (multiplier ^ 3 - multiplier ^ 2 - multiplier) (Some (multiplier ^ 2)) ].
 
 Definition parity_trace1_last_item : transition_item ParityVLSM :=
   Build_transition_item parity_label (Some multiplier)
@@ -808,11 +808,13 @@ End sec_composition.
 
 Section sec_free_composition.
 
-Context {index : Type}
+Context
+  {index : Type}
   (multipliers : index -> Z)
   (Hmultipliers : forall (i : index), multipliers i <> 0)
   `{finite.Finite index}
-  `{Inhabited index}.
+  `{Inhabited index}
+  .
 
 Definition free_parity_composite_vlsm : VLSM ParityMessage :=
   free_composite_vlsm (indexed_parity_vlsms multipliers).
@@ -898,21 +900,18 @@ Definition multipliers23 (n : index23) : Z :=
 #[local] Instance inhabited_index23 : Inhabited index23 := populate two.
 
 #[local] Instance eq_dec_index23 : EqDecision index23.
-Proof.
-  intros x y.
-  unfold Decision.
-  decide equality.
-Qed.
+Proof. by intros x y; unfold Decision; decide equality. Qed.
 
 #[local] Instance finite_index23 : finite.Finite index23.
 Proof.
   exists [two; three].
-  - repeat constructor; set_solver.
-  - intros []; set_solver.
+  - by repeat constructor; set_solver.
+  - by intros []; set_solver.
 Qed.
 
 Definition parity_constraint
-  (l : composite_label (indexed_parity_vlsms multipliers23)) (sm : composite_state (indexed_parity_vlsms multipliers23) * option ParityMessage) : Prop :=
+  (l : composite_label (indexed_parity_vlsms multipliers23))
+  (sm : composite_state (indexed_parity_vlsms multipliers23) * option ParityMessage) : Prop :=
   let i := projT1 l in
   let (s', _) := composite_transition (indexed_parity_vlsms multipliers23) l sm in
   Z.Even (((fst sm) i) + (s' i)).
@@ -948,14 +947,13 @@ Definition state02 := statenm 0 2.
 Example valid_statenm_geq1 (n m : Z) (Hn : n >= 1) (Hm : m >= 1) :
   valid_state_prop parity_composite_vlsm23 (statenm n m).
 Proof.
-  by apply initial_state_is_valid; cbn; unfold composite_initial_state_prop; cbn;
-  unfold ParityComponent_initial_state_prop; intros p; unfold statenm; cbn; destruct p; lia.
+  by apply initial_state_is_valid; cbn; unfold composite_initial_state_prop;
+   cbn; unfold ParityComponent_initial_state_prop; intros p; unfold statenm;
+   cbn; destruct p; lia.
 Qed.
 
 Example valid_state11 : valid_state_prop parity_composite_vlsm23 state11.
-Proof.
-  by assert (H1 : 1 >= 1) by lia; apply (valid_statenm_geq1 1 1 H1); lia.
-Qed.
+Proof. by apply (valid_statenm_geq1 1 1); lia. Qed.
 
 Example valid_state00 : valid_state_prop parity_composite_vlsm23 state00.
 Proof.
@@ -977,7 +975,7 @@ Proof.
   - apply initial_message_is_valid. exists two.
     assert (initial_message_prop (indexed_parity_vlsms multipliers23 two) 2) by done.
     by exists (exist _ 2 H).
-  - unfold state02. cbn. lia.
+  - by unfold state02; cbn; lia.
   - by lia.
   - by cbn; state_update_simpl; exists 1; lia.
   - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn; lia.
@@ -1016,7 +1014,8 @@ Proof.
 Qed.
 
 Lemma final_state_prop23_left (s : composite_state (indexed_parity_vlsms multipliers23)) :
-  (s = state00) \/ (s = state01) \/ (s = state10) \/ (s = state11) -> final_state s.
+  (s = state00 \/ s = state01 \/ s = state10 \/ s = state11) ->
+  final_state s.
 Proof.
   intros Hcases.
   split.
@@ -1031,18 +1030,14 @@ Proof.
     destruct om; [| done].
     cbn in *; subst.
     state_update_simpl.
-    assert (Z.Even p) as [n Hp].
-      {
-        destruct Hc as [n Hc].
-        exists (s i - n).
-        by lia.
-      }
-    by destruct Hcases as [Hst | [Hst | [Hst | Hst]]]; subst; destruct i; cbn in *; lia.
+    assert (Z.Even p) as [n Hp] by (destruct Hc as [n Hc]; exists (s i - n); lia).
+    by destruct Hcases as [Hst |[Hst |[Hst | Hst]]]; subst; destruct i; cbn in *; lia.
 Qed.
 
 Lemma final_state_prop23_right (s : composite_state (indexed_parity_vlsms multipliers23)) :
-  final_state s -> (s two = 0 /\ s three = 0) \/ (s two = 0 /\ s three = 1) \/
-                   (s two = 1 /\ s three = 0) \/ (s two = 1 /\ s three = 1).
+  final_state s ->
+   (s two = 0 /\ s three = 0) \/ (s two = 0 /\ s three = 1) \/
+    (s two = 1 /\ s three = 0) \/ (s two = 1 /\ s three = 1).
 Proof.
   intros [Hs Hfinal].
   destruct (decide ((s two = 0 /\ s three = 0) \/ (s two = 0 /\ s three = 1) \/
@@ -1050,12 +1045,10 @@ Proof.
   assert (exists (i : index23), s i > 1) as [i Hi].
   {
     cut (s two > 1 \/ s three > 1).
-    {
-      by intros []; eexists.
-    }
-    assert (s two >= 0) by (eapply composite_state_pos; done).
-    assert (s three >= 0) by (eapply composite_state_pos; done).
-    lia.
+    - by intros []; eexists.
+    - assert (s two >= 0) by (eapply composite_state_pos; done).
+      assert (s three >= 0) by (eapply composite_state_pos; done).
+      by lia.
   }
   contradict Hfinal. clear n.
   exists (existT i parity_label), (Some 2),
