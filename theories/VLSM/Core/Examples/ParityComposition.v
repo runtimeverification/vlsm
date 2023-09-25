@@ -121,8 +121,8 @@ Definition ParityVLSM : VLSM ParityMessage :=
 |}.
 
 (**
-  We define an alias [parity_label] as an alias for the element of the unit
-  type to make things more readable later.
+  To improve readability, we explicitly define [parity_label] as the value of
+  the unit type.
 *)
 
 Definition parity_label : label ParityType := ().
@@ -164,7 +164,7 @@ Definition parity_trace1_first_state : ParityState := multiplier ^ 3.
 Definition parity_trace1_last_state : ParityState :=
   destination parity_trace1_last_item.
 
-(** The trace we defined trace is valid: *)
+(** The trace we defined is valid: *)
 
 Example parity_valid_message_prop_mult :
   valid_message_prop ParityVLSM multiplier.
@@ -940,11 +940,7 @@ Definition final_state (s : composite_state (indexed_parity_vlsms multipliers23)
       input_valid_transition parity_composite_vlsm23 l (s, om) som'.
 
 Definition statenm (n m : Z) : composite_state (indexed_parity_vlsms multipliers23) :=
-  fun (i : index23) =>
-  match i with
-  | two => n
-  | three => m
-  end.
+  fun (i : index23) => match i with two => n | three => m end.
 
 Definition state00 := statenm 0 0.
 
