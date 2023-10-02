@@ -1917,8 +1917,9 @@ Lemma composite_has_been_directly_observed_stepwise_props
   (X := composite_vlsm IM constraint)
   : oracle_stepwise_props (vlsm := X) item_sends_or_receives composite_has_been_directly_observed.
 Proof.
-  pose proof (composite_stepwise_props
-                (fun i => (has_been_directly_observed_stepwise_props (IM i))))
+  pose proof 
+    (composite_stepwise_props
+       (fun i => (has_been_directly_observed_stepwise_props (IM i))) constraint)
        as [Hinits Hstep].
   split; [done |].
   by intros l; specialize (Hstep l); destruct l.
