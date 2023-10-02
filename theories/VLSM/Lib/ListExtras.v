@@ -1565,6 +1565,15 @@ Definition element_of_filter
 
 (** ** Computing longest common prefixes and suffixes *)
 
+(** *** Longest common prefix *)
+
+Section sec_longest_common_prefix.
+
+Context
+  {A : Type}
+  `{EqDecision A}
+  .
+
 (**
   [longest_common_prefix] computes the longest common prefix of two lists
   together with the suffixes that result from removing this prefix from
@@ -1572,7 +1581,7 @@ Definition element_of_filter
   if <<l1 = l ++ r1>>, <<l2 = l ++ r2>> and <<l>> is the longest list that
   satisfies these conditions.
 *)
-Fixpoint longest_common_prefix `{EqDecision A} (l1 l2 : list A) : list A * list A * list A :=
+Fixpoint longest_common_prefix (l1 l2 : list A) : list A * list A * list A :=
 match l1, l2 with
 | [], _ => ([], l1, l2)
 | _, [] => ([], l1, l2)
@@ -1585,19 +1594,19 @@ match l1, l2 with
 end.
 
 Lemma longest_common_prefix_nil_l :
-  forall {A : Type} `{EqDecision A} (l : list A),
+  forall (l : list A),
     longest_common_prefix [] l = ([], [], l).
 Proof. done. Qed.
 
 Lemma longest_common_prefix_nil_r :
-  forall {A : Type} `{EqDecision A} (l : list A),
+  forall (l : list A),
     longest_common_prefix l [] = ([], l, []).
 Proof.
   by destruct l.
 Qed.
 
 Lemma longest_common_prefix_diag :
-  forall {A : Type} `{EqDecision A} (l : list A),
+  forall (l : list A),
     longest_common_prefix l l = (l, [], []).
 Proof.
   induction l as [| h t]; cbn; [done |].
@@ -1605,15 +1614,15 @@ Proof.
 Qed.
 
 Lemma longest_common_prefix_head :
-  forall {A : Type} `{EqDecision A} (l1 l2 : list A),
+  forall (l1 l2 : list A),
     head l1 <> head l2 -> longest_common_prefix l1 l2 = ([], l1, l2).
 Proof.
-  intros A ? [] [] Hneq; cbn in *; [done.. |].
+  intros [] [] Hneq; cbn in *; [done.. |].
   by rewrite decide_False; [| congruence].
 Qed.
 
 Lemma longest_common_prefix_app :
-  forall {A : Type} `{EqDecision A} (l l1 l2 p r1 r2 : list A),
+  forall (l l1 l2 p r1 r2 : list A),
     longest_common_prefix l1 l2 = (p, r1, r2) ->
       longest_common_prefix (l ++ l1) (l ++ l2) = (l ++ p, r1, r2).
 Proof.
@@ -1622,8 +1631,8 @@ Proof.
   by apply IHt in Heq as ->.
 Qed.
 
-Lemma longest_common_prefix_app' :
-  forall {A : Type} `{EqDecision A} (l l1 l2 : list A),
+Lemma longest_common_prefix_app_let :
+  forall (l l1 l2 : list A),
     longest_common_prefix (l ++ l1) (l ++ l2) =
       let '(p, r1, r2) := longest_common_prefix l1 l2 in (l ++ p, r1, r2).
 Proof.
@@ -1633,7 +1642,7 @@ Proof.
 Qed.
 
 Lemma longest_common_prefix_app_inv :
-  forall {A : Type} `{EqDecision A} (l1 l2 p r1 r2 : list A),
+  forall (l1 l2 p r1 r2 : list A),
     longest_common_prefix l1 l2 = (p, r1, r2) ->
       l1 = p ++ r1 /\ l2 = p ++ r2.
 Proof.
@@ -1645,8 +1654,8 @@ Proof.
   by apply IHt1 in Heq as [-> ->].
 Qed.
 
-Lemma longest_common_prefix_longest :
-  forall {A : Type} `{EqDecision A} (l1 l2 p r1 r2 : list A),
+Lemma longest_common_prefix_head_inv :
+  forall (l1 l2 p r1 r2 : list A),
     longest_common_prefix l1 l2 = (p, r1, r2) ->
       r1 = [] /\ r2 = [] \/ head r1 <> head r2.
 Proof.
@@ -1662,7 +1671,7 @@ Proof.
 Qed.
 
 Lemma longest_common_prefix_spec :
-  forall {A : Type} `{EqDecision A} (l1 l2 p r1 r2 : list A),
+  forall (l1 l2 p r1 r2 : list A),
     longest_common_prefix l1 l2 = (p, r1, r2)
       <->
     l1 = p ++ r1 /\ l2 = p ++ r2 /\ (r1 = [] /\ r2 = [] \/ head r1 <> head r2).
@@ -1672,14 +1681,14 @@ Proof.
     apply longest_common_prefix_app_inv in Heq as Happ.
     destruct Happ as [-> ->].
     split_and!; [done.. |].
-    by apply longest_common_prefix_longest in Heq.
+    by apply longest_common_prefix_head_inv in Heq.
   - intros (-> & -> & [[-> ->] |]).
     + by rewrite app_nil_r, longest_common_prefix_diag.
-    + by rewrite longest_common_prefix_app', longest_common_prefix_head, app_nil_r.
+    + by rewrite longest_common_prefix_app_let, longest_common_prefix_head, app_nil_r.
 Qed.
 
 Lemma longest_common_prefix_comm :
-  forall {A : Type} `{EqDecision A} (l1 l2 p r1 r2 : list A),
+  forall (l1 l2 p r1 r2 : list A),
     longest_common_prefix l1 l2 = (p, r1, r2) ->
     longest_common_prefix l2 l1 = (p, r2, r1).
 Proof.
@@ -1691,8 +1700,8 @@ Proof.
   - by rewrite decide_False.
 Qed.
 
-Lemma longest_common_prefix_comm' :
-  forall {A : Type} `{EqDecision A} (l1 l2 : list A),
+Lemma longest_common_prefix_comm_let :
+  forall (l1 l2 : list A),
     longest_common_prefix l2 l1 =
       let '(p, r1, r2) := longest_common_prefix l1 l2 in (p, r2, r1).
 Proof.
@@ -1702,7 +1711,7 @@ Proof.
 Qed.
 
 Lemma longest_common_prefix_idem :
-  forall {A : Type} `{EqDecision A} (l1 l2 p r1 r2 : list A),
+  forall (l1 l2 p r1 r2 : list A),
     longest_common_prefix l1 l2 = (p, r1, r2) ->
     longest_common_prefix r1 r2 = ([], r1, r2).
 Proof.
@@ -1715,12 +1724,54 @@ Proof.
   - by rewrite decide_False.
 Qed.
 
+Lemma longest_common_prefix_is_prefix :
+  forall (l1 l2 p r1 r2 : list A),
+    longest_common_prefix l1 l2 = (p, r1, r2) ->
+      prefix p l1 /\ prefix p l2.
+Proof.
+  intros * Hprefix.
+  apply longest_common_prefix_spec in Hprefix as (-> & -> & _).
+  by split; apply prefix_app_r.
+Qed.
+
+Lemma longest_common_prefix_is_longest :
+  forall (l l1 l2 : list A),
+    prefix l l1 -> prefix l l2 ->
+      let '(p, r1, r2) := longest_common_prefix l1 l2 in prefix l p.
+Proof.
+  intros * [p1 ->] [p2 ->].
+  rewrite longest_common_prefix_app_let.
+  destruct (longest_common_prefix p1 p2) as [[]] eqn: Heq.
+  by apply prefix_app_r.
+Qed.
+
+Lemma longest_common_prefix_residual_suffix :
+  forall (l1 l2 p r1 r2 : list A),
+    longest_common_prefix l1 l2 = (p, r1, r2) ->
+      suffix r1 l1 /\ suffix r2 l2.
+Proof.
+  intros * Hprefix.
+  apply longest_common_prefix_spec in Hprefix as (-> & -> & _).
+  by split; apply suffix_app_r.
+Qed.
+
+End sec_longest_common_prefix.
+
+(** *** Longest common suffix *)
+
+Section sec_longest_common_suffix.
+
+Context
+  {A : Type}
+  `{EqDecision A}
+  .
+
 Definition longest_common_suffix `{EqDecision A} (l1 l2 : list A) : list A * list A * list A :=
   let '(p, r1, r2) := longest_common_prefix (reverse l1) (reverse l2) in
     (reverse p, reverse r1, reverse r2).
 
 Lemma longest_common_suffix_diag :
-  forall {A : Type} `{EqDecision A} (l : list A),
+  forall (l : list A),
     longest_common_suffix l l = (l, [], []).
 Proof.
   intros.
@@ -1728,20 +1779,20 @@ Proof.
   by rewrite longest_common_prefix_diag, reverse_involutive; cbn.
 Qed.
 
-Lemma longest_common_suffix_app' :
-  forall {A : Type} `{EqDecision A} (l l1 l2 : list A),
+Lemma longest_common_suffix_app_let :
+  forall (l l1 l2 : list A),
     longest_common_suffix (l1 ++ l) (l2 ++ l) =
       let '(p, r1, r2) := longest_common_suffix l1 l2 in (p ++ l, r1, r2).
 Proof.
   intros.
   unfold longest_common_suffix.
-  rewrite !reverse_app, longest_common_prefix_app'.
+  rewrite !reverse_app, longest_common_prefix_app_let.
   destruct (longest_common_prefix (reverse l1) (reverse l2)) as [[]] eqn: Heq.
   by rewrite reverse_app, reverse_involutive.
 Qed.
 
 Lemma longest_common_suffix_last :
-  forall {A : Type} `{EqDecision A} (l1 l2 : list A),
+  forall (l1 l2 : list A),
     last l1 <> last l2 -> longest_common_suffix l1 l2 = ([], l1, l2).
 Proof.
   intros.
@@ -1752,7 +1803,7 @@ Proof.
 Qed.
 
 Lemma longest_common_suffix_spec :
-  forall {A : Type} `{EqDecision A} (l1 l2 p r1 r2 : list A),
+  forall (l1 l2 p r1 r2 : list A),
     longest_common_suffix l1 l2 = (p, r1, r2)
       <->
     l1 = r1 ++ p /\ l2 = r2 ++ p /\ (r1 = [] /\ r2 = [] \/ last r1 <> last r2).
@@ -1760,7 +1811,7 @@ Proof.
   split; cycle 1.
   - intros (-> & -> & [[-> ->] |]); cbn.
     + by rewrite longest_common_suffix_diag.
-    + by rewrite longest_common_suffix_app', longest_common_suffix_last.
+    + by rewrite longest_common_suffix_app_let, longest_common_suffix_last.
   - unfold longest_common_suffix.
     destruct (longest_common_prefix (reverse l1) (reverse l2)) as [[]] eqn: Heq.
     apply longest_common_prefix_spec in Heq as (Heq1 & Heq2 & H).
@@ -1772,3 +1823,36 @@ Proof.
     rewrite !last_reverse.
     by destruct H as [[-> ->] |]; cbn; [left | right].
 Qed.
+
+Lemma longest_common_suffix_is_suffix :
+  forall (l1 l2 p r1 r2 : list A),
+    longest_common_suffix l1 l2 = (p, r1, r2) ->
+      suffix p l1 /\ suffix p l2.
+Proof.
+  intros * Hsuffix.
+  apply longest_common_suffix_spec in Hsuffix as (-> & -> & _).
+  by split; apply suffix_app_r.
+Qed.
+
+Lemma longest_common_suffix_is_longest :
+  forall (l l1 l2 : list A),
+    suffix l l1 -> suffix l l2 ->
+      let '(p, r1, r2) := longest_common_suffix l1 l2 in suffix l p.
+Proof.
+  intros * [p1 ->] [p2 ->].
+  rewrite longest_common_suffix_app_let.
+  destruct (longest_common_suffix p1 p2) as [[]] eqn: Heq.
+  by apply suffix_app_r.
+Qed.
+
+Lemma longest_common_suffix_residual_prefix :
+  forall (l1 l2 p r1 r2 : list A),
+    longest_common_suffix l1 l2 = (p, r1, r2) ->
+      prefix r1 l1 /\ prefix r2 l2.
+Proof.
+  intros * Hsuffix.
+  apply longest_common_suffix_spec in Hsuffix as (-> & -> & _).
+  by split; apply prefix_app_r.
+Qed.
+
+End sec_longest_common_suffix.
