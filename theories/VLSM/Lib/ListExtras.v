@@ -1734,7 +1734,7 @@ Proof.
   by split; apply prefix_app_r.
 Qed.
 
-Lemma longest_common_prefix_is_longest :
+Lemma prefix_longest_common_prefix :
   forall (l l1 l2 : list A),
     prefix l l1 -> prefix l l2 ->
       let '(p, r1, r2) := longest_common_prefix l1 l2 in prefix l p.
@@ -1824,6 +1824,17 @@ Proof.
     by destruct H as [[-> ->] |]; cbn; [left | right].
 Qed.
 
+Lemma longest_common_suffix_comm_let :
+  forall (l1 l2 : list A),
+    longest_common_suffix l2 l1 =
+      let '(p, r1, r2) := longest_common_suffix l1 l2 in (p, r2, r1).
+Proof.
+  intros.
+  unfold longest_common_suffix.
+  rewrite longest_common_prefix_comm_let.
+  by destruct (longest_common_prefix (reverse l1) (reverse l2)) as [[]].
+Qed.
+
 Lemma longest_common_suffix_is_suffix :
   forall (l1 l2 p r1 r2 : list A),
     longest_common_suffix l1 l2 = (p, r1, r2) ->
@@ -1834,7 +1845,7 @@ Proof.
   by split; apply suffix_app_r.
 Qed.
 
-Lemma longest_common_suffix_is_longest :
+Lemma suffix_longest_common_suffix :
   forall (l l1 l2 : list A),
     suffix l l1 -> suffix l l2 ->
       let '(p, r1, r2) := longest_common_suffix l1 l2 in suffix l p.
