@@ -2804,6 +2804,43 @@ Proof.
   - by apply finite_valid_trace_init_to_alt_right_impl.
 Qed.
 
+Definition finite_valid_trace_from_to_alt
+  (s f : state X) (tr : list (transition_item X)) :=
+  message_valid_transitions_from_to s f tr /\ valid_state_prop X s.
+
+Lemma finite_valid_trace_from_to_alt_left_impl
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_valid_trace_from_to X s f tr -> finite_valid_trace_from_to_alt s f tr.
+Proof.
+  intros Htr. split; [| by apply finite_valid_trace_from_to_first_pstate in Htr].
+  induction Htr.
+  - by constructor.
+  - by constructor; [apply Ht.. |].
+Qed.
+
+Lemma finite_valid_trace_from_to_alt_right_impl
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_valid_trace_from_to_alt s f tr -> finite_valid_trace_from_to X s f tr.
+Proof.
+  intros [Htr Hs].
+  revert s Hs Htr.
+  induction tr; intros; inversion Htr; subst.
+  - by apply (finite_valid_trace_from_to_empty X).
+  - apply (finite_valid_trace_from_to_extend X); [| done].
+    apply IHtr; [| done].
+    apply valid_state_prop_iff; right.
+    by exists l0, (s, om), om'.
+Qed.
+
+Lemma finite_valid_trace_from_to_alt_equiv
+  (s f : state X) (tr : list (transition_item X)) :
+  finite_valid_trace_from_to X s f tr <-> finite_valid_trace_from_to_alt s f tr.
+Proof.
+  split.
+  - by apply finite_valid_trace_from_to_alt_left_impl.
+  - by apply finite_valid_trace_from_to_alt_right_impl.
+Qed.
+
 (**
   Similarly, we can alternately define valid states as states at the end of
   a trace satisfying [finite_valid_trace_init_to_alt].
