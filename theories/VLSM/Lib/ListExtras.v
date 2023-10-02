@@ -1745,6 +1745,18 @@ Proof.
   by apply prefix_app_r.
 Qed.
 
+Lemma longest_common_prefix_is_longest :
+  forall (l1 l2 p r1 r2 p' : list A),
+   longest_common_prefix l1 l2 = (p, r1, r2) ->
+   prefix p' l1 -> prefix p' l2 ->
+   length p' <= length p.
+Proof.
+  intros l1 l2 p r1 r2 p' Hlc Hp1 Hp2.
+  pose proof prefix_longest_common_prefix _ _ _ Hp1 Hp2 as Hlet.
+  destruct (longest_common_prefix l1 l2) as [[]].
+  by inversion Hlc; subst; apply prefix_length.
+Qed.
+
 Lemma longest_common_prefix_residual_suffix :
   forall (l1 l2 p r1 r2 : list A),
     longest_common_prefix l1 l2 = (p, r1, r2) ->
@@ -1854,6 +1866,18 @@ Proof.
   rewrite longest_common_suffix_app_let.
   destruct (longest_common_suffix p1 p2) as [[]] eqn: Heq.
   by apply suffix_app_r.
+Qed.
+
+Lemma longest_common_suffix_is_longest :
+  forall (l1 l2 p r1 r2 p' : list A),
+   longest_common_suffix l1 l2 = (p, r1, r2) ->
+   suffix p' l1 -> suffix p' l2 ->
+   length p' <= length p.
+Proof.
+  intros l1 l2 p r1 r2 p' Hlc Hp1 Hp2.
+  pose proof suffix_longest_common_suffix _ _ _ Hp1 Hp2 as Hlet.
+  destruct (longest_common_suffix l1 l2) as [[]].
+  by inversion Hlc; subst; apply suffix_length.
 Qed.
 
 Lemma longest_common_suffix_residual_prefix :
