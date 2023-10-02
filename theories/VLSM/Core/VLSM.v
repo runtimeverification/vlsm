@@ -2822,8 +2822,7 @@ Lemma finite_valid_trace_from_to_alt_right_impl
   (s f : state X) (tr : list (transition_item X)) :
   finite_valid_trace_from_to_alt s f tr -> finite_valid_trace_from_to X s f tr.
 Proof.
-  intros [Htr Hs].
-  revert s Hs Htr.
+  intros [Htr Hs]; revert s Hs Htr.
   induction tr; intros; inversion Htr; subst.
   - by apply (finite_valid_trace_from_to_empty X).
   - apply (finite_valid_trace_from_to_extend X); [| done].
