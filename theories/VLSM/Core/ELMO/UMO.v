@@ -140,7 +140,7 @@ Defined.
 
 (**
   A reachability predicate specialized for VLSMs refining UMO.
-  [UMO_reachable C s] is equivalent to [ram_state_prop V s] if
+  [UMO_reachable C s] is equivalent to [constrained_state_prop_alt V s] if
   the valid transitions of VLSM <<V>> follow [UMOComponent_transition]
   and the validity predicate is a refinement of [UMOComponent_valid]
   which does not further restrict the [Send] case.
@@ -221,7 +221,7 @@ Qed.
 
 (**
   This lemma shows that for a VLSM based on UMO
-  reachability in the VLSM according to [ram_state_prop]
+  reachability in the VLSM according to [constrained_state_prop_alt]
   is equivalent to [UMO_reachable] with a predicate
   based on the VLSM's [valid] predicate, plus
   a condition on the address.
@@ -241,10 +241,10 @@ Lemma UMO_based_valid_reachable
   (VM : VLSMMachine (Build_VLSMType Message State Label))
   (V := mk_vlsm VM)
   (Hinit_empty : forall si, initial_state_prop V si -> obs si = [])
-  (Hsend_spec : forall s om, ram_state_prop V s -> valid V Send (s, om) <-> om = None)
+  (Hsend_spec : forall s om, constrained_state_prop_alt V s -> valid V Send (s, om) <-> om = None)
   (Htransition : forall l s om, transition V l (s, om) = UMOComponent_transition l s om) :
   forall (s : State),
-    ram_state_prop V s
+    constrained_state_prop_alt V s
       <->
     UMO_reachable (fun s m => VM.(valid) Receive (s, Some m)) s
       /\ initial_state_prop V (MkState [] (adr s)).

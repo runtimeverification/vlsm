@@ -11,7 +11,7 @@ From VLSM.Core Require Import Equivocation MessageDependencies TraceableVLSM.
   relation (see [minimal_equivocation_choice_monotone]).
 
   We then show that the trace determined by [state_to_trace] using this choice
-  function yields a minimally equivocating ram-trace reaching that state
+  function yields a minimally equivocating constrained trace reaching that state
   (see [state_to_minimal_equivocation_trace_equivocation_monotonic]).
 *)
 
@@ -280,7 +280,7 @@ Proof.
 Qed.
 
 (**
-  Given a list of indices and a composite ram-state, select from the given
+  Given a list of indices and a composite constrained state, select from the given
   list of indices the ones whose corresponding component state is initial.
 *)
 Program Definition initial_indices
@@ -669,7 +669,7 @@ Context
   [composite_state_to_trace] with the [minimal_equivocation_choice] function.
 
   By [reachable_composite_state_to_trace], we know that the obtained trace is
-  a ram-trace.
+  a constrained trace.
 *)
 Definition state_to_minimal_equivocation_trace
   (s : composite_state IM) (Hs : valid_state_prop RFree s)

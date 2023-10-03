@@ -173,7 +173,7 @@ Proof.
     + by eapply has_been_directly_observed_step_update; [done |]; right; eapply IHHs.
 Qed.
 
-Lemma ram_transition_preserves_message_dependencies_full_node_condition
+Lemma constrained_transition_preserves_message_dependencies_full_node_condition
   `(input_valid_transition (pre_loaded_with_all_messages_vlsm X) lX (s, im) (s', om)) :
   forall m, message_dependencies_full_node_condition X message_dependencies s m ->
     message_dependencies_full_node_condition X message_dependencies s' m.
