@@ -675,7 +675,7 @@ Proof.
   by eapply finite_valid_trace_init_to_unique_RMi.
 Qed.
 
-(** The trace extracted from a ram-state <<s>> leads to <<s>>. *)
+(** The trace extracted from a constrained state <<s>> leads to <<s>>. *)
 
 Lemma finite_valid_trace_init_to_state2trace_RMi' :
   forall (s : State),
