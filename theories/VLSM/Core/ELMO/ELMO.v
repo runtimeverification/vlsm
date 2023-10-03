@@ -1065,12 +1065,12 @@ Lemma receivable_messages_reachable (ms s : State) i' :
   ELMO_recv_valid s (MkMessage ms) ->
   constrained_state_prop_alt (ELMOComponent i') ms.
 Proof.
-  intros Heq Hram Hrv.
+  intros Heq Hcsp Hrv.
   change ms with (state (MkMessage ms)).
   apply reachable_received_messages_reachable
     with (s := s <+> MkObservation Receive (MkMessage ms))
   ; [| constructor | done].
-  apply ELMO_reachable_view in Hram as [].
+  apply ELMO_reachable_view in Hcsp as [].
   apply ELMO_reachable_view; cbn.
   by split; [apply reach_recv |].
 Qed.
