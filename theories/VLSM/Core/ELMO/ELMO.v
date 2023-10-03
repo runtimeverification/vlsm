@@ -1099,7 +1099,7 @@ Proof.
     + by split; [done |]; eexists; split_and!; [done.. |]; constructor.
 Qed.
 
-Lemma ELMOComponent_elem_of_ram_trace
+Lemma ELMOComponent_elem_of_constrained_trace
   [s tr] (Htr : finite_valid_trace_from Ri s tr) :
   forall item, item ∈ tr ->
     exists (s : State) (m : Message),
@@ -1112,7 +1112,7 @@ Proof.
     inversion Hvi; subst; inversion Hti; subst; eexists _, _; split.
 Qed.
 
-Lemma ELMOComponent_receivedMessages_of_ram_trace
+Lemma ELMOComponent_receivedMessages_of_constrained_trace
   [s s' tr] (Htr : finite_valid_trace_from_to Ri s s' tr) :
   forall item, item ∈ tr ->
   forall m, (field_selector input) m item -> m ∈ receivedMessages s'.
@@ -1125,7 +1125,7 @@ Proof.
   by destruct Hitem as [Hitem | ->]; [right; cbn; eapply IHHtr | left].
 Qed.
 
-Lemma ELMOComponent_sentMessages_of_ram_trace
+Lemma ELMOComponent_sentMessages_of_constrained_trace
   [s s' tr] (Htr : finite_valid_trace_from_to Ri s s' tr) :
   forall item, item ∈ tr ->
   forall m, (field_selector output) m item -> m ∈ sentMessages s'.
@@ -1138,7 +1138,7 @@ Proof.
   by destruct Hitem as [Hitem | ->]; [right; cbn; eapply IHHtr | left].
 Qed.
 
-Lemma ELMOComponent_sizeState_of_ram_trace_output
+Lemma ELMOComponent_sizeState_of_constrained_trace_output
   [s tr] (Htr : finite_valid_trace_from Ri s tr) :
   forall item, item ∈ tr ->
   forall m, (field_selector output) m item ->
@@ -1153,14 +1153,14 @@ Proof.
     by eapply Nat.lt_le_incl, ELMOComponent_valid_transition_size; cbn in Hv, Ht.
 Qed.
 
-Lemma ELMOComponent_messages_of_ram_trace
+Lemma ELMOComponent_messages_of_constrained_trace
   [s s' tr] (Htr : finite_valid_trace_from_to Ri s s' tr) :
   forall item, item ∈ tr ->
   forall m, item_sends_or_receives m item -> m ∈ messages s'.
 Proof.
   intros ? ? ? [|]; apply elem_of_messages.
-  - by right; eapply ELMOComponent_receivedMessages_of_ram_trace.
-  - by left; eapply ELMOComponent_sentMessages_of_ram_trace.
+  - by right; eapply ELMOComponent_receivedMessages_of_constrained_trace.
+  - by left; eapply ELMOComponent_sentMessages_of_constrained_trace.
 Qed.
 
 End sec_ELMOComponent_lemmas.
@@ -2505,7 +2505,7 @@ Lemma all_intermediary_transitions_are_receive
   : Forall (fun item : transition_item ELMOComponentType => l item = Receive) tr_m.
 Proof.
   apply Forall_forall; intros item Hitem.
-  eapply ELMOComponent_elem_of_ram_trace in Hitem as H_item;
+  eapply ELMOComponent_elem_of_constrained_trace in Hitem as H_item;
     [| by eapply valid_trace_forget_last].
   destruct H_item as (s_m0 & m0 & Hs_m0 & H_item).
   destruct item; apply ELMOComponent_input_valid_transition_iff in H_item
@@ -2513,7 +2513,7 @@ Proof.
   inversion H_item as [| ? ? ? [(_ & _ & Hvi) Hti]]; subst;
     inversion Hvi; subst; inversion Hti; subst; clear H_item Hvi Hti.
   contradict Hnot_local_equivocator; apply Hspecial.
-  eapply ELMOComponent_sentMessages_of_ram_trace in Hitem as Hm0; [| done..].
+  eapply ELMOComponent_sentMessages_of_constrained_trace in Hitem as Hm0; [| done..].
   eapply reachable_sent_messages_adr in Hm0 as Hm0_adr;
     [| by eapply finite_valid_trace_from_to_last_pstate].
   exists (MkMessage s_m0); [by congruence | ..].
@@ -2533,7 +2533,7 @@ Proof.
       [| by eapply valid_state_project_preloaded_to_preloaded_free].
     rewrite Hm0_adr in Hsnd_adr.
     eapply inj in Hsnd_adr; [| done]; subst j.
-    eapply ELMOComponent_sizeState_of_ram_trace_output in Hitem;
+    eapply ELMOComponent_sizeState_of_constrained_trace_output in Hitem;
       [| by eapply valid_trace_forget_last | done].
     assert (sizeState s_m0 < sizeState (sigma i_m)).
     {
