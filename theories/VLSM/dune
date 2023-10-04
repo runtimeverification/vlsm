@@ -2,7 +2,7 @@
  (name VLSM)
  (package coq-vlsm)
  (synopsis "Core definitions in Coq for VLSMs")
- (flags :standard 
+ (flags :standard
    -w -future-coercion-class-field
    -w -deprecated-tacopt-without-locality))
 
