@@ -106,7 +106,7 @@ Proof.
     specialize (IHl H); clear H.
     destruct IHl as [prefix [suffix [last [Hf [-> Hnone_after]]]]].
     exists prefix, (suffix ++ [x]), last.
-    simpl. rewrite app_assoc_reverse. simpl.
+    simpl. rewrite <- app_assoc. simpl.
     rewrite Exists_app. rewrite Exists_cons. rewrite Exists_nil.
     by itauto.
 Qed.

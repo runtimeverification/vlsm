@@ -7,12 +7,12 @@ From VLSM.Core Require Import VLSM PreloadedVLSM Composition VLSMEmbedding.
 (** * Traceable VLSMs
 
   This section introduces [TraceableVLSM]s, characterized by the fact that from
-  any ram-state we can derive the possible (valid) transitions leading
+  any constrained state we can derive the possible (valid) transitions leading
   to that state.
 
   We derive several properties of these machines and their composition,
-  including the possibility of extracting a ram-trace from a ram-state
-  (see [reachable_composite_state_to_trace]) as well as that of extracting
+  including the possibility of extracting a constrained trace from a constrained
+  state (see [reachable_composite_state_to_trace]) as well as that of extracting
   a trace with monotonic global equivocation
   (see [state_to_minimal_equivocation_trace_equivocation_monotonic]).
 *)
@@ -63,11 +63,12 @@ Qed.
 
 (**
   A class characterizing VLSMs with reversible transitions. A VLSM is traceable
-  when given a ram-state, one can compute a set of ram-transitions leading to it.
+  when given a constrained state, one can compute a set of constrained transitions
+  leading to it.
 
   We assume that such machines are [TransitionMonotoneVLSM]s and that the
-  set of ram-transitions associated to a ram-state is empty iff the state is
-  initial.
+  set of constrained transitions associated to a constrained state is empty
+  iff the state is initial.
 *)
 Class TraceableVLSM
   `(X : VLSM message)
@@ -116,7 +117,7 @@ Proof.
 Qed.
 
 (**
-  Given any ram-state we can extract a trace leading to it by recursively
+  Given any constrained state we can extract a trace leading to it by recursively
   following the transitions leading to it.
 *)
 Equations state_to_trace (s' : state X) (Hs' : valid_state_prop R s') :
@@ -138,7 +139,7 @@ Proof.
   by rewrite Hdestruct; left.
 Qed.
 
-(** Traces extracted using [state_to_trace] are ram-traces. *)
+(** Traces extracted using [state_to_trace] are constrained traces. *)
 Lemma reachable_state_to_trace :
   forall (s : state X) (Hs : valid_state_prop R s) is tr,
     state_to_trace s Hs = (is, tr) -> finite_valid_trace_init_to R is s tr.
@@ -341,9 +342,10 @@ Qed.
   to that state. Therefore, when trying to reconstruct a particular trace leading
   to the given state, we must choose one among the possible transitions.
 
-  Let us define the type of such a choice function, which takes a composite ram-state
-  and a list of indices as arguments and returns one of the indices and a position
-  in the list of possible transitions to the state for that particular index.
+  Let us define the type of such a choice function, which takes a composite
+  constrained state and a list of indices as arguments and returns one of the
+  indices and a position in the list of possible transitions to the state for
+  that particular index.
 *)
 
 Definition choice_function : Type :=
@@ -358,7 +360,7 @@ Definition choice_function : Type :=
   - if the component state corresponding to the returned index in not initial, then
     the returned position must identify a transition leading to the given state
 
-  - the choice does not depend on the particular proof for the composite ram-state
+  - the choice does not depend on the particular proof for the composite constrained state
 *)
 Record ChoosingWell
   (choose : choice_function)
@@ -405,8 +407,8 @@ Definition not_in_indices_initial_prop
   forall i, i ∉ indices -> initial_state_prop (IM i) (s' i).
 
 (**
-  The ram-transitions leading to a composite ram-state reflect the
-  [not_in_indices_initial_prop]erty, or, alternately, the
+  The constrained transitions leading to a composite constrained state reflect
+  the [not_in_indices_initial_prop]erty, or, alternately, the
   [composite_state_destructor] function reflects it.
 *)
 Lemma composite_tv_state_destructor_preserves_not_in_indices_initial  :
@@ -444,8 +446,8 @@ Qed.
 
 (**
   A [choice_function] is choosing well if it is [ChoosingWell] for any
-  instance of its arguments (a ram-state and a set of indices) satisfying the
-  [not_in_indices_initial_prop]erty.
+  instance of its arguments (a constrained state and a set of indices)
+  satisfying the [not_in_indices_initial_prop]erty.
 *)
 Definition choosing_well (choose : choice_function) : Prop :=
   forall (s' : composite_state IM) (Hs' : valid_state_prop RFree s') (indices : list index),
@@ -453,10 +455,10 @@ Definition choosing_well (choose : choice_function) : Prop :=
       ChoosingWell choose s' Hs' indices.
 
 (**
-  Given a composite ram-state, a [choice_function] and an initial set of indices,
-  we can extract a trace leading to that state by following backwards the
-  transitions yielded by the choice function until the states corresponding to
-  any of the given indices become initial states.
+  Given a composite constrained state, a [choice_function] and an initial
+  set of indices, we can extract a trace leading to that state by following
+  backwards the transitions yielded by the choice function until the states
+  corresponding to any of the given indices become initial states.
 *)
 Equations indexed_composite_state_to_trace
   (choose : choice_function)
@@ -494,7 +496,7 @@ Proof.
 Qed.
 
 (**
-  For any composite ram-state <<s>> and for any index <<i>> for which the
+  For any composite constrained state <<s>> and for any index <<i>> for which the
   component state <<s i>> has the [initial_state_prop]erty, the component state of
   index <<i>> of the origin state of the trace extracted from <<s>> is equal
   to <<s i>>.
@@ -577,7 +579,7 @@ Proof.
 Qed.
 
 (**
-  For any composite ram-state <<s>> and for any index <<i>> for which the
+  For any composite constrained state <<s>> and for any index <<i>> for which the
   component state <<s i>> satisfies [initial_state_prop], the component state of
   index <<i>> of any state of the trace extracted from <<s>> is equal to <<s i>>.
 *)
@@ -640,8 +642,9 @@ Proof.
 Qed.
 
 (**
-  For any given composite ram-state, [indexed_reachable_composite_state_to_trace]
-  yields a ram-trace leading to it.
+  For any given composite constrained state,
+  [indexed_reachable_composite_state_to_trace] yields a constrained trace
+  leading to it.
 *)
 Lemma indexed_reachable_composite_state_to_trace :
   forall (choose : choice_function), choosing_well choose ->
@@ -674,9 +677,9 @@ Proof.
 Qed.
 
 (**
-  Given a composite ram-state, and a [choice_function], we can extract a ram-trace
-  leading to that state by instantiating [indexed_composite_state_to_trace] with
-  the set of all indices.
+  Given a composite constrained state, and a [choice_function], we can extract a
+  constrained trace leading to that state by instantiating
+  [indexed_composite_state_to_trace] with the set of all indices.
 *)
 Definition composite_state_to_trace
   (choose : choice_function)
