@@ -722,10 +722,10 @@ Proof.
 Qed.
 
 Definition ELMO_A (a : Address) : index :=
-match adr2idx a with
-| None => inhabitant
-| Some i => i
-end.
+  match adr2idx a with
+  | None => inhabitant
+  | Some i => i
+  end.
 
 Lemma ELMO_A_inv :
   forall (i : index), ELMO_A (idx i) = i.
