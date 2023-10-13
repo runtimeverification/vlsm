@@ -1,5 +1,7 @@
+From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality.
-From stdpp Require Import prelude finite.
+From stdpp Require Import prelude.
+From VLSM.Lib Require Import Preamble StdppExtras FinSuppFn Primes.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 
 (** * Parity VLSM
@@ -31,7 +33,6 @@ Context
  (multiplier : Z)
  (multiplier_geq_0 : multiplier <> 0)
  (index : Type)
- `{finite.Finite index}
  `{Inhabited index}
  .
 
@@ -566,149 +567,12 @@ Qed.
 
 End sec_parity_vlsm.
 
-Section sec_powers_ind.
-
-Context
-  `{finite.Finite index}
-  .
-
-Definition update_powers (powers : index -> nat) (n : index) (nr : nat) (x : index): nat :=
-  if decide (n = x) then nr else powers x.
-
-Lemma update_powers_eq (powers : index -> nat) (n : index) (nr : nat) :
-  update_powers powers n nr n = nr.
-Proof.
-  by unfold update_powers; rewrite decide_True.
-Qed.
-
-Lemma update_powers_neq (powers : index -> nat) (n : index) (x : index) (nr : nat) :
-  n <> x -> update_powers powers n nr x = powers x.
-Proof.
-  by intros; unfold update_powers; rewrite decide_False.
-Qed.
-
-Definition increment_powers (powers : index -> nat) (n : index) :=
-  update_powers powers n (S (powers n)).
-
-Lemma increment_powers_eq (powers : index -> nat) (n : index) :
-  increment_powers powers n n = S (powers n).
-Proof.
-  by apply update_powers_eq.
-Qed.
-
-Lemma increment_powers_neq (powers : index -> nat) (n : index) (x : index) :
-  n <> x -> increment_powers powers n x = powers x.
-Proof.
-  by apply update_powers_neq.
-Qed.
-
-Definition sum_powers_aux (powers : index -> nat) (l : list index) : nat :=
-  foldr plus 0%nat (map powers l).
-
-Lemma sum_powers_aux_zero (powers : index -> nat) (l : list index) :
-  Forall (fun n => powers n = 0%nat) l -> sum_powers_aux powers l = 0%nat.
-Proof.
-  unfold sum_powers_aux; intros Hforall.
-  induction Hforall; [done |].
-  by cbn; rewrite IHHforall, H0.
-Qed.
-
-Lemma sum_powers_aux_zero_rev (powers : index -> nat) (l : list index) :
-  sum_powers_aux powers l = 0%nat -> Forall (fun n => powers n = 0%nat) l.
-Proof.
-  unfold sum_powers_aux; induction l; cbn; [done |].
-  constructor; [by lia |].
-  by apply IHl; lia.
-Qed.
-
-Definition sum_powers (powers : index -> nat) : nat :=
-  sum_powers_aux powers (enum index).
-
-Definition zero_powers (x : index) : nat := 0.
-
-Inductive Powers : (index -> nat) -> Prop :=
-| P_zero : Powers zero_powers
-| P_succ : forall (i : index) (powers : index -> nat),
-   Powers powers -> Powers (increment_powers powers i).
-
-Lemma sum_powers_zero_iff (powers : index -> nat) :
-  sum_powers powers = 0%nat <-> powers = zero_powers.
-Proof.
-  split.
-  - intros Hzero.
-    apply sum_powers_aux_zero_rev in Hzero.
-    rewrite Forall_forall in Hzero.
-    by extensionality x; apply Hzero, elem_of_enum.
-  - intros ->.
-    by apply sum_powers_aux_zero, Forall_forall.
-Qed.
-
-Lemma sum_increment_powers (powers : index -> nat) (n : index) :
-  sum_powers (increment_powers powers n) = S (sum_powers powers).
-Proof.
-  unfold sum_powers.
-  pose proof (Hnodup := NoDup_enum index).
-  pose proof (Hn := elem_of_enum n).
-  revert Hnodup Hn.
-  generalize (enum index) as l.
-  induction l; [by inversion 2 |].
-  rewrite NoDup_cons, elem_of_cons; cbn.
-  intros [Ha Hnodup] [-> | Hn].
-  - rewrite increment_powers_eq; cbn.
-    do 2 f_equal.
-    clear IHl Hnodup.
-    induction l; [done |].
-    apply not_elem_of_cons in Ha as [Ha0 Ha]; cbn.
-    by rewrite IHl, increment_powers_neq.
-  - unfold sum_powers_aux in IHl; rewrite IHl by done.
-    rewrite increment_powers_neq by set_solver.
-    by lia.
-Qed.
-
-Lemma Powers_powers (powers : index -> nat) : Powers powers.
-Proof.
-  remember (sum_powers powers) as n.
-  revert powers Heqn.
-  induction n; intros.
-  - symmetry in Heqn.
-    apply sum_powers_zero_iff in Heqn as ->.
-    by constructor.
-  - assert (Hnz : exists (i : index), powers i <> 0%nat).
-    {
-      apply Exists_finite, not_Forall_Exists; [by typeclasses eauto |].
-      intros Hall.
-      by unfold sum_powers in Heqn; rewrite sum_powers_aux_zero in Heqn.
-    }
-    destruct Hnz as (x & Hx).
-    destruct (powers x) as [| px] eqn: Heqx; [done |]; clear Hx.
-    pose (powers' := update_powers powers x px).
-    assert (Heq : powers = increment_powers powers' x).
-    {
-      extensionality y; unfold increment_powers, powers'.
-      destruct (decide (x = y)); [by subst; rewrite !update_powers_eq |].
-      by rewrite !update_powers_neq.
-    }
-    rewrite Heq.
-    constructor.
-    apply IHn.
-    rewrite Heq, sum_increment_powers in Heqn.
-    by congruence.
-Qed.
-
-Lemma powers_ind
-  (P : (index -> nat) -> Prop)
-  (Hzero : P zero_powers)
-  (Hsucc : forall (i : index) (powers : index -> nat),
-    P powers -> P (increment_powers powers i)) :
-  forall (powers : index -> nat), P powers.
-Proof.
-  intro powers.
-  pose proof (Hpowers := Powers_powers powers).
-  induction Hpowers; [done |].
-  by apply Hsucc.
-Qed.
-
-End sec_powers_ind.
+(*
+Definition ls_fin_supp_nat_fn (index : Type) :=
+  fin_supp_nat_fn (index := index) (indexSet := listset index).
+Definition ls_powers_ind (index : Type) `{EqDecision index} :=
+  powers_ind (index := index) (indexSet := listset index).
+*)
 
 Section sec_composition.
 
@@ -716,8 +580,7 @@ Context
   {index : Type}
   (multipliers : index -> Z)
   (Hmultipliers : forall (i : index), multipliers i <> 0)
-  `{finite.Finite index}
-  `{Inhabited index}
+  `{FinSet index indexSet}
   .
 
 Definition indexed_parity_vlsms (i : index) : VLSM ParityMessage :=
@@ -741,89 +604,28 @@ Proof.
   by apply (valid_state_project_preloaded ParityMessage indexed_parity_vlsms parity_constraint).
 Qed.
 
-Definition prod_powers_aux (powers : index -> nat) (l : list index) : Z :=
-  foldr Z.mul 1 (zip_with Z.pow (map multipliers l) (map (Z.of_nat ∘ powers) l)).
-
-Lemma prod_powers_aux_cons (powers : index -> nat) (a : index) (l : list index) :
-  prod_powers_aux powers (a :: l) = multipliers a ^ Z.of_nat (powers a) * prod_powers_aux powers l.
-Proof. done. Qed.
-
-Lemma prod_powers_aux_zero (powers : index -> nat) (l : list index) :
-  Forall (fun n => powers n = 0%nat) l -> prod_powers_aux powers l = 1.
-Proof.
-  induction 1 as [| ? ? Heq ? IH]; [done |].
-  by rewrite prod_powers_aux_cons, IH, Heq.
-Qed.
-
-Definition prod_powers (powers : index -> nat) : Z :=
-  prod_powers_aux powers (enum index).
-
-Lemma prod_powers_zero : prod_powers zero_powers = 1.
-Proof.
-  by apply prod_powers_aux_zero; rewrite Forall_forall.
-Qed.
-
-Lemma prod_increment_powers (powers : index -> nat) (n : index) :
-  prod_powers (increment_powers powers n) = multipliers n * prod_powers powers.
-Proof.
-  unfold prod_powers.
-  pose proof (Hnodup := NoDup_enum index).
-  pose proof (Hn := elem_of_enum n).
-  revert Hnodup Hn.
-  generalize (enum index) as l.
-  induction l; [by inversion 2 |].
-  rewrite NoDup_cons, elem_of_cons, !prod_powers_aux_cons.
-  intros [Ha Hnodup] [-> | Hn].
-  - rewrite increment_powers_eq.
-    rewrite Zmult_assoc, <- Z.pow_succ_r; [| by lia].
-    cut (prod_powers_aux (increment_powers powers a) l = prod_powers_aux powers l);
-      [by intros ->; lia |].
-    clear IHl Hnodup.
-    induction l; [done |].
-    apply not_elem_of_cons in Ha as [].
-    by rewrite !prod_powers_aux_cons, IHl, increment_powers_neq by done.
-  - by rewrite IHl, increment_powers_neq by set_solver; lia.
-Qed.
-
-Definition delta_powers (n : index) := increment_powers zero_powers n.
-
-Lemma prod_powers_delta (n : index) : prod_powers (delta_powers n) = multipliers n.
-Proof.
-  unfold delta_powers.
-  rewrite prod_increment_powers, prod_powers_zero.
-  by lia.
-Qed.
-
-Lemma prod_powers_pos (Hmpos : forall (i : index), multipliers i > 0) :
-  forall (powers : index -> nat), prod_powers powers > 0.
-Proof.
-  intros powers.
-  induction powers using powers_ind; [by rewrite prod_powers_zero |].
-  rewrite prod_increment_powers.
-  by specialize (Hmpos i); lia.
-Qed.
-
 Lemma composition_valid_messages_powers_of_mults_right (m : ParityMessage) :
   valid_message_prop parity_composite_vlsm m ->
-  exists (powers : index -> nat) (i : index), Z.of_nat (powers i) >= 1 /\ m = prod_powers powers.
+  exists (fp : fin_supp_nat_fn index indexSet) (i : index),
+    (fin_supp_f fp i >= 1)%nat /\ m = prod_fin_supp_nat_fn multipliers fp.
 Proof.
   intros [s Hvsm].
   remember (Some m) as om.
   revert m Heqom.
   induction Hvsm using valid_state_message_prop_ind; intros; subst.
   - destruct Hom as (n & (mielem & mi) & Hmi); cbn in mi, Hmi.
-    exists (delta_powers n), n.
-    unfold delta_powers at 1.
-    split; [by rewrite increment_powers_eq |].
+    exists (delta_fin_supp_nat_fn n), n.
+    unfold delta_fin_supp_nat_fn at 1; cbn.
+    split; [by rewrite increment_fn_eq; cbn; lia |].
     by rewrite <- Hmi, mi, prod_powers_delta.
   - destruct l as (k & lk).
     destruct om; [| done].
-    destruct (IHHvsm2 p) as [powers (i & Hi)]; [done |].
+    destruct (IHHvsm2 p) as [fp (i & Hi)]; [done |].
     inversion Ht.
-    exists (increment_powers powers k), k.
-    split; [by rewrite increment_powers_eq; lia |].
+    exists (increment_fin_supp_nat_fn fp k), k; cbn.
+    split; [by rewrite increment_fn_eq; cbn; lia |].
     destruct Hi as [Hgeq1 ->].
-    by rewrite prod_increment_powers.
+    by rewrite prod_fin_supp_nat_fn_increment.
 Qed.
 
 End sec_composition.
@@ -831,10 +633,9 @@ End sec_composition.
 Section sec_free_composition.
 
 Context
-  {index : Type}
+  `{EqDecision index}
   (multipliers : index -> Z)
   (Hmultipliers : forall (i : index), multipliers i <> 0)
-  `{finite.Finite index}
   `{Inhabited index}
   .
 
@@ -843,58 +644,71 @@ Definition free_parity_composite_vlsm : VLSM ParityMessage :=
 
 Lemma composition_valid_messages_powers_of_mults_left
   (Hmpos : forall (i : index), multipliers i > 0) (m : ParityMessage) :
-  forall (powers : index -> nat) (i : index),
-    Z.of_nat (powers i) >= 1 /\ m = prod_powers multipliers powers ->
+  forall (fp : fin_supp_nat_fn index (listset index)) (i : index),
+    (fin_supp_f fp i >= 1)%nat /\ m = prod_fin_supp_nat_fn multipliers fp ->
     valid_message_prop free_parity_composite_vlsm m.
 Proof.
-  intros powers i [Hpowgeq1 Hm]; revert i Hpowgeq1 m Hm.
-  induction powers using powers_ind; [done |].
-  pose proof (Hpowers := Powers_powers powers).
-  inversion Hpowers.
-  - subst; clear Hpowers IHpowers.
-    intros _ _ m Hm.
-    rewrite prod_increment_powers, prod_powers_zero in Hm by done.
-    apply initial_message_is_valid. exists i.
-    by unshelve eexists (exist _ m _); cbn; lia.
-  - assert (Hmvalid : valid_message_prop free_parity_composite_vlsm (prod_powers multipliers powers)).
-    {
-      apply IHpowers with (i := i0); [| done].
-      by subst; rewrite increment_powers_eq; lia.
-    }
-    rewrite prod_increment_powers; [| done].
-    pose proof (Hpos := prod_powers_pos multipliers Hmultipliers Hmpos powers).
-    intros; subst; clear - Hmvalid Hpos.
-    remember (prod_powers _ _) as m; clear Heqm.
-    apply input_valid_transition_out with
-      (l := existT i parity_label)
-      (s := fun j => if decide (i = j) then m + 1 else 1) (s' := fun _ => 1)
-      (om := Some m).
-    repeat split.
-    + apply initial_state_is_valid.
-      intros j; cbn; unfold ParityComponent_initial_state_prop.
-      by case_decide; lia.
-    + done.
-    + by rewrite decide_True; [lia |].
-    + by lia.
-    + cbn; f_equal; extensionality j.
-      rewrite decide_True by done.
-      destruct (decide (i = j)); subst; state_update_simpl; [by lia |].
-      by rewrite decide_False.
+  intros fp i [Hpowgeq1 Hm]; revert i Hpowgeq1 m Hm.
+  pose (P := fun (fp : fin_supp_nat_fn index (listset index)) =>
+    forall i : index, (fin_supp_f fp i >= 1)%nat ->
+    forall m : ParityMessage, m = prod_fin_supp_nat_fn multipliers fp ->
+    valid_message_prop free_parity_composite_vlsm m).
+  cut (P fp); [done |].
+  revert fp; apply fin_supp_nat_fn_ind; subst P.
+  - intros fp1 fp2 Heq Hall i Hi m Hm.
+    eapply Hall with (i := i); [| by rewrite Heq].
+    by replace (fin_supp_f fp1) with (fin_supp_f fp2) by (rewrite Heq; done).
+  - by cbn; lia.
+  - intros n fp0 IHfp0 i Hi m Hm.
+    pose proof (Hfp0 := FinSuppNatFn_complete fp0).
+    inversion Hfp0 as [_fp Heqv Heq | n' fp0' _fp Hfp0' Heqv Heq]; subst _fp;
+      rewrite Heqv in *.
+    + rewrite prod_fin_supp_nat_fn_increment, prod_fin_supp_nat_fn_zero in Hm by done.
+      apply initial_message_is_valid. exists n.
+      by unshelve eexists (exist _ m _); cbn; lia.
+    + assert (Hmvalid : valid_message_prop free_parity_composite_vlsm (prod_fin_supp_nat_fn multipliers fp0)).
+      {
+        apply IHfp0 with (i := n'); [| done].
+        replace (fin_supp_f fp0) with (fin_supp_f (increment_fin_supp_nat_fn fp0' n'))
+          by (rewrite Heqv; done).
+        by cbn; rewrite increment_fn_eq; lia.
+      }
+      subst m; rewrite prod_fin_supp_nat_fn_increment by done.
+      pose proof (Hpos := prod_powers_pos multipliers Hmpos fp0).
+      replace (prod_fin_supp_nat_fn _ _) with (prod_fin_supp_nat_fn multipliers fp0)
+        by (rewrite Heqv; done).
+      clear - Hmvalid Hpos.
+      remember (prod_fin_supp_nat_fn _ _) as m; clear Heqm.
+      apply input_valid_transition_out with
+        (l := existT n parity_label)
+        (s := fun j => if decide (n = j) then m + 1 else 1) (s' := fun _ => 1)
+        (om := Some m).
+      repeat split.
+      * apply initial_state_is_valid.
+        intros j; cbn; unfold ParityComponent_initial_state_prop.
+        by case_decide; lia.
+      * done.
+      * by rewrite decide_True; [lia |].
+      * by lia.
+      * cbn; f_equal; extensionality j.
+        rewrite decide_True by done.
+        destruct (decide (n = j)); subst; state_update_simpl; [by lia |].
+        by rewrite decide_False.
 Qed.
 
 Lemma composition_valid_messages_powers_of_mults
   (Hmpos : forall (i : index), multipliers i > 0) (m : ParityMessage) :
-    (exists (powers : index -> nat) (i : index),
-      Z.of_nat (powers i) >= 1 /\ m = prod_powers multipliers powers) <->
-    valid_message_prop free_parity_composite_vlsm m.
+    valid_message_prop free_parity_composite_vlsm m <->
+  exists (fp : fin_supp_nat_fn index (listset index)) (i : index),
+    (fin_supp_f fp i >= 1)%nat /\ m = prod_fin_supp_nat_fn multipliers fp.
 Proof.
   split.
-  - by intros [? []]; eapply composition_valid_messages_powers_of_mults_left.
   - intros Hvm.
     eapply VLSM_incl_valid_message in Hvm; cycle 1.
     + by apply free_composite_vlsm_spec.
     + by do 2 red.
     + by cbn in Hvm; eapply composition_valid_messages_powers_of_mults_right.
+  - by intros [? []]; eapply composition_valid_messages_powers_of_mults_left.
 Qed.
 
 End sec_free_composition.
