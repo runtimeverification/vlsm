@@ -7,9 +7,10 @@ From VLSM.Lib Require Import Preamble StdppExtras.
 
 (**
   We model finitely supported functions as consisting of a total function
-  and a finite set (called the domain) of elements from the function's source
-  type satisfying that an element is in the domain iff its image through the
-  function is different 
+  and a finite set of elements from the function's source type (called the domain),
+  satisfying that an element is in the domain iff its image through the
+  function is different than the [inhabitant].
+  Note that for [nat] and [Z] the [inhabitant] is <<0>>.
 *)
 Record fin_supp_fn (A B Supp : Type) `{FinSet A Supp} `{Inhabited B} := mk_fin_supp_fn
 {
@@ -128,10 +129,13 @@ Definition fin_supp_nat_fn (A Supp : Type) `{FinSet A Supp} :=
 
 Section sec_fin_supp_nat_fn_prop.
 
+(** ** Finitely supported functions on naturals *)
+
 Context
   `{FinSet A Supp}
   .
 
+(** Incrementing one of the components of a function. *)
 Definition increment_fn (f : A -> nat) (n : A) :=
   update_fn f n (S (f n)).
 
@@ -161,6 +165,9 @@ Proof.
   - by rewrite update_fn_eq; set_solver.
   - by rewrite update_fn_neq; set_solver.
 Qed.
+
+Definition delta_fin_supp_nat_fn (n : A) : fin_supp_nat_fn A Supp :=
+  increment_fin_supp_nat_fn zero_fin_supp_fn n.
 
 #[export] Instance increment_fin_supp_nat_fn_proper :
   Proper ((≡) ==> (=) ==> (≡)) increment_fin_supp_nat_fn.
@@ -223,6 +230,11 @@ Proof.
     + by contradict n0; apply Hdom0.
 Qed.
 
+(**
+  To be able to prove things by induction on finitely supported functions on
+  naturals we define the following inductive property and we then show it
+  holds for all such functions.
+*)
 Inductive FinSuppNatFn : fin_supp_nat_fn A Supp -> Prop :=
 | P_zero : forall fp : fin_supp_nat_fn A Supp, fp ≡ zero_fin_supp_fn -> FinSuppNatFn fp
 | P_succ : forall (i : A) (fp0 fp1 : fin_supp_nat_fn A Supp),
@@ -295,6 +307,7 @@ Proof.
   by apply Hsucc.
 Qed.
 
+(** The component-wise sum of two functions *)
 Program Definition fin_supp_nat_fn_add
   (fn1 fn2 : fin_supp_nat_fn A Supp) : fin_supp_nat_fn A Supp :=
 {|

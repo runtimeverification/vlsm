@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble StdppExtras FinSuppFn Primes.
+From VLSM.Lib Require Import Preamble StdppExtras FinSuppFn NatExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 From VLSM.Core Require Import ProjectionTraces.
 
@@ -518,26 +518,31 @@ Qed.
 (** *** Positive powers of the multiplier are valid messages *)
 
 Lemma parity_valid_messages_powers_of_mult_right :
-  forall (m : option ParityMessage),
-    option_valid_message_prop ParityVLSM m -> m <> None ->
-      exists p : Z, p >= 1 /\ m = Some (multiplier ^ p).
+  forall (m : ParityMessage),
+    valid_message_prop ParityVLSM m ->
+    exists p : Z, p >= 1 /\ m = multiplier ^ p.
 Proof.
-  intros m [s Hvsm] Hmnn.
-  induction Hvsm using valid_state_message_prop_ind.
+  intros m [s Hvsm].
+  assert (Hom : is_Some (Some m)) by (eexists; done).
+  replace m with (is_Some_proj Hom) by done.
+  revert Hvsm Hom; generalize (Some m) as om; intros.
+  clear m; induction Hvsm using valid_state_message_prop_ind.
   - unfold option_initial_message_prop, from_option in Hom; cbn in Hom.
-    destruct om; [| done].
+    destruct Hom as [m ->]; cbn in *.
     by exists 1; split; [lia | f_equal; lia].
-  - destruct om, IHHvsm2 as [x Hx]; inversion Ht; cycle 1; [| done..].
+  - destruct om as [m |]; [| done].
+    unshelve edestruct IHHvsm2 as [x Hx]; [done |].
+    inversion Ht; subst; clear Ht.
+    cbn in Hx |- *; destruct Hx as [Hgeq1 ->].
     exists (x + 1).
     split; [by lia |].
-    destruct Hx as [Hgeq1 [= ->]].
     by rewrite <- Z.pow_succ_r; [| lia].
 Qed.
 
 Lemma parity_valid_messages_powers_of_mult_left :
   multiplier > 1 ->
   forall (p : Z),
-    p >= 1 -> option_valid_message_prop ParityVLSM (Some (multiplier ^ p)).
+    p >= 1 -> valid_message_prop ParityVLSM (multiplier ^ p).
 Proof.
   intros Hgt0 p Hp.
   assert (Hle : 0 <= p - 1) by lia.
@@ -560,23 +565,34 @@ Proof.
 Qed.
 
 Lemma parity_valid_messages_powers_of_mult :
-  forall (om : option ParityMessage), multiplier > 1 ->
-    om <> None -> ((option_valid_message_prop ParityVLSM om) <->
-    (exists p : Z, p >= 1 /\ om = Some (multiplier ^ p))).
+  forall (m : ParityMessage), multiplier > 1 ->
+    valid_message_prop ParityVLSM m
+      <->
+    exists p : Z, p >= 1 /\ m = multiplier ^ p.
 Proof.
   split.
   - by intros; apply parity_valid_messages_powers_of_mult_right.
   - by intros (p & Hpgt0 & [= ->]); apply parity_valid_messages_powers_of_mult_left.
 Qed.
 
-End sec_parity_vlsm.
-
-(*
-Definition ls_fin_supp_nat_fn (index : Type) :=
-  fin_supp_nat_fn (index := index) (indexSet := listset index).
-Definition ls_powers_ind (index : Type) `{EqDecision index} :=
-  powers_ind (index := index) (indexSet := listset index).
+(**
+  The constrained transition from Example [parity_example_constrained_transition]
+  is not also valid.
 *)
+Example parity_example_constrained_transition_not_valid :
+  multiplier > 1 ->
+  ~ input_valid_transition ParityVLSM parity_label
+    (multiplier + 1, Some (multiplier + 1)) (0, Some (multiplier ^ 2 + multiplier)).
+Proof.
+  intros Hmult [(_ & Hm & _) _].
+  apply parity_valid_messages_powers_of_mult in Hm as (p & Hp & Heq); [| done].
+  rewrite <- (Z.succ_pred p) in Heq.
+  rewrite Z.pow_succ_r in Heq by lia.
+  assert (Hmul : multiplier * (multiplier ^ Z.pred p - 1) = 1) by lia.
+  by apply Z.eq_mul_1_nonneg in Hmul as []; lia.
+Qed.
+
+End sec_parity_vlsm.
 
 Section sec_composition.
 
@@ -608,6 +624,10 @@ Proof.
   by apply (valid_state_project_preloaded ParityMessage indexed_parity_vlsms parity_constraint).
 Qed.
 
+(**
+  Any valid message can be expressed as a non-empty product of powers
+  of the multipliers associated to the components.
+*)
 Lemma composition_valid_messages_powers_of_mults_right (m : ParityMessage) :
   valid_message_prop parity_composite_vlsm m ->
   exists (fp : fin_supp_nat_fn index indexSet),
@@ -901,6 +921,16 @@ Qed.
 
 End sec_parity23.
 
+(** ** A composition for all primes
+
+  In the following we give an example of a composition with an infinite number
+  of [ParityVLSM] components, one for each prime number.
+
+  Then we characterize the valid messages for this composition to be precisely
+  all natural numbers larger than 1.
+
+  Finally, we show that in this composition any component is a validator.
+*)
 
 Section sec_primes_vlsm_composition.
 
@@ -922,7 +952,7 @@ Proof.
   split.
   - intros (fp & Hdom_fp & ->).
     by apply prod_powers_gt.
-  - by apply primes_decomposition.
+  - by apply primes_factorization.
 Qed.
 
 Theorem component_projection_validator_prop_primes :

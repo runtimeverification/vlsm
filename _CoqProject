@@ -25,7 +25,6 @@ theories/VLSM/Lib/TraceProperties.v
 theories/VLSM/Lib/TraceClassicalProperties.v
 theories/VLSM/Lib/Measurable.v
 theories/VLSM/Lib/FinSuppFn.v
-theories/VLSM/Lib/Primes.v
 
 theories/VLSM/Core/VLSM.v
 theories/VLSM/Core/PreloadedVLSM.v
