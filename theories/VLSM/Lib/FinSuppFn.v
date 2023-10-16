@@ -2,6 +2,15 @@ From Coq Require Import FunctionalExtensionality.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppExtras.
 
+
+(** * Finitely supported functions *)
+
+(**
+  We model finitely supported functions as consisting of a total function
+  and a finite set (called the domain) of elements from the function's source
+  type satisfying that an element is in the domain iff its image through the
+  function is different 
+*)
 Record fin_supp_fn (A B Supp : Type) `{FinSet A Supp} `{Inhabited B} := mk_fin_supp_fn
 {
   fin_supp_f : A -> B ;
@@ -197,7 +206,7 @@ Proof.
     apply elem_of_elements in e; revert e.
     specialize (NoDup_elements dom0).
     generalize (elements dom0) as l; clear; induction l; [by inversion 2 |].
-    rewrite NoDup_cons, elem_of_cons; cbn.
+    rewrite list.NoDup_cons, elem_of_cons; cbn.
     intros [Ha Hnodup] [<- | Hn].
     + rewrite increment_fn_eq; cbn.
       do 2 f_equal.
@@ -296,6 +305,64 @@ Next Obligation.
 Proof. intros [] [] i; cbn.
 rewrite elem_of_union, <- Hdom0, <- Hdom1; cbn.
 by lia.
+Qed.
+
+#[export] Instance fin_supp_nat_fn_add_proper :
+  Proper ((≡) ==> (≡) ==> (≡)) fin_supp_nat_fn_add.
+Proof.
+  intros [] [] [] [] [] []; split; cbn in *; [by set_solver |].
+  by rewrite fp_eqv_fn0, fp_eqv_fn1.
+Qed.
+
+#[export] Instance fin_supp_nat_fn_add_comm : Comm (≡) fin_supp_nat_fn_add.
+Proof.
+  intros [] []; split; cbn; [by set_solver |].
+  extensionality a; apply Nat.add_comm.
+Qed.
+
+#[export] Instance fin_supp_nat_fn_add_left_id :
+  LeftId (≡) zero_fin_supp_fn fin_supp_nat_fn_add.
+Proof.
+  intros []; split; cbn; [by set_solver |].
+  by extensionality a.
+Qed.
+
+#[export] Instance fin_supp_nat_fn_add_right_id :
+  RightId (≡) zero_fin_supp_fn fin_supp_nat_fn_add.
+Proof.
+  intros []; split; cbn; [by set_solver |].
+  by extensionality a.
+Qed.
+
+#[export] Instance fin_supp_nat_fn_add_assoc : Assoc (≡) fin_supp_nat_fn_add.
+Proof.
+  intros [] []; split; cbn; [by set_solver |].
+  extensionality a; apply Nat.add_assoc.
+Qed.
+
+Lemma fin_sup_nat_fn_add_increment_l (fn1 fn2 : fin_supp_nat_fn A Supp) :
+  forall a : A,
+  fin_supp_nat_fn_add (increment_fin_supp_nat_fn fn1 a) fn2
+    ≡
+  increment_fin_supp_nat_fn (fin_supp_nat_fn_add fn1 fn2) a.
+Proof.
+  destruct fn1, fn2; intro a; split; cbn; [by set_solver |].
+  extensionality a'.
+  destruct (decide (a = a')); subst.
+  - by rewrite !increment_fn_eq; lia.
+  - by rewrite !increment_fn_neq by done; lia.
+Qed.
+
+Lemma fin_sup_nat_fn_add_increment_r (fn1 fn2 : fin_supp_nat_fn A Supp) :
+  forall a : A,
+  fin_supp_nat_fn_add fn2 (increment_fin_supp_nat_fn fn1 a)
+    ≡
+  increment_fin_supp_nat_fn (fin_supp_nat_fn_add fn2 fn1) a.
+Proof.
+  etransitivity; [by apply comm; typeclasses eauto |].
+  rewrite fin_sup_nat_fn_add_increment_l.
+  apply increment_fin_supp_nat_fn_proper; [| done].
+  by apply comm; typeclasses eauto.
 Qed.
 
 End sec_fin_supp_nat_fn_prop.

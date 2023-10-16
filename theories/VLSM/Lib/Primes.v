@@ -1,6 +1,6 @@
 From Coq Require Import ZArith.Znumtheory.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble FinSuppFn.
+From VLSM.Lib Require Import Preamble FinSuppFn StdppExtras.
 
 #[export] Instance prime_dec : forall n, Decision (prime n).
 Proof.
@@ -100,14 +100,23 @@ Proof.
   by lia.
 Qed.
 
-Lemma prod_powers_pos (Hmpos : forall (i : index), (multipliers i > 0)%Z) :
-  forall (fp : fin_supp_nat_fn index indexSet), (prod_fin_supp_nat_fn fp > 0)%Z.
+Lemma prod_powers_gt (n : Z) (Hn : (n >= 0)%Z)
+  (Hmpos : forall (i : index), (multipliers i > n)%Z) :
+  forall (fp : fin_supp_nat_fn index indexSet),
+    dom fp ≢ ∅ -> (prod_fin_supp_nat_fn fp > n)%Z.
 Proof.
-  apply fin_supp_nat_fn_ind.
+  intro fp.
+  pose (P := fun fp => dom fp ≢ ∅ -> (prod_fin_supp_nat_fn fp > n)%Z).
+  cut (P fp); [done |].
+  revert fp; apply fin_supp_nat_fn_ind; subst P; cbn.
   - by intros _fp fp ->.
   - by rewrite prod_fin_supp_nat_fn_zero.
-  - intros; rewrite prod_fin_supp_nat_fn_increment.
-    by specialize (Hmpos i); lia.
+  - intros * IH _; rewrite prod_fin_supp_nat_fn_increment.
+    specialize (Hmpos i).
+    destruct (decide (dom fp ≡ ∅)) as [Hdom | Hndom].
+    + apply zero_fin_supp_fn_dom in Hdom as ->.
+      by rewrite prod_fin_supp_nat_fn_zero; lia.
+    + by specialize (IH Hndom); nia.
 Qed.
 
 Lemma prod_powers_add (fp1 fp2 :  fin_supp_nat_fn index indexSet) :
@@ -123,39 +132,39 @@ Proof.
   cut (P fp1); [done |].
   revert fp1.
   apply fin_supp_nat_fn_ind; subst P; cbn.
-  - intros fp1 fp1' Heqv Hall fp2.
-
+  - by intros fp1 fp1' Heqv Hall fp2; rewrite <- Heqv; apply Hall.
+  - intros; rewrite left_id, prod_fin_supp_nat_fn_zero by typeclasses eauto.
+    by lia.
+  - intros i fp1 Hall fp2.
+    rewrite fin_sup_nat_fn_add_increment_l, !prod_fin_supp_nat_fn_increment, Hall.
+    by lia.
+Qed.
 
 End sec_prod_powers.
 
+Definition primes_powers : Type := fin_supp_nat_fn primes (listset primes).
+Definition prod_primes_powers : primes_powers -> Z :=
+  prod_fin_supp_nat_fn (fun p : primes => ` p).
 
-Fixpoint prod_primes (l : list primes) : Z :=
-  match l with
-  | [] => 1%Z
-  | p :: ps => Z.mul (` p) (prod_primes ps)
-  end.
-
-Lemma prod_primes_app (l1 l2 : list primes) :
-  prod_primes (l1 ++ l2) = (prod_primes l1 * prod_primes l2)%Z.
-Proof.
-  by induction l1; cbn; [lia | rewrite IHl1; lia].
-Qed.
 
 Lemma primes_decomposition : forall (n : Z), (n > 1)%Z ->
-  exists (ps : list primes),  n = prod_primes ps.
+  exists (ps : primes_powers), dom ps ≢ ∅ /\ n = prod_primes_powers ps.
 Proof.
-  pose (P := fun n : Z => (n > 1)%Z → ∃ ps : list primes, n = prod_primes ps).
+  pose (P := fun n : Z => (n > 1)%Z →
+    exists (ps : primes_powers), dom ps ≢ ∅ /\ n = prod_primes_powers ps).
   cut (forall n : Z, (0 <= n)%Z -> P n).
   {
     by intros HP n Hn; apply HP; lia.
   }
   apply Zlt_0_ind; subst P; cbn; intros n Hind _ Hn1.
   destruct (decide (prime n)) as [| Hnp].
-  - by exists [dexist n p]; cbn; lia.
+  - exists (delta_fin_supp_nat_fn (dexist n p)); split; [by cbn; set_solver |].
+    by unfold prod_primes_powers; rewrite prod_powers_delta.
   - apply not_prime_divide in Hnp as (p & [Hp1 Hpn] & q & ->); [| lia].
     assert (Hq1 : (1 < q)%Z) by nia.
     assert (Hqn : (q < q * p)%Z) by nia.
-    destruct (Hind p) as [ps ->]; [by split; lia | by lia |..].
-    destruct (Hind q) as [qs ->]; [by split; lia | by lia |..].
-    by eexists; symmetry; apply prod_primes_app.
+    destruct (Hind p) as (ps & Hdomps & ->); [by split; lia | by lia |..].
+    destruct (Hind q) as (qs & Hdomqs & ->); [by split; lia | by lia |..].
+    eexists; split; [| by symmetry; apply prod_powers_add].
+    by cbn; set_solver.
 Qed.
