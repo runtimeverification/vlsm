@@ -686,12 +686,14 @@ Context
   `{!Inj (=) (=) idx}
   .
 
-Definition ELMO_A (a : Address) : index :=
-  hd inhabitant (filter (fun i => idx i = a) (enum index)).
+Definition adr2idx (a : Address) : option index :=
+  head (filter (fun i => idx i = a) (enum index)).
 
-Lemma ELMO_A_inv : forall i, ELMO_A (idx i) = i.
+Lemma adr2idx_idx :
+  forall (i : index),
+    adr2idx (idx i) = Some i.
 Proof.
-  intro i; unfold ELMO_A; cbn.
+  intro i; unfold adr2idx; cbn.
   replace (filter _ _) with [i]; [done |].
   generalize (enum index), (NoDup_enum index) as Hnodup, (elem_of_enum i) as Hi.
   induction l; intros; [by inversion Hi |].
@@ -706,6 +708,30 @@ Proof.
   - by rewrite decide_True, Hnil.
   - rewrite decide_False, IHl; [done.. |].
     by intro Hcontra; eapply inj in Hcontra; [| done]; subst.
+Qed.
+
+Lemma idx_adr2idx :
+  forall (i : index) (adr : Address),
+    adr2idx adr = Some i -> idx i = adr.
+Proof.
+  unfold adr2idx.
+  intros i adr Heq.
+  apply (@elem_of_list_filter _ (fun i => idx i = adr) _ (enum index) i).
+  destruct (filter _ _); inversion Heq; subst.
+  by left.
+Qed.
+
+Definition ELMO_A (a : Address) : index :=
+  match adr2idx a with
+  | None => inhabitant
+  | Some i => i
+  end.
+
+Lemma ELMO_A_inv :
+  forall (i : index), ELMO_A (idx i) = i.
+Proof.
+  intros i; unfold ELMO_A.
+  by rewrite adr2idx_idx.
 Qed.
 
 End sec_BaseELMO_Observations.
