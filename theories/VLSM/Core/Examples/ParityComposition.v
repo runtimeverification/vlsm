@@ -1,9 +1,10 @@
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality.
+From Coq Require Import ZArith.Znumtheory.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppExtras FinSuppFn NatExtras.
-From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
-From VLSM.Core Require Import ProjectionTraces.
+From VLSM.Core Require Import VLSM PreloadedVLSM ConstrainedVLSM Composition.
+From VLSM.Core Require Import VLSMProjections ProjectionTraces.
 
 (** * Parity VLSM
 
@@ -977,5 +978,91 @@ Proof.
     by unfold ParityComponent_initial_state_prop; lia.
 Qed.
 
+Inductive EvenConstraint :
+  label primes_vlsm_composition ->
+  state primes_vlsm_composition * option Z -> Prop :=
+| even_constraint : forall l s m, Z.Even m -> EvenConstraint l (s, Some m).
+
+Definition even_constrained_primes_composition : VLSM Z :=
+  constrained_vlsm primes_vlsm_composition EvenConstraint.
+
+Lemma even_constrained_primes_composition_valid_messages_left (m : Z) :
+  m > 1 -> Z.Even m -> valid_message_prop even_constrained_primes_composition m.
+Proof.
+  intros Hm1 Hmeven.
+  assert (Hinit : composite_initial_message_prop (indexed_parity_vlsms (fun p : primes => ` p)) 2)
+    by (unshelve eexists inhabitant, (exist _ 2 _); done).
+  destruct (decide (m = 2)) as [-> | Hm2]; [by apply initial_message_is_valid |].
+  destruct Hmeven as [n ->].
+  assert (Hn : 2 <= n) by lia.
+  pose (P := fun n => valid_message_prop even_constrained_primes_composition (2 * n)).
+  cut (P n); [done |].
+  clear -Hn Hinit; revert n Hn; apply Zlt_lower_bound_ind; subst P; cbn.
+  intros n Hind Hn.
+  destruct (decide (prime n)) as [Hp | Hnp].
+  - apply input_valid_transition_out with
+      (l := existT (dexist n Hp) parity_label)
+      (s := fun j => if decide (dexist n Hp = j) then 3 else 1) (s' := fun _ => 1)
+        (om := Some 2).
+    repeat split.
+    + apply initial_state_is_valid.
+      intros j; cbn; unfold ParityComponent_initial_state_prop.
+      by case_decide; lia.
+    + by apply initial_message_is_valid.
+    + by rewrite decide_True; [lia |].
+    + by lia.
+    + by exists 1.
+    + cbn; f_equal; [| by f_equal; lia].
+      extensionality j.
+      rewrite decide_True by done.
+      destruct (decide (dexist n Hp = j)); subst; state_update_simpl; [by lia |].
+      by rewrite decide_False.
+  - apply not_prime_divide_prime in Hnp as (m & Hp & q & Hq & ->); [| by lia].
+    apply input_valid_transition_out with
+      (l := existT (dexist m Hp) parity_label)
+      (s := fun j => if decide (dexist m Hp = j) then (2 * q + 1) else 1) (s' := fun _ => 1)
+        (om := Some (2 * q)).
+    repeat split.
+    + apply initial_state_is_valid.
+      intros j; cbn; unfold ParityComponent_initial_state_prop.
+      by case_decide; lia.
+    + by apply Hind.
+    + by rewrite decide_True; [lia |].
+    + by lia.
+    + by exists q.
+    + cbn; f_equal; [| by f_equal; lia].
+      extensionality j.
+      rewrite decide_True by done.
+      destruct (decide (dexist m Hp = j)); subst; state_update_simpl; [by lia |].
+      by rewrite decide_False.
+Qed.
+
+Lemma even_constrained_primes_composition_valid_message_char (m : Z) :
+  valid_message_prop even_constrained_primes_composition m
+    <->
+  (m > 1)%Z /\ Z.Even m \/ prime m.
+Proof.
+  split.
+  - intro Hm.
+    cut ((m > 1)%Z /\ (Z.Even m \/ prime m)).
+    {
+      by destruct (decide (prime m)); [right | left; itauto].
+    }
+    split.
+    + apply primes_vlsm_composition_valid_message_char.
+      eapply VLSM_incl_valid_message; [..| done].
+      * by apply (VLSM_incl_constrained_vlsm primes_vlsm_composition).
+      * by do 2 red.
+    + apply emitted_messages_are_valid_iff in Hm as
+        [([p Hp] & [i Hi] & <-) | ([s [im |]] & [i li] & s' & (_ & _ & _ & Hc) & Ht)];
+        cbn in *; [by subst; right; apply bool_decide_spec in Hp | | done].
+      inversion Hc; subst; clear Hc.
+      inversion Ht; subst; clear Ht.
+      by left; apply Zeven_equiv, Zeven_mult_Zeven_r, Zeven_equiv.
+  - intros [[] | Hprime].
+    + by apply even_constrained_primes_composition_valid_messages_left.
+    + apply initial_message_is_valid.
+      by unshelve eexists (dexist m Hprime), (exist _ m _).
+Qed.
 
 End sec_primes_vlsm_composition.

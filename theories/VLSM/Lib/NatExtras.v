@@ -267,6 +267,25 @@ Proof.
     + by specialize (IH Hndom); nia.
 Qed.
 
+Lemma prod_powers_elem_of_dom (fp : fin_supp_nat_fn index indexSet) :
+  forall i : index, i ∈ dom fp -> (multipliers i | prod_fin_supp_nat_fn fp)%Z.
+Proof.
+  pose (P := fun fp => forall i : index, i ∈ dom fp ->
+    (multipliers i | prod_fin_supp_nat_fn fp)%Z).
+  cut (P fp); [done |].
+  revert fp.
+  apply fin_supp_nat_fn_ind; subst P; cbn.
+  - by intros fp1 fp1' Heqv Hall fp2; rewrite <- Heqv; apply Hall.
+  - by intros; set_solver.
+  - intros j fp0 IHfp0 i.
+    intros Hi.
+    rewrite prod_fin_supp_nat_fn_increment.
+    destruct (decide (i = j)) as [| Hij];
+      [by subst; exists (prod_fin_supp_nat_fn fp0); lia|].
+    destruct (IHfp0 i) as [n ->]; [by set_solver |].
+    by exists (multipliers j * n)%Z; lia.
+Qed.
+
 Lemma prod_powers_add (fp1 fp2 :  fin_supp_nat_fn index indexSet) :
   prod_fin_supp_nat_fn (fin_supp_nat_fn_add fp1 fp2)
     =
@@ -306,6 +325,25 @@ Definition primes_powers : Type := fin_supp_nat_fn primes (listset primes).
 Definition prod_primes_powers : primes_powers -> Z :=
   prod_fin_supp_nat_fn (fun p : primes => ` p).
 
+Lemma not_prime_divide_prime : forall (n : Z), (n > 1)%Z -> ~ prime n ->
+  exists (m : Z), prime m /\ exists (q : Z), (2 <= q < n)%Z /\ n = (q * m)%Z.
+Proof.
+  pose (P := fun n =>  ~ prime n ->
+    exists (m : Z), prime m /\ exists (q : Z), (2 <= q < n)%Z /\ n = (q * m)%Z).
+  cut (forall n : Z, (2 <= n)%Z -> P n).
+  {
+    by intros HP n Hn1 Hnp; apply HP; [lia |].
+  }
+  apply Zlt_lower_bound_ind; subst P; cbn; intros n Hind Hn2 Hnp.
+  apply not_prime_divide in Hnp as (p & [Hp1 Hpn] & q & ->); [| lia].
+  destruct (decide (prime p)) as [| Hnp].
+  - exists p; split; [done |].
+    eexists; split; [| done].
+    by nia.
+  - apply Hind in Hnp as (m & Hmprime & q' & Hq' & ->); [| by lia].
+    exists m; split; [done |].
+    by exists (q * q')%Z; split; nia.
+Qed.
 
 Lemma primes_factorization : forall (n : Z), (n > 1)%Z ->
   exists (ps : primes_powers), dom ps ≢ ∅ /\ n = prod_primes_powers ps.
