@@ -667,3 +667,16 @@ Proof.
   f_equal; apply IHl.
   by intros; apply Heq; right.
 Qed.
+
+Lemma sum_list_with_zero `(f : index -> nat) (l : list index) :
+  sum_list_with  f l = 0 <-> forall (i : index), i ∈ l -> f i = 0.
+Proof.
+  split.
+  - intros Hsum i Hi.
+    apply sum_list_with_in with (f := f) in Hi.
+    by lia.
+  - induction l; intros Hall0; cbn; [done |].
+    rewrite Hall0 by left.
+    apply IHl.
+    by intros; apply Hall0; right.
+Qed.
