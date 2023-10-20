@@ -647,9 +647,9 @@ Proof.
     destruct om; [| done].
     destruct (IHHvsm2 p) as [fp (? & i & ->)]; [done |].
     inversion Ht.
-    exists (increment_fin_supp_nat_fn fp k); cbn.
+    exists (succ_fin_supp_nat_fn fp k); cbn.
     split_and!; [by typeclasses eauto | by set_solver |].
-    by rewrite prod_fin_supp_nat_fn_increment.
+    by rewrite prod_fin_supp_nat_fn_succ.
 Qed.
 
 End sec_composition.
@@ -685,7 +685,7 @@ Proof.
     pose proof (Hfp0 := FinSuppNatFn_complete fp0).
     inversion Hfp0 as [_fp ? Heqv Heq | n' fp0' _fp Hfp0' ? Heqv Heq]; subst _fp;
       rewrite Heqv in *.
-    + rewrite prod_fin_supp_nat_fn_increment, prod_fin_supp_nat_fn_zero in Hm
+    + rewrite prod_fin_supp_nat_fn_succ, prod_fin_supp_nat_fn_zero in Hm
         by typeclasses eauto.
       apply initial_message_is_valid. exists n.
       by unshelve eexists (exist _ m _); cbn; lia.
@@ -695,13 +695,13 @@ Proof.
         apply IHfp0; [| done].
         by rewrite Heqv; cbn; clear; set_solver.
       }
-      subst m; rewrite prod_fin_supp_nat_fn_increment by typeclasses eauto.
+      subst m; rewrite prod_fin_supp_nat_fn_succ by typeclasses eauto.
       replace (prod_fin_supp_nat_fn _ _) with (prod_fin_supp_nat_fn multipliers fp0)
         by (rewrite Heqv; done).
       assert (Hpos : prod_fin_supp_nat_fn multipliers fp0 >= multipliers n').
       {
         rewrite Heqv.
-        rewrite prod_fin_supp_nat_fn_increment
+        rewrite prod_fin_supp_nat_fn_succ
           by (apply FinSuppNatFn_is_fin_supp; done).
         cut (prod_fin_supp_nat_fn multipliers fp0' > 0);
           [by specialize (Hmpos n'); nia |].

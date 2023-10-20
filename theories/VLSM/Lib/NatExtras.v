@@ -246,13 +246,13 @@ Proof.
   by rewrite elements_empty.
 Qed.
 
-Lemma prod_fin_supp_nat_fn_increment
+Lemma prod_fin_supp_nat_fn_succ
   (fp : fin_supp_nat_fn index indexSet) `{!FinSuppFn fp} (n : index) :
-  prod_fin_supp_nat_fn (increment_fin_supp_nat_fn fp n)
+  prod_fin_supp_nat_fn (succ_fin_supp_nat_fn fp n)
     =
   (multipliers n * prod_fin_supp_nat_fn fp)%Z.
 Proof.
-  unfold prod_fin_supp_nat_fn, increment_fin_supp_nat_fn; cbn.
+  unfold prod_fin_supp_nat_fn, succ_fin_supp_nat_fn; cbn.
   destruct (decide (n ∈ fin_dom fp)).
   - assert ({[n]} ∪ fin_dom fp ≡ fin_dom fp) as -> by set_solver.
     apply elem_of_elements in e; revert e.
@@ -260,12 +260,12 @@ Proof.
     generalize (elements (fin_dom fp)) as l; clear; induction l; [by inversion 2 |].
     rewrite NoDup_cons, elem_of_cons; cbn.
     intros [Ha Hnodup] [<- | Hn].
-    + rewrite increment_fn_eq; cbn.
-      setoid_rewrite (prod_powers_aux_fn_dom (increment_fn (fin_dom_f fp) n) (fin_dom_f fp)).
+    + rewrite update_fn_eq; cbn.
+      setoid_rewrite (prod_powers_aux_fn_dom (update_fn (fin_dom_f fp) n (S (fin_dom_f fp n)))).
       * rewrite Z.mul_assoc; f_equal.
         by rewrite <- Z.pow_succ_r; lia.
-      * by intros; rewrite increment_fn_neq; [| set_solver].
-    + rewrite increment_fn_neq by set_solver.
+      * by intros; rewrite update_fn_neq; [| set_solver].
+    + rewrite update_fn_neq by set_solver.
       setoid_rewrite IHl; [| done..].
       by unfold prod_powers_aux; lia.
   - rewrite elements_union_singleton by done; cbn.
@@ -279,7 +279,7 @@ Lemma prod_powers_delta (n : index) :
   prod_fin_supp_nat_fn (delta_fin_supp_nat_fn n) = multipliers n.
 Proof.
   intros; unfold delta_fin_supp_nat_fn.
-  rewrite prod_fin_supp_nat_fn_increment, prod_fin_supp_nat_fn_zero
+  rewrite prod_fin_supp_nat_fn_succ, prod_fin_supp_nat_fn_zero
     by typeclasses eauto.
   by lia.
 Qed.
@@ -309,7 +309,7 @@ Proof.
   - by intros; set_solver.
   - intros j fp0 ? IHfp0 i.
     intros Hi.
-    rewrite prod_fin_supp_nat_fn_increment by done.
+    rewrite prod_fin_supp_nat_fn_succ by done.
     destruct (decide (i = j)) as [| Hij];
       [by subst; exists (prod_fin_supp_nat_fn fp0); lia|].
     destruct (IHfp0 i) as [n ->]; [by set_solver |].
@@ -334,7 +334,7 @@ Proof.
   - intros; rewrite left_id, prod_fin_supp_nat_fn_zero by typeclasses eauto.
     by lia.
   - intros i fp1 ? Hall fp2 ?.
-    rewrite fin_sup_nat_fn_add_increment_l, !prod_fin_supp_nat_fn_increment, Hall
+    rewrite fin_supp_nat_fn_add_succ_l, !prod_fin_supp_nat_fn_succ, Hall
       by typeclasses eauto.
     by lia.
 Qed.
