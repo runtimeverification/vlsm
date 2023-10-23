@@ -50,7 +50,7 @@ Proof.
 Qed.
 
 Lemma fin_supp_NoDup `(f : A -> B) `{!Finite (supp f)} : NoDup (fin_supp f).
-Proof.  by apply dsig_NoDup, NoDup_enum. Qed.
+Proof. by apply dsig_NoDup, NoDup_enum. Qed.
 
 #[export] Instance fin_supp_fn_eq_dec (f g : A -> B) `{!Finite (supp f)} `{!Finite (supp g)} :
   Decision (f = g).
@@ -290,7 +290,7 @@ Proof. by intro; extensionality a. Qed.
 
 #[export] Instance fin_supp_nat_fn_add_right_id :
   RightId (=) zero_fin_supp_nat_fn fin_supp_nat_fn_add.
-Proof. by intro; extensionality a. Qed.
+Proof. by unfold fin_supp_nat_fn_add; intro; extensionality a; cbn; lia. Qed.
 
 #[export] Instance fin_supp_nat_fn_add_assoc : Assoc (=) fin_supp_nat_fn_add.
 Proof.
