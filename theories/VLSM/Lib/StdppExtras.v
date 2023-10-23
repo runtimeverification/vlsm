@@ -441,38 +441,6 @@ Proof.
     by eapply filter_nil_not_elem_of in Px.
 Qed.
 
-Lemma elem_of_list_annotate_forget
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  (xP : dsig P)
-  (Hin : xP ∈ list_annotate P l Hs)
-  : proj1_sig xP ∈ l.
-Proof.
-  induction l.
-  - by inversion Hin.
-  - cbn in Hin.
-    apply elem_of_cons in Hin as [-> | Hin].
-    + by left.
-    + by right; apply (IHl (Forall_inv_tail Hs)).
-Qed.
-
-Lemma elem_of_list_annotate
-  `{EqDecision A}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  (xP : dsig P)
-  : xP ∈ list_annotate P l Hs <-> (` xP) ∈ l.
-Proof.
-  split; [by apply elem_of_list_annotate_forget |].
-  destruct xP as [x Hpx]; cbn.
-  by induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
-Qed.
-
 Lemma occurrences_ordering
   {A : Type}
   (a b : A)
@@ -679,4 +647,19 @@ Proof.
     rewrite Hall0 by left.
     apply IHl.
     by intros; apply Hall0; right.
+Qed.
+
+Lemma dsig_NoDup `(P : A -> Prop) `{Pdec : forall a, Decision (P a)} :
+  forall l : list (dsig P), NoDup l <-> NoDup (map proj1_sig l).
+Proof.
+  intro; split.
+  - induction 1 as [| da dl Hda]; [by constructor |].
+    cbn; constructor; [| done].
+    contradict Hda.
+    apply elem_of_list_fmap in Hda as (_da & Heq & H_da).
+    by apply dsig_eq in Heq as <-.
+  - induction l; [by constructor |].
+    cbn; rewrite !NoDup_cons.
+    intros [Ha]; split; [| by apply IHl].
+    by contradict Ha; apply elem_of_list_fmap; eexists.
 Qed.
