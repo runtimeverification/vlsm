@@ -962,6 +962,11 @@ Proof.
   - apply primes_factorization.
 Qed.
 
+(**
+  For any prime number, its corresponding component in the [primes_vlsm_composition]
+  is a validator for that composition, i.e., all of its constrained transitions
+  can be lifted to valid transitions for the composition.
+*)
 Theorem component_projection_validator_prop_primes :
   forall (p : primes),
     component_projection_validator_prop
@@ -970,20 +975,23 @@ Theorem component_projection_validator_prop_primes :
 Proof.
   intros p lp sp [m|] (Hsp & _ & []).
   exists (lift_to_composite_state' (indexed_parity_vlsms (fun p : primes => ` p)) p sp).
-  repeat split; cycle 2.
-  - eapply VLSM_incl_valid_message;
-      [by apply free_composite_vlsm_spec |..].
-    + by do 2 red.
-    + by apply primes_vlsm_composition_valid_message_char; lia.
-  - by state_update_simpl.
-  - done.
-  - by state_update_simpl.
+  repeat split; [by state_update_simpl | | | by state_update_simpl | done].
   - apply initial_state_is_valid.
     intro p'; cbn.
     destruct (decide (p = p')); subst; state_update_simpl; cbn; [| done].
     by unfold ParityComponent_initial_state_prop; lia.
+  - eapply VLSM_incl_valid_message;
+      [by apply free_composite_vlsm_spec |..].
+    + by do 2 red.
+    + by apply primes_vlsm_composition_valid_message_char; lia.
 Qed.
 
+(** *** A (slightly) constrained composition of primes *)
+
+(**
+  To show how a composition constraint affects validation, we here add a very
+  simple constraint, that the received message must be even, to the composition.
+*)
 Inductive EvenConstraint :
   label primes_vlsm_composition ->
   state primes_vlsm_composition * option Z -> Prop :=
@@ -1043,6 +1051,10 @@ Proof.
       by rewrite decide_False.
 Qed.
 
+(**
+  The valid messages of the [even_constrained_primes_composition] are precisely
+  all positive even numbers.
+*)
 Lemma even_constrained_primes_composition_valid_message_char (m : Z) :
   valid_message_prop even_constrained_primes_composition m
     <->
@@ -1069,6 +1081,81 @@ Proof.
     + by apply even_constrained_primes_composition_valid_messages_left.
     + apply initial_message_is_valid.
       by unshelve eexists (dexist m Hprime), (exist _ m _).
+Qed.
+
+(** No component is validating for the [even_constrained_primes_composition]. *)
+Lemma even_constrained_primes_composition_no_validator :
+  forall (p : primes),
+    ~ component_projection_validator_prop
+      (indexed_parity_vlsms (fun p : primes => ` p))
+      EvenConstraint p.
+Proof.
+  intros p Hnv.
+  cut (input_valid
+    (pre_loaded_with_all_messages_vlsm
+      (indexed_parity_vlsms (λ p0 : primes, `p0) p)) () (3, Some 3)).
+  {
+    intro Hiv.
+    apply Hnv in Hiv as (s & _ & _ & _ & _ & Hc).
+    by inversion Hc as [? ? ? []]; lia.
+  }
+  repeat split; [| by apply any_message_is_valid_in_preloaded | by lia..].
+  apply initial_state_is_valid; cbn.
+  by unfold ParityComponent_initial_state_prop; lia.
+Qed.
+
+(**
+  Now we show that if we constrain each component with a local condition
+  equivalent to the global constraint we can recover validation.
+*)
+Inductive LocalEvenConstraint (mult : Z) :
+  label (ParityVLSM mult) ->
+  state (ParityVLSM mult) * option Z -> Prop :=
+| local_even_constraint : forall l s m, Z.Even m ->
+    LocalEvenConstraint mult l (s, Some m).
+
+Definition even_prime_vlsms (p : primes) : VLSM ParityMessage :=
+  constrained_vlsm (ParityVLSM (` p)) (LocalEvenConstraint (` p)).
+
+(**
+  Adding the local constraint to each component does not change the behavior
+  of the composition.
+*)
+Lemma even_constrained_primes_composition_incl_left :
+  VLSM_incl
+    even_constrained_primes_composition
+    (composite_vlsm even_prime_vlsms EvenConstraint).
+Proof.
+  apply basic_VLSM_strong_incl; cycle 3; [intros ? **; done.. |].
+  intros [p []] s [m|] [Hv Hc]; [| by inversion Hc]; cbn.
+  split; [| done].
+  split; [| by inversion Hc].
+  by destruct Hv.
+Qed.
+
+(**
+  The validation result is recovered for the new constrained components and composition.
+*)
+Lemma even_constrained_primes_composition_all_validators :
+  forall (p : primes),
+    component_projection_validator_prop
+      even_prime_vlsms
+      EvenConstraint p.
+Proof.
+  intros p lp sp [m|] (Hsp & _ & [[] Hc]).
+  inversion Hc as [? ? ? Heven]; subst.
+  exists (lift_to_composite_state' (indexed_parity_vlsms (fun p : primes => ` p)) p sp).
+  repeat split; [by state_update_simpl | | | by state_update_simpl | done..].
+  - apply initial_state_is_valid.
+    intro p'; cbn.
+    destruct (decide (p = p')); subst; state_update_simpl; cbn; [| done].
+    by unfold ParityComponent_initial_state_prop; lia.
+  - apply option_valid_message_Some.
+    eapply VLSM_incl_valid_message;
+      [by apply even_constrained_primes_composition_incl_left |..].
+    + by do 2 red.
+    + apply even_constrained_primes_composition_valid_message_char.
+      by left; split; [lia |].
 Qed.
 
 End sec_primes_vlsm_composition.
