@@ -9,6 +9,7 @@ theories/VLSM/Lib/SsrExport.v
 theories/VLSM/Lib/Preamble.v
 theories/VLSM/Lib/EquationsExtras.v
 theories/VLSM/Lib/FinSuppFn.v
+theories/VLSM/Lib/FinSuppFn2.v
 theories/VLSM/Lib/NatExtras.v
 theories/VLSM/Lib/ListExtras.v
 theories/VLSM/Lib/StdppExtras.v
