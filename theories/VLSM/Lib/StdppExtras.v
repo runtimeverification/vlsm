@@ -633,3 +633,50 @@ Proof.
   - by apply Hsub, elem_of_app; left.
   - by apply Hsub, elem_of_app; right.
 Qed.
+
+#[export] Instance finset_equiv_dec `{FinSet A C} : RelDecision (≡@{C}).
+Proof.
+  intros X Y.
+  destruct (decide (elements X ≡ₚ elements Y));
+    [| by right; contradict n; rewrite n].
+  left.
+  intro a; rewrite <- !elem_of_elements, !elem_of_list_lookup.
+  split; intros (i & Hi).
+  + apply Permutation_inj in p as (Hlen & f & Hinjf & Hp).
+    by rewrite Hp in Hi; eexists.
+  + symmetry in p.
+    apply Permutation_inj in p as (Hlen & f & Hinjf & Hp).
+    by rewrite Hp in Hi; eexists.
+Qed.
+
+#[export] Instance sum_list_with_proper `(f : index -> nat) :
+  Proper ((≡ₚ) ==> (=)) (sum_list_with f).
+Proof.
+  induction 1; cbn.
+  - done.
+  - by rewrite IHPermutation.
+  - by lia.
+  - by congruence.
+Qed.
+
+Lemma sum_list_with_fn_dom index (f g : index -> nat) (l : list index) :
+  (forall i, i ∈ l -> f i = g i) -> sum_list_with f l = sum_list_with g l.
+Proof.
+  induction l; cbn; intros Heq; [done |].
+  rewrite Heq by left.
+  f_equal; apply IHl.
+  by intros; apply Heq; right.
+Qed.
+
+Lemma sum_list_with_zero `(f : index -> nat) (l : list index) :
+  sum_list_with  f l = 0 <-> forall (i : index), i ∈ l -> f i = 0.
+Proof.
+  split.
+  - intros Hsum i Hi.
+    apply sum_list_with_in with (f := f) in Hi.
+    by lia.
+  - induction l; intros Hall0; cbn; [done |].
+    rewrite Hall0 by left.
+    apply IHl.
+    by intros; apply Hall0; right.
+Qed.
