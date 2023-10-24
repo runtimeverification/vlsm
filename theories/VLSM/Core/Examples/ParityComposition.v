@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality.
 From Coq Require Import ZArith.Znumtheory.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble StdppExtras FinSuppFn NatExtras.
+From VLSM.Lib Require Import Preamble StdppExtras FinSuppFn NatExtras ListExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM ConstrainedVLSM Composition.
 From VLSM.Core Require Import VLSMProjections ProjectionTraces.
 
@@ -631,25 +631,25 @@ Qed.
 *)
 Lemma composition_valid_messages_powers_of_mults_right (m : ParityMessage) :
   valid_message_prop parity_composite_vlsm m ->
-  exists (fp : fin_supp_nat_fn index indexSet),
-    FinSuppFn fp /\ fin_dom fp ≢ ∅ /\ m = prod_fin_supp_nat_fn multipliers fp.
+  exists (f : index -> nat) (Hf : finite.Finite (supp f)),
+    fin_supp f <> [] /\ m = prod_fin_supp_nat_fn multipliers f.
 Proof.
   intros [s Hvsm].
   remember (Some m) as om.
   revert m Heqom.
   induction Hvsm using valid_state_message_prop_ind; intros; subst.
   - destruct Hom as (n & (mielem & mi) & Hmi); cbn in mi, Hmi.
-    exists (delta_fin_supp_nat_fn n).
-    unfold delta_fin_supp_nat_fn at 1; cbn.
-    split_and!; [by typeclasses eauto | by set_solver |].
+    exists (delta_fin_supp_nat_fn n), _.
+    split; [by eapply elem_of_not_nil, elem_of_delta_fin_supp_nat_fn_fin_supp |].
     by rewrite <- Hmi, mi, prod_powers_delta.
   - destruct l as (k & lk).
     destruct om; [| done].
-    destruct (IHHvsm2 p) as [fp (? & i & ->)]; [done |].
+    destruct (IHHvsm2 p) as [f (? & Hdomf & ->)]; [done |].
     inversion Ht.
-    exists (succ_fin_supp_nat_fn fp k); cbn.
-    split_and!; [by typeclasses eauto | by set_solver |].
-    by rewrite prod_fin_supp_nat_fn_succ.
+    exists (succ_fin_supp_nat_fn f k), _.
+    split; [| by rewrite prod_fin_supp_nat_fn_succ].
+    apply not_null_element in Hdomf; destruct_dec_sig Hdomf i Hi Heq.
+    by eapply elem_of_not_nil, elem_of_succ_fin_supp_nat_fn_fin_supp; right.
 Qed.
 
 End sec_composition.
@@ -668,49 +668,57 @@ Definition free_parity_composite_vlsm : VLSM ParityMessage :=
 
 Lemma composition_valid_messages_powers_of_mults_left
   (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage)
-  (fp : fin_supp_nat_fn index (listset index)) `{!FinSuppFn fp} :
-    fin_dom fp ≢ ∅ /\ m = prod_fin_supp_nat_fn multipliers fp ->
+  (f : index -> nat) `{!finite.Finite (supp f)} :
+    fin_supp f <> [] /\ m = prod_fin_supp_nat_fn multipliers f ->
     valid_message_prop free_parity_composite_vlsm m.
 Proof.
   intros [Hpowgeq1 Hm]; revert Hpowgeq1 m Hm.
-  pose (P := fun (fp : fin_supp_nat_fn index (listset index)) => fin_dom fp ≢ ∅  ->
-    forall m : ParityMessage, m = prod_fin_supp_nat_fn multipliers fp ->
+  pose (P := fun (f : index -> nat) `{!finite.Finite (supp f)} => fin_supp f <> []  ->
+    forall m : ParityMessage, m = prod_fin_supp_nat_fn multipliers f ->
     valid_message_prop free_parity_composite_vlsm m).
-  cut (P fp); [done |].
-  apply fin_supp_nat_fn_ind; [..| done]; clear -Hmpos; subst P.
-  - intros fp1 fp2 Heq Hall Hi m Hm.
-    by eapply Hall; rewrite Heq.
-  - by cbn; set_solver.
-  - intros n fp0 ? IHfp0 Hi m Hm.
-    pose proof (Hfp0 := FinSuppNatFn_complete fp0).
-    inversion Hfp0 as [_fp ? Heqv Heq | n' fp0' _fp Hfp0' ? Heqv Heq]; subst _fp;
-      rewrite Heqv in *.
-    + rewrite prod_fin_supp_nat_fn_succ, prod_fin_supp_nat_fn_zero in Hm
-        by typeclasses eauto.
+  cut (P f _); [done |].
+  apply fin_supp_nat_fn_ind; clear -Hmpos; subst P.
+  - intros f1 f2 ? ? Heq Hall Hi m Hm.
+    eapply Hall; [| by subst; symmetry; apply prod_fin_supp_nat_fn_proper].
+    contradict Hi; apply Permutation_nil.
+    by rewrite <- Hi; apply fin_supp_proper.
+  - by cbn.
+  - intros n f0 ? IHf0 Hi m Hm.
+    pose proof (Hf0 := FinSuppNatFn_complete f0).
+    inversion Hf0 as [| n' f0' Hf0' Heq].
+    + rewrite prod_fin_supp_nat_fn_succ,
+        <- (prod_fin_supp_nat_fn_proper _ zero_fin_supp_nat_fn),
+        prod_fin_supp_nat_fn_zero in Hm by done.
       apply initial_message_is_valid. exists n.
       by unshelve eexists (exist _ m _); cbn; lia.
-    + apply FinSuppNatFn_is_fin_supp in Hfp0' as ?.
-      assert (Hmvalid : valid_message_prop free_parity_composite_vlsm (prod_fin_supp_nat_fn multipliers fp0)).
+    + apply FinSuppNatFn_has_fin_supp in Hf0' as ?.
+      assert (Hmvalid : valid_message_prop free_parity_composite_vlsm (prod_fin_supp_nat_fn multipliers f0)).
       {
-        apply IHfp0; [| done].
-        by rewrite Heqv; cbn; clear; set_solver.
+        apply IHf0; [| done].
+        assert (Hinh : fin_supp (succ_fin_supp_nat_fn f0' n') <> []).
+        {
+          by eapply elem_of_not_nil, elem_of_succ_fin_supp_nat_fn_fin_supp; left.
+        }
+        contradict Hinh; apply Permutation_nil.
+        by rewrite <- Hinh; apply fin_supp_proper.
       }
       subst m; rewrite prod_fin_supp_nat_fn_succ by typeclasses eauto.
-      replace (prod_fin_supp_nat_fn _ _) with (prod_fin_supp_nat_fn multipliers fp0)
-        by (rewrite Heqv; done).
-      assert (Hpos : prod_fin_supp_nat_fn multipliers fp0 >= multipliers n').
+      assert (Hpos : prod_fin_supp_nat_fn multipliers f0 >= multipliers n').
       {
-        rewrite Heqv.
-        rewrite prod_fin_supp_nat_fn_succ
-          by (apply FinSuppNatFn_is_fin_supp; done).
-        cut (prod_fin_supp_nat_fn multipliers fp0' > 0);
+        replace (prod_fin_supp_nat_fn multipliers f0)
+          with (prod_fin_supp_nat_fn multipliers (succ_fin_supp_nat_fn f0' n'))
+          by (apply prod_fin_supp_nat_fn_proper; done).
+        rewrite prod_fin_supp_nat_fn_succ.
+        cut (prod_fin_supp_nat_fn multipliers f0' > 0);
           [by specialize (Hmpos n'); nia |].
-        destruct (decide (fin_dom fp0' ≡ ∅)); cycle 1.
-        - apply prod_powers_gt; [by lia | | by apply FinSuppNatFn_is_fin_supp | done].
+        destruct (decide (fin_supp f0' = [])); cycle 1.
+        - apply prod_powers_gt; [by lia | | done].
           by intro i; specialize (Hmpos i); lia.
-        - cut (fp0' ≡ zero_fin_supp_nat_fn).
-          + by intros ->; rewrite prod_fin_supp_nat_fn_zero; lia.
-          + by apply empty_dom_fn_dom.
+        - replace (prod_fin_supp_nat_fn multipliers f0')
+              with (prod_fin_supp_nat_fn multipliers zero_fin_supp_nat_fn).
+          + by rewrite prod_fin_supp_nat_fn_zero; lia.
+          + apply prod_fin_supp_nat_fn_proper.
+            by symmetry; eapply empty_supp_fn_supp_inv.
       }
       specialize (Hmpos n').
       clear - Hmvalid Hmpos Hpos.
@@ -735,8 +743,8 @@ Qed.
 Lemma composition_valid_messages_powers_of_mults
   (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage) :
     valid_message_prop free_parity_composite_vlsm m <->
-  exists (fp : fin_supp_nat_fn index (listset index)),
-    FinSuppFn fp /\ fin_dom fp ≢ ∅ /\ m = prod_fin_supp_nat_fn multipliers fp.
+  exists (f : index -> nat) (Hf : finite.Finite (supp f)),
+    fin_supp f <> [] /\ m = prod_fin_supp_nat_fn multipliers f.
 Proof.
   split.
   - intros Hvm.
