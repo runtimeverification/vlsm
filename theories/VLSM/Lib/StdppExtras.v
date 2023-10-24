@@ -627,7 +627,7 @@ Proof.
   - by congruence.
 Qed.
 
-Lemma sum_list_with_fn_dom index (f g : index -> nat) (l : list index) :
+Lemma sum_list_with_ext_forall index (f g : index -> nat) (l : list index) :
   (forall i, i ∈ l -> f i = g i) -> sum_list_with f l = sum_list_with g l.
 Proof.
   induction l; cbn; intros Heq; [done |].

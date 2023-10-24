@@ -52,6 +52,14 @@ Qed.
 Lemma fin_supp_NoDup `(f : A -> B) `{!Finite (supp f)} : NoDup (fin_supp f).
 Proof. by apply dsig_NoDup, NoDup_enum. Qed.
 
+Lemma fin_supp_proper (f g : A -> B) `{!Finite (supp f)} `{!Finite (supp g)} :
+  f = g -> fin_supp f ≡ₚ fin_supp g.
+Proof.
+  intro Heq.
+  apply NoDup_Permutation; [by apply fin_supp_NoDup.. |].
+  by intro; rewrite !elem_of_fin_supp; subst.
+Qed.
+
 #[export] Instance fin_supp_fn_eq_dec (f g : A -> B) `{!Finite (supp f)} `{!Finite (supp g)} :
   Decision (f = g).
 Proof.
@@ -89,6 +97,16 @@ Proof. by intro x; destruct_dec_sig x a Ha Heq; contradiction Ha. Defined.
 
 Lemma empty_supp_fn_supp : fin_supp empty_supp_fn = [].
 Proof. done. Qed.
+
+Lemma empty_supp_fn_supp_inv (f : A -> B) `{!Finite (supp f)} :
+  fin_supp f = [] -> f = empty_supp_fn.
+Proof.
+  intro Hf; extensionality a.
+  destruct (decide (f a = inhabitant)); [done |].
+  contradict Hf.
+  eapply elem_of_not_nil, elem_of_list_fmap.
+  by exists (dexist a n); split; [| apply elem_of_enum].
+Qed.
 
 Definition update_fn_supp (f : A -> B) (n : A) (b : B) `{!Finite (supp f)} :
   listset A :=
@@ -134,6 +152,20 @@ Proof.
       elem_of_singleton; cbn.
     destruct (decide (a = n)); [by left |].
     by right; rewrite update_fn_neq in Ha.
+Qed.
+
+Lemma elem_of_update_fn_fin_supp
+  (f : A -> B) (n : A) (b : B) `{!Finite (supp f)} :
+  forall a : A, a ∈ fin_supp (update_fn f n b) (Finite0 := update_fn_has_fin_supp f n b)
+    <->
+  b = inhabitant /\ a ∈ fin_supp f /\ a <> n \/
+  b <> inhabitant /\ (a ∈ fin_supp f \/ a = n).
+Proof.
+  intro; unfold fin_supp at 1; cbn.
+  rewrite list_annotate_forget, elem_of_elements.
+  unfold update_fn_supp; case_decide.
+  - by rewrite elem_of_difference, elem_of_list_to_set, elem_of_singleton; split; itauto.
+  - by rewrite elem_of_union, elem_of_list_to_set, elem_of_singleton; split; itauto.
 Qed.
 
 End sec_fin_supp_fn.
@@ -188,8 +220,26 @@ Proof.
   by right.
 Qed.
 
+Lemma elem_of_succ_fin_supp_nat_fn_fin_supp
+  (f : A -> nat) (n : A) `{!Finite (supp f)} :
+  forall a : A, a ∈ fin_supp (succ_fin_supp_nat_fn f n) <-> a = n \/ a ∈ fin_supp f.
+Proof.
+  intro; unfold fin_supp at 1; cbn.
+  rewrite list_annotate_forget, elem_of_elements.
+  unfold succ_fin_supp_nat_fn_supp.
+  by rewrite elem_of_union, elem_of_list_to_set, elem_of_singleton.
+Qed.
+
 Definition delta_fin_supp_nat_fn (n : A) : A -> nat :=
   succ_fin_supp_nat_fn zero_fin_supp_nat_fn n.
+
+Lemma elem_of_delta_fin_supp_nat_fn_fin_supp (n : A) :
+  forall a, a ∈ fin_supp (delta_fin_supp_nat_fn n) <-> a = n.
+Proof.
+  intro; unfold delta_fin_supp_nat_fn; rewrite elem_of_succ_fin_supp_nat_fn_fin_supp; cbn.
+  split; [| by left].
+  by intros [| Ha]; [| inversion Ha].
+Qed.
 
 Definition sum_fin_supp_nat_fn (f : A -> nat) `{!Finite (supp f)} : nat :=
   sum_list_with f (fin_supp f).
@@ -200,9 +250,8 @@ Lemma sum_fin_supp_nat_fn_proper
 Proof.
   intros.
   unfold sum_fin_supp_nat_fn; rewrite (sum_list_with_proper f (fin_supp f) (fin_supp g));
-    [by apply sum_list_with_fn_dom; subst |].
-  apply NoDup_Permutation; [by apply fin_supp_NoDup.. |].
-  by intro; rewrite !elem_of_fin_supp; subst.
+    [by apply sum_list_with_ext_forall; subst |].
+  by apply fin_supp_proper.
 Qed.
 
 Lemma sum_fin_supp_nat_fn_zero_inv (f : A -> nat) `{!Finite (supp f)} :
@@ -231,7 +280,7 @@ Proof.
     intros [Ha Hnodup] [<- | Hn].
     + rewrite update_fn_eq; cbn.
       do 2 f_equal.
-      apply sum_list_with_fn_dom.
+      apply sum_list_with_ext_forall.
       by intros; rewrite update_fn_neq by  set_solver.
     + rewrite update_fn_neq by set_solver.
       rewrite IHl by done.
@@ -241,7 +290,7 @@ Proof.
     cbn; rewrite update_fn_eq.
     assert (f n = 0) as -> by (rewrite elem_of_fin_supp in n0; cbn in n0; lia).
     cbn; f_equal.
-    apply sum_list_with_fn_dom.
+    apply sum_list_with_ext_forall.
     by intros; rewrite update_fn_neq; [| set_solver].
 Qed.
 
@@ -277,6 +326,17 @@ Proof.
   apply elem_of_list_annotate, elem_of_elements, elem_of_union; cbn.
   rewrite !elem_of_list_to_set, !elem_of_fin_supp.
   by unfold fin_supp_nat_fn_add in Ha; cbn in *; lia.
+Qed.
+
+Lemma elem_of_fin_supp_nat_fn_add_fin_supp
+  (f1 f2 : A -> nat) `{!Finite (supp f1)} `{!Finite (supp f2)} :
+  forall a : A, a ∈ fin_supp (fin_supp_nat_fn_add f1 f2) <->
+    a ∈ fin_supp f1 \/ a ∈ fin_supp f2.
+Proof.
+  intro; unfold fin_supp at 1; cbn.
+  rewrite list_annotate_forget, elem_of_elements.
+  unfold fin_supp_nat_fn_add_supp.
+  by rewrite elem_of_union, !elem_of_list_to_set.
 Qed.
 
 #[export] Instance fin_supp_nat_fn_add_comm : Comm (=) fin_supp_nat_fn_add.
@@ -376,7 +436,9 @@ Proof.
 Qed.
 
 Lemma fin_supp_nat_fn_ind
-  (P : (A -> nat) -> Prop)
+  (P : forall (f : A -> nat) `{!Finite (supp f)}, Prop)
+  (Hproper : forall (f g : A -> nat) `{!Finite (supp f)} `{!Finite (supp g)},
+    f = g -> P f -> P g)
   (Hzero : P zero_fin_supp_nat_fn)
   (Hsucc : forall (i : A) (f : A -> nat) `{Hf : !Finite (supp f)},
     P f -> P (succ_fin_supp_nat_fn f i)) :
@@ -384,10 +446,11 @@ Lemma fin_supp_nat_fn_ind
 Proof.
   intros.
   pose proof (Hcomplete := FinSuppNatFn_complete f).
-  clear Hf.
-  induction Hcomplete; [done |].
-  apply Hsucc; [| done].
-  by apply FinSuppNatFn_has_fin_supp.
+  induction Hcomplete; [by eapply Hproper in Hzero |].
+  apply FinSuppNatFn_has_fin_supp in Hcomplete.
+  specialize (IHHcomplete Hcomplete).
+  specialize (Hsucc i _ _ IHHcomplete).
+  by eapply Hproper in Hsucc.
 Qed.
 
 End sec_fin_supp_nat_fn_prop.
