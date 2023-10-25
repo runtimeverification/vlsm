@@ -6,33 +6,35 @@ From VLSM.Lib Require Import Preamble StdppExtras ListExtras.
 (** * Finitely supported functions *)
 
 (**
+  A function is finitely supported if its [support] is [Finite].
+*)
+
+(**
   The support of a function is the type of elements of its domain that are not
   mapped to the specified inhabitant of its codomain.
 
   Note that for [nat] and [Z] the default [inhabitant] is [0].
 
-  Note that we require the codomain to have decidable equality, because
-  we want to make our lives easier with regard to proving equality of elements
+  Note that we require the codomain to have decidable equality, because it
+  allows for a straight-forward approach to proving equality of elements
   of the support.
-
-  Then a function is finitely supported if its support is [Finite].
 *)
-Definition supp `(f : A -> B) `{Inhabited B} `{EqDecision B} : Type :=
+Definition support `(f : A -> B) `{Inhabited B} `{EqDecision B} : Type :=
   dsig (fun a => f a <> inhabitant).
 
 Section sec_fin_supp_fn.
 
 Context
-  {A : Type}
+  {A B : Type}
   `{EqDecision A}
-  `{EqDecision B}
   `{Inhabited B}
+  `{EqDecision B}
   .
 
-Definition fin_supp (f : A -> B) `{!Finite (supp f)} : list A :=
-  map proj1_sig (enum (supp f)).
+Definition fin_supp (f : A -> B) `{!Finite (support f)} : list A :=
+  map proj1_sig (enum (support f)).
 
-Lemma elem_of_fin_supp (f : A -> B) `{!Finite (supp f)} :
+Lemma elem_of_fin_supp (f : A -> B) `{!Finite (support f)} :
   forall (a : A), a ∈ fin_supp f <-> f a <> inhabitant.
 Proof.
   unfold fin_supp.
@@ -43,20 +45,17 @@ Proof.
     by exists (dexist a Ha); split; [| apply elem_of_enum].
 Qed.
 
-Lemma not_elem_of_fin_supp (f : A -> B) `{!Finite (supp f)} :
+Lemma not_elem_of_fin_supp (f : A -> B) `{!Finite (support f)} :
   forall (a : A), a ∉ fin_supp f <-> f a = inhabitant.
 Proof.
-  pose (Helem := elem_of_fin_supp f).
-  firstorder.
-  apply dec_stable.
-  contradict H0.
-  by apply Helem.
+  intro a; rewrite elem_of_fin_supp.
+  by destruct (decide (f a = inhabitant)); itauto.
 Qed.
 
-Lemma fin_supp_NoDup `(f : A -> B) `{!Finite (supp f)} : NoDup (fin_supp f).
+Lemma fin_supp_NoDup `(f : A -> B) `{!Finite (support f)} : NoDup (fin_supp f).
 Proof. by apply dsig_NoDup, NoDup_enum. Qed.
 
-Lemma fin_supp_proper (f g : A -> B) `{!Finite (supp f)} `{!Finite (supp g)} :
+Lemma fin_supp_proper (f g : A -> B) `{!Finite (support f)} `{!Finite (support g)} :
   f = g -> fin_supp f ≡ₚ fin_supp g.
 Proof.
   intros Heq.
@@ -64,13 +63,14 @@ Proof.
   by intro; rewrite !elem_of_fin_supp; subst.
 Qed.
 
-#[export] Instance fin_supp_fn_eq_dec (f g : A -> B) `{!Finite (supp f)} `{!Finite (supp g)} :
+#[export] Instance fin_supp_fn_eq_dec
+  (f g : A -> B) `{!Finite (support f)} `{!Finite (support g)} :
   Decision (f = g).
 Proof.
   destruct (@finset_equiv_dec A (listset A) _ _ _ _ _ _ _ _ _
     (list_to_set (fin_supp f)) (list_to_set (fin_supp g))) as [Heqv | Hneqv]; cycle 1.
-  - right; intros ->; apply Hneqv.
-    by intros a; rewrite !elem_of_list_to_set, !elem_of_fin_supp.
+  - right; contradict Hneqv.
+    by rewrite fin_supp_proper.
   - destruct (decide (set_Forall (fun a => f a = g a) (list_to_set (C := listset A) (fin_supp f))))
       as [Hall | Hall]; [| by right; contradict Hall; subst].
     left; extensionality a.
@@ -83,19 +83,19 @@ Qed.
 Definition empty_supp_fn : A -> B :=
   const inhabitant.
 
-#[export] Program Instance empty_supp_fn_has_fin_supp : Finite (supp empty_supp_fn) :=
+#[export] Program Instance empty_supp_fn_has_fin_supp : Finite (support empty_supp_fn) :=
 {
   enum := []
 }.
 Next Obligation.
 Proof. by constructor. Qed.
 Next Obligation.
-Proof. by intros x; destruct_dec_sig x a Ha Heq; contradiction Ha. Defined.
+Proof. by intros x; destruct_dec_sig x a Ha Heq; contradiction Ha. Qed.
 
 Lemma empty_supp_fn_supp : fin_supp empty_supp_fn = [].
 Proof. done. Qed.
 
-Lemma empty_supp_fn_supp_inv (f : A -> B) `{!Finite (supp f)} :
+Lemma empty_supp_fn_supp_inv (f : A -> B) `{!Finite (support f)} :
   fin_supp f = [] -> f = empty_supp_fn.
 Proof.
   intros Hf; extensionality a.
@@ -105,12 +105,12 @@ Proof.
   by apply not_elem_of_nil.
 Qed.
 
-Definition update_fn_supp (f : A -> B) (n : A) (b : B) `{!Finite (supp f)} : listset A :=
+Definition update_fn_supp (f : A -> B) (n : A) (b : B) `{!Finite (support f)} : listset A :=
   if decide (b = inhabitant)
   then list_to_set (fin_supp f) ∖ {[n]}
   else {[n]} ∪ list_to_set (fin_supp f).
 
-Lemma update_fn_supp_all (f : A -> B) (n : A) (b : B) `{!Finite (supp f)} :
+Lemma update_fn_supp_all (f : A -> B) (n : A) (b : B) `{!Finite (support f)} :
   Forall (fun a => update_fn f n b a <> inhabitant) (elements (update_fn_supp f n b)).
 Proof.
   unfold update_fn_supp.
@@ -129,7 +129,7 @@ Proof.
 Qed.
 
 Program Definition update_fn_has_fin_supp
-  (f : A -> B) (n : A) (b : B) `{!Finite (supp f)} : Finite (supp (update_fn f n b)) :=
+  (f : A -> B) (n : A) (b : B) `{!Finite (support f)} : Finite (support (update_fn f n b)) :=
 {|
   enum := list_annotate (update_fn_supp_all f n b)
 |}.
@@ -152,7 +152,7 @@ Proof.
 Qed.
 
 Lemma elem_of_update_fn_fin_supp
-  (f : A -> B) (n : A) (b : B) `{!Finite (supp f)} :
+  (f : A -> B) (n : A) (b : B) `{!Finite (support f)} :
   forall (a : A),
     a ∈ fin_supp (update_fn f n b) (Finite0 := update_fn_has_fin_supp f n b)
       <->
@@ -182,10 +182,10 @@ Definition zero_fin_supp_nat_fn : A -> nat :=
 Definition succ_fin_supp_nat_fn (f : A -> nat) (n : A) : A -> nat :=
   update_fn f n (S (f n)).
 
-Definition succ_fin_supp_nat_fn_supp (f : A -> nat) (n : A) `{!Finite (supp f)} : listset A :=
+Definition succ_fin_supp_nat_fn_supp (f : A -> nat) (n : A) `{!Finite (support f)} : listset A :=
   {[n]} ∪ list_to_set (fin_supp f).
 
-Lemma succ_fin_supp_nat_fn_supp_all (f : A -> nat) (n : A) `{!Finite (supp f)} :
+Lemma succ_fin_supp_nat_fn_supp_all (f : A -> nat) (n : A) `{!Finite (support f)} :
   Forall (fun a => succ_fin_supp_nat_fn f n a <> inhabitant)
     (elements (succ_fin_supp_nat_fn_supp f n)).
 Proof.
@@ -200,7 +200,7 @@ Proof.
 Qed.
 
 #[export] Program Instance succ_fin_supp_nat_fn_has_fin_supp
-  (f : A -> nat) (n : A) `{!Finite (supp f)} : Finite (supp (succ_fin_supp_nat_fn f n)) :=
+  (f : A -> nat) (n : A) `{!Finite (support f)} : Finite (support (succ_fin_supp_nat_fn f n)) :=
 {
   enum := list_annotate (succ_fin_supp_nat_fn_supp_all f n)
 }.
@@ -216,7 +216,7 @@ Proof.
   by right.
 Qed.
 
-Lemma elem_of_succ_fin_supp_nat_fn_fin_supp (f : A -> nat) (n : A) `{!Finite (supp f)} :
+Lemma elem_of_succ_fin_supp_nat_fn_fin_supp (f : A -> nat) (n : A) `{!Finite (support f)} :
   forall (a : A),
     a ∈ fin_supp (succ_fin_supp_nat_fn f n) <-> a = n \/ a ∈ fin_supp f.
 Proof.
@@ -239,11 +239,11 @@ Proof.
   by intros [| Ha]; [| inversion Ha].
 Qed.
 
-Definition sum_fin_supp_nat_fn (f : A -> nat) `{!Finite (supp f)} : nat :=
+Definition sum_fin_supp_nat_fn (f : A -> nat) `{!Finite (support f)} : nat :=
   sum_list_with f (fin_supp f).
 
 Lemma sum_fin_supp_nat_fn_proper
-  (f g : A -> nat) `{!Finite (supp f)} `{!Finite (supp g)} :
+  (f g : A -> nat) `{!Finite (support f)} `{!Finite (support g)} :
   f = g -> sum_fin_supp_nat_fn f = sum_fin_supp_nat_fn g.
 Proof.
   intros.
@@ -253,7 +253,7 @@ Proof.
   - by apply fin_supp_proper.
 Qed.
 
-Lemma sum_fin_supp_nat_fn_zero_inv (f : A -> nat) `{!Finite (supp f)} :
+Lemma sum_fin_supp_nat_fn_zero_inv (f : A -> nat) `{!Finite (support f)} :
   sum_fin_supp_nat_fn f = 0 -> f = zero_fin_supp_nat_fn.
 Proof.
   setoid_rewrite sum_list_with_zero; intros Hall.
@@ -262,7 +262,7 @@ Proof.
   by rewrite elem_of_fin_supp in n; cbn in n; lia.
 Qed.
 
-Lemma sum_fin_supp_nat_fn_succ (f : A -> nat) (n : A) `{!Finite (supp f)} :
+Lemma sum_fin_supp_nat_fn_succ (f : A -> nat) (n : A) `{!Finite (support f)} :
   sum_fin_supp_nat_fn (succ_fin_supp_nat_fn f n) = S (sum_fin_supp_nat_fn f).
 Proof.
   unfold sum_fin_supp_nat_fn, succ_fin_supp_nat_fn; cbn.
@@ -272,8 +272,10 @@ Proof.
   - assert ({[n]} ∪ list_to_set (C := listset A) (fin_supp f) ≡ list_to_set (fin_supp f))
       as -> by set_solver.
     rewrite elements_list_to_set by apply fin_supp_NoDup.
-    revert e; specialize (fin_supp_NoDup f).
-    generalize (fin_supp f) as l; clear; induction l; [by inversion 2 |].
+    remember (fin_supp f) as l.
+    assert (Hnodup : NoDup l) by (subst; apply fin_supp_NoDup).
+    revert Hnodup e; clear Heql.
+    induction l; [by inversion 2 |].
     rewrite list.NoDup_cons, elem_of_cons; cbn.
     intros [Ha Hnodup] [<- | Hn].
     + rewrite update_fn_eq; cbn.
@@ -296,11 +298,11 @@ Definition fin_supp_nat_fn_add (f1 f2 : A -> nat) (a : A) : nat :=
   f1 a + f2 a.
 
 Definition fin_supp_nat_fn_add_supp
-  (f1 f2 : A -> nat) `{!Finite (supp f1)} `{!Finite (supp f2)} : listset A :=
+  (f1 f2 : A -> nat) `{!Finite (support f1)} `{!Finite (support f2)} : listset A :=
     list_to_set (fin_supp f1) ∪ list_to_set (fin_supp f2).
 
 Lemma fin_supp_nat_fn_add_supp_all
-  (f1 f2 : A -> nat) `{!Finite (supp f1)} `{!Finite (supp f2)} :
+  (f1 f2 : A -> nat) `{!Finite (support f1)} `{!Finite (support f2)} :
   Forall (fun a => fin_supp_nat_fn_add f1 f2 a <> inhabitant)
     (elements (fin_supp_nat_fn_add_supp f1 f2)).
 Proof.
@@ -311,8 +313,8 @@ Proof.
 Qed.
 
 #[export] Program Instance fin_supp_nat_fn_add_has_finn_supp
-  (f1 f2 : A -> nat) `{!Finite (supp f1)} `{!Finite (supp f2)}
-  : Finite (supp (fin_supp_nat_fn_add f1 f2)) :=
+  (f1 f2 : A -> nat) `{!Finite (support f1)} `{!Finite (support f2)}
+  : Finite (support (fin_supp_nat_fn_add f1 f2)) :=
 {
   enum := list_annotate (fin_supp_nat_fn_add_supp_all f1 f2)
 }.
@@ -327,7 +329,7 @@ Proof.
 Qed.
 
 Lemma elem_of_fin_supp_nat_fn_add_fin_supp
-  (f1 f2 : A -> nat) `{!Finite (supp f1)} `{!Finite (supp f2)} :
+  (f1 f2 : A -> nat) `{!Finite (support f1)} `{!Finite (support f2)} :
   forall (a : A),
     a ∈ fin_supp (fin_supp_nat_fn_add f1 f2) <->
     a ∈ fin_supp f1 \/ a ∈ fin_supp f2.
@@ -389,12 +391,12 @@ Inductive FinSuppNatFn : (A -> nat) -> Type :=
     FinSuppNatFn f -> FinSuppNatFn (succ_fin_supp_nat_fn f i).
 
 Lemma FinSuppNatFn_has_fin_supp (f : A -> nat) (Hf : FinSuppNatFn f) :
-  Finite (supp f).
+  Finite (support f).
 Proof.
   by induction Hf; typeclasses eauto.
-Defined.
+Qed.
 
-Lemma FinSuppNatFn_complete (f : A -> nat) `{Hf : !Finite (supp f)} :
+Lemma FinSuppNatFn_complete (f : A -> nat) `{Hf : !Finite (support f)} :
   FinSuppNatFn f.
 Proof.
   remember (sum_fin_supp_nat_fn f) as n.
@@ -434,13 +436,13 @@ Proof.
 Qed.
 
 Lemma fin_supp_nat_fn_ind
-  (P : forall (f : A -> nat) `{!Finite (supp f)}, Prop)
-  (Hproper : forall (f g : A -> nat) `{!Finite (supp f)} `{!Finite (supp g)},
+  (P : forall (f : A -> nat) `{!Finite (support f)}, Prop)
+  (Hproper : forall (f g : A -> nat) `{!Finite (support f)} `{!Finite (support g)},
     f = g -> P f -> P g)
   (Hzero : P zero_fin_supp_nat_fn)
-  (Hsucc : forall (i : A) (f : A -> nat) `{Hf : !Finite (supp f)},
+  (Hsucc : forall (i : A) (f : A -> nat) `{Hf : !Finite (support f)},
     P f -> P (succ_fin_supp_nat_fn f i)) :
-  forall (f : A -> nat) `{Hf : !Finite (supp f)}, P f.
+  forall (f : A -> nat) `{Hf : !Finite (support f)}, P f.
 Proof.
   intros.
   pose proof (Hcomplete := FinSuppNatFn_complete f).
