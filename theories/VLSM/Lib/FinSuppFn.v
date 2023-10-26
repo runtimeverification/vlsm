@@ -249,6 +249,26 @@ Proof.
   - by right; split; [lia | itauto].
 Qed.
 
+Lemma succ_fin_supp_nat_fn_supp_in `(f : A -fin<> 0) (n : A) :
+  n ∈ fin_supp f -> fin_supp (succ_fin_supp_nat_fn f n) ≡ₚ fin_supp f.
+Proof.
+  intros.
+  apply NoDup_Permutation; [by apply fin_supp_NoDup.. |].
+  intros; rewrite elem_of_succ_fin_supp_nat_fn_fin_supp.
+  by set_solver.
+Qed.
+
+Lemma succ_fin_supp_nat_fn_supp_not_in `(f : A -fin<> 0) (n : A) :
+  n ∉ fin_supp f -> fin_supp (succ_fin_supp_nat_fn f n) ≡ₚ n :: fin_supp f.
+Proof.
+  intros; cbn; rewrite list_annotate_forget.
+  unfold update_fn_supp; rewrite decide_False by lia.
+  rewrite @elements_union_singleton;
+    [| by typeclasses eauto | by rewrite elem_of_list_to_set].
+  constructor; eapply @elements_list_to_set;
+    [by typeclasses eauto | by apply fin_supp_NoDup].
+Qed.
+
 Definition delta_fin_supp_nat_fn `{EqDecision A} (n : A) : A -fin<> 0 :=
   succ_fin_supp_nat_fn zero_fin_supp_nat_fn n.
 
@@ -289,12 +309,7 @@ Proof.
   unfold sum_fin_supp_nat_fn.
   pose proof (fin_supp_fn_source_dec f).
   destruct (decide (n ∈ fin_supp f)).
-  - assert (fin_supp (succ_fin_supp_nat_fn f n) ≡ₚ fin_supp f) as ->.
-    {
-      apply NoDup_Permutation; [by apply fin_supp_NoDup.. |].
-      intros; rewrite elem_of_succ_fin_supp_nat_fn_fin_supp.
-      by set_solver.
-    }
+  - rewrite succ_fin_supp_nat_fn_supp_in by done.
     pose proof (Hnodup := fin_supp_NoDup f).
     revert Hnodup e; cbn.
     generalize (fin_supp f) as l; induction l; [by inversion 2 |].
@@ -306,12 +321,7 @@ Proof.
       by intros; rewrite update_fn_neq by set_solver.
     + rewrite update_fn_neq by set_solver.
       by rewrite IHl.
-  - cbn; rewrite list_annotate_forget.
-    unfold update_fn_supp; rewrite decide_False by lia.
-    rewrite @elements_union_singleton;
-      [| by typeclasses eauto | by rewrite elem_of_list_to_set].
-    rewrite @elements_list_to_set;
-      [| by typeclasses eauto | by apply fin_supp_NoDup].
+  - rewrite succ_fin_supp_nat_fn_supp_not_in by done.
     cbn; rewrite update_fn_eq.
     replace (f n) with 0 by (rewrite elem_of_fin_supp in n0; cbn in n0; lia).
     cbn; f_equal.
