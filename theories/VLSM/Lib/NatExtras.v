@@ -226,22 +226,16 @@ Proof.
     by destruct Hppos.
 Qed.
 
-Definition prod_fin_supp_nat_fn (f : index -> nat) `{!Finite (supp f)} : Z :=
+Definition prod_fin_supp_nat_fn (f : index -fin<> 0) : Z :=
   prod_powers_aux f (fin_supp f).
 
-Lemma prod_fin_supp_nat_fn_proper
-  (f : index -> nat) `{!Finite (supp f)}
-  (g : index -> nat) `{!Finite (supp g)} :
-  f = g -> prod_fin_supp_nat_fn f = prod_fin_supp_nat_fn g.
-Proof.
-  by intros Heq; apply prod_powers_aux_proper, fin_supp_proper.
-Qed.
+Lemma prod_fin_supp_nat_fn_proper : Proper ((≡) ==> (=)) prod_fin_supp_nat_fn.
+Proof. by intros f g Heq; apply prod_powers_aux_proper, fin_supp_proper. Qed.
 
 Lemma prod_fin_supp_nat_fn_zero : prod_fin_supp_nat_fn zero_fin_supp_nat_fn = 1%Z.
 Proof. done. Qed.
 
-Lemma prod_fin_supp_nat_fn_succ
-  (f : index -> nat) `{!Finite (supp f)} (n : index) :
+Lemma prod_fin_supp_nat_fn_succ (f : index -fin<> 0) (n : index) :
   prod_fin_supp_nat_fn (succ_fin_supp_nat_fn f n)
     =
   (multipliers n * prod_fin_supp_nat_fn f)%Z.
