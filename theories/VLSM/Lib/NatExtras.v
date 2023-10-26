@@ -240,16 +240,9 @@ Lemma prod_fin_supp_nat_fn_succ (f : index -fin<> 0) (n : index) :
     =
   (multipliers n * prod_fin_supp_nat_fn f)%Z.
 Proof.
-  unfold prod_fin_supp_nat_fn, succ_fin_supp_nat_fn.
-  unfold fin_supp at 1, enum, succ_fin_supp_nat_fn_has_fin_supp.
-  rewrite list_annotate_forget.
-  unfold succ_fin_supp_nat_fn_supp.
+  unfold prod_fin_supp_nat_fn.
   destruct (decide (n ∈ fin_supp f)).
-  - assert (Heqv : {[n]} ∪ list_to_set (C := listset index) (fin_supp f) ≡ list_to_set (fin_supp f))
-      by set_solver.
-    apply elements_proper in Heqv.
-    rewrite elements_list_to_set in Heqv by apply fin_supp_NoDup.
-    rewrite prod_powers_aux_proper at 1 by done.
+  - rewrite succ_fin_supp_nat_fn_supp_in by done.
     revert e; specialize (fin_supp_NoDup f).
     generalize (fin_supp f) as l; clear; induction l; [by inversion 2 |].
     rewrite list.NoDup_cons, elem_of_cons; cbn.
@@ -262,8 +255,7 @@ Proof.
     + rewrite update_fn_neq by set_solver.
       setoid_rewrite IHl; [| done..].
       by unfold prod_powers_aux; lia.
-  - rewrite elements_union_singleton by (rewrite elem_of_list_to_set; done).
-    rewrite elements_list_to_set by apply fin_supp_NoDup.
+  - rewrite succ_fin_supp_nat_fn_supp_not_in by done.
     cbn; rewrite update_fn_eq.
     assert (f n = 0) as -> by (rewrite elem_of_fin_supp in n0; cbn in n0; lia).
     cbn; f_equal; [by lia |].
@@ -282,8 +274,8 @@ Qed.
 
 Lemma prod_powers_gt (n : Z) (Hn : (n >= 0)%Z)
   (Hmpos : forall (i : index), (multipliers i > n)%Z) :
-  forall (f : index -> nat) `{!Finite (supp f)},
-    fin_supp f <> [] -> (prod_fin_supp_nat_fn f > n)%Z.
+  forall (f : index -fin<> 0), fin_supp f <> [] ->
+  (prod_fin_supp_nat_fn f > n)%Z.
 Proof.
   intros; apply prod_powers_aux_gt; [done |..].
   by apply Forall_forall; intros; apply Hmpos.
@@ -297,8 +289,7 @@ Proof.
   by exists inh; split; [rewrite Heq | apply elem_of_enum].
 Qed.
 
-Lemma prod_powers_elem_of_dom
-  (f : index -> nat) `{!Finite (supp f)} :
+Lemma prod_powers_elem_of_dom (f : index -fin<> 0) :
   forall i : index, i ∈ fin_supp f -> (multipliers i | prod_fin_supp_nat_fn f)%Z.
 Proof.
   pose (P := fun f `{!Finite (supp f)} => forall i : index, i ∈ fin_supp f ->
