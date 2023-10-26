@@ -229,7 +229,7 @@ Qed.
 Definition prod_fin_supp_nat_fn (f : index -fin<> 0) : Z :=
   prod_powers_aux f (fin_supp f).
 
-Lemma prod_fin_supp_nat_fn_proper : Proper ((≡) ==> (=)) prod_fin_supp_nat_fn.
+#[export] Instance prod_fin_supp_nat_fn_proper : Proper ((≡) ==> (=)) prod_fin_supp_nat_fn.
 Proof. by intros f g Heq; apply prod_powers_aux_proper, fin_supp_proper. Qed.
 
 Lemma prod_fin_supp_nat_fn_zero : prod_fin_supp_nat_fn zero_fin_supp_nat_fn = 1%Z.
@@ -292,51 +292,45 @@ Qed.
 Lemma prod_powers_elem_of_dom (f : index -fin<> 0) :
   forall i : index, i ∈ fin_supp f -> (multipliers i | prod_fin_supp_nat_fn f)%Z.
 Proof.
-  pose (P := fun f `{!Finite (supp f)} => forall i : index, i ∈ fin_supp f ->
+  pose (P := fun f => forall i : index, i ∈ fin_supp f ->
     (multipliers i | prod_fin_supp_nat_fn f)%Z).
-  cut (P f _); [done |].
-  apply fin_supp_nat_fn_ind; clear; subst P; cbn.
-  - intros f g ? ? Heq Hall i Hi.
-    rewrite <- (fin_supp_proper f) in Hi by done.
+  cut (P f); [done |].
+  apply fin_supp_nat_fn_ind; clear; subst P.
+  - intros f g Heq Hall i Hi.
+    rewrite <- Heq in Hi.
     apply Hall in Hi as [x Hx].
-    exists x.
-    by rewrite <- (prod_fin_supp_nat_fn_proper f).
+    by exists x; rewrite <- Heq.
   - by inversion 1.
-  - intros j f ? IHf i.
+  - intros j f IHf i.
     intros Hi.
-    setoid_rewrite prod_fin_supp_nat_fn_succ.
+    rewrite prod_fin_supp_nat_fn_succ.
     apply elem_of_succ_fin_supp_nat_fn_fin_supp in Hi as [<- | Hi];
       [by exists (prod_fin_supp_nat_fn f); lia |].
     edestruct IHf as [x ->]; [done |].
     by exists (multipliers j * x)%Z; lia.
 Qed.
 
-Lemma prod_powers_add
-  (f1 f2 :  index -> nat)
-  `{Hf1 : !Finite (supp f1)} `{Hf2 : !Finite (supp f2)} :
+Lemma prod_powers_add (f1 f2 :  index -fin<> 0) :
   prod_fin_supp_nat_fn (fin_supp_nat_fn_add f1 f2)
     =
   (prod_fin_supp_nat_fn f1 * prod_fin_supp_nat_fn f2)%Z.
 Proof.
-  revert f2 Hf2.
-  pose (P := fun f1 `{!Finite (supp f1)} => forall f2 `(!Finite (supp f2)),
+  revert f2.
+  pose (P := fun f1 => forall f2,
     prod_fin_supp_nat_fn (fin_supp_nat_fn_add f1 f2)
       =
     (prod_fin_supp_nat_fn f1 * prod_fin_supp_nat_fn f2)%Z).
-  cut (P f1 _); [done |].
+  cut (P f1); [done |].
   apply fin_supp_nat_fn_ind; clear; subst P.
-  - intros * Heq Hall ? ?.
-    rewrite <- (prod_fin_supp_nat_fn_proper (fin_supp_nat_fn_add f f2)), Hall
-      by (subst; done).
-    by f_equal; apply prod_fin_supp_nat_fn_proper.
-  - intros f2 ?.
-    rewrite prod_fin_supp_nat_fn_zero.
-    rewrite <- (prod_fin_supp_nat_fn_proper f2); [by lia |].
-    by symmetry; apply left_id; typeclasses eauto.
-  - intros i f1 ? Hall f2 ?.
-    rewrite <- (prod_fin_supp_nat_fn_proper (succ_fin_supp_nat_fn (fin_supp_nat_fn_add f1 f2) i)),
-      !prod_fin_supp_nat_fn_succ, Hall; [by lia |].
-    by rewrite fin_supp_nat_fn_add_succ_l.
+  - intros f f1 Heq Hall f2.
+    rewrite <- Heq, Hall.
+    by lia.
+  - intros f2.
+    rewrite prod_fin_supp_nat_fn_zero, left_id by typeclasses eauto.
+    by lia.
+  - intros i f1 Hall f2.
+    rewrite fin_supp_nat_fn_add_succ_l, !prod_fin_supp_nat_fn_succ, Hall.
+    by lia.
 Qed.
 
 End sec_prod_powers.
@@ -347,10 +341,10 @@ End sec_prod_powers.
 
 Definition primes : Type := dsig prime.
 
-#[export] Instance primes_inhabited : Inhabited primes :=
+#[export] Program Instance primes_inhabited : Inhabited primes :=
   populate (dexist 2%Z prime_2).
 
-Definition prod_primes_powers (powers : primes -> nat) `{!Finite (supp powers)} : Z :=
+Definition prod_primes_powers (powers : primes -fin<> 0) : Z :=
   prod_fin_supp_nat_fn (fun p : primes => ` p) powers.
 
 Lemma not_prime_divide_prime : forall (n : Z), (n > 1)%Z -> ~ prime n ->
@@ -374,22 +368,22 @@ Proof.
 Qed.
 
 Lemma primes_factorization : forall (n : Z), (n > 1)%Z ->
-  exists (ps : primes -> nat) (Hps : Finite (supp ps)),
+  exists (ps : primes -fin<> 0),
     fin_supp ps <> [] /\ n = prod_primes_powers ps.
 Proof.
   intros n H_n; assert (Hn : (2 <= n)%Z) by lia; clear H_n.
   revert n Hn; apply Zlt_lower_bound_ind.
   intros n Hind Hn2.
   destruct (decide (prime n)) as [| Hnp].
-  - eexists (delta_fin_supp_nat_fn (dexist n p)), _.
+  - exists (delta_fin_supp_nat_fn (dexist n p)).
     split; [| by unfold prod_primes_powers; rewrite prod_powers_delta].
     by eapply elem_of_not_nil, elem_of_delta_fin_supp_nat_fn_fin_supp.
   - apply not_prime_divide in Hnp as (p & [Hp1 Hpn] & q & ->); [| lia].
     assert (Hq1 : (1 < q)%Z) by nia.
     assert (Hqn : (q < q * p)%Z) by nia.
-    destruct (Hind p) as (ps & ? & Hdomps & ->); [by lia |].
-    destruct (Hind q) as (qs & ? & Hdomqs & ->); [by lia |].
-    exists (fin_supp_nat_fn_add qs ps), _.
+    destruct (Hind p) as (ps & Hdomps & ->); [by lia |].
+    destruct (Hind q) as (qs & Hdomqs & ->); [by lia |].
+    exists (fin_supp_nat_fn_add qs ps).
     split.
     + apply not_null_element in Hdomps.
       destruct_dec_sig Hdomps i Hi Heq.

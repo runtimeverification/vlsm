@@ -468,9 +468,6 @@ Proof.
   by inversion Hcomplete; subst; [left | right; eexists _,_].
 Qed.
 
-Ltac destruct_fin_supp_nat_fn f f' n Heq :=
-  destruct (fin_supp_nat_fn_inv f) as [Heq | (n & f' & Heq)].
-
 Lemma fin_supp_nat_fn_ind (P : (A -fin<> 0) -> Prop)
   (Hproper : Proper ((≡) ==> impl) P)
   (Hzero : P zero_fin_supp_nat_fn)
@@ -485,3 +482,6 @@ Proof.
 Qed.
 
 End sec_fin_supp_fn_fixed_domain.
+
+Ltac destruct_fin_supp_nat_fn f f' n Heq :=
+  destruct (fin_supp_nat_fn_inv f) as [Heq | (n & f' & Heq)].

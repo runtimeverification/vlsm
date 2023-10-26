@@ -631,7 +631,7 @@ Qed.
 *)
 Lemma composition_valid_messages_powers_of_mults_right (m : ParityMessage) :
   valid_message_prop parity_composite_vlsm m ->
-  exists (f : index -> nat) (Hf : finite.Finite (supp f)),
+  exists (f : index -fin<> 0%nat),
     fin_supp f <> [] /\ m = prod_fin_supp_nat_fn multipliers f.
 Proof.
   intros [s Hvsm].
@@ -639,14 +639,14 @@ Proof.
   revert m Heqom.
   induction Hvsm using valid_state_message_prop_ind; intros; subst.
   - destruct Hom as (n & (mielem & mi) & Hmi); cbn in mi, Hmi.
-    exists (delta_fin_supp_nat_fn n), _.
+    exists (delta_fin_supp_nat_fn n).
     split; [by eapply elem_of_not_nil, elem_of_delta_fin_supp_nat_fn_fin_supp |].
     by rewrite <- Hmi, mi, prod_powers_delta.
   - destruct l as (k & lk).
     destruct om; [| done].
-    destruct (IHHvsm2 p) as [f (? & Hdomf & ->)]; [done |].
+    destruct (IHHvsm2 p) as (f & Hdomf & ->); [done |].
     inversion Ht.
-    exists (succ_fin_supp_nat_fn f k), _.
+    exists (succ_fin_supp_nat_fn f k).
     split; [| by rewrite prod_fin_supp_nat_fn_succ].
     apply not_null_element in Hdomf; destruct_dec_sig Hdomf i Hi Heq.
     by eapply elem_of_not_nil, elem_of_succ_fin_supp_nat_fn_fin_supp; right.
@@ -668,31 +668,27 @@ Definition free_parity_composite_vlsm : VLSM ParityMessage :=
 
 Lemma composition_valid_messages_powers_of_mults_left
   (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage)
-  (f : index -> nat) `{!finite.Finite (supp f)} :
+  (f : index -fin<> 0%nat) :
     fin_supp f <> [] /\ m = prod_fin_supp_nat_fn multipliers f ->
     valid_message_prop free_parity_composite_vlsm m.
 Proof.
   intros [Hpowgeq1 Hm]; revert Hpowgeq1 m Hm.
-  pose (P := fun (f : index -> nat) `{!finite.Finite (supp f)} => fin_supp f <> []  ->
+  pose (P := fun (f : index -fin<> 0%nat) => fin_supp f <> []  ->
     forall m : ParityMessage, m = prod_fin_supp_nat_fn multipliers f ->
     valid_message_prop free_parity_composite_vlsm m).
-  cut (P f _); [done |].
+  cut (P f); [done |].
   apply fin_supp_nat_fn_ind; clear -Hmpos; subst P.
-  - intros f1 f2 ? ? Heq Hall Hi m Hm.
-    eapply Hall; [| by subst; symmetry; apply prod_fin_supp_nat_fn_proper].
+  - intros f1 f2 Heq Hall Hi m Hm.
+    eapply Hall; [| by rewrite Heq].
     contradict Hi; apply Permutation_nil.
-    by rewrite <- Hi; apply fin_supp_proper.
+    by rewrite <- Hi, Heq.
   - by cbn.
-  - intros n f0 ? IHf0 Hi m Hm.
-    pose proof (Hf0 := FinSuppNatFn_complete f0).
-    inversion Hf0 as [| n' f0' Hf0' Heq].
-    + rewrite prod_fin_supp_nat_fn_succ,
-        <- (prod_fin_supp_nat_fn_proper _ zero_fin_supp_nat_fn),
-        prod_fin_supp_nat_fn_zero in Hm by done.
+  - intros n f0 IHf0 Hi m Hm.
+    destruct_fin_supp_nat_fn f0 f0' n' Heq.
+    + rewrite prod_fin_supp_nat_fn_succ, Heq, prod_fin_supp_nat_fn_zero in Hm.
       apply initial_message_is_valid. exists n.
       by unshelve eexists (exist _ m _); cbn; lia.
-    + apply FinSuppNatFn_has_fin_supp in Hf0' as ?.
-      assert (Hmvalid : valid_message_prop free_parity_composite_vlsm (prod_fin_supp_nat_fn multipliers f0)).
+    + assert (Hmvalid : valid_message_prop free_parity_composite_vlsm (prod_fin_supp_nat_fn multipliers f0)).
       {
         apply IHf0; [| done].
         assert (Hinh : fin_supp (succ_fin_supp_nat_fn f0' n') <> []).
@@ -700,25 +696,19 @@ Proof.
           by eapply elem_of_not_nil, elem_of_succ_fin_supp_nat_fn_fin_supp; left.
         }
         contradict Hinh; apply Permutation_nil.
-        by rewrite <- Hinh; apply fin_supp_proper.
+        by rewrite <- Hinh, Heq.
       }
-      subst m; rewrite prod_fin_supp_nat_fn_succ by typeclasses eauto.
+      subst m; rewrite prod_fin_supp_nat_fn_succ.
       assert (Hpos : prod_fin_supp_nat_fn multipliers f0 >= multipliers n').
       {
-        replace (prod_fin_supp_nat_fn multipliers f0)
-          with (prod_fin_supp_nat_fn multipliers (succ_fin_supp_nat_fn f0' n'))
-          by (apply prod_fin_supp_nat_fn_proper; done).
-        rewrite prod_fin_supp_nat_fn_succ.
+        rewrite Heq, prod_fin_supp_nat_fn_succ.
         cut (prod_fin_supp_nat_fn multipliers f0' > 0);
           [by specialize (Hmpos n'); nia |].
-        destruct (decide (fin_supp f0' = [])); cycle 1.
+        destruct (decide (fin_supp f0' = [])) as [Hz |].
+        - eapply empty_supp_fn_supp_inv in Hz as ->.
+          by setoid_rewrite prod_fin_supp_nat_fn_zero; lia.
         - apply prod_powers_gt; [by lia | | done].
           by intro i; specialize (Hmpos i); lia.
-        - replace (prod_fin_supp_nat_fn multipliers f0')
-              with (prod_fin_supp_nat_fn multipliers zero_fin_supp_nat_fn).
-          + by rewrite prod_fin_supp_nat_fn_zero; lia.
-          + apply prod_fin_supp_nat_fn_proper.
-            by symmetry; eapply empty_supp_fn_supp_inv.
       }
       specialize (Hmpos n').
       clear - Hmvalid Hmpos Hpos.
@@ -743,7 +733,7 @@ Qed.
 Lemma composition_valid_messages_powers_of_mults
   (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage) :
     valid_message_prop free_parity_composite_vlsm m <->
-  exists (f : index -> nat) (Hf : finite.Finite (supp f)),
+  exists (f : index -fin<> 0%nat),
     fin_supp f <> [] /\ m = prod_fin_supp_nat_fn multipliers f.
 Proof.
   split.
@@ -965,7 +955,7 @@ Proof.
   rewrite composition_valid_messages_powers_of_mults;
     [| by intro i; specialize (Hprime_pos i); lia..].
   split.
-  - intros (fp & ? & Hdom_fp & ->).
+  - intros (fp & Hdom_fp & ->).
     by apply prod_powers_gt.
   - apply primes_factorization.
 Qed.
@@ -1012,8 +1002,8 @@ Lemma even_constrained_primes_composition_valid_messages_left (m : Z) :
   m > 1 -> Z.Even m -> valid_message_prop even_constrained_primes_composition m.
 Proof.
   intros Hm1 Hmeven.
-  assert (Hinit : composite_initial_message_prop (indexed_parity_vlsms (fun p : primes => ` p)) 2)
-    by (unshelve eexists inhabitant, (exist _ 2 _); done).
+  assert (Hinit : composite_initial_message_prop (indexed_parity_vlsms (fun p : primes => ` p)) 2).
+    by (unshelve eexists (dexist 2 prime_2), (exist _ 2 _); done).
   destruct (decide (m = 2)) as [-> | Hm2]; [by apply initial_message_is_valid |].
   destruct Hmeven as [n ->].
   assert (Hn : 2 <= n) by lia.
