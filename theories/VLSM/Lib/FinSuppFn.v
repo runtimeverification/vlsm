@@ -24,9 +24,6 @@ Global Hint Mode FinSupp - - ! - - - : typeclass_instances.
 
 (**
   We define a type to encapsulate functions of finite support.
-  The notation <<f : A -fin<> b>> says that f represents a function from <<A>>
-  to the type of <<b>> such that only finitely many elements from <<A>> are
-  mapped to values other than <<b>>.
 *)
 Record FinSuppFn {A : Type} `{s : B} `{EqDecision A} `{EqDecision B} : Type := fin_supp_fn
 {
@@ -36,8 +33,6 @@ Record FinSuppFn {A : Type} `{s : B} `{EqDecision A} `{EqDecision B} : Type := f
 
 Arguments fin_supp_fn {_ _ s _ _} _ _.
 Arguments FinSuppFn _ {_} s {_ _}.
-
-#[global] Infix "-fin<>" := FinSuppFn (at level 60, right associativity).
 
 Section sec_fin_supp_fn_fixed_domain.
 
@@ -52,11 +47,11 @@ Context
   {b : B}
   .
 
-#[export] Instance fin_supp_fn_equiv : Equiv (A -fin<> b) :=
+#[export] Instance fin_supp_fn_equiv : Equiv (FinSuppFn A b) :=
   (fun f g => fin_supp_fn_project f = fin_supp_fn_project g).
 
 #[export] Instance fin_supp_fn_equivalence :
-  Equivalence (≡@{A -fin<> b}).
+  Equivalence (≡@{FinSuppFn A b}).
 Proof.
   unfold equiv, fin_supp_fn_equiv.
   constructor.
@@ -69,18 +64,18 @@ Qed.
   Proper ((≡) ==> (=)) (@fin_supp_fn_project A B b _ _).
 Proof. by intros f g Heqv; inversion Heqv. Qed.
 
-Lemma fin_supp_fn_equiv_unfold (f g : A -fin<> b) :
+Lemma fin_supp_fn_equiv_unfold (f g : FinSuppFn A b) :
   f ≡ g <-> fin_supp_fn_project f = fin_supp_fn_project g.
 Proof. done. Qed.
 
 #[export] Instance fin_supp_fn_has_fin_supp_instance
-  (f : A -fin<> b) : @FinSupp _ _ b f _ _ :=
+  (f : FinSuppFn A b) : @FinSupp _ _ b f _ _ :=
     fin_supp_fn_has_fin_supp f.
 
-Definition fin_supp (f : A -fin<> b) : list A :=
+Definition fin_supp (f : FinSuppFn A b) : list A :=
   map proj1_sig (enum (support b f)).
 
-Lemma elem_of_fin_supp (f : A -fin<> b) :
+Lemma elem_of_fin_supp (f : FinSuppFn A b) :
   forall (a : A), a ∈ fin_supp f <-> f a <> b.
 Proof.
   unfold fin_supp.
@@ -91,14 +86,14 @@ Proof.
     by exists (dexist a Ha); split; [| apply elem_of_enum].
 Qed.
 
-Lemma not_elem_of_fin_supp (f : A -fin<> b) :
+Lemma not_elem_of_fin_supp (f : FinSuppFn A b) :
   forall (a : A), a ∉ fin_supp f <-> f a = b.
 Proof.
   intros a; rewrite elem_of_fin_supp.
   by destruct (decide (f a = b)); itauto.
 Qed.
 
-Lemma fin_supp_NoDup (f : A -fin<> b) : NoDup (fin_supp f).
+Lemma fin_supp_NoDup (f : FinSuppFn A b) : NoDup (fin_supp f).
 Proof. by apply dsig_NoDup, NoDup_enum. Qed.
 
 #[export] Instance fin_supp_proper : Proper ((≡) ==> (≡ₚ)) fin_supp.
@@ -108,7 +103,7 @@ Proof.
   by intro; rewrite !elem_of_fin_supp, Heq.
 Qed.
 
-#[export] Instance fin_supp_fn_eq_dec : RelDecision (≡@{A -fin<> b}).
+#[export] Instance fin_supp_fn_eq_dec : RelDecision (≡@{FinSuppFn A b}).
 Proof.
   intros f g.
   destruct (@finset_equiv_dec A (listset A) _ _ _ _ _ _ _ _ _
@@ -124,7 +119,7 @@ Proof.
     by congruence.
 Qed.
 
-Program Definition empty_supp_fn : A -fin<> b :=
+Program Definition empty_supp_fn : FinSuppFn A b :=
   fin_supp_fn (const b) {| enum := [] |}.
 Next Obligation.
 Proof. by constructor. Qed.
@@ -134,7 +129,7 @@ Proof. by intros; destruct_dec_sig x a Ha Heq; contradiction Ha. Qed.
 Lemma empty_supp_fn_supp : fin_supp empty_supp_fn = [].
 Proof. done. Qed.
 
-Lemma empty_supp_fn_supp_inv (f : A -fin<> b) :
+Lemma empty_supp_fn_supp_inv (f : FinSuppFn A b) :
   fin_supp f = [] -> f ≡ empty_supp_fn.
 Proof.
   intros Hf; apply fin_supp_fn_equiv_unfold; extensionality a; cbn.
@@ -143,12 +138,12 @@ Proof.
   by apply not_elem_of_nil.
 Qed.
 
-Definition update_fn_supp (f : A -fin<> b) (n : A) (b' : B) : listset A :=
+Definition update_fn_supp (f : FinSuppFn A b) (n : A) (b' : B) : listset A :=
   if decide (b' = b)
   then list_to_set (fin_supp f) ∖ {[n]}
   else {[n]} ∪ list_to_set (fin_supp f).
 
-Lemma update_fn_supp_all (f : A -fin<> b) (n : A) (b' : B) :
+Lemma update_fn_supp_all (f : FinSuppFn A b) (n : A) (b' : B) :
   Forall (fun a => update_fn f n b' a <> b) (elements (update_fn_supp f n b')).
 Proof.
   unfold update_fn_supp.
@@ -164,7 +159,7 @@ Proof.
 Qed.
 
 Program Definition update_fn_fin_supp
-  (f : A -fin<> b) (n : A) (b' : B) : A -fin<> b :=
+  (f : FinSuppFn A b) (n : A) (b' : B) : FinSuppFn A b :=
   fin_supp_fn (update_fn f n b')
     {| enum := list_annotate (update_fn_supp_all f n b') |}.
 Next Obligation.
@@ -190,7 +185,7 @@ Proof.
   by unfold update_fn; case_decide; cbn; congruence.
 Qed.
 
-Lemma elem_of_update_fn_fin_supp (f : A -fin<> b) (n : A) (b' : B) :
+Lemma elem_of_update_fn_fin_supp (f : FinSuppFn A b) (n : A) (b' : B) :
   forall (a : A),
     a ∈ fin_supp (update_fn_fin_supp f n b')
       <->
@@ -208,9 +203,9 @@ End sec_fin_supp_fn_fixed_supp_value.
 
 (** ** Finitely supported functions on naturals *)
 
-Definition zero_fin_supp_nat_fn : A -fin<> 0 := empty_supp_fn.
+Definition zero_fin_supp_nat_fn : FinSuppFn A 0 := empty_supp_fn.
 
-Definition succ_fin_supp_nat_fn (f : A -fin<> 0) (n : A) : A -fin<> 0 :=
+Definition succ_fin_supp_nat_fn (f : FinSuppFn A 0) (n : A) : FinSuppFn A 0 :=
   update_fn_fin_supp f n (S (f n)).
 
 #[export] Instance succ_fin_supp_nat_fn_proper :
@@ -220,7 +215,7 @@ Proof.
   by apply update_fn_fin_supp_proper; [.. | rewrite Heqv].
 Qed.
 
-Lemma elem_of_succ_fin_supp_nat_fn_fin_supp (f : A -fin<> 0) (n : A) :
+Lemma elem_of_succ_fin_supp_nat_fn_fin_supp (f : FinSuppFn A 0) (n : A) :
   forall (a : A),
     a ∈ fin_supp (succ_fin_supp_nat_fn f n) <-> a = n \/ a ∈ fin_supp f.
 Proof.
@@ -229,7 +224,7 @@ Proof.
   by split; itauto lia.
 Qed.
 
-Lemma succ_fin_supp_nat_fn_supp_in (f : A -fin<> 0) (n : A) :
+Lemma succ_fin_supp_nat_fn_supp_in (f : FinSuppFn A 0) (n : A) :
   n ∈ fin_supp f -> fin_supp (succ_fin_supp_nat_fn f n) ≡ₚ fin_supp f.
 Proof.
   intros.
@@ -238,7 +233,7 @@ Proof.
   by set_solver.
 Qed.
 
-Lemma succ_fin_supp_nat_fn_supp_not_in (f : A -fin<> 0) (n : A) :
+Lemma succ_fin_supp_nat_fn_supp_not_in (f : FinSuppFn A 0) (n : A) :
   n ∉ fin_supp f -> fin_supp (succ_fin_supp_nat_fn f n) ≡ₚ n :: fin_supp f.
 Proof.
   intros; cbn; rewrite list_annotate_forget.
@@ -249,7 +244,7 @@ Proof.
     [typeclasses eauto | apply fin_supp_NoDup].
 Qed.
 
-Definition delta_fin_supp_nat_fn (n : A) : A -fin<> 0 :=
+Definition delta_fin_supp_nat_fn (n : A) : FinSuppFn A 0 :=
   succ_fin_supp_nat_fn zero_fin_supp_nat_fn n.
 
 Lemma elem_of_delta_fin_supp_nat_fn_fin_supp (n : A) :
@@ -262,7 +257,7 @@ Proof.
   by itauto.
 Qed.
 
-Definition sum_fin_supp_nat_fn (f : A -fin<> 0) : nat :=
+Definition sum_fin_supp_nat_fn (f : FinSuppFn A 0) : nat :=
   sum_list_with f (fin_supp f).
 
 Lemma sum_fin_supp_nat_fn_proper : Proper ((≡) ==> (=)) sum_fin_supp_nat_fn.
@@ -274,7 +269,7 @@ Proof.
   - by apply fin_supp_proper.
 Qed.
 
-Lemma sum_fin_supp_nat_fn_zero_inv (f : A -fin<> 0) :
+Lemma sum_fin_supp_nat_fn_zero_inv (f : FinSuppFn A 0) :
   sum_fin_supp_nat_fn f = 0 -> f ≡ zero_fin_supp_nat_fn.
 Proof.
   setoid_rewrite sum_list_with_zero; intros Hall.
@@ -283,7 +278,7 @@ Proof.
   by rewrite elem_of_fin_supp in n; cbn in n; lia.
 Qed.
 
-Lemma sum_fin_supp_nat_fn_succ (f : A -fin<> 0) (n : A) :
+Lemma sum_fin_supp_nat_fn_succ (f : FinSuppFn A 0) (n : A) :
   sum_fin_supp_nat_fn (succ_fin_supp_nat_fn f n) = S (sum_fin_supp_nat_fn f).
 Proof.
   unfold sum_fin_supp_nat_fn.
@@ -309,10 +304,10 @@ Proof.
 Qed.
 
 (** The component-wise sum of two functions *)
-Definition fin_supp_nat_fn_add_supp (f1 f2 : A -fin<> 0) : listset A :=
+Definition fin_supp_nat_fn_add_supp (f1 f2 : FinSuppFn A 0) : listset A :=
   list_to_set (fin_supp f1) ∪ list_to_set (fin_supp f2).
 
-Lemma fin_supp_nat_fn_add_supp_all (f1 f2 : A -fin<> 0) :
+Lemma fin_supp_nat_fn_add_supp_all (f1 f2 : FinSuppFn A 0) :
   Forall (fun a => f1 a + f2 a <> 0)
     (elements (fin_supp_nat_fn_add_supp f1 f2)).
 Proof.
@@ -322,7 +317,7 @@ Proof.
   by lia.
 Qed.
 
-Program Definition fin_supp_nat_fn_add (f1 f2 : A -fin<> 0) : A -fin<> 0 :=
+Program Definition fin_supp_nat_fn_add (f1 f2 : FinSuppFn A 0) : FinSuppFn A 0 :=
   fin_supp_fn (fun a => f1 a + f2 a)
     {| enum := list_annotate (fin_supp_nat_fn_add_supp_all f1 f2) |}.
 Next Obligation.
@@ -343,7 +338,7 @@ Proof.
   by rewrite Heqv1, Heqv2.
 Qed.
 
-Lemma elem_of_fin_supp_nat_fn_add_fin_supp (f1 f2 : A -fin<> 0) :
+Lemma elem_of_fin_supp_nat_fn_add_fin_supp (f1 f2 : FinSuppFn A 0) :
   forall (a : A),
     a ∈ fin_supp (fin_supp_nat_fn_add f1 f2) <->
     a ∈ fin_supp f1 \/ a ∈ fin_supp f2.
@@ -373,7 +368,7 @@ Proof.
   by intros f g h; rewrite !fin_supp_fn_equiv_unfold; extensionality a; cbn; lia.
 Qed.
 
-Lemma fin_supp_nat_fn_add_succ_l (f1 f2 : A -fin<> 0) :
+Lemma fin_supp_nat_fn_add_succ_l (f1 f2 : FinSuppFn A 0) :
   forall (a : A),
     fin_supp_nat_fn_add (succ_fin_supp_nat_fn f1 a) f2
       ≡
@@ -384,7 +379,7 @@ Proof.
   by unfold update_fn; case_decide; cbn; congruence.
 Qed.
 
-Lemma fin_supp_nat_fn_add_succ_r (f1 f2 : A -fin<> 0) :
+Lemma fin_supp_nat_fn_add_succ_r (f1 f2 : FinSuppFn A 0) :
   forall (a : A),
     fin_supp_nat_fn_add f2 (succ_fin_supp_nat_fn f1 a)
       ≡
@@ -399,16 +394,16 @@ Qed.
   naturals we define the following inductive property and then we show that it
   holds for all such functions.
 *)
-Inductive FinSuppNatFn : A -fin<> 0 -> Prop :=
+Inductive FinSuppNatFn : FinSuppFn A 0 -> Prop :=
 | P_zero :
-    forall (f' : A -fin<> 0), f' ≡ zero_fin_supp_nat_fn ->
+    forall (f' : FinSuppFn A 0), f' ≡ zero_fin_supp_nat_fn ->
     FinSuppNatFn f'
 | P_succ :
-    forall (f : A -fin<> 0), FinSuppNatFn f ->
-    forall (f' : A -fin<> 0) (i : A), f' ≡ succ_fin_supp_nat_fn f i ->
+    forall (f : FinSuppFn A 0), FinSuppNatFn f ->
+    forall (f' : FinSuppFn A 0) (i : A), f' ≡ succ_fin_supp_nat_fn f i ->
     FinSuppNatFn f'.
 
-Lemma FinSuppNatFn_complete (f : A -fin<> 0) :  FinSuppNatFn f.
+Lemma FinSuppNatFn_complete (f : FinSuppFn A 0) :  FinSuppNatFn f.
 Proof.
   remember (sum_fin_supp_nat_fn f) as n.
   symmetry in Heqn.
@@ -440,21 +435,21 @@ Proof.
   by congruence.
 Qed.
 
-Lemma fin_supp_nat_fn_inv (f : A -fin<> 0) :
+Lemma fin_supp_nat_fn_inv (f : FinSuppFn A 0) :
   f ≡ zero_fin_supp_nat_fn
     \/
-  exists (a : A) (f' : A -fin<> 0), f ≡ succ_fin_supp_nat_fn f' a.
+  exists (a : A) (f' : FinSuppFn A 0), f ≡ succ_fin_supp_nat_fn f' a.
 Proof.
   pose proof (Hcomplete := FinSuppNatFn_complete f).
   by inversion Hcomplete; subst; [left | right; eexists _,_].
 Qed.
 
-Lemma fin_supp_nat_fn_ind (P : (A -fin<> 0) -> Prop)
+Lemma fin_supp_nat_fn_ind (P : (FinSuppFn A 0) -> Prop)
   (Hproper : Proper ((≡) ==> impl) P)
   (Hzero : P zero_fin_supp_nat_fn)
-  (Hsucc : forall (i : A) (f : A -fin<> 0),
+  (Hsucc : forall (i : A) (f : FinSuppFn A 0),
     P f -> P (succ_fin_supp_nat_fn f i)) :
-  forall (f : A -fin<> 0), P f.
+  forall (f : FinSuppFn A 0), P f.
 Proof.
   intros.
   pose proof (Hcomplete := FinSuppNatFn_complete f).
