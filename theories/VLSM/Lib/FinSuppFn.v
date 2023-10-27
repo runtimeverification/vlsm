@@ -463,6 +463,3 @@ Proof.
 Qed.
 
 End sec_fin_supp_fn_fixed_domain.
-
-Ltac destruct_fin_supp_nat_fn f f' n Heq :=
-  destruct (fin_supp_nat_fn_inv f) as [Heq | (n & f' & Heq)].
