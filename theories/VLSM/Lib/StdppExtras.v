@@ -647,7 +647,7 @@ Proof.
     by intros; apply Hall; right.
 Qed.
 
-Lemma dsig_NoDup `(P : A -> Prop) `{Pdec : forall a, Decision (P a)} :
+Lemma dsig_NoDup_map `(P : A -> Prop) `{Pdec : forall a, Decision (P a)} :
   forall (l : list (dsig P)),
     NoDup l <-> NoDup (map proj1_sig l).
 Proof.
