@@ -16,23 +16,13 @@ From VLSM.Lib Require Import Preamble StdppExtras ListExtras.
 Definition support {A B : Type} (s : B) (f : A -> B) `{EqDecision B} : Type :=
   dsig (fun a => f a <> s).
 
-(** A function is finitely supported if its [support] is [Finite]. *)
-Class FinSupp {A B : Type} (s : B) (f : A -> B) `{EqDecision A} `{EqDecision B} :=
-  finite_supp :> Finite (support s f).
-
-Global Hint Mode FinSupp - - ! - - - : typeclass_instances.
 
 (**
+  A function is finitely supported if its [support] is [Finite].
   We define a type to encapsulate functions of finite support.
 *)
-Record FinSuppFn {A : Type} `{s : B} `{EqDecision A} `{EqDecision B} : Type := fin_supp_fn
-{
-  fin_supp_fn_project :> A -> B;
-  fin_supp_fn_has_fin_supp : FinSupp s fin_supp_fn_project;
-}.
-
-Arguments fin_supp_fn {_ _ s _ _} _ _.
-Arguments FinSuppFn _ {_} s {_ _}.
+Definition FinSuppFn (A : Type) `(s : B) `{EqDecision A} `{EqDecision B} : Type :=
+  sigT (fun (f : A -> B) => Finite (support s f)).
 
 Section sec_fin_supp_fn_fixed_domain.
 
@@ -48,7 +38,7 @@ Context
   .
 
 #[export] Instance fin_supp_fn_equiv : Equiv (FinSuppFn A b) :=
-  (fun f g => fin_supp_fn_project f = fin_supp_fn_project g).
+  (fun f g => projT1 f = projT1 g).
 
 #[export] Instance fin_supp_fn_equivalence :
   Equivalence (≡@{FinSuppFn A b}).
@@ -61,22 +51,22 @@ Proof.
 Qed.
 
 #[export] Instance fin_supp_fn_project_proper :
-  Proper ((≡) ==> (=)) (@fin_supp_fn_project A B b _ _).
+  Proper ((≡) ==> (=)) projT1.
 Proof. by intros f g Heqv; inversion Heqv. Qed.
 
 Lemma fin_supp_fn_equiv_unfold (f g : FinSuppFn A b) :
-  f ≡ g <-> fin_supp_fn_project f = fin_supp_fn_project g.
+  f ≡ g <-> projT1 f = projT1 g.
 Proof. done. Qed.
 
 #[export] Instance fin_supp_fn_has_fin_supp_instance
-  (f : FinSuppFn A b) : @FinSupp _ _ b f _ _ :=
-    fin_supp_fn_has_fin_supp f.
+  (f : FinSuppFn A b) : Finite (support b (projT1 f)) :=
+    projT2 f.
 
 Definition fin_supp (f : FinSuppFn A b) : list A :=
-  map proj1_sig (enum (support b f)).
+  map proj1_sig (enum (support b (projT1 f))).
 
 Lemma elem_of_fin_supp (f : FinSuppFn A b) :
-  forall (a : A), a ∈ fin_supp f <-> f a <> b.
+  forall (a : A), a ∈ fin_supp f <-> projT1 f a <> b.
 Proof.
   unfold fin_supp.
   split; rewrite elem_of_list_fmap.
@@ -87,10 +77,10 @@ Proof.
 Qed.
 
 Lemma not_elem_of_fin_supp (f : FinSuppFn A b) :
-  forall (a : A), a ∉ fin_supp f <-> f a = b.
+  forall (a : A), a ∉ fin_supp f <-> projT1 f a = b.
 Proof.
   intros a; rewrite elem_of_fin_supp.
-  by destruct (decide (f a = b)); itauto.
+  by destruct (decide (projT1 f a = b)); itauto.
 Qed.
 
 Lemma fin_supp_NoDup (f : FinSuppFn A b) : NoDup (fin_supp f).
@@ -110,7 +100,7 @@ Proof.
     (list_to_set (fin_supp f)) (list_to_set (fin_supp g))) as [Heqv | Hneqv]; cycle 1.
   - right; intros Heqv.
     by rewrite Heqv in Hneqv.
-  - destruct (decide (set_Forall (fun a => f a = g a) (list_to_set (C := listset A) (fin_supp f))))
+  - destruct (decide (set_Forall (fun a => projT1 f a = projT1 g a) (list_to_set (C := listset A) (fin_supp f))))
       as [Hall | Hall]; [| by right; contradict Hall; rewrite Hall].
     left; apply fin_supp_fn_equiv_unfold; extensionality a.
     destruct (decide (a ∈ fin_supp f)) as [| Hf]; [by apply Hall, elem_of_list_to_set |].
@@ -120,7 +110,7 @@ Proof.
 Qed.
 
 Program Definition empty_supp_fn : FinSuppFn A b :=
-  fin_supp_fn (const b) {| enum := [] |}.
+  existT (const b) {| enum := [] |}.
 Next Obligation.
 Proof. by constructor. Qed.
 Next Obligation.
@@ -144,7 +134,7 @@ Definition update_fn_supp (f : FinSuppFn A b) (n : A) (b' : B) : listset A :=
   else {[n]} ∪ list_to_set (fin_supp f).
 
 Lemma update_fn_supp_all (f : FinSuppFn A b) (n : A) (b' : B) :
-  Forall (fun a => update_fn f n b' a <> b) (elements (update_fn_supp f n b')).
+  Forall (fun a => update_fn (projT1 f) n b' a <> b) (elements (update_fn_supp f n b')).
 Proof.
   unfold update_fn_supp.
   apply Forall_forall; intros a.
@@ -160,7 +150,7 @@ Qed.
 
 Program Definition update_fn_fin_supp
   (f : FinSuppFn A b) (n : A) (b' : B) : FinSuppFn A b :=
-  fin_supp_fn (update_fn f n b')
+  existT (update_fn (projT1 f) n b')
     {| enum := list_annotate (update_fn_supp_all f n b') |}.
 Next Obligation.
 Proof. by intros; apply list_annotate_NoDup, NoDup_elements. Qed.
@@ -206,7 +196,7 @@ End sec_fin_supp_fn_fixed_supp_value.
 Definition zero_fin_supp_nat_fn : FinSuppFn A 0 := empty_supp_fn.
 
 Definition succ_fin_supp_nat_fn (f : FinSuppFn A 0) (n : A) : FinSuppFn A 0 :=
-  update_fn_fin_supp f n (S (f n)).
+  update_fn_fin_supp f n (S (projT1 f n)).
 
 #[export] Instance succ_fin_supp_nat_fn_proper :
   Proper ((≡) ==> (=) ==> (≡)) succ_fin_supp_nat_fn.
@@ -258,13 +248,13 @@ Proof.
 Qed.
 
 Definition sum_fin_supp_nat_fn (f : FinSuppFn A 0) : nat :=
-  sum_list_with f (fin_supp f).
+  sum_list_with (projT1 f) (fin_supp f).
 
 Lemma sum_fin_supp_nat_fn_proper : Proper ((≡) ==> (=)) sum_fin_supp_nat_fn.
 Proof.
   intros f g Heqv.
   unfold sum_fin_supp_nat_fn.
-  rewrite (sum_list_with_proper f (fin_supp f) (fin_supp g)).
+  rewrite (sum_list_with_proper (projT1 f) (fin_supp f) (fin_supp g)).
   - by apply sum_list_with_ext_forall; intros; rewrite Heqv.
   - by apply fin_supp_proper.
 Qed.
@@ -297,7 +287,7 @@ Proof.
       by rewrite IHl.
   - rewrite succ_fin_supp_nat_fn_supp_not_in by done.
     cbn; rewrite update_fn_eq.
-    replace (f n) with 0 by (rewrite elem_of_fin_supp in n0; cbn in n0; lia).
+    replace (projT1 f n) with 0 by (rewrite elem_of_fin_supp in n0; cbn in n0; lia).
     cbn; f_equal.
     apply sum_list_with_ext_forall.
     by intros; rewrite update_fn_neq; [| set_solver].
@@ -308,7 +298,7 @@ Definition fin_supp_nat_fn_add_supp (f1 f2 : FinSuppFn A 0) : listset A :=
   list_to_set (fin_supp f1) ∪ list_to_set (fin_supp f2).
 
 Lemma fin_supp_nat_fn_add_supp_all (f1 f2 : FinSuppFn A 0) :
-  Forall (fun a => f1 a + f2 a <> 0)
+  Forall (fun a => projT1 f1 a + projT1 f2 a <> 0)
     (elements (fin_supp_nat_fn_add_supp f1 f2)).
 Proof.
   unfold fin_supp_nat_fn_add_supp; apply Forall_forall; intros a.
@@ -318,7 +308,7 @@ Proof.
 Qed.
 
 Program Definition fin_supp_nat_fn_add (f1 f2 : FinSuppFn A 0) : FinSuppFn A 0 :=
-  fin_supp_fn (fun a => f1 a + f2 a)
+  existT (fun a => projT1 f1 a + projT1 f2 a)
     {| enum := list_annotate (fin_supp_nat_fn_add_supp_all f1 f2) |}.
 Next Obligation.
 Proof. by intros; apply list_annotate_NoDup, NoDup_elements. Qed.
@@ -409,7 +399,7 @@ Proof.
   symmetry in Heqn.
   revert f Heqn; induction n; intros;
     [by apply sum_fin_supp_nat_fn_zero_inv in Heqn; constructor |].
-  assert (Hex : Exists (fun (i : A) => f i <> 0) (fin_supp f)).
+  assert (Hex : Exists (fun (i : A) => projT1 f i <> 0) (fin_supp f)).
   {
     apply dec_stable; intros Hex.
     apply not_Exists_Forall in Hex; [| by typeclasses eauto].
@@ -421,7 +411,7 @@ Proof.
   }
   pose proof (Hx := Exists_choose_first_good _ _ Hex); cbn in Hx.
   pose (x := Exists_choose_first Hex).
-  destruct (f x) as [| px] eqn: Heqx; [done |]; clear Hx.
+  destruct (projT1 f x) as [| px] eqn: Heqx; [done |]; clear Hx.
   pose (f' := update_fn_fin_supp f x px).
   assert (Heq : f ≡ succ_fin_supp_nat_fn f' x).
   {
