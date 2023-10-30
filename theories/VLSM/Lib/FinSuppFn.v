@@ -69,11 +69,11 @@ Lemma fsfun_equiv_unfold (f g : fsfun A b) :
 Proof. done. Qed.
 
 #[export] Instance fsfun_has_fin_supp
-  (f : fsfun A b) : Finite (support b (f)) :=
+  (f : fsfun A b) : Finite (support b f) :=
     projT2 f.
 
 Definition fin_supp (f : fsfun A b) : list A :=
-  map proj1_sig (enum (support b (f))).
+  map proj1_sig (enum (support b f)).
 
 Lemma elem_of_fin_supp (f : fsfun A b) :
   forall (a : A), a ∈ fin_supp f <-> f a <> b.
@@ -145,7 +145,7 @@ Definition update_supp (f : fsfun A b) (n : A) (b' : B) : listset A :=
   else {[n]} ∪ list_to_set (fin_supp f).
 
 Lemma update_supp_all (f : fsfun A b) (n : A) (b' : B) :
-  Forall (fun a => update (f) n b' a <> b) (elements (update_supp f n b')).
+  Forall (fun a => update f n b' a <> b) (elements (update_supp f n b')).
 Proof.
   unfold update_supp.
   apply Forall_forall; intros a.
@@ -161,7 +161,7 @@ Qed.
 
 Program Definition update_fsfun
   (f : fsfun A b) (n : A) (b' : B) : fsfun A b :=
-  existT (update (f) n b')
+  existT (update f n b')
     {| enum := list_annotate (update_supp_all f n b') |}.
 Next Obligation.
 Proof. by intros; apply list_annotate_NoDup, NoDup_elements. Qed.
@@ -294,7 +294,7 @@ Lemma fsfun_sum_proper : Proper ((≡) ==> (=)) fsfun_sum.
 Proof.
   intros f g Heqv.
   unfold fsfun_sum.
-  rewrite (sum_list_with_proper (f) (fin_supp f) (fin_supp g)).
+  rewrite (sum_list_with_proper f (fin_supp f) (fin_supp g)).
   - by apply sum_list_with_ext_forall; intros; rewrite Heqv.
   - by apply fin_supp_proper.
 Qed.
