@@ -936,7 +936,7 @@ Proof.
   by apply addObservation_inj in Hadd as [_ ->].
 Qed.
 
-Lemma UMO_reachable_addObservation_inv_Send P :
+Lemma UMO_reachable_addObservation_inv_Send_state P :
   forall (s : State) (m : Message),
     UMO_reachable P (s <+> MkObservation Send m) ->
       s = state m.
@@ -951,13 +951,13 @@ Proof.
   ; apply (f_equal (fun x => length (obs x))) in Hadd; cbn in Hadd; lia.
 Qed.
 
-Lemma UMO_reachable_addObservation_inv_Send' P :
+Lemma UMO_reachable_addObservation_inv_Send P :
   forall (s : State) (m : Message),
     UMO_reachable P (s <+> MkObservation Send m) ->
       UMO_reachable P (state m).
 Proof.
   intros s m Hvsp.
-  erewrite <- UMO_reachable_addObservation_inv_Send; [| done].
+  erewrite <- UMO_reachable_addObservation_inv_Send_state; [| done].
   by eapply UMO_reachable_addObservation_inv.
 Qed.
 
@@ -1272,7 +1272,7 @@ Proof.
   apply elem_of_obs_split in Hin as (s' & obs' & ->).
   exists obs'; cbn.
   do 2 f_equal.
-  by apply UMO_reachable_addObservations_inv, UMO_reachable_addObservation_inv_Send in Hvsp.
+  by apply UMO_reachable_addObservations_inv, UMO_reachable_addObservation_inv_Send_state in Hvsp.
 Qed.
 
 Lemma elem_of_valid_obs_Send_valid P :
@@ -1282,7 +1282,7 @@ Lemma elem_of_valid_obs_Send_valid P :
 Proof.
   intros s m Hin Hvsp.
   destruct (elem_of_valid_obs_Send_split _ _ _ Hin Hvsp) as [obs ->].
-  by apply UMO_reachable_addObservations_inv, UMO_reachable_addObservation_inv_Send' in Hvsp.
+  by apply UMO_reachable_addObservations_inv, UMO_reachable_addObservation_inv_Send in Hvsp.
 Qed.
 
 (**
@@ -1326,13 +1326,13 @@ Proof.
   - by left; congruence.
   - right; exists obs1, obs2; left; subst.
     do 4 f_equal.
-    by eapply UMO_reachable_addObservation_inv_Send,
+    by eapply UMO_reachable_addObservation_inv_Send_state,
       UMO_reachable_addObservations_inv,
       UMO_reachable_addObservation_inv,
       UMO_reachable_addObservations_inv.
   - right; exists obs1, obs2; right; subst.
     do 4 f_equal.
-    by eapply UMO_reachable_addObservation_inv_Send,
+    by eapply UMO_reachable_addObservation_inv_Send_state,
       UMO_reachable_addObservations_inv,
       UMO_reachable_addObservation_inv,
       UMO_reachable_addObservations_inv.
@@ -1453,13 +1453,13 @@ Proof.
   - left.
     rewrite was_sent_before_characterization_2; [| done].
     apply UMO_reachable_addObservations_inv,
-          UMO_reachable_addObservation_inv_Send in Hvsp.
+          UMO_reachable_addObservation_inv_Send_state in Hvsp.
     rewrite <- Hvsp, addObservation_cons.
     by apply state_suffix_addObservations; inversion 1.
   - right; right.
     rewrite was_sent_before_characterization_2; [| done].
     apply UMO_reachable_addObservations_inv,
-          UMO_reachable_addObservation_inv_Send in Hvsp.
+          UMO_reachable_addObservation_inv_Send_state in Hvsp.
     rewrite <- Hvsp, addObservation_cons.
     by apply state_suffix_addObservations; inversion 1.
 Qed.
