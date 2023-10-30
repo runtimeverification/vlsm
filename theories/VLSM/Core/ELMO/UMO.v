@@ -219,6 +219,32 @@ Proof.
   by induction 1; constructor; auto.
 Qed.
 
+(** [Send] transitions in a constrained state are ok. *)
+Lemma input_valid_transition_Send :
+  forall (i : Address) (m : Message),
+    valid_state_prop (pre_loaded_with_all_messages_vlsm (UMOComponent i)) (state m) ->
+      input_valid_transition (pre_loaded_with_all_messages_vlsm (UMOComponent i))
+        Send (state m, None) (state m <+> MkObservation Send m, Some m).
+Proof.
+  intros; red; cbn; split_and!.
+  - done.
+  - by apply option_valid_message_None.
+  - by constructor.
+  - by do 3 f_equal; apply eq_Message.
+Qed.
+
+(** [Receive] transitions in a constrained state are ok. *)
+Lemma input_valid_transition_Receive :
+  forall (i : Address) (s : State) (m : Message),
+    valid_state_prop (pre_loaded_with_all_messages_vlsm (UMOComponent i)) s ->
+    input_valid_transition (pre_loaded_with_all_messages_vlsm (UMOComponent i))
+      Receive (s, Some m) (s <+> MkObservation Receive m, None).
+Proof.
+  intros * Hvsp; red; cbn; split_and!; [done | | | done].
+  - by apply any_message_is_valid_in_preloaded.
+  - by constructor.
+Qed.
+
 (**
   This lemma shows that for a VLSM based on UMO
   reachability in the VLSM according to [constrained_state_prop_alt]
@@ -962,6 +988,71 @@ Proof.
   - by apply IHobs', valid_state_prop_addObservation_Ri with ob'.
 Qed.
 
+Lemma UMO_reachable_constrained_state_prop :
+  forall (s : State),
+    constrained_state_prop (UMOComponent i) s
+      <->
+    UMO_reachable (fun _ _ => True) s /\ adr s = i.
+Proof.
+  intros s; rewrite constrained_state_prop_alt_equiv.
+  split; [by apply UMO_reachable_Ri |].
+  intros [Hur Hadr].
+  induction Hur; red; cbn in Hadr.
+  - by apply initial_state_is_valid; cbv.
+  - by eapply input_valid_transition_destination, input_valid_transition_Send, IHHur.
+  - by eapply input_valid_transition_destination, input_valid_transition_Receive, IHHur.
+Qed.
+
+(** If a state is constrained, after sending a message it's still constrained. *)
+Lemma constrained_state_prop_Send :
+  forall (m : Message),
+    constrained_state_prop (UMOComponent i) (state m) ->
+    constrained_state_prop (UMOComponent i) (state m <+> MkObservation Send m).
+Proof.
+  setoid_rewrite UMO_reachable_constrained_state_prop; cbn.
+  intros m [Hur Hadr]; split; [| done].
+  by destruct m; constructor.
+Qed.
+
+(** If a state is constrained, after receiving a message it's still constrained. *)
+Lemma constrained_state_prop_Receive :
+  forall (s : State) (m : Message),
+    constrained_state_prop (UMOComponent i) s ->
+    constrained_state_prop (UMOComponent i) (s <+> MkObservation Receive m).
+Proof.
+  setoid_rewrite UMO_reachable_constrained_state_prop; cbn.
+  intros s m [Hur Hadr]; split; [| done].
+  by destruct m; constructor.
+Qed.
+
+(**
+  If a state is constrained after adding an observation, it must have been
+  constrained before adding it.
+*)
+Lemma constrained_state_prop_addObservation_inv :
+  forall (s : State) (ob : Observation),
+    constrained_state_prop (UMOComponent i) (s <+> ob) ->
+    constrained_state_prop (UMOComponent i) s.
+Proof.
+  setoid_rewrite UMO_reachable_constrained_state_prop; cbn.
+  intros s ob [Hur Hadr]; split; [| done].
+  by eapply valid_state_prop_addObservation_Ri.
+Qed.
+
+(**
+  If a state is constrained after adding some observations, it must have been
+  constrained before adding them.
+*)
+Lemma constrained_state_prop_addObservations_inv :
+  forall (s : State) (obs : list Observation),
+    constrained_state_prop (UMOComponent i) (s <++> obs) ->
+    constrained_state_prop (UMOComponent i) s.
+Proof.
+  setoid_rewrite UMO_reachable_constrained_state_prop; cbn.
+  intros s ob [Hur Hadr]; split; [| done].
+  by eapply valid_state_prop_addObservations_Ri.
+Qed.
+
 (**
   The lemma just below essentially states that for every reachable state <<s>>,
   messages sent earlier are suffixes of messages sent later and that the
@@ -1530,6 +1621,17 @@ Lemma lift_to_RUMO_finite_valid_trace_from_to :
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
   by apply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_RUMO _ Hvsp i)).
+Qed.
+
+Lemma lift_to_UMO_constrained_state_prop :
+  forall (i : index) (s : State) (us : UMO_state),
+    constrained_state_prop UMO us ->
+    constrained_state_prop (U i) s ->
+    constrained_state_prop UMO (lift_to_UMO_state us i s).
+Proof.
+  setoid_rewrite constrained_state_prop_alt_equiv; unfold constrained_state_prop_alt.
+  intros is s us Hcsp.
+  by eapply VLSM_weak_embedding_valid_state, lift_to_RUMO.
 Qed.
 
 (**
