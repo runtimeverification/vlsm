@@ -904,7 +904,7 @@ Qed.
   Additionally, if the label of the transition is [Send], we know that the
   observation contains the source state.
 *)
-Lemma valid_state_prop_inv_Ri P :
+Lemma UMO_reachable_inv P :
   forall s : State,
     UMO_reachable P s ->
       obs s = [] \/
@@ -926,23 +926,23 @@ Qed.
   label is [Send], then we can characterize the state <<s1>>.
 *)
 
-Lemma valid_state_prop_addObservation_Ri P :
+Lemma UMO_reachable_addObservation_inv P :
   forall (s : State) (ob : Observation),
     UMO_reachable P (s <+> ob) -> UMO_reachable P s.
 Proof.
   intros s ob Hvsp.
-  apply valid_state_prop_inv_Ri in Hvsp
+  apply UMO_reachable_inv in Hvsp
      as [[=] | (lbl & iom & oom & s' & ob' & Ht & Hadd & Hvsp & Hss')]; cbn in *.
   by apply addObservation_inj in Hadd as [_ ->].
 Qed.
 
-Lemma valid_state_prop_addObservation_Ri_Send P :
+Lemma UMO_reachable_addObservation_inv_Send P :
   forall (s : State) (m : Message),
     UMO_reachable P (s <+> MkObservation Send m) ->
       s = state m.
 Proof.
   intros s m Hvsp.
-  apply valid_state_prop_inv_Ri in Hvsp
+  apply UMO_reachable_inv in Hvsp
      as [[=] | (lbl & iom & oom & s' & ob' & Ht & Hadd & Hvsp & Hlbl)]; cbn in *.
   inversion Hadd.
   replace (state m) with (state (message ob')) by (rewrite <- H0; cbn; done).
@@ -951,23 +951,23 @@ Proof.
   ; apply (f_equal (fun x => length (obs x))) in Hadd; cbn in Hadd; lia.
 Qed.
 
-Lemma valid_state_prop_addObservation_Ri_Send' P :
+Lemma UMO_reachable_addObservation_inv_Send' P :
   forall (s : State) (m : Message),
     UMO_reachable P (s <+> MkObservation Send m) ->
       UMO_reachable P (state m).
 Proof.
   intros s m Hvsp.
-  erewrite <- valid_state_prop_addObservation_Ri_Send; [| done].
-  by eapply valid_state_prop_addObservation_Ri.
+  erewrite <- UMO_reachable_addObservation_inv_Send; [| done].
+  by eapply UMO_reachable_addObservation_inv.
 Qed.
 
-Lemma addObservation_message P :
+Lemma UMO_reachable_addObservation_inv_message P :
   forall (s : State) (ob : Observation),
     UMO_reachable P (s <+> ob) -> label ob = Send ->
       message ob = MkMessage s.
 Proof.
   intros s ob Hvsp Heq.
-  apply valid_state_prop_inv_Ri in Hvsp
+  apply UMO_reachable_inv in Hvsp
      as [[=] | (lbl & iom & oom & s' & ob' & Ht & Hadd & Hvsp & Hss')]; cbn in *.
   apply addObservation_inj in Hadd as [-> ->].
   apply Hss'. destruct lbl, iom; inversion Ht; subst; clear Ht; cbn in *; [done | | done | done].
@@ -978,14 +978,14 @@ Qed.
   If a reachable state <<s2>> results from adding observations to a state <<s1>>,
   then <<s1>> is also reachable.
 *)
-Lemma valid_state_prop_addObservations_Ri P :
+Lemma UMO_reachable_addObservations_inv P :
   forall (s : State) (obs' : list Observation),
     UMO_reachable P (s <++> obs') -> UMO_reachable P s.
 Proof.
   intros s obs'; revert s.
   induction obs' as [| ob' obs']; cbn; intros s Hvsp.
   - by rewrite <- addObservations_nil.
-  - by apply IHobs', valid_state_prop_addObservation_Ri with ob'.
+  - by apply IHobs', UMO_reachable_addObservation_inv with ob'.
 Qed.
 
 Lemma UMO_reachable_constrained_state_prop :
@@ -1036,7 +1036,7 @@ Lemma constrained_state_prop_addObservation_inv :
 Proof.
   setoid_rewrite UMO_reachable_constrained_state_prop; cbn.
   intros s ob [Hur Hadr]; split; [| done].
-  by eapply valid_state_prop_addObservation_Ri.
+  by eapply UMO_reachable_addObservation_inv.
 Qed.
 
 (**
@@ -1050,7 +1050,7 @@ Lemma constrained_state_prop_addObservations_inv :
 Proof.
   setoid_rewrite UMO_reachable_constrained_state_prop; cbn.
   intros s ob [Hur Hadr]; split; [| done].
-  by eapply valid_state_prop_addObservations_Ri.
+  by eapply UMO_reachable_addObservations_inv.
 Qed.
 
 (**
@@ -1071,11 +1071,11 @@ Lemma state_suffix_totally_orders_sent_messages_Ri P :
       state_suffix (state m1) (state m2) /\ state_suffix (state m2) s.
 Proof.
   intros s m1 m2 obs1 obs2 obs3 -> Hvsp.
-  apply valid_state_prop_addObservations_Ri in Hvsp.
-  assert (Hm2 := addObservation_message _ _ _ Hvsp).
-  apply valid_state_prop_addObservation_Ri in Hvsp.
-  apply valid_state_prop_addObservations_Ri in Hvsp.
-  assert (Hm1 := addObservation_message _ _ _ Hvsp).
+  apply UMO_reachable_addObservations_inv in Hvsp.
+  assert (Hm2 := UMO_reachable_addObservation_inv_message _ _ _ Hvsp).
+  apply UMO_reachable_addObservation_inv in Hvsp.
+  apply UMO_reachable_addObservations_inv in Hvsp.
+  assert (Hm1 := UMO_reachable_addObservation_inv_message _ _ _ Hvsp).
   cbn in *; rewrite Hm1, Hm2 by done;
   cbn in *; rewrite <- Hm1, <- Hm2 by done
   ; clear Hvsp Hm1 Hm2; split.
@@ -1219,8 +1219,8 @@ Lemma directly_observable_totally_orders_sent_messages_Ri P :
 Proof.
   intros s m1 m2 obs1 obs2 obs3 Heq Hvsp.
   rewrite Heq in Hvsp.
-  apply valid_state_prop_addObservations_Ri in Hvsp.
-  apply addObservation_message in Hvsp as Heq'; [| done].
+  apply UMO_reachable_addObservations_inv in Hvsp.
+  apply UMO_reachable_addObservation_inv_message in Hvsp as Heq'; [| done].
   cbn in Heq'; subst; clear Heq Hvsp.
   repeat (rewrite ?directly_observable_addObservations, ?directly_observable_addObservation); cbn.
   by itauto.
@@ -1272,7 +1272,7 @@ Proof.
   apply elem_of_obs_split in Hin as (s' & obs' & ->).
   exists obs'; cbn.
   do 2 f_equal.
-  by apply valid_state_prop_addObservations_Ri, valid_state_prop_addObservation_Ri_Send in Hvsp.
+  by apply UMO_reachable_addObservations_inv, UMO_reachable_addObservation_inv_Send in Hvsp.
 Qed.
 
 Lemma elem_of_valid_obs_Send_valid P :
@@ -1282,7 +1282,7 @@ Lemma elem_of_valid_obs_Send_valid P :
 Proof.
   intros s m Hin Hvsp.
   destruct (elem_of_valid_obs_Send_split _ _ _ Hin Hvsp) as [obs ->].
-  by apply valid_state_prop_addObservations_Ri, valid_state_prop_addObservation_Ri_Send' in Hvsp.
+  by apply UMO_reachable_addObservations_inv, UMO_reachable_addObservation_inv_Send' in Hvsp.
 Qed.
 
 (**
@@ -1326,16 +1326,16 @@ Proof.
   - by left; congruence.
   - right; exists obs1, obs2; left; subst.
     do 4 f_equal.
-    by eapply valid_state_prop_addObservation_Ri_Send,
-      valid_state_prop_addObservations_Ri,
-      valid_state_prop_addObservation_Ri,
-      valid_state_prop_addObservations_Ri.
+    by eapply UMO_reachable_addObservation_inv_Send,
+      UMO_reachable_addObservations_inv,
+      UMO_reachable_addObservation_inv,
+      UMO_reachable_addObservations_inv.
   - right; exists obs1, obs2; right; subst.
     do 4 f_equal.
-    by eapply valid_state_prop_addObservation_Ri_Send,
-      valid_state_prop_addObservations_Ri,
-      valid_state_prop_addObservation_Ri,
-      valid_state_prop_addObservations_Ri.
+    by eapply UMO_reachable_addObservation_inv_Send,
+      UMO_reachable_addObservations_inv,
+      UMO_reachable_addObservation_inv,
+      UMO_reachable_addObservations_inv.
 Qed.
 
 (** If <<m>> belongs to [sentMessages] of <<s>>, then its state has the same address as <<s>>. *)
@@ -1346,7 +1346,7 @@ Lemma adr_of_sentMessages P :
 Proof.
   intros s m Hvsp Hin.
   apply elem_of_sentMessages, elem_of_obs_split in Hin as (s' & obs' & ->); cbn.
-  apply valid_state_prop_addObservations_Ri in Hvsp.
+  apply UMO_reachable_addObservations_inv in Hvsp.
   by destruct s'; inversion Hvsp.
 Qed.
 
@@ -1452,14 +1452,14 @@ Proof.
   - by right; left.
   - left.
     rewrite was_sent_before_characterization_2; [| done].
-    apply valid_state_prop_addObservations_Ri,
-          valid_state_prop_addObservation_Ri_Send in Hvsp.
+    apply UMO_reachable_addObservations_inv,
+          UMO_reachable_addObservation_inv_Send in Hvsp.
     rewrite <- Hvsp, addObservation_cons.
     by apply state_suffix_addObservations; inversion 1.
   - right; right.
     rewrite was_sent_before_characterization_2; [| done].
-    apply valid_state_prop_addObservations_Ri,
-          valid_state_prop_addObservation_Ri_Send in Hvsp.
+    apply UMO_reachable_addObservations_inv,
+          UMO_reachable_addObservation_inv_Send in Hvsp.
     rewrite <- Hvsp, addObservation_cons.
     by apply state_suffix_addObservations; inversion 1.
 Qed.
