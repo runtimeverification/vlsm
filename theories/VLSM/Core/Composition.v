@@ -682,9 +682,6 @@ Lemma constrained_state_prop_component
     constrained_state_prop (free_composite_vlsm IM) cs ->
     constrained_state_prop (IM i) (cs i).
 Proof.
-  intros Hcsp.
-  rewrite constrained_state_prop_alt_equiv in Hcsp |- *.
-  unfold constrained_state_prop_alt in Hcsp |- *.
   by eapply valid_state_project_preloaded_to_preloaded_free.
 Qed.
 
