@@ -726,17 +726,17 @@ Program Definition not_lt_plus_dec {m n} (Hnlt : ~ n < m) : {k | k + m = n} :=
 Next Obligation.
 Proof. by cbn; lia. Qed.
 
-Definition update_fn `{EqDecision A} `(f : A -> B) (a : A) (b : B) : A -> B :=
+Definition update `{EqDecision A} `(f : A -> B) (a : A) (b : B) : A -> B :=
   fun a' : A => if decide (a = a') then b else f a'.
 
-Lemma update_fn_eq `{EqDecision A} `(f : A -> B) (a : A) (b : B) :
-  update_fn f a b a = b.
+Lemma update_eq `{EqDecision A} `(f : A -> B) (a : A) (b : B) :
+  update f a b a = b.
 Proof.
-  by unfold update_fn; rewrite decide_True.
+  by unfold update; rewrite decide_True.
 Qed.
 
-Lemma update_fn_neq `{EqDecision A} `(f : A -> B) (a : A) (b : B) (a' : A) :
-  a <> a' -> update_fn f a b a' = f a'.
+Lemma update_neq `{EqDecision A} `(f : A -> B) (a : A) (b : B) (a' : A) :
+  a <> a' -> update f a b a' = f a'.
 Proof.
-  by intros; unfold update_fn; rewrite decide_False.
+  by intros; unfold update; rewrite decide_False.
 Qed.

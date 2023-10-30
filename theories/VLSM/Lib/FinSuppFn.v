@@ -13,80 +13,71 @@ From VLSM.Lib Require Import Preamble StdppExtras ListExtras.
   allows for a straight-forward approach to proving equality of elements
   of the support.
 *)
-Definition support {A B} (s : B) (f : A -> B) `{EqDecision B} : Type :=
+Definition support {A B : Type} (s : B) (f : A -> B) `{EqDecision B} : Type :=
   dsig (fun a => f a <> s).
 
-(** A function is finitely supported if its [support] is [Finite]. *)
-Class FinSupp {A B} (s : B) (f : A -> B) `{EqDecision A} `{EqDecision B} :=
-  finite_supp :> Finite (support s f).
-
-Global Hint Mode FinSupp - - ! - - - : typeclass_instances.
 
 (**
+  A function is finitely supported if its [support] is [Finite].
   We define a type to encapsulate functions of finite support.
-  The notation <<f : A -fin<> b>> says that f represents a function from <<A>>
-  to the type of <<b>> satisfying that only a finite set of elements from <<A>>
-  are mapped to values other than <<b>>.
 *)
-Record FinSuppFn {A : Type} `{s : B} `{EqDecision A} `{EqDecision B} : Type := fin_supp_fn
-{
-  fin_supp_fn_project :> A -> B ;
-  fin_supp_fn_has_fin_supp : FinSupp s fin_supp_fn_project
-}.
+Definition fsfun (A : Type) `(s : B) `{EqDecision A, EqDecision B} : Type :=
+  sigT (fun (f : A -> B) => Finite (support s f)).
 
-Arguments fin_supp_fn {A B}%type_scope {s} {_ _} _%function_scope _.
-Arguments FinSuppFn A%type_scope {B}%type_scope s {_ _}.
+Definition fsfun_project
+  {A B : Type} {b : B} `{EqDecision A, EqDecision B} : fsfun A b -> A -> B :=
+  projT1.
 
-Infix "-fin<>" := FinSuppFn (at level 60, right associativity).
+Coercion fsfun_project : fsfun >-> Funclass.
 
-Section sec_fin_supp_fn_fixed_domain.
+#[global] Arguments fsfun_project : simpl never.
+
+Section sec_fsfun_fixed_domain.
 
 Context
   `{EqDecision A}
   .
 
-Section sec_fin_supp_fn_fixed_supp_value.
+Section sec_fsfun_fixed_supp_value.
 
 Context
   `{EqDecision B}
   {b : B}
   .
 
-(**
-  We define a coercion to allow using an encapsulated finitely supported
-  function as its underlying regular function.
-*)
+#[export] Instance fsfun_equiv : Equiv (fsfun A b) :=
+  (fun f g => fsfun_project f = fsfun_project g).
 
-#[export] Instance fin_supp_fn_equiv : Equiv (A -fin<> b) :=
-  (fun f g => fin_supp_fn_project f = fin_supp_fn_project g).
-
-#[export] Instance fin_supp_fn_equivalence :
-  Equivalence (≡@{A -fin<> b}).
+#[export] Instance fsfun_equivalence :
+  Equivalence (≡@{fsfun A b}).
 Proof.
-  unfold equiv, fin_supp_fn_equiv.
+  unfold equiv, fsfun_equiv.
   constructor.
   - done.
   - by intros f g; apply symmetry.
   - by intros f g h; apply transitivity.
 Qed.
 
-#[export] Instance fin_supp_fn_project_proper :
-  Proper ((≡) ==> (=)) (@fin_supp_fn_project A B b _ _).
+#[export] Instance fsfun_project_proper :
+  Proper ((≡) ==> (=)) fsfun_project.
 Proof. by intros f g Heqv; inversion Heqv. Qed.
 
-Lemma fin_supp_fn_equiv_unfold  (f g : A -fin<> b) :
-  f ≡ g <-> fin_supp_fn_project f = fin_supp_fn_project g.
+#[export] Instance projT1_proper :
+  Proper ((≡@{fsfun A b}) ==> (=)) projT1.
+Proof. by apply fsfun_project_proper. Qed.
+
+Lemma fsfun_equiv_unfold (f g : fsfun A b) :
+  f ≡ g <-> fsfun_project f = fsfun_project g.
 Proof. done. Qed.
 
-#[export] Instance fin_supp_fn_has_fin_supp_instance (f : A -fin<> b) :
-  @FinSupp _ _ b f _ _
-    :=
-  fin_supp_fn_has_fin_supp f.
+#[export] Instance fsfun_has_fin_supp
+  (f : fsfun A b) : Finite (support b (f)) :=
+    projT2 f.
 
-Definition fin_supp (f : A -fin<> b) : list A :=
-  map proj1_sig (enum (support b f)).
+Definition fin_supp (f : fsfun A b) : list A :=
+  map proj1_sig (enum (support b (f))).
 
-Lemma elem_of_fin_supp (f : A -fin<> b) :
+Lemma elem_of_fin_supp (f : fsfun A b) :
   forall (a : A), a ∈ fin_supp f <-> f a <> b.
 Proof.
   unfold fin_supp.
@@ -97,15 +88,15 @@ Proof.
     by exists (dexist a Ha); split; [| apply elem_of_enum].
 Qed.
 
-Lemma not_elem_of_fin_supp (f : A -fin<> b) :
+Lemma not_elem_of_fin_supp (f : fsfun A b) :
   forall (a : A), a ∉ fin_supp f <-> f a = b.
 Proof.
-  intro a; rewrite elem_of_fin_supp.
-  destruct (decide (f a = b)); itauto.
+  intros a; rewrite elem_of_fin_supp.
+  by destruct (decide (f a = b)); itauto.
 Qed.
 
-Lemma fin_supp_NoDup (f : A -fin<> b) : NoDup (fin_supp f).
-Proof. by apply dsig_NoDup, NoDup_enum. Qed.
+Lemma fin_supp_NoDup (f : fsfun A b) : NoDup (fin_supp f).
+Proof. by apply dsig_NoDup_map, NoDup_enum. Qed.
 
 #[export] Instance fin_supp_proper : Proper ((≡) ==> (≡ₚ)) fin_supp.
 Proof.
@@ -114,301 +105,330 @@ Proof.
   by intro; rewrite !elem_of_fin_supp, Heq.
 Qed.
 
-#[export] Instance fin_supp_fn_eq_dec : RelDecision (≡@{A -fin<> b}).
+#[export] Instance fsfun_eq_dec : RelDecision (≡@{fsfun A b}).
 Proof.
   intros f g.
   destruct (@finset_equiv_dec A (listset A) _ _ _ _ _ _ _ _ _
     (list_to_set (fin_supp f)) (list_to_set (fin_supp g))) as [Heqv | Hneqv]; cycle 1.
-  - right; intros Heqv; contradict Hneqv.
-    by rewrite Heqv.
-  - destruct (decide (set_Forall (fun a => f a = g a) (list_to_set (C := listset A) (fin_supp f))))
+  - right; intros Heqv.
+    by rewrite Heqv in Hneqv.
+  - destruct (decide (set_Forall (fun a => fsfun_project f a = fsfun_project g a) (list_to_set (C := listset A) (fin_supp f))))
       as [Hall | Hall]; [| by right; contradict Hall; rewrite Hall].
-    left; apply fin_supp_fn_equiv_unfold; extensionality a.
+    left; apply fsfun_equiv_unfold; extensionality a.
     destruct (decide (a ∈ fin_supp f)) as [| Hf]; [by apply Hall, elem_of_list_to_set |].
     destruct (decide (a ∈ fin_supp g)) as [| Hg]; [by apply Hall; rewrite Heqv, elem_of_list_to_set |].
     apply not_elem_of_fin_supp in Hf, Hg.
-    by congruence.
+    by (transitivity b).
 Qed.
 
-Program Definition empty_supp_fn : A -fin<> b :=
-  fin_supp_fn (const b) {| enum := [] |}.
+Program Definition empty_fsfun : fsfun A b :=
+  existT (const b) {| enum := [] |}.
 Next Obligation.
 Proof. by constructor. Qed.
 Next Obligation.
 Proof. by intros; destruct_dec_sig x a Ha Heq; contradiction Ha. Qed.
 
-Lemma empty_supp_fn_supp : fin_supp empty_supp_fn = [].
+Lemma empty_fsfun_supp : fin_supp empty_fsfun = [].
 Proof. done. Qed.
 
-Lemma empty_supp_fn_supp_inv (f : A -fin<> b) :
-  fin_supp f = [] -> f ≡ empty_supp_fn.
+Lemma empty_fsfun_supp_inv (f : fsfun A b) :
+  fin_supp f = [] -> f ≡ empty_fsfun.
 Proof.
-  intros Hf; apply fin_supp_fn_equiv_unfold; extensionality a.
-  change (f a = b).
+  intros Hf; apply fsfun_equiv_unfold; extensionality a; cbn.
   eapply not_elem_of_fin_supp.
   rewrite Hf.
   by apply not_elem_of_nil.
 Qed.
 
-Definition update_fn_supp (f : A -fin<> b) (n : A) (b' : B) : listset A :=
+Definition update_supp (f : fsfun A b) (n : A) (b' : B) : listset A :=
   if decide (b' = b)
   then list_to_set (fin_supp f) ∖ {[n]}
   else {[n]} ∪ list_to_set (fin_supp f).
 
-Lemma update_fn_supp_all (f : A -fin<> b) (n : A) (b' : B) :
-  Forall (fun a => update_fn f n b' a <> b) (elements (update_fn_supp f n b')).
+Lemma update_supp_all (f : fsfun A b) (n : A) (b' : B) :
+  Forall (fun a => update (f) n b' a <> b) (elements (update_supp f n b')).
 Proof.
-  unfold update_fn_supp.
+  unfold update_supp.
   apply Forall_forall; intros a.
   rewrite elem_of_elements.
   case_decide.
   - rewrite elem_of_difference, elem_of_singleton, elem_of_list_to_set,
       elem_of_fin_supp.
-    by intros []; rewrite update_fn_neq.
+    by intros []; rewrite update_neq.
   - rewrite elem_of_union, elem_of_singleton, elem_of_list_to_set,
       elem_of_fin_supp.
-    destruct (decide (a = n)) as [-> |].
-    + by rewrite update_fn_eq.
-    + rewrite update_fn_neq by done.
-      by intros [].
+    by unfold update; case_decide; cbn; intros [].
 Qed.
 
-Program Definition update_fn_fin_supp
-  (f : A -fin<> b) (n : A) (b' : B) : A -fin<> b :=
-  fin_supp_fn (update_fn f n b')
-    {| enum := list_annotate (update_fn_supp_all f n b') |}.
+Program Definition update_fsfun
+  (f : fsfun A b) (n : A) (b' : B) : fsfun A b :=
+  existT (update (f) n b')
+    {| enum := list_annotate (update_supp_all f n b') |}.
 Next Obligation.
 Proof. by intros; apply list_annotate_NoDup, NoDup_elements. Qed.
 Next Obligation.
 Proof.
   intros; destruct_dec_sig x a Ha Heq; subst.
   apply elem_of_list_annotate, elem_of_elements.
-  unfold update_fn_supp; case_decide.
+  unfold update_supp; case_decide.
   - rewrite elem_of_difference, elem_of_list_to_set, elem_of_fin_supp,
       elem_of_singleton; cbn.
-    destruct (decide (a = n)) as [-> |].
-    + by rewrite update_fn_eq in Ha.
-    + by rewrite update_fn_neq in Ha.
+    by unfold update in Ha; case_decide; split; congruence.
   - rewrite elem_of_union, elem_of_list_to_set, elem_of_fin_supp,
       elem_of_singleton; cbn.
-    destruct (decide (a = n)); [by left |].
-    by right; rewrite update_fn_neq in Ha.
+    by unfold update in Ha; case_decide; [left | right].
 Qed.
 
-#[export] Instance update_fn_fin_supp_proper :
-  Proper ((≡) ==> (=) ==> (=) ==> (≡)) update_fn_fin_supp.
+Lemma update_fsfun_eq (f : fsfun A b) (n : A) (b' : B) :
+  update_fsfun f n b' n = b'.
+Proof. by setoid_rewrite update_eq. Qed.
+
+Lemma update_fsfun_neq (f : fsfun A b) (n : A) (b' : B):
+  forall (m : A), m <> n -> update_fsfun f n b' m = f m.
+Proof. by intros; setoid_rewrite update_neq. Qed.
+
+#[export] Instance update_fsfun_proper :
+  Proper ((≡) ==> (=) ==> (=) ==> (≡)) update_fsfun.
 Proof.
   intros f g Heqv _n n -> _b' b' ->.
-  apply fin_supp_fn_equiv_unfold; extensionality a; cbn.
-  destruct (decide (a = n)) as [-> |]; [by rewrite !update_fn_eq |].
-  rewrite !update_fn_neq by done.
-  by rewrite Heqv.
+  apply fsfun_equiv_unfold; extensionality a; cbn.
+  destruct (decide (n = a)) as [-> |].
+  - by rewrite !update_fsfun_eq.
+  - by rewrite !update_fsfun_neq, Heqv.
 Qed.
 
-Lemma elem_of_update_fn_fin_supp (f : A -fin<> b) (n : A) (b' : B) :
+Lemma elem_of_update_fsfun (f : fsfun A b) (n : A) (b' : B) :
   forall (a : A),
-    a ∈ fin_supp (update_fn_fin_supp f n b')
+    a ∈ fin_supp (update_fsfun f n b')
       <->
     b' = b /\ a ∈ fin_supp f /\ a <> n \/
     b' <> b /\ (a ∈ fin_supp f \/ a = n).
 Proof.
   intro; unfold fin_supp at 1; cbn.
   rewrite list_annotate_forget, elem_of_elements.
-  unfold update_fn_supp; case_decide.
+  unfold update_supp; case_decide.
   - by rewrite elem_of_difference, elem_of_list_to_set, elem_of_singleton; split; itauto.
   - by rewrite elem_of_union, elem_of_list_to_set, elem_of_singleton; split; itauto.
 Qed.
 
-End sec_fin_supp_fn_fixed_supp_value.
+End sec_fsfun_fixed_supp_value.
 
 (** ** Finitely supported functions on naturals *)
 
-Definition zero_fin_supp_nat_fn : A -fin<> 0 := empty_supp_fn.
+Definition zero_fsfun : fsfun A 0 := empty_fsfun.
 
-Definition succ_fin_supp_nat_fn (f : A -fin<> 0) (n : A) : A -fin<> 0 :=
-  update_fn_fin_supp f n (S (f n)).
+Lemma zero_fsfun_rew : forall (n : A), zero_fsfun n = 0.
+Proof. done. Qed.
 
-#[export] Instance succ_fin_supp_nat_fn_proper :
-  Proper ((≡) ==> (=) ==> (≡)) succ_fin_supp_nat_fn.
+Definition succ_fsfun (f : fsfun A 0) (n : A) : fsfun A 0 :=
+  update_fsfun f n (S (f n)).
+
+Lemma succ_fsfun_eq (f : fsfun A 0) (n : A) :
+  succ_fsfun f n n = S (f n).
+Proof. by apply update_fsfun_eq. Qed.
+
+Lemma succ_fsfun_neq (f : fsfun A 0) (n : A) :
+  forall (m : A), m <> n -> succ_fsfun f n m = f m.
+Proof. by apply update_fsfun_neq. Qed.
+
+#[export] Instance succ_fsfun_proper :
+  Proper ((≡) ==> (=) ==> (≡)) succ_fsfun.
 Proof.
   intros f g Heqv _n n ->.
-  by apply update_fn_fin_supp_proper; [..| rewrite Heqv].
+  by apply update_fsfun_proper; [.. | rewrite Heqv].
 Qed.
 
-Lemma elem_of_succ_fin_supp_nat_fn_fin_supp (f : A -fin<> 0) (n : A) :
+Lemma elem_of_succ_fsfun (f : fsfun A 0) (n : A) :
   forall (a : A),
-    a ∈ fin_supp (succ_fin_supp_nat_fn f n) <-> a = n \/ a ∈ fin_supp f.
+    a ∈ fin_supp (succ_fsfun f n) <-> a = n \/ a ∈ fin_supp f.
 Proof.
-  intro a; unfold succ_fin_supp_nat_fn; rewrite elem_of_update_fn_fin_supp.
-  split.
-  - by intros [[]|]; [lia | itauto].
-  - by right; split; [lia | itauto].
+  intros a; unfold succ_fsfun.
+  rewrite elem_of_update_fsfun.
+  by split; itauto lia.
 Qed.
 
-Lemma succ_fin_supp_nat_fn_supp_in (f : A -fin<> 0) (n : A) :
-  n ∈ fin_supp f -> fin_supp (succ_fin_supp_nat_fn f n) ≡ₚ fin_supp f.
+Lemma succ_fsfun_supp_in (f : fsfun A 0) (n : A) :
+  n ∈ fin_supp f -> fin_supp (succ_fsfun f n) ≡ₚ fin_supp f.
 Proof.
   intros.
-  apply NoDup_Permutation; [by apply fin_supp_NoDup.. |].
-  intros; rewrite elem_of_succ_fin_supp_nat_fn_fin_supp.
+  apply NoDup_Permutation; intros; [by apply fin_supp_NoDup.. |].
+  rewrite elem_of_succ_fsfun.
   by set_solver.
 Qed.
 
-Lemma succ_fin_supp_nat_fn_supp_not_in (f : A -fin<> 0) (n : A) :
-  n ∉ fin_supp f -> fin_supp (succ_fin_supp_nat_fn f n) ≡ₚ n :: fin_supp f.
+Lemma succ_fsfun_supp_not_in (f : fsfun A 0) (n : A) :
+  n ∉ fin_supp f -> fin_supp (succ_fsfun f n) ≡ₚ n :: fin_supp f.
 Proof.
   intros; cbn; rewrite list_annotate_forget.
-  unfold update_fn_supp; rewrite decide_False by lia.
+  unfold update_supp; rewrite decide_False by lia.
   rewrite @elements_union_singleton;
     [| by typeclasses eauto | by rewrite elem_of_list_to_set].
-  constructor; eapply @elements_list_to_set;
-    [by typeclasses eauto | by apply fin_supp_NoDup].
+  by constructor; eapply @elements_list_to_set;
+    [typeclasses eauto | apply fin_supp_NoDup].
 Qed.
 
-Definition delta_fin_supp_nat_fn (n : A) : A -fin<> 0 :=
-  succ_fin_supp_nat_fn zero_fin_supp_nat_fn n.
+Definition delta_nat_fsfun (n : A) : fsfun A 0 :=
+  succ_fsfun zero_fsfun n.
 
-Lemma elem_of_delta_fin_supp_nat_fn_fin_supp (n : A) :
+Lemma delta_nat_fsfun_eq (n : A) :
+  delta_nat_fsfun n n = 1.
+Proof. by apply succ_fsfun_eq. Qed.
+
+Lemma delta_nat_fsfun_neq (n : A) :
+  forall (m : A), m <> n -> delta_nat_fsfun n m = 0.
+Proof. by apply succ_fsfun_neq. Qed.
+
+Lemma elem_of_delta_nat_fsfun (n : A) :
   forall (a : A),
-    a ∈ fin_supp (delta_fin_supp_nat_fn n) <-> a = n.
+    a ∈ fin_supp (delta_nat_fsfun n) <-> a = n.
 Proof.
   intros a.
-  unfold delta_fin_supp_nat_fn;rewrite elem_of_succ_fin_supp_nat_fn_fin_supp; cbn.
-  split; [| by left].
-  by intros [| Ha]; [| inversion Ha].
+  unfold delta_nat_fsfun.
+  rewrite elem_of_succ_fsfun; cbn; rewrite elem_of_nil.
+  by itauto.
 Qed.
 
-Definition sum_fin_supp_nat_fn (f : A -fin<> 0) : nat :=
-  sum_list_with f (fin_supp f).
+Definition fsfun_sum (f : fsfun A 0) : nat :=
+  sum_list_with (f) (fin_supp f).
 
-Lemma sum_fin_supp_nat_fn_proper : Proper ((≡) ==> (=)) sum_fin_supp_nat_fn.
+Lemma fsfun_sum_proper : Proper ((≡) ==> (=)) fsfun_sum.
 Proof.
   intros f g Heqv.
-  unfold sum_fin_supp_nat_fn.
-  rewrite (sum_list_with_proper f (fin_supp f) (fin_supp g)).
+  unfold fsfun_sum.
+  rewrite (sum_list_with_proper (f) (fin_supp f) (fin_supp g)).
   - by apply sum_list_with_ext_forall; intros; rewrite Heqv.
   - by apply fin_supp_proper.
 Qed.
 
-Lemma sum_fin_supp_nat_fn_zero_inv (f : A -fin<> 0) :
-  sum_fin_supp_nat_fn f = 0 -> f ≡ zero_fin_supp_nat_fn.
+Lemma fsfun_sum_zero_inv (f : fsfun A 0) :
+  fsfun_sum f = 0 -> f ≡ zero_fsfun.
 Proof.
   setoid_rewrite sum_list_with_zero; intros Hall.
-  apply fin_supp_fn_equiv_unfold; extensionality a; cbn.
-  destruct (decide (a ∈ fin_supp f)); [by apply Hall |].
-  by rewrite elem_of_fin_supp in n; cbn in n; lia.
+  apply fsfun_equiv_unfold; extensionality a; cbn.
+  apply dec_stable; intro Ha.
+  apply elem_of_fin_supp in Ha as Ha'.
+  by apply Hall in Ha'.
 Qed.
 
-Lemma sum_fin_supp_nat_fn_succ (f : A -fin<> 0) (n : A) :
-  sum_fin_supp_nat_fn (succ_fin_supp_nat_fn f n) = S (sum_fin_supp_nat_fn f).
+Lemma fsfun_sum_succ (f : fsfun A 0) (n : A) :
+  fsfun_sum (succ_fsfun f n) = S (fsfun_sum f).
 Proof.
-  unfold sum_fin_supp_nat_fn.
+  unfold fsfun_sum.
   destruct (decide (n ∈ fin_supp f)).
-  - rewrite succ_fin_supp_nat_fn_supp_in by done.
+  - rewrite succ_fsfun_supp_in by done.
     pose proof (Hnodup := fin_supp_NoDup f).
     revert Hnodup e; cbn.
     generalize (fin_supp f) as l; induction l; [by inversion 2 |].
     rewrite list.NoDup_cons, elem_of_cons; cbn.
     intros [Ha Hnodup] [<- | Hn].
-    + rewrite update_fn_eq; cbn.
+    + rewrite succ_fsfun_eq; cbn.
       do 2 f_equal.
       apply sum_list_with_ext_forall.
-      by intros; rewrite update_fn_neq by set_solver.
-    + rewrite update_fn_neq by set_solver.
+      by intros; rewrite succ_fsfun_neq by set_solver.
+    + rewrite succ_fsfun_neq by set_solver.
       by rewrite IHl.
-  - rewrite succ_fin_supp_nat_fn_supp_not_in by done.
-    cbn; rewrite update_fn_eq.
+  - rewrite succ_fsfun_supp_not_in by done.
+    cbn; rewrite succ_fsfun_eq.
     replace (f n) with 0 by (rewrite elem_of_fin_supp in n0; cbn in n0; lia).
     cbn; f_equal.
     apply sum_list_with_ext_forall.
-    by intros; rewrite update_fn_neq; [| set_solver].
+    by intros; rewrite succ_fsfun_neq; [| set_solver].
 Qed.
 
 (** The component-wise sum of two functions *)
-Definition fin_supp_nat_fn_add_supp (f1 f2 : A -fin<> 0) : listset A :=
-    list_to_set (fin_supp f1) ∪ list_to_set (fin_supp f2).
+Definition add_fsfun_supp (f1 f2 : fsfun A 0) : listset A :=
+  list_to_set (fin_supp f1) ∪ list_to_set (fin_supp f2).
 
-Lemma fin_supp_nat_fn_add_supp_all (f1 f2 : A -fin<> 0) :
+Lemma add_fsfun_supp_all (f1 f2 : fsfun A 0) :
   Forall (fun a => f1 a + f2 a <> 0)
-    (elements (fin_supp_nat_fn_add_supp f1 f2)).
+    (elements (add_fsfun_supp f1 f2)).
 Proof.
-  unfold fin_supp_nat_fn_add_supp; apply Forall_forall; intros a.
+  unfold add_fsfun_supp; apply Forall_forall; intros a.
   rewrite elem_of_elements, elem_of_union, !elem_of_list_to_set,
     !elem_of_fin_supp.
   by lia.
 Qed.
 
-Program Definition fin_supp_nat_fn_add (f1 f2 : A -fin<> 0) : A -fin<> 0 :=
-  fin_supp_fn (fun a => f1 a + f2 a)
-    {| enum := list_annotate (fin_supp_nat_fn_add_supp_all f1 f2) |}.
+Program Definition add_fsfun (f1 f2 : fsfun A 0) : fsfun A 0 :=
+  existT (fun a => f1 a + f2 a)
+    {| enum := list_annotate (add_fsfun_supp_all f1 f2) |}.
 Next Obligation.
 Proof. by intros; apply list_annotate_NoDup, NoDup_elements. Qed.
 Next Obligation.
 Proof.
   intros; destruct_dec_sig x a Ha Heq; subst.
-  apply elem_of_list_annotate; unfold fin_supp_nat_fn_add_supp.
+  apply elem_of_list_annotate; unfold add_fsfun_supp.
   rewrite elem_of_elements, !elem_of_union, !elem_of_list_to_set, !elem_of_fin_supp.
   by cbn; lia.
 Qed.
 
-#[export] Instance fin_supp_nat_fn_add_proper :
-  Proper ((≡) ==> (≡) ==> (≡)) fin_supp_nat_fn_add.
+Lemma add_fsfun_rew (f1 f2 : fsfun A 0) (a : A) :
+  add_fsfun f1 f2 a = f1 a + f2 a.
+Proof. done. Qed.
+
+#[export] Instance add_fsfun_proper :
+  Proper ((≡) ==> (≡) ==> (≡)) add_fsfun.
 Proof.
   intros f1 g1 Heqv1 f2 g2 Heqv2.
-  apply fin_supp_fn_equiv_unfold; extensionality a; cbn.
-  by rewrite Heqv1, Heqv2.
+  apply fsfun_equiv_unfold; extensionality a.
+  by rewrite !add_fsfun_rew, Heqv1, Heqv2.
 Qed.
 
-Lemma elem_of_fin_supp_nat_fn_add_fin_supp (f1 f2 : A -fin<> 0) :
+Lemma elem_of_add_fsfun (f1 f2 : fsfun A 0) :
   forall (a : A),
-    a ∈ fin_supp (fin_supp_nat_fn_add f1 f2) <->
+    a ∈ fin_supp (add_fsfun f1 f2) <->
     a ∈ fin_supp f1 \/ a ∈ fin_supp f2.
 Proof.
   intro; unfold fin_supp at 1; cbn.
   rewrite list_annotate_forget, elem_of_elements.
-  unfold fin_supp_nat_fn_add_supp.
+  unfold add_fsfun_supp.
   by rewrite elem_of_union, !elem_of_list_to_set.
 Qed.
 
-#[export] Instance fin_supp_nat_fn_add_comm : Comm (≡) fin_supp_nat_fn_add.
+#[export] Instance add_fsfun_comm : Comm (≡) add_fsfun.
 Proof.
-  intros f1 f2; apply fin_supp_fn_equiv_unfold.
-  by extensionality a; cbn; lia.
+  intros f1 f2; apply fsfun_equiv_unfold; extensionality a.
+  by rewrite !add_fsfun_rew; lia.
 Qed.
 
-#[export] Instance fin_supp_nat_fn_add_left_id :
-  LeftId (≡) zero_fin_supp_nat_fn fin_supp_nat_fn_add.
-Proof. by intro; apply fin_supp_fn_equiv_unfold; extensionality a. Qed.
+#[export] Instance add_fsfun_left_id :
+  LeftId (≡) zero_fsfun add_fsfun.
+Proof. by intro; apply fsfun_equiv_unfold; extensionality a. Qed.
 
-#[export] Instance fin_supp_nat_fn_add_right_id :
-  RightId (≡) zero_fin_supp_nat_fn fin_supp_nat_fn_add.
-Proof. by intro; apply fin_supp_fn_equiv_unfold; extensionality a; cbn; lia. Qed.
-
-#[export] Instance fin_supp_nat_fn_add_assoc : Assoc (≡) fin_supp_nat_fn_add.
+#[export] Instance add_fsfun_right_id :
+  RightId (≡) zero_fsfun add_fsfun.
 Proof.
-  by intros f g h; rewrite !fin_supp_fn_equiv_unfold; extensionality a; cbn; lia.
+  intro; apply fsfun_equiv_unfold; extensionality a.
+  by rewrite add_fsfun_rew, zero_fsfun_rew; lia.
 Qed.
 
-Lemma fin_supp_nat_fn_add_succ_l (f1 f2 : A -fin<> 0) :
+#[export] Instance add_fsfun_assoc : Assoc (≡) add_fsfun.
+Proof.
+  intros f g h; rewrite !fsfun_equiv_unfold; extensionality a.
+  by rewrite !add_fsfun_rew; lia.
+Qed.
+
+Lemma add_fsfun_succ_l (f1 f2 : fsfun A 0) :
   forall (a : A),
-    fin_supp_nat_fn_add (succ_fin_supp_nat_fn f1 a) f2
+    add_fsfun (succ_fsfun f1 a) f2
       ≡
-    succ_fin_supp_nat_fn (fin_supp_nat_fn_add f1 f2) a.
+    succ_fsfun (add_fsfun f1 f2) a.
 Proof.
-  intros a; apply fin_supp_fn_equiv_unfold; extensionality a'; cbn.
-  destruct (decide (a' = a)) as [-> |].
-  - by rewrite !update_fn_eq.
-  - by rewrite !update_fn_neq.
+  intros a; apply fsfun_equiv_unfold; extensionality a'.
+  rewrite add_fsfun_rew.
+  destruct (decide (a = a')) as [-> |].
+  - by rewrite !succ_fsfun_eq.
+  - by rewrite !succ_fsfun_neq.
 Qed.
 
-Lemma fin_supp_nat_fn_add_succ_r (f1 f2 : A -fin<> 0) :
+Lemma add_fsfun_succ_r (f1 f2 : fsfun A 0) :
   forall (a : A),
-    fin_supp_nat_fn_add f2 (succ_fin_supp_nat_fn f1 a)
+    add_fsfun f2 (succ_fsfun f1 a)
       ≡
-    succ_fin_supp_nat_fn (fin_supp_nat_fn_add f2 f1) a.
+    succ_fsfun (add_fsfun f2 f1) a.
 Proof.
-  by intros; rewrite (comm fin_supp_nat_fn_add), fin_supp_nat_fn_add_succ_l,
-    (comm fin_supp_nat_fn_add).
+  by intros; rewrite (comm add_fsfun), add_fsfun_succ_l,
+    (comm add_fsfun).
 Qed.
 
 (**
@@ -416,26 +436,26 @@ Qed.
   naturals we define the following inductive property and then we show that it
   holds for all such functions.
 *)
-Inductive FinSuppNatFn : (A -fin<> 0) -> Prop :=
+Inductive NatFSFun : fsfun A 0 -> Prop :=
 | P_zero :
-    forall (f' : A -fin<> 0), f' ≡ zero_fin_supp_nat_fn ->
-    FinSuppNatFn f'
+    forall (f' : fsfun A 0), f' ≡ zero_fsfun ->
+    NatFSFun f'
 | P_succ :
-    forall (f : A -fin<> 0), FinSuppNatFn f ->
-    forall (f' : A -fin<> 0) (i : A), f' ≡ succ_fin_supp_nat_fn f i ->
-    FinSuppNatFn f'.
+    forall (f : fsfun A 0), NatFSFun f ->
+    forall (f' : fsfun A 0) (i : A), f' ≡ succ_fsfun f i ->
+    NatFSFun f'.
 
-Lemma FinSuppNatFn_complete (f : A -fin<> 0) :  FinSuppNatFn f.
+Lemma NatFSFun_complete (f : fsfun A 0) :  NatFSFun f.
 Proof.
-  remember (sum_fin_supp_nat_fn f) as n.
+  remember (fsfun_sum f) as n.
   symmetry in Heqn.
   revert f Heqn; induction n; intros;
-    [by apply sum_fin_supp_nat_fn_zero_inv in Heqn; constructor |].
+    [by apply fsfun_sum_zero_inv in Heqn; constructor |].
   assert (Hex : Exists (fun (i : A) => f i <> 0) (fin_supp f)).
   {
-    destruct (decide (Exists (fun (i : A) => f i <> 0) (fin_supp f))) as [| Hex]; [done |].
+    apply dec_stable; intros Hex.
     apply not_Exists_Forall in Hex; [| by typeclasses eauto].
-    replace (sum_fin_supp_nat_fn f) with 0 in Heqn; [done |].
+    replace (fsfun_sum f) with 0 in Heqn; [done |].
     symmetry.
     apply sum_list_with_zero.
     intros a Ha.
@@ -444,44 +464,41 @@ Proof.
   pose proof (Hx := Exists_choose_first_good _ _ Hex); cbn in Hx.
   pose (x := Exists_choose_first Hex).
   destruct (f x) as [| px] eqn: Heqx; [done |]; clear Hx.
-  pose (f' := update_fn_fin_supp f x px).
-  assert (Heq : f ≡ succ_fin_supp_nat_fn f' x).
+  pose (f' := update_fsfun f x px).
+  assert (Heq : f ≡ succ_fsfun f' x).
   {
-    subst f'; apply fin_supp_fn_equiv_unfold; extensionality a; cbn.
-    destruct (decide (a = x)) as [-> |].
-    - by rewrite !update_fn_eq.
-    - by rewrite !update_fn_neq.
+    subst f'; apply fsfun_equiv_unfold; extensionality a.
+    destruct (decide (x = a)) as [-> |].
+    - by rewrite succ_fsfun_eq, update_fsfun_eq.
+    - by rewrite succ_fsfun_neq, update_fsfun_neq.
   }
   constructor 2 with f' x; [| done].
   apply IHn; subst f'.
-  rewrite sum_fin_supp_nat_fn_proper in Heqn by done.
-  rewrite sum_fin_supp_nat_fn_succ in Heqn.
+  rewrite fsfun_sum_proper in Heqn by done.
+  rewrite fsfun_sum_succ in Heqn.
   by congruence.
 Qed.
 
-Lemma fin_supp_nat_fn_inv (f : A -fin<> 0) :
-  f ≡ zero_fin_supp_nat_fn
+Lemma nat_fsfun_inv (f : fsfun A 0) :
+  f ≡ zero_fsfun
     \/
-  exists (a : A) (f' : A -fin<> 0), f ≡ succ_fin_supp_nat_fn f' a.
+  exists (a : A) (f' : fsfun A 0), f ≡ succ_fsfun f' a.
 Proof.
-  pose proof (Hcomplete := FinSuppNatFn_complete f).
+  pose proof (Hcomplete := NatFSFun_complete f).
   by inversion Hcomplete; subst; [left | right; eexists _,_].
 Qed.
 
-Lemma fin_supp_nat_fn_ind (P : (A -fin<> 0) -> Prop)
+Lemma nat_fsfun_ind (P : (fsfun A 0) -> Prop)
   (Hproper : Proper ((≡) ==> impl) P)
-  (Hzero : P zero_fin_supp_nat_fn)
-  (Hsucc : forall (i : A) (f : A -fin<> 0),
-    P f -> P (succ_fin_supp_nat_fn f i)) :
-  forall (f : A -fin<> 0), P f.
+  (Hzero : P zero_fsfun)
+  (Hsucc : forall (i : A) (f : fsfun A 0),
+    P f -> P (succ_fsfun f i)) :
+  forall (f : fsfun A 0), P f.
 Proof.
   intros.
-  pose proof (Hcomplete := FinSuppNatFn_complete f).
+  pose proof (Hcomplete := NatFSFun_complete f).
   by induction Hcomplete as [| ? ? ? ? ? ->];
-    [eapply Hproper; cycle 1 | apply Hsucc].
+    [eapply Hproper | apply Hsucc].
 Qed.
 
-End sec_fin_supp_fn_fixed_domain.
-
-Ltac destruct_fin_supp_nat_fn f f' n Heq :=
-  destruct (fin_supp_nat_fn_inv f) as [Heq | (n & f' & Heq)].
+End sec_fsfun_fixed_domain.

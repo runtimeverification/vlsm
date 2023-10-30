@@ -631,25 +631,25 @@ Qed.
 *)
 Lemma composition_valid_messages_powers_of_mults_right (m : ParityMessage) :
   valid_message_prop parity_composite_vlsm m ->
-  exists (f : index -fin<> 0%nat),
-    fin_supp f <> [] /\ m = prod_fin_supp_nat_fn multipliers f.
+  exists (f : fsfun index 0%nat),
+    fin_supp f <> [] /\ m = fsfun_prod multipliers f.
 Proof.
   intros [s Hvsm].
   remember (Some m) as om.
   revert m Heqom.
   induction Hvsm using valid_state_message_prop_ind; intros; subst.
   - destruct Hom as (n & (mielem & mi) & Hmi); cbn in mi, Hmi.
-    exists (delta_fin_supp_nat_fn n).
-    split; [by eapply elem_of_not_nil, elem_of_delta_fin_supp_nat_fn_fin_supp |].
+    exists (delta_nat_fsfun n).
+    split; [by eapply elem_of_not_nil, elem_of_delta_nat_fsfun |].
     by rewrite <- Hmi, mi, prod_powers_delta.
   - destruct l as (k & lk).
     destruct om; [| done].
     destruct (IHHvsm2 p) as (f & Hdomf & ->); [done |].
     inversion Ht.
-    exists (succ_fin_supp_nat_fn f k).
-    split; [| by rewrite prod_fin_supp_nat_fn_succ].
+    exists (succ_fsfun f k).
+    split; [| by rewrite fsfun_prod_succ].
     apply not_null_element in Hdomf; destruct_dec_sig Hdomf i Hi Heq.
-    by eapply elem_of_not_nil, elem_of_succ_fin_supp_nat_fn_fin_supp; right.
+    by eapply elem_of_not_nil, elem_of_succ_fsfun; right.
 Qed.
 
 End sec_composition.
@@ -668,51 +668,51 @@ Definition free_parity_composite_vlsm : VLSM ParityMessage :=
 
 Lemma composition_valid_messages_powers_of_mults_left
   (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage)
-  (f : index -fin<> 0%nat) :
-    fin_supp f <> [] /\ m = prod_fin_supp_nat_fn multipliers f ->
+  (f : fsfun index 0%nat) :
+    fin_supp f <> [] /\ m = fsfun_prod multipliers f ->
     valid_message_prop free_parity_composite_vlsm m.
 Proof.
   intros [Hpowgeq1 Hm]; revert Hpowgeq1 m Hm.
-  pose (P := fun (f : index -fin<> 0%nat) => fin_supp f <> []  ->
-    forall m : ParityMessage, m = prod_fin_supp_nat_fn multipliers f ->
+  pose (P := fun (f : fsfun index 0%nat) => fin_supp f <> []  ->
+    forall m : ParityMessage, m = fsfun_prod multipliers f ->
     valid_message_prop free_parity_composite_vlsm m).
   cut (P f); [done |].
-  apply fin_supp_nat_fn_ind; clear -Hmpos; subst P.
+  apply nat_fsfun_ind; clear -Hmpos; subst P.
   - intros f1 f2 Heq Hall Hi m Hm.
     eapply Hall; [| by rewrite Heq].
     contradict Hi; apply Permutation_nil.
     by rewrite <- Hi, Heq.
   - by cbn.
   - intros n f0 IHf0 Hi m Hm.
-    destruct_fin_supp_nat_fn f0 f0' n' Heq.
-    + rewrite prod_fin_supp_nat_fn_succ, Heq, prod_fin_supp_nat_fn_zero in Hm.
+    destruct (nat_fsfun_inv f0) as [Heq | (n' & f0' & Heq)].
+    + rewrite fsfun_prod_succ, Heq, fsfun_prod_zero in Hm.
       apply initial_message_is_valid. exists n.
       by unshelve eexists (exist _ m _); cbn; lia.
-    + assert (Hmvalid : valid_message_prop free_parity_composite_vlsm (prod_fin_supp_nat_fn multipliers f0)).
+    + assert (Hmvalid : valid_message_prop free_parity_composite_vlsm (fsfun_prod multipliers f0)).
       {
         apply IHf0; [| done].
-        assert (Hinh : fin_supp (succ_fin_supp_nat_fn f0' n') <> []).
+        assert (Hinh : fin_supp (succ_fsfun f0' n') <> []).
         {
-          by eapply elem_of_not_nil, elem_of_succ_fin_supp_nat_fn_fin_supp; left.
+          by eapply elem_of_not_nil, elem_of_succ_fsfun; left.
         }
         contradict Hinh; apply Permutation_nil.
         by rewrite <- Hinh, Heq.
       }
-      subst m; rewrite prod_fin_supp_nat_fn_succ.
-      assert (Hpos : prod_fin_supp_nat_fn multipliers f0 >= multipliers n').
+      subst m; rewrite fsfun_prod_succ.
+      assert (Hpos : fsfun_prod multipliers f0 >= multipliers n').
       {
-        rewrite Heq, prod_fin_supp_nat_fn_succ.
-        cut (prod_fin_supp_nat_fn multipliers f0' > 0);
+        rewrite Heq, fsfun_prod_succ.
+        cut (fsfun_prod multipliers f0' > 0);
           [by specialize (Hmpos n'); nia |].
         destruct (decide (fin_supp f0' = [])) as [Hz |].
-        - eapply empty_supp_fn_supp_inv in Hz as ->.
-          by setoid_rewrite prod_fin_supp_nat_fn_zero; lia.
+        - eapply empty_fsfun_supp_inv in Hz as ->.
+          by setoid_rewrite fsfun_prod_zero; lia.
         - apply prod_powers_gt; [by lia | | done].
           by intro i; specialize (Hmpos i); lia.
       }
       specialize (Hmpos n').
       clear - Hmvalid Hmpos Hpos.
-      remember (prod_fin_supp_nat_fn _ _) as m; clear Heqm.
+      remember (fsfun_prod _ _) as m; clear Heqm.
       apply input_valid_transition_out with
         (l := existT n parity_label)
         (s := fun j => if decide (n = j) then m + 1 else 1) (s' := fun _ => 1)
@@ -733,8 +733,8 @@ Qed.
 Lemma composition_valid_messages_powers_of_mults
   (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage) :
     valid_message_prop free_parity_composite_vlsm m <->
-  exists (f : index -fin<> 0%nat),
-    fin_supp f <> [] /\ m = prod_fin_supp_nat_fn multipliers f.
+  exists (f : fsfun index 0%nat),
+    fin_supp f <> [] /\ m = fsfun_prod multipliers f.
 Proof.
   split.
   - intros Hvm.
