@@ -994,20 +994,13 @@ Lemma UMO_reachable_constrained_state_prop :
       <->
     UMO_reachable (fun _ _ => True) s /\ adr s = i.
 Proof.
-  intros s; rewrite constrained_state_prop_alt_equiv; split.
-  - intros [om Hvsp].
-    induction Hvsp.
-    + destruct s, Hs as [Hs1 Hs2].
-      cbn in Hs1, Hs2; rewrite Hs1, Hs2.
-      by split; [constructor |].
-    + destruct l, om as [m |]; inversion Ht; subst; cbn; [| done.. |].
-      * by split; [constructor |]; itauto.
-      * by split; [constructor |]; itauto.
-  - intros [Hur Hadr].
-    induction Hur; red; cbn in Hadr.
-    + by apply initial_state_is_valid; cbv.
-    + by eapply input_valid_transition_destination, input_valid_transition_Send, IHHur.
-    + by eapply input_valid_transition_destination, input_valid_transition_Receive, IHHur.
+  intros s; rewrite constrained_state_prop_alt_equiv.
+  split; [by apply UMO_reachable_Ri |].
+  intros [Hur Hadr].
+  induction Hur; red; cbn in Hadr.
+  - by apply initial_state_is_valid; cbv.
+  - by eapply input_valid_transition_destination, input_valid_transition_Send, IHHur.
+  - by eapply input_valid_transition_destination, input_valid_transition_Receive, IHHur.
 Qed.
 
 (** If a state is constrained, after sending a message it's still constrained. *)
@@ -1610,20 +1603,6 @@ Lemma lift_to_UMO_finite_valid_trace_from_to :
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
   by eapply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_UMO _ Hvsp i)).
-Qed.
-
-(**
-  If a composite state is constrained, so are all of its component states.
-*)
-Lemma constrained_state_prop_component :
-  forall (cs : composite_state U) (j : index),
-    constrained_state_prop UMO cs ->
-    constrained_state_prop (U j) (cs j).
-Proof.
-  intros cs j Hcsp.
-  rewrite constrained_state_prop_alt_equiv in Hcsp |- *.
-  unfold constrained_state_prop_alt in Hcsp |- *.
-  by eapply valid_state_project_preloaded_to_preloaded_free.
 Qed.
 
 (** We could prove the same lifting lemmas for [RUMO], but we won't need them. *)

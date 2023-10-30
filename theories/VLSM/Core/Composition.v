@@ -673,6 +673,21 @@ Proof.
   by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
 Qed.
 
+(**
+  If a composite state is constrained, so are all of its component states.
+*)
+Lemma constrained_state_prop_component
+  {message : Type} `{EqDecision index} (IM : index -> VLSM message)
+  (cs : composite_state IM) (i : index) :
+    constrained_state_prop (free_composite_vlsm IM) cs ->
+    constrained_state_prop (IM i) (cs i).
+Proof.
+  intros Hcsp.
+  rewrite constrained_state_prop_alt_equiv in Hcsp |- *.
+  unfold constrained_state_prop_alt in Hcsp |- *.
+  by eapply valid_state_project_preloaded_to_preloaded_free.
+Qed.
+
 Lemma valid_state_project_preloaded_to_preloaded
   message `{EqDecision index} (IM : index -> VLSM message) constraint
   (X := composite_vlsm IM constraint)
