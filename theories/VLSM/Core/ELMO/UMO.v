@@ -140,7 +140,7 @@ Defined.
 
 (**
   A reachability predicate specialized for VLSMs refining UMO.
-  [UMO_reachable C s] is equivalent to [constrained_state_prop_alt V s] if
+  [UMO_reachable C s] is equivalent to [constrained_state_prop V s] if
   the valid transitions of VLSM <<V>> follow [UMOComponent_transition]
   and the validity predicate is a refinement of [UMOComponent_valid]
   which does not further restrict the [Send] case.
@@ -247,7 +247,7 @@ Qed.
 
 (**
   This lemma shows that for a VLSM based on UMO
-  reachability in the VLSM according to [constrained_state_prop_alt]
+  reachability in the VLSM according to [constrained_state_prop]
   is equivalent to [UMO_reachable] with a predicate
   based on the VLSM's [valid] predicate, plus
   a condition on the address.
@@ -267,10 +267,10 @@ Lemma UMO_based_valid_reachable
   (VM : VLSMMachine (Build_VLSMType Message State Label))
   (V := mk_vlsm VM)
   (Hinit_empty : forall si, initial_state_prop V si -> obs si = [])
-  (Hsend_spec : forall s om, constrained_state_prop_alt V s -> valid V Send (s, om) <-> om = None)
+  (Hsend_spec : forall s om, constrained_state_prop V s -> valid V Send (s, om) <-> om = None)
   (Htransition : forall l s om, transition V l (s, om) = UMOComponent_transition l s om) :
   forall (s : State),
-    constrained_state_prop_alt V s
+    constrained_state_prop V s
       <->
     UMO_reachable (fun s m => VM.(valid) Receive (s, Some m)) s
       /\ initial_state_prop V (MkState [] (adr s)).
@@ -994,7 +994,6 @@ Lemma UMO_reachable_constrained_state_prop :
       <->
     UMO_reachable (fun _ _ => True) s /\ adr s = i.
 Proof.
-  intros s; rewrite constrained_state_prop_alt_equiv.
   split; [by apply UMO_reachable_Ri |].
   intros [Hur Hadr].
   induction Hur; red; cbn in Hadr.
@@ -1629,7 +1628,7 @@ Lemma lift_to_UMO_constrained_state_prop :
     constrained_state_prop (U i) s ->
     constrained_state_prop UMO (lift_to_UMO_state us i s).
 Proof.
-  setoid_rewrite constrained_state_prop_alt_equiv; unfold constrained_state_prop_alt.
+  unfold constrained_state_prop.
   intros is s us Hcsp.
   by eapply VLSM_weak_embedding_valid_state, lift_to_RUMO.
 Qed.
