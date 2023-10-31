@@ -305,10 +305,6 @@ Qed.
 (** ** Every valid state contains a unique valid trace leading to it
 
   To prove this, we will need some basic properties of UMO components.
-
-  For the rest of this section, we will work with two UMO components,
-  one (named [Ui]) for dealing with valid states, and
-  another (named [Ri]) for dealing with reachable states.
 *)
 
 Section sec_UMOComponent_lemmas.
@@ -316,8 +312,9 @@ Section sec_UMOComponent_lemmas.
 (**
   [Ui] is a notation for an [UMOComponent] of address [i].
 
-  The "R" in [Ri] stands for "reachability", as it will be used to state and
-  prove lemmas and theorems which talk about reachability.
+  [Ri] is a notation for an [UMOComponent] of address [i] preloaded with all
+  messages. It will be used to state and prove lemmas and theorems which talk
+  about reachability.
 *)
 
 Context
@@ -336,7 +333,7 @@ Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
-Lemma UMO_reachable_Ui :
+Lemma UMO_reachable_valid_state_prop :
   forall s, valid_state_prop Ui s ->
   UMO_reachable (const (const True)) s /\ adr s = i.
 Proof.
@@ -384,9 +381,9 @@ Qed.
 
 (** For every trace segment, the initial and final state have the same address. *)
 
-Lemma adr_of_states_within_trace_Ri :
+Lemma adr_of_states_within_constrained_trace :
   forall (is s : State) (tr : list transition_item),
-    finite_valid_trace_from_to Ri is s tr ->
+    finite_constrained_trace_from_to Ui is s tr ->
       adr s = adr is.
 Proof.
   induction 1; [done |].
@@ -395,7 +392,7 @@ Proof.
   by destruct Ht as [_ Ht]; cbn in Ht.
 Qed.
 
-Lemma adr_of_states_within_trace_Ui :
+Lemma adr_of_states_within_valid_trace :
   forall (is s : State) (tr : list transition_item),
     finite_valid_trace_from_to Ui is s tr ->
       adr s = adr is.
@@ -408,36 +405,36 @@ Qed.
 
 (** If a state is reachable, its address is the same as the address of the component. *)
 
-Lemma adr_of_reachable_state_Ri :
+Lemma adr_of_constrained_trace :
   forall (is s : State) (tr : list transition_item),
-    finite_valid_trace_init_to Ri is s tr ->
+    finite_constrained_trace_init_to Ui is s tr ->
       adr s = i.
 Proof.
   intros is s tr [Hfvt Hinit].
   transitivity (adr is).
-  - by eapply adr_of_states_within_trace_Ri.
+  - by eapply adr_of_states_within_constrained_trace.
   - by destruct Hinit, is; cbn in *.
 Qed.
 
-Lemma adr_of_reachable_state_Ui :
+Lemma adr_of_valid_trace :
   forall (is s : State) (tr : list transition_item),
     finite_valid_trace_init_to Ui is s tr ->
       adr s = i.
 Proof.
   intros is s tr [Hfvt Hinit].
   transitivity (adr is).
-  - by eapply adr_of_states_within_trace_Ui.
+  - by eapply adr_of_states_within_valid_trace.
   - by destruct Hinit, is; cbn in *.
 Qed.
 
 (** The address of a valid state is the same as the address of the component. *)
-Lemma adr_of_valid_state_Ri :
+Lemma adr_of_constrained_state :
   forall s : State,
-    valid_state_prop Ri s -> adr s = i.
+    constrained_state_prop Ui s -> adr s = i.
 Proof.
   intros s Hvsp.
   apply valid_state_has_trace in Hvsp as (is & tr & Hfvti).
-  by eapply adr_of_reachable_state_Ri.
+  by eapply adr_of_constrained_trace.
 Qed.
 
 Lemma adr_of_valid_state_Ui :
@@ -446,7 +443,7 @@ Lemma adr_of_valid_state_Ui :
 Proof.
   intros s Hvsp.
   apply valid_state_has_trace in Hvsp as (is & tr & Hfvti).
-  by eapply adr_of_reachable_state_Ui.
+  by eapply adr_of_valid_trace.
 Qed.
 
 (** Valid transitions lead to bigger states. *)
@@ -460,9 +457,9 @@ Proof.
   by intros [] s2 [im |] oom []; do 2 inversion_clear 1; cbn; lia.
 Qed.
 
-Lemma input_valid_transition_size_Ri :
+Lemma input_constrained_transition_size :
   forall (s1 s2 : State) (iom oom : option Message) (lbl : Label),
-    input_valid_transition Ri lbl (s1, iom) (s2, oom) ->
+    input_constrained_transition Ui lbl (s1, iom) (s2, oom) ->
       sizeState s1 < sizeState s2.
 Proof.
   intros s1 s2 iom oom lbl [(_ & _ & Hvalid) Ht]; cbn in *.
@@ -474,26 +471,26 @@ Qed.
   its initial state.
 *)
 
-Lemma finite_valid_trace_from_to_size_Ri :
+Lemma finite_constrained_trace_from_to_size :
   forall (s1 s2 : State) (tr : list transition_item),
-    finite_valid_trace_from_to Ri s1 s2 tr ->
+    finite_constrained_trace_from_to Ui s1 s2 tr ->
       s1 = s2 /\ tr = []
         \/
       sizeState s1 < sizeState s2.
 Proof.
   induction 1; [by left |].
   assert (sizeState s' < sizeState s)
-      by (eapply input_valid_transition_size_Ri; done).
+      by (eapply input_constrained_transition_size; done).
   by destruct IHfinite_valid_trace_from_to; [itauto congruence | itauto lia].
 Qed.
 
 (** If a trace leads from a state to itself, then it is empty. *)
 
-Lemma finite_valid_trace_from_to_inv_Ri :
+Lemma finite_constrained_trace_from_to_inv :
   forall (s : State) (tr : list transition_item),
-    finite_valid_trace_from_to Ri s s tr -> tr = [].
+    finite_constrained_trace_from_to Ui s s tr -> tr = [].
 Proof.
-  by intros s tr Hfvt; apply finite_valid_trace_from_to_size_Ri in Hfvt; itauto lia.
+  by intros s tr Hfvt; apply finite_constrained_trace_from_to_size in Hfvt; itauto lia.
 Qed.
 
 (**
@@ -501,18 +498,18 @@ Qed.
   above lemmas because there is a VLSM inclusion from [Ri] to [Ui].
 *)
 
-Lemma input_valid_transition_size_Ui :
+Lemma input_valid_transition_size :
   forall (s1 s2 : State) (iom oom : option Message) (lbl : Label),
     input_valid_transition Ui lbl (s1, iom) (s2, oom) ->
       sizeState s1 < sizeState s2.
 Proof.
   intros s1 s2 iom oom lbl Hivt.
-  eapply input_valid_transition_size_Ri.
+  eapply input_constrained_transition_size.
   by apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
-Lemma finite_valid_trace_from_to_size_Ui :
+Lemma finite_valid_trace_from_to_size :
   forall (s1 s2 : State) (tr : list transition_item),
     finite_valid_trace_from_to Ui s1 s2 tr ->
       s1 = s2 /\ tr = []
@@ -520,17 +517,17 @@ Lemma finite_valid_trace_from_to_size_Ui :
       sizeState s1 < sizeState s2.
 Proof.
   intros s1 s2 tr Hfvt.
-  eapply finite_valid_trace_from_to_size_Ri.
+  eapply finite_constrained_trace_from_to_size.
   by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
-Lemma finite_valid_trace_from_to_inv_Ui :
+Lemma finite_valid_trace_from_to_inv :
   forall (s : State) (tr : list transition_item),
     finite_valid_trace_from_to Ui s s tr -> tr = [].
 Proof.
   intros s tr Hfvt.
-  eapply finite_valid_trace_from_to_inv_Ri.
+  eapply finite_constrained_trace_from_to_inv.
   by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
@@ -545,10 +542,10 @@ Qed.
   every state contains the whole trace/history.
 *)
 
-Lemma input_valid_transition_deterministic_conv_Ri :
+Lemma input_constrained_transition_deterministic_conv :
   forall (s1 s2 f : State) (iom1 iom2 oom1 oom2 : option Message) (lbl1 lbl2 : Label),
-    input_valid_transition Ri lbl1 (s1, iom1) (f, oom1) ->
-    input_valid_transition Ri lbl2 (s2, iom2) (f, oom2) ->
+    input_constrained_transition Ui lbl1 (s1, iom1) (f, oom1) ->
+    input_constrained_transition Ui lbl2 (s2, iom2) (f, oom2) ->
       lbl1 = lbl2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2
@@ -561,47 +558,47 @@ Proof.
   by destruct s1, s2; cbn in *; subst; itauto.
 Qed.
 
-Lemma input_valid_transition_deterministic_conv_Ui :
+Lemma input_valid_transition_deterministic_conv :
   forall (s1 s2 f : State) (iom1 iom2 oom1 oom2 : option Message) (lbl1 lbl2 : Label),
     input_valid_transition Ui lbl1 (s1, iom1) (f, oom1) ->
     input_valid_transition Ui lbl2 (s2, iom2) (f, oom2) ->
       lbl1 = lbl2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
-  by eapply input_valid_transition_deterministic_conv_Ri
+  by eapply input_constrained_transition_deterministic_conv
   ; apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
 (** Every trace segment is fully determined by its initial and final state. *)
 
-Lemma finite_valid_trace_from_to_unique_Ri :
+Lemma finite_constrained_trace_from_to_unique :
   forall (s1 s2 : State) (l1 l2 : list transition_item),
-    finite_valid_trace_from_to Ri s1 s2 l1 ->
-    finite_valid_trace_from_to Ri s1 s2 l2 ->
+    finite_constrained_trace_from_to Ui s1 s2 l1 ->
+    finite_constrained_trace_from_to Ui s1 s2 l2 ->
       l1 = l2.
 Proof.
   intros s1 s2 l1 l2 Hfvt1 Hfvt2; revert l2 Hfvt2.
   induction Hfvt1 using finite_valid_trace_from_to_rev_ind; intros.
-  - by apply finite_valid_trace_from_to_size_Ri in Hfvt2; itauto (congruence + lia).
+  - by apply finite_constrained_trace_from_to_size in Hfvt2; itauto (congruence + lia).
   - destruct Hfvt2 using finite_valid_trace_from_to_rev_ind; [| clear IHHfvt2].
-    + apply finite_valid_trace_from_to_size_Ri in Hfvt1.
-      apply input_valid_transition_size_Ri in Ht.
+    + apply finite_constrained_trace_from_to_size in Hfvt1.
+      apply input_constrained_transition_size in Ht.
       by decompose [and or] Hfvt1; subst; clear Hfvt1; lia.
     + assert (l = l0 /\ s = s0 /\ iom = iom0 /\ oom = oom0)
-          by (eapply input_valid_transition_deterministic_conv_Ri; done).
+          by (eapply input_constrained_transition_deterministic_conv; done).
       decompose [and] H; subst; clear H.
       by f_equal; apply IHHfvt1.
 Qed.
 
-Lemma finite_valid_trace_from_to_unique_Ui :
+Lemma finite_valid_trace_from_to_unique :
   forall (s1 s2 : State) (l1 l2 : list transition_item),
     finite_valid_trace_from_to Ui s1 s2 l1 ->
     finite_valid_trace_from_to Ui s1 s2 l2 ->
       l1 = l2.
 Proof.
   by intros s1 s2 l1 l2 Hfvt1 Hfvt2
-  ; eapply finite_valid_trace_from_to_unique_Ri
+  ; eapply finite_constrained_trace_from_to_unique
   ; apply VLSM_incl_finite_valid_trace_from_to
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
@@ -609,33 +606,33 @@ Qed.
 (** Every trace is determined by its final state. *)
 
 (** Uniqueness *)
-Lemma finite_valid_trace_init_to_unique_Ri :
+Lemma finite_constrained_trace_init_to_unique :
   forall (s f : State) (l1 l2 : list transition_item),
-    finite_valid_trace_init_to Ri s f l1 ->
-    finite_valid_trace_init_to Ri s f l2 ->
+    finite_constrained_trace_init_to Ui s f l1 ->
+    finite_constrained_trace_init_to Ui s f l2 ->
       l1 = l2.
 Proof.
   intros s f l1 l2 [Ht1 _] [Ht2 _].
-  by eapply finite_valid_trace_from_to_unique_Ri.
+  by eapply finite_constrained_trace_from_to_unique.
 Qed.
 
-Lemma finite_valid_trace_init_to_unique_Ui :
+Lemma finite_valid_trace_init_to_unique :
   forall (s f : State) (l1 l2 : list transition_item),
     finite_valid_trace_init_to Ui s f l1 ->
     finite_valid_trace_init_to Ui s f l2 ->
       l1 = l2.
 Proof.
   by intros s f l1 l2 Hfvit1 Hfvit2
-  ; eapply finite_valid_trace_init_to_unique_Ri
+  ; eapply finite_constrained_trace_init_to_unique
   ; apply VLSM_incl_finite_valid_trace_init_to
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
 
 (** If a valid trace leads to state s, the trace extracted from s also leads to s. *)
-Lemma finite_valid_trace_init_to_state2trace_Ri :
+Lemma finite_constrained_trace_init_to_state2trace :
   forall (is s : State) (tr : list transition_item),
-    finite_valid_trace_init_to Ri is s tr ->
-      finite_valid_trace_init_to Ri is s (state2trace s).
+    finite_constrained_trace_init_to Ui is s tr ->
+      finite_constrained_trace_init_to Ui is s (state2trace s).
 Proof.
   intros is s tr [Hfv Hinit]; cbn in *; revert Hinit.
   induction Hfv using finite_valid_trace_from_to_rev_ind; intros.
@@ -654,7 +651,7 @@ Proof.
       by eapply extend_right_finite_trace_from_to; [apply IHHfv |]; auto.
 Qed.
 
-Lemma finite_valid_trace_init_to_state2trace_Ui :
+Lemma finite_valid_trace_init_to_state2trace :
   forall (is s : State) (tr : list transition_item),
     finite_valid_trace_init_to Ui is s tr ->
       finite_valid_trace_init_to Ui is s (state2trace s).
@@ -678,24 +675,24 @@ Qed.
 
 (** The trace extracted from the final state of another trace is equal to that trace. *)
 
-Lemma finite_valid_trace_init_to_state2trace_Ri_inv :
+Lemma finite_constrained_trace_init_to_state2trace_inv :
   forall (is s : State) (tr : list transition_item),
-    finite_valid_trace_init_to Ri is s tr ->
+    finite_constrained_trace_init_to Ui is s tr ->
       state2trace s = tr.
 Proof.
   intros is s tr Hfvti.
-  assert (Hfvti' : finite_valid_trace_init_to Ri is s (state2trace s))
-      by (eapply finite_valid_trace_init_to_state2trace_Ri; done).
-  by eapply finite_valid_trace_init_to_unique_Ri.
+  assert (Hfvti' : finite_constrained_trace_init_to Ui is s (state2trace s))
+      by (eapply finite_constrained_trace_init_to_state2trace; done).
+  by eapply finite_constrained_trace_init_to_unique.
 Qed.
 
-Lemma finite_valid_trace_init_to_state2trace_Ui_inv :
+Lemma finite_valid_trace_init_to_state2trace_inv :
   forall (is s : State) (tr : list transition_item),
     finite_valid_trace_init_to Ui is s tr ->
       state2trace s = tr.
 Proof.
   by intros is s tr Hfvti
-  ; eapply finite_valid_trace_init_to_state2trace_Ri_inv
+  ; eapply finite_constrained_trace_init_to_state2trace_inv
   ; apply VLSM_incl_finite_valid_trace_init_to
   ; eauto using VLSM_incl_Ui_Ri.
 Qed.
@@ -703,48 +700,48 @@ Qed.
 (** The trace extracted from a reachable state [s] leads to [s]. *)
 
 (** Existence *)
-Lemma finite_valid_trace_init_to_state2trace_Ri' :
+Lemma finite_constrained_trace_init_to_state2trace' :
   forall (s : State),
-    valid_state_prop Ri s ->
-      finite_valid_trace_init_to Ri (``(vs0 Ri)) s (state2trace s).
+    constrained_state_prop Ui s ->
+      finite_constrained_trace_init_to Ui (``(vs0 Ri)) s (state2trace s).
 Proof.
   intros s Hs.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
-  apply finite_valid_trace_init_to_state2trace_Ri_inv in Htr as Heqtr; subst.
+  apply finite_constrained_trace_init_to_state2trace_inv in Htr as Heqtr; subst.
   replace (``(vs0 Ri)) with is; [done |].
   by apply vs0_uniqueness, Htr.
 Qed.
 
-Lemma valid_state_contains_unique_valid_trace_Ri :
+Lemma constrained_state_contains_unique_constrained_trace :
   forall s : State,
-    valid_state_prop Ri s ->
+    constrained_state_prop Ui s ->
       exists tr : list transition_item,
-        finite_valid_trace_init_to Ri (``(vs0 Ri)) s tr
+        finite_constrained_trace_init_to Ui (``(vs0 Ri)) s tr
           /\
         forall tr' : list transition_item,
-          finite_valid_trace_init_to Ri (``(vs0 Ri)) s tr' -> tr' = tr.
+          finite_constrained_trace_init_to Ui (``(vs0 Ri)) s tr' -> tr' = tr.
 Proof.
   intros s Hvsp.
   exists (state2trace s); split.
-  - by eapply finite_valid_trace_init_to_state2trace_Ri'.
+  - by eapply finite_constrained_trace_init_to_state2trace'.
   - intros tr' Hfvt. symmetry.
-    by eapply finite_valid_trace_init_to_state2trace_Ri_inv.
+    by eapply finite_constrained_trace_init_to_state2trace_inv.
 Qed.
 
 (** Existence *)
-Lemma finite_valid_trace_init_to_state2trace_Ui' :
+Lemma finite_valid_trace_init_to_state2trace' :
   forall (s : State),
     valid_state_prop Ui s ->
       finite_valid_trace_init_to Ui (``(vs0 Ri)) s (state2trace s).
 Proof.
   intros s Hs.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
-  apply finite_valid_trace_init_to_state2trace_Ui_inv in Htr as Heqtr; subst.
+  apply finite_valid_trace_init_to_state2trace_inv in Htr as Heqtr; subst.
   replace (``(vs0 Ri)) with is; [done |].
   by apply vs0_uniqueness, Htr.
 Qed.
 
-Lemma valid_state_contains_unique_valid_trace_Ui :
+Lemma valid_state_contains_unique_valid_trace :
   forall s : State,
     valid_state_prop Ui s ->
       exists tr : list transition_item,
@@ -755,9 +752,9 @@ Lemma valid_state_contains_unique_valid_trace_Ui :
 Proof.
   intros s Hvsp.
   exists (state2trace s); split.
-  - by eapply finite_valid_trace_init_to_state2trace_Ui'.
+  - by eapply finite_valid_trace_init_to_state2trace'.
   - intros tr' Hfvt. symmetry.
-    by eapply finite_valid_trace_init_to_state2trace_Ui_inv.
+    by eapply finite_valid_trace_init_to_state2trace_inv.
 Qed.
 
 (** ** The suffix ordering on states is a strict total order
@@ -868,9 +865,9 @@ Proof.
 Qed.
 
 (** The previous property carries over from transitions to valid transitions. *)
-Lemma state_suffix_of_input_valid_transition_Ri :
+Lemma state_suffix_of_input_constrained_transition :
   forall (lbl : Label) (s1 s2 : State) (iom oom : option Message),
-    input_valid_transition Ri lbl (s1, iom) (s2, oom) ->
+    input_constrained_transition Ui lbl (s1, iom) (s2, oom) ->
       state_suffix s1 s2.
 Proof.
   intros lbl s1 s2 iom oom [(Hvsp & Hovmp & Hvalid) Ht]; cbn in Ht.
@@ -881,29 +878,29 @@ Qed.
   If there is a trace segment from <<s1>> to <<s2>>, then either the states are
   equal (because the trace is empty), or <<s1>> is a state-suffix of <<s2>>.
 *)
-Lemma state_suffix_of_finite_valid_trace_from_to_Ri :
+Lemma state_suffix_of_finite_constrained_trace_from_to :
   forall (s1 s2 : State) (tr : list transition_item),
-    finite_valid_trace_from_to Ri s1 s2 tr ->
+    finite_constrained_trace_from_to Ui s1 s2 tr ->
       s1 = s2 \/ state_suffix s1 s2.
 Proof.
   induction 1; [by left |].
   destruct IHfinite_valid_trace_from_to as [-> | IH]; right.
-  - by eapply state_suffix_of_input_valid_transition_Ri; eauto.
+  - by eapply state_suffix_of_input_constrained_transition; eauto.
   - transitivity s; [| done].
-    by eapply state_suffix_of_input_valid_transition_Ri; eauto.
+    by eapply state_suffix_of_input_constrained_transition; eauto.
 Qed.
 
 (**
-  [state_suffix_of_finite_valid_trace_from_to_Ri] carries over from
+  [state_suffix_of_finite_constrained_trace_from_to] carries over from
   trace segments to traces.
 *)
-Lemma state_suffix_of_finite_valid_trace_init_to_Ri :
+Lemma state_suffix_of_finite_constrained_trace_init_to :
   forall (s1 s2 : State) (tr : list transition_item),
-    finite_valid_trace_init_to Ri s1 s2 tr ->
+    finite_constrained_trace_init_to Ui s1 s2 tr ->
       s1 = s2 \/ state_suffix s1 s2.
 Proof.
   intros s1 s2 tr [Hfvt Hinit].
-  by eapply state_suffix_of_finite_valid_trace_from_to_Ri.
+  by eapply state_suffix_of_finite_constrained_trace_from_to.
 Qed.
 
 (**
@@ -1056,7 +1053,7 @@ Qed.
   in-between), then the state of <<m1>> is a state-suffix of the state of <<m2>>
   and also the state of <<m2>> is a state-suffix of <<s>>.
 *)
-Lemma state_suffix_totally_orders_sent_messages_Ri P :
+Lemma state_suffix_totally_orders_sent_messages_UMO_reachable_aux P :
   forall (s : State) (m1 m2 : Message) (obs1 obs2 obs3 : list Observation),
     s = MkState [] (adr s) <++>
       obs1 <+> MkObservation Send m1 <++> obs2 <+> MkObservation Send m2 <++> obs3 ->
@@ -1078,8 +1075,11 @@ Proof.
     by apply state_suffix_addObservations, ListExtras.last_not_null.
 Qed.
 
-(** [state_suffix_totally_orders_sent_messages_Ri] easily carries over to valid states. *)
-Lemma state_suffix_totally_orders_sent_messages_Ui :
+(**
+  [state_suffix_totally_orders_sent_messages_UMO_reachable_aux] easily carries
+  over to valid states.
+*)
+Lemma state_suffix_totally_orders_sent_messages_valid_state_prop_aux :
   forall (s : State) (m1 m2 : Message) (obs1 obs2 obs3 : list Observation),
     s = MkState [] (adr s) <++>
       obs1 <+> MkObservation Send m1 <++> obs2 <+> MkObservation Send m2 <++> obs3 ->
@@ -1087,15 +1087,15 @@ Lemma state_suffix_totally_orders_sent_messages_Ui :
       state_suffix (state m1) (state m2) /\ state_suffix (state m2) s.
 Proof.
   intros s m1 m2 obs1 obs2 obs3 Heq Hvsp.
-  eapply state_suffix_totally_orders_sent_messages_Ri; [done |].
-  by apply UMO_reachable_Ui.
+  eapply state_suffix_totally_orders_sent_messages_UMO_reachable_aux; [done |].
+  by apply UMO_reachable_valid_state_prop.
 Qed.
 
 (**
   The [message_suffix] relation is trichotomous on the [sentMessages] of any
   reachable state.
 *)
-Lemma state_suffix_totally_orders_sent_messages_Ri' P :
+Lemma state_suffix_totally_orders_sent_messages_UMO_reachable P :
   forall (s : State) (m1 m2 : Message),
     UMO_reachable P s -> m1 ∈ sentMessages s -> m2 ∈ sentMessages s ->
       message_suffix m1 m2 \/ m1 = m2 \/ message_suffix m2 m1.
@@ -1105,21 +1105,24 @@ Proof.
   destruct (elem_of_list_split_2 _ _ _ H1 H2) as [Heq | (obs1 & obs2 & obs3 & [H | H])]
   ; [right; left | right; right | left].
   - by congruence.
-  - eapply state_suffix_totally_orders_sent_messages_Ri with (s := s); [| done].
+  - eapply state_suffix_totally_orders_sent_messages_UMO_reachable_aux with (s := s); [| done].
     by apply eq_State; cbn; [rewrite app_nil_r |].
-  - eapply state_suffix_totally_orders_sent_messages_Ri with (s := s); [| done].
+  - eapply state_suffix_totally_orders_sent_messages_UMO_reachable_aux with (s := s); [| done].
     by apply eq_State; cbn; [rewrite app_nil_r |].
 Qed.
 
-(** [state_suffix_totally_orders_sent_messages_Ri'] transfers to [sentMessages] of valid states. *)
-Lemma state_suffix_totally_orders_sent_messages_Ui' :
+(**
+  [state_suffix_totally_orders_sent_messages_UMO_reachable] transfers to
+  [sentMessages] of valid states.
+*)
+Lemma state_suffix_totally_orders_sent_messages_valid_state_prop :
   forall (s : State) (m1 m2 : Message),
     valid_state_prop Ui s -> m1 ∈ sentMessages s -> m2 ∈ sentMessages s ->
       message_suffix m1 m2 \/ m1 = m2 \/ message_suffix m2 m1.
 Proof.
   intros s m1 m2 Hvsp Hin1 Hin2.
-  by eapply state_suffix_totally_orders_sent_messages_Ri';
-    [apply UMO_reachable_Ui | ..].
+  by eapply state_suffix_totally_orders_sent_messages_UMO_reachable;
+    [apply UMO_reachable_valid_state_prop | ..].
 Qed.
 
 (** ** Observability
@@ -1203,7 +1206,7 @@ Qed.
   In a reachable state, messages sent earlier are directly observable in
   messages sent later.
 *)
-Lemma directly_observable_totally_orders_sent_messages_Ri P :
+Lemma directly_observable_totally_orders_sent_messages_UMO_reachable P :
   forall (s : State) (m1 m2 : Message) (obs1 obs2 obs3 : list Observation),
     s = MkState [] (adr s) <++>
       obs1 <+> MkObservation Send m1 <++> obs2 <+> MkObservation Send m2 <++> obs3 ->
@@ -1220,10 +1223,10 @@ Proof.
 Qed.
 
 (**
-  [directly_observable_totally_orders_sent_messages_Ri] can be
+  [directly_observable_totally_orders_sent_messages_UMO_reachable] can be
   transferred to valid states.
 *)
-Lemma directly_observable_totally_orders_sent_messages_Ui :
+Lemma directly_observable_totally_orders_sent_messages_valid_state_prop :
   forall (s : State) (m1 m2 : Message) (obs1 obs2 obs3 : list Observation),
     s = MkState [] (adr s) <++>
       obs1 <+> MkObservation Send m1 <++> obs2 <+> MkObservation Send m2 <++> obs3 ->
@@ -1231,7 +1234,8 @@ Lemma directly_observable_totally_orders_sent_messages_Ui :
       directly_observable m1 m2.
 Proof.
   intros s m1 m2 obs1 obs2 obs3 Heq Hvsp.
-  by eapply directly_observable_totally_orders_sent_messages_Ri, UMO_reachable_Ui.
+  by eapply directly_observable_totally_orders_sent_messages_UMO_reachable,
+    UMO_reachable_valid_state_prop.
 Qed.
 
 (**
@@ -1431,7 +1435,7 @@ Qed.
   The relation [was_sent_before] is trichotomous on the [sentMessages] of any
   reachable state.
 *)
-Lemma was_sent_before_totally_orders_sentMessages_Ri P :
+Lemma was_sent_before_totally_orders_sentMessages_UMO_reachable P :
   forall (s : State) (m1 m2 : Message),
     UMO_reachable P s -> m1 ∈ sentMessages s -> m2 ∈ sentMessages s ->
       was_sent_before m1 m2 \/ m1 = m2 \/ was_sent_before m2 m1.
@@ -1680,7 +1684,7 @@ Proof.
       apply valid_state_has_trace in Hvsp' as (s & tr & [Hfvt Hinit]).
       replace s with (MkState [] (idx i)) in *; cycle 1.
       * by inversion Hinit; destruct s; cbn in *; subst.
-      * by eapply finite_valid_trace_init_to_state2trace_Ri.
+      * by eapply finite_constrained_trace_init_to_state2trace.
 Qed.
 
 (**
@@ -1769,7 +1773,7 @@ Proof.
     rewrite (IHis' (state_update U us i' (MkState [] (idx i'))) m i).
     + by state_update_simpl.
     + by apply valid_state_prop_state_update_init.
-    + erewrite adr_of_sentMessages, adr_of_valid_state_Ri; [done | .. | done].
+    + erewrite adr_of_sentMessages, adr_of_constrained_state; [done | .. | done].
       * by rewrite <- Hidx; apply Hvsp'.
       * by eapply UMO_reachable_constrained_state_prop, Hvsp'.
     + intros j Hnin. destruct (decide (i' = j)); subst.
@@ -1778,7 +1782,7 @@ Proof.
   - intros [Hin | Hin]; cycle 1.
     + eapply adr_of_sentMessages in Hin as Hin';
         [| by eapply UMO_reachable_constrained_state_prop, Hvsp'].
-      erewrite Hin', adr_of_valid_state_Ri in Hidx by apply Hvsp'.
+      erewrite Hin', adr_of_constrained_state in Hidx by apply Hvsp'.
       by apply Inj0 in Hidx; subst.
     + rewrite (IHis' _ _ i) in Hin; [| | done |].
       * by destruct (decide (i = i')); subst; state_update_simpl; [inversion Hin |].
