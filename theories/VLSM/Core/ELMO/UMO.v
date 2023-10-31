@@ -346,14 +346,22 @@ Proof.
     destruct_and!; (split; [constructor |]).
 Qed.
 
-Lemma UMO_reachable_Ri :
-  forall s, valid_state_prop Ri s ->
-  UMO_reachable (const (const True)) s /\ adr s = i.
+Lemma UMO_reachable_constrained_state_prop :
+  forall (s : State),
+    constrained_state_prop (UMOComponent i) s
+      <->
+    UMO_reachable (fun _ _ => True) s /\ adr s = i.
 Proof.
-  induction 1 using valid_state_prop_ind;
-    [by destruct s, Hs as [Hobs Hadr]; cbn in *; subst; split; [constructor 1 |] |].
-  by destruct Ht as [(_ & _ & Hv) Ht]; inversion Hv; subst; inversion Ht; subst;
-    destruct_and!; (split; [constructor |]).
+  split.
+  - induction 1 using valid_state_prop_ind;
+      [by destruct s, Hs as [Hobs Hadr]; cbn in *; subst; split; [constructor 1 |] |].
+    by destruct Ht as [(_ & _ & Hv) Ht]; inversion Hv; subst; inversion Ht; subst;
+      destruct_and!; (split; [constructor |]).
+  - intros [Hur Hadr].
+    induction Hur; red; cbn in Hadr.
+    + by apply initial_state_is_valid; cbv.
+    + by eapply input_valid_transition_destination, input_valid_transition_Send, IHHur.
+    + by eapply input_valid_transition_destination, input_valid_transition_Receive, IHHur.
 Qed.
 
 (** The initial state of [Ri] is unique (that of [Ui] too, but we don't need a separate lemma). *)
