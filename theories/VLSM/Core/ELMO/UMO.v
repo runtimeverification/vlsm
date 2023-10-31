@@ -996,20 +996,6 @@ Proof.
   - by apply IHobs', UMO_reachable_addObservation_inv with ob'.
 Qed.
 
-Lemma UMO_reachable_constrained_state_prop :
-  forall (s : State),
-    constrained_state_prop (UMOComponent i) s
-      <->
-    UMO_reachable (fun _ _ => True) s /\ adr s = i.
-Proof.
-  split; [by apply UMO_reachable_Ri |].
-  intros [Hur Hadr].
-  induction Hur; red; cbn in Hadr.
-  - by apply initial_state_is_valid; cbv.
-  - by eapply input_valid_transition_destination, input_valid_transition_Send, IHHur.
-  - by eapply input_valid_transition_destination, input_valid_transition_Receive, IHHur.
-Qed.
-
 (** If a state is constrained, after sending a message it's still constrained. *)
 Lemma constrained_state_prop_Send :
   forall (m : Message),
@@ -1785,13 +1771,13 @@ Proof.
     + by apply valid_state_prop_state_update_init.
     + erewrite adr_of_sentMessages, adr_of_valid_state_Ri; [done | .. | done].
       * by rewrite <- Hidx; apply Hvsp'.
-      * by eapply UMO_reachable_Ri, Hvsp'.
+      * by eapply UMO_reachable_constrained_state_prop, Hvsp'.
     + intros j Hnin. destruct (decide (i' = j)); subst.
       * by state_update_simpl.
       * by state_update_simpl; apply Hall; inversion 1.
   - intros [Hin | Hin]; cycle 1.
     + eapply adr_of_sentMessages in Hin as Hin';
-        [| by eapply UMO_reachable_Ri, Hvsp'].
+        [| by eapply UMO_reachable_constrained_state_prop, Hvsp'].
       erewrite Hin', adr_of_valid_state_Ri in Hidx by apply Hvsp'.
       by apply Inj0 in Hidx; subst.
     + rewrite (IHis' _ _ i) in Hin; [| | done |].
@@ -1812,7 +1798,7 @@ Proof.
   intros us m i Hvsp Hidx.
   rewrite elem_of_UMO_sentMessages by done.
   rewrite <- sentMessages_characterization; [done |].
-  by apply @UMO_reachable_Ri with (idx i),
+  by apply @UMO_reachable_constrained_state_prop with (idx i),
     (preloaded_valid_state_projection _ _ _ Hvsp).
 Qed.
 
