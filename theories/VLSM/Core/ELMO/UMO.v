@@ -437,7 +437,7 @@ Proof.
   by eapply adr_of_constrained_trace.
 Qed.
 
-Lemma adr_of_valid_state_Ui :
+Lemma adr_of_valid_state :
   forall s : State,
     valid_state_prop Ui s -> adr s = i.
 Proof.
