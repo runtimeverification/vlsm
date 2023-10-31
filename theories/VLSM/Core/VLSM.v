@@ -2713,36 +2713,6 @@ Proof. by firstorder. Qed.
 
 End sec_valid_transition_props.
 
-Section sec_constrained_defs.
-
-(** ** Constrained traces, states and messages *)
-
-Context
-  `(X : VLSM message)
-  .
-
-Inductive constrained_transitions_from_to :
-  state X -> state X -> list (transition_item X) -> Prop :=
-| ct_empty : forall s, constrained_transitions_from_to s s []
-| ct_extend : forall s s' om om' l f tr, transition X l (s, om) = (s', om') ->
-    valid X l (s, om) -> constrained_transitions_from_to s' f tr ->
-    constrained_transitions_from_to s f
-      ((Build_transition_item l om s' om') :: tr).
-
-Definition finite_constrained_trace_init_to
-  (s f : state X) (tr : list (transition_item X)) :=
-  constrained_transitions_from_to s f tr /\ initial_state_prop X s.
-
-Definition constrained_state_prop (f : state X) : Prop :=
-  exists (s : state X) (tr : list (transition_item X)),
-    finite_constrained_trace_init_to s f tr.
-
-Definition constrained_message_prop (m : message) : Prop :=
-  exists (s f : state X) (tr : list (transition_item X)) (item : transition_item X),
-    finite_constrained_trace_init_to s f (tr ++ [item]) /\ output item = Some m.
-
-End sec_constrained_defs.
-
 Section sec_finite_valid_trace_init_to_alt.
 
 (** ** Alternate definitions to valid traces and states

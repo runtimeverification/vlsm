@@ -265,7 +265,7 @@ Qed.
 (** The previously defined trace is obviously constrained, since it's valid. *)
 Lemma parity_constrained_trace1 :
   multiplier >= 2 ->
-  finite_constrained_trace_init_to ParityVLSM
+  finite_constrained_trace_init_to_alt ParityVLSM
     parity_trace1_first_state parity_trace1_last_state parity_trace1.
 Proof.
   constructor; [| by unfold parity_trace1_first_state; cbn; red; lia].
@@ -359,7 +359,7 @@ Qed.
 
 Example parity_constrained_trace2_init :
   multiplier > 0 ->
-  finite_constrained_trace_init_to_alt ParityVLSM
+  finite_constrained_trace_init_to ParityVLSM
     parity_trace2_init_first_state parity_trace2_init_last_state parity_trace2_init.
 Proof.
   intros.
@@ -378,7 +378,7 @@ Qed.
 
 Example parity_constrained_trace2 :
   multiplier > 0 ->
-  finite_constrained_trace_init_to_alt ParityVLSM
+  finite_constrained_trace_init_to ParityVLSM
     parity_trace2_init_first_state parity_trace2_last_state parity_trace2.
 Proof.
   intros Hgt0.
@@ -442,7 +442,7 @@ Qed.
 Lemma parity_constrained_messages_left :
   multiplier > 0 ->
   forall (m : ParityMessage),
-    constrained_message_prop_alt ParityVLSM m ->
+    constrained_message_prop ParityVLSM m ->
     exists (j : Z), m = multiplier * j /\ m > 0.
 Proof.
   intros Hgt0 m ([s []] & [] & s' & (_ & _ & []) & Ht).
@@ -454,7 +454,7 @@ Lemma parity_constrained_messages_right :
   multiplier > 0 ->
   forall (m : ParityMessage),
     (exists (j : Z), m = multiplier * j) -> m > 0 ->
-    constrained_message_prop_alt ParityVLSM m.
+    constrained_message_prop ParityVLSM m.
 Proof.
   intros Hgt0 m (j & Hj) Hmgt0.
   unfold constrained_message_prop_alt, can_emit.
@@ -473,7 +473,7 @@ Qed.
 Lemma parity_constrained_messages :
   multiplier > 0 ->
   forall (m : ParityMessage),
-    constrained_message_prop_alt ParityVLSM m <-> (exists (j : Z), m = multiplier * j /\ m > 0).
+    constrained_message_prop ParityVLSM m <-> (exists (j : Z), m = multiplier * j /\ m > 0).
 Proof.
   split.
   - by apply parity_constrained_messages_left.
@@ -484,7 +484,7 @@ Qed.
 
 Lemma parity_constrained_states_right :
   forall (st : ParityState),
-    constrained_state_prop_alt ParityVLSM st -> st >= 0.
+    constrained_state_prop ParityVLSM st -> st >= 0.
 Proof.
   induction 1 using valid_state_prop_ind.
   - by cbn in Hs; unfold ParityComponent_initial_state_prop in Hs; lia.
@@ -494,7 +494,7 @@ Qed.
 
 Lemma parity_constrained_states_left :
   forall (st : ParityState),
-    st >= 0 -> constrained_state_prop_alt ParityVLSM st.
+    st >= 0 -> constrained_state_prop ParityVLSM st.
 Proof.
   intros st Hst.
   unfold constrained_state_prop_alt.
@@ -507,7 +507,7 @@ Qed.
 
 Lemma parity_constrained_states :
   forall (st : ParityState),
-    constrained_state_prop_alt ParityVLSM st <-> st >= 0.
+    constrained_state_prop ParityVLSM st <-> st >= 0.
 Proof.
   split.
   - by apply parity_constrained_states_right.

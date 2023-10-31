@@ -134,7 +134,7 @@ Lemma full_node_VLSM_reachable
     forall (l : Label) (s : State) (m : Message),
       valid V l (s, Some m) -> full_node s m) :
   forall (s : State),
-    constrained_state_prop_alt V s ->
+    constrained_state_prop V s ->
     UMO_reachable full_node s.
 Proof.
   intro s.
@@ -355,7 +355,7 @@ Defined.
     HasBeenDirectlyObservedCapability_from_sent_received (ELMOComponent i).
 
 Lemma ELMO_reachable_view (s : State) i :
-  constrained_state_prop_alt (ELMOComponent i) s
+  constrained_state_prop (ELMOComponent i) s
     <->
   UMO_reachable ELMO_recv_valid s /\ adr s = idx i.
 Proof.
@@ -381,7 +381,7 @@ Proof.
 Qed.
 
 Lemma ELMO_full_node_reachable i s :
-  constrained_state_prop_alt (ELMOComponent i) s -> UMO_reachable full_node s.
+  constrained_state_prop (ELMOComponent i) s -> UMO_reachable full_node s.
 Proof.
   intro Hs; apply ELMO_reachable_view in Hs as [? _].
   eapply UMO_reachable_impl; [| done].
@@ -389,7 +389,7 @@ Proof.
 Qed.
 
 Lemma ELMO_no_self_equiv_reachable i s :
-  constrained_state_prop_alt (ELMOComponent i) s -> UMO_reachable no_self_equiv s.
+  constrained_state_prop (ELMOComponent i) s -> UMO_reachable no_self_equiv s.
 Proof.
   intro Hs; apply ELMO_reachable_view in Hs as [? _].
   eapply UMO_reachable_impl; [| done].
@@ -406,7 +406,7 @@ Context
   (Ri : VLSM Message := pre_loaded_with_all_messages_vlsm Ei).
 
 Lemma ELMO_reachable_adr (s : State) :
-  constrained_state_prop_alt Ei s -> adr s = idx i.
+  constrained_state_prop Ei s -> adr s = idx i.
 Proof.
   by intros [_ Hadr]%ELMO_reachable_view.
 Qed.
@@ -467,7 +467,7 @@ Qed.
 
 (** There is a unique trace from any prefix of a reachable state to that state. *)
 Lemma ELMO_unique_trace_segments (s sf : State) :
-  constrained_state_prop_alt Ei sf -> (s = sf \/ state_suffix s sf) ->
+  constrained_state_prop Ei sf -> (s = sf \/ state_suffix s sf) ->
   exists! (tr : list transition_item),
     finite_valid_trace_from_to Ri s sf tr.
 Proof.
@@ -509,7 +509,7 @@ Qed.
   trace reaching that state from the initial state.
 *)
 Lemma ELMO_unique_traces (sf : State) :
-  constrained_state_prop_alt Ei sf ->
+  constrained_state_prop Ei sf ->
     exists! tr : list transition_item, exists si : State,
       finite_valid_trace_init_to Ri si sf tr.
 Proof.
@@ -614,7 +614,7 @@ Qed.
 
 (**
   This lemma is convenient to prove for [local_equivocators_simple],
-  and our assumption is slightly weaker than [constrained_state_prop_alt Ei].
+  and our assumption is slightly weaker than [constrained_state_prop Ei].
 *)
 Lemma local_equivocators_simple_no_self (s : State) :
   UMO_reachable no_self_equiv s ->
@@ -794,7 +794,7 @@ Qed.
 
 Lemma ELMO_reachable_msg_valid_full :
   forall s : State,
-    constrained_state_prop_alt Ei s -> ELMO_msg_valid_full (MkMessage s).
+    constrained_state_prop Ei s -> ELMO_msg_valid_full (MkMessage s).
 Proof.
   intros s [Hs Hi]%ELMO_reachable_view.
   induction Hs as [| | ? ? Hvalid]; [| specialize (IHHs Hi)..].
@@ -804,7 +804,7 @@ Proof.
 Qed.
 
 Lemma reachable_full_node_for_all_messages i' (s : State) :
-  constrained_state_prop_alt (ELMOComponent i') s ->
+  constrained_state_prop (ELMOComponent i') s ->
   forall m, m ∈ messages s -> full_node s m.
 Proof.
   intros [Hs _]%ELMO_reachable_view.
@@ -819,9 +819,9 @@ Proof.
 Qed.
 
 Lemma reachable_sent_messages_reachable i' (s ms : State) :
-  constrained_state_prop_alt (ELMOComponent i') s ->
+  constrained_state_prop (ELMOComponent i') s ->
   MkMessage ms ∈ sentMessages s ->
-  constrained_state_prop_alt (ELMOComponent i') ms.
+  constrained_state_prop (ELMOComponent i') ms.
 Proof.
   intros [Hs Hadr]%ELMO_reachable_view Hms.
   apply ELMO_reachable_view.
@@ -831,7 +831,7 @@ Proof.
 Qed.
 
 Lemma reachable_sent_messages_adr (s : State) (m : Message) :
-  constrained_state_prop_alt Ei s ->
+  constrained_state_prop Ei s ->
   m ∈ sentMessages s ->
   adr (state m) = idx i.
 Proof.
@@ -840,7 +840,7 @@ Proof.
 Qed.
 
 Lemma reachable_messages_are_msg_valid (s : State) (m : Message) :
-  constrained_state_prop_alt Ei s ->
+  constrained_state_prop Ei s ->
   m ∈ messages s ->
   ELMO_msg_valid_full m.
 Proof.
@@ -933,7 +933,7 @@ Lemma equivocation_limit_recv_msg_prefix_ok (v : State) (m : Message) ob
   (v'' := v <+> MkObservation Receive m)
   :
   adr (state m) <> adr v ->
-  constrained_state_prop_alt Ei v ->
+  constrained_state_prop Ei v ->
   m' ∉ receivedMessages v ->
   m ∉ receivedMessages v ->
   ELMO_recv_valid v m' ->
@@ -975,7 +975,7 @@ Hint Resolve
   : ELMO_hints.
 
 Lemma ELMO_recv_valid_prefix s (m : Message) (ob : Observation) :
-  constrained_state_prop_alt Ei s ->
+  constrained_state_prop Ei s ->
   m <*> ob ∉ receivedMessages s ->
   m ∉ receivedMessages s ->
   adr s <> adr (state m) ->
@@ -990,12 +990,12 @@ Qed.
 Hint Resolve ELMO_recv_valid_prefix : ELMO_hints.
 
 Lemma reachable_received_messages_reachable (s : State) :
-  constrained_state_prop_alt Ei s ->
+  constrained_state_prop Ei s ->
   forall m,
     m ∈ receivedMessages s ->
   forall i',
     adr (state m) = idx i' ->
-    constrained_state_prop_alt (ELMOComponent i') (state m).
+    constrained_state_prop (ELMOComponent i') (state m).
 Proof.
   intros Hs m Hm.
   destruct (decide (adr (state m) = adr s)).
@@ -1027,7 +1027,7 @@ Proof.
   {
     by intro; apply (ELMO_recv_valid_prefix s (MkMessage ms) ob); [apply ELMO_reachable_view | ..].
   }
-  assert (Hms : constrained_state_prop_alt (ELMOComponent i') ms).
+  assert (Hms : constrained_state_prop (ELMOComponent i') ms).
   {
     destruct (decide (MkMessage ms ∈ receivedMessages s)); [| by eauto].
     revert e; clear -Hs IHms Hadr Hadr_ms Hadr_neq.
@@ -1061,9 +1061,9 @@ Qed.
 
 Lemma receivable_messages_reachable (ms s : State) i' :
   adr ms = idx i' ->
-  constrained_state_prop_alt Ei s ->
+  constrained_state_prop Ei s ->
   ELMO_recv_valid s (MkMessage ms) ->
-  constrained_state_prop_alt (ELMOComponent i') ms.
+  constrained_state_prop (ELMOComponent i') ms.
 Proof.
   intros Heq Hcsp Hrv.
   change ms with (state (MkMessage ms)).
@@ -1187,7 +1187,7 @@ Definition ELMOComponent_state_destructor (s : State)
   end.
 
 Lemma ELMOComponent_state_destructor_initial :
-  forall (s' : VLSM.state Ei), constrained_state_prop_alt Ei s' ->
+  forall (s' : VLSM.state Ei), constrained_state_prop Ei s' ->
     initial_state_prop Ei s' <-> ELMOComponent_state_destructor s' = [].
 Proof.
   intros s' Hs'; split; intro Hs''.
@@ -1197,7 +1197,7 @@ Proof.
 Qed.
 
 Lemma ELMOComponent_state_destructor_input_valid_transition :
-  forall (s' : VLSM.state Ei), constrained_state_prop_alt Ei s' ->
+  forall (s' : VLSM.state Ei), constrained_state_prop Ei s' ->
   forall (s : VLSM.state Ei) (item : transition_item Ei),
     (item, s) ∈ ELMOComponent_state_destructor s' ->
     input_valid_transition_item Ri s item.
@@ -1222,7 +1222,7 @@ Proof.
 Qed.
 
 Lemma ELMO_latest_observation_Send_state :
-  forall s' : State, constrained_state_prop_alt Ei s' ->
+  forall s' : State, constrained_state_prop Ei s' ->
   forall (s : State) (m : Message), s' = s <+> MkObservation Send m ->
     s = state m.
 Proof.
@@ -1406,10 +1406,10 @@ Definition FreeELMO : VLSM Message :=
 Definition ReachELMO : VLSM Message :=
   pre_loaded_with_all_messages_vlsm FreeELMO.
 
-Definition composite_constrained_state_prop_alt
+Definition composite_constrained_state_prop
   {message : Type} `{EqDecision index}
   (IM : index -> VLSM message) (s : composite_state IM) : Prop :=
-    constrained_state_prop_alt (free_composite_vlsm IM) s.
+    constrained_state_prop (free_composite_vlsm IM) s.
 
 Lemma ELMO_initial_state_equivocating_validators :
   forall s : composite_state ELMOComponent,
@@ -1500,13 +1500,13 @@ Proof.
 Qed.
 
 Definition ELMO_state_to_minimal_equivocation_trace
-  (s : composite_state ELMOComponent) (Hs : composite_constrained_state_prop_alt ELMOComponent s)
+  (s : composite_state ELMOComponent) (Hs : composite_constrained_state_prop ELMOComponent s)
   : composite_state ELMOComponent * list (composite_transition_item ELMOComponent) :=
   state_to_minimal_equivocation_trace ELMOComponent
     (fun _ : index => ELMOComponent_state_destructor) (fun _ : index => sizeState) s Hs.
 
 Lemma ELMO_state_to_minimal_equivocation_trace_reachable
-  (s : composite_state ELMOComponent) (Hs : composite_constrained_state_prop_alt ELMOComponent s)
+  (s : composite_state ELMOComponent) (Hs : composite_constrained_state_prop ELMOComponent s)
   (is : composite_state ELMOComponent) (tr : list (composite_transition_item ELMOComponent)) :
     ELMO_state_to_minimal_equivocation_trace s Hs = (is, tr) ->
       finite_valid_trace_init_to ReachELMO is s tr.
@@ -1561,7 +1561,7 @@ Proof.
 Qed.
 
 Lemma ELMO_state_to_minimal_equivocation_trace_equivocation_monotonic :
-  forall (s : composite_state ELMOComponent) (Hs : composite_constrained_state_prop_alt ELMOComponent s),
+  forall (s : composite_state ELMOComponent) (Hs : composite_constrained_state_prop ELMOComponent s),
   forall (is : composite_state ELMOComponent) (tr : list (composite_transition_item ELMOComponent)),
   ELMO_state_to_minimal_equivocation_trace s Hs = (is, tr) ->
   forall (pre suf : list (composite_transition_item ELMOComponent))
@@ -1586,7 +1586,7 @@ Qed.
 
 Lemma ELMO_global_equivocators_iff_simple :
   forall (s : VLSM.state ELMOProtocol) (a : Address),
-    composite_constrained_state_prop_alt ELMOComponent s ->
+    composite_constrained_state_prop ELMOComponent s ->
       ELMO_global_equivocators s a <-> global_equivocators_simple s a.
 Proof.
   intros s a Hs.
@@ -1665,7 +1665,7 @@ Qed.
 
 Lemma ELMO_global_equivocators_iff_msg_dep_equivocation :
   forall (s : VLSM.state ELMOProtocol) (a : Address),
-    composite_constrained_state_prop_alt ELMOComponent s ->
+    composite_constrained_state_prop ELMOComponent s ->
   ELMO_global_equivocators s a
     <->
   msg_dep_is_globally_equivocating ELMOComponent
@@ -1683,7 +1683,7 @@ Qed.
 
 Lemma ELMO_global_equivocators_iff_simple_by_generic :
   forall (s : VLSM.state ELMOProtocol) (a : Address),
-    composite_constrained_state_prop_alt ELMOComponent s ->
+    composite_constrained_state_prop ELMOComponent s ->
       ELMO_global_equivocators s a <-> global_equivocators_simple s a.
 Proof.
   intros s a Hs.
@@ -1705,7 +1705,7 @@ Qed.
 
 Lemma ELMO_state_to_minimal_equivocation_equivocating_validators
   (s : composite_state ELMOComponent)
-  (Hs_pre :  composite_constrained_state_prop_alt ELMOComponent s)
+  (Hs_pre :  composite_constrained_state_prop ELMOComponent s)
   (is : composite_state ELMOComponent)
   (tr : list (composite_transition_item ELMOComponent))
   (Heqtr_min : ELMO_state_to_minimal_equivocation_trace s Hs_pre = (is, tr)) :
@@ -1731,7 +1731,7 @@ Lemma ELMO_state_to_minimal_equivocation_trace_valid
   (s : composite_state ELMOComponent)
   (Hs : valid_state_prop ELMOProtocol s)
   (Hs_pre := VLSM_incl_valid_state (constrained_preloaded_incl (free_composite_vlsm _) ELMO_global_constraint) _ Hs
-    : composite_constrained_state_prop_alt ELMOComponent s)
+    : composite_constrained_state_prop ELMOComponent s)
   (is : composite_state ELMOComponent)
   (tr : list (composite_transition_item ELMOComponent)) :
     ELMO_state_to_minimal_equivocation_trace s Hs_pre = (is, tr) ->
@@ -1899,7 +1899,7 @@ Qed.
 
 Lemma global_equivocators_simple_step_update_receive_already_observed
   (i : index) (sigma : composite_state ELMOComponent) (s' : State) (m : Message) :
-    composite_constrained_state_prop_alt ELMOComponent sigma ->
+    composite_constrained_state_prop ELMOComponent sigma ->
     ELMOComponentRAMTransition i Receive (sigma i) s' m ->
     composite_has_been_directly_observed ELMOComponent sigma m ->
       forall a : Address,
@@ -1919,7 +1919,7 @@ Qed.
 
 Lemma ELMO_equivocating_validators_step_update_Send
   (i : index) (sigma : composite_state ELMOComponent) (s' : State) (m : Message) :
-  composite_constrained_state_prop_alt ELMOComponent sigma ->
+  composite_constrained_state_prop ELMOComponent sigma ->
   ELMOComponentRAMTransition i Send (sigma i) s' m ->
     ELMO_equivocating_validators (state_update ELMOComponent sigma i s')
       ⊆
@@ -1941,7 +1941,7 @@ Qed.
 
 Lemma ELMO_equivocating_validators_step_update_Receive
   (i : index) (sigma : composite_state ELMOComponent) (s' : State) (m : Message) :
-  composite_constrained_state_prop_alt ELMOComponent sigma ->
+  composite_constrained_state_prop ELMOComponent sigma ->
   ELMOComponentRAMTransition i Receive (sigma i) s' m ->
     ELMO_equivocating_validators (state_update ELMOComponent sigma i s')
       ⊆
@@ -1965,7 +1965,7 @@ Qed.
 
 Lemma ELMO_equivocating_validators_step_update_Receive_already_Observed
   (i : index) (sigma : composite_state ELMOComponent) (s' : State) (m : Message) :
-  composite_constrained_state_prop_alt ELMOComponent sigma ->
+  composite_constrained_state_prop ELMOComponent sigma ->
   composite_has_been_directly_observed ELMOComponent sigma m ->
   ELMOComponentRAMTransition i Receive (sigma i) s' m ->
     ELMO_equivocating_validators (state_update ELMOComponent sigma i s')
@@ -2143,7 +2143,7 @@ Proof.
     - by apply any_message_is_valid_in_preloaded.
   }
   apply (VLSM_incl_valid_state Hincl) in Hs as Hs_pre.
-  assert (Hs' : composite_constrained_state_prop_alt ELMOComponent s').
+  assert (Hs' : composite_constrained_state_prop ELMOComponent s').
   {
     apply valid_state_prop_iff; right.
     by exists (existT i Receive), (s, Some m), None; repeat split;
@@ -2204,7 +2204,7 @@ Proof.
   {
     assert (Hall_reachable :
       Forall (fun item =>
-        composite_constrained_state_prop_alt ELMOComponent
+        composite_constrained_state_prop ELMOComponent
           ((state_update ELMOComponent s i_m item))) (is_m :: map destination tr_m)).
     {
       apply (VLSM_incl_valid_state Hincl) in Hsimis as Hsimis_pre.
@@ -2232,7 +2232,7 @@ Proof.
     apply Forall_app in Hall_messages_observed as [Hall_messages_observed Hlast_obs].
     rewrite Forall_singleton in Hlast_obs.
     specialize (IHHtr_m Hsimis_eqvs Hall_messages_observed Hall_reachable).
-    assert (Hsis0_pre : composite_constrained_state_prop_alt ELMOComponent (state_update ELMOComponent s i_m s0)).
+    assert (Hsis0_pre : composite_constrained_state_prop ELMOComponent (state_update ELMOComponent s i_m s0)).
     {
       apply valid_trace_get_last in Htr_m as <-.
       rewrite Forall_forall in Hall_reachable.
@@ -2495,7 +2495,7 @@ Lemma all_intermediary_transitions_are_receive
   (Hadr_neq : adr (state m) <> idx i)
   (Hnot_local_equivocator : ~ local_equivocators_full si (adr (state m)))
   (sigma : composite_state ELMOComponent)
-  (Hsigma : composite_constrained_state_prop_alt ELMOComponent sigma)
+  (Hsigma : composite_constrained_state_prop ELMOComponent sigma)
   (Hcomponent : sigma i = si)
   (Hspecial : component_reflects_composite sigma i)
   (tr_m : list transition_item)
@@ -2808,7 +2808,7 @@ Qed.
 *)
 Lemma reflecting_composite_for_reachable_component
   (i : index) (si : VLSM.state (ELMOComponent i))
-  (Hreachable : constrained_state_prop_alt (ELMOComponent i) si) :
+  (Hreachable : constrained_state_prop (ELMOComponent i) si) :
   exists s : VLSM.state ELMOProtocol,
     s i = si
     /\ valid_state_prop ELMOProtocol s
