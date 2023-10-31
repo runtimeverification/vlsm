@@ -725,3 +725,18 @@ Program Definition not_lt_plus_dec {m n} (Hnlt : ~ n < m) : {k | k + m = n} :=
   exist _ (n - m) _.
 Next Obligation.
 Proof. by cbn; lia. Qed.
+
+Definition update `{EqDecision A} `(f : A -> B) (a : A) (b : B) : A -> B :=
+  fun a' : A => if decide (a = a') then b else f a'.
+
+Lemma update_eq `{EqDecision A} `(f : A -> B) (a : A) (b : B) :
+  update f a b a = b.
+Proof.
+  by unfold update; rewrite decide_True.
+Qed.
+
+Lemma update_neq `{EqDecision A} `(f : A -> B) (a : A) (b : B) (a' : A) :
+  a <> a' -> update f a b a' = f a'.
+Proof.
+  by intros; unfold update; rewrite decide_False.
+Qed.

@@ -1,5 +1,5 @@
 From VLSM.Lib Require Import Itauto.
-From stdpp Require Import finite.
+From stdpp Require Import prelude finite.
 From Coq Require Import FinFun.
 From VLSM.Lib Require Import Preamble.
 
@@ -355,32 +355,29 @@ Proof.
 Qed.
 
 Fixpoint list_annotate
-  {A : Type} (P : A -> Prop) {Pdec : forall a, Decision (P a)}
-  (l : list A) : Forall P l -> list (dsig P) :=
+  {A : Type} {P : A -> Prop} {Pdec : forall a, Decision (P a)}
+  {l : list A} : Forall P l -> list (dsig P) :=
   match l with
   | [] => fun _ => []
-  | h :: t => fun Hs => dexist h (Forall_inv Hs) :: list_annotate P t (Forall_inv_tail Hs)
+  | h :: t => fun Hs => dexist h (Forall_inv Hs) :: list_annotate (Forall_inv_tail Hs)
   end.
 
-Lemma list_annotate_length
+Section sec_list_annotate_props.
+
+Context
   {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  : length (list_annotate P l Hs) = length l.
+  {P : A -> Prop}
+  `{Pdec : forall a, Decision (P a)}
+  .
+
+Lemma list_annotate_length (l : list A) (Hs : Forall P l) :
+  length (list_annotate Hs) = length l.
 Proof.
   by induction l; cbn; [| rewrite IHl].
 Qed.
 
-Lemma list_annotate_pi
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  (Hs' : Forall P l)
-  : list_annotate P l Hs = list_annotate P l Hs'.
+Lemma list_annotate_pi (l : list A) (Hs : Forall P l) (Hs' : Forall P l) :
+  list_annotate Hs = list_annotate Hs'.
 Proof.
   revert Hs Hs'.
   induction l; [done |].
@@ -389,16 +386,11 @@ Proof.
 Qed.
 
 Lemma list_annotate_eq
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l1 : list A)
-  (Hl1 : Forall P l1)
-  (l2 : list A)
-  (Hl2 : Forall P l2)
-  : list_annotate P l1 Hl1 = list_annotate P l2 Hl2 <-> l1 = l2.
+  (l1 : list A) (Hl1 : Forall P l1)
+  (l2 : list A) (Hl2 : Forall P l2)
+  : list_annotate Hl1 = list_annotate Hl2 <-> l1 = l2.
 Proof.
-  split; [| intro; subst; apply list_annotate_pi].
+  split; [| by intro; subst; apply list_annotate_pi].
   revert Hl1 l2 Hl2.
   induction l1; destruct l2; simpl; intros; [done.. |].
   inversion H.
@@ -406,31 +398,19 @@ Proof.
   by subst.
 Qed.
 
-Lemma list_annotate_app
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l1 l2 : list A)
-  (Hs : Forall P (l1 ++ l2)) :
-    list_annotate P (l1 ++ l2) Hs =
-    list_annotate P l1 (proj1 (proj1 (@Forall_app _ P l1 l2) Hs)) ++
-    list_annotate P l2 (proj2 (proj1 (@Forall_app _ P l1 l2) Hs)).
+Lemma list_annotate_app (l1 l2 : list A) (Hs : Forall P (l1 ++ l2)) :
+  list_annotate Hs =
+  list_annotate (proj1 (proj1 (@Forall_app _ P l1 l2) Hs)) ++
+  list_annotate (proj2 (proj1 (@Forall_app _ P l1 l2) Hs)).
 Proof.
   induction l1; cbn; [by apply list_annotate_pi |].
   f_equal; [by apply dsig_eq |].
   by rewrite IHl1; f_equal; apply list_annotate_pi.
 Qed.
 
-Lemma nth_error_list_annotate
-  {A : Type}
-  (P : A -> Prop)
-  (Pdec : forall a, Decision (P a))
-  (l : list A)
-  (Hs : Forall P l)
-  (n : nat)
-  : exists (oa : option (dsig P)),
-    nth_error (list_annotate P l Hs) n = oa
-    /\ option_map (@proj1_sig _ _) oa = nth_error l n.
+Lemma nth_error_list_annotate (l : list A) (Hs : Forall P l) (n : nat) :
+  exists (oa : option (dsig P)),
+    nth_error (list_annotate Hs) n = oa /\ option_map (@proj1_sig _ _) oa = nth_error l n.
 Proof.
   generalize dependent l.
   induction n; intros [| a l] Hs.
@@ -440,6 +420,37 @@ Proof.
   - by exists None.
   - by cbn; eauto.
 Qed.
+
+Lemma elem_of_list_annotate (l : list A) (Hs : Forall P l) :
+  forall a, a ∈ list_annotate Hs <-> `a ∈ l.
+Proof.
+  revert Hs; induction l; cbn; intros; [by split; inversion 1 |].
+  destruct_dec_sig a0 a' Ha' Heq; subst; cbn.
+  rewrite !elem_of_cons, IHl; cbn.
+  split; intros [Ha | Ha].
+  - by inversion Ha; left.
+  - by right.
+  - by left; apply dsig_eq.
+  - by right.
+Qed.
+
+Lemma list_annotate_NoDup (l : list A) (Hs : Forall P l) :
+  NoDup l -> NoDup (list_annotate Hs).
+Proof.
+  intros Hl; revert Hs.
+  induction Hl; [by constructor |].
+  intro Hs; constructor; [| by apply IHHl].
+  by rewrite elem_of_list_annotate.
+Qed.
+
+Lemma list_annotate_forget (l : list A) (Hs : Forall P l) :
+  map proj1_sig (list_annotate Hs) = l.
+Proof.
+  revert Hs; induction l; [done |].
+  by intro; cbn; rewrite IHl.
+Qed.
+
+End sec_list_annotate_props.
 
 Fixpoint nth_error_filter_index
   {A} P `{forall (x : A), Decision (P x)}
@@ -1891,3 +1902,22 @@ Proof.
 Qed.
 
 End sec_longest_common_suffix.
+
+Program Fixpoint Exists_choose_first
+  `{P : A -> Prop} `{forall a, Decision (P a)} {l : list A} (Hl : Exists P l) {struct l} : A :=
+  match l with
+  | [] => _
+  | a :: l => if decide (P a) then a else @Exists_choose_first A P _ l _
+  end.
+Next Obligation.
+Proof. by intros; exfalso; subst; inversion Hl. Qed.
+Next Obligation.
+Proof. by intros; subst; apply Exists_cons in Hl as []. Qed.
+
+Lemma Exists_choose_first_good
+  `(P : A -> Prop) `{forall a, Decision (P a)} (l : list A) (Hl : Exists P l) :
+  P (Exists_choose_first Hl).
+Proof.
+  induction l; cbn; [by inversion Hl |].
+  by case_decide; [| apply IHl].
+Qed.

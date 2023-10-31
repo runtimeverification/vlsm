@@ -378,7 +378,7 @@ Context
   .
 
 Program Definition sub_index_list_annotate : list sub_index :=
-  list_annotate _ sub_index_list _.
+  list_annotate (l := sub_index_list) _.
 Next Obligation.
 Proof.
   by apply Forall_forall.

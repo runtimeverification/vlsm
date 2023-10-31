@@ -441,38 +441,6 @@ Proof.
     by eapply filter_nil_not_elem_of in Px.
 Qed.
 
-Lemma elem_of_list_annotate_forget
-  {A : Type}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  (xP : dsig P)
-  (Hin : xP ∈ list_annotate P l Hs)
-  : proj1_sig xP ∈ l.
-Proof.
-  induction l.
-  - by inversion Hin.
-  - cbn in Hin.
-    apply elem_of_cons in Hin as [-> | Hin].
-    + by left.
-    + by right; apply (IHl (Forall_inv_tail Hs)).
-Qed.
-
-Lemma elem_of_list_annotate
-  `{EqDecision A}
-  (P : A -> Prop)
-  {Pdec : forall a, Decision (P a)}
-  (l : list A)
-  (Hs : Forall P l)
-  (xP : dsig P)
-  : xP ∈ list_annotate P l Hs <-> (` xP) ∈ l.
-Proof.
-  split; [by apply elem_of_list_annotate_forget |].
-  destruct xP as [x Hpx]; cbn.
-  by induction 1; cbn; rewrite elem_of_cons, dsig_eq; cbn; auto.
-Qed.
-
 Lemma occurrences_ordering
   {A : Type}
   (a b : A)
@@ -632,4 +600,64 @@ Proof.
   split; intros x Hin.
   - by apply Hsub, elem_of_app; left.
   - by apply Hsub, elem_of_app; right.
+Qed.
+
+#[export] Instance finset_equiv_dec `{FinSet A C} : RelDecision (≡@{C}).
+Proof.
+  intros X Y.
+  destruct (decide (elements X ≡ₚ elements Y));
+    [| by right; contradict n; rewrite n].
+  left; intros a.
+  rewrite <- !elem_of_elements, !elem_of_list_lookup.
+  split; intros (i & Hi); [| symmetry in p];
+    apply Permutation_inj in p as (Hlen & f & Hinjf & Hp).
+  - by rewrite Hp in Hi; eexists.
+  - by rewrite Hp in Hi; eexists.
+Qed.
+
+#[export] Instance sum_list_with_proper `(f : index -> nat) :
+  Proper ((≡ₚ) ==> (=)) (sum_list_with f).
+Proof.
+  induction 1; cbn; [done | ..].
+  - by rewrite IHPermutation.
+  - by lia.
+  - by congruence.
+Qed.
+
+Lemma sum_list_with_ext_forall index (f g : index -> nat) (l : list index) :
+  (forall (i : index), i ∈ l -> f i = g i) ->
+    sum_list_with f l = sum_list_with g l.
+Proof.
+  induction l; cbn; intros Heq; [done |].
+  rewrite Heq by left.
+  rewrite IHl; [done |].
+  by intros; apply Heq; right.
+Qed.
+
+Lemma sum_list_with_zero `(f : index -> nat) (l : list index) :
+  sum_list_with  f l = 0 <-> forall (i : index), i ∈ l -> f i = 0.
+Proof.
+  split.
+  - intros Hsum i Hi.
+    apply sum_list_with_in with (f := f) in Hi.
+    by lia.
+  - induction l; intros Hall; cbn; [done |].
+    rewrite Hall by left.
+    rewrite IHl; [done |].
+    by intros; apply Hall; right.
+Qed.
+
+Lemma dsig_NoDup_map `(P : A -> Prop) `{Pdec : forall a, Decision (P a)} :
+  forall (l : list (dsig P)),
+    NoDup l <-> NoDup (map proj1_sig l).
+Proof.
+  split.
+  - induction 1 as [| da dl Hda]; cbn; constructor; [| done].
+    rewrite elem_of_list_fmap.
+    intros (_da & Heq & H_da).
+    by apply dsig_eq in Heq as <-.
+  - induction l; cbn; [by constructor |].
+    rewrite !NoDup_cons.
+    intros [Ha ?]; split; [| by apply IHl].
+    by contradict Ha; apply elem_of_list_fmap; eexists.
 Qed.
