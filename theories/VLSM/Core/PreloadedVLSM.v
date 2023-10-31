@@ -586,6 +586,18 @@ Context
   `(X : VLSM message)
   .
 
+Definition input_constrained_transition :=
+  input_valid_transition (pre_loaded_with_all_messages_vlsm X).
+
+Definition input_constrained_transition_item :=
+  input_valid_transition_item (pre_loaded_with_all_messages_vlsm X).
+
+Definition finite_constrained_trace_from_to :=
+  finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X).
+
+Definition finite_constrained_trace_from :=
+  finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X).
+
 Definition finite_constrained_trace_init_to :=
   finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X).
 
@@ -594,6 +606,9 @@ Definition constrained_state_prop :=
 
 Definition constrained_message_prop :=
   can_emit (pre_loaded_with_all_messages_vlsm X).
+
+Definition constrained_state_message_prop :=
+  valid_state_message_prop (pre_loaded_with_all_messages_vlsm X).
 
 End sec_constrained_defs.
 
