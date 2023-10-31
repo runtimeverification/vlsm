@@ -411,20 +411,20 @@ Proof.
   by intros [_ Hadr]%ELMO_reachable_view.
 Qed.
 
-Lemma ELMO_transition_output_not_initial :
+Lemma ELMO_constrained_transition_output_not_initial :
   forall l (s : State) (om : option Message) (s' : State) (om' : option Message),
-    input_valid_transition Ri l (s, om) (s', om') ->
+    input_constrained_transition Ei l (s, om) (s', om') ->
     ~ initial_state_prop Ri s'.
 Proof.
   intros l s om [ol a] om' [(_ & _ & Hv) Ht]; compute; intros [-> _].
   by inversion Hv; subst; inversion Ht.
 Qed.
 
-Lemma ELMO_transition_inj :
+Lemma ELMO_input_constrained_transition_inj :
   forall l (s : State) (om : option Message) (s' : State) (om' : option Message),
-    input_valid_transition Ri l (s, om) (s', om') ->
+    input_constrained_transition Ei l (s, om) (s', om') ->
   forall l0 s0 om0 om'0,
-    input_valid_transition Ri l0 (s0, om0) (s', om'0) ->
+    input_constrained_transition Ei l0 (s0, om0) (s', om'0) ->
       l0 = l /\ s0 = s /\ om0 = om /\ om'0 = om'.
 Proof.
   intros l s om s' om' [(_ & _ & Hvalid) Ht] l0 s0 om0 om'0 [(_ & _ & Hvalid0) Ht0].
@@ -469,7 +469,7 @@ Qed.
 Lemma ELMO_unique_trace_segments (s sf : State) :
   constrained_state_prop Ei sf -> (s = sf \/ state_suffix s sf) ->
   exists! (tr : list transition_item),
-    finite_valid_trace_from_to Ri s sf tr.
+    finite_constrained_trace_from_to Ei s sf tr.
 Proof.
   intros Hsf [-> | Hsuf];
     [by exists []; split; [by constructor |]; intros;
@@ -491,7 +491,7 @@ Proof.
       intros tr' Htr'.
       induction Htr' using finite_valid_trace_from_to_rev_ind;
         [by contradict Hsuf; apply Irreflexive_state_suffix | clear IHHtr'].
-      pose proof (ELMO_transition_inj _ _ _ _ _ Ht _ _ _ _ Ht0) as (-> & -> & -> & ->).
+      pose proof (ELMO_input_constrained_transition_inj _ _ _ _ _ Ht _ _ _ _ Ht0) as (-> & -> & -> & ->).
       eapply transition_monotone_empty_trace in Htr'; [| typeclasses eauto].
       by subst.
     + destruct (IHHsf Hss0) as (tr & Htr & Htr_unique).
@@ -500,7 +500,7 @@ Proof.
       intros tr' Htr'.
       induction Htr' using finite_valid_trace_from_to_rev_ind;
         [by contradict Hsuf; apply Irreflexive_state_suffix | clear IHHtr'].
-      pose proof (ELMO_transition_inj _ _ _ _ _ Ht _ _ _ _ Ht0) as (-> & -> & -> & ->).
+      pose proof (ELMO_input_constrained_transition_inj _ _ _ _ _ Ht _ _ _ _ Ht0) as (-> & -> & -> & ->).
       by f_equal; apply Htr_unique.
 Qed.
 
@@ -511,11 +511,11 @@ Qed.
 Lemma ELMO_unique_traces (sf : State) :
   constrained_state_prop Ei sf ->
     exists! tr : list transition_item, exists si : State,
-      finite_valid_trace_init_to Ri si sf tr.
+      finite_constrained_trace_init_to Ei si sf tr.
 Proof.
   intros Hsf.
   pose (si := MkState [] (idx i)).
-  cut (exists! (tr : list transition_item), finite_valid_trace_from_to Ri si sf tr).
+  cut (exists! (tr : list transition_item), finite_constrained_trace_from_to Ei si sf tr).
   {
     intros (tr & Htr & Htr_unique).
     exists tr; split; [by exists si; split |].
@@ -1077,15 +1077,15 @@ Qed.
 
 Inductive ELMOComponentRAMTransition : Label -> State -> State -> Message -> Prop :=
 | ecr_valid_receive : forall (s1 s2 : State) (m : Message),
-    input_valid_transition Ri Receive (s1, Some m) (s2, None) ->
+    input_constrained_transition Ei Receive (s1, Some m) (s2, None) ->
     ELMOComponentRAMTransition Receive s1 s2 m
 | ecr_valid_send : forall (s1 s2 : State) (m : Message),
-    input_valid_transition Ri Send (s1, None) (s2, Some m) ->
+    input_constrained_transition Ei Send (s1, None) (s2, Some m) ->
     ELMOComponentRAMTransition Send s1 s2 m.
 
-Lemma ELMOComponent_input_valid_transition_iff
+Lemma ELMOComponent_input_constrained_transition_iff
   (l : Label) (s : State) (om : option Message) (s' : State) (om' : option Message) :
-  input_valid_transition Ri l (s, om) (s', om')
+  input_constrained_transition Ei l (s, om) (s', om')
     <->
   (l = Receive /\ exists m, om = Some m /\ om' = None /\ ELMOComponentRAMTransition l s s' m)
     \/
@@ -1100,11 +1100,11 @@ Proof.
 Qed.
 
 Lemma ELMOComponent_elem_of_constrained_trace
-  [s tr] (Htr : finite_valid_trace_from Ri s tr) :
+  [s tr] (Htr : finite_constrained_trace_from Ei s tr) :
   forall item, item ∈ tr ->
     exists (s : State) (m : Message),
       destination item = s <+> MkObservation (l item) m /\
-      input_valid_transition_item Ri s item.
+      input_constrained_transition_item Ei s item.
 Proof.
   induction Htr; [by inversion 1 |].
   intro item; rewrite elem_of_cons; intros [-> | Hitem]; [| by apply IHHtr].
@@ -1113,7 +1113,7 @@ Proof.
 Qed.
 
 Lemma ELMOComponent_receivedMessages_of_constrained_trace
-  [s s' tr] (Htr : finite_valid_trace_from_to Ri s s' tr) :
+  [s s' tr] (Htr : finite_constrained_trace_from_to Ei s s' tr) :
   forall item, item ∈ tr ->
   forall m, (field_selector input) m item -> m ∈ receivedMessages s'.
 Proof.
@@ -1126,7 +1126,7 @@ Proof.
 Qed.
 
 Lemma ELMOComponent_sentMessages_of_constrained_trace
-  [s s' tr] (Htr : finite_valid_trace_from_to Ri s s' tr) :
+  [s s' tr] (Htr : finite_constrained_trace_from_to Ei s s' tr) :
   forall item, item ∈ tr ->
   forall m, (field_selector output) m item -> m ∈ sentMessages s'.
 Proof.
@@ -1139,7 +1139,7 @@ Proof.
 Qed.
 
 Lemma ELMOComponent_sizeState_of_constrained_trace_output
-  [s tr] (Htr : finite_valid_trace_from Ri s tr) :
+  [s tr] (Htr : finite_constrained_trace_from Ei s tr) :
   forall item, item ∈ tr ->
   forall m, (field_selector output) m item ->
   sizeState s <= sizeState (state m).
@@ -1154,7 +1154,7 @@ Proof.
 Qed.
 
 Lemma ELMOComponent_messages_of_constrained_trace
-  [s s' tr] (Htr : finite_valid_trace_from_to Ri s s' tr) :
+  [s s' tr] (Htr : finite_constrained_trace_from_to Ei s s' tr) :
   forall item, item ∈ tr ->
   forall m, item_sends_or_receives m item -> m ∈ messages s'.
 Proof.
@@ -1170,7 +1170,6 @@ Section sec_TraceableVLSM_ELMOComponent.
 Context
   (i : index)
   (Ei : VLSM Message := ELMOComponent i)
-  (Ri : VLSM Message := pre_loaded_with_all_messages_vlsm Ei)
   .
 
 Definition ELMOComponent_state_destructor (s : State)
@@ -1196,11 +1195,11 @@ Proof.
     by destruct s' as [[| [[]]] adr]; cbn in *; [| done..].
 Qed.
 
-Lemma ELMOComponent_state_destructor_input_valid_transition :
+Lemma ELMOComponent_state_destructor_input_constrained_transition_item :
   forall (s' : VLSM.state Ei), constrained_state_prop Ei s' ->
   forall (s : VLSM.state Ei) (item : transition_item Ei),
     (item, s) ∈ ELMOComponent_state_destructor s' ->
-    input_valid_transition_item Ri s item.
+    input_constrained_transition_item Ei s item.
 Proof.
   intros s' Hs'; apply valid_state_prop_iff in Hs' as [[[is His] ->] | (l & (s, om) & om' & Hpt)].
   - by cbn in *; apply UMOComponent_initial_state_spec in His as ->; inversion 1.
@@ -1217,7 +1216,7 @@ Proof.
   - by intros [[| [[] ?] ?] ?] *; [inversion 1 | ..];
       intro Hitem; apply elem_of_list_singleton in Hitem;
       inversion_clear Hitem.
-  - by apply ELMOComponent_state_destructor_input_valid_transition.
+  - by apply ELMOComponent_state_destructor_input_constrained_transition_item.
   - by apply ELMOComponent_state_destructor_initial.
 Qed.
 
@@ -1227,7 +1226,7 @@ Lemma ELMO_latest_observation_Send_state :
     s = state m.
 Proof.
   intros s' Hs' s m ->.
-  edestruct (ELMOComponent_state_destructor_input_valid_transition _ Hs') as [(_ & _ & Hv) Ht];
+  edestruct (ELMOComponent_state_destructor_input_constrained_transition_item _ Hs') as [(_ & _ & Hv) Ht];
     [by apply elem_of_list_singleton |]; cbn in *.
   by inversion Hv; subst; inversion Ht; subst; destruct s.
 Qed.
@@ -1239,7 +1238,6 @@ Section sec_MessageDependencies_ELMOComponent.
 Context
   (i : index)
   (Ei : VLSM Message := ELMOComponent i)
-  (Ri : VLSM Message := pre_loaded_with_all_messages_vlsm Ei)
   .
 
 Lemma cannot_resend_message_stepwise_ELMOComponent :
@@ -2506,9 +2504,9 @@ Lemma all_intermediary_transitions_are_receive
 Proof.
   apply Forall_forall; intros item Hitem.
   eapply ELMOComponent_elem_of_constrained_trace in Hitem as H_item;
-    [| by eapply valid_trace_forget_last].
+    [| by red; eapply valid_trace_forget_last].
   destruct H_item as (s_m0 & m0 & Hs_m0 & H_item).
-  destruct item; apply ELMOComponent_input_valid_transition_iff in H_item
+  destruct item; apply ELMOComponent_input_constrained_transition_iff in H_item
     as [[] | (Hl & m_0 & Houtput & Hinput & H_item)]; [done | cbn in *; subst].
   inversion H_item as [| ? ? ? [(_ & _ & Hvi) Hti]]; subst;
     inversion Hvi; subst; inversion Hti; subst; clear H_item Hvi Hti.
@@ -2534,7 +2532,7 @@ Proof.
     rewrite Hm0_adr in Hsnd_adr.
     eapply inj in Hsnd_adr; [| done]; subst j.
     eapply ELMOComponent_sizeState_of_constrained_trace_output in Hitem;
-      [| by eapply valid_trace_forget_last | done].
+      [| by red; eapply valid_trace_forget_last | done].
     assert (sizeState s_m0 < sizeState (sigma i_m)).
     {
       change s_m0 with (state (MkMessage s_m0)).
