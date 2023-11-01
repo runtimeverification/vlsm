@@ -22,15 +22,13 @@ Context
 
 (** ** Component definition *)
 
-Definition UMOComponentState : Type := State.
-
 (** The initial state has no observations and the same address as the component. *)
 
-Definition UMOComponent_initial_state_prop (i : Address) (st : UMOComponentState) : Prop :=
+Definition UMOComponent_initial_state_prop (i : Address) (st : State) : Prop :=
   obs st = [] /\ adr st = i.
 
 Definition UMOComponent_initial_state_type (i : Address) : Type :=
-  {st : UMOComponentState | UMOComponent_initial_state_prop i st}.
+  {st : State | UMOComponent_initial_state_prop i st}.
 
 Program Definition UMOComponent_initial_state
   (i : Address) : UMOComponent_initial_state_type i := MkState [] i.
