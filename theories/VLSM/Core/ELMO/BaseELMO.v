@@ -505,7 +505,7 @@ Context
   (Message := @Message Address)
   .
 
-Definition ELMOComponentType : VLSMType Message :=
+Definition ELMO_component_type : VLSMType Message :=
 {|
   VLSM.state := State;
   VLSM.label := Label;
@@ -513,7 +513,7 @@ Definition ELMOComponentType : VLSMType Message :=
 
 (** We can extract a trace from a [list] of [Observation]s. *)
 Fixpoint observations2trace (obs : list Observation) (adr : Address)
-  : list (transition_item ELMOComponentType) :=
+  : list (transition_item ELMO_component_type) :=
   match obs with
   | [] => []
   | MkObservation Send msg as ob :: obs =>
@@ -523,11 +523,11 @@ Fixpoint observations2trace (obs : list Observation) (adr : Address)
       let obs' := addObservation' ob' obs in
       let dest := MkState obs' adr in
         observations2trace obs adr ++
-          [Build_transition_item ELMOComponentType Send None dest (Some msg')]
+          [Build_transition_item ELMO_component_type Send None dest (Some msg')]
   | MkObservation Receive msg as ob :: obs =>
       let dest := MkState (ob :: obs) adr in
         observations2trace obs adr ++
-          [Build_transition_item ELMOComponentType Receive (Some msg) dest None]
+          [Build_transition_item ELMO_component_type Receive (Some msg) dest None]
   end.
 
 (** A state contains a list of observations, so we can extract a trace from a state. *)
