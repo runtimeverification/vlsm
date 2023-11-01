@@ -323,11 +323,12 @@ Context
   (Ri : VLSM Message := pre_loaded_with_all_messages_vlsm Ui).
 
 (**
-  There is a VLSM inclusion from [Ui] to [Ri]. This is an extremely useful
-  fact - we will prove many lemmas just for [Ri] and then use this fact to
-  transport them to [Ui].
+  There is a VLSM inclusion from any [UMOComponent] to its preloaded version.
+  This is an extremely useful act - we will prove many lemmas just for the
+  preloaded component and then use this fact to transport them to the bare
+  one.
 *)
-Lemma VLSM_incl_Ui_Ri :
+Lemma VLSM_incl_UMOComponent_preloaded :
   VLSM_incl_part Ui Ri.
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
@@ -506,7 +507,7 @@ Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_constrained_transition_size.
   by apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
-  ; eauto using VLSM_incl_Ui_Ri.
+  ; eauto using VLSM_incl_UMOComponent_preloaded.
 Qed.
 
 Lemma finite_valid_trace_from_to_size :
@@ -519,7 +520,7 @@ Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_constrained_trace_from_to_size.
   by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
-  ; eauto using VLSM_incl_Ui_Ri.
+  ; eauto using VLSM_incl_UMOComponent_preloaded.
 Qed.
 
 Lemma finite_valid_trace_from_to_inv :
@@ -529,7 +530,7 @@ Proof.
   intros s tr Hfvt.
   eapply finite_constrained_trace_from_to_inv.
   by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
-  ; eauto using VLSM_incl_Ui_Ri.
+  ; eauto using VLSM_incl_UMOComponent_preloaded.
 Qed.
 
 (**
@@ -567,7 +568,7 @@ Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
   by eapply input_constrained_transition_deterministic_conv
   ; apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
-  ; eauto using VLSM_incl_Ui_Ri.
+  ; eauto using VLSM_incl_UMOComponent_preloaded.
 Qed.
 
 (** Every trace segment is fully determined by its initial and final state. *)
@@ -600,7 +601,7 @@ Proof.
   by intros s1 s2 l1 l2 Hfvt1 Hfvt2
   ; eapply finite_constrained_trace_from_to_unique
   ; apply VLSM_incl_finite_valid_trace_from_to
-  ; eauto using VLSM_incl_Ui_Ri.
+  ; eauto using VLSM_incl_UMOComponent_preloaded.
 Qed.
 
 (** Every trace is determined by its final state. *)
@@ -625,7 +626,7 @@ Proof.
   by intros s f l1 l2 Hfvit1 Hfvit2
   ; eapply finite_constrained_trace_init_to_unique
   ; apply VLSM_incl_finite_valid_trace_init_to
-  ; eauto using VLSM_incl_Ui_Ri.
+  ; eauto using VLSM_incl_UMOComponent_preloaded.
 Qed.
 
 (** If a valid trace leads to state s, the trace extracted from s also leads to s. *)
@@ -694,7 +695,7 @@ Proof.
   by intros is s tr Hfvti
   ; eapply finite_constrained_trace_init_to_state2trace_inv
   ; apply VLSM_incl_finite_valid_trace_init_to
-  ; eauto using VLSM_incl_Ui_Ri.
+  ; eauto using VLSM_incl_UMOComponent_preloaded.
 Qed.
 
 (** The trace extracted from a reachable state [s] leads to [s]. *)
