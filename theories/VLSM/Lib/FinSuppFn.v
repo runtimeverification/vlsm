@@ -16,13 +16,12 @@ From VLSM.Lib Require Import Preamble StdppExtras ListExtras.
 Definition support {A B : Type} (s : B) (f : A -> B) `{EqDecision B} : Type :=
   dsig (fun a => f a <> s).
 
-
 (**
   A function is finitely supported if its [support] is [Finite].
   We define a type to encapsulate functions of finite support.
 *)
 Definition fsfun (A : Type) `(s : B) `{EqDecision A, EqDecision B} : Type :=
-  sigT (fun (f : A -> B) => Finite (support s f)).
+  {f : A -> B & Finite (support s f)}.
 
 Definition fsfun_project
   {A B : Type} {b : B} `{EqDecision A, EqDecision B} : fsfun A b -> A -> B :=
@@ -46,14 +45,13 @@ Context
   .
 
 #[export] Instance fsfun_equiv : Equiv (fsfun A b) :=
-  (fun f g => fsfun_project f = fsfun_project g).
+  fun f g => fsfun_project f = fsfun_project g.
 
 #[export] Instance fsfun_equivalence :
   Equivalence (≡@{fsfun A b}).
 Proof.
   unfold equiv, fsfun_equiv.
-  constructor.
-  - done.
+  constructor; [done | ..].
   - by intros f g; apply symmetry.
   - by intros f g h; apply transitivity.
 Qed.
@@ -71,11 +69,11 @@ Lemma fsfun_equiv_unfold (f g : fsfun A b) :
 Proof. done. Qed.
 
 #[export] Instance fsfun_has_fin_supp
-  (f : fsfun A b) : Finite (support b (f)) :=
+  (f : fsfun A b) : Finite (support b f) :=
     projT2 f.
 
 Definition fin_supp (f : fsfun A b) : list A :=
-  map proj1_sig (enum (support b (f))).
+  map proj1_sig (enum (support b f)).
 
 Lemma elem_of_fin_supp (f : fsfun A b) :
   forall (a : A), a ∈ fin_supp f <-> f a <> b.
@@ -112,13 +110,14 @@ Proof.
     (list_to_set (fin_supp f)) (list_to_set (fin_supp g))) as [Heqv | Hneqv]; cycle 1.
   - right; intros Heqv.
     by rewrite Heqv in Hneqv.
-  - destruct (decide (set_Forall (fun a => fsfun_project f a = fsfun_project g a) (list_to_set (C := listset A) (fin_supp f))))
+  - destruct (decide (set_Forall (fun a => fsfun_project f a = fsfun_project g a)
+      (list_to_set (C := listset A) (fin_supp f))))
       as [Hall | Hall]; [| by right; contradict Hall; rewrite Hall].
     left; apply fsfun_equiv_unfold; extensionality a.
     destruct (decide (a ∈ fin_supp f)) as [| Hf]; [by apply Hall, elem_of_list_to_set |].
     destruct (decide (a ∈ fin_supp g)) as [| Hg]; [by apply Hall; rewrite Heqv, elem_of_list_to_set |].
     apply not_elem_of_fin_supp in Hf, Hg.
-    by (transitivity b).
+    by transitivity b.
 Qed.
 
 Program Definition empty_fsfun : fsfun A b :=
@@ -146,7 +145,7 @@ Definition update_supp (f : fsfun A b) (n : A) (b' : B) : listset A :=
   else {[n]} ∪ list_to_set (fin_supp f).
 
 Lemma update_supp_all (f : fsfun A b) (n : A) (b' : B) :
-  Forall (fun a => update (f) n b' a <> b) (elements (update_supp f n b')).
+  Forall (fun a => update f n b' a <> b) (elements (update_supp f n b')).
 Proof.
   unfold update_supp.
   apply Forall_forall; intros a.
@@ -162,7 +161,7 @@ Qed.
 
 Program Definition update_fsfun
   (f : fsfun A b) (n : A) (b' : B) : fsfun A b :=
-  existT (update (f) n b')
+  existT (update f n b')
     {| enum := list_annotate (update_supp_all f n b') |}.
 Next Obligation.
 Proof. by intros; apply list_annotate_NoDup, NoDup_elements. Qed.
@@ -204,7 +203,7 @@ Lemma elem_of_update_fsfun (f : fsfun A b) (n : A) (b' : B) :
     b' = b /\ a ∈ fin_supp f /\ a <> n \/
     b' <> b /\ (a ∈ fin_supp f \/ a = n).
 Proof.
-  intro; unfold fin_supp at 1; cbn.
+  intros a; unfold fin_supp at 1; cbn.
   rewrite list_annotate_forget, elem_of_elements.
   unfold update_supp; case_decide.
   - by rewrite elem_of_difference, elem_of_list_to_set, elem_of_singleton; split; itauto.
@@ -289,13 +288,13 @@ Proof.
 Qed.
 
 Definition fsfun_sum (f : fsfun A 0) : nat :=
-  sum_list_with (f) (fin_supp f).
+  sum_list_with f (fin_supp f).
 
 Lemma fsfun_sum_proper : Proper ((≡) ==> (=)) fsfun_sum.
 Proof.
   intros f g Heqv.
   unfold fsfun_sum.
-  rewrite (sum_list_with_proper (f) (fin_supp f) (fin_supp g)).
+  rewrite (sum_list_with_proper f (fin_supp f) (fin_supp g)).
   - by apply sum_list_with_ext_forall; intros; rewrite Heqv.
   - by apply fin_supp_proper.
 Qed.
@@ -358,8 +357,8 @@ Next Obligation.
 Proof.
   intros; destruct_dec_sig x a Ha Heq; subst.
   apply elem_of_list_annotate; unfold add_fsfun_supp.
-  rewrite elem_of_elements, !elem_of_union, !elem_of_list_to_set, !elem_of_fin_supp.
-  by cbn; lia.
+  rewrite elem_of_elements, !elem_of_union, !elem_of_list_to_set, !elem_of_fin_supp; cbn.
+  by lia.
 Qed.
 
 Lemma add_fsfun_rew (f1 f2 : fsfun A 0) (a : A) :

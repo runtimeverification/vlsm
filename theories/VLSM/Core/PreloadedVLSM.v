@@ -574,38 +574,84 @@ Qed.
 
 End sec_VLSM_eq_preloaded_properties.
 
-Section sec_constrained_defs_alt.
+(** ** Constrained traces, states and messages
 
-(** ** Alternate definitions to constrained traces, states and messages
-
-  The ability to preload VLSM with all possible messages allows us to give an
-  alternate definition to finite constrained traces as finite valid traces
-  where all messages are valid (initial).
+  We will use the word "constrained" to denote concepts which correspond to
+  validity in the VLSM preloaded with all messages.
 *)
+
+Section sec_constrained_defs.
 
 Context
   `(X : VLSM message)
   .
 
-Definition finite_constrained_trace_init_to_alt :=
+Definition input_constrained_transition :=
+  input_valid_transition (pre_loaded_with_all_messages_vlsm X).
+
+Definition input_constrained_transition_item :=
+  input_valid_transition_item (pre_loaded_with_all_messages_vlsm X).
+
+Definition finite_constrained_trace_from_to :=
+  finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X).
+
+Definition finite_constrained_trace_from :=
+  finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X).
+
+Definition finite_constrained_trace_init_to :=
   finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X).
 
-Lemma finite_constrained_trace_init_to_alt_right_impl
-  (s f : state X) (tr : list (transition_item X)) :
-  finite_constrained_trace_init_to_alt s f tr -> finite_constrained_trace_init_to X s f tr.
+Definition constrained_state_prop :=
+  valid_state_prop (pre_loaded_with_all_messages_vlsm X).
+
+Definition constrained_message_prop :=
+  can_emit (pre_loaded_with_all_messages_vlsm X).
+
+Definition constrained_state_message_prop :=
+  valid_state_message_prop (pre_loaded_with_all_messages_vlsm X).
+
+End sec_constrained_defs.
+
+(** ** Alternate definitions to constrained traces, states and messages
+
+  "Constrained" concepts can also be defined in an alternative way, by mimicking
+  definitions for the corresponding "valid" concepts.
+*)
+
+Section sec_constrained_defs_alt.
+
+Context
+  `(X : VLSM message)
+  .
+
+Inductive constrained_transitions_from_to :
+  state X -> state X -> list (transition_item X) -> Prop :=
+| ct_empty : forall s, constrained_transitions_from_to s s []
+| ct_extend : forall s s' om om' l f tr, transition X l (s, om) = (s', om') ->
+    valid X l (s, om) -> constrained_transitions_from_to s' f tr ->
+    constrained_transitions_from_to s f
+      ((Build_transition_item l om s' om') :: tr).
+
+Definition finite_constrained_trace_init_to_alt
+  (s f : state X) (tr : list (transition_item X)) :=
+  constrained_transitions_from_to s f tr /\ initial_state_prop X s.
+
+Lemma finite_constrained_trace_init_to_alt_right_impl :
+  forall (s f : state X) (tr : list (transition_item X)),
+    finite_constrained_trace_init_to X s f tr -> finite_constrained_trace_init_to_alt s f tr.
 Proof.
-  intros [Htr Hinit].
+  intros s f tr [Htr Hinit].
   constructor; [| done]; clear Hinit.
   induction Htr.
-  - by apply (ct_empty X).
-  - by apply (ct_extend X); [apply Ht..|].
+  - by apply ct_empty.
+  - by apply ct_extend; [apply Ht..|].
 Qed.
 
-Lemma finite_constrained_trace_init_to_alt_left_impl
-  (s f : state X) (tr : list (transition_item X)) :
-  finite_constrained_trace_init_to X s f tr -> finite_constrained_trace_init_to_alt s f tr.
+Lemma finite_constrained_trace_init_to_alt_left_impl :
+  forall (s f : state X) (tr : list (transition_item X)),
+    finite_constrained_trace_init_to_alt s f tr -> finite_constrained_trace_init_to X s f tr.
 Proof.
-  intros [Htr Hs].
+  intros s f tr [Htr Hs].
   split; [| done].
   apply (initial_state_is_valid (pre_loaded_with_all_messages_vlsm X)) in Hs.
   revert s Hs Htr.
@@ -619,9 +665,9 @@ Proof.
       by repeat split; [| apply any_message_is_valid_in_preloaded | ..].
 Qed.
 
-Lemma finite_constrained_trace_init_to_alt_equiv
-  (s f : state X) (tr : list (transition_item X)) :
-  finite_constrained_trace_init_to X s f tr <-> finite_constrained_trace_init_to_alt s f tr.
+Lemma finite_constrained_trace_init_to_alt_equiv :
+  forall (s f : state X) (tr : list (transition_item X)),
+    finite_constrained_trace_init_to_alt s f tr <-> finite_constrained_trace_init_to X s f tr.
 Proof.
   split.
   - by apply finite_constrained_trace_init_to_alt_left_impl.
@@ -633,13 +679,16 @@ Qed.
   the VLSM in which all messages are valid (initial). 
 *)
 
-Definition constrained_state_prop_alt :=
-  valid_state_prop (pre_loaded_with_all_messages_vlsm X).
+Definition constrained_state_prop_alt (f : state X) : Prop :=
+  exists (s : state X) (tr : list (transition_item X)),
+    finite_constrained_trace_init_to_alt s f tr.
 
-Lemma constrained_state_prop_alt_equiv (s : state X):
-    constrained_state_prop X s <-> constrained_state_prop_alt s.
+Lemma constrained_state_prop_alt_equiv :
+  forall (s : state X),
+    constrained_state_prop_alt s <-> constrained_state_prop X s.
 Proof.
-  unfold constrained_state_prop;
+  intros s.
+  unfold constrained_state_prop_alt;
     setoid_rewrite finite_constrained_trace_init_to_alt_equiv; split.
   - by intros (? & ? & []); eapply finite_valid_trace_from_to_last_pstate.
   - by intro Hs; apply valid_state_has_trace in Hs as (? & ? & ?); eexists _, _.
@@ -650,12 +699,15 @@ Qed.
   the VLSM in which all messages are valid (initial). 
 *)
 
-Definition constrained_message_prop_alt :=
-  can_emit (pre_loaded_with_all_messages_vlsm X).
+Definition constrained_message_prop_alt (m : message) : Prop :=
+  exists (s f : state X) (tr : list (transition_item X)) (item : transition_item X),
+    finite_constrained_trace_init_to_alt s f (tr ++ [item]) /\ output item = Some m.
 
-Lemma constrained_message_prop_alt_equiv (m : message):
-  constrained_message_prop X m <-> constrained_message_prop_alt m.
+Lemma constrained_message_prop_alt_equiv :
+  forall (m : message),
+    constrained_message_prop_alt m <-> constrained_message_prop X m.
 Proof.
+  intros m.
   unfold constrained_message_prop_alt, constrained_message_prop; rewrite can_emit_iff.
   setoid_rewrite finite_constrained_trace_init_to_alt_equiv.
   setoid_rewrite non_empty_valid_trace_from_can_produce; split.
