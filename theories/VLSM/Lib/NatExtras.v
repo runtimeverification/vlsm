@@ -176,8 +176,8 @@ Definition prod_powers_aux (powers : index -> nat) (l : list index) : Z :=
 #[export] Instance prod_powers_aux_proper :
   Proper ((=) ==> (≡ₚ) ==> (=)) prod_powers_aux.
 Proof.
-  intros _f f ->; induction 1; cbn.
-  - done.
+  intros _f f ->.
+  induction 1; cbn; [done | ..].
   - by setoid_rewrite IHPermutation.
   - by lia.
   - by congruence.
@@ -187,7 +187,8 @@ Lemma prod_powers_aux_ext_forall (powers1 powers2 : index -> nat) (l : list inde
   (forall i, i ∈ l -> powers1 i = powers2 i) ->
   prod_powers_aux powers1 l = prod_powers_aux powers2 l.
 Proof.
-  intros Hall; unfold prod_powers_aux; do 2 f_equal.
+  intros Hall; unfold prod_powers_aux.
+  do 2 f_equal.
   apply map_ext_Forall, Forall_forall.
   by intros; cbn; f_equal; apply Hall.
 Qed.
@@ -212,7 +213,10 @@ Proof.
   change (prod_powers_aux powers (a :: l))
     with (multipliers a ^ Z.of_nat (powers a) * prod_powers_aux powers l)%Z.
   rewrite Forall_cons, Exists_cons; intros [Hma Hmpos] Hppos.
-  destruct (decide (powers a = 0)); cycle 1.
+  destruct (decide (powers a = 0)).
+  - cut (prod_powers_aux powers l > n)%Z; [by nia |].
+    apply IHl; [done |].
+    by destruct Hppos.
   - destruct (powers a) as [| pa]; [done |].
     replace (Z.of_nat (S pa)) with (Z.succ (Z.of_nat pa)) by lia.
     rewrite Z.pow_succ_r by lia.
@@ -221,9 +225,6 @@ Proof.
     apply prod_powers_aux_ge_1.
     rewrite Forall_forall in Hmpos |- *.
     by intros x Hx; specialize (Hmpos x Hx); lia.
-  - cut (prod_powers_aux powers l > n)%Z; [by nia |].
-    apply IHl; [done |].
-    by destruct Hppos.
 Qed.
 
 Definition fsfun_prod (f : fsfun index 0) : Z :=
@@ -236,9 +237,7 @@ Lemma fsfun_prod_zero : fsfun_prod zero_fsfun = 1%Z.
 Proof. done. Qed.
 
 Lemma fsfun_prod_succ (f : fsfun index 0) (n : index) :
-  fsfun_prod (succ_fsfun f n)
-    =
-  (multipliers n * fsfun_prod f)%Z.
+  fsfun_prod (succ_fsfun f n) = (multipliers n * fsfun_prod f)%Z.
 Proof.
   unfold fsfun_prod.
   destruct (decide (n ∈ fin_supp f)).
@@ -266,8 +265,7 @@ Lemma prod_powers_delta (n : index) :
   fsfun_prod (delta_nat_fsfun n) = multipliers n.
 Proof.
   intros; unfold delta_nat_fsfun.
-  rewrite fsfun_prod_succ, fsfun_prod_zero
-    by typeclasses eauto.
+  rewrite fsfun_prod_succ, fsfun_prod_zero by typeclasses eauto.
   by lia.
 Qed.
 
@@ -276,51 +274,42 @@ Lemma prod_powers_gt (n : Z) (Hn : (n >= 0)%Z)
   forall (f : fsfun index 0), fin_supp f <> [] ->
   (fsfun_prod f > n)%Z.
 Proof.
-  intros; apply prod_powers_aux_gt; [done |..].
-  by apply Forall_forall; intros; apply Hmpos.
-  apply Exists_exists.
-  unfold fin_supp; setoid_rewrite elem_of_list_fmap.
-  destruct (fin_supp f) eqn : Heq; [done |].
-  assert (Hi : i ∈ fin_supp f) by (rewrite Heq; left).
-  apply elem_of_list_fmap in Hi as [inh]; clear -inh.
-  destruct_dec_sig inh i Hi Heq.
-  exists i; split; [| done].
-  by exists inh; split; [rewrite Heq | apply elem_of_enum].
+  intros.
+  apply prod_powers_aux_gt; [done | ..].
+  - by apply Forall_forall; intros; apply Hmpos.
+  - apply Exists_exists.
+    unfold fin_supp; setoid_rewrite elem_of_list_fmap.
+    destruct (fin_supp f) eqn: Heq; [done |].
+    assert (Hi : i ∈ fin_supp f) by (rewrite Heq; left).
+    apply elem_of_list_fmap in Hi.
+    eexists; split; [done |].
+    destruct Hi as ([j Hj] & [= ->] & b).
+    by eapply bool_decide_unpack.
 Qed.
 
-Lemma prod_powers_elem_of_dom (f : fsfun index 0) :
-  forall i : index, i ∈ fin_supp f -> (multipliers i | fsfun_prod f)%Z.
+Lemma prod_powers_elem_of_dom :
+  forall (f : fsfun index 0) (i : index),
+    i ∈ fin_supp f -> (multipliers i | fsfun_prod f)%Z.
 Proof.
-  pose (P := fun f => forall i : index, i ∈ fin_supp f ->
-    (multipliers i | fsfun_prod f)%Z).
-  cut (P f); [done |].
-  apply nat_fsfun_ind; clear; subst P.
+  apply (nat_fsfun_ind (fun f => forall i, i ∈ fin_supp f -> (multipliers i | fsfun_prod f)%Z)).
   - intros f g Heq Hall i Hi.
     rewrite <- Heq in Hi.
     apply Hall in Hi as [x Hx].
     by exists x; rewrite <- Heq.
   - by inversion 1.
-  - intros j f IHf i.
-    intros Hi.
+  - intros j f IHf i Hi.
     rewrite fsfun_prod_succ.
-    apply elem_of_succ_fsfun in Hi as [<- | Hi];
-      [by exists (fsfun_prod f); lia |].
-    edestruct IHf as [x ->]; [done |].
+    apply elem_of_succ_fsfun in Hi as [<- | Hi]; [by exists (fsfun_prod f); lia |].
+    destruct (IHf _ Hi) as [x ->].
     by exists (multipliers j * x)%Z; lia.
 Qed.
 
-Lemma prod_powers_add (f1 f2 :  fsfun index 0) :
-  fsfun_prod (add_fsfun f1 f2)
-    =
-  (fsfun_prod f1 * fsfun_prod f2)%Z.
+Lemma prod_powers_add :
+  forall (f1 f2 : fsfun index 0),
+    fsfun_prod (add_fsfun f1 f2) = (fsfun_prod f1 * fsfun_prod f2)%Z.
 Proof.
-  revert f2.
-  pose (P := fun f1 => forall f2,
-    fsfun_prod (add_fsfun f1 f2)
-      =
-    (fsfun_prod f1 * fsfun_prod f2)%Z).
-  cut (P f1); [done |].
-  apply nat_fsfun_ind; clear; subst P.
+  apply (nat_fsfun_ind (fun f1 => forall f2,
+    fsfun_prod (add_fsfun f1 f2) = (fsfun_prod f1 * fsfun_prod f2)%Z)).
   - intros f f1 Heq Hall f2.
     rewrite <- Heq, Hall.
     by lia.
@@ -346,8 +335,10 @@ Definition primes : Type := dsig prime.
 Definition prod_primes_powers (powers : fsfun primes 0) : Z :=
   fsfun_prod (fun p : primes => ` p) powers.
 
-Lemma not_prime_divide_prime : forall (n : Z), (n > 1)%Z -> ~ prime n ->
-  exists (m : Z), prime m /\ exists (q : Z), (2 <= q < n)%Z /\ n = (q * m)%Z.
+Lemma not_prime_divide_prime :
+  forall (n : Z),
+    (n > 1)%Z -> ~ prime n ->
+      exists (m : Z), prime m /\ exists (q : Z), (2 <= q < n)%Z /\ n = (q * m)%Z.
 Proof.
   pose (P := fun n =>  ~ prime n ->
     exists (m : Z), prime m /\ exists (q : Z), (2 <= q < n)%Z /\ n = (q * m)%Z).
@@ -366,13 +357,15 @@ Proof.
     by exists (q * q')%Z; split; nia.
 Qed.
 
-Lemma primes_factorization : forall (n : Z), (n > 1)%Z ->
-  exists (ps : fsfun primes 0),
-    fin_supp ps <> [] /\ n = prod_primes_powers ps.
+Lemma primes_factorization :
+  forall (n : Z),
+    (n > 1)%Z ->
+    exists (ps : fsfun primes 0),
+      fin_supp ps <> [] /\ n = prod_primes_powers ps.
 Proof.
-  intros n H_n; assert (Hn : (2 <= n)%Z) by lia; clear H_n.
-  revert n Hn; apply Zlt_lower_bound_ind.
-  intros n Hind Hn2.
+  intros n H_n.
+  assert (Hn : (2 <= n)%Z) by lia; clear H_n.
+  revert n Hn; apply Zlt_lower_bound_ind; intros n Hind Hn2.
   destruct (decide (prime n)) as [| Hnp].
   - exists (delta_nat_fsfun (dexist n p)).
     split; [| by unfold prod_primes_powers; rewrite prod_powers_delta].
