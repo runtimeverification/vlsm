@@ -111,7 +111,7 @@ Qed.
 (**
   Some claims about the full node condition hold for any UMO-based VLSM
   whose validity predicate implies the full node condition. By UMO-based we
-  mean a [VLSM] built over the [UMOComponentType] which also has the same
+  mean a [VLSM] built over the [ELMOComponentType] which also has the same
   transition function as UMO/MO, an initial state predicate that ensures
   [obs] of an initial state is empty, and a validity predicate that
   implies [UMOComponentValid].
