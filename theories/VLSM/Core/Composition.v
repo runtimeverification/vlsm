@@ -1351,10 +1351,7 @@ Definition composite_valid_transition_item
 Lemma composite_valid_transition_reachable_iff l s1 iom s2 oom :
   CompositeValidTransition l s1 iom s2 oom <-> ValidTransition RFree l s1 iom s2 oom.
 Proof.
-  split; [by intros []; constructor |].
-  intros []; constructor.
-  - by apply vt_valid.
-  - by apply vt_transition.
+  by split; intros []; constructor.
 Qed.
 
 Definition CompositeValidTransitionNext s1 s2 : Prop :=
