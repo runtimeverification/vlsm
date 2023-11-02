@@ -92,37 +92,6 @@ Proof.
   by apply pre_loaded_with_all_messages_message_valid_initial_state_message.
 Qed.
 
-Inductive preloaded_valid_state_prop : state X -> Prop :=
-| preloaded_valid_initial_state
-    (s : state X)
-    (Hs : initial_state_prop (VLSMMachine := pre_loaded_with_all_messages_vlsm) s) :
-       preloaded_valid_state_prop s
-| preloaded_protocol_generated
-    (l : label X)
-    (s : state X)
-    (Hps : preloaded_valid_state_prop s)
-    (om : option message)
-    (Hv : valid (VLSMMachine := pre_loaded_with_all_messages_vlsm) l (s, om))
-    s' om'
-    (Ht : transition (VLSMMachine := pre_loaded_with_all_messages_vlsm) l (s, om) = (s', om'))
-  : preloaded_valid_state_prop s'.
-
-Lemma preloaded_valid_state_prop_iff (s : state X) :
-  valid_state_prop pre_loaded_with_all_messages_vlsm s
-  <-> preloaded_valid_state_prop s.
-Proof.
-  split.
-  - intros [om Hvalid].
-    induction Hvalid.
-    + by apply preloaded_valid_initial_state.
-    + by apply preloaded_protocol_generated with l s om om'.
-  - induction 1.
-    + by exists None; apply valid_initial_state_message.
-    + exists om'. destruct IHpreloaded_valid_state_prop as [_om Hs].
-      specialize (any_message_is_valid_in_preloaded om) as [_s Hom].
-      by apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l.
-Qed.
-
 Lemma preloaded_weaken_valid_state_message_prop s om :
   valid_state_message_prop X s om ->
   valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.

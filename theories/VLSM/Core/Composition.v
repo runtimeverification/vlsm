@@ -664,13 +664,16 @@ Lemma valid_state_project_preloaded_to_preloaded_free
   valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
 Proof.
   intros [om Hproto].
-  apply preloaded_valid_state_prop_iff.
-  induction Hproto; [by apply preloaded_valid_initial_state, (Hs i) |].
-  destruct l as [j lj]; cbn in Ht.
-  destruct (transition lj _) as (si', _om') eqn: Hti.
-  inversion_clear Ht.
-  destruct (decide (i = j)); subst; state_update_simpl; [| done].
-  by apply preloaded_protocol_generated with lj (s j) om _om'; [| apply Hv |].
+  induction Hproto; [by apply initial_state_is_valid; cbn |].
+  destruct l as [j lj]; cbn in Ht, Hv.
+  destruct (transition lj (s j, om)) eqn: Heq.
+  inversion Ht; subst; clear Ht.
+  destruct (decide (j = i)); subst; state_update_simpl; [| done].
+  destruct IHHproto1 as [om'' Hovmp].
+  exists om'.
+  eapply input_valid_transition_outputs_valid_state_message.
+  repeat split; [by exists om'' | | done..].
+  by apply any_message_is_valid_in_preloaded.
 Qed.
 
 (**
