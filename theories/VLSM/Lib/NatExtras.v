@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble FinSuppFn StdppExtras ListExtras.
 
 (** TODO: remove this once we remove support for stdpp 1.8.0 *)
 #[export] Instance Z_mul_assoc : Assoc (=) (Z.mul).
-Proof.  by intros x y z; apply Z.mul_assoc. Qed.
+Proof. by intros x y z; apply Z.mul_assoc. Qed.
 
 (** * Natural number utility definitions and lemmas *)
 
