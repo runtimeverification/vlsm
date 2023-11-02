@@ -33,7 +33,7 @@ Section sec_parity_vlsm.
 
 Context
  (multiplier : Z)
- (multiplier_geq_0 : multiplier <> 0)
+ (multiplier_gt_1 : multiplier > 1)
  (index : Type)
  `{Inhabited index}
  .
@@ -174,7 +174,7 @@ Example parity_valid_message_prop_mult :
 Proof. by apply initial_message_is_valid. Qed.
 
 Example parity_can_emit_square_mult :
-  multiplier > 1 -> can_emit ParityVLSM (multiplier ^ 2).
+  can_emit ParityVLSM (multiplier ^ 2).
 Proof.
   exists (multiplier, Some multiplier), parity_label, 0.
   repeat split; [| | by lia.. | by cbn; do 2 f_equal; lia].
@@ -183,15 +183,12 @@ Proof.
 Qed.
 
 Example parity_valid_message_prop_square_mult :
-  multiplier > 1 -> valid_message_prop ParityVLSM (multiplier ^ 2).
+  valid_message_prop ParityVLSM (multiplier ^ 2).
 Proof.
-  intros Hgt0.
-  by eapply (emitted_messages_are_valid ParityVLSM (multiplier ^ 2)
-    (parity_can_emit_square_mult Hgt0)).
+  by eapply emitted_messages_are_valid, parity_can_emit_square_mult.
 Qed.
 
 Proposition parity_valid_transition_1 :
-  multiplier > 1 ->
   input_valid_transition ParityVLSM parity_label
    (parity_trace1_first_state, Some (multiplier ^ 2))
    (multiplier ^ 3 - multiplier ^ 2, Some (multiplier ^ 3)).
@@ -302,7 +299,6 @@ Definition parity_trace2_last_state : ParityState :=
 (** The given trace is valid without the last transition. *)
 
 Proposition parity_valid_transition_1' :
-  multiplier > 1 ->
   input_valid_transition ParityVLSM parity_label
     (parity_trace2_init_first_state, Some multiplier) (2 * multiplier + 1, Some (multiplier ^ 2)).
 Proof.
@@ -315,7 +311,6 @@ Proof.
 Qed.
 
 Proposition parity_valid_transition_2' :
-  multiplier > 1 ->
   input_valid_transition ParityVLSM parity_label
     (2 * multiplier + 1, Some multiplier) (multiplier + 1, Some (multiplier ^ 2)).
 Proof.
@@ -328,7 +323,6 @@ Proof.
 Qed.
 
 Example parity_valid_trace2_init :
-  multiplier > 1 ->
   finite_valid_trace_init_to ParityVLSM
     parity_trace2_init_first_state parity_trace2_init_last_state parity_trace2_init.
 Proof.
@@ -341,7 +335,6 @@ Proof.
 Qed.
 
 Example parity_valid_trace2_init_alt :
-  multiplier > 1 ->
   finite_valid_trace_init_to_alt ParityVLSM
     parity_trace2_init_first_state parity_trace2_init_last_state parity_trace2_init.
 Proof.
@@ -361,7 +354,6 @@ Qed.
 *)
 
 Example parity_constrained_trace2_init :
-  multiplier > 1 ->
   finite_constrained_trace_init_to ParityVLSM
     parity_trace2_init_first_state parity_trace2_init_last_state parity_trace2_init.
 Proof.
@@ -380,12 +372,10 @@ Qed.
 *)
 
 Example parity_constrained_trace2 :
-  multiplier > 1 ->
   finite_constrained_trace_init_to ParityVLSM
     parity_trace2_init_first_state parity_trace2_last_state parity_trace2.
 Proof.
-  intros Hgt0.
-  destruct parity_constrained_trace2_init as [Hfvt Hisp]; [done |].
+  destruct parity_constrained_trace2_init as [Hfvt Hisp].
   split; [| done].
   eapply (extend_right_finite_trace_from_to _ Hfvt).
   repeat split.
@@ -404,7 +394,6 @@ Qed.
 *)
 
 Lemma parity_example_valid_transition :
-  multiplier > 1 ->
   input_valid_transition ParityVLSM parity_label
     (multiplier, Some multiplier) (0, Some (multiplier ^ 2)).
 Proof.
@@ -421,11 +410,9 @@ Qed.
 *)
 
 Example parity_example_constrained_transition :
-  multiplier > 1 ->
   input_valid_transition (pre_loaded_with_all_messages_vlsm ParityVLSM) parity_label
     (multiplier + 1, Some (multiplier + 1)) (0, Some (multiplier ^ 2 + multiplier)).
 Proof.
-  intros Hgt0.
   apply (finite_valid_trace_from_to_last_transition
     (pre_loaded_with_all_messages_vlsm ParityVLSM)
     parity_trace2_init_first_state parity_trace2_last_state parity_trace2_init
@@ -541,11 +528,10 @@ Proof.
 Qed.
 
 Lemma parity_valid_messages_powers_of_mult_left :
-  multiplier > 1 ->
   forall (p : Z),
     p >= 1 -> valid_message_prop ParityVLSM (multiplier ^ p).
 Proof.
-  intros Hgt0 p Hp.
+  intros p Hp.
   assert (Hle : 0 <= p - 1) by lia.
   replace p with (p - 1 + 1) by lia.
   remember (p - 1) as x.
@@ -566,7 +552,7 @@ Proof.
 Qed.
 
 Lemma parity_valid_messages_powers_of_mult :
-  forall (m : ParityMessage), multiplier > 1 ->
+  forall (m : ParityMessage),
     valid_message_prop ParityVLSM m
       <->
     exists p : Z, p >= 1 /\ m = multiplier ^ p.
@@ -581,12 +567,11 @@ Qed.
   is not also valid.
 *)
 Example parity_example_constrained_transition_not_valid :
-  multiplier > 1 ->
   ~ input_valid_transition ParityVLSM parity_label
     (multiplier + 1, Some (multiplier + 1)) (0, Some (multiplier ^ 2 + multiplier)).
 Proof.
-  intros Hmult [(_ & Hm & _) _].
-  apply parity_valid_messages_powers_of_mult in Hm as (p & Hp & Heq); [| done].
+  intros [(_ & Hm & _) _].
+  apply parity_valid_messages_powers_of_mult in Hm as (p & Hp & Heq).
   rewrite <- (Z.succ_pred p) in Heq.
   rewrite Z.pow_succ_r in Heq by lia.
   assert (Hmul : multiplier * (multiplier ^ Z.pred p - 1) = 1) by lia.
@@ -659,12 +644,33 @@ Section sec_free_composition.
 Context
   `{EqDecision index}
   (multipliers : index -> Z)
-  (Hmultipliers : forall (i : index), multipliers i <> 0)
   `{Inhabited index}
   .
 
 Definition free_parity_composite_vlsm : VLSM ParityMessage :=
   free_composite_vlsm (indexed_parity_vlsms multipliers).
+
+#[local] Lemma free_parity_composite_vlsm_emits_multiplier :
+  forall (m : ParityMessage),
+    valid_message_prop free_parity_composite_vlsm m ->
+    m >= 2 ->
+  forall (n : index),
+  input_valid_transition free_parity_composite_vlsm (existT n parity_label)
+  (λ j : index, if decide (n = j) then m + 1 else 1, Some m)
+  (λ _ : index, 1, Some (multipliers n * m)).
+Proof.
+  repeat split.
+  - apply initial_state_is_valid.
+    intros j; cbn; red.
+    by case_decide; lia.
+  - done.
+  - by rewrite decide_True; [lia |].
+  - by lia.
+  - cbn; f_equal; extensionality j.
+    rewrite decide_True by done.
+    destruct (decide (n = j)); subst; state_update_simpl; [by lia |].
+    by rewrite decide_False.
+Qed.
 
 Lemma composition_valid_messages_powers_of_mults_left
   (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage)
@@ -708,23 +714,8 @@ Proof.
           by intro i; specialize (Hmpos i); lia.
       }
       specialize (Hmpos n').
-      clear - Hmvalid Hmpos Hpos.
-      remember (fsfun_prod _ _) as m; clear Heqm.
-      apply input_valid_transition_out with
-        (l := existT n parity_label)
-        (s := fun j => if decide (n = j) then m + 1 else 1) (s' := fun _ => 1)
-        (om := Some m).
-      repeat split.
-      * apply initial_state_is_valid.
-        intros j; cbn; red.
-        by case_decide; lia.
-      * done.
-      * by rewrite decide_True; [lia |].
-      * by lia.
-      * cbn; f_equal; extensionality j.
-        rewrite decide_True by done.
-        destruct (decide (n = j)); subst; state_update_simpl; [by lia |].
-        by rewrite decide_False.
+      by eapply input_valid_transition_out,
+        free_parity_composite_vlsm_emits_multiplier; [| lia].
 Qed.
 
 Lemma composition_valid_messages_powers_of_mults
@@ -740,6 +731,18 @@ Proof.
     + by do 2 red.
     + by cbn in Hvm; eapply composition_valid_messages_powers_of_mults_right.
   - by intros [? []]; eapply composition_valid_messages_powers_of_mults_left.
+Qed.
+
+Lemma composition_valid_message_ge_2
+  (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage) :
+  valid_message_prop free_parity_composite_vlsm m ->
+  m >= 2.
+Proof.
+  intro Hv.
+  apply composition_valid_messages_powers_of_mults in Hv
+    as (i & Hsupp & ->); [| done].
+  cut (fsfun_prod multipliers i > 1); [by lia |].
+  by apply prod_powers_gt; [lia| ..].
 Qed.
 
 End sec_free_composition.
@@ -923,7 +926,7 @@ Qed.
 
 End sec_parity23.
 
-(** ** A composition for all primes
+(** ** A VLSM composition for all primes
 
   In the following section we give an example of a composition with an infinite
   number of [ParityVLSM] components, one for each prime number.
@@ -993,6 +996,30 @@ Inductive EvenConstraint :
 Definition even_constrained_primes_composition : VLSM Z :=
   constrained_vlsm primes_vlsm_composition EvenConstraint.
 
+#[local] Lemma even_constrained_primes_composition_emits_multiplier :
+  forall (m : ParityMessage),
+    valid_message_prop even_constrained_primes_composition m ->
+    m >= 2 ->
+    Z.Even m ->
+  forall (n : primes),
+  input_valid_transition even_constrained_primes_composition (existT n parity_label)
+  (λ j : primes, if decide (n = j) then m + 1 else 1, Some m)
+  (λ _ : primes, 1, Some (` n * m)).
+Proof.
+  repeat split.
+  - apply initial_state_is_valid.
+    intros j; cbn; red.
+    by case_decide; lia.
+  - done.
+  - by rewrite decide_True; [lia |].
+  - by lia.
+  - done.
+  - cbn; f_equal; extensionality j.
+    rewrite decide_True by done.
+    destruct (decide (n = j)); subst; state_update_simpl; [by lia |].
+    by rewrite decide_False.
+Qed.
+
 Lemma even_constrained_primes_composition_valid_messages_left (m : Z) :
   m > 1 -> Z.Even m -> valid_message_prop even_constrained_primes_composition m.
 Proof.
@@ -1006,41 +1033,17 @@ Proof.
   cut (P n); [done |].
   clear -Hn Hinit; revert n Hn; apply Zlt_lower_bound_ind; subst P; cbn; intros n Hind Hn.
   destruct (decide (prime n)) as [Hp | Hnp].
-  - apply input_valid_transition_out with
-      (l := existT (dexist n Hp) parity_label)
-      (s := fun j => if decide (dexist n Hp = j) then 3 else 1) (s' := fun _ => 1)
-      (om := Some 2).
-    repeat split.
-    + apply initial_state_is_valid.
-      intros j; cbn; red.
-      by case_decide; lia.
-    + by apply initial_message_is_valid.
-    + by rewrite decide_True; [lia |].
-    + by lia.
-    + by exists 1.
-    + cbn; f_equal; [| by f_equal; lia].
-      extensionality j.
-      rewrite decide_True by done.
-      destruct (decide (dexist n Hp = j)); subst; state_update_simpl; [by lia |].
-      by rewrite decide_False.
+  - replace (2 * n) with (` (dexist n Hp) * 2) by (cbn; lia).
+    eapply input_valid_transition_out,
+      even_constrained_primes_composition_emits_multiplier;
+        [| done | by exists 1].
+    by apply initial_message_is_valid.
   - apply not_prime_divide_prime in Hnp as (m & Hp & q & Hq & ->); [| by lia].
-    apply input_valid_transition_out with
-      (l := existT (dexist m Hp) parity_label)
-      (s := fun j => if decide (dexist m Hp = j) then (2 * q + 1) else 1) (s' := fun _ => 1)
-      (om := Some (2 * q)).
-    repeat split.
-    + apply initial_state_is_valid.
-      intros j; cbn; red.
-      by case_decide; lia.
-    + by apply Hind.
-    + by rewrite decide_True; [lia |].
-    + by lia.
-    + by exists q.
-    + cbn; f_equal; [| by f_equal; lia].
-      extensionality j.
-      rewrite decide_True by done.
-      destruct (decide (dexist m Hp = j)); subst; state_update_simpl; [by lia |].
-      by rewrite decide_False.
+    replace (2 * (q * m)) with (` (dexist m Hp) * (2 * q)) by (cbn; lia).
+    eapply input_valid_transition_out,
+      even_constrained_primes_composition_emits_multiplier;
+      [| by lia | by eexists].
+    by apply Hind.
 Qed.
 
 (**
