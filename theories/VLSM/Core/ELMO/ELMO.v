@@ -403,7 +403,7 @@ Section sec_ELMOComponent_lemmas.
 Context
   (i : index)
   (Ei : VLSM Message := ELMOComponent i)
-  (Ri : VLSM Message := pre_loaded_with_all_messages_vlsm Ei).
+  .
 
 Lemma ELMO_reachable_adr (s : State) :
   constrained_state_prop Ei s -> adr s = idx i.
@@ -414,7 +414,7 @@ Qed.
 Lemma ELMO_constrained_transition_output_not_initial :
   forall l (s : State) (om : option Message) (s' : State) (om' : option Message),
     input_constrained_transition Ei l (s, om) (s', om') ->
-    ~ initial_state_prop Ri s'.
+    ~ initial_state_prop Ei s'.
 Proof.
   intros l s om [ol a] om' [(_ & _ & Hv) Ht]; compute; intros [-> _].
   by inversion Hv; subst; inversion Ht.
@@ -491,7 +491,8 @@ Proof.
       intros tr' Htr'.
       induction Htr' using finite_valid_trace_from_to_rev_ind;
         [by contradict Hsuf; apply Irreflexive_state_suffix | clear IHHtr'].
-      pose proof (ELMO_input_constrained_transition_inj _ _ _ _ _ Ht _ _ _ _ Ht0) as (-> & -> & -> & ->).
+      destruct (ELMO_input_constrained_transition_inj _ _ _ _ _ Ht _ _ _ _ Ht0)
+        as (-> & -> & -> & ->).
       eapply transition_monotone_empty_trace in Htr'; [| typeclasses eauto].
       by subst.
     + destruct (IHHsf Hss0) as (tr & Htr & Htr_unique).
@@ -500,7 +501,8 @@ Proof.
       intros tr' Htr'.
       induction Htr' using finite_valid_trace_from_to_rev_ind;
         [by contradict Hsuf; apply Irreflexive_state_suffix | clear IHHtr'].
-      pose proof (ELMO_input_constrained_transition_inj _ _ _ _ _ Ht _ _ _ _ Ht0) as (-> & -> & -> & ->).
+      destruct (ELMO_input_constrained_transition_inj _ _ _ _ _ Ht _ _ _ _ Ht0)
+        as (-> & -> & -> & ->).
       by f_equal; apply Htr_unique.
 Qed.
 
@@ -642,7 +644,7 @@ Proof.
 Qed.
 
 Lemma local_equivocators_full_nondecreasing (s : State) l om s' om' :
-  transition Ri l (s, om) = (s', om') ->
+  transition Ei l (s, om) = (s', om') ->
   (forall a, local_equivocators_full s a ->
              local_equivocators_full s' a).
 Proof.
@@ -650,7 +652,7 @@ Proof.
 Qed.
 
 Lemma local_equivocators_full_increase_only_received_adr (s : State) m s' om' :
-  transition Ri Receive (s, Some m) = (s', om') ->
+  transition Ei Receive (s, Some m) = (s', om') ->
   forall a, local_equivocators_full s' a ->
             local_equivocators_full s a \/ a = adr (state m).
 Proof.
@@ -1226,8 +1228,8 @@ Lemma ELMO_latest_observation_Send_state :
     s = state m.
 Proof.
   intros s' Hs' s m ->.
-  edestruct (ELMOComponent_state_destructor_input_constrained_transition_item _ Hs') as [(_ & _ & Hv) Ht];
-    [by apply elem_of_list_singleton |]; cbn in *.
+  edestruct (ELMOComponent_state_destructor_input_constrained_transition_item _ Hs')
+    as [(_ & _ & Hv) Ht]; [by apply elem_of_list_singleton |]; cbn in *.
   by inversion Hv; subst; inversion Ht; subst; destruct s.
 Qed.
 
@@ -1367,7 +1369,8 @@ Record global_equivocators_simple (s : composite_state ELMOComponent) (a : Addre
 }.
 Set Warnings "cannot-define-projection".
 
-Definition ELMO_global_equivocation : BasicEquivocation (composite_state ELMOComponent) Address Ca threshold :=
+Definition ELMO_global_equivocation :
+  BasicEquivocation (composite_state ELMOComponent) Address Ca threshold :=
 {|
   is_equivocating := ELMO_global_equivocators;
   is_equivocating_dec := ELMO_global_equivocators_dec;
@@ -1728,7 +1731,8 @@ Qed.
 Lemma ELMO_state_to_minimal_equivocation_trace_valid
   (s : composite_state ELMOComponent)
   (Hs : valid_state_prop ELMOProtocol s)
-  (Hs_pre := VLSM_incl_valid_state (constrained_preloaded_incl (free_composite_vlsm _) ELMO_global_constraint) _ Hs
+  (Hs_pre := VLSM_incl_valid_state (constrained_preloaded_incl
+    (free_composite_vlsm _) ELMO_global_constraint) _ Hs
     : composite_constrained_state_prop ELMOComponent s)
   (is : composite_state ELMOComponent)
   (tr : list (composite_transition_item ELMOComponent)) :
@@ -2230,7 +2234,8 @@ Proof.
     apply Forall_app in Hall_messages_observed as [Hall_messages_observed Hlast_obs].
     rewrite Forall_singleton in Hlast_obs.
     specialize (IHHtr_m Hsimis_eqvs Hall_messages_observed Hall_reachable).
-    assert (Hsis0_pre : composite_constrained_state_prop ELMOComponent (state_update ELMOComponent s i_m s0)).
+    assert (Hsis0_pre : composite_constrained_state_prop ELMOComponent
+      (state_update ELMOComponent s i_m s0)).
     {
       apply valid_trace_get_last in Htr_m as <-.
       rewrite Forall_forall in Hall_reachable.
