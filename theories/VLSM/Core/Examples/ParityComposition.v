@@ -656,8 +656,8 @@ Definition free_parity_composite_vlsm : VLSM ParityMessage :=
     m >= 2 ->
   forall (n : index),
   input_valid_transition free_parity_composite_vlsm (existT n parity_label)
-  (λ j : index, if decide (n = j) then m + 1 else 1, Some m)
-  (λ _ : index, 1, Some (multipliers n * m)).
+(fun j : index => if decide (n = j) then m + 1 else 1, Some m)
+(fun _ : index => 1, Some (multipliers n * m)).
 Proof.
   repeat split.
   - apply initial_state_is_valid.
@@ -735,14 +735,13 @@ Qed.
 
 Lemma composition_valid_message_ge_2
   (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage) :
-  valid_message_prop free_parity_composite_vlsm m ->
-  m >= 2.
+  valid_message_prop free_parity_composite_vlsm m -> m >= 2.
 Proof.
   intro Hv.
   apply composition_valid_messages_powers_of_mults in Hv
     as (i & Hsupp & ->); [| done].
   cut (fsfun_prod multipliers i > 1); [by lia |].
-  by apply prod_powers_gt; [lia| ..].
+  by apply prod_powers_gt; [lia | ..].
 Qed.
 
 End sec_free_composition.
