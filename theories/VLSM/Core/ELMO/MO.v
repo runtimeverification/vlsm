@@ -367,40 +367,40 @@ Qed.
 
 End sec_alternative_definition_of_validity.
 
-Inductive MOComponentValid (P : Address -> Prop) : Label -> State -> option Message -> Prop :=
+Inductive MO_component_valid (P : Address -> Prop) : Label -> State -> option Message -> Prop :=
 | MOCV_Receive :
     forall (s : State) (m : Message),
-      MO_msg_valid P m -> MOComponentValid P Receive s (Some m)
+      MO_msg_valid P m -> MO_component_valid P Receive s (Some m)
 | MOCV_Send :
     forall s : State,
-      MOComponentValid P Send s None.
+      MO_component_valid P Send s None.
 
-Ltac invert_MOComponentValid :=
+Ltac invert_MO_component_valid :=
 repeat match goal with
-| H : MOComponentValid _ Receive _ None  |- _ => inversion H; subst; clear H
-| H : MOComponentValid _ Send _ (Some _) |- _ => inversion H; subst; clear H
+| H : MO_component_valid _ Receive _ None  |- _ => inversion H; subst; clear H
+| H : MO_component_valid _ Send _ (Some _) |- _ => inversion H; subst; clear H
 end.
 
-Definition MOComponentMachine (P : Address -> Prop) (i : Address) : VLSMMachine ELMOComponentType :=
+Definition MO_component_machine (P : Address -> Prop) (i : Address) : VLSMMachine ELMO_component_type :=
 {|
-  initial_state_prop := UMOComponent_initial_state_prop i;
+  initial_state_prop := UMO_component_initial_state_prop i;
   initial_message_prop := const False;
-  s0 := Inhabited_UMOComponent_initial_state_type i;
-  transition := fun l '(st, om) => UMOComponent_transition l st om;
-  valid := fun l '(st, om) => MOComponentValid P l st om;
+  s0 := Inhabited_UMO_component_initial_state_type i;
+  transition := fun l '(st, om) => UMO_component_transition l st om;
+  valid := fun l '(st, om) => MO_component_valid P l st om;
 |}.
 
-Definition MOComponent (P : Address -> Prop) (i : Address) : VLSM Message :=
+Definition MO_component (P : Address -> Prop) (i : Address) : VLSM Message :=
 {|
-  vtype := ELMOComponentType;
-  vmachine := MOComponentMachine P i;
+  vtype := ELMO_component_type;
+  vmachine := MO_component_machine P i;
 |}.
 
-Section sec_MOComponent_lemmas.
+Section sec_MO_component_lemmas.
 
 (** ** Component lemmas
 
-  We will use the notation [Mi] for a [MOComponent] of address [i].
+  We will use the notation [Mi] for a [MO_component] of address [i].
 
   We will use [RMi] to denote the corresponding pre-loaded VLSM, which is
   used to model reachability.
@@ -411,11 +411,11 @@ Section sec_MOComponent_lemmas.
 Context
   {i : Address}
   {P : Address -> Prop}
-  (Mi : VLSM Message := MOComponent P i)
+  (Mi : VLSM Message := MO_component P i)
   (RMi : VLSM Message := pre_loaded_with_all_messages_vlsm Mi).
 
 (** The VLSM [Mi] embeds into [RMi]. *)
-Lemma VLSM_incl_MOComponent_preloaded :
+Lemma VLSM_incl_MO_component_preloaded :
   VLSM_incl_part Mi RMi.
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
@@ -424,7 +424,7 @@ Qed.
 (** The initial state of [RMi] is unique. *)
 Lemma vs0_uniqueness :
   forall is : State,
-    UMOComponent_initial_state_prop i is ->
+    UMO_component_initial_state_prop i is ->
       is = ``(vs0 RMi).
 Proof.
   by intros []; inversion 1; cbv in *; subst.
@@ -478,10 +478,10 @@ Qed.
 
 (** Valid transitions and valid traces lead to bigger states. *)
 
-Lemma MOComponent_valid_transition_size :
+Lemma MO_component_valid_transition_size :
   forall (s1 s2 : State) (iom oom : option Message) (lbl : Label),
-    MOComponentValid P lbl s1 iom ->
-    UMOComponent_transition lbl s1 iom = (s2, oom) ->
+    MO_component_valid P lbl s1 iom ->
+    UMO_component_transition lbl s1 iom = (s2, oom) ->
       sizeState s1 < sizeState s2.
 Proof.
   by intros [] s2 [im |] oom []; do 2 inversion_clear 1; cbn; lia.
@@ -493,7 +493,7 @@ Lemma input_constrained_transition_size :
       sizeState s1 < sizeState s2.
 Proof.
   by intros s1 s2 iom oom lbl [(_ & _ & ?) Ht]; cbn in *
-  ; eapply MOComponent_valid_transition_size.
+  ; eapply MO_component_valid_transition_size.
 Qed.
 
 Lemma finite_constrained_trace_from_to_size :
@@ -525,7 +525,7 @@ Proof.
   destruct lbl1, lbl2, iom1, iom2; cbn in *
   ; inversion Ht1; subst; clear Ht1
   ; inversion Ht2; subst; clear Ht2
-  ; inversion Hvalid1; inversion Hvalid2; invert_MOComponentValid; auto.
+  ; inversion Hvalid1; inversion Hvalid2; invert_MO_component_valid; auto.
   by destruct s1, s2; cbn in *; subst; itauto.
 Qed.
 
@@ -584,7 +584,7 @@ Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_constrained_transition_size.
   by apply (@VLSM_incl_input_valid_transition _ Mi Mi RMi)
-  ; eauto using VLSM_incl_MOComponent_preloaded.
+  ; eauto using VLSM_incl_MO_component_preloaded.
 Qed.
 
 Lemma finite_valid_trace_from_to_size :
@@ -597,7 +597,7 @@ Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_constrained_trace_from_to_size.
   by apply (@VLSM_incl_finite_valid_trace_from_to _ Mi Mi RMi)
-  ; eauto using VLSM_incl_MOComponent_preloaded.
+  ; eauto using VLSM_incl_MO_component_preloaded.
 Qed.
 
 Lemma input_valid_transition_deterministic_conv :
@@ -609,7 +609,7 @@ Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
   by eapply input_constrained_transition_deterministic_conv
   ; apply (@VLSM_incl_input_valid_transition _ Mi Mi RMi)
-  ; eauto using VLSM_incl_MOComponent_preloaded.
+  ; eauto using VLSM_incl_MO_component_preloaded.
 Qed.
 
 Lemma finite_valid_trace_from_to_unique :
@@ -621,7 +621,7 @@ Proof.
   by intros s1 s2 l1 l2 Hfvt1 Hfvt2
   ; eapply finite_constrained_trace_from_to_unique
   ; apply VLSM_incl_finite_valid_trace_from_to
-  ; eauto using VLSM_incl_MOComponent_preloaded.
+  ; eauto using VLSM_incl_MO_component_preloaded.
 Qed.
 
 Lemma finite_valid_trace_init_to_unique :
@@ -633,7 +633,7 @@ Proof.
   by intros s f l1 l2 Hfvit1 Hfvit2
   ; eapply finite_constrained_trace_init_to_unique
   ; apply VLSM_incl_finite_valid_trace_init_to
-  ; eauto using VLSM_incl_MOComponent_preloaded.
+  ; eauto using VLSM_incl_MO_component_preloaded.
 Qed.
 
 (** *** Extracting a trace from a state *)
@@ -790,7 +790,7 @@ Proof.
     ; rewrite ?H12, ?H22 in Hsuf; lia.
 Qed.
 
-End sec_MOComponent_lemmas.
+End sec_MO_component_lemmas.
 
 Section sec_MOProtocol.
 
@@ -801,7 +801,7 @@ Context
   `{!Inj (=) (=) idx}
   (P : Address -> Prop)
   (P' := fun adr => P adr /\ exists i : index, idx i = adr)
-  (M : index -> VLSM Message := fun i => MOComponent P' (idx i))
+  (M : index -> VLSM Message := fun i => MO_component P' (idx i))
   (RM : index -> VLSM Message := fun i => pre_loaded_with_all_messages_vlsm (M i)).
 
 (** ** Protocol
@@ -1088,12 +1088,12 @@ Qed.
   Every state in a MO component gives rise to a unique trace leading to this
   state, which we can then lift to the MO protocol.
 *)
-Definition MOComponent_state2trace
+Definition MO_component_state2trace
   (s : MO_state) (i : index) : list MO_transition_item :=
     lift_to_MO_trace s i (state2trace (s i)).
 
 (**
-  Iterating [MOComponent_state2trace] shows that every reachable MO state contains a
+  Iterating [MO_component_state2trace] shows that every reachable MO state contains a
   trace that leads to this state. However, this trace is not unique, because
   we can concatenate the lifted traces in any order.
 *)
@@ -1102,7 +1102,7 @@ Fixpoint MO_state2trace_aux
   match is with
   | [] => []
   | i :: is' =>
-    MO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++ MOComponent_state2trace us i
+    MO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++ MO_component_state2trace us i
   end.
 
 Definition MO_state2trace
