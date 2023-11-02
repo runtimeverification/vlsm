@@ -1360,11 +1360,6 @@ Qed.
 Definition CompositeValidTransitionNext s1 s2 : Prop :=
   ValidTransitionNext Free s1 s2.
 
-Lemma composite_valid_transition_next :
-  forall l s1 iom s2 oom,
-    CompositeValidTransition l s1 iom s2 oom -> CompositeValidTransitionNext s1 s2.
-Proof. by econstructor. Qed.
-
 Definition composite_valid_transition_future : relation (composite_state IM) :=
   tc CompositeValidTransitionNext.
 
