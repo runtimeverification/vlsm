@@ -656,20 +656,21 @@ Definition free_parity_composite_vlsm : VLSM ParityMessage :=
     m >= 2 ->
   forall (n : index),
   input_valid_transition free_parity_composite_vlsm (existT n parity_label)
-(fun j : index => if decide (n = j) then m + 1 else 1, Some m)
-(fun _ : index => 1, Some (multipliers n * m)).
+(update (const 1) n (m + 1), Some m)
+(const 1, Some (multipliers n * m)).
 Proof.
   repeat split.
   - apply initial_state_is_valid.
     intros j; cbn; red.
-    by case_decide; lia.
+    by destruct (decide (n = j)) as [-> |];
+      [rewrite update_eq; lia | rewrite update_neq].
   - done.
-  - by rewrite decide_True; [lia |].
+  - by rewrite update_eq; lia.
   - by lia.
-  - cbn; f_equal; extensionality j.
-    rewrite decide_True by done.
-    destruct (decide (n = j)); subst; state_update_simpl; [by lia |].
-    by rewrite decide_False.
+  - cbn; f_equal; rewrite update_eq.
+    extensionality j; cbn.
+    destruct (decide (n =j)) as [-> |]; state_update_simpl; [by lia |].
+    by rewrite update_neq.
 Qed.
 
 Lemma composition_valid_messages_powers_of_mults_left
@@ -1002,21 +1003,22 @@ Definition even_constrained_primes_composition : VLSM Z :=
     Z.Even m ->
   forall (n : primes),
   input_valid_transition even_constrained_primes_composition (existT n parity_label)
-  (λ j : primes, if decide (n = j) then m + 1 else 1, Some m)
-  (λ _ : primes, 1, Some (` n * m)).
+  (update (const 1) n (m + 1), Some m)
+  (const 1, Some (` n * m)).
 Proof.
   repeat split.
   - apply initial_state_is_valid.
     intros j; cbn; red.
-    by case_decide; lia.
+    by destruct (decide (n = j)) as [-> |];
+      [rewrite update_eq; lia | rewrite update_neq].
   - done.
-  - by rewrite decide_True; [lia |].
+  - by rewrite update_eq; lia.
   - by lia.
   - done.
-  - cbn; f_equal; extensionality j.
-    rewrite decide_True by done.
-    destruct (decide (n = j)); subst; state_update_simpl; [by lia |].
-    by rewrite decide_False.
+  - cbn; f_equal; extensionality j; cbn.
+    destruct (decide (n = j)); subst; state_update_simpl.
+    + by rewrite update_eq; lia.
+    + by rewrite update_neq.
 Qed.
 
 Lemma even_constrained_primes_composition_valid_messages_left (m : Z) :
