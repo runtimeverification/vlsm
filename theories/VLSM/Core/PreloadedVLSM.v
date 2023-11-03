@@ -169,15 +169,15 @@ Context
   (R := pre_loaded_with_all_messages_vlsm X)
   .
 
-Lemma ValidTransition_preloaded_iff :
+Lemma valid_transition_preloaded_iff :
   forall l s1 iom s2 oom,
-    ValidTransition X l s1 iom s2 oom <-> ValidTransition R l s1 iom s2 oom.
+    valid_transition X l s1 iom s2 oom <-> valid_transition R l s1 iom s2 oom.
 Proof. by firstorder. Qed.
 
-Lemma ValidTransitionNext_preloaded_iff :
-  forall s1 s2, ValidTransitionNext X s1 s2 <-> ValidTransitionNext R s1 s2.
+Lemma valid_transition_next_preloaded_iff :
+  forall s1 s2, valid_transition_next X s1 s2 <-> valid_transition_next R s1 s2.
 Proof.
-  by intros; split; intros []; econstructor; apply ValidTransition_preloaded_iff.
+  by intros; split; intros []; econstructor; apply valid_transition_preloaded_iff.
 Qed.
 
 End sec_pre_loaded_valid_transition.
