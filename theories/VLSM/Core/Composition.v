@@ -1341,11 +1341,8 @@ Context
   (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
-Record CompositeValidTransition l s1 iom s2 oom : Prop :=
-{
-  cvt_valid : composite_valid IM l (s1, iom);
-  cvt_transition : composite_transition IM l (s1, iom) = (s2, oom);
-}.
+Definition CompositeValidTransition l s1 iom s2 oom : Prop :=
+  ValidTransition Free l s1 iom s2 oom.
 
 Definition composite_valid_transition_item
   (s : composite_state IM) (item : composite_transition_item IM) : Prop :=
@@ -1354,21 +1351,11 @@ Definition composite_valid_transition_item
 Lemma composite_valid_transition_reachable_iff l s1 iom s2 oom :
   CompositeValidTransition l s1 iom s2 oom <-> ValidTransition RFree l s1 iom s2 oom.
 Proof.
-  split; [by intros []; constructor |].
-  intros []; constructor.
-  - by apply vt_valid.
-  - by apply vt_transition.
+  by split; intros []; constructor.
 Qed.
 
-Inductive CompositeValidTransitionNext (s1 s2 : composite_state IM) : Prop :=
-| composite_transition_next : forall l iom oom,
-    CompositeValidTransition l s1 iom s2 oom ->
-    CompositeValidTransitionNext s1 s2.
-
-Lemma composite_valid_transition_next :
-  forall l s1 iom s2 oom,
-    CompositeValidTransition l s1 iom s2 oom -> CompositeValidTransitionNext s1 s2.
-Proof. by intros * [Hv Ht]; econstructor. Qed.
+Definition CompositeValidTransitionNext s1 s2 : Prop :=
+  ValidTransitionNext Free s1 s2.
 
 Definition composite_valid_transition_future : relation (composite_state IM) :=
   tc CompositeValidTransitionNext.

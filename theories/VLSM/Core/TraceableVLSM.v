@@ -45,7 +45,7 @@ Proof.
   destruct Hfutures as [tr Htr].
   induction Htr; [done |].
   by apply input_valid_transition_forget_input,
-    valid_transition_next, transition_monotonicity in Ht; lia.
+    transition_next, transition_monotonicity in Ht; lia.
 Qed.
 
 Lemma transition_monotone_empty_trace
@@ -58,7 +58,7 @@ Proof.
   assert (state_size s <= state_size s')
     by (apply transition_monotone_in_futures; [| eexists]; done).
   by apply input_valid_transition_forget_input,
-    valid_transition_next, transition_monotonicity in Ht; lia.
+    transition_next, transition_monotonicity in Ht; lia.
 Qed.
 
 (**

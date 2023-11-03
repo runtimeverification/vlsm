@@ -84,7 +84,7 @@ Lemma not_CompositeValidTransitionNext_initial :
   forall s1, ~ CompositeValidTransitionNext IM s1 s2.
 Proof.
   intros s2 Hs2 s1 [* Hs1].
-  apply composite_valid_transition_projection, proj1, valid_transition_next in Hs1; cbn in Hs1.
+  apply composite_valid_transition_projection, proj1, transition_next in Hs1; cbn in Hs1.
   by contradict Hs1; apply not_ValidTransitionNext_initial, Hs2.
 Qed.
 
@@ -115,7 +115,7 @@ Lemma CompositeValidTransition_reflects_rechability :
 Proof.
   intros * Hnext Hs2; revert l s1 iom oom Hnext.
   induction Hs2 using valid_state_prop_ind; intros * Hnext.
-  - apply composite_valid_transition_next in Hnext.
+  - apply transition_next in Hnext.
     by contradict Hnext; apply not_CompositeValidTransitionNext_initial.
   - destruct l as [i li], l0 as [j lj].
     destruct (decide (i = j)).

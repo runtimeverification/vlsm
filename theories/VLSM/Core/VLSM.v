@@ -2700,11 +2700,6 @@ Context
   `(X : VLSM message)
   .
 
-Lemma valid_transition_next :
-  forall l s1 iom s2 oom,
-    ValidTransition X l s1 iom s2 oom -> ValidTransitionNext X s1 s2.
-Proof. by intros * [Hv Ht]; econstructor. Qed.
-
 Lemma input_valid_transition_forget_input :
   forall l s1 iom s2 oom,
     input_valid_transition X l (s1, iom) (s2, oom) ->
