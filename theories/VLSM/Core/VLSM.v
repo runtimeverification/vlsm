@@ -2683,16 +2683,16 @@ Proof. by subst. Qed.
 
 End sec_same_VLSM.
 
-Record ValidTransition `(X : VLSM message) l s1 iom s2 oom : Prop :=
+Record valid_transition `(X : VLSM message) l s1 iom s2 oom : Prop :=
 {
   vt_valid : valid X l (s1, iom);
   vt_transition : transition X l (s1, iom) = (s2, oom);
 }.
 
-Inductive ValidTransitionNext `(X : VLSM message) (s1 s2 : state X) : Prop :=
+Inductive valid_transition_next `(X : VLSM message) (s1 s2 : state X) : Prop :=
 | transition_next :
-    forall l iom oom (Ht : ValidTransition X l s1 iom s2 oom),
-      ValidTransitionNext X s1 s2.
+    forall l iom oom (Ht : valid_transition X l s1 iom s2 oom),
+      valid_transition_next X s1 s2.
 
 Section sec_valid_transition_props.
 
@@ -2703,7 +2703,7 @@ Context
 Lemma input_valid_transition_forget_input :
   forall l s1 iom s2 oom,
     input_valid_transition X l (s1, iom) (s2, oom) ->
-    ValidTransition X l s1 iom s2 oom.
+    valid_transition X l s1 iom s2 oom.
 Proof. by firstorder. Qed.
 
 End sec_valid_transition_props.

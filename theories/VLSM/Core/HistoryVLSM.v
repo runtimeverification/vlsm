@@ -8,13 +8,13 @@ From VLSM.Core Require Import VLSM PreloadedVLSM Composition.
 
 Class HistoryVLSM `(X : VLSM message) : Prop :=
 {
-  not_ValidTransitionNext_initial :
+  not_valid_transition_next_initial :
     forall s2, initial_state_prop X s2 ->
-    forall s1, ~ ValidTransitionNext X s1 s2;
+    forall s1, ~ valid_transition_next X s1 s2;
   unique_transition_to_state :
     forall [s : state X],
-    forall [l1 s1 iom1 oom1], ValidTransition X l1 s1 iom1 s oom1 ->
-    forall [l2 s2 iom2 oom2], ValidTransition X l2 s2 iom2 s oom2 ->
+    forall [l1 s1 iom1 oom1], valid_transition X l1 s1 iom1 s oom1 ->
+    forall [l2 s2 iom2 oom2], valid_transition X l2 s2 iom2 s oom2 ->
     l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2;
 }.
 
@@ -30,10 +30,10 @@ Context
   HistoryVLSM (pre_loaded_with_all_messages_vlsm X).
 Proof.
   split; intros.
-  - rewrite <- ValidTransitionNext_preloaded_iff.
-    by apply not_ValidTransitionNext_initial.
+  - rewrite <- valid_transition_next_preloaded_iff.
+    by apply not_valid_transition_next_initial.
   - by eapply (@unique_transition_to_state _ X);
-      [| apply ValidTransition_preloaded_iff..].
+      [| apply valid_transition_preloaded_iff..].
 Qed.
 
 Lemma history_unique_trace_to_reachable :
@@ -49,13 +49,13 @@ Proof.
     apply finite_valid_trace_from_to_app_split in Htr' as [_ Hitem].
     inversion Hitem; inversion Htl; subst.
     destruct Ht as [(_ & _ & Hv) Ht].
-    exfalso; clear His'; eapply @not_ValidTransitionNext_initial;
+    exfalso; clear His'; eapply @not_valid_transition_next_initial;
       [| done | by esplit].
     by typeclasses eauto.
   - destruct_list_last tr' tr'' item Heqtr'; subst tr'.
     + inversion Htr'; subst; clear Htr'.
       destruct Ht as [(_ & _ & Hv) Ht].
-      exfalso; eapply @not_ValidTransitionNext_initial; [| done | by esplit].
+      exfalso; eapply @not_valid_transition_next_initial; [| done | by esplit].
       by typeclasses eauto.
     + apply finite_valid_trace_from_to_app_split in Htr' as [Htr' Hitem].
       inversion Hitem; inversion Htl; subst; clear Hitem Htl.
@@ -79,19 +79,19 @@ Context
   (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
-Lemma not_CompositeValidTransitionNext_initial :
+Lemma not_composite_valid_transition_next_initial :
   forall s2, composite_initial_state_prop IM s2 ->
-  forall s1, ~ CompositeValidTransitionNext IM s1 s2.
+  forall s1, ~ composite_valid_transition_next IM s1 s2.
 Proof.
   intros s2 Hs2 s1 [* Hs1].
   apply composite_valid_transition_projection, proj1, transition_next in Hs1; cbn in Hs1.
-  by contradict Hs1; apply not_ValidTransitionNext_initial, Hs2.
+  by contradict Hs1; apply not_valid_transition_next_initial, Hs2.
 Qed.
 
 Lemma composite_quasi_unique_transition_to_state :
   forall [s],
-  forall [l1 s1 iom1 oom1], CompositeValidTransition IM l1 s1 iom1 s oom1 ->
-  forall [l2 s2 iom2 oom2], CompositeValidTransition IM l2 s2 iom2 s oom2 ->
+  forall [l1 s1 iom1 oom1], composite_valid_transition IM l1 s1 iom1 s oom1 ->
+  forall [l2 s2 iom2 oom2], composite_valid_transition IM l2 s2 iom2 s oom2 ->
   projT1 l1 = projT1 l2 ->
   l1 = l2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
@@ -107,16 +107,16 @@ Proof.
   by state_update_simpl.
 Qed.
 
-Lemma CompositeValidTransition_reflects_rechability :
+Lemma composite_valid_transition_reflects_rechability :
   forall l s1 iom s2 oom,
-  CompositeValidTransition IM l s1 iom s2 oom ->
+  composite_valid_transition IM l s1 iom s2 oom ->
   valid_state_prop RFree s2 ->
   input_valid_transition RFree l (s1, iom) (s2, oom).
 Proof.
   intros * Hnext Hs2; revert l s1 iom oom Hnext.
   induction Hs2 using valid_state_prop_ind; intros * Hnext.
   - apply transition_next in Hnext.
-    by contradict Hnext; apply not_CompositeValidTransitionNext_initial.
+    by contradict Hnext; apply not_composite_valid_transition_next_initial.
   - destruct l as [i li], l0 as [j lj].
     destruct (decide (i = j)).
     + subst; apply input_valid_transition_forget_input in Ht as Hvt.
@@ -157,29 +157,29 @@ Proof.
       * by replace (transition _ _ _) with (s' j, oom); f_equal.
 Qed.
 
-Lemma CompositeValidTransitionNext_reflects_rechability :
-  forall s1 s2, CompositeValidTransitionNext IM s1 s2 ->
+Lemma composite_valid_transition_next_reflects_rechability :
+  forall s1 s2, composite_valid_transition_next IM s1 s2 ->
     valid_state_prop RFree s2 -> valid_state_prop RFree s1.
 Proof.
-  by intros s1 s2 []; eapply CompositeValidTransition_reflects_rechability.
+  by intros s1 s2 []; eapply composite_valid_transition_reflects_rechability.
 Qed.
 
 Lemma composite_valid_transition_future_reflects_rechability :
   forall s1 s2, composite_valid_transition_future IM s1 s2 ->
     valid_state_prop RFree s2 -> valid_state_prop RFree s1.
-Proof. by apply tc_reflect, CompositeValidTransitionNext_reflects_rechability. Qed.
+Proof. by apply tc_reflect, composite_valid_transition_next_reflects_rechability. Qed.
 
 Lemma composite_valid_transitions_from_to_reflects_reachability :
   forall s s' tr,
-  CompositeValidTransitionsFromTo IM s s' tr ->
+  composite_valid_transitions_from_to IM s s' tr ->
   valid_state_prop RFree s' -> finite_valid_trace_from_to RFree s s' tr.
 Proof.
   induction 1; intros; [by constructor |].
   assert (Hitem : input_valid_transition RFree (l item) (s', input item)
                           (destination item, output item))
-    by (apply CompositeValidTransition_reflects_rechability; done).
+    by (apply composite_valid_transition_reflects_rechability; done).
   eapply finite_valid_trace_from_to_app.
-  - apply IHCompositeValidTransitionsFromTo.
+  - apply IHcomposite_valid_transitions_from_to.
     by eapply input_valid_transition_origin.
   - by destruct item; apply finite_valid_trace_from_to_singleton.
 Qed.

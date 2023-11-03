@@ -23,7 +23,7 @@ From VLSM.Core Require Import VLSM PreloadedVLSM Composition VLSMEmbedding.
 Class TransitionMonotoneVLSM `(X : VLSM message) (state_size : state X -> nat) : Prop :=
 {
   transition_monotonicity :
-    forall s1 s2 : state X, ValidTransitionNext X s1 s2 -> state_size s1 < state_size s2
+    forall s1 s2 : state X, valid_transition_next X s1 s2 -> state_size s1 < state_size s2
 }.
 
 #[global] Hint Mode TransitionMonotoneVLSM - ! - : typeclass_instances.
@@ -34,7 +34,7 @@ Class TransitionMonotoneVLSM `(X : VLSM message) (state_size : state X -> nat) :
   : TransitionMonotoneVLSM (pre_loaded_with_all_messages_vlsm X) state_size.
 Proof.
   constructor; intros s1 s2 Ht.
-  by apply transition_monotonicity, ValidTransitionNext_preloaded_iff.
+  by apply transition_monotonicity, valid_transition_next_preloaded_iff.
 Qed.
 
 Lemma transition_monotone_in_futures
@@ -112,7 +112,7 @@ Proof.
   apply transition_monotonicity.
   erewrite <- tv_state_destructor_destination by done.
   econstructor.
-  by eapply ValidTransition_preloaded_iff, input_valid_transition_forget_input,
+  by eapply valid_transition_preloaded_iff, input_valid_transition_forget_input,
     tv_state_destructor_transition.
 Qed.
 

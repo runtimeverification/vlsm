@@ -1341,35 +1341,35 @@ Context
   (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
-Definition CompositeValidTransition l s1 iom s2 oom : Prop :=
-  ValidTransition Free l s1 iom s2 oom.
+Definition composite_valid_transition l s1 iom s2 oom : Prop :=
+  valid_transition Free l s1 iom s2 oom.
 
 Definition composite_valid_transition_item
   (s : composite_state IM) (item : composite_transition_item IM) : Prop :=
-  CompositeValidTransition (l item) s (input item) (destination item) (output item).
+  composite_valid_transition (l item) s (input item) (destination item) (output item).
 
 Lemma composite_valid_transition_reachable_iff l s1 iom s2 oom :
-  CompositeValidTransition l s1 iom s2 oom <-> ValidTransition RFree l s1 iom s2 oom.
+  composite_valid_transition l s1 iom s2 oom <-> valid_transition RFree l s1 iom s2 oom.
 Proof.
   by split; intros []; constructor.
 Qed.
 
-Definition CompositeValidTransitionNext s1 s2 : Prop :=
-  ValidTransitionNext Free s1 s2.
+Definition composite_valid_transition_next s1 s2 : Prop :=
+  valid_transition_next Free s1 s2.
 
 Definition composite_valid_transition_future : relation (composite_state IM) :=
-  tc CompositeValidTransitionNext.
+  tc composite_valid_transition_next.
 
-Lemma CompositeValidTransitionNext_reachable_iff s1 s2 :
-  CompositeValidTransitionNext s1 s2 <-> ValidTransitionNext RFree s1 s2.
+Lemma composite_valid_transition_next_reachable_iff s1 s2 :
+  composite_valid_transition_next s1 s2 <-> valid_transition_next RFree s1 s2.
 Proof.
   by split; intros []; econstructor; apply composite_valid_transition_reachable_iff.
 Qed.
 
 Lemma composite_valid_transition_projection :
   forall l s1 iom s2 oom,
-    CompositeValidTransition l s1 iom s2 oom ->
-    ValidTransition (IM (projT1 l)) (projT2 l) (s1 (projT1 l)) iom (s2 (projT1 l)) oom /\
+    composite_valid_transition l s1 iom s2 oom ->
+    valid_transition (IM (projT1 l)) (projT2 l) (s1 (projT1 l)) iom (s2 (projT1 l)) oom /\
     s2 = state_update IM s1 (projT1 l) (s2 (projT1 l)).
 Proof.
   intros [i li] * [Hv Ht]; cbn in Ht; destruct (transition _ _ _) eqn: Hti.
@@ -1378,25 +1378,25 @@ Qed.
 
 Lemma composite_valid_transition_projection_inv :
   forall i li si1 iom si2 oom,
-    ValidTransition (IM i) li si1 iom si2 oom ->
+    valid_transition (IM i) li si1 iom si2 oom ->
     forall s1, s1 i = si1 -> forall s2, s2 = state_update IM s1 i si2 ->
-    CompositeValidTransition (existT i li) s1 iom s2 oom.
+    composite_valid_transition (existT i li) s1 iom s2 oom.
 Proof.
   intros * [Hv Ht] s1 <- s2 ->; split; [done |].
   by cbn; replace (transition _ _ _) with (si2, oom).
 Qed.
 
-Inductive CompositeValidTransitionsFromTo
+Inductive composite_valid_transitions_from_to
   : composite_state IM -> composite_state IM -> list (composite_transition_item IM) -> Prop :=
-| cvtft_empty : forall s, CompositeValidTransitionsFromTo s s []
+| cvtft_empty : forall s, composite_valid_transitions_from_to s s []
 | cvtft_cons : forall s s' tr item,
-    CompositeValidTransitionsFromTo s s' tr ->
+    composite_valid_transitions_from_to s s' tr ->
     composite_valid_transition_item s' item ->
-    CompositeValidTransitionsFromTo s (destination item) (tr ++ [item]).
+    composite_valid_transitions_from_to s (destination item) (tr ++ [item]).
 
-Lemma CompositeValidTransitionsFromTo_trace : forall s s' tr,
+Lemma composite_valid_transitions_from_to_trace : forall s s' tr,
   finite_valid_trace_from_to RFree s s' tr ->
-  CompositeValidTransitionsFromTo s s' tr.
+  composite_valid_transitions_from_to s s' tr.
 Proof.
   induction 1 using finite_valid_trace_from_to_rev_ind; [by constructor |].
   remember {| destination := sf |} as item.

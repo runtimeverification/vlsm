@@ -1786,14 +1786,14 @@ Qed.
   Due to the validity predicate, a transition must have either a non-empty
   input or a non-empty output, the distinction being made by the label.
 *)
-Inductive ELMOProtocolValidTransition
+Inductive ELMOProtocol_valid_transition
   : index -> Label -> VLSM.state ELMOProtocol -> VLSM.state ELMOProtocol -> Message -> Prop :=
 | ep_valid_receive : forall (i : index) (s1 s2 : VLSM.state ELMOProtocol) (m : Message),
-    ValidTransition ELMOProtocol (existT i Receive) s1 (Some m) s2 None ->
-    ELMOProtocolValidTransition i Receive s1 s2 m
+    valid_transition ELMOProtocol (existT i Receive) s1 (Some m) s2 None ->
+    ELMOProtocol_valid_transition i Receive s1 s2 m
 | ep_valid_send : forall (i : index) (s1 s2 : VLSM.state ELMOProtocol) (m : Message),
-    ValidTransition ELMOProtocol (existT i Send) s1 None s2 (Some m) ->
-    ELMOProtocolValidTransition i Send s1 s2 m.
+    valid_transition ELMOProtocol (existT i Send) s1 None s2 (Some m) ->
+    ELMOProtocol_valid_transition i Send s1 s2 m.
 
 Lemma local_equivocators_full_step_update
   (i : index) (l : Label) (s1 s2 : State) (m : Message) :
@@ -2112,7 +2112,7 @@ Lemma ELMO_valid_states_only_receive_valid_messages :
   forall s : VLSM.state ELMOProtocol,
     valid_state_prop ELMOProtocol s ->
   forall (i : index) (l : Label) (s' : VLSM.state ELMOProtocol) (m : Message),
-    ELMOProtocolValidTransition i l s s' m ->
+    ELMOProtocol_valid_transition i l s s' m ->
     valid_message_prop ELMOProtocol m.
 Proof.
   intros s Hs i l s' m Hvalid.
@@ -2821,7 +2821,7 @@ Lemma reflecting_composite_for_reachable_component
       si = s_prev <+> MkObservation l m ->
       let s' := state_update ELMO_component s i s_prev in
       valid_state_prop ELMOProtocol s' /\
-      ELMOProtocolValidTransition i l s' s m.
+      ELMOProtocol_valid_transition i l s' s m.
 Proof.
   induction Hreachable using valid_state_prop_ind;
     [| destruct IHHreachable as (sigma & <- & Hsigma & Hreflects & Hsend & Hall), l; cycle 1].
@@ -2893,7 +2893,7 @@ Proof.
       intros (gamma & Hfutures & Heq_i & [Hsigma'_messages Hsigma'_eqvs] & Hgamma_send).
       pose (sigma' := state_update ELMO_component gamma i s'); subst s'.
       exists sigma'; split; [by subst sigma'; state_update_simpl |].
-      assert (Hvtsigma : ValidTransition ELMOProtocol (existT i Receive) gamma (Some m) sigma' None).
+      assert (Hvtsigma : valid_transition ELMOProtocol (existT i Receive) gamma (Some m) sigma' None).
       {
         repeat split; cbn; [by rewrite Heq_i | | by rewrite Heq_i].
         unfold local_equivocation_limit_ok, not_heavy in Hlocal_ok.
