@@ -1,7 +1,15 @@
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras StdppExtras.
 
-(** A straight-forward inductive definition of non-empty lists. *)
+(** * Non-empty lists *)
+
+(** ** Positive definition *)
+
+(**
+  A straight-forward inductive definition of non-empty lists akin to the usual
+  list: a non-empty list is either a singleton or a cons that has a head and a
+  tail.
+*)
 Inductive ne_list (A : Type) : Type :=
 | nel_singl : A -> ne_list A
 | nel_cons : A -> ne_list A -> ne_list A.
@@ -78,6 +86,8 @@ Definition list_to_option_ne_list {A} (l : list A) : option (ne_list A) :=
 Lemma list_to_option_ne_list_unroll {A} (a : A) l :
   list_to_option_ne_list (a :: l) = Some (ne_list_option_cons a (list_to_option_ne_list l)).
 Proof. done. Qed.
+
+(** ** List-based definition *)
 
 (** A definition of non-empty lists based on lists. *)
 Record NeList (A : Type) : Type :=
@@ -199,9 +209,11 @@ Proof.
   by apply Hle; [apply ne_list_min_length |].
 Qed.
 
+(** ** Negative definition *)
+
 (**
-  An alternative inductive definition of non-empty lists using a single
-  constructor.
+  An alternative inductive definition of non-empty lists as a record which
+  has a head and an optional tail.
 *)
 Inductive NonEmptyList (A : Type) : Type := NEL_cons
 {

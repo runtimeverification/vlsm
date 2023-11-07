@@ -1,6 +1,10 @@
 From Cdcl Require Export Itauto.
 
-(** * Classical Itauto tactic *)
+(** * Classical Itauto tactic
+
+  This module contains a version of the itauto tactic that uses classical logic
+  freely. See the comments in VLSM.Lib.Itauto for more details.
+*)
 
 Ltac gen_conflicts tac :=
   intros; unfold not in *; unfold iff in *;
