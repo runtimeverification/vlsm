@@ -207,46 +207,13 @@ Proof.
     by rewrite !unroll_last.
 Qed.
 
-Fixpoint list_suffix
-  {A : Type}
-  (l : list A)
-  (n : nat)
-  {struct n}
-  : list A
-  := match n, l with
-    | 0, _ => l
-    | _, [] => []
-    | S n, a :: l => list_suffix l n
-    end.
-
-Lemma list_suffix_map
-  {A B : Type}
-  (f : A -> B)
-  (l : list A)
-  (n : nat)
-  : List.map f (list_suffix l n) = list_suffix (List.map f l) n.
-Proof.
-  by revert l; induction n; intros [| a l]; [.. | apply IHn].
-Qed.
-
-Fixpoint list_prefix
-  {A : Type}
-  (l : list A)
-  (n : nat)
-  : list A
-  := match n, l with
-    | 0, _ => []
-    | _, [] => []
-    | S n, a :: l => a :: list_prefix l n
-    end.
-
-Lemma list_prefix_split
+Lemma firstn_split
   {A : Type}
   (l left right : list A)
   (left_len : nat)
   (Hlen : left_len = length left)
   (Hsplit : l = left ++ right) :
-  list_prefix l left_len = left.
+  firstn left_len l = left.
 Proof.
   generalize dependent l.
   generalize dependent left.
@@ -257,7 +224,6 @@ Proof.
     symmetry in Hlen.
     rewrite length_zero_iff_nil in Hlen.
     rewrite Hlen.
-    unfold list_prefix.
     by destruct l.
   - intros.
     destruct left; [done |].
@@ -273,85 +239,63 @@ Proof.
     by rewrite IHleft_len.
 Qed.
 
-Lemma list_prefix_map
-  {A B : Type}
-  (f : A -> B)
-  (l : list A)
-  (n : nat)
-  : List.map f (list_prefix l n) = list_prefix (List.map f l) n.
-Proof.
-  by revert l; induction n; intros [| a l]; cbn; [.. | rewrite IHn].
-Qed.
-
-Lemma list_prefix_length
+Lemma firstn_length
   {A : Type}
   (l : list A)
   (n : nat)
   (Hlen : n <= length l)
-  : length (list_prefix l n) = n.
+  : length (firstn n l) = n.
 Proof.
-  by revert l Hlen; induction n; intros [| a l] Hlen; cbn in *;
-    [| | inversion Hlen | rewrite IHn; lia].
+  by rewrite firstn_length; lia.
 Qed.
 
-Lemma list_suffix_length
-  {A : Type}
-  (l : list A)
-  (n : nat)
-  : length (list_suffix l n) = length l - n.
-Proof.
-  by revert l; induction n; intros [| a l]; [.. | apply IHn].
-Qed.
-
-Lemma list_prefix_prefix
+Lemma firstn_prefix
   {A : Type}
   (l : list A)
   (n1 n2 : nat)
   (Hn : n1 <= n2)
-  : list_prefix (list_prefix l n2) n1 = list_prefix l n1.
+  : firstn n1 (firstn n2 l) = firstn n1 l.
 Proof.
-  generalize dependent n1. generalize dependent n2.
-  induction l; intros [| n2] [| n1] Hn; [done .. | by inversion Hn | done |].
-  by simpl; f_equal; apply IHl; lia.
+  by rewrite take_take, min_l.
 Qed.
 
-Lemma list_prefix_suffix
+Lemma firstn_suffix
   {A : Type}
   (l : list A)
   (n : nat)
-  : list_prefix l n ++ list_suffix l n = l.
+  : firstn n l ++ skipn n l = l.
 Proof.
-  by revert n; induction l; intros [| n]; cbn; [.. | rewrite IHl].
+  by rewrite take_drop.
 Qed.
 
-Lemma prefix_of_list_prefix
+Lemma prefix_of_firstn
   {A : Type}
   (l : list A)
   (n : nat)
-  : list_prefix l n `prefix_of` l.
-Proof. by eexists; symmetry; apply list_prefix_suffix. Qed.
+  : firstn n l `prefix_of` l.
+Proof. by eexists; symmetry; apply firstn_suffix. Qed.
 
 Definition list_segment
   {A : Type}
   (l : list A)
   (n1 n2 : nat)
-  := list_suffix (list_prefix l n2) n1.
+  := skipn n1 (firstn n2 l).
 
-Lemma list_prefix_segment_suffix
+Lemma firstn_segment_suffix
   {A : Type}
   (l : list A)
   (n1 n2 : nat)
   (Hn : n1 <= n2)
-  : list_prefix l n1 ++ list_segment l n1 n2 ++ list_suffix l n2 = l.
+  : firstn n1 l ++ list_segment l n1 n2 ++ skipn n2 l = l.
 Proof.
-  rewrite <- (list_prefix_suffix l n2) at 4.
+  rewrite <- (firstn_suffix l n2) at 4.
   rewrite app_assoc.
   f_equal.
   unfold list_segment.
-  rewrite <- (list_prefix_suffix (list_prefix l n2) n1) at 2.
+  rewrite <- (firstn_suffix (firstn n2 l) n1) at 2.
   f_equal.
   symmetry.
-  by apply list_prefix_prefix.
+  by apply firstn_prefix.
 Qed.
 
 Fixpoint list_annotate
@@ -596,13 +540,13 @@ Proof.
   by unfold list_filter_map; rewrite filter_annotate_app, map_app.
 Qed.
 
-Lemma list_prefix_nth
+Lemma firstn_nth
   {A : Type}
   (s : list A)
   (n : nat)
   (i : nat)
   (Hi : i < n)
-  : nth_error (list_prefix s n) i = nth_error s i.
+  : nth_error (firstn n s) i = nth_error s i.
 Proof.
   revert s n Hi.
   induction i; intros [| a s] [| n] Hi; try done.
@@ -624,31 +568,31 @@ Proof.
     [| specialize (IHn l b H0)]; lia.
 Qed.
 
-Lemma list_prefix_nth_last
+Lemma firstn_nth_last
   {A : Type}
   (l : list A)
   (n : nat)
   (nth : A)
   (Hnth : nth_error l n = Some nth)
   (_last : A)
-  : nth = List.last (list_prefix l (S n)) _last.
+  : nth = List.last (firstn (S n) l) _last.
 Proof.
   specialize (nth_error_length l n nth Hnth); intro Hlen.
-  specialize (list_prefix_length l (S n) Hlen); intro Hpref_len.
+  specialize (firstn_length l (S n) Hlen); intro Hpref_len.
   symmetry in Hpref_len.
-  specialize (list_prefix_nth l (S n) n); intro Hpref.
+  specialize (firstn_nth l (S n) n); intro Hpref.
   rewrite <- Hpref in Hnth; [| by constructor].
-  specialize (nth_error_last (list_prefix l (S n)) n Hpref_len _last); intro Hlast.
+  specialize (nth_error_last (firstn (S n) l) n Hpref_len _last); intro Hlast.
   by rewrite Hlast in Hnth; inversion Hnth.
 Qed.
 
-Lemma list_suffix_nth
+Lemma skipn_nth
   {A : Type}
   (s : list A)
   (n : nat)
   (i : nat)
   (Hi : n <= i)
-  : nth_error (list_suffix s n) (i - n) = nth_error s i.
+  : nth_error (skipn n s) (i - n) = nth_error s i.
 Proof.
   revert s n Hi.
   induction i; intros [| a s] [| n] Hi; cbn; try done.
@@ -657,13 +601,13 @@ Proof.
   - by apply IHi; lia.
 Qed.
 
-Lemma list_suffix_last
+Lemma skipn_last
   {A : Type}
   (l : list A)
   (i : nat)
   (Hlt : i < length l)
   (_default : A)
-  : List.last (list_suffix l i) _default  = List.last l _default.
+  : List.last (skipn i l) _default  = List.last l _default.
 Proof.
   revert l Hlt; induction i; intros [| a l] Hlt; [done.. |].
   simpl in Hlt.
@@ -676,13 +620,13 @@ Proof.
   - by rewrite unroll_last, unroll_last.
 Qed.
 
-Lemma list_suffix_last_default
+Lemma skipn_last_default
   {A : Type}
   (l : list A)
   (i : nat)
   (Hlast : i = length l)
   (_default : A)
-  : List.last (list_suffix l i) _default  = _default.
+  : List.last (skipn i l) _default  = _default.
 Proof.
   revert l Hlast; induction i; intros [| a l] Hlast; [done.. |].
   by apply IHi; inversion Hlast.
@@ -699,8 +643,8 @@ Lemma list_segment_nth
   : nth_error (list_segment l n1 n2) (i - n1) = nth_error l i.
 Proof.
   unfold list_segment.
-  rewrite list_suffix_nth; [| done].
-  by apply list_prefix_nth.
+  rewrite skipn_nth; [| done].
+  by apply firstn_nth.
 Qed.
 
 Lemma list_segment_app
@@ -712,13 +656,13 @@ Lemma list_segment_app
   : list_segment l n1 n2 ++ list_segment l n2 n3 = list_segment l n1 n3.
 Proof.
   assert (Hle : n1 <= n3) by lia.
-  specialize (list_prefix_segment_suffix l n1 n3 Hle); intro Hl1.
-  specialize (list_prefix_segment_suffix l n2 n3 H23); intro Hl2.
+  specialize (firstn_segment_suffix l n1 n3 Hle); intro Hl1.
+  specialize (firstn_segment_suffix l n2 n3 H23); intro Hl2.
   rewrite <- Hl2 in Hl1 at 4. clear Hl2.
   repeat rewrite app_assoc in Hl1.
   apply app_inv_tail in Hl1.
-  specialize (list_prefix_suffix (list_prefix l n2) n1); intro Hl2.
-  specialize (list_prefix_prefix l n1 n2 H12); intro Hl3.
+  specialize (firstn_suffix (firstn n2 l) n1); intro Hl2.
+  specialize (firstn_prefix l n1 n2 H12); intro Hl3.
   rewrite Hl3 in Hl2.
   rewrite <- Hl2 in Hl1.
   rewrite <- app_assoc in Hl1.
@@ -736,17 +680,17 @@ Proof.
   unfold list_segment.
   assert (Hle : S n <= length l)
     by (apply nth_error_length in Hnth; done).
-  assert (Hlt : n < length (list_prefix l (S n)))
-    by (rewrite list_prefix_length; try constructor; done).
-  specialize (list_suffix_last (list_prefix l (S n)) n Hlt a); intro Hlast1.
-  specialize (list_prefix_nth_last l n a Hnth a); intro Hlast2.
+  assert (Hlt : n < length (firstn (S n) l))
+    by (rewrite firstn_length; lia).
+  specialize (skipn_last (firstn (S n) l) n Hlt a); intro Hlast1.
+  specialize (firstn_nth_last l n a Hnth a); intro Hlast2.
   rewrite <- Hlast2 in Hlast1.
-  specialize (list_suffix_length (list_prefix l (S n)) n).
-  rewrite list_prefix_length; [| done].
+  specialize (skipn_length n (firstn (S n) l)).
+  rewrite firstn_length by done.
   intro Hlength.
   assert (Hs : S n - n = 1) by lia.
   rewrite Hs in Hlength.
-  remember (list_suffix (list_prefix l (S n)) n) as x.
+  remember (skipn n (firstn (S n) l)) as x.
   clear -Hlength Hlast1.
   destruct x; inversion Hlength.
   destruct x; inversion H0.
@@ -1340,7 +1284,7 @@ Proof. by inversion 1. Qed.
 Lemma fsFurther : forall a l, ForAllSuffix (a :: l) -> ForAllSuffix l.
 Proof. by inversion 1. Qed.
 
-Lemma ForAll_list_suffix : forall m x, ForAllSuffix x -> ForAllSuffix (list_suffix x m).
+Lemma ForAll_skipn : forall m x, ForAllSuffix x -> ForAllSuffix (skipn m x).
 Proof.
   induction m; simpl; intros [] **; [done.. |].
   by apply fsFurther in H; apply IHm.

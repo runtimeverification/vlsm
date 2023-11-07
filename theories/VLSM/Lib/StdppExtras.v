@@ -244,15 +244,16 @@ Proof.
   by etransitivity; [| apply lookup_lt_is_Some].
 Qed.
 
-Lemma list_suffix_lookup
+Lemma skipn_lookup
   {A : Type}
   (s : list A)
   (n : nat)
   (i : nat)
   (Hi : n <= i)
-  : list_suffix s n !! (i - n) = s !! i.
+  : skipn n s !! (i - n) = s !! i.
 Proof.
-  by revert s n Hi; induction i; intros [| a s] [| n] Hi; cbn; try done; [| apply IHi]; lia.
+  rewrite lookup_drop.
+  by replace (n + (i - n)) with i by lia.
 Qed.
 
 Lemma list_difference_singleton_not_in `{EqDecision A} :
