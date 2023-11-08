@@ -17,19 +17,6 @@ From VLSM.Core Require Import VLSMProjections ProjectionTraces.
 
 #[local] Open Scope Z_scope.
 
-(** ** General automation *)
-
-(** Custom tactic used to simplify proofs of valid VLSM transitions. *)
-
-Ltac app_valid_tran :=
-  repeat split; cbn;
-  match goal with
-  | |- option_valid_message_prop _ _ => by apply initial_message_is_valid
-  | |- option_valid_message_prop _ _ => eapply emitted_messages_are_valid
-  | |- valid_state_prop _ _ => by apply initial_state_is_valid
-  | |- valid_state_prop _ _ => eapply input_valid_transition_destination
-  end.
-
 Section sec_parity_vlsm.
 
 (**
@@ -41,7 +28,7 @@ Context
  (multiplier_gt_1 : multiplier > 1)
  .
 
-(** ** Definition of generalized Parity VLSM
+(** ** Definition of the Generalized Parity VLSM
 
   The generalized Parity VLSM will only have one label, indicating a decrement.
   For this reason, the [unit] type can be used.
@@ -266,7 +253,7 @@ Qed.
 (** The previously defined trace is obviously constrained, since it's valid. *)
 Lemma mul_parity_constrained_trace1 :
   multiplier >= 2 ->
-  finite_constrained_trace_init_to_direct ParityVLSM
+  finite_constrained_trace_init_to_direct MulParityVLSM
     mul_parity_trace1_first_state mul_parity_trace1_last_state mul_parity_trace1.
 Proof.
   constructor; [| by unfold mul_parity_trace1_first_state; cbn; red; lia].

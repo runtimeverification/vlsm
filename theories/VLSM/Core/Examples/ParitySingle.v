@@ -68,20 +68,7 @@ Proof.
     by rewrite <- Zeven_unary_minus.
 Qed.
 
-(** ** General automation *)
-
-(** Custom tactic used to simplify proofs on valid VLSM transitions *)
-
-Ltac app_valid_tran :=
-  repeat split; cbn; try done;
-  match goal with
-  | |- option_valid_message_prop _ _ => by apply initial_message_is_valid
-  | |- option_valid_message_prop _ _ => eapply emitted_messages_are_valid
-  | |- valid_state_prop _ _ => by apply initial_state_is_valid
-  | |- valid_state_prop _ _ => eapply input_valid_transition_destination
-  end.
-
-(** ** Definition of Parity VLSM
+(** ** Definition of the Parity VLSM
 
   The Parity VLSM will only have one label, indicating a decrement.
   For this reason, the [unit] type can be used.
