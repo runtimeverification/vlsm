@@ -17,37 +17,6 @@ Proof.
     + by right; eapply IHl.
 Qed.
 
-Lemma map_skipn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
-  map f (skipn n l) = skipn n (map f l).
-Proof.
-  revert n; induction l; intros n.
-  - by rewrite !skipn_nil.
-  - by destruct n; cbn; auto.
-Qed.
-
-Lemma map_firstn [A B : Type] (f : A -> B) (l : list A) (n : nat) :
-  map f (firstn n l) = firstn n (map f l).
-Proof.
-  generalize dependent n.
-  induction l; intros n.
-  - by cbn; rewrite !firstn_nil.
-  - by destruct n; cbn; rewrite ?IHl.
-Qed.
-
-Lemma skipn_S_tail {A : Type} (l : list A) (n : nat) :
-  skipn (S n) l = (skipn n (tail l)).
-Proof.
-  by destruct l; cbn; rewrite ?drop_nil.
-Qed.
-
-Lemma skipn_tail_comm {A : Type} (l : list A) (n : nat) :
-  skipn n (tail l) = tail (skipn n l).
-Proof.
-  revert l; induction n; intros l.
-  - by rewrite !drop_0.
-  - by rewrite !skipn_S_tail, IHn.
-Qed.
-
 Lemma map_tail [A B : Type] (f : A -> B) (l : list A) :
   map f (tail l) = tail (map f l).
 Proof.
@@ -241,17 +210,6 @@ Lemma list_lookup_lt [A] (is : list A) :
 Proof.
   intros; apply lookup_lt_is_Some.
   by etransitivity; [| apply lookup_lt_is_Some].
-Qed.
-
-Lemma list_suffix_lookup
-  {A : Type}
-  (s : list A)
-  (n : nat)
-  (i : nat)
-  (Hi : n <= i)
-  : list_suffix s n !! (i - n) = s !! i.
-Proof.
-  by revert s n Hi; induction i; intros [| a s] [| n] Hi; cbn; try done; [| apply IHi]; lia.
 Qed.
 
 Lemma list_difference_singleton_not_in `{EqDecision A} :

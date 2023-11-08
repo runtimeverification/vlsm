@@ -326,24 +326,24 @@ Qed.
 Lemma finite_trace_last_prefix
   (s : state T) (tr : list transition_item) (n : nat) (s' : state T) :
     finite_trace_nth s tr n = Some s' ->
-    finite_trace_last s (list_prefix tr n) = s'.
+    finite_trace_last s (firstn n tr) = s'.
 Proof.
   unfold finite_trace_nth, finite_trace_last.
-  rewrite list_prefix_map.
+  rewrite <- firstn_map.
   generalize (List.map destination tr); intro l; clear tr.
   destruct n; cbn.
   - by intros [= <-]; destruct l.
-  - by intros H; symmetry; apply list_prefix_nth_last.
+  - by intros H; symmetry; apply firstn_nth_last.
 Qed.
 
 Lemma finite_trace_last_suffix
   (s : state T) (tr : list transition_item) (n : nat) :
-    n < length tr -> finite_trace_last s (list_suffix tr n) = finite_trace_last s tr.
+    n < length tr -> finite_trace_last s (skipn n tr) = finite_trace_last s tr.
 Proof.
   intros H.
   unfold finite_trace_last.
-  rewrite list_suffix_map.
-  apply list_suffix_last.
+  rewrite <- skipn_map.
+  apply skipn_last.
   by rewrite map_length.
 Qed.
 
@@ -1273,9 +1273,9 @@ Lemma finite_valid_trace_from_prefix
   (ls : list transition_item)
   (Htr : finite_valid_trace_from s ls)
   (n : nat) :
-    finite_valid_trace_from s (list_prefix ls n).
+    finite_valid_trace_from s (firstn n ls).
 Proof.
-  specialize (list_prefix_suffix ls n); intro Hdecompose.
+  specialize (take_drop n ls); intro Hdecompose.
   rewrite <- Hdecompose in Htr.
   by apply finite_valid_trace_from_app_iff in Htr as [Hpr _].
 Qed.
@@ -1287,18 +1287,18 @@ Lemma finite_valid_trace_from_suffix
   (n : nat)
   (nth : state X)
   (Hnth : finite_trace_nth s ls n = Some nth) :
-    finite_valid_trace_from nth (list_suffix ls n).
+    finite_valid_trace_from nth (skipn n ls).
 Proof.
-  rewrite <- (list_prefix_suffix ls n) in Htr.
+  rewrite <- (take_drop n ls) in Htr.
   apply finite_valid_trace_from_app_iff in Htr.
   destruct Htr as [_ Htr].
-  replace (finite_trace_last s (list_prefix ls n)) with nth in Htr; [done |].
+  replace (finite_trace_last s (firstn n ls)) with nth in Htr; [done |].
   destruct n.
   - rewrite finite_trace_nth_first in Hnth.
     by destruct ls; cbn; congruence.
   - unfold finite_trace_last.
-    rewrite list_prefix_map.
-    by apply list_prefix_nth_last.
+    rewrite <- firstn_map.
+    by apply firstn_nth_last.
 Qed.
 
 Lemma finite_valid_trace_from_segment
@@ -1316,7 +1316,7 @@ Proof.
   - destruct n1; [done |].
     unfold finite_trace_nth in Hnth |- *.
     simpl in Hnth |- *.
-    by rewrite list_prefix_map, list_prefix_nth.
+    by rewrite <- firstn_map, firstn_nth.
 Qed.
 
 Lemma can_produce_from_valid_trace
@@ -2202,7 +2202,7 @@ Definition trace_prefix
 
 Definition trace_prefix_fn (tr : Trace) (n : nat) : Trace X :=
   match tr with
-  | Finite s ls => Finite s (list_prefix ls n)
+  | Finite s ls => Finite s (firstn n ls)
   | Infinite s st => Finite s (stream_prefix st n)
   end.
 
@@ -2310,9 +2310,9 @@ Proof.
       ; clear Heqpref_tr
       ; simpl
       ; intro Heqprefix.
-      * specialize (list_prefix_suffix l' n); intro Hl'.
+      * specialize (take_drop n l'); intro Hl'.
         rewrite <- Hl'. rewrite Heqprefix.
-        exists (list_suffix l' n).
+        exists (skipn n l').
         by rewrite <- app_assoc.
       * specialize (stream_prefix_suffix l' n); intro Hl'.
         rewrite <- Hl'. rewrite Heqprefix.
@@ -2372,12 +2372,12 @@ Proof.
       rewrite finite_trace_last_suffix.
       * by apply finite_trace_last_prefix.
       * apply finite_trace_nth_length in Hs2.
-        by rewrite list_prefix_length; lia.
+        by rewrite firstn_length; lia.
     + unfold stream_segment.
       rewrite unlock_finite_trace_last.
-      rewrite list_suffix_map, stream_prefix_map.
+      rewrite <- skipn_map, stream_prefix_map.
       simpl in Hs2.
-      rewrite list_suffix_last.
+      rewrite skipn_last.
       * symmetry. rewrite stream_prefix_nth_last.
         unfold Str_nth in Hs2. simpl in Hs2.
         by inversion Hs2; subst.

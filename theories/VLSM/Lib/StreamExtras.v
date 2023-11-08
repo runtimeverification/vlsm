@@ -362,7 +362,7 @@ Lemma stream_prefix_app_l
   (s : Stream A)
   (n : nat)
   (Hle : n <= length l)
-  : stream_prefix (stream_app l s) n = list_prefix l n.
+  : stream_prefix (stream_app l s) n = firstn n l.
 Proof.
   revert n Hle; induction l; intros [| n] Hle; [by inversion Hle.. |].
   by cbn in *; rewrite IHl; [| lia].
@@ -558,10 +558,10 @@ Lemma stream_prefix_prefix
   (l : Stream A)
   (n1 n2 : nat)
   (Hn : n1 <= n2)
-  : list_prefix (stream_prefix l n2) n1 = stream_prefix l n1.
+  : firstn n1 (stream_prefix l n2) = stream_prefix l n1.
 Proof.
   revert l n2 Hn.
-  induction n1; intros [a l]; intros [| n2] Hn; cbn; [by inversion Hn.. |].
+  induction n1; intros [a l]; intros [| n2] Hn; simpl; [by inversion Hn.. |].
   by rewrite IHn1; [| lia].
 Qed.
 
@@ -573,7 +573,7 @@ Lemma stream_prefix_of
   : stream_prefix l n1 `prefix_of` stream_prefix l n2.
 Proof.
   rewrite <- (stream_prefix_prefix l n1 n2 Hn).
-  by apply prefix_of_list_prefix.
+  by apply prefix_of_firstn.
 Qed.
 
 Definition stream_segment
@@ -581,7 +581,7 @@ Definition stream_segment
   (l : Stream A)
   (n1 n2 : nat)
   : list A
-  := list_suffix (stream_prefix l n2) n1.
+  := skipn n1 (stream_prefix l n2).
 
 Lemma stream_segment_nth
   {A : Type}
@@ -594,7 +594,7 @@ Lemma stream_segment_nth
   : nth_error (stream_segment l n1 n2) (i - n1) = Some (Str_nth i l).
 Proof.
   unfold stream_segment.
-  rewrite list_suffix_nth; [| done].
+  rewrite skipn_nth; [| done].
   by apply stream_prefix_nth.
 Qed.
 
@@ -620,14 +620,14 @@ Proof.
   intro k.
   unfold stream_segment_alt. unfold stream_segment.
   destruct (decide (n2 - n1 <= k)).
-  - specialize (nth_error_None (list_suffix (stream_prefix l n2) n1) k); intros [_ H].
+  - specialize (nth_error_None (skipn n1 (stream_prefix l n2)) k); intros [_ H].
     specialize (nth_error_None (stream_prefix (stream_suffix l n1) (n2 - n1)) k); intros [_ H_alt].
     rewrite H, H_alt; [done | |].
     + by rewrite stream_prefix_length.
-    + by rewrite list_suffix_length, stream_prefix_length.
+    + by rewrite skipn_length, stream_prefix_length.
   - rewrite stream_prefix_nth, stream_suffix_nth by lia.
     assert (Hle : n1 <= n1 + k) by lia.
-    specialize (list_suffix_nth (stream_prefix l n2) n1 (n1 + k) Hle)
+    specialize (skipn_nth (stream_prefix l n2) n1 (n1 + k) Hle)
     ; intro Heq.
     clear Hle.
     assert (Hs : n1 + k - n1 = k) by lia.
@@ -643,7 +643,7 @@ Lemma stream_prefix_segment
   : stream_prefix l n1 ++ stream_segment l n1 n2 = stream_prefix l n2.
 Proof.
   unfold stream_segment.
-  rewrite <- (list_prefix_suffix (stream_prefix l n2) n1) at 2.
+  rewrite <- (take_drop n1 (stream_prefix l n2)) at 2.
   by rewrite stream_prefix_prefix.
 Qed.
 
@@ -674,14 +674,14 @@ Proof.
   specialize (stream_prefix_segment_suffix l n2 n3 H23); intro Hl2.
   rewrite <- Hl2 in Hl1 at 4. clear Hl2.
   apply stream_app_inj_l in Hl1.
-  - specialize (list_prefix_suffix (stream_prefix l n2) n1); intro Hl2.
+  - specialize (take_drop n1 (stream_prefix l n2)); intro Hl2.
     specialize (stream_prefix_prefix l n1 n2 H12); intro Hl3.
     rewrite Hl3 in Hl2.
     rewrite <- Hl2, <- app_assoc in Hl1.
     by apply app_inv_head in Hl1.
   - repeat rewrite app_length.
     unfold stream_segment.
-    by rewrite !list_suffix_length, !stream_prefix_length; lia.
+    by rewrite !skipn_length, !stream_prefix_length; lia.
 Qed.
 
 Definition monotone_nat_stream_prop
@@ -871,7 +871,7 @@ Lemma stream_prepend_prefix_l
   (l : ne_list A)
   (s : Stream A)
   : forall n : nat, n <= ne_list_length l ->
-    stream_prefix (stream_prepend l s) n = list_prefix (ne_list_to_list l) n.
+    stream_prefix (stream_prepend l s) n = firstn n (ne_list_to_list l).
 Proof.
   induction l; intros [| n] Hle; cbn; [done | | done |].
   - by cbn in Hle; replace n with 0 by lia.
