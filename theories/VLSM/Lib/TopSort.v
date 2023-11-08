@@ -12,7 +12,7 @@ From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet Stdp
   among the current elements, then recurses on the remaining elements.
 
   To begin with, we assume an unconstrained <<precedes>> function to say
-  whether an element precedes another.  The proofs will show that if
+  whether an element precedes another. The proofs will show that if
   <<precedes>> determines a strict order on the set of elements in the list,
   then the [top_sort] algorithm produces a linear extension of that ordering
   (Lemmas [top_sort_precedes] and [top_sort_precedes_before]).
