@@ -55,9 +55,9 @@ Definition RadixType : VLSMType RadixMessage :=
   and guard predicate are as follows:
 *)
 
-Definition RadixComponent_initial_state_prop (st : RadixState) : Prop := st >= 1.
+Definition Radix_initial_state_prop (st : RadixState) : Prop := st >= 1.
 
-Definition RadixComponent_transition
+Definition Radix_transition
   (l : RadixLabel) (st : RadixState) (om : option RadixMessage)
   : RadixState * option RadixMessage :=
   match om with
@@ -65,7 +65,7 @@ Definition RadixComponent_transition
   | None    => (st, None)
   end.
 
-Definition RadixComponent_valid
+Definition Radix_valid
   (l : RadixLabel) (st : RadixState) (om : option RadixMessage) : Prop :=
   match om with
   | Some msg => msg <= st /\ 2 <= msg
@@ -77,17 +77,17 @@ Definition RadixComponent_valid
   is inhabited as the set of initial states is non-empty.
 *)
 
-Definition RadixComponent_initial_state_type : Type :=
-  {st : RadixState | RadixComponent_initial_state_prop st}.
+Definition Radix_initial_state_type : Type :=
+  {st : RadixState | Radix_initial_state_prop st}.
 
-Program Definition RadixComponent_initial_state :
-  RadixComponent_initial_state_type := exist _ 1 _.
+Program Definition Radix_initial_state :
+  Radix_initial_state_type := exist _ 1 _.
 Next Obligation.
 Proof. done. Defined.
 
-#[export] Instance RadixComponent_Inhabited_initial_state_type :
-  Inhabited (RadixComponent_initial_state_type) :=
-    populate (RadixComponent_initial_state).
+#[export] Instance Radix_Inhabited_initial_state_type :
+  Inhabited (Radix_initial_state_type) :=
+    populate (Radix_initial_state).
 
 (**
   An intermediate representation for the VLSM is required.
@@ -96,11 +96,11 @@ Proof. done. Defined.
 
 Definition RadixMachine : VLSMMachine RadixType :=
 {|
-  initial_state_prop := RadixComponent_initial_state_prop;
+  initial_state_prop := Radix_initial_state_prop;
   initial_message_prop := fun (ms : RadixMessage) => ms = multiplier;
-  s0 := RadixComponent_Inhabited_initial_state_type;
-  transition := fun l '(st, om) => RadixComponent_transition l st om;
-  valid := fun l '(st, om) => RadixComponent_valid l st om;
+  s0 := Radix_Inhabited_initial_state_type;
+  transition := fun l '(st, om) => Radix_transition l st om;
+  valid := fun l '(st, om) => Radix_valid l st om;
 |}.
 
 (** The definition of the Radix VLSM. *)
@@ -166,7 +166,7 @@ Example radix_can_emit_square_mult :
 Proof.
   exists (multiplier, Some multiplier), radix_label, 0.
   repeat split; [| | by lia.. | by cbn; do 2 f_equal; lia].
-  - by apply initial_state_is_valid; cbn; unfold RadixComponent_initial_state_prop; lia.
+  - by apply initial_state_is_valid; cbn; unfold Radix_initial_state_prop; lia.
   - by app_valid_tran.
 Qed.
 
@@ -183,7 +183,7 @@ Proposition radix_valid_transition_1 :
 Proof.
   repeat split; [| | | by lia].
   - by apply initial_state_is_valid; cbn;
-      unfold RadixComponent_initial_state_prop, radix_trace1_first_state; lia.
+      unfold Radix_initial_state_prop, radix_trace1_first_state; lia.
   - by app_valid_tran; eapply radix_can_emit_square_mult.
   - by unfold radix_trace1_first_state; nia.
 Qed.
@@ -220,7 +220,7 @@ Example radix_valid_trace1 :
     radix_trace1_first_state radix_trace1_last_state radix_trace1.
 Proof.
   constructor; unfold radix_trace1_first_state;
-    [| by cbn; unfold RadixComponent_initial_state_prop; lia].
+    [| by cbn; unfold Radix_initial_state_prop; lia].
   repeat apply finite_valid_trace_from_to_extend.
   - by eapply finite_valid_trace_from_to_empty, input_valid_transition_destination,
       radix_valid_transition_3.
@@ -469,7 +469,7 @@ Lemma radix_constrained_states_right :
     constrained_state_prop RadixVLSM st -> st >= 0.
 Proof.
   induction 1 using valid_state_prop_ind.
-  - by cbn in Hs; unfold RadixComponent_initial_state_prop in Hs; lia.
+  - by cbn in Hs; unfold Radix_initial_state_prop in Hs; lia.
   - destruct l, om, Ht as [(Hs & _ & []) Ht].
     by inversion Ht; subst; cbn in *; lia.
 Qed.
@@ -482,7 +482,7 @@ Proof.
   apply input_valid_transition_destination
     with (l := radix_label) (s := st + 2) (om := Some 2) (om' := Some (2 * multiplier)).
   repeat split; [| | by lia.. | by cbn; do 2 f_equal; lia].
-  - by apply initial_state_is_valid; cbn; unfold RadixComponent_initial_state_prop; lia.
+  - by apply initial_state_is_valid; cbn; unfold Radix_initial_state_prop; lia.
   - by apply any_message_is_valid_in_preloaded.
 Qed.
 

@@ -97,10 +97,10 @@ Definition ParityType : VLSMType ParityMessage :=
   and guard predicate are as follows:
 *)
 
-Definition ParityComponent_initial_state_prop (st : ParityState) : Prop :=
+Definition Parity_initial_state_prop (st : ParityState) : Prop :=
   st.1 >= 0 /\ st.1 = st.2.
 
-Definition ParityComponent_transition
+Definition Parity_transition
   (l : ParityLabel) (s : ParityState) (om : option ParityMessage)
   : ParityState * option ParityMessage :=
   match om with
@@ -108,7 +108,7 @@ Definition ParityComponent_transition
   | None    => (s, None)
   end.
 
-Definition ParityComponentValid (l : ParityLabel) (st : ParityState)
+Definition ParityValid (l : ParityLabel) (st : ParityState)
  (om : option ParityMessage) : Prop :=
   match om with
   | Some msg => msg <= st.2 /\ 1 <= msg
@@ -120,17 +120,17 @@ Definition ParityComponentValid (l : ParityLabel) (st : ParityState)
   is inhabited as the set of initial states is non-empty.
 *)
 
-Definition ParityComponent_initial_state_type : Type :=
-  {st : ParityState | ParityComponent_initial_state_prop st}.
+Definition Parity_initial_state_type : Type :=
+  {st : ParityState | Parity_initial_state_prop st}.
 
-Program Definition ParityComponent_initial_state :
-  ParityComponent_initial_state_type := exist _ (0, 0) _.
+Program Definition Parity_initial_state :
+  Parity_initial_state_type := exist _ (0, 0) _.
 Next Obligation.
 Proof. done. Defined.
 
-#[export] Instance ParityComponent_Inhabited_initial_state_type :
- Inhabited (ParityComponent_initial_state_type) :=
-  populate (ParityComponent_initial_state).
+#[export] Instance Parity_Inhabited_initial_state_type :
+ Inhabited (Parity_initial_state_type) :=
+  populate (Parity_initial_state).
 
 (**
   An intermediate representation for the VLSM is required.
@@ -139,11 +139,11 @@ Proof. done. Defined.
 
 Definition ParityMachine : VLSMMachine ParityType :=
 {|
-  initial_state_prop := ParityComponent_initial_state_prop;
+  initial_state_prop := Parity_initial_state_prop;
   initial_message_prop := fun (ms : ParityMessage) => ms = 2;
-  s0 := ParityComponent_Inhabited_initial_state_type;
-  transition := fun l '(st, om) => ParityComponent_transition l st om;
-  valid := fun l '(st, om) => ParityComponentValid l st om;
+  s0 := Parity_Inhabited_initial_state_type;
+  transition := fun l '(st, om) => Parity_transition l st om;
+  valid := fun l '(st, om) => ParityValid l st om;
 |}.
 
 (** The definition of the Parity VLSM. *)
