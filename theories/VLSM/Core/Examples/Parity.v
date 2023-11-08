@@ -3,8 +3,8 @@ From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections.
 
 (** * Parity VLSM
 
-  This module demonstrates some basic notions of the VLSM framework. The idea
-  of the parity VLSM is to store a tuple and continually decrement one of the
+  This module demonstrates some basic notions of the VLSM framework. We define
+  a (single) parity VLSM that stores a tuple and continually decrements one of the
   tuple's elements while a constraint is checked at each step. The name originates
   from the property of this VLSM to preserve the evenness of the tuple elements
   difference ([parity_valid_states_same_parity]). The definitions and lemmas tap into
@@ -68,20 +68,7 @@ Proof.
     by rewrite <- Zeven_unary_minus.
 Qed.
 
-(** ** General automation *)
-
-(** Custom tactic used to simplify proofs on valid VLSM transitions *)
-
-Ltac app_valid_tran :=
-  repeat split; cbn; try done;
-  match goal with
-  | |- option_valid_message_prop _ _ => by apply initial_message_is_valid
-  | |- option_valid_message_prop _ _ => eapply emitted_messages_are_valid
-  | |- valid_state_prop _ _ => by apply initial_state_is_valid
-  | |- valid_state_prop _ _ => eapply input_valid_transition_destination
-  end.
-
-(** ** Definition of Parity VLSM
+(** ** Definition of the Parity VLSM
 
   The Parity VLSM will only have one label, indicating a decrement.
   For this reason, the [unit] type can be used.
@@ -110,10 +97,10 @@ Definition ParityType : VLSMType ParityMessage :=
   and guard predicate are as follows:
 *)
 
-Definition ParityComponent_initial_state_prop (st : ParityState) : Prop :=
+Definition Parity_initial_state_prop (st : ParityState) : Prop :=
   st.1 >= 0 /\ st.1 = st.2.
 
-Definition ParityComponent_transition
+Definition Parity_transition
   (l : ParityLabel) (s : ParityState) (om : option ParityMessage)
   : ParityState * option ParityMessage :=
   match om with
@@ -121,7 +108,7 @@ Definition ParityComponent_transition
   | None    => (s, None)
   end.
 
-Definition ParityComponentValid (l : ParityLabel) (st : ParityState)
+Definition Parity_valid (l : ParityLabel) (st : ParityState)
  (om : option ParityMessage) : Prop :=
   match om with
   | Some msg => msg <= st.2 /\ 1 <= msg
@@ -133,17 +120,17 @@ Definition ParityComponentValid (l : ParityLabel) (st : ParityState)
   is inhabited as the set of initial states is non-empty.
 *)
 
-Definition ParityComponent_initial_state_type : Type :=
-  {st : ParityState | ParityComponent_initial_state_prop st}.
+Definition Parity_initial_state_type : Type :=
+  {st : ParityState | Parity_initial_state_prop st}.
 
-Program Definition ParityComponent_initial_state :
-  ParityComponent_initial_state_type := exist _ (0, 0) _.
+Program Definition Parity_initial_state :
+  Parity_initial_state_type := exist _ (0, 0) _.
 Next Obligation.
 Proof. done. Defined.
 
-#[export] Instance ParityComponent_Inhabited_initial_state_type :
- Inhabited (ParityComponent_initial_state_type) :=
-  populate (ParityComponent_initial_state).
+#[export] Instance Parity_Inhabited_initial_state_type :
+ Inhabited (Parity_initial_state_type) :=
+  populate (Parity_initial_state).
 
 (**
   An intermediate representation for the VLSM is required.
@@ -152,11 +139,11 @@ Proof. done. Defined.
 
 Definition ParityMachine : VLSMMachine ParityType :=
 {|
-  initial_state_prop := ParityComponent_initial_state_prop;
+  initial_state_prop := Parity_initial_state_prop;
   initial_message_prop := fun (ms : ParityMessage) => ms = 2;
-  s0 := ParityComponent_Inhabited_initial_state_type;
-  transition := fun l '(st, om) => ParityComponent_transition l st om;
-  valid := fun l '(st, om) => ParityComponentValid l st om;
+  s0 := Parity_Inhabited_initial_state_type;
+  transition := fun l '(st, om) => Parity_transition l st om;
+  valid := fun l '(st, om) => Parity_valid l st om;
 |}.
 
 (** The definition of the Parity VLSM. *)
