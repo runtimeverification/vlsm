@@ -11,6 +11,10 @@ Context
 
 Section sec_general.
 
+(**
+  If <<X>> is a subset of <<Y>>, then the elements of <<X>> are a sublist
+  of the elements of <<Y>>.
+*)
 Lemma elements_subseteq (X Y : C) :
   X ⊆ Y -> elements X ⊆ elements Y.
 Proof. by set_solver. Qed.

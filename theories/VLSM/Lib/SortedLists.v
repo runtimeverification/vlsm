@@ -5,6 +5,7 @@ From VLSM.Lib Require Import Preamble ListExtras ListSetExtras.
 
 (** * Sorted list utility functions and lemmas *)
 
+(** Insert an element into a sorted list. *)
 Fixpoint add_in_sorted_list_fn
   {A} (compare : A -> A -> comparison) (x : A) (l : list A) : list A :=
   match l with

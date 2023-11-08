@@ -9,6 +9,7 @@ Proof. by intros x y z; apply Z.mul_assoc. Qed.
 
 (** * Natural number utility definitions and lemmas *)
 
+(** Compute the list of all naturals less than <<n>>. *)
 Fixpoint up_to_n_listing (n : nat) : list nat :=
   match n with
   | 0 => []
@@ -174,6 +175,11 @@ Context
   `(multipliers : index -> Z)
   .
 
+(**
+  Despite being functions, <<multipliers>> are supposed to represent a list
+  <<[m_1, ..., m_n]>> and <<powers>> are supposed to represent a list
+  <<[p_1, ..., p_n]>>. The function computes <<m_1^p_1 * ... * m_n^p_n>>.
+*)
 Definition prod_powers_aux (powers : index -> nat) (l : list index) : Z :=
   foldr Z.mul 1%Z (zip_with Z.pow (map multipliers l) (map (Z.of_nat ∘ powers) l)).
 
@@ -331,11 +337,16 @@ End sec_prod_powers.
 
 #[export] Instance prime_decision : forall n, Decision (prime n) := prime_dec.
 
+(** The type of prime numbers. *)
 Definition primes : Type := dsig prime.
 
 #[export] Program Instance primes_inhabited : Inhabited primes :=
   populate (dexist 2%Z prime_2).
 
+(**
+  Compute the product of powers of primes represented by <<powers>>.
+  Since there are only finitely many of them, the result is well-defined.
+*)
 Definition prod_primes_powers (powers : fsfun primes 0) : Z :=
   fsfun_prod (fun p : primes => ` p) powers.
 
