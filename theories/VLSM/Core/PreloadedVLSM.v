@@ -581,18 +581,27 @@ Definition constrained_state_message_prop :=
 
 End sec_constrained_defs.
 
-(** ** Alternate definitions to constrained traces, states and messages
+(** ** Direct definitions of constrained traces, states and messages
 
-  "Constrained" concepts can also be defined in an alternative way, by mimicking
-  definitions for the corresponding "valid" concepts.
+  In the above formalization, "valid" concepts are defined first, then
+  "constrained" ones are derived from them, expressed as validity within the
+  [pre_loaded_with_all_messages_vlsm].
+
+  In this section we state the original mathematical definitions (as presented
+  in the companion technical report) and we show them equivalent with the ones
+  defined above.
 *)
 
-Section sec_constrained_defs_alt.
+Section sec_constrained_direct_defs.
 
 Context
   `(X : VLSM message)
   .
 
+(**
+  A sequence of constrained transitions, without any requirements on the
+  starting state.
+*)
 Inductive constrained_transitions_from_to :
   state X -> state X -> list (transition_item X) -> Prop :=
 | ct_empty : forall s, constrained_transitions_from_to s s []
@@ -601,13 +610,17 @@ Inductive constrained_transitions_from_to :
     constrained_transitions_from_to s f
       ((Build_transition_item l om s' om') :: tr).
 
-Definition finite_constrained_trace_init_to_alt
+(**
+  A constrained state is a sequence of constrained transitions originating in
+  an initial state.
+*)
+Definition finite_constrained_trace_init_to_direct
   (s f : state X) (tr : list (transition_item X)) :=
   constrained_transitions_from_to s f tr /\ initial_state_prop X s.
 
-Lemma finite_constrained_trace_init_to_alt_right_impl :
+Lemma finite_constrained_trace_init_to_direct_right_impl :
   forall (s f : state X) (tr : list (transition_item X)),
-    finite_constrained_trace_init_to X s f tr -> finite_constrained_trace_init_to_alt s f tr.
+    finite_constrained_trace_init_to X s f tr -> finite_constrained_trace_init_to_direct s f tr.
 Proof.
   intros s f tr [Htr Hinit].
   constructor; [| done]; clear Hinit.
@@ -616,9 +629,9 @@ Proof.
   - by apply ct_extend; [apply Ht..|].
 Qed.
 
-Lemma finite_constrained_trace_init_to_alt_left_impl :
+Lemma finite_constrained_trace_init_to_direct_left_impl :
   forall (s f : state X) (tr : list (transition_item X)),
-    finite_constrained_trace_init_to_alt s f tr -> finite_constrained_trace_init_to X s f tr.
+    finite_constrained_trace_init_to_direct s f tr -> finite_constrained_trace_init_to X s f tr.
 Proof.
   intros s f tr [Htr Hs].
   split; [| done].
@@ -634,51 +647,46 @@ Proof.
       by repeat split; [| apply any_message_is_valid_in_preloaded | ..].
 Qed.
 
-Lemma finite_constrained_trace_init_to_alt_equiv :
+Lemma finite_constrained_trace_init_to_direct_equiv :
   forall (s f : state X) (tr : list (transition_item X)),
-    finite_constrained_trace_init_to_alt s f tr <-> finite_constrained_trace_init_to X s f tr.
+    finite_constrained_trace_init_to_direct s f tr <-> finite_constrained_trace_init_to X s f tr.
 Proof.
   split.
-  - by apply finite_constrained_trace_init_to_alt_left_impl.
-  - by apply finite_constrained_trace_init_to_alt_right_impl.
+  - by apply finite_constrained_trace_init_to_direct_left_impl.
+  - by apply finite_constrained_trace_init_to_direct_right_impl.
 Qed.
 
-(**
-  Similarly, we can alternately define constrained states as valid states for
-  the VLSM in which all messages are valid (initial). 
-*)
-
-Definition constrained_state_prop_alt (f : state X) : Prop :=
+(** A constrained state is a state reachable through a constrained trace. *)
+Definition constrained_state_prop_direct (f : state X) : Prop :=
   exists (s : state X) (tr : list (transition_item X)),
-    finite_constrained_trace_init_to_alt s f tr.
+    finite_constrained_trace_init_to_direct s f tr.
 
-Lemma constrained_state_prop_alt_equiv :
+Lemma constrained_state_prop_direct_equiv :
   forall (s : state X),
-    constrained_state_prop_alt s <-> constrained_state_prop X s.
+    constrained_state_prop_direct s <-> constrained_state_prop X s.
 Proof.
   intros s.
-  unfold constrained_state_prop_alt;
-    setoid_rewrite finite_constrained_trace_init_to_alt_equiv; split.
+  unfold constrained_state_prop_direct;
+    setoid_rewrite finite_constrained_trace_init_to_direct_equiv; split.
   - by intros (? & ? & []); eapply finite_valid_trace_from_to_last_pstate.
   - by intro Hs; apply valid_state_has_trace in Hs as (? & ? & ?); eexists _, _.
 Qed.
 
 (**
-  Similarly, we can alternately define constrained messages as emittable in
-  the VLSM in which all messages are valid (initial). 
+  A constrained message is one which can be emitted by a constrained trace.
 *)
 
-Definition constrained_message_prop_alt (m : message) : Prop :=
+Definition constrained_message_prop_direct (m : message) : Prop :=
   exists (s f : state X) (tr : list (transition_item X)) (item : transition_item X),
-    finite_constrained_trace_init_to_alt s f (tr ++ [item]) /\ output item = Some m.
+    finite_constrained_trace_init_to_direct s f (tr ++ [item]) /\ output item = Some m.
 
-Lemma constrained_message_prop_alt_equiv :
+Lemma constrained_message_prop_direct_equiv :
   forall (m : message),
-    constrained_message_prop_alt m <-> constrained_message_prop X m.
+    constrained_message_prop_direct m <-> constrained_message_prop X m.
 Proof.
   intros m.
-  unfold constrained_message_prop_alt, constrained_message_prop; rewrite can_emit_iff.
-  setoid_rewrite finite_constrained_trace_init_to_alt_equiv.
+  unfold constrained_message_prop_direct, constrained_message_prop; rewrite can_emit_iff.
+  setoid_rewrite finite_constrained_trace_init_to_direct_equiv.
   setoid_rewrite non_empty_valid_trace_from_can_produce; split.
   - intros (is & s & tr & item & Htr & Hm).
     exists s, is, (tr ++ [item]), item; split_and!; [..| done].
@@ -693,4 +701,4 @@ Proof.
     by eexists _, _, _, _.
 Qed.
 
-End sec_constrained_defs_alt.
+End sec_constrained_direct_defs.
