@@ -208,21 +208,21 @@ Proof.
     by rewrite !unroll_last.
 Qed.
 
-Lemma firstn_prefix
+Lemma take_prefix
   {A : Type}
   (l : list A)
   (n1 n2 : nat)
   (Hn : n1 <= n2)
-  : firstn n1 (firstn n2 l) = firstn n1 l.
+  : take n1 (take n2 l) = take n1 l.
 Proof.
   by rewrite take_take, min_l.
 Qed.
 
-Lemma prefix_of_firstn
+Lemma prefix_of_take
   {A : Type}
   (l : list A)
   (n : nat)
-  : firstn n l `prefix_of` l.
+  : take n l `prefix_of` l.
 Proof. by eexists; symmetry; apply take_drop. Qed.
 
 (**
@@ -234,23 +234,23 @@ Definition list_segment
   {A : Type}
   (l : list A)
   (n1 n2 : nat)
-  := skipn n1 (firstn n2 l).
+  := drop n1 (take n2 l).
 
-Lemma firstn_segment_suffix
+Lemma take_segment_suffix
   {A : Type}
   (l : list A)
   (n1 n2 : nat)
   (Hn : n1 <= n2)
-  : firstn n1 l ++ list_segment l n1 n2 ++ skipn n2 l = l.
+  : take n1 l ++ list_segment l n1 n2 ++ drop n2 l = l.
 Proof.
   rewrite <- (take_drop n2 l) at 4.
   rewrite app_assoc.
   f_equal.
   unfold list_segment.
-  rewrite <- (take_drop n1 (firstn n2 l)) at 2.
+  rewrite <- (take_drop n1 (take n2 l)) at 2.
   f_equal.
   symmetry.
-  by apply firstn_prefix.
+  by apply take_prefix.
 Qed.
 
 (**
@@ -504,13 +504,13 @@ Proof.
   by unfold list_filter_map; rewrite filter_annotate_app, map_app.
 Qed.
 
-Lemma firstn_nth
+Lemma take_nth
   {A : Type}
   (s : list A)
   (n : nat)
   (i : nat)
   (Hi : i < n)
-  : nth_error (firstn n s) i = nth_error s i.
+  : nth_error (take n s) i = nth_error s i.
 Proof.
   revert s n Hi.
   induction i; intros [| a s] [| n] Hi; try done.
@@ -532,56 +532,56 @@ Proof.
     [| specialize (IHn l b H0)]; lia.
 Qed.
 
-Lemma firstn_nth_last
+Lemma take_nth_last
   {A : Type}
   (l : list A)
   (n : nat)
   (nth : A)
   (Hnth : nth_error l n = Some nth)
   (_last : A)
-  : nth = List.last (firstn (S n) l) _last.
+  : nth = List.last (take (S n) l) _last.
 Proof.
   specialize (nth_error_length l n nth Hnth); intro Hlen.
-  specialize (firstn_length (S n) l); intro Hpref_len.
+  specialize (take_length l (S n)); intro Hpref_len.
   symmetry in Hpref_len.
-  specialize (firstn_nth l (S n) n); intro Hpref.
+  specialize (take_nth l (S n) n); intro Hpref.
   rewrite <- Hpref in Hnth; [| by constructor].
   erewrite nth_error_last in Hnth by lia.
   by inversion Hnth.
 Qed.
 
-Lemma skipn_S_tail :
+Lemma drop_S_tail :
   forall {A : Type} (l : list A) (n : nat),
-    skipn (S n) l = skipn n (tail l).
+    drop (S n) l = drop n (tail l).
 Proof.
   by destruct l; cbn; intros; rewrite ?drop_nil.
 Qed.
 
-Lemma skipn_tail_comm :
+Lemma drop_tail_comm :
   forall {A : Type} (l : list A) (n : nat),
-    skipn n (tail l) = tail (skipn n l).
+    drop n (tail l) = tail (drop n l).
 Proof.
   intros A l n; revert l; induction n; intros l.
   - by rewrite !drop_0.
-  - by rewrite !skipn_S_tail, IHn.
+  - by rewrite !drop_S_tail, IHn.
 Qed.
 
-Lemma skipn_lookup :
+Lemma drop_lookup :
   forall {A : Type} (s : list A) (n i : nat),
-    n <= i -> skipn n s !! (i - n) = s !! i.
+    n <= i -> drop n s !! (i - n) = s !! i.
 Proof.
   intros.
   rewrite lookup_drop.
   by replace (n + (i - n)) with i by lia.
 Qed.
 
-Lemma skipn_nth
+Lemma drop_nth
   {A : Type}
   (s : list A)
   (n : nat)
   (i : nat)
   (Hi : n <= i)
-  : nth_error (skipn n s) (i - n) = nth_error s i.
+  : nth_error (drop n s) (i - n) = nth_error s i.
 Proof.
   revert s n Hi.
   induction i; intros [| a s] [| n] Hi; cbn; try done.
@@ -590,13 +590,13 @@ Proof.
   - by apply IHi; lia.
 Qed.
 
-Lemma skipn_last
+Lemma drop_last
   {A : Type}
   (l : list A)
   (i : nat)
   (Hlt : i < length l)
   (_default : A)
-  : List.last (skipn i l) _default  = List.last l _default.
+  : List.last (drop i l) _default  = List.last l _default.
 Proof.
   revert l Hlt; induction i; intros [| a l] Hlt; [done.. |].
   simpl in Hlt.
@@ -609,13 +609,13 @@ Proof.
   - by rewrite unroll_last, unroll_last.
 Qed.
 
-Lemma skipn_last_default
+Lemma drop_last_default
   {A : Type}
   (l : list A)
   (i : nat)
   (Hlast : i = length l)
   (_default : A)
-  : List.last (skipn i l) _default  = _default.
+  : List.last (drop i l) _default  = _default.
 Proof.
   revert l Hlast; induction i; intros [| a l] Hlast; [done.. |].
   by apply IHi; inversion Hlast.
@@ -632,8 +632,8 @@ Lemma list_segment_nth
   : nth_error (list_segment l n1 n2) (i - n1) = nth_error l i.
 Proof.
   unfold list_segment.
-  rewrite skipn_nth; [| done].
-  by apply firstn_nth.
+  rewrite drop_nth; [| done].
+  by apply take_nth.
 Qed.
 
 Lemma list_segment_app
@@ -645,13 +645,13 @@ Lemma list_segment_app
   : list_segment l n1 n2 ++ list_segment l n2 n3 = list_segment l n1 n3.
 Proof.
   assert (Hle : n1 <= n3) by lia.
-  specialize (firstn_segment_suffix l n1 n3 Hle); intro Hl1.
-  specialize (firstn_segment_suffix l n2 n3 H23); intro Hl2.
+  specialize (take_segment_suffix l n1 n3 Hle); intro Hl1.
+  specialize (take_segment_suffix l n2 n3 H23); intro Hl2.
   rewrite <- Hl2 in Hl1 at 4. clear Hl2.
   repeat rewrite app_assoc in Hl1.
   apply app_inv_tail in Hl1.
-  specialize (take_drop n1 (firstn n2 l)); intro Hl2.
-  rewrite (firstn_prefix l n1 n2 H12) in Hl2.
+  specialize (take_drop n1 (take n2 l)); intro Hl2.
+  rewrite (take_prefix l n1 n2 H12) in Hl2.
   rewrite <- Hl2 in Hl1.
   rewrite <- app_assoc in Hl1.
   by apply app_inv_head in Hl1.
@@ -668,16 +668,16 @@ Proof.
   unfold list_segment.
   assert (Hle : S n <= length l)
     by (apply nth_error_length in Hnth; done).
-  assert (Hlt : n < length (firstn (S n) l))
-    by (rewrite firstn_length; lia).
-  specialize (skipn_last (firstn (S n) l) n Hlt a); intro Hlast1.
-  specialize (firstn_nth_last l n a Hnth a); intro Hlast2.
+  assert (Hlt : n < length (take (S n) l))
+    by (rewrite take_length; lia).
+  specialize (drop_last (take (S n) l) n Hlt a); intro Hlast1.
+  specialize (take_nth_last l n a Hnth a); intro Hlast2.
   rewrite <- Hlast2 in Hlast1.
-  specialize (skipn_length n (firstn (S n) l)).
-  rewrite firstn_length by done.
+  specialize (drop_length (take (S n) l) n).
+  rewrite take_length by done.
   intro Hlength.
   replace (S n `min` length l - n) with 1 in Hlength by lia.
-  remember (skipn n (firstn (S n) l)) as x.
+  remember (drop n (take (S n) l)) as x.
   clear -Hlength Hlast1.
   destruct x; inversion Hlength.
   destruct x; inversion H0.
@@ -1285,7 +1285,7 @@ Proof. by inversion 1. Qed.
 Lemma fsFurther : forall a l, ForAllSuffix (a :: l) -> ForAllSuffix l.
 Proof. by inversion 1. Qed.
 
-Lemma ForAll_skipn : forall m x, ForAllSuffix x -> ForAllSuffix (skipn m x).
+Lemma ForAll_drop : forall m x, ForAllSuffix x -> ForAllSuffix (drop m x).
 Proof.
   induction m; simpl; intros [] **; [done.. |].
   by apply fsFurther in H; apply IHm.
@@ -1409,14 +1409,14 @@ Qed.
 
 (** [lastn] returns a suffix of length <<n>> from the list <<l>>. *)
 Definition lastn {A : Type} (n : nat) (l : list A) : list A :=
-  rev (firstn n (rev l)).
+  rev (take n (rev l)).
 
 (** If the list is [[]], then the result of [lastn] is also [[]]. *)
 Lemma lastn_nil :
   forall {A : Type} (n : nat),
     lastn n (@nil A) = [].
 Proof.
-  by intros A n; unfold lastn; cbn; rewrite firstn_nil.
+  by intros A n; unfold lastn; cbn; rewrite take_nil.
 Qed.
 
 (** If <<n>> is zero, then the result of [lastn] is [[]]. *)
