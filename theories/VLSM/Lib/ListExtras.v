@@ -6,8 +6,8 @@ From VLSM.Lib Require Import Preamble.
 (** * Utility lemmas about lists *)
 
 (**
-  A list is either null or it can be decomposed into an initial prefix
-  and a last element.
+  A list is either empty or it can be decomposed into an initial prefix
+  and the last element.
 *)
 Lemma has_last_or_null {S} (l : list S)
   : {l' : list S & {a : S | l = l' ++ (a :: nil)}} + {l = nil} .
@@ -18,8 +18,8 @@ Proof.
 Qed.
 
 (**
-  Destructs a list in <<l>> in either null or a prefix <<l'>> and
-  a last element <<a>> with an equation <<Heq>> stating that <<l = l' ++ [a]>>.
+  Decompose a list in into a prefix <<l'>> and the last element <<a>>
+  with an equation <<Heq>> stating that <<l = l' ++ [a]>>.
 *)
 Ltac destruct_list_last l l' a Heq :=
  destruct (has_last_or_null l) as [[l' [a Heq]] | Heq]; rewrite Heq in *; swap 1 2.
@@ -30,6 +30,7 @@ Proof.
   by destruct l.
 Qed.
 
+(** Return the last element of the list if it's present and [None] otherwise. *)
 Definition last_error {S} (l : list S) : option S :=
   match l with
   | [] => None
@@ -275,6 +276,11 @@ Lemma prefix_of_firstn
   : firstn n l `prefix_of` l.
 Proof. by eexists; symmetry; apply firstn_suffix. Qed.
 
+(**
+  Compute the sublist of list <<l>> which starts at index <<n1>>
+  and ends before index <<n2>>.
+  For example, <<list_segment [0; 1; 2; 3; 4; 5] 2 4 = [2; 3]>>.
+*)
 Definition list_segment
   {A : Type}
   (l : list A)
@@ -298,6 +304,10 @@ Proof.
   by apply firstn_prefix.
 Qed.
 
+(**
+  Annotate each element of a list with the proof that it satisfies the
+  given decidable predicate.
+*)
 Fixpoint list_annotate
   {A : Type} {P : A -> Prop} {Pdec : forall a, Decision (P a)}
   {l : list A} : Forall P l -> list (dsig P) :=
@@ -396,11 +406,15 @@ Qed.
 
 End sec_list_annotate_props.
 
+(**
+  Compute the index of the <<n>>-th element of the list that satisfies the
+  predicate <<P>>.
+*)
 Fixpoint nth_error_filter_index
   {A} P `{forall (x : A), Decision (P x)}
   (l : list A)
   (n : nat)
-  :=
+  : option nat :=
   match l with
   | [] => None
   | a :: l =>
@@ -461,8 +475,9 @@ Proof.
 Qed.
 
 (**
-  Produces the sublist of elements of a list filtered by a decidable predicate
-  each of them paired with the proof that it satisfies the predicate.
+  Compute the sublist of a list that contains only elements that satisfy the
+  given decidable predicate. Each element of the resulting list is paired with
+  the proof that it satisfies the predicate.
 *)
 Fixpoint filter_annotate
   {A : Type} (P : A -> Prop) {Pdec : forall a : A, Decision (P a)}
@@ -717,6 +732,10 @@ Proof.
   - by intros (n & _ & Hn); eexists.
 Qed.
 
+(**
+  Map a function <<f : A -> option B>> over a list <<l>> while throwing away
+  the [None]s and unwrapping the [Some]s.
+*)
 Definition map_option
   {A B : Type}
   (f : A -> option B)
@@ -911,6 +930,10 @@ Proof.
     by apply (Hnth (S n)).
 Qed.
 
+(**
+  Compute the list of all decompositions of the given list <<l>> into
+  triples <<(l1, x, l2)>> such that <<l = l1 ++ x :: l2>>.
+*)
 Fixpoint one_element_decompositions
   {A : Type}
   (l : list A)
@@ -952,6 +975,10 @@ Proof.
       by rewrite IHl.
 Qed.
 
+(**
+  Compute the list of all decompositions of the given list <<l>> into
+  tuples <<(l1, x, l2, y, l3)>> such that <<l = l1 ++ x :: l2 ++ y :: l3>>.
+*)
 Definition two_element_decompositions
   {A : Type}
   (l : list A)
@@ -1037,7 +1064,7 @@ Example mode1 : mode [1; 1; 2; 3; 3] = [1; 1; 3; 3].
 Proof. by itauto. Qed.
 
 (**
-  Computes the list suff which satisfies <<pref ++ suff = l>> or
+  Computes the list <<suff>> which satisfies <<pref ++ suff = l>> or
   reports that no such list exists.
 *)
 Fixpoint complete_prefix
@@ -1156,7 +1183,7 @@ Proof.
   by apply rev_involutive.
 Qed.
 
-(** Elements belonging to first type in a list of a sum type. *)
+(** Keep elements which are [inl] but throw away those that are [inr]. *)
 Definition list_sum_project_left
   {A B : Type}
   (x : list (A + B))
@@ -1164,7 +1191,7 @@ Definition list_sum_project_left
   :=
   map_option sum_project_left x.
 
-(** Elements belonging to second type in a list of a sum type. *)
+(** Keep elements which are [inr] but throw away those that are [inl]. *)
 Definition list_sum_project_right
   {A B : Type}
   (x : list (A + B))
@@ -1258,8 +1285,10 @@ Section sec_suffix_quantifiers.
 
 (** ** Quantifiers for all suffixes
 
-  In this section we define list quantifiers similar to [Streams.ForAll] and
-  [Streams.Exists] and prove several properties about them.
+  In this section we define inductive quantifiers for lists that are concerned
+  with predicates over the sublists of the list instead of the elements. They
+  are analogous to [Streams.ForAll] and [Streams.Exists]. We prove several
+  properties about them.
 
   Among the definitions, the more useful are [ForAllSuffix2] and [ExistsSuffix2]
   as they allow us to quantify over relations between consecutive elements.

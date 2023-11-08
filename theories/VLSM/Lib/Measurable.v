@@ -4,7 +4,13 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
 
 (** * Measure-related definitions and lemmas *)
 
+(** The type of positive real numbers. *)
 Definition pos_R := {r : R | (r > 0)%R}.
+
+Definition weight_proj1_sig (w : pos_R) : R := proj1_sig w.
+
+(** We can treat a positive real number as if it were an ordinary real number. *)
+Coercion weight_proj1_sig : pos_R >-> R.
 
 Class Measurable (V : Type) : Type := weight : V -> pos_R.
 
@@ -50,10 +56,6 @@ Proof.
   rewrite sum_weights_list_rew.
   by apply sum_weights_positive_list.
 Qed.
-
-Definition weight_proj1_sig (w : pos_R) : R := proj1_sig w.
-
-Coercion weight_proj1_sig : pos_R >-> R.
 
 Lemma sum_weights_in_list
   : forall (v : V) (vs : list V),

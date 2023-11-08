@@ -161,7 +161,6 @@ Qed.
   Returns all elements <<X>> of <<l>> such that <<X>> does not compare less
   than any other element w.r.t to the precedes relation.
 *)
-
 Definition maximal_elements_list
   {A} (precedes : relation A) `{!RelDecision precedes} (l : list A)
   : list A :=

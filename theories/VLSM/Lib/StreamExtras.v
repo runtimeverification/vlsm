@@ -133,6 +133,10 @@ Proof.
     by apply Further.
 Qed.
 
+(**
+  Retrieve an existential quantifier that works on elements from [Exists],
+  which works on substreams.
+*)
 Definition Exists1 [A : Type] (P : A -> Prop) := Exists (fun s => P (hd s)).
 
 Lemma Exists1_exists [A : Type] (P : A -> Prop) s
@@ -148,6 +152,10 @@ Proof.
     + by apply Further, IHn.
 Qed.
 
+(**
+  Retrieve a universal quantifier that works on elements from [ForAll],
+  which works on substreams.
+*)
 Definition ForAll1 [A : Type] (P : A -> Prop) := ForAll (fun s => P (hd s)).
 
 Lemma ForAll1_subsumption [A : Type] (P Q : A -> Prop)
@@ -199,6 +207,7 @@ Proof.
   by case s.
 Qed.
 
+(** Appends a stream to a list, yielding a stream. *)
 Definition stream_app
   {A : Type}
   (prefix : list A)
@@ -589,6 +598,11 @@ Proof.
   by apply stream_prefix_nth.
 Qed.
 
+(**
+  Compute the sublist of stream <<l>> which starts at index <<n1>>
+  and ends before index <<n2>>.
+*)
+
 Definition stream_segment_alt
   {A : Type}
   (l : Stream A)
@@ -717,9 +731,11 @@ Proof.
   by intros n1 n2; etransitivity; [| by apply (Hs (S n1) (S n2))]; lia.
 Qed.
 
+(** The stream of all natural numbers greater than or equal to <<n>>. *)
 CoFixpoint nat_sequence_from (n : nat) : Stream nat
   := Cons n (nat_sequence_from (S n)).
 
+(** The stream of all natural numbers. *)
 Definition nat_sequence : Stream nat := nat_sequence_from 0.
 
 Lemma nat_sequence_from_nth : forall m n, Str_nth n (nat_sequence_from m) = n + m.
@@ -835,10 +851,12 @@ Proof.
   by firstorder.
 Qed.
 
+(** Prepend a non-empty list to a stream. *)
 Definition stream_prepend {A} (nel : ne_list A) (s : Stream A) : Stream A :=
   (cofix prepend (l : ne_list A) :=
     Cons (ne_list_hd l) (from_option prepend s (ne_list_tl l))) nel.
 
+(** Concatenate a stream of non-empty lists. *)
 CoFixpoint stream_concat {A} (s : Stream (ne_list A)) : Stream A :=
   stream_prepend (hd s) (stream_concat (tl s)).
 

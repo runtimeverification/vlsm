@@ -8,7 +8,7 @@ Definition set_eq {A} (s1 s2 : set A) : Prop :=
   s1 ⊆ s2 /\ s2 ⊆ s1.
 
 (**
-  By declaring [set_eq] and [Equivalence] relation, we enable rewriting with
+  By declaring [set_eq] an [Equivalence] relation, we enable rewriting with
   it using the rewrite tactic. See the Coq reference manual for details:
   https://coq.inria.fr/refman/addendum/generalized-rewriting.html
   (section "Declaring rewrite relations", subsection "First class setoids and morphisms").
@@ -478,10 +478,9 @@ Proof.
 Qed.
 
 (**
-  For each element X of l1, exactly one occurrence of X is removed
-  from l2. If no such occurrence exists, nothing happens. 
+  For each element <<X>> of <<l1>>, exactly one occurrence of <<X>> is removed
+  from <<l2>>. If no such occurrence exists, nothing happens.
 *)
-
 Definition set_remove_list `{EqDecision A} (l1 l2 : list A) : list A :=
   fold_right set_remove l2 l1.
 
