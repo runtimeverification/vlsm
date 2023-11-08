@@ -6,12 +6,13 @@ From VLSM.Lib Require Import Preamble StdppExtras FinSuppFn NatExtras ListExtras
 From VLSM.Core Require Import VLSM PreloadedVLSM ConstrainedVLSM Composition.
 From VLSM.Core Require Import VLSMProjections ProjectionTraces.
 
-(** * Parity VLSM
+(** * Parity VLSM Composition
 
-  This module demonstrates some basic notions of the VLSM framework.
-  The idea of the parity VLSM is to store an integer and continually decrement it,
-  while a constraint is checked at each step. The definitions and lemmas tap into
-  concepts such as valid and constrained traces, transitions, states, and messages.
+  This module demonstrates advanced concepts of the VLSM framework. We define
+  a generalized parity VLSM parameterized on a multiplier and a composition
+  of such VLSMs. We then construct the composition consisting of a component 
+  for each prime number, characterize the valid messages, and show that any
+  component in the composition is a validator.
 *)
 
 #[local] Open Scope Z_scope.
