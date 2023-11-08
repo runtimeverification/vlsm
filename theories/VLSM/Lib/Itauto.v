@@ -15,7 +15,9 @@ From Cdcl Require Export Itauto.
   Every time we want to use itauto, we should import it from the current module
   instead of directly from the Cdcl library.
 
-  TODO: this workaround should be removed after the problem is fixed upstream.
+  TODO: This problem was fixed upstream for the Itauto version for Coq 8.18, so
+  this workaround should be removed after the minimum Coq version we support is
+  8.18.
 *)
 
 Ltac gen_conflicts tac :=
