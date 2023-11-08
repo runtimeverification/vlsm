@@ -108,7 +108,7 @@ Definition Parity_transition
   | None    => (s, None)
   end.
 
-Definition ParityValid (l : ParityLabel) (st : ParityState)
+Definition Parity_valid (l : ParityLabel) (st : ParityState)
  (om : option ParityMessage) : Prop :=
   match om with
   | Some msg => msg <= st.2 /\ 1 <= msg
@@ -143,7 +143,7 @@ Definition ParityMachine : VLSMMachine ParityType :=
   initial_message_prop := fun (ms : ParityMessage) => ms = 2;
   s0 := Parity_Inhabited_initial_state_type;
   transition := fun l '(st, om) => Parity_transition l st om;
-  valid := fun l '(st, om) => ParityValid l st om;
+  valid := fun l '(st, om) => Parity_valid l st om;
 |}.
 
 (** The definition of the Parity VLSM. *)
