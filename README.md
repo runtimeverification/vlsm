@@ -56,8 +56,9 @@ make   # or make -j <number-of-cores-on-your-machine>
 
 ## Coq file organization
 
-- `theories/VLSM/Lib`: Various extensions to the Coq standard library and Coq-std++.
-- `theories/VLSM/Core`: Core VLSM definitions and theory.
+- `theories/Lib`: Various extensions to the Coq standard library and Coq-std++.
+- `theories/Core`: Core VLSM definitions and theory.
+- `theories/Examples`: Examples of VLSM applications, including tutorials.
 
 ## Documentation
 

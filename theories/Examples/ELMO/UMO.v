@@ -3,7 +3,7 @@ From Coq Require Import FunctionalExtensionality.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble StdppExtras StdppListSet.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation ProjectionTraces.
-From VLSM.Core Require Import BaseELMO.
+From VLSM.Examples Require Import BaseELMO.
 
 (** * UMO Protocol Definitions and Properties
 
