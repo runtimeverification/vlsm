@@ -208,16 +208,6 @@ Proof.
     by rewrite !unroll_last.
 Qed.
 
-Lemma firstn_length
-  {A : Type}
-  (l : list A)
-  (n : nat)
-  (Hlen : n <= length l)
-  : length (firstn n l) = n.
-Proof.
-  by rewrite firstn_length; lia.
-Qed.
-
 Lemma firstn_prefix
   {A : Type}
   (l : list A)
@@ -552,12 +542,12 @@ Lemma firstn_nth_last
   : nth = List.last (firstn (S n) l) _last.
 Proof.
   specialize (nth_error_length l n nth Hnth); intro Hlen.
-  specialize (firstn_length l (S n) Hlen); intro Hpref_len.
+  specialize (firstn_length (S n) l); intro Hpref_len.
   symmetry in Hpref_len.
   specialize (firstn_nth l (S n) n); intro Hpref.
   rewrite <- Hpref in Hnth; [| by constructor].
-  specialize (nth_error_last (firstn (S n) l) n Hpref_len _last); intro Hlast.
-  by rewrite Hlast in Hnth; inversion Hnth.
+  erewrite nth_error_last in Hnth by lia.
+  by inversion Hnth.
 Qed.
 
 Lemma skipn_S_tail :
@@ -661,8 +651,7 @@ Proof.
   repeat rewrite app_assoc in Hl1.
   apply app_inv_tail in Hl1.
   specialize (take_drop n1 (firstn n2 l)); intro Hl2.
-  specialize (firstn_prefix l n1 n2 H12); intro Hl3.
-  rewrite Hl3 in Hl2.
+  rewrite (firstn_prefix l n1 n2 H12) in Hl2.
   rewrite <- Hl2 in Hl1.
   rewrite <- app_assoc in Hl1.
   by apply app_inv_head in Hl1.
@@ -687,8 +676,7 @@ Proof.
   specialize (skipn_length n (firstn (S n) l)).
   rewrite firstn_length by done.
   intro Hlength.
-  assert (Hs : S n - n = 1) by lia.
-  rewrite Hs in Hlength.
+  replace (S n `min` length l - n) with 1 in Hlength by lia.
   remember (skipn n (firstn (S n) l)) as x.
   clear -Hlength Hlast1.
   destruct x; inversion Hlength.
