@@ -261,7 +261,7 @@ Qed.
 
 (** Previously defined trace is obviously constrained, since it's valid *)
 Lemma parity_constrained_trace1 :
-  finite_constrained_trace_init_to_alt ParityVLSM
+  finite_constrained_trace_init_to_direct ParityVLSM
    parity_trace1_first_state parity_trace1_last_state parity_trace1.
 Proof.
   constructor; [| done].

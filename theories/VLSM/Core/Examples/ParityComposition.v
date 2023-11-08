@@ -265,7 +265,7 @@ Qed.
 (** The previously defined trace is obviously constrained, since it's valid. *)
 Lemma parity_constrained_trace1 :
   multiplier >= 2 ->
-  finite_constrained_trace_init_to_alt ParityVLSM
+  finite_constrained_trace_init_to_direct ParityVLSM
     parity_trace1_first_state parity_trace1_last_state parity_trace1.
 Proof.
   constructor; [| by unfold parity_trace1_first_state; cbn; red; lia].
@@ -450,7 +450,7 @@ Lemma parity_constrained_messages_right :
     constrained_message_prop ParityVLSM m.
 Proof.
   intros Hgt0 m (j & Hj) Hmgt0.
-  unfold constrained_message_prop_alt, can_emit.
+  unfold constrained_message_prop_direct, can_emit.
   exists (j, Some j), parity_label, 0.
   repeat split.
   - by apply initial_state_is_valid; cbn; red; nia.
