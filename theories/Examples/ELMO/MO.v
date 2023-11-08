@@ -4,7 +4,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 From VLSM.Core Require Import Validator ProjectionTraces.
-From VLSM.Core Require Import BaseELMO UMO.
+From VLSM.Examples Require Import BaseELMO UMO.
 
 (** * MO Protocol Definitions and Properties
 

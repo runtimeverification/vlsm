@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble Measurable FinSetExtras RealsExtras ListEx
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
 From VLSM.Core Require Import Validator ProjectionTraces MessageDependencies.
 From VLSM.Core Require Import TraceableVLSM MinimalEquivocationTrace.
-From VLSM.Core Require Import BaseELMO UMO MO.
+From VLSM.Examples Require Import BaseELMO UMO MO.
 
 Create HintDb ELMO_hints.
 
