@@ -1,10 +1,10 @@
 From stdpp Require Import prelude finite.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections.
 
-(** * Parity Single VLSM
+(** * Parity VLSM
 
   This module demonstrates some basic notions of the VLSM framework. We define
-  a (single) parity VLSM that stores a tuple and continually decrement one of the
+  a (single) parity VLSM that stores a tuple and continually decrements one of the
   tuple's elements while a constraint is checked at each step. The name originates
   from the property of this VLSM to preserve the evenness of the tuple elements
   difference ([parity_valid_states_same_parity]). The definitions and lemmas tap into

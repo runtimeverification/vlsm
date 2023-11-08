@@ -76,8 +76,8 @@ theories/VLSM/Core/Equivocators/LimitedEquivocationSimulation.v
 theories/VLSM/Core/ByzantineTraces/FixedSetByzantineTraces.v
 theories/VLSM/Core/ByzantineTraces/LimitedByzantineTraces.v
 
-theories/VLSM/Core/Examples/ParitySingle.v
-theories/VLSM/Core/Examples/ParityComposition.v
+theories/VLSM/Core/Examples/Parity.v
+theories/VLSM/Core/Examples/PrimesComposition.v
 
 theories/VLSM/Core/ELMO/BaseELMO.v
 theories/VLSM/Core/ELMO/UMO.v
