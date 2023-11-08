@@ -32,35 +32,35 @@ Ltac app_valid_tran :=
 
 Section sec_parity_vlsm.
 
+(**
+  We parameterize the generalized Parity VLSM on an integer multiplier 
+  greater than one.
+*)
 Context
  (multiplier : Z)
  (multiplier_gt_1 : multiplier > 1)
- (index : Type)
- `{Inhabited index}
  .
 
-(** ** Definition of Parity VLSM
+(** ** Definition of generalized Parity VLSM
 
-  The Parity VLSM will only have one label, indicating a decrement.
+  The generalized Parity VLSM will only have one label, indicating a decrement.
   For this reason, the [unit] type can be used.
 *)
 
-Definition ParityLabel : Type := unit.
+Definition MulParityLabel : Type := unit.
 
-(** The state will hold an integer. *)
+(** The state holds an integer. *)
 
-Definition ParityState : Type := Z.
+Definition MulParityState : Type := Z.
 
 (** Messages are integers. *)
 
-Definition ParityMessage : Type := Z.
+Definition MulParityMessage : Type := Z.
 
-(** A VLSM Type is defined using ParityState and ParityLabel. *)
-
-Definition ParityType : VLSMType ParityMessage :=
+Definition MulParityType : VLSMType MulParityMessage :=
 {|
-  state := ParityState;
-  label := ParityLabel;
+  state := MulParityState;
+  label := MulParityLabel;
 |}.
 
 (**
@@ -68,18 +68,18 @@ Definition ParityType : VLSMType ParityMessage :=
   and guard predicate are as follows:
 *)
 
-Definition ParityComponent_initial_state_prop (st : ParityState) : Prop := st >= 1.
+Definition MulParityComponent_initial_state_prop (st : MulParityState) : Prop := st >= 1.
 
-Definition ParityComponent_transition
-  (l : ParityLabel) (st : ParityState) (om : option ParityMessage)
-  : ParityState * option ParityMessage :=
+Definition MulParityComponent_transition
+  (l : MulParityLabel) (st : MulParityState) (om : option MulParityMessage)
+  : MulParityState * option MulParityMessage :=
   match om with
   | Some j  => (st - j, Some (multiplier * j))
   | None    => (st, None)
   end.
 
-Definition ParityComponent_valid
-  (l : ParityLabel) (st : ParityState) (om : option ParityMessage) : Prop :=
+Definition MulParityComponent_valid
+  (l : MulParityLabel) (st : MulParityState) (om : option MulParityMessage) : Prop :=
   match om with
   | Some msg => msg <= st /\ 2 <= msg
   | None     => False
@@ -90,38 +90,38 @@ Definition ParityComponent_valid
   is inhabited as the set of initial states is non-empty.
 *)
 
-Definition ParityComponent_initial_state_type : Type :=
-  {st : ParityState | ParityComponent_initial_state_prop st}.
+Definition MulParityComponent_initial_state_type : Type :=
+  {st : MulParityState | MulParityComponent_initial_state_prop st}.
 
-Program Definition ParityComponent_initial_state :
-  ParityComponent_initial_state_type := exist _ 1 _.
+Program Definition MulParityComponent_initial_state :
+  MulParityComponent_initial_state_type := exist _ 1 _.
 Next Obligation.
 Proof. done. Defined.
 
-#[export] Instance ParityComponent_Inhabited_initial_state_type :
-  Inhabited (ParityComponent_initial_state_type) :=
-    populate (ParityComponent_initial_state).
+#[export] Instance MulParityComponent_Inhabited_initial_state_type :
+  Inhabited (MulParityComponent_initial_state_type) :=
+    populate (MulParityComponent_initial_state).
 
 (**
   An intermediate representation for the VLSM is required.
   It uses the previously defined specifications.
 *)
 
-Definition ParityMachine : VLSMMachine ParityType :=
+Definition MulParityMachine : VLSMMachine MulParityType :=
 {|
-  initial_state_prop := ParityComponent_initial_state_prop;
-  initial_message_prop := fun (ms : ParityMessage) => ms = multiplier;
-  s0 := ParityComponent_Inhabited_initial_state_type;
-  transition := fun l '(st, om) => ParityComponent_transition l st om;
-  valid := fun l '(st, om) => ParityComponent_valid l st om;
+  initial_state_prop := MulParityComponent_initial_state_prop;
+  initial_message_prop := fun (ms : MulParityMessage) => ms = multiplier;
+  s0 := MulParityComponent_Inhabited_initial_state_type;
+  transition := fun l '(st, om) => MulParityComponent_transition l st om;
+  valid := fun l '(st, om) => MulParityComponent_valid l st om;
 |}.
 
-(** The definition of the Parity VLSM. *)
+(** The definition of the MulParity VLSM. *)
 
-Definition ParityVLSM : VLSM ParityMessage :=
+Definition MulParityVLSM : VLSM MulParityMessage :=
 {|
-  vtype := ParityType;
-  vmachine := ParityMachine;
+  vtype := MulParityType;
+  vmachine := MulParityMachine;
 |}.
 
 (**
@@ -129,14 +129,14 @@ Definition ParityVLSM : VLSM ParityMessage :=
   the unit type.
 *)
 
-Definition parity_label : label ParityType := ().
+Definition mul_parity_label : label MulParityType := ().
 
-(** ** Parity VLSM Examples *)
+(** ** MulParity VLSM Examples *)
 
 (** *** Example of an arbitrary transition *)
 
-Lemma parity_example_transition_1 `(X : VLSM ParityMessage) :
-  transition ParityVLSM parity_label (4, Some 10) = (-6, Some (multiplier * 10)).
+Lemma mul_parity_example_transition_1 `(X : VLSM MulParityMessage) :
+  transition MulParityVLSM mul_parity_label (4, Some 10) = (-6, Some (multiplier * 10)).
 Proof. done. Qed.
 
 (** *** Example of a valid trace *)
@@ -150,203 +150,207 @@ Proof. done. Qed.
   difference to the trace.
 *)
 
-Definition parity_trace1_init : list (transition_item ParityVLSM) :=
-  [ Build_transition_item parity_label (Some (multiplier ^ 2))
+Definition mul_parity_trace1_init : list (transition_item MulParityVLSM) :=
+  [ Build_transition_item mul_parity_label (Some (multiplier ^ 2))
      (multiplier ^ 3 - multiplier ^ 2) (Some (multiplier ^ 3))
-  ; Build_transition_item parity_label (Some multiplier)
+  ; Build_transition_item mul_parity_label (Some multiplier)
      (multiplier ^ 3 - multiplier ^ 2 - multiplier) (Some (multiplier ^ 2)) ].
 
-Definition parity_trace1_last_item : transition_item ParityVLSM :=
-  Build_transition_item parity_label (Some multiplier)
+Definition mul_parity_trace1_last_item : transition_item MulParityVLSM :=
+  Build_transition_item mul_parity_label (Some multiplier)
     (multiplier ^ 3 - multiplier ^ 2 - multiplier - multiplier) (Some (multiplier ^ 2)).
 
-Definition parity_trace1 : list (transition_item ParityVLSM) :=
-  parity_trace1_init ++ [parity_trace1_last_item].
+Definition mul_parity_trace1 : list (transition_item MulParityVLSM) :=
+  mul_parity_trace1_init ++ [mul_parity_trace1_last_item].
 
-Definition parity_trace1_first_state : ParityState := multiplier ^ 3.
+Definition mul_parity_trace1_first_state : MulParityState := multiplier ^ 3.
 
-Definition parity_trace1_last_state : ParityState :=
-  destination parity_trace1_last_item.
+Definition mul_parity_trace1_last_state : MulParityState :=
+  destination mul_parity_trace1_last_item.
 
 (** The trace we defined is valid: *)
 
-Example parity_valid_message_prop_mult :
-  valid_message_prop ParityVLSM multiplier.
+Example mul_parity_valid_message_prop_mult :
+  valid_message_prop MulParityVLSM multiplier.
 Proof. by apply initial_message_is_valid. Qed.
 
-Example parity_can_emit_square_mult :
-  can_emit ParityVLSM (multiplier ^ 2).
+Example mul_parity_can_emit_square_mult :
+  can_emit MulParityVLSM (multiplier ^ 2).
 Proof.
-  exists (multiplier, Some multiplier), parity_label, 0.
+  exists (multiplier, Some multiplier), mul_parity_label, 0.
   repeat split; [| | by lia.. | by cbn; do 2 f_equal; lia].
-  - by apply initial_state_is_valid; cbn; unfold ParityComponent_initial_state_prop; lia.
+  - by apply initial_state_is_valid; cbn; unfold MulParityComponent_initial_state_prop; lia.
   - by app_valid_tran.
 Qed.
 
-Example parity_valid_message_prop_square_mult :
-  valid_message_prop ParityVLSM (multiplier ^ 2).
+Example mul_parity_valid_message_prop_square_mult :
+  valid_message_prop MulParityVLSM (multiplier ^ 2).
 Proof.
-  by eapply emitted_messages_are_valid, parity_can_emit_square_mult.
+  by eapply emitted_messages_are_valid, mul_parity_can_emit_square_mult.
 Qed.
 
-Proposition parity_valid_transition_1 :
-  input_valid_transition ParityVLSM parity_label
-   (parity_trace1_first_state, Some (multiplier ^ 2))
+Proposition mul_parity_valid_transition_1 :
+  input_valid_transition MulParityVLSM mul_parity_label
+   (mul_parity_trace1_first_state, Some (multiplier ^ 2))
    (multiplier ^ 3 - multiplier ^ 2, Some (multiplier ^ 3)).
 Proof.
   repeat split; [| | | by lia].
   - by apply initial_state_is_valid; cbn;
-      unfold ParityComponent_initial_state_prop, parity_trace1_first_state; lia.
-  - by app_valid_tran; eapply parity_can_emit_square_mult.
-  - by unfold parity_trace1_first_state; nia.
+      unfold MulParityComponent_initial_state_prop, mul_parity_trace1_first_state; lia.
+  - by app_valid_tran; eapply mul_parity_can_emit_square_mult.
+  - by unfold mul_parity_trace1_first_state; nia.
 Qed.
 
-Proposition parity_valid_transition_2 :
+Proposition mul_parity_valid_transition_2 :
   multiplier >= 2 ->
-  input_valid_transition ParityVLSM parity_label
+  input_valid_transition MulParityVLSM mul_parity_label
    (multiplier ^ 3 - multiplier ^ 2, Some multiplier)
    (multiplier ^ 3 - multiplier ^ 2 - multiplier, Some (multiplier ^ 2)).
 Proof.
   repeat split; [| | | by lia |].
-  - by app_valid_tran; eapply parity_valid_transition_1; lia.
-  - by app_valid_tran; apply parity_can_emit_square_mult.
+  - by app_valid_tran; eapply mul_parity_valid_transition_1; lia.
+  - by app_valid_tran; apply mul_parity_can_emit_square_mult.
   - by nia.
   - by cbn; do 2 f_equal; lia.
 Qed.
 
-Proposition parity_valid_transition_3 :
+Proposition mul_parity_valid_transition_3 :
   multiplier >= 2 ->
-  input_valid_transition ParityVLSM parity_label
+  input_valid_transition MulParityVLSM mul_parity_label
    (multiplier ^ 3 - multiplier ^ 2 - multiplier, Some multiplier)
    (multiplier ^ 3 - multiplier ^ 2 - multiplier - multiplier, Some (multiplier ^ 2)).
 Proof.
   repeat split; [| | | by lia |].
-  - by app_valid_tran; apply parity_valid_transition_2.
-  - by app_valid_tran; apply parity_can_emit_square_mult.
+  - by app_valid_tran; apply mul_parity_valid_transition_2.
+  - by app_valid_tran; apply mul_parity_can_emit_square_mult.
   - by nia.
   - by cbn; do 2 f_equal; lia.
 Qed.
 
-Example parity_valid_trace1 :
+Example mul_parity_valid_trace1 :
   multiplier >= 2 ->
-  finite_valid_trace_init_to ParityVLSM
-    parity_trace1_first_state parity_trace1_last_state parity_trace1.
+  finite_valid_trace_init_to MulParityVLSM
+    mul_parity_trace1_first_state mul_parity_trace1_last_state mul_parity_trace1.
 Proof.
-  constructor; unfold parity_trace1_first_state;
-    [| by cbn; unfold ParityComponent_initial_state_prop; lia].
+  constructor; unfold mul_parity_trace1_first_state;
+    [| by cbn; unfold MulParityComponent_initial_state_prop; lia].
   repeat apply finite_valid_trace_from_to_extend.
   - by eapply finite_valid_trace_from_to_empty, input_valid_transition_destination,
-      parity_valid_transition_3.
-  - by apply parity_valid_transition_3.
-  - by apply parity_valid_transition_2.
-  - by apply parity_valid_transition_1; lia.
+      mul_parity_valid_transition_3.
+  - by apply mul_parity_valid_transition_3.
+  - by apply mul_parity_valid_transition_2.
+  - by apply mul_parity_valid_transition_1; lia.
 Qed.
 
-Example parity_valid_trace1_alt :
+Example mul_parity_valid_trace1_alt :
   multiplier >= 2 ->
-  finite_valid_trace_init_to_alt ParityVLSM
-    parity_trace1_first_state parity_trace1_last_state parity_trace1.
+  finite_valid_trace_init_to_alt MulParityVLSM
+    mul_parity_trace1_first_state mul_parity_trace1_last_state mul_parity_trace1.
 Proof.
-  constructor; [| by unfold parity_trace1_first_state; cbn; red; lia].
+  constructor; [| by unfold mul_parity_trace1_first_state; cbn; red; lia].
   repeat apply mvt_extend; [.. | by apply mvt_empty].
-  - by eapply parity_valid_message_prop_square_mult; lia.
-  - by eapply parity_valid_transition_1; lia.
+  - by eapply mul_parity_valid_message_prop_square_mult; lia.
+  - by eapply mul_parity_valid_transition_1; lia.
   - cbn; split; [| by lia].
-    by unfold parity_trace1_first_state; nia.
-  - by apply parity_valid_message_prop_mult.
-  - by apply parity_valid_transition_2.
+    by unfold mul_parity_trace1_first_state; nia.
+  - by apply mul_parity_valid_message_prop_mult.
+  - by apply mul_parity_valid_transition_2.
   - by cbn; split; [nia | lia].
-  - by apply parity_valid_message_prop_mult.
-  - by apply parity_valid_transition_3.
+  - by apply mul_parity_valid_message_prop_mult.
+  - by apply mul_parity_valid_transition_3.
   - by cbn; split; [nia | lia].
 Qed.
 
 (** *** Example of a constrained trace *)
 
 (** The previously defined trace is obviously constrained, since it's valid. *)
-Lemma parity_constrained_trace1 :
+Lemma mul_parity_constrained_trace1 :
   multiplier >= 2 ->
   finite_constrained_trace_init_to_direct ParityVLSM
-    parity_trace1_first_state parity_trace1_last_state parity_trace1.
+    mul_parity_trace1_first_state mul_parity_trace1_last_state mul_parity_trace1.
 Proof.
-  constructor; [| by unfold parity_trace1_first_state; cbn; red; lia].
+  constructor; [| by unfold mul_parity_trace1_first_state; cbn; red; lia].
   repeat apply ct_extend; [.. | by apply ct_empty].
-  - by eapply parity_valid_transition_1; lia.
+  - by eapply mul_parity_valid_transition_1; lia.
   - cbn; split; [| by lia].
-    by unfold parity_trace1_first_state; nia.
-  - by apply parity_valid_transition_2.
+    by unfold mul_parity_trace1_first_state; nia.
+  - by apply mul_parity_valid_transition_2.
   - by cbn; split; [nia | lia].
-  - by apply parity_valid_transition_3.
+  - by apply mul_parity_valid_transition_3.
   - by cbn; split; [nia | lia].
 Qed.
 
-Definition parity_trace2_init : list (transition_item ParityVLSM) :=
-  [ Build_transition_item parity_label (Some multiplier) (2 * multiplier + 1) (Some (multiplier ^ 2))
-  ; Build_transition_item parity_label (Some multiplier) (multiplier + 1) (Some (multiplier ^ 2)) ].
+Definition mul_parity_trace2_init : list (transition_item MulParityVLSM) :=
+  [ Build_transition_item mul_parity_label (Some multiplier)
+      (2 * multiplier + 1) (Some (multiplier ^ 2))
+  ; Build_transition_item mul_parity_label (Some multiplier)
+      (multiplier + 1) (Some (multiplier ^ 2)) ].
 
-Definition parity_trace2_last_item : transition_item ParityVLSM :=
-  Build_transition_item parity_label (Some (multiplier + 1)) 0 (Some (multiplier ^ 2 + multiplier) ).
+Definition mul_parity_trace2_last_item : transition_item MulParityVLSM :=
+  Build_transition_item mul_parity_label (Some (multiplier + 1))
+    0 (Some (multiplier ^ 2 + multiplier) ).
 
-Definition parity_trace2 : list (transition_item ParityVLSM) :=
-  parity_trace2_init ++ [parity_trace2_last_item].
+Definition mul_parity_trace2 : list (transition_item MulParityVLSM) :=
+  mul_parity_trace2_init ++ [mul_parity_trace2_last_item].
 
-Definition parity_trace2_init_first_state : ParityState := 3 * multiplier + 1.
+Definition mul_parity_trace2_init_first_state : MulParityState := 3 * multiplier + 1.
 
-Definition parity_trace2_init_last_state : ParityState := multiplier + 1.
+Definition mul_parity_trace2_init_last_state : MulParityState := multiplier + 1.
 
-Definition parity_trace2_last_state : ParityState :=
-  destination parity_trace2_last_item.
+Definition mul_parity_trace2_last_state : MulParityState :=
+  destination mul_parity_trace2_last_item.
 
 (** The given trace is valid without the last transition. *)
 
-Proposition parity_valid_transition_1' :
-  input_valid_transition ParityVLSM parity_label
-    (parity_trace2_init_first_state, Some multiplier) (2 * multiplier + 1, Some (multiplier ^ 2)).
+Proposition mul_parity_valid_transition_1' :
+  input_valid_transition MulParityVLSM mul_parity_label
+    (mul_parity_trace2_init_first_state, Some multiplier)
+    (2 * multiplier + 1, Some (multiplier ^ 2)).
 Proof.
   repeat split; [| | | by lia |].
   - apply initial_state_is_valid.
-    by unfold parity_trace2_init_first_state; cbn; red; lia.
-  - by app_valid_tran; apply parity_can_emit_square_mult.
-  - by unfold parity_trace2_init_first_state; lia.
-  - by cbn; do 2 f_equal; unfold parity_trace2_init_first_state; lia.
+    by unfold mul_parity_trace2_init_first_state; cbn; red; lia.
+  - by app_valid_tran; apply mul_parity_can_emit_square_mult.
+  - by unfold mul_parity_trace2_init_first_state; lia.
+  - by cbn; do 2 f_equal; unfold mul_parity_trace2_init_first_state; lia.
 Qed.
 
-Proposition parity_valid_transition_2' :
-  input_valid_transition ParityVLSM parity_label
+Proposition mul_parity_valid_transition_2' :
+  input_valid_transition MulParityVLSM mul_parity_label
     (2 * multiplier + 1, Some multiplier) (multiplier + 1, Some (multiplier ^ 2)).
 Proof.
   repeat split; [| | | by lia |].
   - apply initial_state_is_valid.
-    by unfold parity_trace2_init_first_state; cbn; red; lia.
-  - by app_valid_tran; apply parity_can_emit_square_mult.
-  - by unfold parity_trace2_init_first_state; lia.
-  - by cbn; do 2 f_equal; unfold parity_trace2_init_first_state; lia.
+    by unfold mul_parity_trace2_init_first_state; cbn; red; lia.
+  - by app_valid_tran; apply mul_parity_can_emit_square_mult.
+  - by unfold mul_parity_trace2_init_first_state; lia.
+  - by cbn; do 2 f_equal; unfold mul_parity_trace2_init_first_state; lia.
 Qed.
 
-Example parity_valid_trace2_init :
-  finite_valid_trace_init_to ParityVLSM
-    parity_trace2_init_first_state parity_trace2_init_last_state parity_trace2_init.
+Example mul_parity_valid_trace2_init :
+  finite_valid_trace_init_to MulParityVLSM
+    mul_parity_trace2_init_first_state mul_parity_trace2_init_last_state mul_parity_trace2_init.
 Proof.
-  constructor; [| by unfold parity_trace2_init_first_state; cbn; red; lia].
+  constructor; [| by unfold mul_parity_trace2_init_first_state; cbn; red; lia].
   repeat apply finite_valid_trace_from_to_extend.
   - by eapply finite_valid_trace_from_to_empty, input_valid_transition_destination,
-      parity_valid_transition_2'.
-  - by apply parity_valid_transition_2'.
-  - by apply parity_valid_transition_1'.
+      mul_parity_valid_transition_2'.
+  - by apply mul_parity_valid_transition_2'.
+  - by apply mul_parity_valid_transition_1'.
 Qed.
 
-Example parity_valid_trace2_init_alt :
-  finite_valid_trace_init_to_alt ParityVLSM
-    parity_trace2_init_first_state parity_trace2_init_last_state parity_trace2_init.
+Example mul_parity_valid_trace2_init_alt :
+  finite_valid_trace_init_to_alt MulParityVLSM
+    mul_parity_trace2_init_first_state mul_parity_trace2_init_last_state mul_parity_trace2_init.
 Proof.
-  constructor; [| by unfold parity_trace2_init_first_state; cbn; red; lia].
+  constructor; [| by unfold mul_parity_trace2_init_first_state; cbn; red; lia].
   repeat apply mvt_extend; [.. | by apply mvt_empty].
-  - by apply parity_valid_message_prop_mult.
-  - by apply parity_valid_transition_1'.
-  - by cbn; split; unfold parity_trace2_init_first_state; lia.
-  - by apply parity_valid_message_prop_mult.
-  - by apply parity_valid_transition_2'.
-  - by cbn; split; unfold parity_trace2_init_first_state; lia.
+  - by apply mul_parity_valid_message_prop_mult.
+  - by apply mul_parity_valid_transition_1'.
+  - by cbn; split; unfold mul_parity_trace2_init_first_state; lia.
+  - by apply mul_parity_valid_message_prop_mult.
+  - by apply mul_parity_valid_transition_2'.
+  - by cbn; split; unfold mul_parity_trace2_init_first_state; lia.
 Qed.
 
 (**
@@ -354,38 +358,38 @@ Qed.
   without its last transition is constrained.
 *)
 
-Example parity_constrained_trace2_init :
-  finite_constrained_trace_init_to ParityVLSM
-    parity_trace2_init_first_state parity_trace2_init_last_state parity_trace2_init.
+Example mul_parity_constrained_trace2_init :
+  finite_constrained_trace_init_to MulParityVLSM
+    mul_parity_trace2_init_first_state mul_parity_trace2_init_last_state mul_parity_trace2_init.
 Proof.
   intros.
   apply VLSM_incl_finite_valid_trace_init_to.
   - by apply vlsm_incl_pre_loaded.
-  - by apply parity_valid_trace2_init; lia.
+  - by apply mul_parity_valid_trace2_init; lia.
 Qed.
 
 (**
-  The trace is valid (in the preloaded Parity VLSM) without
+  The trace is valid (in the preloaded MulParity VLSM) without
   its last element and appending it to the end also gives
-  a valid trace (in the preloaded Parity VLSM).
+  a valid trace (in the preloaded MulParity VLSM).
   It follows that the full trace is constrained in
-  the original Parity VLSM.
+  the original MulParity VLSM.
 *)
 
-Example parity_constrained_trace2 :
-  finite_constrained_trace_init_to ParityVLSM
-    parity_trace2_init_first_state parity_trace2_last_state parity_trace2.
+Example mul_parity_constrained_trace2 :
+  finite_constrained_trace_init_to MulParityVLSM
+    mul_parity_trace2_init_first_state mul_parity_trace2_last_state mul_parity_trace2.
 Proof.
-  destruct parity_constrained_trace2_init as [Hfvt Hisp].
+  destruct mul_parity_constrained_trace2_init as [Hfvt Hisp].
   split; [| done].
   eapply (extend_right_finite_trace_from_to _ Hfvt).
   repeat split.
   - by eapply finite_valid_trace_from_to_last_pstate.
   - by apply any_message_is_valid_in_preloaded.
-  - by unfold parity_trace2_init_last_state.
+  - by unfold mul_parity_trace2_init_last_state.
   - by lia.
   - cbn; f_equal.
-    + by unfold parity_trace2_init_last_state; lia.
+    + by unfold mul_parity_trace2_init_last_state; lia.
     + by f_equal; nia.
 Qed.
 
@@ -394,14 +398,14 @@ Qed.
   The last transition of a valid trace is valid.
 *)
 
-Lemma parity_example_valid_transition :
-  input_valid_transition ParityVLSM parity_label
+Lemma mul_parity_example_valid_transition :
+  input_valid_transition MulParityVLSM mul_parity_label
     (multiplier, Some multiplier) (0, Some (multiplier ^ 2)).
 Proof.
   repeat split; [| | by lia.. |].
   - apply initial_state_is_valid.
-    by unfold parity_trace2_init_first_state; cbn; red; lia.
-  - by apply parity_valid_message_prop_mult.
+    by unfold mul_parity_trace2_init_first_state; cbn; red; lia.
+  - by apply mul_parity_valid_message_prop_mult.
   - by cbn; do 2 f_equal; lia.
 Qed.
 
@@ -410,49 +414,49 @@ Qed.
   The last transition of a constrained trace is constrained.
 *)
 
-Example parity_example_constrained_transition :
-  input_valid_transition (pre_loaded_with_all_messages_vlsm ParityVLSM) parity_label
+Example mul_parity_example_constrained_transition :
+  input_valid_transition (pre_loaded_with_all_messages_vlsm MulParityVLSM) mul_parity_label
     (multiplier + 1, Some (multiplier + 1)) (0, Some (multiplier ^ 2 + multiplier)).
 Proof.
   apply (finite_valid_trace_from_to_last_transition
-    (pre_loaded_with_all_messages_vlsm ParityVLSM)
-    parity_trace2_init_first_state parity_trace2_last_state parity_trace2_init
-    parity_trace2 parity_trace2_last_item); [| done].
-  by apply parity_constrained_trace2.
+    (pre_loaded_with_all_messages_vlsm MulParityVLSM)
+    mul_parity_trace2_init_first_state mul_parity_trace2_last_state mul_parity_trace2_init
+    mul_parity_trace2 mul_parity_trace2_last_item); [| done].
+  by apply mul_parity_constrained_trace2.
 Qed.
 
-(** ** Parity VLSM Properties *)
+(** ** MulParity VLSM Properties *)
 
 (** *** Inclusion into preloaded with all messages *)
 
-Lemma parity_valid_is_constrained :
-  VLSM_incl ParityVLSM (pre_loaded_with_all_messages_vlsm ParityVLSM).
+Lemma mul_parity_valid_is_constrained :
+  VLSM_incl MulParityVLSM (pre_loaded_with_all_messages_vlsm MulParityVLSM).
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** *** Constrained messages are positive even integers *)
 
-Lemma parity_constrained_messages_left :
+Lemma mul_parity_constrained_messages_left :
   multiplier > 0 ->
-  forall (m : ParityMessage),
-    constrained_message_prop ParityVLSM m ->
+  forall (m : MulParityMessage),
+    constrained_message_prop MulParityVLSM m ->
     exists (j : Z), m = multiplier * j /\ j > 1.
 Proof.
   intros Hgt0 m ([s []] & [] & s' & (_ & _ & []) & Ht).
   inversion Ht; subst.
-  by exists p; split; lia.
+  by exists m0; split; lia.
 Qed.
 
-Lemma parity_constrained_messages_right :
+Lemma mul_parity_constrained_messages_right :
   multiplier > 0 ->
-  forall (m : ParityMessage),
+  forall (m : MulParityMessage),
     (exists (j : Z), m = multiplier * j) -> m > multiplier ->
-    constrained_message_prop ParityVLSM m.
+    constrained_message_prop MulParityVLSM m.
 Proof.
   intros Hgt0 m (j & Hj) Hmgt0.
   unfold constrained_message_prop_direct, can_emit.
-  exists (j, Some j), parity_label, 0.
+  exists (j, Some j), mul_parity_label, 0.
   repeat split.
   - by apply initial_state_is_valid; cbn; red; nia.
   - by apply any_message_is_valid_in_preloaded.
@@ -461,54 +465,54 @@ Proof.
   - by cbn; do 2 f_equal; lia.
 Qed.
 
-Lemma parity_constrained_messages :
+Lemma mul_parity_constrained_messages :
   multiplier > 0 ->
-  forall (m : ParityMessage),
-    constrained_message_prop ParityVLSM m <-> (exists (j : Z), m = multiplier * j /\ j > 1).
+  forall (m : MulParityMessage),
+    constrained_message_prop MulParityVLSM m <-> (exists (j : Z), m = multiplier * j /\ j > 1).
 Proof.
   split.
-  - by apply parity_constrained_messages_left.
-  - by intros [? []]; apply parity_constrained_messages_right; [| exists x | nia].
+  - by apply mul_parity_constrained_messages_left.
+  - by intros [? []]; apply mul_parity_constrained_messages_right; [| exists x | nia].
 Qed.
 
 (** *** Constrained states property *)
 
-Lemma parity_constrained_states_right :
-  forall (st : ParityState),
-    constrained_state_prop ParityVLSM st -> st >= 0.
+Lemma mul_parity_constrained_states_right :
+  forall (st : MulParityState),
+    constrained_state_prop MulParityVLSM st -> st >= 0.
 Proof.
   induction 1 using valid_state_prop_ind.
-  - by cbn in Hs; unfold ParityComponent_initial_state_prop in Hs; lia.
+  - by cbn in Hs; unfold MulParityComponent_initial_state_prop in Hs; lia.
   - destruct l, om, Ht as [(Hs & _ & []) Ht].
     by inversion Ht; subst; cbn in *; lia.
 Qed.
 
-Lemma parity_constrained_states_left :
-  forall (st : ParityState),
-    st >= 0 -> constrained_state_prop ParityVLSM st.
+Lemma mul_parity_constrained_states_left :
+  forall (st : MulParityState),
+    st >= 0 -> constrained_state_prop MulParityVLSM st.
 Proof.
   intros st Hst.
   apply input_valid_transition_destination
-    with (l := parity_label) (s := st + 2) (om := Some 2) (om' := Some (2 * multiplier)).
+    with (l := mul_parity_label) (s := st + 2) (om := Some 2) (om' := Some (2 * multiplier)).
   repeat split; [| | by lia.. | by cbn; do 2 f_equal; lia].
-  - by apply initial_state_is_valid; cbn; unfold ParityComponent_initial_state_prop; lia.
+  - by apply initial_state_is_valid; cbn; unfold MulParityComponent_initial_state_prop; lia.
   - by apply any_message_is_valid_in_preloaded.
 Qed.
 
-Lemma parity_constrained_states :
-  forall (st : ParityState),
-    constrained_state_prop ParityVLSM st <-> st >= 0.
+Lemma mul_parity_constrained_states :
+  forall (st : MulParityState),
+    constrained_state_prop MulParityVLSM st <-> st >= 0.
 Proof.
   split.
-  - by apply parity_constrained_states_right.
-  - by apply parity_constrained_states_left.
+  - by apply mul_parity_constrained_states_right.
+  - by apply mul_parity_constrained_states_left.
 Qed.
 
 (** *** Positive powers of the multiplier are valid messages *)
 
-Lemma parity_valid_messages_powers_of_mult_right :
-  forall (m : ParityMessage),
-    valid_message_prop ParityVLSM m ->
+Lemma mul_parity_valid_messages_powers_of_mult_right :
+  forall (m : MulParityMessage),
+    valid_message_prop MulParityVLSM m ->
     exists p : Z, p >= 1 /\ m = multiplier ^ p.
 Proof.
   intros m [s Hvsm].
@@ -528,9 +532,9 @@ Proof.
     by rewrite <- Z.pow_succ_r; [| lia].
 Qed.
 
-Lemma parity_valid_messages_powers_of_mult_left :
+Lemma mul_parity_valid_messages_powers_of_mult_left :
   forall (p : Z),
-    p >= 1 -> valid_message_prop ParityVLSM (multiplier ^ p).
+    p >= 1 -> valid_message_prop MulParityVLSM (multiplier ^ p).
 Proof.
   intros p Hp.
   assert (Hle : 0 <= p - 1) by lia.
@@ -542,7 +546,7 @@ Proof.
   intros x Hxgt0 Hindh.
   pose (msgin := multiplier ^ (x + 1)).
   apply emitted_messages_are_valid.
-  exists (msgin, Some (multiplier ^ (x + 1))), parity_label, 0.
+  exists (msgin, Some (multiplier ^ (x + 1))), mul_parity_label, 0.
   repeat split.
   - by apply initial_state_is_valid; cbn; red; lia.
   - by apply Hindh.
@@ -552,27 +556,27 @@ Proof.
   - by cbn; rewrite <- Z.pow_succ_r, Z.add_succ_l; [do 2 f_equal; lia | lia].
 Qed.
 
-Lemma parity_valid_messages_powers_of_mult :
-  forall (m : ParityMessage),
-    valid_message_prop ParityVLSM m
+Lemma mul_parity_valid_messages_powers_of_mult :
+  forall (m : MulParityMessage),
+    valid_message_prop MulParityVLSM m
       <->
     exists p : Z, p >= 1 /\ m = multiplier ^ p.
 Proof.
   split.
-  - by intros; apply parity_valid_messages_powers_of_mult_right.
-  - by intros (p & Hpgt0 & [= ->]); apply parity_valid_messages_powers_of_mult_left.
+  - by intros; apply mul_parity_valid_messages_powers_of_mult_right.
+  - by intros (p & Hpgt0 & [= ->]); apply mul_parity_valid_messages_powers_of_mult_left.
 Qed.
 
 (**
   The constrained transition from [parity_example_constrained_transition]
   is not also valid.
 *)
-Example parity_example_constrained_transition_not_valid :
-  ~ input_valid_transition ParityVLSM parity_label
+Example mul_parity_example_constrained_transition_not_valid :
+  ~ input_valid_transition MulParityVLSM mul_parity_label
     (multiplier + 1, Some (multiplier + 1)) (0, Some (multiplier ^ 2 + multiplier)).
 Proof.
   intros [(_ & Hm & _) _].
-  apply parity_valid_messages_powers_of_mult in Hm as (p & Hp & Heq).
+  apply mul_parity_valid_messages_powers_of_mult in Hm as (p & Hp & Heq).
   rewrite <- (Z.succ_pred p) in Heq.
   rewrite Z.pow_succ_r in Heq by lia.
   assert (Hmul : multiplier * (multiplier ^ Z.pred p - 1) = 1) by lia.
@@ -590,33 +594,33 @@ Context
   `{FinSet index indexSet}
   .
 
-Definition indexed_parity_vlsms (i : index) : VLSM ParityMessage :=
-  ParityVLSM (multipliers i).
+Definition indexed_parity_vlsms (i : index) : VLSM MulParityMessage :=
+  MulParityVLSM (multipliers i).
 
 Context
-  (parity_constraint : composite_label indexed_parity_vlsms ->
-    composite_state indexed_parity_vlsms * option ParityMessage -> Prop)
+  (mul_parity_constraint : composite_label indexed_parity_vlsms ->
+    composite_state indexed_parity_vlsms * option MulParityMessage -> Prop)
   .
 
-Definition parity_composite_vlsm : VLSM ParityMessage :=
-  composite_vlsm indexed_parity_vlsms parity_constraint.
+Definition mul_parity_composite_vlsm : VLSM MulParityMessage :=
+  composite_vlsm indexed_parity_vlsms mul_parity_constraint.
 
 Lemma composite_state_pos
   (s : composite_state indexed_parity_vlsms)
-  (Hs : valid_state_prop parity_composite_vlsm s) :
+  (Hs : valid_state_prop mul_parity_composite_vlsm s) :
     forall (i : index), s i >= 0.
 Proof.
   intros i.
-  apply parity_constrained_states_right with (multipliers i).
-  by apply (valid_state_project_preloaded ParityMessage indexed_parity_vlsms parity_constraint).
+  apply mul_parity_constrained_states_right with (multipliers i).
+  by apply (valid_state_project_preloaded MulParityMessage indexed_parity_vlsms mul_parity_constraint).
 Qed.
 
 (**
   Any valid message can be expressed as a non-empty product of powers
   of the multipliers associated to the components.
 *)
-Lemma composition_valid_messages_powers_of_mults_right (m : ParityMessage) :
-  valid_message_prop parity_composite_vlsm m ->
+Lemma composition_valid_messages_powers_of_mults_right (m : MulParityMessage) :
+  valid_message_prop mul_parity_composite_vlsm m ->
   exists (f : fsfun index 0%nat),
     fin_supp f <> [] /\ m = fsfun_prod multipliers f.
 Proof.
@@ -630,7 +634,7 @@ Proof.
     by rewrite <- Hmi, mi, prod_powers_delta.
   - destruct l as (k & lk).
     destruct om; [| done].
-    destruct (IHHvsm2 p) as (f & Hdomf & ->); [done |].
+    destruct (IHHvsm2 m0) as (f & Hdomf & ->); [done |].
     inversion Ht.
     exists (succ_fsfun f k).
     split; [| by rewrite fsfun_prod_succ].
@@ -648,15 +652,15 @@ Context
   `{Inhabited index}
   .
 
-Definition free_parity_composite_vlsm : VLSM ParityMessage :=
+Definition free_parity_composite_vlsm : VLSM MulParityMessage :=
   free_composite_vlsm (indexed_parity_vlsms multipliers).
 
 #[local] Lemma free_parity_composite_vlsm_emits_multiplier :
-  forall (m : ParityMessage),
+  forall (m : MulParityMessage),
     valid_message_prop free_parity_composite_vlsm m ->
     m >= 2 ->
   forall (n : index),
-  input_valid_transition free_parity_composite_vlsm (existT n parity_label)
+  input_valid_transition free_parity_composite_vlsm (existT n mul_parity_label)
 (update (const 1) n (m + 1), Some m)
 (const 1, Some (multipliers n * m)).
 Proof.
@@ -675,14 +679,14 @@ Proof.
 Qed.
 
 Lemma composition_valid_messages_powers_of_mults_left
-  (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage)
+  (Hmpos : forall (i : index), multipliers i > 1) (m : MulParityMessage)
   (f : fsfun index 0%nat) :
     fin_supp f <> [] /\ m = fsfun_prod multipliers f ->
     valid_message_prop free_parity_composite_vlsm m.
 Proof.
   intros [Hpowgeq1 Hm]; revert f Hpowgeq1 m Hm.
   apply (nat_fsfun_ind (fun (f : fsfun index 0%nat) => fin_supp f <> [] ->
-    forall m : ParityMessage, m = fsfun_prod multipliers f ->
+    forall m : MulParityMessage, m = fsfun_prod multipliers f ->
     valid_message_prop free_parity_composite_vlsm m)); [| done |].
   - intros f1 f2 Heq Hall Hi m Hm.
     eapply Hall; [| by rewrite Heq].
@@ -721,7 +725,7 @@ Proof.
 Qed.
 
 Lemma composition_valid_messages_powers_of_mults
-  (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage) :
+  (Hmpos : forall (i : index), multipliers i > 1) (m : MulParityMessage) :
     valid_message_prop free_parity_composite_vlsm m <->
   exists (f : fsfun index 0%nat),
     fin_supp f <> [] /\ m = fsfun_prod multipliers f.
@@ -736,7 +740,7 @@ Proof.
 Qed.
 
 Lemma composition_valid_message_ge_2
-  (Hmpos : forall (i : index), multipliers i > 1) (m : ParityMessage) :
+  (Hmpos : forall (i : index), multipliers i > 1) (m : MulParityMessage) :
   valid_message_prop free_parity_composite_vlsm m -> m >= 2.
 Proof.
   intro Hv.
@@ -770,23 +774,23 @@ Proof.
   - by intros []; set_solver.
 Qed.
 
-Definition parity_constraint
+Definition mul_parity_constraint
   (l : composite_label (indexed_parity_vlsms multipliers23))
-  (sm : composite_state (indexed_parity_vlsms multipliers23) * option ParityMessage) : Prop :=
+  (sm : composite_state (indexed_parity_vlsms multipliers23) * option MulParityMessage) : Prop :=
     let i := projT1 l in
     let (s', _) := composite_transition (indexed_parity_vlsms multipliers23) l sm in
     Z.Even (((fst sm) i) + (s' i)).
 
-Definition parity_composite_vlsm23 :=
-  parity_composite_vlsm multipliers23 parity_constraint.
+Definition mul_parity_composite_vlsm23 :=
+  mul_parity_composite_vlsm multipliers23 mul_parity_constraint.
 
 Definition final_state (s : composite_state (indexed_parity_vlsms multipliers23)) :=
-  valid_state_prop parity_composite_vlsm23 s /\
+  valid_state_prop mul_parity_composite_vlsm23 s /\
   ~ exists
     (l : composite_label (indexed_parity_vlsms multipliers23))
-    (om : option ParityMessage)
-    (som' : composite_state (indexed_parity_vlsms multipliers23) * option ParityMessage),
-      input_valid_transition parity_composite_vlsm23 l (s, om) som'.
+    (om : option MulParityMessage)
+    (som' : composite_state (indexed_parity_vlsms multipliers23) * option MulParityMessage),
+      input_valid_transition mul_parity_composite_vlsm23 l (s, om) som'.
 
 Definition statenm (n m : Z) : composite_state (indexed_parity_vlsms multipliers23) :=
   fun (i : index23) => match i with two => n | three => m end.
@@ -808,21 +812,21 @@ Definition state22 := statenm 2 2.
 Definition state02 := statenm 0 2.
 
 Example valid_statenm_geq1 (n m : Z) (Hn : n >= 1) (Hm : m >= 1) :
-  valid_state_prop parity_composite_vlsm23 (statenm n m).
+  valid_state_prop mul_parity_composite_vlsm23 (statenm n m).
 Proof.
   by apply initial_state_is_valid; intros []; cbn; red.
 Qed.
 
-Example valid_state11 : valid_state_prop parity_composite_vlsm23 state11.
+Example valid_state11 : valid_state_prop mul_parity_composite_vlsm23 state11.
 Proof. by apply (valid_statenm_geq1 1 1); lia. Qed.
 
-Example valid_state00 : valid_state_prop parity_composite_vlsm23 state00.
+Example valid_state00 : valid_state_prop mul_parity_composite_vlsm23 state00.
 Proof.
   apply input_valid_transition_destination
-    with (l := existT three parity_label) (s := state02) (om := Some 2) (om' := Some 6).
+    with (l := existT three mul_parity_label) (s := state02) (om := Some 2) (om' := Some 6).
   repeat split.
   - apply input_valid_transition_destination
-      with (l := existT two parity_label) (s := state22) (om := Some 2) (om' := Some 4).
+      with (l := existT two mul_parity_label) (s := state22) (om := Some 2) (om' := Some 4).
     repeat split.
     + by apply valid_statenm_geq1.
     + apply initial_message_is_valid.
@@ -843,10 +847,10 @@ Proof.
   - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn; lia.
 Qed.
 
-Example valid_state01 : valid_state_prop parity_composite_vlsm23 state01.
+Example valid_state01 : valid_state_prop mul_parity_composite_vlsm23 state01.
 Proof.
   apply input_valid_transition_destination
-    with (l := existT two parity_label) (s := state21) (om := Some 2) (om' := Some 4).
+    with (l := existT two mul_parity_label) (s := state21) (om := Some 2) (om' := Some 4).
   repeat split.
   - by apply valid_statenm_geq1.
   - apply initial_message_is_valid.
@@ -859,10 +863,10 @@ Proof.
   - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn; lia.
 Qed.
 
-Example valid_state10 : valid_state_prop parity_composite_vlsm23 state10.
+Example valid_state10 : valid_state_prop mul_parity_composite_vlsm23 state10.
 Proof.
   apply input_valid_transition_destination
-    with (l := existT three parity_label) (s := state12) (om := Some 2) (om' := Some 6).
+    with (l := existT three mul_parity_label) (s := state12) (om := Some 2) (om' := Some 6).
   repeat split.
   - by apply valid_statenm_geq1.
   - apply initial_message_is_valid.
@@ -886,12 +890,12 @@ Proof.
     + by apply valid_state10.
     + by apply valid_state11.
   - intros ([i li] & om & som' & (Hs & Hom & Hv & Hc) & Ht).
-    unfold parity_constraint in Hc.
+    unfold mul_parity_constraint in Hc.
     replace (composite_transition _ _ _) with som' in Hc.
     destruct om; [| done].
     cbn in *; subst.
     state_update_simpl.
-    assert (Z.Even p) as [n Hp] by (destruct Hc as [n Hc]; exists (s i - n); lia).
+    assert (Z.Even m) as [n Hp] by (destruct Hc as [n Hc]; exists (s i - n); lia).
     by destruct Hcases as [Hst |[Hst |[Hst | Hst]]]; subst; destruct i; cbn in *; lia.
 Qed.
 
@@ -913,7 +917,7 @@ Proof.
   }
   contradict Hfinal.
   clear n.
-  exists (existT i parity_label), (Some 2),
+  exists (existT i mul_parity_label), (Some 2),
     (state_update (indexed_parity_vlsms multipliers23) s i (s i - 2), Some (multipliers23 i * 2)).
   repeat split; [done | ..].
   - apply initial_message_is_valid.
@@ -930,7 +934,7 @@ End sec_parity23.
 (** ** A VLSM composition for all primes
 
   In the following section we give an example of a composition with an infinite
-  number of [ParityVLSM] components, one for each prime number.
+  number of [MulParityVLSM] components, one for each prime number.
 
   Then we characterize the valid messages for this composition to be precisely
   all natural numbers larger than 1.
@@ -998,12 +1002,12 @@ Definition even_constrained_primes_composition : VLSM Z :=
   constrained_vlsm primes_vlsm_composition EvenConstraint.
 
 #[local] Lemma even_constrained_primes_composition_emits_multiplier :
-  forall (m : ParityMessage),
+  forall (m : MulParityMessage),
     valid_message_prop even_constrained_primes_composition m ->
     m >= 2 ->
     Z.Even m ->
   forall (n : primes),
-  input_valid_transition even_constrained_primes_composition (existT n parity_label)
+  input_valid_transition even_constrained_primes_composition (existT n mul_parity_label)
   (update (const 1) n (m + 1), Some m)
   (const 1, Some (` n * m)).
 Proof.
@@ -1106,12 +1110,12 @@ Qed.
   equivalent to the global constraint we can recover validation.
 *)
 Inductive LocalEvenConstraint (mult : Z) :
-  label (ParityVLSM mult) -> state (ParityVLSM mult) * option Z -> Prop :=
+  label (MulParityVLSM mult) -> state (MulParityVLSM mult) * option Z -> Prop :=
 | local_even_constraint : forall l s m, Z.Even m ->
     LocalEvenConstraint mult l (s, Some m).
 
-Definition even_prime_vlsms (p : primes) : VLSM ParityMessage :=
-  constrained_vlsm (ParityVLSM (`p)) (LocalEvenConstraint (`p)).
+Definition even_prime_vlsms (p : primes) : VLSM MulParityMessage :=
+  constrained_vlsm (MulParityVLSM (`p)) (LocalEvenConstraint (`p)).
 
 (**
   Adding the local constraint to each component does not change the behavior
