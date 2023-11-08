@@ -208,38 +208,6 @@ Proof.
     by rewrite !unroll_last.
 Qed.
 
-Lemma firstn_split
-  {A : Type}
-  (l left right : list A)
-  (left_len : nat)
-  (Hlen : left_len = length left)
-  (Hsplit : l = left ++ right) :
-  firstn left_len l = left.
-Proof.
-  generalize dependent l.
-  generalize dependent left.
-  generalize dependent right.
-  generalize dependent left_len.
-  induction left_len.
-  - intros.
-    symmetry in Hlen.
-    rewrite length_zero_iff_nil in Hlen.
-    rewrite Hlen.
-    by destruct l.
-  - intros.
-    destruct left; [done |].
-    assert (left_len = length left).
-    {
-      simpl in Hlen.
-      inversion Hlen.
-      itauto.
-    }
-    specialize (IHleft_len right left H (left ++ right) eq_refl).
-    rewrite Hsplit.
-    simpl.
-    by rewrite IHleft_len.
-Qed.
-
 Lemma firstn_length
   {A : Type}
   (l : list A)
@@ -260,21 +228,12 @@ Proof.
   by rewrite take_take, min_l.
 Qed.
 
-Lemma firstn_suffix
-  {A : Type}
-  (l : list A)
-  (n : nat)
-  : firstn n l ++ skipn n l = l.
-Proof.
-  by rewrite take_drop.
-Qed.
-
 Lemma prefix_of_firstn
   {A : Type}
   (l : list A)
   (n : nat)
   : firstn n l `prefix_of` l.
-Proof. by eexists; symmetry; apply firstn_suffix. Qed.
+Proof. by eexists; symmetry; apply take_drop. Qed.
 
 (**
   Compute the sublist of list <<l>> which starts at index <<n1>>
@@ -294,11 +253,11 @@ Lemma firstn_segment_suffix
   (Hn : n1 <= n2)
   : firstn n1 l ++ list_segment l n1 n2 ++ skipn n2 l = l.
 Proof.
-  rewrite <- (firstn_suffix l n2) at 4.
+  rewrite <- (take_drop n2 l) at 4.
   rewrite app_assoc.
   f_equal.
   unfold list_segment.
-  rewrite <- (firstn_suffix (firstn n2 l) n1) at 2.
+  rewrite <- (take_drop n1 (firstn n2 l)) at 2.
   f_equal.
   symmetry.
   by apply firstn_prefix.
@@ -601,6 +560,31 @@ Proof.
   by rewrite Hlast in Hnth; inversion Hnth.
 Qed.
 
+Lemma skipn_S_tail :
+  forall {A : Type} (l : list A) (n : nat),
+    skipn (S n) l = skipn n (tail l).
+Proof.
+  by destruct l; cbn; intros; rewrite ?drop_nil.
+Qed.
+
+Lemma skipn_tail_comm :
+  forall {A : Type} (l : list A) (n : nat),
+    skipn n (tail l) = tail (skipn n l).
+Proof.
+  intros A l n; revert l; induction n; intros l.
+  - by rewrite !drop_0.
+  - by rewrite !skipn_S_tail, IHn.
+Qed.
+
+Lemma skipn_lookup :
+  forall {A : Type} (s : list A) (n i : nat),
+    n <= i -> skipn n s !! (i - n) = s !! i.
+Proof.
+  intros.
+  rewrite lookup_drop.
+  by replace (n + (i - n)) with i by lia.
+Qed.
+
 Lemma skipn_nth
   {A : Type}
   (s : list A)
@@ -676,7 +660,7 @@ Proof.
   rewrite <- Hl2 in Hl1 at 4. clear Hl2.
   repeat rewrite app_assoc in Hl1.
   apply app_inv_tail in Hl1.
-  specialize (firstn_suffix (firstn n2 l) n1); intro Hl2.
+  specialize (take_drop n1 (firstn n2 l)); intro Hl2.
   specialize (firstn_prefix l n1 n2 H12); intro Hl3.
   rewrite Hl3 in Hl2.
   rewrite <- Hl2 in Hl1.

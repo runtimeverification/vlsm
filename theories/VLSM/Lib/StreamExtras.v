@@ -643,7 +643,7 @@ Lemma stream_prefix_segment
   : stream_prefix l n1 ++ stream_segment l n1 n2 = stream_prefix l n2.
 Proof.
   unfold stream_segment.
-  rewrite <- (firstn_suffix (stream_prefix l n2) n1) at 2.
+  rewrite <- (take_drop n1 (stream_prefix l n2)) at 2.
   by rewrite stream_prefix_prefix.
 Qed.
 
@@ -674,7 +674,7 @@ Proof.
   specialize (stream_prefix_segment_suffix l n2 n3 H23); intro Hl2.
   rewrite <- Hl2 in Hl1 at 4. clear Hl2.
   apply stream_app_inj_l in Hl1.
-  - specialize (firstn_suffix (stream_prefix l n2) n1); intro Hl2.
+  - specialize (take_drop n1 (stream_prefix l n2)); intro Hl2.
     specialize (stream_prefix_prefix l n1 n2 H12); intro Hl3.
     rewrite Hl3 in Hl2.
     rewrite <- Hl2, <- app_assoc in Hl1.

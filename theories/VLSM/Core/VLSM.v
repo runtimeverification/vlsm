@@ -1275,7 +1275,7 @@ Lemma finite_valid_trace_from_prefix
   (n : nat) :
     finite_valid_trace_from s (firstn n ls).
 Proof.
-  specialize (firstn_suffix ls n); intro Hdecompose.
+  specialize (take_drop n ls); intro Hdecompose.
   rewrite <- Hdecompose in Htr.
   by apply finite_valid_trace_from_app_iff in Htr as [Hpr _].
 Qed.
@@ -1289,7 +1289,7 @@ Lemma finite_valid_trace_from_suffix
   (Hnth : finite_trace_nth s ls n = Some nth) :
     finite_valid_trace_from nth (skipn n ls).
 Proof.
-  rewrite <- (firstn_suffix ls n) in Htr.
+  rewrite <- (take_drop n ls) in Htr.
   apply finite_valid_trace_from_app_iff in Htr.
   destruct Htr as [_ Htr].
   replace (finite_trace_last s (firstn n ls)) with nth in Htr; [done |].
@@ -2310,7 +2310,7 @@ Proof.
       ; clear Heqpref_tr
       ; simpl
       ; intro Heqprefix.
-      * specialize (firstn_suffix l' n); intro Hl'.
+      * specialize (take_drop n l'); intro Hl'.
         rewrite <- Hl'. rewrite Heqprefix.
         exists (skipn n l').
         by rewrite <- app_assoc.
