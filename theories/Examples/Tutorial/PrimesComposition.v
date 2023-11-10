@@ -118,330 +118,26 @@ Definition RadixVLSM : VLSM RadixMessage :=
 
 Definition radix_label : label RadixType := ().
 
-(** ** Radix VLSM Examples *)
+(** ** Parity VLSM Properties *)
 
-(** *** Example of an arbitrary transition *)
-
-Lemma radix_example_transition_1 `(X : VLSM RadixMessage) :
-  transition RadixVLSM radix_label (4, Some 10) = (-6, Some (multiplier * 10)).
-Proof. done. Qed.
-
-(** *** Example of a valid trace *)
-
-(**
-  The initial state cannot be included in this definition, because, since there
-  is no transition reaching this state, it cannot be expressed in the manner below.
-  Regarding the transition which leads to the final state, it technically could be
-  included, but we choose to model this way, in order to be consistent
-  with the subsequent example, where adding the last transition makes a qualitative
-  difference to the trace.
-*)
-
-Definition radix_trace1_init : list (transition_item RadixVLSM) :=
-  [ Build_transition_item radix_label (Some (multiplier ^ 2))
-     (multiplier ^ 3 - multiplier ^ 2) (Some (multiplier ^ 3))
-  ; Build_transition_item radix_label (Some multiplier)
-     (multiplier ^ 3 - multiplier ^ 2 - multiplier) (Some (multiplier ^ 2)) ].
-
-Definition radix_trace1_last_item : transition_item RadixVLSM :=
-  Build_transition_item radix_label (Some multiplier)
-    (multiplier ^ 3 - multiplier ^ 2 - multiplier - multiplier) (Some (multiplier ^ 2)).
-
-Definition radix_trace1 : list (transition_item RadixVLSM) :=
-  radix_trace1_init ++ [radix_trace1_last_item].
-
-Definition radix_trace1_first_state : RadixState := multiplier ^ 3.
-
-Definition radix_trace1_last_state : RadixState :=
-  destination radix_trace1_last_item.
-
-(** The trace we defined is valid: *)
-
-Example radix_valid_message_prop_mult :
-  valid_message_prop RadixVLSM multiplier.
-Proof. by apply initial_message_is_valid. Qed.
-
-Example radix_can_emit_square_mult :
-  can_emit RadixVLSM (multiplier ^ 2).
-Proof.
-  exists (multiplier, Some multiplier), radix_label, 0.
-  repeat split; [| | by lia.. | by cbn; do 2 f_equal; lia].
-  - by apply initial_state_is_valid; cbn; unfold Radix_initial_state_prop; lia.
-  - by app_valid_tran.
-Qed.
-
-Example radix_valid_message_prop_square_mult :
-  valid_message_prop RadixVLSM (multiplier ^ 2).
-Proof.
-  by eapply emitted_messages_are_valid, radix_can_emit_square_mult.
-Qed.
-
-Proposition radix_valid_transition_1 :
-  input_valid_transition RadixVLSM radix_label
-   (radix_trace1_first_state, Some (multiplier ^ 2))
-   (multiplier ^ 3 - multiplier ^ 2, Some (multiplier ^ 3)).
-Proof.
-  repeat split; [| | | by lia].
-  - by apply initial_state_is_valid; cbn;
-      unfold Radix_initial_state_prop, radix_trace1_first_state; lia.
-  - by app_valid_tran; eapply radix_can_emit_square_mult.
-  - by unfold radix_trace1_first_state; nia.
-Qed.
-
-Proposition radix_valid_transition_2 :
-  multiplier >= 2 ->
-  input_valid_transition RadixVLSM radix_label
-   (multiplier ^ 3 - multiplier ^ 2, Some multiplier)
-   (multiplier ^ 3 - multiplier ^ 2 - multiplier, Some (multiplier ^ 2)).
-Proof.
-  repeat split; [| | | by lia |].
-  - by app_valid_tran; eapply radix_valid_transition_1; lia.
-  - by app_valid_tran; apply radix_can_emit_square_mult.
-  - by nia.
-  - by cbn; do 2 f_equal; lia.
-Qed.
-
-Proposition radix_valid_transition_3 :
-  multiplier >= 2 ->
-  input_valid_transition RadixVLSM radix_label
-   (multiplier ^ 3 - multiplier ^ 2 - multiplier, Some multiplier)
-   (multiplier ^ 3 - multiplier ^ 2 - multiplier - multiplier, Some (multiplier ^ 2)).
-Proof.
-  repeat split; [| | | by lia |].
-  - by app_valid_tran; apply radix_valid_transition_2.
-  - by app_valid_tran; apply radix_can_emit_square_mult.
-  - by nia.
-  - by cbn; do 2 f_equal; lia.
-Qed.
-
-Example radix_valid_trace1 :
-  multiplier >= 2 ->
-  finite_valid_trace_init_to RadixVLSM
-    radix_trace1_first_state radix_trace1_last_state radix_trace1.
-Proof.
-  constructor; unfold radix_trace1_first_state;
-    [| by cbn; unfold Radix_initial_state_prop; lia].
-  repeat apply finite_valid_trace_from_to_extend.
-  - by eapply finite_valid_trace_from_to_empty, input_valid_transition_destination,
-      radix_valid_transition_3.
-  - by apply radix_valid_transition_3.
-  - by apply radix_valid_transition_2.
-  - by apply radix_valid_transition_1; lia.
-Qed.
-
-Example radix_valid_trace1_alt :
-  multiplier >= 2 ->
-  finite_valid_trace_init_to_alt RadixVLSM
-    radix_trace1_first_state radix_trace1_last_state radix_trace1.
-Proof.
-  constructor; [| by unfold radix_trace1_first_state; cbn; red; lia].
-  repeat apply mvt_extend; [.. | by apply mvt_empty].
-  - by eapply radix_valid_message_prop_square_mult; lia.
-  - by eapply radix_valid_transition_1; lia.
-  - cbn; split; [| by lia].
-    by unfold radix_trace1_first_state; nia.
-  - by apply radix_valid_message_prop_mult.
-  - by apply radix_valid_transition_2.
-  - by cbn; split; [nia | lia].
-  - by apply radix_valid_message_prop_mult.
-  - by apply radix_valid_transition_3.
-  - by cbn; split; [nia | lia].
-Qed.
-
-(** *** Example of a constrained trace *)
-
-(** The previously defined trace is obviously constrained, since it's valid. *)
-Lemma radix_constrained_trace1 :
-  multiplier >= 2 ->
-  finite_constrained_trace_init_to_direct RadixVLSM
-    radix_trace1_first_state radix_trace1_last_state radix_trace1.
-Proof.
-  constructor; [| by unfold radix_trace1_first_state; cbn; red; lia].
-  repeat apply ct_extend; [.. | by apply ct_empty].
-  - by eapply radix_valid_transition_1; lia.
-  - cbn; split; [| by lia].
-    by unfold radix_trace1_first_state; nia.
-  - by apply radix_valid_transition_2.
-  - by cbn; split; [nia | lia].
-  - by apply radix_valid_transition_3.
-  - by cbn; split; [nia | lia].
-Qed.
-
-Definition radix_trace2_init : list (transition_item RadixVLSM) :=
-  [ Build_transition_item radix_label (Some multiplier)
-      (2 * multiplier + 1) (Some (multiplier ^ 2))
-  ; Build_transition_item radix_label (Some multiplier)
-      (multiplier + 1) (Some (multiplier ^ 2)) ].
-
-Definition radix_trace2_last_item : transition_item RadixVLSM :=
-  Build_transition_item radix_label (Some (multiplier + 1))
-    0 (Some (multiplier ^ 2 + multiplier) ).
-
-Definition radix_trace2 : list (transition_item RadixVLSM) :=
-  radix_trace2_init ++ [radix_trace2_last_item].
-
-Definition radix_trace2_init_first_state : RadixState := 3 * multiplier + 1.
-
-Definition radix_trace2_init_last_state : RadixState := multiplier + 1.
-
-Definition radix_trace2_last_state : RadixState :=
-  destination radix_trace2_last_item.
-
-(** The given trace is valid without the last transition. *)
-
-Proposition radix_valid_transition_1' :
-  input_valid_transition RadixVLSM radix_label
-    (radix_trace2_init_first_state, Some multiplier)
-    (2 * multiplier + 1, Some (multiplier ^ 2)).
-Proof.
-  repeat split; [| | | by lia |].
-  - apply initial_state_is_valid.
-    by unfold radix_trace2_init_first_state; cbn; red; lia.
-  - by app_valid_tran; apply radix_can_emit_square_mult.
-  - by unfold radix_trace2_init_first_state; lia.
-  - by cbn; do 2 f_equal; unfold radix_trace2_init_first_state; lia.
-Qed.
-
-Proposition radix_valid_transition_2' :
-  input_valid_transition RadixVLSM radix_label
-    (2 * multiplier + 1, Some multiplier) (multiplier + 1, Some (multiplier ^ 2)).
-Proof.
-  repeat split; [| | | by lia |].
-  - apply initial_state_is_valid.
-    by unfold radix_trace2_init_first_state; cbn; red; lia.
-  - by app_valid_tran; apply radix_can_emit_square_mult.
-  - by unfold radix_trace2_init_first_state; lia.
-  - by cbn; do 2 f_equal; unfold radix_trace2_init_first_state; lia.
-Qed.
-
-Example radix_valid_trace2_init :
-  finite_valid_trace_init_to RadixVLSM
-    radix_trace2_init_first_state radix_trace2_init_last_state radix_trace2_init.
-Proof.
-  constructor; [| by unfold radix_trace2_init_first_state; cbn; red; lia].
-  repeat apply finite_valid_trace_from_to_extend.
-  - by eapply finite_valid_trace_from_to_empty, input_valid_transition_destination,
-      radix_valid_transition_2'.
-  - by apply radix_valid_transition_2'.
-  - by apply radix_valid_transition_1'.
-Qed.
-
-Example radix_valid_trace2_init_alt :
-  finite_valid_trace_init_to_alt RadixVLSM
-    radix_trace2_init_first_state radix_trace2_init_last_state radix_trace2_init.
-Proof.
-  constructor; [| by unfold radix_trace2_init_first_state; cbn; red; lia].
-  repeat apply mvt_extend; [.. | by apply mvt_empty].
-  - by apply radix_valid_message_prop_mult.
-  - by apply radix_valid_transition_1'.
-  - by cbn; split; unfold radix_trace2_init_first_state; lia.
-  - by apply radix_valid_message_prop_mult.
-  - by apply radix_valid_transition_2'.
-  - by cbn; split; unfold radix_trace2_init_first_state; lia.
-Qed.
-
-(**
-  From the previous lemmas, it follows that the given trace
-  without its last transition is constrained.
-*)
-
-Example radix_constrained_trace2_init :
-  finite_constrained_trace_init_to RadixVLSM
-    radix_trace2_init_first_state radix_trace2_init_last_state radix_trace2_init.
-Proof.
-  intros.
-  apply VLSM_incl_finite_valid_trace_init_to.
-  - by apply vlsm_incl_pre_loaded.
-  - by apply radix_valid_trace2_init; lia.
-Qed.
-
-(**
-  The trace is valid (in the preloaded Radix VLSM) without
-  its last element and appending it to the end also gives
-  a valid trace (in the preloaded Radix VLSM).
-  It follows that the full trace is constrained in
-  the original Radix VLSM.
-*)
-
-Example radix_constrained_trace2 :
-  finite_constrained_trace_init_to RadixVLSM
-    radix_trace2_init_first_state radix_trace2_last_state radix_trace2.
-Proof.
-  destruct radix_constrained_trace2_init as [Hfvt Hisp].
-  split; [| done].
-  eapply (extend_right_finite_trace_from_to _ Hfvt).
-  repeat split.
-  - by eapply finite_valid_trace_from_to_last_pstate.
-  - by apply any_message_is_valid_in_preloaded.
-  - by unfold radix_trace2_init_last_state.
-  - by lia.
-  - cbn; f_equal.
-    + by unfold radix_trace2_init_last_state; lia.
-    + by f_equal; nia.
-Qed.
-
-(** *** Example of a valid transition
-
-  The last transition of a valid trace is valid.
-*)
-
-Lemma radix_example_valid_transition :
-  input_valid_transition RadixVLSM radix_label
-    (multiplier, Some multiplier) (0, Some (multiplier ^ 2)).
-Proof.
-  repeat split; [| | by lia.. |].
-  - apply initial_state_is_valid.
-    by unfold radix_trace2_init_first_state; cbn; red; lia.
-  - by apply radix_valid_message_prop_mult.
-  - by cbn; do 2 f_equal; lia.
-Qed.
-
-(** *** Example of a constrained transition
-
-  The last transition of a constrained trace is constrained.
-*)
-
-Example radix_example_constrained_transition :
-  input_valid_transition (pre_loaded_with_all_messages_vlsm RadixVLSM) radix_label
-    (multiplier + 1, Some (multiplier + 1)) (0, Some (multiplier ^ 2 + multiplier)).
-Proof.
-  apply (finite_valid_trace_from_to_last_transition
-    (pre_loaded_with_all_messages_vlsm RadixVLSM)
-    radix_trace2_init_first_state radix_trace2_last_state radix_trace2_init
-    radix_trace2 radix_trace2_last_item); [| done].
-  by apply radix_constrained_trace2.
-Qed.
-
-(** ** Radix VLSM Properties *)
-
-(** *** Inclusion into preloaded with all messages *)
-
-Lemma radix_valid_is_constrained :
-  VLSM_incl RadixVLSM (pre_loaded_with_all_messages_vlsm RadixVLSM).
-Proof.
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-Qed.
-
-(** *** Constrained messages are positive even integers *)
+(** *** Constrained messages are positives divisible by <<multiplier>> *)
 
 Lemma radix_constrained_messages_left :
-  multiplier > 0 ->
   forall (m : RadixMessage),
     constrained_message_prop RadixVLSM m ->
     exists (j : Z), m = multiplier * j /\ j > 1.
 Proof.
-  intros Hgt0 m ([s []] & [] & s' & (_ & _ & []) & Ht).
+  intros m ([s []] & [] & s' & (_ & _ & []) & Ht).
   inversion Ht; subst.
   by exists r; split; lia.
 Qed.
 
 Lemma radix_constrained_messages_right :
-  multiplier > 0 ->
   forall (m : RadixMessage),
     (exists (j : Z), m = multiplier * j) -> m > multiplier ->
     constrained_message_prop RadixVLSM m.
 Proof.
-  intros Hgt0 m (j & Hj) Hmgt0.
+  intros m (j & Hj) Hmgt0.
   unfold constrained_message_prop_direct, can_emit.
   exists (j, Some j), radix_label, 0.
   repeat split.
@@ -453,13 +149,12 @@ Proof.
 Qed.
 
 Lemma radix_constrained_messages :
-  multiplier > 0 ->
   forall (m : RadixMessage),
     constrained_message_prop RadixVLSM m <-> (exists (j : Z), m = multiplier * j /\ j > 1).
 Proof.
   split.
   - by apply radix_constrained_messages_left.
-  - by intros [? []]; apply radix_constrained_messages_right; [| exists x | nia].
+  - by intros [? []]; apply radix_constrained_messages_right; [exists x | nia].
 Qed.
 
 (** *** Constrained states property *)
@@ -552,22 +247,6 @@ Proof.
   split.
   - by intros; apply radix_valid_messages_powers_of_mult_right.
   - by intros (p & Hpgt0 & [= ->]); apply radix_valid_messages_powers_of_mult_left.
-Qed.
-
-(**
-  The constrained transition from [radix_example_constrained_transition]
-  is not also valid.
-*)
-Example radix_example_constrained_transition_not_valid :
-  ~ input_valid_transition RadixVLSM radix_label
-    (multiplier + 1, Some (multiplier + 1)) (0, Some (multiplier ^ 2 + multiplier)).
-Proof.
-  intros [(_ & Hm & _) _].
-  apply radix_valid_messages_powers_of_mult in Hm as (p & Hp & Heq).
-  rewrite <- (Z.succ_pred p) in Heq.
-  rewrite Z.pow_succ_r in Heq by lia.
-  assert (Hmul : multiplier * (multiplier ^ Z.pred p - 1) = 1) by lia.
-  by apply Z.eq_mul_1_nonneg in Hmul as []; lia.
 Qed.
 
 End sec_radix_vlsm.
