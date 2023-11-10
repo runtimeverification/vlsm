@@ -1579,16 +1579,6 @@ Proof.
   by eapply max_prefix_app in Heq.
 Qed.
 
-Lemma max_prefix_app_inv :
-  forall (l1 l2 p r1 r2 : list A),
-    max_prefix l1 l2 = (r1, r2, p) ->
-      l1 = p ++ r1 /\ l2 = p ++ r2.
-Proof.
-  split.
-  - by eapply max_prefix_fst_alt.
-  - by eapply max_prefix_snd_alt.
-Qed.
-
 Lemma max_prefix_head_inv :
   forall (l1 l2 p r1 r2 : list A),
     max_prefix l1 l2 = (r1, r2, p) ->
@@ -1606,11 +1596,9 @@ Lemma max_prefix_spec :
     l1 = p ++ r1 /\ l2 = p ++ r2 /\ (r1 = [] /\ r2 = [] \/ head r1 <> head r2).
 Proof.
   split.
-  - intros Heq.
-    apply max_prefix_app_inv in Heq as Happ.
-    destruct Happ as [-> ->].
-    split_and!; [done.. |].
-    by apply max_prefix_head_inv in Heq.
+  - split; [by eapply max_prefix_fst_alt |].
+    split; [by eapply max_prefix_snd_alt |].
+    by eapply max_prefix_head_inv.
   - intros (-> & -> & [[-> ->] |]).
     + by rewrite app_nil_r, max_prefix_diag.
     + by rewrite max_prefix_app_let, max_prefix_head, app_nil_r.
@@ -1624,9 +1612,8 @@ Proof.
   induction l1 as [| h1 t1]; destruct l2 as [| h2 t2]; cbn; [by itauto congruence.. |].
   intros p r1 r2.
   destruct (max_prefix t1 t2) as [[]] eqn: Heq.
-  case_decide; subst; intros [= <- <- <-]; cbn.
-  - by case_decide; [erewrite IHt1 |].
-  - by case_decide.
+  case_decide; subst; intros [= <- <- <-]; cbn; case_decide; [| done..].
+  by erewrite IHt1.
 Qed.
 
 Lemma max_prefix_comm_let :
@@ -1653,27 +1640,6 @@ Proof.
   - by case_decide.
 Qed.
 
-Lemma max_prefix_is_prefix :
-  forall (l1 l2 p r1 r2 : list A),
-    max_prefix l1 l2 = (r1, r2, p) ->
-      prefix p l1 /\ prefix p l2.
-Proof.
-  intros * Heq; split.
-  - by apply max_prefix_fst_prefix_alt in Heq.
-  - by apply max_prefix_snd_prefix_alt in Heq.
-Qed.
-
-Lemma prefix_max_prefix :
-  forall (l l1 l2 : list A),
-    prefix l l1 -> prefix l l2 ->
-      let '(r1, r2, p) := max_prefix l1 l2 in prefix l p.
-Proof.
-  intros * [p1 ->] [p2 ->].
-  rewrite max_prefix_app_let.
-  destruct (max_prefix p1 p2) as [[]] eqn: Heq.
-  by apply prefix_app_r.
-Qed.
-
 Lemma max_prefix_is_longest :
   forall (l1 l2 p r1 r2 p' : list A),
    max_prefix l1 l2 = (r1, r2, p) ->
@@ -1681,9 +1647,8 @@ Lemma max_prefix_is_longest :
    length p' <= length p.
 Proof.
   intros l1 l2 p r1 r2 p' Hlc Hp1 Hp2.
-  pose proof prefix_max_prefix _ _ _ Hp1 Hp2 as Hlet.
-  destruct (max_prefix l1 l2) as [[]].
-  by inversion Hlc; subst; apply prefix_length.
+  inversion Hlc; subst; apply prefix_length.
+  by eapply max_prefix_max_alt.
 Qed.
 
 Lemma max_prefix_residual_suffix :
@@ -1732,11 +1697,23 @@ Lemma max_suffix_last :
   forall (l1 l2 : list A),
     last l1 <> last l2 -> max_suffix l1 l2 = (l1, l2, []).
 Proof.
-  intros.
+  intros * Hlast.
   unfold max_suffix.
   rewrite max_prefix_head.
   - by rewrite !reverse_involutive; cbn.
   - by rewrite !head_reverse.
+Qed.
+
+Lemma max_suffix_last_inv :
+  forall (l1 l2 p r1 r2 : list A),
+    max_suffix l1 l2 = (r1, r2, p) ->
+      r1 = [] /\ r2 = [] \/ last r1 <> last r2.
+Proof.
+  intros * Heq.
+  destruct_list_last r1 r1' h1 Heq1; destruct_list_last r2 r2' h2 Heq2; cbn;
+    rewrite ?last_snoc; [by left | by right.. |].
+  right; intros [= ->].
+  by apply max_suffix_max_snoc in Heq.
 Qed.
 
 Lemma max_suffix_spec :
@@ -1745,20 +1722,13 @@ Lemma max_suffix_spec :
       <->
     l1 = r1 ++ p /\ l2 = r2 ++ p /\ (r1 = [] /\ r2 = [] \/ last r1 <> last r2).
 Proof.
-  split; cycle 1.
+  split.
+  - split; [by eapply max_suffix_fst_alt |].
+    split; [by eapply max_suffix_snd_alt |].
+    by eapply max_suffix_last_inv.
   - intros (-> & -> & [[-> ->] |]); cbn.
     + by rewrite max_suffix_diag.
     + by rewrite max_suffix_app_let, max_suffix_last.
-  - unfold max_suffix.
-    destruct (max_prefix (reverse l1) (reverse l2)) as [[]] eqn: Heq.
-    apply max_prefix_spec in Heq as (Heq1 & Heq2 & H).
-    apply (f_equal reverse) in Heq1, Heq2.
-    rewrite reverse_involutive in Heq1, Heq2.
-    rewrite Heq1, Heq2, !reverse_app.
-    intros [= <- <- <-].
-    split_and!; [done.. |].
-    rewrite !last_reverse.
-    by destruct H as [[-> ->] |]; cbn; [left | right].
 Qed.
 
 Lemma max_suffix_comm_let :
@@ -1787,10 +1757,9 @@ Lemma suffix_max_suffix :
     suffix l l1 -> suffix l l2 ->
       let '(r1, r2, p) := max_suffix l1 l2 in suffix l p.
 Proof.
-  intros * [p1 ->] [p2 ->].
-  rewrite max_suffix_app_let.
-  destruct (max_suffix p1 p2) as [[]] eqn: Heq.
-  by apply suffix_app_r.
+  intros.
+  destruct (max_suffix l1 l2) as [[]] eqn: Heq.
+  by eapply max_suffix_max_alt.
 Qed.
 
 Lemma max_suffix_is_longest :
@@ -1800,9 +1769,8 @@ Lemma max_suffix_is_longest :
    length p' <= length p.
 Proof.
   intros l1 l2 p r1 r2 p' Hlc Hp1 Hp2.
-  pose proof suffix_max_suffix _ _ _ Hp1 Hp2 as Hlet.
-  destruct (max_suffix l1 l2) as [[]].
-  by inversion Hlc; subst; apply suffix_length.
+  inversion Hlc; subst; apply suffix_length.
+  by eapply max_suffix_max_alt.
 Qed.
 
 Lemma max_suffix_residual_prefix :
