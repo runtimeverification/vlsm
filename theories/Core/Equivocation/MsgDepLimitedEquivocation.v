@@ -38,7 +38,7 @@ Definition coeqv_message_equivocators (s : composite_state IM) (m : message)
   then (* no additional equivocation *)
     ∅
   else (* m itself and all its non-observed dependencies are equivocating. *)
-    list_to_set (map_option sender [m] ++ (elements (coequivocating_senders s m))).
+    list_to_set (omap sender [m] ++ (elements (coequivocating_senders s m))).
 
 Definition coeqv_composite_transition_message_equivocators
   (l : composite_label IM)
@@ -141,7 +141,7 @@ Definition not_directly_observed_happens_before_dependencies (s : composite_stat
 
 Definition msg_dep_coequivocating_senders (s : composite_state IM) (m : message)
   : Cv :=
-  list_to_set (map_option sender (elements (not_directly_observed_happens_before_dependencies s m))).
+  list_to_set (omap sender (elements (not_directly_observed_happens_before_dependencies s m))).
 
 Definition msg_dep_limited_equivocation_vlsm : VLSM message :=
   coeqv_limited_equivocation_vlsm IM threshold sender msg_dep_coequivocating_senders.
@@ -241,7 +241,7 @@ Proof.
   intro; split; intro Hx; [| by contradict Hx; apply not_elem_of_empty].
   exfalso; contradict Hx.
   unfold msg_dep_coequivocating_senders.
-  rewrite elem_of_list_to_set, elem_of_map_option.
+  rewrite elem_of_list_to_set, elem_of_list_omap.
   setoid_rewrite elem_of_elements; setoid_rewrite elem_of_filter.
   intros (dm & [Hnobs Hdm]  & _).
   contradict Hnobs; exists i.
@@ -280,7 +280,7 @@ Proof.
   apply sets.union_proper; [done |].
   unfold coeqv_message_equivocators, msg_dep_coequivocating_senders.
   case_decide as Hobs; [done |].
-  remember (list_to_set (map_option _ _)) as equivs.
+  remember (list_to_set (omap _ _)) as equivs.
   cut (equivs ≡@{Cv} ∅); [by intros -> |].
   by subst; eapply full_node_msg_dep_coequivocating_senders.
 Qed.
@@ -424,7 +424,7 @@ Proof.
     unfold msg_dep_message_equivocators, coeqv_message_equivocators,
       msg_dep_coequivocating_senders, not_directly_observed_happens_before_dependencies.
     rewrite decide_False, elem_of_list_to_set, elem_of_app, elem_of_elements,
-      elem_of_list_to_set, !elem_of_map_option by done.
+      elem_of_list_to_set, !elem_of_list_omap by done.
     right; exists dm.
     rewrite elem_of_elements, elem_of_filter.
     by setoid_rewrite full_message_dependencies_happens_before.
@@ -627,7 +627,7 @@ Proof.
   unfold msg_dep_coequivocating_senders,
          not_directly_observed_happens_before_dependencies in Heqv
   ; rewrite elem_of_list_to_set, elem_of_app,
-      elem_of_elements, elem_of_list_to_set, !elem_of_map_option in Heqv
+      elem_of_elements, elem_of_list_to_set, !elem_of_list_omap in Heqv
   ; setoid_rewrite elem_of_list_singleton in Heqv
   ; setoid_rewrite elem_of_elements in Heqv
   ; setoid_rewrite elem_of_filter in Heqv.

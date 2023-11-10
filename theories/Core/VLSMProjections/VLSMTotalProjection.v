@@ -97,7 +97,7 @@ Qed.
 Definition pre_VLSM_projection_finite_trace_project
   : list (transition_item TX) -> list (transition_item TY)
   :=
-  map_option pre_VLSM_projection_transition_item_project.
+  omap pre_VLSM_projection_transition_item_project.
 
 Definition pre_VLSM_projection_infinite_trace_project
   (s : Streams.Stream (transition_item TX))
@@ -116,7 +116,7 @@ Lemma pre_VLSM_projection_finite_trace_project_app :
   forall l1 l2, pre_VLSM_projection_finite_trace_project (l1 ++ l2) =
     pre_VLSM_projection_finite_trace_project l1 ++ pre_VLSM_projection_finite_trace_project l2.
 Proof.
-  exact (map_option_app _).
+  exact (omap_app _).
 Qed.
 
 Lemma pre_VLSM_projection_finite_trace_project_app_rev :
@@ -125,21 +125,21 @@ Lemma pre_VLSM_projection_finite_trace_project_app_rev :
       pre_VLSM_projection_finite_trace_project l1 = l1' /\
       pre_VLSM_projection_finite_trace_project l2 = l2'.
 Proof.
-  exact (map_option_app_rev _).
+  exact (omap_app_rev _).
 Qed.
 
 Lemma pre_VLSM_projection_finite_trace_project_elem_of_iff :
   forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
     exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY.
 Proof.
-  exact (elem_of_map_option _).
+  exact (elem_of_list_omap _).
 Qed.
 
 Lemma elem_of_pre_VLSM_projection_finite_trace_project :
   forall trX itemY, itemY ∈ pre_VLSM_projection_finite_trace_project trX <->
     exists itemX, itemX ∈ trX /\ pre_VLSM_projection_transition_item_project itemX = Some itemY.
 Proof.
-  exact (elem_of_map_option _).
+  exact (elem_of_list_omap _).
 Qed.
 
 Lemma pre_VLSM_projection_finite_trace_project_elem_of :
@@ -148,7 +148,7 @@ Lemma pre_VLSM_projection_finite_trace_project_elem_of :
   forall trX,
     itemX ∈ trX -> itemY ∈ pre_VLSM_projection_finite_trace_project trX.
 Proof.
-  by intros; apply elem_of_map_option; exists itemX.
+  by intros; apply elem_of_list_omap; exists itemX.
 Qed.
 
 End sec_pre_definitions.
@@ -916,7 +916,7 @@ Context
 Proof.
   induction Htr using finite_valid_trace_init_to_rev_strong_ind; [by constructor; apply Hstate |].
   unfold pre_VLSM_projection_finite_trace_project.
-  rewrite map_option_app.
+  rewrite omap_app.
   apply finite_valid_trace_from_to_app with (state_project s)
   ; [done |].
   simpl. unfold pre_VLSM_projection_transition_item_project.

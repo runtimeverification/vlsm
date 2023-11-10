@@ -254,7 +254,7 @@ Lemma finite_trace_projection_list_in
       ∈
     VLSM_projection_finite_trace_project (preloaded_component_projection IM j) tr.
 Proof.
-  apply elem_of_map_option.
+  apply elem_of_list_omap.
   exists itemX; split; [done |].
   unfold pre_VLSM_projection_transition_item_project, composite_project_label; subst j.
   case_decide; [| by elim H].
@@ -274,7 +274,7 @@ Lemma finite_trace_projection_list_in_rev
     exists (Hl1 : j = projT1 (l itemX)),
     eq_rect_r _ (projT2 (l itemX)) Hl1 = l itemj.
 Proof.
-  apply elem_of_map_option in Hitemj as [itemX [HitemX HitemX_pr]].
+  apply elem_of_list_omap in Hitemj as [itemX [HitemX HitemX_pr]].
   exists itemX. split; [done |].
   unfold pre_VLSM_projection_transition_item_project in HitemX_pr.
   destruct (composite_project_label _ _ _) as [lY |] eqn: Hly; [| by congruence].

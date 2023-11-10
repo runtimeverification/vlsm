@@ -900,7 +900,7 @@ Proof.
     destruct IHtr as [Heqv_initial Hpr_trXi'].
     split; [done |].
     subst.
-    by apply map_option_app.
+    by apply omap_app.
 Qed.
 
 (**
