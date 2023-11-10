@@ -1,5 +1,6 @@
 From stdpp Require Import prelude finite.
-From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections.
+From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
+From Coq Require Import FunctionalExtensionality.
 
 (** * Parity VLSM
 
@@ -512,3 +513,222 @@ Proof.
   - by apply parity_valid_states_right.
   - by apply parity_valid_states_left.
 Qed.
+
+
+Section sec_radix23.
+
+Inductive index23 := two | three.
+
+
+#[local] Instance eq_dec_index23 : EqDecision index23.
+Proof. by intros x y; unfold Decision; decide equality. Qed.
+
+
+Definition Triple_transition
+  (l : ParityLabel) (st : ParityState) (om : option ParityMessage)
+  : ParityState * option ParityMessage :=
+  match om with
+  | Some j  => (st - j, Some (3 * j))
+  | None    => (st, None)
+  end.
+
+Definition TripleMachine : VLSMMachine ParityType :=
+{|
+  initial_state_prop := Parity_initial_state_prop;
+  initial_message_prop := fun (ms : ParityMessage) => ms = 3;
+  s0 := Parity_Inhabited_initial_state_type;
+  transition := fun l '(st, om) => Triple_transition l st om;
+  valid := fun l '(st, om) => Parity_valid l st om;
+|}.
+
+Definition TripleVLSM : VLSM ParityMessage := mk_vlsm TripleMachine.
+
+Definition components_23 (i : index23) : VLSM ParityMessage :=
+  match i with
+  | two => ParityVLSM
+  | three => TripleVLSM
+  end.
+
+Definition composite_state_23_sum (s : composite_state components_23) : Z :=
+  s two + s three.
+
+Definition zproj (s : composite_state components_23) (i : index23) : Z :=
+  match i with
+  | two => s two
+  | three => s three
+  end.
+
+Definition constraint_23
+  (l : composite_label components_23)
+  (sm : composite_state components_23 * option ParityMessage) : Prop :=
+  let sm' := composite_transition components_23 l sm in
+  Z.Even (composite_state_23_sum sm.1 + composite_state_23_sum sm'.1).
+
+Definition composition_23 : VLSM ParityMessage :=
+  composite_vlsm components_23 constraint_23.
+
+Definition final_state (s : composite_state components_23) :=
+  valid_state_prop composition_23 s /\
+  ~ exists
+    (l : composite_label components_23)
+    (om : option ParityMessage)
+    (som' : composite_state components_23 * option ParityMessage),
+      input_valid_transition composition_23 l (s, om) som'.
+
+Definition statenm (n m : Z) : composite_state components_23 :=
+  fun (i : index23) => match i with two => n | three => m end.
+
+Definition state00 := statenm 0 0.
+
+Definition state01 := statenm 0 1.
+
+Definition state10 := statenm 1 0.
+
+Definition state11 := statenm 1 1.
+
+Definition state12 := statenm 1 2.
+
+Definition state21 := statenm 2 1.
+
+Definition state22 := statenm 2 2.
+
+Definition state02 := statenm 0 2.
+
+Example valid_statenm_geq1 (n m : Z) (Hn : n >= 1) (Hm : m >= 1) :
+  valid_state_prop composition_23 (statenm n m).
+Proof.
+  by apply initial_state_is_valid; intros []; cbn; red.
+Qed.
+
+Example valid_state11 : valid_state_prop composition_23 state11.
+Proof. by apply (valid_statenm_geq1 1 1); lia. Qed.
+
+Example valid_state00 : valid_state_prop composition_23 state00.
+Proof.
+  apply input_valid_transition_destination
+    with (l := existT three parity_label) (s := state02) (om := Some 2) (om' := Some 6).
+  repeat split.
+  - apply input_valid_transition_destination
+      with (l := existT two parity_label) (s := state22) (om := Some 2) (om' := Some 4).
+    repeat split.
+    + by apply valid_statenm_geq1.
+    + apply initial_message_is_valid.
+      exists two.
+      assert (Hinit : initial_message_prop (components_23 two) 2) by done.
+      by exists (exist _ 2 Hinit).
+    + by cbn; lia.
+    + by lia.
+    + by red; cbn; unfold composite_state_23_sum; state_update_simpl; cbn; exists 3.
+    + by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn.
+  - apply initial_message_is_valid.
+    exists two.
+    assert (Hinit : initial_message_prop (components_23 two) 2) by done.
+    by exists (exist _ 2 Hinit).
+  - by unfold state02; cbn; lia.
+  - by lia.
+  - by red; cbn; unfold composite_state_23_sum; state_update_simpl; cbn; exists 1.
+  - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn.
+Qed.
+
+Example valid_state01 : valid_state_prop composition_23 state01.
+Proof.
+  apply input_valid_transition_destination
+    with (l := existT two parity_label) (s := state21) (om := Some 2) (om' := Some 4).
+  repeat split.
+  - by apply valid_statenm_geq1.
+  - apply initial_message_is_valid.
+    exists two.
+    assert (Hinit : initial_message_prop (components_23 two) 2) by done.
+    by exists (exist _ 2 Hinit).
+  - by cbn; lia.
+  - by lia.
+  - by red; cbn; unfold composite_state_23_sum; state_update_simpl; cbn; exists 2.
+  - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn.
+Qed.
+
+Example valid_state10 : valid_state_prop composition_23 state10.
+Proof.
+  apply input_valid_transition_destination
+    with (l := existT three parity_label) (s := state12) (om := Some 2) (om' := Some 6).
+  repeat split.
+  - by apply valid_statenm_geq1.
+  - apply initial_message_is_valid.
+    exists two.
+    assert (Hinit : initial_message_prop (components_23 two) 2) by done.
+    by exists (exist _ 2 Hinit).
+  - by cbn; lia.
+  - by lia.
+  - by red; cbn; unfold composite_state_23_sum; state_update_simpl; cbn; exists 2.
+  - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn.
+Qed.
+
+Lemma final_state_prop23_left (s : composite_state components_23) :
+  (s = state00 \/ s = state01 \/ s = state10 \/ s = state11) -> final_state s.
+Proof.
+  intros Hcases.
+  split.
+  - destruct Hcases as [Hst | [Hst | [Hst | Hst]]]; subst.
+    + by apply valid_state00.
+    + by apply valid_state01.
+    + by apply valid_state10.
+    + by apply valid_state11.
+  - intros ([i li] & om & som' & (Hs & Hom & Hv & Hc) & _).
+    destruct Hc as [n Hc].
+    destruct i; (destruct om ; [| done]); unfold composite_state_23_sum in Hc;
+      cbn in *; state_update_simpl;
+      by destruct Hcases as [| [| []]]; subst; cbn in *; lia.
+Qed.
+
+Lemma valid_state_23_pos :
+  forall (s : composite_state components_23), valid_state_prop composition_23 s ->
+  forall (i : index23), zproj s i >= 0.
+Proof.
+  intros s Hs; induction Hs using valid_state_prop_ind;
+    [by intros i; specialize (Hs i); destruct i; cbn in *; red in Hs; lia |].
+  destruct l as [j lj], Ht as [(_ & _ & Hv & Hc) Ht].
+  intro i; specialize (IHHs i).
+  by destruct j; (destruct om ; [| done]); inversion Ht; subst; clear Ht; cbn in *;
+    destruct i; cbn in *; state_update_simpl; lia.
+Qed.
+
+Lemma final_state_prop23_right (s : composite_state components_23) :
+  final_state s ->
+    (s two = 0 /\ s three = 0) \/ (s two = 0 /\ s three = 1) \/
+    (s two = 1 /\ s three = 0) \/ (s two = 1 /\ s three = 1).
+Proof.
+  intros [Hs Hfinal].
+  destruct (decide ((s two = 0 /\ s three = 0) \/ (s two = 0 /\ s three = 1) \/
+    (s two = 1 /\ s three = 0) \/ (s two = 1 /\ s three = 1))); [done |].
+  contradict Hfinal.
+  assert (s two > 1 \/ s three > 1) as [Hs1 | Hs1].
+  {
+    pose proof (valid_state_23_pos _ Hs two).
+    pose proof (valid_state_23_pos _ Hs three).
+    by cbn in *; lia.
+  }
+  - exists (existT two ()), (Some 2),
+      (state_update components_23 s two (s two - 2), Some 4).
+    repeat split; [done | ..].
+    + apply initial_message_is_valid.
+      exists two.
+      assert (Hinit : initial_message_prop (components_23 two) 2) by done.
+      by exists (exist _ 2 Hinit).
+    + by lia.
+    + by lia.
+    + red; cbn; unfold composite_state_23_sum; state_update_simpl.
+      by exists (s two + s three - 1); lia.
+  - exists (existT three ()), (Some 2),
+      (state_update components_23 s three (s three - 2), Some 6).
+    repeat split; [done | ..].
+    + apply initial_message_is_valid.
+      exists two.
+      assert (Hinit : initial_message_prop (components_23 two) 2) by done.
+      by exists (exist _ 2 Hinit).
+    + by lia.
+    + by lia.
+    + red; cbn; unfold composite_state_23_sum; state_update_simpl.
+      by exists (s two + s three - 1); lia.
+Qed.
+
+End sec_radix23.
+
