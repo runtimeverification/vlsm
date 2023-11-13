@@ -704,38 +704,12 @@ Proof.
   - by intros (n & _ & Hn); eexists.
 Qed.
 
-(**
-  Map a function <<f : A -> option B>> over a list <<l>> while throwing away
-  the [None]s and unwrapping the [Some]s.
-*)
-Definition map_option
-  {A B : Type}
-  (f : A -> option B)
-  : list A -> list B
-  :=
-  fold_right
-    (fun x lb =>
-      match f x with
-      | None => lb
-      | Some b => b :: lb
-      end)
-    [].
-
-Lemma map_option_app
-  {A B : Type}
-  (f : A -> option B)
-  l1 l2
-  : map_option f (l1 ++ l2) = map_option f l1 ++ map_option f l2.
-Proof.
-  by apply omap_app.
-Qed.
-
-Lemma map_option_app_rev
+Lemma omap_app_rev
   {A B : Type}
   (f : A -> option B)
   l l1' l2'
-  (Happ_rev : map_option f l = l1' ++ l2')
-  : exists l1 l2 : list A, l = l1 ++ l2 /\ map_option f l1 = l1' /\ map_option f l2 = l2'.
+  (Happ_rev : omap f l = l1' ++ l2')
+  : exists l1 l2 : list A, l = l1 ++ l2 /\ omap f l1 = l1' /\ omap f l2 = l2'.
 Proof.
   revert l1' l2' Happ_rev.
   induction l; intros.
@@ -756,12 +730,12 @@ Proof.
         by exists [], (a :: l); cbn; rewrite Hfa.
 Qed.
 
-Lemma map_option_length
+Lemma omap_length
   {A B : Type}
   (f : A -> option B)
   (l : list A)
   (Hfl : Forall (fun a => f a <> None) l)
-  : length (map_option f l) = length l.
+  : length (omap f l) = length l.
 Proof.
   induction l; [done |].
   inversion Hfl; subst.
@@ -769,7 +743,7 @@ Proof.
   by destruct (f a); cbn; congruence.
 Qed.
 
-Lemma map_option_nth
+Lemma omap_nth
   {A B : Type}
   (f : A -> option B)
   (l : list A)
@@ -779,7 +753,7 @@ Lemma map_option_nth
   (Hi : i < n)
   (dummya : A)
   (dummyb : B)
-  : Some (nth i (map_option f l) dummyb) = f (nth i l dummya).
+  : Some (nth i (omap f l) dummyb) = f (nth i l dummya).
 Proof.
   generalize dependent i.
   induction l; intros; simpl in *; [lia |].
@@ -789,56 +763,45 @@ Proof.
   by apply H; lia.
 Qed.
 
-(** [map_option] can be expressed as a [list_filter_map]. *)
-Lemma map_option_as_filter
+(** [omap] can be expressed as a [list_filter_map]. *)
+Lemma omap_as_filter
   {A B : Type}
   (f : A -> option B)
   (l : list A)
-  : map_option f l = list_filter_map (is_Some ∘ f) (fun x => is_Some_proj (proj2_dsig x)) l.
+  : omap f l = list_filter_map (is_Some ∘ f) (fun x => is_Some_proj (proj2_dsig x)) l.
 Proof.
-  induction l using rev_ind; [done |].
-  rewrite map_option_app, IHl, list_filter_map_app; cbn; clear IHl.
-  destruct (decide _).
-  - by cbv; destruct i as [? ->].
-  - by destruct (f x); [elim n |].
+  induction l; cbn; [done |].
+  case_decide; cbn.
+  - by rewrite IHl; cbv; destruct H as [? ->].
+  - by destruct (f a); [elim H |].
 Qed.
 
-Lemma map_option_Forall :
+Lemma omap_Forall :
   forall {A B : Type} (f : A -> option B) (l : list A),
     Forall (fun x => ~ is_Some (f x)) l ->
-      map_option f l = [].
+      omap f l = [].
 Proof.
   induction 1; cbn; [done |].
   by destruct (f x); [contradict H |].
 Qed.
 
-Lemma elem_of_map_option :
-  forall {A B : Type} (f : A -> option B) (l : list A) (y : B),
-    y ∈ map_option f l <-> exists x : A, x ∈ l /\ f x = Some y.
-Proof.
-  by apply @elem_of_list_omap.
-Qed.
-
-Lemma NoDup_map_option :
+Lemma NoDup_omap :
   forall {A B : Type} (f : A -> option B) (l : list A),
     (forall a1 a2 : A, is_Some (f a1) -> is_Some (f a2) -> f a1 = f a2 -> a1 = a2) ->
-      NoDup l -> NoDup (map_option f l).
+      NoDup l -> NoDup (omap f l).
 Proof.
   intros A B f l Hinj Hnd.
   induction Hnd as [| h t Hnin Hnd IH]; cbn; [by constructor |].
   destruct (f h) eqn: Heq; [| by apply IH].
   constructor; [| by apply IH].
-  intros Hin; apply elem_of_map_option in Hin as (x & Hinx & Hfx).
+  intros Hin; apply elem_of_list_omap in Hin as (x & Hinx & Hfx).
   assert (x = h) by (apply Hinj; [done.. | congruence]).
   by congruence.
 Qed.
 
 (** Unpack list of [option A] into list of [A]. *)
 Definition cat_option {A : Type} : list (option A) -> list A :=
-  @map_option (option A) A id.
-
-Example cat_option1 : cat_option [Some 1; Some 5; None; Some 6; None] = [1; 5; 6].
-Proof. by itauto. Qed.
+  omap id.
 
 Lemma cat_option_length
   {A : Type}
@@ -846,7 +809,7 @@ Lemma cat_option_length
     (Hfl : Forall (fun a => a <> None) l)
   : length (cat_option l) = length l.
 Proof.
-  by apply map_option_length; itauto.
+  by apply omap_length; itauto.
 Qed.
 
 Lemma cat_option_length_le
@@ -854,9 +817,8 @@ Lemma cat_option_length_le
   (l : list (option A))
   : length (cat_option l) <= length l.
 Proof.
-  induction l; cbn.
-  - by itauto.
-  - by destruct (id a) eqn: eq_id; simpl in *; subst a; simpl; lia.
+  induction l; cbn; [done |].
+  by destruct a; cbn; lia.
 Qed.
 
 Lemma cat_option_app
@@ -864,9 +826,7 @@ Lemma cat_option_app
   (l1 l2 : list (option A)) :
   cat_option (l1 ++ l2) = cat_option l1 ++ cat_option l2.
 Proof.
-  induction l1; cbn.
-  - by itauto.
-  - by destruct a; cbn in *; rewrite IHl1.
+  by unfold cat_option; rewrite omap_app.
 Qed.
 
 Lemma cat_option_nth
@@ -879,10 +839,7 @@ Lemma cat_option_nth
   (dummya : A)
   : Some (nth i (cat_option l) dummya) = (nth i l (Some dummya)).
 Proof.
-  specialize (@map_option_nth (option A) A id l); cbn.
-  intros.
-  unfold id in *.
-  by apply H; itauto.
+  by unfold cat_option; erewrite omap_nth.
 Qed.
 
 Lemma nth_error_eq
@@ -1161,7 +1118,7 @@ Definition list_sum_project_left
   (x : list (A + B))
   : list A
   :=
-  map_option sum_project_left x.
+  omap sum_project_left x.
 
 (** Keep elements which are [inr] but throw away those that are [inl]. *)
 Definition list_sum_project_right
@@ -1169,7 +1126,7 @@ Definition list_sum_project_right
   (x : list (A + B))
   : list B
   :=
-  map_option sum_project_right x.
+  omap sum_project_right x.
 
 Lemma fold_right_andb_false l :
   fold_right andb false l = false.

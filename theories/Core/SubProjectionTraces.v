@@ -564,7 +564,7 @@ Proof.
       as [itemX HitemX].
     exists itemX.
     split.
-    + by apply elem_of_map_option; exists item.
+    + by apply elem_of_list_omap; exists item.
     + unfold pre_VLSM_projection_transition_item_project in HitemX.
       destruct (composite_label_sub_projection_option _); [| by congruence].
       by inversion HitemX.
@@ -606,7 +606,7 @@ Proof.
       [| contradict Hsome; apply is_Some_None].
       cbn.
       split.
-      * by apply elem_of_map_option; exists item.
+      * by apply elem_of_list_omap; exists item.
       * unfold pre_VLSM_projection_transition_item_project in Hproj.
         by destruct (composite_label_sub_projection_option _); [inversion Hproj | congruence].
 Qed.
