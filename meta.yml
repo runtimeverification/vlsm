@@ -52,9 +52,9 @@ supported_coq_versions:
 dependencies:
 - opam:
     name: coq-stdpp
-    version: '{>= "1.8.0"}'
+    version: '{>= "1.9.0"}'
   description: |-
-    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.8.0 or later
+    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0 or later
 - opam:
     name: coq-itauto
   description: |-
@@ -96,7 +96,7 @@ build: |-
 
   ```shell
   opam repo add coq-released https://coq.inria.fr/opam/released
-  opam install coq.8.16.1 coq-stdpp.1.8.0 coq-itauto coq-equations
+  opam install coq.8.18.0 coq-stdpp.1.9.0 coq-itauto coq-equations
   ```
 
   To build the project when you have all dependencies installed, do:
