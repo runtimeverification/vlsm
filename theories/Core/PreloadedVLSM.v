@@ -585,8 +585,8 @@ End sec_constrained_defs.
   [pre_loaded_with_all_messages_vlsm].
 
   In this section we state the original mathematical definitions (as presented
-  in the companion technical report) and we show them equivalent with the ones
-  defined above.
+  in the #<a href="https://doi.org/10.48550/arXiv.2202.12662">VLSM paper</a>#)
+  and we show them equivalent with the ones defined above.
 *)
 
 Section sec_constrained_direct_defs.
@@ -701,9 +701,9 @@ Qed.
 (** *** Definitions of valid traces, messages, and states based on constrained ones
 
   Here we state the original mathematical definitions (as presented in the
-  companion technical report) for valid traces, states, and messages, deriving
-  them from the "constrained" notions, and we showing them equivalent with the
-  ones defined in the VLSM module.
+  #<a href="https://doi.org/10.48550/arXiv.2202.12662">VLSM paper</a>#)
+  for valid traces, states, and messages, deriving them from the "constrained"
+  notions, and we showing them equivalent with the ones defined in the VLSM module.
 *)
 
 (**
