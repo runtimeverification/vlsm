@@ -5,12 +5,12 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppExtras FinSuppFn NatExtras ListExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM ConstrainedVLSM Composition.
 From VLSM.Core Require Import VLSMProjections ProjectionTraces.
-From VLSM.Examples Require Import Parity.
+From VLSM.Examples Require Import Multiply.
 
 (** * Primes Composition of VLSMs
 
   This module demonstrates advanced concepts of the VLSM framework.
-  We generalize the multiplying VLSMs defined in module [Parity] as a radix VLSM
+  We generalize the VLSMs defined in module [Multiply] as a radix VLSM
   parameterized on a multiplier and study the composition of a family of
   such VLSMs.
   We then construct the composition consisting of a component for each prime

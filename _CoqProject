@@ -76,7 +76,7 @@ theories/Core/Equivocators/LimitedEquivocationSimulation.v
 theories/Core/ByzantineTraces/FixedSetByzantineTraces.v
 theories/Core/ByzantineTraces/LimitedByzantineTraces.v
 
-theories/Examples/Tutorial/Parity.v
+theories/Examples/Tutorial/Multiply.v
 theories/Examples/Tutorial/PrimesComposition.v
 
 theories/Examples/ELMO/BaseELMO.v
