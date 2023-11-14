@@ -622,17 +622,23 @@ Definition zproj (s : composite_state components_23) (i : index23) : Z :=
 Definition free_composition_23 : VLSM multiplying_message :=
   free_composite_vlsm components_23.
 
-Lemma composition_23_2_initial : composite_initial_message_prop components_23 2.
-Proof. by exists two; unshelve eexists (exist _ 2 _); cbn; lia. Qed.
+Lemma composition_23_2_initial :
+  composite_initial_message_prop components_23 2.
+Proof.
+  by exists two; unshelve eexists (exist _ 2 _); cbn; lia.
+Qed.
 
-Lemma composition_23_3_initial : composite_initial_message_prop components_23 3.
-Proof. by exists three; unshelve eexists (exist _ 3 _); cbn; lia. Qed.
+Lemma composition_23_3_initial :
+  composite_initial_message_prop components_23 3.
+Proof.
+  by exists three; unshelve eexists (exist _ 3 _); cbn; lia.
+Qed.
 
 Lemma free_composition_23_valid_messages_powers_of_23_right :
   forall (m : multiplying_message),
     valid_message_prop free_composition_23 m ->
-      exists p2 p3 : nat, (p2 + p3 >= 1)%nat /\
-        m = 2 ^ Z.of_nat p2 * 3 ^ (Z.of_nat p3).
+      exists p2 p3 : Z, p2 >= 0 /\ p3 >= 0 /\ p2 + p3 >= 1 /\
+        m = 2 ^ p2 * 3 ^ p3.
 Proof.
   intros m [s Hvsm].
   assert (Hom : is_Some (Some m)) by (eexists; done).
@@ -641,71 +647,82 @@ Proof.
   clear m; induction Hvsm using valid_state_message_prop_ind.
   - destruct Hom as [m ->]; cbn in *; subst.
     destruct Hom0 as ([] & [] & <-); cbn in *.
-    + by exists 1%nat, 0%nat; split; lia.
-    + by exists 0%nat, 1%nat; split; lia.
+    + by exists 1, 0; split; lia.
+    + by exists 0, 1; split; lia.
   - destruct l as [[] []];
       (destruct om as [m |]; [| done]);
       (unshelve edestruct IHHvsm2 as (p2 & p3 & Hgt1 & Heq); [done |]);
       cbn in *; inversion Ht; subst; cbn in *.
-    + exists (S p2), p3.
+    + exists (Z.succ p2), p3.
       split; [by lia |].
-      rewrite Nat2Z.inj_succ, Z.pow_succ_r; lia.
-    + exists p2, (S p3).
+      by rewrite Z.pow_succ_r; lia.
+    + exists p2, (Z.succ p3).
       split; [by lia |].
-      rewrite Nat2Z.inj_succ, Z.pow_succ_r; lia.
+      by rewrite Z.pow_succ_r; lia.
 Qed.
 
 Lemma free_composition_23_valid_messages_powers_of_23_left :
-  forall (p2 p3 : nat), (p2 + p3 >= 1)%nat ->
-    valid_message_prop free_composition_23 (2 ^ Z.of_nat p2 * 3 ^ (Z.of_nat p3)).
+  forall (p2 p3 : Z), p2 >= 0 -> p3 >= 0 -> 1 <= p2 + p3 ->
+    valid_message_prop free_composition_23 (2 ^ p2 * 3 ^ p3).
 Proof.
-  intros p2 p3 Hp.
-  remember (p2 + p3)%nat as p.
-  revert p2 p3 Heqp Hp; induction p as [p Hind] using (well_founded_induction lt_wf).
-  intros [| p2] [| p3] -> Hgt; [by lia |..].
-  - destruct p3 as [| p3].
-    + by apply initial_message_is_valid, composition_23_3_initial.
-    + apply emitted_messages_are_valid.
-      exists (state_23 1 (3 ^ Z.of_nat (S p3)), Some (3 ^ Z.of_nat (S p3))),
-        (existT three multiply_label), state10.
-      repeat split.
-      * by apply initial_state_is_valid; intros []; cbn; red; lia.
-      * replace (3 ^ Z.of_nat (S p3)) with (2 ^ Z.of_nat 0 * 3 ^ Z.of_nat (S p3))
-          by lia.
-        by eapply Hind; cycle 1; [done | lia..].
-      * by rewrite Nat2Z.inj_succ, Z.pow_succ_r; lia.
-      * by cbn; lia.
-      * cbn; f_equal;
-          [| by f_equal; rewrite !Nat2Z.inj_succ, !Z.pow_succ_r; lia].
-        by extensionality i; destruct i; state_update_simpl; cbn; lia.
-  - destruct p2 as [| p2].
-    + by apply initial_message_is_valid, composition_23_2_initial.
-    + apply emitted_messages_are_valid.
-      exists (state_23 (2 ^ Z.of_nat (S p2)) 1, Some (2 ^ Z.of_nat (S p2))),
-        (existT two multiply_label), state01.
-      repeat split.
-      * by apply initial_state_is_valid; intros []; cbn; red; lia.
-      * replace (2 ^ Z.of_nat (S p2)) with (2 ^ Z.of_nat (S p2) * 3 ^ Z.of_nat 0)
-          by lia.
-        by eapply Hind; cycle 1; [done | lia..].
-      * by rewrite Nat2Z.inj_succ, Z.pow_succ_r; lia.
-      * by cbn; lia.
-      * cbn; f_equal;
-          [| by f_equal; rewrite !Nat2Z.inj_succ, !Z.pow_succ_r; lia].
-        by extensionality i; destruct i; state_update_simpl; cbn; lia.
-  - apply emitted_messages_are_valid.
-    exists
-      (state_23 (2 ^ Z.of_nat p2 * 3 ^ Z.of_nat (S p3)) 1,
-        Some (2 ^ Z.of_nat p2 * 3 ^ Z.of_nat (S p3))),
+  intros p2 p3 Hp2 Hp3 Hp.
+  remember (p2 + p3) as p.
+  revert p2 p3 Hp2 Hp3 Heqp.
+  pose (P (p : Z) := forall (p2 p3 : Z), p2 >= 0 -> p3 >= 0 -> p = p2 + p3 ->
+    valid_message_prop free_composition_23 (2 ^ p2 * 3 ^ p3)).
+  cut (P p); [done |].
+  revert p Hp; apply Zlt_lower_bound_ind; subst P; cbn.
+  intros p Hind Hp p2 p3 Hp2 Hp3 ->.
+  destruct (decide (p2 = 0)) as [-> |], (decide (p3 = 0)) as [-> |];
+    [by lia |..].
+  - destruct (decide (p3 = 1)) as [-> |];
+      [by apply initial_message_is_valid, composition_23_3_initial |].
+    apply emitted_messages_are_valid.
+    exists (state_23 1 (3 ^ (p3 - 1)), Some (3 ^ (p3 - 1))),
+      (existT three multiply_label), state10.
+    repeat split.
+    + by apply initial_state_is_valid; intros []; cbn; red; lia.
+    + replace (3 ^ (p3 - 1)) with (2 ^ 0 * 3 ^ (p3 - 1))
+        by lia.
+      by eapply Hind; cycle 3; [done | lia..].
+    + replace (p3 - 1) with (Z.succ (p3 - 2)) by lia.
+      by rewrite Z.pow_succ_r; lia.
+    + by cbn; lia.
+    + cbn; f_equal.
+      * by extensionality i; destruct i; state_update_simpl; cbn; lia.
+      * replace p3 with (Z.succ (p3 - 1)) at 2 by lia.
+        by f_equal; rewrite Z.pow_succ_r; lia.
+  - destruct (decide (p2 = 1)) as [-> |];
+      [by apply initial_message_is_valid, composition_23_2_initial |].
+    apply emitted_messages_are_valid.
+    exists (state_23 (2 ^ (p2 - 1)) 1, Some (2 ^ (p2 - 1))),
       (existT two multiply_label), state01.
     repeat split.
-    * by apply initial_state_is_valid; intros []; cbn; red; lia.
-    * by eapply Hind; cycle 1; [done | lia..].
-    * by rewrite Nat2Z.inj_succ, Z.pow_succ_r; lia.
-    * by cbn; lia.
-    * cbn; f_equal;
-        [| by f_equal; rewrite !Nat2Z.inj_succ, !Z.pow_succ_r; lia].
-      by extensionality i; destruct i; state_update_simpl; cbn; lia.
+    + by apply initial_state_is_valid; intros []; cbn; red; lia.
+    + replace (2 ^ (p2 - 1)) with (2 ^ (p2 - 1) * 3 ^ 0)
+        by lia.
+      by eapply Hind; cycle 3; [done | lia..].
+    + replace (p2 - 1) with (Z.succ (p2 - 2)) by lia.
+      by rewrite Z.pow_succ_r; lia.
+    + by cbn; lia.
+    + cbn; f_equal.
+      * by extensionality i; destruct i; state_update_simpl; cbn; lia.
+      * replace p2 with (Z.succ (p2 - 1)) at 2 by lia.
+        by f_equal; rewrite Z.pow_succ_r; lia.
+  - apply emitted_messages_are_valid.
+    exists
+      (state_23 (2 ^ (p2 - 1) * 3 ^ p3) 1, Some (2 ^ (p2 - 1) * 3 ^ p3)),
+      (existT two multiply_label), state01.
+    repeat split.
+    + by apply initial_state_is_valid; intros []; cbn; red; lia.
+    + by eapply Hind; cycle 3; [done | lia..].
+    + replace p3 with (Z.succ (p3 - 1)) by lia.
+      by rewrite Z.pow_succ_r; lia.
+    + by cbn; lia.
+    + cbn; f_equal.
+      * by extensionality i; destruct i; state_update_simpl; cbn; lia.
+      * replace p2 with (Z.succ (p2 - 1)) at 2 by lia.
+        by f_equal; rewrite Z.pow_succ_r; lia.
 Qed.
 
 (**
@@ -715,38 +732,46 @@ Qed.
 Theorem free_composition_23_valid_messages_powers_of_23 :
   forall (m : multiplying_message),
     valid_message_prop free_composition_23 m <->
-      exists p2 p3 : nat, (p2 + p3 >= 1)%nat /\
-        m = 2 ^ Z.of_nat p2 * 3 ^ (Z.of_nat p3).
+      exists p2 p3 : Z, p2 >= 0 /\ p3 >= 0 /\ p2 + p3 >= 1 /\
+        m = 2 ^ p2 * 3 ^ p3.
 Proof.
   split.
   - by apply free_composition_23_valid_messages_powers_of_23_right.
-  - intros (? & ? & ? & ->).
-    by apply free_composition_23_valid_messages_powers_of_23_left.
+  - intros (? & ? & ? & ? & ? & ->).
+    by eapply free_composition_23_valid_messages_powers_of_23_left; lia.
 Qed.
 
-Definition state_update_23 (s : composite_state components_23)
-  (i : index23) (z : Z) (j : index23) : state (components_23 j) :=
+Section sec_state_update_23.
+
+Context
+  (s : composite_state components_23)
+  (i : index23)
+  (z : Z)
+  .
+
+Definition state_update_23 (j : index23) : state (components_23 j) :=
   if (decide (i = j)) then
-    match j with two => z | three  => z end
+    match j with
+    | two => z
+    | three  => z
+    end
   else s j.
 
-Lemma state_update_23_eq (s : composite_state components_23) (i : index23) (z : Z) :
-  zproj (state_update_23 s i z) i = z.
-Proof. by destruct i; cbn; unfold state_update_23; rewrite decide_True. Qed.
+Lemma state_update_23_eq :
+  zproj state_update_23 i = z.
+Proof. by unfold state_update_23; destruct i; cbn; rewrite decide_True. Qed.
 
-Lemma state_update_23_neq (s : composite_state components_23) (i : index23) (z : Z) :
-  forall (j : index23), j <> i -> state_update_23 s i z j = s j.
+Lemma state_update_23_neq :
+  forall (j : index23), j <> i -> state_update_23 j = s j.
 Proof. by intros; unfold state_update_23; rewrite decide_False. Qed.
 
-Lemma state_update_23_twice (s : composite_state components_23) (i : index23) :
-  forall (z z' : Z),
+End sec_state_update_23.
+
+Lemma state_update_23_twice :
+  forall (s : composite_state components_23) (i : index23) (z z' : Z),
     state_update_23 (state_update_23 s i z) i z' = state_update_23 s i z'.
 Proof.
-  intros; extensionality j; unfold state_update_23; destruct i, j; cbn.
-  - by rewrite !decide_True.
-  - by rewrite !decide_False.
-  - by rewrite !decide_False.
-  - by rewrite !decide_True.
+  by intros; extensionality j; unfold state_update_23; case_decide; subst.
 Qed.
 
 Lemma state_update_23_two (s : composite_state components_23) (z : Z) :
@@ -772,7 +797,10 @@ Proof.
 Defined.
 
 Definition multiplier_23 (i : index23) : Z :=
-  match i with two => 2 | three => 3 end.
+  match i with
+  | two => 2
+  | three => 3
+  end.
 
 Lemma free_composition_23_reachable_0 :
   forall (s : composite_state components_23), valid_state_prop free_composition_23 s ->
@@ -781,7 +809,7 @@ Lemma free_composition_23_reachable_0 :
 Proof.
   intros s Hs i Hi.
   remember (zproj s i) as si; revert s Hs Heqsi.
-    pose (P (si : Z) :=
+  pose (P (si : Z) :=
     forall (s : composite_state components_23),
       valid_state_prop free_composition_23 s ->
       si = zproj s i ->
@@ -791,7 +819,8 @@ Proof.
   intros si Hind Hlt s Hs Heqsi.
   destruct (decide (4 <= si)); [| destruct (decide (si = 3))].
   - pose (s' := state_update_23 s i (si - 2)).
-    cut (input_valid_transition free_composition_23 (label_23 i) (s, Some 2) (s', Some (2 * multiplier_23 i))).
+    cut (input_valid_transition free_composition_23 (label_23 i)
+      (s, Some 2) (s', Some (2 * multiplier_23 i))).
     {
       transitivity s'; [by eapply input_valid_transition_in_futures |].
       replace (state_update_23 s i 0) with (state_update_23 s' i 0)
@@ -825,7 +854,7 @@ Proof.
 Qed.
 
 (**
-  From any composite state whose components are natural numbers larger than 1
+  From any composite state whose components are larger than 1
   there is a valid trace reaching [state00].
 *)
 Theorem free_composite_23_reachable_00 :
@@ -876,8 +905,8 @@ Lemma parity_composition_23_valid_messages_powers_of_23_right :
   forall (m : multiplying_message),
     valid_message_prop parity_composition_23 m ->
       m = 3 \/
-      exists p2 p3 : nat, (p2 >= 1)%nat /\
-        m = 2 ^ Z.of_nat p2 * 3 ^ (Z.of_nat p3).
+      exists p2 p3 : Z, p2 >= 1 /\ p3 >= 0 /\
+        m = 2 ^ p2 * 3 ^ p3.
 Proof.
   intros m [s Hvsm].
   assert (Hom : is_Some (Some m)) by (eexists; done).
@@ -886,7 +915,7 @@ Proof.
   clear m; induction Hvsm using valid_state_message_prop_ind.
   - destruct Hom as [m ->]; cbn in *; subst.
     destruct Hom0 as ([] & [] & <-); cbn in *.
-    + by right; exists 1%nat, 0%nat; split; lia.
+    + by right; exists 1, 0; split; lia.
     + by left.
   - right; destruct Hv as [Hv Hc]; unfold parity_constraint_23 in Hc.
     assert (H_om : is_Some om) by (destruct l as [[] []], om; done).
@@ -894,49 +923,60 @@ Proof.
     specialize (IHHvsm2 H_om); cbn in *.
     destruct l as [[] []], IHHvsm2 as [| (p2 & p3 & Hgt1 & Heq)];
       cbn in *; inversion Ht; subst; cbn in *.
-    + by exists 1%nat, 1%nat; lia.
-    + exists (S p2), p3; split; [lia |].
-      by rewrite Nat2Z.inj_succ, Z.pow_succ_r; lia.
+    + by exists 1, 1; lia.
+    + exists (Z.succ p2), p3; split; [lia |].
+      by rewrite Z.pow_succ_r; lia.
     + exfalso; clear -Hc.
       destruct Hc as [n Hn]; unfold composite_state_23_sum in Hn.
       by state_update_simpl; lia.
-    + exists p2, (S p3).
+    + exists p2, (Z.succ p3).
       split; [by lia |].
-      rewrite Nat2Z.inj_succ, Z.pow_succ_r; lia.
+      by rewrite Z.pow_succ_r; lia.
 Qed.
 
 Lemma parity_composition_23_valid_messages_powers_of_23_left :
-  forall (p2 p3 : nat), (p2 >= 1)%nat ->
-    valid_message_prop parity_composition_23 (2 ^ Z.of_nat p2 * 3 ^ (Z.of_nat p3)).
+  forall (p2 p3 : Z), 1 <= p2 -> 0 <= p3 ->
+    valid_message_prop parity_composition_23 (2 ^ p2 * 3 ^ p3).
 Proof.
-  induction p2; [by inversion 1 |].
-  intros p3 _; destruct p2; [clear IHp2; induction p3 |].
-  - by apply initial_message_is_valid, composition_23_2_initial.
-  - apply emitted_messages_are_valid.
-    exists (state_23 1 ((2 * 3 ^ Z.of_nat p3)), Some (2 ^ Z.of_nat 1 * 3 ^ Z.of_nat p3)),
+  intros p2 p3 Hp2; revert p3.
+  pose (P (p2 : Z) := forall (p3 : Z), 0 <= p3 ->
+    valid_message_prop parity_composition_23 (2 ^ p2 * 3 ^ p3)).
+  cut (P p2); [done |].
+  revert p2 Hp2; apply Zlt_lower_bound_ind; subst P; cbn.
+  intros p2 Hind Hp2.
+  destruct (decide (p2 = 1)) as [-> |].
+  - clear Hind; apply natlike_ind;
+      [by apply initial_message_is_valid, composition_23_2_initial |].
+    intros p3 Hp3 Hind.
+    apply emitted_messages_are_valid.
+    exists (state_23 1 ((2 * 3 ^ p3)), Some (2 ^ 1 * 3 ^ p3)),
       (existT three multiply_label), state10.
     repeat split.
     + by apply initial_state_is_valid; intros []; cbn; red; lia.
     + done.
     + by lia.
     + by cbn; lia.
-    + by apply parity_constraint_23_even; exists (3 ^ Z.of_nat p3); lia.
-    + cbn; f_equal;
-        [| by f_equal; rewrite !Nat2Z.inj_succ, !Z.pow_succ_r; lia].
-      by extensionality i; destruct i; state_update_simpl; cbn; lia.
-  - apply emitted_messages_are_valid.
-    exists (state_23 (2 ^ Z.of_nat (S p2) * 3 ^ Z.of_nat p3) 1, Some (2 ^ Z.of_nat (S p2) * 3 ^ Z.of_nat p3)),
+    + by apply parity_constraint_23_even; exists (3 ^ p3); lia.
+    + cbn; f_equal.
+      * by extensionality i; destruct i; state_update_simpl; cbn; lia.
+      * by f_equal; rewrite Z.pow_succ_r; lia.
+  - intros p3 Hp3.
+    apply emitted_messages_are_valid.
+    exists (state_23 (2 ^ (p2 - 1) * 3 ^ p3) 1, Some (2 ^ (p2 - 1) * 3 ^ p3)),
       (existT two multiply_label), state01.
     repeat split.
     + by apply initial_state_is_valid; intros []; cbn; red; lia.
-    + by apply IHp2; lia.
-    + by rewrite Nat2Z.inj_succ, Z.pow_succ_r; lia.
+    + by apply Hind; lia.
+    + replace (p2 - 1) with (Z.succ (p2 - 2)) by lia.
+      by rewrite Z.pow_succ_r; lia.
     + by cbn; lia.
-    + apply parity_constraint_23_even; exists (2 ^ Z.of_nat p2 * 3 ^ Z.of_nat p3).
-      by rewrite !Nat2Z.inj_succ, !Z.pow_succ_r; lia.
-    + cbn; f_equal;
-        [| by f_equal; rewrite !Nat2Z.inj_succ, !Z.pow_succ_r; lia].
-      by extensionality i; destruct i; state_update_simpl; cbn; lia.
+    + apply parity_constraint_23_even; exists (2 ^ (p2 - 2) * 3 ^ p3).
+      replace (p2 - 1) with (Z.succ (p2 - 2)) by lia.
+      by rewrite Z.pow_succ_r; lia.
+    + cbn; f_equal.
+      * by extensionality i; destruct i; state_update_simpl; cbn; lia.
+      * replace p2 with (Z.succ (p2 - 1)) at 2 by lia.
+        by f_equal; rewrite !Z.pow_succ_r; lia.
 Qed.
 
 (**
@@ -948,14 +988,14 @@ Theorem parity_composition_23_valid_messages_powers_of_23 :
   forall (m : multiplying_message),
     valid_message_prop parity_composition_23 m <->
       m = 3 \/
-      exists p2 p3 : nat, (p2 >= 1)%nat /\
-        m = 2 ^ Z.of_nat p2 * 3 ^ (Z.of_nat p3).
+      exists p2 p3 : Z, p2 >= 1 /\ p3 >= 0 /\
+        m = 2 ^ p2 * 3 ^ p3.
 Proof.
   split.
   - by apply parity_composition_23_valid_messages_powers_of_23_right.
-  - intros [-> | (? & ? & ? & ->)];
-      [| by apply parity_composition_23_valid_messages_powers_of_23_left].
-    by apply initial_message_is_valid, composition_23_3_initial.
+  - intros [-> | (? & ? & ? & ? & ->)].
+    + by apply initial_message_is_valid, composition_23_3_initial.
+    + by apply parity_composition_23_valid_messages_powers_of_23_left; lia.
 Qed.
 
 (**
@@ -1109,16 +1149,26 @@ Qed.
 
 Lemma parity_composition_23_reachable_0 :
   forall (s : composite_state components_23), valid_state_prop parity_composition_23 s ->
-  forall (i : index23) (n : nat), zproj s i = 2 * Z.of_nat n ->
+  forall (i : index23) (n : Z), 0 <= n -> zproj s i = 2 * n ->
     in_futures parity_composition_23 s (state_update_23 s i 0).
 Proof.
-  intros s Hs i n Hsi; revert s Hs Hsi; induction n; intros.
-  - cut (state_update_23 s i 0 = s); [by intros ->; apply in_futures_refl |].
+  intros s Hs i n Hn. revert s Hs.
+  pose (P (n : Z) := forall (s : composite_state components_23),
+    valid_state_prop parity_composition_23 s ->
+    zproj s i = 2 * n ->
+    in_futures parity_composition_23 s (state_update_23 s i 0)).
+  cut (P n); [done |].
+  revert n Hn.
+  apply natlike_ind; subst P; cbn.
+  - intros s Hs Hsi.
+    cut (state_update_23 s i 0 = s); [by intros ->; apply in_futures_refl |].
     destruct i.
     + by rewrite state_update_23_two, state_update_id.
     + by rewrite state_update_23_three, state_update_id.
-  - pose (s' := state_update_23 s i (zproj s i - 2)).
-    cut (input_valid_transition parity_composition_23 (label_23 i) (s, Some 2) (s', Some (2 * multiplier_23 i))).
+  - intros n Hn IHn s Hs Hsi.
+    pose (s' := state_update_23 s i (zproj s i - 2)).
+    cut (input_valid_transition parity_composition_23 (label_23 i)
+      (s, Some 2) (s', Some (2 * multiplier_23 i))).
     {
       transitivity s'; [by eapply input_valid_transition_in_futures |].
       replace (state_update_23 s i 0) with (state_update_23 s' i 0)
@@ -1141,25 +1191,25 @@ Qed.
   a valid trace reaching [state00].
 *)
 Theorem parity_composite_23_reachable_00 :
-  forall (s2 s3 : nat),
+  forall (s2 s3 : Z), 0 <= s2 -> 0 <= s3 ->
     in_futures parity_composition_23
-      (state_23 (2 * Z.of_nat s2) (2 * Z.of_nat s3)) state00.
+      (state_23 (2 * s2) (2 * s3)) state00.
 Proof.
   intros.
   cut (in_futures parity_composition_23
-    (state_23 (2 * Z.of_nat s2) (2 * Z.of_nat s3)) (state_23 0 (2 * Z.of_nat s3))).
+    (state_23 (2 * s2) (2 * s3)) (state_23 0 (2 * s3))).
   {
     etransitivity; [done |].
-    replace state00 with (state_update_23 (state_23 0 (2 * Z.of_nat s3)) three 0).
-    - eapply parity_composition_23_reachable_0; [| done].
+    replace state00 with (state_update_23 (state_23 0 (2 * s3)) three 0).
+    - eapply parity_composition_23_reachable_0; cycle 2; [done | | lia].
       by eapply in_futures_valid_snd.
     - extensionality i; destruct i; cbn.
       + by rewrite state_update_23_neq.
       + by rewrite state_update_23_three; state_update_simpl.
   }
-  replace (state_23 0 (2 * Z.of_nat s3)) with (state_update_23 (state_23 (2 * Z.of_nat s2) (2 * Z.of_nat s3)) two 0).
-  - eapply parity_composition_23_reachable_0; [| done].
-    destruct s2, s3.
+  replace (state_23 0 (2 * s3)) with (state_update_23 (state_23 (2 * s2) (2 * s3)) two 0).
+  - eapply parity_composition_23_reachable_0; cycle 2; [done | | lia].
+    destruct (decide (s2 = 0)) as [-> |], (decide (s3 = 0)) as [-> |].
     + by apply valid_state00.
     + by apply valid_state0n; lia.
     + by apply valid_staten0; lia.
