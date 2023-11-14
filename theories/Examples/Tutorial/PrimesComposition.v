@@ -83,7 +83,7 @@ Definition radix_label : label multiplying_type := ().
 
 (** ** Parity VLSM Properties *)
 
-(** *** Constrained messages are positives divisible by <<multiplier>> *)
+(** *** Constrained messages are positives divisible by the multiplier *)
 
 Lemma radix_constrained_messages_left :
   forall (m : multiplying_message),
