@@ -622,19 +622,6 @@ Definition zproj (s : composite_state components_23) (i : index23) : Z :=
 Definition free_composition_23 : VLSM multiplying_message :=
   free_composite_vlsm components_23.
 
-
-Definition state00 := statenm 0 0.
-
-Definition state01 := statenm 0 1.
-
-Definition state10 := statenm 1 0.
-
-Definition state11 := statenm 1 1.
-
-Definition state12 := statenm 1 2.
-
-Definition state21 := statenm 2 1.
-
 Definition composite_state_23_sum (s : composite_state components_23) : Z :=
   s two + s three.
 
@@ -644,6 +631,8 @@ Definition parity_constraint_23
   let sm' := composite_transition components_23 l sm in
   Z.Even (composite_state_23_sum sm.1 + composite_state_23_sum sm'.1).
 
+Definition parity_composition_23 : VLSM multiplying_message :=
+  composite_vlsm components_23 parity_constraint_23.
 
 (**
   Final states are valid state from which no further valid transition can be taken.

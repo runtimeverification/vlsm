@@ -5,14 +5,17 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StdppExtras FinSuppFn NatExtras ListExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM ConstrainedVLSM Composition.
 From VLSM.Core Require Import VLSMProjections ProjectionTraces.
+From VLSM.Examples Require Import Parity.
 
 (** * Primes Composition of VLSMs
 
-  This module demonstrates advanced concepts of the VLSM framework. We define
-  a radix VLSM parameterized on a multiplier and a composition
-  of such VLSMs. We then construct the composition consisting of a component
-  for each prime number, characterize the valid messages, and show that any
-  component in the composition is a validator.
+  This module demonstrates advanced concepts of the VLSM framework.
+  We generalize the multiplying VLSMs defined in module [Parity] as a radix VLSM
+  parameterized on a multiplier and study the composition of a family of
+  such VLSMs.
+  We then construct the composition consisting of a component for each prime
+  number, characterize the valid messages, and show that any component in
+  the composition is a validator.
 *)
 
 #[local] Open Scope Z_scope.
@@ -30,46 +33,18 @@ Context
 
 (** ** Definition of the Radix VLSM
 
-  The Radix VLSM will only have one label, indicating a decrement.
-  For this reason, the [unit] type can be used.
+  The Radix VLSM will share the type and transition validity predicate of the
+  multiplying VLSM and differ only by the fact that the only initial message
+  is the <<multiplier>> parameter, and that it outputs its input multiplied by
+  the <<multiplier>>.
 *)
 
-Definition RadixLabel : Type := unit.
-
-(** The state holds an integer. *)
-
-Definition RadixState : Type := Z.
-
-(** Messages are integers. *)
-
-Definition RadixMessage : Type := Z.
-
-Definition RadixType : VLSMType RadixMessage :=
-{|
-  state := RadixState;
-  label := RadixLabel;
-|}.
-
-(**
-  The specifications for the initial state, transition
-  and guard predicate are as follows:
-*)
-
-Definition Radix_initial_state_prop (st : RadixState) : Prop := st >= 1.
-
-Definition Radix_transition
-  (l : RadixLabel) (st : RadixState) (om : option RadixMessage)
-  : RadixState * option RadixMessage :=
+Definition radix_transition
+  (l : multiplying_label) (st : multiplying_state) (om : option multiplying_message)
+  : multiplying_state * option multiplying_message :=
   match om with
   | Some j  => (st - j, Some (multiplier * j))
   | None    => (st, None)
-  end.
-
-Definition Radix_valid
-  (l : RadixLabel) (st : RadixState) (om : option RadixMessage) : Prop :=
-  match om with
-  | Some msg => msg <= st /\ 2 <= msg
-  | None     => False
   end.
 
 (**
@@ -77,38 +52,26 @@ Definition Radix_valid
   is inhabited as the set of initial states is non-empty.
 *)
 
-Definition Radix_initial_state_type : Type :=
-  {st : RadixState | Radix_initial_state_prop st}.
-
-Program Definition Radix_initial_state :
-  Radix_initial_state_type := exist _ 1 _.
-Next Obligation.
-Proof. done. Defined.
-
-#[export] Instance Radix_Inhabited_initial_state_type :
-  Inhabited (Radix_initial_state_type) :=
-    populate (Radix_initial_state).
-
 (**
   An intermediate representation for the VLSM is required.
   It uses the previously defined specifications.
 *)
 
-Definition RadixMachine : VLSMMachine RadixType :=
+Definition radix_machine : VLSMMachine multiplying_type :=
 {|
-  initial_state_prop := Radix_initial_state_prop;
-  initial_message_prop := fun (ms : RadixMessage) => ms = multiplier;
-  s0 := Radix_Inhabited_initial_state_type;
-  transition := fun l '(st, om) => Radix_transition l st om;
-  valid := fun l '(st, om) => Radix_valid l st om;
+  initial_state_prop := multiplying_initial_state_prop;
+  initial_message_prop := fun (ms : multiplying_message) => ms = multiplier;
+  s0 := multiplying_initial_state_type_inhabited;
+  transition := fun l '(st, om) => radix_transition l st om;
+  valid := fun l '(st, om) => multiplying_valid l st om;
 |}.
 
 (** The definition of the Radix VLSM. *)
 
-Definition RadixVLSM : VLSM RadixMessage :=
+Definition radix_vlsm : VLSM multiplying_message :=
 {|
-  vtype := RadixType;
-  vmachine := RadixMachine;
+  vtype := multiplying_type;
+  vmachine := radix_machine;
 |}.
 
 (**
@@ -116,26 +79,26 @@ Definition RadixVLSM : VLSM RadixMessage :=
   the unit type.
 *)
 
-Definition radix_label : label RadixType := ().
+Definition radix_label : label multiplying_type := ().
 
 (** ** Parity VLSM Properties *)
 
 (** *** Constrained messages are positives divisible by <<multiplier>> *)
 
 Lemma radix_constrained_messages_left :
-  forall (m : RadixMessage),
-    constrained_message_prop RadixVLSM m ->
+  forall (m : multiplying_message),
+    constrained_message_prop radix_vlsm m ->
     exists (j : Z), m = multiplier * j /\ j > 1.
 Proof.
   intros m ([s []] & [] & s' & (_ & _ & []) & Ht).
   inversion Ht; subst.
-  by exists r; split; lia.
+  by eexists; split; [done | lia].
 Qed.
 
 Lemma radix_constrained_messages_right :
-  forall (m : RadixMessage),
+  forall (m : multiplying_message),
     (exists (j : Z), m = multiplier * j) -> m > multiplier ->
-    constrained_message_prop RadixVLSM m.
+    constrained_message_prop radix_vlsm m.
 Proof.
   intros m (j & Hj) Hmgt0.
   unfold constrained_message_prop_direct, can_emit.
@@ -149,8 +112,8 @@ Proof.
 Qed.
 
 Lemma radix_constrained_messages :
-  forall (m : RadixMessage),
-    constrained_message_prop RadixVLSM m <-> (exists (j : Z), m = multiplier * j /\ j > 1).
+  forall (m : multiplying_message),
+    constrained_message_prop radix_vlsm m <-> (exists (j : Z), m = multiplier * j /\ j > 1).
 Proof.
   split.
   - by apply radix_constrained_messages_left.
@@ -160,30 +123,30 @@ Qed.
 (** *** Constrained states property *)
 
 Lemma radix_constrained_states_right :
-  forall (st : RadixState),
-    constrained_state_prop RadixVLSM st -> st >= 0.
+  forall (st : multiplying_state),
+    constrained_state_prop radix_vlsm st -> st >= 0.
 Proof.
   induction 1 using valid_state_prop_ind.
-  - by cbn in Hs; unfold Radix_initial_state_prop in Hs; lia.
+  - by cbn in Hs; red in Hs; lia.
   - destruct l, om, Ht as [(Hs & _ & []) Ht].
     by inversion Ht; subst; cbn in *; lia.
 Qed.
 
 Lemma radix_constrained_states_left :
-  forall (st : RadixState),
-    st >= 0 -> constrained_state_prop RadixVLSM st.
+  forall (st : multiplying_state),
+    st >= 0 -> constrained_state_prop radix_vlsm st.
 Proof.
   intros st Hst.
   apply input_valid_transition_destination
     with (l := radix_label) (s := st + 2) (om := Some 2) (om' := Some (2 * multiplier)).
   repeat split; [| | by lia.. | by cbn; do 2 f_equal; lia].
-  - by apply initial_state_is_valid; cbn; unfold Radix_initial_state_prop; lia.
+  - by apply initial_state_is_valid; cbn; red; lia.
   - by apply any_message_is_valid_in_preloaded.
 Qed.
 
 Lemma radix_constrained_states :
-  forall (st : RadixState),
-    constrained_state_prop RadixVLSM st <-> st >= 0.
+  forall (st : multiplying_state),
+    constrained_state_prop radix_vlsm st <-> st >= 0.
 Proof.
   split.
   - by apply radix_constrained_states_right.
@@ -193,8 +156,8 @@ Qed.
 (** *** Positive powers of the multiplier are valid messages *)
 
 Lemma radix_valid_messages_powers_of_mult_right :
-  forall (m : RadixMessage),
-    valid_message_prop RadixVLSM m ->
+  forall (m : multiplying_message),
+    valid_message_prop radix_vlsm m ->
     exists p : Z, p >= 1 /\ m = multiplier ^ p.
 Proof.
   intros m [s Hvsm].
@@ -216,7 +179,7 @@ Qed.
 
 Lemma radix_valid_messages_powers_of_mult_left :
   forall (p : Z),
-    p >= 1 -> valid_message_prop RadixVLSM (multiplier ^ p).
+    p >= 1 -> valid_message_prop radix_vlsm (multiplier ^ p).
 Proof.
   intros p Hp.
   assert (Hle : 0 <= p - 1) by lia.
@@ -239,8 +202,8 @@ Proof.
 Qed.
 
 Lemma radix_valid_messages_powers_of_mult :
-  forall (m : RadixMessage),
-    valid_message_prop RadixVLSM m
+  forall (m : multiplying_message),
+    valid_message_prop radix_vlsm m
       <->
     exists p : Z, p >= 1 /\ m = multiplier ^ p.
 Proof.
@@ -260,15 +223,15 @@ Context
   `{FinSet index indexSet}
   .
 
-Definition indexed_radix_vlsms (i : index) : VLSM RadixMessage :=
-  RadixVLSM (multipliers i).
+Definition indexed_radix_vlsms (i : index) : VLSM multiplying_message :=
+  radix_vlsm (multipliers i).
 
 Context
   (radix_constraint : composite_label indexed_radix_vlsms ->
-    composite_state indexed_radix_vlsms * option RadixMessage -> Prop)
+    composite_state indexed_radix_vlsms * option multiplying_message -> Prop)
   .
 
-Definition radix_composite_vlsm : VLSM RadixMessage :=
+Definition radix_composite_vlsm : VLSM multiplying_message :=
   composite_vlsm indexed_radix_vlsms radix_constraint.
 
 Lemma composite_state_pos
@@ -278,14 +241,14 @@ Lemma composite_state_pos
 Proof.
   intros i.
   apply radix_constrained_states_right with (multipliers i).
-  by apply (valid_state_project_preloaded RadixMessage indexed_radix_vlsms radix_constraint).
+  by apply (valid_state_project_preloaded multiplying_message indexed_radix_vlsms radix_constraint).
 Qed.
 
 (**
   Any valid message can be expressed as a non-empty product of powers
   of the multipliers associated to the components.
 *)
-Lemma composition_valid_messages_powers_of_mults_right (m : RadixMessage) :
+Lemma composition_valid_messages_powers_of_mults_right (m : multiplying_message) :
   valid_message_prop radix_composite_vlsm m ->
   exists (f : fsfun index 0%nat),
     fin_supp f <> [] /\ m = fsfun_prod multipliers f.
@@ -300,7 +263,7 @@ Proof.
     by rewrite <- Hmi, mi, prod_powers_delta.
   - destruct l as (k & lk).
     destruct om; [| done].
-    destruct (IHHvsm2 r) as (f & Hdomf & ->); [done |].
+    destruct (IHHvsm2 _ eq_refl) as (f & Hdomf & ->).
     inversion Ht.
     exists (succ_fsfun f k).
     split; [| by rewrite fsfun_prod_succ].
@@ -318,11 +281,11 @@ Context
   `{Inhabited index}
   .
 
-Definition free_radix_composite_vlsm : VLSM RadixMessage :=
+Definition free_radix_composite_vlsm : VLSM multiplying_message :=
   free_composite_vlsm (indexed_radix_vlsms multipliers).
 
 #[local] Lemma free_radix_composite_vlsm_emits_multiplier :
-  forall (m : RadixMessage),
+  forall (m : multiplying_message),
     valid_message_prop free_radix_composite_vlsm m ->
     m >= 2 ->
   forall (n : index),
@@ -345,14 +308,14 @@ Proof.
 Qed.
 
 Lemma composition_valid_messages_powers_of_mults_left
-  (Hmpos : forall (i : index), multipliers i > 1) (m : RadixMessage)
+  (Hmpos : forall (i : index), multipliers i > 1) (m : multiplying_message)
   (f : fsfun index 0%nat) :
     fin_supp f <> [] /\ m = fsfun_prod multipliers f ->
     valid_message_prop free_radix_composite_vlsm m.
 Proof.
   intros [Hpowgeq1 Hm]; revert f Hpowgeq1 m Hm.
   apply (nat_fsfun_ind (fun (f : fsfun index 0%nat) => fin_supp f <> [] ->
-    forall m : RadixMessage, m = fsfun_prod multipliers f ->
+    forall m : multiplying_message, m = fsfun_prod multipliers f ->
     valid_message_prop free_radix_composite_vlsm m)); [| done |].
   - intros f1 f2 Heq Hall Hi m Hm.
     eapply Hall; [| by rewrite Heq].
@@ -391,7 +354,7 @@ Proof.
 Qed.
 
 Lemma composition_valid_messages_powers_of_mults
-  (Hmpos : forall (i : index), multipliers i > 1) (m : RadixMessage) :
+  (Hmpos : forall (i : index), multipliers i > 1) (m : multiplying_message) :
     valid_message_prop free_radix_composite_vlsm m <->
   exists (f : fsfun index 0%nat),
     fin_supp f <> [] /\ m = fsfun_prod multipliers f.
@@ -406,7 +369,7 @@ Proof.
 Qed.
 
 Lemma composition_valid_message_ge_2
-  (Hmpos : forall (i : index), multipliers i > 1) (m : RadixMessage) :
+  (Hmpos : forall (i : index), multipliers i > 1) (m : multiplying_message) :
   valid_message_prop free_radix_composite_vlsm m -> m >= 2.
 Proof.
   intro Hv.
@@ -421,7 +384,7 @@ End sec_free_composition.
 (** ** A VLSM composition for all primes
 
   In the following section we give an example of a composition with an infinite
-  number of [RadixVLSM] components, one for each prime number.
+  number of [radix_vlsm] components, one for each prime number.
 
   Then we characterize the valid messages for this composition to be precisely
   all natural numbers larger than 1.
@@ -489,7 +452,7 @@ Definition even_constrained_primes_composition : VLSM Z :=
   constrained_vlsm primes_vlsm_composition EvenConstraint.
 
 #[local] Lemma even_constrained_primes_composition_emits_multiplier :
-  forall (m : RadixMessage),
+  forall (m : multiplying_message),
     valid_message_prop even_constrained_primes_composition m ->
     m >= 2 ->
     Z.Even m ->
@@ -597,12 +560,12 @@ Qed.
   equivalent to the global constraint we can recover validation.
 *)
 Inductive LocalEvenConstraint (mult : Z) :
-  label (RadixVLSM mult) -> state (RadixVLSM mult) * option Z -> Prop :=
+  label (radix_vlsm mult) -> state (radix_vlsm mult) * option Z -> Prop :=
 | local_even_constraint : forall l s m, Z.Even m ->
     LocalEvenConstraint mult l (s, Some m).
 
-Definition even_prime_vlsms (p : primes) : VLSM RadixMessage :=
-  constrained_vlsm (RadixVLSM (`p)) (LocalEvenConstraint (`p)).
+Definition even_prime_vlsms (p : primes) : VLSM multiplying_message :=
+  constrained_vlsm (radix_vlsm (`p)) (LocalEvenConstraint (`p)).
 
 (**
   Adding the local constraint to each component does not change the behavior
@@ -623,7 +586,7 @@ Qed.
 (**
   The validation result is recovered for the new constrained components and composition.
 *)
-Lemma even_constrained_primes_composition_all_validators :
+Theorem even_constrained_primes_composition_all_validators :
   forall (p : primes),
     component_projection_validator_prop even_prime_vlsms EvenConstraint p.
 Proof.
