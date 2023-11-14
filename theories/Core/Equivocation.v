@@ -1917,7 +1917,7 @@ Lemma composite_has_been_directly_observed_stepwise_props
   (X := composite_vlsm IM constraint)
   : oracle_stepwise_props (vlsm := X) item_sends_or_receives composite_has_been_directly_observed.
 Proof.
-  pose proof 
+  pose proof
     (composite_stepwise_props
        (fun i => (has_been_directly_observed_stepwise_props (IM i))) constraint)
        as [Hinits Hstep].
@@ -2853,12 +2853,14 @@ Lemma all_pre_traces_to_valid_state_are_valid_free
 Proof.
   apply pre_traces_with_valid_inputs_are_valid in Htr; [done |].
   apply valid_trace_last_pstate in Htr as Hspre.
-  intros.
+  apply Forall_forall; intros.
+  destruct (input x) as [m |] eqn: Hm; [| by apply option_valid_message_None].
   eapply received_valid; cbn; [done |].
   specialize (proper_received _ s Hspre m) as Hproper.
   apply proj2 in Hproper. apply Hproper.
   apply has_been_received_consistency; [by typeclasses eauto | done |].
-  by exists is, tr, Htr.
+  exists is, tr, Htr.
+  by apply Exists_exists; eexists.
 Qed.
 
 End sec_all_traces_to_valid_state_are_valid.
