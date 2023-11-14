@@ -330,10 +330,8 @@ Lemma Forall_filter :
   forall {A : Type} (P : A -> Prop) {Pdec : forall a : A, Decision (P a)} (l : list A),
     Forall P (filter P l).
 Proof.
-  intros.
-  rewrite Forall_forall; intros a.
-  rewrite elem_of_list_filter.
-  by intros [].
+  induction l as [| h t]; cbn; [by constructor |].
+  by case_decide; [constructor |].
 Qed.
 
 (**
