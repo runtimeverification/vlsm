@@ -627,7 +627,7 @@ Proof.
     + by rewrite drop_length, stream_prefix_length.
   - rewrite stream_prefix_nth, stream_suffix_nth by lia.
     assert (Hle : n1 <= n1 + k) by lia.
-    specialize (drop_nth (stream_prefix l n2) n1 (n1 + k) Hle)
+    specialize (drop_nth (n1 + k) n1 (stream_prefix l n2) Hle)
     ; intro Heq.
     clear Hle.
     assert (Hs : n1 + k - n1 = k) by lia.
@@ -783,7 +783,7 @@ Lemma stream_prefix_nth_last
   (_last : A)
   : List.last (stream_prefix l (S n)) _last = Str_nth n l.
 Proof.
-  specialize (nth_error_last (stream_prefix l (S n)) n); intro Hlast.
+  specialize (nth_error_last n (stream_prefix l (S n))); intro Hlast.
   specialize (stream_prefix_length l (S n)); intro Hpref_len.
   symmetry in Hpref_len.
   specialize (Hlast Hpref_len _last).
