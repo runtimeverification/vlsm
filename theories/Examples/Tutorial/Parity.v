@@ -2,20 +2,19 @@ From stdpp Require Import prelude finite.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 From Coq Require Import FunctionalExtensionality.
 
-(** * The "multiplying" VLSMs
+(** * VLSMs that Multiply
 
   This module demonstrates some basic notions of the VLSM framework.
 
-  We define a type of VLSM that stores an integer and continually decrements it
+  We define a family of VLSMs that store an integer and continually decrement it
   using input messages (also integers), while a constraint is checked at each step.
   The definitions and lemmas tap into concepts such as valid and constrained
   traces, transitions, states, and messages.
 
   The "doubling" VLSM has 2 as the only initial message and outputs the doubles
-  of the messages it receives as input, which leads to constrained
-  messages being positive even numbers [doubling_constrained_messages] and,
-  combined with the only initial message being 2, the valid messages of the
-  doubling VLSM are powers of 2 [doubling_valid_messages_powers_of_2].
+  of the messages it receives as input. Therefore, constrained messages are
+  positive even numbers [doubling_constrained_messages] and valid messages are
+  powers of 2 [doubling_valid_messages_powers_of_2].
 
   Similarly, the "tripling" VLSM has 3 as the only initial message and outputs
   the triples of the messages it receives as input.
