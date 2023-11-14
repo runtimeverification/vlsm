@@ -711,25 +711,28 @@ Qed.
   a valid message is either an initial message or an [output] of a valid trace.
 *)
 Inductive
-  finite_valid_trace_init_to_def :
+  finite_valid_trace_init_to_from_constrained :
     state X -> state X -> list (transition_item X) -> Prop :=
 | fvtit_def : forall (s f : state X) (tr : list (transition_item X)),
     finite_constrained_trace_init_to_direct s f tr ->
-    (forall item, item ∈ tr -> option_valid_message_prop_def (input item)) ->
-    finite_valid_trace_init_to_def s f tr
+    (forall item, item ∈ tr ->
+      option_valid_message_prop_from_constrained (input item)) ->
+    finite_valid_trace_init_to_from_constrained s f tr
 with
-  option_valid_message_prop_def : option message -> Prop :=
+  option_valid_message_prop_from_constrained : option message -> Prop :=
 | ovmp_def_initial :
-  forall om, option_initial_message_prop X om -> option_valid_message_prop_def om
+  forall om, option_initial_message_prop X om ->
+    option_valid_message_prop_from_constrained om
 | ovmp_def_emit :
   forall (s f : state X) (tr : list (transition_item X)),
-    finite_valid_trace_init_to_def s f tr ->
+   finite_valid_trace_init_to_from_constrained s f tr ->
    forall (item : transition_item X), item ∈ tr ->
-   option_valid_message_prop_def (output item).
+   option_valid_message_prop_from_constrained (output item).
 
-Lemma finite_valid_trace_init_to_def_right_impl :
+Lemma finite_valid_trace_init_to_from_constrained_right_impl :
   forall (s f : state X) (tr : list (transition_item X)),
-  finite_valid_trace_init_to X s f tr -> finite_valid_trace_init_to_def s f tr.
+  finite_valid_trace_init_to X s f tr ->
+  finite_valid_trace_init_to_from_constrained s f tr.
 Proof.
   intros * Htr.
   induction Htr using finite_valid_trace_init_to_rev_strong_ind;
@@ -752,17 +755,17 @@ Proof.
     by rewrite elem_of_app, elem_of_list_singleton; right.
 Qed.
 
-Lemma finite_valid_trace_init_to_def_left_impl :
+Lemma finite_valid_trace_init_to_from_constrained_left_impl :
   forall (s f : state X) (tr : list (transition_item X)),
-  finite_valid_trace_init_to_def s f tr -> finite_valid_trace_init_to X s f tr
-with option_valid_message_prop_def_left_impl :
-  forall om, option_valid_message_prop_def om -> option_valid_message_prop X om.
+  finite_valid_trace_init_to_from_constrained s f tr -> finite_valid_trace_init_to X s f tr
+with option_valid_message_prop_from_constrained_left_impl :
+  forall om, option_valid_message_prop_from_constrained om -> option_valid_message_prop X om.
 Proof.
   - intros * Htr; inversion Htr as [? ? ? [Htrc Hinit] Hmsgs]; subst; clear Htr.
     apply pre_traces_with_valid_inputs_are_valid;
       [by apply finite_constrained_trace_init_to_direct_left_impl |].
     rewrite Forall_forall in *; intros.
-    by apply option_valid_message_prop_def_left_impl, Hmsgs.
+    by apply option_valid_message_prop_from_constrained_left_impl, Hmsgs.
   - intros om Hom.
     inversion Hom as [? Hinit | ? ? ? Hemit ? Hitem]; subst;
       [by apply option_initial_message_is_valid |].
@@ -770,63 +773,63 @@ Proof.
       [| by apply option_valid_message_None].
     eapply option_valid_message_Some, valid_trace_output_is_valid;
       [| by apply Exists_exists; eexists].
-    by eapply valid_trace_forget_last, finite_valid_trace_init_to_def_left_impl.
+    by eapply valid_trace_forget_last, finite_valid_trace_init_to_from_constrained_left_impl.
 Qed.
 
-Lemma finite_valid_trace_init_to_def_equiv :
+Lemma finite_valid_trace_init_to_from_constrained_equiv :
   forall (s f : state X) (tr : list (transition_item X)),
-  finite_valid_trace_init_to_def s f tr <-> finite_valid_trace_init_to X s f tr.
+  finite_valid_trace_init_to_from_constrained s f tr <-> finite_valid_trace_init_to X s f tr.
 Proof.
   split.
-  - by apply finite_valid_trace_init_to_def_left_impl.
-  - by apply finite_valid_trace_init_to_def_right_impl.
+  - by apply finite_valid_trace_init_to_from_constrained_left_impl.
+  - by apply finite_valid_trace_init_to_from_constrained_right_impl.
 Qed.
 
-Lemma option_valid_message_prop_def_right_impl :
-  forall om, option_valid_message_prop X om -> option_valid_message_prop_def om.
+Lemma option_valid_message_prop_from_constrained_right_impl :
+  forall om, option_valid_message_prop X om -> option_valid_message_prop_from_constrained om.
 Proof.
   intros [m |] Hm; [| by apply ovmp_def_initial].
   apply emitted_messages_are_valid_iff in Hm as [| Hm]; [by apply ovmp_def_initial |].
   apply can_emit_has_trace in Hm as (is & tr & item & Htr & <-).
-  apply valid_trace_add_default_last, finite_valid_trace_init_to_def_right_impl in Htr.
+  apply valid_trace_add_default_last, finite_valid_trace_init_to_from_constrained_right_impl in Htr.
   econstructor 2; [done |].
   by rewrite elem_of_app, elem_of_list_singleton; right.
 Qed.
 
-Lemma option_valid_message_prop_def_equiv :
-  forall om, option_valid_message_prop_def om <-> option_valid_message_prop X om.
+Lemma option_valid_message_prop_from_constrained_equiv :
+  forall om, option_valid_message_prop_from_constrained om <-> option_valid_message_prop X om.
 Proof.
   split.
-  - by apply option_valid_message_prop_def_left_impl.
-  - by apply option_valid_message_prop_def_right_impl.
+  - by apply option_valid_message_prop_from_constrained_left_impl.
+  - by apply option_valid_message_prop_from_constrained_right_impl.
 Qed.
 
 (** A valid state is a state reachable through a valid trace. *)
-Definition valid_state_prop_def (s : state X) : Prop :=
+Definition valid_state_prop_from_constrained (s : state X) : Prop :=
   exists (is : state X) (tr : list (transition_item X)),
-    finite_valid_trace_init_to_def is s tr.
+    finite_valid_trace_init_to_from_constrained is s tr.
 
-Lemma valid_state_prop_def_left_impl :
-  forall (s : state X), valid_state_prop_def s -> valid_state_prop X s.
+Lemma valid_state_prop_from_constrained_left_impl :
+  forall (s : state X), valid_state_prop_from_constrained s -> valid_state_prop X s.
 Proof.
   intros s (is & tr & Htr).
-  by apply finite_valid_trace_init_to_def_equiv, valid_trace_last_pstate in Htr.
+  by apply finite_valid_trace_init_to_from_constrained_equiv, valid_trace_last_pstate in Htr.
 Qed.
 
-Lemma valid_state_prop_def_right_impl :
-  forall (s : state X), valid_state_prop X s -> valid_state_prop_def s.
+Lemma valid_state_prop_from_constrained_right_impl :
+  forall (s : state X), valid_state_prop X s -> valid_state_prop_from_constrained s.
 Proof.
   intros s Hs.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
-  by exists is, tr; apply finite_valid_trace_init_to_def_equiv.
+  by exists is, tr; apply finite_valid_trace_init_to_from_constrained_equiv.
 Qed.
 
-Lemma valid_state_prop_def_equiv :
-  forall (s : state X), valid_state_prop_def s <-> valid_state_prop X s.
+Lemma valid_state_prop_from_constrained_equiv :
+  forall (s : state X), valid_state_prop_from_constrained s <-> valid_state_prop X s.
 Proof.
   split.
-  - by apply valid_state_prop_def_left_impl.
-  - by apply valid_state_prop_def_right_impl.
+  - by apply valid_state_prop_from_constrained_left_impl.
+  - by apply valid_state_prop_from_constrained_right_impl.
 Qed.
 
 End sec_constrained_direct_defs.
