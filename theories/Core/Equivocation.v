@@ -1772,7 +1772,7 @@ Proof.
   ; [| by apply stepwise_props | by eapply finite_valid_trace_from_to_last_pstate, Hpre_tr].
   specialize (Horacle _ _ Hpre_tr); clear Hpre_tr.
   apply Exists_exists in Horacle as (item & Hitem & Hout).
-  apply elem_of_map_option in Hitem as (itemX & HitemX & HitemX_pr).
+  apply elem_of_list_omap in Hitem as (itemX & HitemX & HitemX_pr).
   apply elem_of_list_split in HitemX as (pre & suf & Htr_pr).
   exists (finite_trace_last is pre), itemX.
   rewrite cons_middle in Htr_pr.

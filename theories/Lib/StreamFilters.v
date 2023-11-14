@@ -600,12 +600,12 @@ Definition stream_map_option
 Lemma stream_map_option_prefix
   (Hinf : InfinitelyOften P s)
   (n : nat)
-  (map_opt_pre := map_option f (stream_prefix s n))
+  (map_opt_pre := omap f (stream_prefix s n))
   (m := length map_opt_pre)
   : stream_prefix (stream_map_option Hinf) m = map_opt_pre.
 Proof.
   subst map_opt_pre m.
-  rewrite !(map_option_as_filter f (stream_prefix s n)).
+  rewrite !(omap_as_filter f (stream_prefix s n)).
   by apply fitering_subsequence_stream_filter_map_prefix.
 Qed.
 
@@ -613,19 +613,19 @@ Program Definition stream_map_option_prefix_ex
   (Hinf : InfinitelyOften P s)
   (Hfs := stream_filter_positions_filtering_subsequence _ _ Hinf)
   (k : nat)
-  : { n | stream_prefix (stream_map_option Hinf) k = map_option f (stream_prefix s n)} :=
+  : { n | stream_prefix (stream_map_option Hinf) k = omap f (stream_prefix s n)} :=
   let (n, Heq) := (fitering_subsequence_stream_filter_map_prefix_ex P
                     (fun k => is_Some_proj (proj2_dsig k)) _ _ Hfs k)
   in exist _ n _.
 Next Obligation.
 Proof.
-  by intros; cbn; rewrite !map_option_as_filter.
+  by intros; cbn; rewrite !omap_as_filter.
 Qed.
 
 Definition bounded_stream_map_option
   (Hfin : FinitelyManyBound P s)
   : list B :=
-  map_option f (stream_prefix s (` Hfin)).
+  omap f (stream_prefix s (` Hfin)).
 
 End sec_stream_map_option.
 

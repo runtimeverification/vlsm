@@ -68,8 +68,8 @@ Definition equivocating_senders_in_trace
   let equivocating_items :=
     map (fun d => match d with (_, item, _) => item end)
       (filter test decompositions) in
-  let equivocating_messages := map_option input equivocating_items in
-  let equivocating_senders := map_option sender equivocating_messages in
+  let equivocating_messages := omap input equivocating_items in
+  let equivocating_senders := omap sender equivocating_messages in
   remove_dups equivocating_senders.
 
 Lemma no_input_no_equivocating_senders_in_trace tr
@@ -80,8 +80,8 @@ Proof.
   intros v Hv.
   unfold equivocating_senders_in_trace in Hv.
   rewrite elem_of_remove_dups in Hv.
-  apply elem_of_map_option in Hv as [msg [Hmsg Hv]].
-  apply elem_of_map_option in Hmsg as [item [Hitem Hmsg]].
+  apply elem_of_list_omap in Hv as [msg [Hmsg Hv]].
+  apply elem_of_list_omap in Hmsg as [item [Hitem Hmsg]].
   apply elem_of_list_fmap in Hitem as [((pre, _item), _suf) [Heq_item Hitem]].
   apply elem_of_list_filter, proj2, elem_of_one_element_decompositions in Hitem.
   subst tr _item.
@@ -99,8 +99,8 @@ Lemma elem_of_equivocating_senders_in_trace
     equivocation_in_trace PreFree m tr.
 Proof.
   unfold equivocating_senders_in_trace.
-  rewrite elem_of_remove_dups, elem_of_map_option.
-  setoid_rewrite elem_of_map_option.
+  rewrite elem_of_remove_dups, elem_of_list_omap.
+  setoid_rewrite elem_of_list_omap.
   setoid_rewrite elem_of_list_fmap.
   split.
   - intros [im [[item [[((prefix, _item), suffix) [Heq_item Hfilter]] Hinput]] Hsender]].

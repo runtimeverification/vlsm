@@ -429,14 +429,14 @@ Proof.
   by destruct (Nat.max_spec_le a (list_max l)) as [[H ->] | [H ->]]; itauto lia.
 Qed.
 
-Lemma map_option_subseteq
+Lemma omap_subseteq
   {A B : Type}
   (f : A -> option B)
   (l1 l2 : list A)
   (Hincl : l1 ⊆ l2)
-  : map_option f l1 ⊆ map_option f l2.
+  : omap f l1 ⊆ omap f l2.
 Proof.
-  by intros b; rewrite !elem_of_map_option; firstorder.
+  by intros b; rewrite !elem_of_list_omap; firstorder.
 Qed.
 
 Lemma elem_of_cat_option
@@ -445,7 +445,7 @@ Lemma elem_of_cat_option
   (a : A)
   : a ∈ cat_option l <-> exists b : option A, b ∈ l /\ b = Some a.
 Proof.
-  by apply elem_of_map_option.
+  by apply elem_of_list_omap.
 Qed.
 
 Lemma list_max_elem_of_exists2
