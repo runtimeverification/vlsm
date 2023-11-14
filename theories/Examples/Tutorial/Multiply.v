@@ -1131,7 +1131,7 @@ Proof.
     + by apply initial_message_is_valid, composition_23_2_initial.
     + by destruct i; cbn in Hsi |- *; lia.
     + by apply parity_constraint_23_even; exists 1; lia.
-    + destruct i; cbn; f_equal; subst s'; cbn; symmetry.
+    + destruct i; cbn; f_equal; symmetry.
       * by apply state_update_23_two.
       * by apply state_update_23_three.
 Qed.
