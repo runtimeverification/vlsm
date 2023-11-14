@@ -106,8 +106,8 @@ Proof.
   repeat split.
   - by apply initial_state_is_valid; cbn; red; nia.
   - by apply any_message_is_valid_in_preloaded.
-  - by lia.
   - by nia.
+  - by lia.
   - by cbn; do 2 f_equal; lia.
 Qed.
 
@@ -195,9 +195,9 @@ Proof.
   repeat split.
   - by apply initial_state_is_valid; cbn; red; lia.
   - by apply Hindh.
-  - by lia.
   - replace (x + 1) with (Z.succ x) by lia.
     by rewrite Z.pow_succ_r; lia.
+  - by lia.
   - by cbn; rewrite <- Z.pow_succ_r, Z.add_succ_l; [do 2 f_equal; lia | lia].
 Qed.
 
@@ -299,8 +299,8 @@ Proof.
     by destruct (decide (n = j)) as [-> |];
       [rewrite update_eq; lia | rewrite update_neq].
   - done.
-  - by rewrite update_eq; lia.
   - by lia.
+  - by rewrite update_eq; lia.
   - cbn; f_equal; rewrite update_eq.
     extensionality j; cbn.
     destruct (decide (n =j)) as [-> |]; state_update_simpl; [by lia |].
@@ -429,7 +429,7 @@ Theorem component_projection_validator_prop_primes :
 Proof.
   intros p lp sp [m|] (Hsp & _ & []).
   exists (lift_to_composite_state' (indexed_radix_vlsms (fun p : primes => `p)) p sp).
-  repeat split; [by state_update_simpl | | | by state_update_simpl | done].
+  repeat split; cycle 1; [| | by state_update_simpl..].
   - apply initial_state_is_valid.
     intros p'; cbn; red.
     by destruct (decide (p = p')); subst; state_update_simpl; cbn; [lia |].
@@ -467,8 +467,8 @@ Proof.
     by destruct (decide (n = j)) as [-> |];
       [rewrite update_eq; lia | rewrite update_neq].
   - done.
-  - by rewrite update_eq; lia.
   - by lia.
+  - by rewrite update_eq; lia.
   - done.
   - cbn; f_equal; extensionality j; cbn.
     destruct (decide (n = j)); subst; state_update_simpl.
@@ -593,7 +593,7 @@ Proof.
   intros p lp sp [m |] (Hsp & _ & [[] Hc]).
   inversion Hc as [? ? ? Heven]; subst.
   exists (lift_to_composite_state' (indexed_radix_vlsms (fun p : primes => `p)) p sp).
-  repeat split; [by state_update_simpl | | | by state_update_simpl | done..].
+  repeat split; cycle 1; [| | by state_update_simpl..].
   - apply initial_state_is_valid.
     intro p'; cbn; red.
     by destruct (decide (p = p')); subst; state_update_simpl; cbn; [lia |].

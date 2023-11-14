@@ -81,13 +81,13 @@ Proof. done. Defined.
 
 (**
   The transition validity predicate is also common for all multiplying VLSMs:
-  themessage must exist, must be larger than 1 and not larger than the current state.
+  the message must exist, must be larger than 1, and not larger than the current state.
 *)
 
 Definition multiplying_valid
   (l : multiplying_label) (st : multiplying_state) (om : option multiplying_message) : Prop :=
   match om with
-  | Some msg => msg <= st /\ 2 <= msg
+  | Some msg => 2 <= msg <= st
   | None     => False
   end.
 
@@ -478,9 +478,9 @@ Proof.
   repeat split.
   - by apply initial_state_is_valid; cbn; red; lia.
   - by apply Hindh.
-  - by lia.
   - replace (x + 1) with (Z.succ x) by lia.
     by rewrite Z.pow_succ_r; lia.
+  - by lia.
   - by cbn; rewrite <- Z.pow_succ_r, Z.add_succ_l; [do 2 f_equal; lia | lia].
 Qed.
 
@@ -548,9 +548,9 @@ Qed.
   outputs the triple of the received input.
 
   It can be shown that its constrained messages are multiples of three and that
-  its valid messages are powers of three, but the proofs will be similar as
+  its valid messages are powers of three, but the proofs will be similar to
   those for the doubling VLSM so we will omit them. The development in module
-  [PrimesComposition] will make results for the doubling and tripling VLSM be
+  [PrimesComposition] will make the results for the doubling and tripling VLSM be
   particular instances of more general results.
 *)
 
@@ -593,6 +593,7 @@ Definition components_23 (i : index23) : VLSM multiplying_message :=
   | three => tripling_vlsm
   end.
 
+(** We define a helper function to make composite state easier to write. *)
 Definition state_23 (n m : Z) : composite_state components_23 :=
   fun (i : index23) => match i with two => n | three => m end.
 
@@ -666,16 +667,16 @@ Proof.
       exists two.
       assert (Hinit : initial_message_prop (components_23 two) 2) by done.
       by exists (exist _ 2 Hinit).
-    + by cbn; lia.
     + by lia.
+    + by cbn; lia.
     + by red; cbn; unfold composite_state_23_sum; state_update_simpl; cbn; exists 3.
     + by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn.
   - apply initial_message_is_valid.
     exists two.
     assert (Hinit : initial_message_prop (components_23 two) 2) by done.
     by exists (exist _ 2 Hinit).
-  - by unfold state02; cbn; lia.
   - by lia.
+  - by unfold state02; cbn; lia.
   - by red; cbn; unfold composite_state_23_sum; state_update_simpl; cbn; exists 1.
   - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn.
 Qed.
@@ -690,8 +691,8 @@ Proof.
     exists two.
     assert (Hinit : initial_message_prop (components_23 two) 2) by done.
     by exists (exist _ 2 Hinit).
-  - by cbn; lia.
   - by lia.
+  - by cbn; lia.
   - by red; cbn; unfold composite_state_23_sum; state_update_simpl; cbn; exists 2.
   - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn.
 Qed.
@@ -706,8 +707,8 @@ Proof.
     exists two.
     assert (Hinit : initial_message_prop (components_23 two) 2) by done.
     by exists (exist _ 2 Hinit).
-  - by cbn; lia.
   - by lia.
+  - by cbn; lia.
   - by red; cbn; unfold composite_state_23_sum; state_update_simpl; cbn; exists 2.
   - by cbn; f_equal; extensionality i; destruct i; cbn; state_update_simpl; cbn.
 Qed.
