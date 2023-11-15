@@ -84,3 +84,7 @@ theories/Examples/ELMO/UMO.v
 theories/Examples/ELMO/MO.v
 theories/Examples/ELMO/ELMO.v
 theories/Examples/ELMO/AllELMO.v
+
+theories/Examples/Paxos/Consensus.v
+theories/Examples/Paxos/Voting.v
+theories/Examples/Paxos/Paxos.v
