@@ -69,12 +69,13 @@ Definition consensus_transition (l : consensus_label) :
   end.
 
 Definition consensus_vlsm_machine : VLSMMachine consensus_type :=
-  {| initial_state_prop := consensus_initial_state_prop
-   ; s0 := populate (_ ↾ (reflexivity _ : consensus_initial_state_prop ∅))
-   ; initial_message_prop := consensus_initial_message_prop
-   ; transition := consensus_transition
-   ; valid := consensus_valid
-  |}.
+{|
+  initial_state_prop := consensus_initial_state_prop;
+  s0 := populate (_ ↾ (reflexivity _ : consensus_initial_state_prop ∅));
+  initial_message_prop := consensus_initial_message_prop;
+  transition := consensus_transition;
+  valid := consensus_valid;
+|}.
 
 Definition consensus_vlsm := mk_vlsm consensus_vlsm_machine.
 

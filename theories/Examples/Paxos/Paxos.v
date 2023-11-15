@@ -154,19 +154,21 @@ Definition maxVBal (sa : acceptor_state) : Ballot' := fst <$> lastVote sa.
 Definition maxVVal (sa : acceptor_state) : option Value := snd <$> lastVote sa.
 
 Definition initial_acceptor : acceptor_state :=
-  {| maxBal := None
-   ; lastVote := None
-   ; sent_messages := []
-   |}.
+{|
+  maxBal := None;
+  lastVote := None;
+  sent_messages := [];
+|}.
 
 Inductive acceptor_label : Set :=
 | A_send_1b
 | A_send_2b.
 
 Definition acceptor_type : VLSMType paxos_message :=
-  {| state := acceptor_state
-   ; label := acceptor_label
-   |}.
+{|
+  state := acceptor_state;
+  label := acceptor_label;
+|}.
 
 Definition acceptor_valid : acceptor_label -> acceptor_state * option paxos_message -> Prop :=
   fun l som =>
@@ -191,12 +193,13 @@ Definition acceptor_transition (l : acceptor_label) (som : acceptor_state * opti
   end.
 
 Definition acceptor_machine : VLSMMachine acceptor_type :=
-  {| initial_state_prop := (.= initial_acceptor)
-   ; s0 := populate (exist _ initial_acceptor eq_refl)
-   ; initial_message_prop := (fun _ => False)
-   ; valid := acceptor_valid
-   ; transition := acceptor_transition
-   |}.
+{|
+  initial_state_prop := (.= initial_acceptor);
+  s0 := populate (exist _ initial_acceptor eq_refl);
+  initial_message_prop := (fun _ => False);
+  valid := acceptor_valid;
+  transition := acceptor_transition;
+|}.
 
 Definition acceptor_vlsm : VLSM paxos_message := mk_vlsm acceptor_machine.
 
@@ -227,10 +230,11 @@ Proof.
 Qed.
 
 #[export] Instance acceptor_has_been_sent_inst : HasBeenSentCapability acceptor_vlsm :=
-  {| has_been_sent := acceptor_has_been_sent
-   ; has_been_sent_dec := acceptor_has_been_sent_dec
-   ; has_been_sent_stepwise_props := acceptor_has_been_sent_stepwise_props
-   |}.
+{|
+  has_been_sent := acceptor_has_been_sent;
+  has_been_sent_dec := acceptor_has_been_sent_dec;
+  has_been_sent_stepwise_props := acceptor_has_been_sent_stepwise_props;
+|}.
 
 End sec_acceptor_vlsm.
 
@@ -375,42 +379,47 @@ Record ballot_state :=
 }.
 
 Definition initial_ballot_state : ballot_state :=
-  {| sent_1a := false
-  ; gathered_1b := ∅
-  ; sent_1c := []
-  ; sent_2a := None
-  |}.
+{|
+  sent_1a := false;
+  gathered_1b := ∅;
+  sent_1c := [];
+  sent_2a := None;
+|}.
 
 #[export] Instance ballot_state_empty : Empty ballot_state := initial_ballot_state.
 
 Definition set_sent_1a (sb : ballot_state) : ballot_state :=
-  {| sent_1a := true
-  ; gathered_1b := gathered_1b sb
-  ; sent_1c := sent_1c sb
-  ; sent_2a := sent_2a sb
-  |}.
+{|
+  sent_1a := true;
+  gathered_1b := gathered_1b sb;
+  sent_1c := sent_1c sb;
+  sent_2a := sent_2a sb;
+|}.
 
 Definition insert_gathered_1b
   (a : Acceptor) (last_vote : option (Ballot * Value)) (sb : ballot_state) : ballot_state :=
-  {| sent_1a := sent_1a sb
-  ; gathered_1b := <[ a := last_vote ]> (gathered_1b sb)
-  ; sent_1c := sent_1c sb
-  ; sent_2a := sent_2a sb
-  |}.
+{|
+  sent_1a := sent_1a sb;
+  gathered_1b := <[ a := last_vote ]> (gathered_1b sb);
+  sent_1c := sent_1c sb;
+  sent_2a := sent_2a sb;
+|}.
 
 Definition set_sent_1c (safe_v : AllOrFin VSet) (sb : ballot_state) : ballot_state :=
-  {| sent_1a := sent_1a sb
-  ; gathered_1b := gathered_1b sb
-  ; sent_1c := safe_v :: sent_1c sb
-  ; sent_2a := sent_2a sb
-  |}.
+{|
+  sent_1a := sent_1a sb;
+  gathered_1b := gathered_1b sb;
+  sent_1c := safe_v :: sent_1c sb;
+  sent_2a := sent_2a sb;
+|}.
 
 Definition set_sent_2a (v : Value) (sb : ballot_state) : ballot_state :=
-  {| sent_1a := sent_1a sb
-  ; gathered_1b := gathered_1b sb
-  ; sent_1c := sent_1c sb
-  ; sent_2a := Some v
-  |}.
+{|
+  sent_1a := sent_1a sb;
+  gathered_1b := gathered_1b sb;
+  sent_1c := sent_1c sb;
+  sent_2a := Some v;
+|}.
 
 Definition leaders_state := Bmap ballot_state.
 
@@ -423,9 +432,10 @@ Inductive leader_label : Type :=
 Definition leaders_label : Type := Ballot * leader_label.
 
 Definition leaders_type : VLSMType paxos_message :=
-  {| state := leaders_state
-   ; label := leaders_label
-   |}.
+{|
+  state := leaders_state;
+  label := leaders_label;
+|}.
 
 Definition calculate_safe_values
   (b : Ballot) (participants : AMap (option (Ballot * Value))) : AllOrFin VSet :=
@@ -600,12 +610,13 @@ Definition leaders_transition
     end.
 
 Definition leaders_machine : VLSMMachine leaders_type :=
-  {| initial_state_prop := (.= ∅)
-   ; s0 := populate (exist _ ∅ eq_refl)
-   ; initial_message_prop := fun _ => False
-   ; valid := leaders_valid
-   ; transition := leaders_transition
-   |}.
+{|
+  initial_state_prop := (.= ∅);
+  s0 := populate (exist _ ∅ eq_refl);
+  initial_message_prop := fun _ => False;
+  valid := leaders_valid;
+  transition := leaders_transition;
+|}.
 
 Definition leaders_vlsm : VLSM paxos_message := mk_vlsm leaders_machine.
 
@@ -700,7 +711,9 @@ Proof.
 Qed.
 
 #[export] Instance leaders_has_been_sent_cap : HasBeenSentCapability leaders_vlsm :=
-  {| has_been_sent_stepwise_props := leaders_has_been_sent_props |}.
+{|
+  has_been_sent_stepwise_props := leaders_has_been_sent_props;
+|}.
 
 Lemma examine_leaders_output :
   forall l s im s' om,
@@ -1330,8 +1343,9 @@ Qed.
 *)
 Definition to_voting_state : state (voting_vlsm Value VSet Acceptor ASet Quorum) :=
   fun a =>
-    {| Voting.maxBal := maxBal (s (acceptor_ix a))
-    ; Voting.votes := votes_from_acceptor (s (acceptor_ix a))
+    {|
+      Voting.maxBal := maxBal (s (acceptor_ix a));
+      Voting.votes := votes_from_acceptor (s (acceptor_ix a));
     |}.
 
 (**
