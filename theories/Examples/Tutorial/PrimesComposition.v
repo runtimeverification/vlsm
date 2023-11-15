@@ -81,7 +81,7 @@ Definition radix_vlsm : VLSM multiplying_message :=
 
 Definition radix_label : label multiplying_type := ().
 
-(** ** Parity VLSM Properties *)
+(** ** Radix VLSM Properties *)
 
 (** *** Constrained messages are positives divisible by the multiplier *)
 
