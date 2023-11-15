@@ -259,14 +259,14 @@ Lemma finite_trace_last_is_last
   (s : state T) (x : transition_item T) (tl : list (transition_item T)) :
     finite_trace_last s (tl ++ [x]) = destination x.
 Proof.
-  by unfold finite_trace_last; rewrite map_app; cbn; rewrite last_is_last.
+  by unfold finite_trace_last; rewrite map_app; cbn; rewrite last_app.
 Qed.
 
 Lemma finite_trace_last_output_is_last
   (x : transition_item T) (tl : list (transition_item T)) :
     finite_trace_last_output (tl ++ [x]) = output x.
 Proof.
-  by unfold finite_trace_last_output; rewrite map_app; cbn; rewrite last_is_last.
+  by unfold finite_trace_last_output; rewrite map_app; cbn; rewrite last_app.
 Qed.
 
 Lemma finite_trace_nth_first
