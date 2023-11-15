@@ -33,16 +33,17 @@ Definition consensus_state : Type := VSet.
 Definition consensus_message : Type := False.
 
 (**
-  This inductive can be seen as a degenerate case in
-  a family of types for expressing voting choices.
+  This type can be seen as a degenerate case when
+  defining a sum type for expressing different steps
+  in a transition system.
 *)
 Inductive consensus_action : Type :=
 | Decided (v : V).
 
 (**
-  To enable refinement, we need to allow stutter actions
-  in our transition system. Hence, we use [None] to express
-  stuttering, i.e., a no-op transition.
+  To enable TLA-style refinement, we need to allow stutter actions
+  in our transition system. Hence, we use [None] to express stuttering,
+  i.e., a no-op transition.
 *)
 Definition consensus_label : Type := option consensus_action.
 
