@@ -146,14 +146,16 @@ Inductive acceptor_label : Type :=
 Solve Obligations with congruence.
 
 Definition acceptor_type : VLSMType False :=
-  {| state := acceptor_state
-   ; label := acceptor_label
-   |}.
+{|
+  state := acceptor_state;
+  label := acceptor_label;
+|}.
 
 Definition acceptor_s0 : acceptor_state :=
-  {| votes := ∅
-   ; maxBal := None
-   |}.
+{|
+  votes := ∅;
+  maxBal := None;
+|}.
 
 Definition acceptor_initial_state_prop (S : acceptor_state) : Prop :=
   S = acceptor_s0.
@@ -175,12 +177,13 @@ Definition acceptor_transition
     end.
 
 Definition acceptor_vlsm_machine : VLSMMachine acceptor_type :=
-  {| initial_state_prop := eq acceptor_s0
-   ; s0 := populate (exist _ acceptor_s0 eq_refl)
-   ; initial_message_prop := (fun _ => False)
-   ; transition := acceptor_transition
-   ; valid := acceptor_locally_valid
-   |}.
+{|
+  initial_state_prop := eq acceptor_s0;
+  s0 := populate (exist _ acceptor_s0 eq_refl);
+  initial_message_prop := (fun _ => False);
+  transition := acceptor_transition;
+  valid := acceptor_locally_valid;
+|}.
 
 Definition acceptor_vlsm : VLSM False := mk_vlsm acceptor_vlsm_machine.
 
