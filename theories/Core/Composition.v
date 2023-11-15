@@ -918,7 +918,7 @@ Proof.
   apply
     (Decision_iff
       (P := List.Exists (fun i => initial_message_prop (IM i) m) (enum index))).
-  - rewrite <- exists_finite.
+  - rewrite Exists_finite.
     split; intros [i Hm]; exists i.
     + by exists (exist _ _ Hm).
     + by destruct Hm as [[im Hinit] [= ->]].
