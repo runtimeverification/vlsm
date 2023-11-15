@@ -1201,8 +1201,8 @@ Proof.
 Qed.
 
 (**
-  From any composite state whose components are even natural numbers there is
-  a valid trace reaching [state00].
+  From any composite state whose components are even non-negative integers
+  there is a valid trace reaching [state00].
 *)
 Theorem parity_composite_23_reachable_00 :
   forall (s2 s3 : Z), 0 <= s2 -> 0 <= s3 ->
