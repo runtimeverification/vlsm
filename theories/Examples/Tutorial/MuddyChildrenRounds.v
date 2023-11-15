@@ -14,14 +14,14 @@ From VLSM.Core Require Import ConstrainedVLSM.
   Here is #<a href="https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html#muddy">a standard statement of the muddy children puzzle</a>#:
   Three children are playing in the mud. Father calls the children to the house,
   arranging them in a semicircle so that each child can clearly see every other
-  child. “At least one of you has mud on your forehead”, says Father.
-  The children look around, each examining every other child’s forehead.
+  child. "At least one of you has mud on your forehead", says Father.
+  The children look around, each examining every other child's forehead.
   Of course, no child can examine his or her own. Father continues,
-  “If you know whether your forehead is dirty, then step forward now”.
+  "If you know whether your forehead is dirty, then step forward now".
   No child steps forward. Father repeats himself a second time,
-  “If you know whether your forehead is dirty, then step forward now”.
+  "If you know whether your forehead is dirty, then step forward now".
   Some but not all of the children step forward. Father repeats himself a third
-  time, “If you know whether your forehead is dirty, then step forward now”.
+  time, "If you know whether your forehead is dirty, then step forward now".
   All of the remaining children step forward. How many children have muddy foreheads?
 
   We alter the puzzle in two ways:
