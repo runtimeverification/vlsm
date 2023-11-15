@@ -70,8 +70,7 @@ Proof.
     apply Rplus_eq_compat_l.
     by rewrite decide_True.
   - inversion Hnodup as [| ? ? Ha Hnodup']; subst; clear Hnodup.
-    pose proof (in_not_in _ _ _ _ Hv' Ha).
-    rewrite decide_False; cbn; [| done].
+    rewrite decide_False; cbn; [| by intros ->].
     rewrite <- Rplus_assoc, (Rplus_comm (proj1_sig (weight v))), Rplus_assoc.
     by apply Rplus_eq_compat_l, IHvs.
 Qed.
