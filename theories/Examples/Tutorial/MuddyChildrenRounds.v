@@ -1087,7 +1087,7 @@ Lemma MC_build_muddy_muddy_trace_last_target (is : composite_state MCVLSM)
 Proof.
   destruct round; cbn.
   - by state_update_simpl; eexists.
-  - rewrite map_app. cbn. rewrite last_is_last.
+  - rewrite map_app; cbn. rewrite last_last.
     by state_update_simpl; eexists.
 Qed.
 
@@ -1101,7 +1101,7 @@ Proof.
   intros Hneq.
   destruct round; cbn.
   - by state_update_simpl; eexists.
-  - rewrite map_app. cbn. rewrite last_is_last.
+  - rewrite map_app. cbn. rewrite last_last.
     state_update_simpl.
     destruct (MC_build_muddy_muddy_trace_last_target is helper target round)
      as (obs & Hlast).
