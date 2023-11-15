@@ -12,25 +12,25 @@ From VLSM.Core Require Import ConstrainedVLSM.
   self-contained example of modeling and reasoning with VLSMs.
 
   Here is #<a href="https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html#muddy">a standard statement of the muddy children puzzle</a>#:
-  Three children are playing in the mud. Father calls the children to the house,
+
+  "Three children are playing in the mud. Father calls the children to the house,
   arranging them in a semicircle so that each child can clearly see every other
-  child. "At least one of you has mud on your forehead", says Father.
+  child. _At least one of you has mud on your forehead_, says Father.
   The children look around, each examining every other child's forehead.
   Of course, no child can examine his or her own. Father continues,
-  "If you know whether your forehead is dirty, then step forward now".
+  _If you know whether your forehead is dirty, then step forward now_.
   No child steps forward. Father repeats himself a second time,
-  "If you know whether your forehead is dirty, then step forward now".
+  _If you know whether your forehead is dirty, then step forward now_.
   Some but not all of the children step forward. Father repeats himself a third
-  time, "If you know whether your forehead is dirty, then step forward now".
-  All of the remaining children step forward. How many children have muddy foreheads?
+  time, _If you know whether your forehead is dirty, then step forward now_.
+  All of the remaining children step forward. How many children have muddy foreheads?"
 
   We alter the puzzle in two ways:
+  - we allow an arbitrary but fixed number of children, and
+  - we allow the children to communicate asynchronously.
 
-  - we allow an arbitrary number of children
-  - we allow the children to communicate asynchronously
-
-  To allow asynchronous communication we let each child maintain the "round"
-  they perceive themselves to be in an to communicate that to their peers.
+  To allow asynchronous communication, we let each child maintain the "round"
+  they perceive themselves to be in and to communicate their round number to their peers.
 
   We define some VLSM-specific notions in the
   context of the MC puzzle (such as labels, states, initial states,
