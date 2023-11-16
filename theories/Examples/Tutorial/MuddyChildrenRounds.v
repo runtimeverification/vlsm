@@ -293,11 +293,11 @@ Proof.
   split; destruct m; simpl.
   - destruct (s msg_index0) eqn:?; destruct st_rs0; simpl; [|done].
     destruct r; intros [[Hs Hr]|[Hs Hr]].
-    * by subst; eapply MC_no_equivocation_inductive_msg_eq; eauto.
-    * by subst; eapply MC_no_equivocation_inductive_undecided; eauto.
+    + by subst; eapply MC_no_equivocation_inductive_msg_eq; eauto.
+    + by subst; eapply MC_no_equivocation_inductive_undecided; eauto.
   - destruct (s msg_index0) eqn:?; destruct st_rs0 eqn:?.
-    * by destruct r; intros Hne; inversion Hne; subst; itauto congruence.
-    * by intros Hne; subst; inversion Hne; subst; itauto congruence.
+    + by destruct r; intros Hne; inversion Hne; subst; itauto congruence.
+    + by intros Hne; subst; inversion Hne; subst; itauto congruence.
 Qed.
 
 Definition MC_constraint
@@ -1008,8 +1008,8 @@ Proof.
     destruct Hnoequiv as [[Hnoequivst Hnoequivr] | [Hnoequivst Hnoequivr]]; [| done].
     subst; rewrite H11 in Hinvariant; cbn in Hinvariant.
     split; destruct Hinvariant as [Hn Hstobs].
-    * by rewrite <- Hstobs in Hn.
-    * assert (Hcons : consistent s).
+    + by rewrite <- Hstobs in Hn.
+    + assert (Hcons : consistent s).
       {
         apply (MC_non_initial_valid_consistent s).
         unfold MC_non_initial_valid_state; split; [done |].
