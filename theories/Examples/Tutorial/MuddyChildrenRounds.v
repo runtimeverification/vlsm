@@ -312,13 +312,13 @@ Definition MC_composite_vlsm : VLSM Message :=
   composite_vlsm MCVLSM MC_constraint.
 
 Definition MC_final_state (s : composite_state MCVLSM) : Prop :=
-  ∀ n : index, state_status (st_rs (s n)) <> undecided.
+  forall n : index, state_status (st_rs (s n)) <> undecided.
 
 Definition MC_initial_consistent_state (s : composite_state MCVLSM) : Prop :=
   composite_initial_state_prop MCVLSM s /\ consistent s.
 
 Definition MC_non_initial_valid_state (s : composite_state MCVLSM) : Prop :=
-  valid_state_prop MC_composite_vlsm s /\ ¬ (composite_initial_state_prop MCVLSM s).
+  valid_state_prop MC_composite_vlsm s /\ ~ (composite_initial_state_prop MCVLSM s).
 
 Definition MC_obs_equivalence (s1 s2 : composite_state MCVLSM) : Prop :=
   forall n : index, st_obs (s1 n) ≡ st_obs (s2 n).
@@ -1037,7 +1037,7 @@ Qed.
 
 Lemma MC_valid_noninitial_state_undecided_round_less_obs (s : composite_state MCVLSM) (i : index) :
   valid_state_prop MC_composite_vlsm s ->
-  ¬ MC_initial_state_prop (s i) ->
+  ~ MC_initial_state_prop (s i) ->
   state_status (st_rs (s i)) = undecided ->
   state_round (st_rs (s i)) < size (st_obs (s i)).
 Proof.
