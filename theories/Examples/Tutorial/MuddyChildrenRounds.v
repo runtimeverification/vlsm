@@ -224,7 +224,7 @@ Program Definition MC_initial_state : MC_initial_state_type :=
 Next Obligation.
 Proof. done. Qed.
 
-Instance Decision_MC_initial_state_prop :
+#[export] Instance Decision_MC_initial_state_prop :
   forall s, Decision (MC_initial_state_prop s).
 Proof. by typeclasses eauto. Qed.
 
