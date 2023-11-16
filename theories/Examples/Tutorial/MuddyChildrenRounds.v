@@ -1390,7 +1390,7 @@ Proof.
         {
           replace obs with (st_obs (finite_trace_last is
             (MC_build_clean_muddy_trace is target helper round) helper));
-          [| by rewrite Hlasthelper].
+            [| by rewrite Hlasthelper].
           apply MC_in_futures_preserves_obs_equiv. by eexists.
         }
         destruct Hcons as [Hnempty Hcons].
@@ -1433,7 +1433,7 @@ Proof.
       {
         replace obs' with (st_obs (finite_trace_last is
           (MC_build_clean_muddy_trace is target helper round) target));
-        [| by rewrite Hlast].
+          [| by rewrite Hlast].
         apply MC_in_futures_preserves_obs_equiv. by eexists.
       }
       destruct Hcons as [Hnempty Hcons].
