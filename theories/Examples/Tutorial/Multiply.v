@@ -2,7 +2,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 From Coq Require Import FunctionalExtensionality.
 
-(** * VLSMs that Multiply
+(** * Tutorial: VLSMs that Multiply
 
   This module demonstrates some basic notions of the VLSM framework.
 
@@ -11,21 +11,21 @@ From Coq Require Import FunctionalExtensionality.
   The definitions and lemmas tap into concepts such as valid and constrained
   traces, transitions, states, and messages.
 
-  The "doubling" VLSM has 2 as the only initial message and outputs the doubles
-  of the messages it receives as input. Therefore, constrained messages are
-  positive even numbers [doubling_constrained_messages] and valid messages are
-  powers of 2 [doubling_valid_messages_powers_of_2].
+  The "doubling" VLSM has 2 as its only initial message and as output doubles
+  the messages it receives as input. Therefore, constrained messages are
+  positive even numbers ([doubling_constrained_messages]) and valid messages are
+  powers of 2 ([doubling_valid_messages_powers_of_2]). Similarly, the "tripling"
+  VLSM has 3 as its only initial message and as output triples the messages it
+  receives as input.
 
-  Similarly, the "tripling" VLSM has 3 as the only initial message and outputs
-  the triples of the messages it receives as input.
-  When putting them together, though, they become more than the sum of their
-  parts: for example, the free composition's valid messages are all integers
-  which can be decomposed as a product of powers of 2 and 3.
+  When composing the doubling and tripling VLSMs, they become more than
+  the sum of their parts: the free composition's valid messages are
+  all integers which can be decomposed as a product of powers of 2 and 3.
 *)
 
 #[local] Open Scope Z_scope.
 
-(** ** Definition of the multiplying VLSMs' common features
+(** ** Definition of common features of the multiplying VLSMs
 
   The multiplying VLSMs have only one type of transition, decrementing their
   state and multiplying their input message as an output.
@@ -126,7 +126,7 @@ Definition doubling_machine : VLSMMachine multiplying_type :=
   valid := fun l '(st, om) => multiplying_valid l st om;
 |}.
 
-(** The definition of the doubling VLSM. *)
+(** The definition of the doubling VLSM *)
 
 Definition doubling_vlsm : VLSM multiplying_message :=
 {|
@@ -134,7 +134,7 @@ Definition doubling_vlsm : VLSM multiplying_message :=
   vmachine := doubling_machine;
 |}.
 
-(** *** Doubling VLSM Examples *)
+(** *** Doubling VLSM examples *)
 
 (** **** Example of an arbitrary transition *)
 
@@ -363,7 +363,7 @@ Proof.
   by apply doubling_constrained_trace2.
 Qed.
 
-(** *** Doubling VLSM Properties *)
+(** *** Doubling VLSM properties *)
 
 (** **** Inclusion into preloaded with all messages *)
 
@@ -438,7 +438,7 @@ Proof.
   - by apply doubling_constrained_states_left.
 Qed.
 
-(** *** Powers of 2 greater or equal than 2 are valid messages *)
+(** *** Powers of 2 greater than or equal to 2 are valid messages *)
 
 Lemma doubling_valid_messages_powers_of_2_right :
   forall (m : multiplying_message),
@@ -1235,4 +1235,3 @@ Proof.
 Qed.
 
 End sec_23_composition.
-
