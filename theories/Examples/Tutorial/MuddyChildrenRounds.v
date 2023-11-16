@@ -395,7 +395,7 @@ Lemma MC_in_futures_preserves_obs_equiv
   (Hfutures : in_futures MC_composite_vlsm s s') :
   MC_obs_equivalence s s'.
 Proof.
-  apply (in_futures_preserving MC_composite_vlsm); [..| done].
+  apply (in_futures_preserving MC_composite_vlsm); [.. | done].
   - by split; typeclasses eauto.
   - intros s1 s2 l om1 om2 [].
     by apply MC_trans_preserves_obs_equiv with l om1 om2.
@@ -1119,7 +1119,7 @@ Proof.
   intros Hvalid * Hsi.
   apply input_valid_transition_out with (l := existT i emit) (s := s) (s' := s)
     (om := None).
-  repeat split; subst; [done |..].
+  repeat split; subst; [done | ..].
   - by apply option_valid_message_None.
   - by cbn in *; rewrite Hsi; constructor.
   - cbn in *. rewrite !Hsi. rewrite MC_transition_equation_5.
@@ -1498,7 +1498,7 @@ Proof.
         (obs := st_obs (is i)); [| by state_update_simpl].
       apply input_valid_transition_destination with (l := existT i init) (s := is)
         (om := None) (om' := None).
-      repeat split; subst; [by apply initial_state_is_valid |.. ].
+      repeat split; subst; [by apply initial_state_is_valid | ..].
       * by apply option_valid_message_None.
       * specialize (Hinit i). cbn in *.
         unfold MC_initial_state_prop in Hinit.
@@ -1745,7 +1745,7 @@ Proof.
         (state_update MCVLSM s i (mkSt (st_obs (s i)) (Some (mkRS 0 muddy)))) None).
       cbn; state_update_simpl; cbn.
       unfold state_round_inc. unfold MC_initial_state_prop in He.
-      rewrite He; split; [| lia]. repeat split; [apply Hs |..].
+      rewrite He; split; [| lia]. repeat split; [apply Hs | ..].
       * by apply option_valid_message_None.
       * cbn. destruct (s i). cbn in *. subst. by constructor.
       * by apply MC_non_initial_valid_consistent in Hs as [].
@@ -1759,7 +1759,7 @@ Proof.
         (state_update MCVLSM s i (mkSt (st_obs (s i)) (Some (mkRS 0 undecided)))) None).
       cbn; state_update_simpl; cbn.
       unfold state_round_inc. unfold MC_initial_state_prop in He.
-      rewrite He; split; [| lia]. repeat split; [apply Hs |..].
+      rewrite He; split; [| lia]. repeat split; [apply Hs | ..].
       * by apply option_valid_message_None.
       * cbn. destruct (s i). cbn in *. subst. by constructor.
       * by apply MC_non_initial_valid_consistent in Hs as [].
@@ -1804,7 +1804,7 @@ Proof.
           - cbn. destruct (decide (i = j)); [by subst |].
             rewrite Hobs in *.
             clear - Hj n e. by set_solver.
-          - cbn. rewrite Hroundj. rewrite MC_muddy_number_of_muddy_seen; [done ..|].
+          - cbn. rewrite Hroundj. rewrite MC_muddy_number_of_muddy_seen; [done.. |].
             rewrite (Hobs j) in e. clear - e. by set_solver.
         }
         assert (Hnoequiv : MC_no_equivocation s {|
@@ -1887,7 +1887,7 @@ Proof.
            apply MC_muddy_number_of_muddy_seen_iff in Hobsj as Hjmuddy; [| done].
            rewrite Hroundj, Hobsj in *.
            replace st_obs0 with (st_obs (s i)) by (rewrite Hsi; done).
-           rewrite decide_True; [rewrite decide_False; [rewrite decide_True |] |]; [done |..].
+           rewrite decide_True; [rewrite decide_False; [rewrite decide_True |] |]; [done | ..].
            ++ destruct (decide (i = j)).
               ** by subst; rewrite Hsi in He.
               ** rewrite Hobs in n0.
@@ -2100,7 +2100,7 @@ Proof.
               apply MC_valid_noequiv_valid in Hc; [| done..].
               cbn in Hc; destruct Hc as [Hroundj Hj].
               split; [done |].
-              apply MC_undecided_undecided_increase_round in Ht; try done; [..| cbn in *; lia].
+              apply MC_undecided_undecided_increase_round in Ht; try done; [.. | cbn in *; lia].
               cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc.
               case_match; [| by lia].
               remember (state_round (st_rs (s j))) as roundj; unfold state_round in Ht.
