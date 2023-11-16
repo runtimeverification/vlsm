@@ -67,9 +67,10 @@ Inductive ChildStatus : Type :=
 | clean.
 
 Record RoundStatus : Type := mkRS
-  { rs_round : nat
-  ; rs_status : ChildStatus
-  }.
+{
+  rs_round : nat;
+  rs_status : ChildStatus;
+}.
 
 Section sec_muddy.
 
@@ -86,19 +87,21 @@ Context
   perceive themselves to be at and their [ChildStatus].
 *)
 Record State : Type := mkSt
-  { st_obs : indexSet
-  ; st_rs : option RoundStatus
-  }.
+{
+  st_obs : indexSet;
+  st_rs : option RoundStatus;
+}.
 
 (**
   A message carries the identity of its sender, and shares the round number
   and their [ChildStatus].
 *)
 Record Message : Type := mkMsg
-  { msg_index : index
-  ; msg_round : nat
-  ; msg_status : ChildStatus
-  }.
+{
+  msg_index : index;
+  msg_round : nat;
+  msg_status : ChildStatus;
+}.
 
 Definition MCType : VLSMType Message :=
 {|
