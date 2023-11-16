@@ -7,14 +7,16 @@ From VLSM.Core Require Import VLSM PreloadedVLSM ConstrainedVLSM Composition.
 From VLSM.Core Require Import VLSMProjections ProjectionTraces.
 From VLSM.Examples Require Import Multiply.
 
-(** * Primes Composition of VLSMs
+(** * Tutorial: Primes Composition of VLSMs
 
-  This module demonstrates advanced concepts of the VLSM framework.
-  We generalize the VLSMs defined in module [Multiply] as a radix VLSM
+  This module demonstrates some advanced concepts in the VLSM framework.
+
+  We generalize the VLSMs defined in the module Multiply as a radix VLSM
   parameterized on a multiplier and study the composition of a family of
   such VLSMs.
-  We then construct the composition consisting of a component for each prime
-  number, characterize the valid messages, and show that any component in
+
+  We then construct the VLSM composition consisting of a component for each prime
+  number, characterize valid messages, and show that any component in
   the composition is a validator.
 *)
 
@@ -81,7 +83,7 @@ Definition radix_vlsm : VLSM multiplying_message :=
 
 Definition radix_label : label multiplying_type := ().
 
-(** ** Radix VLSM Properties *)
+(** ** Radix VLSM properties *)
 
 (** *** Constrained messages are positives divisible by the multiplier *)
 
@@ -399,7 +401,7 @@ Definition primes_vlsm_composition : VLSM Z :=
 
 Lemma primes_vlsm_composition_valid_message_char :
   forall (m : Z),
-    valid_message_prop primes_vlsm_composition m <-> (m > 1)%Z.
+    valid_message_prop primes_vlsm_composition m <-> m > 1.
 Proof.
   assert (Hprime_pos : forall i : primes, `i > 1).
   {
@@ -509,11 +511,11 @@ Qed.
 Lemma even_constrained_primes_composition_valid_message_char (m : Z) :
   valid_message_prop even_constrained_primes_composition m
     <->
-  (m > 1)%Z /\ Z.Even m \/ prime m.
+  ((m > 1 /\ Z.Even m) \/ prime m).
 Proof.
   split.
   - intros Hm.
-    cut ((m > 1)%Z /\ (Z.Even m \/ prime m)).
+    cut (m > 1 /\ (Z.Even m \/ prime m)).
     {
       by destruct (decide (prime m)); [right | left; itauto].
     }
