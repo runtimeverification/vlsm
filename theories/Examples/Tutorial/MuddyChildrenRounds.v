@@ -352,10 +352,10 @@ Proof.
   intros i; rewrite !elem_of_union_list.
   split; intros (X & HX & Hi); apply elem_of_list_fmap in HX as (y & -> & Hy).
   - exists (st_obs (s2 y)); split.
-    + apply elem_of_list_fmap; by exists y.
+    + by apply elem_of_list_fmap; exists y.
     + by apply Hobs.
   - exists (st_obs (s1 y)); split.
-    + apply elem_of_list_fmap; by exists y.
+    + by apply elem_of_list_fmap; exists y.
     + by apply Hobs.
 Qed.
 
@@ -531,7 +531,7 @@ Lemma MC_transition_undecided_receive_clean_round_obs :
   (mkSt (st_obs s) (Some (mkRS (msg_round m) clean)), None).
 Proof.
   by intros; rewrite H9, H10; simpl; rewrite MC_transition_equation_9;
-  unfold MC_transition_clause_3; repeat case_decide.
+    unfold MC_transition_clause_3; repeat case_decide.
 Qed.
 
 Lemma MC_transition_undecided_receive_clean_round_obs_plus_one :
@@ -704,10 +704,10 @@ Proof.
   rewrite Hobs_equiv, Hcons, size_difference in Hinvs; cycle 1.
   - apply singleton_subseteq_l; unfold MuddyUnion; rewrite elem_of_union_list.
     exists (st_obs (s i)); split; [| done].
-    apply elem_of_list_fmap; exists i; by split; [| apply elem_of_enum].
+    by apply elem_of_list_fmap; exists i; split; [| apply elem_of_enum].
   - rewrite size_singleton in Hinvs.
     apply MC_number_of_muddy_seen with (n := i) in Hconsistent.
-    destruct Hconsistent; lia.
+    by destruct Hconsistent; lia.
 Qed.
 
 Lemma MC_composite_invariant_preservation_muddy_from_clean (s sm : composite_state MCVLSM)
@@ -775,7 +775,7 @@ Proof.
   assert (Hinvs : MC_composite_invariant s').
   {
     eapply Hind; cycle 2; [by split | | done].
-    rewrite app_length; cbn; lia.
+    by rewrite app_length; cbn; lia.
   }
   apply valid_trace_get_last in Hlst as Heqs.
   apply valid_trace_forget_last, first_transition_valid in Hlst.
@@ -784,7 +784,7 @@ Proof.
   {
     symmetry. apply set_size_proper. apply MC_obs_equiv_preserves_muddy.
     apply MC_trans_preserves_obs_equiv with l input output.
-    apply Hlst.
+    by apply Hlst.
   }
   unfold MC_component_invariant, MC_component_invariant_helper. rewrite HMuddyUnion.
   destruct l as [j lj]. destruct Hlst as [(_ & _ & Hv & Hc) Ht]. cbn in Ht.
@@ -852,10 +852,10 @@ Proof.
       by destruct (statusj); lia.
     }
     assert (o0 ≡ st_obs (s' i)). { by rewrite <- H10. }
-    repeat case_decide; inversion Heqcall; subst; cbn in *;
+    by repeat case_decide; inversion Heqcall; subst; cbn in *;
     clear Heqcall; try lia;
     (split; [lia |]);
-    by eapply MC_composite_invariant_preservation_muddy_from_undecided.
+    eapply MC_composite_invariant_preservation_muddy_from_undecided.
   - (* receive *)
     rewrite <- H10 in H0; inversion H0; subst; clear H0; rewrite Htj in Heqcall.
     unfold MC_component_invariant in Hinvs; rewrite <- H10 in Hinvs; cbn in Hinvs.
@@ -913,26 +913,26 @@ Proof.
       destruct (Hinvs' j) as [Hjinit | Hinvsj]; [by rewrite Hsj in Hjinit |].
       unfold MC_component_invariant in Hinvsj.
       rewrite Hsj in Hinvsj. cbn in Hinvsj.
-      cbn. lia.
+      by cbn; lia.
     }
     assert (o0 ≡ st_obs (s' i)). { by rewrite <- H10. }
     repeat case_decide; inversion Heqcall; subst; cbn in *;
-    clear Heqcall; try lia;
+    by clear Heqcall; try lia;
     (split; [lia |]);
     ( destruct Hinvs as [Hstobs Hmuddy];
       rewrite <- Hmuddy in Hstobs;
       destruct (decide (size (MuddyUnion s') = 0)); [| lia];
-      by apply size_non_empty_iff in HMuddy_s').
+      apply size_non_empty_iff in HMuddy_s').
   - (* receive *)
     rewrite <- H10 in H0; inversion H0; subst; clear H0.
     rewrite Htj in Heqcall; inversion Heqcall; subst; cbn in *.
     clear Heqcall Htj; unfold MC_component_invariant in Hinvs.
-    rewrite <- H10 in Hinvs; cbn in Hinvs; by destruct Hinvs.
+    by rewrite <- H10 in Hinvs; cbn in Hinvs; destruct Hinvs.
   - (* receive *)
     rewrite <- H10 in H0; inversion H0; subst; clear H0; rewrite Htj in Heqcall.
     inversion Heqcall; cbn in *; subst.
     clear Heqcall Htj; unfold MC_component_invariant in Hinvs; rewrite <- H10 in Hinvs.
-    cbn in Hinvs; by destruct Hinvs.
+    by cbn in Hinvs; destruct Hinvs.
   - (* receive *)
     rewrite <- H10 in H0; inversion H0; subst; clear H0; rewrite Htj in Heqcall.
     unfold MC_component_invariant in Hinvs; rewrite <- H10 in Hinvs; cbn in Hinvs.
@@ -998,8 +998,8 @@ Proof.
     unfold MC_no_equivocation in Hnoequiv.
     repeat case_match; [| done].
     cbn in *.
-    destruct Hnoequiv as [[Hnoequivst Hnoequivr] | [Hnoequivst Hnoequivr]];
-      by rewrite H10 in Hsminit.
+    by destruct Hnoequiv as [[Hnoequivst Hnoequivr] | [Hnoequivst Hnoequivr]];
+      rewrite H10 in Hsminit.
   - unfold MC_component_invariant, MC_component_invariant_helper in Hinvariant.
     unfold MC_no_equivocation in Hnoequiv.
     repeat case_match; try done; cbn in *; subst;
@@ -1425,7 +1425,7 @@ Proof.
         by rewrite state_update_twice.
     + cbn in *; subst. rewrite Hlasthelper. cbn.
       state_update_simpl. rewrite Hlast.
-      constructor.
+      by constructor.
     + by cbn in *; state_update_simpl; left.
     + cbn. state_update_simpl. rewrite Hlast.
       rewrite MC_transition_equation_7. unfold MC_transition_clause_5.
@@ -1650,7 +1650,7 @@ Lemma MC_undecided_muddy_increase_round (s : composite_state MCVLSM)
   message_status (input item) = muddy ->
   message_index (input item) i ∈ st_obs (s i) ->
   message_round (input item) = size (st_obs (s i)) - 1 \/
-   message_round (input item) = size (st_obs (s i)) ->
+    message_round (input item) = size (st_obs (s i)) ->
   state_round (st_rs (destination item i)) > state_round (st_rs (s i)).
 Proof.
   intros Hl Hvalid Hsundecided Hmmuddy Hmindex [Hmround1 | Hmround2].
@@ -1807,12 +1807,12 @@ Proof.
           apply MC_undecided_muddy_to_muddy_increase_round in Ht; try done.
           - cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc; case_match; [| lia].
             remember (state_round (st_rs (s j))) as roundj.
-            unfold state_round in Ht; cbn in Ht; lia.
+            by unfold state_round in Ht; cbn in Ht; lia.
           - cbn. destruct (decide (i = j)); [by subst |].
             rewrite Hobs in *.
-            clear - Hj n e. set_solver.
+            clear - Hj n e. by set_solver.
           - cbn. rewrite Hroundj. rewrite MC_muddy_number_of_muddy_seen; [done ..|].
-            rewrite (Hobs j) in e. clear - e. set_solver.
+            rewrite (Hobs j) in e. clear - e. by set_solver.
         }
         assert (Hnoequiv : MC_no_equivocation s {|
           msg_index := j;
@@ -1841,7 +1841,7 @@ Proof.
            ++ by symmetry; apply MC_muddy_number_of_muddy_seen_iff;
                 [| by apply MuddyUnion_elem in e].
            ++ destruct Hcons as [Hinit Hcons]. rewrite Hcons.
-              destruct (decide (i = j)); [by subst; rewrite Hsi in He | set_solver].
+              by destruct (decide (i = j)); [subst; rewrite Hsi in He | set_solver].
       * exists (Build_transition_item (T := composite_type MCVLSM) (existT i receive)
           (Some (mkMsg j (state_round (st_rs (s j))) muddy))
           (state_update MCVLSM s i (mkSt (st_obs (s i))
@@ -1862,10 +1862,10 @@ Proof.
           - cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc.
             case_match; [| lia].
             remember (state_round (st_rs (s j))) as roundj.
-            unfold state_round in Ht; cbn in Ht; lia.
+            by unfold state_round in Ht; cbn in Ht; lia.
           - cbn. destruct (decide (i = j)); [by subst; rewrite He in Hundecided |].
             rewrite Hobs in *.
-            clear - Hj n n1. set_solver.
+            clear - Hj n n1. by set_solver.
           - cbn. rewrite Hroundj. rewrite MC_clean_number_of_muddy_seen; [done .. |].
             rewrite (Hobs j) in n0. destruct (decide (i = j)); [by subst; congruence |].
             clear - n0 n1.
@@ -1996,7 +1996,7 @@ Proof.
              by cbn in Ht; lia.
            }
            assert (Hnoequiv :  MC_no_equivocation s
-            ( mkMsg k (state_round (st_rs (s k))) undecided)).
+            (mkMsg k (state_round (st_rs (s k))) undecided)).
            {
              by unfold MC_no_equivocation; repeat case_match;
                cbn in *; [left; split | lia].
