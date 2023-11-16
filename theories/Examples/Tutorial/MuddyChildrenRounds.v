@@ -519,16 +519,15 @@ Qed.
 
 Lemma MC_transition_undecided_receive_clean_round_obs :
   forall (i : index) (s : State) (m : Message),
-  state_status (st_rs s) = undecided ->
-  msg_status m = clean ->
-  msg_index m ∉ st_obs s ->
-  msg_round m = size (st_obs s) ->
-  MC_transition i receive
-    (mkSt (st_obs s)
-      (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
-    (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
-    =
-  (mkSt (st_obs s) (Some (mkRS (msg_round m) clean)), None).
+    state_status (st_rs s) = undecided ->
+    msg_status m = clean ->
+    msg_index m ∉ st_obs s ->
+    msg_round m = size (st_obs s) ->
+    MC_transition i receive
+      (mkSt (st_obs s) (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
+      (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
+      =
+    (mkSt (st_obs s) (Some (mkRS (msg_round m) clean)), None).
 Proof.
   by intros; rewrite H9, H10; simpl; rewrite MC_transition_equation_9;
     unfold MC_transition_clause_3; repeat case_decide.
@@ -536,16 +535,15 @@ Qed.
 
 Lemma MC_transition_undecided_receive_clean_round_obs_plus_one :
   forall (i : index) (s : State) (m : Message),
-  state_status (st_rs s) = undecided ->
-  msg_status m = clean ->
-  msg_index m ∉ st_obs s ->
-  msg_round m = size (st_obs s) + 1 ->
-  MC_transition i receive
-    (mkSt (st_obs s)
-       (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
-    (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
-    =
-  (mkSt (st_obs s) (Some (mkRS (msg_round m - 1) muddy)), None).
+    state_status (st_rs s) = undecided ->
+    msg_status m = clean ->
+    msg_index m ∉ st_obs s ->
+    msg_round m = size (st_obs s) + 1 ->
+    MC_transition i receive
+      (mkSt (st_obs s) (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
+      (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
+      =
+    (mkSt (st_obs s) (Some (mkRS (msg_round m - 1) muddy)), None).
 Proof.
   by intros; rewrite H9, H10; simpl; rewrite MC_transition_equation_9;
     unfold MC_transition_clause_3; repeat case_decide; try itauto; lia.
@@ -553,16 +551,15 @@ Qed.
 
 Lemma MC_transition_undecided_receive_muddy_round_obs :
   forall (i : index) (s : State) (m : Message),
-  state_status (st_rs s) = undecided ->
-  msg_status m = muddy ->
-  msg_index m ∈ st_obs s ->
-  msg_round m = size (st_obs s) ->
-  MC_transition i receive
-   (mkSt (st_obs s)
-     (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
-   (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
-    =
-  (mkSt (st_obs s) (Some (mkRS (msg_round m) muddy)), None).
+    state_status (st_rs s) = undecided ->
+    msg_status m = muddy ->
+    msg_index m ∈ st_obs s ->
+    msg_round m = size (st_obs s) ->
+    MC_transition i receive
+      (mkSt (st_obs s) (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
+      (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
+      =
+    (mkSt (st_obs s) (Some (mkRS (msg_round m) muddy)), None).
 Proof.
   by intros; rewrite H9, H10; simpl; rewrite MC_transition_equation_8;
     unfold MC_transition_clause_4; repeat case_decide.
@@ -570,16 +567,15 @@ Qed.
 
 Lemma MC_transition_undecided_receive_muddy_round_obs_minus_one :
   forall (i : index) (s : State) (m : Message),
-  state_status (st_rs s) = undecided ->
-  msg_status m = muddy ->
-  msg_index m ∈ st_obs s ->
-  msg_round m = size (st_obs s) - 1 ->
-  MC_transition i receive
-   (mkSt (st_obs s)
-    (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
-   (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
-   =
-  (mkSt (st_obs s) (Some (mkRS (msg_round m + 1) clean)), None).
+    state_status (st_rs s) = undecided ->
+    msg_status m = muddy ->
+    msg_index m ∈ st_obs s ->
+    msg_round m = size (st_obs s) - 1 ->
+    MC_transition i receive
+      (mkSt (st_obs s) (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
+      (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
+      =
+    (mkSt (st_obs s) (Some (mkRS (msg_round m + 1) clean)), None).
 Proof.
   intros; rewrite H9, H10; simpl; rewrite MC_transition_equation_8;
    unfold MC_transition_clause_4; repeat case_decide; try itauto.
@@ -589,17 +585,16 @@ Qed.
 
 Lemma MC_transition_undecided_receive_undecided_round_obs_minus_one :
   forall (i : index) (s : State) (m : Message),
-  state_status (st_rs s) = undecided ->
-  msg_status m = undecided ->
-  msg_index m ∈ st_obs s ->
-  msg_round m = size (st_obs s) - 1 ->
-  state_round (st_rs s) < size (st_obs s) ->
-  MC_transition i receive
-   (mkSt (st_obs s)
-    (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
-   (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
-   =
-  (mkSt (st_obs s) (Some (mkRS (msg_round m + 1) muddy)), None).
+    state_status (st_rs s) = undecided ->
+    msg_status m = undecided ->
+    msg_index m ∈ st_obs s ->
+    msg_round m = size (st_obs s) - 1 ->
+    state_round (st_rs s) < size (st_obs s) ->
+    MC_transition i receive
+      (mkSt (st_obs s) (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
+      (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
+      =
+    (mkSt (st_obs s) (Some (mkRS (msg_round m + 1) muddy)), None).
 Proof.
   by intros; rewrite H9, H10; simpl; rewrite MC_transition_equation_7;
     unfold MC_transition_clause_5; repeat case_decide; try itauto; lia.
@@ -607,17 +602,16 @@ Qed.
 
 Lemma MC_transition_undecided_receive_undecided_round_obs :
   forall (i : index) (s : State) (m : Message),
-  state_status (st_rs s) = undecided ->
-  msg_status m = undecided ->
-  msg_index m ∉ st_obs s ->
-  msg_round m = size (st_obs s) ->
-  state_round (st_rs s) < size (st_obs s) ->
-  MC_transition i receive
-   (mkSt (st_obs s)
-    (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
-   (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
-   =
-  (mkSt (st_obs s) (Some (mkRS (msg_round m) muddy)), None).
+    state_status (st_rs s) = undecided ->
+    msg_status m = undecided ->
+    msg_index m ∉ st_obs s ->
+    msg_round m = size (st_obs s) ->
+    state_round (st_rs s) < size (st_obs s) ->
+    MC_transition i receive
+      (mkSt (st_obs s) (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
+      (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
+      =
+    (mkSt (st_obs s) (Some (mkRS (msg_round m) muddy)), None).
 Proof.
   by intros; rewrite H9, H10; simpl; rewrite MC_transition_equation_7;
     unfold MC_transition_clause_5; repeat case_decide; try itauto; lia.
@@ -625,17 +619,16 @@ Qed.
 
 Lemma MC_transition_undecided_receive_undecided_round_lt_obs_minus_one :
   forall (i : index) (s : State) (m : Message),
-  state_status (st_rs s) = undecided ->
-  msg_status m = undecided ->
-  msg_index m ∈ st_obs s ->
-  state_round (st_rs s) <= msg_round m < size (st_obs s) - 1 ->
-  state_round (st_rs s) < size (st_obs s) ->
-  MC_transition i receive
-   (mkSt (st_obs s)
-     (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
-   (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
-   =
-  (mkSt (st_obs s) (Some (mkRS (msg_round m + 1) (state_status (st_rs s)))), None).
+    state_status (st_rs s) = undecided ->
+    msg_status m = undecided ->
+    msg_index m ∈ st_obs s ->
+    state_round (st_rs s) <= msg_round m < size (st_obs s) - 1 ->
+    state_round (st_rs s) < size (st_obs s) ->
+    MC_transition i receive
+      (mkSt (st_obs s) (Some (mkRS (state_round (st_rs s)) (state_status (st_rs s)))))
+      (Some (mkMsg (msg_index m) (msg_round m) (msg_status m)))
+      =
+    (mkSt (st_obs s) (Some (mkRS (msg_round m + 1) (state_status (st_rs s)))), None).
 Proof.
   by intros; rewrite H9, H10; simpl; rewrite MC_transition_equation_7;
     unfold MC_transition_clause_5; repeat case_decide; try itauto; lia.
