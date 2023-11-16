@@ -4,14 +4,15 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Lib Require Import Preamble EquationsExtras ListExtras.
 From VLSM.Core Require Import ConstrainedVLSM.
 
-(** * Round-Based Asynchronous Muddy Children Puzzle
+(** * Tutorial: Round-Based Asynchronous Muddy Children Puzzle
 
   This module formalizes the Muddy Children (MC) puzzle
   as a constrained composition of VLSMs that communicate
   asynchronously in rounds. The module provides an advanced
   self-contained example of modeling and reasoning with VLSMs.
 
-  Here is #<a href="https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html#muddy">a standard statement of the muddy children puzzle</a>#:
+  Consider a #<a href="https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html">
+  standard statement of the MC puzzle</a>#:
 
   "Three children are playing in the mud. Father calls the children to the house,
   arranging them in a semicircle so that each child can clearly see every other
