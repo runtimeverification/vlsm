@@ -11,7 +11,8 @@ From VLSM.Core Require Import ConstrainedVLSM.
   asynchronously in rounds. The module provides an advanced
   self-contained example of modeling and reasoning with VLSMs.
 
-  Consider a #<a href="https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html">
+  Consider a
+  #<a href="https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html">
   standard statement of the MC puzzle</a>#:
 
   "Three children are playing in the mud. Father calls the children to the house,
@@ -762,7 +763,8 @@ Proof.
   revert s tr Heqlen_tr Htr.
   induction len_tr as [len_tr Hind] using (well_founded_induction Wf_nat.lt_wf). intros.
   subst len_tr.
-  destruct_list_last tr tr' lst Htr_lst; [by destruct Htr as [Htr Hinit]; inversion Htr; subst; left |].
+  destruct_list_last tr tr' lst Htr_lst;
+    [by destruct Htr as [Htr Hinit]; inversion Htr; subst; left |].
   intro i; destruct Htr as [Htr Hinit].
   apply finite_valid_trace_from_to_app_split in Htr as [Htr' Hlst].
   remember (finite_trace_last is tr') as s'.
@@ -1193,8 +1195,10 @@ Proof.
     eapply finite_valid_trace_from_to_app; [done |].
     apply valid_trace_add_default_last.
     apply finite_valid_trace_singleton.
-    destruct (MC_build_muddy_muddy_trace_last_helper is helper target round) as (obs & Hlasthelper); [done |].
-    destruct (MC_build_muddy_muddy_trace_last_target is helper target round) as (obs' & Hlast).
+    destruct (MC_build_muddy_muddy_trace_last_helper is helper target round)
+      as (obs & Hlasthelper); [done |].
+    destruct (MC_build_muddy_muddy_trace_last_target is helper target round)
+      as (obs' & Hlast).
     repeat split.
     + by apply valid_trace_last_pstate in IH.
     + apply valid_trace_last_pstate in IH as Hfinal.
@@ -1351,8 +1355,10 @@ Proof.
     eapply valid_trace_forget_last.
     split; [| done].
     eapply finite_valid_trace_from_to_app; [done |].
-    destruct (MC_build_clean_muddy_trace_last_helper is target helper round) as (obs & Hlasthelper); [done |].
-    destruct (MC_build_clean_muddy_trace_last_target is target helper round) as (obs' & Hlast).
+    destruct (MC_build_clean_muddy_trace_last_helper is target helper round)
+      as (obs & Hlasthelper); [done |].
+    destruct (MC_build_clean_muddy_trace_last_target is target helper round)
+      as (obs' & Hlast).
     assert (Hvalidtr1 : input_valid_transition MC_composite_vlsm
      (existT helper receive)
      (finite_trace_last is
@@ -1716,15 +1722,17 @@ Definition MC_transition_item_update s j i st rs : transition_item :=
 |}.
 
 (**
-  The progress lemma [MC_progress] ensures that from any valid non-initial composite state, there is
-  a valid transition to a new composite state, in which at least one component has greater
-  round than before the transition.
+  The progress lemma [MC_progress] ensures that from any valid non-initial
+  composite state, there is a valid transition to a new composite state, in
+  which at least one component has greater round than before the transition.
 
   This result will be further used in the proof of the correctness theorem.
-  To prove the progress lemma, we proceed by case analysis. We distinguish two main cases:
-  - at least one component is in an initial state, so we can use an init transition to prove our goal;
-  - else, we have to obtain two convenient components and build a transition between them,
-    that results in an increased round number.
+  To prove the progress lemma, we proceed by case analysis. We distinguish
+  two main cases:
+  - at least one component is in an initial state, so we can use an init
+    transition to prove our goal;
+  - else, we have to obtain two convenient components and build a transition
+    between them, that results in an increased round number.
 *)
 Lemma MC_progress (s : composite_state MCVLSM) :
   MC_non_initial_valid_state s ->
@@ -1795,7 +1803,8 @@ Proof.
           split; [done |].
           apply MC_undecided_muddy_to_muddy_increase_round in Ht; try done.
           - cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc; case_match; [| lia].
-            remember (state_round (st_rs (s j))) as roundj; unfold state_round in Ht; cbn in Ht; lia.
+            remember (state_round (st_rs (s j))) as roundj.
+            unfold state_round in Ht; cbn in Ht; lia.
           - cbn. destruct (decide (i = j)); [by subst |].
             rewrite Hobs in *.
             clear - Hj n e. set_solver.
@@ -1807,7 +1816,10 @@ Proof.
           msg_round := state_round (st_rs (s j));
           msg_status := muddy
         |}).
-        { unfold MC_no_equivocation. by repeat case_match; [rewrite <- H10; left; rewrite H10, <- He |]. }
+        {
+          unfold MC_no_equivocation.
+          by repeat case_match; [rewrite <- H10; left; rewrite H10, <- He |].
+        }
         destruct (s i) eqn: Hsi. destruct st_rs0; [| by contradict n; eexists; rewrite Hsi].
         destruct r as [ri sti]. cbn in Hundecided; subst.
         repeat split; try done.
@@ -1823,7 +1835,8 @@ Proof.
            rewrite Hroundj, Hobsj in *.
            replace st_obs0 with (st_obs (s i)) by (rewrite Hsi; done).
            rewrite decide_True; [rewrite decide_True; [done |] |].
-           ++ by symmetry; apply MC_muddy_number_of_muddy_seen_iff; [| by apply MuddyUnion_elem in e].
+           ++ by symmetry; apply MC_muddy_number_of_muddy_seen_iff;
+                [| by apply MuddyUnion_elem in e].
            ++ destruct Hcons as [Hinit Hcons]. rewrite Hcons.
               destruct (decide (i = j)); [by subst; rewrite Hsi in He | set_solver].
       * exists (Build_transition_item (T := composite_type MCVLSM) (existT i receive)
@@ -1843,8 +1856,10 @@ Proof.
           cbn in Hc. destruct Hc as [Hroundj Hj].
           split; [done |].
           apply MC_undecided_muddy_to_clean_increase_round in Ht; try done.
-          - cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc; case_match; [| lia].
-            remember (state_round (st_rs (s j))) as roundj; unfold state_round in Ht; cbn in Ht; lia.
+          - cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc.
+            case_match; [| lia].
+            remember (state_round (st_rs (s j))) as roundj.
+            unfold state_round in Ht; cbn in Ht; lia.
           - cbn. destruct (decide (i = j)); [by subst; rewrite He in Hundecided |].
             rewrite Hobs in *.
             clear - Hj n n1. set_solver.
@@ -1858,7 +1873,10 @@ Proof.
           msg_round := state_round (st_rs (s j));
           msg_status := muddy
         |}).
-        { unfold MC_no_equivocation. by repeat case_match; [rewrite <- H10; left; rewrite H10, <- He |]. }
+        {
+          unfold MC_no_equivocation.
+          by repeat case_match; [rewrite <- H10; left; rewrite H10, <- He |].
+        }
         destruct (s i) eqn: Hsi. destruct st_rs0; [| by contradict n; eexists; rewrite Hsi].
         destruct r as [ri sti]. cbn in Hundecided; subst.
         repeat split; try done.
@@ -1960,7 +1978,8 @@ Proof.
             (Some (mkRS (state_round (st_rs (s k)) + 1) muddy)))) None).
            cbn; state_update_simpl; cbn.
            cut (input_valid_transition_item MC_composite_vlsm s
-            (MC_transition_item_update s k j undecided (mkRS (state_round (st_rs (s k)) + 1) muddy))).
+             (MC_transition_item_update s k j undecided
+             (mkRS (state_round (st_rs (s k)) + 1) muddy))).
            {
              intro Ht; destruct (id Ht) as [(_ & Hm & Hv & Hc) _].
              unfold MC_constraint, input in Hc.
@@ -1968,7 +1987,8 @@ Proof.
              cbn in Hc; destruct Hc as [Hroundk Hk].
              split; [done |].
              apply MC_undecided_undecided_to_muddy_increase_round in Ht; try done.
-             cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc; case_match; [| by lia].
+             cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc.
+             case_match; [| by lia].
              remember (state_round (st_rs (s k))) as roundk; unfold state_round in Ht.
              by cbn in Ht; lia.
            }
@@ -1996,7 +2016,8 @@ Proof.
             (Some (mkRS (state_round (st_rs (s k)) + 1) undecided)))) None).
            cbn; state_update_simpl; cbn.
            cut (input_valid_transition_item MC_composite_vlsm s
-             (MC_transition_item_update s k j undecided (mkRS (state_round (st_rs (s k)) + 1) undecided))).
+             (MC_transition_item_update s k j undecided
+             (mkRS (state_round (st_rs (s k)) + 1) undecided))).
            {
              intro Ht; destruct (id Ht) as [(_ & Hm & Hv & Hc) _].
              unfold MC_constraint, input in Hc.
@@ -2037,7 +2058,8 @@ Proof.
               (Some (mkRS (state_round (st_rs (s j)) + 1) muddy)))) None).
              cbn; state_update_simpl; cbn.
              cut (input_valid_transition_item MC_composite_vlsm s
-              (MC_transition_item_update s j k undecided (mkRS (state_round (st_rs (s j)) + 1) muddy))).
+               (MC_transition_item_update s j k undecided
+               (mkRS (state_round (st_rs (s j)) + 1) muddy))).
              {
                intro Ht; destruct (id Ht) as [(_ & Hm & Hv & Hc) _].
                unfold MC_constraint, input in Hc.
@@ -2074,7 +2096,8 @@ Proof.
               (Some (mkRS (state_round (st_rs (s j)) + 1) undecided)))) None).
             cbn; state_update_simpl; cbn.
             cut (input_valid_transition_item MC_composite_vlsm s
-             (MC_transition_item_update s j k undecided (mkRS (state_round (st_rs (s j)) + 1) undecided))).
+              (MC_transition_item_update s j k undecided
+              (mkRS (state_round (st_rs (s j)) + 1) undecided))).
             {
               intro Ht; destruct (id Ht) as [(_ & Hm & Hv & Hc) _].
               unfold MC_constraint, input in Hc.
@@ -2082,7 +2105,8 @@ Proof.
               cbn in Hc; destruct Hc as [Hroundj Hj].
               split; [done |].
               apply MC_undecided_undecided_increase_round in Ht; try done; [..| cbn in *; lia].
-              cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc; case_match; [| by lia].
+              cbn in Ht; state_update_simpl; cbn in Ht; unfold state_round_inc.
+              case_match; [| by lia].
               remember (state_round (st_rs (s j))) as roundj; unfold state_round in Ht.
               by cbn in Ht; lia.
             }
