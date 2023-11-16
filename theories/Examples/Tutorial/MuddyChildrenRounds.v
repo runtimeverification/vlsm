@@ -185,10 +185,10 @@ MC_transition i receive (mkSt o (Some (mkRS r undecided))) (Some (mkMsg j r' und
 MC_transition _ _ s _ := (s, None).
 
 Definition state_status (s : option RoundStatus) : ChildStatus :=
- from_option rs_status undecided s.
+  from_option rs_status undecided s.
 
 Definition state_round (s : option RoundStatus) : nat :=
- from_option rs_round 0 s.
+  from_option rs_round 0 s.
 
 Definition state_round_inc (s : State) : nat :=
   match st_rs s with
@@ -225,7 +225,7 @@ Next Obligation.
 Proof. done. Qed.
 
 Instance Decision_MC_initial_state_prop :
- forall s, Decision (MC_initial_state_prop s).
+  forall s, Decision (MC_initial_state_prop s).
 Proof. by typeclasses eauto. Qed.
 
 #[export] Instance Inhabited_MC_initial_state_type : Inhabited (MC_initial_state_type) :=
@@ -339,7 +339,7 @@ Qed.
 Proof. by split; typeclasses eauto. Qed.
 
 Lemma MC_state_update_preserves_obs_equiv
- (s : composite_state MCVLSM) (i : index) (si : State) :
+  (s : composite_state MCVLSM) (i : index) (si : State) :
   st_obs (s i) ≡ st_obs si -> MC_obs_equivalence s (state_update MCVLSM s i si).
 Proof.
   by intros Hobs n; destruct (decide (n = i)); subst; state_update_simpl.
@@ -517,7 +517,7 @@ Proof.
 Qed.
 
 Lemma MC_transition_undecided_receive_clean_round_obs :
- forall (i : index) (s : State) (m : Message),
+  forall (i : index) (s : State) (m : Message),
   state_status (st_rs s) = undecided ->
   msg_status m = clean ->
   msg_index m ∉ st_obs s ->
@@ -534,7 +534,7 @@ Proof.
 Qed.
 
 Lemma MC_transition_undecided_receive_clean_round_obs_plus_one :
- forall (i : index) (s : State) (m : Message),
+  forall (i : index) (s : State) (m : Message),
   state_status (st_rs s) = undecided ->
   msg_status m = clean ->
   msg_index m ∉ st_obs s ->
@@ -551,7 +551,7 @@ Proof.
 Qed.
 
 Lemma MC_transition_undecided_receive_muddy_round_obs :
- forall (i : index) (s : State) (m : Message),
+  forall (i : index) (s : State) (m : Message),
   state_status (st_rs s) = undecided ->
   msg_status m = muddy ->
   msg_index m ∈ st_obs s ->
@@ -568,7 +568,7 @@ Proof.
 Qed.
 
 Lemma MC_transition_undecided_receive_muddy_round_obs_minus_one :
- forall (i : index) (s : State) (m : Message),
+  forall (i : index) (s : State) (m : Message),
   state_status (st_rs s) = undecided ->
   msg_status m = muddy ->
   msg_index m ∈ st_obs s ->
@@ -587,7 +587,7 @@ Proof.
 Qed.
 
 Lemma MC_transition_undecided_receive_undecided_round_obs_minus_one :
- forall (i : index) (s : State) (m : Message),
+  forall (i : index) (s : State) (m : Message),
   state_status (st_rs s) = undecided ->
   msg_status m = undecided ->
   msg_index m ∈ st_obs s ->
@@ -605,7 +605,7 @@ Proof.
 Qed.
 
 Lemma MC_transition_undecided_receive_undecided_round_obs :
- forall (i : index) (s : State) (m : Message),
+  forall (i : index) (s : State) (m : Message),
   state_status (st_rs s) = undecided ->
   msg_status m = undecided ->
   msg_index m ∉ st_obs s ->
@@ -623,7 +623,7 @@ Proof.
 Qed.
 
 Lemma MC_transition_undecided_receive_undecided_round_lt_obs_minus_one :
- forall (i : index) (s : State) (m : Message),
+  forall (i : index) (s : State) (m : Message),
   state_status (st_rs s) = undecided ->
   msg_status m = undecided ->
   msg_index m ∈ st_obs s ->
