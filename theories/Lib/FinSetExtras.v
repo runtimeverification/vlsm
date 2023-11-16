@@ -1,5 +1,5 @@
 From VLSM.Lib Require Import Itauto.
-From stdpp Require Import prelude.
+From stdpp Require Import prelude fin_maps.
 From VLSM.Lib Require Import Preamble.
 
 (** * Finite set utility definitions and lemmas *)
@@ -238,3 +238,21 @@ Lemma set_map_id (X : C) : X ≡ set_map id X.
 Proof. by set_solver. Qed.
 
 End sec_map.
+
+Definition mmap_insert
+  {I A SA : Type} {MI : Type -> Type}
+  `{FinMap I MI} `{FinSet A SA} (i : I) (a : A) (m : MI SA) :=
+  <[ i := {[ a ]} ∪ m !!! i ]> m.
+
+Lemma elem_of_mmap_insert
+  {I A SA : Type} {MI : Type -> Type}
+  `{FinMap I MI} `{FinSet A SA} (m : MI SA) (i j : I) (a b : A) :
+    b ∈ mmap_insert i a m !!! j <-> (a = b /\ i = j) \/ (b ∈ m !!! j).
+Proof.
+  unfold mmap_insert.
+  destruct (decide (i = j)) as [<- | Hij].
+  - rewrite lookup_total_insert.
+    by destruct (decide (a = b)); set_solver.
+  - rewrite lookup_total_insert_ne by done.
+    by set_solver.
+Qed.
