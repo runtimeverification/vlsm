@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
-From stdpp Require Import prelude finite base fin_sets fin_maps nmap.
+From stdpp Require Import prelude finite fin_sets fin_maps nmap.
 From Coq Require Import Streams FunctionalExtensionality Eqdep_dec.
-From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM.Lib Require Import Preamble ListExtras FinSetExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections Composition Equivocation.
 From VLSM.Core.Equivocation Require Import NoEquivocation.
 From VLSM.Examples Require Import Voting.

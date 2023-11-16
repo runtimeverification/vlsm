@@ -1,30 +1,30 @@
 From VLSM.Lib Require Import Itauto.
-From stdpp Require Import prelude finite base fin_sets fin_maps nmap.
+From stdpp Require Import prelude finite fin_sets fin_maps nmap.
 From Coq Require Import Streams FunctionalExtensionality Eqdep_dec.
-From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM.Lib Require Import Preamble ListExtras FinSetExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections Composition.
 From VLSM.Examples Require Import Consensus.
 
 (** * Consensus by Voting
 
-  A specification of a consensus algorithm where a set of nodes, the *acceptors*,
-  agree on a value by voting.
+  A specification of a consensus algorithm where a set of nodes,
+  the _acceptors_, agree on a value by voting.
 
-  The algorithm uses numbered rounds of voting.
-  Each acceptor casts at most one vote per round.
-  A value is chosen when a sufficient set of acceptors, a *quorum*, have voted for
-  the same value in the same round.
+  The algorithm uses numbered rounds of voting. Each acceptor casts at
+  most one vote per round. A value is chosen when a sufficient set of
+  acceptors, a _quorum_, have voted for the same value in the same round.
 
-  This specification is closer to something implementable than the Consensus module,
-  but still has some restrictions on the allowed transitions of an acceptor
-  that can only be checked with access to the states of all acceptors.
-  We model this as a composite VLSM with a composition constraint.
+  This specification is closer to something implementable than the
+  Consensus module, but still has some restrictions on the allowed
+  transitions of an acceptor that can only be checked with access to
+  the states of all acceptors. We model this as a composite VLSM with
+  a composition constraint.
 *)
 
-(** Ballot numbers. *)
+(** Ballot numbers *)
 Definition Ballot := N.
 
-(** Ballot numbers extended with a minimal element "-1" that comes before others. *)
+(** Ballot numbers extended with a minimal element "-1" that comes before others *)
 Definition Ballot' := option Ballot.
 
 Definition Ballot'_to_Z (b : Ballot') : Z := from_option Z.of_N (-1)%Z b.
@@ -68,24 +68,6 @@ Lemma Ballot'_Zeq_iff (b : Ballot') (x : Ballot) :
   (b : Z) = (x : Z) <-> b = Some x.
 Proof.
   by destruct b; cbn; [rewrite (inj_iff Z.of_N) |]; split; (congruence || ballot_lia).
-Qed.
-
-Definition mmap_insert
-  {I A SA : Type} {MI : Type -> Type}
-  `{FinMap I MI} `{FinSet A SA} (i : I) (a : A) (m : MI SA) :=
-  <[ i := {[ a ]} ∪ m !!! i ]> m.
-
-Lemma elem_of_mmap_insert
-  {I A SA : Type} {MI : Type -> Type}
-  `{FinMap I MI} `{FinSet A SA} (m : MI SA) (i j : I) (a b : A) :
-    b ∈ mmap_insert i a m !!! j <-> (a = b /\ i = j) \/ (b ∈ m !!! j).
-Proof.
-  unfold mmap_insert.
-  destruct (decide (i = j)) as [<- | Hij].
-  - rewrite lookup_total_insert.
-    by destruct (decide (a = b)); set_solver.
-  - rewrite lookup_total_insert_ne by done.
-    by set_solver.
 Qed.
 
 Section sec_voting_spec.
