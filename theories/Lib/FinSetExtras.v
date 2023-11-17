@@ -169,13 +169,14 @@ Qed.
 #[export] Instance fin_set_singleton_eq_dec :
   forall (X : C) (x : A), Decision (X ≡ {[x]}).
 Proof.
-  intros.
-  destruct (decide (elements X = [x])).
+  intros X x.
+  destruct (decide (elements X = [x])) as [Heq|Heq].
   - left; intro i.
-    by rewrite elem_of_singleton, <- elem_of_elements, e, elem_of_list_singleton.
-  - right; contradict n.
+    rewrite elem_of_singleton, <- elem_of_elements.
+    by rewrite Heq, elem_of_list_singleton.
+  - right; contradict Heq.
     apply Permutation_singleton_r.
-    by rewrite n, elements_singleton.
+    by rewrite Heq, elements_singleton.
 Qed.
 
 End sec_general.

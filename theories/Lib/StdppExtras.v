@@ -620,7 +620,7 @@ Proof.
 Qed.
 
 Lemma is_Some_proj_elim {A : Type}
- (m : option A) (Hsome : is_Some m) (f : A) (H : m = Some f) :
+  (m : option A) (Hsome : is_Some m) (f : A) (H : m = Some f) :
   is_Some_proj Hsome = f.
 Proof. by intros; subst. Qed.
 
