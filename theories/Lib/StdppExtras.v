@@ -618,3 +618,91 @@ Proof.
     intros [Ha ?]; split; [| by apply IHl].
     by contradict Ha; apply elem_of_list_fmap; eexists.
 Qed.
+
+Lemma is_Some_proj_elim {A : Type}
+  (m : option A) (Hsome : is_Some m) (f : A) (H : m = Some f) :
+  is_Some_proj Hsome = f.
+Proof. by intros; subst. Qed.
+
+Definition set_Forall2 `{ElemOf A C} (R : relation A) (X : C) :=
+  forall x y : A, x ∈ X -> y ∈ X -> x <> y -> R x y.
+
+Definition set_Exists2 `{ElemOf A C} (R : relation A) (X : C) :=
+  exists x y : A, x ∈ X /\ y ∈ X /\ x <> y /\ R x y.
+
+Section sec_Forall2_Exists2_props.
+
+Context
+  `{SemiSet A C}
+  (R : relation A)
+  .
+
+Lemma set_Forall2_empty : set_Forall2 R (∅ : C).
+Proof. by unfold set_Forall2; set_solver. Qed.
+
+Lemma set_Forall2_singleton (x : A) : set_Forall2 R ({[ x ]} : C).
+Proof. by unfold set_Forall2; set_solver. Qed.
+
+Lemma set_Forall2_pair (x y : A) :
+  x <> y -> set_Forall2 R ({[ x; y ]} : C) <-> R x y /\ R y x.
+Proof. by unfold set_Forall2; set_solver. Qed.
+
+Lemma set_Forall2_union (X Y : C) :
+  set_Forall2 R X -> set_Forall2 R Y ->
+  (forall x y : A, x ∈ X -> y ∈ Y -> x <> y -> R x y /\ R y x) ->
+  set_Forall2 R (X ∪ Y).
+Proof. by unfold set_Forall2; set_solver. Qed.
+
+Lemma set_Forall2_union_inv_1 (X Y : C) :
+  set_Forall2 R (X ∪ Y) -> set_Forall2 R X.
+Proof. by unfold set_Forall2; set_solver. Qed.
+
+Lemma set_Forall2_union_inv_2 (X Y : C) :
+  set_Forall2 R (X ∪ Y) -> set_Forall2 R Y.
+Proof. by unfold set_Forall2; set_solver. Qed.
+
+Lemma set_Exists2_empty : ~ set_Exists2 R (∅ : C).
+Proof. by unfold set_Exists2; set_solver. Qed.
+
+Lemma set_Exists2_singleton x : ~ set_Exists2 R ({[ x ]} : C).
+Proof. by unfold set_Exists2; set_solver. Qed.
+
+Lemma set_Exists2_pair (x y : A) :
+  set_Exists2 R ({[ x; y ]} : C) <-> x <> y /\ (R x y \/ R y x).
+Proof.
+  split; [by unfold set_Exists2; set_solver |].
+  intros [? []].
+  - by exists x, y; set_solver.
+  - by exists y, x; set_solver.
+Qed.
+
+Lemma set_Exists2_union_1 (X Y : C) :
+  set_Exists2 R X -> set_Exists2 R (X ∪ Y).
+Proof. by intros [x [y Hxy]]; exists x, y; set_solver. Qed.
+
+Lemma set_Exists2_union_2 (X Y : C) :
+  set_Exists2 R Y -> set_Exists2 R (X ∪ Y).
+Proof. by intros [x [y Hxy]]; exists x, y; set_solver. Qed.
+
+Lemma set_Exists2_union_3 (X Y : C) (x y : A) :
+  x ∈ X -> y ∈ Y -> x <> y -> R x y -> set_Exists2 R (X ∪ Y).
+Proof. by exists x, y; set_solver. Qed.
+
+Lemma set_Exists2_union_4 (X Y : C) (x y : A) :
+  x ∈ X -> y ∈ Y -> x <> y -> R y x -> set_Exists2 R (X ∪ Y).
+Proof. by intros; exists y, x; set_solver. Qed.
+
+Lemma set_Exists2_union_inv (X Y : C) :
+  set_Exists2 R (X ∪ Y) ->
+    set_Exists2 R X \/ set_Exists2 R Y \/
+    exists x y : A, x ∈ X /\ y ∈ Y /\ x <> y /\ (R x y \/ R y x).
+Proof.
+  intros (x & y & Hx & Hy & Hneq & Hxy).
+  apply elem_of_union in Hx as [], Hy as [].
+  - by left; exists x, y.
+  - by right; right; exists x, y; repeat split; [.. | left].
+  - by right; right; exists y, x; repeat split; [.. | right].
+  - by right; left; exists x, y.
+Qed.
+
+End sec_Forall2_Exists2_props.

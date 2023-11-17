@@ -157,6 +157,28 @@ Proof.
   - by typeclasses eauto.
 Qed.
 
+#[export] Instance fin_set_empty_eq_dec :
+  forall (X : C), Decision (X ≡ ∅).
+Proof.
+  intros.
+  destruct (decide (elements X = [])).
+  - by left; rewrite <- elements_empty_iff.
+  - by right; rewrite <- elements_empty_iff.
+Qed.
+
+#[export] Instance fin_set_singleton_eq_dec :
+  forall (X : C) (x : A), Decision (X ≡ {[x]}).
+Proof.
+  intros X x.
+  destruct (decide (elements X = [x])) as [Heq|Heq].
+  - left; intro i.
+    rewrite elem_of_singleton, <- elem_of_elements.
+    by rewrite Heq, elem_of_list_singleton.
+  - right; contradict Heq.
+    apply Permutation_singleton_r.
+    by rewrite Heq, elements_singleton.
+Qed.
+
 End sec_general.
 
 Section sec_filter.
