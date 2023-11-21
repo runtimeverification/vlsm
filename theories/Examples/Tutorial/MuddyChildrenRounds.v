@@ -297,13 +297,11 @@ Lemma MC_no_equivocation_inductive_equiv :
   forall s m, MC_no_equivocation s m <-> MC_no_equivocation_inductive s m.
 Proof.
   split; destruct m; cbn.
-  - destruct (s msg_index0) eqn: Heq; destruct st_rs0; cbn; [|done].
-    destruct r; intros [[Hs Hr] | [Hs Hr]].
-    + by subst; eapply MC_no_equivocation_inductive_msg_eq; eauto.
-    + by subst; eapply MC_no_equivocation_inductive_undecided; eauto.
-  - destruct (s msg_index0) eqn: Heq1; destruct st_rs0 eqn: Heq2.
-    + by destruct r; inversion 1; itauto congruence.
-    + by inversion 1; itauto congruence.
+  - repeat case_match; [| done].
+    intros [[] | []]; subst.
+    + by eapply MC_no_equivocation_inductive_msg_eq; eauto.
+    + by eapply MC_no_equivocation_inductive_undecided; eauto.
+  - by repeat case_match; inversion 1; itauto congruence.
 Qed.
 
 Definition MC_constraint
@@ -510,9 +508,10 @@ Lemma MC_number_of_muddy_seen (s : composite_state MCVLSM) :
   consistent s ->
   forall n, size (st_obs (s n)) <= size (MuddyUnion s) <= size (st_obs (s n)) + 1.
 Proof.
-  intros Hcons n; destruct (decide (n ∈ MuddyUnion s)).
-  - by apply MC_muddy_number_of_muddy_seen in e as ->; [lia |].
-  - by apply MC_clean_number_of_muddy_seen in n0 as ->; [lia |].
+  intros Hcons n.
+  destruct (decide (n ∈ MuddyUnion s)) as [Hdec | Hdec].
+  - by apply MC_muddy_number_of_muddy_seen in Hdec as ->; [lia |].
+  - by apply MC_clean_number_of_muddy_seen in Hdec as ->; [lia |].
 Qed.
 
 Lemma MC_transition_undecided_receive_clean_round_obs :
@@ -576,7 +575,7 @@ Lemma MC_transition_undecided_receive_muddy_round_obs_minus_one :
     (mkSt (st_obs s) (Some (mkRS (msg_round m + 1) clean)), None).
 Proof.
   intros; rewrite H9, H10, MC_transition_equation_8;
-   unfold MC_transition_clause_4; repeat case_decide; [| done..].
+    unfold MC_transition_clause_4; repeat case_decide; [| done..].
   destruct (decide (size (st_obs s) = 0)); [| by lia].
   by apply non_empty_inhabited, size_non_empty_iff in H11.
 Qed.
@@ -667,19 +666,21 @@ Proof.
   intros s i.
   unfold MC_component_invariant, MC_component_invariant_helper.
   case_match; split; intros.
-  - by apply component_invariant_undecided in H9.
+  - by apply component_invariant_undecided.
   - by inversion H10; [| congruence..].
-  - by apply component_invariant_muddy in H9; destruct H10.
+  - by apply component_invariant_muddy; destruct H10.
   - by inversion H10; split; congruence.
-  - by apply component_invariant_clean in H9; destruct H10.
+  - by apply component_invariant_clean; destruct H10.
   - by inversion H10; split; congruence.
 Qed.
 
 Definition MC_composite_invariant (s : composite_state MCVLSM) : Prop :=
-  forall i : index, initial_state_prop (MCVLSM i) (s i) \/ MC_component_invariant s i.
+  forall (i : index),
+    initial_state_prop (MCVLSM i) (s i) \/ MC_component_invariant s i.
 
 Definition MC_composite_invariant_inductive (s : composite_state MCVLSM) : Prop :=
-  forall i : index, initial_state_prop (MCVLSM i) (s i) \/ MC_component_invariant_inductive s i.
+  forall (i : index),
+    initial_state_prop (MCVLSM i) (s i) \/ MC_component_invariant_inductive s i.
 
 Lemma MC_composite_invariant_preservation_muddy_from_undecided
   (s sm : composite_state MCVLSM) (i j : index) (o : indexSet) :
@@ -697,9 +698,11 @@ Proof.
   - rewrite size_singleton in Hinvs.
     apply MC_number_of_muddy_seen with (n := i) in Hconsistent.
     by destruct Hconsistent; lia.
-  - apply singleton_subseteq_l; unfold MuddyUnion; rewrite elem_of_union_list.
+  - apply singleton_subseteq_l.
+    unfold MuddyUnion; rewrite elem_of_union_list.
     exists (st_obs (s i)); split; [| done].
-    by apply elem_of_list_fmap; exists i; split; [| apply elem_of_enum].
+    apply elem_of_list_fmap.
+    by exists i; split; [| apply elem_of_enum].
 Qed.
 
 Lemma MC_composite_invariant_preservation_muddy_from_clean (s sm : composite_state MCVLSM)
@@ -715,7 +718,7 @@ Proof.
   rewrite Hobs_equiv in Hinvs.
   destruct (decide (i = j)); [by subst; lia |].
   remember (size (st_obs (s i))) as o.
-  rewrite  Hcons, size_difference_alt in Hinvs.
+  rewrite Hcons, size_difference_alt in Hinvs.
   replace (size (MuddyUnion s ∩ {[j]})) with 0 in Hinvs.
   - by apply MC_number_of_muddy_seen with (n := i) in Hconsistent; lia.
   - symmetry; apply size_empty_iff.
@@ -922,7 +925,7 @@ Proof.
   - (* receive *)
     unfold MC_component_invariant in Hinvs; rewrite <- H10 in Hinvs; cbn in Hinvs.
     destruct Hinvs; [done |].
-    assert (Hcons : consistent s').
+    assert (consistent s') as [HMuddy_s' Hconsistent].
     {
       clear - H10 Htr'.
       destruct (decide (composite_initial_state_prop MCVLSM s')).
@@ -931,7 +934,6 @@ Proof.
         split; [| done].
         by apply valid_trace_last_pstate in Htr'.
     }
-    destruct Hcons as [HMuddy_s' Hconsistent].
     specialize (Hconsistent i) as Hconsi.
     rewrite <- H10 in Hconsi; cbn in Hconsi.
     assert (Hinvs : MC_component_invariant_helper (mkSt (st_obs (s' j))
@@ -983,7 +985,7 @@ Proof.
     rewrite H11 in Hinvariant; cbn in Hinvariant.
     destruct Hinvariant as [Hn Hstobs].
     split; [by rewrite <- Hstobs in Hn |].
-    assert (Hcons : consistent s).
+    assert (consistent s) as [Hnempty Hcons].
     {
       apply MC_non_initial_valid_consistent.
       unfold MC_non_initial_valid_state.
@@ -995,7 +997,6 @@ Proof.
       exists msg_index0; split; cbn; [by apply elem_of_enum |].
       by rewrite H11.
     }
-    destruct Hcons as [Hnempty Hcons].
     replace st_obs0 with (st_obs (s msg_index0)) in Hstobs; [| by rewrite H11].
     rewrite Hcons, size_difference_alt in Hstobs.
     apply size_non_empty_iff in Hnempty.
