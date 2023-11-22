@@ -734,17 +734,19 @@ Proof.
   intros Htr i Hnoninit.
   induction Htr using finite_valid_trace_init_to_rev_ind;
     [by contradiction Hnoninit; apply Hsi |].
-  setoid_rewrite elem_of_app.
-  setoid_rewrite elem_of_list_singleton.
-  destruct (decide (MC_initial_state_prop (s i)));
-    [| by destruct (IHHtr n) as (? & ? & ?); eauto].
-  destruct Ht as [(_ & _ & Hv & _) Ht], l as [j lj]; cbn in Ht, Hv.
-  destruct (MC_transition j lj (s j) iom) as [si' om'] eqn: Htj.
-  inversion Ht; subst; clear Ht.
-  destruct (decide (i = j)); subst; state_update_simpl; [| done].
-  unfold MC_initial_state_prop in m.
-  destruct (s j); cbn in *; subst; inversion Hv; subst.
-  by eauto.
+  destruct (decide (MC_initial_state_prop (s i))); cycle 1.
+  - destruct (IHHtr n) as (item & Hitem & Hinit).
+    by exists item; rewrite elem_of_app; itauto.
+  - eexists.
+    rewrite elem_of_app, elem_of_list_singleton.
+    split; [by right |]; cbn.
+    destruct Ht as [(_ & _ & Hv & _) Ht], l as (j & lj); cbn in Ht, Hv |- *.
+    destruct (MC_transition j lj (s j) iom) as [si' om'].
+    inversion Ht; subst; clear Ht.
+    destruct (decide (i = j)); subst; state_update_simpl; [| done].
+    unfold MC_initial_state_prop in m.
+    destruct (s j); cbn in *; subst.
+    by inversion Hv; subst.
 Qed.
 
 (**
