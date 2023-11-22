@@ -80,12 +80,6 @@ categories:
 - name: Computer Science/Concurrent Systems and Protocols/Theory of concurrent systems
 
 build: |-
-  ## Working with the project online
-
-  The simplest way of working with this project without needing to install anything is by doing so online:
-
-  [![Open in Papillon](https://papillon.unbounded.network/github-badge.svg)](https://papillon.unbounded.network/projects/github/runtimeverification/vlsm/master)
-
   ## Building instructions
 
   We recommend using [opam](https://opam.ocaml.org) to install project dependencies.
