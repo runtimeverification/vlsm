@@ -785,7 +785,7 @@ Proof.
 Qed.
 
 Lemma MC_component_invariant_helper_from_constraint :
-  forall {s : composite_state MCVLSM} {i : index} {r : nat} (status : ChildStatus),
+  forall (s : composite_state MCVLSM) (i : index) (r : nat) (status : ChildStatus),
     MC_composite_invariant s ->
     MC_constraint (existT i receive)
       (s, Some {| msg_index := i; msg_round := r; msg_status := status |}) ->
