@@ -27,12 +27,6 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
 - Related publication(s):
   - [Validating Labelled State Transition and Message Production Systems: A Theory for Modelling Faulty Distributed Systems](https://arxiv.org/abs/2202.12662) doi:[10.48550/arXiv.2202.12662](https://doi.org/10.48550/arXiv.2202.12662)
 
-## Working with the project online
-
-The simplest way of working with this project without needing to install anything is by doing so online:
-
-[![Open in Papillon](https://papillon.unbounded.network/github-badge.svg)](https://papillon.unbounded.network/projects/github/runtimeverification/vlsm/master)
-
 ## Building instructions
 
 We recommend using [opam](https://opam.ocaml.org) to install project dependencies.
