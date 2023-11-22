@@ -871,45 +871,41 @@ Proof.
   - (* receive *)
     unfold MC_component_invariant in Hinvs; rewrite <- H10 in Hinvs; cbn in Hinvs.
     destruct Hinvs; [done |].
-    assert (Hcons : consistent s').
-    {
-      by eapply consistent_finite_valid_trace_from_to; [| rewrite <- H10; cbn].
-    }
-    destruct Hcons as [HMuddy_s' Hconsistent]; specialize (Hconsistent i) as Hconsi.
+    eapply consistent_finite_valid_trace_from_to in Htr'
+      as [HMuddy_s' Hconsistent]; [| by rewrite <- H10; cbn].
+    specialize (Hconsistent i) as Hconsi.
     rewrite <- H10 in Hconsi; cbn in Hconsi.
+    assert (Hinvs : MC_component_invariant_helper (mkSt (st_obs (s' j))
+      (Some (mkRS r' undecided))) (MuddyUnion s'))
+      by (eapply MC_component_invariant_helper_from_constraint; done).
     assert (o0 ≡ st_obs (s' i)) by (rewrite <- H10; done).
     repeat case_decide; inversion Heqcall; subst; cbn in *; clear Heqcall;
       repeat split; try lia; [| done].
-    eapply MC_composite_invariant_preservation_muddy_from_undecided; [done.. |].
-    by eapply (MC_component_invariant_helper_from_constraint undecided).
+    by eapply MC_composite_invariant_preservation_muddy_from_undecided.
   - (* receive *)
     unfold MC_component_invariant in Hinvs; rewrite <- H10 in Hinvs; cbn in Hinvs.
     destruct Hinvs; [done |].
-    assert (Hcons : consistent s').
-    {
-      by eapply consistent_finite_valid_trace_from_to; [| rewrite <- H10; cbn].
-    }
-    destruct Hcons as [HMuddy_s' Hconsistent]; specialize (Hconsistent i) as Hconsi.
+    eapply consistent_finite_valid_trace_from_to in Htr'
+      as [HMuddy_s' Hconsistent]; [| by rewrite <- H10; cbn].
+    specialize (Hconsistent i) as Hconsi.
     rewrite <- H10 in Hconsi; cbn in Hconsi.
+    assert (Hinvs : MC_component_invariant_helper (mkSt (st_obs (s' j))
+      (Some (mkRS r' undecided))) (MuddyUnion s'))
+      by (eapply MC_component_invariant_helper_from_constraint; done).
     assert (o0 ≡ st_obs (s' i)) by (rewrite <- H10; done).
     repeat case_decide; inversion Heqcall; subst; cbn in *; clear Heqcall;
       repeat split; try lia; [done |].
-    eapply MC_composite_invariant_preservation_muddy_from_clean; [done.. |].
-    by eapply (MC_component_invariant_helper_from_constraint undecided).
+    by eapply MC_composite_invariant_preservation_muddy_from_clean.
   - (* receive *)
     unfold MC_component_invariant in Hinvs; rewrite <- H10 in Hinvs; cbn in Hinvs.
     destruct Hinvs; [done |].
-    assert (Hcons : consistent s').
-    {
-      by eapply consistent_finite_valid_trace_from_to; [| rewrite <- H10; cbn].
-    }
-    destruct Hcons as [HMuddy_s' Hconsistent]; specialize (Hconsistent i) as Hconsi.
+    eapply consistent_finite_valid_trace_from_to in Htr'
+      as [HMuddy_s' Hconsistent]; [| by rewrite <- H10; cbn].
+    specialize (Hconsistent i) as Hconsi.
     rewrite <- H10 in Hconsi; cbn in Hconsi.
     assert (Hinvs : MC_component_invariant_helper (mkSt (st_obs (s' j))
-      (Some (mkRS r' muddy))) (MuddyUnion s')).
-    {
-      by eapply MC_component_invariant_helper_from_constraint.
-    }
+      (Some (mkRS r' muddy))) (MuddyUnion s'))
+      by (eapply MC_component_invariant_helper_from_constraint; done).
     assert (o0 ≡ st_obs (s' i)) by (rewrite <- H10; done).
     repeat case_decide; inversion Heqcall; subst; cbn in *; clear Heqcall;
       repeat split; try lia; [| done].
@@ -928,17 +924,13 @@ Proof.
   - (* receive *)
     unfold MC_component_invariant in Hinvs; rewrite <- H10 in Hinvs; cbn in Hinvs.
     destruct Hinvs; [done |].
-    assert (consistent s') as [HMuddy_s' Hconsistent].
-    {
-      by eapply consistent_finite_valid_trace_from_to; [| rewrite <- H10; cbn].
-    }
+    eapply consistent_finite_valid_trace_from_to in Htr'
+      as [HMuddy_s' Hconsistent]; [| by rewrite <- H10; cbn].
     specialize (Hconsistent i) as Hconsi.
     rewrite <- H10 in Hconsi; cbn in Hconsi.
     assert (Hinvs : MC_component_invariant_helper (mkSt (st_obs (s' j))
-      (Some (mkRS r' clean))) (MuddyUnion s')).
-    {
-      by eapply MC_component_invariant_helper_from_constraint.
-    }
+      (Some (mkRS r' clean))) (MuddyUnion s'))
+      by (eapply MC_component_invariant_helper_from_constraint; done).
     assert (o0 ≡ st_obs (s' i)) by (rewrite <- H10; done).
     by repeat case_decide; inversion Heqcall; subst; cbn in *; clear Heqcall; lia.
 Qed.
@@ -976,10 +968,8 @@ Proof.
     rewrite H11 in Hinvariant; cbn in Hinvariant.
     destruct Hinvariant as [Hn Hstobs].
     split; [by rewrite <- Hstobs in Hn |].
-    assert (consistent s) as [Hnempty Hcons].
-    {
-      by eapply consistent_valid_state_prop; [| rewrite H11; cbn].
-    }
+    eapply consistent_valid_state_prop in Hs' as [Hnempty Hcons];
+      [| by rewrite H11; cbn].
     replace st_obs0 with (st_obs (s msg_index0)) in Hstobs; [| by rewrite H11].
     rewrite Hcons, size_difference_alt in Hstobs.
     apply size_non_empty_iff in Hnempty.
