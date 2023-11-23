@@ -776,7 +776,8 @@ Qed.
 
 Lemma consistent_valid_state_prop :
   forall (s : composite_state MCVLSM) (i : index),
-    valid_state_prop MC_composite_vlsm s -> st_rs (s i) <> None ->
+    valid_state_prop MC_composite_vlsm s ->
+    st_rs (s i) <> None ->
       consistent s.
 Proof.
   intros * Hv Hneq.
@@ -787,12 +788,8 @@ Qed.
 Lemma MC_component_invariant_helper_from_constraint :
   forall (s : composite_state MCVLSM) (i : index) (r : nat) (status : ChildStatus),
     MC_composite_invariant s ->
-    MC_constraint (existT i receive)
-      (s, Some {| msg_index := i; msg_round := r; msg_status := status |}) ->
-    MC_component_invariant_helper
-    {|
-      st_obs := st_obs (s i); st_rs := Some {| rs_round := r; rs_status := status |}
-    |} (MuddyUnion s).
+    MC_constraint (existT i receive) (s, Some (mkMsg i r status)) ->
+    MC_component_invariant_helper (mkSt (st_obs (s i)) (Some (mkRS r status))) (MuddyUnion s).
 Proof.
   cbn; intros * Hinvs Hc.
   destruct (s i) as [oj [[rj statusj] |]] eqn: Hsj; [| done].
