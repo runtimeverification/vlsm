@@ -67,7 +67,8 @@ Section sec_ELMOComponent_lemmas.
 
 ### Type classes
 
-- CamelCase name
+- CamelCase for class (type) name
+- CamelCase for constructor name using prefix `mk` (when construction via `Instance` might not be sufficient)
 - field declaration with C-style naming on separate line, with 2 spaces of indentation
 - the `;` in the last field should not be omitted
 - it's recommended to include the sort annotation, especially when it's `Prop`
@@ -119,13 +120,67 @@ Inductive lv_event_type : Type :=
 ### Definitions
 
 - C-style name
-- two spaces indentation before definition body
+- if a definition doesn't fit into a single line, indent its body with 2 spaces when starting on the next line.
 - generally avoid unnecessary type declarations for quantified variables
 
 Example:
 ```coq
 Definition lv_message_observations (s : state) (target : index) : set lv_event :=
   set_union (lv_sent_observations s target) (lv_received_observations s target).
+```
+
+- When explicitly defining a constant that lives in `Prop`, avoid using `Definition` with `:=`. Instead use `Lemma` (or `Theorem`, `Proposition`, etc.) and provide the constant term body using the `exact` tactic, while indicating the opacity with `Qed` or `Defined`.
+
+Not recommended:
+```coq
+Definition finite_trace_partial_map_app
+  : forall l1 l2, finite_trace_partial_map (l1 ++ l2) =
+    finite_trace_partial_map l1 ++ finite_trace_partial_map l2
+  := map_option_app _.
+```
+
+Recommended:
+```coq
+Lemma finite_trace_partial_map_app :
+  forall l1 l2 : list (transition_item TX),
+    finite_trace_partial_map (l1 ++ l2) =
+    finite_trace_partial_map l1 ++ finite_trace_partial_map l2.
+Proof. exact (map_option_app _). Qed.
+```
+
+### Pattern matching
+
+- Indent match expressions by 2 spaces.
+- Do not indent the `|` relative to the match keyword.
+- Avoid wasting space with indentation, i.e. when the match branch is long, put the result on the next line.
+
+Recommended:
+```coq
+Fixpoint add_in_sorted_list_fn
+  {A} (compare : A -> A -> comparison) (x : A) (l : list A) : list A :=
+  match l with
+  | [] => [x]
+  | h :: t =>
+    match compare x h with
+    | Lt => x :: h :: t
+    | Eq => h :: t
+    | Gt => h :: @add_in_sorted_list_fn A compare x t
+    end
+  end.
+```
+
+Not recommended:
+```coq
+Fixpoint add_in_sorted_list_fn
+  {A} (compare : A -> A -> comparison) (x : A) (l : list A) : list A :=
+match l with
+| [] => [x]
+| h :: t => match compare x h with
+            | Lt => x :: h :: t
+            | Eq => h :: t
+            | Gt => h :: @add_in_sorted_list_fn A compare x t
+            end
+end.
 ```
 
 ### Theorems and lemmas
@@ -142,20 +197,49 @@ Lemma sync_some (s : vstate X) (from to : index) :
 
 ### Records
 
-- C-style name
-- CamelCase for constructor name
+- C-style for record (type) name
+- CamelCase for constructor name using prefix `mk`
 - field declaration with C-style naming on separate line, with 2 spaces of indentation
 - the `;` in the last field should not be omitted
 - it's recommended to include the sort annotation, especially when it's `Prop`
 
 Example:
 ```coq
-Record simp_lv_event : Type := SimpObs
+Record simp_lv_event : Type := mkSimpObs
 {
-  get_simp_event_type : simp_lv_event_type;
-  get_simp_event_subject : index;
-  get_simp_event_state : (@state index index_listing);
+  simp_lv_event_type : simp_lv_event_type;
+  simp_lv_event_subject : index;
+  simp_lv_event_state : @state index index_listing;
 }.
+```
+
+### Locality annotations
+
+Locality annotations should be put on the same line as the command they annotate. This makes it easier to process them with line-based tools, like `grep` or `sed`.
+
+Recommended:
+```coq
+#[export] Instance compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
+```
+
+Not recommended:
+```coq
+#[export]
+Instance compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
+```
+
+In case you need to split a long line, keep the annotation on the same line as the command and the name. When splitting the above example:
+
+Recommended:
+```coq
+#[export] Instance compare_eq_dec
+  {A} `{CompareStrictOrder A} : EqDecision A.
+```
+
+Not recommended:
+```coq
+#[export] Instance
+  compare_eq_dec {A} `{CompareStrictOrder A} : EqDecision A.
 ```
 
 ## Coqdoc

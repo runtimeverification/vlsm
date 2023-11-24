@@ -30,13 +30,28 @@ git clone https://github.com/JasonGross/coq-tools.git
 
 ### Minimizing requires
 
-To minimize a single file's list of Coq require sentences, run the script `minimize-requires.py` from the Coq repository:
+The minimization script included in the Coq repository will operate on absolutized imports.
+For example, `Require Import Coq.Lists.List` is the absolutized version of `From Coq Require Import List`.
+When in the project's root directory, run the following to absolutize the imports of a file `file.v`:
 
 ```shell
-./../coq-tools/minimize-requires.py file.v --in-place .bak
+./../coq-tools/absolutize-imports.py path/to/file.v --in-place .bak
 ```
 
-In this single file case, all the project's `-Q`/`-R` options must be manually passed to the script. To instead minimize the require sentences in the entire project without the need to manually pass any paths, run the script from the directory where the `_CoqProject` file lives:
+In this single file case, all the project's `-Q`/`-R` options must be manually passed to the script. To instead absolutize the import sentences in the entire project without the need to manually pass any paths, run the script from the directory where the `_CoqProject` file lives:
+
+```shell
+./../coq-tools/absolutize-imports.py -f _CoqProject --update-all 
+```
+
+
+To minimize the list of require sentences for a file `file.v` run the script `minimize-requires.py` from the Coq repository:
+
+```shell
+./../coq-tools/minimize-requires.py path/to/file.v --in-place .bak
+```
+
+To minimize the require sentences for the whole project:
 
 ```shell
 ./../coq-tools/minimize-requires.py --all -f _CoqProject
@@ -72,3 +87,21 @@ For example, if you want to limit the number of consecutive newlines to 1, run:
 ```shell
 python scripts/strip-newlines.py 2
 ```
+
+## Analyzing commments and specifications
+
+To analyze comment and specification usage throughout the project (for all `*.v` files), run:
+
+```shell
+./all-comment-ratio.sh
+```
+
+This will output a table whose columns correspond (in this order) to: comment size, specification size, ratio between comments and specifications, ratio between specifications and comments, filename.
+
+The default separator is the tab character (`\t`). To change it use the `--separator` or `-s` flag followed by `tab`, `pipe` (will use the `|` character) or `csv` (will use commas).
+For example, in order to separate columns by commas:
+
+```shell
+./all-comment-ratio.sh -s csv
+```
+

@@ -31,7 +31,8 @@ authors:
 - name: Lucas Peña
 - name: Grigore Roșu
 - name: Traian Șerbănuță
-- name: Dafina Trufas
+- name: Ioan Teodorescu
+- name: Dafina Trufaș
 - name: Jan Tušil
 - name: Vlad Zamfir
 
@@ -51,9 +52,9 @@ supported_coq_versions:
 dependencies:
 - opam:
     name: coq-stdpp
-    version: '{>= "1.8.0"}'
+    version: '{>= "1.9.0"}'
   description: |-
-    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.8.0 or later
+    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0 or later
 - opam:
     name: coq-itauto
   description: |-
@@ -65,6 +66,8 @@ dependencies:
 
 tested_coq_opam_versions:
 - version: '8.16-ocaml-4.14-flambda'
+- version: '8.17-ocaml-4.14-flambda'
+- version: '8.18-ocaml-4.14-flambda'
 
 namespace: VLSM
 
@@ -77,12 +80,6 @@ categories:
 - name: Computer Science/Concurrent Systems and Protocols/Theory of concurrent systems
 
 build: |-
-  ## Working with the project online
-
-  The simplest way of working with this project without needing to install anything is by doing so online:
-
-  [![Open in Papillon](https://papillon.unbounded.network/github-badge.svg)](https://papillon.unbounded.network/projects/github/runtimeverification/vlsm/master)
-
   ## Building instructions
 
   We recommend using [opam](https://opam.ocaml.org) to install project dependencies.
@@ -93,7 +90,7 @@ build: |-
 
   ```shell
   opam repo add coq-released https://coq.inria.fr/opam/released
-  opam install coq.8.16.1 coq-stdpp.1.8.0 coq-itauto coq-equations
+  opam install coq.8.18.0 coq-stdpp.1.9.0 coq-itauto coq-equations
   ```
 
   To build the project when you have all dependencies installed, do:
@@ -107,8 +104,9 @@ build: |-
 documentation: |-
   ## Coq file organization
 
-  - `theories/VLSM/Lib`: Various extensions to the Coq standard library and Coq-std++.
-  - `theories/VLSM/Core`: Core VLSM definitions and theory.
+  - `theories/Lib`: Various extensions to the Coq standard library and Coq-std++.
+  - `theories/Core`: Core VLSM definitions and theory.
+  - `theories/Examples`: Examples of VLSM applications, including tutorials.
 
   ## Documentation
 

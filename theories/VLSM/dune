@@ -1,9 +1,0 @@
-(coq.theory
- (name VLSM)
- (package coq-vlsm)
- (synopsis "Core definitions in Coq for VLSMs")
- (flags :standard 
-   -w -future-coercion-class-field
-   -w -deprecated-tacopt-without-locality))
-
-(include_subdirs qualified)
