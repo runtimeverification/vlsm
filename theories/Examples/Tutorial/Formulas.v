@@ -238,7 +238,7 @@ Definition expression_binop_vlsm : VLSM expression :=
 
 End sec_expression_binop_vlsm.
 
-(** ** VLSM for expressions *)
+(** *** VLSM for expressions *)
 
 Section sec_expression_vlsm.
 
