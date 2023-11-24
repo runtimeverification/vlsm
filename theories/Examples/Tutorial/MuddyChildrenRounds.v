@@ -1081,11 +1081,7 @@ Lemma st_obs_finite_valid_trace_from_to :
   forall (s1 s2 : composite_state MCVLSM) (tr : list transition_item) (i : index),
     finite_valid_trace_from_to MC_composite_vlsm s1 s2 tr ->
       st_obs (s1 i) ≡ st_obs (s2 i).
-Proof.
-  intros.
-  apply MC_in_futures_preserves_obs_equiv.
-  by exists tr.
-Qed.
+Proof. by intros; apply MC_in_futures_preserves_obs_equiv; exists tr. Qed.
 
 Lemma MC_build_muddy_muddy_trace_valid
   (is : composite_state MCVLSM)
