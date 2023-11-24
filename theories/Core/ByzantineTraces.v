@@ -304,7 +304,8 @@ Context
   .
 
 Lemma validator_component_byzantine_fault_tolerance :
-  forall tr : Trace, byzantine_trace_prop (IM i) tr ->
+  forall (tr : Trace),
+    byzantine_trace_prop (IM i) tr ->
     valid_trace_prop (pre_composite_vlsm_induced_projection_validator IM constraint i) tr.
 Proof.
   intros tr Htr.
