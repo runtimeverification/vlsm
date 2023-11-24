@@ -72,6 +72,9 @@ Record RoundStatus : Type := mkRS
   rs_status : ChildStatus;
 }.
 
+(** We want to display [RoundStatus] using the constructor instead of the record syntax. *)
+Add Printing Constructor RoundStatus.
+
 Section sec_muddy.
 
 Context
@@ -92,6 +95,8 @@ Record State : Type := mkSt
   st_rs : option RoundStatus;
 }.
 
+Add Printing Constructor State.
+
 (**
   A message carries the identity of its sender, and shares the round number
   and their [ChildStatus].
@@ -102,6 +107,8 @@ Record Message : Type := mkMsg
   msg_round : nat;
   msg_status : ChildStatus;
 }.
+
+Add Printing Constructor Message.
 
 Definition MCType : VLSMType Message :=
 {|
@@ -1306,16 +1313,14 @@ Proof.
       as (obs' & Hlast).
     assert (Hvalidtr1 : input_valid_transition MC_composite_vlsm
       (existT helper receive)
-      (finite_trace_last is
-        (MC_build_clean_muddy_trace is target helper round),
-        Some {| msg_index := target; msg_round := round; msg_status := undecided |})
+      (finite_trace_last is (MC_build_clean_muddy_trace is target helper round),
+        Some (mkMsg target round undecided))
       (state_update MCVLSM
-        (finite_trace_last is
-          (MC_build_clean_muddy_trace is target helper round)) helper
-          {| st_obs := st_obs (finite_trace_last is
-               (MC_build_clean_muddy_trace is target helper round) helper);
-             st_rs := Some (mkRS round undecided)
-          |}, None)).
+        (finite_trace_last is (MC_build_clean_muddy_trace is target helper round))
+        helper
+        (mkSt (st_obs (finite_trace_last is (MC_build_clean_muddy_trace
+          is target helper round) helper)) (Some (mkRS round undecided))),
+          None)).
     {
       repeat split; cbn in *.
       - by apply valid_trace_last_pstate in IH.
@@ -1622,10 +1627,8 @@ Qed.
 Definition MC_transition_item_update s j i st rs : transition_item :=
 {|
   l := existT i receive : composite_label MCVLSM;
-  input := Some
-    {| msg_index := j; msg_status := st; msg_round := state_round (st_rs (s j)) |};
-  destination := state_update MCVLSM s i
-    {| st_obs := st_obs (s i); st_rs := Some rs |};
+  input := Some (mkMsg j (state_round (st_rs (s j))) st);
+  destination := state_update MCVLSM s i (mkSt (st_obs (s i)) (Some rs));
   output := None
 |}.
 
@@ -1669,8 +1672,7 @@ Proof.
       * by apply MC_non_initial_valid_consistent in Hs as []; set_solver.
       * by apply MC_non_initial_valid_consistent in Hs as []; set_solver.
       * destruct (s i); cbn in *; subst.
-        funelim (MC_transition i init
-          {| st_obs := st_obs0; st_rs := None |} None); try done.
+        funelim (MC_transition i init (mkSt st_obs0 None) None); try done.
         -- by rewrite <- Heqcall; inversion H11.
         -- by inversion H10; congruence.
     + exists (Build_transition_item (T := composite_type MCVLSM) (existT i init) None
@@ -1687,8 +1689,7 @@ Proof.
       * apply MC_non_initial_valid_consistent in Hs as []; set_solver.
       * apply MC_non_initial_valid_consistent in Hs as []; set_solver.
       * destruct (s i); cbn in *; subst.
-        funelim (MC_transition i init
-          {| st_obs := st_obs0; st_rs := None |} None); try done.
+        funelim (MC_transition i init (mkSt st_obs0 None) None); try done.
         -- by inversion H10; congruence.
         -- by rewrite <- Heqcall; inversion H11.
   - apply not_Forall_Exists in Hall; [| by typeclasses eauto].
@@ -1729,11 +1730,7 @@ Proof.
             rewrite (Hobs j) in e.
             by clear - e; set_solver.
         }
-        assert (Hnoequiv : MC_no_equivocation s {|
-          msg_index := j;
-          msg_round := state_round (st_rs (s j));
-          msg_status := muddy;
-        |}).
+        assert (Hnoequiv : MC_no_equivocation s (mkMsg j (state_round (st_rs (s j))) muddy)).
         {
           unfold MC_no_equivocation.
           by repeat case_match; [rewrite <- H10; left; rewrite H10, <- He |].
@@ -1790,11 +1787,7 @@ Proof.
             destruct (decide (i = j)); [by subst; congruence |].
             by clear - n0 n1; set_solver.
         }
-        assert (Hnoequiv :  MC_no_equivocation s {|
-          msg_index := j;
-          msg_round := state_round (st_rs (s j));
-          msg_status := muddy
-        |}).
+        assert (Hnoequiv :  MC_no_equivocation s (mkMsg j (state_round (st_rs (s j))) muddy)).
         {
           unfold MC_no_equivocation.
           by repeat case_match; [rewrite <- H10; left; rewrite H10, <- He |].
@@ -2184,7 +2177,7 @@ Proof.
       (existT i init) None (state_update MCVLSM s i (mkSt (st_obs (s i))
       (Some (mkRS 0 muddy)))) None) as item.
     assert (Hvalidtr : input_valid_transition MC_composite_vlsm (existT i init) (s, None)
-      (state_update MCVLSM s i {| st_obs := st_obs (s i); st_rs := Some (mkRS 0 muddy) |},
+      (state_update MCVLSM s i (mkSt (st_obs (s i)) (Some (mkRS 0 muddy))),
       None)).
     {
       repeat split; cbn; [| | | done | by rewrite Hcons.. |].
@@ -2196,7 +2189,7 @@ Proof.
         by rewrite e.
     }
     assert (Hvalids' : MC_non_initial_valid_state (state_update MCVLSM s i
-      {| st_obs := st_obs (s i); st_rs := Some (mkRS 0 muddy) |})).
+      (mkSt (st_obs (s i)) (Some (mkRS 0 muddy))))).
     {
       split.
       - by eapply input_valid_transition_destination.
@@ -2214,7 +2207,7 @@ Proof.
       (existT i init) None (state_update MCVLSM s i (mkSt (st_obs (s i))
       (Some (mkRS 0 undecided)))) None) as item.
     assert (Hvalidtr : input_valid_transition MC_composite_vlsm (existT i init) (s, None)
-      (state_update MCVLSM s i {| st_obs := st_obs (s i); st_rs := Some (mkRS 0 undecided) |},
+      (state_update MCVLSM s i (mkSt (st_obs (s i)) (Some (mkRS 0 undecided))),
       None)).
     {
       repeat split; cbn; [| | | done | by rewrite Hcons.. |].
@@ -2227,7 +2220,7 @@ Proof.
         by inversion H9.
     }
     assert (Hvalids' : MC_non_initial_valid_state (state_update MCVLSM s i
-      {| st_obs := st_obs (s i); st_rs := Some (mkRS 0 undecided) |})).
+      (mkSt (st_obs (s i)) (Some (mkRS 0 undecided))))).
     {
       split.
       - by eapply input_valid_transition_destination.
