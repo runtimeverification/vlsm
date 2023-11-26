@@ -48,7 +48,54 @@ Qed.
 
 Definition expression : Type := list symbol.
 
-(** ** VLSM for top and bottom rules
+Inductive Formula : Type :=
+| FTop
+| FBot
+| FVar (x : Var)
+| FNeg (f : Formula)
+| FConj (f1 f2 : Formula)
+| FDisj (f1 f2 : Formula)
+| FImpl (f1 f2 : Formula)
+| FIff (f1 f2 : Formula).
+
+(**
+  We introduce the following notations to allow us to more easily write formulas.
+*)
+#[local] Notation "⊤" := FTop.
+#[local] Notation "⊥" := FBot.
+#[local] Notation "x ∨ y" := (FDisj x y) (at level 85, right associativity).
+#[local] Notation "x ∧ y" := (FConj x y) (at level 80, right associativity).
+#[local] Notation "x → y" := (FImpl x y) (at level 99, y at level 200, right associativity).
+#[local] Notation "x ↔ y" := (FIff x y) (at level 95, no associativity).
+#[local] Notation "¬ x" := (FNeg x) (at level 75, right associativity).
+
+(**
+  Similarly to the notations above, the purpose of this coercion is to allow
+  using variables directly as formulas.
+*)
+Coercion FVar : Var >-> Formula.
+
+(** A [Formula] is flattened to an [expression] using prefix notation. *)
+Fixpoint flatten_formula (f : Formula) : expression :=
+  match f with
+  | FTop => [Top]
+  | FBot => [Bot]
+  | FVar x => [PVar x]
+  | ¬ f => Neg :: flatten_formula f
+  | f1 ∧ f2 => Conj :: flatten_formula f1 ++ flatten_formula f2
+  | f1 ∨ f2 => Disj :: flatten_formula f1 ++ flatten_formula f2
+  | f1 → f2 => Impl :: flatten_formula f1 ++ flatten_formula f2
+  | f1 ↔ f2 => Iff :: flatten_formula f1 ++ flatten_formula f2
+  end.
+
+Lemma flatten_formula_nzlen :
+  forall (f : Formula),
+    length (flatten_formula f) > 0.
+Proof. by intros []; cbn; lia. Qed.
+
+(** ** Encoding formulas as VLSMs *)
+
+(** *** VLSM for top and bottom rules
 
   This is a very simple VLSM, with a single state and a single label, accepting
   no input and outputing the expression containing just the symbol parameter.
@@ -80,7 +127,7 @@ Definition expression_const_vlsm : VLSM expression :=
 
 End sec_expression_const_vlsm.
 
-(** ** VLSM for the variable rule
+(** *** VLSM for the variable rule
 
   This VLSM has a single state and its labels are the variables.
   Its behavior is to accept no input and to output the expression containing
@@ -109,7 +156,7 @@ Definition expression_var_vlsm : VLSM expression :=
 
 End sec_expression_var_vlsm.
 
-(** ** VLSM for the negation rule
+(** *** VLSM for the negation rule
 
   This VLSM has a single state and a single label, accepts as input an expression
   and outputs the expression obtained by prefixing the input with the negation
@@ -145,7 +192,7 @@ Definition expression_neg_vlsm : VLSM expression :=
 
 End sec_expression_neg_vlsm.
 
-(** ** VLSM for binary connective rules
+(** *** VLSM for binary connective rules
 
   This VLSM has a single label and its states are [option expression] with
   [None] being the initial state.
@@ -190,6 +237,10 @@ Definition expression_binop_vlsm : VLSM expression :=
   mk_vlsm expression_binop_vlsm_machine.
 
 End sec_expression_binop_vlsm.
+
+(** *** VLSM for expressions *)
+
+Section sec_expression_vlsm.
 
 Inductive index :=
 | ITop
@@ -241,53 +292,14 @@ Definition default_composite_label
 Definition expression_vlsm : VLSM expression :=
   free_composite_vlsm expression_components.
 
+End sec_expression_vlsm.
+
+(** ** Characterization of valid messages as formulas *)
+
+Section sec_valid_message_char.
+
 Definition well_formed_expression : expression -> Prop :=
   valid_message_prop expression_vlsm.
-
-Inductive Formula : Type :=
-| FTop
-| FBot
-| FVar (x : Var)
-| FNeg (f : Formula)
-| FConj (f1 f2 : Formula)
-| FDisj (f1 f2 : Formula)
-| FImpl (f1 f2 : Formula)
-| FIff (f1 f2 : Formula).
-
-(**
-  We introduce the following notations to allow us to more easily write formulas.
-*)
-Notation "⊤" := FTop.
-Notation "⊥" := FBot.
-Notation "x ∨ y" := (FDisj x y) (at level 85, right associativity).
-Notation "x ∧ y" := (FConj x y) (at level 80, right associativity).
-Notation "x → y" := (FImpl x y) (at level 99, y at level 200, right associativity).
-Notation "x ↔ y" := (FIff x y) (at level 95, no associativity).
-Notation "¬ x" := (FNeg x) (at level 75, right associativity).
-
-(**
-  Similarly to the notations above, the purpose of this coercion is to allow
-  using variables directly as formulas.
-*)
-Coercion FVar : Var >-> Formula.
-
-(** A [Formula] is flattened to an [expression] using prefix notation. *)
-Fixpoint flatten_formula (f : Formula) : expression :=
-  match f with
-  | FTop => [Top]
-  | FBot => [Bot]
-  | FVar x => [PVar x]
-  | ¬ f => Neg :: flatten_formula f
-  | f1 ∧ f2 => Conj :: flatten_formula f1 ++ flatten_formula f2
-  | f1 ∨ f2 => Disj :: flatten_formula f1 ++ flatten_formula f2
-  | f1 → f2 => Impl :: flatten_formula f1 ++ flatten_formula f2
-  | f1 ↔ f2 => Iff :: flatten_formula f1 ++ flatten_formula f2
-  end.
-
-Lemma flatten_formula_nzlen :
-  forall (f : Formula),
-    length (flatten_formula f) > 0.
-Proof. by intros []; cbn; lia. Qed.
 
 (**
   We will show below (lemma [flatten_formula_prefix]) that no (strict) prefix of
@@ -587,7 +599,15 @@ Proof.
   - by apply well_formed_expression_are_flatten_formulas.
   - by intros [f <-]; apply flatten_formulas_are_well_formed_expressions.
 Qed.
-(** We define a function to interpret formulas as Coq terms in the [Prop] sort, given that all atoms are mapped to [Prop] terms. *)
+
+End sec_valid_message_char.
+
+(** ** Interpretation of formulas
+
+  We define a function to interpret formulas as Coq terms in the [Prop] sort,
+  given that all atoms are mapped to [Prop] terms.
+*)
+
 Section sec_formula_interpretation.
 
 Context
