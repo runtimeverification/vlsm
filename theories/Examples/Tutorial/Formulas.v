@@ -61,13 +61,13 @@ Inductive Formula : Type :=
 (**
   We introduce the following notations to allow us to more easily write formulas.
 *)
-Notation "⊤" := FTop.
-Notation "⊥" := FBot.
-Notation "x ∨ y" := (FDisj x y) (at level 85, right associativity).
-Notation "x ∧ y" := (FConj x y) (at level 80, right associativity).
-Notation "x → y" := (FImpl x y) (at level 99, y at level 200, right associativity).
-Notation "x ↔ y" := (FIff x y) (at level 95, no associativity).
-Notation "¬ x" := (FNeg x) (at level 75, right associativity).
+#[local] Notation "⊤" := FTop.
+#[local] Notation "⊥" := FBot.
+#[local] Notation "x ∨ y" := (FDisj x y) (at level 85, right associativity).
+#[local] Notation "x ∧ y" := (FConj x y) (at level 80, right associativity).
+#[local] Notation "x → y" := (FImpl x y) (at level 99, y at level 200, right associativity).
+#[local] Notation "x ↔ y" := (FIff x y) (at level 95, no associativity).
+#[local] Notation "¬ x" := (FNeg x) (at level 75, right associativity).
 
 (**
   Similarly to the notations above, the purpose of this coercion is to allow
@@ -602,7 +602,7 @@ Qed.
 
 End sec_valid_message_char.
 
-(** ** Interpretation of formulas as Coq propositions
+(** ** Interpretation of formulas
 
   We define a function to interpret formulas as Coq terms in the [Prop] sort,
   given that all atoms are mapped to [Prop] terms.
