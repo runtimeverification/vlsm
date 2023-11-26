@@ -18,9 +18,7 @@ From VLSM.Core Require Import VLSM Composition ProjectionTraces.
   To simplify the presentation, the grammar we consider for formulas is
   unambiguous and uses prefix notation:
 
-  <<
-  f ::= ⊤ | ⊥ | x | ¬ f | ∧ f f | ∨ f f | → f f | ↔ f f
-  >>
+  <<f ::= ⊤ | ⊥ | x | ¬ f | ∧ f f | ∨ f f | → f f | ↔ f f>>
 *)
 
 Section sec_formula.
