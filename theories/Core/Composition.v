@@ -1406,3 +1406,93 @@ Proof.
 Qed.
 
 End sec_composite_valid_transition.
+
+(** ** Valid composite states properties *)
+
+Section sec_composite_state.
+
+Context
+  `{EqDecision index}
+  `[IM : index -> VLSM message]
+  [constraint : composite_label IM -> composite_state IM * option message -> Prop]
+  (X := composite_vlsm IM constraint)
+  .
+
+(**
+  Given a valid state for the free composition and a constrained trace in one
+  of the components receiving only valid messages of the free composition,
+  the trace can be replayed on top of the given state to yield a valid trace
+  segment for the free composition.
+*)
+Lemma pre_free_lift_to_free_weak_embedding :
+  forall (i : index) (cs : composite_state IM),
+    valid_state_prop (free_composite_vlsm IM) cs ->
+    VLSM_weak_embedding
+      (pre_loaded_vlsm (IM i) (valid_message_prop (free_composite_vlsm IM)))
+      (free_composite_vlsm IM) (lift_to_composite_label IM i) (lift_to_composite_state IM cs i).
+Proof.
+  intros i cs Hvsp; constructor; intros s tr Htr.
+  pose proof (Heq := vlsm_is_preloaded_with_valid (free_composite_vlsm IM)).
+  apply (VLSM_eq_valid_state Heq) in Hvsp.
+  apply (VLSM_eq_finite_valid_trace_from Heq).
+  by unshelve eapply VLSM_weak_embedding_finite_valid_trace_from in Htr; cycle 3;
+    [apply pre_lift_to_free_weak_embedding | ..].
+Qed.
+
+Definition lift_to_composite_plan [i : index] : plan (IM i) -> composite_plan IM :=
+  List.map (lift_to_composite_plan_item IM i).
+
+(**
+  A component state for the final state of a valid trace of the composition
+  is either initial, or there is a witness in the trace when a transition in
+  that component led to the current component state.
+*)
+Lemma final_state_component_initial_or_transition :
+  forall (i : index) (is f : composite_state IM) (tr : list (composite_transition_item IM)),
+    finite_valid_trace_init_to X is f tr ->
+    initial_state_prop (IM i) (f i)
+      \/
+    exists (item : composite_transition_item IM),
+      item ∈ tr /\ destination item i = f i /\ projT1 (l item) = i.
+Proof.
+  intros * Htr; induction Htr using finite_valid_trace_init_to_rev_ind; [by left |].
+  destruct l as [j lj], (decide (i = j)) as [<- |]; cbn.
+  - by right; eexists; split; [rewrite elem_of_app, elem_of_list_singleton; right |].
+  - destruct Ht as [_ Ht]; cbn in Ht.
+    destruct (transition lj (s j, iom)) as [si' om']; inversion Ht; subst; clear Ht.
+    state_update_simpl.
+    destruct IHHtr as [| (? & ? & ?)]; [by left |].
+    by right; eexists; split; [rewrite elem_of_app; left |].
+Qed.
+
+(**
+  A reformulation of [final_state_component_initial_or_transition] in terms of
+  [valid_state_prop] and [in_futures].
+
+  A component state from a valid state for a composition is either initial or
+  there exists a valid transition in the composition from whose destination
+  the given state is validly reachable and which corresponds to a transition
+  in the component leading to the current component state.
+*)
+Lemma valid_state_component_initial_or_transition :
+  forall (i : index) (f : composite_state IM),
+    valid_state_prop X f ->
+    initial_state_prop (IM i) (f i)
+      \/
+    exists (s1 s2 : composite_state IM) (li : label (IM i)) (om om' : option message),
+      in_futures X s2 f /\ s2 i = f i /\
+      input_valid_transition X (existT i li) (s1, om) (s2, om').
+Proof.
+  intros i f Hf.
+  apply valid_state_has_trace in Hf as (is & tr & Htr).
+  apply (final_state_component_initial_or_transition i) in Htr as Hitem.
+  destruct Hitem as [| (item & Hitem & Hdest & Hl)]; [by left |].
+  apply elem_of_list_split in Hitem as (pre & suf & ->).
+  destruct Htr as [Htr Hinit].
+  apply finite_valid_trace_from_to_app_split in Htr as [_ Htr].
+  inversion Htr; subst; destruct l as [i li]; cbn in *.
+  right; exists (finite_trace_last is pre), s, li, iom, oom.
+  by split; [eexists |].
+Qed.
+
+End sec_composite_state.

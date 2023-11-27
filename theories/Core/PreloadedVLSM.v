@@ -833,3 +833,15 @@ Proof.
 Qed.
 
 End sec_constrained_direct_defs.
+
+Lemma vlsm_is_preloaded_with_valid `(X : VLSM message) :
+  VLSM_eq X (pre_loaded_vlsm X (valid_message_prop X)).
+Proof.
+  split; [by apply basic_VLSM_strong_incl; intros ?; only 2: left |].
+  apply basic_VLSM_incl; intros ? **; cbn; [done | ..].
+  - destruct HmX as [Hinit | HmX].
+    + by apply initial_message_is_valid.
+    + by destruct X.
+  - by apply Hv.
+  - by apply H.
+Qed.
