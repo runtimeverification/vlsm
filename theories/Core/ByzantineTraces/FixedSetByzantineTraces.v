@@ -43,6 +43,16 @@ Context
   (node_idx : index)
   .
 
+Program Definition emit_any_signed_message_vlsm_s0 :
+  {_ : state (@emit_any_message_vlsm_type message) | True} :=
+  exist _ tt _.
+Next Obligation.
+Proof. done. Defined.
+
+#[export] Instance emit_any_signed_message_vlsm_state_inh :
+  Inhabited {_ : state (@emit_any_message_vlsm_type message) | True} :=
+    populate emit_any_signed_message_vlsm_s0.
+
 (** The [valid]ity predicate allows sending only signed messages *)
 Definition signed_messages_valid
   (l : label (@emit_any_message_vlsm_type message))
@@ -53,10 +63,10 @@ Definition signed_messages_valid
 Definition emit_any_signed_message_vlsm_machine
   : VLSMMachine emit_any_message_vlsm_type
   :=
-  {| initial_state_prop := fun s => True
-   ; initial_message_prop := fun m => False
-   ; s0 := emit_any_message_vlsm_state_inh
-   ; transition := emit_any_message_vlsm_transition
+  {| initial_state_prop := fun _ => True
+   ; initial_message_prop := fun _ => False
+   ; s0 := emit_any_signed_message_vlsm_state_inh
+   ; transition := fun l _ => (tt, Some l)
    ; valid := signed_messages_valid
   |}.
 
@@ -445,7 +455,7 @@ Proof.
     unfold fixed_byzantine_IM, update_IM.
     simpl.
     rewrite @decide_True by done.
-    cbn. unfold emit_any_message_vlsm_transition.
+    cbn.
     by inversion 1; itauto.
 Qed.
 

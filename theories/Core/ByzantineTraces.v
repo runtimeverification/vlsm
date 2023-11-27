@@ -77,9 +77,9 @@ Definition emit_any_message_vlsm_type : VLSMType message :=
 |}.
 
 (**
-  The single state is the initial state and no messages are initial.
+  To define the VLSM, we need to prove that the type of states is inhabited,
+  since we need an initial state.
 *)
-
 Program Definition emit_any_message_vlsm_s0 : {_ : state emit_any_message_vlsm_type | True} :=
   exist _ tt _.
 Next Obligation.
@@ -90,27 +90,20 @@ Proof. done. Defined.
     populate emit_any_message_vlsm_s0.
 
 (**
-  The [transition] function of the [emit_any_message_vlsm] generates the
-  message given as a label.
+  The definition of [emit_any_message_vlsm_machine] says that:
+  - all states are initial
+  - no messages are initial
+  - the single state is the initial state
+  - the [transition] function generates the message given as the label
+  - all transitions are valid
 *)
-Definition emit_any_message_vlsm_transition
-  (l : label emit_any_message_vlsm_type)
-  (som : state emit_any_message_vlsm_type * option message)
-  : state emit_any_message_vlsm_type * option message :=
-    (tt, Some l).
-
-(** The [valid]ity predicate specifies that all transitions are valid. *)
-Definition emit_any_message_vlsm_valid
-  (l : label emit_any_message_vlsm_type)
-  (som : state emit_any_message_vlsm_type * option message) : Prop :=
-    True.
-
 Definition emit_any_message_vlsm_machine : VLSMMachine emit_any_message_vlsm_type :=
 {|
   initial_state_prop := fun _ => True;
   initial_message_prop := fun _ => False;
-  transition := emit_any_message_vlsm_transition;
-  valid := emit_any_message_vlsm_valid;
+  s0 := emit_any_message_vlsm_state_inh;
+  transition := fun l _ => (tt, Some l);
+  valid := fun _ _ => True;
 |}.
 
 Definition emit_any_message_vlsm : VLSM message :=
