@@ -7,7 +7,7 @@ From VLSM.Core Require Import Composition SubProjectionTraces ByzantineTraces.
 From VLSM.Core Require Import Validator Equivocation EquivocationProjections.
 From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.FixedSetEquivocation.
 
-(** * VLSM Compositions with a fixed set of byzantine nodes
+(** * Core: VLSM Compositions with a Fixed Set of Byzantine Nodes
 
   In this module we study a composition in which a fixed subset of nodes are
   replaced by byzantine nodes, i.e., nodes which can send arbitrary

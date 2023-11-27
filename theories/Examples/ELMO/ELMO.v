@@ -11,7 +11,7 @@ Create HintDb ELMO_hints.
 
 #[local] Hint Resolve submseteq_tail_l : ELMO_hints.
 
-(** * ELMO Protocol Definitions and Properties
+(** * ELMO: Protocol Definitions and Properties for ELMO
 
   This module contains definitions and properties of ELMO components and
   the ELMO protocol.

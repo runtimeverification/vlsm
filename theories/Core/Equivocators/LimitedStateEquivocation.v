@@ -12,7 +12,8 @@ From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
 From VLSM.Core Require Import Equivocators.FixedEquivocation.
 
-(** * VLSM Limited Equivocation *)
+(** * Core: VLSM Limited Equivocation *)
+
 Definition composite_constraint
   {index message} (IM : index -> VLSM message) : Type :=
   composite_label IM -> composite_state IM * option message -> Prop.

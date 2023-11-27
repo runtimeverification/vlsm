@@ -5,7 +5,7 @@ From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import SubProjectionTraces MessageDependencies Equivocation.
 From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquivocation.
 
-(** * Witnessed equivocation
+(** * Core: Witnessed Equivocation
 
   Although [is_equivocating_tracewise] provides a very precise notion of
   equivocation, it does not guarantee the monotonicity of the set of equivocators
@@ -23,7 +23,7 @@ From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquiv
   In particular, the set of equivocators is monotonically increasing for such a
   trace (Lemma [strong_witness_equivocating_validators_prefix_monotonicity]).
 
-  We then use this result to show that any Free valid state is also a valid
+  We then use this result to show that any free valid state is also a valid
   state for the composition of nodes under the [fixed_equivocation_constraint]
   induced by its set of equivocators.
 *)

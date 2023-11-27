@@ -4,7 +4,7 @@ From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections. 
 
-(** * VLSM Message Dependencies
+(** * Core: VLSM Message Dependencies
 
   An abstract framework for the full-node condition.
   Assumes that each message has an associated set of <<message_dependencies>>.

@@ -5,7 +5,7 @@ From VLSM.Core Require Import VLSM PreloadedVLSM Composition VLSMProjections Val
 
 Section sec_projections.
 
-(** * Composite VLSM induced projections
+(** * Core: Composite VLSM Induced Projections
 
   In this section we define a VLSM representing the induced projection of a
   composite VLSM to a single node ([composite_vlsm_induced_projection]), and we

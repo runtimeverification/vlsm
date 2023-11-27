@@ -5,11 +5,11 @@ From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Validator ProjectionTraces.
 From VLSM.Core Require Import SubProjectionTraces Equivocation Equivocation.NoEquivocation.
 
-(** * Fixed Set Equivocation
+(** * Core: Fixed Set Equivocation
 
-  In this section we define fixed equivocation for the regular composition.
+  In this module, we define fixed equivocation for the regular VLSM composition.
 
-  Assuming that a only a fixed subset of the nodes (here called equivocating)
+  Assuming that a only a fixed subset of the nodes (here called _equivocating_)
   are allowed to equivocate, inspired by the results leading to
   Lemma [equivocators_valid_trace_from_project] which links state equivocation
   to free composition, we can say that a message can be produced by a network

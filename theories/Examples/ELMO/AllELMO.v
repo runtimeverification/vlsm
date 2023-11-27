@@ -1,4 +1,4 @@
-(** * ELMO definitions and results exports *)
+(** * ELMO: Exporting of All ELMO Modules *)
 
 From VLSM.Examples Require Export BaseELMO UMO MO ELMO.
 

@@ -3,19 +3,15 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters StdppExtras.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
 
-Section sec_VLSM_projection.
-
-(** * VLSM Total Projections
+(** * Core: VLSM Total Projections
 
   A VLSM projection guaranteeing the existence of projection for all states and
   traces. We say that VLSM <<X>> projects to VLSM <<Y>> (sharing the same messages) if
   there exists maps <<state_project>> taking <<X>>-states to <<Y>>-states,
   and <<trace_project>>, taking list of transitions from <<X>> to <<Y>>, such that:
 
-  - state and [trace_project_preserves_valid_trace]s.
-
+  - state and [trace_project_preserves_valid_trace]s
   - [trace_project_app]: trace projection commutes with concatenation of traces
-
   - [final_state_project]: state projection commutes with [finite_trace_last]
 
   Proper examples of total projections (which are not [VLSM_embedding]s)
@@ -26,6 +22,8 @@ Section sec_VLSM_projection.
   first (original) node instance for each equivocator (e.g.,
   [equivocators_no_equivocations_vlsm_X_vlsm_projection]).
 *)
+
+Section sec_VLSM_projection.
 
 Section sec_pre_definitions.
 

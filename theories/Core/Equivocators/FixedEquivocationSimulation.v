@@ -12,9 +12,9 @@ From VLSM.Core Require Import Equivocators.FullReplayTraces.
 From VLSM.Core Require Import Equivocators.FixedEquivocation.
 From VLSM.Core Require Import Equivocators.SimulatingFree.
 
-(** * VLSM Equivocators Simulating fixed-set equivocation composition
+(** * Core: VLSM Equivocators Simulating Fixed Set Equivocation Composition
 
-  In this module we show that the composition of equivocators with no
+  In this module, we show that the composition of equivocators with no
   message-equivocation and fixed-set state-equivocation can simulate the
   fixed-set message-equivocation composition of regular nodes.
 

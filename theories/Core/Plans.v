@@ -2,7 +2,11 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM.
 
-(** * VLSM Plans *)
+(** * Core: VLSM Plans
+
+  A plan is a (sequence of actions) which can be attempted on a
+  given state to yield a trace.
+*)
 
 Section sec_plans.
 
@@ -11,9 +15,6 @@ Context
   {T : VLSMType message}.
 
 (**
-  A plan is a (sequence of actions) which can be attempted on a
-  given state to yield a trace.
-
   A [plan_item] is a singleton plan, and contains a label and an input
   which would allow to transition from any given state
   (note that we don't address validity for now).

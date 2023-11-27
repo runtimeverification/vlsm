@@ -5,7 +5,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-(** * Core properties of possibly-infinite traces *)
+(** * Properties of possibly-infinite traces *)
 
 (**
   The property encodings and many specific properties are adapted from the paper

@@ -4,7 +4,7 @@ From VLSM.Lib Require Import ListExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Validator Composition.
 From VLSM.Core Require Import ConstrainedVLSM.
 
-(** * State-annotated VLSMs
+(** * Core: State-Annotated VLSMs
 
   This module describes the VLSM obtained by augmenting the states of an existing
   VLSM with annotations and providing additional validity constraints taking into
@@ -205,7 +205,7 @@ End sec_annotated_vlsm_projections.
 
 Section sec_composite_annotated_vlsm_projections.
 
-(** ** Specializing [projection_validator_prop]erties to annotated compositions. *)
+(** ** Specializing projection validator properties to annotated compositions *)
 
 Context
   {message : Type}

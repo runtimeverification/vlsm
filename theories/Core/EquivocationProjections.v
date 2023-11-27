@@ -3,16 +3,16 @@ From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM Equivocation.
 From VLSM.Core Require Import Composition VLSMProjections Validator ProjectionTraces.
 
-(** * VLSM projections and messages properties
+(** * Core: VLSM Projections and Messages Properties
 
-  In this section we show that messages properties (oracles like [has_been_sent],
+  In this section, we show that messages properties (oracles like [has_been_sent],
   [has_been_received], and [has_been_directly_observed]) are reflected and, in some cases,
   preserved by VLSM projections.
 *)
 
 Section sec_projection_oracle.
 
-(** ** [VLSM_projection]s reflect message properties *)
+(** ** VLSM projections reflect message properties *)
 
 Context
   {message : Type}

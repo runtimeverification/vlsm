@@ -6,7 +6,7 @@ From VLSM.Lib Require Import ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 From VLSM.Core Require Export PreloadedVLSM ConstrainedVLSM ReachableThreshold.
 
-(** * VLSM Equivocation Definitions
+(** * Core: VLSM Equivocation Definitions
 
   This module is dedicated to building the vocabulary for discussing equivocation.
   Equivocation occurs on the receipt of a message which has not been previously sent.
@@ -15,6 +15,7 @@ From VLSM.Core Require Export PreloadedVLSM ConstrainedVLSM ReachableThreshold.
   and limit equivocation by means of a composition constraint.
 *)
 
+(* FIXME: move to preamble *)
 Lemma exists_proj1_sig {A : Type} (P : A -> Prop) (a : A) :
   (exists xP : {x | P x}, proj1_sig xP = a) <-> P a.
 Proof.

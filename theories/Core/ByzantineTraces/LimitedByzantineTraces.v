@@ -10,9 +10,9 @@ From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation.
 From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 
-(** * VLSM Compositions with Byzantine nodes of limited weight
+(** * Core: VLSM Compositions with Byzantine Nodes of Limited Weight
 
-  In this module we define and study protocol executions allowing a
+  In this module, we define and study protocol executions allowing a
   (weight-)limited amount of byzantine faults.
 
   We will show that, if the non-byzantine nodes are validators for a

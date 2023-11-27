@@ -4,7 +4,7 @@ From Coq Require Import Streams.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMInclusion VLSMEmbedding VLSMEquality.
 
-(** * Constrained VLSM
+(** * Core: Constrained VLSMs
 
   Given a base VLSM <<X>>, we can further constrain its validity
   condition with the given predicate, producing a new VLSM.

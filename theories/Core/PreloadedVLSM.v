@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections.
 
-(** * Pre-loaded VLSMs
+(** * Core: Preloaded VLSMs
 
   Given a VLSM <<X>>, we introduce the _pre-loaded_ version of it, which is
   identical to <<X>>, except that all messages are initial. The high degree

@@ -8,9 +8,9 @@ From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
 From VLSM.Core Require Import Equivocators.FullReplayTraces.
 
-(** * Equivocators simulating regular nodes
+(** * Core: Equivocators Simulating Regular Nodes
 
-  In this module we prove a general simulation result parameterized by
+  In this module, we prove a general simulation result parameterized by
   constraints with good properties, then we instantiate the general result for
   the free composition of regular nodes.
 *)

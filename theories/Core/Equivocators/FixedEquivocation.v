@@ -10,7 +10,7 @@ From VLSM.Core Require Import Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
 
-(** * VLSM Equivocators Fixed Equivocation *)
+(** * Core: VLSM Equivocators Fixed Equivocation *)
 
 Section sec_equivocators_fixed_equivocations_vlsm.
 

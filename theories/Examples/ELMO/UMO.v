@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble StdppExtras StdppListSet.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation ProjectionTraces.
 From VLSM.Examples Require Import BaseELMO.
 
-(** * UMO Protocol Definitions and Properties
+(** * ELMO: Protocol Definitions and Properties for UMO
 
   This module contains definitions and properties of UMO components and
   the UMO protocol.

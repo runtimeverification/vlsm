@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras.
 From VLSM.Core Require Import VLSM VLSMProjections ProjectionTraces Composition Validator.
 From VLSM.Core Require Import Equivocation EquivocationProjections Equivocation.NoEquivocation.
 
-(** * VLSM Subcomposition *)
+(** * Core: VLSM Subcomposition *)
 
 Section sec_sub_composition.
 

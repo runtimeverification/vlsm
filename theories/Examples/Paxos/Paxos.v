@@ -12,6 +12,7 @@ Create HintDb list_simpl discriminated.
 Ltac simpl_elem_of_list := rewrite_strat any (topdown (hints list_simpl)).
 Ltac simpl_elem_of_list_in H := rewrite_strat any (topdown (hints list_simpl)) in H.
 
+(* FIXME: move to Core *)
 Lemma from_send_to_from_sent_argument
   [message] (V : VLSM message)
   `{!HasBeenSentCapability V}
@@ -37,7 +38,7 @@ Proof.
   - by eapply P_stable, IHHs.
 Qed.
 
-(** * A Basic Paxos Protocol
+(** * Paxos: A Basic Paxos Protocol
 
   This protocol maintains safety in the presence of message loss,
   but may not be safe for Byzantine failures.

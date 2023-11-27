@@ -2,7 +2,8 @@ From stdpp Require Import prelude.
 From Coq Require Import Reals Lra.
 From VLSM.Lib Require Import RealsExtras Measurable ListExtras StdppListSet.
 
-(**
+(** * Core: Reachable Thresholds
+
   Given a set of validators and a [threshold] (a positive real number), we say
   that the threshold is reachable ([rt_reachable]) when there exists a
   set of validators whose combined weight passes the threshold.
