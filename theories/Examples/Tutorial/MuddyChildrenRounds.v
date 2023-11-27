@@ -72,7 +72,7 @@ Record RoundStatus : Type := mkRS
   rs_status : ChildStatus;
 }.
 
-(** We want to display [RoundStatus] using the constructor instead of the record syntax. *)
+(** Show [RoundStatus] using the constructor instead of the record syntax. *)
 Add Printing Constructor RoundStatus.
 
 Section sec_muddy.
@@ -95,6 +95,7 @@ Record State : Type := mkSt
   st_rs : option RoundStatus;
 }.
 
+(** Show [State] using the constructor instead of the record syntax. *)
 Add Printing Constructor State.
 
 (**
@@ -108,6 +109,7 @@ Record Message : Type := mkMsg
   msg_status : ChildStatus;
 }.
 
+(** Show [Message] using the constructor instead of the record syntax. *)
 Add Printing Constructor Message.
 
 Definition MCType : VLSMType Message :=
