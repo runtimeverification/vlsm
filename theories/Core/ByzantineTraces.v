@@ -7,7 +7,8 @@ From VLSM.Core Require Import PreloadedVLSM.
 
   In this section, we introduce two definitions of Byzantine traces,
   prove that they are equivalent (lemma [byzantine_alt_byzantine_iff]),
-  and equivalent with traces on the corresponding pre-loaded VLSM
+  and then prove that both definitions are equivalent with the definition
+  of a valid trace in the corresponding preloaded VLSM
   (lemmas [byzantine_pre_loaded_with_all_messages] and
   [pre_loaded_with_all_messages_alt_eq]).
 
