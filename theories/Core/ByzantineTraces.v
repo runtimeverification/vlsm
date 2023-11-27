@@ -76,8 +76,7 @@ Definition emit_any_message_vlsm_type : VLSMType message :=
 |}.
 
 (**
-  The [emit_any_message_vlsm] further says that the single state is
-  initial and no messages are initial.
+  The single state is the initial state and no messages are initial.
 *)
 
 Program Definition emit_any_message_vlsm_s0 : {_ : state emit_any_message_vlsm_type | True} :=
