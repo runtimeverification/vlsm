@@ -676,9 +676,6 @@ Proof.
         by apply msg_dep_happens_before_iff_one; left.
 Qed.
 
-Definition Message_sender (m : Message) : option Address :=
-  Some (adr (state m)).
-
 Context
   `{finite.Finite index}
   `{Inhabited index}
@@ -721,17 +718,75 @@ Proof.
   by left.
 Qed.
 
-Definition ELMO_A (a : Address) : index :=
-  match adr2idx a with
-  | None => inhabitant
-  | Some i => i
+Definition Message_validator : Type :=
+  dsig (is_Some ∘ adr2idx).
+
+Definition Message_sender (m : Message) : option Message_validator :=
+  let a := adr (state m) in
+  match decide (is_Some (adr2idx a)) with
+  | left Ha => Some (dexist a Ha)
+  | _ => None
   end.
 
-Lemma ELMO_A_inv :
-  forall (i : index), ELMO_A (idx i) = i.
+Lemma Message_sender_Some_adr :
+  forall (m : Message) (v : Message_validator),
+  Message_sender m = Some v -> ` v = adr (state m).
 Proof.
-  intros i; unfold ELMO_A.
-  by rewrite adr2idx_idx.
+  unfold Message_sender; intros * Hsender; case_decide; [| done].
+  by inversion Hsender.
+Qed.
+
+Lemma Message_sender_Some_adr_iff :
+  forall (m : Message) (v : Message_validator),
+  Message_sender m = Some v <-> ` v = adr (state m).
+Proof.
+  split; [by apply Message_sender_Some_adr |].
+  unfold Message_sender; case_decide as Hdec;
+    [by intro; f_equal; apply dsig_eq |].
+  intro Hv; contradict Hdec.
+  by destruct_dec_sig v a Ha Heq; subst v; cbn in Hv; subst a.
+Qed.
+
+Definition ELMO_A (v : Message_validator) : index :=
+  is_Some_proj (proj2_dsig v).
+
+Definition ELMO_A_inv_fn (i : index) : Message_validator :=
+  dexist (idx i) (ex_intro _ i (adr2idx_idx i)).
+
+Lemma ELMO_A_inv :
+  forall (i : index) (v : Message_validator), ` v = idx i -> ELMO_A v = i.
+Proof.
+  intros * Hv.
+  destruct_dec_sig v a Ha Heq; subst v; cbn in Hv; subst a.
+  by apply is_Some_proj_elim, adr2idx_idx.
+Qed.
+
+Lemma Message_sender_A :
+  forall (m : Message) (v : Message_validator),
+  Message_sender m = Some v -> idx (ELMO_A v) = adr (state m).
+Proof.
+  intros * Hsender.
+  apply Message_sender_Some_adr in Hsender.
+  destruct_dec_sig v a Ha Heq; subst v.
+  cbn in Hsender; subst a.
+  apply idx_adr2idx.
+  destruct Ha as [a Heq].
+  rewrite Heq at 1.
+  f_equal; symmetry; apply ELMO_A_inv; cbn.
+  by symmetry; apply idx_adr2idx.
+Qed.
+
+#[export] Instance ELMO_A_inj : Inj (=) (=) ELMO_A.
+Proof.
+  intros v1 v2.
+  destruct_dec_sig v1 a1 Ha1 Heq1; subst v1.
+  destruct_dec_sig v2 a2 Ha2 Heq2; subst v2.
+  destruct Ha1 as [i1 Ha1], Ha2 as [i2 Ha2].
+  unfold ELMO_A; cbn.
+  erewrite !is_Some_proj_elim by done.
+  intros ->; apply dsig_eq; cbn.
+  apply idx_adr2idx in Ha1, Ha2; subst.
+  by f_equal.
 Qed.
 
 End sec_BaseELMO_Observations.
