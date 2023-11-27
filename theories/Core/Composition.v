@@ -360,7 +360,7 @@ Definition lift_to_composite_transition_item' :
     lift_to_composite_transition_item (proj1_sig composite_s0).
 
 Definition lift_to_composite_plan_item
-  (i : index) (a : vplan_item (IM i)) : composite_plan_item.
+  (i : index) (a : plan_item (IM i)) : composite_plan_item.
 Proof.
   destruct a.
   split.
@@ -988,7 +988,7 @@ Qed.
 Lemma relevant_components_one_free
   (s s' : state Free)
   (Hprs' : valid_state_prop Free s')
-  (ai : vplan_item Free)
+  (ai : plan_item Free)
   (i := projT1 (label_a ai))
   (Heq : (s i) = (s' i))
   (Hpr : finite_valid_plan_from Free s [ai]) :
