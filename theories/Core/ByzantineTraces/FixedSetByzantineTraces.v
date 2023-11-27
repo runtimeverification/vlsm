@@ -45,18 +45,18 @@ Context
 
 (** The [valid]ity predicate allows sending only signed messages *)
 Definition signed_messages_valid
-  (l : label (@all_messages_type message))
-  (som : state (@all_messages_type message) * option message)
+  (l : label (@emit_any_message_vlsm_type message))
+  (som : state (@emit_any_message_vlsm message) * option message)
   : Prop :=
   channel_authenticated_message A sender node_idx l.
 
 Definition emit_any_signed_message_vlsm_machine
-  : VLSMMachine all_messages_type
+  : VLSMMachine emit_any_message_vlsm_type
   :=
   {| initial_state_prop := fun s => True
    ; initial_message_prop := fun m => False
-   ; s0 := all_messages_state_inh
-   ; transition := all_messages_transition
+   ; s0 := emit_any_message_vlsm_state_inh
+   ; transition := emit_any_message_vlsm_transition
    ; valid := signed_messages_valid
   |}.
 
@@ -445,7 +445,7 @@ Proof.
     unfold fixed_byzantine_IM, update_IM.
     simpl.
     rewrite @decide_True by done.
-    cbn. unfold all_messages_transition.
+    cbn. unfold emit_any_message_vlsm_transition.
     by inversion 1; itauto.
 Qed.
 

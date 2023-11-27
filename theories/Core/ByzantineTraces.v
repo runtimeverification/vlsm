@@ -62,14 +62,14 @@ Qed.
   The [alternate_byzantine_trace_prop]erty relies on the composition
   of the VLSM with a special VLSM which can produce all messages.
 
-  We will define its type ([all_messages_type]),
-  signature ([all_messages_sig]) and the VLSM itself ([emit_any_message_vlsm]) below.
+  We will define its type ([emit_any_message_vlsm_type]) and the VLSM itself
+  ([emit_any_message_vlsm]) below.
 
   The type of the [emit_any_message_vlsm] sets the [label] set to consist of all
   <<message>>s and the [state] to consist of a single state (here [tt]).
 *)
 
-Definition all_messages_type : VLSMType message :=
+Definition emit_any_message_vlsm_type : VLSMType message :=
 {|
   label := message;
   state := unit;
@@ -81,34 +81,37 @@ Definition all_messages_type : VLSMType message :=
   ensure that the sets of labels and messages are both non-empty.
 *)
 
-Program Definition all_messages_s0 : {_ : state all_messages_type | True} :=
+Program Definition emit_any_message_vlsm_s0 : {_ : state emit_any_message_vlsm_type | True} :=
   exist _ tt _.
 Next Obligation.
 Proof. done. Defined.
 
-#[export] Instance all_messages_state_inh : Inhabited {_ : state all_messages_type | True} :=
-  populate all_messages_s0.
+#[export] Instance emit_any_message_vlsm_state_inh :
+  Inhabited {_ : state emit_any_message_vlsm_type | True} :=
+    populate emit_any_message_vlsm_s0.
 
 (**
   The [transition] function of the [emit_any_message_vlsm] generates the
   message given as a label.
 *)
-Definition all_messages_transition
-  (l : label all_messages_type) (som : state all_messages_type * option message)
-  : state all_messages_type * option message :=
+Definition emit_any_message_vlsm_transition
+  (l : label emit_any_message_vlsm_type)
+  (som : state emit_any_message_vlsm_type * option message)
+  : state emit_any_message_vlsm_type * option message :=
     (tt, Some l).
 
 (** The [valid]ity predicate specifies that all transitions are valid. *)
-Definition all_messages_valid
-  (l : label all_messages_type) (som : state all_messages_type * option message) : Prop :=
+Definition emit_any_message_vlsm_valid
+  (l : label emit_any_message_vlsm_type)
+  (som : state emit_any_message_vlsm_type * option message) : Prop :=
     True.
 
-Definition emit_any_message_vlsm_machine : VLSMMachine all_messages_type :=
+Definition emit_any_message_vlsm_machine : VLSMMachine emit_any_message_vlsm_type :=
 {|
   initial_state_prop := fun _ => True;
   initial_message_prop := fun _ => False;
-  transition := all_messages_transition;
-  valid := all_messages_valid;
+  transition := emit_any_message_vlsm_transition;
+  valid := emit_any_message_vlsm_valid;
 |}.
 
 Definition emit_any_message_vlsm : VLSM message :=
