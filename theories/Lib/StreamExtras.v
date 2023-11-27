@@ -2,7 +2,7 @@ From stdpp Require Import prelude.
 From Coq Require Import Streams Classical Sorted.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras SortedLists NeList.
 
-(** * Stream utility definitions and lemmas *)
+(** * Utility: Stream Definitions and Results *)
 
 Lemma stream_eq_hd_tl {A} (s s' : Stream A) :
   hd s = hd s' -> tl s = tl s' -> s = s'.

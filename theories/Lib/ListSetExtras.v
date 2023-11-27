@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras StdppListSet.
 
-(** * List set utility definitions and lemmas *)
+(** * Utility: List Set Definitions and Results *)
 
 Definition set_eq {A} (s1 s2 : set A) : Prop :=
   s1 ⊆ s2 /\ s2 ⊆ s1.

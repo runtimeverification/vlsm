@@ -1,7 +1,7 @@
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import ListExtras StdppExtras.
 
-(** * Non-empty lists *)
+(** * Utility: Non-Empty Lists *)
 
 (** ** Positive definition *)
 

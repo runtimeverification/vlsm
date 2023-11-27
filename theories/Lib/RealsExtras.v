@@ -1,7 +1,7 @@
 From Coq Require Import Reals.
 From stdpp Require Import prelude.
 
-(** * Real number utility definitions and lemmas *)
+(** * Utility: Real Number Definitions and Results *)
 
 #[export] Instance Rle_transitive : Transitive Rle.
 Proof.

@@ -3,7 +3,7 @@ From Coq Require Import FunctionalExtensionality.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble StdppExtras ListExtras.
 
-(** * Finitely supported functions *)
+(** * Utility: Finitely Supported Functions *)
 
 (**
   The support of a function (w.r.t. a specified codomain value) is the type of

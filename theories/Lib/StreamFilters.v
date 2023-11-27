@@ -1,6 +1,9 @@
 From stdpp Require Import prelude.
 From Coq Require Import Streams Sorted.
-From VLSM.Lib Require Import Preamble StreamExtras SortedLists ListExtras StdppExtras NeList.
+From VLSM.Lib Require Import Preamble StreamExtras SortedLists.
+From VLSM.Lib Require Import ListExtras StdppExtras NeList.
+
+(** * Utility: Stream Filters *)
 
 (**
   Given a predicate <<P>> and a stream <<s>>, a stream of naturals <<ns>>

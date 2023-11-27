@@ -3,7 +3,7 @@ Obligation Tactic := idtac.
 From stdpp Require Import prelude.
 From Coq Require Import Eqdep_dec.
 
-(** * General utility definitions, lemmas, and tactics *)
+(** * Utility: General Definitions, Results and Tactics *)
 
 Tactic Notation "spec" hyp(H) :=
   match type of H with ?a -> _ =>
