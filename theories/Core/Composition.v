@@ -1103,7 +1103,7 @@ Lemma relevant_components_free
   finite_valid_plan_from Free s' a /\
   (forall (i : index), i ∈ li -> (res' i) = res i).
 Proof.
-  induction a using rev_ind; cbn in *; [by auto using finite_valid_plan_empty |].
+  induction a using rev_ind; cbn in *; [by split; [constructor |] |].
   apply finite_valid_plan_from_app_iff in Hpr as [Hrem Hsingle].
   spec IHa.
   {
