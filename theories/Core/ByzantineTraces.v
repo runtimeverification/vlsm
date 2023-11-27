@@ -339,7 +339,6 @@ Context
   (constraint : composite_label IM -> composite_state IM  * option message -> Prop)
   (X := composite_vlsm IM constraint)
   (PreLoadedX := pre_loaded_with_all_messages_vlsm X)
-  (FreeX := free_composite_vlsm IM)
   (Hvalidator : forall i : index, component_message_validator_prop IM constraint i)
   .
 
