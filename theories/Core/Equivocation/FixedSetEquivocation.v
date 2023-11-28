@@ -53,8 +53,8 @@ Definition equivocators_composition_for_directly_observed s
   := pre_loaded_free_equivocating_vlsm_composition (composite_has_been_directly_observed IM s).
 
 (**
-  The fixed equivocation constraint for the regular composition of components
-  stipulates that a message can be received either if it [has_been_directly_observed]
+  The fixed equivocation constraint for a regular composition stipulates that
+  a message can be received either if it [has_been_directly_observed]
   or it can be emitted by the free composition of equivocators pre-loaded with
   the messages directly observed in the current state.
 *)
@@ -625,10 +625,10 @@ Qed.
 End sec_fixed_equivocator_sub_projection.
 
 (**
-  [strong_fixed_equivocation_constraint] is not actually stronger/
+  [strong_fixed_equivocation_constraint] is not actually stronger.
 
-  In this section we show that the compositions of components using
-  the [fixed_equivocation_constraint] and the [strong_fixed_equivocation]
+  In this section we show that a composition using the
+  [fixed_equivocation_constraint] and the [strong_fixed_equivocation]
   are trace-equivalent.
 
   The importance of this result is that we can reduce the complexity of proofs
@@ -889,8 +889,8 @@ Qed.
 
 (** *** Main result of the section
 
-  Given a valid state <<s>> for the <<Fixed>> composition (composition of
-  components where only the <<equivocators>> are allowed to message-equivocate),
+  Given a valid state <<s>> for the <<Fixed>> composition (composition
+  where only the <<equivocators>> are allowed to message-equivocate),
   we can "lift" any trace of the free composition of just the equivocators
   pre-loaded with the messages observed in <<s>> to a trace over the <<Fixed>>
   composition by simply setting the non-equivocating state components to those

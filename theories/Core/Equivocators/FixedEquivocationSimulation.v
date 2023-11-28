@@ -377,7 +377,7 @@ End sec_fixed_equivocating.
 
 (** ** No-equivocation simulation as a particular case of fixed set simulation
 
-  In this section we show that traces of the composition of components with no
+  In this section we show that traces of the composition with no
   message equivocation can be simulated by the composition of equivocators with
   no message equivocation in which no component is allowed to state-equivocate.
 *)

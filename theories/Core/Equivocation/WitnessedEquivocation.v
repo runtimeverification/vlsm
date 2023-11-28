@@ -24,7 +24,7 @@ From VLSM.Core Require Import NoEquivocation FixedSetEquivocation TraceWiseEquiv
   trace (Lemma [strong_witness_equivocating_validators_prefix_monotonicity]).
 
   We then use this result to show that any free valid state is also a valid
-  state for the composition of components under the [fixed_equivocation_constraint]
+  state for a composition under the [fixed_equivocation_constraint]
   induced by its set of equivocators.
 *)
 
