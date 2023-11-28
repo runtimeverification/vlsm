@@ -749,17 +749,17 @@ Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%functi
 
 (** ** Lifting a trace from a sub-composition to the full composition
 
-  In this section we first show that given a valid state for a composition of
-  all nodes we can reset some of its state-components to initial states for those
-  components without losing the valid state property.
+  In this section, we first show that given a valid state for a composition of
+  all components we can reset some of the state-components to initial states
+  without losing the valid state property.
 
-  The set of nodes for which the reset operation will happen is <<equivocators>>.
+  The set of components for which the reset operation will happen is <<equivocators>>.
 
   We then show that a similar result holds for replacing the equivocator
   components with the components corresponding to any valid state of the
   composition of just the equivocators.
 
-  We proving those results for compositions pre-loaded with all messages
+  We prove those results for compositions pre-loaded with all messages
   (Lemmas [reset_equivocating_transitions_preloaded_projection] and
   [PreSubFree_PreFree_weak_embedding]).
 *)
@@ -852,7 +852,7 @@ Proof.
 Qed.
 
 (**
-  Given any valid trace for the composition of all nodes and an initial state
+  Given any valid trace for the composition of all components and an initial state
   for the composition of just the equivocators, the trace obtained by resetting
   the components corresponding to the equivocators to those of the given initial
   state and removing the transitions corresponding to the equivocators is
@@ -913,10 +913,10 @@ Proof.
 Qed.
 
 (**
-  Given any valid state for the composition of all nodes and a valid trace
+  Given any valid state for the composition of all components and a valid trace
   for the composition of just the equivocators, the trace obtained by completing
   the state-components from the trace with the components from the given
-  valid state is a valid trace for the composition of all nodes.
+  valid state is a valid trace for the composition of all components.
 *)
 Lemma PreSubFree_PreFree_weak_embedding :
   VLSM_weak_embedding PreSubFree PreFree
@@ -1261,8 +1261,8 @@ Qed.
 
 (** ** No-equivocation results for sub-composition
 
-  Constraining (only) a subset of the nodes of a composition to not message-
-  equivocate.
+  Constraining (only) a subset of the components of a composition to
+  not message-equivocate.
 *)
 Definition sub_IM_not_equivocating_constraint
   (l : composite_label IM)
@@ -1741,8 +1741,8 @@ Proof.
 Qed.
 
 (**
-  If a node can emit a message, it can also emit it in a subcomposition with
-  other nodes, and starting with more pre-loaded messages.
+  If a component can emit a message, it can also emit it in a subcomposition with
+  other components, and starting with more pre-loaded messages.
 *)
 Lemma can_emit_with_more
   (j : index)

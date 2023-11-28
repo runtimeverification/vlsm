@@ -432,7 +432,7 @@ Context
 (**
   Under [sender_safety_alt_prop]erty assumptions, if a message can be emitted
   by the free composition (pre-loaded with all messages), then it can also be
-  emitted by the node corresponding to its sender (pre-loaded with all messages).
+  emitted by the component corresponding to its sender (pre-loaded with all messages).
 *)
 Lemma can_emit_projection
   : can_emit PreFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.

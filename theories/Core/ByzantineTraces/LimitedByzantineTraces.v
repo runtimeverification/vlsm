@@ -10,16 +10,16 @@ From VLSM.Core Require Import Equivocation.LimitedMessageEquivocation.
 From VLSM.Core Require Import Equivocation.MsgDepLimitedEquivocation.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 
-(** * Core: VLSM Compositions with Byzantine Nodes of Limited Weight
+(** * Core: VLSM Compositions with Byzantine Components of Limited Weight
 
   In this module, we define and study protocol executions allowing a
   (weight-)limited amount of byzantine faults.
 
-  We will show that, if the non-byzantine nodes are validators for a
+  We will show that, if the non-byzantine components are validators for a
   composition constraint allowing only a limited amount of equivocation, then
-  they do not distinguish between byzantine nodes and equivocating ones, that is,
-  projections of traces with byzantine faults to the non-byzantine nodes are
-  projections of traces of the composition of the regular nodes under a
+  they do not distinguish between byzantine components and equivocating ones, that is,
+  projections of traces with byzantine faults to the non-byzantine components are
+  projections of traces of the composition of the regular components under a
   composition constraint allowing only a limited amount of equivocation.
 *)
 
@@ -43,7 +43,7 @@ Context
 (**
   We define the [limited_byzantine_trace_prop]erty in two steps. First, we
   leverage the [fixed_byzantine_trace_alt_prop]erty by assuming a fixed selection
-  of <<byzantine>> nodes whose added weight is below the [ReachableThreshold].
+  of <<byzantine>> components whose added weight is below the [ReachableThreshold].
 *)
 Definition fixed_limited_byzantine_trace_prop
   (s : composite_state IM)
@@ -56,7 +56,7 @@ Definition fixed_limited_byzantine_trace_prop
 
 (**
   The union of traces with the [fixed_limited_byzantine_trace_prop]erty over
-  all possible selections of (limited) byzantine nodes.
+  all possible selections of (limited) byzantine components.
 *)
 Definition limited_byzantine_trace_prop
   (s : composite_state IM)
@@ -79,9 +79,9 @@ Context
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
   .
 
-(** ** Assuming the byzantine nodes are known
+(** ** Assuming the byzantine components are known
 
-  We will first fix a selection of <<byzantine>> nodes of limited weight and
+  We will first fix a selection of <<byzantine>> components of limited weight and
   analyze traces with the [fixed_limited_byzantine_trace_prop]erty w.r.t. that
   selection.
 *)
@@ -191,7 +191,7 @@ Qed.
 
 (**
   By replacing the byzantine components of a composite [valid_state] with
-  initial states for those machines and ignoring transitions for byzantine nodes
+  initial states for those machines and ignoring transitions for byzantine components
   we obtain valid traces for the <<Limited>> equivocation composition.
 *)
 Lemma limited_PreNonByzantine_vlsm_lift
@@ -217,9 +217,9 @@ End sec_fixed_limited_selection.
 
 (**
   Given a trace with the [fixed_limited_byzantine_trace_prop]erty for a selection
-  of <<byzantine>> nodes, there exists a valid trace for the <<Limited>>
+  of <<byzantine>> components, there exists a valid trace for the <<Limited>>
   equivocation composition such that the projection of the two traces to
-  the <<non-byzantine>> nodes coincide.
+  the <<non-byzantine>> components coincide.
 *)
 Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating s tr byzantine_vs
   (byzantine : Ci := fin_sets.set_map A byzantine_vs)
@@ -246,8 +246,8 @@ Qed.
 
   Given any trace with the [limited_byzantine_trace_prop]erty, there exists
   a valid trace for the <<Limited>> equivocation composition and
-  a selection of nodes of limited weight such that the projection of the
-  two traces to the nodes not in the selection coincide.
+  a selection of components of limited weight such that the projection of the
+  two traces to the components not in the selection coincide.
 *)
 Lemma validator_limited_non_byzantine_traces_are_limited_non_equivocating s tr
   : limited_byzantine_trace_prop s tr ->
@@ -304,9 +304,9 @@ Context
   .
 
 (**
-  If the set of byzantine nodes is weight-limited and if an [input_valid_transition]
-  of the non-byzantine nodes from a state of weight-limited equivocation does not
-  introduce equivocators from the non-byzantine nodes, then the transition is valid
+  If the set of byzantine components is weight-limited and if an [input_valid_transition]
+  of the non-byzantine components from a state of weight-limited equivocation does not
+  introduce equivocators from the non-byzantine components, then the transition is valid
   for weight-limited equivocation.
 *)
 Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
@@ -361,7 +361,7 @@ Qed.
 (**
   Considering a trace with the [fixed_byzantine_trace_alt_prop]erty for a
   set <<byzantine>> of indices of bounded weight, its subtrace corresponding to
-  the non-byzantine nodes is of limited equivocation and its set of equivocators
+  the non-byzantine components is of limited equivocation and its set of equivocators
   is included in <<byzantine>>.
 *)
 Lemma lift_fixed_byzantine_traces_to_limited

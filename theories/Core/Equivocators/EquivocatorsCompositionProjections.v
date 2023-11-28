@@ -1202,7 +1202,7 @@ Qed.
 (**
   Projecting a pre-loaded valid trace of the composition of equivocators
   using [proper_equivocator_descriptors] one obtains a pre-loaded valid trace
-  of the free composition of nodes.
+  of the free composition of components.
 *)
 Lemma pre_equivocators_valid_trace_project
   (is final_state : state (equivocators_no_equivocations_vlsm IM))

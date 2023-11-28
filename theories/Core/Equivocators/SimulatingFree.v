@@ -8,11 +8,11 @@ From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
 From VLSM.Core Require Import Equivocators.FullReplayTraces.
 
-(** * Core: Equivocators Simulating Regular Nodes
+(** * Core: Equivocators Simulating Regular Components
 
   In this module, we prove a general simulation result parameterized by
   constraints with good properties, then we instantiate the general result for
-  the free composition of regular nodes.
+  the free composition of regular components.
 *)
 
 Section sec_generalized_constraints.
@@ -21,7 +21,7 @@ Section sec_generalized_constraints.
 
   In this section we prove a general simulation result, namely that a composition
   of equivocators constrained by a <<constraintE>> can simulate a composition of
-  the corresponding regular nodes constrained by a <<constraintX>> if they are
+  the corresponding regular components constrained by a <<constraintX>> if they are
   related through the [zero_descriptor_constraint_lifting_prop]erty and the
   [replayable_message_prop].
 *)
@@ -66,7 +66,7 @@ Definition zero_descriptor_constraint_lifting_prop : Prop :=
   The [replayable_message_prop]erty plays an important role in designing a
   general, abstract, proof for trace simulation (Lemma
   [generalized_equivocators_finite_valid_trace_init_to_rev]), as it specifies
-  that given a message <<m>> received in a regular node-composition state <<s>>
+  that given a message <<m>> received in a regular component-composition state <<s>>
   for which the constraint <<constraintX>> is satisfied, then any trace of the
   equivocators-composition (constrained by <<constraintE>>>) producing <<m>>
   can be "replayed" on top of an equivocators-composition state corresponding
@@ -92,7 +92,7 @@ Definition replayable_message_prop : Prop :=
 
 (**
   The main result of this section, showing that every trace of the
-  composition of regular nodes can be obtained as a [zero_descriptor] projection
+  composition of regular components can be obtained as a [zero_descriptor] projection
   of a valid trace for the composition of equivocators.
 
   The proof proceeds by replaying the transitions of the trace on the original
@@ -225,7 +225,7 @@ End sec_generalized_constraints.
 (** ** VLSM Equivocators Simulating Free Composite
 
   In this section we show that the composition of equivocators with no-message
-  equivocation can simulate the free composition of regular nodes.
+  equivocation can simulate the free composition of regular components.
 
   To allow reusing this result in the proof for simulating fixed equivocation,
   we first prove an intermediate result, where both the composite VLSMs are
@@ -301,7 +301,7 @@ Qed.
 
 (**
   Specializing the [generalized_equivocators_finite_valid_trace_init_to_rev]
-  result using the [free_constraint] for the composition of regular nodes
+  result using the [free_constraint] for the composition of regular components
   and the no-message-equivocation constraint for the composition of equivocators.
 *)
 Lemma seeded_equivocators_finite_valid_trace_init_to_rev

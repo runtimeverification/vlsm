@@ -2,6 +2,8 @@ From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
 From VLSM.Core Require Import Equivocation.
 
+(** * Core: The Full Node Constraint *)
+
 Section sec_full_node_constraint.
 
 Context
@@ -16,10 +18,10 @@ Context
   .
 
 (**
-  Given a composite state <<s>>, a message <<m>>, and a node index <<i>>
+  Given a composite state <<s>>, a message <<m>>, and a component index <<i>>
   if there is a machine we say that message <<m>> can be
-  [node_generated_without_further_equivocation] by node <<i>> if the message
-  can be produced by node <<i>> pre_loaded with all messages in a trace in which
+  [node_generated_without_further_equivocation] by component <<i>> if the message
+  can be produced by component <<i>> preloaded with all messages in a trace in which
   all message equivocation is done through messages causing
   [no_additional_equivocations] to state <<s>> (message [has_been_directly_observed] in <<s>>).
 *)
@@ -48,7 +50,7 @@ Definition node_generated_without_further_equivocation_alt
   The equivocation-based abstract definition of the full node condition
   stipulates that a message can be received in a state <<s>> if either it causes
   [no_additional_equivocations] to state <<s>>, or it can be
-  [node_generated_without_further_equivocation] by an admissible node.
+  [node_generated_without_further_equivocation] by an admissible component.
 *)
 Definition full_node_condition_for_admissible_equivocators
   (l : composite_label IM)

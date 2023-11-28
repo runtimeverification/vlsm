@@ -23,7 +23,7 @@ From VLSM.Core Require Import Equivocators.FixedEquivocation.
   [fixed_limited_equivocation_prop]erty.
 
   As a corollary we show that any state which is valid for the composition
-  of regular nodes using a [limited_equivocation_constraint] can be
+  of regular components using a [limited_equivocation_constraint] can be
   obtained as the projection of a valid state for the composition of
   equivocators with no message equivocation and limited state equivocation.
 *)
@@ -160,7 +160,7 @@ Context
   .
 
 (**
-  Any valid state for the composition of regular nodes under a limited
+  Any valid state for the composition of regular components under a limited
   message-equivocation constraint is the projection of a valid state of
   the composition of equivocators under a no message-equivocation and limited
   state-equivocation constraint.
