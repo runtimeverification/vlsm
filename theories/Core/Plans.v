@@ -174,8 +174,7 @@ Context
   corresponding [type] and [transition].
 *)
 
-Definition vplan_item := (@plan_item _ X).
-Definition plan : Type := list vplan_item.
+Definition plan : Type := list (plan_item X).
 Definition apply_plan := (@_apply_plan _ X (@transition _ _ X)).
 Definition trace_to_plan := (@_trace_to_plan _ X).
 Definition apply_plan_app
