@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From Coq Require Import Streams.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
 
-(** * VLSM Basics
+(** * Core: VLSM Basics
 
   This module provides basic VLSM infrastructure.
 *)
@@ -2670,7 +2670,7 @@ End sec_valid_transition_props.
 
 Section sec_finite_valid_trace_init_to_alt.
 
-(** ** Alternate definitions to valid traces and states
+(** ** Alternate definitions of valid traces and states
 
   Inspired from the [constrained_transitions_from_to] definition we can
   derive an alternate definition for valid traces which is easier to use

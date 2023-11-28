@@ -8,9 +8,9 @@ From VLSM.Core Require Import Equivocation.FixedSetEquivocation.
 From VLSM.Core Require Import Equivocation.TraceWiseEquivocation.
 From VLSM.Core Require Import Equivocation.WitnessedEquivocation.
 
-(** * VLSM Limited Message Equivocation
+(** * Core: VLSM Limited Message Equivocation
 
-  In this section we define the notion of limited (message-based) equivocation.
+  In this module, we define the notion of limited (message-based) equivocation.
 
   This notion is slightly harder to define than that of fixed-set equivocation,
   because, while for the latter we fix a set and let only the nodes belonging to

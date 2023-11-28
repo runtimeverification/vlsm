@@ -4,7 +4,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-(** * Definition of possibly-infinite traces *)
+(** * Utility: Definition of Possibly-Infinite Traces *)
 
 Ltac invs h := inversion h; subst => {h}.
 

@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude fin_maps.
 From VLSM.Lib Require Import Preamble.
 
-(** * Finite set utility definitions and lemmas *)
+(** * Utility: Finite Set Utility Definitions and Results *)
 
 Section sec_fin_set.
 

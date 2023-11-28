@@ -9,7 +9,7 @@ From VLSM.Core Require Import Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators.
 From VLSM.Core Require Import Equivocators.MessageProperties.
 
-(** * VLSM Equivocator Composition
+(** * Core: VLSM Equivocator Composition
 
   Given a composition <<X>> of VLSMs, we can model equivocator behavior by
   creating an _equivocator composition_ which replaces each component of <<X>>

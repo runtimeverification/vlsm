@@ -16,9 +16,9 @@ From VLSM.Core Require Import
   Equivocators.FixedEquivocationSimulation.
 From VLSM.Core Require Import Equivocators.FixedEquivocation.
 
-(** * VLSM Equivocators Simulating limited message equivocation traces
+(** * Core: VLSM Equivocators Simulating Limited Message Equivocation Traces
 
-  In this module we show that the composition of equivocators with no-message
+  In this module, we show that the composition of equivocators with no-message
   equivocation and limited state-equivocation can simulate all traces with the
   [fixed_limited_equivocation_prop]erty.
 

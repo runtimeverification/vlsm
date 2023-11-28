@@ -3,13 +3,14 @@ From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM.
 From VLSM.Core.VLSMProjections Require Import VLSMEmbedding VLSMTotalProjection.
 
-(** * VLSM Inclusion
+(** * Core: VLSM Inclusion
 
   When both VLSMs have the same state and label types they also share the
   same [Trace] type, and sets of traces can be compared without conversion.
   Then VLSM <<X>> is _included_ in VLSM <<Y>> if every [valid_trace] available to <<X>>
   is also available to <<Y>>.
 *)
+
 Section sec_VLSM_inclusion.
 
 Context

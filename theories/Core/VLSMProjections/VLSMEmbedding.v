@@ -3,9 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMTotalProjection.
 
-Section sec_VLSM_embedding.
-
-(** * VLSM Embedding (Embedding)
+(** * Core: VLSM Embedding
 
   A VLSM projection guaranteeing the existence of projection for all labels and
   states, and the full correspondence between [transition_item]s.
@@ -23,6 +21,8 @@ Section sec_VLSM_embedding.
   [lift_to_composite_VLSM_embedding] or
   [projection_friendliness_lift_to_composite_VLSM_embedding]).
 *)
+
+Section sec_VLSM_embedding.
 
 Section sec_pre_definitions.
 

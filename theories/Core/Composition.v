@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections.
 From VLSM.Core Require Import PreloadedVLSM ConstrainedVLSM.
 
-(** * VLSM Composition
+(** * Core: VLSM Composition
 
   This module provides Coq definitions for composite VLSMs and their projections
   to components.

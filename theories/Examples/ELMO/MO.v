@@ -6,7 +6,7 @@ From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 From VLSM.Core Require Import Validator ProjectionTraces.
 From VLSM.Examples Require Import BaseELMO UMO.
 
-(** * MO Protocol Definitions and Properties
+(** * ELMO: Protocol Definitions and Properties for MO
 
   This module contains definitions and properties of MO components and
   the MO protocol.

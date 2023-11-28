@@ -4,7 +4,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM Composition.
 
-(** * HistoryVLSMs *)
+(** * Core: History VLSMs *)
 
 Class HistoryVLSM `(X : VLSM message) : Prop :=
 {

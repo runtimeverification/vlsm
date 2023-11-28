@@ -5,7 +5,7 @@ From VLSM.Lib Require Import Preamble ListExtras FinSetExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections Composition.
 From VLSM.Examples Require Import Consensus.
 
-(** * Consensus by Voting
+(** * Paxos: Specification of Consensus by Voting
 
   A specification of a consensus algorithm where a set of nodes,
   the _acceptors_, agree on a value by voting.

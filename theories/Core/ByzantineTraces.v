@@ -3,7 +3,7 @@ From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 From VLSM.Core Require Import PreloadedVLSM.
 
-(** * VLSM Byzantine Traces
+(** * Core: VLSM Byzantine Traces
 
   In this section, we introduce two definitions of Byzantine traces,
   prove that they are equivalent (lemma [byzantine_alt_byzantine_iff]),

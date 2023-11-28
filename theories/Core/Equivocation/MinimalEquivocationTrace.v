@@ -3,9 +3,9 @@ From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras NatExt
 From VLSM.Core Require Import VLSM Composition.
 From VLSM.Core Require Import Equivocation MessageDependencies TraceableVLSM.
 
-(** * Minimally-equivocating traces
+(** * Core: Minimally Equivocating Traces
 
-  In this module we define a [choice_function], [minimal_equivocation_choice],
+  In this module, we define a [choice_function] and [minimal_equivocation_choice],
   guaranteeing that the transition it chooses does not decrease the set of
   validators which are equivocating according to the [msg_dep_is_globally_equivocating]
   relation (see [minimal_equivocation_choice_monotone]).

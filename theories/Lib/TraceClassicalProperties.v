@@ -5,7 +5,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-(** * Properties of possibly-infinite traces requiring classical logic *)
+(** * Utility: Properties of Possibly-Infinite Traces Requiring Classical Logic *)
 
 Section sec_trace_classical_properties.
 

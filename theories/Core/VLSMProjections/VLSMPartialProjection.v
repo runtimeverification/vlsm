@@ -3,9 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM.
 
-Section sec_VLSM_partial_projection.
-
-(** * VLSM Partial Projections
+(** * Core: VLSM Partial Projections
 
   A generic notion of VLSM projection. We say that VLSM <<X>> partially projects to
   VLSM <<Y>> (sharing the same messages) if there exists a partial map <<partial_trace_project>>
@@ -26,6 +24,8 @@ Section sec_VLSM_partial_projection.
   of regular nodes guided by a specific start [MachineDescriptor] (see, e.g.,
   [equivocators_no_equivocations_vlsm_X_vlsm_partial_projection]).
 *)
+
+Section sec_VLSM_partial_projection.
 
 Record VLSM_partial_projection_type
   {message : Type}

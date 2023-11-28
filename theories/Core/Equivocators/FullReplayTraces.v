@@ -9,9 +9,9 @@ From VLSM.Core Require Import Equivocators.EquivocatorReplay Equivocators.Messag
 From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections Plans.
 
-(** * VLSM Equivocator Full Replay Traces
+(** * Core: VLSM Equivocator Full Replay Traces
 
-  In this section we show that given a trace of equivocators, one can "replay"
+  In this module, we show that given a trace of equivocators, one can "replay"
   that at the end of an existing trace, by first equivocating for each initial
   state and then performing each transition, but appropriately "shifted".
 

@@ -6,9 +6,9 @@ From VLSM.Core Require Import VLSM Composition ProjectionTraces.
 From VLSM.Core Require Import Equivocation.
 From VLSM.Lib Require Import Preamble StdppExtras.
 
-(** * VLSM Trace-wise Equivocation
+(** * Core: VLSM Trace-Wise Equivocation
 
-  In this section we define a more precise notion of message equivocation,
+  In this module, we define a more precise notion of message equivocation,
   based on analyzing (all) traces leading to a state. Although in some cases
   we might be able to actually compute this, its purpose is more to identify
   the ideal notion of detectable equivocation which would be used to

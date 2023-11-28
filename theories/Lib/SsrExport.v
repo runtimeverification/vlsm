@@ -1,4 +1,4 @@
-(** * SSReflect exports *)
+(** * Utility: SSReflect Exports *)
 
 From Coq Require Export ssreflect.
 #[export] Set SsrOldRewriteGoalsOrder.
