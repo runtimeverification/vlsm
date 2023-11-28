@@ -1396,6 +1396,9 @@ Proof.
   by subst; eexists; apply adr2idx_idx.
 Qed.
 
+#[export] Instance Message_validator_measurable : Measurable (Message_validator idx) :=
+  fun v => weight (` v).
+
 Definition ELMO_global_constraint
   (l : composite_label ELMO_component)
   (som : composite_state ELMO_component * option Message) : Prop :=

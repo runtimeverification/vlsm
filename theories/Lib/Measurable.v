@@ -41,6 +41,10 @@ Proof.
   by apply elements_empty_iff in Hl as ->.
 Qed.
 
+Lemma sum_weights_singleton :
+  forall (x : V), sum_weights {[x]} = ` (weight x).
+Proof. by intros; unfold sum_weights; rewrite set_fold_singleton; lra. Qed.
+
 Lemma sum_weights_positive_list (l : list V) :
   (0 <= sum_weights_list l)%R.
 Proof.
