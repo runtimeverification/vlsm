@@ -392,8 +392,8 @@ Definition MO_component_machine (P : Address -> Prop) (i : Address) : VLSMMachin
 
 Definition MO_component (P : Address -> Prop) (i : Address) : VLSM Message :=
 {|
-  vtype := ELMO_component_type;
-  vmachine := MO_component_machine P i;
+  vlsm_type := ELMO_component_type;
+  vlsm_machine := MO_component_machine P i;
 |}.
 
 Section sec_MO_component_lemmas.
