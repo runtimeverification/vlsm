@@ -21,7 +21,7 @@ From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.FixedSetE
   equivocators to the non-equivocating components.
 
   That is, non-byzantine validator components do not distinguish between byzantine
-  components and equivocating ones.  Therefore, when analyzing the security of a
+  components and equivocating ones. Therefore, when analyzing the security of a
   protocol it suffices to consider equivocating components.
 *)
 
@@ -94,7 +94,7 @@ Context
   .
 
 (**
-  Given a collection of components indexed by an <<index>>, we define the
+  Given a collection of components indexed by <<index>>, we define the
   associated fixed byzantine collection of components by replacing the components
   corresponding to the indices in a given <<byzantine>> with byzantine components,
   i.e., components which can emit any (signed) message.
@@ -249,9 +249,9 @@ End sec_fixed_byzantine_traces_as_projections.
 
 (** ** Fixed Byzantine traces as traces pre-loaded with signed messages
 
-  In this section we'll be showing that byzantine traces correspond to traces of
-  the composition of components in the [non_byzantine], preloaded with messages
-  signed by the components in the <<byzantine>>.
+  In this section we show that byzantine traces correspond to traces of
+  a composition in the [non_byzantine] set, preloaded with messages
+  signed by the components in the <<byzantine>> set.
 *)
 
 Section sec_fixed_byzantine_traces_as_pre_loaded.
@@ -262,8 +262,8 @@ Definition fixed_set_signed_message (m : message) : Prop :=
     exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
 
 (**
-  Given that we're only looking at the composition of components in the
-  [non_byzantine], we can define their subset as either a subset of the
+  Given that we're only looking at the composition in the
+  [non_byzantine] set, we can define their subset as either a subset of the
   [fixed_byzantine_IM] or of the original <<IM>>.
 
   As it turns out, the first definition is easier to prove equivalent to the
