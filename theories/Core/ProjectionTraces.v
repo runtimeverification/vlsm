@@ -8,7 +8,7 @@ Section sec_projections.
 (** * Core: Composite VLSM Induced Projections
 
   In this section we define a VLSM representing the induced projection of a
-  composite VLSM to a single node ([composite_vlsm_induced_projection]), and we
+  composite VLSM to a single component ([composite_vlsm_induced_projection]), and we
   study the relation between their traces.
 
   Let us fix an indexed set of VLSMs <<IM>> and their composition <<X>>

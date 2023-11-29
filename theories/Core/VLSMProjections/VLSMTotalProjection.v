@@ -18,8 +18,8 @@ From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
   are projections in which some of transitions might be dropped, such as
   the projection of a composition to one of the components ([component_projection])
   or the projection of the compositions of equivocators to the composition of
-  regular nodes using the particular [MachineDescriptor] which select the
-  first (original) node instance for each equivocator (e.g.,
+  regular components using the particular [MachineDescriptor] which select the
+  first (original) component instance for each equivocator (e.g.,
   [equivocators_no_equivocations_vlsm_X_vlsm_projection]).
 *)
 
