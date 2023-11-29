@@ -326,7 +326,7 @@ Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
   (Heqv_byzantine : ann' ⊆ byzantine_vs)
   : input_valid_transition Limited
       (lift_sub_label IM (elements non_byzantine) sub_l) (ann_s, iom)
-      (Build_annotated_state (free_composite_vlsm IM) Cv
+      (mk_annotated_state (free_composite_vlsm IM) Cv
         (lift_sub_state IM (elements non_byzantine) sub_sf) ann',
       oom).
 Proof.
@@ -376,7 +376,7 @@ Lemma lift_fixed_byzantine_traces_to_limited
   (s_reset_byzantine :=
     lift_sub_state IM (elements non_byzantine)
       (composite_state_sub_projection IM (elements non_byzantine) s))
-  (bs := Build_annotated_state (free_composite_vlsm IM) Cv s_reset_byzantine (` inhabitant))
+  (bs := mk_annotated_state (free_composite_vlsm IM) Cv s_reset_byzantine (` inhabitant))
   (btr :=
     msg_dep_annotate_trace_with_equivocators (Cv := Cv) IM full_message_dependencies sender
       s_reset_byzantine
