@@ -95,8 +95,8 @@ Context
 
 (**
   Given a collection of components indexed by <<index>>, we define the
-  associated fixed byzantine collection of components by replacing the components
-  corresponding to the indices in a given <<byzantine>> with byzantine components,
+  associated collection of fixed byzantine components by replacing the components
+  corresponding to the indices in a given <<byzantine>> set with byzantine components,
   i.e., components which can emit any (signed) message.
 *)
 Definition fixed_byzantine_IM : index -> VLSM message :=

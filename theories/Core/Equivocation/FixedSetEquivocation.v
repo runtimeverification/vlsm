@@ -901,7 +901,7 @@ Qed.
 
   We prove this as a [VLSM_weak_embedding] between the free composition of
   equivocators pre-loaded with the messages observed in <<s>> and the <<Fixed>>
-  composition of all components. Note that this is a strengthening of Lemma
+  composition of all the components. Note that this is a strengthening of Lemma
   [PreSubFree_PreFree_weak_embedding].
 *)
 Lemma EquivPreloadedBase_Fixed_weak_embedding

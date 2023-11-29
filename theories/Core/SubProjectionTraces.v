@@ -749,9 +749,9 @@ Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%functi
 
 (** ** Lifting a trace from a sub-composition to the full composition
 
-  In this section, we first show that given a valid state for a composition of
-  all components we can reset some of the state-components to initial states
-  without losing the valid state property.
+  In this section, we first show that given a valid state for a composition,
+  we can reset some of the state-components to initial states without losing
+  the valid state property.
 
   The set of components for which the reset operation will happen is <<equivocators>>.
 

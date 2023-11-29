@@ -219,7 +219,7 @@ End sec_fixed_limited_selection.
   Given a trace with the [fixed_limited_byzantine_trace_prop]erty for a selection
   of <<byzantine>> components, there exists a valid trace for the <<Limited>>
   equivocation composition such that the projection of the two traces to
-  the <<non-byzantine>> components coincide.
+  the non-byzantine components coincide.
 *)
 Lemma validator_fixed_limited_non_byzantine_traces_are_limited_non_equivocating s tr byzantine_vs
   (byzantine : Ci := fin_sets.set_map A byzantine_vs)

@@ -66,7 +66,7 @@ Definition zero_descriptor_constraint_lifting_prop : Prop :=
   The [replayable_message_prop]erty plays an important role in designing a
   general, abstract, proof for trace simulation (Lemma
   [generalized_equivocators_finite_valid_trace_init_to_rev]), as it specifies
-  that given a message <<m>> received in a regular component-composition state <<s>>
+  that given a message <<m>> received in a regular composite state <<s>>
   for which the constraint <<constraintX>> is satisfied, then any trace of the
   equivocators-composition (constrained by <<constraintE>>>) producing <<m>>
   can be "replayed" on top of an equivocators-composition state corresponding

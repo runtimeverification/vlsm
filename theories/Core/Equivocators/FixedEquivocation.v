@@ -269,8 +269,8 @@ Section sec_from_equivocators_to_components.
 
   In this section we show that the projection of [valid_trace]s of a
   composition of equivocators with a fixed equivocation constraint are
-  [valid_trace]s for the composition of components with a similar fixed
-  equivocation constraint.
+  [valid_trace]s for the composition with a similar fixed equivocation
+  constraint.
 *)
 
 Context

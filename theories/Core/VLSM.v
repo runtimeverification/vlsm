@@ -1565,7 +1565,7 @@ Qed.
   holds only if <<s>> and <<om>> are the final state and output of an initial valid
   trace, or a pair of an initial state and option-initial message.
   It follows the inductive structure of <<valid_state_message_prop>>, but augments every
-  component of the tree with such an exhibiting trace.
+  branch of the tree with such an exhibiting trace.
 
   Its main benefit is that when performing induction over it, one can also use the
   induction hypothesis for the (trace generating the) message being received.
