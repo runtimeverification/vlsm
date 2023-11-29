@@ -13,10 +13,10 @@ From VLSM.Core Require Import Equivocation.WitnessedEquivocation.
   In this module, we define the notion of limited (message-based) equivocation.
 
   This notion is slightly harder to define than that of fixed-set equivocation,
-  because, while for the latter we fix a set and let only the nodes belonging to
-  that set to equivocate, in the case of limited equivocation, the set of nodes
-  equivocating can change dynamically, each node being virtually allowed to
-  equivocate as long as the weight of all nodes currently equivocating does
+  because, while for the latter we fix a set and let only the components belonging to
+  that set to equivocate, in the case of limited equivocation, the set of components
+  equivocating can change dynamically, each component being virtually allowed to
+  equivocate as long as the weight of all components currently equivocating does
   not pass a certain threshold.
 
   As we need to be able to measure the amount of equivocation in a given state
@@ -25,7 +25,7 @@ From VLSM.Core Require Import Equivocation.WitnessedEquivocation.
   We here choose [is_equivocating_tracewise] as this measure.
 
   Moreover, to further limit the amount of equivocation allowed when producing
-  a message, we assume a full-node-like  condition to be satisfied by all nodes.
+  a message, we assume a full-node-like  condition to be satisfied by all components.
   This  guarantees that whenever a message not-previously send is received in a
   state, the amount of equivocation would only grow with the weight of the
   sender of the message (if that wasn't already known as an equivocator).

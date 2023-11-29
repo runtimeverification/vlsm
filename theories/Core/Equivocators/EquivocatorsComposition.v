@@ -262,7 +262,7 @@ Qed.
 
   This will be used to project [composite_state]s and [composite_transition_item]s
   from the composition of equivocators to the composition of their corresponding
-  nodes.
+  components.
 *)
 Definition equivocator_descriptors : Type := forall (eqv : index), MachineDescriptor (IM eqv).
 

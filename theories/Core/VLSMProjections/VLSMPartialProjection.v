@@ -21,7 +21,7 @@ From VLSM.Core Require Import VLSM.
 
   Proper examples of partial projections (which are not [VLSM_projection]s) are
   the projections from the compositions of equivocators to the composition
-  of regular nodes guided by a specific start [MachineDescriptor] (see, e.g.,
+  of regular components guided by a specific start [MachineDescriptor] (see, e.g.,
   [equivocators_no_equivocations_vlsm_X_vlsm_partial_projection]).
 *)
 

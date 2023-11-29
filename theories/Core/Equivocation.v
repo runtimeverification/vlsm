@@ -1200,7 +1200,7 @@ Qed.
 
   In protocols like the CBC full node protocol, validators often
   work with the set of all messages they have directly observed,
-  which includes the messages the node sent itself along with
+  which includes the messages the component sent itself along with
   messages that were received.
   The [has_been_directly_observed] oracle tells whether the given message was sent
   or received during any trace leading to the given state.
@@ -1947,8 +1947,8 @@ Context
   (sender : message -> option validator)
   .
 
-Definition node_signed_message (node_idx : index) (m : message) : Prop :=
-  option_map A (sender m) = Some node_idx.
+Definition component_signed_message (component_idx : index) (m : message) : Prop :=
+  option_map A (sender m) = Some component_idx.
 
 (**
   Definitions for safety and nontriviality of the [sender] function.
@@ -1995,8 +1995,8 @@ Proof.
     by specialize (Hsender_safety m v Hsender _ Hemit).
 Qed.
 
-Definition channel_authenticated_message (node_idx : index) (m : message) : Prop :=
-  option_map A (sender m) = Some node_idx.
+Definition channel_authenticated_message (component_idx : index) (m : message) : Prop :=
+  option_map A (sender m) = Some component_idx.
 
 (**
   The [channel_authentication_prop]erty requires that any sent message must
