@@ -262,7 +262,7 @@ Definition fixed_set_signed_message (m : message) : Prop :=
     exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
 
 (**
-  Given that we're only looking at the composition in the
+  Given that we're only looking at the composition indexed by the
   [non_byzantine] set, we can define their subset as either a subset of the
   [fixed_byzantine_IM] or of the original <<IM>>.
 
