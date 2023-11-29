@@ -251,8 +251,8 @@ Definition MCMachine (i : index) : VLSMMachine MCType :=
 
 Definition MCVLSM (i : index) : VLSM Message :=
 {|
-  vtype := MCType;
-  vmachine := MCMachine i;
+  vlsm_type := MCType;
+  vlsm_machine := MCMachine i;
 |}.
 
 #[export] Instance MC_composite_initial_state_dec :

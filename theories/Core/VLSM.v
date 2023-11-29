@@ -88,13 +88,13 @@ Definition decidable_initial_messages_prop
 
 Record VLSM (message : Type) : Type := mk_vlsm
 {
-  vtype :> VLSMType message;
-  vmachine :> VLSMMachine vtype;
+  vlsm_type :> VLSMType message;
+  vlsm_machine :> VLSMMachine vlsm_type;
 }.
 
-Arguments vtype [message] v.
-Arguments vmachine [message] v.
-Arguments mk_vlsm [message] [vtype] vmachine.
+Arguments vlsm_type [message] v.
+Arguments vlsm_machine [message] v.
+Arguments mk_vlsm [message] [vlsm_type] vlsm_machine.
 
 Section sec_traces.
 
@@ -358,7 +358,7 @@ Definition vs0 `(X : VLSM message) := @inhabitant _ (@s0 _ _ X).
 Lemma mk_vlsm_machine
   {message : Type}
   (X : VLSM message)
-  : mk_vlsm (vmachine X) = X.
+  : mk_vlsm (vlsm_machine X) = X.
 Proof.
   by destruct X.
 Qed.
