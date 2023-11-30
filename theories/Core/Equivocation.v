@@ -15,15 +15,6 @@ From VLSM.Core Require Export PreloadedVLSM ConstrainedVLSM ReachableThreshold.
   and limit equivocation by means of a composition constraint.
 *)
 
-(* FIXME: move to preamble *)
-Lemma exists_proj1_sig {A : Type} (P : A -> Prop) (a : A) :
-  (exists xP : {x | P x}, proj1_sig xP = a) <-> P a.
-Proof.
-  split.
-  - by intros [[x Hx] [= ->]].
-  - by intro Ha; exists (exist _ a Ha).
-Qed.
-
 (** ** Basic equivocation
 
   Assuming a set of <<state>>s, and a set of <<validator>>s,
@@ -706,6 +697,30 @@ Proof.
   unfold has_not_been_sent.
   rewrite <- selected_message_exists_preloaded_not_some_iff_no.
   by apply not_iff_compat, (iff_trans proper_sent).
+Qed.
+
+Lemma from_send_to_from_sent_argument
+  `{HasBeenSentCapability}
+  (P : state vlsm -> Prop)
+  (P_stable : forall s l oim s' oom,
+    input_valid_transition pre_vlsm l (s, oim) (s', oom) ->
+    P s -> P s')
+  (msg : message)
+  (send_establishes_P : forall s l oim s',
+    input_valid_transition pre_vlsm l (s, oim) (s', Some msg) ->
+    P s') :
+  forall s,
+    valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
+    has_been_sent s msg ->
+    P s.
+Proof.
+  intros s Hs.
+  induction Hs using valid_state_prop_ind;
+    [by intros []%has_been_sent_no_inits |].
+  rewrite has_been_sent_step_update; [| done].
+  intros [-> | H_sent].
+  - by eapply send_establishes_P.
+  - by eapply P_stable, IHHs.
 Qed.
 
 Definition has_been_received_stepwise_prop
