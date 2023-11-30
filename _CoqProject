@@ -84,7 +84,6 @@ theories/Examples/ELMO/BaseELMO.v
 theories/Examples/ELMO/UMO.v
 theories/Examples/ELMO/MO.v
 theories/Examples/ELMO/ELMO.v
-theories/Examples/ELMO/ELMOByzantine.v
 theories/Examples/ELMO/AllELMO.v
 
 theories/Examples/Paxos/Consensus.v

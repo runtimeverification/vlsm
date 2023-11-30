@@ -37,7 +37,6 @@ Proof.
     by rewrite Hvs1; apply sum_weights_proper; rewrite Heqv.
   - by rewrite !sum_weights_empty.
   - intros v vs Hv Hvs.
-    Search sum_weights union.
     rewrite sum_weights_disj_union, Hvs by set_solver.
     replace (sum_weights (set_map _ ({[v]} ∪ _)))
       with (sum_weights (set_map (C := listset (Message_validator idx)) (D := listset Address) proj1_sig {[v]} ∪ set_map (D := listset Address) proj1_sig vs))
@@ -222,7 +221,6 @@ Proof.
           + 
 
 (*
-        Search coeqv_composite_transition_message_equivocators.
         unfold local_equivocation_limit_ok, not_heavy in Hlocal_ok.
         unfold ELMO_not_heavy, not_heavy.
         etransitivity; [| done].
