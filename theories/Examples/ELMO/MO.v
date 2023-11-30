@@ -426,45 +426,40 @@ Proof.
   intros; apply basic_VLSM_strong_incl.
   - by intro.
   - by intro.
-  - intros l s om; cbn.
-    by inversion 1; subst; constructor.
+  - by inversion 1; subst; constructor.
   - by intro.
 Qed.
 
-#[export]
-Instance HasBeenSentCapability_MOComponent : HasBeenSentCapability Mi.
+#[export] Instance HasBeenSentCapability_MOComponent : HasBeenSentCapability Mi.
 Proof.
-  apply Build_HasBeenSentCapability with (fun s m => m ∈ sentMessages s)
-  ; [by intros s m; typeclasses eauto |].
-  split.
-  - by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil.
-  - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
-    destruct l, im; cbn in *; invert_MO_component_valid
-    ; inversion Ht; subst; clear Ht; cbn.
-    + by rewrite decide_False; cbn; firstorder congruence.
-    + rewrite decide_True by done; cbn.
-      unfold Message; rewrite elem_of_cons.
-      by firstorder congruence.
+  constructor 1 with (fun s m => m ∈ sentMessages s);
+    [by intros s m; typeclasses eauto |].
+  split; [by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil |].
+  intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
+  destruct l, im; cbn in *; invert_MO_component_valid;
+    inversion Ht; subst; clear Ht; cbn.
+  - by rewrite decide_False; cbn; firstorder congruence.
+  - rewrite decide_True by done; cbn.
+    unfold Message; rewrite elem_of_cons.
+    by firstorder congruence.
 Defined.
 
-#[export]
-Instance HasBeenReceivedCapability_MOComponent : HasBeenReceivedCapability Mi.
+#[export] Instance HasBeenReceivedCapability_MOComponent : HasBeenReceivedCapability Mi.
 Proof.
-  eapply Build_HasBeenReceivedCapability with (fun s m => m ∈ receivedMessages s)
-  ; [intros s m; typeclasses eauto | split].
-  - by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil.
-  - intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
-    destruct l, im; cbn in *; invert_MO_component_valid
-    ; inversion Ht; subst; clear Ht; cbn.
-    + rewrite decide_True by done; cbn.
-      unfold Message; rewrite elem_of_cons.
-      by firstorder congruence.
-    + by rewrite decide_False; cbn; firstorder congruence.
+  constructor 1 with (fun s m => m ∈ receivedMessages s);
+    [by intros s m; typeclasses eauto |].
+  split; [by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil |].
+  intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
+  destruct l, im; cbn in *; invert_MO_component_valid;
+    inversion Ht; subst; clear Ht; cbn.
+  - rewrite decide_True by done; cbn.
+    unfold Message; rewrite elem_of_cons.
+    by firstorder congruence.
+  - by rewrite decide_False; cbn; firstorder congruence.
 Defined.
 
-#[export]
-Instance HasBeenDirectlyObservedCapability_MOComponent
-  : HasBeenDirectlyObservedCapability Mi :=
+#[export] Instance HasBeenDirectlyObservedCapability_MOComponent :
+  HasBeenDirectlyObservedCapability Mi :=
     HasBeenDirectlyObservedCapability_from_sent_received Mi.
 
 (** The initial state of [RMi] is unique. *)

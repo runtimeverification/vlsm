@@ -635,7 +635,8 @@ End sec_induced_validator_validators.
 
 (** ** Transporting validator properties through VLSM embeddings/inclusions *)
 
-Lemma VLSM_embedding_projection_validator {message}
+Lemma VLSM_embedding_projection_validator
+  {message : Type}
   (X X' Y : VLSM message)
   (pr_label : label X' -> option (label Y))
   (pr_state : state X' -> state Y)
@@ -645,11 +646,13 @@ Lemma VLSM_embedding_projection_validator {message}
 Proof.
   intros Hvalidator ? * Hvalid.
   apply Hvalidator in Hvalid as (lX & sX & [HlX HsX Hvalid]).
-  exists (em_label lX), (em_state sX); split; [done.. |].
-  by apply (VLSM_embedding_input_valid Hembedding).
+  exists (em_label lX), (em_state sX).
+  constructor; [done.. |].
+  by apply VLSM_embedding_input_valid.
 Qed.
 
-Lemma VLSM_canceling_embedding_projection_validator {message}
+Lemma VLSM_canceling_embedding_projection_validator
+  {message : Type}
   (X X' Y : VLSM message)
   (pr_label : label X -> option (label Y))
   (pr_state : state X -> state Y)
@@ -661,11 +664,13 @@ Lemma VLSM_canceling_embedding_projection_validator {message}
 Proof.
   intros Hvalidator ? * Hvalid.
   apply Hvalidator in Hvalid as (lX & sX & [HlX HsX Hvalid]).
-  exists (em_label lX), (em_state sX); split; [by cbn; rewrite cancel.. |].
-  by apply (VLSM_embedding_input_valid Hembedding).
+  exists (em_label lX), (em_state sX).
+  constructor; [by cbn; rewrite cancel.. |].
+  by apply VLSM_embedding_input_valid.
 Qed.
 
-Lemma VLSM_incl_projection_validator {message}
+Lemma VLSM_incl_projection_validator
+  {message : Type}
   (T : VLSMType message)
   (MX MX' : VLSMMachine T)
   (X := mk_vlsm MX)
@@ -677,11 +682,12 @@ Lemma VLSM_incl_projection_validator {message}
   projection_validator_prop (X := X) Y pr_label pr_state ->
   projection_validator_prop (X := X') Y pr_label pr_state.
 Proof.
-  by eapply VLSM_canceling_embedding_projection_validator;
-    [apply VLSM_incl_embedding_iff |..].
+  eapply VLSM_canceling_embedding_projection_validator; [| done..].
+  by apply VLSM_incl_embedding_iff.
 Qed.
 
-Lemma VLSM_embedding_message_validator {message}
+Lemma VLSM_embedding_message_validator
+  {message : Type}
   (X X' Y : VLSM message)
   (pr_label : label X -> option (label Y))
   (pr_state : state X -> state Y)
@@ -691,11 +697,12 @@ Lemma VLSM_embedding_message_validator {message}
   message_validator_prop (X := X') Y.
 Proof.
   intros Hvalidator ? * Hvalid.
-  apply Hvalidator in Hvalid.
-  by apply (VLSM_embedding_valid_message Hembedding).
+  eapply VLSM_embedding_valid_message; [done.. |].
+  by apply Hvalidator in Hvalid.
 Qed.
 
-Lemma VLSM_incl_message_validator {message}
+Lemma VLSM_incl_message_validator
+  {message : Type}
   (T : VLSMType message)
   (MX MX' : VLSMMachine T)
   (X := mk_vlsm MX)
@@ -709,8 +716,8 @@ Lemma VLSM_incl_message_validator {message}
   message_validator_prop (X := X') Y.
 Proof.
   intros Hvalidator ? * Hvalid.
-  apply Hvalidator in Hvalid.
-  by apply (VLSM_incl_valid_message Hincl).
+  eapply VLSM_incl_valid_message; [done.. |].
+  by apply Hvalidator in Hvalid.
 Qed.
 
 (** ** Validator properties for the [component_projection].

@@ -730,21 +730,20 @@ Definition Message_sender (m : Message) : option Message_validator :=
 
 Lemma Message_sender_Some_adr :
   forall (m : Message) (v : Message_validator),
-  Message_sender m = Some v -> ` v = adr (state m).
+    Message_sender m = Some v -> `v = adr (state m).
 Proof.
-  unfold Message_sender; intros * Hsender; case_decide; [| done].
+  unfold Message_sender; intros v mv Hsender; case_decide; [| done].
   by inversion Hsender.
 Qed.
 
 Lemma Message_sender_Some_adr_iff :
   forall (m : Message) (v : Message_validator),
-  Message_sender m = Some v <-> ` v = adr (state m).
+    Message_sender m = Some v <-> `v = adr (state m).
 Proof.
   split; [by apply Message_sender_Some_adr |].
-  unfold Message_sender; case_decide as Hdec;
-    [by intro; f_equal; apply dsig_eq |].
-  intro Hv; contradict Hdec.
-  by destruct_dec_sig v a Ha Heq; subst v; cbn in Hv; subst a.
+  unfold Message_sender; case_decide as Hdec; intros Hv.
+  - by f_equal; apply dsig_eq.
+  - by destruct_dec_sig v a Ha Heq; subst v; cbn in Hv; subst a.
 Qed.
 
 Definition ELMO_A (v : Message_validator) : index :=
@@ -754,18 +753,19 @@ Definition ELMO_A_inv_fn (i : index) : Message_validator :=
   dexist (idx i) (ex_intro _ i (adr2idx_idx i)).
 
 Lemma ELMO_A_inv :
-  forall (i : index) (v : Message_validator), ` v = idx i -> ELMO_A v = i.
+  forall (i : index) (v : Message_validator),
+    `v = idx i -> ELMO_A v = i.
 Proof.
-  intros * Hv.
+  intros i v Hv.
   destruct_dec_sig v a Ha Heq; subst v; cbn in Hv; subst a.
   by apply is_Some_proj_elim, adr2idx_idx.
 Qed.
 
 Lemma Message_sender_A :
   forall (m : Message) (v : Message_validator),
-  Message_sender m = Some v -> idx (ELMO_A v) = adr (state m).
+    Message_sender m = Some v -> idx (ELMO_A v) = adr (state m).
 Proof.
-  intros * Hsender.
+  intros m v Hsender.
   apply Message_sender_Some_adr in Hsender.
   destruct_dec_sig v a Ha Heq; subst v.
   cbn in Hsender; subst a.
@@ -785,8 +785,7 @@ Proof.
   unfold ELMO_A; cbn.
   erewrite !is_Some_proj_elim by done.
   intros ->; apply dsig_eq; cbn.
-  apply idx_adr2idx in Ha1, Ha2; subst.
-  by f_equal.
+  by apply idx_adr2idx in Ha1, Ha2; subst.
 Qed.
 
 End sec_BaseELMO_Observations.
