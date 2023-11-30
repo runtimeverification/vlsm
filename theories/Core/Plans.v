@@ -240,6 +240,28 @@ Proof.
   by apply finite_valid_trace_last_pstate.
 Qed.
 
+Definition finite_valid_plan_from_to (s : state X) (a : plan) : Prop :=
+  finite_valid_trace_from_to _ s (apply_plan s a).2 (apply_plan s a).1.
+
+Lemma finite_valid_plan_from_to_app_iff :
+  forall (s : state X) (a b : plan),
+    finite_valid_plan_from_to s (a ++ b)
+      <->
+    finite_valid_plan_from_to s a /\ finite_valid_plan_from_to (apply_plan s a).2 b.
+Proof.
+  intros s a b.
+  unfold finite_valid_plan_from_to.
+  rewrite apply_plan_app.
+  destruct (apply_plan _ a) as [aitems afinal] eqn: Ha,
+    (apply_plan _ b) as [bitems bfinal] eqn: Hb; cbn.
+  replace aitems with (apply_plan s a).1 by (rewrite Ha; done).
+  replace afinal with (apply_plan s a).2 by (rewrite Ha; done). cbn.
+  rewrite <- apply_plan_last.
+  split.
+  - by apply finite_valid_trace_from_to_app_split.
+  - by intros []; eapply finite_valid_trace_from_to_app.
+Qed.
+
 (**
   By extracting a plan from a [valid_trace] based on a state <<s>>
   and reapplying the plan to the same state <<s>> we obtain the original trace.
