@@ -291,10 +291,10 @@ Context
   .
 
 (**
-  If each of the nodes satisfy the [message_dependencies_full_node_condition_prop]erty,
+  If each of the components satisfy the [message_dependencies_full_node_condition_prop]erty,
   then projections of valid traces for the composition of equivocators
   with limited state-equivocation and no message-equivocation are also valid
-  traces for the composition of regular nodes with limited
+  traces for the composition of regular components with limited
   message-equivocation.
 *)
 Lemma limited_equivocators_valid_trace_project
@@ -355,7 +355,7 @@ Proof.
 Qed.
 
 (**
-  In the case of using the original machine copy for projecting each node, we
+  In the case of using the original machine copy for projecting each component, we
   are guaranteed to obtain a trace projection for each trace, hence the relation
   above strengthens to a [VLSM_projection].
 *)

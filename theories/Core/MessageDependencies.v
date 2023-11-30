@@ -238,7 +238,7 @@ Proof.
 Qed.
 
 (**
-  Under full-node assumptions, it it is valid to receive a message in a state
+  Under full-node assumptions, it is valid to receive a message in a state
   then any of its happens-before dependencies [has_been_directly_observed] in that state.
 *)
 Lemma msg_dep_full_node_input_valid_happens_before_has_been_directly_observed
@@ -1040,7 +1040,7 @@ End sec_FullMessageDependencies_happens_before.
   that, under [FullMessageDependencies] assumptions, if the validity predicate
   ensures that message itself and all of its dependencies can be emitted using
   only its dependencies, then the input message is valid for the free composition.
-  Thus, the node itself is a validator for the free composition.
+  Thus, the component itself is a validator for the free composition.
 *)
 
 Section sec_free_composition_validators.
@@ -1099,7 +1099,7 @@ Definition valid_all_dependencies_emittable_from_dependencies_prop (i : index) :
     all_dependencies_emittable_from_dependencies_prop m.
 
 (**
-  If a message can be emitted by a node preloaded with the message's direct
+  If a message can be emitted by a component preloaded with the message's direct
   dependencies, and if all the dependencies of the message are valid for the
   free composition, then the message itself is valid for the free composition.
 *)
@@ -1138,7 +1138,7 @@ Proof.
 Qed.
 
 (**
-  If a node in a composition satisfies the
+  If a component in a composition satisfies the
   [valid_all_dependencies_emittable_from_dependencies_prop]erty, then it also has
   the [component_message_validator_prop]erty, that is, it is a validator for the
   free composition.

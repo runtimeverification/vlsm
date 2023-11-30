@@ -19,7 +19,7 @@ Context
   .
 
 Definition constrained_vlsm_type : VLSMType message :=
-  vtype X.
+  vlsm_type X.
 
 Definition constrained_vlsm_machine : VLSMMachine X :=
 {|
@@ -32,8 +32,8 @@ Definition constrained_vlsm_machine : VLSMMachine X :=
 
 Definition constrained_vlsm : VLSM message :=
 {|
-  vtype := vtype X;
-  vmachine := constrained_vlsm_machine;
+  vlsm_type := vlsm_type X;
+  vlsm_machine := constrained_vlsm_machine;
 |}.
 
 End sec_constrained_vlsm.
@@ -55,7 +55,7 @@ Proof.
   rewrite <- (mk_vlsm_machine X); cbn.
   intros constraint.
   apply (VLSMInclusion.VLSM_incl_embedding_iff (constrained_vlsm_machine X constraint)).
-  by apply (VLSM_embedding_constrained_vlsm {| vtype := X; vmachine := X; |}).
+  by apply (VLSM_embedding_constrained_vlsm {| vlsm_type := X; vlsm_machine := X; |}).
 Qed.
 
 Section sec_constrained_vlsm_lemmas.
@@ -84,7 +84,7 @@ Proof.
   intros s om H.
   destruct X.
   eapply VLSM_incl_valid_state_message; [.. | by do 2 red | done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma valid_state_prop_constrained_vlsm :
@@ -125,7 +125,7 @@ Proof.
   intros l [s om] Hiv.
   destruct X.
   apply VLSM_incl_input_valid; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma input_valid_transition_constrained_vlsm :
@@ -136,7 +136,7 @@ Proof.
   intros l [s om] [s' om'] Hivt.
   destruct X.
   apply VLSM_incl_input_valid_transition; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma option_can_produce_constrained_vlsm :
@@ -147,7 +147,7 @@ Proof.
   intros s om Hocp.
   destruct X.
   eapply VLSM_incl_can_produce; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma can_produce_constrained_vlsm :
@@ -166,7 +166,7 @@ Proof.
   intros m Hce.
   destruct X.
   eapply VLSM_incl_can_emit; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma finite_valid_trace_from_constrained_vlsm :
@@ -177,7 +177,7 @@ Proof.
   intros s tr Hfvtf.
   destruct X.
   apply VLSM_incl_finite_valid_trace_from; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma finite_valid_trace_constrained_vlsm :
@@ -188,7 +188,7 @@ Proof.
   intros s tr Hfvt.
   destruct X.
   apply VLSM_incl_finite_valid_trace; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma finite_valid_trace_from_to_constrained_vlsm :
@@ -199,7 +199,7 @@ Proof.
   intros s1 s2 tr Hfvtft.
   destruct X.
   apply VLSM_incl_finite_valid_trace_from_to; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma finite_valid_trace_init_to_constrained_vlsm :
@@ -210,7 +210,7 @@ Proof.
   intros s1 s2 tr Hfvtit.
   destruct X.
   apply VLSM_incl_finite_valid_trace_init_to; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma finite_valid_trace_init_to_emit_constrained_vlsm :
@@ -240,7 +240,7 @@ Proof.
   intros s tr Hivtf.
   destruct X.
   apply VLSM_incl_infinite_valid_trace_from; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma infinite_valid_trace_constrained_vlsm :
@@ -251,7 +251,7 @@ Proof.
   intros s tr Hivt.
   destruct X.
   apply VLSM_incl_infinite_valid_trace; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma valid_trace_from_prop_constrained_vlsm :
@@ -272,7 +272,7 @@ Proof.
   intros tr Hvtp.
   destruct X.
   apply VLSM_incl_valid_trace; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 Lemma in_futures_constrained_vlsm :
@@ -283,7 +283,7 @@ Proof.
   intros s1 s2 Hif.
   destruct X.
   apply VLSM_incl_in_futures; [| done].
-  by apply (VLSM_incl_constrained_vlsm {| vtype := vtype; vmachine := vmachine; |}).
+  by apply (VLSM_incl_constrained_vlsm {| vlsm_type := vlsm_type; vlsm_machine := vlsm_machine; |}).
 Qed.
 
 End sec_constrained_vlsm_lemmas.
