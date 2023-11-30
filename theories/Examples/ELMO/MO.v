@@ -6,7 +6,7 @@ From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 From VLSM.Core Require Import Equivocation Validator ProjectionTraces.
 From VLSM.Examples Require Import BaseELMO UMO.
 
-(** * MO Protocol Definitions and Properties
+(** * ELMO: Protocol Definitions and Properties for MO
 
   This module contains definitions and properties of MO components and
   the MO protocol.
@@ -392,8 +392,8 @@ Definition MO_component_machine (P : Address -> Prop) (i : Address) : VLSMMachin
 
 Definition MO_component (P : Address -> Prop) (i : Address) : VLSM Message :=
 {|
-  vtype := ELMO_component_type;
-  vmachine := MO_component_machine P i;
+  vlsm_type := ELMO_component_type;
+  vlsm_machine := MO_component_machine P i;
 |}.
 
 Section sec_MO_component_lemmas.

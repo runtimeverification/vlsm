@@ -1,6 +1,6 @@
 From Cdcl Require Export Itauto.
 
-(** * Classical Itauto tactic
+(** * Utility: Classical Itauto Tactic
 
   This module contains a version of the itauto tactic that uses classical logic
   freely. See the comments in VLSM.Lib.Itauto for more details.

@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble StreamExtras StreamFilters StdppExtras.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMPartialProjection.
 
-(** * VLSM Stuttering Embeddings
+(** * Core: VLSM Stuttering Embeddings
 
   Stuttering embeddings are VLSM projections guaranteeing the existence of
   translations for all states and traces, in which a transition in the source

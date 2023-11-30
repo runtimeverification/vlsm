@@ -9,7 +9,7 @@ From VLSM.Core Require Import Equivocation.NoEquivocation.
 From VLSM.Core Require Import Equivocators.Equivocators.
 From VLSM.Core Require Import Equivocators.MessageProperties.
 
-(** * VLSM Equivocator Composition
+(** * Core: VLSM Equivocator Composition
 
   Given a composition <<X>> of VLSMs, we can model equivocator behavior by
   creating an _equivocator composition_ which replaces each component of <<X>>
@@ -262,7 +262,7 @@ Qed.
 
   This will be used to project [composite_state]s and [composite_transition_item]s
   from the composition of equivocators to the composition of their corresponding
-  nodes.
+  components.
 *)
 Definition equivocator_descriptors : Type := forall (eqv : index), MachineDescriptor (IM eqv).
 

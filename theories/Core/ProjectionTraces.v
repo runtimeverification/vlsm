@@ -6,10 +6,10 @@ From VLSM.Core Require Import Composition VLSMProjections Validator.
 
 Section sec_projections.
 
-(** * Composite VLSM induced projections
+(** * Core: Composite VLSM Induced Projections
 
   In this section we define a VLSM representing the induced projection of a
-  composite VLSM to a single node ([composite_vlsm_induced_projection]), and we
+  composite VLSM to a single component ([composite_vlsm_induced_projection]), and we
   study the relation between their traces.
 
   Let us fix an indexed set of VLSMs <<IM>> and their composition <<X>>
@@ -561,7 +561,7 @@ Context
   (X := composite_vlsm IM constraint)
   .
 
-(** ** A sufficient condition for the [projection_friendly_prop]erty *)
+(** ** A sufficient condition for the projection friendly property *)
 
 Context
   (j : index)
@@ -633,3 +633,50 @@ Proof.
 Qed.
 
 End sec_projection_friendliness_sufficient_condition.
+
+(** ** Free composition *)
+
+Section sec_composition.
+
+Context
+  `{EqDecision index}
+  `[IM : index -> VLSM message]
+  .
+
+(**
+  A stronger version of [valid_state_component_initial_or_transition] for the
+  free composition, it guarantees that a component state of a valid state for
+  the free composition is either initial or there is a valid transition in the
+  free composition leading to the given state which corresponds to a component
+  transition.
+*)
+Lemma free_valid_state_component_initial_or_transition :
+  forall (i : index) (s : composite_state IM),
+    valid_state_prop (free_composite_vlsm IM) s ->
+    initial_state_prop (IM i) (s i)
+      \/
+    exists (l : label (IM i)) (si0 : state (IM i)) (om om' : option message),
+      input_valid_transition (free_composite_vlsm IM) (existT i l)
+        (state_update IM s i si0, om) (s, om').
+Proof.
+  intros i s Hs.
+  apply (VLSM_eq_valid_state (free_composite_vlsm_spec IM)) in Hs as Hs'.
+  apply (valid_state_component_initial_or_transition i) in Hs'
+    as [| (s1 & s2 & li & om & om' & Hfutures & Heq & Ht)]; [by left |].
+  right; exists li, (s1 i), om, om'.
+  replace s with (state_update IM s i (s2 i)) at 2
+    by (apply state_update_id; done).
+  apply (VLSM_weak_embedding_input_valid_transition
+    (pre_free_lift_to_free_weak_embedding i s Hs)).
+  unshelve eapply (VLSM_incl_input_valid_transition
+    (pre_loaded_vlsm_incl (IM i)
+      (valid_message_prop (composite_vlsm IM (free_constraint IM)))
+      (valid_message_prop (free_composite_vlsm IM)) _)).
+  - apply VLSM_incl_valid_message; [| by intro].
+    by apply free_composite_vlsm_spec.
+  - eapply (VLSM_projection_input_valid_transition
+      (composite_vlsm_induced_projection_is_projection IM _ _)); [| done].
+    by rewrite Validator.composite_project_label_eq.
+Qed.
+
+End sec_composition.

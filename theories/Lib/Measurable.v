@@ -2,7 +2,7 @@ From stdpp Require Import prelude.
 From Coq Require Import Reals Lra.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet.
 
-(** * Measure-related definitions and lemmas *)
+(** * Utility: Measure Related Definitions and Results *)
 
 (** The type of positive real numbers. *)
 Definition pos_R := {r : R | (r > 0)%R}.

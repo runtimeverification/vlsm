@@ -3,9 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras StreamFilters.
 From VLSM.Core Require Import VLSM VLSMProjections.VLSMTotalProjection.
 
-Section sec_VLSM_embedding.
-
-(** * VLSM Embedding (Embedding)
+(** * Core: VLSM Embedding
 
   A VLSM projection guaranteeing the existence of projection for all labels and
   states, and the full correspondence between [transition_item]s.
@@ -23,6 +21,8 @@ Section sec_VLSM_embedding.
   [lift_to_composite_VLSM_embedding] or
   [projection_friendliness_lift_to_composite_VLSM_embedding]).
 *)
+
+Section sec_VLSM_embedding.
 
 Section sec_pre_definitions.
 
@@ -109,7 +109,7 @@ Context
   Proper examples of [VLSM_weak_embedding] are presented in Lemmas
   [PreSubFree_PreFree_weak_embedding] and
   [EquivPreloadedBase_Fixed_weak_embedding], which show that a trace over
-  a subset of nodes can be replayed on top of a valid state for the full
+  a subset of components can be replayed on top of a valid state for the full
   composition. Note that in this case, the initial state of the trace not
   translated to an initial state but rather to a regular valid state.
 *)

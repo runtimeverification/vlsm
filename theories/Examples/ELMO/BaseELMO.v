@@ -4,7 +4,7 @@ From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble StdppExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM MessageDependencies.
 
-(** * Basic Definitions and Lemmas for UMO, MO and ELMO
+(** * ELMO: Basic Definitions and Results for UMO, MO and ELMO
 
   This module contains basic definitions and lemmas needed for the UMO, MO and
   ELMO protocols. In contrast to the paper, which uses natural numbers,

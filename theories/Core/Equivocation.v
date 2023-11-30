@@ -6,7 +6,7 @@ From VLSM.Lib Require Import ListSetExtras Measurable.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces Validator.
 From VLSM.Core Require Export PreloadedVLSM ConstrainedVLSM ReachableThreshold.
 
-(** * VLSM Equivocation Definitions
+(** * Core: VLSM Equivocation Definitions
 
   This module is dedicated to building the vocabulary for discussing equivocation.
   Equivocation occurs on the receipt of a message which has not been previously sent.
@@ -14,14 +14,6 @@ From VLSM.Core Require Export PreloadedVLSM ConstrainedVLSM ReachableThreshold.
   Our main purpose is to keep track of equivocating senders in a composite context
   and limit equivocation by means of a composition constraint.
 *)
-
-Lemma exists_proj1_sig {A : Type} (P : A -> Prop) (a : A) :
-  (exists xP : {x | P x}, proj1_sig xP = a) <-> P a.
-Proof.
-  split.
-  - by intros [[x Hx] [= ->]].
-  - by intro Ha; exists (exist _ a Ha).
-Qed.
 
 (** ** Basic equivocation
 
@@ -707,6 +699,30 @@ Proof.
   by apply not_iff_compat, (iff_trans proper_sent).
 Qed.
 
+Lemma from_send_to_from_sent_argument
+  `{HasBeenSentCapability}
+  (P : state vlsm -> Prop)
+  (P_stable : forall s l oim s' oom,
+    input_valid_transition pre_vlsm l (s, oim) (s', oom) ->
+    P s -> P s')
+  (msg : message)
+  (send_establishes_P : forall s l oim s',
+    input_valid_transition pre_vlsm l (s, oim) (s', Some msg) ->
+    P s') :
+  forall s,
+    valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->
+    has_been_sent s msg ->
+    P s.
+Proof.
+  intros s Hs.
+  induction Hs using valid_state_prop_ind;
+    [by intros []%has_been_sent_no_inits |].
+  rewrite has_been_sent_step_update; [| done].
+  intros [-> | H_sent].
+  - by eapply send_establishes_P.
+  - by eapply P_stable, IHHs.
+Qed.
+
 Definition has_been_received_stepwise_prop
   (has_been_received_pred : state_message_oracle) : Prop :=
     oracle_stepwise_props (field_selector input) has_been_received_pred.
@@ -1199,7 +1215,7 @@ Qed.
 
   In protocols like the CBC full node protocol, validators often
   work with the set of all messages they have directly observed,
-  which includes the messages the node sent itself along with
+  which includes the messages the component sent itself along with
   messages that were received.
   The [has_been_directly_observed] oracle tells whether the given message was sent
   or received during any trace leading to the given state.
@@ -1946,8 +1962,8 @@ Context
   (sender : message -> option validator)
   .
 
-Definition node_signed_message (node_idx : index) (m : message) : Prop :=
-  option_map A (sender m) = Some node_idx.
+Definition component_signed_message (component_idx : index) (m : message) : Prop :=
+  option_map A (sender m) = Some component_idx.
 
 (**
   Definitions for safety and nontriviality of the [sender] function.
@@ -1994,8 +2010,8 @@ Proof.
     by specialize (Hsender_safety m v Hsender _ Hemit).
 Qed.
 
-Definition channel_authenticated_message (node_idx : index) (m : message) : Prop :=
-  option_map A (sender m) = Some node_idx.
+Definition channel_authenticated_message (component_idx : index) (m : message) : Prop :=
+  option_map A (sender m) = Some component_idx.
 
 (**
   The [channel_authentication_prop]erty requires that any sent message must

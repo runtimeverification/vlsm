@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From Coq Require Import Sorting.
 From VLSM.Lib Require Import Preamble ListExtras ListSetExtras.
 
-(** * Sorted list utility functions and lemmas *)
+(** * Utility: Sorted List Functions and Results *)
 
 (** Insert an element into a sorted list. *)
 Fixpoint add_in_sorted_list_fn

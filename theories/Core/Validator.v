@@ -2,12 +2,12 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 
-(** * VLSM Projection Validators
+(** * Core: VLSM Projection Validators
 
-  In the sequel we fix VLSMs <<X>> and <<Y>> and some <<label_project>>
+  Below, we fix VLSMs <<X>> and <<Y>> and some <<label_project>>
   and <state_project>> [VLSM_projection] mappings from <<X>> to <<Y>>.
 
-  The Transition Input Validation property validates an input corresponding to
+  The _transition input validation_ property validates an input corresponding to
   a projection by ensuring that that input can be "lifted" to the original VLSM.
 *)
 

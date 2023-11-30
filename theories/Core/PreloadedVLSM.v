@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections.
 
-(** * Pre-loaded VLSMs
+(** * Core: Preloaded VLSMs
 
   Given a VLSM <<X>>, we introduce the _pre-loaded_ version of it, which is
   identical to <<X>>, except that all messages are initial. The high degree
@@ -833,3 +833,15 @@ Proof.
 Qed.
 
 End sec_constrained_direct_defs.
+
+Lemma vlsm_is_preloaded_with_valid `(X : VLSM message) :
+  VLSM_eq X (pre_loaded_vlsm X (valid_message_prop X)).
+Proof.
+  split; [by apply basic_VLSM_strong_incl; intros ?; only 2: left |].
+  apply basic_VLSM_incl; intros ? **; cbn; [done | ..].
+  - destruct HmX as [Hinit | HmX].
+    + by apply initial_message_is_valid.
+    + by destruct X.
+  - by apply Hv.
+  - by apply H.
+Qed.

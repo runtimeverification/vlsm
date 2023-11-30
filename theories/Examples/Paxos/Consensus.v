@@ -4,7 +4,7 @@ From Coq Require Import Streams FunctionalExtensionality Eqdep_dec.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM Plans VLSMProjections.
 
-(** * Consensus Specification
+(** * Paxos: Abstract Specification of Consensus
 
   A very high-level specification of the consensus problem,
   following Lamport.

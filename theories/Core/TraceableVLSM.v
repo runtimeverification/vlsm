@@ -4,7 +4,7 @@ From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble ListSetExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM Composition VLSMEmbedding.
 
-(** * Traceable VLSMs
+(** * Core: Traceable VLSMs
 
   This section introduces [TraceableVLSM]s, characterized by the fact that from
   any constrained state we can derive the possible (valid) transitions leading
@@ -93,6 +93,8 @@ Class TraceableVLSM
 
 #[global] Hint Mode TraceableVLSM - ! - - : typeclass_instances.
 
+(** ** Traceable VLSM properties *)
+
 Section sec_traceable_vlsm_props.
 
 Context
@@ -166,7 +168,7 @@ Qed.
 
 End sec_traceable_vlsm_props.
 
-(** * Composition of TraceableVLSMs *)
+(** ** Composition of traceable VLSMs *)
 
 Section sec_traceable_vlsm_composition.
 

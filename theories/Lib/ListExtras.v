@@ -3,7 +3,7 @@ From stdpp Require Import prelude finite.
 From Coq Require Import FinFun.
 From VLSM.Lib Require Import Preamble.
 
-(** * Utility lemmas about lists *)
+(** * Utility: Lemmas About Lists *)
 
 (**
   A list is either empty or it can be decomposed into an initial prefix

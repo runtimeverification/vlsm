@@ -2,7 +2,7 @@ From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Equivocators.Equivocators.
 
-(** * VLSM Projecting Equivocator Traces *)
+(** * Core: VLSM Projecting Equivocator Traces *)
 
 Section sec_equivocator_vlsm_projections.
 

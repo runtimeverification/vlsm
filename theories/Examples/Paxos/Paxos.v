@@ -12,32 +12,7 @@ Create HintDb list_simpl discriminated.
 Ltac simpl_elem_of_list := rewrite_strat any (topdown (hints list_simpl)).
 Ltac simpl_elem_of_list_in H := rewrite_strat any (topdown (hints list_simpl)) in H.
 
-Lemma from_send_to_from_sent_argument
-  [message] (V : VLSM message)
-  `{!HasBeenSentCapability V}
-  (P : state V -> Prop)
-  (P_stable : forall s l oim s' oom,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm V) l (s, oim) (s', oom) ->
-    P s -> P s')
-  (msg : message)
-  (send_establishes_P : forall s l oim s',
-    input_valid_transition (pre_loaded_with_all_messages_vlsm V) l (s, oim) (s', Some msg) ->
-    P s') :
-  forall s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm V) s ->
-    has_been_sent V s msg ->
-    P s.
-Proof.
-  intros s Hs.
-  induction Hs using valid_state_prop_ind;
-    [by intros []%has_been_sent_no_inits |].
-  rewrite (has_been_sent_step_update Ht).
-  intros [-> | H_sent].
-  - by eapply send_establishes_P.
-  - by eapply P_stable, IHHs.
-Qed.
-
-(** * A Basic Paxos Protocol
+(** * Paxos: A Basic Paxos Protocol
 
   This protocol maintains safety in the presence of message loss,
   but may not be safe for Byzantine failures.

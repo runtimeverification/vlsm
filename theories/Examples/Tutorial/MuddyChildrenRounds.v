@@ -72,6 +72,9 @@ Record RoundStatus : Type := mkRS
   rs_status : ChildStatus;
 }.
 
+(** Show [RoundStatus] using the constructor instead of the record syntax. *)
+Add Printing Constructor RoundStatus.
+
 Section sec_muddy.
 
 Context
@@ -92,6 +95,9 @@ Record State : Type := mkSt
   st_rs : option RoundStatus;
 }.
 
+(** Show [State] using the constructor instead of the record syntax. *)
+Add Printing Constructor State.
+
 (**
   A message carries the identity of its sender, and shares the round number
   and their [ChildStatus].
@@ -102,6 +108,9 @@ Record Message : Type := mkMsg
   msg_round : nat;
   msg_status : ChildStatus;
 }.
+
+(** Show [Message] using the constructor instead of the record syntax. *)
+Add Printing Constructor Message.
 
 Definition MCType : VLSMType Message :=
 {|
@@ -242,8 +251,8 @@ Definition MCMachine (i : index) : VLSMMachine MCType :=
 
 Definition MCVLSM (i : index) : VLSM Message :=
 {|
-  vtype := MCType;
-  vmachine := MCMachine i;
+  vlsm_type := MCType;
+  vlsm_machine := MCMachine i;
 |}.
 
 #[export] Instance MC_composite_initial_state_dec :
@@ -952,11 +961,10 @@ Proof.
   pose proof (Hs' := Hs).
   apply MC_composite_invariant_preservation in Hs.
   destruct (Hs (msg_index m)) as [Hinit | Hinvariant].
-  - assert (Hsminit : MC_initial_state_prop (s (msg_index m))) by apply Hinit.
-    unfold MC_initial_state_prop in Hsminit.
-    unfold MC_no_equivocation in Hnoequiv.
+  - unfold MC_no_equivocation in Hnoequiv.
     repeat case_match; cbn in *; [| done].
-    by rewrite H10 in Hsminit.
+    unfold MC_initial_state_prop in Hinit.
+    by rewrite H10 in Hinit.
   - unfold MC_component_invariant, MC_component_invariant_helper in Hinvariant.
     unfold MC_no_equivocation in Hnoequiv.
     repeat case_match; cbn in *; subst; try done;
@@ -1078,6 +1086,12 @@ Proof.
   - by rewrite !Hsi, MC_transition_equation_5, state_update_id.
 Qed.
 
+Lemma st_obs_finite_valid_trace_from_to :
+  forall (s1 s2 : composite_state MCVLSM) (tr : list transition_item) (i : index),
+    finite_valid_trace_from_to MC_composite_vlsm s1 s2 tr ->
+      st_obs (s1 i) ≡ st_obs (s2 i).
+Proof. by intros; apply MC_in_futures_preserves_obs_equiv; exists tr. Qed.
+
 Lemma MC_build_muddy_muddy_trace_valid
   (is : composite_state MCVLSM)
   (target helper : index) (round : nat) :
@@ -1155,14 +1169,8 @@ Proof.
       by left.
     + rewrite Hlasthelper, MC_transition_equation_7; cbn.
       unfold MC_transition_clause_5.
-      assert (Hobsequiv : st_obs (is target) ≡ obs).
-      {
-        replace obs with (st_obs (finite_trace_last is
-          (MC_build_muddy_muddy_trace is helper target round) target));
-          [| by rewrite Hlasthelper].
-        apply MC_in_futures_preserves_obs_equiv.
-        by eexists.
-      }
+      assert (Hobsequiv : st_obs (is target) ≡ obs)
+        by (rewrite st_obs_finite_valid_trace_from_to, Hlasthelper; done).
       rewrite decide_True, decide_False, decide_True.
       * by replace (round + 1) with (S round) by lia.
       * split; [by lia |].
@@ -1307,33 +1315,24 @@ Proof.
       as (obs' & Hlast).
     assert (Hvalidtr1 : input_valid_transition MC_composite_vlsm
       (existT helper receive)
-      (finite_trace_last is
-        (MC_build_clean_muddy_trace is target helper round),
-        Some {| msg_index := target; msg_round := round; msg_status := undecided |})
+      (finite_trace_last is (MC_build_clean_muddy_trace is target helper round),
+        Some (mkMsg target round undecided))
       (state_update MCVLSM
-        (finite_trace_last is
-          (MC_build_clean_muddy_trace is target helper round)) helper
-          {| st_obs := st_obs (finite_trace_last is
-               (MC_build_clean_muddy_trace is target helper round) helper);
-             st_rs := Some (mkRS round undecided)
-          |}, None)).
+        (finite_trace_last is (MC_build_clean_muddy_trace is target helper round))
+        helper
+        (mkSt (st_obs (finite_trace_last is (MC_build_clean_muddy_trace
+          is target helper round) helper)) (Some (mkRS round undecided))),
+          None)).
     {
       repeat split; cbn in *.
       - by apply valid_trace_last_pstate in IH.
       - apply valid_trace_last_pstate in IH as Hfinal.
-        remember (finite_trace_last _ _) as final.
-        by apply MC_valid_message_from_valid_state with (s := final) (obs := obs').
+        by eapply MC_valid_message_from_valid_state.
       - by rewrite Hlasthelper; constructor.
       - by subst; rewrite Hlast; cbn; left.
       - rewrite Hlasthelper, MC_transition_equation_7; cbn.
-        assert (Hobsequiv : st_obs (is helper) ≡ obs).
-        {
-          replace obs with (st_obs (finite_trace_last is
-            (MC_build_clean_muddy_trace is target helper round) helper));
-            [| by rewrite Hlasthelper].
-          apply MC_in_futures_preserves_obs_equiv.
-          by eexists.
-        }
+        assert (Hobsequiv : st_obs (is helper) ≡ obs)
+          by (rewrite st_obs_finite_valid_trace_from_to, Hlasthelper; subst; done).
         destruct Hcons as [Hnempty Hcons].
         assert (Htargetobs : target ∉ obs).
         {
@@ -1371,14 +1370,8 @@ Proof.
     + state_update_simpl.
       rewrite Hlast, MC_transition_equation_7.
       unfold MC_transition_clause_5.
-      assert (Hobsequiv : st_obs (is target) ≡ obs').
-      {
-        replace obs' with (st_obs (finite_trace_last is
-          (MC_build_clean_muddy_trace is target helper round) target));
-          [| by rewrite Hlast].
-        apply MC_in_futures_preserves_obs_equiv.
-        by eexists.
-      }
+      assert (Hobsequiv : st_obs (is target) ≡ obs')
+        by (rewrite st_obs_finite_valid_trace_from_to, Hlast; done).
       destruct Hcons as [Hnempty Hcons].
       assert (Htargetobs : helper ∈ obs').
       {
@@ -1465,6 +1458,18 @@ Proof.
         -- by rewrite size_empty; lia.
 Qed.
 
+Lemma composite_initial_state_prop_not_None :
+  forall (s : composite_state MCVLSM) (i : index),
+    st_rs (s i) <> None ->
+    ~ composite_initial_state_prop MCVLSM s.
+Proof.
+  intros s i Hneq Hforall.
+  apply Forall_finite in Hforall.
+  contradict Hforall.
+  apply Exists_not_Forall, Exists_exists.
+  by exists i; split; cbn; [apply elem_of_enum |].
+Qed.
+
 Lemma MC_valid_noequiv_valid (s : composite_state MCVLSM) (m : Message) :
   valid_state_prop MC_composite_vlsm s ->
   MC_no_equivocation s m ->
@@ -1479,13 +1484,8 @@ Proof.
     [by eapply MC_valid_message_from_valid_state |].
   assert (Hnivs : MC_non_initial_valid_state s).
   {
-    clear - Hs j Hsjf.
     split; [done |].
-    intros Hforall.
-    apply Forall_finite in Hforall.
-    contradict Hforall.
-    apply Exists_not_Forall, Exists_exists.
-    exists j; split; cbn; [by apply elem_of_enum |].
+    eapply composite_initial_state_prop_not_None.
     by rewrite Hsjf.
   }
   assert (Hcons : consistent s) by (apply MC_non_initial_valid_consistent; done).
@@ -1629,10 +1629,8 @@ Qed.
 Definition MC_transition_item_update s j i st rs : transition_item :=
 {|
   l := existT i receive : composite_label MCVLSM;
-  input := Some
-    {| msg_index := j; msg_status := st; msg_round := state_round (st_rs (s j)) |};
-  destination := state_update MCVLSM s i
-    {| st_obs := st_obs (s i); st_rs := Some rs |};
+  input := Some (mkMsg j (state_round (st_rs (s j))) st);
+  destination := state_update MCVLSM s i (mkSt (st_obs (s i)) (Some rs));
   output := None
 |}.
 
@@ -1676,8 +1674,7 @@ Proof.
       * by apply MC_non_initial_valid_consistent in Hs as []; set_solver.
       * by apply MC_non_initial_valid_consistent in Hs as []; set_solver.
       * destruct (s i); cbn in *; subst.
-        funelim (MC_transition i init
-          {| st_obs := st_obs0; st_rs := None |} None); try done.
+        funelim (MC_transition i init (mkSt st_obs0 None) None); try done.
         -- by rewrite <- Heqcall; inversion H11.
         -- by inversion H10; congruence.
     + exists (Build_transition_item (T := composite_type MCVLSM) (existT i init) None
@@ -1694,8 +1691,7 @@ Proof.
       * apply MC_non_initial_valid_consistent in Hs as []; set_solver.
       * apply MC_non_initial_valid_consistent in Hs as []; set_solver.
       * destruct (s i); cbn in *; subst.
-        funelim (MC_transition i init
-          {| st_obs := st_obs0; st_rs := None |} None); try done.
+        funelim (MC_transition i init (mkSt st_obs0 None) None); try done.
         -- by inversion H10; congruence.
         -- by rewrite <- Heqcall; inversion H11.
   - apply not_Forall_Exists in Hall; [| by typeclasses eauto].
@@ -1736,11 +1732,7 @@ Proof.
             rewrite (Hobs j) in e.
             by clear - e; set_solver.
         }
-        assert (Hnoequiv : MC_no_equivocation s {|
-          msg_index := j;
-          msg_round := state_round (st_rs (s j));
-          msg_status := muddy;
-        |}).
+        assert (Hnoequiv : MC_no_equivocation s (mkMsg j (state_round (st_rs (s j))) muddy)).
         {
           unfold MC_no_equivocation.
           by repeat case_match; [rewrite <- H10; left; rewrite H10, <- He |].
@@ -1797,11 +1789,7 @@ Proof.
             destruct (decide (i = j)); [by subst; congruence |].
             by clear - n0 n1; set_solver.
         }
-        assert (Hnoequiv :  MC_no_equivocation s {|
-          msg_index := j;
-          msg_round := state_round (st_rs (s j));
-          msg_status := muddy
-        |}).
+        assert (Hnoequiv :  MC_no_equivocation s (mkMsg j (state_round (st_rs (s j))) muddy)).
         {
           unfold MC_no_equivocation.
           by repeat case_match; [rewrite <- H10; left; rewrite H10, <- He |].
@@ -1861,7 +1849,6 @@ Proof.
         unfold MC_component_invariant in Hinvariantk.
         inversion Hinvariantk; [done | | by contradict n0; eexists].
         apply MuddyUnion_elem, MC_muddy_number_of_muddy_seen in Hkobs; [| done].
-        rewrite Hkobs in H11.
         by apply size_non_empty_iff in Hmuddy; lia.
       }
       assert (Hkinvariant : state_round (st_rs (s k)) < size (st_obs (s k))).
@@ -1877,7 +1864,6 @@ Proof.
         unfold MC_component_invariant in Hinvariantj.
         inversion Hinvariantj; [done | | by contradict n0; eexists].
         apply MC_muddy_number_of_muddy_seen in Hjmuddyunion; [| done].
-        rewrite Hjmuddyunion in H11.
         by apply size_non_empty_iff in Hmuddy; lia.
       }
       assert (Hjinvariant : state_round (st_rs (s j)) < size (st_obs (s j))).
@@ -2193,7 +2179,7 @@ Proof.
       (existT i init) None (state_update MCVLSM s i (mkSt (st_obs (s i))
       (Some (mkRS 0 muddy)))) None) as item.
     assert (Hvalidtr : input_valid_transition MC_composite_vlsm (existT i init) (s, None)
-      (state_update MCVLSM s i {| st_obs := st_obs (s i); st_rs := Some (mkRS 0 muddy) |},
+      (state_update MCVLSM s i (mkSt (st_obs (s i)) (Some (mkRS 0 muddy))),
       None)).
     {
       repeat split; cbn; [| | | done | by rewrite Hcons.. |].
@@ -2205,20 +2191,12 @@ Proof.
         by rewrite e.
     }
     assert (Hvalids' : MC_non_initial_valid_state (state_update MCVLSM s i
-      {| st_obs := st_obs (s i); st_rs := Some (mkRS 0 muddy) |})).
+      (mkSt (st_obs (s i)) (Some (mkRS 0 muddy))))).
     {
       split.
-      - eapply (@valid_trace_last_pstate _ (@finite_valid_trace_init_to));
-          [by typeclasses eauto |].
-        split; [| by cbn; red; apply Hinit].
-        rewrite Heqitem.
-        by eapply finite_valid_trace_from_to_singleton.
-      - intros Hinits'.
-        apply Forall_finite in Hinits'.
-        contradict Hinits'.
-        apply Exists_not_Forall, Exists_exists.
-        exists i; split; [by apply elem_of_enum |].
-        by cbn; state_update_simpl.
+      - by eapply input_valid_transition_destination.
+      - eapply composite_initial_state_prop_not_None with i.
+        by state_update_simpl; cbn.
     }
     apply MC_safety in Hvalids'; [| done].
     destruct Hvalids' as (tr & sf & Htr & Hsf).
@@ -2231,7 +2209,7 @@ Proof.
       (existT i init) None (state_update MCVLSM s i (mkSt (st_obs (s i))
       (Some (mkRS 0 undecided)))) None) as item.
     assert (Hvalidtr : input_valid_transition MC_composite_vlsm (existT i init) (s, None)
-      (state_update MCVLSM s i {| st_obs := st_obs (s i); st_rs := Some (mkRS 0 undecided) |},
+      (state_update MCVLSM s i (mkSt (st_obs (s i)) (Some (mkRS 0 undecided))),
       None)).
     {
       repeat split; cbn; [| | | done | by rewrite Hcons.. |].
@@ -2244,20 +2222,12 @@ Proof.
         by inversion H9.
     }
     assert (Hvalids' : MC_non_initial_valid_state (state_update MCVLSM s i
-      {| st_obs := st_obs (s i); st_rs := Some (mkRS 0 undecided) |})).
+      (mkSt (st_obs (s i)) (Some (mkRS 0 undecided))))).
     {
       split.
-      - eapply (@valid_trace_last_pstate _ (@finite_valid_trace_init_to));
-          [by typeclasses eauto |].
-        split; [| by cbn; red; apply Hinit].
-        rewrite Heqitem.
-        by eapply finite_valid_trace_from_to_singleton.
-      - intros Hinits'.
-        apply Forall_finite in Hinits'.
-        contradict Hinits'.
-        apply Exists_not_Forall, Exists_exists.
-        exists i; split; [by apply elem_of_enum |].
-        by cbn; state_update_simpl.
+      - by eapply input_valid_transition_destination.
+      - eapply composite_initial_state_prop_not_None with i.
+        by state_update_simpl; cbn.
     }
     apply MC_safety in Hvalids'; [| done].
     destruct Hvalids' as (tr & sf & Htr & Hsf).

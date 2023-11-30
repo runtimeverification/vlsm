@@ -3,13 +3,14 @@ From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM.
 From VLSM.Core.VLSMProjections Require Import VLSMEmbedding VLSMTotalProjection.
 
-(** * VLSM Inclusion
+(** * Core: VLSM Inclusion
 
   When both VLSMs have the same state and label types they also share the
   same [Trace] type, and sets of traces can be compared without conversion.
   Then VLSM <<X>> is _included_ in VLSM <<Y>> if every [valid_trace] available to <<X>>
   is also available to <<Y>>.
 *)
+
 Section sec_VLSM_inclusion.
 
 Context
@@ -24,7 +25,7 @@ Definition VLSM_incl_part
   forall t : Trace,
     valid_trace_prop X t -> valid_trace_prop Y t.
 
-#[local] Notation VLSM_incl X Y := (VLSM_incl_part (vmachine X) (vmachine Y)).
+#[local] Notation VLSM_incl X Y := (VLSM_incl_part (vlsm_machine X) (vlsm_machine Y)).
 
 Lemma VLSM_incl_refl
   (MX : VLSMMachine T)
@@ -118,7 +119,7 @@ Qed.
 
 End sec_VLSM_inclusion.
 
-Notation VLSM_incl X Y := (VLSM_incl_part (vmachine X) (vmachine Y)).
+Notation VLSM_incl X Y := (VLSM_incl_part (vlsm_machine X) (vlsm_machine Y)).
 
 Section sec_VLSM_incl_preservation.
 

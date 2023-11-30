@@ -10,7 +10,7 @@ From VLSM.Core Require Import Equivocators.MessageProperties.
 From VLSM.Core Require Import Equivocators.EquivocatorsComposition.
 From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections.
 
-(** * VLSM Equivocators Fixed Equivocation *)
+(** * Core: VLSM Equivocators Fixed Equivocation *)
 
 Section sec_equivocators_fixed_equivocations_vlsm.
 
@@ -208,14 +208,14 @@ Section sec_fixed_equivocation_with_fullnode.
 
 (**
   This section instantiates the [full_node_condition_for_admissible_equivocators]
-  by choosing the admissible indices to be the fixed set of nodes allowed to
+  by choosing the admissible indices to be the fixed set of components allowed to
   equivocate, and then shows that this constraint is stronger than the
   [fixed_equivocation_constraint].
 
   Context setting the stage for, and instantiating the
   [full_node_condition_for_admissible_equivocators].
-  It requires that the nodes have [has_been_sent] and [has_been_received]
-  capabilities, that the number of nodes is finite.
+  It requires that the components have [has_been_sent] and [has_been_received]
+  capabilities, that the number of components is finite.
 
   Additionally to the above we require that equality on messages is decidable
   and that the set of VLSMs allowed to equivocate is non-empty.
@@ -246,8 +246,8 @@ Proof.
 Qed.
 
 (**
-  If all nodes have the [cannot_resend_message_stepwise_prop]erty, then the
-  full node constraint is stronger than the [fixed_equivocation_constraint]
+  If all components have the [cannot_resend_message_stepwise_prop]erty, then the
+  full node condition is stronger than the [fixed_equivocation_constraint]
   (by reduction to the result above).
 *)
 Lemma fixed_equivocation_constraint_subsumption
@@ -263,14 +263,14 @@ Qed.
 
 End sec_fixed_equivocation_with_fullnode.
 
-Section sec_from_equivocators_to_nodes.
+Section sec_from_equivocators_to_components.
 
-(** ** From composition of equivocators to composition of simple nodes
+(** ** From composition of equivocators to composition of simple components
 
   In this section we show that the projection of [valid_trace]s of a
   composition of equivocators with a fixed equivocation constraint are
-  [valid_trace]s for the composition of nodes with a similar fixed
-  equivocation constraint.
+  [valid_trace]s for the composition with a similar fixed equivocation
+  constraint.
 *)
 
 Context
@@ -395,7 +395,7 @@ Definition constraint_has_been_sent_prop
 (**
   Generic proof that the projection of a trace of the composition of equivocators
   with no message equivocation and fixed state equivocation is valid w.r.t.
-  the composition of the regular nodes constrained by any constraint satisfying
+  the composition of the regular components constrained by any constraint satisfying
   several properties, including the [constraint_has_been_sent_prop]erty.
 
   The proof proceeds by well founded induction on the length of the trace,
@@ -727,14 +727,14 @@ Qed.
   Consider a [valid_trace] for the composition of equivocators with
   no message equivocation and fixed state equivocation.
 
-  Because any of its projections to the composition of original nodes contains
-  all transitions from nodes not allowed to equivocate, then a final state of
+  Because any of its projections to the composition of original components contains
+  all transitions from components not allowed to equivocate, then a final state of
   such a projection will be able to observe all messages sent or received by
-  non-equivocating nodes in the initial trace.
+  non-equivocating components in the initial trace.
 
-  Therefore if seeding the composition of equivocating nodes with these
+  Therefore if seeding the composition of equivocating components with these
   messages, the restriction of the initial trace to only the equivocating
-  nodes will satisfy the [trace_sub_item_input_is_seeded_or_sub_previously_sent]
+  components will satisfy the [trace_sub_item_input_is_seeded_or_sub_previously_sent]
   property w.r.t. these messages, a sufficient condition for it being
   valid ([finite_valid_trace_sub_projection]).
 *)
@@ -871,9 +871,9 @@ Proof.
 Qed.
 
 (**
-  Because any of its projections to the composition of original nodes contains
-  all transitions from nodes not allowed to equivocate, all messages
-  sent by non-equivocating nodes in the original trace will also be sent
+  Because any of its projections to the composition of original components contains
+  all transitions from components not allowed to equivocate, all messages
+  sent by non-equivocating components in the original trace will also be sent
   in any projection.
 *)
 Lemma equivocator_vlsm_trace_project_reflect_non_equivocating
@@ -947,7 +947,7 @@ Qed.
   As a consequence of the [equivocator_vlsm_trace_project_reflect_non_equivocating]
   lemma, if a message emmitted by a trace cannot be directly observed in a
   projection of the trace's final state, then it must be that it was emitted by
-  one of the nodes allowed to equivocate.
+  one of the components allowed to equivocate.
 *)
 Lemma projection_has_not_been_directly_observed_is_equivocating
   (is : composite_state (equivocator_IM IM))
@@ -992,7 +992,7 @@ Qed.
 (**
   The next two lemmas are rather technical, but their basic meaning is that
   if we take the composition of a subset of equivocators, it doesn't matter
-  the way we do it (either first obtain the indexed subset of nodes and then
+  the way we do it (either first obtain the indexed subset of components and then
   transform that into equivocators and take their composition, or we first
   start with the indexed full set of equivocators and then select a subset
   of them and take their composition).
@@ -1080,14 +1080,14 @@ Qed.
   composition of equivocators with no message equivocation and fixed state
   equivocation, a message which [has_been_sent] for that state but not
   [has_been_directly_observed] for a projection of that state <<sx>>, can nevertheless be
-  generated by the composition of the nodes allowed to equivocate, pre-loaded with
+  generated by the composition of the components allowed to equivocate, pre-loaded with
   the messages directly observed in the state <<sx>>.
 
   To prove that, we consider a trace witness for the message having been sent,
   we use [projection_has_not_been_directly_observed_is_equivocating] to derive that
   it must have been sent by one of the machines allowed to equivocate, from this
   we derive that it can be sent by the restriction of the composition of
-  equivocators to just the equivocating nodes, pre-loaded with the messages
+  equivocators to just the equivocating components, pre-loaded with the messages
   directly observed in the projection, then we use
   the [seeded_equivocators_valid_trace_project] result to reach our conclusion.
 *)
@@ -1165,7 +1165,7 @@ Proof.
   inversion Hpr_item. subst output_itemX pre_descriptors. clear Hpr_item deqv'.
   simpl in Houtput_select.
 
-  (* show that that item must be specifying a transition for an equivocating node *)
+  (* show that that item must be specifying a transition for an equivocating component *)
 
   rewrite <- (valid_trace_get_last Htr) in Hdescriptors, n.
   specialize
@@ -1179,7 +1179,7 @@ Proof.
   (*
     Phase III (b):
     Consider a projection trX' obtained using the final_descriptor_m as above,
-    but first restricting the nodes to just the equivocators allowed to equivocate.
+    but first restricting the components to just the equivocators allowed to equivocate.
     We will show that we can use [seeded_equivocators_valid_trace_project]
     and leverage the result from Phase II (a)
     to derive that the resulting projection is valid.
@@ -1213,7 +1213,7 @@ Proof.
   clear Htr'pre Hproject.
 
   (*
-    State that by restricting trXm to the subset of equivocating nodes
+    State that by restricting trXm to the subset of equivocating components
     we obtain the same trX' trace.
   *)
 
@@ -1246,7 +1246,7 @@ Qed.
 (**
   Main result of this section, stating that traces which are valid for the
   equivocator-based definition of fixed equivocation project to traces which are
-  valid for the simple-nodes definition of fixed equivocation.
+  valid for the simple-components definition of fixed equivocation.
 *)
 Theorem fixed_equivocators_valid_trace_project
   (final_descriptors : equivocator_descriptors IM)
@@ -1323,14 +1323,14 @@ Proof.
     by apply (equivocators_total_VLSM_projection_finite_trace_project IM (proj1 Hpre_tr)).
 Qed.
 
-End sec_from_equivocators_to_nodes.
+End sec_from_equivocators_to_components.
 
 Section sec_all_equivocating.
 
 (** ** Fixed Equivocation for all Equivocators
 
-  In this section we show that if the set of nodes allowed to equivocate in the
-  fixed set equivocation is the entire set of nodes, then the composition
+  In this section we show that if the set of components allowed to equivocate in the
+  fixed set equivocation is the entire set of components, then the composition
   under the fixed-set equivocation constraint is the same as the composition
   with only the no-message-equivocation constraint.
 *)

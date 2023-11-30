@@ -3,16 +3,16 @@ From VLSM.Lib Require Import Preamble.
 From VLSM.Core Require Import VLSM Equivocation.
 From VLSM.Core Require Import Composition VLSMProjections Validator ProjectionTraces.
 
-(** * VLSM projections and messages properties
+(** * Core: VLSM Projections and Messages Properties
 
-  In this section we show that messages properties (oracles like [has_been_sent],
+  In this section, we show that messages properties (oracles like [has_been_sent],
   [has_been_received], and [has_been_directly_observed]) are reflected and, in some cases,
   preserved by VLSM projections.
 *)
 
 Section sec_projection_oracle.
 
-(** ** [VLSM_projection]s reflect message properties *)
+(** ** VLSM projections reflect message properties *)
 
 Context
   {message : Type}
@@ -432,7 +432,7 @@ Context
 (**
   Under [sender_safety_alt_prop]erty assumptions, if a message can be emitted
   by the free composition (pre-loaded with all messages), then it can also be
-  emitted by the node corresponding to its sender (pre-loaded with all messages).
+  emitted by the component corresponding to its sender (pre-loaded with all messages).
 *)
 Lemma can_emit_projection
   : can_emit PreFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.

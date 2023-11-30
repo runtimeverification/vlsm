@@ -5,7 +5,7 @@ From VLSM.Lib Require Import ListSetExtras NatExtras.
 From VLSM.Core Require Import VLSM Equivocation.
 From VLSM.Core Require Import Equivocators.Equivocators Equivocators.EquivocatorsProjections.
 
-(** * VLSM Message Properties *)
+(** * Core: VLSM Message Properties *)
 
 Section sec_equivocator_vlsm_message_properties.
 

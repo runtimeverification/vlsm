@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras ListSetExtras StdppListSet StdppExtras.
 
-(** * Topological sorting implementation
+(** * Utility: Topological Sorting
 
   This module implements an algorithm producing a linear extension for a
   given partial order using an approach similar to that of Kahn's topological

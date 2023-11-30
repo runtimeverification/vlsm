@@ -1,6 +1,8 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 
+(** * Utility: Std++ List Sets *)
+
 Section sec_fst_defs.
 
 Context `{EqDecision A}.

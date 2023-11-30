@@ -3,9 +3,9 @@ From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM.
 From VLSM.Core.VLSMProjections Require Import VLSMInclusion VLSMEmbedding.
 
-(** * VLSM Trace Equality
+(** * Core: VLSM Trace Equality
 
-  We can also define VLSM _equality_ in terms of traces.
+  In this module, we define VLSM _equality_ in terms of traces.
   When both VLSMs have the same state and label types they also share the
   same [Trace] type, and sets of traces can be compared without conversion.
   Then VLSM <<X>> and VLSM <<Y>> are _equal_ if their [valid_trace]s are exactly the same.
@@ -25,7 +25,7 @@ Definition VLSM_eq_part
 
 End sec_VLSM_equality.
 
-Notation VLSM_eq X Y := (VLSM_eq_part (vmachine X) (vmachine Y)).
+Notation VLSM_eq X Y := (VLSM_eq_part (vlsm_machine X) (vlsm_machine Y)).
 
 Lemma VLSM_eq_refl
   {message : Type}

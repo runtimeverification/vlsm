@@ -3,7 +3,7 @@ From stdpp Require Import prelude.
 From Coq Require Import Streams.
 From VLSM.Lib Require Import Preamble ListExtras StreamExtras.
 
-(** * VLSM Basics
+(** * Core: VLSM Basics
 
   This module provides basic VLSM infrastructure.
 *)
@@ -88,13 +88,13 @@ Definition decidable_initial_messages_prop
 
 Record VLSM (message : Type) : Type := mk_vlsm
 {
-  vtype :> VLSMType message;
-  vmachine :> VLSMMachine vtype;
+  vlsm_type :> VLSMType message;
+  vlsm_machine :> VLSMMachine vlsm_type;
 }.
 
-Arguments vtype [message] v.
-Arguments vmachine [message] v.
-Arguments mk_vlsm [message] [vtype] vmachine.
+Arguments vlsm_type [message] v.
+Arguments vlsm_machine [message] v.
+Arguments mk_vlsm [message] [vlsm_type] vlsm_machine.
 
 Section sec_traces.
 
@@ -358,7 +358,7 @@ Definition vs0 `(X : VLSM message) := @inhabitant _ (@s0 _ _ X).
 Lemma mk_vlsm_machine
   {message : Type}
   (X : VLSM message)
-  : mk_vlsm (vmachine X) = X.
+  : mk_vlsm (vlsm_machine X) = X.
 Proof.
   by destruct X.
 Qed.
@@ -1564,8 +1564,8 @@ Qed.
   This inductive property is reflecting that fact that a that <<valid_state_message_prop (s, om)>>
   holds only if <<s>> and <<om>> are the final state and output of an initial valid
   trace, or a pair of an initial state and option-initial message.
-  It follows the inductive structure of <<valid_state_message_prop>>, but augments every node of
-  the tree with such an exhibiting trace.
+  It follows the inductive structure of <<valid_state_message_prop>>, but augments every
+  branch of the tree with such an exhibiting trace.
 
   Its main benefit is that when performing induction over it, one can also use the
   induction hypothesis for the (trace generating the) message being received.
@@ -2670,7 +2670,7 @@ End sec_valid_transition_props.
 
 Section sec_finite_valid_trace_init_to_alt.
 
-(** ** Alternate definitions to valid traces and states
+(** ** Alternate definitions of valid traces and states
 
   Inspired from the [constrained_transitions_from_to] definition we can
   derive an alternate definition for valid traces which is easier to use

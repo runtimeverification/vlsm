@@ -3,7 +3,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import EquationsExtras.
 From VLSM.Lib Require Import Preamble FinSuppFn StdppExtras ListExtras.
 
-(** * Natural number utility definitions and lemmas *)
+(** * Utility: Natural Number Definitions and Results *)
 
 (** Compute the list of all naturals less than <<n>>. *)
 Fixpoint up_to_n_listing (n : nat) : list nat :=

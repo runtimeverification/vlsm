@@ -130,8 +130,8 @@ Definition doubling_machine : VLSMMachine multiplying_type :=
 
 Definition doubling_vlsm : VLSM multiplying_message :=
 {|
-  vtype := multiplying_type;
-  vmachine := doubling_machine;
+  vlsm_type := multiplying_type;
+  vlsm_machine := doubling_machine;
 |}.
 
 (** *** Doubling VLSM examples *)

@@ -3,7 +3,7 @@ Obligation Tactic := idtac.
 From stdpp Require Import prelude.
 From Coq Require Import Eqdep_dec.
 
-(** * General utility definitions, lemmas, and tactics *)
+(** * Utility: General Definitions, Results and Tactics *)
 
 Tactic Notation "spec" hyp(H) :=
   match type of H with ?a -> _ =>
@@ -117,6 +117,14 @@ Proof.
 Qed.
 
 (** ** Equality of dependent pairs *)
+
+Lemma exists_proj1_sig {A : Type} (P : A -> Prop) (a : A) :
+  (exists xP : {x | P x}, proj1_sig xP = a) <-> P a.
+Proof.
+  split.
+  - by intros [[x Hx] [= ->]].
+  - by intro Ha; exists (exist _ a Ha).
+Qed.
 
 Lemma dec_sig_to_exist {A} {P} {P_dec : forall x : A, Decision (P x)} (a : dsig P)
   : exists (a' : A) (e : P a'), a = dexist a' e.

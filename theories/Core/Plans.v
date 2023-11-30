@@ -2,7 +2,11 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM.
 
-(** * VLSM Plans *)
+(** * Core: VLSM Plans
+
+  A plan is a (sequence of actions) which can be attempted on a
+  given state to yield a trace.
+*)
 
 Section sec_plans.
 
@@ -11,9 +15,6 @@ Context
   {T : VLSMType message}.
 
 (**
-  A plan is a (sequence of actions) which can be attempted on a
-  given state to yield a trace.
-
   A [plan_item] is a singleton plan, and contains a label and an input
   which would allow to transition from any given state
   (note that we don't address validity for now).
@@ -174,8 +175,7 @@ Context
   corresponding [type] and [transition].
 *)
 
-Definition vplan_item := (@plan_item _ X).
-Definition plan : Type := list vplan_item.
+Definition plan : Type := list (plan_item X).
 Definition apply_plan := (@_apply_plan _ X (@transition _ _ X)).
 Definition trace_to_plan := (@_trace_to_plan _ X).
 Definition apply_plan_app
@@ -238,6 +238,28 @@ Proof.
   subst after_a.
   rewrite <- apply_plan_last.
   by apply finite_valid_trace_last_pstate.
+Qed.
+
+Definition finite_valid_plan_from_to (s : state X) (a : plan) : Prop :=
+  finite_valid_trace_from_to _ s (apply_plan s a).2 (apply_plan s a).1.
+
+Lemma finite_valid_plan_from_to_app_iff :
+  forall (s : state X) (a b : plan),
+    finite_valid_plan_from_to s (a ++ b)
+      <->
+    finite_valid_plan_from_to s a /\ finite_valid_plan_from_to (apply_plan s a).2 b.
+Proof.
+  intros s a b.
+  unfold finite_valid_plan_from_to.
+  rewrite apply_plan_app.
+  destruct (apply_plan _ a) as [aitems afinal] eqn: Ha,
+    (apply_plan _ b) as [bitems bfinal] eqn: Hb; cbn.
+  replace aitems with (apply_plan s a).1 by (rewrite Ha; done).
+  replace afinal with (apply_plan s a).2 by (rewrite Ha; done). cbn.
+  rewrite <- apply_plan_last.
+  split.
+  - by apply finite_valid_trace_from_to_app_split.
+  - by intros []; eapply finite_valid_trace_from_to_app.
 Qed.
 
 (**

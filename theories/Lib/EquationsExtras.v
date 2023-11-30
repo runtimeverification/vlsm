@@ -1,7 +1,7 @@
 From Equations Require Export Equations.
 Export Equations.Prop.Logic.
 
-(** * Equations utility definitions
+(** * Utility: Equations Definitions
 
   The [inspect] definition is used to pack a value with a proof
   of an equality to itself. When pattern matching on the first component in

@@ -1,6 +1,6 @@
 From Cdcl Require Export Itauto.
 
-(** * Constructive Itauto tactic
+(** * Utility: Constructive Itauto Tactic
 
   This module contains a workaround that prevents the itauto tactic from using
   classical logic.
