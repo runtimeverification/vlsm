@@ -118,6 +118,14 @@ Qed.
 
 (** ** Equality of dependent pairs *)
 
+Lemma exists_proj1_sig {A : Type} (P : A -> Prop) (a : A) :
+  (exists xP : {x | P x}, proj1_sig xP = a) <-> P a.
+Proof.
+  split.
+  - by intros [[x Hx] [= ->]].
+  - by intro Ha; exists (exist _ a Ha).
+Qed.
+
 Lemma dec_sig_to_exist {A} {P} {P_dec : forall x : A, Decision (P x)} (a : dsig P)
   : exists (a' : A) (e : P a'), a = dexist a' e.
 Proof.

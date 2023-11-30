@@ -318,8 +318,8 @@ Definition ELMO_component_machine (i : index) : VLSMMachine ELMO_component_type 
 
 Definition ELMO_component (i : index) : VLSM Message :=
 {|
-  vtype := ELMO_component_type;
-  vmachine := ELMO_component_machine i;
+  vlsm_type := ELMO_component_type;
+  vlsm_machine := ELMO_component_machine i;
 |}.
 
 #[export] Instance ComputableSentMessages_ELMO_component

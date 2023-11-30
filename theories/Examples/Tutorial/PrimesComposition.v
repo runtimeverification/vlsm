@@ -72,8 +72,8 @@ Definition radix_machine : VLSMMachine multiplying_type :=
 
 Definition radix_vlsm : VLSM multiplying_message :=
 {|
-  vtype := multiplying_type;
-  vmachine := radix_machine;
+  vlsm_type := multiplying_type;
+  vlsm_machine := radix_machine;
 |}.
 
 (**

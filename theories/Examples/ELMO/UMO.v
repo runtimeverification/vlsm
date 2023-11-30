@@ -80,8 +80,8 @@ Definition UMO_component_machine (i : Address) : VLSMMachine ELMO_component_type
 
 Definition UMO_component (i : Address) : VLSM Message :=
 {|
-  vtype := ELMO_component_type;
-  vmachine := UMO_component_machine i;
+  vlsm_type := ELMO_component_type;
+  vlsm_machine := UMO_component_machine i;
 |}.
 
 (** UMO components have a unique initial state. *)

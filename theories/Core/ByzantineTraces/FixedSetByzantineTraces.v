@@ -7,31 +7,31 @@ From VLSM.Core Require Import Composition SubProjectionTraces ByzantineTraces.
 From VLSM.Core Require Import Validator Equivocation EquivocationProjections.
 From VLSM.Core Require Import Equivocation.NoEquivocation Equivocation.FixedSetEquivocation.
 
-(** * Core: VLSM Compositions with a Fixed Set of Byzantine Nodes
+(** * Core: VLSM Compositions with a Fixed Set of Byzantine Components
 
-  In this module we study a composition in which a fixed subset of nodes are
-  replaced by byzantine nodes, i.e., nodes which can send arbitrary
+  In this module we study a composition in which a fixed subset of components are
+  replaced by byzantine components, i.e., components which can send arbitrary
   [channel_authenticated_message]s at any time, while the rest are protocol
-  abiding (non-equivocating) nodes.
+  abiding (non-equivocating) components.
 
-  We will show that, if the non-byzantine nodes are validators for the
-  composition with that specific fixed-set of nodes as equivocators, then the
-  projections of traces to the non-byzantine nodes are precisely the projections
-  of traces of the composition with that specific fixed-set of nodes as
-  equivocators to the non-equivocating nodes.
+  We will show that, if the non-byzantine components are validators for the
+  composition with that specific fixed-set of components as equivocators, then the
+  projections of traces to the non-byzantine components are precisely the projections
+  of traces of the composition with that specific fixed-set of components as
+  equivocators to the non-equivocating components.
 
-  That is, non-byzantine validator nodes do not distinguish between byzantine
-  nodes and equivocating ones.  Therefore, when analyzing the security of a
-  protocol it suffices to consider equivocating nodes.
+  That is, non-byzantine validator components do not distinguish between byzantine
+  components and equivocating ones. Therefore, when analyzing the security of a
+  protocol it suffices to consider equivocating components.
 *)
 
 Section sec_emit_any_signed_message_vlsm.
 
-(** ** A machine which can emit any valid message for a given node
+(** ** A machine which can emit any valid message for a given component
 
   This VLSM is similar to the [emit_any_message_vlsm] with the exception of the
   validity predicate which requires that the sender of the emitted message
-  corresponds to the given node.
+  corresponds to the given component.
 *)
 
 Context
@@ -40,7 +40,7 @@ Context
   {validator : Type}
   (A : validator -> index)
   (sender : message -> option validator)
-  (node_idx : index)
+  (component_idx : index)
   .
 
 Program Definition emit_any_signed_message_vlsm_s0 :
@@ -58,7 +58,7 @@ Definition signed_messages_valid
   (l : label (@emit_any_message_vlsm_type message))
   (som : state (@emit_any_message_vlsm message) * option message)
   : Prop :=
-  channel_authenticated_message A sender node_idx l.
+  channel_authenticated_message A sender component_idx l.
 
 Definition emit_any_signed_message_vlsm_machine
   : VLSMMachine emit_any_message_vlsm_type
@@ -94,10 +94,10 @@ Context
   .
 
 (**
-  Given a collection of nodes indexed by an <<index>>, we define the
-  associated fixed byzantine collection of nodes by replacing the nodes
-  corresponding to the indices in a given <<byzantine>> with byzantine nodes,
-  i.e., nodes which can emit any (signed) message.
+  Given a collection of components indexed by <<index>>, we define the
+  associated collection of fixed byzantine components by replacing the components
+  corresponding to the indices in a given <<byzantine>> set with byzantine components,
+  i.e., components which can emit any (signed) message.
 *)
 Definition fixed_byzantine_IM : index -> VLSM message :=
   update_IM IM byzantine (fun i => emit_any_signed_message_vlsm A sender (` i)).
@@ -145,7 +145,7 @@ Context
   (non_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
   .
 
-(** Constraint requiring only that the non-byzantine nodes are not equivocating. *)
+(** Constraint requiring only that the non-byzantine components are not equivocating. *)
 Definition non_byzantine_not_equivocating_constraint
   : composite_label fixed_byzantine_IM ->
     composite_state fixed_byzantine_IM * option message -> Prop :=
@@ -153,9 +153,9 @@ Definition non_byzantine_not_equivocating_constraint
 
 (** *** First definition of the fixed byzantine trace property
 
-  Fixed byzantine traces are projections to the subset of protocol-following nodes
-  of traces which are valid for the composition in which a fixed set of nodes
-  were replaced by byzantine nodes and the rest are protocol-following
+  Fixed byzantine traces are projections to the subset of protocol-following components
+  of traces which are valid for the composition in which a fixed set of components
+  were replaced by byzantine components and the rest are protocol-following
   (i.e., they are not equivocating).
 *)
 Definition fixed_byzantine_trace_prop
@@ -209,7 +209,7 @@ Qed.
 
 (**
   The induced projection from the composition of [fixed_byzantine_IM] under
-  the [non_byzantine_not_equivocating_constraint] to the non-byzantine nodes has
+  the [non_byzantine_not_equivocating_constraint] to the non-byzantine components has
   the [projection_friendly_prop]erty.
 *)
 Lemma fixed_non_byzantine_projection_friendliness
@@ -233,8 +233,8 @@ Qed.
   Characterization result for the first definition:
   the [fixed_byzantine_trace_prop]erty is equivalent to the
   [finite_valid_trace_prop]erty of the [pre_induced_sub_projection] of the
-  the composition in which a fixed set of nodes were replaced by byzantine nodes
-  and the rest are protocol-following to the set of protocol-following nodes.
+  the composition in which a fixed set of components were replaced by byzantine components
+  and the rest are protocol-following to the set of protocol-following components.
 *)
 Lemma fixed_byzantine_trace_char1 is tr
   : fixed_byzantine_trace_prop is tr <->
@@ -249,9 +249,9 @@ End sec_fixed_byzantine_traces_as_projections.
 
 (** ** Fixed Byzantine traces as traces pre-loaded with signed messages
 
-  In this section we'll be showing that byzantine traces correspond to traces of
-  the composition of nodes in the [non_byzantine], preloaded with messages
-  signed by the nodes in the <<byzantine>>.
+  In this section we show that byzantine traces correspond to traces of
+  a composition in the [non_byzantine] set, preloaded with messages
+  signed by the components in the <<byzantine>> set.
 *)
 
 Section sec_fixed_byzantine_traces_as_pre_loaded.
@@ -262,13 +262,13 @@ Definition fixed_set_signed_message (m : message) : Prop :=
     exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
 
 (**
-  Given that we're only looking at the composition of nodes in the
-  [non_byzantine], we can define their subset as either a subset of the
+  Given that we're only looking at the composition indexed by the
+  [non_byzantine] set, we can define their subset as either a subset of the
   [fixed_byzantine_IM] or of the original <<IM>>.
 
   As it turns out, the first definition is easier to prove equivalent to the
   induced [fixed_non_byzantine_projection], while the second is easier to work
-  with in general because it makes no reference to byzantine nodes.
+  with in general because it makes no reference to byzantine components.
 
   Therefore we'll first be defining them both below and show that they are
   equivalent to each-other using the generic Lemma [same_IM_embedding].
@@ -282,7 +282,7 @@ Definition pre_loaded_fixed_non_byzantine_vlsm : VLSM message :=
   composite_no_equivocation_vlsm_with_pre_loaded (sub_IM IM (elements non_byzantine)) (free_constraint _)
     fixed_set_signed_message.
 
-Lemma non_byzantine_nodes_same
+Lemma non_byzantine_components_same
   : forall sub_i, sub_IM fixed_byzantine_IM (elements non_byzantine) sub_i = sub_IM IM (elements non_byzantine) sub_i.
 Proof.
   intro sub_i.
@@ -294,18 +294,18 @@ Proof.
   by rewrite decide_False; [| rewrite elem_of_elements].
 Qed.
 
-Lemma non_byzantine_nodes_same_sym
+Lemma non_byzantine_components_same_sym
   : forall sub_i, sub_IM IM (elements non_byzantine) sub_i = sub_IM fixed_byzantine_IM (elements non_byzantine) sub_i.
 Proof.
-  by intro; symmetry; apply non_byzantine_nodes_same.
+  by intro; symmetry; apply non_byzantine_components_same.
 Qed.
 
 Lemma pre_loaded_fixed_non_byzantine_VLSM_embedding
   : VLSM_embedding
     pre_loaded_fixed_non_byzantine_vlsm'
     pre_loaded_fixed_non_byzantine_vlsm
-    (same_IM_label_rew non_byzantine_nodes_same)
-    (same_IM_state_rew non_byzantine_nodes_same).
+    (same_IM_label_rew non_byzantine_components_same)
+    (same_IM_state_rew non_byzantine_components_same).
 Proof.
   apply same_IM_embedding.
   intros s1 Hs1 l1 om [Hom _].
@@ -319,8 +319,8 @@ Lemma pre_loaded_fixed_non_byzantine_VLSM_embedding'
   : VLSM_embedding
     pre_loaded_fixed_non_byzantine_vlsm
     pre_loaded_fixed_non_byzantine_vlsm'
-    (same_IM_label_rew non_byzantine_nodes_same_sym)
-    (same_IM_state_rew non_byzantine_nodes_same_sym).
+    (same_IM_label_rew non_byzantine_components_same_sym)
+    (same_IM_state_rew non_byzantine_components_same_sym).
 Proof.
   apply same_IM_embedding.
   intros s1 Hs1 l1 om [Hom _].
@@ -514,7 +514,7 @@ End sec_fixed_byzantine_traces_as_pre_loaded.
   we introduce the following alternate definition to the
   [fixed_byzantine_trace_prop]erty, this time defined for (not necessarily valid)
   traces of the full composition, accepting any such trace as long as its
-  projection to the non-byzantine nodes is indistinguishable from a projection
+  projection to the non-byzantine components is indistinguishable from a projection
   of a valid trace of the composition of [fixed_byzantine_IM] under the
   [non_byzantine_not_equivocating_constraint].
 *)
@@ -525,11 +525,11 @@ Definition fixed_byzantine_trace_alt_prop is tr : Prop :=
 
 End sec_fixed_byzantine_traces.
 
-(** ** Relation between Byzantine nodes and equivocators
+(** ** Relation between Byzantine components and equivocators
 
   In this section we show that while equivocators can always appear as byzantine
-  to the protocol-abiding nodes, the converse is also true if the protocol-
-  abiding nodes satisfy the [projection_message_validator_prop]erty, which basically
+  to the protocol-abiding components, the converse is also true if the protocol-
+  abiding components satisfy the [projection_message_validator_prop]erty, which basically
   allows them to locally verify the authenticity of a received message.
 *)
 
@@ -797,7 +797,7 @@ Qed.
 (**
   The VLSM corresponding to the induced projection from a fixed-set byzantine
   composition to the non-byzantine components is trace-equivalent to the VLSM
-  corresponding to the induced projection from the composition of regular nodes
+  corresponding to the induced projection from the composition of regular components
   under a fixed-set equivocation constraint to the same components.
 *)
 Lemma validator_fixed_non_byzantine_eq_fixed_non_equivocating
@@ -809,14 +809,14 @@ Qed.
 
 (** ** The main result
 
-  Assuming that the non-byzantine nodes are validators for the
+  Assuming that the non-byzantine components are validators for the
   [fixed_equivocation_constraint] we give the following characterization of traces
   with the [fixed_byzantine_trace_alt_prop]erty in terms of equivocation:
 
   A trace has the [fixed_byzantine_trace_alt_prop]erty for a <<selection>> of
-  byzantine nodes iff there exists a valid trace for the <<Fixed>>
+  byzantine components iff there exists a valid trace for the <<Fixed>>
   equivocation composition the projections of the two traces to the non-byzantine
-  nodes, i.e., the nodes in the <<selection_complement>> coincide.
+  components, i.e., the components in the <<selection_complement>> coincide.
 *)
 Lemma validator_fixed_byzantine_traces_equivocation_char bis btr
   : fixed_byzantine_trace_alt_prop IM selection A sender bis btr <->
