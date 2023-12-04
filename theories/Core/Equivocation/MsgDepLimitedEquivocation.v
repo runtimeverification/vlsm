@@ -56,19 +56,19 @@ Definition coeqv_limited_equivocation_constraint
   : Prop :=
   (sum_weights (coeqv_composite_transition_message_equivocators l som) <= threshold)%R.
 
-#[export] Program Instance empty_validators_inhabited : Inhabited {s : Cv | s = ∅} :=
+#[export] Program Instance empty_validators_inhabited : Inhabited {s : Cv | s ≡@{Cv}  ∅} :=
   populate (exist _ ∅ _).
 Next Obligation.
 Proof. done. Defined.
 
 Definition coeqv_limited_equivocation_vlsm : VLSM message :=
   constrained_vlsm
-    (annotated_vlsm (free_composite_vlsm IM) Cv (fun s => s = ∅)
+    (annotated_vlsm (free_composite_vlsm IM) Cv (fun s => s ≡@{Cv}  ∅)
       coeqv_composite_transition_message_equivocators)
     coeqv_limited_equivocation_constraint.
 
 Definition coeqv_annotate_trace_with_equivocators :=
-  annotate_trace (free_composite_vlsm IM) Cv (fun s => s = ∅)
+  annotate_trace (free_composite_vlsm IM) Cv (fun s => s ≡@{Cv}  ∅)
     coeqv_composite_transition_message_equivocators.
 
 Lemma coeqv_limited_equivocation_transition_state_annotation_incl [l s iom s' oom]
@@ -96,7 +96,7 @@ Lemma coeqv_limited_equivocation_state_not_heavy s
     (sum_weights (state_annotation s) <= threshold)%R.
 Proof.
   induction 1 using valid_state_prop_ind.
-  - destruct s, Hs as [_ ->]; cbn in *.
+  - destruct s, Hs as [_ Heqv]; cbn in *.
     rewrite sum_weights_empty; [| done].
     by apply (rt_positive (H6 := H7)).
   - destruct Ht as [(_ & _ & _ & Hc) Ht]
@@ -106,16 +106,52 @@ Proof.
 Qed.
 
 Definition coeqv_limited_equivocation_projection_validator_prop : index -> Prop :=
-  annotated_projection_validator_prop IM (fun s => s = ∅)
+  annotated_projection_validator_prop IM (fun s => s ≡@{Cv}  ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
 
 Definition coeqv_limited_equivocation_message_validator_prop : index -> Prop :=
-  annotated_message_validator_prop IM (fun s => s = ∅)
+  annotated_message_validator_prop IM (fun s => s ≡@{Cv}  ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
 
 Definition coeqv_limited_equivocation_projection_validator_prop_alt : index -> Prop :=
-  annotated_projection_validator_prop_alt IM (fun s => s = ∅)
+  annotated_projection_validator_prop_alt IM (fun s => s ≡@{Cv}  ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
+
+#[export] Program Instance coeqv_limited_equivocation_vlsm_has_been_sent :
+  HasBeenSentCapability coeqv_limited_equivocation_vlsm :=
+{
+  has_been_sent :=
+    fun (sigma : state coeqv_limited_equivocation_vlsm) (m : message)=>
+      composite_has_been_sent IM (original_state sigma) m
+}.
+Next Obligation.
+Proof. by intros ? ?; apply composite_has_been_sent_dec. Qed.
+Next Obligation.
+Proof.
+  split; [by intros s []; apply free_composite_has_been_sent_stepwise_props |].
+  intros [i li] [s eqv] im [s' eqv'] om Ht msg.
+  apply (VLSM_projection_input_valid_transition
+    (preloaded_annotated_composite_preloaded_projection IM
+      (fun s => s ≡@{Cv}  ∅) coeqv_limited_equivocation_constraint
+      coeqv_composite_transition_message_equivocators i))
+    with  (lY := li) in Ht as Hti; [| by apply (composite_project_label_eq IM)].
+  cbn in Hti.
+  apply has_been_sent_step_update with (msg := msg) in Hti.
+  destruct Ht as [_ Ht]; cbn in Ht; unfold annotated_transition in Ht.
+  cbn in Ht; destruct transition; inversion Ht; subst; cbn in *; clear Ht.
+  split.
+  - intros [i_msg Hmsg].
+    destruct (decide (i = i_msg)) as [<- | Hi_msg].
+    + cbn in Hmsg; apply Hti in Hmsg as [-> | Hmsg]; [by left |].
+      by right; eexists.
+    + by right; state_update_simpl; eexists.
+  - cbn in *.
+    intros [-> | Hmsg]; [by eexists; apply Hti; left |].
+    destruct Hmsg as [i_msg Hmsg].
+    destruct (decide (i = i_msg)) as [<- | Hi_msg];
+      [by eexists; apply Hti; right |].
+    by exists i_msg; state_update_simpl.
+Qed.
 
 End sec_coequivocating_senders_limited_equivocation.
 

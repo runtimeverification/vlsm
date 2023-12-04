@@ -387,11 +387,13 @@ Lemma lift_fixed_byzantine_traces_to_limited
     state_annotation (@finite_trace_last _ Limited bs btr) ⊆ byzantine_vs.
 Proof.
   subst non_byzantine.
-  induction Hbyzantine using finite_valid_trace_rev_ind; [repeat split |].
-  - constructor; apply initial_state_is_valid.
-    by repeat split; cbn; apply lift_sub_state_initial.
-  - by cbn; apply lift_sub_state_initial.
-  - by apply empty_subseteq.
+  induction Hbyzantine using finite_valid_trace_rev_ind.
+  - split; [| by apply empty_subseteq].
+    cut (initial_state_prop Limited bs).
+    {
+      by split; [constructor; apply initial_state_is_valid |].
+    }
+    by split; cbn; [apply lift_sub_state_initial |].
   - subst s_reset_byzantine bs btr.
     unfold pre_VLSM_embedding_finite_trace_project; rewrite !map_app.
     rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.

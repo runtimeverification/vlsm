@@ -2,7 +2,7 @@ From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections. 
+From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
 (** * Core: VLSM Message Dependencies
 
@@ -1259,6 +1259,52 @@ Proof.
     eapply has_been_sent_iff_by_sender in mdgee_not_sent0; [| done..].
     rewrite Hv, Hsj in mdgee_not_sent0.
     by eexists.
+Qed.
+
+(** We also define the case in which a transition doesn't forget equivocation. *)
+Definition transition_preserves_global_equivocation
+  (s : composite_state IM) (item : composite_transition_item IM) : Prop :=
+  forall (v : validator),
+    msg_dep_is_globally_equivocating IM message_dependencies sender s v ->
+    msg_dep_is_globally_equivocating IM message_dependencies sender (destination item) v.
+
+Inductive TraceMonotonicGlobalEquivocation :
+  composite_state IM -> list (composite_transition_item IM) -> Prop :=
+| tpge_initial : forall (s : composite_state IM),
+  TraceMonotonicGlobalEquivocation s []
+| tpge_step : forall (s : composite_state IM) (item : composite_transition_item IM)
+    (tr : list (composite_transition_item IM)),
+    transition_preserves_global_equivocation s item ->
+    TraceMonotonicGlobalEquivocation (destination item) tr ->
+    TraceMonotonicGlobalEquivocation s (item :: tr).
+
+Definition trace_monotonic_global_equivocation
+  (s : composite_state IM) (tr : list (composite_transition_item IM)) : Prop :=
+  forall (pre suf : list (composite_transition_item IM))
+    (item : composite_transition_item IM),
+    tr = pre ++ [item] ++ suf ->
+    transition_preserves_global_equivocation (finite_trace_last s pre) item.
+
+Lemma trace_monotonic_global_equivocation_def_equiv :
+  forall (s : composite_state IM) (tr : list (composite_transition_item IM)),
+  trace_monotonic_global_equivocation s tr
+    <->
+  TraceMonotonicGlobalEquivocation s tr.
+Proof.
+  split.
+  - remember (length tr) as n; revert s tr Heqn.
+    induction n as [n IHn] using (well_founded_ind lt_wf).
+    intros s [| item tr]; [by constructor |].
+    cbn; intros -> Hall; constructor; [by apply (Hall [] tr) |].
+    eapply IHn; cycle 1; [done | | by lia].
+    intros pre suf item' ->.
+    specialize (Hall (item :: pre) suf item').
+    rewrite finite_trace_last_cons in Hall; apply Hall.
+    by simplify_list_eq.
+  - induction 1; intros pre suf item1 Heq; [by destruct pre |].
+    destruct pre as [| _item pre]; simplify_list_eq; [done |].
+    rewrite finite_trace_last_cons.
+    by eapply IHTraceMonotonicGlobalEquivocation.
 Qed.
 
 End sec_msg_dep_is_globally_equivocating_props.
