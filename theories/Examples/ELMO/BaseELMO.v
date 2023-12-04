@@ -746,24 +746,24 @@ Proof.
   - by destruct_dec_sig v a Ha Heq; subst v; cbn in Hv; subst a.
 Qed.
 
-Definition ELMO_A (v : Message_validator) : index :=
+Definition Message_sender_index (v : Message_validator) : index :=
   is_Some_proj (proj2_dsig v).
 
-Definition ELMO_A_inv_fn (i : index) : Message_validator :=
+Definition Message_sender_index_inv_fn (i : index) : Message_validator :=
   dexist (idx i) (ex_intro _ i (adr2idx_idx i)).
 
-Lemma ELMO_A_inv :
+Lemma Message_sender_index_inv :
   forall (i : index) (v : Message_validator),
-    `v = idx i -> ELMO_A v = i.
+    `v = idx i -> Message_sender_index v = i.
 Proof.
   intros i v Hv.
   destruct_dec_sig v a Ha Heq; subst v; cbn in Hv; subst a.
   by apply is_Some_proj_elim, adr2idx_idx.
 Qed.
 
-Lemma Message_sender_A :
+Lemma Message_sender_index_address :
   forall (m : Message) (v : Message_validator),
-    Message_sender m = Some v -> idx (ELMO_A v) = adr (state m).
+    Message_sender m = Some v -> idx (Message_sender_index v) = adr (state m).
 Proof.
   intros m v Hsender.
   apply Message_sender_Some_adr in Hsender.
@@ -772,17 +772,17 @@ Proof.
   apply idx_adr2idx.
   destruct Ha as [a Heq].
   rewrite Heq at 1.
-  f_equal; symmetry; apply ELMO_A_inv; cbn.
+  f_equal; symmetry; apply Message_sender_index_inv; cbn.
   by symmetry; apply idx_adr2idx.
 Qed.
 
-#[export] Instance ELMO_A_inj : Inj (=) (=) ELMO_A.
+#[export] Instance Message_sender_index_inj : Inj (=) (=) Message_sender_index.
 Proof.
   intros v1 v2.
   destruct_dec_sig v1 a1 Ha1 Heq1; subst v1.
   destruct_dec_sig v2 a2 Ha2 Heq2; subst v2.
   destruct Ha1 as [i1 Ha1], Ha2 as [i2 Ha2].
-  unfold ELMO_A; cbn.
+  unfold Message_sender_index; cbn.
   erewrite !is_Some_proj_elim by done.
   intros ->; apply dsig_eq; cbn.
   by apply idx_adr2idx in Ha1, Ha2; subst.

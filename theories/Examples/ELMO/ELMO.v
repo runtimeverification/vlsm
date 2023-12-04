@@ -1568,14 +1568,14 @@ Proof.
 Qed.
 
 Lemma ELMO_channel_authentication_prop :
-  channel_authentication_prop ELMO_component (ELMO_A idx) (Message_sender idx).
+  channel_authentication_prop ELMO_component (Message_sender_index idx) (Message_sender idx).
 Proof.
   intros i m ((s & []) & [] & s' & [(Hs & _ & Hv) Ht]);
     inversion Hv; subst; inversion Ht; subst.
   unfold channel_authenticated_message, Message_sender.
   erewrite ELMO_reachable_adr by done.
   case_decide as Hadr.
-  - by cbn; f_equal; apply ELMO_A_inv.
+  - by cbn; f_equal; apply Message_sender_index_inv.
   - by rewrite (adr2idx_idx idx) in Hadr; contradict Hadr; eexists.
 Qed.
 
@@ -2136,7 +2136,7 @@ Proof.
   - done.
   - by apply Message_sender_Some_adr_iff.
   - exists i_a; state_update_simpl.
-    by apply ELMO_A_inv in Ha as <-.
+    by apply Message_sender_index_inv in Ha as <-.
 Qed.
 
 Lemma ELMO_valid_states_only_receive_valid_messages :
