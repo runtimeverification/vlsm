@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import EquationsExtras.
-From VLSM.Lib Require Import Preamble StdppExtras.
+From VLSM.Lib Require Import Preamble StdppExtras Measurable.
 From VLSM.Core Require Import VLSM PreloadedVLSM MessageDependencies.
 
 (** * ELMO: Basic Definitions and Results for UMO, MO and ELMO
@@ -787,5 +787,9 @@ Proof.
   intros ->; apply dsig_eq; cbn.
   by apply idx_adr2idx in Ha1, Ha2; subst.
 Qed.
+
+#[export] Instance Message_validator_measurable
+  `{Measurable Address} : Measurable Message_validator :=
+    fun v => weight (`v).
 
 End sec_BaseELMO_Observations.
