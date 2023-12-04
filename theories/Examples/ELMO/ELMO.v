@@ -1383,6 +1383,21 @@ Definition ELMO_not_heavy : composite_state ELMO_component -> Prop :=
 Definition ELMO_equivocating_validators : composite_state ELMO_component -> Ca :=
   equivocating_validators (1 := ELMO_global_equivocation).
 
+Lemma ELMO_equivocating_validators_are_Message_validators :
+  forall (s : composite_state ELMO_component) (a : Address),
+    a ∈ ELMO_equivocating_validators s ->
+      exists (v : Message_validator idx), `v = a.
+Proof.
+  intros s a Ha.
+  apply elem_of_filter in Ha as [_ Ha]; cbn in Ha.
+  apply elem_of_list_to_set, elem_of_list_fmap in Ha as (i & Hi & _).
+  unshelve eexists (dexist a _); [| done].
+  by subst; eexists; apply adr2idx_idx.
+Qed.
+
+#[export] Instance Message_validator_measurable : Measurable (Message_validator idx) :=
+  fun v => weight (`v).
+
 Definition ELMO_global_constraint
   (l : composite_label ELMO_component)
   (som : composite_state ELMO_component * option Message) : Prop :=
@@ -1553,12 +1568,15 @@ Proof.
 Qed.
 
 Lemma ELMO_channel_authentication_prop :
-  channel_authentication_prop ELMO_component (ELMO_A idx) Message_sender.
+  channel_authentication_prop ELMO_component (ELMO_A idx) (Message_sender idx).
 Proof.
-  intros i m ((s, []) & [] & s' & [(Hs & _ & Hv) Ht]);
+  intros i m ((s & []) & [] & s' & [(Hs & _ & Hv) Ht]);
     inversion Hv; subst; inversion Ht; subst.
-  unfold channel_authenticated_message; cbn; f_equal.
-  by erewrite ELMO_reachable_adr, ELMO_A_inv.
+  unfold channel_authenticated_message, Message_sender.
+  erewrite ELMO_reachable_adr by done.
+  case_decide as Hadr.
+  - by cbn; f_equal; apply ELMO_A_inv.
+  - by rewrite (adr2idx_idx idx) in Hadr; contradict Hadr; eexists.
 Qed.
 
 Lemma ELMO_state_to_minimal_equivocation_trace_equivocation_monotonic :
@@ -1568,10 +1586,10 @@ Lemma ELMO_state_to_minimal_equivocation_trace_equivocation_monotonic :
   forall (pre suf : list (composite_transition_item ELMO_component))
     (item : composite_transition_item ELMO_component),
     tr = pre ++ [item] ++ suf ->
-    forall v : Address,
-      msg_dep_is_globally_equivocating ELMO_component Message_dependencies Message_sender
+    forall (v : Message_validator idx),
+      msg_dep_is_globally_equivocating ELMO_component Message_dependencies (Message_sender idx)
         (finite_trace_last is pre) v ->
-      msg_dep_is_globally_equivocating ELMO_component Message_dependencies Message_sender
+      msg_dep_is_globally_equivocating ELMO_component Message_dependencies (Message_sender idx)
         (destination item) v.
 Proof.
   eapply state_to_minimal_equivocation_trace_equivocation_monotonic.
@@ -1613,14 +1631,16 @@ Qed.
    of the generic definition [full_node_is_globally_equivocating].
 *)
 Lemma global_equivocators_simple_iff_full_node_equivocation :
-  forall (s : VLSM.state ELMOProtocol) (a : Address),
-    full_node_is_globally_equivocating ELMO_component Message_sender s a
-    <->
-    global_equivocators_simple s a.
+  forall (s : VLSM.state ELMOProtocol) (v : Message_validator idx),
+    full_node_is_globally_equivocating ELMO_component (Message_sender idx) s v
+      <->
+    global_equivocators_simple s (`v).
 Proof.
   split.
-  - by intros [? [?%Some_inj]]; econstructor.
-  - by intros [? <-]; econstructor.
+  - intros [? []].
+    by erewrite Message_sender_Some_adr by done; econstructor.
+  - intros []; econstructor; split; [| done..].
+    by apply Message_sender_Some_adr_iff.
 Qed.
 
 (**
@@ -1665,33 +1685,36 @@ Proof.
 Qed.
 
 Lemma ELMO_global_equivocators_iff_msg_dep_equivocation :
-  forall (s : VLSM.state ELMOProtocol) (a : Address),
+  forall (s : VLSM.state ELMOProtocol) (v : Message_validator idx),
     composite_constrained_state_prop ELMO_component s ->
-  ELMO_global_equivocators s a
-    <->
-  msg_dep_is_globally_equivocating ELMO_component
-    Message_dependencies Message_sender s a.
+    ELMO_global_equivocators s (`v)
+      <->
+    msg_dep_is_globally_equivocating ELMO_component
+      Message_dependencies (Message_sender idx) s v.
 Proof.
-  cbn; intros s a Hs.
-  apply Morphisms_Prop.ex_iff_morphism; intro m.
+  cbn; intros s v Hs.
+  apply Morphisms_Prop.ex_iff_morphism; intros m.
   assert (forall k : index, UMO_reachable full_node (s k))
     by (intro; eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded_free; done).
   setoid_rewrite <- full_node_messages_iff_rec_obs; [| done].
   setoid_rewrite <- ELMO_CHBO_in_messages; [| done].
-  (* firstorder works here but is slow *)
-  by split; intros []; constructor; [cbv; f_equal | .. | apply Some_inj |]; itauto.
+  split.
+  - intros (? & ? & ?).
+    by constructor; [apply Message_sender_Some_adr_iff |..].
+  - intros []; split_and!; [| done..].
+    by symmetry; apply Message_sender_Some_adr_iff.
 Qed.
 
 Lemma ELMO_global_equivocators_iff_simple_by_generic :
-  forall (s : VLSM.state ELMOProtocol) (a : Address),
+  forall (s : VLSM.state ELMOProtocol) (v : Message_validator idx),
     composite_constrained_state_prop ELMO_component s ->
-      ELMO_global_equivocators s a <-> global_equivocators_simple s a.
+      ELMO_global_equivocators s (`v) <-> global_equivocators_simple s (`v).
 Proof.
   intros s a Hs.
   rewrite ELMO_global_equivocators_iff_msg_dep_equivocation by done.
   rewrite <- global_equivocators_simple_iff_full_node_equivocation by done.
-  pose proof @ELMO_component_message_dependencies_full_node_condition.
-  by rewrite full_node_is_globally_equivocating_iff; [| typeclasses eauto | ..].
+  rewrite full_node_is_globally_equivocating_iff; [done | by typeclasses eauto | | done].
+  by apply ELMO_component_message_dependencies_full_node_condition.
 Qed.
 
 (**
@@ -1721,11 +1744,15 @@ Proof.
   apply input_valid_transition_destination in Ht as Hsf.
   eapply Forall_impl.
   - by apply IHHtr_min; [| intros * ->; eapply Hall; simplify_list_eq].
-  - intros x ->.
-    apply filter_subprop.
-    setoid_rewrite ELMO_global_equivocators_iff_msg_dep_equivocation; [| done..].
+  - intros x -> a Ha.
+    apply ELMO_equivocating_validators_are_Message_validators in Ha as Hv.
+    destruct Hv as [v <-].
+    apply elem_of_filter in Ha as [Heqv Hv].
+    apply elem_of_filter; split; [| done].
+    apply ELMO_global_equivocators_iff_msg_dep_equivocation in Heqv; [| done].
     apply valid_trace_get_last in Htr_min as <-.
-    by apply (Hall tr [] _ eq_refl).
+    eapply Hall in Heqv; [| done].
+    by apply ELMO_global_equivocators_iff_msg_dep_equivocation.
 Qed.
 
 Lemma ELMO_state_to_minimal_equivocation_trace_valid
@@ -2082,8 +2109,11 @@ Proof.
     - by cbn; state_update_simpl.
   }
   apply input_valid_transition_destination in Hpre_tisi as Hpre_sfisi.
-  unfold ELMO_equivocating_validators, equivocating_validators.
-  intro a; rewrite elem_of_union, elem_of_singleton, !elem_of_filter.
+  intros a Ha.
+  apply ELMO_equivocating_validators_are_Message_validators in Ha as Hmeqv.
+  destruct Hmeqv as [v <-].
+  revert Ha; unfold ELMO_equivocating_validators, equivocating_validators.
+  rewrite elem_of_union, elem_of_singleton, !elem_of_filter.
   unfold is_equivocating; cbn; rewrite !ELMO_global_equivocators_iff_simple by done.
   intros [[ges_m ges_adr [k Hrcv] ges_not_sent] Ha].
   assert (k <> i); [intros -> |]; state_update_simpl.
@@ -2091,21 +2121,22 @@ Proof.
     by cbn in Hrcv; replace si with (MkState [] (idx i)) in Hrcv;
       [inversion Hrcv | apply eq_State; symmetry; apply Hsi].
   }
-  cut (~ composite_has_been_sent ELMO_component sf ges_m \/ a = idx i).
+  cut (~ composite_has_been_sent ELMO_component sf ges_m \/ `v = idx i).
   {
     intros []; [| by right].
     left; split; [| done].
     by econstructor; [| eexists |].
   }
-  apply elem_of_list_to_set, elem_of_list_fmap in Ha as (i_a & -> & _).
+  apply elem_of_list_to_set, elem_of_list_fmap in Ha as (i_a & Ha & _).
+  cbn in *; rewrite Ha.
   destruct (decide (i_a = i)); [by subst; right | left].
   contradict ges_not_sent.
   eapply has_been_sent_iff_by_sender in ges_not_sent; cycle 1.
   - by apply channel_authentication_sender_safety, ELMO_channel_authentication_prop.
   - done.
-  - done.
-  - rewrite ges_adr, ELMO_A_inv in ges_not_sent by done.
-    by exists i_a; state_update_simpl.
+  - by apply Message_sender_Some_adr_iff.
+  - exists i_a; state_update_simpl.
+    by apply ELMO_A_inv in Ha as <-.
 Qed.
 
 Lemma ELMO_valid_states_only_receive_valid_messages :

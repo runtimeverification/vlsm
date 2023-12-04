@@ -20,7 +20,7 @@ Context
   (annotation : Type)
   .
 
-Record annotated_state : Type :=
+Record annotated_state : Type := mk_annotated_state
 {
   original_state : state X;
   state_annotation : annotation;
@@ -246,7 +246,7 @@ Definition annotated_composite_label_lift : label (IM i) -> label AnnotatedFree
 
 Definition annotated_composite_state_lift : state (IM i) -> state AnnotatedFree
   := fun si =>
-     Build_annotated_state (free_composite_vlsm IM) _
+     mk_annotated_state (free_composite_vlsm IM) _
       (lift_to_composite_state' IM i si) (` inhabitant).
 
 Definition annotated_projection_validator_prop_alt : Prop :=

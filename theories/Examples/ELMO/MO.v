@@ -3,7 +3,7 @@ From Coq Require Import FunctionalExtensionality.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
-From VLSM.Core Require Import Validator ProjectionTraces.
+From VLSM.Core Require Import Equivocation Validator ProjectionTraces.
 From VLSM.Examples Require Import BaseELMO UMO.
 
 (** * ELMO: Protocol Definitions and Properties for MO
@@ -420,6 +420,47 @@ Lemma VLSM_incl_MO_component_preloaded :
 Proof.
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
+
+Lemma VLSM_incl_UMO_MOComponent : VLSM_incl Mi (UMO_component i).
+Proof.
+  intros; apply basic_VLSM_strong_incl.
+  - by intro.
+  - by intro.
+  - by inversion 1; subst; constructor.
+  - by intro.
+Qed.
+
+#[export] Instance HasBeenSentCapability_MOComponent : HasBeenSentCapability Mi.
+Proof.
+  constructor 1 with (fun s m => m ∈ sentMessages s);
+    [by intros s m; typeclasses eauto |].
+  split; [by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil |].
+  intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
+  destruct l, im; cbn in *; invert_MO_component_valid;
+    inversion Ht; subst; clear Ht; cbn.
+  - by rewrite decide_False; cbn; firstorder congruence.
+  - rewrite decide_True by done; cbn.
+    unfold Message; rewrite elem_of_cons.
+    by firstorder congruence.
+Defined.
+
+#[export] Instance HasBeenReceivedCapability_MOComponent : HasBeenReceivedCapability Mi.
+Proof.
+  constructor 1 with (fun s m => m ∈ receivedMessages s);
+    [by intros s m; typeclasses eauto |].
+  split; [by intros [] []; cbn in *; subst; cbn; apply not_elem_of_nil |].
+  intros l s im s' om [(Hvsp & Hovmp & Hv) Ht] m; cbn in *.
+  destruct l, im; cbn in *; invert_MO_component_valid;
+    inversion Ht; subst; clear Ht; cbn.
+  - rewrite decide_True by done; cbn.
+    unfold Message; rewrite elem_of_cons.
+    by firstorder congruence.
+  - by rewrite decide_False; cbn; firstorder congruence.
+Defined.
+
+#[export] Instance HasBeenDirectlyObservedCapability_MOComponent :
+  HasBeenDirectlyObservedCapability Mi :=
+    HasBeenDirectlyObservedCapability_from_sent_received Mi.
 
 (** The initial state of [RMi] is unique. *)
 Lemma vs0_uniqueness :

@@ -1,7 +1,8 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras.
-From VLSM.Core Require Import VLSM PreloadedVLSM Composition VLSMProjections Validator.
+From VLSM.Core Require Import VLSM PreloadedVLSM ConstrainedVLSM.
+From VLSM.Core Require Import Composition VLSMProjections Validator.
 
 Section sec_projections.
 
@@ -490,6 +491,13 @@ Qed.
 Definition component_message_validator_prop : Prop :=
   @message_validator_prop _ X (IM j).
 
+Lemma component_projection_validator_is_message_validator :
+  component_projection_validator_prop -> component_message_validator_prop.
+Proof.
+  by intros ?; eapply projection_validator_is_message_validator,
+    component_projection_validator_prop_is_induced.
+Qed.
+
 (**
   Assuming the [component_projection_validator_prop]erty, the component
   [pre_loaded_with_all_messages_vlsm] is [VLSM_eq]ual (trace-equivalent) with
@@ -520,6 +528,29 @@ Definition pre_loaded_with_all_messages_validator_component_proj_incl
   proj1 (pre_loaded_with_all_messages_validator_component_proj_eq Hvalidator).
 
 End sec_fixed_projection.
+
+Section projection_validation_constraint_subsumption.
+
+Context
+  {message : Type}
+  `{EqDecision index}
+  (IM : index -> VLSM message)
+  (constraint1 constraint2 : composite_label IM -> composite_state IM * option message -> Prop)
+  (j : index)
+  .
+
+Lemma component_projection_validator_constraint_subsumption :
+  weak_input_valid_constraint_subsumption (free_composite_vlsm IM) constraint1 constraint2 ->
+  component_projection_validator_prop IM constraint1 j ->
+  component_projection_validator_prop IM constraint2 j.
+Proof.
+  intros Hsubsumption Hvalidator lj sj omi Hivj.
+  apply Hvalidator in Hivj as (s & Heqsj & Hivj).
+  exists s; split; [done |].
+  by revert Hivj; apply VLSM_incl_input_valid, weak_constraint_subsumption_incl.
+Qed.
+
+End projection_validation_constraint_subsumption.
 
 Section sec_projection_friendliness_sufficient_condition.
 
