@@ -491,10 +491,10 @@ Qed.
 Definition component_message_validator_prop : Prop :=
   @message_validator_prop _ X (IM j).
 
-Lemma component_projection_validator_is_message_validator
-  : component_projection_validator_prop -> component_message_validator_prop.
+Lemma component_projection_validator_is_message_validator :
+  component_projection_validator_prop -> component_message_validator_prop.
 Proof.
-  by intro Hproj; eapply projection_validator_is_message_validator,
+  by intros ?; eapply projection_validator_is_message_validator,
     component_projection_validator_prop_is_induced.
 Qed.
 
@@ -536,7 +536,8 @@ Context
   `{EqDecision index}
   (IM : index -> VLSM message)
   (constraint1 constraint2 : composite_label IM -> composite_state IM * option message -> Prop)
-  (j : index).
+  (j : index)
+  .
 
 Lemma component_projection_validator_constraint_subsumption :
   weak_input_valid_constraint_subsumption (free_composite_vlsm IM) constraint1 constraint2 ->
