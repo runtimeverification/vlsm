@@ -46,7 +46,7 @@ with Message : Type := MkMessage
   types, using their constructor names, instead of as records with the
   {| ... |} notation.
 *)
-#[export] Unset Printing Records.
+Add Printing Constructor State Observation Message.
 
 (** Two states are equal when they have equal observations and equal addresses. *)
 Lemma eq_State :
@@ -789,3 +789,9 @@ Proof.
 Qed.
 
 End sec_BaseELMO_Observations.
+
+(**
+  We want to display State, Observation and Message using constructors
+  also outside of the current module.
+*)
+Add Printing Constructor State Observation Message.
