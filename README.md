@@ -61,9 +61,26 @@ make   # or make -j <number-of-cores-on-your-machine>
 - [latest coqdoc presentation of the Coq files](https://runtimeverification.github.io/vlsm-docs/latest/coqdoc/toc.html)
 - [latest Alectryon presentation the Coq files](https://runtimeverification.github.io/vlsm-docs/latest/alectryon/toc.html)
 
-### Tutorials
+### VLSM tutorials
 
 - [VLSMs that Generate Logical Formulas](theories/Examples/Tutorial/Formulas.v): construction of VLSMs corresponding to propositional logic symbols, with their composition having well-formed propositional formulas as valid messages.
 - [VLSMs that Multiply](theories/Examples/Tutorial/Multiply.v): construction of VLSMs that perform arithmetic operations, with their composition having products of powers as valid messages.
 - [Primes Composition of VLSMs](theories/Examples/Tutorial/PrimesComposition.v): construction of an infinite family of VLSMs that multiply and their composition based on primes.
-- [Round-based asynchronous muddy children puzzle](theories/Examples/Tutorial/MuddyChildrenRounds.v): the [muddy children puzzle](https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html#muddy) as a constrained composition of VLSMs that communicate asynchronously in rounds.
+- [Round-based Asynchronous Muddy Children Puzzle](theories/Examples/Tutorial/MuddyChildrenRounds.v): the [muddy children puzzle](https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html#muddy) as a constrained composition of VLSMs that communicate asynchronously in rounds.
+
+### VLSM application: ELMO
+
+ELMO (Equivocation-Limited Message Observer) is a family of protocols that demonstrates gradual refinement of a specification to make it validating for increasingly more complex constraints.
+
+- [BaseELMO](theories/Examples/ELMO/BaseELMO.v): basic definitions and results related to ELMO.
+- [UMO](theories/Examples/ELMO/UMO.v): definition and properties of UMO (Unvalidating Message Observer) components and the UMO protocol.
+- [MO](theories/Examples/ELMO/UMO.v): definition and properties of MO (Message Observer) components and the MO protocol.
+- [ELMO](theories/Examples/ELMO/ELMO.v): definition and properties of ELMO components and the ELMO protocol.
+
+### VLSM application: Paxos
+
+Paxos is a protocol for achieving distributed consensus in the presence of crash faults and message loss.
+
+- [Abstract Specification of Consensus](theories/Examples/Paxos/Consensus.v): high-level specification of consensus.
+- [Specification of Consensus by Voting](theories/Examples/Paxos/Consensus.v): specification of consensus where a set of nodes agree on a value by voting.
+- [A Basic Paxos Protocol](theories/Examples/Paxos/Consensus.v): consensus by votes from a quorum of acceptor nodes and using a leader node for each ballot.
