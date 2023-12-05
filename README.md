@@ -8,7 +8,7 @@
 
 
 [coqdoc-shield]: https://img.shields.io/badge/docs-coqdoc-blue.svg
-[coqdoc-link]: https://runtimeverification.github.io/vlsm-docs/latest/coqdoc/toc.html
+[coqdoc-link]: https://runtimeverification.github.io/vlsm
 
 
 A validating labelled state transition and message production system
