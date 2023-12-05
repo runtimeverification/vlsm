@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 # If argument $1 is not present, print usage info and exit.
 if test -z "$1"
 then
@@ -49,7 +48,7 @@ do
   sed \
   -e 's/\.\.\///' \
   -e 's/\.\///' \
-  -e 's/theories\//Require Import /' \
+  -e 's/theories\//From VLSM Require Import /' \
   -e 's/\//./g' \
   -e 's/\.v/./' \
   >> "$tmp/tmp"
