@@ -20,7 +20,7 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
 - License: [BSD 3-Clause "New" or "Revised" License](LICENSE.md)
 - Compatible Coq versions: 8.16 and later
 - Additional dependencies:
-  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0 or later
+  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0
   - [Itauto](https://gitlab.inria.fr/fbesson/itauto)
   - [Coq-Equations](https://github.com/mattam82/Coq-Equations)
 - Coq namespace: `VLSM`
@@ -82,5 +82,5 @@ ELMO (Equivocation-Limited Message Observer) is a family of protocols that demon
 [Paxos](https://en.wikipedia.org/wiki/Paxos_(computer_science)) is a protocol for achieving distributed consensus among network nodes in the presence of crash faults and message loss.
 
 - [Abstract Specification of Consensus](theories/Examples/Paxos/Consensus.v): specification of consensus as a set of values that can be agreed on by nodes.
-- [Specification of Consensus by Voting](theories/Examples/Paxos/Consensus.v): specification of consensus where nodes agree on a value by voting.
-- [A Basic Paxos Protocol](theories/Examples/Paxos/Consensus.v): specification of consensus by votes from a quorum of acceptor nodes and using a leader node for each ballot.
+- [Specification of Consensus by Voting](theories/Examples/Paxos/Voting.v): specification of consensus where nodes agree on a value by voting.
+- [A Basic Paxos Protocol](theories/Examples/Paxos/Paxos.v): specification of consensus by votes from a quorum of acceptor nodes and using a leader node for each ballot.
