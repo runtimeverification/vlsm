@@ -52,9 +52,9 @@ supported_coq_versions:
 dependencies:
 - opam:
     name: coq-stdpp
-    version: '{>= "1.9.0"}'
+    version: '{= "1.9.0"}'
   description: |-
-    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0 or later
+    [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0
 - opam:
     name: coq-itauto
   description: |-
@@ -75,6 +75,7 @@ keywords:
 - name: consensus
 - name: fault tolerance
 - name: distributed algorithms
+- name: Paxos
 
 categories:
 - name: Computer Science/Concurrent Systems and Protocols/Theory of concurrent systems
@@ -136,6 +137,6 @@ documentation: |-
   [Paxos](https://en.wikipedia.org/wiki/Paxos_(computer_science)) is a protocol for achieving distributed consensus among network nodes in the presence of crash faults and message loss.
 
   - [Abstract Specification of Consensus](theories/Examples/Paxos/Consensus.v): specification of consensus as a set of values that can be agreed on by nodes.
-  - [Specification of Consensus by Voting](theories/Examples/Paxos/Consensus.v): specification of consensus where nodes agree on a value by voting.
-  - [A Basic Paxos Protocol](theories/Examples/Paxos/Consensus.v): specification of consensus by votes from a quorum of acceptor nodes and using a leader node for each ballot.
+  - [Specification of Consensus by Voting](theories/Examples/Paxos/Voting.v): specification of consensus where nodes agree on a value by voting.
+  - [A Basic Paxos Protocol](theories/Examples/Paxos/Paxos.v): specification of consensus by votes from a quorum of acceptor nodes and using a leader node for each ballot.
 ---
