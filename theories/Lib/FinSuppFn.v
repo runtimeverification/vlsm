@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From Coq Require Import FunctionalExtensionality.
 From stdpp Require Import prelude finite.
-From VLSM.Lib Require Import Preamble StdppExtras ListExtras.
+From VLSM.Lib Require Import Preamble StdppExtras ListExtras FinSetExtras.
 
 (** * Utility: Finitely Supported Functions *)
 

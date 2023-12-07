@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import FunctionalExtensionality.
-From VLSM.Lib Require Import Preamble.
+From VLSM.Lib Require Import Preamble FinSetExtras.
 From VLSM.Core Require Import VLSM MessageDependencies ProjectionTraces VLSMProjections.
 From VLSM.Core Require Import Composition SubProjectionTraces ByzantineTraces.
 From VLSM.Core Require Import Validator Equivocation EquivocationProjections.

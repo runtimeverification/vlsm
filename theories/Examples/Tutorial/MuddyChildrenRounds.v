@@ -1,7 +1,7 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From VLSM.Core Require Import VLSM VLSMProjections Composition.
-From VLSM.Lib Require Import Preamble EquationsExtras ListExtras.
+From VLSM.Lib Require Import Preamble EquationsExtras ListExtras FinSetExtras.
 From VLSM.Core Require Import ConstrainedVLSM.
 
 (** * Tutorial: Round-Based Asynchronous Muddy Children Puzzle
@@ -1616,7 +1616,7 @@ Proof.
   {
     by apply MC_valid_noninitial_state_undecided_round_less_obs;
       cbn in *; subst; [| inversion Hv |].
-  } 
+  }
   apply MC_transition_undecided_receive_undecided_round_obs_minus_one with
     i (s i) (mkMsg (message_index input i) (message_round input)
     (message_status input)) in Hsundecided

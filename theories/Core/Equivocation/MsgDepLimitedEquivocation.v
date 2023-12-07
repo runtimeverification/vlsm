@@ -776,4 +776,50 @@ Proof.
   - by apply msg_dep_fixed_limited_equivocation.
 Qed.
 
+Lemma constrained_limited_to_annotated_limited_valid_state
+  `{!finite.Finite validator}
+  {is_equivocating_tracewise_no_has_been_sent_dec :
+    RelDecision (is_equivocating_tracewise_no_has_been_sent IM A sender)}
+  `{!WitnessedEquivocation.WitnessedEquivocationCapability (Cv := Cv) IM threshold A sender}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies) :
+  forall (s : composite_state IM),
+    valid_state_prop
+      (tracewise_limited_equivocation_vlsm_composition IM threshold A sender (Cv := Cv))
+      s ->
+    exists (sigma : state Limited),
+      valid_state_prop Limited sigma /\ original_state sigma = s.
+Proof.
+  intros s Hs.
+  eapply @limited_valid_state_has_trace_exhibiting_limited_equivocation
+    with (Ci := Ci) in Hs as (is & tr & <- & Htr); [| done..].
+  apply msg_dep_limited_fixed_equivocation, valid_trace_add_default_last in Htr.
+  eexists; split; [by apply valid_trace_last_pstate in Htr |].
+  by cbn; rewrite msg_dep_annotate_trace_with_equivocators_last_original_state.
+Qed.
+
+Lemma constrained_limited_to_annotated_limited_valid_message
+  `{!finite.Finite validator}
+  {is_equivocating_tracewise_no_has_been_sent_dec :
+    RelDecision (is_equivocating_tracewise_no_has_been_sent IM A sender)}
+  `{!WitnessedEquivocation.WitnessedEquivocationCapability (Cv := Cv) IM threshold A sender}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies) :
+  forall (m : message),
+    valid_message_prop
+      (tracewise_limited_equivocation_vlsm_composition IM threshold A sender (Cv := Cv))
+      m ->
+    valid_message_prop Limited m.
+Proof.
+  intros msg Hmsg.
+  apply emitted_messages_are_valid_iff in Hmsg as [Hmsg | ([s im] & [i li] & s' & Ht)];
+    [by apply initial_message_is_valid |].
+  apply input_valid_transition_destination in Ht as Hs'.
+  apply constrained_limited_to_annotated_limited_valid_state
+    in Hs' as (sigma & Hsigma & <-); [| done].
+  eapply sent_valid; [done |].
+  exists i.
+  apply can_produce_has_been_sent.
+  apply input_valid_transition_project_active in Ht.
+  by eexists _, _.
+Qed.
+
 End sec_msg_dep_fixed_limited_equivocation.

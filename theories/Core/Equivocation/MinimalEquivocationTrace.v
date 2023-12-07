@@ -1,7 +1,10 @@
 From stdpp Require Import prelude finite.
+From Coq Require Import Reals.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras NatExtras.
+From VLSM.Lib Require Import Measurable EquationsExtras.
 From VLSM.Core Require Import VLSM Composition.
 From VLSM.Core Require Import Equivocation MessageDependencies TraceableVLSM.
+From VLSM.Core Require Import AnnotatedVLSM MsgDepLimitedEquivocation.
 
 (** * Core: Minimally Equivocating Traces
 
