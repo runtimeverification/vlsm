@@ -262,7 +262,7 @@ Proof.
   by apply elem_of_cons in H0 as []; [| inversion H0].
 Qed.
 
-Lemma filter_set_add `{StrictlyComparable X} P
+Lemma filter_set_add `{EqDecision X} P
   `{forall (x : X), Decision (P x)} :
   forall (l : list X) x, ~ P x ->
   filter P l = filter P (set_add x l).
@@ -273,7 +273,7 @@ Proof.
     by destruct (decide (P hd)); rewrite <- IHl.
 Qed.
 
-Lemma set_add_ignore `{StrictlyComparable X} :
+Lemma set_add_ignore `{EqDecision X} :
   forall (l : list X) (x : X),
     x ∈ l ->
     set_add x l = l.
