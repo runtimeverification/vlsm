@@ -20,7 +20,7 @@ contains a formalization of VLSMs and their theory in the Coq proof assistant.
 - License: [BSD 3-Clause "New" or "Revised" License](LICENSE.md)
 - Compatible Coq versions: 8.16 and later
 - Additional dependencies:
-  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0
+  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0 and later
   - [Itauto](https://gitlab.inria.fr/fbesson/itauto)
   - [Coq-Equations](https://github.com/mattam82/Coq-Equations)
 - Coq namespace: `VLSM`

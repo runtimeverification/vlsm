@@ -285,7 +285,7 @@ Inductive immediate_substate : State -> State -> Prop :=
 | substate_prev : forall s ob, immediate_substate s (s <+> ob)
 | substate_new : forall s ob, immediate_substate (state (message ob)) (s <+> ob).
 
-Lemma immediate_substate_wf : wf immediate_substate.
+Lemma immediate_substate_wf : well_founded immediate_substate.
 Proof.
   intro s; induction s using addObservation_both_ind; constructor.
   - by inversion 1.
