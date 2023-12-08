@@ -112,83 +112,90 @@ Qed.
   message for their identitity and the given ballot and value.
 *)
 
-Section sec_acceptor_vlsm.
+Section sec_paxos_acceptor_vlsm.
 
 Context
   (self : Acceptor)
   .
 
-Record acceptor_state :=
+Record paxos_acceptor_state :=
 {
-  maxBal : Ballot';
+  paxos_maxBal : Ballot';
   lastVote : option (Ballot * Value);
   sent_messages : list paxos_message;
 }.
 
-Definition maxVBal (sa : acceptor_state) : Ballot' := fst <$> lastVote sa.
-Definition maxVVal (sa : acceptor_state) : option Value := snd <$> lastVote sa.
+Definition maxVBal (sa : paxos_acceptor_state) : Ballot' := fst <$> lastVote sa.
+Definition maxVVal (sa : paxos_acceptor_state) : option Value := snd <$> lastVote sa.
 
-Definition initial_acceptor : acceptor_state :=
+Definition paxos_acceptor_initial : paxos_acceptor_state :=
 {|
-  maxBal := None;
+  paxos_maxBal := None;
   lastVote := None;
   sent_messages := [];
 |}.
 
-Inductive acceptor_label : Set :=
+Inductive paxos_acceptor_label : Type :=
 | A_send_1b
 | A_send_2b.
 
-Definition acceptor_type : VLSMType paxos_message :=
+Definition paxos_acceptor_type : VLSMType paxos_message :=
 {|
-  state := acceptor_state;
-  label := acceptor_label;
+  state := paxos_acceptor_state;
+  label := paxos_acceptor_label;
 |}.
 
-Definition acceptor_valid : acceptor_label -> acceptor_state * option paxos_message -> Prop :=
+Definition paxos_acceptor_valid :
+ paxos_acceptor_label -> paxos_acceptor_state * option paxos_message -> Prop :=
   fun l som =>
     match l, som with
-    | A_send_1b, (s, Some (b, m_1a)) => (maxBal s < b)%Z
-    | A_send_2b, (s, Some (b, m_2a v)) => (maxBal s <= b)%Z
+    | A_send_1b, (s, Some (b, m_1a)) => (paxos_maxBal s < b)%Z
+    | A_send_2b, (s, Some (b, m_2a v)) => (paxos_maxBal s <= b)%Z
     | _, _ => False
     end.
 
-Definition acceptor_transition (l : acceptor_label) (som : acceptor_state * option paxos_message)
-  : acceptor_state * option paxos_message :=
+Definition paxos_acceptor_transition
+ (l : paxos_acceptor_label) (som : paxos_acceptor_state * option paxos_message)
+  : paxos_acceptor_state * option paxos_message :=
   match l, som with
   | A_send_1b, (s, Some (b, m_1a)) =>
       let reply := (b, m_1b self (lastVote s)) in
-      ({| maxBal := Some b; lastVote := lastVote s; sent_messages := reply :: sent_messages s; |},
+      ({| paxos_maxBal := Some b; lastVote := lastVote s;
+          sent_messages := reply :: sent_messages s; |},
         Some reply)
   | A_send_2b, (s, Some (b, m_2a v)) =>
       let reply := (b, m_2b self v) in
-      ({| maxBal := Some b; lastVote := Some (b, v); sent_messages := reply::sent_messages s|},
+      ({| paxos_maxBal := Some b; lastVote := Some (b, v);
+          sent_messages := reply::sent_messages s|},
         Some reply)
   | _, _ => (som.1, None) (* illegal inputs *)
   end.
 
-Definition acceptor_machine : VLSMMachine acceptor_type :=
+Definition paxos_acceptor_machine : VLSMMachine paxos_acceptor_type :=
 {|
-  initial_state_prop := (.= initial_acceptor);
-  s0 := populate (exist _ initial_acceptor eq_refl);
+  initial_state_prop := (.= paxos_acceptor_initial);
+  s0 := populate (exist _ paxos_acceptor_initial eq_refl);
   initial_message_prop := (fun _ => False);
-  valid := acceptor_valid;
-  transition := acceptor_transition;
+  valid := paxos_acceptor_valid;
+  transition := paxos_acceptor_transition;
 |}.
 
-Definition acceptor_vlsm : VLSM paxos_message := mk_vlsm acceptor_machine.
+Definition paxos_acceptor_vlsm : VLSM paxos_message := mk_vlsm paxos_acceptor_machine.
 
-Definition acceptor_has_been_sent (s : state acceptor_vlsm) (m : paxos_message) : Prop :=
+Definition paxos_acceptor_has_been_sent
+ (s : state paxos_acceptor_vlsm) (m : paxos_message) : Prop :=
   m ∈ sent_messages s.
 
-#[export] Instance acceptor_has_been_sent_dec : RelDecision acceptor_has_been_sent :=
+#[export] Instance paxos_acceptor_has_been_sent_dec :
+ RelDecision paxos_acceptor_has_been_sent :=
   fun s m => elem_of_list_dec m (sent_messages s).
 
-Lemma acceptor_has_been_sent_stepwise_props : has_been_sent_stepwise_prop acceptor_has_been_sent.
+Lemma paxos_acceptor_has_been_sent_stepwise_props :
+ has_been_sent_stepwise_prop paxos_acceptor_has_been_sent.
 Proof.
   constructor.
   - intros s Hs m.
-    unfold acceptor_has_been_sent.
+    unfold paxos_acceptor_has_been_sent.
     simpl in Hs; subst s.
     by apply not_elem_of_nil.
   - intros l s im s' om Htrans msg.
@@ -196,28 +203,29 @@ Proof.
     enough (H_hist : sent_messages s' =
       match om with Some m' => m' :: sent_messages s | None => sent_messages s end).
     {
-      unfold acceptor_has_been_sent.
+      unfold paxos_acceptor_has_been_sent.
       destruct om; rewrite H_hist, ?elem_of_cons; itauto congruence.
     }
     destruct Htrans as [(_ & _ & Hvalid) Htran].
-    change transition with acceptor_transition in Htran.
+    change transition with paxos_acceptor_transition in Htran.
     by destruct l, im as [[? []] |]; simpl in Htran; inversion Htran.
 Qed.
 
-#[export] Instance acceptor_has_been_sent_inst : HasBeenSentCapability acceptor_vlsm :=
+#[export] Instance paxos_acceptor_has_been_sent_inst :
+ HasBeenSentCapability paxos_acceptor_vlsm :=
 {|
-  has_been_sent := acceptor_has_been_sent;
-  has_been_sent_dec := acceptor_has_been_sent_dec;
-  has_been_sent_stepwise_props := acceptor_has_been_sent_stepwise_props;
+  has_been_sent := paxos_acceptor_has_been_sent;
+  has_been_sent_dec := paxos_acceptor_has_been_sent_dec;
+  has_been_sent_stepwise_props := paxos_acceptor_has_been_sent_stepwise_props;
 |}.
 
-End sec_acceptor_vlsm.
+End sec_paxos_acceptor_vlsm.
 
-Section sec_acceptor_vlsm_lem.
+Section sec_paxos_acceptor_vlsm_lem.
 
-Lemma examine_acceptor_output :
+Lemma examine_paxos_acceptor_output :
   forall [a l s oim s' ob om],
-    acceptor_transition a l (s, oim) = (s', Some (ob, om)) ->
+    paxos_acceptor_transition a l (s, oim) = (s', Some (ob, om)) ->
     match om with
     | m_1b a' _ => l = A_send_1b /\ a' = a
     | m_2b a' _ => l = A_send_2b /\ a' = a
@@ -227,22 +235,23 @@ Proof.
   by intros a [] s [[? []] |] * Ht; inversion Ht.
 Qed.
 
-Lemma maxBal_mono :
+Lemma paxos_maxBal_mono :
   forall a l s im s' om,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm (acceptor_vlsm a)) l (s, im) (s', om) ->
-    (maxBal s <= maxBal s')%Z.
+    input_valid_transition (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) l (s, im) (s', om) ->
+    (paxos_maxBal s <= paxos_maxBal s')%Z.
 Proof.
   intros * [(_ & _ & Hvalid) Htrans].
-  cbn in Hvalid, Htrans; unfold acceptor_valid, acceptor_transition in Hvalid, Htrans.
+  cbn in Hvalid, Htrans;
+    unfold paxos_acceptor_valid, paxos_acceptor_transition in Hvalid, Htrans.
   by repeat case_match; injection Htrans as [= <- <-]; cbn -[Ballot'_to_Z];
     change (Ballot'_to_Z (Some ?b)) with (Ballot_to_Z b); lia.
 Qed.
 
 Lemma last_vote_was_sent :
   forall a s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (acceptor_vlsm a)) s ->
+    valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) s ->
     forall lv,
-      lastVote s = Some lv -> has_been_sent (acceptor_vlsm a) s (lv.1, m_2b a lv.2).
+      lastVote s = Some lv -> has_been_sent (paxos_acceptor_vlsm a) s (lv.1, m_2b a lv.2).
 Proof.
   intros a s Hs.
   induction Hs using valid_state_prop_ind; intros lv Hlv;
@@ -254,7 +263,7 @@ Proof.
     by right; apply IHHs; congruence.
   }
   destruct Ht as [_ Ht].
-  change transition with (acceptor_transition a) in Ht.
+  change transition with (paxos_acceptor_transition a) in Ht.
   destruct l; cbn in Ht, IHHs |- *.
   - right.
     apply (f_equal fst) in Ht; simpl in Ht; subst s'.
@@ -265,74 +274,76 @@ Proof.
     by congruence.
 Qed.
 
-Lemma acceptor_sent_bounds_maxBal :
+Lemma paxos_acceptor_sent_bounds_maxBal :
   forall a s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (acceptor_vlsm a)) s ->
+    valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) s ->
   forall b mb,
-    has_been_sent (acceptor_vlsm a) s (b, mb) ->
-    (b <= maxBal s)%Z.
+    has_been_sent (paxos_acceptor_vlsm a) s (b, mb) ->
+    (b <= paxos_maxBal s)%Z.
 Proof.
   intros a s Hs b mb.
   apply (from_send_to_from_sent_argument
-    (acceptor_vlsm a) (fun s => b <= maxBal s)%Z); [.. | done].
-  - by intros * Ht; apply maxBal_mono in Ht; lia.
+    (paxos_acceptor_vlsm a) (fun s => b <= paxos_maxBal s)%Z); [.. | done].
+  - by intros * Ht; apply paxos_maxBal_mono in Ht; lia.
   - intros * [_ Htrans].
-    cbn in Htrans; unfold acceptor_transition in Htrans.
+    cbn in Htrans; unfold paxos_acceptor_transition in Htrans.
     by repeat case_match; inversion Htrans.
 Qed.
 
-Lemma maxVBal_le_maxBal :
+Lemma maxVBal_le_paxos_maxBal :
   forall a s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (acceptor_vlsm a)) s ->
-      (maxVBal s <= maxBal s)%Z.
+    valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) s ->
+      (maxVBal s <= paxos_maxBal s)%Z.
 Proof.
   intros a s Hs.
   unfold maxVBal.
   destruct (lastVote s) as [[b_lv v_lv] |] eqn: Heq; simpl.
-  - eapply acceptor_sent_bounds_maxBal; [done |].
+  - eapply paxos_acceptor_sent_bounds_maxBal; [done |].
     by apply (last_vote_was_sent a s Hs _ Heq).
-  - by destruct (maxBal s); simpl; lia.
+  - by destruct (paxos_maxBal s); simpl; lia.
 Qed.
 
 Lemma maxVBal_mono :
   forall a l s im s' om,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm (acceptor_vlsm a)) l (s, im) (s', om) ->
+    input_valid_transition 
+      (pre_loaded_with_all_messages_vlsm
+         (paxos_acceptor_vlsm a)) l (s, im) (s', om) ->
     (maxVBal s <= maxVBal s')%Z.
 Proof.
   intros * Ht.
   destruct Ht as [(Hs & _ & Hvalid) Htrans].
-  cbn in Hvalid, Htrans; unfold acceptor_valid, acceptor_transition in Hvalid, Htrans.
+  cbn in Hvalid, Htrans; unfold paxos_acceptor_valid, paxos_acceptor_transition in Hvalid, Htrans.
   repeat case_match; inversion Htrans; cbn; try done.
-  by transitivity (maxBal s); [apply maxVBal_le_maxBal |].
+  by transitivity (paxos_maxBal s); [apply maxVBal_le_paxos_maxBal |].
 Qed.
 
 Lemma sent_vote_le_maxVBal :
   forall a s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (acceptor_vlsm a)) s ->
+    valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) s ->
   forall b v,
-    has_been_sent (acceptor_vlsm a) s (b, m_2b a v) ->
+    has_been_sent (paxos_acceptor_vlsm a) s (b, m_2b a v) ->
     (b <= maxVBal s)%Z.
 Proof.
   intros a s Hs b v; revert s Hs.
-  apply (from_send_to_from_sent_argument (acceptor_vlsm a) (fun s => b <= maxVBal s)%Z);
+  apply (from_send_to_from_sent_argument (paxos_acceptor_vlsm a) (fun s => b <= maxVBal s)%Z);
     intros * Ht; [by apply maxVBal_mono in Ht; lia |].
   destruct Ht as [_ Htrans].
-  destruct (examine_acceptor_output Htrans) as [-> _].
+  destruct (examine_paxos_acceptor_output Htrans) as [-> _].
   by cbn in Htrans; repeat case_match; inversion Htrans.
 Qed.
 
 Lemma sending_1b_updates_maxBal :
   forall [a l s im s' b lv],
     input_valid_transition (pre_loaded_with_all_messages_vlsm
-      (acceptor_vlsm a)) l (s, im) (s', Some (b, m_1b a lv)) ->
-    (maxBal s < b)%Z /\ (maxBal s' = Some b).
+      (paxos_acceptor_vlsm a)) l (s, im) (s', Some (b, m_1b a lv)) ->
+    (paxos_maxBal s < b)%Z /\ (paxos_maxBal s' = Some b).
 Proof.
   intros * [(_ & _ & Hvalid) Hstep]; cbn in Hstep.
-  apply examine_acceptor_output in Hstep as Hla; destruct Hla as [-> _].
+  apply examine_paxos_acceptor_output in Hstep as Hla; destruct Hla as [-> _].
   by destruct im as [[? []] |]; cbn in s, s', Hvalid; inversion Hstep; subst.
 Qed.
 
-End sec_acceptor_vlsm_lem.
+End sec_paxos_acceptor_vlsm_lem.
 
 Section sec_leaders_vlsm.
 
@@ -747,7 +758,7 @@ Proof. by apply cancel_surj. Defined.
 Definition IM (ix : paxos_index) : VLSM paxos_message :=
   match ix with
   | leaders_ix => leaders_vlsm
-  | acceptor_ix a => acceptor_vlsm a
+  | acceptor_ix a => paxos_acceptor_vlsm a
   end.
 
 #[export] Instance IM_HasBeenSentCapability (ix : paxos_index) : HasBeenSentCapability (IM ix).
@@ -779,7 +790,7 @@ Proof.
   destruct l as [[| a_l] l], (transition _ _ _) as [si' om'] eqn: H_step in Ht;
     injection Ht as [= <- ->].
   - by apply examine_leaders_output in H_step; destruct omb.
-  - cbn in H_step; apply examine_acceptor_output in H_step.
+  - cbn in H_step; apply examine_paxos_acceptor_output in H_step.
     by destruct omb; cbn; itauto congruence.
 Qed.
 
@@ -819,8 +830,8 @@ Proof.
   by eapply H_stable_in_ix.
 Qed.
 
-Lemma lift_acceptor_stable_prop (P : acceptor_state -> Prop) a :
-  Pred_Stable_In (pre_loaded_with_all_messages_vlsm (acceptor_vlsm a)) P ->
+Lemma lift_acceptor_stable_prop (P : paxos_acceptor_state -> Prop) a :
+  Pred_Stable_In (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) P ->
   (forall l s im s' om,
     input_valid_transition (pre_loaded_with_all_messages_vlsm paxos_vlsm) l (s, im) (s', om) ->
       P (s (acceptor_ix a)) -> P (s' (acceptor_ix a))).
@@ -909,13 +920,13 @@ Lemma sent_1b_once :
 Proof.
   intros s Hs b a; revert s Hs.
   apply (sends_unique_argument _ (fun x => (b, m_1b a x))
-    (fun s => (b <= maxBal (s (acceptor_ix a)))%Z)).
+    (fun s => (b <= paxos_maxBal (s (acceptor_ix a)))%Z)).
   - by intros x y; congruence.
   - (* P_stable *)
-    apply (lift_acceptor_stable_prop (fun sb => b <= maxBal sb)%Z a).
+    apply (lift_acceptor_stable_prop (fun sb => b <= paxos_maxBal sb)%Z a).
     intros * Ht Hle.
-    transitivity (maxBal s); [done |].
-    by eapply maxBal_mono.
+    transitivity (paxos_maxBal s); [done |].
+    by eapply paxos_maxBal_mono.
   - intros * Ht.
     apply input_valid_transition_preloaded_project_active in Ht as Ht'.
     destruct Ht as [(_ & _ & Hvalid) Ht].
@@ -955,7 +966,7 @@ Proof.
   apply localize_sent_messages; cbn; [by apply Ht |].
   apply input_valid_transition_preloaded_project_active
     in Ht as [(Hs & _ & Hvalid) Ht]; cbn in Hvalid, Ht.
-  apply examine_acceptor_output in Ht as Hl; destruct Hl as [-> _].
+  apply examine_paxos_acceptor_output in Ht as Hl; destruct Hl as [-> _].
   simpl in Hvalid.
   destruct im as [[ib []] |]; [| done..].
   injection Ht as [= Heq_s' -> Hlv].
@@ -979,7 +990,7 @@ Proof.
   apply localize_send in Hstep as Hi_l; simpl in Hi_l; subst i_l; clear Hstep.
   apply input_valid_transition_preloaded_project_active in Ht; simpl in Ht.
   destruct Ht as [(_ & _ & Hvalid) Hstep_a]; cbn in Hstep_a.
-  apply examine_acceptor_output in Hstep_a as Hl; destruct Hl as [-> _].
+  apply examine_paxos_acceptor_output in Hstep_a as Hl; destruct Hl as [-> _].
   by cbn in Hvalid; destruct im as [[? []] |]; inversion Hstep_a.
 Qed.
 
@@ -1095,7 +1106,7 @@ Proof.
   revert Hstep Hs'.
   generalize (s (acceptor_ix a')); intros sa.
   generalize (s' (acceptor_ix a')); intros sa'.
-  unfold acceptor_transition.
+  unfold paxos_acceptor_transition.
   by repeat case_match; intros [= <- <-]; cbn; try done;
     rewrite elem_of_cons; intros [[=] |].
 Qed.
@@ -1143,8 +1154,8 @@ Lemma vote_messages_complete :
     was_voted a b v -> (b, a, v) ∈ vote_messages.
 Proof.
   intros a b v [[| ia] Hsent]; [done |].
-  change (has_been_sent _) with (acceptor_has_been_sent a) in Hsent.
-  unfold acceptor_has_been_sent in Hsent.
+  change (has_been_sent _) with (paxos_acceptor_has_been_sent a) in Hsent.
+  unfold paxos_acceptor_has_been_sent in Hsent.
   unfold vote_messages.
   rewrite elem_of_list_bind.
   exists a.
@@ -1225,15 +1236,15 @@ Proof.
   by destruct av1a as [vs1 |], av2a as [vs2 |]; simpl; set_solver.
 Qed.
 
-Definition votes : Bmap (AMap VSet) :=
+Definition paxos_votes : Bmap (AMap VSet) :=
   foldr (fun '(b, a, v) => combine_votesets (singleton_voteset b a v)) ∅ vote_messages.
 
-Lemma elem_of_votes :
+Lemma elem_of_paxos_votes :
   forall b a v,
-    (b, a, v) ∈ vote_messages <-> vote_in_voteset b a v votes.
+    (b, a, v) ∈ vote_messages <-> vote_in_voteset b a v paxos_votes.
 Proof.
   intros b a v.
-  unfold votes.
+  unfold paxos_votes.
   induction vote_messages; simpl.
   - rewrite elem_of_nil.
     unfold vote_in_voteset.
@@ -1243,31 +1254,31 @@ Proof.
     by itauto.
 Qed.
 
-Lemma votes_good :
+Lemma paxos_votes_good :
   forall a b v,
-    was_voted a b v <-> vote_in_voteset b a v votes.
+    was_voted a b v <-> vote_in_voteset b a v paxos_votes.
 Proof.
   intros a b v.
-  rewrite <- elem_of_votes.
+  rewrite <- elem_of_paxos_votes.
   split.
   - by apply vote_messages_complete.
   - by apply vote_messages_sound.
 Qed.
 
-Definition votes_from_acceptor (acc : acceptor_state) : Bmap VSet :=
+Definition votes_from_paxos_acceptor (acc : paxos_acceptor_state) : Bmap VSet :=
   let m_2a_msgs_a :=
     omap (fun m => match m with (b, m_2b _ v) => Some (b, v) | _ => None end) (sent_messages acc)
   in
     foldr (fun '(b, v) votes => mmap_insert b v votes) ∅ m_2a_msgs_a.
 
-Lemma votes_from_acceptor_to_sent (a : Acceptor) :
+Lemma votes_from_paxos_acceptor_to_sent (a : Acceptor) :
   forall b v,
-    v ∈ votes_from_acceptor (s (acceptor_ix a)) !!! b ->
+    v ∈ votes_from_paxos_acceptor (s (acceptor_ix a)) !!! b ->
       (b, m_2b a v) ∈ sent_messages (s (acceptor_ix a)).
 Proof.
   intros b v Hv.
   pose proof (Hsender := fun a' => sender_id_m_2b s Hs a' b v a).
-  unfold votes_from_acceptor in Hv; revert Hv.
+  unfold votes_from_paxos_acceptor in Hv; revert Hv.
   set (msgs := sent_messages (s (acceptor_ix a))) in *; clearbody msgs; clear s Hs.
   induction msgs; cbn; [by rewrite lookup_total_empty; simpl; set_solver |].
   case_match.
@@ -1285,13 +1296,13 @@ Proof.
     by intros a' Ha'; apply Hsender; constructor.
 Qed.
 
-Lemma votes_from_acceptor_from_sent (a : Acceptor) :
+Lemma votes_from_paxos_acceptor_from_sent (a : Acceptor) :
   forall b v,
     (b, m_2b a v) ∈ sent_messages (s (acceptor_ix a)) ->
-    v ∈ votes_from_acceptor (s (acceptor_ix a)) !!! b.
+    v ∈ votes_from_paxos_acceptor (s (acceptor_ix a)) !!! b.
 Proof.
   intros b v.
-  unfold votes_from_acceptor.
+  unfold votes_from_paxos_acceptor.
   generalize (sent_messages (s (acceptor_ix a))) as msgs.
   induction msgs; intros H_elem; [by apply elem_of_nil in H_elem |].
   destruct a0 as [b0 m0].
@@ -1301,26 +1312,26 @@ Proof.
     by apply elem_of_mmap_insert; right; apply IHmsgs.
 Qed.
 
-Lemma votes_from_acceptor_iff :
+Lemma votes_from_paxos_acceptor_iff :
   forall a b v,
     (b, m_2b a v) ∈ sent_messages (s (acceptor_ix a))
-    <-> v ∈ votes_from_acceptor (s (acceptor_ix a)) !!! b.
+    <-> v ∈ votes_from_paxos_acceptor (s (acceptor_ix a)) !!! b.
 Proof.
   split.
-  - by apply votes_from_acceptor_from_sent.
-  - by apply votes_from_acceptor_to_sent.
+  - by apply votes_from_paxos_acceptor_from_sent.
+  - by apply votes_from_paxos_acceptor_to_sent.
 Qed.
 
 (**
   The projection from Paxos to Voting maps each acceptor to a voter,
-  using the [maxBal] of the acceptor and the set [votes_from_acceptor]
+  using the [paxos_maxBal] of the acceptor and the set [votes_from_paxos_acceptor]
   as the [maxBal] and [votes] of the voter.
 *)
 Definition to_voting_state : state (voting_vlsm Value VSet Acceptor ASet Quorum) :=
   fun a =>
     {|
-      Voting.maxBal := maxBal (s (acceptor_ix a));
-      Voting.votes := votes_from_acceptor (s (acceptor_ix a));
+      maxBal := paxos_maxBal (s (acceptor_ix a));
+      votes := votes_from_paxos_acceptor (s (acceptor_ix a));
     |}.
 
 (**
@@ -1351,9 +1362,9 @@ Definition V_SafeAt : Ballot -> Value -> Prop :=
 
 Definition Inv_past_vote_info_prop : Prop :=
   forall (a : Acceptor),
-    (maxVBal (s (acceptor_ix a)) <= maxBal (s (acceptor_ix a)))%Z
+    (maxVBal (s (acceptor_ix a)) <= paxos_maxBal (s (acceptor_ix a)))%Z
     /\ (forall (b : Ballot),
-         (maxVBal (s (acceptor_ix a)) < b)%Z -> (b < maxBal (s (acceptor_ix a)))%Z ->
+         (maxVBal (s (acceptor_ix a)) < b)%Z -> (b < paxos_maxBal (s (acceptor_ix a)))%Z ->
             V_DidNotVoteIn a b)
     /\ match lastVote (s (acceptor_ix a)) with
        | None => True
@@ -1364,7 +1375,7 @@ Definition P1bInv_prop : Prop :=
   forall (b_m : Ballot) (a_m : Acceptor) (lv_m : option (Ballot * Value)),
     let mbal_m := fst <$> lv_m : Ballot' in
       has_been_sent paxos_vlsm s (b_m, m_1b a_m lv_m) ->
-      (b_m <= maxBal (s (acceptor_ix a_m)))%Z
+      (b_m <= paxos_maxBal (s (acceptor_ix a_m)))%Z
       /\ (mbal_m < b_m)%Z
       /\ (forall (b : Ballot), (b < b_m)%Z -> (mbal_m < b)%Z -> V_DidNotVoteIn a_m b).
 
@@ -1637,9 +1648,9 @@ Proof.
     assert (has_been_sent paxos_vlsm s (b_1c, m_2b a w)) as H_sent_w.
     {
       apply (localize_sent_messages s); [done |].
-      cbn; unfold acceptor_has_been_sent.
+      cbn; unfold paxos_acceptor_has_been_sent.
       unfold voted_for, to_voting_state in Hw; simpl in Hw.
-      by apply votes_from_acceptor_iff in Hw.
+      by apply votes_from_paxos_acceptor_iff in Hw.
     }
     clear Hw.
     apply sent_1b_impl_sent_lastvote_as_2b in Hsent; [| done].
@@ -1678,9 +1689,9 @@ Proof.
   split.
   - intros H_vote_msg.
     apply localize_sent_messages; [done |].
-    by apply votes_from_acceptor_iff.
+    by apply votes_from_paxos_acceptor_iff.
   - intros H_sent.
-    apply votes_from_acceptor_iff; [done |].
+    apply votes_from_paxos_acceptor_iff; [done |].
     by apply localize_sent_messages in H_sent.
 Qed.
 
@@ -1702,7 +1713,7 @@ Proof.
   intros s Hs a.
   split; [| split].
   - apply valid_state_project_preloaded_to_preloaded with (i := acceptor_ix a) in Hs as Hsa.
-    by eapply maxVBal_le_maxBal.
+    by eapply maxVBal_le_paxos_maxBal.
   - (* No voting in the middle *)
     intros b H_VBal H_Bal v Hvote.
     clear H_Bal (* don't *).
@@ -1723,22 +1734,22 @@ Proof.
   intros s Hs b a lv mbal_m Hsent.
   split; [| split].
   - apply valid_state_project_preloaded_to_preloaded with (i:=acceptor_ix a) in Hs as Hsa.
-    by apply localize_sent_messages, acceptor_sent_bounds_maxBal in Hsent.
+    by apply localize_sent_messages, paxos_acceptor_sent_bounds_maxBal in Hsent.
   - subst mbal_m.
     apply localize_sent_messages in Hsent; [| done].
     simpl message_sender in Hsent.
-    change (IM _) with (acceptor_vlsm a) in Hsent.
+    change (IM _) with (paxos_acceptor_vlsm a) in Hsent.
     pattern (s (acceptor_ix a)).
-    revert Hsent; apply (from_send_to_from_sent_argument (acceptor_vlsm a));
+    revert Hsent; apply (from_send_to_from_sent_argument (paxos_acceptor_vlsm a));
       [done | ..]; cycle 1.
     + by apply valid_state_project_preloaded_to_preloaded with (i:=acceptor_ix a) in Hs.
     + clear s Hs; intros s * Ht.
       apply input_valid_transition_origin in Ht as Hs.
       destruct (Ht) as [_ Htrans].
       apply sending_1b_updates_maxBal in Ht as [Hb _].
-      assert (maxVBal s <= maxBal s)%Z by (apply maxVBal_le_maxBal; done).
+      assert (maxVBal s <= paxos_maxBal s)%Z by (apply maxVBal_le_paxos_maxBal; done).
       cbn in Htrans.
-      apply examine_acceptor_output in Htrans as Hl.
+      apply examine_paxos_acceptor_output in Htrans as Hl.
       destruct Hl as [-> _].
       simpl in Htrans.
       destruct oim as [[? []] |]; try discriminate; [].
@@ -1750,9 +1761,9 @@ Proof.
     setoid_rewrite V_DidNotVoteIn_iff; [| done].
     setoid_rewrite localize_sent_messages; [| done..].
     simpl (message_sender _).
-    change (IM (acceptor_ix a)) with (acceptor_vlsm a).
+    change (IM (acceptor_ix a)) with (paxos_acceptor_vlsm a).
     subst mbal_m.
-    assert (Hsa : valid_state_prop (pre_loaded_with_all_messages_vlsm (acceptor_vlsm a))
+    assert (Hsa : valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a))
       (s (acceptor_ix a))).
     {
       by apply valid_state_project_preloaded_to_preloaded with (i := acceptor_ix a) in Hs.
@@ -1768,23 +1779,23 @@ Proof.
       destruct H_sent_old_s' as [| H_sent_old_s]; [done |].
       apply sent_vote_le_maxVBal in H_sent_old_s; [| done].
       destruct Ht as [(_ & _ & Hvalid) Htrans].
-      destruct (examine_acceptor_output Htrans) as [-> _].
-      change transition with (acceptor_transition a) in Htrans; cbn in Htrans.
+      destruct (examine_paxos_acceptor_output Htrans) as [-> _].
+      change transition with (paxos_acceptor_transition a) in Htrans; cbn in Htrans.
       destruct om as [[? []] |]; try discriminate; [].
       injection Htrans as [= <- -> <-].
-      change valid with acceptor_valid in Hvalid; cbn in Hvalid.
+      change valid with paxos_acceptor_valid in Hvalid; cbn in Hvalid.
       change (maxVBal s0 < b_mid)%Z in Hmid2.
       by lia.
     + intros b_mid Hmid1 Hmid2 v H_sent_old_s'.
       apply (has_been_sent_step_update Ht) in H_sent_old_s' as [-> | H_bad_send_s0];
         [| by eapply IHHsa].
-      assert (b <= maxBal s0)%Z by (apply acceptor_sent_bounds_maxBal in H_sent_s; done).
-      cut (maxBal s0 <= b_mid)%Z; [by lia |].
+      assert (b <= paxos_maxBal s0)%Z by (apply paxos_acceptor_sent_bounds_maxBal in H_sent_s; done).
+      cut (paxos_maxBal s0 <= b_mid)%Z; [by lia |].
       destruct Ht as [(_ & _ & Hvalid) Htrans].
-      destruct (examine_acceptor_output Htrans) as [-> _].
-      change transition with (acceptor_transition a) in Htrans; cbn in Htrans.
+      destruct (examine_paxos_acceptor_output Htrans) as [-> _].
+      change transition with (paxos_acceptor_transition a) in Htrans; cbn in Htrans.
       destruct om as [[? []] |]; try discriminate; [].
-      change valid with acceptor_valid in Hvalid; cbn in Hvalid.
+      change valid with paxos_acceptor_valid in Hvalid; cbn in Hvalid.
       by injection Htrans as [= <- ->].
 Qed.
 
@@ -1803,7 +1814,7 @@ Proof.
     unfold vote_committed, to_voting_state; simpl.
     apply input_valid_transition_preloaded_project_any with (i := acceptor_ix a)
       in Ht as [-> | (li & -> & Ht)]; [done |].
-    apply maxBal_mono in Ht.
+    apply paxos_maxBal_mono in Ht.
     by lia.
   - specialize (HQ2 a Ha); revert HQ2; cbn.
     apply input_valid_transition_origin in Ht as Hs0.
@@ -1815,13 +1826,13 @@ Proof.
     apply (has_been_sent_step_update Ht) in Hsent_s' as [-> |]; [| done].
     exfalso.
     unfold vote_committed in HQ1; simpl in HQ1.
-    cut (maxBal (s (acceptor_ix a)) <= d)%Z; [by lia |].
+    cut (paxos_maxBal (s (acceptor_ix a)) <= d)%Z; [by lia |].
     destruct l as [li l].
     assert (li = acceptor_ix a) as ->
       by (destruct Ht as [_ Htrans]; apply localize_send in Htrans; done).
     apply input_valid_transition_preloaded_project_active in Ht; simpl in Ht.
     destruct Ht as [(_ & _ & Hvalid) Htrans]; cbn in Htrans, Hvalid.
-    apply examine_acceptor_output in Htrans as Hl; destruct Hl as [-> _].
+    apply examine_paxos_acceptor_output in Htrans as Hl; destruct Hl as [-> _].
     simpl in Hvalid.
     destruct oim as [[? []] |]; try done; [].
     by inversion Htrans; subst.
@@ -1953,8 +1964,8 @@ Proof.
       apply valid_state_project_preloaded_to_preloaded with (i := acceptor_ix a) in Hs as Hsa;
       destruct (H_Q_participating a Ha) as [lv Hsent_1b].
     + unfold vote_committed; simpl.
-      cut (b <= maxBal (s (acceptor_ix a)))%Z; [by lia |].
-      by apply localize_sent_messages, acceptor_sent_bounds_maxBal in Hsent_1b.
+      cut (b <= paxos_maxBal (s (acceptor_ix a)))%Z; [by lia |].
+      by apply localize_sent_messages, paxos_acceptor_sent_bounds_maxBal in Hsent_1b.
     + intros w Hvoted.
       apply V_VotedFor_iff in Hvoted; [| done].
       contradict Hvoted.
@@ -1991,10 +2002,10 @@ Proof.
     split; intros a Ha;
       destruct (H_Q_participating a Ha) as [lv Hsent_1b].
     + unfold vote_committed; simpl.
-      cut (b <= maxBal (s (acceptor_ix a)))%Z; [by lia |].
+      cut (b <= paxos_maxBal (s (acceptor_ix a)))%Z; [by lia |].
       apply localize_sent_messages in Hsent_1b; [| done].
       apply valid_state_project_preloaded_to_preloaded with (i:=acceptor_ix a) in Hs as Hsa.
-      by apply acceptor_sent_bounds_maxBal in Hsent_1b.
+      by apply paxos_acceptor_sent_bounds_maxBal in Hsent_1b.
     + intros w Hvote_w.
       destruct (Inv1 _ _ _ Hsent_1b) as (H_b_s & H_b_lv & Hdnv).
       specialize (H_Q_voted_before_1c a Ha).
