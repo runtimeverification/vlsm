@@ -155,7 +155,7 @@ Definition paxos_acceptor_valid :
     end.
 
 Definition paxos_acceptor_transition
- (l : paxos_acceptor_label) (som : paxos_acceptor_state * option paxos_message)
+  (l : paxos_acceptor_label) (som : paxos_acceptor_state * option paxos_message)
   : paxos_acceptor_state * option paxos_message :=
   match l, som with
   | A_send_1b, (s, Some (b, m_1a)) =>
@@ -183,15 +183,15 @@ Definition paxos_acceptor_machine : VLSMMachine paxos_acceptor_type :=
 Definition paxos_acceptor_vlsm : VLSM paxos_message := mk_vlsm paxos_acceptor_machine.
 
 Definition paxos_acceptor_has_been_sent
- (s : state paxos_acceptor_vlsm) (m : paxos_message) : Prop :=
-  m ∈ sent_messages s.
+  (s : state paxos_acceptor_vlsm) (m : paxos_message) : Prop :=
+    m ∈ sent_messages s.
 
 #[export] Instance paxos_acceptor_has_been_sent_dec :
- RelDecision paxos_acceptor_has_been_sent :=
+  RelDecision paxos_acceptor_has_been_sent :=
   fun s m => elem_of_list_dec m (sent_messages s).
 
 Lemma paxos_acceptor_has_been_sent_stepwise_props :
- has_been_sent_stepwise_prop paxos_acceptor_has_been_sent.
+  has_been_sent_stepwise_prop paxos_acceptor_has_been_sent.
 Proof.
   constructor.
   - intros s Hs m.
@@ -212,7 +212,7 @@ Proof.
 Qed.
 
 #[export] Instance paxos_acceptor_has_been_sent_inst :
- HasBeenSentCapability paxos_acceptor_vlsm :=
+  HasBeenSentCapability paxos_acceptor_vlsm :=
 {|
   has_been_sent := paxos_acceptor_has_been_sent;
   has_been_sent_dec := paxos_acceptor_has_been_sent_dec;
