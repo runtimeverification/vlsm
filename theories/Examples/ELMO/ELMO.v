@@ -429,9 +429,9 @@ Lemma ELMO_input_constrained_transition_inj :
 Proof.
   intros l s om s' om' [(_ & _ & Hvalid) Ht] l0 s0 om0 om'0 [(_ & _ & Hvalid0) Ht0].
   by inversion Hvalid; subst; cbn in Ht;
-    injection Ht as [= <- <-];
-    inversion Hvalid0; subst; inversion Ht0;
-    replace s0 with s by (apply eq_State; done).
+  injection Ht as [= <- <-];
+  inversion Hvalid0; subst; inversion Ht0;
+  [replace s0 with s by (apply eq_State; done)|].
 Qed.
 
 Lemma ELMO_component_valid_transition_size :

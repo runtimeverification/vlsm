@@ -35,7 +35,7 @@ Coercion Ballot'_to_Z : Ballot' >-> Z.
 
 Ltac ballot_lia := unfold Ballot_to_Z in *; lia.
 
-Lemma Ballot_lt_wf : wf (fun (x y : Ballot) => (x < y)%Z).
+Lemma Ballot_lt_wf : well_founded (fun (x y : Ballot) => (x < y)%Z).
 Proof.
   generalize N.lt_wf_0.
   by apply (wf_projected N.lt id), N2Z.inj_lt.
