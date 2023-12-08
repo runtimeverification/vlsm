@@ -90,10 +90,10 @@ Record acceptor_state : Type :=
 Section sec_acceptor_state_predicates.
 
 Context
-  (S : acceptor_state)
+  (AState : acceptor_state)
   .
 
-Definition voted_for (b : Ballot) (v : Value) := v ∈ votes S !!! b.
+Definition voted_for (b : Ballot) (v : Value) := v ∈ votes AState !!! b.
 
 #[export] Instance voted_for_dec (b : Ballot) (v : Value) : Decision (voted_for b v) :=
   VSDec _ _.
@@ -139,8 +139,8 @@ Definition acceptor_initial : acceptor_state :=
   maxBal := None;
 |}.
 
-Definition acceptor_initial_state_prop (S : acceptor_state) : Prop :=
-  S = acceptor_initial.
+Definition acceptor_initial_state_prop (s : acceptor_state) : Prop :=
+  s = acceptor_initial.
 
 Definition acceptor_valid : acceptor_label -> acceptor_state * option False -> Prop :=
   fun l '(s, _) =>
