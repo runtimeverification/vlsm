@@ -639,8 +639,8 @@ Lemma input_valid_transition_deterministic_conv :
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
   by eapply input_constrained_transition_deterministic_conv;
-    apply (@VLSM_incl_input_valid_transition _ Mi Mi);
-    eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply (@VLSM_incl_input_valid_transition _ Mi Mi); [| done | | done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_from_to_unique :
@@ -651,8 +651,8 @@ Lemma finite_valid_trace_from_to_unique :
 Proof.
   by intros s1 s2 l1 l2 Hfvt1 Hfvt2;
     eapply finite_constrained_trace_from_to_unique;
-    apply VLSM_incl_finite_valid_trace_from_to;
-    eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply VLSM_incl_finite_valid_trace_from_to; [| done | | done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_init_to_unique :
@@ -663,8 +663,8 @@ Lemma finite_valid_trace_init_to_unique :
 Proof.
   by intros s f l1 l2 Hfvit1 Hfvit2;
     eapply finite_constrained_trace_init_to_unique;
-    apply VLSM_incl_finite_valid_trace_init_to;
-    eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply VLSM_incl_finite_valid_trace_init_to; [| done | | done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** *** Extracting a trace from a state *)

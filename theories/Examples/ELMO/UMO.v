@@ -547,9 +547,9 @@ Lemma input_valid_transition_deterministic_conv :
       lbl1 = lbl2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
-  by eapply input_constrained_transition_deterministic_conv
-  ; apply (@VLSM_incl_input_valid_transition _ Ui Ui);
-    eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by eapply input_constrained_transition_deterministic_conv;
+    apply (@VLSM_incl_input_valid_transition _ Ui Ui); [| done | | done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** Every trace segment is fully determined by its initial and final state. *)
@@ -579,10 +579,10 @@ Lemma finite_valid_trace_from_to_unique :
     finite_valid_trace_from_to Ui s1 s2 l2 ->
       l1 = l2.
 Proof.
-  by intros s1 s2 l1 l2 Hfvt1 Hfvt2
-  ; eapply finite_constrained_trace_from_to_unique
-  ; apply VLSM_incl_finite_valid_trace_from_to
-  ; eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by intros s1 s2 l1 l2 Hfvt1 Hfvt2;
+    eapply finite_constrained_trace_from_to_unique;
+    apply VLSM_incl_finite_valid_trace_from_to; [| done | | done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** Every trace is determined by its final state. *)
@@ -604,10 +604,10 @@ Lemma finite_valid_trace_init_to_unique :
     finite_valid_trace_init_to Ui s f l2 ->
       l1 = l2.
 Proof.
-  by intros s f l1 l2 Hfvit1 Hfvit2
-  ; eapply finite_constrained_trace_init_to_unique
-  ; apply VLSM_incl_finite_valid_trace_init_to
-  ; eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by intros s f l1 l2 Hfvit1 Hfvit2;
+    eapply finite_constrained_trace_init_to_unique;
+    apply VLSM_incl_finite_valid_trace_init_to; [| done | | done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** If a valid trace leads to state s, the trace extracted from s also leads to s. *)
@@ -673,10 +673,10 @@ Lemma finite_valid_trace_init_to_state2trace_inv :
     finite_valid_trace_init_to Ui is s tr ->
       state2trace s = tr.
 Proof.
-  by intros is s tr Hfvti
-  ; eapply finite_constrained_trace_init_to_state2trace_inv
-  ; apply VLSM_incl_finite_valid_trace_init_to
-  ; eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by intros is s tr Hfvti;
+    eapply finite_constrained_trace_init_to_state2trace_inv;
+    apply VLSM_incl_finite_valid_trace_init_to; [| done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** The trace extracted from a reachable state [s] leads to [s]. *)
