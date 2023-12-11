@@ -401,25 +401,13 @@ Section sec_MO_component_lemmas.
 (** ** Component lemmas
 
   We will use the notation [Mi] for a [MO_component] of address [i].
-
-  We will use [RMi] to denote the corresponding pre-loaded VLSM, which is
-  used to model reachability.
-
-  There is a VLSM inclusion from [Mi] to [RMi].
 *)
 
 Context
   {i : Address}
   {P : Address -> Prop}
   (Mi : VLSM Message := MO_component P i)
-  (RMi : VLSM Message := pre_loaded_with_all_messages_vlsm Mi).
-
-(** The VLSM [Mi] embeds into [RMi]. *)
-Lemma VLSM_incl_MO_component_preloaded :
-  VLSM_incl_part Mi RMi.
-Proof.
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-Qed.
+  .
 
 Lemma VLSM_incl_UMO_MOComponent : VLSM_incl Mi (UMO_component i).
 Proof.
@@ -462,11 +450,11 @@ Defined.
   HasBeenDirectlyObservedCapability Mi :=
     HasBeenDirectlyObservedCapability_from_sent_received Mi.
 
-(** The initial state of [RMi] is unique. *)
+(** The initial state of [Mi] is unique. *)
 Lemma vs0_uniqueness :
   forall is : State,
     UMO_component_initial_state_prop i is ->
-      is = ``(vs0 RMi).
+      is = ``(vs0 Mi).
 Proof.
   by intros []; inversion 1; cbv in *; subst.
 Qed.
@@ -509,10 +497,12 @@ Lemma constrained_state_prop_MO_msg_valid :
 Proof.
   induction 1 as [m Hobs | m Hm IH | m mr Hm IHm Hmr IHmr]; cbn; intros Hadr.
   - by exists None; constructor.
-  - apply (@input_valid_transition_destination _ RMi Send (state m) _ None (Some m)).
+  - apply (@input_valid_transition_destination _ (pre_loaded_with_all_messages_vlsm Mi)
+      Send (state m) _ None (Some m)).
     destruct m as [s]; cbn in *.
     by apply input_constrained_transition_Send, IH.
-  - apply (@input_valid_transition_destination _ RMi Receive (state m) _ (Some mr) None).
+  - apply (@input_valid_transition_destination _ (pre_loaded_with_all_messages_vlsm Mi)
+      Receive (state m) _ (Some mr) None).
     destruct m as [s]; cbn in *.
     by apply input_constrained_transition_Receive; itauto.
 Qed.
@@ -546,7 +536,7 @@ Lemma finite_constrained_trace_from_to_size :
 Proof.
   induction 1; [by left |].
   assert (sizeState s' < sizeState s)
-      by (eapply input_constrained_transition_size; done).
+    by (eapply input_constrained_transition_size; done).
   by destruct IHfinite_valid_trace_from_to; [itauto congruence | itauto lia].
 Qed.
 
@@ -624,8 +614,8 @@ Lemma input_valid_transition_size :
 Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_constrained_transition_size.
-  by apply (@VLSM_incl_input_valid_transition _ Mi Mi RMi)
-  ; eauto using VLSM_incl_MO_component_preloaded.
+  apply (@VLSM_incl_input_valid_transition _ Mi Mi); [| done].
+  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_from_to_size :
@@ -637,8 +627,8 @@ Lemma finite_valid_trace_from_to_size :
 Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_constrained_trace_from_to_size.
-  by apply (@VLSM_incl_finite_valid_trace_from_to _ Mi Mi RMi)
-  ; eauto using VLSM_incl_MO_component_preloaded.
+  apply (@VLSM_incl_finite_valid_trace_from_to _ Mi Mi); [| done].
+  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 Lemma input_valid_transition_deterministic_conv :
@@ -648,9 +638,9 @@ Lemma input_valid_transition_deterministic_conv :
       lbl1 = lbl2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
-  by eapply input_constrained_transition_deterministic_conv
-  ; apply (@VLSM_incl_input_valid_transition _ Mi Mi RMi)
-  ; eauto using VLSM_incl_MO_component_preloaded.
+  by eapply input_constrained_transition_deterministic_conv;
+    apply (@VLSM_incl_input_valid_transition _ Mi Mi);
+    eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_from_to_unique :
@@ -659,10 +649,10 @@ Lemma finite_valid_trace_from_to_unique :
     finite_valid_trace_from_to Mi s1 s2 l2 ->
       l1 = l2.
 Proof.
-  by intros s1 s2 l1 l2 Hfvt1 Hfvt2
-  ; eapply finite_constrained_trace_from_to_unique
-  ; apply VLSM_incl_finite_valid_trace_from_to
-  ; eauto using VLSM_incl_MO_component_preloaded.
+  by intros s1 s2 l1 l2 Hfvt1 Hfvt2;
+    eapply finite_constrained_trace_from_to_unique;
+    apply VLSM_incl_finite_valid_trace_from_to;
+    eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_init_to_unique :
@@ -671,10 +661,10 @@ Lemma finite_valid_trace_init_to_unique :
     finite_valid_trace_init_to Mi s f l2 ->
       l1 = l2.
 Proof.
-  by intros s f l1 l2 Hfvit1 Hfvit2
-  ; eapply finite_constrained_trace_init_to_unique
-  ; apply VLSM_incl_finite_valid_trace_init_to
-  ; eauto using VLSM_incl_MO_component_preloaded.
+  by intros s f l1 l2 Hfvit1 Hfvit2;
+    eapply finite_constrained_trace_init_to_unique;
+    apply VLSM_incl_finite_valid_trace_init_to;
+    eauto using vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** *** Extracting a trace from a state *)
@@ -712,7 +702,7 @@ Lemma finite_constrained_trace_init_to_state2trace_inv :
 Proof.
   intros is s tr Hfvti.
   assert (Hfvti' : finite_constrained_trace_init_to Mi is s (state2trace s))
-      by (eapply finite_constrained_trace_init_to_state2trace; done).
+    by (eapply finite_constrained_trace_init_to_state2trace; done).
   by eapply finite_constrained_trace_init_to_unique.
 Qed.
 
@@ -721,12 +711,12 @@ Qed.
 Lemma finite_constrained_trace_init_to_state2trace' :
   forall (s : State),
     constrained_state_prop Mi s ->
-      finite_constrained_trace_init_to Mi (``(vs0 RMi)) s (state2trace s).
+      finite_constrained_trace_init_to Mi (``(vs0 Mi)) s (state2trace s).
 Proof.
   intros s Hs.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
   apply finite_constrained_trace_init_to_state2trace_inv in Htr as Heqtr; subst.
-  replace (``(vs0 RMi)) with is; [done |].
+  replace (``(vs0 Mi)) with is; [done |].
   by apply vs0_uniqueness, Htr.
 Qed.
 
@@ -734,10 +724,10 @@ Lemma constrained_state_contains_unique_constrained_trace :
   forall s : State,
     constrained_state_prop Mi s ->
       exists tr : list transition_item,
-        finite_constrained_trace_init_to Mi (``(vs0 RMi)) s tr
+        finite_constrained_trace_init_to Mi (``(vs0 Mi)) s tr
           /\
         forall tr' : list transition_item,
-          finite_constrained_trace_init_to Mi (``(vs0 RMi)) s tr' -> tr' = tr.
+          finite_constrained_trace_init_to Mi (``(vs0 Mi)) s tr' -> tr' = tr.
 Proof.
   intros s Hvsp.
   exists (state2trace s); split.
@@ -843,19 +833,15 @@ Context
   (P : Address -> Prop)
   (P' := fun adr => P adr /\ exists i : index, idx i = adr)
   (M : index -> VLSM Message := fun i => MO_component P' (idx i))
-  (RM : index -> VLSM Message := fun i => pre_loaded_with_all_messages_vlsm (M i)).
+  .
 
 (** ** Protocol
 
   The MO protocol is a free composition of finitely many MO components (each
   with the same predicate <<P>>.
-
-  To talk about reachable states in the MO protocol, we will use [RMO],
-  which is MO preloaded with all messages.
 *)
 
 Definition MO : VLSM Message := free_composite_vlsm M.
-Definition RMO : VLSM Message := pre_loaded_with_all_messages_vlsm MO.
 
 (** We set up aliases for some functions operating on free VLSM composition. *)
 
@@ -942,80 +928,77 @@ Proof.
   by eapply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_MO _ Hvsp i)).
 Qed.
 
-(** We could prove the same lifting lemmas for [RMO], but we won't need them. *)
-
-Lemma lift_to_RMO
-  (us : MO_state) (Hus : valid_state_prop RMO us) (i : index) :
-  VLSM_weak_embedding (RM i) RMO (lift_to_MO_label i) (lift_to_MO_state us i).
-Proof. by apply lift_to_preloaded_free_weak_embedding. Qed.
-
-Lemma lift_to_RMO_valid_state_prop :
+Lemma lift_to_MO_constrained_state_prop :
   forall (i : index) (s : State) (us : MO_state),
-    valid_state_prop RMO us -> valid_state_prop (RM i) s ->
-      valid_state_prop RMO (lift_to_MO_state us i s).
+    constrained_state_prop MO us -> constrained_state_prop (M i) s ->
+      constrained_state_prop MO (lift_to_MO_state us i s).
 Proof.
   intros is s us Hvsp.
-  by eapply VLSM_weak_embedding_valid_state, lift_to_RMO.
+  by eapply VLSM_weak_embedding_valid_state, lift_to_preloaded_free_weak_embedding.
 Qed.
 
-Lemma lift_to_RMO_valid_message_prop :
+Lemma lift_to_preloaded_MO_option_valid_message_prop :
   forall (i : index) (om : option Message),
-    option_valid_message_prop (RM i) om ->
-      option_valid_message_prop RMO om.
+    option_valid_message_prop (pre_loaded_with_all_messages_vlsm (M i)) om ->
+      option_valid_message_prop (pre_loaded_with_all_messages_vlsm MO) om.
 Proof.
   intros i [] Hovmp; cycle 1.
   - by exists (``(vs0 MO)); constructor.
   - eapply VLSM_weak_embedding_valid_message.
-    + by apply (lift_to_RMO (``(vs0 MO))); exists None; constructor.
+    + eapply (lift_to_preloaded_free_weak_embedding _ i (``(vs0 MO))).
+      by exists None; constructor.
     + by inversion 1; cbn; [| right].
     + by apply Hovmp.
 Qed.
 
-Lemma lift_to_RMO_input_valid_transition :
+Lemma lift_to_MO_input_constrained_transition :
   forall (i : index) (lbl : Label) (s1 s2 : State) (iom oom : option Message) (us : MO_state),
-    valid_state_prop RMO us ->
-    input_valid_transition (RM i) lbl (s1, iom) (s2, oom) ->
-      input_valid_transition RMO
+    constrained_state_prop MO us ->
+    input_constrained_transition (M i) lbl (s1, iom) (s2, oom) ->
+      input_constrained_transition MO
         (lift_to_MO_label i lbl)
         (lift_to_MO_state us i s1, iom)
         (lift_to_MO_state us i s2, oom).
 Proof.
   intros i lbl s1 s2 iom oom us Hivt.
-  by apply @VLSM_weak_embedding_input_valid_transition, lift_to_RMO.
+  by apply @VLSM_weak_embedding_input_valid_transition, lift_to_preloaded_free_weak_embedding.
 Qed.
 
-Lemma lift_to_RMO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (transition_item (RM i))) (us : MO_state),
-    valid_state_prop RMO us ->
-    finite_valid_trace_from_to (RM i) s1 s2 tr ->
-      finite_valid_trace_from_to
-        RMO (lift_to_MO_state us i s1) (lift_to_MO_state us i s2) (lift_to_MO_trace us i tr).
+Lemma lift_to_MO_finite_constrained_trace_from_to :
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (M i))) (us : MO_state),
+    constrained_state_prop MO us ->
+    finite_constrained_trace_from_to (M i) s1 s2 tr ->
+      finite_constrained_trace_from_to MO
+        (lift_to_MO_state us i s1) (lift_to_MO_state us i s2) (lift_to_MO_trace us i tr).
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
-  by apply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_RMO _ Hvsp i)).
+  unshelve eapply (@VLSM_weak_embedding_finite_valid_trace_from_to _
+    (pre_loaded_with_all_messages_vlsm (M i))
+    (pre_loaded_with_all_messages_vlsm MO) _ _); [| done].
+  by apply lift_to_preloaded_free_weak_embedding.
 Qed.
 
 (** *** Lifting lemmas for validating theorem *)
 
-Lemma initial_state_prop_lift_RM_to_MO :
+Lemma initial_state_prop_lift_to_MO :
   forall (i : index) (s : State),
-    initial_state_prop (RM i) s ->
+    initial_state_prop (M i) s ->
       initial_state_prop MO (lift_to_MO_state (``(vs0 MO)) i s).
 Proof.
   intros i s Hisp j; cbn.
   by destruct (decide (i = j)); subst; state_update_simpl.
 Qed.
 
-Lemma finite_valid_trace_lift_RM_to_MO :
+Lemma finite_valid_trace_init_to_lift_to_MO :
   forall (i : index) (s : State),
-    initial_state_prop (RM i) s ->
+    initial_state_prop (M i) s ->
       finite_valid_trace_init_to MO
         (lift_to_MO_state (``(vs0 MO)) i s) (lift_to_MO_state (``(vs0 MO)) i s) [].
 Proof.
   constructor; cycle 1.
-  - by apply initial_state_prop_lift_RM_to_MO.
+  - by apply initial_state_prop_lift_to_MO.
   - constructor; exists None; constructor; [| done].
-    by apply initial_state_prop_lift_RM_to_MO.
+    by apply initial_state_prop_lift_to_MO.
 Qed.
 
 Lemma option_valid_message_prop_initial :
@@ -1088,14 +1071,14 @@ Qed.
 
 Lemma lift_to_MO_finite_valid_trace_init_to :
   forall (i : index) (s1 s2 : State) (tr : list (transition_item (M i))),
-    finite_valid_trace_init_to (RM i) s1 s2 tr ->
+    finite_constrained_trace_init_to (M i) s1 s2 tr ->
       finite_valid_trace_init_to MO (lift_to_MO_state (``(vs0 MO)) i s1)
         (lift_to_MO_state (``(vs0 MO)) i s2) (lift_to_MO_trace (``(vs0 MO)) i tr).
 Proof.
   intros i s1 s2 tr [Hfvt Hisp].
   induction Hfvt using finite_valid_trace_from_to_rev_ind; cbn;
-    [by apply finite_valid_trace_lift_RM_to_MO |].
-  constructor; [| by apply initial_state_prop_lift_RM_to_MO].
+    [by apply finite_valid_trace_init_to_lift_to_MO |].
+  constructor; [| by apply initial_state_prop_lift_to_MO].
   unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project.
   rewrite map_app.
   eapply finite_valid_trace_from_to_app; cbn; [by apply IHHfvt |].
@@ -1116,13 +1099,14 @@ Proof.
     + by cbn; state_update_simpl.
 Qed.
 
-Lemma lift_RM_to_MO :
+Lemma lift_preloaded_component_to_MO :
   forall i : index,
-    VLSM_embedding (RM i) MO (lift_to_MO_label i) (lift_to_MO_state (``(vs0 MO)) i).
+    VLSM_embedding (pre_loaded_with_all_messages_vlsm (M i)) MO
+      (lift_to_MO_label i) (lift_to_MO_state (``(vs0 MO)) i).
 Proof.
   constructor; intros.
   by eapply valid_trace_forget_last, lift_to_MO_finite_valid_trace_init_to,
-    valid_trace_add_default_last.
+    finite_valid_trace_init_add_last.
 Qed.
 
 (**
@@ -1150,10 +1134,10 @@ Definition MO_state2trace
   (us : MO_state) : list MO_transition_item :=
     MO_state2trace_aux us (enum index).
 
-Lemma finite_valid_trace_from_to_MO_state2trace_RMO :
+Lemma finite_constrained_trace_init_to_MO_state2trace :
   forall us : MO_state,
-    valid_state_prop RMO us ->
-      finite_valid_trace_init_to RMO (``(vs0 RMO)) us (MO_state2trace us).
+    constrained_state_prop MO us ->
+      finite_constrained_trace_init_to MO (``(vs0 MO)) us (MO_state2trace us).
 Proof.
   intros us Hvsp; split; [| done].
   unfold MO_state2trace.
@@ -1172,7 +1156,7 @@ Proof.
         by apply Hall; rewrite elem_of_cons; intros [].
       * by apply pre_composite_free_update_state_with_initial.
     + replace us with (state_update M us i (us i)) at 2 by (state_update_simpl; done).
-      apply lift_to_RMO_finite_valid_trace_from_to; [done |].
+      apply lift_to_MO_finite_constrained_trace_from_to; [done |].
       apply (valid_state_project_preloaded_to_preloaded_free _ _ us i) in Hvsp as Hvsp'.
       apply valid_state_has_trace in Hvsp' as (s & tr & [Hfvt Hinit]).
       replace s with (MkState [] (idx i)) in *; cycle 1.
@@ -1214,9 +1198,9 @@ Qed.
 
 (** *** Equivocation *)
 
-Lemma rec_obs_input_valid_transition :
+Lemma rec_obs_input_constrained_transition :
   forall (i : index) (s1 s2 : State) (m1 m2 : option Message) (lbl : Label),
-    input_valid_transition (RM i) lbl (s1, m1) (s2, m2) ->
+    input_constrained_transition (M i) lbl (s1, m1) (s2, m2) ->
       forall ob : Observation, rec_obs s1 ob -> rec_obs s2 ob.
 Proof.
   intros i s1 s2 m1 m2 lbl Hivt ob Hro.
@@ -1332,8 +1316,8 @@ Proof.
 Qed.
 
 Lemma messages_rec_obs :
-  forall i (s : VLSM.state (RM i)),
-    valid_state_prop (RM i) s ->
+  forall i (s : VLSM.state (M i)),
+    constrained_state_prop (M i) s ->
     forall (m' : Message) (ob : Observation),
       m' ∈ messages s ->
       rec_obs (state m') ob ->
