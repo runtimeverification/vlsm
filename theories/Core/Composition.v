@@ -667,7 +667,7 @@ Definition composite_constrained_state_prop
 
 (** If a composite state is constrained, so are all of its component states. *)
 Lemma composite_constrained_state_project
-  (message : Type) `{EqDecision index} (IM : index -> VLSM message)
+  {message : Type} `{EqDecision index} (IM : index -> VLSM message)
   (s : composite_state IM) i :
     composite_constrained_state_prop IM s ->
     constrained_state_prop (IM i) (s i).
