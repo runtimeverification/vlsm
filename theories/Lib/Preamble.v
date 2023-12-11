@@ -81,7 +81,7 @@ Qed.
 Lemma tc_wf_projected
   `{R1 : relation A} `(R2 : relation B) `{!Transitive R2} (f : A -> B) :
   (forall x y, R1 x y -> R2 (f x) (f y)) ->
-  wf R2 -> wf (tc R1).
+  well_founded R2 -> well_founded (tc R1).
 Proof.
   intros Hpreserve.
   apply wf_projected with f.
