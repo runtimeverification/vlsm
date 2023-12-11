@@ -293,7 +293,7 @@ Program Definition initial_indices
 Next Obligation.
 Proof.
   by intros; eapply traceable_vlsm_initial_state_dec,
-    valid_state_project_preloaded_to_preloaded_free.
+    composite_constrained_state_project.
 Qed.
 
 (**

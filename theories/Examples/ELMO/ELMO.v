@@ -1455,12 +1455,6 @@ Definition LimitedELMO : VLSM Message :=
   msg_dep_limited_equivocation_vlsm (Cv := listset (Message_validator idx))
     ELMO_component threshold Message_full_dependencies (Message_sender idx).
 
-(* TODO(traiansf): move this somewhere more appropriate *)
-Definition composite_constrained_state_prop
-  {message : Type} `{EqDecision index}
-  (IM : index -> VLSM message) (s : composite_state IM) : Prop :=
-    constrained_state_prop (free_composite_vlsm IM) s.
-
 Lemma ELMO_initial_state_equivocating_validators :
   forall s : composite_state ELMO_component,
     composite_initial_state_prop ELMO_component s ->
@@ -1729,7 +1723,7 @@ Proof.
   cbn; intros s v Hs.
   apply Morphisms_Prop.ex_iff_morphism; intros m.
   assert (forall k : index, UMO_reachable full_node (s k))
-    by (intro; eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded_free; done).
+    by (intro; eapply ELMO_full_node_reachable, composite_constrained_state_project; done).
   setoid_rewrite <- full_node_messages_iff_rec_obs; [| done].
   setoid_rewrite <- ELMO_CHBO_in_messages; [| done].
   split.
@@ -1977,7 +1971,7 @@ Proof.
   exists m; repeat split; [| done].
   destruct Hobs as [k Hobs]; exists k.
   apply full_node_messages_iff_rec_obs; [| by apply elem_of_messages].
-  by eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded_free.
+  by eapply ELMO_full_node_reachable, composite_constrained_state_project.
 Qed.
 
 Lemma ELMO_equivocating_validators_step_update_Send
@@ -2594,11 +2588,11 @@ Proof.
     }
     apply elem_of_messages in Hm as [Hsnd |]; [| done].
     cbn in Hsnd; eapply reachable_sent_messages_adr in Hsnd; cycle 1.
-    + by eapply valid_state_project_preloaded_to_preloaded_free.
+    + by eapply composite_constrained_state_project.
     + by congruence.
   - intros [j Hsnd].
     cbn in Hsnd; eapply reachable_sent_messages_adr in Hsnd as Hsnd_adr;
-      [| by eapply valid_state_project_preloaded_to_preloaded_free].
+      [| by eapply composite_constrained_state_project].
     rewrite Hm0_adr in Hsnd_adr.
     eapply inj in Hsnd_adr; [| done]; subst j.
     eapply ELMO_component_sizeState_of_constrained_trace_output in Hitem;

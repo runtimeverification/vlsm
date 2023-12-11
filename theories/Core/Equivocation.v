@@ -2417,7 +2417,7 @@ Proof.
   - destruct Hobserved as [Hreceived | Hsent].
     + by eapply preloaded_messages_received_from_component_of_valid_state_are_valid_free.
     + by eapply preloaded_messages_sent_from_component_of_valid_state_are_valid_free.
-  - eapply valid_state_project_preloaded_to_preloaded_free.
+  - eapply composite_constrained_state_project.
     eapply VLSM_incl_valid_state; [| done].
     by apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.

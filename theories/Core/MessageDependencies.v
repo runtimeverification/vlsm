@@ -849,8 +849,8 @@ Proof.
     by rewrite composite_has_been_directly_observed_sent_received_iff; intros [].
   }
   destruct Hobs as [Hobs | m' [i Hobs] Hhb]; [done | exists i].
-  by eapply msg_dep_full_node_happens_before_reflects_has_been_directly_observed
-  ; [| | apply valid_state_project_preloaded_to_preloaded_free | |].
+  by eapply msg_dep_full_node_happens_before_reflects_has_been_directly_observed;
+    cycle 2; [eapply composite_constrained_state_project |..].
 Qed.
 
 Lemma msg_dep_locally_is_globally_equivocating
@@ -872,7 +872,7 @@ Proof.
       [.. | by contradict n; eapply has_been_sent_iff_by_sender];
       [done | by eapply composite_HasBeenObserved_lift].
   contradict Hncomp; eapply tc_comparable, Hsent_comparable; [| done..].
-  by eapply valid_state_project_preloaded_to_preloaded_free.
+  by eapply composite_constrained_state_project.
 Qed.
 
 Lemma full_node_sent_locally_is_globally_equivocating
@@ -894,7 +894,7 @@ Proof.
       [by contradict n; eapply has_been_sent_iff_by_sender | done |];
       by constructor 1; eexists.
   contradict Hncomp; eapply Hsent_comparable; [| done..].
-  by eapply valid_state_project_preloaded_to_preloaded_free.
+  by eapply composite_constrained_state_project.
 Qed.
 
 End sec_composite_message_dependencies_equivocation.
