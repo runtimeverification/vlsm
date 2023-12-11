@@ -303,26 +303,19 @@ Proof.
   by destruct prefix; inversion Heq.
 Qed.
 
-Definition constrained_composite_state_is_equivocating_tracewise
-  (vs : valid_state PreFree) (v : validator) : Prop :=
-    is_equivocating_tracewise_no_has_been_sent (` vs) v.
-
 Context
-  `{!RelDecision constrained_composite_state_is_equivocating_tracewise}
+  `{RelDecision _ _ is_equivocating_tracewise_no_has_been_sent}
   .
 
 #[export] Program Instance equivocation_dec_tracewise
-  : BasicEquivocation (valid_state PreFree) validator Cv threshold :=
+  : BasicEquivocation (composite_state IM) validator Cv threshold :=
   {
     state_validators := fun _ => list_to_set (enum validator);
     is_equivocating := is_equivocating_tracewise_no_has_been_sent;
   }.
 
-Lemma equivocating_validators_is_equivocating_tracewise_iff
-  (s : composite_state IM) (Hs : valid_state_prop PreFree s) (v : validator) :
-  v ∈ equivocating_validators (exist _ s Hs)
-    <->
-  is_equivocating_tracewise_no_has_been_sent s v.
+Lemma equivocating_validators_is_equivocating_tracewise_iff s v
+  : v ∈ equivocating_validators s <-> is_equivocating_tracewise_no_has_been_sent s v.
 Proof.
   unfold equivocating_validators.
   simpl.
@@ -330,53 +323,43 @@ Proof.
   by itauto (apply elem_of_enum).
 Qed.
 
-#[export] Instance valid_state_equiv : Equiv (valid_state PreFree) :=
-  fun s s' => proj1_sig s = proj1_sig s'.
-
-#[export] Instance valid_state_equivocating_validators_proper :
-  Proper ((≡) ==> (≡)) equivocating_validators.
-Proof.
-  intros [s Hs] [_s Hs'] Heqv v; cbv in Heqv; subst _s.
-  by split; intros Hv;
-    do 2 eapply equivocating_validators_is_equivocating_tracewise_iff.
-Qed.
-
 Lemma equivocating_validators_empty_in_initial_state
-  (s : composite_state IM) (His : composite_initial_state_prop IM s) :
-  equivocating_validators (exist _ s (initial_state_is_valid PreFree _ His)) ≡@{Cv} ∅.
+  (s : composite_state IM)
+  (His : composite_initial_state_prop IM s)
+  : equivocating_validators s ≡@{Cv} ∅.
 Proof.
-  apply equiv_empty; intros v Hv.
-  apply equivocating_validators_is_equivocating_tracewise_iff in Hv.
-  by contradict Hv; apply initial_state_not_is_equivocating_tracewise.
+  intro v. split.
+  - rewrite equivocating_validators_is_equivocating_tracewise_iff.
+    by apply initial_state_not_is_equivocating_tracewise with (v := v) in His.
+  - by intro HV; contradict HV; apply not_elem_of_empty.
 Qed.
 
 Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validators
-  (l : label PreFree) (s s' : composite_state IM) (om om' : option message)
+  l s om s' om'
   (Ht : input_valid_transition PreFree l (s, om) (s', om'))
-  (Hno_sender : om ≫= sender = None) :
-  equivocating_validators (exist _ s' (input_valid_transition_destination _ Ht))
-    ⊆
-  equivocating_validators (exist _ s (input_valid_transition_origin _ Ht)).
+  (Hno_sender : om ≫= sender = None)
+  : equivocating_validators s' ⊆ equivocating_validators s.
 Proof.
-  intros v Hv%equivocating_validators_is_equivocating_tracewise_iff.
+  intros v Hs'%equivocating_validators_is_equivocating_tracewise_iff.
   by eapply equivocating_validators_is_equivocating_tracewise_iff,
-    transition_receiving_no_sender_reflects_is_equivocating_tracewise.
+            transition_receiving_no_sender_reflects_is_equivocating_tracewise.
 Qed.
 
 Lemma initial_state_equivocators_weight
-  (s : composite_state IM) (His : composite_initial_state_prop IM s)
-  : equivocation_fault (exist _ s (initial_state_is_valid PreFree _ His)) = 0%R.
+  (s : composite_state IM)
+  (Hs : composite_initial_state_prop IM s)
+  : equivocation_fault s = 0%R.
 Proof.
-  by apply sum_weights_empty, equivocating_validators_empty_in_initial_state.
+  apply equivocating_validators_empty_in_initial_state, elements_empty_iff in Hs.
+  unfold equivocation_fault.
+  by apply sum_weights_empty, elements_empty_iff.
 Qed.
 
 Lemma composite_transition_no_sender_equivocators_weight
-  (l : label PreFree) (s s' : composite_state IM) (om om' : option message)
+  l s om s' om'
   (Ht : input_valid_transition PreFree l (s, om) (s', om'))
-  (Hno_sender : om ≫= sender = None) :
-  (equivocation_fault (exist _ s' (input_valid_transition_destination _ Ht))
-    <=
-   equivocation_fault (exist _ s (input_valid_transition_origin _ Ht)))%R.
+  (Hno_sender : om ≫= sender = None)
+  : (equivocation_fault s' <= equivocation_fault s)%R.
 Proof.
   specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators
     _ _ _ _ _ Ht Hno_sender) as Heqv.

@@ -128,13 +128,12 @@ Context
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
   (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
   `{finite.Finite validator}
   `{ReachableThreshold validator Cv threshold}
   (A : validator -> index)
   (sender : message -> option validator)
-  `{!RelDecision (constrained_composite_state_is_equivocating_tracewise IM A sender)}
-  (HBE : BasicEquivocation (valid_state PreFree) validator Cv threshold
+  `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
+  (HBE : BasicEquivocation (composite_state IM) validator Cv threshold
     := equivocation_dec_tracewise IM threshold A sender)
   .
 
