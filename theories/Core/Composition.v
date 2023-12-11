@@ -657,7 +657,7 @@ Ltac state_update_simpl :=
 *)
 
 (**
-  We call a [composite_state] constrained is it is constrained for the
+  We call a [composite_state] constrained if it is constrained for the
   [free_composite_vlsm].
 *)
 Definition composite_constrained_state_prop
@@ -665,14 +665,12 @@ Definition composite_constrained_state_prop
   (IM : index -> VLSM message) (s : composite_state IM) : Prop :=
     constrained_state_prop (free_composite_vlsm IM) s.
 
-(**
-  If a composite state is constrained, so are all of its component states.
-*)
+(** If a composite state is constrained, so are all of its component states. *)
 Lemma composite_constrained_state_project
-  message `{EqDecision index} (IM : index -> VLSM message)
+  (message : Type) `{EqDecision index} (IM : index -> VLSM message)
   (s : composite_state IM) i :
-  composite_constrained_state_prop IM s ->
-  constrained_state_prop (IM i) (s i).
+    composite_constrained_state_prop IM s ->
+    constrained_state_prop (IM i) (s i).
 Proof.
   intros [om Hproto].
   induction Hproto; [by apply initial_state_is_valid; cbn |].

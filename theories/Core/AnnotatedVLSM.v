@@ -254,8 +254,8 @@ Definition annotated_projection_validator_prop_alt : Prop :=
     annotated_composite_label_project annotated_composite_state_project
     annotated_composite_label_lift annotated_composite_state_lift.
 
-Lemma preloaded_annotated_composite_preloaded_projection
-  : VLSM_projection
+Lemma preloaded_annotated_composite_preloaded_projection :
+  VLSM_projection
     (pre_loaded_with_all_messages_vlsm AnnotatedFree)
     (pre_loaded_with_all_messages_vlsm (IM i))
     annotated_composite_label_project annotated_composite_state_project.
@@ -289,14 +289,14 @@ Proof.
   - by intro; intros; apply any_message_is_valid_in_preloaded.
 Qed.
 
-Lemma annotated_composite_preloaded_projection
-  : VLSM_projection AnnotatedFree (pre_loaded_with_all_messages_vlsm (IM i))
+Lemma annotated_composite_preloaded_projection :
+  VLSM_projection AnnotatedFree (pre_loaded_with_all_messages_vlsm (IM i))
     annotated_composite_label_project annotated_composite_state_project.
 Proof.
   apply @VLSM_incl_projection_trans
-    with (MY := (pre_loaded_with_all_messages_vlsm AnnotatedFree));
-    [| by apply preloaded_annotated_composite_preloaded_projection].
-  by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm AnnotatedFree).
+    with (MY := (pre_loaded_with_all_messages_vlsm AnnotatedFree)).
+  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm AnnotatedFree).
+  - by apply preloaded_annotated_composite_preloaded_projection.
 Qed.
 
 Definition annotated_composite_induced_validator : VLSM message

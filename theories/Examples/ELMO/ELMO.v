@@ -49,18 +49,19 @@ Proof.
   - intros v vs Hv Hvs.
     rewrite sum_weights_disj_union, Hvs by set_solver.
     replace (sum_weights (set_map _ ({[v]} ∪ _)))
-      with (sum_weights (set_map (C := listset (Message_validator idx)) (D := listset Address) proj1_sig {[v]} ∪ set_map (D := listset Address) proj1_sig vs))
+      with (sum_weights (set_map (C := listset (Message_validator idx))
+        (D := listset Address) proj1_sig {[v]} ∪ set_map (D := listset Address) proj1_sig vs))
       by (apply sum_weights_proper; rewrite set_map_union; done).
     rewrite sum_weights_disj_union; cycle 1.
     + rewrite set_map_singleton.
-      cut (` v ∉ set_map (D := listset Address) proj1_sig vs); [by set_solver |].
+      cut (`v ∉ set_map (D := listset Address) proj1_sig vs); [by set_solver |].
       contradict Hv.
       apply elem_of_map in Hv as (v' & Hv' & Hv).
       by apply dsig_eq in Hv' as ->.
     + replace (sum_weights (set_map _ {[v]}))
-        with (sum_weights (Cv := listset Address) {[` v]});
-        [by rewrite !sum_weights_singleton |].
-      by apply sum_weights_proper; rewrite set_map_singleton.
+        with (sum_weights (Cv := listset Address) {[` v]}).
+      * by rewrite !sum_weights_singleton.
+      * by apply sum_weights_proper; rewrite set_map_singleton.
 Qed.
 
 Definition immediate_dependency (m1 m2 : Message) : Prop :=
@@ -1410,9 +1411,8 @@ Definition ELMO_global_equivocation :
 Definition ELMO_not_heavy : composite_state ELMO_component -> Prop :=
   not_heavy (1 := ELMO_global_equivocation).
 
-Definition ELMO_equivocating_validators :
-  composite_state ELMO_component -> listset Address :=
-    equivocating_validators (1 := ELMO_global_equivocation).
+Definition ELMO_equivocating_validators : composite_state ELMO_component -> listset Address :=
+  equivocating_validators (1 := ELMO_global_equivocation).
 
 Lemma ELMO_equivocating_validators_are_Message_validators :
   forall (s : composite_state ELMO_component) (a : Address),

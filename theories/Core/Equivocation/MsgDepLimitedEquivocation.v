@@ -121,7 +121,7 @@ Definition coeqv_limited_equivocation_projection_validator_prop_alt : index -> P
   HasBeenSentCapability coeqv_limited_equivocation_vlsm :=
 {
   has_been_sent :=
-    fun (sigma : state coeqv_limited_equivocation_vlsm) (m : message)=>
+    fun (sigma : state coeqv_limited_equivocation_vlsm) (m : message) =>
       composite_has_been_sent IM (original_state sigma) m
 }.
 Next Obligation.
@@ -137,20 +137,19 @@ Proof.
     with  (lY := li) in Ht as Hti; [| by apply (composite_project_label_eq IM)].
   cbn in Hti.
   apply has_been_sent_step_update with (msg := msg) in Hti.
-  destruct Ht as [_ Ht]; cbn in Ht; unfold annotated_transition in Ht.
-  cbn in Ht; destruct transition; inversion Ht; subst; cbn in *; clear Ht.
+  destruct Ht as [_ Ht]; cbn in Ht; unfold annotated_transition in Ht; cbn in Ht.
+  destruct transition; inversion Ht; subst; cbn in *; clear Ht.
   split.
   - intros [i_msg Hmsg].
     destruct (decide (i = i_msg)) as [<- | Hi_msg].
     + cbn in Hmsg; apply Hti in Hmsg as [-> | Hmsg]; [by left |].
       by right; eexists.
     + by right; state_update_simpl; eexists.
-  - cbn in *.
-    intros [-> | Hmsg]; [by eexists; apply Hti; left |].
+  - intros [-> | Hmsg]; [by eexists; apply Hti; left |].
     destruct Hmsg as [i_msg Hmsg].
-    destruct (decide (i = i_msg)) as [<- | Hi_msg];
-      [by eexists; apply Hti; right |].
-    by exists i_msg; state_update_simpl.
+    destruct (decide (i = i_msg)) as [<- | Hi_msg].
+    + by eexists; apply Hti; right.
+    + by exists i_msg; state_update_simpl.
 Qed.
 
 End sec_coequivocating_senders_limited_equivocation.
@@ -782,12 +781,11 @@ Lemma constrained_limited_to_annotated_limited_valid_state
     RelDecision (is_equivocating_tracewise_no_has_been_sent IM A sender)}
   `{!WitnessedEquivocation.WitnessedEquivocationCapability (Cv := Cv) IM threshold A sender}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies) :
-  forall (s : composite_state IM),
-    valid_state_prop
-      (tracewise_limited_equivocation_vlsm_composition IM threshold A sender (Cv := Cv))
-      s ->
-    exists (sigma : state Limited),
-      valid_state_prop Limited sigma /\ original_state sigma = s.
+    forall (s : composite_state IM),
+      valid_state_prop (tracewise_limited_equivocation_vlsm_composition
+        IM threshold A sender (Cv := Cv)) s ->
+      exists (sigma : state Limited),
+        valid_state_prop Limited sigma /\ original_state sigma = s.
 Proof.
   intros s Hs.
   eapply @limited_valid_state_has_trace_exhibiting_limited_equivocation
@@ -803,11 +801,10 @@ Lemma constrained_limited_to_annotated_limited_valid_message
     RelDecision (is_equivocating_tracewise_no_has_been_sent IM A sender)}
   `{!WitnessedEquivocation.WitnessedEquivocationCapability (Cv := Cv) IM threshold A sender}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies) :
-  forall (m : message),
-    valid_message_prop
-      (tracewise_limited_equivocation_vlsm_composition IM threshold A sender (Cv := Cv))
-      m ->
-    valid_message_prop Limited m.
+    forall (m : message),
+      valid_message_prop (tracewise_limited_equivocation_vlsm_composition
+        IM threshold A sender (Cv := Cv)) m ->
+      valid_message_prop Limited m.
 Proof.
   intros msg Hmsg.
   apply emitted_messages_are_valid_iff in Hmsg as [Hmsg | ([s im] & [i li] & s' & Ht)];
