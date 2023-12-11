@@ -2449,7 +2449,7 @@ Definition other_components_after_send
 Lemma non_equivocating_received_message_continues_trace
   (i : index) (si si' : VLSM.state (ELMO_component i))
   (m : Message)
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (ELMO_component i))
+  (Ht : input_constrained_transition (ELMO_component i)
     Receive (si, Some m) (si', None))
   (Hnot_local_equivocator' : ~ local_equivocators_full si' (adr (state m)))
   (i_m : index)
@@ -2462,8 +2462,7 @@ Lemma non_equivocating_received_message_continues_trace
   (Hspecial : component_reflects_composite sigma i)
   (H_not_i_paused : other_components_after_send (fun j : index => j = i) sigma)
   : exists tr_m,
-      finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (ELMO_component i_m))
-        (sigma i_m) (state m) tr_m.
+      finite_constrained_trace_from_to (ELMO_component i_m) (sigma i_m) (state m) tr_m.
 Proof.
   assert (Hsigma_no_junk :
     forall j, j <> i ->
@@ -2521,7 +2520,7 @@ Qed.
 Lemma all_intermediary_transitions_are_receive
   (i : index) (si si' : VLSM.state (ELMO_component i))
   (m : Message)
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (ELMO_component i))
+  (Ht : input_constrained_transition (ELMO_component i)
     Receive (si, Some m) (si', None))
   (i_m : index)
   (Hi_m : adr (state m) = idx i_m)
@@ -2532,9 +2531,7 @@ Lemma all_intermediary_transitions_are_receive
   (Hcomponent : sigma i = si)
   (Hspecial : component_reflects_composite sigma i)
   (tr_m : list transition_item)
-  (Htr_m : finite_valid_trace_from_to
-          (pre_loaded_with_all_messages_vlsm (ELMO_component i_m))
-          (sigma i_m) (state m) tr_m)
+  (Htr_m : finite_constrained_trace_from_to (ELMO_component i_m) (sigma i_m) (state m) tr_m)
   : Forall (fun item : transition_item ELMO_component_type => l item = Receive) tr_m.
 Proof.
   apply Forall_forall; intros item Hitem.
@@ -2582,9 +2579,7 @@ Lemma lift_receive_trace
   (m : Message)
   (i_m : index)
   (tr_m : list transition_item)
-  (Htr_m :
-    finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (ELMO_component i_m))
-      (sigma i_m) (state m) tr_m)
+  (Htr_m : finite_constrained_trace_from_to (ELMO_component i_m) (sigma i_m) (state m) tr_m)
   (Htr_m_receive : Forall (fun item : transition_item ELMO_component_type => l item = Receive) tr_m)
   (Htr_m_inputs_in_sigma :
     forall (item : transition_item) (msg : Message),
@@ -2667,7 +2662,7 @@ Qed.
 Lemma special_receivable_messages_emittable_in_future
   (i : index) (si si' : VLSM.state (ELMO_component i))
   (m : Message)
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (ELMO_component i))
+  (Ht : input_constrained_transition (ELMO_component i)
     Receive (si, Some m) (si', None))
   (i_m : index)
   (Hi_m : adr (state m) = idx i_m)
@@ -2753,7 +2748,7 @@ Qed.
 
 Lemma receiving_already_sent_global_local_equivocators
   (i : index) (sigma : composite_state ELMO_component) (m : Message) (s' : State)
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (ELMO_component i))
+  (Ht : input_constrained_transition (ELMO_component i)
     Receive (sigma i, Some m) (s', None))
   (Hreflects : component_reflects_composite sigma i)
   (Hm : composite_has_been_sent ELMO_component sigma m)
@@ -2783,7 +2778,7 @@ Qed.
 
 Lemma receiving_already_equivocating_global_local_equivocators
   (i : index) (sigma : composite_state ELMO_component) (m : Message) (s' : State)
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (ELMO_component i))
+  (Ht : input_constrained_transition (ELMO_component i)
     Receive (sigma i, Some m) (s', None))
   (Hreflects : component_reflects_composite sigma i)
   (Heqv : local_equivocators_full (sigma i) (adr (state m)))
@@ -2802,7 +2797,7 @@ Qed.
 
 Lemma receiving_not_already_equivocating_global_local_equivocators
   (i : index) (sigma : composite_state ELMO_component) (m : Message) (s' : State)
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm (ELMO_component i))
+  (Ht : input_constrained_transition (ELMO_component i)
     Receive (sigma i, Some m) (s', None))
   (Hreflects : component_reflects_composite sigma i)
   (Hneqv : ~ local_equivocators_full (sigma i) (adr (state m)))
@@ -3053,7 +3048,7 @@ Proof.
   intros i li si om Hvti.
   apply input_valid_transition_iff in Hvti as [[si' om'] Hvti].
   pose (Hvti' := Hvti); destruct Hvti' as [(_ & _ & Hvi) Hti].
-  assert (Hsi' : valid_state_prop (pre_loaded_with_all_messages_vlsm (ELMO_component i)) si')
+  assert (Hsi' : constrained_state_prop (ELMO_component i) si')
     by (eapply input_valid_transition_destination; done).
   apply reflecting_composite_for_reachable_component in Hsi'
     as (s' & <- & Hs' & _ & _ & Htransitions).
