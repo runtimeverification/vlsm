@@ -160,7 +160,7 @@ Qed.
 *)
 Lemma msg_dep_has_been_sent
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   m
   (Hsent : has_been_sent X s m)
   : forall dm, msg_dep_rel message_dependencies dm m -> has_been_directly_observed X s dm.
@@ -191,7 +191,7 @@ Qed.
 Lemma full_node_has_been_received
   (Hfull : message_dependencies_full_node_condition_prop)
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   m
   (Hreceived : has_been_received X s m)
   : forall dm, msg_dep_rel message_dependencies dm m -> has_been_directly_observed X s dm.
@@ -212,7 +212,7 @@ Qed.
 Lemma msg_dep_full_node_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   : forall dm m, msg_dep_rel message_dependencies dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.
@@ -228,7 +228,7 @@ Qed.
 Lemma msg_dep_full_node_happens_before_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   : forall dm m, msg_dep_happens_before message_dependencies dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.

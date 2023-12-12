@@ -82,12 +82,12 @@ Class TraceableVLSM
       (item, s) ∈ state_destructor s' -> destination item = s';
   tv_state_destructor_transition :
     forall s' : state X,
-      valid_state_prop (pre_loaded_with_all_messages_vlsm X) s' ->
+      constrained_state_prop X s' ->
       forall (s : state X) (item : transition_item X),
         (item, s) ∈ state_destructor s' ->
         input_valid_transition_item (pre_loaded_with_all_messages_vlsm X) s item;
   tv_state_destructor_initial :
-    forall (s : state X) (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s),
+    forall (s : state X) (Hs : constrained_state_prop X s),
       initial_state_prop X s <-> state_destructor s = [];
 }.
 

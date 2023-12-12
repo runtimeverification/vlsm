@@ -112,7 +112,7 @@ Qed.
 
 Lemma equivocator_state_append_preloaded_weak_projection
   (base_s : equivocator_state X)
-  (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
+  (Hbase_s : constrained_state_prop (equivocator_vlsm X) base_s)
   : VLSM_weak_embedding (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
       (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
       (equivocator_state_append_label base_s) (equivocator_state_append base_s).
@@ -152,8 +152,8 @@ Qed.
 
 Lemma equivocator_state_append_sent_left
   `{HasBeenSentCapability message X}
-  base_s (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
-  s (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
+  base_s (Hbase_s : constrained_state_prop (equivocator_vlsm X) base_s)
+  s (Hs : constrained_state_prop (equivocator_vlsm X) s)
   : forall m, equivocator_has_been_sent X base_s m ->
     equivocator_has_been_sent X (equivocator_state_append base_s s) m.
 Proof.
@@ -165,8 +165,8 @@ Qed.
 
 Lemma equivocator_state_append_sent_right
   `{HasBeenSentCapability message X}
-  base_s (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
-  s (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
+  base_s (Hbase_s : constrained_state_prop (equivocator_vlsm X) base_s)
+  s (Hs : constrained_state_prop (equivocator_vlsm X) s)
   : forall m, equivocator_has_been_sent X s m ->
     equivocator_has_been_sent X (equivocator_state_append base_s s) m.
 Proof.

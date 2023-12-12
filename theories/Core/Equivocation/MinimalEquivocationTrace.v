@@ -271,7 +271,7 @@ Definition composite_latest_sent_observed_in
 
 Lemma traceable_vlsm_initial_state_dec :
   forall (i : index) (si : state (IM i)),
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) si ->
+    constrained_state_prop (IM i) si ->
     Decision (initial_state_prop (IM i) si).
 Proof.
   intros; destruct (decide (state_destructor i si = nil)).

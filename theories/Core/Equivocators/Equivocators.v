@@ -1058,10 +1058,10 @@ Qed.
 *)
 Lemma preloaded_equivocator_state_project_valid_state
   (bs : state (equivocator_vlsm X))
-  (Hbs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs)
+  (Hbs : constrained_state_prop (equivocator_vlsm X) bs)
   : forall i si,
     equivocator_state_project bs i = Some si ->
-      valid_state_prop (pre_loaded_with_all_messages_vlsm X) si.
+      constrained_state_prop X si.
 Proof.
   intros i si Hpr.
   by apply (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr).

@@ -660,8 +660,8 @@ Lemma valid_state_project_preloaded_to_preloaded_free
   message `{EqDecision index} (IM : index -> VLSM message)
   (X := free_composite_vlsm IM)
   (s : state (pre_loaded_with_all_messages_vlsm X)) i :
-  valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-  valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
+  constrained_state_prop X s ->
+  constrained_state_prop (IM i) (s i).
 Proof.
   intros [om Hproto].
   induction Hproto; [by apply initial_state_is_valid; cbn |].
@@ -692,8 +692,8 @@ Lemma valid_state_project_preloaded_to_preloaded
   message `{EqDecision index} (IM : index -> VLSM message) constraint
   (X := composite_vlsm IM constraint)
   (s : state (pre_loaded_with_all_messages_vlsm X)) i :
-  valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-  valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
+  constrained_state_prop X s ->
+  constrained_state_prop (IM i) (s i).
 Proof.
   intros.
   eapply valid_state_project_preloaded_to_preloaded_free.
@@ -706,7 +706,7 @@ Lemma valid_state_project_preloaded
       (X := composite_vlsm IM constraint)
       (s : state X) i :
   valid_state_prop X s ->
-  valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
+  constrained_state_prop (IM i) (s i).
 Proof.
   by intros; apply valid_state_project_preloaded_to_preloaded,
     pre_loaded_with_all_messages_valid_state_prop.
