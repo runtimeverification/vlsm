@@ -428,24 +428,23 @@ Qed.
   [valid_state_message_prop]erty is transferred.
 *)
 Lemma proj_pre_loaded_with_all_messages_valid_state_message_preservation
-  (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
   (s : state Xj)
   (om : option message)
   (Hps : valid_state_message_prop Xj s om)
-  : valid_state_message_prop PreLoaded s om.
+  : constrained_state_message_prop (IM j) s om.
 Proof.
   induction Hps.
-  - by apply (valid_initial_state_message PreLoaded); [| destruct om].
-  - apply (valid_generated_state_message PreLoaded) with s _om _s om l; [done.. | | done].
+  - by apply valid_initial_state_message; [| destruct om].
+  - apply (valid_generated_state_message (pre_loaded_with_all_messages_vlsm (IM j)))
+      with s _om _s om l; [done.. | | done].
     by cbn; eapply (projection_valid_implies_valid IM), Hv.
 Qed.
 
 (** We can now finally prove the main result for this section. *)
-Lemma proj_pre_loaded_with_all_messages_incl
-  (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
-  : VLSM_incl Xj PreLoaded.
+Lemma proj_pre_loaded_with_all_messages_incl :
+  VLSM_incl Xj (pre_loaded_with_all_messages_vlsm (IM j)).
 Proof.
-  apply (basic_VLSM_incl Xj PreLoaded); intro; intros.
+  apply (basic_VLSM_incl Xj); intro; intros.
   - done.
   - by apply initial_message_is_valid.
   - by cbn; eapply (projection_valid_implies_valid IM), Hv.
