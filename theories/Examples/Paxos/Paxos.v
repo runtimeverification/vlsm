@@ -812,9 +812,7 @@ Proof.
 Qed.
 
 Notation Pred_Stable_In VLSM P :=
-  (forall l s im s' om,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm VLSM) l (s, im) (s', om) ->
-    P s -> P s').
+  (forall l s im s' om, input_constrained_transition VLSM l (s, im) (s', om) -> P s -> P s').
 
 Lemma lift_component_stable_prop ix (P : state (IM ix) -> Prop) :
   Pred_Stable_In (IM ix) P ->
