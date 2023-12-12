@@ -85,7 +85,7 @@ Class TraceableVLSM
       constrained_state_prop X s' ->
       forall (s : state X) (item : transition_item X),
         (item, s) ∈ state_destructor s' ->
-        input_valid_transition_item (pre_loaded_with_all_messages_vlsm X) s item;
+        input_constrained_transition_item X s item;
   tv_state_destructor_initial :
     forall (s : state X) (Hs : constrained_state_prop X s),
       initial_state_prop X s <-> state_destructor s = [];
@@ -158,7 +158,7 @@ Proof.
     replace s' with (destination item)
       by (eapply tv_state_destructor_destination; rewrite Hdestruct; left).
     eapply (finite_valid_trace_from_to_app R); [by apply Hind |].
-    cut (input_valid_transition_item R s item).
+    cut (input_constrained_transition_item X s item).
     {
       by destruct item; cbn; apply (finite_valid_trace_from_to_singleton R).
     }
@@ -238,14 +238,14 @@ Lemma composite_tv_state_destructor_transition :
   forall (s' : composite_state IM), constrained_state_prop Free s' ->
   forall (s : composite_state IM) (item : composite_transition_item IM) (i : index),
   (item, s) ∈ composite_state_destructor s' i ->
-  input_valid_transition_item RFree s item.
+  input_constrained_transition_item Free s item.
 Proof.
   intros s' Hs' s item i.
   unfold composite_state_destructor; rewrite elem_of_list_fmap.
   intros ([itemi si] & [=-> ->] & Hin).
   eapply (VLSM_weak_embedding_input_valid_transition
            (lift_to_preloaded_free_weak_embedding IM i s' Hs')).
-  eapply @tv_state_destructor_transition; [done | | done].
+  rapply @tv_state_destructor_transition; [| done].
   by eapply composite_constrained_state_project.
 Qed.
 
@@ -323,7 +323,7 @@ Qed.
 Lemma composite_state_destructor_lookup_reachable :
   forall s' : composite_state IM, constrained_state_prop Free s' ->
   forall i n item s, composite_state_destructor s' i !! n = Some (item, s) ->
-    input_valid_transition_item RFree s item.
+    input_constrained_transition_item Free s item.
 Proof.
   intros s' Hs' i n item s Hdestruct.
   by eapply composite_tv_state_destructor_transition, elem_of_list_lookup_2.
@@ -332,7 +332,7 @@ Qed.
 Lemma composite_state_destructor_head_reachable :
   forall s' : composite_state IM, constrained_state_prop Free s' ->
   forall i item s, head (composite_state_destructor s' i) = Some (item, s) ->
-  input_valid_transition_item RFree s item.
+  input_constrained_transition_item Free s item.
 Proof.
   intros s' Hs' i item s Hdestruct.
   by eapply composite_tv_state_destructor_transition, head_Some_elem_of.
