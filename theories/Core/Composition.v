@@ -1390,7 +1390,7 @@ Inductive composite_valid_transitions_from_to
     composite_valid_transitions_from_to s (destination item) (tr ++ [item]).
 
 Lemma composite_valid_transitions_from_to_trace : forall s s' tr,
-  finite_valid_trace_from_to RFree s s' tr ->
+  finite_constrained_trace_from_to Free s s' tr ->
   composite_valid_transitions_from_to s s' tr.
 Proof.
   induction 1 using finite_valid_trace_from_to_rev_ind; [by constructor |].

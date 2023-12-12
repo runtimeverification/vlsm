@@ -178,9 +178,8 @@ Qed.
 Lemma preloaded_finite_valid_trace_from_to_projection
   (s s' : composite_state IM)
   (trx : list (composite_transition_item IM))
-  (Htr : finite_valid_trace_from_to
-          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s s' trx)
-   : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (s' j)
+  (Htr : finite_constrained_trace_from_to (free_composite_vlsm IM) s s' trx)
+   : finite_constrained_trace_from_to (IM j) (s j) (s' j)
       (VLSM_projection_finite_trace_project preloaded_component_projection trx).
 Proof.
   by apply (VLSM_projection_finite_valid_trace_from_to preloaded_component_projection).

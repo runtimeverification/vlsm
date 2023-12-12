@@ -654,7 +654,7 @@ Lemma indexed_reachable_composite_state_to_trace :
   forall (indices : list index), NoDup indices ->
     not_in_indices_initial_prop s indices ->
     forall is tr, indexed_composite_state_to_trace choose s Hs indices = (is, tr) ->
-    finite_valid_trace_from_to RFree is s tr.
+    finite_constrained_trace_from_to Free is s tr.
 Proof.
   intros choose Hchoose s Hs indices; revert Hchoose.
   apply_funelim (indexed_composite_state_to_trace choose s Hs indices);

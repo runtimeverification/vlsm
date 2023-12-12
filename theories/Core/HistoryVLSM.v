@@ -76,7 +76,6 @@ Context
   (IM : index -> VLSM message)
   `{forall i : index, HistoryVLSM (IM i)}
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 Lemma not_composite_valid_transition_next_initial :
@@ -172,7 +171,7 @@ Proof. by apply tc_reflect, composite_valid_transition_next_reflects_rechability
 Lemma composite_valid_transitions_from_to_reflects_reachability :
   forall s s' tr,
   composite_valid_transitions_from_to IM s s' tr ->
-  constrained_state_prop Free s' -> finite_valid_trace_from_to RFree s s' tr.
+  constrained_state_prop Free s' -> finite_constrained_trace_from_to Free s s' tr.
 Proof.
   induction 1; intros; [by constructor |].
   assert (Hitem : input_constrained_transition Free (l item) (s', input item)
