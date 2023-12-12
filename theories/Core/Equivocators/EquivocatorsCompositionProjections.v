@@ -907,7 +907,7 @@ Qed.
 Lemma equivocators_trace_project_preserves_zero_descriptors
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
-  (Htr : finite_valid_trace_from PreFreeE is tr)
+  (Htr : finite_constrained_trace_from FreeE is tr)
   (descriptors : equivocator_descriptors IM)
   (idescriptors : equivocator_descriptors IM)
   (trX : list (composite_transition_item IM))
@@ -937,7 +937,7 @@ Lemma preloaded_equivocators_valid_trace_from_project
   (tr : list (composite_transition_item (equivocator_IM IM)))
   (final_state := finite_trace_last is tr)
   (Hproper : proper_equivocator_descriptors IM final_descriptors final_state)
-  (Htr : finite_valid_trace_from PreFreeE is tr)
+  (Htr : finite_constrained_trace_from FreeE is tr)
   : exists
     (trX : list (composite_transition_item IM))
     (initial_descriptors : equivocator_descriptors IM),
@@ -985,7 +985,7 @@ Qed.
 Lemma equivocators_trace_project_zero_descriptors
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
-  (Htr : finite_valid_trace_from PreFreeE is tr)
+  (Htr : finite_constrained_trace_from FreeE is tr)
   : exists (trX : list (composite_transition_item IM)),
     equivocators_trace_project (zero_descriptor IM) tr = Some (trX, (zero_descriptor IM)).
 Proof.
@@ -1090,7 +1090,7 @@ Lemma preloaded_equivocators_valid_trace_project_proper_initial
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
   (final_state := finite_trace_last is tr)
-  (Htr : finite_valid_trace_from PreFreeE is tr)
+  (Htr : finite_constrained_trace_from FreeE is tr)
   (final_descriptors : equivocator_descriptors IM)
   (trX : list (composite_transition_item IM))
   (initial_descriptors : equivocator_descriptors IM)
@@ -1109,8 +1109,7 @@ Qed.
 Lemma equivocators_trace_project_output_reflecting_inv
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
-  (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm
-           (free_composite_vlsm (equivocator_IM IM))) is tr)
+  (Htr : finite_constrained_trace_from (free_composite_vlsm (equivocator_IM IM)) is tr)
   (m : message)
   (Hbbs : Exists (field_selector output m) tr)
   : exists
@@ -1169,8 +1168,7 @@ Qed.
 Lemma equivocators_trace_project_output_reflecting_iff
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
-  (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm
-          (free_composite_vlsm (equivocator_IM IM))) is tr)
+  (Htr : finite_constrained_trace_from (free_composite_vlsm (equivocator_IM IM)) is tr)
   (m : message)
   : Exists (field_selector output m) tr
   <-> exists
@@ -1361,7 +1359,7 @@ Lemma equivocators_partial_trace_project_extends_left
   partial_trace_project (sX, trX) = Some (sY, trY) ->
   forall s'X preX,
     finite_trace_last s'X preX = sX ->
-    finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) s'X (preX ++ trX) ->
+    finite_constrained_trace_from X s'X (preX ++ trX) ->
     exists s'Y preY,
       partial_trace_project (s'X, preX ++ trX) = Some (s'Y, preY ++ trY) /\
       finite_trace_last s'Y preY = sY.
@@ -1412,7 +1410,7 @@ Definition equivocators_total_trace_project
 *)
 Lemma equivocators_total_trace_project_characterization
   {s tr}
-  (Hpre_tr : finite_valid_trace_from PreFreeE s tr)
+  (Hpre_tr : finite_constrained_trace_from FreeE s tr)
   : equivocators_trace_project (zero_descriptor IM) tr =
     Some (equivocators_total_trace_project tr, zero_descriptor IM).
 Proof.
@@ -1424,7 +1422,7 @@ Lemma equivocators_total_trace_project_app
   (X := FreeE)
   (trace_project := equivocators_total_trace_project)
   : forall tr1X tr2X,
-      (exists sX, finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) sX (tr1X ++ tr2X)) ->
+      (exists sX, finite_constrained_trace_from X sX (tr1X ++ tr2X)) ->
       trace_project (tr1X ++ tr2X) = trace_project tr1X ++ trace_project tr2X.
 Proof.
   intros tr1X tr2X [sX Hpre_tr].
@@ -1441,7 +1439,7 @@ Qed.
 
 Lemma equivocators_total_VLSM_projection_finite_trace_project
   {s tr}
-  (Hpre_tr : finite_valid_trace_from PreFreeE s tr)
+  (Hpre_tr : finite_constrained_trace_from FreeE s tr)
   : pre_VLSM_projection_finite_trace_project PreFreeE _ equivocators_total_label_project
       equivocators_total_state_project tr = equivocators_total_trace_project tr.
 Proof.
@@ -1450,7 +1448,7 @@ Proof.
   rewrite pre_VLSM_projection_finite_trace_project_app.
   apply finite_valid_trace_from_app_iff in Hpre_tr as [Hpre_tr Hpre_x].
   specialize (IHtr Hpre_tr).
-  rewrite IHtr.
+  unfold PreFreeE in IHtr; rewrite IHtr.
   f_equal.
   inversion Hpre_x. subst.
   destruct Ht as [[_ [_ Hv]] Ht]. destruct l as (i, [sn | ji li | ji li])
@@ -1477,7 +1475,7 @@ Lemma equivocators_total_trace_project_final_state
   (state_project := equivocators_total_state_project)
   (trace_project := equivocators_total_trace_project)
   : forall sX trX,
-      finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X) sX trX ->
+      finite_constrained_trace_from X sX trX ->
       state_project (finite_trace_last sX trX) =
       finite_trace_last (state_project sX) (trace_project trX).
 Proof.
@@ -1880,7 +1878,7 @@ Proof.
   split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert
-      (HPreFree_pre_tr : finite_valid_trace_from SubPreFreeE s_pre (pre ++ tr)).
+      (HPreFree_pre_tr : finite_constrained_trace_from SubFreeE s_pre (pre ++ tr)).
     {
       revert Hpre_tr; apply VLSM_incl_finite_valid_trace_from.
       by apply SeededXE_incl_PreFreeE.
@@ -1926,7 +1924,7 @@ Proof.
   split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert
-      (HPreFree_pre_tr : finite_valid_trace_from PreFreeE s_pre (pre ++ tr)).
+      (HPreFree_pre_tr : finite_constrained_trace_from FreeE s_pre (pre ++ tr)).
     {
       apply VLSM_incl_finite_valid_trace_from; [| done].
       by apply constrained_preloaded_incl.
@@ -2081,7 +2079,7 @@ Proof.
     (equivocators_no_equivocations_vlsm_X_vlsm_partial_projection final_descriptors) is tr) as Hsim.
   unfold equivocators_partial_trace_project in Hsim.
   rewrite decide_True in Hsim by done.
-  assert (HPreFree_tr : finite_valid_trace_from PreFreeE is tr).
+  assert (HPreFree_tr : finite_constrained_trace_from FreeE is tr).
   {
     apply VLSM_incl_finite_valid_trace_from; [| done].
     by apply constrained_preloaded_incl.

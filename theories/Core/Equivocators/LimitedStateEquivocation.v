@@ -337,7 +337,7 @@ Proof.
   split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert (HPreFree_pre_tr :
-      finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) s_pre (pre ++ tr)).
+      finite_constrained_trace_from FreeE s_pre (pre ++ tr)).
     {
       apply VLSM_incl_finite_valid_trace_from; [| done].
       by apply constrained_preloaded_incl.

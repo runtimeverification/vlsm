@@ -1005,7 +1005,7 @@ Qed.
 Lemma preloaded_equivocator_vlsm_trace_project_valid_inv
   (bs : state (equivocator_vlsm X))
   (btr : list (transition_item (equivocator_vlsm X)))
-  (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs btr)
+  (Hbtr : finite_constrained_trace_from (equivocator_vlsm X) bs btr)
   (i : nat)
   si
   (Hi : equivocator_state_project bs i = Some si)

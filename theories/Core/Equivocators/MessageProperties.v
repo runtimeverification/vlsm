@@ -57,7 +57,7 @@ Qed.
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
   (bs : state (equivocator_vlsm X))
   (btr : list (transition_item (equivocator_vlsm X)))
-  (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs btr)
+  (Hbtr : finite_constrained_trace_from (equivocator_vlsm X) bs btr)
   (bitem : transition_item (equivocator_vlsm X))
   (Hitem : bitem ∈ btr)
   (sn : state X)
@@ -180,7 +180,7 @@ Qed.
 Lemma equivocator_vlsm_trace_project_output_reflecting_inv
   (is : state (equivocator_vlsm X))
   (tr : list (transition_item (equivocator_vlsm X)))
-  (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) is tr)
+  (Htr : finite_constrained_trace_from (equivocator_vlsm X) is tr)
   (m : message)
   (Hbbs : Exists (field_selector output m) tr)
   : exists
@@ -200,7 +200,7 @@ Proof.
     by destruct (preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
       _ _ Htr _ Hin _ eq_refl)
       as  [_ [Hcontra _]]; cbn in *; congruence.
-  - apply valid_trace_add_default_last in Htr.
+  - red in Htr; apply valid_trace_add_default_last in Htr.
     specialize
     (preloaded_equivocator_vlsm_trace_project_valid_item
        _ _ _ Htr _ Hin _ Hsndl)
