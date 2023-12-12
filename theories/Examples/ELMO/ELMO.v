@@ -33,7 +33,7 @@ Context
   `{!Inj (=) (=) idx}
   `{!ReachableThreshold (Message_validator idx) (listset (Message_validator idx)) threshold}.
 
-#[local] Instance Address_reachable_threshold :
+#[export] Instance ReachableThreshold_Address :
   ReachableThreshold Address (listset Address) threshold.
 Proof.
   destruct ReachableThreshold0 as (Hgt0 & vs & Hvs).

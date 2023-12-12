@@ -1269,28 +1269,28 @@ Definition transition_preserves_global_equivocation
     msg_dep_is_globally_equivocating IM message_dependencies sender s v ->
     msg_dep_is_globally_equivocating IM message_dependencies sender (destination item) v.
 
-Inductive TraceMonotonicGlobalEquivocation :
+Inductive TraceMonotoneGlobalEquivocation :
   composite_state IM -> list (composite_transition_item IM) -> Prop :=
 | tpge_initial :
-    forall (s : composite_state IM), TraceMonotonicGlobalEquivocation s []
+    forall (s : composite_state IM), TraceMonotoneGlobalEquivocation s []
 | tpge_step :
     forall (s : composite_state IM) (item : composite_transition_item IM)
       (tr : list (composite_transition_item IM)),
       transition_preserves_global_equivocation s item ->
-      TraceMonotonicGlobalEquivocation (destination item) tr ->
-      TraceMonotonicGlobalEquivocation s (item :: tr).
+      TraceMonotoneGlobalEquivocation (destination item) tr ->
+      TraceMonotoneGlobalEquivocation s (item :: tr).
 
-Definition trace_monotonic_global_equivocation
+Definition trace_monotone_global_equivocation
   (s : composite_state IM) (tr : list (composite_transition_item IM)) : Prop :=
     forall (pre suf : list (composite_transition_item IM)) (item : composite_transition_item IM),
       tr = pre ++ [item] ++ suf ->
       transition_preserves_global_equivocation (finite_trace_last s pre) item.
 
-Lemma trace_monotonic_global_equivocation_def_equiv :
+Lemma trace_monotone_global_equivocation_def_equiv :
   forall (s : composite_state IM) (tr : list (composite_transition_item IM)),
-    trace_monotonic_global_equivocation s tr
+    trace_monotone_global_equivocation s tr
       <->
-    TraceMonotonicGlobalEquivocation s tr.
+    TraceMonotoneGlobalEquivocation s tr.
 Proof.
   split.
   - remember (length tr) as n; revert s tr Heqn.
@@ -1305,7 +1305,7 @@ Proof.
   - induction 1; intros pre suf item1 Heq; [by destruct pre |].
     destruct pre as [| _item pre]; simplify_list_eq; [done |].
     rewrite finite_trace_last_cons.
-    by eapply IHTraceMonotonicGlobalEquivocation.
+    by eapply IHTraceMonotoneGlobalEquivocation.
 Qed.
 
 End sec_msg_dep_is_globally_equivocating_props.
