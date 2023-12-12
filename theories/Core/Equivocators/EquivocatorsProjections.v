@@ -937,7 +937,7 @@ Qed.
 Lemma preloaded_equivocator_vlsm_trace_project_valid
   (bs be : state (equivocator_vlsm X))
   (btr : list (transition_item (equivocator_vlsm X)))
-  (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs be btr)
+  (Hbtr : finite_constrained_trace_from_to (equivocator_vlsm X) bs be btr)
   (j : nat)
   ej
   (Hj : equivocator_state_project be j = Some ej)
@@ -948,10 +948,10 @@ Lemma preloaded_equivocator_vlsm_trace_project_valid
     match di with
     | NewMachine sn =>
       initial_state_prop X sn
-      /\ finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) sn ej tr
+      /\ finite_constrained_trace_from_to X sn ej tr
     | Existing i =>
       exists s, equivocator_state_project bs i = Some s /\
-      finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) s ej tr
+      finite_constrained_trace_from_to X s ej tr
     end.
 Proof.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
@@ -1040,7 +1040,7 @@ Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
   (is fs : state (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)))
   (tr : list transition_item)
   (Hntr : tr <> [])
-  (Htr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) is fs tr)
+  (Htr : finite_constrained_trace_from_to (equivocator_vlsm X) is fs tr)
   (j : nat)
   (di : MachineDescriptor X)
   (trX : list (transition_item X))
@@ -1052,7 +1052,7 @@ Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
         sn fsj trX
     | Existing i =>
       exists isi, equivocator_state_project is i = Some isi /\
-      finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) isi fsj trX /\
+      finite_constrained_trace_from_to X isi fsj trX /\
       (initial_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) is ->
         initial_state_prop (pre_loaded_with_all_messages_vlsm X) isi)
     end.
@@ -1061,7 +1061,7 @@ Proof.
   spec Hj; [done |].
   specialize (Hj is) as [fsj Hfsj].
   replace (finite_trace_last _ _) with fs in Hfsj
-    by (symmetry; apply (valid_trace_get_last Htr)).
+    by (symmetry; red in Htr; apply valid_trace_get_last in Htr; done).
   exists fsj. split; [done |].
   specialize
     (preloaded_equivocator_vlsm_trace_project_valid _ _ _ Htr _ _ Hfsj)

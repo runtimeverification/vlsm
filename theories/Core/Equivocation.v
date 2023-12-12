@@ -415,7 +415,7 @@ Lemma oracle_partial_trace_update
   [oracle : state_message_oracle]
   (Horacle : oracle_stepwise_props selector oracle)
   s0 s tr
-  (Htr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm vlsm) s0 s tr) :
+  (Htr : finite_constrained_trace_from_to vlsm s0 s tr) :
     forall (m : message),
       oracle s m <-> (trace_has_message selector m tr \/ oracle s0 m).
 Proof.
@@ -2741,7 +2741,7 @@ Proof.
       erewrite oracle_partial_trace_update.
       - by left.
       - by apply has_been_received_stepwise_props.
-      - by apply valid_trace_add_default_last; apply Htr.
+      - by apply valid_trace_add_default_last in Htr; apply Htr.
     }
     specialize (IHHtr Htrm').
     apply (extend_right_finite_trace_from _ IHHtr).
@@ -2927,7 +2927,7 @@ Lemma has_been_received_in_state_preloaded s1 m :
   exists (s0 : state (pre_loaded_with_all_messages_vlsm X))
     (item : transition_item) (tr : list transition_item),
     input item = Some m /\
-    finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X) s0 s1 (item :: tr).
+    finite_constrained_trace_from_to X s0 s1 (item :: tr).
 Proof.
   intros Hpsp Hhbr.
   pose proof (Hetr := valid_state_has_trace _ _ Hpsp).

@@ -95,7 +95,7 @@ Qed.
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item
   (bs bf : state (equivocator_vlsm X))
   (btr : list (transition_item (equivocator_vlsm X)))
-  (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs bf btr)
+  (Hbtr : finite_constrained_trace_from_to (equivocator_vlsm X) bs bf btr)
   (bitem : transition_item (equivocator_vlsm X))
   (Hitem : bitem ∈ btr)
   (idl : nat)
