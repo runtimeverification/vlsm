@@ -1459,8 +1459,8 @@ Proof.
     by auto using finite_valid_trace_from_to_extend.
 Qed.
 
-Lemma finite_valid_trace_from_to_snoc
-  (s f : state X) (ls : list transition_item) (item : transition_item):
+Lemma finite_valid_trace_from_to_snoc :
+  forall (s f : state X) (ls : list transition_item) (item : transition_item X),
     finite_valid_trace_from_to s f (ls ++ [item]) <->
     let m := finite_trace_last s ls in
       finite_valid_trace_from_to s m ls /\
@@ -1506,43 +1506,45 @@ Proof.
   by eauto using finite_valid_trace_from_to_last.
 Qed.
 
-Lemma finite_valid_trace_init_to_snoc
-  (si sf : state X) (tr : list transition_item) (item : transition_item):
-  finite_valid_trace_init_to si sf (tr ++ [item]) <->
-  finite_valid_trace_init_to si (finite_trace_last si tr) tr /\
-  input_valid_transition_item (finite_trace_last si tr) item /\
-  destination item = sf.
+Lemma finite_valid_trace_init_to_snoc :
+  forall (si sf : state X) (tr : list transition_item) (item : transition_item X),
+    finite_valid_trace_init_to si sf (tr ++ [item]) <->
+    finite_valid_trace_init_to si (finite_trace_last si tr) tr /\
+    input_valid_transition_item (finite_trace_last si tr) item /\
+    destination item = sf.
 Proof.
-  unfold finite_valid_trace_init_to; rewrite finite_valid_trace_from_to_snoc.
+  unfold finite_valid_trace_init_to; intros.
+  rewrite finite_valid_trace_from_to_snoc.
   by itauto.
 Qed.
 
-Lemma finite_valid_trace_init_to_snoc_rev
-  {si sf : state X} {tr : list transition_item} {item : transition_item}:
-  finite_valid_trace_init_to si sf tr ->
-  input_valid_transition_item sf item ->
-  finite_valid_trace_init_to si (destination item) (tr ++ [item]).
+Lemma finite_valid_trace_init_to_snoc_rev :
+  forall {si sf : state X} {tr : list transition_item} {item : transition_item X},
+    finite_valid_trace_init_to si sf tr ->
+    input_valid_transition_item sf item ->
+    finite_valid_trace_init_to si (destination item) (tr ++ [item]).
 Proof.
-  unfold finite_valid_trace_init_to; rewrite finite_valid_trace_from_to_snoc.
-  intros [Htr Hinit].
+  unfold finite_valid_trace_init_to.
+  intros * [Htr Hinit] Hivt.
+  rewrite finite_valid_trace_from_to_snoc.
   apply finite_valid_trace_from_to_last in Htr as Hsf; subst sf.
   by itauto.
 Qed.
 
-Lemma finite_valid_trace_init_to_prefix
-  {si sf : state X} {pre tr : list transition_item} :
-  finite_valid_trace_init_to si sf tr ->
-  pre `prefix_of` tr ->
-  finite_valid_trace_init_to si (finite_trace_last si pre) pre.
+Lemma finite_valid_trace_init_to_prefix :
+  forall {si sf : state X} {pre tr : list (transition_item X)},
+    finite_valid_trace_init_to si sf tr ->
+    pre `prefix_of` tr ->
+    finite_valid_trace_init_to si (finite_trace_last si pre) pre.
 Proof.
-  intros [] [suf ->]; split; [| done].
+  intros * [] [suf ->]; split; [| done].
   by eapply finite_valid_trace_from_to_app_split.
 Qed.
 
-Lemma finite_valid_trace_init_to_prefix_1
-  {si sf : state X} {pre suf : list transition_item} :
-  finite_valid_trace_init_to si sf (pre ++ suf) ->
-  finite_valid_trace_init_to si (finite_trace_last si pre) pre.
+Lemma finite_valid_trace_init_to_prefix_1 :
+  forall {si sf : state X} {pre suf : list (transition_item X)},
+    finite_valid_trace_init_to si sf (pre ++ suf) ->
+    finite_valid_trace_init_to si (finite_trace_last si pre) pre.
 Proof. by intros; eapply finite_valid_trace_init_to_prefix; [| eexists]. Qed.
 
 Lemma extend_right_finite_trace_from_to
