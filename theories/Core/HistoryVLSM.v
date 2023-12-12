@@ -110,7 +110,7 @@ Qed.
 Lemma composite_valid_transition_reflects_rechability :
   forall l s1 iom s2 oom,
   composite_valid_transition IM l s1 iom s2 oom ->
-  valid_state_prop RFree s2 ->
+  constrained_state_prop Free s2 ->
   input_constrained_transition Free l (s1, iom) (s2, oom).
 Proof.
   intros * Hnext Hs2; revert l s1 iom oom Hnext.
@@ -159,20 +159,20 @@ Qed.
 
 Lemma composite_valid_transition_next_reflects_rechability :
   forall s1 s2, composite_valid_transition_next IM s1 s2 ->
-    valid_state_prop RFree s2 -> valid_state_prop RFree s1.
+    constrained_state_prop Free s2 -> constrained_state_prop Free s1.
 Proof.
   by intros s1 s2 []; eapply composite_valid_transition_reflects_rechability.
 Qed.
 
 Lemma composite_valid_transition_future_reflects_rechability :
   forall s1 s2, composite_valid_transition_future IM s1 s2 ->
-    valid_state_prop RFree s2 -> valid_state_prop RFree s1.
+    constrained_state_prop Free s2 -> constrained_state_prop Free s1.
 Proof. by apply tc_reflect, composite_valid_transition_next_reflects_rechability. Qed.
 
 Lemma composite_valid_transitions_from_to_reflects_reachability :
   forall s s' tr,
   composite_valid_transitions_from_to IM s s' tr ->
-  valid_state_prop RFree s' -> finite_valid_trace_from_to RFree s s' tr.
+  constrained_state_prop Free s' -> finite_valid_trace_from_to RFree s s' tr.
 Proof.
   induction 1; intros; [by constructor |].
   assert (Hitem : input_constrained_transition Free (l item) (s', input item)

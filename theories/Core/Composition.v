@@ -490,10 +490,8 @@ Qed.
 Lemma valid_state_preloaded_composite_free_lift
   (j : index)
   (sj : state (IM j))
-  (Hp : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM j)) sj)
-  : valid_state_prop
-      (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
-      (lift_to_composite_state' j sj).
+  (Hp : constrained_state_prop (IM j) sj)
+  : constrained_state_prop free_composite_vlsm (lift_to_composite_state' j sj).
 Proof.
   by apply (VLSM_embedding_valid_state (lift_to_composite_preloaded_VLSM_embedding j)).
 Qed.
@@ -597,7 +595,7 @@ Qed.
 
 Lemma lift_to_preloaded_free_weak_embedding :
   forall (i : index) (cs : composite_state),
-    valid_state_prop (pre_loaded_with_all_messages_vlsm free_composite_vlsm) cs ->
+    constrained_state_prop free_composite_vlsm cs ->
     VLSM_weak_embedding
       (pre_loaded_with_all_messages_vlsm (IM i))
       (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
@@ -660,8 +658,8 @@ Lemma valid_state_project_preloaded_to_preloaded_free
   message `{EqDecision index} (IM : index -> VLSM message)
   (X := free_composite_vlsm IM)
   (s : state (pre_loaded_with_all_messages_vlsm X)) i :
-  valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-  valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
+  constrained_state_prop X s ->
+  constrained_state_prop (IM i) (s i).
 Proof.
   intros [om Hproto].
   induction Hproto; [by apply initial_state_is_valid; cbn |].
@@ -692,8 +690,8 @@ Lemma valid_state_project_preloaded_to_preloaded
   message `{EqDecision index} (IM : index -> VLSM message) constraint
   (X := composite_vlsm IM constraint)
   (s : state (pre_loaded_with_all_messages_vlsm X)) i :
-  valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
-  valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
+  constrained_state_prop X s ->
+  constrained_state_prop (IM i) (s i).
 Proof.
   intros.
   eapply valid_state_project_preloaded_to_preloaded_free.
@@ -706,7 +704,7 @@ Lemma valid_state_project_preloaded
       (X := composite_vlsm IM constraint)
       (s : state X) i :
   valid_state_prop X s ->
-  valid_state_prop (pre_loaded_with_all_messages_vlsm (IM i)) (s i).
+  constrained_state_prop (IM i) (s i).
 Proof.
   by intros; apply valid_state_project_preloaded_to_preloaded,
     pre_loaded_with_all_messages_valid_state_prop.
@@ -1265,7 +1263,7 @@ Context
   (constraint1 : composite_label IM1 -> composite_state IM1 * option message -> Prop)
   (constraint2 : composite_label IM2 -> composite_state IM2 * option message -> Prop)
   (constraint_projection
-    : forall s1, valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1 ->
+    : forall s1, constrained_state_prop (free_composite_vlsm IM1) s1 ->
       forall l1 om, constraint1 l1 (s1, om) ->
     constraint2 (same_IM_label_rew l1) (same_IM_state_rew s1, om))
   (seed : message -> Prop)

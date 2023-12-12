@@ -1833,7 +1833,7 @@ Proof.
     apply or_comm in Hc.
     destruct Hc as [Hinit_input | Hno_equiv]
     ; [by apply initial_message_is_valid, seeded_equivocators_initial_message; right |].
-    assert (Hs_free : valid_state_prop SubPreFreeE (finite_trace_last is tr'))
+    assert (Hs_free : constrained_state_prop SubFreeE (finite_trace_last is tr'))
       by (apply proj1, finite_valid_trace_from_to_last_pstate in Hpre_tr_to; done).
     apply (composite_proper_sent _ _ Hs_free) in Hno_equiv.
     specialize (Hno_equiv is tr' Hpre_tr_to).

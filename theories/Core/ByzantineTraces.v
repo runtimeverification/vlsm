@@ -219,7 +219,7 @@ Lemma preloaded_alt_valid_state :
     valid_state_prop Alt (lifted_alt_state sj).
 Proof.
   intros sj om Hp.
-  assert (Hsj : valid_state_prop PreLoaded sj)
+  assert (Hsj : constrained_state_prop M sj)
     by (exists om; done); clear Hp.
   induction Hsj using valid_state_prop_ind;
     [by apply initial_state_is_valid; intros [] |].

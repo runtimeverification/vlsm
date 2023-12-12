@@ -44,7 +44,7 @@ Lemma VLSM_projection_oracle_reflect
   (oracleY : state Y -> message -> Prop)
   (HstepwiseX : oracle_stepwise_props (vlsm := X) selectorX oracleX)
   (HstepwiseY : oracle_stepwise_props (vlsm := Y) selectorY oracleY)
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
   forall m, oracleY (state_project s) m -> oracleX s m.
 Proof.
   intros s Hs m Hm.
@@ -71,7 +71,7 @@ End sec_selectors.
 Lemma VLSM_projection_has_been_sent_reflect
   `{HasBeenSentCapability message X}
   `{HasBeenSentCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector output) (field_selector output).
@@ -83,7 +83,7 @@ Qed.
 Lemma VLSM_projection_has_been_received_reflect
   `{HasBeenReceivedCapability message X}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with (field_selector input) (field_selector input).
@@ -97,7 +97,7 @@ Lemma VLSM_projection_has_been_directly_observed_reflect
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_directly_observed Y (state_project s) m -> has_been_directly_observed X s m.
 Proof.
   apply VLSM_projection_oracle_reflect with item_sends_or_receives item_sends_or_receives.
@@ -161,7 +161,7 @@ Lemma VLSM_weak_embedding_oracle
   (HstepwiseY : oracle_stepwise_props (vlsm := Y) selectorY oracleY)
   (HoracleX_dec : RelDecision oracleX)
   (HoracleY_dec : RelDecision oracleY)
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, oracleX s m -> oracleY (state_project s) m.
 Proof.
   intros s Hs m Hm.
@@ -178,7 +178,7 @@ End sec_selectors.
 Lemma VLSM_weak_embedding_has_been_sent
   `{HasBeenSentCapability message X}
   `{HasBeenSentCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m.
 Proof.
   apply VLSM_weak_embedding_oracle with (field_selector output) (field_selector output).
@@ -192,7 +192,7 @@ Qed.
 Lemma VLSM_weak_embedding_has_been_received
   `{HasBeenReceivedCapability message X}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m.
 Proof.
   apply VLSM_weak_embedding_oracle with (field_selector input) (field_selector input).
@@ -208,7 +208,7 @@ Lemma VLSM_weak_embedding_has_been_directly_observed
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_directly_observed X s m -> has_been_directly_observed Y (state_project s) m.
 Proof.
   apply VLSM_weak_embedding_oracle with item_sends_or_receives item_sends_or_receives.
@@ -238,7 +238,7 @@ Context
 Lemma VLSM_embedding_has_been_sent
   `{HasBeenSentCapability message X}
   `{HasBeenSentCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_sent X s m -> has_been_sent Y (state_project s) m.
 Proof.
   exact (VLSM_weak_embedding_has_been_sent (VLSM_embedding_weaken Hsimul)).
@@ -247,7 +247,7 @@ Qed.
 Lemma VLSM_embedding_has_been_received
   `{HasBeenReceivedCapability message X}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_received X s m -> has_been_received Y (state_project s) m.
 Proof.
   exact (VLSM_weak_embedding_has_been_received (VLSM_embedding_weaken Hsimul)).
@@ -258,7 +258,7 @@ Lemma VLSM_embedding_has_been_directly_observed
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_directly_observed X s m -> has_been_directly_observed Y (state_project s) m.
 Proof.
   exact (VLSM_weak_embedding_has_been_directly_observed (VLSM_embedding_weaken Hsimul)).
@@ -267,7 +267,7 @@ Qed.
 Lemma VLSM_embedding_has_been_sent_reflect
   `{HasBeenSentCapability message X}
   `{HasBeenSentCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_sent Y (state_project s) m -> has_been_sent X s m.
 Proof.
   exact (VLSM_projection_has_been_sent_reflect  (VLSM_embedding_is_projection Hsimul)).
@@ -276,7 +276,7 @@ Qed.
 Lemma VLSM_embedding_has_been_received_reflect
   `{HasBeenReceivedCapability message X}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_received Y (state_project s) m -> has_been_received X s m.
 Proof.
   exact (VLSM_projection_has_been_received_reflect  (VLSM_embedding_is_projection Hsimul)).
@@ -287,7 +287,7 @@ Lemma VLSM_embedding_has_been_directly_observed_reflect
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_directly_observed Y (state_project s) m -> has_been_directly_observed X s m.
 Proof.
   exact (VLSM_projection_has_been_directly_observed_reflect (VLSM_embedding_is_projection Hsimul)).
@@ -311,7 +311,7 @@ Context
 Lemma VLSM_incl_has_been_sent
   `{HasBeenSentCapability message X}
   `{HasBeenSentCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_sent X s m -> has_been_sent Y s m.
 Proof.
   intros s Hs m Hm.
@@ -323,7 +323,7 @@ Qed.
 Lemma VLSM_incl_has_been_received
   `{HasBeenReceivedCapability message X}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_received X s m -> has_been_received Y s m.
 Proof.
   intros s Hs m Hm.
@@ -337,7 +337,7 @@ Lemma VLSM_incl_has_been_directly_observed
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_directly_observed X s m -> has_been_directly_observed Y s m.
 Proof.
   intros s Hs m Hm.
@@ -349,7 +349,7 @@ Qed.
 Lemma VLSM_incl_has_been_sent_reflect
   `{HasBeenSentCapability message X}
   `{HasBeenSentCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_sent Y s m -> has_been_sent X s m.
 Proof.
   intros s Hs m Hm.
@@ -361,7 +361,7 @@ Qed.
 Lemma VLSM_incl_has_been_received_reflect
   `{HasBeenReceivedCapability message X}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_received Y s m -> has_been_received X s m.
 Proof.
   intros s Hs m Hm.
@@ -375,7 +375,7 @@ Lemma VLSM_incl_has_been_directly_observed_reflect
   `{HasBeenReceivedCapability message X}
   `{HasBeenSentCapability message Y}
   `{HasBeenReceivedCapability message Y}
-  : forall s, valid_state_prop (pre_loaded_with_all_messages_vlsm X) s ->
+  : forall s, constrained_state_prop X s ->
     forall m, has_been_directly_observed Y s m -> has_been_directly_observed X s m.
 Proof.
   intros s Hs m Hm.
@@ -402,7 +402,7 @@ Context
   [has_been_sent] predicate is preserved through the [same_IM_state_rew] map.
 *)
 Lemma same_IM_composite_has_been_sent_preservation s1 m
-  (Hs1 : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1)
+  (Hs1 : constrained_state_prop (free_composite_vlsm IM1) s1)
   : composite_has_been_sent IM1 s1 m ->
     composite_has_been_sent IM2 (same_IM_state_rew Heq s1) m.
 Proof.
