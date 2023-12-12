@@ -316,7 +316,7 @@ Lemma selected_message_exists_in_all_traces_initial_state
 Proof.
   intro Hselected.
   assert (Hps : constrained_state_prop vlsm s) by (apply initial_state_is_valid; done).
-  assert (Htr : finite_valid_trace_init_to pre_vlsm s s []) by (split; [constructor |]; done).
+  assert (Htr : finite_constrained_trace_init_to vlsm s s []) by (split; [constructor |]; done).
   specialize (Hselected s [] Htr).
   unfold trace_has_message in Hselected.
   by rewrite Exists_nil in Hselected.
@@ -438,7 +438,7 @@ Lemma oracle_initial_trace_update
   (Horacle : oracle_stepwise_props selector oracle)
   s m
   [s0 tr]
-  (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) s0 s tr) :
+  (Htr : finite_constrained_trace_init_to vlsm s0 s tr) :
     oracle s m <-> trace_has_message selector m tr.
 Proof.
   rewrite (oracle_partial_trace_update Horacle) by apply Htr.
@@ -998,14 +998,14 @@ Qed.
 
 Lemma examine_one_trace :
   forall is s tr,
-    finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr ->
+    finite_constrained_trace_init_to vlsm is s tr ->
   forall m,
     oracle s m <->
     trace_has_message selector m tr.
 Proof.
   intros is s tr Htr m.
   assert (constrained_state_prop vlsm s)
-    by (apply valid_trace_last_pstate in Htr; done).
+    by (red in Htr; apply valid_trace_last_pstate in Htr; done).
   split.
   - intros Horacle.
     apply Horacle_all_have in Horacle; [| done].
@@ -1119,7 +1119,7 @@ Defined.
 Lemma has_been_sent_examine_one_trace
   `{HasBeenSentCapability message vlsm} :
   forall is s tr,
-    finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr ->
+    finite_constrained_trace_init_to vlsm is s tr ->
   forall m,
     has_been_sent vlsm s m <->
     trace_has_message (field_selector output) m tr.
@@ -1183,7 +1183,7 @@ Defined.
 Lemma has_been_received_examine_one_trace
   `{HasBeenReceivedCapability message vlsm} :
   forall is s tr,
-    finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr ->
+    finite_constrained_trace_init_to vlsm is s tr ->
   forall m,
     has_been_received vlsm s m <->
     trace_has_message (field_selector input) m tr.
@@ -1198,7 +1198,7 @@ Lemma trace_to_initial_state_has_no_inputs
   {message} vlsm
   `{HasBeenReceivedCapability message vlsm}
   is s tr
-  (Htr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr)
+  (Htr : finite_constrained_trace_init_to vlsm is s tr)
   (Hs : initial_state_prop vlsm s)
   : forall item, item ∈ tr -> input item = None.
 Proof.
@@ -1280,7 +1280,7 @@ Qed.
 Lemma has_been_directly_observed_examine_one_trace
   {message} (vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :
   forall is s tr,
-    finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm vlsm) is s tr ->
+    finite_constrained_trace_init_to vlsm is s tr ->
   forall m,
     has_been_directly_observed vlsm s m <->
     trace_has_message item_sends_or_receives m tr.
@@ -1605,7 +1605,7 @@ Lemma sent_can_emit
   can_emit X m.
 Proof.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
-  assert (Hpre_tr : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X) is s tr).
+  assert (Hpre_tr : finite_constrained_trace_init_to X is s tr).
   {
     by clear -Htr; destruct X;
       eapply VLSM_incl_finite_valid_trace_init_to;
@@ -2130,25 +2130,22 @@ Qed.
 
 Lemma has_been_sent_iff_by_sender
   (Hsender_safety : sender_safety_alt_prop) [is s tr]
-  (Htr : finite_valid_trace_init_to
-    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) is s tr)
+  (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr)
   [m v] (Hsender : sender m = Some v) :
   composite_has_been_sent s m <-> has_been_sent (IM (A v)) (s (A v)) m.
 Proof.
   split; [| by exists (A v)].
   intros [i Hi].
   erewrite Hsender_safety; [done | done |].
-  assert
-    (Htr_pr : finite_valid_trace_init_to
-      (pre_loaded_with_all_messages_vlsm (IM i))
-      (is i) (s i) (VLSM_projection_finite_trace_project (preloaded_component_projection IM i) tr)).
+  assert (Htr_pr : finite_constrained_trace_init_to (IM i) (is i) (s i)
+    (VLSM_projection_finite_trace_project (preloaded_component_projection IM i) tr)).
   {
     by apply (VLSM_projection_finite_valid_trace_init_to (preloaded_component_projection IM i)).
   }
   eapply can_emit_from_valid_trace.
   - by eapply valid_trace_forget_last.
   - eapply proper_sent; [| done | done].
-    by revert Htr_pr; apply valid_trace_last_pstate.
+    by red in Htr_pr; apply valid_trace_last_pstate in Htr_pr.
 Qed.
 
 Lemma no_additional_equivocations_constraint_dec
@@ -2630,7 +2627,7 @@ Lemma state_received_not_sent_trace_iff
   (m : message)
   (s is : state (PreX))
   (tr : list transition_item)
-  (Htr : finite_valid_trace_init_to PreX is s tr)
+  (Htr : finite_constrained_trace_init_to X is s tr)
   : state_received_not_sent s m <-> trace_received_not_sent_before_or_after tr m.
 Proof.
   assert (Hs : constrained_state_prop X s)
@@ -2659,7 +2656,7 @@ Lemma state_received_not_sent_invariant_trace_iff
   (P : message -> Prop)
   (s is : state (PreX))
   (tr : list transition_item)
-  (Htr : finite_valid_trace_init_to PreX is s tr)
+  (Htr : finite_constrained_trace_init_to X is s tr)
   : state_received_not_sent_invariant s P <->
     trace_received_not_sent_before_or_after_invariant tr P.
 Proof.
@@ -2802,7 +2799,7 @@ Proof.
   apply Hlift; [| done].
   revert Hequiv_s.
   apply state_received_not_sent_invariant_trace_iff with is.
-  apply valid_trace_add_last; [done |].
+  eapply valid_trace_add_last in Htr; [done |].
   apply last_error_destination_last.
   by destruct Hgen as [-> [<- _]].
 Qed.
@@ -2862,11 +2859,11 @@ Context
 Lemma all_pre_traces_to_valid_state_are_valid_free
   (s is : state PreY) (tr : list (transition_item PreY))
   (Hs : valid_state_prop Y s)
-  (Htr : finite_valid_trace_init_to PreY is s tr)
+  (Htr : finite_constrained_trace_init_to Y is s tr)
   : finite_valid_trace_init_to Y is s tr.
 Proof.
   apply pre_traces_with_valid_inputs_are_valid in Htr; [done |].
-  apply valid_trace_last_pstate in Htr as Hspre.
+  red in Htr; apply valid_trace_last_pstate in Htr as Hspre.
   apply Forall_forall; intros.
   destruct (input x) as [m |] eqn: Hm; [| by apply option_valid_message_None].
   eapply received_valid; cbn; [done |].

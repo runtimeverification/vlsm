@@ -38,9 +38,9 @@ Qed.
 
 Lemma history_unique_trace_to_reachable :
   forall is s tr,
-    finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X) is s tr ->
+    finite_constrained_trace_init_to X is s tr ->
   forall is' tr',
-    finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X) is' s tr' ->
+    finite_constrained_trace_init_to X is' s tr' ->
       is' = is /\ tr' = tr.
 Proof.
   intros is s tr Htr; induction Htr using finite_valid_trace_init_to_rev_ind;
