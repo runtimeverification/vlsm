@@ -703,11 +703,11 @@ Lemma from_send_to_from_sent_argument
   `{HasBeenSentCapability}
   (P : state vlsm -> Prop)
   (P_stable : forall s l oim s' oom,
-    input_valid_transition pre_vlsm l (s, oim) (s', oom) ->
+    input_constrained_transition vlsm l (s, oim) (s', oom) ->
     P s -> P s')
   (msg : message)
   (send_establishes_P : forall s l oim s',
-    input_valid_transition pre_vlsm l (s, oim) (s', Some msg) ->
+    input_constrained_transition vlsm l (s, oim) (s', Some msg) ->
     P s') :
   forall s,
     valid_state_prop (pre_loaded_with_all_messages_vlsm vlsm) s ->

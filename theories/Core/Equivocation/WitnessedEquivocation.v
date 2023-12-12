@@ -168,7 +168,7 @@ Qed.
 *)
 Lemma equivocating_validators_step_update
     l s om s' om'
-    (Ht : input_valid_transition PreFree l (s, om) (s', om'))
+    (Ht : input_constrained_transition Free l (s, om) (s', om'))
     v
     : v ∈ equivocating_validators s' ->
       v ∈ equivocating_validators s \/
