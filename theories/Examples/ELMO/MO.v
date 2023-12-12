@@ -1157,7 +1157,7 @@ Proof.
       * by apply pre_composite_free_update_state_with_initial.
     + replace us with (state_update M us i (us i)) at 2 by (state_update_simpl; done).
       apply lift_to_MO_finite_constrained_trace_from_to; [done |].
-      apply (valid_state_project_preloaded_to_preloaded_free _ _ us i) in Hvsp as Hvsp'.
+      apply (composite_constrained_state_project _ us i) in Hvsp as Hvsp'.
       apply valid_state_has_trace in Hvsp' as (s & tr & [Hfvt Hinit]).
       replace s with (MkState [] (idx i)) in *; cycle 1.
       * by inversion Hinit; destruct s; cbn in *; subst.

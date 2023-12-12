@@ -654,12 +654,21 @@ Ltac state_update_simpl :=
   precise.
 *)
 
-Lemma valid_state_project_preloaded_to_preloaded_free
-  message `{EqDecision index} (IM : index -> VLSM message)
-  (X := free_composite_vlsm IM)
-  (s : state (pre_loaded_with_all_messages_vlsm X)) i :
-  constrained_state_prop X s ->
-  constrained_state_prop (IM i) (s i).
+(**
+  We call a [composite_state] constrained if it is constrained for the
+  [free_composite_vlsm].
+*)
+Definition composite_constrained_state_prop
+  {message : Type} `{EqDecision index}
+  (IM : index -> VLSM message) (s : composite_state IM) : Prop :=
+    constrained_state_prop (free_composite_vlsm IM) s.
+
+(** If a composite state is constrained, so are all of its component states. *)
+Lemma composite_constrained_state_project
+  {message : Type} `{EqDecision index} (IM : index -> VLSM message)
+  (s : composite_state IM) i :
+    composite_constrained_state_prop IM s ->
+    constrained_state_prop (IM i) (s i).
 Proof.
   intros [om Hproto].
   induction Hproto; [by apply initial_state_is_valid; cbn |].
@@ -674,18 +683,6 @@ Proof.
   by apply any_message_is_valid_in_preloaded.
 Qed.
 
-(**
-  If a composite state is constrained, so are all of its component states.
-*)
-Lemma constrained_state_prop_component
-  {message : Type} `{EqDecision index} (IM : index -> VLSM message)
-  (cs : composite_state IM) (i : index) :
-    constrained_state_prop (free_composite_vlsm IM) cs ->
-    constrained_state_prop (IM i) (cs i).
-Proof.
-  by eapply valid_state_project_preloaded_to_preloaded_free.
-Qed.
-
 Lemma valid_state_project_preloaded_to_preloaded
   message `{EqDecision index} (IM : index -> VLSM message) constraint
   (X := composite_vlsm IM constraint)
@@ -694,7 +691,7 @@ Lemma valid_state_project_preloaded_to_preloaded
   constrained_state_prop (IM i) (s i).
 Proof.
   intros.
-  eapply valid_state_project_preloaded_to_preloaded_free.
+  eapply composite_constrained_state_project.
   apply VLSM_incl_valid_state; [| done].
   by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
 Qed.
@@ -736,7 +733,7 @@ Proof.
   destruct Hptrans as [[Hproto_s [_ Hcvalid]] Htrans].
   split; [| by eapply composite_transition_project_active].
   split; [| split].
-  - by eapply valid_state_project_preloaded_to_preloaded_free.
+  - by eapply composite_constrained_state_project.
   - by apply any_message_is_valid_in_preloaded.
   - by destruct l; apply Hcvalid.
 Qed.

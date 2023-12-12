@@ -246,7 +246,7 @@ Proof.
   eapply (VLSM_weak_embedding_input_valid_transition
            (lift_to_preloaded_free_weak_embedding IM i s' Hs')).
   rapply @tv_state_destructor_transition; [| done].
-  by eapply valid_state_project_preloaded_to_preloaded_free.
+  by eapply composite_constrained_state_project.
 Qed.
 
 Lemma composite_tv_state_destructor_index  :
@@ -284,9 +284,9 @@ Proof.
   - replace (state_destructor i (s i))
       with (@nil (transition_item (IM i) * state (IM i))); [done |].
     symmetry; apply tv_state_destructor_initial; [| done].
-    by eapply valid_state_project_preloaded_to_preloaded_free.
+    by eapply composite_constrained_state_project.
   - apply tv_state_destructor_initial.
-    + by eapply valid_state_project_preloaded_to_preloaded_free.
+    + by eapply composite_constrained_state_project.
     + by eapply fmap_nil_inv.
 Qed.
 
@@ -316,7 +316,7 @@ Proof.
   - apply composite_state_update_size_monotone.
     state_update_simpl.
     eapply tv_state_destructor_size; [done | | done].
-    by eapply valid_state_project_preloaded_to_preloaded_free.
+    by eapply composite_constrained_state_project.
   - by rewrite state_update_twice, state_update_id.
 Qed.
 

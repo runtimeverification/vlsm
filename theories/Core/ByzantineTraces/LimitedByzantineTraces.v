@@ -387,11 +387,11 @@ Lemma lift_fixed_byzantine_traces_to_limited
     state_annotation (@finite_trace_last _ Limited bs btr) ⊆ byzantine_vs.
 Proof.
   subst non_byzantine.
-  induction Hbyzantine using finite_valid_trace_rev_ind; [repeat split |].
-  - constructor; apply initial_state_is_valid.
-    by repeat split; cbn; apply lift_sub_state_initial.
-  - by cbn; apply lift_sub_state_initial.
-  - by apply empty_subseteq.
+  induction Hbyzantine using finite_valid_trace_rev_ind.
+  - split; [| by apply empty_subseteq].
+    assert (Hisp : initial_state_prop Limited bs)
+      by (split; cbn; [apply lift_sub_state_initial |]; done).
+    by split; [constructor; apply initial_state_is_valid |].
   - subst s_reset_byzantine bs btr.
     unfold pre_VLSM_embedding_finite_trace_project; rewrite !map_app.
     rewrite @msg_dep_annotate_trace_with_equivocators_app; cbn.
@@ -400,9 +400,9 @@ Proof.
     ; destruct IHHbyzantine as [[Htr0_ann Hsi_ann] Htr0_eqv_byzantine]
     ; cbn in Htr0_eqv_byzantine |- *.
     remember (@finite_trace_last _ (annotated_type (free_composite_vlsm IM) _) _ _)
-     as lst in Htr0_eqv_byzantine at 1 |- * at 1 2 3 4 5 6.
-    assert (Hlsti : original_state lst = lift_sub_state IM (elements (list_to_set (enum index) ∖ byzantine))
-                                          (finite_trace_last si tr0)).
+      as lst in Htr0_eqv_byzantine at 1 |- * at 1 2 3 4 5 6.
+    assert (Hlsti : original_state lst = lift_sub_state IM
+      (elements (list_to_set (enum index) ∖ byzantine)) (finite_trace_last si tr0)).
     {
       subst lst; rewrite msg_dep_annotate_trace_with_equivocators_last_original_state; symmetry.
       apply (pre_VLSM_embedding_finite_trace_last _ _

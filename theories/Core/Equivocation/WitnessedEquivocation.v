@@ -252,7 +252,7 @@ Proof.
     in Hwitness as Hincl
   ; [| by split].
   remember (finite_trace_last is tr) as s.
-  destruct (option_bind _ _ sender om) as [v |] eqn: Heq_v.
+  destruct (om ≫= sender) as [v |] eqn: Heq_v.
   - destruct om as [m |]; [| by inversion Heq_v]. simpl in Heq_v.
     destruct (decide (set_eq (elements (equivocating_validators s)) (elements (equivocating_validators s')))).
     + apply set_eq_fin_set in s0; left; split; [done |].

@@ -559,19 +559,6 @@ Proof.
   - by apply Hsub, elem_of_app; right.
 Qed.
 
-#[export] Instance finset_equiv_dec `{FinSet A C} : RelDecision (≡@{C}).
-Proof.
-  intros X Y.
-  destruct (decide (elements X ≡ₚ elements Y));
-    [| by right; contradict n; rewrite n].
-  left; intros a.
-  rewrite <- !elem_of_elements, !elem_of_list_lookup.
-  split; intros (i & Hi); [| symmetry in p];
-    apply Permutation_inj in p as (Hlen & f & Hinjf & Hp).
-  - by rewrite Hp in Hi; eexists.
-  - by rewrite Hp in Hi; eexists.
-Qed.
-
 #[export] Instance sum_list_with_proper `(f : index -> nat) :
   Proper ((≡ₚ) ==> (=)) (sum_list_with f).
 Proof.
