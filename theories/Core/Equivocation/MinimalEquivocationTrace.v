@@ -37,7 +37,6 @@ Context
   (A : validator -> index)
   (Hchannel : channel_authentication_prop IM A sender)
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -206,7 +205,7 @@ Lemma composite_latest_sent_observed_in_before_send
   (s : composite_state IM) (item : composite_transition_item IM) (m : message)
   (Hij : CompositeLatestSentObservedIn s' i j s item m)
   (s_j : composite_state IM) (item_j : composite_transition_item IM) (m_j : message)
-  : valid_state_prop RFree s' ->
+  : constrained_state_prop Free s' ->
     head (composite_state_destructor IM state_destructor s' j) = Some (item_j, s_j) ->
     output item_j = Some m_j ->
     latest_composite_observed_before_send s' i j.
@@ -284,7 +283,7 @@ Qed.
   list of indices the ones whose corresponding component state is initial.
 *)
 Program Definition initial_indices
-  (s : composite_state IM) (Hs : valid_state_prop RFree s) (is : list index)
+  (s : composite_state IM) (Hs : constrained_state_prop Free s) (is : list index)
   : list index :=
   @filter _ _ _ (fun i => initial_state_prop (IM i) (s i)) _ is.
 Next Obligation.
@@ -339,7 +338,7 @@ Definition find_sent_not_observed_decomposition
 *)
 Definition minimal_equivocation_choice
   (s : composite_state IM)
-  (Hs : valid_state_prop RFree s)
+  (Hs : constrained_state_prop Free s)
   (is : list index)
   : index * nat :=
   match initial_indices s Hs is with
@@ -412,7 +411,7 @@ Lemma composite_latest_sent_observed_in_chain
   (is : list index)
   (Hne : is <> [])
   (s : composite_state IM)
-  (Hs : valid_state_prop RFree s)
+  (Hs : constrained_state_prop Free s)
   (Hall_sent_observed : forall x : index, x ∈ is ->
     exists y, y ∈ is /\
     composite_latest_sent_observed_in s x y)
@@ -446,7 +445,7 @@ Qed.
 *)
 Lemma all_latest_composite_observed_before_send_one_step
   (s : composite_state IM)
-  (Hs : valid_state_prop RFree s)
+  (Hs : constrained_state_prop Free s)
   (is is' : list index)
   (Hsub : is' ⊆ is)
   (Hall_sent_observed : forall x : index, x ∈ is ->
@@ -473,7 +472,7 @@ Qed.
 *)
 Lemma all_latest_composite_observed_before_send
   (s : composite_state IM)
-  (Hs : valid_state_prop RFree s)
+  (Hs : constrained_state_prop Free s)
   (is is' : list index)
   (Hsub : is' ⊆ is)
   (Hall_sent_observed : forall x : index, x ∈ is ->
@@ -522,7 +521,7 @@ Qed.
 *)
 Lemma at_least_one_send_not_previously_observed
   (s' : composite_state IM)
-  (Hs' : valid_state_prop RFree s')
+  (Hs' : constrained_state_prop Free s')
   (is : list index)
   (His : is <> [])
   (Hnodup : NoDup is)
@@ -584,7 +583,7 @@ Qed.
 *)
 Lemma minimal_equivocation_choice_monotone :
   forall (is : list index), NoDup is ->
-  forall (s' : composite_state IM) (Hs' : valid_state_prop RFree s'),
+  forall (s' : composite_state IM) (Hs' : constrained_state_prop Free s'),
     not_in_indices_initial_prop IM s' is ->
     forall (i : index) (Hi : i ∈ is) (n : nat),
       minimal_equivocation_choice s' Hs' is  = (i, n) ->
@@ -661,7 +660,6 @@ Context
   (A : validator -> index)
   (Hchannel : channel_authentication_prop IM A sender)
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -672,7 +670,7 @@ Context
   a constrained trace.
 *)
 Definition state_to_minimal_equivocation_trace
-  (s : composite_state IM) (Hs : valid_state_prop RFree s)
+  (s : composite_state IM) (Hs : constrained_state_prop Free s)
   : composite_state IM * list (composite_transition_item IM) :=
   composite_state_to_trace IM state_destructor state_size
     (minimal_equivocation_choice IM state_destructor state_size) s Hs.
@@ -683,7 +681,7 @@ Definition state_to_minimal_equivocation_trace
   minimally-equivocating trace reaching its final state.
 *)
 Lemma state_to_minimal_equivocation_trace_equivocation_monotonic :
-  forall (s : composite_state IM) (Hs : valid_state_prop RFree s),
+  forall (s : composite_state IM) (Hs : constrained_state_prop Free s),
   forall is tr, state_to_minimal_equivocation_trace s Hs = (is, tr) ->
   forall (pre suf : list (composite_transition_item IM))
     (item : composite_transition_item IM),

@@ -92,8 +92,7 @@ Lemma node_generated_without_further_equivocation_weaken
   (i : index)
   (Hno_resend : cannot_resend_message_stepwise_prop (IM i))
   (s : composite_state IM)
-  (Hs : valid_state_prop
-     (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
+  (Hs : constrained_state_prop (free_composite_vlsm IM) s)
   (m : message)
   (Hsmi : node_generated_without_further_equivocation s m i)
   : node_generated_without_further_equivocation_alt s m i.

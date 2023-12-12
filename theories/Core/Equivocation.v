@@ -315,7 +315,7 @@ Lemma selected_message_exists_in_all_traces_initial_state
   : ~ selected_message_exists_in_all_preloaded_traces message_selector s m.
 Proof.
   intro Hselected.
-  assert (Hps : valid_state_prop pre_vlsm s) by (apply initial_state_is_valid; done).
+  assert (Hps : constrained_state_prop vlsm s) by (apply initial_state_is_valid; done).
   assert (Htr : finite_valid_trace_init_to pre_vlsm s s []) by (split; [constructor |]; done).
   specialize (Hselected s [] Htr).
   unfold trace_has_message in Hselected.
@@ -361,10 +361,10 @@ Record oracle_tracewise_props
   (oracle : state_message_oracle) : Prop :=
 {
   proper_oracle_holds :
-    forall (s : state pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    forall (s : state pre_vlsm) (Hs : constrained_state_prop vlsm s) (m : message),
       all_traces_have_message_prop message_selector oracle s m;
   proper_not_oracle_holds :
-    forall (s : state pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
+    forall (s : state pre_vlsm) (Hs : constrained_state_prop vlsm s) (m : message),
       no_traces_have_message_prop message_selector (negate_oracle oracle) s m;
 }.
 
@@ -564,14 +564,14 @@ Proof.
 Qed.
 
 Lemma proper_sent `{HasBeenSentCapability} :
-  forall (s : state pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
+  forall (s : state pre_vlsm) (Hs : constrained_state_prop vlsm s) (m : message),
     has_been_sent_prop has_been_sent s m.
 Proof.
   by intros; apply has_been_sent_tracewise_props.
 Qed.
 
 Lemma proper_not_sent `{HasBeenSentCapability} :
-  forall (s : state pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
+  forall (s : state pre_vlsm) (Hs : constrained_state_prop vlsm s) (m : message),
     has_not_been_sent_prop has_not_been_sent s m.
 Proof.
   by intros; apply has_been_sent_tracewise_props.
@@ -580,7 +580,7 @@ Qed.
 (** Reverse implication for 'selected_messages_consistency_prop' always holds. *)
 Lemma consistency_from_valid_state_proj2
   (s : state pre_vlsm)
-  (Hs : valid_state_prop pre_vlsm s)
+  (Hs : constrained_state_prop vlsm s)
   (m : message)
   (selector : message -> transition_item -> Prop)
   (Hall : selected_message_exists_in_all_preloaded_traces selector s m)
@@ -595,7 +595,7 @@ Qed.
 Lemma has_been_sent_consistency
   `{HasBeenSentCapability}
   (s : state pre_vlsm)
-  (Hs : valid_state_prop pre_vlsm s)
+  (Hs : constrained_state_prop vlsm s)
   (m : message)
   : selected_messages_consistency_prop (field_selector output) s m.
 Proof.
@@ -615,7 +615,7 @@ Lemma can_produce_has_been_sent
   (Hsm : can_produce pre_vlsm s m)
   : has_been_sent s m.
 Proof.
-  assert (valid_state_prop pre_vlsm s) by (apply can_produce_valid in Hsm; eexists; done).
+  assert (constrained_state_prop vlsm s) by (apply can_produce_valid in Hsm; eexists; done).
   apply proper_sent; [done |].
   apply has_been_sent_consistency; [done |].
   apply non_empty_valid_trace_from_can_produce in Hsm.
@@ -642,7 +642,7 @@ Lemma specialized_proper_sent
   : has_been_sent s m.
 Proof.
   destruct Hs as [_om Hs].
-  assert (Hpres : valid_state_prop pre_vlsm s)
+  assert (Hpres : constrained_state_prop vlsm s)
     by (exists _om; apply pre_loaded_with_all_messages_valid_state_message_preservation; done).
   apply proper_sent; [done |].
   specialize (has_been_sent_consistency s Hpres m) as Hcons.
@@ -669,7 +669,7 @@ Lemma specialized_proper_sent_rev
   : specialized_selected_message_exists_in_all_traces vlsm (field_selector output) s m.
 Proof.
   destruct Hs as [_om Hs].
-  assert (Hpres : valid_state_prop pre_vlsm s)
+  assert (Hpres : constrained_state_prop vlsm s)
     by (exists _om; apply pre_loaded_with_all_messages_valid_state_message_preservation; done).
   apply proper_sent in Hsm; [| done].
   intros is tr Htr.
@@ -765,14 +765,14 @@ Proof.
 Qed.
 
 Lemma proper_received `{HasBeenReceivedCapability} :
-  forall (s : state pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
+  forall (s : state pre_vlsm) (Hs : constrained_state_prop vlsm s) (m : message),
     has_been_received_prop has_been_received s m.
 Proof.
   by apply proper_oracle_holds, has_been_received_tracewise_props.
 Qed.
 
 Lemma proper_not_received `{HasBeenReceivedCapability} :
-  forall (s : state pre_vlsm) (Hs : valid_state_prop pre_vlsm s) (m : message),
+  forall (s : state pre_vlsm) (Hs : constrained_state_prop vlsm s) (m : message),
     has_not_been_received_prop has_not_been_received s m.
 Proof.
   by apply proper_not_oracle_holds, has_been_received_tracewise_props.
@@ -781,7 +781,7 @@ Qed.
 Lemma has_been_received_consistency
   `{HasBeenReceivedCapability}
   (s : state pre_vlsm)
-  (Hs : valid_state_prop pre_vlsm s)
+  (Hs : constrained_state_prop vlsm s)
   (m : message)
   : selected_messages_consistency_prop (field_selector input) s m.
 Proof.
@@ -829,7 +829,7 @@ Definition sent_messages
 Lemma sent_messages_proper
   `{HasBeenSentCapability}
   (s : state vlsm)
-  (Hs : valid_state_prop pre_vlsm s)
+  (Hs : constrained_state_prop vlsm s)
   (m : message)
   : has_been_sent s m <-> exists (m' : sent_messages s), proj1_sig m' = m.
 Proof.
@@ -850,7 +850,7 @@ Definition received_messages
 Lemma received_messages_proper
   `{HasBeenReceivedCapability}
   (s : state vlsm)
-  (Hs : valid_state_prop pre_vlsm s)
+  (Hs : constrained_state_prop vlsm s)
   (m : message)
   : has_been_received s m <-> exists (m' : received_messages s), proj1_sig m' = m.
 Proof.
@@ -2634,7 +2634,7 @@ Lemma state_received_not_sent_trace_iff
   (Htr : finite_valid_trace_init_to PreX is s tr)
   : state_received_not_sent s m <-> trace_received_not_sent_before_or_after tr m.
 Proof.
-  assert (Hs : valid_state_prop PreX s)
+  assert (Hs : constrained_state_prop X s)
     by (apply proj1, valid_trace_last_pstate in Htr; done).
   split; intros [Hbrm Hnbsm].
   - apply proper_received in Hbrm; [| done].
@@ -2774,7 +2774,7 @@ Lemma lift_preloaded_state_to_seeded
   (P : message -> Prop)
   (s : state X)
   (Hequiv_s : state_received_not_sent_invariant s P)
-  (Hs : valid_state_prop PreX s)
+  (Hs : constrained_state_prop X s)
   : valid_state_prop (pre_loaded_vlsm X P) s.
 Proof.
   apply valid_state_has_trace in Hs as Htr.

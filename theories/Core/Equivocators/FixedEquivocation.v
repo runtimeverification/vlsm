@@ -783,7 +783,7 @@ Proof.
     apply VLSM_incl_finite_valid_trace_from; [| done].
     by apply constrained_preloaded_incl.
   }
-  assert (Hs_free : valid_state_prop  (pre_loaded_with_all_messages_vlsm FreeE) s).
+  assert (Hs_free : constrained_state_prop FreeE s).
   { apply finite_valid_trace_last_pstate in Hsuf_free. subst s.
     by rewrite finite_trace_last_app.
   }

@@ -79,7 +79,7 @@ Qed.
 Class WitnessedEquivocationCapability : Prop :=
 {
   is_equivocating_tracewise_witness :
-    forall s, valid_state_prop PreFree s ->
+    forall s, constrained_state_prop Free s ->
     exists is tr, finite_valid_trace_init_to PreFree is s tr /\
       trace_witnessing_equivocation_prop is tr
 }.
@@ -471,7 +471,7 @@ Qed.
   The conclusion then follows by the two helper lemmas above.
 *)
 Lemma preloaded_has_strong_trace_witnessing_equivocation_prop s
-  (Hs : valid_state_prop PreFree s)
+  (Hs : constrained_state_prop Free s)
   : exists is' tr',
     finite_valid_trace_init_to PreFree is' s tr' /\
     strong_trace_witnessing_equivocation_prop is' tr'.

@@ -491,9 +491,7 @@ Lemma valid_state_preloaded_composite_free_lift
   (j : index)
   (sj : state (IM j))
   (Hp : constrained_state_prop (IM j) sj)
-  : valid_state_prop
-      (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
-      (lift_to_composite_state' j sj).
+  : constrained_state_prop free_composite_vlsm (lift_to_composite_state' j sj).
 Proof.
   by apply (VLSM_embedding_valid_state (lift_to_composite_preloaded_VLSM_embedding j)).
 Qed.

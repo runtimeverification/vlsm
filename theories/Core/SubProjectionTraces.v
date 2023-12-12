@@ -776,7 +776,7 @@ Context
   (SubFree : VLSM message :=  free_composite_vlsm (sub_IM IM equivocators))
   (PreSubFree := pre_loaded_with_all_messages_vlsm SubFree)
   (base_s : composite_state IM)
-  (Hbase_s : valid_state_prop PreFree base_s)
+  (Hbase_s : constrained_state_prop Free base_s)
   .
 
 (** A partial label projection function which only keeps non-equivocating transitions. *)
