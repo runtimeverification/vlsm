@@ -778,7 +778,7 @@ Definition message_sender (m : paxos_message_body) : paxos_index :=
 
 Lemma localize_send :
   forall l s im s' om,
-    transition (pre_loaded_with_all_messages_vlsm paxos_vlsm) l (s, im) = (s', Some om) ->
+    transition paxos_vlsm l (s, im) = (s', Some om) ->
     projT1 l = message_sender (snd om).
 Proof.
   intros * Ht; destruct om as [ob omb]; cbn in Ht |- *.
