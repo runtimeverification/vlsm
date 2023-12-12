@@ -563,7 +563,7 @@ End sec_pre_loaded_constrained_projection.
 
 Lemma SeededXE_PreFreeE_weak_embedding
   (full_replay_state : composite_state (equivocator_IM IM))
-  (Hfull_replay_state : valid_state_prop PreFreeE full_replay_state)
+  (Hfull_replay_state : constrained_state_prop FreeE full_replay_state)
   : VLSM_weak_embedding SeededXE PreFreeE
       (lift_equivocators_sub_label_to full_replay_state)
       (lift_equivocators_sub_state_to full_replay_state).
@@ -583,7 +583,7 @@ Qed.
 
 Lemma PreFreeSubE_PreFreeE_weak_embedding
   (full_replay_state : composite_state (equivocator_IM IM))
-  (Hfull_replay_state : valid_state_prop PreFreeE  full_replay_state)
+  (Hfull_replay_state : constrained_state_prop FreeE  full_replay_state)
   : VLSM_weak_embedding PreFreeSubE PreFreeE
       (lift_equivocators_sub_label_to full_replay_state)
       (lift_equivocators_sub_state_to full_replay_state).

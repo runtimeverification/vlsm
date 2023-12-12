@@ -535,7 +535,7 @@ Definition projection_validator_prop_alt :=
 *)
 Lemma validator_alt_free_states_are_projection_states
   : projection_validator_prop_alt ->
-    forall s, valid_state_prop PreY s -> valid_state_prop Xi s.
+    forall s, constrained_state_prop Y s -> valid_state_prop Xi s.
 Proof.
   intros Hvalidator sY Hs.
   induction Hs using valid_state_prop_ind.
@@ -573,7 +573,7 @@ Qed.
 
 Lemma validator_free_states_are_projection_states
   : projection_validator_prop Y label_project state_project ->
-    forall s, valid_state_prop PreY s -> valid_state_prop Xi s.
+    forall s, constrained_state_prop Y s -> valid_state_prop Xi s.
 Proof.
   rewrite <- projection_validator_prop_alt_iff by done.
   by apply validator_alt_free_states_are_projection_states.

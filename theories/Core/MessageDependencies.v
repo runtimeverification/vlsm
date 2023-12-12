@@ -160,7 +160,7 @@ Qed.
 *)
 Lemma msg_dep_has_been_sent
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   m
   (Hsent : has_been_sent X s m)
   : forall dm, msg_dep_rel message_dependencies dm m -> has_been_directly_observed X s dm.
@@ -191,7 +191,7 @@ Qed.
 Lemma full_node_has_been_received
   (Hfull : message_dependencies_full_node_condition_prop)
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   m
   (Hreceived : has_been_received X s m)
   : forall dm, msg_dep_rel message_dependencies dm m -> has_been_directly_observed X s dm.
@@ -212,7 +212,7 @@ Qed.
 Lemma msg_dep_full_node_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   : forall dm m, msg_dep_rel message_dependencies dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.
@@ -228,7 +228,7 @@ Qed.
 Lemma msg_dep_full_node_happens_before_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   : forall dm m, msg_dep_happens_before message_dependencies dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.
@@ -417,7 +417,7 @@ Definition full_node_is_locally_equivocating (s : state X) (v : validator) : Pro
   a state would be totally ordered by [msg_dep_rel].
 *)
 Definition has_been_sent_msg_dep_comparable_prop : Prop :=
-  forall (s : state X), valid_state_prop R s ->
+  forall (s : state X), constrained_state_prop X s ->
   forall (m1 m2 : message),
     has_been_sent X s m1 ->
     has_been_sent X s m2 ->
@@ -465,7 +465,7 @@ Qed.
 Lemma full_node_HasBeenObserved_is_directly_observed
   `{!MessageDependencies X message_dependencies}
   (Hfull : message_dependencies_full_node_condition_prop X message_dependencies)
-  : forall s, valid_state_prop R s ->
+  : forall s, constrained_state_prop X s ->
     forall m, HasBeenObserved s m <-> has_been_directly_observed X s m.
 Proof.
   intros s Hs m; split; [| by intros; constructor].
@@ -480,7 +480,7 @@ Qed.
 Lemma full_node_is_locally_equivocating_iff
   `{!MessageDependencies X message_dependencies}
   (Hfull : message_dependencies_full_node_condition_prop X message_dependencies)
-  : forall s, valid_state_prop R s ->
+  : forall s, constrained_state_prop X s ->
     forall v,
       msg_dep_is_locally_equivocating s v
         <->
@@ -836,7 +836,7 @@ Qed.
 Lemma full_node_is_globally_equivocating_iff
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
-  : forall s, valid_state_prop RFree s ->
+  : forall s, constrained_state_prop Free s ->
     forall v,
       msg_dep_is_globally_equivocating s v
         <->
@@ -859,7 +859,7 @@ Lemma msg_dep_locally_is_globally_equivocating
   (Hsafety : sender_safety_alt_prop IM A sender)
   (Hsent_comparable :
     forall i, has_been_sent_msg_dep_comparable_prop (IM i) message_dependencies)
-  : forall s, valid_state_prop RFree s ->
+  : forall s, constrained_state_prop Free s ->
     forall i v,
     msg_dep_is_locally_equivocating (IM i) message_dependencies sender (s i) v ->
     msg_dep_is_globally_equivocating s v.
@@ -881,7 +881,7 @@ Lemma full_node_sent_locally_is_globally_equivocating
   (Hsafety : sender_safety_alt_prop IM A sender)
   (Hsent_comparable :
     forall i, has_been_sent_msg_dep_comparable_prop (IM i) message_dependencies)
-  : forall s, valid_state_prop RFree s ->
+  : forall s, constrained_state_prop Free s ->
     forall i v,
     full_node_is_sent_locally_equivocating (IM i) message_dependencies sender (s i) v ->
     msg_dep_is_globally_equivocating s v.

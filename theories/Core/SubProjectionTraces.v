@@ -584,7 +584,7 @@ Proof.
     destruct Hmsg as [Hseed | [item [Hitem [Hout Hsub_item]]]]; [by right |].
     left.
     remember (finite_trace_last (composite_state_sub_projection _) _) as lst.
-    assert (Hlst_pre : valid_state_prop (pre_loaded_with_all_messages_vlsm Sub_Free) lst)
+    assert (Hlst_pre : constrained_state_prop Sub_Free lst)
       by (revert Hlst; apply VLSM_incl_valid_state, Xj_incl_Pre_Sub_Free; done).
     apply composite_proper_sent; [done |].
     apply has_been_sent_consistency; [by typeclasses eauto | done |].
@@ -776,7 +776,7 @@ Context
   (SubFree : VLSM message :=  free_composite_vlsm (sub_IM IM equivocators))
   (PreSubFree := pre_loaded_with_all_messages_vlsm SubFree)
   (base_s : composite_state IM)
-  (Hbase_s : valid_state_prop PreFree base_s)
+  (Hbase_s : constrained_state_prop Free base_s)
   .
 
 (** A partial label projection function which only keeps non-equivocating transitions. *)
@@ -1236,7 +1236,7 @@ Context
   .
 
 Lemma sub_IM_has_been_sent_iff_by_sender s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM indices))) s)
+  (Hs : constrained_state_prop (free_composite_vlsm (sub_IM IM indices)) s)
   m v
   (Hsender : sender m = Some v)
   (Hv : A v ∈ indices)

@@ -147,7 +147,7 @@ Qed.
 *)
 Lemma fixed_equivocation_replay_has_message
   eqv_state_s
-  (Heqv_state_s : valid_state_prop PreFreeE eqv_state_s)
+  (Heqv_state_s : constrained_state_prop FreeE eqv_state_s)
   im s
   (Him :
     can_produce
