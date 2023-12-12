@@ -500,7 +500,7 @@ Qed.
 
   - [None] is a valid message ([valid_message_mrec_None]);
   - if <<m>> is an optional <<message>> with the [initial_message_prop]erty,
-    then it constitutes a valid message 
+    then it constitutes a valid message
   - for all [state]s <<st>>, [option]al <<message>>s <<om>>, and [label] <<l>>:
     - if <<om>> is a valid message ([valid_message_mrec]);
     - and if <<st>> is a valid state ([valid_state_mrec]);
@@ -777,7 +777,7 @@ Qed.
   are determined by the label, initial state and input message of the
   transition. This is because [transition] is a function.
 
-  Because of the above, [input_valid_transition]s are also deterministic. 
+  Because of the above, [input_valid_transition]s are also deterministic.
 *)
 
 Lemma input_valid_transition_deterministic :
@@ -1459,6 +1459,22 @@ Proof.
     by auto using finite_valid_trace_from_to_extend.
 Qed.
 
+Lemma finite_valid_trace_from_to_snoc :
+  forall (s f : state X) (ls : list transition_item) (item : transition_item X),
+    finite_valid_trace_from_to s f (ls ++ [item]) <->
+    let m := finite_trace_last s ls in
+      finite_valid_trace_from_to s m ls /\
+      input_valid_transition_item m item /\
+      destination item = f.
+Proof.
+  split.
+  - intros Htr; apply finite_valid_trace_from_to_app_split in Htr as [Htr Hitem].
+    by inversion Hitem; inversion Htl; subst.
+  - intros (Htr & Hitem & <-).
+    eapply finite_valid_trace_from_to_app; [done |].
+    by destruct item; apply finite_valid_trace_from_to_singleton.
+Qed.
+
 Definition finite_valid_trace_init_to (si sf : state X) (tr : list transition_item) : Prop :=
   finite_valid_trace_from_to si sf tr /\ initial_state_prop X si.
 
@@ -1489,6 +1505,47 @@ Proof.
   intros [Htr _].
   by eauto using finite_valid_trace_from_to_last.
 Qed.
+
+Lemma finite_valid_trace_init_to_snoc :
+  forall (si sf : state X) (tr : list transition_item) (item : transition_item X),
+    finite_valid_trace_init_to si sf (tr ++ [item]) <->
+    finite_valid_trace_init_to si (finite_trace_last si tr) tr /\
+    input_valid_transition_item (finite_trace_last si tr) item /\
+    destination item = sf.
+Proof.
+  unfold finite_valid_trace_init_to; intros.
+  rewrite finite_valid_trace_from_to_snoc.
+  by itauto.
+Qed.
+
+Lemma finite_valid_trace_init_to_snoc_rev :
+  forall {si sf : state X} {tr : list transition_item} {item : transition_item X},
+    finite_valid_trace_init_to si sf tr ->
+    input_valid_transition_item sf item ->
+    finite_valid_trace_init_to si (destination item) (tr ++ [item]).
+Proof.
+  unfold finite_valid_trace_init_to.
+  intros * [Htr Hinit] Hivt.
+  rewrite finite_valid_trace_from_to_snoc.
+  apply finite_valid_trace_from_to_last in Htr as Hsf; subst sf.
+  by itauto.
+Qed.
+
+Lemma finite_valid_trace_init_to_prefix :
+  forall {si sf : state X} {pre tr : list (transition_item X)},
+    finite_valid_trace_init_to si sf tr ->
+    pre `prefix_of` tr ->
+    finite_valid_trace_init_to si (finite_trace_last si pre) pre.
+Proof.
+  intros * [] [suf ->]; split; [| done].
+  by eapply finite_valid_trace_from_to_app_split.
+Qed.
+
+Lemma finite_valid_trace_init_to_prefix_1 :
+  forall {si sf : state X} {pre suf : list (transition_item X)},
+    finite_valid_trace_init_to si sf (pre ++ suf) ->
+    finite_valid_trace_init_to si (finite_trace_last si pre) pre.
+Proof. by intros; eapply finite_valid_trace_init_to_prefix; [| eexists]. Qed.
 
 Lemma extend_right_finite_trace_from_to
   (s1 s2 : state X)

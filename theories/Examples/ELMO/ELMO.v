@@ -3,8 +3,9 @@ From Coq Require Import FunctionalExtensionality Reals.
 From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble Measurable FinSetExtras RealsExtras ListExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition Equivocation.
-From VLSM.Core Require Import Validator ProjectionTraces MessageDependencies.
+From VLSM.Core Require Import ReachableThreshold Validator ProjectionTraces MessageDependencies.
 From VLSM.Core Require Import TraceableVLSM MinimalEquivocationTrace.
+From VLSM.Core Require Import AnnotatedVLSM MsgDepLimitedEquivocation.
 From VLSM.Examples Require Import BaseELMO UMO MO.
 
 Create HintDb ELMO_hints.
@@ -21,16 +22,47 @@ Section sec_ELMO.
 
 Context
   {Address : Type}
+  `{EqDecision Address}
+  `{Measurable Address}
   (State := @State Address)
   (Observation := @Observation Address)
   (Message := @Message Address)
-  {measurable_Address : Measurable Address}
-  `{FinSet Address Ca}
   (threshold : R)
-  `{!ReachableThreshold Address Ca threshold}
   `{finite.Finite index}
   (idx : index -> Address)
-  `{!Inj (=) (=) idx}.
+  `{!Inj (=) (=) idx}
+  `{!ReachableThreshold (Message_validator idx) (listset (Message_validator idx)) threshold}.
+
+#[export] Instance ReachableThreshold_Address :
+  ReachableThreshold Address (listset Address) threshold.
+Proof.
+  destruct ReachableThreshold0 as (Hgt0 & vs & Hvs).
+  split; [done |].
+  exists (set_map proj1_sig vs).
+  replace (sum_weights _) with (sum_weights vs); [done |].
+  clear Hvs; revert vs; apply set_ind.
+  - intros vs1 vs2 Heqv Hvs1.
+    replace (sum_weights vs2) with (sum_weights vs1)
+      by (apply sum_weights_proper; done).
+    by rewrite Hvs1; apply sum_weights_proper; rewrite Heqv.
+  - by rewrite !sum_weights_empty.
+  - intros v vs Hv Hvs.
+    rewrite sum_weights_disj_union, Hvs by set_solver.
+    replace (sum_weights (set_map _ ({[v]} ∪ _)))
+      with (sum_weights (set_map (C := listset (Message_validator idx))
+        (D := listset Address) proj1_sig {[v]} ∪ set_map (D := listset Address) proj1_sig vs))
+      by (apply sum_weights_proper; rewrite set_map_union; done).
+    rewrite sum_weights_disj_union; cycle 1.
+    + rewrite set_map_singleton.
+      cut (`v ∉ set_map (D := listset Address) proj1_sig vs); [by set_solver |].
+      contradict Hv.
+      apply elem_of_map in Hv as (v' & Hv' & Hv).
+      by apply dsig_eq in Hv' as ->.
+    + replace (sum_weights (set_map _ {[v]}))
+        with (sum_weights (Cv := listset Address) {[` v]}).
+      * by rewrite !sum_weights_singleton.
+      * by apply sum_weights_proper; rewrite set_map_singleton.
+Qed.
 
 Definition immediate_dependency (m1 m2 : Message) : Prop :=
   m1 ∈ messages (state m2).
@@ -262,7 +294,7 @@ Proof.
   by induction 1; [done | ..]; destruct IHELMO_msg_valid_full; econstructor.
 Qed.
 
-#[local] Instance ELMO_local_equivocation : BasicEquivocation State Address Ca threshold :=
+#[local] Instance ELMO_local_equivocation : BasicEquivocation State Address (listset Address) threshold :=
 {
   is_equivocating := local_equivocators_full;
   is_equivocating_dec := local_equivocators_full_dec;
@@ -1369,7 +1401,7 @@ Record global_equivocators_simple (s : composite_state ELMO_component) (a : Addr
 Set Warnings "cannot-define-projection".
 
 Definition ELMO_global_equivocation :
-  BasicEquivocation (composite_state ELMO_component) Address Ca threshold :=
+  BasicEquivocation (composite_state ELMO_component) Address (listset Address) threshold :=
 {|
   is_equivocating := ELMO_global_equivocators;
   is_equivocating_dec := ELMO_global_equivocators_dec;
@@ -1379,7 +1411,7 @@ Definition ELMO_global_equivocation :
 Definition ELMO_not_heavy : composite_state ELMO_component -> Prop :=
   not_heavy (1 := ELMO_global_equivocation).
 
-Definition ELMO_equivocating_validators : composite_state ELMO_component -> Ca :=
+Definition ELMO_equivocating_validators : composite_state ELMO_component -> listset Address :=
   equivocating_validators (1 := ELMO_global_equivocation).
 
 Lemma ELMO_equivocating_validators_are_Message_validators :
@@ -1393,9 +1425,6 @@ Proof.
   unshelve eexists (dexist a _); [| done].
   by subst; eexists; apply adr2idx_idx.
 Qed.
-
-#[export] Instance Message_validator_measurable : Measurable (Message_validator idx) :=
-  fun v => weight (`v).
 
 Definition ELMO_global_constraint
   (l : composite_label ELMO_component)
@@ -1421,10 +1450,9 @@ Definition FreeELMO : VLSM Message :=
 Definition ReachELMO : VLSM Message :=
   pre_loaded_with_all_messages_vlsm FreeELMO.
 
-Definition composite_constrained_state_prop
-  {message : Type} `{EqDecision index}
-  (IM : index -> VLSM message) (s : composite_state IM) : Prop :=
-    constrained_state_prop (free_composite_vlsm IM) s.
+Definition LimitedELMO : VLSM Message :=
+  msg_dep_limited_equivocation_vlsm (Cv := listset (Message_validator idx))
+    ELMO_component threshold Message_full_dependencies (Message_sender idx).
 
 Lemma ELMO_initial_state_equivocating_validators :
   forall s : composite_state ELMO_component,
@@ -1445,7 +1473,7 @@ Proof.
   intros s Hs.
   unfold ELMO_not_heavy, not_heavy.
   replace (equivocation_fault s) with 0%R.
-  - by apply (rt_positive (H6 := H6)).
+  - by unshelve eapply rt_positive; cycle 2.
   - by symmetry; apply sum_weights_empty, ELMO_initial_state_equivocating_validators.
 Qed.
 
@@ -1567,14 +1595,14 @@ Proof.
 Qed.
 
 Lemma ELMO_channel_authentication_prop :
-  channel_authentication_prop ELMO_component (ELMO_A idx) (Message_sender idx).
+  channel_authentication_prop ELMO_component (Message_sender_index idx) (Message_sender idx).
 Proof.
   intros i m ((s & []) & [] & s' & [(Hs & _ & Hv) Ht]);
     inversion Hv; subst; inversion Ht; subst.
   unfold channel_authenticated_message, Message_sender.
   erewrite ELMO_reachable_adr by done.
   case_decide as Hadr.
-  - by cbn; f_equal; apply ELMO_A_inv.
+  - by cbn; f_equal; apply Message_sender_index_inv.
   - by rewrite (adr2idx_idx idx) in Hadr; contradict Hadr; eexists.
 Qed.
 
@@ -1694,7 +1722,7 @@ Proof.
   cbn; intros s v Hs.
   apply Morphisms_Prop.ex_iff_morphism; intros m.
   assert (forall k : index, UMO_reachable full_node (s k))
-    by (intro; eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded_free; done).
+    by (intro; eapply ELMO_full_node_reachable, composite_constrained_state_project; done).
   setoid_rewrite <- full_node_messages_iff_rec_obs; [| done].
   setoid_rewrite <- ELMO_CHBO_in_messages; [| done].
   split.
@@ -1942,7 +1970,7 @@ Proof.
   exists m; repeat split; [| done].
   destruct Hobs as [k Hobs]; exists k.
   apply full_node_messages_iff_rec_obs; [| by apply elem_of_messages].
-  by eapply ELMO_full_node_reachable, valid_state_project_preloaded_to_preloaded_free.
+  by eapply ELMO_full_node_reachable, composite_constrained_state_project.
 Qed.
 
 Lemma ELMO_equivocating_validators_step_update_Send
@@ -2135,7 +2163,7 @@ Proof.
   - done.
   - by apply Message_sender_Some_adr_iff.
   - exists i_a; state_update_simpl.
-    by apply ELMO_A_inv in Ha as <-.
+    by apply Message_sender_index_inv in Ha as <-.
 Qed.
 
 Lemma ELMO_valid_states_only_receive_valid_messages :
@@ -2556,11 +2584,11 @@ Proof.
     }
     apply elem_of_messages in Hm as [Hsnd |]; [| done].
     cbn in Hsnd; eapply reachable_sent_messages_adr in Hsnd; cycle 1.
-    + by eapply valid_state_project_preloaded_to_preloaded_free.
+    + by eapply composite_constrained_state_project.
     + by congruence.
   - intros [j Hsnd].
     cbn in Hsnd; eapply reachable_sent_messages_adr in Hsnd as Hsnd_adr;
-      [| by eapply valid_state_project_preloaded_to_preloaded_free].
+      [| by eapply composite_constrained_state_project].
     rewrite Hm0_adr in Hsnd_adr.
     eapply inj in Hsnd_adr; [| done]; subst j.
     eapply ELMO_component_sizeState_of_constrained_trace_output in Hitem;

@@ -1,8 +1,8 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM.Lib Require Import Preamble ListExtras FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections. 
+From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
 (** * Core: VLSM Message Dependencies
 
@@ -849,8 +849,9 @@ Proof.
     by rewrite composite_has_been_directly_observed_sent_received_iff; intros [].
   }
   destruct Hobs as [Hobs | m' [i Hobs] Hhb]; [done | exists i].
-  by eapply msg_dep_full_node_happens_before_reflects_has_been_directly_observed
-  ; [| | apply valid_state_project_preloaded_to_preloaded_free | |].
+  eapply msg_dep_full_node_happens_before_reflects_has_been_directly_observed;
+    [done | done | | done..].
+  by eapply composite_constrained_state_project.
 Qed.
 
 Lemma msg_dep_locally_is_globally_equivocating
@@ -872,7 +873,7 @@ Proof.
       [.. | by contradict n; eapply has_been_sent_iff_by_sender];
       [done | by eapply composite_HasBeenObserved_lift].
   contradict Hncomp; eapply tc_comparable, Hsent_comparable; [| done..].
-  by eapply valid_state_project_preloaded_to_preloaded_free.
+  by eapply composite_constrained_state_project.
 Qed.
 
 Lemma full_node_sent_locally_is_globally_equivocating
@@ -894,7 +895,7 @@ Proof.
       [by contradict n; eapply has_been_sent_iff_by_sender | done |];
       by constructor 1; eexists.
   contradict Hncomp; eapply Hsent_comparable; [| done..].
-  by eapply valid_state_project_preloaded_to_preloaded_free.
+  by eapply composite_constrained_state_project.
 Qed.
 
 End sec_composite_message_dependencies_equivocation.
@@ -1259,6 +1260,52 @@ Proof.
     eapply has_been_sent_iff_by_sender in mdgee_not_sent0; [| done..].
     rewrite Hv, Hsj in mdgee_not_sent0.
     by eexists.
+Qed.
+
+(** We also define the case in which a transition doesn't forget equivocation. *)
+Definition transition_preserves_global_equivocation
+  (s : composite_state IM) (item : composite_transition_item IM) : Prop :=
+  forall (v : validator),
+    msg_dep_is_globally_equivocating IM message_dependencies sender s v ->
+    msg_dep_is_globally_equivocating IM message_dependencies sender (destination item) v.
+
+Inductive TraceMonotoneGlobalEquivocation :
+  composite_state IM -> list (composite_transition_item IM) -> Prop :=
+| tpge_initial :
+    forall (s : composite_state IM), TraceMonotoneGlobalEquivocation s []
+| tpge_step :
+    forall (s : composite_state IM) (item : composite_transition_item IM)
+      (tr : list (composite_transition_item IM)),
+      transition_preserves_global_equivocation s item ->
+      TraceMonotoneGlobalEquivocation (destination item) tr ->
+      TraceMonotoneGlobalEquivocation s (item :: tr).
+
+Definition trace_monotone_global_equivocation
+  (s : composite_state IM) (tr : list (composite_transition_item IM)) : Prop :=
+    forall (pre suf : list (composite_transition_item IM)) (item : composite_transition_item IM),
+      tr = pre ++ [item] ++ suf ->
+      transition_preserves_global_equivocation (finite_trace_last s pre) item.
+
+Lemma trace_monotone_global_equivocation_def_equiv :
+  forall (s : composite_state IM) (tr : list (composite_transition_item IM)),
+    trace_monotone_global_equivocation s tr
+      <->
+    TraceMonotoneGlobalEquivocation s tr.
+Proof.
+  split.
+  - remember (length tr) as n; revert s tr Heqn.
+    induction n as [n IHn] using (well_founded_ind lt_wf).
+    intros s [| item tr]; [by constructor |].
+    cbn; intros -> Hall; constructor; [by apply (Hall [] tr) |].
+    eapply IHn; cycle 1; [done | | by lia].
+    intros pre suf item' ->.
+    specialize (Hall (item :: pre) suf item').
+    rewrite finite_trace_last_cons in Hall; apply Hall.
+    by simplify_list_eq.
+  - induction 1; intros pre suf item1 Heq; [by destruct pre |].
+    destruct pre as [| _item pre]; simplify_list_eq; [done |].
+    rewrite finite_trace_last_cons.
+    by eapply IHTraceMonotoneGlobalEquivocation.
 Qed.
 
 End sec_msg_dep_is_globally_equivocating_props.

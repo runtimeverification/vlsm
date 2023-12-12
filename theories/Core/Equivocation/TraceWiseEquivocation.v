@@ -225,9 +225,9 @@ Lemma transition_is_equivocating_tracewise_char
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v ->
     is_equivocating_tracewise_no_has_been_sent s v \/
-    option_bind _ _ sender om = Some v.
+    om ≫= sender = Some v.
 Proof.
-  destruct (decide (option_bind _ _ sender om = Some v))
+  destruct (decide (om ≫= sender = Some v))
   ; [by intro; right |].
   intros Heqv. left. intros is tr [Htr Hinit].
   specialize (extend_right_finite_trace_from_to _ Htr Ht) as Htr'.
@@ -246,7 +246,7 @@ Qed.
 Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
   l s om s' om'
   (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
-  (Hno_sender : option_bind _ _ sender om = None)
+  (Hno_sender : om ≫= sender = None)
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v -> is_equivocating_tracewise_no_has_been_sent s v.
 Proof.
@@ -337,7 +337,7 @@ Qed.
 Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validators
   l s om s' om'
   (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
-  (Hno_sender : option_bind _ _ sender om = None)
+  (Hno_sender : om ≫= sender = None)
   : equivocating_validators s' ⊆ equivocating_validators s.
 Proof.
   intros v Hs'%equivocating_validators_is_equivocating_tracewise_iff.
@@ -358,7 +358,7 @@ Qed.
 Lemma composite_transition_no_sender_equivocators_weight
   l s om s' om'
   (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
-  (Hno_sender : option_bind _ _ sender om = None)
+  (Hno_sender : om ≫= sender = None)
   : (equivocation_fault s' <= equivocation_fault s)%R.
 Proof.
   specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators

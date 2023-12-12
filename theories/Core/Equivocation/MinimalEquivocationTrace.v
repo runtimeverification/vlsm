@@ -1,7 +1,10 @@
 From stdpp Require Import prelude finite.
+From Coq Require Import Reals.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras NatExtras.
+From VLSM.Lib Require Import Measurable EquationsExtras.
 From VLSM.Core Require Import VLSM Composition.
 From VLSM.Core Require Import Equivocation MessageDependencies TraceableVLSM.
+From VLSM.Core Require Import AnnotatedVLSM MsgDepLimitedEquivocation.
 
 (** * Core: Minimally Equivocating Traces
 
@@ -289,7 +292,7 @@ Program Definition initial_indices
 Next Obligation.
 Proof.
   by intros; eapply traceable_vlsm_initial_state_dec,
-    valid_state_project_preloaded_to_preloaded_free.
+    composite_constrained_state_project.
 Qed.
 
 (**
