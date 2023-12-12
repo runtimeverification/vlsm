@@ -566,8 +566,7 @@ Proof.
       * by eapply valid_trace_output_is_valid; [apply HtrXm |].
       * rewrite <- Hstate_project.
         apply Hconstraint_hbs; [done | apply Hproper' |].
-        assert (Hlst'pre :
-          valid_state_prop (pre_loaded_with_all_messages_vlsm FreeE) (finite_trace_last is tr'))
+        assert (Hlst'pre : constrained_state_prop FreeE (finite_trace_last is tr'))
             by (apply finite_valid_trace_last_pstate, Htr'pre).
         apply proper_sent; [done |].
         apply has_been_sent_consistency; [typeclasses eauto | done |].
@@ -642,7 +641,7 @@ Proof.
     by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
 
-  assert (Hlst_preX : valid_state_prop (pre_loaded_with_all_messages_vlsm Free)
+  assert (Hlst_preX : constrained_state_prop Free
     (finite_trace_last (equivocators_state_project IM initial_descriptors is) trX)).
   {
     apply (finite_valid_trace_last_pstate (pre_loaded_with_all_messages_vlsm Free)).
@@ -759,7 +758,7 @@ Proof.
     revert HtrXFree; apply VLSM_incl_finite_valid_trace.
     by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
   }
-  assert (Hlst_trX : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) lst_trX).
+  assert (Hlst_trX : constrained_state_prop Free lst_trX).
   {
     subst lst_trX s; cbn in Hfinal_state |- *; rewrite Hfinal_state.
     by apply finite_valid_trace_last_pstate, HtrXPre.
@@ -1109,7 +1108,7 @@ Proof.
     apply VLSM_incl_finite_valid_trace_init_to; [| done].
     by apply constrained_preloaded_incl.
   }
-  assert (Hplst : valid_state_prop (pre_loaded_with_all_messages_vlsm FreeE) s)
+  assert (Hplst : constrained_state_prop FreeE s)
     by (apply valid_trace_last_pstate in Htr'pre; done).
   apply proper_sent in Hm; [| done]. clear Hplst.
   specialize (Hm is tr Htr'pre).

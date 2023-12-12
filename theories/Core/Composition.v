@@ -490,7 +490,7 @@ Qed.
 Lemma valid_state_preloaded_composite_free_lift
   (j : index)
   (sj : state (IM j))
-  (Hp : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM j)) sj)
+  (Hp : constrained_state_prop (IM j) sj)
   : valid_state_prop
       (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
       (lift_to_composite_state' j sj).
@@ -597,7 +597,7 @@ Qed.
 
 Lemma lift_to_preloaded_free_weak_embedding :
   forall (i : index) (cs : composite_state),
-    valid_state_prop (pre_loaded_with_all_messages_vlsm free_composite_vlsm) cs ->
+    constrained_state_prop free_composite_vlsm cs ->
     VLSM_weak_embedding
       (pre_loaded_with_all_messages_vlsm (IM i))
       (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
@@ -1265,7 +1265,7 @@ Context
   (constraint1 : composite_label IM1 -> composite_state IM1 * option message -> Prop)
   (constraint2 : composite_label IM2 -> composite_state IM2 * option message -> Prop)
   (constraint_projection
-    : forall s1, valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1 ->
+    : forall s1, constrained_state_prop (free_composite_vlsm IM1) s1 ->
       forall l1 om, constraint1 l1 (s1, om) ->
     constraint2 (same_IM_label_rew l1) (same_IM_state_rew s1, om))
   (seed : message -> Prop)

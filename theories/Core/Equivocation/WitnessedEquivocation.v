@@ -769,7 +769,7 @@ Proof.
     specialize (Heqv v).
     rewrite finite_trace_last_is_last in Heqv.
     simpl in Heqv.
-    assert (Hpre_s : valid_state_prop (pre_loaded_with_all_messages_vlsm Free) s).
+    assert (Hpre_s : constrained_state_prop Free s).
     { by apply proj1, finite_valid_trace_from_to_last_pstate in Hpre_tr. }
     destruct (decide (composite_has_been_directly_observed IM s im)).
     { repeat split

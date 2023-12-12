@@ -159,8 +159,8 @@ Definition finite_trace_projection_list (tr : list (composite_transition_item IM
 
 Lemma preloaded_valid_state_projection
   (s : state _)
-  (Hps : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
-  : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM j)) (s j).
+  (Hps : constrained_state_prop (free_composite_vlsm IM) s)
+  : constrained_state_prop (IM j) (s j).
 Proof.
   by apply (VLSM_projection_valid_state preloaded_component_projection).
 Qed.

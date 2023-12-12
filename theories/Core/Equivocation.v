@@ -1847,7 +1847,7 @@ Qed.
 
 Lemma composite_proper_sent
   (s : state (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
+  (Hs : constrained_state_prop (free_composite_vlsm IM) s)
   (m : message)
   : has_been_sent_prop (free_composite_vlsm IM) composite_has_been_sent s m.
 Proof.
@@ -2483,8 +2483,7 @@ Lemma composite_has_been_directly_observed_lift
     has_been_directly_observed (IM i) s m.
 Proof.
   pose (free_composite_vlsm IM) as Free.
-  assert (Hlift_s :
-    valid_state_prop (pre_loaded_with_all_messages_vlsm Free) (lift_to_composite_state' IM i s)).
+  assert (Hlift_s : constrained_state_prop Free (lift_to_composite_state' IM i s)).
   { revert Hs.  apply valid_state_preloaded_composite_free_lift. }
   split; intros Hobs.
   - apply (proper_directly_observed (IM i)); [done |].

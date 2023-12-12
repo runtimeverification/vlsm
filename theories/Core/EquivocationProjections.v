@@ -402,7 +402,7 @@ Context
   [has_been_sent] predicate is preserved through the [same_IM_state_rew] map.
 *)
 Lemma same_IM_composite_has_been_sent_preservation s1 m
-  (Hs1 : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1)) s1)
+  (Hs1 : constrained_state_prop (free_composite_vlsm IM1) s1)
   : composite_has_been_sent IM1 s1 m ->
     composite_has_been_sent IM2 (same_IM_state_rew Heq s1) m.
 Proof.
