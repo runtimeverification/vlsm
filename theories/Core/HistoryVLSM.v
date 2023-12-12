@@ -111,7 +111,7 @@ Lemma composite_valid_transition_reflects_rechability :
   forall l s1 iom s2 oom,
   composite_valid_transition IM l s1 iom s2 oom ->
   valid_state_prop RFree s2 ->
-  input_valid_transition RFree l (s1, iom) (s2, oom).
+  input_constrained_transition Free l (s1, iom) (s2, oom).
 Proof.
   intros * Hnext Hs2; revert l s1 iom oom Hnext.
   induction Hs2 using valid_state_prop_ind; intros * Hnext.
@@ -140,7 +140,7 @@ Proof.
           apply f_equal with (f := fun s => s j) in Heqs'.
           by state_update_simpl.
       }
-      assert (Hss1 : input_valid_transition RFree (existT i li)
+      assert (Hss1 : input_constrained_transition Free (existT i li)
                   (state_update IM s j (s1 j), om) (s1, om')).
       {
         repeat split; [by apply IHHs2 | by apply any_message_is_valid_in_preloaded | ..]
@@ -175,7 +175,7 @@ Lemma composite_valid_transitions_from_to_reflects_reachability :
   valid_state_prop RFree s' -> finite_valid_trace_from_to RFree s s' tr.
 Proof.
   induction 1; intros; [by constructor |].
-  assert (Hitem : input_valid_transition RFree (l item) (s', input item)
+  assert (Hitem : input_constrained_transition Free (l item) (s', input item)
                           (destination item, output item))
     by (apply composite_valid_transition_reflects_rechability; done).
   eapply finite_valid_trace_from_to_app.

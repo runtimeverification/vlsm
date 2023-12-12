@@ -353,7 +353,7 @@ Qed.
 *)
 
 Example doubling_example_constrained_transition :
-  input_valid_transition (pre_loaded_with_all_messages_vlsm doubling_vlsm) multiply_label
+  input_constrained_transition doubling_vlsm multiply_label
    (3, Some 3) (0, Some 6).
 Proof.
   apply (finite_valid_trace_from_to_last_transition
