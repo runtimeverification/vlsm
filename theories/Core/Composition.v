@@ -730,8 +730,8 @@ Lemma input_valid_transition_preloaded_project_active_free
   {message} `{EqDecision V} {IM : V -> VLSM message}
   (X := free_composite_vlsm IM)
   l s im s' om :
-  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
-  input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l)
+  input_constrained_transition X l (s, im) (s', om) ->
+  input_constrained_transition (IM (projT1 l)) (projT2 l)
     (s (projT1 l), im) (s' (projT1 l), om).
 Proof.
   intro Hptrans.
@@ -747,8 +747,8 @@ Lemma input_valid_transition_preloaded_project_active
   {message} `{EqDecision V} {IM : V -> VLSM message} {constraint}
   (X := composite_vlsm IM constraint)
   l s im s' om :
-  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
-  input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l)
+  input_constrained_transition X l (s, im) (s', om) ->
+  input_constrained_transition (IM (projT1 l)) (projT2 l)
     (s (projT1 l), im) (s' (projT1 l), om).
 Proof.
   intros.
@@ -762,7 +762,7 @@ Lemma input_valid_transition_project_active
   (X := composite_vlsm IM constraint)
   l s im s' om :
   input_valid_transition X l (s, im) (s', om) ->
-  input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l))) (projT2 l)
+  input_constrained_transition (IM (projT1 l)) (projT2 l)
     (s (projT1 l), im) (s' (projT1 l), om).
 Proof.
   intro Hptrans.
@@ -775,11 +775,11 @@ Lemma input_valid_transition_preloaded_project_any_free
   {message : Type} `{EqDecision V} {IM : V -> VLSM message}
   (X := free_composite_vlsm IM)
   (l : label X) s im s' om :
-  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
+  input_constrained_transition X l (s, im) (s', om) ->
     s i = s' i \/
     exists li : label (IM i),
       l = existT i li /\
-     input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, im) (s' i, om).
+     input_constrained_transition (IM i) li (s i, im) (s' i, om).
 Proof.
   intro Hptrans.
   destruct l as [j lj].
@@ -799,11 +799,11 @@ Lemma input_valid_transition_preloaded_project_any
   {message : Type} `{EqDecision V} {IM : V -> VLSM message} {constraint}
   (X := composite_vlsm IM constraint)
   (l : label X) s im s' om :
-  input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, im) (s', om) ->
+  input_constrained_transition X l (s, im) (s', om) ->
     s i = s' i \/
     exists li : label (IM i),
       l = existT i li /\
-      input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, im) (s' i, om).
+      input_constrained_transition (IM i) li (s i, im) (s' i, om).
 Proof.
   intros.
   apply input_valid_transition_preloaded_project_any_free.
@@ -820,7 +820,7 @@ Lemma input_valid_transition_project_any
     s i = s' i \/
     exists li : label (IM i),
       l = existT i li /\
-      input_valid_transition (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, im) (s' i, om).
+      input_constrained_transition (IM i) li (s i, im) (s' i, om).
 Proof.
   intro Hproto.
   apply preloaded_weaken_input_valid_transition in Hproto.

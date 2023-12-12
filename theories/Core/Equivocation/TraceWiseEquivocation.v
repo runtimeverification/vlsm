@@ -221,7 +221,7 @@ Qed.
 
 Lemma transition_is_equivocating_tracewise_char
   l s om s' om'
-  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v ->
     is_equivocating_tracewise_no_has_been_sent s v \/
@@ -245,7 +245,7 @@ Qed.
 
 Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
   l s om s' om'
-  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
   (Hno_sender : option_bind _ _ sender om = None)
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v -> is_equivocating_tracewise_no_has_been_sent s v.
@@ -336,7 +336,7 @@ Qed.
 
 Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validators
   l s om s' om'
-  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
   (Hno_sender : option_bind _ _ sender om = None)
   : equivocating_validators s' ⊆ equivocating_validators s.
 Proof.
@@ -357,7 +357,7 @@ Qed.
 
 Lemma composite_transition_no_sender_equivocators_weight
   l s om s' om'
-  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
   (Hno_sender : option_bind _ _ sender om = None)
   : (equivocation_fault s' <= equivocation_fault s)%R.
 Proof.
