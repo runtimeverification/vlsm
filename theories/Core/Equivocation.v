@@ -454,7 +454,7 @@ Lemma oracle_stepwise_props_change_selector
   (selector' : message -> transition_item -> Prop)
   (Heqv :
     forall s item,
-      input_valid_transition_item (pre_loaded_with_all_messages_vlsm vlsm) s item ->
+      input_constrained_transition_item vlsm s item ->
       forall m, selector m item <-> selector' m item)
   : oracle_stepwise_props selector' oracle.
 Proof.
@@ -2113,8 +2113,7 @@ Lemma composite_emitted_by_validator_have_sender
     (can_emit_signed : channel_authentication_prop)
     (A_inj : forall v1 v2, A v1 = A v2 -> v1 = v2)
   : forall s item,
-      input_valid_transition_item (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
-        s item ->
+      input_constrained_transition_item (free_composite_vlsm IM) s item ->
     forall v, A v = projT1 (l item) ->
     forall (m : message), output item = Some m ->
     sender m = Some v.

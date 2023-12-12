@@ -349,7 +349,7 @@ Inductive ObservedBeforeStateOrMessage
 Record ObservedBeforeSendTransition
   (s : state X) (item : transition_item X) (m1 m2 : message) : Prop :=
 {
-  dobst_transition : input_valid_transition_item R s item;
+  dobst_transition : input_constrained_transition_item X s item;
   dobst_output_m2 : output item = Some m2;
   dobst_observed_m1 : ObservedBeforeStateOrMessage m1 s (input item);
 }.
@@ -685,7 +685,7 @@ Qed.
 Record CompositeObservedBeforeSendTransition
   (s : composite_state IM) (item : composite_transition_item IM) (m1 m2 : message) : Prop :=
 {
-  cdobst_transition : input_valid_transition_item RFree s item;
+  cdobst_transition : input_constrained_transition_item Free s item;
   cdobst_output_m2 : output item = Some m2;
   cdobst_observed_m1 :
     ObservedBeforeStateOrMessage (IM (projT1 (l item))) message_dependencies m1
@@ -1236,7 +1236,6 @@ Context
   (Hauth : channel_authentication_prop IM A sender)
   (Hsender_safety := channel_authentication_sender_safety _ _ _ Hauth)
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -1245,7 +1244,7 @@ Context
 *)
 Lemma input_valid_transition_preserves_msg_dep_is_globally_equivocating :
   forall (s : composite_state IM) (item : composite_transition_item IM),
-    input_valid_transition_item RFree s item ->
+    input_constrained_transition_item Free s item ->
     forall j, destination item j = s j ->
     forall v, A v = j ->
       msg_dep_is_globally_equivocating IM message_dependencies sender s v ->
