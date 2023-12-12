@@ -237,7 +237,7 @@ Qed.
 
 Lemma paxos_maxBal_mono :
   forall a l s im s' om,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) l (s, im) (s', om) ->
+    input_constrained_transition (paxos_acceptor_vlsm a) l (s, im) (s', om) ->
     (paxos_maxBal s <= paxos_maxBal s')%Z.
 Proof.
   intros * [(_ & _ & Hvalid) Htrans].
@@ -249,7 +249,7 @@ Qed.
 
 Lemma last_vote_was_sent :
   forall a s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) s ->
+    constrained_state_prop (paxos_acceptor_vlsm a) s ->
     forall lv,
       lastVote s = Some lv -> has_been_sent (paxos_acceptor_vlsm a) s (lv.1, m_2b a lv.2).
 Proof.
@@ -276,7 +276,7 @@ Qed.
 
 Lemma paxos_acceptor_sent_bounds_maxBal :
   forall a s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) s ->
+    constrained_state_prop (paxos_acceptor_vlsm a) s ->
   forall b mb,
     has_been_sent (paxos_acceptor_vlsm a) s (b, mb) ->
     (b <= paxos_maxBal s)%Z.
@@ -292,7 +292,7 @@ Qed.
 
 Lemma maxVBal_le_paxos_maxBal :
   forall a s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) s ->
+    constrained_state_prop (paxos_acceptor_vlsm a) s ->
       (maxVBal s <= paxos_maxBal s)%Z.
 Proof.
   intros a s Hs.
@@ -305,9 +305,7 @@ Qed.
 
 Lemma maxVBal_mono :
   forall a l s im s' om,
-    input_valid_transition 
-      (pre_loaded_with_all_messages_vlsm
-         (paxos_acceptor_vlsm a)) l (s, im) (s', om) ->
+    input_constrained_transition (paxos_acceptor_vlsm a) l (s, im) (s', om) ->
     (maxVBal s <= maxVBal s')%Z.
 Proof.
   intros * Ht.
@@ -319,7 +317,7 @@ Qed.
 
 Lemma sent_vote_le_maxVBal :
   forall a s,
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) s ->
+    constrained_state_prop (paxos_acceptor_vlsm a) s ->
   forall b v,
     has_been_sent (paxos_acceptor_vlsm a) s (b, m_2b a v) ->
     (b <= maxVBal s)%Z.
@@ -334,8 +332,7 @@ Qed.
 
 Lemma sending_1b_updates_maxBal :
   forall [a l s im s' b lv],
-    input_valid_transition (pre_loaded_with_all_messages_vlsm
-      (paxos_acceptor_vlsm a)) l (s, im) (s', Some (b, m_1b a lv)) ->
+    input_constrained_transition (paxos_acceptor_vlsm a) l (s, im) (s', Some (b, m_1b a lv)) ->
     (paxos_maxBal s < b)%Z /\ (paxos_maxBal s' = Some b).
 Proof.
   intros * [(_ & _ & Hvalid) Hstep]; cbn in Hstep.
@@ -768,8 +765,6 @@ Defined.
 
 Definition paxos_vlsm := composite_vlsm IM (no_equivocations (free_composite_vlsm IM)).
 
-Definition preloaded_paxos_vlsm := pre_loaded_with_all_messages_vlsm paxos_vlsm.
-
 End sec_paxos_vlsm.
 
 Definition message_sender (m : paxos_message_body) : paxos_index :=
@@ -783,7 +778,7 @@ Definition message_sender (m : paxos_message_body) : paxos_index :=
 
 Lemma localize_send :
   forall l s im s' om,
-    transition preloaded_paxos_vlsm l (s, im) = (s', Some om) ->
+    transition (pre_loaded_with_all_messages_vlsm paxos_vlsm) l (s, im) = (s', Some om) ->
     projT1 l = message_sender (snd om).
 Proof.
   intros * Ht; destruct om as [ob omb]; cbn in Ht |- *.
@@ -796,7 +791,7 @@ Qed.
 
 Lemma localize_sent_messages
   (s : state paxos_vlsm)
-  (Hs : valid_state_prop preloaded_paxos_vlsm s) (* or preloaded *)
+  (Hs : constrained_state_prop paxos_vlsm s)
   : forall m : paxos_message,
     has_been_sent paxos_vlsm s m
     <-> has_been_sent (IM (message_sender (snd m))) (s (message_sender (snd m))) m.
@@ -817,11 +812,13 @@ Proof.
 Qed.
 
 Notation Pred_Stable_In VLSM P :=
-  (forall l s im s' om, input_valid_transition VLSM l (s, im) (s', om) -> P s -> P s').
+  (forall l s im s' om,
+    input_valid_transition (pre_loaded_with_all_messages_vlsm VLSM) l (s, im) (s', om) ->
+    P s -> P s').
 
 Lemma lift_component_stable_prop ix (P : state (IM ix) -> Prop) :
-  Pred_Stable_In (pre_loaded_with_all_messages_vlsm (IM ix)) P ->
-  Pred_Stable_In preloaded_paxos_vlsm (fun s => P (s ix)).
+  Pred_Stable_In (IM ix) P ->
+  Pred_Stable_In paxos_vlsm (fun s => P (s ix)).
 Proof.
   intros H_stable_in_ix * Ht.
   destruct l as [i_l l].
@@ -831,18 +828,18 @@ Proof.
 Qed.
 
 Lemma lift_acceptor_stable_prop (P : paxos_acceptor_state -> Prop) a :
-  Pred_Stable_In (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a)) P ->
+  Pred_Stable_In (paxos_acceptor_vlsm a) P ->
   (forall l s im s' om,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm paxos_vlsm) l (s, im) (s', om) ->
+    input_constrained_transition paxos_vlsm l (s, im) (s', om) ->
       P (s (acceptor_ix a)) -> P (s' (acceptor_ix a))).
 Proof.
   by exact (lift_component_stable_prop (acceptor_ix a) P).
 Qed.
 
 Lemma lift_leaders_stable_prop (P : leaders_state -> Prop) :
-  Pred_Stable_In (pre_loaded_with_all_messages_vlsm leaders_vlsm) P ->
+  Pred_Stable_In leaders_vlsm P ->
   (forall l s im s' om,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm paxos_vlsm) l (s, im) (s', om) ->
+    input_constrained_transition paxos_vlsm l (s, im) (s', om) ->
       P (s leaders_ix) -> P (s' leaders_ix)).
 Proof.
   by exact (lift_component_stable_prop leaders_ix P).
@@ -851,10 +848,10 @@ Qed.
 Lemma send_implies_sent_argument
   (a b : paxos_message) :
   (forall l s oim s',
-    input_valid_transition preloaded_paxos_vlsm l (s, oim) (s', Some b) ->
+    input_constrained_transition paxos_vlsm l (s, oim) (s', Some b) ->
     has_been_sent paxos_vlsm s a) ->
   (forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
     has_been_sent paxos_vlsm s b ->
     has_been_sent paxos_vlsm s a).
 Proof.
@@ -871,13 +868,13 @@ Lemma sends_unique_argument
   A (f : A -> paxos_message) (P : state paxos_vlsm -> Prop)
   (f_inj : Inj eq eq f)
   (HP_stable : forall l s oim s' oom,
-    input_valid_transition preloaded_paxos_vlsm l (s, oim) (s', oom) ->
+    input_constrained_transition paxos_vlsm l (s, oim) (s', oom) ->
     P s -> P s')
   (HP_step : forall l s oim s' x,
-      input_valid_transition preloaded_paxos_vlsm l (s, oim) (s', Some (f x)) ->
+      input_constrained_transition paxos_vlsm l (s, oim) (s', Some (f x)) ->
       ~ P s /\ P s') :
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
   forall a b,
     has_been_sent paxos_vlsm s (f a) ->
     has_been_sent paxos_vlsm s (f b) ->
@@ -886,9 +883,9 @@ Proof.
   intros s Hs.
   induction Hs using valid_state_prop_ind;
     [by intros a b []%has_been_sent_no_inits |].
-  assert (Hs : valid_state_prop preloaded_paxos_vlsm s) by apply Ht.
+  assert (Hs : constrained_state_prop paxos_vlsm s) by apply Ht.
   assert (HP_sent : forall s : state paxos_vlsm,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
     forall a : A, has_been_sent paxos_vlsm s (f a) -> P s).
   {
     clear -HP_step HP_stable.
@@ -912,7 +909,7 @@ Qed.
 
 Lemma sent_1b_once :
   forall (s : state paxos_vlsm),
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
   forall (b : Ballot) (a : Acceptor) lv1 lv2,
     has_been_sent paxos_vlsm s (b, m_1b a lv1) ->
     has_been_sent paxos_vlsm s (b, m_1b a lv2) ->
@@ -941,7 +938,7 @@ Qed.
 
 Lemma last_vote_was_sent_paxos :
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
   forall a lv,
     lastVote (s (acceptor_ix a)) = Some lv ->
     has_been_sent paxos_vlsm s (lv.1, m_2b a lv.2).
@@ -953,7 +950,7 @@ Proof.
 Qed.
 
 Lemma sent_1b_impl_sent_lastvote_as_2b :
-  forall s, valid_state_prop preloaded_paxos_vlsm s ->
+  forall s, constrained_state_prop paxos_vlsm s ->
   forall (b : Ballot) (a : Acceptor) (b_lv : Ballot) (v_lv : Value),
     has_been_sent paxos_vlsm s (b, m_1b a (Some (b_lv, v_lv))) ->
     has_been_sent paxos_vlsm s (b_lv, m_2b a v_lv).
@@ -974,7 +971,7 @@ Proof.
 Qed.
 
 Lemma sent_2b_after_2a :
-  forall s, valid_state_prop preloaded_paxos_vlsm s ->
+  forall s, constrained_state_prop paxos_vlsm s ->
   forall (b : Ballot) (a : Acceptor) v,
     has_been_sent paxos_vlsm s (b, m_2b a v) ->
     has_been_sent paxos_vlsm s (b, m_2a v).
@@ -996,7 +993,7 @@ Qed.
 
 Lemma sent_2a_unique :
   forall s : state paxos_vlsm,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
   forall (b : Ballot) (v w : Value),
     has_been_sent paxos_vlsm s (b, m_2a v) ->
     has_been_sent paxos_vlsm s (b, m_2a w) ->
@@ -1036,7 +1033,7 @@ Qed.
 
 Lemma sent_2b_unique :
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
   forall (b : Ballot) (a : Acceptor) v w,
     has_been_sent paxos_vlsm s (b, m_2b a v) ->
     has_been_sent paxos_vlsm s (b, m_2b a w) ->
@@ -1049,7 +1046,7 @@ Qed.
 
 Lemma sent_2a_after_1c :
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
   forall (b : Ballot) (v : Value),
     has_been_sent paxos_vlsm s (b, m_2a v) ->
     exists (safe_v : AllOrFin VSet),
@@ -1066,7 +1063,7 @@ Proof.
     by right.
   - clear IHHs.
     subst om'.
-    assert (Hs' : valid_state_prop preloaded_paxos_vlsm s')
+    assert (Hs' : constrained_state_prop paxos_vlsm s')
       by (apply input_valid_transition_destination in Ht; done).
     destruct l as [ix l].
     destruct (Ht) as [_ Hstep].
@@ -1091,7 +1088,7 @@ Qed.
 
 Lemma sender_id_m_2b :
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
   forall a b v a',
     (b, m_2b a v) ∈ sent_messages (s (acceptor_ix a')) ->
     a' = a.
@@ -1122,7 +1119,7 @@ Section sec_paxos_refinement_map.
 
 Context
   (s : state paxos_vlsm)
-  (Hs : valid_state_prop preloaded_paxos_vlsm s)
+  (Hs : constrained_state_prop paxos_vlsm s)
   .
 
 Definition was_voted (a : Acceptor) (b : Ballot) (v : Value) : Prop :=
@@ -1431,12 +1428,12 @@ Proof.
     rewrite (lookup_total_empty (A := ballot_state) (M := Bmap)) in Hlookup; cbn in Hlookup.
     by rewrite lookup_empty in Hlookup.
   - rename Hs into Hs'.
-    assert (Hs : valid_state_prop preloaded_paxos_vlsm s) by apply Ht.
+    assert (Hs : constrained_state_prop paxos_vlsm s) by apply Ht.
     intros b a lv Hlookup.
     destruct l as [[| a_l] li]; cycle 1.
     + (* On an acceptor state, the gathered_1b field of the leaders state can't change *)
       rewrite has_been_sent_step_update by (apply Ht; done).
-      right; apply IHv; [done |].
+      right; apply IHc; [done |].
       cut (s' leaders_ix = s leaders_ix); [by intros <- |].
       apply input_valid_transition_preloaded_project_any with (i := leaders_ix) in Ht.
       by destruct Ht as [<- | [? [[=]]]].
@@ -1465,7 +1462,7 @@ Proof.
         cbn in H_leader_valid; subst b'.
         by destruct H_no_equivocation.
       * rewrite (lookup_total_insert_ne (s leaders_ix)) in Hlookup by done.
-        by apply IHv.
+        by apply IHc.
 Qed.
 
 Lemma check_safe_at_okay :
@@ -1679,7 +1676,7 @@ End sec_paxos_refinement_map.
 
 Lemma V_VotedFor_iff :
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
   forall a b v,
     V_VotedFor s a b v <->
     has_been_sent paxos_vlsm s (b, m_2b a v).
@@ -1697,7 +1694,7 @@ Qed.
 
 Lemma V_DidNotVoteIn_iff :
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
   forall a b,
     V_DidNotVoteIn s a b <->
       forall v, ~ has_been_sent paxos_vlsm s (b, m_2b a v).
@@ -1707,7 +1704,7 @@ Qed.
 
 Lemma past_vote_info_is_invariant:
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
       Inv_past_vote_info_prop s.
 Proof.
   intros s Hs a.
@@ -1727,7 +1724,7 @@ Qed.
 
 Lemma P1bInv_is_invariant:
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
     P1bInv_prop s.
 Proof.
   cbv beta delta [P1bInv_prop].
@@ -1763,8 +1760,7 @@ Proof.
     simpl (message_sender _).
     change (IM (acceptor_ix a)) with (paxos_acceptor_vlsm a).
     subst mbal_m.
-    assert (Hsa : valid_state_prop (pre_loaded_with_all_messages_vlsm (paxos_acceptor_vlsm a))
-      (s (acceptor_ix a))).
+    assert (Hsa : constrained_state_prop (paxos_acceptor_vlsm a) (s (acceptor_ix a))).
     {
       by apply valid_state_project_preloaded_to_preloaded with (i := acceptor_ix a) in Hs.
     }
@@ -1801,7 +1797,7 @@ Qed.
 
 Lemma V_SafeAt_stable :
   forall [l s oim s' oom],
-    input_valid_transition preloaded_paxos_vlsm l (s, oim) (s', oom) ->
+    input_constrained_transition paxos_vlsm l (s, oim) (s', oom) ->
   forall b v,
     V_SafeAt s b v -> V_SafeAt s' b v.
 Proof.
@@ -1839,13 +1835,15 @@ Proof.
 Qed.
 
 Lemma P2aInv_is_invariant :
-  forall (s : state preloaded_paxos_vlsm),
-    valid_state_prop preloaded_paxos_vlsm s ->
+  forall (s : state paxos_vlsm),
+    constrained_state_prop paxos_vlsm s ->
     P2aInv_prop s.
 Proof.
   unfold P2aInv_prop.
   intros s Hs b v Hsent.
-  pattern s; revert s Hs Hsent; apply from_send_to_from_sent_argument.
+  pattern s; revert s Hs Hsent.
+  change (state paxos_vlsm) with (state (pre_loaded_with_all_messages_vlsm paxos_vlsm)).
+  apply from_send_to_from_sent_argument.
   - (* the propery is just an existential around has_been_sent, so stability is easy *)
     intros * Ht (vs & Hv & Hsent).
     exists vs.
@@ -1873,7 +1871,7 @@ Qed.
 
 Lemma ShowsSafeAt_stable :
   forall [l s oim s' oom],
-    input_valid_transition preloaded_paxos_vlsm l (s, oim) (s', oom) ->
+    input_constrained_transition paxos_vlsm l (s, oim) (s', oom) ->
   forall (Q : sig Quorum) b v,
     ShowsSafeAt s Q b v -> ShowsSafeAt s' Q b v.
 Proof.
@@ -1912,17 +1910,18 @@ Proof.
 Qed.
 
 Lemma sent_1c_implies_ShowsSafeAt :
-  forall (s : state preloaded_paxos_vlsm),
-    valid_state_prop preloaded_paxos_vlsm s ->
+  forall (s : state paxos_vlsm),
+    constrained_state_prop paxos_vlsm s ->
   forall b vs,
     has_been_sent paxos_vlsm s (b, m_1c vs) ->
   forall v, v ∈ vs -> exists (Q : sig Quorum), ShowsSafeAt s Q b v.
 Proof.
   intros s Hs b vs Hsent v Hv; revert s Hs Hsent.
+  change (state paxos_vlsm) with (state (pre_loaded_with_all_messages_vlsm paxos_vlsm)).
   apply from_send_to_from_sent_argument;
     [by intros * ? [Q ?]; exists Q; eapply ShowsSafeAt_stable |].
   intros * Ht.
-  assert (Hs : valid_state_prop preloaded_paxos_vlsm s) by apply Ht.
+  assert (Hs : constrained_state_prop paxos_vlsm s) by apply Ht.
   cut (exists Q, ShowsSafeAt s Q b v);
     [by intros [Q ?]; exists Q; eapply ShowsSafeAt_stable |].
   apply (check_safe_at_okay s Hs).
@@ -1937,8 +1936,8 @@ Proof.
 Qed.
 
 Lemma ShowsSafeAt_impl_V_SafeAt :
-   forall (s : state preloaded_paxos_vlsm),
-    valid_state_prop preloaded_paxos_vlsm s ->
+   forall (s : state paxos_vlsm),
+    constrained_state_prop paxos_vlsm s ->
   forall b v,
     (exists (Q : sig Quorum), ShowsSafeAt s Q b v) ->
       V_SafeAt s b v.
@@ -2030,7 +2029,7 @@ Qed.
 
 Lemma P1cInv_is_invariant :
   forall s,
-    valid_state_prop preloaded_paxos_vlsm s ->
+    constrained_state_prop paxos_vlsm s ->
     P1cInv_prop s.
 Proof.
   unfold P1cInv_prop.
@@ -2057,7 +2056,7 @@ Proof.
 Qed.
 
 Lemma paxos_invariants (s : state paxos_vlsm) :
-  valid_state_prop preloaded_paxos_vlsm s -> PInv s.
+  constrained_state_prop paxos_vlsm s -> PInv s.
 Proof.
   intros Hs.
   unfold PInv.
