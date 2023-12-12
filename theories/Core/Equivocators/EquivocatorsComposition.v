@@ -194,20 +194,18 @@ Proof.
 Qed.
 
 Lemma equivocators_pre_trace_cannot_decrease_state_size
-  (Pre := pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM))
   s s' tr
-  (Htr : finite_valid_trace_from_to Pre s s' tr)
+  (Htr : finite_constrained_trace_from_to (free_composite_vlsm equivocator_IM) s s' tr)
   : forall eqv, equivocator_state_n (s eqv) <= equivocator_state_n (s' eqv).
 Proof.
   apply trace_to_plan_to_trace_from_to in Htr.
-  specialize (equivocators_plan_cannot_decrease_state_size s (trace_to_plan Pre tr)) as Hmon.
+  specialize (equivocators_plan_cannot_decrease_state_size s (trace_to_plan _ tr)) as Hmon.
   by replace (composite_apply_plan _ _ _) with (tr, s') in Hmon.
 Qed.
 
 Lemma equivocators_pre_trace_preserves_equivocating_state
-  (Pre := pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM))
   s s' tr
-  (Htr : finite_valid_trace_from_to Pre s s' tr)
+  (Htr : finite_constrained_trace_from_to (free_composite_vlsm equivocator_IM) s s' tr)
   : forall eqv, is_equivocating_state (IM eqv) (s eqv) -> is_equivocating_state (IM eqv) (s' eqv).
 Proof.
   unfold is_equivocating_state, is_singleton_state.
