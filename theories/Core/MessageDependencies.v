@@ -174,7 +174,7 @@ Proof.
 Qed.
 
 Lemma constrained_transition_preserves_message_dependencies_full_node_condition
-  `(input_valid_transition (pre_loaded_with_all_messages_vlsm X) lX (s, im) (s', om)) :
+  `(input_constrained_transition X lX (s, im) (s', om)) :
   forall m, message_dependencies_full_node_condition X message_dependencies s m ->
     message_dependencies_full_node_condition X message_dependencies s' m.
 Proof.

@@ -204,7 +204,7 @@ Lemma pre_loaded_with_all_messages_projection_input_valid_transition_eq
   (Ht : input_valid_transition
           (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
   (Hl : projT1 l = j)
-  : input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
+  : input_constrained_transition (IM (projT1 l))
       (projT2 l) (s1 (projT1 l), om1) (s2 (projT1 l), om2).
 Proof.
   specialize

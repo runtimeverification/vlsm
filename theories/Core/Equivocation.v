@@ -402,7 +402,7 @@ Record oracle_stepwise_props
       forall (m : message), ~ oracle s m;
   oracle_step_update :
     forall (l : label _) (s : state _) (im : option message) (s' : state _) (om : option message),
-      input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
+      input_constrained_transition vlsm l (s, im) (s', om) ->
       forall (msg : message),
       oracle s' msg
         <->
@@ -546,7 +546,7 @@ Qed.
 
 Lemma has_been_sent_step_update `{HasBeenSentCapability} :
   forall (l : label _) (s : state _) (im : option message) (s' : state _) (om : option message),
-    input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
+    input_constrained_transition vlsm l (s, im) (s', om) ->
   forall msg : message,
     has_been_sent s' msg <-> (om = Some msg \/ has_been_sent s msg).
 Proof.
@@ -747,7 +747,7 @@ Qed.
 
 Lemma has_been_received_step_update `{HasBeenReceivedCapability} :
   forall [l : label _] [s : state _] [im : option message] [s' : state _] [om : option message],
-    input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
+    input_constrained_transition vlsm l (s, im) (s', om) ->
   forall msg : message,
     has_been_received s' msg <-> (im = Some msg \/ has_been_received s msg).
 Proof.
@@ -1021,7 +1021,7 @@ Qed.
 
 Lemma oracle_step_property_from_trace :
      forall l s im s' om,
-       input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
+       input_constrained_transition vlsm l (s, im) (s', om) ->
        forall msg, oracle s' msg
                    <-> (selector msg {| l := l; input := im; destination := s'; output := om |}
                         \/ oracle s msg).
@@ -1246,7 +1246,7 @@ Qed.
 
 Lemma has_been_directly_observed_step_update `{HasBeenDirectlyObservedCapability message vlsm} :
   forall l s im s' om,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm vlsm) l (s, im) (s', om) ->
+    input_constrained_transition vlsm l (s, im) (s', om) ->
   forall msg : message,
     has_been_directly_observed vlsm s' msg <->
     (im = Some msg \/ om = Some msg) \/ has_been_directly_observed vlsm s msg.
@@ -2673,7 +2673,7 @@ Qed.
 (** A sent message cannot have been previously sent or received. *)
 Definition cannot_resend_message_stepwise_prop : Prop :=
   forall l s oim s' m,
-    input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, oim) (s', Some m) ->
+    input_constrained_transition X l (s, oim) (s', Some m) ->
     ~ has_been_sent X s m /\ ~ has_been_received X s' m.
 
 Lemma cannot_resend_received_message_in_future
@@ -2700,7 +2700,7 @@ Context
   .
 
 Lemma input_valid_transition_received_not_resent l s m s' om'
-  (Ht : input_valid_transition (pre_loaded_with_all_messages_vlsm X) l (s, Some m) (s', om'))
+  (Ht : input_constrained_transition X l (s, Some m) (s', om'))
   : om' <> Some m.
 Proof.
   destruct om' as [m' |]; [| by congruence].
