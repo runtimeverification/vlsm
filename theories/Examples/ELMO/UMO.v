@@ -218,13 +218,13 @@ Proof.
 Qed.
 
 (** [Send] transitions in a constrained state are ok. *)
-Lemma input_valid_transition_Send :
+Lemma input_constrained_transition_Send :
   forall (i : Address) (m : Message),
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (UMO_component i)) (state m) ->
-      input_valid_transition (pre_loaded_with_all_messages_vlsm (UMO_component i))
+    constrained_state_prop (UMO_component i) (state m) ->
+      input_constrained_transition (UMO_component i)
         Send (state m, None) (state m <+> MkObservation Send m, Some m).
 Proof.
-  intros; red; cbn; split_and!.
+  intros; do 2 (red; cbn); split_and!.
   - done.
   - by apply option_valid_message_None.
   - by constructor.
@@ -232,13 +232,13 @@ Proof.
 Qed.
 
 (** [Receive] transitions in a constrained state are ok. *)
-Lemma input_valid_transition_Receive :
+Lemma input_constrained_transition_Receive :
   forall (i : Address) (s : State) (m : Message),
-    valid_state_prop (pre_loaded_with_all_messages_vlsm (UMO_component i)) s ->
-    input_valid_transition (pre_loaded_with_all_messages_vlsm (UMO_component i))
+    constrained_state_prop (UMO_component i) s ->
+    input_constrained_transition (UMO_component i)
       Receive (s, Some m) (s <+> MkObservation Receive m, None).
 Proof.
-  intros * Hvsp; red; cbn; split_and!; [done | | | done].
+  intros; do 2 (red; cbn); split_and!; [done | | | done].
   - by apply any_message_is_valid_in_preloaded.
   - by constructor.
 Qed.
@@ -307,30 +307,12 @@ Qed.
 
 Section sec_UMO_component_lemmas.
 
-(**
-  [Ui] is a notation for an [UMO_component] of address [i].
-
-  [Ri] is a notation for an [UMO_component] of address [i] preloaded with all
-  messages. It will be used to state and prove lemmas and theorems which talk
-  about reachability.
-*)
+(** [Ui] is a notation for an [UMO_component] of address [i]. *)
 
 Context
   {i : Address}
   (Ui : VLSM Message := UMO_component i)
-  (Ri : VLSM Message := pre_loaded_with_all_messages_vlsm Ui).
-
-(**
-  There is a VLSM inclusion from any [UMO_component] to its preloaded version.
-  This is an extremely useful act - we will prove many lemmas just for the
-  preloaded component and then use this fact to transport them to the bare
-  one.
-*)
-Lemma VLSM_incl_UMO_component_preloaded :
-  VLSM_incl_part Ui Ri.
-Proof.
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
-Qed.
+  .
 
 Lemma UMO_reachable_valid_state_prop :
   forall s, valid_state_prop Ui s ->
@@ -356,15 +338,15 @@ Proof.
   - intros [Hur Hadr].
     induction Hur; red; cbn in Hadr.
     + by apply initial_state_is_valid; cbv.
-    + by eapply input_valid_transition_destination, input_valid_transition_Send, IHHur.
-    + by eapply input_valid_transition_destination, input_valid_transition_Receive, IHHur.
+    + by eapply input_valid_transition_destination, input_constrained_transition_Send, IHHur.
+    + by eapply input_valid_transition_destination, input_constrained_transition_Receive, IHHur.
 Qed.
 
-(** The initial state of [Ri] is unique (that of [Ui] too, but we don't need a separate lemma). *)
+(** The initial state of [Ui] is unique. *)
 Lemma vs0_uniqueness :
   forall is : State,
     UMO_component_initial_state_prop i is ->
-      is = ``(vs0 Ri).
+      is = ``(vs0 Ui).
 Proof.
   by intros []; inversion 1; cbv in *; by subst.
 Qed.
@@ -494,7 +476,8 @@ Qed.
 
 (**
   The same lemmas as above, but for the component [Ui]. They follow from the
-  above lemmas because there is a VLSM inclusion from [Ri] to [Ui].
+  above lemmas because there is a VLSM inclusion from [Ui] to [Ui] preloaded
+  with all messages.
 *)
 
 Lemma input_valid_transition_size :
@@ -504,8 +487,8 @@ Lemma input_valid_transition_size :
 Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_constrained_transition_size.
-  by apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
-  ; eauto using VLSM_incl_UMO_component_preloaded.
+  apply (@VLSM_incl_input_valid_transition _ Ui Ui); [| done].
+  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_from_to_size :
@@ -517,8 +500,8 @@ Lemma finite_valid_trace_from_to_size :
 Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_constrained_trace_from_to_size.
-  by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
-  ; eauto using VLSM_incl_UMO_component_preloaded.
+  apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui); [| done].
+  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_from_to_inv :
@@ -527,8 +510,8 @@ Lemma finite_valid_trace_from_to_inv :
 Proof.
   intros s tr Hfvt.
   eapply finite_constrained_trace_from_to_inv.
-  by apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui Ri)
-  ; eauto using VLSM_incl_UMO_component_preloaded.
+  apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui); [| done].
+  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (**
@@ -564,9 +547,9 @@ Lemma input_valid_transition_deterministic_conv :
       lbl1 = lbl2 /\ s1 = s2 /\ iom1 = iom2 /\ oom1 = oom2.
 Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
-  by eapply input_constrained_transition_deterministic_conv
-  ; apply (@VLSM_incl_input_valid_transition _ Ui Ui Ri)
-  ; eauto using VLSM_incl_UMO_component_preloaded.
+  by eapply input_constrained_transition_deterministic_conv;
+    apply (@VLSM_incl_input_valid_transition _ Ui Ui); [| done | | done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** Every trace segment is fully determined by its initial and final state. *)
@@ -596,10 +579,10 @@ Lemma finite_valid_trace_from_to_unique :
     finite_valid_trace_from_to Ui s1 s2 l2 ->
       l1 = l2.
 Proof.
-  by intros s1 s2 l1 l2 Hfvt1 Hfvt2
-  ; eapply finite_constrained_trace_from_to_unique
-  ; apply VLSM_incl_finite_valid_trace_from_to
-  ; eauto using VLSM_incl_UMO_component_preloaded.
+  by intros s1 s2 l1 l2 Hfvt1 Hfvt2;
+    eapply finite_constrained_trace_from_to_unique;
+    apply VLSM_incl_finite_valid_trace_from_to; [| done | | done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** Every trace is determined by its final state. *)
@@ -621,10 +604,10 @@ Lemma finite_valid_trace_init_to_unique :
     finite_valid_trace_init_to Ui s f l2 ->
       l1 = l2.
 Proof.
-  by intros s f l1 l2 Hfvit1 Hfvit2
-  ; eapply finite_constrained_trace_init_to_unique
-  ; apply VLSM_incl_finite_valid_trace_init_to
-  ; eauto using VLSM_incl_UMO_component_preloaded.
+  by intros s f l1 l2 Hfvit1 Hfvit2;
+    eapply finite_constrained_trace_init_to_unique;
+    apply VLSM_incl_finite_valid_trace_init_to; [| done | | done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** If a valid trace leads to state s, the trace extracted from s also leads to s. *)
@@ -690,10 +673,10 @@ Lemma finite_valid_trace_init_to_state2trace_inv :
     finite_valid_trace_init_to Ui is s tr ->
       state2trace s = tr.
 Proof.
-  by intros is s tr Hfvti
-  ; eapply finite_constrained_trace_init_to_state2trace_inv
-  ; apply VLSM_incl_finite_valid_trace_init_to
-  ; eauto using VLSM_incl_UMO_component_preloaded.
+  by intros is s tr Hfvti;
+    eapply finite_constrained_trace_init_to_state2trace_inv;
+    apply VLSM_incl_finite_valid_trace_init_to; [| done];
+    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
 (** The trace extracted from a reachable state [s] leads to [s]. *)
@@ -702,12 +685,12 @@ Qed.
 Lemma finite_constrained_trace_init_to_state2trace' :
   forall (s : State),
     constrained_state_prop Ui s ->
-      finite_constrained_trace_init_to Ui (``(vs0 Ri)) s (state2trace s).
+      finite_constrained_trace_init_to Ui (``(vs0 Ui)) s (state2trace s).
 Proof.
   intros s Hs.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
   apply finite_constrained_trace_init_to_state2trace_inv in Htr as Heqtr; subst.
-  replace (``(vs0 Ri)) with is; [done |].
+  replace (``(vs0 Ui)) with is; [done |].
   by apply vs0_uniqueness, Htr.
 Qed.
 
@@ -715,10 +698,10 @@ Lemma constrained_state_contains_unique_constrained_trace :
   forall s : State,
     constrained_state_prop Ui s ->
       exists tr : list transition_item,
-        finite_constrained_trace_init_to Ui (``(vs0 Ri)) s tr
+        finite_constrained_trace_init_to Ui (``(vs0 Ui)) s tr
           /\
         forall tr' : list transition_item,
-          finite_constrained_trace_init_to Ui (``(vs0 Ri)) s tr' -> tr' = tr.
+          finite_constrained_trace_init_to Ui (``(vs0 Ui)) s tr' -> tr' = tr.
 Proof.
   intros s Hvsp.
   exists (state2trace s); split.
@@ -731,12 +714,12 @@ Qed.
 Lemma finite_valid_trace_init_to_state2trace' :
   forall (s : State),
     valid_state_prop Ui s ->
-      finite_valid_trace_init_to Ui (``(vs0 Ri)) s (state2trace s).
+      finite_valid_trace_init_to Ui (``(vs0 Ui)) s (state2trace s).
 Proof.
   intros s Hs.
   apply valid_state_has_trace in Hs as (is & tr & Htr).
   apply finite_valid_trace_init_to_state2trace_inv in Htr as Heqtr; subst.
-  replace (``(vs0 Ri)) with is; [done |].
+  replace (``(vs0 Ui)) with is; [done |].
   by apply vs0_uniqueness, Htr.
 Qed.
 
@@ -744,10 +727,10 @@ Lemma valid_state_contains_unique_valid_trace :
   forall s : State,
     valid_state_prop Ui s ->
       exists tr : list transition_item,
-        finite_valid_trace_init_to Ui (``(vs0 Ri)) s tr
+        finite_valid_trace_init_to Ui (``(vs0 Ui)) s tr
           /\
         forall tr' : list transition_item,
-          finite_valid_trace_init_to Ui (``(vs0 Ri)) s tr' -> tr' = tr.
+          finite_valid_trace_init_to Ui (``(vs0 Ui)) s tr' -> tr' = tr.
 Proof.
   intros s Hvsp.
   exists (state2trace s); split.
@@ -1258,7 +1241,7 @@ Proof.
   by apply eq_State; cbn.
 Qed.
 
-Lemma elem_of_valid_obs_Send_split P :
+Lemma elem_of_UMO_reachable_obs_Send_split P :
   forall (s : State) (m : Message),
     MkObservation Send m ∈ obs s -> UMO_reachable P s ->
       exists obs' : list Observation,
@@ -1271,18 +1254,18 @@ Proof.
   by apply UMO_reachable_addObservations_inv, UMO_reachable_addObservation_inv_Send_state in Hvsp.
 Qed.
 
-Lemma elem_of_valid_obs_Send_valid P :
+Lemma elem_of_UMO_reachable_obs_Send_UMO_reachable P :
   forall (s : State) (m : Message),
     MkObservation Send m ∈ obs s -> UMO_reachable P s ->
       UMO_reachable P (state m).
 Proof.
   intros s m Hin Hvsp.
-  destruct (elem_of_valid_obs_Send_split _ _ _ Hin Hvsp) as [obs ->].
+  destruct (elem_of_UMO_reachable_obs_Send_split _ _ _ Hin Hvsp) as [obs ->].
   by apply UMO_reachable_addObservations_inv, UMO_reachable_addObservation_inv_Send in Hvsp.
 Qed.
 
 (**
-  [elem_of_obs_split] and [elem_of_valid_obs_Send_split] can be generalized to
+  [elem_of_obs_split] and [elem_of_UMO_reachable_obs_Send_split] can be generalized to
   two observations <<ob1>> and <<ob2>> and from there to any numbers of observations.
 *)
 
@@ -1306,7 +1289,7 @@ Proof.
     by left; apply eq_State; cbn.
 Qed.
 
-Lemma elem_of_valid_obs_Send_split_2 P :
+Lemma elem_of_UMO_reachable_obs_Send_split_2 P :
   forall (s : State) (m1 m2 : Message),
     MkObservation Send m1 ∈ obs s -> MkObservation Send m2 ∈ obs s ->
     UMO_reachable P s ->
@@ -1360,7 +1343,7 @@ Lemma sentMessages_characterization P :
         state_suffix s' s \/ s' = s.
 Proof.
   intros s m Hvsp; setoid_rewrite elem_of_sentMessages; split.
-  - intros Hin; eapply elem_of_valid_obs_Send_split in Hin as (obs' & ->); [| done].
+  - intros Hin; eapply elem_of_UMO_reachable_obs_Send_split in Hin as (obs' & ->); [| done].
     destruct obs' as [| ob obs'].
     + by right.
     + by left; apply state_suffix_addObservations; inversion 1.
@@ -1392,7 +1375,7 @@ Proof.
   intros m1 m2 Hvsp; split.
   - intros [Hadr Hsent].
     apply elem_of_sentMessages in Hsent.
-    eapply elem_of_valid_obs_Send_split in Hsent as (obs' & ->); [| done].
+    eapply elem_of_UMO_reachable_obs_Send_split in Hsent as (obs' & ->); [| done].
     destruct obs' as [| ob' obs']; cbn.
     + by right.
     + by left; apply state_suffix_addObservations; inversion 1.
@@ -1416,7 +1399,8 @@ Lemma was_sent_before_characterization_2 P :
 Proof.
   intros m1 m2 Hvsp; split.
   - intros [Hadr Hsent].
-    eapply elem_of_sentMessages, elem_of_valid_obs_Send_split in Hsent as (obs' & ->); [| done].
+    eapply elem_of_sentMessages, elem_of_UMO_reachable_obs_Send_split
+      in Hsent as (obs' & ->); [| done].
     cbn; rewrite addObservation_cons.
     by apply state_suffix_addObservations; inversion 1.
   - intros (Hadr & Hsuf & Hnsuf).
@@ -1441,9 +1425,11 @@ Lemma was_sent_before_totally_orders_sentMessages_UMO_reachable P :
 Proof.
   intros s m1 m2 Hvsp Hin1 Hin2.
   apply elem_of_sentMessages in Hin1, Hin2.
-  assert (Hvsp1 : UMO_reachable P (state m1)) by (eapply elem_of_valid_obs_Send_valid; done).
-  assert (Hvsp2 : UMO_reachable P (state m2)) by (eapply elem_of_valid_obs_Send_valid; done).
-  destruct (elem_of_valid_obs_Send_split_2 P s m1 m2 Hin1 Hin2)
+  assert (Hvsp1 : UMO_reachable P (state m1))
+    by (eapply elem_of_UMO_reachable_obs_Send_UMO_reachable; done).
+  assert (Hvsp2 : UMO_reachable P (state m2))
+    by (eapply elem_of_UMO_reachable_obs_Send_UMO_reachable; done).
+  destruct (elem_of_UMO_reachable_obs_Send_split_2 P s m1 m2 Hin1 Hin2)
     as [Heq | (obs1 & obs2 & [-> | ->])]; [done | | |]; clear Hin1 Hin2.
   - by right; left.
   - left.
@@ -1510,17 +1496,14 @@ Context
   (idx : index -> Address)
   `{!Inj (=) (=) idx}
   (U : index -> VLSM Message := fun i => UMO_component (idx i))
-  (R : index -> VLSM Message := fun i => pre_loaded_with_all_messages_vlsm (U i)).
+  .
 
 (** ** Protocol
 
   The UMO protocol is a free composition of finitely many UMO components.
-  To talk about reachable states in the UMO protocol, we will use [RUMO],
-  which is UMO preloaded with all messages.
 *)
 
 Definition UMO : VLSM Message := free_composite_vlsm U.
-Definition RUMO : VLSM Message := pre_loaded_with_all_messages_vlsm UMO.
 
 (** We set up aliases for some functions operating on free VLSM composition. *)
 
@@ -1601,22 +1584,18 @@ Proof.
   by eapply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_UMO _ Hvsp i)).
 Qed.
 
-(** We could prove the same lifting lemmas for [RUMO], but we won't need them. *)
-
-Lemma lift_to_RUMO
-  (us : UMO_state) (Hus : valid_state_prop RUMO us) (i : index) :
-  VLSM_weak_embedding (R i) RUMO (lift_to_UMO_label i) (lift_to_UMO_state us i).
-Proof. by apply lift_to_preloaded_free_weak_embedding. Qed.
-
-Lemma lift_to_RUMO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (transition_item (R i))) (us : UMO_state),
-    valid_state_prop RUMO us ->
-    finite_valid_trace_from_to (R i) s1 s2 tr ->
-      finite_valid_trace_from_to
-        RUMO (lift_to_UMO_state us i s1) (lift_to_UMO_state us i s2) (lift_to_UMO_trace us i tr).
+Lemma lift_to_UMO_finite_constrained_trace_from_to :
+  forall (i : index) (s1 s2 : State) (tr : list (transition_item (U i))) (us : UMO_state),
+    constrained_state_prop UMO us ->
+    finite_constrained_trace_from_to (U i) s1 s2 tr ->
+      finite_constrained_trace_from_to UMO
+        (lift_to_UMO_state us i s1) (lift_to_UMO_state us i s2) (lift_to_UMO_trace us i tr).
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
-  by apply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_RUMO _ Hvsp i)).
+  unshelve eapply (@VLSM_weak_embedding_finite_valid_trace_from_to _
+    (pre_loaded_with_all_messages_vlsm (U i))
+    (pre_loaded_with_all_messages_vlsm UMO) _ _); [| done].
+  by eapply lift_to_preloaded_free_weak_embedding.
 Qed.
 
 Lemma lift_to_UMO_constrained_state_prop :
@@ -1627,7 +1606,7 @@ Lemma lift_to_UMO_constrained_state_prop :
 Proof.
   unfold constrained_state_prop.
   intros is s us Hcsp.
-  by eapply VLSM_weak_embedding_valid_state, lift_to_RUMO.
+  by eapply VLSM_weak_embedding_valid_state, lift_to_preloaded_free_weak_embedding.
 Qed.
 
 (**
@@ -1656,10 +1635,10 @@ Definition UMO_state2trace
   (us : UMO_state) : list UMO_transition_item :=
     UMO_state2trace_aux us (enum index).
 
-Lemma finite_valid_trace_from_to_UMO_state2trace_RUMO :
+Lemma finite_constrained_trace_init_to_UMO_state2trace :
   forall us : UMO_state,
-    valid_state_prop RUMO us ->
-      finite_valid_trace_init_to RUMO (``(vs0 RUMO)) us (UMO_state2trace us).
+    constrained_state_prop UMO us ->
+      finite_constrained_trace_init_to UMO (``(vs0 UMO)) us (UMO_state2trace us).
 Proof.
   intros us Hvsp; split; [| done].
   unfold UMO_state2trace.
@@ -1678,7 +1657,7 @@ Proof.
         apply Hall. rewrite elem_of_cons. by intros [].
       * by apply pre_composite_free_update_state_with_initial.
     + replace us with (state_update U us i (us i)) at 2 by (state_update_simpl; done).
-      apply lift_to_RUMO_finite_valid_trace_from_to; [done |].
+      apply lift_to_UMO_finite_constrained_trace_from_to; [done |].
       apply (valid_state_project_preloaded_to_preloaded_free _ _ us i) in Hvsp as Hvsp'.
       apply valid_state_has_trace in Hvsp' as (s & tr & [Hfvt Hinit]).
       replace s with (MkState [] (idx i)) in *; cycle 1.
@@ -1687,18 +1666,18 @@ Proof.
 Qed.
 
 (**
-  It turns out that [finite_valid_trace_from_to_UMO_state2trace_RUMO]
+  It turns out that [finite_constrained_trace_init_to_UMO_state2trace]
   also holds for valid states.
 *)
-Lemma finite_valid_trace_from_to_UMO_state2trace_UMO :
+Lemma finite_valid_trace_from_to_UMO_state2trace :
   forall us : UMO_state,
     valid_state_prop UMO us ->
       finite_valid_trace_init_to UMO (``(vs0 UMO)) us (UMO_state2trace us).
 Proof.
   intros us Hvsp.
   apply all_pre_traces_to_valid_state_are_valid_free; [typeclasses eauto | done |].
-  apply finite_valid_trace_from_to_UMO_state2trace_RUMO.
-  eapply (@VLSM_incl_valid_state _ UMO UMO RUMO); [| done].
+  apply finite_constrained_trace_init_to_UMO_state2trace.
+  eapply (@VLSM_incl_valid_state _ UMO UMO); [| done].
   by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
 Qed.
 
@@ -1741,10 +1720,10 @@ Fixpoint UMO_messages_aux (us : UMO_state) (is : list index) : set Message :=
 Definition UMO_messages (us : UMO_state) : set Message :=
   UMO_messages_aux us (enum index).
 
-Lemma valid_state_prop_state_update_init :
+Lemma constrained_state_prop_state_update_init :
   forall (us : UMO_state) (i : index),
-    valid_state_prop RUMO us ->
-      valid_state_prop RUMO (state_update U us i (MkState [] (idx i))).
+    constrained_state_prop UMO us ->
+      constrained_state_prop UMO (state_update U us i (MkState [] (idx i))).
 Proof.
   intros us i Hvsp.
   by apply pre_composite_free_update_state_with_initial.
@@ -1752,7 +1731,7 @@ Qed.
 
 Lemma elem_of_UMO_sentMessages :
   forall (us : UMO_state) (m : Message) (i : index),
-    valid_state_prop RUMO us -> idx i = adr (state m) ->
+    constrained_state_prop UMO us -> idx i = adr (state m) ->
       m ∈ UMO_sentMessages us <-> m ∈ sentMessages (us i).
 Proof.
   intros us m i Hvsp Hidx.
@@ -1763,7 +1742,7 @@ Proof.
   induction is as [| i' is']; intros; [by rewrite Hall; [| apply not_elem_of_nil] |].
   cbn in *; unfold State, Observation, Message in *; rewrite elem_of_app.
   assert (Hvsp' :
-    forall j, valid_state_prop (pre_loaded_with_all_messages_vlsm (UMO_component (idx j))) (us j))
+    forall j, constrained_state_prop (UMO_component (idx j)) (us j))
     by (intro j; apply (preloaded_valid_state_projection _ _ _ Hvsp); done).
   split; cycle 1.
   - intros Hin.
@@ -1771,7 +1750,7 @@ Proof.
     left. unfold Message, State, Observation in *; cbn.
     rewrite (IHis' (state_update U us i' (MkState [] (idx i'))) m i).
     + by state_update_simpl.
-    + by apply valid_state_prop_state_update_init.
+    + by apply constrained_state_prop_state_update_init.
     + erewrite adr_of_sentMessages, adr_of_constrained_state; [done | .. | done].
       * by rewrite <- Hidx; apply Hvsp'.
       * by eapply UMO_reachable_constrained_state_prop, Hvsp'.
@@ -1785,14 +1764,14 @@ Proof.
       by apply Inj0 in Hidx; subst.
     + rewrite (IHis' _ _ i) in Hin; [| | done |].
       * by destruct (decide (i = i')); subst; state_update_simpl; [inversion Hin |].
-      * by apply valid_state_prop_state_update_init.
+      * by apply constrained_state_prop_state_update_init.
       * intros j Hnin. destruct (decide (i' = j)); subst; state_update_simpl; [done |].
         by apply Hall; inversion 1.
 Qed.
 
 Lemma UMO_sentMessages_characterization :
   forall (us : UMO_state) (m : Message) (i : index),
-    valid_state_prop RUMO us -> idx i = adr (state m) ->
+    constrained_state_prop UMO us -> idx i = adr (state m) ->
       m ∈ UMO_sentMessages us
         <->
       let s' := state m <+> MkObservation Send m in
