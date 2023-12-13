@@ -544,9 +544,7 @@ Lemma even_constrained_primes_composition_no_validator :
         EvenConstraint p.
 Proof.
   intros p Hnv.
-  cut (input_valid
-    (pre_loaded_with_all_messages_vlsm
-      (indexed_radix_vlsms (λ p0 : primes, `p0) p)) () (3, Some 3)).
+  cut (input_constrained (indexed_radix_vlsms (λ p0 : primes, `p0) p) () (3, Some 3)).
   {
     intro Hiv.
     apply Hnv in Hiv as (s & _ & _ & _ & _ & Hc).

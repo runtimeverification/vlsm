@@ -423,7 +423,6 @@ Context
   (A : validator -> index)
   (sender : message -> option validator)
   (Hsender_safety : sender_safety_alt_prop IM A sender)
-  (PreFree := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
   (j : index)
   (m : message)
   (Hj : option_map A (sender m) = Some j)
@@ -434,8 +433,9 @@ Context
   by the free composition (pre-loaded with all messages), then it can also be
   emitted by the component corresponding to its sender (pre-loaded with all messages).
 *)
-Lemma can_emit_projection
-  : can_emit PreFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+Lemma can_emit_projection :
+  can_emit (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) m ->
+  can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
 Proof.
   destruct (sender m) as [v |] eqn: Hsender; simpl in Hj; [| by congruence].
   apply Some_inj in Hj.

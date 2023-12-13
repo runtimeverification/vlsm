@@ -38,7 +38,6 @@ Context
                   composite_state (equivocator_IM IM) * option message -> Prop)
   (CE := pre_loaded_vlsm (composite_vlsm (equivocator_IM IM) constraintE) seed)
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   .
 
 Definition last_in_trace_except_from
@@ -111,7 +110,7 @@ Lemma generalized_equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to CE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  assert (HinclE : VLSM_incl CE PreFreeE)
+  assert (HinclE : VLSM_incl CE (pre_loaded_with_all_messages_vlsm FreeE))
     by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
   induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
   - specialize (lift_initial_to_equivocators_state IM _ His) as Hs.
@@ -240,7 +239,6 @@ Context
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (seed : message -> Prop)
   (SeededXE : VLSM message :=
     composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed)

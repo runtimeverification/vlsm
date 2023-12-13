@@ -650,7 +650,6 @@ Context
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
   (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -741,7 +740,6 @@ Context
   (Free := free_composite_vlsm IM)
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -1041,7 +1039,6 @@ Context
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
   (StrongFixedNonEquivocating := pre_induced_sub_projection IM (elements non_equivocators)
                                 (strong_fixed_equivocation_constraint IM equivocators))
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**

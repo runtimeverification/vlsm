@@ -1029,7 +1029,6 @@ Proof.
   intros l s im s' om Htrans msg.
   rename Htrans into Htrans'.
   pose proof Htrans' as [[Hproto_s [Hproto_m Hvalid]] Htrans].
-  set (preloaded := pre_loaded_with_all_messages_vlsm vlsm) in * |- *.
   pose proof (valid_state_has_trace _ _ Hproto_s)
     as [is [tr [Htr Hinit]]].
   pose proof (Htr' := extend_right_finite_trace_from_to _ Htr Htrans').
@@ -2615,7 +2614,6 @@ Context
   {message : Type}
   `{EqDecision message}
   (X : VLSM message)
-  (PreX := pre_loaded_with_all_messages_vlsm X)
   `{HasBeenSentCapability message X}
   `{HasBeenReceivedCapability message X}
   .
@@ -2625,7 +2623,7 @@ Definition state_received_not_sent (s : state X) (m : message) : Prop :=
 
 Lemma state_received_not_sent_trace_iff
   (m : message)
-  (s is : state (PreX))
+  (s is : state (pre_loaded_with_all_messages_vlsm X))
   (tr : list transition_item)
   (Htr : finite_constrained_trace_init_to X is s tr)
   : state_received_not_sent s m <-> trace_received_not_sent_before_or_after tr m.
@@ -2654,7 +2652,7 @@ Definition state_received_not_sent_invariant
 
 Lemma state_received_not_sent_invariant_trace_iff
   (P : message -> Prop)
-  (s is : state (PreX))
+  (s is : state (pre_loaded_with_all_messages_vlsm X))
   (tr : list transition_item)
   (Htr : finite_constrained_trace_init_to X is s tr)
   : state_received_not_sent_invariant s P <->
@@ -2673,8 +2671,8 @@ Definition cannot_resend_message_stepwise_prop : Prop :=
 
 Lemma cannot_resend_received_message_in_future
   (Hno_resend : cannot_resend_message_stepwise_prop)
-  (s1 s2 : state (PreX))
-  (Hfuture : in_futures PreX s1 s2)
+  (s1 s2 : state (pre_loaded_with_all_messages_vlsm X))
+  (Hfuture : in_futures (pre_loaded_with_all_messages_vlsm X) s1 s2)
   : forall m : message,
     state_received_not_sent s1 m -> state_received_not_sent s2 m.
 Proof.
@@ -2715,7 +2713,7 @@ Lemma lift_preloaded_trace_to_seeded
   (P : message -> Prop)
   (tr : list transition_item)
   (Htrm : trace_received_not_sent_before_or_after_invariant tr P)
-  (is : state (PreX))
+  (is : state (pre_loaded_with_all_messages_vlsm X))
   (Htr : finite_constrained_trace X is tr)
   : finite_valid_trace (pre_loaded_vlsm X P) is tr.
 Proof.
@@ -2788,7 +2786,7 @@ Lemma lift_generated_to_seeded
   (s : state X)
   (Hequiv_s : state_received_not_sent_invariant s P)
   (m : message)
-  (Hgen : can_produce PreX s m)
+  (Hgen : can_produce (pre_loaded_with_all_messages_vlsm X) s m)
   : can_produce (pre_loaded_vlsm X P) s m.
 Proof.
   apply non_empty_valid_trace_from_can_produce.
@@ -2843,7 +2841,6 @@ Context
   `{forall i : index, (HasBeenReceivedCapability (IM i))}
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  (PreX := pre_loaded_with_all_messages_vlsm X)
   (Y := free_composite_vlsm IM)
   (PreY := pre_loaded_with_all_messages_vlsm Y).
 

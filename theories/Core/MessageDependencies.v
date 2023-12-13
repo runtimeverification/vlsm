@@ -275,7 +275,6 @@ Context
   `{!HasBeenSentCapability X}
   `{!HasBeenReceivedCapability X}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
-  (R := pre_loaded_with_all_messages_vlsm X)
   .
 
 (**
@@ -294,7 +293,7 @@ Inductive HasBeenObserved (s : state X) (m : message) : Prop :=
       HasBeenObserved s m.
 
 Lemma transition_preserves_HasBeenObserved :
-  forall l s im s' om, input_valid_transition R l (s, im) (s', om) ->
+  forall l s im s' om, input_constrained_transition X l (s, im) (s', om) ->
   forall msg, HasBeenObserved s msg -> HasBeenObserved s' msg.
 Proof.
   intros * Ht msg Hbefore; inversion Hbefore as [Hobs | m Hobs Hdep].
@@ -303,7 +302,7 @@ Proof.
 Qed.
 
 Lemma HasBeenObserved_step_update :
-  forall l s im s' om, input_valid_transition R l (s, im) (s', om) ->
+  forall l s im s' om, input_constrained_transition X l (s, im) (s', om) ->
   forall msg,
     HasBeenObserved s' msg
       <->
@@ -606,7 +605,6 @@ Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -645,7 +643,7 @@ Proof.
 Qed.
 
 Lemma transition_preserves_CompositeHasBeenObserved :
-  forall l s im s' om, input_valid_transition RFree l (s, im) (s', om) ->
+  forall l s im s' om, input_constrained_transition Free l (s, im) (s', om) ->
   forall msg, CompositeHasBeenObserved s msg -> CompositeHasBeenObserved s' msg.
 Proof.
   destruct (free_composite_has_been_directly_observed_stepwise_props IM) as [].
@@ -655,7 +653,7 @@ Proof.
 Qed.
 
 Lemma CompositeHasBeenObserved_step_update :
-  forall l s im s' om, input_valid_transition RFree l (s, im) (s', om) ->
+  forall l s im s' om, input_constrained_transition Free l (s, im) (s', om) ->
   forall msg,
     CompositeHasBeenObserved s' msg
       <->
@@ -742,7 +740,7 @@ Qed.
 
 Lemma composite_observed_before_send_subsumes_msg_dep_rel
   `{forall i, MessageDependencies (IM i) message_dependencies} :
-  forall m, can_emit RFree m ->
+  forall m, can_emit (pre_loaded_with_all_messages_vlsm Free) m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
     composite_observed_before_send dm m.
 Proof.
