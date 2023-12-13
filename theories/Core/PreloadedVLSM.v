@@ -558,6 +558,9 @@ Definition input_constrained :=
 Definition input_constrained_transition :=
   input_valid_transition (pre_loaded_with_all_messages_vlsm X).
 
+Definition input_constrained_transition_to :=
+  input_valid_transition_to (pre_loaded_with_all_messages_vlsm X).
+
 Definition input_constrained_transition_item :=
   input_valid_transition_item (pre_loaded_with_all_messages_vlsm X).
 
