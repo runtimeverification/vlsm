@@ -259,7 +259,7 @@ Section sec_fixed_byzantine_traces_as_pre_loaded.
 Definition fixed_set_signed_message (m : message) : Prop :=
   non_sub_index_authenticated_message (elements non_byzantine) A sender m /\
   (exists i, i ∈ non_byzantine /\
-    exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m)).
+    exists l s, input_constrained (IM i) l (s, Some m)).
 
 (**
   Given that we're only looking at the composition indexed by the

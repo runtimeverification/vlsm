@@ -68,7 +68,7 @@ Context
 *)
 Definition projection_validator_prop :=
   forall li si omi,
-    input_valid PreY li (si, omi) ->
+    input_constrained Y li (si, omi) ->
     exists lX sX, InputValidation label_project state_project li si omi lX sX.
 
 (**
@@ -77,7 +77,7 @@ Definition projection_validator_prop :=
   an [input_valid_transition] in <<X>>.
 *)
 Definition transition_validator :=
-  forall lY sY omi, input_valid PreY lY (sY, omi) ->
+  forall lY sY omi, input_constrained Y lY (sY, omi) ->
   exists lX sX sX' om',
     TransitionValidation label_project state_project lY sY omi lX sX sX' om'.
 
@@ -87,7 +87,7 @@ Definition transition_validator :=
 *)
 Definition message_validator_prop :=
   forall li si im,
-    input_valid PreY li (si, Some im) ->
+    input_constrained Y li (si, Some im) ->
     valid_message_prop X im.
 
 (** The [projection_validator_prop]erty is stronger. *)
@@ -221,7 +221,7 @@ Lemma induced_validator_valid_is_input_valid
   (Hproj : VLSM_projection X pre_projection_induced_validator label_project state_project)
   l s om
   : valid projection_induced_validator l (s, om) ->
-      input_valid pre_projection_induced_validator l (s, om).
+      input_constrained projection_induced_validator l (s, om).
 Proof.
   intro Hv.
   destruct (id Hv) as (lX & sX & [HlX  HsX (Hps & Hopm & _)]); cbn in HsX; subst.
@@ -589,7 +589,7 @@ Context
   We can show that <<PreY>> is included in <<Xi>> by applying the meta-lemma
   [VLSM_incl_finite_traces_characterization], and by induction on the length
   of a trace. The [projection_validator_prop]erty is used to translate
-  [input_valid]ity for the PreY machine into the [pre_projection_induced_validator].
+  [input_valid]ity for the preloaded machine into the [pre_projection_induced_validator].
 *)
 Lemma pre_loaded_with_all_messages_validator_proj_incl
   : VLSM_incl PreY Xi.
@@ -988,7 +988,7 @@ Context
 *)
 Definition self_validator_vlsm_prop :=
   forall (l : label _) (s : state _) (om : option message),
-    input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
+    input_constrained X l (s, om) ->
     input_valid X l (s, om).
 
 (**

@@ -51,8 +51,7 @@ Context
   (X : VLSM message)
   `{HasBeenSentCapability message X}
   `{HasBeenDirectlyObservedCapability message X}
-  (Henforced : forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
-    no_equivocations X l (s, om))
+  (Henforced : forall l s om, input_constrained X l (s, om) -> no_equivocations X l (s, om))
   .
 
 (**

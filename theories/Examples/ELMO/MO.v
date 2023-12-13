@@ -1171,7 +1171,7 @@ Lemma MO_component_validating :
 Proof.
   unfold component_projection_validator_prop.
   intros i lj sj omi * Hiv.
-  apply input_valid_transition_iff in Hiv as [[s m] Ht].
+  red in Hiv; apply input_valid_transition_iff in Hiv as [[s m] Ht].
   destruct (exists_right_finite_trace_from _ _ _ _ _ _ Ht) as (s' & tr & Hfvt & Hlast).
   apply lift_to_MO_finite_valid_trace_init_to in Hfvt as [Hfvt _].
   unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project in Hfvt;
