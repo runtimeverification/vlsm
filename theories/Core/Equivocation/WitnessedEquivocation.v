@@ -489,7 +489,7 @@ Proof.
     forall is tr,
     m = set_size (equivocating_validators (finite_trace_last is tr)) ->
     n = length tr ->
-    finite_valid_trace PreFree is tr ->
+    finite_constrained_trace Free is tr ->
     trace_witnessing_equivocation_prop is tr ->
     let s := finite_trace_last is tr in
     exists (is' : state PreFree) (tr' : list transition_item),

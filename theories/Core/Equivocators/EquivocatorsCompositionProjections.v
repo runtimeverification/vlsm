@@ -1007,7 +1007,7 @@ Lemma preloaded_equivocators_valid_trace_project_inv
   (is : composite_state (equivocator_IM IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
   (final_state := finite_trace_last is tr)
-  (Htr : finite_valid_trace PreFreeE is tr)
+  (Htr : finite_constrained_trace FreeE is tr)
   (trX : list (composite_transition_item IM))
   (initial_descriptors : equivocator_descriptors IM)
   (Hproject : equivocators_trace_project final_descriptors tr = Some (trX, initial_descriptors))
@@ -2125,7 +2125,7 @@ Proof.
     apply VLSM_incl_finite_valid_trace_from; [| done].
     by apply constrained_preloaded_incl.
   - intros * Htr.
-    assert (Hpre_tr : finite_valid_trace PreFreeE sX trX).
+    assert (Hpre_tr : finite_constrained_trace FreeE sX trX).
     {
       apply VLSM_incl_finite_valid_trace; [| done].
       by apply constrained_preloaded_incl.

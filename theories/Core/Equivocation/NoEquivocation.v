@@ -108,7 +108,7 @@ Qed.
 *)
 Lemma no_equivocations_preloaded_traces :
   forall (is : state (pre_loaded_with_all_messages_vlsm X)) (tr : list transition_item),
-    finite_valid_trace (pre_loaded_with_all_messages_vlsm X) is tr -> finite_valid_trace X is tr.
+    finite_constrained_trace X is tr -> finite_valid_trace X is tr.
 Proof.
   intros is tr Htr.
   induction Htr using finite_valid_trace_rev_ind;

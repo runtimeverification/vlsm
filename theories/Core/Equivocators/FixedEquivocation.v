@@ -490,7 +490,7 @@ Proof.
       by apply equivocators_fixed_equivocations_vlsm_incl_free.
     }
     assert
-      (Htr'pre : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) is tr').
+      (Htr'pre : finite_constrained_trace FreeE is tr').
     {
       split; [| done].
       specialize (vlsm_incl_pre_loaded_with_all_messages_vlsm FreeE) as Hincl.
@@ -570,7 +570,7 @@ Proof.
             by (apply finite_valid_trace_last_pstate, Htr'pre).
         apply proper_sent; [done |].
         apply has_been_sent_consistency; [typeclasses eauto | done |].
-        by exists is, tr', (valid_trace_add_default_last Htr'pre).
+        by red in Htr'pre; exists is, tr', (valid_trace_add_default_last Htr'pre).
     + exists trX'. exists initial_descriptors. subst foldx. split; [done |].
       split; [by apply Htr_project |].
       split; [| done].
@@ -628,14 +628,14 @@ Proof.
   subst lst.
   rewrite Hfinal_state.
 
-  assert (Htr_Pre : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) is tr).
+  assert (Htr_Pre : finite_constrained_trace FreeE is tr).
   {
     apply VLSM_incl_finite_valid_trace; [| done].
     by apply constrained_preloaded_incl.
   }
 
-  assert (HtrX_Pre : finite_valid_trace (pre_loaded_with_all_messages_vlsm Free)
-                      (equivocators_state_project IM initial_descriptors is) trX).
+  assert (HtrX_Pre : finite_constrained_trace Free
+    (equivocators_state_project IM initial_descriptors is) trX).
   {
     revert HtrX_Free; apply VLSM_incl_finite_valid_trace.
     by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
@@ -650,6 +650,7 @@ Proof.
   rewrite (has_been_directly_observed_sent_received_iff Free) by done.
   right. apply proper_sent; [done |].
   apply has_been_sent_consistency; [by typeclasses eauto | done |].
+  red in HtrX_Pre.
   exists (equivocators_state_project IM initial_descriptors is), trX,
     (valid_trace_add_default_last HtrX_Pre).
 
@@ -752,7 +753,7 @@ Proof.
   intros pre item suf m Heq Hm Hitem.
   destruct (free_equivocators_valid_trace_project descriptors is tr Hproper Htr)
     as [trX [initial_descriptors [Hinitial_descriptors [Htr_project [Hfinal_state HtrXFree]]]]].
-  assert (HtrXPre : finite_valid_trace (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
+  assert (HtrXPre : finite_constrained_trace (free_composite_vlsm IM)
     (equivocators_state_project IM initial_descriptors is) trX).
   {
     revert HtrXFree; apply VLSM_incl_finite_valid_trace.
@@ -763,7 +764,7 @@ Proof.
     subst lst_trX s; cbn in Hfinal_state |- *; rewrite Hfinal_state.
     by apply finite_valid_trace_last_pstate, HtrXPre.
   }
-  assert (Htr_free : finite_valid_trace  (pre_loaded_with_all_messages_vlsm FreeE) is tr).
+  assert (Htr_free : finite_constrained_trace FreeE is tr).
   {
     apply VLSM_incl_finite_valid_trace; [| done].
     by apply constrained_preloaded_incl.
@@ -968,7 +969,7 @@ Proof.
   elim Hno. clear Hno.
   apply composite_has_been_directly_observed_sent_received_iff.
   left.
-  assert (HtrX_free : finite_valid_trace (pre_loaded_with_all_messages_vlsm Free)
+  assert (HtrX_free : finite_constrained_trace Free
     (equivocators_state_project IM initial_descriptors is) trX).
   {
     revert HtrX; apply VLSM_incl_finite_valid_trace.
@@ -980,6 +981,7 @@ Proof.
   rewrite Hlast_state.
   apply (composite_proper_sent IM); [done |].
   apply has_been_sent_consistency; [by typeclasses eauto | done |].
+  red in HtrX_free.
   exists (equivocators_state_project IM initial_descriptors is), trX,
     (valid_trace_add_default_last HtrX_free).
   clear HtrX HtrX_free Hfree_lst.
@@ -1300,7 +1302,7 @@ Proof.
   - apply PreFreeE_Free_vlsm_projection_type.
     apply VLSM_incl_finite_valid_trace_from; [| done].
     by apply equivocators_fixed_equivocations_vlsm_incl_PreFree.
-  - assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
+  - assert (Hpre_tr : finite_constrained_trace FreeE sX trX).
     {
       apply VLSM_incl_finite_valid_trace; [| done].
       by apply equivocators_fixed_equivocations_vlsm_incl_PreFree.
