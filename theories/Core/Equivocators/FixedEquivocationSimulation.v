@@ -311,8 +311,8 @@ Proof.
       apply proj1 in Him_etr.
       replace (im_ert' ++ [item]) with (im_ert' ++ [item] ++ []) in Him_etr
         by (rewrite app_assoc; apply app_nil_r).
-      specialize (input_valid_transition_to (pre_loaded_with_all_messages_vlsm
-        (free_composite_vlsm (equivocator_IM (sub_IM IM (elements equivocating)))))
+      specialize (input_constrained_transition_to
+        (free_composite_vlsm (equivocator_IM (sub_IM IM (elements equivocating))))
         _ _ _ _ _ Him_etr eq_refl)
         as Ht.
       rewrite finite_trace_last_is_last.
