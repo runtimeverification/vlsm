@@ -270,7 +270,7 @@ Context
   .
 
 Lemma full_node_msg_dep_coequivocating_senders s m i li
-  (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, Some m))
+  (Hvalid : input_constrained (IM i) li (s i, Some m))
   : msg_dep_coequivocating_senders IM full_message_dependencies sender s m ≡@{Cv} ∅.
 Proof.
   intro; split; intro Hx; [| by contradict Hx; apply not_elem_of_empty].
@@ -290,7 +290,7 @@ Lemma annotated_free_input_valid_projection
   i li s om
   : input_valid (constrained_vlsm (annotated_vlsm (free_composite_vlsm IM) Cv iprop trans) constr)
       (existT i li) (s, om) ->
-    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om).
+    input_constrained (IM i) li (original_state s i, om).
 Proof.
   intro Hvalid.
   eapply (VLSM_projection_input_valid (preloaded_component_projection IM i))
@@ -302,7 +302,7 @@ Qed.
 
 Lemma full_node_msg_dep_composite_transition_message_equivocators
   i li (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
-  (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om))
+  (Hvalid : input_constrained (IM i) li (original_state s i, om))
   : coeqv_composite_transition_message_equivocators
       IM sender (full_node_coequivocating_senders IM)
       (existT i li) (s, om)
@@ -322,7 +322,7 @@ Qed.
 
 Lemma msg_dep_full_node_valid_iff
   l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
-  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
+  (Hvi : input_constrained (IM (projT1 l))
            (projT2 l) (original_state s (projT1 l), om))
   : valid Limited l (s, om) <-> valid FullNodeLimited l (s, om).
 Proof.
@@ -338,7 +338,7 @@ Qed.
 
 Lemma msg_dep_full_node_transition_iff
   l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
-  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
+  (Hvi : input_constrained (IM (projT1 l))
            (projT2 l) (original_state s (projT1 l), om))
   : transition Limited l (s, om) = transition FullNodeLimited l (s, om).
 Proof.

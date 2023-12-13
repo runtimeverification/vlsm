@@ -552,6 +552,9 @@ Context
   `(X : VLSM message)
   .
 
+Definition input_constrained :=
+  input_valid (pre_loaded_with_all_messages_vlsm X).
+
 Definition input_constrained_transition :=
   input_valid_transition (pre_loaded_with_all_messages_vlsm X).
 

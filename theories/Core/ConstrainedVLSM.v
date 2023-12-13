@@ -379,7 +379,7 @@ Definition strong_constraint_subsumption : Prop :=
 *)
 Definition preloaded_constraint_subsumption : Prop :=
   forall (l : label X) (som : state _ * option message),
-    input_valid (pre_loaded_with_all_messages_vlsm (constrained_vlsm X constraint1)) l som ->
+    input_constrained (constrained_vlsm X constraint1) l som ->
       constraint2 l som.
 
 (**
@@ -468,7 +468,7 @@ Lemma preloaded_constraint_subsumption_input_valid
   (l : label X1)
   (s : state X1)
   (om : option message)
-  (Hv : input_valid (pre_loaded_with_all_messages_vlsm X1) l (s, om))
+  (Hv : input_constrained X1 l (s, om))
   : valid X2 l (s, om).
 Proof.
   by split; [apply Hv | apply Hpre_subsumption].

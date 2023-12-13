@@ -3074,7 +3074,7 @@ Theorem ELMO_components_validating :
     component_projection_validator_prop ELMO_component ELMO_global_constraint i.
 Proof.
   intros i li si om Hvti.
-  apply input_valid_transition_iff in Hvti as [[si' om'] Hvti].
+  red in Hvti; apply input_valid_transition_iff in Hvti as [[si' om'] Hvti].
   pose (Hvti' := Hvti); destruct Hvti' as [(_ & _ & Hvi) Hti].
   assert (Hsi' : constrained_state_prop (ELMO_component i) si')
     by (eapply input_valid_transition_destination; done).

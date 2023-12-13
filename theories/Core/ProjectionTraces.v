@@ -467,7 +467,7 @@ Qed.
 *)
 Definition component_projection_validator_prop :=
   forall (lj : label (IM j)) (sj : state (IM j)) (omi : option message),
-    input_valid (pre_loaded_with_all_messages_vlsm (IM j)) lj (sj, omi) ->
+    input_constrained (IM j) lj (sj, omi) ->
     valid Xj lj (sj, omi).
 
 Lemma component_projection_validator_prop_is_induced

@@ -244,7 +244,7 @@ Qed.
 Lemma msg_dep_full_node_input_valid_happens_before_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   l s m
-  (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m))
+  (Hvalid : input_constrained X l (s, Some m))
   : forall dm, msg_dep_happens_before message_dependencies dm m ->
     has_been_directly_observed X s dm.
 Proof.
@@ -1096,7 +1096,7 @@ Definition all_dependencies_emittable_from_dependencies_prop (m : message) : Pro
   [all_dependencies_emittable_from_dependencies_prop]erty.
 *)
 Definition valid_all_dependencies_emittable_from_dependencies_prop (i : index) : Prop :=
-  forall l s m, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m) ->
+  forall l s m, input_constrained (IM i) l (s, Some m) ->
     all_dependencies_emittable_from_dependencies_prop m.
 
 (**
