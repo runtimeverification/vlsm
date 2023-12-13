@@ -52,7 +52,7 @@ Definition byzantine_trace_prop (tr : Trace M) : Prop :=
 Lemma byzantine_pre_loaded_with_all_messages :
   forall (tr : Trace M),
     byzantine_trace_prop tr ->
-    valid_trace_prop (pre_loaded_with_all_messages_vlsm M) tr.
+    constrained_trace_prop M tr.
 Proof.
   intros tr [M' Htr]; cbn in Htr.
   by apply proj_pre_loaded_with_all_messages_incl in Htr.
