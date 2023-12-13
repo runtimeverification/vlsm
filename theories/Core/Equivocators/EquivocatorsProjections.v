@@ -1048,8 +1048,7 @@ Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
   : exists fsj, equivocator_state_project fs j = Some fsj /\
     match di with
     | NewMachine sn =>
-      finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X)
-        sn fsj trX
+      finite_constrained_trace_init_to X sn fsj trX
     | Existing i =>
       exists isi, equivocator_state_project is i = Some isi /\
       finite_constrained_trace_from_to X isi fsj trX /\

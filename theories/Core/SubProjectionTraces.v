@@ -492,7 +492,7 @@ Definition state_sub_item_input_is_seeded_or_sub_previously_sent
   (s : composite_state IM)
   : Prop
   := forall is tr,
-    finite_valid_trace_init_to Pre is s tr ->
+    finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr ->
     trace_sub_item_input_is_seeded_or_sub_previously_sent tr.
 
 Lemma finite_valid_trace_sub_projection

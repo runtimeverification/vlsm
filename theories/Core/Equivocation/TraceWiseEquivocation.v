@@ -148,7 +148,7 @@ Definition is_equivocating_tracewise
   : Prop
   :=
   forall is tr
-  (Hpr : finite_valid_trace_init_to PreFree is s tr),
+  (Hpr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
   exists (m : message),
   (sender m = Some v) /\
   exists prefix elem suffix (lprefix := finite_trace_last is prefix),
@@ -167,7 +167,7 @@ Definition is_equivocating_tracewise_no_has_been_sent
   : Prop
   :=
   forall is tr
-  (Htr : finite_valid_trace_init_to PreFree is s tr),
+  (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
   exists (m : message),
   (sender m = Some v) /\
   equivocation_in_trace PreFree m tr.
@@ -177,7 +177,7 @@ Lemma is_equivocating_tracewise_no_has_been_sent_equivocating_senders_in_trace
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s v <->
     forall is tr
-    (Htr : finite_valid_trace_init_to PreFree is s tr),
+    (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
     v ∈ equivocating_senders_in_trace tr.
 Proof.
   by split; intros Heqv is tr Htr; specialize (Heqv _ _ Htr)
@@ -206,7 +206,8 @@ Proof.
   apply exist_proper; intro.
   apply and_proper_l; intros ->.
   apply and_iff_compat_l, not_iff_compat; cbn.
-  cut (finite_valid_trace_init_to PreFree is (finite_trace_last is prefix) prefix).
+  cut (finite_constrained_trace_init_to (free_composite_vlsm IM) is
+    (finite_trace_last is prefix) prefix).
   {
     intros.
     erewrite <- oracle_initial_trace_update

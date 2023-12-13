@@ -1202,7 +1202,7 @@ Qed.
 Lemma pre_equivocators_valid_trace_project
   (is final_state : state (equivocators_no_equivocations_vlsm IM))
   (tr : list (composite_transition_item (equivocator_IM IM)))
-  (Htr : finite_valid_trace_init_to PreFreeE is final_state tr)
+  (Htr : finite_constrained_trace_init_to FreeE is final_state tr)
   (final_descriptors : equivocator_descriptors IM)
   (Hproper : proper_equivocator_descriptors IM final_descriptors final_state)
   : exists
@@ -1213,12 +1213,12 @@ Lemma pre_equivocators_valid_trace_project
     (final_stateX := equivocators_state_project IM final_descriptors final_state)
     (trX : list (composite_transition_item IM)),
     equivocators_trace_project final_descriptors tr = Some (trX, initial_descriptors) /\
-    finite_valid_trace_init_to PreFree isX final_stateX trX.
+    finite_constrained_trace_init_to Free isX final_stateX trX.
 Proof.
   generalize dependent final_descriptors.
   generalize dependent final_state.
   induction tr using rev_ind; intros.
-  - apply valid_trace_get_last in Htr as Hfinal_state_eq.
+  - red in Htr; apply valid_trace_get_last in Htr as Hfinal_state_eq.
     subst.
     exists final_descriptors. split; [done |].
     exists [].
@@ -1505,7 +1505,7 @@ Proof.
     as [_initial_descriptors [_ [_trX [_Htr_project HtrX]]]].
   rewrite Htr_project in _Htr_project.
   inversion _Htr_project; subst.
-  by apply valid_trace_forget_last in HtrX.
+  by red in HtrX; apply valid_trace_forget_last in HtrX.
 Qed.
 
 End sec_equivocators_composition_projections.
@@ -1736,7 +1736,7 @@ Proof.
   { destruct Htr as [Htr Hinit]. split; [| done].
     by apply finite_valid_trace_from_add_last.
   }
-  assert (Hpre_tr_to : finite_valid_trace_init_to SubPreFreeE is final_state tr).
+  assert (Hpre_tr_to : finite_constrained_trace_init_to SubFreeE is final_state tr).
   {
     revert Htr_to; apply VLSM_incl_finite_valid_trace_init_to.
     by apply seeded_no_equivocation_incl_preloaded.
@@ -1807,7 +1807,7 @@ Proof.
     apply finite_valid_trace_singleton.
     assert (Htr_to : finite_valid_trace_init_to SeededXE is (finite_trace_last is tr') tr')
       by (split; [apply finite_valid_trace_from_add_last |]; done).
-    assert (Hpre_tr_to : finite_valid_trace_init_to SubPreFreeE is (finite_trace_last is tr') tr').
+    assert (Hpre_tr_to : finite_constrained_trace_init_to SubFreeE is (finite_trace_last is tr') tr').
     {
       revert Htr_to; apply VLSM_incl_finite_valid_trace_init_to.
       by apply seeded_no_equivocation_incl_preloaded.

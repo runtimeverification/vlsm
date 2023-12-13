@@ -102,7 +102,6 @@ Context
   (state_size : state X -> nat)
   (state_destructor : state X -> list (transition_item X * state X))
   `{!TraceableVLSM X state_destructor state_size}
-  (R := pre_loaded_with_all_messages_vlsm X)
   .
 
 Lemma tv_state_destructor_size :
@@ -144,23 +143,23 @@ Qed.
 (** Traces extracted using [state_to_trace] are constrained traces. *)
 Lemma reachable_state_to_trace :
   forall (s : state X) (Hs : constrained_state_prop X s) is tr,
-    state_to_trace s Hs = (is, tr) -> finite_valid_trace_init_to R is s tr.
+    state_to_trace s Hs = (is, tr) -> finite_constrained_trace_init_to X is s tr.
 Proof.
   intros s Hs.
   apply_funelim (state_to_trace s Hs); clear s Hs.
   - intros s' Hdestruct ? ? ? ? Heqis_tr.
     inversion Heqis_tr; subst; split.
-    + by apply finite_valid_trace_from_to_empty with (X := R).
+    + by rapply @finite_valid_trace_from_to_empty.
     + by eapply @tv_state_destructor_initial with (X := X).
   - intros ? ? ? ? ? ? Hind ? ? ? Heqis_tr.
     destruct (state_to_trace s _) as [_is _tr]; inversion Heqis_tr; subst; clear Heqis_tr.
     split; [| by eapply Hind].
     replace s' with (destination item)
       by (eapply tv_state_destructor_destination; rewrite Hdestruct; left).
-    eapply (finite_valid_trace_from_to_app R); [by apply Hind |].
+    rapply (@finite_valid_trace_from_to_app); [by apply Hind |].
     cut (input_constrained_transition_item X s item).
     {
-      by destruct item; cbn; apply (finite_valid_trace_from_to_singleton R).
+      by destruct item; cbn; rapply (@finite_valid_trace_from_to_singleton).
     }
     eapply tv_state_destructor_transition; [done |].
     by rewrite Hdestruct; left.
@@ -180,7 +179,6 @@ Context
   (state_size : forall i, state (IM i) -> nat)
   `{forall i, TraceableVLSM (IM i) (state_destructor i) (state_size i)}
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -668,7 +666,7 @@ Proof.
       by (eapply composite_tv_state_destructor_destination; done).
     eapply composite_tv_state_destructor_transition in Hdestruct; [| done].
     destruct item; cbn in *.
-    by apply (extend_right_finite_trace_from_to RFree) with s; [apply Hind |].
+    by apply extend_right_finite_trace_from_to with s; [apply Hind |].
   - by intros; contradiction n; subst;
       apply cw_chosen_index_in_indices; [apply Hchoose |].
   - intros ? Hdestruct _ Hj _ _ -> Hind _ _ _ _ **; eapply Hind; [done | | | done].
@@ -693,7 +691,7 @@ Lemma reachable_composite_state_to_trace :
   forall (choose : choice_function), choosing_well choose ->
   forall (s : composite_state IM) (Hs : constrained_state_prop Free s),
   forall is tr, composite_state_to_trace choose s Hs = (is, tr) ->
-  finite_valid_trace_init_to RFree is s tr.
+  finite_constrained_trace_init_to Free is s tr.
 Proof.
   intros ? Hchoose * Heqis_tr.
   pose proof (Hnodup := NoDup_enum index).

@@ -1102,13 +1102,13 @@ Proof.
   (* Phase I: exhibiting a [valid_trace] ending in tr s and sending m *)
   apply valid_state_has_trace in Hs.
   destruct Hs as [is [tr Htr]].
-  assert (Htr'pre : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm FreeE) is s tr).
+  assert (Htr'pre : finite_constrained_trace_init_to FreeE is s tr).
   {
     apply VLSM_incl_finite_valid_trace_init_to; [| done].
     by apply constrained_preloaded_incl.
   }
   assert (Hplst : constrained_state_prop FreeE s)
-    by (apply valid_trace_last_pstate in Htr'pre; done).
+    by (red in Htr'pre; apply valid_trace_last_pstate in Htr'pre; done).
   apply proper_sent in Hm; [| done]. clear Hplst.
   specialize (Hm is tr Htr'pre).
   (*
@@ -1134,7 +1134,7 @@ Proof.
   rewrite HeqsX in n.
   clear HeqsX.
   (* Phase III (a): Obtain a projection trXm of tr outputing m using a final_descriptor_m *)
-
+  red in Htr'pre.
   apply (equivocators_trace_project_output_reflecting_iff _ _ _
     (proj1 (valid_trace_forget_last Htr'pre))) in Hm
     as (final_descriptors_m & initial_descriptors_m & trXm & Hfinal_descriptors_m &
