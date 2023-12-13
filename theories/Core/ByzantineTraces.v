@@ -215,7 +215,7 @@ Definition lifted_alt_state (s : state M) : state Alt :=
 (** Lifting a valid state of <<PreLoaded>> we obtain a valid state of <<Alt>>. *)
 Lemma preloaded_alt_valid_state :
   forall (sj : state PreLoaded) (om : option message),
-    valid_state_message_prop PreLoaded sj om ->
+    constrained_state_message_prop M sj om ->
     valid_state_prop Alt (lifted_alt_state sj).
 Proof.
   intros sj om Hp.
