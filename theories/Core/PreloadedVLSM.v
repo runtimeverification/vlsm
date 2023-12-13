@@ -576,6 +576,12 @@ Definition finite_constrained_trace_init_to :=
 Definition finite_constrained_trace :=
   finite_valid_trace (pre_loaded_with_all_messages_vlsm X).
 
+Definition constrained_trace_from_prop :=
+  valid_trace_from_prop (pre_loaded_with_all_messages_vlsm X).
+
+Definition constrained_trace_prop :=
+  valid_trace_prop (pre_loaded_with_all_messages_vlsm X).
+
 Definition constrained_state_prop :=
   valid_state_prop (pre_loaded_with_all_messages_vlsm X).
 
