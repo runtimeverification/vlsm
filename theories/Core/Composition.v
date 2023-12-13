@@ -1333,7 +1333,6 @@ Context
   `{EqDecision index}
   (IM : index -> VLSM message)
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 Definition composite_valid_transition l s1 iom s2 oom : Prop :=
@@ -1344,7 +1343,9 @@ Definition composite_valid_transition_item
   composite_valid_transition (l item) s (input item) (destination item) (output item).
 
 Lemma composite_valid_transition_reachable_iff l s1 iom s2 oom :
-  composite_valid_transition l s1 iom s2 oom <-> valid_transition RFree l s1 iom s2 oom.
+  composite_valid_transition l s1 iom s2 oom
+    <->
+  valid_transition (pre_loaded_with_all_messages_vlsm Free) l s1 iom s2 oom.
 Proof.
   by split; intros []; constructor.
 Qed.
@@ -1356,7 +1357,9 @@ Definition composite_valid_transition_future : relation (composite_state IM) :=
   tc composite_valid_transition_next.
 
 Lemma composite_valid_transition_next_reachable_iff s1 s2 :
-  composite_valid_transition_next s1 s2 <-> valid_transition_next RFree s1 s2.
+  composite_valid_transition_next s1 s2
+    <->
+  valid_transition_next (pre_loaded_with_all_messages_vlsm Free) s1 s2.
 Proof.
   by split; intros []; econstructor; apply composite_valid_transition_reachable_iff.
 Qed.

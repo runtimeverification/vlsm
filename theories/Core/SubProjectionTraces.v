@@ -374,7 +374,6 @@ Context
   (Free := free_composite_vlsm IM)
   (Sub_Free := free_composite_vlsm sub_IM)
   (X := composite_vlsm IM constraint)
-  (Pre := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
   .
 
 Program Definition sub_index_list_annotate : list sub_index :=

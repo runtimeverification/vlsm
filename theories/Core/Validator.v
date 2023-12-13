@@ -58,7 +58,6 @@ Context
   (Y : VLSM message)
   (label_project : label X -> option (label Y))
   (state_project : state X -> state Y)
-  (PreY := pre_loaded_with_all_messages_vlsm Y)
   .
 
 (**
@@ -479,12 +478,11 @@ Context
   (Hproji :=
     projection_induced_validator_is_projection
       _ _ _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency Htransition_None)
-  (PreY := pre_loaded_with_all_messages_vlsm Y)
-  (Hproj : VLSM_projection X PreY label_project state_project)
+  (Hproj : VLSM_projection X (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
 (**
-  If there is a [VLSM_projection] from <<X>> to <<PreY>> and the
+  If there is a [VLSM_projection] from <<X>> to preloaded <<Y>> and the
   [projection_induced_validator_is_projection], then a [transition] [valid] for the
   [projection_induced_validator] has the same output as the transition on <<Y>>.
 *)
@@ -503,7 +501,7 @@ Proof.
 Qed.
 
 Lemma induced_validator_incl_preloaded_with_all_messages
-  : VLSM_incl Xi PreY.
+  : VLSM_incl Xi (pre_loaded_with_all_messages_vlsm Y).
 Proof.
   apply basic_VLSM_incl.
   - by intros is (s & <- & Hs); apply (VLSM_projection_initial_state Hproj).
@@ -586,13 +584,13 @@ Context
   .
 
 (**
-  We can show that <<PreY>> is included in <<Xi>> by applying the meta-lemma
+  We can show that preloaded <<Y>> is included in <<Xi>> by applying the meta-lemma
   [VLSM_incl_finite_traces_characterization], and by induction on the length
   of a trace. The [projection_validator_prop]erty is used to translate
   [input_valid]ity for the preloaded machine into the [pre_projection_induced_validator].
 *)
 Lemma pre_loaded_with_all_messages_validator_proj_incl
-  : VLSM_incl PreY Xi.
+  : VLSM_incl (pre_loaded_with_all_messages_vlsm Y) Xi.
 Proof.
   (* reduce inclusion to inclusion of finite traces. *)
   apply VLSM_incl_finite_traces_characterization.
@@ -617,12 +615,12 @@ Qed.
 (**
   Given that any projection is included in the [pre_loaded_with_all_messages_vlsm]
   of its component (Lemma [proj_pre_loaded_with_all_messages_incl]), we conclude
-  that <<PreY>> and <<Xi>> are trace-equal.  This means that all the
+  that preloaded <<Y>> and <<Xi>> are trace-equal.  This means that all the
   byzantine behavior of a component which is a validator
   is exhibited by its corresponding projection.
 *)
 Lemma pre_loaded_with_all_messages_validator_proj_eq
-  : VLSM_eq PreY Xi.
+  : VLSM_eq (pre_loaded_with_all_messages_vlsm Y) Xi.
 Proof.
   split.
   - by apply pre_loaded_with_all_messages_validator_proj_incl.
@@ -735,7 +733,6 @@ Context
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   (i : index)
-  (PreXi := pre_loaded_with_all_messages_vlsm (IM i))
   .
 
 Definition composite_project_label (l : composite_label IM)
@@ -840,7 +837,6 @@ Context
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   (i : index)
-  (PreXi := pre_loaded_with_all_messages_vlsm (IM i))
   .
 
 (**
@@ -1002,20 +998,18 @@ Definition self_validator_vlsm_prop :=
 
 Context
   (Hvalidator : self_validator_vlsm_prop)
-  (PreX := pre_loaded_with_all_messages_vlsm X)
   .
 
 (**
-  Let <<PreX>> be the [pre_loaded_with_all_messages_vlsm] associated to X.
   From Lemma [vlsm_incl_pre_loaded_with_all_messages_vlsm] we know that <<X>> is
-  included in <<PreX>>.
+  included in preloaded <<X>>.
 
   To prove the converse we use the [self_validator_vlsm_prop]erty to
   verify the conditions of meta-lemma [VLSM_incl_finite_traces_characterization].
 *)
 
-Lemma pre_loaded_with_all_messages_self_validator_vlsm_incl
-  : VLSM_incl PreX X.
+Lemma pre_loaded_with_all_messages_self_validator_vlsm_incl :
+  VLSM_incl (pre_loaded_with_all_messages_vlsm X) X.
 Proof.
   unfold self_validator_vlsm_prop  in Hvalidator.
   destruct X as (T & M). simpl in *.
@@ -1036,10 +1030,10 @@ Proof.
     by eapply Hvalidator.
 Qed.
 
-(** We conclude that <<X>> and <<PreX>> are trace-equal. *)
+(** We conclude that <<X>> and preloaded <<X>> are trace-equal. *)
 
 Lemma pre_loaded_with_all_messages_self_validator_vlsm_eq
-  : VLSM_eq PreX X.
+  : VLSM_eq (pre_loaded_with_all_messages_vlsm X) X.
 Proof.
   split.
   - by apply pre_loaded_with_all_messages_self_validator_vlsm_incl.

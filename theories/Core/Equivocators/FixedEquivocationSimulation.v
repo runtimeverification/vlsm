@@ -40,7 +40,6 @@ Context
   (X : VLSM message := strong_fixed_equivocation_vlsm_composition IM equivocating)
   (XE : VLSM message := equivocators_fixed_equivocations_vlsm IM (elements equivocating))
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (SubFreeE := free_composite_vlsm (sub_IM (equivocator_IM IM) (elements equivocating)))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   .
@@ -393,7 +392,6 @@ Context
   (X : VLSM message := composite_vlsm IM (composite_no_equivocations IM))
   (XE : VLSM message := equivocators_fixed_equivocations_vlsm IM [])
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   .
 
 Lemma no_equivocating_equivocators_finite_valid_trace_init_to_rev

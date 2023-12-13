@@ -32,7 +32,6 @@ Context
   `{finite.Finite validator}
   (A : validator -> index)
   (sender : message -> option validator)
-  (PreFree := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
   .
 
 (**
@@ -96,7 +95,7 @@ Lemma elem_of_equivocating_senders_in_trace
   : v ∈ equivocating_senders_in_trace tr <->
     exists (m : message),
     (sender m = Some v) /\
-    equivocation_in_trace PreFree m tr.
+    equivocation_in_trace (free_composite_vlsm IM) m tr.
 Proof.
   unfold equivocating_senders_in_trace.
   rewrite elem_of_remove_dups, elem_of_list_omap.
@@ -170,7 +169,7 @@ Definition is_equivocating_tracewise_no_has_been_sent
   (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
   exists (m : message),
   (sender m = Some v) /\
-  equivocation_in_trace PreFree m tr.
+  equivocation_in_trace (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) m tr.
 
 Lemma is_equivocating_tracewise_no_has_been_sent_equivocating_senders_in_trace
   (s : composite_state IM)

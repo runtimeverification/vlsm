@@ -198,7 +198,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_projection_input_valid_transition_eq
   (s1 s2 : composite_state IM)
   (om1 om2 : option message)
-  (l : label (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
+  (l : label (free_composite_vlsm IM))
   (Ht : input_constrained_transition (free_composite_vlsm IM) l (s1, om1) (s2, om2))
   (Hl : projT1 l = j)
   : input_constrained_transition (IM (projT1 l))
@@ -216,7 +216,7 @@ Qed.
 Lemma pre_loaded_with_all_messages_projection_input_valid_transition_neq
   [s1 s2 : composite_state IM]
   [om1 om2 : option message]
-  [l : label (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))]
+  [l : label (free_composite_vlsm IM)]
   (Ht : input_constrained_transition (free_composite_vlsm IM) l (s1, om1) (s2, om2))
   [i : index]
   (Hi : i <> projT1 l)

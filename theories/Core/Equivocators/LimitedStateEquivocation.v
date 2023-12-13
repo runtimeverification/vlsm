@@ -64,7 +64,6 @@ Context
   (HBE : BasicEquivocation (composite_state (equivocator_IM IM)) index Ci threshold
     := equivocating_indices_BasicEquivocation IM threshold)
   (FreeE : VLSM message := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   .
 
 Definition equivocators_limited_equivocations_constraint
@@ -88,8 +87,10 @@ Proof.
 Qed.
 
 (** Inclusion of preloaded machine in the preloaded free composition. *)
-Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm) PreFreeE.
+Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free :
+  VLSM_incl
+    (pre_loaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm)
+    (pre_loaded_with_all_messages_vlsm FreeE).
 Proof.
   by apply basic_VLSM_incl_preloaded; intros ? *; [intro | inversion 1 | intro].
 Qed.

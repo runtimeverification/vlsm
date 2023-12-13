@@ -32,9 +32,7 @@ Context
   (equivocating : list index)
   (Free := free_composite_vlsm IM)
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (FreeSubE := free_composite_vlsm (sub_IM (equivocator_IM IM) equivocating))
-  (PreFreeSubE := pre_loaded_with_all_messages_vlsm FreeSubE)
   (SeededXE : VLSM message := seeded_equivocators_no_equivocation_vlsm IM equivocating seed)
 .
 
@@ -564,7 +562,7 @@ End sec_pre_loaded_constrained_projection.
 Lemma SeededXE_PreFreeE_weak_embedding
   (full_replay_state : composite_state (equivocator_IM IM))
   (Hfull_replay_state : constrained_state_prop FreeE full_replay_state)
-  : VLSM_weak_embedding SeededXE PreFreeE
+  : VLSM_weak_embedding SeededXE (pre_loaded_with_all_messages_vlsm FreeE)
       (lift_equivocators_sub_label_to full_replay_state)
       (lift_equivocators_sub_state_to full_replay_state).
 Proof.
@@ -583,8 +581,10 @@ Qed.
 
 Lemma PreFreeSubE_PreFreeE_weak_embedding
   (full_replay_state : composite_state (equivocator_IM IM))
-  (Hfull_replay_state : constrained_state_prop FreeE  full_replay_state)
-  : VLSM_weak_embedding PreFreeSubE PreFreeE
+  (Hfull_replay_state : constrained_state_prop FreeE  full_replay_state) :
+    VLSM_weak_embedding
+      (pre_loaded_with_all_messages_vlsm FreeSubE)
+      (pre_loaded_with_all_messages_vlsm FreeE)
       (lift_equivocators_sub_label_to full_replay_state)
       (lift_equivocators_sub_state_to full_replay_state).
 Proof.

@@ -149,13 +149,11 @@ Qed.
 Section sec_pre_loaded_with_all_messages_byzantine_alt.
 
 (**
-  Let <<PreLoaded>> denote the [pre_loaded_with_all_messages_vlsm] of <<M>>,
-  let <<Alt>> denote the free composition of <<M>> with the [emit_any_message_vlsm],
+  Let <<Alt>> denote the free composition of <<M>> with the [emit_any_message_vlsm],
   and let <<Alt1>> denote the projection of <<Alt>> to the component of <<M>>.
 *)
 
 Context
-  (PreLoaded := pre_loaded_with_all_messages_vlsm M)
   (Alt1 := binary_free_composition_fst M emit_any_message_vlsm)
   (Alt := binary_free_composition M emit_any_message_vlsm)
   .
@@ -165,13 +163,13 @@ Context
   of <<Alt1>> into <<Preloaded>>.
 *)
 Lemma alt_pre_loaded_with_all_messages_incl :
-  VLSM_incl Alt1 PreLoaded.
+  VLSM_incl Alt1 (pre_loaded_with_all_messages_vlsm M).
 Proof.
   by intros t Hvt; apply byzantine_pre_loaded_with_all_messages, byzantine_alt_byzantine.
 Qed.
 
 (**
-  To prove the reverse inclusion (between <<PreLoaded>> and <<Alt1>>) we will use the
+  To prove the reverse inclusion (between preloaded <<M>> and <<Alt1>>) we will use the
   [basic_VLSM_incl] meta-result about proving inclusions between
   VLSMs which states that:
 
@@ -212,9 +210,9 @@ Proof. by apply any_message_is_valid_in_preloaded. Qed.
 Definition lifted_alt_state (s : state M) : state Alt :=
   lift_to_composite_state' (binary_IM M emit_any_message_vlsm) first s.
 
-(** Lifting a valid state of <<PreLoaded>> we obtain a valid state of <<Alt>>. *)
+(** Lifting a constrained state of <<M>> we obtain a valid state of <<Alt>>. *)
 Lemma preloaded_alt_valid_state :
-  forall (sj : state PreLoaded) (om : option message),
+  forall (sj : state M) (om : option message),
     constrained_state_message_prop M sj om ->
     valid_state_prop Alt (lifted_alt_state sj).
 Proof.
@@ -238,9 +236,9 @@ Qed.
   results above to show that <<Preloaded>> is included in <<Alt1>>.
 *)
 Lemma pre_loaded_with_all_messages_alt_incl :
-  VLSM_incl PreLoaded Alt1.
+  VLSM_incl (pre_loaded_with_all_messages_vlsm M) Alt1.
 Proof.
-  apply (basic_VLSM_incl PreLoaded Alt1); intro; intros;
+  apply (basic_VLSM_incl _ Alt1); intro; intros;
     [done | by apply alt_proj_option_valid_message | | by apply H].
   exists (lifted_alt_state s).
   split; [done |].
@@ -252,7 +250,7 @@ Qed.
 
 (** Hence, <<Preloaded>> and <<Alt1>> are actually trace-equivalent. *)
 Lemma pre_loaded_with_all_messages_alt_eq :
-  VLSM_eq PreLoaded Alt1.
+  VLSM_eq (pre_loaded_with_all_messages_vlsm M) Alt1.
 Proof.
   split.
   - by apply pre_loaded_with_all_messages_alt_incl.
@@ -331,17 +329,16 @@ Context
   (IM : index -> VLSM message)
   (constraint : composite_label IM -> composite_state IM  * option message -> Prop)
   (X := composite_vlsm IM constraint)
-  (PreLoadedX := pre_loaded_with_all_messages_vlsm X)
   (Hvalidator : forall i : index, component_message_validator_prop IM constraint i)
   .
 
 (**
-  Since we know that <<PreloadedX>> contains precisely the byzantine traces
-  of <<X>>, we just need to show that <<PreLoadedX>> is included in <<X>> to
+  Since we know that preloaded <<X>> contains precisely the byzantine traces
+  of <<X>>, we just need to show that preloaded <<X>> is included in <<X>> to
   prove our main result.
 *)
 Lemma validator_pre_loaded_with_all_messages_incl :
-  VLSM_incl PreLoadedX X.
+  VLSM_incl (pre_loaded_with_all_messages_vlsm X) X.
 Proof.
   apply VLSM_incl_finite_traces_characterization.
   intros s tr Htr.

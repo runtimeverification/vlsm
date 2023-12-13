@@ -199,7 +199,6 @@ Context
   `{RelDecision _ _ (is_equivocating_tracewise_no_has_been_sent IM A sender)}
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
   (Limited : VLSM message := tracewise_limited_equivocation_vlsm_composition (Cv := Cv) IM threshold A sender)
   (HBE : BasicEquivocation (composite_state IM) validator Cv threshold :=
     equivocation_dec_tracewise IM threshold A sender)
