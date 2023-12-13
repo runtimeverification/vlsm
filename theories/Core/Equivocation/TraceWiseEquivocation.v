@@ -95,7 +95,7 @@ Lemma elem_of_equivocating_senders_in_trace
   : v ∈ equivocating_senders_in_trace tr <->
     exists (m : message),
     (sender m = Some v) /\
-    equivocation_in_trace (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) m tr.
+    equivocation_in_trace (free_composite_vlsm IM) m tr.
 Proof.
   unfold equivocating_senders_in_trace.
   rewrite elem_of_remove_dups, elem_of_list_omap.
