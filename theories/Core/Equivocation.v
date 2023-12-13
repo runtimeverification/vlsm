@@ -2716,7 +2716,7 @@ Lemma lift_preloaded_trace_to_seeded
   (tr : list transition_item)
   (Htrm : trace_received_not_sent_before_or_after_invariant tr P)
   (is : state (PreX))
-  (Htr : finite_valid_trace PreX is tr)
+  (Htr : finite_constrained_trace X is tr)
   : finite_valid_trace (pre_loaded_vlsm X P) is tr.
 Proof.
   unfold trace_received_not_sent_before_or_after_invariant in Htrm.

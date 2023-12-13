@@ -368,7 +368,7 @@ Proof.
     revert HtrX. apply VLSM_incl_finite_valid_trace_from.
     by apply constrained_preloaded_incl.
   - intro HtrX.
-    assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
+    assert (Hpre_tr : finite_constrained_trace FreeE sX trX).
     {
       apply VLSM_incl_finite_valid_trace; [| done].
       by apply constrained_preloaded_incl.
