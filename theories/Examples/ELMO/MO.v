@@ -895,7 +895,7 @@ Proof.
   - by contradict Hadr; rewrite adr2idx_idx.
 Qed.
 
-Lemma cannot_resend_message_stepwise_ELMO_component i :
+Lemma cannot_resend_message_stepwise_MO_component i :
   cannot_resend_message_stepwise_prop (M i).
 Proof.
   intros ? * [(Hs & _ & Hv) Ht];
@@ -906,7 +906,7 @@ Proof.
     by apply elem_of_receivedMessages, obs_sizeState in Hobs; cbn in Hobs; lia.
 Qed.
 
-#[export] Instance MessageDependencies_ELMO_component i :
+#[export] Instance MessageDependencies_MO_component i :
   MessageDependencies (M i) Message_dependencies.
 Proof.
   constructor.
@@ -927,7 +927,7 @@ Proof.
     + apply Exists_exists; eexists.
       by split; [apply elem_of_app; right; left |].
     + eapply lift_preloaded_trace_to_seeded;
-        [by apply cannot_resend_message_stepwise_ELMO_component | | done].
+        [by apply cannot_resend_message_stepwise_MO_component | | done].
       intros dm [Hrcv Hnsnd].
       apply elem_of_list_to_set, elem_of_list_fmap.
       exists (MkObservation Receive dm); split; [done |].

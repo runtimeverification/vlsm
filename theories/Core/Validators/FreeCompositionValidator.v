@@ -3,7 +3,21 @@ From stdpp Require Import prelude.
 From VLSM.Core Require Import VLSM Composition Equivocation MessageDependencies.
 From VLSM.Core Require Import VLSMProjections ProjectionTraces.
 
-(** * Sufficient conditions for being a validator for the free composition *)
+(** * Sufficient conditions for being a validator for the free composition
+In this module we give sufficient (abstract) conditions for a component to be
+validator for the free composition it is part of.
+
+Nemely, we show that if an indexed collection of vlsm <<IM>> satisfies
+the [channel_authentication_prop]erty, the [MessageDependencies] and
+[FullMessageDependencies] assumptions, the [HasBeenSentCapability] and
+[HasBeenReceivedCapability], then any component which for every valid input
+guarantees that the message and all its dependencies are [emittable] by one
+of the components is a validator for the free composition of <<IM>>
+(lemma [free_valid_message_yields_projection_validator]).
+
+Specialized (simpler) conditions are provided and proved for components which
+additionally satisfy the [message_dependencies_full_node_condition_prop]erty.
+*)
 
 (** ** Message validators are validators for the free composition *)
 
@@ -66,11 +80,9 @@ Proof.
   eexists; split; cycle 1.
   - apply (@VLSM_incl_input_valid _ _ (free_composite_vlsm IM)); [| done].
     by apply free_composite_vlsm_spec.
-  - subst si.
-    pose proof (Heq_last := lift_to_composite_finite_trace_last IM i isi tri).
-    apply (f_equal (fun s => s i)) in Heq_last.
-    unfold lift_to_composite_state', lift_to_composite_state at 1 in Heq_last.
-    by rewrite state_update_eq in Heq_last.
+  - cut (si = (lift_to_composite_state' IM i (finite_trace_last isi tri)) i);
+      [by intros ->; rewrite (lift_to_composite_finite_trace_last IM) |].
+    by subst si; state_update_simpl.
 Qed.
 
 End sec_free_composition_validator.
@@ -94,7 +106,7 @@ Context
   `{forall i : index, MessageDependencies (IM i) message_dependencies}
   .
 
-(** Property that there is a component which can emit a given message *)
+(** Captures the union of constrained messages over all components of <<IM>>. *)
 Definition emittable (m : message) : Prop :=
   exists i, can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m.
 
@@ -176,7 +188,7 @@ Qed.
 Lemma free_valid_message_emittable_from_dependencies :
   forall (m : message),
     free_valid_message m ->
-    Emittable_from_dependencies_prop (message_dependencies := message_dependencies) IM A sender m.
+    Emittable_from_dependencies_prop IM A sender message_dependencies m.
 Proof.
   intros m [[i Hemit] _].
   apply Hchannel in Hemit as Hauth.

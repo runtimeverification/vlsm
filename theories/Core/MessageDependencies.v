@@ -1050,10 +1050,12 @@ Context
   (IM : index -> VLSM message)
   `{forall i, HasBeenSentCapability (IM i)}
   `{forall i, HasBeenReceivedCapability (IM i)}
-  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   {validator : Type}
   (A : validator -> index)
   (sender : message -> option validator)
+  `(message_dependencies : message -> Cm)
+  `(full_message_dependencies : message -> Cm)
+  `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
   .
 
 (**
