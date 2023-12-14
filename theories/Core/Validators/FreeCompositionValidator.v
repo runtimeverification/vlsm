@@ -5,9 +5,9 @@ From VLSM.Core Require Import VLSMProjections ProjectionTraces.
 
 (** * Sufficient conditions for being a validator for the free composition *)
 
-Section sec_free_composition_validator.
-
 (** ** Message validators are validators for the free composition *)
+
+Section sec_free_composition_validator.
 
 Context
   `{EqDecision index}
@@ -19,7 +19,7 @@ Context
   constrained trace of the component lifts to a valid trace of the composition.
 *)
 Lemma free_component_message_validator_valid_trace :
-  forall i : index,
+  forall (i : index),
     component_message_validator_prop IM (free_constraint IM) i ->
   forall is fi tr,
     finite_constrained_trace_init_to (IM i) is fi tr ->
@@ -30,10 +30,12 @@ Proof.
   apply pre_traces_with_valid_inputs_are_valid.
   - by apply (VLSM_embedding_finite_valid_trace_init_to
       (lift_to_composite_preloaded_VLSM_embedding IM i)).
-  - rewrite Forall_forall; intros item Hitem.
+  - rewrite Forall_forall.
+    intros item Hitem.
     apply elem_of_list_fmap in Hitem as (itemi & -> & Hitem); cbn in isi, fi.
     apply elem_of_list_split in Hitem as (pre & suf & Heqtri).
-    destruct Htri as [Htri _]; apply valid_trace_forget_last in Htri.
+    destruct Htri as [Htri _].
+    apply valid_trace_forget_last in Htri.
     eapply (input_valid_transition_to (pre_loaded_with_all_messages_vlsm (IM i)))
       in Heqtri as Ht; [| done].
     destruct itemi, input as [m |]; cbn in *;
@@ -48,11 +50,12 @@ Qed.
   then it is also a "full" validator for the free composition.
 *)
 Lemma free_component_message_validator_yields_validator :
-  forall i : index,
+  forall (i : index),
     component_message_validator_prop IM (free_constraint IM) i ->
     component_projection_validator_prop IM (free_constraint IM) i.
 Proof.
-  intros i Hvalid li si iom Ht; unfold input_constrained in Ht.
+  intros i Hvalid li si iom Ht.
+  unfold input_constrained in Ht.
   apply input_valid_transition_iff in Ht as [[si' oom] Ht].
   apply (exists_right_finite_trace_from (pre_loaded_with_all_messages_vlsm (IM i)))
     in Ht as (isi & tri & Htri & Hsi').
@@ -72,9 +75,9 @@ Qed.
 
 End sec_free_composition_validator.
 
-Section sec_free_composition_message_validator.
-
 (** ** Sufficient conditions for being a message validator for the free composition *)
+
+Section sec_free_composition_message_validator.
 
 Context
   `{EqDecision index}
@@ -133,7 +136,8 @@ Lemma full_node_free_valid_message_entails_helper :
     (forall dm, has_been_directly_observed (IM i) s dm -> free_valid_message dm) ->
       free_valid_message m.
 Proof.
-  intros i Hfulli Hfree l s m Hv Hobs; constructor; [by apply (Hfree l s m Hv) |].
+  intros i Hfulli Hfree l s m Hv Hobs.
+  constructor; [by eapply Hfree |].
   intros dm Hdm.
   eapply Hobs, Hfulli; [| done].
   by apply Hv.
@@ -170,7 +174,7 @@ Proof.
 Qed.
 
 Lemma free_valid_message_emittable_from_dependencies :
-  forall m : message,
+  forall (m : message),
     free_valid_message m ->
     Emittable_from_dependencies_prop (message_dependencies := message_dependencies) IM A sender m.
 Proof.
@@ -184,7 +188,7 @@ Proof.
 Qed.
 
 Lemma msg_dep_reflects_free_valid_message :
-  forall dm m : message,
+  forall (dm m : message),
     msg_dep_rel message_dependencies dm m ->
     free_valid_message m -> free_valid_message dm.
 Proof.
@@ -198,11 +202,10 @@ Lemma free_valid_message_is_valid :
       valid_message_prop (free_composite_vlsm IM) m.
 Proof.
   intros m Hm.
-  eapply free_valid_from_all_dependencies_emitable_from_dependencies
-    with (sender := sender) (A := A); [done |].
+  eapply free_valid_from_all_dependencies_emitable_from_dependencies; [done |].
   unfold all_dependencies_emittable_from_dependencies_prop.
-  intros dm; rewrite elem_of_cons; intros [-> | Hdm];
-    [by apply free_valid_message_emittable_from_dependencies |].
+  intros dm; rewrite elem_of_cons.
+  intros [-> | Hdm]; [by apply free_valid_message_emittable_from_dependencies |].
   apply free_valid_message_emittable_from_dependencies.
   apply elem_of_elements, full_message_dependencies_happens_before in Hdm.
   eapply msg_dep_happens_before_reflect; [| done..].
@@ -228,8 +231,7 @@ Proof.
   intros li si im Him.
   unshelve eapply VLSM_incl_valid_message;
     [| by apply free_composite_vlsm_spec | by do 2 red |].
-  eapply free_valid_message_is_valid, Hfree_valid_message_inputs.
-  by eapply Him.
+  by eapply free_valid_message_is_valid, Hfree_valid_message_inputs, Him.
 Qed.
 
 Lemma free_valid_message_yields_projection_validator :

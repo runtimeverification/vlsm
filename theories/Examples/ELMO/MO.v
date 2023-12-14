@@ -45,14 +45,15 @@ Inductive MO_msg_valid (P : Address -> Prop) : Message -> Prop :=
 Lemma MO_msg_valid_P_adr (P : Address -> Prop) (m : Message) :
   MO_msg_valid P m -> P (adr (state m)).
 Proof.
-  by induction 1; [| apply IHMO_msg_valid | apply IHMO_msg_valid1].
+  by induction 1.
 Qed.
 
 Lemma MO_msg_valid_dep (P : Address -> Prop) (m : Message) :
   MO_msg_valid P m ->
   forall dm, dm ∈ Message_dependencies m -> MO_msg_valid P dm.
 Proof.
-  unfold Message_dependencies; intros Hv dm Hdm.
+  unfold Message_dependencies.
+  intros Hv dm Hdm.
   apply elem_of_list_to_set, elem_of_list_fmap in Hdm as (o & -> & Ho).
   revert o Ho; induction Hv; cbn; intros.
   - by destruct m, state; cbn in *; subst; inversion Ho.
@@ -870,18 +871,16 @@ Lemma MO_reachable_view (s : State) i :
   UMO_reachable (const (MO_msg_valid P'))  s /\ adr s = idx i.
 Proof.
   eapply iff_trans.
-  - apply UMO_based_valid_reachable; [| | done].
-    + by inversion 1.
-    + by cbn; split; inversion 1; [| constructor].
-  - apply Morphisms_Prop.and_iff_morphism.
-    + by split; apply UMO_reachable_impl; inversion 1; subst; [| constructor..].
-    + by cbn; firstorder.
+  - apply UMO_based_valid_reachable; cbn; [by inversion 1 | | done].
+    by cbn; split; inversion 1; [| constructor].
+  - apply Morphisms_Prop.and_iff_morphism; cbn; [| by firstorder].
+    by split; apply UMO_reachable_impl; inversion 1; subst; [| constructor..].
 Qed.
 
 Lemma MO_reachable_adr (s : State) i :
   constrained_state_prop (M i) s -> adr s = idx i.
 Proof.
-  by intros [_ Hadr]%MO_reachable_view.
+  by intros Hadr; apply MO_reachable_view in Hadr as [].
 Qed.
 
 Lemma MO_channel_authentication_prop :
@@ -891,18 +890,17 @@ Proof.
     inversion Hv; subst; inversion Ht; subst.
   unfold channel_authenticated_message, Message_sender.
   erewrite MO_reachable_adr by done.
-  case_decide as Hadr.
-  - by cbn; f_equal; apply Message_sender_index_inv.
-  - by rewrite (adr2idx_idx idx) in Hadr; contradict Hadr; eexists.
+  case_decide as Hadr; cbn.
+  - by f_equal; apply Message_sender_index_inv.
+  - by contradict Hadr; rewrite adr2idx_idx.
 Qed.
-
 
 Lemma cannot_resend_message_stepwise_ELMO_component i :
   cannot_resend_message_stepwise_prop (M i).
 Proof.
   intros ? * [(Hs & _ & Hv) Ht];
     inversion Hv; subst; inversion Ht; subst;
-    simpl; split; intro Hobs.
+    simpl; split; intros Hobs.
   - by apply elem_of_sentMessages, obs_sizeState in Hobs; cbn in Hobs; lia.
   - rewrite receivedMessages_addObservation, decide_False in Hobs by (intro; done).
     by apply elem_of_receivedMessages, obs_sizeState in Hobs; cbn in Hobs; lia.
@@ -913,8 +911,7 @@ Qed.
 Proof.
   constructor.
   - intros m s' ((s, iom) & l & [(_ & _ & Hv) Ht]) dm Hdm; cbn in *.
-    apply elem_of_list_to_set, elem_of_list_fmap in Hdm
-      as (o & -> & Hy).
+    apply elem_of_list_to_set, elem_of_list_fmap in Hdm as (o & -> & Hy).
     inversion Hv; subst; inversion Ht; subst; cbn in *; clear Ht.
     red; unfold Message; simpl.
     destruct o as [[] ?].
@@ -925,7 +922,7 @@ Proof.
   - intros m Hm.
     apply can_emit_has_trace in Hm as (is & tr & item & Htr & Houtput).
     apply (can_emit_from_valid_trace
-            (pre_loaded_vlsm (M i) (fun msg : Message => msg ∈ Message_dependencies m)))
+      (pre_loaded_vlsm (M i) (fun msg : Message => msg ∈ Message_dependencies m)))
       with is (tr ++ [item]); cycle 1.
     + apply Exists_exists; eexists.
       by split; [apply elem_of_app; right; left |].
@@ -952,31 +949,32 @@ Proof.
 Qed.
 
 Lemma MO_msg_valid_free :
-  forall (m : Message), MO_msg_valid P' m ->
-  free_valid_message M Message_dependencies m.
+  forall (m : Message),
+    MO_msg_valid P' m ->
+    free_valid_message M Message_dependencies m.
 Proof.
-  induction m  as (m & Hind) using (well_founded_ind
+  induction m as (m & Hind) using (well_founded_ind
     (msg_dep_happens_before_wf Message_dependencies Message_full_dependencies _)).
   intros Hm; constructor.
   - remember (adr (state m)) as a; symmetry in Heqa.
     eapply constrained_state_prop_MO_msg_valid in Heqa as Hstate_m; [| done].
     apply MO_msg_valid_P_adr in Hm as (_  & i & Hi).
     rewrite <- Heqa, <- Hi in Hstate_m.
-    exists i; unfold can_emit.
-    exists (state m, None), Send, (state m <+> MkObservation Send m).
-    repeat split.
-    + done.
-    + apply any_message_is_valid_in_preloaded.
+    red; unfold can_emit; cbn.
+    exists i, (state m, None), Send, (state m <+> MkObservation Send m).
+    repeat split; [done | ..].
+    + by apply any_message_is_valid_in_preloaded.
     + by constructor.
-    + by destruct m, state.
-  - intros dm Hdm.
-    by apply Hind; [constructor | eapply MO_msg_valid_dep].
+    + by destruct m as [[]].
+  - by intros dm Hdm; apply Hind; [constructor | eapply MO_msg_valid_dep].
 Qed.
 
 Lemma MO_component_validating :
-  forall i : index, component_projection_validator_prop M (free_constraint M) i.
+  forall (i : index),
+    component_projection_validator_prop M (free_constraint M) i.
 Proof.
-  intros i; eapply free_valid_message_yields_projection_validator;
+  intros i.
+  eapply free_valid_message_yields_projection_validator;
     [by apply MO_channel_authentication_prop | by typeclasses eauto |].
   intros li si m (_ & _ & Hv).
   inversion Hv as [? ? Hm |]; subst; clear i si Hv.
