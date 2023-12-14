@@ -54,6 +54,21 @@ cd vlsm
 make   # or make -j <number-of-cores-on-your-machine>
 ```
 
+### Nix instructions
+
+From the project's root directory, run an interactive shell with the project's dependencies available, and then build it:
+
+```shell
+nix-shell
+make   # or make -j <number-of-cores-on-your-machine>
+```
+
+Alternatively, you can build the project:
+
+```shell
+nix-build
+```
+
 ## Documentation
 
 ### File organization
