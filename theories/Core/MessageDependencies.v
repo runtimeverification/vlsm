@@ -1,8 +1,8 @@
 From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude.
-From VLSM.Lib Require Import Preamble ListExtras.
+From VLSM.Lib Require Import Preamble ListExtras FinSetExtras.
 From VLSM.Core Require Import VLSM VLSMProjections Composition ProjectionTraces.
-From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections. 
+From VLSM.Core Require Import SubProjectionTraces Equivocation EquivocationProjections.
 
 (** * Core: VLSM Message Dependencies
 
@@ -48,7 +48,7 @@ Definition message_dependencies_full_node_condition
   - Necessity: All dependent messages for a message <<m>>m are required to be
   directly observed by origin state of a transition emitting the message <<m>>.
 
-  - Sufficiency: A message can be produced by the machine pre-loaded with its
+  - Sufficiency: A message can be produced by the machine preloaded with its
   dependencies.
 
   Additionally, we require that the induced [msg_dep_happens_before] relation
@@ -67,11 +67,11 @@ Class MessageDependencies
   : Prop :=
 {
   message_dependencies_are_necessary (m : message)
-    `(can_produce (pre_loaded_with_all_messages_vlsm X) s' m)
+    `(can_produce (preloaded_with_all_messages_vlsm X) s' m)
     : message_dependencies_full_node_condition X message_dependencies s' m;
   message_dependencies_are_sufficient (m : message)
-    `(can_emit (pre_loaded_with_all_messages_vlsm X) m)
-    : can_emit (pre_loaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
+    `(can_emit (preloaded_with_all_messages_vlsm X) m)
+    : can_emit (preloaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
 }.
 
 (*
@@ -122,7 +122,7 @@ Proof. by apply tc_reflect. Qed.
 
 (**
   In the absence of initial messages, and if [msg_dep_rel]ation reflects
-  the pre-loaded message property, then it also reflects the
+  the preloaded message property, then it also reflects the
   [valid_message_prop]erty.
 *)
 Lemma msg_dep_reflects_validity
@@ -130,8 +130,8 @@ Lemma msg_dep_reflects_validity
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel message_dependencies dm m -> P m -> P dm)
   : forall dm m, msg_dep_rel message_dependencies dm m ->
-    valid_message_prop (pre_loaded_vlsm X P) m ->
-    valid_message_prop (pre_loaded_vlsm X P) dm.
+    valid_message_prop (preloaded_vlsm X P) m ->
+    valid_message_prop (preloaded_vlsm X P) dm.
 Proof.
   intros dm m Hdm.
   rewrite emitted_messages_are_valid_iff, can_emit_iff.
@@ -140,17 +140,17 @@ Proof.
     apply Hreflects with m; [done |].
     destruct Hinit as [Hinit | Hp]; [| done].
     by contradict Hinit; apply no_initial_messages_in_X.
-  - apply (directly_observed_valid (pre_loaded_vlsm X P) s).
+  - apply (directly_observed_valid (preloaded_vlsm X P) s).
     + by exists (Some m); apply can_produce_valid.
     + destruct X as [T M].
       eapply VLSM_incl_has_been_directly_observed
         with HasBeenSentCapability0 HasBeenReceivedCapability0; cycle 2.
       * eapply @message_dependencies_are_necessary; [done | | done].
         by apply (VLSM_incl_can_produce
-          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P)).
+          (preloaded_vlsm_incl_preloaded_with_all_messages (mk_vlsm M) P)).
       * by apply basic_VLSM_incl_preloaded; cbv.
       * apply (VLSM_incl_valid_state
-          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P)).
+          (preloaded_vlsm_incl_preloaded_with_all_messages (mk_vlsm M) P)).
         by eexists; eapply can_produce_valid.
 Qed.
 
@@ -160,7 +160,7 @@ Qed.
 *)
 Lemma msg_dep_has_been_sent
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   m
   (Hsent : has_been_sent X s m)
   : forall dm, msg_dep_rel message_dependencies dm m -> has_been_directly_observed X s dm.
@@ -174,7 +174,7 @@ Proof.
 Qed.
 
 Lemma constrained_transition_preserves_message_dependencies_full_node_condition
-  `(input_valid_transition (pre_loaded_with_all_messages_vlsm X) lX (s, im) (s', om)) :
+  `(input_constrained_transition X lX (s, im) (s', om)) :
   forall m, message_dependencies_full_node_condition X message_dependencies s m ->
     message_dependencies_full_node_condition X message_dependencies s' m.
 Proof.
@@ -191,7 +191,7 @@ Qed.
 Lemma full_node_has_been_received
   (Hfull : message_dependencies_full_node_condition_prop)
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   m
   (Hreceived : has_been_received X s m)
   : forall dm, msg_dep_rel message_dependencies dm m -> has_been_directly_observed X s dm.
@@ -212,7 +212,7 @@ Qed.
 Lemma msg_dep_full_node_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   : forall dm m, msg_dep_rel message_dependencies dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.
@@ -228,7 +228,7 @@ Qed.
 Lemma msg_dep_full_node_happens_before_reflects_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm X) s)
+  (Hs : constrained_state_prop X s)
   : forall dm m, msg_dep_happens_before message_dependencies dm m ->
     has_been_directly_observed X s m -> has_been_directly_observed X s dm.
 Proof.
@@ -244,7 +244,7 @@ Qed.
 Lemma msg_dep_full_node_input_valid_happens_before_has_been_directly_observed
   (Hfull : message_dependencies_full_node_condition_prop)
   l s m
-  (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m))
+  (Hvalid : input_constrained X l (s, Some m))
   : forall dm, msg_dep_happens_before message_dependencies dm m ->
     has_been_directly_observed X s dm.
 Proof.
@@ -275,7 +275,6 @@ Context
   `{!HasBeenSentCapability X}
   `{!HasBeenReceivedCapability X}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
-  (R := pre_loaded_with_all_messages_vlsm X)
   .
 
 (**
@@ -294,7 +293,7 @@ Inductive HasBeenObserved (s : state X) (m : message) : Prop :=
       HasBeenObserved s m.
 
 Lemma transition_preserves_HasBeenObserved :
-  forall l s im s' om, input_valid_transition R l (s, im) (s', om) ->
+  forall l s im s' om, input_constrained_transition X l (s, im) (s', om) ->
   forall msg, HasBeenObserved s msg -> HasBeenObserved s' msg.
 Proof.
   intros * Ht msg Hbefore; inversion Hbefore as [Hobs | m Hobs Hdep].
@@ -303,7 +302,7 @@ Proof.
 Qed.
 
 Lemma HasBeenObserved_step_update :
-  forall l s im s' om, input_valid_transition R l (s, im) (s', om) ->
+  forall l s im s' om, input_constrained_transition X l (s, im) (s', om) ->
   forall msg,
     HasBeenObserved s' msg
       <->
@@ -349,7 +348,7 @@ Inductive ObservedBeforeStateOrMessage
 Record ObservedBeforeSendTransition
   (s : state X) (item : transition_item X) (m1 m2 : message) : Prop :=
 {
-  dobst_transition : input_valid_transition_item R s item;
+  dobst_transition : input_constrained_transition_item X s item;
   dobst_output_m2 : output item = Some m2;
   dobst_observed_m1 : ObservedBeforeStateOrMessage m1 s (input item);
 }.
@@ -359,7 +358,7 @@ Definition observed_before_send (m1 m2 : message) : Prop :=
 
 Lemma observed_before_send_subsumes_msg_dep_rel
   `{!MessageDependencies X message_dependencies} :
-  forall m, can_emit (pre_loaded_with_all_messages_vlsm X) m ->
+  forall m, can_emit (preloaded_with_all_messages_vlsm X) m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
     observed_before_send dm m.
 Proof.
@@ -417,7 +416,7 @@ Definition full_node_is_locally_equivocating (s : state X) (v : validator) : Pro
   a state would be totally ordered by [msg_dep_rel].
 *)
 Definition has_been_sent_msg_dep_comparable_prop : Prop :=
-  forall (s : state X), valid_state_prop R s ->
+  forall (s : state X), constrained_state_prop X s ->
   forall (m1 m2 : message),
     has_been_sent X s m1 ->
     has_been_sent X s m2 ->
@@ -465,7 +464,7 @@ Qed.
 Lemma full_node_HasBeenObserved_is_directly_observed
   `{!MessageDependencies X message_dependencies}
   (Hfull : message_dependencies_full_node_condition_prop X message_dependencies)
-  : forall s, valid_state_prop R s ->
+  : forall s, constrained_state_prop X s ->
     forall m, HasBeenObserved s m <-> has_been_directly_observed X s m.
 Proof.
   intros s Hs m; split; [| by intros; constructor].
@@ -480,7 +479,7 @@ Qed.
 Lemma full_node_is_locally_equivocating_iff
   `{!MessageDependencies X message_dependencies}
   (Hfull : message_dependencies_full_node_condition_prop X message_dependencies)
-  : forall s, valid_state_prop R s ->
+  : forall s, constrained_state_prop X s ->
     forall v,
       msg_dep_is_locally_equivocating s v
         <->
@@ -538,9 +537,9 @@ Proof.
   intros [[i [[im Him] _]] | Hemit]
   ; [by contradict Him; apply no_initial_messages_in_IM |].
   right.
-  pose proof (vlsm_is_pre_loaded_with_False X) as XeqXFalse.
+  pose proof (vlsm_is_preloaded_with_False X) as XeqXFalse.
   apply (VLSM_eq_can_emit XeqXFalse).
-  cut (valid_message_prop (pre_loaded_vlsm X (fun _ => False)) dm).
+  cut (valid_message_prop (preloaded_vlsm X (fun _ => False)) dm).
   {
     clear -no_initial_messages_in_IM.
     rewrite emitted_messages_are_valid_iff.
@@ -576,7 +575,7 @@ Lemma msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_send
   : forall m, valid_message_prop X m ->
     forall dm, msg_dep_happens_before message_dependencies dm m ->
     exists v, sender dm = Some v /\
-      can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) dm.
+      can_emit (preloaded_with_all_messages_vlsm (IM (A v))) dm.
 Proof.
   intros m Hm dm Hdm.
   cut (valid_message_prop X dm).
@@ -606,7 +605,6 @@ Context
   `{forall i, HasBeenReceivedCapability (IM i)}
   `{!Irreflexive (msg_dep_happens_before message_dependencies)}
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -645,7 +643,7 @@ Proof.
 Qed.
 
 Lemma transition_preserves_CompositeHasBeenObserved :
-  forall l s im s' om, input_valid_transition RFree l (s, im) (s', om) ->
+  forall l s im s' om, input_constrained_transition Free l (s, im) (s', om) ->
   forall msg, CompositeHasBeenObserved s msg -> CompositeHasBeenObserved s' msg.
 Proof.
   destruct (free_composite_has_been_directly_observed_stepwise_props IM) as [].
@@ -655,7 +653,7 @@ Proof.
 Qed.
 
 Lemma CompositeHasBeenObserved_step_update :
-  forall l s im s' om, input_valid_transition RFree l (s, im) (s', om) ->
+  forall l s im s' om, input_constrained_transition Free l (s, im) (s', om) ->
   forall msg,
     CompositeHasBeenObserved s' msg
       <->
@@ -685,7 +683,7 @@ Qed.
 Record CompositeObservedBeforeSendTransition
   (s : composite_state IM) (item : composite_transition_item IM) (m1 m2 : message) : Prop :=
 {
-  cdobst_transition : input_valid_transition_item RFree s item;
+  cdobst_transition : input_constrained_transition_item Free s item;
   cdobst_output_m2 : output item = Some m2;
   cdobst_observed_m1 :
     ObservedBeforeStateOrMessage (IM (projT1 (l item))) message_dependencies m1
@@ -742,7 +740,7 @@ Qed.
 
 Lemma composite_observed_before_send_subsumes_msg_dep_rel
   `{forall i, MessageDependencies (IM i) message_dependencies} :
-  forall m, can_emit RFree m ->
+  forall m, can_emit (preloaded_with_all_messages_vlsm Free) m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
     composite_observed_before_send dm m.
 Proof.
@@ -768,7 +766,7 @@ Proof.
   intros m Hm dm Hdm; constructor.
   eapply composite_observed_before_send_subsumes_msg_dep_rel; [| done].
   eapply VLSM_incl_can_emit; [| done].
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Lemma tc_composite_observed_before_send_subsumes_happens_before
@@ -836,7 +834,7 @@ Qed.
 Lemma full_node_is_globally_equivocating_iff
   `{forall i, MessageDependencies (IM i) message_dependencies}
   (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
-  : forall s, valid_state_prop RFree s ->
+  : forall s, constrained_state_prop Free s ->
     forall v,
       msg_dep_is_globally_equivocating s v
         <->
@@ -849,8 +847,9 @@ Proof.
     by rewrite composite_has_been_directly_observed_sent_received_iff; intros [].
   }
   destruct Hobs as [Hobs | m' [i Hobs] Hhb]; [done | exists i].
-  by eapply msg_dep_full_node_happens_before_reflects_has_been_directly_observed
-  ; [| | apply valid_state_project_preloaded_to_preloaded_free | |].
+  eapply msg_dep_full_node_happens_before_reflects_has_been_directly_observed;
+    [done | done | | done..].
+  by eapply composite_constrained_state_project.
 Qed.
 
 Lemma msg_dep_locally_is_globally_equivocating
@@ -858,7 +857,7 @@ Lemma msg_dep_locally_is_globally_equivocating
   (Hsafety : sender_safety_alt_prop IM A sender)
   (Hsent_comparable :
     forall i, has_been_sent_msg_dep_comparable_prop (IM i) message_dependencies)
-  : forall s, valid_state_prop RFree s ->
+  : forall s, constrained_state_prop Free s ->
     forall i v,
     msg_dep_is_locally_equivocating (IM i) message_dependencies sender (s i) v ->
     msg_dep_is_globally_equivocating s v.
@@ -872,7 +871,7 @@ Proof.
       [.. | by contradict n; eapply has_been_sent_iff_by_sender];
       [done | by eapply composite_HasBeenObserved_lift].
   contradict Hncomp; eapply tc_comparable, Hsent_comparable; [| done..].
-  by eapply valid_state_project_preloaded_to_preloaded_free.
+  by eapply composite_constrained_state_project.
 Qed.
 
 Lemma full_node_sent_locally_is_globally_equivocating
@@ -880,7 +879,7 @@ Lemma full_node_sent_locally_is_globally_equivocating
   (Hsafety : sender_safety_alt_prop IM A sender)
   (Hsent_comparable :
     forall i, has_been_sent_msg_dep_comparable_prop (IM i) message_dependencies)
-  : forall s, valid_state_prop RFree s ->
+  : forall s, constrained_state_prop Free s ->
     forall i v,
     full_node_is_sent_locally_equivocating (IM i) message_dependencies sender (s i) v ->
     msg_dep_is_globally_equivocating s v.
@@ -894,7 +893,7 @@ Proof.
       [by contradict n; eapply has_been_sent_iff_by_sender | done |];
       by constructor 1; eexists.
   contradict Hncomp; eapply Hsent_comparable; [| done..].
-  by eapply valid_state_project_preloaded_to_preloaded_free.
+  by eapply composite_constrained_state_project.
 Qed.
 
 End sec_composite_message_dependencies_equivocation.
@@ -920,8 +919,8 @@ Lemma msg_dep_reflects_sub_free_validity
   (Hreflects : forall dm m, msg_dep_rel message_dependencies dm m -> P m -> P dm)
   (X := free_composite_vlsm (sub_IM IM (elements indices)))
   : forall dm m, msg_dep_rel message_dependencies dm m ->
-    valid_message_prop (pre_loaded_vlsm X P) m ->
-    valid_message_prop (pre_loaded_vlsm X P) dm.
+    valid_message_prop (preloaded_vlsm X P) m ->
+    valid_message_prop (preloaded_vlsm X P) dm.
 Proof.
   eapply msg_dep_reflects_validity; [| | done].
   - by typeclasses eauto.
@@ -1059,20 +1058,20 @@ Context
 
 (**
   The property of a message of having a sender and being emittable by the
-  component corresponding to its sender pre-loaded with the dependencies of the
+  component corresponding to its sender preloaded with the dependencies of the
   message.
 *)
 Inductive Emittable_from_dependencies_prop (m : message) : Prop :=
 | efdp : forall (v : validator) (Hsender : sender m = Some v)
             (Hemittable : can_emit
-              (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m))
+              (preloaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m))
               m),
              Emittable_from_dependencies_prop m.
 
 Definition emittable_from_dependencies_prop (m : message) : Prop :=
   match sender m with
   | None => False
-  | Some v => can_emit (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m)) m
+  | Some v => can_emit (preloaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m)) m
   end.
 
 Lemma emittable_from_dependencies_prop_iff m
@@ -1095,7 +1094,7 @@ Definition all_dependencies_emittable_from_dependencies_prop (m : message) : Pro
   [all_dependencies_emittable_from_dependencies_prop]erty.
 *)
 Definition valid_all_dependencies_emittable_from_dependencies_prop (i : index) : Prop :=
-  forall l s m, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, Some m) ->
+  forall l s m, input_constrained (IM i) l (s, Some m) ->
     all_dependencies_emittable_from_dependencies_prop m.
 
 (**
@@ -1105,7 +1104,7 @@ Definition valid_all_dependencies_emittable_from_dependencies_prop (i : index) :
 *)
 Lemma free_valid_from_valid_dependencies
   m i
-  (Hm : can_emit (pre_loaded_vlsm (IM i) (fun dm => dm ∈ message_dependencies m)) m)
+  (Hm : can_emit (preloaded_vlsm (IM i) (fun dm => dm ∈ message_dependencies m)) m)
   (Hdeps :
     forall dm, dm ∈ full_message_dependencies m ->
       valid_message_prop (free_composite_vlsm IM) dm)
@@ -1236,7 +1235,6 @@ Context
   (Hauth : channel_authentication_prop IM A sender)
   (Hsender_safety := channel_authentication_sender_safety _ _ _ Hauth)
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -1245,7 +1243,7 @@ Context
 *)
 Lemma input_valid_transition_preserves_msg_dep_is_globally_equivocating :
   forall (s : composite_state IM) (item : composite_transition_item IM),
-    input_valid_transition_item RFree s item ->
+    input_constrained_transition_item Free s item ->
     forall j, destination item j = s j ->
     forall v, A v = j ->
       msg_dep_is_globally_equivocating IM message_dependencies sender s v ->
@@ -1259,6 +1257,52 @@ Proof.
     eapply has_been_sent_iff_by_sender in mdgee_not_sent0; [| done..].
     rewrite Hv, Hsj in mdgee_not_sent0.
     by eexists.
+Qed.
+
+(** We also define the case in which a transition doesn't forget equivocation. *)
+Definition transition_preserves_global_equivocation
+  (s : composite_state IM) (item : composite_transition_item IM) : Prop :=
+  forall (v : validator),
+    msg_dep_is_globally_equivocating IM message_dependencies sender s v ->
+    msg_dep_is_globally_equivocating IM message_dependencies sender (destination item) v.
+
+Inductive TraceMonotoneGlobalEquivocation :
+  composite_state IM -> list (composite_transition_item IM) -> Prop :=
+| tpge_initial :
+    forall (s : composite_state IM), TraceMonotoneGlobalEquivocation s []
+| tpge_step :
+    forall (s : composite_state IM) (item : composite_transition_item IM)
+      (tr : list (composite_transition_item IM)),
+      transition_preserves_global_equivocation s item ->
+      TraceMonotoneGlobalEquivocation (destination item) tr ->
+      TraceMonotoneGlobalEquivocation s (item :: tr).
+
+Definition trace_monotone_global_equivocation
+  (s : composite_state IM) (tr : list (composite_transition_item IM)) : Prop :=
+    forall (pre suf : list (composite_transition_item IM)) (item : composite_transition_item IM),
+      tr = pre ++ [item] ++ suf ->
+      transition_preserves_global_equivocation (finite_trace_last s pre) item.
+
+Lemma trace_monotone_global_equivocation_def_equiv :
+  forall (s : composite_state IM) (tr : list (composite_transition_item IM)),
+    trace_monotone_global_equivocation s tr
+      <->
+    TraceMonotoneGlobalEquivocation s tr.
+Proof.
+  split.
+  - remember (length tr) as n; revert s tr Heqn.
+    induction n as [n IHn] using (well_founded_ind lt_wf).
+    intros s [| item tr]; [by constructor |].
+    cbn; intros -> Hall; constructor; [by apply (Hall [] tr) |].
+    eapply IHn; cycle 1; [done | | by lia].
+    intros pre suf item' ->.
+    specialize (Hall (item :: pre) suf item').
+    rewrite finite_trace_last_cons in Hall; apply Hall.
+    by simplify_list_eq.
+  - induction 1; intros pre suf item1 Heq; [by destruct pre |].
+    destruct pre as [| _item pre]; simplify_list_eq; [done |].
+    rewrite finite_trace_last_cons.
+    by eapply IHTraceMonotoneGlobalEquivocation.
 Qed.
 
 End sec_msg_dep_is_globally_equivocating_props.

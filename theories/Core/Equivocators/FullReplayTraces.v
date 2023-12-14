@@ -16,7 +16,7 @@ From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections Pl
   state and then performing each transition, but appropriately "shifted".
 
   To make the results more general, we take the trace to be replayed to be
-  produced by a restricted set of equivocators pre-loaded with messages
+  produced by a restricted set of equivocators preloaded with messages
   satisfying some conditions.
 *)
 
@@ -32,9 +32,7 @@ Context
   (equivocating : list index)
   (Free := free_composite_vlsm IM)
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (FreeSubE := free_composite_vlsm (sub_IM (equivocator_IM IM) equivocating))
-  (PreFreeSubE := pre_loaded_with_all_messages_vlsm FreeSubE)
   (SeededXE : VLSM message := seeded_equivocators_no_equivocation_vlsm IM equivocating seed)
 .
 
@@ -459,13 +457,13 @@ Proof.
     by rewrite state_update_neq; [| inversion 1].
 Qed.
 
-Section sec_pre_loaded_constrained_projection.
+Section sec_preloaded_constrained_projection.
 
 (**
   By replaying a [valid_trace] on top of a [valid_state] we obtain a
   [valid_trace]. We derive this as a more general [VLSM_weak_embedding]
   result for a class of VLSM parameterized by a constraint having "good"
-  properties and pre-loaded with a seed, to allow deriving the
+  properties and preloaded with a seed, to allow deriving the
   [VLSM_weak_embedding] result for both the free composition of equivocators
   and for the no message equivocation composition of equivocators (free, or with
   an additional fixed-set state-equivocation constraint).
@@ -476,7 +474,7 @@ Context
     composite_label (equivocator_IM IM) ->
     composite_state (equivocator_IM IM) * option message -> Prop)
   (seed1 : message -> Prop)
-  (SeededCE := pre_loaded_vlsm (composite_vlsm (equivocator_IM IM) constraint) seed1)
+  (SeededCE := preloaded_vlsm (composite_vlsm (equivocator_IM IM) constraint) seed1)
   (Hconstraint_none : forall i ns s, i ∈ equivocating -> valid_state_prop SeededCE s ->
                         constraint (existT i (Spawn ns)) (s, None))
   (Hseed : forall m, seed m -> valid_message_prop SeededCE m)
@@ -559,12 +557,12 @@ Proof.
   by apply (VLSM_weak_embedding_finite_valid_trace_from lift_equivocators_sub_weak_projection).
 Qed.
 
-End sec_pre_loaded_constrained_projection.
+End sec_preloaded_constrained_projection.
 
 Lemma SeededXE_PreFreeE_weak_embedding
   (full_replay_state : composite_state (equivocator_IM IM))
-  (Hfull_replay_state : valid_state_prop PreFreeE full_replay_state)
-  : VLSM_weak_embedding SeededXE PreFreeE
+  (Hfull_replay_state : constrained_state_prop FreeE full_replay_state)
+  : VLSM_weak_embedding SeededXE (preloaded_with_all_messages_vlsm FreeE)
       (lift_equivocators_sub_label_to full_replay_state)
       (lift_equivocators_sub_state_to full_replay_state).
 Proof.
@@ -573,18 +571,20 @@ Proof.
   eapply (lift_equivocators_sub_weak_projection (free_constraint _) (fun _ => True)) in HtrX; cycle 1.
   - done.
   - by intros; apply initial_message_is_valid; right.
-  - apply (VLSM_incl_valid_state (MX := pre_loaded_vlsm FreeE (fun _ => True))); [| done].
+  - apply (VLSM_incl_valid_state (MX := preloaded_vlsm FreeE (fun _ => True))); [| done].
     by apply preloaded_free_composite_vlsm_spec.
   - done.
-  - apply (@VLSM_incl_finite_valid_trace_from _ _ (pre_loaded_vlsm
+  - apply (@VLSM_incl_finite_valid_trace_from _ _ (preloaded_vlsm
       (composite_vlsm (equivocator_IM IM) (free_constraint _)) (fun _ => True))); [| done].
-    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
 Qed.
 
 Lemma PreFreeSubE_PreFreeE_weak_embedding
   (full_replay_state : composite_state (equivocator_IM IM))
-  (Hfull_replay_state : valid_state_prop PreFreeE  full_replay_state)
-  : VLSM_weak_embedding PreFreeSubE PreFreeE
+  (Hfull_replay_state : constrained_state_prop FreeE  full_replay_state) :
+    VLSM_weak_embedding
+      (preloaded_with_all_messages_vlsm FreeSubE)
+      (preloaded_with_all_messages_vlsm FreeE)
       (lift_equivocators_sub_label_to full_replay_state)
       (lift_equivocators_sub_state_to full_replay_state).
 Proof.
@@ -604,14 +604,14 @@ Section sec_seeded_no_equiv.
 
 Context
   (SeededAllXE : VLSM message :=
-    composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed)
+    composite_no_equivocation_vlsm_with_preloaded (equivocator_IM IM) (free_constraint _) seed)
   (full_replay_state : composite_state (equivocator_IM IM))
   (Hfull_replay_state : valid_state_prop SeededAllXE full_replay_state)
   .
 
 #[local] Lemma SeededNoEquiv_subsumption :
   forall l s om, input_valid SeededXE l (s, om) ->
-    no_equivocations_additional_constraint_with_pre_loaded
+    no_equivocations_additional_constraint_with_preloaded
       (equivocator_IM IM) (free_constraint _) seed
       (lift_equivocators_sub_label_to full_replay_state l)
       (lift_equivocators_sub_state_to full_replay_state s, om).
@@ -623,11 +623,11 @@ Proof.
     (equivocator_IM IM) (free_constraint _) seed)) in Hfull_replay_state.
   specialize (valid_state_project_preloaded_to_preloaded _ (equivocator_IM IM) (free_constraint _)
     full_replay_state) as Hfull_replay_state_pr.
-  pose (no_equivocations_additional_constraint_with_pre_loaded (sub_IM (equivocator_IM IM)
+  pose (no_equivocations_additional_constraint_with_preloaded (sub_IM (equivocator_IM IM)
     equivocating) (free_constraint (sub_IM (equivocator_IM IM) equivocating)) seed)
         as constraint.
   specialize
-    (pre_loaded_vlsm_incl_pre_loaded_with_all_messages
+    (preloaded_vlsm_incl_preloaded_with_all_messages
       (composite_vlsm (sub_IM (equivocator_IM IM) equivocating) constraint)
       seed) as Hincl.
   apply (VLSM_incl_valid_state Hincl) in Hs.
@@ -676,9 +676,9 @@ Lemma sub_replayed_trace_from_valid_equivocating
   : finite_valid_trace_from SeededAllXE
       full_replay_state (replayed_trace_from full_replay_state is tr).
 Proof.
-  unfold composite_no_equivocation_vlsm_with_pre_loaded in SeededAllXE.
+  unfold composite_no_equivocation_vlsm_with_preloaded in SeededAllXE.
   specialize (sub_preloaded_replayed_trace_from_valid_equivocating
-    (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM)
+    (no_equivocations_additional_constraint_with_preloaded (equivocator_IM IM)
       (free_constraint _) seed) seed)
     as Hvalid.
   spec Hvalid; [done |].

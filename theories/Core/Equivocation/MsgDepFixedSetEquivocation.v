@@ -20,7 +20,7 @@ Context
   .
 
 Definition equivocator_can_emit (m : message) : Prop :=
-  exists i, i ∈ elements equivocators /\ can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m.
+  exists i, i ∈ elements equivocators /\ can_emit (preloaded_with_all_messages_vlsm (IM i)) m.
 
 Definition dependencies_with_non_equivocating_senders_were_sent s m : Prop :=
   forall dm, msg_dep_happens_before message_dependencies dm m ->
@@ -46,7 +46,7 @@ Lemma messages_with_valid_dependences_can_be_emitted s dm
     valid_message_prop (equivocators_composition_for_sent IM equivocators s) dm0)
   (dm_i : index)
   (Hdm_i : dm_i ∈ equivocators)
-  (Hemitted : can_emit (pre_loaded_with_all_messages_vlsm (IM dm_i)) dm)
+  (Hemitted : can_emit (preloaded_with_all_messages_vlsm (IM dm_i)) dm)
   : can_emit (equivocators_composition_for_sent IM equivocators s) dm.
 Proof.
   eapply sub_valid_preloaded_lifts_can_be_emitted, message_dependencies_are_sufficient.
@@ -117,7 +117,7 @@ Lemma single_equivocator_projection s j
   (Hj : j ∈ elements equivocators)
   : VLSM_projection
       (equivocators_composition_for_sent IM equivocators s)
-      (pre_loaded_with_all_messages_vlsm (IM j))
+      (preloaded_with_all_messages_vlsm (IM j))
       (sub_label_element_project IM equivocators j)
       (sub_state_element_project IM equivocators j Hj).
 Proof.
@@ -371,7 +371,7 @@ Proof.
     apply elem_of_elements in HAj.
     eapply VLSM_incl_can_emit.
     {
-      apply pre_loaded_vlsm_incl_relaxed
+      apply preloaded_vlsm_incl_relaxed
         with (P := fun dm => composite_has_been_directly_observed IM s dm \/
           dm ∈ message_dependencies m).
       intros m0 [Hsent_m0 | Hdep_m0]; [itauto |].
@@ -384,7 +384,7 @@ Proof.
         with (Hj := HAj) (P := fun dm => dm ∈ message_dependencies m); itauto.
     }
     apply message_dependencies_are_sufficient.
-    cut (exists k, can_emit (pre_loaded_with_all_messages_vlsm (IM k)) m).
+    cut (exists k, can_emit (preloaded_with_all_messages_vlsm (IM k)) m).
     {
       intros [k Hk].
       replace (A j) with k; [done |].
@@ -393,7 +393,7 @@ Proof.
     eapply @can_emit_composite_project
       with (constraint := full_node_fixed_set_equivocation_constraint).
     apply (VLSM_incl_can_emit
-            (vlsm_incl_pre_loaded_with_all_messages_vlsm (composite_vlsm IM _))).
+            (vlsm_incl_preloaded_with_all_messages_vlsm (composite_vlsm IM _))).
     apply emitted_messages_are_valid_iff in Hm as [[k [[im Him] Heqm]] | Hemit]
     ; [| done].
     by clear Heqm; contradict Him; apply no_initial_messages_in_IM.

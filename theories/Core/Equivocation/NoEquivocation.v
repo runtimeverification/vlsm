@@ -41,7 +41,7 @@ End sec_no_equivocations.
   In this section we show that under [no_equivocations] assumptions:
 
   - for any valid state all messages [directly_observed_were_sent].
-  - the [pre_loaded_with_all_messages_vlsm] is equal to the [no_equivocations] VLSM.
+  - the [preloaded_with_all_messages_vlsm] is equal to the [no_equivocations] VLSM.
 *)
 
 Section sec_no_equivocation_invariants.
@@ -51,8 +51,7 @@ Context
   (X : VLSM message)
   `{HasBeenSentCapability message X}
   `{HasBeenDirectlyObservedCapability message X}
-  (Henforced : forall l s om, input_valid (pre_loaded_with_all_messages_vlsm X) l (s, om) ->
-    no_equivocations X l (s, om))
+  (Henforced : forall l s om, input_constrained X l (s, om) -> no_equivocations X l (s, om))
   .
 
 (**
@@ -108,8 +107,8 @@ Qed.
   one cannot use the new messages to create additional traces.
 *)
 Lemma no_equivocations_preloaded_traces :
-  forall (is : state (pre_loaded_with_all_messages_vlsm X)) (tr : list transition_item),
-    finite_valid_trace (pre_loaded_with_all_messages_vlsm X) is tr -> finite_valid_trace X is tr.
+  forall (is : state (preloaded_with_all_messages_vlsm X)) (tr : list transition_item),
+    finite_constrained_trace X is tr -> finite_valid_trace X is tr.
 Proof.
   intros is tr Htr.
   induction Htr using finite_valid_trace_rev_ind;
@@ -126,7 +125,7 @@ Proof.
 Qed.
 
 Lemma preloaded_incl_no_equivocations :
-  VLSM_incl (pre_loaded_with_all_messages_vlsm X) X.
+  VLSM_incl (preloaded_with_all_messages_vlsm X) X.
 Proof.
   specialize no_equivocations_preloaded_traces.
   clear -X. destruct X as [T [S M]].
@@ -134,11 +133,11 @@ Proof.
 Qed.
 
 Lemma preloaded_eq_no_equivocations :
-  VLSM_eq (pre_loaded_with_all_messages_vlsm X) X.
+  VLSM_eq (preloaded_with_all_messages_vlsm X) X.
 Proof.
   split.
   - by apply preloaded_incl_no_equivocations.
-  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm X).
+  - by apply (vlsm_incl_preloaded_with_all_messages_vlsm X).
 Qed.
 
 End sec_no_equivocation_invariants.
@@ -211,7 +210,7 @@ Section sec_seeded_composite_vlsm_no_equivocation.
 (** ** Pre-loading a VLSM composition with no equivocations constraint
 
   When adding initial messages to a VLSM composition with a no equivocation
-  constraint, we cannot simply use the [pre_loaded_vlsm] construct
+  constraint, we cannot simply use the [preloaded_vlsm] construct
   because the no-equivocation constraint must also be altered to reflect that
   the newly added initial messages are safe to be received at all times.
 *)
@@ -224,22 +223,22 @@ Context
 
 (** Constraint is updated to also allow seeded messages. *)
 
-Definition no_equivocations_additional_constraint_with_pre_loaded
+Definition no_equivocations_additional_constraint_with_preloaded
   (l : composite_label IM) (som : composite_state IM * option message) : Prop :=
     composite_no_equivocations_except_from seed l som /\ constraint l som.
 
-Definition composite_no_equivocation_vlsm_with_pre_loaded : VLSM message :=
-  pre_loaded_vlsm (composite_vlsm IM no_equivocations_additional_constraint_with_pre_loaded) seed.
+Definition composite_no_equivocation_vlsm_with_preloaded : VLSM message :=
+  preloaded_vlsm (composite_vlsm IM no_equivocations_additional_constraint_with_preloaded) seed.
 
-Definition free_composite_no_equivocation_vlsm_with_pre_loaded : VLSM message :=
-  pre_loaded_vlsm (free_composite_vlsm IM) seed.
+Definition free_composite_no_equivocation_vlsm_with_preloaded : VLSM message :=
+  preloaded_vlsm (free_composite_vlsm IM) seed.
 
 Lemma seeded_no_equivocation_incl_preloaded :
-  VLSM_incl composite_no_equivocation_vlsm_with_pre_loaded
-    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)).
+  VLSM_incl composite_no_equivocation_vlsm_with_preloaded
+    (preloaded_with_all_messages_vlsm (free_composite_vlsm IM)).
 Proof.
-  apply (VLSM_incl_trans _ (pre_loaded_with_all_messages_vlsm (composite_vlsm IM _))).
-  - by cbn; apply (@pre_loaded_vlsm_incl message (composite_vlsm IM _)).
+  apply (VLSM_incl_trans _ (preloaded_with_all_messages_vlsm (composite_vlsm IM _))).
+  - by cbn; apply (@preloaded_vlsm_incl message (composite_vlsm IM _)).
   - by apply (preloaded_constraint_subsumption_incl_free (free_composite_vlsm IM)).
 Qed.
 
@@ -250,15 +249,15 @@ Definition no_equivocations_additional_constraint
   (l : composite_label IM) (som : composite_state IM * option message) : Prop :=
     composite_no_equivocations l som /\ constraint l som.
 
-Lemma false_composite_no_equivocation_vlsm_with_pre_loaded :
+Lemma false_composite_no_equivocation_vlsm_with_preloaded :
   VLSM_eq
-    (composite_no_equivocation_vlsm_with_pre_loaded (fun m => False))
+    (composite_no_equivocation_vlsm_with_preloaded (fun m => False))
     (composite_vlsm IM no_equivocations_additional_constraint).
 Proof.
-  unfold composite_no_equivocation_vlsm_with_pre_loaded.
+  unfold composite_no_equivocation_vlsm_with_preloaded.
   apply VLSM_eq_trans with
-    (composite_vlsm IM (no_equivocations_additional_constraint_with_pre_loaded (fun _ =>  False))).
-  - by apply VLSM_eq_sym, vlsm_is_pre_loaded_with_False.
+    (composite_vlsm IM (no_equivocations_additional_constraint_with_preloaded (fun _ =>  False))).
+  - by apply VLSM_eq_sym, vlsm_is_preloaded_with_False.
   - by split; apply (constraint_subsumption_incl (free_composite_vlsm IM));
       intros l [s [m |]] Hpv; apply Hpv.
 Qed.

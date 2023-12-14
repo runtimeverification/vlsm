@@ -32,7 +32,6 @@ Context
   `{finite.Finite validator}
   (A : validator -> index)
   (sender : message -> option validator)
-  (PreFree := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
   .
 
 (**
@@ -96,7 +95,7 @@ Lemma elem_of_equivocating_senders_in_trace
   : v ∈ equivocating_senders_in_trace tr <->
     exists (m : message),
     (sender m = Some v) /\
-    equivocation_in_trace PreFree m tr.
+    equivocation_in_trace (free_composite_vlsm IM) m tr.
 Proof.
   unfold equivocating_senders_in_trace.
   rewrite elem_of_remove_dups, elem_of_list_omap.
@@ -148,7 +147,7 @@ Definition is_equivocating_tracewise
   : Prop
   :=
   forall is tr
-  (Hpr : finite_valid_trace_init_to PreFree is s tr),
+  (Hpr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
   exists (m : message),
   (sender m = Some v) /\
   exists prefix elem suffix (lprefix := finite_trace_last is prefix),
@@ -167,17 +166,17 @@ Definition is_equivocating_tracewise_no_has_been_sent
   : Prop
   :=
   forall is tr
-  (Htr : finite_valid_trace_init_to PreFree is s tr),
+  (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
   exists (m : message),
   (sender m = Some v) /\
-  equivocation_in_trace PreFree m tr.
+  equivocation_in_trace (preloaded_with_all_messages_vlsm (free_composite_vlsm IM)) m tr.
 
 Lemma is_equivocating_tracewise_no_has_been_sent_equivocating_senders_in_trace
   (s : composite_state IM)
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s v <->
     forall is tr
-    (Htr : finite_valid_trace_init_to PreFree is s tr),
+    (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
     v ∈ equivocating_senders_in_trace tr.
 Proof.
   by split; intros Heqv is tr Htr; specialize (Heqv _ _ Htr)
@@ -206,7 +205,8 @@ Proof.
   apply exist_proper; intro.
   apply and_proper_l; intros ->.
   apply and_iff_compat_l, not_iff_compat; cbn.
-  cut (finite_valid_trace_init_to PreFree is (finite_trace_last is prefix) prefix).
+  cut (finite_constrained_trace_init_to (free_composite_vlsm IM) is
+    (finite_trace_last is prefix) prefix).
   {
     intros.
     erewrite <- oracle_initial_trace_update
@@ -221,13 +221,13 @@ Qed.
 
 Lemma transition_is_equivocating_tracewise_char
   l s om s' om'
-  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v ->
     is_equivocating_tracewise_no_has_been_sent s v \/
-    option_bind _ _ sender om = Some v.
+    om ≫= sender = Some v.
 Proof.
-  destruct (decide (option_bind _ _ sender om = Some v))
+  destruct (decide (om ≫= sender = Some v))
   ; [by intro; right |].
   intros Heqv. left. intros is tr [Htr Hinit].
   specialize (extend_right_finite_trace_from_to _ Htr Ht) as Htr'.
@@ -245,8 +245,8 @@ Qed.
 
 Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
   l s om s' om'
-  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
-  (Hno_sender : option_bind _ _ sender om = None)
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
+  (Hno_sender : om ≫= sender = None)
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v -> is_equivocating_tracewise_no_has_been_sent s v.
 Proof.
@@ -280,7 +280,7 @@ Proof.
     , finite_valid_trace_from_to_last in Htr.
   rewrite (VLSMTotalProjection.VLSM_projection_finite_trace_project_app
     (preloaded_component_projection IM (A v))) in Htrv.
-  apply proj1, (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (IM (A v))))
+  apply proj1, (finite_valid_trace_from_to_app_split (preloaded_with_all_messages_vlsm (IM (A v))))
     in Htrv as [_ Htrv].
   rewrite Htr in Htrv.
   intro Hbs_m. elim Hnbs_m. clear Hnbs_m.
@@ -336,8 +336,8 @@ Qed.
 
 Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validators
   l s om s' om'
-  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
-  (Hno_sender : option_bind _ _ sender om = None)
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
+  (Hno_sender : om ≫= sender = None)
   : equivocating_validators s' ⊆ equivocating_validators s.
 Proof.
   intros v Hs'%equivocating_validators_is_equivocating_tracewise_iff.
@@ -357,8 +357,8 @@ Qed.
 
 Lemma composite_transition_no_sender_equivocators_weight
   l s om s' om'
-  (Ht : input_valid_transition PreFree l (s, om) (s', om'))
-  (Hno_sender : option_bind _ _ sender om = None)
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
+  (Hno_sender : om ≫= sender = None)
   : (equivocation_fault s' <= equivocation_fault s)%R.
 Proof.
   specialize (input_valid_transition_receiving_no_sender_reflects_equivocating_validators

@@ -4,6 +4,9 @@ From VLSM.Lib Require Import Preamble.
 
 (** * Utility: Finite Set Utility Definitions and Results *)
 
+(** For some reason, this instance is not exported by stdpp. *)
+#[export] Existing Instance elem_of_dec_slow.
+
 Section sec_fin_set.
 
 Context
@@ -177,6 +180,19 @@ Proof.
   - right; contradict Heq.
     apply Permutation_singleton_r.
     by rewrite Heq, elements_singleton.
+Qed.
+
+#[export] Instance finset_equiv_dec `{FinSet A C} : RelDecision (≡@{C}).
+Proof.
+  intros X Y.
+  destruct (decide (elements X ≡ₚ elements Y));
+    [| by right; contradict n; rewrite n].
+  left; intros a.
+  rewrite <- !elem_of_elements, !elem_of_list_lookup.
+  split; intros (i & Hi); [| symmetry in p];
+    apply Permutation_inj in p as (Hlen & f & Hinjf & Hp).
+  - by rewrite Hp in Hi; eexists.
+  - by rewrite Hp in Hi; eexists.
 Qed.
 
 End sec_general.

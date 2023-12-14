@@ -194,20 +194,18 @@ Proof.
 Qed.
 
 Lemma equivocators_pre_trace_cannot_decrease_state_size
-  (Pre := pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM))
   s s' tr
-  (Htr : finite_valid_trace_from_to Pre s s' tr)
+  (Htr : finite_constrained_trace_from_to (free_composite_vlsm equivocator_IM) s s' tr)
   : forall eqv, equivocator_state_n (s eqv) <= equivocator_state_n (s' eqv).
 Proof.
   apply trace_to_plan_to_trace_from_to in Htr.
-  specialize (equivocators_plan_cannot_decrease_state_size s (trace_to_plan Pre tr)) as Hmon.
+  specialize (equivocators_plan_cannot_decrease_state_size s (trace_to_plan _ tr)) as Hmon.
   by replace (composite_apply_plan _ _ _) with (tr, s') in Hmon.
 Qed.
 
 Lemma equivocators_pre_trace_preserves_equivocating_state
-  (Pre := pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM))
   s s' tr
-  (Htr : finite_valid_trace_from_to Pre s s' tr)
+  (Htr : finite_constrained_trace_from_to (free_composite_vlsm equivocator_IM) s s' tr)
   : forall eqv, is_equivocating_state (IM eqv) (s eqv) -> is_equivocating_state (IM eqv) (s' eqv).
 Proof.
   unfold is_equivocating_state, is_singleton_state.
@@ -241,8 +239,8 @@ Qed.
 
 Lemma preloaded_equivocators_no_equivocations_vlsm_incl_PreFree :
   VLSM_incl
-    (pre_loaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm)
-    (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
+    (preloaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm)
+    (preloaded_with_all_messages_vlsm equivocators_free_vlsm).
 Proof.
   by apply basic_VLSM_incl_preloaded; [intro | inversion 1 | intro].
 Qed.
@@ -531,7 +529,7 @@ Context
 Definition seeded_equivocators_no_equivocation_vlsm
   (seed : message -> Prop)
   : VLSM message :=
-  composite_no_equivocation_vlsm_with_pre_loaded
+  composite_no_equivocation_vlsm_with_preloaded
     sub_equivocator_IM (free_constraint sub_equivocator_IM) seed.
 
 Lemma sub_equivocator_IM_initial_state_commute is :

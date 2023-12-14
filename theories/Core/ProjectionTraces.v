@@ -25,7 +25,7 @@ Context
   .
 
 Definition composite_vlsm_induced_projection j : VLSM message :=
-  pre_loaded_vlsm (IM j) (valid_message_prop X).
+  preloaded_vlsm (IM j) (valid_message_prop X).
 
 Lemma composite_vlsm_induced_projection_is_projection :
   forall j,
@@ -73,7 +73,7 @@ End sec_projections.
 
 (** ** VLSM Projection Traces *)
 
-Section sec_pre_loaded_projection_traces.
+Section sec_preloaded_projection_traces.
 
 Context
   {message : Type}
@@ -85,8 +85,8 @@ Context
 (* The projection of a preloaded finite valid trace remains a preloaded valid trace. *)
 Lemma preloaded_component_projection :
   VLSM_projection
-    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
-    (pre_loaded_with_all_messages_vlsm (IM j))
+    (preloaded_with_all_messages_vlsm (free_composite_vlsm IM))
+    (preloaded_with_all_messages_vlsm (IM j))
     (composite_project_label IM j) (fun s => s j).
 Proof.
   apply basic_VLSM_projection_preloaded; intro; intros; [.. | done]
@@ -159,8 +159,8 @@ Definition finite_trace_projection_list (tr : list (composite_transition_item IM
 
 Lemma preloaded_valid_state_projection
   (s : state _)
-  (Hps : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s)
-  : valid_state_prop (pre_loaded_with_all_messages_vlsm (IM j)) (s j).
+  (Hps : constrained_state_prop (free_composite_vlsm IM) s)
+  : constrained_state_prop (IM j) (s j).
 Proof.
   by apply (VLSM_projection_valid_state preloaded_component_projection).
 Qed.
@@ -168,8 +168,8 @@ Qed.
 Lemma preloaded_finite_valid_trace_projection
   (s : composite_state IM)
   (trx : list (composite_transition_item IM))
-  (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s trx)
-   : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (IM j)) (s j)
+  (Htr : finite_constrained_trace_from (free_composite_vlsm IM) s trx)
+   : finite_constrained_trace_from (IM j) (s j)
       (VLSM_projection_finite_trace_project preloaded_component_projection trx).
 Proof.
   by apply (VLSM_projection_finite_valid_trace_from preloaded_component_projection).
@@ -178,9 +178,8 @@ Qed.
 Lemma preloaded_finite_valid_trace_from_to_projection
   (s s' : composite_state IM)
   (trx : list (composite_transition_item IM))
-  (Htr : finite_valid_trace_from_to
-          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s s' trx)
-   : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (s' j)
+  (Htr : finite_constrained_trace_from_to (free_composite_vlsm IM) s s' trx)
+   : finite_constrained_trace_from_to (IM j) (s j) (s' j)
       (VLSM_projection_finite_trace_project preloaded_component_projection trx).
 Proof.
   by apply (VLSM_projection_finite_valid_trace_from_to preloaded_component_projection).
@@ -189,22 +188,20 @@ Qed.
 Lemma preloaded_finite_valid_trace_init_to_projection
   (s s' : composite_state IM)
   (trx : list (composite_transition_item IM))
-  (Htr : finite_valid_trace_init_to
-          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) s s' trx)
-   : finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm (IM j)) (s j) (s' j)
+  (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) s s' trx)
+   : finite_constrained_trace_init_to (IM j) (s j) (s' j)
       (VLSM_projection_finite_trace_project preloaded_component_projection trx).
 Proof.
   by apply (VLSM_projection_finite_valid_trace_init_to preloaded_component_projection).
 Qed.
 
-Lemma pre_loaded_with_all_messages_projection_input_valid_transition_eq
+Lemma preloaded_with_all_messages_projection_input_valid_transition_eq
   (s1 s2 : composite_state IM)
   (om1 om2 : option message)
-  (l : label (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
-  (Ht : input_valid_transition
-          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
+  (l : label (free_composite_vlsm IM))
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s1, om1) (s2, om2))
   (Hl : projT1 l = j)
-  : input_valid_transition (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
+  : input_constrained_transition (IM (projT1 l))
       (projT2 l) (s1 (projT1 l), om1) (s2 (projT1 l), om2).
 Proof.
   specialize
@@ -216,12 +213,11 @@ Proof.
   by apply Eqdep_dec.UIP_dec.
 Qed.
 
-Lemma pre_loaded_with_all_messages_projection_input_valid_transition_neq
+Lemma preloaded_with_all_messages_projection_input_valid_transition_neq
   [s1 s2 : composite_state IM]
   [om1 om2 : option message]
-  [l : label (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))]
-  (Ht : input_valid_transition
-          (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) l (s1, om1) (s2, om2))
+  [l : label (free_composite_vlsm IM)]
+  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s1, om1) (s2, om2))
   [i : index]
   (Hi : i <> projT1 l)
   : s1 i = s2 i.
@@ -233,7 +229,7 @@ Proof.
   by state_update_simpl.
 Qed.
 
-End sec_pre_loaded_projection_traces.
+End sec_preloaded_projection_traces.
 
 Section sec_projection_traces_membership.
 
@@ -326,11 +322,11 @@ Context
   component <<j>>.
 
   In this section we establish some basic properties for projections, building up
-  to Lemma [proj_pre_loaded_with_all_messages_incl], which guarantees that all
+  to Lemma [proj_preloaded_with_all_messages_incl], which guarantees that all
   [valid_trace]s of <<Xj>> are also [valid_trace]s for the
-  [pre_loaded_with_all_messages_vlsm] associated to the component <<IM j>>.
+  [preloaded_with_all_messages_vlsm] associated to the component <<IM j>>.
   In particular this ensures that the byzantine traces of <<IM j>> include all
-  [valid_trace]s of <<Xj>> (see Lemma [pre_loaded_with_all_messages_alt_eq]).
+  [valid_trace]s of <<Xj>> (see Lemma [preloaded_with_all_messages_alt_eq]).
 
 *)
 
@@ -428,28 +424,27 @@ Qed.
 
 (**
   As a stepping stone towards proving trace inclusion between <<Xj>> and
-  the [pre_loaded_with_all_messages_vlsm] associated to <<IM j>>, we prove that the
+  the [preloaded_with_all_messages_vlsm] associated to <<IM j>>, we prove that the
   [valid_state_message_prop]erty is transferred.
 *)
-Lemma proj_pre_loaded_with_all_messages_valid_state_message_preservation
-  (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
+Lemma proj_preloaded_with_all_messages_valid_state_message_preservation
   (s : state Xj)
   (om : option message)
   (Hps : valid_state_message_prop Xj s om)
-  : valid_state_message_prop PreLoaded s om.
+  : constrained_state_message_prop (IM j) s om.
 Proof.
   induction Hps.
-  - by apply (valid_initial_state_message PreLoaded); [| destruct om].
-  - apply (valid_generated_state_message PreLoaded) with s _om _s om l; [done.. | | done].
+  - by apply valid_initial_state_message; [| destruct om].
+  - apply (valid_generated_state_message (preloaded_with_all_messages_vlsm (IM j)))
+      with s _om _s om l; [done.. | | done].
     by cbn; eapply (projection_valid_implies_valid IM), Hv.
 Qed.
 
 (** We can now finally prove the main result for this section. *)
-Lemma proj_pre_loaded_with_all_messages_incl
-  (PreLoaded := pre_loaded_with_all_messages_vlsm (IM j))
-  : VLSM_incl Xj PreLoaded.
+Lemma proj_preloaded_with_all_messages_incl :
+  VLSM_incl Xj (preloaded_with_all_messages_vlsm (IM j)).
 Proof.
-  apply (basic_VLSM_incl Xj PreLoaded); intro; intros.
+  apply (basic_VLSM_incl Xj); intro; intros.
   - done.
   - by apply initial_message_is_valid.
   - by cbn; eapply (projection_valid_implies_valid IM), Hv.
@@ -457,12 +452,12 @@ Proof.
 Qed.
 
 Lemma component_projection_to_preloaded :
-  VLSM_projection X (pre_loaded_with_all_messages_vlsm (IM j))
+  VLSM_projection X (preloaded_with_all_messages_vlsm (IM j))
     (composite_project_label IM j) (fun s => s j).
 Proof.
   eapply VLSM_projection_incl_trans.
   - by apply component_projection.
-  - by apply proj_pre_loaded_with_all_messages_incl.
+  - by apply proj_preloaded_with_all_messages_incl.
 Qed.
 
 (**
@@ -472,7 +467,7 @@ Qed.
 *)
 Definition component_projection_validator_prop :=
   forall (lj : label (IM j)) (sj : state (IM j)) (omi : option message),
-    input_valid (pre_loaded_with_all_messages_vlsm (IM j)) lj (sj, omi) ->
+    input_constrained (IM j) lj (sj, omi) ->
     valid Xj lj (sj, omi).
 
 Lemma component_projection_validator_prop_is_induced
@@ -500,16 +495,16 @@ Qed.
 
 (**
   Assuming the [component_projection_validator_prop]erty, the component
-  [pre_loaded_with_all_messages_vlsm] is [VLSM_eq]ual (trace-equivalent) with
+  [preloaded_with_all_messages_vlsm] is [VLSM_eq]ual (trace-equivalent) with
   its corresponding [projection_induced_validator].
 *)
-Lemma pre_loaded_with_all_messages_validator_component_proj_eq
+Lemma preloaded_with_all_messages_validator_component_proj_eq
   (Hvalidator : component_projection_validator_prop)
-  : VLSM_eq (pre_loaded_with_all_messages_vlsm (IM j)) Xj.
+  : VLSM_eq (preloaded_with_all_messages_vlsm (IM j)) Xj.
 Proof.
   eapply VLSM_eq_trans;
     [| apply VLSM_eq_sym, pre_composite_vlsm_induced_projection_validator_iff].
-  apply pre_loaded_with_all_messages_validator_proj_eq.
+  apply preloaded_with_all_messages_validator_proj_eq.
   - by apply component_transition_projection_None.
   - by apply component_label_projection_lift.
   - by apply component_state_projection_lift.
@@ -522,10 +517,10 @@ Proof.
     by unfold composite_project_label; cbn; rewrite (decide_True_pi eq_refl).
 Qed.
 
-Definition pre_loaded_with_all_messages_validator_component_proj_incl
+Definition preloaded_with_all_messages_validator_component_proj_incl
   (Hvalidator : component_projection_validator_prop)
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm (IM j)) Xj :=
-  proj1 (pre_loaded_with_all_messages_validator_component_proj_eq Hvalidator).
+  : VLSM_incl (preloaded_with_all_messages_vlsm (IM j)) Xj :=
+  proj1 (preloaded_with_all_messages_validator_component_proj_eq Hvalidator).
 
 End sec_fixed_projection.
 
@@ -670,7 +665,7 @@ Proof.
   apply (VLSM_weak_embedding_input_valid_transition
     (pre_free_lift_to_free_weak_embedding i s Hs)).
   unshelve eapply (VLSM_incl_input_valid_transition
-    (pre_loaded_vlsm_incl (IM i)
+    (preloaded_vlsm_incl (IM i)
       (valid_message_prop (composite_vlsm IM (free_constraint IM)))
       (valid_message_prop (free_composite_vlsm IM)) _)).
   - apply VLSM_incl_valid_message; [| by intro].

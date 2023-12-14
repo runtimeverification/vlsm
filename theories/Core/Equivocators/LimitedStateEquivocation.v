@@ -64,7 +64,6 @@ Context
   (HBE : BasicEquivocation (composite_state (equivocator_IM IM)) index Ci threshold
     := equivocating_indices_BasicEquivocation IM threshold)
   (FreeE : VLSM message := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   .
 
 Definition equivocators_limited_equivocations_constraint
@@ -88,8 +87,10 @@ Proof.
 Qed.
 
 (** Inclusion of preloaded machine in the preloaded free composition. *)
-Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm) PreFreeE.
+Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free :
+  VLSM_incl
+    (preloaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm)
+    (preloaded_with_all_messages_vlsm FreeE).
 Proof.
   by apply basic_VLSM_incl_preloaded; intros ? *; [intro | inversion 1 | intro].
 Qed.
@@ -337,7 +338,7 @@ Proof.
   split; [split |].
   - intros s tr sX trX Hpr_tr s_pre pre Hs_lst Hpre_tr.
     assert (HPreFree_pre_tr :
-      finite_valid_trace_from (pre_loaded_with_all_messages_vlsm FreeE) s_pre (pre ++ tr)).
+      finite_constrained_trace_from FreeE s_pre (pre ++ tr)).
     {
       apply VLSM_incl_finite_valid_trace_from; [| done].
       by apply constrained_preloaded_incl.
@@ -368,7 +369,7 @@ Proof.
     revert HtrX. apply VLSM_incl_finite_valid_trace_from.
     by apply constrained_preloaded_incl.
   - intro HtrX.
-    assert (Hpre_tr : finite_valid_trace (pre_loaded_with_all_messages_vlsm FreeE) sX trX).
+    assert (Hpre_tr : finite_constrained_trace FreeE sX trX).
     {
       apply VLSM_incl_finite_valid_trace; [| done].
       by apply constrained_preloaded_incl.

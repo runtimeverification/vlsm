@@ -11,16 +11,22 @@
 [coqdoc-link]: https://runtimeverification.github.io/vlsm-docs/latest/coqdoc/toc.html
 
 
-A validating labelled state transition and message production system
-(VLSM) abstractly models a distributed system with faults. This project
-contains a formalization of VLSMs and their theory in the Coq proof assistant.
+The theory of Validating Labelled State transition and Message
+production systems (VLSMs) enables describing and proving properties
+of distributed systems executing in the presence of faults. This
+project contains a formalization of this theory in the Coq proof
+assistant along with several examples of distributed protocols
+modeled and verified using VLSMs, including the ELMO
+(Equivocation-Limited Message Observer) family of message
+validating protocols and the Paxos protocol for crash-tolerant
+distributed consensus.
 
 ## Meta
 
 - License: [BSD 3-Clause "New" or "Revised" License](LICENSE.md)
 - Compatible Coq versions: 8.16 and later
 - Additional dependencies:
-  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0
+  - [Coq-std++](https://gitlab.mpi-sws.org/iris/stdpp/) 1.9.0 and later
   - [Itauto](https://gitlab.inria.fr/fbesson/itauto)
   - [Coq-Equations](https://github.com/mattam82/Coq-Equations)
 - Coq namespace: `VLSM`

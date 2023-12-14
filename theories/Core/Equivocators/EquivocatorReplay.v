@@ -61,10 +61,10 @@ Qed.
 Lemma equivocator_state_append_initial_state_in_futures
     (seed : message -> Prop)
     (base_s : equivocator_state X)
-    (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
+    (Hbase_s : valid_state_prop (preloaded_vlsm (equivocator_vlsm X) seed) base_s)
     s
     : initial_state_prop (equivocator_vlsm X) s ->
-      in_futures (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s
+      in_futures (preloaded_vlsm (equivocator_vlsm X) seed) base_s
         (equivocator_state_append base_s s).
 Proof.
   exists
@@ -73,7 +73,7 @@ Proof.
       None
       (equivocator_state_append base_s s)
       None)].
-  apply (finite_valid_trace_from_to_singleton (pre_loaded_vlsm (equivocator_vlsm X) seed)).
+  apply (finite_valid_trace_from_to_singleton (preloaded_vlsm (equivocator_vlsm X) seed)).
   repeat split.
   - done.
   - by apply option_valid_message_None.
@@ -85,10 +85,10 @@ Qed.
 Lemma equivocator_state_append_transition_initial_state
     (seed : message -> Prop)
     (base_s : equivocator_state X)
-    (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
+    (Hbase_s : valid_state_prop (preloaded_vlsm (equivocator_vlsm X) seed) base_s)
     s
     : initial_state_prop (equivocator_vlsm X) s ->
-      valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed)
+      valid_state_prop (preloaded_vlsm (equivocator_vlsm X) seed)
         (equivocator_state_append base_s s).
 Proof.
   intros Hs. apply in_futures_valid_snd with base_s.
@@ -98,9 +98,9 @@ Qed.
 Lemma equivocator_state_append_preloaded_with_weak_projection
   (seed : message -> Prop)
   (base_s : equivocator_state X)
-  (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
-  : VLSM_weak_embedding (pre_loaded_vlsm (equivocator_vlsm X) seed)
-      (pre_loaded_vlsm (equivocator_vlsm X) seed)
+  (Hbase_s : valid_state_prop (preloaded_vlsm (equivocator_vlsm X) seed) base_s)
+  : VLSM_weak_embedding (preloaded_vlsm (equivocator_vlsm X) seed)
+      (preloaded_vlsm (equivocator_vlsm X) seed)
       (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
   apply basic_VLSM_weak_embedding; intro; intros.
@@ -112,9 +112,9 @@ Qed.
 
 Lemma equivocator_state_append_preloaded_weak_projection
   (base_s : equivocator_state X)
-  (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
-  : VLSM_weak_embedding (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
-      (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X))
+  (Hbase_s : constrained_state_prop (equivocator_vlsm X) base_s)
+  : VLSM_weak_embedding (preloaded_with_all_messages_vlsm (equivocator_vlsm X))
+      (preloaded_with_all_messages_vlsm (equivocator_vlsm X))
       (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
   by constructor; apply equivocator_state_append_preloaded_with_weak_projection.
@@ -126,7 +126,7 @@ Lemma equivocator_state_append_weak_projection
   : VLSM_weak_embedding (equivocator_vlsm X) (equivocator_vlsm X)
         (equivocator_state_append_label base_s) (equivocator_state_append base_s).
 Proof.
-  specialize (vlsm_is_pre_loaded_with_False (equivocator_vlsm X)) as Heq.
+  specialize (vlsm_is_preloaded_with_False (equivocator_vlsm X)) as Heq.
   constructor.
   intros sX trX HtrX.
   apply (VLSM_eq_finite_valid_trace_from Heq) in HtrX.
@@ -138,9 +138,9 @@ Qed.
 
 Lemma equivocator_state_append_in_futures
   (seed : message -> Prop)
-  base_s (Hbase_s : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s)
-  s (Hs : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) s)
-  : in_futures (pre_loaded_vlsm (equivocator_vlsm X) seed) base_s (equivocator_state_append base_s s).
+  base_s (Hbase_s : valid_state_prop (preloaded_vlsm (equivocator_vlsm X) seed) base_s)
+  s (Hs : valid_state_prop (preloaded_vlsm (equivocator_vlsm X) seed) s)
+  : in_futures (preloaded_vlsm (equivocator_vlsm X) seed) base_s (equivocator_state_append base_s s).
 Proof.
   apply valid_state_has_trace in Hs as [is [tr [Htr His]]].
   specialize (equivocator_state_append_preloaded_with_weak_projection seed _ Hbase_s) as Hproj.
@@ -152,8 +152,8 @@ Qed.
 
 Lemma equivocator_state_append_sent_left
   `{HasBeenSentCapability message X}
-  base_s (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
-  s (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
+  base_s (Hbase_s : constrained_state_prop (equivocator_vlsm X) base_s)
+  s (Hs : constrained_state_prop (equivocator_vlsm X) s)
   : forall m, equivocator_has_been_sent X base_s m ->
     equivocator_has_been_sent X (equivocator_state_append base_s s) m.
 Proof.
@@ -165,8 +165,8 @@ Qed.
 
 Lemma equivocator_state_append_sent_right
   `{HasBeenSentCapability message X}
-  base_s (Hbase_s : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) base_s)
-  s (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) s)
+  base_s (Hbase_s : constrained_state_prop (equivocator_vlsm X) base_s)
+  s (Hs : constrained_state_prop (equivocator_vlsm X) s)
   : forall m, equivocator_has_been_sent X s m ->
     equivocator_has_been_sent X (equivocator_state_append base_s s) m.
 Proof.

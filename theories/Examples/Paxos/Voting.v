@@ -35,7 +35,7 @@ Coercion Ballot'_to_Z : Ballot' >-> Z.
 
 Ltac ballot_lia := unfold Ballot_to_Z in *; lia.
 
-Lemma Ballot_lt_wf : wf (fun (x y : Ballot) => (x < y)%Z).
+Lemma Ballot_lt_wf : well_founded (fun (x y : Ballot) => (x < y)%Z).
 Proof.
   generalize N.lt_wf_0.
   by apply (wf_projected N.lt id), N2Z.inj_lt.
@@ -90,10 +90,10 @@ Record acceptor_state : Type :=
 Section sec_acceptor_state_predicates.
 
 Context
-  (S : acceptor_state)
+  (AState : acceptor_state)
   .
 
-Definition voted_for (b : Ballot) (v : Value) := v ∈ votes S !!! b.
+Definition voted_for (b : Ballot) (v : Value) := v ∈ votes AState !!! b.
 
 #[export] Instance voted_for_dec (b : Ballot) (v : Value) : Decision (voted_for b v) :=
   VSDec _ _.
@@ -133,16 +133,16 @@ Definition acceptor_type : VLSMType False :=
   label := acceptor_label;
 |}.
 
-Definition acceptor_s0 : acceptor_state :=
+Definition acceptor_initial : acceptor_state :=
 {|
   votes := ∅;
   maxBal := None;
 |}.
 
-Definition acceptor_initial_state_prop (S : acceptor_state) : Prop :=
-  S = acceptor_s0.
+Definition acceptor_initial_state_prop (s : acceptor_state) : Prop :=
+  s = acceptor_initial.
 
-Definition acceptor_locally_valid : acceptor_label -> acceptor_state * option False -> Prop :=
+Definition acceptor_valid : acceptor_label -> acceptor_state * option False -> Prop :=
   fun l '(s, _) =>
     match l with
     | SkipToRound b => (maxBal s < b)%Z
@@ -158,16 +158,16 @@ Definition acceptor_transition
     | Vote b v => ({| votes := mmap_insert b v s_votes; maxBal := Some b; |}, None)
     end.
 
-Definition acceptor_vlsm_machine : VLSMMachine acceptor_type :=
+Definition acceptor_machine : VLSMMachine acceptor_type :=
 {|
-  initial_state_prop := eq acceptor_s0;
-  s0 := populate (exist _ acceptor_s0 eq_refl);
+  initial_state_prop := (.= acceptor_initial);
+  s0 := populate (exist _ acceptor_initial eq_refl);
   initial_message_prop := (fun _ => False);
   transition := acceptor_transition;
-  valid := acceptor_locally_valid;
+  valid := acceptor_valid;
 |}.
 
-Definition acceptor_vlsm : VLSM False := mk_vlsm acceptor_vlsm_machine.
+Definition acceptor_vlsm : VLSM False := mk_vlsm acceptor_machine.
 
 End sec_acceptor_vlsm.
 
@@ -536,7 +536,7 @@ Lemma inv_acceptor_no_conflict :
 Proof.
   intros s Hs.
   induction Hs using valid_state_prop_ind; intros a b v w.
-  - rewrite <- (Hs a); clear Hs s a.
+  - rewrite (Hs a); clear Hs s a.
     intro Hv; exfalso; contradict Hv.
     unfold voted_for; cbn.
     rewrite lookup_total_empty. (* matching a typo in stdpp *)
@@ -562,7 +562,7 @@ Proof.
   intros s Hs.
   induction Hs using valid_state_prop_ind; intros a b.
   - intros _ v.
-    rewrite <- (Hs a).
+    rewrite (Hs a).
     unfold voted_for; cbn.
     rewrite lookup_total_empty; cbn.
     by apply not_elem_of_empty.
@@ -718,7 +718,7 @@ Proof.
   intros s Hs.
   induction Hs using valid_state_prop_ind; unfold acceptor_votes_safe_prop; intros a b v.
   - intros Hvote; contradict Hvote.
-    rewrite <- (Hs a).
+    rewrite (Hs a).
     unfold voted_for; cbn.
     rewrite lookup_total_empty; cbn.
     by apply not_elem_of_empty.
@@ -915,7 +915,7 @@ Proof.
   destruct Hv as [Q HvQ], (QA Q Q) as [a Ha].
   lapply (HvQ a); [| by set_solver].
   unfold voted_for.
-  rewrite <- (Hs a); cbn.
+  rewrite (Hs a); cbn.
   rewrite lookup_total_empty.
   by apply elem_of_empty.
 Qed.

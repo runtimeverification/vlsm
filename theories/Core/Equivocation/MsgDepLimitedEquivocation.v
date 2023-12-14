@@ -56,19 +56,19 @@ Definition coeqv_limited_equivocation_constraint
   : Prop :=
   (sum_weights (coeqv_composite_transition_message_equivocators l som) <= threshold)%R.
 
-#[export] Program Instance empty_validators_inhabited : Inhabited {s : Cv | s = ∅} :=
+#[export] Program Instance empty_validators_inhabited : Inhabited {s : Cv | s ≡@{Cv}  ∅} :=
   populate (exist _ ∅ _).
 Next Obligation.
 Proof. done. Defined.
 
 Definition coeqv_limited_equivocation_vlsm : VLSM message :=
   constrained_vlsm
-    (annotated_vlsm (free_composite_vlsm IM) Cv (fun s => s = ∅)
+    (annotated_vlsm (free_composite_vlsm IM) Cv (fun s => s ≡@{Cv}  ∅)
       coeqv_composite_transition_message_equivocators)
     coeqv_limited_equivocation_constraint.
 
 Definition coeqv_annotate_trace_with_equivocators :=
-  annotate_trace (free_composite_vlsm IM) Cv (fun s => s = ∅)
+  annotate_trace (free_composite_vlsm IM) Cv (fun s => s ≡@{Cv}  ∅)
     coeqv_composite_transition_message_equivocators.
 
 Lemma coeqv_limited_equivocation_transition_state_annotation_incl [l s iom s' oom]
@@ -96,7 +96,7 @@ Lemma coeqv_limited_equivocation_state_not_heavy s
     (sum_weights (state_annotation s) <= threshold)%R.
 Proof.
   induction 1 using valid_state_prop_ind.
-  - destruct s, Hs as [_ ->]; cbn in *.
+  - destruct s, Hs as [_ Heqv]; cbn in *.
     rewrite sum_weights_empty; [| done].
     by apply (rt_positive (H6 := H7)).
   - destruct Ht as [(_ & _ & _ & Hc) Ht]
@@ -106,16 +106,51 @@ Proof.
 Qed.
 
 Definition coeqv_limited_equivocation_projection_validator_prop : index -> Prop :=
-  annotated_projection_validator_prop IM (fun s => s = ∅)
+  annotated_projection_validator_prop IM (fun s => s ≡@{Cv}  ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
 
 Definition coeqv_limited_equivocation_message_validator_prop : index -> Prop :=
-  annotated_message_validator_prop IM (fun s => s = ∅)
+  annotated_message_validator_prop IM (fun s => s ≡@{Cv}  ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
 
 Definition coeqv_limited_equivocation_projection_validator_prop_alt : index -> Prop :=
-  annotated_projection_validator_prop_alt IM (fun s => s = ∅)
+  annotated_projection_validator_prop_alt IM (fun s => s ≡@{Cv}  ∅)
     coeqv_limited_equivocation_constraint coeqv_composite_transition_message_equivocators.
+
+#[export] Program Instance coeqv_limited_equivocation_vlsm_has_been_sent :
+  HasBeenSentCapability coeqv_limited_equivocation_vlsm :=
+{
+  has_been_sent :=
+    fun (sigma : state coeqv_limited_equivocation_vlsm) (m : message) =>
+      composite_has_been_sent IM (original_state sigma) m
+}.
+Next Obligation.
+Proof. by intros ? ?; apply composite_has_been_sent_dec. Qed.
+Next Obligation.
+Proof.
+  split; [by intros s []; apply free_composite_has_been_sent_stepwise_props |].
+  intros [i li] [s eqv] im [s' eqv'] om Ht msg.
+  apply (VLSM_projection_input_valid_transition
+    (preloaded_annotated_composite_preloaded_projection IM
+      (fun s => s ≡@{Cv}  ∅) coeqv_limited_equivocation_constraint
+      coeqv_composite_transition_message_equivocators i))
+    with  (lY := li) in Ht as Hti; [| by apply (composite_project_label_eq IM)].
+  cbn in Hti.
+  apply has_been_sent_step_update with (msg := msg) in Hti.
+  destruct Ht as [_ Ht]; cbn in Ht; unfold annotated_transition in Ht; cbn in Ht.
+  destruct transition; inversion Ht; subst; cbn in *; clear Ht.
+  split.
+  - intros [i_msg Hmsg].
+    destruct (decide (i = i_msg)) as [<- | Hi_msg].
+    + cbn in Hmsg; apply Hti in Hmsg as [-> | Hmsg]; [by left |].
+      by right; eexists.
+    + by right; state_update_simpl; eexists.
+  - intros [-> | Hmsg]; [by eexists; apply Hti; left |].
+    destruct Hmsg as [i_msg Hmsg].
+    destruct (decide (i = i_msg)) as [<- | Hi_msg].
+    + by eexists; apply Hti; right.
+    + by exists i_msg; state_update_simpl.
+Qed.
 
 End sec_coequivocating_senders_limited_equivocation.
 
@@ -235,7 +270,7 @@ Context
   .
 
 Lemma full_node_msg_dep_coequivocating_senders s m i li
-  (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (s i, Some m))
+  (Hvalid : input_constrained (IM i) li (s i, Some m))
   : msg_dep_coequivocating_senders IM full_message_dependencies sender s m ≡@{Cv} ∅.
 Proof.
   intro; split; intro Hx; [| by contradict Hx; apply not_elem_of_empty].
@@ -255,19 +290,19 @@ Lemma annotated_free_input_valid_projection
   i li s om
   : input_valid (constrained_vlsm (annotated_vlsm (free_composite_vlsm IM) Cv iprop trans) constr)
       (existT i li) (s, om) ->
-    input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om).
+    input_constrained (IM i) li (original_state s i, om).
 Proof.
   intro Hvalid.
   eapply (VLSM_projection_input_valid (preloaded_component_projection IM i))
   ; [by apply (composite_project_label_eq IM) |].
   by apply
-    (VLSM_incl_input_valid (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))),
+    (VLSM_incl_input_valid (vlsm_incl_preloaded_with_all_messages_vlsm (free_composite_vlsm IM))),
     (VLSM_embedding_input_valid (forget_annotations_projection (free_composite_vlsm IM) _ _ _)).
 Qed.
 
 Lemma full_node_msg_dep_composite_transition_message_equivocators
   i li (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
-  (Hvalid : input_valid (pre_loaded_with_all_messages_vlsm (IM i)) li (original_state s i, om))
+  (Hvalid : input_constrained (IM i) li (original_state s i, om))
   : coeqv_composite_transition_message_equivocators
       IM sender (full_node_coequivocating_senders IM)
       (existT i li) (s, om)
@@ -287,7 +322,7 @@ Qed.
 
 Lemma msg_dep_full_node_valid_iff
   l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
-  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
+  (Hvi : input_constrained (IM (projT1 l))
            (projT2 l) (original_state s (projT1 l), om))
   : valid Limited l (s, om) <-> valid FullNodeLimited l (s, om).
 Proof.
@@ -303,7 +338,7 @@ Qed.
 
 Lemma msg_dep_full_node_transition_iff
   l (s : state (annotated_type (free_composite_vlsm IM) Cv)) om
-  (Hvi : input_valid (pre_loaded_with_all_messages_vlsm (IM (projT1 l)))
+  (Hvi : input_constrained (IM (projT1 l))
            (projT2 l) (original_state s (projT1 l), om))
   : transition Limited l (s, om) = transition FullNodeLimited l (s, om).
 Proof.
@@ -386,9 +421,9 @@ Lemma equivocating_messages_are_equivocator_emitted
     exists v : validator,
       v ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Cv)
         /\
-      can_emit (pre_loaded_vlsm (IM (A v)) (fun dm => msg_dep_rel message_dependencies dm im)) im.
+      can_emit (preloaded_vlsm (IM (A v)) (fun dm => msg_dep_rel message_dependencies dm im)) im.
 Proof.
-  eapply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
+  eapply (VLSM_incl_can_emit (vlsm_incl_preloaded_with_all_messages_vlsm (free_composite_vlsm IM)))
       in Him.
   apply can_emit_free_composite_project in Him as [j Him].
   apply Hchannel in Him as Hsender.
@@ -411,13 +446,13 @@ Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_em
   : forall dm, msg_dep_happens_before message_dependencies dm im ->
     composite_has_been_directly_observed IM s dm \/
     exists v_i, v_i ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Cv) /\
-      can_emit (pre_loaded_with_all_messages_vlsm (IM (A v_i))) dm.
+      can_emit (preloaded_with_all_messages_vlsm (IM (A v_i))) dm.
 Proof.
   intros dm Hdm.
   destruct (decide (composite_has_been_directly_observed IM s dm)) as [Hobs | Hnobs]
   ; [by left | right].
   cut (exists v, sender dm = Some v /\
-                 can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) dm).
+                 can_emit (preloaded_with_all_messages_vlsm (IM (A v))) dm).
   {
     intros (v & Hsender & Hemit).
     exists v; split; [| done].
@@ -634,7 +669,7 @@ Proof.
   destruct Heqv as [(msg & Hmsg & Hsender) | (msg & [Hnobserved_msg Hdep_msg] & Hsender)].
   - subst msg.
     eapply VLSM_incl_can_emit in Hemitted
-    ; [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
+    ; [| apply preloaded_vlsm_incl_preloaded_with_all_messages].
     apply can_emit_free_composite_project in Hemitted as [sub_eqv Hemitted].
     destruct_dec_sig sub_eqv _eqv H_eqv Heqsub_eqv; subst.
     unfold sub_IM in Hemitted; cbn in Hemitted.
@@ -647,7 +682,7 @@ Proof.
       - contradict Hnobserved_msg.
         by eapply sent_by_non_equivocating_are_directly_observed.
       - eapply VLSM_incl_can_emit in Hemitted_msg
-        ; [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
+        ; [| apply preloaded_vlsm_incl_preloaded_with_all_messages].
         apply can_emit_free_composite_project in Hemitted_msg as [sub_i Hemitted_msg].
         destruct_dec_sig sub_i i Hi Heqsub_i; subst.
         eapply Hsender_safety in Hemitted_msg; [| done].
@@ -738,6 +773,50 @@ Proof.
   eapply @traces_exhibiting_limited_equivocation_are_valid; [done.. | |].
   - by apply Hsender_safety.
   - by apply msg_dep_fixed_limited_equivocation.
+Qed.
+
+Lemma constrained_limited_to_annotated_limited_valid_state
+  `{!finite.Finite validator}
+  {is_equivocating_tracewise_no_has_been_sent_dec :
+    RelDecision (is_equivocating_tracewise_no_has_been_sent IM A sender)}
+  `{!WitnessedEquivocation.WitnessedEquivocationCapability (Cv := Cv) IM threshold A sender}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies) :
+    forall (s : composite_state IM),
+      valid_state_prop (tracewise_limited_equivocation_vlsm_composition
+        IM threshold A sender (Cv := Cv)) s ->
+      exists (sigma : state Limited),
+        valid_state_prop Limited sigma /\ original_state sigma = s.
+Proof.
+  intros s Hs.
+  eapply @limited_valid_state_has_trace_exhibiting_limited_equivocation
+    with (Ci := Ci) in Hs as (is & tr & <- & Htr); [| done..].
+  apply msg_dep_limited_fixed_equivocation, valid_trace_add_default_last in Htr.
+  eexists; split; [by apply valid_trace_last_pstate in Htr |].
+  by cbn; rewrite msg_dep_annotate_trace_with_equivocators_last_original_state.
+Qed.
+
+Lemma constrained_limited_to_annotated_limited_valid_message
+  `{!finite.Finite validator}
+  {is_equivocating_tracewise_no_has_been_sent_dec :
+    RelDecision (is_equivocating_tracewise_no_has_been_sent IM A sender)}
+  `{!WitnessedEquivocation.WitnessedEquivocationCapability (Cv := Cv) IM threshold A sender}
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies) :
+    forall (m : message),
+      valid_message_prop (tracewise_limited_equivocation_vlsm_composition
+        IM threshold A sender (Cv := Cv)) m ->
+      valid_message_prop Limited m.
+Proof.
+  intros msg Hmsg.
+  apply emitted_messages_are_valid_iff in Hmsg as [Hmsg | ([s im] & [i li] & s' & Ht)];
+    [by apply initial_message_is_valid |].
+  apply input_valid_transition_destination in Ht as Hs'.
+  apply constrained_limited_to_annotated_limited_valid_state
+    in Hs' as (sigma & Hsigma & <-); [| done].
+  eapply sent_valid; [done |].
+  exists i.
+  apply can_produce_has_been_sent.
+  apply input_valid_transition_project_active in Ht.
+  by eexists _, _.
 Qed.
 
 End sec_msg_dep_fixed_limited_equivocation.

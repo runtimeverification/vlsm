@@ -38,9 +38,6 @@ Proof. by firstorder. Qed.
 
 Notation decide_eq := (fun x y => decide (x = y)).
 
-(** For some reason, this instance is not exported by stdpp. *)
-#[export] Existing Instance elem_of_dec_slow.
-
 (** ** Lemmas about transitive closure *)
 
 Lemma transitive_tc_idempotent `(Transitive A R) :
@@ -84,7 +81,7 @@ Qed.
 Lemma tc_wf_projected
   `{R1 : relation A} `(R2 : relation B) `{!Transitive R2} (f : A -> B) :
   (forall x y, R1 x y -> R2 (f x) (f y)) ->
-  wf R2 -> wf (tc R1).
+  well_founded R2 -> well_founded (tc R1).
 Proof.
   intros Hpreserve.
   apply wf_projected with f.

@@ -307,7 +307,7 @@ Example doubling_constrained_trace2_init :
    doubling_trace2_init_first_state doubling_trace2_init_last_state doubling_trace2_init.
 Proof.
   apply VLSM_incl_finite_valid_trace_init_to.
-  - by apply vlsm_incl_pre_loaded.
+  - by apply vlsm_incl_preloaded.
   - by apply doubling_valid_trace2_init.
 Qed.
 
@@ -325,7 +325,7 @@ Example doubling_constrained_trace2 :
 Proof.
   destruct doubling_constrained_trace2_init.
   split; [| done].
-  eapply (extend_right_finite_trace_from_to (pre_loaded_with_all_messages_vlsm doubling_vlsm));
+  eapply (extend_right_finite_trace_from_to (preloaded_with_all_messages_vlsm doubling_vlsm));
     [done |].
   repeat split; [| | done..].
   - by eapply finite_valid_trace_from_to_last_pstate.
@@ -353,11 +353,11 @@ Qed.
 *)
 
 Example doubling_example_constrained_transition :
-  input_valid_transition (pre_loaded_with_all_messages_vlsm doubling_vlsm) multiply_label
+  input_constrained_transition doubling_vlsm multiply_label
    (3, Some 3) (0, Some 6).
 Proof.
   apply (finite_valid_trace_from_to_last_transition
-    (pre_loaded_with_all_messages_vlsm doubling_vlsm)
+    (preloaded_with_all_messages_vlsm doubling_vlsm)
     doubling_trace2_init_first_state doubling_trace2_last_state doubling_trace2_init
     doubling_trace2 doubling_trace2_last_item); [| done].
   by apply doubling_constrained_trace2.
@@ -368,9 +368,9 @@ Qed.
 (** **** Inclusion into preloaded with all messages *)
 
 Lemma doubling_valid_is_constrained :
-  VLSM_incl doubling_vlsm (pre_loaded_with_all_messages_vlsm doubling_vlsm).
+  VLSM_incl doubling_vlsm (preloaded_with_all_messages_vlsm doubling_vlsm).
 Proof.
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 (** *** Constrained messages are positive even integers *)

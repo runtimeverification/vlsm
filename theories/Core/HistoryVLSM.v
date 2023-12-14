@@ -20,14 +20,14 @@ Class HistoryVLSM `(X : VLSM message) : Prop :=
 
 #[global] Hint Mode HistoryVLSM - ! : typeclass_instances.
 
-Section sec_history_vlsm_pre_loaded.
+Section sec_history_vlsm_preloaded.
 
 Context
   `{HistoryVLSM message X}
   .
 
 #[export] Instance preloaded_history_vlsm :
-  HistoryVLSM (pre_loaded_with_all_messages_vlsm X).
+  HistoryVLSM (preloaded_with_all_messages_vlsm X).
 Proof.
   split; intros.
   - rewrite <- valid_transition_next_preloaded_iff.
@@ -38,9 +38,9 @@ Qed.
 
 Lemma history_unique_trace_to_reachable :
   forall is s tr,
-    finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X) is s tr ->
+    finite_constrained_trace_init_to X is s tr ->
   forall is' tr',
-    finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X) is' s tr' ->
+    finite_constrained_trace_init_to X is' s tr' ->
       is' = is /\ tr' = tr.
 Proof.
   intros is s tr Htr; induction Htr using finite_valid_trace_init_to_rev_ind;
@@ -66,7 +66,7 @@ Proof.
       by destruct_and! IHHtr; subst.
 Qed.
 
-End sec_history_vlsm_pre_loaded.
+End sec_history_vlsm_preloaded.
 
 Section sec_history_vlsm_composite.
 
@@ -76,7 +76,6 @@ Context
   (IM : index -> VLSM message)
   `{forall i : index, HistoryVLSM (IM i)}
   (Free := free_composite_vlsm IM)
-  (RFree := pre_loaded_with_all_messages_vlsm Free)
   .
 
 Lemma not_composite_valid_transition_next_initial :
@@ -110,8 +109,8 @@ Qed.
 Lemma composite_valid_transition_reflects_rechability :
   forall l s1 iom s2 oom,
   composite_valid_transition IM l s1 iom s2 oom ->
-  valid_state_prop RFree s2 ->
-  input_valid_transition RFree l (s1, iom) (s2, oom).
+  constrained_state_prop Free s2 ->
+  input_constrained_transition Free l (s1, iom) (s2, oom).
 Proof.
   intros * Hnext Hs2; revert l s1 iom oom Hnext.
   induction Hs2 using valid_state_prop_ind; intros * Hnext.
@@ -140,7 +139,7 @@ Proof.
           apply f_equal with (f := fun s => s j) in Heqs'.
           by state_update_simpl.
       }
-      assert (Hss1 : input_valid_transition RFree (existT i li)
+      assert (Hss1 : input_constrained_transition Free (existT i li)
                   (state_update IM s j (s1 j), om) (s1, om')).
       {
         repeat split; [by apply IHHs2 | by apply any_message_is_valid_in_preloaded | ..]
@@ -159,23 +158,23 @@ Qed.
 
 Lemma composite_valid_transition_next_reflects_rechability :
   forall s1 s2, composite_valid_transition_next IM s1 s2 ->
-    valid_state_prop RFree s2 -> valid_state_prop RFree s1.
+    constrained_state_prop Free s2 -> constrained_state_prop Free s1.
 Proof.
   by intros s1 s2 []; eapply composite_valid_transition_reflects_rechability.
 Qed.
 
 Lemma composite_valid_transition_future_reflects_rechability :
   forall s1 s2, composite_valid_transition_future IM s1 s2 ->
-    valid_state_prop RFree s2 -> valid_state_prop RFree s1.
+    constrained_state_prop Free s2 -> constrained_state_prop Free s1.
 Proof. by apply tc_reflect, composite_valid_transition_next_reflects_rechability. Qed.
 
 Lemma composite_valid_transitions_from_to_reflects_reachability :
   forall s s' tr,
   composite_valid_transitions_from_to IM s s' tr ->
-  valid_state_prop RFree s' -> finite_valid_trace_from_to RFree s s' tr.
+  constrained_state_prop Free s' -> finite_constrained_trace_from_to Free s s' tr.
 Proof.
   induction 1; intros; [by constructor |].
-  assert (Hitem : input_valid_transition RFree (l item) (s', input item)
+  assert (Hitem : input_constrained_transition Free (l item) (s', input item)
                           (destination item, output item))
     by (apply composite_valid_transition_reflects_rechability; done).
   eapply finite_valid_trace_from_to_app.

@@ -57,7 +57,7 @@ Qed.
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
   (bs : state (equivocator_vlsm X))
   (btr : list (transition_item (equivocator_vlsm X)))
-  (Hbtr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs btr)
+  (Hbtr : finite_constrained_trace_from (equivocator_vlsm X) bs btr)
   (bitem : transition_item (equivocator_vlsm X))
   (Hitem : bitem ∈ btr)
   (sn : state X)
@@ -70,7 +70,7 @@ Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)))
+  apply (finite_valid_trace_from_app_iff (preloaded_with_all_messages_vlsm (equivocator_vlsm X)))
     in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
@@ -95,7 +95,7 @@ Qed.
 Lemma preloaded_equivocator_vlsm_trace_project_valid_item
   (bs bf : state (equivocator_vlsm X))
   (btr : list (transition_item (equivocator_vlsm X)))
-  (Hbtr : finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) bs bf btr)
+  (Hbtr : finite_constrained_trace_from_to (equivocator_vlsm X) bs bf btr)
   (bitem : transition_item (equivocator_vlsm X))
   (Hitem : bitem ∈ btr)
   (idl : nat)
@@ -116,7 +116,7 @@ Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)))
+  apply (finite_valid_trace_from_to_app_split (preloaded_with_all_messages_vlsm (equivocator_vlsm X)))
     in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
@@ -180,7 +180,7 @@ Qed.
 Lemma equivocator_vlsm_trace_project_output_reflecting_inv
   (is : state (equivocator_vlsm X))
   (tr : list (transition_item (equivocator_vlsm X)))
-  (Htr : finite_valid_trace_from (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) is tr)
+  (Htr : finite_constrained_trace_from (equivocator_vlsm X) is tr)
   (m : message)
   (Hbbs : Exists (field_selector output m) tr)
   : exists
@@ -200,7 +200,7 @@ Proof.
     by destruct (preloaded_equivocator_vlsm_trace_project_valid_item_new_machine
       _ _ Htr _ Hin _ eq_refl)
       as  [_ [Hcontra _]]; cbn in *; congruence.
-  - apply valid_trace_add_default_last in Htr.
+  - red in Htr; apply valid_trace_add_default_last in Htr.
     specialize
     (preloaded_equivocator_vlsm_trace_project_valid_item
        _ _ _ Htr _ Hin _ Hsndl)
@@ -311,7 +311,7 @@ Proof.
       {
         repeat split; [| | done..].
         - by apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
-        - by eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X).
+        - by eexists _; apply (preloaded_with_all_messages_message_valid_initial_state_message X).
       }
       specialize (existing_false_label_equivocator_state_project_not_same X Ht _ Hidesc)
         as Hnot_same.
@@ -369,7 +369,7 @@ Proof.
       {
         repeat split; [| | done..].
         - by apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
-        - by eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X).
+        - by eexists _; apply (preloaded_with_all_messages_message_valid_initial_state_message X).
       }
       specialize (existing_true_label_equivocator_state_project_not_last X Ht _ Hidesc)
         as Hnot_last.

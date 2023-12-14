@@ -77,7 +77,7 @@ Definition free_sub_vlsm_composition : VLSM message
 
 Definition seeded_free_sub_composition
   (messageSet : message -> Prop)
-  := pre_loaded_vlsm free_sub_vlsm_composition
+  := preloaded_vlsm free_sub_vlsm_composition
       (fun m => messageSet m \/ composite_initial_message_prop IM m).
 
 Definition composite_state_sub_projection
@@ -299,7 +299,7 @@ Qed.
 Lemma induced_sub_projection_valid_projection l s om
   (Hv : valid pre_induced_sub_projection l (s, om))
   : exists i, i ∈ sub_index_list /\
-    exists l s, input_valid (pre_loaded_with_all_messages_vlsm (IM i)) l (s, om).
+    exists l s, input_constrained (IM i) l (s, om).
 Proof.
   destruct l as (sub_i, li).
   destruct Hv as (lX & sX & [HlX Heqs (HsX & Hom & Hv)]).
@@ -374,7 +374,6 @@ Context
   (Free := free_composite_vlsm IM)
   (Sub_Free := free_composite_vlsm sub_IM)
   (X := composite_vlsm IM constraint)
-  (Pre := pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
   .
 
 Program Definition sub_index_list_annotate : list sub_index :=
@@ -455,16 +454,16 @@ Proof. by destruct l. Qed.
 Context
   (seed : message -> Prop)
   (sub_constraint : composite_label sub_IM -> composite_state sub_IM * option message -> Prop)
-  (Xj := composite_no_equivocation_vlsm_with_pre_loaded sub_IM (free_constraint sub_IM) seed)
+  (Xj := composite_no_equivocation_vlsm_with_preloaded sub_IM (free_constraint sub_IM) seed)
   .
 
 Lemma Xj_incl_Pre_Sub_Free
-  : VLSM_incl Xj (pre_loaded_with_all_messages_vlsm Sub_Free).
+  : VLSM_incl Xj (preloaded_with_all_messages_vlsm Sub_Free).
 Proof.
-  apply (VLSM_incl_trans _ (pre_loaded_with_all_messages_vlsm
-    (composite_vlsm sub_IM (no_equivocations_additional_constraint_with_pre_loaded sub_IM _ seed)))).
-  - by cbn; apply (pre_loaded_vlsm_incl (composite_vlsm sub_IM
-      (no_equivocations_additional_constraint_with_pre_loaded sub_IM (free_constraint sub_IM) seed))).
+  apply (VLSM_incl_trans _ (preloaded_with_all_messages_vlsm
+    (composite_vlsm sub_IM (no_equivocations_additional_constraint_with_preloaded sub_IM _ seed)))).
+  - by cbn; apply (preloaded_vlsm_incl (composite_vlsm sub_IM
+      (no_equivocations_additional_constraint_with_preloaded sub_IM (free_constraint sub_IM) seed))).
   - by cbn; apply (preloaded_constraint_subsumption_incl_free (free_composite_vlsm _)).
 Qed.
 
@@ -492,7 +491,7 @@ Definition state_sub_item_input_is_seeded_or_sub_previously_sent
   (s : composite_state IM)
   : Prop
   := forall is tr,
-    finite_valid_trace_init_to Pre is s tr ->
+    finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr ->
     trace_sub_item_input_is_seeded_or_sub_previously_sent tr.
 
 Lemma finite_valid_trace_sub_projection
@@ -584,7 +583,7 @@ Proof.
     destruct Hmsg as [Hseed | [item [Hitem [Hout Hsub_item]]]]; [by right |].
     left.
     remember (finite_trace_last (composite_state_sub_projection _) _) as lst.
-    assert (Hlst_pre : valid_state_prop (pre_loaded_with_all_messages_vlsm Sub_Free) lst)
+    assert (Hlst_pre : constrained_state_prop Sub_Free lst)
       by (revert Hlst; apply VLSM_incl_valid_state, Xj_incl_Pre_Sub_Free; done).
     apply composite_proper_sent; [done |].
     apply has_been_sent_consistency; [by typeclasses eauto | done |].
@@ -759,7 +758,7 @@ Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%functi
   components with the components corresponding to any valid state of the
   composition of just the equivocators.
 
-  We prove those results for compositions pre-loaded with all messages
+  We prove those results for compositions preloaded with all messages
   (Lemmas [reset_equivocating_transitions_preloaded_projection] and
   [PreSubFree_PreFree_weak_embedding]).
 *)
@@ -772,11 +771,11 @@ Context
   (IM : index -> VLSM message)
   (equivocators : list index)
   (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
+  (PreFree := preloaded_with_all_messages_vlsm Free)
   (SubFree : VLSM message :=  free_composite_vlsm (sub_IM IM equivocators))
-  (PreSubFree := pre_loaded_with_all_messages_vlsm SubFree)
+  (PreSubFree := preloaded_with_all_messages_vlsm SubFree)
   (base_s : composite_state IM)
-  (Hbase_s : valid_state_prop PreFree base_s)
+  (Hbase_s : constrained_state_prop Free base_s)
   .
 
 (** A partial label projection function which only keeps non-equivocating transitions. *)
@@ -1104,8 +1103,8 @@ Lemma lift_sub_incl_preloaded_embedding
   (P Q : message -> Prop)
   (Hpq : forall m, P m -> Q m)
   : VLSM_embedding
-      (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices1)) P)
-      (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices2)) Q)
+      (preloaded_vlsm (free_composite_vlsm (sub_IM IM indices1)) P)
+      (preloaded_vlsm (free_composite_vlsm (sub_IM IM indices2)) Q)
       lift_sub_incl_label lift_sub_incl_state.
 Proof.
   apply basic_VLSM_embedding_preloaded_with; [done | ..]; intro; intros.
@@ -1138,7 +1137,7 @@ Context
 Lemma sub_can_emit_sender (P : message -> Prop)
   : forall m v,
     sender m = Some v ->
-    can_emit (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) P)  m ->
+    can_emit (preloaded_vlsm (free_composite_vlsm (sub_IM IM indices)) P)  m ->
     A v ∈ indices.
 Proof.
   intros m v Hsender Hemit.
@@ -1150,7 +1149,7 @@ Proof.
     as Hproj.
   spec Hproj; [by apply initial_state_is_valid; destruct (composite_s0 IM) |].
   apply (VLSM_incl_input_valid_transition
-    (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (free_composite_vlsm (sub_IM IM indices)) P))
+    (preloaded_vlsm_incl_preloaded_with_all_messages (free_composite_vlsm (sub_IM IM indices)) P))
      in Ht.
   apply (VLSM_weak_embedding_input_valid_transition Hproj) in Ht; clear Hproj.
   specialize (ProjectionTraces.preloaded_component_projection IM i) as Hproj.
@@ -1236,7 +1235,7 @@ Context
   .
 
 Lemma sub_IM_has_been_sent_iff_by_sender s
-  (Hs : valid_state_prop (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM indices))) s)
+  (Hs : constrained_state_prop (free_composite_vlsm (sub_IM IM indices)) s)
   m v
   (Hsender : sender m = Some v)
   (Hv : A v ∈ indices)
@@ -1396,7 +1395,7 @@ Context
   .
 
 Lemma preloaded_sub_composition_all_embedding (seed : message -> Prop) :
-  VLSM_embedding (pre_loaded_vlsm X seed) (pre_loaded_vlsm SubX seed)
+  VLSM_embedding (preloaded_vlsm X seed) (preloaded_vlsm SubX seed)
     free_sub_free_label  (composite_state_sub_projection IM (enum index)).
 Proof.
   apply basic_VLSM_strong_embedding.
@@ -1506,8 +1505,8 @@ Qed.
 Lemma preloaded_sub_element_embedding
   (P Q : message -> Prop)
   (PimpliesQ : forall m, P m -> Q m)
-  (PrePXj := pre_loaded_vlsm (IM j) P)
-  (PreQSubFree := pre_loaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q)
+  (PrePXj := preloaded_vlsm (IM j) P)
+  (PreQSubFree := preloaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q)
   : VLSM_embedding PrePXj PreQSubFree sub_element_label sub_element_state.
 Proof.
   apply basic_VLSM_embedding_preloaded_with; [done | ..].
@@ -1531,13 +1530,13 @@ Qed.
 Lemma sub_valid_preloaded_lifts_can_be_emitted
   (P Q : message -> Prop)
   (HPvalid : forall dm, P dm ->
-    valid_message_prop (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q) dm)
-  : forall m, can_emit (pre_loaded_vlsm (IM j) P) m ->
-    can_emit (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q) m.
+    valid_message_prop (preloaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q) dm)
+  : forall m, can_emit (preloaded_vlsm (IM j) P) m ->
+    can_emit (preloaded_vlsm (free_composite_vlsm (sub_IM IM (elements indices))) Q) m.
 Proof.
   intros m Hm.
   eapply VLSM_incl_can_emit.
-  - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
+  - apply (preloaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
     by itauto.
   - eapply VLSM_embedding_can_emit; [| done].
     apply preloaded_sub_element_embedding.
@@ -1553,7 +1552,7 @@ Qed.
   Note that, in general, this is not trace-equivalent with the directly obtained
   [projection_induced_validator] of the constrained composition to the corresponding
   component, as the intermediate induced projection might generate more
-  [input_valid_transitions] to be considered as a basis for the next projection.
+  [input_valid_transition]s to be considered as a basis for the next projection.
 *)
 
 Definition sub_label_element_project
@@ -1632,7 +1631,7 @@ Definition induced_sub_element_projection constraint : VLSM message :=
     sub_element_label sub_element_state.
 
 Definition pre_induced_sub_element_projection constraint : VLSM message :=
-  pre_loaded_with_all_messages_vlsm (induced_sub_element_projection constraint).
+  preloaded_with_all_messages_vlsm (induced_sub_element_projection constraint).
 
 Lemma induced_sub_element_projection_is_projection constraint
   : VLSM_projection
@@ -1665,14 +1664,14 @@ Context
   (IM : index -> VLSM message)
   indices
   (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
+  (PreFree := preloaded_with_all_messages_vlsm Free)
   (SubFree := free_composite_vlsm (sub_IM IM indices))
-  (PreSubFree := pre_loaded_with_all_messages_vlsm SubFree)
+  (PreSubFree := preloaded_with_all_messages_vlsm SubFree)
   .
 
 Lemma lift_sub_free_preloaded_with_embedding
   (seed : message -> Prop)
-  : VLSM_embedding (pre_loaded_vlsm SubFree seed) (pre_loaded_vlsm Free seed)
+  : VLSM_embedding (preloaded_vlsm SubFree seed) (preloaded_vlsm Free seed)
     (lift_sub_label IM indices) (lift_sub_state IM indices).
 Proof.
   apply (basic_VLSM_embedding_preloaded_with SubFree Free seed seed); intro; intros; [done | ..].
@@ -1688,9 +1687,9 @@ Lemma lift_sub_free_embedding
 Proof.
   constructor.
   intros sX trX HtrX.
-  by apply (VLSM_eq_finite_valid_trace (vlsm_is_pre_loaded_with_False Free)),
+  by apply (VLSM_eq_finite_valid_trace (vlsm_is_preloaded_with_False Free)),
     (VLSM_embedding_finite_valid_trace (lift_sub_free_preloaded_with_embedding _)),
-    (VLSM_eq_finite_valid_trace (vlsm_is_pre_loaded_with_False SubFree)).
+    (VLSM_eq_finite_valid_trace (vlsm_is_preloaded_with_False SubFree)).
 Qed.
 
 Lemma lift_sub_preloaded_free_embedding
@@ -1706,23 +1705,21 @@ Qed.
   Deriving reachable-validity for the component from the input validity
   w.r.t. a sub_composition preloaded with messages.
 *)
-Lemma pre_loaded_sub_composite_input_valid_projection constraint Q
+Lemma preloaded_sub_composite_input_valid_projection constraint Q
   i Hi li sub_s im
   : input_valid
-      (pre_loaded_vlsm (composite_vlsm (sub_IM IM indices) constraint) Q)
+      (preloaded_vlsm (composite_vlsm (sub_IM IM indices) constraint) Q)
       (existT (dexist i Hi) li) (sub_s, Some im) ->
-    input_valid (pre_loaded_with_all_messages_vlsm (IM i))
-      li (lift_sub_state IM indices sub_s i, Some im).
+    input_constrained (IM i) li (lift_sub_state IM indices sub_s i, Some im).
 Proof.
   intro Ht_sub.
   eapply (VLSM_projection_input_valid (preloaded_component_projection IM i) (existT i li) li)
   ; [by rewrite composite_project_label_eq |].
-  cut (input_valid
-        (pre_loaded_with_all_messages_vlsm (free_composite_vlsm (sub_IM IM indices)))
-        (existT (dexist i Hi) li) (sub_s, Some im));
+  cut (input_constrained (free_composite_vlsm (sub_IM IM indices))
+    (existT (dexist i Hi) li) (sub_s, Some im));
     [by apply (VLSM_embedding_input_valid lift_sub_preloaded_free_embedding) |].
   eapply VLSM_incl_input_valid; [| done].
-  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
 Qed.
 
 Lemma can_emit_sub_projection
@@ -1733,7 +1730,7 @@ Lemma can_emit_sub_projection
   (j : index)
   (m : message)
   (Hj : option_map A (sender m) = Some j)
-  : can_emit PreSubFree m -> can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+  : can_emit PreSubFree m -> can_emit (preloaded_with_all_messages_vlsm (IM j)) m.
 Proof.
   intro Hemit.
   apply can_emit_projection with validator A sender; [done | done |].
@@ -1742,7 +1739,7 @@ Qed.
 
 (**
   If a component can emit a message, it can also emit it in a subcomposition with
-  other components, and starting with more pre-loaded messages.
+  other components, and starting with more preloaded messages.
 *)
 Lemma can_emit_with_more
   (j : index)
@@ -1750,7 +1747,7 @@ Lemma can_emit_with_more
   (Hj : j ∈ indices)
   (P Q : message -> Prop)
   (PimpliesQ : forall m, P m -> Q m)
-  : can_emit (pre_loaded_vlsm (IM j) P) m -> can_emit (pre_loaded_vlsm SubFree Q) m.
+  : can_emit (preloaded_vlsm (IM j) P) m -> can_emit (preloaded_vlsm SubFree Q) m.
 Proof.
   intro Hemit.
   specialize
@@ -1783,9 +1780,9 @@ Context
   the components of the sub-composition.
 *)
 Lemma sub_no_indices_no_can_emit (P : message -> Prop) :
-  forall m, ~ can_emit (pre_loaded_vlsm (free_composite_vlsm (sub_IM IM indices)) P) m.
+  forall m, ~ can_emit (preloaded_vlsm (free_composite_vlsm (sub_IM IM indices)) P) m.
 Proof.
-  apply pre_loaded_empty_free_composition_no_emit, elem_of_nil_inv.
+  apply preloaded_empty_free_composition_no_emit, elem_of_nil_inv.
   by intro sub_i; destruct_dec_sig sub_i i Hi Heqsub_i; subst; inversion Hi.
 Qed.
 

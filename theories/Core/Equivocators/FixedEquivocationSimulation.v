@@ -40,7 +40,6 @@ Context
   (X : VLSM message := strong_fixed_equivocation_vlsm_composition IM equivocating)
   (XE : VLSM message := equivocators_fixed_equivocations_vlsm IM (elements equivocating))
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   (SubFreeE := free_composite_vlsm (sub_IM (equivocator_IM IM) (elements equivocating)))
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
   .
@@ -138,7 +137,7 @@ Qed.
 
 (**
   A message that can be generated from a state <<s>> of the free composition
-  of equivocating equivocators pre-loaded with all messages has the
+  of equivocating equivocators preloaded with all messages has the
   [composite_has_been_sent] property for the state obtained upon "appending"
   state <<s>> to valid state for the composition of all equivocators.
 
@@ -147,11 +146,11 @@ Qed.
 *)
 Lemma fixed_equivocation_replay_has_message
   eqv_state_s
-  (Heqv_state_s : valid_state_prop PreFreeE eqv_state_s)
+  (Heqv_state_s : constrained_state_prop FreeE eqv_state_s)
   im s
   (Him :
     can_produce
-    (pre_loaded_with_all_messages_vlsm
+    (preloaded_with_all_messages_vlsm
       (free_composite_vlsm (equivocator_IM (sub_IM IM (elements equivocating)))))
     s im)
   : composite_has_been_sent (equivocator_IM IM)
@@ -191,8 +190,8 @@ Lemma fixed_equivocation_has_replayable_message_prop
     (strong_fixed_equivocation_constraint IM equivocating)
     (equivocators_fixed_equivocations_constraint IM (elements equivocating)).
 Proof.
-  specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
-  specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
+  specialize (vlsm_is_preloaded_with_False XE) as HeqXE.
+  specialize (vlsm_is_preloaded_with_False X) as HeqX.
   specialize (equivocators_fixed_equivocations_vlsm_incl_PreFree IM (elements equivocating)) as HinclE.
   intro; intros.
   destruct iom as [im |]; swap 1 2; [| destruct HcX as [Hsent | Hemitted]].
@@ -311,8 +310,8 @@ Proof.
       apply proj1 in Him_etr.
       replace (im_ert' ++ [item]) with (im_ert' ++ [item] ++ []) in Him_etr
         by (rewrite app_assoc; apply app_nil_r).
-      specialize (input_valid_transition_to (pre_loaded_with_all_messages_vlsm
-        (free_composite_vlsm (equivocator_IM (sub_IM IM (elements equivocating)))))
+      specialize (input_constrained_transition_to
+        (free_composite_vlsm (equivocator_IM (sub_IM IM (elements equivocating))))
         _ _ _ _ _ Him_etr eq_refl)
         as Ht.
       rewrite finite_trace_last_is_last.
@@ -340,16 +339,16 @@ Lemma fixed_equivocators_finite_valid_trace_init_to_rev
       finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   (*
-    Since the base result works with pre-loaded vlsms, some massaging of the
+    Since the base result works with preloaded vlsms, some massaging of the
     hypothesis and conclusion is done to fit the applied lemma.
   *)
   assert (no_initial_messages_in_XE :
-    forall m, ~ initial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
+    forall m, ~ initial_message_prop (preloaded_vlsm XE (fun _ => False)) m).
   { intros m [[i [[mi Hmi] Him]] | Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).
   }
-  specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
-  specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
+  specialize (vlsm_is_preloaded_with_False X) as HeqX.
+  specialize (vlsm_is_preloaded_with_False XE) as HeqXE.
   apply (VLSM_eq_finite_valid_trace_init_to HeqX) in HtrX.
   apply
     (generalized_equivocators_finite_valid_trace_init_to_rev
@@ -393,7 +392,6 @@ Context
   (X : VLSM message := composite_vlsm IM (composite_no_equivocations IM))
   (XE : VLSM message := equivocators_fixed_equivocations_vlsm IM [])
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
   .
 
 Lemma no_equivocating_equivocators_finite_valid_trace_init_to_rev
@@ -407,13 +405,13 @@ Lemma no_equivocating_equivocators_finite_valid_trace_init_to_rev
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   assert (no_initial_messages_in_XE :
-    forall m, ~ initial_message_prop (pre_loaded_vlsm XE (fun _ => False)) m).
+    forall m, ~ initial_message_prop (preloaded_vlsm XE (fun _ => False)) m).
   {
     intros m [[i [[mi Hmi] Him]] | Hseeded]; [| done].
     by elim (no_initial_messages_in_IM i mi).
   }
-  specialize (vlsm_is_pre_loaded_with_False X) as HeqX.
-  specialize (vlsm_is_pre_loaded_with_False XE) as HeqXE.
+  specialize (vlsm_is_preloaded_with_False X) as HeqX.
+  specialize (vlsm_is_preloaded_with_False XE) as HeqXE.
   apply (VLSM_eq_finite_valid_trace_init_to HeqX) in HtrX.
   apply
     (generalized_equivocators_finite_valid_trace_init_to_rev
