@@ -825,7 +825,7 @@ Section sec_component_projection_validator_alt.
   composition to a component obtained by strengthening the component instead of
   deriving its elements via the projection [composite_vlsm_induced_projection_validator].
 
-  We then show this VLSM and some of its pre-loaded variants are
+  We then show this VLSM and some of its preloaded variants are
   [VLSM_eq]ual (trace-equivalent) to the corresponding variants of the
   [composite_vlsm_induced_validator].
 *)

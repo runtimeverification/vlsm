@@ -247,7 +247,7 @@ Qed.
 
 End sec_fixed_byzantine_traces_as_projections.
 
-(** ** Fixed Byzantine traces as traces pre-loaded with signed messages
+(** ** Fixed Byzantine traces as traces preloaded with signed messages
 
   In this section we show that byzantine traces correspond to traces of
   a composition in the [non_byzantine] set, preloaded with messages

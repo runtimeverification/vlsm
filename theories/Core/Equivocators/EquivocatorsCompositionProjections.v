@@ -715,7 +715,7 @@ Qed.
 
 (**
   The state and descriptors obtained after applying [equivocators_trace_project]
-  on a pre-loaded valid trace satisfy the [previous_state_descriptor_prop]erty.
+  on a preloaded valid trace satisfy the [previous_state_descriptor_prop]erty.
 *)
 Lemma equivocators_trace_project_from_state_descriptors
   (descriptors idescriptors : equivocator_descriptors IM)
@@ -1195,8 +1195,8 @@ Proof.
 Qed.
 
 (**
-  Projecting a pre-loaded valid trace of the composition of equivocators
-  using [proper_equivocator_descriptors] one obtains a pre-loaded valid trace
+  Projecting a preloaded valid trace of the composition of equivocators
+  using [proper_equivocator_descriptors] one obtains a preloaded valid trace
   of a free composition.
 *)
 Lemma pre_equivocators_valid_trace_project

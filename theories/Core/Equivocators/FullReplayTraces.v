@@ -16,7 +16,7 @@ From VLSM.Core Require Import Equivocators.EquivocatorsCompositionProjections Pl
   state and then performing each transition, but appropriately "shifted".
 
   To make the results more general, we take the trace to be replayed to be
-  produced by a restricted set of equivocators pre-loaded with messages
+  produced by a restricted set of equivocators preloaded with messages
   satisfying some conditions.
 *)
 
@@ -463,7 +463,7 @@ Section sec_preloaded_constrained_projection.
   By replaying a [valid_trace] on top of a [valid_state] we obtain a
   [valid_trace]. We derive this as a more general [VLSM_weak_embedding]
   result for a class of VLSM parameterized by a constraint having "good"
-  properties and pre-loaded with a seed, to allow deriving the
+  properties and preloaded with a seed, to allow deriving the
   [VLSM_weak_embedding] result for both the free composition of equivocators
   and for the no message equivocation composition of equivocators (free, or with
   an additional fixed-set state-equivocation constraint).

@@ -228,7 +228,7 @@ End sec_generalized_constraints.
 
   To allow reusing this result in the proof for simulating fixed equivocation,
   we first prove an intermediate result, where both the composite VLSMs are
-  pre-loaded with the same set of messages.
+  preloaded with the same set of messages.
 *)
 
 Section sec_seeded_all_equivocating.
@@ -381,7 +381,7 @@ Context
 
 (**
   Further specializing [seeded_equivocators_finite_valid_trace_init_to_rev]
-  to remove the pre-loading operation.
+  to remove the preloading operation.
 *)
 Lemma equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)

@@ -5,9 +5,9 @@ From VLSM.Core Require Import VLSM VLSMProjections.
 
 (** * Core: Preloaded VLSMs
 
-  Given a VLSM <<X>>, we introduce the _pre-loaded_ version of it, which is
+  Given a VLSM <<X>>, we introduce the _preloaded_ version of it, which is
   identical to <<X>>, except that all messages are initial. The high degree
-  of freedom allowed to the pre-loaded version lets it experience everything
+  of freedom allowed to the preloaded version lets it experience everything
   experienced by <<X>> but also other kinds of behavior, including _Byzantine_
   behavior, which makes it a useful concept in Byzantine fault tolerance analysis.
 *)

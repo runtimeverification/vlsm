@@ -137,7 +137,7 @@ Qed.
 
 (**
   A message that can be generated from a state <<s>> of the free composition
-  of equivocating equivocators pre-loaded with all messages has the
+  of equivocating equivocators preloaded with all messages has the
   [composite_has_been_sent] property for the state obtained upon "appending"
   state <<s>> to valid state for the composition of all equivocators.
 
@@ -339,7 +339,7 @@ Lemma fixed_equivocators_finite_valid_trace_init_to_rev
       finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
   (*
-    Since the base result works with pre-loaded vlsms, some massaging of the
+    Since the base result works with preloaded vlsms, some massaging of the
     hypothesis and conclusion is done to fit the applied lemma.
   *)
   assert (no_initial_messages_in_XE :

@@ -445,9 +445,9 @@ Qed.
 
 (**
   If all messages described by a predicate <<P>> are valid for the free
-  composition pre-loaded with messages described by a predicate <<Q>>, then
-  any message which can be emitted by a component pre-loaded with <<P>> can
-  also be emitted by the free composition pre-loaded with <<Q>>.
+  composition preloaded with messages described by a predicate <<Q>>, then
+  any message which can be emitted by a component preloaded with <<P>> can
+  also be emitted by the free composition preloaded with <<Q>>.
 *)
 Lemma valid_preloaded_lifts_can_be_emitted
   (P Q : message -> Prop)
@@ -467,7 +467,7 @@ Qed.
 (**
   As a specialization of [valid_preloaded_lifts_can_be_emitted], if all
   messages described by a predicate <<P>> are valid for the free composition,
-  then any message which can be emitted by a component pre-loaded with <<P>>
+  then any message which can be emitted by a component preloaded with <<P>>
   can also be emitted by the free composition.
 *)
 Lemma free_valid_preloaded_lifts_can_be_emitted
@@ -1232,7 +1232,7 @@ End sec_empty_composition_properties.
 
   If two indexed sets of VLSMs are extensionally-equal, then we can establish a
   [VLSM_embedding] between their compositions with subsumable constraints
-  (and pre-loaded with the same set of messages).
+  (and preloaded with the same set of messages).
 *)
 
 Section sec_same_IM_embedding.

@@ -758,7 +758,7 @@ Arguments lift_sub_transition [message index]%type_scope {EqDecision0} IM%functi
   components with the components corresponding to any valid state of the
   composition of just the equivocators.
 
-  We prove those results for compositions pre-loaded with all messages
+  We prove those results for compositions preloaded with all messages
   (Lemmas [reset_equivocating_transitions_preloaded_projection] and
   [PreSubFree_PreFree_weak_embedding]).
 *)
@@ -1739,7 +1739,7 @@ Qed.
 
 (**
   If a component can emit a message, it can also emit it in a subcomposition with
-  other components, and starting with more pre-loaded messages.
+  other components, and starting with more preloaded messages.
 *)
 Lemma can_emit_with_more
   (j : index)

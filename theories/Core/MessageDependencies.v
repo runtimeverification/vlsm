@@ -48,7 +48,7 @@ Definition message_dependencies_full_node_condition
   - Necessity: All dependent messages for a message <<m>>m are required to be
   directly observed by origin state of a transition emitting the message <<m>>.
 
-  - Sufficiency: A message can be produced by the machine pre-loaded with its
+  - Sufficiency: A message can be produced by the machine preloaded with its
   dependencies.
 
   Additionally, we require that the induced [msg_dep_happens_before] relation
@@ -122,7 +122,7 @@ Proof. by apply tc_reflect. Qed.
 
 (**
   In the absence of initial messages, and if [msg_dep_rel]ation reflects
-  the pre-loaded message property, then it also reflects the
+  the preloaded message property, then it also reflects the
   [valid_message_prop]erty.
 *)
 Lemma msg_dep_reflects_validity
@@ -1058,7 +1058,7 @@ Context
 
 (**
   The property of a message of having a sender and being emittable by the
-  component corresponding to its sender pre-loaded with the dependencies of the
+  component corresponding to its sender preloaded with the dependencies of the
   message.
 *)
 Inductive Emittable_from_dependencies_prop (m : message) : Prop :=

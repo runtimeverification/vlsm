@@ -370,7 +370,7 @@ Definition strong_constraint_subsumption : Prop :=
   property.
 
   This definition is useful in proving [VLSM_incl]usions between [VLSM]s
-  pre-loaded with all messages (Lemma [preloaded_constraint_subsumption_incl]).
+  preloaded with all messages (Lemma [preloaded_constraint_subsumption_incl]).
 
   Although there are currently no explicit cases for its usage, it might be more
   useful than the [strong_constraint_subsumption] property in cases where proving
