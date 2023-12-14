@@ -296,7 +296,7 @@ Proof.
   eapply (VLSM_projection_input_valid (preloaded_component_projection IM i))
   ; [by apply (composite_project_label_eq IM) |].
   by apply
-    (VLSM_incl_input_valid (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))),
+    (VLSM_incl_input_valid (vlsm_incl_preloaded_with_all_messages_vlsm (free_composite_vlsm IM))),
     (VLSM_embedding_input_valid (forget_annotations_projection (free_composite_vlsm IM) _ _ _)).
 Qed.
 
@@ -421,9 +421,9 @@ Lemma equivocating_messages_are_equivocator_emitted
     exists v : validator,
       v ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Cv)
         /\
-      can_emit (pre_loaded_vlsm (IM (A v)) (fun dm => msg_dep_rel message_dependencies dm im)) im.
+      can_emit (preloaded_vlsm (IM (A v)) (fun dm => msg_dep_rel message_dependencies dm im)) im.
 Proof.
-  eapply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
+  eapply (VLSM_incl_can_emit (vlsm_incl_preloaded_with_all_messages_vlsm (free_composite_vlsm IM)))
       in Him.
   apply can_emit_free_composite_project in Him as [j Him].
   apply Hchannel in Him as Hsender.
@@ -446,13 +446,13 @@ Lemma equivocating_messages_dependencies_are_directly_observed_or_equivocator_em
   : forall dm, msg_dep_happens_before message_dependencies dm im ->
     composite_has_been_directly_observed IM s dm \/
     exists v_i, v_i ∈ msg_dep_message_equivocators IM full_message_dependencies sender s im (Cv := Cv) /\
-      can_emit (pre_loaded_with_all_messages_vlsm (IM (A v_i))) dm.
+      can_emit (preloaded_with_all_messages_vlsm (IM (A v_i))) dm.
 Proof.
   intros dm Hdm.
   destruct (decide (composite_has_been_directly_observed IM s dm)) as [Hobs | Hnobs]
   ; [by left | right].
   cut (exists v, sender dm = Some v /\
-                 can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) dm).
+                 can_emit (preloaded_with_all_messages_vlsm (IM (A v))) dm).
   {
     intros (v & Hsender & Hemit).
     exists v; split; [| done].
@@ -669,7 +669,7 @@ Proof.
   destruct Heqv as [(msg & Hmsg & Hsender) | (msg & [Hnobserved_msg Hdep_msg] & Hsender)].
   - subst msg.
     eapply VLSM_incl_can_emit in Hemitted
-    ; [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
+    ; [| apply preloaded_vlsm_incl_preloaded_with_all_messages].
     apply can_emit_free_composite_project in Hemitted as [sub_eqv Hemitted].
     destruct_dec_sig sub_eqv _eqv H_eqv Heqsub_eqv; subst.
     unfold sub_IM in Hemitted; cbn in Hemitted.
@@ -682,7 +682,7 @@ Proof.
       - contradict Hnobserved_msg.
         by eapply sent_by_non_equivocating_are_directly_observed.
       - eapply VLSM_incl_can_emit in Hemitted_msg
-        ; [| apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages].
+        ; [| apply preloaded_vlsm_incl_preloaded_with_all_messages].
         apply can_emit_free_composite_project in Hemitted_msg as [sub_i Hemitted_msg].
         destruct_dec_sig sub_i i Hi Heqsub_i; subst.
         eapply Hsender_safety in Hemitted_msg; [| done].

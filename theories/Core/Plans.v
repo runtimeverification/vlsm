@@ -43,7 +43,7 @@ Context
   upon applying a plan, then a [VLSMType] and a [transition] function
   suffice for defining plan application and related results.
   The advantage of this approach is that the same definition works for
-  pre_loaded versions as well as for all constrained variants of a composition.
+  preloaded versions as well as for all constrained variants of a composition.
 
   Applying a plan (list of [plan_item]s) to a state we obtain a
   final state and a trace. We define that in the [_apply_plan] definition below

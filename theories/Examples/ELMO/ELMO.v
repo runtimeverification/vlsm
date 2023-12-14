@@ -1299,7 +1299,7 @@ Proof.
   - intros m Hm.
     apply can_emit_has_trace in Hm as (is & tr & item & Htr & Houtput).
     apply (can_emit_from_valid_trace
-            (pre_loaded_vlsm Ei (fun msg : Message => msg ∈ Message_dependencies m)))
+            (preloaded_vlsm Ei (fun msg : Message => msg ∈ Message_dependencies m)))
       with is (tr ++ [item]); cycle 1.
     + apply Exists_exists; eexists.
       by split; [apply elem_of_app; right; left |].
@@ -1444,11 +1444,11 @@ Definition FreeELMO : VLSM Message :=
 
 (**
   To talk about reachable composite states for the ELMOProtocol we also name
-  the [pre_loaded_with_all_messages_vlsm] version of the [free_composition].
+  the [preloaded_with_all_messages_vlsm] version of the [free_composition].
 *)
 
 Definition ReachELMO : VLSM Message :=
-  pre_loaded_with_all_messages_vlsm FreeELMO.
+  preloaded_with_all_messages_vlsm FreeELMO.
 
 Definition LimitedELMO : VLSM Message :=
   msg_dep_limited_equivocation_vlsm (Cv := listset (Message_validator idx))
@@ -1813,7 +1813,7 @@ Proof.
     eapply (EquivocationProjections.VLSM_incl_has_been_directly_observed_reflect
       (preloaded_constraint_subsumption_incl_free (free_composite_vlsm ELMO_component)
         ELMO_global_constraint)).
-    - by generalize Hs; apply VLSM_incl_valid_state, vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    - by generalize Hs; apply VLSM_incl_valid_state, vlsm_incl_preloaded_with_all_messages_vlsm.
     - eapply has_been_directly_observed_examine_one_trace; [done |].
       by apply Exists_exists; eexists; cbn; eauto.
   }
@@ -2657,7 +2657,7 @@ Proof.
         (in_futures_preserving_oracle_from_stepwise _ _ _ _
           (composite_has_been_directly_observed_stepwise_props ELMO_component
             ELMO_global_constraint)) in Hm0;
-        [| by eapply (VLSM_incl_in_futures (vlsm_incl_pre_loaded_with_all_messages_vlsm
+        [| by eapply (VLSM_incl_in_futures (vlsm_incl_preloaded_with_all_messages_vlsm
           ELMOProtocol)); eexists].
       destruct Hm0 as [i_m0 Hm0].
       eapply ELMO_not_heavy_receive_observed_message; [| done |].
@@ -2669,7 +2669,7 @@ Proof.
       (in_futures_preserving_oracle_from_stepwise _ _ _ _
         (composite_has_been_directly_observed_stepwise_props ELMO_component
           ELMO_global_constraint)) in Hm0;
-      [| by eapply (VLSM_incl_in_futures (vlsm_incl_pre_loaded_with_all_messages_vlsm
+      [| by eapply (VLSM_incl_in_futures (vlsm_incl_preloaded_with_all_messages_vlsm
         ELMOProtocol)); eexists].
     intro a; cbn.
     transitivity (global_equivocators_simple (lift_to_composite_state ELMO_component sigma i_m s) a);

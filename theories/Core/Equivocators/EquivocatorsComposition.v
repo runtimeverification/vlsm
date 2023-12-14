@@ -239,8 +239,8 @@ Qed.
 
 Lemma preloaded_equivocators_no_equivocations_vlsm_incl_PreFree :
   VLSM_incl
-    (pre_loaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm)
-    (pre_loaded_with_all_messages_vlsm equivocators_free_vlsm).
+    (preloaded_with_all_messages_vlsm equivocators_no_equivocations_vlsm)
+    (preloaded_with_all_messages_vlsm equivocators_free_vlsm).
 Proof.
   by apply basic_VLSM_incl_preloaded; [intro | inversion 1 | intro].
 Qed.
@@ -529,7 +529,7 @@ Context
 Definition seeded_equivocators_no_equivocation_vlsm
   (seed : message -> Prop)
   : VLSM message :=
-  composite_no_equivocation_vlsm_with_pre_loaded
+  composite_no_equivocation_vlsm_with_preloaded
     sub_equivocator_IM (free_constraint sub_equivocator_IM) seed.
 
 Lemma sub_equivocator_IM_initial_state_commute is :

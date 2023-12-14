@@ -38,7 +38,7 @@ Context
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   `{finite.Finite validator}
   (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
+  (PreFree := preloaded_with_all_messages_vlsm Free)
   (threshold : R)
   `{ReachableThreshold validator Cv threshold}
   (A : validator -> index)
@@ -598,7 +598,7 @@ Lemma free_has_strong_trace_witnessing_equivocation_prop s
     finite_valid_trace_init_to Free is' s tr' /\
     strong_trace_witnessing_equivocation_prop is' tr'.
 Proof.
-  apply (VLSM_incl_valid_state (vlsm_incl_pre_loaded_with_all_messages_vlsm Free))
+  apply (VLSM_incl_valid_state (vlsm_incl_preloaded_with_all_messages_vlsm Free))
     in Hs as Hpre_s.
   apply preloaded_has_strong_trace_witnessing_equivocation_prop in Hpre_s.
   destruct Hpre_s as [is [tr [Htr Hwitness]]].
@@ -684,13 +684,13 @@ Proof.
   apply emitted_messages_are_valid_iff in Hmsg
     as [(_v & [_im Him] & Heqim) | Hiom]
   ; [by elim (no_initial_messages_in_IM _v _im) |].
-  apply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
+  apply (VLSM_incl_can_emit (vlsm_incl_preloaded_with_all_messages_vlsm (free_composite_vlsm IM)))
     in Hiom.
   apply can_emit_free_composite_project in Hiom as [_v Hiom].
   specialize (Hsender_safety _ _ Hsender _ Hiom) as Heq_v. simpl in Heq_v.
   subst _v.
   eapply message_dependencies_are_sufficient in Hiom.
-  unfold pre_loaded_free_equivocating_vlsm_composition, free_equivocating_vlsm_composition.
+  unfold preloaded_free_equivocating_vlsm_composition, free_equivocating_vlsm_composition.
   specialize
     (@lift_to_composite_generalized_preloaded_VLSM_embedding
       message (sub_index (elements (C := Ci) (fin_sets.set_map A (equivocating_validators sf)))) _
@@ -739,7 +739,7 @@ Proof.
       apply (Heqv prefix (suffix ++  [{| l := l; input := iom; destination := sf; output := oom |}])).
       by subst; apply app_assoc.
     }
-    apply (VLSM_incl_finite_valid_trace_init_to (vlsm_incl_pre_loaded_with_all_messages_vlsm Free))
+    apply (VLSM_incl_finite_valid_trace_init_to (vlsm_incl_preloaded_with_all_messages_vlsm Free))
       in Htr as Hpre_tr.
     assert
       (Htr_sf : finite_valid_trace_from_to

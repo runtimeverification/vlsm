@@ -38,24 +38,24 @@ Definition free_equivocating_vlsm_composition : VLSM message :=
   free_composite_vlsm (sub_IM IM (elements equivocating)).
 
 (**
-  [pre_loaded_free_equivocating_vlsm_composition] preloads the free composition
+  [preloaded_free_equivocating_vlsm_composition] preloads the free composition
   of equivocating components all with the messages given by the <<messageSet>>.
 *)
-Definition pre_loaded_free_equivocating_vlsm_composition
+Definition preloaded_free_equivocating_vlsm_composition
   (messageSet : message -> Prop)
-  := pre_loaded_vlsm free_equivocating_vlsm_composition messageSet.
+  := preloaded_vlsm free_equivocating_vlsm_composition messageSet.
 
 (**
   Given a composite state <<s>>, we define the composition of equivocators
   preloaded with the messages directly observed in <<s>>.
 *)
 Definition equivocators_composition_for_directly_observed s
-  := pre_loaded_free_equivocating_vlsm_composition (composite_has_been_directly_observed IM s).
+  := preloaded_free_equivocating_vlsm_composition (composite_has_been_directly_observed IM s).
 
 (**
   The fixed equivocation constraint for a regular composition stipulates that
   a message can be received either if it [has_been_directly_observed]
-  or it can be emitted by the free composition of equivocators pre-loaded with
+  or it can be emitted by the free composition of equivocators preloaded with
   the messages directly observed in the current state.
 *)
 Definition fixed_equivocation s m
@@ -88,7 +88,7 @@ Qed.
 
   A seemingly stronger fixed equivocation constraint requires that a received
   message either [has_been_sent] by a non-equivocating component
-  or it can be emitted by the free composition of equivocators pre-loaded with
+  or it can be emitted by the free composition of equivocators preloaded with
   messages which have been sent by non-equivocating components.
 
   We say seemingly because, as shown by the [Fixed_eq_StrongFixed] result,
@@ -133,7 +133,7 @@ Qed.
   preloaded with the messages sent by non-equivocating components in <<s>>.
 *)
 Definition equivocators_composition_for_sent s
-  := pre_loaded_free_equivocating_vlsm_composition (sent_by_non_equivocating s).
+  := preloaded_free_equivocating_vlsm_composition (sent_by_non_equivocating s).
 
 Definition strong_fixed_equivocation s m
   := sent_by_non_equivocating s m \/
@@ -151,8 +151,8 @@ Definition strong_fixed_equivocation_vlsm_composition : VLSM message
   := composite_vlsm IM strong_fixed_equivocation_constraint.
 
 (**
-  The composition of equivocators pre-loaded with only the messages sent by
-  non-equivocators is included in that pre-loaded with all the directly observed
+  The composition of equivocators preloaded with only the messages sent by
+  non-equivocators is included in that preloaded with all the directly observed
   messages.
 *)
 Lemma Equivocators_Strong_Fixed_incl base_s
@@ -160,7 +160,7 @@ Lemma Equivocators_Strong_Fixed_incl base_s
       (equivocators_composition_for_sent base_s)
       (equivocators_composition_for_directly_observed base_s).
 Proof.
-  apply pre_loaded_vlsm_incl.
+  apply preloaded_vlsm_incl.
   by apply sent_by_non_equivocating_are_directly_observed.
 Qed.
 
@@ -268,7 +268,7 @@ End sec_fixed_equivocation_index_incl.
   is a strengthening of Lemma [finite_valid_trace_sub_projection] for the
   [fixed_equivocation_constraint], showing that, when restricting
   a Fixed valid trace to only the transitions belonging to the equivocators,
-  the obtained trace is valid for the composition of equivocators pre-loaded
+  the obtained trace is valid for the composition of equivocators preloaded
   only with those messages sent by the non-equivocators in the original trace.
 *)
 
@@ -285,13 +285,13 @@ Context
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
   (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
+  (PreFree := preloaded_with_all_messages_vlsm Free)
   .
 
 Definition Fixed_incl_Free : VLSM_incl Fixed Free := VLSM_incl_constrained_vlsm _ _.
 
 Lemma preloaded_Fixed_incl_Preloaded :
-  VLSM_incl (pre_loaded_with_all_messages_vlsm Fixed) (pre_loaded_with_all_messages_vlsm Free).
+  VLSM_incl (preloaded_with_all_messages_vlsm Fixed) (preloaded_with_all_messages_vlsm Free).
 Proof.
   exact (preloaded_constraint_subsumption_incl_free _ _).
 Qed.
@@ -320,7 +320,7 @@ Lemma in_futures_preserves_can_emit_by_equivocators_composition_for_sent s base_
     can_emit (equivocators_composition_for_sent IM equivocators s) m ->
     can_emit (equivocators_composition_for_sent IM equivocators base_s) m.
 Proof.
-  by apply VLSM_incl_can_emit, pre_loaded_vlsm_incl,
+  by apply VLSM_incl_can_emit, preloaded_vlsm_incl,
         in_futures_preserves_sent_by_non_equivocating.
 Qed.
 
@@ -528,7 +528,7 @@ Qed.
 (**
   Main result of this section: when restricting a Fixed valid trace to only
   the transitions belonging to the equivocators, the obtained trace is valid
-  for the composition of equivocators pre-loaded with messages sent by the
+  for the composition of equivocators preloaded with messages sent by the
   non-equivocators in the original trace.
 
   This is a simple corollary of Lemma [fixed_finite_valid_trace_sub_projection_helper]
@@ -721,7 +721,7 @@ End sec_Fixed_eq_StrongFixed.
   components.
 
   In this section we essentially prove that given a Fixed valid state <<s>>,
-  any valid trace over the composition of equivocators pre-loaded with the
+  any valid trace over the composition of equivocators preloaded with the
   messages directly observed in <<s>> can be "lifted" to a Fixed valid trace in which
   the non-equivocators remain in their corresponding component-state given by <<s>>
   (lemma [EquivPreloadedBase_Fixed_weak_embedding]).
@@ -764,7 +764,7 @@ Lemma restrict_observed_to_non_equivocating_incl s eqv_is
     (equivocators_composition_for_sent IM equivocators
       (lift_sub_state_to IM (elements equivocators) s eqv_is)).
 Proof.
-  apply pre_loaded_vlsm_incl.
+  apply preloaded_vlsm_incl.
   by apply lift_sub_state_to_sent_by_non_equivocating_iff.
 Qed.
 
@@ -774,7 +774,7 @@ Lemma restrict_observed_to_non_equivocating_incl_rev s eqv_is
       (lift_sub_state_to IM (elements equivocators) s eqv_is))
     (equivocators_composition_for_sent IM equivocators s).
 Proof.
-  apply pre_loaded_vlsm_incl.
+  apply preloaded_vlsm_incl.
   by apply lift_sub_state_to_sent_by_non_equivocating_iff.
 Qed.
 
@@ -890,7 +890,7 @@ Qed.
   Given a valid state <<s>> for the <<Fixed>> composition (composition
   where only the <<equivocators>> are allowed to message-equivocate),
   we can "lift" any trace of the free composition of just the equivocators
-  pre-loaded with the messages observed in <<s>> to a trace over the <<Fixed>>
+  preloaded with the messages observed in <<s>> to a trace over the <<Fixed>>
   composition by simply setting the non-equivocating state components to those
   of <<s>>.
 
@@ -898,7 +898,7 @@ Qed.
   equivocation and fixed equivocation (Lemma [strong_witness_has_fixed_equivocation]).
 
   We prove this as a [VLSM_weak_embedding] between the free composition of
-  equivocators pre-loaded with the messages observed in <<s>> and the <<Fixed>>
+  equivocators preloaded with the messages observed in <<s>> and the <<Fixed>>
   composition of all the components. Note that this is a strengthening of Lemma
   [PreSubFree_PreFree_weak_embedding].
 *)
@@ -1061,7 +1061,7 @@ Proof.
     intros Hsent_impl [[j [Hj Hsent]] | Hemit].
     - by left; apply Hsent_impl; exists j.
     - right. revert Hemit.
-      by apply VLSM_incl_can_emit, pre_loaded_vlsm_incl.
+      by apply VLSM_incl_can_emit, preloaded_vlsm_incl.
   }
   clear m.
   intros m [i [Hi Hsent]].

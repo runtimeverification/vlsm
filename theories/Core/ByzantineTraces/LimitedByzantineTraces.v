@@ -93,7 +93,7 @@ Context
   (byzantine : Ci := fin_sets.set_map A byzantine_vs )
   (non_byzantine : Ci := difference (list_to_set (enum index)) byzantine)
   (Hlimit : (sum_weights byzantine_vs <= threshold)%R)
-  (PreNonByzantine := pre_loaded_fixed_non_byzantine_vlsm IM byzantine A sender)
+  (PreNonByzantine := preloaded_fixed_non_byzantine_vlsm IM byzantine A sender)
   (HBE : BasicEquivocation (composite_state IM) validator Cv threshold
     := equivocation_dec_tracewise IM threshold A sender)
   .
@@ -309,14 +309,14 @@ Context
   introduce equivocators from the non-byzantine components, then the transition is valid
   for weight-limited equivocation.
 *)
-Lemma lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited
+Lemma lift_preloaded_fixed_non_byzantine_valid_transition_to_limited
   (byzantine_vs : Cv)
   (byzantine : Ci := fin_sets.set_map A byzantine_vs)
   (non_byzantine := difference (list_to_set (enum index)) byzantine)
   (Hlimited : (sum_weights byzantine_vs <= threshold)%R)
   sub_l sub_s iom sub_sf oom
   (Ht_sub : input_valid_transition
-      (pre_loaded_fixed_non_byzantine_vlsm IM byzantine A sender)
+      (preloaded_fixed_non_byzantine_vlsm IM byzantine A sender)
       sub_l (sub_s, iom) (sub_sf, oom))
   ann_s
   (Hann_s : valid_state_prop Limited ann_s)
@@ -334,7 +334,7 @@ Proof.
   repeat split; cbn.
   - done.
   - destruct iom as [im |]; [| apply option_valid_message_None].
-    by eapply Hvalidator, pre_loaded_sub_composite_input_valid_projection, Ht_sub.
+    by eapply Hvalidator, preloaded_sub_composite_input_valid_projection, Ht_sub.
   - unfold lift_sub_state in Hann_s_pr.
     rewrite Hann_s_pr, (lift_sub_state_to_eq _ _ _ _ _ Hi).
     by apply Ht_sub.
@@ -418,7 +418,7 @@ Proof.
       apply finite_valid_trace_from_app_iff; split; [done |].
       subst x; cbn; apply finite_valid_trace_singleton.
       replace (finite_trace_last _ _) with lst.
-      by eapply lift_pre_loaded_fixed_non_byzantine_valid_transition_to_limited;
+      by eapply lift_preloaded_fixed_non_byzantine_valid_transition_to_limited;
         [| | subst lst; apply finite_valid_trace_last_pstate | |].
     }
     destruct iom as [im |]; [| done].
@@ -426,7 +426,7 @@ Proof.
     unfold coeqv_message_equivocators
     ; case_decide as Hnobs; [by apply empty_subseteq |].
     rewrite (full_node_msg_dep_coequivocating_senders _ _ _ _ Hfull _ _ i li);
-      [| by cbn; rewrite Hlsti; eapply @pre_loaded_sub_composite_input_valid_projection, Hx].
+      [| by cbn; rewrite Hlsti; eapply @preloaded_sub_composite_input_valid_projection, Hx].
     rewrite elements_empty, app_nil_r; cbn.
     intro _i_im; rewrite elem_of_list_to_set.
     destruct (sender im) as [i_im |] eqn: Hsender; [| by inversion 1].

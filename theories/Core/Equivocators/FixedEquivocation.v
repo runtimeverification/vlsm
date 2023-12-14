@@ -85,7 +85,7 @@ Qed.
 Lemma in_futures_reflects_fixed_equivocation
   (s1 s2 : composite_state equivocator_IM)
   (Hfutures :
-    in_futures (pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM)) s1 s2)
+    in_futures (preloaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM)) s1 s2)
   : state_has_fixed_equivocation s2 -> state_has_fixed_equivocation s1.
 Proof.
   destruct Hfutures as [tr Htr].
@@ -156,7 +156,7 @@ Qed.
 (** Inclusion into the preloaded free composition. *)
 Lemma equivocators_fixed_equivocations_vlsm_incl_PreFree :
   VLSM_incl equivocators_fixed_equivocations_vlsm
-    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM)).
+    (preloaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM)).
 Proof.
   by apply constrained_preloaded_incl.
 Qed.
@@ -164,8 +164,8 @@ Qed.
 (** Inclusion of preloaded machine into the preloaded free composition. *)
 Lemma preloaded_equivocators_fixed_equivocations_vlsm_incl_free :
   VLSM_incl
-    (pre_loaded_with_all_messages_vlsm equivocators_fixed_equivocations_vlsm)
-    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM)).
+    (preloaded_with_all_messages_vlsm equivocators_fixed_equivocations_vlsm)
+    (preloaded_with_all_messages_vlsm (free_composite_vlsm equivocator_IM)).
 Proof.
   by apply basic_VLSM_incl_preloaded; [intro | inversion 1 | intro].
 Qed.
@@ -493,7 +493,7 @@ Proof.
       (Htr'pre : finite_constrained_trace FreeE is tr').
     {
       split; [| done].
-      specialize (vlsm_incl_pre_loaded_with_all_messages_vlsm FreeE) as Hincl.
+      specialize (vlsm_incl_preloaded_with_all_messages_vlsm FreeE) as Hincl.
       by apply (VLSM_incl_finite_valid_trace_from Hincl), Htr'.
     }
     specialize (equivocators_trace_project_preserves_proper_fixed_equivocator_descriptors
@@ -638,13 +638,13 @@ Proof.
     (equivocators_state_project IM initial_descriptors is) trX).
   {
     revert HtrX_Free; apply VLSM_incl_finite_valid_trace.
-    by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    by apply vlsm_incl_preloaded_with_all_messages_vlsm.
   }
 
   assert (Hlst_preX : constrained_state_prop Free
     (finite_trace_last (equivocators_state_project IM initial_descriptors is) trX)).
   {
-    apply (finite_valid_trace_last_pstate (pre_loaded_with_all_messages_vlsm Free)).
+    apply (finite_valid_trace_last_pstate (preloaded_with_all_messages_vlsm Free)).
     by apply HtrX_Pre.
   }
   rewrite (has_been_directly_observed_sent_received_iff Free) by done.
@@ -757,7 +757,7 @@ Proof.
     (equivocators_state_project IM initial_descriptors is) trX).
   {
     revert HtrXFree; apply VLSM_incl_finite_valid_trace.
-    by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    by apply vlsm_incl_preloaded_with_all_messages_vlsm.
   }
   assert (Hlst_trX : constrained_state_prop Free lst_trX).
   {
@@ -826,7 +826,7 @@ Proof.
       by intros i Hi; apply Hpr, (proj2 Hproper).
   }
   assert
-    (Hfutures : in_futures (pre_loaded_with_all_messages_vlsm FreeE)
+    (Hfutures : in_futures (preloaded_with_all_messages_vlsm FreeE)
       (destination pre_item) s0).
   { apply elem_of_list_split in Hpre_item.
     destruct Hpre_item as [pre_pre [pre_suf Hpre_item]].
@@ -838,7 +838,7 @@ Proof.
     destruct Htr_free as [Htr_s0 _].
     subst pre. clear -Htr_s0.
     rewrite <- app_assoc in Htr_s0.
-    apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm FreeE)) in Htr_s0.
+    apply (finite_valid_trace_from_app_iff (preloaded_with_all_messages_vlsm FreeE)) in Htr_s0.
     destruct Htr_s0 as [_ Hfuture].
     rewrite finite_trace_last_is_last in Hfuture.
     eexists.
@@ -973,7 +973,7 @@ Proof.
     (equivocators_state_project IM initial_descriptors is) trX).
   {
     revert HtrX; apply VLSM_incl_finite_valid_trace.
-    by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    by apply vlsm_incl_preloaded_with_all_messages_vlsm.
   }
   specialize (finite_valid_trace_last_pstate _ _ _ (proj1 HtrX_free)) as Hfree_lst.
   subst sX s.
@@ -997,16 +997,16 @@ Qed.
   start with the indexed full set of equivocators and then select a subset
   of them and take their composition).
 *)
-Lemma pre_loaded_equivocators_composition_sub_projection_commute
+Lemma preloaded_equivocators_composition_sub_projection_commute
   (seed1 : message -> Prop)
   (seed2 : message -> Prop)
   (Hseed12 : forall m, seed1 m -> seed2 m)
   : VLSM_incl
-    (composite_no_equivocation_vlsm_with_pre_loaded
+    (composite_no_equivocation_vlsm_with_preloaded
       (sub_IM (equivocator_IM IM) (elements equivocating))
       (free_constraint _)
       seed1)
-    (composite_no_equivocation_vlsm_with_pre_loaded
+    (composite_no_equivocation_vlsm_with_preloaded
       (equivocator_IM (sub_IM IM (elements equivocating)))
       (free_constraint _)
       seed2).
@@ -1032,20 +1032,20 @@ Proof.
     apply (preloaded_valid_state_projection (equivocator_IM (sub_IM IM (elements equivocating))) subi).
     revert Hs.
     apply VLSM_incl_valid_state.
-    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
   - by destruct 1.
 Qed.
 
-Lemma pre_loaded_equivocators_composition_sub_projection_commute_inv
+Lemma preloaded_equivocators_composition_sub_projection_commute_inv
   (seed1 : message -> Prop)
   (seed2 : message -> Prop)
   (Hseed12 : forall m, seed1 m -> seed2 m)
   : VLSM_incl
-    (composite_no_equivocation_vlsm_with_pre_loaded
+    (composite_no_equivocation_vlsm_with_preloaded
       (equivocator_IM (sub_IM IM (elements equivocating)))
       (free_constraint _)
       seed1)
-    (composite_no_equivocation_vlsm_with_pre_loaded
+    (composite_no_equivocation_vlsm_with_preloaded
       (sub_IM (equivocator_IM IM) (elements equivocating))
       (free_constraint _)
       seed2).
@@ -1069,7 +1069,7 @@ Proof.
     apply (preloaded_valid_state_projection (equivocator_IM (sub_IM IM (elements equivocating))) subi).
     revert Hs.
     apply VLSM_incl_valid_state.
-    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
 Qed.
 
 (**
@@ -1080,14 +1080,14 @@ Qed.
   composition of equivocators with no message equivocation and fixed state
   equivocation, a message which [has_been_sent] for that state but not
   [has_been_directly_observed] for a projection of that state <<sx>>, can nevertheless be
-  generated by the composition of the components allowed to equivocate, pre-loaded with
+  generated by the composition of the components allowed to equivocate, preloaded with
   the messages directly observed in the state <<sx>>.
 
   To prove that, we consider a trace witness for the message having been sent,
   we use [projection_has_not_been_directly_observed_is_equivocating] to derive that
   it must have been sent by one of the machines allowed to equivocate, from this
   we derive that it can be sent by the restriction of the composition of
-  equivocators to just the equivocating components, pre-loaded with the messages
+  equivocators to just the equivocating components, preloaded with the messages
   directly observed in the projection, then we use
   the [seeded_equivocators_valid_trace_project] result to reach our conclusion.
 *)
@@ -1116,7 +1116,7 @@ Proof.
   (*
     Phase II (a): The restriction of tr to the equivocators allowed to
     state-equivocate is valid for the corresponding composition
-    pre-loaded with the messages directly observed in the projection sX of s.
+    preloaded with the messages directly observed in the projection sX of s.
   *)
   specialize
     (finite_valid_trace_sub_projection (equivocator_IM IM) (elements equivocating)
@@ -1185,7 +1185,7 @@ Proof.
     to derive that the resulting projection is valid.
   *)
   unfold equivocators_composition_for_directly_observed,
-    pre_loaded_free_equivocating_vlsm_composition.
+    preloaded_free_equivocating_vlsm_composition.
   specialize
     (seeded_equivocators_valid_trace_project IM (elements equivocating)
       (composite_has_been_directly_observed IM sX)

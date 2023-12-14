@@ -20,14 +20,14 @@ Class HistoryVLSM `(X : VLSM message) : Prop :=
 
 #[global] Hint Mode HistoryVLSM - ! : typeclass_instances.
 
-Section sec_history_vlsm_pre_loaded.
+Section sec_history_vlsm_preloaded.
 
 Context
   `{HistoryVLSM message X}
   .
 
 #[export] Instance preloaded_history_vlsm :
-  HistoryVLSM (pre_loaded_with_all_messages_vlsm X).
+  HistoryVLSM (preloaded_with_all_messages_vlsm X).
 Proof.
   split; intros.
   - rewrite <- valid_transition_next_preloaded_iff.
@@ -66,7 +66,7 @@ Proof.
       by destruct_and! IHHtr; subst.
 Qed.
 
-End sec_history_vlsm_pre_loaded.
+End sec_history_vlsm_preloaded.
 
 Section sec_history_vlsm_composite.
 

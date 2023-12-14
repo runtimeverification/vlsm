@@ -195,7 +195,7 @@ Qed.
 Lemma fixed_non_byzantine_projection_incl_preloaded :
   VLSM_incl
     fixed_non_byzantine_projection
-    (pre_loaded_with_all_messages_vlsm
+    (preloaded_with_all_messages_vlsm
       (free_composite_vlsm (sub_IM fixed_byzantine_IM (elements non_byzantine)))).
 Proof.
   apply basic_VLSM_strong_incl.
@@ -247,14 +247,14 @@ Qed.
 
 End sec_fixed_byzantine_traces_as_projections.
 
-(** ** Fixed Byzantine traces as traces pre-loaded with signed messages
+(** ** Fixed Byzantine traces as traces preloaded with signed messages
 
   In this section we show that byzantine traces correspond to traces of
   a composition in the [non_byzantine] set, preloaded with messages
   signed by the components in the <<byzantine>> set.
 *)
 
-Section sec_fixed_byzantine_traces_as_pre_loaded.
+Section sec_fixed_byzantine_traces_as_preloaded.
 
 Definition fixed_set_signed_message (m : message) : Prop :=
   non_sub_index_authenticated_message (elements non_byzantine) A sender m /\
@@ -274,12 +274,12 @@ Definition fixed_set_signed_message (m : message) : Prop :=
   equivalent to each-other using the generic Lemma [same_IM_embedding].
 *)
 
-Definition pre_loaded_fixed_non_byzantine_vlsm' : VLSM message :=
-  composite_no_equivocation_vlsm_with_pre_loaded (sub_IM fixed_byzantine_IM (elements non_byzantine))
+Definition preloaded_fixed_non_byzantine_vlsm' : VLSM message :=
+  composite_no_equivocation_vlsm_with_preloaded (sub_IM fixed_byzantine_IM (elements non_byzantine))
     (free_constraint _) fixed_set_signed_message.
 
-Definition pre_loaded_fixed_non_byzantine_vlsm : VLSM message :=
-  composite_no_equivocation_vlsm_with_pre_loaded (sub_IM IM (elements non_byzantine)) (free_constraint _)
+Definition preloaded_fixed_non_byzantine_vlsm : VLSM message :=
+  composite_no_equivocation_vlsm_with_preloaded (sub_IM IM (elements non_byzantine)) (free_constraint _)
     fixed_set_signed_message.
 
 Lemma non_byzantine_components_same
@@ -300,10 +300,10 @@ Proof.
   by intro; symmetry; apply non_byzantine_components_same.
 Qed.
 
-Lemma pre_loaded_fixed_non_byzantine_VLSM_embedding
+Lemma preloaded_fixed_non_byzantine_VLSM_embedding
   : VLSM_embedding
-    pre_loaded_fixed_non_byzantine_vlsm'
-    pre_loaded_fixed_non_byzantine_vlsm
+    preloaded_fixed_non_byzantine_vlsm'
+    preloaded_fixed_non_byzantine_vlsm
     (same_IM_label_rew non_byzantine_components_same)
     (same_IM_state_rew non_byzantine_components_same).
 Proof.
@@ -315,10 +315,10 @@ Proof.
   by left; eapply same_IM_composite_has_been_sent_preservation.
 Qed.
 
-Lemma pre_loaded_fixed_non_byzantine_VLSM_embedding'
+Lemma preloaded_fixed_non_byzantine_VLSM_embedding'
   : VLSM_embedding
-    pre_loaded_fixed_non_byzantine_vlsm
-    pre_loaded_fixed_non_byzantine_vlsm'
+    preloaded_fixed_non_byzantine_vlsm
+    preloaded_fixed_non_byzantine_vlsm'
     (same_IM_label_rew non_byzantine_components_same_sym)
     (same_IM_state_rew non_byzantine_components_same_sym).
 Proof.
@@ -332,10 +332,10 @@ Qed.
 
 (**
   We next show that the [fixed_non_byzantine_projection] and
-  [pre_loaded_fixed_non_byzantine_vlsm'] are [VLSM_eq]ual.
+  [preloaded_fixed_non_byzantine_vlsm'] are [VLSM_eq]ual.
 
   The validity of [fixed_non_byzantine_projection] subsumes
-  the constraint of [pre_loaded_fixed_non_byzantine_vlsm'].
+  the constraint of [preloaded_fixed_non_byzantine_vlsm'].
 *)
 Lemma fixed_non_byzantine_projection_valid_no_equivocations
   : forall l s om, valid fixed_non_byzantine_projection l (s, om) ->
@@ -364,8 +364,8 @@ Proof.
   by rewrite decide_False; [intros; exists li, si | rewrite elem_of_elements].
 Qed.
 
-Lemma fixed_non_byzantine_pre_loaded_incl
-  : VLSM_incl fixed_non_byzantine_projection pre_loaded_fixed_non_byzantine_vlsm'.
+Lemma fixed_non_byzantine_preloaded_incl
+  : VLSM_incl fixed_non_byzantine_projection preloaded_fixed_non_byzantine_vlsm'.
 Proof.
   apply basic_VLSM_incl.
   - by intro; intros; apply fixed_non_byzantine_projection_initial_state_preservation.
@@ -383,8 +383,8 @@ Proof.
     by apply induced_sub_projection_transition_preservation.
 Qed.
 
-Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_valid
-  : weak_embedding_valid_preservation pre_loaded_fixed_non_byzantine_vlsm'
+Lemma preloaded_fixed_non_byzantine_vlsm_lift_valid
+  : weak_embedding_valid_preservation preloaded_fixed_non_byzantine_vlsm'
     (composite_vlsm fixed_byzantine_IM
        non_byzantine_not_equivocating_constraint)
     (lift_sub_label fixed_byzantine_IM (elements non_byzantine))
@@ -404,7 +404,7 @@ Proof.
             A sender fixed_byzantine_IM_sender_safety)
     ; [| done | done].
     eapply (VLSM_incl_valid_state); [| done].
-    by eapply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by eapply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
   - contradict HAv; clear -Hseeded Hsender.
     destruct Hseeded as [(i & Hi & Hm) _].
     unfold channel_authenticated_message in Hm.
@@ -412,9 +412,9 @@ Proof.
     by inversion Hm; subst.
 Qed.
 
-Lemma pre_loaded_fixed_non_byzantine_vlsm_lift_initial_message
+Lemma preloaded_fixed_non_byzantine_vlsm_lift_initial_message
   : weak_embedding_initial_message_preservation
-    pre_loaded_fixed_non_byzantine_vlsm'
+    preloaded_fixed_non_byzantine_vlsm'
     (composite_vlsm fixed_byzantine_IM
        non_byzantine_not_equivocating_constraint)
     (lift_sub_state fixed_byzantine_IM (elements non_byzantine)).
@@ -466,22 +466,22 @@ Qed.
   are derived from valid messages and protocol validity of the larger
   composition; therefore, the following simple result becomes very important.
 *)
-Lemma pre_loaded_fixed_non_byzantine_vlsm_lift :
+Lemma preloaded_fixed_non_byzantine_vlsm_lift :
   VLSM_embedding
-    pre_loaded_fixed_non_byzantine_vlsm'
+    preloaded_fixed_non_byzantine_vlsm'
     (composite_vlsm fixed_byzantine_IM non_byzantine_not_equivocating_constraint)
     (lift_sub_label fixed_byzantine_IM (elements non_byzantine))
     (lift_sub_state fixed_byzantine_IM (elements non_byzantine)).
 Proof.
   apply basic_VLSM_embedding.
-  - by intro; intros; apply pre_loaded_fixed_non_byzantine_vlsm_lift_valid.
+  - by intro; intros; apply preloaded_fixed_non_byzantine_vlsm_lift_valid.
   - by intro; intros * []; rapply lift_sub_transition.
   - by intro; intros; apply (lift_sub_state_initial fixed_byzantine_IM).
-  - by intro; intros; apply (pre_loaded_fixed_non_byzantine_vlsm_lift_initial_message l s m).
+  - by intro; intros; apply (preloaded_fixed_non_byzantine_vlsm_lift_initial_message l s m).
 Qed.
 
-Lemma pre_loaded_fixed_non_byzantine_incl
-  : VLSM_incl pre_loaded_fixed_non_byzantine_vlsm' fixed_non_byzantine_projection.
+Lemma preloaded_fixed_non_byzantine_incl
+  : VLSM_incl preloaded_fixed_non_byzantine_vlsm' fixed_non_byzantine_projection.
 Proof.
   apply basic_VLSM_incl; cbn.
   - by intro; intros; apply fixed_non_byzantine_projection_initial_state_preservation.
@@ -492,25 +492,25 @@ Proof.
     split.
     + by apply composite_label_sub_projection_option_lift.
     + by apply composite_state_sub_projection_lift.
-    + by apply (VLSM_embedding_input_valid pre_loaded_fixed_non_byzantine_vlsm_lift).
+    + by apply (VLSM_embedding_input_valid preloaded_fixed_non_byzantine_vlsm_lift).
   - by intros l s om s' om' [_ Ht]; apply induced_sub_projection_transition_preservation.
 Qed.
 
-Lemma fixed_non_byzantine_pre_loaded_eq
-  : VLSM_eq fixed_non_byzantine_projection pre_loaded_fixed_non_byzantine_vlsm'.
+Lemma fixed_non_byzantine_preloaded_eq
+  : VLSM_eq fixed_non_byzantine_projection preloaded_fixed_non_byzantine_vlsm'.
 Proof.
   split.
-  - by apply fixed_non_byzantine_pre_loaded_incl.
-  - by apply pre_loaded_fixed_non_byzantine_incl.
+  - by apply fixed_non_byzantine_preloaded_incl.
+  - by apply preloaded_fixed_non_byzantine_incl.
 Qed.
 
-End sec_fixed_byzantine_traces_as_pre_loaded.
+End sec_fixed_byzantine_traces_as_preloaded.
 
 (** *** Second fixed byzantine trace definition
 
   Given the equivalence results from Lemmas [fixed_byzantine_trace_char1],
-  [fixed_non_byzantine_pre_loaded_eq], and
-  [pre_loaded_fixed_non_byzantine_VLSM_embedding],
+  [fixed_non_byzantine_preloaded_eq], and
+  [preloaded_fixed_non_byzantine_VLSM_embedding],
   we introduce the following alternate definition to the
   [fixed_byzantine_trace_prop]erty, this time defined for (not necessarily valid)
   traces of the full composition, accepting any such trace as long as its
@@ -519,7 +519,7 @@ End sec_fixed_byzantine_traces_as_pre_loaded.
   [non_byzantine_not_equivocating_constraint].
 *)
 Definition fixed_byzantine_trace_alt_prop is tr : Prop :=
-  finite_valid_trace pre_loaded_fixed_non_byzantine_vlsm
+  finite_valid_trace preloaded_fixed_non_byzantine_vlsm
     (composite_state_sub_projection IM (elements non_byzantine) is)
     (finite_trace_sub_projection IM (elements non_byzantine) tr).
 
@@ -547,7 +547,7 @@ Context
   (A : validator -> index)
   (sender : message -> option validator)
   (selection_complement := difference (list_to_set (enum index)) selection)
-  (PreNonByzantine : VLSM message := pre_loaded_fixed_non_byzantine_vlsm IM selection A sender)
+  (PreNonByzantine : VLSM message := preloaded_fixed_non_byzantine_vlsm IM selection A sender)
   (Fixed : VLSM message := fixed_equivocation_vlsm_composition IM selection)
   (FixedNonEquivocating : VLSM message :=
     pre_induced_sub_projection IM (elements selection_complement) (fixed_equivocation_constraint IM selection))
@@ -671,7 +671,7 @@ Proof.
       apply emitted_messages_are_valid_iff in HomY.
       destruct HomY as [[_v [[_im Him] Heqim]] | Hiom]
       ; [by elim (no_initial_messages_in_IM _v _im) |].
-      apply (VLSM_incl_can_emit (vlsm_incl_pre_loaded_with_all_messages_vlsm Fixed))
+      apply (VLSM_incl_can_emit (vlsm_incl_preloaded_with_all_messages_vlsm Fixed))
         in Hiom.
       apply can_emit_composite_project in Hiom as [_v Hiom].
       destruct Hseeded as [[i [Hi Hsigned]] _].
@@ -701,7 +701,7 @@ Proof.
 Qed.
 
 Lemma preloaded_non_byzantine_vlsm_lift
-  : VLSM_embedding PreNonByzantine (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))
+  : VLSM_embedding PreNonByzantine (preloaded_with_all_messages_vlsm (free_composite_vlsm IM))
       (lift_sub_label IM (elements selection_complement))
       (lift_sub_state IM (elements selection_complement)).
 Proof.

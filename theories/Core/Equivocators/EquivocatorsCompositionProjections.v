@@ -18,9 +18,9 @@ Context {message : Type}
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
+  (PreFreeE := preloaded_with_all_messages_vlsm FreeE)
   (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
+  (PreFree := preloaded_with_all_messages_vlsm Free)
   .
 
 (**
@@ -715,7 +715,7 @@ Qed.
 
 (**
   The state and descriptors obtained after applying [equivocators_trace_project]
-  on a pre-loaded valid trace satisfy the [previous_state_descriptor_prop]erty.
+  on a preloaded valid trace satisfy the [previous_state_descriptor_prop]erty.
 *)
 Lemma equivocators_trace_project_from_state_descriptors
   (descriptors idescriptors : equivocator_descriptors IM)
@@ -1195,8 +1195,8 @@ Proof.
 Qed.
 
 (**
-  Projecting a pre-loaded valid trace of the composition of equivocators
-  using [proper_equivocator_descriptors] one obtains a pre-loaded valid trace
+  Projecting a preloaded valid trace of the composition of equivocators
+  using [proper_equivocator_descriptors] one obtains a preloaded valid trace
   of a free composition.
 *)
 Lemma pre_equivocators_valid_trace_project
@@ -1693,9 +1693,9 @@ Context
   (seed : message -> Prop)
   (SeededXE := seeded_equivocators_no_equivocation_vlsm IM selection seed)
   (SubFreeE := free_composite_vlsm (sub_IM (equivocator_IM IM) selection))
-  (SubPreFreeE := pre_loaded_with_all_messages_vlsm SubFreeE)
+  (SubPreFreeE := preloaded_with_all_messages_vlsm SubFreeE)
   (SubFree := free_composite_vlsm (sub_IM IM selection))
-  (SeededX := pre_loaded_vlsm SubFree seed)
+  (SeededX := preloaded_vlsm SubFree seed)
   .
 
 Lemma seeded_equivocators_initial_message
@@ -1864,7 +1864,7 @@ Proof.
 Qed.
 
 Lemma PreSeededXE_incl_PreFreeE
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm SeededXE) SubPreFreeE.
+  : VLSM_incl (preloaded_with_all_messages_vlsm SeededXE) SubPreFreeE.
 Proof.
   by apply basic_VLSM_incl_preloaded; [intro | inversion 1 | intro].
 Qed.
@@ -1906,9 +1906,9 @@ Context
   (IM : index -> VLSM message)
   `{forall i : index, HasBeenSentCapability (IM i)}
   (FreeE := free_composite_vlsm (equivocator_IM IM))
-  (PreFreeE := pre_loaded_with_all_messages_vlsm FreeE)
+  (PreFreeE := preloaded_with_all_messages_vlsm FreeE)
   (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
+  (PreFree := preloaded_with_all_messages_vlsm Free)
   .
 
 Definition free_sub_free_equivocator_descriptors
@@ -1940,7 +1940,7 @@ Proof.
       (equivocators_no_equivocations_constraint IM)) as Hproj.
     apply (VLSM_embedding_finite_valid_trace Hproj) in Htr.
     specialize
-      (false_composite_no_equivocation_vlsm_with_pre_loaded
+      (false_composite_no_equivocation_vlsm_with_preloaded
         (SubProjectionTraces.sub_IM (equivocator_IM IM) (enum index))
         (free_constraint _))
       as Heq.
@@ -2018,7 +2018,7 @@ Proof.
     subst.
     clear -HtrX.
     specialize
-      (vlsm_is_pre_loaded_with_False
+      (vlsm_is_preloaded_with_False
         (free_composite_vlsm (SubProjectionTraces.sub_IM IM (finite.enum index))))
       as Heq.
     apply (VLSM_eq_finite_valid_trace Heq) in HtrX.
