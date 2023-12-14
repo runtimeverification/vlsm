@@ -27,15 +27,70 @@ Definition pre_loaded_vlsm {message : Type} (X : VLSM message) (initial : messag
   : VLSM message :=
     mk_vlsm (pre_loaded_vlsm_machine X initial).
 
+Definition pre_loaded_with_all_messages_vlsm `(X : VLSM message) : VLSM message :=
+  pre_loaded_vlsm X (fun _ => True).
+
+(** ** Constrained traces, states and messages
+
+  We will use the word "constrained" to denote concepts which correspond to
+  validity in the VLSM preloaded with all messages.
+*)
+
+Section sec_constrained_defs.
+
+Context
+  `(X : VLSM message)
+  .
+
+Definition input_constrained :=
+  input_valid (pre_loaded_with_all_messages_vlsm X).
+
+Definition input_constrained_transition :=
+  input_valid_transition (pre_loaded_with_all_messages_vlsm X).
+
+Definition input_constrained_transition_to :=
+  input_valid_transition_to (pre_loaded_with_all_messages_vlsm X).
+
+Definition input_constrained_transition_item :=
+  input_valid_transition_item (pre_loaded_with_all_messages_vlsm X).
+
+Definition finite_constrained_trace_from_to :=
+  finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X).
+
+Definition finite_constrained_trace_from :=
+  finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X).
+
+Definition finite_constrained_trace_init_to :=
+  finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X).
+
+Definition finite_constrained_trace :=
+  finite_valid_trace (pre_loaded_with_all_messages_vlsm X).
+
+Definition constrained_trace_from_prop :=
+  valid_trace_from_prop (pre_loaded_with_all_messages_vlsm X).
+
+Definition constrained_trace_prop :=
+  valid_trace_prop (pre_loaded_with_all_messages_vlsm X).
+
+Definition constrained_state_prop :=
+  valid_state_prop (pre_loaded_with_all_messages_vlsm X).
+
+Definition constrained_message_prop :=
+  can_emit (pre_loaded_with_all_messages_vlsm X).
+
+Definition constrained_state_message_prop :=
+  valid_state_message_prop (pre_loaded_with_all_messages_vlsm X).
+
+End sec_constrained_defs.
+
+(** ** Basic properties of preloaded VLSMs *)
+
 Section sec_pre_loaded_with_all_messages_vlsm.
 
 Context
   {message : Type}
   (X : VLSM message)
   .
-
-Definition pre_loaded_with_all_messages_vlsm : VLSM message :=
-  pre_loaded_vlsm X (fun _ => True).
 
 (**
   A message which can be emitted during a protocol run of the
@@ -49,14 +104,14 @@ Definition pre_loaded_with_all_messages_vlsm : VLSM message :=
 Definition byzantine_message_prop
   (m : message)
   : Prop
-  := can_emit pre_loaded_with_all_messages_vlsm m.
+  := can_emit (pre_loaded_with_all_messages_vlsm X) m.
 
 Definition byzantine_message : Type
   := sig byzantine_message_prop.
 
 Lemma pre_loaded_with_all_messages_message_valid_initial_state_message
   (om : option message)
-  : valid_state_message_prop pre_loaded_with_all_messages_vlsm (proj1_sig (vs0 X)) om.
+  : constrained_state_message_prop X (proj1_sig (vs0 X)) om.
 Proof.
   by apply valid_initial_state_message; [apply proj2_sig | destruct om]; cbn; [right |].
 Qed.
@@ -65,18 +120,18 @@ Lemma pre_loaded_with_all_messages_valid_state_message_preservation
   (s : state X)
   (om : option message)
   (Hps : valid_state_message_prop X s om)
-  : valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
+  : constrained_state_message_prop X s om.
 Proof.
   induction Hps.
-  - apply (valid_initial_state_message pre_loaded_with_all_messages_vlsm); cbn; [done |].
+  - apply valid_initial_state_message; cbn; [done |].
     by destruct om; cbn; [right |].
-  - by apply (valid_generated_state_message pre_loaded_with_all_messages_vlsm) with s _om _s om l.
+  - by eapply valid_generated_state_message; cycle 2.
 Qed.
 
 Lemma pre_loaded_with_all_messages_valid_state_prop
   (s : state X)
   (Hps : valid_state_prop X s)
-  : valid_state_prop pre_loaded_with_all_messages_vlsm s.
+  : constrained_state_prop X s.
 Proof.
   unfold valid_state_prop in *.
   destruct Hps as [om Hprs].
@@ -86,7 +141,7 @@ Proof.
 Qed.
 
 Lemma any_message_is_valid_in_preloaded (om : option message) :
-  option_valid_message_prop pre_loaded_with_all_messages_vlsm om.
+  option_valid_message_prop (pre_loaded_with_all_messages_vlsm X) om.
 Proof.
   eexists.
   by apply pre_loaded_with_all_messages_message_valid_initial_state_message.
@@ -94,20 +149,20 @@ Qed.
 
 Lemma preloaded_weaken_valid_state_message_prop s om :
   valid_state_message_prop X s om ->
-  valid_state_message_prop pre_loaded_with_all_messages_vlsm s om.
+  constrained_state_message_prop X s om.
 Proof.
   induction 1.
-  - refine (valid_initial_state_message pre_loaded_with_all_messages_vlsm s Hs om _).
+  - apply valid_initial_state_message; [done |].
     by destruct om; cbn; [right |].
-  - by eapply valid_generated_state_message; cycle 2; eauto.
+  - by eapply valid_generated_state_message; cycle 2.
 Qed.
 
 Lemma preloaded_weaken_input_valid_transition
       l s om s' om' :
   input_valid_transition X l (s, om) (s', om') ->
-  input_valid_transition pre_loaded_with_all_messages_vlsm l (s, om) (s', om').
+  input_constrained_transition X l (s, om) (s', om').
 Proof.
-  unfold input_valid_transition.
+  unfold input_constrained_transition, input_valid_transition.
   intros [[[_om valid_s] [_ Hvalid]] Htrans].
   repeat split; [| | done..].
   - by exists _om; apply preloaded_weaken_valid_state_message_prop.
@@ -116,20 +171,20 @@ Qed.
 
 Lemma preloaded_weaken_valid_trace_from s tr
   : finite_valid_trace_from X s tr ->
-    finite_valid_trace_from pre_loaded_with_all_messages_vlsm s tr.
+    finite_constrained_trace_from X s tr.
 Proof.
-  intros H. induction H using finite_valid_trace_from_rev_ind.
-  - apply (finite_valid_trace_from_empty pre_loaded_with_all_messages_vlsm).
+  induction 1 using finite_valid_trace_from_rev_ind.
+  - apply (finite_valid_trace_from_empty (pre_loaded_with_all_messages_vlsm X)).
     destruct H as [om H]. exists om.
     by revert H; apply preloaded_weaken_valid_state_message_prop.
-  - apply (finite_valid_trace_from_app_iff pre_loaded_with_all_messages_vlsm).
+  - apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm X)).
     split; [done |].
-    apply (finite_valid_trace_singleton pre_loaded_with_all_messages_vlsm).
+    apply (finite_valid_trace_singleton (pre_loaded_with_all_messages_vlsm X)).
     by revert Hx; apply preloaded_weaken_input_valid_transition.
 Qed.
 
 Lemma pre_trace_segments_with_valid_inputs_are_valid s f tr
-  (Htr : finite_valid_trace_from_to pre_loaded_with_all_messages_vlsm s f tr)
+  (Htr : finite_constrained_trace_from_to X s f tr)
   (Hs : valid_state_prop X s)
   (Hobs : Forall (fun item => option_valid_message_prop X (input item)) tr)
   : finite_valid_trace_from_to X s f tr.
@@ -148,7 +203,7 @@ Proof.
 Qed.
 
 Lemma pre_traces_with_valid_inputs_are_valid s f tr
-  (Htr : finite_valid_trace_init_to pre_loaded_with_all_messages_vlsm s f tr)
+  (Htr : finite_constrained_trace_init_to X s f tr)
   (Hobs : Forall (fun item => option_valid_message_prop X (input item)) tr)
   : finite_valid_trace_init_to X s f tr.
 Proof.
@@ -163,16 +218,20 @@ Section sec_pre_loaded_valid_transition.
 
 Context
   `(X : VLSM message)
-  (R := pre_loaded_with_all_messages_vlsm X)
   .
 
 Lemma valid_transition_preloaded_iff :
   forall l s1 iom s2 oom,
-    valid_transition X l s1 iom s2 oom <-> valid_transition R l s1 iom s2 oom.
+    valid_transition X l s1 iom s2 oom
+      <->
+    valid_transition (pre_loaded_with_all_messages_vlsm X) l s1 iom s2 oom.
 Proof. by firstorder. Qed.
 
 Lemma valid_transition_next_preloaded_iff :
-  forall s1 s2, valid_transition_next X s1 s2 <-> valid_transition_next R s1 s2.
+  forall s1 s2,
+    valid_transition_next X s1 s2
+      <->
+    valid_transition_next (pre_loaded_with_all_messages_vlsm X) s1 s2.
 Proof.
   by intros; split; intros []; econstructor; apply valid_transition_preloaded_iff.
 Qed.
@@ -499,7 +558,7 @@ Lemma pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm
   (P : message -> Prop)
   (Hvalidating :
     forall (l : label _) (s : state _) (m : message)
-      (Hv : input_valid (pre_loaded_with_all_messages_vlsm X) l (s, Some m)),
+      (Hv : input_constrained X l (s, Some m)),
       valid_message_prop (pre_loaded_vlsm X P) m)
   : VLSM_eq (pre_loaded_with_all_messages_vlsm X) (pre_loaded_vlsm X P).
 Proof.
@@ -539,59 +598,6 @@ Proof.
 Qed.
 
 End sec_VLSM_eq_preloaded_properties.
-
-(** ** Constrained traces, states and messages
-
-  We will use the word "constrained" to denote concepts which correspond to
-  validity in the VLSM preloaded with all messages.
-*)
-
-Section sec_constrained_defs.
-
-Context
-  `(X : VLSM message)
-  .
-
-Definition input_constrained :=
-  input_valid (pre_loaded_with_all_messages_vlsm X).
-
-Definition input_constrained_transition :=
-  input_valid_transition (pre_loaded_with_all_messages_vlsm X).
-
-Definition input_constrained_transition_to :=
-  input_valid_transition_to (pre_loaded_with_all_messages_vlsm X).
-
-Definition input_constrained_transition_item :=
-  input_valid_transition_item (pre_loaded_with_all_messages_vlsm X).
-
-Definition finite_constrained_trace_from_to :=
-  finite_valid_trace_from_to (pre_loaded_with_all_messages_vlsm X).
-
-Definition finite_constrained_trace_from :=
-  finite_valid_trace_from (pre_loaded_with_all_messages_vlsm X).
-
-Definition finite_constrained_trace_init_to :=
-  finite_valid_trace_init_to (pre_loaded_with_all_messages_vlsm X).
-
-Definition finite_constrained_trace :=
-  finite_valid_trace (pre_loaded_with_all_messages_vlsm X).
-
-Definition constrained_trace_from_prop :=
-  valid_trace_from_prop (pre_loaded_with_all_messages_vlsm X).
-
-Definition constrained_trace_prop :=
-  valid_trace_prop (pre_loaded_with_all_messages_vlsm X).
-
-Definition constrained_state_prop :=
-  valid_state_prop (pre_loaded_with_all_messages_vlsm X).
-
-Definition constrained_message_prop :=
-  can_emit (pre_loaded_with_all_messages_vlsm X).
-
-Definition constrained_state_message_prop :=
-  valid_state_message_prop (pre_loaded_with_all_messages_vlsm X).
-
-End sec_constrained_defs.
 
 (** ** Direct definitions of constrained traces, states and messages
 
