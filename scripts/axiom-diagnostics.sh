@@ -37,7 +37,7 @@ then
 fi
 
 # Create a temporary directory to hold intermediate results.
-tmp=$(mktemp -d)
+tmp=$(mktemp -d -p .)
 
 # Find all Coq source files to be parsed.
 for filepath in $(find $dir -name "*.v")
