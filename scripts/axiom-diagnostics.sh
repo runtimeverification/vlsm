@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # If argument $1 is not present, print usage info and exit.
 if test -z "$1"
