@@ -9,12 +9,12 @@ From VLSM.Core Require Import PreloadedVLSM.
   prove that they are equivalent (lemma [byzantine_alt_byzantine_iff]),
   and then prove that both definitions are equivalent with the definition
   of a valid trace in the corresponding preloaded VLSM
-  (lemmas [byzantine_pre_loaded_with_all_messages] and
-  [pre_loaded_with_all_messages_alt_eq]).
+  (lemmas [byzantine_preloaded_with_all_messages] and
+  [preloaded_with_all_messages_alt_eq]).
 
   Note that, contrary to what one might think, the byzantine trace property
   does not only capture traces exhibiting byzantine behavior, but also all
-  valid traces (consequence of lemma [vlsm_incl_pre_loaded_with_all_messages_vlsm]).
+  valid traces (consequence of lemma [vlsm_incl_preloaded_with_all_messages_vlsm]).
   Therefore to avoid confusion we will call _proper byzantine traces_,
   or _traces exhibiting byzantine behavior_ the collection of traces with
   the byzantine trace property but without the valid trace property.
@@ -46,16 +46,16 @@ Definition byzantine_trace_prop (tr : Trace M) : Prop :=
 
 (**
   The first result says that all traces with the byzantine trace property
-  for a VLSM <<M>> are traces of the [pre_loaded_with_all_messages_vlsm]
+  for a VLSM <<M>> are traces of the [preloaded_with_all_messages_vlsm]
   associated to <<M>>.
 *)
-Lemma byzantine_pre_loaded_with_all_messages :
+Lemma byzantine_preloaded_with_all_messages :
   forall (tr : Trace M),
     byzantine_trace_prop tr ->
     constrained_trace_prop M tr.
 Proof.
   intros tr [M' Htr]; cbn in Htr.
-  by apply proj_pre_loaded_with_all_messages_incl in Htr.
+  by apply proj_preloaded_with_all_messages_incl in Htr.
 Qed.
 
 (** ** An alternative definition
@@ -140,13 +140,13 @@ Qed.
   Since we have already proven that [alternate_byzantine_trace_prop]
   implies [byzantine_trace_prop] (lemma [byzantine_alt_byzantine]),
   and since we know that the traces satisfying [byzantine_trace_prop]
-  are valid traces for the [pre_loaded_with_all_messages_vlsm], to
+  are valid traces for the [preloaded_with_all_messages_vlsm], to
   prove the equivalence it is enough to close the circle by proving the
-  VLSM inclusion between the [pre_loaded_with_all_messages_vlsm] and the
+  VLSM inclusion between the [preloaded_with_all_messages_vlsm] and the
   projection VLSM used to define [alternate_byzantine_trace_prop].
 *)
 
-Section sec_pre_loaded_with_all_messages_byzantine_alt.
+Section sec_preloaded_with_all_messages_byzantine_alt.
 
 (**
   Let <<Alt>> denote the free composition of <<M>> with the [emit_any_message_vlsm],
@@ -162,10 +162,10 @@ Context
   First, note that using the results above it is easy to prove the inclusion
   of <<Alt1>> into <<Preloaded>>.
 *)
-Lemma alt_pre_loaded_with_all_messages_incl :
-  VLSM_incl Alt1 (pre_loaded_with_all_messages_vlsm M).
+Lemma alt_preloaded_with_all_messages_incl :
+  VLSM_incl Alt1 (preloaded_with_all_messages_vlsm M).
 Proof.
-  by intros t Hvt; apply byzantine_pre_loaded_with_all_messages, byzantine_alt_byzantine.
+  by intros t Hvt; apply byzantine_preloaded_with_all_messages, byzantine_alt_byzantine.
 Qed.
 
 (**
@@ -235,8 +235,8 @@ Qed.
   Finally, we can use [basic_VLSM_incl] together with the
   results above to show that <<Preloaded>> is included in <<Alt1>>.
 *)
-Lemma pre_loaded_with_all_messages_alt_incl :
-  VLSM_incl (pre_loaded_with_all_messages_vlsm M) Alt1.
+Lemma preloaded_with_all_messages_alt_incl :
+  VLSM_incl (preloaded_with_all_messages_vlsm M) Alt1.
 Proof.
   apply (basic_VLSM_incl _ Alt1); intro; intros;
     [done | by apply alt_proj_option_valid_message | | by apply H].
@@ -249,15 +249,15 @@ Proof.
 Qed.
 
 (** Hence, <<Preloaded>> and <<Alt1>> are actually trace-equivalent. *)
-Lemma pre_loaded_with_all_messages_alt_eq :
-  VLSM_eq (pre_loaded_with_all_messages_vlsm M) Alt1.
+Lemma preloaded_with_all_messages_alt_eq :
+  VLSM_eq (preloaded_with_all_messages_vlsm M) Alt1.
 Proof.
   split.
-  - by apply pre_loaded_with_all_messages_alt_incl.
-  - by apply alt_pre_loaded_with_all_messages_incl.
+  - by apply preloaded_with_all_messages_alt_incl.
+  - by apply alt_preloaded_with_all_messages_incl.
 Qed.
 
-End sec_pre_loaded_with_all_messages_byzantine_alt.
+End sec_preloaded_with_all_messages_byzantine_alt.
 
 (**
   Finally, we can conclude that the two definitions for byzantine traces are
@@ -269,7 +269,7 @@ Lemma byzantine_alt_byzantine_iff :
 Proof.
   split; intros.
   - by apply byzantine_alt_byzantine.
-  - by apply pre_loaded_with_all_messages_alt_incl, byzantine_pre_loaded_with_all_messages.
+  - by apply preloaded_with_all_messages_alt_incl, byzantine_preloaded_with_all_messages.
 Qed.
 
 End sec_byzantine_traces.
@@ -278,7 +278,7 @@ End sec_byzantine_traces.
 
   Given that projections of composition of validator VLSMs
   are equivalent to their corresponding VLSM preloaded with all
-  messages ([pre_loaded_with_all_messages_validating_proj_eq]),
+  messages ([preloaded_with_all_messages_validating_proj_eq]),
   we can derive that for validators, all their byzantine traces are
   included in the valid traces of their projection from the composition.
 *)
@@ -301,8 +301,8 @@ Lemma validator_component_byzantine_fault_tolerance :
 Proof.
   intros tr Htr.
   eapply VLSM_incl_valid_trace.
-  - by apply pre_loaded_with_all_messages_validator_component_proj_incl.
-  - by apply byzantine_pre_loaded_with_all_messages in Htr.
+  - by apply preloaded_with_all_messages_validator_component_proj_incl.
+  - by apply byzantine_preloaded_with_all_messages in Htr.
 Qed.
 
 End sec_single_validator_byzantine_traces.
@@ -320,7 +320,7 @@ Section sec_composite_validator_byzantine_traces.
 (**
   Let us fix an indexed set of VLSMs <<IM>> and their
   constrained composition <<X>>, and let <<PreloadedX>> be
-  the [pre_loaded_with_all_messages_vlsm] associated to <<X>>.
+  the [preloaded_with_all_messages_vlsm] associated to <<X>>.
 *)
 
 Context
@@ -337,8 +337,8 @@ Context
   of <<X>>, we just need to show that preloaded <<X>> is included in <<X>> to
   prove our main result.
 *)
-Lemma validator_pre_loaded_with_all_messages_incl :
-  VLSM_incl (pre_loaded_with_all_messages_vlsm X) X.
+Lemma validator_preloaded_with_all_messages_incl :
+  VLSM_incl (preloaded_with_all_messages_vlsm X) X.
 Proof.
   apply VLSM_incl_finite_traces_characterization.
   intros s tr Htr.
@@ -358,7 +358,7 @@ Proof.
   split_and!; [| | by cbn; apply Hv].
   - by eapply valid_state_project_preloaded_to_preloaded in Hlst.
   - eexists _.
-    by apply pre_loaded_with_all_messages_message_valid_initial_state_message.
+    by apply preloaded_with_all_messages_message_valid_initial_state_message.
 Qed.
 
 (**
@@ -371,8 +371,8 @@ Lemma composite_validator_byzantine_traces_are_not_byzantine :
     valid_trace_prop X tr.
 Proof.
   intros tr Hbyz.
-  apply validator_pre_loaded_with_all_messages_incl.
-  by apply byzantine_alt_byzantine_iff, alt_pre_loaded_with_all_messages_incl in Hbyz.
+  apply validator_preloaded_with_all_messages_incl.
+  by apply byzantine_alt_byzantine_iff, alt_preloaded_with_all_messages_incl in Hbyz.
 Qed.
 
 End sec_composite_validator_byzantine_traces.

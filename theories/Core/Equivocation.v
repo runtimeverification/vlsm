@@ -100,7 +100,7 @@ Section sec_simple.
 Context
   {message : Type}
   (vlsm : VLSM message)
-  (pre_vlsm := pre_loaded_with_all_messages_vlsm vlsm)
+  (pre_vlsm := preloaded_with_all_messages_vlsm vlsm)
   .
 
 (**
@@ -631,7 +631,7 @@ Qed.
 
 (**
   Sufficient condition for [proper_sent] avoiding the
-  [pre_loaded_with_all_messages_vlsm].
+  [preloaded_with_all_messages_vlsm].
 *)
 Lemma specialized_proper_sent
   `{HasBeenSentCapability}
@@ -643,7 +643,7 @@ Lemma specialized_proper_sent
 Proof.
   destruct Hs as [_om Hs].
   assert (Hpres : constrained_state_prop vlsm s)
-    by (exists _om; apply pre_loaded_with_all_messages_valid_state_message_preservation; done).
+    by (exists _om; apply preloaded_with_all_messages_valid_state_message_preservation; done).
   apply proper_sent; [done |].
   specialize (has_been_sent_consistency s Hpres m) as Hcons.
   apply Hcons.
@@ -653,12 +653,12 @@ Proof.
   revert Htr.
   unfold pre_vlsm; clear.
   destruct vlsm as (T, M).
-  by apply VLSM_incl_finite_valid_trace_init_to, vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply VLSM_incl_finite_valid_trace_init_to, vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 (**
   [proper_sent] condition specialized to regular VLSM traces
-  (avoiding [pre_loaded_with_all_messages_vlsm]).
+  (avoiding [preloaded_with_all_messages_vlsm]).
 *)
 Lemma specialized_proper_sent_rev
   `{HasBeenSentCapability}
@@ -670,7 +670,7 @@ Lemma specialized_proper_sent_rev
 Proof.
   destruct Hs as [_om Hs].
   assert (Hpres : constrained_state_prop vlsm s)
-    by (exists _om; apply pre_loaded_with_all_messages_valid_state_message_preservation; done).
+    by (exists _om; apply preloaded_with_all_messages_valid_state_message_preservation; done).
   apply proper_sent in Hsm; [| done].
   intros is tr Htr.
   specialize (Hsm is tr).
@@ -678,7 +678,7 @@ Proof.
   revert Htr.
   unfold pre_vlsm; clear.
   destruct vlsm as (T, M).
-  by apply VLSM_incl_finite_valid_trace_init_to, vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply VLSM_incl_finite_valid_trace_init_to, vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Lemma has_been_sent_consistency_proper_not_sent
@@ -917,7 +917,7 @@ Proof.
 Qed.
 
 Lemma prove_none_have_message_from_stepwise :
-  forall (s : state (pre_loaded_with_all_messages_vlsm vlsm))
+  forall (s : state (preloaded_with_all_messages_vlsm vlsm))
          (Hs : constrained_state_prop vlsm s)
          (m : message),
     no_traces_have_message_prop vlsm selector (fun s m => ~ oracle s m) s m.
@@ -935,7 +935,7 @@ Qed.
 
 Lemma selected_messages_consistency_prop_from_stepwise
     (oracle_dec : RelDecision oracle)
-    (s : state (pre_loaded_with_all_messages_vlsm vlsm))
+    (s : state (preloaded_with_all_messages_vlsm vlsm))
     (Hs : constrained_state_prop vlsm s)
     (m : message)
     : selected_messages_consistency_prop vlsm selector s m.
@@ -950,8 +950,8 @@ Proof.
 Qed.
 
 Lemma in_futures_preserving_oracle_from_stepwise :
-  forall (s1 s2 : state (pre_loaded_with_all_messages_vlsm vlsm))
-    (Hfutures : in_futures (pre_loaded_with_all_messages_vlsm vlsm) s1 s2)
+  forall (s1 s2 : state (preloaded_with_all_messages_vlsm vlsm))
+    (Hfutures : in_futures (preloaded_with_all_messages_vlsm vlsm) s1 s2)
     (m : message),
     oracle s1 m -> oracle  s2 m.
 Proof.
@@ -1070,7 +1070,7 @@ Lemma preloaded_has_been_sent_stepwise_props
       (vlsm : VLSM message)
       `{HasBeenSentCapability message vlsm}
       (seed : message -> Prop)
-      (X := pre_loaded_vlsm vlsm seed) :
+      (X := preloaded_vlsm vlsm seed) :
   has_been_sent_stepwise_prop (vlsm := X) (has_been_sent vlsm).
 Proof.
   destruct (has_been_sent_stepwise_props vlsm); cbn in *.
@@ -1085,7 +1085,7 @@ Qed.
       (vlsm : VLSM message)
       `{HasBeenSentCapability message vlsm}
       (seed : message -> Prop) :
-  HasBeenSentCapability (pre_loaded_vlsm vlsm seed).
+  HasBeenSentCapability (preloaded_vlsm vlsm seed).
 Proof.
   econstructor.
   - by apply (has_been_sent_dec vlsm).
@@ -1134,7 +1134,7 @@ Lemma preloaded_has_been_received_stepwise_props
       (vlsm : VLSM message)
       `{HasBeenReceivedCapability message vlsm}
       (seed : message -> Prop)
-      (X := pre_loaded_vlsm vlsm seed) :
+      (X := preloaded_vlsm vlsm seed) :
   has_been_received_stepwise_prop (vlsm := X) (has_been_received vlsm).
 Proof.
   destruct (has_been_received_stepwise_props vlsm); cbn in *.
@@ -1149,7 +1149,7 @@ Qed.
       (vlsm : VLSM message)
       `{HasBeenReceivedCapability message vlsm}
       (seed : message -> Prop) :
-  HasBeenReceivedCapability (pre_loaded_vlsm vlsm seed).
+  HasBeenReceivedCapability (preloaded_vlsm vlsm seed).
 Proof.
   econstructor.
   - by apply (has_been_received_dec vlsm).
@@ -1255,7 +1255,7 @@ Qed.
 
 Lemma proper_directly_observed
   {message} (vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :
-  forall (s : state (pre_loaded_with_all_messages_vlsm vlsm)),
+  forall (s : state (preloaded_with_all_messages_vlsm vlsm)),
     constrained_state_prop vlsm s ->
     forall m,
       all_traces_have_message_prop vlsm item_sends_or_receives (has_been_directly_observed vlsm) s m.
@@ -1266,7 +1266,7 @@ Qed.
 
 Lemma proper_not_directly_observed
   `(vlsm : VLSM message) `{HasBeenDirectlyObservedCapability message vlsm} :
-  forall (s : state (pre_loaded_with_all_messages_vlsm vlsm)),
+  forall (s : state (preloaded_with_all_messages_vlsm vlsm)),
     constrained_state_prop vlsm s ->
     forall m,
       no_traces_have_message_prop vlsm item_sends_or_receives
@@ -1337,7 +1337,7 @@ Context
 
 Lemma has_been_directly_observed_sent_received_iff
   `{HasBeenDirectlyObservedCapability message vlsm}
-  (s : state (pre_loaded_with_all_messages_vlsm vlsm))
+  (s : state (preloaded_with_all_messages_vlsm vlsm))
   (Hs : constrained_state_prop vlsm s)
   (m : message)
   : has_been_directly_observed vlsm s m <-> has_been_received vlsm s m \/ has_been_sent vlsm s m.
@@ -1392,7 +1392,7 @@ Qed.
 
 Lemma has_been_directly_observed_consistency
   `{HasBeenDirectlyObservedCapability message vlsm}
-  (s : state (pre_loaded_with_all_messages_vlsm vlsm))
+  (s : state (preloaded_with_all_messages_vlsm vlsm))
   (Hs : constrained_state_prop vlsm s)
   (m : message)
   : selected_messages_consistency_prop vlsm item_sends_or_receives s m.
@@ -1608,7 +1608,7 @@ Proof.
   {
     by clear -Htr; destruct X;
       eapply VLSM_incl_finite_valid_trace_init_to;
-      [apply vlsm_incl_pre_loaded_with_all_messages_vlsm |].
+      [apply vlsm_incl_preloaded_with_all_messages_vlsm |].
   }
   unfold can_emit.
   eapply has_been_sent_examine_one_trace, Exists_exists in Hsent
@@ -1624,11 +1624,11 @@ Lemma preloaded_sent_can_emit
   [message]
   (X : VLSM message)
   `{HasBeenSentCapability message X}
-  (s : state (pre_loaded_with_all_messages_vlsm X))
+  (s : state (preloaded_with_all_messages_vlsm X))
   (Hs : constrained_state_prop X s)
   (m : message)
   (Hsent : has_been_sent X s m) :
-  can_emit (pre_loaded_with_all_messages_vlsm X) m.
+  can_emit (preloaded_with_all_messages_vlsm X) m.
 Proof.
   by eapply sent_can_emit.
 Qed.
@@ -1759,7 +1759,7 @@ Proof.
   split.
   - by apply oracle_no_inits0.
   - intros; apply oracle_step_update0.
-    apply (@VLSM_incl_input_valid_transition _ _ (pre_loaded_with_all_messages_vlsm X)); [| done].
+    apply (@VLSM_incl_input_valid_transition _ _ (preloaded_with_all_messages_vlsm X)); [| done].
     by apply preloaded_constraint_subsumption_incl_free.
 Qed.
 
@@ -1845,7 +1845,7 @@ Qed.
     free_composite_has_been_sent_stepwise_props.
 
 Lemma composite_proper_sent
-  (s : state (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)))
+  (s : state (preloaded_with_all_messages_vlsm (free_composite_vlsm IM)))
   (Hs : constrained_state_prop (free_composite_vlsm IM) s)
   (m : message)
   : has_been_sent_prop (free_composite_vlsm IM) composite_has_been_sent s m.
@@ -1981,7 +1981,7 @@ Definition sender_safety_prop : Prop :=
   (Hsender : sender m = Some v),
   forall (j : index)
          (Hdif : j <> A v),
-         ~ can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+         ~ can_emit (preloaded_with_all_messages_vlsm (IM j)) m.
 
 (**
   An alternative, possibly friendlier, formulation. Note that it is
@@ -1995,7 +1995,7 @@ Definition sender_safety_alt_prop : Prop :=
   (v : validator)
   (Hsender : sender m = Some v),
   forall (i : index),
-  can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m ->
+  can_emit (preloaded_with_all_messages_vlsm (IM i)) m ->
   A v = i.
 
 Lemma sender_safety_alt_iff
@@ -2020,7 +2020,7 @@ Definition channel_authenticated_message (component_idx : index) (m : message) :
 *)
 Definition channel_authentication_prop : Prop :=
   forall i m,
-  can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m ->
+  can_emit (preloaded_with_all_messages_vlsm (IM i)) m ->
   channel_authenticated_message i m.
 
 (** Channel authentication guarantees sender safety *)
@@ -2037,7 +2037,7 @@ Qed.
 Definition sender_nontriviality_prop : Prop :=
   forall (v : validator),
   exists (m : message),
-  can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m /\
+  can_emit (preloaded_with_all_messages_vlsm (IM (A v))) m /\
   sender m = Some v.
 
 Definition no_initial_messages_in_IM_prop : Prop :=
@@ -2049,15 +2049,15 @@ Lemma free_composite_no_initial_valid_messages_emitted_by_sender
   (X := free_composite_vlsm IM)
   : forall (m : message), valid_message_prop X m ->
     exists v, sender m = Some v /\
-      can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m.
+      can_emit (preloaded_with_all_messages_vlsm (IM (A v))) m.
 Proof.
   intro m.
   rewrite emitted_messages_are_valid_iff.
   intros [[i [[mi Hmi] _]] | [(s, om) [(i, l) [s' Ht]]]]
   ; [by contradict Hmi; apply no_initial_messages_in_IM |].
   eapply VLSM_incl_input_valid_transition in Ht;
-    [| by eapply (vlsm_incl_pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM))].
-  apply pre_loaded_with_all_messages_projection_input_valid_transition_eq
+    [| by eapply (vlsm_incl_preloaded_with_all_messages_vlsm (free_composite_vlsm IM))].
+  apply preloaded_with_all_messages_projection_input_valid_transition_eq
     with (j := i) in Ht; [| done]; cbn in Ht.
   specialize (can_emit_signed i m).
   spec can_emit_signed; [by eexists _, _, _ |].
@@ -2074,7 +2074,7 @@ Lemma composite_no_initial_valid_messages_emitted_by_sender
     (X := composite_vlsm IM constraint)
     : forall (m : message), valid_message_prop X m ->
       exists v, sender m = Some v /\
-        can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m.
+        can_emit (preloaded_with_all_messages_vlsm (IM (A v))) m.
 Proof.
   intros.
   apply free_composite_no_initial_valid_messages_emitted_by_sender; [done.. |].
@@ -2090,7 +2090,7 @@ Lemma free_composite_no_initial_valid_messages_have_sender
 Proof.
   intros m Hm.
   cut (exists v : validator, sender m = Some v /\
-    can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) m).
+    can_emit (preloaded_with_all_messages_vlsm (IM (A v))) m).
   - by intros (v & -> & _); congruence.
   - by apply free_composite_no_initial_valid_messages_emitted_by_sender.
 Qed.
@@ -2277,7 +2277,7 @@ Lemma messages_sent_from_component_produced_previously
   (Hsent : has_been_sent (IM i) (s i) m) :
   exists s_m,
     in_futures X s_m s /\
-    can_produce (pre_loaded_with_all_messages_vlsm (IM i)) (s_m i) m.
+    can_produce (preloaded_with_all_messages_vlsm (IM i)) (s_m i) m.
 Proof.
   specialize (sent_component_sent_previously Hs Hsent)
     as (s_item & [] & Ht & Hfutures & <- & Houtput)
@@ -2305,7 +2305,7 @@ Qed.
 
 Lemma preloaded_messages_sent_from_component_of_valid_state_are_valid_free
   (seed : message -> Prop)
-  (X := pre_loaded_vlsm (free_composite_vlsm IM) seed)
+  (X := preloaded_vlsm (free_composite_vlsm IM) seed)
   (s : composite_state IM)
   (Hs : valid_state_prop X s)
   (i : index)
@@ -2331,7 +2331,7 @@ Qed.
 
 Lemma preloaded_messages_received_from_component_of_valid_state_are_valid_free
   (seed : message -> Prop)
-  (X := pre_loaded_vlsm (free_composite_vlsm IM) seed)
+  (X := preloaded_vlsm (free_composite_vlsm IM) seed)
   (s : composite_state IM)
   (Hs : valid_state_prop X s)
   (i : index)
@@ -2358,7 +2358,7 @@ Qed.
 Lemma preloaded_composite_sent_valid
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
+  (X := preloaded_vlsm (composite_vlsm IM constraint) seed)
   (s : composite_state IM)
   (Hs : valid_state_prop X s)
   (m : message)
@@ -2371,7 +2371,7 @@ Qed.
 Lemma preloaded_composite_received_valid
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (seed : message -> Prop)
-  (X := pre_loaded_vlsm (composite_vlsm IM constraint) seed)
+  (X := preloaded_vlsm (composite_vlsm IM constraint) seed)
   (s : composite_state IM)
   (Hs : valid_state_prop X s)
   (m : message)
@@ -2400,7 +2400,7 @@ Qed.
 
 Lemma preloaded_free_composite_directly_observed_valid
   (seed : message -> Prop)
-  (X := pre_loaded_vlsm (free_composite_vlsm IM) seed)
+  (X := preloaded_vlsm (free_composite_vlsm IM) seed)
   (s : composite_state IM)
   (Hs : valid_state_prop X s)
   (m : message)
@@ -2414,7 +2414,7 @@ Proof.
     + by eapply preloaded_messages_sent_from_component_of_valid_state_are_valid_free.
   - eapply composite_constrained_state_project.
     eapply VLSM_incl_valid_state; [| done].
-    by apply pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+    by apply preloaded_vlsm_incl_preloaded_with_all_messages.
 Qed.
 
 End sec_composite.
@@ -2623,7 +2623,7 @@ Definition state_received_not_sent (s : state X) (m : message) : Prop :=
 
 Lemma state_received_not_sent_trace_iff
   (m : message)
-  (s is : state (pre_loaded_with_all_messages_vlsm X))
+  (s is : state (preloaded_with_all_messages_vlsm X))
   (tr : list transition_item)
   (Htr : finite_constrained_trace_init_to X is s tr)
   : state_received_not_sent s m <-> trace_received_not_sent_before_or_after tr m.
@@ -2652,7 +2652,7 @@ Definition state_received_not_sent_invariant
 
 Lemma state_received_not_sent_invariant_trace_iff
   (P : message -> Prop)
-  (s is : state (pre_loaded_with_all_messages_vlsm X))
+  (s is : state (preloaded_with_all_messages_vlsm X))
   (tr : list transition_item)
   (Htr : finite_constrained_trace_init_to X is s tr)
   : state_received_not_sent_invariant s P <->
@@ -2671,8 +2671,8 @@ Definition cannot_resend_message_stepwise_prop : Prop :=
 
 Lemma cannot_resend_received_message_in_future
   (Hno_resend : cannot_resend_message_stepwise_prop)
-  (s1 s2 : state (pre_loaded_with_all_messages_vlsm X))
-  (Hfuture : in_futures (pre_loaded_with_all_messages_vlsm X) s1 s2)
+  (s1 s2 : state (preloaded_with_all_messages_vlsm X))
+  (Hfuture : in_futures (preloaded_with_all_messages_vlsm X) s1 s2)
   : forall m : message,
     state_received_not_sent s1 m -> state_received_not_sent s2 m.
 Proof.
@@ -2713,9 +2713,9 @@ Lemma lift_preloaded_trace_to_seeded
   (P : message -> Prop)
   (tr : list transition_item)
   (Htrm : trace_received_not_sent_before_or_after_invariant tr P)
-  (is : state (pre_loaded_with_all_messages_vlsm X))
+  (is : state (preloaded_with_all_messages_vlsm X))
   (Htr : finite_constrained_trace X is tr)
-  : finite_valid_trace (pre_loaded_vlsm X P) is tr.
+  : finite_valid_trace (preloaded_vlsm X P) is tr.
 Proof.
   unfold trace_received_not_sent_before_or_after_invariant in Htrm.
   split; [| by apply Htr].
@@ -2769,7 +2769,7 @@ Lemma lift_preloaded_state_to_seeded
   (s : state X)
   (Hequiv_s : state_received_not_sent_invariant s P)
   (Hs : constrained_state_prop X s)
-  : valid_state_prop (pre_loaded_vlsm X P) s.
+  : valid_state_prop (preloaded_vlsm X P) s.
 Proof.
   apply valid_state_has_trace in Hs as Htr.
   destruct Htr as [is [tr Htr]].
@@ -2786,8 +2786,8 @@ Lemma lift_generated_to_seeded
   (s : state X)
   (Hequiv_s : state_received_not_sent_invariant s P)
   (m : message)
-  (Hgen : can_produce (pre_loaded_with_all_messages_vlsm X) s m)
-  : can_produce (pre_loaded_vlsm X P) s m.
+  (Hgen : can_produce (preloaded_with_all_messages_vlsm X) s m)
+  : can_produce (preloaded_vlsm X P) s m.
 Proof.
   apply non_empty_valid_trace_from_can_produce.
   apply non_empty_valid_trace_from_can_produce in Hgen.
@@ -2819,7 +2819,7 @@ Context
   .
 
 Lemma has_been_sent_irrelevance
-  (s : state (pre_loaded_with_all_messages_vlsm X))
+  (s : state (preloaded_with_all_messages_vlsm X))
   (m : message)
   (Hs : constrained_state_prop X s)
   : @has_been_sent _ X Hbs1 s m -> @has_been_sent _ X Hbs2 s m.
@@ -2842,7 +2842,7 @@ Context
   (constraint : composite_label IM -> composite_state IM * option message -> Prop)
   (X := composite_vlsm IM constraint)
   (Y := free_composite_vlsm IM)
-  (PreY := pre_loaded_with_all_messages_vlsm Y).
+  (PreY := preloaded_with_all_messages_vlsm Y).
 
 (**
   Under [HasBeenReceivedCapability] assumptions, and given the fact that
@@ -2850,7 +2850,7 @@ Context
   in which all (received) messages are valid, it follows that
   any message which [has_been_received] for state <<s>> is valid.
 
-  Hence, given any pre_loaded trace leading to <<s>>, all messages received
+  Hence, given any preloaded trace leading to <<s>>, all messages received
   within it must be valid, thus the trace itself is valid.
 *)
 Lemma all_pre_traces_to_valid_state_are_valid_free
@@ -2891,7 +2891,7 @@ Proof.
   intros Hpsp Hhbr.
   pose proof (Hetr := valid_state_has_trace _ _ Hpsp).
   destruct Hetr as [ist [tr Hetr]].
-  apply proper_received in Hhbr; [| by apply pre_loaded_with_all_messages_valid_state_prop, Hpsp].
+  apply proper_received in Hhbr; [| by apply preloaded_with_all_messages_valid_state_prop, Hpsp].
   unfold selected_message_exists_in_all_preloaded_traces in Hhbr.
   unfold specialized_selected_message_exists_in_all_traces in Hhbr.
   specialize (Hhbr ist tr).
@@ -2918,7 +2918,7 @@ Qed.
 Lemma has_been_received_in_state_preloaded s1 m :
   constrained_state_prop X s1 ->
   has_been_received X s1 m ->
-  exists (s0 : state (pre_loaded_with_all_messages_vlsm X))
+  exists (s0 : state (preloaded_with_all_messages_vlsm X))
     (item : transition_item) (tr : list transition_item),
     input item = Some m /\
     finite_constrained_trace_from_to X s0 s1 (item :: tr).
@@ -2940,7 +2940,7 @@ Proof.
   apply elem_of_list_split in Htritemin.
   destruct Htritemin as [l1 [l2 Heqtr]].
   rewrite Heqtr in Hfptf.
-  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm X)) in Hfptf.
+  apply (finite_valid_trace_from_to_app_split (preloaded_with_all_messages_vlsm X)) in Hfptf.
   destruct Hfptf as [Htr1 Htr2].
   destruct tritem eqn: Heqtritem.
   simpl in Hintritem. subst input.

@@ -19,7 +19,7 @@ Context
   {X Y : VLSM message}
   {label_project : label X -> option (label Y)}
   {state_project : state X -> state Y}
-  (Hsimul : VLSM_projection (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y)
+  (Hsimul : VLSM_projection (preloaded_with_all_messages_vlsm X) (preloaded_with_all_messages_vlsm Y)
     label_project state_project)
   .
 
@@ -117,8 +117,8 @@ Context
   {X Y : VLSM message}
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
-  (Hsimul : VLSM_weak_embedding (pre_loaded_with_all_messages_vlsm X)
-    (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
+  (Hsimul : VLSM_weak_embedding (preloaded_with_all_messages_vlsm X)
+    (preloaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
 Section sec_selectors.
@@ -144,7 +144,7 @@ Proof.
   exists is', (tr_is ++ (VLSM_weak_embedding_finite_trace_project Hsimul tr)).
   destruct Hpr_is as [Hpr_is His'].
   repeat split; [| done |].
-  - by eapply (finite_valid_trace_from_to_app (pre_loaded_with_all_messages_vlsm Y)).
+  - by eapply (finite_valid_trace_from_to_app (preloaded_with_all_messages_vlsm Y)).
   - apply Exists_app. right.
     apply Exists_exists in Hm as [item [Hitem Hm]].
     apply elem_of_list_split in Hitem as [pre [suf Heqtr]].
@@ -231,8 +231,8 @@ Context
   {label_project : label X -> label Y}
   {state_project : state X -> state Y}
   (Hsimul :
-    VLSM_embedding (pre_loaded_with_all_messages_vlsm X)
-      (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
+    VLSM_embedding (preloaded_with_all_messages_vlsm X)
+      (preloaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
 Lemma VLSM_embedding_has_been_sent
@@ -305,7 +305,7 @@ Context
   {MX MY : VLSMMachine T}
   (X := mk_vlsm MX)
   (Y := mk_vlsm MY)
-  (Hincl : VLSM_incl (pre_loaded_with_all_messages_vlsm X) (pre_loaded_with_all_messages_vlsm Y))
+  (Hincl : VLSM_incl (preloaded_with_all_messages_vlsm X) (preloaded_with_all_messages_vlsm Y))
   .
 
 Lemma VLSM_incl_has_been_sent
@@ -434,8 +434,8 @@ Context
   emitted by the component corresponding to its sender (pre-loaded with all messages).
 *)
 Lemma can_emit_projection :
-  can_emit (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) m ->
-  can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+  can_emit (preloaded_with_all_messages_vlsm (free_composite_vlsm IM)) m ->
+  can_emit (preloaded_with_all_messages_vlsm (IM j)) m.
 Proof.
   destruct (sender m) as [v |] eqn: Hsender; simpl in Hj; [| by congruence].
   apply Some_inj in Hj.

@@ -294,22 +294,22 @@ Lemma constrained_preloaded_comm :
   forall `(X : VLSM message) (constraint : label X -> state X * option message -> Prop)
     (initial : message -> Prop),
       VLSM_eq
-        (constrained_vlsm (pre_loaded_vlsm X initial) constraint)
-        (pre_loaded_vlsm (constrained_vlsm X constraint) initial).
+        (constrained_vlsm (preloaded_vlsm X initial) constraint)
+        (preloaded_vlsm (constrained_vlsm X constraint) initial).
 Proof.
   intros message X.
   rewrite <- (mk_vlsm_machine X); cbn.
   intros constraint initial.
   by split; apply (VLSM_incl_embedding_iff (constrained_vlsm_machine
-    (pre_loaded_vlsm X initial) constraint)), basic_VLSM_strong_embedding; red; cbn.
+    (preloaded_vlsm X initial) constraint)), basic_VLSM_strong_embedding; red; cbn.
 Qed.
 
 Lemma VLSM_incl_constrained_preloaded :
   forall `(X : VLSM message) (constraint : label X -> state X * option message -> Prop)
     (initial : message -> Prop),
       VLSM_incl
-        (constrained_vlsm (pre_loaded_vlsm X initial) constraint)
-        (pre_loaded_vlsm (constrained_vlsm X constraint) initial).
+        (constrained_vlsm (preloaded_vlsm X initial) constraint)
+        (preloaded_vlsm (constrained_vlsm X constraint) initial).
 Proof.
   by intros; apply constrained_preloaded_comm.
 Qed.
@@ -318,8 +318,8 @@ Lemma VLSM_incl_preloaded_constrained :
   forall `(X : VLSM message) (constraint : label X -> state X * option message -> Prop)
     (initial : message -> Prop),
       VLSM_incl
-        (pre_loaded_vlsm (constrained_vlsm X constraint) initial)
-        (constrained_vlsm (pre_loaded_vlsm X initial) constraint).
+        (preloaded_vlsm (constrained_vlsm X constraint) initial)
+        (constrained_vlsm (preloaded_vlsm X initial) constraint).
 Proof.
   by intros; apply constrained_preloaded_comm.
 Qed.
@@ -333,21 +333,21 @@ Context
   (constraint : label X -> state X * option message -> Prop)
   .
 
-Lemma constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages :
+Lemma constrained_preloaded_vlsm_incl_preloaded_with_all_messages :
   forall (P : message -> Prop),
     VLSM_incl
-      (pre_loaded_vlsm (constrained_vlsm X constraint) P)
-      (pre_loaded_with_all_messages_vlsm X).
+      (preloaded_vlsm (constrained_vlsm X constraint) P)
+      (preloaded_with_all_messages_vlsm X).
 Proof.
   by intros; apply basic_VLSM_strong_incl; cbv; [| itauto.. |].
 Qed.
 
 Lemma constrained_preloaded_incl :
-  VLSM_incl (constrained_vlsm X constraint) (pre_loaded_with_all_messages_vlsm X).
+  VLSM_incl (constrained_vlsm X constraint) (preloaded_with_all_messages_vlsm X).
 Proof.
   apply (@VLSM_incl_trans _ _ _ X).
   - by cbn; apply VLSM_incl_constrained_vlsm.
-  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm X).
+  - by apply (vlsm_incl_preloaded_with_all_messages_vlsm X).
 Qed.
 
 Context
@@ -366,7 +366,7 @@ Definition strong_constraint_subsumption : Prop :=
 
 (**
   A weaker version of [strong_constraint_subsumption] requiring [input_valid]ity
-  w.r.t. [pre_loaded_with_all_messages_vlsm] as a precondition for the subsumption
+  w.r.t. [preloaded_with_all_messages_vlsm] as a precondition for the subsumption
   property.
 
   This definition is useful in proving [VLSM_incl]usions between [VLSM]s
@@ -476,7 +476,7 @@ Qed.
 
 Lemma preloaded_constraint_subsumption_incl
   (Hpre_subsumption : preloaded_constraint_subsumption)
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm X1) (pre_loaded_with_all_messages_vlsm X2).
+  : VLSM_incl (preloaded_with_all_messages_vlsm X1) (preloaded_with_all_messages_vlsm X2).
 Proof.
   apply basic_VLSM_incl; intro; intros; [done | | | apply H].
   - by apply initial_message_is_valid.
@@ -485,8 +485,8 @@ Qed.
 
 Lemma preloaded_constraint_subsumption_incl_free :
   VLSM_incl
-    (pre_loaded_with_all_messages_vlsm X1)
-    (pre_loaded_with_all_messages_vlsm X).
+    (preloaded_with_all_messages_vlsm X1)
+    (preloaded_with_all_messages_vlsm X).
 Proof.
   apply basic_VLSM_incl; intro; intros; [done | ..].
   - by apply initial_message_is_valid.
@@ -509,7 +509,7 @@ Proof.
   apply Hpre_subsumption.
   destruct som.
   eapply VLSM_incl_input_valid; [| done].
-  by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm X1).
+  by apply (vlsm_incl_preloaded_with_all_messages_vlsm X1).
 Qed.
 
 Lemma strong_constraint_subsumption_strongest

@@ -67,11 +67,11 @@ Class MessageDependencies
   : Prop :=
 {
   message_dependencies_are_necessary (m : message)
-    `(can_produce (pre_loaded_with_all_messages_vlsm X) s' m)
+    `(can_produce (preloaded_with_all_messages_vlsm X) s' m)
     : message_dependencies_full_node_condition X message_dependencies s' m;
   message_dependencies_are_sufficient (m : message)
-    `(can_emit (pre_loaded_with_all_messages_vlsm X) m)
-    : can_emit (pre_loaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
+    `(can_emit (preloaded_with_all_messages_vlsm X) m)
+    : can_emit (preloaded_vlsm X (fun msg => msg ∈ message_dependencies m)) m
 }.
 
 (*
@@ -130,8 +130,8 @@ Lemma msg_dep_reflects_validity
   (P : message -> Prop)
   (Hreflects : forall dm m, msg_dep_rel message_dependencies dm m -> P m -> P dm)
   : forall dm m, msg_dep_rel message_dependencies dm m ->
-    valid_message_prop (pre_loaded_vlsm X P) m ->
-    valid_message_prop (pre_loaded_vlsm X P) dm.
+    valid_message_prop (preloaded_vlsm X P) m ->
+    valid_message_prop (preloaded_vlsm X P) dm.
 Proof.
   intros dm m Hdm.
   rewrite emitted_messages_are_valid_iff, can_emit_iff.
@@ -140,17 +140,17 @@ Proof.
     apply Hreflects with m; [done |].
     destruct Hinit as [Hinit | Hp]; [| done].
     by contradict Hinit; apply no_initial_messages_in_X.
-  - apply (directly_observed_valid (pre_loaded_vlsm X P) s).
+  - apply (directly_observed_valid (preloaded_vlsm X P) s).
     + by exists (Some m); apply can_produce_valid.
     + destruct X as [T M].
       eapply VLSM_incl_has_been_directly_observed
         with HasBeenSentCapability0 HasBeenReceivedCapability0; cycle 2.
       * eapply @message_dependencies_are_necessary; [done | | done].
         by apply (VLSM_incl_can_produce
-          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P)).
+          (preloaded_vlsm_incl_preloaded_with_all_messages (mk_vlsm M) P)).
       * by apply basic_VLSM_incl_preloaded; cbv.
       * apply (VLSM_incl_valid_state
-          (pre_loaded_vlsm_incl_pre_loaded_with_all_messages (mk_vlsm M) P)).
+          (preloaded_vlsm_incl_preloaded_with_all_messages (mk_vlsm M) P)).
         by eexists; eapply can_produce_valid.
 Qed.
 
@@ -358,7 +358,7 @@ Definition observed_before_send (m1 m2 : message) : Prop :=
 
 Lemma observed_before_send_subsumes_msg_dep_rel
   `{!MessageDependencies X message_dependencies} :
-  forall m, can_emit (pre_loaded_with_all_messages_vlsm X) m ->
+  forall m, can_emit (preloaded_with_all_messages_vlsm X) m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
     observed_before_send dm m.
 Proof.
@@ -537,9 +537,9 @@ Proof.
   intros [[i [[im Him] _]] | Hemit]
   ; [by contradict Him; apply no_initial_messages_in_IM |].
   right.
-  pose proof (vlsm_is_pre_loaded_with_False X) as XeqXFalse.
+  pose proof (vlsm_is_preloaded_with_False X) as XeqXFalse.
   apply (VLSM_eq_can_emit XeqXFalse).
-  cut (valid_message_prop (pre_loaded_vlsm X (fun _ => False)) dm).
+  cut (valid_message_prop (preloaded_vlsm X (fun _ => False)) dm).
   {
     clear -no_initial_messages_in_IM.
     rewrite emitted_messages_are_valid_iff.
@@ -575,7 +575,7 @@ Lemma msg_dep_happens_before_composite_no_initial_valid_messages_emitted_by_send
   : forall m, valid_message_prop X m ->
     forall dm, msg_dep_happens_before message_dependencies dm m ->
     exists v, sender dm = Some v /\
-      can_emit (pre_loaded_with_all_messages_vlsm (IM (A v))) dm.
+      can_emit (preloaded_with_all_messages_vlsm (IM (A v))) dm.
 Proof.
   intros m Hm dm Hdm.
   cut (valid_message_prop X dm).
@@ -740,7 +740,7 @@ Qed.
 
 Lemma composite_observed_before_send_subsumes_msg_dep_rel
   `{forall i, MessageDependencies (IM i) message_dependencies} :
-  forall m, can_emit (pre_loaded_with_all_messages_vlsm Free) m ->
+  forall m, can_emit (preloaded_with_all_messages_vlsm Free) m ->
   forall dm, msg_dep_rel message_dependencies dm m ->
     composite_observed_before_send dm m.
 Proof.
@@ -766,7 +766,7 @@ Proof.
   intros m Hm dm Hdm; constructor.
   eapply composite_observed_before_send_subsumes_msg_dep_rel; [| done].
   eapply VLSM_incl_can_emit; [| done].
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Lemma tc_composite_observed_before_send_subsumes_happens_before
@@ -919,8 +919,8 @@ Lemma msg_dep_reflects_sub_free_validity
   (Hreflects : forall dm m, msg_dep_rel message_dependencies dm m -> P m -> P dm)
   (X := free_composite_vlsm (sub_IM IM (elements indices)))
   : forall dm m, msg_dep_rel message_dependencies dm m ->
-    valid_message_prop (pre_loaded_vlsm X P) m ->
-    valid_message_prop (pre_loaded_vlsm X P) dm.
+    valid_message_prop (preloaded_vlsm X P) m ->
+    valid_message_prop (preloaded_vlsm X P) dm.
 Proof.
   eapply msg_dep_reflects_validity; [| | done].
   - by typeclasses eauto.
@@ -1064,14 +1064,14 @@ Context
 Inductive Emittable_from_dependencies_prop (m : message) : Prop :=
 | efdp : forall (v : validator) (Hsender : sender m = Some v)
             (Hemittable : can_emit
-              (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m))
+              (preloaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m))
               m),
              Emittable_from_dependencies_prop m.
 
 Definition emittable_from_dependencies_prop (m : message) : Prop :=
   match sender m with
   | None => False
-  | Some v => can_emit (pre_loaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m)) m
+  | Some v => can_emit (preloaded_vlsm (IM (A v)) (fun dm => dm ∈ message_dependencies m)) m
   end.
 
 Lemma emittable_from_dependencies_prop_iff m
@@ -1104,7 +1104,7 @@ Definition valid_all_dependencies_emittable_from_dependencies_prop (i : index) :
 *)
 Lemma free_valid_from_valid_dependencies
   m i
-  (Hm : can_emit (pre_loaded_vlsm (IM i) (fun dm => dm ∈ message_dependencies m)) m)
+  (Hm : can_emit (preloaded_vlsm (IM i) (fun dm => dm ∈ message_dependencies m)) m)
   (Hdeps :
     forall dm, dm ∈ full_message_dependencies m ->
       valid_message_prop (free_composite_vlsm IM) dm)

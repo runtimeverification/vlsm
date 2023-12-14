@@ -31,7 +31,7 @@ Definition node_generated_without_further_equivocation
   (i : index)
   : Prop
   := exists (si : state (IM i)),
-    can_produce (pre_loaded_with_all_messages_vlsm (IM i)) si m /\
+    can_produce (preloaded_with_all_messages_vlsm (IM i)) si m /\
     state_received_not_sent_invariant (IM i) si (composite_has_been_directly_observed IM s).
 
 (**
@@ -44,7 +44,7 @@ Definition node_generated_without_further_equivocation_alt
   (m : message)
   (i : index)
   : Prop
-  := can_emit (pre_loaded_vlsm (IM i) (composite_has_been_directly_observed IM s)) m.
+  := can_emit (preloaded_vlsm (IM i) (composite_has_been_directly_observed IM s)) m.
 
 (**
   The equivocation-based abstract definition of the full node condition

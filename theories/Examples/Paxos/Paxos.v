@@ -1536,7 +1536,7 @@ Proof.
           by apply map_lookup_filter_Some.
       }
       apply H_prev_votes in H_newest_lv_voted as Hsent; destruct Hsent as (a' & _ & Hsent).
-      apply pre_loaded_with_all_messages_valid_state_prop in Hs as Hs_pre.
+      apply preloaded_with_all_messages_valid_state_prop in Hs as Hs_pre.
       apply gathered_1b_ok, sent_1b_impl_sent_lastvote_as_2b, sent_2b_after_2a, sent_2a_after_1c
         in Hsent as (vsafe_vs & H_v_safe_vs & H_safe_vs_sent); [| done..].
       exists vsafe_vs; split; [done |]; split; [done |].
@@ -1840,7 +1840,7 @@ Proof.
   unfold P2aInv_prop.
   intros s Hs b v Hsent.
   pattern s; revert s Hs Hsent.
-  change (state paxos_vlsm) with (state (pre_loaded_with_all_messages_vlsm paxos_vlsm)).
+  change (state paxos_vlsm) with (state (preloaded_with_all_messages_vlsm paxos_vlsm)).
   apply from_send_to_from_sent_argument.
   - (* the propery is just an existential around has_been_sent, so stability is easy *)
     intros * Ht (vs & Hv & Hsent).
@@ -1915,7 +1915,7 @@ Lemma sent_1c_implies_ShowsSafeAt :
   forall v, v ∈ vs -> exists (Q : sig Quorum), ShowsSafeAt s Q b v.
 Proof.
   intros s Hs b vs Hsent v Hv; revert s Hs Hsent.
-  change (state paxos_vlsm) with (state (pre_loaded_with_all_messages_vlsm paxos_vlsm)).
+  change (state paxos_vlsm) with (state (preloaded_with_all_messages_vlsm paxos_vlsm)).
   apply from_send_to_from_sent_argument;
     [by intros * ? [Q ?]; exists Q; eapply ShowsSafeAt_stable |].
   intros * Ht.

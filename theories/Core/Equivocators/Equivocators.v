@@ -948,11 +948,11 @@ Lemma preloaded_equivocator_state_projection_preserves_validity
   (seed : message -> Prop)
   (bs : state (equivocator_vlsm X))
   (om : option message)
-  (Hbs : valid_state_message_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) bs om)
-  : option_valid_message_prop (pre_loaded_vlsm X seed) om /\
+  (Hbs : valid_state_message_prop (preloaded_vlsm (equivocator_vlsm X) seed) bs om)
+  : option_valid_message_prop (preloaded_vlsm X seed) om /\
     forall i si,
       equivocator_state_project bs i = Some si ->
-      valid_state_prop (pre_loaded_vlsm X seed) si.
+      valid_state_prop (preloaded_vlsm X seed) si.
 Proof.
   induction Hbs.
   - split; [by apply option_initial_message_is_valid |].
@@ -963,7 +963,7 @@ Proof.
     replace i with 0 in * by lia.
     rewrite equivocator_state_project_zero in H; inversion H.
     by apply initial_state_is_valid.
-  - specialize (valid_generated_state_message (pre_loaded_vlsm X seed)) as Hgen.
+  - specialize (valid_generated_state_message (preloaded_vlsm X seed)) as Hgen.
     apply proj2 in IHHbs1. apply proj1 in IHHbs2.
 
     (*
@@ -1002,10 +1002,10 @@ Qed.
 Lemma preloaded_with_equivocator_state_project_valid_state
   (seed : message -> Prop)
   (bs : state (equivocator_vlsm X))
-  (Hbs : valid_state_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) bs)
+  (Hbs : valid_state_prop (preloaded_vlsm (equivocator_vlsm X) seed) bs)
   : forall i si,
     equivocator_state_project bs i = Some si ->
-    valid_state_prop (pre_loaded_vlsm X seed) si.
+    valid_state_prop (preloaded_vlsm X seed) si.
 Proof.
   destruct Hbs as [om  Hbs].
   by apply preloaded_equivocator_state_projection_preserves_validity, proj2 in Hbs.
@@ -1014,9 +1014,9 @@ Qed.
 Lemma preloaded_with_equivocator_state_project_valid_message
   (seed : message -> Prop)
   (om : option message)
-  (Hom : option_valid_message_prop (pre_loaded_vlsm (equivocator_vlsm X) seed) om)
+  (Hom : option_valid_message_prop (preloaded_vlsm (equivocator_vlsm X) seed) om)
   :
-  option_valid_message_prop (pre_loaded_vlsm X seed) om.
+  option_valid_message_prop (preloaded_vlsm X seed) om.
 Proof.
   destruct Hom as [s Hm].
   by apply preloaded_equivocator_state_projection_preserves_validity, proj1 in Hm.
@@ -1029,9 +1029,9 @@ Lemma equivocator_state_project_valid_state
     equivocator_state_project bs i = Some si -> valid_state_prop X si.
 Proof.
   intros i si Hpr.
-  apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False (equivocator_vlsm X))) in Hbs.
+  apply (VLSM_eq_valid_state (vlsm_is_preloaded_with_False (equivocator_vlsm X))) in Hbs.
   specialize (preloaded_with_equivocator_state_project_valid_state _ _ Hbs _ _ Hpr) as Hsi.
-  apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False X)) in Hsi.
+  apply (VLSM_eq_valid_state (vlsm_is_preloaded_with_False X)) in Hsi.
   by destruct X.
 Qed.
 
@@ -1042,18 +1042,18 @@ Lemma equivocator_state_project_valid_message
   option_valid_message_prop X om.
 Proof.
   destruct om as [m |]; [| by apply option_valid_message_None].
-  specialize (vlsm_is_pre_loaded_with_False_initial_message (equivocator_vlsm X)) as Hinit.
-  apply (VLSM_incl_valid_message (proj1 (vlsm_is_pre_loaded_with_False (equivocator_vlsm X))))
+  specialize (vlsm_is_preloaded_with_False_initial_message (equivocator_vlsm X)) as Hinit.
+  apply (VLSM_incl_valid_message (proj1 (vlsm_is_preloaded_with_False (equivocator_vlsm X))))
     in Hom; [| done].
   apply preloaded_with_equivocator_state_project_valid_message in Hom.
-  specialize (vlsm_is_pre_loaded_with_False_initial_message_rev X) as Hinit_rev.
-  by apply (VLSM_incl_valid_message (proj2 (vlsm_is_pre_loaded_with_False X))) in Hom
+  specialize (vlsm_is_preloaded_with_False_initial_message_rev X) as Hinit_rev.
+  by apply (VLSM_incl_valid_message (proj2 (vlsm_is_preloaded_with_False X))) in Hom
   ; destruct X.
 Qed.
 
 (**
-  All components of valid states of the [pre_loaded_with_all_messages_vlsm] corresponding
-  to an [equivocator_vlsm] are also valid for the [pre_loaded_with_all_messages_vlsm]
+  All components of valid states of the [preloaded_with_all_messages_vlsm] corresponding
+  to an [equivocator_vlsm] are also valid for the [preloaded_with_all_messages_vlsm]
   corresponding to the original machine.
 *)
 Lemma preloaded_equivocator_state_project_valid_state

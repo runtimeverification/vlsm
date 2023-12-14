@@ -497,11 +497,11 @@ Lemma constrained_state_prop_MO_msg_valid :
 Proof.
   induction 1 as [m Hobs | m Hm IH | m mr Hm IHm Hmr IHmr]; cbn; intros Hadr.
   - by exists None; constructor.
-  - apply (@input_valid_transition_destination _ (pre_loaded_with_all_messages_vlsm Mi)
+  - apply (@input_valid_transition_destination _ (preloaded_with_all_messages_vlsm Mi)
       Send (state m) _ None (Some m)).
     destruct m as [s]; cbn in *.
     by apply input_constrained_transition_Send, IH.
-  - apply (@input_valid_transition_destination _ (pre_loaded_with_all_messages_vlsm Mi)
+  - apply (@input_valid_transition_destination _ (preloaded_with_all_messages_vlsm Mi)
       Receive (state m) _ (Some mr) None).
     destruct m as [s]; cbn in *.
     by apply input_constrained_transition_Receive; itauto.
@@ -615,7 +615,7 @@ Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_constrained_transition_size.
   apply (@VLSM_incl_input_valid_transition _ Mi Mi); [| done].
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_from_to_size :
@@ -628,7 +628,7 @@ Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_constrained_trace_from_to_size.
   apply (@VLSM_incl_finite_valid_trace_from_to _ Mi Mi); [| done].
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Lemma input_valid_transition_deterministic_conv :
@@ -640,7 +640,7 @@ Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
   by eapply input_constrained_transition_deterministic_conv;
     apply (@VLSM_incl_input_valid_transition _ Mi Mi); [| done | | done];
-    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_from_to_unique :
@@ -652,7 +652,7 @@ Proof.
   by intros s1 s2 l1 l2 Hfvt1 Hfvt2;
     eapply finite_constrained_trace_from_to_unique;
     apply VLSM_incl_finite_valid_trace_from_to; [| done | | done];
-    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_init_to_unique :
@@ -664,7 +664,7 @@ Proof.
   by intros s f l1 l2 Hfvit1 Hfvit2;
     eapply finite_constrained_trace_init_to_unique;
     apply VLSM_incl_finite_valid_trace_init_to; [| done | | done];
-    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 (** *** Extracting a trace from a state *)
@@ -939,8 +939,8 @@ Qed.
 
 Lemma lift_to_preloaded_MO_option_valid_message_prop :
   forall (i : index) (om : option Message),
-    option_valid_message_prop (pre_loaded_with_all_messages_vlsm (M i)) om ->
-      option_valid_message_prop (pre_loaded_with_all_messages_vlsm MO) om.
+    option_valid_message_prop (preloaded_with_all_messages_vlsm (M i)) om ->
+      option_valid_message_prop (preloaded_with_all_messages_vlsm MO) om.
 Proof.
   intros i [] Hovmp; cycle 1.
   - by exists (``(vs0 MO)); constructor.
@@ -973,8 +973,8 @@ Lemma lift_to_MO_finite_constrained_trace_from_to :
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
   unshelve eapply (@VLSM_weak_embedding_finite_valid_trace_from_to _
-    (pre_loaded_with_all_messages_vlsm (M i))
-    (pre_loaded_with_all_messages_vlsm MO) _ _); [| done].
+    (preloaded_with_all_messages_vlsm (M i))
+    (preloaded_with_all_messages_vlsm MO) _ _); [| done].
   by apply lift_to_preloaded_free_weak_embedding.
 Qed.
 
@@ -1101,7 +1101,7 @@ Qed.
 
 Lemma lift_preloaded_component_to_MO :
   forall i : index,
-    VLSM_embedding (pre_loaded_with_all_messages_vlsm (M i)) MO
+    VLSM_embedding (preloaded_with_all_messages_vlsm (M i)) MO
       (lift_to_MO_label i) (lift_to_MO_state (``(vs0 MO)) i).
 Proof.
   constructor; intros.

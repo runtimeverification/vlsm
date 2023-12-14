@@ -821,7 +821,7 @@ Lemma preloaded_with_equivocator_vlsm_trace_project_valid
   (seed : message -> Prop)
   (bs be : state (equivocator_vlsm X))
   (btr : list (transition_item (equivocator_vlsm X)))
-  (Hbtr : finite_valid_trace_from_to (pre_loaded_vlsm (equivocator_vlsm X) seed) bs be btr)
+  (Hbtr : finite_valid_trace_from_to (preloaded_vlsm (equivocator_vlsm X) seed) bs be btr)
   (j : nat)
   ej
   (Hj : equivocator_state_project be j = Some ej)
@@ -832,17 +832,17 @@ Lemma preloaded_with_equivocator_vlsm_trace_project_valid
     match di with
     | NewMachine sn =>
       initial_state_prop X sn
-      /\ finite_valid_trace_from_to (pre_loaded_vlsm X seed) sn ej tr
+      /\ finite_valid_trace_from_to (preloaded_vlsm X seed) sn ej tr
     | Existing i =>
       exists s, equivocator_state_project bs i = Some s /\
-      finite_valid_trace_from_to (pre_loaded_vlsm X seed) s ej tr
+      finite_valid_trace_from_to (preloaded_vlsm X seed) s ej tr
     end.
 Proof.
   induction Hbtr; intros.
   - exists [].
     eexists; split; [done |].
     eexists; split; [done |].
-    apply (finite_valid_trace_from_to_empty (pre_loaded_vlsm X seed)); revert Hj.
+    apply (finite_valid_trace_from_to_empty (preloaded_vlsm X seed)); revert Hj.
     by apply preloaded_with_equivocator_state_project_valid_state.
   - remember {| l := l; input := iom; |} as item.
     destruct Ht as [[Hs' [Hiom Hv]] Ht].
@@ -875,7 +875,7 @@ Proof.
       split; [apply Hproper' |].
       destruct itemX. simpl in *.
       rewrite Heqsi in Hitem_pr. subst.
-      apply (finite_valid_trace_from_to_extend (pre_loaded_vlsm X seed)); [done |].
+      apply (finite_valid_trace_from_to_extend (preloaded_vlsm X seed)); [done |].
       repeat split; [.. | done | done].
       * by apply initial_state_is_valid.
       * by apply preloaded_with_equivocator_state_project_valid_message.
@@ -885,7 +885,7 @@ Proof.
       eexists _; split; [done |].
       destruct itemX. simpl in *.
       subst.
-      apply (finite_valid_trace_from_to_extend (pre_loaded_vlsm X seed)); [done |].
+      apply (finite_valid_trace_from_to_extend (preloaded_vlsm X seed)); [done |].
       repeat split; [.. | done | done].
       * by eapply preloaded_with_equivocator_state_project_valid_state.
       * by apply preloaded_with_equivocator_state_project_valid_message.
@@ -912,7 +912,7 @@ Lemma equivocator_vlsm_trace_project_valid
     end.
 Proof.
   apply (VLSM_incl_finite_valid_trace_from_to
-    (proj1 (vlsm_is_pre_loaded_with_False (equivocator_vlsm X)))) in Hbtr.
+    (proj1 (vlsm_is_preloaded_with_False (equivocator_vlsm X)))) in Hbtr.
   specialize (preloaded_with_equivocator_vlsm_trace_project_valid _ _ _ _ Hbtr _ _ Hj)
     as [tr [di [Hbtr_pr Hdi]]].
   eexists _, _; split; [done |].
@@ -920,19 +920,19 @@ Proof.
   - destruct Hdi as [Hsn Htr].
     split; [done |].
     apply (VLSM_incl_finite_valid_trace_from_to (proj2
-      (vlsm_is_pre_loaded_with_False X))) in Htr.
+      (vlsm_is_preloaded_with_False X))) in Htr.
     by clear -Htr; destruct X.
   - destruct Hdi as [s [Hpr_bs_i Htr]].
     eexists; split; [done |].
-    apply (VLSM_incl_finite_valid_trace_from_to (proj2 (vlsm_is_pre_loaded_with_False X)))
+    apply (VLSM_incl_finite_valid_trace_from_to (proj2 (vlsm_is_preloaded_with_False X)))
       in Htr.
     by clear -Htr; destruct X.
 Qed.
 
 (**
-  The projection of a segment of a valid trace from the [pre_loaded_with_all_messages_vlsm]
+  The projection of a segment of a valid trace from the [preloaded_with_all_messages_vlsm]
   corresponding to the [equivocator_vlsm] is defined and it is a valid
-  trace segment in the [pre_loaded_with_all_messages_vlsm] corresponding to the original vlsm.
+  trace segment in the [preloaded_with_all_messages_vlsm] corresponding to the original vlsm.
 *)
 Lemma preloaded_equivocator_vlsm_trace_project_valid
   (bs be : state (equivocator_vlsm X))
@@ -1037,7 +1037,7 @@ Qed.
 
 (** An inversion lemma about projections of a valid trace. *)
 Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
-  (is fs : state (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)))
+  (is fs : state (preloaded_with_all_messages_vlsm (equivocator_vlsm X)))
   (tr : list transition_item)
   (Hntr : tr <> [])
   (Htr : finite_constrained_trace_from_to (equivocator_vlsm X) is fs tr)
@@ -1052,8 +1052,8 @@ Lemma preloaded_equivocator_vlsm_valid_trace_project_inv2
     | Existing i =>
       exists isi, equivocator_state_project is i = Some isi /\
       finite_constrained_trace_from_to X isi fsj trX /\
-      (initial_state_prop (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) is ->
-        initial_state_prop (pre_loaded_with_all_messages_vlsm X) isi)
+      (initial_state_prop (preloaded_with_all_messages_vlsm (equivocator_vlsm X)) is ->
+        initial_state_prop (preloaded_with_all_messages_vlsm X) isi)
     end.
 Proof.
   specialize (equivocator_vlsm_trace_project_inv _ Hntr j) as Hj.
@@ -1103,7 +1103,7 @@ Qed.
 
 Lemma preloaded_equivocator_zero_projection :
   VLSM_projection
-    (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)) (pre_loaded_with_all_messages_vlsm X)
+    (preloaded_with_all_messages_vlsm (equivocator_vlsm X)) (preloaded_with_all_messages_vlsm X)
     equivocator_label_zero_project equivocator_state_zero.
 Proof.
   apply basic_VLSM_projection_preloaded; intro; intros.

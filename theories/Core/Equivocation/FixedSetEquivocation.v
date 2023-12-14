@@ -38,19 +38,19 @@ Definition free_equivocating_vlsm_composition : VLSM message :=
   free_composite_vlsm (sub_IM IM (elements equivocating)).
 
 (**
-  [pre_loaded_free_equivocating_vlsm_composition] preloads the free composition
+  [preloaded_free_equivocating_vlsm_composition] preloads the free composition
   of equivocating components all with the messages given by the <<messageSet>>.
 *)
-Definition pre_loaded_free_equivocating_vlsm_composition
+Definition preloaded_free_equivocating_vlsm_composition
   (messageSet : message -> Prop)
-  := pre_loaded_vlsm free_equivocating_vlsm_composition messageSet.
+  := preloaded_vlsm free_equivocating_vlsm_composition messageSet.
 
 (**
   Given a composite state <<s>>, we define the composition of equivocators
   preloaded with the messages directly observed in <<s>>.
 *)
 Definition equivocators_composition_for_directly_observed s
-  := pre_loaded_free_equivocating_vlsm_composition (composite_has_been_directly_observed IM s).
+  := preloaded_free_equivocating_vlsm_composition (composite_has_been_directly_observed IM s).
 
 (**
   The fixed equivocation constraint for a regular composition stipulates that
@@ -133,7 +133,7 @@ Qed.
   preloaded with the messages sent by non-equivocating components in <<s>>.
 *)
 Definition equivocators_composition_for_sent s
-  := pre_loaded_free_equivocating_vlsm_composition (sent_by_non_equivocating s).
+  := preloaded_free_equivocating_vlsm_composition (sent_by_non_equivocating s).
 
 Definition strong_fixed_equivocation s m
   := sent_by_non_equivocating s m \/
@@ -160,7 +160,7 @@ Lemma Equivocators_Strong_Fixed_incl base_s
       (equivocators_composition_for_sent base_s)
       (equivocators_composition_for_directly_observed base_s).
 Proof.
-  apply pre_loaded_vlsm_incl.
+  apply preloaded_vlsm_incl.
   by apply sent_by_non_equivocating_are_directly_observed.
 Qed.
 
@@ -285,13 +285,13 @@ Context
   (Fixed := fixed_equivocation_vlsm_composition IM equivocators)
   (StrongFixed := strong_fixed_equivocation_vlsm_composition IM equivocators)
   (Free := free_composite_vlsm IM)
-  (PreFree := pre_loaded_with_all_messages_vlsm Free)
+  (PreFree := preloaded_with_all_messages_vlsm Free)
   .
 
 Definition Fixed_incl_Free : VLSM_incl Fixed Free := VLSM_incl_constrained_vlsm _ _.
 
 Lemma preloaded_Fixed_incl_Preloaded :
-  VLSM_incl (pre_loaded_with_all_messages_vlsm Fixed) (pre_loaded_with_all_messages_vlsm Free).
+  VLSM_incl (preloaded_with_all_messages_vlsm Fixed) (preloaded_with_all_messages_vlsm Free).
 Proof.
   exact (preloaded_constraint_subsumption_incl_free _ _).
 Qed.
@@ -320,7 +320,7 @@ Lemma in_futures_preserves_can_emit_by_equivocators_composition_for_sent s base_
     can_emit (equivocators_composition_for_sent IM equivocators s) m ->
     can_emit (equivocators_composition_for_sent IM equivocators base_s) m.
 Proof.
-  by apply VLSM_incl_can_emit, pre_loaded_vlsm_incl,
+  by apply VLSM_incl_can_emit, preloaded_vlsm_incl,
         in_futures_preserves_sent_by_non_equivocating.
 Qed.
 
@@ -764,7 +764,7 @@ Lemma restrict_observed_to_non_equivocating_incl s eqv_is
     (equivocators_composition_for_sent IM equivocators
       (lift_sub_state_to IM (elements equivocators) s eqv_is)).
 Proof.
-  apply pre_loaded_vlsm_incl.
+  apply preloaded_vlsm_incl.
   by apply lift_sub_state_to_sent_by_non_equivocating_iff.
 Qed.
 
@@ -774,7 +774,7 @@ Lemma restrict_observed_to_non_equivocating_incl_rev s eqv_is
       (lift_sub_state_to IM (elements equivocators) s eqv_is))
     (equivocators_composition_for_sent IM equivocators s).
 Proof.
-  apply pre_loaded_vlsm_incl.
+  apply preloaded_vlsm_incl.
   by apply lift_sub_state_to_sent_by_non_equivocating_iff.
 Qed.
 
@@ -1061,7 +1061,7 @@ Proof.
     intros Hsent_impl [[j [Hj Hsent]] | Hemit].
     - by left; apply Hsent_impl; exists j.
     - right. revert Hemit.
-      by apply VLSM_incl_can_emit, pre_loaded_vlsm_incl.
+      by apply VLSM_incl_can_emit, preloaded_vlsm_incl.
   }
   clear m.
   intros m [i [Hi Hsent]].

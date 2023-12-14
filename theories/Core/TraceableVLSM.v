@@ -28,10 +28,10 @@ Class TransitionMonotoneVLSM `(X : VLSM message) (state_size : state X -> nat) :
 
 #[global] Hint Mode TransitionMonotoneVLSM - ! - : typeclass_instances.
 
-#[export] Instance pre_loaded_TransitionMonotoneVLSM
+#[export] Instance preloaded_TransitionMonotoneVLSM
   `(X : VLSM message) (state_size : state X -> nat)
   `{!TransitionMonotoneVLSM X state_size}
-  : TransitionMonotoneVLSM (pre_loaded_with_all_messages_vlsm X) state_size.
+  : TransitionMonotoneVLSM (preloaded_with_all_messages_vlsm X) state_size.
 Proof.
   constructor; intros s1 s2 Ht.
   by apply transition_monotonicity, valid_transition_next_preloaded_iff.

@@ -206,7 +206,7 @@ Definition projection_induced_validator : VLSM message :=
   mk_vlsm projection_induced_validator_machine.
 
 Definition pre_projection_induced_validator : VLSM message :=
-  pre_loaded_with_all_messages_vlsm projection_induced_validator.
+  preloaded_with_all_messages_vlsm projection_induced_validator.
 
 Lemma projection_induced_validator_is_validating :
   projection_validator_prop pre_projection_induced_validator label_project state_project.
@@ -478,7 +478,7 @@ Context
   (Hproji :=
     projection_induced_validator_is_projection
       _ _ _ _ _ _ Hlabel_lift Hstate_lift Htransition_consistency Htransition_None)
-  (Hproj : VLSM_projection X (pre_loaded_with_all_messages_vlsm Y) label_project state_project)
+  (Hproj : VLSM_projection X (preloaded_with_all_messages_vlsm Y) label_project state_project)
   .
 
 (**
@@ -501,7 +501,7 @@ Proof.
 Qed.
 
 Lemma induced_validator_incl_preloaded_with_all_messages
-  : VLSM_incl Xi (pre_loaded_with_all_messages_vlsm Y).
+  : VLSM_incl Xi (preloaded_with_all_messages_vlsm Y).
 Proof.
   apply basic_VLSM_incl.
   - by intros is (s & <- & Hs); apply (VLSM_projection_initial_state Hproj).
@@ -577,7 +577,7 @@ Proof.
   by apply validator_alt_free_states_are_projection_states.
 Qed.
 
-Section sec_pre_loaded_with_all_messages_validator_proj.
+Section sec_preloaded_with_all_messages_validator_proj.
 
 Context
   (Hvalidator : projection_validator_prop Y label_project state_project)
@@ -589,8 +589,8 @@ Context
   of a trace. The [projection_validator_prop]erty is used to translate
   [input_valid]ity for the preloaded machine into the [pre_projection_induced_validator].
 *)
-Lemma pre_loaded_with_all_messages_validator_proj_incl
-  : VLSM_incl (pre_loaded_with_all_messages_vlsm Y) Xi.
+Lemma preloaded_with_all_messages_validator_proj_incl
+  : VLSM_incl (preloaded_with_all_messages_vlsm Y) Xi.
 Proof.
   (* reduce inclusion to inclusion of finite traces. *)
   apply VLSM_incl_finite_traces_characterization.
@@ -613,21 +613,21 @@ Proof.
 Qed.
 
 (**
-  Given that any projection is included in the [pre_loaded_with_all_messages_vlsm]
-  of its component (Lemma [proj_pre_loaded_with_all_messages_incl]), we conclude
+  Given that any projection is included in the [preloaded_with_all_messages_vlsm]
+  of its component (Lemma [proj_preloaded_with_all_messages_incl]), we conclude
   that preloaded <<Y>> and <<Xi>> are trace-equal.  This means that all the
   byzantine behavior of a component which is a validator
   is exhibited by its corresponding projection.
 *)
-Lemma pre_loaded_with_all_messages_validator_proj_eq
-  : VLSM_eq (pre_loaded_with_all_messages_vlsm Y) Xi.
+Lemma preloaded_with_all_messages_validator_proj_eq
+  : VLSM_eq (preloaded_with_all_messages_vlsm Y) Xi.
 Proof.
   split.
-  - by apply pre_loaded_with_all_messages_validator_proj_incl.
+  - by apply preloaded_with_all_messages_validator_proj_incl.
   - by apply induced_validator_incl_preloaded_with_all_messages.
 Qed.
 
-End sec_pre_loaded_with_all_messages_validator_proj.
+End sec_preloaded_with_all_messages_validator_proj.
 
 End sec_induced_validator_validators.
 
@@ -882,14 +882,14 @@ Definition composite_vlsm_induced_projection_validator : VLSM message :=
   mk_vlsm composite_vlsm_induced_projection_validator_machine.
 
 Definition pre_composite_vlsm_induced_projection_validator : VLSM message :=
-  pre_loaded_with_all_messages_vlsm composite_vlsm_induced_projection_validator.
+  preloaded_with_all_messages_vlsm composite_vlsm_induced_projection_validator.
 
 Lemma preloaded_composite_vlsm_induced_projection_validator_iff
   (P : message -> Prop)
   (Hinits : forall m,  initial_message_prop (IM i) m -> P m)
   : VLSM_eq
-      (pre_loaded_vlsm composite_vlsm_induced_projection_validator P)
-      (pre_loaded_vlsm (composite_vlsm_induced_validator IM constraint i) P).
+      (preloaded_vlsm composite_vlsm_induced_projection_validator P)
+      (preloaded_vlsm (composite_vlsm_induced_validator IM constraint i) P).
 Proof.
   split; cbn; apply basic_VLSM_strong_incl.
   - intros s Hs; cbn in *; red.
@@ -943,24 +943,24 @@ Lemma composite_vlsm_induced_projection_validator_iff
       (composite_vlsm_induced_validator IM constraint i).
 Proof.
   eapply VLSM_eq_trans;
-    [by apply (vlsm_is_pre_loaded_with_False composite_vlsm_induced_projection_validator) |].
+    [by apply (vlsm_is_preloaded_with_False composite_vlsm_induced_projection_validator) |].
   eapply VLSM_eq_trans;
     [by apply preloaded_composite_vlsm_induced_projection_validator_iff |].
   by apply VLSM_eq_sym,
-    (vlsm_is_pre_loaded_with_False
+    (vlsm_is_preloaded_with_False
       (composite_vlsm_induced_validator IM constraint i)).
 Qed.
 
 Definition valid_preloaded_composite_vlsm_induced_projection_validator
   : VLSM message :=
-  pre_loaded_vlsm composite_vlsm_induced_projection_validator (valid_message_prop X).
+  preloaded_vlsm composite_vlsm_induced_projection_validator (valid_message_prop X).
 
 Lemma valid_preloaded_composite_vlsm_induced_projection_validator_iff
   : VLSM_eq
       valid_preloaded_composite_vlsm_induced_projection_validator
       pre_composite_vlsm_induced_projection_validator.
 Proof.
-  apply VLSM_eq_sym, pre_loaded_with_all_messages_eq_validating_pre_loaded_vlsm.
+  apply VLSM_eq_sym, preloaded_with_all_messages_eq_validating_preloaded_vlsm.
   intros _ _ m (_ & _ & _ & _ & _ & Hm & _).
   by apply initial_message_is_valid; right.
 Qed.
@@ -979,7 +979,7 @@ Context
 (**
   Let us fix a (regular) VLSM <<X>>. <<X>> is a self-validator if for any
   arguments satisfying [valid] where the state is reachable in the
-  [pre_loaded_with_all_messages_vlsm], the arguments are also
+  [preloaded_with_all_messages_vlsm], the arguments are also
   a [valid_state] and [valid_message] for the original VLSM.
 *)
 Definition self_validator_vlsm_prop :=
@@ -989,8 +989,8 @@ Definition self_validator_vlsm_prop :=
 
 (**
   In the sequel we will show that a VLSM with the [self_validator_vlsm_prop]erty
-  is trace-equal to its associated [pre_loaded_with_all_messages_vlsm], basically
-  meaning (due to Lemma [byzantine_pre_loaded_with_all_messages]) that all traces
+  is trace-equal to its associated [preloaded_with_all_messages_vlsm], basically
+  meaning (due to Lemma [byzantine_preloaded_with_all_messages]) that all traces
   with the [byzantine_trace_prop]erty associated to self-validator VLSMs are also
   [valid_trace]s for that VLSM, meaning that the VLSM cannot exhibit
   byzantine behavior.
@@ -1001,15 +1001,15 @@ Context
   .
 
 (**
-  From Lemma [vlsm_incl_pre_loaded_with_all_messages_vlsm] we know that <<X>> is
+  From Lemma [vlsm_incl_preloaded_with_all_messages_vlsm] we know that <<X>> is
   included in preloaded <<X>>.
 
   To prove the converse we use the [self_validator_vlsm_prop]erty to
   verify the conditions of meta-lemma [VLSM_incl_finite_traces_characterization].
 *)
 
-Lemma pre_loaded_with_all_messages_self_validator_vlsm_incl :
-  VLSM_incl (pre_loaded_with_all_messages_vlsm X) X.
+Lemma preloaded_with_all_messages_self_validator_vlsm_incl :
+  VLSM_incl (preloaded_with_all_messages_vlsm X) X.
 Proof.
   unfold self_validator_vlsm_prop  in Hvalidator.
   destruct X as (T & M). simpl in *.
@@ -1032,12 +1032,12 @@ Qed.
 
 (** We conclude that <<X>> and preloaded <<X>> are trace-equal. *)
 
-Lemma pre_loaded_with_all_messages_self_validator_vlsm_eq
-  : VLSM_eq (pre_loaded_with_all_messages_vlsm X) X.
+Lemma preloaded_with_all_messages_self_validator_vlsm_eq
+  : VLSM_eq (preloaded_with_all_messages_vlsm X) X.
 Proof.
   split.
-  - by apply pre_loaded_with_all_messages_self_validator_vlsm_incl.
-  - by apply (vlsm_incl_pre_loaded_with_all_messages_vlsm X).
+  - by apply preloaded_with_all_messages_self_validator_vlsm_incl.
+  - by apply (vlsm_incl_preloaded_with_all_messages_vlsm X).
 Qed.
 
 End sec_self_validator_vlsm.

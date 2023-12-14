@@ -70,7 +70,7 @@ Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_valid_trace_from_app_iff (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)))
+  apply (finite_valid_trace_from_app_iff (preloaded_with_all_messages_vlsm (equivocator_vlsm X)))
     in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
@@ -116,7 +116,7 @@ Proof.
   apply elem_of_list_split in Hitem.
   destruct Hitem as [bprefix [bsuffix Heq]].
   subst btr.
-  apply (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (equivocator_vlsm X)))
+  apply (finite_valid_trace_from_to_app_split (preloaded_with_all_messages_vlsm (equivocator_vlsm X)))
     in Hbtr.
   destruct Hbtr as [Hbprefix Hbsuffix].
   remember (finite_trace_last _ _) as lst.
@@ -311,7 +311,7 @@ Proof.
       {
         repeat split; [| | done..].
         - by apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
-        - by eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X).
+        - by eexists _; apply (preloaded_with_all_messages_message_valid_initial_state_message X).
       }
       specialize (existing_false_label_equivocator_state_project_not_same X Ht _ Hidesc)
         as Hnot_same.
@@ -369,7 +369,7 @@ Proof.
       {
         repeat split; [| | done..].
         - by apply (preloaded_equivocator_state_project_valid_state X _ Hs _ _ Hidesc).
-        - by eexists _; apply (pre_loaded_with_all_messages_message_valid_initial_state_message X).
+        - by eexists _; apply (preloaded_with_all_messages_message_valid_initial_state_message X).
       }
       specialize (existing_true_label_equivocator_state_project_not_last X Ht _ Hidesc)
         as Hnot_last.
