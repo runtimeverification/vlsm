@@ -4,19 +4,20 @@ From VLSM.Core Require Import VLSM Composition Equivocation MessageDependencies.
 From VLSM.Core Require Import VLSMProjections ProjectionTraces.
 
 (** * Sufficient conditions for being a validator for the free composition
-In this module we give sufficient (abstract) conditions for a component to be
-validator for the free composition it is part of.
 
-Nemely, we show that if an indexed collection of vlsm <<IM>> satisfies
-the [channel_authentication_prop]erty, the [MessageDependencies] and
-[FullMessageDependencies] assumptions, the [HasBeenSentCapability] and
-[HasBeenReceivedCapability], then any component which for every valid input
-guarantees that the message and all its dependencies are [emittable] by one
-of the components is a validator for the free composition of <<IM>>
-(lemma [free_valid_message_yields_projection_validator]).
-
-Specialized (simpler) conditions are provided and proved for components which
-additionally satisfy the [message_dependencies_full_node_condition_prop]erty.
+  In this module we give sufficient conditions for a component to be a
+  validator for the free composition it is part of.
+  
+  Namely, we show that if an indexed collection of VLSMs <<IM>> satisfies
+  the [channel_authentication_prop]erty, the [MessageDependencies] and
+  [FullMessageDependencies] assumptions, the [HasBeenSentCapability] and
+  [HasBeenReceivedCapability], then any component, which for every valid input
+  guarantees that the message and all its dependencies are [emittable] by one
+  of the components, is a validator for the free composition of <<IM>>
+  (lemma [free_valid_message_yields_projection_validator]).
+  
+  Specialized (simpler) conditions are provided and proved for components which
+  additionally satisfy the [message_dependencies_full_node_condition_prop]erty.
 *)
 
 (** ** Message validators are validators for the free composition *)
