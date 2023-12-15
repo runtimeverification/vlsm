@@ -20,6 +20,11 @@ Class ReachableThreshold V Cv (threshold : R) `{Hm : Measurable V} `{FinSet V Cv
 
 #[global] Hint Mode ReachableThreshold - - - ! ! ! ! ! ! ! ! ! ! : typeclass_instances.
 
+Class DecidableReachableThreshold V Cv (threshold : R) `{ReachableThreshold V Cv threshold} :=
+  rt_dec :> forall (vs : Cv), Decision (sum_weights vs <= threshold)%R.
+
+#[global] Hint Mode DecidableReachableThreshold - - - ! ! ! ! ! ! ! ! ! ! ! : typeclass_instances.
+
 Section sec_reachable_threshold_props.
 
 Context
