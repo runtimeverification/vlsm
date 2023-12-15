@@ -45,19 +45,19 @@ DUPLICATES.md: $(DOCVFILES)
 alectryon: $(ALECTRYONHTMLFILES)
 .PHONY: alectryon
 
-# requires https://github.com/palmskog/rvdpdgraph/tree/v8.16
+# requires https://github.com/palmskog/rvdpdgraph/tree/v8.18
 rvdpd: $(SVGFILES)
 .PHONY: rvdpd
 
 $(ALECTRYONHTMLFILES): %.alectryon.html: %.v %.glob %.vo $(ALECTRYONDIR)/toc.html
-	$(SHOW)'ALECTRYON --output-directory $(ALECTRYONDIR) --output $(ALECTRYONDIR)/$(addsuffix .html,$(subst /,.,$(patsubst theories/%,%,$(basename $<))))'
-	$(HIDE)$(ALECTRYON) $(ALECTRYONHTMLFLAGS) $(COQDOCLIBS) --output-directory $(ALECTRYONDIR) --output $(ALECTRYONDIR)/$(addsuffix .html,$(subst /,.,$(patsubst theories/%,%,$(basename $<)))) $<
+	$(SHOW)'ALECTRYON --output-directory $(ALECTRYONDIR) --output $(ALECTRYONDIR)/$(addsuffix .html,$(subst /,.,$(patsubst theories/%,VLSM.%,$(basename $<))))'
+	$(HIDE)$(ALECTRYON) $(ALECTRYONHTMLFLAGS) $(COQDOCLIBS) --output-directory $(ALECTRYONDIR) --output $(ALECTRYONDIR)/$(addsuffix .html,$(subst /,.,$(patsubst theories/%,VLSM.%,$(basename $<)))) $<
 .PHONY: $(ALECTRYONHTMLFILES)
 
 $(ALECTRYONDIR)/toc.html:
 	$(HIDE)mkdir -p $(@D)
 	$(HIDE)cat resources/alectryon_toc_header.html > $@
-	$(HIDE)for vfile in $(subst /,.,$(patsubst theories/%,%,$(basename $(DOCVFILES)))) ; do \
+	$(HIDE)for vfile in $(subst /,.,$(patsubst theories/%,VLSM.%,$(basename $(DOCVFILES)))) ; do \
 	    echo "    <li><a href='$$vfile.html'>$$vfile</a></li>" >> $@; \
 	done
 	$(HIDE)cat resources/alectryon_toc_footer.html >> $@
@@ -71,13 +71,13 @@ $(COQDOCDIR)/map.svg: resources/map.dot
 	$(HIDE)dot -T svg resources/map.dot > $@
 
 $(DPDFILES): %.dpd: %.v %.glob %.vo
-	echo "Set DependGraph File \"$@\". Print FileDependGraph $(patsubst theories.%,%,$(subst /,.,$(basename $@)))." | $(COQTOP) $(COQDEBUG) $(COQFLAGS) $(COQLIBS) -require-import-from rvdpdgraph rvdpdgraph -load-vernac-object $(patsubst theories.%,%,$(subst /,.,$(basename $@))) -quiet > /dev/null 2>&1
+	echo "Set DependGraph File \"$@\". Print FileDependGraph $(patsubst theories.%,VLSM.%,$(subst /,.,$(basename $@)))." | $(COQTOP) $(COQDEBUG) $(COQFLAGS) $(COQLIBS) -require-import-from rvdpdgraph rvdpdgraph -load-vernac-object $(patsubst theories.%,VLSM.%,$(subst /,.,$(basename $@))) -quiet > /dev/null 2>&1
 
 $(DOTFILES): %.dot: %.dpd
 	rvdpd2dot -graphname rvdpdgraph -o $@ $<
 
 $(SVGFILES): %.svg: %.dot $(COQDOCDIR)/map.svg
-	dot -T svg $< > $(COQDOCDIR)/$(patsubst theories.%,%,$(subst /,.,$@))
+	dot -T svg $< > $(COQDOCDIR)/$(patsubst theories.%,VLSM.%,$(subst /,.,$@))
 .PHONY: $(SVGFILES)
 
 resources/index.html: resources/index.md

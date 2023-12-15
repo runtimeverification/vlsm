@@ -14,3 +14,6 @@ Export Equations.Prop.Logic.
   </a>#.
 *)
 Notation "x 'eq:' p" := (exist _ x p) (only parsing, at level 20).
+
+(* required for documentation generation *)
+Definition iYC2 := True.
