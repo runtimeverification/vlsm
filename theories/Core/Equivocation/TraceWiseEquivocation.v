@@ -32,6 +32,7 @@ Context
   `{finite.Finite validator}
   (A : validator -> index)
   (sender : message -> option validator)
+  (Free := free_composite_vlsm IM)
   .
 
 (**
@@ -95,7 +96,7 @@ Lemma elem_of_equivocating_senders_in_trace
   : v ∈ equivocating_senders_in_trace tr <->
     exists (m : message),
     (sender m = Some v) /\
-    equivocation_in_trace (free_composite_vlsm IM) m tr.
+    equivocation_in_trace Free m tr.
 Proof.
   unfold equivocating_senders_in_trace.
   rewrite elem_of_remove_dups, elem_of_list_omap.
@@ -147,7 +148,7 @@ Definition is_equivocating_tracewise
   : Prop
   :=
   forall is tr
-  (Hpr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
+  (Hpr : finite_constrained_trace_init_to Free is s tr),
   exists (m : message),
   (sender m = Some v) /\
   exists prefix elem suffix (lprefix := finite_trace_last is prefix),
@@ -166,17 +167,17 @@ Definition is_equivocating_tracewise_no_has_been_sent
   : Prop
   :=
   forall is tr
-  (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
+  (Htr : finite_constrained_trace_init_to Free is s tr),
   exists (m : message),
   (sender m = Some v) /\
-  equivocation_in_trace (preloaded_with_all_messages_vlsm (free_composite_vlsm IM)) m tr.
+  equivocation_in_trace Free m tr.
 
 Lemma is_equivocating_tracewise_no_has_been_sent_equivocating_senders_in_trace
   (s : composite_state IM)
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s v <->
     forall is tr
-    (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
+    (Htr : finite_constrained_trace_init_to Free is s tr),
     v ∈ equivocating_senders_in_trace tr.
 Proof.
   by split; intros Heqv is tr Htr; specialize (Heqv _ _ Htr)
@@ -205,7 +206,7 @@ Proof.
   apply exist_proper; intro.
   apply and_proper_l; intros ->.
   apply and_iff_compat_l, not_iff_compat; cbn.
-  cut (finite_constrained_trace_init_to (free_composite_vlsm IM) is
+  cut (finite_constrained_trace_init_to Free is
     (finite_trace_last is prefix) prefix).
   {
     intros.
@@ -221,7 +222,7 @@ Qed.
 
 Lemma transition_is_equivocating_tracewise_char
   l s om s' om'
-  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
+  (Ht : input_constrained_transition Free l (s, om) (s', om'))
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v ->
     is_equivocating_tracewise_no_has_been_sent s v \/
@@ -245,7 +246,7 @@ Qed.
 
 Lemma transition_receiving_no_sender_reflects_is_equivocating_tracewise
   l s om s' om'
-  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
+  (Ht : input_constrained_transition Free l (s, om) (s', om'))
   (Hno_sender : om ≫= sender = None)
   (v : validator)
   : is_equivocating_tracewise_no_has_been_sent s' v -> is_equivocating_tracewise_no_has_been_sent s v.
@@ -288,6 +289,32 @@ Proof.
   apply in_futures_preserving_oracle_from_stepwise with (field_selector output).
   - by apply has_been_sent_stepwise_props.
   - by eexists.
+Qed.
+
+Lemma is_equivocating_tracewise_is_equivocating_statewise_previously
+  (Hno_self_eqv : no_self_equivocation_condition_prop IM A sender) :
+  forall s v, is_equivocating_tracewise s v ->
+  forall is tr, finite_constrained_trace_init_to Free is s tr ->
+  exists item, item ∈ tr /\ is_equivocating_statewise IM A sender (destination item) v.
+Proof.
+  intros s v Hsv is tr Htr.
+  destruct (Hsv is tr Htr)
+    as (m & Hsender & prefix & item & suffix & -> & Hinput & Hnsent).
+  exists item; split; [by apply elem_of_app; right; left |].
+  unfold is_equivocating_statewise, equivocating_wrt.
+  apply (finite_valid_trace_init_to_prefix (preloaded_with_all_messages_vlsm Free)
+    (pre := prefix ++ [item])) in Htr;
+    [| by exists suffix; simplify_list_eq].
+  apply finite_valid_trace_init_to_snoc in Htr as (_ & Hitem & _).
+  apply input_valid_transition_preloaded_project_active_free in Hitem as Hti.
+  destruct item, l as [i li]; cbn in *.
+  exists i, m; split_and!; [done |..];
+    [| by eapply has_been_received_step_update; [| left]].
+  do 2 red; contradict Hnsent.
+  destruct Hitem as [(_ & _ & Hv) Ht]; cbn in Hv, Ht.
+  destruct (decide (i = A v)) as [-> | Hneq].
+  - by subst; apply (Hno_self_eqv (existT (A v) li) _ _ Hv v).
+  - by destruct transition; inversion Ht; subst; state_update_simpl.
 Qed.
 
 Lemma initial_state_not_is_equivocating_tracewise
@@ -336,7 +363,7 @@ Qed.
 
 Lemma input_valid_transition_receiving_no_sender_reflects_equivocating_validators
   l s om s' om'
-  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
+  (Ht : input_constrained_transition Free l (s, om) (s', om'))
   (Hno_sender : om ≫= sender = None)
   : equivocating_validators s' ⊆ equivocating_validators s.
 Proof.
@@ -357,7 +384,7 @@ Qed.
 
 Lemma composite_transition_no_sender_equivocators_weight
   l s om s' om'
-  (Ht : input_constrained_transition (free_composite_vlsm IM) l (s, om) (s', om'))
+  (Ht : input_constrained_transition Free l (s, om) (s', om'))
   (Hno_sender : om ≫= sender = None)
   : (equivocation_fault s' <= equivocation_fault s)%R.
 Proof.

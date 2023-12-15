@@ -38,7 +38,6 @@ Context
   `{forall i : index, HasBeenReceivedCapability (IM i)}
   `{finite.Finite validator}
   (Free := free_composite_vlsm IM)
-  (PreFree := preloaded_with_all_messages_vlsm Free)
   (threshold : R)
   `{ReachableThreshold validator Cv threshold}
   (A : validator -> index)
@@ -59,7 +58,7 @@ Definition trace_witnessing_equivocation_prop
   (s := finite_trace_last is tr)
   : Prop :=
   forall v, v ∈ equivocating_validators s <->
-    exists (m : message), (sender m = Some v) /\ equivocation_in_trace PreFree m tr.
+    exists (m : message), (sender m = Some v) /\ equivocation_in_trace Free m tr.
 
 Lemma equivocating_senders_in_trace_witnessing_equivocation_prop
   is tr
@@ -103,7 +102,7 @@ Proof.
   simpl.
   split; [by inversion 1 |].
   intros [m [_ Hmsg]].
-  - by elim (no_equivocation_in_empty_trace PreFree m).
+  - by elim (no_equivocation_in_empty_trace Free m).
   - by symmetry; apply elements_empty_iff, equivocating_validators_empty_in_initial_state.
 Qed.
 
@@ -376,9 +375,9 @@ Proof.
       apply Hprefix in Hv.
       destruct Hv as [m [Hmsg Heqv]].
       exists m. split; [done |].
-      by apply equivocation_in_trace_prefix.
+      by apply (equivocation_in_trace_prefix Free).
     + intros [m [Hmsg Heqv]].
-      apply equivocation_in_trace_last_char in Heqv.
+      apply (equivocation_in_trace_last_char Free) in Heqv.
       destruct Heqv as [Heqv | Heqv].
       * apply Heq. rewrite <- Hlst'.
         apply Hprefix.
@@ -492,7 +491,7 @@ Proof.
     finite_constrained_trace Free is tr ->
     trace_witnessing_equivocation_prop is tr ->
     let s := finite_trace_last is tr in
-    exists (is' : state PreFree) (tr' : list transition_item),
+    exists (is' : state Free) (tr' : list transition_item),
       finite_constrained_trace_init_to Free is' s tr' /\
       (forall prefix suffix : list transition_item,
        prefix ++ suffix = tr' ->
@@ -536,7 +535,7 @@ Proof.
       specialize (IHn Hwitness').
       destruct IHn as [is' [tr'' [[Htr'' Hinit'] Hprefix]]].
       specialize
-        (finite_valid_trace_from_to_app PreFree _ _ _ _ _ Htr'' Hitem)
+        (finite_valid_trace_from_to_app _ _ _ _ _ _ Htr'' Hitem)
         as Htr''_item.
       eexists is', _.
       split; [done |].
@@ -571,7 +570,7 @@ Proof.
       simpl in *.
       rewrite <- Heqs in Hitem.
       specialize
-        (finite_valid_trace_from_to_app PreFree _ _ _ _ _ Htr''' Hitem)
+        (finite_valid_trace_from_to_app _ _ _ _ _ _ Htr''' Hitem)
         as Htr'''_item.
       eexists is'', _.
       split; [done |].

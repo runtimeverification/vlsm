@@ -1,10 +1,11 @@
+From VLSM.Lib Require Import Itauto.
 From stdpp Require Import prelude finite.
 From Coq Require Import Reals.
 From VLSM.Lib Require Import Preamble ListExtras StdppListSet StdppExtras NatExtras.
 From VLSM.Lib Require Import Measurable EquationsExtras.
 From VLSM.Core Require Import VLSM Composition.
 From VLSM.Core Require Import Equivocation MessageDependencies TraceableVLSM.
-From VLSM.Core Require Import AnnotatedVLSM MsgDepLimitedEquivocation.
+From VLSM.Core Require Import TraceWiseEquivocation.
 
 (** * Core: Minimally Equivocating Traces
 
@@ -23,10 +24,9 @@ Section sec_minimal_equivocation_choice.
 (** ** The minimal equivocation choice function *)
 
 Context
-  `{EqDecision message}
   `{finite.Finite index}
   `{Inhabited index}
-  (IM : index -> VLSM message)
+  `(IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
   `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
@@ -646,10 +646,9 @@ Section sec_minimal_equivocation_trace.
 (** ** Extracting a minimally-equivocating trace *)
 
 Context
-  `{EqDecision message}
   `{finite.Finite index}
   `{Inhabited index}
-  (IM : index -> VLSM message)
+  `(IM : index -> VLSM message)
   `{forall i, ComputableSentMessages (IM i)}
   `{forall i, ComputableReceivedMessages (IM i)}
   `{FullMessageDependencies message Cm message_dependencies full_message_dependencies}
@@ -658,7 +657,8 @@ Context
   (state_destructor : forall i, state (IM i) -> set (transition_item (IM i) * state (IM i)))
   (state_size : forall i, state (IM i) -> nat)
   `{forall i, TraceableVLSM (IM i) (state_destructor i) (state_size i)}
-  `(sender : message -> option validator)
+  `{EqDecision validator}
+  (sender : message -> option validator)
   `{!Irreflexive (tc_composite_observed_before_send IM message_dependencies)}
   (A : validator -> index)
   (Hchannel : channel_authentication_prop IM A sender)
@@ -701,5 +701,153 @@ Proof.
     [by eapply minimal_equivocation_choice_is_choosing_well | | done..].
   by intros ? **; eapply minimal_equivocation_choice_monotone.
 Qed.
+
+Lemma state_to_minimal_equivocation_trace_equivocation_monotonic_final :
+  forall (s : composite_state IM) (Hs_pre :  composite_constrained_state_prop IM s)
+    (is : composite_state IM) (tr : list (composite_transition_item IM)),
+    state_to_minimal_equivocation_trace s Hs_pre = (is, tr) ->
+    forall (item : composite_transition_item IM), item ∈ tr ->
+    forall v : validator,
+      msg_dep_is_globally_equivocating IM message_dependencies sender
+        (destination item) v ->
+      msg_dep_is_globally_equivocating IM message_dependencies sender s v.
+Proof.
+  intros * Htr_min; rewrite <- Forall_forall.
+  assert (Hall := state_to_minimal_equivocation_trace_equivocation_monotonic _ _ _ _ Htr_min).
+  apply reachable_composite_state_to_trace in Htr_min;
+    [| by apply minimal_equivocation_choice_is_choosing_well].
+  induction Htr_min using finite_valid_trace_init_to_rev_ind;
+    [by constructor |].
+  apply Forall_app; split; [| by apply Forall_singleton].
+  apply input_valid_transition_origin in Ht as Hs.
+  apply input_valid_transition_destination in Ht as Hsf.
+  eapply Forall_impl.
+  - by apply IHHtr_min; [| intros * ->; eapply Hall; simplify_list_eq].
+  - cbn; intros item Hitem_s v Hv.
+    apply Hitem_s in Hv.
+    specialize (Hall tr []); setoid_rewrite app_nil_r in Hall.
+    apply (Hall _ eq_refl).
+    by apply valid_trace_get_last in Htr_min; subst.
+Qed.
+
+Section sec_tracewise_equivocation.
+
+Context
+  (Hfull : forall i, message_dependencies_full_node_condition_prop (IM i) message_dependencies)
+  .
+
+Lemma minimal_equivocation_trace_includes_tracewise_equivocation :
+  forall (s : composite_state IM) (Hs : constrained_state_prop Free s),
+  forall is tr, state_to_minimal_equivocation_trace s Hs = (is, tr) ->
+  forall v, is_equivocating_tracewise_no_has_been_sent IM A sender s v ->
+  exists (m : message), (sender m = Some v) /\ equivocation_in_trace Free m tr.
+Proof.
+  intros s Hs is tr Heqtr v Heqv.
+  edestruct Heqv.
+  - eapply reachable_composite_state_to_trace; [| done].
+    by apply minimal_equivocation_choice_is_choosing_well.
+  - by eexists.
+Qed.
+
+Lemma minimal_equivocation_trace_equivocation_is_statewise_equivocating
+  (Hno_self_eqv : no_self_equivocation_condition_prop IM A sender) :
+  forall (s : composite_state IM) (Hs : constrained_state_prop Free s),
+  forall is tr, state_to_minimal_equivocation_trace s Hs = (is, tr) ->
+  forall (m : message), equivocation_in_trace Free m tr ->
+  forall (v : validator), sender m = Some v ->
+  is_equivocating_statewise IM A sender s v.
+Proof.
+  intros * Htr_min m (pre & item & suffix & -> & Hinput & Hno_output) v Hsender.
+  eapply full_node_is_globally_equivocating_statewise_iff;
+    [by apply channel_authentication_sender_safety | done |].
+  eapply full_node_is_globally_equivocating_iff; [done.. |].
+  eapply state_to_minimal_equivocation_trace_equivocation_monotonic_final;
+    [done | by apply elem_of_app; right; left |].
+  apply reachable_composite_state_to_trace in Htr_min;
+    [| by apply minimal_equivocation_choice_is_choosing_well].
+  apply
+    (finite_valid_trace_init_to_prefix (preloaded_with_all_messages_vlsm Free)
+      (pre := pre ++ [item])) in Htr_min;
+    [| by exists suffix; simplify_list_eq].
+  rewrite finite_trace_last_is_last in Htr_min.
+  apply valid_trace_last_pstate in Htr_min as Hditem.
+  eapply full_node_is_globally_equivocating_iff; [done.. |].
+  apply (finite_valid_trace_init_to_snoc (preloaded_with_all_messages_vlsm Free))
+    in Htr_min as Hitem.
+  destruct Hitem as (Htr & Hitem & _).
+  exists m; constructor; [done |..].
+  - exists (projT1 (l item)).
+    apply input_valid_transition_preloaded_project_active_free in Hitem.
+    by eapply has_been_received_step_update; [done | left].
+  - contradict Hno_output.
+    eapply has_been_sent_examine_one_trace; [done |].
+    apply input_valid_transition_preloaded_project_active_free in Hitem as Hi.
+    eapply has_been_sent_iff_by_sender in Hno_output;
+      [| by apply channel_authentication_sender_safety | done | done].
+    exists (A v).
+    destruct item, l as [i li], Hitem as [(_ & _ & Hv) Ht]; cbn in Ht.
+    destruct transition; inversion Ht; subst.
+    destruct (decide (i = A v)) as [-> | Hneq];
+      [| by cbn in *; state_update_simpl].
+    by cbn in Hinput; subst; apply (Hno_self_eqv (existT (A v) li) _ _ Hv v).
+Qed.
+
+Lemma is_equivocating_statewise_equiv_is_equivocating_tracewise
+  (Hno_self_eqv : no_self_equivocation_condition_prop IM A sender) :
+  forall (s : composite_state IM) (Hs : constrained_state_prop Free s),
+  forall v,
+    is_equivocating_tracewise IM A sender s v
+      <->
+    is_equivocating_statewise IM A sender s v.
+Proof.
+  split; [| by apply is_equivocating_statewise_implies_is_equivocating_tracewise].
+  intros Heqv.
+  destruct (state_to_minimal_equivocation_trace s Hs) as (is, tr) eqn: Heq_tr.
+  pose proof (channel_authentication_sender_safety _ _ _ Hchannel).
+  edestruct minimal_equivocation_trace_includes_tracewise_equivocation
+    as (m & Hsender & Heqvm);
+    [done | by eapply is_equivocating_tracewise_no_has_been_sent_iff |..].
+  by eapply minimal_equivocation_trace_equivocation_is_statewise_equivocating.
+Qed.
+
+Lemma is_equivocating_tracewise_iff_on_minimal_trace
+  (Hno_self_eqv : no_self_equivocation_condition_prop IM A sender) :
+  forall (s : composite_state IM) (Hs : constrained_state_prop Free s),
+  forall is tr, state_to_minimal_equivocation_trace s Hs = (is, tr) ->
+  forall v, is_equivocating_tracewise_no_has_been_sent IM A sender s v <->
+  exists (m : message), (sender m = Some v) /\ equivocation_in_trace Free m tr.
+Proof.
+  intros s Hs is tr Heq_tr v; split;
+    [by eapply minimal_equivocation_trace_includes_tracewise_equivocation |].
+  intros (m & Hsender & Heqv).
+  pose proof (channel_authentication_sender_safety _ _ _ Hchannel).
+  eapply is_equivocating_tracewise_no_has_been_sent_iff; [done |].
+  apply is_equivocating_statewise_equiv_is_equivocating_tracewise; [done ..|].
+  by eapply minimal_equivocation_trace_equivocation_is_statewise_equivocating.
+Qed.
+
+#[export] Instance is_equivocating_tracewise_no_has_been_sent_dec
+  (Hno_self_eqv : no_self_equivocation_condition_prop IM A sender)
+  `{forall s, Decision (constrained_state_prop Free s)} :
+  RelDecision (is_equivocating_tracewise_no_has_been_sent IM A sender).
+Proof.
+  intros s v.
+  destruct (decide (constrained_state_prop Free s)) as [Hs | Hns]; cycle 1.
+  - left; intros is tr Htr; exfalso.
+    by unfold finite_constrained_trace_init_to in Htr; apply valid_trace_last_pstate in Htr.
+  - destruct (state_to_minimal_equivocation_trace s Hs) as (is, tr) eqn: Heq_tr.
+    apply @Decision_iff
+      with (P := Exists
+        (fun m => sender m = Some v /\ equivocation_in_trace Free m tr)
+        (omap input tr));
+      [| by typeclasses eauto].
+    rewrite is_equivocating_tracewise_iff_on_minimal_trace, Exists_exists by done.
+    apply exist_proper; intro m; split; [by itauto |].
+    intros [Hsender Heqv]; split_and!; [| done..].
+    destruct Heqv as (pre & item & suf & -> & Hinput & _).
+    by rewrite omap_app, elem_of_app; right; cbn in *; rewrite Hinput; left.
+Qed.
+
+End sec_tracewise_equivocation.
 
 End sec_minimal_equivocation_trace.

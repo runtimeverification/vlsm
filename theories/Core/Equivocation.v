@@ -2227,6 +2227,22 @@ Definition equivocation_fault_constraint
   let (s', om') := (composite_transition IM l som) in
   not_heavy s'.
 
+(**
+  Noting that the [equivocation_in_trace] definition counts as an equivocation
+  a message which is emitted at the same time it is received, while the
+  received-not-sent evidence of equivocation would not be able to
+  detect such a case, we here define the _no-self-equivocation_ property of a
+  VLSM to not be allowed to receive a message having itself as a sender unless
+  it is registered as having been already sent in the current state.
+*)
+Definition no_self_equivocation (i : index) (s : state (IM i)) (m : message) : Prop :=
+  forall v, sender m = Some v -> A v = i -> has_been_sent (IM i) s m.
+
+Definition no_self_equivocation_condition_prop : Prop :=
+  forall l s m,
+  composite_valid IM l (s, Some m) ->
+  no_self_equivocation (projT1 l) (s (projT1 l)) m.
+
 Lemma sent_component_sent_previously
   [constraint : composite_label IM -> composite_state IM * option message -> Prop]
   (X := composite_vlsm IM constraint)
