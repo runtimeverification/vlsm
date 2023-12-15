@@ -127,7 +127,7 @@ documentation: |-
   - [VLSMs that Generate Logical Formulas](theories/Examples/Tutorial/Formulas.v): construction of VLSMs corresponding to propositional logic symbols, with their composition having well-formed propositional formulas as valid messages.
   - [VLSMs that Multiply](theories/Examples/Tutorial/Multiply.v): construction of VLSMs that perform arithmetic operations, with their composition having products of powers as valid messages.
   - [Primes Composition of VLSMs](theories/Examples/Tutorial/PrimesComposition.v): construction of an infinite family of VLSMs that multiply and their composition based on primes.
-  - [Round-based Asynchronous Muddy Children Puzzle](theories/Examples/Tutorial/MuddyChildrenRounds.v): the [muddy children puzzle](https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html#muddy) as a constrained composition of VLSMs that communicate asynchronously in rounds.
+  - [Round-based Asynchronous Muddy Children Puzzle](theories/Examples/Tutorial/MuddyChildrenRounds.v): the [muddy children puzzle](https://plato.stanford.edu/entries/dynamic-epistemic/appendix-B-solutions.html#muddy) as a constrained composition of VLSMs that communicate asynchronously in rounds. For additional background, see the [first](https://www.youtube.com/watch?v=lTNG4HJ7V6U) and [second](https://www.youtube.com/watch?v=1H7kAW26pOA) part of a workshop presentation on the formalization.
 
   ### VLSM application: ELMO
 
