@@ -5,7 +5,7 @@ From VLSM.Core Require Import VLSM VLSMProjections.
 
 (** * Core: Preloaded VLSMs
 
-  Given a VLSM <<X>>, we can _preloaded_ it with some messages, i.e. construct
+  Given a VLSM <<X>>, we can _preload_ it with some messages, i.e. construct
   an identical VLSM, except that these messages are now considered initial. In
   particular, we can preload <<X>> with all messages, i.e. make a copy of <<X>>
   in which all messages are initial. The high degree of freedom allowed by the

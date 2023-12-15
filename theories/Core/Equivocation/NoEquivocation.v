@@ -207,7 +207,7 @@ End sec_composite_no_equivocation_invariants.
 
 Section sec_seeded_composite_vlsm_no_equivocation.
 
-(** ** Pre-loading a VLSM composition with no equivocations constraint
+(** ** Preloading a VLSM composition with no equivocations constraint
 
   When adding initial messages to a VLSM composition with a no equivocation
   constraint, we cannot simply use the [preloaded_vlsm] construct
