@@ -16,7 +16,7 @@
 	<script>
 	  if (document.title === "Table of Contents") {
 	      document.write("<a href='map.svg'>File dependency graph</a>");
-	  } else {
+	  } else if (document.title !== "Index") {
               document.write("<a href='" + document.title + ".svg'>" + document.title + " dependency graph</a>");
 	  }
 	</script>

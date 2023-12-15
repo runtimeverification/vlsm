@@ -19,3 +19,6 @@ Tactic Notation "itauto" :=
   itauto auto.
 
 Ltac itautor tac := let t := solve[tac | itauto tac] in itauto t.
+
+(* required for documentation generation *)
+Definition iYC2 := True.
