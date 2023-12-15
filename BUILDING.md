@@ -145,19 +145,19 @@ If you are using WSL on Windows, you need to install the VS Code [WSL extension]
 
 We recommend also installing the [Fast Unicode Math Characters extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode), to enable easier input of mathematical symbols.
 
-To enable Coq support in VS Code, there are two options: the VsCoq extension and the Coq LSP extension.
+To enable Coq support in VS Code, there are two options: the VsCoq extension and the Coq LSP extension. Note that these extensions are restricted to Coq 8.18.0 and later. For earlier versions, you can use the [VsCoq Legacy extension](https://github.com/coq-community/vscoq/tree/vscoq1).
 
 ### VsCoq extension
 
-The [VsCoq extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq) is a stable standalone extension using Coq's legacy XML protocol. It can be installed from the command line:
+To install the [VsCoq extension](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp) from the command line, make sure that [switch creation](#install-a-switch-for-opam) and [dependency installation](#install-the-project-dependencies-via-opam) are done and then run:
 
 ```shell
-code --install-extension maximedenes.vscoq
+opam install vscoq-language-server && code --install-extension maximedenes.vscoq
 ```
 
 ## Coq LSP extension
 
-The [Coq LSP extension](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp) is an experimental new extension with advanced features that requires installing an opam package. To install it from the command line, make sure that [switch creation](#install-a-switch-for-opam) and [dependency installation](#install-the-project-dependencies-via-opam) are done and then run:
+To install the [Coq LSP extension](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp) from the command line, make sure that [switch creation](#install-a-switch-for-opam) and [dependency installation](#install-the-project-dependencies-via-opam) are done and then run:
 
 ```shell
 opam install coq-lsp && code --install-extension ejgallego.coq-lsp
