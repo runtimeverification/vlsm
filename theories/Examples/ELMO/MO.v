@@ -4,6 +4,7 @@ From stdpp Require Import prelude finite.
 From VLSM.Lib Require Import Preamble ListExtras StdppExtras.
 From VLSM.Core Require Import VLSM PreloadedVLSM VLSMProjections Composition.
 From VLSM.Core Require Import Equivocation Validator ProjectionTraces.
+From VLSM.Core Require Import MessageDependencies FreeCompositionValidator.
 From VLSM.Examples Require Import BaseELMO UMO.
 
 (** * ELMO: Protocol Definitions and Properties for MO
@@ -40,6 +41,25 @@ Inductive MO_msg_valid (P : Address -> Prop) : Message -> Prop :=
 | MO_mv_recv :
     forall m mr : Message,
       MO_msg_valid P m -> MO_msg_valid P mr -> MO_msg_valid P (m <*> MkObservation Receive mr).
+
+Lemma MO_msg_valid_P_adr (P : Address -> Prop) (m : Message) :
+  MO_msg_valid P m -> P (adr (state m)).
+Proof.
+  by induction 1.
+Qed.
+
+Lemma MO_msg_valid_dep (P : Address -> Prop) (m : Message) :
+  MO_msg_valid P m ->
+  forall dm, dm ∈ Message_dependencies m -> MO_msg_valid P dm.
+Proof.
+  unfold Message_dependencies.
+  intros Hv dm Hdm.
+  apply elem_of_list_to_set, elem_of_list_fmap in Hdm as (o & -> & Ho).
+  revert o Ho; induction Hv; cbn; intros.
+  - by destruct m, state; cbn in *; subst; inversion Ho.
+  - by apply elem_of_addObservation in Ho as [-> |]; [| apply IHHv].
+  - by apply elem_of_addObservation in Ho as [-> |]; [| apply IHHv1].
+Qed.
 
 Section sec_alternative_definition_of_validity.
 
@@ -843,357 +863,122 @@ Context
 
 Definition MO : VLSM Message := free_composite_vlsm M.
 
-(** We set up aliases for some functions operating on free VLSM composition. *)
-
-Definition MO_state : Type := composite_state M.
-Definition MO_label : Type := composite_label M.
-Definition MO_transition_item : Type := composite_transition_item M.
-
-(** We can lift labels, states and traces from an MO component to the MO protocol. *)
-
-Definition lift_to_MO_label
-  (i : index) (li : VLSM.label (M i)) : MO_label :=
-    lift_to_composite_label M i li.
-
-Definition lift_to_MO_state
-  (us : MO_state) (i : index) (si : VLSM.state (M i)) : MO_state :=
-    lift_to_composite_state M us i si.
-
-Definition lift_to_MO_trace
-  (us : MO_state) (i : index) (tr : list (transition_item (M i)))
-  : list MO_transition_item :=
-    pre_VLSM_embedding_finite_trace_project
-      _ _ (lift_to_MO_label i) (lift_to_MO_state us i) tr.
-
-#[local] Hint Rewrite @state_update_twice : state_update.
-
-#[local] Hint Unfold lift_to_MO_label : state_update.
-#[local] Hint Unfold lift_to_MO_state : state_update.
-#[local] Hint Unfold lift_to_MO_trace : state_update.
-
-(**
-  We can also lift properties from MO components to the MO protocol, among
-  them [valid_state_prop], [valid_message_prop], [input_valid_transition]
-  and the various kinds of traces.
-*)
-
-Lemma lift_to_MO :
-  forall (us : MO_state) (Hus : valid_state_prop MO us) (i : index),
-    VLSM_weak_embedding (M i) MO (lift_to_MO_label i) (lift_to_MO_state us i).
-Proof. by intros; apply lift_to_free_weak_embedding. Qed.
-
-Lemma lift_to_MO_valid_state_prop :
-  forall (i : index) (s : State) (us : MO_state),
-    valid_state_prop MO us -> valid_state_prop (M i) s ->
-      valid_state_prop MO (lift_to_MO_state us i s).
-Proof.
-  intros is s us Hvsp.
-  by eapply VLSM_weak_embedding_valid_state, lift_to_MO.
-Qed.
-
-Lemma lift_to_MO_valid_message_prop :
-  forall (i : index) (om : option Message),
-    option_valid_message_prop (M i) om ->
-      option_valid_message_prop MO om.
-Proof.
-  intros i [] Hovmp; cycle 1.
-  - by exists (``(vs0 MO)); constructor.
-  - eapply VLSM_weak_embedding_valid_message.
-    + by apply (lift_to_MO (``(vs0 MO))); exists None; constructor.
-    + by inversion 1.
-    + by apply Hovmp.
-Qed.
-
-Lemma lift_to_MO_input_valid_transition :
-  forall (i : index) (lbl : Label) (s1 s2 : State) (iom oom : option Message) (us : MO_state),
-    valid_state_prop MO us ->
-    input_valid_transition (M i) lbl (s1, iom) (s2, oom) ->
-      input_valid_transition MO
-        (lift_to_MO_label i lbl)
-        (lift_to_MO_state us i s1, iom)
-        (lift_to_MO_state us i s2, oom).
-Proof.
-  intros i lbl s1 s2 iom oom us Hivt.
-  by apply @VLSM_weak_embedding_input_valid_transition, lift_to_MO.
-Qed.
-
-Lemma lift_to_MO_finite_valid_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (transition_item (M i))) (us : MO_state),
-    valid_state_prop MO us ->
-    finite_valid_trace_from_to (M i) s1 s2 tr ->
-      finite_valid_trace_from_to
-        MO (lift_to_MO_state us i s1) (lift_to_MO_state us i s2) (lift_to_MO_trace us i tr).
-Proof.
-  intros i s1 s2 tr us Hvsp Hfvt.
-  by eapply (VLSM_weak_embedding_finite_valid_trace_from_to (lift_to_MO _ Hvsp i)).
-Qed.
-
-Lemma lift_to_MO_constrained_state_prop :
-  forall (i : index) (s : State) (us : MO_state),
-    constrained_state_prop MO us -> constrained_state_prop (M i) s ->
-      constrained_state_prop MO (lift_to_MO_state us i s).
-Proof.
-  intros is s us Hvsp.
-  by eapply VLSM_weak_embedding_valid_state, lift_to_preloaded_free_weak_embedding.
-Qed.
-
-Lemma lift_to_preloaded_MO_option_valid_message_prop :
-  forall (i : index) (om : option Message),
-    option_valid_message_prop (preloaded_with_all_messages_vlsm (M i)) om ->
-      option_valid_message_prop (preloaded_with_all_messages_vlsm MO) om.
-Proof.
-  intros i [] Hovmp; cycle 1.
-  - by exists (``(vs0 MO)); constructor.
-  - eapply VLSM_weak_embedding_valid_message.
-    + eapply (lift_to_preloaded_free_weak_embedding _ i (``(vs0 MO))).
-      by exists None; constructor.
-    + by inversion 1; cbn; [| right].
-    + by apply Hovmp.
-Qed.
-
-Lemma lift_to_MO_input_constrained_transition :
-  forall (i : index) (lbl : Label) (s1 s2 : State) (iom oom : option Message) (us : MO_state),
-    constrained_state_prop MO us ->
-    input_constrained_transition (M i) lbl (s1, iom) (s2, oom) ->
-      input_constrained_transition MO
-        (lift_to_MO_label i lbl)
-        (lift_to_MO_state us i s1, iom)
-        (lift_to_MO_state us i s2, oom).
-Proof.
-  intros i lbl s1 s2 iom oom us Hivt.
-  by apply @VLSM_weak_embedding_input_valid_transition, lift_to_preloaded_free_weak_embedding.
-Qed.
-
-Lemma lift_to_MO_finite_constrained_trace_from_to :
-  forall (i : index) (s1 s2 : State) (tr : list (transition_item (M i))) (us : MO_state),
-    constrained_state_prop MO us ->
-    finite_constrained_trace_from_to (M i) s1 s2 tr ->
-      finite_constrained_trace_from_to MO
-        (lift_to_MO_state us i s1) (lift_to_MO_state us i s2) (lift_to_MO_trace us i tr).
-Proof.
-  intros i s1 s2 tr us Hvsp Hfvt.
-  unshelve eapply (@VLSM_weak_embedding_finite_valid_trace_from_to _
-    (preloaded_with_all_messages_vlsm (M i))
-    (preloaded_with_all_messages_vlsm MO) _ _); [| done].
-  by apply lift_to_preloaded_free_weak_embedding.
-Qed.
-
-(** *** Lifting lemmas for validating theorem *)
-
-Lemma initial_state_prop_lift_to_MO :
-  forall (i : index) (s : State),
-    initial_state_prop (M i) s ->
-      initial_state_prop MO (lift_to_MO_state (``(vs0 MO)) i s).
-Proof.
-  intros i s Hisp j; cbn.
-  by destruct (decide (i = j)); subst; state_update_simpl.
-Qed.
-
-Lemma finite_valid_trace_init_to_lift_to_MO :
-  forall (i : index) (s : State),
-    initial_state_prop (M i) s ->
-      finite_valid_trace_init_to MO
-        (lift_to_MO_state (``(vs0 MO)) i s) (lift_to_MO_state (``(vs0 MO)) i s) [].
-Proof.
-  constructor; cycle 1.
-  - by apply initial_state_prop_lift_to_MO.
-  - constructor; exists None; constructor; [| done].
-    by apply initial_state_prop_lift_to_MO.
-Qed.
-
-Lemma option_valid_message_prop_initial :
-  forall i : index,
-    option_valid_message_prop MO (Some (MkMessage (MkState [] (idx i)))).
-Proof.
-  intros i.
-  remember (MkMessage (MkState [] (idx i))) as m.
-  exists (state_update M (``(vs0 MO)) i (state m <+> MkObservation Send m)).
-  by econstructor 2 with
-    (s := ``(vs0 MO)) (_om := None) (_s := ``(vs0 MO)) (om := None) (l := existT i Send);
-    [by repeat split; constructor.. | rewrite Heqm].
-Qed.
-
-Lemma option_valid_message_prop_addObservationToMessage_Send :
-  forall m : Message,
-    option_valid_message_prop MO (Some m) ->
-      option_valid_message_prop MO (Some (m <*> MkObservation Send m)).
-Proof.
-  intros m [s' IH].
-  inversion IH; subst; [by inversion Hom as [j []]; inversion x |].
-  destruct l as [k []], om as [m' |];
-    inversion Hv; subst; clear Hv;
-    inversion Ht; subst; clear Ht.
-  unfold addObservationToMessage; cbn; red.
-  remember (s k <+> MkObservation Send (MkMessage (s k))) as sk'.
-  remember (state_update M s k sk') as ss.
-  assert (Heq : ss k = sk') by (subst; state_update_simpl; done).
-  rewrite <- Heq in *; clear Heqsk'.
-  exists (state_update M ss k (ss k <+> MkObservation Send (MkMessage (ss k)))).
-  by econstructor 2 with (s := ss) (_s := ``(vs0 MO)) (om := None) (l := existT k Send);
-    [| constructor | repeat split; constructor |].
-Qed.
-
-Lemma option_valid_message_prop_addObservationToMessage_Receive :
-  forall m mr : Message,
-    MO_msg_valid P' mr ->
-    option_valid_message_prop MO (Some m) ->
-    option_valid_message_prop MO (Some mr) ->
-      option_valid_message_prop MO (Some (m <*> MkObservation Receive mr)).
-Proof.
-  intros m mr Hvalid [sm IH1] [smr IH2].
-  inversion IH1; subst; [by inversion Hom as [j []]; inversion x |].
-  destruct l as [k []], om as [m' |];
-    inversion Hv; subst; clear Hv;
-    inversion Ht; subst; clear Ht.
-  exists (state_update M s k (s k <+> MkObservation Receive mr <+>
-    MkObservation Send (MkMessage (s k <+> MkObservation Receive mr)))).
-  econstructor 2 with
-    (s := state_update M s k (s k <+> MkObservation Receive mr)) (_om := None)
-    (_s := ``(vs0 MO)) (om := None) (l := existT k Send); cycle 1.
-  - by constructor.
-  - by repeat split; constructor.
-  - by cbn; state_update_simpl.
-  - by econstructor 2 with (s := s) (om := Some mr) (l := existT k Receive);
-      [| | repeat split; constructor |].
-Qed.
-
-Lemma option_valid_message_prop_MO_msg_valid :
-  forall m : Message,
-    MO_msg_valid P' m -> option_valid_message_prop MO (Some m).
-Proof.
-  induction 1.
-  - destruct H1 as (_ & i & Heq).
-    replace m with (MkMessage (MkState [] (idx i))) by (apply eq_Message; done).
-    by apply option_valid_message_prop_initial.
-  - by apply option_valid_message_prop_addObservationToMessage_Send.
-  - by apply option_valid_message_prop_addObservationToMessage_Receive.
-Qed.
-
-Lemma lift_to_MO_finite_valid_trace_init_to :
-  forall (i : index) (s1 s2 : State) (tr : list (transition_item (M i))),
-    finite_constrained_trace_init_to (M i) s1 s2 tr ->
-      finite_valid_trace_init_to MO (lift_to_MO_state (``(vs0 MO)) i s1)
-        (lift_to_MO_state (``(vs0 MO)) i s2) (lift_to_MO_trace (``(vs0 MO)) i tr).
-Proof.
-  intros i s1 s2 tr [Hfvt Hisp].
-  induction Hfvt using finite_valid_trace_from_to_rev_ind; cbn;
-    [by apply finite_valid_trace_init_to_lift_to_MO |].
-  constructor; [| by apply initial_state_prop_lift_to_MO].
-  unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project.
-  rewrite map_app.
-  eapply finite_valid_trace_from_to_app; cbn; [by apply IHHfvt |].
-  apply valid_trace_add_last; [| done].
-  apply first_transition_valid; cbn.
-  destruct Ht as [(Hvsp & _ & Hvalid) Ht], l, iom as [im |]; cbn in *;
-    inversion Hvalid; subst; clear Hvalid;
-    inversion Ht; subst; cbn in *; clear Ht; cycle 1.
-  - repeat split.
-    + by eapply finite_valid_trace_from_to_last_pstate, IHHfvt.
-    + by apply option_valid_message_None.
-    + by constructor.
-    + by cbn; state_update_simpl.
-  - repeat split.
-    + by eapply finite_valid_trace_from_to_last_pstate, IHHfvt.
-    + by apply option_valid_message_prop_MO_msg_valid.
-    + by constructor.
-    + by cbn; state_update_simpl.
-Qed.
-
-Lemma lift_preloaded_component_to_MO :
-  forall i : index,
-    VLSM_embedding (preloaded_with_all_messages_vlsm (M i)) MO
-      (lift_to_MO_label i) (lift_to_MO_state (``(vs0 MO)) i).
-Proof.
-  constructor; intros.
-  by eapply valid_trace_forget_last, lift_to_MO_finite_valid_trace_init_to,
-    finite_valid_trace_init_add_last.
-Qed.
-
-(**
-  Every state in a MO component gives rise to a unique trace leading to this
-  state, which we can then lift to the MO protocol.
-*)
-Definition MO_component_state2trace
-  (s : MO_state) (i : index) : list MO_transition_item :=
-    lift_to_MO_trace s i (state2trace (s i)).
-
-(**
-  Iterating [MO_component_state2trace] shows that every reachable MO state contains a
-  trace that leads to this state. However, this trace is not unique, because
-  we can concatenate the lifted traces in any order.
-*)
-Fixpoint MO_state2trace_aux
-  (us : MO_state) (is : list index) : list MO_transition_item :=
-  match is with
-  | [] => []
-  | i :: is' =>
-    MO_state2trace_aux (state_update _ us i (MkState [] (idx i))) is' ++ MO_component_state2trace us i
-  end.
-
-Definition MO_state2trace
-  (us : MO_state) : list MO_transition_item :=
-    MO_state2trace_aux us (enum index).
-
-Lemma finite_constrained_trace_init_to_MO_state2trace :
-  forall us : MO_state,
-    constrained_state_prop MO us ->
-      finite_constrained_trace_init_to MO (``(vs0 MO)) us (MO_state2trace us).
-Proof.
-  intros us Hvsp; split; [| done].
-  unfold MO_state2trace.
-  assert (Hall : forall i, i ∉ enum index -> us i = MkState [] (idx i))
-    by (intros i Hin; contradict Hin; apply elem_of_enum).
-  revert us Hall Hvsp.
-  generalize (enum index) as is.
-  induction is as [| i is']; cbn; intros us Hall Hvsp.
-  - replace us with (fun n : index => MkState [] (idx n)).
-    + by constructor; apply initial_state_is_valid; compute.
-    + extensionality i; rewrite Hall; [done |].
-      by apply not_elem_of_nil.
-  - eapply finite_valid_trace_from_to_app.
-    + apply IHis'.
-      * intros j Hj. destruct (decide (i = j)); subst; state_update_simpl; [done |].
-        by apply Hall; rewrite elem_of_cons; intros [].
-      * by apply pre_composite_free_update_state_with_initial.
-    + replace us with (state_update M us i (us i)) at 2 by (state_update_simpl; done).
-      apply lift_to_MO_finite_constrained_trace_from_to; [done |].
-      apply (composite_constrained_state_project _ us i) in Hvsp as Hvsp'.
-      apply valid_state_has_trace in Hvsp' as (s & tr & [Hfvt Hinit]).
-      replace s with (MkState [] (idx i)) in *; cycle 1.
-      * by inversion Hinit; destruct s; cbn in *; subst.
-      * by eapply finite_constrained_trace_init_to_state2trace.
-Qed.
-
 (** *** Validators *)
 
-Lemma MO_component_validating :
-  forall i : index, component_projection_validator_prop M (free_constraint M) i.
+Lemma MO_reachable_view (s : State) i :
+  constrained_state_prop (M i) s
+    <->
+  UMO_reachable (const (MO_msg_valid P'))  s /\ adr s = idx i.
 Proof.
-  unfold component_projection_validator_prop.
-  intros i lj sj omi * Hiv.
-  red in Hiv; apply input_valid_transition_iff in Hiv as [[s m] Ht].
-  destruct (exists_right_finite_trace_from _ _ _ _ _ _ Ht) as (s' & tr & Hfvt & Hlast).
-  apply lift_to_MO_finite_valid_trace_init_to in Hfvt as [Hfvt _].
-  unfold lift_to_MO_trace, pre_VLSM_embedding_finite_trace_project in Hfvt;
-    rewrite map_app in Hfvt.
-  apply finite_valid_trace_from_to_app_split in Hfvt as [_ Hfvt].
-  remember (finite_trace_last _ _) as ftl.
-  change (finite_trace_last _ _)
-    with (finite_trace_last
-            (lift_to_MO_state (fun j : index => MkState [] (idx j)) i s')
-            (lift_to_MO_trace (fun j : index => MkState [] (idx j)) i tr)) in Heqftl.
-  apply valid_trace_forget_last, first_transition_valid in Hfvt; cbn in *.
-  destruct Hfvt as [[Hvps [Hovmp Hv]] Ht']; cbn in Hv.
-  unfold lift_to_MO_trace in Heqftl; cbn in Heqftl.
-  rewrite <- pre_VLSM_embedding_finite_trace_last, Hlast in Heqftl.
-  exists ftl; split; [by rewrite Heqftl; state_update_simpl |].
-  split_and!; [| | done..].
-  - eapply VLSM_incl_valid_state; [| by apply Hvps].
-    by apply free_composite_vlsm_spec.
-  - destruct Hovmp as [ss Hvsmp].
-    exists ss.
-    apply VLSM_incl_valid_state_message; [| by do 2 red | done].
-    by apply free_composite_vlsm_spec.
+  eapply iff_trans.
+  - apply UMO_based_valid_reachable; cbn; [by inversion 1 | | done].
+    by cbn; split; inversion 1; [| constructor].
+  - apply Morphisms_Prop.and_iff_morphism; cbn; [| by firstorder].
+    by split; apply UMO_reachable_impl; inversion 1; subst; [| constructor..].
+Qed.
+
+Lemma MO_reachable_adr (s : State) i :
+  constrained_state_prop (M i) s -> adr s = idx i.
+Proof.
+  by intros Hadr; apply MO_reachable_view in Hadr as [].
+Qed.
+
+Lemma MO_channel_authentication_prop :
+  channel_authentication_prop M (Message_sender_index idx) (Message_sender idx).
+Proof.
+  intros i m ((s & []) & [] & s' & [(Hs & _ & Hv) Ht]);
+    inversion Hv; subst; inversion Ht; subst.
+  unfold channel_authenticated_message, Message_sender.
+  erewrite MO_reachable_adr by done.
+  case_decide as Hadr; cbn.
+  - by f_equal; apply Message_sender_index_inv.
+  - by contradict Hadr; rewrite adr2idx_idx.
+Qed.
+
+Lemma cannot_resend_message_stepwise_MO_component i :
+  cannot_resend_message_stepwise_prop (M i).
+Proof.
+  intros ? * [(Hs & _ & Hv) Ht];
+    inversion Hv; subst; inversion Ht; subst;
+    simpl; split; intros Hobs.
+  - by apply elem_of_sentMessages, obs_sizeState in Hobs; cbn in Hobs; lia.
+  - rewrite receivedMessages_addObservation, decide_False in Hobs by (intro; done).
+    by apply elem_of_receivedMessages, obs_sizeState in Hobs; cbn in Hobs; lia.
+Qed.
+
+#[export] Instance MessageDependencies_MO_component i :
+  MessageDependencies (M i) Message_dependencies.
+Proof.
+  constructor.
+  - intros m s' ((s, iom) & l & [(_ & _ & Hv) Ht]) dm Hdm; cbn in *.
+    apply elem_of_list_to_set, elem_of_list_fmap in Hdm as (o & -> & Hy).
+    inversion Hv; subst; inversion Ht; subst; cbn in *; clear Ht.
+    red; unfold Message; simpl.
+    destruct o as [[] ?].
+    + right; apply elem_of_receivedMessages_addObservation.
+      by right; apply elem_of_receivedMessages.
+    + left; apply elem_of_sentMessages_addObservation.
+      by right; apply elem_of_sentMessages.
+  - intros m Hm.
+    apply can_emit_has_trace in Hm as (is & tr & item & Htr & Houtput).
+    apply (can_emit_from_valid_trace
+      (preloaded_vlsm (M i) (fun msg : Message => msg ∈ Message_dependencies m)))
+      with is (tr ++ [item]); cycle 1.
+    + apply Exists_exists; eexists.
+      by split; [apply elem_of_app; right; left |].
+    + eapply lift_preloaded_trace_to_seeded;
+        [by apply cannot_resend_message_stepwise_MO_component | | done].
+      intros dm [Hrcv Hnsnd].
+      apply elem_of_list_to_set, elem_of_list_fmap.
+      exists (MkObservation Receive dm); split; [done |].
+      apply elem_of_receivedMessages.
+      destruct Htr as [Htr His].
+      apply finite_valid_trace_from_app_iff in Htr as [Htr Hitem].
+      apply valid_trace_add_default_last in Htr.
+      apply first_transition_valid in Hitem as [(_ & _ & Hv) Ht].
+      destruct item, l, input; cbn in *; inversion Hv; subst; inversion Ht; subst.
+      clear Hv Ht Hnsnd; cbn.
+      assert (Hrcv' : trace_has_message (field_selector input) dm tr).
+      {
+        apply Exists_exists in Hrcv as (dm_item & Hdm_item & Hdm).
+        rewrite elem_of_app, elem_of_list_singleton in Hdm_item.
+        destruct Hdm_item as [Hdm_item | ->]; cbn in Hdm; [| done].
+        by apply Exists_exists; eexists.
+      }
+      by eapply @has_been_received_examine_one_trace with (vlsm := M i) in Hrcv'; cycle 1.
+Qed.
+
+Lemma MO_msg_valid_free :
+  forall (m : Message),
+    MO_msg_valid P' m ->
+    free_valid_message M Message_dependencies m.
+Proof.
+  induction m as (m & Hind) using (well_founded_ind
+    (msg_dep_happens_before_wf Message_dependencies Message_full_dependencies _)).
+  intros Hm; constructor.
+  - remember (adr (state m)) as a; symmetry in Heqa.
+    eapply constrained_state_prop_MO_msg_valid in Heqa as Hstate_m; [| done].
+    apply MO_msg_valid_P_adr in Hm as (_  & i & Hi).
+    rewrite <- Heqa, <- Hi in Hstate_m.
+    red; unfold can_emit; cbn.
+    exists i, (state m, None), Send, (state m <+> MkObservation Send m).
+    repeat split; [done | ..].
+    + by apply any_message_is_valid_in_preloaded.
+    + by constructor.
+    + by destruct m as [[]].
+  - by intros dm Hdm; apply Hind; [constructor | eapply MO_msg_valid_dep].
+Qed.
+
+Lemma MO_component_validating :
+  forall (i : index),
+    component_projection_validator_prop M (free_constraint M) i.
+Proof.
+  intros i.
+  eapply free_valid_message_yields_projection_validator;
+    [by apply MO_channel_authentication_prop | by typeclasses eauto |].
+  intros li si m (_ & _ & Hv).
+  inversion Hv as [? ? Hm |]; subst; clear i si Hv.
+  by apply MO_msg_valid_free.
 Qed.
 
 (** *** Equivocation *)

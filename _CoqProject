@@ -50,6 +50,7 @@ theories/Core/AnnotatedVLSM.v
 theories/Core/ByzantineTraces.v
 theories/Core/TraceableVLSM.v
 theories/Core/HistoryVLSM.v
+theories/Core/Validators/FreeCompositionValidator.v
 
 theories/Core/Equivocation/FixedSetEquivocation.v
 theories/Core/Equivocation/MsgDepFixedSetEquivocation.v
