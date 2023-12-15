@@ -7,6 +7,7 @@ The guide assumes a Unix shell, and some installation commands
 assume a Debian-like Linux distribution, such as Ubuntu.
 
 - [Building VLSM manually](#building-vlsm-manually)
+- [Building VLSM using the Coq Platform](#building-vlsm-using-the-coq-platform)
 - [Editor instructions](#editor-instructions)
 
 Notes for Windows users:
@@ -77,6 +78,50 @@ eval $(opam env)
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
 opam install coq.8.18.0 coq-stdpp.1.9.0 coq-itauto coq-equations
+```
+
+### Clone the project repository
+
+```shell
+git clone https://github.com/runtimeverification/vlsm
+```
+
+### Build the project
+
+```shell
+cd vlsm
+make -j $(nproc)
+```
+
+## Building VLSM using the Coq Platform
+
+### Download and unpack the Coq Platform scripts
+
+The latest Coq Platform release is always available using [this link](https://github.com/coq/platform/releases/latest).
+
+However, for the purposes of demonstration, we will assume the archive is called `2023.11.0.zip`.
+
+```shell
+wget https://github.com/coq/platform/archive/refs/tags/2023.11.0.zip
+unzip 2023.11.0.zip
+```
+
+### Run the Platform scripts
+
+```shell
+cd platform-2023.11.0
+./coq_platform_make.sh
+```
+
+### Activate the Platform switch
+
+The Platform scripts will create a new opam switch, whose
+name can be viewed by running `opam switch`. Here, we assume
+the switch is called `__coq-platform.2023.11.0~8.18~2023.11`.
+
+```shell
+opam switch __coq-platform.2023.11.0~8.18~2023.11
+eval $(opam env)
 ```
 
 ### Clone the project repository
