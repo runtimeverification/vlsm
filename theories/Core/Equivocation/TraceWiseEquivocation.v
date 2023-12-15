@@ -169,7 +169,7 @@ Definition is_equivocating_tracewise_no_has_been_sent
   (Htr : finite_constrained_trace_init_to (free_composite_vlsm IM) is s tr),
   exists (m : message),
   (sender m = Some v) /\
-  equivocation_in_trace (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM)) m tr.
+  equivocation_in_trace (preloaded_with_all_messages_vlsm (free_composite_vlsm IM)) m tr.
 
 Lemma is_equivocating_tracewise_no_has_been_sent_equivocating_senders_in_trace
   (s : composite_state IM)
@@ -280,7 +280,7 @@ Proof.
     , finite_valid_trace_from_to_last in Htr.
   rewrite (VLSMTotalProjection.VLSM_projection_finite_trace_project_app
     (preloaded_component_projection IM (A v))) in Htrv.
-  apply proj1, (finite_valid_trace_from_to_app_split (pre_loaded_with_all_messages_vlsm (IM (A v))))
+  apply proj1, (finite_valid_trace_from_to_app_split (preloaded_with_all_messages_vlsm (IM (A v))))
     in Htrv as [_ Htrv].
   rewrite Htr in Htrv.
   intro Hbs_m. elim Hnbs_m. clear Hnbs_m.

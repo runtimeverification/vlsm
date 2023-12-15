@@ -1,5 +1,4 @@
-#!/bin/sh
-
+#!/usr/bin/env bash
 
 # If argument $1 is not present, print usage info and exit.
 if test -z "$1"
@@ -38,7 +37,7 @@ then
 fi
 
 # Create a temporary directory to hold intermediate results.
-tmp=$(mktemp -d)
+tmp=$(mktemp -d -p .)
 
 # Find all Coq source files to be parsed.
 for filepath in $(find $dir -name "*.v")
@@ -49,7 +48,7 @@ do
   sed \
   -e 's/\.\.\///' \
   -e 's/\.\///' \
-  -e 's/theories\//Require Import /' \
+  -e 's/theories\//From VLSM Require Import /' \
   -e 's/\//./g' \
   -e 's/\.v/./' \
   >> "$tmp/tmp"

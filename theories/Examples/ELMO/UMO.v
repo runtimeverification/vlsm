@@ -488,7 +488,7 @@ Proof.
   intros s1 s2 iom oom lbl Hivt.
   eapply input_constrained_transition_size.
   apply (@VLSM_incl_input_valid_transition _ Ui Ui); [| done].
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_from_to_size :
@@ -501,7 +501,7 @@ Proof.
   intros s1 s2 tr Hfvt.
   eapply finite_constrained_trace_from_to_size.
   apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui); [| done].
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Lemma finite_valid_trace_from_to_inv :
@@ -511,7 +511,7 @@ Proof.
   intros s tr Hfvt.
   eapply finite_constrained_trace_from_to_inv.
   apply (@VLSM_incl_finite_valid_trace_from_to _ Ui Ui); [| done].
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 (**
@@ -549,7 +549,7 @@ Proof.
   intros s1 s2 f iom1 iom2 oom1 oom2 lbl1 lbl2 Hivt1 Hivt2.
   by eapply input_constrained_transition_deterministic_conv;
     apply (@VLSM_incl_input_valid_transition _ Ui Ui); [| done | | done];
-    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 (** Every trace segment is fully determined by its initial and final state. *)
@@ -582,7 +582,7 @@ Proof.
   by intros s1 s2 l1 l2 Hfvt1 Hfvt2;
     eapply finite_constrained_trace_from_to_unique;
     apply VLSM_incl_finite_valid_trace_from_to; [| done | | done];
-    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 (** Every trace is determined by its final state. *)
@@ -607,7 +607,7 @@ Proof.
   by intros s f l1 l2 Hfvit1 Hfvit2;
     eapply finite_constrained_trace_init_to_unique;
     apply VLSM_incl_finite_valid_trace_init_to; [| done | | done];
-    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 (** If a valid trace leads to state s, the trace extracted from s also leads to s. *)
@@ -676,7 +676,7 @@ Proof.
   by intros is s tr Hfvti;
     eapply finite_constrained_trace_init_to_state2trace_inv;
     apply VLSM_incl_finite_valid_trace_init_to; [| done];
-    apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+    apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 (** The trace extracted from a reachable state [s] leads to [s]. *)
@@ -1593,8 +1593,8 @@ Lemma lift_to_UMO_finite_constrained_trace_from_to :
 Proof.
   intros i s1 s2 tr us Hvsp Hfvt.
   unshelve eapply (@VLSM_weak_embedding_finite_valid_trace_from_to _
-    (pre_loaded_with_all_messages_vlsm (U i))
-    (pre_loaded_with_all_messages_vlsm UMO) _ _); [| done].
+    (preloaded_with_all_messages_vlsm (U i))
+    (preloaded_with_all_messages_vlsm UMO) _ _); [| done].
   by eapply lift_to_preloaded_free_weak_embedding.
 Qed.
 
@@ -1678,7 +1678,7 @@ Proof.
   apply all_pre_traces_to_valid_state_are_valid_free; [typeclasses eauto | done |].
   apply finite_constrained_trace_init_to_UMO_state2trace.
   eapply (@VLSM_incl_valid_state _ UMO UMO); [| done].
-  by apply vlsm_incl_pre_loaded_with_all_messages_vlsm.
+  by apply vlsm_incl_preloaded_with_all_messages_vlsm.
 Qed.
 
 Fixpoint UMO_obs_aux (us : UMO_state) (is : list index) : list Observation :=

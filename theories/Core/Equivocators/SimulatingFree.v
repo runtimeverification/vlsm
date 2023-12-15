@@ -33,10 +33,10 @@ Context
   `{forall i : index, HasBeenSentCapability (IM i)}
   (seed : message -> Prop)
   (constraintX : composite_label IM -> composite_state IM * option message -> Prop)
-  (CX := pre_loaded_vlsm (composite_vlsm IM constraintX) seed)
+  (CX := preloaded_vlsm (composite_vlsm IM constraintX) seed)
   (constraintE : composite_label (equivocator_IM IM) ->
                   composite_state (equivocator_IM IM) * option message -> Prop)
-  (CE := pre_loaded_vlsm (composite_vlsm (equivocator_IM IM) constraintE) seed)
+  (CE := preloaded_vlsm (composite_vlsm (equivocator_IM IM) constraintE) seed)
   (FreeE := free_composite_vlsm (equivocator_IM IM))
   .
 
@@ -110,8 +110,8 @@ Lemma generalized_equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to CE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  assert (HinclE : VLSM_incl CE (pre_loaded_with_all_messages_vlsm FreeE))
-    by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  assert (HinclE : VLSM_incl CE (preloaded_with_all_messages_vlsm FreeE))
+    by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
   induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
   - specialize (lift_initial_to_equivocators_state IM _ His) as Hs.
     remember (lift_to_equivocators_state IM is) as s.
@@ -228,7 +228,7 @@ End sec_generalized_constraints.
 
   To allow reusing this result in the proof for simulating fixed equivocation,
   we first prove an intermediate result, where both the composite VLSMs are
-  pre-loaded with the same set of messages.
+  preloaded with the same set of messages.
 *)
 
 Section sec_seeded_all_equivocating.
@@ -241,9 +241,9 @@ Context
   (FreeE := free_composite_vlsm (equivocator_IM IM))
   (seed : message -> Prop)
   (SeededXE : VLSM message :=
-    composite_no_equivocation_vlsm_with_pre_loaded (equivocator_IM IM) (free_constraint _) seed)
+    composite_no_equivocation_vlsm_with_preloaded (equivocator_IM IM) (free_constraint _) seed)
   (Free := free_composite_vlsm IM)
-  (SeededFree := pre_loaded_vlsm Free seed)
+  (SeededFree := preloaded_vlsm Free seed)
   .
 
 (**
@@ -281,7 +281,7 @@ Proof.
     (sub_replayed_trace_from_valid_equivocating IM seed
       (enum index) _ Hfull_replay_state).
   pose (Hproj := preloaded_sub_composition_all_embedding (equivocator_IM IM)
-    (no_equivocations_additional_constraint_with_pre_loaded (equivocator_IM IM)
+    (no_equivocations_additional_constraint_with_preloaded (equivocator_IM IM)
     (free_constraint _) seed) seed).
   apply (VLSM_embedding_finite_valid_trace Hproj) in Htr.
   revert Htr.
@@ -381,7 +381,7 @@ Context
 
 (**
   Further specializing [seeded_equivocators_finite_valid_trace_init_to_rev]
-  to remove the pre-loading operation.
+  to remove the preloading operation.
 *)
 Lemma equivocators_finite_valid_trace_init_to_rev
   (no_initial_messages_in_IM : no_initial_messages_in_IM_prop IM)
@@ -393,7 +393,7 @@ Lemma equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to XE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  specialize (vlsm_is_pre_loaded_with_False Free) as Heq.
+  specialize (vlsm_is_preloaded_with_False Free) as Heq.
   apply (VLSM_eq_finite_valid_trace_init_to Heq) in HtrX.
   specialize
     (seeded_equivocators_finite_valid_trace_init_to_rev
@@ -404,11 +404,11 @@ Proof.
   exists s; split; [done |].
   exists tr; split; [done |].
   split; [| done].
-  unfold composite_no_equivocation_vlsm_with_pre_loaded in Htr.
-  remember (no_equivocations_additional_constraint_with_pre_loaded _ _ _)
+  unfold composite_no_equivocation_vlsm_with_preloaded in Htr.
+  remember (no_equivocations_additional_constraint_with_preloaded _ _ _)
     as constraint.
   clear Heq.
-  specialize (vlsm_is_pre_loaded_with_False (composite_vlsm (equivocator_IM IM) constraint))
+  specialize (vlsm_is_preloaded_with_False (composite_vlsm (equivocator_IM IM) constraint))
     as Heq.
   apply (VLSM_eq_finite_valid_trace_init_to Heq) in Htr.
   revert Htr.

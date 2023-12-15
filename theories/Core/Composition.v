@@ -201,8 +201,8 @@ Qed.
 Lemma preloaded_free_composite_vlsm_spec :
   forall (initial : message -> Prop),
     VLSM_eq
-      (pre_loaded_vlsm free_composite_vlsm initial)
-      (pre_loaded_vlsm (composite_vlsm free_constraint) initial).
+      (preloaded_vlsm free_composite_vlsm initial)
+      (preloaded_vlsm (composite_vlsm free_constraint) initial).
 Proof.
   split.
   - apply (VLSM_incl_embedding_iff); cbn.
@@ -214,8 +214,8 @@ Qed.
 
 Lemma preloaded_with_all_messages_free_composite_vlsm_spec :
   VLSM_eq
-    (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
-    (pre_loaded_with_all_messages_vlsm (composite_vlsm free_constraint)).
+    (preloaded_with_all_messages_vlsm free_composite_vlsm)
+    (preloaded_with_all_messages_vlsm (composite_vlsm free_constraint)).
 Proof.
   split.
   - apply (VLSM_incl_embedding_iff); cbn.
@@ -408,7 +408,7 @@ Lemma lift_to_composite_generalized_preloaded_VLSM_embedding
   (PimpliesQ : forall m, P m -> Q m)
   (j : index)
   : VLSM_embedding
-      (pre_loaded_vlsm (IM j) P) (pre_loaded_vlsm free_composite_vlsm Q)
+      (preloaded_vlsm (IM j) P) (preloaded_vlsm free_composite_vlsm Q)
       (lift_to_composite_label j) (lift_to_composite_state' j).
 Proof.
   apply basic_VLSM_embedding_preloaded_with; intro; intros.
@@ -425,8 +425,8 @@ Qed.
 
 Lemma lift_to_composite_preloaded_VLSM_embedding (j : index) :
   VLSM_embedding
-    (pre_loaded_with_all_messages_vlsm (IM j))
-    (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
+    (preloaded_with_all_messages_vlsm (IM j))
+    (preloaded_with_all_messages_vlsm free_composite_vlsm)
     (lift_to_composite_label j)
     (lift_to_composite_state' j).
 Proof.
@@ -445,19 +445,19 @@ Qed.
 
 (**
   If all messages described by a predicate <<P>> are valid for the free
-  composition pre-loaded with messages described by a predicate <<Q>>, then
-  any message which can be emitted by a component pre-loaded with <<P>> can
-  also be emitted by the free composition pre-loaded with <<Q>>.
+  composition preloaded with messages described by a predicate <<Q>>, then
+  any message which can be emitted by a component preloaded with <<P>> can
+  also be emitted by the free composition preloaded with <<Q>>.
 *)
 Lemma valid_preloaded_lifts_can_be_emitted
   (P Q : message -> Prop)
-  (HPvalid : forall dm, P dm -> valid_message_prop (pre_loaded_vlsm free_composite_vlsm Q) dm)
-  : forall j m, can_emit (pre_loaded_vlsm (IM j) P) m ->
-    can_emit (pre_loaded_vlsm free_composite_vlsm Q) m.
+  (HPvalid : forall dm, P dm -> valid_message_prop (preloaded_vlsm free_composite_vlsm Q) dm)
+  : forall j m, can_emit (preloaded_vlsm (IM j) P) m ->
+    can_emit (preloaded_vlsm free_composite_vlsm Q) m.
 Proof.
   intros j m Hm.
   eapply VLSM_incl_can_emit.
-  - apply (pre_loaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
+  - apply (preloaded_vlsm_incl_relaxed _ (fun m => Q m \/ P m)).
     by itauto.
   - eapply VLSM_embedding_can_emit; [| done].
     apply lift_to_composite_generalized_preloaded_VLSM_embedding.
@@ -467,22 +467,22 @@ Qed.
 (**
   As a specialization of [valid_preloaded_lifts_can_be_emitted], if all
   messages described by a predicate <<P>> are valid for the free composition,
-  then any message which can be emitted by a component pre-loaded with <<P>>
+  then any message which can be emitted by a component preloaded with <<P>>
   can also be emitted by the free composition.
 *)
 Lemma free_valid_preloaded_lifts_can_be_emitted
   (P : message -> Prop)
   (Hdeps : forall dm, P dm -> valid_message_prop free_composite_vlsm dm)
-  : forall i m, can_emit (pre_loaded_vlsm (IM i) P) m ->
+  : forall i m, can_emit (preloaded_vlsm (IM i) P) m ->
     can_emit free_composite_vlsm m.
 Proof.
   intros.
   eapply VLSM_incl_can_emit.
-  - by eapply (vlsm_is_pre_loaded_with_False free_composite_vlsm).
+  - by eapply (vlsm_is_preloaded_with_False free_composite_vlsm).
   - eapply valid_preloaded_lifts_can_be_emitted; [| done].
     intros dm Hdm.
     eapply VLSM_incl_valid_message.
-    + by apply (vlsm_is_pre_loaded_with_False free_composite_vlsm).
+    + by apply (vlsm_is_preloaded_with_False free_composite_vlsm).
     + by cbv; itauto.
     + by apply Hdeps.
 Qed.
@@ -501,8 +501,8 @@ Lemma can_emit_composite_free_lift
   (PimpliesQ : forall m, P m -> Q m)
   (j : index)
   (m : message)
-  (Htrj : can_emit (pre_loaded_vlsm (IM j) P) m)
-  : can_emit (pre_loaded_vlsm free_composite_vlsm Q) m.
+  (Htrj : can_emit (preloaded_vlsm (IM j) P) m)
+  : can_emit (preloaded_vlsm free_composite_vlsm Q) m.
 Proof.
   eapply VLSM_embedding_can_emit; [| done].
   by apply lift_to_composite_generalized_preloaded_VLSM_embedding.
@@ -515,11 +515,11 @@ Qed.
 Lemma pre_composite_free_update_state_with_initial
   (P : message -> Prop)
   (s : composite_state)
-  (Hs : valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) s)
+  (Hs : valid_state_prop (preloaded_vlsm free_composite_vlsm P) s)
   (i : index)
   (si : state (IM i))
   (Hsi : initial_state_prop (IM i) si)
-  : valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) (state_update s i si).
+  : valid_state_prop (preloaded_vlsm free_composite_vlsm P) (state_update s i si).
 Proof.
   induction Hs using valid_state_prop_ind.
   - apply initial_state_is_valid; cbn.
@@ -564,9 +564,9 @@ Proof. by intros i m Hm; exists i, (exist _ _ Hm). Qed.
 
 Lemma pre_lift_to_free_weak_embedding :
   forall (i : index) (cs : composite_state) (P : message -> Prop),
-    valid_state_prop (pre_loaded_vlsm free_composite_vlsm P) cs ->
+    valid_state_prop (preloaded_vlsm free_composite_vlsm P) cs ->
     VLSM_weak_embedding
-      (pre_loaded_vlsm (IM i) P) (pre_loaded_vlsm free_composite_vlsm P)
+      (preloaded_vlsm (IM i) P) (preloaded_vlsm free_composite_vlsm P)
       (lift_to_composite_label i) (lift_to_composite_state cs i).
 Proof.
   intros i cs P Hvsp.
@@ -586,10 +586,10 @@ Lemma lift_to_free_weak_embedding :
         (lift_to_composite_label i) (lift_to_composite_state cs i).
 Proof.
   constructor; intros.
-  apply (VLSM_eq_finite_valid_trace_from (vlsm_is_pre_loaded_with_False free_composite_vlsm)),
+  apply (VLSM_eq_finite_valid_trace_from (vlsm_is_preloaded_with_False free_composite_vlsm)),
     pre_lift_to_free_weak_embedding.
-  - by apply (VLSM_eq_valid_state (vlsm_is_pre_loaded_with_False free_composite_vlsm)).
-  - apply (VLSM_eq_finite_valid_trace_from (vlsm_is_pre_loaded_with_False (IM i))).
+  - by apply (VLSM_eq_valid_state (vlsm_is_preloaded_with_False free_composite_vlsm)).
+  - apply (VLSM_eq_finite_valid_trace_from (vlsm_is_preloaded_with_False (IM i))).
     by destruct (IM i).
 Qed.
 
@@ -597,8 +597,8 @@ Lemma lift_to_preloaded_free_weak_embedding :
   forall (i : index) (cs : composite_state),
     constrained_state_prop free_composite_vlsm cs ->
     VLSM_weak_embedding
-      (pre_loaded_with_all_messages_vlsm (IM i))
-      (pre_loaded_with_all_messages_vlsm free_composite_vlsm)
+      (preloaded_with_all_messages_vlsm (IM i))
+      (preloaded_with_all_messages_vlsm free_composite_vlsm)
       (lift_to_composite_label i)
       (lift_to_composite_state cs i).
 Proof.
@@ -639,7 +639,7 @@ Ltac state_update_simpl :=
   We cannot just use properties [valid_state_message_prop (IM i)]
   or [input_valid_transition (IM i)].
   For simplicity these lemmas use
-  [pre_loaded_with_all_messages_vlsm (IM i)].
+  [preloaded_with_all_messages_vlsm (IM i)].
 
   This does not precisely reflect the set of
   messages and transitions that can actually be
@@ -686,14 +686,14 @@ Qed.
 Lemma valid_state_project_preloaded_to_preloaded
   message `{EqDecision index} (IM : index -> VLSM message) constraint
   (X := composite_vlsm IM constraint)
-  (s : state (pre_loaded_with_all_messages_vlsm X)) i :
+  (s : state (preloaded_with_all_messages_vlsm X)) i :
   constrained_state_prop X s ->
   constrained_state_prop (IM i) (s i).
 Proof.
   intros.
   eapply composite_constrained_state_project.
   apply VLSM_incl_valid_state; [| done].
-  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
 Qed.
 
 Lemma valid_state_project_preloaded
@@ -704,7 +704,7 @@ Lemma valid_state_project_preloaded
   constrained_state_prop (IM i) (s i).
 Proof.
   by intros; apply valid_state_project_preloaded_to_preloaded,
-    pre_loaded_with_all_messages_valid_state_prop.
+    preloaded_with_all_messages_valid_state_prop.
 Qed.
 
 Lemma composite_transition_project_active
@@ -748,8 +748,8 @@ Lemma input_valid_transition_preloaded_project_active
 Proof.
   intros.
   apply input_valid_transition_preloaded_project_active_free.
-  apply (@VLSM_incl_input_valid_transition _ _ (pre_loaded_with_all_messages_vlsm X)); [| done].
-  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  apply (@VLSM_incl_input_valid_transition _ _ (preloaded_with_all_messages_vlsm X)); [| done].
+  by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
 Qed.
 
 Lemma input_valid_transition_project_active
@@ -802,8 +802,8 @@ Lemma input_valid_transition_preloaded_project_any
 Proof.
   intros.
   apply input_valid_transition_preloaded_project_any_free.
-  apply (@VLSM_incl_input_valid_transition _ _ (pre_loaded_with_all_messages_vlsm X)); [| done].
-  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  apply (@VLSM_incl_input_valid_transition _ _ (preloaded_with_all_messages_vlsm X)); [| done].
+  by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
 Qed.
 
 Lemma input_valid_transition_project_any
@@ -831,8 +831,8 @@ Lemma can_emit_free_composite_project
   {message : Type} `{EqDecision V} {IM : V -> VLSM message}
   (X := free_composite_vlsm IM)
   (m : message)
-  (Hemit : can_emit (pre_loaded_with_all_messages_vlsm X) m) :
-    exists (j : V), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+  (Hemit : can_emit (preloaded_with_all_messages_vlsm X) m) :
+    exists (j : V), can_emit (preloaded_with_all_messages_vlsm (IM j)) m.
 Proof.
   apply can_emit_iff in Hemit as (s2 & [s1 oim] & l & Ht).
   exists (projT1 l).
@@ -845,12 +845,12 @@ Lemma can_emit_composite_project
   {message : Type} `{EqDecision V} {IM : V -> VLSM message} {constraint}
   (X := composite_vlsm IM constraint)
   (m : message)
-  (Hemit : can_emit (pre_loaded_with_all_messages_vlsm X) m) :
-    exists (j : V), can_emit (pre_loaded_with_all_messages_vlsm (IM j)) m.
+  (Hemit : can_emit (preloaded_with_all_messages_vlsm X) m) :
+    exists (j : V), can_emit (preloaded_with_all_messages_vlsm (IM j)) m.
 Proof.
   apply can_emit_free_composite_project.
   eapply VLSM_incl_can_emit; [| done].
-  by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+  by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
 Qed.
 
 (** ** Binary free composition
@@ -1204,24 +1204,24 @@ Proof.
   - by elim (empty_composition_no_emit _ Hemit).
 Qed.
 
-Lemma pre_loaded_empty_composition_no_emit
+Lemma preloaded_empty_composition_no_emit
   (seed : message -> Prop)
-  (PreX := pre_loaded_vlsm X seed)
+  (PreX := preloaded_vlsm X seed)
   : forall m, ~ can_emit PreX m.
 Proof.
   by intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
-Lemma pre_loaded_empty_free_composition_no_emit
+Lemma preloaded_empty_free_composition_no_emit
   (seed : message -> Prop)
-  (PreX := pre_loaded_vlsm (free_composite_vlsm IM) seed)
+  (PreX := preloaded_vlsm (free_composite_vlsm IM) seed)
   : forall m, ~ can_emit PreX m.
 Proof.
   by intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
 
-Lemma pre_loaded_with_all_empty_composition_no_emit
-  : forall m, ~ can_emit (pre_loaded_with_all_messages_vlsm X) m.
+Lemma preloaded_with_all_empty_composition_no_emit
+  : forall m, ~ can_emit (preloaded_with_all_messages_vlsm X) m.
 Proof.
   by intros m [s' [l _]]; elim (empty_composition_no_label l).
 Qed.
@@ -1232,7 +1232,7 @@ End sec_empty_composition_properties.
 
   If two indexed sets of VLSMs are extensionally-equal, then we can establish a
   [VLSM_embedding] between their compositions with subsumable constraints
-  (and pre-loaded with the same set of messages).
+  (and preloaded with the same set of messages).
 *)
 
 Section sec_same_IM_embedding.
@@ -1254,7 +1254,7 @@ Definition same_IM_state_rew
   : composite_state IM2 :=
   fun i => same_VLSM_state_rew (Heq i) (s1 i).
 
-Section sec_pre_loaded_constrained.
+Section sec_preloaded_constrained.
 
 Context
   (constraint1 : composite_label IM1 -> composite_state IM1 * option message -> Prop)
@@ -1268,8 +1268,8 @@ Context
 
 Lemma same_IM_embedding
   : VLSM_embedding
-    (pre_loaded_vlsm (composite_vlsm IM1 constraint1) seed)
-    (pre_loaded_vlsm (composite_vlsm IM2 constraint2) seed)
+    (preloaded_vlsm (composite_vlsm IM1 constraint1) seed)
+    (preloaded_vlsm (composite_vlsm IM2 constraint2) seed)
     same_IM_label_rew
     same_IM_state_rew.
 Proof.
@@ -1277,7 +1277,7 @@ Proof.
   - destruct Hv as [Hs [Hom [Hv Hc]]].
     apply constraint_projection in Hc; cycle 1.
     + apply VLSM_incl_valid_state; [| done].
-      by apply constrained_pre_loaded_vlsm_incl_pre_loaded_with_all_messages.
+      by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
     + split; [| done].
       clear Hc. revert Hv. destruct l as (i, li). cbn.
       by apply same_VLSM_valid_preservation.
@@ -1300,12 +1300,12 @@ Proof.
     + done.
 Qed.
 
-End sec_pre_loaded_constrained.
+End sec_preloaded_constrained.
 
 Lemma same_IM_preloaded_free_embedding :
   VLSM_embedding
-    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM1))
-    (pre_loaded_with_all_messages_vlsm (free_composite_vlsm IM2))
+    (preloaded_with_all_messages_vlsm (free_composite_vlsm IM1))
+    (preloaded_with_all_messages_vlsm (free_composite_vlsm IM2))
     same_IM_label_rew
     same_IM_state_rew.
 Proof.
@@ -1345,7 +1345,7 @@ Definition composite_valid_transition_item
 Lemma composite_valid_transition_reachable_iff l s1 iom s2 oom :
   composite_valid_transition l s1 iom s2 oom
     <->
-  valid_transition (pre_loaded_with_all_messages_vlsm Free) l s1 iom s2 oom.
+  valid_transition (preloaded_with_all_messages_vlsm Free) l s1 iom s2 oom.
 Proof.
   by split; intros []; constructor.
 Qed.
@@ -1359,7 +1359,7 @@ Definition composite_valid_transition_future : relation (composite_state IM) :=
 Lemma composite_valid_transition_next_reachable_iff s1 s2 :
   composite_valid_transition_next s1 s2
     <->
-  valid_transition_next (pre_loaded_with_all_messages_vlsm Free) s1 s2.
+  valid_transition_next (preloaded_with_all_messages_vlsm Free) s1 s2.
 Proof.
   by split; intros []; econstructor; apply composite_valid_transition_reachable_iff.
 Qed.
@@ -1426,7 +1426,7 @@ Lemma pre_free_lift_to_free_weak_embedding :
   forall (i : index) (cs : composite_state IM),
     valid_state_prop (free_composite_vlsm IM) cs ->
     VLSM_weak_embedding
-      (pre_loaded_vlsm (IM i) (valid_message_prop (free_composite_vlsm IM)))
+      (preloaded_vlsm (IM i) (valid_message_prop (free_composite_vlsm IM)))
       (free_composite_vlsm IM) (lift_to_composite_label IM i) (lift_to_composite_state IM cs i).
 Proof.
   intros i cs Hvsp; constructor; intros s tr Htr.

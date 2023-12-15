@@ -7,7 +7,7 @@ From VLSM.Core Require Import VLSMProjections ProjectionTraces.
 
   In this module we give sufficient conditions for a component to be a
   validator for the free composition it is part of.
-  
+
   Namely, we show that if an indexed collection of VLSMs <<IM>> satisfies
   the [channel_authentication_prop]erty, the [MessageDependencies] and
   [FullMessageDependencies] assumptions, the [HasBeenSentCapability] and
@@ -15,7 +15,7 @@ From VLSM.Core Require Import VLSMProjections ProjectionTraces.
   guarantees that the message and all its dependencies are [emittable] by one
   of the components, is a validator for the free composition of <<IM>>
   (lemma [free_valid_message_yields_projection_validator]).
-  
+
   Specialized (simpler) conditions are provided and proved for components which
   additionally satisfy the [message_dependencies_full_node_condition_prop]erty.
 *)
@@ -51,7 +51,7 @@ Proof.
     apply elem_of_list_split in Hitem as (pre & suf & Heqtri).
     destruct Htri as [Htri _].
     apply valid_trace_forget_last in Htri.
-    eapply (input_valid_transition_to (pre_loaded_with_all_messages_vlsm (IM i)))
+    eapply (input_valid_transition_to (preloaded_with_all_messages_vlsm (IM i)))
       in Heqtri as Ht; [| done].
     destruct itemi, input as [m |]; cbn in *;
       [| by apply option_valid_message_None].
@@ -72,7 +72,7 @@ Proof.
   intros i Hvalid li si iom Ht.
   unfold input_constrained in Ht.
   apply input_valid_transition_iff in Ht as [[si' oom] Ht].
-  apply (exists_right_finite_trace_from (pre_loaded_with_all_messages_vlsm (IM i)))
+  apply (exists_right_finite_trace_from (preloaded_with_all_messages_vlsm (IM i)))
     in Ht as (isi & tri & Htri & Hsi').
   apply free_component_message_validator_valid_trace in Htri as [Htr _]; [| done].
   setoid_rewrite map_app in Htr.
@@ -109,7 +109,7 @@ Context
 
 (** Captures the union of constrained messages over all components of <<IM>>. *)
 Definition emittable (m : message) : Prop :=
-  exists i, can_emit (pre_loaded_with_all_messages_vlsm (IM i)) m.
+  exists i, can_emit (preloaded_with_all_messages_vlsm (IM i)) m.
 
 (**
   A sufficient condition for determining that a message is valid for the free
@@ -170,7 +170,7 @@ Proof.
   eapply has_been_directly_observed_step_update in Hdm; [| done].
   destruct Hdm as [[-> | ->]|]; [.. | by apply IHHs].
   - by destruct Ht; eapply full_node_free_valid_message_entails_helper.
-  - assert (Hdm : can_produce (pre_loaded_with_all_messages_vlsm (IM i)) s' dm)
+  - assert (Hdm : can_produce (preloaded_with_all_messages_vlsm (IM i)) s' dm)
       by (eexists _,_; done).
     apply message_dependencies_are_necessary in Hdm as Hdeps.
     constructor; [by eexists; apply can_emit_iff; eexists |].

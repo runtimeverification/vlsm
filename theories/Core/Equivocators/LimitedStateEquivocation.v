@@ -89,8 +89,8 @@ Qed.
 (** Inclusion of preloaded machine in the preloaded free composition. *)
 Lemma preloaded_equivocators_limited_equivocations_vlsm_incl_free :
   VLSM_incl
-    (pre_loaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm)
-    (pre_loaded_with_all_messages_vlsm FreeE).
+    (preloaded_with_all_messages_vlsm equivocators_limited_equivocations_vlsm)
+    (preloaded_with_all_messages_vlsm FreeE).
 Proof.
   by apply basic_VLSM_incl_preloaded; intros ? *; [intro | inversion 1 | intro].
 Qed.
