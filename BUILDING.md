@@ -145,11 +145,11 @@ If you are using WSL on Windows, you need to install the VS Code [WSL extension]
 
 We recommend also installing the [Fast Unicode Math Characters extension](https://marketplace.visualstudio.com/items?itemName=GuidoTapia2.unicode-math-vscode), to enable easier input of mathematical symbols.
 
-To enable Coq support in VS Code, there are two options: the VsCoq extension and the Coq LSP extension. Note that these extensions are restricted to Coq 8.18.0 and later. For earlier versions, you can use the [VsCoq Legacy extension](https://github.com/coq-community/vscoq/tree/vscoq1).
+To enable Coq support in VS Code, there are two main options: the VsCoq extension and the Coq LSP extension. Note that these extensions are restricted to Coq 8.18.0 and later. For earlier versions, you can use the [VsCoq Legacy extension](https://github.com/coq-community/vscoq/tree/vscoq1).
 
 ### VsCoq extension
 
-To install the [VsCoq extension](https://marketplace.visualstudio.com/items?itemName=ejgallego.coq-lsp) from the command line, make sure that [switch creation](#install-a-switch-for-opam) and [dependency installation](#install-the-project-dependencies-via-opam) are done and then run:
+To install the [VsCoq extension](https://marketplace.visualstudio.com/items?itemName=maximedenes.vscoq) from the command line, make sure that [switch creation](#install-a-switch-for-opam) and [dependency installation](#install-the-project-dependencies-via-opam) are done and then run:
 
 ```shell
 opam install vscoq-language-server && code --install-extension maximedenes.vscoq

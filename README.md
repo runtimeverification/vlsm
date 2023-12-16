@@ -65,7 +65,7 @@ make   # or make -j <number-of-cores-on-your-machine>
 ### Source documentation
 
 - [latest coqdoc presentation of the Coq files](https://runtimeverification.github.io/vlsm-docs/latest/coqdoc/toc.html)
-- [latest Alectryon presentation the Coq files](https://runtimeverification.github.io/vlsm-docs/latest/alectryon/toc.html)
+- [latest Alectryon presentation of the Coq files](https://runtimeverification.github.io/vlsm-docs/latest/alectryon/toc.html)
 
 ### VLSM tutorials
 
