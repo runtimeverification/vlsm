@@ -173,37 +173,28 @@ Qed.
   If <<precedes>> is a [StrictOrder] on <<l>>, then there must exist an
   element of <<l>> with no predecessors in <<l>>.
 *)
-Lemma count_predecessors_zero
-  (Hl : l <> [])
-  : Exists (fun a => count_predecessors a = 0) l.
+Lemma count_predecessors_zero :
+  l <> [] ->
+  Exists (fun a => count_predecessors a = 0) l.
 Proof.
   unfold count_predecessors.
-  induction l; [done |].
+  induction l; [done |]; intros _.
   inversion_clear HPl as [| ? ? HPa HPl0].
-  specialize (IHl0 HPl0).
   apply Exists_cons.
   rewrite filter_cons.
-  destruct (decide (precedes a a)); [by contradict p; apply precedes_irreflexive |].
-  assert ({ l0=[] }+{l0 <> [] }) by (destruct l0; clear; [left | right]; congruence).
-  destruct H as [? | Hl0]; [subst l0 |]; [by left |].
-  specialize (IHl0 Hl0).
-  apply Exists_exists in IHl0.
-  destruct IHl0 as [x [Hin Hlen]].
-  destruct (decide (precedes a x)).
+  rewrite decide_False; [| by apply precedes_irreflexive].
+  destruct l0 as [| h t]; [by left |].
+  apply Exists_exists in IHl0 as (x & Hin & Hlen); [| done..].
+  destruct (decide (precedes a x)); cycle 1.
+  - right.
+    apply Exists_exists; exists x.
+    by rewrite filter_cons, decide_False.
   - left.
-    specialize (Forall_forall P l0); intros [Hall _].
-    specialize (Hall HPl0 x Hin).
-    match goal with |- ?X = 0  => cut (X <= 0) end; [by lia |].
-    rewrite <- Hlen; clear Hlen.
-    apply filter_length_fn.
-    revert HPl0.
-    intro.
-    apply (Forall_impl P); [done |].
-    intros.
-    by apply precedes_transitive with a.
-  - right. apply Exists_exists. exists x.
-    rewrite filter_cons.
-    by destruct (decide (precedes a x)).
+    apply Nat.le_antisymm; [| by lia].
+    rewrite <- Hlen.
+    apply filter_length_fn, (Forall_impl P); intros; [done |].
+    apply precedes_transitive with a; only 1-2, 4-5: done.
+    by eapply Forall_forall in HPl0.
 Qed.
 
 (**
