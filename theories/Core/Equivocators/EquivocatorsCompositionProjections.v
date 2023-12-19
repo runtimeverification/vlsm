@@ -59,14 +59,14 @@ Definition equivocators_transition_item_project
 Lemma equivocators_transition_item_project_preserves_equivocating_indices
   (descriptors : equivocator_descriptors IM)
   (item : composite_transition_item (equivocator_IM IM))
-  oitem idescriptors
-  s
+  (oitem : option (composite_transition_item IM))
+  (idescriptors : equivocator_descriptors IM)
+  (s : composite_state (equivocator_IM IM))
   (Hdescriptors : proper_equivocator_descriptors IM descriptors (destination item))
   (Ht : composite_transition (equivocator_IM IM) (l item) (s, input item) =
-          (destination item, output item))
+    (destination item, output item))
   (Hv : composite_valid (equivocator_IM IM) (l item) (s, input item))
-  (Hpr : equivocators_transition_item_project descriptors item = Some (oitem, idescriptors))
-  :
+  (Hpr : equivocators_transition_item_project descriptors item = Some (oitem, idescriptors)) :
     set_union
       (equivocating_indices IM (enum index) s)
       (newmachine_descriptors_list IM (enum index) idescriptors)
@@ -75,43 +75,33 @@ Lemma equivocators_transition_item_project_preserves_equivocating_indices
       (equivocating_indices IM (enum index) (destination item))
       (newmachine_descriptors_list IM (enum index) descriptors).
 Proof.
-  unfold equivocators_transition_item_project
-    , composite_transition_item_projection
-    , composite_transition_item_projection_from_eq  in Hpr; simpl in Hpr.
+  unfold equivocators_transition_item_project,
+    composite_transition_item_projection,
+    composite_transition_item_projection_from_eq in Hpr; cbn in Hpr.
   unfold eq_rect_r, eq_rect in Hpr; simpl in Hpr.
-  match type of Hpr with
-    (match ?exp with _ => _ end = _)
-    => destruct exp as [(oitemx, deqv') |] eqn: Hitem_pr; [| by congruence]
-  end.
-  simpl in Ht.
-  destruct item. simpl in *. destruct l as (i, li). simpl in *.
-  match type of Ht with
-  | (let '(si', om') := ?t in _) = _ => destruct t as [si' om] eqn: Htei
-  end.
+  case_match eqn: Hitem_pr; [| by congruence].
+  destruct p as [oitemx deqv'].
+  destruct item; cbn in *; destruct l as [i li]; cbn in *.
+  move Ht at bottom; case_match.
   inversion Ht; subst; clear Ht.
   replace idescriptors with (equivocator_descriptors_update IM descriptors i deqv')
     by (destruct oitemx; congruence); clear oitem Hpr.
-  intros eqv Heqv. apply set_union_iff in Heqv. apply set_union_iff.
-  destruct (decide (eqv = i)).
-  - subst i.
-    unfold equivocating_indices in *.
-    unfold newmachine_descriptors_list in *.
-    rewrite! elem_of_list_filter in *.
+  intros eqv Heqv.
+  rewrite set_union_iff in Heqv |- *.
+  destruct (decide (eqv = i)) as [<- |].
+  - unfold equivocating_indices, newmachine_descriptors_list in *.
+    rewrite! elem_of_list_filter in Heqv |- *.
     specialize (Hdescriptors eqv).
     state_update_simpl.
-    cut (is_equivocating_state (IM eqv) si' \/  is_newmachine_descriptor (IM eqv) (descriptors eqv));
+    cut (is_equivocating_state (IM eqv) e \/  is_newmachine_descriptor (IM eqv) (descriptors eqv));
       [by itauto |].
     eapply (equivocator_transition_item_project_preserves_equivocating_indices)
       in Hitem_pr; [done.. |].
     by itauto.
-  - destruct Heqv as [Heqv | Heqv]
-    ; apply elem_of_list_filter in Heqv as [Heqv Hin].
-    + left.
-      apply elem_of_list_filter.
-      by state_update_simpl.
-    + right.
-      apply elem_of_list_filter.
-      by state_update_simpl.
+  - unfold equivocating_indices, newmachine_descriptors_list in Heqv |- *.
+    rewrite !elem_of_list_filter in Heqv |- *.
+    state_update_simpl.
+    by itauto.
 Qed.
 
 (**
