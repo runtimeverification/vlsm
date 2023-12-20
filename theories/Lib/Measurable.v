@@ -100,8 +100,8 @@ Proof.
   intros v Hv.
   apply StdppListSet.set_remove_iff; [done |].
   split.
-  + by apply Hincl; right.
-  + by intros ->.
+  - by apply Hincl; right.
+  - by intros ->.
 Qed.
 
 Lemma sum_weights_subseteq
