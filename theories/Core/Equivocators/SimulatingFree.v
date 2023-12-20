@@ -110,53 +110,46 @@ Lemma generalized_equivocators_finite_valid_trace_init_to_rev
     finite_valid_trace_init_to CE is s tr /\
     finite_trace_last_output trX = finite_trace_last_output tr.
 Proof.
-  assert (HinclE : VLSM_incl CE (preloaded_with_all_messages_vlsm FreeE))
-    by apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages.
   induction HtrX using finite_valid_trace_init_to_rev_strong_ind.
   - specialize (lift_initial_to_equivocators_state IM _ His) as Hs.
     remember (lift_to_equivocators_state IM is) as s.
-    cut (equivocators_state_project IM (zero_descriptor IM) s = is).
-    { intro Hproject.
-      exists s. split; [done |].
-      exists s. split; [done |].
-      exists []. split; [done |]. do 2 (split; [| done]).
-      constructor.
-      by apply initial_state_is_valid.
-    }
-    by apply functional_extensionality_dep_good; subst.
-  - destruct IHHtrX1 as [eqv_state_is [Hstate_start_project [eqv_state_s
-      [Hstate_final_project [eqv_state_tr [Hstate_project [Hstate_trace _]]]]]]].
-    destruct IHHtrX2 as [eqv_msg_is [Hmsg_start_project [eqv_msg_s [_
-      [eqv_msg_tr [Hmsg_project [Hmsg_trace Hfinal_msg]]]]]]].
-    exists eqv_state_is. split; [done |].
-    apply valid_trace_last_pstate in Hstate_trace as Hstate_valid.
+    assert (Hproject : equivocators_state_project IM (zero_descriptor IM) s = is)
+      by (apply functional_extensionality_dep_good; subst; done).
+    exists s; split; [done |].
+    exists s; split; [done |].
+    exists []; split; [done |].
+    do 2 (split; [| done]).
+    constructor.
+    by apply initial_state_is_valid.
+  - destruct IHHtrX1 as (eqv_state_is & Hstate_start_project & eqv_state_s
+      & Hstate_final_project & eqv_state_tr & Hstate_project & Hstate_trace & _).
+    destruct IHHtrX2 as (eqv_msg_is & Hmsg_start_project & eqv_msg_s & _
+      & eqv_msg_tr & Hmsg_project & Hmsg_trace & Hfinal_msg).
+    exists eqv_state_is; split; [done |].
     destruct Ht as [[Hs [Hiom [Hv Hc]]] Ht].
+    apply valid_trace_last_pstate in Hstate_trace as Hstate_valid.
     specialize
       (Hreplayable _ _ _ HtrX1 _ Hstate_valid Hstate_final_project _ _ _ Hmsg_trace iom)
       as Hreplay.
     spec Hreplay.
-    { clear -Heqiom Hfinal_msg.
+    {
+      clear -Heqiom Hfinal_msg.
       destruct iom as [im |]; [| done].
       unfold empty_initial_message_or_final_output in Heqiom.
-      destruct_list_last iom_tr iom_tr' item Heqiom_tr.
-      - by right.
-      - left. simpl in *. rewrite <- Hfinal_msg.
-        by rewrite finite_trace_last_output_is_last.
+      destruct_list_last iom_tr iom_tr' item Heqiom_tr; [by right | left].
+      by cbn; rewrite <- Hfinal_msg, finite_trace_last_output_is_last.
     }
-    specialize (Hreplay _ Hc)
-      as [emsg_tr [es [Hmsg_trace_full_replay [Hemsg_tr_pr [Hes_pr Hbs_iom]]]]].
+    destruct (Hreplay _ Hc)
+      as (emsg_tr & es & Hmsg_trace_full_replay & Hemsg_tr_pr & Hes_pr & Hbs_iom).
     intros .
     specialize
       (finite_valid_trace_from_to_app CE  _ _ _ _ _ (proj1 Hstate_trace) Hmsg_trace_full_replay)
       as Happ.
     specialize
       (extend_right_finite_trace_from_to CE Happ) as Happ_extend.
-    destruct l as (eqv, li).
-    pose
-      (@existT _ (fun i : index => label (equivocator_IM IM i)) eqv (ContinueWith 0 li))
-      as el.
-    destruct (transition CE el (es, iom))
-      as (es', om') eqn: Hesom'.
+    destruct l as [eqv li].
+    pose (el := @existT _ (fun i : index => label (equivocator_IM IM i)) eqv (ContinueWith 0 li)).
+    destruct (transition CE el (es, iom)) as [es' om'] eqn: Hesom'.
     specialize (Happ_extend  el iom es' om').
     apply valid_trace_get_last in Happ as Heqes.
     assert (Hes_pr_i : forall i, equivocators_total_state_project IM es i = s i)
@@ -169,54 +162,41 @@ Proof.
     cbn in Hesom', Hes_pr_eqv.
     rewrite Hes_pr_eqv in Hesom'.
     cbn in Ht.
-    destruct (transition _ _ _) as (si', _om) eqn: Hteqv.
-    inversion Ht. subst sf _om. clear Ht.
-    inversion Hesom'. subst es' om'. clear Hesom'.
-    match type of Happ_extend with
-    | ?H -> _ => cut H
-    end.
-    { intro Hivt.
-      specialize (Happ_extend Hivt).
-      match goal with
-      |- ?H /\ _ => assert (Hproject : H)
-      end.
-      { apply functional_extensionality_dep.
-        intro i.
-        unfold equivocators_total_state_project at 1.
-        unfold equivocators_state_project.
-        by destruct (decide (i = eqv)); subst; state_update_simpl; [| apply Hes_pr_i].
-      }
-      split; [done |].
-      eexists; split; [| split; [split; [done |] |]].
-      - apply valid_trace_forget_last in Happ_extend.
-        apply (VLSM_incl_finite_valid_trace_from HinclE) in Happ_extend.
-        rewrite (equivocators_total_trace_project_app IM)
-          by (eexists; done).
-        apply valid_trace_forget_last in Happ.
-        apply (VLSM_incl_finite_valid_trace_from HinclE) in Happ.
-        rewrite (equivocators_total_trace_project_app IM)
-          by (eexists; done).
-        rewrite Hemsg_tr_pr.
-        rewrite app_nil_r.
-        rewrite Hstate_project.
-        f_equal.
-        subst el.
-        unfold equivocators_total_trace_project.
-        cbn. unfold equivocators_transition_item_project.
-        by cbn; rewrite !equivocator_state_project_zero, decide_True
-        ; cbn; repeat f_equal.
-      - by apply Hstate_trace.
-      - by rewrite! finite_trace_last_output_is_last.
+    destruct (transition _ _ _) as [si' _om] eqn: Hteqv.
+    inversion Ht; subst sf _om; clear Ht.
+    inversion Hesom'; subst es' om'; clear Hesom'.
+    spec Happ_extend.
+    {
+      apply valid_trace_last_pstate in Happ.
+      repeat split; [done | .. | done]; cycle 1.
+      - by subst el; cbn; rewrite equivocator_state_project_zero, Hes_pr_eqv.
+      - by apply Hsubsumption.
+      - destruct iom as [im |]; [| by apply option_valid_message_None].
+        destruct Hbs_iom as [Hbs_iom | Hseeded].
+        + by apply (preloaded_composite_sent_valid (equivocator_IM IM) _ _ _ Happ _ Hbs_iom).
+        + by apply initial_message_is_valid.
     }
-    clear Happ_extend.
-    apply valid_trace_last_pstate in Happ.
-    repeat split; [done | .. | done].
-    + destruct iom as [im |]; [| by apply option_valid_message_None].
-      destruct Hbs_iom as [Hbs_iom | Hseeded].
-      * by apply (preloaded_composite_sent_valid (equivocator_IM IM) _ _ _ Happ _ Hbs_iom).
-      * by apply initial_message_is_valid.
-    + by subst el; cbn; rewrite equivocator_state_project_zero, Hes_pr_eqv.
-    + by apply Hsubsumption.
+    match goal with
+    |- ?H /\ _ => assert (Hproject : H)
+    end.
+    {
+      apply functional_extensionality_dep; intro i; cbn.
+      by destruct (decide (i = eqv)); subst; state_update_simpl; [| apply Hes_pr_i].
+    }
+    split; [done |].
+    eexists; split; [| split; [split; [done |] |]]; cycle 1.
+    + by apply Hstate_trace.
+    + by rewrite !finite_trace_last_output_is_last.
+    + apply valid_trace_forget_last in Happ_extend.
+      assert (HinclE : VLSM_incl CE (preloaded_with_all_messages_vlsm FreeE))
+        by (apply constrained_preloaded_vlsm_incl_preloaded_with_all_messages).
+      apply (VLSM_incl_finite_valid_trace_from HinclE) in Happ_extend.
+      rewrite (equivocators_total_trace_project_app IM)
+        by (eexists; done).
+      apply valid_trace_forget_last, (VLSM_incl_finite_valid_trace_from HinclE) in Happ.
+      rewrite (equivocators_total_trace_project_app IM)
+        by (eexists; done).
+      by rewrite Hemsg_tr_pr, app_nil_r, Hstate_project, <- Hproject.
 Qed.
 
 End sec_generalized_constraints.
