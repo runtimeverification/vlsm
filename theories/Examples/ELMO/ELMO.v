@@ -106,6 +106,9 @@ Qed.
 Definition full_node (s : State) (m : Message) : Prop :=
   messages (state m) ⊆+ messages s.
 
+#[export] Instance full_node_dec : RelDecision full_node.
+Proof. by intros ? ?; apply submseteq_dec. Qed.
+
 Lemma full_node_reachable_messages_ind
   (P : State -> Message -> Prop)
   (Hnew : forall s l msg
@@ -261,8 +264,30 @@ Definition local_equivocators_full (s : State) : Address -> Prop :=
 Definition no_self_equiv (s : State) (m : Message) : Prop :=
   adr s = adr (state m) -> m ∈ sentMessages s.
 
+#[export] Instance no_self_equiv_dec : RelDecision no_self_equiv.
+Proof.
+  intros s m.
+  destruct (decide (m ∈ sentMessages s)) as [| Hnin]; [by left; intro |].
+  destruct (decide (adr s = adr (state m))); [| by left; intro].
+  by right; contradict Hnin; apply Hnin.
+Qed.
+
 Inductive MessageHasSender (m : Message) : Prop :=
 | message_has_sender : forall i, adr (state m) = idx i -> MessageHasSender m.
+
+#[export] Instance MessageHasSender_dec :
+  forall (m : Message), Decision (MessageHasSender m).
+Proof.
+  intro m.
+  assert (Decision (Exists (fun i => adr (state m) = idx i) (enum index)))
+    as [Hex | Hnex] by typeclasses eauto.
+  - left.
+    apply Exists_exists in Hex as (i & _ & Hi).
+    by econstructor.
+  - right; contradict Hnex; inversion Hnex.
+    apply Exists_exists; eexists; split; [| done].
+    by apply elem_of_enum.
+Qed.
 
 Inductive ELMO_msg_valid_full : Message -> Prop :=
 | MVF_nil :
@@ -278,6 +303,33 @@ Inductive ELMO_msg_valid_full : Message -> Prop :=
       no_self_equiv (state m) mo ->
       ELMO_msg_valid_full m ->
       ELMO_msg_valid_full (m <*> MkObservation Receive mo).
+
+#[export] Instance ELMO_msg_valid_full_dec :
+  forall (m : Message), Decision (ELMO_msg_valid_full m).
+Proof.
+  assert (Hwf := well_founded_lt_compat _ (fun m => @sizeMessage Address m)
+      (fun m1 m2 => sizeMessage m1 < sizeMessage m2) (fun _ _ H => H)).
+  apply (@well_founded_induction _ (fun m1 m2 => sizeMessage m1 < sizeMessage m2) Hwf).
+  intros [[[| [[] m'] obs'] adr']] IH.
+  - destruct (decide (MessageHasSender (MkMessage (MkState [] adr')))) as [| Hnmhs];
+      [by left; constructor |].
+    by right; contradict Hnmhs; inversion Hnmhs.
+  - pose (m := (MkMessage (MkState obs' adr'))).
+    destruct (decide (full_node (state m) m')) as [| Hnf];
+      [| by right; contradict Hnf; inversion Hnf; [| destruct m0, state; cbn in *; subst]].
+    destruct (decide (no_self_equiv (state m) m')) as [| Hnse];
+      [| by right; contradict Hnse; inversion Hnse; [| destruct m0, state; cbn in *; subst]].
+    destruct (IH (MkMessage (MkState obs' adr'))) as [| Hnv];
+      [..| by right; contradict Hnv; inversion Hnv; [| destruct m0, state; cbn in *; subst]].
+    + by cbn; lia.
+    + by left; apply (MVF_recv m m').
+  - destruct (IH (MkMessage (MkState obs' adr'))) as [| Hnv];
+      [by cbn; lia |..].
+    + destruct (decide (m' = (MkMessage (MkState obs' adr')))) as [-> | Hneq];
+        [by left; constructor 2 |].
+      by right; contradict Hneq; inversion Hneq; [| destruct m', state].
+    + by right; contradict Hnv; inversion Hnv; [done | destruct m', state].
+Qed.
 
 Lemma ELMO_msg_valid_full_to_reach (m : Message) :
   ELMO_msg_valid_full m ->
@@ -312,6 +364,22 @@ Record ELMO_recv_valid (s : State) (m : Message) : Prop :=
     local_equivocation_limit_ok (s <+> MkObservation Receive m);
 }.
 
+#[export] Instance ELMO_recv_valid_dec
+  `{!DecidableReachableThreshold Address (listset Address) threshold} :
+  RelDecision ELMO_recv_valid.
+Proof.
+  intros s m.
+  destruct (decide (full_node s m)) as [| Hno];
+    [| by right; contradict Hno; inversion Hno].
+  destruct (decide (no_self_equiv s m)) as [| Hno];
+    [| by right; contradict Hno; inversion Hno].
+  destruct (decide (ELMO_msg_valid_full m)) as [| Hno];
+    [| by right; contradict Hno; inversion Hno].
+  destruct (decide (not_heavy (s <+> MkObservation Receive m))) as [| Hno];
+    [| by right; contradict Hno; inversion Hno].
+  by left; constructor.
+Qed.
+
 Inductive ELMO_component_valid : Label -> State -> option Message -> Prop :=
 | ELMOCV_Receive :
     forall (s : State) (m : Message),
@@ -320,6 +388,16 @@ Inductive ELMO_component_valid : Label -> State -> option Message -> Prop :=
 | ELMOCV_Send :
     forall s : State,
       ELMO_component_valid Send s None.
+
+#[export] Instance ELMO_component_valid_dec
+  `{!DecidableReachableThreshold Address (listset Address) threshold} :
+  forall l : Label, RelDecision (ELMO_component_valid l).
+Proof.
+  intros [] s [m |];
+    [| by right; inversion 1 | by right; inversion 1 | by left; constructor].
+  by destruct (decide (ELMO_recv_valid s m)) as [| Hno];
+    [left; constructor | right; contradict Hno; inversion Hno].
+Qed.
 
 (**
   This definition is closer to the way the validity condition
@@ -1264,6 +1342,18 @@ Proof.
   by inversion Hv; subst; inversion Ht; subst; destruct s.
 Qed.
 
+Lemma ELMO_constrained_state_prop_cons :
+  forall (s : State) (obs : Observation),
+  constrained_state_prop Ei (s <+> obs) ->
+  constrained_state_prop Ei s.
+Proof.
+  intros * Hsobs.
+  by edestruct s, obs, label,
+    (ELMO_component_state_destructor_input_constrained_transition_item _ Hsobs)
+    as [[] _]; [| done | | done];
+    apply elem_of_list_singleton.
+Qed.
+
 End sec_TraceableVLSM_ELMO_component.
 
 Section sec_MessageDependencies_ELMO_component.
@@ -1453,6 +1543,321 @@ Definition ReachELMO : VLSM Message :=
 Definition LimitedELMO : VLSM Message :=
   msg_dep_limited_equivocation_vlsm (Cv := listset (Message_validator idx))
     ELMO_component threshold Message_full_dependencies (Message_sender idx).
+
+Section sec_ELMO_state_replayable.
+
+Context
+  `{!DecidableReachableThreshold Address (listset Address) threshold}
+  .
+
+Record elmo_trace :=
+{
+  st_fst : composite_state ELMO_component;
+  trace : list (composite_transition_item ELMO_component);
+  st_lst : composite_state ELMO_component;
+}.
+
+Definition constrained_elmo_trace (tr : elmo_trace) : Prop :=
+  finite_constrained_trace_init_to FreeELMO (st_fst tr) (st_lst tr) (trace tr).
+
+Definition elmo_replay_observation
+  (tr : elmo_trace) (i : index) (obs : Observation) : option elmo_trace :=
+  let st_lst' := state_update ELMO_component (st_lst tr) i (st_lst tr i <+> obs) in
+  match obs with
+  | MkObservation Send (MkMessage s_msg) =>
+    if (decide (s_msg = st_lst tr i)) then
+      let item := Build_transition_item (T := composite_type ELMO_component)
+        (existT i Send) None st_lst' (Some (MkMessage s_msg))
+      in
+      Some
+      {|
+        st_fst := st_fst tr;
+        trace := trace tr ++ [item];
+        st_lst := st_lst'
+      |}
+    else None
+  | MkObservation Receive msg =>
+    if (decide (ELMO_component_valid Receive (st_lst tr i) (Some msg))) then
+      let item := Build_transition_item (T := composite_type ELMO_component)
+        (existT i Receive) (Some msg) st_lst' None
+      in
+      Some
+      {|
+        st_fst := st_fst tr;
+        trace := trace tr ++ [item];
+        st_lst := st_lst'
+      |}
+    else None
+  end.
+
+Definition option_elmo_replay_observation
+  (i : index) (obs : Observation) (otr : option elmo_trace) : option elmo_trace :=
+  otr ≫= fun tr => elmo_replay_observation tr i obs.
+
+Lemma elmo_replay_observation_constrained
+  (tr : elmo_trace) (i : index) (obs : Observation) :
+  forall tr', elmo_replay_observation tr i obs = Some tr' ->
+  constrained_elmo_trace tr ->
+  constrained_elmo_trace tr'
+    /\
+  st_lst tr' i = st_lst tr i <+> obs
+    /\
+  forall (j : index), j <> i -> st_lst tr' j = st_lst tr j.
+Proof.
+  intros tr' Htr' [Htr Hinit].
+  destruct obs as [[] msg]; cbn in Htr'.
+  - case_decide; [| done].
+    apply Some_inj in Htr' as <-; cbn; repeat split; intros; state_update_simpl;
+      [| by cbn; apply Hinit.. | done | done].
+    eapply finite_valid_trace_from_to_app; [done |].
+    apply finite_valid_trace_from_to_singleton.
+    repeat split; [..| done].
+    + by apply valid_trace_last_pstate in Htr.
+    + by apply any_message_is_valid_in_preloaded.
+  - destruct msg as [s_msg].
+    case_decide; [| done]; subst.
+    apply Some_inj in Htr' as <-; cbn; repeat split; intros; state_update_simpl;
+      [| by cbn; apply Hinit.. | done | done].
+    eapply finite_valid_trace_from_to_app; [done |].
+    apply finite_valid_trace_from_to_singleton.
+    repeat split; [..| by constructor].
+    + by apply valid_trace_last_pstate in Htr.
+    + by apply any_message_is_valid_in_preloaded.
+Qed.
+
+Lemma elmo_replay_observation_constrained_rev
+  (tr : elmo_trace) (i : index) (obs : Observation) :
+  constrained_state_prop (ELMO_component i) (st_lst tr i <+> obs) ->
+  exists tr', elmo_replay_observation tr i obs = Some tr'
+    /\ st_lst tr' i = st_lst tr i <+> obs
+    /\ forall (j : index), j <> i -> st_lst tr' j = st_lst tr j.
+Proof.
+  intros Hsobs.
+  edestruct obs, label,
+    (ELMO_component_state_destructor_input_constrained_transition_item _ _ Hsobs)
+    as [(_ & _ & Hv) Ht];
+    [by apply elem_of_list_singleton | | by apply elem_of_list_singleton |]; cbn in *.
+  - rewrite decide_True; [| by destruct (st_lst tr i)].
+    eexists; split; [done |]; cbn.
+    split; [by state_update_simpl |].
+    by intros; state_update_simpl.
+  - destruct (st_lst tr i); cbn in *.
+    inversion Ht; subst.
+    rewrite decide_True by done.
+    eexists; split; [done |]; cbn.
+    split; [by state_update_simpl |].
+    by intros; state_update_simpl.
+Qed.
+
+Definition elmo_replay_observations
+  (tr : elmo_trace) (i : index) (obss : list Observation) : option elmo_trace :=
+  foldr (option_elmo_replay_observation i) (Some tr) obss.
+
+Lemma elmo_replay_observations_constrained
+  (tr : elmo_trace) (i : index) (obss : list Observation) :
+  forall tr', elmo_replay_observations tr i obss = Some tr' ->
+  constrained_elmo_trace tr ->
+  constrained_elmo_trace tr'
+    /\
+  st_lst tr' i = st_lst tr i <++> obss
+    /\
+  forall (j : index), j <> i -> st_lst tr' j = st_lst tr j.
+Proof.
+  revert tr; induction obss using rev_ind; cbn.
+  - inversion 1.
+    split; [done |].
+    by repeat split; symmetry; apply addObservations_nil.
+  - intros tr tr'; unfold elmo_replay_observations.
+    rewrite foldr_snoc; intros Htr' Htr.
+    destruct option_elmo_replay_observation as [tr1 |] eqn:Htr1.
+    + apply IHobss in Htr' as (Htr' & Hlst_tr'i & Hlst_tr'j);
+        [| by eapply elmo_replay_observation_constrained].
+      apply elmo_replay_observation_constrained in Htr1
+        as (? & Hlst_tr1i & Hlst_tr1j); [| done].
+      split_and!; [done |..].
+      * rewrite Hlst_tr'i, Hlst_tr1i; destruct (st_lst tr i).
+        by unfold addObservation, addObservation', addObservations; cbn; simplify_list_eq.
+      * by intros ? ?; rewrite Hlst_tr'j, Hlst_tr1j.
+    + exfalso; clear -Htr'.
+      revert tr' Htr'; induction obss; [done |].
+      by cbn; destruct foldr; cbn; [intros; eapply IHobss |].
+Qed.
+
+Definition elmo_replay_component_state
+  (tr : elmo_trace) (i : index) (si : State) : option elmo_trace :=
+  elmo_replay_observations tr i (obs si).
+
+Lemma elmo_replay_component_state_constrained
+  (tr : elmo_trace) (i : index) (si : State) :
+  initial_state_prop (ELMO_component i) (st_lst tr i) ->
+  adr si = idx i ->
+  forall tr', elmo_replay_component_state tr i si = Some tr' ->
+  constrained_elmo_trace tr ->
+  constrained_elmo_trace tr'
+    /\
+  st_lst tr' i = si
+    /\
+  forall (j : index), j <> i -> st_lst tr' j = st_lst tr j.
+Proof.
+  intros Hi His tr' Heqtr' Htr.
+  eapply elmo_replay_observations_constrained in Htr
+    as (Htr' & Hlst_tr'i & Hlst_tr'j); [| done].
+  destruct Hi as [Hobsi Hadri].
+  split_and!; [done | | done].
+  rewrite Hlst_tr'i.
+  destruct (st_lst tr i), si; cbn in *; subst.
+  unfold addObservations; f_equal; cbn.
+  by apply app_nil_r.
+Qed.
+
+Lemma elmo_replay_component_state_constrained_rev
+  (tr : elmo_trace) (i : index) (si : State) :
+  initial_state_prop (ELMO_component i) (st_lst tr i) ->
+  constrained_state_prop (ELMO_component i) si ->
+  exists tr', elmo_replay_component_state tr i si = Some tr'
+    /\ st_lst tr' i = si
+    /\ forall j, j <> i -> st_lst tr' j = st_lst tr j.
+Proof.
+  intros * Hinit Hsi.
+  unfold elmo_replay_component_state.
+  destruct si; cbn.
+  revert Hsi.
+  destruct Hinit.
+  induction obs; intros; cbn.
+  - exists tr; split_and!; [done | | done].
+    destruct (st_lst tr i); cbn in *; subst; f_equal.
+    by apply ELMO_reachable_adr in Hsi.
+  - destruct IHobs as (tr' & -> & Hlsti & Hlstj);
+      [by eapply ELMO_constrained_state_prop_cons |].
+    destruct (elmo_replay_observation_constrained_rev tr' i a)
+      as (tr'' & Heq_tr'' & Hlst''i & Hlst''j); [by rewrite Hlsti |].
+    eexists; split_and!; [done |..].
+    + by rewrite Hlst''i, Hlsti.
+    + by intros; rewrite Hlst''j, Hlstj.
+Qed.
+
+Definition option_elmo_replay_component_state (s : composite_state ELMO_component)
+  (i : index) (otr : option elmo_trace) : option elmo_trace :=
+  otr ≫= fun tr => elmo_replay_component_state tr i (s i).
+
+Definition elmo_initial_trace : elmo_trace :=
+  {|
+    st_fst := ` (composite_s0 ELMO_component);
+    trace := [];
+    st_lst := ` (composite_s0 ELMO_component);
+  |}.
+
+Definition elmo_replay_composite_state
+  (s : composite_state ELMO_component) : option elmo_trace :=
+  foldr (option_elmo_replay_component_state s) (Some elmo_initial_trace) (enum index).
+
+Lemma elmo_replay_composite_state_constrained (s : composite_state ELMO_component) :
+  (forall i, adr (s i) = idx i) ->
+  forall tr', elmo_replay_composite_state s = Some tr' ->
+  constrained_elmo_trace tr' /\ st_lst tr' = s.
+Proof.
+  unfold elmo_replay_composite_state; intros Hadr tr' Heqtr'.
+  pose proof (Hnodup := NoDup_enum index).
+  remember (enum index) as indices.
+  assert (Hall : Forall (fun i => st_lst elmo_initial_trace i = st_fst elmo_initial_trace i) indices)
+    by (rewrite Forall_forall; done).
+  assert (Htr : constrained_elmo_trace elmo_initial_trace).
+  {
+    split; [| done].
+    by constructor; apply initial_state_is_valid.
+  }
+  cut (constrained_elmo_trace tr'
+    /\ Forall (fun i => st_lst tr' i = s i) indices
+    /\ forall j, j ∉ indices -> st_lst tr' j = st_lst elmo_initial_trace j).
+  {
+    subst; rewrite Forall_forall; intros (? & Halli & _).
+    split; [done |].
+    by extensionality i; apply Halli, elem_of_enum.
+  }
+  clear Heqindices; revert Hall tr' Heqtr' Htr.
+  generalize elmo_initial_trace as tr.
+  revert Hnodup; induction indices; cbn; intros;
+    [by inversion Heqtr'; subst; split_and!; [| constructor |] |].
+  apply NoDup_cons in Hnodup as [Ha Hnodup].
+  apply Forall_cons in Hall as [Heqa Hall].
+  rewrite Forall_cons.
+  destruct foldr as [tr'' |] eqn: Hfold; [| done].
+  cbn in Heqtr'.
+  apply proj2 in Htr as Hinit.
+  eapply IHindices in Htr as (Htr'' & Halli & Hallj); [| done..].
+  eapply elmo_replay_component_state_constrained in Htr''
+  as (Htr' & Hlsta & Hlstj ); [..| done].
+  - split_and!; [done | done | |].
+    + rewrite Forall_forall in Halli |- *.
+      intros j Hj; rewrite Hlstj by (contradict Ha; subst; done).
+      by apply Halli.
+    + intros j; rewrite elem_of_cons; intros Hj.
+      rewrite Hlstj by (contradict Hj; left; done).
+      by apply Hallj; contradict Hj; right.
+  - rewrite Hallj, Heqa by done.
+    by apply Hinit.
+  - by apply Hadr.
+Qed.
+
+Lemma elmo_replayed_composite_state_is_constrained
+  (s : composite_state ELMO_component) :
+  (forall i : index, adr (s i) = idx i) ->
+  is_Some (elmo_replay_composite_state s) ->
+  composite_constrained_state_prop ELMO_component s.
+Proof.
+  intros ? [tr' Heqtr'].
+  apply elmo_replay_composite_state_constrained in Heqtr' as [Htr' <-]; [| done].
+  unfold constrained_elmo_trace, finite_constrained_trace_init_to in Htr'.
+  by apply valid_trace_last_pstate in Htr'.
+Qed.
+
+Lemma elmo_replayed_composite_state_is_constrained_rev
+  (s : composite_state ELMO_component) :
+  composite_constrained_state_prop ELMO_component s ->
+  is_Some (elmo_replay_composite_state s).
+Proof.
+  intros Hs.
+  cut (exists tr', elmo_replay_composite_state s = Some tr'
+    /\ forall j, j ∉ enum index ->  st_lst tr' j = st_lst elmo_initial_trace j);
+    [by intros (? & ? & _); eexists |].
+  unfold elmo_replay_composite_state.
+  pose proof (Hnodup := NoDup_enum index).
+  assert (Hinit : composite_initial_state_prop ELMO_component (st_fst elmo_initial_trace))
+    by done.
+  assert (Halli : Forall (fun i => st_lst elmo_initial_trace i = st_fst elmo_initial_trace i) (enum index))
+    by (apply Forall_forall; done).
+  revert Hinit Halli; generalize elmo_initial_trace as tr.
+  revert Hnodup; generalize (enum index) as indices.
+  induction indices; intros; cbn; [by eexists; split |].
+  apply Forall_cons in Halli as [Hlsta Halli].
+  apply NoDup_cons in Hnodup as [Ha Hnodup].
+  eapply IHindices in Halli as (tr' & -> & Hallj); [| done..].
+  destruct (elmo_replay_component_state_constrained_rev tr' a (s a))
+    as (tr'' & Heqtr'' & Hlst_tr''a & Htr''allj).
+  - rewrite Hallj, Hlsta by done.
+    by apply Hinit.
+  - by apply composite_constrained_state_project.
+  - eexists; split; [done |].
+    intros j Hj.
+    rewrite Htr''allj by (contradict Hj; subst; left).
+    by apply Hallj; contradict Hj; right.
+Qed.
+
+#[export] Instance ELMO_constrained_state_prop_dec :
+  forall (s : composite_state ELMO_component),
+    Decision (composite_constrained_state_prop ELMO_component s).
+Proof.
+  intros s.
+  eapply (Decision_iff
+    (P := (forall i : index, adr (s i) = idx i)
+    /\ is_Some (elmo_replay_composite_state s)));
+    [| by typeclasses eauto].
+  split; [by intros []; apply elmo_replayed_composite_state_is_constrained |].
+  intros Hs; split; [| by apply elmo_replayed_composite_state_is_constrained_rev].
+  by intros i; apply ELMO_reachable_adr, composite_constrained_state_project.
+Qed.
+
+End sec_ELMO_state_replayable.
 
 Lemma ELMO_initial_state_equivocating_validators :
   forall s : composite_state ELMO_component,

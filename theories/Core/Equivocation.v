@@ -79,6 +79,12 @@ Proof.
   by apply sum_weights_subseteq.
 Qed.
 
+#[export] Instance not_heavy_dec
+   `{BasicEquivocation st validator Cv threshold}
+   `{!DecidableReachableThreshold validator Cv threshold} :
+   forall (s : st), Decision (not_heavy s).
+Proof. by intros s; apply rt_dec. Qed.
+
 (** *** State-message oracles and endowing states with history
 
   Our first step is to define some useful concepts in the context of a single VLSM.
